@@ -5,6 +5,7 @@
 
 #include <engine/graphics.h>
 #include <engine/input.h>
+#include <engine/keys.h>
 
 #include <stddef.h>
 
@@ -18,10 +19,9 @@ class CInput : public IEngineInput
 	int m_InputGrabbed;
 	char *m_pClipboardText;
 
-	int64_t m_LastRelease;
-	int64_t m_ReleaseDelta;
-
 	bool m_MouseFocus;
+	bool m_MouseDoubleClick;
+
 	int m_VideoRestartNeeded;
 
 	void AddEvent(char *pText, int Key, int Flags);
@@ -48,6 +48,7 @@ public:
 
 	virtual void Init();
 
+	bool ModifierIsPressed() const { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
 	bool KeyIsPressed(int Key) const { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
@@ -56,12 +57,11 @@ public:
 	virtual void MouseModeRelative();
 	virtual void NativeMousePos(int *x, int *y) const;
 	virtual bool NativeMousePressed(int index);
-	virtual int MouseDoubleClick();
+	virtual bool MouseDoubleClick();
 	virtual const char *GetClipboardText();
 	virtual void SetClipboardText(const char *Text);
 
 	virtual int Update();
-	virtual void NextFrame();
 
 	virtual int VideoRestartNeeded();
 

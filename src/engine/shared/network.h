@@ -455,7 +455,7 @@ public:
 	// error and state
 	int NetType() const { return m_Socket.type; }
 	int State();
-	int GotProblems() const;
+	int GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;
 
 	bool SecurityTokenUnknown() { return m_Connection.SecurityToken() == NET_SECURITY_TOKEN_UNKNOWN; }

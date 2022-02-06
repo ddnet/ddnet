@@ -361,7 +361,7 @@ void CGhostLoader::Close()
 	m_File = 0;
 }
 
-bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc)
+bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc)
 {
 	CGhostHeader Header;
 	mem_zero(&Header, sizeof(Header));
@@ -395,7 +395,7 @@ bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pInfo, const 
 			return false;
 		}
 	}
-	*pInfo = Header.ToGhostInfo();
+	*pGhostInfo = Header.ToGhostInfo();
 
 	return true;
 }

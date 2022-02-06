@@ -344,11 +344,7 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 		}
 	}
 	str_truncate(aHost, sizeof(aHost), pRest + Start, End - Start);
-	if(net_addr_from_str(pOut, aHost))
-	{
-		return true;
-	}
-	return false;
+	return net_addr_from_str(pOut, aHost) != 0;
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
@@ -447,7 +443,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
 	const char **ppUrls = apUrls;
 	int NumUrls = 0;
-	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(File)
 	{
 		CLineReader Lines;

@@ -25,18 +25,22 @@ To clone the libraries if you have previously cloned DDNet without them:
 
     git submodule update --init --recursive
 
-Dependencies on Linux
----------------------
+Dependencies on Linux / macOS
+-----------------------------
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
-    sudo apt install build-essential cmake git libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python google-mock
+    sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python
 
 Or on Arch Linux like this:
 
-    sudo pacman -S --needed base-devel cmake curl freetype2 git glew libnotify opusfile python sdl2 sqlite wavpack gmock
+    sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack
 
 There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite/). For instructions on installing it, see [AUR packages installation instructions on ArchWiki](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
+
+On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
+
+    brew install cmake freetype glew googletest opusfile SDL2 wavpack
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
 
@@ -64,9 +68,19 @@ Whether to prefer bundled libraries over system libraries. Setting to ON will ma
 Whether to enable WebSocket support for server. Setting to ON requires the `libwebsockets-dev` library installed. Default value is OFF.
 
 * **-DMYSQL=[ON|OFF]** <br>
-Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 or MariaDB 10.2. Setting to ON requires the `libmariadbclient-dev`, `libmysqlcppconn-dev` and `libboost-dev` libraries installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
+Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 or MariaDB 10.2. Setting to ON requires the `libmariadbclient-dev` library installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
 
-   Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
+   Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
+
+* **-DTEST_MYSQL=[ON|OFF]** <br>
+Whether to test MySQL/MariaDB support in GTest based tests. Note that this requires a running MySQL/MariaDB database on localhost with this setup:
+
+```
+CREATE DATABASE ddnet;
+CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
+GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
+FLUSH PRIVILEGES;
+```
 
 * **-DAUTOUPDATE=[ON|OFF]** <br>
 Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
@@ -75,7 +89,7 @@ Whether to enable the autoupdater. Packagers may want to disable this for their 
 Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
 
 * **-DVIDEORECORDER=[ON|OFF]** <br>
-Whether to add video recording support using FFmpeg to the client. You can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4. This feature is currently experimental and not enabled by default.
+Whether to add video recording support using FFmpeg to the client. Default value is OFF.
 
 Dependencies needed on debian: `libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev`
 
@@ -91,6 +105,13 @@ You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
 
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
+
+* **-DCMAKE_CXX_LINK_FLAGS=[FLAGS]** <br>
+Custom flags to set for compiler when linking. With clang++ as the compiler this can be [used to link](https://github.com/rui314/mold#how-to-use) with [mold](https://github.com/rui314/mold), speeds up linking by a factor of ~10:
+
+```bash
+CC=clang CXX=clang++ cmake -DCMAKE_CXX_LINK_FLAGS="--ld-path=/usr/bin/mold" .
+```
 
 Running tests (Debian/Ubuntu)
 -----------------------------
@@ -110,6 +131,16 @@ sudo cp *.a /usr/lib
 
 To run the tests you must target `run_tests` with make:
 `make run_tests`
+
+Code formatting
+---------------
+We use clang-format 10 to format the C++ code of this project. Execute `scripts/fix_style.py` after changing the code to ensure code is formatted properly, a GitHub central style checker will do the same and prevent your change from being submitted.
+
+On Arch Linux you can install clang-format 10 using the [clang-format-static-bin AUR package](https://aur.archlinux.org/packages/clang-format-static-bin/). On macOS you can install clang-format 10 using a [homebrew tap](https://github.com/r-lib/homebrew-taps):
+```bash
+brew install r-lib/taps/clang-format@10
+sudo ln -s /opt/homebrew/Cellar/clang-format@10/10.0.1/bin/clang-format /opt/homebrew/bin/clang-format-10
+```
 
 Using AddressSanitizer + UndefinedBehaviourSanitizer or Valgrind's Memcheck
 ---------------------------------------------------------------------------

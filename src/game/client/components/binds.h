@@ -24,12 +24,14 @@ class CBinds : public CComponent
 public:
 	CBinds();
 	~CBinds();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	class CBindsSpecial : public CComponent
 	{
 	public:
 		CBinds *m_pBinds;
-		virtual bool OnInput(IInput::CEvent Event);
+		virtual int Sizeof() const override { return sizeof(*this); }
+		virtual bool OnInput(IInput::CEvent Event) override;
 	};
 
 	enum
@@ -38,6 +40,7 @@ public:
 		MODIFIER_SHIFT,
 		MODIFIER_CTRL,
 		MODIFIER_ALT,
+		MODIFIER_GUI,
 		MODIFIER_COUNT,
 		MODIFIER_COMBINATION_COUNT = 1 << MODIFIER_COUNT
 	};
@@ -56,8 +59,8 @@ public:
 	static const char *GetModifierName(int Modifier);
 	static const char *GetKeyBindModifiersName(int Modifier);
 
-	virtual void OnConsoleInit();
-	virtual bool OnInput(IInput::CEvent Event);
+	virtual void OnConsoleInit() override;
+	virtual bool OnInput(IInput::CEvent Event) override;
 
 	// DDRace
 

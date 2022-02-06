@@ -88,9 +88,6 @@ Client
 Close
 == Stäng
 
-Compatible version
-== Kompatibel version
-
 Connect
 == Anslut
 
@@ -246,9 +243,6 @@ MOTD
 
 Map
 == Bana
-
-Maximum ping:
-== Högsta ping:
 
 Mouse sens.
 == Muskänslighet
@@ -1232,6 +1226,12 @@ Demos directory
 Smooth Dynamic Camera
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1251,6 +1251,9 @@ Windowed
 == 
 
 Windowed borderless
+== 
+
+Windowed fullscreen
 == 
 
 Desktop fullscreen
@@ -1320,6 +1323,12 @@ Use current map as background
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Entities

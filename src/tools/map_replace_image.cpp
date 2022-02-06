@@ -110,6 +110,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 
 int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
@@ -205,5 +206,6 @@ int main(int argc, const char **argv)
 	g_DataWriter.Finish();
 
 	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
+	cmdline_free(argc, argv);
 	return 0;
 }

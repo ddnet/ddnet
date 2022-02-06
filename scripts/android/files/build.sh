@@ -1,16 +1,16 @@
 #!/bin/bash
 
-[ x"$1" == x ] && {
+[ "$1" == "" ] && {
     printf '\e[31mDid not pass ANDROID_SDK_ROOT to build script\e[30m\n'
 	exit 1
 }
 
-[ x"$2" == x ] && {
+[ "$2" == "" ] && {
     printf '\e[31mDid not pass APK name to build script\e[30m\n'
 	exit 1
 }
 
-[ x"$3" == x ] && {
+[ "$3" == "" ] && {
     printf '\e[31mDid not pass build type to build script\e[30m\n'
 	exit 1
 }

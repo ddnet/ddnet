@@ -470,6 +470,18 @@ void CPlayers::RenderPlayer(
 			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, p.x, p.y);
 		}
 
+		if(RenderInfo.m_ShineDecoration)
+		{
+			if(Direction.x < 0)
+			{
+				m_pClient->m_Effects.PowerupShine(p + vec2(32, 0), vec2(32, 12));
+			}
+			else
+			{
+				m_pClient->m_Effects.PowerupShine(p - vec2(32, 0), vec2(32, 12));
+			}
+		}
+
 		if(Player.m_Weapon == WEAPON_GUN || Player.m_Weapon == WEAPON_SHOTGUN)
 		{
 			// check if we're firing stuff
@@ -542,34 +554,33 @@ void CPlayers::RenderPlayer(
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->QuadsSetRotation(0);
+	int ShowDirection = g_Config.m_ClShowDirection;
 #if defined(CONF_VIDEORECORDER)
-	if((((!IVideo::Current() && (g_Config.m_ClShowDirection >= 1)) || (IVideo::Current() && g_Config.m_ClVideoShowDirection)) && ClientID >= 0) || DemoPlayer()->IsPlaying())
-#else
-	if((g_Config.m_ClShowDirection >= 1 && ClientID >= 0) || DemoPlayer()->IsPlaying())
+	if(IVideo::Current())
+		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
+	vec2 ShowDirectionPos(Position.x - 11.0f, Position.y - 70.f);
+	if((Local && ShowDirection == 2) || (!Local && ShowDirection >= 1))
 	{
-		if((Local && g_Config.m_ClShowDirection == 2) || (!Local && g_Config.m_ClShowDirection >= 1))
+		if(Player.m_Direction == -1)
 		{
-			if(Player.m_Direction == -1)
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-				Graphics()->QuadsSetRotation(pi);
-				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - 30.f, Position.y - 70.f);
-			}
-			else if(Player.m_Direction == 1)
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + 30.f, Position.y - 70.f);
-			}
-			if(Player.m_Jumped & 1)
-			{
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-				Graphics()->QuadsSetRotation(pi * 3 / 2);
-				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x, Position.y - 70.f);
-			}
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Graphics()->QuadsSetRotation(0);
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
 		}
+		else if(Player.m_Direction == 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
+		}
+		if(Player.m_Jumped & 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi * 3 / 2);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y);
+		}
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0);
 	}
 
 	if(OtherTeam || ClientID < 0)
@@ -650,6 +661,7 @@ void CPlayers::OnRender()
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
+		m_aRenderInfo[i].m_ShineDecoration = m_pClient->m_aClients[i].m_LiveFrozen;
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja

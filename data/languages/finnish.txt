@@ -87,9 +87,6 @@ Client
 Close
 == Sulje
 
-Compatible version
-== Yhteensopiva versio
-
 Connect
 == Yhdistä
 
@@ -245,9 +242,6 @@ MOTD
 
 Map
 == Kenttä
-
-Maximum ping:
-== Maksimiping:
 
 Mouse sens.
 == Hiiren herkkyys
@@ -1250,6 +1244,12 @@ Are you sure that you want to disconnect and switch to a different server?
 Refreshing...
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -1275,6 +1275,9 @@ Statboard
 == 
 
 Show entities
+== 
+
+Windowed fullscreen
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1314,6 +1317,12 @@ Regular Background Color
 == 
 
 New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Entities

@@ -563,7 +563,7 @@ bool CVideo::OpenAudio()
 }
 
 /* Add an output stream. */
-bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **ppCodec, enum AVCodecID CodecId)
+bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId)
 {
 	AVCodecContext *c;
 

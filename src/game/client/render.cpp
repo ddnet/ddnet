@@ -476,34 +476,34 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 	DrawRoundRectExt(x, y, w, h, r, 0xf);
 }
 
-void CRenderTools::DrawUIRect(const CUIRect *r, ColorRGBA Color, int Corners, float Rounding)
+void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	Graphics()->TextureClear();
 
 	// TODO: FIX US
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
-	DrawRoundRectExt(r->x, r->y, r->w, r->h, Rounding * UI()->Scale(), Corners);
+	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding * UI()->Scale(), Corners);
 	Graphics()->QuadsEnd();
 }
 
-void CRenderTools::DrawUIRect4(const CUIRect *r, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
+void CRenderTools::DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
 {
 	Graphics()->TextureClear();
 
 	Graphics()->QuadsBegin();
-	DrawRoundRectExt4(r->x, r->y, r->w, r->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Rounding, Corners);
+	DrawRoundRectExt4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Rounding, Corners);
 	Graphics()->QuadsEnd();
 }
 
-void CRenderTools::DrawUIRect4NoRounding(const CUIRect *r, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight)
+void CRenderTools::DrawUIRect4NoRounding(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight)
 {
 	Graphics()->TextureClear();
 
 	Graphics()->QuadsBegin();
 
 	Graphics()->SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
-	IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(r->x, r->y, r->w, r->h);
+	IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
 	Graphics()->QuadsDrawTL(&ItemQ, 1);
 
 	Graphics()->QuadsEnd();
@@ -773,38 +773,4 @@ void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[1] = OffsetY + CenterY - Height / 2;
 	pPoints[2] = pPoints[0] + Width;
 	pPoints[3] = pPoints[1] + Height;
-}
-
-void CRenderTools::RenderTilemapGenerateSkip(class CLayers *pLayers)
-{
-	for(int g = 0; g < pLayers->NumGroups(); g++)
-	{
-		CMapItemGroup *pGroup = pLayers->GetGroup(g);
-
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
-		{
-			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer + l);
-
-			if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				CMapItemLayerTilemap *pTmap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)pLayers->Map()->GetData(pTmap->m_Data);
-				for(int y = 0; y < pTmap->m_Height; y++)
-				{
-					for(int x = 1; x < pTmap->m_Width;)
-					{
-						int sx;
-						for(sx = 1; x + sx < pTmap->m_Width && sx < 255; sx++)
-						{
-							if(pTiles[y * pTmap->m_Width + x + sx].m_Index)
-								break;
-						}
-
-						pTiles[y * pTmap->m_Width + x].m_Skip = sx - 1;
-						x += sx;
-					}
-				}
-			}
-		}
-	}
 }

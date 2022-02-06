@@ -104,6 +104,7 @@ void CCharacterCore::Reset()
 	m_HasTelegunLaser = false;
 	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
+	m_LiveFrozen = false;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -298,7 +299,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && m_pWorld && m_pTeleOuts && m_pTeleOuts->size() && (*m_pTeleOuts)[teleNr - 1].size())
+			if(GoingThroughTele && m_pWorld && m_pTeleOuts && !m_pTeleOuts->empty() && !(*m_pTeleOuts)[teleNr - 1].empty())
 			{
 				m_TriggeredEvents = 0;
 				m_HookedPlayer = -1;
@@ -562,6 +563,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	// Freeze
 	m_FreezeEnd = pObjDDNet->m_FreezeEnd;
 	m_DeepFrozen = pObjDDNet->m_FreezeEnd == -1;
+	m_LiveFrozen = (pObjDDNet->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
 
 	// Telegun
 	m_HasTelegunGrenade = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;

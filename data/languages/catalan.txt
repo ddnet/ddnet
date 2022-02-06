@@ -81,9 +81,6 @@ Client
 Close
 == Tancar
 
-Compatible version
-== Versió compatible
-
 Connect
 == Connectar
 
@@ -241,9 +238,6 @@ MOTD
 
 Map
 == Mapa
-
-Maximum ping:
-== Ping màxim:
 
 Mouse sens.
 == Sensibilitat del ratolí
@@ -1329,3 +1323,18 @@ SA
 
 CHN
 == CHN
+
+Settings file
+== 
+
+Config directory
+== 
+
+Windowed fullscreen
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

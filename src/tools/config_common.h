@@ -46,6 +46,7 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 
 int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 	IStorage *pStorage = CreateLocalStorage();
 	if(argc == 1)
@@ -64,5 +65,6 @@ int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 	{
 		ProcessItem(argv[i], pStorage);
 	}
+	cmdline_free(argc, argv);
 	return 0;
 }

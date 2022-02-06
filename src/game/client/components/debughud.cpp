@@ -94,7 +94,7 @@ void CDebugHud::RenderTuning()
 
 	float y = 27.0f;
 	int Count = 0;
-	for(int i = 0; i < m_pClient->m_Tuning[g_Config.m_ClDummy].Num(); i++)
+	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		char aBuf[128];
 		float Current, Standard;
@@ -120,7 +120,7 @@ void CDebugHud::RenderTuning()
 		TextRender()->Text(0x0, x - w, y + Count * 6, 5, aBuf, -1.0f);
 
 		x += 5.0f;
-		TextRender()->Text(0x0, x, y + Count * 6, 5, m_pClient->m_Tuning[g_Config.m_ClDummy].ms_apNames[i], -1.0f);
+		TextRender()->Text(0x0, x, y + Count * 6, 5, CTuningParams::ms_apNames[i], -1.0f);
 
 		Count++;
 	}

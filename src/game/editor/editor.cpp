@@ -69,14 +69,7 @@ static const char *VANILLA_IMAGES[] = {
 
 static bool IsVanillaImage(const char *pImage)
 {
-	for(const auto *pVanillaImage : VANILLA_IMAGES)
-	{
-		if(str_comp(pImage, pVanillaImage) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
 
 const void *CEditor::ms_pUiGotContext;
@@ -130,7 +123,7 @@ CLayerGroup::CLayerGroup()
 
 CLayerGroup::~CLayerGroup()
 {
-	Clear();
+	m_lLayers.delete_all();
 }
 
 void CLayerGroup::Convert(CUIRect *pRect)
@@ -304,33 +297,18 @@ void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void
  OTHER
 *********************************************************/
 
-int CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
-{
-	bool ReturnValue = false;
-	CUIRect EditBox;
-	CUIRect ClearButton;
-	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
-	if(DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, Offset, Hidden, Corners & ~CUI::CORNER_R))
-	{
-		ReturnValue = true;
-	}
-
-	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
-	UI()->DoLabel(&ClearButton, "×", ClearButton.h * 0.8f, 0);
-	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
-	{
-		pStr[0] = 0;
-		UI()->SetActiveItem(pID);
-		ReturnValue = true;
-	}
-	return ReturnValue;
-}
-
-int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners)
+bool CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
-	return m_UIEx.DoEditBox(pID, pRect, pStr, StrSize, FontSize, Offset, Hidden, Corners);
+	return UIEx()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
+}
+
+bool CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
+{
+	if(UI()->LastActiveItem() == pID)
+		m_EditBoxActive = 2;
+	return UIEx()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
 ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
@@ -405,7 +383,7 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_ALL, 3.0f);
 	CUIRect NewRect = *pRect;
-	UI()->DoLabel(&NewRect, pText, 10.f, 0, -1, AlignVert);
+	UI()->DoLabel(&NewRect, pText, 10.f, TEXTALIGN_CENTER, -1, AlignVert);
 	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
@@ -417,7 +395,7 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 	ColorRGBA Color = ColorRGBA(BaseColor.r * Bright, BaseColor.g * Bright, BaseColor.b * Bright, Alpha);
 
 	RenderTools()->DrawUIRect(pRect, Color, CUI::CORNER_ALL, 3.0f);
-	UI()->DoLabel(pRect, pText, 10.f, 0, -1);
+	UI()->DoLabel(pRect, pText, 10.f, TEXTALIGN_CENTER, -1);
 	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
 }
@@ -429,7 +407,7 @@ int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, cons
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
-	UI()->DoLabel(&t, pText, 10, -1, -1);
+	UI()->DoLabel(&t, pText, 10, TEXTALIGN_LEFT, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -440,7 +418,7 @@ int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, cons
 
 	r = *pRect;
 	r.VMargin(5.0f, &r);
-	UI()->DoLabel(&r, pText, 10, -1, -1);
+	UI()->DoLabel(&r, pText, 10, TEXTALIGN_LEFT, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -451,7 +429,7 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
-	UI()->DoLabel(&t, pText, 10, -1, -1);
+	UI()->DoLabel(&t, pText, 10, TEXTALIGN_LEFT, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -459,7 +437,7 @@ int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_T, 5.0f);
 	CUIRect NewRect = *pRect;
-	UI()->DoLabel(&NewRect, pText, 10, 0, -1);
+	UI()->DoLabel(&NewRect, pText, 10, TEXTALIGN_CENTER, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -467,21 +445,21 @@ int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const 
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), Corners, 3.0f);
 	CUIRect NewRect = *pRect;
-	UI()->DoLabel(&NewRect, pText, FontSize, 0, -1, AlignVert);
+	UI()->DoLabel(&NewRect, pText, FontSize, TEXTALIGN_CENTER, -1, AlignVert);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_R, 3.0f);
-	UI()->DoLabel(pRect, pText ? pText : "+", 10, 0, -1);
+	UI()->DoLabel(pRect, pText ? pText : "+", 10, TEXTALIGN_CENTER, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_L, 3.0f);
-	UI()->DoLabel(pRect, pText ? pText : "-", 10, 0, -1);
+	UI()->DoLabel(pRect, pText ? pText : "-", 10, TEXTALIGN_CENTER, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -657,7 +635,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		else
 			str_format(aBuf, sizeof(aBuf), "%d", Current);
 		RenderTools()->DrawUIRect(pRect, Color ? *Color : GetButtonColor(pID, 0), Corners, 5.0f);
-		UI()->DoLabel(pRect, aBuf, 10, 0, -1);
+		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_CENTER, -1);
 	}
 
 	return Current;
@@ -843,16 +821,13 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
-	bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+	bool ModPressed = Input()->ModifierIsPressed();
 	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
 
-	ToolBar.HSplitTop(ToolBar.h / 2.0f, &TB_Top, &TB_Bottom);
-
-	TB_Top.HSplitBottom(2.5f, &TB_Top, 0);
-	TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
+	ToolBar.HSplitMid(&TB_Top, &TB_Bottom, 5.0f);
 
 	// top line buttons
 	{
@@ -860,7 +835,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_HqButton = 0;
 		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
-			(Input()->KeyPress(KEY_H) && CtrlPressed))
+			(Input()->KeyPress(KEY_H) && ModPressed))
 		{
 			m_ShowDetail = !m_ShowDetail;
 		}
@@ -871,7 +846,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_AnimateButton = 0;
 		if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
-			(Input()->KeyPress(KEY_M) && CtrlPressed))
+			(Input()->KeyPress(KEY_M) && ModPressed))
 		{
 			m_AnimateStart = time_get();
 			m_Animate = !m_Animate;
@@ -883,7 +858,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
 		if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
-			(Input()->KeyPress(KEY_P) && CtrlPressed))
+			(Input()->KeyPress(KEY_P) && ModPressed))
 		{
 			m_ProofBorders = !m_ProofBorders;
 		}
@@ -894,7 +869,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
 		if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid") ||
-			(Input()->KeyPress(KEY_G) && CtrlPressed))
+			(Input()->KeyPress(KEY_G) && ModPressed))
 		{
 			m_GridActive = !m_GridActive;
 		}
@@ -905,7 +880,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_TileInfoButton = 0;
 		if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-			(Input()->KeyPress(KEY_I) && CtrlPressed))
+			(Input()->KeyPress(KEY_I) && ModPressed))
 		{
 			m_ShowTileInfo = !m_ShowTileInfo;
 			m_ShowEnvelopePreview = 0;
@@ -917,7 +892,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_AllowPlaceUnusedTilesButton = 0;
 		if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
-			(Input()->KeyPress(KEY_U) && CtrlPressed))
+			(Input()->KeyPress(KEY_U) && ModPressed))
 		{
 			m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
 		}
@@ -1150,7 +1125,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 						static int s_ModifierButton = 0;
-						if(DoButton_Ex(&s_ModifierButton, aButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL) || (CtrlPressed && Input()->KeyPress(KEY_A)))
+						if(DoButton_Ex(&s_ModifierButton, aButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL) || (ModPressed && Input()->KeyPress(KEY_A)))
 						{
 							static int s_ModifierPopupID = 0;
 							if(!UiPopupExists(&s_ModifierPopupID))
@@ -1176,12 +1151,12 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				Invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
-					  (Input()->KeyPress(KEY_Q) && CtrlPressed);
+					  (Input()->KeyPress(KEY_Q) && ModPressed);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				Invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
-					  (Input()->KeyPress(KEY_Q) && CtrlPressed);
+					  (Input()->KeyPress(KEY_Q) && ModPressed);
 			}
 
 			if(Invoked)
@@ -1192,7 +1167,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				pGroup->Mapping(Mapping);
 				int x = Mapping[0] + (Mapping[2] - Mapping[0]) / 2;
 				int y = Mapping[1] + (Mapping[3] - Mapping[1]) / 2;
-				if(Input()->KeyPress(KEY_Q) && CtrlPressed)
+				if(Input()->KeyPress(KEY_Q) && ModPressed)
 				{
 					x += UI()->MouseWorldX() - (m_WorldOffsetX * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
 					y += UI()->MouseWorldY() - (m_WorldOffsetY * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
@@ -1226,7 +1201,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
 			static int s_BrushDrawModeButton = 0;
 			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
-				(Input()->KeyPress(KEY_D) && CtrlPressed && !ShiftPressed))
+				(Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
@@ -1266,10 +1241,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		UI()->SetHotItem(pID);
 
 	bool IgnoreGrid;
-	if(Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT))
-		IgnoreGrid = true;
-	else
-		IgnoreGrid = false;
+	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	if(UI()->ActiveItem() == pID)
 	{
@@ -1367,7 +1339,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CEditor::DoQuad(CQuad *q, int Index)
+void CEditor::DoQuad(CQuad *pQuad, int Index)
 {
 	enum
 	{
@@ -1380,7 +1352,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 	};
 
 	// some basic values
-	void *pID = &q->m_aPoints[4]; // use pivot addr as id
+	void *pID = &pQuad->m_aPoints[4]; // use pivot addr as id
 	static array<array<CPoint>> s_lRotatePoints;
 	static int s_Operation = OP_NONE;
 	static float s_RotateAngle = 0;
@@ -1388,8 +1360,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 	float wy = UI()->MouseWorldY();
 
 	// get pivot
-	float CenterX = fx2f(q->m_aPoints[4].x);
-	float CenterY = fx2f(q->m_aPoints[4].y);
+	float CenterX = fx2f(pQuad->m_aPoints[4].x);
+	float CenterY = fx2f(pQuad->m_aPoints[4].y);
 
 	float dx = (CenterX - wx) / m_WorldZoom;
 	float dy = (CenterY - wy) / m_WorldZoom;
@@ -1397,10 +1369,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		UI()->SetHotItem(pID);
 
 	bool IgnoreGrid;
-	if(Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT))
-		IgnoreGrid = true;
-	else
-		IgnoreGrid = false;
+	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	// draw selection background
 	if(IsQuadSelected(Index))
@@ -1432,13 +1401,13 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					else
 						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
 
-					q->m_aPoints[4].x = f2fx(x);
-					q->m_aPoints[4].y = f2fx(y);
+					pQuad->m_aPoints[4].x = f2fx(x);
+					pQuad->m_aPoints[4].y = f2fx(y);
 				}
 				else
 				{
-					q->m_aPoints[4].x = f2fx(wx);
-					q->m_aPoints[4].y = f2fx(wy);
+					pQuad->m_aPoints[4].x = f2fx(wx);
+					pQuad->m_aPoints[4].y = f2fx(wy);
 				}
 			}
 			else if(s_Operation == OP_MOVE_ALL)
@@ -1460,8 +1429,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 					else
 						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
 
-					int OffsetX = f2fx(x) - q->m_aPoints[4].x;
-					int OffsetY = f2fx(y) - q->m_aPoints[4].y;
+					int OffsetX = f2fx(x) - pQuad->m_aPoints[4].x;
+					int OffsetY = f2fx(y) - pQuad->m_aPoints[4].y;
 
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
@@ -1475,8 +1444,8 @@ void CEditor::DoQuad(CQuad *q, int Index)
 				}
 				else
 				{
-					int OffsetX = f2fx(wx) - q->m_aPoints[4].x;
-					int OffsetY = f2fx(wy) - q->m_aPoints[4].y;
+					int OffsetX = f2fx(wx) - pQuad->m_aPoints[4].x;
+					int OffsetY = f2fx(wy) - pQuad->m_aPoints[4].y;
 
 					for(int i = 0; i < m_lSelectedQuads.size(); ++i)
 					{
@@ -1571,7 +1540,7 @@ void CEditor::DoQuad(CQuad *q, int Index)
 
 				SelectQuad(Index);
 			}
-			else if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
+			else if(Input()->ModifierIsPressed())
 			{
 				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
@@ -1669,10 +1638,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	static int s_Operation = OP_NONE;
 
 	bool IgnoreGrid;
-	if(Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT))
-		IgnoreGrid = true;
-	else
-		IgnoreGrid = false;
+	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	if(UI()->ActiveItem() == pID)
 	{
@@ -1998,10 +1964,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	}
 
 	bool IgnoreGrid;
-	if(Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT))
-		IgnoreGrid = true;
-	else
-		IgnoreGrid = false;
+	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	if(UI()->ActiveItem() == pID && s_ActQIndex == QIndex)
 	{
@@ -2052,7 +2015,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 
 		if(UI()->MouseButton(0))
 		{
-			if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))
+			if(Input()->ModifierIsPressed())
 			{
 				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
@@ -2294,7 +2257,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			s_StartWx = wx;
 			s_StartWy = wy;
 
-			if(Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL) || UI()->MouseButton(2))
+			if(Input()->ModifierIsPressed() || UI()->MouseButton(2))
 			{
 				if(Input()->KeyIsPressed(KEY_LSHIFT))
 					s_Operation = OP_PAN_EDITOR;
@@ -2604,7 +2567,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) &&
-			!Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) &&
+			!Input()->ModifierIsPressed() &&
 			m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 		{
 			float PanSpeed = 64.0f;
@@ -2790,7 +2753,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		CUIRect Label, Shifter;
 		Slot.VSplitMid(&Label, &Shifter);
 		Shifter.HMargin(1.0f, &Shifter);
-		UI()->DoLabel(&Label, pProps[i].m_pName, 10.0f, -1, -1);
+		UI()->DoLabel(&Label, pProps[i].m_pName, 10.0f, TEXTALIGN_LEFT, -1);
 
 		if(pProps[i].m_Type == PROPTYPE_INT_STEP)
 		{
@@ -2954,17 +2917,15 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		else if(pProps[i].m_Type == PROPTYPE_SHIFT)
 		{
 			CUIRect Left, Right, Up, Down;
-			Shifter.VSplitMid(&Left, &Up);
-			Left.VSplitRight(1.0f, &Left, 0);
-			Up.VSplitLeft(1.0f, 0, &Up);
+			Shifter.VSplitMid(&Left, &Up, 2.0f);
 			Left.VSplitLeft(10.0f, &Left, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Right);
 			RenderTools()->DrawUIRect(&Shifter, ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
-			UI()->DoLabel(&Shifter, "X", 10.0f, 0, -1);
+			UI()->DoLabel(&Shifter, "X", 10.0f, TEXTALIGN_CENTER, -1);
 			Up.VSplitLeft(10.0f, &Up, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Down);
 			RenderTools()->DrawUIRect(&Shifter, ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
-			UI()->DoLabel(&Shifter, "Y", 10.0f, 0, -1);
+			UI()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_CENTER, -1);
 			if(DoButton_ButtonDec(&pIDs[i], "-", 0, &Left, 0, "Left"))
 			{
 				*pNewVal = 1;
@@ -3042,7 +3003,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
 			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
-			UI()->DoLabel(&Shifter, aBuf, FontSize, 0, -1);
+			UI()->DoLabel(&Shifter, aBuf, FontSize, TEXTALIGN_CENTER, -1);
 
 			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, 0, 0, &Dec, 0, "Previous Envelope"))
 			{
@@ -3765,9 +3726,9 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 		{
 			ToolBox.HSplitTop(15.0f, &Slot, &ToolBox);
 			if(e == 0)
-				UI()->DoLabel(&Slot, "Embedded", 12.0f, 0);
+				UI()->DoLabel(&Slot, "Embedded", 12.0f, TEXTALIGN_CENTER);
 			else
-				UI()->DoLabel(&Slot, "External", 12.0f, 0);
+				UI()->DoLabel(&Slot, "External", 12.0f, TEXTALIGN_CENTER);
 		}
 		ImageCur += 15.0f;
 
@@ -3976,7 +3937,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 	CUIRect Slot;
 
 	ToolBox.HSplitTop(15.0f, &Slot, &ToolBox);
-	UI()->DoLabel(&Slot, "Embedded", 12.0f, 0);
+	UI()->DoLabel(&Slot, "Embedded", 12.0f, TEXTALIGN_CENTER);
 	SoundCur += 15.0f;
 
 	for(int i = 0; i < m_Map.m_lSounds.size(); i++)
@@ -4149,7 +4110,7 @@ void CEditor::RenderFileDialog()
 	// title
 	RenderTools()->DrawUIRect(&Title, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 	Title.VMargin(10.0f, &Title);
-	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, -1, -1);
+	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, TEXTALIGN_LEFT, -1);
 
 	// pathbox
 	char aPath[128], aBuf[128];
@@ -4158,13 +4119,13 @@ void CEditor::RenderFileDialog()
 	else
 		aPath[0] = 0;
 	str_format(aBuf, sizeof(aBuf), "Current path: %s", aPath);
-	UI()->DoLabel(&PathBox, aBuf, 10.0f, -1, -1);
+	UI()->DoLabel(&PathBox, aBuf, 10.0f, TEXTALIGN_LEFT, -1);
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
 		// filebox
+		UI()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, TEXTALIGN_LEFT, -1);
 		static float s_FileBoxID = 0;
-		UI()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, -1, -1);
 		if(DoEditBox(&s_FileBoxID, &FileBox, m_aFileDialogFileName, sizeof(m_aFileDialogFileName), 10.0f, &s_FileBoxID))
 		{
 			// remove '/' and '\'
@@ -4184,9 +4145,9 @@ void CEditor::RenderFileDialog()
 		CUIRect ClearBox;
 		FileBox.VSplitRight(15, &FileBox, &ClearBox);
 
-		static float s_SearchBoxID = 0;
-		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, -1, -1);
+		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, TEXTALIGN_LEFT, -1);
 		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
+		static float s_SearchBoxID = 0;
 		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID, false, CUI::CORNER_L);
 		if(m_FileDialogOpening)
 			UI()->SetActiveItem(&s_SearchBoxID);
@@ -4195,7 +4156,7 @@ void CEditor::RenderFileDialog()
 		{
 			static int s_ClearButton = 0;
 			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
-			UI()->DoLabel(&ClearBox, "×", 10.0f, 0);
+			UI()->DoLabel(&ClearBox, "×", 10.0f, TEXTALIGN_CENTER);
 			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &ClearBox))
 			{
 				m_aFileDialogSearchText[0] = 0;
@@ -4303,11 +4264,11 @@ void CEditor::RenderFileDialog()
 				}
 			}
 		}
-		if(m_PreviewImageIsLoaded)
+		if(m_FileDialogFileType == CEditor::FILETYPE_IMG && m_PreviewImageIsLoaded)
 		{
 			int w = m_FilePreviewImageInfo.m_Width;
 			int h = m_FilePreviewImageInfo.m_Height;
-			if(m_FilePreviewImageInfo.m_Width > Preview.w)
+			if(m_FilePreviewImageInfo.m_Width > Preview.w) // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
 			{
 				h = m_FilePreviewImageInfo.m_Height * Preview.w / m_FilePreviewImageInfo.m_Width;
 				w = Preview.w;
@@ -4425,7 +4386,7 @@ void CEditor::RenderFileDialog()
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, 0))
 		{
-			m_FileDialogNewFolderName[0] = 0;
+			m_aFileDialogNewFolderName[0] = 0;
 			m_FileDialogErrString[0] = 0;
 			static int s_NewFolderPopupID = 0;
 			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
@@ -4589,7 +4550,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 			str_copy(aBuf, m_pTooltip, sizeof(aBuf));
 
 		float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, View.w);
-		UI()->DoLabel(&View, aBuf, FontSize, -1, View.w);
+		UI()->DoLabel(&View, aBuf, FontSize, TEXTALIGN_LEFT, View.w);
 	}
 }
 
@@ -4790,7 +4751,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
-		UI()->DoLabel(&Shifter, aBuf, 10.0f, 0, -1);
+		UI()->DoLabel(&Shifter, aBuf, 10.0f, TEXTALIGN_CENTER, -1);
 
 		static int s_PrevButton = 0;
 		if(DoButton_ButtonDec(&s_PrevButton, 0, 0, &Dec, 0, "Previous Envelope"))
@@ -4814,7 +4775,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 			ToolBar.VSplitLeft(35.0f, &Button, &ToolBar);
-			UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
+			UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT, -1);
 
 			ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
 
@@ -4890,7 +4851,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			ToolBar.VSplitLeft(4.0f, &Button, &ToolBar);
 			ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
-			UI()->DoLabel(&Button, "Synchronized", 10.0f, -1, -1);
+			UI()->DoLabel(&Button, "Synchronized", 10.0f, TEXTALIGN_LEFT, -1);
 		}
 
 		float EndTime = pEnvelope->EndTime();
@@ -5097,7 +5058,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							{
 								if(i != 0)
 								{
-									if((Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+									if(Input()->ModifierIsPressed())
 										pEnvelope->m_lPoints[i].m_Time += (int)((m_MouseDeltaX));
 									else
 										pEnvelope->m_lPoints[i].m_Time += (int)((m_MouseDeltaX * TimeScale) * 1000.0f);
@@ -5109,7 +5070,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							}
 							else
 							{
-								if((Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+								if(Input()->ModifierIsPressed())
 									pEnvelope->m_lPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY * 0.001f);
 								else
 									pEnvelope->m_lPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY * ValueScale);
@@ -5200,9 +5161,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 
-			static float s_ValNumber = 0;
-			static float s_TimeNumber = 0;
-
 			CUIRect ToolBar1;
 			CUIRect ToolBar2;
 
@@ -5218,11 +5176,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				ToolBar1.VSplitMid(&Label1, &ToolBar1);
 				ToolBar2.VSplitMid(&Label2, &ToolBar2);
 
-				UI()->DoLabel(&Label1, "Value:", 10.0f, -1, -1);
-				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, -1, -1);
+				UI()->DoLabel(&Label1, "Value:", 10.0f, TEXTALIGN_LEFT, -1);
+				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, TEXTALIGN_LEFT, -1);
 			}
 
+			static float s_ValNumber = 0;
 			DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
+			static float s_TimeNumber = 0;
 			DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
 		}
 	}
@@ -5242,7 +5202,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 
 		// command line
 		ToolBar.VSplitLeft(5.0f, 0, &Button);
-		UI()->DoLabel(&Button, "Command:", 12.0f, -1);
+		UI()->DoLabel(&Button, "Command:", 12.0f, TEXTALIGN_LEFT);
 
 		Button.VSplitLeft(70.0f, 0, &Button);
 		Button.VSplitLeft(180.0f, &Button, 0);
@@ -5255,7 +5215,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 		// buttons
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_AddButton = 0;
-		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.") || ((Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER)) && UI()->LastActiveItem() == &m_CommandBox))
+		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.") || ((Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER)) && UI()->LastActiveItem() == &m_CommandBox && m_Dialog == DIALOG_NONE))
 		{
 			if(m_aSettingsCommand[0] != 0 && str_find(m_aSettingsCommand, " "))
 			{
@@ -5283,7 +5243,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, 0);
 			static int s_ModButton = 0;
-			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && UI()->LastActiveItem() != &m_CommandBox))
+			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && UI()->LastActiveItem() != &m_CommandBox && m_Dialog == DIALOG_NONE))
 			{
 				if(str_comp(m_Map.m_lSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand) != 0 && m_aSettingsCommand[0] != 0 && str_find(m_aSettingsCommand, " "))
 				{
@@ -5311,7 +5271,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, 0);
 			static int s_DelButton = 0;
-			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_CommandBox))
+			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_CommandBox && m_Dialog == DIALOG_NONE))
 			{
 				m_Map.m_lSettings.remove_index(s_CommandSelectedIndex);
 				if(s_CommandSelectedIndex >= m_Map.m_lSettings.size())
@@ -5545,13 +5505,13 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	MenuBar.VSplitLeft(MenuBar.w * 0.75f, &MenuBar, &Info);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "File: %s", m_aFileName);
-	UI()->DoLabel(&MenuBar, aBuf, 10.0f, -1, -1);
+	UI()->DoLabel(&MenuBar, aBuf, 10.0f, TEXTALIGN_LEFT, -1);
 
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
 	str_format(aBuf, sizeof(aBuf), "X: %i, Y: %i, Z: %i, A: %.1f, G: %i  %s", (int)UI()->MouseWorldX() / 32, (int)UI()->MouseWorldY() / 32, m_ZoomLevel, m_AnimateSpeed, m_GridFactor, aTimeStr);
-	UI()->DoLabel(&Info, aBuf, 10.0f, 1, -1);
+	UI()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_RIGHT, -1);
 
 	static int s_CloseButton = 0;
 	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor", 0) || (m_Dialog == DIALOG_NONE && !UiPopupOpen() && !m_PopupEventActivated && Input()->KeyPress(KEY_ESCAPE)))
@@ -5637,7 +5597,7 @@ void CEditor::Render()
 		if(Input()->KeyPress(i))
 		{
 			int Slot = i - KEY_1;
-			if((Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)) && !m_Brush.IsEmpty())
+			if(Input()->ModifierIsPressed() && !m_Brush.IsEmpty())
 			{
 				dbg_msg("editor", "saving current brush to %d", Slot);
 				if(m_apSavedBrushes[Slot])
@@ -5716,11 +5676,11 @@ void CEditor::Render()
 
 	if(m_Dialog == DIALOG_NONE)
 	{
-		bool CtrlPressed = Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL);
+		bool ModPressed = Input()->ModifierIsPressed();
 		bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 		bool AltPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 		// ctrl+n to create new map
-		if(Input()->KeyPress(KEY_N) && CtrlPressed)
+		if(Input()->KeyPress(KEY_N) && ModPressed)
 		{
 			if(HasUnsavedData())
 			{
@@ -5737,12 +5697,12 @@ void CEditor::Render()
 			}
 		}
 		// ctrl+a to append map
-		if(Input()->KeyPress(KEY_A) && CtrlPressed)
+		if(Input()->KeyPress(KEY_A) && ModPressed)
 		{
 			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", CallbackAppendMap, this);
 		}
 		// ctrl+o or ctrl+l to open
-		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && CtrlPressed)
+		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ModPressed)
 		{
 			if(ShiftPressed)
 			{
@@ -5777,13 +5737,13 @@ void CEditor::Render()
 		}
 
 		// ctrl+shift+alt+s to save as
-		if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed && AltPressed)
+		if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed && AltPressed)
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 		// ctrl+shift+s to save as
-		else if(Input()->KeyPress(KEY_S) && CtrlPressed && ShiftPressed)
+		else if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed)
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
 		// ctrl+s to save
-		else if(Input()->KeyPress(KEY_S) && CtrlPressed)
+		else if(Input()->KeyPress(KEY_S) && ModPressed)
 		{
 			if(m_aFileName[0] && m_ValidSaveFilename)
 			{
@@ -6145,11 +6105,11 @@ void CEditor::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	m_UI.Init(m_pGraphics, m_pTextRender);
 	m_RenderTools.Init(m_pGraphics, &m_UI, pGameClient);
-	m_UI.SetGraphics(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 
-	m_UIEx.Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
+	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
@@ -6242,8 +6202,8 @@ void CEditor::UpdateAndRender()
 	float rx = 0, ry = 0;
 	{
 		Input()->MouseRelative(&rx, &ry);
-		m_UIEx.ConvertMouseMove(&rx, &ry);
-		m_UIEx.ResetMouseSlow();
+		UIEx()->ConvertMouseMove(&rx, &ry);
+		UIEx()->ResetMouseSlow();
 
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;

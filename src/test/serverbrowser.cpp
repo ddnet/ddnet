@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <memory>
 
 #include <engine/client/serverbrowser_ping_cache.h>
 #include <engine/console.h>
@@ -10,9 +11,11 @@
 TEST(ServerBrowser, PingCache)
 {
 	CTestInfo Info;
-	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = Info.CreateTestStorage();
-	IServerBrowserPingCache *pPingCache = CreateServerBrowserPingCache(pConsole, pStorage);
+	Info.m_DeleteTestStorageFilesOnSuccess = true;
+
+	auto pConsole = std::unique_ptr<IConsole>(CreateConsole(CFGFLAG_CLIENT));
+	auto pStorage = std::unique_ptr<IStorage>(Info.CreateTestStorage());
+	auto pPingCache = std::unique_ptr<IServerBrowserPingCache>(CreateServerBrowserPingCache(pConsole.get(), pStorage.get()));
 
 	const IServerBrowserPingCache::CEntry *pEntries;
 	int NumEntries;
@@ -84,8 +87,7 @@ TEST(ServerBrowser, PingCache)
 		EXPECT_EQ(pEntries[1].m_Ping, 345);
 	}
 
-	delete pPingCache;
-	pPingCache = CreateServerBrowserPingCache(pConsole, pStorage);
+	pPingCache.reset(CreateServerBrowserPingCache(pConsole.get(), pStorage.get()));
 
 	// Persistence.
 	pPingCache->Load();
@@ -98,10 +100,4 @@ TEST(ServerBrowser, PingCache)
 		EXPECT_EQ(pEntries[0].m_Ping, 1337);
 		EXPECT_EQ(pEntries[1].m_Ping, 345);
 	}
-
-	delete pPingCache;
-	delete pStorage;
-	delete pConsole;
-
-	Info.DeleteTestStorageFilesOnSuccess();
 }

@@ -17,7 +17,7 @@ void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 
 void CUIElement::InitRects(int RequestedRectCount)
 {
-	dbg_assert(m_UIRects.size() == 0, "UI rects can only be initialized once, create another ui element instead.");
+	dbg_assert(m_UIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
 	m_UIRects.resize(RequestedRectCount);
 }
 
@@ -41,6 +41,14 @@ void CUIElement::SUIElementRect::Reset()
 /********************************************************
  UI
 *********************************************************/
+
+float CUI::ms_FontmodHeight = 0.8f;
+
+void CUI::Init(class IGraphics *pGraphics, class ITextRender *pTextRender)
+{
+	m_pGraphics = pGraphics;
+	m_pTextRender = pTextRender;
+}
 
 CUI::CUI()
 {
@@ -196,11 +204,11 @@ float CUIRect::Scale() const
 	return g_Config.m_UiScale / 100.0f;
 }
 
-void CUI::ClipEnable(const CUIRect *r)
+void CUI::ClipEnable(const CUIRect *pRect)
 {
 	float XScale = Graphics()->ScreenWidth() / Screen()->w;
 	float YScale = Graphics()->ScreenHeight() / Screen()->h;
-	Graphics()->ClipEnable((int)(r->x * XScale), (int)(r->y * YScale), (int)(r->w * XScale), (int)(r->h * YScale));
+	Graphics()->ClipEnable((int)(pRect->x * XScale), (int)(pRect->y * YScale), (int)(pRect->w * XScale), (int)(pRect->h * YScale));
 }
 
 void CUI::ClipDisable()
@@ -208,25 +216,26 @@ void CUI::ClipDisable()
 	Graphics()->ClipDisable();
 }
 
-void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom) const
+void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const
 {
 	CUIRect r = *this;
-	float Cut = r.h / 2;
+	const float Cut = r.h / 2;
+	const float HalfSpacing = Spacing / 2;
 
 	if(pTop)
 	{
 		pTop->x = r.x;
 		pTop->y = r.y;
 		pTop->w = r.w;
-		pTop->h = Cut;
+		pTop->h = Cut - HalfSpacing;
 	}
 
 	if(pBottom)
 	{
 		pBottom->x = r.x;
-		pBottom->y = r.y + Cut;
+		pBottom->y = r.y + Cut + HalfSpacing;
 		pBottom->w = r.w;
-		pBottom->h = r.h - Cut;
+		pBottom->h = r.h - Cut - HalfSpacing;
 	}
 }
 
@@ -274,25 +283,25 @@ void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 	}
 }
 
-void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight) const
+void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing) const
 {
 	CUIRect r = *this;
-	float Cut = r.w / 2;
-	//	Cut *= Scale();
+	const float Cut = r.w / 2;
+	const float HalfSpacing = Spacing / 2;
 
 	if(pLeft)
 	{
 		pLeft->x = r.x;
 		pLeft->y = r.y;
-		pLeft->w = Cut;
+		pLeft->w = Cut - HalfSpacing;
 		pLeft->h = r.h;
 	}
 
 	if(pRight)
 	{
-		pRight->x = r.x + Cut;
+		pRight->x = r.x + Cut + HalfSpacing;
 		pRight->y = r.y;
-		pRight->w = r.w - Cut;
+		pRight->w = r.w - Cut - HalfSpacing;
 		pRight->h = r.h;
 	}
 }
@@ -456,15 +465,18 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	{
 		AlignmentVert = y + (h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
-	if(Align == 0)
+	// if(Align == 0)
+	if(Align & TEXTALIGN_CENTER)
 	{
 		AlignmentHori = x + (w - tw) / 2.f;
 	}
-	else if(Align < 0)
+	// else if(Align < 0)
+	else if(Align & TEXTALIGN_LEFT)
 	{
 		AlignmentHori = x;
 	}
-	else if(Align > 0)
+	// else if(Align > 0)
+	else if(Align & TEXTALIGN_RIGHT)
 	{
 		AlignmentHori = x + w - tw;
 	}
@@ -496,14 +508,14 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	return tw;
 }
 
-void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
+void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
 {
-	DoTextLabel(r->x, r->y, r->w, r->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
+	DoTextLabel(pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
 }
 
-void CUI::DoLabelScaled(const CUIRect *r, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+void CUI::DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
 {
-	DoLabel(r, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
+	DoLabel(pRect, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
 }
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
@@ -522,15 +534,18 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	{
 		AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
-	if(Align == 0)
+	// if(Align == 0)
+	if(Align & TEXTALIGN_CENTER)
 	{
 		AlignmentHori = pRect->x + (pRect->w - tw) / 2.f;
 	}
-	else if(Align < 0)
+	// else if(Align < 0)
+	else if(Align & TEXTALIGN_LEFT)
 	{
 		AlignmentHori = pRect->x;
 	}
-	else if(Align > 0)
+	// else if(Align > 0)
+	else if(Align & TEXTALIGN_RIGHT)
 	{
 		AlignmentHori = pRect->x + pRect->w - tw;
 	}

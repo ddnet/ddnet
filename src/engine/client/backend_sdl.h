@@ -73,9 +73,9 @@ private:
 	CCommandBuffer *m_pBuffer;
 	std::atomic_bool m_Shutdown;
 	std::atomic_bool m_BufferInProcess;
-	std::thread m_Thread;
+	void *m_Thread;
 
-	void ThreadFunc();
+	static void ThreadFunc(void *pUser);
 };
 
 // takes care of implementation independent operations
@@ -253,15 +253,19 @@ public:
 
 	virtual void Minimize();
 	virtual void Maximize();
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless);
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing);
 	virtual bool SetWindowScreen(int Index);
+	virtual bool UpdateDisplayMode(int Index);
 	virtual int GetWindowScreen();
 	virtual int WindowActive();
 	virtual int WindowOpen();
 	virtual void SetWindowGrab(bool Grab);
-	virtual void ResizeWindow(int w, int h, int RefreshRate);
+	virtual bool ResizeWindow(int w, int h, int RefreshRate);
 	virtual void GetViewportSize(int &w, int &h);
 	virtual void NotifyWindow();
+
+	virtual void WindowDestroyNtf(uint32_t WindowID);
+	virtual void WindowCreateNtf(uint32_t WindowID);
 
 	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch);
 	virtual bool IsConfigModernAPI() { return IsModernAPI(m_BackendType); }

@@ -18,7 +18,7 @@ public:
 	CAnimKeyframe *GetFrontFoot() { return &m_FrontFoot; };
 	CAnimKeyframe *GetAttach() { return &m_Attach; };
 	void Set(CAnimation *pAnim, float Time);
-	void Add(CAnimation *pAdded, float Time, float Amount);
+	void Add(CAnimation *pAnim, float Time, float Amount);
 
 	static CAnimState *GetIdle();
 };

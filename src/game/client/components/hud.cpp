@@ -127,8 +127,7 @@ void CHud::RenderGameTimer()
 
 		str_time(Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
-		float w;
-		w = TextRender()->TextWidth(0, 12,
+		float w = TextRender()->TextWidth(0, FontSize,
 			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
 			-1, -1.0f);
 		// last 60 sec red, last 10 sec blink
@@ -350,7 +349,9 @@ void CHud::RenderScoreHud()
 					aScore[t][0] = 0;
 			}
 
-			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0;
+			static int LocalClientID = -1;
+			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0 || LocalClientID != m_pClient->m_Snap.m_LocalClientID;
+			LocalClientID = m_pClient->m_Snap.m_LocalClientID;
 
 			bool RecreateRect = ForceScoreInfoInit;
 			for(int t = 0; t < 2; t++)
@@ -646,11 +647,11 @@ void CHud::RenderVoting()
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	Base.y += Base.h;
 	Base.h = 11.f;
-	UI()->DoLabel(&Base, aBuf, 6.0f, -1);
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_LEFT);
 
 	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
-	UI()->DoLabel(&Base, aBuf, 6.0f, 1);
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_RIGHT);
 }
 
 void CHud::RenderCursor()
@@ -881,7 +882,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 
 		m_LastReceivedTimeTick = Client()->GameTick(g_Config.m_ClDummy);
 
-		m_FinishTime = pMsg->m_Finish ? true : false;
+		m_FinishTime = pMsg->m_Finish != 0;
 
 		if(pMsg->m_Check)
 		{

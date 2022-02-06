@@ -5,6 +5,8 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
+#include "entities/laser.h"
+#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -169,7 +171,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			}
 		}
 
-		if(g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
+		if(g_Config.m_SvTeam < 3 && g_Config.m_SvMaxTeamSize != 2 && g_Config.m_SvPauseable)
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -238,7 +240,7 @@ void CGameTeams::Tick()
 	{
 		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
 		int Team = m_Core.Team(i);
-		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i])
+		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i] || m_Practice[m_Core.Team(i)])
 		{
 			continue;
 		}
@@ -481,6 +483,9 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
 	int64_t Mask = 0;
 
+	if(Team == TEAM_SUPER)
+		return 0xffffffffffffffff;
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ExceptID)
@@ -652,7 +657,7 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 		}
 	}
 
-	if(Size >= 2)
+	if(Size >= (unsigned int)g_Config.m_SvMinTeamSize)
 		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time, pTimestamp);
 }
 
@@ -888,6 +893,9 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
 	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+	swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+
+	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",

@@ -263,15 +263,14 @@ class CTextRender : public IEngineTextRender
 
 	int WordLength(const char *pText)
 	{
-		int Length = 0;
+		const char *pCursor = pText;
 		while(1)
 		{
-			const char *pCursor = (pText + Length);
 			if(*pCursor == 0)
-				return Length;
+				return pCursor - pText;
 			if(*pCursor == '\n' || *pCursor == '\t' || *pCursor == ' ')
-				return Length + 1;
-			Length = str_utf8_forward(pText, Length);
+				return pCursor - pText + 1;
+			str_utf8_decode(&pCursor);
 		}
 	}
 
@@ -978,7 +977,7 @@ public:
 
 		AppendTextContainer(pCursor, ContainerIndex, pText, Length);
 
-		if(TextContainer.m_StringInfo.m_CharacterQuads.size() == 0 && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
+		if(TextContainer.m_StringInfo.m_CharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
 		{
 			FreeTextContainer(ContainerIndex);
 			return -1;
@@ -1088,16 +1087,12 @@ public:
 		int SelectionEndChar = -1;
 
 		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			if((LastCharX - LastCharWidth / 2 <= CursorX &&
-				   CharX + CharWidth / 2 > CursorX &&
-				   CharY - Size <= CursorY &&
-				   CharY > CursorY) ||
-				(CheckOuter &&
-					CharY - Size > CursorY))
-			{
-				return true;
-			}
-			return false;
+			return (LastCharX - LastCharWidth / 2 <= CursorX &&
+				       CharX + CharWidth / 2 > CursorX &&
+				       CharY - Size <= CursorY &&
+				       CharY > CursorY) ||
+			       (CheckOuter &&
+				       CharY - Size > CursorY);
 		};
 		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
@@ -1111,15 +1106,11 @@ public:
 			}
 		};
 		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float CharX, float CharWidth, float CharY) -> bool {
-			if((CharX + CharWidth / 2 > CursorX &&
-				   CharY - Size <= CursorY &&
-				   CharY > CursorY) ||
-				(CheckOuter &&
-					CharY <= CursorY))
-			{
-				return true;
-			}
-			return false;
+			return (CharX + CharWidth / 2 > CursorX &&
+				       CharY - Size <= CursorY &&
+				       CharY > CursorY) ||
+			       (CheckOuter &&
+				       CharY <= CursorY);
 		};
 		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
@@ -1403,7 +1394,7 @@ public:
 				GotNewLineLast = 0;
 		}
 
-		if(TextContainer.m_StringInfo.m_CharacterQuads.size() != 0 && IsRendered)
+		if(!TextContainer.m_StringInfo.m_CharacterQuads.empty() && IsRendered)
 		{
 			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
 			// setup the buffers

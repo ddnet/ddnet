@@ -78,7 +78,6 @@ void CBackground::LoadBackground()
 	else if(m_pMap->Load(aBuf))
 	{
 		m_pLayers->InitBackground(m_pMap);
-		RenderTools()->RenderTilemapGenerateSkip(m_pLayers);
 		NeedImageLoading = true;
 		m_Loaded = true;
 	}

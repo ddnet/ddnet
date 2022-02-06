@@ -131,7 +131,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	//spawn
-	virtual bool CanSpawn(int Team, vec2 *pPos);
+	virtual bool CanSpawn(int Team, vec2 *pOutPos);
 
 	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
 	/*

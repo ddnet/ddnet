@@ -90,9 +90,6 @@ Client
 Close
 == Chiudi
 
-Compatible version
-== Versione compatibile
-
 Connect
 == Connetti
 
@@ -248,9 +245,6 @@ MOTD
 
 Map
 == Mappa
-
-Maximum ping:
-== Ping massimo:
 
 Mouse sens.
 == Sensibilità
@@ -1296,6 +1290,12 @@ Markers:
 %.2f KiB
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Converse
 == 
 
@@ -1309,6 +1309,9 @@ Windowed
 == 
 
 Windowed borderless
+== 
+
+Windowed fullscreen
 == 
 
 Desktop fullscreen
@@ -1363,6 +1366,12 @@ Entities Background color
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Discord

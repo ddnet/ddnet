@@ -103,9 +103,6 @@ Client
 Close
 == Fechar
 
-Compatible version
-== Versão compatível
-
 Connect
 == Conectar
 
@@ -264,9 +261,6 @@ MOTD
 
 Map
 == Mapa
-
-Maximum ping:
-== Ping máximo:
 
 Mouse sens.
 == Sens. do mouse
@@ -1352,3 +1346,18 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == Mostrar pressionamento de teclas de jogadores locais
+
+Settings file
+== 
+
+Config directory
+== 
+
+Windowed fullscreen
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

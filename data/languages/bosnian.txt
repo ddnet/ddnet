@@ -88,9 +88,6 @@ Client
 Close
 == Zatvori
 
-Compatible version
-== Kompatibilna verzija
-
 Connect
 == Konektuj
 
@@ -246,9 +243,6 @@ MOTD
 
 Map
 == Mapa
-
-Maximum ping:
-== Maksimalan ping:
 
 Mouse sens.
 == Osjetljivost miša
@@ -1168,6 +1162,12 @@ Smooth Dynamic Camera
 Skip the main menu
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1193,6 +1193,9 @@ Windowed
 == 
 
 Windowed borderless
+== 
+
+Windowed fullscreen
 == 
 
 Desktop fullscreen
@@ -1274,6 +1277,12 @@ Use current map as background
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Entities

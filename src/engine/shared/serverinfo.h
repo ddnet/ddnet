@@ -20,7 +20,7 @@ public:
 		bool m_IsPlayer;
 	};
 
-	CClient m_aClients[MAX_CLIENTS];
+	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	int m_MaxClients;
 	int m_NumClients; // Indirectly serialized.
 	int m_MaxPlayers;

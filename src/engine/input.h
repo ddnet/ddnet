@@ -62,6 +62,7 @@ public:
 	int *GetEventCountRaw() { return &m_NumEvents; }
 
 	// keys
+	virtual bool ModifierIsPressed() const = 0;
 	virtual bool KeyIsPressed(int Key) const = 0;
 	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
@@ -72,7 +73,7 @@ public:
 	virtual bool NativeMousePressed(int index) = 0;
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
-	virtual int MouseDoubleClick() = 0;
+	virtual bool MouseDoubleClick() = 0;
 	virtual const char *GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;
 
@@ -92,7 +93,6 @@ class IEngineInput : public IInput
 public:
 	virtual void Init() = 0;
 	virtual int Update() = 0;
-	virtual void NextFrame() = 0;
 	virtual int VideoRestartNeeded() = 0;
 };
 

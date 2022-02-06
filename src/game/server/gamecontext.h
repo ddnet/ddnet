@@ -197,7 +197,7 @@ public:
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
 	void CreateHammerHit(vec2 Pos, int64_t Mask = -1);
 	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1);
-	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1);
+	void CreateDeath(vec2 Pos, int ClientID, int64_t Mask = -1);
 	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1);
 	void CreateSoundGlobal(int Sound, int Target = -1);
 
@@ -215,10 +215,11 @@ public:
 	};
 
 	// network
-	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg, const char *pSixupDesc = 0);
+	void CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = 0);
 	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendChatTeam(int Team, const char *pText);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
+	void SendStartWarning(int ClientID, const char *pMessage);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendMotd(int ClientID);
@@ -299,8 +300,6 @@ private:
 
 	//DDRace Console Commands
 
-	//static void ConMute(IConsole::IResult *pResult, void *pUserData);
-	//static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
 	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConNinja(IConsole::IResult *pResult, void *pUserData);
@@ -334,6 +333,7 @@ private:
 
 	static void ConToTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
+	void Teleport(CCharacter *pChr, vec2 Pos);
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConCredits(IConsole::IResult *pResult, void *pUserData);
@@ -384,6 +384,7 @@ private:
 	static void ConTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
+	static void ConTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
@@ -393,6 +394,7 @@ private:
 	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);
 	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmuteID(IConsole::IResult *pResult, void *pUserData);
 	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
 	static void ConModerate(IConsole::IResult *pResult, void *pUserData);
 
@@ -412,14 +414,15 @@ private:
 		NETADDR m_Addr;
 		int m_Expire;
 		char m_aReason[128];
+		bool m_InitialChatDelay;
 	};
 
 	CMute m_aMutes[MAX_MUTES];
 	int m_NumMutes;
 	CMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
-	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason);
-	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "");
+	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
 	bool TryVoteMute(const NETADDR *pAddr, int Secs);
 	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);

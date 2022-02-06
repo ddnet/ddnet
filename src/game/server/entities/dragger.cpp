@@ -174,7 +174,6 @@ void CDragger::Tick()
 		Move();
 	}
 	Drag();
-	return;
 }
 
 void CDragger::Snap(int SnappingClient)

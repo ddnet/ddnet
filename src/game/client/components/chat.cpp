@@ -178,7 +178,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_V))
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_V))
 	{
 		const char *Text = Input()->GetClipboardText();
 		if(Text)
@@ -192,7 +192,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				if(Text[i] == '\n')
 				{
 					int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-					str_utf8_copy(aLine, Text + Begin, max);
+					str_copy(aLine, Text + Begin, max);
 					Begin = i + 1;
 					SayChat(aLine);
 					while(Text[i] == '\n')
@@ -200,17 +200,17 @@ bool CChat::OnInput(IInput::CEvent Event)
 				}
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-			str_utf8_copy(aLine, Text + Begin, max);
+			str_copy(aLine, Text + Begin, max);
 			m_Input.Append(aLine);
 		}
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_C))
 	{
 		Input()->SetClipboardText(m_Input.GetString());
 	}
 
-	if(Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
+	if(Input()->ModifierIsPressed()) // jump to spaces and special ASCII characters
 	{
 		int SearchDirection = 0;
 		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_BACKSPACE))
@@ -1357,7 +1357,7 @@ void CChat::Say(int Team, const char *pLine)
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 void CChat::SayChat(const char *pLine)

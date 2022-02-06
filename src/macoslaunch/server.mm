@@ -52,17 +52,31 @@ void runServer()
 	NSBundle *mainBundle = [NSBundle mainBundle];
 	NSTask *task;
 	task = [[NSTask alloc] init];
-	[task setCurrentDirectoryPath: [mainBundle resourcePath]];
+	[task setCurrentDirectoryPath: [mainBundle resourcePath]]; // NOLINT(clang-analyzer-nullability.NullablePassedToNonnull)
 
-	// get a server config
-	NSOpenPanel *openDlg = [NSOpenPanel openPanel];
-	[openDlg setCanChooseFiles:YES];
+	NSArray *arguments = [NSArray new];
 
-	if([openDlg runModal] != NSOKButton)
-		return;
-
-	NSString *filename = [[openDlg URL] path];
-	NSArray *arguments = [NSArray arrayWithObjects: @"-f", filename, nil];
+	NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+	[alert setMessageText: @"Run DDNet Server"];
+	[alert addButtonWithTitle: @"Use default config"];
+	[alert addButtonWithTitle: @"Select config"];
+	[alert addButtonWithTitle: @"Cancel"];
+	switch([alert runModal])
+	{
+		case NSAlertFirstButtonReturn:
+			break;
+		case NSAlertThirdButtonReturn:
+			return;
+		case NSAlertSecondButtonReturn:
+			// get a server config
+			NSOpenPanel *openDlg = [NSOpenPanel openPanel];
+			[openDlg setCanChooseFiles:YES];
+			if([openDlg runModal] != NSOKButton)
+				return;
+			NSString *filename = [[openDlg URL] path];
+			arguments = [NSArray arrayWithObjects: @"-f", filename, nil];
+			break;
+	}
 
 	// run server
 	NSWindow *window;

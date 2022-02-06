@@ -7,6 +7,7 @@
 # 2020-11-12 TsFreddie
 # 2021-06-01 TsFreddie
 # 2021-11-19 cheeser0613
+# 2021-12-21 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -88,9 +89,6 @@ Client
 
 Close
 == 關閉
-
-Compatible version
-== 相容的版本
 
 Connect
 == 連線
@@ -253,9 +251,6 @@ MOTD
 
 Map
 == 地圖
-
-Maximum ping:
-== 最高延遲：
 
 Mouse sens.
 == 滑鼠靈敏度
@@ -1344,3 +1339,18 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == 顯示周圍玩家的按鍵輸入
+
+Settings file
+== 設定文件
+
+Config directory
+== 配置目錄 (cfg)
+
+Run on join
+== 加入時執行
+
+Chat command (e.g. showall 1)
+== 聊天指令 (例如: showall 1)
+
+Windowed fullscreen
+== 

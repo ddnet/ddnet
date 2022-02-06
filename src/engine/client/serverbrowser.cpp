@@ -206,7 +206,7 @@ bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 	CServerEntry *b = m_ppServerlist[Index2];
 	//	make sure empty entries are listed last
 	return (a->m_GotInfo && b->m_GotInfo) || (!a->m_GotInfo && !b->m_GotInfo) ? str_comp(a->m_Info.m_aName, b->m_Info.m_aName) < 0 :
-										    a->m_GotInfo ? true : false;
+										    a->m_GotInfo != 0;
 }
 
 bool CServerBrowser::SortCompareMap(int Index1, int Index2) const
@@ -281,8 +281,6 @@ void CServerBrowser::Filter()
 		else if(g_Config.m_BrFilterFull && Players(m_ppServerlist[i]->m_Info) == Max(m_ppServerlist[i]->m_Info))
 			Filtered = 1;
 		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags & SERVER_FLAG_PASSWORD)
-			Filtered = 1;
-		else if(g_Config.m_BrFilterCompatversion && str_comp_num(m_ppServerlist[i]->m_Info.m_aVersion, m_aNetVersion, 3) != 0)
 			Filtered = 1;
 		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aAddress, g_Config.m_BrFilterServerAddress))
 			Filtered = 1;
@@ -397,7 +395,6 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterFriends << 7;
 	i |= g_Config.m_BrFilterPw << 8;
 	i |= g_Config.m_BrSortOrder << 9;
-	i |= g_Config.m_BrFilterCompatversion << 11;
 	i |= g_Config.m_BrFilterGametypeStrict << 12;
 	i |= g_Config.m_BrFilterUnfinishedMap << 13;
 	i |= g_Config.m_BrFilterCountry << 14;
@@ -1487,7 +1484,7 @@ int CServerBrowser::HasRank(const char *pMap)
 
 void CServerBrowser::LoadDDNetInfoJson()
 {
-	IOHANDLE File = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ, IStorage::TYPE_SAVE);
+	IOHANDLE File = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
 	if(!File)
 		return;
 

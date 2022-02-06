@@ -464,6 +464,16 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	}
 }
 
+void CGameContext::SendStartWarning(int ClientID, const char *pMessage)
+{
+	CCharacter *pChr = GetPlayerChar(ClientID);
+	if(pChr && pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+	{
+		SendChatTarget(ClientID, pMessage);
+		pChr->m_LastStartWarning = Server()->Tick();
+	}
+}
+
 void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
 	CNetMsg_Sv_Emoticon Msg;
@@ -1054,7 +1064,7 @@ void CGameContext::OnTick()
 			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
 				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);
 			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
-				str_copy(g_Config.m_SvMap, m_SqlRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
+				Server()->ChangeMap(m_SqlRandomMapResult->m_aMap);
 			else
 				m_LastMapVote = 0;
 		}
@@ -1271,18 +1281,18 @@ void CGameContext::OnClientEnter(int ClientID)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
 
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	if(Info.m_GotDDNetVersion)
+	{
+		if(OnClientDDNetVersionKnown(ClientID))
+			return; // kicked
+	}
+
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);
-
-		IServer::CClientInfo Info;
-		Server()->GetClientInfo(ClientID, &Info);
-		if(Info.m_GotDDNetVersion)
-		{
-			if(OnClientDDNetVersionKnown(ClientID))
-				return; // kicked
-		}
 
 		if(g_Config.m_SvShowOthersDefault > 0)
 		{
@@ -1359,6 +1369,14 @@ void CGameContext::OnClientEnter(int ClientID)
 		NewClientInfoMsg.m_Local = 1;
 		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
+
+	// initial chat delay
+	if(g_Config.m_SvChatInitialDelay != 0 && m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
+	{
+		NETADDR Addr;
+		Server()->GetClientAddr(ClientID, &Addr);
+		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientID), "Initial chat delay", true);
+	}
 }
 
 bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
@@ -1400,18 +1418,9 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	// Check which team the player should be on
 	const int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	if(!m_apPlayers[ClientID])
-		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-	else
-	{
+	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
-		m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-		//	//m_apPlayers[ClientID]->Reset();
-		//	//((CServer*)Server())->m_aClients[ClientID].Reset();
-		//	((CServer*)Server())->m_aClients[ClientID].m_State = 4;
-	}
-	//players[client_id].init(client_id);
-	//players[client_id].client_id = client_id;
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -1765,8 +1774,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
-			pPlayer->UpdatePlaytime();
-
 			int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
 			if(Team)
 				Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
@@ -1834,6 +1841,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
+				pPlayer->UpdatePlaytime();
 				char aCensoredMessage[256];
 				CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
 				SendChat(ClientID, Team, aCensoredMessage, ClientID);
@@ -3126,7 +3134,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
-	char aMapName[128];
+	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
 	SHA256_DIGEST MapSha256;
 	int MapCrc;
@@ -3209,7 +3217,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	m_pController = new CGameControllerDDRace(this);
 
 	const char *pCensorFilename = "censorlist.txt";
-	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
 	{
 		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
@@ -3422,12 +3430,10 @@ void CGameContext::DeleteTempfile()
 
 void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 {
-	char aConfig[128];
-	char aTemp[128];
+	char aConfig[IO_MAX_PATH_LENGTH];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
-	str_format(aTemp, sizeof(aTemp), "%s.%d.tmp", pNewMapName, pid());
 
-	IOHANDLE File = Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = Storage()->OpenFile(aConfig, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
 	{
 		// No map-specific config, just return.
@@ -3540,7 +3546,8 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	dbg_msg("mapchange", "imported settings");
 	free(pSettings);
 	Reader.Close();
-	Writer.OpenFile(Storage(), aTemp);
+	char aTemp[IO_MAX_PATH_LENGTH];
+	Writer.OpenFile(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
 	Writer.Finish();
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
@@ -3604,7 +3611,7 @@ void CGameContext::LoadMapSettings()
 		break;
 	}
 
-	char aBuf[128];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", g_Config.m_SvMap);
 	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
@@ -3644,7 +3651,7 @@ void CGameContext::OnPostSnap()
 
 bool CGameContext::IsClientReady(int ClientID) const
 {
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsReady ? true : false;
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_IsReady;
 }
 
 bool CGameContext::IsClientPlayer(int ClientID) const
@@ -3789,13 +3796,11 @@ int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDel
 	Server()->GetClientAddr(ClientID, &Addr);
 
 	int Muted = 0;
-	if(m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed() && RespectChatInitialDelay)
-		Muted = (m_apPlayers[ClientID]->m_JoinTick + Server()->TickSpeed() * g_Config.m_SvChatInitialDelay - Server()->Tick()) / Server()->TickSpeed();
-	if(Muted <= 0)
+	for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
 	{
-		for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
 		{
-			if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+			if(RespectChatInitialDelay || m_aMutes[i].m_InitialChatDelay)
 				Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 		}
 	}
@@ -3838,9 +3843,7 @@ void CGameContext::ResetTuning()
 
 bool CheckClientID2(int ClientID)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-		return false;
-	return true;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS;
 }
 
 void CGameContext::Whisper(int ClientID, char *pStr)
@@ -4100,12 +4103,7 @@ int CGameContext::GetClientVersion(int ClientID) const
 
 bool CGameContext::PlayerModerating() const
 {
-	for(const auto &pPlayer : m_apPlayers)
-	{
-		if(pPlayer && pPlayer->m_Moderating)
-			return true;
-	}
-	return false;
+	return std::any_of(std::begin(m_apPlayers), std::end(m_apPlayers), [](const CPlayer *pPlayer) { return pPlayer && pPlayer->m_Moderating; });
 }
 
 void CGameContext::ForceVote(int EnforcerID, bool Success)

@@ -83,7 +83,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	{
 		// headline
 		Game.HSplitTop(20.0f, &Label, &Game);
-		UI()->DoLabelScaled(&Label, Localize("Game"), 20.0f, -1);
+		UI()->DoLabelScaled(&Label, Localize("Game"), 20.0f, TEXTALIGN_LEFT);
 		Game.Margin(5.0f, &Game);
 		Game.VSplitMid(&Left, &Right);
 		Left.VSplitRight(5.0f, &Left, 0);
@@ -160,8 +160,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Right.HSplitTop(20.0f, &Label, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Name plates size"), g_Config.m_ClNameplatesSize);
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-			g_Config.m_ClNameplatesSize = (int)(m_UIEx.DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize / 100.0f) * 100.0f + 0.1f);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClNameplatesSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize / 100.0f) * 100.0f + 0.1f);
 
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
@@ -178,8 +178,8 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				Right.HSplitTop(20.0f, &Label, &Right);
 				Right.HSplitTop(20.0f, &Button, &Right);
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Clan plates size"), g_Config.m_ClNameplatesClanSize);
-				UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
-				g_Config.m_ClNameplatesClanSize = (int)(m_UIEx.DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize / 100.0f) * 100.0f + 0.1f);
+				UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+				g_Config.m_ClNameplatesClanSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize / 100.0f) * 100.0f + 0.1f);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	{
 		// headline
 		Client.HSplitTop(20.0f, &Label, &Client);
-		UI()->DoLabelScaled(&Label, Localize("Client"), 20.0f, -1);
+		UI()->DoLabelScaled(&Label, Localize("Client"), 20.0f, TEXTALIGN_LEFT);
 		Client.Margin(5.0f, &Client);
 		Client.VSplitMid(&Left, &Right);
 		Left.VSplitRight(5.0f, &Left, 0);
@@ -215,9 +215,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max demos"), g_Config.m_ClAutoDemoMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max demos"), "∞");
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 			Right.HSplitTop(20.0f, &Button, &Right);
-			g_Config.m_ClAutoDemoMax = static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_ClAutoDemoMax, &Button, g_Config.m_ClAutoDemoMax / 1000.0f) * 1000.0f + 0.1f);
+			g_Config.m_ClAutoDemoMax = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClAutoDemoMax, &Button, g_Config.m_ClAutoDemoMax / 1000.0f) * 1000.0f + 0.1f);
 
 			Right.HSplitTop(SliderGroupMargin, 0, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
@@ -229,9 +229,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max Screenshots"), g_Config.m_ClAutoScreenshotMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max Screenshots"), "∞");
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 			Right.HSplitTop(20.0f, &Button, &Right);
-			g_Config.m_ClAutoScreenshotMax = static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_ClAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax / 1000.0f) * 1000.0f + 0.1f);
+			g_Config.m_ClAutoScreenshotMax = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClAutoScreenshotMax, &Button, g_Config.m_ClAutoScreenshotMax / 1000.0f) * 1000.0f + 0.1f);
 		}
 
 		Left.HSplitTop(10.0f, 0, &Left);
@@ -241,9 +241,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_ClRefreshRate);
 		else
 			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Refresh Rate"), "∞");
-		UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		g_Config.m_ClRefreshRate = static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
+		g_Config.m_ClRefreshRate = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
 
 #if defined(CONF_FAMILY_WINDOWS)
 		Left.HSplitTop(10.0f, 0, &Left);
@@ -259,6 +259,38 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 #endif
 
 		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect SettingsButton;
+		Left.HSplitBottom(25.0f, &Left, &SettingsButton);
+
+		SettingsButton.HSplitTop(5.0f, 0, &SettingsButton);
+		static int s_SettingsButtonID = 0;
+		if(DoButton_Menu(&s_SettingsButtonID, Localize("Settings file"), 0, &SettingsButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "settings_ddnet.cfg", aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file");
+			}
+		}
+
+		Left.HSplitTop(15.0f, 0, &Left);
+		CUIRect ConfigButton;
+		Left.HSplitBottom(25.0f, &Left, &ConfigButton);
+
+		ConfigButton.HSplitTop(5.0f, 0, &ConfigButton);
+		static int s_ConfigButtonID = 0;
+		if(DoButton_Menu(&s_ConfigButtonID, Localize("Config directory"), 0, &ConfigButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file");
+			}
+		}
+
+		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect DirectoryButton;
 		Left.HSplitBottom(25.0f, &Left, &DirectoryButton);
 		RenderThemeSelection(Left);
@@ -268,13 +300,11 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
-			char aBufFull[IO_MAX_PATH_LENGTH + 7];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
-			str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-			if(!open_link(aBufFull))
+			if(!open_file(aBuf))
 			{
-				dbg_msg("menus", "couldn't open link");
+				dbg_msg("menus", "couldn't open file");
 			}
 		}
 
@@ -294,10 +324,10 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max Screenshots"), g_Config.m_ClAutoStatboardScreenshotMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max Screenshots"), "∞");
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			g_Config.m_ClAutoStatboardScreenshotMax =
-				static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_ClAutoStatboardScreenshotMax,
+				static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClAutoStatboardScreenshotMax,
 							 &Button,
 							 g_Config.m_ClAutoStatboardScreenshotMax / 1000.0f) *
 							 1000.0f +
@@ -320,10 +350,10 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max CSVs"), g_Config.m_ClAutoCSVMax);
 			else
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Max CSVs"), "∞");
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			g_Config.m_ClAutoCSVMax =
-				static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_ClAutoCSVMax,
+				static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClAutoCSVMax,
 							 &Button,
 							 g_Config.m_ClAutoCSVMax / 1000.0f) *
 							 1000.0f +
@@ -364,9 +394,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	Button.VSplitLeft(150.0f, &Button, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 	static float s_OffsetName = 0.0f;
-	if(DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, pNameFallback))
+	if(UIEx()->DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, pNameFallback))
 	{
 		SetNeedSendInfo();
 	}
@@ -378,9 +408,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	Button.VSplitLeft(200.0f, &Button, &Dummy);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 	static float s_OffsetClan = 0.0f;
-	if(DoEditBox(pClan, &Button, pClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
+	if(UIEx()->DoEditBox(pClan, &Button, pClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
 	{
 		SetNeedSendInfo();
 	}
@@ -418,7 +448,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
 			if(pEntry->m_Texture.IsValid())
-				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, 0);
+				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_CENTER);
 		}
 	}
 
@@ -453,19 +483,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton;
 
-	static float s_ClSkinPrefix = 0.0f;
-
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	char *Skin = g_Config.m_ClPlayerSkin;
+	char *pSkinName = g_Config.m_ClPlayerSkin;
 	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
 	unsigned *ColorBody = &g_Config.m_ClPlayerColorBody;
 	unsigned *ColorFeet = &g_Config.m_ClPlayerColorFeet;
 
 	if(m_Dummy)
 	{
-		Skin = g_Config.m_ClDummySkin;
+		pSkinName = g_Config.m_ClDummySkin;
 		UseCustomColor = &g_Config.m_ClDummyUseCustomColor;
 		ColorBody = &g_Config.m_ClDummyColorBody;
 		ColorFeet = &g_Config.m_ClDummyColorFeet;
@@ -473,7 +501,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin info
 	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(Skin));
+	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
@@ -497,7 +525,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, 0);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -529,12 +557,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
-	UI()->DoLabelScaled(&SkinPrefixLabel, Localize("Skin prefix"), 14.0f, -1);
+	UI()->DoLabelScaled(&SkinPrefixLabel, Localize("Skin prefix"), 14.0f, TEXTALIGN_LEFT);
 
 	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
 	{
 		static int s_ClearButton = 0;
-		DoClearableEditBox(g_Config.m_ClSkinPrefix, &s_ClearButton, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_ClSkinPrefix);
+		static float s_Offset = 0.0f;
+		UIEx()->DoClearableEditBox(g_Config.m_ClSkinPrefix, &s_ClearButton, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_Offset);
 	}
 
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
@@ -563,10 +592,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, 0, vec2(1, 0), TeeRenderPos);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	Label.HMargin(15.0f, &Label);
-	// UI()->DoLabelScaled(&Label, Skin, 14.0f, -1, 150.0f);
+
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
-	if(DoClearableEditBox(Skin, &s_ClearButton, &Label, Skin, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default"))
+	if(UIEx()->DoClearableEditBox(pSkinName, &s_ClearButton, &Label, pSkinName, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default"))
 	{
 		SetNeedSendInfo();
 	}
@@ -587,9 +616,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*UseCustomColor)
 	{
 		CUIRect aRects[2];
-		Label.VSplitMid(&aRects[0], &aRects[1]);
-		aRects[0].VSplitRight(10.0f, &aRects[0], 0);
-		aRects[1].VSplitLeft(10.0f, 0, &aRects[1]);
+		Label.VSplitMid(&aRects[0], &aRects[1], 20.0f);
 
 		unsigned *paColors[2] = {ColorBody, ColorFeet};
 		const char *paParts[] = {Localize("Body"), Localize("Feet")};
@@ -597,7 +624,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		for(int i = 0; i < 2; i++)
 		{
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
-			UI()->DoLabelScaled(&Label, paParts[i], 14.0f, -1);
+			UI()->DoLabelScaled(&Label, paParts[i], 14.0f, TEXTALIGN_LEFT);
 			aRects[i].VSplitLeft(10.0f, 0, &aRects[i]);
 			aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
 
@@ -651,7 +678,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		const CSkin *s = s_paSkinList[i].m_pSkin;
 
-		if(str_comp(s->m_aName, Skin) == 0)
+		if(str_comp(s->m_aName, pSkinName) == 0)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
@@ -671,7 +698,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
-			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, -1, Item.m_Rect.w);
+			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, TEXTALIGN_LEFT, Item.m_Rect.w);
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
@@ -688,7 +715,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(Skin, s_paSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(pSkinName, s_paSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
@@ -700,7 +727,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		const char *pSearchLabel = "\xEE\xA2\xB6";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1, -1, 0);
+		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, -1, 0);
 		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
@@ -708,10 +735,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
 		static int s_ClearButton = 0;
-		static float Offset = 0.0f;
-		if(Input()->KeyPress(KEY_F) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL)))
+		static float s_Offset = 0.0f;
+		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-		if(DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &Offset, false, CUI::CORNER_ALL, Localize("Search")))
+		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search")))
 			s_InitSkinlist = true;
 	}
 
@@ -734,13 +761,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
-		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-		if(!open_link(aBufFull))
+		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open file");
 		}
 	}
 
@@ -848,7 +873,7 @@ void CMenus::UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
 
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, -1);
+			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 			int OldId = Key.m_KeyId, OldModifier = Key.m_Modifier, NewModifier;
 			int NewId = DoKeyReader((void *)&gs_aKeys[i].m_Name, &Button, OldId, OldModifier, &NewModifier);
 			if(NewId != OldId || NewModifier != OldModifier)
@@ -920,8 +945,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
 			Button.VSplitLeft(160.0f, &Label, &Button);
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
-			UI()->DoLabel(&Label, aBuf, 14.0f * UI()->Scale(), -1);
-			int NewValue = (int)(m_UIEx.DoScrollbarH(&g_Config.m_InpMousesens, &Button, (minimum(g_Config.m_InpMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
+			UI()->DoLabel(&Label, aBuf, 14.0f * UI()->Scale(), TEXTALIGN_LEFT);
+			int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_InpMousesens, &Button, (minimum(g_Config.m_InpMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
 			if(g_Config.m_InpMousesens < 500 || NewValue < 500)
 				g_Config.m_InpMousesens = minimum(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
@@ -932,8 +957,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
 			Button.VSplitLeft(160.0f, &Label, &Button);
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
-			UI()->DoLabel(&Label, aBuf, 14.0f * UI()->Scale(), -1);
-			int NewValue = (int)(m_UIEx.DoScrollbarH(&g_Config.m_UiMousesens, &Button, (minimum(g_Config.m_UiMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
+			UI()->DoLabel(&Label, aBuf, 14.0f * UI()->Scale(), TEXTALIGN_LEFT);
+			int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_UiMousesens, &Button, (minimum(g_Config.m_UiMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
 			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
 				g_Config.m_UiMousesens = minimum(NewValue, 500);
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
@@ -1037,7 +1062,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 			if(Item.m_Visible)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s", pStr[i]);
-				UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, 0);
+				UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, TEXTALIGN_CENTER);
 			}
 		}
 		bool ClickedItem = false;
@@ -1109,7 +1134,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 	str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
 
-	UI()->DoLabelScaled(&ModeLabel, aBuf, sc_FontSizeResListHeader, 0);
+	UI()->DoLabelScaled(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_CENTER);
 	UiDoListboxStart(&s_NumNodes, &ModeList, sc_RowHeightResList, Localize("Display Modes"), aBuf, s_NumNodes - 1, 1, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_NumNodes; ++i)
@@ -1128,7 +1153,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		{
 			int G = gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
 			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
-			UI()->DoLabelScaled(&Item.m_Rect, aBuf, sc_FontSizeResList, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, aBuf, sc_FontSizeResList, TEXTALIGN_LEFT);
 		}
 	}
 
@@ -1140,32 +1165,34 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		g_Config.m_GfxScreenWidth = s_aModes[NewSelected].m_WindowWidth;
 		g_Config.m_GfxScreenHeight = s_aModes[NewSelected].m_WindowHeight;
 		g_Config.m_GfxScreenRefreshRate = s_aModes[NewSelected].m_RefreshRate;
-		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate, true);
+		Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
 	}
 
 	// switches
 	static float s_ScrollValueDrop = 0;
-	static const int s_NumWindowMode = 4;
+	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
+	static const int s_NumWindowMode = sizeof(pWindowModes) / sizeof(pWindowModes[0]);
 	static int s_aWindowModeIDs[s_NumWindowMode];
 	const void *aWindowModeIDs[s_NumWindowMode];
 	for(int i = 0; i < s_NumWindowMode; ++i)
 		aWindowModeIDs[i] = &s_aWindowModeIDs[i];
 	static int s_WindowModeDropDownState = 0;
-	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
 
-	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 3 : 2) : (g_Config.m_GfxBorderless ? 1 : 0));
+	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
 
 	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, aWindowModeIDs, pWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
 	if(OldSelected != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false);
+			Client()->SetWindowParams(0, false, true);
 		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true);
+			Client()->SetWindowParams(0, true, true);
 		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(2, false);
+			Client()->SetWindowParams(3, false, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(1, false);
+			Client()->SetWindowParams(2, false, true);
+		else if(NewWindowMode == 4)
+			Client()->SetWindowParams(1, false, true);
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -1260,14 +1287,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
-		if(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
-			s_GfxOpenGLVersion == (int)IsNewOpenGL &&
-			s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
-			s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
-			s_GfxHighdpi == g_Config.m_GfxHighdpi)
-			m_NeedRestartGraphics = false;
-		else
-			m_NeedRestartGraphics = true;
+		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
+					  s_GfxOpenGLVersion == (int)IsNewOpenGL &&
+					  s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
+					  s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
+					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
 	}
 
 	MainView.HSplitTop(20.0f, &Label, &MainView);
@@ -1276,8 +1300,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_GfxRefreshRate);
 	else
 		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Refresh Rate"), "∞");
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-	int NewRefreshRate = static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, (minimum(g_Config.m_GfxRefreshRate, 1000)) / 1000.0f) * 1000.0f + 0.1f);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+	int NewRefreshRate = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_GfxRefreshRate, &Button, (minimum(g_Config.m_GfxRefreshRate, 1000)) / 1000.0f) * 1000.0f + 0.1f);
 	if(g_Config.m_GfxRefreshRate <= 1000 || NewRefreshRate < 1000)
 		g_Config.m_GfxRefreshRate = NewRefreshRate;
 
@@ -1285,7 +1309,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Text, &MainView);
 	//text.VSplitLeft(15.0f, 0, &text);
-	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, -1);
+	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, TEXTALIGN_LEFT);
 	RenderHSLScrollbars(&MainView, &g_Config.m_UiColor, true);
 }
 
@@ -1367,10 +1391,10 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_SndRate);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		UI()->DoLabelScaled(&Button, Localize("Sample rate"), 14.0f, -1);
+		UI()->DoLabelScaled(&Button, Localize("Sample rate"), 14.0f, TEXTALIGN_LEFT);
 		Button.VSplitLeft(190.0f, 0, &Button);
-		static float Offset = 0.0f;
-		DoEditBox(&g_Config.m_SndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &Offset);
+		static float s_Offset = 0.0f;
+		UIEx()->DoEditBox(&g_Config.m_SndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &s_Offset);
 		g_Config.m_SndRate = maximum(1, str_toint(aBuf));
 		m_NeedRestartSound = !s_SndEnable || s_SndRate != g_Config.m_SndRate;
 	}
@@ -1381,8 +1405,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, -1);
-		g_Config.m_SndVolume = (int)(m_UIEx.DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Sound volume"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_SndVolume = (int)(UIEx()->DoScrollbarH(&g_Config.m_SndVolume, &Button, g_Config.m_SndVolume / 100.0f) * 100.0f);
 	}
 
 	// volume slider game sounds
@@ -1391,8 +1415,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Game sound volume"), 14.0f, -1);
-		g_Config.m_SndGameSoundVolume = (int)(m_UIEx.DoScrollbarH(&g_Config.m_SndGameSoundVolume, &Button, g_Config.m_SndGameSoundVolume / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Game sound volume"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_SndGameSoundVolume = (int)(UIEx()->DoScrollbarH(&g_Config.m_SndGameSoundVolume, &Button, g_Config.m_SndGameSoundVolume / 100.0f) * 100.0f);
 	}
 
 	// volume slider gui sounds
@@ -1401,8 +1425,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Chat sound volume"), 14.0f, -1);
-		g_Config.m_SndChatSoundVolume = (int)(m_UIEx.DoScrollbarH(&g_Config.m_SndChatSoundVolume, &Button, g_Config.m_SndChatSoundVolume / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Chat sound volume"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_SndChatSoundVolume = (int)(UIEx()->DoScrollbarH(&g_Config.m_SndChatSoundVolume, &Button, g_Config.m_SndChatSoundVolume / 100.0f) * 100.0f);
 	}
 
 	// volume slider map sounds
@@ -1411,8 +1435,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, -1);
-		g_Config.m_SndMapSoundVolume = (int)(m_UIEx.DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Map sound volume"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_SndMapSoundVolume = (int)(UIEx()->DoScrollbarH(&g_Config.m_SndMapSoundVolume, &Button, g_Config.m_SndMapSoundVolume / 100.0f) * 100.0f);
 	}
 
 	// volume slider background music
@@ -1421,8 +1445,8 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Background music volume"), 14.0f, -1);
-		g_Config.m_SndBackgroundMusicVolume = (int)(m_UIEx.DoScrollbarH(&g_Config.m_SndBackgroundMusicVolume, &Button, g_Config.m_SndBackgroundMusicVolume / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Background music volume"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_SndBackgroundMusicVolume = (int)(UIEx()->DoScrollbarH(&g_Config.m_SndBackgroundMusicVolume, &Button, g_Config.m_SndBackgroundMusicVolume / 100.0f) * 100.0f);
 	}
 }
 
@@ -1442,7 +1466,7 @@ public:
 
 void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
 {
-	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
 	{
 		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "couldn't open index file");
@@ -1536,7 +1560,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			m_pClient->m_CountryFlags.Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
-			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, TEXTALIGN_LEFT);
 		}
 	}
 
@@ -1647,11 +1671,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 	if(m_NeedRestartUpdate)
 	{
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, -1);
+		UI()->DoLabelScaled(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, TEXTALIGN_LEFT);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
-		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, -1);
+		UI()->DoLabelScaled(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, TEXTALIGN_LEFT);
 
 	RenderColorPicker();
 }
@@ -1994,7 +2018,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		Button.Margin(2.0f, &Rail);
 
 		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 255));
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 
 		ColorHSLA CurColorPureHSLA(RenderColorHSLA.r, 1, 0.5f, 1);
 		ColorRGBA CurColorPure = color_cast<ColorRGBA>(CurColorPureHSLA);
@@ -2029,7 +2053,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], LightVal, *paComponent[3]));
 		}
 
-		*paComponent[i] = m_UIEx.DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i], &ColorInner);
+		*paComponent[i] = UIEx()->DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i], &ColorInner);
 	}
 
 	*pColor = Color.Pack(Alpha);
@@ -2044,7 +2068,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Section, SectionTwo;
 
 	MainView.HSplitTop(20, &TabLabel1, &MainView);
-	TabLabel1.VSplitLeft(TabLabel1.w / 2, &TabLabel1, &TabLabel2);
+	TabLabel1.VSplitMid(&TabLabel1, &TabLabel2);
 
 	static int s_aPageTabs[2] = {};
 
@@ -2063,7 +2087,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.VSplitLeft(MainView.w * 0.55, &MainView, &Column);
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, Localize("HUD"), 20.0f, -1);
+		UI()->DoLabelScaled(&Section, Localize("HUD"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
@@ -2084,7 +2108,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		// ***** Kill Messages ***** //
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, Localize("Kill Messages"), 20.0f, -1);
+		UI()->DoLabelScaled(&Section, Localize("Kill Messages"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
@@ -2100,7 +2124,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView = Column;
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, Localize("Laser"), 20.0f, -1);
+		UI()->DoLabelScaled(&Section, Localize("Laser"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
@@ -2124,7 +2148,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(25.0f, 0x0, &MainView);
 		MainView.HSplitTop(20.0f, &SectionTwo, &MainView);
 
-		UI()->DoLabelScaled(&SectionTwo, Localize("Hookline"), 20.0f, -1);
+		UI()->DoLabelScaled(&SectionTwo, Localize("Hookline"), 20.0f, TEXTALIGN_LEFT);
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
@@ -2145,7 +2169,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	else if(s_CurTab == 1)
 	{ // ***** CHAT TAB ***** //
 
-		MainView.VSplitLeft(MainView.w / 2, &MainView, &Column);
+		MainView.VSplitMid(&MainView, &Column);
 
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &MainView, LineMargin))
 			GameClient()->m_Chat.RebuildChat();
@@ -2157,7 +2181,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Section, &MainView);
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
-		UI()->DoLabelScaled(&Section, Localize("Messages"), 20.0f, -1);
+		UI()->DoLabelScaled(&Section, Localize("Messages"), 20.0f, TEXTALIGN_LEFT);
 
 		const float LineSize = 25.0f;
 		const float WantedPickerPosition = 210.0f;
@@ -2185,7 +2209,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
 		MainView.HSplitTop(20.0f, &Section, &MainView);
 
-		UI()->DoLabelScaled(&Section, Localize("Preview"), 20.0f, -1);
+		UI()->DoLabelScaled(&Section, Localize("Preview"), 20.0f, TEXTALIGN_LEFT);
 
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
 		RenderTools()->DrawUIRect(&MainView, ColorRGBA(1, 1, 1, 0.1f), CUI::CORNER_ALL, 8.0f);
@@ -2371,7 +2395,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	MainView.HSplitTop(100.0f, &Demo, &MainView);
 
 	Demo.HSplitTop(30.0f, &Label, &Demo);
-	UI()->DoLabelScaled(&Label, Localize("Demo"), 20.0f, -1);
+	UI()->DoLabelScaled(&Label, Localize("Demo"), 20.0f, TEXTALIGN_LEFT);
 	Demo.Margin(5.0f, &Demo);
 	Demo.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
@@ -2391,9 +2415,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Button.VSplitLeft(140.0f, &Label, &Button);
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), Localize("Default length: %d"), g_Config.m_ClReplayLength);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 
-		int NewValue = (int)(m_UIEx.DoScrollbarH(&g_Config.m_ClReplayLength, &Button, (minimum(g_Config.m_ClReplayLength, 600) - 10) / 590.0f) * 590.0f) + 10;
+		int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClReplayLength, &Button, (minimum(g_Config.m_ClReplayLength, 600) - 10) / 590.0f) * 590.0f) + 10;
 		if(g_Config.m_ClReplayLength < 600 || NewValue < 600)
 			g_Config.m_ClReplayLength = minimum(NewValue, 600);
 
@@ -2437,7 +2461,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	MainView.HSplitTop(330.0f, &Gameplay, &MainView);
 
 	Gameplay.HSplitTop(30.0f, &Label, &Gameplay);
-	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, -1);
+	UI()->DoLabelScaled(&Label, Localize("Gameplay"), 20.0f, TEXTALIGN_LEFT);
 	Gameplay.Margin(5.0f, &Gameplay);
 	Gameplay.VSplitMid(&Left, &Right);
 	Left.VSplitRight(5.0f, &Left, 0);
@@ -2447,8 +2471,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(120.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, -1);
-		g_Config.m_ClOverlayEntities = (int)(m_UIEx.DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClOverlayEntities = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOverlayEntities, &Button, g_Config.m_ClOverlayEntities / 100.0f) * 100.0f);
 	}
 
 	{
@@ -2457,8 +2481,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Button.VSplitMid(&LeftLeft, &Button);
 
 		Button.VSplitLeft(50.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Size"), 14.0f, -1);
-		g_Config.m_ClTextEntitiesSize = (int)(m_UIEx.DoScrollbarH(&g_Config.m_ClTextEntitiesSize, &Button, g_Config.m_ClTextEntitiesSize / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Size"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClTextEntitiesSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClTextEntitiesSize, &Button, g_Config.m_ClTextEntitiesSize / 100.0f) * 100.0f);
 
 		if(DoButton_CheckBox(&g_Config.m_ClTextEntities, Localize("Show text entities"), g_Config.m_ClTextEntities, &LeftLeft))
 		{
@@ -2472,8 +2496,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Button.VSplitMid(&LeftLeft, &Button);
 
 		Button.VSplitLeft(50.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, -1);
-		g_Config.m_ClShowOthersAlpha = (int)(m_UIEx.DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha / 100.0f) * 100.0f);
+		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClShowOthersAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha / 100.0f) * 100.0f);
 
 		if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers == 1, &LeftLeft))
 		{
@@ -2499,8 +2523,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Label.VSplitLeft(130.0f, &Label, &Button);
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
-	UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
-	g_Config.m_ClDefaultZoom = static_cast<int>(m_UIEx.DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom / 20.0f) * 20.0f + 0.1f);
+	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+	g_Config.m_ClDefaultZoom = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom / 20.0f) * 20.0f + 0.1f);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
@@ -2569,30 +2593,30 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Left.VSplitRight(10.0f, &Left, 0x0);
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
-	CUIRect TempLabel;
+	CUIRect TempLabel, TempLabel2;
 	Left.HSplitTop(25.0f, &TempLabel, &Left);
 	Left.HSplitTop(5.0f, 0x0, &Left);
 
-	UI()->DoLabelScaled(&TempLabel, Localize("Background"), 20.0f, -1);
+	UI()->DoLabelScaled(&TempLabel, Localize("Background"), 20.0f, TEXTALIGN_LEFT);
 
-	Right.HSplitTop(25.0f, 0x0, &Right);
+	Right.HSplitTop(45.0f, 0x0, &Right);
 	Right.HSplitTop(25.0f, &TempLabel, &Right);
 	Right.HSplitTop(5.0f, 0x0, &Miscellaneous);
 
-	UI()->DoLabelScaled(&TempLabel, Localize("Miscellaneous"), 20.0f, -1);
+	UI()->DoLabelScaled(&TempLabel, Localize("Miscellaneous"), 20.0f, TEXTALIGN_LEFT);
 
 	static int ResetID1 = 0;
 	static int ResetID2 = 0;
 	ColorRGBA GreyDefault(0.5f, 0.5f, 0.5f, 1);
 	DoLine_ColorPicker(&ResetID2, 25.0f, 194.0f, 13.0f, 5.0f, &Left, Localize("Entities Background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
-	static float s_Map = 0.0f;
 	Left.VSplitLeft(5.0f, 0x0, &Left);
 	Left.HSplitTop(25.0f, &Background, &Left);
 	Background.HSplitTop(20.0f, &Background, 0);
 	Background.VSplitLeft(100.0f, &Label, &TempLabel);
-	UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, -1);
-	DoEditBox(g_Config.m_ClBackgroundEntities, &TempLabel, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+	UI()->DoLabelScaled(&Label, Localize("Map"), 14.0f, TEXTALIGN_LEFT);
+	static float s_Map = 0.0f;
+	UIEx()->DoEditBox(g_Config.m_ClBackgroundEntities, &TempLabel, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
@@ -2623,12 +2647,20 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		Client()->GenerateTimeoutSeed();
 	}
+
+	static float s_RunOnJoin = 0.0f;
+	Right.VSplitLeft(5.0f, 0, &Right);
+	Right.HSplitTop(5.0f, 0, &Right);
+	Right.HSplitTop(20.0f, &Right, 0);
+	Right.VSplitLeft(100.0f, &Label, &TempLabel2);
+	UI()->DoLabelScaled(&Label, Localize("Run on join"), 14.0f, TEXTALIGN_LEFT);
+	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &TempLabel2, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, Localize("Chat command (e.g. showall 1)"));
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
 		MainView.VSplitMid(&Left, &Right);
 		Left.w += 20.0f;
-		Left.HSplitBottom(25.0f, 0x0, &Label);
+		Left.HSplitBottom(20.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 		char aBuf[256];
 		int State = Updater()->GetCurrentState();
@@ -2663,7 +2695,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 				Client()->RequestDDNetInfo();
 			}
 		}
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif

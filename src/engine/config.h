@@ -13,6 +13,7 @@ public:
 
 	virtual void Init() = 0;
 	virtual void Reset() = 0;
+	virtual void Reset(const char *pScriptName) = 0;
 	virtual bool Save() = 0;
 	virtual class CConfig *Values() = 0;
 

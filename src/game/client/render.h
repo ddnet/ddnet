@@ -19,6 +19,7 @@ public:
 		m_ColorFeet = ColorRGBA(1, 1, 1);
 		m_Size = 1.0f;
 		m_GotAirJump = 1;
+		m_ShineDecoration = 0;
 	};
 
 	CSkin::SSkinTextures m_OriginalRenderSkin;
@@ -33,6 +34,7 @@ public:
 	ColorRGBA m_ColorFeet;
 	float m_Size;
 	int m_GotAirJump;
+	int m_ShineDecoration;
 };
 
 // sprite renderings
@@ -101,8 +103,6 @@ public:
 	void DrawCircle(float x, float y, float r, int Segments);
 
 	// larger rendering methods
-	void RenderTilemapGenerateSkip(class CLayers *pLayers);
-
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
 	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
 
@@ -129,11 +129,11 @@ public:
 	// DDRace
 
 	void RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
-	void RenderSpeedupOverlay(CSpeedupTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
-	void RenderSpeedupmap(CSpeedupTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 };

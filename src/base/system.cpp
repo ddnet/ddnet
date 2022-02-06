@@ -26,6 +26,7 @@
 #if defined(CONF_FAMILY_UNIX)
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -49,6 +50,7 @@
 #define _task_user_
 
 #include <Carbon/Carbon.h>
+#include <mach-o/dyld.h>
 #include <mach/mach_time.h>
 #endif
 
@@ -67,6 +69,7 @@
 #include <direct.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <io.h>
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
@@ -87,6 +90,47 @@ IOHANDLE io_stdin()
 }
 IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
 IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
+
+IOHANDLE io_current_exe()
+{
+	// From https://stackoverflow.com/a/1024937.
+#if defined(CONF_FAMILY_WINDOWS)
+	wchar_t wpath[IO_MAX_PATH_LENGTH];
+	char path[IO_MAX_PATH_LENGTH];
+	if(!GetModuleFileNameW(NULL, wpath, sizeof(wpath) / sizeof(wpath[0])))
+	{
+		return 0;
+	}
+	if(!WideCharToMultiByte(CP_UTF8, 0, wpath, -1, path, sizeof(path), NULL, NULL))
+	{
+		return 0;
+	}
+	return io_open(path, IOFLAG_READ);
+#elif defined(CONF_PLATFORM_MACOS)
+	char path[IO_MAX_PATH_LENGTH];
+	uint32_t path_size = sizeof(path);
+	if(_NSGetExecutablePath(path, &path_size))
+	{
+		return 0;
+	}
+	return io_open(path, IOFLAG_READ);
+#else
+	static const char *NAMES[] = {
+		"/proc/self/exe", // Linux, Android
+		"/proc/curproc/exe", // NetBSD
+		"/proc/curproc/file", // DragonFly
+	};
+	for(auto &name : NAMES)
+	{
+		IOHANDLE result = io_open(name, IOFLAG_READ);
+		if(result)
+		{
+			return result;
+		}
+	}
+	return 0;
+#endif
+}
 
 typedef struct
 {
@@ -114,11 +158,11 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	if(!test)
 	{
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
-		dbg_break_imp();
+		dbg_break();
 	}
 }
 
-void dbg_break_imp()
+void dbg_break()
 {
 #ifdef __GNUC__
 	__builtin_trap();
@@ -311,13 +355,13 @@ void mem_zero(void *block, unsigned size)
 	memset(block, 0, size);
 }
 
-IOHANDLE io_open(const char *filename, int flags)
+IOHANDLE io_open_impl(const char *filename, int flags)
 {
-	dbg_assert(flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, write or append");
+	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
-	if(flags == IOFLAG_READ)
+	if((flags & IOFLAG_READ) != 0)
 		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
 	if(flags == IOFLAG_WRITE)
 		return (IOHANDLE)_wfsopen(wBuffer, L"wb", _SH_DENYNO);
@@ -325,7 +369,7 @@ IOHANDLE io_open(const char *filename, int flags)
 		return (IOHANDLE)_wfsopen(wBuffer, L"ab", _SH_DENYNO);
 	return 0x0;
 #else
-	if(flags == IOFLAG_READ)
+	if((flags & IOFLAG_READ) != 0)
 		return (IOHANDLE)fopen(filename, "rb");
 	if(flags == IOFLAG_WRITE)
 		return (IOHANDLE)fopen(filename, "wb");
@@ -333,6 +377,21 @@ IOHANDLE io_open(const char *filename, int flags)
 		return (IOHANDLE)fopen(filename, "ab");
 	return 0x0;
 #endif
+}
+
+IOHANDLE io_open(const char *filename, int flags)
+{
+	IOHANDLE result = io_open_impl(filename, flags);
+	unsigned char buf[3];
+	if((flags & IOFLAG_SKIP_BOM) == 0 || !result)
+	{
+		return result;
+	}
+	if(io_read(result, buf, sizeof(buf)) != 3 || buf[0] != 0xef || buf[1] != 0xbb || buf[2] != 0xbf)
+	{
+		io_seek(result, 0, IOSEEK_START);
+	}
+	return result;
 }
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
@@ -409,6 +468,19 @@ int io_close(IOHANDLE io)
 int io_flush(IOHANDLE io)
 {
 	return fflush((FILE *)io);
+}
+
+int io_sync(IOHANDLE io)
+{
+	if(io_flush(io))
+	{
+		return 1;
+	}
+#if defined(CONF_FAMILY_WINDOWS)
+	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == 0;
+#else
+	return fsync(fileno((FILE *)io)) != 0;
+#endif
 }
 
 #define ASYNC_BUFSIZE 8 * 1024
@@ -757,7 +829,12 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 #if defined(CONF_FAMILY_UNIX)
 	{
 		pthread_t id;
-		int result = pthread_create(&id, NULL, thread_run, data);
+		pthread_attr_t attr;
+		pthread_attr_init(&attr);
+#if defined(CONF_PLATFORM_MACOS)
+		pthread_attr_set_qos_class_np(&attr, QOS_CLASS_USER_INTERACTIVE, 0);
+#endif
+		int result = pthread_create(&id, &attr, thread_run, data);
 		if(result != 0)
 		{
 			dbg_msg("thread", "creating %s thread failed: %d", name, result);
@@ -2074,7 +2151,7 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	{
 		WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer2, sizeof(buffer2), NULL, NULL);
 		str_copy(buffer + length, buffer2, (int)sizeof(buffer) - length);
-		if(cb(buffer2, fs_is_dir(buffer), type, user))
+		if(cb(buffer2, (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0, type, user))
 			break;
 	} while(FindNextFileW(handle, &finddata));
 
@@ -2094,7 +2171,7 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	while((entry = readdir(d)) != NULL)
 	{
 		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
-		if(cb(entry->d_name, fs_is_dir(buffer), type, user))
+		if(cb(entry->d_name, entry->d_type == DT_UNKNOWN ? fs_is_dir(buffer) : entry->d_type == DT_DIR, type, user))
 			break;
 	}
 
@@ -2134,7 +2211,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 		info.m_TimeCreated = filetime_to_unixtime(&finddata.ftCreationTime);
 		info.m_TimeModified = filetime_to_unixtime(&finddata.ftLastWriteTime);
 
-		if(cb(&info, fs_is_dir(buffer), type, user))
+		if(cb(&info, (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0, type, user))
 			break;
 	} while(FindNextFileW(handle, &finddata));
 
@@ -2163,7 +2240,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 		info.m_TimeCreated = created;
 		info.m_TimeModified = modified;
 
-		if(cb(&info, fs_is_dir(buffer), type, user))
+		if(cb(&info, entry->d_type == DT_UNKNOWN ? fs_is_dir(buffer) : entry->d_type == DT_DIR, type, user))
 			break;
 	}
 
@@ -2374,6 +2451,7 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 
 	*created = filetime_to_unixtime(&finddata.ftCreationTime);
 	*modified = filetime_to_unixtime(&finddata.ftLastWriteTime);
+	FindClose(handle);
 #elif defined(CONF_FAMILY_UNIX)
 	struct stat sb;
 	if(stat(name, &sb))
@@ -2424,7 +2502,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	tv.tv_usec = time % 1000000;
 	sockid = 0;
 
-	FD_ZERO(&readfds);
+	FD_ZERO(&readfds); // NOLINT(clang-analyzer-security.insecureAPI.bzero)
 	if(sock.ipv4sock >= 0)
 	{
 		FD_SET(sock.ipv4sock, &readfds);
@@ -2530,23 +2608,28 @@ void str_append(char *dst, const char *src, int dst_size)
 	}
 
 	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
 	strncpy(dst, src, dst_size - 1);
 	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
 	int size = -1;
-	int cursor = 0;
+	const char *cursor = src;
 	int pos = 0;
-	while(pos <= truncation_len && cursor < dst_size && size != cursor)
+	while(pos <= truncation_len && cursor - src < dst_size && size != cursor - src)
 	{
-		size = cursor;
-		cursor = str_utf8_forward(src, cursor);
+		size = cursor - src;
+		if(str_utf8_decode(&cursor) == 0)
+		{
+			break;
+		}
 		pos++;
 	}
 	str_copy(dst, src, size + 1);
@@ -2569,33 +2652,22 @@ int str_length(const char *str)
 
 int str_format(char *buffer, int buffer_size, const char *format, ...)
 {
-	int ret;
 #if defined(CONF_FAMILY_WINDOWS)
 	va_list ap;
 	va_start(ap, format);
-	ret = _vsnprintf(buffer, buffer_size, format, ap);
+	_vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
 	buffer[buffer_size - 1] = 0; /* assure null termination */
-
-	/* _vsnprintf is documented to return negative values on truncation, but
-	 * in practice we didn't see that. let's handle it anyway just in case. */
-	if(ret < 0)
-		ret = buffer_size - 1;
 #else
 	va_list ap;
 	va_start(ap, format);
-	ret = vsnprintf(buffer, buffer_size, format, ap);
+	vsnprintf(buffer, buffer_size, format, ap);
 	va_end(ap);
 
 	/* null termination is assured by definition of vsnprintf */
 #endif
-
-	/* a return value of buffer_size or more indicates truncated output */
-	if(ret >= buffer_size)
-		ret = buffer_size - 1;
-
-	return ret;
+	return str_utf8_fix_truncation(buffer);
 }
 
 char *str_trim_words(char *str, int words)
@@ -3261,41 +3333,31 @@ int str_utf8_rewind(const char *str, int cursor)
 	return cursor;
 }
 
+int str_utf8_fix_truncation(char *str)
+{
+	int len = str_length(str);
+	if(len > 0)
+	{
+		int last_char_index = str_utf8_rewind(str, len);
+		const char *last_char = str + last_char_index;
+		// Fix truncated UTF-8.
+		if(str_utf8_decode(&last_char) == -1)
+		{
+			str[last_char_index] = 0;
+			return last_char_index;
+		}
+	}
+	return len;
+}
+
 int str_utf8_forward(const char *str, int cursor)
 {
-	const char *buf = str + cursor;
-	if(!buf[0])
+	const char *ptr = str + cursor;
+	if(str_utf8_decode(&ptr) == 0)
+	{
 		return cursor;
-
-	if((*buf & 0x80) == 0x0) /* 0xxxxxxx */
-		return cursor + 1;
-	else if((*buf & 0xE0) == 0xC0) /* 110xxxxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		return cursor + 2;
 	}
-	else if((*buf & 0xF0) == 0xE0) /* 1110xxxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		return cursor + 3;
-	}
-	else if((*buf & 0xF8) == 0xF0) /* 11110xxx */
-	{
-		if(!buf[1])
-			return cursor + 1;
-		if(!buf[2])
-			return cursor + 2;
-		if(!buf[3])
-			return cursor + 3;
-		return cursor + 4;
-	}
-
-	/* invalid */
-	return cursor + 1;
+	return ptr - str;
 }
 
 int str_utf8_encode(char *ptr, int chr)
@@ -3449,21 +3511,22 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
-void str_utf8_copy(char *dst, const char *src, int dst_size)
-{
-	str_utf8_truncate(dst, dst_size, src, dst_size);
-}
-
 void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
 {
+	const char *cursor = str;
 	*size = 0;
 	*count = 0;
 	while(*size < max_size && *count < max_count)
 	{
-		int new_size = str_utf8_forward(str, *size);
-		if(new_size == *size || new_size >= max_size)
+		if(str_utf8_decode(&cursor) == 0)
+		{
 			break;
-		*size = new_size;
+		}
+		if(cursor - str >= max_size)
+		{
+			break;
+		}
+		*size = cursor - str;
 		++(*count);
 	}
 }
@@ -3523,15 +3586,30 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 
 int bytes_be_to_int(const unsigned char *bytes)
 {
-	return ((bytes[0] & 0xff) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | (bytes[3] & 0xff);
+	int Result;
+	unsigned char *pResult = (unsigned char *)&Result;
+	for(unsigned i = 0; i < sizeof(int); i++)
+	{
+#if defined(CONF_ARCH_ENDIAN_BIG)
+		pResult[i] = bytes[i];
+#else
+		pResult[i] = bytes[sizeof(int) - i - 1];
+#endif
+	}
+	return Result;
 }
 
 void int_to_bytes_be(unsigned char *bytes, int value)
 {
-	bytes[0] = (value >> 24) & 0xff;
-	bytes[1] = (value >> 16) & 0xff;
-	bytes[2] = (value >> 8) & 0xff;
-	bytes[3] = value & 0xff;
+	const unsigned char *pValue = (const unsigned char *)&value;
+	for(unsigned i = 0; i < sizeof(int); i++)
+	{
+#if defined(CONF_ARCH_ENDIAN_BIG)
+		bytes[i] = pValue[i];
+#else
+		bytes[sizeof(int) - i - 1] = pValue[i];
+#endif
+	}
 }
 
 unsigned bytes_be_to_uint(const unsigned char *bytes)
@@ -3553,6 +3631,50 @@ int pid()
 	return _getpid();
 #else
 	return getpid();
+#endif
+}
+
+void cmdline_fix(int *argc, const char ***argv)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	int wide_argc = 0;
+	WCHAR **wide_argv = CommandLineToArgvW(GetCommandLineW(), &wide_argc);
+	dbg_assert(wide_argv != NULL, "CommandLineToArgvW failure");
+
+	int total_size = 0;
+
+	for(int i = 0; i < wide_argc; i++)
+	{
+		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, NULL, 0, NULL, NULL);
+		dbg_assert(size != 0, "WideCharToMultiByte failure");
+		total_size += size;
+	}
+
+	char **new_argv = (char **)malloc((wide_argc + 1) * sizeof(*new_argv));
+	new_argv[0] = (char *)malloc(total_size);
+	mem_zero(new_argv[0], total_size);
+
+	int remaining_size = total_size;
+	for(int i = 0; i < wide_argc; i++)
+	{
+		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, new_argv[i], remaining_size, NULL, NULL);
+		dbg_assert(size != 0, "WideCharToMultiByte failure");
+
+		remaining_size -= size;
+		new_argv[i + 1] = new_argv[i] + size;
+	}
+
+	new_argv[wide_argc] = 0;
+	*argc = wide_argc;
+	*argv = (const char **)new_argv;
+#endif
+}
+
+void cmdline_free(int argc, const char **argv)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	free((void *)*argv);
+	free((char **)argv);
 #endif
 }
 
@@ -3607,13 +3729,26 @@ int open_link(const char *link)
 	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
 	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
 #elif defined(CONF_PLATFORM_LINUX)
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "xdg-open %s >/dev/null 2>&1 &", link);
-	return system(aBuf) == 0;
+	const int pid = fork();
+	if(pid == 0)
+		execlp("xdg-open", "xdg-open", link, nullptr);
+	return pid > 0;
 #elif defined(CONF_FAMILY_UNIX)
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "open %s &", link);
-	return system(aBuf) == 0;
+	const int pid = fork();
+	if(pid == 0)
+		execlp("open", "open", link, nullptr);
+	return pid > 0;
+#endif
+}
+
+int open_file(const char *path)
+{
+#if defined(CONF_PLATFORM_MACOS)
+	return open_link(path);
+#else
+	char buf[512];
+	str_format(buf, sizeof(buf), "file://%s", path);
+	return open_link(buf);
 #endif
 }
 
@@ -3815,6 +3950,85 @@ void set_console_msg_color(const void *rgbvoid)
 		str_format(buff, sizeof(buff), "%c[38;2;%d;%d;%dm", esc_seq, (int)uint8_t(rgb->r * 255.0f), (int)uint8_t(rgb->g * 255.0f), (int)uint8_t(rgb->b * 255.0f));
 	if(has_stdout_logger)
 		stdout_nonewline_logger.logger(buff, stdout_nonewline_logger.user);
+#endif
+}
+
+int os_version_str(char *version, int length)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	const char *DLL = "C:\\Windows\\System32\\user32.dll";
+	DWORD handle;
+	DWORD size = GetFileVersionInfoSizeA(DLL, &handle);
+	if(!size)
+	{
+		return 1;
+	}
+	void *data = malloc(size);
+	if(!GetFileVersionInfoA(DLL, handle, size, data))
+	{
+		free(data);
+		return 1;
+	}
+	VS_FIXEDFILEINFO *fileinfo;
+	UINT unused;
+	if(!VerQueryValueA(data, "\\", (void **)&fileinfo, &unused))
+	{
+		free(data);
+		return 1;
+	}
+	str_format(version, length, "Windows %d.%d.%d.%d",
+		HIWORD(fileinfo->dwProductVersionMS),
+		LOWORD(fileinfo->dwProductVersionMS),
+		HIWORD(fileinfo->dwProductVersionLS),
+		LOWORD(fileinfo->dwProductVersionLS));
+	free(data);
+	return 0;
+#else
+	struct utsname u;
+	if(uname(&u))
+	{
+		return 1;
+	}
+	char extra[128];
+	extra[0] = 0;
+
+	do
+	{
+		IOHANDLE os_release = io_open("/etc/os-release", IOFLAG_READ);
+		char buf[4096];
+		int read;
+		int offset;
+		char *newline;
+		if(!os_release)
+		{
+			break;
+		}
+		read = io_read(os_release, buf, sizeof(buf) - 1);
+		io_close(os_release);
+		buf[read] = 0;
+		if(str_startswith(buf, "PRETTY_NAME="))
+		{
+			offset = 0;
+		}
+		else
+		{
+			const char *found = str_find(buf, "\nPRETTY_NAME=");
+			if(!found)
+			{
+				break;
+			}
+			offset = found - buf + 1;
+		}
+		newline = (char *)str_find(buf + offset, "\n");
+		if(newline)
+		{
+			*newline = 0;
+		}
+		str_format(extra, sizeof(extra), "; %s", buf + offset + 12);
+	} while(0);
+
+	str_format(version, length, "%s %s (%s, %s)%s", u.sysname, u.release, u.machine, u.version, extra);
+	return 0;
 #endif
 }
 }

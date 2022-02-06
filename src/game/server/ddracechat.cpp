@@ -682,9 +682,6 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
-		return;
-
 	if(!g_Config.m_SvSwap)
 	{
 		pSelf->Console()->Print(
@@ -747,6 +744,9 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)
 	{
+		if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+			return;
+
 		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);
 		return;
 	}
@@ -1036,10 +1036,10 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 			}
-			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvTeamMaxSize)
+			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvMaxTeamSize)
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvTeamMaxSize);
+				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
 			}
 			else if(const char *pError = pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
@@ -1294,9 +1294,7 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 
 bool CheckClientID(int ClientID)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-		return false;
-	return true;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS;
 }
 
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
@@ -1462,6 +1460,53 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->Rescue();
+}
+
+void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	vec2 Pos = pPlayer->m_ViewPos;
+
+	if(pResult->NumArguments() > 0)
+	{
+		int ClientID;
+		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+		{
+			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientID)) == 0)
+				break;
+		}
+		if(ClientID == MAX_CLIENTS)
+		{
+			pSelf->SendChatTarget(pPlayer->GetCID(), "No player with this name found.");
+			return;
+		}
+		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientID];
+		if(!pPlayerTo)
+			return;
+		CCharacter *pChrTo = pPlayerTo->GetCharacter();
+		if(!pChrTo)
+			return;
+		Pos = pChrTo->m_Pos;
+	}
+
+	pSelf->Teleport(pChr, Pos);
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)

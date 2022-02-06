@@ -566,10 +566,8 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 void CCollision::Dest()
 {
-	if(m_pDoor)
-		delete[] m_pDoor;
-	if(m_pSwitchers)
-		delete[] m_pSwitchers;
+	delete[] m_pDoor;
+	delete[] m_pSwitchers;
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
@@ -597,9 +595,7 @@ bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos
 	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && ((m_pFront[pos].m_Flags == ROTATION_0 && pos0.y > pos1.y) || (m_pFront[pos].m_Flags == ROTATION_90 && pos0.x < pos1.x) || (m_pFront[pos].m_Flags == ROTATION_180 && pos0.y < pos1.y) || (m_pFront[pos].m_Flags == ROTATION_270 && pos0.x > pos1.x)))
 		return true;
 	int offpos = GetPureMapIndex(x + xoff, y + yoff);
-	if(m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH))
-		return true;
-	return false;
+	return m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH);
 }
 
 bool CCollision::IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1) const
@@ -754,7 +750,7 @@ void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) con
 		*MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
 
-int CCollision::IsSwitch(int Index) const
+int CCollision::GetSwitchType(int Index) const
 {
 	if(Index < 0 || !m_pSwitch)
 		return 0;
@@ -846,9 +842,9 @@ bool CCollision::TileExists(int Index) const
 	if(Index < 0)
 		return false;
 
-	if(m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_TELE_LASER_DISABLE)
+	if((m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= TILE_TELE_LASER_DISABLE) || (m_pTiles[Index].m_Index >= TILE_LFREEZE && m_pTiles[Index].m_Index <= TILE_LUNFREEZE))
 		return true;
-	if(m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index <= TILE_TELE_LASER_DISABLE)
+	if(m_pFront && ((m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index <= TILE_TELE_LASER_DISABLE) || (m_pFront[Index].m_Index >= TILE_LFREEZE && m_pFront[Index].m_Index <= TILE_LUNFREEZE)))
 		return true;
 	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
 		return true;

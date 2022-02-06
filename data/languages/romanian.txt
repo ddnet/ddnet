@@ -91,9 +91,6 @@ Client
 Close
 == Închide
 
-Compatible version
-== Versiune compatibilă
-
 Connect
 == Conectează
 
@@ -252,9 +249,6 @@ MOTD
 
 Map
 == Hartă
-
-Maximum ping:
-== Ping maxim:
 
 Mouse sens.
 == Sensib. maus
@@ -898,6 +892,12 @@ Refresh Rate
 Show console window
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -992,6 +992,9 @@ Windowed
 == 
 
 Windowed borderless
+== 
+
+Windowed fullscreen
 == 
 
 Desktop fullscreen
@@ -1214,6 +1217,12 @@ Try fast HTTP map download first
 == 
 
 New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 DDNet %s is available:

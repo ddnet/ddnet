@@ -11,7 +11,7 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 	// only handle F and composed F binds
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 	{
-		int Mask = m_pBinds->GetModifierMask(Input());
+		int Mask = CBinds::GetModifierMask(Input());
 
 		// Look for a composed bind
 		bool ret = false;
@@ -92,6 +92,9 @@ int CBinds::GetModifierMask(IInput *i)
 	Mask |= i->KeyIsPressed(KEY_LCTRL) << CBinds::MODIFIER_CTRL;
 	Mask |= i->KeyIsPressed(KEY_RCTRL) << CBinds::MODIFIER_CTRL;
 	Mask |= i->KeyIsPressed(KEY_LALT) << CBinds::MODIFIER_ALT;
+	Mask |= i->KeyIsPressed(KEY_RALT) << CBinds::MODIFIER_ALT;
+	Mask |= i->KeyIsPressed(KEY_LGUI) << CBinds::MODIFIER_GUI;
+	Mask |= i->KeyIsPressed(KEY_RGUI) << CBinds::MODIFIER_GUI;
 	if(!Mask)
 		return 1 << CBinds::MODIFIER_NONE;
 
@@ -109,7 +112,11 @@ int CBinds::GetModifierMaskOfKey(int Key)
 	case KEY_RCTRL:
 		return 1 << CBinds::MODIFIER_CTRL;
 	case KEY_LALT:
+	case KEY_RALT:
 		return 1 << CBinds::MODIFIER_ALT;
+	case KEY_LGUI:
+	case KEY_RGUI:
+		return 1 << CBinds::MODIFIER_GUI;
 	default:
 		return 0;
 	}
@@ -124,7 +131,9 @@ bool CBinds::ModifierMatchesKey(int Modifier, int Key)
 	case MODIFIER_CTRL:
 		return Key == KEY_LCTRL || Key == KEY_RCTRL;
 	case MODIFIER_ALT:
-		return Key == KEY_LALT;
+		return Key == KEY_LALT || Key == KEY_RALT;
+	case MODIFIER_GUI:
+		return Key == KEY_LGUI || Key == KEY_RGUI;
 	case MODIFIER_NONE:
 	default:
 		return false;
@@ -159,7 +168,7 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(m_aapKeyBindings[0][e.m_Key] && !ret)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
-		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)))
+		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
 		if(e.m_Flags & IInput::FLAG_RELEASE)
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
@@ -394,6 +403,8 @@ int CBinds::GetBindSlot(const char *pBindString, int *Mod)
 			*Mod |= (1 << MODIFIER_CTRL);
 		else if(!str_comp(aMod, "alt"))
 			*Mod |= (1 << MODIFIER_ALT);
+		else if(!str_comp(aMod, "gui"))
+			*Mod |= (1 << MODIFIER_GUI);
 		else
 			return 0;
 
@@ -415,6 +426,8 @@ const char *CBinds::GetModifierName(int Modifier)
 		return "ctrl";
 	case MODIFIER_ALT:
 		return "alt";
+	case MODIFIER_GUI:
+		return "gui";
 	case MODIFIER_NONE:
 	default:
 		return "";
@@ -440,8 +453,6 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBinds *pSelf = (CBinds *)pUserData;
 
-	char aBuffer[256];
-	char *pEnd = aBuffer + sizeof(aBuffer);
 	pConfigManager->WriteLine("unbindall");
 	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
 	{
@@ -450,13 +461,19 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 			if(!pSelf->m_aapKeyBindings[i][j])
 				continue;
 
-			str_format(aBuffer, sizeof(aBuffer), "bind %s%s \"", GetKeyBindModifiersName(i), pSelf->Input()->KeyName(j));
-			// process the string. we need to escape some characters
-			char *pDst = aBuffer + str_length(aBuffer);
-			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
-			str_append(aBuffer, "\"", sizeof(aBuffer));
+			// worst case the str_escape can double the string length
+			int Size = str_length(pSelf->m_aapKeyBindings[i][j]) * 2 + 30;
+			char *pBuffer = (char *)malloc(Size);
+			char *pEnd = pBuffer + Size;
 
-			pConfigManager->WriteLine(aBuffer);
+			str_format(pBuffer, Size, "bind %s%s \"", GetKeyBindModifiersName(i), pSelf->Input()->KeyName(j));
+			// process the string. we need to escape some characters
+			char *pDst = pBuffer + str_length(pBuffer);
+			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
+			str_append(pBuffer, "\"", Size);
+
+			pConfigManager->WriteLine(pBuffer);
+			free(pBuffer);
 		}
 	}
 }

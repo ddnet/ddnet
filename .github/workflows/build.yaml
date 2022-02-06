@@ -32,16 +32,17 @@ jobs:
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
+            GTEST_FILTER: -*SQLite*
         - os: macOS-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
-          package-file: DDNet-*-osx.dmg
+          package-file: DDNet-*-macos.dmg
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
-          cmake-args: -G "Visual Studio 16 2019" -A x64
+          cmake-args: -A x64
           package-file: DDNet-*-win64.zip
           fancy: false
           env:
@@ -63,14 +64,25 @@ jobs:
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
       run: |
-        sudo apt-get install libmariadbclient-dev libwebsockets-dev -y
+        sudo apt-get install libmariadbclient-dev libwebsockets-dev mariadb-server -y
+        sudo rm -rf /var/lib/mysql/
+        sudo mysql_install_db --user=mysql --datadir=/var/lib/mysql/
+        cd /usr; sudo /usr/bin/mysqld_safe --datadir='/var/lib/mysql/' --no-watch
+        sleep 10
+        sudo mariadb <<EOF
+        CREATE DATABASE ddnet;
+        CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
+        GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
+        FLUSH PRIVILEGES;
+        EOF
 
     - name: Prepare macOS
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2
+        brew install pkg-config sdl2 python3
         brew upgrade freetype
+        pip3 install dmgbuild
         sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Build in debug mode
@@ -82,9 +94,14 @@ jobs:
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
     - name: Test debug
+      env: ${{ matrix.env }}
       run: |
         cd debug
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+    - name: Run debug server
+      env: ${{ matrix.env }}
+      run: |
+        cd debug
         ./DDNet-Server shutdown
 
     - name: Build in release mode
@@ -95,9 +112,14 @@ jobs:
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
     - name: Test release
+      env: ${{ matrix.env }}
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
+    - name: Run release server
+      env: ${{ matrix.env }}
+      run: |
+        cd release
         ./DDNet-Server shutdown
 
     - name: Build headless client
@@ -120,13 +142,19 @@ jobs:
       run: |
         mkdir fancy
         cd fancy
-        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
+        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DTEST_MYSQL=ON -DWEBSOCKETS=ON ..
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
     - name: Test fancy
       if: matrix.fancy
+      env: ${{ matrix.env }}
       run: |
-        cd release
+        cd fancy
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
+    - name: Run fancy server
+      if: matrix.fancy
+      env: ${{ matrix.env }}
+      run: |
+        cd fancy
         ./DDNet-Server shutdown
 
     - name: Package

@@ -48,7 +48,6 @@ public: // TODO: Maybe make protected
 	/* Getters */
 	int GetID() const { return m_ID; }
 
-public:
 	/* Constructor */
 	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 
@@ -115,6 +114,16 @@ public:
 	virtual void Snap(int SnappingClient) {}
 
 	/*
+		Function: SwapClients
+			Called when two players have swapped their client ids.
+
+		Arguments:
+			Client1 - First client ID
+			Client2 - Second client ID
+	*/
+	virtual void SwapClients(int Client1, int Client2) {}
+
+	/*
 		Function: NetworkClipped
 			Performs a series of test to see if a client can see the
 			entity.
@@ -128,20 +137,20 @@ public:
 		Returns:
 			True if the entity doesn't have to be in the snapshot.
 	*/
-	bool NetworkClipped(int SnappingClient);
-	bool NetworkClipped(int SnappingClient, vec2 CheckPos);
+	bool NetworkClipped(int SnappingClient) const;
+	bool NetworkClipped(int SnappingClient, vec2 CheckPos) const;
 
 	bool GameLayerClipped(vec2 CheckPos);
 
 	// DDRace
 
-	bool GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2 *pOutPos);
+	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
 	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos);
 
 	int m_Number;
 	int m_Layer;
 };
 
-bool NetworkClipped(CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);
+bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);
 
 #endif

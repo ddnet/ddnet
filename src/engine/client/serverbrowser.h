@@ -229,7 +229,7 @@ private:
 	static void Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData);
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
-	void SetLatency(const NETADDR Addr, int Latency);
+	void SetLatency(NETADDR Addr, int Latency);
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };

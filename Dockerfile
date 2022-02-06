@@ -41,8 +41,8 @@ RUN printf '#!/bin/bash\n \
         cd /build/win32\n \
         pwd\n \
         cmake -DCMAKE_TOOLCHAIN_FILE=/ddnet/cmake/toolchains/mingw32.toolchain /ddnet && make\n \
-        mkdir /build/osx\n \
-        cd /build/osx\n \
+        mkdir /build/macos\n \
+        cd /build/macos\n \
         pwd\n \
         cmake -DCMAKE_TOOLCHAIN_FILE=/ddnet/cmake/toolchains/darwin.toolchain -DCMAKE_OSX_SYSROOT=/osxcross/target/SDK/MacOSX10.11.sdk/ /ddnet && make' \
         >> build-all.sh

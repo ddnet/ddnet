@@ -91,9 +91,9 @@ public:
 
 	std::vector<CTheme> m_lThemes;
 
-public:
 	CMenuBackground();
 	~CMenuBackground() override {}
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void OnInit() override;
 	void OnMapLoad() override;

@@ -24,14 +24,7 @@ static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 
 static bool IsVanillaSkin(const char *pName)
 {
-	for(auto &pVanillaSkin : VANILLA_SKINS)
-	{
-		if(str_comp(pName, pVanillaSkin) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
 int CSkins::CGetPngFile::OnCompletion(int State)
@@ -421,11 +414,12 @@ int CSkins::FindImpl(const char *pName)
 	CDownloadSkin Skin;
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
 
-	char aUrl[256];
+	char aUrl[IO_MAX_PATH_LENGTH];
 	char aEscapedName[256];
 	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, aEscapedName);
-	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s.%d.tmp", pName, pid());
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, HTTPLOG::NONE);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
