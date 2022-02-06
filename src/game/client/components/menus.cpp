@@ -663,7 +663,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		{
 			char aBuf[64];
 			if(*NewModifierCombination)
-				str_format(aBuf, sizeof(aBuf), "%s+%s", CBinds::GetModifierName(*NewModifierCombination), Input()->KeyName(Key));
+				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*NewModifierCombination), Input()->KeyName(Key));
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", Input()->KeyName(Key));
 
