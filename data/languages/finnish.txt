@@ -1277,6 +1277,9 @@ Statboard
 Show entities
 == 
 
+Windowed fullscreen
+== 
+
 Enable long pain sound (used when shooting in freeze)
 == 
 

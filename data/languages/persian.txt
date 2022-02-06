@@ -976,6 +976,9 @@ Windowed
 Windowed borderless
 == 
 
+Windowed fullscreen
+== 
+
 V-Sync
 == 
 

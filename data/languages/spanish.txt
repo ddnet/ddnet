@@ -1347,6 +1347,9 @@ Settings file
 Config directory
 == Directorio de configuración
 
+Windowed fullscreen
+== 
+
 Run on join
 == Ejec. al entrar
 
