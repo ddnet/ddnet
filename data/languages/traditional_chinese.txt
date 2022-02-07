@@ -8,6 +8,7 @@
 # 2021-06-01 TsFreddie
 # 2021-11-19 cheeser0613
 # 2021-12-21 cheeser0613
+# 2022-02-07 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1351,3 +1352,6 @@ Run on join
 
 Chat command (e.g. showall 1)
 == 聊天指令 (例如: showall 1)
+
+Windowed fullscreen
+== 視窗化全螢幕

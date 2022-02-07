@@ -1325,6 +1325,9 @@ Settings file
 Config directory
 == 
 
+Windowed fullscreen
+== 
+
 Kill Messages
 == 
 

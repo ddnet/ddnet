@@ -147,7 +147,7 @@ public:
 	int GetNumScreens() const override { return 0; };
 	void Minimize() override{};
 	void Maximize() override{};
-	void SetWindowParams(int FullscreenMode, bool IsBorderless) override{};
+	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override{};
 	bool SetWindowScreen(int Index) override { return false; };
 	void Move(int x, int y) override{};
 	void Resize(int w, int h, int RefreshRate) override{};

@@ -137,7 +137,7 @@ public:
 
 	// gfx
 	virtual void SwitchWindowScreen(int Index) = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void LoadFont() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;

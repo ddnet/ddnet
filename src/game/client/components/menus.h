@@ -50,7 +50,7 @@ public:
 	bool m_TakeKey;
 	bool m_GotKey;
 	IInput::CEvent m_Key;
-	int m_Modifier;
+	int m_ModifierCombination;
 	CMenusKeyBinder();
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual bool OnInput(IInput::CEvent Event) override;
@@ -95,7 +95,7 @@ class CMenus : public CComponent
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier);
+	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination);
 
 	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
 

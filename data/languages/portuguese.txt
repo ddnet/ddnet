@@ -1118,6 +1118,9 @@ Windowed
 Windowed borderless
 == 
 
+Windowed fullscreen
+== 
+
 Desktop fullscreen
 == 
 

@@ -42,7 +42,7 @@ jobs:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
-          cmake-args: -G "Visual Studio 17 2022" -A x64
+          cmake-args: -A x64
           package-file: chillerbot-ux-*-win64.zip
           fancy: false
           env:

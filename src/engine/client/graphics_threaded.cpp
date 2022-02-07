@@ -2075,14 +2075,24 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 
 int CGraphics_Threaded::IssueInit()
 {
-	int Flags = IGraphicsBackend::INITFLAG_RESIZABLE;
+	int Flags = 0;
+
+	bool IsPurlyWindowed = g_Config.m_GfxFullscreen == 0;
+	bool IsExclusiveFullscreen = g_Config.m_GfxFullscreen == 1;
+	bool IsDesktopFullscreen = g_Config.m_GfxFullscreen == 2;
+#ifndef CONF_FAMILY_WINDOWS
+	//  special mode for windows only
+	IsDesktopFullscreen |= g_Config.m_GfxFullscreen == 3;
+#endif
 
 	if(g_Config.m_GfxBorderless)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
-	if(g_Config.m_GfxFullscreen == 1)
+	if(IsExclusiveFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
-	else if(g_Config.m_GfxFullscreen == 2)
+	else if(IsDesktopFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
+	if(IsPurlyWindowed || IsExclusiveFullscreen || IsDesktopFullscreen)
+		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi)
@@ -2310,9 +2320,9 @@ void CGraphics_Threaded::Maximize()
 	m_pBackend->Maximize();
 }
 
-void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
+void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing)
 {
-	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless);
+	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless, AllowResizing);
 	CVideoMode CurMode;
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
