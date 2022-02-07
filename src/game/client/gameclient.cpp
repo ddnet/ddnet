@@ -1271,9 +1271,9 @@ void CGameClient::OnNewSnapshot()
 								m_Snap.m_aCharacters[Item.m_ID].m_Cur = m_aClients[Item.m_ID].m_Evolved;
 						}
 
-						if(EvolveCur && m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
+						if(EvolvePrev && m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
 							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick(g_Config.m_ClDummy));
-						if(EvolvePrev && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
+						if(EvolveCur && m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
 							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick(g_Config.m_ClDummy));
 
 						m_aClients[Item.m_ID].m_Snapped = *((const CNetObj_Character *)pData);
