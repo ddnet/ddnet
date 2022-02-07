@@ -8,7 +8,7 @@
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
-static const char TEEHISTORIAN_VERSION_MINOR[] = "2";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "3";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
@@ -505,6 +505,22 @@ void CTeeHistorian::RecordPlayerJoin(int ClientID, int Protocol)
 	}
 
 	Write(Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordPlayerReady(int ClientID)
+{
+	EnsureTickWritten();
+
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_ready cid=%d", ClientID);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_READY, Buffer.Data(), Buffer.Size());
 }
 
 void CTeeHistorian::RecordPlayerDrop(int ClientID, const char *pReason)
