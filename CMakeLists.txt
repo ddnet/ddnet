@@ -445,7 +445,7 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMGBUILD dmgbuild)
 endif()
 
-message(STATUS "******** DDNet ********")
+message(STATUS "******** ${CMAKE_PROJECT_NAME} ********")
 set(TARGET "Target OS: ${TARGET_OS} ${CMAKE_SYSTEM_PROCESSOR}")
 if(TARGET_OS STREQUAL "mac")
   set(TARGET "${TARGET} (SDK: ${CMAKE_OSX_SYSROOT}, architectures: ${CMAKE_OSX_ARCHITECTURES})")
