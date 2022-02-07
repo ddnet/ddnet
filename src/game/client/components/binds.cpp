@@ -4,12 +4,14 @@
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
+#include <game/client/gameclient.h>
+
 static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
 	// only handle F and composed F binds
-	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
+	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && (Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
 	{
 		int Mask = CBinds::GetModifierMask(Input());
 
