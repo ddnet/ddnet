@@ -595,7 +595,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	return Current;
 }
 
-int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier)
+int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination)
 {
 	// process
 	static void *pGrabbedID = 0;
@@ -603,7 +603,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, 
 	static int ButtonUsed = 0;
 	int Inside = UI()->MouseInside(pRect);
 	int NewKey = Key;
-	*NewModifier = Modifier;
+	*NewModifierCombination = ModifierCombination;
 
 	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
 		MouseReleased = true;
@@ -616,7 +616,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, 
 			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
 			{
 				NewKey = m_Binder.m_Key.m_Key;
-				*NewModifier = m_Binder.m_Modifier;
+				*NewModifierCombination = m_Binder.m_ModifierCombination;
 			}
 			m_Binder.m_GotKey = false;
 			UI()->SetActiveItem(0);
@@ -662,8 +662,8 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, 
 		if(Key)
 		{
 			char aBuf[64];
-			if(*NewModifier)
-				str_format(aBuf, sizeof(aBuf), "%s+%s", CBinds::GetModifierName(*NewModifier), Input()->KeyName(Key));
+			if(*NewModifierCombination)
+				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*NewModifierCombination), Input()->KeyName(Key));
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", Input()->KeyName(Key));
 
