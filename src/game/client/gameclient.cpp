@@ -1258,8 +1258,12 @@ void CGameClient::OnNewSnapshot()
 						m_Snap.m_aCharacters[Item.m_ID].m_Active = true;
 						m_Snap.m_aCharacters[Item.m_ID].m_Prev = *((const CNetObj_Character *)pOld);
 
+						// limit evolving to 3 seconds
+						int EvolvePrevTick = minimum(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick + Client()->GameTickSpeed() * 3, Client()->PrevGameTick(g_Config.m_ClDummy));
+						int EvolveCurTick = minimum(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick + Client()->GameTickSpeed() * 3, Client()->GameTick(g_Config.m_ClDummy));
+
 						// reuse the result from the previous evolve if the snapped character didn't change since the previous snapshot
-						if(m_aClients[Item.m_ID].m_Evolved.m_Tick == Client()->PrevGameTick(g_Config.m_ClDummy))
+						if(m_aClients[Item.m_ID].m_Evolved.m_Tick == EvolvePrevTick)
 						{
 							if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
 								m_Snap.m_aCharacters[Item.m_ID].m_Prev = m_aClients[Item.m_ID].m_Evolved;
@@ -1268,9 +1272,9 @@ void CGameClient::OnNewSnapshot()
 						}
 
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Prev.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, Client()->PrevGameTick(g_Config.m_ClDummy));
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, EvolvePrevTick);
 						if(m_Snap.m_aCharacters[Item.m_ID].m_Cur.m_Tick)
-							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, Client()->GameTick(g_Config.m_ClDummy));
+							Evolve(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, EvolveCurTick);
 
 						m_aClients[Item.m_ID].m_Snapped = *((const CNetObj_Character *)pData);
 						m_aClients[Item.m_ID].m_Evolved = m_Snap.m_aCharacters[Item.m_ID].m_Cur;
