@@ -3,6 +3,7 @@
 
 #define _WIN32_WINNT 0x0501
 
+#include <climits>
 #include <new>
 
 #include <stdarg.h>
