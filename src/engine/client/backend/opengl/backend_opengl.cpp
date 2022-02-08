@@ -571,12 +571,12 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 				if(GLEW_KHR_debug)
 				{
 					glEnable(GL_DEBUG_OUTPUT);
-					glDebugMessageCallback(GfxOpenGLMessageCallback, 0);
+					glDebugMessageCallback((GLDEBUGPROC)GfxOpenGLMessageCallback, 0);
 				}
 				else if(GLEW_ARB_debug_output)
 				{
 					glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-					glDebugMessageCallbackARB(GfxOpenGLMessageCallback, 0);
+					glDebugMessageCallbackARB((GLDEBUGPROC)GfxOpenGLMessageCallback, 0);
 				}
 				dbg_msg("gfx", "Enabled OpenGL debug mode");
 			}
