@@ -4042,11 +4042,9 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 			str_copy(m_aFileDialogFileName, m_FileList[Index].m_aFilename, sizeof(m_aFileDialogFileName));
 		else
 			m_aFileDialogFileName[0] = 0;
-		m_FilesSelectedIndex = Index;
 		m_PreviewImageIsLoaded = false;
-
-		if(Input()->MouseDoubleClick())
-			m_FileDialogActivate = true;
+		m_FileDialogActivate |= Index == m_FilesSelectedIndex && Input()->MouseDoubleClick();
+		m_FilesSelectedIndex = Index;
 	}
 }
 
