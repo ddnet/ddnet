@@ -42,6 +42,8 @@ EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGE
 
 RawHeader = '''
 #include <engine/shared/teehistorian_ex.h>
+#include <string>
+#include <vector>
 
 enum
 {
@@ -66,6 +68,9 @@ enum
 {
 	GAMEINFO_CURVERSION=8,
 };
+
+typedef std::pair<std::string, float> LOCKED_TUNE;
+typedef std::vector<LOCKED_TUNE> LOCKED_TUNINGS;
 '''
 
 RawSource = '''
@@ -500,4 +505,6 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
+
+	NetMessageEx("Sv_TuneLock", "tunelock@netmsg.ddnet.tw", []),
 ]

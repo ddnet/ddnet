@@ -91,6 +91,7 @@ public:
 	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
+	int IsTuneLock(int Index) const;
 	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const;
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;

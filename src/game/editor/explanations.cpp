@@ -193,6 +193,14 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_TUNE)
 				return "TUNE ZONE: Area where defined tunes work.";
 			break;
+		case TILE_TUNELOCK:
+			if(Layer == LAYER_TUNE)
+				return "TUNE LOCK: Locks the defined tunes for the specific player, no effect in tune zones.";
+			break;
+		case TILE_TUNELOCK_RESET:
+			if(Layer == LAYER_TUNE)
+				return "TUNE LOCK RESET: Resets all locked tunes for the specific player.";
+			break;
 		case TILE_OLDLASER:
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 				return "GLOBAL OLD SHOTGUN: Shotgun drags others always towards the shooter, even after having bounced. Shooter can't hit themselves. Place only one tile somewhere on the map.";

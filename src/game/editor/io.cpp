@@ -799,15 +799,22 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
 							{
+								static const int s_aTilesComp[] = {
+									TILE_TUNE,
+									TILE_TUNELOCK,
+									TILE_TUNELOCK_RESET};
+
 								CTuneTile *pLayerTuneTiles = ((CLayerTune *)pTiles)->m_pTuneTile;
 								mem_copy(((CLayerTune *)pTiles)->m_pTuneTile, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(pLayerTuneTiles[i].m_Type == TILE_TUNE)
-										pTiles->m_pTiles[i].m_Index = TILE_TUNE;
-									else
-										pTiles->m_pTiles[i].m_Index = 0;
+									pTiles->m_pTiles[i].m_Index = 0;
+									for(int TilesComp : s_aTilesComp)
+									{
+										if(pLayerTuneTiles[i].m_Type == TilesComp)
+											pTiles->m_pTiles[i].m_Index = TilesComp;
+									}
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tune);

@@ -353,7 +353,9 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE)
+					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE ||
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNELOCK ||
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNELOCK_RESET)
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
 					}

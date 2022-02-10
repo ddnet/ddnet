@@ -712,8 +712,21 @@ int CCollision::IsTune(int Index) const
 	if(Index < 0 || !m_pTune)
 		return 0;
 
-	if(m_pTune[Index].m_Type)
+	if(m_pTune[Index].m_Type == TILE_TUNE)
 		return m_pTune[Index].m_Number;
+
+	return 0;
+}
+
+int CCollision::IsTuneLock(int Index) const
+{
+	if(Index < 0 || !m_pTune)
+		return 0;
+
+	if(m_pTune[Index].m_Type == TILE_TUNELOCK)
+		return m_pTune[Index].m_Number;
+	if(m_pTune[Index].m_Type == TILE_TUNELOCK_RESET)
+		return -1;
 
 	return 0;
 }

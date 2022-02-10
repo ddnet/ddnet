@@ -73,6 +73,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
+	LOCKED_TUNINGS m_vLockedTuning[NUM_TUNEZONES];
 	std::vector<std::string> m_vCensorlist;
 
 	bool m_TeeHistorianActive;
@@ -96,6 +97,9 @@ class CGameContext : public IGameServer
 	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLock(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockDump(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockSetMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwitchOpen(IConsole::IResult *pResult, void *pUserData);
 	static void ConPause(IConsole::IResult *pResult, void *pUserData);
@@ -135,11 +139,16 @@ public:
 	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
-	CTuningParams *Tuning() { return &m_Tuning; }
+	CTuningParams *Tuning(int ClientID = -1);
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
+
+	LOCKED_TUNINGS *LockedTuning() { return &m_vLockedTuning[0]; }
+	bool SetLockedTune(LOCKED_TUNINGS *pLockedTunings, LOCKED_TUNE Tune);
+	void ApplyTuneLock(LOCKED_TUNINGS *pLockedTunings, int TuneLock);
+	CTuningParams ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNINGS LockedTunings);
 
 	CGameContext();
 	CGameContext(int Reset);
@@ -185,6 +194,7 @@ public:
 	int m_VoteEnforce;
 	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
 	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
+	char m_aaTuneLockMsg[NUM_TUNEZONES][256];
 
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();

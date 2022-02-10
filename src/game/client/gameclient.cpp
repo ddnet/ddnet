@@ -741,6 +741,30 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_aTuning[Conn] = NewTuning;
 		return;
 	}
+	else if(MsgId == NETMSGTYPE_SV_TUNELOCK)
+	{
+		int ClientID = pUnpacker->GetInt();
+		int Size = pUnpacker->GetInt();
+
+		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+			return;
+
+		m_aClients[ClientID].m_vLockedTunings.clear();
+
+		for(int i = 0; i < Size; i++)
+		{
+			const char *pParam = pUnpacker->GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
+			float Value = pUnpacker->GetInt() / 100.f;
+
+			if(pUnpacker->Error())
+				return;
+
+			LOCKED_TUNE LockedTune(pParam, Value);
+			m_aClients[ClientID].m_vLockedTunings.push_back(LockedTune);
+		}
+
+		return;
+	}
 
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
@@ -2066,6 +2090,7 @@ void CGameClient::CClientData::Reset()
 	m_SpecCharPresent = false;
 
 	mem_zero(m_aSwitchStates, sizeof(m_aSwitchStates));
+	m_vLockedTunings.clear();
 
 	UpdateRenderInfo(false);
 }
