@@ -1046,6 +1046,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
+	bool DoubleClicked = false;
 
 	for(int i = 0; i < NumGhosts; i++)
 	{
@@ -1078,6 +1079,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 			if(UI()->DoButtonLogic(pItem, "", 0, &SelectHitBox))
 			{
 				NewSelected = i;
+				DoubleClicked |= NewSelected == m_DoubleClickIndex;
+				m_DoubleClickIndex = NewSelected;
 			}
 		}
 
@@ -1165,7 +1168,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 		static int s_GhostButton = 0;
 		const char *pText = pGhost->Active() ? Localize("Deactivate") : Localize("Activate");
-		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
+		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (DoubleClicked && Input()->MouseDoubleClick()))
 		{
 			if(pGhost->Active())
 			{
