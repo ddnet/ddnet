@@ -218,6 +218,7 @@ public:
 	int m_Hit;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	CTuningParams m_Tuning;
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
@@ -273,6 +274,8 @@ public:
 	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; }
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
+
+	CTuningParams *Tuning();
 };
 
 enum

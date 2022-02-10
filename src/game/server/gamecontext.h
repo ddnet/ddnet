@@ -20,6 +20,7 @@
 #include "teehistorian.h"
 
 #include <memory>
+#include <string>
 
 /*
 	Tick
@@ -73,6 +74,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
+	std::vector<std::pair<std::string, float>> m_aLockedTuning[NUM_TUNEZONES];
 	array<string> m_aCensorlist;
 
 	bool m_TeeHistorianActive;
@@ -96,6 +98,8 @@ class CGameContext : public IGameServer
 	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLock(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockDump(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwitchOpen(IConsole::IResult *pResult, void *pUserData);
 	static void ConPause(IConsole::IResult *pResult, void *pUserData);
@@ -135,11 +139,14 @@ public:
 	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
-	CTuningParams *Tuning() { return &m_Tuning; }
+	CTuningParams *Tuning(int ClientID = -1);
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
+
+	std::vector<std::pair<std::string, float>> *LockedTuning() { return &m_aLockedTuning[0]; }
+	void ApplyTuneLock(CTuningParams *pTuning, int TuneLock);
 
 	CGameContext();
 	CGameContext(int Reset);
