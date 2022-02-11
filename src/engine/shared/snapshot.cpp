@@ -4,6 +4,8 @@
 #include "compression.h"
 #include "uuid_manager.h"
 
+#include <climits>
+
 #include <game/generated/protocol.h>
 #include <game/generated/protocolglue.h>
 
@@ -380,6 +382,8 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		{
 			if(pData + 1 > pEnd)
 				return -2;
+			if(*pData < 0 || *pData > INT_MAX / 4)
+				return -3;
 			ItemSize = (*pData++) * 4;
 		}
 
