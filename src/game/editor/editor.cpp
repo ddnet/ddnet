@@ -6031,7 +6031,10 @@ void CEditor::Reset(bool CreateDefault)
 
 	// create default layers
 	if(CreateDefault)
-		m_Map.CreateDefault(m_EntitiesTexture);
+	{
+		m_EditorWasUsedBefore = true;
+		m_Map.CreateDefault(GetEntitiesTexture());
+	}
 
 	SelectGameLayer();
 	m_lSelectedQuads.clear();
@@ -6141,7 +6144,7 @@ void CEditorMap::MakeGameLayer(CLayer *pLayer)
 {
 	m_pGameLayer = (CLayerGame *)pLayer;
 	m_pGameLayer->m_pEditor = m_pEditor;
-	m_pGameLayer->m_Texture = m_pEditor->m_EntitiesTexture;
+	m_pGameLayer->m_Texture = m_pEditor->GetEntitiesTexture();
 }
 
 void CEditorMap::MakeGameGroup(CLayerGroup *pGroup)
@@ -6207,6 +6210,60 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	m_pTuneLayer = 0x0;
 }
 
+int CEditor::GetTextureUsageFlag()
+{
+	return Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+}
+
+IGraphics::CTextureHandle CEditor::GetFrontTexture()
+{
+	int TextureLoadFlag = GetTextureUsageFlag();
+
+	if(!m_FrontTexture.IsValid())
+		m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	return m_FrontTexture;
+}
+
+IGraphics::CTextureHandle CEditor::GetTeleTexture()
+{
+	int TextureLoadFlag = GetTextureUsageFlag();
+	if(!m_TeleTexture.IsValid())
+		m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	return m_TeleTexture;
+}
+
+IGraphics::CTextureHandle CEditor::GetSpeedupTexture()
+{
+	int TextureLoadFlag = GetTextureUsageFlag();
+	if(!m_SpeedupTexture.IsValid())
+		m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	return m_SpeedupTexture;
+}
+
+IGraphics::CTextureHandle CEditor::GetSwitchTexture()
+{
+	int TextureLoadFlag = GetTextureUsageFlag();
+	if(!m_SwitchTexture.IsValid())
+		m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	return m_SwitchTexture;
+}
+
+IGraphics::CTextureHandle CEditor::GetTuneTexture()
+{
+	int TextureLoadFlag = GetTextureUsageFlag();
+	if(!m_TuneTexture.IsValid())
+		m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	return m_TuneTexture;
+}
+
+IGraphics::CTextureHandle CEditor::GetEntitiesTexture()
+{
+	int TextureLoadFlag = GetTextureUsageFlag();
+	if(!m_EntitiesTexture.IsValid())
+		m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+	return m_EntitiesTexture;
+}
+
 void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();
@@ -6227,14 +6284,6 @@ void CEditor::Init()
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
-
-	m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
-	m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
-	m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
-	m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
-	m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 
 	m_TilesetPicker.m_pEditor = this;
 	m_TilesetPicker.MakePalette();
@@ -6246,7 +6295,7 @@ void CEditor::Init()
 
 	m_Brush.m_pMap = &m_Map;
 
-	Reset();
+	Reset(false);
 	m_Map.m_Modified = false;
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
@@ -6273,6 +6322,12 @@ void CEditor::UpdateAndRender()
 {
 	static float s_MouseX = 0.0f;
 	static float s_MouseY = 0.0f;
+
+	if(!m_EditorWasUsedBefore)
+	{
+		m_EditorWasUsedBefore = true;
+		Reset();
+	}
 
 	if(m_Animate)
 		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
@@ -6369,33 +6424,33 @@ void CEditorMap::MakeTeleLayer(CLayer *pLayer)
 {
 	m_pTeleLayer = (CLayerTele *)pLayer;
 	m_pTeleLayer->m_pEditor = m_pEditor;
-	m_pTeleLayer->m_Texture = m_pEditor->m_TeleTexture;
+	m_pTeleLayer->m_Texture = m_pEditor->GetTeleTexture();
 }
 
 void CEditorMap::MakeSpeedupLayer(CLayer *pLayer)
 {
 	m_pSpeedupLayer = (CLayerSpeedup *)pLayer;
 	m_pSpeedupLayer->m_pEditor = m_pEditor;
-	m_pSpeedupLayer->m_Texture = m_pEditor->m_SpeedupTexture;
+	m_pSpeedupLayer->m_Texture = m_pEditor->GetSpeedupTexture();
 }
 
 void CEditorMap::MakeFrontLayer(CLayer *pLayer)
 {
 	m_pFrontLayer = (CLayerFront *)pLayer;
 	m_pFrontLayer->m_pEditor = m_pEditor;
-	m_pFrontLayer->m_Texture = m_pEditor->m_FrontTexture;
+	m_pFrontLayer->m_Texture = m_pEditor->GetFrontTexture();
 }
 
 void CEditorMap::MakeSwitchLayer(CLayer *pLayer)
 {
 	m_pSwitchLayer = (CLayerSwitch *)pLayer;
 	m_pSwitchLayer->m_pEditor = m_pEditor;
-	m_pSwitchLayer->m_Texture = m_pEditor->m_SwitchTexture;
+	m_pSwitchLayer->m_Texture = m_pEditor->GetSwitchTexture();
 }
 
 void CEditorMap::MakeTuneLayer(CLayer *pLayer)
 {
 	m_pTuneLayer = (CLayerTune *)pLayer;
 	m_pTuneLayer->m_pEditor = m_pEditor;
-	m_pTuneLayer->m_Texture = m_pEditor->m_TuneTexture;
+	m_pTuneLayer->m_Texture = m_pEditor->GetTuneTexture();
 }
