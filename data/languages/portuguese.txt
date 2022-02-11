@@ -2,10 +2,11 @@
 #originally created by:
 #	HeroiAmarelo
 #modified by:
-#	HeroiAmarelo	2011-07-15 00:35:23
-#	HeroiAmarelo	2012-08-01 15:47:40
-#	HeroiAmarelo	2012-10-18 23:56:32
-#	Rockus			2018-04-06
+#	HeroiAmarelo	2011-07-15
+#	HeroiAmarelo	2012-08-01
+#	HeroiAmarelo	2012-10-18
+#	Rockus		2018-04-06
+#	rockuS		2022-02-10
 ##### /authors #####
 
 ##### translated strings #####
@@ -87,6 +88,9 @@ Client
 
 Close
 == Fechar
+
+Compatible version
+== Versão compatível
 
 Connect
 == Ligar
@@ -732,7 +736,7 @@ Check now
 == Verifica agora
 
 AntiPing: predict other players
-== Antiping: prever os outros jogadores
+== AntiPing: prever os outros jogadores
 
 Automatically take statboard screenshot
 == Tirar automaticamente screenshot da statboard
@@ -825,7 +829,7 @@ Successfully saved the replay!
 == 
 
 Saving ddnet-settings.cfg failed
-== 
+== Falha ao guardar ddnet-settings.cfg
 
 Replay feature is disabled!
 == 
@@ -834,7 +838,7 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 == 
 
 Warning
-== 
+== Aviso
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
@@ -846,7 +850,7 @@ Personal best:
 == 
 
 Reconnect in %d sec
-== 
+== Reconectar em %d seg
 
 Render demo
 == 
@@ -855,16 +859,16 @@ Replace video
 == 
 
 File already exists, do you want to overwrite it?
-== 
+== O ficheiro já existe, queres substituí-lo?
 
 Disconnect Dummy
-== 
+== Desconectar Dummy
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Tens a certeza que queres desconectar o teu dummy?
 
 Welcome to DDNet
-== 
+== Bem-vindo à DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
@@ -879,49 +883,49 @@ Hook (right mouse) can be used to swing through the map and to hook other tees t
 == 
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
+== O mais importante é a comunicação: Não existe um tutorial pelo que terás de utilizar o chat (tecla t) para conversar com outros jogadores para que aprendas os básicos e os truques do jogo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== É recomendado que verifiques as definições para ajustá-las a teu gosto antes de te juntares a um servidor.
 
 Please enter your nickname below.
-== 
+== Por favor introduz o teu nome abaixo.
 
 Existing Player
-== 
+== Jogador Existente
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== O teu nome '%s' já está em uso (%d points). Queres usá-lo mesmo assim?
 
 Checking for existing player with your name
-== 
+== A verificar a existência de um jogador com o teu nome
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Tens a certeza que te queres desconectar e mudar para outro servidor?
 
 Country / Region
-== 
+== País / Região
 
 Destination file already exist
-== 
+== Ficheiro de destino já existe
 
 Speed
-== 
+== Velocidade
 
 Video name:
-== 
+== Nome do vídeo:
 
 Show DDNet map finishes in server browser
 == 
 
 transmits your player name to info2.ddnet.tw
-== 
+== transmite o teu nome de jogador para info2.ddnet.tw
 
 Theme
-== 
+== Tema
 
 AFR
 == 
@@ -948,19 +952,19 @@ Getting server list from master server
 == 
 
 %d of %d servers
-== 
+== %d of %d servidores
 
 %d of %d server
-== 
+== %d of %d servidor
 
 %d players
-== 
+== %d jogadores
 
 %d player
-== 
+== %d jogador
 
 Refreshing...
-== 
+== A atualizar...
 
 Filter connecting players
 == 
@@ -990,7 +994,7 @@ Length
 == 
 
 Date
-== 
+== Data
 
 Fetch Info
 == 
@@ -1002,7 +1006,7 @@ Render
 == 
 
 Connect Dummy
-== 
+== Conectar Dummy
 
 Kill
 == 
@@ -1011,19 +1015,19 @@ Pause
 == 
 
 Time
-== 
+== Tempo
 
 Reload
-== 
+== Recarregar
 
 Deactivate
-== 
+== Desativar
 
 Activate
-== 
+== Ativar
 
 Save
-== 
+== Guardar
 
 Smooth Dynamic Camera
 == 
@@ -1035,13 +1039,13 @@ Skip the main menu
 == 
 
 Settings file
-== 
+== Ficheiro de definições
 
 Config directory
 == 
 
 Themes directory
-== 
+== Diretório de temas
 
 Download skins
 == 
@@ -1059,7 +1063,7 @@ Skin Database
 == 
 
 Skins directory
-== 
+== Diretório de skins
 
 Hook collisions
 == 
@@ -1110,19 +1114,16 @@ UI mouse s.
 == 
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Janela
 
 Windowed borderless
-== 
-
-Windowed fullscreen
-== 
+== Janela s/ bordas
 
 Desktop fullscreen
-== 
+== Ecrã completo
 
 may cause delay
 == 
@@ -1146,13 +1147,13 @@ Threaded sound loading
 == 
 
 Game sound volume
-== 
+== Volume do jogo
 
 Chat sound volume
-== 
+== Volume do chat
 
 Background music volume
-== 
+== Volume da música de fundo
 
 Assets
 == 
@@ -1185,13 +1186,13 @@ Hookable
 == 
 
 Tee
-== 
+== Tee
 
 Use old chat style
-== 
+== Usar o modo antigo de chat
 
 Friend message
-== 
+== Mensagem de amigo/a
 
 Client message
 == 
@@ -1209,7 +1210,7 @@ Overlay entities
 == 
 
 Size
-== 
+== Tamanho
 
 Show text entities
 == 
@@ -1230,7 +1231,7 @@ Show local player's key presses
 == 
 
 Background
-== 
+== Fundo
 
 Entities Background color
 == 
@@ -1260,31 +1261,31 @@ Emoticons
 == 
 
 Particles
-== 
+== Partículas
 
 Assets directory
 == 
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 Learn
-== 
+== Aprender
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Website
 
 Settings
-== 
+== Definições
 
 Stop server
-== 
+== Parar servidor
 
 Run server
 == 
@@ -1293,7 +1294,7 @@ Server executable not found, can't run server
 == 
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
@@ -1339,10 +1340,10 @@ Grabs
 == 
 
 1 new mention
-== 
+== 1 nova menção
 
 %d new mentions
-== 
+== %d novas menções
 
 9+ new mentions
-== 
+== 9+ novas menções
