@@ -168,7 +168,7 @@ void CTerminalUI::RenderHelpPage()
 		"h  - auto reply to known chat messages",
 		"k  - selfkill"};
 
-	DrawBorders(g_pLogWindow, offX, offY - 1, width, 9 + 2);
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, sizeof(aHelpLines) / 128 + 2);
 
 	int i = 0;
 	for(auto &aLine : aHelpLines)
