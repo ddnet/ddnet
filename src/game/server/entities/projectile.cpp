@@ -44,6 +44,9 @@ CProjectile::CProjectile(
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+
 	GameWorld()->InsertEntity(this);
 }
 
@@ -142,7 +145,7 @@ void CProjectile::Tick()
 	{
 		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
-	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath))
+	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath || m_BelongsToPracticeTeam))
 	{
 		m_MarkedForDestroy = true;
 		return;

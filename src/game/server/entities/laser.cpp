@@ -25,7 +25,10 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
-	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team(), -1, m_Owner) : 0;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	m_TeamMask = pOwnerChar ? pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner) : 0;
+	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -230,7 +233,7 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	if(g_Config.m_SvDestroyLasersOnDeath && m_Owner >= 0)
+	if((g_Config.m_SvDestroyLasersOnDeath || m_BelongsToPracticeTeam) && m_Owner >= 0)
 	{
 		CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 		if(!(pOwnerChar && pOwnerChar->IsAlive()))
