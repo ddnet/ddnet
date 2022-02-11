@@ -28,7 +28,6 @@ class CPlayers : public CComponent
 		float Intra = 0.f);
 
 	int m_WeaponEmoteQuadContainerIndex;
-	int m_DirectionQuadContainerIndex;
 	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:

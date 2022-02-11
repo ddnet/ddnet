@@ -552,37 +552,6 @@ void CPlayers::RenderPlayer(
 
 	RenderInfo.m_Size = 64.0f; // force some settings
 
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-	Graphics()->QuadsSetRotation(0);
-	int ShowDirection = g_Config.m_ClShowDirection;
-#if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current())
-		ShowDirection = g_Config.m_ClVideoShowDirection;
-#endif
-	vec2 ShowDirectionPos(Position.x - 11.0f, Position.y - 70.f);
-	if((Local && ShowDirection == 2) || (!Local && ShowDirection >= 1))
-	{
-		if(Player.m_Direction == -1)
-		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->QuadsSetRotation(pi);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
-		}
-		else if(Player.m_Direction == 1)
-		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
-		}
-		if(Player.m_Jumped & 1)
-		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->QuadsSetRotation(pi * 3 / 2);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y);
-		}
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Graphics()->QuadsSetRotation(0);
-	}
-
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
@@ -811,10 +780,4 @@ void CPlayers::OnInit()
 
 	Graphics()->QuadsSetSubset(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsSetRotation(0.f);
-	// the direction
-	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
-
-	IGraphics::CQuadItem QuadItem(0.f, 0.f, 22.f, 22.f);
-	Graphics()->QuadContainerAddQuads(m_DirectionQuadContainerIndex, &QuadItem, 1);
-	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
 }
