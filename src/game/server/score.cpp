@@ -99,6 +99,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 			aWord[31] = 0;
 			m_aWordlist.push_back(aWord);
 		}
+		io_close(File);
 	}
 	else
 	{

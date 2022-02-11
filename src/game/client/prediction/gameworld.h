@@ -94,7 +94,7 @@ public:
 private:
 	void RemoveEntities();
 
-	CEntity *m_pNextTraverseEntity;
+	CEntity *m_pNextTraverseEntity = nullptr;
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
 
 	class CCharacter *m_apCharacters[MAX_CLIENTS];
