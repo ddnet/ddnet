@@ -168,7 +168,7 @@ void CTerminalUI::RenderHelpPage()
 		"h  - auto reply to known chat messages",
 		"k  - selfkill"};
 
-	DrawBorders(g_pLogWindow, offX, offY - 1, width, 8 + 2);
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, 9 + 2);
 
 	int i = 0;
 	for(auto &aLine : aHelpLines)
@@ -469,6 +469,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	{
 		m_RenderHelpPage = !m_RenderHelpPage;
 		gs_NeedLogDraw = true;
+		m_NewInput = true;
 	}
 	else if(Key == 'h' && m_LastKeyPress < time_get() - time_freq() / 2)
 	{
