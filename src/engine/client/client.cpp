@@ -1578,7 +1578,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	}
 	if(Version >= 5)
 	{
-		Result.m_SyncWeaponInput = Flags & SERVERCAPFLAG_SYNCWEAPONINPUT;
+		Result.m_SyncWeaponInput = true;
 	}
 	return Result;
 }
@@ -2899,7 +2899,8 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort :
+                                                                                               g_Config.m_ClContactPort;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
