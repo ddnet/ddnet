@@ -1,7 +1,7 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
@@ -314,14 +314,7 @@ Objects = [
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
 		NetIntRange("m_NumSwitchers", 0, 256),
 		# 256 switches / 32 bits = 8 int32
-		NetIntAny("m_Status1"),
-		NetIntAny("m_Status2"),
-		NetIntAny("m_Status3"),
-		NetIntAny("m_Status4"),
-		NetIntAny("m_Status5"),
-		NetIntAny("m_Status6"),
-		NetIntAny("m_Status7"),
-		NetIntAny("m_Status8"),
+		NetArray(NetIntAny("m_Status"), 8),
 	]),
 
 	# Switch info for map items

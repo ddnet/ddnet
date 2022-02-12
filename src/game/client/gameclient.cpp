@@ -1447,22 +1447,7 @@ void CGameClient::OnNewSnapshot()
 
 				for(int j = 0; j < NumSwitchers + 1; j++)
 				{
-					if(j < 32)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status1 & (1 << j);
-					else if(j < 64)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status2 & (1 << (j - 32));
-					else if(j < 96)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status3 & (1 << (j - 64));
-					else if(j < 128)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status4 & (1 << (j - 96));
-					else if(j < 160)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status5 & (1 << (j - 128));
-					else if(j < 192)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status6 & (1 << (j - 160));
-					else if(j < 224)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status7 & (1 << (j - 192));
-					else if(j < 256)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status8 & (1 << (j - 224));
+					Collision()->m_pSwitchers[j].m_Status[Team] = (pSwitchStateData->m_Status[j / 32] >> (j % 32)) & 1;
 
 					// update
 					if(Collision()->m_pSwitchers[j].m_Status[Team])
