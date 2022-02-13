@@ -173,7 +173,7 @@ private:
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
-	void SendZoneMsgs();
+	void SendTuneMsg(const char *pMessage);
 	IAntibot *Antibot();
 
 	bool m_SetSavePos;

@@ -86,7 +86,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_LastLockedTunings.clear();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aSentLockedTunings[i] = false;
-	SendZoneMsgs(); // we want a entermessage also on spawn
+	SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 	Server()->StartRecord(m_pPlayer->GetCID());
@@ -1990,11 +1990,11 @@ void CCharacter::HandleTuneLayer()
 		if(m_LockedTunings != m_LastLockedTunings)
 		{
 			GameServer()->SendTuningParams(m_pPlayer->GetCID());
+			SendTuneMsg(GameServer()->m_aaTuneLockMsg[TuneLock == -1 ? 0 : TuneLock]); // -1 = tune lock reset, number 0 is used to set the message
 
 			// update tunes for other players when we are snapped
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				m_aSentLockedTunings[i] = false;
-
 			m_LastLockedTunings = m_LockedTunings;
 		}
 	}
@@ -2003,44 +2003,30 @@ void CCharacter::HandleTuneLayer()
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
-		// send zone msgs
-		SendZoneMsgs();
+		// send zone leave msg
+		SendTuneMsg(GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld]);
+
+		// send zone enter msg
+		SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]);
 	}
 }
 
-void CCharacter::SendZoneMsgs()
+void CCharacter::SendTuneMsg(const char *pMessage)
 {
-	// send zone leave msg
-	// (m_TuneZoneOld >= 0: avoid zone leave msgs on spawn)
-	if(m_TuneZoneOld >= 0 && GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld])
+	if (!pMessage[0])
+		return;
+
+	const char *pCur = pMessage;
+	const char *pPos;
+	while((pPos = str_find(pCur, "\\n")))
 	{
-		const char *pCur = GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld];
-		const char *pPos;
-		while((pPos = str_find(pCur, "\\n")))
-		{
-			char aBuf[256];
-			str_copy(aBuf, pCur, pPos - pCur + 1);
-			aBuf[pPos - pCur + 1] = '\0';
-			pCur = pPos + 2;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
+		char aBuf[256];
+		str_copy(aBuf, pCur, pPos - pCur + 1);
+		aBuf[pPos - pCur + 1] = '\0';
+		pCur = pPos + 2;
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 	}
-	// send zone enter msg
-	if(GameServer()->m_aaZoneEnterMsg[m_TuneZone])
-	{
-		const char *pCur = GameServer()->m_aaZoneEnterMsg[m_TuneZone];
-		const char *pPos;
-		while((pPos = str_find(pCur, "\\n")))
-		{
-			char aBuf[256];
-			str_copy(aBuf, pCur, pPos - pCur + 1);
-			aBuf[pPos - pCur + 1] = '\0';
-			pCur = pPos + 2;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
-	}
+	GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
 }
 
 CTuningParams *CCharacter::Tuning()
