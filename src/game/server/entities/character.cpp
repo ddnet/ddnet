@@ -1327,8 +1327,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacter *pThis = (CCharacter *)pUser;
-	CCollision *pCollision = pThis->Collision();
-	return pCollision->m_pSwitchers && pThis->Team() != TEAM_SUPER && pCollision->m_pSwitchers[Number].m_Status[pThis->Team()];
+	auto &aSwitchers = pThis->Switchers();
+	return !aSwitchers.empty() && pThis->Team() != TEAM_SUPER && aSwitchers[Number].m_Status[pThis->Team()];
 }
 
 void CCharacter::HandleTiles(int Index)
@@ -1599,48 +1599,88 @@ void CCharacter::HandleTiles(int Index)
 	// handle switch tiles
 	if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
+<<<<<<< HEAD
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHOPEN;
+=======
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHOPEN;
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
+<<<<<<< HEAD
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = Server()->Tick() + 1 + Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDOPEN;
+=======
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = Server()->Tick() + 1 + GameServer()->Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDOPEN;
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
+<<<<<<< HEAD
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = Server()->Tick() + 1 + Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDCLOSE;
+=======
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = Server()->Tick() + 1 + GameServer()->Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDCLOSE;
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
+<<<<<<< HEAD
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
 		Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
+=======
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
+		Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
 	{
+<<<<<<< HEAD
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+=======
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 		{
 			Freeze(Collision()->GetSwitchDelay(MapIndex));
 		}
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
 	{
+<<<<<<< HEAD
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+=======
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 			m_DeepFreeze = true;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER)
 	{
+<<<<<<< HEAD
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+=======
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 			m_DeepFreeze = false;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
 	{
+<<<<<<< HEAD
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+=======
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 		{
 			m_LiveFreeze = true;
 			m_Core.m_LiveFrozen = true;
@@ -1648,7 +1688,11 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER)
 	{
+<<<<<<< HEAD
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+=======
+		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+>>>>>>> b7ea8837e (Move switch state to gamecore)
 		{
 			m_LiveFreeze = false;
 			m_Core.m_LiveFrozen = false;

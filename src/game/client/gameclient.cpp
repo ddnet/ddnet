@@ -445,6 +445,7 @@ void CGameClient::OnConnected()
 {
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
+	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_NumSwitchers);
 
 	CRaceHelper::ms_aFlagIndex[0] = -1;
 	CRaceHelper::ms_aFlagIndex[1] = -1;
@@ -1438,23 +1439,22 @@ void CGameClient::OnNewSnapshot()
 				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
 
 				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
-				if(!Collision()->m_pSwitchers || NumSwitchers != Collision()->m_NumSwitchers)
+				if(Switchers().empty() || NumSwitchers != (int)Switchers().size())
 				{
-					delete[] Collision()->m_pSwitchers;
-					Collision()->m_pSwitchers = new CCollision::SSwitchers[NumSwitchers + 1];
+					m_GameWorld.m_Core.InitSwitchers(NumSwitchers);
 					Collision()->m_NumSwitchers = NumSwitchers;
 				}
 
 				for(int j = 0; j < NumSwitchers + 1; j++)
 				{
-					Collision()->m_pSwitchers[j].m_Status[Team] = (pSwitchStateData->m_Status[j / 32] >> (j % 32)) & 1;
+					Switchers()[j].m_Status[Team] = (pSwitchStateData->m_Status[j / 32] >> (j % 32)) & 1;
 
 					// update
-					if(Collision()->m_pSwitchers[j].m_Status[Team])
-						Collision()->m_pSwitchers[j].m_Type[Team] = TILE_SWITCHOPEN;
+					if(Switchers()[j].m_Status[Team])
+						Switchers()[j].m_Type[Team] = TILE_SWITCHOPEN;
 					else
-						Collision()->m_pSwitchers[j].m_Type[Team] = TILE_SWITCHCLOSE;
-					Collision()->m_pSwitchers[j].m_EndTick[Team] = 0;
+						Switchers()[j].m_Type[Team] = TILE_SWITCHCLOSE;
+					Switchers()[j].m_EndTick[Team] = 0;
 				}
 
 				if(!GotSwitchStateTeam)

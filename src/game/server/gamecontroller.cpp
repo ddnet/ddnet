@@ -632,7 +632,7 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 
-	if(GameServer()->Collision()->m_pSwitchers)
+	if(!GameServer()->Switchers().empty())
 	{
 		int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
 
@@ -651,7 +651,7 @@ void IGameController::Snap(int SnappingClient)
 
 		for(int i = 0; i < pSwitchState->m_NumSwitchers + 1; i++)
 		{
-			int Status = (int)GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
+			int Status = (int)GameServer()->Switchers()[i].m_Status[Team];
 			pSwitchState->m_Status[i / 32] |= (Status << (i % 32));
 		}
 	}

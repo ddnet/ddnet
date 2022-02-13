@@ -471,12 +471,12 @@ int CSaveTeam::Save(int Team)
 
 			for(int i = 1; i < m_pController->GameServer()->Collision()->m_NumSwitchers + 1; i++)
 			{
-				m_pSwitchers[i].m_Status = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
-				if(m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team])
-					m_pSwitchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team];
+				m_pSwitchers[i].m_Status = m_pController->GameServer()->Switchers()[i].m_Status[Team];
+				if(m_pController->GameServer()->Switchers()[i].m_EndTick[Team])
+					m_pSwitchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Switchers()[i].m_EndTick[Team];
 				else
 					m_pSwitchers[i].m_EndTime = 0;
-				m_pSwitchers[i].m_Type = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team];
+				m_pSwitchers[i].m_Type = m_pController->GameServer()->Switchers()[i].m_Type[Team];
 			}
 		}
 		return 0;
@@ -532,10 +532,10 @@ void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 	{
 		for(int i = 1; i < minimum(m_NumSwitchers, m_pController->GameServer()->Collision()->m_NumSwitchers) + 1; i++)
 		{
-			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_pSwitchers[i].m_Status;
+			m_pController->GameServer()->Switchers()[i].m_Status[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)
-				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
-			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = m_pSwitchers[i].m_Type;
+				m_pController->GameServer()->Switchers()[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
+			m_pController->GameServer()->Switchers()[i].m_Type[Team] = m_pSwitchers[i].m_Type;
 		}
 	}
 }

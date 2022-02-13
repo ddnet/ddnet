@@ -116,15 +116,6 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_NumSwitchers;
 
-	struct SSwitchers
-	{
-		bool m_Status[MAX_CLIENTS];
-		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-	};
-	SSwitchers *m_pSwitchers;
-
 private:
 	class CTeleTile *m_pTele;
 	class CSpeedupTile *m_pSpeedup;

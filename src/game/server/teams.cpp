@@ -61,9 +61,9 @@ void CGameTeams::ResetSwitchers(int Team)
 	{
 		for(int i = 0; i < GameServer()->Collision()->m_NumSwitchers + 1; ++i)
 		{
-			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = GameServer()->Collision()->m_pSwitchers[i].m_Initial;
-			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
-			GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
+			GameServer()->Switchers()[i].m_Status[Team] = GameServer()->Switchers()[i].m_Initial;
+			GameServer()->Switchers()[i].m_EndTick[Team] = 0;
+			GameServer()->Switchers()[i].m_Type[Team] = TILE_SWITCHOPEN;
 		}
 	}
 }

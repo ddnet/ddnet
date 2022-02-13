@@ -58,6 +58,7 @@ public: // TODO: Maybe make protected
 	virtual ~CEntity();
 
 	/* Objects */
+	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->m_Core.m_aSwitchers; }
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
 	class CConfig *Config() { return m_pGameWorld->Config(); }
 	class CGameContext *GameServer() { return m_pGameWorld->GameServer(); }

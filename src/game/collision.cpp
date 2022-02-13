@@ -48,7 +48,6 @@ CCollision::CCollision()
 	m_pFront = 0;
 	m_pSwitch = 0;
 	m_pDoor = 0;
-	m_pSwitchers = 0;
 	m_pTune = 0;
 }
 
@@ -92,7 +91,6 @@ void CCollision::Init(class CLayers *pLayers)
 	else
 	{
 		m_pDoor = 0;
-		m_pSwitchers = 0;
 	}
 
 	if(m_pLayers->TuneLayer())
@@ -130,22 +128,6 @@ void CCollision::Init(class CLayers *pLayers)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
-			}
-		}
-	}
-
-	if(m_NumSwitchers)
-	{
-		m_pSwitchers = new SSwitchers[m_NumSwitchers + 1];
-
-		for(int i = 0; i < m_NumSwitchers + 1; ++i)
-		{
-			m_pSwitchers[i].m_Initial = true;
-			for(int j = 0; j < MAX_CLIENTS; ++j)
-			{
-				m_pSwitchers[i].m_Status[j] = true;
-				m_pSwitchers[i].m_EndTick[j] = 0;
-				m_pSwitchers[i].m_Type[j] = 0;
 			}
 		}
 	}
@@ -566,7 +548,6 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 void CCollision::Dest()
 {
 	delete[] m_pDoor;
-	delete[] m_pSwitchers;
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
@@ -577,7 +558,6 @@ void CCollision::Dest()
 	m_pSwitch = 0;
 	m_pTune = 0;
 	m_pDoor = 0;
-	m_pSwitchers = 0;
 }
 
 int CCollision::IsSolid(int x, int y) const

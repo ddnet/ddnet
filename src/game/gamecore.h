@@ -174,6 +174,14 @@ enum
 	SHOW_OTHERS_ONLY_TEAM = 2 // show players that are in solo and are in the same team
 };
 
+struct SSwitchers
+{
+	bool m_Status[MAX_CLIENTS];
+	bool m_Initial;
+	int m_EndTick[MAX_CLIENTS];
+	int m_Type[MAX_CLIENTS];
+};
+
 class CWorldCore
 {
 public:
@@ -198,6 +206,9 @@ public:
 	CTuningParams m_Tuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
+
+	void InitSwitchers(int Num);
+	std::vector<SSwitchers> m_aSwitchers;
 };
 
 class CCharacterCore

@@ -1083,17 +1083,17 @@ void CGameContext::OnTick()
 		{
 			for(int j = 0; j < MAX_CLIENTS; ++j)
 			{
-				if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
+				if(Switchers()[i].m_EndTick[j] <= Server()->Tick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
 				{
-					Collision()->m_pSwitchers[i].m_Status[j] = false;
-					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
-					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHCLOSE;
+					Switchers()[i].m_Status[j] = false;
+					Switchers()[i].m_EndTick[j] = 0;
+					Switchers()[i].m_Type[j] = TILE_SWITCHCLOSE;
 				}
-				else if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+				else if(Switchers()[i].m_EndTick[j] <= Server()->Tick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
 				{
-					Collision()->m_pSwitchers[i].m_Status[j] = true;
-					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
-					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHOPEN;
+					Switchers()[i].m_Status[j] = true;
+					Switchers()[i].m_EndTick[j] = 0;
+					Switchers()[i].m_Type[j] = TILE_SWITCHOPEN;
 				}
 			}
 		}
@@ -2729,7 +2729,7 @@ void CGameContext::ConSwitchOpen(IConsole::IResult *pResult, void *pUserData)
 
 	if(pSelf->Collision()->m_NumSwitchers > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_NumSwitchers + 1)
 	{
-		pSelf->Collision()->m_pSwitchers[Switch].m_Initial = false;
+		pSelf->Switchers()[Switch].m_Initial = false;
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "switch %d opened by default", Switch);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -3203,6 +3203,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+	m_World.m_Core.InitSwitchers(m_Collision.m_NumSwitchers);
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
@@ -3260,7 +3261,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 		if(Collision()->m_NumSwitchers > 0)
 			for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
-				Collision()->m_pSwitchers[i].m_Initial = true;
+				Switchers()[i].m_Initial = true;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);

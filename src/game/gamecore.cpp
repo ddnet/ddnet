@@ -652,8 +652,24 @@ void CCharacterCore::SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts)
 bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
-	if(pThis->Collision()->m_pSwitchers)
+	if(pThis->m_pWorld && !pThis->m_pWorld->m_aSwitchers.empty())
 		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
-			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
+			return pThis->m_pWorld->m_aSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
+}
+
+void CWorldCore::InitSwitchers(int NumSwitchers)
+{
+	m_aSwitchers.resize(NumSwitchers + 1);
+
+	for(int i = 0; i < NumSwitchers + 1; i++)
+	{
+		m_aSwitchers[i].m_Initial = true;
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			m_aSwitchers[i].m_Status[j] = true;
+			m_aSwitchers[i].m_EndTick[j] = 0;
+			m_aSwitchers[i].m_Type[j] = 0;
+		}
+	}
 }
