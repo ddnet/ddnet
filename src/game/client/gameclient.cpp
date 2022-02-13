@@ -2230,6 +2230,32 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
 
+	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
+	for(int i = 0; i < Num; i++)
+	{
+		IClient::CSnapItem Item;
+		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+		if(Item.m_Type == NETOBJTYPE_SWITCHTIMESTATE)
+		{
+			const CNetObj_SwitchTimeState *pSwitchTimeStateData = (const CNetObj_SwitchTimeState *)pData;
+			for(int i = 0; i < (int)(sizeof(pSwitchTimeStateData->m_EndTick) / sizeof(pSwitchTimeStateData->m_EndTick[0])); i++)
+			{
+				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
+				int Num = pSwitchTimeStateData->m_SwitchNumber[i];
+				int EndTick = pSwitchTimeStateData->m_EndTick[i];
+				if(in_range(Num, 0, (int)Switchers().size()) && EndTick > 0)
+				{
+					// update EndTick
+					if(Switchers()[Num].m_Status[Team])
+						Switchers()[Num].m_Type[Team] = TILE_SWITCHTIMEDOPEN;
+					else
+						Switchers()[Num].m_Type[Team] = TILE_SWITCHTIMEDCLOSE;
+					Switchers()[Num].m_EndTick[Team] = EndTick;
+				}
+			}
+		}
+	}
+
 	// always update default tune zone, even without character
 	if(!m_GameWorld.m_WorldConfig.m_UseTuneZones)
 		m_GameWorld.TuningList()[0] = m_Tuning[g_Config.m_ClDummy];

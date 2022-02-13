@@ -670,6 +670,7 @@ void CWorldCore::InitSwitchers(int NumSwitchers)
 			m_aSwitchers[i].m_Status[j] = true;
 			m_aSwitchers[i].m_EndTick[j] = 0;
 			m_aSwitchers[i].m_Type[j] = 0;
+			m_aSwitchers[i].m_LastUpdateTick[j] = 0;
 		}
 	}
 }

@@ -199,6 +199,29 @@ void CGameWorld::Tick()
 
 	RemoveEntities();
 
+	// update switch state
+	if(Collision()->m_NumSwitchers > 0)
+	{
+		for(int i = 0; i < (int)Switchers().size(); ++i)
+		{
+			for(int j = 0; j < MAX_CLIENTS; ++j)
+			{
+				if(Switchers()[i].m_EndTick[j] <= GameTick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
+				{
+					Switchers()[i].m_Status[j] = false;
+					Switchers()[i].m_EndTick[j] = 0;
+					Switchers()[i].m_Type[j] = TILE_SWITCHCLOSE;
+				}
+				else if(Switchers()[i].m_EndTick[j] <= GameTick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+				{
+					Switchers()[i].m_Status[j] = true;
+					Switchers()[i].m_EndTick[j] = 0;
+					Switchers()[i].m_Type[j] = TILE_SWITCHOPEN;
+				}
+			}
+		}
+	}
+
 	OnModified();
 }
 

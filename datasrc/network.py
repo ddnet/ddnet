@@ -317,6 +317,11 @@ Objects = [
 		NetArray(NetIntAny("m_Status"), 8),
 	]),
 
+	NetObjectEx("SwitchTimeState", "switch-time-state@netobj.ddnet.tw", [
+		NetArray(NetIntAny("m_SwitchNumber"), 4),
+		NetArray(NetIntAny("m_EndTick"), 4),
+	]),
+
 	# Switch info for map items
 	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
 		NetIntAny("m_SwitchNumber"),

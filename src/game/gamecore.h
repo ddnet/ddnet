@@ -180,6 +180,7 @@ struct SSwitchers
 	bool m_Initial;
 	int m_EndTick[MAX_CLIENTS];
 	int m_Type[MAX_CLIENTS];
+	int m_LastUpdateTick[MAX_CLIENTS];
 };
 
 class CWorldCore

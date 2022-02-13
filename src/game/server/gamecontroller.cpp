@@ -649,10 +649,39 @@ void IGameController::Snap(int SnappingClient)
 		pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->m_NumSwitchers, 0, 255);
 		mem_zero(pSwitchState->m_Status, sizeof(pSwitchState->m_Status));
 
+		std::vector<std::pair<int, int>> aEndTicks; // <EndTick, SwitchNumber>
+
 		for(int i = 0; i < pSwitchState->m_NumSwitchers + 1; i++)
 		{
 			int Status = (int)GameServer()->Switchers()[i].m_Status[Team];
 			pSwitchState->m_Status[i / 32] |= (Status << (i % 32));
+
+			int EndTick = GameServer()->Switchers()[i].m_EndTick[Team];
+			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_LastUpdateTick[Team] < Server()->Tick())
+			{
+				// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
+				aEndTicks.push_back({GameServer()->Switchers()[i].m_EndTick[Team], i});
+			}
+		}
+
+		// send the endtick of switchers that are about to toggle back (up to some number, prioritizing those with the earliest endticks)
+		CNetObj_SwitchTimeState *pSwitchTimeState = static_cast<CNetObj_SwitchTimeState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHTIMESTATE, Team, sizeof(CNetObj_SwitchTimeState)));
+		if(!pSwitchTimeState)
+			return;
+
+		std::sort(aEndTicks.begin(), aEndTicks.end());
+		for(int i = 0; i < (int)(sizeof(pSwitchTimeState->m_EndTick) / sizeof(pSwitchTimeState->m_EndTick[0])); i++)
+		{
+			if(i < (int)aEndTicks.size())
+			{
+				pSwitchTimeState->m_EndTick[i] = aEndTicks[i].first;
+				pSwitchTimeState->m_SwitchNumber[i] = aEndTicks[i].second;
+			}
+			else
+			{
+				pSwitchTimeState->m_SwitchNumber[i] = -1;
+				pSwitchTimeState->m_EndTick[i] = 0;
+			}
 		}
 	}
 }
