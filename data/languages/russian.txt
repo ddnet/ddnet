@@ -1114,7 +1114,7 @@ Skip the main menu
 == Пропускать главное меню
 
 https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/wiki/Main_Page/ru
 
 Website
 == Сайт
