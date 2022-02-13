@@ -2013,7 +2013,7 @@ void CCharacter::HandleTuneLayer()
 
 void CCharacter::SendTuneMsg(const char *pMessage)
 {
-	if (!pMessage[0])
+	if(!pMessage[0])
 		return;
 
 	const char *pCur = pMessage;
