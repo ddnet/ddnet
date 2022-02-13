@@ -82,7 +82,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
-	m_Tuning = *GameServer()->Tuning();
+	m_LockedTunings.clear();
+	m_LastLockedTunings.clear();
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		m_aSentLockedTunings[i] = false;
 	SendZoneMsgs(); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
@@ -989,6 +992,24 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	return true;
 }
 
+void CCharacter::HandleTuneLock(int SnappingClient, int ID)
+{
+	if(m_aSentLockedTunings[SnappingClient])
+		return;
+
+	CMsgPacker Msg(NETMSGTYPE_SV_TUNELOCK);
+	Msg.AddInt(ID);
+	unsigned int Size = m_LockedTunings.size();
+	Msg.AddInt(Size);
+	for(unsigned int i = 0; i < Size; i++)
+	{
+		Msg.AddString(m_LockedTunings[i].first.c_str(), -1);
+		Msg.AddInt((int)(m_LockedTunings[i].second * 100.f));
+	}
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, SnappingClient);
+	m_aSentLockedTunings[SnappingClient] = true;
+}
+
 //TODO: Move the emote stuff to a function
 void CCharacter::SnapCharacter(int SnappingClient, int ID)
 {
@@ -1152,6 +1173,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))
 		return;
 
+	HandleTuneLock(SnappingClient, ID);
 	SnapCharacter(SnappingClient, ID);
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
@@ -1963,8 +1985,18 @@ void CCharacter::HandleTuneLayer()
 	int TuneLock = GameServer()->Collision()->IsTuneLock(CurrentIndex);
 	if(TuneLock)
 	{
-		GameServer()->ApplyTuneLock(&m_Tuning, TuneLock);
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		GameServer()->ApplyTuneLock(&m_LockedTunings, TuneLock);
+
+		if(m_LockedTunings != m_LastLockedTunings)
+		{
+			GameServer()->SendTuningParams(m_pPlayer->GetCID());
+
+			// update tunes for other players when we are snapped
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				m_aSentLockedTunings[i] = false;
+
+			m_LastLockedTunings = m_LockedTunings;
+		}
 	}
 
 	m_Core.m_Tuning = *Tuning(); // throw tunings from specific zone into gamecore
@@ -2015,7 +2047,10 @@ CTuningParams *CCharacter::Tuning()
 {
 	if(m_TuneZone)
 		return &GameServer()->TuningList()[m_TuneZone];
-	return &m_Tuning;
+
+	static CTuningParams Tuning;
+	Tuning = GameServer()->ApplyLockedTunings(*GameServer()->Tuning(), m_LockedTunings);
+	return &Tuning;
 }
 
 IAntibot *CCharacter::Antibot()

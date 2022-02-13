@@ -147,20 +147,53 @@ bool CGameContext::EmulateBug(int Bug)
 CTuningParams *CGameContext::Tuning(int ClientID)
 {
 	if(GetPlayerChar(ClientID))
-		return &GetPlayerChar(ClientID)->m_Tuning;
+		return GetPlayerChar(ClientID)->Tuning();
 	return &m_Tuning;
 }
 
-void CGameContext::ApplyTuneLock(CTuningParams *pTuning, int TuneLock)
+bool CGameContext::SetLockedTune(LOCKED_TUNINGS *pLockedTunings, LOCKED_TUNE Tune)
+{
+	const char *pParam = Tune.first.c_str();
+	float NewValue = Tune.second;
+
+	float GlobalValue;
+	if(!m_Tuning.Get(pParam, &GlobalValue))
+		return false;
+
+	for(unsigned int i = 0; i < pLockedTunings->size(); i++)
+	{
+		if(str_comp_nocase(pLockedTunings->at(i).first.c_str(), pParam) == 0)
+		{
+			if(NewValue == GlobalValue)
+				pLockedTunings->erase(pLockedTunings->begin() + i);
+			else
+				pLockedTunings->at(i).second = NewValue;
+			return true;
+		}
+	}
+
+	LOCKED_TUNE LockedTune(pParam, NewValue);
+	pLockedTunings->push_back(LockedTune);
+	return true;
+}
+
+void CGameContext::ApplyTuneLock(LOCKED_TUNINGS *pLockedTunings, int TuneLock)
 {
 	if(TuneLock < 0 || TuneLock >= NUM_TUNEZONES)
 	{
-		*pTuning = *Tuning();
+		pLockedTunings->clear();
 		return;
 	}
 
 	for(unsigned int i = 0; i < LockedTuning()[TuneLock].size(); i++)
-		pTuning->Set(LockedTuning()[TuneLock][i].first.c_str(), LockedTuning()[TuneLock][i].second);
+		SetLockedTune(pLockedTunings, LockedTuning()[TuneLock][i]);
+}
+
+CTuningParams CGameContext::ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNINGS LockedTunings)
+{
+	for(unsigned int i = 0; i < LockedTunings.size(); i++)
+		Tuning.Set(LockedTunings[i].first.c_str(), LockedTunings[i].second);
+	return Tuning;
 }
 
 void CGameContext::FillAntibot(CAntibotRoundData *pData)
@@ -737,7 +770,10 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 	int *pParams = 0;
 	if(Zone == 0)
-		pParams = (int *)Tuning(ClientID);
+	{
+		CTuningParams *pTuning = GetClientVersion(ClientID) >= VERSION_DDNET_TUNELOCK ? &m_Tuning : Tuning(ClientID);
+		pParams = (int *)pTuning;
+	}
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
 
@@ -2657,29 +2693,9 @@ void CGameContext::ConTuneLock(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < NUM_TUNEZONES)
 	{
-		float Value;
-		if(pSelf->Tuning()->Get(pParamName, &Value))
+		LOCKED_TUNE LockedTune(pParamName, NewValue);
+		if(pSelf->SetLockedTune(&pSelf->LockedTuning()[List], LockedTune))
 		{
-			bool Found = false;
-			for(unsigned int i = 0; i < pSelf->LockedTuning()[List].size(); i++)
-			{
-				if(str_comp_nocase(pSelf->LockedTuning()[List][i].first.c_str(), pParamName) == 0)
-				{
-					// erase value if it gets set to the same as global tuning is
-					if(NewValue == Value)
-						pSelf->LockedTuning()[List].erase(pSelf->LockedTuning()[List].begin() + i);
-					else
-						pSelf->LockedTuning()[List][i].second = NewValue; // override value in case somebody updates it ingame
-					Found = true;
-				}
-			}
-
-			if(!Found)
-			{
-				std::pair<std::string, float> Tune(pParamName, NewValue);
-				pSelf->LockedTuning()[List].push_back(Tune);
-			}
-
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%s for lock %d changed to %.2f", pParamName, List, NewValue);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -3930,10 +3946,6 @@ void CGameContext::ResetTuning()
 	Tuning()->Set("shotgun_speed", 500);
 	Tuning()->Set("shotgun_speeddiff", 0);
 	Tuning()->Set("shotgun_curvature", 0);
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(GetPlayerChar(i))
-			*Tuning(i) = m_Tuning;
 	SendTuningParams(-1);
 }
 

@@ -42,6 +42,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	bool CanSnapCharacter(int SnappingClient);
+	void HandleTuneLock(int SnappingClient, int ID);
 
 	bool IsGrounded();
 
@@ -218,7 +219,9 @@ public:
 	int m_Hit;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	CTuningParams m_Tuning;
+	LOCKED_TUNINGS m_LockedTunings;
+	LOCKED_TUNINGS m_LastLockedTunings;
+	bool m_aSentLockedTunings[MAX_CLIENTS];
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;

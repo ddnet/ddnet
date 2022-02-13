@@ -44,11 +44,6 @@
 
 */
 
-enum
-{
-	NUM_TUNEZONES = 256
-};
-
 class CConfig;
 class CHeap;
 class CPlayer;
@@ -74,7 +69,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	std::vector<std::pair<std::string, float>> m_aLockedTuning[NUM_TUNEZONES];
+	LOCKED_TUNINGS m_aLockedTuning[NUM_TUNEZONES];
 	array<string> m_aCensorlist;
 
 	bool m_TeeHistorianActive;
@@ -145,8 +140,10 @@ public:
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 
-	std::vector<std::pair<std::string, float>> *LockedTuning() { return &m_aLockedTuning[0]; }
-	void ApplyTuneLock(CTuningParams *pTuning, int TuneLock);
+	LOCKED_TUNINGS *LockedTuning() { return &m_aLockedTuning[0]; }
+	bool SetLockedTune(LOCKED_TUNINGS *pLockedTunings, LOCKED_TUNE Tune);
+	void ApplyTuneLock(LOCKED_TUNINGS *pLockedTunings, int TuneLock);
+	CTuningParams ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNINGS LockedTunings);
 
 	CGameContext();
 	CGameContext(int Reset);
