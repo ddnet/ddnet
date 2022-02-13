@@ -3718,6 +3718,7 @@ int main(int argc, const char **argv) // ignore_convention
 	int Ret = pServer->Run();
 
 	MysqlUninit();
+	secure_random_uninit();
 
 	// free
 	delete pKernel;
