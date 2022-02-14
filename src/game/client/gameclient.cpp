@@ -1074,7 +1074,7 @@ void CGameClient::InvalidateSnapshot()
 
 void CGameClient::OnNewSnapshot()
 {
-	auto &&Evolve = [=](CNetObj_Character *pCharacter, int Tick) {
+	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
 		CWorldCore TempWorld;
 		CCharacterCore TempCore;
 		CTeamsCore TempTeams;
