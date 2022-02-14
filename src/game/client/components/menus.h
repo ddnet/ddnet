@@ -212,7 +212,7 @@ class CMenus : public CComponent
 	 * @param pNearTo Place the tooltip near this rect.
 	 * @param pText The text to display in the tooltip
 	 */
-	void DoToolTip(const CUIRect *pNearRect, const char* pText, float WidthHint = -1.0f);
+	void DoToolTip(const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 	// menus_settings_assets.cpp
 public:
 	struct SCustomItem
