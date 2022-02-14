@@ -98,7 +98,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 			char aWord[32] = {0};
 			sscanf(pLine, "%*s %31s", aWord);
 			aWord[31] = 0;
-			m_aWordlist.push_back(aWord);
+			m_aWordlist.emplace_back(aWord);
 		}
 		io_close(File);
 	}
