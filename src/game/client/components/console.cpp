@@ -3,9 +3,9 @@
 
 #include <base/tl/sorted_array.h>
 
-#include <limits.h>
+#include <climits>
 #include <limits>
-#include <math.h>
+#include <cmath>
 
 #include <game/generated/client_data.h>
 

@@ -6,7 +6,7 @@
 #include <engine/shared/config.h>
 
 #include <fcntl.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

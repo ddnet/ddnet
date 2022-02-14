@@ -18,7 +18,7 @@
 #include <base/detect.h>
 #include <base/math.h>
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "SDL_hints.h"
 #include "SDL_pixels.h"

@@ -6,7 +6,7 @@
 
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <vector>
 

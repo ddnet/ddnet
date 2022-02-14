@@ -6,7 +6,7 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <limits.h>
+#include <climits>
 
 #include <base/hash_ctxt.h>
 #include <base/math.h>

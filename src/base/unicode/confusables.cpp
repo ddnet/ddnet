@@ -2,7 +2,7 @@
 
 #include "../system.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 static int str_utf8_skeleton(int ch, const int **skeleton, int *skeleton_len)
 {

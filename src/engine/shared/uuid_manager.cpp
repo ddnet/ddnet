@@ -3,7 +3,7 @@
 #include <base/hash_ctxt.h>
 #include <engine/shared/packer.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
 	0xe0, 0x5d, 0xda, 0xaa, 0xc4, 0xe6, 0x4c, 0xfb,

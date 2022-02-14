@@ -18,7 +18,7 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/version.h>
-#include <string.h>
+#include <cstring>
 
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>

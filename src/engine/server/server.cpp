@@ -48,7 +48,7 @@
 #include <windows.h>
 #endif
 
-#include <signal.h>
+#include <csignal>
 
 volatile sig_atomic_t InterruptSignaled = 0;
 

@@ -4,7 +4,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <mastersrv/mastersrv.h>
-#include <stdlib.h> //rand
+#include <cstdlib> //rand
 
 CNetServer *pNet;
 

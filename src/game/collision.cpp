@@ -8,7 +8,7 @@
 
 #include <engine/kernel.h>
 #include <engine/map.h>
-#include <math.h>
+#include <cmath>
 
 #include <game/collision.h>
 #include <game/layers.h>

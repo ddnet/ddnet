@@ -24,7 +24,7 @@
 
 #include <engine/shared/image_manipulation.h>
 
-#include <math.h> // cosf, sinf, log2f
+#include <cmath> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"

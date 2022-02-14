@@ -6,7 +6,7 @@
 #include <climits>
 #include <new>
 
-#include <stdarg.h>
+#include <cstdarg>
 #include <tuple>
 
 #include <base/hash_ctxt.h>

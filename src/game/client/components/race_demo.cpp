@@ -1,6 +1,6 @@
 /* (c) Redix and Sushi */
 
-#include <ctype.h>
+#include <cctype>
 
 #include <base/system.h>
 #include <engine/serverbrowser.h>

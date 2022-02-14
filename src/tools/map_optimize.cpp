@@ -5,7 +5,7 @@
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
-#include <stdint.h>
+#include <cstdint>
 #include <utility>
 #include <vector>
 
