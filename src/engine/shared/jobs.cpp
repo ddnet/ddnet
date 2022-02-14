@@ -19,8 +19,7 @@ IJob &IJob::operator=(const IJob &Other)
 }
 
 IJob::~IJob()
-{
-}
+= default;
 
 int IJob::Status()
 {

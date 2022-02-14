@@ -4,8 +4,7 @@
 #include <engine/storage.h>
 
 CMap::CMap()
-{
-}
+= default;
 
 void *CMap::GetData(int Index)
 {

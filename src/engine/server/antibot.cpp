@@ -196,8 +196,7 @@ CAntibot::CAntibot() :
 {
 }
 CAntibot::~CAntibot()
-{
-}
+= default;
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();

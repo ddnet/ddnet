@@ -16,7 +16,7 @@ struct CSqlExecData
 		CDbConnectionPool::FWrite pFunc,
 		std::unique_ptr<const ISqlData> pThreadData,
 		const char *pName);
-	~CSqlExecData() {}
+	~CSqlExecData() = default;
 
 	enum
 	{
@@ -64,8 +64,7 @@ CDbConnectionPool::CDbConnectionPool() :
 }
 
 CDbConnectionPool::~CDbConnectionPool()
-{
-}
+= default;
 
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {

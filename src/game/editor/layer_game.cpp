@@ -10,8 +10,7 @@ CLayerGame::CLayerGame(int w, int h) :
 }
 
 CLayerGame::~CLayerGame()
-{
-}
+= default;
 
 CTile CLayerGame::GetTile(int x, int y)
 {

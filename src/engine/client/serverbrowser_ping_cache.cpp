@@ -13,7 +13,7 @@ class CServerBrowserPingCache : public IServerBrowserPingCache
 {
 public:
 	CServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage);
-	virtual ~CServerBrowserPingCache() {}
+	virtual ~CServerBrowserPingCache() = default;
 
 	void Load();
 

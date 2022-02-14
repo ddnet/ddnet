@@ -10,8 +10,7 @@
 #include <engine/storage.h>
 
 CHostLookup::CHostLookup()
-{
-}
+= default;
 
 CHostLookup::CHostLookup(const char *pHostname, int Nettype)
 {

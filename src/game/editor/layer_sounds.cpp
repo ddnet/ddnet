@@ -13,8 +13,7 @@ CLayerSounds::CLayerSounds()
 }
 
 CLayerSounds::~CLayerSounds()
-{
-}
+= default;
 
 void CLayerSounds::Render(bool Tileset)
 {

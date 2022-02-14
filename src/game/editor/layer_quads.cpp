@@ -18,8 +18,7 @@ CLayerQuads::CLayerQuads()
 }
 
 CLayerQuads::~CLayerQuads()
-{
-}
+= default;
 
 void CLayerQuads::Render(bool QuadPicker)
 {
