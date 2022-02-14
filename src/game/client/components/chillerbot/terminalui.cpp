@@ -123,6 +123,7 @@ int CTerminalUI::CursesTick()
 	LogDraw();
 	InfoDraw();
 	RenderServerList();
+	RenderDownload();
 	RenderHelpPage();
 
 	int input = GetInput(); // calls InputDraw()
@@ -332,9 +333,6 @@ void CTerminalUI::OnRender()
 	if(cl_InterruptSignaled)
 		Console()->ExecuteLine("quit");
 
-	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
-		"selectedServer=%d/%d",
-		m_SelectedServer, m_NumServers);
 	if(!m_pClient->m_Snap.m_pLocalCharacter)
 		return;
 	RenderScoreboard(0, g_pLogWindow);
@@ -344,6 +342,67 @@ void CTerminalUI::OnRender()
 		"%.2f %.2f scoreboard=%d",
 		X / 32, Y / 32,
 		m_ScoreboardActive);
+}
+
+void CTerminalUI::RenderDownload()
+{
+	if(Client()->State() != IClient::STATE_LOADING)
+		return;
+	if(Client()->MapDownloadAmount() == -1)
+		return;
+	if(Client()->MapDownloadTotalsize() == -1)
+		return;
+
+	int mx = getmaxx(g_pLogWindow);
+	int my = getmaxy(g_pLogWindow);
+	int offY = 5;
+	int offX = 2;
+	if(my < 20)
+		offY = 2;
+	int width = minimum(128, mx - 3);
+
+	int Download = (Client()->MapDownloadAmount() * width) / Client()->MapDownloadTotalsize();
+	// str_format(g_aInfoStr, sizeof(g_aInfoStr),
+	// 	"download=%d%% (%d/%d KiB)",
+	// 	Download,
+	// 	Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024);
+
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, 3);
+	DrawBorders(g_pLogWindow, offX, offY + 1, width, 3);
+
+	char aProgress[512];
+	for(auto &Progress : aProgress)
+		Progress = '#';
+	if(Download > 0 && Download < width)
+		aProgress[Download] = '\0';
+	aProgress[width - 2] = '\0';
+	char aBuf[1024];
+	str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aProgress);
+	aBuf[mx - 2] = '\0'; // ensure no line wrapping
+	mvwprintw(g_pLogWindow, offY, offX, "%s", aBuf);
+	char aMapName[128];
+	str_format(aMapName, sizeof(aMapName), "Downloading map %s ", Client()->MapDownloadName());
+	if(str_length(aMapName) + 24 < width)
+	{
+		str_format(
+			aProgress,
+			sizeof(aProgress),
+			"%d%% (%d/%d KiB)",
+			Download,
+			Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024);
+		str_append(aMapName, aProgress, sizeof(aMapName));
+	}
+	aMapName[width - 2] = '\0';
+	str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aMapName);
+	aBuf[mx - 2] = '\0'; // ensure no line wrapping
+	mvwprintw(g_pLogWindow, offY + 2, offX, "%s", aBuf);
+	static int LastDownload = Download;
+	if(LastDownload != Download)
+	{
+		LastDownload = Download;
+		m_NewInput = false;
+		gs_NeedLogDraw = true;
+	}
 }
 
 int CTerminalUI::GetInput()
