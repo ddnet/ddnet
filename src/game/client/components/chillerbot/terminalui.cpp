@@ -555,6 +555,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		{
 			m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers - 1);
 			gs_NeedLogDraw = true;
+			m_NewInput = true;
 		}
 	}
 	else if(Key == KEY_DOWN)
@@ -564,10 +565,12 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		{
 			m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers - 1);
 			gs_NeedLogDraw = true;
+			m_NewInput = true;
 		}
 	}
 	else if(Key == 'c' && m_RenderServerList)
 	{
+		m_RenderServerList = false;
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedServer);
 		if(pItem && m_pClient->Client()->State() != IClient::STATE_CONNECTING)
 		{
