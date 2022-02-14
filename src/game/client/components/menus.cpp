@@ -2845,3 +2845,50 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 
 	return NewIndex != -1;
 }
+
+void CMenus::DoToolTip(const CUIRect *pNearRect, const char* pText, float WidthHint)
+{
+	if(!UI()->MouseInside(pNearRect))
+		return;
+
+	// TODO: config to disable tooltips?
+
+	const float MARGIN = 5.0f;
+
+	CUIRect Rect;
+	Rect.w = WidthHint;
+	if(WidthHint < 0.0f)
+		Rect.w = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f) + 4.0f;
+	Rect.h = 30.0f;
+	
+	CUIRect *pScreen = UI()->Screen();
+	
+	// Try the top side.
+	if(pNearRect->y - Rect.h - MARGIN > pScreen->y)
+	{
+		Rect.x = UI()->MouseX() - Rect.w / 2.0f;
+		Rect.y = pNearRect->y - Rect.h - MARGIN;
+	}
+	// Try the bottom side.
+	else if(pNearRect->y + pNearRect->h  + MARGIN < pScreen->h)
+	{
+		Rect.x = UI()->MouseX() - Rect.w / 2.0f;
+		Rect.y = pNearRect->y + pNearRect->h + MARGIN;
+	}
+	// Try the right side.
+	else if(pNearRect->x + pNearRect->w + MARGIN + Rect.w < pScreen->w)
+	{
+		Rect.x = pNearRect->x + pNearRect->w + MARGIN;
+		Rect.y = UI()->MouseY() - Rect.h / 2.0f;
+	}
+	// Try the left side.
+	else if(pNearRect->x - Rect.w - MARGIN > pScreen->x)
+	{
+		Rect.x = pNearRect->x - Rect.w - MARGIN;
+		Rect.y = UI()->MouseY() - Rect.h / 2.0f;
+	}
+
+	RenderTools()->DrawUIRect(&Rect, ColorRGBA(0.2, 0.2, 0.2, 0.80f), CUI::CORNER_ALL, 5.0f);
+	Rect.Margin(2.0f, &Rect);
+	UI()->DoLabel(&Rect, pText, 14.0f, TEXTALIGN_LEFT);
+}

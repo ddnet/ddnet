@@ -530,6 +530,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
+	DoToolTip(&DummyLabel, Localize("Toggle to edit your dummy settings."));
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
