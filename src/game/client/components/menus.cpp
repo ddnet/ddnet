@@ -2834,7 +2834,7 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 	return NewIndex != -1;
 }
 
-void CMenus::DoToolTip(const CUIRect *pNearRect, const char* pText, float WidthHint)
+void CMenus::DoToolTip(const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
 	if(!UI()->MouseInside(pNearRect))
 		return;
@@ -2848,9 +2848,9 @@ void CMenus::DoToolTip(const CUIRect *pNearRect, const char* pText, float WidthH
 	if(WidthHint < 0.0f)
 		Rect.w = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f) + 4.0f;
 	Rect.h = 30.0f;
-	
+
 	CUIRect *pScreen = UI()->Screen();
-	
+
 	// Try the top side.
 	if(pNearRect->y - Rect.h - MARGIN > pScreen->y)
 	{
@@ -2858,7 +2858,7 @@ void CMenus::DoToolTip(const CUIRect *pNearRect, const char* pText, float WidthH
 		Rect.y = pNearRect->y - Rect.h - MARGIN;
 	}
 	// Try the bottom side.
-	else if(pNearRect->y + pNearRect->h  + MARGIN < pScreen->h)
+	else if(pNearRect->y + pNearRect->h + MARGIN < pScreen->h)
 	{
 		Rect.x = UI()->MouseX() - Rect.w / 2.0f;
 		Rect.y = pNearRect->y + pNearRect->h + MARGIN;
