@@ -126,7 +126,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		sha256_init(&Sha256Ctxt);
 		unsigned char aBuffer[BUFFER_SIZE];
 
-		while(1)
+		while(true)
 		{
 			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
 			if(Bytes <= 0)
@@ -144,14 +144,14 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	if(sizeof(Header) != io_read(File, &Header, sizeof(Header)))
 	{
 		dbg_msg("datafile", "couldn't load header");
-		return 0;
+		return false;
 	}
 	if(Header.m_aID[0] != 'A' || Header.m_aID[1] != 'T' || Header.m_aID[2] != 'A' || Header.m_aID[3] != 'D')
 	{
 		if(Header.m_aID[0] != 'D' || Header.m_aID[1] != 'A' || Header.m_aID[2] != 'T' || Header.m_aID[3] != 'A')
 		{
 			dbg_msg("datafile", "wrong signature. %x %x %x %x", Header.m_aID[0], Header.m_aID[1], Header.m_aID[2], Header.m_aID[3]);
-			return 0;
+			return false;
 		}
 	}
 
@@ -161,7 +161,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	if(Header.m_Version != 3 && Header.m_Version != 4)
 	{
 		dbg_msg("datafile", "wrong version. version=%x", Header.m_Version);
-		return 0;
+		return false;
 	}
 
 	// read in the rest except the data

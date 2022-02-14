@@ -88,7 +88,7 @@ int str_utf8_comp_confusable(const char *str1, const char *str2)
 	str_utf8_skeleton_begin(&skel1, str1);
 	str_utf8_skeleton_begin(&skel2, str2);
 
-	while(1)
+	while(true)
 	{
 		int ch1 = str_utf8_skeleton_next(&skel1);
 		int ch2 = str_utf8_skeleton_next(&skel2);

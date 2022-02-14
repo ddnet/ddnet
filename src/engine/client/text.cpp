@@ -264,7 +264,7 @@ class CTextRender : public IEngineTextRender
 	int WordLength(const char *pText)
 	{
 		const char *pCursor = pText;
-		while(1)
+		while(true)
 		{
 			if(*pCursor == 0)
 				return pCursor - pText;

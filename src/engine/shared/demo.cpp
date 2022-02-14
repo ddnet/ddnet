@@ -152,7 +152,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	else
 	{
 		// write map data
-		while(1)
+		while(true)
 		{
 			unsigned char aChunk[1024 * 64];
 			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
@@ -487,7 +487,7 @@ void CDemoPlayer::ScanFile()
 	StartPos = io_tell(m_File);
 	m_Info.m_SeekablePoints = 0;
 
-	while(1)
+	while(true)
 	{
 		long CurrentPos = io_tell(m_File);
 
@@ -554,7 +554,7 @@ void CDemoPlayer::DoTick()
 	if(m_UpdateIntraTimesFunc)
 		m_UpdateIntraTimesFunc();
 
-	while(1)
+	while(true)
 	{
 		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
 		{
@@ -672,7 +672,7 @@ void CDemoPlayer::DoTick()
 
 void CDemoPlayer::Pause()
 {
-	m_Info.m_Info.m_Paused = 1;
+	m_Info.m_Info.m_Paused = true;
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
 		IVideo::Current()->Pause(true);
@@ -685,7 +685,7 @@ void CDemoPlayer::Unpause()
 	{
 		/*m_Info.start_tick = m_Info.current_tick;
 		m_Info.start_time = time_get();*/
-		m_Info.m_Info.m_Paused = 0;
+		m_Info.m_Info.m_Paused = false;
 	}
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
@@ -991,7 +991,7 @@ int CDemoPlayer::Update(bool RealTime)
 		int64_t Freq = time_freq();
 		m_Info.m_CurrentTime += (int64_t)(Deltatime * (double)m_Info.m_Info.m_Speed);
 
-		while(1)
+		while(true)
 		{
 			int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
 

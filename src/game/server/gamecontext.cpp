@@ -3872,7 +3872,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 		pName = pStr;
 		char *pDst = pStr; // we might have to process escape data
-		while(1)
+		while(true)
 		{
 			if(pStr[0] == '"')
 			{
@@ -3911,7 +3911,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 	else
 	{
 		pName = pStr;
-		while(1)
+		while(true)
 		{
 			if(pStr[0] == 0)
 			{

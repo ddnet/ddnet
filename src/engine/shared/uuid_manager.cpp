@@ -67,7 +67,7 @@ int ParseUuid(CUuid *pUuid, const char *pBuffer)
 		return 1;
 	}
 	aCopy[8] = aCopy[13] = aCopy[18] = aCopy[23] = 0;
-	if(0 ||
+	if(false ||
 		str_hex_decode(pUuid->m_aData + 0, 4, aCopy + 0) ||
 		str_hex_decode(pUuid->m_aData + 4, 2, aCopy + 9) ||
 		str_hex_decode(pUuid->m_aData + 6, 2, aCopy + 14) ||

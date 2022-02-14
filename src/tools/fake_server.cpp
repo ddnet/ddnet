@@ -116,7 +116,7 @@ static int Run()
 	if(!pNet->Open(BindAddr, 0, 0, 0, 0))
 		return 0;
 
-	while(1)
+	while(true)
 	{
 		CNetChunk p;
 		pNet->Update();

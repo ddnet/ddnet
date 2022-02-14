@@ -159,7 +159,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 
 	pStr = pResult->m_pArgsStart;
 
-	while(1)
+	while(true)
 	{
 		if(!Command)
 			break;
@@ -198,7 +198,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				pResult->AddArgument(pStr);
 
 				pDst = pStr; // we might have to process escape data
-				while(1)
+				while(true)
 				{
 					if(pStr[0] == '"')
 						break;

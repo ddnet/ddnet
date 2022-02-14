@@ -369,8 +369,8 @@ void CCharacter::FireWeapon()
 				ProjStartPos, //Pos
 				Direction, //Dir
 				Lifetime, //Span
-				0, //Freeze
-				0, //Explosive
+				false, //Freeze
+				false, //Explosive
 				0, //Force
 				-1 //SoundImpact
 			);
@@ -397,8 +397,8 @@ void CCharacter::FireWeapon()
 					ProjStartPos, //Pos
 					vec2(cosf(a), sinf(a)) * Speed, //Dir
 					(int)(GameWorld()->GameTickSpeed() * Tuning()->m_ShotgunLifetime), //Span
-					0, //Freeze
-					0, //Explosive
+					false, //Freeze
+					false, //Explosive
 					0, //Force
 					-1 //SoundImpact
 				);
@@ -424,7 +424,7 @@ void CCharacter::FireWeapon()
 			ProjStartPos, //Pos
 			Direction, //Dir
 			Lifetime, //Span
-			0, //Freeze
+			false, //Freeze
 			true, //Explosive
 			0, //Force
 			SOUND_GRENADE_EXPLODE //SoundImpact
@@ -1064,7 +1064,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
 	m_ProximityRadius = ms_PhysSize;
-	m_Core.m_LeftWall = 1;
+	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
@@ -1101,8 +1101,8 @@ void CCharacter::ResetPrediction()
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_FreezeTick = 0;
-	m_DeepFreeze = 0;
-	m_LiveFreeze = 0;
+	m_DeepFreeze = false;
+	m_LiveFreeze = false;
 	m_FrozenLastTick = false;
 	m_Super = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)

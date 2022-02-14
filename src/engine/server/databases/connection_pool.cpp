@@ -132,7 +132,7 @@ void CDbConnectionPool::Worker()
 	// enter fail mode when a sql request fails, skip read request during it and
 	// write to the backup database until all requests are handled
 	bool FailMode = false;
-	while(1)
+	while(true)
 	{
 		if(FailMode && m_NumElem.GetApproximateValue() == 0)
 		{

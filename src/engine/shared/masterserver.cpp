@@ -155,7 +155,7 @@ public:
 
 		CLineReader LineReader;
 		LineReader.Init(File);
-		while(1)
+		while(true)
 		{
 			CMasterInfo Info = {{0}};
 			const char *pLine = LineReader.Get();

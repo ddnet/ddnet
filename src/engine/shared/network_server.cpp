@@ -627,7 +627,7 @@ static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
 */
 int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 {
-	while(1)
+	while(true)
 	{
 		NETADDR Addr;
 
