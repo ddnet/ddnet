@@ -3794,6 +3794,35 @@ int secure_random_init()
 #endif
 }
 
+int secure_random_uninit()
+{
+	if(!secure_random_data.initialized)
+	{
+		return 0;
+	}
+#if defined(CONF_FAMILY_WINDOWS)
+	if(CryptReleaseContext(secure_random_data.provider, 0))
+	{
+		secure_random_data.initialized = 0;
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+#else
+	if(!io_close(secure_random_data.urandom))
+	{
+		secure_random_data.initialized = 0;
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+#endif
+}
+
 void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";

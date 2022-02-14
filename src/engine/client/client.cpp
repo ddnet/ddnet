@@ -4415,6 +4415,7 @@ int main(int argc, const char **argv) // ignore_convention
 	free(pClient);
 
 	NotificationsUninit();
+	secure_random_uninit();
 
 	if(Restarting)
 	{

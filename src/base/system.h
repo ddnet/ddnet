@@ -2295,6 +2295,16 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 int secure_random_init();
 
 /*
+	Function: secure_random_uninit
+		Uninitializes the secure random module.
+
+	Returns:
+		0 - Uninitialization succeeded.
+		1 - Uninitialization failed.
+*/
+int secure_random_uninit();
+
+/*
 	Function: secure_random_password
 		Fills the buffer with the specified amount of random password
 		characters.
