@@ -45,8 +45,7 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_CurrentRecord = 0;
 }
 
-IGameController::~IGameController()
-= default;
+IGameController::~IGameController() = default;
 
 void IGameController::DoActivityCheck()
 {

@@ -6,6 +6,7 @@
 #include "teeinfo.h"
 #include <antibot/antibot_data.h>
 #include <base/math.h>
+#include <cstring>
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/map.h>
@@ -18,7 +19,6 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/version.h>
-#include <cstring>
 
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>

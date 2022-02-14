@@ -63,8 +63,7 @@ CDbConnectionPool::CDbConnectionPool() :
 	thread_init_and_detach(CDbConnectionPool::Worker, this, "database worker thread");
 }
 
-CDbConnectionPool::~CDbConnectionPool()
-= default;
+CDbConnectionPool::~CDbConnectionPool() = default;
 
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {

@@ -201,8 +201,7 @@ CHead::CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
 {
 }
 
-CHead::~CHead()
-= default;
+CHead::~CHead() = default;
 
 bool CHead::AfterInit(void *pCurl)
 {

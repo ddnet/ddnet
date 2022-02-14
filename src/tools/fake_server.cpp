@@ -1,10 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
+#include <cstdlib> //rand
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <mastersrv/mastersrv.h>
-#include <cstdlib> //rand
 
 CNetServer *pNet;
 

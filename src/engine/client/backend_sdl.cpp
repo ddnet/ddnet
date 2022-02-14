@@ -193,8 +193,7 @@ void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::S
 #endif
 }
 
-CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
-= default;
+CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL() = default;
 
 bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {

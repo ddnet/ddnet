@@ -3,8 +3,7 @@
 #include "map.h"
 #include <engine/storage.h>
 
-CMap::CMap()
-= default;
+CMap::CMap() = default;
 
 void *CMap::GetData(int Index)
 {
