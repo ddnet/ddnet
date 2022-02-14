@@ -21,10 +21,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	InitTeleporter();
 }
 
-CGameControllerDDRace::~CGameControllerDDRace()
-{
-	// Nothing to clean
-}
+CGameControllerDDRace::~CGameControllerDDRace() = default;
 
 CScore *CGameControllerDDRace::Score()
 {

@@ -14,7 +14,7 @@ class CSaveTee
 {
 public:
 	CSaveTee();
-	~CSaveTee();
+	~CSaveTee() = default;
 	void Save(CCharacter *pchr);
 	void Load(CCharacter *pchr, int Team, bool IsSwap = false);
 	char *GetString(const CSaveTeam *pTeam);

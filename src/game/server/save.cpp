@@ -12,8 +12,7 @@
 CSaveTee::CSaveTee()
 = default;
 
-CSaveTee::~CSaveTee()
-= default;
+
 
 void CSaveTee::Save(CCharacter *pChr)
 {
