@@ -2848,7 +2848,19 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 
 void CMenus::DoToolTip(const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
+	static int64_t HoverTime = -1;
+
 	if(!UI()->MouseInside(pNearRect))
+	{
+		HoverTime = -1;
+		return;
+	}
+
+	if(HoverTime == -1)
+		HoverTime = time_get();
+
+	// Delay tooltip until 1 second passed.
+	if(HoverTime > time_get() - time_freq())
 		return;
 
 	// TODO: config to disable tooltips?
