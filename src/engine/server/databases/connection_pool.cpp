@@ -3,6 +3,8 @@
 
 #include <engine/console.h>
 
+#include <memory>
+
 // helper struct to hold thread data
 struct CSqlExecData
 {
@@ -86,7 +88,7 @@ void CDbConnectionPool::Execute(
 	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pSqlRequestData), pName));
+	m_aTasks[FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.Signal();
 }
@@ -96,7 +98,7 @@ void CDbConnectionPool::ExecuteWrite(
 	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pSqlRequestData), pName));
+	m_aTasks[FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.Signal();
 }

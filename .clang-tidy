@@ -41,6 +41,7 @@ Checks: >
   -misc-static-assert,
   -misc-unused-parameters,
   modernize-loop-convert,
+  modernize-make-unique,
   readability-*,
   -readability-braces-around-statements,
   -readability-convert-member-functions-to-static,
