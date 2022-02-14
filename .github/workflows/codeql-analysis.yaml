@@ -55,7 +55,7 @@ jobs:
       run: |
        mkdir release
        cd release
-       cmake -G "Ninja" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
+       cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
        cmake --build . --config RelWithDebInfo --target everything
 
     - name: Perform CodeQL Analysis
