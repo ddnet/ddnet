@@ -1553,6 +1553,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   steam.h
   storage.h
   textrender.h
+  textrender_null.h
   updater.h
   uuid.h
   warning.h

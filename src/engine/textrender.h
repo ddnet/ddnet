@@ -62,6 +62,91 @@ enum ETextCursorCursorMode
 	TEXT_CURSOR_CURSOR_MODE_SET,
 };
 
+struct STextCharQuadVertexColor
+{
+	unsigned char m_R, m_G, m_B, m_A;
+};
+
+struct STextCharQuadVertex
+{
+	STextCharQuadVertex()
+	{
+		m_Color.m_R = m_Color.m_G = m_Color.m_B = m_Color.m_A = 255;
+	}
+	float m_X, m_Y;
+	// do not use normalized floats as coordinates, since the texture might grow
+	float m_U, m_V;
+	STextCharQuadVertexColor m_Color;
+};
+
+struct STextCharQuad
+{
+	STextCharQuadVertex m_Vertices[4];
+};
+
+struct STextString
+{
+	int m_QuadBufferObjectIndex;
+	int m_QuadBufferContainerIndex;
+	size_t m_QuadNum;
+	int m_SelectionQuadContainerIndex;
+
+	std::vector<STextCharQuad> m_CharacterQuads;
+};
+
+struct STextContainer
+{
+	STextContainer() { Reset(); }
+
+	CFont *m_pFont;
+	int m_FontSize;
+	STextString m_StringInfo;
+
+	// keep these values to calculate offsets
+	float m_AlignedStartX;
+	float m_AlignedStartY;
+	float m_X;
+	float m_Y;
+
+	int m_Flags;
+	int m_LineCount;
+	int m_GlyphCount;
+	int m_CharCount;
+	int m_MaxLines;
+
+	float m_StartX;
+	float m_StartY;
+	float m_LineWidth;
+	float m_UnscaledFontSize;
+
+	int m_RenderFlags;
+
+	bool m_HasCursor;
+	bool m_HasSelection;
+
+	void Reset()
+	{
+		m_pFont = NULL;
+		m_FontSize = 0;
+
+		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = -1;
+		m_StringInfo.m_QuadNum = 0;
+		m_StringInfo.m_CharacterQuads.clear();
+
+		m_AlignedStartX = m_AlignedStartY = m_X = m_Y = 0.f;
+		m_Flags = m_LineCount = m_CharCount = m_GlyphCount = 0;
+		m_MaxLines = -1;
+		m_StartX = m_StartY = 0.f;
+		m_LineWidth = -1.f;
+		m_UnscaledFontSize = 0.f;
+
+		m_RenderFlags = 0;
+
+		m_HasCursor = false;
+		m_HasSelection = false;
+	}
+};
+
 class CTextCursor
 {
 public:
