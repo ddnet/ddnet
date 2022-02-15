@@ -24,7 +24,7 @@
 
 #include <engine/shared/image_manipulation.h>
 
-#include <math.h> // cosf, sinf, log2f
+#include <cmath> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"
@@ -1252,7 +1252,7 @@ int CGraphics_Threaded::CreateQuadContainer(bool AutomaticUpload)
 	if(m_FirstFreeQuadContainer == -1)
 	{
 		Index = m_QuadContainers.size();
-		m_QuadContainers.push_back(SQuadContainer(AutomaticUpload));
+		m_QuadContainers.emplace_back(AutomaticUpload);
 	}
 	else
 	{
@@ -1293,7 +1293,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				SBufferContainerInfo Info;
 				Info.m_Stride = sizeof(CCommandBuffer::SVertex);
 
-				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				Info.m_Attributes.emplace_back();
 				SBufferContainerInfo::SAttribute *pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
@@ -1301,7 +1301,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_pOffset = 0;
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				Info.m_Attributes.emplace_back();
 				pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
@@ -1309,7 +1309,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				Info.m_Attributes.emplace_back();
 				pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 4;
 				pAttr->m_FuncType = 0;
@@ -1333,7 +1333,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 
 	for(int i = 0; i < Num; ++i)
 	{
-		Container.m_Quads.push_back(SQuadContainer::SQuad());
+		Container.m_Quads.emplace_back();
 		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X;
@@ -1379,7 +1379,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 
 	for(int i = 0; i < Num; ++i)
 	{
-		Container.m_Quads.push_back(SQuadContainer::SQuad());
+		Container.m_Quads.emplace_back();
 		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X0;
@@ -1946,7 +1946,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	if(m_FirstFreeVertexArrayInfo == -1)
 	{
 		Index = m_VertexArrayInfo.size();
-		m_VertexArrayInfo.push_back(SVertexArrayInfo());
+		m_VertexArrayInfo.emplace_back();
 	}
 	else
 	{
@@ -2420,7 +2420,7 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
 {
-	m_ResizeListeners.push_back(SWindowResizeListener(pFunc, pUser));
+	m_ResizeListeners.emplace_back(pFunc, pUser);
 }
 
 int CGraphics_Threaded::GetWindowScreen()

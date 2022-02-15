@@ -1,12 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cctype>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 #include "system.h"
 #if !defined(CONF_PLATFORM_MACOS)
@@ -24,7 +24,7 @@
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-#include <signal.h>
+#include <csignal>
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
@@ -32,7 +32,7 @@
 
 /* unix net includes */
 #include <arpa/inet.h>
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -566,7 +566,7 @@ static void aio_thread(void *user)
 	ASYNCIO *aio = (ASYNCIO *)user;
 
 	lock_wait(aio->lock);
-	while(1)
+	while(true)
 	{
 		struct BUFFERS buffers;
 		int result_io_error;
@@ -1356,7 +1356,7 @@ static int parse_int(int *out, const char **str)
 	i = **str - '0';
 	(*str)++;
 
-	while(1)
+	while(true)
 	{
 		if(**str < '0' || **str > '9')
 		{
@@ -2736,7 +2736,7 @@ void str_clean_whitespaces(char *str_in)
 		read++;
 
 	/* end of read string is detected in the loop */
-	while(1)
+	while(true)
 	{
 		/* skip whitespace */
 		int found_whitespace = 0;
@@ -3448,7 +3448,7 @@ int str_utf8_decode(const char **ptr)
 	int utf8_code_point = 0;
 	int utf8_bytes_seen = 0;
 	int utf8_bytes_needed = 0;
-	while(1)
+	while(true)
 	{
 		unsigned char byte = str_byte_next(ptr);
 		if(utf8_bytes_needed == 0)
@@ -3913,7 +3913,7 @@ int secure_rand_below(int below)
 {
 	unsigned int mask = find_next_power_of_two_minus_one(below);
 	dbg_assert(below > 0, "below must be positive");
-	while(1)
+	while(true)
 	{
 		unsigned int n;
 		secure_random_fill(&n, sizeof(n));
@@ -4063,7 +4063,7 @@ int os_version_str(char *version, int length)
 			*newline = 0;
 		}
 		str_format(extra, sizeof(extra), "; %s", buf + offset + 12);
-	} while(0);
+	} while(false);
 
 	str_format(version, length, "%s %s (%s, %s)%s", u.sysname, u.release, u.machine, u.version, extra);
 	return 0;

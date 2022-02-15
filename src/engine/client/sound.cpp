@@ -21,7 +21,7 @@ extern "C" {
 #include <opusfile.h>
 #include <wavpack.h>
 }
-#include <math.h>
+#include <cmath>
 
 enum
 {

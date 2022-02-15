@@ -4,9 +4,9 @@
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
+#include <cstdio>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-#include <stdio.h>
 #include <string>
 #include <vector>
 
@@ -42,18 +42,18 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 			if(pCompiler->m_OpenGLVersionMajor == 3)
 			{
 				if(pCompiler->m_OpenGLVersionMinor == 0)
-					Lines.push_back(std::string("#version 130 \r\n"));
+					Lines.emplace_back("#version 130 \r\n");
 				if(pCompiler->m_OpenGLVersionMinor == 1)
-					Lines.push_back(std::string("#version 140 \r\n"));
+					Lines.emplace_back("#version 140 \r\n");
 				if(pCompiler->m_OpenGLVersionMinor == 2)
-					Lines.push_back(std::string("#version 150 \r\n"));
+					Lines.emplace_back("#version 150 \r\n");
 			}
 			else if(pCompiler->m_OpenGLVersionMajor == 2)
 			{
 				if(pCompiler->m_OpenGLVersionMinor == 0)
-					Lines.push_back(std::string("#version 110 \r\n"));
+					Lines.emplace_back("#version 110 \r\n");
 				if(pCompiler->m_OpenGLVersionMinor == 1)
-					Lines.push_back(std::string("#version 120 \r\n"));
+					Lines.emplace_back("#version 120 \r\n");
 			}
 		}
 
@@ -61,14 +61,14 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		{
 			if(Type == GL_FRAGMENT_SHADER)
 			{
-				Lines.push_back("precision highp float; \r\n");
-				Lines.push_back("precision highp sampler2D; \r\n");
-				Lines.push_back("precision highp sampler3D; \r\n");
-				Lines.push_back("precision highp samplerCube; \r\n");
-				Lines.push_back("precision highp samplerCubeShadow; \r\n");
-				Lines.push_back("precision highp sampler2DShadow; \r\n");
-				Lines.push_back("precision highp sampler2DArray; \r\n");
-				Lines.push_back("precision highp sampler2DArrayShadow; \r\n");
+				Lines.emplace_back("precision highp float; \r\n");
+				Lines.emplace_back("precision highp sampler2D; \r\n");
+				Lines.emplace_back("precision highp sampler3D; \r\n");
+				Lines.emplace_back("precision highp samplerCube; \r\n");
+				Lines.emplace_back("precision highp samplerCubeShadow; \r\n");
+				Lines.emplace_back("precision highp sampler2DShadow; \r\n");
+				Lines.emplace_back("precision highp sampler2DArray; \r\n");
+				Lines.emplace_back("precision highp sampler2DArrayShadow; \r\n");
 			}
 		}
 
@@ -79,7 +79,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 		if(Type == GL_FRAGMENT_SHADER && !IsNewOpenGL && pCompiler->m_OpenGLVersionMajor <= 3 && pCompiler->m_HasTextureArray)
 		{
-			Lines.push_back(std::string("#extension GL_EXT_texture_array : enable\r\n"));
+			Lines.emplace_back("#extension GL_EXT_texture_array : enable\r\n");
 		}
 
 		CLineReader LineReader;

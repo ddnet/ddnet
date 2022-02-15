@@ -1824,7 +1824,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 	{
 		for(int i = m_BufferObjectIndices.size(); i < Index + 1; ++i)
 		{
-			m_BufferObjectIndices.push_back(SBufferObject(0));
+			m_BufferObjectIndices.emplace_back(0);
 		}
 	}
 

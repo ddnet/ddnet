@@ -17,9 +17,7 @@ CLayerQuads::CLayerQuads()
 	m_Image = -1;
 }
 
-CLayerQuads::~CLayerQuads()
-{
-}
+CLayerQuads::~CLayerQuads() = default;
 
 void CLayerQuads::Render(bool QuadPicker)
 {

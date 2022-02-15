@@ -5,9 +5,9 @@
 
 #include "hash_ctxt.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 
 typedef uint32_t u32;
 typedef uint64_t u64;

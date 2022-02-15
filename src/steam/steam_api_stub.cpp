@@ -2,7 +2,7 @@
 
 #include <steam/steam_api_flat.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 extern "C" {
 

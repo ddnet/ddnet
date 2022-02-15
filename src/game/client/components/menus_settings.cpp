@@ -1449,7 +1449,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 class CLanguage
 {
 public:
-	CLanguage() {}
+	CLanguage() = default;
 	CLanguage(const char *n, const char *f, int Code) :
 		m_Name(n), m_FileName(f), m_CountryCode(Code) {}
 

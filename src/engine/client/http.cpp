@@ -8,7 +8,7 @@
 #include <game/version.h>
 
 #if !defined(CONF_FAMILY_WINDOWS)
-#include <signal.h>
+#include <csignal>
 #endif
 
 #define WIN32_LEAN_AND_MEAN
@@ -201,9 +201,7 @@ CHead::CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
 {
 }
 
-CHead::~CHead()
-{
-}
+CHead::~CHead() = default;
 
 bool CHead::AfterInit(void *pCurl)
 {

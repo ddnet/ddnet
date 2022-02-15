@@ -1,10 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
+#include <cstdlib> //rand
 #include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <mastersrv/mastersrv.h>
-#include <stdlib.h> //rand
 
 CNetServer *pNet;
 
@@ -116,7 +116,7 @@ static int Run()
 	if(!pNet->Open(BindAddr, 0, 0, 0, 0))
 		return 0;
 
-	while(1)
+	while(true)
 	{
 		CNetChunk p;
 		pNet->Update();
