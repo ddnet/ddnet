@@ -61,14 +61,8 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	if((pPlayerInfo->m_Local && ShowDirection == 2) || (!pPlayerInfo->m_Local && ShowDirection >= 1))
 	{
 		const float ShowDirectionImgSize = 22.0f;
-		vec2 ShowDirectionPos;
-		if(g_Config.m_ClShowDirectionBelow)
-			ShowDirectionPos = vec2(Position.x - 11.0f, Position.y + ShowDirectionImgSize);
-		else
-		{
-			YOffset -= ShowDirectionImgSize;
-			ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
-		}
+		YOffset -= ShowDirectionImgSize;
+		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
 
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
 		{
