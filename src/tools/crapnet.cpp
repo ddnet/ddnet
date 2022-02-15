@@ -53,7 +53,7 @@ void Run(unsigned short Port, NETADDR Dest)
 	MMSGS m;
 	net_init_mmsgs(&m);
 
-	while(1)
+	while(true)
 	{
 		static int Lastcfg = 0;
 		int n = ((time_get() / time_freq()) / m_ConfigInterval) % m_ConfigNumpingconfs;
@@ -64,7 +64,7 @@ void Run(unsigned short Port, NETADDR Dest)
 		Lastcfg = n;
 
 		// handle incoming packets
-		while(1)
+		while(true)
 		{
 			// fetch data
 			int DataTrash = 0;
@@ -142,7 +142,7 @@ void Run(unsigned short Port, NETADDR Dest)
 		{*/
 		CPacket *p = 0;
 		CPacket *pNext = m_pFirst;
-		while(1)
+		while(true)
 		{
 			p = pNext;
 			if(!p)

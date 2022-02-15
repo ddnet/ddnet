@@ -5,7 +5,7 @@
 
 #include <base/tl/array.h>
 
-#include <math.h>
+#include <cmath>
 
 #include <base/math.h>
 #include <base/system.h>

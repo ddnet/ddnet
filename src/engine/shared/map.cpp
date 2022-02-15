@@ -3,9 +3,7 @@
 #include "map.h"
 #include <engine/storage.h>
 
-CMap::CMap()
-{
-}
+CMap::CMap() = default;
 
 void *CMap::GetData(int Index)
 {

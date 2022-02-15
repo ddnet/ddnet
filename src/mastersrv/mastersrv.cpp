@@ -380,7 +380,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	dbg_msg("mastersrv", "started");
 
-	while(1)
+	while(true)
 	{
 		m_NetOp.Update();
 		m_NetChecker.Update();

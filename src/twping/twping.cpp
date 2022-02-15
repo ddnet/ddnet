@@ -1,9 +1,9 @@
 #include <base/math.h>
 #include <base/system.h>
+#include <cstdio>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <mastersrv/mastersrv.h>
-#include <stdio.h>
 
 static CNetClient g_NetOp; // main
 

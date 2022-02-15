@@ -72,7 +72,7 @@ void CGLSLProgram::DetachAllShaders()
 {
 	TWGLuint aShaders[100];
 	GLsizei ReturnedCount = 0;
-	while(1)
+	while(true)
 	{
 		glGetAttachedShaders(m_ProgramID, 100, &ReturnedCount, aShaders);
 

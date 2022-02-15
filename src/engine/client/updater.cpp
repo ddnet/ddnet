@@ -7,7 +7,7 @@
 #include <engine/storage.h>
 #include <game/version.h>
 
-#include <stdlib.h> // system
+#include <cstdlib> // system
 
 using std::map;
 using std::string;

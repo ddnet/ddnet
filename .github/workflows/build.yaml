@@ -17,8 +17,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-18.04]
         include:
         - os: ubuntu-latest
-          cmake-args: -G "Unix Makefiles"
-          build-args: --parallel
+          cmake-args: -G Ninja
           package-file: DDNet-*-linux_x86_64.tar.xz
           fancy: true
           env:
@@ -26,7 +25,7 @@ jobs:
             CXXFLAGS: -Werror
         - os: ubuntu-18.04
           cmake-path: /usr/bin/
-          cmake-args: -G "Unix Makefiles"
+          cmake-args: -G Ninja
           package-file: DDNet-*-linux_x86_64.tar.xz
           fancy: false
           env:
@@ -34,8 +33,7 @@ jobs:
             CXXFLAGS: -Werror
             GTEST_FILTER: -*SQLite*
         - os: macOS-latest
-          cmake-args: -G "Unix Makefiles"
-          build-args: --parallel
+          cmake-args: -G Ninja
           package-file: DDNet-*-macos.dmg
           fancy: false
           env:
@@ -59,7 +57,7 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev -y
 
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
@@ -80,7 +78,7 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2 python3
+        brew install pkg-config sdl2 python3 ninja
         brew upgrade freetype
         pip3 install dmgbuild
         sudo rm -rf /Library/Developer/CommandLineTools

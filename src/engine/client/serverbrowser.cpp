@@ -6,7 +6,7 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <limits.h>
+#include <climits>
 
 #include <base/hash_ctxt.h>
 #include <base/math.h>
@@ -1194,7 +1194,7 @@ void CServerBrowser::Update(bool ForceResort)
 
 	CServerEntry *pEntry = m_pFirstReqServer;
 	int Count = 0;
-	while(1)
+	while(true)
 	{
 		if(!pEntry) // no more entries
 			break;
@@ -1223,7 +1223,7 @@ void CServerBrowser::Update(bool ForceResort)
 	{
 		//reset old ones
 		pEntry = m_pFirstReqServer;
-		while(1)
+		while(true)
 		{
 			if(!pEntry) // no more entries
 				break;
@@ -1239,7 +1239,7 @@ void CServerBrowser::Update(bool ForceResort)
 	else if(Count == 0 && m_CurrentMaxRequests == 1) //we reached the limit, just release all left requests. IF a server sends us a packet, a new request will be added automatically, so we can delete all
 	{
 		pEntry = m_pFirstReqServer;
-		while(1)
+		while(true)
 		{
 			if(!pEntry) // no more entries
 				break;

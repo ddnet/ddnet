@@ -1,4 +1,4 @@
-#include <ctype.h>
+#include <cctype>
 #include <list>
 
 #include <base/math.h>

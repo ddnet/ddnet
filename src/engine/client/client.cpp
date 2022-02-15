@@ -6,7 +6,7 @@
 #include <climits>
 #include <new>
 
-#include <stdarg.h>
+#include <cstdarg>
 #include <tuple>
 
 #include <base/hash_ctxt.h>
@@ -376,7 +376,7 @@ CClient::CClient() :
 
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
-	m_LastDummy = 0;
+	m_LastDummy = false;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 
@@ -2518,7 +2518,7 @@ void CClient::Update()
 		{
 			// switch dummy snapshot
 			int64_t Now = m_GameTime[!g_Config.m_ClDummy].Get(time_get());
-			while(1)
+			while(true)
 			{
 				CSnapshotStorage::CHolder *pCur = m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT];
 				int64_t TickStart = (pCur->m_Tick) * time_freq() / 50;
@@ -2557,7 +2557,7 @@ void CClient::Update()
 				Repredict = 1;
 			}
 
-			while(1)
+			while(true)
 			{
 				CSnapshotStorage::CHolder *pCur = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
 				int64_t TickStart = (pCur->m_Tick) * time_freq() / 50;
@@ -2979,7 +2979,7 @@ void CClient::Run()
 	int64_t LastTime = time_get_microseconds();
 	int64_t LastRenderTime = time_get();
 
-	while(1)
+	while(true)
 	{
 		set_new_tick();
 

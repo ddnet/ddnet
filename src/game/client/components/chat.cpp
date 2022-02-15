@@ -683,7 +683,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	if(*p == 0)
 		return;
 
-	auto &&FChatMsgCheckAndPrint = [=](CLine *pLine) {
+	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine) {
 		if(pLine->m_ClientID < 0) // server or client message
 		{
 			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)

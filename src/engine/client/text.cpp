@@ -264,7 +264,7 @@ class CTextRender : public IEngineTextRender
 	int WordLength(const char *pText)
 	{
 		const char *pCursor = pText;
-		while(1)
+		while(true)
 		{
 			if(*pCursor == 0)
 				return pCursor - pText;
@@ -666,7 +666,7 @@ public:
 
 		m_DefaultTextContainerInfo.m_Stride = sizeof(STextCharQuadVertex);
 
-		m_DefaultTextContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		SBufferContainerInfo::SAttribute *pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 2;
 		pAttr->m_FuncType = 0;
@@ -674,7 +674,7 @@ public:
 		pAttr->m_pOffset = 0;
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 		pAttr->m_VertBufferBindingIndex = -1;
-		m_DefaultTextContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 2;
 		pAttr->m_FuncType = 0;
@@ -682,7 +682,7 @@ public:
 		pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 		pAttr->m_VertBufferBindingIndex = -1;
-		m_DefaultTextContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 4;
 		pAttr->m_FuncType = 0;
@@ -1267,7 +1267,7 @@ public:
 					// don't add text that isn't drawn, the color overwrite is used for that
 					if(m_Color.a != 0.f && IsRendered)
 					{
-						TextContainer.m_StringInfo.m_CharacterQuads.push_back(STextCharQuad());
+						TextContainer.m_StringInfo.m_CharacterQuads.emplace_back();
 						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads.back();
 
 						TextCharQuad.m_Vertices[0].m_X = CharX;
@@ -1371,7 +1371,7 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						SelectionQuads.push_back(IGraphics::CQuadItem(SelX, DrawY, SelWidth, Size));
+						SelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
 					}
 
 					LastSelX = SelX;
