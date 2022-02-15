@@ -3,7 +3,7 @@
 
 #include <base/tl/sorted_array.h>
 
-#include <limits.h>
+#include <climits>
 #include <math.h>
 
 #include <game/generated/client_data.h>
