@@ -408,7 +408,7 @@ int CWarList::LoadWarNames(const char *pDir)
 		std::pair<std::string, std::string> Entry;
 		Entry.first = std::string(pLine);
 		Entry.second = std::string(pDir);
-		m_vWarlist.push_back(Entry);
+		m_vWarlist.emplace_back(Entry);
 	}
 
 	io_close(File);
@@ -442,7 +442,7 @@ int CWarList::LoadTeamNames(const char *pFilename)
 	{
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
-		m_vTeamlist.push_back(std::string(pLine));
+		m_vTeamlist.emplace_back(std::string(pLine));
 	}
 
 	io_close(File);
@@ -480,7 +480,7 @@ int CWarList::LoadTraitorNames(const char *pDir)
 		std::pair<std::string, std::string> Entry;
 		Entry.first = std::string(pLine);
 		Entry.second = std::string(pDir);
-		m_vTraitorlist.push_back(Entry);
+		m_vTraitorlist.emplace_back(Entry);
 	}
 
 	io_close(File);
@@ -513,7 +513,7 @@ int CWarList::LoadWarClanNames(const char *pFilename)
 	{
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
-		m_vWarClanlist.push_back(std::string(pLine));
+		m_vWarClanlist.emplace_back(std::string(pLine));
 	}
 
 	io_close(File);
@@ -546,7 +546,7 @@ int CWarList::LoadTeamClanNames(const char *pFilename)
 	{
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
-		m_vTeamClanlist.push_back(std::string(pLine));
+		m_vTeamClanlist.emplace_back(std::string(pLine));
 	}
 
 	io_close(File);
@@ -579,7 +579,7 @@ int CWarList::LoadWarClanPrefixNames(const char *pFilename)
 	{
 		if(!str_skip_whitespaces(pLine)[0])
 			continue;
-		m_vWarClanPrefixlist.push_back(std::string(pLine));
+		m_vWarClanPrefixlist.emplace_back(std::string(pLine));
 	}
 
 	io_close(File);

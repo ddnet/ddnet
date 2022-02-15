@@ -15,10 +15,6 @@ CNetObj_Character *CVibeBot::GetCharacter() const
 	return &m_pClient->m_Snap.m_aCharacters[m_pClient->m_LocalIDs[m_MoveID]].m_Cur;
 }
 
-CVibeBot::CVibeBot()
-{
-}
-
 void CVibeBot::Reset()
 {
 	m_SendData[0] = false;

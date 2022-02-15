@@ -40,7 +40,6 @@ private:
 	void EmoteBotTick();
 
 public:
-	CVibeBot();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	CNetObj_Character *GetCharacter() const;

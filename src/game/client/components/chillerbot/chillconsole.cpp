@@ -4,7 +4,7 @@
 #include <base/tl/sorted_array.h>
 
 #include <climits>
-#include <math.h>
+#include <cmath>
 
 #include <game/generated/client_data.h>
 

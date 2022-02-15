@@ -6,7 +6,7 @@
 
 #include <base/terminalui.h>
 
-#include <signal.h>
+#include <csignal>
 
 #include "terminalui.h"
 
