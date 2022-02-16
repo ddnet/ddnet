@@ -7,7 +7,7 @@
 
 static CNetClient g_NetOp; // main
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
 	NETADDR BindAddr;

@@ -318,7 +318,7 @@ void ReloadBans()
 	m_pConsole->ExecuteFile("master.cfg", -1, true);
 }
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 {
 	int64_t LastBuild = 0, LastBanReload = 0;
 	ServerType Type = SERVERTYPE_INVALID;
@@ -347,8 +347,8 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfigManager->Init();
 	m_pConsole->Init();
 	m_NetBan.Init(m_pConsole, pStorage);
-	if(argc > 1) // ignore_convention
-		m_pConsole->ParseArguments(argc - 1, &argv[1]); // ignore_convention
+	if(argc > 1)
+		m_pConsole->ParseArguments(argc - 1, &argv[1]);
 
 	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
 	{
