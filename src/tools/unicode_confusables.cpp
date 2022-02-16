@@ -1,6 +1,6 @@
 #include <base/system.h>
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
