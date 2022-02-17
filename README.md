@@ -39,4 +39,9 @@
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 - in console
 
-&nbsp;&nbsp;&nbsp;&nbsp;allows any console command to be using in cl_run_on_join 
+&nbsp;&nbsp;&nbsp;&nbsp;allows any console command to be used in cl_run_on_join 
+
+
+**Instalation:**
+
+Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
