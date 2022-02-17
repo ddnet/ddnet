@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <base/math.h>
 #include <base/system.h>
+#include <cstdint>
 #include <engine/shared/datafile.h>
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
-#include <stdint.h>
 #include <utility>
 #include <vector>
 

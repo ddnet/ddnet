@@ -264,7 +264,7 @@ class CTextRender : public IEngineTextRender
 	int WordLength(const char *pText)
 	{
 		const char *pCursor = pText;
-		while(1)
+		while(true)
 		{
 			if(*pCursor == 0)
 				return pCursor - pText;
@@ -514,7 +514,7 @@ class CTextRender : public IEngineTextRender
 			return;
 		}
 
-		pBitmap = &FtFace->glyph->bitmap; // ignore_convention
+		pBitmap = &FtFace->glyph->bitmap;
 
 		unsigned int RealWidth = pBitmap->width;
 		unsigned int RealHeight = pBitmap->rows;
@@ -540,9 +540,9 @@ class CTextRender : public IEngineTextRender
 			// prepare glyph data
 			mem_zero(ms_aGlyphData, Width * Height);
 
-			for(py = 0; py < pBitmap->rows; py++) // ignore_convention
-				for(px = 0; px < pBitmap->width; px++) // ignore_convention
-					ms_aGlyphData[(py + y) * Width + px + x] = pBitmap->buffer[py * pBitmap->width + px]; // ignore_convention
+			for(py = 0; py < pBitmap->rows; py++)
+				for(px = 0; px < pBitmap->width; px++)
+					ms_aGlyphData[(py + y) * Width + px + x] = pBitmap->buffer[py * pBitmap->width + px];
 
 			// upload the glyph
 			while(!GetCharacterSpace(pFont, 0, (int)Width, (int)Height, X, Y))
@@ -571,9 +571,9 @@ class CTextRender : public IEngineTextRender
 			pFontchr->m_Width = Width;
 			pFontchr->m_CharHeight = RealHeight;
 			pFontchr->m_CharWidth = RealWidth;
-			pFontchr->m_OffsetX = (FtFace->glyph->metrics.horiBearingX >> 6); // ignore_convention
+			pFontchr->m_OffsetX = (FtFace->glyph->metrics.horiBearingX >> 6);
 			pFontchr->m_OffsetY = -((FtFace->glyph->metrics.height >> 6) - (FtFace->glyph->metrics.horiBearingY >> 6));
-			pFontchr->m_AdvanceX = (FtFace->glyph->advance.x >> 6); // ignore_convention
+			pFontchr->m_AdvanceX = (FtFace->glyph->advance.x >> 6);
 
 			pFontchr->m_aUVs[0] = X;
 			pFontchr->m_aUVs[1] = Y;
@@ -666,7 +666,7 @@ public:
 
 		m_DefaultTextContainerInfo.m_Stride = sizeof(STextCharQuadVertex);
 
-		m_DefaultTextContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		SBufferContainerInfo::SAttribute *pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 2;
 		pAttr->m_FuncType = 0;
@@ -674,7 +674,7 @@ public:
 		pAttr->m_pOffset = 0;
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 		pAttr->m_VertBufferBindingIndex = -1;
-		m_DefaultTextContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 2;
 		pAttr->m_FuncType = 0;
@@ -682,7 +682,7 @@ public:
 		pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 		pAttr->m_VertBufferBindingIndex = -1;
-		m_DefaultTextContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 4;
 		pAttr->m_FuncType = 0;
@@ -1267,7 +1267,7 @@ public:
 					// don't add text that isn't drawn, the color overwrite is used for that
 					if(m_Color.a != 0.f && IsRendered)
 					{
-						TextContainer.m_StringInfo.m_CharacterQuads.push_back(STextCharQuad());
+						TextContainer.m_StringInfo.m_CharacterQuads.emplace_back();
 						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads.back();
 
 						TextCharQuad.m_Vertices[0].m_X = CharX;
@@ -1371,7 +1371,7 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						SelectionQuads.push_back(IGraphics::CQuadItem(SelX, DrawY, SelWidth, Size));
+						SelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
 					}
 
 					LastSelX = SelX;
@@ -1682,7 +1682,7 @@ public:
 					continue;
 				}
 
-				pBitmap = &pFont->m_FtFace->glyph->bitmap; // ignore_convention
+				pBitmap = &pFont->m_FtFace->glyph->bitmap;
 
 				int SlotW = pBitmap->width;
 				int SlotH = pBitmap->rows;
@@ -1691,12 +1691,12 @@ public:
 				// prepare glyph data
 				mem_zero(ms_aGlyphData, SlotSize);
 
-				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY) // ignore_convention
+				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY)
 				{
-					for(py = 0; py < (unsigned)SlotH; py++) // ignore_convention
+					for(py = 0; py < (unsigned)SlotH; py++)
 						for(px = 0; px < (unsigned)SlotW; px++)
 						{
-							ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py * pBitmap->width + px]; // ignore_convention
+							ms_aGlyphData[(py)*SlotW + px] = pBitmap->buffer[py * pBitmap->width + px];
 						}
 				}
 

@@ -312,23 +312,23 @@ int CInput::Update()
 			// fall through
 		case SDL_MOUSEBUTTONDOWN:
 			if(Event.button.button == SDL_BUTTON_LEFT)
-				Scancode = KEY_MOUSE_1; // ignore_convention
+				Scancode = KEY_MOUSE_1;
 			if(Event.button.button == SDL_BUTTON_RIGHT)
-				Scancode = KEY_MOUSE_2; // ignore_convention
+				Scancode = KEY_MOUSE_2;
 			if(Event.button.button == SDL_BUTTON_MIDDLE)
-				Scancode = KEY_MOUSE_3; // ignore_convention
+				Scancode = KEY_MOUSE_3;
 			if(Event.button.button == SDL_BUTTON_X1)
-				Scancode = KEY_MOUSE_4; // ignore_convention
+				Scancode = KEY_MOUSE_4;
 			if(Event.button.button == SDL_BUTTON_X2)
-				Scancode = KEY_MOUSE_5; // ignore_convention
+				Scancode = KEY_MOUSE_5;
 			if(Event.button.button == 6)
-				Scancode = KEY_MOUSE_6; // ignore_convention
+				Scancode = KEY_MOUSE_6;
 			if(Event.button.button == 7)
-				Scancode = KEY_MOUSE_7; // ignore_convention
+				Scancode = KEY_MOUSE_7;
 			if(Event.button.button == 8)
-				Scancode = KEY_MOUSE_8; // ignore_convention
+				Scancode = KEY_MOUSE_8;
 			if(Event.button.button == 9)
-				Scancode = KEY_MOUSE_9; // ignore_convention
+				Scancode = KEY_MOUSE_9;
 			if(Event.button.button == SDL_BUTTON_LEFT)
 			{
 				if(Event.button.clicks % 2 == 0)
@@ -340,13 +340,13 @@ int CInput::Update()
 
 		case SDL_MOUSEWHEEL:
 			if(Event.wheel.y > 0)
-				Scancode = KEY_MOUSE_WHEEL_UP; // ignore_convention
+				Scancode = KEY_MOUSE_WHEEL_UP;
 			if(Event.wheel.y < 0)
-				Scancode = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
+				Scancode = KEY_MOUSE_WHEEL_DOWN;
 			if(Event.wheel.x > 0)
-				Scancode = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
+				Scancode = KEY_MOUSE_WHEEL_LEFT;
 			if(Event.wheel.x < 0)
-				Scancode = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
+				Scancode = KEY_MOUSE_WHEEL_RIGHT;
 			Action |= IInput::FLAG_RELEASE;
 			break;
 

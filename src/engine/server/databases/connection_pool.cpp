@@ -3,6 +3,8 @@
 
 #include <engine/console.h>
 
+#include <memory>
+
 // helper struct to hold thread data
 struct CSqlExecData
 {
@@ -14,7 +16,7 @@ struct CSqlExecData
 		CDbConnectionPool::FWrite pFunc,
 		std::unique_ptr<const ISqlData> pThreadData,
 		const char *pName);
-	~CSqlExecData() {}
+	~CSqlExecData() = default;
 
 	enum
 	{
@@ -61,9 +63,7 @@ CDbConnectionPool::CDbConnectionPool() :
 	thread_init_and_detach(CDbConnectionPool::Worker, this, "database worker thread");
 }
 
-CDbConnectionPool::~CDbConnectionPool()
-{
-}
+CDbConnectionPool::~CDbConnectionPool() = default;
 
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {
@@ -86,7 +86,7 @@ void CDbConnectionPool::Execute(
 	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pSqlRequestData), pName));
+	m_aTasks[FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.Signal();
 }
@@ -96,7 +96,7 @@ void CDbConnectionPool::ExecuteWrite(
 	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pSqlRequestData), pName));
+	m_aTasks[FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
 	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
 	m_NumElem.Signal();
 }
@@ -130,7 +130,7 @@ void CDbConnectionPool::Worker()
 	// enter fail mode when a sql request fails, skip read request during it and
 	// write to the backup database until all requests are handled
 	bool FailMode = false;
-	while(1)
+	while(true)
 	{
 		if(FailMode && m_NumElem.GetApproximateValue() == 0)
 		{

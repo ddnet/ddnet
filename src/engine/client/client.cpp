@@ -6,7 +6,7 @@
 #include <climits>
 #include <new>
 
-#include <stdarg.h>
+#include <cstdarg>
 #include <tuple>
 
 #include <base/hash_ctxt.h>
@@ -376,7 +376,7 @@ CClient::CClient() :
 
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
-	m_LastDummy = 0;
+	m_LastDummy = false;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 
@@ -2519,7 +2519,7 @@ void CClient::Update()
 		{
 			// switch dummy snapshot
 			int64_t Now = m_GameTime[!g_Config.m_ClDummy].Get(time_get());
-			while(1)
+			while(true)
 			{
 				CSnapshotStorage::CHolder *pCur = m_aSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT];
 				int64_t TickStart = (pCur->m_Tick) * time_freq() / 50;
@@ -2558,7 +2558,7 @@ void CClient::Update()
 				Repredict = 1;
 			}
 
-			while(1)
+			while(true)
 			{
 				CSnapshotStorage::CHolder *pCur = m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
 				int64_t TickStart = (pCur->m_Tick) * time_freq() / 50;
@@ -2854,7 +2854,7 @@ void CClient::Run()
 		}
 
 #ifndef CONF_PLATFORM_ANDROID
-		atexit(SDL_Quit); // ignore_convention
+		atexit(SDL_Quit);
 #endif
 	}
 
@@ -2980,7 +2980,7 @@ void CClient::Run()
 	int64_t LastTime = time_get_microseconds();
 	int64_t LastRenderTime = time_get();
 
-	while(1)
+	while(true)
 	{
 		set_new_tick();
 
@@ -4234,14 +4234,14 @@ void CClient::HandleMapPath(const char *pPath)
 */
 
 #if defined(CONF_PLATFORM_MACOS)
-extern "C" int TWMain(int argc, const char **argv) // ignore_convention
+extern "C" int TWMain(int argc, const char **argv)
 #elif defined(CONF_PLATFORM_ANDROID)
 extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
 extern "C" void InitAndroid();
 
 int SDL_main(int argc, char *argv2[])
 #else
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 #endif
 {
 #if defined(CONF_PLATFORM_ANDROID)
@@ -4251,13 +4251,13 @@ int main(int argc, const char **argv) // ignore_convention
 	bool Silent = false;
 	bool RandInitFailed = false;
 
-	for(int i = 1; i < argc; i++) // ignore_convention
+	for(int i = 1; i < argc; i++)
 	{
-		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0) // ignore_convention
+		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
 		{
 			Silent = true;
 		}
-		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0) // ignore_convention
+		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0)
 		{
 #if defined(CONF_FAMILY_WINDOWS)
 			AllocConsole();
@@ -4284,7 +4284,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, Silent, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv); // ignore_convention
+	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
@@ -4395,8 +4395,8 @@ int main(int argc, const char **argv) // ignore_convention
 		pClient->HandleDemoPath(argv[1]);
 	else if(argc == 2 && str_endswith(argv[1], ".map"))
 		pClient->HandleMapPath(argv[1]);
-	else if(argc > 1) // ignore_convention
-		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]); // ignore_convention
+	else if(argc > 1)
+		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);
 
 	if(pSteam->GetConnectAddress())
 	{
@@ -4416,6 +4416,7 @@ int main(int argc, const char **argv) // ignore_convention
 	free(pClient);
 
 	NotificationsUninit();
+	secure_random_uninit();
 
 	if(Restarting)
 	{

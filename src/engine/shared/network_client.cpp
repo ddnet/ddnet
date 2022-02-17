@@ -57,7 +57,7 @@ int CNetClient::ResetErrorString()
 
 int CNetClient::Recv(CNetChunk *pChunk)
 {
-	while(1)
+	while(true)
 	{
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))

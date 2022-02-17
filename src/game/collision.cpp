@@ -6,9 +6,9 @@
 
 #include <antibot/antibot_data.h>
 
+#include <cmath>
 #include <engine/kernel.h>
 #include <engine/map.h>
-#include <math.h>
 
 #include <game/collision.h>
 #include <game/layers.h>

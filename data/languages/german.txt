@@ -1197,7 +1197,7 @@ Assets directory
 == Assets-Ordner
 
 https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/wiki/Main_Page/de
 
 Saving ddnet-settings.cfg failed
 == ddnet-settings.cfg zu speichern ist fehlgeschlagen

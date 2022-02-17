@@ -1,13 +1,13 @@
 #include <base/math.h>
 #include <base/system.h>
+#include <cstdio>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <mastersrv/mastersrv.h>
-#include <stdio.h>
 
 static CNetClient g_NetOp; // main
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
 	NETADDR BindAddr;

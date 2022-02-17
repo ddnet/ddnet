@@ -9,13 +9,7 @@
 #include "teams.h"
 #include <engine/shared/config.h>
 
-CSaveTee::CSaveTee()
-{
-}
-
-CSaveTee::~CSaveTee()
-{
-}
+CSaveTee::CSaveTee() = default;
 
 void CSaveTee::Save(CCharacter *pChr)
 {

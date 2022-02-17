@@ -18,7 +18,7 @@
 #include <base/detect.h>
 #include <base/math.h>
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "SDL_hints.h"
 #include "SDL_pixels.h"
@@ -193,9 +193,7 @@ void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::S
 #endif
 }
 
-CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
-{
-}
+CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL() = default;
 
 bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
@@ -755,6 +753,11 @@ void CGraphicsBackend_SDL_OpenGL::GetCurrentVideoMode(CVideoMode &CurMode, int H
 	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
 }
 
+CGraphicsBackend_SDL_OpenGL::CGraphicsBackend_SDL_OpenGL()
+{
+	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+}
+
 int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 	// print sdl version
@@ -966,8 +969,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 	// start the command processor
 	m_pProcessor = new CCommandProcessor_SDL_OpenGL(m_BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
 	StartProcessor(m_pProcessor);
-
-	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
 
 	// issue init commands for OpenGL and SDL
 	CCommandBuffer CmdBuffer(1024, 512);

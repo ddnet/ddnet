@@ -17,7 +17,7 @@ void Run(NETADDR Dest)
 		Socket = net_udp_create(BindAddr);
 	}
 
-	while(1)
+	while(true)
 	{
 		unsigned char aData[1024];
 		int Size = 0;

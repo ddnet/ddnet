@@ -182,7 +182,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookPos = m_Pos + TargetDirection * PhysSize * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookedPlayer = -1;
-				m_HookTick = SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
+				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
 				m_TriggeredEvents |= COREEVENT_HOOK_LAUNCH;
 			}
 		}

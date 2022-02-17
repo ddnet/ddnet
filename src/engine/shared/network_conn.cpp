@@ -68,7 +68,7 @@ void CNetConnection::Init(NETSOCKET Socket, bool BlockCloseMsg)
 
 void CNetConnection::AckChunks(int Ack)
 {
-	while(1)
+	while(true)
 	{
 		CNetChunkResend *pResend = m_Buffer.First();
 		if(!pResend)

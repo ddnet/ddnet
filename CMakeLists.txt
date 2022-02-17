@@ -184,12 +184,12 @@ endif()
 
 if(NOT MSVC AND NOT HAIKU)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-    check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
-    if(FLAG_SUPPORTED_std_gnu__11)
+    check_cxx_compiler_flag(-std=gnu++17 FLAG_SUPPORTED_std_gnu__17)
+    if(FLAG_SUPPORTED_std_gnu__17)
       if(CMAKE_CXX_FLAGS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17")
       else()
-        set(CMAKE_CXX_FLAGS -std=gnu++11)
+        set(CMAKE_CXX_FLAGS -std=gnu++17)
       endif()
     endif()
   endif()
@@ -2769,6 +2769,7 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
+    target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
   endif()
   if(OUR_FLAGS_LINK)
     target_link_libraries(${target} ${OUR_FLAGS_LINK})
@@ -2803,7 +2804,7 @@ endforeach()
 
 foreach(target ${TARGETS_OWN})
   if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1) AND NOT TARGET_OS STREQUAL "mac")
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
   endif()
 

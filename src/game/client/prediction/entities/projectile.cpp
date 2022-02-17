@@ -173,7 +173,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj,
 	{
 		m_Owner = -1;
 		m_Bouncing = 0;
-		m_Freeze = 0;
+		m_Freeze = false;
 		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (fabs(1.0f - length(m_Direction)) < 0.015f);
 	}
 	m_Type = pProj->m_Type;

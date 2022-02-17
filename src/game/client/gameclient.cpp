@@ -1074,7 +1074,7 @@ void CGameClient::InvalidateSnapshot()
 
 void CGameClient::OnNewSnapshot()
 {
-	auto &&Evolve = [=](CNetObj_Character *pCharacter, int Tick) {
+	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
 		CWorldCore TempWorld;
 		CCharacterCore TempCore;
 		CTeamsCore TempTeams;
@@ -1344,8 +1344,8 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{
-				static bool s_GameOver = 0;
-				static bool s_GamePaused = 0;
+				static bool s_GameOver = false;
+				static bool s_GamePaused = false;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
 				bool CurrentTickGameOver = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER);
 				if(!s_GameOver && CurrentTickGameOver)
@@ -1813,7 +1813,7 @@ void CGameClient::OnPredict()
 
 	// detect mispredictions of other players and make corrections smoother when possible
 	static vec2 s_aLastPos[MAX_CLIENTS] = {{0, 0}};
-	static bool s_aLastActive[MAX_CLIENTS] = {0};
+	static bool s_aLastActive[MAX_CLIENTS] = {false};
 
 	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && abs(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && abs(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
 	{
@@ -2622,7 +2622,7 @@ int CGameClient::SwitchStateTeam()
 bool CGameClient::IsLocalCharSuper()
 {
 	if(m_Snap.m_LocalClientID < 0)
-		return 0;
+		return false;
 	return m_aClients[m_Snap.m_LocalClientID].m_Super;
 }
 

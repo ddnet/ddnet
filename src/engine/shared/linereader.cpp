@@ -15,7 +15,7 @@ char *CLineReader::Get()
 	unsigned LineStart = m_BufferPos;
 	bool CRLFBreak = false;
 
-	while(1)
+	while(true)
 	{
 		if(m_BufferPos >= m_BufferSize)
 		{
