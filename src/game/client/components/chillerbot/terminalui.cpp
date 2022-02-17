@@ -348,9 +348,9 @@ void CTerminalUI::RenderDownload()
 {
 	if(Client()->State() != IClient::STATE_LOADING)
 		return;
-	if(Client()->MapDownloadAmount() == -1)
+	if(Client()->MapDownloadAmount() < 1)
 		return;
-	if(Client()->MapDownloadTotalsize() == -1)
+	if(Client()->MapDownloadTotalsize() < 1)
 		return;
 
 	int mx = getmaxx(g_pLogWindow);
