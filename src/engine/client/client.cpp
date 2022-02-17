@@ -2099,21 +2099,22 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							CNetMsg_Cl_Say Msg;
-							Msg.m_Team = 0;
-							char aBuf[256];
-							if(g_Config.m_ClRunOnJoin[0])
-							{
-								str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[Conn], g_Config.m_ClRunOnJoin);
-							}
-							else
-							{
-								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
-							}
-							Msg.m_pMessage = aBuf;
-							CMsgPacker Packer(Msg.MsgID(), false);
-							Msg.Pack(&Packer);
-							SendMsg(Conn, &Packer, MSGFLAG_VITAL);
+							m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
+							//CNetMsg_Cl_Say Msg;
+							//Msg.m_Team = 0;
+							//char aBuf[256];
+							//if(g_Config.m_ClRunOnJoin[0])
+							//{
+							//	str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[Conn], g_Config.m_ClRunOnJoin);
+							//}
+							//else
+							//{
+							//	str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
+							//}
+							//Msg.m_pMessage = aBuf;
+							//CMsgPacker Packer(Msg.MsgID(), false);
+							//Msg.Pack(&Packer);
+							//SendMsg(Conn, &Packer, MSGFLAG_VITAL);
 						}
 						m_CodeRunAfterJoin[Conn] = true;
 					}
@@ -2899,8 +2900,7 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort :
-                                                                                               g_Config.m_ClContactPort;
+			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
