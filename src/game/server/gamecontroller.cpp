@@ -278,6 +278,14 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 	if(Index == ENTITY_ARMOR_1)
 		Type = POWERUP_ARMOR;
+	else if(Index == ENTITY_ARMOR_SHOTGUN)
+		Type = POWERUP_ARMOR_SHOTGUN;
+	else if(Index == ENTITY_ARMOR_GRENADE)
+		Type = POWERUP_ARMOR_GRENADE;
+	else if(Index == ENTITY_ARMOR_NINJA)
+		Type = POWERUP_ARMOR_NINJA;
+	else if(Index == ENTITY_ARMOR_LASER)
+		Type = POWERUP_ARMOR_LASER;
 	else if(Index == ENTITY_HEALTH_1)
 		Type = POWERUP_HEALTH;
 	else if(Index == ENTITY_WEAPON_SHOTGUN)

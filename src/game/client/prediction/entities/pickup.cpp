@@ -50,6 +50,61 @@ void CPickup::Tick()
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
 				break;
 
+			case POWERUP_ARMOR_SHOTGUN:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_SHOTGUN))
+				{
+					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
+					pChr->SetWeaponAmmo(WEAPON_SHOTGUN, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_SHOTGUN)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_GRENADE:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_GRENADE))
+				{
+					pChr->SetWeaponGot(WEAPON_GRENADE, false);
+					pChr->SetWeaponAmmo(WEAPON_GRENADE, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_GRENADE)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_NINJA:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				pChr->SetNinjaActivationDir(vec2(0, 0));
+				pChr->SetNinjaActivationTick(-500);
+				pChr->SetNinjaCurrentMoveTime(0);
+				break;
+
+			case POWERUP_ARMOR_LASER:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_LASER))
+				{
+					pChr->SetWeaponGot(WEAPON_LASER, false);
+					pChr->SetWeaponAmmo(WEAPON_LASER, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_LASER)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
 			case POWERUP_WEAPON:
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 					pChr->GiveWeapon(m_Subtype);
