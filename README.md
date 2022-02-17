@@ -2,9 +2,8 @@
 
 Tater's custom ddnet client with some small modifications
 
-Features:
+Features
 	**Display frozen tees in your team on your HUD** 
-
 		cl_frozen_tees_display
 			1 - on
 			2 - on + show skin of frozen tees
