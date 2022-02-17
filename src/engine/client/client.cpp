@@ -1559,7 +1559,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	Result.m_AnyPlayerFlag = DDNet;
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
-	Result.m_SyncWeaponInput = false;
+	Result.m_SyncWeaponInput = true;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
@@ -4556,5 +4556,5 @@ int CClient::MaxLatencyTicks() const
 
 int CClient::PredictionMargin() const
 {
-	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
+	return g_Config.m_ClPredictionMargin;
 }
