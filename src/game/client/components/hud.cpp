@@ -679,9 +679,13 @@ void CHud::RenderTextInfo()
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(StartPos + progressiveOffset, 9.0f + CurrentRow * TeeSize);
 						float Alpha = 1.0f;
-						if(g_Config.m_ClShowFrozenHud == 2.0)
-							Alpha = 0.5f;
-
+						if(g_Config.m_ClShowFrozenHud == 2.0 && Frozen)
+						{
+							Alpha = 0.6f;
+							TeeInfo.m_ColorBody.r *= 0.4;
+							TeeInfo.m_ColorBody.g *= 0.4;
+							TeeInfo.m_ColorBody.b *= 0.4;
+						}
 						if(Frozen)
 							RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(1.0f, 0.0f), TeeRenderPos, Alpha);
 						else
