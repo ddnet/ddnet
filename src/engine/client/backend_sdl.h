@@ -241,6 +241,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
+	CGraphicsBackend_SDL_OpenGL();
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
 
