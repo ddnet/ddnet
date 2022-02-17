@@ -576,76 +576,119 @@ void CHud::RenderTextInfo()
 		TextRender()->Text(0, m_Width - 10 - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 	//render team in freeze text
-	if(true)
+	if(g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0)
 	{
-		int numInTeam = 0;
-		int numFrozen = 0;
-		int localTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+		int NumInTeam = 0;
+		int NumFrozen = 0;
+		int LocalTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(!m_pClient->m_Snap.m_paPlayerInfos[i])
 				continue;
 
-			if(m_pClient->m_Teams.Team(i) == localTeamID)
+			if(m_pClient->m_Teams.Team(i) == LocalTeamID)
 			{
-				numInTeam++;
+				NumInTeam++;
 				if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
-					numFrozen++;
+					NumFrozen++;
 			}
-			//numFrozen++;
 		}
 
 		char aBuf[64];
-		//str_format(aBuf, sizeof(aBuf), "%d / %d", m_pClient->m_Teams.Team(0), m_pClient->m_Teams.Team(localTeamID));
-		str_format(aBuf, sizeof(aBuf), "%d / %d", numInTeam - numFrozen, numInTeam);
-		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Teams.Team(1));
-		TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
-	}
-	//render frozen tee display
-	if(true)
-	{
-		CTeeRenderInfo FreezeInfo;
+		if(g_Config.m_ClShowFrozenText == 1)
+			str_format(aBuf, sizeof(aBuf), "%d / %d", NumInTeam - NumFrozen, NumInTeam);
+		else if(g_Config.m_ClShowFrozenText == 2)
+			str_format(aBuf, sizeof(aBuf), "%d / %d", NumFrozen, NumInTeam);
+		if(g_Config.m_ClShowFrozenText > 0)
+			TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
 
-		int Skin = m_pClient->m_Skins.Find("x_ninja");
-		if(Skin != -1)
+		if(g_Config.m_ClShowFrozenHud > 0 && !m_pClient->m_Scoreboard.Active())
 		{
-			const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
-			FreezeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			FreezeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-			FreezeInfo.m_BloodColor = pSkin->m_BloodColor;
-			FreezeInfo.m_SkinMetrics = pSkin->m_Metrics;
-			FreezeInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-			FreezeInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-			FreezeInfo.m_CustomColoredSkin = false;
-		}
-
-		int numInTeam = 0;
-		int numFrozen = 0;
-		float progressiveOffset = 0.0f;
-		int localTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(!m_pClient->m_Snap.m_paPlayerInfos[i])
-				continue;
-
-			if(m_pClient->m_Teams.Team(i) == localTeamID)
+			CTeeRenderInfo FreezeInfo;
+			int Skin = m_pClient->m_Skins.Find("x_ninja");
+			if(Skin != -1)
 			{
-				numInTeam++;
-				CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
-				if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
+				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+				FreezeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				FreezeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				FreezeInfo.m_BloodColor = pSkin->m_BloodColor;
+				FreezeInfo.m_SkinMetrics = pSkin->m_Metrics;
+				FreezeInfo.m_ColorBody = ColorRGBA(1, 1, 1);
+				FreezeInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+				FreezeInfo.m_CustomColoredSkin = false;
+			}
+
+			float progressiveOffset = 0.0f;
+			int MaxTees = (int)(8.3 * (m_Width / m_Height));
+			if(!g_Config.m_ClShowfps && !g_Config.m_ClShowpred)
+				MaxTees = (int)(9.5 * (m_Width / m_Height));
+			int MaxRows = g_Config.m_ClFrozenMaxRows;
+			float StartPos = m_Width / 2 + 38.0f * (m_Width / m_Height) / 1.78;
+			float TeeSize = 13.0f;
+
+			int TotalRows = std::min(MaxRows, (NumInTeam + MaxTees - 1) / MaxTees);
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+			RenderTools()->DrawRoundRectExt(StartPos - TeeSize / 2, 0.0f, TeeSize * std::min(NumInTeam, MaxTees), 16.0f + (TotalRows - 1) * TeeSize, 5.0f, CUI::CORNER_B);
+			Graphics()->QuadsEnd();
+
+			bool Overflow = NumInTeam > MaxTees * MaxRows;
+
+			int NumDisplayed = 0;
+			int NumInRow = 0;
+			int CurrentRow = 0;
+			
+			for(int OverflowIndex = 0; OverflowIndex < 1 +Overflow; OverflowIndex++)
+			{
+				for(int i = 0; i < MAX_CLIENTS && NumDisplayed < MaxTees * MaxRows; i++)
 				{
-					TeeInfo = FreezeInfo;
+					if(!m_pClient->m_Snap.m_paPlayerInfos[i])
+						continue;
+					if(m_pClient->m_Teams.Team(i) == LocalTeamID)
+					{
+
+						bool Frozen = false;
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
+						if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
+						{
+							if(g_Config.m_ClShowFrozenHud == 1.0)
+								TeeInfo = FreezeInfo;
+							Frozen = true;
+						}
+
+						if(Overflow && Frozen && OverflowIndex == 0)
+							continue;
+						if(Overflow && !Frozen && OverflowIndex == 1)
+							continue;
+
+						NumDisplayed++;
+						NumInRow++;
+						if(NumInRow > MaxTees)
+						{
+							NumInRow = 1;
+							progressiveOffset = 0.0f;
+							CurrentRow++;
+						}
+
+
+
+						TeeInfo.m_Size = TeeSize;
+						CAnimState *pIdleState = CAnimState::GetIdle();
+						vec2 OffsetToMid;
+						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						vec2 TeeRenderPos(StartPos + progressiveOffset, 9.0f + CurrentRow * TeeSize);
+						float Alpha = 1.0f;
+						if(g_Config.m_ClShowFrozenHud == 2.0)
+							Alpha = 0.5f;
+
+						if(Frozen)
+							RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(1.0f, 0.0f), TeeRenderPos, Alpha);
+						else
+							RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+						progressiveOffset += TeeSize;
+					}
 				}
-
-				TeeInfo.m_Size = 12.0f;
-
-				CAnimState *pIdleState = CAnimState::GetIdle();
-				vec2 OffsetToMid;
-				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-				vec2 TeeRenderPos(m_Width/2 + 35.0f + progressiveOffset, 8.0f);
-
-				RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
-				progressiveOffset += 12.0f;
 			}
 		}
 	}

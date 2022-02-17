@@ -190,7 +190,7 @@ void CKillMessages::OnRender()
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	float StartX = Width * 1.5f - 10.0f;
-	float y = 30.0f + 100.0f * ((g_Config.m_ClShowfps ? 1 : 0) + g_Config.m_ClShowpred);
+	float y = 30.0f + 100.0f * std::max(std::min(g_Config.m_ClShowFrozenHud, 1) * std::min(2, g_Config.m_ClFrozenMaxRows), ((g_Config.m_ClShowfps ? 1 : 0) + g_Config.m_ClShowpred));
 
 	for(int i = 1; i <= MAX_KILLMSGS; i++)
 	{
