@@ -2099,22 +2099,28 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
-							//CNetMsg_Cl_Say Msg;
-							//Msg.m_Team = 0;
-							//char aBuf[256];
-							//if(g_Config.m_ClRunOnJoin[0])
-							//{
-							//	str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[Conn], g_Config.m_ClRunOnJoin);
-							//}
-							//else
-							//{
-							//	str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
-							//}
-							//Msg.m_pMessage = aBuf;
-							//CMsgPacker Packer(Msg.MsgID(), false);
-							//Msg.Pack(&Packer);
-							//SendMsg(Conn, &Packer, MSGFLAG_VITAL);
+							if(g_Config.m_ClRunOnJoinConsole)
+							{
+								m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
+							}
+							else
+							{
+								CNetMsg_Cl_Say Msg;
+								Msg.m_Team = 0;
+								char aBuf[256];
+								if(g_Config.m_ClRunOnJoin[0])
+								{
+									str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[Conn], g_Config.m_ClRunOnJoin);
+								}
+								else
+								{
+									str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
+								}
+								Msg.m_pMessage = aBuf;
+								CMsgPacker Packer(Msg.MsgID(), false);
+								Msg.Pack(&Packer);
+								SendMsg(Conn, &Packer, MSGFLAG_VITAL);
+							}
 						}
 						m_CodeRunAfterJoin[Conn] = true;
 					}
