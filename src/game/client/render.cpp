@@ -129,28 +129,28 @@ void CRenderTools::DrawSprite(float x, float y, float ScaledWidth, float ScaledH
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
 {
 	IGraphics::CQuadItem QuadItem(x, y, Size, Size);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
 {
 	IGraphics::CQuadItem QuadItem(-(Size) / 2.f, -(Size) / 2.f, (Size), (Size));
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(-(Width) / 2.f, -(Height) / 2.f, (Width), (Height));
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(X, Y, Width, Height);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)

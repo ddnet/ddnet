@@ -15,6 +15,8 @@ class CItems : public CComponent
 
 	int m_ItemsQuadContainerIndex;
 
+	int m_WeaponArmorQuadOffset = 0;
+
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnRender() override;

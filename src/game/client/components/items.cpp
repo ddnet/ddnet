@@ -190,6 +190,10 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 			m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
 			Pos.x -= 10.0f;
 		}
+		else if(c[pCurrent->m_Type] >= SPRITE_PICKUP_ARMOR_SHOTGUN && c[pCurrent->m_Type] <= SPRITE_PICKUP_ARMOR_NINJA)
+		{
+			QuadOffset = m_WeaponArmorQuadOffset + (c[pCurrent->m_Type] - SPRITE_PICKUP_ARMOR_SHOTGUN);
+		}
 	}
 
 	Graphics()->QuadsSetRotation(Angle);
@@ -563,7 +567,7 @@ void CItems::OnInit()
 
 	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+	m_WeaponArmorQuadOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
