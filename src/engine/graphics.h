@@ -409,8 +409,8 @@ public:
 	virtual int CreateQuadContainer(bool AutomaticUpload = true) = 0;
 	virtual void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) = 0;
 	virtual void QuadContainerUpload(int ContainerIndex) = 0;
-	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
-	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
+	virtual int QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
+	virtual int QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadContainerReset(int ContainerIndex) = 0;
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;

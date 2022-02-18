@@ -125,8 +125,8 @@ public:
 	int CreateQuadContainer(bool AutomaticUpload = true) override { return -1; }
 	void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) override {}
 	void QuadContainerUpload(int ContainerIndex) override{};
-	void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override{};
-	void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override{};
+	int QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override { return -1; };
+	int QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override { return -1; };
 	void QuadContainerReset(int ContainerIndex) override{};
 	void DeleteQuadContainer(int ContainerIndex) override{};
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override{};
