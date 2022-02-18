@@ -4060,4 +4060,37 @@ int os_version_str(char *version, int length)
 	return 0;
 #endif
 }
+
+#if defined(CONF_EXCEPTION_HANDLING)
+#if defined(CONF_FAMILY_WINDOWS)
+static HMODULE gs_ExceptionHandlingModule = nullptr;
+#endif
+
+void init_exception_handler()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	gs_ExceptionHandlingModule = LoadLibraryA("exchndl.dll");
+	if(gs_ExceptionHandlingModule != nullptr)
+	{
+		auto pfnExcHndlInit = (void APIENTRY (*)())GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlInit");
+		pfnExcHndlInit();
+	}
+#else
+#error exception handling not implemented
+#endif
+}
+
+void set_exception_handler_log_file(const char *pLogFilePath)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	if(gs_ExceptionHandlingModule != nullptr)
+	{
+		auto pExceptionLogFilePathFunc = (BOOL APIENTRY(*)(const char *))(GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlSetLogFileNameA"));
+		pExceptionLogFilePathFunc(pLogFilePath);
+	}
+#else
+#error exception handling not implemented
+#endif
+}
+#endif
 }

@@ -117,6 +117,8 @@ option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at ru
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
+option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
+
 if(TEST_MYSQL)
   set(MYSQL ON)
 endif()
@@ -217,6 +219,10 @@ if(NOT MSVC AND NOT HAIKU)
     add_c_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
   endif()
 
+  if(EXCEPTION_HANDLING)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -DCONF_EXCEPTION_HANDLING)
+  endif()
+
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
   if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
     add_c_compiler_flag_if_supported(OUR_FLAGS_OWN
@@ -237,6 +243,12 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
   # TODO: Enable for C++ code except gtest
   #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
+endif()
+
+if(MSVC)
+  if(EXCEPTION_HANDLING)
+  add_c_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
+  endif()
 endif()
 
 if(NOT MSVC AND NOT HAIKU)
@@ -438,6 +450,10 @@ if(WEBSOCKETS)
 else()
   set(WEBSOCKETS_LIBRARIES)
   set(WEBSOCKETS_INCLUDE_DIRS)
+endif()
+
+if(EXCEPTION_HANDLING)
+  find_package(ExceptionHandling)
 endif()
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
@@ -1399,6 +1415,7 @@ set(COPY_FILES
   ${FFMPEG_COPY_FILES}
   ${WEBSOCKETS_COPY_FILES}
   ${DISCORDSDK_COPY_FILES}
+  ${EXCEPTION_HANDLING_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
