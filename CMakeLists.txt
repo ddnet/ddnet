@@ -221,6 +221,10 @@ if(NOT MSVC AND NOT HAIKU)
 
   if(EXCEPTION_HANDLING)
     add_c_compiler_flag_if_supported(OUR_FLAGS -DCONF_EXCEPTION_HANDLING)
+    # use the frame pointer (frame pointer usage is disabled by default in
+    # some architectures like x86_64 and for some optimization levels; and it
+    # may be impossible to walk the call stack without it)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -fno-omit-frame-pointer)
   endif()
 
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
