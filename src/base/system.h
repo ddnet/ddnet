@@ -32,21 +32,24 @@
 extern "C" {
 #endif
 
-/* Group: Debug */
-/*
-	Function: dbg_assert
-		Breaks into the debugger based on a test.
+/**
+ * @defgroup Debug
+ *
+ * Utilities for debugging.
+ */
 
-	Parameters:
-		test - Result of the test.
-		msg - Message that should be printed if the test fails.
-
-	Remarks:
-		Also works in release mode.
-
-	See Also:
-		<dbg_break>
-*/
+/**
+ * @ingroup Debug
+ *
+ * Breaks into the debugger based on a test.
+ *
+ * @param test Result of the test.
+ * @param msg Message that should be printed if the test fails.
+ *
+ * @remark Also works in release mode.
+ *
+ * @see dbg_break
+ */
 #define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 
@@ -62,101 +65,100 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 #define GNUC_ATTRIBUTE(x)
 #endif
 
-/*
-	Function: dbg_break
-		Breaks into the debugger.
-
-	Remarks:
-		Also works in release mode.
-
-	See Also:
-		<dbg_assert>
-*/
+/**
+ * Breaks into the debugger.
+ *
+ * @ingroup Debug
+ * @remark Also works in release mode.
+ *
+ * @see dbg_assert
+ */
 void dbg_break();
 
-/*
-	Function: dbg_msg
-
-	Prints a debug message.
-
-	Parameters:
-		sys - A string that describes what system the message belongs to
-		fmt - A printf styled format string.
-
-	Remarks:
-		Also works in release mode.
-
-	See Also:
-		<dbg_assert>
+/**
+ * Prints a debug message.
+ *
+ * @ingroup Debug
+ *
+ * @param sys A string that describes what system the message belongs to.
+ * @param fmt A printf styled format string.
+ *
+ * @remark Also works in release mode.
+ *
+ * @see dbg_assert
 */
 void dbg_msg(const char *sys, const char *fmt, ...)
 	GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
-/* Group: Memory */
+/**
+ * @defgroup Memory
+ * Memory management utilities.
+ */
 
-/*
-	Function: mem_copy
-		Copies a a memory block.
-
-	Parameters:
-		dest - Destination.
-		source - Source to copy.
-		size - Size of the block to copy.
-
-	Remarks:
-		- This functions DOES NOT handles cases where source and
-		destination is overlapping.
-
-	See Also:
-		<mem_move>
-*/
+/**
+ * Copies a a memory block.
+ *
+ * @ingroup Memory
+ *
+ * @param dest Destination.
+ * @param source Source to copy.
+ * @param size Size of the block to copy.
+ *
+ * @remark This functions DOES NOT handle cases where the source and destination is overlapping.
+ *
+ * @see mem_move
+ */
 void mem_copy(void *dest, const void *source, unsigned size);
 
-/*
-	Function: mem_move
-		Copies a a memory block
-
-	Parameters:
-		dest - Destination
-		source - Source to copy
-		size - Size of the block to copy
-
-	Remarks:
-		- This functions handles cases where source and destination
-		is overlapping
-
-	See Also:
-		<mem_copy>
-*/
+/**
+ * Copies a a memory block.
+ *
+ * @ingroup Memory
+ *
+ * @param dest Destination.
+ * @param source Source to copy.
+ * @param size Size of the block to copy.
+ *
+ * @remark This functions handles the cases where the source and destination is overlapping.
+ *
+ * @see mem_copy
+ */
 void mem_move(void *dest, const void *source, unsigned size);
 
-/*
-	Function: mem_zero
-		Sets a complete memory block to 0
-
-	Parameters:
-		block - Pointer to the block to zero out
-		size - Size of the block
-*/
+/**
+ * Sets a complete memory block to 0.
+ *
+ * @ingroup Memory
+ *
+ * @param block Pointer to the block to zero out.
+ * @param size Size of the block.
+ */
 void mem_zero(void *block, unsigned size);
 
-/*
-	Function: mem_comp
-		Compares two blocks of memory
-
-	Parameters:
-		a - First block of data
-		b - Second block of data
-		size - Size of the data to compare
-
-	Returns:
-		<0 - Block a is less than block b
-		0 - Block a is equal to block b
-		>0 - Block a is greater than block b
-*/
+/**
+ * Compares two blocks of memory
+ *
+ * @ingroup Memory
+ *
+ * @param a First block of data
+ * @param b Second block of data
+ * @param size Size of the data to compare
+ *
+ * @return < 0 - Block a is less than block b.
+ * @return 0 - Block a is equal to block b.
+ * @return > 0 - Block a is greater than block b.
+ */
 int mem_comp(const void *a, const void *b, int size);
 
-/* Group: File IO */
+/**
+ * @defgroup File-IO
+ *
+ * I/O related operations.
+ */
+
+/**
+ * @ingroup File-IO
+ */
 enum
 {
 	IOFLAG_READ = 1,
@@ -173,373 +175,365 @@ enum
 
 typedef struct IOINTERNAL *IOHANDLE;
 
-/*
-	Function: io_open
-		Opens a file.
-
-	Parameters:
-		filename - File to open.
-		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
-
-	Returns:
-		Returns a handle to the file on success and 0 on failure.
-
-*/
+/**
+ * Opens a file.
+ *
+ * @ingroup File-IO
+ *
+ * @param File to open.
+ * @param flags A set of IOFLAG flags. 
+ *
+ * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
+ *
+ * @return A handle to the file on success and 0 on failure.
+ *
+ */
 IOHANDLE io_open(const char *filename, int flags);
 
-/*
-	Function: io_read
-		Reads data into a buffer from a file.
-
-	Parameters:
-		io - Handle to the file to read data from.
-		buffer - Pointer to the buffer that will receive the data.
-		size - Number of bytes to read from the file.
-
-	Returns:
-		Number of bytes read.
-
-*/
+/**
+ * Reads data into a buffer from a file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file to read data from.
+ * @param buffer Pointer to the buffer that will receive the data.
+ * @param size Number of bytes to read from the file.
+ *
+ * @return Number of bytes read.
+ *
+ */
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size);
 
-/*
-	Function: io_skip
-		Skips data in a file.
-
-	Parameters:
-		io - Handle to the file.
-		size - Number of bytes to skip.
-
-	Returns:
-		Number of bytes skipped.
-*/
+/**
+ * Skips data in a file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ * @param size Number of bytes to skip.
+ *
+ * @return Number of bytes skipped.
+ */
 unsigned io_skip(IOHANDLE io, int size);
 
-/*
-	Function: io_write
-		Writes data from a buffer to file.
-
-	Parameters:
-		io - Handle to the file.
-		buffer - Pointer to the data that should be written.
-		size - Number of bytes to write.
-
-	Returns:
-		Number of bytes written.
-*/
+/**
+ * Writes data from a buffer to file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ * @param buffer Pointer to the data that should be written.
+ * @param size Number of bytes to write.
+ *
+ * @return Number of bytes written.
+ */
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size);
 
-/*
-	Function: io_write_newline
-		Writes newline to file.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Number of bytes written.
-*/
+/**
+ * Writes newline to file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return Number of bytes written.
+ */
 unsigned io_write_newline(IOHANDLE io);
 
-/*
-	Function: io_seek
-		Seeks to a specified offset in the file.
-
-	Parameters:
-		io - Handle to the file.
-		offset - Offset from pos to stop.
-		origin - Position to start searching from.
-
-	Returns:
-		Returns 0 on success.
-*/
+/**
+ * Seeks to a specified offset in the file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ * @param offset Offset from pos to stop.
+ * @param origin Position to start searching from.
+ *
+ * @return 0 on success.
+ */
 int io_seek(IOHANDLE io, int offset, int origin);
 
-/*
-	Function: io_tell
-		Gets the current position in the file.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns the current position. -1L if an error occurred.
-*/
+/**
+ * Gets the current position in the file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return The current position. @c -1L if an error occurred.
+ */
 long int io_tell(IOHANDLE io);
 
-/*
-	Function: io_length
-		Gets the total length of the file. Resetting cursor to the beginning
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns the total size. -1L if an error occurred.
-*/
+/**
+ * Gets the total length of the file. Resetting cursor to the beginning
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return The total size. @c -1L if an error occurred.
+ */
 long int io_length(IOHANDLE io);
 
-/*
-	Function: io_close
-		Closes a file.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns 0 on success.
-*/
+/**
+ * Closes a file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return 0 on success.
+ */
 int io_close(IOHANDLE io);
 
-/*
-	Function: io_flush
-		Empties all buffers and writes all pending data.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns 0 on success.
-*/
+/**
+ * Empties all buffers and writes all pending data.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return 0 on success.
+ */
 int io_flush(IOHANDLE io);
 
-/*
-	Function: io_sync
-		Synchronize file changes to disk.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns 0 on success.
-*/
+/**
+ * Synchronize file changes to disk.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return 0 on success.
+ */
 int io_sync(IOHANDLE io);
 
-/*
-	Function: io_error
-		Checks whether an error occurred during I/O with the file.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns nonzero on error, 0 otherwise.
-*/
+/**
+ * Checks whether an error occurred during I/O with the file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return nonzero on error, 0 otherwise.
+ */
 int io_error(IOHANDLE io);
 
-/*
-	Function: io_stdin
-		Returns an <IOHANDLE> to the standard input.
-*/
+/**
+ * @ingroup File-IO
+ * @return An <IOHANDLE> to the standard input.
+ */
 IOHANDLE io_stdin();
 
-/*
-	Function: io_stdout
-		Returns an <IOHANDLE> to the standard output.
-*/
+/**
+ * @ingroup File-IO
+ * @return An <IOHANDLE> to the standard output.
+ */
 IOHANDLE io_stdout();
 
-/*
-	Function: io_stderr
-		Returns an <IOHANDLE> to the standard error.
-*/
+/**
+ * @ingroup File-IO
+ * @return An <IOHANDLE> to the standard error.
+ */
 IOHANDLE io_stderr();
 
-/*
-	Function: io_current_exe
-		Returns an <IOHANDLE> to the current executable.
-*/
+/**
+ * @ingroup File-IO
+ * @return An <IOHANDLE> to the current executable.
+ */
 IOHANDLE io_current_exe();
 
 typedef struct ASYNCIO ASYNCIO;
 
-/*
-	Function: aio_new
-		Wraps a <IOHANDLE> for asynchronous writing.
-
-	Parameters:
-		io - Handle to the file.
-
-	Returns:
-		Returns the handle for asynchronous writing.
-
-*/
+/**
+ * Wraps a @link IOHANDLE @endlink for asynchronous writing.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return The handle for asynchronous writing.
+ *
+ */
 ASYNCIO *aio_new(IOHANDLE io);
 
-/*
-	Function: aio_lock
-		Locks the ASYNCIO structure so it can't be written into by
-		other threads.
-
-	Parameters:
-		aio - Handle to the file.
-*/
+/**
+ * Locks the ASYNCIO structure so it can't be written into by
+ * other threads.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ */
 void aio_lock(ASYNCIO *aio);
 
-/*
-	Function: aio_unlock
-		Unlocks the ASYNCIO structure after finishing the contiguous
-		write.
-
-	Parameters:
-		aio - Handle to the file.
-*/
+/**
+ * Unlocks the ASYNCIO structure after finishing the contiguous
+ * write.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ */
 void aio_unlock(ASYNCIO *aio);
 
-/*
-	Function: aio_write
-		Queues a chunk of data for writing.
-
-	Parameters:
-		aio - Handle to the file.
-		buffer - Pointer to the data that should be written.
-		size - Number of bytes to write.
-
-*/
+/**
+ * Queues a chunk of data for writing.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ * @param buffer Pointer to the data that should be written.
+ * @param size Number of bytes to write.
+ */
 void aio_write(ASYNCIO *aio, const void *buffer, unsigned size);
 
-/*
-	Function: aio_write_newline
-		Queues a newline for writing.
-
-	Parameters:
-		aio - Handle to the file.
-
-*/
+/**
+ * Queues a newline for writing.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ *
+ */
 void aio_write_newline(ASYNCIO *aio);
 
-/*
-	Function: aio_write_unlocked
-		Queues a chunk of data for writing. The ASYNCIO struct must be
-		locked using `aio_lock` first.
-
-	Parameters:
-		aio - Handle to the file.
-		buffer - Pointer to the data that should be written.
-		size - Number of bytes to write.
-
-*/
+/**
+ * Queues a chunk of data for writing. The ASYNCIO struct must be
+ * locked using @link aio_lock @endlink first.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ * @param buffer Pointer to the data that should be written.
+ * @param size Number of bytes to write.
+ *
+ */
 void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size);
 
-/*
-	Function: aio_write_newline_unlocked
-		Queues a newline for writing. The ASYNCIO struct must be locked
-		using `aio_lock` first.
-
-	Parameters:
-		aio - Handle to the file.
-
-*/
+/**
+ * Queues a newline for writing. The ASYNCIO struct must be locked
+ * using @link aio_lock @endlink first.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ *
+ */
 void aio_write_newline_unlocked(ASYNCIO *aio);
 
-/*
-	Function: aio_error
-		Checks whether errors have occurred during the asynchronous
-		writing.
-
-		Call this function regularly to see if there are errors. Call
-		this function after <aio_wait> to see if the process of writing
-		to the file succeeded.
-
-	Parameters:
-		aio - Handle to the file.
-
-	Returns:
-		Returns 0 if no error occurred, and nonzero on error.
-
-*/
+/**
+ * Checks whether errors have occurred during the asynchronous
+ * writing.
+ *
+ * Call this function regularly to see if there are errors. Call
+ * this function after <aio_wait> to see if the process of writing
+ * to the file succeeded.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ *
+ * @eturn 0 if no error occurred, and nonzero on error.
+ *
+ */
 int aio_error(ASYNCIO *aio);
 
-/*
-	Function: aio_close
-		Queues file closing.
-
-	Parameters:
-		aio - Handle to the file.
-
-*/
+/**
+ * Queues file closing.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ *
+ */
 void aio_close(ASYNCIO *aio);
 
-/*
-	Function: aio_wait
-		Wait for the asynchronous operations to complete.
-
-	Parameters:
-		aio - Handle to the file.
-
-*/
+/**
+ * Wait for the asynchronous operations to complete.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ *
+ */
 void aio_wait(ASYNCIO *aio);
 
-/*
-	Function: aio_free
-		Frees the resources associated to the asynchronous file handle.
-
-	Parameters:
-		aio - Handle to the file.
-
-*/
+/**
+ * Frees the resources associated to the asynchronous file handle.
+ *
+ * @ingroup File-IO
+ *
+ * @param aio Handle to the file.
+ *
+i */
 void aio_free(ASYNCIO *aio);
 
-/* Group: Threads */
+/**
+ * @defgroup Threads
+ * Threading related functions.
+ *
+ * @see Locks
+ */
 
-/*
-	Function: thread_sleep
-		Suspends the current thread for a given period.
-
-	Parameters:
-		microseconds - Number of microseconds to sleep.
-*/
+/**
+ * Suspends the current thread for a given period.
+ *
+ * @ingroup Threads
+ *
+ * @param microseconds Number of microseconds to sleep.
+ */
 void thread_sleep(int microseconds);
 
-/*
-	Function: thread_init
-		Creates a new thread.
-
-	Parameters:
-		threadfunc - Entry point for the new thread.
-		user - Pointer to pass to the thread.
-		name - name describing the use of the thread
-*/
+/**
+ * Creates a new thread.
+ *
+ * @ingroup Threads
+ *
+ * @param threadfunc Entry point for the new thread.
+ * @param user Pointer to pass to the thread.
+ * @param name name describing the use of the thread
+ */
 void *thread_init(void (*threadfunc)(void *), void *user, const char *name);
 
-/*
-	Function: thread_wait
-		Waits for a thread to be done or destroyed.
-
-	Parameters:
-		thread - Thread to wait for.
-*/
+/**
+ * Waits for a thread to be done or destroyed.
+ *
+ * @ingroup Threads
+ *
+ * @param thread Thread to wait for.
+ */
 void thread_wait(void *thread);
 
-/*
-	Function: thread_yield
-		Yield the current threads execution slice.
-*/
+/**
+ * Yield the current threads execution slice.
+ *
+ * @ingroup Threads
+ */
 void thread_yield();
 
-/*
-	Function: thread_detach
-		Puts the thread in the detached thread, guaranteeing that
-		resources of the thread will be freed immediately when the
-		thread terminates.
-
-	Parameters:
-		thread - Thread to detach
+/**
+ * Puts the thread in the detached thread, guaranteeing that
+ * resources of the thread will be freed immediately when the
+ * thread terminates.
+ *
+ * @ingroup Threads
+ *
+ * @param thread Thread to detach
 */
 void thread_detach(void *thread);
 
-/*
-	Function: thread_init_and_detach
-		Creates a new thread and if it succeeded detaches it.
-
-	Parameters:
-		threadfunc - Entry point for the new thread.
-		user - Pointer to pass to the thread.
-		name - name describing the use of the thread
-
-	Returns:
-		Returns the thread if no error occured, 0 on error.
-*/
+/**
+ * Creates a new thread and if it succeeded detaches it.
+ *
+ * @ingroup Threads
+ *
+ * @param threadfunc Entry point for the new thread.
+ * @param user Pointer to pass to the thread.
+ * @param name Name describing the use of the thread
+ *
+ * @return The thread if no error occured, 0 on error.
+ */
 void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 // Enable thread safety attributes only with clang.
@@ -610,14 +604,36 @@ void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char 
 #define NO_THREAD_SAFETY_ANALYSIS \
 	THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
 
-/* Group: Locks */
+/**
+ * @defgroup Locks
+ *
+ * Synchronization primitives.
+ *
+ * @see Threads
+ */
+
 typedef CAPABILITY("mutex") void *LOCK;
 
+/**
+ * @ingroup Locks
+ */
 LOCK lock_create();
+/**
+ * @ingroup Locks
+ */
 void lock_destroy(LOCK lock);
 
+/**
+ * @ingroup Locks
+ */
 int lock_trylock(LOCK lock) TRY_ACQUIRE(1, lock);
+/**
+ * @ingroup Locks
+ */
 void lock_wait(LOCK lock) ACQUIRE(lock);
+/**
+ * @ingroup Locks
+ */
 void lock_unlock(LOCK lock) RELEASE(lock);
 
 /* Group: Semaphores */
@@ -633,65 +649,89 @@ typedef sem_t SEMAPHORE;
 #error not implemented on this platform
 #endif
 
+/**
+ * @ingroup Locks
+ */
 void sphore_init(SEMAPHORE *sem);
+/**
+ * @ingroup Locks
+ */
 void sphore_wait(SEMAPHORE *sem);
+/**
+ * @ingroup Locks
+ */
 void sphore_signal(SEMAPHORE *sem);
+/**
+ * @ingroup Locks
+ */
 void sphore_destroy(SEMAPHORE *sem);
 
+/**
+ * @defgroup Time
+ *
+ * Time utilities.
+ */
+
+/**
+ * @ingroup Time
+ */
 void set_new_tick();
 
-/*
-	Function: time_get_impl
-		Fetches a sample from a high resolution timer.
-
-	Returns:
-		Current value of the timer.
-
-	Remarks:
-		To know how fast the timer is ticking, see <time_freq>.
-*/
+/**
+ * Fetches a sample from a high resolution timer.
+ *
+ * @ingroup Time
+ *
+ * @return Current value of the timer.
+ *
+ * @remark To know how fast the timer is ticking, see @link time_freq @endlink.
+ *
+ * @see time_freq
+ */
 int64_t time_get_impl();
 
-/*
-	Function: time_get
-		Fetches a sample from a high resolution timer.
-
-	Returns:
-		Current value of the timer.
-
-	Remarks:
-		To know how fast the timer is ticking, see <time_freq>.
-		Uses <time_get_impl> to fetch the sample.
-*/
+/**
+ * Fetches a sample from a high resolution timer.
+ *
+ * @ingroup Time
+ *
+ * @return Current value of the timer.
+ *
+ * @remark To know how fast the timer is ticking, see @link time_freq @endlink.
+ * @remark Uses @link time_get_impl @endlink to fetch the sample.
+ *
+ * @see time_freq time_get_impl
+ */
 int64_t time_get();
 
-/*
-	Function: time_freq
-		Returns the frequency of the high resolution timer.
-
-	Returns:
-		Returns the frequency of the high resolution timer.
-*/
+/**
+ * @ingroup Time
+ *
+ * @return The frequency of the high resolution timer.
+ */
 int64_t time_freq();
 
-/*
-	Function: time_timestamp
-		Retrieves the current time as a UNIX timestamp
-
-	Returns:
-		The time as a UNIX timestamp
-*/
+/**
+ * Retrieves the current time as a UNIX timestamp
+ *
+ * @ingroup Time
+ *
+ * @return The time as a UNIX timestamp
+ */
 int time_timestamp();
 
-/*
-	Function: time_houroftheday
-		Retrieves the hours since midnight (0..23)
-
-	Returns:
-		The current hour of the day
-*/
+/**
+ * Retrieves the hours since midnight (0..23)
+ *
+ * @ingroup Time
+ *
+ * @return The current hour of the day
+ */
 int time_houroftheday();
 
+/**
+ * @ingroup Time
+ */
 enum
 {
 	SEASON_SPRING = 0,
@@ -701,25 +741,33 @@ enum
 	SEASON_NEWYEAR
 };
 
-/*
-	Function: time_season
-		Retrieves the current season of the year.
-
-	Returns:
-		one of the SEASON_* enum literals
-*/
+/**
+ * Retrieves the current season of the year.
+ *
+ * @ingroup Time
+ *
+ * @return One of the SEASON_* enum literals
+ *
+ * @see SEASON_SPRING
+ */
 int time_season();
 
-/*
-Function: time_get_microseconds
-Fetches a sample from a high resolution timer and converts it in microseconds.
-
-Returns:
-Current value of the timer in microseconds.
+/**
+ * Fetches a sample from a high resolution timer and converts it in microseconds.
+ *
+ * @ingroup Time
+ *
+ * @return Current value of the timer in microseconds.
 */
 int64_t time_get_microseconds();
 
-/* Group: Network General */
+/**
+ * @defgroup Network-General
+ */
+
+/**
+ * @ingroup Network-General
+ */
 typedef struct
 {
 	int type;
@@ -728,6 +776,9 @@ typedef struct
 	int web_ipv4sock;
 } NETSOCKET;
 
+/**
+ * @ingroup Network-General
+ */
 enum
 {
 	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
@@ -740,6 +791,9 @@ enum
 	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4
 };
 
+/**
+ * @ingroup Network-General
+ */
 typedef struct
 {
 	unsigned int type;
@@ -748,20 +802,25 @@ typedef struct
 } NETADDR;
 
 #ifdef CONF_FAMILY_UNIX
+/**
+ * @ingroup Network-General
+ */
 typedef int UNIXSOCKET;
+/**
+ * @ingroup Network-General
+ */
 typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
-/*
-	Function: net_init
-		Initiates network functionality.
 
-	Returns:
-		Returns 0 on success,
-
-	Remarks:
-		You must call this function before using any other network
-		functions.
-*/
+/**
+ * Initiates network functionality.
+ *
+ * @ingroup Network-General
+ *
+ * @return 0 on success.
+ *
+ * @remark You must call this function before using any other network functions.
+ */
 int net_init();
 
 /*
@@ -774,98 +833,95 @@ int net_init();
 */
 int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 
-/*
-	Function: net_addr_comp
-		Compares two network addresses.
-
-	Parameters:
-		a - Address to compare
-		b - Address to compare to.
-
-	Returns:
-		<0 - Address a is less than address b
-		0 - Address a is equal to address b
-		>0 - Address a is greater than address b
-*/
+/**
+ * Compares two network addresses.
+ *
+ * @ingroup Network-General
+ *
+ * @param a Address to compare
+ * @param b Address to compare to.
+ *
+ * @return `< 0` - Address a is less than address b
+ * @return `0` - Address a is equal to address b
+ * @return `> 0` - Address a is greater than address b
+ */
 int net_addr_comp(const NETADDR *a, const NETADDR *b);
 
-/*
-	Function: net_addr_comp_noport
-		Compares two network addresses ignoring port.
-
-	Parameters:
-		a - Address to compare
-		b - Address to compare to.
-
-	Returns:
-		<0 - Address a is less than address b
-		0 - Address a is equal to address b
-		>0 - Address a is greater than address b
-*/
+/**
+ * Compares two network addresses ignoring port.
+ *
+ * @ingroup Network-General
+ *
+ * @param a Address to compare
+ * @param b Address to compare to.
+ *
+ * @return `< 0` - Address a is less than address b
+ * @return `0` - Address a is equal to address b
+ * @return `> 0` - Address a is greater than address b
+ */
 int net_addr_comp_noport(const NETADDR *a, const NETADDR *b);
 
-/*
-	Function: net_addr_str
-		Turns a network address into a representative string.
-
-	Parameters:
-		addr - Address to turn into a string.
-		string - Buffer to fill with the string.
-		max_length - Maximum size of the string.
-		add_port - add port to string or not
-
-	Remarks:
-		- The string will always be zero terminated
-
-*/
+/**
+ * Turns a network address into a representative string.
+ *
+ * @ingroup Network-General
+ *
+ * @param addr Address to turn into a string.
+ * @param string Buffer to fill with the string.
+ * @param max_length Maximum size of the string.
+ * @param add_port add port to string or not
+ *
+ * @remark The string will always be zero terminated
+ */
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port);
 
-/*
-	Function: net_addr_from_str
-		Turns string into a network address.
-
-	Returns:
-		0 on success
-
-	Parameters:
-		addr - Address to fill in.
-		string - String to parse.
-*/
+/**
+ * Turns string into a network address.
+ *
+ * @param addr Address to fill in.
+ * @param string String to parse.
+ *
+ * @return 0 on success
+ */
 int net_addr_from_str(NETADDR *addr, const char *string);
 
-/* Group: Network UDP */
+/**
+ * @defgroup Network-UDP
+ * @ingroup Network-General
+ */
 
-/*
-	Function: net_udp_create
-		Creates a UDP socket and binds it to a port.
-
-	Parameters:
-		bindaddr - Address to bind the socket to.
-
-	Returns:
-		On success it returns an handle to the socket. On failure it
-		returns NETSOCKET_INVALID.
-*/
+/**
+ * Creates a UDP socket and binds it to a port.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param bindaddr Address to bind the socket to.
+ *
+ * @return On success it returns an handle to the socket. On failure it
+ * returns NETSOCKET_INVALID.
+ */
 NETSOCKET net_udp_create(NETADDR bindaddr);
 
-/*
-	Function: net_udp_send
-		Sends a packet over an UDP socket.
-
-	Parameters:
-		sock - Socket to use.
-		addr - Where to send the packet.
-		data - Pointer to the packet data to send.
-		size - Size of the packet.
-
-	Returns:
-		On success it returns the number of bytes sent. Returns -1
-		on error.
-*/
+/**
+ * Sends a packet over an UDP socket.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param sock Socket to use.
+ * @param addr Where to send the packet.
+ * @param data Pointer to the packet data to send.
+ * @param size Size of the packet.
+ *
+ * @return On success it returns the number of bytes sent. Returns -1
+ * on error.
+ */
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
 
 #define VLEN 128
 #define PACKETSIZE 1400
+/**
+ * @ingroup Network-General
+ */
 typedef struct
 {
 #ifdef CONF_PLATFORM_LINUX
@@ -880,120 +936,118 @@ typedef struct
 #endif
 } MMSGS;
 
+/**
+ * @ingroup Network-General
+ */
 void net_init_mmsgs(MMSGS *m);
 
-/*
-	Function: net_udp_recv
-		Receives a packet over an UDP socket.
-
-	Parameters:
-		sock - Socket to use.
-		addr - Pointer to an NETADDR that will receive the address.
-		buffer - Pointer to a buffer that can be used to receive the data.
-		maxsize - Maximum size to receive.
-		data - Will get set to the actual data, might be the passed buffer or an internal one
-
-	Returns:
-		On success it returns the number of bytes received. Returns -1
-		on error.
-*/
+/**
+ * Receives a packet over an UDP socket.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param sock Socket to use.
+ * @param addr Pointer to an NETADDR that will receive the address.
+ * @param buffer Pointer to a buffer that can be used to receive the data.
+ * @param maxsize Maximum size to receive.
+ * @param data Will get set to the actual data, might be the passed buffer or an internal one
+ *
+ * @return On success it returns the number of bytes received. Returns -1
+ * on error.
+ */
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data);
 
-/*
-	Function: net_udp_close
-		Closes an UDP socket.
-
-	Parameters:
-		sock - Socket to close.
-
-	Returns:
-		Returns 0 on success. -1 on error.
-*/
+/**
+ * Closes an UDP socket.
+ *
+ * @ingroup Network-UDP
+ *
+ * @param sock Socket to close.
+ *
+ * @return 0 on success. -1 on error.
+ */
 int net_udp_close(NETSOCKET sock);
 
-/* Group: Network TCP */
+/**
+ * @defgroup Network-TCP
+ * @ingroup Network-General
+ */
 
-/*
-	Function: net_tcp_create
-		Creates a TCP socket.
-
-	Parameters:
-		bindaddr - Address to bind the socket to.
-
-	Returns:
-		On success it returns an handle to the socket. On failure it returns NETSOCKET_INVALID.
-*/
+/**
+ * Creates a TCP socket.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param bindaddr Address to bind the socket to.
+ *
+ * @return On success it returns an handle to the socket. On failure it returns NETSOCKET_INVALID.
+ */
 NETSOCKET net_tcp_create(NETADDR bindaddr);
 
-/*
-	Function: net_tcp_listen
-		Makes the socket start listening for new connections.
-
-	Parameters:
-		sock - Socket to start listen to.
-		backlog - Size of the queue of incoming connections to keep.
-
-	Returns:
-		Returns 0 on success.
-*/
+/**
+ * Makes the socket start listening for new connections.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param sock Socket to start listen to.
+ * @param backlog Size of the queue of incoming connections to keep.
+ *
+ * @return 0 on success.
+ */
 int net_tcp_listen(NETSOCKET sock, int backlog);
 
-/*
-	Function: net_tcp_accept
-		Polls a listning socket for a new connection.
-
-	Parameters:
-		sock - Listning socket to poll.
-		new_sock - Pointer to a socket to fill in with the new socket.
-		addr - Pointer to an address that will be filled in the remote address (optional, can be NULL).
-
-	Returns:
-		Returns a non-negative integer on success. Negative integer on failure.
-*/
+/**
+ * Polls a listning socket for a new connection.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param sock - Listning socket to poll.
+ * @param new_sock - Pointer to a socket to fill in with the new socket.
+ * @param addr - Pointer to an address that will be filled in the remote address (optional, can be NULL).
+ *
+ * @return A non-negative integer on success. Negative integer on failure.
+ */
 int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *addr);
 
-/*
-	Function: net_tcp_connect
-		Connects one socket to another.
-
-	Parameters:
-		sock - Socket to connect.
-		addr - Address to connect to.
-
-	Returns:
-		Returns 0 on success.
-
-*/
+/**
+ * Connects one socket to another.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param sock Socket to connect.
+ * @param addr Address to connect to.
+ *
+ * @return 0 on success.
+ *
+ */
 int net_tcp_connect(NETSOCKET sock, const NETADDR *addr);
 
-/*
-	Function: net_tcp_send
-		Sends data to a TCP stream.
-
-	Parameters:
-		sock - Socket to send data to.
-		data - Pointer to the data to send.
-		size - Size of the data to send.
-
-	Returns:
-		Number of bytes sent. Negative value on failure.
-*/
+/**
+ * Sends data to a TCP stream.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param sock Socket to send data to.
+ * @param data Pointer to the data to send.
+ * @param size Size of the data to send.
+ *
+ * @return Number of bytes sent. Negative value on failure.
+ */
 int net_tcp_send(NETSOCKET sock, const void *data, int size);
 
-/*
-	Function: net_tcp_recv
-		Recvives data from a TCP stream.
-
-	Parameters:
-		sock - Socket to recvive data from.
-		data - Pointer to a buffer to write the data to
-		max_size - Maximum of data to write to the buffer.
-
-	Returns:
-		Number of bytes recvived. Negative value on failure. When in
-		non-blocking mode, it returns 0 when there is no more data to
-		be fetched.
-*/
+/**
+ * Recvives data from a TCP stream.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param sock Socket to recvive data from.
+ * @param data Pointer to a buffer to write the data to
+ * @param max_size Maximum of data to write to the buffer.
+ *
+ * @return Number of bytes recvived. Negative value on failure. When in
+ * non-blocking mode, it returns 0 when there is no more data to
+ * be fetched.
+ */
 int net_tcp_recv(NETSOCKET sock, void *data, int maxsize);
 
 /*
