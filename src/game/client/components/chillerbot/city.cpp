@@ -211,6 +211,17 @@ void CCityHelper::OnServerMsg(const char *pMsg)
 		SetWalletMoney(Money);
 		return;
 	}
+	if(!str_comp(pMsg, "You don't have enough money in your wallet"))
+	{
+		m_pClient->m_ChatHelper.SayBuffer("/stats", true);
+		return;
+	}
+	if(!str_comp(pMsg, "No such command: money."))
+	{
+		m_AutoDropMoney[0] = false;
+		m_AutoDropMoney[1] = false;
+		return;
+	}
 }
 
 int CCityHelper::ClosestClientIDToPos(vec2 Pos, int Dummy)
