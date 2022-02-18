@@ -230,7 +230,11 @@ extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak)); //
 
 void CSqliteConnection::Print()
 {
-	if(m_pStmt != nullptr && sqlite3_expanded_sql != nullptr)
+	if(m_pStmt != nullptr
+#if defined(__GNUC__) && !defined(__MINGW32__)
+		&& sqlite3_expanded_sql != nullptr
+#endif
+	)
 	{
 		char *pExpandedStmt = sqlite3_expanded_sql(m_pStmt);
 		dbg_msg("sql", "SQLite statement: %s", pExpandedStmt);

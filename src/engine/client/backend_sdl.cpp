@@ -788,7 +788,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, g_Config.m_GfxOpenGLMajor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, g_Config.m_GfxOpenGLMinor);
-	dbg_msg("gfx", "Created OpenGL %zu.%zu context.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor);
+	dbg_msg("gfx", "Created OpenGL %d.%d context.", g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor);
 
 	if(m_BackendType == BACKEND_TYPE_OPENGL)
 	{
