@@ -1485,15 +1485,11 @@ void CCharacter::HandleTiles(int Index)
 	// live freeze
 	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Super)
 	{
-		if(!m_LiveFreeze && !m_Core.m_LiveFrozen)
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Live FREEZE has been activated");
 		m_LiveFreeze = true;
 		m_Core.m_LiveFrozen = true;
 	}
 	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Super)
 	{
-		if(m_LiveFreeze && m_Core.m_LiveFrozen)
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Live FREEZE has been deactivated");
 		m_LiveFreeze = false;
 		m_Core.m_LiveFrozen = false;
 	}
