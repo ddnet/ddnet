@@ -1,5 +1,5 @@
 if(TARGET_OS STREQUAL "windows")
-  set_extra_dirs_lib(EXCEPTION_HANDLING exception_handling)
+  set_extra_dirs_lib(EXCEPTION_HANDLING drmingw)
   find_file(EXCEPTION_HANDLING_LIBRARY
     NAMES exchndl.dll
     HINTS ${HINTS_EXCEPTION_HANDLING_LIBDIR}
