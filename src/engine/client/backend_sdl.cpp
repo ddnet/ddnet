@@ -61,6 +61,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 	auto *pSelf = (CGraphicsBackend_Threaded *)pUser;
 	std::unique_lock<std::mutex> Lock(pSelf->m_BufferSwapMutex);
 	// notify, that the thread started
+	pSelf->m_Started = true;
 	pSelf->m_BufferDoneCond.notify_all();
 	while(!pSelf->m_Shutdown)
 	{
@@ -75,11 +76,12 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 			pSelf->m_pBuffer = nullptr;
 			pSelf->m_BufferInProcess.store(false, std::memory_order_relaxed);
 			pSelf->m_BufferDoneCond.notify_all();
-		}
+
 #if defined(CONF_VIDEORECORDER)
-		if(IVideo::Current())
-			IVideo::Current()->NextVideoFrameThread();
+			if(IVideo::Current())
+				IVideo::Current()->NextVideoFrameThread();
 #endif
+		}
 	}
 }
 
@@ -97,7 +99,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_Thread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
-	m_BufferDoneCond.wait(Lock);
+	m_BufferDoneCond.wait(Lock, [this]() -> bool { return m_Started; });
 }
 
 void CGraphicsBackend_Threaded::StopProcessor()
@@ -127,7 +129,7 @@ bool CGraphicsBackend_Threaded::IsIdle() const
 void CGraphicsBackend_Threaded::WaitForIdle()
 {
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	if(m_pBuffer != nullptr)
+	while(m_pBuffer != nullptr)
 		m_BufferDoneCond.wait(Lock);
 }
 

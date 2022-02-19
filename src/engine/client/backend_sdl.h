@@ -72,6 +72,7 @@ private:
 	std::condition_variable m_BufferDoneCond;
 	CCommandBuffer *m_pBuffer;
 	std::atomic_bool m_Shutdown;
+	bool m_Started = false;
 	std::atomic_bool m_BufferInProcess;
 	void *m_Thread;
 
