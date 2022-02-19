@@ -702,7 +702,7 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 
-	if(g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		m_pCharacter->SetSolo(true);
 }
 

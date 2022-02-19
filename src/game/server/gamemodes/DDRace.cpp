@@ -70,13 +70,13 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
 		}
-		if(g_Config.m_SvTeam == 2 && (Team == TEAM_FLOCK || m_Teams.Count(Team) <= 1))
+		if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && (Team == TEAM_FLOCK || m_Teams.Count(Team) <= 1))
 		{
 			GameServer()->SendStartWarning(ClientID, "You have to be in a team with other tees to start");
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
 		}
-		if(g_Config.m_SvTeam != 3 && Team > TEAM_FLOCK && Team < TEAM_SUPER && m_Teams.Count(Team) < g_Config.m_SvMinTeamSize)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team > TEAM_FLOCK && Team < TEAM_SUPER && m_Teams.Count(Team) < g_Config.m_SvMinTeamSize)
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "Your team has fewer than %d players, so your team rank won't count", g_Config.m_SvMinTeamSize);
@@ -149,7 +149,7 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 	if(!GameServer()->PlayerModerating() && WasModerator)
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
 
-	if(g_Config.m_SvTeam != 3)
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 		m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 }
 
@@ -179,7 +179,7 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 
 	if(Team == TEAM_SPECTATORS)
 	{
-		if(g_Config.m_SvTeam != 3 && pCharacter)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && pCharacter)
 		{
 			// Joining spectators should not kill a locked team, but should still
 			// check if the team finished by you leaving it.
