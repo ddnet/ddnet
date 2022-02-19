@@ -46,7 +46,7 @@ void CTeamsCore::Reset()
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(g_Config.m_SvTeam == 3)
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 			m_Team[i] = i;
 		else
 			m_Team[i] = TEAM_FLOCK;
