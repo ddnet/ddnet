@@ -223,6 +223,7 @@ static void logger_file(const char *line, void *user)
 	aio_unlock(logfile);
 }
 
+#if !defined(CONF_FAMILY_WINDOWS)
 static void logger_file_no_newline(const char *line, void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
@@ -230,8 +231,7 @@ static void logger_file_no_newline(const char *line, void *user)
 	aio_write_unlocked(logfile, line, str_length(line));
 	aio_unlock(logfile);
 }
-
-#if defined(CONF_FAMILY_WINDOWS)
+#else
 static void logger_stdout_sync(const char *line, void *user)
 {
 	size_t length = str_length(line);
@@ -2122,7 +2122,7 @@ static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 	li.QuadPart -= 11644473600LL; // Windows epoch is in the past
 
 	t = li.QuadPart;
-	return t == li.QuadPart ? t : (time_t)-1;
+	return t == (time_t)li.QuadPart ? t : (time_t)-1;
 }
 #endif
 
@@ -2613,8 +2613,8 @@ void str_append(char *dst, const char *src, int dst_size)
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
-	strncpy(dst, src, dst_size - 1);
-	dst[dst_size - 1] = 0; /* assure null termination */
+	dst[0] = '\0';
+	strncat(dst, src, dst_size - 1);
 	str_utf8_fix_truncation(dst);
 }
 
