@@ -62,18 +62,18 @@ MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIE
 MACRO_CONFIG_INT(ClRunOnJoinConsole, tc_run_on_join_console, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether to use run on join in chat or console")
 
 
-MACRO_CONFIG_INT(ClShowFrozenText, TC_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
-MACRO_CONFIG_INT(ClShowFrozenHud, TC_frozen_tees_display, 2, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD info. (0 - off, 1 - normal, 2 - show skin)")
-MACRO_CONFIG_INT(ClFrozenMaxRows, TC_max_frozen_display_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display.")
+MACRO_CONFIG_INT(ClShowFrozenText, tc_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
+MACRO_CONFIG_INT(ClShowFrozenHud, tc_frozen_tees_display, 2, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD info. (0 - off, 1 - normal, 2 - show skin)")
+MACRO_CONFIG_INT(ClFrozenMaxRows, tc_max_frozen_display_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display.")
 
-MACRO_CONFIG_INT(ClFixKoGSpec, TC_kog_spec_skin, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "A fix to display spectating tees on KoG.")
+MACRO_CONFIG_INT(ClFixKoGSpec, tc_kog_spec_skin, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "A fix to display spectating tees on KoG.")
 
-MACRO_CONFIG_INT(ClFreezeUpdateFix, TC_freeze_update_fix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
+MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
 
 
-MACRO_CONFIG_INT(ClUnfreezeDelayHelper, TC_unfreeze_delay_helper, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "!EXPERIMENTAL! Removes some of the delay after unfrozen, ONLY USE ON GORES SERVERS!")
-MACRO_CONFIG_INT(ClUnfreezeHelperPercent, TC_unfreeze_helper_percent, 30, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")
-MACRO_CONFIG_INT(ClUnfreezeHelperLimit, TC_unfreeze_helper_limit, 45, 0, 500, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
+MACRO_CONFIG_INT(ClUnfreezeDelayHelper, tc_unfreeze_delay_helper, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "!EXPERIMENTAL! Removes some of the delay after unfrozen, ONLY USE ON GORES SERVERS!")
+MACRO_CONFIG_INT(ClUnfreezeHelperPercent, tc_unfreeze_helper_percent, 30, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")
+MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_unfreeze_helper_limit, 45, 0, 500, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
 
 //AAAAAAA
 MACRO_CONFIG_INT(ClAmIFrozen, EEEfrz, 0, 0, 1, CFGFLAG_CLIENT, "eeeee.")
