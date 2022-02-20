@@ -634,8 +634,10 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	HitRect.h = minimum(HitRect.h, (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) - HitRect.y);
 
+	bool DoubleClickable = false;
 	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &HitRect))
 	{
+		DoubleClickable |= gs_ListBoxNewSelected == ThisItemIndex;
 		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
 	}
@@ -647,7 +649,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
+			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
