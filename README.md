@@ -2,46 +2,43 @@
 
 ### Taters custom ddnet client with some small modifications
 
-## Features:
-**Display frozen tees in your team on your HUD** 
+# Features:
+### **Display frozen tees in your team on your HUD** 
 
-&nbsp;&nbsp;&nbsp;&nbsp;cl_frozen_tees_display
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_display**
+```
+0 - off
+1 - on
+2 - on + show skin of frozen tees
+```
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 - on
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_max_frozen_display_rows**
+```
+(1 - 10) adjust the maximum number of tees displayed
+```
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2 - on + show skin of frozen tees
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_text**
+```
+0 - off
+1 - on minimal text version of frozen tee HUD
+```
 
+### **KoG cl_prediction_margin PATCH**
+```
+default: 10
+cl_prediction_margin will work on KoG, however your hammer will be delayed more as you increase the margin
+set this between 15 and 25 if you are having lag, you can put it on a bind if it messes too much with your hammer
+```
 
-&nbsp;&nbsp;&nbsp;&nbsp;cl_max_frozen_display_rows
+### **cl_run_on_join works with console**
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1 - 10) adjust the maximum number of tees displayed
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;cl_frozen_tees_text
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 - on minimal text version of frozen tee HUD
-
-
-**KoG cl_prediction_margin PATCH**
-
-&nbsp;&nbsp;&nbsp;&nbsp;default: 10
-
-&nbsp;&nbsp;&nbsp;&nbsp;cl_prediction_margin will work on KoG, however your hammer will be delayed more as you increase the margin
-
-&nbsp;&nbsp;&nbsp;&nbsp;set this between 15 and 25 if you are having lag, you can put it on a bind if it messes too much with your hammer
-
-
-**cl_run_on_join as console**
-
-&nbsp;&nbsp;&nbsp;&nbsp;cl_run_on_join_console
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 - in chat (normal)
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1 - in console
-
-&nbsp;&nbsp;&nbsp;&nbsp;allows any console command to be used in cl_run_on_join 
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_run_on_join_console**
+```
+0 - output command to chat (normal)
+1 - output command to console
+```
 
 
-### Installation:
+# Installation:
 
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
