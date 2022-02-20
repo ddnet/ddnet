@@ -59,9 +59,24 @@ MACRO_CONFIG_INT(ClShowpred, cl_showpred, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE
 MACRO_CONFIG_INT(ClEyeWheel, cl_eye_wheel, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show eye wheel along together with emotes")
 MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How long the eyes emotes last")
 
-MACRO_CONFIG_INT(ClShowFrozenText, cl_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
-MACRO_CONFIG_INT(ClShowFrozenHud, cl_frozen_tees_display, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD info. (0 - off, 1 - normal, 2 - show skin)")
-MACRO_CONFIG_INT(ClFrozenMaxRows, cl_max_frozen_display_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display.")
+//Tater Variables
+MACRO_CONFIG_INT(ClShowFrozenText, TC_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
+MACRO_CONFIG_INT(ClShowFrozenHud, TC_frozen_tees_display, 2, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD info. (0 - off, 1 - normal, 2 - show skin)")
+MACRO_CONFIG_INT(ClFrozenMaxRows, TC_max_frozen_display_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display.")
+
+MACRO_CONFIG_INT(ClFixKoGSpec, TC_kog_spec_skin, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "A fix to display spectating tees on KoG.")
+
+MACRO_CONFIG_INT(ClFreezeUpdateFix, TC_freeze_update_fix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
+
+
+MACRO_CONFIG_INT(ClUnfreezeDelayHelper, TC_unfreeze_delay_helper, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "!EXPERIMENTAL! Removes some of the delay after unfrozen, ONLY USE ON GORES SERVERS!")
+MACRO_CONFIG_INT(ClUnfreezeHelperPercent, TC_unfreeze_helper_percent, 30, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")
+MACRO_CONFIG_INT(ClUnfreezeHelperLimit, TC_unfreeze_helper_limit, 45, 0, 500, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
+
+//AAAAAAA
+MACRO_CONFIG_INT(ClAmIFrozen, EEEfrz, 0, 0, 1, CFGFLAG_CLIENT, "eeeee.")
+MACRO_CONFIG_INT(ClWhatsMyPing, EEEpng, 0, 0, 9999, CFGFLAG_CLIENT, "eeeee.")
+
 
 MACRO_CONFIG_INT(ClAirjumpindicator, cl_airjumpindicator, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "")
 MACRO_CONFIG_INT(ClThreadsoundloading, cl_threadsoundloading, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Load sound files threaded")

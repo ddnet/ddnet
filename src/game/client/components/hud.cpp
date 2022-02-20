@@ -602,6 +602,12 @@ void CHud::RenderTextInfo()
 		if(g_Config.m_ClShowFrozenText > 0)
 			TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
 
+		//if(m_pClient->m_PredictedChar.m_ActiveWeapon)
+		
+		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_PrevPredicted.m_FreezeEnd);
+		//str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClWhatsMyPing);
+
+		//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
 		if(g_Config.m_ClShowFrozenHud > 0 && !m_pClient->m_Scoreboard.Active())
 		{
 			CTeeRenderInfo FreezeInfo;
@@ -685,6 +691,9 @@ void CHud::RenderTextInfo()
 							TeeInfo.m_ColorBody.r *= 0.4;
 							TeeInfo.m_ColorBody.g *= 0.4;
 							TeeInfo.m_ColorBody.b *= 0.4;
+							TeeInfo.m_ColorFeet.r *= 0.4;
+							TeeInfo.m_ColorFeet.g *= 0.4;
+							TeeInfo.m_ColorFeet.b *= 0.4;
 						}
 						if(Frozen)
 							RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(1.0f, 0.0f), TeeRenderPos, Alpha);

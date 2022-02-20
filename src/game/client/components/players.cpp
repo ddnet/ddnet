@@ -628,7 +628,7 @@ void CPlayers::OnRender()
 	{
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
 		m_aRenderInfo[i].m_ShineDecoration = m_pClient->m_aClients[i].m_LiveFrozen;
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+		if((m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
 			int Skin = m_pClient->m_Skins.Find("x_ninja");
@@ -664,7 +664,7 @@ void CPlayers::OnRender()
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			// only render active characters
-			if(p % 3 == 0 && !m_pClient->m_aClients[i].m_SpecCharPresent)
+			if(p % 3 == 0 && !m_pClient->m_aClients[i].m_SpecCharPresent && !g_Config.m_ClFixKoGSpec)
 				continue;
 			if(p % 3 != 0 && !m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				continue;
@@ -675,7 +675,12 @@ void CPlayers::OnRender()
 				{
 					continue;
 				}
-				vec2 Pos = m_pClient->m_aClients[i].m_SpecChar;
+
+				vec2 Pos;
+				if(!g_Config.m_ClFixKoGSpec)
+					Pos = m_pClient->m_aClients[i].m_SpecChar;
+				else
+					Pos = m_pClient->m_aClients[i].m_RenderPos;
 				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Pos);
 			}
 			else
@@ -704,7 +709,10 @@ void CPlayers::OnRender()
 				{
 					RenderPlayer(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
 				}
+				if(Local)
+					g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Latency;
 			}
+			
 		}
 	}
 }

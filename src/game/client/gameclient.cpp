@@ -2455,6 +2455,11 @@ void CGameClient::UpdateRenderedCharacters()
 					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))
 						m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
 				}
+				if(pChar && pChar->m_FreezeTime > 0)
+					g_Config.m_ClAmIFrozen = 1;
+				else
+					g_Config.m_ClAmIFrozen = 0;
+
 			}
 			else
 			{
