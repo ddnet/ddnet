@@ -2,6 +2,10 @@
 
 ### Taters custom ddnet client with some small modifications
 
+# Installation:
+
+Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
+
 # Features:
 ### **Display frozen tees in your team on your HUD** 
 
@@ -70,7 +74,3 @@ ONLY USE ON GORES MAPS! May cause jittering when using with dummy!
 Higher values will likely cause extra jittering after you are unfrozen
 ```
 
-
-# Installation:
-
-Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
