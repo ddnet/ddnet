@@ -5,6 +5,8 @@
 #include <game/client/components/chillerbot/chillerbotux.h>
 #include <game/client/gameclient.h>
 
+#include <engine/serverbrowser.h>
+
 #include "remotecontrol.h"
 
 void CRemoteControl::OnChatMessage(int ClientID, int Team, const char *pMsg)
@@ -26,13 +28,17 @@ void CRemoteControl::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	if(Team != 3) // whisper only
 		return;
 
+	CServerInfo ServerInfo;
+	Client()->GetServerInfo(&ServerInfo);
+	bool IsFDDRace = !str_comp(ServerInfo.m_aGameType, "F-DDrace");
+
 	char aBuf[128];
 	int Num = 0;
 	char aMsg[3][2048] = {{0}};
 	for(int i = 0, k = 0; pMsg[i]; i++, k++)
 	{
 		char c = pMsg[i];
-		if(c == ' ' && Num < 2)
+		if(c == ' ' && Num < (IsFDDRace ? 2 : 1))
 		{
 			Num++;
 			k = -1;
@@ -46,19 +52,28 @@ void CRemoteControl::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
-	else if(Num == 1)
+	else if(Num == 1 && IsFDDRace)
 	{
 		str_format(aBuf, sizeof(aBuf), "Error: %s missing command (usage: '/whisper name token command')", aName);
 		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
-	if(!str_comp(aMsg[1], g_Config.m_ClRemoteControlTokenAdmin))
-		m_pClient->Console()->ExecuteLine(aMsg[2]);
-	else if(!str_comp(aMsg[1], g_Config.m_ClRemoteControlToken))
-		ExecuteWhitelisted(aMsg[2]);
+	if(!str_comp(aMsg[IsFDDRace ? 1 : 0], g_Config.m_ClRemoteControlTokenAdmin))
+		m_pClient->Console()->ExecuteLine(aMsg[IsFDDRace ? 2 : 1]);
+	else if(!str_comp(aMsg[IsFDDRace ? 1 : 0], g_Config.m_ClRemoteControlToken))
+		ExecuteWhitelisted(aMsg[IsFDDRace ? 2 : 1]);
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "Error: %s failed to remote control (invalid token)", aName);
+		dbg_msg("chillerbot", "whisper='%s'", pMsg);
+		dbg_msg(
+			"chillerbot",
+			"Error: %s failed to remote control (invalid token attempt='%s' token='%s' admin='%s')",
+			aName, aMsg[IsFDDRace ? 1 : 0], g_Config.m_ClRemoteControlToken, g_Config.m_ClRemoteControlTokenAdmin);
+		str_format(
+			aBuf,
+			sizeof(aBuf),
+			"Error: %s failed to remote control (invalid token)",
+			aName);
 		m_pClient->m_ChatHelper.SayBuffer(aBuf);
 		return;
 	}
