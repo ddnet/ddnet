@@ -59,13 +59,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	m_Address = BindAddr;
 	m_pNetBan = pNetBan;
 
-	// clamp clients
-	m_MaxClients = MaxClients;
-	if(m_MaxClients > NET_MAX_CLIENTS)
-		m_MaxClients = NET_MAX_CLIENTS;
-	if(m_MaxClients < 1)
-		m_MaxClients = 1;
-
+	m_MaxClients = clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
 	m_MaxClientsPerIP = MaxClientsPerIP;
 
 	m_NumConAttempts = 0;

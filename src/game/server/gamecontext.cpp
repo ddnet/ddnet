@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/tl/sorted_array.h>
+#include <iostream>
 
 #include "gamecontext.h"
 #include "teeinfo.h"
@@ -362,7 +363,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 
 	if(To == -1)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(!((Server()->IsSixup(i) && (Flags & CHAT_SIXUP)) ||
 				   (!Server()->IsSixup(i) && (Flags & CHAT_SIX))))
@@ -420,7 +421,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NOSEND, -1);
 
 		// send to the clients
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(!m_apPlayers[i])
 				continue;
@@ -444,7 +445,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NOSEND, -1);
 
 		// send to the clients
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(m_apPlayers[i] != 0)
 			{
@@ -617,7 +618,7 @@ void CGameContext::SendVoteSet(int ClientID)
 
 	if(ClientID == -1)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(!m_apPlayers[i])
 				continue;
@@ -1337,7 +1338,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	// update client infos (others before local)
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < Server()->MaxClients(); ++i)
 	{
 		if(i == ClientID || !m_apPlayers[i] || !Server()->ClientIngame(i))
 			continue;
@@ -2308,7 +2309,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 				}
 
-				for(int i = 0; i < MAX_CLIENTS; i++)
+				for(int i = 0; i < Server()->MaxClients(); i++)
 				{
 					if(i != ClientID)
 					{
