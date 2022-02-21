@@ -200,6 +200,12 @@ if(NOT MSVC AND NOT HAIKU)
   # -fstack-protector-all doesn't work on MinGW.
   add_c_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
 
+  # Disable PIE since it causes Thunar not to recognize executables:
+  # https://gitlab.xfce.org/xfce/thunar/-/issues/168
+  if(TARGET_OS STREQUAL "linux")
+    add_c_compiler_flag_if_supported(OUR_FLAGS -no-pie)
+  endif()
+
   # Disable exceptions as DDNet does not use them.
   add_c_compiler_flag_if_supported(OUR_FLAGS -fno-exceptions)
 
