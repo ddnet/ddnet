@@ -145,9 +145,6 @@ Dynamic Camera
 Emoticon
 == Emotikona
 
-Enter
-== Wejdź
-
 Error
 == Błąd
 
@@ -1066,18 +1063,6 @@ Reconnect in %d sec
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork jest grą online polegającą na współpracy z innymi graczami, gdzie twoim i ich zadaniem jest dotrzeć do mety na końcu mapy. Jako nowy gracz powinieneś zacząć od serwerów Novice, które hostują najłatwiejsze mapy. Weź pod uwagę ping, aby wybrać serwer najbliżej siebie.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Mapy zawierają freeze, który tymczasowo uniemożliwia poruszanie się tee. Powienieneś współpracować z innymi, aby ukończyć wszystkie części mapy.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Rolka myszki zmienia narzędzie (broń). Młotek (lewy przycisk myszki) może być użyty do uderzania innych tee i odmrażania ich, gdy są unieruchomieni po kontakcie z freezem.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hak (prawy przycisk myszki) może być użyty do wspinania się po mapie i łapania innych tee (przyciągania ich do siebie).
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Najważniejszym przyciskiem jest T. Dzięki niemu możesz rozmawiać z innymi, aby nauczyć się podstaw i trików związanych z grą.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Przed wejściem na dowolny serwer zalecane jest sprawdzenie ustawień w celu dostosowania ich do własnych upodobań.
 
@@ -1236,6 +1221,12 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR

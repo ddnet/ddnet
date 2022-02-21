@@ -141,9 +141,6 @@ Dynamic Camera
 Emoticon
 == Hangulatjel
 
-Enter
-== Belépés
-
 Error
 == Hiba
 
@@ -1042,18 +1039,6 @@ Markers:
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == A DDraceNetwork együttműködésen alapuló online játékként tekinthető, ahol a cél az, hogy te és egy csapat Tee elérje a célvonalat. Ha újonc vagy, a kezdő (Novice) szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. A lehető legkisebb ping választása alapján válassz egy szervert.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== A pályákon fagyasztó részeket találtok, melyek ideiglenesen blokkolják a játékos mozgását. Együtt kell dolgoznod a pályarészekkel az átjutáshoz.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== A görgő megváltoztatja a fegyvereket. A kalapács (bal egérgomb) segítségével más Játékosokat megüthetsz és ütésekkel kiolvadhatnak a fagyásból.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== A horoggal (jobb egérgomb) megkapaszkodhatsz néhány platformon és más Játékosokat is megragadhatsz vele.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== A legfontosabb kulcs a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Ajánlott, hogy ellenőrizd a beállításokat, hogy a kedvedhez igazítsd őket, mielőtt csatlakoznál egy szerverhez. (Tipp: szűrők)
 
@@ -1333,6 +1318,12 @@ https://wiki.ddnet.tw/
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat.
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
 
 Settings file
 == Beállítások fájl

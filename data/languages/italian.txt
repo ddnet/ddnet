@@ -147,9 +147,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Entra
-
 Error
 == Errore
 
@@ -722,18 +719,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork è un gioco online cooperativo dove l'obbiettivo è per te ed il tuo gruppo di tee di raggiungere la linea del traguardo della mappa. Da nuovo arrivato dovresti iniziare sui server Novice, dove sono ospitate le mappe più facili. Considera il ping per scegliere un server vicino a te.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Le mappe contengono freeze, che rendono temporaneamente impossibile il movimento per un tee. Devi fare gioco di squadra per superare queste parti.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La rotellina del mouse cambia le armi. Il Martello (tasto sinistro mouse) può essere usato per colpire altri tee e svegliarli quando sono stati gelati nel freeze.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Il Rampino (tasto destro mouse) può essere usato per aggrapparsi ad alcune superfici e per agganciare altri tee.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== La cosa più importante è la comunicazione: Non ci sono tutorial quindi dovrai scrivere in chat (tasto t) con altri giocatori per imparare le basi e i trucchi del gioco.
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Usa il tasto k per ucciderti (respawn), il tasto q per andare in modalità pausa e guardare altri giocatori. Guarda le impostazioni per gli altri tasti.
 
@@ -1252,6 +1237,12 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR
