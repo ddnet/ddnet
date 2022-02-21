@@ -15,12 +15,15 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 1 - on
 2 - on + show skin of frozen tees
 ```
-
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_max_frozen_display_rows**
 ```
 (1 - 10) adjust the maximum number of tees displayed
 ```
-
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_only_inteam**
+```
+0 - always display (team 0) 
+1 - only display in team
+```
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_text**
 ```
 0 - off
