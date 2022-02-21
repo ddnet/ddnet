@@ -488,12 +488,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 				pCommand->m_pCapabilities->m_TextBuffering = false;
 				pCommand->m_pCapabilities->m_QuadContainerBuffering = false;
 
-				if(GLEW_ARB_texture_non_power_of_two || pCommand->m_GlewMajor > 2)
-					pCommand->m_pCapabilities->m_NPOTTextures = true;
-				else
-				{
-					pCommand->m_pCapabilities->m_NPOTTextures = false;
-				}
+				pCommand->m_pCapabilities->m_NPOTTextures = GLEW_ARB_texture_non_power_of_two || pCommand->m_GlewMajor > 2;
 
 				if(!pCommand->m_pCapabilities->m_NPOTTextures || (!pCommand->m_pCapabilities->m_3DTextures && !pCommand->m_pCapabilities->m_2DArrayTextures))
 				{
@@ -576,12 +571,12 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 				if(GLEW_KHR_debug)
 				{
 					glEnable(GL_DEBUG_OUTPUT);
-					glDebugMessageCallback(GfxOpenGLMessageCallback, 0);
+					glDebugMessageCallback((GLDEBUGPROC)GfxOpenGLMessageCallback, 0);
 				}
 				else if(GLEW_ARB_debug_output)
 				{
 					glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-					glDebugMessageCallbackARB(GfxOpenGLMessageCallback, 0);
+					glDebugMessageCallbackARB((GLDEBUGPROC)GfxOpenGLMessageCallback, 0);
 				}
 				dbg_msg("gfx", "Enabled OpenGL debug mode");
 			}
@@ -1829,7 +1824,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 	{
 		for(int i = m_BufferObjectIndices.size(); i < Index + 1; ++i)
 		{
-			m_BufferObjectIndices.push_back(SBufferObject(0));
+			m_BufferObjectIndices.emplace_back(0);
 		}
 	}
 
@@ -2329,9 +2324,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 	}
 }
 
-#ifdef BACKEND_GL_MODERN_API
 #undef BACKEND_GL_MODERN_API
-#endif
 
 #endif
 

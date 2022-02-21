@@ -12,35 +12,35 @@ endif()
 
 set_extra_dirs_lib(FFMPEG ffmpeg)
 find_library(AVCODEC_LIBRARY
-  NAMES avcodec libavcodec avcodec.58
+  NAMES avcodec.59 avcodec libavcodec
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVCODEC_LIBRARY_DIRS}
   PATHS ${PATHS_AVCODEC_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVFORMAT_LIBRARY
-  NAMES avformat libavformat avformat.58
+  NAMES avformat.59 avformat libavformat
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVFORMAT_LIBRARY_DIRS}
   PATHS ${PATHS_AVFORMAT_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVUTIL_LIBRARY
-  NAMES avutil libavutil avutil.56
+  NAMES avutil.57 avutil libavutil
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVUTIL_LIBRARY_DIRS}
   PATHS ${PATHS_AVUTIL_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWSCALE_LIBRARY
-  NAMES swscale libswscale swscale.5
+  NAMES swscale.6 swscale libswscale
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWSCALE_LIBRARY_DIRS}
   PATHS ${PATHS_SWSCALE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWRESAMPLE_LIBRARY
-  NAMES swresample libswresample swresample.3
+  NAMES swresample.4 swresample libswresample
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWRESAMPLE_LIBRARY_DIRS}
   PATHS ${PATHS_SWRESAMPLE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
@@ -146,14 +146,23 @@ set(FFMPEG_INCLUDE_DIRS
 )
 
 is_bundled(FFMPEG_BUNDLED "${AVCODEC_LIBRARY}")
-if(FFMPEG_BUNDLED AND TARGET_OS STREQUAL "windows")
-  set(FFMPEG_COPY_FILES
-    "${EXTRA_FFMPEG_LIBDIR}/avcodec-58.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avformat-58.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/avutil-56.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/swresample-3.dll"
-    "${EXTRA_FFMPEG_LIBDIR}/swscale-5.dll"
-  )
-else()
-  set(FFMPEG_COPY_FILES)
+set(FFMPEG_COPY_FILES)
+if(FFMPEG_BUNDLED)
+  if(TARGET_OS STREQUAL "windows")
+    set(FFMPEG_COPY_FILES
+      "${EXTRA_FFMPEG_LIBDIR}/avcodec-59.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/avformat-59.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/avutil-57.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/swresample-4.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/swscale-6.dll"
+    )
+  elseif(TARGET_OS STREQUAL "mac")
+    set(FFMPEG_COPY_FILES
+      "${EXTRA_FFMPEG_LIBDIR}/libavcodec.59.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libavformat.59.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libavutil.57.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libswresample.4.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libswscale.6.dylib"
+    )
+  endif()
 endif()

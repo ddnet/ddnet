@@ -7,7 +7,7 @@
 #include <engine/storage.h>
 #include <game/version.h>
 
-#include <stdlib.h> // system
+#include <cstdlib> // system
 
 using std::map;
 using std::string;
@@ -93,8 +93,8 @@ CUpdater::CUpdater()
 	m_Percent = 0;
 	m_Lock = lock_create();
 
-	str_format(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC ".%d.tmp", pid());
-	str_format(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC ".%d.tmp", pid());
+	IStorage::FormatTmpPath(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC);
+	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
 }
 
 void CUpdater::Init()
@@ -247,7 +247,7 @@ bool CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ, IStorage::TYPE_ABSOLUTE);
+	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
 	if(!File)
 		return;
 

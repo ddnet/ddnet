@@ -11,7 +11,8 @@ class CDebugHud : public CComponent
 	void RenderHint();
 
 public:
-	virtual void OnRender();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnRender() override;
 };
 
 #endif

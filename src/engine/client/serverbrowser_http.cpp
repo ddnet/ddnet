@@ -23,7 +23,7 @@ public:
 		MAX_URLS = 16,
 	};
 	CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CChooseMaster() {}
+	virtual ~CChooseMaster();
 
 	bool GetBestUrl(const char **pBestUrl) const;
 	void Reset();
@@ -44,13 +44,17 @@ private:
 	};
 	class CJob : public IJob
 	{
+		LOCK m_Lock;
 		std::shared_ptr<CData> m_pData;
+		std::unique_ptr<CHead> m_pHead PT_GUARDED_BY(m_Lock);
+		std::unique_ptr<CGet> m_pGet PT_GUARDED_BY(m_Lock);
 		virtual void Run();
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
-			m_pData(std::move(pData)) {}
-		virtual ~CJob() {}
+			m_pData(std::move(pData)) { m_Lock = lock_create(); }
+		virtual ~CJob() { lock_destroy(m_Lock); }
+		void Abort();
 	};
 
 	IEngine *m_pEngine;
@@ -73,6 +77,14 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const cha
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		str_copy(m_pData->m_aaUrls[i], ppUrls[i], sizeof(m_pData->m_aaUrls[i]));
+	}
+}
+
+CChooseMaster::~CChooseMaster()
+{
+	if(m_pJob)
+	{
+		m_pJob->Abort();
 	}
 }
 
@@ -113,6 +125,21 @@ void CChooseMaster::Refresh()
 		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
 }
 
+void CChooseMaster::CJob::Abort()
+{
+	lock_wait(m_Lock);
+	if(m_pHead != nullptr)
+	{
+		m_pHead->Abort();
+	}
+
+	if(m_pGet != nullptr)
+	{
+		m_pGet->Abort();
+	}
+	lock_unlock(m_Lock);
+}
+
 void CChooseMaster::CJob::Run()
 {
 	// Check masters in a random order.
@@ -139,21 +166,37 @@ void CChooseMaster::CJob::Run()
 	{
 		aTimeMs[i] = -1;
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		CHead Head(pUrl, Timeout, HTTPLOG::FAILURE);
-		IEngine::RunJobBlocking(&Head);
-		if(Head.State() != HTTP_DONE)
+		CHead *pHead = new CHead(pUrl, Timeout, HTTPLOG::FAILURE);
+		lock_wait(m_Lock);
+		m_pHead = std::unique_ptr<CHead>(pHead);
+		lock_unlock(m_Lock);
+		IEngine::RunJobBlocking(pHead);
+		if(pHead->State() == HTTP_ABORTED)
+		{
+			dbg_msg("serverbrowse_http", "master chooser aborted");
+			return;
+		}
+		if(pHead->State() != HTTP_DONE)
 		{
 			continue;
 		}
 		int64_t StartTime = time_get_microseconds();
-		CGet Get(pUrl, Timeout, HTTPLOG::FAILURE);
-		IEngine::RunJobBlocking(&Get);
+		CGet *pGet = new CGet(pUrl, Timeout, HTTPLOG::FAILURE);
+		lock_wait(m_Lock);
+		m_pGet = std::unique_ptr<CGet>(pGet);
+		lock_unlock(m_Lock);
+		IEngine::RunJobBlocking(pGet);
 		int Time = (time_get_microseconds() - StartTime) / 1000;
-		if(Get.State() != HTTP_DONE)
+		if(pHead->State() == HTTP_ABORTED)
+		{
+			dbg_msg("serverbrowse_http", "master chooser aborted");
+			return;
+		}
+		if(pGet->State() != HTTP_DONE)
 		{
 			continue;
 		}
-		json_value *pJson = Get.ResultJson();
+		json_value *pJson = pGet->ResultJson();
 		if(!pJson)
 		{
 			continue;
@@ -195,7 +238,7 @@ class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CServerBrowserHttp() {}
+	virtual ~CServerBrowserHttp();
 	void Update();
 	bool IsRefreshing() { return m_State != STATE_DONE; }
 	void Refresh();
@@ -261,6 +304,15 @@ CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, con
 {
 	m_pChooseMaster->Refresh();
 }
+
+CServerBrowserHttp::~CServerBrowserHttp()
+{
+	if(m_pGetServers != nullptr)
+	{
+		m_pGetServers->Abort();
+	}
+}
+
 void CServerBrowserHttp::Update()
 {
 	if(m_State == STATE_WANTREFRESH)
@@ -344,11 +396,7 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 		}
 	}
 	str_truncate(aHost, sizeof(aHost), pRest + Start, End - Start);
-	if(net_addr_from_str(pOut, aHost))
-	{
-		return true;
-	}
-	return false;
+	return net_addr_from_str(pOut, aHost) != 0;
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
@@ -447,7 +495,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
 	const char **ppUrls = apUrls;
 	int NumUrls = 0;
-	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(File)
 	{
 		CLineReader Lines;

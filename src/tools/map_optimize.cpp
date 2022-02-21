@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <base/math.h>
 #include <base/system.h>
+#include <cstdint>
 #include <engine/shared/datafile.h>
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
-#include <stdint.h>
 #include <utility>
 #include <vector>
 
@@ -78,6 +78,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 
 int main(int argc, const char **argv)
 {
+	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
@@ -104,7 +105,7 @@ int main(int argc, const char **argv)
 	{
 		fs_makedir("out");
 		char aBuff[IO_MAX_PATH_LENGTH];
-		pStorage->StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
+		IStorage::StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
 		str_format(aFileName, sizeof(aFileName), "out/%s.map", aBuff);
 	}
 
@@ -324,5 +325,6 @@ int main(int argc, const char **argv)
 	DataFile.Close();
 	df.Finish();
 
+	cmdline_free(argc, argv);
 	return 0;
 }

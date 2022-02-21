@@ -3,9 +3,9 @@
 
 #include <base/tl/sorted_array.h>
 
-#include <limits.h>
+#include <climits>
+#include <cmath>
 #include <limits>
-#include <math.h>
 
 #include <game/generated/client_data.h>
 
@@ -73,6 +73,16 @@ void CGameConsole::CInstance::ClearBacklog()
 	m_BacklogActPage = 0;
 }
 
+void CGameConsole::CInstance::ClearBacklogYOffsets()
+{
+	auto *pEntry = m_Backlog.First();
+	while(pEntry)
+	{
+		pEntry->m_YOffset = -1.0f;
+		pEntry = m_Backlog.Next(pEntry);
+	}
+}
+
 void CGameConsole::CInstance::ClearHistory()
 {
 	m_History.Init();
@@ -115,7 +125,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 {
 	bool Handled = false;
 
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL)) // jump to spaces and special ASCII characters
+	if(m_pGameConsole->Input()->ModifierIsPressed()) // jump to spaces and special ASCII characters
 	{
 		int SearchDirection = 0;
 		if(m_pGameConsole->Input()->KeyPress(KEY_LEFT) || m_pGameConsole->Input()->KeyPress(KEY_BACKSPACE))
@@ -176,7 +186,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			m_Input.SetCursorOffset(FoundAt);
 		}
 	}
-	if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_V))
+	if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_V))
 	{
 		const char *Text = m_pGameConsole->Input()->GetClipboardText();
 		if(Text)
@@ -203,23 +213,23 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			m_Input.Append(aLine);
 		}
 	}
-	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_C))
+	else if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_C))
 	{
 		m_pGameConsole->Input()->SetClipboardText(m_Input.GetString());
 	}
-	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_A))
+	else if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_A))
 	{
 		m_Input.SetCursorOffset(0);
 	}
-	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_E))
+	else if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_E))
 	{
 		m_Input.SetCursorOffset(m_Input.GetLength());
 	}
-	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_U))
+	else if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_U))
 	{
 		m_Input.SetRange("", 0, m_Input.GetCursorOffset());
 	}
-	else if(m_pGameConsole->Input()->KeyIsPressed(KEY_LCTRL) && m_pGameConsole->Input()->KeyPress(KEY_K))
+	else if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_K))
 	{
 		m_Input.SetRange("", m_Input.GetCursorOffset(), m_Input.GetLength());
 	}
@@ -681,7 +691,7 @@ void CGameConsole::OnRender()
 		float LineOffset = 1.0f;
 
 		bool WantsSelectionCopy = false;
-		if(Input()->KeyIsPressed(KEY_LCTRL) && Input()->KeyPress(KEY_C))
+		if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_C))
 			WantsSelectionCopy = true;
 		std::string SelectionString;
 
@@ -991,6 +1001,17 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
 
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
+}
+
+void CGameConsole::OnInit()
+{
+	// add resize event
+	Graphics()->AddWindowResizeListener([this](void *) {
+		m_LocalConsole.ClearBacklogYOffsets();
+		m_RemoteConsole.ClearBacklogYOffsets();
+		m_HasSelection = false;
+	},
+		nullptr);
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)

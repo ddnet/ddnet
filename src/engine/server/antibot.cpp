@@ -120,10 +120,10 @@ void CAntibot::OnHammerFire(int ClientID)
 	Update();
 	AntibotOnHammerFire(ClientID);
 }
-void CAntibot::OnHammerHit(int ClientID)
+void CAntibot::OnHammerHit(int ClientID, int TargetID)
 {
 	Update();
-	AntibotOnHammerHit(ClientID);
+	AntibotOnHammerHit(ClientID, TargetID);
 }
 void CAntibot::OnDirectInput(int ClientID)
 {
@@ -195,9 +195,7 @@ CAntibot::CAntibot() :
 	m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
 {
 }
-CAntibot::~CAntibot()
-{
-}
+CAntibot::~CAntibot() = default;
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -225,7 +223,7 @@ void CAntibot::OnPlayerDestroy(int ClientID) {}
 void CAntibot::OnSpawn(int ClientID) {}
 void CAntibot::OnHammerFireReloading(int ClientID) {}
 void CAntibot::OnHammerFire(int ClientID) {}
-void CAntibot::OnHammerHit(int ClientID) {}
+void CAntibot::OnHammerHit(int ClientID, int TargetID) {}
 void CAntibot::OnDirectInput(int ClientID) {}
 void CAntibot::OnCharacterTick(int ClientID) {}
 void CAntibot::OnHookAttach(int ClientID, bool Player) {}

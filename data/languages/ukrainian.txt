@@ -1,6 +1,6 @@
 ##### authors #####
 #originally created by:
-#	.ua and Ivan
+#	.ua and Ivan. REWORKED BY SwiatoslaW#2927 (09.12.2021)
 #modified by:
 #	404_not_found		2011-07-30 19:50:58
 ##### /authors #####
@@ -42,9 +42,6 @@ Chat
 
 Close
 == Зачинити
-
-Compatible version
-== Сумісна версія
 
 Connect
 == Під’єднатись
@@ -181,9 +178,6 @@ MOTD
 Map
 == Карта
 
-Maximum ping:
-== Макс. пінг:
-
 Mouse sens.
 == Чутлив. миші
 
@@ -218,7 +212,7 @@ No servers found
 == Сервера не знайдені
 
 No servers match your filter criteria
-== Не знайдено ні одного сервара, який би відповідав вашим критеріям
+== Не знайдено ні одного сервара, який би відповідав вашим фільтрам
 
 Ok
 == Ок
@@ -230,7 +224,7 @@ Password
 == Пароль
 
 Password incorrect
-== пароль введено невірно
+== неправильний пароль
 
 Ping
 == Пінг
@@ -240,7 +234,7 @@ Pistol
 
 [Demo browser]
 Play
-== Перегляд
+== Перегляд демо
 
 Player
 == Гравець
@@ -279,7 +273,7 @@ Sample rate
 == Частота
 
 Score
-== Очки
+== бали
 
 Score limit
 == Ліміт очок
@@ -407,7 +401,7 @@ Your skin
 == Ваш скін
 
 Info
-== Інфо
+== Інформація
 
 Hue
 == Відтінок
@@ -455,7 +449,7 @@ Free-View
 == Вільний перегляд
 
 Server best:
-== Найкраще сервера
+== Найкращі сервера
 
 Personal best:
 == Твоє найкраще
@@ -530,7 +524,7 @@ Most importantly communication is key: There is no tutorial so you'll have to ch
 == Найголовніше, що спілкування є ключовим: туторіалу немає, тому вам доведеться спілкуватися з іншими гравцями, щоб засвоїти основи та хитрощі гри.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Рекомендується перевірити налаштування, щоб підлаштувати їх до душі перед тим, як приєднатися до сервера.
+== Рекомендується перевірити налаштування, щоб підлаштувати їх для комфортної гри перед тим, як приєднатися до сервера.
 
 Please enter your nickname below.
 == Будь ласка, введіть свій нікнейм нижче
@@ -572,13 +566,13 @@ Video name:
 == Назва відео
 
 Show DDNet map finishes in server browser
-== Показувати статус завершення карти DDNet в браузері сервера
+== Показувати завершені карти DDNet в браузері сервера
 
 transmits your player name to info2.ddnet.tw
 == передає Ваш нікнейм на info2.ddnet.tw
 
 Search
-== Поиск
+== Пошук
 
 Exclude
 == Виключити
@@ -593,7 +587,7 @@ Show friends only
 == Тільки з друзями
 
 Strict gametype filter
-== Строгий фільтр р-мів
+== Строгий фільтр режимів
 
 Server address:
 == Адреса сервера
@@ -608,13 +602,13 @@ Indicate map finish
 == Показувати фініші карт
 
 Unfinished map
-== Нефінішована карта
+== Не пройдені карти
 
 Countries
 == Країни
 
 Types
-== Тип
+== Типи
 
 Friends
 == Друзі
@@ -629,7 +623,7 @@ Add Friend
 == Додати друга
 
 DDNet %s is out!
-== Вийшов DDNet %s!
+== Вийшла нова версія DDNet %s!
 
 Downloading %s:
 == Завантаження %s:
@@ -644,7 +638,7 @@ Update now
 == Оновити зараз
 
 Restart
-== Перезапустити
+== Перезавантажити
 
 Select a name
 == Оберіть ім'я
@@ -656,7 +650,7 @@ Remove chat
 == Видалити чат
 
 Demofile: %s
-== Демо: %s
+== Демофайл: %s
 
 Parent Folder
 == Батьківський каталог
@@ -710,16 +704,16 @@ Fetch Info
 == Отримати інформацію
 
 Rename
-== Перейменув.
+== Перейменуватися
 
 Render
 == Почати рендер
 
 Connecting dummy
-== Підключення Dummy
+== Підключення даммі
 
 Connect Dummy
-== Підключити Dummy
+== Підключити даммі
 
 Player options
 == Опції гравця
@@ -728,7 +722,7 @@ Change settings
 == Змінити налаштування
 
 Kick player
-== Забанити гравця
+== Викинути гравця
 
 Move player to spectators
 == Перемістити гравця до глядачів
@@ -755,7 +749,7 @@ Save
 == Зберегти
 
 Switch weapon when out of ammo
-== Перемикати зброю без патронів
+== Змінювати зброю коли закінчились боєприпаси
 
 Reset wanted weapon on death
 == Скидати вибір зброї при смерті
@@ -764,13 +758,13 @@ Show only chat messages from friends
 == Показувати повідомлення тільки від друзів
 
 Name plates size
-== Розмір
+== Розмір ніків 
 
 Use team colors for name plates
 == Розфарбовувати ім'я гравця кольором команди
 
 Show clan above name plates
-== Показувати клан
+== Показувати клан над ніком
 
 Clan plates size
 == Розмір панелі клану
@@ -782,7 +776,7 @@ Automatically record demos
 == Автоматично записувати демо
 
 Automatically take game over screenshot
-== Робити знімок результатів гри
+== Автоматично робити знімок результатів гри
 
 Max demos
 == Максимальна кількість демо
@@ -797,10 +791,10 @@ Show console window
 == Показувати консоль
 
 Automatically take statboard screenshot
-== Автоматично робити скрін результатів
+== Автоматично робити знімок результатів
 
 Automatically create statboard csv
-== Автоматично створювати statboard csv
+== Автоматично створювати статистику csv
 
 Max CSVs
 == Максимум CSV
@@ -839,19 +833,19 @@ Show others
 == Показувати інших
 
 Show all
-== Показувати всіх
+== Показувати все
 
 Toggle dyncam
-== Переключити дин. камеру
+== Включити динамічну камеру
 
 Toggle dummy
-== Переключити Дамм
+== Переключити Даммі
 
 Toggle ghost
 == Переключити примару
 
 Dummy copy
-== Повторення рухів Дамі
+== Повторення рухів Даммі
 
 Hammerfly dummy
 == Політ з даммі
@@ -860,13 +854,13 @@ Converse
 == Розмовляти
 
 Spectator mode
-== Спостерігач
+== Режим спостерігача
 
 Spectate next
-== Спостерігати слід.
+== Спостерігати за наптупним
 
 Spectate previous
-== Спостерігати попер.
+== Спостерігати за попереднім
 
 Statboard
 == Статистика
@@ -875,13 +869,13 @@ Lock team
 == Закрити команду
 
 Show entities
-== Показати сутності
+== Показати текстури
 
 Show HUD
 == Показувати HUD
 
 UI mouse s.
-== Чутлив. миші в меню
+== Чутлившсть миші в меню
 
 may cause delay
 == може спричинити затримку
@@ -899,31 +893,31 @@ Use high DPI
 == Використовувати високий DPI
 
 Play background music
-== Грати фонову музику
+== Запускати фонову музику
 
 Enable game sounds
-== Звуки гри
+== Включити звуки гри
 
 Enable gun sound
-== Звуки зброї
+== Включити звуки зброї
 
 Enable long pain sound (used when shooting in freeze)
-== Включити звук тривалого болю (при стрільбі з фриза)
+== Включити звук тривалого болю (при стрільбі в фрізі)
 
 Enable server message sound
-== Звуки повідомлення сервера
+== Включити звуки повідомлення сервера
 
 Enable regular chat sound
-== Звичайні звуки чату
+== Включити звуки чату
 
 Enable team chat sound
-== Звуки повідомлень в команді
+== Включити звуки повідомлень в команді
 
 Enable highlighted chat sound
-== Звуки підсвічених повідомлень
+== Включити звуки виділених повідомлень
 
 Threaded sound loading
-== Фонове завантаження музики
+== музика при завантаженні
 
 Map sound volume
 == Гучність звуку на карті
@@ -935,13 +929,13 @@ DDNet
 == DDNet
 
 DDNet Client needs to be restarted to complete update!
-== Перезапустіть DDNet Client для завершення поновлення!
+== Перезапустіть DDNet для активації оновлення!
 
 Use DDRace Scoreboard
 == Використовувати DDRace табло
 
 Show score
-== Показувати лідерів
+== Показувати очки
 
 Show health + ammo
 == Показувати здоров'я + патрони
@@ -950,10 +944,10 @@ Show names in chat in team colors
 == Виділяти кольором повідомлення гравців в командному чаті
 
 Show kill messages
-== Показати повідомлення про вбивство
+== Показувати список вбивств
 
 Show votes window after voting
-== Не приховувати меню голосування після вашого вибору
+== Показувати голосування після вашого голосу
 
 Messages
 == Повідомлення 
@@ -980,7 +974,7 @@ Client message
 == Повідомлення від клієнта
 
 Save the best demo of each race
-== Зберігати краще демо кожної спроби
+== Зберігати краще демо кожної гонки
 
 Default length: %d
 == Стандартна довжина: %d
@@ -998,31 +992,31 @@ Gameplay
 == Ігровий процес
 
 Overlay entities
-== Накласти сутності
+== Накласти текстури
 
 Size
 == Розмір
 
 Show text entities
-== Текстові сутності
+== Текстові текстури
 
 Show others (own team only)
-== Завжди показувати вашу команду
+== Завжди показувати тільки вашу команду
 
 Show quads
 == Показувати quads
 
 AntiPing
-== AntiPing
+== Антипінг
 
 AntiPing: predict other players
-== AntiPing: прогнозувати інших гравців
+== Антипінг: прогнозувати інших гравців
 
 AntiPing: predict weapons
-== AntiPing: прогнозувати снаряди
+== Антипінг: прогнозувати снаряди
 
 AntiPing: predict grenade paths
-== AntiPing: прогнозувати шляхи гранат
+== Антипінг: прогнозувати шляхи гранат
 
 Show other players' hook collision lines
 == Показувати лінії колізій гака інших гравців
@@ -1037,10 +1031,10 @@ Show tiles layers from BG map
 == Показувати шари з тайлами з фонової карти
 
 Try fast HTTP map download first
-== Намагатися закачати карту швидко по HTTP
+== Намагатися скакачати карту швидко по HTTP
 
 DDNet %s is available:
-== Доступний DDNet %s:
+== Доступний новий DDNet %s:
 
 Updating...
 == Оновлення ...
@@ -1064,13 +1058,13 @@ Follow
 == Стежити
 
 Frags
-== Фраги
+== Вбивств
 
 Deaths
-== Смерті
+== Смертей
 
 Suicides
-== Самогуб.
+== Самогубств
 
 Ratio
 == Співвідношення
@@ -1082,7 +1076,7 @@ FPM
 == FPM
 
 Spree
-== Серія
+== Спрей
 
 Best
 == Найкраще
@@ -1091,13 +1085,13 @@ Grabs
 == Захоплень
 
 1 new mention
-== 1 нова згадка
+== 1 нове згадування
 
 %d new mentions
-== %d нових згадок
+== %d нових згадувань
 
 9+ new mentions
-== 9+ нових згадок
+== 9+ нових згадувань
 
 Manual
 == Ручна
@@ -1112,227 +1106,242 @@ Replay
 == Повтор
 
 Saving ddnet-settings.cfg failed
-== 
+== Збереження налаштувань невдалося 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Ширина або висота текстури %s не поділяється на %d, що може викликати візуальні помилки
 
 Warning
-== 
+== Небезпека
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Включкний режим виправлення помилок натисніть Ctrl+Shift+D щоб виключити його
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Натисніть k для самогубства,q щоб зупинитись і спостерігати за іншими. Дивіться в налаштуваннях для інших налаштувань
 
 Existing Player
-== 
+== Існуючий гравець
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Твій нік %s уже хтось використовує (%d очків ). Чи ти всеодно хочеш його взяти?
 
 Checking for existing player with your name
-== 
+== Провіряється наявність гравців з твоїм ніком
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Ти впевнений що хочеш відключитися і перейти до іншого серверу?
 
 Country / Region
-== 
+== Країна / Регіон
 
 Speed
-== 
+== Швидкість
 
 Theme
-== 
+== Тема
 
 AFR
-== 
+== АФР
 
 ASI
-== 
+== Азія
 
 AUS
-== 
+== Австралія
 
 EUR
-== 
+== Європа
 
 NA
-== 
+== Пн.Амер.
 
 SA
-== 
+== Пв.Амер.
 
 CHN
-== 
+== Китай
 
 Getting server list from master server
-== 
+== Отримання списку серверів з головного сервера
 
 %d of %d servers
-== 
+== %d З %d серверів
 
 %d of %d server
-== 
+== %d З %d сервера
 
 %d players
-== 
+== %dГравців
 
 %d player
-== 
+== %d Гравець
 
 Refreshing...
-== 
+== Оновлення...
 
 Leak IP
-== 
+== Стійке IP
 
 Markers
-== 
+== Марки
 
 Demos directory
-== 
+== Каталог демо
 
 Smooth Dynamic Camera
-== 
+== Гладка динамічна камера
 
 Skip the main menu
-== 
+== пропускати головне меняю
 
 Themes directory
-== 
+== Каталог тем
 
 Download skins
-== 
+== завантажувати скіни інших
 
 Skin Database
-== 
+== Бази даних скінів
 
 Skins directory
-== 
+== Каталог скінав
 
 Chat command
-== 
+== командний чат
 
 Dummy
-== 
+== Даммі
 
 Windowed
-== 
+== Віконний
 
 Windowed borderless
-== 
+== Віконний без меж
 
 Desktop fullscreen
-== 
+== Повний робочий стіл
 
 Use modern OpenGL
-== 
+== Використовувати сучасний OpenGL
 
 Game sound volume
-== 
+== Гучність звуку гри
 
 Chat sound volume
-== 
+== Гучність звуку чату
 
 Background music volume
-== 
+== Гучність музики заднього фону 
 
 Assets
-== 
+== Текстури
 
 Show client IDs
-== 
+== Показувати id клієнта
 
 Kill Messages
-== 
+== Повідомлення вбивств
 
 Kill Message Normal Color
-== 
+== Колір повідомлення вбивств
 
 Kill Message Highlight Color
-== 
+== Підсвічення повідомлення вбивств
 
 Laser Outline Color
-== 
+== Колір обводки лазеру
 
 Laser Inner Color
-== 
+== Колір лазеру
 
 Hookline
-== 
+== лінія гаку
 
 No hit
-== 
+== Без ударів
 
 Hookable
-== 
+== можна хукати
 
 Tee
-== 
+== Tee
 
 Use old chat style
-== 
+== Використовувати стиль старого чату
 
 Preview
-== 
+== Попередній перегляд
 
 Show local player's key presses
-== 
+== Показувати рухи гравців поблизу
 
 Background
-== 
+== Задній фон
 
 Entities Background color
-== 
+== колір текстури заднього фону
 
 Use current map as background
-== 
+== використовувати поточну карту як задній фон
 
 Regular Background Color
-== 
+== Звичайний колір заднього фону
 
 Entities
-== 
+== Текстури
 
 Emoticons
-== 
+== Емоції
 
 Particles
-== 
+== частинки
 
 Assets directory
-== 
+== Каталог текстур
 
 Discord
-== 
+== Діскорд
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Website
-== 
+== Вебсайт
 
 Settings
-== 
+== Налаштування
 
 Stop server
-== 
+== Зупинити сервер
 
 Run server
-== 
+== Запустити сервер
 
 Server executable not found, can't run server
-== 
+== Серверний виконуваний файл не знайдено, неможливо запустити
 
 Editor
-== 
+== Редактор
 
 [Start menu]
 Play
+== Грати
+
+Settings file
+== 
+
+Config directory
+== 
+
+Windowed fullscreen
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 

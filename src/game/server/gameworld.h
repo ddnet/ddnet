@@ -32,7 +32,7 @@ private:
 	void Reset();
 	void RemoveEntities();
 
-	CEntity *m_pNextTraverseEntity;
+	CEntity *m_pNextTraverseEntity = nullptr;
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
 
 	class CGameContext *m_pGameServer;
@@ -58,16 +58,16 @@ public:
 	CEntity *FindFirst(int Type);
 
 	/*
-		Function: find_entities
+		Function: FindEntities
 			Finds entities close to a position and returns them in a list.
 
 		Arguments:
-			pos - Position.
-			radius - How close the entities have to be.
-			ents - Pointer to a list that should be filled with the pointers
+			Pos - Position.
+			Radius - How close the entities have to be.
+			ppEnts - Pointer to a list that should be filled with the pointers
 				to the entities.
-			max - Number of entities that fits into the ents array.
-			type - Type of the entities to find.
+			Max - Number of entities that fits into the ents array.
+			Type - Type of the entities to find.
 
 		Returns:
 			Number of entities found and added to the ents array.
@@ -79,11 +79,11 @@ public:
 			Finds the CCharacters that intersects the line. // made for types lasers=1 and doors=0
 
 		Arguments:
-			pos0 - Start position
-			pos2 - End position
-			radius - How for from the line the CCharacter is allowed to be.
-			new_pos - Intersection position
-			notthis - Entity to ignore intersecting with
+			Pos0 - Start position
+			Pos1 - End position
+			Radius - How for from the line the CCharacter is allowed to be.
+			NewPos - Intersection position
+			pNotThis - Entity to ignore intersecting with
 
 		Returns:
 			Returns a pointer to the closest hit or NULL of there is no intersection.
@@ -91,13 +91,13 @@ public:
 	//class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
 	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CCharacter *pNotThis = 0, int CollideWith = -1, class CCharacter *pThisOnly = 0);
 	/*
-		Function: closest_CCharacter
+		Function: ClosestCharacter
 			Finds the closest CCharacter to a specific point.
 
 		Arguments:
-			pos - The center position.
-			radius - How far off the CCharacter is allowed to be
-			notthis - Entity to ignore
+			Pos - The center position.
+			Radius - How far off the CCharacter is allowed to be
+			ppNotThis - Entity to ignore
 
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
@@ -105,55 +105,60 @@ public:
 	class CCharacter *ClosestCharacter(vec2 Pos, float Radius, CEntity *ppNotThis);
 
 	/*
-		Function: insert_entity
+		Function: InsertEntity
 			Adds an entity to the world.
 
 		Arguments:
-			entity - Entity to add
+			pEntity - Entity to add
 	*/
 	void InsertEntity(CEntity *pEntity);
 
 	/*
-		Function: remove_entity
+		Function: RemoveEntity
 			Removes an entity from the world.
 
 		Arguments:
-			entity - Entity to remove
+			pEntity - Entity to remove
 	*/
 	void RemoveEntity(CEntity *pEntity);
 
 	/*
-		Function: snap
-			Calls snap on all the entities in the world to create
+		Function: Snap
+			Calls Snap on all the entities in the world to create
 			the snapshot.
 
 		Arguments:
-			snapping_client - ID of the client which snapshot
+			SnappingClient - ID of the client which snapshot
 			is being created.
 	*/
 	void Snap(int SnappingClient);
 
 	/*
-		Function: tick
-			Calls tick on all the entities in the world to progress
+		Function: Tick
+			Calls Tick on all the entities in the world to progress
 			the world to the next tick.
-
 	*/
 	void Tick();
+
+	/*
+		Function: SwapClients
+			Calls SwapClients on all the entities in the world to ensure that /swap
+			command is handled safely.
+	*/
+	void SwapClients(int Client1, int Client2);
 
 	// DDRace
 	void ReleaseHooked(int ClientID);
 
 	/*
-		Function: interserct_CCharacters
+		Function: IntersectedCharacters
 			Finds all CCharacters that intersect the line.
 
 		Arguments:
-			pos0 - Start position
-			pos2 - End position
-			radius - How for from the line the CCharacter is allowed to be.
-			new_pos - Intersection position
-			notthis - Entity to ignore intersecting with
+			Pos0 - Start position
+			Pos1 - End position
+			Radius - How for from the line the CCharacter is allowed to be.
+			pNotThis - Entity to ignore intersecting with
 
 		Returns:
 			Returns list with all Characters on line.

@@ -10,10 +10,11 @@ class CLaser : public CEntity
 public:
 	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
+	virtual void Reset() override;
+	virtual void Tick() override;
+	virtual void TickPaused() override;
+	virtual void Snap(int SnappingClient) override;
+	virtual void SwapClients(int Client1, int Client2) override;
 
 protected:
 	bool HitCharacter(vec2 From, vec2 To);
@@ -37,6 +38,7 @@ private:
 	int m_TuneZone;
 	bool m_TeleportCancelled;
 	bool m_IsBlueTeleport;
+	bool m_BelongsToPracticeTeam;
 };
 
 #endif

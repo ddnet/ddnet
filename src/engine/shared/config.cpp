@@ -39,15 +39,36 @@ void CConfigManager::Reset()
 #undef MACRO_CONFIG_STR
 }
 
+void CConfigManager::Reset(const char *pScriptName)
+{
+#define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
+	if(str_comp(pScriptName, #ScriptName) == 0) \
+	{ \
+		g_Config.m_##Name = def; \
+		return; \
+	};
+#define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) MACRO_CONFIG_INT(Name, ScriptName, def, 0, 0, flags, desc)
+#define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) \
+	if(str_comp(pScriptName, #ScriptName) == 0) \
+	{ \
+		str_copy(g_Config.m_##Name, def, len); \
+		return; \
+	};
+
+#include "config_variables.h"
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+}
+
 bool CConfigManager::Save()
 {
 	if(!m_pStorage || !g_Config.m_ClSaveSettings)
 		return true;
 
-	char aConfigFileTmp[64];
-	str_format(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE ".%d.tmp", pid());
-
-	m_ConfigFile = m_pStorage->OpenFile(aConfigFileTmp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	char aConfigFileTmp[IO_MAX_PATH_LENGTH];
+	m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE), IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 	if(!m_ConfigFile)
 	{
@@ -88,6 +109,11 @@ bool CConfigManager::Save()
 
 	for(int i = 0; i < m_NumCallbacks; i++)
 		m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
+
+	if(io_sync(m_ConfigFile) != 0)
+	{
+		m_Failed = true;
+	}
 
 	if(io_close(m_ConfigFile) != 0)
 		m_Failed = true;

@@ -14,7 +14,7 @@ class CSaveTee
 {
 public:
 	CSaveTee();
-	~CSaveTee();
+	~CSaveTee() = default;
 	void Save(CCharacter *pchr);
 	void Load(CCharacter *pchr, int Team, bool IsSwap = false);
 	char *GetString(const CSaveTeam *pTeam);
@@ -58,6 +58,7 @@ private:
 	int m_FreezeTime;
 	int m_FreezeTick;
 	int m_DeepFreeze;
+	int m_LiveFreeze;
 	int m_EndlessHook;
 	int m_DDRaceState;
 
@@ -128,7 +129,7 @@ public:
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 
 private:
-	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentWeakStrong);
+	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentCharacter);
 
 	IGameController *m_pController;
 

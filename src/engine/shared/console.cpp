@@ -7,6 +7,7 @@
 #include <base/system.h>
 #include <base/vmath.h>
 
+#include <engine/client/checksum.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
@@ -158,7 +159,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 
 	pStr = pResult->m_pArgsStart;
 
-	while(1)
+	while(true)
 	{
 		if(!Command)
 			break;
@@ -197,7 +198,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				pResult->AddArgument(pStr);
 
 				pDst = pStr; // we might have to process escape data
-				while(1)
+				while(true)
 				{
 					if(pStr[0] == '"')
 						break;
@@ -315,11 +316,14 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
 {
-	// if the color is pure white, use default terminal color
-	if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
-		set_console_msg_color(NULL);
-	else
-		set_console_msg_color(&PrintColor);
+	if(g_Config.m_ConsoleEnableColors)
+	{
+		// if the color is pure white, use default terminal color
+		if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
+			set_console_msg_color(NULL);
+		else
+			set_console_msg_color(&PrintColor);
+	}
 	dbg_msg(pFrom, "%s", pStr);
 	set_console_msg_color(NULL);
 	char aBuf[1024];
@@ -337,6 +341,29 @@ void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCa
 {
 	m_pfnTeeHistorianCommandCallback = pfnCallback;
 	m_pTeeHistorianCommandUserdata = pUser;
+}
+
+void CConsole::InitChecksum(CChecksumData *pData) const
+{
+	pData->m_NumCommands = 0;
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	{
+		if(pData->m_NumCommands < (int)(sizeof(pData->m_aCommandsChecksum) / sizeof(pData->m_aCommandsChecksum[0])))
+		{
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
+			void *pUserData = pCommand->m_pUserData;
+			while(pfnCallback == Con_Chain)
+			{
+				CChain *pChainInfo = static_cast<CChain *>(pUserData);
+				pfnCallback = pChainInfo->m_pfnCallback;
+				pUserData = pChainInfo->m_pCallbackUserData;
+			}
+			int CallbackBits = (uintptr_t)pfnCallback & 0xfff;
+			int *pTarget = &pData->m_aCommandsChecksum[pData->m_NumCommands];
+			*pTarget = ((uint8_t)pCommand->m_pName[0]) | ((uint8_t)pCommand->m_pName[1] << 8) | (CallbackBits << 16);
+		}
+		pData->m_NumCommands += 1;
+	}
 }
 
 bool CConsole::LineIsValid(const char *pStr)
@@ -588,7 +615,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	m_pFirstExec = &ThisFile;
 
 	// exec the file
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, StorageType);
 
 	char aBuf[128];
 	if(File)

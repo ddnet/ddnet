@@ -34,7 +34,7 @@ public:
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
 	int GetClientVersion() const;
-	bool SetTimerType(int NewType);
+	bool SetTimerType(int TimerType);
 
 	void Tick();
 	void PostTick();
@@ -186,6 +186,7 @@ public:
 	bool m_LastBroadcastImportance;
 
 	CNetObj_PlayerInput *m_pLastTarget;
+	bool m_LastTargetInit;
 	/* 
 		afk timer's 1st warning after 50% of sv_max_afk_time
 		2nd warning after 90%

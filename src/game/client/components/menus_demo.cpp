@@ -27,7 +27,7 @@
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
-	UI()->DoLabel(pRect, pText, 14.0f, 0);
+	UI()->DoLabel(pRect, pText, 14.0f, TEXTALIGN_CENTER);
 	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
 }
 
@@ -89,11 +89,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
-		UI()->DoLabelScaled(&Part, Localize("Select a name"), 24.f, 0);
+		UI()->DoLabelScaled(&Part, Localize("Select a name"), 24.f, TEXTALIGN_CENTER);
 		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
 		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f / UI()->Scale(), &Part);
-		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 24.f, 0);
+		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 24.f, TEXTALIGN_CENTER);
 
 		CUIRect Label, TextBox, Ok, Abort;
 
@@ -157,9 +157,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Label.VSplitLeft(120.0f, 0, &TextBox);
 		TextBox.VSplitLeft(20.0f, 0, &TextBox);
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
-		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, -1);
-		static float Offset = 0.0f;
-		if(DoEditBox(&Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &Offset))
+		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
+		static float s_Offset = 0.0f;
+		if(UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
 		{
 			m_aDemoPlayerPopupHint[0] = '\0';
 		}
@@ -327,7 +327,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		char aTotalTime[32];
 		str_time((int64_t)TotalTicks / SERVER_TICK_SPEED * 100, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
 		str_format(aBuffer, sizeof(aBuffer), "%s / %s", aCurrentTime, aTotalTime);
-		UI()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, 0);
+		UI()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, TEXTALIGN_CENTER);
 
 		// do the logic
 		int Inside = UI()->MouseInside(&SeekBar);
@@ -434,7 +434,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins * 3, 0, &ButtonBar);
 	char aBuffer[64];
 	str_format(aBuffer, sizeof(aBuffer), "×%g", pInfo->m_Speed);
-	UI()->DoLabel(&ButtonBar, aBuffer, Button.h * 0.7f, -1);
+	UI()->DoLabel(&ButtonBar, aBuffer, Button.h * 0.7f, TEXTALIGN_LEFT);
 
 	// slice begin button
 	ButtonBar.VSplitLeft(Margins * 10, 0, &ButtonBar);
@@ -563,7 +563,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	if(Num == 0)
 		gs_ListBoxScrollValue = 0;
 	else
-		gs_ListBoxScrollValue = m_UIEx.DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
+		gs_ListBoxScrollValue = UIEx()->DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
@@ -634,8 +634,10 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	HitRect.h = minimum(HitRect.h, (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) - HitRect.y);
 
+	bool DoubleClickable = false;
 	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &HitRect))
 	{
+		DoubleClickable |= gs_ListBoxNewSelected == ThisItemIndex;
 		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
 	}
@@ -647,7 +649,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
+			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
@@ -903,76 +905,76 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		// left side
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Created:"), 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Created:"), 14.0f, TEXTALIGN_LEFT);
 
 		char aTimestamp[256];
 		str_timestamp_ex(m_lDemos[m_DemolistSelectedIndex].m_Date, aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 
-		UI()->DoLabelScaled(&Right, aTimestamp, 14.0f, -1);
+		UI()->DoLabelScaled(&Right, aTimestamp, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Type:"), 14.0f, -1);
-		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aType, 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Type:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aType, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Length:"), 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Length:"), 14.0f, TEXTALIGN_LEFT);
 		int Length = m_lDemos[m_DemolistSelectedIndex].Length();
 		char aBuf[64];
 		str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Version:"), 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Version:"), 14.0f, TEXTALIGN_LEFT);
 		str_format(aBuf, sizeof(aBuf), "%d", m_lDemos[m_DemolistSelectedIndex].m_Info.m_Version);
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Markers:"), 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_LEFT);
 		str_format(aBuf, sizeof(aBuf), "%d", m_lDemos[m_DemolistSelectedIndex].NumMarkers());
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 
 		// right side
 		Labels = MainView;
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Map:"), 14.0f, -1);
-		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapName, 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Map:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapName, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Size:"), 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Size:"), 14.0f, TEXTALIGN_LEFT);
 		const float Size = m_lDemos[m_DemolistSelectedIndex].Size() / 1024.0f;
 		if(Size > 1024)
 			str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), Size);
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
+		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		if(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
 		{
-			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, -1);
+			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, TEXTALIGN_LEFT);
 			char aSha[SHA256_MAXSTRSIZE];
 			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha) / 2);
-			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, -1);
+			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, TEXTALIGN_LEFT);
 		}
 		else
 		{
-			UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, -1);
+			UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, TEXTALIGN_LEFT);
 			str_format(aBuf, sizeof(aBuf), "%08x", m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
-			UI()->DoLabelScaled(&Right, aBuf, 14.0f, -1);
+			UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		}
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, -1);
-		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, -1);
+		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, TEXTALIGN_LEFT);
 	}
 
 	// demo list
@@ -1072,8 +1074,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
 
 	static float s_ScrollValue = 0;
-
-	s_ScrollValue = m_UIEx.DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	int PreviousIndex = m_DemolistSelectedIndex;
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_lDemos.size());
@@ -1091,8 +1092,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	int ScrollNum = maximum(m_lDemos.size() - Num + 1, 0);
 	ListBox.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
-	int NewSelected = -1;
 	int ItemIndex = -1;
+	bool DoubleClicked = false;
 
 	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
 	{
@@ -1133,10 +1134,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			if(UI()->DoButtonLogic(r.front().m_aName /* TODO: */, "", Selected, &SelectHitBox))
 			{
-				NewSelected = ItemIndex;
+				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
 				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
 				DemolistOnUpdate(false);
-				m_DoubleClickIndex = NewSelected;
+				m_DoubleClickIndex = ItemIndex;
 			}
 		}
 		else
@@ -1172,7 +1173,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				char aBuf[3];
 				str_format(aBuf, sizeof(aBuf), "%d", r.front().NumMarkers());
 				Button.VMargin(4.0f, &Button);
-				UI()->DoLabelScaled(&Button, aBuf, 12.0f, 1);
+				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
 			else if(ID == COL_LENGTH && !r.front().m_IsDir && r.front().m_InfosLoaded)
 			{
@@ -1180,14 +1181,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				char aBuf[32];
 				str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 				Button.VMargin(4.0f, &Button);
-				UI()->DoLabelScaled(&Button, aBuf, 12.0f, 1);
+				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
 			else if(ID == COL_DATE && !r.front().m_IsDir)
 			{
 				char aBuf[64];
 				str_timestamp_ex(r.front().m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 				Button.VSplitRight(24.0f, &Button, 0);
-				UI()->DoLabelScaled(&Button, aBuf, 12.0f, 1);
+				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
 		}
 	}
@@ -1195,15 +1196,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	UI()->ClipDisable();
 
 	bool Activated = false;
-
-	if(m_EnterPressed || (Input()->MouseDoubleClick() && UI()->HotItem() == m_lDemos[m_DemolistSelectedIndex].m_aName))
+	if(m_EnterPressed || (DoubleClicked && Input()->MouseDoubleClick()))
 	{
 		UI()->SetActiveItem(0);
 		Activated = true;
 	}
 
 	static int s_RefreshButton = 0;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		DemolistPopulate();
 		DemolistOnUpdate(false);
@@ -1255,13 +1255,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "demos", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("demos", IStorage::TYPE_SAVE);
-		str_format(aBufFull, sizeof(aBufFull), "file://%s", aBuf);
-		if(!open_link(aBufFull))
+		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open file");
 		}
 	}
 
@@ -1305,5 +1303,5 @@ void CMenus::RenderDemoList(CUIRect MainView)
 #endif
 	}
 
-	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, -1);
+	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, TEXTALIGN_LEFT);
 }

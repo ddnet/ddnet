@@ -95,9 +95,6 @@ Client
 Close
 == Закрыть
 
-Compatible version
-== Совместимая версия
-
 Connect
 == Подключиться
 
@@ -253,9 +250,6 @@ MOTD
 
 Map
 == Карта
-
-Maximum ping:
-== Макс. пинг:
 
 Mouse sens.
 == Чувств. мыши
@@ -1120,7 +1114,7 @@ Skip the main menu
 == Пропускать главное меню
 
 https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/wiki/Main_Page/ru
 
 Website
 == Сайт
@@ -1344,3 +1338,18 @@ Hookable
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
+
+Settings file
+== 
+
+Config directory
+== 
+
+Windowed fullscreen
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

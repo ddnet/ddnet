@@ -73,6 +73,7 @@ void CPlayer::Reset()
 	m_aTimeoutCode[0] = '\0';
 	delete m_pLastTarget;
 	m_pLastTarget = new CNetObj_PlayerInput({0});
+	m_LastTargetInit = false;
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -107,7 +108,7 @@ void CPlayer::Reset()
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_ShowDistance = vec2(1200, 800);
-	m_SpecTeam = 0;
+	m_SpecTeam = false;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;
@@ -556,8 +557,11 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
 		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
-		UpdatePlaytime();
+		// Ignore the first direct input and keep the player afk as it is sent automatically
+		if(m_LastTargetInit)
+			UpdatePlaytime();
 		m_LastActionTick = Server()->Tick();
+		m_LastTargetInit = true;
 	}
 }
 
@@ -692,7 +696,7 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, GameServer()->GetDDRaceTeam(m_ClientID)))
 		return;
 
 	m_WeakHookSpawn = false;
@@ -702,7 +706,7 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 
-	if(g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		m_pCharacter->SetSolo(true);
 }
 
@@ -889,9 +893,7 @@ int CPlayer::IsPaused()
 
 bool CPlayer::IsPlaying()
 {
-	if(m_pCharacter && m_pCharacter->IsAlive())
-		return true;
-	return false;
+	return m_pCharacter && m_pCharacter->IsAlive();
 }
 
 void CPlayer::SpectatePlayerName(const char *pName)

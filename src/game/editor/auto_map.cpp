@@ -1,5 +1,5 @@
-#include <inttypes.h>
-#include <stdio.h> // sscanf
+#include <cinttypes>
+#include <cstdio> // sscanf
 
 #include <engine/console.h>
 #include <engine/shared/linereader.h>
@@ -47,7 +47,7 @@ void CAutoMapper::Load(const char *pTileName)
 {
 	char aPath[256];
 	str_format(aPath, sizeof(aPath), "editor/%s.rules", pTileName);
-	IOHANDLE RulesFile = m_pEditor->Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE RulesFile = m_pEditor->Storage()->OpenFile(aPath, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!RulesFile)
 		return;
 

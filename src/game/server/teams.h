@@ -11,7 +11,6 @@
 
 class CGameTeams
 {
-	int m_TeamState[MAX_CLIENTS];
 	// `m_TeeStarted` is used to keep track whether a given tee has hit the
 	// start of the map yet. If a tee that leaves hasn't hit the start line
 	// yet, the team will be marked as "not allowed to finish"
@@ -21,17 +20,20 @@ class CGameTeams
 	// the team to finish instantly.
 	bool m_TeeStarted[MAX_CLIENTS];
 	bool m_TeeFinished[MAX_CLIENTS];
-	bool m_TeamLocked[MAX_CLIENTS];
-	uint64_t m_Invited[MAX_CLIENTS];
-	bool m_Practice[MAX_CLIENTS];
-	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[MAX_CLIENTS];
-	uint64_t m_LastSwap[MAX_CLIENTS];
-	bool m_TeamSentStartWarning[MAX_CLIENTS];
+	int m_LastChat[MAX_CLIENTS];
+
+	int m_TeamState[NUM_TEAMS];
+	bool m_TeamLocked[NUM_TEAMS];
+	uint64_t m_Invited[NUM_TEAMS];
+	bool m_Practice[NUM_TEAMS];
+	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[NUM_TEAMS];
+	uint64_t m_LastSwap[NUM_TEAMS];
+	bool m_TeamSentStartWarning[NUM_TEAMS];
 	// `m_TeamUnfinishableKillTick` is -1 by default and gets set when a
 	// team becomes unfinishable. If the team hasn't entered practice mode
 	// by that time, it'll get killed to prevent people not understanding
 	// the message from playing for a long time in an unfinishable team.
-	int m_TeamUnfinishableKillTick[MAX_CLIENTS];
+	int m_TeamUnfinishableKillTick[NUM_TEAMS];
 
 	class CGameContext *m_pGameContext;
 
@@ -89,7 +91,7 @@ public:
 
 	// returns nullptr if successful, error string if failed
 	const char *SetCharacterTeam(int ClientID, int Team);
-	void CheckTeamFinished(int ClientID);
+	void CheckTeamFinished(int Team);
 
 	void ChangeTeamState(int Team, int State);
 
@@ -108,8 +110,6 @@ public:
 	void SetTeamLock(int Team, bool Lock);
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientID, bool Invited);
-
-	int m_LastChat[MAX_CLIENTS];
 
 	int GetDDRaceState(CPlayer *Player);
 	int GetStartTime(CPlayer *Player);
@@ -177,7 +177,7 @@ public:
 	{
 		if(TeamID < TEAM_FLOCK || TeamID >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvTeam != 3 && TeamID == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamID == TEAM_FLOCK)
 			return false;
 
 		return m_pSaveTeamResult[TeamID] != nullptr;
@@ -187,7 +187,7 @@ public:
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return;
 
 		m_Practice[Team] = true;
@@ -197,7 +197,7 @@ public:
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return false;
 
 		return m_Practice[Team];

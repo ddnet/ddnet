@@ -86,9 +86,6 @@ Client
 Close
 == Bezárás
 
-Compatible version
-== Kompatibilis Verzió
-
 Connect
 == Csatlakozás
 
@@ -241,9 +238,6 @@ MOTD
 
 Map
 == Pálya
-
-Maximum ping:
-== Maximum Ping:
 
 Mouse sens.
 == Egér érzékenység
@@ -1335,3 +1329,18 @@ https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
+
+Settings file
+== 
+
+Config directory
+== 
+
+Windowed fullscreen
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 

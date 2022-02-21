@@ -28,13 +28,13 @@ class CPlayers : public CComponent
 		float Intra = 0.f);
 
 	int m_WeaponEmoteQuadContainerIndex;
-	int m_DirectionQuadContainerIndex;
 	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:
 	vec2 m_CurPredictedPos[MAX_CLIENTS];
-	virtual void OnInit();
-	virtual void OnRender();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnInit() override;
+	virtual void OnRender() override;
 };
 
 #endif

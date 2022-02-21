@@ -21,7 +21,7 @@ public:
 		vec2 Pos,
 		vec2 Dir,
 		int Span,
-		bool Freeeze,
+		bool Freeze,
 		bool Explosive,
 		float Force,
 		int SoundImpact,

@@ -90,9 +90,6 @@ Client
 Close
 == Kapat
 
-Compatible version
-== Uyumlu versiyon
-
 Connect
 == Bağlan
 
@@ -248,9 +245,6 @@ MOTD
 
 Map
 == Harita
-
-Maximum ping:
-== Maksimum ping
 
 Mouse sens.
 == Mouse duyarlılığı
@@ -1206,6 +1200,12 @@ Smooth Dynamic Camera
 Skip the main menu
 == 
 
+Settings file
+== 
+
+Config directory
+== 
+
 Themes directory
 == 
 
@@ -1228,6 +1228,9 @@ Windowed
 == 
 
 Windowed borderless
+== 
+
+Windowed fullscreen
 == 
 
 Desktop fullscreen
@@ -1297,6 +1300,12 @@ Use current map as background
 == 
 
 Regular Background Color
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
 == 
 
 Entities

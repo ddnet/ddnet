@@ -67,7 +67,7 @@ public:
 	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
-	bool Freeze(int Time);
+	bool Freeze(int Seconds);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
@@ -82,6 +82,7 @@ public:
 	int m_FreezeTick;
 	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
+	bool m_LiveFreeze;
 	bool m_EndlessHook;
 	enum
 	{

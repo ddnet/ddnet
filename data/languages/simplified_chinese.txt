@@ -14,6 +14,8 @@
 # 2021-05-27 Momo
 # 2021-06-01 TsFreddie
 # 2021-11-19 cheeser0613
+# 2021-12-21 cheeser0613
+# 2022-02-07 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -95,9 +97,6 @@ Client
 
 Close
 == 关闭
-
-Compatible version
-== 兼容的版本
 
 Connect
 == 连接
@@ -260,9 +259,6 @@ MOTD
 
 Map
 == 地图
-
-Maximum ping:
-== 最高延迟：
 
 Mouse sens.
 == 鼠标灵敏度
@@ -1224,7 +1220,7 @@ Chat sound volume
 == 聊天提示音量
 
 Background music volume
-== 背景音樂音量
+== 背景音乐音量
 
 Assets
 == 材质
@@ -1351,3 +1347,18 @@ Kill Message Highlight Color
 
 Show local player's key presses
 == 显示周围玩家的按键输入
+
+Settings file
+== 设置文件
+
+Config directory
+== 配置目录 (cfg)
+
+Run on join
+== 加入时执行
+
+Chat command (e.g. showall 1)
+== 聊天指令 (例如: showall 1)
+
+Windowed fullscreen
+== 窗口化全屏

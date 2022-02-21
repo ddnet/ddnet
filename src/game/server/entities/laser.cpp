@@ -25,7 +25,10 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
-	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->Teams()->TeamMask(GameServer()->GetPlayerChar(Owner)->Team(), -1, m_Owner) : 0;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	m_TeamMask = pOwnerChar ? pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner) : 0;
+	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -129,7 +132,7 @@ void CLaser::DoBounce()
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
 
 			CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
-			if(Res == TILE_TELEINWEAPON && pControllerDDRace->m_TeleOuts[z - 1].size())
+			if(Res == TILE_TELEINWEAPON && !pControllerDDRace->m_TeleOuts[z - 1].empty())
 			{
 				int TeleOut = GameServer()->m_World.m_Core.RandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size());
 				m_TelePos = pControllerDDRace->m_TeleOuts[z - 1][TeleOut];
@@ -193,8 +196,8 @@ void CLaser::DoBounce()
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
-		bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
+		bool IsSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_TELE_GUN;
+		bool IsBlueSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
 		int IsTeleInWeapon = GameServer()->Collision()->IsTeleportWeapon(MapIndex);
 
 		if(!IsTeleInWeapon)
@@ -230,7 +233,7 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	if(g_Config.m_SvDestroyLasersOnDeath && m_Owner >= 0)
+	if((g_Config.m_SvDestroyLasersOnDeath || m_BelongsToPracticeTeam) && m_Owner >= 0)
 	{
 		CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 		if(!(pOwnerChar && pOwnerChar->IsAlive()))
@@ -284,4 +287,9 @@ void CLaser::Snap(int SnappingClient)
 	pObj->m_FromX = (int)m_From.x;
 	pObj->m_FromY = (int)m_From.y;
 	pObj->m_StartTick = m_EvalTick;
+}
+
+void CLaser::SwapClients(int Client1, int Client2)
+{
+	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
 }

@@ -747,6 +747,13 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			break;
 		case 10:
 			Result = TILE_TELECHECKINEVIL;
+			break;
+		case 11:
+			Result = TILE_LFREEZE;
+			break;
+		case 12:
+			Result = TILE_LUNFREEZE;
+			break;
 		default:
 			break;
 		}
@@ -1011,7 +1018,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		Warning.HMargin(0.5f, &Warning);
 
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, -1, Warning.w);
+		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, TEXTALIGN_LEFT, Warning.w);
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 		pToolbox->HSplitTop(2.0f, 0, pToolbox);
 	}

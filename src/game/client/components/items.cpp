@@ -17,11 +17,6 @@
 
 #include "items.h"
 
-void CItems::OnReset()
-{
-	m_NumExtraProjectiles = 0;
-}
-
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 {
 	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
@@ -63,7 +58,27 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	else
 		Ct = (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
 	if(Ct < 0)
-		return; // projectile haven't been shot yet
+	{
+		if(Ct > -s_LastGameTickTime / 2)
+		{
+			// Fixup the timing which might be screwed during demo playback because
+			// s_LastGameTickTime depends on the system timer, while the other part
+			// (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) / (float)SERVER_TICK_SPEED
+			// is virtually constant (for projectiles fired on the current game tick):
+			// (x - (x+2)) / 50 = -0.04
+			//
+			// We have a strict comparison for the passed time being more than the time between ticks
+			// if(CurtickStart > m_Info.m_CurrentTime) in CDemoPlayer::Update()
+			// so on the practice the typical value of s_LastGameTickTime varies from 0.02386 to 0.03999
+			// which leads to Ct from -0.00001 to -0.01614.
+			// Round up those to 0.0 to fix missing rendering of the projectile.
+			Ct = 0;
+		}
+		else
+		{
+			return; // projectile haven't been shot yet
+		}
+	}
 
 	vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct - 0.001f);
@@ -325,9 +340,10 @@ void CItems::OnRender()
 			CProjectileData Data = pProj->GetData();
 			RenderProjectile(&Data, pProj->ID());
 		}
-		for(auto *pLaser = (CLaser *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pLaser; pLaser = (CLaser *)pLaser->NextEntity())
+		for(CEntity *pEnt = GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->NextEntity())
 		{
-			if(pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
+			auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
+			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 				continue;
 			CNetObj_Laser Data;
 			pLaser->FillInfo(&Data);
@@ -376,20 +392,17 @@ void CItems::OnRender()
 			{
 				if(auto *pProj = (CProjectile *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
 				{
-					if(pProj->GetOwner() >= 0)
+					bool IsOtherTeam = m_pClient->IsOtherTeam(pProj->GetOwner());
+					if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
+						&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
+						&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
+						&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{
-						bool IsOtherTeam = m_pClient->IsOtherTeam(pProj->GetOwner());
-						if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
-							&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
-							&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
-							&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
-						{
-							ReconstructSmokeTrail(&Data, pProj->m_DestroyTick);
-						}
-						pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
-						if(!IsOtherTeam)
-							continue;
+						ReconstructSmokeTrail(&Data, pProj->m_DestroyTick);
 					}
+					pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
+					if(!IsOtherTeam)
+						continue;
 				}
 			}
 			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
@@ -414,7 +427,7 @@ void CItems::OnRender()
 		{
 			if(UsePredicted)
 			{
-				auto *pLaser = (CLaser *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData);
+				auto *pLaser = dynamic_cast<CLaser *>(GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData));
 				if(pLaser && pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 					continue;
 			}
@@ -471,21 +484,6 @@ void CItems::OnRender()
 				RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(pData),
 					static_cast<const CNetObj_GameData *>(pPrevGameData), m_pClient->m_Snap.m_pGameDataObj);
 			}
-		}
-	}
-
-	// render extra projectiles
-	for(int i = 0; i < m_NumExtraProjectiles; i++)
-	{
-		if(m_aExtraProjectiles[i].m_StartTick < Client()->GameTick(g_Config.m_ClDummy))
-		{
-			m_aExtraProjectiles[i] = m_aExtraProjectiles[m_NumExtraProjectiles - 1];
-			m_NumExtraProjectiles--;
-		}
-		else if(!UsePredicted)
-		{
-			CProjectileData Data = ExtractProjectileInfo(&m_aExtraProjectiles[i], &GameClient()->m_GameWorld);
-			RenderProjectile(&Data, 0);
 		}
 	}
 
@@ -552,15 +550,6 @@ void CItems::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
-}
-
-void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
-{
-	if(m_NumExtraProjectiles != MAX_EXTRA_PROJECTILES)
-	{
-		m_aExtraProjectiles[m_NumExtraProjectiles] = *pProj;
-		m_NumExtraProjectiles++;
-	}
 }
 
 void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick)

@@ -252,7 +252,6 @@ public:
 
 	void Clear()
 	{
-		//m_lLayers.delete_all();
 		m_lLayers.clear();
 	}
 
@@ -337,7 +336,6 @@ class CEditorMap
 public:
 	CEditor *m_pEditor;
 	bool m_Modified;
-	int m_UndoModified;
 
 	CEditorMap()
 	{
@@ -394,7 +392,6 @@ public:
 	CEnvelope *NewEnvelope(int Channels)
 	{
 		m_Modified = true;
-		m_UndoModified++;
 		CEnvelope *e = new CEnvelope(Channels);
 		m_lEnvelopes.add(e);
 		return e;
@@ -405,7 +402,6 @@ public:
 	CLayerGroup *NewGroup()
 	{
 		m_Modified = true;
-		m_UndoModified++;
 		CLayerGroup *g = new CLayerGroup;
 		g->m_pMap = this;
 		m_lGroups.add(g);
@@ -421,7 +417,6 @@ public:
 		if(Index0 == Index1)
 			return Index0;
 		m_Modified = true;
-		m_UndoModified++;
 		swap(m_lGroups[Index0], m_lGroups[Index1]);
 		return Index1;
 	}
@@ -431,7 +426,6 @@ public:
 		if(Index < 0 || Index >= m_lGroups.size())
 			return;
 		m_Modified = true;
-		m_UndoModified++;
 		delete m_lGroups[Index];
 		m_lGroups.remove_index(Index);
 	}
@@ -439,7 +433,6 @@ public:
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
 		m_Modified = true;
-		m_UndoModified++;
 		for(int i = 0; i < m_lGroups.size(); i++)
 			m_lGroups[i]->ModifyImageIndex(pfnFunc);
 	}
@@ -447,7 +440,6 @@ public:
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
 		m_Modified = true;
-		m_UndoModified++;
 		for(int i = 0; i < m_lGroups.size(); i++)
 			m_lGroups[i]->ModifyEnvelopeIndex(pfnFunc);
 	}
@@ -455,7 +447,6 @@ public:
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
 		m_Modified = true;
-		m_UndoModified++;
 		for(int i = 0; i < m_lGroups.size(); i++)
 			m_lGroups[i]->ModifySoundIndex(pfnFunc);
 	}
@@ -725,8 +716,6 @@ public:
 		m_AnimateSpeed = 1;
 
 		m_ShowEnvelopeEditor = 0;
-		m_ShowUndo = 0;
-		m_UndoScrollValue = 0.0f;
 		m_ShowServerSettingsEditor = false;
 
 		m_ShowEnvelopePreview = 0;
@@ -760,24 +749,6 @@ public:
 	virtual bool HasUnsavedData() const { return m_Map.m_Modified; }
 	virtual void UpdateMentions() { m_Mentions++; }
 	virtual void ResetMentions() { m_Mentions = 0; }
-
-	int64_t m_LastUndoUpdateTime;
-	bool m_UndoRunning;
-	void CreateUndoStep();
-	static void CreateUndoStepThread(void *pUser);
-	int UndoStep();
-	struct CUndo
-	{
-		int m_FileNum;
-		int m_ButtonId;
-		char m_aName[128];
-		IGraphics::CTextureHandle m_PreviewImage;
-		bool m_PreviewImageIsLoaded;
-	};
-	array<CUndo> m_lUndoSteps;
-	bool m_Undo;
-	int m_ShowUndo;
-	float m_UndoScrollValue;
 
 	CLayerGroup *m_apSavedBrushes[10];
 
@@ -868,7 +839,7 @@ public:
 	int m_FileDialogFileType;
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
-	char m_FileDialogNewFolderName[64];
+	char m_aFileDialogNewFolderName[64];
 	char m_FileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
@@ -970,14 +941,14 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = 0);
 
-	int DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden, int Corners);
-	int DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *Offset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
 	void RenderGrid(CLayerGroup *pGroup);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pExtra = 0);
+	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext = 0);
 	void UiDoPopupMenu();
 	bool UiPopupExists(void *pID);
 	bool UiPopupOpen();
@@ -1049,7 +1020,6 @@ public:
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
-	void RenderUndoList(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 
 	void RenderMenubar(CUIRect Menubar);

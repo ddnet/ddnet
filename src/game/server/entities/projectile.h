@@ -15,7 +15,7 @@ public:
 		vec2 Pos,
 		vec2 Dir,
 		int Span,
-		bool Freeeze,
+		bool Freeze,
 		bool Explosive,
 		float Force,
 		int SoundImpact,
@@ -29,10 +29,11 @@ public:
 	bool IsAffected(int ClientID) const;
 	void SetAffected(int ClientID, bool Affected);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
+	virtual void Reset() override;
+	virtual void Tick() override;
+	virtual void TickPaused() override;
+	virtual void Snap(int SnappingClient) override;
+	virtual void SwapClients(int Client1, int Client2) override;
 
 private:
 	vec2 m_Direction;
@@ -50,6 +51,7 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+	bool m_BelongsToPracticeTeam;
 
 	// gctf
 	int64_t m_AffectedCharacters;

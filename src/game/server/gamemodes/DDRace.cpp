@@ -26,10 +26,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	InitTeleporter();
 }
 
-CGameControllerDDRace::~CGameControllerDDRace()
-{
-	// Nothing to clean
-}
+CGameControllerDDRace::~CGameControllerDDRace() = default;
 
 CScore *CGameControllerDDRace::Score()
 {
@@ -71,25 +68,24 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// start
 	if(IsOnStartTile && PlayerDDRaceState != DDRACE_CHEAT)
 	{
-		if(m_Teams.GetSaving(GetPlayerTeam(ClientID)))
+		const int Team = GetPlayerTeam(ClientID);
+		if(m_Teams.GetSaving(Team))
 		{
-			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
-			{
-				GameServer()->SendChatTarget(ClientID, "You can't start while loading/saving of team is in progress");
-				pChr->m_LastStartWarning = Server()->Tick();
-			}
+			GameServer()->SendStartWarning(ClientID, "You can't start while loading/saving of team is in progress");
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
 		}
-		if(g_Config.m_SvTeam == 2 && (GetPlayerTeam(ClientID) == TEAM_FLOCK || m_Teams.Count(GetPlayerTeam(ClientID)) <= 1))
+		if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && (Team == TEAM_FLOCK || m_Teams.Count(Team) <= 1))
 		{
-			if(pChr->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
-			{
-				GameServer()->SendChatTarget(ClientID, "You have to be in a team with other tees to start");
-				pChr->m_LastStartWarning = Server()->Tick();
-			}
+			GameServer()->SendStartWarning(ClientID, "You have to be in a team with other tees to start");
 			pChr->Die(ClientID, WEAPON_WORLD);
 			return;
+		}
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team > TEAM_FLOCK && Team < TEAM_SUPER && m_Teams.Count(Team) < g_Config.m_SvMinTeamSize)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Your team has fewer than %d players, so your team rank won't count", g_Config.m_SvMinTeamSize);
+			GameServer()->SendStartWarning(ClientID, aBuf);
 		}
 		if(g_Config.m_SvResetPickups)
 		{
@@ -158,7 +154,7 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 	if(!GameServer()->PlayerModerating() && WasModerator)
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
 
-	if(g_Config.m_SvTeam != 3)
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 		m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 }
 
@@ -189,7 +185,7 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 
 	if(Team == TEAM_SPECTATORS)
 	{
-		if(g_Config.m_SvTeam != 3 && pCharacter)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && pCharacter)
 		{
 			// Joining spectators should not kill a locked team, but should still
 			// check if the team finished by you leaving it.

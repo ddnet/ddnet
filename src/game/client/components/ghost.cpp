@@ -618,6 +618,11 @@ void CGhost::OnReset()
 	m_LastRaceTick = -1;
 }
 
+void CGhost::OnShutdown()
+{
+	OnReset();
+}
+
 void CGhost::OnMapLoad()
 {
 	OnReset();

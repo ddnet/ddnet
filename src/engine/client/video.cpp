@@ -563,7 +563,7 @@ bool CVideo::OpenAudio()
 }
 
 /* Add an output stream. */
-bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **ppCodec, enum AVCodecID CodecId)
+bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId)
 {
 	AVCodecContext *c;
 
@@ -598,10 +598,10 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, AVCodec **pp
 		// m_MixingRate = g_Config.m_SndRate;
 		//
 		// // Set 16-bit stereo audio at 22Khz
-		// Format.freq = g_Config.m_SndRate; // ignore_convention
-		// Format.format = AUDIO_S16; // ignore_convention
-		// Format.channels = 2; // ignore_convention
-		// Format.samples = g_Config.m_SndBufferSize; // ignore_convention
+		// Format.freq = g_Config.m_SndRate;
+		// Format.format = AUDIO_S16;
+		// Format.channels = 2;
+		// Format.samples = g_Config.m_SndBufferSize;
 
 		c->sample_fmt = (*ppCodec)->sample_fmts ? (*ppCodec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
 		c->bit_rate = g_Config.m_SndRate * 2 * 16;

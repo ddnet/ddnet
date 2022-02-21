@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <limits.h>
+#include <climits>
 
 #include <engine/demo.h>
 #include <engine/graphics.h>
@@ -466,5 +466,5 @@ void CSpectator::Spectate(int SpectatorID)
 
 	CNetMsg_Cl_SetSpectatorMode Msg;
 	Msg.m_SpectatorID = SpectatorID;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }

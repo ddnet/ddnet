@@ -36,7 +36,6 @@ class CGameConsole : public CComponent
 		int m_CompletionEnumerationCount;
 		int m_BacklogActPage;
 
-	public:
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
@@ -59,6 +58,7 @@ class CGameConsole : public CComponent
 		void Init(CGameConsole *pGameConsole);
 
 		void ClearBacklog();
+		void ClearBacklogYOffsets();
 		void ClearHistory();
 
 		void ExecuteLine(const char *pLine);
@@ -119,16 +119,18 @@ public:
 	};
 
 	CGameConsole();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void PrintLine(int Type, const char *pLine);
 	void RequireUsername(bool UsernameReq);
 
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnConsoleInit();
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual bool OnInput(IInput::CEvent Events);
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnConsoleInit() override;
+	virtual void OnInit() override;
+	virtual void OnReset() override;
+	virtual void OnRender() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual bool OnInput(IInput::CEvent Events) override;
 
 	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };

@@ -32,10 +32,11 @@ protected:
 public:
 	CBackground(int MapType = CMapLayers::TYPE_BACKGROUND_FORCE, bool OnlineOnly = true);
 	virtual ~CBackground();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnInit();
-	virtual void OnMapLoad();
-	virtual void OnRender();
+	virtual void OnInit() override;
+	virtual void OnMapLoad() override;
+	virtual void OnRender() override;
 
 	void LoadBackground();
 };

@@ -1,6 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <stdio.h> // sscanf
+#include <cstdio> // sscanf
 
 #include <base/system.h>
 
@@ -149,13 +149,13 @@ public:
 			return -1;
 
 		// try to open file
-		IOHANDLE File = m_pStorage->OpenFile("masters.cfg", IOFLAG_READ, IStorage::TYPE_SAVE);
+		IOHANDLE File = m_pStorage->OpenFile("masters.cfg", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
 		if(!File)
 			return -1;
 
 		CLineReader LineReader;
 		LineReader.Init(File);
-		while(1)
+		while(true)
 		{
 			CMasterInfo Info = {{0}};
 			const char *pLine = LineReader.Get();

@@ -6,12 +6,13 @@
 // TODO: remove this
 #include "././game/variables.h"
 
-MACRO_CONFIG_STR(PlayerName, player_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Name of the player")
-MACRO_CONFIG_STR(PlayerClan, player_clan, 12, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Clan of the player")
-MACRO_CONFIG_INT(PlayerCountry, player_country, -1, -1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Country of the player")
+MACRO_CONFIG_STR(PlayerName, player_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Name of the player")
+MACRO_CONFIG_STR(PlayerClan, player_clan, 12, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Clan of the player")
+MACRO_CONFIG_INT(PlayerCountry, player_country, -1, -1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Country of the player")
 MACRO_CONFIG_STR(Password, password, 32, "", CFGFLAG_CLIENT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "Password to the server")
 MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Filename to log all output to")
 MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Adjusts the amount of information in the console")
+MACRO_CONFIG_INT(ConsoleEnableColors, console_enable_colors, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable colors in console output")
 MACRO_CONFIG_INT(Events, events, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable triggering of events, (eye emotes on some holidays in server, christmas skins in client).")
 
 MACRO_CONFIG_STR(SteamName, steam_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Last seen name of the Steam profile")
@@ -20,7 +21,6 @@ MACRO_CONFIG_INT(ClSaveSettings, cl_save_settings, 1, 0, 1, CFGFLAG_CLIENT, "Wri
 MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for updating the game (in Hz)")
 MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for updating the game when the window is inactive (in Hz)")
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(ClEditorUndo, cl_editorundo, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Undo function in editor")
 MACRO_CONFIG_INT(ClEditorDilate, cl_editor_dilate, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Automatically dilates embedded images")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Skin filtering string")
 
@@ -55,7 +55,6 @@ MACRO_CONFIG_STR(BrFilterGametype, br_filter_gametype, 128, "", CFGFLAG_SAVE | C
 MACRO_CONFIG_INT(BrFilterGametypeStrict, br_filter_gametype_strict, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Strict gametype filter")
 MACRO_CONFIG_INT(BrFilterConnectingPlayers, br_filter_connecting_players, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Filter connecting players")
 MACRO_CONFIG_STR(BrFilterServerAddress, br_filter_serveraddress, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Server address to filter")
-MACRO_CONFIG_INT(BrFilterCompatversion, br_filter_compatversion, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Filter out non-compatible servers in browser")
 MACRO_CONFIG_INT(BrFilterUnfinishedMap, br_filter_unfinished_map, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show only servers with unfinished maps")
 
 MACRO_CONFIG_STR(BrFilterExcludeCountries, br_filter_exclude_countries, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Filter out DDNet servers by country")
@@ -79,12 +78,12 @@ MACRO_CONFIG_INT(SndBufferSize, snd_buffer_size, 512, 128, 32768, CFGFLAG_SAVE |
 MACRO_CONFIG_INT(SndRate, snd_rate, 48000, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound mixing rate")
 MACRO_CONFIG_INT(SndEnable, snd_enable, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound enable")
 MACRO_CONFIG_INT(SndMusic, snd_enable_music, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Play background music")
-MACRO_CONFIG_INT(SndVolume, snd_volume, 100, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound volume")
+MACRO_CONFIG_INT(SndVolume, snd_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound volume")
 MACRO_CONFIG_INT(SndDevice, snd_device, -1, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "(deprecated) Sound device to use")
-MACRO_CONFIG_INT(SndChatSoundVolume, snd_chat_volume, 100, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Chat sound volume")
-MACRO_CONFIG_INT(SndGameSoundVolume, snd_game_volume, 100, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Game sound volume")
-MACRO_CONFIG_INT(SndMapSoundVolume, snd_ambient_volume, 70, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Map Sound sound volume")
-MACRO_CONFIG_INT(SndBackgroundMusicVolume, snd_background_music_volume, 50, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Background music sound volume")
+MACRO_CONFIG_INT(SndChatSoundVolume, snd_chat_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Chat sound volume")
+MACRO_CONFIG_INT(SndGameSoundVolume, snd_game_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Game sound volume")
+MACRO_CONFIG_INT(SndMapSoundVolume, snd_ambient_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Map Sound sound volume")
+MACRO_CONFIG_INT(SndBackgroundMusicVolume, snd_background_music_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Background music sound volume")
 
 MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(SndGame, snd_game, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable game sounds")
@@ -104,10 +103,10 @@ MACRO_CONFIG_INT(GfxDesktopWidth, gfx_desktop_width, 0, 0, 0, CFGFLAG_SAVE | CFG
 MACRO_CONFIG_INT(GfxDesktopHeight, gfx_desktop_height, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Desktop resolution height for detecting display changes (not recommended to change manually)")
 #if !defined(CONF_PLATFORM_MACOS)
 MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
-MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen")
+MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 1, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
 #else
 MACRO_CONFIG_INT(GfxBorderless, gfx_borderless, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Borderless window (not to be used with fullscreen)")
-MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen")
+MACRO_CONFIG_INT(GfxFullscreen, gfx_fullscreen, 0, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Set fullscreen mode: 0=no fullscreen, 1=pure fullscreen, 2=desktop fullscreen, 3=windowed fullscreen")
 #endif
 MACRO_CONFIG_INT(GfxHighdpi, gfx_highdpi, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable high-dpi")
 MACRO_CONFIG_INT(GfxColorDepth, gfx_color_depth, 24, 16, 24, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Colors bits for framebuffer (fullscreen only)")
@@ -127,6 +126,10 @@ MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 200, 1, 100000, CFGFLAG_SAVE | CFG
 MACRO_CONFIG_INT(InpMouseOld, inp_mouseold, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use old mouse mode (warp mouse instead of raw input)")
 MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
 MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
+
+MACRO_CONFIG_INT(ClPort, cl_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for client connections to server (0 to choose a random port, requires a restart)")
+MACRO_CONFIG_INT(ClDummyPort, cl_dummy_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for dummy connections to server (0 to choose a random port, requires a restart)")
+MACRO_CONFIG_INT(ClContactPort, cl_contact_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for serverinfo connections to server (0 to choose a random port, requires a restart)")
 
 MACRO_CONFIG_STR(SvName, sv_name, 128, "unnamed server", CFGFLAG_SERVER, "Server name")
 MACRO_CONFIG_STR(Bindaddr, bindaddr, 128, "", CFGFLAG_CLIENT | CFGFLAG_SERVER | CFGFLAG_MASTER, "Address to bind the client/server to")
@@ -255,7 +258,8 @@ MACRO_CONFIG_STR(SvRulesLine9, sv_rules_line9, 128, "", CFGFLAG_SERVER, "Rules l
 MACRO_CONFIG_STR(SvRulesLine10, sv_rules_line10, 128, "", CFGFLAG_SERVER, "Rules line 10")
 
 MACRO_CONFIG_INT(SvTeam, sv_team, 1, 0, 3, CFGFLAG_SERVER | CFGFLAG_GAME, "Teams configuration (0 = off, 1 = on but optional, 2 = must play only with teams, 3 = forced random team only for you)")
-MACRO_CONFIG_INT(SvTeamMaxSize, sv_max_team_size, MAX_CLIENTS, 1, MAX_CLIENTS, CFGFLAG_SERVER | CFGFLAG_GAME, "Maximum team size (from 2 to 64)")
+MACRO_CONFIG_INT(SvMinTeamSize, sv_min_team_size, 2, 1, MAX_CLIENTS, CFGFLAG_SERVER | CFGFLAG_GAME, "Minimum team size (finishing in a team smaller than this size gives you no teamrank)")
+MACRO_CONFIG_INT(SvMaxTeamSize, sv_max_team_size, MAX_CLIENTS, 1, MAX_CLIENTS, CFGFLAG_SERVER | CFGFLAG_GAME, "Maximum team size")
 MACRO_CONFIG_INT(SvMapVote, sv_map_vote, 1, 0, 1, CFGFLAG_SERVER, "Whether to allow /map")
 
 MACRO_CONFIG_STR(SvAnnouncementFileName, sv_announcement_filename, 24, "announcement.txt", CFGFLAG_SERVER, "file which will have the announcement, each one at a line")
@@ -306,6 +310,7 @@ MACRO_CONFIG_INT(ClZoomBackgroundLayers, cl_zoom_background_layers, 0, 0, 1, CFG
 MACRO_CONFIG_COL(ClBackgroundColor, cl_background_color, 128, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Background color") //0 0 128
 MACRO_CONFIG_COL(ClBackgroundEntitiesColor, cl_background_entities_color, 128, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Background (entities) color") //0 0 128
 MACRO_CONFIG_STR(ClBackgroundEntities, cl_background_entities, 100, "", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Background (entities)")
+MACRO_CONFIG_STR(ClRunOnJoin, cl_run_on_join, 100, "", CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Command to run when joining a server")
 
 // menu background map
 MACRO_CONFIG_STR(ClMenuMap, cl_menu_map, 100, "auto", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Background map in the menu")
@@ -374,7 +379,7 @@ MACRO_CONFIG_INT(ClChatTeamColors, cl_chat_teamcolors, 0, 0, 1, CFGFLAG_CLIENT |
 MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset chat when pressing escape")
 MACRO_CONFIG_INT(ClChatOld, cl_chat_old, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Old chat style: No tee, no background");
 
-MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show tee direction")
+MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show key presses (1 = other players', 2 = also your own)")
 MACRO_CONFIG_INT(ClHttpMapDownload, cl_http_map_download, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Try fast HTTP map download first")
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
 MACRO_CONFIG_INT(ClConfirmDisconnectTime, cl_confirm_disconnect_time, 20, -1, 1440, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Confirmation popup before disconnecting after game time (in minutes, -1 to turn off, 0 to always turn on)")

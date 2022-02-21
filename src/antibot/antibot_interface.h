@@ -22,7 +22,7 @@ ANTIBOTAPI void AntibotOnPlayerDestroy(int ClientID);
 ANTIBOTAPI void AntibotOnSpawn(int ClientID);
 ANTIBOTAPI void AntibotOnHammerFireReloading(int ClientID);
 ANTIBOTAPI void AntibotOnHammerFire(int ClientID);
-ANTIBOTAPI void AntibotOnHammerHit(int ClientID);
+ANTIBOTAPI void AntibotOnHammerHit(int ClientID, int TargetID);
 ANTIBOTAPI void AntibotOnDirectInput(int ClientID);
 ANTIBOTAPI void AntibotOnCharacterTick(int ClientID);
 ANTIBOTAPI void AntibotOnHookAttach(int ClientID, bool Player);

@@ -5,6 +5,8 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
+#include "entities/laser.h"
+#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -18,11 +20,15 @@ void CGameTeams::Reset()
 	m_Core.Reset();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		m_TeamState[i] = TEAMSTATE_EMPTY;
-		m_TeamLocked[i] = false;
 		m_TeeStarted[i] = false;
 		m_TeeFinished[i] = false;
 		m_LastChat[i] = 0;
+	}
+
+	for(int i = 0; i < NUM_TEAMS; ++i)
+	{
+		m_TeamState[i] = TEAMSTATE_EMPTY;
+		m_TeamLocked[i] = false;
 		m_pSaveTeamResult[i] = nullptr;
 
 		m_Invited[i] = 0;
@@ -70,11 +76,11 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	CCharacter *pStartingChar = Character(ClientID);
 	if(!pStartingChar)
 		return;
-	if(g_Config.m_SvTeam == 3 && pStartingChar->m_DDRaceState == DDRACE_STARTED)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && pStartingChar->m_DDRaceState == DDRACE_STARTED)
 		return;
-	if((g_Config.m_SvTeam == 3 || m_Core.Team(ClientID) != TEAM_FLOCK) && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
+	if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || m_Core.Team(ClientID) != TEAM_FLOCK) && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
 		return;
-	if(g_Config.m_SvTeam != 3 &&
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO &&
 		(m_Core.Team(ClientID) == TEAM_FLOCK || m_Core.Team(ClientID) == TEAM_SUPER))
 	{
 		m_TeeStarted[ClientID] = true;
@@ -165,7 +171,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			}
 		}
 
-		if(g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
+		if(g_Config.m_SvTeam < SV_TEAM_FORCED_SOLO && g_Config.m_SvMaxTeamSize != 2 && g_Config.m_SvPauseable)
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -181,7 +187,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 
 void CGameTeams::OnCharacterFinish(int ClientID)
 {
-	if((m_Core.Team(ClientID) == TEAM_FLOCK && g_Config.m_SvTeam != 3) || m_Core.Team(ClientID) == TEAM_SUPER)
+	if((m_Core.Team(ClientID) == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || m_Core.Team(ClientID) == TEAM_SUPER)
 	{
 		CPlayer *pPlayer = GetPlayer(ClientID);
 		if(pPlayer && pPlayer->IsPlaying())
@@ -234,7 +240,7 @@ void CGameTeams::Tick()
 	{
 		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
 		int Team = m_Core.Team(i);
-		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i])
+		if(!pChar || m_TeamState[Team] != TEAMSTATE_STARTED || m_TeeStarted[i] || m_Practice[m_Core.Team(i)])
 		{
 			continue;
 		}
@@ -385,7 +391,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	m_TeeFinished[ClientID] = false;
 	int OldTeam = m_Core.Team(ClientID);
 
-	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == 3) && OldTeam != TEAM_SUPER && m_TeamState[OldTeam] != TEAMSTATE_EMPTY)
+	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && OldTeam != TEAM_SUPER && m_TeamState[OldTeam] != TEAMSTATE_EMPTY)
 	{
 		bool NoElseInOldTeam = Count(OldTeam) <= 1;
 		if(NoElseInOldTeam)
@@ -477,6 +483,9 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
 	int64_t Mask = 0;
 
+	if(Team == TEAM_SUPER)
+		return 0xffffffffffffffff;
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ExceptID)
@@ -544,7 +553,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 
 void CGameTeams::SendTeamsState(int ClientID)
 {
-	if(g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		return;
 
 	if(!m_pGameContext->m_apPlayers[ClientID])
@@ -638,7 +647,7 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 	{
 		PlayerCIDs[i] = Players[i]->GetCID();
 
-		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != 3 && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
+		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
 		{
 			SetForceCharacterTeam(Players[i]->GetCID(), TEAM_FLOCK);
 			char aBuf[512];
@@ -648,7 +657,7 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 		}
 	}
 
-	if(Size >= 2)
+	if(Size >= (unsigned int)g_Config.m_SvMinTeamSize)
 		GameServer()->Score()->SaveTeamScore(PlayerCIDs, Size, Time, pTimestamp);
 }
 
@@ -884,6 +893,9 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
 	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+	swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+
+	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
@@ -894,7 +906,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 void CGameTeams::ProcessSaveTeam()
 {
-	for(int Team = 0; Team < MAX_CLIENTS; Team++)
+	for(int Team = 0; Team < NUM_TEAMS; Team++)
 	{
 		if(m_pSaveTeamResult[Team] == nullptr || !m_pSaveTeamResult[Team]->m_Completed)
 			continue;
@@ -977,7 +989,7 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 
 	if(m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[Team])
 	{
-		if(g_Config.m_SvTeam != 3)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 			SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 		else
 			SetForceCharacterTeam(ClientID, ClientID); // initialize team
@@ -994,7 +1006,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
 
-	if(g_Config.m_SvTeam == 3 && Team != TEAM_SUPER)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Team != TEAM_SUPER)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		ResetRoundState(Team);
@@ -1065,7 +1077,7 @@ void CGameTeams::KillSavedTeam(int ClientID, int Team)
 
 void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 {
-	if(g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		ResetRoundState(Team);

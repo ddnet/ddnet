@@ -135,6 +135,10 @@ public:
 	 */
 	virtual ~CComponent() {}
 	/**
+	 * Gets the size of the non-abstract component.
+	 */
+	virtual int Sizeof() const = 0;
+	/**
 	 * Get a pointer to the game client.
 	 */
 	class CGameClient *GameClient() const { return m_pClient; }
@@ -158,6 +162,11 @@ public:
 	 * Called to let the components run initialization code.
 	 */
 	virtual void OnInit(){};
+	/**
+	 * Called to cleanup the component.
+	 * This method is called when the client is closed.
+	 */
+	virtual void OnShutdown(){};
 	/**
 	 * Called to reset the component.
 	 * This method is usually called on your component constructor to avoid code duplication.

@@ -255,7 +255,6 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(m_Loaded)
 		{
 			m_pLayers->InitBackground(m_pMap);
-			RenderTools()->RenderTilemapGenerateSkip(m_pLayers);
 			NeedImageLoading = true;
 
 			CMapLayers::OnMapLoad();
@@ -299,12 +298,10 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 void CMenuBackground::OnMapLoad()
 {
-	return;
 }
 
 void CMenuBackground::OnRender()
 {
-	return;
 }
 
 bool CMenuBackground::Render()
@@ -390,12 +387,12 @@ void CMenuBackground::ChangePosition(int PositionNumber)
 
 std::vector<CTheme> &CMenuBackground::GetThemes()
 {
-	if(m_lThemes.size() == 0) // not loaded yet
+	if(m_lThemes.empty()) // not loaded yet
 	{
 		// when adding more here, make sure to change the value of PREDEFINED_THEMES_COUNT too
-		m_lThemes.push_back(CTheme("", true, true)); // no theme
-		m_lThemes.push_back(CTheme("auto", true, true)); // auto theme
-		m_lThemes.push_back(CTheme("rand", true, true)); // random theme
+		m_lThemes.emplace_back("", true, true); // no theme
+		m_lThemes.emplace_back("auto", true, true); // auto theme
+		m_lThemes.emplace_back("rand", true, true); // random theme
 
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);

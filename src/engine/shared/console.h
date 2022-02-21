@@ -89,8 +89,8 @@ class CConsole : public IConsole
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
-		CResult() :
-			IResult()
+		CResult()
+
 		{
 			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
 			m_pArgsStart = 0;
@@ -194,6 +194,8 @@ class CConsole : public IConsole
 	CCommand *FindCommand(const char *pName, int FlagMask);
 
 public:
+	CConfig *Config() { return m_pConfig; }
+
 	CConsole(int FlagMask);
 	~CConsole();
 
@@ -220,6 +222,7 @@ public:
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
+	virtual void InitChecksum(CChecksumData *pData) const;
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
 	void ResetServerGameSettings();

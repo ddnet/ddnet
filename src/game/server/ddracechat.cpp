@@ -163,9 +163,9 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		if(str_comp(pArg, "teams") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s %s",
-				g_Config.m_SvTeam == 1 ?
+				g_Config.m_SvTeam == SV_TEAM_ALLOWED ?
 					"Teams are available on this server" :
-					(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3) ?
+					(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) ?
 					"Teams are not available on this server" :
 					"You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
 				"and all of your team will die if the team is locked");
@@ -638,7 +638,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || Team >= TEAM_SUPER)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -702,9 +702,6 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
-		return;
-
 	if(!g_Config.m_SvSwap)
 	{
 		pSelf->Console()->Print(
@@ -718,7 +715,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != 3) || Team >= TEAM_SUPER)
+	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || Team >= TEAM_SUPER)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -767,6 +764,9 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)
 	{
+		if(pSelf->ProcessSpamProtection(pResult->m_ClientID))
+			return;
+
 		Teams.RequestTeamSwap(pPlayer, pSwapPlayer, Team);
 		return;
 	}
@@ -859,7 +859,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lock",
 			"Teams are disabled");
@@ -905,7 +905,7 @@ void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "unlock",
 			"Teams are disabled");
@@ -938,7 +938,7 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 	const char *pName = pResult->GetString(0);
 
-	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 			"Teams are disabled");
@@ -1015,13 +1015,13 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			"You are running a vote please try again after the vote is done!");
 		return;
 	}
-	else if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	else if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 			"Teams are disabled");
 		return;
 	}
-	else if(g_Config.m_SvTeam == 2 && pResult->GetInteger(0) == 0 && pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_LastStartWarning < pSelf->Server()->Tick() - 3 * pSelf->Server()->TickSpeed())
+	else if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && pResult->GetInteger(0) == 0 && pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_LastStartWarning < pSelf->Server()->Tick() - 3 * pSelf->Server()->TickSpeed())
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1056,10 +1056,10 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 			}
-			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvTeamMaxSize)
+			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.Count(Team) >= g_Config.m_SvMaxTeamSize)
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvTeamMaxSize);
+				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
 			}
 			else if(const char *pError = pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
@@ -1314,9 +1314,7 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 
 bool CheckClientID(int ClientID)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-		return false;
-	return true;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS;
 }
 
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
@@ -1482,6 +1480,53 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->Rescue();
+}
+
+void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	vec2 Pos = pPlayer->m_ViewPos;
+
+	if(pResult->NumArguments() > 0)
+	{
+		int ClientID;
+		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+		{
+			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientID)) == 0)
+				break;
+		}
+		if(ClientID == MAX_CLIENTS)
+		{
+			pSelf->SendChatTarget(pPlayer->GetCID(), "No player with this name found.");
+			return;
+		}
+		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientID];
+		if(!pPlayerTo)
+			return;
+		CCharacter *pChrTo = pPlayerTo->GetCharacter();
+		if(!pChrTo)
+			return;
+		Pos = pChrTo->m_Pos;
+	}
+
+	pSelf->Teleport(pChr, Pos);
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)

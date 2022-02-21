@@ -64,9 +64,7 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
 }
 
-IGameController::~IGameController()
-{
-}
+IGameController::~IGameController() = default;
 
 void IGameController::DoActivityCheck()
 {
@@ -118,25 +116,24 @@ void IGameController::DoActivityCheck()
 	}
 }
 
-float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
+float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 {
 	float Score = 0.0f;
 	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 	for(; pC; pC = (CCharacter *)pC->TypeNext())
 	{
-		// team mates are not as dangerous as enemies
-		float Scoremod = 1.0f;
-		if(pEval->m_FriendlyTeam != -1 && pC->GetPlayer()->GetTeam() == pEval->m_FriendlyTeam)
-			Scoremod = 0.5f;
+		// ignore players in other teams
+		if(GameServer()->GetDDRaceTeam(pC->GetPlayer()->GetCID()) != DDTeam)
+			continue;
 
 		float d = distance(Pos, pC->m_Pos);
-		Score += Scoremod * (d == 0 ? 1000000000.0f : 1.0f / d);
+		Score += d == 0 ? 1000000000.0f : 1.0f / d;
 	}
 
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 {
 	// j == 0: Find an empty slot, j == 1: Take any slot if no empty one found
 	for(int j = 0; j < 2 && !pEval->m_Got; j++)
@@ -172,7 +169,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 				P += Positions[Result];
 			}
 
-			float S = EvaluateSpawnPos(pEval, P);
+			float S = EvaluateSpawnPos(pEval, P, DDTeam);
 			if(!pEval->m_Got || (j == 0 && pEval->m_Score > S))
 			{
 				pEval->m_Got = true;
@@ -183,7 +180,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 	}
 }
 
-bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
+bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 {
 	CSpawnEval Eval;
 
@@ -196,19 +193,19 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 		Eval.m_FriendlyTeam = Team;
 
 		// first try own team spawn, then normal spawn and then enemy
-		EvaluateSpawnType(&Eval, 1 + (Team & 1));
+		EvaluateSpawnType(&Eval, 1 + (Team & 1), DDTeam);
 		if(!Eval.m_Got)
 		{
-			EvaluateSpawnType(&Eval, 0);
+			EvaluateSpawnType(&Eval, 0, DDTeam);
 			if(!Eval.m_Got)
-				EvaluateSpawnType(&Eval, 1 + ((Team + 1) & 1));
+				EvaluateSpawnType(&Eval, 1 + ((Team + 1) & 1), DDTeam);
 		}
 	}
 	else
 	{
-		EvaluateSpawnType(&Eval, 0);
-		EvaluateSpawnType(&Eval, 1);
-		EvaluateSpawnType(&Eval, 2);
+		EvaluateSpawnType(&Eval, 0, DDTeam);
+		EvaluateSpawnType(&Eval, 1, DDTeam);
+		EvaluateSpawnType(&Eval, 2, DDTeam);
 	}
 
 	*pOutPos = Eval.m_Pos;
@@ -517,7 +514,7 @@ void IGameController::StartRound()
 
 void IGameController::ChangeMap(const char *pToMap)
 {
-	str_copy(g_Config.m_SvMap, pToMap, sizeof(g_Config.m_SvMap));
+	Server()->ChangeMap(pToMap);
 }
 
 void IGameController::OnReset()
@@ -728,6 +725,9 @@ void IGameController::Snap(int SnappingClient)
 
 		if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorID] && GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter())
 			Team = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter()->Team();
+
+		if(Team == TEAM_SUPER)
+			return;
 
 		CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, Team, sizeof(CNetObj_SwitchState)));
 		if(!pSwitchState)

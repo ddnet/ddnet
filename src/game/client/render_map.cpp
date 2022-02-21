@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <cmath>
 #include <engine/graphics.h>
-#include <math.h>
 
 #include "render.h"
 
@@ -76,7 +76,6 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 	pResult[1] = fx2f(pPoints[NumPoints - 1].m_aValues[1]);
 	pResult[2] = fx2f(pPoints[NumPoints - 1].m_aValues[2]);
 	pResult[3] = fx2f(pPoints[NumPoints - 1].m_aValues[3]);
-	return;
 }
 
 static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)

@@ -1,6 +1,6 @@
 /* (c) Redix and Sushi */
 
-#include <ctype.h>
+#include <cctype>
 
 #include <base/system.h>
 #include <engine/serverbrowser.h>
@@ -113,6 +113,11 @@ void CRaceDemo::OnNewSnapshot()
 }
 
 void CRaceDemo::OnReset()
+{
+	StopRecord();
+}
+
+void CRaceDemo::OnShutdown()
 {
 	StopRecord();
 }

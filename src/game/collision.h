@@ -92,7 +92,7 @@ public:
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
 	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const;
-	int IsSwitch(int Index) const;
+	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
 

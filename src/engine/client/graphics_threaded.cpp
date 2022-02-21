@@ -24,7 +24,7 @@
 
 #include <engine/shared/image_manipulation.h>
 
-#include <math.h> // cosf, sinf, log2f
+#include <cmath> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"
@@ -157,7 +157,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_RenderEnable = true;
 	m_DoScreenshot = false;
 
-	png_init(0, 0); // ignore_convention
+	png_init(0, 0);
 }
 
 void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
@@ -512,8 +512,8 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		return 0;
 	}
 
-	png_t Png; // ignore_convention
-	int Error = png_open_read(&Png, 0, File); // ignore_convention
+	png_t Png;
+	int Error = png_open_read(&Png, 0, File);
 	if(Error != PNG_NO_ERROR)
 	{
 		dbg_msg("game/png", "failed to open file. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
@@ -521,15 +521,15 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		return 0;
 	}
 
-	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA)) // ignore_convention
+	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA))
 	{
 		dbg_msg("game/png", "invalid format. filename='%s'", aCompleteFilename);
 		io_close(File);
 		return 0;
 	}
 
-	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp); // ignore_convention
-	Error = png_get_data(&Png, pBuffer); // ignore_convention
+	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
+	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
 		dbg_msg("game/png", "failed to read image. filename='%s', pnglite: %s", aCompleteFilename, png_error_string(Error));
@@ -539,11 +539,11 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 	}
 	io_close(File);
 
-	pImg->m_Width = Png.width; // ignore_convention
-	pImg->m_Height = Png.height; // ignore_convention
-	if(Png.color_type == PNG_TRUECOLOR) // ignore_convention
+	pImg->m_Width = Png.width;
+	pImg->m_Height = Png.height;
+	if(Png.color_type == PNG_TRUECOLOR)
 		pImg->m_Format = CImageInfo::FORMAT_RGB;
-	else if(Png.color_type == PNG_TRUECOLOR_ALPHA) // ignore_convention
+	else if(Png.color_type == PNG_TRUECOLOR_ALPHA)
 		pImg->m_Format = CImageInfo::FORMAT_RGBA;
 	else
 	{
@@ -660,7 +660,7 @@ void CGraphics_Threaded::ScreenshotDirect()
 	{
 		// find filename
 		char aWholePath[1024];
-		png_t Png; // ignore_convention
+		png_t Png;
 
 		IOHANDLE File = m_pStorage->OpenFile(m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 		if(!File)
@@ -673,9 +673,9 @@ void CGraphics_Threaded::ScreenshotDirect()
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
-			png_open_write(&Png, 0, File); // ignore_convention
-			png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Image.m_pData); // ignore_convention
-			io_close(File); // ignore_convention
+			png_open_write(&Png, 0, File);
+			png_set_data(&Png, Image.m_Width, Image.m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Image.m_pData);
+			io_close(File);
 		}
 
 		free(Image.m_pData);
@@ -1252,7 +1252,7 @@ int CGraphics_Threaded::CreateQuadContainer(bool AutomaticUpload)
 	if(m_FirstFreeQuadContainer == -1)
 	{
 		Index = m_QuadContainers.size();
-		m_QuadContainers.push_back(SQuadContainer(AutomaticUpload));
+		m_QuadContainers.emplace_back(AutomaticUpload);
 	}
 	else
 	{
@@ -1275,7 +1275,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 	if(IsQuadContainerBufferingEnabled())
 	{
 		SQuadContainer &Container = m_QuadContainers[ContainerIndex];
-		if(Container.m_Quads.size() > 0)
+		if(!Container.m_Quads.empty())
 		{
 			if(Container.m_QuadBufferObjectIndex == -1)
 			{
@@ -1293,7 +1293,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				SBufferContainerInfo Info;
 				Info.m_Stride = sizeof(CCommandBuffer::SVertex);
 
-				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				Info.m_Attributes.emplace_back();
 				SBufferContainerInfo::SAttribute *pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
@@ -1301,7 +1301,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_pOffset = 0;
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				Info.m_Attributes.emplace_back();
 				pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
@@ -1309,7 +1309,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 				pAttr->m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
-				Info.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+				Info.m_Attributes.emplace_back();
 				pAttr = &Info.m_Attributes.back();
 				pAttr->m_DataTypeCount = 4;
 				pAttr->m_FuncType = 0;
@@ -1333,7 +1333,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 
 	for(int i = 0; i < Num; ++i)
 	{
-		Container.m_Quads.push_back(SQuadContainer::SQuad());
+		Container.m_Quads.emplace_back();
 		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X;
@@ -1379,7 +1379,7 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 
 	for(int i = 0; i < Num; ++i)
 	{
-		Container.m_Quads.push_back(SQuadContainer::SQuad());
+		Container.m_Quads.emplace_back();
 		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X0;
@@ -1946,7 +1946,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	if(m_FirstFreeVertexArrayInfo == -1)
 	{
 		Index = m_VertexArrayInfo.size();
-		m_VertexArrayInfo.push_back(SVertexArrayInfo());
+		m_VertexArrayInfo.emplace_back();
 	}
 	else
 	{
@@ -2075,14 +2075,24 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 
 int CGraphics_Threaded::IssueInit()
 {
-	int Flags = IGraphicsBackend::INITFLAG_RESIZABLE;
+	int Flags = 0;
+
+	bool IsPurlyWindowed = g_Config.m_GfxFullscreen == 0;
+	bool IsExclusiveFullscreen = g_Config.m_GfxFullscreen == 1;
+	bool IsDesktopFullscreen = g_Config.m_GfxFullscreen == 2;
+#ifndef CONF_FAMILY_WINDOWS
+	//  special mode for windows only
+	IsDesktopFullscreen |= g_Config.m_GfxFullscreen == 3;
+#endif
 
 	if(g_Config.m_GfxBorderless)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
-	if(g_Config.m_GfxFullscreen == 1)
+	if(IsExclusiveFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
-	else if(g_Config.m_GfxFullscreen == 2)
+	else if(IsDesktopFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
+	if(IsPurlyWindowed || IsExclusiveFullscreen || IsDesktopFullscreen)
+		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 	if(g_Config.m_GfxHighdpi)
@@ -2310,73 +2320,107 @@ void CGraphics_Threaded::Maximize()
 	m_pBackend->Maximize();
 }
 
-void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
+void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing)
 {
-	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless);
+	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless, AllowResizing);
 	CVideoMode CurMode;
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
-	Resize(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate, false, true);
+	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
 }
 
 bool CGraphics_Threaded::SetWindowScreen(int Index)
 {
-	return m_pBackend->SetWindowScreen(Index);
+	if(!m_pBackend->SetWindowScreen(Index))
+	{
+		return false;
+	}
+
+	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+	return true;
 }
 
-void CGraphics_Threaded::Resize(int w, int h, int RefreshRate, bool SetWindowSize, bool ForceResizeEvent)
+void CGraphics_Threaded::Move(int x, int y)
 {
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && IVideo::Current()->IsRecording())
 		return;
 #endif
 
-	if(!ForceResizeEvent && WindowWidth() == w && WindowHeight() == h && (RefreshRate != -1 && RefreshRate == m_ScreenRefreshRate))
+	// Only handling CurScreen != m_GfxScreen doesn't work reliably
+	const int CurScreen = m_pBackend->GetWindowScreen();
+	m_pBackend->UpdateDisplayMode(CurScreen);
+	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+}
+
+void CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
+{
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && IVideo::Current()->IsRecording())
+		return;
+#endif
+
+	if(WindowWidth() == w && WindowHeight() == h && RefreshRate == m_ScreenRefreshRate)
 		return;
 
 	// if the size is changed manually, only set the window resize, a window size changed event is triggered anyway
-	if(SetWindowSize)
+	if(m_pBackend->ResizeWindow(w, h, RefreshRate))
 	{
-		m_pBackend->ResizeWindow(w, h, RefreshRate);
+		CVideoMode CurMode;
+		m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
+		GotResized(w, h, RefreshRate);
 	}
-	else
+}
+
+void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
+{
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && IVideo::Current()->IsRecording())
+		return;
+#endif
+
+	// if RefreshRate is -1 use the current config refresh rate
+	if(RefreshRate == -1)
+		RefreshRate = g_Config.m_GfxScreenRefreshRate;
+
+	// if the size change event is triggered, set all parameters and change the viewport
+	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+
+	// adjust the viewport to only allow certain aspect ratios
+	if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
+		m_ScreenHeight = 4 * m_ScreenWidth / 5;
+
+	m_ScreenRefreshRate = RefreshRate;
+
+	g_Config.m_GfxScreenWidth = w;
+	g_Config.m_GfxScreenHeight = h;
+	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
+	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	CCommandBuffer::SCommand_Update_Viewport Cmd;
+	Cmd.m_X = 0;
+	Cmd.m_Y = 0;
+	Cmd.m_Width = m_ScreenWidth;
+	Cmd.m_Height = m_ScreenHeight;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add resize command"))
 	{
-		// if the size change event is triggered, set all parameters and change the viewport
-		m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
-
-		// adjust the viewport to only allow certain aspect ratios
-		if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
-			m_ScreenHeight = 4 * m_ScreenWidth / 5;
-
-		m_ScreenRefreshRate = RefreshRate == -1 ? m_ScreenRefreshRate : RefreshRate;
-
-		g_Config.m_GfxScreenWidth = w;
-		g_Config.m_GfxScreenHeight = h;
-		g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
-
-		CCommandBuffer::SCommand_Update_Viewport Cmd;
-		Cmd.m_X = 0;
-		Cmd.m_Y = 0;
-		Cmd.m_Width = m_ScreenWidth;
-		Cmd.m_Height = m_ScreenHeight;
-
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to add resize command"))
-		{
-			return;
-		}
-
-		// kick the command buffer
-		KickCommandBuffer();
-		WaitForIdle();
-
-		for(auto &ResizeListener : m_ResizeListeners)
-			ResizeListener.m_pFunc(ResizeListener.m_pUser);
+		return;
 	}
+
+	// kick the command buffer and wait
+	KickCommandBuffer();
+	WaitForIdle();
+
+	for(auto &ResizeListener : m_ResizeListeners)
+		ResizeListener.m_pFunc(ResizeListener.m_pUser);
 }
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
 {
-	m_ResizeListeners.push_back(SWindowResizeListener(pFunc, pUser));
+	m_ResizeListeners.emplace_back(pFunc, pUser);
 }
 
 int CGraphics_Threaded::GetWindowScreen()
@@ -2386,6 +2430,8 @@ int CGraphics_Threaded::GetWindowScreen()
 
 void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
 {
+	m_pBackend->WindowDestroyNtf(WindowID);
+
 	CCommandBuffer::SCommand_WindowDestroyNtf Cmd;
 	Cmd.m_WindowID = WindowID;
 
@@ -2398,6 +2444,8 @@ void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
 
 void CGraphics_Threaded::WindowCreateNtf(uint32_t WindowID)
 {
+	m_pBackend->WindowCreateNtf(WindowID);
+
 	CCommandBuffer::SCommand_WindowCreateNtf Cmd;
 	Cmd.m_WindowID = WindowID;
 
@@ -2484,6 +2532,11 @@ void CGraphics_Threaded::Swap()
 
 	// kick the command buffer
 	KickCommandBuffer();
+	// TODO: Remove when https://github.com/libsdl-org/SDL/issues/5203 is fixed
+#ifdef CONF_PLATFORM_MACOS
+	if(str_find(GetVersionString(), "Metal"))
+		WaitForIdle();
+#endif
 }
 
 bool CGraphics_Threaded::SetVSync(bool State)
