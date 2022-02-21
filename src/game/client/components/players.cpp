@@ -695,6 +695,9 @@ void CPlayers::OnRender()
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			// only render active characters
+			if(!m_pClient->m_aClients[i].m_Active)
+				continue;
+
 			if(p % 3 == 0 && !m_pClient->m_aClients[i].m_SpecCharPresent && !g_Config.m_ClFixKoGSpec)
 				continue;
 			if(p % 3 != 0 && !m_pClient->m_Snap.m_aCharacters[i].m_Active)
