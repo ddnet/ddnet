@@ -1485,15 +1485,11 @@ void CCharacter::HandleTiles(int Index)
 	// live freeze
 	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Super)
 	{
-		if(!m_LiveFreeze && !m_Core.m_LiveFrozen)
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Live FREEZE has been activated");
 		m_LiveFreeze = true;
 		m_Core.m_LiveFrozen = true;
 	}
 	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Super)
 	{
-		if(m_LiveFreeze && m_Core.m_LiveFrozen)
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Live FREEZE has been deactivated");
 		m_LiveFreeze = false;
 		m_Core.m_LiveFrozen = false;
 	}
@@ -1820,7 +1816,7 @@ void CCharacter::HandleTiles(int Index)
 
 		m_StartTime -= (min * 60 + sec) * Server()->TickSpeed();
 
-		if((g_Config.m_SvTeam == 3 || Team != TEAM_FLOCK) && Team != TEAM_SUPER)
+		if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team != TEAM_FLOCK) && Team != TEAM_SUPER)
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
@@ -1846,7 +1842,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_StartTime > Server()->Tick())
 			m_StartTime = Server()->Tick();
 
-		if((g_Config.m_SvTeam == 3 || Team != TEAM_FLOCK) && Team != TEAM_SUPER)
+		if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team != TEAM_FLOCK) && Team != TEAM_SUPER)
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
@@ -2086,7 +2082,7 @@ void CCharacter::DDRaceTick()
 	HandleTuneLayer(); // need this before coretick
 
 	// look for save position for rescue feature
-	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == 3 || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
+	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
 		int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 		const int aTiles[] = {
@@ -2323,7 +2319,7 @@ void CCharacter::DDRaceInit()
 		}
 	}
 
-	if(g_Config.m_SvTeam == 2 && Team == TEAM_FLOCK)
+	if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && Team == TEAM_FLOCK)
 	{
 		GameServer()->SendStartWarning(GetPlayer()->GetCID(), "Please join a team before you start");
 	}

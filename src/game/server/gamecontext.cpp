@@ -3192,7 +3192,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldTeleportHook = 0;
 		g_Config.m_SvOldTeleportWeapons = 0;
 		g_Config.m_SvTeleportHoldHook = 0;
-		g_Config.m_SvTeam = 1;
+		g_Config.m_SvTeam = SV_TEAM_ALLOWED;
 		g_Config.m_SvShowOthersDefault = 0;
 
 		if(Collision()->m_NumSwitchers > 0)
@@ -3208,7 +3208,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	if(g_Config.m_SvSoloServer)
 	{
-		g_Config.m_SvTeam = 3;
+		g_Config.m_SvTeam = SV_TEAM_FORCED_SOLO;
 		g_Config.m_SvShowOthersDefault = 1;
 
 		Tuning()->Set("player_collision", 0);
