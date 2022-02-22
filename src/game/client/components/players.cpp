@@ -686,8 +686,9 @@ void CPlayers::OnRender()
 					Pos = m_pClient->m_aClients[i].m_RenderPos;
 
 				bool spec = false;
-				if(m_pClient->m_Snap.m_paPlayerInfos[i]) 
-					spec = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS;
+				if(m_pClient->m_Snap.m_paPlayerInfos[i])
+					spec = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS && !(m_pClient->IsOtherTeam(i));
+				
 
 				if(spec)
 					RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Pos);
