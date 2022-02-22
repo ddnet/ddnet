@@ -133,7 +133,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 		return 0;
 	}
-	if(!Graphics()->CheckImageFormatRGBA(pName, Info))
+	if(!Graphics()->IsImageFormatRGBA(pName, Info))
 	{
 		str_format(aBuf, sizeof(aBuf), "skin format is not RGBA: %s", pName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);

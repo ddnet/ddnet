@@ -610,7 +610,7 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInf
 	return ImageIsValid;
 }
 
-bool CGraphics_Threaded::CheckImageFormatRGBA(const char *pFileName, CImageInfo &Img)
+bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Img)
 {
 	if(Img.m_Format != CImageInfo::FORMAT_RGBA && Img.m_Format != CImageInfo::FORMAT_ALPHA)
 	{
