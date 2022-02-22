@@ -80,6 +80,8 @@ MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_unfreeze_helper_limit, 45, 0, 500, CF
 
 //AAAAAAA
 MACRO_CONFIG_INT(ClAmIFrozen, EEEfrz, 0, 0, 1, CFGFLAG_CLIENT, "eeeee.")
+MACRO_CONFIG_INT(ClFreezeTick, EEEfrztck, 0, 0, 9999, CFGFLAG_CLIENT, "eeeee.")
+
 MACRO_CONFIG_INT(ClWhatsMyPing, EEEpng, 0, 0, 9999, CFGFLAG_CLIENT, "eeeee.")
 
 

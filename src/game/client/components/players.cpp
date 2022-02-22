@@ -710,6 +710,17 @@ void CPlayers::OnRender()
 				CNetObj_Character PrevChar = m_pClient->m_aClients[i].m_RenderPrev;
 				CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
 
+				if(Local && g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix)
+				{
+					CurChar.m_Weapon = WEAPON_NINJA;
+					if (CurChar.m_Emote == EMOTE_NORMAL) {
+						CurChar.m_Emote = EMOTE_BLINK;
+					}
+				}
+				if (Local) {
+					if(m_pClient->m_Snap.m_pLocalInfo)
+						g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Latency;
+				}
 				if(p < 3)
 				{
 					RenderHook(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
@@ -718,10 +729,7 @@ void CPlayers::OnRender()
 				{
 					RenderPlayer(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
 				}
-				if(Local)
-					g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Latency;
 			}
-			
 		}
 	}
 }

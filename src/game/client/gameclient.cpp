@@ -2456,9 +2456,14 @@ void CGameClient::UpdateRenderedCharacters()
 						m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
 				}
 				if(pChar && pChar->m_FreezeTime > 0)
+				{
 					g_Config.m_ClAmIFrozen = 1;
+				}
 				else
+				{
 					g_Config.m_ClAmIFrozen = 0;
+					g_Config.m_ClFreezeTick = Client()->GameTick(g_Config.m_ClDummy);
+				}
 
 			}
 			else
