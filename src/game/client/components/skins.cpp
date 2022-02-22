@@ -133,6 +133,12 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 		return 0;
 	}
+	if(!Graphics()->IsImageFormatRGBA(pName, Info))
+	{
+		str_format(aBuf, sizeof(aBuf), "skin format is not RGBA: %s", pName);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		return 0;
+	}
 
 	CSkin Skin;
 	Skin.m_IsVanilla = IsVanillaSkin(pName);
@@ -175,7 +181,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	if(BodyWidth > Info.m_Width || BodyHeight > Info.m_Height)
 		return 0;
 	unsigned char *d = (unsigned char *)Info.m_pData;
-	int Pitch = Info.m_Width * 4;
+	const int PixelStep = 4;
+	int Pitch = Info.m_Width * PixelStep;
 
 	// dig out blood color
 	{
@@ -183,12 +190,12 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 		for(int y = 0; y < BodyHeight; y++)
 			for(int x = 0; x < BodyWidth; x++)
 			{
-				uint8_t AlphaValue = d[y * Pitch + x * 4 + 3];
+				uint8_t AlphaValue = d[y * Pitch + x * PixelStep + 3];
 				if(AlphaValue > 128)
 				{
-					aColors[0] += d[y * Pitch + x * 4 + 0];
-					aColors[1] += d[y * Pitch + x * 4 + 1];
-					aColors[2] += d[y * Pitch + x * 4 + 2];
+					aColors[0] += d[y * Pitch + x * PixelStep + 0];
+					aColors[1] += d[y * Pitch + x * PixelStep + 1];
+					aColors[2] += d[y * Pitch + x * PixelStep + 2];
 				}
 			}
 		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
@@ -208,16 +215,13 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// get feet outline size
 	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOutlineOffsetX, FeetOutlineOffsetY, FeetOutlineWidth, FeetOutlineHeight);
 
-	// create colorless version
-	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
-
 	// make the texture gray scale
 	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
 	{
-		int v = (d[i * Step] + d[i * Step + 1] + d[i * Step + 2]) / 3;
-		d[i * Step] = v;
-		d[i * Step + 1] = v;
-		d[i * Step + 2] = v;
+		int v = (d[i * PixelStep] + d[i * PixelStep + 1] + d[i * PixelStep + 2]) / 3;
+		d[i * PixelStep] = v;
+		d[i * PixelStep + 1] = v;
+		d[i * PixelStep + 2] = v;
 	}
 
 	int Freq[256] = {0};
@@ -228,8 +232,8 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	for(int y = 0; y < BodyHeight; y++)
 		for(int x = 0; x < BodyWidth; x++)
 		{
-			if(d[y * Pitch + x * 4 + 3] > 128)
-				Freq[d[y * Pitch + x * 4]]++;
+			if(d[y * Pitch + x * PixelStep + 3] > 128)
+				Freq[d[y * Pitch + x * PixelStep]]++;
 		}
 
 	for(int i = 1; i < 256; i++)
@@ -244,7 +248,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	for(int y = 0; y < BodyHeight; y++)
 		for(int x = 0; x < BodyWidth; x++)
 		{
-			int v = d[y * Pitch + x * 4];
+			int v = d[y * Pitch + x * PixelStep];
 			if(v <= OrgWeight && OrgWeight == 0)
 				v = 0;
 			else if(v <= OrgWeight)
@@ -253,9 +257,9 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 				v = NewWeight;
 			else
 				v = (int)(((v - OrgWeight) / (float)InvOrgWeight) * InvNewWeight + NewWeight);
-			d[y * Pitch + x * 4] = v;
-			d[y * Pitch + x * 4 + 1] = v;
-			d[y * Pitch + x * 4 + 2] = v;
+			d[y * Pitch + x * PixelStep] = v;
+			d[y * Pitch + x * PixelStep + 1] = v;
+			d[y * Pitch + x * PixelStep + 2] = v;
 		}
 
 	Skin.m_ColorableSkin.m_Body = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_BODY]);
