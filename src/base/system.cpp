@@ -4072,8 +4072,17 @@ void init_exception_handler()
 	gs_ExceptionHandlingModule = LoadLibraryA("exchndl.dll");
 	if(gs_ExceptionHandlingModule != nullptr)
 	{
-		auto pfnExcHndlInit = (void APIENTRY (*)())GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlInit");
-		pfnExcHndlInit();
+		// Intentional
+#ifdef __MINGW32__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type"
+#endif
+		auto pfnExcHndlInit = (void APIENTRY (*)(void *))GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlInit");
+#ifdef __MINGW32__
+#pragma clang diagnostic pop
+#endif
+		void *pExceptionHandlingOffset = (void *)GetModuleHandle(NULL);
+		pfnExcHndlInit(pExceptionHandlingOffset);
 	}
 #else
 #error exception handling not implemented
