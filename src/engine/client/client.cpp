@@ -1846,17 +1846,20 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(Unpacker.Error() == 0)
 				m_pConsole->DeregisterTemp(pName);
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
+		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
 		{
 			int Result = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
-				m_RconAuthed[Dummy] = Result;
-			int Old = m_UseTempRconCommands;
-			m_UseTempRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error() != 0)
-				m_UseTempRconCommands = 0;
-			if(Old != 0 && m_UseTempRconCommands == 0)
-				m_pConsole->DeregisterTempAll();
+				m_RconAuthed[Conn] = Result;
+			if(Conn == CONN_MAIN)
+			{
+				int Old = m_UseTempRconCommands;
+				m_UseTempRconCommands = Unpacker.GetInt();
+				if(Unpacker.Error() != 0)
+					m_UseTempRconCommands = 0;
+				if(Old != 0 && m_UseTempRconCommands == 0)
+					m_pConsole->DeregisterTempAll();
+			}
 		}
 		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_LINE)
 		{
