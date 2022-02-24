@@ -12,7 +12,7 @@ if [ -z ${2+x} ]; then
     exit 1
 fi
 
-TMP_OFFSET=$(cat "$2" | grep -E -o "\(with offset [0-9A-F]*\)" | grep -E -o "[A-F0-9]*")
+TMP_OFFSET=$(grep -E -o "\(with offset [0-9A-F]*\)" "$2" | grep -E -o "[A-F0-9]*")
 
 ADDR_PC_REGEX='[0-9A-F]+ [0-9A-F]+ [0-9A-F]+ [0-9A-F]+'
 while read -r line
