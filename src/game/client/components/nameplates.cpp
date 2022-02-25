@@ -61,26 +61,36 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
 
-		const float ShowDirectionImgSize = 22.0f;
-		YOffset -= ShowDirectionImgSize;
-		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
+		float Scale = g_Config.m_ClShowDirectionSize / 100.0f;
+		float ShowDirectionImgSize = 22.0f * Scale;
+		float ShowDirectionPosY;
+		if(g_Config.m_ClOldShowDirectionPosition)
+		{
+			ShowDirectionPosY = Position.y - 70;
+		}
+		else
+		{
+			// + 6 because the arrows themselves already have a transparent frame
+			YOffset -= (ShowDirectionImgSize - 6);
+			ShowDirectionPosY = YOffset;
+		}
 
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - (ShowDirectionImgSize + ShowDirectionImgSize / 2), ShowDirectionPosY, Scale, Scale);
 		}
 		else if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + (ShowDirectionImgSize / 2), ShowDirectionPosY, Scale, Scale);
 		}
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - (ShowDirectionImgSize / 2), ShowDirectionPosY, Scale, Scale);
 		}
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);

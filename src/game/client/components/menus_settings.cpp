@@ -2574,6 +2574,15 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClShowDirection = g_Config.m_ClShowDirection != 2 ? 2 : 1;
 	}
 
+	if(g_Config.m_ClShowDirection > 0)
+	{
+		Left.HSplitTop(20.0f, &Label, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Key presses size"), g_Config.m_ClShowDirectionSize);
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClShowDirectionSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClShowDirectionSize, &Button, g_Config.m_ClShowDirectionSize / 100.0f) * 100.0f);
+	}
+
 	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
 	{
