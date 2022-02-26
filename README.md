@@ -22,7 +22,7 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_only_inteam**
 ```
 0 - always display (team 0) 
-1 - only display in team
+1 - only display frozen hud after you join a team
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_text**
 ```
@@ -45,6 +45,23 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 1 - output command to console
 ```
 
+### **Display screen center for lineups**
+
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_show_center**
+```
+0 - off
+1 - on
+```
+
+### **Adjustable Hook Line Size**
+
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_hook_line_width**
+```
+0 - default 1 pixel rendering
+(1-20) - adjustable size
+```
+
+
 ### **KoG Spectator skin fix**
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_kog_spec_skin**
 ```
@@ -52,7 +69,7 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 1 - on
 ```
 
-### **Enter freeze delay fix (WIP)**
+### **Enter freeze delay fix**
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_freeze_update_fix**
 ```
 0 - normal
