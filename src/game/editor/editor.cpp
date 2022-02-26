@@ -698,7 +698,14 @@ void CEditor::SelectLayer(int LayerIndex, int GroupIndex)
 		m_SelectedGroup = GroupIndex;
 
 	m_lSelectedLayers.clear();
+	AddSelectedLayer(LayerIndex);
+}
+
+void CEditor::AddSelectedLayer(int LayerIndex)
+{
 	m_lSelectedLayers.add(LayerIndex);
+
+	m_QuadKnifeActive = false;
 }
 
 void CEditor::SelectQuad(int Index)
@@ -1471,7 +1478,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
 					static int s_QuadPopupID = 0;
-					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupQuad);
+					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -1788,6 +1795,239 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
 	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
+float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
+{
+	return abs(((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) * 0.5);
+}
+
+bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
+{
+	// Normalize to increase precision
+	vec2 Min(minimum(A.x, minimum(B.x, C.x)), minimum(A.y, minimum(B.y, C.y)));
+	vec2 Max(maximum(A.x, maximum(B.x, C.x)), maximum(A.y, maximum(B.y, C.y)));
+	vec2 Size(Max.x - Min.x, Max.y - Min.y);
+
+	if(Size.x < FLT_EPSILON || Size.y < FLT_EPSILON)
+		return false;
+
+	vec2 Normal(1.f / Size.x, 1.f / Size.y);
+
+	A = (A - Min) * Normal;
+	B = (B - Min) * Normal;
+	C = (C - Min) * Normal;
+	Point = (Point - Min) * Normal;
+
+	float Area = TriangleArea(A, B, C);
+	return Area > 0.f && abs(TriangleArea(Point, A, B) + TriangleArea(Point, B, C) + TriangleArea(Point, C, A) - Area) < 0.000001f;
+}
+
+void CEditor::DoQuadKnife(int QuadIndex)
+{
+	CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+	CQuad *pQuad = &pLayer->m_lQuads[QuadIndex];
+
+	bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	float SnapRadius = 4.f * m_WorldZoom;
+
+	vec2 Mouse = vec2(UI()->MouseWorldX(), UI()->MouseWorldY());
+	vec2 Point = Mouse;
+
+	vec2 v[4] = {
+		vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y)),
+		vec2(fx2f(pQuad->m_aPoints[1].x), fx2f(pQuad->m_aPoints[1].y)),
+		vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y)),
+		vec2(fx2f(pQuad->m_aPoints[2].x), fx2f(pQuad->m_aPoints[2].y))};
+
+	m_pTooltip = "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode";
+
+	if(UI()->MouseButtonClicked(1))
+	{
+		m_QuadKnifeActive = false;
+		return;
+	}
+	
+	// Handle snapping
+	if(m_GridActive && !IgnoreGrid)
+	{
+		float CellSize = (float)GetLineDistance();
+		vec2 OnGrid = vec2(roundf(Mouse.x / CellSize) * CellSize, roundf(Mouse.y / CellSize) * CellSize);
+
+		if (IsInTriangle(OnGrid, v[0], v[1], v[2]) || IsInTriangle(OnGrid, v[0], v[3], v[2]))
+			Point = OnGrid;
+		else
+		{
+			float MinDistance = -1.f;
+
+			for(int i = 0; i < 4; i++)
+			{
+				int j = (i + 1) % 4;
+				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
+				vec2 Max(maximum(v[i].x, v[j].x), maximum(v[i].y, v[j].y));
+
+				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > FLT_EPSILON)
+				{
+					vec2 OnEdge(v[i].x + (OnGrid.y - v[i].y) / (v[j].y - v[i].y) * (v[j].x - v[i].x), OnGrid.y);
+					float Distance = abs(OnGrid.x - OnEdge.x);
+
+					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
+					{
+						MinDistance = Distance;
+						Point = OnEdge;
+					}
+				}
+				
+				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > FLT_EPSILON)
+				{
+					vec2 OnEdge(OnGrid.x, v[i].y + (OnGrid.x - v[i].x) / (v[j].x - v[i].x) * (v[j].y - v[i].y));
+					float Distance = abs(OnGrid.y - OnEdge.y);
+
+					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
+					{
+						MinDistance = Distance;
+						Point = OnEdge;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		float MinDistance = -1.f;
+
+		// Try snapping to corners
+		for(int i = 0; i < 4; i++)
+		{
+			float Distance = distance(Mouse, v[i]);
+
+			if(Distance <= SnapRadius && (Distance < MinDistance || MinDistance < 0.f))
+			{
+				MinDistance = Distance;
+				Point = v[i];
+			}
+		}
+
+		if (MinDistance < 0.f)
+		{
+			// Try snapping to edges
+			for(int i = 0; i < 4; i++)
+			{
+				int j = (i + 1) % 4;
+				vec2 s(v[j] - v[i]);
+
+				float t = ((Mouse.x - v[i].x) * s.x + (Mouse.y - v[i].y) * s.y) / (s.x * s.x + s.y * s.y);
+
+				if(in_range(t, 0.f, 1.f))
+				{
+					vec2 OnEdge = vec2((v[i].x + t * s.x), (v[i].y + t * s.y));
+					float Distance = distance(Mouse, OnEdge);
+
+					if(Distance <= SnapRadius && (Distance < MinDistance || MinDistance < 0.f))
+					{
+						MinDistance = Distance;
+						Point = OnEdge;
+					}
+				}
+			}
+		}
+	}
+
+	bool ValidPosition = IsInTriangle(Point, v[0], v[1], v[2]) || IsInTriangle(Point, v[0], v[3], v[2]);
+
+	if(UI()->MouseButtonClicked(0) && ValidPosition)
+		m_aQuadKnifePoints[m_QuadKnifeCount++] = Point;
+
+	if(m_QuadKnifeCount == 4)
+	{
+		if(IsInTriangle(m_aQuadKnifePoints[3], m_aQuadKnifePoints[0], m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]) ||
+			IsInTriangle(m_aQuadKnifePoints[1], m_aQuadKnifePoints[0], m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]))
+		{
+			// Fix concave order
+			swap(m_aQuadKnifePoints[0], m_aQuadKnifePoints[3]);
+			swap(m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]);
+		}
+
+		swap(m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]);
+
+		CQuad *pResult = pLayer->NewQuad(64, 64, 64, 64);
+		pQuad = &pLayer->m_lQuads[QuadIndex];
+
+		for(int i = 0; i < 4; i++)
+		{
+			int t = IsInTriangle(m_aQuadKnifePoints[i], v[0], v[3], v[2]) ? 2 : 1;
+				
+			vec2 A = vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y));
+			vec2 B = vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y));
+			vec2 C = vec2(fx2f(pQuad->m_aPoints[t].x), fx2f(pQuad->m_aPoints[t].y));
+
+			float TriArea = TriangleArea(A, B, C);
+			float WeightA = TriangleArea(m_aQuadKnifePoints[i], B, C) / TriArea;
+			float WeightB = TriangleArea(m_aQuadKnifePoints[i], C, A) / TriArea;
+			float WeightC = TriangleArea(m_aQuadKnifePoints[i], A, B) / TriArea;
+
+			pResult->m_aColors[i].r = (int)round(pQuad->m_aColors[0].r * WeightA + pQuad->m_aColors[3].r * WeightB + pQuad->m_aColors[t].r * WeightC);
+			pResult->m_aColors[i].g = (int)round(pQuad->m_aColors[0].g * WeightA + pQuad->m_aColors[3].g * WeightB + pQuad->m_aColors[t].g * WeightC);
+			pResult->m_aColors[i].b = (int)round(pQuad->m_aColors[0].b * WeightA + pQuad->m_aColors[3].b * WeightB + pQuad->m_aColors[t].b * WeightC);
+			pResult->m_aColors[i].a = (int)round(pQuad->m_aColors[0].a * WeightA + pQuad->m_aColors[3].a * WeightB + pQuad->m_aColors[t].a * WeightC);
+
+			pResult->m_aTexcoords[i].x = (int)round(pQuad->m_aTexcoords[0].x * WeightA + pQuad->m_aTexcoords[3].x * WeightB + pQuad->m_aTexcoords[t].x * WeightC);
+			pResult->m_aTexcoords[i].y = (int)round(pQuad->m_aTexcoords[0].y * WeightA + pQuad->m_aTexcoords[3].y * WeightB + pQuad->m_aTexcoords[t].y * WeightC);
+
+			pResult->m_aPoints[i].x = f2fx(m_aQuadKnifePoints[i].x);
+			pResult->m_aPoints[i].y = f2fx(m_aQuadKnifePoints[i].y);
+		}
+
+		pResult->m_aPoints[4].x = ((pResult->m_aPoints[0].x + pResult->m_aPoints[3].x) / 2 + (pResult->m_aPoints[1].x + pResult->m_aPoints[2].x) / 2) / 2;
+		pResult->m_aPoints[4].y = ((pResult->m_aPoints[0].y + pResult->m_aPoints[3].y) / 2 + (pResult->m_aPoints[1].y + pResult->m_aPoints[2].y) / 2) / 2;
+
+		m_QuadKnifeCount = 0;
+	}
+
+	// Render
+	IGraphics::CLineItem aEdges[4] = {
+		IGraphics::CLineItem(v[0].x, v[0].y, v[1].x, v[1].y),
+		IGraphics::CLineItem(v[1].x, v[1].y, v[2].x, v[2].y),
+		IGraphics::CLineItem(v[2].x, v[2].y, v[3].x, v[3].y),
+		IGraphics::CLineItem(v[3].x, v[3].y, v[0].x, v[0].y)};
+
+	IGraphics::CLineItem aLines[4];
+	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
+
+	for(int i = 0; i < LineCount; i++)
+		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, m_aQuadKnifePoints[i + 1].x, m_aQuadKnifePoints[i + 1].y);
+
+	IGraphics::CQuadItem aMarkers[4];
+	int MarkerCount = m_QuadKnifeCount;
+
+	for(int i = 0; i < MarkerCount; i++)
+		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+
+	if(ValidPosition)
+	{
+		// Preview
+		if(m_QuadKnifeCount > 0)
+			aLines[LineCount++] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[LineCount].x, m_aQuadKnifePoints[LineCount].y);
+
+		if(m_QuadKnifeCount == 3)
+			aLines[LineCount++] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[0].x, m_aQuadKnifePoints[0].y);
+
+		aMarkers[MarkerCount++] = IGraphics::CQuadItem(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+	}
+
+	Graphics()->TextureClear();
+
+	Graphics()->LinesBegin();	
+	Graphics()->SetColor(1.f, 0.5f, 0.f, 1.f);
+	Graphics()->LinesDraw(aEdges, 4);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->LinesDraw(aLines, LineCount);
+	Graphics()->LinesEnd();
+
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
+	Graphics()->QuadsDraw(aMarkers, MarkerCount);
+	Graphics()->QuadsEnd();
 }
 
 void CEditor::DoQuadEnvelopes(const array<CQuad> &lQuads, IGraphics::CTextureHandle Texture)
@@ -2405,7 +2645,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_Brush.Clear();
 				}
 
-				if(UI()->MouseButton(0) && s_Operation == OP_NONE)
+				if(UI()->MouseButton(0) && s_Operation == OP_NONE && !m_QuadKnifeActive)
 				{
 					UI()->SetActiveItem(s_pEditorID);
 
@@ -2486,16 +2726,21 @@ void CEditor::DoMapEditor(CUIRect View)
 						if(!m_ShowEnvelopePreview)
 							m_ShowEnvelopePreview = 2;
 
-						Graphics()->TextureClear();
-						Graphics()->QuadsBegin();
-						for(int i = 0; i < pLayer->m_lQuads.size(); i++)
+						if(m_QuadKnifeActive)
+							DoQuadKnife(m_lSelectedQuads[m_SelectedQuadIndex]);
+						else
 						{
-							for(int v = 0; v < 4; v++)
-								DoQuadPoint(&pLayer->m_lQuads[i], i, v);
+							Graphics()->TextureClear();
+							Graphics()->QuadsBegin();
+							for(int i = 0; i < pLayer->m_lQuads.size(); i++)
+							{
+								for(int v = 0; v < 4; v++)
+									DoQuadPoint(&pLayer->m_lQuads[i], i, v);
 
-							DoQuad(&pLayer->m_lQuads[i], i);
+								DoQuad(&pLayer->m_lQuads[i], i);
+							}
+							Graphics()->QuadsEnd();
 						}
-						Graphics()->QuadsEnd();
 					}
 
 					if(pEditLayers[k]->m_Type == LAYERTYPE_SOUNDS)
@@ -3076,7 +3321,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						m_lSelectedLayers.clear();
 						for(int i = 0; i < m_Map.m_lGroups[g]->m_lLayers.size(); i++)
 						{
-							m_lSelectedLayers.add(i);
+							AddSelectedLayer(i);
 						}
 					}
 
@@ -3169,7 +3414,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 						{
 							if(!m_lSelectedLayers.remove(i))
-								m_lSelectedLayers.add(i);
+								AddSelectedLayer(i);
 						}
 						else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
 						{
@@ -3233,7 +3478,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 		{
 			if(m_lSelectedLayers[m_lSelectedLayers.size() - 1] < m_Map.m_lGroups[m_SelectedGroup]->m_lLayers.size() - 1)
-				m_lSelectedLayers.add(m_lSelectedLayers[m_lSelectedLayers.size() - 1] + 1);
+				AddSelectedLayer(m_lSelectedLayers[m_lSelectedLayers.size() - 1] + 1);
 		}
 		else
 		{
@@ -3264,7 +3509,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 		{
 			if(m_lSelectedLayers[m_lSelectedLayers.size() - 1] > 0)
-				m_lSelectedLayers.add(m_lSelectedLayers[m_lSelectedLayers.size() - 1] - 1);
+				AddSelectedLayer(m_lSelectedLayers[m_lSelectedLayers.size() - 1] - 1);
 		}
 		else
 		{
