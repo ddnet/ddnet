@@ -124,7 +124,7 @@ void CHud::RenderGameTimer()
 		}
 		else
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
-	
+
 		str_time(Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
 		float w = TextRender()->TextWidth(0, FontSize,
@@ -164,6 +164,24 @@ void CHud::RenderSuddenDeath()
 		float w = TextRender()->TextWidth(0, FontSize, pText, -1, -1.0f);
 		TextRender()->Text(0, Half - w / 2, 2, FontSize, pText, -1.0f);
 	}
+}
+
+void CHud::RenderCenterLines()
+{
+	if(m_pClient->m_Scoreboard.Active())
+		return;
+
+	Graphics()->TextureClear();
+	Graphics()->LinesBegin();
+	Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+
+	IGraphics::CLineItem Array[2] = {
+		IGraphics::CLineItem(m_Width / 2.0, 0.0f, m_Width / 2.0, m_Height),
+		IGraphics::CLineItem(0.0f, m_Height / 2.0, m_Width, m_Height / 2.0f)};
+
+	Graphics()->LinesDraw(Array, 2);
+
+	Graphics()->LinesEnd();
 }
 
 void CHud::RenderScoreHud()
@@ -642,7 +660,7 @@ void CHud::RenderTextInfo()
 			int NumDisplayed = 0;
 			int NumInRow = 0;
 			int CurrentRow = 0;
-			
+
 			for(int OverflowIndex = 0; OverflowIndex < 1 + Overflow; OverflowIndex++)
 			{
 				for(int i = 0; i < MAX_CLIENTS && NumDisplayed < MaxTees * MaxRows; i++)
@@ -651,7 +669,6 @@ void CHud::RenderTextInfo()
 						continue;
 					if(m_pClient->m_Teams.Team(i) == LocalTeamID)
 					{
-
 						bool Frozen = false;
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
 						if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
@@ -674,8 +691,6 @@ void CHud::RenderTextInfo()
 							progressiveOffset = 0.0f;
 							CurrentRow++;
 						}
-
-
 
 						TeeInfo.m_Size = TeeSize;
 						CAnimState *pIdleState = CAnimState::GetIdle();
@@ -989,6 +1004,8 @@ void CHud::OnRender()
 			RenderScoreHud();
 		RenderWarmupTimer();
 		RenderTextInfo();
+		if(g_Config.m_ClShowCenterLines)
+			RenderCenterLines();
 		RenderLocalTime((m_Width / 7) * 3);
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderConnectionWarning();

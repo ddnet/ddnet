@@ -293,8 +293,11 @@ void CPlayers::RenderPlayer(
 			vec2 InitPos = Position;
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
 
-			//Graphics()->LinesBegin();
-			Graphics()->QuadsBegin();
+			if(g_Config.m_ClHookLineSize > 0)
+				Graphics()->QuadsBegin();
+			else
+				Graphics()->LinesBegin();
+
 			ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
 			float PhysSize = 28.0f;
@@ -353,21 +356,25 @@ void CPlayers::RenderPlayer(
 			}
 			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
 
-			float LineWidth = 2.0f;
-
-			vec2 PerpToAngle = vec2(ExDirection.y, -ExDirection.x);
-			//These variable names only serve 
-			vec2 TopLeftPos = FinishPos + PerpToAngle * -LineWidth;
-			vec2 TopRightPos = FinishPos + PerpToAngle * LineWidth;
-			vec2 BotLeftPos = InitPos + PerpToAngle * -LineWidth;
-			vec2 BotRightPos = InitPos + PerpToAngle * LineWidth;
-			IGraphics::CFreeformItem FreeformItem(TopLeftPos.x, TopLeftPos.y, TopRightPos.x, TopRightPos.y, BotLeftPos.x, BotLeftPos.y, BotRightPos.x, BotRightPos.y);
-			Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
-			Graphics()->QuadsEnd();
-
-			//IGraphics::CLineItem LineItem(InitPos.x, InitPos.y, FinishPos.x, FinishPos.y);
-			//Graphics()->LinesDraw(&LineItem, 1);
-			//Graphics()->LinesEnd();
+			if(g_Config.m_ClHookLineSize > 0)
+			{
+				float LineWidth = 0.5f+(float)g_Config.m_ClHookLineSize*0.5f;
+				vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * (float)g_Config.m_ClWhatsMyZoom / 100.0f;
+				//These variable names only serve as a mental reference for the up right direction case
+				vec2 TopLeftPos = FinishPos + PerpToAngle * -LineWidth;
+				vec2 TopRightPos = FinishPos + PerpToAngle * LineWidth;
+				vec2 BotLeftPos = InitPos + PerpToAngle * -LineWidth;
+				vec2 BotRightPos = InitPos + PerpToAngle * LineWidth;
+				IGraphics::CFreeformItem FreeformItem(TopLeftPos.x, TopLeftPos.y, TopRightPos.x, TopRightPos.y, BotLeftPos.x, BotLeftPos.y, BotRightPos.x, BotRightPos.y);
+				Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
+				Graphics()->QuadsEnd();
+			}
+			else
+			{
+				IGraphics::CLineItem LineItem(InitPos.x, InitPos.y, FinishPos.x, FinishPos.y);
+				Graphics()->LinesDraw(&LineItem, 1);
+				Graphics()->LinesEnd();
+			}
 		}
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
