@@ -358,7 +358,7 @@ void CPlayers::RenderPlayer(
 
 			if(g_Config.m_ClHookLineSize > 0)
 			{
-				float LineWidth = 0.5f+(float)g_Config.m_ClHookLineSize*0.5f;
+				float LineWidth = 0.5f+(float)g_Config.m_ClHookLineSize*0.25f;
 				vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * (float)g_Config.m_ClWhatsMyZoom / 100.0f;
 				//These variable names only serve as a mental reference for the up right direction case
 				vec2 TopLeftPos = FinishPos + PerpToAngle * -LineWidth;
