@@ -1805,11 +1805,11 @@ float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
 bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 {
 	// Normalize to increase precision
-	vec2 Min(minimum(A.x, minimum(B.x, C.x)), minimum(A.y, minimum(B.y, C.y)));
-	vec2 Max(maximum(A.x, maximum(B.x, C.x)), maximum(A.y, maximum(B.y, C.y)));
+	vec2 Min(minimum(A.x, B.x, C.x), minimum(A.y, B.y, C.y));
+	vec2 Max(maximum(A.x, B.x, C.x), maximum(A.y, B.y, C.y));
 	vec2 Size(Max.x - Min.x, Max.y - Min.y);
 
-	if(Size.x < FLT_EPSILON || Size.y < FLT_EPSILON)
+	if(Size.x < 0.0000001f || Size.y < 0.0000001f)
 		return false;
 
 	vec2 Normal(1.f / Size.x, 1.f / Size.y);
@@ -1866,7 +1866,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
 				vec2 Max(maximum(v[i].x, v[j].x), maximum(v[i].y, v[j].y));
 
-				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > FLT_EPSILON)
+				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
 				{
 					vec2 OnEdge(v[i].x + (OnGrid.y - v[i].y) / (v[j].y - v[i].y) * (v[j].x - v[i].x), OnGrid.y);
 					float Distance = abs(OnGrid.x - OnEdge.x);
@@ -1878,7 +1878,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 					}
 				}
 				
-				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > FLT_EPSILON)
+				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > 0.0000001f)
 				{
 					vec2 OnEdge(OnGrid.x, v[i].y + (OnGrid.x - v[i].x) / (v[j].x - v[i].x) * (v[j].y - v[i].y));
 					float Distance = abs(OnGrid.y - OnEdge.y);
@@ -1935,8 +1935,11 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	bool ValidPosition = IsInTriangle(Point, v[0], v[1], v[2]) || IsInTriangle(Point, v[0], v[3], v[2]);
 
-	if(UI()->MouseButtonClicked(0) && ValidPosition)
-		m_aQuadKnifePoints[m_QuadKnifeCount++] = Point;
+	if (UI()->MouseButtonClicked(0) && ValidPosition)
+	{
+		m_aQuadKnifePoints[m_QuadKnifeCount] = Point;
+		m_QuadKnifeCount++;
+	}
 
 	if(m_QuadKnifeCount == 4)
 	{
@@ -2007,12 +2010,19 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	{
 		// Preview
 		if(m_QuadKnifeCount > 0)
-			aLines[LineCount++] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[LineCount].x, m_aQuadKnifePoints[LineCount].y);
+		{
+			aLines[LineCount] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[LineCount].x, m_aQuadKnifePoints[LineCount].y);
+			LineCount++;
+		}
 
-		if(m_QuadKnifeCount == 3)
-			aLines[LineCount++] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[0].x, m_aQuadKnifePoints[0].y);
+		if (m_QuadKnifeCount == 3)
+		{
+			aLines[LineCount] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[0].x, m_aQuadKnifePoints[0].y);
+			LineCount++;
+		}
 
-		aMarkers[MarkerCount++] = IGraphics::CQuadItem(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		aMarkers[MarkerCount] = IGraphics::CQuadItem(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		MarkerCount++;
 	}
 
 	Graphics()->TextureClear();
