@@ -1,4 +1,4 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
+[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) 
 
 ### Taters custom ddnet client with some small modifications
 
