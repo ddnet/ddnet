@@ -1,5 +1,5 @@
-#include <inttypes.h>
-#include <stdio.h> // sscanf
+#include <cinttypes>
+#include <cstdio> // sscanf
 
 #include <engine/console.h>
 #include <engine/shared/linereader.h>

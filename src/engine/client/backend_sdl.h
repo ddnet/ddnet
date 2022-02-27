@@ -72,6 +72,7 @@ private:
 	std::condition_variable m_BufferDoneCond;
 	CCommandBuffer *m_pBuffer;
 	std::atomic_bool m_Shutdown;
+	bool m_Started = false;
 	std::atomic_bool m_BufferInProcess;
 	void *m_Thread;
 
@@ -241,6 +242,7 @@ class CGraphicsBackend_SDL_OpenGL : public CGraphicsBackend_Threaded
 	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
+	CGraphicsBackend_SDL_OpenGL();
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage);
 	virtual int Shutdown();
 

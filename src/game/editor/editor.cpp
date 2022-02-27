@@ -213,7 +213,6 @@ void CLayerGroup::DeleteLayer(int Index)
 	delete m_lLayers[Index];
 	m_lLayers.remove_index(Index);
 	m_pMap->m_Modified = true;
-	m_pMap->m_UndoModified++;
 }
 
 void CLayerGroup::GetSize(float *w, float *h) const
@@ -238,7 +237,6 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 	if(Index0 == Index1)
 		return Index0;
 	m_pMap->m_Modified = true;
-	m_pMap->m_UndoModified++;
 	swap(m_lLayers[Index0], m_lLayers[Index1]);
 	return Index1;
 }
@@ -779,8 +777,6 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 		str_copy(pEditor->m_aFileName, pFileName, sizeof(pEditor->m_aFileName));
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
 		pEditor->m_Map.m_Modified = false;
-		pEditor->m_Map.m_UndoModified = 0;
-		pEditor->m_LastUndoUpdateTime = time_get();
 	}
 
 	pEditor->m_Dialog = DIALOG_NONE;
@@ -800,8 +796,6 @@ void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	if(pEditor->Save(pFileName))
 	{
 		pEditor->m_Map.m_Modified = false;
-		pEditor->m_Map.m_UndoModified = 0;
-		pEditor->m_LastUndoUpdateTime = time_get();
 	}
 
 	pEditor->m_Dialog = DIALOG_NONE;
@@ -1281,8 +1275,6 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 			{
 				if(m_lSelectedLayers.size() == 1)
 				{
-					m_Map.m_UndoModified++;
-
 					static int s_SourcePopupID = 0;
 					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
 					m_LockMouse = false;
@@ -1295,11 +1287,6 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		{
 			if(!UI()->MouseButton(0))
 			{
-				if(s_Operation == OP_MOVE)
-				{
-					m_Map.m_UndoModified++;
-				}
-
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -1481,8 +1468,6 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			{
 				if(m_lSelectedLayers.size() == 1)
 				{
-					m_Map.m_UndoModified++;
-
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
 					static int s_QuadPopupID = 0;
@@ -1499,7 +1484,6 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			{
 				if(m_lSelectedLayers.size() == 1)
 				{
-					m_Map.m_UndoModified++;
 					m_LockMouse = false;
 					m_Map.m_Modified = true;
 					DeleteSelectedQuads();
@@ -1512,11 +1496,6 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		{
 			if(!UI()->MouseButton(0))
 			{
-				if(s_Operation == OP_ROTATE || s_Operation == OP_MOVE_ALL || s_Operation == OP_MOVE_PIVOT)
-				{
-					m_Map.m_UndoModified++;
-				}
-
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
@@ -1727,8 +1706,6 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			{
 				if(m_lSelectedLayers.size() == 1)
 				{
-					m_Map.m_UndoModified++;
-
 					m_SelectedQuadPoint = V;
 					m_SelectedQuadIndex = FindSelectedQuadIndex(QuadIndex);
 
@@ -1749,9 +1726,6 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					else
 						m_SelectedPoints = 1 << V;
 				}
-
-				if(s_Operation == OP_MOVEPOINT || s_Operation == OP_MOVEUV)
-					m_Map.m_UndoModified++;
 
 				m_LockMouse = false;
 				UI()->SetActiveItem(0);
@@ -2559,9 +2533,6 @@ void CEditor::DoMapEditor(CUIRect View)
 			// release mouse
 			if(!UI()->MouseButton(0))
 			{
-				if(s_Operation == OP_BRUSH_DRAW || s_Operation == OP_BRUSH_PAINT)
-					m_Map.m_UndoModified++;
-
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(0);
 			}
@@ -4071,11 +4042,9 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 			str_copy(m_aFileDialogFileName, m_FileList[Index].m_aFilename, sizeof(m_aFileDialogFileName));
 		else
 			m_aFileDialogFileName[0] = 0;
-		m_FilesSelectedIndex = Index;
 		m_PreviewImageIsLoaded = false;
-
-		if(Input()->MouseDoubleClick())
-			m_FileDialogActivate = true;
+		m_FileDialogActivate |= Index == m_FilesSelectedIndex && Input()->MouseDoubleClick();
+		m_FilesSelectedIndex = Index;
 	}
 }
 
@@ -4532,15 +4501,6 @@ void CEditor::RenderStatusbar(CUIRect View)
 		m_ShowServerSettingsEditor ^= 1;
 	}
 
-	if(g_Config.m_ClEditorUndo)
-	{
-		View.VSplitRight(5.0f, &View, &Button);
-		View.VSplitRight(60.0f, &View, &Button);
-		static int s_UndolistButton = 0;
-		if(DoButton_Editor(&s_UndolistButton, "Undolist", m_ShowUndo, &Button, 0, "Toggles the undo list."))
-			m_ShowUndo = (m_ShowUndo + 1) % 2;
-	}
-
 	if(m_pTooltip)
 	{
 		char aBuf[512];
@@ -4551,64 +4511,6 @@ void CEditor::RenderStatusbar(CUIRect View)
 
 		float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, View.w);
 		UI()->DoLabel(&View, aBuf, FontSize, TEXTALIGN_LEFT, View.w);
-	}
-}
-
-void CEditor::RenderUndoList(CUIRect View)
-{
-	CUIRect List, Preview, Scroll, Button;
-	View.VSplitMid(&List, &Preview);
-	List.VSplitRight(20.0f, &List, &Scroll);
-	m_UndoScrollValue = UIEx()->DoScrollbarV(&m_UndoScrollValue, &Scroll, m_UndoScrollValue);
-
-	float TopY = List.y;
-	float Height = List.h;
-	UI()->ClipEnable(&List);
-	int ClickedIndex = -1;
-	int HoveredIndex = -1;
-	int ScrollNum = m_lUndoSteps.size() - List.h / 17.0f;
-	if(ScrollNum < 0)
-		ScrollNum = 0;
-	List.y -= m_UndoScrollValue * ScrollNum * 17.0f;
-	for(int i = 0; i < m_lUndoSteps.size(); i++)
-	{
-		List.HSplitTop(17.0f, &Button, &List);
-		if(List.y < TopY)
-			continue;
-		if(List.y - 17.0f > TopY + Height)
-			break;
-		if(DoButton_Editor(&m_lUndoSteps[i].m_ButtonId, m_lUndoSteps[i].m_aName, 0, &Button, 0, "Undo to this step"))
-			ClickedIndex = i;
-		if(UI()->HotItem() == &m_lUndoSteps[i].m_ButtonId)
-			HoveredIndex = i;
-	}
-	UI()->ClipDisable();
-	if(ClickedIndex != -1)
-	{
-		char aBuffer[1024];
-		str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i", m_lUndoSteps[HoveredIndex].m_FileNum);
-		m_Map.Load(m_pStorage, aBuffer, IStorage::TYPE_SAVE);
-		m_Map.m_UndoModified = 0;
-		m_LastUndoUpdateTime = time_get();
-	}
-	if(HoveredIndex != -1)
-	{
-		if(!m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded)
-		{
-			char aBuffer[1024];
-			str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i.png", m_lUndoSteps[HoveredIndex].m_FileNum);
-			m_lUndoSteps[HoveredIndex].m_PreviewImage = Graphics()->LoadTexture(aBuffer, IStorage::TYPE_SAVE, CImageInfo::FORMAT_RGB, 0);
-			m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded = true;
-		}
-		if(m_lUndoSteps[HoveredIndex].m_PreviewImageIsLoaded)
-		{
-			Graphics()->TextureSet(m_lUndoSteps[HoveredIndex].m_PreviewImage);
-			Graphics()->BlendNormal();
-			Graphics()->QuadsBegin();
-			IGraphics::CQuadItem QuadItem(Preview.x, Preview.y, Preview.w, Preview.h);
-			Graphics()->QuadsDrawTL(&QuadItem, 1);
-			Graphics()->QuadsEnd();
-		}
 	}
 }
 
@@ -4680,7 +4582,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
 		{
 			m_Map.m_Modified = true;
-			m_Map.m_UndoModified++;
 			pNewEnv = m_Map.NewEnvelope(1);
 		}
 
@@ -4690,7 +4591,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
 		{
 			m_Map.m_Modified = true;
-			m_Map.m_UndoModified++;
 			pNewEnv = m_Map.NewEnvelope(4);
 		}
 
@@ -4700,7 +4600,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
 		{
 			m_Map.m_Modified = true;
-			m_Map.m_UndoModified++;
 			pNewEnv = m_Map.NewEnvelope(3);
 		}
 
@@ -4713,7 +4612,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			if(DoButton_Editor(&s_DelButton, "Delete", 0, &Button, 0, "Delete this envelope"))
 			{
 				m_Map.m_Modified = true;
-				m_Map.m_UndoModified++;
 				m_Map.DeleteEnvelope(m_SelectedEnvelope);
 				if(m_SelectedEnvelope >= m_Map.m_lEnvelopes.size())
 					m_SelectedEnvelope = m_Map.m_lEnvelopes.size() - 1;
@@ -4783,7 +4681,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			if(DoEditBox(&s_NameBox, &Button, pEnvelope->m_aName, sizeof(pEnvelope->m_aName), 10.0f, &s_NameBox))
 			{
 				m_Map.m_Modified = true;
-				m_Map.m_UndoModified++;
 			}
 		}
 	}
@@ -4889,7 +4786,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						f2fx(aChannels[0]), f2fx(aChannels[1]),
 						f2fx(aChannels[2]), f2fx(aChannels[3]));
 					m_Map.m_Modified = true;
-					m_Map.m_UndoModified++;
 				}
 
 				m_ShowEnvelopePreview = 1;
@@ -5076,9 +4972,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									pEnvelope->m_lPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY * ValueScale);
 							}
 
-							if(m_SelectedEnvelopePoint != i)
-								m_Map.m_UndoModified++;
-
 							m_SelectedQuadEnvelope = m_SelectedEnvelope;
 							m_ShowEnvelopePreview = 1;
 							m_SelectedEnvelopePoint = i;
@@ -5113,7 +5006,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							pEnvelope->m_lPoints.remove_index(i);
 							m_Map.m_Modified = true;
-							m_Map.m_UndoModified++;
 						}
 
 						m_ShowEnvelopePreview = 1;
@@ -5537,7 +5429,7 @@ void CEditor::Render()
 	// render checker
 	RenderBackground(View, m_CheckerTexture, 32.0f, 1.0f);
 
-	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, ExtraEditor, UndoList, ToolBox;
+	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
 	m_ShowPicker = Input()->KeyIsPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && UI()->LastActiveItem() != &m_CommandBox && m_lSelectedLayers.size() == 1;
 
 	if(m_GuiActive)
@@ -5555,10 +5447,6 @@ void CEditor::Render()
 			else if(m_ShowEnvelopeEditor == 3)
 				Size *= 3.0f;
 			View.HSplitBottom(Size, &View, &ExtraEditor);
-		}
-		if(m_ShowUndo && !m_ShowPicker)
-		{
-			View.HSplitBottom(250.0f, &View, &UndoList);
 		}
 
 		if(m_ShowServerSettingsEditor && !m_ShowPicker)
@@ -5767,11 +5655,6 @@ void CEditor::Render()
 				RenderBackground(ExtraEditor, m_BackgroundTexture, 128.0f, Brightness);
 				ExtraEditor.Margin(2.0f, &ExtraEditor);
 			}
-			if(m_ShowUndo)
-			{
-				RenderBackground(UndoList, m_BackgroundTexture, 128.0f, Brightness);
-				UndoList.Margin(2.0f, &UndoList);
-			}
 		}
 
 		if(m_Mode == MODE_LAYERS)
@@ -5793,8 +5676,6 @@ void CEditor::Render()
 		{
 			if(m_ShowEnvelopeEditor)
 				RenderEnvelopeEditor(ExtraEditor);
-			if(m_ShowUndo)
-				RenderUndoList(UndoList);
 			static bool s_ShowServerSettingsEditorLast = false;
 			if(m_ShowServerSettingsEditor)
 			{
@@ -5885,19 +5766,6 @@ void CEditor::Render()
 	m_MouseInsidePopup = false;
 }
 
-static int UndoStepsListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
-{
-	IStorage *pStorage = (IStorage *)pUser;
-	if(str_comp_nocase_num(pName, "undo_", 5) == 0)
-	{
-		char aBuffer[1024];
-		pStorage->GetCompletePath(IStorage::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
-		str_append(aBuffer, pName, sizeof(aBuffer));
-		fs_remove(aBuffer);
-	}
-	return 0;
-}
-
 void CEditor::Reset(bool CreateDefault)
 {
 	m_Map.Clean();
@@ -5905,8 +5773,6 @@ void CEditor::Reset(bool CreateDefault)
 	//delete undo file
 	char aBuffer[1024];
 	m_pStorage->GetCompletePath(IStorage::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
-	fs_listdir(aBuffer, UndoStepsListdirCallback, 0, m_pStorage);
-	m_lUndoSteps.clear();
 
 	mem_zero(m_apSavedBrushes, sizeof m_apSavedBrushes);
 
@@ -5936,16 +5802,11 @@ void CEditor::Reset(bool CreateDefault)
 	m_MouseDeltaWy = 0;
 
 	m_Map.m_Modified = false;
-	m_Map.m_UndoModified = 0;
-	m_LastUndoUpdateTime = time_get();
-	m_UndoRunning = false;
 
 	m_ShowEnvelopePreview = 0;
 	m_ShiftBy = 1;
 
 	m_Map.m_Modified = false;
-	m_Map.m_UndoModified = 0;
-	m_LastUndoUpdateTime = time_get();
 }
 
 int CEditor::GetLineDistance() const
@@ -5992,7 +5853,6 @@ void CEditorMap::DeleteEnvelope(int Index)
 		return;
 
 	m_Modified = true;
-	m_UndoModified++;
 
 	// fix links between envelopes and quads
 	for(int i = 0; i < m_lGroups.size(); ++i)
@@ -6135,8 +5995,6 @@ void CEditor::Init()
 
 	Reset();
 	m_Map.m_Modified = false;
-	m_Map.m_UndoModified = 0;
-	m_LastUndoUpdateTime = time_get();
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 }
@@ -6156,34 +6014,6 @@ void CEditor::PlaceBorderTiles()
 
 	for(int i = (pT->m_Width * (pT->m_Height - 2)); i < pT->m_Width * pT->m_Height; ++i)
 		pT->m_pTiles[i].m_Index = 1;
-}
-
-void CEditor::CreateUndoStep()
-{
-	thread_init_and_detach(CreateUndoStepThread, this, "Editor Undo");
-}
-
-void CEditor::CreateUndoStepThread(void *pUser)
-{
-	CEditor *pEditor = (CEditor *)pUser;
-
-	CUndo NewStep;
-	str_timestamp(NewStep.m_aName, sizeof(NewStep.m_aName));
-	if(pEditor->m_lUndoSteps.size())
-		NewStep.m_FileNum = pEditor->m_lUndoSteps[pEditor->m_lUndoSteps.size() - 1].m_FileNum + 1;
-	else
-		NewStep.m_FileNum = 0;
-	NewStep.m_PreviewImageIsLoaded = false;
-
-	char aBuffer[1024];
-	str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i.png", NewStep.m_FileNum);
-	pEditor->Graphics()->TakeCustomScreenshot(aBuffer);
-
-	str_format(aBuffer, sizeof(aBuffer), "editor/undo_%i", NewStep.m_FileNum);
-	pEditor->Save(aBuffer);
-
-	pEditor->m_lUndoSteps.add(NewStep);
-	pEditor->m_UndoRunning = false;
 }
 
 void CEditor::UpdateAndRender()
@@ -6255,21 +6085,6 @@ void CEditor::UpdateAndRender()
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
 
-	if(g_Config.m_ClEditorUndo)
-	{
-		// Screenshot at most every 5 seconds, at least every 60
-		if((m_LastUndoUpdateTime + time_freq() * 60 < time_get() && m_Map.m_UndoModified) || (m_LastUndoUpdateTime + time_freq() * 5 < time_get() && m_Map.m_UndoModified >= 10))
-		{
-			m_Map.m_UndoModified = 0;
-			m_LastUndoUpdateTime = time_get();
-
-			if(!m_UndoRunning)
-			{
-				m_UndoRunning = true;
-				CreateUndoStep();
-			}
-		}
-	}
 	Render();
 
 	if(Input()->KeyPress(KEY_F10))

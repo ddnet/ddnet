@@ -222,14 +222,19 @@ void CSqliteConnection::BindFloat(int Idx, float Value)
 	m_Done = false;
 }
 
-// TODO(2020-09-07): remove extern declaration, when all supported systems ship SQLite3 version 3.14 or above
-#if defined(__GNUC__)
+// Keep support for SQLite < 3.14 on older Linux distributions. MinGW does not
+// support __attribute__((weak)): https://sourceware.org/bugzilla/show_bug.cgi?id=9687
+#if defined(__GNUC__) && !defined(__MINGW32__)
 extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak)); // NOLINT(readability-redundant-declaration)
 #endif
 
 void CSqliteConnection::Print()
 {
-	if(m_pStmt != nullptr)
+	if(m_pStmt != nullptr
+#if defined(__GNUC__) && !defined(__MINGW32__)
+		&& sqlite3_expanded_sql != nullptr
+#endif
+	)
 	{
 		char *pExpandedStmt = sqlite3_expanded_sql(m_pStmt);
 		dbg_msg("sql", "SQLite statement: %s", pExpandedStmt);

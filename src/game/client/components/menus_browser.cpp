@@ -215,7 +215,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
-	int DoubleClicked = 0;
+	bool DoubleClicked = false;
 	int NumPlayers = 0;
 
 	m_SelectedIndex = -1;
@@ -300,7 +300,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				NewSelected = ItemIndex;
 				if(NewSelected == m_DoubleClickIndex)
-					DoubleClicked = 1;
+					DoubleClicked = true;
 				m_DoubleClickIndex = NewSelected;
 			}
 		}
@@ -474,7 +474,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		// select the new server
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
-		if(Input()->MouseDoubleClick() && DoubleClicked)
+		if(DoubleClicked && Input()->MouseDoubleClick())
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{

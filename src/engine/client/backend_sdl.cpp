@@ -18,7 +18,7 @@
 #include <base/detect.h>
 #include <base/math.h>
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "SDL_hints.h"
 #include "SDL_pixels.h"
@@ -61,6 +61,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 	auto *pSelf = (CGraphicsBackend_Threaded *)pUser;
 	std::unique_lock<std::mutex> Lock(pSelf->m_BufferSwapMutex);
 	// notify, that the thread started
+	pSelf->m_Started = true;
 	pSelf->m_BufferDoneCond.notify_all();
 	while(!pSelf->m_Shutdown)
 	{
@@ -75,11 +76,12 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 			pSelf->m_pBuffer = nullptr;
 			pSelf->m_BufferInProcess.store(false, std::memory_order_relaxed);
 			pSelf->m_BufferDoneCond.notify_all();
-		}
+
 #if defined(CONF_VIDEORECORDER)
-		if(IVideo::Current())
-			IVideo::Current()->NextVideoFrameThread();
+			if(IVideo::Current())
+				IVideo::Current()->NextVideoFrameThread();
 #endif
+		}
 	}
 }
 
@@ -97,7 +99,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_Thread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
-	m_BufferDoneCond.wait(Lock);
+	m_BufferDoneCond.wait(Lock, [this]() -> bool { return m_Started; });
 }
 
 void CGraphicsBackend_Threaded::StopProcessor()
@@ -127,7 +129,7 @@ bool CGraphicsBackend_Threaded::IsIdle() const
 void CGraphicsBackend_Threaded::WaitForIdle()
 {
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	if(m_pBuffer != nullptr)
+	while(m_pBuffer != nullptr)
 		m_BufferDoneCond.wait(Lock);
 }
 
@@ -193,9 +195,7 @@ void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::S
 #endif
 }
 
-CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL()
-{
-}
+CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL() = default;
 
 bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
@@ -302,6 +302,7 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 			return true;
 		}
 #endif
+#ifdef GLEW_VERSION_4_5
 		if(GLEW_VERSION_4_5)
 		{
 			GlewMajor = 4;
@@ -309,6 +310,7 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 			GlewPatch = 0;
 			return true;
 		}
+#endif
 // Don't allow GL 3.3, if the driver doesn't support atleast OpenGL 4.5
 #ifndef CONF_FAMILY_WINDOWS
 		if(GLEW_VERSION_4_4)
@@ -753,6 +755,11 @@ void CGraphicsBackend_SDL_OpenGL::GetCurrentVideoMode(CVideoMode &CurMode, int H
 	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
 }
 
+CGraphicsBackend_SDL_OpenGL::CGraphicsBackend_SDL_OpenGL()
+{
+	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+}
+
 int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 	// print sdl version
@@ -783,7 +790,7 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, g_Config.m_GfxOpenGLMajor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, g_Config.m_GfxOpenGLMinor);
-	dbg_msg("gfx", "Created OpenGL %zu.%zu context.", (size_t)g_Config.m_GfxOpenGLMajor, (size_t)g_Config.m_GfxOpenGLMinor);
+	dbg_msg("gfx", "Created OpenGL %d.%d context.", g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor);
 
 	if(m_BackendType == BACKEND_TYPE_OPENGL)
 	{
@@ -964,8 +971,6 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 	// start the command processor
 	m_pProcessor = new CCommandProcessor_SDL_OpenGL(m_BackendType, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
 	StartProcessor(m_pProcessor);
-
-	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
 
 	// issue init commands for OpenGL and SDL
 	CCommandBuffer CmdBuffer(1024, 512);

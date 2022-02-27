@@ -177,7 +177,7 @@ public:
 	{
 		if(TeamID < TEAM_FLOCK || TeamID >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvTeam != 3 && TeamID == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamID == TEAM_FLOCK)
 			return false;
 
 		return m_pSaveTeamResult[TeamID] != nullptr;
@@ -187,7 +187,7 @@ public:
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return;
 
 		m_Practice[Team] = true;
@@ -197,7 +197,7 @@ public:
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return false;
 
 		return m_Practice[Team];

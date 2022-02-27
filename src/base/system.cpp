@@ -1,12 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cctype>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 #include "system.h"
 #if !defined(CONF_PLATFORM_MACOS)
@@ -24,7 +24,7 @@
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-#include <signal.h>
+#include <csignal>
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
@@ -32,7 +32,7 @@
 
 /* unix net includes */
 #include <arpa/inet.h>
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -223,6 +223,7 @@ static void logger_file(const char *line, void *user)
 	aio_unlock(logfile);
 }
 
+#if !defined(CONF_FAMILY_WINDOWS)
 static void logger_file_no_newline(const char *line, void *user)
 {
 	ASYNCIO *logfile = (ASYNCIO *)user;
@@ -230,8 +231,7 @@ static void logger_file_no_newline(const char *line, void *user)
 	aio_write_unlocked(logfile, line, str_length(line));
 	aio_unlock(logfile);
 }
-
-#if defined(CONF_FAMILY_WINDOWS)
+#else
 static void logger_stdout_sync(const char *line, void *user)
 {
 	size_t length = str_length(line);
@@ -557,7 +557,7 @@ static void aio_thread(void *user)
 	ASYNCIO *aio = (ASYNCIO *)user;
 
 	lock_wait(aio->lock);
-	while(1)
+	while(true)
 	{
 		struct BUFFERS buffers;
 		int result_io_error;
@@ -1347,7 +1347,7 @@ static int parse_int(int *out, const char **str)
 	i = **str - '0';
 	(*str)++;
 
-	while(1)
+	while(true)
 	{
 		if(**str < '0' || **str > '9')
 		{
@@ -2122,7 +2122,7 @@ static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 	li.QuadPart -= 11644473600LL; // Windows epoch is in the past
 
 	t = li.QuadPart;
-	return t == li.QuadPart ? t : (time_t)-1;
+	return t == (time_t)li.QuadPart ? t : (time_t)-1;
 }
 #endif
 
@@ -2613,8 +2613,8 @@ void str_append(char *dst, const char *src, int dst_size)
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
-	strncpy(dst, src, dst_size - 1);
-	dst[dst_size - 1] = 0; /* assure null termination */
+	dst[0] = '\0';
+	strncat(dst, src, dst_size - 1);
 	str_utf8_fix_truncation(dst);
 }
 
@@ -2727,7 +2727,7 @@ void str_clean_whitespaces(char *str_in)
 		read++;
 
 	/* end of read string is detected in the loop */
-	while(1)
+	while(true)
 	{
 		/* skip whitespace */
 		int found_whitespace = 0;
@@ -3439,7 +3439,7 @@ int str_utf8_decode(const char **ptr)
 	int utf8_code_point = 0;
 	int utf8_bytes_seen = 0;
 	int utf8_bytes_needed = 0;
-	while(1)
+	while(true)
 	{
 		unsigned char byte = str_byte_next(ptr);
 		if(utf8_bytes_needed == 0)
@@ -3794,6 +3794,35 @@ int secure_random_init()
 #endif
 }
 
+int secure_random_uninit()
+{
+	if(!secure_random_data.initialized)
+	{
+		return 0;
+	}
+#if defined(CONF_FAMILY_WINDOWS)
+	if(CryptReleaseContext(secure_random_data.provider, 0))
+	{
+		secure_random_data.initialized = 0;
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+#else
+	if(!io_close(secure_random_data.urandom))
+	{
+		secure_random_data.initialized = 0;
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+#endif
+}
+
 void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
@@ -3875,7 +3904,7 @@ int secure_rand_below(int below)
 {
 	unsigned int mask = find_next_power_of_two_minus_one(below);
 	dbg_assert(below > 0, "below must be positive");
-	while(1)
+	while(true)
 	{
 		unsigned int n;
 		secure_random_fill(&n, sizeof(n));
@@ -3924,6 +3953,10 @@ static int color_hsv_to_windows_console_color(const ColorHSVA *hsv)
 
 void set_console_msg_color(const void *rgbvoid)
 {
+	static const char *pNoColor = getenv("NO_COLOR");
+	if(pNoColor)
+		return;
+
 #if defined(CONF_FAMILY_WINDOWS)
 	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
 	int color = 15;
@@ -4025,10 +4058,60 @@ int os_version_str(char *version, int length)
 			*newline = 0;
 		}
 		str_format(extra, sizeof(extra), "; %s", buf + offset + 12);
-	} while(0);
+	} while(false);
 
 	str_format(version, length, "%s %s (%s, %s)%s", u.sysname, u.release, u.machine, u.version, extra);
 	return 0;
 #endif
 }
+
+#if defined(CONF_EXCEPTION_HANDLING)
+#if defined(CONF_FAMILY_WINDOWS)
+static HMODULE gs_ExceptionHandlingModule = nullptr;
+#endif
+
+void init_exception_handler()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	gs_ExceptionHandlingModule = LoadLibraryA("exchndl.dll");
+	if(gs_ExceptionHandlingModule != nullptr)
+	{
+		// Intentional
+#ifdef __MINGW32__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type"
+#endif
+		auto pfnExcHndlInit = (void APIENTRY (*)(void *))GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlInit");
+#ifdef __MINGW32__
+#pragma clang diagnostic pop
+#endif
+		void *pExceptionHandlingOffset = (void *)GetModuleHandle(NULL);
+		pfnExcHndlInit(pExceptionHandlingOffset);
+	}
+#else
+#error exception handling not implemented
+#endif
+}
+
+void set_exception_handler_log_file(const char *pLogFilePath)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	if(gs_ExceptionHandlingModule != nullptr)
+	{
+		// Intentional
+#ifdef __MINGW32__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type"
+#endif
+		auto pExceptionLogFilePathFunc = (BOOL APIENTRY(*)(const char *))(GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlSetLogFileNameA"));
+#ifdef __MINGW32__
+#pragma clang diagnostic pop
+#endif
+		pExceptionLogFilePathFunc(pLogFilePath);
+	}
+#else
+#error exception handling not implemented
+#endif
+}
+#endif
 }

@@ -2295,6 +2295,16 @@ void generate_password(char *buffer, unsigned length, unsigned short *random, un
 int secure_random_init();
 
 /*
+	Function: secure_random_uninit
+		Uninitializes the secure random module.
+
+	Returns:
+		0 - Uninitialization succeeded.
+		1 - Uninitialization failed.
+*/
+int secure_random_uninit();
+
+/*
 	Function: secure_random_password
 		Fills the buffer with the specified amount of random password
 		characters.
@@ -2357,6 +2367,11 @@ void set_console_msg_color(const void *rgbvoid);
 		1 - Failure in getting the version.
 */
 int os_version_str(char *version, int length);
+
+#if defined(CONF_EXCEPTION_HANDLING)
+void init_exception_handler();
+void set_exception_handler_log_file(const char *pLogFilePath);
+#endif
 
 #if defined(__cplusplus)
 }

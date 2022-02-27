@@ -6,14 +6,14 @@
 #include <sqlite3.h>
 
 #include <algorithm>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
 class CServerBrowserPingCache : public IServerBrowserPingCache
 {
 public:
 	CServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage);
-	virtual ~CServerBrowserPingCache() {}
+	virtual ~CServerBrowserPingCache() = default;
 
 	void Load();
 

@@ -18,9 +18,7 @@ IJob &IJob::operator=(const IJob &Other)
 	return *this;
 }
 
-IJob::~IJob()
-{
-}
+IJob::~IJob() = default;
 
 int IJob::Status()
 {

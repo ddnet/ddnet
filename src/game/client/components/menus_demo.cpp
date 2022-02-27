@@ -634,8 +634,10 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	HitRect.h = minimum(HitRect.h, (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) - HitRect.y);
 
+	bool DoubleClickable = false;
 	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &HitRect))
 	{
+		DoubleClickable |= gs_ListBoxNewSelected == ThisItemIndex;
 		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
 	}
@@ -647,7 +649,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
+			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
@@ -1090,8 +1092,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	int ScrollNum = maximum(m_lDemos.size() - Num + 1, 0);
 	ListBox.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
-	int NewSelected = -1;
 	int ItemIndex = -1;
+	bool DoubleClicked = false;
 
 	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
 	{
@@ -1132,10 +1134,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			if(UI()->DoButtonLogic(r.front().m_aName /* TODO: */, "", Selected, &SelectHitBox))
 			{
-				NewSelected = ItemIndex;
+				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
 				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
 				DemolistOnUpdate(false);
-				m_DoubleClickIndex = NewSelected;
+				m_DoubleClickIndex = ItemIndex;
 			}
 		}
 		else
@@ -1194,7 +1196,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	UI()->ClipDisable();
 
 	bool Activated = false;
-	if(m_EnterPressed || (NewSelected >= 0 && Input()->MouseDoubleClick()))
+	if(m_EnterPressed || (DoubleClicked && Input()->MouseDoubleClick()))
 	{
 		UI()->SetActiveItem(0);
 		Activated = true;

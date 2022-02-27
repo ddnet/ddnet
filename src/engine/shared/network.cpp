@@ -26,7 +26,7 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 	CNetChunkHeader Header;
 	unsigned char *pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
 
-	while(1)
+	while(true)
 	{
 		unsigned char *pData = m_Data.m_aChunkData;
 

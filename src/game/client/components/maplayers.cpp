@@ -339,12 +339,12 @@ bool AddTile(std::vector<SGraphicTile> &TmpTiles, std::vector<SGraphicTileTexure
 {
 	if(Index)
 	{
-		TmpTiles.push_back(SGraphicTile());
+		TmpTiles.emplace_back();
 		SGraphicTile &Tile = TmpTiles.back();
 		SGraphicTileTexureCoords *pTileTex = NULL;
 		if(DoTextureCoords)
 		{
-			TmpTileTexCoords.push_back(SGraphicTileTexureCoords());
+			TmpTileTexCoords.emplace_back();
 			SGraphicTileTexureCoords &TileTex = TmpTileTexCoords.back();
 			pTileTex = &TileTex;
 		}
@@ -844,7 +844,7 @@ void CMapLayers::OnMapLoad()
 							// then create the buffer container
 							SBufferContainerInfo ContainerInfo;
 							ContainerInfo.m_Stride = (DoTextureCoords ? (sizeof(float) * 2 + sizeof(vec3)) : 0);
-							ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+							ContainerInfo.m_Attributes.emplace_back();
 							SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_Attributes.back();
 							pAttr->m_DataTypeCount = 2;
 							pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
@@ -854,7 +854,7 @@ void CMapLayers::OnMapLoad()
 							pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 							if(DoTextureCoords)
 							{
-								ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+								ContainerInfo.m_Attributes.emplace_back();
 								pAttr = &ContainerInfo.m_Attributes.back();
 								pAttr->m_DataTypeCount = 3;
 								pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
@@ -948,7 +948,7 @@ void CMapLayers::OnMapLoad()
 					// then create the buffer container
 					SBufferContainerInfo ContainerInfo;
 					ContainerInfo.m_Stride = (Textured ? (sizeof(STmpQuadTextured) / 4) : (sizeof(STmpQuad) / 4));
-					ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+					ContainerInfo.m_Attributes.emplace_back();
 					SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_Attributes.back();
 					pAttr->m_DataTypeCount = 4;
 					pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
@@ -956,7 +956,7 @@ void CMapLayers::OnMapLoad()
 					pAttr->m_pOffset = 0;
 					pAttr->m_FuncType = 0;
 					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
-					ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+					ContainerInfo.m_Attributes.emplace_back();
 					pAttr = &ContainerInfo.m_Attributes.back();
 					pAttr->m_DataTypeCount = 4;
 					pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
@@ -966,7 +966,7 @@ void CMapLayers::OnMapLoad()
 					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 					if(Textured)
 					{
-						ContainerInfo.m_Attributes.push_back(SBufferContainerInfo::SAttribute());
+						ContainerInfo.m_Attributes.emplace_back();
 						pAttr = &ContainerInfo.m_Attributes.back();
 						pAttr->m_DataTypeCount = 2;
 						pAttr->m_Type = GRAPHICS_TYPE_FLOAT;

@@ -195,9 +195,7 @@ CAntibot::CAntibot() :
 	m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
 {
 }
-CAntibot::~CAntibot()
-{
-}
+CAntibot::~CAntibot() = default;
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();

@@ -6,6 +6,8 @@ Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.q
 
 You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
 
+[Source Code Documentation](https://wiki.ddnet.tw/docs/) is available.
+
 Cloning
 -------
 
@@ -31,6 +33,10 @@ Dependencies on Linux / macOS
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
     sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python
+
+Or on CentOS, RedHat and AlmaLinux like this:
+
+    sudo yum install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel pnglite-devel SDL2-devel sqlite-devel wavpack-devel
 
 Or on Arch Linux like this:
 
