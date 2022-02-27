@@ -381,7 +381,7 @@ MACRO_CONFIG_INT(ClChatOld, cl_chat_old, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE,
 
 MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show key presses (1 = other players', 2 = also your own)")
 MACRO_CONFIG_INT(ClShowDirectionSize, cl_show_direction_size, 100, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of key presses from 0 to 100%")
-MACRO_CONFIG_INT(ClOldShowDirectionPosition, cl_old_show_direction_position, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Key presses are displayed behind the player names")
+MACRO_CONFIG_INT(ClShowDirectionPosition, cl_show_direction_position, 0, 0, 3, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Key presses position (0 = above tee, 1 = nameplate middle, 2 = under nameplate, 3 = in tee)")
 MACRO_CONFIG_INT(ClHttpMapDownload, cl_http_map_download, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Try fast HTTP map download first")
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
 MACRO_CONFIG_INT(ClConfirmDisconnectTime, cl_confirm_disconnect_time, 20, -1, 1440, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Confirmation popup before disconnecting after game time (in minutes, -1 to turn off, 0 to always turn on)")

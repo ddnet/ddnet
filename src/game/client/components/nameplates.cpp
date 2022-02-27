@@ -63,35 +63,73 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 		float Scale = g_Config.m_ClShowDirectionSize / 100.0f;
 		float ShowDirectionImgSize = 22.0f * Scale;
-		float ShowDirectionPosY;
-		if(g_Config.m_ClOldShowDirectionPosition)
+		float GapSize = 8.0f * Scale;
+
+		vec2 LeftArrow, UPArrow, RightArrow;
+		switch(g_Config.m_ClShowDirectionPosition)
 		{
-			ShowDirectionPosY = Position.y - 70;
+		default:
+		case SHOW_DIRECTION_ABOVE_TEE:
+		{
+			LeftArrow.x = Position.x - (ShowDirectionImgSize + GapSize + ShowDirectionImgSize / 2);
+			RightArrow.x = Position.x + (GapSize + ShowDirectionImgSize / 2);
+			UPArrow.x = Position.x - (ShowDirectionImgSize / 2);
+
+			// + 2 because the arrows themselves already have a transparent frame
+			YOffset -= (ShowDirectionImgSize - 2);
+
+			LeftArrow.y = RightArrow.y = UPArrow.y = YOffset;
 		}
-		else
+		break;
+		case SHOW_DIRECTION_IN_NAMEPLATE:
 		{
-			// + 6 because the arrows themselves already have a transparent frame
-			YOffset -= (ShowDirectionImgSize - 6);
-			ShowDirectionPosY = YOffset;
+			LeftArrow.x = Position.x - (ShowDirectionImgSize + GapSize + ShowDirectionImgSize / 2);
+			RightArrow.x = Position.x + (GapSize + ShowDirectionImgSize / 2);
+			UPArrow.x = Position.x - (ShowDirectionImgSize / 2);
+			LeftArrow.y = RightArrow.y = UPArrow.y = Position.y - 70;
+		}
+		break;
+		case SHOW_DIRECTION_UNDER_NAMEPLATE:
+		{
+			LeftArrow.x = Position.x - (ShowDirectionImgSize + GapSize + ShowDirectionImgSize / 2);
+			RightArrow.x = Position.x + (GapSize + ShowDirectionImgSize / 2);
+			UPArrow.x = Position.x - (ShowDirectionImgSize / 2);
+
+			// Y = Position.y - 32 - 4 because -4 is the default body animation
+			LeftArrow.y = RightArrow.y = UPArrow.y = Position.y - 36;
+		}
+		break;
+		case SHOW_DIRECTION_IN_TEE:
+		{
+			LeftArrow.x = Position.x - 32.f;
+			RightArrow.x = Position.x + 32.f - ShowDirectionImgSize;
+			UPArrow.x = Position.x - (ShowDirectionImgSize / 2);
+
+			LeftArrow.y = Position.y - (ShowDirectionImgSize / 2);
+			RightArrow.y = Position.y - (ShowDirectionImgSize / 2);
+			UPArrow.y = Position.y - 36;
+		}
+		break;
 		}
 
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - (ShowDirectionImgSize + ShowDirectionImgSize / 2), ShowDirectionPosY, Scale, Scale);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, LeftArrow.x, LeftArrow.y, Scale, Scale);
 		}
 		else if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + (ShowDirectionImgSize / 2), ShowDirectionPosY, Scale, Scale);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, RightArrow.x, RightArrow.y, Scale, Scale);
 		}
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x - (ShowDirectionImgSize / 2), ShowDirectionPosY, Scale, Scale);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, UPArrow.x, UPArrow.y, Scale, Scale);
 		}
+
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
 	}

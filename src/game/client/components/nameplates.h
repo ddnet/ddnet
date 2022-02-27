@@ -8,6 +8,15 @@ struct CNetObj_Character;
 struct CNetObj_PlayerInfo;
 struct CMapItemGroup;
 
+// position of the movement direction arrows
+enum
+{
+	SHOW_DIRECTION_ABOVE_TEE = 0, // between the tee and the nameplate
+	SHOW_DIRECTION_IN_NAMEPLATE, // this is the old position - in the middle of the nameplate
+	SHOW_DIRECTION_UNDER_NAMEPLATE, // under the nameplate, thus at the top of the tee
+	SHOW_DIRECTION_IN_TEE, // side direction arrows on the side in the middle of the tee
+};
+
 struct SPlayerNamePlate
 {
 	SPlayerNamePlate()
