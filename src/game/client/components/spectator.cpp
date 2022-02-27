@@ -214,6 +214,7 @@ void CSpectator::OnRender()
 	float TeeSizeMod = 1.0f;
 	float RoundRadius = 30.0f;
 	bool Selected = false;
+	bool SelectedM = false;
 	int TotalPlayers = 0;
 	int PerLine = 8;
 	float BoxMove = -10.0f;
@@ -288,10 +289,10 @@ void CSpectator::OnRender()
 	if(m_SelectorMouse.x <= (300.0f - 20.0f) && m_SelectorMouse.x >= 20.0f &&
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
-		m_SelectedSpectatorID = SPEC_FREEVIEW;
-		Selected = true;
+		m_SelectedSpectatorID = SPEC_MULTIVIEW;
+		SelectedM = true;
 	}
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, SelectedM ? 1.0f : 0.5f);
 	TextRender()->Text(0, Width / 2.0f + (40.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
@@ -467,7 +468,7 @@ void CSpectator::Spectate(int SpectatorID)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_MULTIVIEW, MAX_CLIENTS - 1);
 		return;
 	}
 

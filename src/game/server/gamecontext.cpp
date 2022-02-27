@@ -2219,7 +2219,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
 
-			pMsg->m_SpectatorID = clamp(pMsg->m_SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+			pMsg->m_SpectatorID = clamp(pMsg->m_SpectatorID, (int)SPEC_MULTIVIEW, MAX_CLIENTS - 1);
 
 			if(pMsg->m_SpectatorID >= 0)
 				if(!Server()->ReverseTranslate(pMsg->m_SpectatorID, ClientID))

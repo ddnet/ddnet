@@ -556,7 +556,56 @@ void CGameClient::UpdatePositions()
 	// spectator position
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
-		if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID != SPEC_FOLLOW && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(true)
+		//if(m_Snap.m_SpecInfo.m_SpectatorID == SPEC_MULTIVIEW)
+		{
+			vec2 minpos;
+			vec2 maxpos;
+			bool init = false;
+			//todo: m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd != 0 nicht so berücksichtigen
+			for(int i = 0; i < 64; i++)
+			{
+				if(m_Snap.m_aCharacters[i].m_Cur.m_X == 0)
+					continue;
+
+				int playerx = m_aClients[i].m_RenderPos.x;
+				int playery = m_aClients[i].m_RenderPos.y;
+
+				if(!init)
+				{
+					minpos.x = playerx;
+					minpos.y = playery;
+					maxpos.x = playerx;
+					maxpos.y = playery;
+					init = true;
+				}
+
+				if(playerx < minpos.x)
+					minpos.x = playerx;
+				if(playerx > maxpos.x)
+					maxpos.x = playerx;
+				if(playery < minpos.y)
+					minpos.y = playery;
+				if(playery > maxpos.y)
+					maxpos.y = playery;
+			}
+
+			float posx = (minpos.x + maxpos.x) / 2.0f;
+			float posy = (minpos.y + maxpos.y) / 2.0f;
+
+			//dbg_msg("dbg", "distance: %f", distance(minpos, maxpos));
+
+			// m_Camera.m_Zoom = 10;
+			// distance 2000 = zoom 2
+			// distance 1400 = zoom 3
+			// distance 700 = zoom 8
+			// distance 500 = zoom 10
+			// distance 200 = zoom 14
+
+			m_Snap.m_SpecInfo.m_Position = vec2(posx, posy);
+			m_Snap.m_SpecInfo.m_UsePosition = true;
+		}
+		else if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID != SPEC_FOLLOW && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		{
 			m_Snap.m_SpecInfo.m_Position = mix(
 				vec2(m_Snap.m_aCharacters[m_Snap.m_SpecInfo.m_SpectatorID].m_Prev.m_X, m_Snap.m_aCharacters[m_Snap.m_SpecInfo.m_SpectatorID].m_Prev.m_Y),
