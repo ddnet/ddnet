@@ -660,6 +660,8 @@ private:
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 	int m_SwitchStateTeam[NUM_DUMMIES];
 
+	vec2 m_oldMultiViewPos;
+
 	enum
 	{
 		NUM_TUNEZONES = 256

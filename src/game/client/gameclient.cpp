@@ -562,7 +562,7 @@ void CGameClient::UpdatePositions()
 			vec2 minpos;
 			vec2 maxpos;
 			bool init = false;
-			//todo: m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd != 0 nicht so berücksichtigen
+			//wenn die distanz zu groß wird .... 6000/8000 oder so, dann soll distanz bei jedem gecheckt werden und nur eine gruppe berücksichtigt
 			for(int i = 0; i < 64; i++)
 			{
 				if(m_Snap.m_aCharacters[i].m_Cur.m_X == 0)
@@ -602,7 +602,12 @@ void CGameClient::UpdatePositions()
 			// distance 500 = zoom 10
 			// distance 200 = zoom 14
 
-			m_Snap.m_SpecInfo.m_Position = vec2(posx, posy);
+			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 5000)
+				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.05f);
+			else
+				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos)* 0.01f);
+
+			m_oldMultiViewPos = m_Snap.m_SpecInfo.m_Position;
 			m_Snap.m_SpecInfo.m_UsePosition = true;
 		}
 		else if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID != SPEC_FOLLOW && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
