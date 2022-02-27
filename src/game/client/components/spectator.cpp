@@ -263,6 +263,7 @@ void CSpectator::OnRender()
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 		RenderTools()->DrawRoundRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
+		RenderTools()->DrawRoundRect(Width / 2.0f + (20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
 		Graphics()->QuadsEnd();
 	}
 
@@ -283,6 +284,15 @@ void CSpectator::OnRender()
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
 	TextRender()->Text(0, Width / 2.0f - (ObjWidth - 60.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
+	
+	if(m_SelectorMouse.x <= (300.0f - 20.0f) && m_SelectorMouse.x >= 20.0f &&
+		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
+	{
+		m_SelectedSpectatorID = SPEC_FREEVIEW;
+		Selected = true;
+	}
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+	TextRender()->Text(0, Width / 2.0f + (40.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
