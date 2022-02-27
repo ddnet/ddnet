@@ -546,7 +546,7 @@ void CGameClient::UpdatePositions()
 			//			m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
 		}
 	}
-	else if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter)
+	else if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter && !g_Config.m_ClFreeGhost)
 	{
 		m_LocalCharacterPos = mix(
 			vec2(m_Snap.m_pLocalPrevCharacter->m_X, m_Snap.m_pLocalPrevCharacter->m_Y),
@@ -1728,6 +1728,7 @@ void CGameClient::OnPredict()
 		pDummyChar = m_PredictedWorld.GetCharacterByID(m_PredictedDummyID);
 
 	// predict
+	// prediction actually happens here
 	for(int Tick = Client()->GameTick(g_Config.m_ClDummy) + 1; Tick <= Client()->PredGameTick(g_Config.m_ClDummy); Tick++)
 	{
 		// fetch the previous characters
@@ -1810,6 +1811,8 @@ void CGameClient::OnPredict()
 					m_Effects.AirJump(Pos);
 		}
 	}
+
+
 
 	// detect mispredictions of other players and make corrections smoother when possible
 	static vec2 s_aLastPos[MAX_CLIENTS] = {{0, 0}};

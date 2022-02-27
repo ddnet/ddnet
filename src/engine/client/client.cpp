@@ -553,7 +553,7 @@ void CClient::SendInput()
 	if(m_PredTick[g_Config.m_ClDummy] <= 0)
 		return;
 
-	bool Force = false;
+	bool Force = true;
 	// fetch input
 	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 	{
@@ -578,12 +578,18 @@ void CClient::SendInput()
 			m_aInputs[i][m_CurrentInput[i]].m_Time = Now;
 
 			// pack it
-			for(int k = 0; k < Size / 4; k++)
-				Msg.AddInt(m_aInputs[i][m_CurrentInput[i]].m_aData[k]);
-
+			if(g_Config.m_ClFreeGhost)
+			{
+				for(int k = 0; k < Size / 4; k++)
+					Msg.AddInt(0);
+			}
+			else
+			{
+				for(int k = 0; k < Size / 4; k++)
+					Msg.AddInt(m_aInputs[i][m_CurrentInput[i]].m_aData[k]);
+			}
 			m_CurrentInput[i]++;
 			m_CurrentInput[i] %= 200;
-
 			SendMsg(i, &Msg, MSGFLAG_FLUSH);
 			// ugly workaround for dummy. we need to send input with dummy to prevent
 			// prediction time resets. but if we do it too often, then it's

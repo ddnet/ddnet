@@ -510,6 +510,8 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
+	if(g_Config.m_ClFreeGhost)
+		return;
 	// skip the input if chat is active
 	if(pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
