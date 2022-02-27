@@ -3953,6 +3953,10 @@ static int color_hsv_to_windows_console_color(const ColorHSVA *hsv)
 
 void set_console_msg_color(const void *rgbvoid)
 {
+	static const char *pNoColor = getenv("NO_COLOR");
+	if(pNoColor)
+		return;
+
 #if defined(CONF_FAMILY_WINDOWS)
 	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
 	int color = 15;
