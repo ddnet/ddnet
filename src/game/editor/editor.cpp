@@ -1988,11 +1988,17 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	}
 
 	// Render
+	Graphics()->TextureClear();
+	Graphics()->LinesBegin();	
+
 	IGraphics::CLineItem aEdges[4] = {
 		IGraphics::CLineItem(v[0].x, v[0].y, v[1].x, v[1].y),
 		IGraphics::CLineItem(v[1].x, v[1].y, v[2].x, v[2].y),
 		IGraphics::CLineItem(v[2].x, v[2].y, v[3].x, v[3].y),
 		IGraphics::CLineItem(v[3].x, v[3].y, v[0].x, v[0].y)};
+
+	Graphics()->SetColor(1.f, 0.5f, 0.f, 1.f);
+	Graphics()->LinesDraw(aEdges, 4);
 
 	IGraphics::CLineItem aLines[4];
 	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
@@ -2000,43 +2006,41 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	for(int i = 0; i < LineCount; i++)
 		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, m_aQuadKnifePoints[i + 1].x, m_aQuadKnifePoints[i + 1].y);
 
-	IGraphics::CQuadItem aMarkers[4];
-	int MarkerCount = m_QuadKnifeCount;
-
-	for(int i = 0; i < MarkerCount; i++)
-		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->LinesDraw(aLines, LineCount);
 
 	if(ValidPosition)
 	{
-		// Preview
 		if(m_QuadKnifeCount > 0)
 		{
-			aLines[LineCount] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[LineCount].x, m_aQuadKnifePoints[LineCount].y);
-			LineCount++;
+			IGraphics::CLineItem LineCurrent(Point.x, Point.y, m_aQuadKnifePoints[m_QuadKnifeCount - 1].x, m_aQuadKnifePoints[m_QuadKnifeCount - 1].y);
+			Graphics()->LinesDraw(&LineCurrent, 1);
 		}
 
-		if (m_QuadKnifeCount == 3)
+		if(m_QuadKnifeCount == 3)
 		{
-			aLines[LineCount] = IGraphics::CLineItem(Point.x, Point.y, m_aQuadKnifePoints[0].x, m_aQuadKnifePoints[0].y);
-			LineCount++;
+			IGraphics::CLineItem LineClose(Point.x, Point.y, m_aQuadKnifePoints[0].x, m_aQuadKnifePoints[0].y);
+			Graphics()->LinesDraw(&LineClose, 1);
 		}
-
-		aMarkers[MarkerCount] = IGraphics::CQuadItem(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
-		MarkerCount++;
 	}
 
-	Graphics()->TextureClear();
-
-	Graphics()->LinesBegin();	
-	Graphics()->SetColor(1.f, 0.5f, 0.f, 1.f);
-	Graphics()->LinesDraw(aEdges, 4);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->LinesDraw(aLines, LineCount);
 	Graphics()->LinesEnd();
-
 	Graphics()->QuadsBegin();
+
+	IGraphics::CQuadItem aMarkers[4];
+
+	for(int i = 0; i < m_QuadKnifeCount; i++)
+		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+
 	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
-	Graphics()->QuadsDraw(aMarkers, MarkerCount);
+	Graphics()->QuadsDraw(aMarkers, m_QuadKnifeCount);
+
+	if(ValidPosition)
+	{
+		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		Graphics()->QuadsDraw(&MarkerCurrent, 1);
+	}
+	
 	Graphics()->QuadsEnd();
 }
 
