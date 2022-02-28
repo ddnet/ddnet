@@ -593,8 +593,6 @@ void CGameClient::UpdatePositions()
 			float posx = (minpos.x + maxpos.x) / 2.0f;
 			float posy = (minpos.y + maxpos.y) / 2.0f;
 
-			//dbg_msg("dbg", "distance: %f", distance(minpos, maxpos));
-
 			// m_Camera.m_Zoom = 10;
 			// distance 2000 = zoom 2
 			// distance 1400 = zoom 3
@@ -602,10 +600,19 @@ void CGameClient::UpdatePositions()
 			// distance 500 = zoom 10
 			// distance 200 = zoom 14
 
-			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 5000)
-				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.05f);
+			float maxDistance = 100000.0f;
+			float minDistance = 2000.0f;
+			float maxSmoothVel = 0.03f;
+			float minSmoothVel = 0.007f;
+
+			float multiplier = (maxSmoothVel - minSmoothVel) / (maxDistance - minDistance) * (distance(m_oldMultiViewPos, vec2(posx, posy)) - minDistance) + minSmoothVel;
+
+			/*if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 4000)
+				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.04f);
 			else
-				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos)* 0.01f);
+				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.008f);
+			*/
+			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * multiplier);
 
 			m_oldMultiViewPos = m_Snap.m_SpecInfo.m_Position;
 			m_Snap.m_SpecInfo.m_UsePosition = true;
