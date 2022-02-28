@@ -556,15 +556,30 @@ void CGameClient::UpdatePositions()
 	// spectator position
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
-		if(true)
+		if(m_isMultiView)
 		//if(m_Snap.m_SpecInfo.m_SpectatorID == SPEC_MULTIVIEW)
 		{
 			vec2 minpos;
 			vec2 maxpos;
 			bool init = false;
+			bool tmp = false;
+			bool initdone = false;
 			//wenn die distanz zu groß wird .... 6000/8000 oder so, dann soll distanz bei jedem gecheckt werden und nur eine gruppe berücksichtigt
 			for(int i = 0; i < 64; i++)
 			{
+				if(!initdone)
+				{
+					initdone = true;
+					for(int j = 0; j < 64; j++)
+					{
+						if(m_aMultiView[j] == true)
+							tmp = true;
+					}
+				}
+
+				if(tmp && m_aMultiView[i] == false)
+					continue;
+
 				if(m_Snap.m_aCharacters[i].m_Cur.m_X == 0)
 					continue;
 
@@ -607,16 +622,6 @@ void CGameClient::UpdatePositions()
 
 			float zoom = (maxZoom - minZoom) / (maxPlayerDistance - minPlayerDistance) * (distance(minpos, maxpos) - minPlayerDistance) + minZoom;
 
-			/*float zoom = 10;
-			if(distance(minpos, maxpos) > 2000)
-				zoom = 4;
-			else if(distance(minpos, maxpos) > 1000)
-				zoom = 6;
-			else if(distance(minpos, maxpos) > 700)
-				zoom = 8;
-			else if(distance(minpos, maxpos) > 200)
-				zoom = 10;*/
-
 			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400)
 				zoom = zoom - 3;
 
@@ -629,11 +634,6 @@ void CGameClient::UpdatePositions()
 
 			float multiplier = (maxSmoothVel - minSmoothVel) / (maxDistance - minDistance) * (distance(m_oldMultiViewPos, vec2(posx, posy)) - minDistance) + minSmoothVel;
 
-			/*if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 4000)
-				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.04f);
-			else
-				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.008f);
-			*/
 			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * clamp(multiplier, 0.007f, 1.0f));
 
 			m_oldMultiViewPos = m_Snap.m_SpecInfo.m_Position;

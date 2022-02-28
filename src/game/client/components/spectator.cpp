@@ -96,6 +96,13 @@ void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Spectate(pResult->GetInteger(0));
 }
 
+void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
+{
+	CSpectator *pSelf = (CSpectator *)pUserData;
+
+	pSelf->GameClient()->m_aMultiView[pResult->GetInteger(0)] = !pSelf->GameClient()->m_aMultiView[pResult->GetInteger(0)];
+}
+
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
@@ -160,6 +167,7 @@ void CSpectator::OnConsoleInit()
 {
 	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector");
 	Console()->Register("spectate", "i[spectator-id]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
+	Console()->Register("spec_multi", "i[id]", CFGFLAG_CLIENT, ConMultiView, this, "Add multi view ids");
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
 	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
 	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
@@ -264,9 +272,19 @@ void CSpectator::OnRender()
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 		RenderTools()->DrawRoundRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
+		Graphics()->QuadsEnd();
+	}
+
+	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_MULTIVIEW) ||
+		m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_MULTIVIEW)
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 		RenderTools()->DrawRoundRect(Width / 2.0f + (20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
 		Graphics()->QuadsEnd();
 	}
+
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
 	{
@@ -281,6 +299,7 @@ void CSpectator::OnRender()
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorID = SPEC_FREEVIEW;
+		GameClient()->m_isMultiView = false;
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
@@ -290,6 +309,7 @@ void CSpectator::OnRender()
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorID = SPEC_MULTIVIEW;
+		GameClient()->m_isMultiView = true;
 		SelectedM = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, SelectedM ? 1.0f : 0.5f);
@@ -389,6 +409,7 @@ void CSpectator::OnRender()
 			m_SelectorMouse.y >= y - (LineHeight / 6.0f) && m_SelectorMouse.y < y + (LineHeight * 5.0f / 6.0f))
 		{
 			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
+			//GameClient()->m_aMultiView[m_SelectedSpectatorID] = true;
 			Selected = true;
 		}
 		float TeeAlpha;

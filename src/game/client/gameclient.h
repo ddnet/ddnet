@@ -328,6 +328,9 @@ public:
 	int m_ExpectingTuningForZone[2];
 	int m_ExpectingTuningSince[2];
 
+	bool m_aMultiView[64];
+	bool m_isMultiView;
+
 	// client data
 	struct CClientData
 	{
