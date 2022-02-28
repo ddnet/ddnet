@@ -600,9 +600,31 @@ void CGameClient::UpdatePositions()
 			// distance 500 = zoom 10
 			// distance 200 = zoom 14
 
-			float maxDistance = 100000.0f;
-			float minDistance = 2000.0f;
-			float maxSmoothVel = 0.03f;
+			float maxPlayerDistance = 2000.0f;
+			float minPlayerDistance = 200.0f;
+			float maxZoom = 2.0f;
+			float minZoom = 7.0f;
+
+			float zoom = (maxZoom - minZoom) / (maxPlayerDistance - minPlayerDistance) * (distance(minpos, maxpos) - minPlayerDistance) + minZoom;
+
+			/*float zoom = 10;
+			if(distance(minpos, maxpos) > 2000)
+				zoom = 4;
+			else if(distance(minpos, maxpos) > 1000)
+				zoom = 6;
+			else if(distance(minpos, maxpos) > 700)
+				zoom = 8;
+			else if(distance(minpos, maxpos) > 200)
+				zoom = 10;*/
+
+			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400)
+				zoom = zoom - 3;
+
+			m_Camera.SetZoom(clamp(zoom, 0.0f, 8.0f));
+
+			float maxDistance = 500.0f;
+			float minDistance = 200.0f;
+			float maxSmoothVel = 0.1f;
 			float minSmoothVel = 0.007f;
 
 			float multiplier = (maxSmoothVel - minSmoothVel) / (maxDistance - minDistance) * (distance(m_oldMultiViewPos, vec2(posx, posy)) - minDistance) + minSmoothVel;
@@ -612,7 +634,7 @@ void CGameClient::UpdatePositions()
 			else
 				m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * 0.008f);
 			*/
-			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * multiplier);
+			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * clamp(multiplier, 0.007f, 1.0f));
 
 			m_oldMultiViewPos = m_Snap.m_SpecInfo.m_Position;
 			m_Snap.m_SpecInfo.m_UsePosition = true;

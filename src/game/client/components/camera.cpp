@@ -222,3 +222,8 @@ void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 		clamp(pResult->GetInteger(0) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f),
 		clamp(pResult->GetInteger(1) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f));
 }
+
+void CCamera::SetZoom(float Target)
+{
+	ChangeZoom(pow(ZoomStep, Target - 10));
+}
