@@ -1163,7 +1163,7 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	{
 		if(pSnapPlayer->m_SpectatorID != -1 && !CanCollide(pSnapPlayer->m_SpectatorID) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(pSnapPlayer->m_SpectatorID))))
 			return false;
-		else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam)
+		else if(pSnapPlayer->m_SpectatorID == -1 && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam && !SameTeam(SnappingClient))
 			return false;
 	}
 	else if(pSnapChar && !pSnapChar->m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == 0 || (pSnapPlayer->m_ShowOthers == 2 && !SameTeam(SnappingClient))))
