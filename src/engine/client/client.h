@@ -393,6 +393,7 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
+	virtual const char *ServerAddress() const { return m_aServerAddressStr; }
 	virtual const char *MapDownloadName() const { return m_aMapdownloadName; }
 	virtual int MapDownloadAmount() const { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	virtual int MapDownloadTotalsize() const { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
