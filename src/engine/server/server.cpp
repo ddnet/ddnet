@@ -2446,6 +2446,19 @@ int CServer::Run()
 	}
 
 	// start server
+	unsigned char *pProxySecret = nullptr;
+	unsigned char aProxySecretBuf[32];
+	if(g_Config.m_RpEnable)
+	{
+
+		if(str_hex_decode(aProxySecretBuf, sizeof(aProxySecretBuf), g_Config.m_RpSecret))
+		{
+			dbg_msg("server", "couldn't parse proxy secret, must be 64 random hex characters, found '%s'", g_Config.m_RpSecret);
+			return -1;
+		}
+		pProxySecret = aProxySecretBuf;
+	}
+
 	NETADDR BindAddr;
 	int NetType = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
 
@@ -2455,7 +2468,7 @@ int CServer::Run()
 	BindAddr.type = NetType;
 
 	int Port = Config()->m_SvPort;
-	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP); BindAddr.port++)
+	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP, pProxySecret); BindAddr.port++)
 	{
 		if(Port != 0 || BindAddr.port >= 8310)
 		{

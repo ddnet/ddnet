@@ -739,7 +739,8 @@ enum
 
 typedef struct
 {
-	unsigned int type;
+	unsigned short proxy;
+	unsigned short type;
 	unsigned char ip[16];
 	unsigned short port;
 } NETADDR;
@@ -830,6 +831,30 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 */
 int net_addr_from_str(NETADDR *addr, const char *string);
 
+/*
+	Function: net_addr_to_ipv6
+		Turns an IPv4 or IPv6 address into an IPv6 address. IPv4
+		addresses are prefixed with ::ffff:.
+
+	Parameters:
+		from - Address to convert to IPv6
+		to - Result
+*/
+void net_addr_to_ipv6(const NETADDR *from, NETADDR *to);
+
+/*
+	Function: net_addr_from_str
+		Turns an IPv6 address into either an IPv4 or IPv6 address.
+		IPv4-mapped addresses (prefixed with ::ffff:) are those turned
+		into IPv4 addresses.
+
+	Parameters:
+		from - Address to convert to IPv6
+		to - Result
+*/
+void net_addr_from_ipv6(const NETADDR *from, NETADDR *to);
+
+
 /* Group: Network UDP */
 
 /*
@@ -844,6 +869,17 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 		`NETTYPE_WEBSOCKET_IPV4`.
 */
 int net_socket_type(NETSOCKET sock);
+
+/*
+	Function: net_udp_proxy_enable
+		Enables UDP proxying. Expects a prepended IPv6 address in each
+		packet.
+
+	Parameters:
+		sock - Socket to use.
+		secret - Secret for registering reverse proxies.
+*/
+void net_udp_proxy_enable(NETSOCKET sock, unsigned char secret[32]);
 
 /*
 	Function: net_udp_create

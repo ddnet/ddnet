@@ -176,6 +176,11 @@ struct NETSOCKET_INTERNAL
 	int web_ipv4sock;
 
 	NETSOCKET_BUFFER buffer;
+
+	bool proxy;
+	unsigned char proxy_secret[32];
+	int num_proxies;
+	NETADDR proxies[16];
 };
 static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
@@ -1182,7 +1187,11 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 
 int net_addr_comp(const NETADDR *a, const NETADDR *b)
 {
-	return mem_comp(a, b, sizeof(NETADDR));
+	NETADDR ta = *a;
+	NETADDR tb = *b;
+	ta.proxy = 0;
+	tb.proxy = 0;
+	return mem_comp(&ta, &tb, sizeof(NETADDR));
 }
 
 int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
@@ -1286,6 +1295,48 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 	}
 	else
 		str_format(string, max_length, "unknown type %d", addr->type);
+}
+
+static unsigned char MAPPING_IPV4[12] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF};
+
+void net_addr_to_ipv6(const NETADDR *from, NETADDR *to)
+{
+	to->type = NETTYPE_IPV6;
+	mem_zero(to->ip, sizeof(to->ip));
+	to->port = from->port;
+	switch(from->type)
+	{
+	case NETTYPE_IPV4:
+		mem_copy(to->ip, MAPPING_IPV4, sizeof(MAPPING_IPV4));
+		mem_copy(to->ip + sizeof(MAPPING_IPV4), from->ip, 4);
+		break;
+	case NETTYPE_IPV6:
+		mem_copy(to->ip, from->ip, sizeof(to->ip));
+		break;
+	default:
+		dbg_assert(0, "unknown type");
+	}
+}
+
+void net_addr_from_ipv6(const NETADDR *from, NETADDR *to)
+{
+	mem_zero(to, sizeof(*to));
+	if(from->type != NETTYPE_IPV6)
+	{
+		dbg_assert(0, "must be ipv6");
+		return;
+	}
+	to->port = from->port;
+	if(mem_comp(from->ip, MAPPING_IPV4, sizeof(MAPPING_IPV4)) == 0)
+	{
+		to->type = NETTYPE_IPV4;
+		mem_copy(to->ip, from->ip + sizeof(MAPPING_IPV4), 4);
+	}
+	else
+	{
+		to->type = NETTYPE_IPV6;
+		mem_copy(to->ip, from->ip, sizeof(to->ip));
+	}
 }
 
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
@@ -1616,6 +1667,14 @@ int net_socket_type(NETSOCKET sock)
 	return sock->type;
 }
 
+void net_udp_proxy_enable(NETSOCKET sock, unsigned char secret[32])
+{
+	dbg_assert(!sock->proxy, "proxy enabled twice");
+	sock->proxy = true;
+	mem_copy(sock->proxy_secret, secret, sizeof(sock->proxy_secret));
+	dbg_msg("udp/proxy", "enabled proxy");
+}
+
 NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
@@ -1708,7 +1767,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	return sock;
 }
 
-int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
+int net_udp_send_impl(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
 {
 	int d = -1;
 
@@ -1823,7 +1882,32 @@ void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 #endif
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
+int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size)
+{
+	if(!sock->proxy)
+	{
+		return net_udp_send_impl(sock, addr, data, size);
+	}
+	if(!(1 <= addr->proxy && addr->proxy < 1 + sock->num_proxies))
+	{
+		return 0;
+	}
+	unsigned char newdata[PACKETSIZE];
+	if(size > (int)sizeof(newdata) - 18)
+	{
+		size = sizeof(newdata) - 18;
+	}
+	NETADDR ipv6;
+	net_addr_to_ipv6(addr, &ipv6);
+	mem_copy(newdata, ipv6.ip, 16);
+	newdata[16] = ipv6.port >> 8;
+	newdata[17] = ipv6.port;
+	mem_copy(newdata + 18, data, size);
+	return net_udp_send_impl(sock, &sock->proxies[addr->proxy - 1], newdata, size + 18);
+}
+
+
+int net_udp_recv_impl(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 {
 	char sockaddrbuf[128];
 	int bytes = 0;
@@ -1897,6 +1981,76 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	else if(bytes == 0)
 		return 0;
 	return -1; /* error */
+}
+
+NETADDR NET_UDP_PROXY_ADD = {
+	0,
+	NETTYPE_IPV6,
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+	1
+};
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
+{
+	if(!sock->proxy)
+	{
+		return net_udp_recv_impl(sock, addr, data);
+	}
+	while(1)
+	{
+		NETADDR proxy_addr;
+		int size = net_udp_recv_impl(sock, &proxy_addr, data);
+		// error or no more packets
+		if(size <= 0)
+		{
+			return size;
+		}
+		// too small for proxy packet
+		if(size < 18)
+		{
+			continue;
+		}
+
+		NETADDR proxiedfrom_ipv6;
+		mem_zero(&proxiedfrom_ipv6, sizeof(proxiedfrom_ipv6));
+		proxiedfrom_ipv6.type = NETTYPE_IPV6;
+		mem_copy(proxiedfrom_ipv6.ip, *data, 16);
+		proxiedfrom_ipv6.port = ((*data)[16] << 8) | (*data)[17];
+
+		NETADDR proxiedfrom;
+		net_addr_from_ipv6(&proxiedfrom_ipv6, &proxiedfrom);
+
+		for(int i = 0; i < sock->num_proxies; i++)
+		{
+			if(net_addr_comp(&proxy_addr, &sock->proxies[i]) == 0)
+			{
+				proxiedfrom.proxy = i + 1;
+				break;
+			}
+		}
+		if(proxiedfrom.proxy == 0)
+		{
+			if(net_addr_comp(&proxiedfrom, &NET_UDP_PROXY_ADD) == 0 &&
+				size >= 18 + (int)sizeof(sock->proxy_secret) &&
+				mem_comp(*data + 18, sock->proxy_secret, sizeof(sock->proxy_secret)) == 0)
+			{
+				char proxy_addr_str[NETADDR_MAXSTRSIZE];
+				net_addr_str(&proxy_addr, proxy_addr_str, sizeof(proxy_addr_str), true);
+				if(sock->num_proxies == sizeof(sock->proxies) / sizeof(sock->proxies[0]))
+				{
+					dbg_msg("udp/proxy", "could not add proxy, array already full, proxy=%s", proxy_addr_str);
+					continue;
+				}
+				sock->proxies[sock->num_proxies] = proxy_addr;
+				sock->num_proxies += 1;
+				dbg_msg("udp/proxy", "added %s", proxy_addr_str);
+			}
+			continue;
+		}
+		*addr = proxiedfrom;
+		*data += 18;
+		size -= 18;
+		return size;
+	}
 }
 
 int net_udp_close(NETSOCKET sock)
