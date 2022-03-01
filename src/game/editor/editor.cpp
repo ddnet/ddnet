@@ -1847,14 +1847,14 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		m_QuadKnifeActive = false;
 		return;
 	}
-	
+
 	// Handle snapping
 	if(m_GridActive && !IgnoreGrid)
 	{
 		float CellSize = (float)GetLineDistance();
 		vec2 OnGrid = vec2(roundf(Mouse.x / CellSize) * CellSize, roundf(Mouse.y / CellSize) * CellSize);
 
-		if (IsInTriangle(OnGrid, v[0], v[1], v[2]) || IsInTriangle(OnGrid, v[0], v[3], v[2]))
+		if(IsInTriangle(OnGrid, v[0], v[1], v[2]) || IsInTriangle(OnGrid, v[0], v[3], v[2]))
 			Point = OnGrid;
 		else
 		{
@@ -1877,7 +1877,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 						Point = OnEdge;
 					}
 				}
-				
+
 				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > 0.0000001f)
 				{
 					vec2 OnEdge(OnGrid.x, v[i].y + (OnGrid.x - v[i].x) / (v[j].x - v[i].x) * (v[j].y - v[i].y));
@@ -1897,18 +1897,18 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		float MinDistance = -1.f;
 
 		// Try snapping to corners
-		for(int i = 0; i < 4; i++)
+		for(const auto &x : v)
 		{
-			float Distance = distance(Mouse, v[i]);
+			float Distance = distance(Mouse, x);
 
 			if(Distance <= SnapRadius && (Distance < MinDistance || MinDistance < 0.f))
 			{
 				MinDistance = Distance;
-				Point = v[i];
+				Point = x;
 			}
 		}
 
-		if (MinDistance < 0.f)
+		if(MinDistance < 0.f)
 		{
 			// Try snapping to edges
 			for(int i = 0; i < 4; i++)
@@ -1935,7 +1935,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	bool ValidPosition = IsInTriangle(Point, v[0], v[1], v[2]) || IsInTriangle(Point, v[0], v[3], v[2]);
 
-	if (UI()->MouseButtonClicked(0) && ValidPosition)
+	if(UI()->MouseButtonClicked(0) && ValidPosition)
 	{
 		m_aQuadKnifePoints[m_QuadKnifeCount] = Point;
 		m_QuadKnifeCount++;
@@ -1959,7 +1959,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		for(int i = 0; i < 4; i++)
 		{
 			int t = IsInTriangle(m_aQuadKnifePoints[i], v[0], v[3], v[2]) ? 2 : 1;
-				
+
 			vec2 A = vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y));
 			vec2 B = vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y));
 			vec2 C = vec2(fx2f(pQuad->m_aPoints[t].x), fx2f(pQuad->m_aPoints[t].y));
@@ -1989,7 +1989,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	// Render
 	Graphics()->TextureClear();
-	Graphics()->LinesBegin();	
+	Graphics()->LinesBegin();
 
 	IGraphics::CLineItem aEdges[4] = {
 		IGraphics::CLineItem(v[0].x, v[0].y, v[1].x, v[1].y),
@@ -2040,7 +2040,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
 		Graphics()->QuadsDraw(&MarkerCurrent, 1);
 	}
-	
+
 	Graphics()->QuadsEnd();
 }
 
