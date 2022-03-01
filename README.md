@@ -95,7 +95,7 @@ Whether to enable the autoupdater. Packagers may want to disable this for their 
 Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
 
 * **-DVIDEORECORDER=[ON|OFF]** <br>
-Whether to add video recording support using FFmpeg to the client. Default value is OFF.
+Whether to add video recording support using FFmpeg to the client. Default value is ON.
 
 Dependencies needed on debian: `libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev`
 
