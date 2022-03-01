@@ -3,7 +3,7 @@
 #include "network.h"
 #include <base/system.h>
 
-bool CNetClient::Open(NETADDR BindAddr, int Flags)
+bool CNetClient::Open(NETADDR BindAddr)
 {
 	// open socket
 	NETSOCKET Socket;

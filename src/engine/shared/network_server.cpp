@@ -46,7 +46,7 @@ static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
 }
 
-bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, int Flags)
+bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));

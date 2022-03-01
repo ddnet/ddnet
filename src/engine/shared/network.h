@@ -350,7 +350,7 @@ public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, int Flags);
+	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP);
 	int Close();
 
 	//
@@ -408,7 +408,7 @@ public:
 	void SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int Flags);
+	bool Open(NETADDR BindAddr, class CNetBan *pNetBan);
 	int Close();
 
 	//
@@ -435,7 +435,7 @@ public:
 	NETSOCKET m_Socket;
 	MMSGS m_MMSGS;
 	// openness
-	bool Open(NETADDR BindAddr, int Flags);
+	bool Open(NETADDR BindAddr);
 	int Close();
 
 	// connection state

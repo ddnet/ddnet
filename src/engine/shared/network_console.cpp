@@ -7,7 +7,7 @@
 #include "netban.h"
 #include "network.h"
 
-bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan, int Flags)
+bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));
