@@ -132,7 +132,7 @@ sudo cmake CMakeLists.txt
 sudo make -j8
  
 # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
-sudo cp *.a /usr/lib
+sudo cp lib/*.a /usr/lib
 ```
 
 To run the tests you must target `run_tests` with make:
