@@ -52,7 +52,7 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_VelY = 0;
 	pChar->m_Angle = pGhostChar->m_Angle;
 	pChar->m_Direction = pGhostChar->m_Direction;
-	pChar->m_Weapon = pGhostChar->m_Weapon == WEAPON_GRENADE ? WEAPON_GRENADE : WEAPON_GUN;
+	pChar->m_Weapon = pGhostChar->m_Weapon;
 	pChar->m_HookState = pGhostChar->m_HookState;
 	pChar->m_HookX = pGhostChar->m_HookX;
 	pChar->m_HookY = pGhostChar->m_HookY;
