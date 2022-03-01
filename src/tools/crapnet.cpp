@@ -49,8 +49,6 @@ void Run(unsigned short Port, NETADDR Dest)
 
 	int ID = 0;
 	int Delaycounter = 0;
-	MMSGS m;
-	net_init_mmsgs(&m);
 
 	while(true)
 	{
@@ -69,7 +67,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			int DataTrash = 0;
 			NETADDR From;
 			unsigned char *pData;
-			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024 * 2, &m, &pData);
+			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024 * 2, &pData);
 			if(Bytes <= 0)
 				break;
 

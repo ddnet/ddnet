@@ -149,12 +149,32 @@ static DBG_LOGGER_DATA stdout_nonewline_logger;
 
 static NETSTATS network_stats = {0};
 
+#define VLEN 128
+#define PACKETSIZE 1400
+typedef struct
+{
+#ifdef CONF_PLATFORM_LINUX
+	int pos;
+	int size;
+	struct mmsghdr msgs[VLEN];
+	struct iovec iovecs[VLEN];
+	char bufs[VLEN][PACKETSIZE];
+	char sockaddrs[VLEN][128];
+#else
+	int dummy;
+#endif
+} MMSGS;
+
+void net_init_mmsgs(MMSGS *m);
+
 struct NETSOCKET_INTERNAL
 {
 	int type;
 	int ipv4sock;
 	int ipv6sock;
 	int web_ipv4sock;
+
+	MMSGS mmsgs;
 };
 static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
@@ -1681,6 +1701,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	/* set non-blocking */
 	net_set_non_blocking(sock);
 
+	net_init_mmsgs(&sock->mmsgs);
+
 	/* return */
 	return sock;
 }
@@ -1789,7 +1811,7 @@ void net_init_mmsgs(MMSGS *m)
 #endif
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data)
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, unsigned char **data)
 {
 	char sockaddrbuf[128];
 	int bytes = 0;
@@ -1797,28 +1819,28 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS
 #if defined(CONF_PLATFORM_LINUX)
 	if(sock->ipv4sock >= 0)
 	{
-		if(m->pos >= m->size)
+		if(sock->mmsgs.pos >= sock->mmsgs.size)
 		{
-			m->size = recvmmsg(sock->ipv4sock, m->msgs, VLEN, 0, NULL);
-			m->pos = 0;
+			sock->mmsgs.size = recvmmsg(sock->ipv4sock, sock->mmsgs.msgs, VLEN, 0, NULL);
+			sock->mmsgs.pos = 0;
 		}
 	}
 
 	if(sock->ipv6sock >= 0)
 	{
-		if(m->pos >= m->size)
+		if(sock->mmsgs.pos >= sock->mmsgs.size)
 		{
-			m->size = recvmmsg(sock->ipv6sock, m->msgs, VLEN, 0, NULL);
-			m->pos = 0;
+			sock->mmsgs.size = recvmmsg(sock->ipv6sock, sock->mmsgs.msgs, VLEN, 0, NULL);
+			sock->mmsgs.pos = 0;
 		}
 	}
 
-	if(m->pos < m->size)
+	if(sock->mmsgs.pos < sock->mmsgs.size)
 	{
-		sockaddr_to_netaddr((struct sockaddr *)&(m->sockaddrs[m->pos]), addr);
-		bytes = m->msgs[m->pos].msg_len;
-		*data = (unsigned char *)m->bufs[m->pos];
-		m->pos++;
+		sockaddr_to_netaddr((struct sockaddr *)&(sock->mmsgs.sockaddrs[sock->mmsgs.pos]), addr);
+		bytes = sock->mmsgs.msgs[sock->mmsgs.pos].msg_len;
+		*data = (unsigned char *)sock->mmsgs.bufs[sock->mmsgs.pos];
+		sock->mmsgs.pos++;
 		network_stats.recv_bytes += bytes;
 		network_stats.recv_packets++;
 		return bytes;

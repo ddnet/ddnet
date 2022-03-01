@@ -874,24 +874,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
 */
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
 
-#define VLEN 128
-#define PACKETSIZE 1400
-typedef struct
-{
-#ifdef CONF_PLATFORM_LINUX
-	int pos;
-	int size;
-	struct mmsghdr msgs[VLEN];
-	struct iovec iovecs[VLEN];
-	char bufs[VLEN][PACKETSIZE];
-	char sockaddrs[VLEN][128];
-#else
-	int dummy;
-#endif
-} MMSGS;
-
-void net_init_mmsgs(MMSGS *m);
-
 /*
 	Function: net_udp_recv
 		Receives a packet over an UDP socket.
@@ -907,7 +889,7 @@ void net_init_mmsgs(MMSGS *m);
 		On success it returns the number of bytes received. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data);
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, unsigned char **data);
 
 /*
 	Function: net_udp_close
