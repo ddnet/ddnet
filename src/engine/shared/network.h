@@ -367,7 +367,7 @@ public:
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }
 	class CNetBan *NetBan() const { return m_pNetBan; }
-	int NetType() const { return m_Socket.type; }
+	int NetType() const { return net_socket_type(m_Socket); }
 	int MaxClients() const { return m_MaxClients; }
 
 	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token);
@@ -453,7 +453,7 @@ public:
 	int ResetErrorString();
 
 	// error and state
-	int NetType() const { return m_Socket.type; }
+	int NetType() const { return net_socket_type(m_Socket); }
 	int State();
 	int GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;

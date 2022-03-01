@@ -53,7 +53,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	// open socket
 	m_Socket = net_udp_create(BindAddr);
-	if(!m_Socket.type)
+	if(!m_Socket)
 		return false;
 
 	m_Address = BindAddr;

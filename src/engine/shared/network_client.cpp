@@ -8,7 +8,7 @@ bool CNetClient::Open(NETADDR BindAddr, int Flags)
 	// open socket
 	NETSOCKET Socket;
 	Socket = net_udp_create(BindAddr);
-	if(!Socket.type)
+	if(!Socket)
 		return false;
 
 	// clean it
