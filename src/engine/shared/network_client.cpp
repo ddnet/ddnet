@@ -65,7 +65,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		// TODO: empty the recvinfo
 		NETADDR Addr;
 		unsigned char *pData;
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &pData);
+		int Bytes = net_udp_recv(m_Socket, &Addr, &pData);
 
 		// no more packets for now
 		if(Bytes <= 0)

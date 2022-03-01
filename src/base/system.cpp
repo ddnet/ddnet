@@ -161,11 +161,12 @@ typedef struct
 	char bufs[VLEN][PACKETSIZE];
 	char sockaddrs[VLEN][128];
 #else
-	int dummy;
+	char buf[PACKETSIZE];
 #endif
-} MMSGS;
+} NETSOCKET_BUFFER;
 
-void net_init_mmsgs(MMSGS *m);
+void net_buffer_init(NETSOCKET_BUFFER *buffer);
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size);
 
 struct NETSOCKET_INTERNAL
 {
@@ -174,7 +175,7 @@ struct NETSOCKET_INTERNAL
 	int ipv6sock;
 	int web_ipv4sock;
 
-	MMSGS mmsgs;
+	NETSOCKET_BUFFER buffer;
 };
 static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
@@ -1526,7 +1527,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 	/* close down websocket_ipv4 */
 	if(sock->web_ipv4sock >= 0)
 	{
-		websocket_destroy(sock.web_ipv4sock);
+		websocket_destroy(sock->web_ipv4sock);
 		sock->web_ipv4sock = -1;
 		sock->type &= ~NETTYPE_WEBSOCKET_IPV4;
 	}
@@ -1701,7 +1702,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	/* set non-blocking */
 	net_set_non_blocking(sock);
 
-	net_init_mmsgs(&sock->mmsgs);
+	net_buffer_init(&sock->buffer);
 
 	/* return */
 	return sock;
@@ -1790,28 +1791,39 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	return d;
 }
 
-void net_init_mmsgs(MMSGS *m)
+void net_buffer_init(NETSOCKET_BUFFER *buffer)
 {
 #if defined(CONF_PLATFORM_LINUX)
 	int i;
-	m->pos = 0;
-	m->size = 0;
-	mem_zero(m->msgs, sizeof(m->msgs));
-	mem_zero(m->iovecs, sizeof(m->iovecs));
-	mem_zero(m->sockaddrs, sizeof(m->sockaddrs));
+	buffer->pos = 0;
+	buffer->size = 0;
+	mem_zero(buffer->msgs, sizeof(buffer->msgs));
+	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
+	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
 	for(i = 0; i < VLEN; ++i)
 	{
-		m->iovecs[i].iov_base = m->bufs[i];
-		m->iovecs[i].iov_len = PACKETSIZE;
-		m->msgs[i].msg_hdr.msg_iov = &(m->iovecs[i]);
-		m->msgs[i].msg_hdr.msg_iovlen = 1;
-		m->msgs[i].msg_hdr.msg_name = &(m->sockaddrs[i]);
-		m->msgs[i].msg_hdr.msg_namelen = sizeof(m->sockaddrs[i]);
+		buffer->iovecs[i].iov_base = buffer->bufs[i];
+		buffer->iovecs[i].iov_len = PACKETSIZE;
+		buffer->msgs[i].msg_hdr.msg_iov = &(buffer->iovecs[i]);
+		buffer->msgs[i].msg_hdr.msg_iovlen = 1;
+		buffer->msgs[i].msg_hdr.msg_name = &(buffer->sockaddrs[i]);
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
 	}
 #endif
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, unsigned char **data)
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	*buf = buffer->bufs[0];
+	*size = sizeof(buffer->bufs[0]);
+#else
+	*buf = buffer->buf;
+	*size = sizeof(buffer->buf);
+#endif
+}
+
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 {
 	char sockaddrbuf[128];
 	int bytes = 0;
@@ -1819,28 +1831,28 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, unsig
 #if defined(CONF_PLATFORM_LINUX)
 	if(sock->ipv4sock >= 0)
 	{
-		if(sock->mmsgs.pos >= sock->mmsgs.size)
+		if(sock->buffer.pos >= sock->buffer.size)
 		{
-			sock->mmsgs.size = recvmmsg(sock->ipv4sock, sock->mmsgs.msgs, VLEN, 0, NULL);
-			sock->mmsgs.pos = 0;
+			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.pos = 0;
 		}
 	}
 
 	if(sock->ipv6sock >= 0)
 	{
-		if(sock->mmsgs.pos >= sock->mmsgs.size)
+		if(sock->buffer.pos >= sock->buffer.size)
 		{
-			sock->mmsgs.size = recvmmsg(sock->ipv6sock, sock->mmsgs.msgs, VLEN, 0, NULL);
-			sock->mmsgs.pos = 0;
+			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.pos = 0;
 		}
 	}
 
-	if(sock->mmsgs.pos < sock->mmsgs.size)
+	if(sock->buffer.pos < sock->buffer.size)
 	{
-		sockaddr_to_netaddr((struct sockaddr *)&(sock->mmsgs.sockaddrs[sock->mmsgs.pos]), addr);
-		bytes = sock->mmsgs.msgs[sock->mmsgs.pos].msg_len;
-		*data = (unsigned char *)sock->mmsgs.bufs[sock->mmsgs.pos];
-		sock->mmsgs.pos++;
+		sockaddr_to_netaddr((struct sockaddr *)&(sock->buffer.sockaddrs[sock->buffer.pos]), addr);
+		bytes = sock->buffer.msgs[sock->buffer.pos].msg_len;
+		*data = (unsigned char *)sock->buffer.bufs[sock->buffer.pos];
+		sock->buffer.pos++;
 		network_stats.recv_bytes += bytes;
 		network_stats.recv_packets++;
 		return bytes;
@@ -1849,25 +1861,28 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, unsig
 	if(bytes == 0 && sock->ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
-		bytes = recvfrom(sock->ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = (unsigned char *)buffer;
+		bytes = recvfrom(sock->ipv4sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = (unsigned char *)sock->buffer.buf;
 	}
 
 	if(bytes <= 0 && sock->ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
-		bytes = recvfrom(sock->ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = (unsigned char *)buffer;
+		bytes = recvfrom(sock->ipv6sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = (unsigned char *)sock->buffer.buf;
 	}
 #endif
 
 #if defined(CONF_WEBSOCKETS)
 	if(bytes <= 0 && sock->web_ipv4sock >= 0)
 	{
+		char *buf;
+		int size;
+		net_buffer_simple(&sock->buffer, &buf, &size);
 		socklen_t fromlen = sizeof(struct sockaddr);
 		struct sockaddr_in *sockaddrbuf_in = (struct sockaddr_in *)&sockaddrbuf;
-		bytes = websocket_recv(sock->web_ipv4sock, (unsigned char *)buffer, maxsize, sockaddrbuf_in, fromlen);
-		*data = (unsigned char *)buffer;
+		bytes = websocket_recv(sock->web_ipv4sock, (unsigned char *)buf, size, sockaddrbuf_in, fromlen);
+		*data = (unsigned char *)buf;
 		sockaddrbuf_in->sin_family = AF_WEBSOCKET_INET;
 	}
 #endif

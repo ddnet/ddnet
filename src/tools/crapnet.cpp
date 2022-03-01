@@ -67,7 +67,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			int DataTrash = 0;
 			NETADDR From;
 			unsigned char *pData;
-			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024 * 2, &pData);
+			int Bytes = net_udp_recv(Socket, &From, &pData);
 			if(Bytes <= 0)
 				break;
 
