@@ -340,8 +340,7 @@ CServer::~CServer()
 {
 	for(auto &pCurrentMapData : m_apCurrentMapData)
 	{
-		if(pCurrentMapData)
-			free(pCurrentMapData);
+		free(pCurrentMapData);
 	}
 
 	delete m_pConnectionPool;
@@ -2382,7 +2381,7 @@ int CServer::LoadMap(const char *pMapName)
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
 		}
 	}
-	if(!Config()->m_SvSixup && m_apCurrentMapData[SIXUP])
+	if(!Config()->m_SvSixup)
 	{
 		free(m_apCurrentMapData[SIXUP]);
 		m_apCurrentMapData[SIXUP] = 0;

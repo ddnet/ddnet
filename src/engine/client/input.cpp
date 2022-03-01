@@ -135,10 +135,7 @@ bool CInput::MouseDoubleClick()
 
 const char *CInput::GetClipboardText()
 {
-	if(m_pClipboardText)
-	{
-		SDL_free(m_pClipboardText);
-	}
+	SDL_free(m_pClipboardText);
 	m_pClipboardText = SDL_GetClipboardText();
 	return m_pClipboardText;
 }

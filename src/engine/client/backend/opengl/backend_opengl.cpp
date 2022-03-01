@@ -1863,8 +1863,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RecreateBufferObject(const CCommandB
 	}
 
 	BufferObject.m_DataSize = pCommand->m_DataSize;
-	if(BufferObject.m_pData)
-		free(BufferObject.m_pData);
+	free(BufferObject.m_pData);
 	BufferObject.m_pData = malloc(pCommand->m_DataSize);
 	if(pUploadData)
 		mem_copy(BufferObject.m_pData, pUploadData, pCommand->m_DataSize);
@@ -1921,11 +1920,8 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferObject(const CCommandBuf
 		glDeleteBuffers(1, &BufferObject.m_BufferObjectID);
 	}
 
-	if(BufferObject.m_pData)
-	{
-		free(BufferObject.m_pData);
-		BufferObject.m_pData = NULL;
-	}
+	free(BufferObject.m_pData);
+	BufferObject.m_pData = NULL;
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand)
@@ -1993,11 +1989,8 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferContainer(const CCommand
 					glDeleteBuffers(1, &m_BufferObjectIndices[VertBufferID].m_BufferObjectID);
 				}
 
-				if(m_BufferObjectIndices[VertBufferID].m_pData)
-				{
-					free(m_BufferObjectIndices[VertBufferID].m_pData);
-					m_BufferObjectIndices[VertBufferID].m_pData = NULL;
-				}
+				free(m_BufferObjectIndices[VertBufferID].m_pData);
+				m_BufferObjectIndices[VertBufferID].m_pData = NULL;
 			}
 		}
 	}

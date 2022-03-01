@@ -86,21 +86,15 @@ enum
 CEditorImage::~CEditorImage()
 {
 	m_pEditor->Graphics()->UnloadTexture(&m_Texture);
-	if(m_pData)
-	{
-		free(m_pData);
-		m_pData = 0;
-	}
+	free(m_pData);
+	m_pData = 0;
 }
 
 CEditorSound::~CEditorSound()
 {
 	m_pEditor->Sound()->UnloadSample(m_SoundID);
-	if(m_pData)
-	{
-		free(m_pData);
-		m_pData = 0x0;
-	}
+	free(m_pData);
+	m_pData = 0x0;
 }
 
 CLayerGroup::CLayerGroup()
@@ -3313,11 +3307,8 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 
 	CEditorImage *pImg = pEditor->m_Map.m_lImages[pEditor->m_SelectedImage];
 	pEditor->Graphics()->UnloadTexture(&(pImg->m_Texture));
-	if(pImg->m_pData)
-	{
-		free(pImg->m_pData);
-		pImg->m_pData = 0;
-	}
+	free(pImg->m_pData);
+	pImg->m_pData = 0;
 	*pImg = ImgInfo;
 	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
@@ -3494,11 +3485,8 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 
 	// unload sample
 	pEditor->Sound()->UnloadSample(pSound->m_SoundID);
-	if(pSound->m_pData)
-	{
-		free(pSound->m_pData);
-		pSound->m_pData = 0x0;
-	}
+	free(pSound->m_pData);
+	pSound->m_pData = 0x0;
 
 	// replace sound
 	IStorage::StripPathAndExtension(pFileName, pSound->m_aName, sizeof(pSound->m_aName));

@@ -209,14 +209,11 @@ void CVideo::Stop()
 	if(m_pFormatContext)
 		avformat_free_context(m_pFormatContext);
 
-	if(m_pRGB)
-		free(m_pRGB);
+	free(m_pRGB);
 
-	if(m_pPixels)
-		free(m_pPixels);
+	free(m_pPixels);
 
-	if(ms_pCurrentVideo)
-		delete ms_pCurrentVideo;
+	delete ms_pCurrentVideo;
 }
 
 void CVideo::NextVideoFrameThread()
