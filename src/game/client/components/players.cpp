@@ -487,11 +487,11 @@ void CPlayers::RenderPlayer(
 			// check if we're firing stuff
 			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles) //prev.attackticks)
 			{
-				float Alpha = 0.0f;
+				float AlphaMuzzle = 0.0f;
 				if(AttackTicksPassed < g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3)
 				{
 					float t = AttackTicksPassed / g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
-					Alpha = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
+					AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
 				}
 
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
@@ -511,7 +511,7 @@ void CPlayers::RenderPlayer(
 					else
 						s_LastIteX = IteX;
 				}
-				if(Alpha > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
+				if(AlphaMuzzle > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
 					float OffsetY = -g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsety;
 					int QuadOffset = IteX * 2 + (Direction.x < 0 ? 1 : 0);
