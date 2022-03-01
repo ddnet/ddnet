@@ -1,0 +1,9 @@
+[package]
+name = "proxy"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+clap = "2.34.0"
+hex = "0.4" # TODO: check for updates
+hexdump = "0.1.1"
