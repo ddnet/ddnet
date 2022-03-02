@@ -2485,10 +2485,8 @@ void CClient::Update()
 #if defined(CONF_VIDEORECORDER)
 		if(m_DemoPlayer.IsPlaying() && IVideo::Current())
 		{
-			if(IVideo::Current()->FrameRendered())
-				IVideo::Current()->NextVideoFrame();
-			if(IVideo::Current()->AudioFrameRendered())
-				IVideo::Current()->NextAudioFrameTimeline();
+			IVideo::Current()->NextVideoFrame();
+			IVideo::Current()->NextAudioFrameTimeline(Sound()->GetSoundMixFunc());
 		}
 		else if(m_ButtonRender)
 			Disconnect();
@@ -3099,9 +3097,20 @@ void CClient::Run()
 
 			bool AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
 
+			int GfxRefreshRate = g_Config.m_GfxRefreshRate;
+
+#if defined(CONF_VIDEORECORDER)
+			// keep rendering synced
+			if(IVideo::Current())
+			{
+				AsyncRenderOld = false;
+				GfxRefreshRate = 0;
+			}
+#endif
+
 			if(IsRenderActive &&
 				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
-				(!g_Config.m_GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
+				(!GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
 
@@ -3429,7 +3438,12 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 
 	if(!IVideo::Current())
 	{
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
+		// wait for idle, so there is no data race
+		pSelf->Graphics()->WaitForIdle();
+		// pause the sound device while creating the video instance
+		pSelf->Sound()->PauseAudioDevice();
+		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
+		pSelf->Sound()->UnpauseAudioDevice();
 		IVideo::Current()->Start();
 		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
 		if(paused)
@@ -3449,7 +3463,12 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 	pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", pVideoName);
 	if(!IVideo::Current())
 	{
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
+		// wait for idle, so there is no data race
+		pSelf->Graphics()->WaitForIdle();
+		// pause the sound device while creating the video instance
+		pSelf->Sound()->PauseAudioDevice();
+		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
+		pSelf->Sound()->UnpauseAudioDevice();
 		IVideo::Current()->Start();
 	}
 	else
