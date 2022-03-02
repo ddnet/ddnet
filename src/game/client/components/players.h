@@ -27,7 +27,7 @@ class CPlayers : public CComponent
 		int ClientID,
 		float Intra = 0.f);
 
-	int m_WeaponEmoteQuadContainerIndex;
+	int m_WeaponQuadContainerIndex;
 	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:

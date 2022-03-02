@@ -57,6 +57,7 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/players.h"
+#include "components/players_emoticon.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
@@ -124,6 +125,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_MapLayersForeGround);
 	m_All.Add(&m_Particles.m_RenderExplosions);
 	m_All.Add(&m_NamePlates);
+	m_All.Add(&m_PlayersEmoticon);
 	m_All.Add(&m_Particles.m_RenderGeneral);
 	m_All.Add(&m_DamageInd);
 	m_All.Add(&m_Hud);

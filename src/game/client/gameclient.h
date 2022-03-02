@@ -47,6 +47,7 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/players.h"
+#include "components/players_emoticon.h"
 #include "components/race_demo.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
@@ -129,6 +130,7 @@ public:
 	CSpectator m_Spectator;
 
 	CPlayers m_Players;
+	CPlayersEmoticon m_PlayersEmoticon;
 	CNamePlates m_NamePlates;
 	CItems m_Items;
 	CMapImages m_MapImages;
