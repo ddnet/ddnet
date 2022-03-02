@@ -75,14 +75,9 @@ CServerBrowser::CServerBrowser()
 
 CServerBrowser::~CServerBrowser()
 {
-	if(m_ppServerlist)
-		free(m_ppServerlist);
-
-	if(m_pSortedServerlist)
-		free(m_pSortedServerlist);
-
-	if(m_pDDNetInfo)
-		json_value_free(m_pDDNetInfo);
+	free(m_ppServerlist);
+	free(m_pSortedServerlist);
+	json_value_free(m_pDDNetInfo);
 
 	delete m_pHttp;
 	m_pHttp = nullptr;
@@ -265,8 +260,7 @@ void CServerBrowser::Filter()
 	// allocate the sorted list
 	if(m_NumSortedServersCapacity < m_NumServers)
 	{
-		if(m_pSortedServerlist)
-			free(m_pSortedServerlist);
+		free(m_pSortedServerlist);
 		m_NumSortedServersCapacity = m_NumServers;
 		m_pSortedServerlist = (int *)calloc(m_NumSortedServersCapacity, sizeof(int));
 	}
@@ -1501,8 +1495,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 	io_read(File, pBuf, Length);
 	io_close(File);
 
-	if(m_pDDNetInfo)
-		json_value_free(m_pDDNetInfo);
+	json_value_free(m_pDDNetInfo);
 
 	m_pDDNetInfo = json_parse(pBuf, Length);
 
