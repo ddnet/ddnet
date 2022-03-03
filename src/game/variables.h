@@ -78,7 +78,7 @@ MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | 
 
 MACRO_CONFIG_INT(ClShowCenterLines, tc_show_center, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws lines to show the center of your screen/hitbox")
 
-MACRO_CONFIG_INT(ClFreeGhost, tc_freeghost, 0, 0, 1, CFGFLAG_CLIENT , "")
+//MACRO_CONFIG_INT(ClFreeGhost, tc_freeghost, 0, 0, 1, CFGFLAG_CLIENT , "")
 
 MACRO_CONFIG_INT(ClOutline, tc_outline, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outlines")
 MACRO_CONFIG_INT(ClOutlineFreeze, tc_outline_freeze, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outline around freeze and deep")

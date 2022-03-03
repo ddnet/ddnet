@@ -577,17 +577,9 @@ void CClient::SendInput()
 			m_aInputs[i][m_CurrentInput[i]].m_PredictionMargin = m_PredictedTime.GetMargin(Now);
 			m_aInputs[i][m_CurrentInput[i]].m_Time = Now;
 
-			// pack it
-			if(g_Config.m_ClFreeGhost)
-			{
-				for(int k = 0; k < Size / 4; k++)
-					Msg.AddInt(0);
-			}
-			else
-			{
-				for(int k = 0; k < Size / 4; k++)
-					Msg.AddInt(m_aInputs[i][m_CurrentInput[i]].m_aData[k]);
-			}
+			for(int k = 0; k < Size / 4; k++)
+				Msg.AddInt(m_aInputs[i][m_CurrentInput[i]].m_aData[k]);
+
 			m_CurrentInput[i]++;
 			m_CurrentInput[i] %= 200;
 			SendMsg(i, &Msg, MSGFLAG_FLUSH);
@@ -2912,7 +2904,8 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort :
+                                                                                               g_Config.m_ClContactPort;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;

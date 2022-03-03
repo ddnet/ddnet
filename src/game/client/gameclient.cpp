@@ -546,7 +546,7 @@ void CGameClient::UpdatePositions()
 			//			m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
 		}
 	}
-	else if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter && !g_Config.m_ClFreeGhost)
+	else if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter)
 	{
 		m_LocalCharacterPos = mix(
 			vec2(m_Snap.m_pLocalPrevCharacter->m_X, m_Snap.m_pLocalPrevCharacter->m_Y),
