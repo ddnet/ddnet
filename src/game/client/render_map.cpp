@@ -592,10 +592,11 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 
 			int c = mx + my * w;
 
-			unsigned char Index = pTele[c].m_Number;
+			unsigned char Index = pTele[c].m_Type;
 			if(!Index)
 				continue;
-			Index = pTele[c].m_Type;
+			if(Index == TILE_CHECKPOINT_FIRST)
+				continue;
 			if(!(Index == TILE_TELECHECKINEVIL || Index == TILE_TELECHECK || Index == TILE_TELEIN || Index == TILE_TELEINEVIL))
 				continue;
 
