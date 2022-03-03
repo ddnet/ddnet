@@ -1302,7 +1302,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);
 
-		if(g_Config.m_SvShowOthersDefault > 0)
+		if(g_Config.m_SvShowOthersDefault > SHOW_OTHERS_OFF)
 		{
 			if(g_Config.m_SvShowOthers)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
@@ -3194,7 +3194,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldTeleportWeapons = 0;
 		g_Config.m_SvTeleportHoldHook = 0;
 		g_Config.m_SvTeam = SV_TEAM_ALLOWED;
-		g_Config.m_SvShowOthersDefault = 0;
+		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_OFF;
 
 		if(Collision()->m_NumSwitchers > 0)
 			for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
@@ -3210,7 +3210,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	if(g_Config.m_SvSoloServer)
 	{
 		g_Config.m_SvTeam = SV_TEAM_FORCED_SOLO;
-		g_Config.m_SvShowOthersDefault = 1;
+		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_ON;
 
 		Tuning()->Set("player_collision", 0);
 		Tuning()->Set("player_hooking", 0);
