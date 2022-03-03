@@ -85,7 +85,7 @@ MACRO_CONFIG_INT(ClOutlineFreeze, tc_outline_freeze, 1, 0, 1, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClOutlineTele, tc_outline_tele, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outline around teleporters")
 MACRO_CONFIG_INT(ClOutlineSolid, tc_outline_solid, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outline around hook and unhook")
 
-MACRO_CONFIG_INT(ClOutlineWidth, tc_outline_width, 8, 0, 16, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(1-16) Width of freeze outline")
+MACRO_CONFIG_INT(ClOutlineWidth, tc_outline_width, 8, 1, 16, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(1-16) Width of freeze outline")
 MACRO_CONFIG_INT(ClOutlineAlpha, tc_outline_alpha, 50, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(0-100) Outline alpha")
 
 

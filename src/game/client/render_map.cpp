@@ -491,14 +491,23 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 			}
 			else
 			{
-				Neighbors[0] = pTiles[(mx - 1) + (my - 1) * w].m_Index != Index;
-				Neighbors[1] = pTiles[(mx + 0) + (my - 1) * w].m_Index != Index;
-				Neighbors[2] = pTiles[(mx + 1) + (my - 1) * w].m_Index != Index;
-				Neighbors[3] = pTiles[(mx - 1) + (my + 0) * w].m_Index != Index;
-				Neighbors[4] = pTiles[(mx + 1) + (my + 0) * w].m_Index != Index;
-				Neighbors[5] = pTiles[(mx - 1) + (my + 1) * w].m_Index != Index;
-				Neighbors[6] = pTiles[(mx + 0) + (my + 1) * w].m_Index != Index;
-				Neighbors[7] = pTiles[(mx + 1) + (my + 1) * w].m_Index != Index;
+				int IndexN;
+				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
+				Neighbors[0] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
+				Neighbors[1] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
+				Neighbors[2] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
+				Neighbors[3] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
+				Neighbors[4] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
+				Neighbors[5] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
+				Neighbors[6] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
+				Neighbors[7] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
 			}
 			float Size = (float)g_Config.m_ClOutlineWidth * 3.0f;
 			float Size3 = Size / 3.0f;
@@ -559,7 +568,7 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 	int EndY = (int)(ScreenY1 / Scale) + 1;
 	int EndX = (int)(ScreenX1 / Scale) + 1;
 
-	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
+	if(EndX - StartX > Graphics()->ScreenWidth() / 15 || EndY - StartY > Graphics()->ScreenHeight() / 14)
 		return;
 
 	Graphics()->TextureClear();
