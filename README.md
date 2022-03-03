@@ -30,6 +30,35 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 1 - on minimal text version of frozen tee HUD
 ```
 
+### **Show outlines around tiles** 
+
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outlines**
+```
+0 - off
+1 - on
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_freeze**
+```
+Outlines freeze tiles
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_solid**
+```
+Outlines hook and unhook tiles
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_tele**
+```
+Outlines tele tiles
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_width**
+```
+(1-16) Outline width
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_alpha**
+```
+(0-100) Outline alpha
+```
+
 ### **KoG cl_prediction_margin PATCH**
 ```
 default: 10
