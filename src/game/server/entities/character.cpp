@@ -1077,7 +1077,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		AmmoCount = 10;
 	}
 
-	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
+	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == SERVER_DEMO_CLIENT ||
 		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID))
 	{
 		Health = m_Health;
@@ -1153,7 +1153,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 bool CCharacter::CanSnapCharacter(int SnappingClient)
 {
-	if(SnappingClient < 0)
+	if(SnappingClient == SERVER_DEMO_CLIENT)
 		return true;
 
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
@@ -1176,7 +1176,7 @@ void CCharacter::Snap(int SnappingClient)
 {
 	int ID = m_pPlayer->GetCID();
 
-	if(SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
+	if(!Server()->Translate(ID, SnappingClient))
 		return;
 
 	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))

@@ -88,7 +88,7 @@ void CPlasma::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 	CCharacter *SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	CPlayer *SnapPlayer = SnappingClient > -1 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	CPlayer *SnapPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
 	if(SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick))
