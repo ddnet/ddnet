@@ -34,8 +34,8 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_outlines**
 ```
-0 - off
-1 - on
+0 - off (all outline rendering is off)
+1 - on (render any enabled outlines)
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_freeze**
