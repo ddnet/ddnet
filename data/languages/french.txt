@@ -1373,3 +1373,6 @@ Run on join
 
 Chat command (e.g. showall 1)
 == Commande du tchat (e.g. showall 1)
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
