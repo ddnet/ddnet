@@ -2003,7 +2003,7 @@ void CMapLayers::OnRender()
 					if(g_Config.m_ClOutlineFreeze)
 						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_FREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
 					if(g_Config.m_ClOutlineSolid && EntityOverlayVal)
-						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_SOLID, 1.0f);
+						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_SOLID, (float)g_Config.m_ClOutlineAlpha / 50.0f);
 				}
 				if(g_Config.m_ClOutlineTele && IsTeleLayer)
 				{
