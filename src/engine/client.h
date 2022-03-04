@@ -146,6 +146,7 @@ public:
 	virtual void EnterGame(int Conn) = 0;
 
 	//
+	virtual const char *ServerAddress() const = 0;
 	virtual const char *MapDownloadName() const = 0;
 	virtual int MapDownloadAmount() const = 0;
 	virtual int MapDownloadTotalsize() const = 0;

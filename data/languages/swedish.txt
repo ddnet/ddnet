@@ -1347,3 +1347,6 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 

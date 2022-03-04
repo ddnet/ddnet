@@ -1360,3 +1360,6 @@ Chat command (e.g. showall 1)
 
 Windowed fullscreen
 == Vollbild-Fenster
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== Das Format der Textur %s ist nicht RGBA was graphische Fehler verursachen wird.

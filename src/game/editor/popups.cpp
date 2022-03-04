@@ -603,6 +603,17 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		return 1;
 	}
 
+	// slice button
+	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_SliceButton = 0;
+	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, 0, "Enables quad knife mode"))
+	{
+		pEditor->m_QuadKnifeCount = 0;
+		pEditor->m_QuadKnifeActive = true;
+		return 1;
+	}
+
 	enum
 	{
 		PROP_POS_X = 0,
