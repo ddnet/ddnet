@@ -1347,11 +1347,14 @@ Settings file
 Config directory
 == Directorio de configuración
 
-Windowed fullscreen
-== 
-
 Run on join
 == Ejec. al entrar
 
 Chat command (e.g. showall 1)
 == Comando de chat (Ej. showall 1)
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Windowed fullscreen
+== 

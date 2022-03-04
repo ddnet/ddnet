@@ -89,9 +89,6 @@ Client
 Close
 == Fechar
 
-Compatible version
-== Versão compatível
-
 Connect
 == Ligar
 
@@ -825,38 +822,14 @@ Switch weapon when out of ammo
 AntiPing: predict grenade paths
 == Antiping: prever os caminhos da granada
 
-Successfully saved the replay!
-== 
-
 Saving ddnet-settings.cfg failed
 == Falha ao guardar ddnet-settings.cfg
-
-Replay feature is disabled!
-== 
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
 
 Warning
 == Aviso
 
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
-
-Server best:
-== 
-
-Personal best:
-== 
-
 Reconnect in %d sec
 == Reconectar em %d seg
-
-Render demo
-== 
-
-Replace video
-== 
 
 File already exists, do you want to overwrite it?
 == O ficheiro já existe, queres substituí-lo?
@@ -870,23 +843,8 @@ Are you sure that you want to disconnect your dummy?
 Welcome to DDNet
 == Bem-vindo à DDNet
 
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == O mais importante é a comunicação: Não existe um tutorial pelo que terás de utilizar o chat (tecla t) para conversar com outros jogadores para que aprendas os básicos e os truques do jogo.
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == É recomendado que verifiques as definições para ajustá-las a teu gosto antes de te juntares a um servidor.
@@ -918,14 +876,174 @@ Speed
 Video name:
 == Nome do vídeo:
 
-Show DDNet map finishes in server browser
-== 
-
 transmits your player name to info2.ddnet.tw
 == transmite o teu nome de jogador para info2.ddnet.tw
 
 Theme
 == Tema
+
+%d of %d servers
+== %d of %d servidores
+
+%d of %d server
+== %d of %d servidor
+
+%d players
+== %d jogadores
+
+%d player
+== %d jogador
+
+Refreshing...
+== A atualizar...
+
+Date
+== Data
+
+Connect Dummy
+== Conectar Dummy
+
+Time
+== Tempo
+
+Reload
+== Recarregar
+
+Deactivate
+== Desativar
+
+Activate
+== Ativar
+
+Save
+== Guardar
+
+Settings file
+== Ficheiro de definições
+
+Themes directory
+== Diretório de temas
+
+Skins directory
+== Diretório de skins
+
+Dummy
+== Dummy
+
+Windowed
+== Janela
+
+Windowed borderless
+== Janela s/ bordas
+
+Desktop fullscreen
+== Ecrã completo
+
+Game sound volume
+== Volume do jogo
+
+Chat sound volume
+== Volume do chat
+
+Background music volume
+== Volume da música de fundo
+
+Tee
+== Tee
+
+Use old chat style
+== Usar o modo antigo de chat
+
+Friend message
+== Mensagem de amigo/a
+
+Size
+== Tamanho
+
+Background
+== Fundo
+
+Particles
+== Partículas
+
+Discord
+== Discord
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Learn
+== Aprender
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Website
+== Website
+
+Settings
+== Definições
+
+Stop server
+== Parar servidor
+
+Editor
+== Editor
+
+[Start menu]
+1 new mention
+== 1 nova menção
+
+%d new mentions
+== %d novas menções
+
+9+ new mentions
+== 9+ novas menções
+
+Successfully saved the replay!
+== 
+
+Replay feature is disabled!
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Server best:
+== 
+
+Personal best:
+== 
+
+Render demo
+== 
+
+Replace video
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
+== 
+
+The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
+== 
+
+Hook (right mouse) can be used to swing through the map and to hook other tees to you.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Show DDNet map finishes in server browser
+== 
 
 AFR
 == 
@@ -950,21 +1068,6 @@ CHN
 
 Getting server list from master server
 == 
-
-%d of %d servers
-== %d of %d servidores
-
-%d of %d server
-== %d of %d servidor
-
-%d players
-== %d jogadores
-
-%d player
-== %d jogador
-
-Refreshing...
-== A atualizar...
 
 Filter connecting players
 == 
@@ -993,9 +1096,6 @@ Markers
 Length
 == 
 
-Date
-== Data
-
 Fetch Info
 == 
 
@@ -1005,29 +1105,11 @@ Demos directory
 Render
 == 
 
-Connect Dummy
-== Conectar Dummy
-
 Kill
 == 
 
 Pause
 == 
-
-Time
-== Tempo
-
-Reload
-== Recarregar
-
-Deactivate
-== Desativar
-
-Activate
-== Ativar
-
-Save
-== Guardar
 
 Smooth Dynamic Camera
 == 
@@ -1038,14 +1120,8 @@ Reset wanted weapon on death
 Skip the main menu
 == 
 
-Settings file
-== Ficheiro de definições
-
 Config directory
 == 
-
-Themes directory
-== Diretório de temas
 
 Download skins
 == 
@@ -1061,9 +1137,6 @@ Skin prefix
 
 Skin Database
 == 
-
-Skins directory
-== Diretório de skins
 
 Hook collisions
 == 
@@ -1113,17 +1186,8 @@ Chat command
 UI mouse s.
 == 
 
-Dummy
-== Dummy
-
-Windowed
-== Janela
-
-Windowed borderless
-== Janela s/ bordas
-
-Desktop fullscreen
-== Ecrã completo
+Windowed fullscreen
+== 
 
 may cause delay
 == 
@@ -1145,15 +1209,6 @@ Enable long pain sound (used when shooting in freeze)
 
 Threaded sound loading
 == 
-
-Game sound volume
-== Volume do jogo
-
-Chat sound volume
-== Volume do chat
-
-Background music volume
-== Volume da música de fundo
 
 Assets
 == 
@@ -1185,15 +1240,6 @@ No hit
 Hookable
 == 
 
-Tee
-== Tee
-
-Use old chat style
-== Usar o modo antigo de chat
-
-Friend message
-== Mensagem de amigo/a
-
 Client message
 == 
 
@@ -1208,9 +1254,6 @@ Enable replays
 
 Overlay entities
 == 
-
-Size
-== Tamanho
 
 Show text entities
 == 
@@ -1229,9 +1272,6 @@ Show other players' key presses
 
 Show local player's key presses
 == 
-
-Background
-== Fundo
 
 Entities Background color
 == 
@@ -1260,41 +1300,14 @@ Entities
 Emoticons
 == 
 
-Particles
-== Partículas
-
 Assets directory
 == 
-
-Discord
-== Discord
-
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
-
-Learn
-== Aprender
-
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
-
-Website
-== Website
-
-Settings
-== Definições
-
-Stop server
-== Parar servidor
 
 Run server
 == 
 
 Server executable not found, can't run server
 == 
-
-Editor
-== Editor
 
 [Start menu]
 Play
@@ -1338,12 +1351,3 @@ Spree
 
 Grabs
 == 
-
-1 new mention
-== 1 nova menção
-
-%d new mentions
-== %d novas menções
-
-9+ new mentions
-== 9+ novas menções

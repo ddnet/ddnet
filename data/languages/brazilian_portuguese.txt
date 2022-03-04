@@ -1347,6 +1347,9 @@ Kill Message Highlight Color
 Show local player's key presses
 == Mostrar pressionamento de teclas de jogadores locais
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Settings file
 == 
 

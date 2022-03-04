@@ -730,27 +730,6 @@ transmits your player name to info2.ddnet.tw
 Theme
 == 테마
 
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
-
 Getting server list from master server
 == 마스터 서버에서 서버 목록을 받는 중
 
@@ -807,12 +786,6 @@ Demofile: %s
 
 Markers:
 == 책갈피
-
-%.2f MiB
-== 
-
-%.2f KiB
-== 
 
 Demo
 == 데모
@@ -1345,3 +1318,33 @@ Grabs
 
 9+ new mentions
 == 9+ 건 이상의 새로운 언급
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 

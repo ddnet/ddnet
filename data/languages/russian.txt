@@ -1339,6 +1339,9 @@ Hookable
 Show local player's key presses
 == Показывать нажатия клавиш игрока
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Settings file
 == 
 
