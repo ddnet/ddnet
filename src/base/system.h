@@ -1050,433 +1050,401 @@ int net_tcp_send(NETSOCKET sock, const void *data, int size);
  */
 int net_tcp_recv(NETSOCKET sock, void *data, int maxsize);
 
-/*
-	Function: net_tcp_close
-		Closes a TCP socket.
-
-	Parameters:
-		sock - Socket to close.
-
-	Returns:
-		Returns 0 on success. Negative value on failure.
-*/
+/**
+ * Closes a TCP socket.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param sock Socket to close.
+ *
+ * @return 0 on success. Negative value on failure.
+ */
 int net_tcp_close(NETSOCKET sock);
 
 #if defined(CONF_FAMILY_UNIX)
-/* Group: Network Unix Sockets */
+/**
+ * @defgroup Network-Unix-Sockets
+ * @ingroup Network-General
+ */
 
-/*
-	Function: net_unix_create_unnamed
-		Creates an unnamed unix datagram socket.
-
-	Returns:
-		On success it returns a handle to the socket. On failure it returns -1.
-*/
+/**
+ * Creates an unnamed unix datagram socket.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @return On success it returns a handle to the socket. On failure it returns -1.
+ */
 UNIXSOCKET net_unix_create_unnamed();
 
-/*
-	Function: net_unix_send
-		Sends data to a Unix socket.
-
-	Parameters:
-		sock - Socket to use.
-		addr - Where to send the packet.
-		data - Pointer to the packet data to send.
-		size - Size of the packet.
-
-	Returns:
-		Number of bytes sent. Negative value on failure.
-*/
+/**
+ * Sends data to a Unix socket.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @param sock Socket to use.
+ * @param addr Where to send the packet.
+ * @param data Pointer to the packet data to send.
+ * @param size Size of the packet.
+ *
+ * @return Number of bytes sent. Negative value on failure.
+ */
 int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size);
 
-/*
-	Function: net_unix_set_addr
-		Sets the unixsocketaddress for a path to a socket file.
-
-	Parameters:
-		addr - Pointer to the addressstruct to fill.
-		path - Path to the (named) unix socket.
-*/
+/**
+ * Sets the unixsocketaddress for a path to a socket file.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @param addr Pointer to the addressstruct to fill.
+ * @param path Path to the (named) unix socket.
+ */
 void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path);
 
-/*
-	Function: net_unix_close
-		Closes a Unix socket.
-
-	Parameters:
-		sock - Socket to close.
-*/
+/**
+ * Closes a Unix socket.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @param sock Socket to close.
+ */
 void net_unix_close(UNIXSOCKET sock);
 
 #endif
 
-/* Group: Strings */
+/**
+ * @defgroup Strings
+ *
+ * String related functions.
+ */
 
-/*
-	Function: str_append
-		Appends a string to another.
-
-	Parameters:
-		dst - Pointer to a buffer that contains a string.
-		src - String to append.
-		dst_size - Size of the buffer of the dst string.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-*/
+/**
+ * Appends a string to another.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that contains a string.
+ * @param src String to append.
+ * @param dst_size Size of the buffer of the dst string.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
 void str_append(char *dst, const char *src, int dst_size);
 
-/*
-	Function: str_copy
-		Copies a string to another.
-
-	Parameters:
-		dst - Pointer to a buffer that shall receive the string.
-		src - String to be copied.
-		dst_size - Size of the buffer dst.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-*/
+/**
+ * Copies a string to another.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that shall receive the string.
+ * @param src String to be copied.
+ * @param dst_size Size of the buffer dst.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
 void str_copy(char *dst, const char *src, int dst_size);
 
-/*
-	Function: str_utf8_truncate
-		Truncates a utf8 encoded string to a given length.
-
-	Parameters:
-		dst - Pointer to a buffer that shall receive the string.
-		dst_size - Size of the buffer dst.
-		str - String to be truncated.
-		truncation_len - Maximum codepoints in the returned string.
-
-	Remarks:
-		- The strings are treated as utf8-encoded zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-*/
+/**
+ * Truncates a utf8 encoded string to a given length.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that shall receive the string.
+ * @param dst_size Size of the buffer dst.
+ * @param str String to be truncated.
+ * @param truncation_len Maximum codepoints in the returned string.
+ *
+ * @remark The strings are treated as utf8-encoded zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
 void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
-/*
-	Function: str_truncate
-		Truncates a string to a given length.
-
-	Parameters:
-		dst - Pointer to a buffer that shall receive the string.
-		dst_size - Size of the buffer dst.
-		src - String to be truncated.
-		truncation_len - Maximum length of the returned string (not
-		counting the zero termination).
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-		- Garantees that dst string will contain zero-termination.
-*/
+/**
+ * Truncates a string to a given length.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that shall receive the string.
+ * @param dst_size Size of the buffer dst.
+ * @param src String to be truncated.
+ * @param truncation_len Maximum length of the returned string (not
+ * counting the zero termination).
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Garantees that dst string will contain zero-termination.
+ */
 void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
-/*
-	Function: str_length
-		Returns the length of a zero terminated string.
-
-	Parameters:
-		str - Pointer to the string.
-
-	Returns:
-		Length of string in bytes excluding the zero termination.
+/**
+ * Returns the length of a zero terminated string.
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to the string.
+ *
+ * @return Length of string in bytes excluding the zero termination.
 */
 int str_length(const char *str);
 
-/*
-	Function: str_format
-		Performs printf formatting into a buffer.
-
-	Parameters:
-		buffer - Pointer to the buffer to receive the formatted string.
-		buffer_size - Size of the buffer.
-		format - printf formatting string.
-		... - Parameters for the formatting.
-
-	Returns:
-		Length of written string, even if it has been truncated
-
-	Remarks:
-		- See the C manual for syntax for the printf formatting string.
-		- The strings are treated as zero-terminated strings.
-		- Guarantees that dst string will contain zero-termination.
-*/
+/**
+ * Performs printf formatting into a buffer.
+ *
+ * @ingroup Strings
+ *
+ * @param buffer Pointer to the buffer to receive the formatted string.
+ * @param buffer_size Size of the buffer.
+ * @param format printf formatting string.
+ * @param ... Parameters for the formatting.
+ *
+ * @return Length of written string, even if it has been truncated
+ *
+ * @remark See the C manual for syntax for the printf formatting string.
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
 int str_format(char *buffer, int buffer_size, const char *format, ...)
 	GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
-/*
-	Function: str_trim_words
-		Trims specific number of words at the start of a string.
-
-	Parameters:
-		str - String to trim the words from.
-		words - Count of words to trim.
-
-	Returns:
-		Trimmed string
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Trims specific number of words at the start of a string.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to trim the words from.
+ * @param words Count of words to trim.
+ *
+ * @return Trimmed string
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 char *str_trim_words(char *str, int words);
 
-/*
-	Function: str_sanitize_cc
-		Replaces all characters below 32 with whitespace.
-
-	Parameters:
-		str - String to sanitize.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Replaces all characters below 32 with whitespace.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to sanitize.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 void str_sanitize_cc(char *str);
 
-/*
-	Function: str_sanitize
-		Replaces all characters below 32 with whitespace with
-		exception to \t, \n and \r.
-
-	Parameters:
-		str - String to sanitize.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Replaces all characters below 32 with whitespace with
+ * exception to \t, \n and \r.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to sanitize.
+ *
+ * @remark The strings are treated as zero-terminated strings.
 */
 void str_sanitize(char *str);
 
-/*
-	Function: str_sanitize_filename
-		Replaces all invalid filename characters with whitespace.
-
-	Parameters:
-		str - String to sanitize.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Replaces all invalid filename characters with whitespace.
+ *
+ * @param str String to sanitize.
+ *
+ * @remark The strings are treated as zero-terminated strings.
 */
 void str_sanitize_filename(char *str);
 
-/*
-	Function: str_clean_whitespaces
-		Removes leading and trailing spaces and limits the use of multiple spaces.
-	Parameters:
-		str - String to clean up
-	Remarks:
-		- The strings are treated as zero-termineted strings.
-*/
+/**
+ * Removes leading and trailing spaces and limits the use of multiple spaces.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to clean up
+ *
+ * @remark The strings are treated as zero-termineted strings.
+ */
 void str_clean_whitespaces(char *str);
 
-/*
-	Function: str_skip_to_whitespace
-		Skips leading non-whitespace characters(all but ' ', '\t', '\n', '\r').
-
-	Parameters:
-		str - Pointer to the string.
-
-	Returns:
-		Pointer to the first whitespace character found
-		within the string.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Skips leading non-whitespace characters(all but ' ', '\t', '\n', '\r').
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to the string.
+ *
+ * @return Pointer to the first whitespace character found
+ *		   within the string.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 char *str_skip_to_whitespace(char *str);
 
-/*
-	Function: str_skip_to_whitespace_const
-		See str_skip_to_whitespace.
-*/
+/**
+ * @ingroup Strings
+ * @see str_skip_to_whitespace
+ */
 const char *str_skip_to_whitespace_const(const char *str);
 
-/*
-	Function: str_skip_whitespaces
-		Skips leading whitespace characters(' ', '\t', '\n', '\r').
-
-	Parameters:
-		str - Pointer to the string.
-
-	Returns:
-		Pointer to the first non-whitespace character found
-		within the string.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Skips leading whitespace characters(' ', '\t', '\n', '\r').
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to the string.
+ *
+ * Pointer to the first non-whitespace character found
+ * within the string.
+ *
+ * @remark The strings are treated as zero-terminated strings.
 */
 char *str_skip_whitespaces(char *str);
 
-/*
-	Function: str_skip_whitespaces_const
-		See str_skip_whitespaces.
-*/
+/**
+ * @ingroup Strings
+ * @see str_skip_whitespaces
+ */
 const char *str_skip_whitespaces_const(const char *str);
 
-/*
-	Function: str_comp_nocase
-		Compares to strings case insensitively.
-
-	Parameters:
-		a - String to compare.
-		b - String to compare.
-
-	Returns:
-		<0 - String a is less than string b
-		0 - String a is equal to string b
-		>0 - String a is greater than string b
-
-	Remarks:
-		- Only guaranteed to work with a-z/A-Z.
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Compares to strings case insensitively.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ *
+ * @return `< 0` - String a is less than string b
+ * @return `0` - String a is equal to string b
+ * @return `> 0` - String a is greater than string b
+ *
+ * @remark Only guaranteed to work with a-z/A-Z.
+ * @remark The strings are treated as zero-terminated strings.
+ */
 int str_comp_nocase(const char *a, const char *b);
 
-/*
-	Function: str_comp_nocase_num
-		Compares up to num characters of two strings case insensitively.
-
-	Parameters:
-		a - String to compare.
-		b - String to compare.
-		num - Maximum characters to compare
-
-	Returns:
-		<0 - String a is less than string b
-		0 - String a is equal to string b
-		>0 - String a is greater than string b
-
-	Remarks:
-		- Only guaranteed to work with a-z/A-Z.
-		  (use str_utf8_comp_nocase_num for unicode support)
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Compares up to num characters of two strings case insensitively.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ * @param num Maximum characters to compare
+ *
+ * @return `< 0` - String a is less than string b
+ * @return `0` - String a is equal to string b
+ * @return `> 0` - String a is greater than string b
+ *
+ * @remark Only guaranteed to work with a-z/A-Z.
+ * (use str_utf8_comp_nocase_num for unicode support)
+ * @remark The strings are treated as zero-terminated strings.
+ */
 int str_comp_nocase_num(const char *a, const char *b, int num);
 
-/*
-	Function: str_comp
-		Compares two strings case sensitive.
-
-	Parameters:
-		a - String to compare.
-		b - String to compare.
-
-	Returns:
-		<0 - String a is less than string b
-		0 - String a is equal to string b
-		>0 - String a is greater than string b
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Compares two strings case sensitive.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ *
+ * @return `< 0` - String a is less than string b
+ * @return `0` - String a is equal to string b
+ * @return `> 0` - String a is greater than string b
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 int str_comp(const char *a, const char *b);
 
-/*
-	Function: str_comp_num
-		Compares up to num characters of two strings case sensitive.
-
-	Parameters:
-		a - String to compare.
-		b - String to compare.
-		num - Maximum characters to compare
-
-	Returns:
-		<0 - String a is less than string b
-		0 - String a is equal to string b
-		>0 - String a is greater than string b
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Compares up to num characters of two strings case sensitive.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ * @param num Maximum characters to compare
+ *
+ * @return `< 0` - String a is less than string b
+ * @return `0` - String a is equal to string b
+ * @return `> 0` - String a is greater than string b
+ *
+ * @remark The strings are treated as zero-terminated strings.
 */
 int str_comp_num(const char *a, const char *b, int num);
 
-/*
-	Function: str_comp_filenames
-		Compares two strings case sensitive, digit chars will be compared as numbers.
-
-	Parameters:
-		a - String to compare.
-		b - String to compare.
-
-	Returns:
-		<0 - String a is less than string b
-		0 - String a is equal to string b
-		>0 - String a is greater than string b
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Compares two strings case sensitive, digit chars will be compared as numbers.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ *
+ * @return `< 0` - String a is less than string b
+ * @return `0` - String a is equal to string b
+ * @return `> 0` - String a is greater than string b
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 int str_comp_filenames(const char *a, const char *b);
 
-/*
-	Function: str_startswith
-		Checks whether the string begins with a certain prefix.
-
-	Parameter:
-		str - String to check.
-		prefix - Prefix to look for.
-
-	Returns:
-		A pointer to the string str after the string prefix, or 0 if
-		the string prefix isn't a prefix of the string str.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * Checks whether the string begins with a certain prefix.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to check.
+ * @param prefix Prefix to look for.
+ *
+ * @return A pointer to the string str after the string prefix, or 0 if
+ *		   the string prefix isn't a prefix of the string str.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 const char *str_startswith(const char *str, const char *prefix);
 
-/*
-	Function: str_endswith
-		Checks whether the string ends with a certain suffix.
-
-	Parameter:
-		str - String to check.
-		suffix - Suffix to look for.
-
-	Returns:
-		A pointer to the beginning of the suffix in the string str, or
-		0 if the string suffix isn't a suffix of the string str.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Checks whether the string ends with a certain suffix.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to check.
+ * @param suffix Suffix to look for.
+ *
+ * @return A pointer to the beginning of the suffix in the string str, or
+ *		   0 if the string suffix isn't a suffix of the string str.
+ *
+ * @return The strings are treated as zero-terminated strings.
 */
 const char *str_endswith(const char *str, const char *suffix);
 
-/*
-	Function: str_utf8_dist
-		Computes the edit distance between two strings.
-
-	Parameters:
-		a - First string for the edit distance.
-		b - Second string for the edit distance.
-
-	Returns:
-		The edit distance between the both strings.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Computes the edit distance between two strings.
+ *
+ * @param a First string for the edit distance.
+ * @param b Second string for the edit distance.
+ *
+ * @return The edit distance between the both strings.
+ *
+ * @remark The strings are treated as zero-terminated strings.
 */
 int str_utf8_dist(const char *a, const char *b);
 
-/*
-	Function: str_utf8_dist_buffer
-		Computes the edit distance between two strings, allows buffers
-		to be passed in.
-
-	Parameters:
-		a - First string for the edit distance.
-		b - Second string for the edit distance.
-		buf - Buffer for the function.
-		buf_len - Length of the buffer, must be at least as long as
-		          twice the length of both strings combined plus two.
-
-	Returns:
-		The edit distance between the both strings.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
+/**
+ * Computes the edit distance between two strings, allows buffers
+ * to be passed in.
+ *
+ * @ingroup Strings
+ *
+ * @param a - First string for the edit distance.
+ * @param b - Second string for the edit distance.
+ * @param buf - Buffer for the function.
+ * @param buf_len Length of the buffer, must be at least as long as
+ *				  twice the length of both strings combined plus two.
+ *
+ * @return The edit distance between the both strings.
+ *
+ * @remark The strings are treated as zero-terminated strings.
 */
 int str_utf8_dist_buffer(const char *a, const char *b, int *buf, int buf_len);
 
