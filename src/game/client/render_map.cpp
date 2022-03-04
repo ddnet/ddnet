@@ -595,9 +595,7 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 			unsigned char Index = pTele[c].m_Type;
 			if(!Index)
 				continue;
-			if(Index == TILE_CHECKPOINT_FIRST)
-				continue;
-			if(!(Index == TILE_TELECHECKINEVIL || Index == TILE_TELECHECK || Index == TILE_TELEIN || Index == TILE_TELEINEVIL))
+			if(!(Index == TILE_TELECHECKINEVIL || Index == TILE_TELEIN || Index == TILE_TELEINEVIL))
 				continue;
 
 			IGraphics::CQuadItem Array[8];
