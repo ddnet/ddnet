@@ -167,6 +167,15 @@ enum
 	//COREEVENT_HOOK_TELE=0x80,
 };
 
+// show others values - do not change them
+enum
+{
+	SHOW_OTHERS_NOT_SET = -1, // show others value before it is set
+	SHOW_OTHERS_OFF = 0, // show no other players in solo or other teams
+	SHOW_OTHERS_ON = 1, // show all other players in solo and other teams
+	SHOW_OTHERS_ONLY_TEAM = 2 // show players that are in solo and are in the same team
+};
+
 class CWorldCore
 {
 public:

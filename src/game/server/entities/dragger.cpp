@@ -243,7 +243,7 @@ void CDragger::Snap(int SnappingClient)
 		if(!pChar && !pTarget && m_CaughtTeam != 0)
 			continue;
 
-		if(pChar && pTarget && pTarget->GetPlayer()->GetCID() != pChar->GetPlayer()->GetCID() && ((pChar->GetPlayer()->m_ShowOthers == 0 && (pChar->Teams()->m_Core.GetSolo(SnappingClient) || pChar->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID()))) || (pChar->GetPlayer()->m_ShowOthers == 2 && !pTarget->SameTeam(SnappingClient))))
+		if(pChar && pTarget && pTarget->GetPlayer()->GetCID() != pChar->GetPlayer()->GetCID() && ((pChar->GetPlayer()->m_ShowOthers == SHOW_OTHERS_OFF && (pChar->Teams()->m_Core.GetSolo(SnappingClient) || pChar->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID()))) || (pChar->GetPlayer()->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !pTarget->SameTeam(SnappingClient))))
 		{
 			continue;
 		}

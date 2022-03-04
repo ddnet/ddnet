@@ -340,8 +340,7 @@ CServer::~CServer()
 {
 	for(auto &pCurrentMapData : m_apCurrentMapData)
 	{
-		if(pCurrentMapData)
-			free(pCurrentMapData);
+		free(pCurrentMapData);
 	}
 
 	delete m_pConnectionPool;
@@ -861,7 +860,7 @@ void CServer::DoSnapshot()
 	}
 
 	// create snapshots for all clients
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MaxClients(); i++)
 	{
 		// client must be ingame to receive snapshots
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
@@ -2157,7 +2156,7 @@ void CServer::UpdateServerInfo(bool Resend)
 
 	if(Resend)
 	{
-		for(int i = 0; i < MAX_CLIENTS; ++i)
+		for(int i = 0; i < MaxClients(); ++i)
 		{
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
@@ -2382,7 +2381,7 @@ int CServer::LoadMap(const char *pMapName)
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
 		}
 	}
-	if(!Config()->m_SvSixup && m_apCurrentMapData[SIXUP])
+	if(!Config()->m_SvSixup)
 	{
 		free(m_apCurrentMapData[SIXUP]);
 		m_apCurrentMapData[SIXUP] = 0;

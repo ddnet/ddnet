@@ -64,7 +64,7 @@ public:
 		T tmp;
 		if(ClientID == -1)
 		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
+			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i))
 				{
 					mem_copy(&tmp, pMsg, sizeof(T));
@@ -85,7 +85,7 @@ public:
 		int Result = 0;
 		if(ClientID == -1)
 		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
+			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i) && IsSixup(i))
 					Result = SendPackMsgOne(pMsg, Flags, i);
 		}
