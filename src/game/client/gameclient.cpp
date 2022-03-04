@@ -556,42 +556,49 @@ void CGameClient::UpdatePositions()
 	// spectator position
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
-		if(m_isMultiView)
+		if(m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+		{
+			//spectate_closest
+		}
+		else if(m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		//if(m_Snap.m_SpecInfo.m_SpectatorID == SPEC_MULTIVIEW)
 		{
+
 			vec2 minpos;
 			vec2 maxpos;
 			bool init = false;
 			bool tmp = false;
 			bool initdone = false;
 			//wenn die distanz zu groß wird .... 6000/8000 oder so, dann soll distanz bei jedem gecheckt werden und nur eine gruppe berücksichtigt
-			for(int i = 0; i < 64; i++)
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				if(!initdone)
 				{
 					initdone = true;
-					for(int j = 0; j < 64; j++)
+					for(int j = 0; j < MAX_CLIENTS; j++)
 					{
 						if(m_aMultiView[j] == true)
 							tmp = true;
 					}
 				}
 
-				if(tmp && m_aMultiView[i] == false)
+				if(tmp && m_aMultiView[i] == false) // special ids activated and not in the list
 					continue;
 
-				if(m_Snap.m_aCharacters[i].m_Cur.m_X == 0)
+				if(m_Snap.m_aCharacters[i].m_Cur.m_X == 0) // not rendered
 					continue;
 
 				int playerx = m_aClients[i].m_RenderPos.x;
 				int playery = m_aClients[i].m_RenderPos.y;
 
+				if(distance(m_oldMultiViewPos, vec2(playerx, playery)) > 1000 && m_aClients[i].m_FreezeEnd != 0) // too far away and frozen, so not relevant
+					continue;
+					
 				if(!init)
 				{
-					minpos.x = playerx;
-					minpos.y = playery;
-					maxpos.x = playerx;
-					maxpos.y = playery;
+					minpos = vec2(playerx, playery);
+					maxpos = vec2(playerx, playery);
 					init = true;
 				}
 
@@ -617,19 +624,25 @@ void CGameClient::UpdatePositions()
 
 			float maxPlayerDistance = 2000.0f;
 			float minPlayerDistance = 200.0f;
-			float maxZoom = 2.0f;
-			float minZoom = 7.0f;
+			float maxZoom = 3.0f;
+			float minZoom = 8.0f; // 10 cleaner aber zu slow
 
 			float zoom = (maxZoom - minZoom) / (maxPlayerDistance - minPlayerDistance) * (distance(minpos, maxpos) - minPlayerDistance) + minZoom;
+			/*if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400)
+				zoom = clamp(zoom, 1.0f, 8.0f);
+			else
+				zoom = clamp(zoom, 2.0f, 8.0f);*/
 
-			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400)
-				zoom = zoom - 3;
+			//dbg_msg("dbg", "distance: %f, zoom: %f", distance(minpos, maxpos), zoom);
 
-			m_Camera.SetZoom(clamp(zoom, 0.0f, 8.0f));
+			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400 && zoom > 0)
+				zoom = zoom - 1;
+
+			m_Camera.SetZoom(clamp(zoom, -3.5f, 8.0f));
 
 			float maxDistance = 500.0f;
 			float minDistance = 200.0f;
-			float maxSmoothVel = 0.1f;
+			float maxSmoothVel = 0.06f; // was 0.1f but too fast
 			float minSmoothVel = 0.007f;
 
 			float multiplier = (maxSmoothVel - minSmoothVel) / (maxDistance - minDistance) * (distance(m_oldMultiViewPos, vec2(posx, posy)) - minDistance) + minSmoothVel;

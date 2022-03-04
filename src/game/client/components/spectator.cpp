@@ -99,7 +99,13 @@ void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-
+	if(pResult->GetInteger(0) == -1)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			pSelf->GameClient()->m_aMultiView[i] = false;
+		}
+	}
 	pSelf->GameClient()->m_aMultiView[pResult->GetInteger(0)] = !pSelf->GameClient()->m_aMultiView[pResult->GetInteger(0)];
 }
 
@@ -167,7 +173,7 @@ void CSpectator::OnConsoleInit()
 {
 	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector");
 	Console()->Register("spectate", "i[spectator-id]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
-	Console()->Register("spec_multi", "i[id]", CFGFLAG_CLIENT, ConMultiView, this, "Add multi view ids");
+	Console()->Register("sm", "i[id]", CFGFLAG_CLIENT, ConMultiView, this, "Add Client-IDs to multi-spectate them exclusivly (-1 to reset)");
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
 	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
 	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
@@ -409,7 +415,6 @@ void CSpectator::OnRender()
 			m_SelectorMouse.y >= y - (LineHeight / 6.0f) && m_SelectorMouse.y < y + (LineHeight * 5.0f / 6.0f))
 		{
 			m_SelectedSpectatorID = m_pClient->m_Snap.m_paInfoByDDTeamName[i]->m_ClientID;
-			//GameClient()->m_aMultiView[m_SelectedSpectatorID] = true;
 			Selected = true;
 		}
 		float TeeAlpha;
