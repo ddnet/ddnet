@@ -509,49 +509,71 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
 				Neighbors[7] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
 			}
-			float Size = (float)g_Config.m_ClOutlineWidth * 3.0f;
-			float Size3 = Size / 3.0f;
+
+
+			float Size = (float)g_Config.m_ClOutlineWidth;
 			int NumQuads = 0;
-			if(Neighbors[0] || Neighbors[1] || Neighbors[3])
+
+			//Do lonely corners first
+			if(Neighbors[0] && !Neighbors[1] && !Neighbors[3])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size3, Size3);
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Size);
 				NumQuads++;
 			}
+			if(Neighbors[2] && !Neighbors[1] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[5] && !Neighbors[3] && !Neighbors[6])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[7] && !Neighbors[6] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			//Top
 			if(Neighbors[1])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Size3, my * Scale, Scale - Size3 * 2.0f, Size3);
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Scale, Size);
 				NumQuads++;
 			}
-			if(Neighbors[2] || Neighbors[1] || Neighbors[4])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size3, my * Scale, Size3, Size3);
-				NumQuads++;
-			}
-			if(Neighbors[3])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size3, Size3, Scale - Size3 * 2.0f);
-				NumQuads++;
-			}
-			if(Neighbors[4])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size3, my * Scale + Size3, Size3, Scale - Size3 * 2.0f);
-				NumQuads++;
-			}
-			if(Neighbors[5] || Neighbors[3] || Neighbors[6])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size3, Size3, Size3);
-				NumQuads++;
-			}
+			//Bottom
 			if(Neighbors[6])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Size3, my * Scale + Scale - Size3, Scale - Size3 * 2.0f, Size3);
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Scale, Size);
 				NumQuads++;
 			}
-			if(Neighbors[7] || Neighbors[6] || Neighbors[4])
+			//Left
+			if(Neighbors[3])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size3, my * Scale + Scale - Size3, Size3, Size3);
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size * 2.0f);
 				NumQuads++;
 			}
+			//Right
+			if(Neighbors[4])
+			{
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size * 2.0f);
+				NumQuads++;
+			}
+
 
 			Graphics()->QuadsDrawTL(Array, NumQuads);
 		}
@@ -609,47 +631,66 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 			Neighbors[6] = pTiles[(mx + 0) + (my + 1) * w].m_Index == 0 && !pTele[(mx + 0) + (my + 1) * w].m_Number;
 			Neighbors[7] = pTiles[(mx + 1) + (my + 1) * w].m_Index == 0 && !pTele[(mx + 1) + (my + 1) * w].m_Number;
 
-			float Size = (float)g_Config.m_ClOutlineWidth * 3.0f;
-			float Size3 = Size / 3.0f;
+			float Size = (float)g_Config.m_ClOutlineWidth;
 			int NumQuads = 0;
-			if(Neighbors[0] || Neighbors[1] || Neighbors[3])
+
+			//Do lonely corners first
+			if(Neighbors[0] && !Neighbors[1] && !Neighbors[3])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size3, Size3);
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Size);
 				NumQuads++;
 			}
+			if(Neighbors[2] && !Neighbors[1] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[5] && !Neighbors[3] && !Neighbors[6])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[7] && !Neighbors[6] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			//Top
 			if(Neighbors[1])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Size3, my * Scale, Scale - Size3 * 2.0f, Size3);
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Scale, Size);
 				NumQuads++;
 			}
-			if(Neighbors[2] || Neighbors[1] || Neighbors[4])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size3, my * Scale, Size3, Size3);
-				NumQuads++;
-			}
-			if(Neighbors[3])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size3, Size3, Scale - Size3 * 2.0f);
-				NumQuads++;
-			}
-			if(Neighbors[4])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size3, my * Scale + Size3, Size3, Scale - Size3 * 2.0f);
-				NumQuads++;
-			}
-			if(Neighbors[5] || Neighbors[3] || Neighbors[6])
-			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size3, Size3, Size3);
-				NumQuads++;
-			}
+			//Bottom
 			if(Neighbors[6])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Size3, my * Scale + Scale - Size3, Scale - Size3 * 2.0f, Size3);
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Scale, Size);
 				NumQuads++;
 			}
-			if(Neighbors[7] || Neighbors[6] || Neighbors[4])
+			//Left
+			if(Neighbors[3])
 			{
-				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size3, my * Scale + Scale - Size3, Size3, Size3);
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size * 2.0f);
+				NumQuads++;
+			}
+			//Right
+			if(Neighbors[4])
+			{
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size * 2.0f);
 				NumQuads++;
 			}
 
