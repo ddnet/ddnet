@@ -308,7 +308,6 @@ class CNetServer
 
 	NETADDR m_Address;
 	NETSOCKET m_Socket;
-	MMSGS m_MMSGS;
 	class CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
 	int m_MaxClients;
@@ -350,7 +349,7 @@ public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, int Flags);
+	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP);
 	int Close();
 
 	//
@@ -367,7 +366,7 @@ public:
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }
 	class CNetBan *NetBan() const { return m_pNetBan; }
-	int NetType() const { return m_Socket.type; }
+	int NetType() const { return net_socket_type(m_Socket); }
 	int MaxClients() const { return m_MaxClients; }
 
 	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token);
@@ -408,7 +407,7 @@ public:
 	void SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, class CNetBan *pNetBan, int Flags);
+	bool Open(NETADDR BindAddr, class CNetBan *pNetBan);
 	int Close();
 
 	//
@@ -433,9 +432,8 @@ class CNetClient
 
 public:
 	NETSOCKET m_Socket;
-	MMSGS m_MMSGS;
 	// openness
-	bool Open(NETADDR BindAddr, int Flags);
+	bool Open(NETADDR BindAddr);
 	int Close();
 
 	// connection state
@@ -453,7 +451,7 @@ public:
 	int ResetErrorString();
 
 	// error and state
-	int NetType() const { return m_Socket.type; }
+	int NetType() const { return net_socket_type(m_Socket); }
 	int State();
 	int GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;
