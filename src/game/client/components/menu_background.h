@@ -1,6 +1,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENU_BACKGROUND_H
 #define GAME_CLIENT_COMPONENTS_MENU_BACKGROUND_H
 
+#include <base/tl/string.h>
+
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
