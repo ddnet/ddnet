@@ -196,7 +196,7 @@ void CGameWorld::UpdatePlayerMaps()
 			// copypasted chunk from character.cpp Snap() follows
 			CCharacter *SnapChar = GameServer()->GetPlayerChar(i);
 			if(SnapChar && !SnapChar->m_Super &&
-				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
+				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
 				!ch->CanCollide(i) &&
 				(!GameServer()->m_apPlayers[i] ||
 					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
