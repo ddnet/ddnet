@@ -86,11 +86,12 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
+CRequest::CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress, IPRESOLVE IpResolve) :
 	m_Timeout(Timeout),
 	m_Size(0),
 	m_Progress(0),
 	m_LogProgress(LogProgress),
+	m_IpResolve(IpResolve),
 	m_State(HTTP_QUEUED),
 	m_Abort(false)
 {
@@ -147,6 +148,7 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_NOPROGRESS, 0L);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
+	curl_easy_setopt(pHandle, CURLOPT_IPRESOLVE, m_IpResolve == IPRESOLVE::V4 ? CURL_IPRESOLVE_V4 : m_IpResolve == IPRESOLVE::V6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_WHATEVER);
 
 	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x076800)
 	{
@@ -283,8 +285,8 @@ size_t CGet::OnData(char *pData, size_t DataSize)
 	return DataSize;
 }
 
-CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress) :
-	CRequest(pUrl, Timeout, LogProgress),
+CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress, IPRESOLVE IpResolve) :
+	CRequest(pUrl, Timeout, LogProgress, IpResolve),
 	m_pStorage(pStorage),
 	m_File(0),
 	m_StorageType(StorageType)
