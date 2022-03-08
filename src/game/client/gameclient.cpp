@@ -715,7 +715,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		{
 			CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
-			if((pMsg->m_Team == 1 && (m_aClients[m_LocalIDs[0]].m_Team != m_aClients[m_LocalIDs[1]].m_Team || m_Teams.Team(m_LocalIDs[0]) != m_Teams.Team(m_LocalIDs[1]))) || pMsg->m_Team > 1)
+			if((pMsg->m_Team == 1 && ((!m_GameInfo.m_AllowMoreTeams && m_aClients[m_LocalIDs[0]].m_Team != m_aClients[m_LocalIDs[1]].m_Team) || ((m_aClients[m_LocalIDs[0]].m_Team == TEAM_SPECTATORS && !m_aClients[m_LocalIDs[0]].m_Paused && !m_aClients[m_LocalIDs[0]].m_Spec) != (m_aClients[m_LocalIDs[1]].m_Team == TEAM_SPECTATORS && !m_aClients[m_LocalIDs[1]].m_Paused && !m_aClients[m_LocalIDs[1]].m_Spec)) || m_Teams.Team(m_LocalIDs[0]) != m_Teams.Team(m_LocalIDs[1]))) || pMsg->m_Team > 1)
 			{
 				m_Chat.OnMessage(MsgId, pRawMsg);
 			}
@@ -789,6 +789,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		m_Ghost.m_AllowRestart = true;
 		m_RaceDemo.m_AllowRestart = true;
+		m_GameInfo.m_AllowMoreTeams = true;
 	}
 	else if(MsgId == NETMSGTYPE_SV_KILLMSG)
 	{
@@ -999,6 +1000,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_AllowEyeWheel = DDRace || BlockWorlds || City || Plus;
 	Info.m_AllowHookColl = DDRace;
 	Info.m_AllowZoom = Race || BlockWorlds || City;
+	Info.m_AllowMoreTeams = DDRace;
 	Info.m_BugDDRaceGhost = DDRace;
 	Info.m_BugDDRaceInput = DDRace;
 	Info.m_BugFNGLaserRange = FNG;

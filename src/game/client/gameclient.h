@@ -67,6 +67,7 @@ public:
 	bool m_AllowEyeWheel;
 	bool m_AllowHookColl;
 	bool m_AllowZoom;
+	bool m_AllowMoreTeams;
 
 	bool m_BugDDRaceGhost;
 	bool m_BugDDRaceInput;
