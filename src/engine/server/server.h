@@ -235,15 +235,16 @@ public:
 
 	enum
 	{
-		SIX = 0,
-		SIXUP,
+		MAP_TYPE_SIX = 0,
+		MAP_TYPE_SIXUP,
+		NUM_MAP_TYPES
 	};
 
 	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
-	SHA256_DIGEST m_aCurrentMapSha256[2];
-	unsigned m_aCurrentMapCrc[2];
-	unsigned char *m_apCurrentMapData[2];
-	unsigned int m_aCurrentMapSize[2];
+	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
+	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
+	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
+	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES];
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS + 1];
 	CRegister m_Register;

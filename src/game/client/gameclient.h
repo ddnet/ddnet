@@ -63,6 +63,7 @@ public:
 	bool m_UnlimitedAmmo;
 	bool m_DDRaceRecordMessage;
 	bool m_RaceRecordMessage;
+	bool m_RaceSounds;
 
 	bool m_AllowEyeWheel;
 	bool m_AllowHookColl;
