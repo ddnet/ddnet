@@ -880,7 +880,7 @@ public:
 		m_Color.b = b;
 		m_Color.a = a;
 	}
-	virtual void TextColor(ColorRGBA rgb) { m_Color = rgb; };
+	virtual void TextColor(ColorRGBA rgb) { m_Color = rgb; }
 
 	virtual void TextOutlineColor(float r, float g, float b, float a)
 	{
@@ -889,7 +889,7 @@ public:
 		m_OutlineColor.b = b;
 		m_OutlineColor.a = a;
 	}
-	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; };
+	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; }
 
 	virtual void TextSelectionColor(float r, float g, float b, float a)
 	{
@@ -898,7 +898,7 @@ public:
 		m_SelectionColor.b = b;
 		m_SelectionColor.a = a;
 	}
-	virtual void TextSelectionColor(ColorRGBA rgb) { m_SelectionColor = rgb; };
+	virtual void TextSelectionColor(ColorRGBA rgb) { m_SelectionColor = rgb; }
 
 	virtual ColorRGBA GetTextColor() { return m_Color; }
 	virtual ColorRGBA GetTextOutlineColor() { return m_OutlineColor; }
