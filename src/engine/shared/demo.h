@@ -147,14 +147,14 @@ public:
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const;
 	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const;
-	const char *GetDemoFileName() { return m_aFilename; };
+	const char *GetDemoFileName() { return m_aFilename; }
 	int GetDemoType() const;
 
 	int Update(bool RealTime = true);
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	virtual bool IsPlaying() const { return m_File != 0; }
-	const CMapInfo *GetMapInfo() { return &m_MapInfo; };
+	const CMapInfo *GetMapInfo() { return &m_MapInfo; }
 };
 
 class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener

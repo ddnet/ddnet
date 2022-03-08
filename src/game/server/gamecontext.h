@@ -449,9 +449,9 @@ public:
 	int m_VoteVictim;
 	int m_VoteEnforcer;
 
-	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; };
-	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; };
-	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; };
+	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
+	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
+	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser, ColorRGBA PrintColor = {1, 1, 1, 1});
