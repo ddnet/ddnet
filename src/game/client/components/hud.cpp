@@ -594,7 +594,7 @@ void CHud::RenderTextInfo()
 		TextRender()->Text(0, m_Width - 10 - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 	//render team in freeze text
-	if(g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0)
+	if((g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0) && GameClient()->m_GameInfo.m_EntitiesDDRace)
 	{
 		int NumInTeam = 0;
 		int NumFrozen = 0;

@@ -441,12 +441,13 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 	int EndY = (int)(ScreenY1 / Scale) + 1;
 	int EndX = (int)(ScreenX1 / Scale) + 1;
 
-	if(EndX - StartX > Graphics()->ScreenWidth() / 14 || EndY - StartY > Graphics()->ScreenHeight() / 14)
+	if(EndX - StartX > Graphics()->ScreenWidth() / 12 || EndY - StartY > Graphics()->ScreenHeight() / 12)
 		return;
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, Alpha);
+	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColor));
+	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -480,34 +481,43 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 			bool Neighbors[8];
 			if(IsFreeze && TileType == TILE_FREEZE)
 			{
-				Neighbors[0] = pTiles[(mx - 1) + (my - 1) * w].m_Index == 0;
-				Neighbors[1] = pTiles[(mx + 0) + (my - 1) * w].m_Index == 0;
-				Neighbors[2] = pTiles[(mx + 1) + (my - 1) * w].m_Index == 0;
-				Neighbors[3] = pTiles[(mx - 1) + (my + 0) * w].m_Index == 0;
-				Neighbors[4] = pTiles[(mx + 1) + (my + 0) * w].m_Index == 0;
-				Neighbors[5] = pTiles[(mx - 1) + (my + 1) * w].m_Index == 0;
-				Neighbors[6] = pTiles[(mx + 0) + (my + 1) * w].m_Index == 0;
-				Neighbors[7] = pTiles[(mx + 1) + (my + 1) * w].m_Index == 0;
+				int IndexN;
+				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
+				Neighbors[0] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
+				Neighbors[1] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
+				Neighbors[2] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
+				Neighbors[3] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
+				Neighbors[4] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
+				Neighbors[5] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
+				Neighbors[6] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
+				Neighbors[7] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
 			}
 			else
 			{
 				int IndexN;
 				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
-				Neighbors[0] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[0] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
-				Neighbors[1] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[1] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
-				Neighbors[2] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[2] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
-				Neighbors[3] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[3] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
-				Neighbors[4] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[4] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
-				Neighbors[5] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[5] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
-				Neighbors[6] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[6] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
-				Neighbors[7] = IndexN != TILE_SOLID && IndexN != TILE_NOHOOK;
+				Neighbors[7] = IndexN != TILE_NOHOOK && IndexN != Index;
 			}
 
 
@@ -590,12 +600,13 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 	int EndY = (int)(ScreenY1 / Scale) + 1;
 	int EndX = (int)(ScreenX1 / Scale) + 1;
 
-	if(EndX - StartX > Graphics()->ScreenWidth() / 15 || EndY - StartY > Graphics()->ScreenHeight() / 14)
+	if(EndX - StartX > Graphics()->ScreenWidth() / 12 || EndY - StartY > Graphics()->ScreenHeight() / 12)
 		return;
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, (float)g_Config.m_ClOutlineAlpha / 100.0f);
+	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColor));
+	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
