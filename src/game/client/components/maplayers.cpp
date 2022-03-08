@@ -1998,12 +1998,14 @@ void CMapLayers::OnRender()
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
 				if(IsGameLayer)
 					pGameTiles = pTiles;
-				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
+				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid || g_Config.m_ClOutlineUnFreeze) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
 				{
+					if(g_Config.m_ClOutlineUnFreeze)
+						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_UNFREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
 					if(g_Config.m_ClOutlineFreeze)
 						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_FREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
 					if(g_Config.m_ClOutlineSolid && EntityOverlayVal)
-						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_SOLID, (float)g_Config.m_ClOutlineAlpha / 50.0f);
+						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_SOLID, (float)g_Config.m_ClOutlineAlphaSolid / 100.0f);
 				}
 				if(g_Config.m_ClOutlineTele && IsTeleLayer)
 				{
@@ -2012,7 +2014,7 @@ void CMapLayers::OnRender()
 					if(TeleSize >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTeleTile))
 					{
 						if(pGameTiles != NULL)
-							RenderTools()->RenderTeleOutlines(pGameTiles, pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, 1.0f);
+							RenderTools()->RenderTeleOutlines(pGameTiles, pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, (float)g_Config.m_ClOutlineAlpha / 100.0f);
 					}
 				}
 			}
