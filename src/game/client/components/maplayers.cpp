@@ -1998,8 +1998,10 @@ void CMapLayers::OnRender()
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
 				if(IsGameLayer)
 					pGameTiles = pTiles;
-				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
+				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid || g_Config.m_ClOutlineUnFreeze) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
 				{
+					if(g_Config.m_ClOutlineUnFreeze)
+						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_UNFREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
 					if(g_Config.m_ClOutlineFreeze)
 						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_FREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
 					if(g_Config.m_ClOutlineSolid && EntityOverlayVal)

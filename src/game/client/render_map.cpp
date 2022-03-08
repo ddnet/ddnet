@@ -468,13 +468,16 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 
 			unsigned char Index = pTiles[c].m_Index;
 			bool IsFreeze = Index == TILE_FREEZE || Index == TILE_DFREEZE;
+			bool IsUnFreeze = Index == TILE_UNFREEZE || Index == TILE_DUNFREEZE;
 			bool IsSolid = Index == TILE_SOLID || Index == TILE_NOHOOK;
 
-			if(!(IsSolid || IsFreeze)) //Not an tile we care about
+			if(!(IsSolid || IsFreeze || IsUnFreeze)) //Not an tile we care about
 				continue;
 			if(IsSolid && !(TileType == TILE_SOLID))
 				continue;
 			if(IsFreeze && !(TileType == TILE_FREEZE))
+				continue;
+			if(IsUnFreeze && !(TileType == TILE_UNFREEZE))
 				continue;
 
 			IGraphics::CQuadItem Array[8];
@@ -499,7 +502,7 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
 				Neighbors[7] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
 			}
-			else
+			else if(IsSolid && TileType == TILE_SOLID)
 			{
 				int IndexN;
 				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
@@ -518,6 +521,26 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				Neighbors[6] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
 				Neighbors[7] = IndexN != TILE_NOHOOK && IndexN != Index;
+			}
+			else
+			{
+				int IndexN;
+				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
+				Neighbors[0] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
+				Neighbors[1] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
+				Neighbors[2] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
+				Neighbors[3] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
+				Neighbors[4] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
+				Neighbors[5] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
+				Neighbors[6] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
+				Neighbors[7] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
 			}
 
 
