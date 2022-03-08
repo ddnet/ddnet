@@ -2406,18 +2406,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
-		Button.VSplitLeft(160.0f, &LeftLeft, &Button);
 
-		Button.VSplitLeft(140.0f, &Label, &Button);
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), Localize("Default length: %d"), g_Config.m_ClReplayLength);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-
-		int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClReplayLength, &Button, (minimum(g_Config.m_ClReplayLength, 600) - 10) / 590.0f) * 590.0f) + 10;
-		if(g_Config.m_ClReplayLength < 600 || NewValue < 600)
-			g_Config.m_ClReplayLength = minimum(NewValue, 600);
-
-		if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &LeftLeft))
+		if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &Button))
 		{
 			g_Config.m_ClReplays ^= 1;
 			if(!g_Config.m_ClReplays)
@@ -2431,6 +2421,16 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 				Client()->DemoRecorder_HandleAutoStart();
 			}
 		}
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		Button.VSplitLeft(140.0f, &Label, &Button);
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), Localize("Default length: %d"), g_Config.m_ClReplayLength);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+
+		int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClReplayLength, &Button, (minimum(g_Config.m_ClReplayLength, 600) - 10) / 590.0f) * 590.0f) + 10;
+		if(g_Config.m_ClReplayLength < 600 || NewValue < 600)
+			g_Config.m_ClReplayLength = minimum(NewValue, 600);
 	}
 
 	Right.HSplitTop(20.0f, &Button, &Right);
@@ -2588,7 +2588,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Left.VSplitRight(10.0f, &Left, 0x0);
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
-	CUIRect TempLabel, TempLabel2;
+	CUIRect TempLabel;
 	Left.HSplitTop(25.0f, &TempLabel, &Left);
 	Left.HSplitTop(5.0f, 0x0, &Left);
 
@@ -2644,12 +2644,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	static float s_RunOnJoin = 0.0f;
-	Right.VSplitLeft(5.0f, 0, &Right);
 	Right.HSplitTop(5.0f, 0, &Right);
-	Right.HSplitTop(20.0f, &Right, 0);
-	Right.VSplitLeft(100.0f, &Label, &TempLabel2);
+	Right.HSplitTop(20.0f, &Label, &Right);
+	Label.VSplitLeft(5.0f, 0, &Label);
 	UI()->DoLabelScaled(&Label, Localize("Run on join"), 14.0f, TEXTALIGN_LEFT);
-	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &TempLabel2, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, Localize("Chat command (e.g. showall 1)"));
+	Right.HSplitTop(20.0f, &Button, &Right);
+	Button.VSplitLeft(5.0f, 0, &Button);
+	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &Button, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, Localize("Chat command (e.g. showall 1)"));
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
