@@ -507,11 +507,11 @@ void CPlayers::RenderPlayer(
 			// check if we're firing stuff
 			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles) //prev.attackticks)
 			{
-				float Alpha = 0.0f;
+				float AlphaMuzzle = 0.0f;
 				if(AttackTicksPassed < g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3)
 				{
 					float t = AttackTicksPassed / g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
-					Alpha = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
+					AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
 				}
 
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
@@ -531,7 +531,7 @@ void CPlayers::RenderPlayer(
 					else
 						s_LastIteX = IteX;
 				}
-				if(Alpha > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
+				if(AlphaMuzzle > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
 					float OffsetY = -g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsety;
 					int QuadOffset = IteX * 2 + (Direction.x < 0 ? 1 : 0);
@@ -638,6 +638,13 @@ void CPlayers::RenderPlayer(
 	}
 }
 
+inline bool CPlayers::IsPlayerInfoAvailable(int ClientID) const
+{
+	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientID);
+	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientID);
+	return pPrevInfo && pInfo;
+}
+
 void CPlayers::OnRender()
 {
 	// update RenderInfo for ninja
@@ -676,12 +683,12 @@ void CPlayers::OnRender()
 	m_RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
 	m_RenderInfoSpec.m_CustomColoredSkin = false;
 	m_RenderInfoSpec.m_Size = 64.0f;
+	int LocalClientID = m_pClient->m_Snap.m_LocalClientID;
 
-	// render other players in three passes, first pass we render spectees,
-	// then everyone but us, and finally we render ourselves
-	for(int p = 0; p < 6; p++)
+	// render everyone else's hook, then our own
+	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		if(ClientID == LocalClientID || !m_pClient->m_Snap.m_aCharacters[ClientID].m_Active || !IsPlayerInfoAvailable(ClientID))
 		{
 			// only render active characters
 			if(!m_pClient->m_aClients[i].m_Active)
@@ -728,8 +735,15 @@ void CPlayers::OnRender()
 				if((p % 3) == 2 && !Local)
 					continue;
 
-				CNetObj_Character PrevChar = m_pClient->m_aClients[i].m_RenderPrev;
-				CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
+	// render spectating players
+	for(auto &m_aClient : m_pClient->m_aClients)
+	{
+		if(!m_aClient.m_SpecCharPresent)
+		{
+			continue;
+		}
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), m_aClient.m_SpecChar);
+	}
 
 				if(Local && g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix)
 				{
@@ -752,6 +766,12 @@ void CPlayers::OnRender()
 				}
 			}
 		}
+		RenderPlayer(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
+	}
+	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
+	{
+		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
+		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 }
 

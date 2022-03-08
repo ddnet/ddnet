@@ -610,6 +610,25 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInf
 	return ImageIsValid;
 }
 
+bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Img)
+{
+	if(Img.m_Format != CImageInfo::FORMAT_RGBA && Img.m_Format != CImageInfo::FORMAT_ALPHA)
+	{
+		SWarning NewWarning;
+		char aText[128];
+		aText[0] = '\0';
+		if(pFileName)
+		{
+			str_format(aText, sizeof(aText), "\"%s\"", pFileName);
+		}
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
+			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
+		m_Warnings.emplace_back(NewWarning);
+		return false;
+	}
+	return true;
+}
+
 void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight)
 {
 	for(int Y = 0; Y < SubCopyHeight; ++Y)

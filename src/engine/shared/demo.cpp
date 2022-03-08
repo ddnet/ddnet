@@ -864,7 +864,6 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 
 	// free data
 	free(pMapData);
-
 	return true;
 }
 
@@ -1157,8 +1156,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	unsigned char *pMapData = m_pDemoPlayer->GetMapData(m_pStorage);
 	const int Result = m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1;
-	if(pMapData)
-		free(pMapData);
+	free(pMapData);
 	if(Result != 0)
 		return;
 

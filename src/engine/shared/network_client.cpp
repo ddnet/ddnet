@@ -3,12 +3,12 @@
 #include "network.h"
 #include <base/system.h>
 
-bool CNetClient::Open(NETADDR BindAddr, int Flags)
+bool CNetClient::Open(NETADDR BindAddr)
 {
 	// open socket
 	NETSOCKET Socket;
 	Socket = net_udp_create(BindAddr);
-	if(!Socket.type)
+	if(!Socket)
 		return false;
 
 	// clean it
@@ -17,7 +17,6 @@ bool CNetClient::Open(NETADDR BindAddr, int Flags)
 	// init
 	m_Socket = Socket;
 	m_Connection.Init(m_Socket, false);
-	net_init_mmsgs(&m_MMSGS);
 
 	return true;
 }
@@ -66,7 +65,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		// TODO: empty the recvinfo
 		NETADDR Addr;
 		unsigned char *pData;
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &m_MMSGS, &pData);
+		int Bytes = net_udp_recv(m_Socket, &Addr, &pData);
 
 		// no more packets for now
 		if(Bytes <= 0)
@@ -116,7 +115,7 @@ int CNetClient::Send(CNetChunk *pChunk)
 	else
 	{
 		int Flags = 0;
-		dbg_assert(pChunk->m_ClientID == 0, "errornous client id");
+		dbg_assert(pChunk->m_ClientID == 0, "erroneous client id");
 
 		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;

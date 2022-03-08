@@ -9,9 +9,7 @@ void CConsoleNetConnection::Reset()
 	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
 	m_aErrorString[0] = 0;
 
-	m_Socket.type = NETTYPE_INVALID;
-	m_Socket.ipv4sock = -1;
-	m_Socket.ipv6sock = -1;
+	m_Socket = nullptr;
 	m_aBuffer[0] = 0;
 	m_BufferOffset = 0;
 
