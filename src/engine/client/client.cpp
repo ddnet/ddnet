@@ -4508,7 +4508,8 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, CTimeout{10000, 500, 10});
+	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, CTimeout{10000, 500, 10}, HTTPLOG::ALL, IPRESOLVE::V4);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 
