@@ -63,12 +63,12 @@ MACRO_CONFIG_INT(ClRunOnJoinConsole, tc_run_on_join_console, 0, 0, 1, CFGFLAG_CL
 
 MACRO_CONFIG_INT(ClShowFrozenText, tc_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
 MACRO_CONFIG_INT(ClShowFrozenHud, tc_frozen_tees_hud, 2, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD info. (0 - off, 1 - normal, 2 - show skin)")
-MACRO_CONFIG_INT(ClFrozenMaxRows, tc_max_frozen_tees_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display")
+MACRO_CONFIG_INT(ClFrozenMaxRows, tc_frozen_tees_max_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display")
 MACRO_CONFIG_INT(ClFrozenHudTeamOnly, tc_frozen_tees_only_inteam, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Only render frozen tee HUD display while in team")
 
 MACRO_CONFIG_INT(ClFixKoGSpec, tc_kog_spec_skin, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "A fix to display spectating tees on KoG.")
 
-MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
+MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
 
 MACRO_CONFIG_INT(ClUnfreezeDelayHelper, tc_react_helper, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "!EXPERIMENTAL! Removes some of the delay after unfrozen, ONLY USE ON GORES SERVERS!")
 MACRO_CONFIG_INT(ClUnfreezeHelperPercent, tc_react_helper_percent, 17, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")

@@ -4555,7 +4555,7 @@ int CClient::MaxLatencyTicks() const
 
 int CClient::PredictionMargin() const
 {
-	if(g_Config.m_ClAmIFrozen && g_Config.m_ClUnfreezeDelayHelper && m_CurGameTick[g_Config.m_ClDummy] - g_Config.m_ClFreezeTick > 12)
+	if(g_Config.m_ClAmIFrozen && g_Config.m_ClUnfreezeDelayHelper && m_CurGameTick[g_Config.m_ClDummy] - g_Config.m_ClFreezeTick > 17)
 	{
 		//min macro is broken on linux, manually typing it instead.
 		if(g_Config.m_ClWhatsMyPing * g_Config.m_ClUnfreezeHelperPercent / 100 < g_Config.m_ClUnfreezeHelperLimit)
