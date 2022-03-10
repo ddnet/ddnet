@@ -720,24 +720,21 @@ Current value of the timer in microseconds.
 int64_t time_get_microseconds();
 
 /* Group: Network General */
-typedef struct
-{
-	int type;
-	int ipv4sock;
-	int ipv6sock;
-	int web_ipv4sock;
-} NETSOCKET;
+typedef struct NETSOCKET_INTERNAL *NETSOCKET;
 
 enum
 {
 	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
 
+	NETTYPE_LINK_BROADCAST = 4,
+
 	NETTYPE_INVALID = 0,
 	NETTYPE_IPV4 = 1,
 	NETTYPE_IPV6 = 2,
-	NETTYPE_LINK_BROADCAST = 4,
 	NETTYPE_WEBSOCKET_IPV4 = 8,
-	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4
+
+	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4,
+	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
 };
 
 typedef struct
@@ -836,6 +833,19 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 /* Group: Network UDP */
 
 /*
+	Function: net_socket_type
+		Determine a socket's type.
+
+	Parameters:
+		sock - Socket whose type should be determined.
+
+	Returns:
+		The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6` and
+		`NETTYPE_WEBSOCKET_IPV4`.
+*/
+int net_socket_type(NETSOCKET sock);
+
+/*
 	Function: net_udp_create
 		Creates a UDP socket and binds it to a port.
 
@@ -864,24 +874,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
 */
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
 
-#define VLEN 128
-#define PACKETSIZE 1400
-typedef struct
-{
-#ifdef CONF_PLATFORM_LINUX
-	int pos;
-	int size;
-	struct mmsghdr msgs[VLEN];
-	struct iovec iovecs[VLEN];
-	char bufs[VLEN][PACKETSIZE];
-	char sockaddrs[VLEN][128];
-#else
-	int dummy;
-#endif
-} MMSGS;
-
-void net_init_mmsgs(MMSGS *m);
-
 /*
 	Function: net_udp_recv
 		Receives a packet over an UDP socket.
@@ -889,15 +881,14 @@ void net_init_mmsgs(MMSGS *m);
 	Parameters:
 		sock - Socket to use.
 		addr - Pointer to an NETADDR that will receive the address.
-		buffer - Pointer to a buffer that can be used to receive the data.
-		maxsize - Maximum size to receive.
-		data - Will get set to the actual data, might be the passed buffer or an internal one
+		data - Received data. Will be invalidated when this function is
+		called again.
 
 	Returns:
 		On success it returns the number of bytes received. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data);
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 
 /*
 	Function: net_udp_close

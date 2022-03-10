@@ -363,13 +363,13 @@ int main(int argc, const char **argv)
 		BindAddr.port = MASTERSERVER_PORT;
 	}
 
-	if(!m_NetOp.Open(BindAddr, 0))
+	if(!m_NetOp.Open(BindAddr))
 	{
 		dbg_msg("mastersrv", "couldn't start network (op)");
 		return -1;
 	}
 	BindAddr.port = MASTERSERVER_PORT + 1;
-	if(!m_NetChecker.Open(BindAddr, 0))
+	if(!m_NetChecker.Open(BindAddr))
 	{
 		dbg_msg("mastersrv", "couldn't start network (checker)");
 		return -1;

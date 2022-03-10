@@ -12,7 +12,7 @@ CAntibot::CAntibot() :
 }
 CAntibot::~CAntibot()
 {
-	if(m_pGameServer && m_RoundData.m_Map.m_pTiles)
+	if(m_pGameServer)
 		free(m_RoundData.m_Map.m_pTiles);
 
 	if(m_Initialized)
@@ -79,8 +79,7 @@ void CAntibot::RoundEnd()
 	AntibotRoundEnd();
 
 	m_pGameServer = 0;
-	if(m_RoundData.m_Map.m_pTiles)
-		free(m_RoundData.m_Map.m_pTiles);
+	free(m_RoundData.m_Map.m_pTiles);
 }
 void CAntibot::Dump() { AntibotDump(); }
 void CAntibot::Update()

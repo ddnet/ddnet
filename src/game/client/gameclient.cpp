@@ -276,8 +276,8 @@ void CGameClient::OnInit()
 
 	m_DDRaceMsgSent[0] = false;
 	m_DDRaceMsgSent[1] = false;
-	m_ShowOthers[0] = -1;
-	m_ShowOthers[1] = -1;
+	m_ShowOthers[0] = SHOW_OTHERS_NOT_SET;
+	m_ShowOthers[1] = SHOW_OTHERS_NOT_SET;
 	m_SwitchStateTeam[0] = -1;
 	m_SwitchStateTeam[1] = -1;
 
@@ -511,8 +511,8 @@ void CGameClient::OnReset()
 	m_Teams.Reset();
 	m_DDRaceMsgSent[0] = false;
 	m_DDRaceMsgSent[1] = false;
-	m_ShowOthers[0] = -1;
-	m_ShowOthers[1] = -1;
+	m_ShowOthers[0] = SHOW_OTHERS_NOT_SET;
+	m_ShowOthers[1] = SHOW_OTHERS_NOT_SET;
 
 	m_LastZoom = .0;
 	m_LastScreenAspect = .0;
@@ -654,7 +654,7 @@ void CGameClient::OnRender()
 void CGameClient::OnDummyDisconnect()
 {
 	m_DDRaceMsgSent[1] = false;
-	m_ShowOthers[1] = -1;
+	m_ShowOthers[1] = SHOW_OTHERS_NOT_SET;
 	m_LastNewPredictedTick[1] = -1;
 	m_PredictedDummyID = -1;
 }
@@ -1605,7 +1605,7 @@ void CGameClient::OnNewSnapshot()
 		m_DDRaceMsgSent[i] = true;
 	}
 
-	if(m_ShowOthers[g_Config.m_ClDummy] == -1 || (m_ShowOthers[g_Config.m_ClDummy] != -1 && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
+	if(m_ShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || (m_ShowOthers[g_Config.m_ClDummy] != SHOW_OTHERS_NOT_SET && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		{
 			CNetMsg_Cl_ShowOthers Msg;
@@ -2760,7 +2760,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		else
 			LoadGameSkin(pPath, true);
 	}
-	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_HEALTH_FULL].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_HEALTH_FULL].m_pSet->m_Gridy, true))
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_HEALTH_FULL].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_HEALTH_FULL].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
 	{
 		m_GameSkin.m_SpriteHealthFull = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HEALTH_FULL]);
 		m_GameSkin.m_SpriteHealthEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HEALTH_EMPTY]);
@@ -2913,7 +2913,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 		else
 			LoadEmoticonsSkin(pPath, true);
 	}
-	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_OOP].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_OOP].m_pSet->m_Gridy, true))
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_OOP].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_OOP].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
 	{
 		for(int i = 0; i < 16; ++i)
 			m_EmoticonsSkin.m_SpriteEmoticons[i] = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OOP + i]);
@@ -2967,7 +2967,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		else
 			LoadParticlesSkin(pPath, true);
 	}
-	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SLICE].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SLICE].m_pSet->m_Gridy, true))
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SLICE].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SLICE].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
 	{
 		m_ParticlesSkin.m_SpriteParticleSlice = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SLICE]);
 		m_ParticlesSkin.m_SpriteParticleBall = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_BALL]);

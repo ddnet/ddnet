@@ -1324,6 +1324,9 @@ SA
 CHN
 == CHN
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Settings file
 == 
 

@@ -1238,6 +1238,9 @@ Best
 9+ new mentions
 == 9+ uutta mainintaa
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 

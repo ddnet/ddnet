@@ -241,6 +241,7 @@ public:
 	virtual void FreePNG(CImageInfo *pImg) = 0;
 
 	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
+	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
 
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;

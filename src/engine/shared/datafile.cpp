@@ -578,11 +578,9 @@ CDataFileWriter::~CDataFileWriter()
 	free(m_pItemTypes);
 	m_pItemTypes = 0;
 	for(int i = 0; i < m_NumItems; i++)
-		if(m_pItems[i].m_pData)
-			free(m_pItems[i].m_pData);
+		free(m_pItems[i].m_pData);
 	for(int i = 0; i < m_NumDatas; ++i)
-		if(m_pDatas[i].m_pCompressedData)
-			free(m_pDatas[i].m_pCompressedData);
+		free(m_pDatas[i].m_pCompressedData);
 	free(m_pItems);
 	m_pItems = 0;
 	free(m_pDatas);

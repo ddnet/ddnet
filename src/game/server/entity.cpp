@@ -83,7 +83,7 @@ bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos)
 
 bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos)
 {
-	if(SnappingClient == -1 || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
+	if(SnappingClient == SERVER_DEMO_CLIENT || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
 		return false;
 
 	float dx = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;

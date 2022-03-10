@@ -1605,7 +1605,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 	if(Sys)
 	{
 		// system message
-		if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
+		if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
 		{
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
@@ -1621,7 +1621,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			m_MapDetailsSha256 = *pMapSha256;
 			m_MapDetailsCrc = MapCrc;
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
 			if(!m_CanReceiveServerCapabilities)
 			{
@@ -1637,7 +1637,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
 		{
 			if(m_CanReceiveServerCapabilities)
 			{
@@ -1726,7 +1726,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				}
 			}
 		}
-		else if(!Dummy && Msg == NETMSG_MAP_DATA)
+		else if(Conn == CONN_MAIN && Msg == NETMSG_MAP_DATA)
 		{
 			int Last = Unpacker.GetInt();
 			int MapCRC = Unpacker.GetInt();
@@ -1768,11 +1768,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				}
 			}
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CON_READY)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CON_READY)
 		{
 			GameClient()->OnConnected();
 		}
-		else if(Dummy && Msg == NETMSG_CON_READY)
+		else if(Conn == CONN_DUMMY && Msg == NETMSG_CON_READY)
 		{
 			m_DummyConnected = true;
 			g_Config.m_ClDummy = 1;
@@ -1844,17 +1844,20 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(Unpacker.Error() == 0)
 				m_pConsole->DeregisterTemp(pName);
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
+		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
 		{
 			int Result = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
-				m_RconAuthed[Dummy] = Result;
-			int Old = m_UseTempRconCommands;
-			m_UseTempRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error() != 0)
-				m_UseTempRconCommands = 0;
-			if(Old != 0 && m_UseTempRconCommands == 0)
-				m_pConsole->DeregisterTempAll();
+				m_RconAuthed[Conn] = Result;
+			if(Conn == CONN_MAIN)
+			{
+				int Old = m_UseTempRconCommands;
+				m_UseTempRconCommands = Unpacker.GetInt();
+				if(Unpacker.Error() != 0)
+					m_UseTempRconCommands = 0;
+				if(Old != 0 && m_UseTempRconCommands == 0)
+					m_pConsole->DeregisterTempAll();
+			}
 		}
 		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_LINE)
 		{
@@ -2904,9 +2907,8 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort :
-                                                                                               g_Config.m_ClContactPort;
-			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
+			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
 			}
