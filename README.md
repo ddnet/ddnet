@@ -9,17 +9,15 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 # Features:
 ### **Display frozen tees in your team on your HUD** 
 
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_display**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_hud**
 ```
 0 - off
 1 - on
 2 - on + show skin of frozen tees
 ```
-
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_max_frozen_display_rows**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_max_rows**
 ```
 (1 - 10) adjust the maximum number of tees displayed
-
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_only_inteam**
 ```
@@ -34,7 +32,7 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 
 ### **Show outlines around tiles** 
 
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outlines**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline**
 ```
 0 - off (all outline rendering is off)
 1 - on (render any enabled outlines)
@@ -52,6 +50,10 @@ Outlines hook and unhook tiles
 ```
 Outlines tele tiles
 ```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_unfreeze**
+```
+Outlines unfreeze and undeep tiles
+```
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_width**
 ```
 (1-16) Outline width
@@ -59,6 +61,14 @@ Outlines tele tiles
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_alpha**
 ```
 (0-100) Outline alpha
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_alpha_solid**
+```
+(0-100) Outline alpha for hook and unhook
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color**
+```
+Outline color, use the same format as skin color. 
 ```
 
 ### **KoG cl_prediction_margin PATCH**
@@ -100,7 +110,7 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 1 - on
 ```
 
-### **Enter freeze delay fix**
+### **Enter freeze delay fix (WIP)**
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_freeze_update_fix**
 ```
 0 - normal
@@ -108,18 +118,18 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 ```
 
 ### **Reduce Unfreeze Delay on high ping servers (EXPERIMENTAL)**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_unfreeze_delay_helper**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_react_helper**
 ```
 0 - off
 1 - on, removes a portion of the delay after you get hammered/saved on a high ping server. 
 
 ONLY USE ON GORES MAPS! May cause jittering when using with dummy!
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_unfreeze_helper_percent**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_react_helper_percent**
 ```
 (0-90) default: 30. Choose what percent of your ping should attempt to be removed from the unfreeze delay. 
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_unfreeze_helper_limit**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_react_helper_limit**
 ```
 (0-500) default: 45. The maximum amount of delay that will be removed, regardless of ping. 
 Higher values will likely cause extra jittering after you are unfrozen
