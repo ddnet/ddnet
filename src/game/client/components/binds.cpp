@@ -101,9 +101,6 @@ int CBinds::GetModifierMask(IInput *i)
 		}
 	}
 
-	if(!Mask)
-		return 1 << CBinds::MODIFIER_NONE;
-
 	return Mask;
 }
 
@@ -137,8 +134,6 @@ bool CBinds::OnInput(IInput::CEvent e)
 	int Mask = GetModifierMask(Input());
 	int KeyModifierMask = GetModifierMaskOfKey(e.m_Key);
 	Mask &= ~KeyModifierMask;
-	if(!Mask)
-		Mask = 1 << MODIFIER_NONE;
 
 	bool ret = false;
 	for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)

@@ -63,6 +63,7 @@ public:
 	bool m_UnlimitedAmmo;
 	bool m_DDRaceRecordMessage;
 	bool m_RaceRecordMessage;
+	bool m_RaceSounds;
 
 	bool m_AllowEyeWheel;
 	bool m_AllowHookColl;
@@ -228,8 +229,8 @@ public:
 	class IDemoRecorder *DemoRecorder(int Recorder) const { return Client()->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
-	class CLayers *Layers() { return &m_Layers; };
-	class CCollision *Collision() { return &m_Collision; };
+	class CLayers *Layers() { return &m_Layers; }
+	class CCollision *Collision() { return &m_Collision; }
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
@@ -438,8 +439,8 @@ public:
 			m_Active = false;
 			m_IngameTicks += Tick - m_JoinTick;
 		};
-		int GetIngameTicks(int Tick) const { return m_IngameTicks + Tick - m_JoinTick; };
-		float GetFPM(int Tick, int TickSpeed) const { return (float)(m_Frags * TickSpeed * 60) / GetIngameTicks(Tick); };
+		int GetIngameTicks(int Tick) const { return m_IngameTicks + Tick - m_JoinTick; }
+		float GetFPM(int Tick, int TickSpeed) const { return (float)(m_Frags * TickSpeed * 60) / GetIngameTicks(Tick); }
 	};
 
 	CClientStats m_aStats[MAX_CLIENTS];

@@ -24,7 +24,7 @@ public:
 	vec2 GetPos() const { return m_Pos; }
 	const char *GetName() const { return m_aName; }
 	int GetClientID() const { return m_ClientID; }
-	void SetClientID(int ClientID) { m_ClientID = ClientID; };
+	void SetClientID(int ClientID) { m_ClientID = ClientID; }
 
 private:
 	int m_ClientID;

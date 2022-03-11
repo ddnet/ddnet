@@ -149,7 +149,35 @@ static DBG_LOGGER_DATA stdout_nonewline_logger;
 
 static NETSTATS network_stats = {0};
 
-static NETSOCKET invalid_socket = {NETTYPE_INVALID, -1, -1};
+#define VLEN 128
+#define PACKETSIZE 1400
+typedef struct
+{
+#ifdef CONF_PLATFORM_LINUX
+	int pos;
+	int size;
+	struct mmsghdr msgs[VLEN];
+	struct iovec iovecs[VLEN];
+	char bufs[VLEN][PACKETSIZE];
+	char sockaddrs[VLEN][128];
+#else
+	char buf[PACKETSIZE];
+#endif
+} NETSOCKET_BUFFER;
+
+void net_buffer_init(NETSOCKET_BUFFER *buffer);
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size);
+
+struct NETSOCKET_INTERNAL
+{
+	int type;
+	int ipv4sock;
+	int ipv6sock;
+	int web_ipv4sock;
+
+	NETSOCKET_BUFFER buffer;
+};
+static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
@@ -1488,30 +1516,32 @@ static void priv_net_close_socket(int sock)
 static int priv_net_close_all_sockets(NETSOCKET sock)
 {
 	/* close down ipv4 */
-	if(sock.ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
-		priv_net_close_socket(sock.ipv4sock);
-		sock.ipv4sock = -1;
-		sock.type &= ~NETTYPE_IPV4;
+		priv_net_close_socket(sock->ipv4sock);
+		sock->ipv4sock = -1;
+		sock->type &= ~NETTYPE_IPV4;
 	}
 
 #if defined(CONF_WEBSOCKETS)
 	/* close down websocket_ipv4 */
-	if(sock.web_ipv4sock >= 0)
+	if(sock->web_ipv4sock >= 0)
 	{
-		websocket_destroy(sock.web_ipv4sock);
-		sock.web_ipv4sock = -1;
-		sock.type &= ~NETTYPE_WEBSOCKET_IPV4;
+		websocket_destroy(sock->web_ipv4sock);
+		sock->web_ipv4sock = -1;
+		sock->type &= ~NETTYPE_WEBSOCKET_IPV4;
 	}
 #endif
 
 	/* close down ipv6 */
-	if(sock.ipv6sock >= 0)
+	if(sock->ipv6sock >= 0)
 	{
-		priv_net_close_socket(sock.ipv6sock);
-		sock.ipv6sock = -1;
-		sock.type &= ~NETTYPE_IPV6;
+		priv_net_close_socket(sock->ipv6sock);
+		sock->ipv6sock = -1;
+		sock->type &= ~NETTYPE_IPV6;
 	}
+
+	free(sock);
 	return 0;
 }
 
@@ -1581,9 +1611,15 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	return sock;
 }
 
+int net_socket_type(NETSOCKET sock)
+{
+	return sock->type;
+}
+
 NETSOCKET net_udp_create(NETADDR bindaddr)
 {
-	NETSOCKET sock = invalid_socket;
+	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
+	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
 
@@ -1598,8 +1634,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
-			sock.type |= NETTYPE_IPV4;
-			sock.ipv4sock = socket;
+			sock->type |= NETTYPE_IPV4;
+			sock->ipv4sock = socket;
 
 			/* set broadcast */
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
@@ -1629,8 +1665,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 		if(socket >= 0)
 		{
-			sock.type |= NETTYPE_WEBSOCKET_IPV4;
-			sock.web_ipv4sock = socket;
+			sock->type |= NETTYPE_WEBSOCKET_IPV4;
+			sock->web_ipv4sock = socket;
 		}
 	}
 #endif
@@ -1646,8 +1682,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
-			sock.type |= NETTYPE_IPV6;
-			sock.ipv6sock = socket;
+			sock->type |= NETTYPE_IPV6;
+			sock->ipv6sock = socket;
 
 			/* set broadcast */
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
@@ -1666,6 +1702,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	/* set non-blocking */
 	net_set_non_blocking(sock);
 
+	net_buffer_init(&sock->buffer);
+
 	/* return */
 	return sock;
 }
@@ -1676,7 +1714,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 
 	if(addr->type & NETTYPE_IPV4)
 	{
-		if(sock.ipv4sock >= 0)
+		if(sock->ipv4sock >= 0)
 		{
 			struct sockaddr_in sa;
 			if(addr->type & NETTYPE_LINK_BROADCAST)
@@ -1689,7 +1727,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			else
 				netaddr_to_sockaddr_in(addr, &sa);
 
-			d = sendto((int)sock.ipv4sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
+			d = sendto((int)sock->ipv4sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
 			dbg_msg("net", "can't send ipv4 traffic to this socket");
@@ -1698,11 +1736,11 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 #if defined(CONF_WEBSOCKETS)
 	if(addr->type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		if(sock.web_ipv4sock >= 0)
+		if(sock->web_ipv4sock >= 0)
 		{
 			char addr_str[NETADDR_MAXSTRSIZE];
 			str_format(addr_str, sizeof(addr_str), "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
-			d = websocket_send(sock.web_ipv4sock, (const unsigned char *)data, size, addr_str, addr->port);
+			d = websocket_send(sock->web_ipv4sock, (const unsigned char *)data, size, addr_str, addr->port);
 		}
 
 		else
@@ -1712,7 +1750,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 
 	if(addr->type & NETTYPE_IPV6)
 	{
-		if(sock.ipv6sock >= 0)
+		if(sock->ipv6sock >= 0)
 		{
 			struct sockaddr_in6 sa;
 			if(addr->type & NETTYPE_LINK_BROADCAST)
@@ -1727,7 +1765,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			else
 				netaddr_to_sockaddr_in6(addr, &sa);
 
-			d = sendto((int)sock.ipv6sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
+			d = sendto((int)sock->ipv6sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
 			dbg_msg("net", "can't send ipv6 traffic to this socket");
@@ -1753,84 +1791,98 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	return d;
 }
 
-void net_init_mmsgs(MMSGS *m)
+void net_buffer_init(NETSOCKET_BUFFER *buffer)
 {
 #if defined(CONF_PLATFORM_LINUX)
 	int i;
-	m->pos = 0;
-	m->size = 0;
-	mem_zero(m->msgs, sizeof(m->msgs));
-	mem_zero(m->iovecs, sizeof(m->iovecs));
-	mem_zero(m->sockaddrs, sizeof(m->sockaddrs));
+	buffer->pos = 0;
+	buffer->size = 0;
+	mem_zero(buffer->msgs, sizeof(buffer->msgs));
+	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
+	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
 	for(i = 0; i < VLEN; ++i)
 	{
-		m->iovecs[i].iov_base = m->bufs[i];
-		m->iovecs[i].iov_len = PACKETSIZE;
-		m->msgs[i].msg_hdr.msg_iov = &(m->iovecs[i]);
-		m->msgs[i].msg_hdr.msg_iovlen = 1;
-		m->msgs[i].msg_hdr.msg_name = &(m->sockaddrs[i]);
-		m->msgs[i].msg_hdr.msg_namelen = sizeof(m->sockaddrs[i]);
+		buffer->iovecs[i].iov_base = buffer->bufs[i];
+		buffer->iovecs[i].iov_len = PACKETSIZE;
+		buffer->msgs[i].msg_hdr.msg_iov = &(buffer->iovecs[i]);
+		buffer->msgs[i].msg_hdr.msg_iovlen = 1;
+		buffer->msgs[i].msg_hdr.msg_name = &(buffer->sockaddrs[i]);
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
 	}
 #endif
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data)
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	*buf = buffer->bufs[0];
+	*size = sizeof(buffer->bufs[0]);
+#else
+	*buf = buffer->buf;
+	*size = sizeof(buffer->buf);
+#endif
+}
+
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 {
 	char sockaddrbuf[128];
 	int bytes = 0;
 
 #if defined(CONF_PLATFORM_LINUX)
-	if(sock.ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
-		if(m->pos >= m->size)
+		if(sock->buffer.pos >= sock->buffer.size)
 		{
-			m->size = recvmmsg(sock.ipv4sock, m->msgs, VLEN, 0, NULL);
-			m->pos = 0;
+			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.pos = 0;
 		}
 	}
 
-	if(sock.ipv6sock >= 0)
+	if(sock->ipv6sock >= 0)
 	{
-		if(m->pos >= m->size)
+		if(sock->buffer.pos >= sock->buffer.size)
 		{
-			m->size = recvmmsg(sock.ipv6sock, m->msgs, VLEN, 0, NULL);
-			m->pos = 0;
+			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.pos = 0;
 		}
 	}
 
-	if(m->pos < m->size)
+	if(sock->buffer.pos < sock->buffer.size)
 	{
-		sockaddr_to_netaddr((struct sockaddr *)&(m->sockaddrs[m->pos]), addr);
-		bytes = m->msgs[m->pos].msg_len;
-		*data = (unsigned char *)m->bufs[m->pos];
-		m->pos++;
+		sockaddr_to_netaddr((struct sockaddr *)&(sock->buffer.sockaddrs[sock->buffer.pos]), addr);
+		bytes = sock->buffer.msgs[sock->buffer.pos].msg_len;
+		*data = (unsigned char *)sock->buffer.bufs[sock->buffer.pos];
+		sock->buffer.pos++;
 		network_stats.recv_bytes += bytes;
 		network_stats.recv_packets++;
 		return bytes;
 	}
 #else
-	if(bytes == 0 && sock.ipv4sock >= 0)
+	if(bytes == 0 && sock->ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
-		bytes = recvfrom(sock.ipv4sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = (unsigned char *)buffer;
+		bytes = recvfrom(sock->ipv4sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = (unsigned char *)sock->buffer.buf;
 	}
 
-	if(bytes <= 0 && sock.ipv6sock >= 0)
+	if(bytes <= 0 && sock->ipv6sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in6);
-		bytes = recvfrom(sock.ipv6sock, (char *)buffer, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
-		*data = (unsigned char *)buffer;
+		bytes = recvfrom(sock->ipv6sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = (unsigned char *)sock->buffer.buf;
 	}
 #endif
 
 #if defined(CONF_WEBSOCKETS)
-	if(bytes <= 0 && sock.web_ipv4sock >= 0)
+	if(bytes <= 0 && sock->web_ipv4sock >= 0)
 	{
+		char *buf;
+		int size;
+		net_buffer_simple(&sock->buffer, &buf, &size);
 		socklen_t fromlen = sizeof(struct sockaddr);
 		struct sockaddr_in *sockaddrbuf_in = (struct sockaddr_in *)&sockaddrbuf;
-		bytes = websocket_recv(sock.web_ipv4sock, (unsigned char *)buffer, maxsize, sockaddrbuf_in, fromlen);
-		*data = (unsigned char *)buffer;
+		bytes = websocket_recv(sock->web_ipv4sock, (unsigned char *)buf, size, sockaddrbuf_in, fromlen);
+		*data = (unsigned char *)buf;
 		sockaddrbuf_in->sin_family = AF_WEBSOCKET_INET;
 	}
 #endif
@@ -1854,7 +1906,8 @@ int net_udp_close(NETSOCKET sock)
 
 NETSOCKET net_tcp_create(NETADDR bindaddr)
 {
-	NETSOCKET sock = invalid_socket;
+	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
+	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 
 	if(bindaddr.type & NETTYPE_IPV4)
@@ -1868,8 +1921,8 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		socket = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
-			sock.type |= NETTYPE_IPV4;
-			sock.ipv4sock = socket;
+			sock->type |= NETTYPE_IPV4;
+			sock->ipv4sock = socket;
 		}
 	}
 
@@ -1884,8 +1937,8 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		socket = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
-			sock.type |= NETTYPE_IPV6;
-			sock.ipv6sock = socket;
+			sock->type |= NETTYPE_IPV6;
+			sock->ipv6sock = socket;
 		}
 	}
 
@@ -1896,22 +1949,22 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 int net_set_non_blocking(NETSOCKET sock)
 {
 	unsigned long mode = 1;
-	if(sock.ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock.ipv4sock, FIONBIO, (unsigned long *)&mode);
+		ioctlsocket(sock->ipv4sock, FIONBIO, (unsigned long *)&mode);
 #else
-		if(ioctl(sock.ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
+		if(ioctl(sock->ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
 			dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
 #endif
 	}
 
-	if(sock.ipv6sock >= 0)
+	if(sock->ipv6sock >= 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock.ipv6sock, FIONBIO, (unsigned long *)&mode);
+		ioctlsocket(sock->ipv6sock, FIONBIO, (unsigned long *)&mode);
 #else
-		if(ioctl(sock.ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
+		if(ioctl(sock->ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
 			dbg_msg("socket", "setting ipv6 non-blocking failed: %d", errno);
 #endif
 	}
@@ -1922,22 +1975,22 @@ int net_set_non_blocking(NETSOCKET sock)
 int net_set_blocking(NETSOCKET sock)
 {
 	unsigned long mode = 0;
-	if(sock.ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock.ipv4sock, FIONBIO, (unsigned long *)&mode);
+		ioctlsocket(sock->ipv4sock, FIONBIO, (unsigned long *)&mode);
 #else
-		if(ioctl(sock.ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
+		if(ioctl(sock->ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
 			dbg_msg("socket", "setting ipv4 blocking failed: %d", errno);
 #endif
 	}
 
-	if(sock.ipv6sock >= 0)
+	if(sock->ipv6sock >= 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock.ipv6sock, FIONBIO, (unsigned long *)&mode);
+		ioctlsocket(sock->ipv6sock, FIONBIO, (unsigned long *)&mode);
 #else
-		if(ioctl(sock.ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
+		if(ioctl(sock->ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
 			dbg_msg("socket", "setting ipv6 blocking failed: %d", errno);
 #endif
 	}
@@ -1948,10 +2001,10 @@ int net_set_blocking(NETSOCKET sock)
 int net_tcp_listen(NETSOCKET sock, int backlog)
 {
 	int err = -1;
-	if(sock.ipv4sock >= 0)
-		err = listen(sock.ipv4sock, backlog);
-	if(sock.ipv6sock >= 0)
-		err = listen(sock.ipv6sock, backlog);
+	if(sock->ipv4sock >= 0)
+		err = listen(sock->ipv4sock, backlog);
+	if(sock->ipv6sock >= 0)
+		err = listen(sock->ipv6sock, backlog);
 	return err;
 }
 
@@ -1960,36 +2013,41 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 	int s;
 	socklen_t sockaddr_len;
 
-	*new_sock = invalid_socket;
+	*new_sock = nullptr;
 
-	if(sock.ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
 		struct sockaddr_in addr;
 		sockaddr_len = sizeof(addr);
 
-		s = accept(sock.ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
+		s = accept(sock->ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
 
 		if(s != -1)
 		{
 			sockaddr_to_netaddr((const struct sockaddr *)&addr, a);
-			new_sock->type = NETTYPE_IPV4;
-			new_sock->ipv4sock = s;
+
+			*new_sock = (NETSOCKET_INTERNAL *)malloc(sizeof(**new_sock));
+			**new_sock = invalid_socket;
+			(*new_sock)->type = NETTYPE_IPV4;
+			(*new_sock)->ipv4sock = s;
 			return s;
 		}
 	}
 
-	if(sock.ipv6sock >= 0)
+	if(sock->ipv6sock >= 0)
 	{
 		struct sockaddr_in6 addr;
 		sockaddr_len = sizeof(addr);
 
-		s = accept(sock.ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
+		s = accept(sock->ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
 
 		if(s != -1)
 		{
+			*new_sock = (NETSOCKET_INTERNAL *)malloc(sizeof(**new_sock));
+			**new_sock = invalid_socket;
 			sockaddr_to_netaddr((const struct sockaddr *)&addr, a);
-			new_sock->type = NETTYPE_IPV6;
-			new_sock->ipv6sock = s;
+			(*new_sock)->type = NETTYPE_IPV6;
+			(*new_sock)->ipv6sock = s;
 			return s;
 		}
 	}
@@ -2003,14 +2061,14 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 	{
 		struct sockaddr_in addr;
 		netaddr_to_sockaddr_in(a, &addr);
-		return connect(sock.ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
+		return connect(sock->ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
 	if(a->type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
 		netaddr_to_sockaddr_in6(a, &addr);
-		return connect(sock.ipv6sock, (struct sockaddr *)&addr, sizeof(addr));
+		return connect(sock->ipv6sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
 	return -1;
@@ -2031,10 +2089,10 @@ int net_tcp_send(NETSOCKET sock, const void *data, int size)
 {
 	int bytes = -1;
 
-	if(sock.ipv4sock >= 0)
-		bytes = send((int)sock.ipv4sock, (const char *)data, size, 0);
-	if(sock.ipv6sock >= 0)
-		bytes = send((int)sock.ipv6sock, (const char *)data, size, 0);
+	if(sock->ipv4sock >= 0)
+		bytes = send((int)sock->ipv4sock, (const char *)data, size, 0);
+	if(sock->ipv6sock >= 0)
+		bytes = send((int)sock->ipv6sock, (const char *)data, size, 0);
 
 	return bytes;
 }
@@ -2043,10 +2101,10 @@ int net_tcp_recv(NETSOCKET sock, void *data, int maxsize)
 {
 	int bytes = -1;
 
-	if(sock.ipv4sock >= 0)
-		bytes = recv((int)sock.ipv4sock, (char *)data, maxsize, 0);
-	if(sock.ipv6sock >= 0)
-		bytes = recv((int)sock.ipv6sock, (char *)data, maxsize, 0);
+	if(sock->ipv4sock >= 0)
+		bytes = recv((int)sock->ipv4sock, (char *)data, maxsize, 0);
+	if(sock->ipv6sock >= 0)
+		bytes = recv((int)sock->ipv6sock, (char *)data, maxsize, 0);
 
 	return bytes;
 }
@@ -2503,21 +2561,21 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	sockid = 0;
 
 	FD_ZERO(&readfds); // NOLINT(clang-analyzer-security.insecureAPI.bzero)
-	if(sock.ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
-		FD_SET(sock.ipv4sock, &readfds);
-		sockid = sock.ipv4sock;
+		FD_SET(sock->ipv4sock, &readfds);
+		sockid = sock->ipv4sock;
 	}
-	if(sock.ipv6sock >= 0)
+	if(sock->ipv6sock >= 0)
 	{
-		FD_SET(sock.ipv6sock, &readfds);
-		if(sock.ipv6sock > sockid)
-			sockid = sock.ipv6sock;
+		FD_SET(sock->ipv6sock, &readfds);
+		if(sock->ipv6sock > sockid)
+			sockid = sock->ipv6sock;
 	}
 #if defined(CONF_WEBSOCKETS)
-	if(sock.web_ipv4sock >= 0)
+	if(sock->web_ipv4sock >= 0)
 	{
-		int maxfd = websocket_fd_set(sock.web_ipv4sock, &readfds);
+		int maxfd = websocket_fd_set(sock->web_ipv4sock, &readfds);
 		if(maxfd > sockid)
 		{
 			sockid = maxfd;
@@ -2532,13 +2590,13 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	else
 		select(sockid + 1, &readfds, NULL, NULL, &tv);
 
-	if(sock.ipv4sock >= 0 && FD_ISSET(sock.ipv4sock, &readfds))
+	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
 		return 1;
 #if defined(CONF_WEBSOCKETS)
-	if(sock.web_ipv4sock >= 0 && FD_ISSET(sockid, &readfds))
+	if(sock->web_ipv4sock >= 0 && FD_ISSET(sockid, &readfds))
 		return 1;
 #endif
-	if(sock.ipv6sock >= 0 && FD_ISSET(sock.ipv6sock, &readfds))
+	if(sock->ipv6sock >= 0 && FD_ISSET(sock->ipv6sock, &readfds))
 		return 1;
 
 	return 0;
