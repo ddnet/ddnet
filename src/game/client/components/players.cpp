@@ -550,8 +550,6 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, 0.5f); // render ghost
 	}
 
-	RenderInfo.m_Size = 64.0f; // force some settings
-
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
@@ -618,6 +616,13 @@ void CPlayers::RenderPlayer(
 	}
 }
 
+inline bool CPlayers::IsPlayerInfoAvailable(int ClientID) const
+{
+	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientID);
+	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientID);
+	return pPrevInfo && pInfo;
+}
+
 void CPlayers::OnRender()
 {
 	// update RenderInfo for ninja
@@ -656,56 +661,46 @@ void CPlayers::OnRender()
 	m_RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
 	m_RenderInfoSpec.m_CustomColoredSkin = false;
 	m_RenderInfoSpec.m_Size = 64.0f;
+	int LocalClientID = m_pClient->m_Snap.m_LocalClientID;
 
-	// render other players in three passes, first pass we render spectees,
-	// then everyone but us, and finally we render ourselves
-	for(int p = 0; p < 6; p++)
+	// render everyone else's hook, then our own
+	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		if(ClientID == LocalClientID || !m_pClient->m_Snap.m_aCharacters[ClientID].m_Active || !IsPlayerInfoAvailable(ClientID))
 		{
-			// only render active characters
-			if(p % 3 == 0 && !m_pClient->m_aClients[i].m_SpecCharPresent)
-				continue;
-			if(p % 3 != 0 && !m_pClient->m_Snap.m_aCharacters[i].m_Active)
-				continue;
-
-			if(p % 3 == 0)
-			{
-				if(p < 3)
-				{
-					continue;
-				}
-				vec2 Pos = m_pClient->m_aClients[i].m_SpecChar;
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Pos);
-			}
-			else
-			{
-				const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
-				const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
-				if(!pPrevInfo || !pInfo)
-				{
-					continue;
-				}
-
-				bool Local = m_pClient->m_Snap.m_LocalClientID == i;
-				if((p % 3) == 1 && Local)
-					continue;
-				if((p % 3) == 2 && !Local)
-					continue;
-
-				CNetObj_Character PrevChar = m_pClient->m_aClients[i].m_RenderPrev;
-				CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
-
-				if(p < 3)
-				{
-					RenderHook(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
-				}
-				else
-				{
-					RenderPlayer(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
-				}
-			}
+			continue;
 		}
+		RenderHook(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
+	}
+	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
+	{
+		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
+		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
+	}
+
+	// render spectating players
+	for(auto &m_aClient : m_pClient->m_aClients)
+	{
+		if(!m_aClient.m_SpecCharPresent)
+		{
+			continue;
+		}
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), m_aClient.m_SpecChar);
+	}
+
+	// render everyone else's tee, then our own
+	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+	{
+		if(ClientID == LocalClientID || !m_pClient->m_Snap.m_aCharacters[ClientID].m_Active || !IsPlayerInfoAvailable(ClientID))
+		{
+			continue;
+		}
+		RenderPlayer(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
+	}
+	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
+	{
+		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
+		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 }
 

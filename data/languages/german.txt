@@ -653,7 +653,7 @@ Show ghost
 == Geist anzeigen
 
 No updates available
-== Keine neuen Versionen verfügbar
+== Keine neuen Versionen
 
 Update now
 == Jetzt aktualisieren
@@ -704,7 +704,7 @@ Team message
 == Team-Nachricht
 
 Save the best demo of each race
-== Beste Aufnahme von jedem Rennen speichern
+== Beste Aufnahme von jedem Rennen
 
 Are you sure that you want to disconnect?
 == Bist du sicher, dass du die Verbindung trennen möchtest?
@@ -728,7 +728,7 @@ System message
 == Server-Nachricht
 
 DDNet %s is available:
-== DDNet %s ist verfügbar:
+== DDNet %s verfügbar:
 
 Updating...
 == Aktualisieren...
@@ -758,7 +758,7 @@ Show score
 == %.2f KiB
 
 Try fast HTTP map download first
-== Schnellen HTTP-Kartendownload zuerst versuchen
+== Schnellen HTTP-Kartendownload nutzen
 
 Enable regular chat sound
 == Ton für normale Nachrichten aktivieren
@@ -797,7 +797,7 @@ Reset wanted weapon on death
 == Waffe beim Tod zurücksetzen
 
 Switch weapon when out of ammo
-== Waffe wechseln, wenn die Munition leer ist
+== Waffe wechseln wenn Munition leer ist
 
 Grabs
 == Griffe
@@ -806,7 +806,7 @@ Select a name
 == Namen wählen
 
 Automatically take game over screenshot
-== Automatisch Bildschirmfoto am Spielende aufnehmen
+== Automatisches Bildschirmfoto am Spielende
 
 Please use a different name
 == Bitte anderen Namen wählen
@@ -845,13 +845,13 @@ Frags
 == Abschüsse
 
 Automatically take statboard screenshot
-== Automatisch Bildschirmfoto der Punktetafel aufnehmen
+== Automatisches Bildschirmfoto der Punktetafel
 
 Enable long pain sound (used when shooting in freeze)
 == Langen Schmerzens-Ton aktivieren (benutzt, wenn beim Einfrieren geschossen wird)
 
 Vanilla skins only
-== Nur Skins des Standardspiels
+== Nur Vanilla-Skins
 
 Refresh Rate
 == Aktual.-Rate
@@ -959,7 +959,7 @@ Length
 == Länge
 
 Show text entities
-== Entities-Text anzeigen
+== Entities-Text
 
 Hook collisions
 == Hakenkollisionen
@@ -1004,7 +1004,7 @@ Markers
 == Markierungen
 
 Enable replays
-== Wiederholungen aktivieren
+== Wiederholungen
 
 Toggle dummy
 == Dummy wechseln
@@ -1106,7 +1106,7 @@ Toggle dyncam
 == Dyncam wechseln
 
 Show others (own team only)
-== Andere Spieler zeigen (nur eigenes Team)
+== Andere Spieler zeigen (eigenes Team)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Benutze die Taste k um neuzustarten, q zum pausieren und andere Spieler zu beobachten. In den Einstellungen sieht man weitere Tasten.
@@ -1179,7 +1179,7 @@ Skins directory
 == Skin-Ordner
 
 Background music volume
-== Hintergrundmusik-Lautstärke
+== Hintergrundmusik-Lautst.
 
 Assets
 == Assets

@@ -25,6 +25,13 @@ enum class HTTPLOG
 	ALL,
 };
 
+enum class IPRESOLVE
+{
+	WHATEVER,
+	V4,
+	V6,
+};
+
 struct CTimeout
 {
 	long ConnectTimeoutMs;
@@ -51,6 +58,7 @@ class CRequest : public IJob
 	std::atomic<double> m_Current;
 	std::atomic<int> m_Progress;
 	HTTPLOG m_LogProgress;
+	IPRESOLVE m_IpResolve;
 
 	std::atomic<int> m_State;
 	std::atomic<bool> m_Abort;
@@ -65,7 +73,7 @@ protected:
 	virtual int OnCompletion(int State) { return State; }
 
 public:
-	CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
+	CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL, IPRESOLVE IpResolve = IPRESOLVE::WHATEVER);
 
 	double Current() const { return m_Current.load(std::memory_order_relaxed); }
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
@@ -129,7 +137,7 @@ protected:
 	virtual int OnCompletion(int State);
 
 public:
-	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
+	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL, IPRESOLVE IpResolve = IPRESOLVE::WHATEVER);
 
 	const char *Dest() const { return m_aDest; }
 };

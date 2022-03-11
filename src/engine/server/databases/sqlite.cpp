@@ -20,8 +20,8 @@ public:
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
 	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
 	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
-	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
-	virtual const char *Random() const { return "RANDOM()"; };
+	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; }
+	virtual const char *Random() const { return "RANDOM()"; }
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
 	// > For compatibility, if there exist columns named "true" or "false", then

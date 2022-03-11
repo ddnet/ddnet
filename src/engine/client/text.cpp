@@ -880,7 +880,7 @@ public:
 		m_Color.b = b;
 		m_Color.a = a;
 	}
-	virtual void TextColor(ColorRGBA rgb) { m_Color = rgb; };
+	virtual void TextColor(ColorRGBA rgb) { m_Color = rgb; }
 
 	virtual void TextOutlineColor(float r, float g, float b, float a)
 	{
@@ -889,7 +889,7 @@ public:
 		m_OutlineColor.b = b;
 		m_OutlineColor.a = a;
 	}
-	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; };
+	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; }
 
 	virtual void TextSelectionColor(float r, float g, float b, float a)
 	{
@@ -898,7 +898,7 @@ public:
 		m_SelectionColor.b = b;
 		m_SelectionColor.a = a;
 	}
-	virtual void TextSelectionColor(ColorRGBA rgb) { m_SelectionColor = rgb; };
+	virtual void TextSelectionColor(ColorRGBA rgb) { m_SelectionColor = rgb; }
 
 	virtual ColorRGBA GetTextColor() { return m_Color; }
 	virtual ColorRGBA GetTextOutlineColor() { return m_OutlineColor; }
@@ -1902,14 +1902,13 @@ public:
 
 	virtual void OnWindowResize()
 	{
-		bool FoundTextContainer = false;
 		for(auto *pTextContainer : m_TextContainers)
-			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
-				FoundTextContainer = true;
-		if(FoundTextContainer)
 		{
-			dbg_msg("textrender", "%s", "Found non empty text container");
-			dbg_assert(false, "text container was not empty");
+			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
+			{
+				dbg_msg("textrender", "Found non empty text container with index %d", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex);
+				dbg_assert(false, "text container was not empty");
+			}
 		}
 
 		for(auto &pFont : m_Fonts)
