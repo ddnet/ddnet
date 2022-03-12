@@ -148,7 +148,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 }
 
 //***************************************************************
-int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int OutputSize)
+int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int OutputSize) const
 {
 	// this macro loads a symbol for a byte into bits and bitcount
 #define HUFFMAN_MACRO_LOADSYMBOL(Sym) \
@@ -215,7 +215,7 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 }
 
 //***************************************************************
-int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int OutputSize)
+int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int OutputSize) const
 {
 	// setup buffer pointers
 	unsigned char *pDst = (unsigned char *)pOutput;
@@ -226,8 +226,8 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 	unsigned Bits = 0;
 	unsigned Bitcount = 0;
 
-	CNode *pEof = &m_aNodes[HUFFMAN_EOF_SYMBOL];
-	CNode *pNode = 0;
+	const CNode *pEof = &m_aNodes[HUFFMAN_EOF_SYMBOL];
+	const CNode *pNode = 0;
 
 	while(true)
 	{
