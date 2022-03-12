@@ -1592,7 +1592,9 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   uuid.h
   warning.h
 )
-set_src(ENGINE_SHARED GLOB src/engine/shared
+set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
+  chillerbot/langparser.cpp
+  chillerbot/langparser.h
   compression.cpp
   compression.h
   config.cpp
@@ -1850,8 +1852,6 @@ if(CLIENT)
     components/chillerbot/chillpw.h
     components/chillerbot/city.cpp
     components/chillerbot/city.h
-    components/chillerbot/langparser.cpp
-    components/chillerbot/langparser.h
     components/chillerbot/playerpics.cpp
     components/chillerbot/playerpics.h
     components/chillerbot/remotecontrol.cpp
@@ -2371,6 +2371,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     io.cpp
     jobs.cpp
     json.cpp
+    langparser.cpp
     mapbugs.cpp
     name_ban.cpp
     netaddr.cpp
