@@ -125,10 +125,7 @@ bool CWarList::IsWarlist(const char *pName)
 	for(auto &WarClanPrefix : m_vWarClanPrefixlist)
 		if(str_startswith(pName, WarClanPrefix.c_str()))
 			return true;
-	for(auto &Entry : m_vWarlist)
-		if(std::string(pName) == Entry.first)
-			return true;
-	return false;
+	return std::any_of(std::begin(m_vWarlist), std::end(m_vWarlist), [&pName](const std::pair<std::string, std::string> &Entry) { return std::string(pName) == Entry.first; });
 }
 
 bool CWarList::IsTeamlist(const char *pName)
@@ -138,10 +135,7 @@ bool CWarList::IsTeamlist(const char *pName)
 
 bool CWarList::IsTraitorlist(const char *pName)
 {
-	for(auto &Entry : m_vTraitorlist)
-		if(std::string(pName) == Entry.first)
-			return true;
-	return false;
+	return std::any_of(std::begin(m_vTraitorlist), std::end(m_vTraitorlist), [&pName](const std::pair<std::string, std::string> &Entry) { return std::string(pName) == Entry.first; });
 }
 
 bool CWarList::IsWarClanlist(const char *pClan)
