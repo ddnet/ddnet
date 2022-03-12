@@ -4,6 +4,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+#include "langparser.h"
+
 #define MAX_CHAT_BUFFER_LEN 8
 #define MAX_CHAT_FILTERS 8
 #define MAX_CHAT_FILTER_LEN 128
@@ -11,6 +13,7 @@ class CChatHelper : public CComponent
 {
 	class CChillerBotUX *m_pChillerBot;
 
+	CLangParser m_LangParser;
 	struct CCommand
 	{
 		const char *pName;
@@ -36,10 +39,6 @@ class CChatHelper : public CComponent
 	char m_aaChatFilter[MAX_CHAT_FILTERS][MAX_CHAT_FILTER_LEN];
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
-	bool IsGreeting(const char *pMsg);
-	bool IsBye(const char *pMsg);
-	bool IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameLen);
-	bool IsQuestionWhy(const char *pMsg);
 	void DoGreet();
 	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessage);
 	void SayFormat(const char *pMsg);

@@ -138,158 +138,6 @@ bool CChatHelper::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-bool CChatHelper::IsGreeting(const char *pMsg)
-{
-	const char aGreetings[][128] = {
-		"hi",
-		"hay",
-		"hey",
-		"heey",
-		"heeey",
-		"heeeey",
-		"haay",
-		"haaay",
-		"haaaay",
-		"haaaaay",
-		"henlo",
-		"helo",
-		"hello",
-		"hallo",
-		"hellu",
-		"hallu",
-		"helu",
-		"henlu",
-		"hemnlo",
-		"herro",
-		"ahoi",
-		"moin",
-		"servus",
-		"guten tag",
-		"good morning",
-		"priviet",
-		"ola",
-		"ay",
-		"ayy",
-		"ayyy",
-		"ayyyy",
-		"aayyy",
-		"aaay",
-		"aaaay",
-		"yo",
-		"yoyo",
-		"yoyoyo",
-		"yoo",
-		"yooo",
-		"salut",
-		"slt",
-		"sup",
-		"szia",
-		"selam"};
-	for(const auto &aGreeting : aGreetings)
-	{
-		const char *pHL = str_find_nocase(pMsg, aGreeting);
-		while(pHL)
-		{
-			int Length = str_length(aGreeting);
-
-			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
-				return true;
-			pHL = str_find_nocase(pHL + 1, aGreeting);
-		}
-	}
-	return false;
-}
-
-bool CChatHelper::IsBye(const char *pMsg)
-{
-	const char aByes[][128] = {
-		"bb",
-		"see you",
-		"leaving",
-		"have a nice day",
-		"have an nice day",
-		"quit",
-		"bye"};
-	for(const auto &aBye : aByes)
-	{
-		const char *pHL = str_find_nocase(pMsg, aBye);
-		while(pHL)
-		{
-			int Length = str_length(aBye);
-
-			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
-				return true;
-			pHL = str_find_nocase(pHL + 1, aBye);
-		}
-	}
-	return false;
-}
-
-bool CChatHelper::IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameLen)
-{
-	const char aByes[][128] = {
-		"DELETE THE GAME",
-		"GAYASS",
-		"NIGGER",
-		"NIGGA",
-		"GAYNIGGER",
-		"GAYNIGGA",
-		"your mother",
-		"ur mom",
-		"fuck your",
-		"fucking idiot",
-		"piece of shit"};
-	for(const auto &aBye : aByes)
-	{
-		const char *pHL = str_find_nocase(pMsg, aBye);
-		while(pHL)
-		{
-			int Length = str_length(aBye);
-
-			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '1' || pHL[Length] == pHL[Length - 1]))
-				return true;
-			pHL = str_find_nocase(pHL + 1, aBye);
-		}
-	}
-	// /me
-	if(str_startswith(pMsg, "### '"))
-	{
-		if(str_endswith(pMsg, "' DELETED"))
-			return true;
-		if(str_endswith(pMsg, "' RRRRREEEEEEEEEEEEEEEEEEEEEEEEE"))
-			return true;
-	}
-	return false;
-}
-
-bool CChatHelper::IsQuestionWhy(const char *pMsg)
-{
-	const char aWhys[][128] = {
-		"warum",
-		"whyy",
-		"whyyy",
-		"whyyyy",
-		"w hyyyy",
-		"whhy",
-		"whhyy",
-		"whhyyy",
-		"wtf?",
-		"why"};
-	for(const auto &pWhy : aWhys)
-	{
-		const char *pHL = str_find_nocase(pMsg, pWhy);
-		while(pHL)
-		{
-			int Length = str_length(pWhy);
-
-			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == pHL[Length - 1]))
-				return true;
-			pHL = str_find_nocase(pHL + 1, pWhy);
-		}
-	}
-	return false;
-}
-
 void CChatHelper::SayFormat(const char *pMsg)
 {
 	char aBuf[1028] = {0};
@@ -346,20 +194,20 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		return true;
 	}
 	// greetings
-	if(IsGreeting(pMessage))
+	if(m_LangParser.IsGreeting(pMessage))
 	{
 		str_format(aBuf, sizeof(aBuf), "hi %s", pMessageAuthor);
 		m_pClient->m_Chat.Say(0, aBuf);
 		return true;
 	}
-	if(IsBye(pMessage))
+	if(m_LangParser.IsBye(pMessage))
 	{
 		str_format(aBuf, sizeof(aBuf), "bye %s", pMessageAuthor);
 		m_pClient->m_Chat.Say(0, aBuf);
 		return true;
 	}
 	// why?
-	if(IsQuestionWhy(pMessage) || (str_find(pMessage, "?") && MsgLen < NameLen + 4) ||
+	if(m_LangParser.IsQuestionWhy(pMessage) || (str_find(pMessage, "?") && MsgLen < NameLen + 4) ||
 		((str_find(pMessage, "stop") || str_find_nocase(pMessage, "help")) && (m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))))
 	{
 		char aWarReason[128];
@@ -717,7 +565,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		return;
 	str_copy(m_aLastPingName, aName, sizeof(m_aLastPingName));
 	str_copy(m_aLastPingClan, m_pClient->m_aClients[ClientID].m_aClan, sizeof(m_aLastPingClan));
-	if(IsGreeting(pMsg))
+	if(m_LangParser.IsGreeting(pMsg))
 	{
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
 		m_NextGreetClear = time_get() + time_freq() * 10;
@@ -814,7 +662,7 @@ int CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 	}
 	if(Team == 3) // whisper recv
 		Highlighted = true;
-	if(g_Config.m_ClChatSpamFilterInsults && IsInsult(ClientID, pMsg, MsgLen, NameLen))
+	if(g_Config.m_ClChatSpamFilterInsults && m_LangParser.IsInsult(ClientID, pMsg, MsgLen, NameLen))
 		return SPAM_INSULT;
 	if(!Highlighted)
 		return SPAM_NONE;

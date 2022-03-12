@@ -1850,6 +1850,8 @@ if(CLIENT)
     components/chillerbot/chillpw.h
     components/chillerbot/city.cpp
     components/chillerbot/city.h
+    components/chillerbot/langparser.cpp
+    components/chillerbot/langparser.h
     components/chillerbot/playerpics.cpp
     components/chillerbot/playerpics.h
     components/chillerbot/remotecontrol.cpp
