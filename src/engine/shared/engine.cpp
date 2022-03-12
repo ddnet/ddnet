@@ -9,6 +9,8 @@
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
+#include <engine/shared/assertion_logger.h>
+
 CHostLookup::CHostLookup() = default;
 
 CHostLookup::CHostLookup(const char *pHostname, int Nettype)
@@ -28,6 +30,10 @@ public:
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	bool m_Logging;
+
+	CAssertionLogger m_AssertionLogger;
+
+	char m_aAppName[256];
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	{
@@ -53,6 +59,7 @@ public:
 
 	CEngine(bool Test, const char *pAppname, bool Silent, int Jobs)
 	{
+		str_copy(m_aAppName, pAppname, std::size(m_aAppName));
 		if(!Test)
 		{
 			if(!Silent)
@@ -79,7 +86,12 @@ public:
 		m_Logging = false;
 	}
 
-	void Init()
+	~CEngine() override
+	{
+		m_JobPool.Destroy();
+	}
+
+	void Init() override
 	{
 		m_pConsole = Kernel()->RequestInterface<IConsole>();
 		m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -87,17 +99,21 @@ public:
 		if(!m_pConsole || !m_pStorage)
 			return;
 
+		char aFullPath[IO_MAX_PATH_LENGTH];
+		m_pStorage->GetCompletePath(IStorage::TYPE_SAVE, "dumps/", aFullPath, sizeof(aFullPath));
+		m_AssertionLogger.Init(aFullPath, m_aAppName);
+
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
 	}
 
-	void InitLogfile()
+	void InitLogfile() override
 	{
 		// open logfile if needed
 		if(g_Config.m_Logfile[0])
 			dbg_logger_file(g_Config.m_Logfile);
 	}
 
-	void AddJob(std::shared_ptr<IJob> pJob)
+	void AddJob(std::shared_ptr<IJob> pJob) override
 	{
 		if(g_Config.m_Debug)
 			dbg_msg("engine", "job added");

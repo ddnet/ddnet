@@ -58,6 +58,7 @@ public:
 	~CJobPool();
 
 	void Init(int NumThreads);
+	void Destroy();
 	void Add(std::shared_ptr<IJob> pJob);
 	static void RunBlocking(IJob *pJob);
 };

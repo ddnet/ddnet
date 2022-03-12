@@ -1849,6 +1849,9 @@ typedef void (*DBG_LOGGER)(const char *line, void *user);
 typedef void (*DBG_LOGGER_FINISH)(void *user);
 void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
 
+typedef void (*DBG_LOGGER_ASSERTION)(void *user);
+void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user);
+
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
