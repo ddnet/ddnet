@@ -677,7 +677,7 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
-		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
+		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 
 	// render spectating players
@@ -702,7 +702,7 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
-		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
+		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 }
 
