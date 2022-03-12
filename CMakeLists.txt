@@ -1593,6 +1593,8 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   warning.h
 )
 set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
+  assertion_logger.cpp
+  assertion_logger.h
   chillerbot/langparser.cpp
   chillerbot/langparser.h
   compression.cpp

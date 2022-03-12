@@ -132,12 +132,13 @@ IOHANDLE io_current_exe()
 #endif
 }
 
-typedef struct
+struct DBG_LOGGER_DATA
 {
 	DBG_LOGGER logger;
 	DBG_LOGGER_FINISH finish;
+	DBG_LOGGER_ASSERTION on_assert = nullptr;
 	void *user;
-} DBG_LOGGER_DATA;
+};
 
 static DBG_LOGGER_DATA loggers[16];
 static int has_stdout_logger = 0;
@@ -181,11 +182,21 @@ static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
+static void dbg_assert_notify_loggers()
+{
+	for(int i = 0; i < num_loggers; i++)
+	{
+		if(loggers[i].on_assert)
+			loggers[i].on_assert(loggers[i].user);
+	}
+}
+
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
 	{
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
+		dbg_assert_notify_loggers();
 		dbg_break();
 	}
 }
@@ -344,6 +355,13 @@ void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
 	data.user = user;
 	loggers[num_loggers] = data;
 	num_loggers++;
+}
+
+void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user)
+{
+	dbg_logger(logger, finish, user);
+
+	loggers[num_loggers - 1].on_assert = on_assert;
 }
 
 void dbg_logger_stdout()
