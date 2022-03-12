@@ -1231,6 +1231,9 @@ Play
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 

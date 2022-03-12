@@ -306,7 +306,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT, -1);
+		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
 		Button.VSplitLeft(40.0f, 0, &Button);
 		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName), 10.0f, &s_Name))
@@ -421,7 +421,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT, -1);
+		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
 		Button.VSplitLeft(40.0f, 0, &Button);
 		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->GetSelectedLayer(0)->m_aName, sizeof(pEditor->GetSelectedLayer(0)->m_aName), 10.0f, &s_Name))
@@ -600,6 +600,17 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 			lQuads[i]->m_aPoints[3].y = Bottom;
 			pEditor->m_Map.m_Modified = true;
 		}
+		return 1;
+	}
+
+	// slice button
+	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_SliceButton = 0;
+	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, 0, "Enables quad knife mode"))
+	{
+		pEditor->m_QuadKnifeCount = 0;
+		pEditor->m_QuadKnifeActive = true;
 		return 1;
 	}
 
@@ -1025,7 +1036,9 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitTop(20.0f, &Label, &View);
 		pEditor->UI()->DoLabel(&Label, "Error:", 10.0f, TEXTALIGN_LEFT);
 		View.HSplitTop(20.0f, &Label, &View);
-		pEditor->UI()->DoLabel(&Label, "Unable to create the folder", 10.0f, TEXTALIGN_LEFT, View.w);
+		SLabelProperties Props;
+		Props.m_MaxWidth = View.w;
+		pEditor->UI()->DoLabel(&Label, "Unable to create the folder", 10.0f, TEXTALIGN_LEFT, Props);
 
 		// button
 		ButtonBar.VMargin(ButtonBar.w / 2.0f - 55.0f, &ButtonBar);
@@ -1138,24 +1151,26 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitTop(30.0f, 0, &View);
 	View.VMargin(40.0f, &View);
 	View.HSplitTop(20.0f, &Label, &View);
+	SLabelProperties Props;
+	Props.m_MaxWidth = Label.w - 10.0f;
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you exit the editor.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you exit the editor.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
 	else if((pEditor->m_PopupEventType == POPEVENT_LOAD) || (pEditor->m_PopupEventType == POPEVENT_LOADCURRENT))
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you load a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you load a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you create a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you create a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
 		pEditor->UI()->DoLabel(&Label, "The file already exists.\nDo you want to overwrite the map?", 10.0f, TEXTALIGN_LEFT);
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
-		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
-		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
-		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
-		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, TEXTALIGN_LEFT, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, TEXTALIGN_LEFT, Props);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);

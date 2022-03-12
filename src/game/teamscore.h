@@ -12,6 +12,15 @@ enum
 	VANILLA_TEAM_SUPER = VANILLA_MAX_CLIENTS
 };
 
+// do not change the values of the following enum
+enum
+{
+	SV_TEAM_FORBIDDEN = 0, // teams are disabled on the map
+	SV_TEAM_ALLOWED = 1, // teams are enabled on the map, but optional
+	SV_TEAM_MANDATORY = 2, // map must be played with a team
+	SV_TEAM_FORCED_SOLO = 3 // map forces a random team for each individual player
+};
+
 class CTeamsCore
 {
 	int m_Team[MAX_CLIENTS];

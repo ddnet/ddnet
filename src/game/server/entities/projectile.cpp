@@ -317,7 +317,7 @@ void CProjectile::Snap(int SnappingClient)
 		pEntData->m_EntityClass = ENTITYCLASS_PROJECTILE;
 	}
 
-	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
 	{
 		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
@@ -335,7 +335,7 @@ void CProjectile::Snap(int SnappingClient)
 	if(pOwnerChar && pOwnerChar->IsAlive())
 		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 
-	if(m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;
 
 	CNetObj_DDNetProjectile DDNetProjectile;

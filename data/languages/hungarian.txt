@@ -1330,6 +1330,9 @@ https://ddnet.tw/discord
 https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Settings file
 == 
 

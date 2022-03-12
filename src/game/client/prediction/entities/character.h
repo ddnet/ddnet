@@ -105,20 +105,20 @@ public:
 	bool m_LastRefillJumps;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
-	int GetLastWeapon() { return m_LastWeapon; };
-	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
-	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; };
+	int GetLastWeapon() { return m_LastWeapon; }
+	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
+	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; }
 	void SetActiveWeapon(int ActiveWeap);
-	CCharacterCore GetCore() { return m_Core; };
-	void SetCore(CCharacterCore Core) { m_Core = Core; };
-	CCharacterCore *Core() { return &m_Core; };
-	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
-	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
-	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
-	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
-	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
-	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
-	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+	CCharacterCore GetCore() { return m_Core; }
+	void SetCore(CCharacterCore Core) { m_Core = Core; }
+	CCharacterCore *Core() { return &m_Core; }
+	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; }
+	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; }
+	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; }
+	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; }
+	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; }
+	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; }
+	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
 	int GetCID() { return m_ID; }
 	void SetInput(CNetObj_PlayerInput *pNewInput)
 	{

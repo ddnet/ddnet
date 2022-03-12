@@ -906,7 +906,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 #if defined(CONF_VIDEORECORDER)
 			if(IVideo::Current())
 			{
-				PlaySound &= g_Config.m_ClVideoShowChat;
+				PlaySound &= (bool)g_Config.m_ClVideoShowChat;
 			}
 #endif
 			if(PlaySound)

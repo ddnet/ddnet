@@ -179,6 +179,17 @@ public:
 	void InitRects(int RequestedRectCount);
 };
 
+struct SLabelProperties
+{
+	float m_MaxWidth = -1;
+	int m_AlignVertically = 1;
+	bool m_StopAtEnd = false;
+	class CTextCursor *m_pSelCursor = nullptr;
+	bool m_EnableWidthCheck = true;
+
+	SLabelProperties() {}
+};
+
 class CUI
 {
 	const void *m_pHotItem;
@@ -280,11 +291,11 @@ public:
 	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
-	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, class CTextCursor *pSelCursor = NULL);
-	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, class CTextCursor *pSelCursor = NULL);
-	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1);
+	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
+	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
+	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
-	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 };

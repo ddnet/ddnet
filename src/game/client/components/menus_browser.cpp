@@ -102,7 +102,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, 0, {0}, {0}}, // Localize - these strings are localized within CLocConstString
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, "Type", 1, 50.0f, 0, {0}, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, 0, {0}, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 60.0f, 0, {0}, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 75.0f, 0, {0}, {0}},
 		{-1, -1, " ", 1, 10.0f, 0, {0}, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, FIXED, {0}, {0}},
 	};
@@ -514,7 +514,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 16.0f, TEXTALIGN_LEFT, -1, 0);
+
+		SLabelProperties Props;
+		Props.m_AlignVertically = 0;
+		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 16.0f, TEXTALIGN_LEFT, Props);
 		SearchIconWidth = TextRender()->TextWidth(0, 16.0f, pSearchLabel, -1, -1.0f);
 		ExcludeIconWidth = TextRender()->TextWidth(0, 16.0f, pExcludeLabel, -1, -1.0f);
 		ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
@@ -541,7 +544,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		UI()->DoLabelScaled(&QuickExclude, pExcludeLabel, 16.0f, TEXTALIGN_LEFT, -1, 0);
+
+		SLabelProperties Props;
+		Props.m_AlignVertically = 0;
+		UI()->DoLabelScaled(&QuickExclude, pExcludeLabel, 16.0f, TEXTALIGN_LEFT, Props);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickExclude.VSplitLeft(ExcludeSearchIconMax, 0, &QuickExclude);

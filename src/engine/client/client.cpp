@@ -1651,7 +1651,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 	if(Sys)
 	{
 		// system message
-		if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
+		if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
 		{
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
@@ -1667,7 +1667,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			m_MapDetailsSha256 = *pMapSha256;
 			m_MapDetailsCrc = MapCrc;
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
 			if(!m_CanReceiveServerCapabilities)
 			{
@@ -1683,7 +1683,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
 		{
 			if(m_CanReceiveServerCapabilities)
 			{
@@ -1772,7 +1772,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				}
 			}
 		}
-		else if(!Dummy && Msg == NETMSG_MAP_DATA)
+		else if(Conn == CONN_MAIN && Msg == NETMSG_MAP_DATA)
 		{
 			int Last = Unpacker.GetInt();
 			int MapCRC = Unpacker.GetInt();
@@ -1814,11 +1814,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				}
 			}
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CON_READY)
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CON_READY)
 		{
 			GameClient()->OnConnected();
 		}
-		else if(Dummy && Msg == NETMSG_CON_READY)
+		else if(Conn == CONN_DUMMY && Msg == NETMSG_CON_READY)
 		{
 			m_DummyConnected = true;
 			g_Config.m_ClDummy = 1;
@@ -1890,17 +1890,20 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(Unpacker.Error() == 0)
 				m_pConsole->DeregisterTemp(pName);
 		}
-		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
+		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
 		{
 			int Result = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
-				m_RconAuthed[Dummy] = Result;
-			int Old = m_UseTempRconCommands;
-			m_UseTempRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error() != 0)
-				m_UseTempRconCommands = 0;
-			if(Old != 0 && m_UseTempRconCommands == 0)
-				m_pConsole->DeregisterTempAll();
+				m_RconAuthed[Conn] = Result;
+			if(Conn == CONN_MAIN)
+			{
+				int Old = m_UseTempRconCommands;
+				m_UseTempRconCommands = Unpacker.GetInt();
+				if(Unpacker.Error() != 0)
+					m_UseTempRconCommands = 0;
+				if(Old != 0 && m_UseTempRconCommands == 0)
+					m_pConsole->DeregisterTempAll();
+			}
 		}
 		else if(!Dummy && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_LINE)
 		{
@@ -2944,7 +2947,7 @@ void CClient::Run()
 		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
 		{
 			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
-			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr, 0))
+			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
 			}
@@ -4313,6 +4316,10 @@ int main(int argc, const char **argv)
 	InitAndroid();
 #endif
 
+#if defined(CONF_EXCEPTION_HANDLING)
+	init_exception_handler();
+#endif
+
 	if(secure_random_init() != 0)
 	{
 		RandInitFailed = true;
@@ -4336,6 +4343,16 @@ int main(int argc, const char **argv)
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IDiscord *pDiscord = CreateDiscord();
 	ISteam *pSteam = CreateSteam();
+
+#if defined(CONF_EXCEPTION_HANDLING)
+	char aBuf[IO_MAX_PATH_LENGTH];
+	char aBufName[IO_MAX_PATH_LENGTH];
+	char aDate[64];
+	str_timestamp(aDate, sizeof(aDate));
+	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_crash_log_%d_%s.RTP", pid(), aDate);
+	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBuf, sizeof(aBuf));
+	set_exception_handler_log_file(aBuf);
+#endif
 
 	if(RandInitFailed)
 	{
@@ -4536,7 +4553,8 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
 
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, CTimeout{10000, 500, 10});
+	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
+	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, CTimeout{10000, 500, 10}, HTTPLOG::ALL, IPRESOLVE::V4);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

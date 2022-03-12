@@ -13,7 +13,7 @@ int main(int argc, const char **argv)
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
-	g_NetOp.Open(BindAddr, 0);
+	g_NetOp.Open(BindAddr);
 
 	if(argc != 2)
 	{

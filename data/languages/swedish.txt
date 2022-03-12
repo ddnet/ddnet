@@ -5,7 +5,8 @@
 #	Martin Pola		2011-04-02 11:17:09
 #	Kottizen		2011-07-02 00:34:54
 #	3edcxzaq1		2020-06-25 00:00:00
-#	cur.ie		2020-09-28 00:00:00
+#	cur.ie			2020-09-28 00:00:00
+#	simpygirl		2022-02-20 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -218,7 +219,7 @@ High Detail
 == Extra detaljer
 
 Hook
-== Haken
+== Hook
 
 Invalid Demo
 == Ogiltigt deo
@@ -515,8 +516,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Du måste starta om spelet för att ändringarna skall verkställas.
 
-##### needs translation #####
-
 New name:
 == Nytt namn:
 
@@ -677,7 +676,7 @@ Indicate map finish
 == Indikera bana avklarning
 
 Map sound volume
-== Bana ljud Volym
+== Bana ljudvolym
 
 Reconnect in %d sec
 == Återkopplar om %d sekunder
@@ -734,22 +733,22 @@ transmits your player name to info2.ddnet.tw
 == 9+ nya nämningar
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork är ett kooperativ online spel där målet är för dig och en group av tees att nå banas mål. Som en nykomling så borde du starta på Novice serverna, vilket har bara de enklast banorna. Kom ihåg att använda ping till att välja en server som är nära dig.
+== DDraceNetwork är ett kooperativ online spel där målet är för dig och en grupp av tees att nå banas mål. Som en nykomling, så borde du starta på Novice serverna, vilket har bara de enklaste banorna. Kom ihåg att använda ping till att välja en server som är nära dig.
 
 The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Banorna innehåller freeze, vilket temporärt gör att en tee inte kan röra sig. Du behöver att arbeta tillsamas för att komma igenom dessa delar.
+== Banorna innehåller freeze, vilket temporärt gör att en tee inte kan röra på sig. Du behöver att arbeta tillsammans för att komma igenom dessa hinder.
 
 The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Med Skrollhjulet så kan du ändra vapen. Hammaren (vänster klick) kan användas till att slå andra tees och vakna up de från att bli frysta.
+== Med Skrollhjulet så kan du ändra vapen. Hammaren (vänster klick) kan användas till att slå andra tees och vakna upp dem från att bli frysta.
 
 Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hook (höger klick) kan användas till att svinga sig igenom banan och att dra andra tees till dig.
+== Hook (höger klick) kan användas till att svinga sig igenom banan och att dra andra tees emot dig.
 
 Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Mest viktiga är kommunikation: Det finns ingen tutorial så du kommer att behöva chatta (t knappen) med andra spelare för att lära dig grunderna och tricks till spelet.
+== Mest viktiga är kommunikation: Det finns ingen tutorial, så du kommer att behöva chatta (t knappen) med andra spelare för att lära dig grunderna och tricks till spelet.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Det är rekomenderad att du kollar igenom inställningarna och ändra dom så de passar dig innan du ansluter dig till en server.
+== Det är rekommenderad att du kollar igenom inställningarna och ändra dem, så de passar dig innan du ansluter till en server.
 
 Please enter your nickname below.
 == Skriv ditt smeknamn nedanför.
@@ -917,7 +916,7 @@ Replace video
 == Ersätt video
 
 Server best:
-== Serverens bästa:
+== Serverns bästa:
 
 Friend message
 == Vän meddelande
@@ -1061,7 +1060,7 @@ Show others
 == Visa andra
 
 Unfinished map
-== Oavslutat bana
+== Oavklarad bana
 
 Show health + ammo
 == Visa hälsa + ammunition
@@ -1070,7 +1069,7 @@ Show quads
 == Visa quads
 
 Show names in chat in team colors
-== Visa namn in chatten med lag färger
+== Visa namn in chatten med lagets färger
 
 Update now
 == Updatera nu
@@ -1100,7 +1099,7 @@ Warning
 == Varning
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Använd knappen k för att dö (starta om), q för att pausa och se andra spelare. Se inställnignar för andra knappbindningar.
+== Använd knappen k för att dö (starta om), q för att pausa och se andra spelare. Se inställningar för andra knappbindningar.
 
 Country / Region
 == Land / Region
@@ -1109,7 +1108,7 @@ Speed
 == Hastighet
 
 %d of %d servers
-== %d av %d servrar.
+== %d av %d servrar
 
 %d of %d server
 == %d av %d server
@@ -1167,184 +1166,187 @@ Replay
 == Repris
 
 Saving ddnet-settings.cfg failed
-== 
+== Det gick inte att spara ddnet-settings.cfg
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Bredden på texturen %s är inte delbar med %d, eller höjden är inte delbar med %d, vilket kan orsaka visuella buggar.
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Felsökningsläge är aktiverad, Klicka Ctrl+Shift+D för att stänga av felsökningsläge.
 
 Existing Player
-== 
+== Existerande spelare
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Ditt smeknamn '%s' är redan i användning (%d poäng). Vill du använda namnet ändå?
 
 Checking for existing player with your name
-== 
+== Söker efter en befintlig spelare med ditt namn
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Är du säker att du vill koppla ifrån och byta server?
 
 Theme
-== 
+== Tema
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Hämtar server lista från master server
 
 Refreshing...
-== 
+== Ladder om...
 
 Leak IP
-== 
+== Läck IP
 
 Demos directory
-== 
+== Demos mapp
 
 Smooth Dynamic Camera
-== 
+== Smooth dynamisk kamera
 
 Settings file
-== 
+== Inställningsfil
 
 Config directory
-== 
+== Config mapp
 
 Themes directory
-== 
+== Tema mapp
 
 Skin Database
-== 
+== Skin databas
 
 Skins directory
-== 
+== Skins mapp
 
 Chat command
-== 
+== Chattkommando
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Windowed
 
 Windowed borderless
-== 
+== Windowed borderless
 
 Windowed fullscreen
-== 
+== Windowed fullscreen
 
 Desktop fullscreen
-== 
+== Desktop fullscreen
 
 Use modern OpenGL
-== 
+== Använd modern OpenGL
 
 Game sound volume
-== 
+== Spel ljudvolym
 
 Chat sound volume
-== 
+== Chat ljudvolym
 
 Background music volume
-== 
+== Bakgrund musik volym
 
 Assets
-== 
+== Assets
 
 Show client IDs
-== 
+== Visa klient ID:n
 
 Kill Messages
-== 
+== Döds meddelanden
 
 Kill Message Normal Color
-== 
+== Döds Meddelanden Normal Färg
 
 Kill Message Highlight Color
-== 
+== Döds Meddelanden Betonad Färg
 
 Laser Outline Color
-== 
+== Laser Yttre Färg
 
 Laser Inner Color
-== 
+== Laser Inre Färg
 
 Hookline
-== 
+== Hooklina
 
 No hit
-== 
+== Ingen träff
 
 Hookable
-== 
+== Hookable
 
 Tee
-== 
+== Tee
 
 Use old chat style
-== 
+== Använd gammal chatt stil
 
 Preview
-== 
+== Förhandsvisning
 
 Show local player's key presses
-== 
+== Visa egna tangent tryck
 
 Background
-== 
+== Bakgrund
 
 Entities Background color
-== 
+== Entities bakgrunds färg
 
 Use current map as background
-== 
+== Använd nuvarande bana som bakgrund
 
 Regular Background Color
-== 
+== Vanlig Bakgrunds Färg
 
 Run on join
-== 
+== Kör på join
 
 Chat command (e.g. showall 1)
-== 
+== Chatt kommando (t.ex. showall 1)
 
 Entities
-== 
+== Entities
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Partiklar
 
 Assets directory
-== 
+== Assets mapp
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+The format of texture %s is not RGBA which will cause visual bugs.
 == 

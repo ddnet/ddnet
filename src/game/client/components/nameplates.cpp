@@ -53,8 +53,44 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	float YOffset = Position.y - 38;
 	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 
+	// render players' key presses
+	int ShowDirection = g_Config.m_ClShowDirection;
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current())
+		ShowDirection = g_Config.m_ClVideoShowDirection;
+#endif
+	if((pPlayerInfo->m_Local && ShowDirection == 2) || (!pPlayerInfo->m_Local && ShowDirection >= 1))
+	{
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0);
+
+		const float ShowDirectionImgSize = 22.0f;
+		YOffset -= ShowDirectionImgSize;
+		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
+
+		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
+		}
+		else if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
+		}
+		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi * 3 / 2);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y);
+		}
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0);
+	}
+
 	// render name plate
-	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
+	if((!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn) && g_Config.m_ClNameplates)
 	{
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
@@ -207,7 +243,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong)
+	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
 	{
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedData && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
@@ -265,7 +301,12 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 void CNamePlates::OnRender()
 {
-	if(!g_Config.m_ClNameplates)
+	int ShowDirection = g_Config.m_ClShowDirection;
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current())
+		ShowDirection = g_Config.m_ClVideoShowDirection;
+#endif
+	if(!g_Config.m_ClNameplates && ShowDirection == 0)
 		return;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -318,4 +359,11 @@ void CNamePlates::OnWindowResize()
 void CNamePlates::OnInit()
 {
 	ResetNamePlates();
+
+	// the direction
+	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
+
+	IGraphics::CQuadItem QuadItem(0.f, 0.f, 22.f, 22.f);
+	Graphics()->QuadContainerAddQuads(m_DirectionQuadContainerIndex, &QuadItem, 1);
+	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
 }

@@ -26,9 +26,9 @@ class CPlayers : public CComponent
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
 		float Intra = 0.f);
+	bool IsPlayerInfoAvailable(int ClientID) const;
 
 	int m_WeaponEmoteQuadContainerIndex;
-	int m_DirectionQuadContainerIndex;
 	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:

@@ -235,15 +235,16 @@ public:
 
 	enum
 	{
-		SIX = 0,
-		SIXUP,
+		MAP_TYPE_SIX = 0,
+		MAP_TYPE_SIXUP,
+		NUM_MAP_TYPES
 	};
 
 	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
-	SHA256_DIGEST m_aCurrentMapSha256[2];
-	unsigned m_aCurrentMapCrc[2];
-	unsigned char *m_apCurrentMapData[2];
-	unsigned int m_aCurrentMapSize[2];
+	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
+	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
+	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
+	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES];
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS + 1];
 	CRegister m_Register;
@@ -451,18 +452,18 @@ public:
 	}
 
 	void AuthRemoveKey(int KeySlot);
-	bool ClientPrevIngame(int ClientID) { return m_aPrevStates[ClientID] == CClient::STATE_INGAME; };
-	const char *GetNetErrorString(int ClientID) { return m_NetServer.ErrorString(ClientID); };
-	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); };
+	bool ClientPrevIngame(int ClientID) { return m_aPrevStates[ClientID] == CClient::STATE_INGAME; }
+	const char *GetNetErrorString(int ClientID) { return m_NetServer.ErrorString(ClientID); }
+	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); }
 	bool SetTimedOut(int ClientID, int OrigID);
-	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
+	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); }
 
 	void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags);
 
 	bool ErrorShutdown() const { return m_aErrorShutdownReason[0] != 0; }
 	void SetErrorShutdown(const char *pReason);
 
-	bool IsSixup(int ClientID) const { return m_aClients[ClientID].m_Sixup; }
+	bool IsSixup(int ClientID) const { return ClientID != SERVER_DEMO_CLIENT && m_aClients[ClientID].m_Sixup; }
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

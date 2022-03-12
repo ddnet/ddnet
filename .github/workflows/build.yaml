@@ -18,7 +18,7 @@ jobs:
         include:
         - os: ubuntu-latest
           cmake-args: -G Ninja
-          package-file: chillerbot-ux-*-linux_x86_64.tar.xz
+          package-file: "*-linux_x86_64.tar.xz"
           fancy: true
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
@@ -26,7 +26,7 @@ jobs:
         - os: ubuntu-18.04
           cmake-path: /usr/bin/
           cmake-args: -G Ninja
-          package-file: chillerbot-ux-*-linux_x86_64.tar.xz
+          package-file: "*-linux_x86_64.tar.xz"
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
@@ -34,14 +34,14 @@ jobs:
             GTEST_FILTER: -*SQLite*
         - os: macOS-latest
           cmake-args: -G Ninja
-          package-file: chillerbot-ux-*-macos.dmg
+          package-file: "*-macos.dmg"
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
           cmake-args: -A x64
-          package-file: chillerbot-ux-*-win64.zip
+          package-file: "*-win64.zip"
           fancy: false
           env:
             CFLAGS: /WX
@@ -57,7 +57,7 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev -y
 
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
@@ -78,7 +78,7 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2 python3 ninja
+        brew install pkg-config sdl2 ffmpeg python3 ninja
         brew upgrade freetype
         pip3 install dmgbuild
         sudo rm -rf /Library/Developer/CommandLineTools

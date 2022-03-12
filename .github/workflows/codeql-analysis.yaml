@@ -38,7 +38,7 @@ jobs:
       if: matrix.language == 'cpp'
       run: |
        sudo apt-get update -y
-       sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libmariadbclient-dev libwebsockets-dev -y
+       sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libmariadbclient-dev libwebsockets-dev -y
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

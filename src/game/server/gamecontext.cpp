@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/tl/sorted_array.h>
+#include <iostream>
 
 #include "gamecontext.h"
 #include "teeinfo.h"
@@ -362,7 +363,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 
 	if(To == -1)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(!((Server()->IsSixup(i) && (Flags & CHAT_SIXUP)) ||
 				   (!Server()->IsSixup(i) && (Flags & CHAT_SIX))))
@@ -420,7 +421,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NOSEND, -1);
 
 		// send to the clients
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(!m_apPlayers[i])
 				continue;
@@ -444,7 +445,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NOSEND, -1);
 
 		// send to the clients
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(m_apPlayers[i] != 0)
 			{
@@ -617,7 +618,7 @@ void CGameContext::SendVoteSet(int ClientID)
 
 	if(ClientID == -1)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(!m_apPlayers[i])
 				continue;
@@ -1301,7 +1302,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(g_Config.m_SvWelcome[0] != 0)
 			SendChatTarget(ClientID, g_Config.m_SvWelcome);
 
-		if(g_Config.m_SvShowOthersDefault > 0)
+		if(g_Config.m_SvShowOthersDefault > SHOW_OTHERS_OFF)
 		{
 			if(g_Config.m_SvShowOthers)
 				SendChatTarget(ClientID, "You can see other players. To disable this use DDNet client and type /showothers .");
@@ -1337,7 +1338,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	// update client infos (others before local)
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < Server()->MaxClients(); ++i)
 	{
 		if(i == ClientID || !m_apPlayers[i] || !Server()->ClientIngame(i))
 			continue;
@@ -1783,7 +1784,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
 			if(Team)
-				Team = ((pPlayer->GetTeam() == -1) ? CHAT_SPEC : GameTeam);
+				Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : GameTeam);
 			else
 				Team = CHAT_ALL;
 
@@ -2308,7 +2309,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 				}
 
-				for(int i = 0; i < MAX_CLIENTS; i++)
+				for(int i = 0; i < Server()->MaxClients(); i++)
 				{
 					if(i != ClientID)
 					{
@@ -3192,8 +3193,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvOldTeleportHook = 0;
 		g_Config.m_SvOldTeleportWeapons = 0;
 		g_Config.m_SvTeleportHoldHook = 0;
-		g_Config.m_SvTeam = 1;
-		g_Config.m_SvShowOthersDefault = 0;
+		g_Config.m_SvTeam = SV_TEAM_ALLOWED;
+		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_OFF;
 
 		if(Collision()->m_NumSwitchers > 0)
 			for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
@@ -3208,8 +3209,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	if(g_Config.m_SvSoloServer)
 	{
-		g_Config.m_SvTeam = 3;
-		g_Config.m_SvShowOthersDefault = 1;
+		g_Config.m_SvTeam = SV_TEAM_FORCED_SOLO;
+		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_ON;
 
 		Tuning()->Set("player_collision", 0);
 		Tuning()->Set("player_hooking", 0);

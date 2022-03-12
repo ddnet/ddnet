@@ -637,14 +637,14 @@ class CEditor : public IEditor
 	CChillerEditor m_ChillerEditor;
 
 public:
-	class IInput *Input() { return m_pInput; };
-	class IClient *Client() { return m_pClient; };
+	class IInput *Input() { return m_pInput; }
+	class IClient *Client() { return m_pClient; }
 	class CConfig *Config() { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; };
-	class IGraphics *Graphics() { return m_pGraphics; };
+	class IConsole *Console() { return m_pConsole; }
+	class IGraphics *Graphics() { return m_pGraphics; }
 	class ISound *Sound() { return m_pSound; }
-	class ITextRender *TextRender() { return m_pTextRender; };
-	class IStorage *Storage() { return m_pStorage; };
+	class ITextRender *TextRender() { return m_pTextRender; }
+	class IStorage *Storage() { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
 	CUIEx *UIEx() { return &m_UIEx; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
@@ -725,6 +725,9 @@ public:
 		m_SelectedQuadEnvelope = -1;
 		m_SelectedEnvelopePoint = -1;
 
+		m_QuadKnifeActive = false;
+		m_QuadKnifeCount = 0;
+
 		m_CommandBox = 0.0f;
 		m_aSettingsCommand[0] = 0;
 
@@ -773,6 +776,7 @@ public:
 	CLayerGroup *GetSelectedGroup() const;
 	CSoundSource *GetSelectedSource();
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
+	void AddSelectedLayer(int LayerIndex);
 	void SelectQuad(int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
@@ -908,6 +912,10 @@ public:
 	int m_SelectedSound;
 	int m_SelectedSource;
 
+	bool m_QuadKnifeActive;
+	int m_QuadKnifeCount;
+	vec2 m_aQuadKnifePoints[4];
+
 	IGraphics::CTextureHandle m_CheckerTexture;
 	IGraphics::CTextureHandle m_BackgroundTexture;
 	IGraphics::CTextureHandle m_CursorTexture;
@@ -1002,6 +1010,10 @@ public:
 	void DoQuadEnvelopes(const array<CQuad> &m_lQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
+
+	float TriangleArea(vec2 A, vec2 B, vec2 C);
+	bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C);
+	void DoQuadKnife(int QuadIndex);
 
 	void DoSoundSource(CSoundSource *pSource, int Index);
 

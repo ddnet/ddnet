@@ -1355,3 +1355,6 @@ Chat command (e.g. showall 1)
 
 Windowed fullscreen
 == 視窗化全螢幕
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 

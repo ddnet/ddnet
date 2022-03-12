@@ -28,7 +28,7 @@ public:
 	void WrapNormal() override{};
 	void WrapClamp() override{};
 
-	int MemoryUsage() const override { return 0; };
+	int MemoryUsage() const override { return 0; }
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override{};
 	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override
@@ -43,23 +43,24 @@ public:
 	void LinesEnd() override{};
 	void LinesDraw(const CLineItem *pArray, int Num) override{};
 
-	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override { return 0; };
-	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override { return CreateTextureHandle(0); };
-	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override { return 0; };
+	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override { return 0; }
+	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override { return CreateTextureHandle(0); }
+	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override { return 0; }
 
-	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h) { return CreateTextureHandle(0); };
-	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override { return CreateTextureHandle(0); };
-	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return CreateTextureHandle(0); };
+	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h) { return CreateTextureHandle(0); }
+	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override { return CreateTextureHandle(0); }
+	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return CreateTextureHandle(0); }
 
-	bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) override { return false; };
-	bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return false; };
+	bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) override { return false; }
+	bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return false; }
 
 	// simple uncompressed RGBA loaders
-	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) override { return CreateTextureHandle(0); };
-	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override { return 0; };
+	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) override { return CreateTextureHandle(0); }
+	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override { return 0; }
 	void FreePNG(CImageInfo *pImg) override{};
 
-	bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) override { return false; };
+	bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) override { return false; }
+	bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) override { return false; }
 
 	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) override{};
 	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) override{};
@@ -132,57 +133,57 @@ public:
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override{};
 
 	// opengl 3.3 functions
-	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override { return 0; };
+	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override { return 0; }
 	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override{};
 	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) override{};
 	void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) override{};
 	void DeleteBufferObject(int BufferIndex) override{};
 
-	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override { return 0; };
+	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override { return 0; }
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
 	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override{};
 	void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo) override{};
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override{};
 
-	int GetNumScreens() const override { return 0; };
+	int GetNumScreens() const override { return 0; }
 	void Minimize() override{};
 	void Maximize() override{};
 	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override{};
-	bool SetWindowScreen(int Index) override { return false; };
+	bool SetWindowScreen(int Index) override { return false; }
 	void Move(int x, int y) override{};
 	void Resize(int w, int h, int RefreshRate) override{};
 	void GotResized(int w, int h, int RefreshRate) override{};
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override{};
-	int GetWindowScreen() override { return 0; };
+	int GetWindowScreen() override { return 0; }
 
 	void WindowDestroyNtf(uint32_t WindowID) override{};
 	void WindowCreateNtf(uint32_t WindowID) override{};
 
-	int WindowActive() override { return 1; };
-	int WindowOpen() override { return 0; };
+	int WindowActive() override { return 1; }
+	int WindowOpen() override { return 0; }
 
 	void SetWindowGrab(bool Grab) override{};
 	void NotifyWindow() override{};
 
-	int Init() override { return 0; };
+	int Init() override { return 0; }
 	void Shutdown() override{};
 
 	void TakeScreenshot(const char *pFilename) override{};
 	void TakeCustomScreenshot(const char *pFilename) override{};
 	void Swap() override{};
-	bool SetVSync(bool State) override { return false; };
+	bool SetVSync(bool State) override { return false; }
 
-	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override { return 0; };
+	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override { return 0; }
 
 	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
 	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }
 
 	// synchronization
 	void InsertSignal(CSemaphore *pSemaphore) override{};
-	bool IsIdle() const override { return true; };
+	bool IsIdle() const override { return true; }
 	void WaitForIdle() override{};
 
-	SWarning *GetCurWarning() override { return NULL; };
+	SWarning *GetCurWarning() override { return NULL; }
 
 	void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) override {}
 	bool IsConfigModernAPI() override { return false; }
@@ -192,9 +193,9 @@ public:
 	bool IsQuadContainerBufferingEnabled() override { return false; }
 	bool HasTextureArrays() override { return false; }
 
-	const char *GetVendorString() override { return "headless"; };
-	const char *GetVersionString() override { return "headless"; };
-	const char *GetRendererString() override { return "headless"; };
+	const char *GetVendorString() override { return "headless"; }
+	const char *GetVersionString() override { return "headless"; }
+	const char *GetRendererString() override { return "headless"; }
 };
 
 #endif // ENGINE_CLIENT_GRAPHICS_THREADED_NULL_H

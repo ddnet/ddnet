@@ -47,8 +47,7 @@ CBinds::~CBinds()
 {
 	for(int i = 0; i < KEY_LAST; i++)
 		for(auto &apKeyBinding : m_aapKeyBindings)
-			if(apKeyBinding[i])
-				free(apKeyBinding[i]);
+			free(apKeyBinding[i]);
 }
 
 void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombination)
@@ -59,11 +58,8 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombin
 	if(FreeOnly && Get(KeyID, ModifierCombination)[0])
 		return;
 
-	if(m_aapKeyBindings[ModifierCombination][KeyID])
-	{
-		free(m_aapKeyBindings[ModifierCombination][KeyID]);
-		m_aapKeyBindings[ModifierCombination][KeyID] = 0;
-	}
+	free(m_aapKeyBindings[ModifierCombination][KeyID]);
+	m_aapKeyBindings[ModifierCombination][KeyID] = 0;
 
 	// skip modifiers for +xxx binds
 	if(pStr[0] == '+')
@@ -105,9 +101,6 @@ int CBinds::GetModifierMask(IInput *i)
 		}
 	}
 
-	if(!Mask)
-		return 1 << CBinds::MODIFIER_NONE;
-
 	return Mask;
 }
 
@@ -141,8 +134,6 @@ bool CBinds::OnInput(IInput::CEvent e)
 	int Mask = GetModifierMask(Input());
 	int KeyModifierMask = GetModifierMaskOfKey(e.m_Key);
 	Mask &= ~KeyModifierMask;
-	if(!Mask)
-		Mask = 1 << MODIFIER_NONE;
 
 	bool ret = false;
 	for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
@@ -176,8 +167,7 @@ void CBinds::UnbindAll()
 	{
 		for(auto &pKeyBinding : apKeyBinding)
 		{
-			if(pKeyBinding)
-				free(pKeyBinding);
+			free(pKeyBinding);
 			pKeyBinding = 0;
 		}
 	}
