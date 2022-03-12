@@ -332,6 +332,7 @@ public:
 	bool m_aMultiView[64];
 	bool m_isMultiView;
 	int m_prMultiViewZoom;
+	bool m_firstMultiViewEntry;
 
 	// client data
 	struct CClientData
@@ -666,6 +667,7 @@ private:
 	int m_SwitchStateTeam[NUM_DUMMIES];
 
 	vec2 m_oldMultiViewPos;
+	int m_oldSpecMultiViewID;
 
 	enum
 	{

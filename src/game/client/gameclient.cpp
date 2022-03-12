@@ -553,22 +553,64 @@ void CGameClient::UpdatePositions()
 			vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 	}
 
+	//dbg_msg("dbg", "Distanz: %f", distance(vec2(m_aClients[0].m_RenderPos.x, m_aClients[0].m_RenderPos.y), vec2(m_aClients[1].m_RenderPos.x, m_aClients[1].m_RenderPos.y)));
+
 	// spectator position
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
 		if(m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 		{
-			//spectate_closest
+			//SAME CODE AS IN SPECTATOR.CPP
+			int SpectatorID = m_Snap.m_SpecInfo.m_SpectatorID;
+
+			int NewSpectatorID = -1;
+
+			vec2 CurPosition(m_Camera.m_Center);
+			if(SpectatorID != SPEC_FREEVIEW)
+			{
+				const CNetObj_Character &CurCharacter = m_Snap.m_aCharacters[SpectatorID].m_Cur;
+				CurPosition.x = CurCharacter.m_X;
+				CurPosition.y = CurCharacter.m_Y;
+			}
+
+			int ClosestDistance = INT_MAX;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(i == SpectatorID || !m_Snap.m_paPlayerInfos[i] || m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+					continue;
+				const CNetObj_Character &MaybeClosestCharacter = m_Snap.m_aCharacters[i].m_Cur;
+				int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
+				if(NewSpectatorID == -1 || Distance < ClosestDistance)
+				{
+					NewSpectatorID = i;
+					ClosestDistance = Distance;
+				}
+			}
+			if(NewSpectatorID > -1)
+				m_Spectator.Spectate(NewSpectatorID);
 		}
-		else if(m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
-		//if(m_Snap.m_SpecInfo.m_SpectatorID == SPEC_MULTIVIEW)
+		else if(m_isMultiView)
 		{
-			g_Config.m_ClSmoothZoomTime = 1337;
+			if(m_oldSpecMultiViewID != m_Snap.m_SpecInfo.m_SpectatorID  || !m_firstMultiViewEntry)
+			{
+				m_firstMultiViewEntry = true;
+
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					m_aMultiView[i] = false;
+				}
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(m_Snap.m_aCharacters[i].m_Cur.m_X != 0) // is on screen TODO IMPROVE THIS BY ZOOM RATIO
+						m_aMultiView[i] = true;
+				}
+			}
+			g_Config.m_ClSmoothZoomTime = 2000;
 
 			vec2 minpos;
 			vec2 maxpos;
 			bool init = false;
-			bool tmp = false;
+			bool idsActivated = false;
 			bool initdone = false;
 			//wenn die distanz zu groß wird .... 6000/8000 oder so, dann soll distanz bei jedem gecheckt werden und nur eine gruppe berücksichtigt
 
@@ -580,11 +622,11 @@ void CGameClient::UpdatePositions()
 					for(int j = 0; j < MAX_CLIENTS; j++)
 					{
 						if(m_aMultiView[j] == true)
-							tmp = true;
+							idsActivated = true;
 					}
 				}
 
-				if(tmp && m_aMultiView[i] == false) // special ids activated and not in the list
+				if(idsActivated && m_aMultiView[i] == false) // special ids activated and not in the list
 					continue;
 
 				if(m_Snap.m_aCharacters[i].m_Cur.m_X == 0) // not rendered
@@ -593,8 +635,9 @@ void CGameClient::UpdatePositions()
 				int playerx = m_aClients[i].m_RenderPos.x;
 				int playery = m_aClients[i].m_RenderPos.y;
 
-				if(distance(m_oldMultiViewPos, vec2(playerx, playery)) > 1000 && m_aClients[i].m_FreezeEnd != 0) // too far away and frozen, so not relevant
-					continue;
+				if(m_oldMultiViewPos != vec2(0, 0) && m_Snap.m_SpecInfo.m_SpectatorID == i)
+					if(distance(m_oldMultiViewPos, vec2(playerx, playery)) > 1500 && m_aClients[i].m_FreezeEnd != 0) // too far away and frozen, so not relevant
+						continue;
 					
 				if(!init)
 				{
@@ -654,6 +697,8 @@ void CGameClient::UpdatePositions()
 
 			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * clamp(multiplier, 0.007f, 1.0f));
 
+			m_oldSpecMultiViewID = m_Snap.m_SpecInfo.m_SpectatorID;
+
 			m_oldMultiViewPos = m_Snap.m_SpecInfo.m_Position;
 			m_Snap.m_SpecInfo.m_UsePosition = true;
 		}
@@ -675,10 +720,18 @@ void CGameClient::UpdatePositions()
 			m_Snap.m_SpecInfo.m_UsePosition = true;
 		}
 
-		if(!m_isMultiView)
+		if(!m_isMultiView || (m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW))
 		{
 			g_Config.m_ClSmoothZoomTime = 250;
+			m_prMultiViewZoom = 0;
+			m_firstMultiViewEntry = false;
 		}
+	}
+	else
+	{
+		g_Config.m_ClSmoothZoomTime = 250;
+		m_prMultiViewZoom = 0;
+		m_firstMultiViewEntry = false;
 	}
 
 	UpdateRenderedCharacters();
