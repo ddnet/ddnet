@@ -662,7 +662,7 @@ int CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 	}
 	if(Team == 3) // whisper recv
 		Highlighted = true;
-	if(g_Config.m_ClChatSpamFilterInsults && m_LangParser.IsInsult(ClientID, pMsg, MsgLen, NameLen))
+	if(g_Config.m_ClChatSpamFilterInsults && m_LangParser.IsInsult(pMsg))
 		return SPAM_INSULT;
 	if(!Highlighted)
 		return SPAM_NONE;

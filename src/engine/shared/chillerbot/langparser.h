@@ -6,7 +6,7 @@ class CLangParser
 public:
 	bool IsGreeting(const char *pMsg);
 	bool IsBye(const char *pMsg);
-	bool IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameLen);
+	bool IsInsult(const char *pMsg);
 	bool IsQuestionWhy(const char *pMsg);
 };
 

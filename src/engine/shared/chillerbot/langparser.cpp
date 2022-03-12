@@ -91,7 +91,7 @@ bool CLangParser::IsBye(const char *pMsg)
 	return false;
 }
 
-bool CLangParser::IsInsult(int ClientID, const char *pMsg, int MsgLen, int NameLen)
+bool CLangParser::IsInsult(const char *pMsg)
 {
 	const char aByes[][128] = {
 		"DELETE THE GAME",
