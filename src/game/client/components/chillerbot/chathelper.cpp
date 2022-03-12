@@ -206,28 +206,6 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		m_pClient->m_Chat.Say(0, aBuf);
 		return true;
 	}
-	// why?
-	if(m_LangParser.IsQuestionWhy(pMessage) || (str_find(pMessage, "?") && MsgLen < NameLen + 4) ||
-		((str_find(pMessage, "stop") || str_find_nocase(pMessage, "help")) && (m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))))
-	{
-		char aWarReason[128];
-		if(m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))
-		{
-			m_pClient->m_WarList.GetWarReason(pMessageAuthor, aWarReason, sizeof(aWarReason));
-			if(aWarReason[0])
-				str_format(aBuf, sizeof(aBuf), "%s has war because: %s", pMessageAuthor, aWarReason);
-			else
-				str_format(aBuf, sizeof(aBuf), "%s you are on my warlist.", pMessageAuthor);
-			m_pClient->m_Chat.Say(0, aBuf);
-			return true;
-		}
-		else if(m_pClient->m_WarList.IsWarClanlist(m_aLastPingClan))
-		{
-			str_format(aBuf, sizeof(aBuf), "%s your clan is on my warlist.", pMessageAuthor);
-			m_pClient->m_Chat.Say(0, aBuf);
-			return true;
-		}
-	}
 	// check war for others
 	const char *pWhy = str_find_nocase(pMessage, "why");
 	if(!pWhy)
@@ -372,6 +350,28 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 					return true;
 				}
 			}
+		}
+	}
+	// why? (check war for self)
+	if(m_LangParser.IsQuestionWhy(pMessage) || (str_find(pMessage, "?") && MsgLen < NameLen + 4) ||
+		((str_find(pMessage, "stop") || str_find_nocase(pMessage, "help")) && (m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))))
+	{
+		char aWarReason[128];
+		if(m_pClient->m_WarList.IsWarlist(pMessageAuthor) || m_pClient->m_WarList.IsTraitorlist(pMessageAuthor))
+		{
+			m_pClient->m_WarList.GetWarReason(pMessageAuthor, aWarReason, sizeof(aWarReason));
+			if(aWarReason[0])
+				str_format(aBuf, sizeof(aBuf), "%s has war because: %s", pMessageAuthor, aWarReason);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s you are on my warlist.", pMessageAuthor);
+			m_pClient->m_Chat.Say(0, aBuf);
+			return true;
+		}
+		else if(m_pClient->m_WarList.IsWarClanlist(m_aLastPingClan))
+		{
+			str_format(aBuf, sizeof(aBuf), "%s your clan is on my warlist.", pMessageAuthor);
+			m_pClient->m_Chat.Say(0, aBuf);
+			return true;
 		}
 	}
 
