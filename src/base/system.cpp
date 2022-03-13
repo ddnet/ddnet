@@ -4143,47 +4143,47 @@ int os_version_str(char *version, int length)
 
 #if defined(CONF_EXCEPTION_HANDLING)
 #if defined(CONF_FAMILY_WINDOWS)
-static HMODULE gs_ExceptionHandlingModule = nullptr;
+static HMODULE exception_handling_module = nullptr;
 #endif
 
 void init_exception_handler()
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	gs_ExceptionHandlingModule = LoadLibraryA("exchndl.dll");
-	if(gs_ExceptionHandlingModule != nullptr)
+	exception_handling_module = LoadLibraryA("exchndl.dll");
+	if(exception_handling_module != nullptr)
 	{
 		// Intentional
 #ifdef __MINGW32__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type"
 #endif
-		auto pfnExcHndlInit = (void APIENTRY (*)(void *))GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlInit");
+		auto exc_hndl_init = (void APIENTRY (*)(void *))GetProcAddress(exception_handling_module, "ExcHndlInit");
 #ifdef __MINGW32__
 #pragma clang diagnostic pop
 #endif
-		void *pExceptionHandlingOffset = (void *)GetModuleHandle(NULL);
-		pfnExcHndlInit(pExceptionHandlingOffset);
+		void *exception_handling_offset = (void *)GetModuleHandle(NULL);
+		exc_hndl_init(exception_handling_offset);
 	}
 #else
 #error exception handling not implemented
 #endif
 }
 
-void set_exception_handler_log_file(const char *pLogFilePath)
+void set_exception_handler_log_file(const char *log_file_path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(gs_ExceptionHandlingModule != nullptr)
+	if(exception_handling_module != nullptr)
 	{
 		// Intentional
 #ifdef __MINGW32__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type"
 #endif
-		auto pExceptionLogFilePathFunc = (BOOL APIENTRY(*)(const char *))(GetProcAddress(gs_ExceptionHandlingModule, "ExcHndlSetLogFileNameA"));
+		auto exception_log_file_path_func = (BOOL APIENTRY(*)(const char *))(GetProcAddress(exception_handling_module, "ExcHndlSetLogFileNameA"));
 #ifdef __MINGW32__
 #pragma clang diagnostic pop
 #endif
-		pExceptionLogFilePathFunc(pLogFilePath);
+		exception_log_file_path_func(log_file_path);
 	}
 #else
 #error exception handling not implemented
