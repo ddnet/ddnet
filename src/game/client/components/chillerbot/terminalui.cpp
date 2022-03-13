@@ -154,11 +154,11 @@ void CTerminalUI::RenderHelpPage()
 	int my = getmaxy(g_pLogWindow);
 	int offY = 5;
 	int offX = 40;
-	if(mx < 128)
+	int width = minimum(128, mx - 3);
+	if(mx < width + 2 + offX)
 		offX = 2;
 	if(my < 60)
 		offY = 2;
-	int width = minimum(128, mx - 3);
 
 	const char aHelpLines[][128] = {
 		"?  - toggle this help",
