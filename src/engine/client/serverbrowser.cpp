@@ -1736,7 +1736,7 @@ bool IsBlockInfectionZ(const CServerInfo *pInfo)
 
 bool IsBlockWorlds(const CServerInfo *pInfo)
 {
-	return (str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
+	return (str_startswith(pInfo->m_aGameType, "bw  ")) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
 }
 
 bool IsCity(const CServerInfo *pInfo)
