@@ -15,6 +15,11 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 1 - on
 2 - on + show skin of frozen tees
 ```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_hud_skins**
+```
+0 - Use ninja for frozen tees
+1 - Show darker+transparent version of tee skin when frozen
+```
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_max_rows**
 ```
 (1 - 10) adjust the maximum number of tees displayed
