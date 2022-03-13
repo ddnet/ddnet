@@ -505,11 +505,11 @@ void CPlayers::RenderPlayer(
 			// check if we're firing stuff
 			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles) //prev.attackticks)
 			{
-				float AlphaMuzzle = 0.0f;
+				float Alpha = 0.0f;
 				if(AttackTicksPassed < g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3)
 				{
 					float t = AttackTicksPassed / g_pData->m_Weapons.m_aId[iw].m_Muzzleduration;
-					AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
+					Alpha = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
 				}
 
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
@@ -529,7 +529,7 @@ void CPlayers::RenderPlayer(
 					else
 						s_LastIteX = IteX;
 				}
-				if(AlphaMuzzle > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
+				if(Alpha > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
 					float OffsetY = -g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsety;
 					int QuadOffset = IteX * 2 + (Direction.x < 0 ? 1 : 0);
@@ -633,7 +633,6 @@ void CPlayers::RenderPlayer(
 		}
 	}
 }
-
 inline bool CPlayers::IsPlayerInfoAvailable(int ClientID) const
 {
 	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientID);
@@ -651,25 +650,25 @@ void CPlayers::OnRender()
 	{
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
 		m_aRenderInfo[i].m_ShineDecoration = m_pClient->m_aClients[i].m_LiveFrozen;
-		if((m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i)) && g_Config.m_ClShowNinja)
-		{
-			// change the skin for the player to the ninja
-			int Skin = m_pClient->m_Skins.Find("x_ninja");
-			if(Skin != -1)
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i) && g_Config.m_ClShowNinja)
 			{
-				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
-				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
-				m_aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
-				m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
-				if(!IsTeamplay)
+				// change the skin for the player to the ninja
+				int Skin = m_pClient->m_Skins.Find("x_ninja");
+				if(Skin != -1)
 				{
-					m_aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
-					m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
+					const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+					m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+					m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+					m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
+					m_aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
+					m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
+					if(!IsTeamplay)
+					{
+						m_aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
+						m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
+					}
 				}
 			}
-		}
 	}
 	int Skin = m_pClient->m_Skins.Find("x_spec");
 	const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
@@ -697,42 +696,57 @@ void CPlayers::OnRender()
 	}
 
 	// render spectating players
-	for(auto &m_aClient : m_pClient->m_aClients)
+	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 	{
-		if(!m_aClient.m_SpecCharPresent)
+		auto &m_aClient = m_pClient->m_aClients[ClientID];
+
+		if(!IsPlayerInfoAvailable(ClientID))
 		{
 			continue;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), m_aClient.m_SpecChar);
+		if(!m_aClient.m_SpecCharPresent && !g_Config.m_ClFixKoGSpec)
+		{
+			continue;
+		}
+		
+		vec2 Pos;
+		if(g_Config.m_ClFixKoGSpec)
+			Pos = m_aClient.m_RenderPos;
+		else
+			Pos = m_aClient.m_SpecChar;
+
+		bool spec = false;
+		spec = m_aClient.m_Team == TEAM_SPECTATORS && !(m_pClient->IsOtherTeam(ClientID));
+
+		if(spec)
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Pos);
 	}
 
-				if(Local && g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix)
-				{
-					CurChar.m_Weapon = WEAPON_NINJA;
-					if (CurChar.m_Emote == EMOTE_NORMAL) {
-						CurChar.m_Emote = EMOTE_BLINK;
-					}
-				}
-				if (Local) {
-					if(m_pClient->m_Snap.m_pLocalInfo)
-						g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Latency;
-				}
-				if(p < 3)
-				{
-					RenderHook(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
-				}
-				else
-				{
-					RenderPlayer(&PrevChar, &CurChar, &m_aRenderInfo[i], i);
-				}
-			}
+	// render everyone else's tee, then our own
+	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+	{
+		if(ClientID == LocalClientID || !m_pClient->m_Snap.m_aCharacters[ClientID].m_Active || !IsPlayerInfoAvailable(ClientID))
+		{
+			continue;
 		}
 		RenderPlayer(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
 	}
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
+		if(m_pClient->m_Snap.m_pLocalInfo)
+			g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[LocalClientID]->m_Latency;
+
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
-		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
+		CNetObj_Character CurChar = pLocalClientData->m_RenderCur;
+		if(g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix)
+		{
+			CurChar.m_Weapon = WEAPON_NINJA;
+			if(CurChar.m_Emote == EMOTE_NORMAL)
+			{
+				CurChar.m_Emote = EMOTE_BLINK;
+			}
+		}
+		RenderPlayer(&pLocalClientData->m_RenderPrev, &CurChar, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 }
 
