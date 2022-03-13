@@ -38,16 +38,10 @@ CJobPool::CJobPool()
 
 CJobPool::~CJobPool()
 {
-	m_Shutdown = true;
-	for(int i = 0; i < m_NumThreads; i++)
-		sphore_signal(&m_Semaphore);
-	for(int i = 0; i < m_NumThreads; i++)
+	if(!m_Shutdown)
 	{
-		if(m_apThreads[i])
-			thread_wait(m_apThreads[i]);
+		Destroy();
 	}
-	lock_destroy(m_Lock);
-	sphore_destroy(&m_Semaphore);
 }
 
 void CJobPool::WorkerThread(void *pUser)
@@ -84,6 +78,20 @@ void CJobPool::Init(int NumThreads)
 	m_NumThreads = NumThreads > MAX_THREADS ? MAX_THREADS : NumThreads;
 	for(int i = 0; i < NumThreads; i++)
 		m_apThreads[i] = thread_init(WorkerThread, this, "CJobPool worker");
+}
+
+void CJobPool::Destroy()
+{
+	m_Shutdown = true;
+	for(int i = 0; i < m_NumThreads; i++)
+		sphore_signal(&m_Semaphore);
+	for(int i = 0; i < m_NumThreads; i++)
+	{
+		if(m_apThreads[i])
+			thread_wait(m_apThreads[i]);
+	}
+	lock_destroy(m_Lock);
+	sphore_destroy(&m_Semaphore);
 }
 
 void CJobPool::Add(std::shared_ptr<IJob> pJob)

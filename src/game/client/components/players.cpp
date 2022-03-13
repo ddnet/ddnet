@@ -293,7 +293,7 @@ void CPlayers::RenderPlayer(
 			vec2 InitPos = Position;
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
 
-			if(g_Config.m_ClHookLineSize > 0)
+			if(g_Config.m_ClHookCollSize > 0)
 				Graphics()->QuadsBegin();
 			else
 				Graphics()->LinesBegin();
@@ -355,17 +355,15 @@ void CPlayers::RenderPlayer(
 				HookCollColor = color_invert(HookCollColor);
 			}
 			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
-
-			if(g_Config.m_ClHookLineSize > 0)
+			if(g_Config.m_ClHookCollSize > 0)
 			{
-				float LineWidth = 0.5f+(float)g_Config.m_ClHookLineSize*0.25f;
-				vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * (float)g_Config.m_ClWhatsMyZoom / 100.0f;
-				//These variable names only serve as a mental reference for the up right direction case
-				vec2 TopLeftPos = FinishPos + PerpToAngle * -LineWidth;
-				vec2 TopRightPos = FinishPos + PerpToAngle * LineWidth;
-				vec2 BotLeftPos = InitPos + PerpToAngle * -LineWidth;
-				vec2 BotRightPos = InitPos + PerpToAngle * LineWidth;
-				IGraphics::CFreeformItem FreeformItem(TopLeftPos.x, TopLeftPos.y, TopRightPos.x, TopRightPos.y, BotLeftPos.x, BotLeftPos.y, BotRightPos.x, BotRightPos.y);
+				float LineWidth = 0.5f + (float)(g_Config.m_ClHookCollSize - 1) * 0.25f;
+				vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * GameClient()->m_Camera.m_Zoom;
+				vec2 Pos0 = FinishPos + PerpToAngle * -LineWidth;
+				vec2 Pos1 = FinishPos + PerpToAngle * LineWidth;
+				vec2 Pos2 = InitPos + PerpToAngle * -LineWidth;
+				vec2 Pos3 = InitPos + PerpToAngle * LineWidth;
+				IGraphics::CFreeformItem FreeformItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y, Pos2.x, Pos2.y, Pos3.x, Pos3.y);
 				Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
 				Graphics()->QuadsEnd();
 			}
@@ -570,8 +568,6 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &Ghost, Player.m_Emote, Direction, GhostPosition, 0.5f); // render ghost
 	}
 
-	RenderInfo.m_Size = 64.0f; // force some settings
-
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
@@ -690,50 +686,15 @@ void CPlayers::OnRender()
 	{
 		if(ClientID == LocalClientID || !m_pClient->m_Snap.m_aCharacters[ClientID].m_Active || !IsPlayerInfoAvailable(ClientID))
 		{
-			// only render active characters
-			if(!m_pClient->m_aClients[i].m_Active)
-				continue;
-
-			if(p % 3 == 0 && !m_pClient->m_aClients[i].m_SpecCharPresent && !g_Config.m_ClFixKoGSpec)
-				continue;
-			if(p % 3 != 0 && !m_pClient->m_Snap.m_aCharacters[i].m_Active)
-				continue;
-
-			if(p % 3 == 0)
-			{
-				if(p < 3)
-				{
-					continue;
-				}
-
-				vec2 Pos;
-				if(!g_Config.m_ClFixKoGSpec)
-					Pos = m_pClient->m_aClients[i].m_SpecChar;
-				else
-					Pos = m_pClient->m_aClients[i].m_RenderPos;
-
-				bool spec = false;
-				if(m_pClient->m_Snap.m_paPlayerInfos[i])
-					spec = m_pClient->m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS && !(m_pClient->IsOtherTeam(i));
-				
-
-				if(spec)
-					RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Pos);
-			}
-			else
-			{
-				const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
-				const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
-				if(!pPrevInfo || !pInfo)
-				{
-					continue;
-				}
-
-				bool Local = m_pClient->m_Snap.m_LocalClientID == i;
-				if((p % 3) == 1 && Local)
-					continue;
-				if((p % 3) == 2 && !Local)
-					continue;
+			continue;
+		}
+		RenderHook(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
+	}
+	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
+	{
+		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
+		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
+	}
 
 	// render spectating players
 	for(auto &m_aClient : m_pClient->m_aClients)
@@ -771,7 +732,7 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
-		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
+		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 }
 

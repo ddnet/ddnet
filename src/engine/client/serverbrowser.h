@@ -116,12 +116,12 @@ public:
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	int HasRank(const char *pMap);
-	int NumCountries(int Network) { return m_aNetworks[Network].m_NumCountries; };
-	int GetCountryFlag(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; };
-	const char *GetCountryName(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_aName; };
+	int NumCountries(int Network) { return m_aNetworks[Network].m_NumCountries; }
+	int GetCountryFlag(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; }
+	const char *GetCountryName(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
 
-	int NumTypes(int Network) { return m_aNetworks[Network].m_NumTypes; };
-	const char *GetType(int Network, int Index) { return m_aNetworks[Network].m_aTypes[Index]; };
+	int NumTypes(int Network) { return m_aNetworks[Network].m_NumTypes; }
+	const char *GetType(int Network, int Index) { return m_aNetworks[Network].m_aTypes[Index]; }
 
 	void DDNetFilterAdd(char *pFilter, const char *pName);
 	void DDNetFilterRem(char *pFilter, const char *pName);
@@ -142,7 +142,7 @@ public:
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
-	int GetCurrentType() { return m_ServerlistType; };
+	int GetCurrentType() { return m_ServerlistType; }
 
 private:
 	CNetClient *m_pNetClient;

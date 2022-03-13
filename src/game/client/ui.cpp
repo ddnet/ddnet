@@ -7,6 +7,7 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
+#include <limits>
 
 void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
@@ -451,17 +452,28 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	return 1;
 }
 
-float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, class CTextCursor *pSelCursor)
+float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
-	float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float tw = std::numeric_limits<float>::max();
+	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : w;
+	tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	while(tw > MaxTextWidth + 0.001f)
+	{
+		if(!LabelProps.m_EnableWidthCheck)
+			break;
+		if(Size < 4.0f)
+			break;
+		Size -= 1.0f;
+		tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	}
 
-	int Flags = TEXTFLAG_RENDER | (StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
+	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
 
 	float AlignmentVert = y + (h - AlignedSize) / 2.f;
 	float AlignmentHori = 0;
-	if(AlignVertically == 0)
+	if(LabelProps.m_AlignVertically == 0)
 	{
 		AlignmentVert = y + (h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
@@ -483,54 +495,65 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 
 	CTextCursor Cursor;
 	TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
-	Cursor.m_LineWidth = (float)MaxWidth;
-	if(pSelCursor)
+	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
+	if(LabelProps.m_pSelCursor)
 	{
-		Cursor.m_CursorMode = pSelCursor->m_CursorMode;
-		Cursor.m_CursorCharacter = pSelCursor->m_CursorCharacter;
-		Cursor.m_CalculateSelectionMode = pSelCursor->m_CalculateSelectionMode;
-		Cursor.m_PressMouseX = pSelCursor->m_PressMouseX;
-		Cursor.m_PressMouseY = pSelCursor->m_PressMouseY;
-		Cursor.m_ReleaseMouseX = pSelCursor->m_ReleaseMouseX;
-		Cursor.m_ReleaseMouseY = pSelCursor->m_ReleaseMouseY;
+		Cursor.m_CursorMode = LabelProps.m_pSelCursor->m_CursorMode;
+		Cursor.m_CursorCharacter = LabelProps.m_pSelCursor->m_CursorCharacter;
+		Cursor.m_CalculateSelectionMode = LabelProps.m_pSelCursor->m_CalculateSelectionMode;
+		Cursor.m_PressMouseX = LabelProps.m_pSelCursor->m_PressMouseX;
+		Cursor.m_PressMouseY = LabelProps.m_pSelCursor->m_PressMouseY;
+		Cursor.m_ReleaseMouseX = LabelProps.m_pSelCursor->m_ReleaseMouseX;
+		Cursor.m_ReleaseMouseY = LabelProps.m_pSelCursor->m_ReleaseMouseY;
 
-		Cursor.m_SelectionStart = pSelCursor->m_SelectionStart;
-		Cursor.m_SelectionEnd = pSelCursor->m_SelectionEnd;
+		Cursor.m_SelectionStart = LabelProps.m_pSelCursor->m_SelectionStart;
+		Cursor.m_SelectionEnd = LabelProps.m_pSelCursor->m_SelectionEnd;
 	}
 
 	TextRender()->TextEx(&Cursor, pText, -1);
 
-	if(pSelCursor)
+	if(LabelProps.m_pSelCursor)
 	{
-		*pSelCursor = Cursor;
+		*LabelProps.m_pSelCursor = Cursor;
 	}
 
 	return tw;
 }
 
-void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, CTextCursor *pSelCursor)
+void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
-	DoTextLabel(pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, MaxWidth, AlignVertically, false, pSelCursor);
+	DoTextLabel(pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, LabelProps);
 }
 
-void CUI::DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically)
+void CUI::DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
-	DoLabel(pRect, pText, Size * Scale(), Align, MaxWidth, AlignVertically);
+	DoLabel(pRect, pText, Size * Scale(), Align, LabelProps);
 }
 
-void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)
+void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, CTextCursor *pReadCursor)
 {
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
-	float tw = TextRender()->TextWidth(0, Size, pText, -1, MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float tw = std::numeric_limits<float>::max();
+	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
+	tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	while(tw > MaxTextWidth + 0.001f)
+	{
+		if(!LabelProps.m_EnableWidthCheck)
+			break;
+		if(Size < 4.0f)
+			break;
+		Size -= 1.0f;
+		tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	}
 	float AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f;
 	float AlignmentHori = 0;
 
 	CTextCursor Cursor;
 
-	int Flags = TEXTFLAG_RENDER | (StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
+	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
 
-	if(AlignVertically == 0)
+	if(LabelProps.m_AlignVertically == 0)
 	{
 		AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
@@ -558,7 +581,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	{
 		TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
 	}
-	Cursor.m_LineWidth = MaxWidth;
+	Cursor.m_LineWidth = LabelProps.m_MaxWidth;
 
 	RectEl.m_TextColor = TextRender()->GetTextColor();
 	RectEl.m_TextOutlineColor = TextRender()->GetTextOutlineColor();
@@ -614,7 +637,12 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 		TmpRect.y = y;
 		TmpRect.w = w;
 		TmpRect.h = h;
-		DoLabel(RectEl, &TmpRect, pText, Size, Align, MaxWidth, AlignVertically, StopAtEnd, StrLen, pReadCursor);
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = MaxWidth;
+		Props.m_AlignVertically = AlignVertically;
+		Props.m_StopAtEnd = StopAtEnd;
+		DoLabel(RectEl, &TmpRect, pText, Size, Align, Props, StrLen, pReadCursor);
 	}
 
 	STextRenderColor ColorText(RectEl.m_TextColor);
