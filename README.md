@@ -6,6 +6,9 @@
 
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
 
+# Settings Page: 
+![image](https://user-images.githubusercontent.com/22122579/158047968-a1b2ddf8-31b3-4127-95e2-0836add2f33a.png)
+
 # Features:
 ### **Display frozen tees in your team on your HUD** 
 
@@ -14,6 +17,11 @@ Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it usin
 0 - off
 1 - on
 2 - on + show skin of frozen tees
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_hud_skins**
+```
+0 - Use ninja for frozen tees
+1 - Show darker+transparent version of tee skin when frozen
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_max_rows**
 ```
@@ -66,9 +74,21 @@ Outlines unfreeze and undeep tiles
 ```
 (0-100) Outline alpha for hook and unhook
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_freeze**
 ```
-Outline color, use the same format as skin color. 
+Freeze outline color. 
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_solid**
+```
+Hook/Unhook outline color. 
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_tele**
+```
+Tele outline color. 
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_unfreeze**
+```
+Unfreeze/Undeep outline color. 
 ```
 
 ### **KoG cl_prediction_margin PATCH**
