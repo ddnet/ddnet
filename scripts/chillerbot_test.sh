@@ -39,9 +39,9 @@ function cleanup() {
 trap cleanup EXIT
 
 {
-	echo 'add_path $CURRENTDIR'
-	echo 'add_path $USERDIR'
-	echo 'add_path $DATADIR'
+	echo $'add_path $CURRENTDIR'
+	echo $'add_path $USERDIR'
+	echo $'add_path $DATADIR'
 } > storage.cfg
 
 mkdir -p chillerbot/warlist/war/foo
@@ -52,7 +52,9 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 ./DDNet-Server "sv_input_fifo server.fifo;sv_port 17822" > server.log &
 
 # support chillerbot-zx
+# shellcheck disable=SC2211
 ./chillerbot-* "cl_input_fifo client1.fifo;player_name client1;connect localhost:17822" > client1.log &
+# shellcheck disable=SC2211
 ./chillerbot-* \
 	"cl_input_fifo client2.fifo;
 	player_name client2;
@@ -78,7 +80,8 @@ function run_tests() {
 	local in_msg
 	local out_msg
 	local srv_log
-	for i in ${!ins[@]}
+	local line
+	for i in "${!ins[@]}"
 	do
 		in_msg="${ins[$i]}"
 		out_msg="${outs[$i]}"
@@ -96,7 +99,10 @@ function run_tests() {
 			echo "Expected:"
 			echo "  $out_msg"
 			echo "Got:"
-			echo "$srv_log" | sed -e 's/^/  /'
+			while read -r line
+			do
+				echo "  $line"
+			done < <(echo "$srv_log")
 			echo ""
 			exit 1
 		else
