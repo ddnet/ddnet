@@ -1,0 +1,41 @@
+name: chillerbot
+
+on:
+  push:
+    branches-ignore:
+      - staging.tmp
+      - trying.tmp
+      - staging-squash-merge.tmp
+  pull_request:
+
+jobs:
+  build-cmake:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        include:
+        - os: ubuntu-latest
+          cmake-args: -G Ninja
+          package-file: "*-linux_x86_64.tar.xz"
+          fancy: true
+          env:
+            CFLAGS: -Wdeclaration-after-statement -Werror
+            CXXFLAGS: -Werror
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Prepare Linux
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev -y
+
+    - name: Run tests
+      env: ${{ matrix.env }}
+      run: |
+        ./scripts/chillerbot_test.sh
