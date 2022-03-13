@@ -186,8 +186,6 @@ struct SLabelProperties
 	bool m_StopAtEnd = false;
 	class CTextCursor *m_pSelCursor = nullptr;
 	bool m_EnableWidthCheck = true;
-
-	SLabelProperties() {}
 };
 
 class CUI
