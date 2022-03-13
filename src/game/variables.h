@@ -74,7 +74,7 @@ MACRO_CONFIG_INT(ClUnfreezeDelayHelper, tc_react_helper, 0, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClUnfreezeHelperPercent, tc_react_helper_percent, 17, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")
 MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_react_helper_limit, 30, 0, 500, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
 
-MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Adjustable hookline width, set to 0 for old default rendering")
+//MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Adjustable hookline width, set to 0 for old default rendering")
 
 MACRO_CONFIG_INT(ClShowCenterLines, tc_show_center, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws lines to show the center of your screen/hitbox")
 
