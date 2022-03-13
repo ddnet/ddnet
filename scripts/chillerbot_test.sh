@@ -46,10 +46,11 @@ trap cleanup EXIT
 
 mkdir -p chillerbot/warlist/war/foo
 echo foo > chillerbot/warlist/war/foo/names.txt
+echo fooslongalt >> chillerbot/warlist/war/foo/names.txt
 echo client1 >> chillerbot/warlist/war/foo/names.txt
 echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 
-./DDNet-Server "sv_input_fifo server.fifo;sv_port 17822" > server.log &
+./DDNet-Server "sv_input_fifo server.fifo;sv_port 17822;sv_spamprotection 0;sv_spam_mute_duration 0" > server.log &
 
 # support chillerbot-zx
 # shellcheck disable=SC2211
@@ -74,6 +75,8 @@ ins+=('wats ur inp_mousesens? client2');outs+=('client1 my current inp_mousesens
 ins+=('client2: why?');outs+=('client1 has war because: bullied me in school')
 ins+=('client2: why kill my friend foo');outs+=('client1: foo has war because: bullied me in school')
 ins+=('why do you war foo client2');outs+=('client1: foo has war because: bullied me in school')
+# TODO: add str_endswith_nocase() https://github.com/chillerbot/chillerbot-ux/issues/58
+ins+=('why do you war fooslongalt CLIENT2');outs+=('client1 fooslongalt has war because: bullied me in school')
 
 function run_tests() {
 	local i
@@ -87,7 +90,7 @@ function run_tests() {
 		out_msg="${outs[$i]}"
 		sleep 1
 		echo "say $in_msg" > client1.fifo
-		sleep 0.5
+		sleep 1
 		echo "reply_to_last_ping" > client2.fifo
 		sleep 1
 		srv_log="$(tail server.log)"
