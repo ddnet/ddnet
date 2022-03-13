@@ -679,6 +679,8 @@ void CGameClient::UpdatePositions()
 			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400 && zoom > 0)
 				zoom = zoom - 1;
 
+			m_distView = distance(m_oldMultiViewPos, vec2(posx, posy));
+
 			zoom = clamp(zoom, -3.5f, 8.0f);
 
 			//preference

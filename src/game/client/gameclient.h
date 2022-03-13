@@ -333,6 +333,7 @@ public:
 	bool m_isMultiView;
 	int m_prMultiViewZoom;
 	bool m_firstMultiViewEntry;
+	float m_distView;
 
 	// client data
 	struct CClientData

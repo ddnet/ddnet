@@ -800,7 +800,12 @@ void CHud::RenderSpectatorHud()
 
 	// draw the text
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? (GameClient()->m_isMultiView ? "Multi-View v3.3" : m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName) : Localize("Free-View"));
+	char MultiView[128];
+	char prMulti[128];
+	str_format(prMulti, sizeof(prMulti), "%d", GameClient()->m_prMultiViewZoom);
+	str_format(MultiView, sizeof(MultiView), "Multi-View v3.4 (zoom: %s, dist: %.0f)", GameClient()->m_prMultiViewZoom == 0 ? "auto" : prMulti, GameClient()->m_distView);
+	str_format(aBuf, sizeof(aBuf), "%s%s %s", (GameClient()->m_isMultiView ? "" : Localize("Spectate")), GameClient()->m_isMultiView ? "" : ":", m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? (GameClient()->m_isMultiView ? MultiView : m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName) :
+                                                                                                                                                                                                                 Localize("Free-View"));
 	TextRender()->Text(0, m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
