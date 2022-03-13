@@ -84,15 +84,15 @@ function run_tests() {
 	local out_msg
 	local srv_log
 	local line
+	sleep 1
 	for i in "${!ins[@]}"
 	do
 		in_msg="${ins[$i]}"
 		out_msg="${outs[$i]}"
-		sleep 1
 		echo "say $in_msg" > client1.fifo
-		sleep 1
+		sleep 0.5
 		echo "reply_to_last_ping" > client2.fifo
-		sleep 1
+		sleep 0.5
 		srv_log="$(tail server.log)"
 		if ! echo "$srv_log" | grep -q "$out_msg"
 		then
