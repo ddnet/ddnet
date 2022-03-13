@@ -446,7 +446,18 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColor));
+	ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
+	if (TileType == TILE_FREEZE) {
+		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorFreeze));
+	}
+	else if(TileType == TILE_SOLID)
+	{
+		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorSolid));
+	}
+	else if(TileType == TILE_UNFREEZE)
+	{
+		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorUnfreeze));
+	}
 	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)
@@ -628,7 +639,7 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColor));
+	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorTele));
 	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)

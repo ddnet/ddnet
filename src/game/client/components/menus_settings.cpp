@@ -2451,6 +2451,18 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
 
+	{
+		CUIRect Button, Label;
+		//MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(150.0f, &Label, &Button);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
+	}
+
+
 	MainView.HSplitTop(30.0f, 0x0, &MainView);
 
 	// ***** REACT HELPER ***** //
@@ -2501,7 +2513,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, ("Show any enabled outlines"), &g_Config.m_ClOutline, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, ("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline hook & unhook"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline walls"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, ("Outline teleporter"), &g_Config.m_ClOutlineTele, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, ("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &MainView, LineMargin);
 	{
@@ -2530,17 +2542,31 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(185.0f, &Label, &Button);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha (Hook)", g_Config.m_ClOutlineAlphaSolid);
+		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha (walls)", g_Config.m_ClOutlineAlphaSolid);
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 		g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
 	}
+	static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
 
 	MainView.HSplitTop(5.0f, 0x0, &MainView);
 	MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 
 	MainView.HSplitTop(25.0f, &Section, &MainView);
-	static int OutlineColorID;
-	DoLine_ColorPicker(&OutlineColorID, 25.0f, 120.0f, 14.0f, 0.0f, &Section, ("Outline Color"), &g_Config.m_ClOutlineColor, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+	DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+	MainView.HSplitTop(25.0f, &Section, &MainView);
+	DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+	MainView.HSplitTop(25.0f, &Section, &MainView);
+	DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+	MainView.HSplitTop(25.0f, &Section, &MainView);
+	DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+
+
+
+
 }
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
