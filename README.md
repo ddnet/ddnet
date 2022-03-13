@@ -6,6 +6,9 @@
 
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
 
+# Settings Page: 
+![image](https://user-images.githubusercontent.com/22122579/158047968-a1b2ddf8-31b3-4127-95e2-0836add2f33a.png)
+
 # Features:
 ### **Display frozen tees in your team on your HUD** 
 
