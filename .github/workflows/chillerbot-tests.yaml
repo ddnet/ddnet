@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  build-cmake:
+  integration-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
