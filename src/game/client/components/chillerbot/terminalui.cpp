@@ -125,6 +125,8 @@ int CTerminalUI::CursesTick()
 	RenderServerList();
 	RenderDownload();
 	RenderHelpPage();
+	if(m_pClient->m_Snap.m_pLocalCharacter)
+		RenderScoreboard(0, g_pLogWindow);
 
 	int input = GetInput(); // calls InputDraw()
 
@@ -225,62 +227,63 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 {
 	if(!m_ScoreboardActive)
 		return;
-	// TODO:
-	/*
+
 	int RenderScoreIDs[MAX_CLIENTS];
 	int NumRenderScoreIDs = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 		RenderScoreIDs[i] = -1;
 
-    int mx = getmaxx(pWin);
-    int my = getmaxy(pWin);
-    int offY = 5;
-    int offX = 40;
-    if(mx < 128)
-        offX = 2;
-    if(my < 60)
-        offY = 2;
-    int width = minimum(128, mx - 3);
+	int mx = getmaxx(pWin);
+	int my = getmaxy(pWin);
+	int offY = 5;
+	int offX = 40;
+	int width = minimum(128, mx - 3);
+	if(mx < offX + 2 + width)
+		offX = 2;
+	if(my < 60)
+		offY = 2;
 
-    for(int i = 0; i < MAX_CLIENTS; i++)
-    {
-        // make sure that we render the correct team
-        const CGameClient::CPlayerInfoItem *pInfo = &m_pClient->m_Snap.m_aInfoByScore[i];
-        if(!pInfo->m_pPlayerInfo || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != Team)
-            continue;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		// make sure that we render the correct team
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
+		if(!pInfo || pInfo->m_Team != Team)
+			continue;
 
-        RenderScoreIDs[NumRenderScoreIDs] = i;
-        NumRenderScoreIDs++;
-        if(offY+i > my - 8)
-            break;
-    }
+		RenderScoreIDs[NumRenderScoreIDs] = i;
+		NumRenderScoreIDs++;
+		if(offY + i > my - 8)
+			break;
+	}
 
-    DrawBorders(pWin, offX, offY-1, width, NumRenderScoreIDs+2);
-    // DrawBorders(pWin, 10, 5, 10, 5);
+	DrawBorders(pWin, offX, offY - 1, width, NumRenderScoreIDs + 2);
+	// DrawBorders(pWin, 10, 5, 10, 5);
 
-	for(int i = 0 ; i < NumRenderScoreIDs ; i++)
+	for(int i = 0; i < NumRenderScoreIDs; i++)
 	{
 		if(RenderScoreIDs[i] >= 0)
 		{
 			// if(rendered++ < 0) continue;
 
-            const CGameClient::CPlayerInfoItem *pInfo = &m_pClient->m_Snap.m_aInfoByScore[RenderScoreIDs[i]];
-            // Client()->ChillerLog("scoreboard", "%s", m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+			// make sure that we render the correct team
+			const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
+			if(!pInfo || pInfo->m_Team != Team)
+				continue;
 
-            char aLine[1024];
-            char aBuf[1024];
-            str_format(aBuf, sizeof(aBuf),
-                "%4d| %-20s | %-20s |",
-                clamp(pInfo->m_pPlayerInfo->m_Score, -999, 9999),
-                m_pClient->m_aClients[pInfo->m_ClientID].m_aName,
-                m_pClient->m_aClients[pInfo->m_ClientID].m_aClan
-            );
-            str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
-            aLine[mx-2] = '\0'; // ensure no line wrapping
-	        mvwprintw(pWin, offY+i, offX, "%s", aLine);
-        }
-    }
-    */
+			// dbg_msg("scoreboard", "i=%d name=%s", i, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+
+			char aLine[1024];
+			char aBuf[1024];
+			str_format(aBuf, sizeof(aBuf),
+				"%4d| %-20s | %-20s |",
+				clamp(pInfo->m_Score, -999, 9999),
+				m_pClient->m_aClients[pInfo->m_ClientID].m_aName,
+				m_pClient->m_aClients[pInfo->m_ClientID].m_aClan);
+			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
+			aLine[mx - 2] = '\0'; // ensure no line wrapping
+			mvwprintw(pWin, offY + i, offX, "%s", aLine);
+		}
+	}
 }
 
 void CTerminalUI::OnInit()
@@ -337,7 +340,6 @@ void CTerminalUI::OnRender()
 
 	if(!m_pClient->m_Snap.m_pLocalCharacter)
 		return;
-	RenderScoreboard(0, g_pLogWindow);
 	float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
 	float Y = m_pClient->m_Snap.m_pLocalCharacter->m_Y;
 	str_format(g_aInfoStr2, sizeof(g_aInfoStr2),
@@ -547,7 +549,11 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	// m_pClient->m_Controls.SetCursesTargetY(AimY);
 	TrackKey(Key);
 	if(Key == 9) // tab
+	{
 		m_ScoreboardActive = !m_ScoreboardActive;
+		gs_NeedLogDraw = true;
+		m_NewInput = true;
+	}
 	else if(Key == 'k')
 		m_pClient->SendKill(g_Config.m_ClDummy);
 	else if(KeyInHistory('a', 5) || Key == 'a')
