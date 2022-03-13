@@ -62,7 +62,9 @@ MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIE
 MACRO_CONFIG_INT(ClRunOnJoinConsole, tc_run_on_join_console, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether to use run on join in chat or console")
 
 MACRO_CONFIG_INT(ClShowFrozenText, tc_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
-MACRO_CONFIG_INT(ClShowFrozenHud, tc_frozen_tees_hud, 2, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD info. (0 - off, 1 - normal, 2 - show skin)")
+MACRO_CONFIG_INT(ClShowFrozenHud, tc_frozen_tees_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD")
+MACRO_CONFIG_INT(ClShowFrozenHudSkins, tc_frozen_tees_hud_skins, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Use ninja skin, or darkened skin for frozen tees on hud")
+
 MACRO_CONFIG_INT(ClFrozenMaxRows, tc_frozen_tees_max_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display")
 MACRO_CONFIG_INT(ClFrozenHudTeamOnly, tc_frozen_tees_only_inteam, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Only render frozen tee HUD display while in team")
 
@@ -72,7 +74,7 @@ MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 0, 0, 1, CFGFLAG_CLIEN
 
 MACRO_CONFIG_INT(ClUnfreezeDelayHelper, tc_react_helper, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "!EXPERIMENTAL! Removes some of the delay after unfrozen, ONLY USE ON GORES SERVERS!")
 MACRO_CONFIG_INT(ClUnfreezeHelperPercent, tc_react_helper_percent, 17, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")
-MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_react_helper_limit, 30, 0, 500, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
+MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_react_helper_limit, 30, 0, 60, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
 
 //MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Adjustable hookline width, set to 0 for old default rendering")
 
@@ -149,7 +151,7 @@ MACRO_CONFIG_STR(ClSkinPrefix, cl_skin_prefix, 12, "", CFGFLAG_CLIENT | CFGFLAG_
 MACRO_CONFIG_INT(ClFatSkins, cl_fat_skins, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable fat skins")
 
 MACRO_CONFIG_INT(UiPage, ui_page, 9, 6, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface page")
-MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 9, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface settings page")
+MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface settings page")
 MACRO_CONFIG_INT(UiToolboxPage, ui_toolbox_page, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toolbox page")
 MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 64, "localhost:8303", CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Interface server address")
 MACRO_CONFIG_INT(UiScale, ui_scale, 100, 50, 150, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface scale")
