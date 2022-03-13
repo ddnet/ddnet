@@ -262,7 +262,8 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		if(pKill)
 		{
 			bool HasWar = true;
-			char aVictim[MAX_NAME_LENGTH];
+			// aVictim also has to hold the full own name to match the chop off
+			char aVictim[MAX_NAME_LENGTH + 3 + MAX_NAME_LENGTH];
 			str_copy(aVictim, pKill, sizeof(aVictim));
 			if(!m_pClient->m_WarList.IsWarlist(aVictim) && !m_pClient->m_WarList.IsTraitorlist(aVictim))
 			{
