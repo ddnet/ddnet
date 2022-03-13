@@ -1317,7 +1317,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
 	CUIRect Button;
-	MainView.VSplitMid(&MainView, 0);
 	static int s_SndEnable = g_Config.m_SndEnable;
 	static int s_SndRate = g_Config.m_SndRate;
 
