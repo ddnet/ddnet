@@ -2428,7 +2428,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFrozenHudTeamOnly, ("Only show after joining a team"), &g_Config.m_ClFrozenHudTeamOnly, &MainView, LineMargin);
 	{
 		CUIRect Button, Label;
-		//MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(140.0f, &Label, &Button);
 		char aBuf[64];
@@ -2453,7 +2452,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	{
 		CUIRect Button, Label;
-		//MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(150.0f, &Label, &Button);
 		char aBuf[64];
@@ -2482,7 +2480,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnfreezeDelayHelper, ("Enable"), &g_Config.m_ClUnfreezeDelayHelper, &MainView, LineMargin);
 	{
 		CUIRect Button, Label;
-		//MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(215.0f, &Label, &Button);
 		char aBuf[64];
@@ -2492,7 +2489,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	}
 	{
 		CUIRect Button, Label;
-		//MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(215.0f, &Label, &Button);
 		char aBuf[64];

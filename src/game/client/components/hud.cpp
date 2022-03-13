@@ -673,7 +673,7 @@ void CHud::RenderTextInfo()
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
 						if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
 						{
-							if(g_Config.m_ClShowFrozenHud == 1.0)
+							if(!g_Config.m_ClShowFrozenHudSkins)
 								TeeInfo = FreezeInfo;
 							Frozen = true;
 						}
@@ -699,7 +699,7 @@ void CHud::RenderTextInfo()
 						vec2 TeeRenderPos(StartPos + progressiveOffset, 9.0f + CurrentRow * TeeSize);
 						float Alpha = 1.0f;
 						CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
-						if(g_Config.m_ClShowFrozenHud == 2.0 && Frozen)
+						if(g_Config.m_ClShowFrozenHudSkins && Frozen)
 						{
 							Alpha = 0.6f;
 							TeeInfo.m_ColorBody.r *= 0.4;
