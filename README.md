@@ -71,9 +71,21 @@ Outlines unfreeze and undeep tiles
 ```
 (0-100) Outline alpha for hook and unhook
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_freeze**
 ```
-Outline color, use the same format as skin color. 
+Freeze outline color. 
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_solid**
+```
+Hook/Unhook outline color. 
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_tele**
+```
+Tele outline color. 
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_unfreeze**
+```
+Unfreeze/Undeep outline color. 
 ```
 
 ### **KoG cl_prediction_margin PATCH**
