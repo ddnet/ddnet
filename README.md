@@ -94,15 +94,6 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 1 - on
 ```
 
-### **Adjustable Hook Line Size**
-
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_hook_line_width**
-```
-0 - default 1 pixel rendering
-(1-20) - adjustable size
-```
-
-
 ### **KoG Spectator skin fix**
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_kog_spec_skin**
 ```
