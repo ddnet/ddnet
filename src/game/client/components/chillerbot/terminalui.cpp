@@ -292,6 +292,8 @@ void CTerminalUI::OnInit()
 	m_RenderHelpPage = false;
 	g_pClient = m_pClient;
 	mem_zero(m_aLastPressedKey, sizeof(m_aLastPressedKey));
+	mem_zero(m_aaInputHistory, sizeof(m_aaInputHistory));
+	mem_zero(m_InputHistory, sizeof(m_InputHistory));
 	AimX = 20;
 	AimY = 0;
 	curses_init();
@@ -459,6 +461,8 @@ int CTerminalUI::GetInput()
 				str_copy(g_Config.m_BrFilterString, g_aInputStr, sizeof(g_Config.m_BrFilterString));
 				ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 			}
+			AddInputHistory(m_InputMode, g_aInputStr);
+			m_InputHistory[m_InputMode] = 0;
 			g_aInputStr[0] = '\0';
 			wclear(g_pInputWin);
 			DrawBorders(g_pInputWin);
@@ -496,9 +500,37 @@ int CTerminalUI::GetInput()
 			DrawBorders(g_pInputWin);
 			return 0;
 		}
-		char aKey[8];
-		str_format(aKey, sizeof(aKey), "%c", c);
-		str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
+		else if(c == 260) // left arrow
+		{
+			// could be used for cursor movement
+		}
+		else if(c == 261) // right arrow
+		{
+			// could be used for cursor movement
+		}
+		if((c == 258 || c == 259) && m_InputMode >= 0) // up/down arrow scroll history
+		{
+			str_copy(g_aInputStr, m_aaInputHistory[m_InputMode][m_InputHistory[m_InputMode]], sizeof(g_aInputStr));
+			wclear(g_pInputWin);
+			InputDraw();
+			DrawBorders(g_pInputWin);
+			// update history index after using it because index 0 is already the last item
+			int OldHistory = m_InputHistory[m_InputMode];
+			if(c == 258) // down arrow
+				m_InputHistory[m_InputMode] = clamp(m_InputHistory[m_InputMode] - 1, 0, (int)(INPUT_HISTORY_MAX_LEN));
+			else if(c == 259) // up arrow
+				m_InputHistory[m_InputMode] = clamp(m_InputHistory[m_InputMode] + 1, 0, (int)(INPUT_HISTORY_MAX_LEN));
+
+			// stop scrolling and roll back when reached an empty history element
+			if(m_aaInputHistory[m_InputMode][m_InputHistory[m_InputMode]][0] == '\0')
+				m_InputHistory[m_InputMode] = OldHistory;
+		}
+		else
+		{
+			char aKey[8];
+			str_format(aKey, sizeof(aKey), "%c", c);
+			str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
+		}
 		// dbg_msg("yeee", "got key d=%d c=%c", c, c);
 	}
 	InputDraw();

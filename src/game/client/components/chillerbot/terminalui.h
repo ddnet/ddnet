@@ -61,6 +61,9 @@ class CTerminalUI : public CComponent
 		INPUT_CHAT,
 		INPUT_CHAT_TEAM,
 		INPUT_BROWSER_SEARCH,
+		NUM_INPUTS,
+
+		INPUT_HISTORY_MAX_LEN = 16,
 
 		NC_INFO_SIZE = 3,
 	};
@@ -86,6 +89,40 @@ class CTerminalUI : public CComponent
 			return "INVALID";
 		}
 	};
+
+	/*
+		m_aaInputHistory
+
+		All submitted input strings for all inputs
+		The lower the index the more recent is the entry
+	*/
+	char m_aaInputHistory[NUM_INPUTS][INPUT_HISTORY_MAX_LEN][1024];
+	/*
+		m_InputHistory
+
+		All indecies of currently selected history entries
+		pointing to the strings in m_aaInputHistory
+	*/
+	int m_InputHistory[NUM_INPUTS];
+
+	void InputHistoryToStr(int Type, char *pBuf, int Size)
+	{
+		str_copy(pBuf, "", Size);
+		for(int i = 0; i < INPUT_HISTORY_MAX_LEN; i++)
+		{
+			char aBuf[1024 + 16];
+			str_format(aBuf, sizeof(aBuf), "%d: %s", i, m_aaInputHistory[Type][i]);
+			str_append(pBuf, aBuf, Size);
+		}
+	};
+	void AddInputHistory(int Type, const char *pInput)
+	{
+		for(int i = INPUT_HISTORY_MAX_LEN; i > 0; i--)
+		{
+			str_copy(m_aaInputHistory[Type][i], m_aaInputHistory[Type][i - 1], sizeof(m_aaInputHistory[Type][i]));
+		}
+		str_copy(m_aaInputHistory[Type][0], pInput, sizeof(m_aaInputHistory[Type][0]));
+	}
 
 	virtual void OnInit() override;
 	virtual void OnRender() override;
