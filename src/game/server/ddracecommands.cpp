@@ -466,6 +466,8 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason, 
 
 void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason, bool InitialChatDelay)
 {
+	if(Secs <= 0)
+		return;
 	if(!TryMute(pAddr, Secs, pReason, InitialChatDelay))
 		return;
 	if(InitialChatDelay)

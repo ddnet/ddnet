@@ -294,7 +294,11 @@ void CPlayers::RenderPlayer(
 			vec2 InitPos = Position;
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
 
-			Graphics()->LinesBegin();
+			if(g_Config.m_ClHookCollSize > 0)
+				Graphics()->QuadsBegin();
+			else
+				Graphics()->LinesBegin();
+
 			ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
 			float PhysSize = 28.0f;
@@ -352,9 +356,24 @@ void CPlayers::RenderPlayer(
 				HookCollColor = color_invert(HookCollColor);
 			}
 			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
-			IGraphics::CLineItem LineItem(InitPos.x, InitPos.y, FinishPos.x, FinishPos.y);
-			Graphics()->LinesDraw(&LineItem, 1);
-			Graphics()->LinesEnd();
+			if(g_Config.m_ClHookCollSize > 0)
+			{
+				float LineWidth = 0.5f + (float)(g_Config.m_ClHookCollSize - 1) * 0.25f;
+				vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * GameClient()->m_Camera.m_Zoom;
+				vec2 Pos0 = FinishPos + PerpToAngle * -LineWidth;
+				vec2 Pos1 = FinishPos + PerpToAngle * LineWidth;
+				vec2 Pos2 = InitPos + PerpToAngle * -LineWidth;
+				vec2 Pos3 = InitPos + PerpToAngle * LineWidth;
+				IGraphics::CFreeformItem FreeformItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y, Pos2.x, Pos2.y, Pos3.x, Pos3.y);
+				Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
+				Graphics()->QuadsEnd();
+			}
+			else
+			{
+				IGraphics::CLineItem LineItem(InitPos.x, InitPos.y, FinishPos.x, FinishPos.y);
+				Graphics()->LinesDraw(&LineItem, 1);
+				Graphics()->LinesEnd();
+			}
 		}
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -675,7 +694,7 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
-		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
+		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 
 	// render spectating players
@@ -700,7 +719,7 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
-		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderPrev, &m_aRenderInfo[LocalClientID], LocalClientID);
+		RenderPlayer(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &m_aRenderInfo[LocalClientID], LocalClientID);
 	}
 }
 

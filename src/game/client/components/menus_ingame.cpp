@@ -687,12 +687,16 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 			static int s_ClearButton = 0;
 			static float s_Offset = 0.0f;
+
+			SUIExEditBoxProperties EditProps;
 			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
 			{
 				UI()->SetActiveItem(&m_aFilterString);
 				m_ControlPageOpening = false;
+				EditProps.m_SelectText = true;
 			}
-			UIEx()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search"));
+			EditProps.m_pEmptyText = Localize("Search");
+			UIEx()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps);
 		}
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
