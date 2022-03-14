@@ -685,13 +685,15 @@ void CGameClient::UpdatePositions()
 			float posx = (minpos.x + maxpos.x) / 2.0f;
 			float posy = (minpos.y + maxpos.y) / 2.0f;
 
+			m_distPlayer = distance(minpos, maxpos);
+
 			float maxPlayerDistance = 2000.0f;
 			float minPlayerDistance = 200.0f;
 			float maxZoom = 0.0f;
 			if(maxpos.x-minpos.x > maxpos.y-minpos.y)
 				maxZoom = 5.0f;
 			else
-				maxZoom = 3.0f;
+				maxZoom = 4.0f;
 			float minZoom = 8.0f; // 10 cleaner aber zu slow
 
 			float zoom = (maxZoom - minZoom) / (maxPlayerDistance - minPlayerDistance) * (distance(minpos, maxpos) - minPlayerDistance) + minZoom;

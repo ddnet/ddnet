@@ -334,6 +334,7 @@ public:
 	int m_prMultiViewZoom;
 	bool m_firstMultiViewEntry;
 	float m_distView;
+	float m_distPlayer;
 	bool m_idsActivated;
 
 	// client data

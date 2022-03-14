@@ -795,18 +795,18 @@ void CHud::RenderSpectatorHud()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(m_Width - 180.0f, m_Height - 15.0f, 180.0f, 15.0f, 5.0f, CUI::CORNER_TL);
+	RenderTools()->DrawRoundRectExt(m_Width - 240.0f, m_Height - 15.0f, 240.0f, 15.0f, 5.0f, CUI::CORNER_TL);
 	Graphics()->QuadsEnd();
 
 	// draw the text
 	char aBuf[128];
 	char MultiView[128];
 	char prMulti[128];
-	str_format(prMulti, sizeof(prMulti), "%d", GameClient()->m_prMultiViewZoom);
-	str_format(MultiView, sizeof(MultiView), "v3.5 (zoom: %s, dist: %.0f, ids: %s)", GameClient()->m_prMultiViewZoom == 0 ? "auto" : prMulti, GameClient()->m_distView, GameClient()->m_idsActivated ? "yes" : "no");
+	str_format(prMulti, sizeof(prMulti), "%s%d", GameClient()->m_prMultiViewZoom > 0 ? "+" : "", GameClient()->m_prMultiViewZoom);
+	str_format(MultiView, sizeof(MultiView), "v3.6 (zoom: %.1f (%s), cdist: %.0f, pdist: %.0f, ids: %s)", (log(m_pClient->m_Camera.m_Zoom) / log(0.866025f)) + 10, GameClient()->m_prMultiViewZoom == 0 ? "auto" : prMulti, GameClient()->m_distView, GameClient()->m_distPlayer, GameClient()->m_idsActivated ? "yes" : "no");
 	str_format(aBuf, sizeof(aBuf), "%s%s %s", (GameClient()->m_isMultiView ? "" : Localize("Spectate")), GameClient()->m_isMultiView ? "" : ":", m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? (GameClient()->m_isMultiView ? MultiView : m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName) :
                                                                                                                                                                                                                  Localize("Free-View"));
-	TextRender()->Text(0, m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
+	TextRender()->Text(0, m_Width - 234.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
 void CHud::RenderLocalTime(float x)
