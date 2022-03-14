@@ -13,6 +13,12 @@ class IGraphics;
 
 class CRenderTools;
 
+struct SUIExEditBoxProperties
+{
+	bool m_SelectText = false;
+	const char *m_pEmptyText = "";
+};
+
 class CUIEx
 {
 	CUI *m_pUI;
@@ -58,8 +64,8 @@ public:
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = NULL);
 
-	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
-	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const char *pEmptyText = "");
+	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
+	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
 };
 
 #endif

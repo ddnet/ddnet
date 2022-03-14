@@ -77,7 +77,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombin
 		str_copy(m_aapKeyBindings[ModifierCombination][KeyID], pStr, Size);
 		str_format(aBuf, sizeof(aBuf), "bound %s%s (%d) = %s", GetKeyBindModifiersName(ModifierCombination), Input()->KeyName(KeyID), KeyID, m_aapKeyBindings[ModifierCombination][KeyID]);
 	}
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
+	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "binds", aBuf, gs_BindPrintColor);
 }
 
 int CBinds::GetModifierMask(IInput *i)

@@ -1849,6 +1849,9 @@ typedef void (*DBG_LOGGER)(const char *line, void *user);
 typedef void (*DBG_LOGGER_FINISH)(void *user);
 void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
 
+typedef void (*DBG_LOGGER_ASSERTION)(void *user);
+void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user);
+
 void dbg_logger_stdout();
 void dbg_logger_debugger();
 void dbg_logger_file(const char *filename);
@@ -2361,7 +2364,7 @@ int os_version_str(char *version, int length);
 
 #if defined(CONF_EXCEPTION_HANDLING)
 void init_exception_handler();
-void set_exception_handler_log_file(const char *pLogFilePath);
+void set_exception_handler_log_file(const char *log_file_path);
 #endif
 
 #if defined(__cplusplus)
