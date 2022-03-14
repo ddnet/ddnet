@@ -42,6 +42,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	bool CanSnapCharacter(int SnappingClient);
+	void HandleTuneLock(int SnappingClient, int ID);
 
 	bool IsGrounded();
 
@@ -172,7 +173,7 @@ private:
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
-	void SendZoneMsgs();
+	void SendTuneMsg(const char *pMessage);
 	IAntibot *Antibot();
 
 	bool m_SetSavePos;
@@ -218,6 +219,9 @@ public:
 	int m_Hit;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	LOCKED_TUNINGS m_LockedTunings;
+	LOCKED_TUNINGS m_LastLockedTunings;
+	bool m_aSentLockedTunings[MAX_CLIENTS];
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
@@ -273,6 +277,8 @@ public:
 	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; }
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
+
+	CTuningParams *Tuning();
 };
 
 enum

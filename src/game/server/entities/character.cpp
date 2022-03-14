@@ -82,7 +82,11 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
-	SendZoneMsgs(); // we want a entermessage also on spawn
+	m_LockedTunings.clear();
+	m_LastLockedTunings.clear();
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		m_aSentLockedTunings[i] = false;
+	SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 	Server()->StartRecord(m_pPlayer->GetCID());
@@ -169,11 +173,7 @@ void CCharacter::HandleJetpack()
 	{
 		if(m_Jetpack)
 		{
-			float Strength;
-			if(!m_TuneZone)
-				Strength = GameServer()->Tuning()->m_JetpackStrength;
-			else
-				Strength = GameServer()->TuningList()[m_TuneZone].m_JetpackStrength;
+			float Strength = Tuning()->m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -433,11 +433,7 @@ void CCharacter::FireWeapon()
 			/*pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 					m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);*/
 
-			float Strength;
-			if(!m_TuneZone)
-				Strength = GameServer()->Tuning()->m_HammerStrength;
-			else
-				Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
+			float Strength = Tuning()->m_HammerStrength;
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -457,11 +453,7 @@ void CCharacter::FireWeapon()
 		// if we Hit anything, we have to wait for the reload
 		if(Hits)
 		{
-			float FireDelay;
-			if(!m_TuneZone)
-				FireDelay = GameServer()->Tuning()->m_HammerHitFireDelay;
-			else
-				FireDelay = GameServer()->TuningList()[m_TuneZone].m_HammerHitFireDelay;
+			float FireDelay = Tuning()->m_HammerHitFireDelay;
 			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 		}
 	}
@@ -471,11 +463,7 @@ void CCharacter::FireWeapon()
 	{
 		if(!m_Jetpack || !m_pPlayer->m_NinjaJetpack || m_Core.m_HasTelegunGun)
 		{
-			int Lifetime;
-			if(!m_TuneZone)
-				Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GunLifetime);
-			else
-				Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
+			int Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GunLifetime);
 
 			new CProjectile(
 				GameWorld(),
@@ -515,11 +503,7 @@ void CCharacter::FireWeapon()
 			}
 
 			GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE);*/
-		float LaserReach;
-		if(!m_TuneZone)
-			LaserReach = GameServer()->Tuning()->m_LaserReach;
-		else
-			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
+		float LaserReach = Tuning()->m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -528,11 +512,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GRENADE:
 	{
-		int Lifetime;
-		if(!m_TuneZone)
-			Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime);
-		else
-			Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
+		int Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GrenadeLifetime);
 
 		new CProjectile(
 			GameWorld(),
@@ -553,11 +533,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_LASER:
 	{
-		float LaserReach;
-		if(!m_TuneZone)
-			LaserReach = GameServer()->Tuning()->m_LaserReach;
-		else
-			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
+		float LaserReach = Tuning()->m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_LASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -586,10 +562,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		if(!m_TuneZone)
-			GameServer()->Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
-		else
-			GameServer()->TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
@@ -1019,6 +992,24 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	return true;
 }
 
+void CCharacter::HandleTuneLock(int SnappingClient, int ID)
+{
+	if(m_aSentLockedTunings[SnappingClient])
+		return;
+
+	CMsgPacker Msg(NETMSGTYPE_SV_TUNELOCK);
+	Msg.AddInt(ID);
+	unsigned int Size = m_LockedTunings.size();
+	Msg.AddInt(Size);
+	for(unsigned int i = 0; i < Size; i++)
+	{
+		Msg.AddString(m_LockedTunings[i].first.c_str(), -1);
+		Msg.AddInt((int)(m_LockedTunings[i].second * 100.f));
+	}
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, SnappingClient);
+	m_aSentLockedTunings[SnappingClient] = true;
+}
+
 //TODO: Move the emote stuff to a function
 void CCharacter::SnapCharacter(int SnappingClient, int ID)
 {
@@ -1182,6 +1173,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))
 		return;
 
+	HandleTuneLock(SnappingClient, ID);
 	SnapCharacter(SnappingClient, ID);
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
@@ -1195,9 +1187,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !GameServer()->Tuning()->m_PlayerCollision)
+	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !GameServer()->Tuning()->m_PlayerHooking)
+	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -1985,51 +1977,62 @@ void CCharacter::HandleTuneLayer()
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
-	if(m_TuneZone)
-		m_Core.m_Tuning = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
-	else
-		m_Core.m_Tuning = *GameServer()->Tuning();
+	// -1 resets tune lock
+	int TuneLock = GameServer()->Collision()->IsTuneLock(CurrentIndex);
+	if(TuneLock)
+	{
+		GameServer()->ApplyTuneLock(&m_LockedTunings, TuneLock);
+
+		if(m_LockedTunings != m_LastLockedTunings)
+		{
+			GameServer()->SendTuningParams(m_pPlayer->GetCID());
+			SendTuneMsg(GameServer()->m_aaTuneLockMsg[TuneLock == -1 ? 0 : TuneLock]); // -1 = tune lock reset, number 0 is used to set the message
+
+			// update tunes for other players when we are snapped
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				m_aSentLockedTunings[i] = false;
+			m_LastLockedTunings = m_LockedTunings;
+		}
+	}
+
+	m_Core.m_Tuning = *Tuning(); // throw tunings from specific zone into gamecore
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
-		// send zone msgs
-		SendZoneMsgs();
+		// send zone leave msg
+		SendTuneMsg(GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld]);
+
+		// send zone enter msg
+		SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]);
 	}
 }
 
-void CCharacter::SendZoneMsgs()
+void CCharacter::SendTuneMsg(const char *pMessage)
 {
-	// send zone leave msg
-	// (m_TuneZoneOld >= 0: avoid zone leave msgs on spawn)
-	if(m_TuneZoneOld >= 0 && GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld])
+	if(!pMessage[0])
+		return;
+
+	const char *pCur = pMessage;
+	const char *pPos;
+	while((pPos = str_find(pCur, "\\n")))
 	{
-		const char *pCur = GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld];
-		const char *pPos;
-		while((pPos = str_find(pCur, "\\n")))
-		{
-			char aBuf[256];
-			str_copy(aBuf, pCur, pPos - pCur + 1);
-			aBuf[pPos - pCur + 1] = '\0';
-			pCur = pPos + 2;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
+		char aBuf[256];
+		str_copy(aBuf, pCur, pPos - pCur + 1);
+		aBuf[pPos - pCur + 1] = '\0';
+		pCur = pPos + 2;
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 	}
-	// send zone enter msg
-	if(GameServer()->m_aaZoneEnterMsg[m_TuneZone])
-	{
-		const char *pCur = GameServer()->m_aaZoneEnterMsg[m_TuneZone];
-		const char *pPos;
-		while((pPos = str_find(pCur, "\\n")))
-		{
-			char aBuf[256];
-			str_copy(aBuf, pCur, pPos - pCur + 1);
-			aBuf[pPos - pCur + 1] = '\0';
-			pCur = pPos + 2;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
-	}
+	GameServer()->SendChatTarget(m_pPlayer->GetCID(), pCur);
+}
+
+CTuningParams *CCharacter::Tuning()
+{
+	if(m_TuneZone)
+		return &GameServer()->TuningList()[m_TuneZone];
+
+	static CTuningParams Tuning;
+	Tuning = GameServer()->ApplyLockedTunings(*GameServer()->Tuning(), m_LockedTunings);
+	return &Tuning;
 }
 
 IAntibot *CCharacter::Antibot()

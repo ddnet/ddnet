@@ -145,6 +145,58 @@ bool CGameContext::EmulateBug(int Bug)
 	return m_MapBugs.Contains(Bug);
 }
 
+CTuningParams *CGameContext::Tuning(int ClientID)
+{
+	if(GetPlayerChar(ClientID))
+		return GetPlayerChar(ClientID)->Tuning();
+	return &m_Tuning;
+}
+
+bool CGameContext::SetLockedTune(LOCKED_TUNINGS *pLockedTunings, LOCKED_TUNE Tune)
+{
+	const char *pParam = Tune.first.c_str();
+	float NewValue = Tune.second;
+
+	float GlobalValue;
+	if(!m_Tuning.Get(pParam, &GlobalValue))
+		return false;
+
+	for(unsigned int i = 0; i < pLockedTunings->size(); i++)
+	{
+		if(str_comp_nocase(pLockedTunings->at(i).first.c_str(), pParam) == 0)
+		{
+			if(NewValue == GlobalValue)
+				pLockedTunings->erase(pLockedTunings->begin() + i);
+			else
+				pLockedTunings->at(i).second = NewValue;
+			return true;
+		}
+	}
+
+	LOCKED_TUNE LockedTune(pParam, NewValue);
+	pLockedTunings->push_back(LockedTune);
+	return true;
+}
+
+void CGameContext::ApplyTuneLock(LOCKED_TUNINGS *pLockedTunings, int TuneLock)
+{
+	if(TuneLock < 0 || TuneLock >= NUM_TUNEZONES)
+	{
+		pLockedTunings->clear();
+		return;
+	}
+
+	for(unsigned int i = 0; i < LockedTuning()[TuneLock].size(); i++)
+		SetLockedTune(pLockedTunings, LockedTuning()[TuneLock][i]);
+}
+
+CTuningParams CGameContext::ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNINGS LockedTunings)
+{
+	for(unsigned int i = 0; i < LockedTunings.size(); i++)
+		Tuning.Set(LockedTunings[i].first.c_str(), LockedTunings[i].second);
+	return Tuning;
+}
+
 void CGameContext::FillAntibot(CAntibotRoundData *pData)
 {
 	if(!pData->m_Map.m_pTiles)
@@ -243,7 +295,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
-			Strength = Tuning()->m_ExplosionStrength;
+			Strength = Tuning(Owner)->m_ExplosionStrength;
 		else
 			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
 
@@ -711,30 +763,33 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		return;
 	}
 
+	if(!m_apPlayers[ClientID])
+		return;
+
 	CheckPureTuning();
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 	int *pParams = 0;
 	if(Zone == 0)
-		pParams = (int *)&m_Tuning;
+	{
+		CTuningParams *pTuning = GetClientVersion(ClientID) >= VERSION_DDNET_TUNELOCK ? &m_Tuning : Tuning(ClientID);
+		pParams = (int *)pTuning;
+	}
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
 
-	unsigned int Last = sizeof(m_Tuning) / sizeof(int);
-	if(m_apPlayers[ClientID])
-	{
-		int ClientVersion = m_apPlayers[ClientID]->GetClientVersion();
-		if(ClientVersion < VERSION_DDNET_EXTRATUNES)
-			Last = 33;
-		else if(ClientVersion < VERSION_DDNET_HOOKDURATION_TUNE)
-			Last = 37;
-		else if(ClientVersion < VERSION_DDNET_FIREDELAY_TUNE)
-			Last = 38;
-	}
+	unsigned int Last = sizeof(CTuningParams) / sizeof(int);
+	int ClientVersion = m_apPlayers[ClientID]->GetClientVersion();
+	if(ClientVersion < VERSION_DDNET_EXTRATUNES)
+		Last = 33;
+	else if(ClientVersion < VERSION_DDNET_HOOKDURATION_TUNE)
+		Last = 37;
+	else if(ClientVersion < VERSION_DDNET_FIREDELAY_TUNE)
+		Last = 38;
 
 	for(unsigned i = 0; i < Last; i++)
 	{
-		if(m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
+		if(m_apPlayers[ClientID]->GetCharacter())
 		{
 			if((i == 30) // laser_damage is removed from 0.7
 				&& (Server()->IsSixup(ClientID)))
@@ -2480,6 +2535,10 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 
 	if(pSelf->Tuning()->Set(pParamName, NewValue))
 	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(pSelf->GetPlayerChar(i))
+				pSelf->Tuning(i)->Set(pParamName, NewValue);
+
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -2622,6 +2681,56 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 		if(List >= 0 && List < NUM_TUNEZONES)
 		{
 			str_copy(pSelf->m_aaZoneLeaveMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneLeaveMsg[List]));
+		}
+	}
+}
+
+void CGameContext::ConTuneLock(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int List = pResult->GetInteger(0);
+	const char *pParamName = pResult->GetString(1);
+	float NewValue = pResult->GetFloat(2);
+
+	if(List >= 0 && List < NUM_TUNEZONES)
+	{
+		LOCKED_TUNE LockedTune(pParamName, NewValue);
+		if(pSelf->SetLockedTune(&pSelf->LockedTuning()[List], LockedTune))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%s for lock %d changed to %.2f", pParamName, List, NewValue);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->SendTuningParams(-1);
+		}
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+	}
+}
+
+void CGameContext::ConTuneLockDump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int List = pResult->GetInteger(0);
+	char aBuf[256];
+	if(List >= 0 && List < NUM_TUNEZONES)
+	{
+		for(unsigned int i = 0; i < pSelf->LockedTuning()[List].size(); i++)
+		{
+			str_format(aBuf, sizeof(aBuf), "lock %d: %s %.2f", List, pSelf->LockedTuning()[List][i].first.c_str(), pSelf->LockedTuning()[List][i].second);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
+	}
+}
+
+void CGameContext::ConTuneLockSetMsgEnter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if(List >= 0 && List < NUM_TUNEZONES)
+		{
+			str_copy(pSelf->m_aaTuneLockMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaTuneLockMsg[List]));
 		}
 	}
 }
@@ -3083,6 +3192,9 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune_zone_reset", "?i[zone]", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
 	Console()->Register("tune_zone_enter", "i[zone] r[message]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
 	Console()->Register("tune_zone_leave", "i[zone] r[message]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
+	Console()->Register("tune_lock", "i[number] s[tuning] i[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneLock, this, "Tune for lock a variable to value");
+	Console()->Register("tune_lock_dump", "i[number]", CFGFLAG_SERVER, ConTuneLockDump, this, "Dump lock tuning for number x");
+	Console()->Register("tune_lock_enter", "i[number] r[message]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneLockSetMsgEnter, this, "which message to display on tune lock enter; use 0 for lock reset");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_SERVER | CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doublexplosion@ddnet.tw)");
 	Console()->Register("switch_open", "i[switch]", CFGFLAG_SERVER | CFGFLAG_GAME, ConSwitchOpen, this, "Whether a switch is deactivated by default (otherwise activated)");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
@@ -3153,6 +3265,10 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	//world = new GAMEWORLD;
 	//players = new CPlayer[MAX_CLIENTS];
 
+	// reset tune locks
+	for(int i = 0; i < NUM_TUNEZONES; i++)
+		LockedTuning()[i].clear();
+
 	// Reset Tunezones
 	CTuningParams TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
@@ -3170,6 +3286,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		// Send no text by default when changing tune zones.
 		m_aaZoneEnterMsg[i][0] = 0;
 		m_aaZoneLeaveMsg[i][0] = 0;
+		m_aaTuneLockMsg[i][0] = 0;
 	}
 	// Reset Tuning
 	if(g_Config.m_SvTuneReset)

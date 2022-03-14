@@ -402,6 +402,8 @@ public:
 		int m_PredTick[200];
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
+
+		LOCKED_TUNINGS m_LockedTunings;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
