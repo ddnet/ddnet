@@ -3549,7 +3549,7 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SaveReplay(g_Config.m_ClReplayLength);
 }
 
-void CClient::SaveReplay(const int Length, const char Filename[])
+void CClient::SaveReplay(const int Length, const char *pFilename)
 {
 	if(!g_Config.m_ClReplays)
 	{
@@ -3571,10 +3571,10 @@ void CClient::SaveReplay(const int Length, const char Filename[])
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
 
-		if(str_comp(Filename, "") == 0)
+		if(str_comp(pFilename, "") == 0)
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
 		else
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", Filename);
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
 
 		char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
