@@ -513,7 +513,7 @@ public:
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
-	virtual void SaveReplay(int Length);
+	virtual void SaveReplay(int Length, const char *pFilename = "");
 
 	virtual bool EditorHasUnsavedData() const { return m_pEditor->HasUnsavedData(); }
 
