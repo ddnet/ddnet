@@ -560,6 +560,29 @@ void CGameClient::UpdatePositions()
 	{
 		if(m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 		{
+			if(m_oldSpecMultiViewID != m_Snap.m_SpecInfo.m_SpectatorID || !m_firstMultiViewEntry)
+			{
+				m_firstMultiViewEntry = true;
+
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					m_aMultiView[i] = false;
+				}
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					int SpectatorID = m_Snap.m_SpecInfo.m_SpectatorID;
+					vec2 MousePos;
+					MousePos.x = m_Camera.m_Center.x;
+					MousePos.y = m_Camera.m_Center.y;
+					//if(m_aClients[i].m_RenderPos.x + 875 > MousePos.x && m_aClients[i].m_RenderPos.x - 875 < MousePos.x && m_aClients[i].m_RenderPos.y + 450 > MousePos.y && m_aClients[i].m_RenderPos.y - 450 < MousePos.y)
+					if(m_Snap.m_aCharacters[i].m_Cur.m_X != 0 != 0 && m_Snap.m_aCharacters[i].m_Cur.m_Y != 0 != 0)
+					{
+						//dbg_msg("dbg", "good: %d, Mousex: %f, Mousey: %f, Renderx: %f, Rendery: %f", i, MousePos.x, MousePos.y, m_aClients[i].m_RenderPos.x, m_aClients[i].m_RenderPos.y);
+						m_aMultiView[i] = true;
+					}
+				}
+			}
+			
 			//SAME CODE AS IN SPECTATOR.CPP
 			int SpectatorID = m_Snap.m_SpecInfo.m_SpectatorID;
 
@@ -588,23 +611,21 @@ void CGameClient::UpdatePositions()
 			}
 			if(NewSpectatorID > -1)
 				m_Spectator.Spectate(NewSpectatorID);
+
+			m_cleanIds = false;
 		}
 		else if(m_isMultiView)
 		{
-			if(m_oldSpecMultiViewID != m_Snap.m_SpecInfo.m_SpectatorID  || !m_firstMultiViewEntry)
+			if(m_cleanIds)
 			{
-				m_firstMultiViewEntry = true;
+				m_cleanIds = false;
 
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
 					m_aMultiView[i] = false;
 				}
-				for(int i = 0; i < MAX_CLIENTS; i++)
-				{
-					if(m_Snap.m_aCharacters[i].m_Cur.m_X != 0) // is on screen TODO IMPROVE THIS BY ZOOM RATIO
-						m_aMultiView[i] = true;
-				}
 			}
+
 			g_Config.m_ClSmoothZoomTime = 2000;
 
 			vec2 minpos;
@@ -625,6 +646,11 @@ void CGameClient::UpdatePositions()
 							idsActivated = true;
 					}
 				}
+
+				if(idsActivated)
+					m_idsActivated = true;
+				else
+					m_idsActivated = false;
 
 				if(idsActivated && m_aMultiView[i] == false) // special ids activated and not in the list
 					continue;
@@ -727,6 +753,11 @@ void CGameClient::UpdatePositions()
 			g_Config.m_ClSmoothZoomTime = 250;
 			m_prMultiViewZoom = 0;
 			m_firstMultiViewEntry = false;
+		}
+
+		if(!m_isMultiView && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		{
+			m_cleanIds = true;
 		}
 	}
 	else

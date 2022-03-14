@@ -334,6 +334,7 @@ public:
 	int m_prMultiViewZoom;
 	bool m_firstMultiViewEntry;
 	float m_distView;
+	bool m_idsActivated;
 
 	// client data
 	struct CClientData
@@ -669,6 +670,8 @@ private:
 
 	vec2 m_oldMultiViewPos;
 	int m_oldSpecMultiViewID;
+	float m_oldZoomMulti;
+	bool m_cleanIds;
 
 	enum
 	{
