@@ -413,7 +413,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		OldDDTeam = DDTeam;
 
 		// background so it's easy to find the local player or the followed one in spectator mode
-		if(pInfo->m_Local || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
+		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
@@ -701,7 +701,7 @@ bool CScoreboard::Active()
 	if(m_Active)
 		return true;
 
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
+	if(m_pClient->m_Snap.m_pLocalInfo && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
 		// we are not a spectator, check if we are dead
 		if(!m_pClient->m_Snap.m_pLocalCharacter && g_Config.m_ClScoreboardOnDeath)

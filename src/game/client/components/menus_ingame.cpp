@@ -170,10 +170,7 @@ void CMenus::RenderGame(CUIRect MainView)
 				}
 			}
 		}
-	}
 
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
-	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
