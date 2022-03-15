@@ -599,7 +599,7 @@ void CGameClient::UpdatePositions()
 			int ClosestDistance = INT_MAX;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
-				if(i == SpectatorID || !m_Snap.m_paPlayerInfos[i] || m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+				if(i == SpectatorID || !m_Snap.m_paPlayerInfos[i] || m_Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS || (SpectatorID == SPEC_FREEVIEW && i == m_Snap.m_LocalClientID))
 					continue;
 				const CNetObj_Character &MaybeClosestCharacter = m_Snap.m_aCharacters[i].m_Cur;
 				int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
