@@ -3538,13 +3538,18 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 		if(Length <= 0)
 			pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: length must be greater than 0 second.");
 		else
-			pSelf->SaveReplay(Length);
+		{
+			if(pResult->NumArguments() >= 2)
+				pSelf->SaveReplay(Length, pResult->GetString(1));
+			else
+				pSelf->SaveReplay(Length);
+		}
 	}
 	else
 		pSelf->SaveReplay(g_Config.m_ClReplayLength);
 }
 
-void CClient::SaveReplay(const int Length)
+void CClient::SaveReplay(const int Length, const char *pFilename)
 {
 	if(!g_Config.m_ClReplays)
 	{
@@ -3566,7 +3571,11 @@ void CClient::SaveReplay(const int Length)
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
 
-		str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
+		if(str_comp(pFilename, "") == 0)
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
+		else
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
+
 		char *pSrc = (&m_DemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
 
 		// Slice the demo to get only the last cl_replay_length seconds
@@ -4172,7 +4181,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
-	m_pConsole->Register("save_replay", "?i[length]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
+	m_pConsole->Register("save_replay", "?i[length] ?s[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
