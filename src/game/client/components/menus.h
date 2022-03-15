@@ -246,11 +246,16 @@ public:
 	{
 	};
 
+	struct SCustomHud : public SCustomItem
+	{
+	};
+
 protected:
 	sorted_array<SCustomEntities> m_EntitiesList;
 	sorted_array<SCustomGame> m_GameList;
 	sorted_array<SCustomEmoticon> m_EmoticonList;
 	sorted_array<SCustomParticle> m_ParticlesList;
+	sorted_array<SCustomHud> m_HudList;
 
 	bool m_IsInit = false;
 
@@ -260,11 +265,13 @@ protected:
 	static int GameScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int HudScan(const char *pName, int IsDir, int DirType, void *pUser);
 
 	static void ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAssetHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	void ClearCustomItems(int CurTab);
 

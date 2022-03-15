@@ -530,6 +530,7 @@ public:
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+	void LoadHudSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
 
@@ -640,6 +641,34 @@ public:
 
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
+
+	struct SClientHudSkin
+	{
+		IGraphics::CTextureHandle m_SpriteHudAirjump;
+		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
+		IGraphics::CTextureHandle m_SpriteHudSolo;
+		IGraphics::CTextureHandle m_SpriteHudNoCollision;
+		IGraphics::CTextureHandle m_SpriteHudEndlessJump;
+		IGraphics::CTextureHandle m_SpriteHudEndlessHook;
+		IGraphics::CTextureHandle m_SpriteHudJetpack;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFull;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNoHookHit;
+		IGraphics::CTextureHandle m_SpriteHudNoHammerHit;
+		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;
+		IGraphics::CTextureHandle m_SpriteHudNoGrenadeHit;
+		IGraphics::CTextureHandle m_SpriteHudNoLaserHit;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGun;
+		IGraphics::CTextureHandle m_SpriteHudTeleportLaser;
+		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
+		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
+	};
+
+	SClientHudSkin m_HudSkin;
+	bool m_HudSkinLoaded;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
 
