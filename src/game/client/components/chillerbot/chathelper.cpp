@@ -400,6 +400,8 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	// small talk
 	if(str_find_nocase(pMessage, "how are you") ||
 		str_find_nocase(pMessage, "how r u") ||
+		str_find_nocase(pMessage, "how ru ") ||
+		str_find_nocase(pMessage, "how ru?") ||
 		str_find_nocase(pMessage, "how r you") ||
 		str_find_nocase(pMessage, "how are u") ||
 		str_find_nocase(pMessage, "how is it going") ||
