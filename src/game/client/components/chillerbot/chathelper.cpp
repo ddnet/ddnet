@@ -334,7 +334,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 			{
 				m_pClient->m_WarList.GetWarReason(aVictim, aWarReason, sizeof(aWarReason));
 				if(aWarReason[0])
-					str_format(aBuf, sizeof(aBuf), "%s: %s has war because: %s", pMessageAuthor, aVictim, aWarReason);
+					str_format(pResponse, SizeOfResponse, "%s: %s has war because: %s", pMessageAuthor, aVictim, aWarReason);
 				else
 					str_format(pResponse, SizeOfResponse, "%s: the name %s is on my warlist.", pMessageAuthor, aVictim);
 				return true;
@@ -363,7 +363,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		{
 			m_pClient->m_WarList.GetWarReason(pMessageAuthor, aWarReason, sizeof(aWarReason));
 			if(aWarReason[0])
-				str_format(aBuf, sizeof(aBuf), "%s has war because: %s", pMessageAuthor, aWarReason);
+				str_format(pResponse, SizeOfResponse, "%s has war because: %s", pMessageAuthor, aWarReason);
 			else
 				str_format(pResponse, SizeOfResponse, "%s you are on my warlist.", pMessageAuthor);
 			return true;
