@@ -524,9 +524,14 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
+		SUIExEditBoxProperties EditProps;
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		{
 			UI()->SetActiveItem(&s_aFilterString[s_CurCustomTab]);
-		if(UIEx()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search")))
+			EditProps.m_SelectText = true;
+		}
+		EditProps.m_pEmptyText = Localize("Search");
+		if(UIEx()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps))
 			s_InitCustomList[s_CurCustomTab] = true;
 	}
 

@@ -532,11 +532,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
+		SUIExEditBoxProperties EditProps;
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		{
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
+
+			EditProps.m_SelectText = true;
+		}
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(UIEx()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, CUI::CORNER_ALL))
+		if(UIEx()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps))
 			Client()->ServerBrowserUpdate();
 	}
 

@@ -2364,7 +2364,7 @@ int os_version_str(char *version, int length);
 
 #if defined(CONF_EXCEPTION_HANDLING)
 void init_exception_handler();
-void set_exception_handler_log_file(const char *pLogFilePath);
+void set_exception_handler_log_file(const char *log_file_path);
 #endif
 
 #if defined(CONF_CURSES_CLIENT)
