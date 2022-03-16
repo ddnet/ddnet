@@ -126,6 +126,7 @@ public:
 	int64_t GetAfkTime() { return m_AfkTill; }
 	const char *GetAfkMessage() { return m_aAfkMessage; }
 	int GetAfkActivity() { return m_AfkActivity; }
+	bool IsAfk() { return GetAfkTime() && GetAfkActivity() < 25; }
 
 	void EnableComponent(const char *pComponent, const char *pNoteShort = 0, const char *pNoteLong = 0);
 	void DisableComponent(const char *pComponent);

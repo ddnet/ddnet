@@ -577,7 +577,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	str_copy(m_aLastPingMessage, pMsg, sizeof(m_aLastPingMessage));
 	m_NextPingMsgClear = time_get() + time_freq() * 60;
 	int64_t AfkTill = m_pChillerBot->GetAfkTime();
-	if(AfkTill && m_pChillerBot->GetAfkActivity() < 25)
+	if(m_pChillerBot->IsAfk())
 	{
 		char aBuf[256];
 		char aNote[128];
@@ -712,19 +712,24 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 			return true;
 		if(Spam >= SPAM_INSULT)
 			return true;
-		char aName[64];
-		str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
-		if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
+
+		// if not afk auto respond to pings
+		if(!m_pChillerBot->IsAfk())
 		{
-			Get128Name(pLine, aName);
-			// dbg_msg("chillerbot", "fixname 128 player '%s' -> '%s'", m_pClient->m_aClients[ClientID].m_aName, aName);
-		}
-		if(!ReplyToLastPing(aName, pLine))
-		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "%s your message got spam filtered", aName);
-			m_pClient->m_Chat.Say(0, aBuf);
-			m_aLastPingMessage[0] = '\0';
+			char aName[64];
+			str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
+			if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
+			{
+				Get128Name(pLine, aName);
+				// dbg_msg("chillerbot", "fixname 128 player '%s' -> '%s'", m_pClient->m_aClients[ClientID].m_aName, aName);
+			}
+			if(!ReplyToLastPing(aName, pLine))
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "%s your message got spam filtered", aName);
+				SayBuffer(aBuf);
+				m_aLastPingMessage[0] = '\0';
+			}
 		}
 		return true;
 	}
