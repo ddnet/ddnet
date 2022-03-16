@@ -95,8 +95,13 @@ void CChatHelper::OnConsoleInit()
 void CChatHelper::ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData)
 {
 	CChatHelper *pSelf = (CChatHelper *)pUserData;
-	if(pSelf->ReplyToLastPing(pSelf->m_aLastPingName, pSelf->m_aLastPingMessage))
+	char aResponse[1024];
+	if(pSelf->ReplyToLastPing(pSelf->m_aLastPingName, pSelf->m_aLastPingMessage, aResponse, sizeof(aResponse)))
+	{
 		pSelf->m_aLastPingMessage[0] = '\0';
+		if(aResponse[0])
+			pSelf->m_pClient->m_Chat.Say(0, aResponse);
+	}
 }
 
 void CChatHelper::ConSayHi(IConsole::IResult *pResult, void *pUserData)
@@ -168,8 +173,9 @@ void CChatHelper::SayFormat(const char *pMsg)
 	m_pClient->m_Chat.Say(0, aBuf);
 }
 
-bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessage)
+bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessage, char *pResponse, int SizeOfResponse)
 {
+	pResponse[0] = '\0';
 	if(pMessageAuthor[0] == '\0')
 		return false;
 	if(pMessage[0] == '\0')
@@ -189,21 +195,18 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	// ping without further context
 	if(MsgLen < NameLen + 2)
 	{
-		str_format(aBuf, sizeof(aBuf), "%s ?", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s ?", pMessageAuthor);
 		return true;
 	}
 	// greetings
 	if(m_LangParser.IsGreeting(pMessage))
 	{
-		str_format(aBuf, sizeof(aBuf), "hi %s", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "hi %s", pMessageAuthor);
 		return true;
 	}
 	if(m_LangParser.IsBye(pMessage))
 	{
-		str_format(aBuf, sizeof(aBuf), "bye %s", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "bye %s", pMessageAuthor);
 		return true;
 	}
 	// check war for others
@@ -333,8 +336,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 				if(aWarReason[0])
 					str_format(aBuf, sizeof(aBuf), "%s: %s has war because: %s", pMessageAuthor, aVictim, aWarReason);
 				else
-					str_format(aBuf, sizeof(aBuf), "%s: the name %s is on my warlist.", pMessageAuthor, aVictim);
-				m_pClient->m_Chat.Say(0, aBuf);
+					str_format(pResponse, SizeOfResponse, "%s: the name %s is on my warlist.", pMessageAuthor, aVictim);
 				return true;
 			}
 			for(auto &Client : m_pClient->m_aClients)
@@ -346,8 +348,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 
 				if(m_pClient->m_WarList.IsWarClanlist(Client.m_aClan))
 				{
-					str_format(aBuf, sizeof(aBuf), "%s i war %s because his clan %s is on my warlist.", pMessageAuthor, aVictim, Client.m_aClan);
-					m_pClient->m_Chat.Say(0, aBuf);
+					str_format(pResponse, SizeOfResponse, "%s i war %s because his clan %s is on my warlist.", pMessageAuthor, aVictim, Client.m_aClan);
 					return true;
 				}
 			}
@@ -364,14 +365,12 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 			if(aWarReason[0])
 				str_format(aBuf, sizeof(aBuf), "%s has war because: %s", pMessageAuthor, aWarReason);
 			else
-				str_format(aBuf, sizeof(aBuf), "%s you are on my warlist.", pMessageAuthor);
-			m_pClient->m_Chat.Say(0, aBuf);
+				str_format(pResponse, SizeOfResponse, "%s you are on my warlist.", pMessageAuthor);
 			return true;
 		}
 		else if(m_pClient->m_WarList.IsWarClanlist(m_aLastPingClan))
 		{
-			str_format(aBuf, sizeof(aBuf), "%s your clan is on my warlist.", pMessageAuthor);
-			m_pClient->m_Chat.Say(0, aBuf);
+			str_format(pResponse, SizeOfResponse, "%s your clan is on my warlist.", pMessageAuthor);
 			return true;
 		}
 	}
@@ -379,10 +378,8 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	// spec me
 	if(str_find_nocase(pMessage, "spec") || str_find_nocase(pMessage, "watch") || (str_find_nocase(pMessage, "look") && !str_find_nocase(pMessage, "looks")) || str_find_nocase(pMessage, "schau"))
 	{
-		str_format(aBuf, sizeof(aBuf), "/pause %s", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
-		str_format(aBuf, sizeof(aBuf), "%s ok i am watching you", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "/pause %s", pMessageAuthor);
+		str_format(pResponse, SizeOfResponse, "%s ok i am watching you", pMessageAuthor);
 		return true;
 	}
 	// wanna? (always say no automated if motivated to do something type yes manually)
@@ -392,15 +389,13 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		// If you get asked to be given something "no sorry" sounds weird
 		// If you are being asked to do something together "no thanks" sounds weird
 		// the generic "no" might be a bit dry
-		str_format(aBuf, sizeof(aBuf), "%s no", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s no", pMessageAuthor);
 		return true;
 	}
 	// help
 	if(str_find_nocase(pMessage, "help") || str_find_nocase(pMessage, "hilfe"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s where? what?", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s where? what?", pMessageAuthor);
 		return true;
 	}
 	// small talk
@@ -412,14 +407,12 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		str_find_nocase(pMessage, "ca va") ||
 		(str_find_nocase(pMessage, "как") && str_find_nocase(pMessage, "дела")))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s good, and you? :)", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s good, and you? :)", pMessageAuthor);
 		return true;
 	}
 	if(str_find_nocase(pMessage, "wie gehts") || str_find_nocase(pMessage, "wie geht es") || str_find_nocase(pMessage, "was geht"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s gut, und dir? :)", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s gut, und dir? :)", pMessageAuthor);
 		return true;
 	}
 	if(str_find_nocase(pMessage, "about you") || str_find_nocase(pMessage, "and you") || str_find_nocase(pMessage, "and u") ||
@@ -427,8 +420,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		(str_find_nocase(pMessage, "wbu") && MsgLen < NameLen + 8) ||
 		(str_find_nocase(pMessage, "hbu") && MsgLen < NameLen + 8))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s good", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s good", pMessageAuthor);
 		return true;
 	}
 	// advertise chillerbot
@@ -436,8 +428,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		str_find_nocase(pMessage, "good client") ||
 		((str_find_nocase(pMessage, "ddnet") || str_find_nocase(pMessage, "vanilla")) && str_find_nocase(pMessage, "?")))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s I use chillerbot-ux ( https://chillerbot.github.io )", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s I use chillerbot-ux ( https://chillerbot.github.io )", pMessageAuthor);
 		return true;
 	}
 	// whats your setting (mousesense, distance, dyn)
@@ -451,22 +442,19 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		   str_find_nocase(pMessage, "hoch")) &&
 		(str_find_nocase(pMessage, "sens") || str_find_nocase(pMessage, "sesn") || str_find_nocase(pMessage, "snse") || str_find_nocase(pMessage, "senes") || str_find_nocase(pMessage, "inp") || str_find_nocase(pMessage, "speed")))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s my current inp_mousesens is %d", pMessageAuthor, g_Config.m_InpMousesens);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s my current inp_mousesens is %d", pMessageAuthor, g_Config.m_InpMousesens);
 		return true;
 	}
 	if((str_find_nocase(pMessage, "?") || str_find_nocase(pMessage, "what") || str_find_nocase(pMessage, "which") || str_find_nocase(pMessage, "wat") || str_find_nocase(pMessage, "much") || str_find_nocase(pMessage, "many")) &&
 		str_find_nocase(pMessage, "dist"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s my current cl_mouse_max_distance is %d", pMessageAuthor, g_Config.m_ClMouseMaxDistance);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s my current cl_mouse_max_distance is %d", pMessageAuthor, g_Config.m_ClMouseMaxDistance);
 		return true;
 	}
 	if((str_find_nocase(pMessage, "?") || str_find_nocase(pMessage, "do you") || str_find_nocase(pMessage, "do u")) &&
 		str_find_nocase(pMessage, "dyn"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s my dyncam is currently %s", pMessageAuthor, g_Config.m_ClDyncam ? "on" : "off");
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s my dyncam is currently %s", pMessageAuthor, g_Config.m_ClDyncam ? "on" : "off");
 		return true;
 	}
 	// compliments
@@ -476,28 +464,24 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		str_find_nocase(pMessage, "nice") ||
 		str_find_nocase(pMessage, "pro"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s thanks", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s thanks", pMessageAuthor);
 		return true;
 	}
 	// impatient
 	if(str_find_nocase(pMessage, "answer") || str_find_nocase(pMessage, "ignore") || str_find_nocase(pMessage, "antwort") || str_find_nocase(pMessage, "ignorier"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s i am currently busy (automated reply)", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s i am currently busy (automated reply)", pMessageAuthor);
 		return true;
 	}
 	// weeb
 	if(str_find_nocase(pMessage, "uwu"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s OwO", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s OwO", pMessageAuthor);
 		return true;
 	}
 	if(str_find_nocase(pMessage, "owo"))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s UwU", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s UwU", pMessageAuthor);
 		return true;
 	}
 	// no u
@@ -509,8 +493,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 					   str_find_nocase(pMessage, "nub") ||
 					   str_find_nocase(pMessage, "bad")))
 	{
-		str_format(aBuf, sizeof(aBuf), "%s no u", pMessageAuthor);
-		m_pClient->m_Chat.Say(0, aBuf);
+		str_format(pResponse, SizeOfResponse, "%s no u", pMessageAuthor);
 		return true;
 	}
 	return false;
@@ -723,13 +706,19 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 				Get128Name(pLine, aName);
 				// dbg_msg("chillerbot", "fixname 128 player '%s' -> '%s'", m_pClient->m_aClients[ClientID].m_aName, aName);
 			}
-			if(!ReplyToLastPing(aName, pLine))
+			char aResponse[1024];
+			if(ReplyToLastPing(aName, pLine, aResponse, sizeof(aResponse)))
+			{
+				if(aResponse[0])
+					SayBuffer(aResponse);
+			}
+			else
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s your message got spam filtered", aName);
 				SayBuffer(aBuf);
-				m_aLastPingMessage[0] = '\0';
 			}
+			m_aLastPingMessage[0] = '\0';
 		}
 		return true;
 	}
