@@ -69,13 +69,10 @@ done
 
 ins=()
 outs=()
-ins+=('hi client2');outs+=('hi client2')
+ins+=('hi client2');outs+=('hi client1')
 ins+=('client2 how are you?');outs+=('client1 good, and you? :)')
 ins+=('wats ur inp_mousesens? client2');outs+=('client1 my current inp_mousesens is 1000')
 ins+=('client2: why?');outs+=('client1 has war because: bullied me in school')
-ins+=('test');outs+=('test')
-ins+=('test');outs+=('test')
-ins+=('test');outs+=('test')
 ins+=('client2: why kill my friend foo');outs+=('client1: foo has war because: bullied me in school')
 ins+=('why do you war foo client2');outs+=('client1: foo has war because: bullied me in school')
 # TODO: add str_endswith_nocase() https://github.com/chillerbot/chillerbot-ux/issues/58
@@ -87,6 +84,7 @@ function run_tests() {
 	local out_msg
 	local srv_log
 	local line
+	local attempts
 	sleep 1
 	for i in "${!ins[@]}"
 	do
@@ -106,7 +104,25 @@ function run_tests() {
 		done
 		echo "reply_to_last_ping" > client2.fifo
 		sleep 0.5
-		srv_log="$(tail server.log)"
+		attempts=0
+		while grep -F '[chat]' server.log | grep -v NOREPLY | tail -n 1 | grep -q '[0-9]:client1: '
+		do
+			if [ "$attempts" -gt "0" ]
+			then
+				break
+			fi
+			attempts="$((attempts+1))"
+			# last message is from client1
+			# resend
+			# also resend the input message because reply to last ping got wiped
+			echo "say $in_msg" > client1.fifo
+			sleep 0.5
+			printf '!'
+			echo "reply_to_last_ping" > client2.fifo
+			sleep 0.5
+		done
+		sleep 0.5
+		srv_log="$(grep -F '[chat]' server.log | tail -n2)"
 		if ! echo "$srv_log" | grep -qF "$out_msg"
 		then
 			echo ""
