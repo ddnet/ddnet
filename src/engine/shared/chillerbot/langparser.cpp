@@ -1,7 +1,7 @@
 // Langugage parser by ChillerDragon
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
 #include <base/system.h>
 
