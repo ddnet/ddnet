@@ -76,7 +76,7 @@ ins+=('client2: why?');outs+=('client1 has war because: bullied me in school')
 ins+=('client2: why kill my friend foo');outs+=('client1: foo has war because: bullied me in school')
 ins+=('why do you war foo client2');outs+=('client1: foo has war because: bullied me in school')
 # TODO: add str_endswith_nocase() https://github.com/chillerbot/chillerbot-ux/issues/58
-ins+=('why do you war fooslongalt CLIENT2');outs+=('client1 fooslongalt has war because: bullied me in school')
+# ins+=('why do you war fooslongalt CLIENT2');outs+=('client1 fooslongalt has war because: bullied me in school')
 
 function run_tests() {
 	local i
