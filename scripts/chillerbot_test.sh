@@ -80,6 +80,8 @@ ins+=('why do you war foo client2');outs+=('client1: foo has war because: bullie
 ins+=('kann ich dich was fragen client2?');outs+=('client1 frag! Aber es kann sein, dass ich nicht antworte.')
 ins+=('can me ask question client2');outs+=('client1 yes but I might not answer')
 ins+=('kan i di was frage client2?');outs+=('client1 frag! Aber es kann sein, dass ich nicht antworte.')
+ins+=('u have nade client2?');outs+=('client1 No I got those weapons: hammer, gun')
+ins+=('client2 hast du hammer?');outs+=('client1 Yes I got those weapons: hammer, gun')
 # not sure if that should be covered
 # ins+=('I HAVE A QUESTION client2');outs+=('client1 okay')
 # TODO: add str_endswith_nocase() https://github.com/chillerbot/chillerbot-ux/issues/58

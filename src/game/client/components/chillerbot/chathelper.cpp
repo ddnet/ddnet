@@ -475,6 +475,42 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	// ask to ask
 	if(m_LangParser.IsAskToAsk(pMessage, pMessageAuthor, pResponse, SizeOfResponse))
 		return true;
+	// got weapon?
+	if(str_find_nocase(pMessage, "got") || str_find_nocase(pMessage, "have") || str_find_nocase(pMessage, "hast"))
+	{
+		int Weapon = -1;
+		if(str_find_nocase(pMessage, "hammer"))
+			Weapon = WEAPON_HAMMER;
+		else if(str_find_nocase(pMessage, "gun"))
+			Weapon = WEAPON_GUN;
+		else if(str_find_nocase(pMessage, "sg") || str_find_nocase(pMessage, "shotgun") || str_find_nocase(pMessage, "shotty"))
+			Weapon = WEAPON_SHOTGUN;
+		else if(str_find_nocase(pMessage, "nade") || str_find_nocase(pMessage, "rocket") || str_find_nocase(pMessage, "bazooka"))
+			Weapon = WEAPON_GRENADE;
+		else if(str_find_nocase(pMessage, "rifle") || str_find_nocase(pMessage, "laser") || str_find_nocase(pMessage, "sniper"))
+			Weapon = WEAPON_LASER;
+		if(CCharacter *pChar = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
+		{
+			char aWeapons[1024];
+			aWeapons[0] = '\0';
+			if(pChar->GetWeaponGot(WEAPON_HAMMER))
+				str_append(aWeapons, "hammer", sizeof(aWeapons));
+			if(pChar->GetWeaponGot(WEAPON_GUN))
+				str_append(aWeapons, aWeapons[0] ? ", gun" : "gun", sizeof(aWeapons));
+			if(pChar->GetWeaponGot(WEAPON_SHOTGUN))
+				str_append(aWeapons, aWeapons[0] ? ", shotgun" : "shotgun", sizeof(aWeapons));
+			if(pChar->GetWeaponGot(WEAPON_GRENADE))
+				str_append(aWeapons, aWeapons[0] ? ", grenade" : "grenade", sizeof(aWeapons));
+			if(pChar->GetWeaponGot(WEAPON_LASER))
+				str_append(aWeapons, aWeapons[0] ? ", rifle" : "rifle", sizeof(aWeapons));
+
+			if(pChar->GetWeaponGot(Weapon))
+				str_format(pResponse, SizeOfResponse, "%s Yes I got those weapons: %s", pMessageAuthor, aWeapons);
+			else
+				str_format(pResponse, SizeOfResponse, "%s No I got those weapons: %s", pMessageAuthor, aWeapons);
+			return true;
+		}
+	}
 	// weeb
 	if(str_find_nocase(pMessage, "uwu"))
 	{
