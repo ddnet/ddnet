@@ -74,7 +74,14 @@ ins+=('client2 how are you?');outs+=('client1 good, and you? :)')
 ins+=('wats ur inp_mousesens? client2');outs+=('client1 my current inp_mousesens is 1000')
 ins+=('client2: why?');outs+=('client1 has war because: bullied me in school')
 ins+=('client2: why kill my friend foo');outs+=('client1: foo has war because: bullied me in school')
+ins+=('can i ask you smtin client2');outs+=('client1 yes but I might not answer')
+ins+=('can i ask you something client2');outs+=('client1 yes but I might not answer')
 ins+=('why do you war foo client2');outs+=('client1: foo has war because: bullied me in school')
+ins+=('kann ich dich was fragen client2?');outs+=('client1 frag! Aber es kann sein, dass ich nicht antworte.')
+ins+=('can me ask question client2');outs+=('client1 yes but I might not answer')
+ins+=('kan i di was frage client2?');outs+=('client1 frag! Aber es kann sein, dass ich nicht antworte.')
+# not sure if that should be covered
+# ins+=('I HAVE A QUESTION client2');outs+=('client1 okay')
 # TODO: add str_endswith_nocase() https://github.com/chillerbot/chillerbot-ux/issues/58
 # ins+=('why do you war fooslongalt CLIENT2');outs+=('client1 fooslongalt has war because: bullied me in school')
 

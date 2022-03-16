@@ -1,8 +1,70 @@
 // Langugage parser by ChillerDragon
 
+#include <stdarg.h>
+#include <stdio.h>
+
 #include <base/system.h>
 
 #include "langparser.h"
+
+const char *CLangParser::StrFindOrder(const char *pHaystack, int NumNeedles, ...)
+{
+	va_list args;
+	va_start(args, NumNeedles);
+	// dbg_msg("langparser", "strfindorder called with %d needles", NumNeedles);
+	const char *pSearch = pHaystack;
+	bool Found = true;
+	for(int i = 0; i < NumNeedles; i++)
+	{
+		const char *pNeedle = va_arg(args, const char *);
+		// dbg_msg("needle", "%s", pNeedle);
+		if(!(pSearch = str_find_nocase(pSearch, pNeedle)))
+		{
+			Found = false;
+			break;
+		}
+	}
+	va_end(args);
+	return Found ? pSearch : NULL;
+}
+
+bool CLangParser::IsAskToAskGerman(const char *pMessage, const char *pMessageAuthor, char *pResponse, int SizeOfResponse)
+{
+	if(pResponse)
+		pResponse[0] = '\0';
+	// kann ich dich etwas
+	// kan i di was
+	const char *pCanSomething = StrFindOrder(pMessage, 2, "kan", "was");
+	if(!pCanSomething)
+		return false;
+	if(str_find_nocase(pCanSomething, "frag"))
+	{
+		if(pResponse)
+			str_format(pResponse, SizeOfResponse, "%s frag! Aber es kann sein, dass ich nicht antworte.", pMessageAuthor ? pMessageAuthor : "");
+		return true;
+	}
+	return false;
+}
+
+bool CLangParser::IsAskToAsk(const char *pMessage, const char *pMessageAuthor, char *pResponse, int SizeOfResponse)
+{
+	if(pResponse)
+		pResponse[0] = '\0';
+	const char *pCanAsk = StrFindOrder(pMessage, 2, "can", "ask");
+	if(!pCanAsk)
+		return IsAskToAskGerman(pMessage, pMessageAuthor, pResponse, SizeOfResponse);
+	if(str_find_nocase(pCanAsk, "smt") ||
+		str_find_nocase(pCanAsk, "sume") ||
+		str_find_nocase(pCanAsk, "some") ||
+		str_find_nocase(pCanAsk, "thing") ||
+		str_find_nocase(pCanAsk, "question"))
+	{
+		if(pResponse)
+			str_format(pResponse, SizeOfResponse, "%s yes but I might not answer", pMessageAuthor ? pMessageAuthor : "");
+		return true;
+	}
+	return false;
+}
 
 bool CLangParser::IsGreeting(const char *pMsg)
 {

@@ -181,7 +181,6 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	if(pMessage[0] == '\0')
 		return false;
 
-	char aBuf[128];
 	int MsgLen = str_length(pMessage);
 	int NameLen = 0;
 	const char *pName = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName;
@@ -473,6 +472,9 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		str_format(pResponse, SizeOfResponse, "%s i am currently busy (automated reply)", pMessageAuthor);
 		return true;
 	}
+	// ask to ask
+	if(m_LangParser.IsAskToAsk(pMessage, pMessageAuthor, pResponse, SizeOfResponse))
+		return true;
 	// weeb
 	if(str_find_nocase(pMessage, "uwu"))
 	{
@@ -666,6 +668,8 @@ int CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 
 	// ping without further context
 	if(MsgLen < NameLen + 2)
+		return SPAM_OTHER;
+	else if(m_LangParser.IsAskToAsk(pMsg))
 		return SPAM_OTHER;
 	else if(!str_comp(aName, "nameless tee") || !str_comp(aName, "brainless tee") || str_find(aName, ")nameless tee") || str_find(aName, ")brainless te"))
 		return SPAM_OTHER;
