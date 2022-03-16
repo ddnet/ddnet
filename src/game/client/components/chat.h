@@ -4,9 +4,9 @@
 #define GAME_CLIENT_COMPONENTS_CHAT_H
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
+
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
-
 #include <game/client/skin.h>
 
 class CChat : public CComponent
@@ -80,6 +80,13 @@ class CChat : public CComponent
 	char m_aCompletionBuffer[256];
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
+	struct CRateablePlayer
+	{
+		int ClientID;
+		int Score;
+	};
+	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
+	int m_PlayerCompletionListLength;
 
 	struct CCommand
 	{
