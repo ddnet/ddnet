@@ -102,13 +102,13 @@ bool OpenMaps(IStorage *pStorage, const char pMapNames[3][64], CDataFileReader I
 		}
 	}
 
-        if(!OutputMap.Open(pStorage, pMapNames[2], IStorage::TYPE_ABSOLUTE))
-        {
-                dbg_msg("map_replace_area", "Error: unable to open map '%s'", pMapNames[2]);
-                return false;
-        }
-
-        return true;
+	if(!OutputMap.Open(pStorage, pMapNames[2], IStorage::TYPE_ABSOLUTE))
+	{
+		dbg_msg("map_replace_area", "Error: unable to open map '%s'", pMapNames[2]);
+		return false;
+	}
+	
+	return true;
 }
 
 bool CompareLayers(const char pMapNames[3][64], CDataFileReader InputMaps[2])
