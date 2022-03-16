@@ -713,11 +713,21 @@ int CChatHelper::IsSpam(int ClientID, int Team, const char *pMsg)
 		return SPAM_OTHER;
 	else if(str_find(pMsg, "bro, check out this client: krxclient.pages.dev"))
 		return SPAM_OTHER;
-	else if((str_find(pMsg, "help") || str_find(pMsg, "hilfe")) && MsgLen < NameLen + 16)
+	else if((str_find_nocase(pMsg, "help") || str_find_nocase(pMsg, "hilfe")) && MsgLen < NameLen + 16)
 		return SPAM_OTHER;
-	else if((str_find(pMsg, "give") || str_find(pMsg, "need") || str_find(pMsg, "want") || str_find(pMsg, "please") || str_find(pMsg, "pls") || str_find(pMsg, "plz")) &&
-		(str_find(pMsg, "rcon") || str_find(pMsg, "password") || str_find(pMsg, "admin") || str_find(pMsg, "helper") || str_find(pMsg, "mod") || str_find(pMsg, "money") || str_find(pMsg, "moni") || str_find(pMsg, "flag")))
-		return SPAM_OTHER;
+	else if((str_find_nocase(pMsg, "give") || str_find_nocase(pMsg, "need") || str_find_nocase(pMsg, "want") || str_find_nocase(pMsg, "please") || str_find_nocase(pMsg, "pls") || str_find_nocase(pMsg, "plz")) &&
+		(str_find_nocase(pMsg, "rcon") || str_find_nocase(pMsg, "password") || str_find_nocase(pMsg, "admin") || str_find_nocase(pMsg, "helper") || str_find_nocase(pMsg, "mod") || str_find_nocase(pMsg, "money") || str_find_nocase(pMsg, "moni") || str_find_nocase(pMsg, "flag")))
+	{
+		// "I give you money"
+		// "Do you want me to give you the flag"
+		// "I give money back chillerdragon"
+		// "ChillerDragon: Can you please post a tutorial on how to download the DDNet++ mod"
+		if((str_find_nocase(pMsg, " i ") && str_find_nocase(pMsg, "you")) || str_find_nocase(pMsg, "give you") || m_LangParser.StrFindOrder(pMsg, 2, "give", "back") ||
+			(str_find_nocase(pMsg, "mod") && (str_find_nocase(pMsg, "tutorial") || str_find_nocase(pMsg, "code") || str_find_nocase(pMsg, "download"))))
+			return SPAM_NONE;
+		else
+			return SPAM_OTHER;
+	}
 	return SPAM_NONE;
 }
 
