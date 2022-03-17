@@ -155,6 +155,10 @@ void CPlayerPics::RenderNameplate(
 
 void CPlayerPics::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha)
 {
+	int ClientID = pPlayerInfo->m_ClientID;
+	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+	float YOffset = Position.y - (g_Config.m_ClRenderPicHeight + (g_Config.m_ClNameplatesClan ? 90.0f : 60.0f));
+
 	// render playerpic
 	if(!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn)
 	{
@@ -163,13 +167,48 @@ void CPlayerPics::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			// render player pics
 			vec4 Color(1.0f, 1.0f, 1.0f, g_Config.m_ClRenderPicAlpha / 100.0f);
-			Render(pName, &Color, Position.x - (g_Config.m_ClRenderPicWidth / 2), Position.y - (g_Config.m_ClRenderPicHeight + (g_Config.m_ClNameplatesClan ? 90.0f : 60.0f)), g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
+			Render(pName, &Color, Position.x - (g_Config.m_ClRenderPicWidth / 2), YOffset, g_Config.m_ClRenderPicWidth, g_Config.m_ClRenderPicHeight);
 		}
 
 		TextRender()->TextColor(1, 1, 1, 1);
 		TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
 
 		TextRender()->SetRenderFlags(0);
+
+		char aWarReason[128];
+		m_pClient->m_WarList.GetWarReason(pName, aWarReason, sizeof(aWarReason));
+		if(g_Config.m_ClNameplatesWarReason && aWarReason[0])
+		{
+			if(str_comp(aWarReason, m_aNamePlates[ClientID].m_aWarReason) != 0 || FontSizeClan != m_aNamePlates[ClientID].m_WarReasonTextFontSize)
+			{
+				mem_copy(m_aNamePlates[ClientID].m_aWarReason, aWarReason, sizeof(m_aNamePlates[ClientID].m_aWarReason));
+				m_aNamePlates[ClientID].m_WarReasonTextFontSize = FontSizeClan;
+
+				if(m_aNamePlates[ClientID].m_WarReasonTextContainerIndex != -1)
+					TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_WarReasonTextContainerIndex);
+
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1;
+
+				// create nameplates at standard zoom
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+
+				m_aNamePlates[ClientID].m_WarReasonTextWidth = TextRender()->TextWidth(0, FontSizeClan, aWarReason, -1, -1.0f);
+
+				m_aNamePlates[ClientID].m_WarReasonTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, aWarReason);
+				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			}
+			YOffset += FontSizeClan;
+			STextRenderColor TColor;
+			STextRenderColor TOutlineColor;
+			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.6f);
+			TColor.Set(1.0f, 0.0f, 0.0f, 0.7f);
+			if(m_aNamePlates[ClientID].m_WarReasonTextContainerIndex != -1)
+				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_WarReasonTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_WarReasonTextWidth / 2.0f, YOffset);
+		}
 	}
 }
 

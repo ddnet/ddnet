@@ -8,6 +8,33 @@
 
 #include <game/client/components/nameplates.h>
 
+struct SChillerNamePlate
+{
+	SChillerNamePlate()
+	{
+		Reset();
+	}
+
+	void Reset()
+	{
+		m_NameTextContainerIndex = m_WarReasonTextContainerIndex = -1;
+		m_aName[0] = 0;
+		m_aWarReason[0] = 0;
+		m_NameTextWidth = m_WarReasonTextWidth = 0.f;
+		m_NameTextFontSize = m_WarReasonTextFontSize = 0;
+	}
+
+	char m_aName[MAX_NAME_LENGTH];
+	float m_NameTextWidth;
+	int m_NameTextContainerIndex;
+	float m_NameTextFontSize;
+
+	char m_aWarReason[128];
+	float m_WarReasonTextWidth;
+	int m_WarReasonTextContainerIndex;
+	float m_WarReasonTextFontSize;
+};
+
 class CPlayerPics : public CComponent
 {
 public:
@@ -41,7 +68,7 @@ private:
 	void LoadPlayerpicsIndexfile();
 
 	void MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup);
-	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
+	SChillerNamePlate m_aNamePlates[MAX_CLIENTS];
 	void RenderNameplate(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
