@@ -323,6 +323,32 @@ bool CChat::OnInput(IInput::CEvent Event)
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
+		if(!m_CompletionUsed && m_aCompletionBuffer[0] != '/')
+		{
+			// Create the completion list of player names through which the player can iterate
+			const char *PlayerName, *FoundInput;
+			m_PlayerCompletionListLength = 0;
+			for(auto &PlayerInfo : m_pClient->m_Snap.m_paInfoByName)
+			{
+				if(PlayerInfo)
+				{
+					PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
+					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
+					if(FoundInput != 0)
+					{
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientID = PlayerInfo->m_ClientID;
+						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = (int)(FoundInput - PlayerName);
+						m_PlayerCompletionListLength++;
+					}
+				}
+			}
+			std::stable_sort(m_aPlayerCompletionList, m_aPlayerCompletionList + m_PlayerCompletionListLength,
+				[](const CRateablePlayer &p1, const CRateablePlayer &p2) -> bool {
+					return p1.Score < p2.Score;
+				});
+		}
+
 		if(m_aCompletionBuffer[0] == '/')
 		{
 			CCommand *pCompletionCommand = 0;
@@ -395,50 +421,34 @@ bool CChat::OnInput(IInput::CEvent Event)
 		{
 			// find next possible name
 			const char *pCompletionString = 0;
-
-			if(m_ReverseTAB && m_CompletionUsed)
-				m_CompletionChosen--;
-			else if(!m_ReverseTAB)
-				m_CompletionChosen++;
-			m_CompletionChosen = (m_CompletionChosen + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS);
-
-			m_CompletionUsed = true;
-
-			for(int i = 0; i < 2 * MAX_CLIENTS; ++i)
+			if(m_PlayerCompletionListLength > 0)
 			{
-				int SearchType;
-				int Index;
-
-				if(m_ReverseTAB)
+				// We do this in a loop, if a player left the game during the repeated pressing of Tab, they are skipped
+				CGameClient::CClientData *CompletionClientData;
+				for(int i = 0; i < m_PlayerCompletionListLength; ++i)
 				{
-					SearchType = ((m_CompletionChosen - i + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS)) / MAX_CLIENTS;
-					Index = (m_CompletionChosen - i + MAX_CLIENTS) % MAX_CLIENTS;
-				}
-				else
-				{
-					SearchType = ((m_CompletionChosen + i) % (2 * MAX_CLIENTS)) / MAX_CLIENTS;
-					Index = (m_CompletionChosen + i) % MAX_CLIENTS;
-				}
+					if(m_ReverseTAB && m_CompletionUsed)
+					{
+						m_CompletionChosen--;
+					}
+					else if(!m_ReverseTAB)
+					{
+						m_CompletionChosen++;
+					}
+					if(m_CompletionChosen < 0)
+					{
+						m_CompletionChosen += m_PlayerCompletionListLength;
+					}
+					m_CompletionChosen %= m_PlayerCompletionListLength;
+					m_CompletionUsed = true;
 
-				if(!m_pClient->m_Snap.m_paInfoByName[Index])
-					continue;
+					CompletionClientData = &m_pClient->m_aClients[m_aPlayerCompletionList[m_CompletionChosen].ClientID];
+					if(!CompletionClientData->m_Active)
+					{
+						continue;
+					}
 
-				int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
-
-				bool Found = false;
-				if(SearchType == 1)
-				{
-					if(str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
-						str_utf8_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
-						Found = true;
-				}
-				else if(!str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
-					Found = true;
-
-				if(Found)
-				{
-					pCompletionString = m_pClient->m_aClients[Index2].m_aName;
-					m_CompletionChosen = Index + SearchType * MAX_CLIENTS;
+					pCompletionString = CompletionClientData->m_aName;
 					break;
 				}
 			}
