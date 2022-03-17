@@ -32,10 +32,21 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	CCharacter *pHit;
 	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0 && !m_WasTele);
 
+	CGameWorld *world = GameWorld();
+
+	//gets non predicted world if player positions is disabled
+	if(!g_Config.m_ClAntiPingPlayers)
+	{
+		while(world->m_pParent != nullptr)
+		{
+			world = world->m_pParent;
+		}
+	}
+
 	if(pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) && m_Type == WEAPON_LASER) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : 0, m_Owner);
+		pHit = world->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : 0, m_Owner);
 	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
+		pHit = world->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
 
 	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER && m_Type == WEAPON_LASER) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
 		return false;
