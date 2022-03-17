@@ -32,7 +32,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
 	{
-		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		dbg_msg("map_replace_image", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
 	int Error = png_open_read(&Png, 0, File);
@@ -54,7 +54,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		dbg_msg("map_replace_image", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
 		free(pBuffer);
 		io_close(File);
 		return 0;
@@ -181,7 +181,7 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
 	{
 		if(Index == g_NewDataID)
 		{

@@ -162,7 +162,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 					float r = Voice.m_Circle.m_Radius;
 					RangeX = r;
 
-					int Dist = (int)sqrtf((float)dx * dx + dy * dy); // nasty float
+					int Dist = (int)sqrtf((float)dx * dx + (float)dy * dy); // nasty float
 					if(Dist < r)
 					{
 						InVoiceField = true;

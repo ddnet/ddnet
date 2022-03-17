@@ -8,6 +8,8 @@ You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/),
 
 [Source Code Documentation](https://wiki.ddnet.tw/docs/) is available.
 
+If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.tw/wiki/Development) article on the wiki.
+
 Cloning
 -------
 
