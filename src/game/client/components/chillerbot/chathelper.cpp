@@ -28,10 +28,7 @@ void CChatHelper::OnInit()
 	m_aGreetName[0] = '\0';
 	m_NextGreetClear = 0;
 	m_NextMessageSend = 0;
-	m_NextPingMsgClear = 0;
 	m_aLastAfkPing[0] = '\0';
-	m_aLastPingMessage[0] = '\0';
-	m_aLastPingName[0] = '\0';
 	mem_zero(m_aSendBuffer, sizeof(m_aSendBuffer));
 }
 
@@ -40,15 +37,22 @@ void CChatHelper::OnRender()
 	int64_t time_now = time_get();
 	if(time_now % 10 == 0)
 	{
+		for(auto &Ping : m_aLastPings)
+		{
+			if(!Ping.m_ReciveTime)
+				continue;
+			if(Ping.m_ReciveTime < time_now - time_freq() * 60)
+			{
+				Ping.m_aName[0] = '\0';
+				Ping.m_aClan[0] = '\0';
+				Ping.m_aMessage[0] = '\0';
+				Ping.m_ReciveTime = 0;
+			}
+		}
 		if(m_NextGreetClear < time_now)
 		{
 			m_NextGreetClear = 0;
 			m_aGreetName[0] = '\0';
-		}
-		if(m_NextPingMsgClear < time_now)
-		{
-			m_NextPingMsgClear = 0;
-			m_aLastPingMessage[0] = '\0';
 		}
 		if(m_NextMessageSend < time_now)
 		{
@@ -96,11 +100,31 @@ void CChatHelper::ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData
 {
 	CChatHelper *pSelf = (CChatHelper *)pUserData;
 	char aResponse[1024];
-	if(pSelf->ReplyToLastPing(pSelf->m_aLastPingName, pSelf->m_aLastPingMessage, aResponse, sizeof(aResponse)))
+	char aName[32];
+	char aClan[32];
+	char aMessage[2048];
+	aMessage[0] = 'x';
+	// pop message stack until reached the end
+	// abort as soon as a response is found
+	// this makes sure we always respond to something
+	// given there is any respondable message is still in the stack
+	while(aMessage[0])
 	{
-		pSelf->m_aLastPingMessage[0] = '\0';
-		if(aResponse[0])
-			pSelf->m_pClient->m_Chat.Say(0, aResponse);
+		pSelf->PopPing(aName, sizeof(aName), aClan, sizeof(aClan), aMessage, sizeof(aMessage));
+		dbg_msg("autoreply", "popped name=%s message=%s", aName, aMessage);
+		int i = 0;
+		for(auto &Ping : pSelf->m_aLastPings)
+		{
+			dbg_msg("autoreply", "%d: name=%s msg=%s", i++, Ping.m_aName, Ping.m_aMessage);
+		}
+		if(pSelf->ReplyToLastPing(aName, aClan, aMessage, aResponse, sizeof(aResponse)))
+		{
+			if(aResponse[0])
+			{
+				pSelf->m_pClient->m_Chat.Say(0, aResponse);
+				break;
+			}
+		}
 	}
 }
 
@@ -154,8 +178,8 @@ void CChatHelper::SayFormat(const char *pMsg)
 		{
 			if(pMsg[i + 1] == 'n')
 			{
-				str_append(aBuf, m_aLastPingName, sizeof(aBuf));
-				buf_i += str_length(m_aLastPingName);
+				str_append(aBuf, m_aLastPings[0].m_aName, sizeof(aBuf));
+				buf_i += str_length(m_aLastPings[0].m_aName);
 				i++;
 				continue;
 			}
@@ -173,7 +197,7 @@ void CChatHelper::SayFormat(const char *pMsg)
 	m_pClient->m_Chat.Say(0, aBuf);
 }
 
-bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessage, char *pResponse, int SizeOfResponse)
+bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessageAuthorClan, const char *pMessage, char *pResponse, int SizeOfResponse)
 {
 	pResponse[0] = '\0';
 	if(pMessageAuthor[0] == '\0')
@@ -367,7 +391,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 				str_format(pResponse, SizeOfResponse, "%s you are on my warlist.", pMessageAuthor);
 			return true;
 		}
-		else if(m_pClient->m_WarList.IsWarClanlist(m_aLastPingClan))
+		else if(m_pClient->m_WarList.IsWarClanlist(pMessageAuthorClan))
 		{
 			str_format(pResponse, SizeOfResponse, "%s your clan is on my warlist.", pMessageAuthor);
 			return true;
@@ -587,18 +611,16 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		return;
 	if(Client()->DummyConnected() && !str_comp(aName, m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName))
 		return;
-	str_copy(m_aLastPingName, aName, sizeof(m_aLastPingName));
-	str_copy(m_aLastPingClan, m_pClient->m_aClients[ClientID].m_aClan, sizeof(m_aLastPingClan));
 	if(m_LangParser.IsGreeting(pMsg))
 	{
 		str_copy(m_aGreetName, aName, sizeof(m_aGreetName));
 		m_NextGreetClear = time_get() + time_freq() * 10;
 	}
+	// could iterate over ping history and also ignore older duplicates
 	// ignore duplicated messages
-	if(!str_comp(m_aLastPingMessage, pMsg))
+	if(!str_comp(m_aLastPings[0].m_aMessage, pMsg))
 		return;
-	str_copy(m_aLastPingMessage, pMsg, sizeof(m_aLastPingMessage));
-	m_NextPingMsgClear = time_get() + time_freq() * 60;
+	PushPing(aName, m_pClient->m_aClients[ClientID].m_aClan, pMsg);
 	int64_t AfkTill = m_pChillerBot->GetAfkTime();
 	if(m_pChillerBot->IsAfk())
 	{
@@ -759,7 +781,7 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 				// dbg_msg("chillerbot", "fixname 128 player '%s' -> '%s'", m_pClient->m_aClients[ClientID].m_aName, aName);
 			}
 			char aResponse[1024];
-			if(ReplyToLastPing(aName, pLine, aResponse, sizeof(aResponse)))
+			if(ReplyToLastPing(aName, m_pClient->m_aClients[ClientID].m_aClan, pLine, aResponse, sizeof(aResponse)))
 			{
 				if(aResponse[0])
 					SayBuffer(aResponse);
@@ -770,7 +792,9 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 				str_format(aBuf, sizeof(aBuf), "%s your message got spam filtered", aName);
 				SayBuffer(aBuf);
 			}
-			m_aLastPingMessage[0] = '\0';
+			// TODO: do we need PopPing() here? Can't we omit the pLine parameter then from this func?
+			// who is called first FilterChat() or OnChatMessage()
+			// m_aLastPingMessage[0] = '\0';
 		}
 		return true;
 	}

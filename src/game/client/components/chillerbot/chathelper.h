@@ -28,19 +28,66 @@ class CChatHelper : public CComponent
 
 	int64_t m_NextGreetClear;
 	int64_t m_NextMessageSend;
-	int64_t m_NextPingMsgClear;
+
+	struct CLastPing
+	{
+		CLastPing()
+		{
+			m_aName[0] = '\0';
+			m_aClan[0] = '\0';
+			m_aMessage[0] = '\0';
+			m_ReciveTime = 0;
+		}
+		char m_aName[32];
+		char m_aClan[32];
+		char m_aMessage[2048];
+		int64_t m_ReciveTime;
+	};
+
+	enum
+	{
+		PING_QUEUE_SIZE = 16
+	};
+
+	/*
+		m_aLastPings
+
+		A stack holding the most recent 16 pings in chat.
+		Index 0 will be the latest message.
+		Popping of the stack will always give you the most recent message.
+	*/
+	CLastPing m_aLastPings[PING_QUEUE_SIZE];
+
+	void PushPing(const char *pName, const char *pClan, const char *pMessage)
+	{
+		// yikers is this copying a shitton of data by value?
+		for(int i = PING_QUEUE_SIZE - 1; i > 0; i--)
+			m_aLastPings[i] = m_aLastPings[i - 1];
+		str_copy(m_aLastPings[0].m_aName, pName, sizeof(m_aLastPings[0].m_aName));
+		str_copy(m_aLastPings[0].m_aClan, pClan, sizeof(m_aLastPings[0].m_aClan));
+		str_copy(m_aLastPings[0].m_aMessage, pMessage, sizeof(m_aLastPings[0].m_aMessage));
+		m_aLastPings[0].m_ReciveTime = time_get();
+	}
+	void PopPing(char *pName, int SizeOfName, char *pClan, int SizeOfClan, char *pMessage, int SizeOfMessage)
+	{
+		str_copy(pName, m_aLastPings[0].m_aName, SizeOfName);
+		str_copy(pClan, m_aLastPings[0].m_aClan, SizeOfClan);
+		str_copy(pMessage, m_aLastPings[0].m_aMessage, SizeOfMessage);
+		m_aLastPings[PING_QUEUE_SIZE - 1].m_aName[0] = '\0';
+		m_aLastPings[PING_QUEUE_SIZE - 1].m_aClan[0] = '\0';
+		m_aLastPings[PING_QUEUE_SIZE - 1].m_aMessage[0] = '\0';
+		for(int i = 0; i < PING_QUEUE_SIZE - 1; i++)
+			m_aLastPings[i] = m_aLastPings[i + 1];
+	}
 
 	char m_aGreetName[32];
-	char m_aLastPingName[32];
-	char m_aLastPingClan[32];
 	char m_aLastAfkPing[2048];
-	char m_aLastPingMessage[2048];
 	char m_aSendBuffer[MAX_CHAT_BUFFER_LEN][2048];
 	char m_aaChatFilter[MAX_CHAT_FILTERS][MAX_CHAT_FILTER_LEN];
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void DoGreet();
-	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessage, char *pResponse, int SizeOfResponse);
+	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessageAuthorClan, const char *pMessage, char *pResponse, int SizeOfResponse);
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
 	void ListChatFilter();
@@ -72,7 +119,6 @@ public:
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 	void Get128Name(const char *pMsg, char *pName);
 	const char *GetGreetName() { return m_aGreetName; }
-	const char *GetPingName() { return m_aLastPingName; }
 	const char *LastAfkPingMessage() { return m_aLastAfkPing; }
 	void ClearLastAfkPingMessage() { m_aLastAfkPing[0] = '\0'; }
 	/*
