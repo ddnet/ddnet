@@ -168,7 +168,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 	{
 		// Use m_RenderInfo.m_CustomColoredSkin instead of m_UseCustomColor
 		// m_UseCustomColor says if the player's skin has a custom color (value sent from the client side)
-		
+
 		// m_RenderInfo.m_CustomColoredSkin Defines if in the context of the game the color is being customized,
 		// Using this value if the game is teams (red and blue), this value will be true even if the skin is with the normal color.
 		// And will use the team body color to create player death effect instead of tee color
