@@ -416,7 +416,7 @@ Show friends only
 == Nur Freunde zeigen
 
 Show ingame HUD
-== Spielanzeigen
+== Spiel-HUD anzeigen
 
 Show name plates
 == Zeige Namen

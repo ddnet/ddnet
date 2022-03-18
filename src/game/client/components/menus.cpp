@@ -1970,7 +1970,7 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button;
+			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button, Buttons;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -1980,7 +1980,8 @@ int CMenus::Render()
 #endif
 			Part.VMargin(80.0f, &Part);
 
-			Part.VSplitMid(&Abort, &Ok);
+			Part.HSplitBottom(20.0f, &Part, &Buttons);
+			Buttons.VSplitMid(&Abort, &Ok);
 
 			Ok.VMargin(20.0f, &Ok);
 			Abort.VMargin(20.0f, &Abort);
@@ -2028,12 +2029,11 @@ int CMenus::Render()
 
 			float ButtonSize = 20.0f;
 			Part.VSplitLeft(113.0f, 0, &Part);
-			Part.VSplitLeft(ButtonSize, &Button, &Part);
+			Part.VSplitLeft(200.0f, &Button, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
 				g_Config.m_ClVideoShowChat ^= 1;
-			Part.VSplitLeft(112.0f, 0, &Part);
-			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Button))
+			Part.VSplitLeft(32.0f, 0, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Part))
 				g_Config.m_ClVideoSndEnable ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -2071,9 +2071,8 @@ int CMenus::Render()
 			else if(DecDemoSpeed)
 				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
 
-			Part.VSplitLeft(107.0f, 0, &Part);
-			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Button))
+			Part.VSplitLeft(207.0f, 0, &Part);
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Part))
 				g_Config.m_ClVideoShowhud ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
