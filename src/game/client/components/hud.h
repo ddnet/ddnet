@@ -49,8 +49,8 @@ class CHud : public CComponent
 	void RenderTeambalanceWarning();
 	void RenderVoting();
 
-	void PrepareHealthAmoQuads();
-	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
+	void PrepareAmmoHealthAndArmorQuads();
+	void RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -87,6 +87,15 @@ private:
 	int m_CheckpointTick;
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
+
+	// Quad Offsets
+	int m_AmmoOffset[NUM_WEAPONS];
+	int m_HealthOffset;
+	int m_EmptyHealthOffset;
+	int m_ArmorOffset;
+	int m_EmptyArmorOffset;
+	int m_CursorOffset[NUM_WEAPONS];
+	int m_FlagOffset;
 };
 
 #endif
