@@ -4,6 +4,7 @@
 #modified by:
 #	Boti.
 #	Cellegen
+#       bencie
 ##### /authors #####
 
 ##### translated strings #####
@@ -493,7 +494,7 @@ Yes
 == Igen
 
 You must restart the game for all settings to take effect.
-== Újra kell indítani a játékot, a beállítások érvénybe lépéséhez.
+== Újra kell indítania a játékot ahhoz, hogy minden beállítás érvénybe lépjen.
 
 New name:
 == Új Név:
@@ -523,7 +524,7 @@ Created:
 == Készült:
 
 Max Screenshots
-== Maximum Fotó
+== Maximum Fotók
 
 Length:
 == Hossza:
@@ -541,7 +542,7 @@ Info
 == Infó
 
 Miscellaneous
-== Vegyes
+== Egyéb
 
 Record demo
 == Demó felvétele
@@ -835,7 +836,7 @@ Clan plates size
 == Klán felirat mérete
 
 Update now
-== frissíts most
+== Frissíts most
 
 Show clan above name plates
 == Klán mutatása a nevek fölött
@@ -922,7 +923,7 @@ Show DDNet map finishes in server browser
 == Mutassa a befejezett pályákat a keresőben
 
 transmits your player name to info2.ddnet.tw
-== Keress rá a játékosnevedre az info2.ddnet.tw oldalon
+== továbbítja a játékosnevedet az info2.ddnet.tw oldalra
 
 Reload
 == újratöltés
@@ -1084,10 +1085,10 @@ Length
 == Hossz
 
 Are you sure that you want to disconnect your dummy?
-== Biztos, hogy kiakarod léptetni a dummy-d?
+== Biztos, hogy kiakarod léptetni a másolatod?
 
 Saving ddnet-settings.cfg failed
-== nem sikerült elmenteni ddnet-settings.cfg fájlt
+== Nem sikerült elmenteni ddnet-settings.cfg fájlt
 
 Warning
 == Figyelmeztetés
@@ -1135,7 +1136,7 @@ Smooth Dynamic Camera
 == Egyenletes dinamikus kamera
 
 Skip the main menu
-== Főmenű kihagyása
+== Főmenü kihagyása
 
 Themes directory
 == Témák Helye
@@ -1159,7 +1160,7 @@ Chat sound volume
 == Chat Hangerő
 
 Background music volume
-== Háttér Zene hangerő
+== Háttérzene hangerő
 
 Assets
 == Kinézet
@@ -1201,7 +1202,7 @@ Run server
 == Szerver indítása
 
 Server executable not found, can't run server
-== nem sikerült elindítani a szervert
+== Nem sikerült elindítani a szervert
 
 Editor
 == Szerkesztő
@@ -1226,7 +1227,7 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 == A Struktúra Szélessége %s nem osztható %d al, vagy a magasság nem osztható %d al, ami vizuális hibákhoz vezethet.
 
 Getting server list from master server
-== Szerver Lista Lekérése
+== Szerverlista lekérése
 
 Leak IP
 == IP Mutatása
@@ -1292,7 +1293,7 @@ ASI
 == ÁZSIA
 
 AUS
-== AUSZTRIA
+== AUSZTRÁLIA
 
 EUR
 == EURÓPA
@@ -1331,19 +1332,19 @@ https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat.
 
 Settings file
-== 
+== Beállítások fájl
 
 Config directory
-== 
+== Konfigurációs fájl helye
 
 Windowed fullscreen
-== 
+== Ablakos Teljesképernyő
 
 Run on join
-== 
+== Futtatás belépéskor
 
 Chat command (e.g. showall 1)
-== 
+== Chat parancs (például showall 1)
