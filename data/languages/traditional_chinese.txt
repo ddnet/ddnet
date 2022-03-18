@@ -9,6 +9,7 @@
 # 2021-11-19 cheeser0613
 # 2021-12-21 cheeser0613
 # 2022-02-07 cheeser0613
+# 2022-03-19 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1357,4 +1358,4 @@ Windowed fullscreen
 == 視窗化全螢幕
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== %s 材質文件并非RGBA格式因此可能會導致視覺錯誤
