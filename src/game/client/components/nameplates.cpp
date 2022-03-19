@@ -174,14 +174,14 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSize;
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, YOffset);
-			if((g_Config.m_ClPingNameCircle || m_pClient->m_Scoreboard.Active()) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !pPlayerInfo->m_Local)) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
 				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_paPlayerInfos[ClientID]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.6f));
 				Graphics()->SetColor(rgb);
 				float CircleSize = 7.0f;
-				RenderTools()->DrawCircle(Position.x - tw / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 28);
+				RenderTools()->DrawCircle(Position.x - tw / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
 				Graphics()->QuadsEnd();
 			}
 		}
