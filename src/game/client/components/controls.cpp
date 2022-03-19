@@ -264,7 +264,7 @@ int CControls::SnapInput(int *pData)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
 	}
 
-	if(m_pClient->m_Scoreboard.Active() || g_Config.m_ClWhatsMyPing == 0)
+	if(m_pClient->m_Scoreboard.Active() || g_Config.m_ClWhatsMyPing == 0 || g_Config.m_ClPingNameCircle)
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
 	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)

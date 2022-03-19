@@ -75,7 +75,6 @@ void CCamera::ChangeZoom(float Target)
 
 void CCamera::OnRender()
 {
-	g_Config.m_ClWhatsMyZoom = (int)(m_Zoom*100.0f);
 	if(m_Zooming)
 	{
 		float Time = Client()->LocalTime();

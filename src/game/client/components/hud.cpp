@@ -641,18 +641,19 @@ void CHud::RenderTextInfo()
 			}
 
 			float progressiveOffset = 0.0f;
-			int MaxTees = (int)(8.3 * (m_Width / m_Height));
+			float TeeSize = g_Config.m_ClFrozenHudTeeSize;
+			int MaxTees = (int)(8.3 * (m_Width / m_Height) * 13.0f / TeeSize);
 			if(!g_Config.m_ClShowfps && !g_Config.m_ClShowpred)
-				MaxTees = (int)(9.5 * (m_Width / m_Height));
+				MaxTees = (int)(9.5 * (m_Width / m_Height) * 13.0f / TeeSize);
 			int MaxRows = g_Config.m_ClFrozenMaxRows;
 			float StartPos = m_Width / 2 + 38.0f * (m_Width / m_Height) / 1.78;
-			float TeeSize = 13.0f;
+
 
 			int TotalRows = std::min(MaxRows, (NumInTeam + MaxTees - 1) / MaxTees);
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-			RenderTools()->DrawRoundRectExt(StartPos - TeeSize / 2, 0.0f, TeeSize * std::min(NumInTeam, MaxTees), 16.0f + (TotalRows - 1) * TeeSize, 5.0f, CUI::CORNER_B);
+			RenderTools()->DrawRoundRectExt(StartPos - TeeSize / 2, 0.0f, TeeSize * std::min(NumInTeam, MaxTees), TeeSize + 3.0f + (TotalRows - 1) * TeeSize, 5.0f, CUI::CORNER_B);
 			Graphics()->QuadsEnd();
 
 			bool Overflow = NumInTeam > MaxTees * MaxRows;
@@ -696,7 +697,7 @@ void CHud::RenderTextInfo()
 						CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-						vec2 TeeRenderPos(StartPos + progressiveOffset, 9.0f + CurrentRow * TeeSize);
+						vec2 TeeRenderPos(StartPos + progressiveOffset, TeeSize *(0.7f) + CurrentRow * TeeSize);
 						float Alpha = 1.0f;
 						CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
 						if(g_Config.m_ClShowFrozenHudSkins && Frozen)

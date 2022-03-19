@@ -2435,7 +2435,15 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 		g_Config.m_ClFrozenMaxRows = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenMaxRows, &Button, (g_Config.m_ClFrozenMaxRows - 1) / 5.0f) * 5.0f) + 1;
 	}
-
+	{
+		CUIRect Button, Label;
+		MainView.HSplitTop(20.0f, &Button, &MainView);
+		Button.VSplitLeft(140.0f, &Label, &Button);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s: %i", "Tee Size", g_Config.m_ClFrozenHudTeeSize);
+		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClFrozenHudTeeSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenHudTeeSize, &Button, (g_Config.m_ClFrozenHudTeeSize - 8) / 19.0f) * 19.0f) + 8;
+	}
 	MainView.HSplitTop(30.0f, 0x0, &MainView);
 
 	// ***** MISCELLANEOUS ***** //
@@ -2449,6 +2457,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpec, ("Spectator outline fix on KoG (slightly buggy)"), &g_Config.m_ClFixKoGSpec, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
 
 	{
 		CUIRect Button, Label;
