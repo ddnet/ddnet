@@ -224,6 +224,19 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	for(int i = 0; i < m_lFriends.size(); m_lFriends[i++].m_NumFound = 0)
 		;
 
+	auto RenderBrowserIcons = [this](CUIElement::SUIElementRect &UIRect, CUIRect *pRect, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, const char *pText, ETextAlignment TextAlign) {
+		float FontSize = 14.0f * UI()->Scale();
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->TextColor(TextColor);
+		TextRender()->TextOutlineColor(TextOutlineColor);
+		UI()->DoLabelStreamed(UIRect, pRect, pText, FontSize, TextAlign, -1, 0);
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(nullptr);
+	};
+
 	for(int i = 0; i < NumServers; i++)
 	{
 		int ItemIndex = i;
@@ -328,17 +341,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(ID == COL_FLAG_LOCK)
 			{
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_LOCK, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEE\xA2\x97", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEE\xA1\xBD", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_DDNET, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, "\xEE\xBD\xB6", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_NAME)
 			{
@@ -372,7 +391,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					Icon.Margin(2.0f, &Icon);
 
 					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
-						DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_RANK, &Icon);
+					{
+						RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), "\xEF\x81\xAE", TEXTALIGN_CENTER);
+					}
 				}
 
 				float FontSize = 12.0f * UI()->Scale();
@@ -403,7 +424,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Icon);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEE\xA1\xBD", TEXTALIGN_LEFT);
 				}
 
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));

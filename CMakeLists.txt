@@ -839,7 +839,6 @@ set(EXPECTED_DATA
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
   blob.png
-  browse_icons.png
   censorlist.txt
   console.png
   console_bar.png
