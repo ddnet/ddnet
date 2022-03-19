@@ -23,20 +23,17 @@ freely, subject to the following restrictions:
 All content under 'data' except the assets, font, language & skin files,
 (which have their own licenses) are released under
 CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
-Apache 2.0 for the 'Icon.tff' file:
-Copyright Google
+SIL OFL 1.1 License for the 'Icon.otf' ('Font Awesome 6 Free-Solid-900.otf') file:
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Copyright (c) 2022 Fonticons, Inc. (https://fontawesome.com)
+with Reserved Font Name: "Font Awesome".
 
-   http://www.apache.org/licenses/LICENSE-2.0
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+http://scripts.sil.org/OFL
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SIL OPEN FONT LICENSE
+Version 1.1 - 26 February 2007
 
 The other fonts are released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
 

@@ -1138,7 +1138,7 @@ set(EXPECTED_DATA
   file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
-  fonts/Icons.ttf
+  fonts/Icons.otf
   fonts/SourceHanSansSC-Regular.otf
   game.png
   gui_buttons.png
