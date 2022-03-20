@@ -496,7 +496,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	void *pTmpData = malloc(MemSize);
 	if(!ConvertToRGBA((uint8_t *)pTmpData, (const uint8_t *)pData, Width, Height, Format))
 	{
-		dbg_msg("graphics", "converted image %s to RGBA, consider making its file format using RGBA", pTexName);
+		dbg_msg("graphics", "converted image %s to RGBA, consider making its file format RGBA", pTexName);
 	}
 	Cmd.m_pData = pTmpData;
 
@@ -624,7 +624,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int 
 
 	AddCmd(
 		Cmd, [] { return true; }, "failed to update text texture.");
-	return 0;
+	return true;
 }
 
 int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
@@ -739,7 +739,7 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInf
 
 bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Img)
 {
-	if(Img.m_Format != CImageInfo::FORMAT_RGBA && Img.m_Format != CImageInfo::FORMAT_ALPHA)
+	if(Img.m_Format != CImageInfo::FORMAT_RGBA)
 	{
 		SWarning NewWarning;
 		char aText[128];
@@ -787,14 +787,17 @@ void CGraphics_Threaded::KickCommandBuffer()
 	m_pCommandBuffer->Reset();
 }
 
-void CGraphics_Threaded::ScreenshotDirect()
+bool CGraphics_Threaded::ScreenshotDirect()
 {
 	// add swap command
 	CImageInfo Image;
 	mem_zero(&Image, sizeof(Image));
 
-	CCommandBuffer::SCommand_Screenshot Cmd;
+	bool DidSwap = false;
+
+	CCommandBuffer::SCommand_TrySwapAndScreenshot Cmd;
 	Cmd.m_pImage = &Image;
+	Cmd.m_pSwapped = &DidSwap;
 	AddCmd(
 		Cmd, [] { return true; }, "failed to take screenshot.");
 
@@ -826,6 +829,8 @@ void CGraphics_Threaded::ScreenshotDirect()
 
 		free(Image.m_pData);
 	}
+
+	return DidSwap;
 }
 
 void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
@@ -834,13 +839,14 @@ void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
 	m_State.m_Texture = TextureID.Id();
 }
 
-void CGraphics_Threaded::Clear(float r, float g, float b)
+void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
 {
 	CCommandBuffer::SCommand_Clear Cmd;
 	Cmd.m_Color.r = r;
 	Cmd.m_Color.g = g;
 	Cmd.m_Color.b = b;
 	Cmd.m_Color.a = 0;
+	Cmd.m_ForceClear = ForceClearNow || m_IsForcedViewport;
 	AddCmd(
 		Cmd, [] { return true; }, "failed to clear graphics.");
 }
@@ -1218,25 +1224,25 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet)
+void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset)
 {
-	if(NumIndicesOffet == 0)
+	if(NumIndicesOffset == 0)
 		return;
 
 	// add the VertexArrays and draw
 	CCommandBuffer::SCommand_RenderTileLayer Cmd;
 	Cmd.m_State = m_State;
-	Cmd.m_IndicesDrawNum = NumIndicesOffet;
+	Cmd.m_IndicesDrawNum = NumIndicesOffset;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	mem_copy(&Cmd.m_Color, pColor, sizeof(Cmd.m_Color));
 
-	void *Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
+	void *Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
 	if(Data == 0x0)
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
+		Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
 		if(Data == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
@@ -1244,18 +1250,18 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 		}
 	}
 	Cmd.m_pIndicesOffsets = (char **)Data;
-	Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffet));
+	Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffset));
 
 	if(!AddCmd(
 		   Cmd, [&] {
-			   Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
+			   Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
 			   if(Data == 0x0)
 			   {
 				   dbg_msg("graphics", "failed to allocate data for vertices");
 				   return false;
 			   }
 			   Cmd.m_pIndicesOffsets = (char **)Data;
-			   Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffet));
+			   Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffset));
 			   return true;
 		   },
 		   "failed to allocate memory for render command"))
@@ -1263,9 +1269,10 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 		return;
 	}
 
-	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char *) * NumIndicesOffet);
-	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int) * NumIndicesOffet);
+	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char *) * NumIndicesOffset);
+	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int) * NumIndicesOffset);
 
+	m_pCommandBuffer->AddRenderCalls(NumIndicesOffset);
 	// todo max indices group check!!
 }
 
@@ -1294,6 +1301,8 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	{
 		return;
 	}
+
+	m_pCommandBuffer->AddRenderCalls(1);
 }
 
 void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum)
@@ -1321,6 +1330,8 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 	{
 		return;
 	}
+
+	m_pCommandBuffer->AddRenderCalls(1);
 }
 
 void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset)
@@ -1356,6 +1367,8 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 	}
 
 	mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
+
+	m_pCommandBuffer->AddRenderCalls(((QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1);
 }
 
 void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor)
@@ -1378,6 +1391,8 @@ void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, i
 	{
 		return;
 	}
+
+	m_pCommandBuffer->AddRenderCalls(1);
 }
 
 int CGraphics_Threaded::CreateQuadContainer(bool AutomaticUpload)
@@ -1594,6 +1609,8 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		{
 			return;
 		}
+
+		m_pCommandBuffer->AddRenderCalls(1);
 	}
 	else
 	{
@@ -1671,6 +1688,8 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 		{
 			return;
 		}
+
+		m_pCommandBuffer->AddRenderCalls(1);
 	}
 	else
 	{
@@ -1815,6 +1834,9 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		}
 
 		mem_copy(Cmd.m_pRenderInfo, pRenderInfo, sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
+
+		m_pCommandBuffer->AddRenderCalls(((DrawCount - 1) / gs_GraphicsMaxParticlesRenderCount) + 1);
+
 		WrapNormal();
 	}
 	else
@@ -2235,6 +2257,37 @@ int CGraphics_Threaded::IssueInit()
 	return r;
 }
 
+void CGraphics_Threaded::AdjustViewport(bool SendViewportChangeToBackend)
+{
+	// adjust the viewport to only allow certain aspect ratios
+	// keep this in sync with backend_vulkan GetSwapImageSize's check
+	if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
+	{
+		m_IsForcedViewport = true;
+		m_ScreenHeight = 4 * m_ScreenWidth / 5;
+
+		if(SendViewportChangeToBackend)
+		{
+			CCommandBuffer::SCommand_Update_Viewport Cmd;
+			Cmd.m_X = 0;
+			Cmd.m_Y = 0;
+			Cmd.m_Width = m_ScreenWidth;
+			Cmd.m_Height = m_ScreenHeight;
+			Cmd.m_ByResize = true;
+
+			if(!AddCmd(
+				   Cmd, [] { return true; }, "failed to add resize command"))
+			{
+				return;
+			}
+		}
+	}
+	else
+	{
+		m_IsForcedViewport = false;
+	}
+}
+
 void CGraphics_Threaded::AddBackEndWarningIfExists()
 {
 	const char *pErrStr = m_pBackend->GetErrorString();
@@ -2354,6 +2407,16 @@ int CGraphics_Threaded::InitWindow()
 			return 0;
 	}
 
+	// at the very end, just try to set to gl 1.4
+	{
+		g_Config.m_GfxGLMajor = 1;
+		g_Config.m_GfxGLMinor = 4;
+		g_Config.m_GfxGLPatch = 0;
+
+		if(IssueInit() == 0)
+			return 0;
+	}
+
 	dbg_msg("gfx", "out of ideas. failed to init graphics");
 
 	return -1;
@@ -2413,6 +2476,8 @@ int CGraphics_Threaded::Init()
 	str_format(aBuf, sizeof(aBuf), "GPU version: %s", GetVersionString());
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gfx", aBuf, GPUInfoPrintColor);
 
+	AdjustViewport(true);
+
 	return 0;
 }
 
@@ -2460,6 +2525,7 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	}
 
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+	AdjustViewport(true);
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 	return true;
 }
@@ -2475,6 +2541,7 @@ void CGraphics_Threaded::Move(int x, int y)
 	const int CurScreen = m_pBackend->GetWindowScreen();
 	m_pBackend->UpdateDisplayMode(CurScreen);
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
+	AdjustViewport(true);
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 }
 
@@ -2511,9 +2578,7 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	// if the size change event is triggered, set all parameters and change the viewport
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 
-	// adjust the viewport to only allow certain aspect ratios
-	if(m_ScreenHeight > 4 * m_ScreenWidth / 5)
-		m_ScreenHeight = 4 * m_ScreenWidth / 5;
+	AdjustViewport(false);
 
 	m_ScreenRefreshRate = RefreshRate;
 
@@ -2635,14 +2700,16 @@ void CGraphics_Threaded::Swap()
 		}
 	}
 
-	// TODO: screenshot support
+	bool TookScreenshotAndSwapped = false;
+
 	if(m_DoScreenshot)
 	{
 		if(WindowActive())
-			ScreenshotDirect();
+			TookScreenshotAndSwapped = ScreenshotDirect();
 		m_DoScreenshot = false;
 	}
 
+	if(!TookScreenshotAndSwapped)
 	{
 		// add swap command
 		CCommandBuffer::SCommand_Swap Cmd;

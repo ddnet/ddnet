@@ -82,7 +82,7 @@ public:
 
 	void TextureSet(CTextureHandle TextureID) override{};
 
-	void Clear(float r, float g, float b) override{};
+	void Clear(float r, float g, float b, bool ForceClearNow = false) override{};
 
 	void QuadsBegin() override{};
 	void QuadsEnd() override{};
@@ -138,7 +138,7 @@ public:
 	void FlushVertices(bool KeepVertices = false) override{};
 	void FlushVerticesTex3D() override{};
 
-	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override{};
+	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) override{};
 	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override{};
 	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override{};
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override{};
@@ -194,7 +194,7 @@ public:
 
 	SWarning *GetCurWarning() override { return NULL; }
 
-	void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) override {}
+	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return false; }
 	bool IsConfigModernAPI() override { return false; }
 	bool IsTileBufferingEnabled() override { return false; }
 	bool IsQuadBufferingEnabled() override { return false; }

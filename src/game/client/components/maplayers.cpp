@@ -844,6 +844,7 @@ void CMapLayers::OnMapLoad()
 							// then create the buffer container
 							SBufferContainerInfo ContainerInfo;
 							ContainerInfo.m_Stride = (DoTextureCoords ? (sizeof(float) * 2 + sizeof(vec3)) : 0);
+							ContainerInfo.m_VertBufferBindingIndex = BufferObjectIndex;
 							ContainerInfo.m_Attributes.emplace_back();
 							SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_Attributes.back();
 							pAttr->m_DataTypeCount = 2;
@@ -946,6 +947,7 @@ void CMapLayers::OnMapLoad()
 					// then create the buffer container
 					SBufferContainerInfo ContainerInfo;
 					ContainerInfo.m_Stride = (Textured ? (sizeof(STmpQuadTextured) / 4) : (sizeof(STmpQuad) / 4));
+					ContainerInfo.m_VertBufferBindingIndex = BufferObjectIndex;
 					ContainerInfo.m_Attributes.emplace_back();
 					SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_Attributes.back();
 					pAttr->m_DataTypeCount = 4;
@@ -1401,6 +1403,17 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Rot = aChannels[2] / 180.0f * pi;
 		}
 
+		bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || !(aColor[3] > 0);
+
+		if(NeedsFlush)
+		{
+			// render quads of the current offset directly(cancel batching)
+			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+			QuadsRenderCount = 0;
+			// since this quad is ignored, the offset is the next quad
+			CurQuadOffset = i + 1;
+		}
+
 		if(aColor[3] > 0)
 		{
 			SQuadRenderInfo &QInfo = s_QuadRenderInfo[QuadsRenderCount++];
@@ -1408,14 +1421,6 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			QInfo.m_aOffsets[0] = OffsetX;
 			QInfo.m_aOffsets[1] = OffsetY;
 			QInfo.m_Rotation = Rot;
-		}
-		else
-		{
-			// render quads of the current offset directly(cancel batching)
-			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
-			QuadsRenderCount = 0;
-			// since this quad is ignored, the offset is the next quad
-			CurQuadOffset = i + 1;
 		}
 	}
 	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);

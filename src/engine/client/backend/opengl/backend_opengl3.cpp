@@ -1042,6 +1042,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 		{
 			SBufferContainer Container;
 			Container.m_ContainerInfo.m_Stride = 0;
+			Container.m_ContainerInfo.m_VertBufferBindingIndex = -1;
 			m_BufferContainers.push_back(Container);
 		}
 	}

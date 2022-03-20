@@ -29,7 +29,7 @@ public:
 	virtual ~CCommandProcessorFragment_GLBase() = default;
 	virtual bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand) = 0;
 
-	virtual void StartCommands(size_t CommandCount) {}
+	virtual void StartCommands(size_t CommandCount, size_t EstimatedRenderCallCount) {}
 	virtual void EndCommands() {}
 
 	enum

@@ -103,7 +103,7 @@ protected:
 	virtual void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand);
 	virtual void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand);
 	virtual void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderTex3D"); }
-	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
+	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand);
 
 	virtual void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand);
 	virtual void Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand);
@@ -139,7 +139,6 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 {
 	struct SBufferContainer
 	{
-		SBufferContainer() {}
 		SBufferContainerInfo m_ContainerInfo;
 	};
 	std::vector<SBufferContainer> m_BufferContainers;

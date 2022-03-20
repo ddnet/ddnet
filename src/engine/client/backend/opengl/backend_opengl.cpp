@@ -1005,8 +1005,10 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 #endif
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand)
+void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand)
 {
+	*pCommand->m_pSwapped = false;
+
 	// fetch image data
 	GLint aViewport[4] = {0, 0, 0, 0};
 	glGetIntegerv(GL_VIEWPORT, aViewport);
@@ -1088,8 +1090,8 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_RENDER_TEX3D:
 		Cmd_RenderTex3D(static_cast<const CCommandBuffer::SCommand_RenderTex3D *>(pBaseCommand));
 		break;
-	case CCommandBuffer::CMD_SCREENSHOT:
-		Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_Screenshot *>(pBaseCommand));
+	case CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT:
+		Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand));
 		break;
 	case CCommandBuffer::CMD_UPDATE_VIEWPORT:
 		Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand));
@@ -1971,6 +1973,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferContainer(const CCommand
 		{
 			SBufferContainer Container;
 			Container.m_ContainerInfo.m_Stride = 0;
+			Container.m_ContainerInfo.m_VertBufferBindingIndex = -1;
 			m_BufferContainers.push_back(Container);
 		}
 	}

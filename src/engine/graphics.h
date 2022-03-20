@@ -42,6 +42,8 @@ struct SQuadRenderInfo
 	float m_aColor[4];
 	float m_aOffsets[2];
 	float m_Rotation;
+	// allows easier upload for uniform buffers because of the alignment requirements
+	float m_Padding;
 };
 
 struct SGraphicTile
@@ -151,11 +153,28 @@ struct GL_SVertexTex3DStream
 	GL_STexCoord3D m_Tex;
 };
 
+static constexpr size_t gs_GraphicsMaxQuadsRenderCount = 256;
+static constexpr size_t gs_GraphicsMaxParticlesRenderCount = 512;
+
 enum EGraphicsDriverAgeType
 {
 	GRAPHICS_DRIVER_AGE_TYPE_LEGACY = 0,
 	GRAPHICS_DRIVER_AGE_TYPE_DEFAULT,
 	GRAPHICS_DRIVER_AGE_TYPE_MODERN,
+
+	GRAPHICS_DRIVER_AGE_TYPE_COUNT,
+};
+
+enum EBackendType
+{
+	BACKEND_TYPE_OPENGL = 0,
+	BACKEND_TYPE_OPENGL_ES,
+	BACKEND_TYPE_VULKAN,
+
+	// special value to tell the backend to identify the current backend
+	BACKEND_TYPE_AUTO,
+
+	BACKEND_TYPE_COUNT,
 };
 
 struct STWGraphicGPU
@@ -235,7 +254,8 @@ public:
 	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
 	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
 
-	virtual void Clear(float r, float g, float b) = 0;
+	// ForceClearNow forces the backend to trigger a clear, even at performance cost, else it might be delayed by one frame
+	virtual void Clear(float r, float g, float b, bool ForceClearNow = false) = 0;
 
 	virtual void ClipEnable(int x, int y, int w, int h) = 0;
 	virtual void ClipDisable() = 0;
@@ -291,7 +311,7 @@ public:
 	virtual void FlushVerticesTex3D() = 0;
 
 	// specific render functions
-	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
+	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
 	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) = 0;
 	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) = 0;
@@ -315,7 +335,8 @@ public:
 	virtual void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
-	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) = 0;
+	// returns true if the driver age type is supported, passing BACKEND_TYPE_AUTO for BackendType will query the values for the currently used backend
+	virtual bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) = 0;
 	virtual bool IsConfigModernAPI() = 0;
 	virtual bool IsTileBufferingEnabled() = 0;
 	virtual bool IsQuadBufferingEnabled() = 0;
@@ -440,6 +461,7 @@ public:
 	virtual void NotifyWindow() = 0;
 
 	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
+	// this function always returns the pixels in RGB
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
