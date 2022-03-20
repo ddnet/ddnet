@@ -28,7 +28,13 @@ public:
 	void WrapNormal() override{};
 	void WrapClamp() override{};
 
-	int MemoryUsage() const override { return 0; }
+	uint64_t TextureMemoryUsage() const override { return 0; }
+	uint64_t BufferMemoryUsage() const override { return 0; }
+	uint64_t StreamedMemoryUsage() const override { return 0; }
+	uint64_t StagingMemoryUsage() const override { return 0; }
+
+	TTWGraphicsGPUList m_FakeGPUList;
+	const TTWGraphicsGPUList &GetGPUs() const override { return m_FakeGPUList; }
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override{};
 	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override
@@ -47,11 +53,20 @@ public:
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override { return CreateTextureHandle(0); }
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override { return 0; }
 
-	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h) { return CreateTextureHandle(0); }
-	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override { return CreateTextureHandle(0); }
-	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return CreateTextureHandle(0); }
+	bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override
+	{
+		return false;
+	}
+	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override { return false; }
+	bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData) override { return false; }
 
-	bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) override { return false; }
+	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override { return CreateTextureHandle(0); };
+	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return CreateTextureHandle(0); };
+
+	bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) override
+	{
+		return false;
+	}
 	bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override { return false; }
 
 	// simple uncompressed RGBA loaders
@@ -71,8 +86,6 @@ public:
 
 	void QuadsBegin() override{};
 	void QuadsEnd() override{};
-	void TextQuadsBegin() override{};
-	void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override{};
 	void QuadsTex3DBegin() override{};
 	void QuadsTex3DEnd() override{};
 	void TrianglesBegin() override{};
@@ -123,7 +136,6 @@ public:
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override{};
 
 	void FlushVertices(bool KeepVertices = false) override{};
-	void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override{};
 	void FlushVerticesTex3D() override{};
 
 	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override{};
@@ -132,17 +144,14 @@ public:
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override{};
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override{};
 
-	// opengl 3.3 functions
-	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override { return 0; }
-	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override{};
-	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) override{};
-	void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) override{};
+	// modern GL functions
+	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override { return 0; };
+	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override{};
 	void DeleteBufferObject(int BufferIndex) override{};
 
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override { return 0; }
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
 	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override{};
-	void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo) override{};
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override{};
 
 	int GetNumScreens() const override { return 0; }
@@ -193,9 +202,15 @@ public:
 	bool IsQuadContainerBufferingEnabled() override { return false; }
 	bool HasTextureArrays() override { return false; }
 
-	const char *GetVendorString() override { return "headless"; }
-	const char *GetVersionString() override { return "headless"; }
-	const char *GetRendererString() override { return "headless"; }
+	const char *GetVendorString() override
+	{
+		return "headless";
+	};
+	const char *GetVersionString() override { return "headless"; };
+	const char *GetRendererString() override { return "headless"; };
+
+	TGLBackendReadPresentedImageData m_FakeGetPresentedImageDataFunc;
+	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override { return m_FakeGetPresentedImageDataFunc; };
 };
 
 #endif // ENGINE_CLIENT_GRAPHICS_THREADED_NULL_H

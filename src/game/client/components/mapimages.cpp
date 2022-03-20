@@ -223,7 +223,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
 		{
 			int ColorChannelCount = 4;
-			if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			if(ImgInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT)
 				ColorChannelCount = 1;
 			else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
 				ColorChannelCount = 3;

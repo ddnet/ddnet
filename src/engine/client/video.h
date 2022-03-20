@@ -16,6 +16,9 @@ extern "C" {
 
 #include <engine/shared/demo.h>
 #include <engine/shared/video.h>
+
+#include <atomic>
+#include <vector>
 #define ALEN 2048
 
 extern LOCK g_WriteLock;
@@ -94,15 +97,15 @@ private:
 	bool m_Started;
 	bool m_Recording;
 
-	bool m_ProcessingVideoFrame;
-	bool m_ProcessingAudioFrame;
+	std::atomic<bool> m_ProcessingVideoFrame;
+	std::atomic<bool> m_ProcessingAudioFrame;
 
-	bool m_NextFrame;
-	bool m_NextAudioFrame;
+	std::atomic<bool> m_NextFrame;
+	std::atomic<bool> m_NextAudioFrame;
 
 	bool m_HasAudio;
 
-	TWGLubyte *m_pPixels;
+	std::vector<uint8_t> m_PixelHelper;
 
 	OutputStream m_VideoStream;
 	OutputStream m_AudioStream;
@@ -114,8 +117,6 @@ private:
 
 	AVFormatContext *m_pFormatContext;
 	const AVOutputFormat *m_pFormat;
-
-	uint8_t *m_pRGB;
 
 	int m_SndBufferSize;
 };

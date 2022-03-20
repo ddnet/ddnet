@@ -24,13 +24,16 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 
+#include "base/system.h"
 #include "binds.h"
 #include "camera.h"
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
 
+#include <memory>
 #include <utility>
+#include <vector>
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -1097,7 +1100,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static CVideoMode s_aModes[MAX_RESOLUTIONS];
 	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
-	static int s_GfxOpenGLVersion = Graphics()->IsConfigModernAPI();
+	static int s_GfxModernGLVersion = Graphics()->IsConfigModernAPI();
 	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
 	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
@@ -1211,12 +1214,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		int NumScreens = Graphics()->GetNumScreens();
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		int Screen_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxScreen, Localize("Screen"), g_Config.m_GfxScreen, &Button);
-		if(Screen_MouseButton == 1) //inc
+		if(Screen_MouseButton == 1) // inc
 		{
 			Client()->SwitchWindowScreen((g_Config.m_GfxScreen + 1) % NumScreens);
 			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 		}
-		else if(Screen_MouseButton == 2) //dec
+		else if(Screen_MouseButton == 2) // dec
 		{
 			Client()->SwitchWindowScreen((g_Config.m_GfxScreen - 1 + NumScreens) % NumScreens);
 			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
@@ -1226,12 +1229,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("may cause delay"));
 	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, aBuf, g_Config.m_GfxFsaaSamples, &Button);
-	if(GfxFsaaSamples_MouseButton == 1) //inc
+	if(GfxFsaaSamples_MouseButton == 1) // inc
 	{
 		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples + 1) % 17;
 		CheckSettings = true;
 	}
-	else if(GfxFsaaSamples_MouseButton == 2) //dec
+	else if(GfxFsaaSamples_MouseButton == 2) // dec
 	{
 		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples - 1 + 17) % 17;
 		CheckSettings = true;
@@ -1241,29 +1244,29 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 
-	bool IsNewOpenGL = Graphics()->IsConfigModernAPI();
+	bool IsModernGL = Graphics()->IsConfigModernAPI();
 
 	// only promote modern GL in menu settings if the driver isn't on the blocklist already
 	if(g_Config.m_GfxDriverIsBlocked == 0)
 	{
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 
-		if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use modern OpenGL"), IsNewOpenGL, &Button))
+		if(DoButton_CheckBox(&g_Config.m_GfxGLMajor, Localize("Use modern OpenGL"), IsModernGL, &Button))
 		{
 			CheckSettings = true;
-			if(IsNewOpenGL)
+			if(IsModernGL)
 			{
-				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_DEFAULT, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-				IsNewOpenGL = false;
+				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_DEFAULT, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
+				IsModernGL = false;
 			}
 			else
 			{
-				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_MODERN, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-				IsNewOpenGL = true;
+				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_MODERN, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
+				IsModernGL = true;
 			}
 		}
 
-		if(IsNewOpenGL)
+		if(IsModernGL)
 		{
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			if(DoButton_CheckBox(&g_Config.m_GfxUsePreinitBuffer, Localize("Preinit VBO (iGPUs only)"), g_Config.m_GfxUsePreinitBuffer, &Button))
@@ -1292,7 +1295,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(CheckSettings)
 	{
 		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
-					  s_GfxOpenGLVersion == (int)IsNewOpenGL &&
+					  s_GfxModernGLVersion == (int)IsModernGL &&
 					  s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
 					  s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
 					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
@@ -1314,7 +1317,70 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Text, &MainView);
 	//text.VSplitLeft(15.0f, 0, &text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, TEXTALIGN_LEFT);
-	RenderHSLScrollbars(&MainView, &g_Config.m_UiColor, true);
+	CUIRect HSLBar = MainView;
+	RenderHSLScrollbars(&HSLBar, &g_Config.m_UiColor, true);
+	MainView.y = HSLBar.y;
+	MainView.h = MainView.h - MainView.y;
+
+	// GPU list
+	const auto &GPUList = Graphics()->GetGPUs();
+	if(GPUList.m_GPUs.size() > 1)
+	{
+		MainView.HSplitTop(10.0f, nullptr, &MainView);
+		MainView.HSplitTop(20.0f, &Text, &MainView);
+		UI()->DoLabelScaled(&Text, Localize("Graphic cards"), 16.0f, TEXTALIGN_CENTER);
+
+		static float s_ScrollValueDropGPU = 0;
+		static int s_GPUDropDownState = 0;
+
+		static std::vector<std::unique_ptr<int>> vGPUIDs;
+		static std::vector<const void *> vGPUIDPtrs;
+		static std::vector<const char *> vGPUIDNames;
+
+		size_t GPUCount = GPUList.m_GPUs.size() + 1;
+		vGPUIDs.resize(GPUCount);
+		vGPUIDPtrs.resize(GPUCount);
+		vGPUIDNames.resize(GPUCount);
+
+		char aCurDeviceName[256 + 4];
+
+		int OldSelectedGPU = -1;
+		for(size_t i = 0; i < GPUCount; ++i)
+		{
+			if(vGPUIDs[i].get() == nullptr)
+				vGPUIDs[i] = std::unique_ptr<int>(new int());
+			vGPUIDPtrs[i] = vGPUIDs[i].get();
+			if(i == 0)
+			{
+				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s(%s)", Localize("auto"), GPUList.m_AutoGPU.m_Name);
+				vGPUIDNames[i] = aCurDeviceName;
+				if(str_comp("auto", g_Config.m_GfxGPUName) == 0)
+				{
+					OldSelectedGPU = 0;
+				}
+			}
+			else
+			{
+				vGPUIDNames[i] = GPUList.m_GPUs[i - 1].m_Name;
+				if(str_comp(GPUList.m_GPUs[i - 1].m_Name, g_Config.m_GfxGPUName) == 0)
+				{
+					OldSelectedGPU = i;
+				}
+			}
+		}
+
+		static int s_GPUCount = 0;
+		s_GPUCount = GPUCount;
+
+		const int NewGPU = RenderDropDown(s_GPUDropDownState, &MainView, OldSelectedGPU, vGPUIDPtrs.data(), vGPUIDNames.data(), s_GPUCount, &s_GPUCount, s_ScrollValueDropGPU);
+		if(OldSelectedGPU != NewGPU)
+		{
+			if(NewGPU == 0)
+				str_copy(g_Config.m_GfxGPUName, "auto", sizeof(g_Config.m_GfxGPUName));
+			else
+				str_copy(g_Config.m_GfxGPUName, GPUList.m_GPUs[NewGPU - 1].m_Name, sizeof(g_Config.m_GfxGPUName));
+		}
+	}
 }
 
 void CMenus::RenderSettingsSound(CUIRect MainView)

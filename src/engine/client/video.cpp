@@ -4,19 +4,14 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
-#include "video.h"
+#include <engine/client/graphics_threaded.h>
 
-#ifndef CONF_BACKEND_OPENGL_ES
-#include <GL/glew.h>
-#else
-#include <GLES3/gl3.h>
-#endif
+#include "video.h"
 
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-const size_t FORMAT_NCHANNELS = 3;
 const size_t FORMAT_GL_NCHANNELS = 4;
 LOCK g_WriteLock = 0;
 
@@ -27,11 +22,8 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, IStorage *pStorage, IConsole *pCon
 	m_VideoStream(),
 	m_AudioStream()
 {
-	m_pPixels = 0;
-
 	m_pFormatContext = 0;
 	m_pFormat = 0;
-	m_pRGB = 0;
 	m_pOptDict = 0;
 
 	m_VideoCodec = 0;
@@ -101,10 +93,8 @@ void CVideo::Start()
 
 	m_pFormat = m_pFormatContext->oformat;
 
-	size_t NVals = FORMAT_NCHANNELS * m_Width * m_Height;
 	size_t GLNVals = FORMAT_GL_NCHANNELS * m_Width * m_Height;
-	m_pPixels = (uint8_t *)malloc(GLNVals * sizeof(TWGLubyte));
-	m_pRGB = (uint8_t *)malloc(NVals * sizeof(uint8_t));
+	m_PixelHelper.resize(GLNVals * sizeof(uint8_t));
 
 	/* Add the audio and video streams using the default format codecs
 	 * and initialize the codecs. */
@@ -157,7 +147,7 @@ void CVideo::Start()
 	{
 		m_VideoStream.pSwsCtx = sws_getCachedContext(
 			m_VideoStream.pSwsCtx,
-			m_VideoStream.pEnc->width, m_VideoStream.pEnc->height, AV_PIX_FMT_RGB24,
+			m_VideoStream.pEnc->width, m_VideoStream.pEnc->height, AV_PIX_FMT_RGBA,
 			m_VideoStream.pEnc->width, m_VideoStream.pEnc->height, AV_PIX_FMT_YUV420P,
 			0, 0, 0, 0);
 	}
@@ -208,10 +198,6 @@ void CVideo::Stop()
 
 	if(m_pFormatContext)
 		avformat_free_context(m_pFormatContext);
-
-	free(m_pRGB);
-
-	free(m_pPixels);
 
 	delete ms_pCurrentVideo;
 }
@@ -363,30 +349,18 @@ void CVideo::FillAudioFrame()
 
 void CVideo::FillVideoFrame()
 {
-	const int InLinesize[1] = {3 * m_VideoStream.pEnc->width};
-	sws_scale(m_VideoStream.pSwsCtx, (const uint8_t *const *)&m_pRGB, InLinesize, 0,
+	const int InLinesize[1] = {4 * m_VideoStream.pEnc->width};
+	auto *pRGBAData = m_PixelHelper.data();
+	sws_scale(m_VideoStream.pSwsCtx, (const uint8_t *const *)&pRGBAData, InLinesize, 0,
 		m_VideoStream.pEnc->height, m_VideoStream.pFrame->data, m_VideoStream.pFrame->linesize);
 }
 
 void CVideo::ReadRGBFromGL()
 {
-	/* Get RGBA to align to 32 bits instead of just 24 for RGB. May be faster for FFmpeg. */
-	glReadBuffer(GL_FRONT);
-	GLint Alignment;
-	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_pPixels);
-	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
-	for(int i = 0; i < m_Height; i++)
-	{
-		for(int j = 0; j < m_Width; j++)
-		{
-			size_t CurGL = FORMAT_GL_NCHANNELS * (m_Width * (m_Height - i - 1) + j);
-			size_t CurRGB = FORMAT_NCHANNELS * (m_Width * i + j);
-			for(int k = 0; k < (int)FORMAT_NCHANNELS; k++)
-				m_pRGB[CurRGB + k] = m_pPixels[CurGL + k];
-		}
-	}
+	uint32_t Width;
+	uint32_t Height;
+	uint32_t Format;
+	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_PixelHelper);
 }
 
 AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)

@@ -21,6 +21,7 @@
 struct SBufferContainerInfo
 {
 	int m_Stride;
+	int m_VertBufferBindingIndex;
 
 	// the attributes of the container
 	struct SAttribute
@@ -32,8 +33,6 @@ struct SBufferContainerInfo
 
 		//0: float, 1:integer
 		unsigned int m_FuncType;
-
-		int m_VertBufferBindingIndex;
 	};
 	std::vector<SAttribute> m_Attributes;
 };
@@ -69,7 +68,7 @@ public:
 		FORMAT_AUTO = -1,
 		FORMAT_RGB = 0,
 		FORMAT_RGBA = 1,
-		FORMAT_ALPHA = 2,
+		FORMAT_SINGLE_COMPONENT = 2,
 	};
 
 	/* Variable: width
@@ -159,11 +158,26 @@ enum EGraphicsDriverAgeType
 	GRAPHICS_DRIVER_AGE_TYPE_MODERN,
 };
 
+struct STWGraphicGPU
+{
+	struct STWGraphicGPUItem
+	{
+		char m_Name[256];
+		bool m_IsDiscreteGPU;
+	};
+	std::vector<STWGraphicGPUItem> m_GPUs;
+	STWGraphicGPUItem m_AutoGPU;
+};
+
+typedef STWGraphicGPU TTWGraphicsGPUList;
+
 typedef std::function<void(void *)> WINDOW_RESIZE_FUNC;
 
 namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
 }
+
+typedef std::function<bool(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData)> TGLBackendReadPresentedImageData;
 
 class IGraphics : public IInterface
 {
@@ -235,7 +249,13 @@ public:
 	virtual void BlendAdditive() = 0;
 	virtual void WrapNormal() = 0;
 	virtual void WrapClamp() = 0;
-	virtual int MemoryUsage() const = 0;
+
+	virtual uint64_t TextureMemoryUsage() const = 0;
+	virtual uint64_t BufferMemoryUsage() const = 0;
+	virtual uint64_t StreamedMemoryUsage() const = 0;
+	virtual uint64_t StagingMemoryUsage() const = 0;
+
+	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 	virtual void FreePNG(CImageInfo *pImg) = 0;
@@ -256,6 +276,11 @@ public:
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 
+	// pTextData & pTextOutlineData are automatically free'd
+	virtual bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) = 0;
+	virtual bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) = 0;
+	virtual bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData) = 0;
+
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
 
@@ -263,7 +288,6 @@ public:
 	virtual bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
-	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void FlushVerticesTex3D() = 0;
 
 	// specific render functions
@@ -274,17 +298,21 @@ public:
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 
 	// opengl 3.3 functions
+
+	enum EBufferObjectCreateFlags
+	{
+		// tell the backend that the buffer only needs to be valid for the span of one frame. Buffer size is not allowed to be bigger than GL_SVertex * MAX_VERTICES
+		BUFFER_OBJECT_CREATE_FLAGS_ONE_TIME_USE_BIT = 1 << 0,
+	};
+
 	// if a pointer is passed as moved pointer, it requires to be allocated with malloc()
-	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) = 0;
-	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) = 0;
+	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) = 0;
+	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) = 0;
 	virtual void DeleteBufferObject(int BufferIndex) = 0;
 
 	virtual int CreateBufferContainer(struct SBufferContainerInfo *pContainerInfo) = 0;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
 	virtual void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) = 0;
-	virtual void UpdateBufferContainer(int ContainerIndex, struct SBufferContainerInfo *pContainerInfo) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
 	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) = 0;
@@ -312,8 +340,6 @@ public:
 
 	virtual void QuadsBegin() = 0;
 	virtual void QuadsEnd() = 0;
-	virtual void TextQuadsBegin() = 0;
-	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void QuadsTex3DBegin() = 0;
 	virtual void QuadsTex3DEnd() = 0;
 	virtual void TrianglesBegin() = 0;
@@ -412,6 +438,9 @@ public:
 
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
+
+	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
+	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
 

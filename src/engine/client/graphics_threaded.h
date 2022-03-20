@@ -60,6 +60,8 @@ class CCommandBuffer
 
 public:
 	CBuffer m_CmdBuffer;
+	size_t m_CommandCount = 0;
+
 	CBuffer m_DataBuffer;
 
 	enum
@@ -68,15 +70,16 @@ public:
 		MAX_VERTICES = 32 * 1024,
 	};
 
-	enum
+	enum ECommandBufferCMD
 	{
 		// commadn groups
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
-		CMDGROUP_PLATFORM_OPENGL = 10000, // commands specific to a platform
+		CMDGROUP_PLATFORM_GL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
 
 		//
-		CMD_NOP = CMDGROUP_CORE,
+		CMD_FIRST = CMDGROUP_CORE,
+		CMD_NOP = CMD_FIRST,
 
 		//
 		CMD_RUNBUFFER,
@@ -88,13 +91,16 @@ public:
 		CMD_TEXTURE_CREATE,
 		CMD_TEXTURE_DESTROY,
 		CMD_TEXTURE_UPDATE,
+		CMD_TEXT_TEXTURES_CREATE,
+		CMD_TEXT_TEXTURES_DESTROY,
+		CMD_TEXT_TEXTURE_UPDATE,
 
 		// rendering
 		CMD_CLEAR,
 		CMD_RENDER,
 		CMD_RENDER_TEX3D,
 
-		//opengl 2.0+ commands (some are just emulated and only exist in opengl 3.3+)
+		// opengl 2.0+ commands (some are just emulated and only exist in opengl 3.3+)
 		CMD_CREATE_BUFFER_OBJECT, // create vbo
 		CMD_RECREATE_BUFFER_OBJECT, // recreate vbo
 		CMD_UPDATE_BUFFER_OBJECT, // update vbo
@@ -112,7 +118,6 @@ public:
 		CMD_RENDER_BORDER_TILE_LINE, // render an amount of tiles multiple times
 		CMD_RENDER_QUAD_LAYER, // render a quad layer
 		CMD_RENDER_TEXT, // render text
-		CMD_RENDER_TEXT_STREAM, // render text stream
 		CMD_RENDER_QUAD_CONTAINER, // render a quad buffer container
 		CMD_RENDER_QUAD_CONTAINER_EX, // render a quad buffer container with extended parameters
 		CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE, // render a quad buffer container as sprite multiple times
@@ -129,14 +134,14 @@ public:
 		// in Android a window that minimizes gets destroyed
 		CMD_WINDOW_CREATE_NTF,
 		CMD_WINDOW_DESTROY_NTF,
+
+		CMD_COUNT,
 	};
 
 	enum
 	{
 		TEXFORMAT_INVALID = 0,
-		TEXFORMAT_RGB,
 		TEXFORMAT_RGBA,
-		TEXFORMAT_ALPHA,
 
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
@@ -254,6 +259,8 @@ public:
 		bool m_DeletePointer;
 		void *m_pUploadData;
 		size_t m_DataSize;
+
+		int m_Flags; // @see EBufferObjectCreateFlags
 	};
 
 	struct SCommand_RecreateBufferObject : public SCommand
@@ -266,6 +273,8 @@ public:
 		bool m_DeletePointer;
 		void *m_pUploadData;
 		size_t m_DataSize;
+
+		int m_Flags; // @see EBufferObjectCreateFlags
 	};
 
 	struct SCommand_UpdateBufferObject : public SCommand
@@ -310,6 +319,7 @@ public:
 		int m_BufferContainerIndex;
 
 		int m_Stride;
+		int m_VertBufferBindingIndex;
 
 		int m_AttrCount;
 		SBufferContainerInfo::SAttribute *m_Attributes;
@@ -323,6 +333,7 @@ public:
 		int m_BufferContainerIndex;
 
 		int m_Stride;
+		int m_VertBufferBindingIndex;
 
 		int m_AttrCount;
 		SBufferContainerInfo::SAttribute *m_Attributes;
@@ -350,9 +361,9 @@ public:
 		SCommand_RenderTileLayer() :
 			SCommand(CMD_RENDER_TILE_LAYER) {}
 		SState m_State;
-		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
 
-		//the char offset of all indices that should be rendered, and the amount of renders
+		// the char offset of all indices that should be rendered, and the amount of renders
 		char **m_pIndicesOffsets;
 		unsigned int *m_pDrawCount;
 
@@ -365,7 +376,7 @@ public:
 		SCommand_RenderBorderTile() :
 			SCommand(CMD_RENDER_BORDER_TILE) {}
 		SState m_State;
-		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
@@ -380,7 +391,7 @@ public:
 		SCommand_RenderBorderTileLine() :
 			SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
 		SState m_State;
-		SColorf m_Color; //the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
@@ -416,24 +427,6 @@ public:
 
 		int m_DrawNum;
 		float m_aTextColor[4];
-		float m_aTextOutlineColor[4];
-	};
-
-	struct SCommand_RenderTextStream : public SCommand
-	{
-		SCommand_RenderTextStream() :
-			SCommand(CMD_RENDER_TEXT_STREAM) {}
-		SState m_State;
-
-		SVertex *m_pVertices;
-		unsigned m_PrimType;
-		unsigned m_PrimCount;
-
-		int m_TextureSize;
-
-		int m_TextTextureIndex;
-		int m_TextOutlineTextureIndex;
-
 		float m_aTextOutlineColor[4];
 	};
 
@@ -521,6 +514,7 @@ public:
 		int m_Y;
 		int m_Width;
 		int m_Height;
+		bool m_ByResize; // resized by an resize event.. a hint to make clear that the viewport update can be deferred if wanted
 	};
 
 	struct SCommand_Texture_Create : public SCommand
@@ -563,6 +557,47 @@ public:
 
 		// texture information
 		int m_Slot;
+	};
+
+	struct SCommand_TextTextures_Create : public SCommand
+	{
+		SCommand_TextTextures_Create() :
+			SCommand(CMD_TEXT_TEXTURES_CREATE) {}
+
+		// texture information
+		int m_Slot;
+		int m_SlotOutline;
+
+		int m_Width;
+		int m_Height;
+
+		void *m_pTextData;
+		void *m_pTextOutlineData;
+	};
+
+	struct SCommand_TextTextures_Destroy : public SCommand
+	{
+		SCommand_TextTextures_Destroy() :
+			SCommand(CMD_TEXT_TEXTURES_DESTROY) {}
+
+		// texture information
+		int m_Slot;
+		int m_SlotOutline;
+	};
+
+	struct SCommand_TextTexture_Update : public SCommand
+	{
+		SCommand_TextTexture_Update() :
+			SCommand(CMD_TEXT_TEXTURE_UPDATE) {}
+
+		// texture information
+		int m_Slot;
+
+		int m_X;
+		int m_Y;
+		int m_Width;
+		int m_Height;
+		void *m_pData; // will be freed by the command processor
 	};
 
 	struct SCommand_WindowCreateNtf : public CCommandBuffer::SCommand
@@ -611,6 +646,8 @@ public:
 			m_pCmdBufferHead = pCmd;
 		m_pCmdBufferTail = pCmd;
 
+		++m_CommandCount;
+
 		return true;
 	}
 
@@ -624,6 +661,8 @@ public:
 		m_pCmdBufferHead = m_pCmdBufferTail = nullptr;
 		m_CmdBuffer.Reset();
 		m_DataBuffer.Reset();
+
+		m_CommandCount = 0;
 	}
 };
 
@@ -631,8 +670,8 @@ enum EGraphicsBackendErrorCodes
 {
 	GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN = -1,
 	GRAPHICS_BACKEND_ERROR_CODE_NONE = 0,
-	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_CONTEXT_FAILED,
-	GRAPHICS_BACKEND_ERROR_CODE_OPENGL_VERSION_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_GL_CONTEXT_FAILED,
+	GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED,
 	GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED,
 	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED,
 	GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED,
@@ -660,7 +699,12 @@ public:
 	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
 
-	virtual int MemoryUsage() const = 0;
+	virtual uint64_t TextureMemoryUsage() const = 0;
+	virtual uint64_t BufferMemoryUsage() const = 0;
+	virtual uint64_t StreamedMemoryUsage() const = 0;
+	virtual uint64_t StagingMemoryUsage() const = 0;
+
+	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
 
 	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
@@ -685,13 +729,14 @@ public:
 	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
 
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
+	virtual void RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer) = 0;
 	virtual bool IsIdle() const = 0;
 	virtual void WaitForIdle() = 0;
 
 	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) {}
 	// checks if the current values of the config are a graphics modern API
 	virtual bool IsConfigModernAPI() { return false; }
-	virtual bool IsNewOpenGL() { return false; }
+	virtual bool UseTrianglesAsQuad() { return false; }
 	virtual bool HasTileBuffering() { return false; }
 	virtual bool HasQuadBuffering() { return false; }
 	virtual bool HasTextBuffering() { return false; }
@@ -702,6 +747,9 @@ public:
 	virtual const char *GetVendorString() = 0;
 	virtual const char *GetVersionString() = 0;
 	virtual const char *GetRendererString() = 0;
+
+	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
+	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -717,12 +765,12 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer::SState m_State;
 	IGraphicsBackend *m_pBackend;
-	bool m_OpenGLTileBufferingEnabled;
-	bool m_OpenGLQuadBufferingEnabled;
-	bool m_OpenGLTextBufferingEnabled;
-	bool m_OpenGLQuadContainerBufferingEnabled;
-	bool m_OpenGLHasTextureArrays;
-	bool m_IsNewOpenGL;
+	bool m_GLTileBufferingEnabled;
+	bool m_GLQuadBufferingEnabled;
+	bool m_GLTextBufferingEnabled;
+	bool m_GLQuadContainerBufferingEnabled;
+	bool m_GLHasTextureArrays;
+	bool m_GLUseTrianglesAsQuad;
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
 	CCommandBuffer *m_pCommandBuffer;
@@ -762,8 +810,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	{
 		SVertexArrayInfo() :
 			m_FreeIndex(-1) {}
-		// keep a reference to them, so we can free their IDs
-		std::vector<int> m_AssociatedBufferObjectIndices;
+		// keep a reference to it, so we can free the ID
+		int m_AssociatedBufferObjectIndex;
 
 		int m_FreeIndex;
 	};
@@ -874,7 +922,12 @@ public:
 	void WrapNormal() override;
 	void WrapClamp() override;
 
-	int MemoryUsage() const override;
+	uint64_t TextureMemoryUsage() const override;
+	uint64_t BufferMemoryUsage() const override;
+	uint64_t StreamedMemoryUsage() const override;
+	uint64_t StagingMemoryUsage() const override;
+
+	const TTWGraphicsGPUList &GetGPUs() const override;
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
 	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
@@ -886,6 +939,10 @@ public:
 	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
+
+	bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override;
+	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
+	bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData) override;
 
 	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h);
 	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override;
@@ -913,8 +970,6 @@ public:
 
 	void QuadsBegin() override;
 	void QuadsEnd() override;
-	void TextQuadsBegin() override;
-	void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
 	void QuadsTex3DBegin() override;
 	void QuadsTex3DEnd() override;
 	void TrianglesBegin() override;
@@ -956,7 +1011,7 @@ public:
 
 		dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
 
-		if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+		if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
 		{
 			for(int i = 0; i < Num; ++i)
 			{
@@ -1084,7 +1139,7 @@ public:
 
 		if(m_Drawing == DRAWING_QUADS)
 		{
-			if(g_Config.m_GfxQuadAsTriangle && !m_IsNewOpenGL)
+			if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
 			{
 				PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 				PrimCount = NumVerts / 3;
@@ -1145,7 +1200,6 @@ public:
 	}
 
 	void FlushVertices(bool KeepVertices = false) override;
-	void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) override;
 	void FlushVerticesTex3D() override;
 
 	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) override;
@@ -1154,17 +1208,17 @@ public:
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
 
-	// opengl 3.3 functions
-	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override;
-	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) override;
-	void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) override;
-	void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) override;
+	// modern GL functions
+	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override;
+	void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override;
+	void UpdateBufferObjectInternal(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false);
+	void CopyBufferObjectInternal(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize);
 	void DeleteBufferObject(int BufferIndex) override;
 
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
 	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override;
-	void UpdateBufferContainer(int ContainerIndex, SBufferContainerInfo *pContainerInfo) override;
+	void UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
 	int GetNumScreens() const override;
@@ -1209,15 +1263,17 @@ public:
 
 	void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) override { m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch); }
 	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }
-	bool IsTileBufferingEnabled() override { return m_OpenGLTileBufferingEnabled; }
-	bool IsQuadBufferingEnabled() override { return m_OpenGLQuadBufferingEnabled; }
-	bool IsTextBufferingEnabled() override { return m_OpenGLTextBufferingEnabled; }
-	bool IsQuadContainerBufferingEnabled() override { return m_OpenGLQuadContainerBufferingEnabled; }
-	bool HasTextureArrays() override { return m_OpenGLHasTextureArrays; }
+	bool IsTileBufferingEnabled() override { return m_GLTileBufferingEnabled; }
+	bool IsQuadBufferingEnabled() override { return m_GLQuadBufferingEnabled; }
+	bool IsTextBufferingEnabled() override { return m_GLTextBufferingEnabled; }
+	bool IsQuadContainerBufferingEnabled() override { return m_GLQuadContainerBufferingEnabled; }
+	bool HasTextureArrays() override { return m_GLHasTextureArrays; }
 
 	const char *GetVendorString() override;
 	const char *GetVersionString() override;
 	const char *GetRendererString() override;
+
+	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
 };
 
 extern IGraphicsBackend *CreateGraphicsBackend();

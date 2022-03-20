@@ -839,7 +839,7 @@ void CMapLayers::OnMapLoad()
 							}
 
 							// first create the buffer object
-							int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData, true);
+							int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData, 0, true);
 
 							// then create the buffer container
 							SBufferContainerInfo ContainerInfo;
@@ -851,7 +851,6 @@ void CMapLayers::OnMapLoad()
 							pAttr->m_Normalized = false;
 							pAttr->m_pOffset = 0;
 							pAttr->m_FuncType = 0;
-							pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 							if(DoTextureCoords)
 							{
 								ContainerInfo.m_Attributes.emplace_back();
@@ -861,7 +860,6 @@ void CMapLayers::OnMapLoad()
 								pAttr->m_Normalized = false;
 								pAttr->m_pOffset = (void *)(sizeof(vec2));
 								pAttr->m_FuncType = 0;
-								pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 							}
 
 							Visuals.m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
@@ -944,7 +942,7 @@ void CMapLayers::OnMapLoad()
 					else
 						pUploadData = &tmpQuads[0];
 					// create the buffer object
-					int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData);
+					int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData, 0);
 					// then create the buffer container
 					SBufferContainerInfo ContainerInfo;
 					ContainerInfo.m_Stride = (Textured ? (sizeof(STmpQuadTextured) / 4) : (sizeof(STmpQuad) / 4));
@@ -955,7 +953,6 @@ void CMapLayers::OnMapLoad()
 					pAttr->m_Normalized = false;
 					pAttr->m_pOffset = 0;
 					pAttr->m_FuncType = 0;
-					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 					ContainerInfo.m_Attributes.emplace_back();
 					pAttr = &ContainerInfo.m_Attributes.back();
 					pAttr->m_DataTypeCount = 4;
@@ -963,7 +960,6 @@ void CMapLayers::OnMapLoad()
 					pAttr->m_Normalized = true;
 					pAttr->m_pOffset = (void *)(sizeof(float) * 4);
 					pAttr->m_FuncType = 0;
-					pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 					if(Textured)
 					{
 						ContainerInfo.m_Attributes.emplace_back();
@@ -973,7 +969,6 @@ void CMapLayers::OnMapLoad()
 						pAttr->m_Normalized = false;
 						pAttr->m_pOffset = (void *)(sizeof(float) * 4 + sizeof(unsigned char) * 4);
 						pAttr->m_FuncType = 0;
-						pAttr->m_VertBufferBindingIndex = BufferObjectIndex;
 					}
 
 					pQLayerVisuals->m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
