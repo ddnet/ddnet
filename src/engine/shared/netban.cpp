@@ -373,11 +373,11 @@ int CNetBan::UnbanByIndex(int Index)
 	}
 	else
 	{
-		CBanRange *pBan = m_BanRangePool.Get(Index - m_BanAddrPool.Num());
-		if(pBan)
+		CBanRange *pBanRange = m_BanRangePool.Get(Index - m_BanAddrPool.Num());
+		if(pBanRange)
 		{
-			NetToString(&pBan->m_Data, aBuf, sizeof(aBuf));
-			Result = m_BanRangePool.Remove(pBan);
+			NetToString(&pBanRange->m_Data, aBuf, sizeof(aBuf));
+			Result = m_BanRangePool.Remove(pBanRange);
 		}
 		else
 		{
@@ -416,11 +416,11 @@ bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize
 	// check ban ranges
 	for(int i = Length - 1; i >= 0; --i)
 	{
-		for(CBanRange *pBan = m_BanRangePool.First(&aHash[i]); pBan; pBan = pBan->m_pHashNext)
+		for(CBanRange *pBanRange = m_BanRangePool.First(&aHash[i]); pBanRange; pBanRange = pBanRange->m_pHashNext)
 		{
-			if(NetMatch(&pBan->m_Data, pAddr, i, Length))
+			if(NetMatch(&pBanRange->m_Data, pAddr, i, Length))
 			{
-				MakeBanInfo(pBan, pBuf, BufferSize, MSGTYPE_PLAYER);
+				MakeBanInfo(pBanRange, pBuf, BufferSize, MSGTYPE_PLAYER);
 				return true;
 			}
 		}

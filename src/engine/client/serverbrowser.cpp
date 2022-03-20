@@ -678,10 +678,10 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			NETADDR Broadcast;
 			mem_zero(&Broadcast, sizeof(Broadcast));
 			Broadcast.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
-			int Token = GenerateToken(Broadcast);
+			int TokenBC = GenerateToken(Broadcast);
 			bool Drop = false;
-			Drop = Drop || BasicToken != GetBasicToken(Token);
-			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			Drop = Drop || BasicToken != GetBasicToken(TokenBC);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(TokenBC));
 			if(Drop)
 			{
 				return;
@@ -696,10 +696,10 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			{
 				return;
 			}
-			int Token = GenerateToken(Addr);
+			int TokenAddr = GenerateToken(Addr);
 			bool Drop = false;
-			Drop = Drop || BasicToken != GetBasicToken(Token);
-			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			Drop = Drop || BasicToken != GetBasicToken(TokenAddr);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(TokenAddr));
 			if(Drop)
 			{
 				return;
@@ -1520,6 +1520,33 @@ void CServerBrowser::LoadDDNetInfoJson()
 	}
 }
 
+const char *CServerBrowser::GetTutorialServer()
+{
+	CNetwork *pNetwork = &m_aNetworks[NETWORK_DDNET];
+	const char *pBestAddr = nullptr;
+	int BestLatency = std::numeric_limits<int>::max();
+
+	for(int i = 0; i < pNetwork->m_NumCountries; i++)
+	{
+		CNetworkCountry *pCntr = &pNetwork->m_aCountries[i];
+		for(int j = 0; j < pCntr->m_NumServers; j++)
+		{
+			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+			if(!pEntry)
+				continue;
+			if(str_find(pEntry->m_Info.m_aName, "(Tutorial)") == 0)
+				continue;
+			if(pEntry->m_Info.m_NumPlayers > pEntry->m_Info.m_MaxPlayers - 10)
+				continue;
+			if(pEntry->m_Info.m_Latency >= BestLatency)
+				continue;
+			BestLatency = pEntry->m_Info.m_Latency;
+			pBestAddr = pEntry->m_Info.m_aAddress;
+		}
+	}
+	return pBestAddr;
+}
+
 const json_value *CServerBrowser::LoadDDNetInfo()
 {
 	LoadDDNetInfoJson();
@@ -1619,11 +1646,11 @@ void CServerBrowser::CountryFilterClean(int Network)
 	char aNewList[128];
 	aNewList[0] = '\0';
 
-	for(auto &Network : m_aNetworks)
+	for(auto &Net : m_aNetworks)
 	{
-		for(int i = 0; i < Network.m_NumCountries; i++)
+		for(int i = 0; i < Net.m_NumCountries; i++)
 		{
-			const char *pName = Network.m_aCountries[i].m_aName;
+			const char *pName = Net.m_aCountries[i].m_aName;
 			if(DDNetFiltered(pExcludeCountries, pName))
 			{
 				char aBuf[128];
@@ -1736,7 +1763,7 @@ bool IsBlockInfectionZ(const CServerInfo *pInfo)
 
 bool IsBlockWorlds(const CServerInfo *pInfo)
 {
-	return (str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
+	return (str_startswith(pInfo->m_aGameType, "bw  ")) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
 }
 
 bool IsCity(const CServerInfo *pInfo)

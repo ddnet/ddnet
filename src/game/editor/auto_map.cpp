@@ -502,9 +502,9 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 						if(pRule->m_Value == CPosRule::INDEX)
 						{
 							RespectRules = false;
-							for(int i = 0; i < pRule->m_aIndexList.size(); ++i)
+							for(int k = 0; k < pRule->m_aIndexList.size(); ++k)
 							{
-								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_TestFlag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+								if(CheckIndex == pRule->m_aIndexList[k].m_ID && (!pRule->m_aIndexList[k].m_TestFlag || CheckFlags == pRule->m_aIndexList[k].m_Flag))
 								{
 									RespectRules = true;
 									break;
@@ -513,9 +513,9 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 						}
 						else if(pRule->m_Value == CPosRule::NOTINDEX)
 						{
-							for(int i = 0; i < pRule->m_aIndexList.size(); ++i)
+							for(int k = 0; k < pRule->m_aIndexList.size(); ++k)
 							{
-								if(CheckIndex == pRule->m_aIndexList[i].m_ID && (!pRule->m_aIndexList[i].m_TestFlag || CheckFlags == pRule->m_aIndexList[i].m_Flag))
+								if(CheckIndex == pRule->m_aIndexList[k].m_ID && (!pRule->m_aIndexList[k].m_TestFlag || CheckFlags == pRule->m_aIndexList[k].m_Flag))
 								{
 									RespectRules = false;
 									break;

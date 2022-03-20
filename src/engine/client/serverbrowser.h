@@ -110,6 +110,7 @@ public:
 	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing);
 	void RemoveFavorite(const NETADDR &Addr);
 
+	virtual const char *GetTutorialServer();
 	void LoadDDNetRanks();
 	void RecheckOfficial();
 	void LoadDDNetServers();
