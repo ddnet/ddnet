@@ -620,11 +620,11 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	// ignore duplicated messages
 	if(!str_comp(m_aLastPings[0].m_aMessage, pMsg))
 		return;
+	char aBuf[256];
 	PushPing(aName, m_pClient->m_aClients[ClientID].m_aClan, pMsg);
 	int64_t AfkTill = m_pChillerBot->GetAfkTime();
 	if(m_pChillerBot->IsAfk())
 	{
-		char aBuf[256];
 		char aNote[128];
 		str_format(aBuf, sizeof(aBuf), "%s: I am currently afk.", aName);
 		if(AfkTill > time_get() + time_freq() * 61)
@@ -649,6 +649,16 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
 		m_pChillerBot->SetComponentNoteLong("afk", m_aLastAfkPing);
 		return;
+	}
+	if(g_Config.m_ClTabbedOutMsg)
+	{
+		IEngineGraphics *pGraphics = ((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>());
+		if(pGraphics && !pGraphics->WindowActive() && Graphics())
+		{
+			str_format(aBuf, sizeof(aBuf), "%s: I am currently tabbed out", aName);
+			SayBuffer(aBuf, true);
+			return;
+		}
 	}
 	if(g_Config.m_ClAutoReply)
 		SayFormat(g_Config.m_ClAutoReplyMsg);
