@@ -693,7 +693,7 @@ public:
 
 		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 		char aFilename[IO_MAX_PATH_LENGTH];
-		const char *pFontFile = "fonts/Icons.ttf";
+		const char *pFontFile = "fonts/Icons.otf";
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
