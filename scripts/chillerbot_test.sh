@@ -106,35 +106,7 @@ function run_tests() {
 		out_msg="${outs[$i]}"
 		echo "say $in_msg" > client1.fifo
 		sleep 0.5
-		srv_log="$(tail server.log)"
-		while ! echo "$srv_log" | grep -qF "$in_msg"
-		do
-			# error sending message
-			# resend
-			printf '!'
-			echo "say $in_msg" > client1.fifo
-			sleep 0.5
-			srv_log="$(tail server.log)"
-		done
 		echo "reply_to_last_ping" > client2.fifo
-		sleep 0.5
-		attempts=0
-		while grep -F '[chat]' server.log | grep -v NOREPLY | tail -n 1 | grep -q '[0-9]:client1: '
-		do
-			if [ "$attempts" -gt "0" ]
-			then
-				break
-			fi
-			attempts="$((attempts+1))"
-			# last message is from client1
-			# resend
-			# also resend the input message because reply to last ping got wiped
-			echo "say $in_msg" > client1.fifo
-			sleep 0.5
-			printf '!'
-			echo "reply_to_last_ping" > client2.fifo
-			sleep 0.5
-		done
 		sleep 0.5
 		srv_log="$(grep -F '[chat]' server.log | tail -n2)"
 		if ! echo "$srv_log" | grep -qF "$out_msg"
