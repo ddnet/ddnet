@@ -449,7 +449,6 @@ void CPlayers::RenderPlayer(
 				}
 				if(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
-					vec2 Dir;
 					if(PredictLocalWeapons)
 						Dir = vec2(pPlayerChar->m_X, pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
 					else
@@ -465,7 +464,7 @@ void CPlayers::RenderPlayer(
 						Dir = vec2(1, 0);
 					}
 					Graphics()->QuadsSetRotation(HadOkenAngle);
-					int QuadOffset = IteX * 2;
+					QuadOffset = IteX * 2;
 					vec2 DirY(-Dir.y, Dir.x);
 					p = Position;
 					float OffsetX = g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsetx;
@@ -533,7 +532,7 @@ void CPlayers::RenderPlayer(
 				if(AlphaMuzzle > 0.0f && g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX])
 				{
 					float OffsetY = -g_pData->m_Weapons.m_aId[iw].m_Muzzleoffsety;
-					int QuadOffset = IteX * 2 + (Direction.x < 0 ? 1 : 0);
+					QuadOffset = IteX * 2 + (Direction.x < 0 ? 1 : 0);
 					if(Direction.x < 0)
 						OffsetY = -OffsetY;
 

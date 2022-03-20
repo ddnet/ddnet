@@ -156,9 +156,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Starten
-
 Error
 == Fehlgeschlagen
 
@@ -416,7 +413,7 @@ Show friends only
 == Nur Freunde zeigen
 
 Show ingame HUD
-== Spielanzeigen
+== Spiel-HUD anzeigen
 
 Show name plates
 == Zeige Namen
@@ -1042,9 +1039,6 @@ Pause
 transmits your player name to info2.ddnet.tw
 == überträgt deinen Spielernamen an info2.ddnet.tw
 
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Das Mausrad wechselt Waffen. Hammer (linke Maustaste) kann benutzt werden um andere Tees zu schlagen und vom Freeze aufzuwecken.
-
 Server best:
 == Serverbeste:
 
@@ -1078,23 +1072,14 @@ Kill
 Please enter your nickname below.
 == Bitte gib deinen Spitznamen unten ein.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Die Map enthält Freeze, dass deinen Tee kurzzeitig unbeweglich macht. Ihr müsst zusammenarbeiten um durch diese Parts zu kommen.
-
 Render
 == Rendern
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hook (rechte Maustaste) kann benutzt werden um durch die Map zu schwingen und andere Tees zu dir zu ziehen.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Es wird empfohlen die Einstellungen nach deinem Geschmack anzupassen bevor du einem Server beitrittst.
 
 Use high DPI
 == Hohe DPI nutzen
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Am wichtigsten ist Kommunikation: Es gibt kein Tutorial, das heißt du musst mit den anderen Spielern schreiben (t-Taste) um die Grundlagen und Tricks des Spiels zu lernen.
 
 Learn
 == Lernen
@@ -1363,3 +1348,9 @@ Windowed fullscreen
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == Das Format der Textur %s ist nicht RGBA was graphische Fehler verursachen wird.
+
+Join Tutorial Server
+== Tutorial-Server betreten
+
+Skip Tutorial
+== Tutorial überspringen
