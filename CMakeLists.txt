@@ -1243,6 +1243,7 @@ set(EXPECTED_DATA
   maps/LearnToPlay.map
   maps/Sunny\ Side\ Up.map
   maps/Tsunami.map
+  maps/Tutorial.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1261,6 +1262,7 @@ set(EXPECTED_DATA
   maps7/LearnToPlay.map
   maps7/Sunny\ Side\ Up.map
   maps7/Tsunami.map
+  maps7/Tutorial.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png

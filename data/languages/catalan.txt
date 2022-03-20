@@ -138,9 +138,6 @@ Dynamic Camera
 Emoticon
 == Emoticó
 
-Enter
-== Entrar
-
 Error
 == Error
 
@@ -951,18 +948,6 @@ Are you sure that you want to disconnect your dummy?
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork és un videojoc cooperatiu en línia on l'objectiu és que tu i el teu grup de tees arribin a la meta final del mapa. Com a nouvingut hauries de començar en els servidors Novice, que contenen els mapes més fàcils. Considera el teu ping per escollir un servidor a prop teu.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Els mapes contenen "freeze", que fan que el tee no es pugui moure temporalment. Hauràs de treballar en equip per passar aquestes parts.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Pots canviar d'arma amb la roda del ratolí. El martell (ratolí esquerre) pot ser utilitzat per descongelar altres tees.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== El ganxo (ratolí dret) pot ser utilitzat per gronxar-se pel mapa i enganxar altres tees cap a tu.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== El més important és la comunicació: No hi ha tutorial, per això hauràs de parlar pel xat (tecla t) amb altres jugadors per aprendre les tècniques del joc.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == És recomanat que miris la configuració i ho canviïs al teu gust abans d'entrar a un servidor.
 
@@ -1325,6 +1310,12 @@ CHN
 == CHN
 
 The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Settings file

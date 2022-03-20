@@ -235,6 +235,7 @@ public:
 	virtual SWarning *GetCurWarning() = 0;
 
 	virtual CChecksumData *ChecksumData() = 0;
+	virtual bool InfoTaskRunning() = 0;
 
 	// chillerbot
 

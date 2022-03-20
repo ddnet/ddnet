@@ -525,6 +525,7 @@ public:
 
 	virtual SWarning *GetCurWarning();
 	virtual CChecksumData *ChecksumData() { return &m_Checksum.m_Data; }
+	virtual bool InfoTaskRunning() { return m_pDDNetInfoTask != nullptr; }
 };
 
 #endif

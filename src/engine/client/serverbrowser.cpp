@@ -1520,6 +1520,33 @@ void CServerBrowser::LoadDDNetInfoJson()
 	}
 }
 
+const char *CServerBrowser::GetTutorialServer()
+{
+	CNetwork *pNetwork = &m_aNetworks[NETWORK_DDNET];
+	const char *pBestAddr = nullptr;
+	int BestLatency = std::numeric_limits<int>::max();
+
+	for(int i = 0; i < pNetwork->m_NumCountries; i++)
+	{
+		CNetworkCountry *pCntr = &pNetwork->m_aCountries[i];
+		for(int j = 0; j < pCntr->m_NumServers; j++)
+		{
+			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+			if(!pEntry)
+				continue;
+			if(str_find(pEntry->m_Info.m_aName, "(Tutorial)") == 0)
+				continue;
+			if(pEntry->m_Info.m_NumPlayers > pEntry->m_Info.m_MaxPlayers - 10)
+				continue;
+			if(pEntry->m_Info.m_Latency >= BestLatency)
+				continue;
+			BestLatency = pEntry->m_Info.m_Latency;
+			pBestAddr = pEntry->m_Info.m_aAddress;
+		}
+	}
+	return pBestAddr;
+}
+
 const json_value *CServerBrowser::LoadDDNetInfo()
 {
 	LoadDDNetInfoJson();

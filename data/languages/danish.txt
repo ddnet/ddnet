@@ -143,9 +143,6 @@ Dynamic Camera
 Emoticon
 == Humørikoner
 
-Enter
-== Fortsæt
-
 Error
 == Fejl
 
@@ -670,18 +667,6 @@ Welcome to DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork er et samarbejdsvilligt onlinespil, hvor målet er, at du og din gruppe tees når målstregen på kortet. Som nybegynder skal du starte på Novice-servere, som er vært for de nemmeste kort. Overvej ping for at vælge en server tæt på dig.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Kortene indeholder frysning, hvilket midlertidigt gør, at en tee ikke kan bevæge sig. Du er nødt til at arbejde sammen for at komme igennem disse dele.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Mushjulet skifter våben. Hammer (venstre mus) kan bruges til at ramme andre tees og vække dem fra at være frossne.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Krog (højre mus) kan bruges til at svinge gennem kortet og til at trække andre tees til dig.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Vigtigst er kommunikation nøglen: Der er ingen tutorial, så du bliver nødt til at chatte (t tasten) med andre spillere for at lære de grundlæggende og tricks i spillet. 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Brug k tasten til at dræbe (genstart), q for at sætte pause og se andre spillere. Se indstillinger for andre tastebindinger.
@@ -1234,6 +1219,12 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR
