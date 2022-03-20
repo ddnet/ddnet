@@ -515,7 +515,7 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 			Weapon = WEAPON_GRENADE;
 		else if(str_find_nocase(pMessage, "rifle") || str_find_nocase(pMessage, "laser") || str_find_nocase(pMessage, "sniper"))
 			Weapon = WEAPON_LASER;
-		if(CCharacter *pChar = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
+		if(CCharacter *pChar = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_LocalIDs[g_Config.m_ClDummy]))
 		{
 			char aWeapons[1024];
 			aWeapons[0] = '\0';

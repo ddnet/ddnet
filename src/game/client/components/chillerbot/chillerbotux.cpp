@@ -84,6 +84,7 @@ void CChillerBotUX::OnRender()
 	}
 	RenderSpeedHud();
 	RenderEnabledComponents();
+	RenderWeaponHud();
 	FinishRenameTick();
 	ChangeTileNotifyTick();
 	m_ForceDir = 0;
@@ -115,6 +116,29 @@ void CChillerBotUX::ChangeTileNotifyTick()
 		m_LastNotification = time_get();
 	}
 	LastTile = CurrentTile;
+}
+
+void CChillerBotUX::RenderWeaponHud()
+{
+	if(!g_Config.m_ClWeaponHud)
+		return;
+	if(CCharacter *pChar = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_LocalIDs[g_Config.m_ClDummy]))
+	{
+		char aWeapons[1024];
+		aWeapons[0] = '\0';
+		if(pChar->GetWeaponGot(WEAPON_HAMMER))
+			str_append(aWeapons, "hammer", sizeof(aWeapons));
+		if(pChar->GetWeaponGot(WEAPON_GUN))
+			str_append(aWeapons, aWeapons[0] ? ", gun" : "gun", sizeof(aWeapons));
+		if(pChar->GetWeaponGot(WEAPON_SHOTGUN))
+			str_append(aWeapons, aWeapons[0] ? ", shotgun" : "shotgun", sizeof(aWeapons));
+		if(pChar->GetWeaponGot(WEAPON_GRENADE))
+			str_append(aWeapons, aWeapons[0] ? ", grenade" : "grenade", sizeof(aWeapons));
+		if(pChar->GetWeaponGot(WEAPON_LASER))
+			str_append(aWeapons, aWeapons[0] ? ", rifle" : "rifle", sizeof(aWeapons));
+
+		SetComponentNoteLong("weapon hud", aWeapons);
+	}
 }
 
 void CChillerBotUX::RenderSpeedHud()
@@ -470,6 +494,10 @@ void CChillerBotUX::UpdateComponents()
 		EnableComponent("money");
 	else
 		DisableComponent("money");
+	if(g_Config.m_ClWeaponHud)
+		EnableComponent("weapon hud");
+	else
+		DisableComponent("weapon hud");
 }
 
 void CChillerBotUX::OnConsoleInit()
@@ -487,6 +515,7 @@ void CChillerBotUX::OnConsoleInit()
 
 	Console()->Chain("cl_camp_hack", ConchainCampHack, this);
 	Console()->Chain("cl_chillerbot_hud", ConchainChillerbotHud, this);
+	Console()->Chain("cl_weapon_hud", ConchainWeaponHud, this);
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
 	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
 	Console()->Chain("cl_show_last_killer", ConchainShowLastKiller, this);
@@ -530,6 +559,17 @@ void CChillerBotUX::ConchainChillerbotHud(IConsole::IResult *pResult, void *pUse
 		pSelf->EnableComponent("chillerbot hud");
 	else
 		pSelf->DisableComponent("chillerbot hud");
+	pSelf->UpdateComponents();
+}
+
+void CChillerBotUX::ConchainWeaponHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("weapon hud");
+	else
+		pSelf->DisableComponent("weapon hud");
 	pSelf->UpdateComponents();
 }
 
