@@ -244,6 +244,7 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=local)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
   # TODO: Enable for C++ code except gtest
   #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")

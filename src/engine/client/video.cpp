@@ -146,9 +146,9 @@ void CVideo::Start()
 		int Ret = avio_open(&m_pFormatContext->pb, aWholePath, AVIO_FLAG_WRITE);
 		if(Ret < 0)
 		{
-			char aBuf[AV_ERROR_MAX_STRING_SIZE];
-			av_strerror(Ret, aBuf, sizeof(aBuf));
-			dbg_msg("video_recorder", "Could not open '%s': %s", aWholePath, aBuf);
+			char aError[AV_ERROR_MAX_STRING_SIZE];
+			av_strerror(Ret, aError, sizeof(aError));
+			dbg_msg("video_recorder", "Could not open '%s': %s", aWholePath, aError);
 			return;
 		}
 	}
@@ -166,9 +166,9 @@ void CVideo::Start()
 	int Ret = avformat_write_header(m_pFormatContext, &m_pOptDict);
 	if(Ret < 0)
 	{
-		char aBuf[AV_ERROR_MAX_STRING_SIZE];
-		av_strerror(Ret, aBuf, sizeof(aBuf));
-		dbg_msg("video_recorder", "Error occurred when opening output file: %s", aBuf);
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(Ret, aError, sizeof(aError));
+		dbg_msg("video_recorder", "Error occurred when opening output file: %s", aError);
 		return;
 	}
 	m_Recording = true;

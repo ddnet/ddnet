@@ -182,9 +182,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	if(Index < 0)
 		return false;
 
-	int Type = -1;
-	int SubType = 0;
-
 	int x, y;
 	x = (Pos.x - 16.0f) / 32.0f;
 	y = (Pos.y - 16.0f) / 32.0f;
@@ -275,6 +272,9 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			Number);
 		bullet->SetBouncing(2 - (Dir % 2));
 	}
+
+	int Type = -1;
+	int SubType = 0;
 
 	if(Index == ENTITY_ARMOR_1)
 		Type = POWERUP_ARMOR;

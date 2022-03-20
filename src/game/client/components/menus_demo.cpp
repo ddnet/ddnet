@@ -339,17 +339,16 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			else
 			{
 				static float PrevAmount = 0.0f;
-				float Amount = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
+				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
-					Amount = PrevAmount + (Amount - PrevAmount) * 0.05f;
+					AmountSeek = PrevAmount + (AmountSeek - PrevAmount) * 0.05f;
 
-					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount - Amount) >= 0.0001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.0001f)
 					{
-						//PrevAmount = Amount;
 						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(Amount);
+						DemoPlayer()->SeekPercent(AmountSeek);
 						m_pClient->m_SuppressEvents = false;
 						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
 						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
@@ -357,11 +356,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				}
 				else
 				{
-					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount - Amount) >= 0.001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.001f)
 					{
-						PrevAmount = Amount;
+						PrevAmount = AmountSeek;
 						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(Amount);
+						DemoPlayer()->SeekPercent(AmountSeek);
 						m_pClient->m_SuppressEvents = false;
 						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
 						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
@@ -1112,15 +1111,15 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(Selected)
 			{
-				CUIRect r = Row;
-				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
+				CUIRect Rect = Row;
+				Rect.Margin(0.5f, &Rect);
+				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 			else if(UI()->MouseInside(&SelectHitBox))
 			{
-				CUIRect r = Row;
-				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
+				CUIRect Rect = Row;
+				Rect.Margin(0.5f, &Rect);
+				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection

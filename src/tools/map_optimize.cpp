@@ -82,7 +82,7 @@ int main(int argc, const char **argv)
 	dbg_logger_stdout();
 
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
-	int Index, ID = 0, Type = 0, Size;
+	int ID = 0, Type = 0, Size;
 	void *pPtr;
 	char aFileName[IO_MAX_PATH_LENGTH];
 	CDataFileReader DataFile;
@@ -142,8 +142,7 @@ int main(int argc, const char **argv)
 	std::vector<SMapOptimizeItem> DataFindHelper;
 
 	// add all items
-	int i = 0;
-	for(int Index = 0; Index < DataFile.NumItems(); Index++)
+	for(int Index = 0, i = 0; Index < DataFile.NumItems(); Index++)
 	{
 		pPtr = DataFile.GetItem(Index, &Type, &ID);
 		Size = DataFile.GetItemSize(Index);
@@ -165,11 +164,11 @@ int main(int argc, const char **argv)
 					aImageFlags[pTLayer->m_Image] |= 1;
 					// check tiles that are used in this image
 					int DataIndex = pTLayer->m_Data;
-					unsigned int Size = DataFile.GetDataSize(DataIndex);
+					unsigned int DataSize = DataFile.GetDataSize(DataIndex);
 					void *pTiles = DataFile.GetData(DataIndex);
 					unsigned int TileSize = sizeof(CTile);
 
-					if(Size >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
+					if(DataSize >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
 					{
 						int x = 0;
 						int y = 0;
@@ -217,6 +216,7 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
+	int Index;
 	for(Index = 0; Index < DataFile.NumData(); Index++)
 	{
 		bool DeletePtr = false;

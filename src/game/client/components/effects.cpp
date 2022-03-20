@@ -227,7 +227,6 @@ void CEffects::Explosion(vec2 Pos)
 	// add the smoke
 	for(int i = 0; i < 24; i++)
 	{
-		CParticle p;
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SMOKE;
 		p.m_Pos = Pos;

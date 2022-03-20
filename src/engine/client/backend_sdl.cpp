@@ -1051,13 +1051,13 @@ int CGraphicsBackend_SDL_OpenGL::Init(const char *pName, int *pScreen, int *pWid
 	}
 
 	{
-		CCommandBuffer::SCommand_Update_Viewport CmdSDL;
-		CmdSDL.m_X = 0;
-		CmdSDL.m_Y = 0;
+		CCommandBuffer::SCommand_Update_Viewport CmdSDL2;
+		CmdSDL2.m_X = 0;
+		CmdSDL2.m_Y = 0;
 
-		CmdSDL.m_Width = *pCurrentWidth;
-		CmdSDL.m_Height = *pCurrentHeight;
-		CmdBuffer.AddCommandUnsafe(CmdSDL);
+		CmdSDL2.m_Width = *pCurrentWidth;
+		CmdSDL2.m_Height = *pCurrentHeight;
+		CmdBuffer.AddCommandUnsafe(CmdSDL2);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();

@@ -779,8 +779,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 		if(pData->m_BestTime)
 		{
-			float Diff = (Time - pData->m_BestTime) * 100;
-			MsgLegacy.m_Check = Msg.m_Check = (int)Diff;
+			float Diff100 = (Time - pData->m_BestTime) * 100;
+			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
 		}
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
