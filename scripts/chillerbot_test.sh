@@ -82,10 +82,10 @@ ins+=('can me ask question client2');outs+=('client1 yes but I might not answer'
 ins+=('kan i di was frage client2?');outs+=('client1 frag! Aber es kann sein, dass ich nicht antworte.')
 ins+=('u have nade client2?');outs+=('client1 No I got those weapons: hammer, gun')
 ins+=('client2 hast du hammer?');outs+=('client1 Yes I got those weapons: hammer, gun')
-# not sure if that should be covered
+# not sure if that should be covered (seen it 2 times in game now -,-)
 # ins+=('I HAVE A QUESTION client2');outs+=('client1 okay')
-# TODO: add str_endswith_nocase() https://github.com/chillerbot/chillerbot-ux/issues/58
-# ins+=('why do you war fooslongalt CLIENT2');outs+=('client1 fooslongalt has war because: bullied me in school')
+ins+=('why do you war fooslongalt CLIENT2');outs+=('client1: fooslongalt has war because: bullied me in school')
+ins+=('why do you war fooslongalt cLIEnT2???????');outs+=('client1: fooslongalt has war because: bullied me in school')
 
 function run_tests() {
 	local i

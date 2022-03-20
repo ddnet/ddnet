@@ -294,18 +294,18 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 			if(!m_pClient->m_WarList.IsWarlist(aVictim) && !m_pClient->m_WarList.IsTraitorlist(aVictim))
 			{
 				HasWar = false;
-				if(str_endswith(aVictim, "?")) // cut off the question mark from the victim name
+				while(str_endswith(aVictim, "?")) // cut off the question marks from the victim name
 					aVictim[str_length(aVictim) - 1] = '\0';
 				// cut off own name from the victime name if question in this format "why do you war foo (your name)"
 				char aOwnName[MAX_NAME_LENGTH + 3];
 				// main tee
 				str_format(aOwnName, sizeof(aOwnName), " %s", m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName);
-				if(str_endswith(aVictim, aOwnName))
+				if(str_endswith_nocase(aVictim, aOwnName))
 					aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
 				if(m_pClient->Client()->DummyConnected())
 				{
 					str_format(aOwnName, sizeof(aOwnName), " %s", m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName);
-					if(str_endswith(aVictim, aOwnName))
+					if(str_endswith_nocase(aVictim, aOwnName))
 						aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
 				}
 
