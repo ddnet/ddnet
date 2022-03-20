@@ -2853,7 +2853,7 @@ static int GetAuthLevel(const char *pLevel)
 	int Level = -1;
 	if(!str_comp_nocase(pLevel, "admin"))
 		Level = AUTHED_ADMIN;
-	else if(!str_comp_nocase_num(pLevel, "mod", 3))
+	else if(str_startswith(pLevel, "mod"))
 		Level = AUTHED_MOD;
 	else if(!str_comp_nocase(pLevel, "helper"))
 		Level = AUTHED_HELPER;
