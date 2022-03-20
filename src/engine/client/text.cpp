@@ -693,7 +693,7 @@ public:
 
 		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 		char aFilename[IO_MAX_PATH_LENGTH];
-		const char *pFontFile = "fonts/Icons.ttf";
+		const char *pFontFile = "fonts/Icons.otf";
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
@@ -1086,18 +1086,18 @@ public:
 		int SelectionStartChar = -1;
 		int SelectionEndChar = -1;
 
-		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			return (LastCharX - LastCharWidth / 2 <= CursorX &&
-				       CharX + CharWidth / 2 > CursorX &&
-				       CharY - Size <= CursorY &&
-				       CharY > CursorY) ||
+		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
+			return (LastCharX - LastCharWidth / 2 <= CursorX_ &&
+				       CharX + CharWidth / 2 > CursorX_ &&
+				       CharY - Size <= CursorY_ &&
+				       CharY > CursorY_) ||
 			       (CheckOuter &&
-				       CharY - Size > CursorY);
+				       CharY - Size > CursorY_);
 		};
-		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckInsideChar(CheckOuter, CursorX, CursorY, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
+				if(CheckInsideChar(CheckOuter, CursorX_, CursorY_, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 				{
 					SelectionChar = CharacterCounter;
 					SelectionStarted = !SelectionStarted;
@@ -1105,17 +1105,17 @@ public:
 				}
 			}
 		};
-		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float CharX, float CharWidth, float CharY) -> bool {
-			return (CharX + CharWidth / 2 > CursorX &&
-				       CharY - Size <= CursorY &&
-				       CharY > CursorY) ||
+		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float CharX, float CharWidth, float CharY) -> bool {
+			return (CharX + CharWidth / 2 > CursorX_ &&
+				       CharY - Size <= CursorY_ &&
+				       CharY > CursorY_) ||
 			       (CheckOuter &&
-				       CharY <= CursorY);
+				       CharY <= CursorY_);
 		};
-		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckOutsideChar(CheckOuter, CursorX, CursorY, CharX, CharWidth, CharY))
+				if(CheckOutsideChar(CheckOuter, CursorX_, CursorY_, CharX, CharWidth, CharY))
 				{
 					SelectionChar = CharacterCounter;
 					SelectionStarted = !SelectionStarted;

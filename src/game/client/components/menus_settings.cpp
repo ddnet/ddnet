@@ -71,7 +71,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	static int s_ClShowConsole = g_Config.m_ClShowConsole;
 #endif
 
-	char aBuf[128];
+	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	CUIRect Label, Button, Left, Right, Game, Client;
 	MainView.HSplitTop(150.0f, &Game, &Client);
 
@@ -206,7 +206,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
 			Right.HSplitTop(20.0f, &Label, &Right);
-			char aBuf[64];
 			if(g_Config.m_ClAutoDemoMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max demos"), g_Config.m_ClAutoDemoMax);
 			else
@@ -232,7 +231,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		Left.HSplitTop(10.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
-		char aBuf[64];
 		if(g_Config.m_ClRefreshRate)
 			str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_ClRefreshRate);
 		else
@@ -262,7 +260,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_SettingsButtonID = 0;
 		if(DoButton_Menu(&s_SettingsButtonID, Localize("Settings file"), 0, &SettingsButton))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, CONFIG_FILE, aBuf, sizeof(aBuf));
 			if(!open_file(aBuf))
 			{
@@ -278,7 +275,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_ConfigButtonID = 0;
 		if(DoButton_Menu(&s_ConfigButtonID, Localize("Config directory"), 0, &ConfigButton))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
 			if(!open_file(aBuf))
 			{
@@ -295,7 +291,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_ThemesButtonID = 0;
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
 			if(!open_file(aBuf))
@@ -437,7 +432,6 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i, s_ListBoxUsed);
 		if(Item.m_Visible)
 		{
-			CUIRect Label;
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 			float OldWidth = Item.m_Rect.w;
@@ -521,7 +515,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(230.0f, &Label, 0);
 	Dummy.VSplitLeft(170.0f, &Dummy, &SkinPrefix);
 	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, 0);
-	char aBuf[128];
+	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 
@@ -569,7 +563,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		static const char *s_aSkinPrefixes[] = {"kitty", "santa"};
 		for(auto &pPrefix : s_aSkinPrefixes)
 		{
-			CUIRect Button;
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
 			if(DoButton_Menu(&pPrefix, pPrefix, 0, &Button))
@@ -682,7 +675,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
-		char aBuf[128];
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
@@ -726,7 +718,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		const char *pSearchLabel = "\xEE\xA2\xB6";
+		const char *pSearchLabel = "\xEF\x80\x82";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
@@ -739,17 +731,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
-		static int s_ClearButton = 0;
+		static int s_ClearButtonSearch = 0;
 		static float s_Offset = 0.0f;
-		SUIExEditBoxProperties EditProps;
+		SUIExEditBoxProperties EditPropsSearch;
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
 
-			EditProps.m_SelectText = true;
+			EditPropsSearch.m_SelectText = true;
 		}
-		EditProps.m_pEmptyText = Localize("Search");
-		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps))
+		EditPropsSearch.m_pEmptyText = Localize("Search");
+		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButtonSearch, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditPropsSearch))
 			s_InitSkinlist = true;
 	}
 
@@ -771,7 +763,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_DirectoryButtonID = 0;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
-		char aBuf[IO_MAX_PATH_LENGTH];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
 		if(!open_file(aBuf))
@@ -783,7 +774,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static int s_SkinRefreshButtonID = 0;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		m_pClient->m_Skins.Refresh();
 		s_InitSkinlist = true;
@@ -1142,8 +1133,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_FontSizeResListHeader = 12.0f;
 	static const float sc_FontSizeResList = 10.0f;
 	int OldSelected = -1;
-	int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-	str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+	{
+		int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
+		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+	}
 
 	UI()->DoLabelScaled(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_CENTER);
 	UiDoListboxStart(&s_NumNodes, &ModeList, sc_RowHeightResList, Localize("Display Modes"), aBuf, s_NumNodes - 1, 1, OldSelected, s_ScrollValue);
@@ -1326,7 +1319,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
-	CUIRect Button;
+	CUIRect Button, Label;
 	static int s_SndEnable = g_Config.m_SndEnable;
 	static int s_SndRate = g_Config.m_SndRate;
 
@@ -1411,7 +1404,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1421,7 +1413,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider game sounds
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1431,7 +1422,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider gui sounds
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1441,7 +1431,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider map sounds
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1451,7 +1440,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider background music
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1958,8 +1946,8 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 			LeftColor.b = 0;
 			RightColor.b = ColorHSLA::DARKEST_LGT;
 
-			ColorRGBA RightColorRGBA = color_cast<ColorRGBA>(RightColor);
-			ColorRGBA LeftColorRGBA = color_cast<ColorRGBA>(LeftColor);
+			RightColorRGBA = color_cast<ColorRGBA>(RightColor);
+			LeftColorRGBA = color_cast<ColorRGBA>(LeftColor);
 
 			IGraphics::CColorVertex Array[4] = {
 				IGraphics::CColorVertex(0, LeftColorRGBA.r, LeftColorRGBA.g, LeftColorRGBA.b, 1),
@@ -2317,19 +2305,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			int DefaultInd = GameClient()->m_Skins.Find("default");
 
-			for(auto &i : RenderInfo)
+			for(auto &Info : RenderInfo)
 			{
-				i.m_Size = RealTeeSize;
-				i.m_CustomColoredSkin = false;
+				Info.m_Size = RealTeeSize;
+				Info.m_CustomColoredSkin = false;
 			}
 
 			int ind = -1;
-			int i = 0;
+			int pos = 0;
 
-			RenderInfo[i++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
-			RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-			RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-			RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
 		}
 
 		// System
@@ -2429,7 +2417,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 
 		if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &Button))
@@ -2489,7 +2476,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.VMargin(5.0f, &Right);
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(120.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, TEXTALIGN_LEFT);
@@ -2497,7 +2483,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitMid(&LeftLeft, &Button);
 
@@ -2512,7 +2497,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitMid(&LeftLeft, &Button);
 
@@ -2541,7 +2525,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
-	char aBuf[64];
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 	g_Config.m_ClDefaultZoom = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom / 20.0f) * 20.0f + 0.1f);
@@ -2685,7 +2669,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Left.w += 20.0f;
 		Left.HSplitBottom(20.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 
 		// Update Button

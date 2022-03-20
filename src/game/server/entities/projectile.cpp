@@ -254,7 +254,7 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-			int64_t TeamMask = -1LL;
+			TeamMask = -1LL;
 			if(pOwnerChar && pOwnerChar->IsAlive())
 			{
 				TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);

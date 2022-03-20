@@ -420,9 +420,9 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 			m_DummyInput.m_WantedWeapon = WEAPON_HAMMER + 1;
 		}
 
-		vec2 Main = m_LocalCharacterPos;
-		vec2 Dummy = m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
-		vec2 Dir = Main - Dummy;
+		vec2 MainPos = m_LocalCharacterPos;
+		vec2 DummyPos = m_aClients[m_LocalIDs[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+		vec2 Dir = MainPos - DummyPos;
 		m_HammerInput.m_TargetX = (int)(Dir.x);
 		m_HammerInput.m_TargetY = (int)(Dir.y);
 
@@ -1622,31 +1622,31 @@ void CGameClient::OnNewSnapshot()
 					Collision()->m_NumSwitchers = NumSwitchers;
 				}
 
-				for(int i = 0; i < NumSwitchers + 1; i++)
+				for(int j = 0; j < NumSwitchers + 1; j++)
 				{
-					if(i < 32)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status1 & (1 << i);
-					else if(i < 64)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status2 & (1 << (i - 32));
-					else if(i < 96)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status3 & (1 << (i - 64));
-					else if(i < 128)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status4 & (1 << (i - 96));
-					else if(i < 160)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status5 & (1 << (i - 128));
-					else if(i < 192)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status6 & (1 << (i - 160));
-					else if(i < 224)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status7 & (1 << (i - 192));
-					else if(i < 256)
-						Collision()->m_pSwitchers[i].m_Status[Team] = pSwitchStateData->m_Status8 & (1 << (i - 224));
+					if(j < 32)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status1 & (1 << j);
+					else if(j < 64)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status2 & (1 << (j - 32));
+					else if(j < 96)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status3 & (1 << (j - 64));
+					else if(j < 128)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status4 & (1 << (j - 96));
+					else if(j < 160)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status5 & (1 << (j - 128));
+					else if(j < 192)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status6 & (1 << (j - 160));
+					else if(j < 224)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status7 & (1 << (j - 192));
+					else if(j < 256)
+						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status8 & (1 << (j - 224));
 
 					// update
-					if(Collision()->m_pSwitchers[i].m_Status[Team])
-						Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
+					if(Collision()->m_pSwitchers[j].m_Status[Team])
+						Collision()->m_pSwitchers[j].m_Type[Team] = TILE_SWITCHOPEN;
 					else
-						Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHCLOSE;
-					Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
+						Collision()->m_pSwitchers[j].m_Type[Team] = TILE_SWITCHCLOSE;
+					Collision()->m_pSwitchers[j].m_EndTick[Team] = 0;
 				}
 
 				if(!GotSwitchStateTeam)
@@ -2306,8 +2306,8 @@ void CGameClient::SendKill(int ClientID)
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_KILL, false);
-		Client()->SendMsg(!g_Config.m_ClDummy, &Msg, MSGFLAG_VITAL);
+		CMsgPacker MsgP(NETMSGTYPE_CL_KILL, false);
+		Client()->SendMsg(!g_Config.m_ClDummy, &MsgP, MSGFLAG_VITAL);
 	}
 }
 

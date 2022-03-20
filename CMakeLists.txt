@@ -244,9 +244,11 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=local) # global has too many occurences
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
-  # TODO: Enable for C++ code except gtest
-  #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
 endif()
 
 if(MSVC)
@@ -839,7 +841,6 @@ set(EXPECTED_DATA
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
   blob.png
-  browse_icons.png
   censorlist.txt
   console.png
   console_bar.png
@@ -1138,7 +1139,7 @@ set(EXPECTED_DATA
   file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
-  fonts/Icons.ttf
+  fonts/Icons.otf
   fonts/SourceHanSansSC-Regular.otf
   game.png
   gui_buttons.png
@@ -1235,6 +1236,7 @@ set(EXPECTED_DATA
   maps/LearnToPlay.map
   maps/Sunny\ Side\ Up.map
   maps/Tsunami.map
+  maps/Tutorial.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1253,6 +1255,7 @@ set(EXPECTED_DATA
   maps7/LearnToPlay.map
   maps7/Sunny\ Side\ Up.map
   maps7/Tsunami.map
+  maps7/Tutorial.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png

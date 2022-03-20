@@ -170,6 +170,7 @@ public:
 	virtual void CountryFilterClean(int Network) = 0;
 	virtual void TypeFilterClean(int Network) = 0;
 	virtual int GetCurrentType() = 0;
+	virtual const char *GetTutorialServer() = 0;
 };
 
 #endif

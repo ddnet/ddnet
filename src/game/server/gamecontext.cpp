@@ -1790,25 +1790,25 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if(pMsg->m_pMessage[0] == '/')
 			{
-				if(str_comp_nocase_num(pMsg->m_pMessage + 1, "w ", 2) == 0)
+				if(str_startswith(pMsg->m_pMessage + 1, "w "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
 					Whisper(pPlayer->GetCID(), aWhisperMsg);
 				}
-				else if(str_comp_nocase_num(pMsg->m_pMessage + 1, "whisper ", 8) == 0)
+				else if(str_startswith(pMsg->m_pMessage + 1, "whisper "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 9, 256);
 					Whisper(pPlayer->GetCID(), aWhisperMsg);
 				}
-				else if(str_comp_nocase_num(pMsg->m_pMessage + 1, "c ", 2) == 0)
+				else if(str_startswith(pMsg->m_pMessage + 1, "c "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
 					Converse(pPlayer->GetCID(), aWhisperMsg);
 				}
-				else if(str_comp_nocase_num(pMsg->m_pMessage + 1, "converse ", 9) == 0)
+				else if(str_startswith(pMsg->m_pMessage + 1, "converse "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
@@ -3251,8 +3251,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "teehistorian/%s.teehistorian", aGameUuid);
 
-		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-		if(!File)
+		IOHANDLE THFile = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		if(!THFile)
 		{
 			dbg_msg("teehistorian", "failed to open '%s'", aFilename);
 			Server()->SetErrorShutdown("teehistorian open error");
@@ -3262,7 +3262,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		{
 			dbg_msg("teehistorian", "recording to '%s'", aFilename);
 		}
-		m_pTeeHistorianFile = aio_new(File);
+		m_pTeeHistorianFile = aio_new(THFile);
 
 		char aVersion[128];
 		if(GIT_SHORTREV_HASH)
@@ -3820,7 +3820,7 @@ int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDel
 		return 1;
 	}
 
-	if((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+	if(g_Config.m_SvSpamMuteDuration && (m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
 	{
 		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
 		m_apPlayers[ClientID]->m_ChatScore = 0;

@@ -2387,10 +2387,10 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 		else
 		{
-			CLayerQuads *t = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-			if(t)
+			CLayerQuads *q = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+			if(q)
 			{
-				m_QuadsetPicker.m_Image = t->m_Image;
+				m_QuadsetPicker.m_Image = q->m_Image;
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].x = f2fx(View.x);
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[0].y = f2fx(View.y);
 				m_QuadsetPicker.m_lQuads[0].m_aPoints[1].x = f2fx((View.x + View.w));
@@ -3092,14 +3092,14 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			NewColorHex |= UiDoValueSelector(((char *)&pIDs[i] - 1), &Shifter, "", (pProps[i].m_Value >> 8) & 0xFFFFFF, 0, 0xFFFFFF, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.", false, true) << 8;
 
 			// color picker
-			ColorRGBA Color = ColorRGBA(
+			ColorRGBA ColorPick = ColorRGBA(
 				((pProps[i].m_Value >> s_aShift[0]) & 0xff) / 255.0f,
 				((pProps[i].m_Value >> s_aShift[1]) & 0xff) / 255.0f,
 				((pProps[i].m_Value >> s_aShift[2]) & 0xff) / 255.0f,
 				1.0f);
 
 			static int s_ColorPicker, s_ColorPickerID;
-			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &Color))
+			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &ColorPick))
 			{
 				ms_PickerColor = color_cast<ColorHSVA>(Color);
 				UiInvokePopupMenu(&s_ColorPickerID, 0, UI()->MouseX(), UI()->MouseY(), 180, 150, PopupColorPicker);
@@ -3457,10 +3457,10 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						if(m_lSelectedLayers.size() > 1)
 						{
 							bool AllTile = true;
-							for(int i = 0; AllTile && i < m_lSelectedLayers.size(); i++)
+							for(int j = 0; AllTile && j < m_lSelectedLayers.size(); j++)
 							{
-								if(m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[m_lSelectedLayers[i]]->m_Type == LAYERTYPE_TILES)
-									s_LayerPopupContext.m_aLayers.add((CLayerTiles *)m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[m_lSelectedLayers[i]]);
+								if(m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[m_lSelectedLayers[j]]->m_Type == LAYERTYPE_TILES)
+									s_LayerPopupContext.m_aLayers.add((CLayerTiles *)m_Map.m_lGroups[m_SelectedGroup]->m_lLayers[m_lSelectedLayers[j]]);
 								else
 									AllTile = false;
 							}
@@ -4449,10 +4449,10 @@ void CEditor::RenderFileDialog()
 			{
 				//scroll
 				float IndexY = View.y - m_FileDialogScrollValue * ScrollNum * 17.0f + NewIndex * 17.0f;
-				int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + 17.0f ? 1 : 0;
-				if(Scroll)
+				int ScrollPos = View.y > IndexY ? -1 : View.y + View.h < IndexY + 17.0f ? 1 : 0;
+				if(ScrollPos)
 				{
-					if(Scroll < 0)
+					if(ScrollPos < 0)
 						m_FileDialogScrollValue = ((float)(NewIndex) + 0.5f) / ScrollNum;
 					else
 						m_FileDialogScrollValue = ((float)(NewIndex - Num) + 2.5f) / ScrollNum;
@@ -5744,27 +5744,27 @@ void CEditor::Render()
 				if(m_apSavedBrushes[Slot])
 				{
 					CLayerGroup *pPrev = m_apSavedBrushes[Slot];
-					for(int i = 0; i < pPrev->m_lLayers.size(); i++)
+					for(int j = 0; j < pPrev->m_lLayers.size(); j++)
 					{
-						if(pPrev->m_lLayers[i]->m_BrushRefCount == 1)
-							delete pPrev->m_lLayers[i];
+						if(pPrev->m_lLayers[j]->m_BrushRefCount == 1)
+							delete pPrev->m_lLayers[j];
 						else
-							pPrev->m_lLayers[i]->m_BrushRefCount--;
+							pPrev->m_lLayers[j]->m_BrushRefCount--;
 					}
 				}
 				delete m_apSavedBrushes[Slot];
 				m_apSavedBrushes[Slot] = new CLayerGroup(m_Brush);
 
-				for(int i = 0; i < m_apSavedBrushes[Slot]->m_lLayers.size(); i++)
-					m_apSavedBrushes[Slot]->m_lLayers[i]->m_BrushRefCount++;
+				for(int j = 0; j < m_apSavedBrushes[Slot]->m_lLayers.size(); j++)
+					m_apSavedBrushes[Slot]->m_lLayers[j]->m_BrushRefCount++;
 			}
 			else if(m_apSavedBrushes[Slot])
 			{
 				dbg_msg("editor", "loading brush from slot %d", Slot);
 
 				CLayerGroup *pNew = m_apSavedBrushes[Slot];
-				for(int i = 0; i < pNew->m_lLayers.size(); i++)
-					pNew->m_lLayers[i]->m_BrushRefCount++;
+				for(int j = 0; j < pNew->m_lLayers.size(); j++)
+					pNew->m_lLayers[j]->m_BrushRefCount++;
 
 				m_Brush = *pNew;
 			}
