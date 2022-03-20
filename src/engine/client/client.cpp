@@ -4416,9 +4416,9 @@ int main(int argc, const char **argv)
 	// parse the command line arguments
 	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
 		pClient->HandleConnectLink(argv[1]);
-	else if(argc == 2 && str_endswith(argv[1], ".demo"))
+	else if(argc == 2 && str_endswith_nocase(argv[1], ".demo"))
 		pClient->HandleDemoPath(argv[1]);
-	else if(argc == 2 && str_endswith(argv[1], ".map"))
+	else if(argc == 2 && str_endswith_nocase(argv[1], ".map"))
 		pClient->HandleMapPath(argv[1]);
 	else if(argc > 1)
 		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);

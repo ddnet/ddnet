@@ -771,7 +771,7 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[1024];
 	// add map extension
-	if(!str_endswith(pFileName, ".map"))
+	if(!str_endswith_nocase(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -792,7 +792,7 @@ void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[1024];
 	// add map extension
-	if(!str_endswith(pFileName, ".map"))
+	if(!str_endswith_nocase(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -809,7 +809,7 @@ void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	if(!IsDir && str_endswith(pName, ".png"))
+	if(!IsDir && str_endswith_nocase(pName, ".png"))
 	{
 		std::string Name = pName;
 		pEditor->m_SelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
@@ -4246,9 +4246,9 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	CEditor *pEditor = (CEditor *)pUser;
 	if((pName[0] == '.' && (pName[1] == 0 ||
 				       (pName[1] == '.' && pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
-		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pName, ".map")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(pName, ".png")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pName, ".opus")))))
+		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith_nocase(pName, ".map")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith_nocase(pName, ".png")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith_nocase(pName, ".opus")))))
 		return 0;
 
 	CEditor::CFilelistItem Item;
@@ -4469,7 +4469,7 @@ void CEditor::RenderFileDialog()
 
 		if(m_FileDialogFileType == CEditor::FILETYPE_IMG && !m_PreviewImageIsLoaded && m_FilesSelectedIndex > -1)
 		{
-			if(str_endswith(m_FileList[m_FilesSelectedIndex].m_aFilename, ".png"))
+			if(str_endswith_nocase(m_FileList[m_FilesSelectedIndex].m_aFilename, ".png"))
 			{
 				char aBuffer[1024];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_FileList[m_FilesSelectedIndex].m_aFilename);

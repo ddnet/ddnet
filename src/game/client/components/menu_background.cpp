@@ -86,7 +86,7 @@ void CMenuBackground::ResetPositions()
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CMenuBackground *pSelf = (CMenuBackground *)pUser;
-	const char *pSuffix = str_endswith(pName, ".map");
+	const char *pSuffix = str_endswith_nocase(pName, ".map");
 	if(IsDir || !pSuffix)
 		return 0;
 	char aFullName[128];
@@ -136,7 +136,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CMenuBackground *pSelf = (CMenuBackground *)pUser;
-	const char *pSuffix = str_endswith(pName, ".png");
+	const char *pSuffix = str_endswith_nocase(pName, ".png");
 	if(IsDir || !pSuffix)
 		return 0;
 

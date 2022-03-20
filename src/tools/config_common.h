@@ -18,7 +18,7 @@ inline void ProcessItem(const char *pItemName, IStorage *pStorage)
 		return;
 	}
 
-	if(!str_endswith(pItemName, ".map"))
+	if(!str_endswith_nocase(pItemName, ".map"))
 	{
 		dbg_msg("config_common", "can't process non-map file '%s'", pItemName);
 		return;

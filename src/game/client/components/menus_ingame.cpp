@@ -899,7 +899,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 {
 	CMenus *pSelf = (CMenus *)pUser;
 	const char *pMap = pSelf->Client()->GetCurrentMap();
-	if(IsDir || !str_endswith(pName, ".gho") || !str_startswith(pName, pMap))
+	if(IsDir || !str_endswith_nocase(pName, ".gho") || !str_startswith(pName, pMap))
 		return 0;
 
 	char aFilename[IO_MAX_PATH_LENGTH];

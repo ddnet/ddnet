@@ -47,7 +47,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CSkins *pSelf = (CSkins *)pUser;
 
-	if(IsDir || !str_endswith(pName, ".png"))
+	if(IsDir || !str_endswith_nocase(pName, ".png"))
 		return 0;
 
 	char aNameWithoutPng[128];

@@ -184,7 +184,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 {
 	CDemoListParam *pParam = (CDemoListParam *)pUser;
 	int MapLen = str_length(pParam->pMap);
-	if(IsDir || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
+	if(IsDir || !str_endswith_nocase(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
 		return 0;
 
 	CDemoItem Item;

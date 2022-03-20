@@ -3033,7 +3033,7 @@ int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUser
 {
 	sorted_array<CMapNameItem> *pMapList = (sorted_array<CMapNameItem> *)pUserData;
 
-	if(IsDir || !str_endswith(pName, ".map"))
+	if(IsDir || !str_endswith_nocase(pName, ".map"))
 		return 0;
 
 	CMapNameItem Item;

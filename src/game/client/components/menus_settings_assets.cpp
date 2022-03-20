@@ -79,7 +79,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 	else
 	{
-		if(str_endswith(pName, ".png"))
+		if(str_endswith_nocase(pName, ".png"))
 		{
 			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
@@ -153,7 +153,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 	}
 	else
 	{
-		if(str_endswith(pName, ".png"))
+		if(str_endswith_nocase(pName, ".png"))
 		{
 			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);

@@ -2712,7 +2712,7 @@ void CMenus::RenderUpdating(const char *pCaption, int current, int total)
 int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
-	if(IsDir || !str_endswith(pName, ".png"))
+	if(IsDir || !str_endswith_nocase(pName, ".png"))
 		return 0;
 
 	char aBuf[IO_MAX_PATH_LENGTH];

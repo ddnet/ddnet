@@ -119,7 +119,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
 			else
 			{
-				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
+				if(!str_endswith_nocase(m_aCurrentDemoFile, ".demo"))
 					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
 				char aPath[IO_MAX_PATH_LENGTH];
@@ -745,7 +745,7 @@ int CMenus::UiLogicGetCurrentClickedItem()
 int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
-	if(str_comp(pInfo->m_pName, ".") == 0 || (str_comp(pInfo->m_pName, "..") == 0 && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0) || (!IsDir && !str_endswith(pInfo->m_pName, ".demo")))
+	if(str_comp(pInfo->m_pName, ".") == 0 || (str_comp(pInfo->m_pName, "..") == 0 && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0) || (!IsDir && !str_endswith_nocase(pInfo->m_pName, ".demo")))
 	{
 		return 0;
 	}
