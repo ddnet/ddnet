@@ -496,7 +496,9 @@ int CTerminalUI::GetInput()
 		{
 			if(str_length(g_aInputStr) < 1)
 				return 0;
-			str_truncate(g_aInputStr, sizeof(g_aInputStr), g_aInputStr, str_length(g_aInputStr) - 1);
+			char aBuf[1024];
+			str_truncate(aBuf, sizeof(aBuf), g_aInputStr, str_length(g_aInputStr) - 1);
+			str_copy(g_aInputStr, aBuf, sizeof(g_aInputStr));
 			wclear(g_pInputWin);
 			InputDraw();
 			DrawBorders(g_pInputWin);
