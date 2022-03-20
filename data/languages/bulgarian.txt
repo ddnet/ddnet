@@ -142,9 +142,6 @@ Dynamic Camera
 Emoticon
 == Емотикони
 
-Enter
-== Влез
-
 Error
 == Грешка
 
@@ -676,18 +673,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
@@ -719,6 +704,12 @@ Speed
 == 
 
 Video name:
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Show DDNet map finishes in server browser
@@ -1102,6 +1093,9 @@ Laser Inner Color
 Hookline
 == 
 
+Size
+== 
+
 No hit
 == 
 
@@ -1141,10 +1135,10 @@ Preview
 Save the best demo of each race
 == 
 
-Default length: %d
+Enable replays
 == 
 
-Enable replays
+Default length: %d
 == 
 
 Show ghost
@@ -1157,9 +1151,6 @@ Gameplay
 == 
 
 Overlay entities
-== 
-
-Size
 == 
 
 Show text entities

@@ -70,6 +70,7 @@ CMenus::CMenus()
 	m_ActivePage = PAGE_INTERNET;
 	m_MenuPage = 0;
 	m_GamePage = PAGE_GAME;
+	m_JoinTutorial = false;
 
 	m_NeedRestartGraphics = false;
 	m_NeedRestartSound = false;
@@ -1343,6 +1344,13 @@ int CMenus::Render()
 
 	if(m_Popup == POPUP_NONE)
 	{
+		if(m_JoinTutorial && !Client()->InfoTaskRunning())
+		{
+			m_JoinTutorial = false;
+			const char *pAddr = ServerBrowser()->GetTutorialServer();
+			if(pAddr)
+				Client()->Connect(pAddr);
+		}
 		if(m_ShowStart && Client()->State() == IClient::STATE_OFFLINE)
 		{
 			m_pBackground->ChangePosition(CMenuBackground::POS_START);
@@ -1542,12 +1550,8 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
 			pTitle = Localize("Welcome to DDNet");
-			str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
+			str_format(aBuf, sizeof(aBuf), "%s\n\n%s\n\n%s\n\n%s",
 				Localize("DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you."),
-				Localize("The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts."),
-				Localize("The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen."),
-				Localize("Hook (right mouse) can be used to swing through the map and to hook other tees to you."),
-				Localize("Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game."),
 				Localize("Use k key to kill (restart), q to pause and watch other players. See settings for other key binds."),
 				Localize("It's recommended that you check the settings to adjust them to your liking before joining a server."),
 				Localize("Please enter your nickname below."));
@@ -2156,22 +2160,29 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
-			CUIRect Label, TextBox;
+			CUIRect Label, TextBox, Skip, Join;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(80.0f, &Part);
+			Part.VSplitMid(&Skip, &Join);
+			Skip.VMargin(20.0f, &Skip);
+			Join.VMargin(20.0f, &Join);
 
-			static int s_EnterButton = 0;
-			if(DoButton_Menu(&s_EnterButton, Localize("Enter"), 0, &Part) || m_EnterPressed)
+			static int s_JoinTutorialButton = 0;
+			if(DoButton_Menu(&s_JoinTutorialButton, Localize("Join Tutorial Server"), 0, &Join) || m_EnterPressed)
 			{
+				m_JoinTutorial = true;
 				Client()->RequestDDNetInfo();
-				if(g_Config.m_BrIndicateFinished)
-					m_Popup = POPUP_POINTS;
-				else
-				{
-					m_Popup = POPUP_NONE;
-				}
+				m_Popup = g_Config.m_BrIndicateFinished ? POPUP_POINTS : POPUP_NONE;
+			}
+
+			static int s_SkipTutorialButton = 0;
+			if(DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip) || m_EscapePressed)
+			{
+				m_JoinTutorial = false;
+				Client()->RequestDDNetInfo();
+				m_Popup = g_Config.m_BrIndicateFinished ? POPUP_POINTS : POPUP_NONE;
 			}
 
 			Box.HSplitBottom(20.f, &Box, &Part);

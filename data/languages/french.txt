@@ -158,9 +158,6 @@ Dynamic Camera
 Emoticon
 == Émoticônes
 
-Enter
-== Démarrer
-
 Error
 == Erreur
 
@@ -1094,18 +1091,6 @@ Reconnect in %d sec
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une carte. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Les cartes contiennent du freeze (gel), ce qui vous empêche temporairement de bouger. Vous devez travailler en équipe pour passer ces parties.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La molette de la souris permet de changer d'arme. Le marteau (clic gauche) peut être utilisé pour frapper les autres tees ce qui les unfreeze (dégèle).
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Le grappin (clic droit) peut être utilisé pour se balancer tout le long de la carte en attrapant les murs et peut aussi permettre d'attraper les autres Tees.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== La communication est la clé de la réussite: Il n'y a pas de tutoriel donc vous devrez parler avec d'autres joueurs (touche T) afin d'apprendre les bases du jeu ainsi que ses mécanismes complexes, avancés et variés.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Il est recommandé d'ajuster les configurations à votre goût avant de rejoindre un serveur.
 
@@ -1375,4 +1360,10 @@ Chat command (e.g. showall 1)
 == Commande du tchat (e.g. showall 1)
 
 The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 

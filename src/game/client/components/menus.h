@@ -265,6 +265,7 @@ protected:
 	bool m_MenuActive;
 	bool m_UseMouseButtons;
 	vec2 m_MousePos;
+	bool m_JoinTutorial;
 
 	char m_aNextServer[256];
 
