@@ -1121,7 +1121,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		void *Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
+		Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffet);
 		if(Data == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");

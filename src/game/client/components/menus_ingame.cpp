@@ -664,7 +664,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// vote menu
 	{
-		CUIRect Button, QuickSearch;
+		CUIRect QuickSearch;
 
 		// render quick search
 		{

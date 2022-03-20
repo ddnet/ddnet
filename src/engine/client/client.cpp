@@ -158,12 +158,12 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		float v0 = (m_aValues[i0] - m_Min) / (m_Max - m_Min);
 		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
 
-		IGraphics::CColorVertex Array[2] = {
+		IGraphics::CColorVertex ArrayV[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(Array, 2);
-		IGraphics::CLineItem LineItem(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
-		pGraphics->LinesDraw(&LineItem, 1);
+		pGraphics->SetColorVertex(ArrayV, 2);
+		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
+		pGraphics->LinesDraw(&LineItem2, 1);
 	}
 	pGraphics->LinesEnd();
 
@@ -1758,9 +1758,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				// request new chunk
 				m_MapdownloadChunk++;
 
-				CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
-				Msg.AddInt(m_MapdownloadChunk);
-				SendMsg(CONN_MAIN, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+				CMsgPacker MsgP(NETMSG_REQUEST_MAP_DATA, true);
+				MsgP.AddInt(m_MapdownloadChunk);
+				SendMsg(CONN_MAIN, &MsgP, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 
 				if(g_Config.m_Debug)
 				{
@@ -1784,8 +1784,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_PING)
 		{
-			CMsgPacker Msg(NETMSG_PING_REPLY, true);
-			SendMsg(Conn, &Msg, 0);
+			CMsgPacker MsgP(NETMSG_PING_REPLY, true);
+			SendMsg(Conn, &MsgP, 0);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
@@ -1794,9 +1794,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			CMsgPacker Msg(NETMSG_PONGEX, true);
-			Msg.AddRaw(pID, sizeof(*pID));
-			SendMsg(Conn, &Msg, MSGFLAG_FLUSH);
+			CMsgPacker MsgP(NETMSG_PONGEX, true);
+			MsgP.AddRaw(pID, sizeof(*pID));
+			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH);
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_PONGEX)
 		{
@@ -1823,13 +1823,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			int Result = HandleChecksum(Conn, *pUuid, &Unpacker);
-			if(Result)
+			int ResultCheck = HandleChecksum(Conn, *pUuid, &Unpacker);
+			if(ResultCheck)
 			{
-				CMsgPacker Msg(NETMSG_CHECKSUM_ERROR, true);
-				Msg.AddRaw(pUuid, sizeof(*pUuid));
-				Msg.AddInt(Result);
-				SendMsg(Conn, &Msg, MSGFLAG_VITAL);
+				CMsgPacker MsgP(NETMSG_CHECKSUM_ERROR, true);
+				MsgP.AddRaw(pUuid, sizeof(*pUuid));
+				MsgP.AddInt(ResultCheck);
+				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
@@ -1848,9 +1848,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
 		{
-			int Result = Unpacker.GetInt();
+			int ResultInt = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
-				m_RconAuthed[Conn] = Result;
+				m_RconAuthed[Conn] = ResultInt;
 			if(Conn == CONN_MAIN)
 			{
 				int Old = m_UseTempRconCommands;
@@ -2102,8 +2102,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							CNetMsg_Cl_Say Msg;
-							Msg.m_Team = 0;
+							CNetMsg_Cl_Say MsgP;
+							MsgP.m_Team = 0;
 							char aBuf[256];
 							if(g_Config.m_ClRunOnJoin[0])
 							{
@@ -2113,10 +2113,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							{
 								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
 							}
-							Msg.m_pMessage = aBuf;
-							CMsgPacker Packer(Msg.MsgID(), false);
-							Msg.Pack(&Packer);
-							SendMsg(Conn, &Packer, MSGFLAG_VITAL);
+							MsgP.m_pMessage = aBuf;
+							CMsgPacker PackerTimeout(MsgP.MsgID(), false);
+							MsgP.Pack(&PackerTimeout);
+							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
 						m_CodeRunAfterJoin[Conn] = true;
 					}
@@ -2642,7 +2642,7 @@ void CClient::Update()
 				m_CurrentServerNextPingTime >= 0 &&
 				time_get() > m_CurrentServerNextPingTime)
 			{
-				int64_t Now = time_get();
+				int64_t NowPing = time_get();
 				int64_t Freq = time_freq();
 
 				char aBuf[64];
@@ -2660,8 +2660,8 @@ void CClient::Update()
 					Msg.AddRaw(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
 					SendMsg(CONN_MAIN, &Msg, MSGFLAG_FLUSH);
 				}
-				m_CurrentServerCurrentPingTime = Now;
-				m_CurrentServerNextPingTime = Now + 600 * Freq; // ping every 10 minutes
+				m_CurrentServerCurrentPingTime = NowPing;
+				m_CurrentServerNextPingTime = NowPing + 600 * Freq; // ping every 10 minutes
 			}
 		}
 
@@ -4053,11 +4053,11 @@ void CClient::LoadFont()
 			File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 			if(File)
 			{
-				size_t Size = io_length(File);
-				unsigned char *pBuf = (unsigned char *)malloc(Size);
+				Size = io_length(File);
+				pBuf = (unsigned char *)malloc(Size);
 				io_read(File, pBuf, Size);
 				io_close(File);
-				IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+				pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
 			}
 

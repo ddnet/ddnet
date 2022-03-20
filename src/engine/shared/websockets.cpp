@@ -120,13 +120,13 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 		websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.First();
 		if(chunk == NULL)
 			break;
-		int len = chunk->size - chunk->read;
+		int chunk_len = chunk->size - chunk->read;
 		int n =
 			lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read],
 				chunk->size - chunk->read, LWS_WRITE_BINARY);
 		if(n < 0)
 			return 1;
-		if(n < len)
+		if(n < chunk_len)
 		{
 			chunk->read += n;
 			lws_callback_on_writable(wsi);
