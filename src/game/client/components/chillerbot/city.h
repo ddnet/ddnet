@@ -17,7 +17,7 @@ private:
 
 	void SetAutoDrop(bool Drop, int Delay, int ClientID);
 	void OnServerMsg(const char *pMsg);
-	void OnChatMsg(int ClientID, const char *pMsg);
+	void OnChatMsg(int ClientID, int Team, const char *pMsg);
 	int ClosestClientIDToPos(vec2 Pos, int Dummy);
 
 	bool m_AutoDropMoney[NUM_DUMMIES];
@@ -37,7 +37,7 @@ public:
 	std::vector<std::pair<std::string, int>> m_vWalletMain;
 	std::vector<std::pair<std::string, int>> m_vWalletDummy;
 
-	void PrintWalletToChat(int ClientID = -1);
+	void PrintWalletToChat(int ClientID = -1, const char *pWhisper = NULL);
 	void DropAllMoney(int ClientID);
 	int WalletMoney(int ClientID = -1);
 };
