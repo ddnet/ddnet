@@ -98,7 +98,6 @@ function run_tests() {
 	local out_msg
 	local srv_log
 	local line
-	local attempts
 	sleep 1
 	for i in "${!ins[@]}"
 	do
