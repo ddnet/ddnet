@@ -597,8 +597,8 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ?"
-		"  GROUP BY Name, Time "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  GROUP BY Name "
+		"  WINDOW w AS (ORDER BY MIN(Time))"
 		") as a "
 		"WHERE Name = ?",
 		pSqlServer->GetPrefix());
