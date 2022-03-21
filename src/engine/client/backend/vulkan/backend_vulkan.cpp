@@ -39,7 +39,6 @@
 #include <SDL_vulkan.h>
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #ifndef VK_API_VERSION_MAJOR
 #define VK_API_VERSION_MAJOR VK_VERSION_MAJOR
@@ -981,7 +980,9 @@ private:
 	VkSurfaceKHR m_VKPresentSurface;
 	SSwapImgViewportExtent m_VKSwapImgAndViewportExtent;
 
+#ifdef VK_EXT_debug_utils
 	VkDebugUtilsMessengerEXT m_DebugMessenger;
+#endif
 
 	VkDescriptorSetLayout m_StandardTexturedDescriptorSetLayout;
 	VkDescriptorSetLayout m_Standard3DTexturedDescriptorSetLayout;
@@ -3369,11 +3370,13 @@ public:
 		for(const auto &Ext : VKExtensions)
 			ExtCStr.emplace_back(Ext.c_str());
 
+#ifdef VK_EXT_debug_utils
 		if(TryDebugExtensions && (g_Config.m_DbgGfx == DEBUG_GFX_MODE_MINIMUM || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL))
 		{
 			// debug message support
 			ExtCStr.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
+#endif
 
 		VkApplicationInfo VKAppInfo = {};
 		VKAppInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -3930,6 +3933,7 @@ public:
 		vkGetDeviceQueue(m_VKDevice, m_VKGraphicsQueueIndex, 0, &m_VKPresentQueue);
 	}
 
+#ifdef VK_EXT_debug_utils
 	static VKAPI_ATTR VkBool32 VKAPI_CALL VKDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity, VkDebugUtilsMessageTypeFlagsEXT MessageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
 	{
 		if((MessageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0)
@@ -3965,9 +3969,11 @@ public:
 			func(m_VKInstance, DebugMessenger, nullptr);
 		}
 	}
+#endif
 
 	void SetupDebugCallback()
 	{
+#ifdef VK_EXT_debug_utils
 		VkDebugUtilsMessengerCreateInfoEXT CreateInfo = {};
 		CreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		CreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -3983,12 +3989,15 @@ public:
 		{
 			dbg_msg("vulkan", "enabled vulkan debug context.");
 		}
+#endif
 	}
 
 	void UnregisterDebugCallback()
 	{
+#ifdef VK_EXT_debug_utils
 		if(m_DebugMessenger != VK_NULL_HANDLE)
 			DestroyDebugUtilsMessengerEXT(m_DebugMessenger);
+#endif
 	}
 
 	bool CreateImageViews()
