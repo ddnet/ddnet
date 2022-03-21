@@ -539,6 +539,11 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
+void CCharacterCore::Read(const CNetObj_Character *pObjChar)
+{
+	m_ActiveWeapon = pObjChar->m_Weapon;
+	Read((const CNetObj_CharacterCore *) pObjChar);
+}
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
@@ -569,6 +574,14 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_HasTelegunGun = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
 	m_HasTelegunLaser = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
+	// Weapons
+	m_aWeapons[WEAPON_HAMMER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_HAMMER) != 0;
+	m_aWeapons[WEAPON_GUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GUN) != 0;
+	m_aWeapons[WEAPON_SHOTGUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_SHOTGUN) != 0;
+	m_aWeapons[WEAPON_GRENADE].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GRENADE) != 0;
+	m_aWeapons[WEAPON_LASER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_LASER) != 0;
+
+	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
 }
 

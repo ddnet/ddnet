@@ -26,10 +26,10 @@ void CSaveTee::Save(CCharacter *pChr)
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
-		m_aWeapons[i].m_AmmoRegenStart = pChr->m_aWeapons[i].m_AmmoRegenStart;
-		m_aWeapons[i].m_Ammo = pChr->m_aWeapons[i].m_Ammo;
-		m_aWeapons[i].m_Ammocost = pChr->m_aWeapons[i].m_Ammocost;
-		m_aWeapons[i].m_Got = pChr->m_aWeapons[i].m_Got;
+		m_aWeapons[i].m_AmmoRegenStart = pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart;
+		m_aWeapons[i].m_Ammo = pChr->m_Core.m_aWeapons[i].m_Ammo;
+		m_aWeapons[i].m_Ammocost = pChr->m_Core.m_aWeapons[i].m_Ammocost;
+		m_aWeapons[i].m_Got = pChr->m_Core.m_aWeapons[i].m_Got;
 	}
 
 	m_LastWeapon = pChr->m_LastWeapon;
@@ -120,11 +120,11 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
-		pChr->m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
+		pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
 		// m_Ammo not used anymore for tracking freeze following https://github.com/ddnet/ddnet/pull/2086
-		pChr->m_aWeapons[i].m_Ammo = -1;
-		pChr->m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
-		pChr->m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
+		pChr->m_Core.m_aWeapons[i].m_Ammo = -1;
+		pChr->m_Core.m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
+		pChr->m_Core.m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
 	}
 
 	pChr->m_LastWeapon = m_LastWeapon;

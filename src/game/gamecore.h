@@ -221,7 +221,15 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+
 	int m_ActiveWeapon;
+	struct WeaponStat
+	{
+		int m_AmmoRegenStart;
+		int m_Ammo;
+		int m_Ammocost;
+		bool m_Got;
+	} m_aWeapons[NUM_WEAPONS];
 
 	bool m_NewHook;
 
@@ -240,7 +248,8 @@ public:
 	void Tick(bool UseInput);
 	void Move();
 
-	void Read(const CNetObj_CharacterCore *pObjCore);
+	void Read(const CNetObj_CharacterCore *pObjCore);	
+	void Read(const CNetObj_Character *pObjCore);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
 
