@@ -713,12 +713,16 @@ int CInput::Update()
 			case SDL_WINDOWEVENT_RESTORED:
 				Graphics()->WindowCreateNtf(Event.window.windowID);
 				break;
+			default:
+				break; // ignore other window events (LEAVE, ENTER, etc.)
 			}
 			break;
 
 		// other messages
 		case SDL_QUIT:
 			return 1;
+		default:
+			break; // ignore other events (system, etc.)
 		}
 
 		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))

@@ -780,6 +780,9 @@ int CPlayer::Pause(int State, bool Force)
 				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			}
 			break;
+		default:
+			dbg_assert(false, "Invalid or unknown player pause state");
+			break;
 		}
 
 		// Update state
@@ -888,6 +891,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
+		{
 			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_CpTime);
 			m_Score = Result.m_Data.m_Info.m_Score;
 			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
@@ -910,6 +914,10 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 					Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
 				GameServer()->SendBroadcast(aBuf, m_ClientID);
 			}
+		}
+			break;
+		default:
+			dbg_assert(false, "Invalid or unknown message kind");
 			break;
 		}
 	}

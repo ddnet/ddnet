@@ -271,10 +271,11 @@ def main():
 
 		for item in network.Objects:
 			for line in item.emit_validate():
-				lines += ["\t" + line]
+				lines += ['\t' + line]
 			lines += ['\t']
+		lines += ['\tdefault:']
+		lines += ['\t\treturn -1;']
 		lines += ['\t}']
-		lines += ['\treturn -1;']
 		lines += ['};']
 		lines += ['']
 

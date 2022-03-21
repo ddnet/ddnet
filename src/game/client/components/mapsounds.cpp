@@ -145,6 +145,9 @@ void CMapSounds::OnRender()
 					Sound()->SetVoiceRectangle(Source.m_Voice, fx2f(Source.m_pSource->m_Shape.m_Rectangle.m_Width), fx2f(Source.m_pSource->m_Shape.m_Rectangle.m_Height));
 					break;
 				}
+				default:
+					dbg_assert(false, "Invalid or unknown sound shape");
+					break;
 				};
 			}
 		}

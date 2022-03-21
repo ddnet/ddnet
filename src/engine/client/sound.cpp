@@ -208,6 +208,9 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 					break;
 				}
+				default:
+					dbg_assert(false, "Invalid or unknown sound shape");
+					break;
 				};
 
 				if(InVoiceField)

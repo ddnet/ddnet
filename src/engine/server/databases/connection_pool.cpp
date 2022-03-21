@@ -222,6 +222,9 @@ void CDbConnectionPool::Worker()
 			}
 		}
 		break;
+		default:
+			dbg_assert(false, "Invalid or unknown mode access");
+			break;
 		}
 		if(!Success)
 			dbg_msg("sql", "%s failed on all databases", pThreadData->m_pName);
@@ -249,6 +252,9 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		break;
 	case CSqlExecData::WRITE_ACCESS:
 		Success = !pData->m_Ptr.m_pWriteFunc(pConnection, pData->m_pThreadData.get(), Failure, aError, sizeof(aError));
+		break;
+	default:
+		dbg_assert(false, "Invalid or unknown mode access");
 		break;
 	}
 	pConnection->Disconnect();

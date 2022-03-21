@@ -70,18 +70,12 @@ void CCharacter::HandleJetpack()
 		return;
 	}
 
-	switch(m_Core.m_ActiveWeapon)
+	if(m_Core.m_ActiveWeapon == WEAPON_GUN && m_Jetpack)
 	{
-	case WEAPON_GUN:
-	{
-		if(m_Jetpack)
-		{
-			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
-			if(!m_TuneZone)
-				Strength = m_LastJetpackStrength;
-			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
-		}
-	}
+		float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
+		if(!m_TuneZone)
+			Strength = m_LastJetpackStrength;
+		TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
 	}
 }
 
@@ -450,6 +444,9 @@ void CCharacter::FireWeapon()
 		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 	}
 	break;
+	default:
+		dbg_assert(false, "Invalid or unknown weapon");
+		break;
 	}
 
 	m_AttackTick = GameWorld()->GameTick();

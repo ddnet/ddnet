@@ -43,6 +43,10 @@ void CScorePlayerResult::SetVariant(Variant v)
 		m_Data.m_Info.m_Time = 0;
 		for(float &CpTime : m_Data.m_Info.m_CpTime)
 			CpTime = 0;
+		break;
+	default:
+		dbg_assert(false, "Invalid or unknown message kind");
+		break;
 	}
 }
 

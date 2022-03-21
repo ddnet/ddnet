@@ -65,6 +65,8 @@ vec2 CProjectile::GetPos(float Time)
 		Curvature = pTuning->m_GunCurvature;
 		Speed = pTuning->m_GunSpeed;
 		break;
+	default:
+		break; // ignore non projectile weapons
 	}
 
 	return CalcPos(m_Pos, m_Direction, Curvature, Speed, Time);

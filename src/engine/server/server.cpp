@@ -1750,6 +1750,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 							str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (helper)", ClientID, pIdent);
 							break;
 						}
+						default:
+							str_format(aBuf, sizeof(aBuf), "ClientID=%d invalid authentication level=%d", ClientID, AuthLevel);
+							break;
 						}
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 

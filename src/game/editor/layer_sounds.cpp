@@ -62,6 +62,9 @@ void CLayerSounds::Render(bool Tileset)
 					Width * Falloff, Height * Falloff, 0.0f);
 			break;
 		}
+		default:
+			dbg_assert(false, "Invalid or unknown sound shape");
+			break;
 		}
 	}
 

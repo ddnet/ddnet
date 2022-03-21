@@ -194,6 +194,8 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		break;
 	case TILE_STOPA:
 		return CANTMOVE_LEFT | CANTMOVE_RIGHT | CANTMOVE_UP | CANTMOVE_DOWN;
+	default: // other tiles don't prevent movement
+		break;
 	}
 	return 0;
 }
@@ -207,7 +209,7 @@ static int GetMoveRestrictionsMask(int Direction)
 	case MR_DIR_DOWN: return CANTMOVE_DOWN;
 	case MR_DIR_LEFT: return CANTMOVE_LEFT;
 	case MR_DIR_UP: return CANTMOVE_UP;
-	default: dbg_assert(false, "invalid dir");
+	default: dbg_assert(false, "invalid direction");
 	}
 	return 0;
 }

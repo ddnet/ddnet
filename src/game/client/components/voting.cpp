@@ -237,7 +237,8 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_VoteOptionListAdd *pMsg = (CNetMsg_Sv_VoteOptionListAdd *)pRawMsg;
 		int NumOptions = pMsg->m_NumOptions;
-		for(int i = 0; i < NumOptions; ++i)
+		bool Stop = false;
+		for(int i = 0; i < NumOptions && !Stop; ++i)
 		{
 			switch(i)
 			{
@@ -255,7 +256,11 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 			case 11: AddOption(pMsg->m_pDescription11); break;
 			case 12: AddOption(pMsg->m_pDescription12); break;
 			case 13: AddOption(pMsg->m_pDescription13); break;
-			case 14: AddOption(pMsg->m_pDescription14);
+			case 14: AddOption(pMsg->m_pDescription14); break;
+			default:
+				dbg_msg("vote", "Too many options to add: %d", NumOptions);
+				Stop = true; // don't spam if NumOptions is really high
+				break;
 			}
 		}
 	}

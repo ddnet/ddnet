@@ -208,6 +208,9 @@ void CEmoticon::EyeEmote(int Emote)
 	case EMOTE_BLINK:
 		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
 		break;
+	default:
+		str_format(aBuf, sizeof(aBuf), "/emote normal %d", g_Config.m_ClEyeDuration);
+		break;
 	}
 	GameClient()->m_Chat.Say(0, aBuf);
 }

@@ -482,6 +482,8 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 				return "TELELASER OFF: Turn laser off as telegun weapon.";
 			break;
+		default:
+			break;
 		}
 		if(Tile >= TILE_CHECKPOINT_FIRST && Tile <= TILE_CHECKPOINT_LAST && (Layer == LAYER_GAME || Layer == LAYER_FRONT))
 			return "TIME CHECKPOINT: Compares your current race time with your record to show you whether you are running faster or slower.";
@@ -586,6 +588,8 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME)
 				return "SPIKE: Old FNG spikes. Deprecated.";
 			break;
+		default:
+			break;
 		}
 		if((Tile >= TILE_PUB_CREDITS1 && Tile <= TILE_PUB_CREDITS8) && Layer == LAYER_GAME)
 			return "CREDITS: Who designed the entities.";
@@ -654,11 +658,13 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME)
 				return "LASER: Gives you laser weapon with 10 charges.";
 			break;
+		default:
+			break;
 		}
 		if((Tile >= TILE_PUB_CREDITS1 && Tile <= TILE_PUB_CREDITS8) && Layer == LAYER_GAME)
 			return "CREDITS: Who designed the entities.";
 		else if((Tile == TILE_PUB_ENTITIES_OFF1 || Tile == TILE_PUB_ENTITIES_OFF2) && Layer == LAYER_GAME)
 			return "ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.";
 	}
-	return "";
+	return "Unknown or invalid tile";
 }

@@ -747,6 +747,9 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 			pSource->m_Shape.m_Rectangle.m_Height = f2fx(800.0f);
 			break;
 		}
+		default:
+			dbg_assert(false, "Invalid or unknown sound shape");
+			break;
 		}
 	}
 
@@ -891,6 +894,9 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 
 		break;
 	}
+	default:
+		dbg_assert(false, "Invalid or unknown sound shape");
+		break;
 	}
 
 	return 0;

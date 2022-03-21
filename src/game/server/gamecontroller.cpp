@@ -89,6 +89,10 @@ void IGameController::DoActivityCheck()
 					// kick the player
 					Server()->Kick(i, "Kicked for inactivity");
 				}
+				break;
+				default:
+					dbg_assert(false, "Invalid or unknown value for SvInactiveKick");
+					break;
 				}
 			}
 		}

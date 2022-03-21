@@ -592,7 +592,7 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		CEntity *pEnt = GetEntity(ObjID, EntType); \
 		if(pEnt && EntClass(this, ObjID, (ObjClass *)pObjData).Match((EntClass *)pEnt)) \
 			return pEnt; \
-		return 0; \
+		return nullptr; \
 	}
 	switch(ObjType)
 	{
@@ -614,12 +614,14 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	case NETOBJTYPE_LASER: FindType(ENTTYPE_LASER, CLaser, CNetObj_Laser);
 	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
+	default: // no match, return nullptr
+		return nullptr;
 	}
-	return 0;
+	return nullptr;
 }
 
 void CGameWorld::OnModified()

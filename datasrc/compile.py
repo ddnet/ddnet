@@ -277,8 +277,10 @@ def main():
 			for line in item.emit_validate(base_item):
 				lines += ["\t" + line]
 			lines += ['\t']
+
+		lines += ['\tdefault:']
+		lines += ['\t\treturn -1;']
 		lines += ['\t}']
-		lines += ['\treturn -1;']
 		lines += ['}']
 		lines += ['']
 
