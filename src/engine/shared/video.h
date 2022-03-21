@@ -3,6 +3,8 @@
 
 #include <base/system.h>
 
+typedef void (*ISoundMixFunc)(short *pFinalOut, unsigned Frames);
+
 class IVideo
 {
 public:
@@ -14,12 +16,10 @@ public:
 	virtual bool IsRecording() = 0;
 
 	virtual void NextVideoFrame() = 0;
-	virtual bool FrameRendered() = 0;
 	virtual void NextVideoFrameThread() = 0;
 
 	virtual void NextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames)) = 0;
-	virtual bool AudioFrameRendered() = 0;
-	virtual void NextAudioFrameTimeline() = 0;
+	virtual void NextAudioFrameTimeline(ISoundMixFunc Mix) = 0;
 
 	static IVideo *Current() { return ms_pCurrentVideo; }
 

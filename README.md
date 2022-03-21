@@ -34,21 +34,21 @@ Dependencies on Linux / macOS
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
-    sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev
+    sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev libvulkan-dev glslang-tools spirv-tools
 
 Or on CentOS, RedHat and AlmaLinux like this:
 
-    sudo yum install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel pnglite-devel SDL2-devel sqlite-devel wavpack-devel libx264-devel ffmpeg-devel
+    sudo yum install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel pnglite-devel SDL2-devel sqlite-devel wavpack-devel libx264-devel ffmpeg-devel vulkan-devel glslang spirv-tools
 
 Or on Arch Linux like this:
 
-    sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg
+    sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools
 
 There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite/). For instructions on installing it, see [AUR packages installation instructions on ArchWiki](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
 
 On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
 
-    brew install cmake freetype glew googletest opusfile SDL2 wavpack x264 ffmpeg
+    brew install cmake freetype glew googletest opusfile SDL2 wavpack x264 ffmpeg molten-vk vulkan-headers glslang spirv-tools
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
 
@@ -108,6 +108,10 @@ Whether to optimize for development, speeding up the compilation process a littl
 * **-DUPNP=[ON|OFF]** <br>
 Whether to enable UPnP support for the server.
 You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
+
+* **-DVULKAN=[ON|OFF]** <br>
+Whether to enable the vulkan backend.
+On Windows you need to install the Vulkan SDK and set the `VULKAN_SDK` environment flag accordingly.
 
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
