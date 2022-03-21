@@ -2295,7 +2295,7 @@ if(TOOLS)
 
   add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
 
-  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
 
   target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
   target_link_libraries(${TARGET_TWPING} ${LIBS})
