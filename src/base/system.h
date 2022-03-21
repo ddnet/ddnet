@@ -1348,8 +1348,25 @@ int str_comp_num(const char *a, const char *b, int num);
 int str_comp_filenames(const char *a, const char *b);
 
 /*
+       Function: str_startswith_nocase
+               Checks case insensitive whether the string begins with a certain prefix.
+
+       Parameter:
+               str - String to check.
+               prefix - Prefix to look for.
+
+       Returns:
+               A pointer to the string str after the string prefix, or 0 if
+               the string prefix isn't a prefix of the string str.
+
+       Remarks:
+               - The strings are treated as zero-terminated strings.
+*/
+const char *str_startswith_nocase(const char *str, const char *prefix);
+
+/*
 	Function: str_startswith
-		Checks whether the string begins with a certain prefix.
+		Checks case sensitive whether the string begins with a certain prefix.
 
 	Parameter:
 		str - String to check.
@@ -1365,8 +1382,25 @@ int str_comp_filenames(const char *a, const char *b);
 const char *str_startswith(const char *str, const char *prefix);
 
 /*
+       Function: str_endswith_nocase
+               Checks case insensitive whether the string ends with a certain suffix.
+
+       Parameter:
+               str - String to check.
+               suffix - Suffix to look for.
+
+       Returns:
+               A pointer to the beginning of the suffix in the string str, or
+               0 if the string suffix isn't a suffix of the string str.
+
+       Remarks:
+               - The strings are treated as zero-terminated strings.
+*/
+const char *str_endswith_nocase(const char *str, const char *suffix);
+
+/*
 	Function: str_endswith
-		Checks whether the string ends with a certain suffix.
+		Checks case sensitive whether the string ends with a certain suffix.
 
 	Parameter:
 		str - String to check.
@@ -2364,7 +2398,7 @@ int os_version_str(char *version, int length);
 
 #if defined(CONF_EXCEPTION_HANDLING)
 void init_exception_handler();
-void set_exception_handler_log_file(const char *pLogFilePath);
+void set_exception_handler_log_file(const char *log_file_path);
 #endif
 
 #if defined(__cplusplus)

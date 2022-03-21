@@ -24,13 +24,18 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 
+#include "base/system.h"
 #include "binds.h"
 #include "camera.h"
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
 
+#include <memory>
 #include <utility>
+#include <vector>
+
+#include <array>
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -71,7 +76,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	static int s_ClShowConsole = g_Config.m_ClShowConsole;
 #endif
 
-	char aBuf[128];
+	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	CUIRect Label, Button, Left, Right, Game, Client;
 	MainView.HSplitTop(150.0f, &Game, &Client);
 
@@ -206,7 +211,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				g_Config.m_ClAutoDemoRecord ^= 1;
 
 			Right.HSplitTop(20.0f, &Label, &Right);
-			char aBuf[64];
 			if(g_Config.m_ClAutoDemoMax)
 				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Max demos"), g_Config.m_ClAutoDemoMax);
 			else
@@ -232,7 +236,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		Left.HSplitTop(10.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Label, &Left);
-		char aBuf[64];
 		if(g_Config.m_ClRefreshRate)
 			str_format(aBuf, sizeof(aBuf), "%s: %i Hz", Localize("Refresh Rate"), g_Config.m_ClRefreshRate);
 		else
@@ -262,7 +265,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_SettingsButtonID = 0;
 		if(DoButton_Menu(&s_SettingsButtonID, Localize("Settings file"), 0, &SettingsButton))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, CONFIG_FILE, aBuf, sizeof(aBuf));
 			if(!open_file(aBuf))
 			{
@@ -278,7 +280,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_ConfigButtonID = 0;
 		if(DoButton_Menu(&s_ConfigButtonID, Localize("Config directory"), 0, &ConfigButton))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
 			if(!open_file(aBuf))
 			{
@@ -295,7 +296,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		static int s_ThemesButtonID = 0;
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
 			if(!open_file(aBuf))
@@ -392,7 +392,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 	static float s_OffsetName = 0.0f;
-	if(UIEx()->DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, pNameFallback))
+	SUIExEditBoxProperties EditProps;
+	EditProps.m_pEmptyText = pNameFallback;
+	if(UIEx()->DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
 	{
 		SetNeedSendInfo();
 	}
@@ -435,7 +437,6 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i, s_ListBoxUsed);
 		if(Item.m_Visible)
 		{
-			CUIRect Label;
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 			float OldWidth = Item.m_Rect.w;
@@ -519,7 +520,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(230.0f, &Label, 0);
 	Dummy.VSplitLeft(170.0f, &Dummy, &SkinPrefix);
 	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, 0);
-	char aBuf[128];
+	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 
@@ -567,7 +568,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		static const char *s_aSkinPrefixes[] = {"kitty", "santa"};
 		for(auto &pPrefix : s_aSkinPrefixes)
 		{
-			CUIRect Button;
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
 			if(DoButton_Menu(&pPrefix, pPrefix, 0, &Button))
@@ -591,7 +591,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
-	if(UIEx()->DoClearableEditBox(pSkinName, &s_ClearButton, &Label, pSkinName, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, "default"))
+	SUIExEditBoxProperties EditProps;
+	EditProps.m_pEmptyText = "default";
+	if(UIEx()->DoClearableEditBox(pSkinName, &s_ClearButton, &Label, pSkinName, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, CUI::CORNER_ALL, EditProps))
 	{
 		SetNeedSendInfo();
 	}
@@ -678,7 +680,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
-		char aBuf[128];
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
@@ -722,7 +723,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		const char *pSearchLabel = "\xEE\xA2\xB6";
+		const char *pSearchLabel = "\xEF\x80\x82";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
@@ -735,11 +736,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
-		static int s_ClearButton = 0;
+		static int s_ClearButtonSearch = 0;
 		static float s_Offset = 0.0f;
+		SUIExEditBoxProperties EditPropsSearch;
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		{
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButton, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search")))
+
+			EditPropsSearch.m_SelectText = true;
+		}
+		EditPropsSearch.m_pEmptyText = Localize("Search");
+		if(UIEx()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButtonSearch, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditPropsSearch))
 			s_InitSkinlist = true;
 	}
 
@@ -761,7 +768,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_DirectoryButtonID = 0;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Skins directory"), 0, &DirectoryButton))
 	{
-		char aBuf[IO_MAX_PATH_LENGTH];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
 		if(!open_file(aBuf))
@@ -773,7 +779,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static int s_SkinRefreshButtonID = 0;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEE\x97\x95", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		m_pClient->m_Skins.Refresh();
 		s_InitSkinlist = true;
@@ -1096,9 +1102,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static CVideoMode s_aModes[MAX_RESOLUTIONS];
 	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
-	static int s_GfxOpenGLVersion = Graphics()->IsConfigModernAPI();
-	static int s_GfxEnableTextureUnitOptimization = g_Config.m_GfxEnableTextureUnitOptimization;
-	static int s_GfxUsePreinitBuffer = g_Config.m_GfxUsePreinitBuffer;
+	static bool s_GfxBackendChanged = false;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
 	static int s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
 
@@ -1132,8 +1136,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_FontSizeResListHeader = 12.0f;
 	static const float sc_FontSizeResList = 10.0f;
 	int OldSelected = -1;
-	int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-	str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+	{
+		int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
+		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+	}
 
 	UI()->DoLabelScaled(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_CENTER);
 	UiDoListboxStart(&s_NumNodes, &ModeList, sc_RowHeightResList, Localize("Display Modes"), aBuf, s_NumNodes - 1, 1, OldSelected, s_ScrollValue);
@@ -1179,6 +1185,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		aWindowModeIDs[i] = &s_aWindowModeIDs[i];
 	static int s_WindowModeDropDownState = 0;
 
+	static int s_OldSelectedBackend = -1;
+
 	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
 
 	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, aWindowModeIDs, pWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
@@ -1208,12 +1216,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		int NumScreens = Graphics()->GetNumScreens();
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		int Screen_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxScreen, Localize("Screen"), g_Config.m_GfxScreen, &Button);
-		if(Screen_MouseButton == 1) //inc
+		if(Screen_MouseButton == 1) // inc
 		{
 			Client()->SwitchWindowScreen((g_Config.m_GfxScreen + 1) % NumScreens);
 			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 		}
-		else if(Screen_MouseButton == 2) //dec
+		else if(Screen_MouseButton == 2) // dec
 		{
 			Client()->SwitchWindowScreen((g_Config.m_GfxScreen - 1 + NumScreens) % NumScreens);
 			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
@@ -1223,12 +1231,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("may cause delay"));
 	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, aBuf, g_Config.m_GfxFsaaSamples, &Button);
-	if(GfxFsaaSamples_MouseButton == 1) //inc
+	if(GfxFsaaSamples_MouseButton == 1) // inc
 	{
 		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples + 1) % 17;
 		CheckSettings = true;
 	}
-	else if(GfxFsaaSamples_MouseButton == 2) //dec
+	else if(GfxFsaaSamples_MouseButton == 2) // dec
 	{
 		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples - 1 + 17) % 17;
 		CheckSettings = true;
@@ -1238,61 +1246,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 
-	bool IsNewOpenGL = Graphics()->IsConfigModernAPI();
-
-	// only promote modern GL in menu settings if the driver isn't on the blocklist already
-	if(g_Config.m_GfxDriverIsBlocked == 0)
-	{
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-
-		if(DoButton_CheckBox(&g_Config.m_GfxOpenGLMajor, Localize("Use modern OpenGL"), IsNewOpenGL, &Button))
-		{
-			CheckSettings = true;
-			if(IsNewOpenGL)
-			{
-				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_DEFAULT, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-				IsNewOpenGL = false;
-			}
-			else
-			{
-				Graphics()->GetDriverVersion(GRAPHICS_DRIVER_AGE_TYPE_MODERN, g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch);
-				IsNewOpenGL = true;
-			}
-		}
-
-		if(IsNewOpenGL)
-		{
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			if(DoButton_CheckBox(&g_Config.m_GfxUsePreinitBuffer, Localize("Preinit VBO (iGPUs only)"), g_Config.m_GfxUsePreinitBuffer, &Button))
-			{
-				CheckSettings = true;
-				g_Config.m_GfxUsePreinitBuffer ^= 1;
-			}
-
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			if(DoButton_CheckBox(&g_Config.m_GfxEnableTextureUnitOptimization, Localize("Multiple texture units (disable for macOS)"), g_Config.m_GfxEnableTextureUnitOptimization, &Button))
-			{
-				CheckSettings = true;
-				g_Config.m_GfxEnableTextureUnitOptimization ^= 1;
-			}
-		}
-	}
-
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
 	{
 		CheckSettings = true;
 		g_Config.m_GfxHighdpi ^= 1;
-	}
-
-	// check if the new settings require a restart
-	if(CheckSettings)
-	{
-		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
-					  s_GfxOpenGLVersion == (int)IsNewOpenGL &&
-					  s_GfxUsePreinitBuffer == g_Config.m_GfxUsePreinitBuffer &&
-					  s_GfxEnableTextureUnitOptimization == g_Config.m_GfxEnableTextureUnitOptimization &&
-					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
 	}
 
 	MainView.HSplitTop(20.0f, &Label, &MainView);
@@ -1311,13 +1269,213 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Text, &MainView);
 	//text.VSplitLeft(15.0f, 0, &text);
 	UI()->DoLabelScaled(&Text, Localize("UI Color"), 14.0f, TEXTALIGN_LEFT);
-	RenderHSLScrollbars(&MainView, &g_Config.m_UiColor, true);
+	CUIRect HSLBar = MainView;
+	RenderHSLScrollbars(&HSLBar, &g_Config.m_UiColor, true);
+	MainView.y = HSLBar.y;
+	MainView.h = MainView.h - MainView.y;
+
+	// Backend list
+	struct SMenuBackendInfo
+	{
+		int m_Major = 0;
+		int m_Minor = 0;
+		int m_Patch = 0;
+		const char *m_pBackendName = "";
+		bool m_Found = false;
+	};
+	std::array<std::array<SMenuBackendInfo, EGraphicsDriverAgeType::GRAPHICS_DRIVER_AGE_TYPE_COUNT>, EBackendType::BACKEND_TYPE_COUNT> aaSupportedBackends{};
+	uint32_t FoundBackendCount = 0;
+	for(uint32_t i = 0; i < BACKEND_TYPE_COUNT; ++i)
+	{
+		if(EBackendType(i) == BACKEND_TYPE_AUTO)
+			continue;
+		for(uint32_t n = 0; n < GRAPHICS_DRIVER_AGE_TYPE_COUNT; ++n)
+		{
+			auto &Info = aaSupportedBackends[i][n];
+			if(Graphics()->GetDriverVersion(EGraphicsDriverAgeType(n), Info.m_Major, Info.m_Minor, Info.m_Patch, Info.m_pBackendName, EBackendType(i)))
+			{
+				// don't count blocked opengl drivers
+				if(EBackendType(i) != BACKEND_TYPE_OPENGL || EGraphicsDriverAgeType(n) == GRAPHICS_DRIVER_AGE_TYPE_LEGACY || g_Config.m_GfxDriverIsBlocked == 0)
+				{
+					Info.m_Found = true;
+					++FoundBackendCount;
+				}
+			}
+		}
+	}
+
+	if(FoundBackendCount > 1)
+	{
+		MainView.HSplitTop(10.0f, nullptr, &MainView);
+		MainView.HSplitTop(20.0f, &Text, &MainView);
+		UI()->DoLabelScaled(&Text, Localize("Renderer"), 16.0f, TEXTALIGN_CENTER);
+
+		static float s_ScrollValueDropBackend = 0;
+		static int s_BackendDropDownState = 0;
+
+		static std::vector<std::unique_ptr<int>> vBackendIDs;
+		static std::vector<const void *> vBackendIDPtrs;
+		static std::vector<std::string> vBackendIDNames;
+		static std::vector<const char *> vBackendIDNamesCStr;
+		static std::vector<SMenuBackendInfo> vBackendInfos;
+
+		size_t BackendCount = FoundBackendCount + 1;
+		vBackendIDs.resize(BackendCount);
+		vBackendIDPtrs.resize(BackendCount);
+		vBackendIDNames.resize(BackendCount);
+		vBackendIDNamesCStr.resize(BackendCount);
+		vBackendInfos.resize(BackendCount);
+
+		char aTmpBackendName[256];
+
+		auto IsInfoDefault = [](const SMenuBackendInfo &CheckInfo) {
+			return str_comp_nocase(CheckInfo.m_pBackendName, "OpenGL") == 0 && CheckInfo.m_Major == 3 && CheckInfo.m_Minor == 0 && CheckInfo.m_Patch == 0;
+		};
+
+		int OldSelectedBackend = -1;
+		uint32_t CurCounter = 0;
+		for(uint32_t i = 0; i < BACKEND_TYPE_COUNT; ++i)
+		{
+			for(uint32_t n = 0; n < GRAPHICS_DRIVER_AGE_TYPE_COUNT; ++n)
+			{
+				auto &Info = aaSupportedBackends[i][n];
+				if(Info.m_Found)
+				{
+					if(vBackendIDs[CurCounter].get() == nullptr)
+						vBackendIDs[CurCounter] = std::make_unique<int>();
+					vBackendIDPtrs[CurCounter] = vBackendIDs[CurCounter].get();
+
+					{
+						bool IsDefault = IsInfoDefault(Info);
+						str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%d.%d.%d)%s%s", Info.m_pBackendName, Info.m_Major, Info.m_Minor, Info.m_Patch, IsDefault ? " - " : "", IsDefault ? Localize("default") : "");
+						vBackendIDNames[CurCounter] = aTmpBackendName;
+						vBackendIDNamesCStr[CurCounter] = vBackendIDNames[CurCounter].c_str();
+						if(str_comp_nocase(Info.m_pBackendName, g_Config.m_GfxBackend) == 0 && g_Config.m_GfxGLMajor == Info.m_Major && g_Config.m_GfxGLMinor == Info.m_Minor && g_Config.m_GfxGLPatch == Info.m_Patch)
+						{
+							OldSelectedBackend = CurCounter;
+						}
+
+						vBackendInfos[CurCounter] = Info;
+					}
+					++CurCounter;
+				}
+			}
+		}
+
+		if(OldSelectedBackend != -1)
+		{
+			// no custom selected
+			BackendCount -= 1;
+		}
+		else
+		{
+			// custom selected one
+			if(vBackendIDs[CurCounter].get() == nullptr)
+				vBackendIDs[CurCounter] = std::make_unique<int>();
+			vBackendIDPtrs[CurCounter] = vBackendIDs[CurCounter].get();
+
+			str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%s %d.%d.%d)", Localize("custom"), g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
+			vBackendIDNames[CurCounter] = aTmpBackendName;
+			vBackendIDNamesCStr[CurCounter] = vBackendIDNames[CurCounter].c_str();
+			OldSelectedBackend = CurCounter;
+
+			vBackendInfos[CurCounter].m_pBackendName = "custom";
+			vBackendInfos[CurCounter].m_Major = g_Config.m_GfxGLMajor;
+			vBackendInfos[CurCounter].m_Minor = g_Config.m_GfxGLMinor;
+			vBackendInfos[CurCounter].m_Patch = g_Config.m_GfxGLPatch;
+		}
+
+		if(s_OldSelectedBackend == -1)
+			s_OldSelectedBackend = OldSelectedBackend;
+
+		static int s_BackendCount = 0;
+		s_BackendCount = BackendCount;
+
+		const int NewBackend = RenderDropDown(s_BackendDropDownState, &MainView, OldSelectedBackend, vBackendIDPtrs.data(), vBackendIDNamesCStr.data(), s_BackendCount, &s_BackendCount, s_ScrollValueDropBackend);
+		if(OldSelectedBackend != NewBackend)
+		{
+			str_copy(g_Config.m_GfxBackend, vBackendInfos[NewBackend].m_pBackendName, sizeof(g_Config.m_GfxBackend));
+			g_Config.m_GfxGLMajor = vBackendInfos[NewBackend].m_Major;
+			g_Config.m_GfxGLMinor = vBackendInfos[NewBackend].m_Minor;
+			g_Config.m_GfxGLPatch = vBackendInfos[NewBackend].m_Patch;
+
+			CheckSettings = true;
+			s_GfxBackendChanged = s_OldSelectedBackend != NewBackend;
+		}
+	}
+
+	// GPU list
+	const auto &GPUList = Graphics()->GetGPUs();
+	if(GPUList.m_GPUs.size() > 1)
+	{
+		MainView.HSplitTop(10.0f, nullptr, &MainView);
+		MainView.HSplitTop(20.0f, &Text, &MainView);
+		UI()->DoLabelScaled(&Text, Localize("Graphics cards"), 16.0f, TEXTALIGN_CENTER);
+
+		static float s_ScrollValueDropGPU = 0;
+		static int s_GPUDropDownState = 0;
+
+		static std::vector<std::unique_ptr<int>> vGPUIDs;
+		static std::vector<const void *> vGPUIDPtrs;
+		static std::vector<const char *> vGPUIDNames;
+
+		size_t GPUCount = GPUList.m_GPUs.size() + 1;
+		vGPUIDs.resize(GPUCount);
+		vGPUIDPtrs.resize(GPUCount);
+		vGPUIDNames.resize(GPUCount);
+
+		char aCurDeviceName[256 + 4];
+
+		int OldSelectedGPU = -1;
+		for(size_t i = 0; i < GPUCount; ++i)
+		{
+			if(vGPUIDs[i].get() == nullptr)
+				vGPUIDs[i] = std::make_unique<int>();
+			vGPUIDPtrs[i] = vGPUIDs[i].get();
+			if(i == 0)
+			{
+				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s(%s)", Localize("auto"), GPUList.m_AutoGPU.m_Name);
+				vGPUIDNames[i] = aCurDeviceName;
+				if(str_comp("auto", g_Config.m_GfxGPUName) == 0)
+				{
+					OldSelectedGPU = 0;
+				}
+			}
+			else
+			{
+				vGPUIDNames[i] = GPUList.m_GPUs[i - 1].m_Name;
+				if(str_comp(GPUList.m_GPUs[i - 1].m_Name, g_Config.m_GfxGPUName) == 0)
+				{
+					OldSelectedGPU = i;
+				}
+			}
+		}
+
+		static int s_GPUCount = 0;
+		s_GPUCount = GPUCount;
+
+		const int NewGPU = RenderDropDown(s_GPUDropDownState, &MainView, OldSelectedGPU, vGPUIDPtrs.data(), vGPUIDNames.data(), s_GPUCount, &s_GPUCount, s_ScrollValueDropGPU);
+		if(OldSelectedGPU != NewGPU)
+		{
+			if(NewGPU == 0)
+				str_copy(g_Config.m_GfxGPUName, "auto", sizeof(g_Config.m_GfxGPUName));
+			else
+				str_copy(g_Config.m_GfxGPUName, GPUList.m_GPUs[NewGPU - 1].m_Name, sizeof(g_Config.m_GfxGPUName));
+		}
+	}
+
+	// check if the new settings require a restart
+	if(CheckSettings)
+	{
+		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
+					  !s_GfxBackendChanged &&
+					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
+	}
 }
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
-	CUIRect Button;
-	MainView.VSplitMid(&MainView, 0);
+	CUIRect Button, Label;
 	static int s_SndEnable = g_Config.m_SndEnable;
 	static int s_SndRate = g_Config.m_SndRate;
 
@@ -1402,7 +1560,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1412,7 +1569,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider game sounds
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1422,7 +1578,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider gui sounds
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1432,7 +1587,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider map sounds
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1442,7 +1596,6 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider background music
 	{
-		CUIRect Button, Label;
 		MainView.HSplitTop(5.0f, &Button, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
@@ -1955,8 +2108,8 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 			LeftColor.b = 0;
 			RightColor.b = ColorHSLA::DARKEST_LGT;
 
-			ColorRGBA RightColorRGBA = color_cast<ColorRGBA>(RightColor);
-			ColorRGBA LeftColorRGBA = color_cast<ColorRGBA>(LeftColor);
+			RightColorRGBA = color_cast<ColorRGBA>(RightColor);
+			LeftColorRGBA = color_cast<ColorRGBA>(LeftColor);
 
 			IGraphics::CColorVertex Array[4] = {
 				IGraphics::CColorVertex(0, LeftColorRGBA.r, LeftColorRGBA.g, LeftColorRGBA.b, 1),
@@ -2314,19 +2467,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 			int DefaultInd = GameClient()->m_Skins.Find("default");
 
-			for(auto &i : RenderInfo)
+			for(auto &Info : RenderInfo)
 			{
-				i.m_Size = RealTeeSize;
-				i.m_CustomColoredSkin = false;
+				Info.m_Size = RealTeeSize;
+				Info.m_CustomColoredSkin = false;
 			}
 
 			int ind = -1;
-			int i = 0;
+			int pos = 0;
 
-			RenderInfo[i++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
-			RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-			RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-			RenderInfo[i++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
 		}
 
 		// System
@@ -2597,7 +2750,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 
 		if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &Button))
@@ -2657,7 +2809,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.VMargin(5.0f, &Right);
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitLeft(120.0f, &Label, &Button);
 		UI()->DoLabelScaled(&Label, Localize("Overlay entities"), 14.0f, TEXTALIGN_LEFT);
@@ -2665,7 +2816,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitMid(&LeftLeft, &Button);
 
@@ -2680,7 +2830,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	{
-		CUIRect Button, Label;
 		Left.HSplitTop(20.0f, &Button, &Left);
 		Button.VSplitMid(&LeftLeft, &Button);
 
@@ -2709,7 +2858,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
-	char aBuf[64];
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 	g_Config.m_ClDefaultZoom = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom / 20.0f) * 20.0f + 0.1f);
@@ -2843,7 +2992,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	UI()->DoLabelScaled(&Label, Localize("Run on join"), 14.0f, TEXTALIGN_LEFT);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	Button.VSplitLeft(5.0f, 0, &Button);
-	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &Button, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, Localize("Chat command (e.g. showall 1)"));
+	SUIExEditBoxProperties EditProps;
+	EditProps.m_pEmptyText = Localize("Chat command (e.g. showall 1)");
+	UIEx()->DoEditBox(g_Config.m_ClRunOnJoin, &Button, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, CUI::CORNER_ALL, EditProps);
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{
@@ -2851,7 +3002,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Left.w += 20.0f;
 		Left.HSplitBottom(20.0f, 0x0, &Label);
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-		char aBuf[256];
 		int State = Updater()->GetCurrentState();
 
 		// Update Button

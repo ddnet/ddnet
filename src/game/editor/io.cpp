@@ -310,12 +310,12 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				// Convert to RGBA
 				unsigned char *pDataRGBA = (unsigned char *)malloc((size_t)Item.m_Width * Item.m_Height * 4);
 				unsigned char *pDataRGB = (unsigned char *)pImg->m_pData;
-				for(int i = 0; i < Item.m_Width * Item.m_Height; i++)
+				for(int j = 0; j < Item.m_Width * Item.m_Height; j++)
 				{
-					pDataRGBA[i * 4] = pDataRGB[i * 3];
-					pDataRGBA[i * 4 + 1] = pDataRGB[i * 3 + 1];
-					pDataRGBA[i * 4 + 2] = pDataRGB[i * 3 + 2];
-					pDataRGBA[i * 4 + 3] = 255;
+					pDataRGBA[j * 4] = pDataRGB[j * 3];
+					pDataRGBA[j * 4 + 1] = pDataRGB[j * 3 + 1];
+					pDataRGBA[j * 4 + 2] = pDataRGB[j * 3 + 2];
+					pDataRGBA[j * 4 + 3] = 255;
 				}
 				Item.m_ImageData = df.AddData(Item.m_Width * Item.m_Height * 4, pDataRGBA);
 				free(pDataRGBA);
@@ -602,8 +602,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 	Clean();
 
 	// check version
-	CMapItemVersion *pItem = (CMapItemVersion *)DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(!pItem)
+	CMapItemVersion *pItemVersion = (CMapItemVersion *)DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
+	if(!pItemVersion)
 	{
 		// import old map
 		/*MAP old_mapstuff;
@@ -612,7 +612,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 		*/
 		return 0;
 	}
-	else if(pItem->m_Version == 1)
+	else if(pItemVersion->m_Version == 1)
 	{
 		//editor.reset(false);
 
@@ -882,7 +882,6 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 						pGroup->AddLayer(pTiles);
 						void *pData = DataFile.GetData(pTilemapItem->m_Data);
-						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
 						pTiles->m_Image = pTilemapItem->m_Image;
 						pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
 
@@ -1019,6 +1018,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						}
 						else // regular tile layer or game layer
 						{
+							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
 							{
 								mem_copy(pTiles->m_pTiles, pData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
@@ -1292,14 +1292,14 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						CLayer *pLayer = m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
 						if(pLayer->m_Type == LAYERTYPE_TILES)
 						{
-							CLayerTiles *pLayer = (CLayerTiles *)m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
+							CLayerTiles *pTiles = (CLayerTiles *)m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
 							// only load auto mappers for tile layers (not physics layers)
-							if(!(pLayer->m_Game || pLayer->m_Tele || pLayer->m_Speedup ||
-								   pLayer->m_Front || pLayer->m_Switch || pLayer->m_Tune))
+							if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
+								   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
 							{
-								pLayer->m_AutoMapperConfig = pItem->m_AutomapperConfig;
-								pLayer->m_Seed = pItem->m_AutomapperSeed;
-								pLayer->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
+								pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
+								pTiles->m_Seed = pItem->m_AutomapperSeed;
+								pTiles->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
 							}
 						}
 					}

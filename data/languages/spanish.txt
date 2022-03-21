@@ -152,9 +152,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Entrar
-
 Error
 == Error
 
@@ -676,18 +673,6 @@ Welcome to DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork es un juego cooperativo en línea donde el objetivo es que tú y vuestro grupo de tees lleguen a la meta del mapa. Como recién llegado, deberías comenzar en los servidores Novice, que alojan los mapas más fáciles. Considera el ping para elegir un servidor cercano.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Los mapas contienen freeze, lo que hace que un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos del freeze.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a otros tees hacia ti.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Lo más importante es que la comunicación es clave: no hay un tutorial, por lo que tendrás que chatear (tecla t) con otros jugadores para aprender los conceptos básicos y las técnicas del juego.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Se recomienda que verifiques la configuración para ajustarla a tu gusto antes de unirte a un servidor.
@@ -1354,6 +1339,12 @@ Chat command (e.g. showall 1)
 == Comando de chat (Ej. showall 1)
 
 The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Windowed fullscreen

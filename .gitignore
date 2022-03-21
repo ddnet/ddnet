@@ -99,6 +99,7 @@ tags
 *.dtb
 *.dylib
 *.exe
+*.fifo
 *.filters
 *.lnk
 *.log

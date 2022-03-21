@@ -16,6 +16,7 @@
 # 2021-11-19 cheeser0613
 # 2021-12-21 cheeser0613
 # 2022-02-07 cheeser0613
+# 2022-03-19 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -154,9 +155,6 @@ Dynamic Camera
 
 Emoticon
 == 表情
-
-Enter
-== 确定
 
 Error
 == 错误
@@ -1059,18 +1057,6 @@ Toggle dyncam
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork 是以到达地图终点为目标，单人或组队的在线合作游戏。如果你是新手，你可以从有入门级地图的 Novice 服务器开始。记得选择 Ping 值低的服务器。
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 地图中的冰冻可以使 tee 暂时无法移动。你需要合作来通过这些关卡。
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 鼠标滚轮可以切换武器。锤子 (鼠标左键) 击中其他 tee 时，可以让他们从冰冻中苏醒。
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 钩索 (鼠标右键) 可以用来悠荡您的角色来通过地图关卡，也可以用来将其他 tee 拉向自己。
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 游戏内没有教程，沟通则至关重要。你需要通过聊天 (t键) 向其他玩家学习基本技巧。
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推荐在进入服务器前，先将设置调整到符合你的习惯。
 
@@ -1364,4 +1350,10 @@ Windowed fullscreen
 == 窗口化全屏
 
 The format of texture %s is not RGBA which will cause visual bugs.
+== %s 材质文件并非RGBA格式因此可能会导致视觉错误
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 

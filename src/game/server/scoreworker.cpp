@@ -418,12 +418,12 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		}
 		pSqlServer->BindString(1, pData->m_aMap);
 
-		bool End;
-		if(pSqlServer->Step(&End, pError, ErrorSize))
+		bool End2;
+		if(pSqlServer->Step(&End2, pError, ErrorSize))
 		{
 			return true;
 		}
-		if(!End)
+		if(!End2)
 		{
 			int Points = pSqlServer->GetInt(1);
 			if(pSqlServer->AddPoints(pData->m_aName, Points, pError, ErrorSize))

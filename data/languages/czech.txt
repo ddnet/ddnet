@@ -145,9 +145,6 @@ Dynamic Camera
 Emoticon
 == Emotikony
 
-Enter
-== Vstoupit
-
 Error
 == Chyba
 
@@ -662,18 +659,6 @@ Welcome to DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork je kooperativní online hra, kde je cílem pro vás a vaši skupinu dosáhnout cílové čáry mapy. Jako nováček byste měli začít na začínajících serverech, které hostují nejjednodušší mapy. Zvažte ping a vyberte si server, který je vám nejblíž.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Mapy obsahují zmrazení, které dočasně znemožňuje vašemu tee pohyb. Abyste se dostali přes tyto části, musíte spolupracovat.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Kolečko myši mění zbraně. Kladivo (levé tlačítko myši) lze použít k zasažení ostatních tee a jejich rozmražení.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hák (pravé tlačítko myši) lze použít k zhoupnutí se skrz mapu a k přitáhnutí ostatních tee k vám.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== A co je nejdůležitější, klíčem je komunikace. Neexistuje žádný návod, takže budete muset chatovat (klávesou t) s ostatními hráči, abyste se naučili základy a triky hry.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Před připojením k serveru se doporučuje zkontrolovat nastavení a upravit je podle vašich představ.
@@ -1236,6 +1221,12 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR

@@ -224,6 +224,21 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	for(int i = 0; i < m_lFriends.size(); m_lFriends[i++].m_NumFound = 0)
 		;
 
+	auto RenderBrowserIcons = [this](CUIElement::SUIElementRect &UIRect, CUIRect *pRect, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, const char *pText, ETextAlignment TextAlign, bool SmallFont = false) {
+		float FontSize = 14.0f * UI()->Scale();
+		if(SmallFont)
+			FontSize = 6.0f * UI()->Scale();
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->TextColor(TextColor);
+		TextRender()->TextOutlineColor(TextOutlineColor);
+		UI()->DoLabelStreamed(UIRect, pRect, pText, FontSize, TextAlign, -1, 0);
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(nullptr);
+	};
+
 	for(int i = 0; i < NumServers; i++)
 	{
 		int ItemIndex = i;
@@ -328,17 +343,24 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(ID == COL_FLAG_LOCK)
 			{
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_LOCK, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\xA3", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_DDNET, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, "\xEF\x82\xA3", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 1), &Button, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, "\xEF\x80\x8C", TEXTALIGN_CENTER, true);
+				}
 			}
 			else if(ID == COL_NAME)
 			{
@@ -372,7 +394,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					Icon.Margin(2.0f, &Icon);
 
 					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
-						DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_RANK, &Icon);
+					{
+						RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), "\xEF\x84\x9E", TEXTALIGN_CENTER);
+					}
 				}
 
 				float FontSize = 12.0f * UI()->Scale();
@@ -403,7 +427,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Icon);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
 				}
 
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
@@ -507,8 +531,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	float SearchIconWidth = 0;
 	float ExcludeIconWidth = 0;
 	float ExcludeSearchIconMax = 0;
-	const char *pSearchLabel = "\xEE\xA2\xB6"; // U+0e8b6
-	const char *pExcludeLabel = "\xEE\x85\x8B"; // U+0e14b
+	const char *pSearchLabel = "\xEF\x80\x82";
+	const char *pExcludeLabel = "\xEF\x81\x9E";
 
 	// render quick search
 	{
@@ -532,11 +556,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
+		SUIExEditBoxProperties EditProps;
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		{
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
+
+			EditProps.m_SelectText = true;
+		}
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(UIEx()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, CUI::CORNER_ALL))
+		if(UIEx()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -843,8 +872,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = TypesWidth;
 					Rect.h = TypesHeight;
 
-					int Button = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
-					if(Button == 1 || Button == 2)
+					int Click = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
+					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
 						if(pFilterExcludeTypes[0] == '\0')
@@ -884,7 +913,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
-					else if(Button == 3)
+					else if(Click == 3)
 					{
 						// middle click to reset (re-enable all)
 						pFilterExcludeTypes[0] = '\0';
@@ -938,8 +967,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = FlagWidth;
 					Rect.h = FlagHeight;
 
-					int Button = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
-					if(Button == 1 || Button == 2)
+					int Click = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
+					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
 						if(pFilterExcludeCountries[0] == '\0')
@@ -979,7 +1008,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
-					else if(Button == 3)
+					else if(Click == 3)
 					{
 						// middle click to reset (re-enable all)
 						pFilterExcludeCountries[0] = '\0';

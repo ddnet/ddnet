@@ -33,6 +33,8 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
 	TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE = 1 << 7,
 	TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD = 1 << 8,
+	// text is only rendered once and then discarded (a hint for buffer creation)
+	TEXT_RENDER_FLAG_ONE_TIME_USE = 1 << 9,
 };
 
 enum

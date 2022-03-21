@@ -80,7 +80,7 @@ static std::atomic<int> m_SoundVolume{100};
 
 static int m_NextVoice = 0;
 static int *m_pMixBuffer = 0; // buffer only used by the thread callback function
-static unsigned m_MaxFrames = 0;
+static uint32_t m_MaxFrames = 0;
 
 static const void *s_pWVBuffer = 0x0;
 static int s_WVBufferPosition = 0;
@@ -109,8 +109,8 @@ static int IntAbs(int i)
 static void Mix(short *pFinalOut, unsigned Frames)
 {
 	int MasterVol;
-	mem_zero(m_pMixBuffer, m_MaxFrames * 2 * sizeof(int));
 	Frames = minimum(Frames, m_MaxFrames);
+	mem_zero(m_pMixBuffer, Frames * 2 * sizeof(int));
 
 	// acquire lock while we are mixing
 	m_SoundLock.lock();
@@ -162,7 +162,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 					float r = Voice.m_Circle.m_Radius;
 					RangeX = r;
 
-					int Dist = (int)sqrtf((float)dx * dx + dy * dy); // nasty float
+					int Dist = (int)sqrtf((float)dx * dx + (float)dy * dy); // nasty float
 					if(Dist < r)
 					{
 						InVoiceField = true;
@@ -284,9 +284,13 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 	(void)pUnused;
 #if defined(CONF_VIDEORECORDER)
 	if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
-		Mix((short *)pStream, Len / 2 / 2);
+	{
+		Mix((short *)pStream, Len / sizeof(int16_t) / 2);
+	}
 	else
-		IVideo::Current()->NextAudioFrame(Mix);
+	{
+		mem_zero(pStream, Len);
+	}
 #else
 	Mix((short *)pStream, Len / 2 / 2);
 #endif
@@ -331,6 +335,9 @@ int CSound::Init()
 		dbg_msg("client/sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 
 	m_MaxFrames = FormatOut.samples * 2;
+#if defined(CONF_VIDEORECORDER)
+	m_MaxFrames = maximum<uint32_t>(m_MaxFrames, 1024 * 2); // make the buffer bigger just in case
+#endif
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
 
 	SDL_PauseAudioDevice(m_Device, 0);
@@ -353,10 +360,6 @@ int CSound::Update()
 		std::unique_lock<std::mutex> Lock(m_SoundLock);
 		m_SoundVolume = WantedVolume;
 	}
-	//#if defined(CONF_VIDEORECORDER)
-	//	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
-	//		IVideo::Current()->NextAudioFrame(Mix);
-	//#endif
 	return 0;
 }
 
@@ -983,6 +986,21 @@ void CSound::StopVoice(CVoiceHandle Voice)
 		m_aVoices[VoiceID].m_pSample = 0;
 		m_aVoices[VoiceID].m_Age++;
 	}
+}
+
+ISoundMixFunc CSound::GetSoundMixFunc()
+{
+	return Mix;
+}
+
+void CSound::PauseAudioDevice()
+{
+	SDL_PauseAudioDevice(m_Device, 1);
+}
+
+void CSound::UnpauseAudioDevice()
+{
+	SDL_PauseAudioDevice(m_Device, 0);
 }
 
 IEngineSound *CreateEngineSound() { return new CSound; }

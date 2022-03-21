@@ -131,7 +131,7 @@ public:
 
 	IGraphics::CTextureHandle m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
-	unsigned char *m_TextureData[2];
+	uint8_t *m_TextureData[2];
 
 	// width and height are the same
 	int m_CurTextureDimensions[2];
@@ -179,6 +179,8 @@ struct STextContainer
 	bool m_HasCursor;
 	bool m_HasSelection;
 
+	bool m_SingleTimeUse;
+
 	void Reset()
 	{
 		m_pFont = NULL;
@@ -199,6 +201,8 @@ struct STextContainer
 
 		m_HasCursor = false;
 		m_HasSelection = false;
+
+		m_SingleTimeUse = false;
 	}
 };
 
@@ -315,35 +319,23 @@ class CTextRender : public IEngineTextRender
 			}
 	}
 
-	IGraphics::CTextureHandle InitTexture(int Width, int Height, void *pUploadData = NULL)
+	void InitTextures(int Width, int Height, IGraphics::CTextureHandle (&aTextures)[2], uint8_t *(&aTextureData)[2])
 	{
-		void *pMem = NULL;
-		if(pUploadData)
-		{
-			pMem = pUploadData;
-		}
-		else
-		{
-			pMem = calloc((size_t)Width * Height, 1);
-		}
-
-		IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_ALPHA, pMem, CImageInfo::FORMAT_ALPHA, IGraphics::TEXLOAD_NOMIPMAPS | IGraphics::TEXLOAD_NO_COMPRESSION);
-
-		if(!pUploadData)
-			free(pMem);
-
-		return Texture;
+		size_t NewTextureSize = (size_t)Width * (size_t)Height * 1;
+		void *pTmpTextData = malloc(NewTextureSize);
+		void *pTmpTextOutlineData = malloc(NewTextureSize);
+		mem_copy(pTmpTextData, aTextureData[0], NewTextureSize);
+		mem_copy(pTmpTextOutlineData, aTextureData[1], NewTextureSize);
+		Graphics()->LoadTextTextures(Width, Height, aTextures[0], aTextures[1], pTmpTextData, pTmpTextOutlineData);
 	}
 
-	void UnloadTexture(IGraphics::CTextureHandle Index)
+	void UnloadTextures(IGraphics::CTextureHandle (&aTextures)[2])
 	{
-		Graphics()->UnloadTexture(&Index);
+		Graphics()->UnloadTextTextures(aTextures[0], aTextures[1]);
 	}
 
-	void IncreaseFontTexture(CFont *pFont, int TextureIndex)
+	void IncreaseFontTextureImpl(CFont *pFont, int TextureIndex, int NewDimensions)
 	{
-		int NewDimensions = pFont->m_CurTextureDimensions[TextureIndex] * 2;
-
 		unsigned char *pTmpTexBuffer = new unsigned char[NewDimensions * NewDimensions];
 		mem_zero(pTmpTexBuffer, (size_t)NewDimensions * NewDimensions * sizeof(unsigned char));
 
@@ -354,13 +346,22 @@ class CTextRender : public IEngineTextRender
 				pTmpTexBuffer[x + y * NewDimensions] = pFont->m_TextureData[TextureIndex][x + y * pFont->m_CurTextureDimensions[TextureIndex]];
 			}
 		}
-		UnloadTexture(pFont->m_aTextures[TextureIndex]);
-		pFont->m_aTextures[TextureIndex] = InitTexture(NewDimensions, NewDimensions, pTmpTexBuffer);
 
 		delete[] pFont->m_TextureData[TextureIndex];
 		pFont->m_TextureData[TextureIndex] = pTmpTexBuffer;
 		pFont->m_CurTextureDimensions[TextureIndex] = NewDimensions;
 		pFont->m_TextureSkyline[TextureIndex].m_CurHeightOfPixelColumn.resize(NewDimensions, 0);
+	}
+
+	void IncreaseFontTexture(CFont *pFont)
+	{
+		int NewDimensions = pFont->m_CurTextureDimensions[0] * 2;
+		UnloadTextures(pFont->m_aTextures);
+
+		IncreaseFontTextureImpl(pFont, 0, NewDimensions);
+		IncreaseFontTextureImpl(pFont, 1, NewDimensions);
+
+		InitTextures(NewDimensions, NewDimensions, pFont->m_aTextures, pFont->m_TextureData);
 	}
 
 	int AdjustOutlineThicknessToFontSize(int OutlineThickness, int FontSize)
@@ -381,7 +382,7 @@ class CTextRender : public IEngineTextRender
 				pFont->m_TextureData[TextureIndex][x + PosX + ((y + PosY) * pFont->m_CurTextureDimensions[TextureIndex])] = pData[x + y * Width];
 			}
 		}
-		Graphics()->LoadTextureRawSub(pFont->m_aTextures[TextureIndex], PosX, PosY, Width, Height, CImageInfo::FORMAT_ALPHA, pData);
+		Graphics()->UpdateTextTexture(pFont->m_aTextures[TextureIndex], PosX, PosY, Width, Height, pData);
 	}
 
 	// 128k * 2 of data used for rendering glyphs
@@ -547,7 +548,7 @@ class CTextRender : public IEngineTextRender
 			// upload the glyph
 			while(!GetCharacterSpace(pFont, 0, (int)Width, (int)Height, X, Y))
 			{
-				IncreaseFontTexture(pFont, 0);
+				IncreaseFontTexture(pFont);
 			}
 			UploadGlyph(pFont, 0, X, Y, (int)Width, (int)Height, ms_aGlyphData);
 
@@ -555,7 +556,7 @@ class CTextRender : public IEngineTextRender
 
 			while(!GetCharacterSpace(pFont, 1, (int)Width, (int)Height, X, Y))
 			{
-				IncreaseFontTexture(pFont, 1);
+				IncreaseFontTexture(pFont);
 			}
 			UploadGlyph(pFont, 1, X, Y, (int)Width, (int)Height, ms_aGlyphDataOutlined);
 		}
@@ -665,6 +666,7 @@ public:
 		m_FirstFreeTextContainerIndex = -1;
 
 		m_DefaultTextContainerInfo.m_Stride = sizeof(STextCharQuadVertex);
+		m_DefaultTextContainerInfo.m_VertBufferBindingIndex = -1;
 
 		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		SBufferContainerInfo::SAttribute *pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
@@ -673,7 +675,6 @@ public:
 		pAttr->m_Normalized = false;
 		pAttr->m_pOffset = 0;
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-		pAttr->m_VertBufferBindingIndex = -1;
 		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 2;
@@ -681,7 +682,6 @@ public:
 		pAttr->m_Normalized = false;
 		pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-		pAttr->m_VertBufferBindingIndex = -1;
 		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
 		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
 		pAttr->m_DataTypeCount = 4;
@@ -689,11 +689,10 @@ public:
 		pAttr->m_Normalized = true;
 		pAttr->m_pOffset = (void *)(sizeof(float) * 2 + sizeof(float) * 2);
 		pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
-		pAttr->m_VertBufferBindingIndex = -1;
 
 		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 		char aFilename[IO_MAX_PATH_LENGTH];
-		const char *pFontFile = "fonts/Icons.ttf";
+		const char *pFontFile = "fonts/Icons.otf";
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
@@ -727,8 +726,7 @@ public:
 		pFont->m_TextureData[1] = new unsigned char[pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1]];
 		mem_zero(pFont->m_TextureData[1], (size_t)pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1] * sizeof(unsigned char));
 
-		pFont->m_aTextures[0] = InitTexture(pFont->m_CurTextureDimensions[0], pFont->m_CurTextureDimensions[0]);
-		pFont->m_aTextures[1] = InitTexture(pFont->m_CurTextureDimensions[1], pFont->m_CurTextureDimensions[1]);
+		InitTextures(pFont->m_CurTextureDimensions[0], pFont->m_CurTextureDimensions[0], pFont->m_aTextures, pFont->m_TextureData);
 
 		pFont->m_TextureSkyline[0].m_CurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[0], 0);
 		pFont->m_TextureSkyline[1].m_CurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[1], 0);
@@ -906,7 +904,10 @@ public:
 
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
 	{
+		int OldRenderFlags = m_RenderFlags;
+		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
 		int TextCont = CreateTextContainer(pCursor, pText, Length);
+		m_RenderFlags = OldRenderFlags;
 		if(TextCont != -1)
 		{
 			if((pCursor->m_Flags & TEXTFLAG_RENDER) != 0)
@@ -935,6 +936,8 @@ public:
 		int ContainerIndex = GetFreeTextContainerIndex();
 		STextContainer &TextContainer = GetTextContainer(ContainerIndex);
 		TextContainer.m_pFont = pFont;
+
+		TextContainer.m_SingleTimeUse = (m_RenderFlags & TEXT_RENDER_FLAG_ONE_TIME_USE) != 0;
 
 		CFontSizeData *pSizeData = NULL;
 
@@ -1086,18 +1089,18 @@ public:
 		int SelectionStartChar = -1;
 		int SelectionEndChar = -1;
 
-		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			return (LastCharX - LastCharWidth / 2 <= CursorX &&
-				       CharX + CharWidth / 2 > CursorX &&
-				       CharY - Size <= CursorY &&
-				       CharY > CursorY) ||
+		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
+			return (LastCharX - LastCharWidth / 2 <= CursorX_ &&
+				       CharX + CharWidth / 2 > CursorX_ &&
+				       CharY - Size <= CursorY_ &&
+				       CharY > CursorY_) ||
 			       (CheckOuter &&
-				       CharY - Size > CursorY);
+				       CharY - Size > CursorY_);
 		};
-		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckInsideChar(CheckOuter, CursorX, CursorY, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
+				if(CheckInsideChar(CheckOuter, CursorX_, CursorY_, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 				{
 					SelectionChar = CharacterCounter;
 					SelectionStarted = !SelectionStarted;
@@ -1105,17 +1108,17 @@ public:
 				}
 			}
 		};
-		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX, int CursorY, float CharX, float CharWidth, float CharY) -> bool {
-			return (CharX + CharWidth / 2 > CursorX &&
-				       CharY - Size <= CursorY &&
-				       CharY > CursorY) ||
+		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float CharX, float CharWidth, float CharY) -> bool {
+			return (CharX + CharWidth / 2 > CursorX_ &&
+				       CharY - Size <= CursorY_ &&
+				       CharY > CursorY_) ||
 			       (CheckOuter &&
-				       CharY <= CursorY);
+				       CharY <= CursorY_);
 		};
-		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX, int CursorY, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckOutsideChar(CheckOuter, CursorX, CursorY, CharX, CharWidth, CharY))
+				if(CheckOutsideChar(CheckOuter, CursorX_, CursorY_, CharX, CharWidth, CharY))
 				{
 					SelectionChar = CharacterCounter;
 					SelectionStarted = !SelectionStarted;
@@ -1405,7 +1408,7 @@ public:
 
 				if(TextContainer.m_StringInfo.m_QuadBufferObjectIndex != -1 && (TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
-					Graphics()->RecreateBufferObject(TextContainer.m_StringInfo.m_QuadBufferObjectIndex, DataSize, pUploadData);
+					Graphics()->RecreateBufferObject(TextContainer.m_StringInfo.m_QuadBufferObjectIndex, DataSize, pUploadData, TextContainer.m_SingleTimeUse ? IGraphics::EBufferObjectCreateFlags::BUFFER_OBJECT_CREATE_FLAGS_ONE_TIME_USE_BIT : 0);
 					Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);
 				}
 			}
@@ -1524,11 +1527,10 @@ public:
 		{
 			STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 			size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
-			void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
-			TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData);
+			void *pUploadData = TextContainer.m_StringInfo.m_CharacterQuads.data();
+			TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData, TextContainer.m_SingleTimeUse ? IGraphics::EBufferObjectCreateFlags::BUFFER_OBJECT_CREATE_FLAGS_ONE_TIME_USE_BIT : 0);
 
-			for(auto &Attribute : m_DefaultTextContainerInfo.m_Attributes)
-				Attribute.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
+			m_DefaultTextContainerInfo.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
 
 			TextContainer.m_StringInfo.m_QuadBufferContainerIndex = Graphics()->CreateBufferContainer(&m_DefaultTextContainerInfo);
 			Graphics()->IndicesNumRequiredNotify(TextContainer.m_StringInfo.m_QuadNum * 6);
@@ -1920,7 +1922,7 @@ public:
 					k = 0;
 
 				mem_zero(pFont->m_TextureData[j], (size_t)pFont->m_CurTextureDimensions[j] * pFont->m_CurTextureDimensions[j] * sizeof(unsigned char));
-				Graphics()->LoadTextureRawSub(pFont->m_aTextures[j], 0, 0, pFont->m_CurTextureDimensions[j], pFont->m_CurTextureDimensions[j], CImageInfo::FORMAT_ALPHA, pFont->m_TextureData[j]);
+				Graphics()->UpdateTextTexture(pFont->m_aTextures[j], 0, 0, pFont->m_CurTextureDimensions[j], pFont->m_CurTextureDimensions[j], pFont->m_TextureData[j]);
 			}
 
 			pFont->InitFontSizes();

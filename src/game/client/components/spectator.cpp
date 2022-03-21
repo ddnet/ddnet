@@ -136,7 +136,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	int ClosestDistance = INT_MAX;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == SpectatorID || !Snap.m_paPlayerInfos[i] || Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+		if(i == SpectatorID || !Snap.m_paPlayerInfos[i] || Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS || (SpectatorID == SPEC_FREEVIEW && i == Snap.m_LocalClientID))
 			continue;
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));

@@ -392,7 +392,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 			if(NextDDTeam != DDTeam)
 			{
-				char aBuf[64];
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 				{
 					str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
@@ -413,7 +412,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		OldDDTeam = DDTeam;
 
 		// background so it's easy to find the local player or the followed one in spectator mode
-		if(pInfo->m_Local || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
+		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
@@ -674,8 +673,8 @@ void CScoreboard::OnRender()
 						str_copy(aText, Localize("Blue team wins!"), sizeof(aText));
 				}
 
-				float w = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);
-				TextRender()->Text(0, Width / 2 - w / 2, 39, 86.0f, aText, -1.0f);
+				float TextWidth = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);
+				TextRender()->Text(0, Width / 2 - TextWidth / 2, 39, 86.0f, aText, -1.0f);
 			}
 
 			//decrease width, because team games use additional offsets
@@ -701,7 +700,7 @@ bool CScoreboard::Active()
 	if(m_Active)
 		return true;
 
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
+	if(m_pClient->m_Snap.m_pLocalInfo && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
 		// we are not a spectator, check if we are dead
 		if(!m_pClient->m_Snap.m_pLocalCharacter && g_Config.m_ClScoreboardOnDeath)
