@@ -24,7 +24,7 @@ class CSnapshot
 	int m_DataSize;
 	int m_NumItems;
 
-	int *Offsets()    const { return (int *)(this + 1); } // Wcast-qual
+	int *Offsets() const { return (int *)(this + 1); } // Wcast-qual
 	char *DataStart() const { return (char *)(Offsets() + m_NumItems); } // Wcast-qual
 
 public:

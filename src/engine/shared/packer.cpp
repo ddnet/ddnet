@@ -86,7 +86,7 @@ void CUnpacker::Reset(const void *pData, int Size)
 	m_Error = 0;
 	m_pStart = (const unsigned char *)pData;
 	m_pEnd = m_pStart + Size;
-	m_pCurrent = const_cast<unsigned char*>(m_pStart);
+	m_pCurrent = const_cast<unsigned char *>(m_pStart);
 }
 
 int CUnpacker::GetInt()
@@ -107,7 +107,7 @@ int CUnpacker::GetInt()
 		m_Error = 1;
 		return 0;
 	}
-	m_pCurrent = const_cast<unsigned char*>(pNext);
+	m_pCurrent = const_cast<unsigned char *>(pNext);
 	return i;
 }
 

@@ -13,7 +13,7 @@
 
 CSnapshotItem *CSnapshot::GetItem(int Index) const
 {
-	return const_cast<CSnapshotItem *>((const CSnapshotItem*)(DataStart() + Offsets()[Index])); // Wcast-qual
+	return const_cast<CSnapshotItem *>((const CSnapshotItem *)(DataStart() + Offsets()[Index])); // Wcast-qual
 }
 
 int CSnapshot::GetItemSize(int Index) const
@@ -321,7 +321,7 @@ static int RangeCheck(const void *pEnd, const void *pPtr, const int Size)
 int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
 	const CData *pDelta = (const CData *)pSrcData;
-	int *pData = const_cast<int*>(pDelta->m_aData); // Wcast-qual
+	int *pData = const_cast<int *>(pDelta->m_aData); // Wcast-qual
 	const int *pEnd = (const int *)(((const char *)pSrcData + DataSize));
 
 	CSnapshotBuilder Builder;

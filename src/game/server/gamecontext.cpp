@@ -1702,7 +1702,7 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 		char *pCurLoc = pCensoredMessage;
 		do
 		{
-			pCurLoc = const_cast<char*>(str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].cstr()));
+			pCurLoc = const_cast<char *>(str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].cstr()));
 			if(pCurLoc)
 			{
 				memset(pCurLoc, '*', str_length(m_aCensorlist[i].cstr()));

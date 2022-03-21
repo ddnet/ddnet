@@ -4446,7 +4446,7 @@ int main(int argc, const char **argv)
 	if(Restarting)
 	{
 		char aBuf[512];
-		shell_execute(const_cast<char*>(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf))); // Wcast-qual
+		shell_execute(const_cast<char *>(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf))); // Wcast-qual
 	}
 
 	delete pKernel;
