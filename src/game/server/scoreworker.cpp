@@ -785,8 +785,8 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ? "
-		"  GROUP BY Name, Time, Server "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  GROUP BY Name, Server "
+		"  WINDOW w AS (ORDER BY MIN(Time))"
 		") as a "
 		"ORDER BY `Rank` %s "
 		"LIMIT %d, ?",
