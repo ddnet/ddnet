@@ -1764,9 +1764,9 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
 )
-set_src(MASTERSRV_SHARED GLOB src/mastersrv
-  mastersrv.cpp
-  mastersrv.h
+set(MASTERSRV_SHARED
+  src/mastersrv/mastersrv.cpp
+  src/mastersrv/mastersrv.h
 )
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
@@ -2287,7 +2287,7 @@ endif()
 ########################################################################
 
 if(TOOLS)
-  set_src(MASTERSRV_SRC GLOB src/mastersrv main_mastersrv.cpp)
+  set(MASTERSRV_SRC src/mastersrv/main_mastersrv.cpp)
   set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
   set(TARGET_MASTERSRV mastersrv)
@@ -2335,6 +2335,9 @@ if(TOOLS)
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
+      endif()
+      if(TOOL MATCHES "^fake_server")
+          list(APPEND TOOL_DEPS $<TARGET_OBJECTS:mastersrv-shared>)
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
