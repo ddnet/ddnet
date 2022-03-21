@@ -16,4 +16,3 @@ extern const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS];
 extern const int32_t decomp_chars[NUM_DECOMPS];
 extern const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS];
 extern const int32_t decomp_data[];
-

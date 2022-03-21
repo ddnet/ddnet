@@ -31,4 +31,3 @@ const unsigned char SERVERBROWSE_LIST_LEGACY[SERVERBROWSE_SIZE] = {255, 255, 255
 
 const unsigned char SERVERBROWSE_GETCOUNT_LEGACY[SERVERBROWSE_SIZE] = {255, 255, 255, 255, 'c', 'o', 'u', 'n'};
 const unsigned char SERVERBROWSE_COUNT_LEGACY[SERVERBROWSE_SIZE] = {255, 255, 255, 255, 's', 'i', 'z', 'e'};
-
