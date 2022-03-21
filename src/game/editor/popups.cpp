@@ -1839,7 +1839,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 		ColorArray[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
 		ColorArray[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
 		pEditor->Graphics()->SetColorVertex(ColorArray, 4);
-		IGraphics::CQuadItem QuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
+		QuadItem = IGraphics::CQuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
 		pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 	}
 
@@ -1880,8 +1880,9 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
 
-				pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
-				int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+				if(pEditor->m_EntitiesTexture.IsValid())
+					pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
+				int TextureLoadFlag = pEditor->GetTextureUsageFlag();
 				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 				g_UiNumPopups--;
 			}

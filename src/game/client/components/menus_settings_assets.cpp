@@ -46,7 +46,6 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 			else
 			{
 				str_format(aBuff, sizeof(aBuff), "assets/entities/%s.png", pEntitiesItem->m_aName);
-				CImageInfo ImgInfo;
 				if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 				{
 					pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
@@ -124,7 +123,6 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 		else
 		{
 			str_format(aBuff, sizeof(aBuff), "assets/%s/%s/%s.png", pAssetName, pAssetItem->m_aName, pAssetName);
-			CImageInfo ImgInfo;
 			if(pGraphics->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
 				pAssetItem->m_RenderTexture = pGraphics->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);

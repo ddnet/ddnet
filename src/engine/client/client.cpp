@@ -159,12 +159,12 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		float v0 = (m_aValues[i0] - m_Min) / (m_Max - m_Min);
 		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
 
-		IGraphics::CColorVertex Array[2] = {
+		IGraphics::CColorVertex ArrayV[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(Array, 2);
-		IGraphics::CLineItem LineItem(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
-		pGraphics->LinesDraw(&LineItem, 1);
+		pGraphics->SetColorVertex(ArrayV, 2);
+		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
+		pGraphics->LinesDraw(&LineItem2, 1);
 	}
 	pGraphics->LinesEnd();
 
@@ -1090,9 +1090,12 @@ void CClient::DebugRender()
 		total = 42
 	*/
 	FrameTimeAvg = FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfxmem: %dk fps: %3d",
+	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
 		m_CurGameTick[g_Config.m_ClDummy], m_PredTick[g_Config.m_ClDummy],
-		Graphics()->MemoryUsage() / 1024,
+		(Graphics()->TextureMemoryUsage() / 1024),
+		(Graphics()->BufferMemoryUsage() / 1024),
+		(Graphics()->StreamedMemoryUsage() / 1024),
+		(Graphics()->StagingMemoryUsage() / 1024),
 		(int)(1.0f / FrameTimeAvg + 0.5f));
 	Graphics()->QuadsText(2, 2, 16, aBuffer);
 
@@ -1802,9 +1805,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				// request new chunk
 				m_MapdownloadChunk++;
 
-				CMsgPacker Msg(NETMSG_REQUEST_MAP_DATA, true);
-				Msg.AddInt(m_MapdownloadChunk);
-				SendMsg(CONN_MAIN, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+				CMsgPacker MsgP(NETMSG_REQUEST_MAP_DATA, true);
+				MsgP.AddInt(m_MapdownloadChunk);
+				SendMsg(CONN_MAIN, &MsgP, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 
 				if(g_Config.m_Debug)
 				{
@@ -1828,8 +1831,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_PING)
 		{
-			CMsgPacker Msg(NETMSG_PING_REPLY, true);
-			SendMsg(Conn, &Msg, 0);
+			CMsgPacker MsgP(NETMSG_PING_REPLY, true);
+			SendMsg(Conn, &MsgP, 0);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
@@ -1838,9 +1841,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			CMsgPacker Msg(NETMSG_PONGEX, true);
-			Msg.AddRaw(pID, sizeof(*pID));
-			SendMsg(Conn, &Msg, MSGFLAG_FLUSH);
+			CMsgPacker MsgP(NETMSG_PONGEX, true);
+			MsgP.AddRaw(pID, sizeof(*pID));
+			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH);
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_PONGEX)
 		{
@@ -1867,13 +1870,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			int Result = HandleChecksum(Conn, *pUuid, &Unpacker);
-			if(Result)
+			int ResultCheck = HandleChecksum(Conn, *pUuid, &Unpacker);
+			if(ResultCheck)
 			{
-				CMsgPacker Msg(NETMSG_CHECKSUM_ERROR, true);
-				Msg.AddRaw(pUuid, sizeof(*pUuid));
-				Msg.AddInt(Result);
-				SendMsg(Conn, &Msg, MSGFLAG_VITAL);
+				CMsgPacker MsgP(NETMSG_CHECKSUM_ERROR, true);
+				MsgP.AddRaw(pUuid, sizeof(*pUuid));
+				MsgP.AddInt(ResultCheck);
+				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
@@ -1892,9 +1895,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
 		{
-			int Result = Unpacker.GetInt();
+			int ResultInt = Unpacker.GetInt();
 			if(Unpacker.Error() == 0)
-				m_RconAuthed[Conn] = Result;
+				m_RconAuthed[Conn] = ResultInt;
 			if(Conn == CONN_MAIN)
 			{
 				int Old = m_UseTempRconCommands;
@@ -2146,8 +2149,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							CNetMsg_Cl_Say Msg;
-							Msg.m_Team = 0;
+							CNetMsg_Cl_Say MsgP;
+							MsgP.m_Team = 0;
 							char aBuf[256];
 							if(g_Config.m_ClRunOnJoin[0])
 							{
@@ -2157,10 +2160,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							{
 								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
 							}
-							Msg.m_pMessage = aBuf;
-							CMsgPacker Packer(Msg.MsgID(), false);
-							Msg.Pack(&Packer);
-							SendMsg(Conn, &Packer, MSGFLAG_VITAL);
+							MsgP.m_pMessage = aBuf;
+							CMsgPacker PackerTimeout(MsgP.MsgID(), false);
+							MsgP.Pack(&PackerTimeout);
+							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
 						m_CodeRunAfterJoin[Conn] = true;
 					}
@@ -2526,10 +2529,8 @@ void CClient::Update()
 #if defined(CONF_VIDEORECORDER)
 		if(m_DemoPlayer.IsPlaying() && IVideo::Current())
 		{
-			if(IVideo::Current()->FrameRendered())
-				IVideo::Current()->NextVideoFrame();
-			if(IVideo::Current()->AudioFrameRendered())
-				IVideo::Current()->NextAudioFrameTimeline();
+			IVideo::Current()->NextVideoFrame();
+			IVideo::Current()->NextAudioFrameTimeline(Sound()->GetSoundMixFunc());
 		}
 		else if(m_ButtonRender)
 			Disconnect();
@@ -2686,7 +2687,7 @@ void CClient::Update()
 				m_CurrentServerNextPingTime >= 0 &&
 				time_get() > m_CurrentServerNextPingTime)
 			{
-				int64_t Now = time_get();
+				int64_t NowPing = time_get();
 				int64_t Freq = time_freq();
 
 				char aBuf[64];
@@ -2704,8 +2705,8 @@ void CClient::Update()
 					Msg.AddRaw(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
 					SendMsg(CONN_MAIN, &Msg, MSGFLAG_FLUSH);
 				}
-				m_CurrentServerCurrentPingTime = Now;
-				m_CurrentServerNextPingTime = Now + 600 * Freq; // ping every 10 minutes
+				m_CurrentServerCurrentPingTime = NowPing;
+				m_CurrentServerNextPingTime = NowPing + 600 * Freq; // ping every 10 minutes
 			}
 		}
 
@@ -3141,9 +3142,20 @@ void CClient::Run()
 
 			bool AsyncRenderOld = g_Config.m_GfxAsyncRenderOld;
 
+			int GfxRefreshRate = g_Config.m_GfxRefreshRate;
+
+#if defined(CONF_VIDEORECORDER)
+			// keep rendering synced
+			if(IVideo::Current())
+			{
+				AsyncRenderOld = false;
+				GfxRefreshRate = 0;
+			}
+#endif
+
 			if(IsRenderActive &&
 				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
-				(!g_Config.m_GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
+				(!GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
 				m_RenderFrames++;
 
@@ -3471,7 +3483,12 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 
 	if(!IVideo::Current())
 	{
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
+		// wait for idle, so there is no data race
+		pSelf->Graphics()->WaitForIdle();
+		// pause the sound device while creating the video instance
+		pSelf->Sound()->PauseAudioDevice();
+		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
+		pSelf->Sound()->UnpauseAudioDevice();
 		IVideo::Current()->Start();
 		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
 		if(paused)
@@ -3491,7 +3508,12 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 	pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", pVideoName);
 	if(!IVideo::Current())
 	{
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
+		// wait for idle, so there is no data race
+		pSelf->Graphics()->WaitForIdle();
+		// pause the sound device while creating the video instance
+		pSelf->Sound()->PauseAudioDevice();
+		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
+		pSelf->Sound()->UnpauseAudioDevice();
 		IVideo::Current()->Start();
 	}
 	else
@@ -4098,11 +4120,11 @@ void CClient::LoadFont()
 			File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 			if(File)
 			{
-				size_t Size = io_length(File);
-				unsigned char *pBuf = (unsigned char *)malloc(Size);
+				Size = io_length(File);
+				pBuf = (unsigned char *)malloc(Size);
 				io_read(File, pBuf, Size);
 				io_close(File);
-				IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+				pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
 			}
 
@@ -4354,13 +4376,13 @@ int main(int argc, const char **argv)
 	ISteam *pSteam = CreateSteam();
 
 #if defined(CONF_EXCEPTION_HANDLING)
-	char aBuf[IO_MAX_PATH_LENGTH];
+	char aBufPath[IO_MAX_PATH_LENGTH];
 	char aBufName[IO_MAX_PATH_LENGTH];
 	char aDate[64];
 	str_timestamp(aDate, sizeof(aDate));
 	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_crash_log_%d_%s.RTP", pid(), aDate);
-	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBuf, sizeof(aBuf));
-	set_exception_handler_log_file(aBuf);
+	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
+	set_exception_handler_log_file(aBufPath);
 #endif
 
 	if(RandInitFailed)

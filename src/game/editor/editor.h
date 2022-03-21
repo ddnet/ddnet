@@ -498,6 +498,14 @@ enum
 	PROPTYPE_AUTOMAPPER,
 };
 
+enum
+{
+	DIRECTION_LEFT = 1,
+	DIRECTION_RIGHT = 2,
+	DIRECTION_UP = 4,
+	DIRECTION_DOWN = 8,
+};
+
 typedef struct
 {
 	int x, y;
@@ -635,6 +643,18 @@ class CEditor : public IEditor
 	CUI m_UI;
 	CUIEx m_UIEx;
 	CChillerEditor m_ChillerEditor;
+
+	bool m_EditorWasUsedBefore = false;
+
+	IGraphics::CTextureHandle m_EntitiesTexture;
+
+	IGraphics::CTextureHandle m_FrontTexture;
+	IGraphics::CTextureHandle m_TeleTexture;
+	IGraphics::CTextureHandle m_SpeedupTexture;
+	IGraphics::CTextureHandle m_SwitchTexture;
+	IGraphics::CTextureHandle m_TuneTexture;
+
+	int GetTextureUsageFlag();
 
 public:
 	class IInput *Input() { return m_pInput; }
@@ -919,7 +939,8 @@ public:
 	IGraphics::CTextureHandle m_CheckerTexture;
 	IGraphics::CTextureHandle m_BackgroundTexture;
 	IGraphics::CTextureHandle m_CursorTexture;
-	IGraphics::CTextureHandle m_EntitiesTexture;
+
+	IGraphics::CTextureHandle GetEntitiesTexture();
 
 	CLayerGroup m_Brush;
 	CLayerTiles m_TilesetPicker;
@@ -1129,11 +1150,12 @@ public:
 
 	// DDRace
 
-	IGraphics::CTextureHandle m_FrontTexture;
-	IGraphics::CTextureHandle m_TeleTexture;
-	IGraphics::CTextureHandle m_SpeedupTexture;
-	IGraphics::CTextureHandle m_SwitchTexture;
-	IGraphics::CTextureHandle m_TuneTexture;
+	IGraphics::CTextureHandle GetFrontTexture();
+	IGraphics::CTextureHandle GetTeleTexture();
+	IGraphics::CTextureHandle GetSpeedupTexture();
+	IGraphics::CTextureHandle GetSwitchTexture();
+	IGraphics::CTextureHandle GetTuneTexture();
+
 	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);

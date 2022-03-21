@@ -345,25 +345,25 @@ void CRenderTools::DrawRoundRectExt4(float x, float y, float w, float h, vec4 Co
 	if(!(Corners & 1))
 	{
 		Graphics()->SetColor(ColorTopLeft.r, ColorTopLeft.g, ColorTopLeft.b, ColorTopLeft.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y, r, r); // TL
+		ItemQ = IGraphics::CQuadItem(x, y, r, r); // TL
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 2))
 	{
 		Graphics()->SetColor(ColorTopRight.r, ColorTopRight.g, ColorTopRight.b, ColorTopRight.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x + w, y, -r, r); // TR
+		ItemQ = IGraphics::CQuadItem(x + w, y, -r, r); // TR
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 4))
 	{
 		Graphics()->SetColor(ColorBottomLeft.r, ColorBottomLeft.g, ColorBottomLeft.b, ColorBottomLeft.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y + h, r, -r); // BL
+		ItemQ = IGraphics::CQuadItem(x, y + h, r, -r); // BL
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 8))
 	{
 		Graphics()->SetColor(ColorBottomRight.r, ColorBottomRight.g, ColorBottomRight.b, ColorBottomRight.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
+		ItemQ = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 }

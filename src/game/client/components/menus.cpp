@@ -160,7 +160,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	if(UI()->HotItem() == pID && Active)
 	{
 		RenderTools()->SelectSprite(SPRITE_GUIBUTTON_HOVER);
-		IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
+		QuadItem = IGraphics::CQuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 	}
 	Graphics()->QuadsEnd();
@@ -1651,7 +1651,6 @@ int CMenus::Render()
 			Box.VMargin(20.f / UI()->Scale(), &Box);
 			if(m_pClient->Editor()->HasUnsavedData())
 			{
-				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
 				Props.m_MaxWidth = Part.w - 20.0f;
 				UI()->DoLabelScaled(&Box, aBuf, 20.f, TEXTALIGN_LEFT, Props);
@@ -1918,7 +1917,6 @@ int CMenus::Render()
 				// delete demo
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
-					char aBuf[512];
 					str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
 					if(Storage()->RemoveFile(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
@@ -2131,7 +2129,6 @@ int CMenus::Render()
 			{
 				m_Popup = POPUP_NONE;
 				// render video
-				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
 				const char *pError = Client()->DemoPlayer_Render(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
 				m_Speed = 4;
@@ -2201,7 +2198,6 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 
 			Part.VSplitLeft(30.0f, 0, &Part);
-			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%s\n(%s)",
 				Localize("Show DDNet map finishes in server browser"),
 				Localize("transmits your player name to info2.ddnet.tw"));
@@ -2632,7 +2628,7 @@ void CMenus::RenderBackground()
 		for(int x = -2; x < (int)(sh / Size); x++)
 		{
 			Graphics()->SetColor(0, 0, 0, 0.045f);
-			IGraphics::CQuadItem QuadItem((x - OffsetTime) * Size * 2 + (y & 1) * Size, (y + OffsetTime) * Size, Size, Size);
+			QuadItem = IGraphics::CQuadItem((x - OffsetTime) * Size * 2 + (y & 1) * Size, (y + OffsetTime) * Size, Size, Size);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 		}
 	Graphics()->QuadsEnd();

@@ -57,6 +57,10 @@ public:
 	virtual void Stop(int SampleID);
 	virtual void StopAll();
 	virtual void StopVoice(CVoiceHandle Voice);
+
+	virtual ISoundMixFunc GetSoundMixFunc();
+	virtual void PauseAudioDevice();
+	virtual void UnpauseAudioDevice();
 };
 
 #endif

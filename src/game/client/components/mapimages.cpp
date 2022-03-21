@@ -189,7 +189,9 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknwon;
 		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknwon;
 
-		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+		int TextureLoadFlag = 0;
+		if(Graphics()->IsTileBufferingEnabled())
+			TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 
 		CImageInfo ImgInfo;
 		bool ImagePNGLoaded = false;
@@ -223,7 +225,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
 		{
 			int ColorChannelCount = 4;
-			if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			if(ImgInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT)
 				ColorChannelCount = 1;
 			else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
 				ColorChannelCount = 3;

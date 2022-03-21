@@ -697,36 +697,36 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	if(*p == 0)
 		return;
 
-	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine) {
-		if(pLine->m_ClientID < 0) // server or client message
+	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine_) {
+		if(pLine_->m_ClientID < 0) // server or client message
 		{
 			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(pLine->m_aText);
+				StoreSave(pLine_->m_aText);
 		}
 
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine->m_aName, pLine->m_ClientID >= 0 ? ": " : "", pLine->m_aText);
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine_->m_aName, pLine_->m_ClientID >= 0 ? ": " : "", pLine_->m_aText);
 
 		ColorRGBA ChatLogColor{1, 1, 1, 1};
-		if(pLine->m_Highlighted)
+		if(pLine_->m_Highlighted)
 		{
 			ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
 		}
 		else
 		{
-			if(pLine->m_Friend && g_Config.m_ClMessageFriend)
+			if(pLine_->m_Friend && g_Config.m_ClMessageFriend)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			else if(pLine->m_Team)
+			else if(pLine_->m_Team)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-			else if(pLine->m_ClientID == -1) // system
+			else if(pLine_->m_ClientID == -1) // system
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-			else if(pLine->m_ClientID == -2) // client
+			else if(pLine_->m_ClientID == -2) // client
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 			else // regular message
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
 		}
 
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine->m_Whisper ? "whisper" : (pLine->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine_->m_Whisper ? "whisper" : (pLine_->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
 	};
 
 	while(*p)
