@@ -553,9 +553,13 @@ void CHud::RenderTextInfo()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_TextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
+		auto OldFlags = TextRender()->GetRenderFlags();
+		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
 		if(m_FPSTextContainerIndex == -1)
 			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
-		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
+		else
+			TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
+		TextRender()->SetRenderFlags(OldFlags);
 		STextRenderColor TColor;
 		TColor.m_R = 1.f;
 		TColor.m_G = 1.f;

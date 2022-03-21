@@ -1,4 +1,5 @@
 #include "backend_opengl.h"
+#include "engine/graphics.h"
 
 #include <base/detect.h>
 
@@ -29,6 +30,11 @@
 // ------------ CCommandProcessorFragment_OpenGL
 void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
 {
+	if(pCommand->m_ByResize)
+	{
+		m_CanvasWidth = (uint32_t)pCommand->m_Width;
+		m_CanvasHeight = (uint32_t)pCommand->m_Height;
+	}
 	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
 }
 
@@ -37,60 +43,23 @@ void CCommandProcessorFragment_OpenGL::Cmd_Finish(const CCommandBuffer::SCommand
 	glFinish();
 }
 
-bool CCommandProcessorFragment_OpenGL::Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
-{
-	Target3DImageWidth = ImageWidth / SplitCountWidth;
-	Target3DImageHeight = ImageHeight / SplitCountHeight;
-
-	size_t FullImageWidth = (size_t)ImageWidth * ImageColorChannelCount;
-
-	for(int Y = 0; Y < SplitCountHeight; ++Y)
-	{
-		for(int X = 0; X < SplitCountWidth; ++X)
-		{
-			for(int Y3D = 0; Y3D < Target3DImageHeight; ++Y3D)
-			{
-				int DepthIndex = X + Y * SplitCountWidth;
-
-				size_t TargetImageFullWidth = (size_t)Target3DImageWidth * ImageColorChannelCount;
-				size_t TargetImageFullSize = (size_t)TargetImageFullWidth * Target3DImageHeight;
-				ptrdiff_t ImageOffset = (ptrdiff_t)(((size_t)Y * FullImageWidth * (size_t)Target3DImageHeight) + ((size_t)Y3D * FullImageWidth) + ((size_t)X * TargetImageFullWidth));
-				ptrdiff_t TargetImageOffset = (ptrdiff_t)(TargetImageFullSize * (size_t)DepthIndex + ((size_t)Y3D * TargetImageFullWidth));
-				mem_copy(((uint8_t *)pTarget3DImageData) + TargetImageOffset, ((uint8_t *)pImageBuffer) + (ptrdiff_t)(ImageOffset), TargetImageFullWidth);
-			}
-		}
-	}
-
-	return true;
-}
-
 int CCommandProcessorFragment_OpenGL::TexFormatToOpenGLFormat(int TexFormat)
 {
-	if(TexFormat == CCommandBuffer::TEXFORMAT_RGB)
-		return GL_RGB;
-	if(TexFormat == CCommandBuffer::TEXFORMAT_ALPHA)
-		return GL_ALPHA;
 	if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
 		return GL_RGBA;
 	return GL_RGBA;
 }
 
-int CCommandProcessorFragment_OpenGL::TexFormatToImageColorChannelCount(int TexFormat)
+size_t CCommandProcessorFragment_OpenGL::GLFormatToImageColorChannelCount(int GLFormat)
 {
-	if(TexFormat == CCommandBuffer::TEXFORMAT_RGB)
-		return 3;
-	if(TexFormat == CCommandBuffer::TEXFORMAT_ALPHA)
-		return 1;
-	if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
-		return 4;
-	return 4;
-}
-
-void *CCommandProcessorFragment_OpenGL::Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData)
-{
-	int Bpp = TexFormatToImageColorChannelCount(Format);
-
-	return ResizeImage((const uint8_t *)pData, Width, Height, NewWidth, NewHeight, Bpp);
+	switch(GLFormat)
+	{
+	case GL_RGBA: return 4;
+	case GL_RGB: return 3;
+	case GL_RED: return 1;
+	case GL_ALPHA: return 1;
+	default: return 4;
+	}
 }
 
 bool CCommandProcessorFragment_OpenGL::IsTexturedState(const CCommandBuffer::SState &State)
@@ -312,9 +281,43 @@ GfxOpenGLMessageCallback(GLenum source,
 }
 #endif
 
+bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData)
+{
+	if(m_CanvasWidth == 0 || m_CanvasHeight == 0)
+	{
+		return false;
+	}
+	else
+	{
+		Width = m_CanvasWidth;
+		Height = m_CanvasHeight;
+		Format = CImageInfo::FORMAT_RGBA;
+		DstData.resize((size_t)Width * (Height + 1) * 4); // +1 for flipping image
+		glReadBuffer(GL_FRONT);
+		GLint Alignment;
+		glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, m_CanvasWidth, m_CanvasHeight, GL_RGBA, GL_UNSIGNED_BYTE, DstData.data());
+		glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
+
+		uint8_t *pTempRow = DstData.data() + Width * Height * 4;
+		for(uint32_t Y = 0; Y < Height / 2; ++Y)
+		{
+			mem_copy(pTempRow, DstData.data() + Y * Width * 4, Width * 4);
+			mem_copy(DstData.data() + Y * Width * 4, DstData.data() + ((Height - Y) - 1) * Width * 4, Width * 4);
+			mem_copy(DstData.data() + ((Height - Y) - 1) * Width * 4, pTempRow, Width * 4);
+		}
+
+		return true;
+	}
+}
+
 bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 {
 	m_IsOpenGLES = pCommand->m_RequestedBackend == BACKEND_TYPE_OPENGL_ES;
+
+	TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
+	ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) { return GetPresentedImageData(Width, Height, Format, DstData); };
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
 	dbg_msg("opengl", "Vendor string: %s", pVendorString);
@@ -337,7 +340,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	int BlocklistMajor = -1, BlocklistMinor = -1, BlocklistPatch = -1;
 	bool RequiresWarning = false;
 	const char *pErrString = ParseBlocklistDriverVersions(pVendorString, pVersionString, BlocklistMajor, BlocklistMinor, BlocklistPatch, RequiresWarning);
-	//if the driver is buggy, and the requested GL version is the default, fallback
+	// if the driver is buggy, and the requested GL version is the default, fallback
 	if(pErrString != NULL && pCommand->m_RequestedMajor == 3 && pCommand->m_RequestedMinor == 0 && pCommand->m_RequestedPatch == 0)
 	{
 		// if not already in the error state, set the GL version
@@ -405,6 +408,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 
 			pCommand->m_pCapabilities->m_2DArrayTexturesAsExtension = false;
 			pCommand->m_pCapabilities->m_NPOTTextures = true;
+			pCommand->m_pCapabilities->m_TrianglesAsQuads = false;
 
 			if(MajorV >= 4 || (MajorV == 3 && MinorV == 3))
 			{
@@ -417,6 +421,8 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 				pCommand->m_pCapabilities->m_MipMapping = true;
 				pCommand->m_pCapabilities->m_3DTextures = true;
 				pCommand->m_pCapabilities->m_2DArrayTextures = true;
+
+				pCommand->m_pCapabilities->m_TrianglesAsQuads = true;
 			}
 			else if(MajorV == 3)
 			{
@@ -563,7 +569,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 		glDepthMask(0);
 
 #ifndef BACKEND_AS_OPENGL_ES
-		if(g_Config.m_DbgGfx)
+		if(g_Config.m_DbgGfx != DEBUG_GFX_MODE_NONE)
 		{
 			if(GLEW_KHR_debug || GLEW_ARB_debug_output)
 			{
@@ -624,26 +630,20 @@ bool CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 	return true;
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
+void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData)
 {
-	glBindTexture(GL_TEXTURE_2D, m_Textures[pCommand->m_Slot].m_Tex);
-
-	void *pTexData = pCommand->m_pData;
-	int Width = pCommand->m_Width;
-	int Height = pCommand->m_Height;
-	int X = pCommand->m_X;
-	int Y = pCommand->m_Y;
+	glBindTexture(GL_TEXTURE_2D, m_Textures[Slot].m_Tex);
 
 	if(!m_HasNPOTTextures)
 	{
-		float ResizeW = m_Textures[pCommand->m_Slot].m_ResizeWidth;
-		float ResizeH = m_Textures[pCommand->m_Slot].m_ResizeHeight;
+		float ResizeW = m_Textures[Slot].m_ResizeWidth;
+		float ResizeH = m_Textures[Slot].m_ResizeHeight;
 		if(ResizeW > 0 && ResizeH > 0)
 		{
 			int ResizedW = (int)(Width * ResizeW);
 			int ResizedH = (int)(Height * ResizeH);
 
-			void *pTmpData = Resize(Width, Height, ResizedW, ResizedH, pCommand->m_Format, static_cast<const unsigned char *>(pTexData));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, ResizedW, ResizedH, GLFormatToImageColorChannelCount(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 
@@ -652,11 +652,11 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 		}
 	}
 
-	if(m_Textures[pCommand->m_Slot].m_RescaleCount > 0)
+	if(m_Textures[Slot].m_RescaleCount > 0)
 	{
 		int OldWidth = Width;
 		int OldHeight = Height;
-		for(int i = 0; i < m_Textures[pCommand->m_Slot].m_RescaleCount; ++i)
+		for(int i = 0; i < m_Textures[Slot].m_RescaleCount; ++i)
 		{
 			Width >>= 1;
 			Height >>= 1;
@@ -665,14 +665,18 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::
 			Y /= 2;
 		}
 
-		void *pTmpData = Resize(OldWidth, OldHeight, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pTexData));
+		void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToImageColorChannelCount(GLFormat));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
 
-	glTexSubImage2D(GL_TEXTURE_2D, 0, X, Y, Width, Height,
-		TexFormatToOpenGLFormat(pCommand->m_Format), GL_UNSIGNED_BYTE, pTexData);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, X, Y, Width, Height, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 	free(pTexData);
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
+{
+	TextureUpdate(pCommand->m_Slot, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height, TexFormatToOpenGLFormat(pCommand->m_Format), pCommand->m_pData);
 }
 
 void CCommandProcessorFragment_OpenGL::DestroyTexture(int Slot)
@@ -713,12 +717,9 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer:
 	DestroyTexture(pCommand->m_Slot);
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
+void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData)
 {
 #ifndef BACKEND_GL_MODERN_API
-	int Width = pCommand->m_Width;
-	int Height = pCommand->m_Height;
-	void *pTexData = pCommand->m_pData;
 
 	if(m_MaxTexSize == -1)
 	{
@@ -727,11 +728,11 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTexSize);
 	}
 
-	if(pCommand->m_Slot >= (int)m_Textures.size())
+	if(Slot >= (int)m_Textures.size())
 		m_Textures.resize(m_Textures.size() * 2);
 
-	m_Textures[pCommand->m_Slot].m_ResizeWidth = -1.f;
-	m_Textures[pCommand->m_Slot].m_ResizeHeight = -1.f;
+	m_Textures[Slot].m_ResizeWidth = -1.f;
+	m_Textures[Slot].m_ResizeHeight = -1.f;
 
 	if(!m_HasNPOTTextures)
 	{
@@ -739,12 +740,12 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 		int PowerOfTwoHeight = HighestBit(Height);
 		if(Width != PowerOfTwoWidth || Height != PowerOfTwoHeight)
 		{
-			void *pTmpData = Resize(Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, pCommand->m_Format, static_cast<const unsigned char *>(pTexData));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, GLFormatToImageColorChannelCount(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 
-			m_Textures[pCommand->m_Slot].m_ResizeWidth = (float)PowerOfTwoWidth / (float)Width;
-			m_Textures[pCommand->m_Slot].m_ResizeHeight = (float)PowerOfTwoHeight / (float)Height;
+			m_Textures[Slot].m_ResizeWidth = (float)PowerOfTwoWidth / (float)Width;
+			m_Textures[Slot].m_ResizeHeight = (float)PowerOfTwoHeight / (float)Height;
 
 			Width = PowerOfTwoWidth;
 			Height = PowerOfTwoHeight;
@@ -752,7 +753,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	}
 
 	int RescaleCount = 0;
-	if(pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGBA || pCommand->m_Format == CCommandBuffer::TEXFORMAT_RGB || pCommand->m_Format == CCommandBuffer::TEXFORMAT_ALPHA)
+	if(GLFormat == GL_RGBA)
 	{
 		int OldWidth = Width;
 		int OldHeight = Height;
@@ -771,27 +772,27 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 
 		if(NeedsResize)
 		{
-			void *pTmpData = Resize(OldWidth, OldHeight, Width, Height, pCommand->m_Format, static_cast<const unsigned char *>(pTexData));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToImageColorChannelCount(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
 	}
-	m_Textures[pCommand->m_Slot].m_Width = Width;
-	m_Textures[pCommand->m_Slot].m_Height = Height;
-	m_Textures[pCommand->m_Slot].m_RescaleCount = RescaleCount;
+	m_Textures[Slot].m_Width = Width;
+	m_Textures[Slot].m_Height = Height;
+	m_Textures[Slot].m_RescaleCount = RescaleCount;
 
-	int Oglformat = TexFormatToOpenGLFormat(pCommand->m_Format);
-	int StoreOglformat = TexFormatToOpenGLFormat(pCommand->m_StoreFormat);
+	int Oglformat = GLFormat;
+	int StoreOglformat = GLStoreFormat;
 
-	if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+	if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 	{
-		glGenTextures(1, &m_Textures[pCommand->m_Slot].m_Tex);
-		glBindTexture(GL_TEXTURE_2D, m_Textures[pCommand->m_Slot].m_Tex);
+		glGenTextures(1, &m_Textures[Slot].m_Tex);
+		glBindTexture(GL_TEXTURE_2D, m_Textures[Slot].m_Tex);
 	}
 
-	if(pCommand->m_Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
+	if(Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
 	{
-		if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -800,7 +801,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	}
 	else
 	{
-		if((pCommand->m_Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -816,11 +817,11 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 
 		int Flag2DArrayTexture = (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER);
 		int Flag3DTexture = (CCommandBuffer::TEXFLAG_TO_3D_TEXTURE | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER);
-		if((pCommand->m_Flags & (Flag2DArrayTexture | Flag3DTexture)) != 0)
+		if((Flags & (Flag2DArrayTexture | Flag3DTexture)) != 0)
 		{
-			bool Is3DTexture = (pCommand->m_Flags & Flag3DTexture) != 0;
+			bool Is3DTexture = (Flags & Flag3DTexture) != 0;
 
-			glGenTextures(1, &m_Textures[pCommand->m_Slot].m_Tex2DArray);
+			glGenTextures(1, &m_Textures[Slot].m_Tex2DArray);
 
 			GLenum Target = GL_TEXTURE_3D;
 
@@ -833,12 +834,12 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 				Target = m_2DArrayTarget;
 			}
 
-			glBindTexture(Target, m_Textures[pCommand->m_Slot].m_Tex2DArray);
+			glBindTexture(Target, m_Textures[Slot].m_Tex2DArray);
 
 			if(IsNewApi())
 			{
-				glGenSamplers(1, &m_Textures[pCommand->m_Slot].m_Sampler2DArray);
-				glBindSampler(0, m_Textures[pCommand->m_Slot].m_Sampler2DArray);
+				glGenSamplers(1, &m_Textures[Slot].m_Sampler2DArray);
+				glBindSampler(0, m_Textures[Slot].m_Sampler2DArray);
 			}
 
 			glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -846,14 +847,14 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 			{
 				glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				if(IsNewApi())
-					glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glSamplerParameteri(m_Textures[Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			}
 			else
 			{
 				glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 				glTexParameteri(Target, GL_GENERATE_MIPMAP, GL_TRUE);
 				if(IsNewApi())
-					glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					glSamplerParameteri(m_Textures[Slot].m_Sampler2DArray, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			}
 
 			glTexParameteri(Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -867,23 +868,23 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 
 			if(IsNewApi())
 			{
-				glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glSamplerParameteri(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+				glSamplerParameteri(m_Textures[Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glSamplerParameteri(m_Textures[Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glSamplerParameteri(m_Textures[Slot].m_Sampler2DArray, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
 #ifndef BACKEND_AS_OPENGL_ES
 				if(m_OpenGLTextureLodBIAS != 0 && !m_IsOpenGLES)
-					glSamplerParameterf(m_Textures[pCommand->m_Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
+					glSamplerParameterf(m_Textures[Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
 
 				glBindSampler(0, 0);
 			}
 
-			int ImageColorChannels = TexFormatToImageColorChannelCount(pCommand->m_Format);
+			int ImageColorChannels = GLFormatToImageColorChannelCount(GLFormat);
 
 			uint8_t *p3DImageData = NULL;
 
-			bool IsSingleLayer = (pCommand->m_Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER)) != 0;
+			bool IsSingleLayer = (Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER)) != 0;
 
 			if(!IsSingleLayer)
 				p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
@@ -899,7 +900,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 					dbg_msg("gfx", "3D/2D array texture was resized");
 					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-					uint8_t *pNewTexData = (uint8_t *)Resize(ConvertWidth, ConvertHeight, NewWidth, NewHeight, pCommand->m_Format, (const uint8_t *)pTexData);
+					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToImageColorChannelCount(GLFormat));
 
 					ConvertWidth = NewWidth;
 					ConvertHeight = NewHeight;
@@ -927,20 +928,44 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::
 	}
 
 	// This is the initial value for the wrap modes
-	m_Textures[pCommand->m_Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_Textures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	// calculate memory usage
-	m_Textures[pCommand->m_Slot].m_MemSize = Width * Height * pCommand->m_PixelSize;
+	m_Textures[Slot].m_MemSize = Width * Height * PixelSize;
 	while(Width > 2 && Height > 2)
 	{
 		Width >>= 1;
 		Height >>= 1;
-		m_Textures[pCommand->m_Slot].m_MemSize += Width * Height * pCommand->m_PixelSize;
+		m_Textures[Slot].m_MemSize += Width * Height * PixelSize;
 	}
-	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) + m_Textures[pCommand->m_Slot].m_MemSize, std::memory_order_relaxed);
+	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) + m_Textures[Slot].m_MemSize, std::memory_order_relaxed);
 
 	free(pTexData);
 #endif
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
+{
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, pCommand->m_PixelSize, TexFormatToOpenGLFormat(pCommand->m_Format), TexFormatToOpenGLFormat(pCommand->m_StoreFormat), pCommand->m_Flags, pCommand->m_pData);
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
+{
+	TextureUpdate(pCommand->m_Slot, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, pCommand->m_pData);
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Destroy(const CCommandBuffer::SCommand_TextTextures_Destroy *pCommand)
+{
+	DestroyTexture(pCommand->m_Slot);
+	DestroyTexture(pCommand->m_SlotOutline);
+}
+
+void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
+{
+	void *pTextData = pCommand->m_pTextData;
+	void *pTextOutlineData = pCommand->m_pTextOutlineData;
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, 1, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTextData);
+	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, 1, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTextOutlineData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
@@ -980,8 +1005,10 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 #endif
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand)
+void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand)
 {
+	*pCommand->m_pSwapped = false;
+
 	// fetch image data
 	GLint aViewport[4] = {0, 0, 0, 0};
 	glGetIntegerv(GL_VIEWPORT, aViewport);
@@ -1045,6 +1072,15 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_TEXTURE_UPDATE:
 		Cmd_Texture_Update(static_cast<const CCommandBuffer::SCommand_Texture_Update *>(pBaseCommand));
 		break;
+	case CCommandBuffer::CMD_TEXT_TEXTURES_CREATE:
+		Cmd_TextTextures_Create(static_cast<const CCommandBuffer::SCommand_TextTextures_Create *>(pBaseCommand));
+		break;
+	case CCommandBuffer::CMD_TEXT_TEXTURES_DESTROY:
+		Cmd_TextTextures_Destroy(static_cast<const CCommandBuffer::SCommand_TextTextures_Destroy *>(pBaseCommand));
+		break;
+	case CCommandBuffer::CMD_TEXT_TEXTURE_UPDATE:
+		Cmd_TextTexture_Update(static_cast<const CCommandBuffer::SCommand_TextTexture_Update *>(pBaseCommand));
+		break;
 	case CCommandBuffer::CMD_CLEAR:
 		Cmd_Clear(static_cast<const CCommandBuffer::SCommand_Clear *>(pBaseCommand));
 		break;
@@ -1054,8 +1090,8 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_RENDER_TEX3D:
 		Cmd_RenderTex3D(static_cast<const CCommandBuffer::SCommand_RenderTex3D *>(pBaseCommand));
 		break;
-	case CCommandBuffer::CMD_SCREENSHOT:
-		Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_Screenshot *>(pBaseCommand));
+	case CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT:
+		Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand));
 		break;
 	case CCommandBuffer::CMD_UPDATE_VIEWPORT:
 		Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand));
@@ -1080,7 +1116,6 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_RENDER_BORDER_TILE_LINE: Cmd_RenderBorderTileLine(static_cast<const CCommandBuffer::SCommand_RenderBorderTileLine *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_LAYER: Cmd_RenderQuadLayer(static_cast<const CCommandBuffer::SCommand_RenderQuadLayer *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_TEXT: Cmd_RenderText(static_cast<const CCommandBuffer::SCommand_RenderText *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_RENDER_TEXT_STREAM: Cmd_RenderTextStream(static_cast<const CCommandBuffer::SCommand_RenderTextStream *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER: Cmd_RenderQuadContainer(static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_EX: Cmd_RenderQuadContainerEx(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE: Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); break;
@@ -1103,7 +1138,7 @@ bool CCommandProcessorFragment_OpenGL2::IsAndUpdateTextureSlotBound(int IDX, int
 		return true;
 	else
 	{
-		//the texture slot uses this index now
+		// the texture slot uses this index now
 		m_TextureSlotBoundToUnit[IDX].m_TextureSlot = Slot;
 		m_TextureSlotBoundToUnit[IDX].m_Is2DArray = Is2DArray;
 		return false;
@@ -1125,14 +1160,14 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		{
 		case CCommandBuffer::BLEND_NONE:
 			// We don't really need this anymore
-			//glDisable(GL_BLEND);
+			// glDisable(GL_BLEND);
 			break;
 		case CCommandBuffer::BLEND_ALPHA:
-			//glEnable(GL_BLEND);
+			// glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			break;
 		case CCommandBuffer::BLEND_ADDITIVE:
-			//glEnable(GL_BLEND);
+			// glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 			break;
 		default:
@@ -1267,10 +1302,14 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		// orthographic projection matrix
 		// the z coordinate is the same for every vertex, so just ignore the z coordinate and set it in the shaders
 		float m[2 * 4] = {
-			2.f / (State.m_ScreenBR.x - State.m_ScreenTL.x), 0, 0, -((State.m_ScreenBR.x + State.m_ScreenTL.x) / (State.m_ScreenBR.x - State.m_ScreenTL.x)),
-			0, (2.f / (State.m_ScreenTL.y - State.m_ScreenBR.y)), 0, -((State.m_ScreenTL.y + State.m_ScreenBR.y) / (State.m_ScreenTL.y - State.m_ScreenBR.y)),
-			//0, 0, -(2.f/(9.f)), -((11.f)/(9.f)),
-			//0, 0, 0, 1.0f
+			2.f / (State.m_ScreenBR.x - State.m_ScreenTL.x),
+			0,
+			0,
+			-((State.m_ScreenBR.x + State.m_ScreenTL.x) / (State.m_ScreenBR.x - State.m_ScreenTL.x)),
+			0,
+			(2.f / (State.m_ScreenTL.y - State.m_ScreenBR.y)),
+			0,
+			-((State.m_ScreenTL.y + State.m_ScreenBR.y) / (State.m_ScreenTL.y - State.m_ScreenBR.y)),
 		};
 
 		// transpose bcs of column-major order of opengl
@@ -1580,7 +1619,7 @@ bool CCommandProcessorFragment_OpenGL2::IsTileMapAnalysisSucceeded()
 		}
 	}
 
-	//everything build up, now do the analyze steps
+	// everything build up, now do the analyze steps
 	bool NoError = DoAnalyzeStep(0, CheckCount, VertexCount, pFakeTexture, SingleImageSize);
 	if(NoError && m_HasShaders)
 		NoError &= DoAnalyzeStep(1, CheckCount, VertexCount, pFakeTexture, SingleImageSize);
@@ -1596,7 +1635,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 	if(!CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand))
 		return false;
 
-	m_OpenGLTextureLodBIAS = g_Config.m_GfxOpenGLTextureLODBIAS;
+	m_OpenGLTextureLodBIAS = g_Config.m_GfxGLTextureLODBIAS;
 
 	m_HasShaders = pCommand->m_pCapabilities->m_ShaderSupport;
 
@@ -1635,7 +1674,7 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 			m_pPrimitive3DProgram = new CGLSLPrimitiveProgram;
 			m_pPrimitive3DProgramTextured = new CGLSLPrimitiveProgram;
 
-			CGLSLCompiler ShaderCompiler(g_Config.m_GfxOpenGLMajor, g_Config.m_GfxOpenGLMinor, g_Config.m_GfxOpenGLPatch, m_IsOpenGLES, m_OpenGLTextureLodBIAS / 1000.0f);
+			CGLSLCompiler ShaderCompiler(g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, m_IsOpenGLES, m_OpenGLTextureLodBIAS / 1000.0f);
 			ShaderCompiler.SetHasTextureArray(pCommand->m_pCapabilities->m_2DArrayTextures);
 
 			if(pCommand->m_pCapabilities->m_2DArrayTextures)
@@ -1819,7 +1858,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 {
 	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
-	//create necessary space
+	// create necessary space
 	if((size_t)Index >= m_BufferObjectIndices.size())
 	{
 		for(int i = m_BufferObjectIndices.size(); i < Index + 1; ++i)
@@ -1927,13 +1966,14 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferObject(const CCommandBuf
 void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand)
 {
 	int Index = pCommand->m_BufferContainerIndex;
-	//create necessary space
+	// create necessary space
 	if((size_t)Index >= m_BufferContainers.size())
 	{
 		for(int i = m_BufferContainers.size(); i < Index + 1; ++i)
 		{
 			SBufferContainer Container;
 			Container.m_ContainerInfo.m_Stride = 0;
+			Container.m_ContainerInfo.m_VertBufferBindingIndex = -1;
 			m_BufferContainers.push_back(Container);
 		}
 	}
@@ -1947,6 +1987,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferContainer(const CCommand
 	}
 
 	BufferContainer.m_ContainerInfo.m_Stride = pCommand->m_Stride;
+	BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex = pCommand->m_VertBufferBindingIndex;
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferContainer(const CCommandBuffer::SCommand_UpdateBufferContainer *pCommand)
@@ -1962,6 +2003,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferContainer(const CCommand
 	}
 
 	BufferContainer.m_ContainerInfo.m_Stride = pCommand->m_Stride;
+	BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex = pCommand->m_VertBufferBindingIndex;
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferContainer(const CCommandBuffer::SCommand_DeleteBufferContainer *pCommand)
@@ -1970,28 +2012,16 @@ void CCommandProcessorFragment_OpenGL2::Cmd_DeleteBufferContainer(const CCommand
 
 	if(pCommand->m_DestroyAllBO)
 	{
-		for(size_t i = 0; i < BufferContainer.m_ContainerInfo.m_Attributes.size(); ++i)
+		int VertBufferID = BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex;
+		if(VertBufferID != -1)
 		{
-			int VertBufferID = BufferContainer.m_ContainerInfo.m_Attributes[i].m_VertBufferBindingIndex;
-			if(VertBufferID != -1)
+			if(m_HasShaders)
 			{
-				for(auto &Attribute : BufferContainer.m_ContainerInfo.m_Attributes)
-				{
-					// set all equal ids to zero to not double delete
-					if(VertBufferID == Attribute.m_VertBufferBindingIndex)
-					{
-						Attribute.m_VertBufferBindingIndex = -1;
-					}
-				}
-
-				if(m_HasShaders)
-				{
-					glDeleteBuffers(1, &m_BufferObjectIndices[VertBufferID].m_BufferObjectID);
-				}
-
-				free(m_BufferObjectIndices[VertBufferID].m_pData);
-				m_BufferObjectIndices[VertBufferID].m_pData = NULL;
+				glDeleteBuffers(1, &m_BufferObjectIndices[VertBufferID].m_BufferObjectID);
 			}
+
+			free(m_BufferObjectIndices[VertBufferID].m_pData);
+			m_BufferObjectIndices[VertBufferID].m_pData = NULL;
 		}
 	}
 
@@ -2025,7 +2055,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 
 	bool IsTextured = BufferContainer.m_ContainerInfo.m_Attributes.size() == 2;
 
-	SBufferObject &BufferObject = m_BufferObjectIndices[(size_t)BufferContainer.m_ContainerInfo.m_Attributes[0].m_VertBufferBindingIndex];
+	SBufferObject &BufferObject = m_BufferObjectIndices[(size_t)BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex];
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -2110,7 +2140,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferCon
 
 	bool IsTextured = BufferContainer.m_ContainerInfo.m_Attributes.size() == 2;
 
-	SBufferObject &BufferObject = m_BufferObjectIndices[(size_t)BufferContainer.m_ContainerInfo.m_Attributes[0].m_VertBufferBindingIndex];
+	SBufferObject &BufferObject = m_BufferObjectIndices[(size_t)BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex];
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -2173,7 +2203,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferCon
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand)
 {
 	int Index = pCommand->m_BufferContainerIndex;
-	//if space not there return
+	// if space not there return
 	if((size_t)Index >= m_BufferContainers.size())
 		return;
 
@@ -2185,7 +2215,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTile(const CCommandBuffe
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand)
 {
 	int Index = pCommand->m_BufferContainerIndex;
-	//if space not there return
+	// if space not there return
 	if((size_t)Index >= m_BufferContainers.size())
 		return;
 
@@ -2197,7 +2227,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTileLine(const CCommandB
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand)
 {
 	int Index = pCommand->m_BufferContainerIndex;
-	//if space not there return
+	// if space not there return
 	if((size_t)Index >= m_BufferContainers.size())
 		return;
 
@@ -2205,7 +2235,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 
 	if(pCommand->m_IndicesDrawNum == 0)
 	{
-		return; //nothing to draw
+		return; // nothing to draw
 	}
 
 	if(m_HasShaders)
@@ -2230,7 +2260,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 
 	bool IsTextured = BufferContainer.m_ContainerInfo.m_Attributes.size() == 2;
 
-	SBufferObject &BufferObject = m_BufferObjectIndices[(size_t)BufferContainer.m_ContainerInfo.m_Attributes[0].m_VertBufferBindingIndex];
+	SBufferObject &BufferObject = m_BufferObjectIndices[(size_t)BufferContainer.m_ContainerInfo.m_VertBufferBindingIndex];
 	if(m_HasShaders)
 		glBindBuffer(GL_ARRAY_BUFFER, BufferObject.m_BufferObjectID);
 
