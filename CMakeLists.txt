@@ -1764,7 +1764,10 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
 )
-
+set_src(MASTERSRV_SHARED GLOB src/mastersrv
+  mastersrv.cpp
+  mastersrv.h
+)
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
@@ -1782,7 +1785,8 @@ set(LIBS
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
-list(APPEND TARGETS_OWN engine-shared game-shared)
+add_library(mastersrv-shared EXCLUDE_FROM_ALL OBJECT ${MASTERSRV_SHARED})
+list(APPEND TARGETS_OWN engine-shared game-shared mastersrv-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
   add_library(discord-shared SHARED IMPORTED)
@@ -2064,6 +2068,7 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:mastersrv-shared>
     )
   else()
     add_executable(${TARGET_CLIENT} WIN32
@@ -2073,6 +2078,7 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:mastersrv-shared>
     )
   endif()
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
@@ -2260,6 +2266,7 @@ if(SERVER)
     ${SERVER_ICON}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
+    $<TARGET_OBJECTS:mastersrv-shared>
   )
   target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
   list(APPEND TARGETS_OWN ${TARGET_SERVER})
@@ -2280,13 +2287,14 @@ endif()
 ########################################################################
 
 if(TOOLS)
-  set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+  set_src(MASTERSRV_SRC GLOB src/mastersrv main_mastersrv.cpp)
   set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
   set(TARGET_MASTERSRV mastersrv)
   set(TARGET_TWPING twping)
 
-  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
+
   add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 
   target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
