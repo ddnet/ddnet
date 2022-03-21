@@ -637,21 +637,21 @@ void CLayerTiles::Shift(int Direction)
 			mem_move(&m_pTiles[y * m_Width], &m_pTiles[y * m_Width + o], (m_Width - o) * sizeof(CTile));
 			mem_zero(&m_pTiles[y * m_Width + (m_Width - o)], o * sizeof(CTile));
 		}
-	break;
+		break;
 	case DIRECTION_RIGHT:
 		for(int y = 0; y < m_Height; ++y)
 		{
 			mem_move(&m_pTiles[y * m_Width + o], &m_pTiles[y * m_Width], (m_Width - o) * sizeof(CTile));
 			mem_zero(&m_pTiles[y * m_Width], o * sizeof(CTile));
 		}
-	break;
+		break;
 	case DIRECTION_UP:
 		for(int y = 0; y < m_Height - o; ++y)
 		{
 			mem_copy(&m_pTiles[y * m_Width], &m_pTiles[(y + o) * m_Width], m_Width * sizeof(CTile));
 			mem_zero(&m_pTiles[(y + o) * m_Width], m_Width * sizeof(CTile));
 		}
-	break;
+		break;
 	case DIRECTION_DOWN:
 		for(int y = m_Height - 1; y >= o; --y)
 		{
@@ -1147,27 +1147,26 @@ void CLayerTele::Shift(int Direction)
 			mem_move(&m_pTeleTile[y * m_Width], &m_pTeleTile[y * m_Width + o], (m_Width - o) * sizeof(CTeleTile));
 			mem_zero(&m_pTeleTile[y * m_Width + (m_Width - o)], o * sizeof(CTeleTile));
 		}
-	break;
+		break;
 	case DIRECTION_RIGHT:
 		for(int y = 0; y < m_Height; ++y)
 		{
 			mem_move(&m_pTeleTile[y * m_Width + o], &m_pTeleTile[y * m_Width], (m_Width - o) * sizeof(CTeleTile));
 			mem_zero(&m_pTeleTile[y * m_Width], o * sizeof(CTeleTile));
 		}
-	break;
+		break;
 	case DIRECTION_UP:
 		for(int y = 0; y < m_Height - o; ++y)
 		{
 			mem_copy(&m_pTeleTile[y * m_Width], &m_pTeleTile[(y + o) * m_Width], m_Width * sizeof(CTeleTile));
 			mem_zero(&m_pTeleTile[(y + o) * m_Width], m_Width * sizeof(CTeleTile));
 		}
-	break;
+		break;
 	case DIRECTION_DOWN:
 		for(int y = m_Height - 1; y >= o; --y)
 		{
 			mem_copy(&m_pTeleTile[y * m_Width], &m_pTeleTile[(y - o) * m_Width], m_Width * sizeof(CTeleTile));
 			mem_zero(&m_pTeleTile[(y - o) * m_Width], m_Width * sizeof(CTeleTile));
-
 		}
 	}
 }
@@ -1756,21 +1755,21 @@ void CLayerSwitch::Shift(int Direction)
 			mem_move(&m_pSwitchTile[y * m_Width], &m_pSwitchTile[y * m_Width + o], (m_Width - o) * sizeof(CSwitchTile));
 			mem_zero(&m_pSwitchTile[y * m_Width + (m_Width - o)], o * sizeof(CSwitchTile));
 		}
-	break;
+		break;
 	case DIRECTION_RIGHT:
 		for(int y = 0; y < m_Height; ++y)
 		{
 			mem_move(&m_pSwitchTile[y * m_Width + o], &m_pSwitchTile[y * m_Width], (m_Width - o) * sizeof(CSwitchTile));
 			mem_zero(&m_pSwitchTile[y * m_Width], o * sizeof(CSwitchTile));
 		}
-	break;
+		break;
 	case DIRECTION_UP:
 		for(int y = 0; y < m_Height - o; ++y)
 		{
 			mem_copy(&m_pSwitchTile[y * m_Width], &m_pSwitchTile[(y + o) * m_Width], m_Width * sizeof(CSwitchTile));
 			mem_zero(&m_pSwitchTile[(y + o) * m_Width], m_Width * sizeof(CSwitchTile));
 		}
-	break;
+		break;
 	case DIRECTION_DOWN:
 		for(int y = m_Height - 1; y >= o; --y)
 		{
@@ -2060,21 +2059,21 @@ void CLayerTune::Shift(int Direction)
 			mem_move(&m_pTuneTile[y * m_Width], &m_pTuneTile[y * m_Width + o], (m_Width - o) * sizeof(CTuneTile));
 			mem_zero(&m_pTuneTile[y * m_Width + (m_Width - o)], o * sizeof(CTuneTile));
 		}
-	break;
+		break;
 	case DIRECTION_RIGHT:
 		for(int y = 0; y < m_Height; ++y)
 		{
 			mem_move(&m_pTuneTile[y * m_Width + o], &m_pTuneTile[y * m_Width], (m_Width - o) * sizeof(CTuneTile));
 			mem_zero(&m_pTuneTile[y * m_Width], o * sizeof(CTuneTile));
 		}
-	break;
+		break;
 	case DIRECTION_UP:
 		for(int y = 0; y < m_Height - o; ++y)
 		{
 			mem_copy(&m_pTuneTile[y * m_Width], &m_pTuneTile[(y + o) * m_Width], m_Width * sizeof(CTuneTile));
 			mem_zero(&m_pTuneTile[(y + o) * m_Width], m_Width * sizeof(CTuneTile));
 		}
-	break;
+		break;
 	case DIRECTION_DOWN:
 		for(int y = m_Height - 1; y >= o; --y)
 		{
