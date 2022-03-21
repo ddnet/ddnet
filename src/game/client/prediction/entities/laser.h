@@ -17,7 +17,7 @@ public:
 	const vec2 &GetFrom() { return m_From; }
 	const int &GetOwner() { return m_Owner; }
 	const int &GetEvalTick() { return m_EvalTick; }
-	CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser);
+	CLaser(CGameWorld *pGameWorld, int ID, const CNetObj_Laser *pLaser);
 	void FillInfo(CNetObj_Laser *pLaser);
 	bool Match(CLaser *pLaser);
 

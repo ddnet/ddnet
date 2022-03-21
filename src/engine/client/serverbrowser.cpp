@@ -180,7 +180,7 @@ int CServerBrowser::GenerateToken(const NETADDR &Addr) const
 	SHA256_CTX Sha256;
 	sha256_init(&Sha256);
 	sha256_update(&Sha256, m_aTokenSeed, sizeof(m_aTokenSeed));
-	sha256_update(&Sha256, (unsigned char *)&Addr, sizeof(Addr));
+	sha256_update(&Sha256, (const unsigned char *)&Addr, sizeof(Addr));
 	SHA256_DIGEST Digest = sha256_finish(&Sha256);
 	return (Digest.data[0] << 16) | (Digest.data[1] << 8) | Digest.data[2];
 }
@@ -461,7 +461,7 @@ void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 	}
 }
 
-CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr)
+CServerBrowser::CServerEntry *CServerBrowser::Find(const NETADDR &Addr) const
 {
 	CServerEntry *pEntry = m_aServerlistIp[Addr.ip[0]];
 
@@ -1264,7 +1264,7 @@ int CServerBrowser::FindFavorite(const NETADDR &Addr) const
 
 bool CServerBrowser::GotInfo(const NETADDR &Addr) const
 {
-	CServerEntry *pEntry = ((CServerBrowser *)this)->Find(Addr);
+	const CServerEntry *pEntry = Find(Addr);
 	return pEntry && pEntry->m_GotInfo;
 }
 

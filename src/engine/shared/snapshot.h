@@ -24,8 +24,8 @@ class CSnapshot
 	int m_DataSize;
 	int m_NumItems;
 
-	int *Offsets() const { return (int *)(this + 1); }
-	char *DataStart() const { return (char *)(Offsets() + m_NumItems); }
+	int *Offsets()    const { return (int *)(this + 1); } // Wcast-qual
+	char *DataStart() const { return (char *)(Offsets() + m_NumItems); } // Wcast-qual
 
 public:
 	enum
@@ -78,18 +78,18 @@ private:
 	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
 	CData m_Empty;
 
-	static void UndiffItem(int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate);
+	static void UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, int *pDataRate);
 
 public:
-	static int DiffItem(int *pPast, int *pCurrent, int *pOut, int Size);
+	static int DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
 	CSnapshotDelta(const CSnapshotDelta &Old);
 	int GetDataRate(int Index) const { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, int Size);
 	const CData *EmptyDelta() const;
-	int CreateDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pDstData);
-	int UnpackDelta(class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);
+	int CreateDelta(const class CSnapshot *pFrom, const class CSnapshot *pTo, void *pDstData);
+	int UnpackDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);
 };
 
 // CSnapshotStorage

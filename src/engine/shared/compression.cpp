@@ -67,7 +67,7 @@ long CVariableInt::Decompress(const void *pSrc_, int SrcSize, void *pDst_, int D
 {
 	dbg_assert(DstSize % sizeof(int) == 0, "invalid bounds");
 
-	const unsigned char *pSrc = (unsigned char *)pSrc_;
+	const unsigned char *pSrc = (const unsigned char *)pSrc_;
 	const unsigned char *pSrcEnd = pSrc + SrcSize;
 	int *pDst = (int *)pDst_;
 	const int *pDstEnd = pDst + DstSize / sizeof(int);
@@ -87,7 +87,7 @@ long CVariableInt::Compress(const void *pSrc_, int SrcSize, void *pDst_, int Dst
 {
 	dbg_assert(SrcSize % sizeof(int) == 0, "invalid bounds");
 
-	const int *pSrc = (int *)pSrc_;
+	const int *pSrc = (const int *)pSrc_;
 	unsigned char *pDst = (unsigned char *)pDst_;
 	const unsigned char *pDstEnd = pDst + DstSize;
 	SrcSize /= sizeof(int);

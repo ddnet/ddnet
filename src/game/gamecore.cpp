@@ -23,7 +23,7 @@ bool CTuningParams::Get(int Index, float *pValue) const
 {
 	if(Index < 0 || Index >= Num())
 		return false;
-	*pValue = (float)((CTuneParam *)this)[Index];
+	*pValue = (float)((const CTuneParam *)this)[Index];
 	return true;
 }
 

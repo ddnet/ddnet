@@ -2238,7 +2238,7 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 /*
 	Function: pid
 		Returns the pid of the current process.
-	
+
 	Returns:
 		pid of the current process
 */
@@ -2283,7 +2283,7 @@ typedef pid_t PROCESS;
 	Returns:
 		handle/pid of the new process
 */
-PROCESS shell_execute(const char *file);
+PROCESS shell_execute(char *file);
 
 /*
 	Function: kill_process

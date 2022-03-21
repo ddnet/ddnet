@@ -150,9 +150,9 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 
 	// setup buffer pointers
 	const unsigned char *pSrc = (const unsigned char *)pInput;
-	const unsigned char *pSrcEnd = pSrc + InputSize;
+	const unsigned char *const pSrcEnd = pSrc + InputSize;
 	unsigned char *pDst = (unsigned char *)pOutput;
-	unsigned char *pDstEnd = pDst + OutputSize;
+	const unsigned char *const pDstEnd = pDst + OutputSize;
 
 	// symbol variables
 	unsigned Bits = 0;
@@ -201,9 +201,9 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 {
 	// setup buffer pointers
 	unsigned char *pDst = (unsigned char *)pOutput;
-	unsigned char *pSrc = (unsigned char *)pInput;
-	unsigned char *pDstEnd = pDst + OutputSize;
-	unsigned char *pSrcEnd = pSrc + InputSize;
+	const unsigned char *pSrc = (const unsigned char *)pInput;
+	const unsigned char *const pDstEnd = pDst + OutputSize;
+	const unsigned char *const pSrcEnd = pSrc + InputSize;
 
 	unsigned Bits = 0;
 	unsigned Bitcount = 0;

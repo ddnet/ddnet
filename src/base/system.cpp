@@ -742,7 +742,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 		{
 			mem_copy(aio->buffer + aio->write_pos, buffer, remaining_contiguous);
 			size -= remaining_contiguous;
-			buffer = ((unsigned char *)buffer) + remaining_contiguous;
+			buffer = ((const unsigned char *)buffer) + remaining_contiguous;
 			aio->write_pos = 0;
 		}
 		mem_copy(aio->buffer + aio->write_pos, buffer, size);
@@ -1174,22 +1174,22 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV4;
-		dst->port = htons(((struct sockaddr_in *)src)->sin_port);
-		mem_copy(dst->ip, &((struct sockaddr_in *)src)->sin_addr.s_addr, 4);
+		dst->port = htons(((const struct sockaddr_in *)src)->sin_port);
+		mem_copy(dst->ip, &((const struct sockaddr_in *)src)->sin_addr.s_addr, 4);
 	}
 	else if(src->sa_family == AF_WEBSOCKET_INET)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_WEBSOCKET_IPV4;
-		dst->port = htons(((struct sockaddr_in *)src)->sin_port);
-		mem_copy(dst->ip, &((struct sockaddr_in *)src)->sin_addr.s_addr, 4);
+		dst->port = htons(((const struct sockaddr_in *)src)->sin_port);
+		mem_copy(dst->ip, &((const struct sockaddr_in *)src)->sin_addr.s_addr, 4);
 	}
 	else if(src->sa_family == AF_INET6)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV6;
-		dst->port = htons(((struct sockaddr_in6 *)src)->sin6_port);
-		mem_copy(dst->ip, &((struct sockaddr_in6 *)src)->sin6_addr.s6_addr, 16);
+		dst->port = htons(((const struct sockaddr_in6 *)src)->sin6_port);
+		mem_copy(dst->ip, &((const struct sockaddr_in6 *)src)->sin6_addr.s6_addr, 16);
 	}
 	else
 	{
@@ -3401,11 +3401,11 @@ const char *str_utf8_skip_whitespaces(const char *str)
 
 void str_utf8_trim_right(char *param)
 {
-	const char *str = param;
+	const char *str = param; // Wcast-qual
 	char *end = 0;
 	while(*str)
 	{
-		char *str_old = (char *)str;
+		char *str_old = (char *)str; // Wcast-qual
 		int code = str_utf8_decode(&str);
 
 		// check if unicode is not empty
@@ -3787,7 +3787,7 @@ void cmdline_free(int argc, const char **argv)
 #endif
 }
 
-PROCESS shell_execute(const char *file)
+PROCESS shell_execute(char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[512];
@@ -4161,7 +4161,7 @@ int os_version_str(char *version, int length)
 			}
 			offset = found - buf + 1;
 		}
-		newline = (char *)str_find(buf + offset, "\n");
+		newline = (char *)str_find(buf + offset, "\n"); // Wcast-qual
 		if(newline)
 		{
 			*newline = 0;

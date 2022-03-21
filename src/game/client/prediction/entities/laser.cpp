@@ -150,7 +150,7 @@ void CLaser::Tick()
 	}
 }
 
-CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
+CLaser::CLaser(CGameWorld *pGameWorld, int ID, const CNetObj_Laser *pLaser) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos.x = pLaser->m_X;

@@ -31,7 +31,7 @@ public:
 class CUnpacker
 {
 	const unsigned char *m_pStart;
-	const unsigned char *m_pCurrent;
+	unsigned char *m_pCurrent;
 	const unsigned char *m_pEnd;
 	int m_Error;
 

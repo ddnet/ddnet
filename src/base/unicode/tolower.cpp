@@ -4,8 +4,8 @@
 
 static int compul(const void *a, const void *b)
 {
-	struct UPPER_LOWER *ul_a = (struct UPPER_LOWER *)a;
-	struct UPPER_LOWER *ul_b = (struct UPPER_LOWER *)b;
+	const struct UPPER_LOWER *ul_a = (const struct UPPER_LOWER *)a;
+	const struct UPPER_LOWER *ul_b = (const struct UPPER_LOWER *)b;
 	return ul_a->upper - ul_b->upper;
 }
 

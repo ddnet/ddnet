@@ -13,7 +13,7 @@
 
 CSnapshotItem *CSnapshot::GetItem(int Index) const
 {
-	return (CSnapshotItem *)(DataStart() + Offsets()[Index]);
+	return const_cast<CSnapshotItem *>((const CSnapshotItem*)(DataStart() + Offsets()[Index])); // Wcast-qual
 }
 
 int CSnapshot::GetItemSize(int Index) const
@@ -131,7 +131,7 @@ enum
 	HASHLIST_SIZE = 256,
 };
 
-static void GenerateHash(CItemList *pHashlist, CSnapshot *pSnapshot)
+static void GenerateHash(CItemList *pHashlist, const CSnapshot *pSnapshot)
 {
 	for(int i = 0; i < HASHLIST_SIZE; i++)
 		pHashlist[i].m_Num = 0;
@@ -161,7 +161,7 @@ static int GetItemIndexHashed(int Key, const CItemList *pHashlist)
 	return -1;
 }
 
-int CSnapshotDelta::DiffItem(int *pPast, int *pCurrent, int *pOut, int Size)
+int CSnapshotDelta::DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size)
 {
 	int Needed = 0;
 	while(Size)
@@ -177,7 +177,7 @@ int CSnapshotDelta::DiffItem(int *pPast, int *pCurrent, int *pOut, int Size)
 	return Needed;
 }
 
-void CSnapshotDelta::UndiffItem(int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate)
+void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, int *pDataRate)
 {
 	while(Size)
 	{
@@ -228,7 +228,7 @@ const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
 }
 
 // TODO: OPT: this should be made much faster
-int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData)
+int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData)
 {
 	CData *pDelta = (CData *)pDstData;
 	int *pData = (int *)pDelta->m_aData;
@@ -311,18 +311,18 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	return (int)((char *)pData - (char *)pDstData);
 }
 
-static int RangeCheck(void *pEnd, void *pPtr, int Size)
+static int RangeCheck(const void *pEnd, const void *pPtr, const int Size)
 {
 	if((const char *)pPtr + Size > (const char *)pEnd)
 		return -1;
 	return 0;
 }
 
-int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
+int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
-	CData *pDelta = (CData *)pSrcData;
-	int *pData = (int *)pDelta->m_aData;
-	int *pEnd = (int *)(((char *)pSrcData + DataSize));
+	const CData *pDelta = (const CData *)pSrcData;
+	int *pData = const_cast<int*>(pDelta->m_aData); // Wcast-qual
+	const int *pEnd = (const int *)(((const char *)pSrcData + DataSize));
 
 	CSnapshotBuilder Builder;
 	Builder.Init();

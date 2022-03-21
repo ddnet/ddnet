@@ -719,7 +719,7 @@ public:
 
 		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
 
-		pFont->m_pBuf = (void *)pBuf;
+		pFont->m_pBuf = const_cast<unsigned char*>(pBuf);
 		pFont->m_CurTextureDimensions[0] = 1024;
 		pFont->m_TextureData[0] = new unsigned char[pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0]];
 		mem_zero(pFont->m_TextureData[0], (size_t)pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0] * sizeof(unsigned char));
@@ -743,7 +743,7 @@ public:
 	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size)
 	{
 		CFont::SFontFallBack FallbackFont;
-		FallbackFont.m_pBuf = (void *)pBuf;
+		FallbackFont.m_pBuf = const_cast<unsigned char*>(pBuf);
 		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
 
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
@@ -1049,7 +1049,7 @@ public:
 
 		float Scale = 1.0f / pSizeData->m_FontSize;
 
-		const char *pCurrent = (char *)pText;
+		const char *pCurrent = (const char *)pText;
 		const char *pEnd = pCurrent + Length;
 
 		int RenderFlags = TextContainer.m_RenderFlags;
@@ -1163,7 +1163,7 @@ public:
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END))
 			{
-				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
+				int Wlen = minimum(WordLength((const char *)pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
 				Compare.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
@@ -1658,7 +1658,7 @@ public:
 		if(FontSize < 1)
 			return;
 
-		const char *pCurrent = (char *)pText;
+		const char *pCurrent = (const char *)pText;
 		const char *pEnd = pCurrent + Length;
 		CFont *pFont = m_pDefaultFont;
 		FT_Bitmap *pBitmap;
@@ -1770,7 +1770,7 @@ public:
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight)
 	{
 		CFont *pFont = m_pDefaultFont;
-		const char *pCurrent = (char *)pText;
+		const char *pCurrent = (const char *)pText;
 		const char *pEnd = pCurrent + TextLength;
 
 		int WidthOfText = 0;

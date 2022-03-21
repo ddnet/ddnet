@@ -1047,7 +1047,7 @@ CTeamsCore *CCharacter::TeamsCore()
 	return m_Core.m_pTeams;
 }
 
-CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
+CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, const CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
 {
 	m_ID = ID;
@@ -1119,9 +1119,9 @@ void CCharacter::ResetPrediction()
 	m_LastTuneZoneTick = 0;
 }
 
-void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
+void CCharacter::Read(const CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
-	m_Core.Read((CNetObj_CharacterCore *)pChar);
+	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
 
 	if(pExtended)

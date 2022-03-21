@@ -1130,10 +1130,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 	UseProgram(pProgram);
 
 	SetState(pCommand->m_State, pProgram, true);
-	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float *)&pCommand->m_Color);
+	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (const float *)&pCommand->m_Color);
 
-	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (float *)&pCommand->m_Offset);
-	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float *)&pCommand->m_Dir);
+	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (const float *)&pCommand->m_Offset);
+	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (const float *)&pCommand->m_Dir);
 	pProgram->SetUniform(pProgram->m_LocJumpIndex, (int)pCommand->m_JumpIndex);
 
 	glBindVertexArray(BufferContainer.m_VertArrayID);
@@ -1166,9 +1166,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTileLine(const CComman
 	UseProgram(pProgram);
 
 	SetState(pCommand->m_State, pProgram, true);
-	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float *)&pCommand->m_Color);
-	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (float *)&pCommand->m_Offset);
-	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (float *)&pCommand->m_Dir);
+	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (const float *)&pCommand->m_Color);
+	pProgram->SetUniformVec2(pProgram->m_LocOffset, 1, (const float *)&pCommand->m_Offset);
+	pProgram->SetUniformVec2(pProgram->m_LocDir, 1, (const float *)&pCommand->m_Dir);
 
 	glBindVertexArray(BufferContainer.m_VertArrayID);
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
@@ -1206,7 +1206,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTileLayer(const CCommandBuff
 	UseProgram(pProgram);
 
 	SetState(pCommand->m_State, pProgram, true);
-	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (float *)&pCommand->m_Color);
+	pProgram->SetUniformVec4(pProgram->m_LocColor, 1, (const float *)&pCommand->m_Color);
 
 	glBindVertexArray(BufferContainer.m_VertArrayID);
 	if(BufferContainer.m_LastIndexBufferBound != m_QuadDrawIndexBufferID)
@@ -1351,7 +1351,7 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 
 	if(m_pTextProgram->m_LastOutlineColor[0] != pTextOutlineColor[0] || m_pTextProgram->m_LastOutlineColor[1] != pTextOutlineColor[1] || m_pTextProgram->m_LastOutlineColor[2] != pTextOutlineColor[2] || m_pTextProgram->m_LastOutlineColor[3] != pTextOutlineColor[3])
 	{
-		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocOutlineColor, 1, (float *)pTextOutlineColor);
+		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocOutlineColor, 1, (const float *)pTextOutlineColor);
 		m_pTextProgram->m_LastOutlineColor[0] = pTextOutlineColor[0];
 		m_pTextProgram->m_LastOutlineColor[1] = pTextOutlineColor[1];
 		m_pTextProgram->m_LastOutlineColor[2] = pTextOutlineColor[2];
@@ -1360,7 +1360,7 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 
 	if(m_pTextProgram->m_LastColor[0] != pTextColor[0] || m_pTextProgram->m_LastColor[1] != pTextColor[1] || m_pTextProgram->m_LastColor[2] != pTextColor[2] || m_pTextProgram->m_LastColor[3] != pTextColor[3])
 	{
-		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocColor, 1, (float *)pTextColor);
+		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocColor, 1, (const float *)pTextColor);
 		m_pTextProgram->m_LastColor[0] = pTextColor[0];
 		m_pTextProgram->m_LastColor[1] = pTextColor[1];
 		m_pTextProgram->m_LastColor[2] = pTextColor[2];
@@ -1488,7 +1488,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerEx(const CComma
 
 	if(pCommand->m_Rotation != 0.0f && (pProgram->m_LastCenter[0] != pCommand->m_Center.x || pProgram->m_LastCenter[1] != pCommand->m_Center.y))
 	{
-		pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, (float *)&pCommand->m_Center);
+		pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, (const float *)&pCommand->m_Center);
 		pProgram->m_LastCenter[0] = pCommand->m_Center.x;
 		pProgram->m_LastCenter[1] = pCommand->m_Center.y;
 	}
@@ -1501,7 +1501,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerEx(const CComma
 
 	if(pProgram->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || pProgram->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || pProgram->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || pProgram->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)
 	{
-		pProgram->SetUniformVec4(pProgram->m_LocVertciesColor, 1, (float *)&pCommand->m_VertexColor);
+		pProgram->SetUniformVec4(pProgram->m_LocVertciesColor, 1, (const float *)&pCommand->m_VertexColor);
 		pProgram->m_LastVertciesColor[0] = pCommand->m_VertexColor.r;
 		pProgram->m_LastVertciesColor[1] = pCommand->m_VertexColor.g;
 		pProgram->m_LastVertciesColor[2] = pCommand->m_VertexColor.b;
@@ -1539,14 +1539,14 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 
 	if((m_pSpriteProgramMultiple->m_LastCenter[0] != pCommand->m_Center.x || m_pSpriteProgramMultiple->m_LastCenter[1] != pCommand->m_Center.y))
 	{
-		m_pSpriteProgramMultiple->SetUniformVec2(m_pSpriteProgramMultiple->m_LocCenter, 1, (float *)&pCommand->m_Center);
+		m_pSpriteProgramMultiple->SetUniformVec2(m_pSpriteProgramMultiple->m_LocCenter, 1, (const float *)&pCommand->m_Center);
 		m_pSpriteProgramMultiple->m_LastCenter[0] = pCommand->m_Center.x;
 		m_pSpriteProgramMultiple->m_LastCenter[1] = pCommand->m_Center.y;
 	}
 
 	if(m_pSpriteProgramMultiple->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || m_pSpriteProgramMultiple->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || m_pSpriteProgramMultiple->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || m_pSpriteProgramMultiple->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)
 	{
-		m_pSpriteProgramMultiple->SetUniformVec4(m_pSpriteProgramMultiple->m_LocVertciesColor, 1, (float *)&pCommand->m_VertexColor);
+		m_pSpriteProgramMultiple->SetUniformVec4(m_pSpriteProgramMultiple->m_LocVertciesColor, 1, (const float *)&pCommand->m_VertexColor);
 		m_pSpriteProgramMultiple->m_LastVertciesColor[0] = pCommand->m_VertexColor.r;
 		m_pSpriteProgramMultiple->m_LastVertciesColor[1] = pCommand->m_VertexColor.g;
 		m_pSpriteProgramMultiple->m_LastVertciesColor[2] = pCommand->m_VertexColor.b;

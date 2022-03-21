@@ -611,7 +611,7 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 	}
 
 	if(Best != -1)
-		return (int *)m_aInputs[g_Config.m_ClDummy][Best].m_aData;
+		return (int *)m_aInputs[g_Config.m_ClDummy][Best].m_aData; // Wcast-qual
 	return 0;
 }
 
@@ -620,7 +620,7 @@ int *CClient::GetDirectInput(int Tick, int IsDummy) const
 	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
 		if(m_aInputs[d][i].m_Tick == Tick)
-			return (int *)m_aInputs[d][i].m_aData;
+			return (int *)m_aInputs[d][i].m_aData; // Wcast-qual
 	return 0;
 }
 
@@ -714,9 +714,9 @@ void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADD
 	MD5_CTX Md5;
 	md5_init(&Md5);
 	const char *pDummy = Dummy ? "dummy" : "normal";
-	md5_update(&Md5, (unsigned char *)pDummy, str_length(pDummy) + 1);
-	md5_update(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
-	md5_update(&Md5, (unsigned char *)&Addr, sizeof(Addr));
+	md5_update(&Md5, (const unsigned char *)pDummy, str_length(pDummy) + 1);
+	md5_update(&Md5, (const unsigned char *)pSeed, str_length(pSeed) + 1);
+	md5_update(&Md5, (const unsigned char *)&Addr, sizeof(Addr));
 	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	unsigned short Random[8];
@@ -1321,7 +1321,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 
 		if(Type != -1)
 		{
-			void *pData = (unsigned char *)pPacket->m_pData + sizeof(SERVERBROWSE_INFO);
+			const void *pData = (const unsigned char *)pPacket->m_pData + sizeof(SERVERBROWSE_INFO);
 			int DataSize = pPacket->m_DataSize - sizeof(SERVERBROWSE_INFO);
 			ProcessServerInfo(Type, &pPacket->m_Address, pData, DataSize);
 		}
@@ -1610,7 +1610,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
 		{
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
-			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
+			const SHA256_DIGEST *pMapSha256 = (const SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
 			int MapCrc = Unpacker.GetInt();
 
 			if(Unpacker.Error())
@@ -1789,7 +1789,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
-			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			const CUuid *pID = (const CUuid *)Unpacker.GetRaw(sizeof(*pID));
 			if(Unpacker.Error())
 			{
 				return;
@@ -1800,7 +1800,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_PONGEX)
 		{
-			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			const CUuid *pID = (const CUuid *)Unpacker.GetRaw(sizeof(*pID));
 			if(Unpacker.Error())
 			{
 				return;
@@ -1818,7 +1818,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_CHECKSUM_REQUEST)
 		{
-			CUuid *pUuid = (CUuid *)Unpacker.GetRaw(sizeof(*pUuid));
+			const CUuid *pUuid = (const CUuid *)Unpacker.GetRaw(sizeof(*pUuid));
 			if(Unpacker.Error())
 			{
 				return;
@@ -4446,7 +4446,7 @@ int main(int argc, const char **argv)
 	if(Restarting)
 	{
 		char aBuf[512];
-		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+		shell_execute(const_cast<char*>(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf))); // Wcast-qual
 	}
 
 	delete pKernel;

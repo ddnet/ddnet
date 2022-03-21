@@ -84,7 +84,7 @@ void CPickup::Move()
 	}
 }
 
-CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx) :
+CPickup::CPickup(CGameWorld *pGameWorld, int ID, const CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_Pos.x = pPickup->m_X;

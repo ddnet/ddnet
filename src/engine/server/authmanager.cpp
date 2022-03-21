@@ -11,7 +11,7 @@ static MD5_DIGEST HashPassword(const char *pPassword, const unsigned char aSalt[
 	// Hash the password and the salt
 	MD5_CTX Md5;
 	md5_init(&Md5);
-	md5_update(&Md5, (unsigned char *)pPassword, str_length(pPassword));
+	md5_update(&Md5, pPassword, str_length(pPassword));
 	md5_update(&Md5, aSalt, SALT_BYTES);
 	return md5_finish(&Md5);
 }

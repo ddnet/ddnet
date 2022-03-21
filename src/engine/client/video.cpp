@@ -333,7 +333,7 @@ void CVideo::NextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames))
 			m_AudioStream.pSwrCtx,
 			m_AudioStream.pFrame->data,
 			m_AudioStream.pFrame->nb_samples,
-			(const uint8_t **)m_AudioStream.pTmpFrame->data,
+			const_cast<const uint8_t**>(m_AudioStream.pTmpFrame->data),
 			m_AudioStream.pTmpFrame->nb_samples);
 
 		if(Ret < 0)

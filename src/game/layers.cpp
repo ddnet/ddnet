@@ -175,7 +175,7 @@ void CLayers::InitTilemapSkip()
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				const CMapItemLayerTilemap *pTilemap = (CMapItemLayerTilemap *)pLayer;
+				const CMapItemLayerTilemap *pTilemap = (const CMapItemLayerTilemap *)pLayer;
 				CTile *pTiles = (CTile *)m_pMap->GetData(pTilemap->m_Data);
 				for(int y = 0; y < pTilemap->m_Height; y++)
 				{

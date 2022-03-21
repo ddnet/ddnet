@@ -105,7 +105,7 @@ void CRegister::RegisterSendCountRequest(NETADDR Addr, SECURITY_TOKEN ResponseTo
 
 void CRegister::RegisterGotCount(CNetChunk *pChunk)
 {
-	unsigned char *pData = (unsigned char *)pChunk->m_pData;
+	const unsigned char *pData = (const unsigned char *)pChunk->m_pData;
 	int Count = (pData[sizeof(SERVERBROWSE_COUNT)] << 8) | pData[sizeof(SERVERBROWSE_COUNT) + 1];
 
 	for(auto &MasterserverInfo : m_aMasterserverInfo)

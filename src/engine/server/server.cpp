@@ -1384,7 +1384,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_PREAUTH)
 			{
-				CUuid *pConnectionID = (CUuid *)Unpacker.GetRaw(sizeof(*pConnectionID));
+				const CUuid *pConnectionID = (const CUuid *)Unpacker.GetRaw(sizeof(*pConnectionID));
 				int DDNetVersion = Unpacker.GetInt();
 				const char *pDDNetVersionStr = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 				if(Unpacker.Error() || !str_utf8_check(pDDNetVersionStr) || DDNetVersion < 0)
@@ -1712,7 +1712,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
-			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			const CUuid *pID = (const CUuid *)Unpacker.GetRaw(sizeof(*pID));
 			if(Unpacker.Error())
 			{
 				return;
@@ -2221,7 +2221,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 					if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && Config()->m_SvSixup)
 					{
 						CUnpacker Unpacker;
-						Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
+						Unpacker.Reset((const unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
 						int SrvBrwsToken = Unpacker.GetInt();
 						if(Unpacker.Error())
 							continue;
@@ -2240,7 +2240,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 					}
 					else if(Type != -1)
 					{
-						int Token = ((unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
+						int Token = ((const unsigned char *)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
 						Token |= ExtraToken << 8;
 						SendServerInfoConnless(&Packet.m_Address, Token, Type);
 					}

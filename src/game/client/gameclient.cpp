@@ -892,32 +892,32 @@ void CGameClient::ProcessEvents()
 
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
 		{
-			CNetEvent_DamageInd *ev = (CNetEvent_DamageInd *)pData;
+			const CNetEvent_DamageInd *ev = (const CNetEvent_DamageInd *)pData;
 			m_Effects.DamageIndicator(vec2(ev->m_X, ev->m_Y), direction(ev->m_Angle / 256.0f));
 		}
 		else if(Item.m_Type == NETEVENTTYPE_EXPLOSION)
 		{
-			CNetEvent_Explosion *ev = (CNetEvent_Explosion *)pData;
+			const CNetEvent_Explosion *ev = (const CNetEvent_Explosion *)pData;
 			m_Effects.Explosion(vec2(ev->m_X, ev->m_Y));
 		}
 		else if(Item.m_Type == NETEVENTTYPE_HAMMERHIT)
 		{
-			CNetEvent_HammerHit *ev = (CNetEvent_HammerHit *)pData;
+			const CNetEvent_HammerHit *ev = (const CNetEvent_HammerHit *)pData;
 			m_Effects.HammerHit(vec2(ev->m_X, ev->m_Y));
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{
-			CNetEvent_Spawn *ev = (CNetEvent_Spawn *)pData;
+			const CNetEvent_Spawn *ev = (const CNetEvent_Spawn *)pData;
 			m_Effects.PlayerSpawn(vec2(ev->m_X, ev->m_Y));
 		}
 		else if(Item.m_Type == NETEVENTTYPE_DEATH)
 		{
-			CNetEvent_Death *ev = (CNetEvent_Death *)pData;
+			const CNetEvent_Death *ev = (const CNetEvent_Death *)pData;
 			m_Effects.PlayerDeath(vec2(ev->m_X, ev->m_Y), ev->m_ClientID);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
 		{
-			CNetEvent_SoundWorld *ev = (CNetEvent_SoundWorld *)pData;
+			const CNetEvent_SoundWorld *ev = (const CNetEvent_SoundWorld *)pData;
 			if(!Config()->m_SndGame)
 				continue;
 

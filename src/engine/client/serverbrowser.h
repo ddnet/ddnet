@@ -142,7 +142,7 @@ public:
 
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
-	CServerEntry *Find(const NETADDR &Addr);
+	CServerEntry *Find(const NETADDR &Addr) const;
 	int GetCurrentType() { return m_ServerlistType; }
 
 private:

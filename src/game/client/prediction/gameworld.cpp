@@ -347,7 +347,7 @@ void CGameWorld::NetObjBegin()
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjID, const CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
 {
 	CCharacter *pChar;
 	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
@@ -429,7 +429,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	}
 	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{
-		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData, pDataEx);
+		CPickup NetPickup = CPickup(this, ObjID, (const CNetObj_Pickup *)pObjData, pDataEx);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP))
 		{
 			if(NetPickup.Match(pPickup))
@@ -444,7 +444,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	}
 	else if(ObjType == NETOBJTYPE_LASER && m_WorldConfig.m_PredictWeapons)
 	{
-		CLaser NetLaser = CLaser(this, ObjID, (CNetObj_Laser *)pObjData);
+		CLaser NetLaser = CLaser(this, ObjID, (const CNetObj_Laser *)pObjData);
 		CLaser *pMatching = 0;
 		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
 			if(NetLaser.Match(pLaser))
@@ -568,7 +568,7 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 #define FindType(EntType, EntClass, ObjClass) \
 	{ \
 		CEntity *pEnt = GetEntity(ObjID, EntType); \
-		if(pEnt && EntClass(this, ObjID, (ObjClass *)pObjData).Match((EntClass *)pEnt)) \
+		if(pEnt && EntClass(this, ObjID, (const ObjClass *)pObjData).Match((EntClass *)pEnt)) \
 			return pEnt; \
 		return 0; \
 	}
