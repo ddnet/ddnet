@@ -53,7 +53,7 @@ class CHud : public CComponent
 	void RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter);
 
 	void PreparePlayerStateQuads();
-	void RenderPlayerState(const int ClientID, const CNetObj_Character *pCharacter);
+	void RenderPlayerState(const int ClientID);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -101,25 +101,28 @@ private:
 	int m_FlagOffset;
 	int m_AirjumpOffset;
 	int m_AirjumpEmptyOffset;
-	int m_SoloOffset;
-	int m_NoCollisionOffset;
+	int m_WeaponShotgunOffset;
+	int m_WeaponGrenadeOffset;
+	int m_WeaponLaserOffset;
 	int m_EndlessJumpOffset;
 	int m_EndlessHookOffset;
 	int m_JetpackOffset;
-	int m_FreezeBarFullLeftOffset;
-	int m_FreezeBarFullOffset;
-	int m_FreezeBarEmptyOffset;
-	int m_FreezeBarEmptyRightOffset;
+	int m_TeleportGrenadeOffset;
+	int m_TeleportGunOffset;
+	int m_TeleportLaserOffset;
+	int m_SoloOffset;
+	int m_NoCollisionOffset;
 	int m_NoHookHitOffset;
 	int m_NoHammerHitOffset;
 	int m_NoShotgunHitOffset;
 	int m_NoGrenadeHitOffset;
 	int m_NoLaserHitOffset;
-	int m_TeleportGrenadeOffset;
-	int m_TeleportGunOffset;
-	int m_TeleportLaserOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
+	// int m_FreezeBarFullLeftOffset;
+	// int m_FreezeBarFullOffset;
+	// int m_FreezeBarEmptyOffset;
+	// int m_FreezeBarEmptyRightOffset;
 };
 
 #endif

@@ -542,7 +542,7 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 void CCharacterCore::Read(const CNetObj_Character *pObjChar)
 {
 	m_ActiveWeapon = pObjChar->m_Weapon;
-	Read((const CNetObj_CharacterCore *) pObjChar);
+	Read((const CNetObj_CharacterCore *)pObjChar);
 }
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
