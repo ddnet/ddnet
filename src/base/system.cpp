@@ -4187,12 +4187,12 @@ void init_exception_handler()
 	{
 		// Intentional
 #ifdef __MINGW32__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 		auto exc_hndl_init = (void APIENTRY (*)(void *))GetProcAddress(exception_handling_module, "ExcHndlInit");
 #ifdef __MINGW32__
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 		void *exception_handling_offset = (void *)GetModuleHandle(NULL);
 		exc_hndl_init(exception_handling_offset);
@@ -4209,12 +4209,12 @@ void set_exception_handler_log_file(const char *log_file_path)
 	{
 		// Intentional
 #ifdef __MINGW32__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 		auto exception_log_file_path_func = (BOOL APIENTRY(*)(const char *))(GetProcAddress(exception_handling_module, "ExcHndlSetLogFileNameA"));
 #ifdef __MINGW32__
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 		exception_log_file_path_func(log_file_path);
 	}
