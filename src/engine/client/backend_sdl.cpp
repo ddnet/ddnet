@@ -95,6 +95,7 @@ CGraphicsBackend_Threaded::CGraphicsBackend_Threaded()
 {
 	m_pBuffer = nullptr;
 	m_pProcessor = nullptr;
+	m_Shutdown = true;
 	m_BufferInProcess.store(false, std::memory_order_relaxed);
 }
 
