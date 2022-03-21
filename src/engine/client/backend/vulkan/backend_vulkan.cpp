@@ -2170,13 +2170,13 @@ protected:
 			m_UsedMemoryCommandBuffer[m_CurImageIndex] = false;
 		}
 
-		std::array aWaitSemaphores = {WaitSemaphore};
-		std::array aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+		std::array<VkSemaphore, 1> aWaitSemaphores = {WaitSemaphore};
+		std::array<VkPipelineStageFlags, 1> aWaitStages = {(VkPipelineStageFlags)VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 		SubmitInfo.waitSemaphoreCount = aWaitSemaphores.size();
 		SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
 		SubmitInfo.pWaitDstStageMask = aWaitStages.data();
 
-		std::array aSignalSemaphores = {m_SigSemaphores[m_CurFrames]};
+		std::array<VkSemaphore, 1> aSignalSemaphores = {m_SigSemaphores[m_CurFrames]};
 		SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
 		SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
 
@@ -2198,7 +2198,7 @@ protected:
 		PresentInfo.waitSemaphoreCount = aSignalSemaphores.size();
 		PresentInfo.pWaitSemaphores = aSignalSemaphores.data();
 
-		std::array aSwapChains = {m_VKSwapChain};
+		std::array<VkSwapchainKHR, 1> aSwapChains = {m_VKSwapChain};
 		PresentInfo.swapchainCount = aSwapChains.size();
 		PresentInfo.pSwapchains = aSwapChains.data();
 
@@ -3159,8 +3159,8 @@ protected:
 
 		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, State);
 
-		std::array aVertexBuffers = {ExecBuffer.m_Buffer};
-		std::array aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {ExecBuffer.m_Buffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		if(IsTextured)
@@ -3240,8 +3240,8 @@ protected:
 		size_t BufferOff = 0;
 		CreateStreamVertexBuffer(ExecBuffer.m_ThreadIndex, VKBuffer, VKBufferMem, BufferOff, pVertices, VertPerPrim * sizeof(TName) * PrimitiveCount);
 
-		std::array aVertexBuffers = {VKBuffer};
-		std::array aOffsets = {(VkDeviceSize)BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {VKBuffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		if(IsIndexed)
@@ -3387,7 +3387,7 @@ public:
 		void *pExt = nullptr;
 #if defined(VK_EXT_validation_features) && VK_EXT_VALIDATION_FEATURES_SPEC_VERSION >= 5
 		VkValidationFeaturesEXT Features = {};
-		std::array aEnables = {VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT, VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT};
+		std::array<VkValidationFeatureEnableEXT, 2> aEnables = {VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT, VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT};
 		if(TryDebugExtensions && (g_Config.m_DbgGfx == DEBUG_GFX_MODE_AFFECTS_PERFORMANCE || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL))
 		{
 			Features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
@@ -4090,7 +4090,7 @@ public:
 
 		for(size_t i = 0; i < m_SwapChainImageCount; i++)
 		{
-			std::array aAttachments = {m_SwapChainImageViewList[i]};
+			std::array<VkImageView, 1> aAttachments = {m_SwapChainImageViewList[i]};
 
 			VkFramebufferCreateInfo FramebufferInfo{};
 			FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -4146,7 +4146,7 @@ public:
 		SamplerLayoutBinding.pImmutableSamplers = nullptr;
 		SamplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		std::array aBindings = {SamplerLayoutBinding};
+		std::array<VkDescriptorSetLayoutBinding, 1> aBindings = {SamplerLayoutBinding};
 		VkDescriptorSetLayoutCreateInfo LayoutInfo{};
 		LayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		LayoutInfo.bindingCount = aBindings.size();
@@ -4472,7 +4472,7 @@ public:
 		auto SamplerLayoutBinding2 = SamplerLayoutBinding;
 		SamplerLayoutBinding2.binding = 1;
 
-		std::array aBindings = {SamplerLayoutBinding, SamplerLayoutBinding2};
+		std::array<VkDescriptorSetLayoutBinding, 2> aBindings = {SamplerLayoutBinding, SamplerLayoutBinding2};
 		VkDescriptorSetLayoutCreateInfo LayoutInfo{};
 		LayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		LayoutInfo.bindingCount = aBindings.size();
@@ -4617,7 +4617,7 @@ public:
 		SamplerLayoutBinding.pImmutableSamplers = nullptr;
 		SamplerLayoutBinding.stageFlags = StageFlags;
 
-		std::array aBindings = {SamplerLayoutBinding};
+		std::array<VkDescriptorSetLayoutBinding, 1> aBindings = {SamplerLayoutBinding};
 		VkDescriptorSetLayoutCreateInfo LayoutInfo{};
 		LayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		LayoutInfo.bindingCount = aBindings.size();
@@ -6249,8 +6249,8 @@ public:
 	{
 		if(ExecBuffer.m_ClearColorInRenderThread)
 		{
-			std::array aAttachments = {VkClearAttachment{VK_IMAGE_ASPECT_COLOR_BIT, 0, VkClearValue{VkClearColorValue{{pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, pCommand->m_Color.a}}}}};
-			std::array aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImg}, 0, 1}};
+			std::array<VkClearAttachment, 1> aAttachments = {VkClearAttachment{VK_IMAGE_ASPECT_COLOR_BIT, 0, VkClearValue{VkClearColorValue{{pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, pCommand->m_Color.a}}}}};
+			std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImg}, 0, 1}};
 			vkCmdClearAttachments(GetGraphicCommandBuffer(ExecBuffer.m_ThreadIndex), aAttachments.size(), aAttachments.data(), aClearRects.size(), aClearRects.data());
 		}
 	}
@@ -6572,8 +6572,8 @@ public:
 
 		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, pCommand->m_State);
 
-		std::array aVertexBuffers = {ExecBuffer.m_Buffer};
-		std::array aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {ExecBuffer.m_Buffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		vkCmdBindIndexBuffer(CommandBuffer, ExecBuffer.m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
@@ -6669,8 +6669,8 @@ public:
 
 		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, pCommand->m_State);
 
-		std::array aVertexBuffers = {ExecBuffer.m_Buffer};
-		std::array aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {ExecBuffer.m_Buffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		vkCmdBindIndexBuffer(CommandBuffer, ExecBuffer.m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
@@ -6737,8 +6737,8 @@ public:
 
 		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, pCommand->m_State);
 
-		std::array aVertexBuffers = {ExecBuffer.m_Buffer};
-		std::array aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {ExecBuffer.m_Buffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		VkDeviceSize IndexOffset = (VkDeviceSize)((ptrdiff_t)pCommand->m_pOffset);
@@ -6778,8 +6778,8 @@ public:
 
 		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, pCommand->m_State);
 
-		std::array aVertexBuffers = {ExecBuffer.m_Buffer};
-		std::array aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {ExecBuffer.m_Buffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		VkDeviceSize IndexOffset = (VkDeviceSize)((ptrdiff_t)pCommand->m_pOffset);
@@ -6839,8 +6839,8 @@ public:
 
 		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, pCommand->m_State);
 
-		std::array aVertexBuffers = {ExecBuffer.m_Buffer};
-		std::array aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
+		std::array<VkBuffer, 1> aVertexBuffers = {ExecBuffer.m_Buffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)ExecBuffer.m_BufferOff};
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
 		VkDeviceSize IndexOffset = (VkDeviceSize)((ptrdiff_t)pCommand->m_pOffset);
