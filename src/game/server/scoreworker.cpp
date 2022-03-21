@@ -591,13 +591,13 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	// check sort method
 	char aBuf[600];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Time, PercentRank "
+		"SELECT `Rank`, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS `Rank`, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ?"
-		"  GROUP BY Name "
+		"  GROUP BY Name, Time "
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
 		"WHERE Name = ?",
@@ -693,12 +693,12 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank, PercentRank "
+		"SELECT l.ID, Name, Time, `Rank`, PercentRank "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w AS PercentRank, ID "
+		"  SELECT RANK() OVER w AS `Rank`, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
-		"  GROUP BY ID "
+		"  GROUP BY ID, Time "
 		"  WINDOW w AS (ORDER BY Time)"
 		") AS TeamRank INNER JOIN (" // select rank with Name in team
 		"  SELECT ID "
@@ -779,16 +779,16 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	// check sort method
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Rank, Server "
+		"SELECT Name, Time, `Rank`, Server "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time, Server "
+		"  SELECT RANK() OVER w AS `Rank`, Name, MIN(Time) AS Time, Server "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ? "
-		"  GROUP BY Name "
+		"  GROUP BY Name, Time, Server "
 		"  WINDOW w AS (ORDER BY Time)"
 		") as a "
-		"ORDER BY Rank %s "
+		"ORDER BY `Rank` %s "
 		"LIMIT %d, ?",
 		pSqlServer->GetPrefix(),
 		pOrder,
@@ -881,21 +881,21 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[512];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Rank, TeamSize "
+		"SELECT Name, Time, `Rank`, TeamSize "
 		"FROM (" // limit to 5
-		"  SELECT TeamSize, Rank, ID "
+		"  SELECT TeamSize, `Rank`, ID "
 		"  FROM (" // teamrank score board
-		"    SELECT RANK() OVER w AS Rank, ID, COUNT(*) AS Teamsize "
+		"    SELECT RANK() OVER w AS `Rank`, ID, COUNT(*) AS Teamsize "
 		"    FROM %s_teamrace "
 		"    WHERE Map = ? "
-		"    GROUP BY Id "
+		"    GROUP BY ID, Time "
 		"    WINDOW w AS (ORDER BY Time)"
 		"  ) as l1 "
-		"  ORDER BY Rank %s "
+		"  ORDER BY `Rank` %s "
 		"  LIMIT %d, 5"
 		") as l2 "
 		"INNER JOIN %s_teamrace as r ON l2.ID = r.ID "
-		"ORDER BY Rank %s, r.ID, Name ASC",
+		"ORDER BY `Rank` %s, r.ID, Name ASC",
 		pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -1172,8 +1172,8 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT ("
 		"  SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
-		"    SELECT points FROM %s_points WHERE Name = ?"
-		")) as Rank, Points, Name "
+		"    SELECT Points FROM %s_points WHERE Name = ?"
+		")) as `Rank`, Points, Name "
 		"FROM %s_points WHERE Name = ?",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -1217,13 +1217,13 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT RANK() OVER (ORDER BY a.Points DESC) as Rank, Points, Name "
+		"SELECT RANK() OVER (ORDER BY a.Points DESC) as `Rank`, Points, Name "
 		"FROM ("
 		"  SELECT Points, Name "
 		"  FROM %s_points "
 		"  ORDER BY Points DESC LIMIT ?"
 		") as a "
-		"ORDER BY Rank ASC, Name ASC LIMIT ?, 5",
+		"ORDER BY `Rank` ASC, Name ASC LIMIT ?, 5",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
