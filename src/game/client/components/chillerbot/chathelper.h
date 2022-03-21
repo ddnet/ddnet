@@ -117,7 +117,7 @@ public:
 	CChatHelper();
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
-	void Get128Name(const char *pMsg, char *pName);
+	int Get128Name(const char *pMsg, char *pName);
 	const char *GetGreetName() { return m_aGreetName; }
 	const char *LastAfkPingMessage() { return m_aLastAfkPing; }
 	void ClearLastAfkPingMessage() { m_aLastAfkPing[0] = '\0'; }

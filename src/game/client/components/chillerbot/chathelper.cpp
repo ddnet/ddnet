@@ -575,17 +575,19 @@ void CChatHelper::DoGreet()
 	m_pClient->m_Chat.Say(0, "hi");
 }
 
-void CChatHelper::Get128Name(const char *pMsg, char *pName)
+int CChatHelper::Get128Name(const char *pMsg, char *pName)
 {
-	for(int i = 0; pMsg[i] && i < 17; i++)
+	int i = 0;
+	for(i = 0; pMsg[i] && i < 17; i++)
 	{
 		if(pMsg[i] == ':' && pMsg[i + 1] == ' ')
 		{
 			str_copy(pName, pMsg, i + 1);
-			return;
+			return i;
 		}
 	}
 	str_copy(pName, " ", 2);
+	return -1;
 }
 
 void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)

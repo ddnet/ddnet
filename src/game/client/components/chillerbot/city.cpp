@@ -6,6 +6,8 @@
 #include <game/client/components/controls.h>
 #include <game/client/gameclient.h>
 
+#include <engine/serverbrowser.h>
+
 #include "chillerbotux.h"
 
 #include "city.h"
@@ -277,10 +279,28 @@ void CCityHelper::OnChatMsg(int ClientID, int Team, const char *pMsg)
 	if(!NameLen && Team < 2)
 		return;
 
+	CServerInfo ServerInfo;
+	Client()->GetServerInfo(&ServerInfo);
+	bool IsFDDRace = !str_comp(ServerInfo.m_aGameType, "F-DDrace");
+	int MsgOffset = 0;
+	char aName[64];
+	aName[0] = '\0';
+	// if whisper respond in whisper
+	if(Team >= 2)
+	{
+		str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
+		if(IsFDDRace && ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
+		{
+			MsgOffset = m_pClient->m_ChatHelper.Get128Name(pMsg, aName);
+			if(MsgOffset == -1)
+				MsgOffset = 0;
+		}
+	}
+
 	char aMsg[2048];
 	char aCmd[2048] = {0};
 	str_copy(aMsg, pMsg + NameLen, sizeof(aMsg));
-	for(unsigned int i = 0; i < sizeof(aMsg); i++)
+	for(unsigned int i = MsgOffset; i < sizeof(aMsg); i++)
 	{
 		if(aMsg[i] == ' ' || aMsg[i] == ':')
 			continue;
@@ -294,17 +314,6 @@ void CCityHelper::OnChatMsg(int ClientID, int Team, const char *pMsg)
 	// char aBuf[128];
 	// str_format(aBuf, sizeof(aBuf), "cmd '%s'", aCmd);
 	// m_pClient->m_Chat.Say(0, aBuf);
-	char aName[64];
-	aName[0] = '\0';
-	// if whisper respond in whisper
-	if(Team >= 2)
-	{
-		str_copy(aName, m_pClient->m_aClients[ClientID].m_aName, sizeof(aName));
-		if(ClientID == 63 && !str_comp_num(m_pClient->m_aClients[ClientID].m_aName, " ", 2))
-		{
-			m_pClient->m_ChatHelper.Get128Name(pMsg, aName);
-		}
-	}
 	if(!str_comp(aCmd, "wallet"))
 		PrintWalletToChat(g_Config.m_ClDummy, aName);
 }
