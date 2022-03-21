@@ -713,7 +713,6 @@ void CChillerBotUX::DumpPlayers(const char *pSearch)
 		{
 			if(NextDDTeam != DDTeam)
 			{
-				char aBuf[64];
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 					str_format(aBuf, sizeof(aBuf), "%7d|", DDTeam);
 				else
