@@ -496,6 +496,14 @@ enum
 	PROPTYPE_AUTOMAPPER,
 };
 
+enum
+{
+	DIRECTION_LEFT = 1,
+	DIRECTION_RIGHT = 2,
+	DIRECTION_UP = 4,
+	DIRECTION_DOWN = 8,
+};
+
 typedef struct
 {
 	int x, y;
