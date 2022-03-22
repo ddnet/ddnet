@@ -305,12 +305,29 @@ void CNamePlates::OnRender()
 	if(!g_Config.m_ClNameplates && ShowDirection == 0)
 		return;
 
+	// get screen edges to avoid rendering offscreen
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	// expand the edges to prevent popping in/out onscreen
+	float BorderBuffer = 400;
+	ScreenX0 -= BorderBuffer;
+	ScreenX1 += BorderBuffer;
+	ScreenY0 -= BorderBuffer;
+	ScreenY1 += BorderBuffer * 2.0f;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
 		if(!pInfo)
 		{
 			continue;
+		}
+
+		// don't render offscreen
+		vec2 *pRenderPos = &m_pClient->m_aClients[i].m_RenderPos;
+		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
+		{
+				continue;
 		}
 
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)

@@ -681,6 +681,16 @@ void CPlayers::OnRender()
 	m_RenderInfoSpec.m_Size = 64.0f;
 	int LocalClientID = m_pClient->m_Snap.m_LocalClientID;
 
+	// get screen edges to avoid rendering offscreen
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	// expand the edges to prevent popping in/out onscreen
+	float BorderBuffer = 100;
+	ScreenX0 -= BorderBuffer;
+	ScreenX1 += BorderBuffer;
+	ScreenY0 -= BorderBuffer;
+	ScreenY1 += BorderBuffer;
+
 	// render everyone else's hook, then our own
 	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 	{
@@ -713,6 +723,14 @@ void CPlayers::OnRender()
 		{
 			continue;
 		}
+
+		//don't render offscreen
+		vec2 *pRenderPos = &m_pClient->m_aClients[ClientID].m_RenderPos;
+		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
+		{
+				continue;
+		}
+
 		RenderPlayer(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
 	}
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
