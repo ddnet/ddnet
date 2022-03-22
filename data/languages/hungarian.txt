@@ -1320,10 +1320,10 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat.
 
 Join Tutorial Server
-== 
+== Belépés a Bemutató Szerverre
 
 Skip Tutorial
-== 
+== Bemutató átugrása
 
 Settings file
 == Beállítások fájl
