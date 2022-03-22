@@ -626,13 +626,13 @@ void CGameClient::UpdatePositions()
 				}
 			}
 
-			g_Config.m_ClSmoothZoomTime = 2000;
-
 			vec2 minpos;
 			vec2 maxpos;
 			bool init = false;
 			bool idsActivated = false;
 			bool initdone = false;
+			m_velMultiView = 0.0f;
+			int amountPlayers = 0;
 			//wenn die distanz zu groß wird .... 6000/8000 oder so, dann soll distanz bei jedem gecheckt werden und nur eine gruppe berücksichtigt
 
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -661,7 +661,7 @@ void CGameClient::UpdatePositions()
 				int playerx = m_aClients[i].m_RenderPos.x;
 				int playery = m_aClients[i].m_RenderPos.y;
 
-				if(m_oldMultiViewPos != vec2(0, 0) && m_Snap.m_SpecInfo.m_SpectatorID == i)
+				if(m_Snap.m_SpecInfo.m_SpectatorID != i)
 					if(distance(m_oldMultiViewPos, vec2(playerx, playery)) > 1500 && m_aClients[i].m_FreezeEnd != 0) // too far away and frozen, so not relevant
 						continue;
 					
@@ -680,7 +680,13 @@ void CGameClient::UpdatePositions()
 					minpos.y = playery;
 				if(playery > maxpos.y)
 					maxpos.y = playery;
+
+				const CNetObj_Character &CurrentCharacter = m_Snap.m_aCharacters[i].m_Cur;
+				m_velMultiView += (length(vec2(CurrentCharacter.m_VelX / 256.0f, CurrentCharacter.m_VelY / 256.0f)) * 50) / 32.0f;
+				amountPlayers++;
 			}
+
+			m_velMultiView = m_velMultiView / (float)amountPlayers;
 
 			float posx = (minpos.x + maxpos.x) / 2.0f;
 			float posy = (minpos.y + maxpos.y) / 2.0f;
@@ -690,22 +696,27 @@ void CGameClient::UpdatePositions()
 			float maxPlayerDistance = 2000.0f;
 			float minPlayerDistance = 200.0f;
 			float maxZoom = 0.0f;
-			if(maxpos.x-minpos.x > maxpos.y-minpos.y)
+
+			if(maxpos.x - minpos.x > maxpos.y - minpos.y)
 				maxZoom = 5.0f;
 			else
-				maxZoom = 4.0f;
-			float minZoom = 8.0f; // 10 cleaner aber zu slow
+				maxZoom = 3.2f;
+
+			float minZoom = 8.0f;
 
 			float zoom = (maxZoom - minZoom) / (maxPlayerDistance - minPlayerDistance) * (distance(minpos, maxpos) - minPlayerDistance) + minZoom;
-			/*if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400)
-				zoom = clamp(zoom, 1.0f, 8.0f);
-			else
-				zoom = clamp(zoom, 2.0f, 8.0f);*/
 
 			//dbg_msg("dbg", "distance: %f, zoom: %f", distance(minpos, maxpos), zoom);
 
-			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 400 && zoom > 0)
+			if(distance(m_oldMultiViewPos, vec2(posx, posy)) > 500 && zoom > 0)
 				zoom = zoom - 1;
+
+			float diff = 0.0f;
+
+			if(m_velMultiView > 10)
+				diff = MapValue(150, 20, -2.5f, -1.0f, m_velMultiView);
+
+			zoom = zoom + clamp(diff, -3.5f, 0.0f);
 
 			m_distView = distance(m_oldMultiViewPos, vec2(posx, posy));
 
@@ -713,19 +724,22 @@ void CGameClient::UpdatePositions()
 
 			//preference
 			zoom = zoom + m_prMultiViewZoom;
+			float currentzoom = abs(log(m_Camera.m_Zoom) / log(0.866025f) + 10);
+			/* if(-1.5f > currentzoom - zoom || 1.5f < currentzoom - zoom)
+				g_Config.m_ClSmoothZoomTime = 500;
+			else*/
+				g_Config.m_ClSmoothZoomTime = 2000;
 
 			m_Camera.SetZoom(zoom);
 
-			float maxDistance = 500.0f;
-			float minDistance = 200.0f;
-			float maxSmoothVel = 0.06f; // was 0.1f but too fast
-			float minSmoothVel = 0.007f;
-
 			//dbg_msg("dbg", "max-distance: %f", distance(minpos, maxpos));
 
-			float multiplier = (maxSmoothVel - minSmoothVel) / (maxDistance - minDistance) * (distance(m_oldMultiViewPos, vec2(posx, posy)) - minDistance) + minSmoothVel;
+			float multiplier = MapValue(500.0f, 100.0f, 0.1f, 0.007f, distance(m_oldMultiViewPos, vec2(posx, posy)));
 
-			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * clamp(multiplier, 0.007f, 1.0f));
+
+			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * clamp(multiplier, 0.003f, 1.0f));
+
+			m_multiplierMultiView = clamp(multiplier, 0.003f, 1.0f);
 
 			m_oldSpecMultiViewID = m_Snap.m_SpecInfo.m_SpectatorID;
 
@@ -770,6 +784,11 @@ void CGameClient::UpdatePositions()
 	}
 
 	UpdateRenderedCharacters();
+}
+
+float CGameClient::MapValue(float valuemax, float valuemin, float rangemax, float rangemin, float value)
+{
+	return (rangemax - rangemin) / (valuemax - valuemin) * (value - valuemin) + rangemin;
 }
 
 void CGameClient::OnRender()

@@ -799,7 +799,7 @@ void CHud::RenderSpectatorHud()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(m_Width - (g_Config.m_ClMultiViewDebug ? 240.0f : 180.0f), m_Height - 15.0f, 240.0f, 15.0f, 5.0f, CUI::CORNER_TL);
+	RenderTools()->DrawRoundRectExt(m_Width - (g_Config.m_ClMultiViewDebug ? 320.0f : 180.0f), m_Height - 15.0f, 320.0f, 15.0f, 5.0f, CUI::CORNER_TL);
 	Graphics()->QuadsEnd();
 
 	// draw the text
@@ -808,15 +808,17 @@ void CHud::RenderSpectatorHud()
 	char prMulti[128];
 	char help[128];
 	char version[128];
-	str_format(version, sizeof(version), "%s", "v3.7");
+	str_format(version, sizeof(version), "%s", "v3.8");
 	str_format(prMulti, sizeof(prMulti), "%s%d", GameClient()->m_prMultiViewZoom > 0 ? "+" : "", GameClient()->m_prMultiViewZoom);
-	str_format(MultiView, sizeof(MultiView), "%s (zoom: %.1f (%s), cdist: %.0f, pdist: %.0f, ids: %s)",
+	str_format(MultiView, sizeof(MultiView), "%s (zoom: %.1f (%s), cdist: %.0f, pdist: %.0f, ids: %s, speed: %.3f, vel: %.1f)",
 												version,
 												(log(m_pClient->m_Camera.m_Zoom) / log(0.866025f)) + 10,
 												GameClient()->m_prMultiViewZoom == 0 ? "auto" : prMulti,
 												GameClient()->m_distView,
 												GameClient()->m_distPlayer,
-												GameClient()->m_idsActivated ? "yes" : "no");
+												GameClient()->m_idsActivated ? "yes" : "no",
+												GameClient()->m_multiplierMultiView,
+												GameClient()->m_velMultiView);
 	str_format(help, sizeof(help), "%s", m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? (GameClient()->m_isMultiView ? MultiView : m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName) : Localize("Free-View"));
 	if(g_Config.m_ClMultiViewDebug)
 		str_format(aBuf, sizeof(aBuf), "%s%s %s",
@@ -829,7 +831,7 @@ void CHud::RenderSpectatorHud()
 				m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? (GameClient()->m_isMultiView ? "Multi-View" : m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName) : Localize("Free-View"),
 				GameClient()->m_isMultiView ? version : "");
 
-	TextRender()->Text(0, m_Width - (g_Config.m_ClMultiViewDebug ? 234.0f : 174.0f), m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
+	TextRender()->Text(0, m_Width - (g_Config.m_ClMultiViewDebug ? 314.0f : 174.0f), m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
 void CHud::RenderLocalTime(float x)

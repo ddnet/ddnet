@@ -336,6 +336,8 @@ public:
 	float m_distView;
 	float m_distPlayer;
 	bool m_idsActivated;
+	float m_multiplierMultiView;
+	float m_velMultiView;
 
 	// client data
 	struct CClientData
@@ -662,6 +664,7 @@ private:
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
+	float MapValue(float valuemax, float valuemin, float rangemax, float rangemin, float value);
 
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
