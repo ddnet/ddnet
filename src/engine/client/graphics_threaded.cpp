@@ -309,7 +309,7 @@ static bool ConvertToRGBA(uint8_t *pDest, const uint8_t *pSrc, size_t SrcWidth, 
 		size_t DstChannelCount = 4;
 		for(size_t Y = 0; Y < SrcHeight; ++Y)
 		{
-			for(size_t X = 0; X < SrcHeight; ++X)
+			for(size_t X = 0; X < SrcWidth; ++X)
 			{
 				size_t ImgOffsetSrc = (Y * SrcWidth * SrcChannelCount) + (X * SrcChannelCount);
 				size_t ImgOffsetDest = (Y * SrcWidth * DstChannelCount) + (X * DstChannelCount);
@@ -496,7 +496,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	void *pTmpData = malloc(MemSize);
 	if(!ConvertToRGBA((uint8_t *)pTmpData, (const uint8_t *)pData, Width, Height, Format))
 	{
-		dbg_msg("graphics", "converted image %s to RGBA, consider making its file format RGBA", pTexName);
+		dbg_msg("graphics", "converted image %s to RGBA, consider making its file format RGBA", pTexName ? pTexName : "(no name)");
 	}
 	Cmd.m_pData = pTmpData;
 
