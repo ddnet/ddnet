@@ -327,7 +327,7 @@ void CNamePlates::OnRender()
 		vec2 *pRenderPos = &m_pClient->m_aClients[i].m_RenderPos;
 		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
 		{
-				continue;
+			continue;
 		}
 
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)

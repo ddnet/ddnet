@@ -344,6 +344,7 @@ void CGhost::OnRender()
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
 		m_pClient->m_Players.RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderHookCollLine(&Prev, &Player, -2, IntraTick);
 		m_pClient->m_Players.RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
 	}
 }
