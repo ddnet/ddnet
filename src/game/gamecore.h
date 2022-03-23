@@ -248,8 +248,8 @@ public:
 	void Tick(bool UseInput);
 	void Move();
 
-	void Read(const CNetObj_CharacterCore *pObjCore);
-	void Read(const CNetObj_Character *pObjCore);
+	void ReadCharacterCore(const CNetObj_CharacterCore *pObjCore);
+	void ReadCharacter(const CNetObj_Character *pObjCore);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
 

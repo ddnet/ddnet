@@ -521,7 +521,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
 {
 	m_Pos.x = pObjCore->m_X;
 	m_Pos.y = pObjCore->m_Y;
@@ -539,10 +539,10 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_Character *pObjChar)
+void CCharacterCore::ReadCharacter(const CNetObj_Character *pObjChar)
 {
 	m_ActiveWeapon = pObjChar->m_Weapon;
-	Read((const CNetObj_CharacterCore *)pObjChar);
+	ReadCharacterCore((const CNetObj_CharacterCore *)pObjChar);
 }
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
@@ -589,7 +589,7 @@ void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
 	Write(&Core);
-	Read(&Core);
+	ReadCharacterCore(&Core);
 }
 
 // DDRace
