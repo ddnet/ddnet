@@ -864,9 +864,6 @@ Normal message
 Show score
 == Visa poäng
 
-Multiple texture units (disable for macOS)
-== Multiple texture units (avaktivera för macOS)
-
 Refresh Rate
 == Uppdateringsfrekvens
 
@@ -965,9 +962,6 @@ Best
 
 Updating...
 == Updaterar...
-
-Preinit VBO (iGPUs only)
-== Preinit VBO (bara iGPUs)
 
 Clan plates size
 == Klanskylt storlek
@@ -1243,9 +1237,6 @@ Windowed fullscreen
 Desktop fullscreen
 == Desktop fullscreen
 
-Use modern OpenGL
-== Använd modern OpenGL
-
 Game sound volume
 == Spel ljudvolym
 
@@ -1340,4 +1331,22 @@ Join Tutorial Server
 == 
 
 Skip Tutorial
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
 == 

@@ -898,12 +898,6 @@ Welcome to DDNet
 may cause delay
 == kann verlangsamen
 
-Preinit VBO (iGPUs only)
-== Preinit-VBO (nur für iGPUs)
-
-Multiple texture units (disable for macOS)
-== Mehrere Textureinheiten (nicht für Mac OS)
-
 UI mouse s.
 == UI-Maus-Empf.
 
@@ -1298,9 +1292,6 @@ Windowed borderless
 Desktop fullscreen
 == Desktop-Vollbild
 
-Use modern OpenGL
-== Modernes OpenGL benutzen
-
 Hookline
 == Hooklinie
 
@@ -1354,3 +1345,21 @@ Join Tutorial Server
 
 Skip Tutorial
 == Tutorial überspringen
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
+== 

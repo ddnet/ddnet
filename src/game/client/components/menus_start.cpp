@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/keys.h>
+#include <engine/serverbrowser.h>
 #include <engine/textrender.h>
 
 #include <engine/client/updater.h>
@@ -59,6 +60,19 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link");
 		}
+		m_DoubleClickIndex = -1;
+	}
+
+	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
+	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
+	static int s_TutorialButton;
+	if(DoButton_Menu(&s_TutorialButton, Localize("Tutorial"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	{
+		const char *pAddr = ServerBrowser()->GetTutorialServer();
+		if(pAddr)
+			Client()->Connect(pAddr);
+		else
+			dbg_msg("menus", "couldn't find tutorial server");
 		m_DoubleClickIndex = -1;
 	}
 

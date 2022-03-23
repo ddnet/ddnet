@@ -940,15 +940,6 @@ may cause delay
 Screen
 == Näyttö
 
-Use modern OpenGL
-== Käytä nykyaikaista OpenGL:ää
-
-Preinit VBO (iGPUs only)
-== Esialusta VBO (vain iGPUt)
-
-Multiple texture units (disable for macOS)
-== Monta tekstuuriyksikköä (älä käytä macOS:ällä)
-
 Use high DPI
 == Käytä korkeaa DPI:tä
 
@@ -1274,6 +1265,21 @@ Show entities
 Windowed fullscreen
 == 
 
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
 Enable long pain sound (used when shooting in freeze)
 == 
 
@@ -1326,6 +1332,9 @@ Particles
 == 
 
 Assets directory
+== 
+
+Tutorial
 == 
 
 Server executable not found, can't run server

@@ -907,14 +907,8 @@ Deactivate
 Welcome to DDNet
 == 歡迎來到 DDNet
 
-Preinit VBO (iGPUs only)
-== 預初始化頂點緩衝物件 (僅限整合顯示卡)
-
 Activate
 == 啟用
-
-Multiple texture units (disable for macOS)
-== 多重紋理單元 (macOS不可用)
 
 File already exists, do you want to overwrite it?
 == 檔案已存在，是否覆蓋？
@@ -1268,9 +1262,6 @@ Windowed borderless
 Desktop fullscreen
 == 無邊框全螢幕
 
-Use modern OpenGL
-== 使用現代OpenGL
-
 Show client IDs
 == 顯示客戶端ID
 
@@ -1351,3 +1342,21 @@ Join Tutorial Server
 
 Skip Tutorial
 == 跳過教學
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
+== 

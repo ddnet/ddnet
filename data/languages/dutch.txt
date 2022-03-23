@@ -888,12 +888,6 @@ may cause delay
 Screen
 == Scherm
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (alleen iGPUs)
-
-Multiple texture units (disable for macOS)
-== Meerdere texture eenheden (uitgeschakeld voor macOS)
-
 Use high DPI
 == Gebruik hoge DPI
 
@@ -1227,7 +1221,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1321,6 +1327,9 @@ https://ddnet.tw/discord
 == 
 
 https://wiki.ddnet.tw/
+== 
+
+Tutorial
 == 
 
 Website

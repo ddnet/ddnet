@@ -983,16 +983,22 @@ may cause delay
 FSAA samples
 == 
 
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
-== 
-
 Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1176,6 +1182,9 @@ https://ddnet.tw/discord
 == 
 
 https://wiki.ddnet.tw/
+== 
+
+Tutorial
 == 
 
 Server executable not found, can't run server
