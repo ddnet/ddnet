@@ -104,19 +104,19 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = (int64_t)(mix<float>(
+				s_Time = (int64_t)(mix<double>(
 							   0,
 							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
 			else
 			{
 				int MinTick = pThis->m_LastLocalTick;
-				s_Time = (int64_t)(mix<float>(0,
+				s_Time = (int64_t)(mix<double>(0,
 							   pThis->m_CurrentLocalTick - MinTick,
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -132,10 +132,10 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = (int64_t)(mix<float>(
+				s_Time = (int64_t)(mix<double>(
 							   0,
 							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -1762,8 +1762,8 @@ void CMapLayers::OnRender()
 							if(IsGameLayer)
 							{
 								// slow blinking to hint that it's not a part of the map
-								float Seconds = time_get() / (float)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f * (1.0f + sin(2.0f * pi * Seconds / 3.f)) / 2.0f);
+								double Seconds = time_get() / (double)time_freq();
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1 + sin(2 * (double)pi * Seconds / 3)) / 2);
 
 								RenderTools()->RenderTileRectangle(-201, -201, pTMap->m_Width + 402, pTMap->m_Height + 402,
 									0, TILE_DEATH, // display air inside, death outside
@@ -1781,8 +1781,8 @@ void CMapLayers::OnRender()
 							if(IsGameLayer)
 							{
 								// slow blinking to hint that it's not a part of the map
-								float Seconds = time_get() / (float)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f * (1.0f + sin(2.0f * pi * Seconds / 3.f)) / 2.0f);
+								double Seconds = time_get() / (double)time_freq();
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1.0 + sin(2 * (double)pi * Seconds / 3)) / 2);
 
 								ColorRGBA ColorKill(Color.x * ColorHint.x, Color.y * ColorHint.y, Color.z * ColorHint.z, Color.w * ColorHint.w);
 								RenderKillTileBorder(TileLayerCounter - 1, &ColorKill, pTMap, pGroup);
