@@ -72,6 +72,7 @@ void CChillerBotUX::OnRender()
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chillerbot", "failed to hearthbeat");
 			}
 		}
+		CheckEmptyTick();
 		// if tabbing into tw and going afk set to inactive again over time
 		if(m_AfkActivity && time_get() % 100 == 0)
 			m_AfkActivity--;
@@ -95,6 +96,19 @@ void CChillerBotUX::OnRender()
 		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 	}
 	m_LastForceDir = m_ForceDir;
+}
+
+void CChillerBotUX::CheckEmptyTick()
+{
+	if(!g_Config.m_ClReconnectWhenEmpty)
+		return;
+
+	static int s_LastPlayerCount = 0;
+	int PlayerCount = CountOnlinePlayers();
+	if(s_LastPlayerCount > PlayerCount && PlayerCount == 1)
+		m_pClient->Client()->Connect(m_pClient->Client()->ServerAddress());
+	else
+		s_LastPlayerCount = CountOnlinePlayers();
 }
 
 void CChillerBotUX::ChangeTileNotifyTick()
@@ -1010,4 +1024,14 @@ void CChillerBotUX::ReturnFromAfk(const char *pChatMessage)
 	m_pClient->m_Chat.AddLine(-2, 0, "[chillerbot-ux] welcome back :)");
 	m_AfkTill = 0;
 	DisableComponent("afk");
+}
+
+int CChillerBotUX::CountOnlinePlayers()
+{
+	// Code from scoreboard. There is probably a better way to do this
+	int Num = 0;
+	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByDDTeamScore)
+		if(pInfo)
+			Num++;
+	return Num;
 }

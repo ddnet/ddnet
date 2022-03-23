@@ -86,6 +86,7 @@ class CChillerBotUX : public CComponent
 	void ChangeTileNotifyTick();
 	void FinishRenameTick();
 	void CampHackTick();
+	void CheckEmptyTick();
 	void SelectCampArea(int Key);
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
 	void RenderSpeedHud();
@@ -94,6 +95,9 @@ class CChillerBotUX : public CComponent
 	void GotoSwitch(int Number, int Offset = -1);
 	void GotoTele(int Number, int Offset = -1);
 	void DumpPlayers(const char *pSearch = 0);
+
+	// helpers
+	int CountOnlinePlayers();
 
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
