@@ -622,7 +622,7 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 	// ignore duplicated messages
 	if(!str_comp(m_aLastPings[0].m_aMessage, pMsg))
 		return;
-	char aBuf[256];
+	char aBuf[2048];
 	PushPing(aName, m_pClient->m_aClients[ClientID].m_aClan, pMsg);
 	int64_t AfkTill = m_pChillerBot->GetAfkTime();
 	if(m_pChillerBot->IsAfk())
@@ -651,6 +651,11 @@ void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 		str_format(m_aLastAfkPing, sizeof(m_aLastAfkPing), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
 		m_pChillerBot->SetComponentNoteLong("afk", m_aLastAfkPing);
 		return;
+	}
+	if(g_Config.m_ClShowLastPing)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s: %s", m_pClient->m_aClients[ClientID].m_aName, pMsg);
+		m_pChillerBot->SetComponentNoteLong("last ping", aBuf);
 	}
 	if(g_Config.m_ClTabbedOutMsg)
 	{

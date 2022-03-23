@@ -490,6 +490,10 @@ void CChillerBotUX::UpdateComponents()
 		EnableComponent("last killer");
 	else
 		DisableComponent("last killer");
+	if(g_Config.m_ClShowLastPing)
+		EnableComponent("last ping");
+	else
+		DisableComponent("last ping");
 	if(g_Config.m_ClShowWallet)
 		EnableComponent("money");
 	else
@@ -519,6 +523,7 @@ void CChillerBotUX::OnConsoleInit()
 	Console()->Chain("cl_auto_reply", ConchainAutoReply, this);
 	Console()->Chain("cl_finish_rename", ConchainFinishRename, this);
 	Console()->Chain("cl_show_last_killer", ConchainShowLastKiller, this);
+	Console()->Chain("cl_show_last_ping", ConchainShowLastPing, this);
 }
 
 void CChillerBotUX::ConSetGametile(IConsole::IResult *pResult, void *pUserData)
@@ -601,6 +606,16 @@ void CChillerBotUX::ConchainShowLastKiller(IConsole::IResult *pResult, void *pUs
 		pSelf->EnableComponent("last killer");
 	else
 		pSelf->DisableComponent("last killer");
+}
+
+void CChillerBotUX::ConchainShowLastPing(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CChillerBotUX *pSelf = (CChillerBotUX *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->GetInteger(0))
+		pSelf->EnableComponent("last ping");
+	else
+		pSelf->DisableComponent("last ping");
 }
 
 void CChillerBotUX::ConAfk(IConsole::IResult *pResult, void *pUserData)
