@@ -745,6 +745,9 @@ void CGameClient::UpdatePositions()
 
 			m_oldMultiViewPos = m_Snap.m_SpecInfo.m_Position;
 			m_Snap.m_SpecInfo.m_UsePosition = true;
+
+			if(m_Snap.m_SpecInfo.m_Position == vec2(0, 0))
+				m_Spectator.Spectate(m_Snap.m_SpecInfo.m_SpectatorID);
 		}
 		else if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_DemoSpecID != SPEC_FOLLOW && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		{
