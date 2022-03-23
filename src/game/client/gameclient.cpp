@@ -725,10 +725,8 @@ void CGameClient::UpdatePositions()
 			//preference
 			zoom = zoom + m_prMultiViewZoom;
 			float currentzoom = abs(log(m_Camera.m_Zoom) / log(0.866025f) + 10);
-			/* if(-1.5f > currentzoom - zoom || 1.5f < currentzoom - zoom)
-				g_Config.m_ClSmoothZoomTime = 500;
-			else*/
-				g_Config.m_ClSmoothZoomTime = 2000;
+
+			g_Config.m_ClSmoothZoomTime = 2000;
 
 			m_Camera.SetZoom(zoom);
 
@@ -781,7 +779,8 @@ void CGameClient::UpdatePositions()
 	}
 	else
 	{
-		g_Config.m_ClSmoothZoomTime = 250;
+		if(g_Config.m_ClSmoothZoomTime == 2000)
+			g_Config.m_ClSmoothZoomTime = 250;
 		m_prMultiViewZoom = 0;
 		m_firstMultiViewEntry = false;
 	}
