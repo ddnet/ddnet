@@ -2464,6 +2464,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     ${TESTS_EXTRA}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
+    $<TARGET_OBJECTS:mastersrv-shared>
     ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
