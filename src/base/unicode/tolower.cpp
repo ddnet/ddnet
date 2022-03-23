@@ -15,7 +15,7 @@ int str_utf8_tolower(int code)
 	struct UPPER_LOWER key;
 	struct UPPER_LOWER *res;
 	key.upper = code;
-	res = (UPPER_LOWER *)bsearch(&key, tolower, NUM_TOLOWER, sizeof(struct UPPER_LOWER), compul);
+	res = (UPPER_LOWER *)bsearch(&key, tolowermap, NUM_TOLOWER, sizeof(struct UPPER_LOWER), compul);
 
 	if(res == NULL)
 		return code;
@@ -23,7 +23,7 @@ int str_utf8_tolower(int code)
 }
 }
 
-const struct UPPER_LOWER tolower[] = {
+const struct UPPER_LOWER tolowermap[] = {
 	{65, 97},
 	{66, 98},
 	{67, 99},

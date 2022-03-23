@@ -11,4 +11,4 @@ enum
 	NUM_TOLOWER = 1390,
 };
 
-extern const struct UPPER_LOWER tolower[];
+extern const struct UPPER_LOWER tolowermap[];
