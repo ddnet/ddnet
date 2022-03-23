@@ -24,6 +24,7 @@ public:
 	bool IsBye(const char *pMsg);
 	bool IsInsult(const char *pMsg);
 	bool IsQuestionWhy(const char *pMsg);
+	bool IsQuestionHow(const char *pMsg);
 };
 
 #endif

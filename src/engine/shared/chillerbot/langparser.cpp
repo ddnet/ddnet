@@ -217,3 +217,37 @@ bool CLangParser::IsQuestionWhy(const char *pMsg)
 	}
 	return false;
 }
+
+bool CLangParser::IsQuestionHow(const char *pMsg)
+{
+	const char aHows[][128] = {
+		"wie",
+		"wiee",
+		"wieee",
+		"wiemach",
+		"how",
+		"hoow",
+		"hooww",
+		"explain",
+		"erklär",
+		"tell me",
+		"howto",
+		"i need to know",
+		"i want to know",
+		"howw",
+		"howww",
+		"howwww"};
+	for(const auto &pHow : aHows)
+	{
+		const char *pHL = str_find_nocase(pMsg, pHow);
+		while(pHL)
+		{
+			int Length = str_length(pHow);
+
+			if((pMsg == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == pHL[Length - 1]))
+				return true;
+			pHL = str_find_nocase(pHL + 1, pHow);
+		}
+	}
+	return false;
+}

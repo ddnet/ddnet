@@ -448,9 +448,29 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 		str_format(pResponse, SizeOfResponse, "%s good", pMessageAuthor);
 		return true;
 	}
+	// chillerbot-ux features
+	if(m_LangParser.IsQuestionHow(pMessage))
+	{
+		// feature: auto_drop_money
+		if(str_find_nocase(pMessage, "drop") && (str_find_nocase(pMessage, "money") || str_find_nocase(pMessage, "moni") || str_find_nocase(pMessage, "coin") || str_find_nocase(pMessage, "cash") || str_find_nocase(pMessage, "geld")))
+		{
+			str_format(pResponse, SizeOfResponse, "%s I auto drop money using \"auto_drop_money\" in chillerbot-ux", pMessageAuthor);
+			return true;
+		}
+		// feature: auto reply
+		if((str_find_nocase(pMessage, "reply") && str_find_nocase(pMessage, "chat")) || (str_find_nocase(pMessage, "auto chat") || str_find_nocase(pMessage, "autochat")) ||
+			str_find_nocase(pMessage, "message") ||
+			((str_find_nocase(pMessage, "fast") || str_find_nocase(pMessage, "quick")) && str_find_nocase(pMessage, "chat")))
+		{
+			str_format(pResponse, SizeOfResponse, "%s I bound the chillerbot-ux command \"reply_to_last_ping\" to automate chat", pMessageAuthor);
+			return true;
+		}
+	}
 	// advertise chillerbot
 	if(str_find_nocase(pMessage, "what client") || str_find_nocase(pMessage, "which client") || str_find_nocase(pMessage, "wat client") ||
-		str_find_nocase(pMessage, "good client") ||
+		str_find_nocase(pMessage, "good client") || str_find_nocase(pMessage, "download client") || str_find_nocase(pMessage, "link client") || str_find_nocase(pMessage, "get client") ||
+		str_find_nocase(pMessage, "where chillerbot") || str_find_nocase(pMessage, "download chillerbot") || str_find_nocase(pMessage, "link chillerbot") || str_find_nocase(pMessage, "get chillerbot") ||
+		str_find_nocase(pMessage, "chillerbot url") || str_find_nocase(pMessage, "chillerbot download") || str_find_nocase(pMessage, "chillerbot link") || str_find_nocase(pMessage, "chillerbot website") ||
 		((str_find_nocase(pMessage, "ddnet") || str_find_nocase(pMessage, "vanilla")) && str_find_nocase(pMessage, "?")))
 	{
 		str_format(pResponse, SizeOfResponse, "%s I use chillerbot-ux ( https://chillerbot.github.io )", pMessageAuthor);
