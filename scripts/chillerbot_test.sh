@@ -6,6 +6,10 @@ then
 	exit 1
 fi
 
+function is_cmd() {
+    [ -x "$(command -v "$1")" ] && return 0
+}
+
 function get_cores() {
     local cores
     if is_cmd nproc
@@ -61,11 +65,12 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 	connect localhost:17822" > client1.log &
 # shellcheck disable=SC2211
 ./chillerbot-* \
-	"cl_input_fifo client2.fifo;
+	'cl_input_fifo client2.fifo;
 	cl_chat_spam_filter 0;
 	player_name client2;
 	connect localhost:17822;
-	inp_mousesens 1000" > client2.log &
+	player_clan "Chilli.*";
+	inp_mousesens 1000' > client2.log &
 
 while [[ ! -p client1.fifo ]]
 do
@@ -94,6 +99,7 @@ ins+=('why do you war fooslongalt cLIEnT2???????');outs+=('client1: fooslongalt 
 ins+=('how do you chat so fast?? client2');outs+=('client1 I bound the chillerbot-ux command "reply_to_last_ping" to automate chat')
 ins+=('client2: how do always drop money?');outs+=('client1 I auto drop money using "auto_drop_money" in chillerbot-ux')
 ins+=('client2 ah nice where can i download chillerbot?');outs+=('client1 I use chillerbot-ux ( https://chillerbot.github.io )')
+ins+=('client2 me is join your clan? yes?');outs+=('client1 Chilli.* is a fun clan everybody that uses the skin greensward can join')
 
 function run_tests() {
 	local i

@@ -111,12 +111,6 @@ void CChatHelper::ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData
 	while(aMessage[0])
 	{
 		pSelf->PopPing(aName, sizeof(aName), aClan, sizeof(aClan), aMessage, sizeof(aMessage));
-		dbg_msg("autoreply", "popped name=%s message=%s", aName, aMessage);
-		int i = 0;
-		for(auto &Ping : pSelf->m_aLastPings)
-		{
-			dbg_msg("autoreply", "%d: name=%s msg=%s", i++, Ping.m_aName, Ping.m_aMessage);
-		}
 		if(pSelf->ReplyToLastPing(aName, aClan, aMessage, aResponse, sizeof(aResponse)))
 		{
 			if(aResponse[0])
@@ -197,8 +191,28 @@ void CChatHelper::SayFormat(const char *pMsg)
 	m_pClient->m_Chat.Say(0, aBuf);
 }
 
+bool CChatHelper::HowToJoinClan(const char *pClan, char *pResponse, int SizeOfResponse)
+{
+	if(!pResponse)
+		return false;
+	pResponse[0] = '\0';
+	if(!str_comp(pClan, "Chilli.*"))
+		str_copy(pResponse, "Chilli.* is a fun clan everybody that uses the skin greensward can join", SizeOfResponse);
+	else if(!str_comp(pClan, "|*KoG*|"))
+		str_copy(pResponse, "If you want to join the gores clan |*KoG*| visit their website kog.tw", SizeOfResponse);
+	else if(!str_comp(pClan, "χron"))
+		str_copy(pResponse, "If you want to join the vanilla clan χron visit their website aeon.teewars.com", SizeOfResponse);
+	else if(!str_comp(pClan, "ÆON"))
+		str_copy(pResponse, "If you want to join the vanilla clan ÆON visit their website aeon.teewars.com", SizeOfResponse);
+	else
+		return false;
+	return true;
+}
+
 bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessageAuthorClan, const char *pMessage, char *pResponse, int SizeOfResponse)
 {
+	if(!pResponse)
+		return false;
 	pResponse[0] = '\0';
 	if(pMessageAuthor[0] == '\0')
 		return false;
@@ -209,6 +223,8 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	int NameLen = 0;
 	const char *pName = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName;
 	const char *pDummyName = m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aName;
+	const char *pClan = m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aClan;
+	const char *pDummyClan = m_pClient->m_aClients[m_pClient->m_LocalIDs[1]].m_aClan;
 
 	if(LineShouldHighlight(pMessage, pName))
 		NameLen = str_length(pName);
@@ -231,6 +247,26 @@ bool CChatHelper::ReplyToLastPing(const char *pMessageAuthor, const char *pMessa
 	{
 		str_format(pResponse, SizeOfResponse, "bye %s", pMessageAuthor);
 		return true;
+	}
+	// can i join your clan?
+	if(str_find_nocase(pMessage, "clan") &&
+		(str_find_nocase(pMessage, "enter") ||
+			str_find_nocase(pMessage, "join") ||
+			str_find_nocase(pMessage, "let me") ||
+			str_find_nocase(pMessage, "beitreten") ||
+			str_find_nocase(pMessage, " in ") ||
+			str_find_nocase(pMessage, "can i") ||
+			str_find_nocase(pMessage, "can me") ||
+			str_find_nocase(pMessage, "me you") ||
+			str_find_nocase(pMessage, "me is") ||
+			str_find_nocase(pMessage, "into")))
+	{
+		char aResponse[1024];
+		if(HowToJoinClan(pClan, aResponse, sizeof(aResponse)) || (m_pClient->Client()->DummyConnected() && HowToJoinClan(pDummyClan, aResponse, SizeOfResponse)))
+		{
+			str_format(pResponse, SizeOfResponse, "%s %s", pMessageAuthor, aResponse);
+			return true;
+		}
 	}
 	// check war for others
 	const char *pWhy = str_find_nocase(pMessage, "why");

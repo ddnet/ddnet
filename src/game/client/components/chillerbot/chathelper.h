@@ -88,6 +88,7 @@ class CChatHelper : public CComponent
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void DoGreet();
 	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessageAuthorClan, const char *pMessage, char *pResponse, int SizeOfResponse);
+	bool HowToJoinClan(const char *pClan, char *pResponse, int SizeOfResponse);
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
 	void ListChatFilter();
