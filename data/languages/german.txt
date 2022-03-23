@@ -1347,19 +1347,19 @@ Skip Tutorial
 == Tutorial überspringen
 
 Renderer
-== 
+== Renderer
 
 default
-== 
+== Standard
 
 custom
-== 
+== eigene
 
 Graphics cards
-== 
+== Grafikkarte
 
 auto
-== 
+== Auto
 
 Tutorial
-== 
+== Tutorial
