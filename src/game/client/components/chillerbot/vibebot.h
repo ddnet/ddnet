@@ -33,6 +33,7 @@ private:
 	{
 		E_MUSIC = 5,
 		E_SLEEPY = 12,
+		E_WTF = 13,
 		E_HAPPY = 14,
 	};
 
@@ -63,6 +64,7 @@ public:
 		VB_HAPPY,
 		VB_MUSIC,
 		VB_SLEEPY,
+		VB_WTF,
 
 		EB_OFF = 0,
 	};

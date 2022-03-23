@@ -104,10 +104,10 @@ void CVibeBot::UpdateComponents()
 
 void CVibeBot::OnConsoleInit()
 {
-	Console()->Register("vibe", "s[sleepy|happy|music]?i[dummy]", CFGFLAG_CLIENT, ConVibe, this, "Set vibebot mode ('vibebots' for list)");
+	Console()->Register("vibe", "s[sleepy|wtf|happy|music]?i[dummy]", CFGFLAG_CLIENT, ConVibe, this, "Set vibebot mode ('vibebots' for list)");
 	Console()->Register("vibes", "", CFGFLAG_CLIENT, ConVibes, this, "Shows all vibebots (set via vibebot <name>)");
 	Console()->Register("unvibe", "", CFGFLAG_CLIENT, ConUnVibe, this, "Turn off vibebot");
-	Console()->Register("emotebot", "s[sleepy|happy|music]?i[delay]?i[dummy]", CFGFLAG_CLIENT, ConEmoteBot, this, "Automatically send emotes");
+	Console()->Register("emotebot", "s[sleepy|wtf|happy|music]?i[delay]?i[dummy]", CFGFLAG_CLIENT, ConEmoteBot, this, "Automatically send emotes");
 }
 
 void CVibeBot::ConEmoteBot(IConsole::IResult *pResult, void *pUserData)
@@ -118,6 +118,8 @@ void CVibeBot::ConEmoteBot(IConsole::IResult *pResult, void *pUserData)
 		Mode = E_HAPPY;
 	else if(!str_comp(pResult->GetString(0), "sleepy"))
 		Mode = E_SLEEPY;
+	else if(!str_comp(pResult->GetString(0), "wtf"))
+		Mode = E_WTF;
 	else if(!str_comp(pResult->GetString(0), "music"))
 		Mode = E_MUSIC;
 	else if(str_comp(pResult->GetString(0), "off"))
@@ -138,6 +140,8 @@ void CVibeBot::ConVibe(IConsole::IResult *pResult, void *pUserData)
 		Mode = VB_HAPPY;
 	else if(!str_comp(pResult->GetString(0), "sleepy"))
 		Mode = VB_SLEEPY;
+	else if(!str_comp(pResult->GetString(0), "wtf"))
+		Mode = VB_WTF;
 	else if(!str_comp(pResult->GetString(0), "music"))
 		Mode = VB_MUSIC;
 	else if(str_comp(pResult->GetString(0), "off"))
@@ -252,6 +256,8 @@ void CVibeBot::OnRender()
 			VibeEmote(E_HAPPY);
 		else if(m_Mode[Dummy] == VB_SLEEPY)
 			VibeEmote(E_SLEEPY);
+		else if(m_Mode[Dummy] == VB_WTF)
+			VibeEmote(E_WTF);
 		else if(m_Mode[Dummy] == VB_MUSIC)
 			VibeEmote(E_MUSIC);
 	}
