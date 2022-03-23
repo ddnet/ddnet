@@ -868,12 +868,6 @@ may cause delay
 Screen
 == Екран
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (iGPUs only)
-
-Multiple texture units (disable for macOS)
-== Декілька текстурних одиниць (вимкнути для macOS)
-
 Use high DPI
 == Використовувати високий DPI
 
@@ -1207,9 +1201,6 @@ Windowed borderless
 Desktop fullscreen
 == Повний робочий стіл
 
-Use modern OpenGL
-== Використовувати сучасний OpenGL
-
 Game sound volume
 == Гучність звуку гри
 
@@ -1334,8 +1325,26 @@ Config directory
 Windowed fullscreen
 == 
 
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Tutorial
 == 

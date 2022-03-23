@@ -905,14 +905,8 @@ Deactivate
 Welcome to DDNet
 == Bem-vindo ao DDNet
 
-Preinit VBO (iGPUs only)
-== Pré-iniciar VNO (iGPU somente) 
-
 Activate
 == Ativar
-
-Multiple texture units (disable for macOS)
-== Várias unidades de textura (desabilite para macOS)
 
 UI mouse s.
 == Sens. mouse de UI
@@ -1293,9 +1287,6 @@ Windowed borderless
 Desktop fullscreen
 == Tela cheia de desktop
 
-Use modern OpenGL
-== Usar OpenGL moderno
-
 Hookline
 == Linha do gancho
 
@@ -1350,8 +1341,26 @@ Config directory
 Windowed fullscreen
 == 
 
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Tutorial
 == 

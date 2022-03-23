@@ -958,15 +958,6 @@ may cause delay
 Screen
 == 화면
 
-Use modern OpenGL
-== 최신 OpenGL 사용
-
-Preinit VBO (iGPUs only)
-== VBO 사전 초기화 (내장 그래픽만)
-
-Multiple texture units (disable for macOS)
-== 다중 텍스처 유닛 (macOS 제외)
-
 Use high DPI
 == 높은 DPI 사용
 
@@ -1338,4 +1329,22 @@ CHN
 == 
 
 %.2f KiB
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
 == 

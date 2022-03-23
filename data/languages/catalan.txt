@@ -882,14 +882,8 @@ Deactivate
 Welcome to DDNet
 == Benvingut a DDNet
 
-Preinit VBO (iGPUs only)
-== Preinicialitzar VBO (iGPUs només)
-
 Activate
 == Activar
-
-Multiple texture units (disable for macOS)
-== Multiple texture units (disable for macOS)
 
 UI mouse s.
 == UI mouse s.
@@ -1176,9 +1170,6 @@ Windowed borderless
 Desktop fullscreen
 == Pantalla completa d'escriptori
 
-Use modern OpenGL
-== Utilitzar OpenGL modern
-
 Game sound volume
 == Volum del so del joc
 
@@ -1327,8 +1318,26 @@ Config directory
 Windowed fullscreen
 == 
 
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Tutorial
 == 
