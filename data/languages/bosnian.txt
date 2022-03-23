@@ -874,12 +874,6 @@ may cause delay
 Screen
 == Ekran
 
-Preinit VBO (iGPUs only)
-== Inicijalizuj VBO (samo iGPU-ovi)
-
-Multiple texture units (disable for macOS)
-== Više tekturnih jedinica (isljučeno za macOS)
-
 Use high DPI
 == Koristi visoki DPI
 
@@ -1195,7 +1189,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1298,6 +1304,9 @@ https://ddnet.tw/discord
 == 
 
 https://wiki.ddnet.tw/
+== 
+
+Tutorial
 == 
 
 Website

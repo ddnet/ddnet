@@ -873,12 +873,6 @@ Welcome to DDNet
 may cause delay
 == ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
 
-Preinit VBO (iGPUs only)
-== Preinit-VBO (iGPUs ﻂﻘﻓ)
-
-Multiple texture units (disable for macOS)
-== ﺮﺘﺴﻜﺗ ﻦﻣ ﺮﺜﻛﺍ ( ﺖﻨﻛ ﺍﺫﺍ ﺔﺋﺎﻔﻃﺍ macOS )
-
 UI mouse s.
 == ﻮﻴﻨﻣ ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
 
@@ -1270,7 +1264,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Sample rate
@@ -1334,4 +1340,7 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
 == 

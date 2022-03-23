@@ -696,9 +696,6 @@ DDNet
 Show all
 == Montrer tout le monde
 
-Preinit VBO (iGPUs only)
-== Préinitialisation VBO (iGPU uniquement)
-
 Vanilla skins only
 == Skins par défaut
 
@@ -860,9 +857,6 @@ Remove chat
 
 Markers:
 == Marqueurs :
-
-Multiple texture units (disable for macOS)
-== Unités de texture multiple (désactivé pour macOS)
 
 Pause
 == Pause
@@ -1285,9 +1279,6 @@ Windowed borderless
 Desktop fullscreen
 == Plein écran
 
-Use modern OpenGL
-== Utiliser OpenGL moderne
-
 Show client IDs
 == Montrer les IDs
 
@@ -1368,3 +1359,21 @@ Join Tutorial Server
 
 Skip Tutorial
 == Passer le tutoriel
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
+== 

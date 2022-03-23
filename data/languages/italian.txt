@@ -952,12 +952,6 @@ may cause delay
 Screen
 == Schermo
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (solo iGPU)
-
-Multiple texture units (disable for macOS)
-== Unità multiple di texture
-
 Use high DPI
 == Usa DPI alti
 
@@ -1311,7 +1305,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Show client IDs
@@ -1372,6 +1378,9 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
 == 
 
 FPM
