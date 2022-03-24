@@ -185,14 +185,14 @@ void CCharacter::HandleNinja()
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		return;
 
-	if((Server()->Tick() - m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
+	if((Server()->Tick() - m_Core.m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
 	{
 		// time's up, return
 		RemoveNinja();
 		return;
 	}
 
-	int NinjaTime = m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000) - Server()->Tick();
+	int NinjaTime = m_Core.m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000) - Server()->Tick();
 
 	if(NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
 	{
@@ -204,18 +204,18 @@ void CCharacter::HandleNinja()
 	// force ninja Weapon
 	SetWeapon(WEAPON_NINJA);
 
-	m_Ninja.m_CurrentMoveTime--;
+	m_Core.m_Ninja.m_CurrentMoveTime--;
 
-	if(m_Ninja.m_CurrentMoveTime == 0)
+	if(m_Core.m_Ninja.m_CurrentMoveTime == 0)
 	{
 		// reset velocity
-		m_Core.m_Vel = m_Ninja.m_ActivationDir * m_Ninja.m_OldVelAmount;
+		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * m_Core.m_Ninja.m_OldVelAmount;
 	}
 
-	if(m_Ninja.m_CurrentMoveTime > 0)
+	if(m_Core.m_Ninja.m_CurrentMoveTime > 0)
 	{
 		// Set velocity
-		m_Core.m_Vel = m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
+		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
 		GameServer()->Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f);
 
@@ -569,9 +569,9 @@ void CCharacter::FireWeapon()
 		// reset Hit objects
 		m_NumObjectsHit = 0;
 
-		m_Ninja.m_ActivationDir = Direction;
-		m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * Server()->TickSpeed() / 1000;
-		m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
+		m_Core.m_Ninja.m_ActivationDir = Direction;
+		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * Server()->TickSpeed() / 1000;
+		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	}
@@ -616,7 +616,7 @@ void CCharacter::HandleWeapons()
 
 void CCharacter::GiveNinja()
 {
-	m_Ninja.m_ActivationTick = Server()->Tick();
+	m_Core.m_Ninja.m_ActivationTick = Server()->Tick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
@@ -629,7 +629,7 @@ void CCharacter::GiveNinja()
 
 void CCharacter::RemoveNinja()
 {
-	m_Ninja.m_CurrentMoveTime = 0;
+	m_Core.m_Ninja.m_CurrentMoveTime = 0;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = false;
 	m_Core.m_ActiveWeapon = m_LastWeapon;
 
@@ -856,7 +856,7 @@ void CCharacter::TickPaused()
 {
 	++m_AttackTick;
 	++m_DamageTakenTick;
-	++m_Ninja.m_ActivationTick;
+	++m_Core.m_Ninja.m_ActivationTick;
 	++m_ReckoningTick;
 	if(m_LastAction != -1)
 		++m_LastAction;
@@ -1147,7 +1147,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
 			pCharacter->m_AmmoCount = m_FreezeTick + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
 		else if(Weapon == WEAPON_NINJA)
-			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
+			pCharacter->m_AmmoCount = m_Core.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
@@ -2075,7 +2075,7 @@ void CCharacter::DDRaceTick()
 		if(m_FreezeTime > 0)
 			m_FreezeTime--;
 		else
-			m_Ninja.m_ActivationTick = Server()->Tick();
+			m_Core.m_Ninja.m_ActivationTick = Server()->Tick();
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;
 		m_Input.m_Hook = 0;

@@ -87,7 +87,7 @@ void CCharacter::HandleJetpack()
 
 void CCharacter::RemoveNinja()
 {
-	m_Ninja.m_CurrentMoveTime = 0;
+	m_Core.m_Ninja.m_CurrentMoveTime = 0;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = false;
 	m_Core.m_ActiveWeapon = m_LastWeapon;
 
@@ -99,7 +99,7 @@ void CCharacter::HandleNinja()
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		return;
 
-	if((GameWorld()->GameTick() - m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * GameWorld()->GameTickSpeed() / 1000))
+	if((GameWorld()->GameTick() - m_Core.m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * GameWorld()->GameTickSpeed() / 1000))
 	{
 		// time's up, return
 		RemoveNinja();
@@ -109,18 +109,18 @@ void CCharacter::HandleNinja()
 	// force ninja Weapon
 	SetWeapon(WEAPON_NINJA);
 
-	m_Ninja.m_CurrentMoveTime--;
+	m_Core.m_Ninja.m_CurrentMoveTime--;
 
-	if(m_Ninja.m_CurrentMoveTime == 0)
+	if(m_Core.m_Ninja.m_CurrentMoveTime == 0)
 	{
 		// reset velocity
-		m_Core.m_Vel = m_Ninja.m_ActivationDir * m_Ninja.m_OldVelAmount;
+		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * m_Core.m_Ninja.m_OldVelAmount;
 	}
 
-	if(m_Ninja.m_CurrentMoveTime > 0)
+	if(m_Core.m_Ninja.m_CurrentMoveTime > 0)
 	{
 		// Set velocity
-		m_Core.m_Vel = m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
+		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius), 0.f);
 
@@ -445,9 +445,9 @@ void CCharacter::FireWeapon()
 		// reset Hit objects
 		m_NumObjectsHit = 0;
 
-		m_Ninja.m_ActivationDir = Direction;
-		m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * GameWorld()->GameTickSpeed() / 1000;
-		m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
+		m_Core.m_Ninja.m_ActivationDir = Direction;
+		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * GameWorld()->GameTickSpeed() / 1000;
+		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 	}
 	break;
 	}
@@ -482,7 +482,7 @@ void CCharacter::HandleWeapons()
 
 void CCharacter::GiveNinja()
 {
-	m_Ninja.m_ActivationTick = GameWorld()->GameTick();
+	m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
 	if(!m_FreezeTime)
 		m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
@@ -923,7 +923,7 @@ void CCharacter::DDRaceTick()
 		if(m_FreezeTime > 0)
 			m_FreezeTime--;
 		else
-			m_Ninja.m_ActivationTick = GameWorld()->GameTick();
+			m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
 		if(!m_CanMoveInFreeze)
 		{
 			m_Input.m_Direction = 0;
@@ -1060,7 +1060,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
-	mem_zero(&m_Ninja, sizeof(m_Ninja));
+	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
 	m_ProximityRadius = ms_PhysSize;

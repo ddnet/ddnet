@@ -54,6 +54,7 @@ class CHud : public CComponent
 
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(const int ClientID);
+	void RenderNinjaBar(float x, float y, float Progress);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -101,9 +102,12 @@ private:
 	int m_FlagOffset;
 	int m_AirjumpOffset;
 	int m_AirjumpEmptyOffset;
+	int m_WeaponHammerOffset;
+	int m_WeaponGunOffset;
 	int m_WeaponShotgunOffset;
 	int m_WeaponGrenadeOffset;
 	int m_WeaponLaserOffset;
+	int m_WeaponNinjaOffset;
 	int m_EndlessJumpOffset;
 	int m_EndlessHookOffset;
 	int m_JetpackOffset;
@@ -119,10 +123,10 @@ private:
 	int m_NoLaserHitOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
-	// int m_FreezeBarFullLeftOffset;
-	// int m_FreezeBarFullOffset;
-	// int m_FreezeBarEmptyOffset;
-	// int m_FreezeBarEmptyRightOffset;
+	int m_NinjaBarFullLeftOffset;
+	int m_NinjaBarFullOffset;
+	int m_NinjaBarEmptyOffset;
+	int m_NinjaBarEmptyRightOffset;
 };
 
 #endif

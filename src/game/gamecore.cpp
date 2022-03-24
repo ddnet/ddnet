@@ -580,6 +580,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_aWeapons[WEAPON_SHOTGUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_SHOTGUN) != 0;
 	m_aWeapons[WEAPON_GRENADE].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GRENADE) != 0;
 	m_aWeapons[WEAPON_LASER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_LASER) != 0;
+	m_aWeapons[WEAPON_NINJA].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
 
 	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
