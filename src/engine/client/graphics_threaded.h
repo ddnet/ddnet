@@ -324,7 +324,7 @@ public:
 		int m_VertBufferBindingIndex;
 
 		int m_AttrCount;
-		SBufferContainerInfo::SAttribute *m_Attributes;
+		SBufferContainerInfo::SAttribute *m_pAttributes;
 	};
 
 	struct SCommand_UpdateBufferContainer : public SCommand
@@ -338,7 +338,7 @@ public:
 		int m_VertBufferBindingIndex;
 
 		int m_AttrCount;
-		SBufferContainerInfo::SAttribute *m_Attributes;
+		SBufferContainerInfo::SAttribute *m_pAttributes;
 	};
 
 	struct SCommand_DeleteBufferContainer : public SCommand
