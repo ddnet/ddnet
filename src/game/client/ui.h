@@ -103,7 +103,7 @@ public:
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 
-	bool Inside(float x, float y) const;
+	bool Inside(float x_, float y_) const;
 };
 
 struct SUIAnimator
