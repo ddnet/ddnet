@@ -800,7 +800,7 @@ void CHud::PreparePlayerStateQuads()
 	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_LASER], ScaleX, ScaleY);
 	m_WeaponLaserOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 23.f * ScaleX, 23.f * ScaleY);
 	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_NINJA], ScaleX, ScaleY);
-	m_WeaponNinjaOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 24.f * ScaleX, 24.f * ScaleY);
+	m_WeaponNinjaOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 27.f * ScaleX, 27.f * ScaleY);
 
 	// Quads for displaying capabilities
 	m_EndlessJumpOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -874,7 +874,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	else
 	{
-		TotalJumpsToDisplay = AvailableJumpsToDisplay = m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps;
+		TotalJumpsToDisplay = AvailableJumpsToDisplay = abs(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
 	}
 
 	// render available and used jumps
@@ -960,7 +960,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupNinja);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponNinjaOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponNinjaOffset, x, y + 2.5f);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -977,38 +977,45 @@ void CHud::RenderPlayerState(const int ClientID)
 	// render capabilities
 	x = 5;
 	y += 12;
+	bool HasCapabilities = false;
 	if(pCharacter->m_EndlessJump)
 	{
+		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudEndlessJump);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_EndlessJumpOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_EndlessHook)
 	{
+		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudEndlessHook);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_EndlessHookOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_Jetpack)
 	{
+		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudJetpack);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_JetpackOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_HasTelegunGun)
 	{
+		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudTeleportGun);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_TeleportGunOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_HasTelegunGrenade)
 	{
+		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudTeleportGrenade);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_TeleportGrenadeOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_HasTelegunLaser)
 	{
+		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudTeleportLaser);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_TeleportLaserOffset, x, y);
 		x += 12;
@@ -1016,45 +1023,56 @@ void CHud::RenderPlayerState(const int ClientID)
 
 	// render prohibited capabilities
 	x = 5;
-	y += 12;
+	if(HasCapabilities)
+	{
+		y += 12;
+	}
+	bool HasProhibitedCapabilities = false;
 	if(pCharacter->m_Solo)
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudSolo);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_SoloOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_NoCollision)
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoCollision);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoCollisionOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_NoHookHit)
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHookHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHookHitOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_NoHammerHit)
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHammerHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHammerHitOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoShotgunHit)
+	if((pCharacter->m_NoShotgunHit && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoShotgunHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoShotgunHitOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoGrenadeHit)
+	if((pCharacter->m_NoGrenadeHit && pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got))
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoGrenadeHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoGrenadeHitOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoLaserHit)
+	if((pCharacter->m_NoLaserHit && pCharacter->m_aWeapons[WEAPON_LASER].m_Got))
 	{
+		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoLaserHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
 		x += 12;
@@ -1062,7 +1080,10 @@ void CHud::RenderPlayerState(const int ClientID)
 
 	// render dummy actions
 	x = 5;
-	y += 12;
+	if(HasProhibitedCapabilities)
+	{
+		y += 12;
+	}
 	if(g_Config.m_ClDummyHammer)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHammer);

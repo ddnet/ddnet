@@ -258,7 +258,7 @@ public:
 	void Move();
 
 	void ReadCharacterCore(const CNetObj_CharacterCore *pObjCore);
-	void ReadCharacter(const CNetObj_Character *pObjCore);
+	void ReadCharacter(const CNetObj_Character *pObjChar);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
 
