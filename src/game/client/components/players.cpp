@@ -88,44 +88,50 @@ void CPlayers::RenderHookCollLine(
 	Player = *pPlayerChar;
 
 	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
-	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
-	float Alpha = (OtherTeam || ClientID < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
-
-	float IntraTick = Intra;
-	if(ClientID >= 0)
-		IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
-
-	float Angle;
-	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-	{
-		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]);
-	}
-	else
-	{
-		float AngleIntraTick = IntraTick;
-		// using unpredicted angle when rendering other players in-game
-		if(ClientID >= 0)
-			AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-		// If the player moves their weapon through top, then change
-		// the end angle by 2*Pi, so that the mix function will use the
-		// short path and not the long one.
-		if(Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
-			Player.m_Angle -= 256.0f * 2 * pi;
-		else if(Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
-			Player.m_Angle += 256.0f * 2 * pi;
-
-		Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
-	}
-
-	vec2 Direction = direction(Angle);
-	vec2 Position;
-	if(in_range(ClientID, MAX_CLIENTS - 1))
-		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
-	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	// draw hook collision line
 	{
+		bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
+		float Alpha = (OtherTeam || ClientID < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+
+		float IntraTick = Intra;
+		if(ClientID >= 0)
+			IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+
+		float Angle;
+		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		{
+			// just use the direct input if it's the local player we are rendering
+			Angle = angle(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]);
+		}
+		else
+		{
+			float AngleIntraTick = IntraTick;
+			// using unpredicted angle when rendering other players in-game
+			if(ClientID >= 0)
+				AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+			// If the player moves their weapon through top, then change
+			// the end angle by 2*Pi, so that the mix function will use the
+			// short path and not the long one.
+			if(Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
+				Player.m_Angle -= 256.0f * 2 * pi;
+			else if(Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
+				Player.m_Angle += 256.0f * 2 * pi;
+
+			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
+		}
+
+		vec2 Direction = direction(Angle);
+		vec2 Position;
+		if(in_range(ClientID, MAX_CLIENTS - 1))
+			Position = m_pClient->m_aClients[ClientID].m_RenderPos;
+		else
+			Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+
+		vec2 ExDirection = Direction;
+
+		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+			ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
+
 		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
 		bool RenderHookCollPlayer = ClientID >= 0 && Player.m_PlayerFlags & PLAYERFLAG_AIM && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
 		bool RenderHookCollVideo = true;
@@ -134,10 +140,6 @@ void CPlayers::RenderHookCollLine(
 #endif
 		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
-			vec2 ExDirection = Direction;
-
-			if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
 
 			Graphics()->TextureClear();
 			vec2 InitPos = Position;
@@ -792,7 +794,8 @@ void CPlayers::OnRender()
 			continue;
 		}
 
-		RenderHookCollLine(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, ClientID);
+		if(g_Config.m_ClFrozenHudTeamOnly)
+			RenderHookCollLine(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, ClientID);
 
 		//don't render offscreen
 		vec2 *pRenderPos = &m_pClient->m_aClients[ClientID].m_RenderPos;
@@ -806,7 +809,7 @@ void CPlayers::OnRender()
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo)
 			g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[LocalClientID]->m_Latency;
-		RenderHookCollLine(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, LocalClientID);
+		RenderHookCollLine(&m_pClient->m_aClients[LocalClientID].m_RenderPrev, &m_pClient->m_aClients[LocalClientID].m_RenderCur, LocalClientID);
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
 		CNetObj_Character CurChar = pLocalClientData->m_RenderCur;
 		if(g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix)
