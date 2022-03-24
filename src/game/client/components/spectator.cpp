@@ -281,17 +281,6 @@ void CSpectator::OnRender()
 		Graphics()->QuadsEnd();
 	}
 
-	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_MULTIVIEW) ||
-		m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_MULTIVIEW)
-	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width / 2.0f + (20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
-		Graphics()->QuadsEnd();
-	}
-
-
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
 	{
 		Graphics()->TextureClear();
@@ -314,7 +303,7 @@ void CSpectator::OnRender()
 	if(m_SelectorMouse.x <= (300.0f - 20.0f) && m_SelectorMouse.x >= 20.0f &&
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
-		m_SelectedSpectatorID = SPEC_MULTIVIEW;
+		m_SelectedSpectatorID = SPEC_FOLLOW;
 		GameClient()->m_isMultiView = true;
 		SelectedM = true;
 	}
@@ -494,7 +483,7 @@ void CSpectator::Spectate(int SpectatorID)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_MULTIVIEW, MAX_CLIENTS - 1);
+		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 		return;
 	}
 
