@@ -825,8 +825,6 @@ void CHud::PreparePlayerStateQuads()
 
 	// Quads for displaying ninja bar
 	m_NinjaBarFullLeftOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 6.f, 12.f);
-	m_NinjaBarFullOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 1.f, 12.f);
-	m_NinjaBarEmptyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 1.f, 12.f);
 	m_NinjaBarEmptyRightOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 6.f, 12.f);
 }
 
@@ -1101,54 +1099,135 @@ void CHud::RenderPlayerState(const int ClientID)
 void CHud::RenderNinjaBar(float x, float y, float Progress)
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
+	// half of the ends are also used for the progress display
 	const float EndWidth = 6.0f;
 	const float BarHeight = 12.0f;
 	const float WholeBarWidth = 90.f;
 	const float MiddleBarWidth = WholeBarWidth - (EndWidth * 2.0f);
+	const float EndProgressWidth = EndWidth / 2.0f;
+	const float ProgressBarWidth = WholeBarWidth - (EndProgressWidth * 2.0f);
+	const float EndProgressProportion = EndProgressWidth / ProgressBarWidth;
+	const float MiddleProgressProportion = MiddleBarWidth / ProgressBarWidth;
 
+	// we cut 10% of both sides (right and left) of all sprites so we don't get edge bleeding
+
+	// beginning piece
+	float BeginningPieceProgress = 1;
+	if(Progress <= EndProgressProportion)
+	{
+		BeginningPieceProgress = Progress / EndProgressProportion;
+	}
+	const float BeginningPiecePercentVisible = 0.5f + 0.5f * BeginningPieceProgress;
+	// full
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NinjaBarFullLeftOffset, x, y);
+	Graphics()->QuadsBegin();
+	Graphics()->QuadsSetSubset(0.1f, 0, 0.1f + 0.8f * BeginningPiecePercentVisible, 1);
+	IGraphics::CQuadItem QuadFullBeginning(x, y, EndWidth * BeginningPiecePercentVisible, BarHeight);
+	Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
+	Graphics()->QuadsEnd();
+	if(BeginningPiecePercentVisible < 1.0f)
+	{
+		// empty
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
+		Graphics()->QuadsBegin();
+		Graphics()->QuadsSetSubset(0.1f, 1, 0.1f + 0.8f * (1.0f - BeginningPiecePercentVisible), 0);
+		Graphics()->QuadsSetRotation(pi);
+		IGraphics::CQuadItem QuadEmptyBeginning(x + (EndWidth * BeginningPiecePercentVisible), y, EndWidth * (1.0f - BeginningPiecePercentVisible), BarHeight);
+		Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
+		Graphics()->QuadsEnd();
+		Graphics()->QuadsSetRotation(0);
+	}
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 
+	// middle piece
 	x += EndWidth;
 
-	const float FullBarWidth = MiddleBarWidth * Progress;
-	const float EmptyBarWidth = MiddleBarWidth - FullBarWidth;
+	float MiddlePieceProgress = 1;
+	if(Progress <= EndProgressProportion + MiddleProgressProportion)
+	{
+		if(Progress <= EndProgressProportion)
+		{
+			MiddlePieceProgress = 0;
+		}
+		else
+		{
+			MiddlePieceProgress = (Progress - EndProgressProportion) / MiddleProgressProportion;
+		}
+	}
 
-	// full bar
+	const float FullMiddleBarWidth = MiddleBarWidth * MiddlePieceProgress;
+	const float EmptyMiddleBarWidth = MiddleBarWidth - FullMiddleBarWidth;
+
+	// full ninja bar
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFull);
 	Graphics()->QuadsBegin();
-	if(Progress < 0.1f)
+	// select the middle portion of the sprite so we don't get edge bleeding
+	if(MiddlePieceProgress * MiddleBarWidth <= EndWidth * 0.8f)
 	{
 		// prevent pixel puree, select only a small slice
-		Graphics()->QuadsSetSubset(0, 0, 0.07f, 1);
+		Graphics()->QuadsSetSubset(0.1f, 0, 0.17f, 1);
 	}
-	IGraphics::CQuadItem QuadFull(x, y, FullBarWidth, BarHeight);
+	else
+	{
+		Graphics()->QuadsSetSubset(0.1f, 0, 0.9f, 1);
+	}
+	IGraphics::CQuadItem QuadFull(x, y, FullMiddleBarWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFull, 1);
 	Graphics()->QuadsEnd();
 
-	// empty bar
-	// select the middle portion of the sprite so we don't get edge bleeding
+	// empty ninja bar
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmpty);
 	Graphics()->QuadsBegin();
-	Graphics()->QuadsSetSubset(0.1f, 0, 0.6f, 1);
+	// select the middle portion of the sprite so we don't get edge bleeding
+	if((1.0f - MiddlePieceProgress) * MiddleBarWidth <= EndWidth * 0.8f)
+	{
+		// prevent pixel puree, select only a small slice
+		Graphics()->QuadsSetSubset(0.1f, 0, 0.17f, 1);
+	}
+	else
+	{
+		Graphics()->QuadsSetSubset(0.1f, 0, 0.9f, 1);
+	}
 
-	IGraphics::CQuadItem QuadEmpty(x + FullBarWidth, y, EmptyBarWidth, BarHeight);
+	IGraphics::CQuadItem QuadEmpty(x + FullMiddleBarWidth, y, EmptyMiddleBarWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadEmpty, 1);
 	Graphics()->QuadsEnd();
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 
+	// end piece
 	x += MiddleBarWidth;
-	if(Progress == 1.0f)
+	float EndingPieceProgress = 1;
+	if(Progress <= 1)
+	{
+		if(Progress <= (EndProgressProportion + MiddleProgressProportion))
+		{
+			EndingPieceProgress = 0;
+		}
+		else
+		{
+			EndingPieceProgress = (Progress - EndProgressProportion - MiddleProgressProportion) / EndProgressProportion;
+		}
+	}
+	// full
+	if(EndingPieceProgress > 0.0f)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
+		Graphics()->QuadsBegin();
+		Graphics()->QuadsSetSubset(0.5f + 0.4f * (1.0f - EndingPieceProgress), 1, 0.90f, 0);
 		Graphics()->QuadsSetRotation(pi);
+		IGraphics::CQuadItem QuadFullEnding(x, y, (EndWidth / 2) * EndingPieceProgress, BarHeight);
+		Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
+		Graphics()->QuadsEnd();
+		Graphics()->QuadsSetRotation(0);
 	}
-	else
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
-	}
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NinjaBarEmptyRightOffset, x, y);
-	Graphics()->QuadsSetRotation(0);
+	// empty
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
+	Graphics()->QuadsBegin();
+	Graphics()->QuadsSetSubset(0.5f - 0.4f * (1.0f - EndingPieceProgress), 0, 0.9f, 1);
+	IGraphics::CQuadItem QuadEmptyEnding(x + ((EndWidth / 2) * EndingPieceProgress), y, (EndWidth / 2) * (1.0f - EndingPieceProgress) + (EndWidth / 2), BarHeight);
+	Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
+	Graphics()->QuadsEnd();
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 }
 
 void CHud::RenderSpectatorHud()

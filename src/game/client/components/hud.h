@@ -124,8 +124,6 @@ private:
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
 	int m_NinjaBarFullLeftOffset;
-	int m_NinjaBarFullOffset;
-	int m_NinjaBarEmptyOffset;
 	int m_NinjaBarEmptyRightOffset;
 };
 
