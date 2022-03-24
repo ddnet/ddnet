@@ -309,11 +309,13 @@ void CNamePlates::OnRender()
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	// expand the edges to prevent popping in/out onscreen
-	float BorderBuffer = 400;
-	ScreenX0 -= BorderBuffer;
-	ScreenX1 += BorderBuffer;
-	ScreenY0 -= BorderBuffer;
-	ScreenY1 += BorderBuffer * 2.0f;
+	//
+	// it is assumed that the nameplate and all its components fit into a 800x800 box placed directly above the tee
+	// this may need to be changed or calculated differently in the future
+	ScreenX0 -= 400;
+	ScreenX1 += 400;
+	//ScreenY0 -= 0;
+	ScreenY1 += 800;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{

@@ -734,6 +734,9 @@ void CPlayers::OnRender()
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	// expand the edges to prevent popping in/out onscreen
+	//
+	// it is assumed that the tee, all its weapons, and emotes fit into a 200x200 box centered on the tee
+	// this may need to be changed or calculated differently in the future
 	float BorderBuffer = 100;
 	ScreenX0 -= BorderBuffer;
 	ScreenX1 += BorderBuffer;
