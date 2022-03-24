@@ -19,7 +19,7 @@
 #	SunnyPistache & Pipou   2020-11-07 11:30:00
 #	Chairn			2021-05-31 20:00:00
 #	T tee			2021-06-01 00:39:00
-#	T tee & NRK		2022-03-22 11:56:11
+#	T tee & NRK & Chairn	2022-03-23 20:52:52
 ##### /authors #####
 
 ##### translated strings #####
@@ -1072,7 +1072,7 @@ Enable long pain sound (used when shooting in freeze)
 == 9+ nouveaux messages
 
 Kill
-== Réapparaître
+== Tuer
 
 Types
 == Types
@@ -1241,7 +1241,7 @@ Replay
 == Replay
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== La largeur de la texture %s n'est pas divisible par %d, ou la hauteur n'est pas divisible par %d, ce qui peut causer des bugs visuels. 
+== La largeur de la texture %s n'est pas divisible par %d, ou la hauteur n'est pas divisible par %d, ce qui peut causer des bugs visuels.
 
 AFR
 == AFR
@@ -1277,13 +1277,13 @@ Dummy
 == Dummy
 
 Windowed
-== Fenêtré 
+== Fenêtré
 
 Windowed borderless
 == Fenêtré sans bordure
 
 Desktop fullscreen
-== Plein écran
+== Bureau plein écran
 
 Use modern OpenGL
 == Utiliser OpenGL moderne
