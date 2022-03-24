@@ -789,12 +789,18 @@ void CHud::PreparePlayerStateQuads()
 
 	// Quads for displaying weapons
 	float ScaleX, ScaleY;
+	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_HAMMER], ScaleX, ScaleY);
+	m_WeaponHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 22.f * ScaleX, 22.f * ScaleY);
+	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_GUN], ScaleX, ScaleY);
+	m_WeaponGunOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 23.f * ScaleX, 23.f * ScaleY);
 	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_SHOTGUN], ScaleX, ScaleY);
 	m_WeaponShotgunOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 24.f * ScaleX, 24.f * ScaleY);
 	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_GRENADE], ScaleX, ScaleY);
 	m_WeaponGrenadeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 24.f * ScaleX, 24.f * ScaleY);
 	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_LASER], ScaleX, ScaleY);
-	m_WeaponLaserOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 24.f * ScaleX, 24.f * ScaleY);
+	m_WeaponLaserOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 23.f * ScaleX, 23.f * ScaleY);
+	RenderTools()->GetSpriteScale(&g_pData->m_aSprites[SPRITE_PICKUP_NINJA], ScaleX, ScaleY);
+	m_WeaponNinjaOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 24.f * ScaleX, 24.f * ScaleY);
 
 	// Quads for displaying capabilities
 	m_EndlessJumpOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -817,11 +823,11 @@ void CHud::PreparePlayerStateQuads()
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
-	// Quads for displaying freeze bar
-	// m_FreezeBarFullLeftOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	// m_FreezeBarFullOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	// m_FreezeBarEmptyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	// m_FreezeBarEmptyRightOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	// Quads for displaying ninja bar
+	m_NinjaBarFullLeftOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 6.f, 12.f);
+	m_NinjaBarFullOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 1.f, 12.f);
+	m_NinjaBarEmptyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 1.f, 12.f);
+	m_NinjaBarEmptyRightOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 6.f, 12.f);
 }
 
 void CHud::RenderPlayerState(const int ClientID)
@@ -881,6 +887,32 @@ void CHud::RenderPlayerState(const int ClientID)
 	float y = 5 + 24;
 
 	// render weapons
+	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
+	{
+		if(pCharacter->m_ActiveWeapon != WEAPON_HAMMER)
+		{
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		}
+		Graphics()->QuadsSetRotation(pi * 7 / 4);
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupHammer);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponHammerOffset, x, y + 1);
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		x += 16;
+	}
+	if(pCharacter->m_aWeapons[WEAPON_GUN].m_Got)
+	{
+		if(pCharacter->m_ActiveWeapon != WEAPON_GUN)
+		{
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		}
+		Graphics()->QuadsSetRotation(pi * 7 / 4);
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGun);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponGunOffset, x, y + 0.5f);
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		x += 12;
+	}
 	if(pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got)
 	{
 		if(pCharacter->m_ActiveWeapon != WEAPON_SHOTGUN)
@@ -915,9 +947,31 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupLaser);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponLaserOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponLaserOffset, x, y + 0.5f);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		x += 12;
+	}
+	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
+	{
+		if(pCharacter->m_ActiveWeapon != WEAPON_NINJA)
+		{
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		}
+		Graphics()->QuadsSetRotation(pi * 7 / 4);
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupNinja);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponNinjaOffset, x, y);
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * m_pClient->m_GameWorld.GameTickSpeed() / 1000;
+		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * m_pClient->m_GameWorld.GameTickSpeed() / 1000 - m_pClient->m_GameWorld.GameTick(), 0, Max) / (float)Max;
+		if(NinjaProgress > 0.0f)
+		{
+			x = 5;
+			y += 12;
+			RenderNinjaBar(x, y, NinjaProgress);
+		}
 	}
 
 	// render capabilities
@@ -1021,6 +1075,59 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
 		x += 12;
 	}
+}
+
+void CHud::RenderNinjaBar(float x, float y, float Progress)
+{
+	Progress = clamp(Progress, 0.0f, 1.0f);
+	const float EndWidth = 6.0f;
+	const float BarHeight = 12.0f;
+	const float WholeBarWidth = 90.f;
+	const float MiddleBarWidth = WholeBarWidth - (EndWidth * 2.0f);
+
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NinjaBarFullLeftOffset, x, y);
+
+	x += EndWidth;
+
+	const float FullBarWidth = MiddleBarWidth * Progress;
+	const float EmptyBarWidth = MiddleBarWidth - FullBarWidth;
+
+	// full bar
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFull);
+	Graphics()->QuadsBegin();
+	if(Progress < 0.1f)
+	{
+		// prevent pixel puree, select only a small slice
+		Graphics()->QuadsSetSubset(0, 0, 0.07f, 1);
+	}
+	IGraphics::CQuadItem QuadFull(x, y, FullBarWidth, BarHeight);
+	Graphics()->QuadsDrawTL(&QuadFull, 1);
+	Graphics()->QuadsEnd();
+
+	// empty bar
+	// select the middle portion of the sprite so we don't get edge bleeding
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmpty);
+	Graphics()->QuadsBegin();
+	Graphics()->QuadsSetSubset(0.1f, 0, 0.6f, 1);
+
+	IGraphics::CQuadItem QuadEmpty(x + FullBarWidth, y, EmptyBarWidth, BarHeight);
+	Graphics()->QuadsDrawTL(&QuadEmpty, 1);
+	Graphics()->QuadsEnd();
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+
+	x += MiddleBarWidth;
+	if(Progress == 1.0f)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
+		Graphics()->QuadsSetRotation(pi);
+	}
+	else
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
+	}
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NinjaBarEmptyRightOffset, x, y);
+	Graphics()->QuadsSetRotation(0);
 }
 
 void CHud::RenderSpectatorHud()
