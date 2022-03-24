@@ -732,7 +732,7 @@ void CGameClient::UpdatePositions()
 
 			//dbg_msg("dbg", "max-distance: %f", distance(minpos, maxpos));
 
-			float multiplier = MapValue(500.0f, 100.0f, 0.1f, 0.007f, distance(m_oldMultiViewPos, vec2(posx, posy)));
+			float multiplier = MapValue(250.0f, 50.0f, 0.1f, 0.007f, distance(m_oldMultiViewPos, vec2(posx, posy)));
 
 
 			m_Snap.m_SpecInfo.m_Position = m_oldMultiViewPos + ((vec2(posx, posy) - m_oldMultiViewPos) * clamp(multiplier, 0.003f, 1.0f));

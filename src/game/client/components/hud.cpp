@@ -808,7 +808,7 @@ void CHud::RenderSpectatorHud()
 	char prMulti[128];
 	char help[128];
 	char version[128];
-	str_format(version, sizeof(version), "%s", "v3.8");
+	str_format(version, sizeof(version), "%s", "v3.9");
 	str_format(prMulti, sizeof(prMulti), "%s%d", GameClient()->m_prMultiViewZoom > 0 ? "+" : "", GameClient()->m_prMultiViewZoom);
 	str_format(MultiView, sizeof(MultiView), "%s (zoom: %.1f (%s), cdist: %.0f, pdist: %.0f, ids: %s, speed: %.3f, vel: %.1f)",
 												version,
