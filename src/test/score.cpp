@@ -356,7 +356,7 @@ TEST_P(Points, NoPointsTop)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult, {"-------- Top Points --------",
-					   "-------------------------------"});
+					     "-------------------------------"});
 }
 
 TEST_P(Points, OnePoints)
