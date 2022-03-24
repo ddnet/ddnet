@@ -2,8 +2,8 @@
 #originally created by:
 #
 #modified by:
-#	lordskelethom	2010-05-30 14:01:11
-#	Ubu				2010-05-30 18:41:43
+#	lordskelethom		2010-05-30 14:01:11
+#	Ubu			2010-05-30 18:41:43
 #	Choupom			2010-10-11 00:32:54
 #	Choupom			2010-11-21 14:07:30
 #	Choupom			2011-01-05 22:13:44
@@ -12,13 +12,14 @@
 #	Choupom			2011-02-13 12:24:15
 #	Choupom			2011-04-02 19:53:54
 #	Choupom			2011-04-03 23:00:57
-#	Ubu				2011-04-04 21:09:05
+#	Ubu			2011-04-04 21:09:05
 #	Choupom			2011-07-02 19:23:49
 #	SunnyPistache & Pipou   2020-07-09 21:09:00
 #	SunnyPistache & Pipou   2020-10-03 09:29:00
 #	SunnyPistache & Pipou   2020-11-07 11:30:00
-#	Chairn					2021-05-31 20:00:00
+#	Chairn			2021-05-31 20:00:00
 #	T tee			2021-06-01 00:39:00
+#	T tee & NRK & Chairn	2022-03-23 20:52:52
 ##### /authors #####
 
 ##### translated strings #####
@@ -1240,7 +1241,7 @@ Replay
 == Replay
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== La largeure de la texture %s n'est pas divisible par %d, ou la hauteur n'est pas divisible par %d, ce qui peut causer des bugs visuels. 
+== La largeur de la texture %s n'est pas divisible par %d, ou la hauteur n'est pas divisible par %d, ce qui peut causer des bugs visuels.
 
 AFR
 == AFR
@@ -1264,7 +1265,7 @@ CHN
 == CHN
 
 Getting server list from master server
-== Obtenir la liste des serveurs depuis le serveur maître
+== Obtention de la liste des serveurs depuis le serveur maître
 
 Leak IP
 == Fuiter l'IP
@@ -1276,13 +1277,13 @@ Dummy
 == Dummy
 
 Windowed
-== Fenêtré 
+== Fenêtré
 
 Windowed borderless
 == Fenêtré sans bordure
 
 Desktop fullscreen
-== Plein écran
+== Bureau plein écran
 
 Use modern OpenGL
 == Utiliser OpenGL moderne
@@ -1354,16 +1355,16 @@ Windowed fullscreen
 == Plein écran fenêtré
 
 Run on join
-== Éxécuter en joignant
+== Exécuter en rejoignant
 
 Chat command (e.g. showall 1)
-== Commande du tchat (e.g. showall 1)
+== Commande du chat (ex: showall 1)
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== La texture %s n'est pas au format RGBA, ce qui causera des bugs visuels.
 
 Join Tutorial Server
-== 
+== Rejoindre un serveur de tutoriel
 
 Skip Tutorial
-== 
+== Passer le tutoriel
