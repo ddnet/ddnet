@@ -1256,11 +1256,11 @@ void CGameContext::OnClientEnter(int ClientID)
 		for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
 			pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
 		{
-			if(!str_comp(pCmd->m_pName, "w") || !str_comp(pCmd->m_pName, "whisper"))
+			if(!str_comp_nocase(pCmd->m_pName, "w") || !str_comp_nocase(pCmd->m_pName, "whisper"))
 				continue;
 
 			const char *pName = pCmd->m_pName;
-			if(!str_comp(pCmd->m_pName, "r"))
+			if(!str_comp_nocase(pCmd->m_pName, "r"))
 				pName = "rescue";
 
 			protocol7::CNetMsg_Sv_CommandInfo Msg;
@@ -2104,7 +2104,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				m_VoteVictim = SpectateID;
 			}
 
-			if(aCmd[0] && str_comp(aCmd, "info") != 0)
+			if(aCmd[0] && str_comp_nocase(aCmd, "info") != 0)
 				CallVote(ClientID, aDesc, aCmd, aReason, aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
