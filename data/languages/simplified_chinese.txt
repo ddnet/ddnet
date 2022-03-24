@@ -17,6 +17,7 @@
 # 2021-12-21 cheeser0613
 # 2022-02-07 cheeser0613
 # 2022-03-19 cheeser0613
+# 2022-03-22 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1353,7 +1354,7 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == %s 材质文件并非RGBA格式因此可能会导致视觉错误
 
 Join Tutorial Server
-== 
+== 进入教学服务器
 
 Skip Tutorial
-== 
+== 跳过教学

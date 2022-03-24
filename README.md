@@ -36,6 +36,8 @@ You can install the required libraries on your system, `touch CMakeLists.txt` an
 
     sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev libvulkan-dev glslang-tools spirv-tools
 
+On older distributions like Ubuntu 18.04 don't install `google-mock`, but instead set `-DDOWNLOAD_GTEST=ON` when building to get a more recent gtest/gmock version.
+
 Or on CentOS, RedHat and AlmaLinux like this:
 
     sudo yum install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel pnglite-devel SDL2-devel sqlite-devel wavpack-devel libx264-devel ffmpeg-devel vulkan-devel glslang spirv-tools
