@@ -11,6 +11,7 @@
 # 2022-02-07 cheeser0613
 # 2022-03-19 cheeser0613
 # 2022-03-22 cheeser0613
+# 2022-03-24 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1058,7 +1059,7 @@ Server best:
 == 伺服器最佳
 
 Learn
-== 教程
+== 教程Wiki
 
 Use high DPI
 == 使用高 DPI
@@ -1344,19 +1345,19 @@ Skip Tutorial
 == 跳過教學
 
 Renderer
-== 
+== 渲染設定
 
 default
-== 
+== 默認
 
 custom
-== 
+== 自定義
 
 Graphics cards
-== 
+== 顯示卡
 
 auto
-== 
+== 自動
 
 Tutorial
-== 
+== 進入教學
