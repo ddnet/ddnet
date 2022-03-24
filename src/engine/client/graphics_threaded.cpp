@@ -2117,14 +2117,14 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
 
-	Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-	if(Cmd.m_Attributes == NULL)
+	Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	if(Cmd.m_pAttributes == nullptr)
 		return -1;
 
 	if(!AddCmd(
 		   Cmd, [&] {
-			   Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-			   if(Cmd.m_Attributes == 0x0)
+			   Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+			   if(Cmd.m_pAttributes == nullptr)
 			   {
 				   dbg_msg("graphics", "failed to allocate data for upload data");
 				   return false;
@@ -2136,7 +2136,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 		return -1;
 	}
 
-	mem_copy(Cmd.m_Attributes, pContainerInfo->m_Attributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_Attributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
 
@@ -2183,14 +2183,14 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
 
-	Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-	if(Cmd.m_Attributes == NULL)
+	Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	if(Cmd.m_pAttributes == nullptr)
 		return;
 
 	if(!AddCmd(
 		   Cmd, [&] {
-			   Cmd.m_Attributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-			   if(Cmd.m_Attributes == 0x0)
+			   Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+			   if(Cmd.m_pAttributes == nullptr)
 			   {
 				   dbg_msg("graphics", "failed to allocate data for upload data");
 				   return false;
@@ -2202,7 +2202,7 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 		return;
 	}
 
-	mem_copy(Cmd.m_Attributes, pContainerInfo->m_Attributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_Attributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
 }

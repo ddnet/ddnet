@@ -40,7 +40,7 @@ class CMapLayers : public CComponent
 	struct STileLayerVisuals
 	{
 		STileLayerVisuals() :
-			m_TilesOfLayer(NULL), m_BorderTop(NULL), m_BorderLeft(NULL), m_BorderRight(NULL), m_BorderBottom(NULL)
+			m_pTilesOfLayer(NULL), m_pBorderTop(NULL), m_pBorderLeft(NULL), m_pBorderRight(NULL), m_pBorderBottom(NULL)
 		{
 			m_Width = 0;
 			m_Height = 0;
@@ -86,7 +86,7 @@ class CMapLayers : public CComponent
 				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xFFFFFFFE) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x00000001);
 			}
 		};
-		STileVisual *m_TilesOfLayer;
+		STileVisual *m_pTilesOfLayer;
 
 		STileVisual m_BorderTopLeft;
 		STileVisual m_BorderTopRight;
@@ -95,10 +95,10 @@ class CMapLayers : public CComponent
 
 		STileVisual m_BorderKillTile; //end of map kill tile -- game layer only
 
-		STileVisual *m_BorderTop;
-		STileVisual *m_BorderLeft;
-		STileVisual *m_BorderRight;
-		STileVisual *m_BorderBottom;
+		STileVisual *m_pBorderTop;
+		STileVisual *m_pBorderLeft;
+		STileVisual *m_pBorderRight;
+		STileVisual *m_pBorderBottom;
 
 		unsigned int m_Width;
 		unsigned int m_Height;
@@ -110,7 +110,7 @@ class CMapLayers : public CComponent
 	struct SQuadLayerVisuals
 	{
 		SQuadLayerVisuals() :
-			m_QuadNum(0), m_QuadsOfLayer(NULL), m_BufferContainerIndex(-1), m_IsTextured(false) {}
+			m_QuadNum(0), m_pQuadsOfLayer(NULL), m_BufferContainerIndex(-1), m_IsTextured(false) {}
 
 		struct SQuadVisual
 		{
@@ -121,7 +121,7 @@ class CMapLayers : public CComponent
 		};
 
 		int m_QuadNum;
-		SQuadVisual *m_QuadsOfLayer;
+		SQuadVisual *m_pQuadsOfLayer;
 
 		int m_BufferContainerIndex;
 		bool m_IsTextured;

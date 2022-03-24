@@ -105,7 +105,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	m_Thread = thread_init(ThreadFunc, this, "Graphics thread");
+	m_pThread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
 	m_BufferSwapCond.wait(Lock, [this]() -> bool { return m_Started; });
 }
@@ -118,7 +118,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 		m_BufferSwapCond.notify_all();
 	}
-	thread_wait(m_Thread);
+	thread_wait(m_pThread);
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
