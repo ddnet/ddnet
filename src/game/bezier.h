@@ -12,13 +12,9 @@ class CCubicBezier
 	float b;
 	float c;
 	float d;
-	CCubicBezier(float a, float b, float c, float d)
-	{
-		this->a = a;
-		this->b = b;
-		this->c = c;
-		this->d = d;
-	}
+	CCubicBezier(float a_, float b_, float c_, float d_)
+        : a(a_), b(b_), c(c_), d(d_)
+	{}
 
 public:
 	CCubicBezier() {}
