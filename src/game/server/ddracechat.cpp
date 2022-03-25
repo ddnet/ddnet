@@ -667,7 +667,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	if(NumCurrentVotes >= NumRequiredVotes)
 	{
-		Teams.EnablePractice(Team);
+		Teams.SetPractice(Team, true);
 		pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
 	}
 }
