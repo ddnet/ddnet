@@ -77,8 +77,8 @@ private:
 
 	std::atomic_bool m_Shutdown{false};
 	CSemaphore m_NumElem;
-	int FirstElem;
-	int LastElem;
+	int m_FirstElem;
+	int m_LastElem;
 	std::unique_ptr<struct CSqlExecData> m_aTasks[512];
 };
 

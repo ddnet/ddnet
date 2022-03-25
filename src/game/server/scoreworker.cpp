@@ -647,7 +647,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(3));
+		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
@@ -728,7 +728,7 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(5));
+		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(5));
 		CTeamrank Teamrank;
 		if(Teamrank.NextSqlResult(pSqlServer, &End, pError, ErrorSize))
 		{

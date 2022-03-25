@@ -105,7 +105,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	m_Thread = thread_init(ThreadFunc, this, "Graphics thread");
+	m_pThread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
 	m_BufferSwapCond.wait(Lock, [this]() -> bool { return m_Started; });
 }
@@ -118,16 +118,21 @@ void CGraphicsBackend_Threaded::StopProcessor()
 		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 		m_BufferSwapCond.notify_all();
 	}
-	thread_wait(m_Thread);
+	thread_wait(m_pThread);
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
+#ifdef CONF_WEBASM
+	// run everything single threaded for now, context binding in a thread seems to not work as of now
+	RunBufferSingleThreadedUnsafe(pBuffer);
+#else
 	WaitForIdle();
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_pBuffer = pBuffer;
 	m_BufferInProcess.store(true, std::memory_order_relaxed);
 	m_BufferSwapCond.notify_all();
+#endif
 }
 
 void CGraphicsBackend_Threaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer)
@@ -668,6 +673,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		pName = "OpenGL";
+#ifndef CONF_BACKEND_OPENGL_ES
 		if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_LEGACY)
 		{
 			Major = 1;
@@ -689,6 +695,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 			Patch = 0;
 			return true;
 		}
+#endif
 	}
 	else if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
@@ -751,10 +758,10 @@ static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int H
 	pVMode->m_Format = pMode->format;
 }
 
-void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen)
+void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID)
 {
 	SDL_DisplayMode DesktopMode;
-	int maxModes = SDL_GetNumDisplayModes(Screen);
+	int maxModes = SDL_GetNumDisplayModes(ScreenID);
 	int numModes = 0;
 
 	// Only collect fullscreen modes when requested, that makes sure in windowed mode no refresh rates are shown that aren't supported without
@@ -762,7 +769,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	bool IsFullscreenDestkop = m_pWindow != NULL && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
 	bool CollectFullscreenModes = m_pWindow == NULL || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
 
-	if(SDL_GetDesktopDisplayMode(Screen, &DesktopMode) < 0)
+	if(SDL_GetDesktopDisplayMode(ScreenID, &DesktopMode) < 0)
 	{
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 	}
@@ -773,7 +780,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	for(int i = 0; i < maxModes && NumModes < ModeCount; i++)
 	{
 		SDL_DisplayMode mode;
-		if(SDL_GetDisplayMode(Screen, i, &mode) < 0)
+		if(SDL_GetDisplayMode(ScreenID, i, &mode) < 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 			continue;
@@ -815,20 +822,20 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	*pNumModes = numModes;
 }
 
-void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen)
+void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID)
 {
 	SDL_DisplayMode DPMode;
 	// if "real" fullscreen, obtain the video mode for that
 	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN)
 	{
-		if(SDL_GetCurrentDisplayMode(Screen, &DPMode))
+		if(SDL_GetCurrentDisplayMode(ScreenID, &DPMode))
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}
 	}
 	else
 	{
-		if(SDL_GetDesktopDisplayMode(Screen, &DPMode) < 0)
+		if(SDL_GetDesktopDisplayMode(ScreenID, &DPMode) < 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}

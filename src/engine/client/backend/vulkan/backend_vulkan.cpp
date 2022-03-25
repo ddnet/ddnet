@@ -1911,7 +1911,7 @@ protected:
 			FreeImageMemBlock(TextureOutline.m_ImgMem);
 			vkDestroyImage(m_VKDevice, TextureOutline.m_Img, nullptr);
 
-			vkDestroyImageView(m_VKDevice, Texture.m_ImgView, nullptr);
+			vkDestroyImageView(m_VKDevice, TextureOutline.m_ImgView, nullptr);
 		}
 
 		DestroyTextDescriptorSets(Texture, TextureOutline);
