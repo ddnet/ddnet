@@ -34,6 +34,7 @@
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
+#include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
@@ -131,6 +132,7 @@ public:
 
 	CPlayers m_Players;
 	CNamePlates m_NamePlates;
+	CFreezeBars m_FreezeBars;
 	CItems m_Items;
 	CMapImages m_MapImages;
 

@@ -39,7 +39,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_Jetpack = pChr->m_Jetpack;
 	m_NinjaJetpack = pChr->m_NinjaJetpack;
 	m_FreezeTime = pChr->m_FreezeTime;
-	m_FreezeTick = pChr->Server()->Tick() - pChr->m_FreezeTick;
+	m_FreezeTick = pChr->Server()->Tick() - pChr->m_Core.m_FreezeTick;
 
 	m_DeepFreeze = pChr->m_DeepFreeze;
 	m_LiveFreeze = pChr->m_LiveFreeze;
@@ -134,7 +134,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Jetpack = m_Jetpack;
 	pChr->m_NinjaJetpack = m_NinjaJetpack;
 	pChr->m_FreezeTime = m_FreezeTime;
-	pChr->m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
+	pChr->m_Core.m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
 
 	pChr->m_DeepFreeze = m_DeepFreeze;
 	pChr->m_LiveFreeze = m_LiveFreeze;

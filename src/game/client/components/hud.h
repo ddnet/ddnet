@@ -54,7 +54,6 @@ class CHud : public CComponent
 
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(const int ClientID);
-	void RenderNinjaBar(float x, float y, float Progress);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -79,6 +78,7 @@ public:
 	// DDRace
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	void RenderProgressBar(float x, const float y, const float width, const float height, float Progress, float Alpha = 1.0f);
 
 private:
 	void RenderRecord();
@@ -125,8 +125,6 @@ private:
 	int m_LiveFrozenOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
-	int m_NinjaBarFullLeftOffset;
-	int m_NinjaBarEmptyRightOffset;
 };
 
 #endif

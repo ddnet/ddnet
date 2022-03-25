@@ -982,10 +982,10 @@ bool CCharacter::Freeze(int Seconds)
 		return false;
 	if((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed()) && Seconds != -1)
 		return false;
-	if(m_FreezeTick < GameWorld()->GameTick() - GameWorld()->GameTickSpeed() || Seconds == -1)
+	if(m_Core.m_FreezeTick < GameWorld()->GameTick() - GameWorld()->GameTickSpeed() || Seconds == -1)
 	{
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * GameWorld()->GameTickSpeed();
-		m_FreezeTick = GameWorld()->GameTick();
+		m_Core.m_FreezeTick = GameWorld()->GameTick();
 		return true;
 	}
 	return false;
@@ -1003,7 +1003,7 @@ bool CCharacter::UnFreeze()
 		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
-		m_FreezeTick = 0;
+		m_Core.m_FreezeTick = 0;
 		m_FrozenLastTick = true;
 		return true;
 	}
@@ -1100,7 +1100,7 @@ void CCharacter::ResetPrediction()
 	m_Core.m_Collision = true;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
-	m_FreezeTick = 0;
+	m_Core.m_FreezeTick = 0;
 	m_DeepFreeze = false;
 	m_LiveFreeze = false;
 	m_FrozenLastTick = false;
@@ -1241,7 +1241,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		// detect unfreeze (in case the player was frozen in the tile prediction and not correctly unfrozen)
 		if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
 			m_DeepFreeze = false;
-		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_FreezeTick || absolute(pChar->m_VelX) == 256 * 10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
+		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_Core.m_FreezeTick || absolute(pChar->m_VelX) == 256 * 10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
 		{
 			m_DeepFreeze = false;
 			UnFreeze();

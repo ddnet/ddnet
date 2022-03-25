@@ -45,6 +45,7 @@
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
+#include "components/freezebars.h"
 #include "components/hud.h"
 #include "components/items.h"
 #include "components/killmessages.h"
@@ -125,6 +126,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_Particles.m_RenderExplosions);
 	m_All.Add(&m_NamePlates);
 	m_All.Add(&m_Particles.m_RenderGeneral);
+	m_All.Add(&m_FreezeBars);
 	m_All.Add(&m_DamageInd);
 	m_All.Add(&m_Hud);
 	m_All.Add(&m_Spectator);

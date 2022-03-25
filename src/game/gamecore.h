@@ -290,6 +290,7 @@ public:
 	bool m_HasTelegunGun;
 	bool m_HasTelegunGrenade;
 	bool m_HasTelegunLaser;
+	int m_FreezeTick;
 	int m_FreezeEnd;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
