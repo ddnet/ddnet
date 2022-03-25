@@ -28,8 +28,8 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 	m_pFormat = 0;
 	m_pOptDict = 0;
 
-	m_VideoCodec = 0;
-	m_AudioCodec = 0;
+	m_pVideoCodec = 0;
+	m_pAudioCodec = 0;
 
 	m_Width = Width;
 	m_Height = Height;
@@ -117,7 +117,7 @@ void CVideo::Start()
 	 * and initialize the codecs. */
 	if(m_pFormat->video_codec != AV_CODEC_ID_NONE)
 	{
-		if(!AddStream(&m_VideoStream, m_pFormatContext, &m_VideoCodec, m_pFormat->video_codec))
+		if(!AddStream(&m_VideoStream, m_pFormatContext, &m_pVideoCodec, m_pFormat->video_codec))
 			return;
 	}
 	else
@@ -127,7 +127,7 @@ void CVideo::Start()
 
 	if(m_HasAudio && m_pFormat->audio_codec != AV_CODEC_ID_NONE)
 	{
-		if(!AddStream(&m_AudioStream, m_pFormatContext, &m_AudioCodec, m_pFormat->audio_codec))
+		if(!AddStream(&m_AudioStream, m_pFormatContext, &m_pAudioCodec, m_pFormat->audio_codec))
 			return;
 	}
 	else
@@ -640,7 +640,7 @@ bool CVideo::OpenVideo()
 	av_dict_copy(&opt, m_pOptDict, 0);
 
 	/* open the codec */
-	Ret = avcodec_open2(c, m_VideoCodec, &opt);
+	Ret = avcodec_open2(c, m_pVideoCodec, &opt);
 	av_dict_free(&opt);
 	if(Ret < 0)
 	{
@@ -709,7 +709,7 @@ bool CVideo::OpenAudio()
 	/* open it */
 	//m_dbgfile = fopen("/tmp/pcm_dbg", "wb");
 	av_dict_copy(&opt, m_pOptDict, 0);
-	Ret = avcodec_open2(c, m_AudioCodec, &opt);
+	Ret = avcodec_open2(c, m_pAudioCodec, &opt);
 	av_dict_free(&opt);
 	if(Ret < 0)
 	{

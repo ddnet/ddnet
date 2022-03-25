@@ -1797,7 +1797,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
 {
-	return abs(((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) * 0.5);
+	return abs(((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) * 0.5f);
 }
 
 bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
@@ -2350,7 +2350,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	if(m_ShowPicker)
 	{
 		CUIRect Screen = *UI()->Screen();
-		float Size = 32.0 * 16.0f;
+		float Size = 32.0f * 16.0f;
 		float w = Size * (Screen.w / View.w);
 		float h = Size * (Screen.h / View.h);
 		float x = -(View.x / Screen.w) * w;

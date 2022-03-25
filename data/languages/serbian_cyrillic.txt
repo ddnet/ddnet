@@ -913,12 +913,6 @@ UI mouse s.
 may cause delay
 == може проузроковати кашњење
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (само у iGPUs)
-
-Multiple texture units (disable for macOS)
-== Вишеструке текстурне јединице (угашено за macOS)
-
 Use high DPI
 == Користи високи DPI
 
@@ -1265,7 +1259,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1338,4 +1344,10 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
 == 

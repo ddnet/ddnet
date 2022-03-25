@@ -1982,7 +1982,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferContainer(const CCommand
 
 	for(int i = 0; i < pCommand->m_AttrCount; ++i)
 	{
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_Attributes[i];
+		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
 		BufferContainer.m_ContainerInfo.m_Attributes.push_back(Attr);
 	}
 
@@ -1998,7 +1998,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferContainer(const CCommand
 
 	for(int i = 0; i < pCommand->m_AttrCount; ++i)
 	{
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_Attributes[i];
+		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
 		BufferContainer.m_ContainerInfo.m_Attributes.push_back(Attr);
 	}
 

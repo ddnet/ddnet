@@ -946,15 +946,6 @@ may cause delay
 Screen
 == 画面
 
-Use modern OpenGL
-== 最新の OpenGL を使用
-
-Preinit VBO (iGPUs only)
-== VBO を事前初期化（統合型グラフィックのみ）
-
-Multiple texture units (disable for macOS)
-== 多重テクスチャユニット（macOS 以外）
-
 Use high DPI
 == 高 DPI 対応モード
 
@@ -1322,6 +1313,21 @@ Config directory
 Windowed fullscreen
 == 
 
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
 Kill Messages
 == 
 
@@ -1338,4 +1344,10 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
 == 

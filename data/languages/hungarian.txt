@@ -886,17 +886,11 @@ Deactivate
 Welcome to DDNet
 == Üdvözlet a DDNet-en
 
-Preinit VBO (iGPUs only)
-== VBO használata (csak iGPU)
-
 Threaded sound loading
 == Csavarmenetes hang betöltése
 
 Activate
 == Aktiválás
-
-Multiple texture units (disable for macOS)
-== Több textúra egységek (kapcsolja ki macOS esetén)
 
 UI mouse s.
 == UI egér sebesség
@@ -1232,9 +1226,6 @@ Windowed borderless
 Desktop fullscreen
 == Asztalos Teljesképernyő
 
-Use modern OpenGL
-== Modern OpenGL Használata
-
 Show client IDs
 == Kliens ID-k Mutatása
 
@@ -1339,3 +1330,24 @@ Run on join
 
 Chat command (e.g. showall 1)
 == Chat parancs (például showall 1)
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
