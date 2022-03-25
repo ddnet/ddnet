@@ -887,12 +887,6 @@ may cause delay
 Screen
 == Pantalla
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (solo iGPU)
-
-Multiple texture units (disable for macOS)
-== Múltiples unidades de textura (deshabilitar para macOS)
-
 Use high DPI
 == Usar DPI alto
 
@@ -1266,9 +1260,6 @@ Windowed borderless
 Desktop fullscreen
 == Pantalla completa de escritorio
 
-Use modern OpenGL
-== Usar OpenGL moderno
-
 Show client IDs
 == Mostrar IDs de clientes
 
@@ -1348,4 +1339,25 @@ Skip Tutorial
 == 
 
 Windowed fullscreen
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
 == 

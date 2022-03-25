@@ -960,12 +960,6 @@ may cause delay
 Screen
 == Экран
 
-Preinit VBO (iGPUs only)
-== Преинициал-ть VBO (только iGPU)
-
-Multiple texture units (disable for macOS)
-== Улучш. блоки текстур (откл. для macOS)
-
 Use high DPI
 == Использовать высокую чувств.
 
@@ -1291,9 +1285,6 @@ Windowed borderless
 Desktop fullscreen
 == Полноэкранный
 
-Use modern OpenGL
-== Использовать новый OpenGL
-
 Tee
 == Tee
 
@@ -1342,8 +1333,29 @@ Config directory
 Windowed fullscreen
 == 
 
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
 == 

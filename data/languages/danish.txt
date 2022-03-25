@@ -920,12 +920,6 @@ may cause delay
 Screen
 == Skærm
 
-Preinit VBO (iGPUs only)
-== Præinit VBO (iGPUs alene)
-
-Multiple texture units (disable for macOS)
-== Flere teksturenheder (deaktiver for macOS)
-
 Use high DPI
 == Brug højt DPI
 
@@ -1281,7 +1275,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Show client IDs
@@ -1339,4 +1345,10 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
 == 
