@@ -9,13 +9,6 @@
 class CAuthManager
 {
 private:
-	enum
-	{
-		AUTHED_NO = 0,
-		AUTHED_HELPER,
-		AUTHED_MOD,
-		AUTHED_ADMIN
-	};
 	struct CKey
 	{
 		char m_aIdent[64];

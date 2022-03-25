@@ -1059,7 +1059,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_VertBufferBindingIndex]);
 
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_Attributes[i];
+		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
 
 		if(Attr.m_FuncType == 0)
 			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, (GLboolean)Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset);
@@ -1091,7 +1091,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferContainer(const CComma
 		glEnableVertexAttribArray((GLuint)i);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_VertBufferBindingIndex]);
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_Attributes[i];
+		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
 		if(Attr.m_FuncType == 0)
 			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset);
 		else if(Attr.m_FuncType == 1)
