@@ -17,7 +17,7 @@ CReplyToPing::CReplyToPing(CChatHelper *pChatHelper, const char *pMessageAuthor,
 	m_SizeOfResponse = SizeOfResponse;
 }
 
-bool CReplyToPing::WhyWar(const char *pVictim)
+bool CReplyToPing::WhyWar(const char *pVictim, bool IsCheck)
 {
 	if(!pVictim)
 		return false;
@@ -30,6 +30,8 @@ bool CReplyToPing::WhyWar(const char *pVictim)
 	{
 		HasWar = false;
 		while(str_endswith(aVictim, "?")) // cut off the question marks from the victim name
+			aVictim[str_length(aVictim) - 1] = '\0';
+		while(str_endswith(aVictim, " ")) // cut off spaces from victim name 'why war foo ?' -> 'foo ?' -> 'foo ' -> 'foo'
 			aVictim[str_length(aVictim) - 1] = '\0';
 		// cut off own name from the victime name if question in this format "why do you war foo (your name)"
 		char aOwnName[MAX_NAME_LENGTH + 3];
@@ -110,6 +112,11 @@ bool CReplyToPing::WhyWar(const char *pVictim)
 			return true;
 		}
 	}
+	if(IsCheck)
+	{
+		str_format(m_pResponse, m_SizeOfResponse, "%s: '%s' is not on my warlist.", m_pMessageAuthor, aVictim);
+		return true;
+	}
 	return false;
 }
 
@@ -173,7 +180,21 @@ bool CReplyToPing::Reply()
 		}
 	}
 	// check if a player has war or not
-	// TODO:
+	const char *pDoYou = nullptr;
+	if(!pDoYou && (pDoYou = str_find_nocase(m_pMessage, "you war ")))
+		pDoYou = pDoYou + str_length("you war ");
+	if(!pDoYou && (pDoYou = str_find_nocase(m_pMessage, "you in war with ")))
+		pDoYou = pDoYou + str_length("you in war with ");
+	// "hast du war mit"
+	// "hast du eig war mit"
+	// "hast du eigentlich war mit"
+	// "hast du überhaupt war mit"
+	// "hast du einen war mit"
+	if(!pDoYou && (pDoYou = LangParser().StrFindOrder(m_pMessage, 2, "hast du ", "war mit ")))
+		pDoYou = pDoYou + str_length("war mit ");
+	if(pDoYou)
+		if(WhyWar(pDoYou, true))
+			return true;
 
 	// check war reason for others
 	const char *pWhy = str_find_nocase(m_pMessage, "why has ");
@@ -255,7 +276,7 @@ bool CReplyToPing::Reply()
 
 		// trim
 		int trim = 0;
-		while(aWhy[trim] && aWhy[trim] == ' ')
+		while(aWhy[trim] == ' ')
 			trim++;
 
 		if(CutOffWar != -1)
@@ -303,11 +324,11 @@ bool CReplyToPing::Reply()
 	// help
 	if(str_find_nocase(m_pMessage, "help") || str_find_nocase(m_pMessage, "hilfe"))
 	{
-        if(!str_find_nocase(m_pMessage, "helper"))
-        {
-            str_format(m_pResponse, m_SizeOfResponse, "%s where? what?", m_pMessageAuthor);
-            return true;
-        }
+		if(!str_find_nocase(m_pMessage, "helper"))
+		{
+			str_format(m_pResponse, m_SizeOfResponse, "%s where? what?", m_pMessageAuthor);
+			return true;
+		}
 	}
 	// small talk
 	if(str_find_nocase(m_pMessage, "how are you") ||
