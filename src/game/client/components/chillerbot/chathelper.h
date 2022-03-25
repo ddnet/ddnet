@@ -81,7 +81,6 @@ class CChatHelper : public CComponent
 		for(int i = 0; i < PING_QUEUE_SIZE - 1; i++)
 			m_aLastPings[i] = m_aLastPings[i + 1];
 	}
-	CReplyToPing *m_pReplyToPing;
 
 	char m_aGreetName[32];
 	char m_aLastAfkPing[2048];
@@ -106,7 +105,6 @@ class CChatHelper : public CComponent
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual void OnConsoleInit() override;
 	virtual void OnInit() override;
-	virtual void OnShutdown() override;
 
 	static void ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);

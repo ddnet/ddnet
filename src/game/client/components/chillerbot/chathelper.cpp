@@ -10,7 +10,6 @@
 
 CChatHelper::CChatHelper()
 {
-	m_pReplyToPing = nullptr;
 	mem_zero(m_aaChatFilter, sizeof(m_aaChatFilter));
 #define CHILLERBOT_CHAT_CMD(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include "chatcommands.h"
@@ -25,22 +24,12 @@ void CChatHelper::RegisterCommand(const char *pName, const char *pParams, int fl
 void CChatHelper::OnInit()
 {
 	m_pChillerBot = &m_pClient->m_ChillerBotUX;
-	m_pReplyToPing = new CReplyToPing(this);
 
 	m_aGreetName[0] = '\0';
 	m_NextGreetClear = 0;
 	m_NextMessageSend = 0;
 	m_aLastAfkPing[0] = '\0';
 	mem_zero(m_aSendBuffer, sizeof(m_aSendBuffer));
-}
-
-void CChatHelper::OnShutdown()
-{
-	if(m_pReplyToPing)
-	{
-		delete m_pReplyToPing;
-		m_pReplyToPing = nullptr;
-	}
 }
 
 void CChatHelper::OnRender()
@@ -122,7 +111,8 @@ void CChatHelper::ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData
 	while(aMessage[0])
 	{
 		pSelf->PopPing(aName, sizeof(aName), aClan, sizeof(aClan), aMessage, sizeof(aMessage));
-		if(pSelf->m_pReplyToPing->ReplyToLastPing(aName, aClan, aMessage, aResponse, sizeof(aResponse)))
+		CReplyToPing ReplyToPing = CReplyToPing(pSelf, aName, aClan, aMessage, aResponse, sizeof(aResponse));
+		if(ReplyToPing.Reply())
 		{
 			if(aResponse[0])
 			{
@@ -455,7 +445,9 @@ bool CChatHelper::FilterChat(int ClientID, int Team, const char *pLine)
 				// dbg_msg("chillerbot", "fixname 128 player '%s' -> '%s'", m_pClient->m_aClients[ClientID].m_aName, aName);
 			}
 			char aResponse[1024];
-			if(m_pReplyToPing->ReplyToLastPing(aName, m_pClient->m_aClients[ClientID].m_aClan, pLine, aResponse, sizeof(aResponse)))
+			// if(m_pReplyToPing->ReplyToLastPing(aName, m_pClient->m_aClients[ClientID].m_aClan, pLine, aResponse, sizeof(aResponse)))
+			CReplyToPing ReplyToPing = CReplyToPing(this, aName, m_pClient->m_aClients[ClientID].m_aClan, pLine, aResponse, sizeof(aResponse));
+			if(ReplyToPing.Reply())
 			{
 				if(aResponse[0])
 					SayBuffer(aResponse);
