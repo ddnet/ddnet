@@ -6,6 +6,50 @@ if [ -z ${1+x} ]; then
 	exit 1
 fi
 
+if [ -z ${2+x} ]; then 
+	echo "Specify the target system"
+	exit 1
+fi
+
+OS_NAME=$2
+ 
+COMPILEFLAGS="-fPIC"
+LINKFLAGS="-fPIC"
+if [[ "${OS_NAME}" == "webasm" ]]; then
+	COMPILEFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
+	LINKFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1 -s WASM=1"
+fi
+
+if [[ "${OS_NAME}" == "android" ]]; then
+	OS_NAME_PATH="android"
+elif [[ "${OS_NAME}" == "windows" ]]; then
+	OS_NAME_PATH="windows"
+elif [[ "${OS_NAME}" == "linux" ]]; then
+	OS_NAME_PATH="linux"
+elif [[ "${OS_NAME}" == "webasm" ]]; then
+	OS_NAME_PATH="webasm"
+fi
+
+COMP_HAS_ARM32=0
+COMP_HAS_ARM64=0
+COMP_HAS_x86=0
+COMP_HAS_x64=0
+COMP_HAS_WEBASM=0
+
+if [[ "${OS_NAME}" == "android" ]]; then
+	COMP_HAS_ARM32=1
+	COMP_HAS_ARM64=1
+	COMP_HAS_x86=1
+	COMP_HAS_x64=1
+elif [[ "${OS_NAME}" == "linux" ]]; then
+	COMP_HAS_x64=1
+elif [[ "${OS_NAME}" == "windows" ]]; then
+	COMP_HAS_x86=1
+	COMP_HAS_x64=1
+elif [[ "${OS_NAME}" == "webasm" ]]; then
+	COMP_HAS_WEBASM=1
+fi
+
 mkdir -p "$1"
 cd "$1" || exit 1
 
@@ -15,15 +59,15 @@ function build_cmake_lib() {
 	fi
 	(
 		cd "${1}" || exit 1
-		cp "${CURDIR}"/scripts/android/cmake_lib_compile.sh cmake_lib_compile.sh
-		./cmake_lib_compile.sh "$_ANDROID_ABI_LEVEL"
+		cp "${CURDIR}"/scripts/compile_libs/cmake_lib_compile.sh cmake_lib_compile.sh
+		./cmake_lib_compile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
 }
 
 _ANDROID_ABI_LEVEL=24
 
-mkdir -p android_libs
-cd android_libs || exit 1
+mkdir -p compile_libs
+cd compile_libs || exit 1
 
 # start with openssl
 (
@@ -37,16 +81,19 @@ cd android_libs || exit 1
 		if [[ "$_WAS_THERE_SSLFILE" == 0 ]]; then
 			./autogen.sh
 		fi
-		cp "${CURDIR}"/scripts/android/make_android_openssl.sh make_android_openssl.sh
-		./make_android_openssl.sh "$_ANDROID_ABI_LEVEL"
+		cp "${CURDIR}"/scripts/compile_libs/make_lib_openssl.sh make_lib_openssl.sh
+		./make_lib_openssl.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
 )
 
+build_cmake_lib zlib https://github.com/madler/zlib
+build_cmake_lib png https://github.com/glennrp/libpng
 build_cmake_lib curl https://github.com/curl/curl
 build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
 build_cmake_lib sdl https://github.com/libsdl-org/SDL
 build_cmake_lib ogg https://github.com/xiph/ogg
 build_cmake_lib opus https://github.com/xiph/opus
+
 (
 	_WAS_THERE_OPUSFILE=1
 	if [ ! -d "opusfile" ]; then
@@ -57,8 +104,8 @@ build_cmake_lib opus https://github.com/xiph/opus
 	if [[ "$_WAS_THERE_OPUSFILE" == 0 ]]; then
 		./autogen.sh
 	fi
-	cp "${CURDIR}"/scripts/android/make_android_opusfile.sh make_android_opusfile.sh
-	./make_android_opusfile.sh "$_ANDROID_ABI_LEVEL"
+	cp "${CURDIR}"/scripts/compile_libs/make_lib_opusfile.sh make_lib_opusfile.sh
+	./make_lib_opusfile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 )
 
 # SQLite, just download and built by hand
@@ -69,111 +116,138 @@ fi
 
 (
 	cd sqlite3 || exit 1
-	cp "${CURDIR}"/scripts/android/make_android_sqlite3.sh make_android_sqlite3.sh
-	./make_android_sqlite3.sh "$_ANDROID_ABI_LEVEL"
+	cp "${CURDIR}"/scripts/compile_libs/make_lib_sqlite3.sh make_lib_sqlite3.sh
+	./make_lib_sqlite3.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 )
 
 cd ..
 
-mkdir ddnet-libs
-function _copy_curl() {
-	mkdir -p ddnet-libs/curl/android/lib"$2"
-	cp android_libs/curl/build_android_"$1"/lib/libcurl.a ddnet-libs/curl/android/lib"$2"/libcurl.a
+function copy_arches_for_lib() {
+	if [[ "$COMP_HAS_ARM32" == "1" ]]; then
+		${1} arm arm
+	fi
+	if [[ "$COMP_HAS_ARM64" == "1" ]]; then
+		${1} arm64 arm64
+	fi
+	if [[ "$COMP_HAS_x86" == "1" ]]; then
+		${1} x86 32
+	fi
+	if [[ "$COMP_HAS_x64" == "1" ]]; then
+		${1} x86_64 64
+	fi
+	if [[ "$COMP_HAS_WEBASM" == "1" ]]; then
+		${1} wasm wasm
+	fi
 }
 
-_copy_curl arm arm
-_copy_curl arm64 arm64
-_copy_curl x86 32
-_copy_curl x86_64 64
+mkdir ddnet-libs
+function _copy_curl() {
+	mkdir -p ddnet-libs/curl/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/curl/build_"$OS_NAME"_"$1"/lib/libcurl.a ddnet-libs/curl/"$OS_NAME_PATH"/lib"$2"/libcurl.a
+}
+
+copy_arches_for_lib _copy_curl
 
 mkdir ddnet-libs
 function _copy_freetype2() {
-	mkdir -p ddnet-libs/freetype/android/lib"$2"
-	cp android_libs/freetype2/build_android_"$1"/libfreetype.a ddnet-libs/freetype/android/lib"$2"/libfreetype.a
+	mkdir -p ddnet-libs/freetype/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/freetype2/build_"$OS_NAME"_"$1"/libfreetype.a ddnet-libs/freetype/"$OS_NAME_PATH"/lib"$2"/libfreetype.a
 }
 
-_copy_freetype2 arm arm
-_copy_freetype2 arm64 arm64
-_copy_freetype2 x86 32
-_copy_freetype2 x86_64 64
+copy_arches_for_lib _copy_freetype2
 
 mkdir ddnet-libs
 function _copy_sdl() {
-	mkdir -p ddnet-libs/sdl/android/lib"$2"
-	cp android_libs/sdl/build_android_"$1"/libSDL2.a ddnet-libs/sdl/android/lib"$2"/libSDL2.a
-	cp android_libs/sdl/build_android_"$1"/libSDL2main.a ddnet-libs/sdl/android/lib"$2"/libSDL2main.a
-	if [ ! -d "ddnet-libs/sdl/include/android" ]; then
-		mkdir -p ddnet-libs/sdl/include/android
+	mkdir -p ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"/libSDL2.a
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2main.a ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"/libSDL2main.a
+	if [ ! -d "ddnet-libs/sdl/include/$OS_NAME_PATH" ]; then
+		mkdir -p ddnet-libs/sdl/include/"$OS_NAME_PATH"
 	fi
-	cp -R android_libs/sdl/include/* ddnet-libs/sdl/include/android
+	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME_PATH"
 }
 
-_copy_sdl arm arm
-_copy_sdl arm64 arm64
-_copy_sdl x86 32
-_copy_sdl x86_64 64
+copy_arches_for_lib _copy_sdl
 
 # copy java code from SDL2
-rm -R ddnet-libs/sdl/java
-mkdir -p ddnet-libs/sdl/java
-cp -R android_libs/sdl/android-project/app/src/main/java/org ddnet-libs/sdl/java/
+if [[ "$OS_NAME" == "android" ]]; then
+	rm -R ddnet-libs/sdl/java
+	mkdir -p ddnet-libs/sdl/java
+	cp -R compile_libs/sdl/android-project/app/src/main/java/org ddnet-libs/sdl/java/
+fi
 
 mkdir ddnet-libs
 function _copy_ogg() {
-	mkdir -p ddnet-libs/opus/android/lib"$2"
-	cp android_libs/ogg/build_android_"$1"/libogg.a ddnet-libs/opus/android/lib"$2"/libogg.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/ogg/build_"$OS_NAME"_"$1"/libogg.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libogg.a
 }
 
-_copy_ogg arm arm
-_copy_ogg arm64 arm64
-_copy_ogg x86 32
-_copy_ogg x86_64 64
+copy_arches_for_lib _copy_ogg
 
 mkdir ddnet-libs
 function _copy_opus() {
-	mkdir -p ddnet-libs/opus/android/lib"$2"
-	cp android_libs/opus/build_android_"$1"/libopus.a ddnet-libs/opus/android/lib"$2"/libopus.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/opus/build_"$OS_NAME"_"$1"/libopus.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libopus.a
 }
 
-_copy_opus arm arm
-_copy_opus arm64 arm64
-_copy_opus x86 32
-_copy_opus x86_64 64
+copy_arches_for_lib _copy_opus
 
 mkdir ddnet-libs
 function _copy_opusfile() {
-	mkdir -p ddnet-libs/opus/android/lib"$2"
-	cp android_libs/opusfile/build_"$1"/libopusfile.a ddnet-libs/opus/android/lib"$2"/libopusfile.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/opusfile/build_"$OS_NAME"_"$1"/libopusfile.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libopusfile.a
 }
 
-_copy_opusfile arm arm
-_copy_opusfile arm64 arm64
-_copy_opusfile x86 32
-_copy_opusfile x86_64 64
+copy_arches_for_lib _copy_opusfile
 
 mkdir ddnet-libs
 function _copy_sqlite3() {
-	mkdir -p ddnet-libs/sqlite3/android/lib"$2"
-	cp android_libs/sqlite3/build_"$1"/sqlite3.a ddnet-libs/sqlite3/android/lib"$2"/libsqlite3.a
+	mkdir -p ddnet-libs/sqlite3/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/sqlite3/build_"$OS_NAME"_"$1"/sqlite3.a ddnet-libs/sqlite3/"$OS_NAME_PATH"/lib"$2"/libsqlite3.a
 }
 
-_copy_sqlite3 arm arm
-_copy_sqlite3 arm64 arm64
-_copy_sqlite3 x86 32
-_copy_sqlite3 x86_64 64
+copy_arches_for_lib _copy_sqlite3
 
 mkdir ddnet-libs
 function _copy_openssl() {
-	mkdir -p ddnet-libs/openssl/android/lib"$2"
+	mkdir -p ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"
 	mkdir -p ddnet-libs/openssl/include
-	mkdir -p ddnet-libs/openssl/include/android
-	cp android_libs/openssl/build_android_"$1"/libcrypto.a ddnet-libs/openssl/android/lib"$2"/libcrypto.a
-	cp android_libs/openssl/build_android_"$1"/libssl.a ddnet-libs/openssl/android/lib"$2"/libssl.a
-	cp -R android_libs/openssl/build_android_"$1"/include/* ddnet-libs/openssl/include/android
-	cp -R android_libs/openssl/include/* ddnet-libs/openssl/include
+	mkdir -p ddnet-libs/openssl/include/"$OS_NAME_PATH"
+	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libcrypto.a ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"/libcrypto.a
+	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libssl.a ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"/libssl.a
+	cp -R compile_libs/openssl/build_"$OS_NAME"_"$1"/include/* ddnet-libs/openssl/include/"$OS_NAME_PATH"
+	cp -R compile_libs/openssl/include/* ddnet-libs/openssl/include
 }
 
-_copy_openssl arm arm
-_copy_openssl arm64 arm64
-_copy_openssl x86 32
-_copy_openssl x86_64 64
+copy_arches_for_lib _copy_openssl
+
+mkdir ddnet-libs
+function _copy_zlib() {
+	# copy headers
+	(
+		cd compile_libs/zlib || exit 1
+		find . -maxdepth 1 -iname '*.h' -print0 | while IFS= read -r -d $'\0' file; do
+			mkdir -p ../../ddnet-libs/zlib/include/"$(dirname "$file")"
+			cp "$file" ../../ddnet-libs/zlib/include/"$(dirname "$file")"
+		done
+
+		cd build_"$OS_NAME"_"$1" || exit 1
+		find . -maxdepth 1 -iname '*.h' -print0 | while IFS= read -r -d $'\0' file; do
+			mkdir -p ../../../ddnet-libs/zlib/include/"$OS_NAME_PATH"/"$(dirname "$file")"
+			cp "$file" ../../../ddnet-libs/zlib/include/"$OS_NAME_PATH"/"$(dirname "$file")"
+		done
+	)
+
+	mkdir -p ddnet-libs/zlib/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/zlib/build_"$OS_NAME"_"$1"/libz.a ddnet-libs/zlib/"$OS_NAME_PATH"/lib"$2"/libz.a
+}
+
+copy_arches_for_lib _copy_zlib
+
+mkdir ddnet-libs
+function _copy_png() {
+	mkdir -p ddnet-libs/png/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/png/build_"$OS_NAME"_"$1"/libpng16.a ddnet-libs/png/"$OS_NAME_PATH"/lib"$2"/libpng16.a
+}
+
+copy_arches_for_lib _copy_png
