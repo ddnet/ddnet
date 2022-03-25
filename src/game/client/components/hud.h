@@ -121,6 +121,8 @@ private:
 	int m_NoShotgunHitOffset;
 	int m_NoGrenadeHitOffset;
 	int m_NoLaserHitOffset;
+	int m_DeepFrozenOffset;
+	int m_LiveFrozenOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
 	int m_NinjaBarFullLeftOffset;

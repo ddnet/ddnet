@@ -819,7 +819,9 @@ void CHud::PreparePlayerStateQuads()
 	m_NoGrenadeHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoLaserHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
-	// Quads for displaying dummy actions
+	// Quads for displaying dummy actions and freeze status
+	m_DeepFrozenOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_LiveFrozenOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
@@ -1016,7 +1018,6 @@ void CHud::RenderPlayerState(const int ClientID)
 		HasCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudTeleportLaser);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_TeleportLaserOffset, x, y);
-		x += 12;
 	}
 
 	// render prohibited capabilities
@@ -1073,14 +1074,25 @@ void CHud::RenderPlayerState(const int ClientID)
 		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoLaserHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
-		x += 12;
 	}
 
-	// render dummy actions
+	// render dummy actions and freeze state
 	x = 5;
 	if(HasProhibitedCapabilities)
 	{
 		y += 12;
+	}
+	if(pCharacter->m_DeepFrozen)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDeepFrozen);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DeepFrozenOffset, x, y);
+		x += 12;
+	}
+	if(pCharacter->m_LiveFrozen)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLiveFrozen);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LiveFrozenOffset, x, y);
+		x += 12;
 	}
 	if(g_Config.m_ClDummyHammer)
 	{
@@ -1092,7 +1104,6 @@ void CHud::RenderPlayerState(const int ClientID)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
-		x += 12;
 	}
 }
 
