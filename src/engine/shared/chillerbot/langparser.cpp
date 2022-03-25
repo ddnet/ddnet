@@ -28,6 +28,16 @@ const char *CLangParser::StrFindOrder(const char *pHaystack, int NumNeedles, ...
 	return Found ? pSearch : NULL;
 }
 
+int CLangParser::StrFindIndex(const char *pHaystack, const char *pNeedle)
+{
+	int HaystackLen = str_length(pHaystack);
+	int i = 0;
+	for(i = 0; i < HaystackLen; i++)
+		if(str_startswith(pHaystack + i, pNeedle))
+			return i;
+	return -1;
+}
+
 bool CLangParser::IsAskToAskGerman(const char *pMessage, const char *pMessageAuthor, char *pResponse, int SizeOfResponse)
 {
 	if(pResponse)

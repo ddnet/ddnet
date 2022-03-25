@@ -70,3 +70,12 @@ TEST(Lang, StrFindOrder)
 	EXPECT_FALSE(Parser.StrFindOrder("i ask you can something", 2, "can", "ask"));
 	EXPECT_FALSE(Parser.StrFindOrder("foo baz bar", 3, "foo", "bar", "baz"));
 }
+
+TEST(Lang, StrFindIndex)
+{
+	CLangParser Parser;
+
+	EXPECT_EQ(Parser.StrFindIndex("foo bar", "bar"), 4);
+	EXPECT_EQ(Parser.StrFindIndex("foo bar", "404"), -1);
+	EXPECT_EQ(Parser.StrFindIndex("foo bar", "foo"), 0);
+}

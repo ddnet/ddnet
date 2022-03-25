@@ -79,7 +79,8 @@ done
 
 ins=()
 outs=()
-# ins+=('client2: why foo war?');outs+=('client1: foo has war because: bullied me in school')
+ins+=('client2: why foo war?');outs+=('client1: foo has war because: bullied me in school')
+ins+=('client2: warum hat       foo war?');outs+=('client1: foo has war because: bullied me in school')
 ins+=('hi client2');outs+=('hi client1')
 ins+=('client2 how are you?');outs+=('client1 good, and you? :)')
 ins+=('wats ur inp_mousesens? client2');outs+=('client1 my current inp_mousesens is 1000')

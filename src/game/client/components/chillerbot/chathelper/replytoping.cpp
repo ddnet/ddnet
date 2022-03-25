@@ -17,6 +17,102 @@ CReplyToPing::CReplyToPing(CChatHelper *pChatHelper, const char *pMessageAuthor,
 	m_SizeOfResponse = SizeOfResponse;
 }
 
+bool CReplyToPing::WhyWar(const char *pVictim)
+{
+	if(!pVictim)
+		return false;
+
+	bool HasWar = true;
+	// aVictim also has to hold the full own name to match the chop off
+	char aVictim[MAX_NAME_LENGTH + 3 + MAX_NAME_LENGTH];
+	str_copy(aVictim, pVictim, sizeof(aVictim));
+	if(!ChatHelper()->GameClient()->m_WarList.IsWarlist(aVictim) && !ChatHelper()->GameClient()->m_WarList.IsTraitorlist(aVictim))
+	{
+		HasWar = false;
+		while(str_endswith(aVictim, "?")) // cut off the question marks from the victim name
+			aVictim[str_length(aVictim) - 1] = '\0';
+		// cut off own name from the victime name if question in this format "why do you war foo (your name)"
+		char aOwnName[MAX_NAME_LENGTH + 3];
+		// main tee
+		str_format(aOwnName, sizeof(aOwnName), " %s", ChatHelper()->GameClient()->m_aClients[ChatHelper()->GameClient()->m_LocalIDs[0]].m_aName);
+		if(str_endswith_nocase(aVictim, aOwnName))
+			aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
+		if(ChatHelper()->GameClient()->Client()->DummyConnected())
+		{
+			str_format(aOwnName, sizeof(aOwnName), " %s", ChatHelper()->GameClient()->m_aClients[ChatHelper()->GameClient()->m_LocalIDs[1]].m_aName);
+			if(str_endswith_nocase(aVictim, aOwnName))
+				aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
+		}
+
+		// cut off descriptions like this
+		// why do you block foo he is new here!
+		// why do you block foo she is my friend!!
+		for(int i = 0; i < str_length(aVictim); i++)
+		{
+			// c++ be like...
+			if(i < 2)
+				continue;
+			if(aVictim[i - 1] != ' ')
+				continue;
+			if((aVictim[i] != 'h' || !aVictim[i + 1] || aVictim[i + 1] != 'e' || !aVictim[i + 2] || aVictim[i + 2] != ' ') &&
+				(aVictim[i] != 's' || !aVictim[i + 1] || aVictim[i + 1] != 'h' || !aVictim[i + 2] || aVictim[i + 2] != 'e' || !aVictim[i + 3] || aVictim[i + 3] != ' '))
+				continue;
+
+			aVictim[i - 1] = '\0';
+			break;
+		}
+
+		// do not kill my friend foo
+		const char *pFriend = NULL;
+		if((pFriend = str_find_nocase(aVictim, " friend ")))
+			pFriend += str_length(" friend ");
+		else if((pFriend = str_find_nocase(aVictim, " frint ")))
+			pFriend += str_length(" frint ");
+		else if((pFriend = str_find_nocase(aVictim, " mate ")))
+			pFriend += str_length(" mate ");
+		else if((pFriend = str_find_nocase(aVictim, " bff ")))
+			pFriend += str_length(" bff ");
+		else if((pFriend = str_find_nocase(aVictim, " girlfriend ")))
+			pFriend += str_length(" girlfriend ");
+		else if((pFriend = str_find_nocase(aVictim, " boyfriend ")))
+			pFriend += str_length(" boyfriend ");
+		else if((pFriend = str_find_nocase(aVictim, " dog ")))
+			pFriend += str_length(" dog ");
+		else if((pFriend = str_find_nocase(aVictim, " gf ")))
+			pFriend += str_length(" gf ");
+		else if((pFriend = str_find_nocase(aVictim, " bf ")))
+			pFriend += str_length(" bf ");
+
+		if(pFriend)
+			str_copy(aVictim, pFriend, sizeof(aVictim));
+	}
+
+	char aWarReason[128];
+	if(HasWar || ChatHelper()->GameClient()->m_WarList.IsWarlist(aVictim) || ChatHelper()->GameClient()->m_WarList.IsTraitorlist(aVictim))
+	{
+		ChatHelper()->GameClient()->m_WarList.GetWarReason(aVictim, aWarReason, sizeof(aWarReason));
+		if(aWarReason[0])
+			str_format(m_pResponse, m_SizeOfResponse, "%s: %s has war because: %s", m_pMessageAuthor, aVictim, aWarReason);
+		else
+			str_format(m_pResponse, m_SizeOfResponse, "%s: the name %s is on my warlist.", m_pMessageAuthor, aVictim);
+		return true;
+	}
+	for(auto &Client : ChatHelper()->GameClient()->m_aClients)
+	{
+		if(!Client.m_Active)
+			continue;
+		if(str_comp(Client.m_aName, aVictim))
+			continue;
+
+		if(ChatHelper()->GameClient()->m_WarList.IsWarClanlist(Client.m_aClan))
+		{
+			str_format(m_pResponse, m_SizeOfResponse, "%s i war %s because his clan %s is on my warlist.", m_pMessageAuthor, aVictim, Client.m_aClan);
+			return true;
+		}
+	}
+	return false;
+}
+
 bool CReplyToPing::Reply()
 {
 	if(!m_pResponse)
@@ -80,7 +176,18 @@ bool CReplyToPing::Reply()
 	// TODO:
 
 	// check war reason for others
-	const char *pWhy = str_find_nocase(m_pMessage, "why");
+	const char *pWhy = str_find_nocase(m_pMessage, "why has ");
+	if(pWhy)
+		pWhy = pWhy + str_length("why has ");
+	if(!pWhy)
+		if((pWhy = str_find_nocase(m_pMessage, "why")))
+			pWhy = pWhy + str_length("why");
+	if(!pWhy)
+		if((pWhy = str_find_nocase(m_pMessage, "warum hat ")))
+			pWhy = pWhy + str_length("warum hat ");
+	if(!pWhy)
+		if((pWhy = str_find_nocase(m_pMessage, "warum")))
+			pWhy = pWhy + str_length("warum");
 	if(!pWhy)
 		pWhy = str_find_nocase(m_pMessage, "stop");
 	if(!pWhy)
@@ -132,97 +239,28 @@ bool CReplyToPing::Reply()
 		else if((pKill = str_find_nocase(pWhy, "freeze "))) // why freeze foo?
 			pKill = pKill + str_length("freeze ");
 
-		if(pKill)
-		{
-			bool HasWar = true;
-			// aVictim also has to hold the full own name to match the chop off
-			char aVictim[MAX_NAME_LENGTH + 3 + MAX_NAME_LENGTH];
-			str_copy(aVictim, pKill, sizeof(aVictim));
-			if(!ChatHelper()->GameClient()->m_WarList.IsWarlist(aVictim) && !ChatHelper()->GameClient()->m_WarList.IsTraitorlist(aVictim))
-			{
-				HasWar = false;
-				while(str_endswith(aVictim, "?")) // cut off the question marks from the victim name
-					aVictim[str_length(aVictim) - 1] = '\0';
-				// cut off own name from the victime name if question in this format "why do you war foo (your name)"
-				char aOwnName[MAX_NAME_LENGTH + 3];
-				// main tee
-				str_format(aOwnName, sizeof(aOwnName), " %s", ChatHelper()->GameClient()->m_aClients[ChatHelper()->GameClient()->m_LocalIDs[0]].m_aName);
-				if(str_endswith_nocase(aVictim, aOwnName))
-					aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
-				if(ChatHelper()->GameClient()->Client()->DummyConnected())
-				{
-					str_format(aOwnName, sizeof(aOwnName), " %s", ChatHelper()->GameClient()->m_aClients[ChatHelper()->GameClient()->m_LocalIDs[1]].m_aName);
-					if(str_endswith_nocase(aVictim, aOwnName))
-						aVictim[str_length(aVictim) - str_length(aOwnName)] = '\0';
-				}
+		if(WhyWar(pKill))
+			return true;
 
-				// cut off descriptions like this
-				// why do you block foo he is new here!
-				// why do you block foo she is my friend!!
-				for(int i = 0; i < str_length(aVictim); i++)
-				{
-					// c++ be like...
-					if(i < 2)
-						continue;
-					if(aVictim[i - 1] != ' ')
-						continue;
-					if((aVictim[i] != 'h' || !aVictim[i + 1] || aVictim[i + 1] != 'e' || !aVictim[i + 2] || aVictim[i + 2] != ' ') &&
-						(aVictim[i] != 's' || !aVictim[i + 1] || aVictim[i + 1] != 'h' || !aVictim[i + 2] || aVictim[i + 2] != 'e' || !aVictim[i + 3] || aVictim[i + 3] != ' '))
-						continue;
+		// "why foo war?"
+		// chop off the "war" at the end
+		char aWhy[128];
+		str_copy(aWhy, pWhy, sizeof(aWhy));
 
-					aVictim[i - 1] = '\0';
-					break;
-				}
+		int CutOffWar = -1;
+		if((CutOffWar = LangParser().StrFindIndex(aWhy, " war")) != -1)
+			aWhy[CutOffWar] = '\0';
+		else if((CutOffWar = LangParser().StrFindIndex(aWhy, " kill")) != -1)
+			aWhy[CutOffWar] = '\0';
 
-				// do not kill my friend foo
-				const char *pFriend = NULL;
-				if((pFriend = str_find_nocase(aVictim, " friend ")))
-					pFriend += str_length(" friend ");
-				else if((pFriend = str_find_nocase(aVictim, " frint ")))
-					pFriend += str_length(" frint ");
-				else if((pFriend = str_find_nocase(aVictim, " mate ")))
-					pFriend += str_length(" mate ");
-				else if((pFriend = str_find_nocase(aVictim, " bff ")))
-					pFriend += str_length(" bff ");
-				else if((pFriend = str_find_nocase(aVictim, " girlfriend ")))
-					pFriend += str_length(" girlfriend ");
-				else if((pFriend = str_find_nocase(aVictim, " boyfriend ")))
-					pFriend += str_length(" boyfriend ");
-				else if((pFriend = str_find_nocase(aVictim, " dog ")))
-					pFriend += str_length(" dog ");
-				else if((pFriend = str_find_nocase(aVictim, " gf ")))
-					pFriend += str_length(" gf ");
-				else if((pFriend = str_find_nocase(aVictim, " bf ")))
-					pFriend += str_length(" bf ");
+		// trim
+		int trim = 0;
+		while(aWhy[trim] && aWhy[trim] == ' ')
+			trim++;
 
-				if(pFriend)
-					str_copy(aVictim, pFriend, sizeof(aVictim));
-			}
-
-			char aWarReason[128];
-			if(HasWar || ChatHelper()->GameClient()->m_WarList.IsWarlist(aVictim) || ChatHelper()->GameClient()->m_WarList.IsTraitorlist(aVictim))
-			{
-				ChatHelper()->GameClient()->m_WarList.GetWarReason(aVictim, aWarReason, sizeof(aWarReason));
-				if(aWarReason[0])
-					str_format(m_pResponse, m_SizeOfResponse, "%s: %s has war because: %s", m_pMessageAuthor, aVictim, aWarReason);
-				else
-					str_format(m_pResponse, m_SizeOfResponse, "%s: the name %s is on my warlist.", m_pMessageAuthor, aVictim);
+		if(CutOffWar != -1)
+			if(WhyWar(aWhy + trim))
 				return true;
-			}
-			for(auto &Client : ChatHelper()->GameClient()->m_aClients)
-			{
-				if(!Client.m_Active)
-					continue;
-				if(str_comp(Client.m_aName, aVictim))
-					continue;
-
-				if(ChatHelper()->GameClient()->m_WarList.IsWarClanlist(Client.m_aClan))
-				{
-					str_format(m_pResponse, m_SizeOfResponse, "%s i war %s because his clan %s is on my warlist.", m_pMessageAuthor, aVictim, Client.m_aClan);
-					return true;
-				}
-			}
-		}
 	}
 	// why? (check war for self)
 	if(LangParser().IsQuestionWhy(m_pMessage) || (str_find(m_pMessage, "?") && MsgLen < NameLen + 4) ||

@@ -17,6 +17,14 @@ public:
 	*/
 	const char *StrFindOrder(const char *pHaystack, int NumNeedles, ...);
 
+	/*
+		StrFindIndex
+
+		Returns index of needle start in haystack if found
+		Returns -1 if needle not found
+	*/
+	int StrFindIndex(const char *pHaystack, const char *pNeedle);
+
 	bool IsAskToAsk(const char *pMessage, const char *pMessageAuthor = 0, char *pResponse = 0, int SizeOfResponse = 0);
 	bool IsAskToAskGerman(const char *pMessage, const char *pMessageAuthor = 0, char *pResponse = 0, int SizeOfResponse = 0);
 

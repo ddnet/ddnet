@@ -29,6 +29,8 @@ class CReplyToPing
 	char *m_pResponse;
 	long unsigned int m_SizeOfResponse;
 
+	bool WhyWar(const char *pVictim);
+
 public:
 	CReplyToPing(class CChatHelper *pChatHelper, const char *pMessageAuthor, const char *pMessageAuthorClan, const char *pMessage, char *pResponse, long unsigned int SizeOfResponse);
 
