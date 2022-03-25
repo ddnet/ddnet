@@ -985,8 +985,6 @@ Editor
 == Editor
 
 [Start menu]
-9+ new mentions
-== 9+ novas menções
 
 Successfully saved the replay!
 == 
@@ -1297,6 +1295,9 @@ Assets directory
 Tutorial
 == 
 
+Can't find a Tutorial server
+== 
+
 Run server
 == 
 
@@ -1350,4 +1351,7 @@ Grabs
 == 
 
 %d new mentions
+== 
+
+9+ new mentions
 == 

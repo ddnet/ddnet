@@ -1344,3 +1344,6 @@ https://ddnet.tw/discord
 
 Tutorial
 == 
+
+Can't find a Tutorial server
+== 

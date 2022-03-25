@@ -1363,3 +1363,6 @@ auto
 
 Tutorial
 == Tutorial
+
+Can't find a Tutorial server
+== Tutorial-Server kann nicht gefunden werden

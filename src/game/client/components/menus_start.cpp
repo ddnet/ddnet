@@ -66,13 +66,26 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
 	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static int s_TutorialButton;
-	if(DoButton_Menu(&s_TutorialButton, Localize("Tutorial"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	static float s_JoinTutorialTime = 0.0f;
+	if(DoButton_Menu(&s_TutorialButton, Localize("Tutorial"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) ||
+		(s_JoinTutorialTime != 0.0f && Client()->LocalTime() >= s_JoinTutorialTime))
 	{
 		const char *pAddr = ServerBrowser()->GetTutorialServer();
 		if(pAddr)
+		{
 			Client()->Connect(pAddr);
+			s_JoinTutorialTime = 0.0f;
+		}
+		else if(s_JoinTutorialTime == 0.0f)
+		{
+			dbg_msg("menus", "couldn't find tutorial server, retrying in 5 seconds");
+			s_JoinTutorialTime = Client()->LocalTime() + 5.0f;
+		}
 		else
-			dbg_msg("menus", "couldn't find tutorial server");
+		{
+			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10000000);
+			s_JoinTutorialTime = 0.0f;
+		}
 		m_DoubleClickIndex = -1;
 	}
 
@@ -145,7 +158,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	static bool EditorHotkeyWasPressed = true;
-	static float EditorHotKeyChecktime = 0;
+	static float EditorHotKeyChecktime = 0.0f;
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_MapEditorButton;
