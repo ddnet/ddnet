@@ -2247,7 +2247,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	if(s_CurTab == 0)
 	{ // ***** GENERAL TAB ***** //
 
-		MainView.VSplitLeft(MainView.w * 0.55, &MainView, &Column);
+		MainView.VSplitLeft(MainView.w * 0.55f, &MainView, &Column);
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 		UI()->DoLabelScaled(&Section, Localize("HUD"), 20.0f, TEXTALIGN_LEFT);

@@ -107,7 +107,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				s_Time = (int64_t)(mix<double>(
 							   0,
 							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -116,7 +116,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				int MinTick = pThis->m_LastLocalTick;
 				s_Time = (int64_t)(mix<double>(0,
 							   pThis->m_CurrentLocalTick - MinTick,
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -135,7 +135,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				s_Time = (int64_t)(mix<double>(
 							   0,
 							   (CurTick - MinTick),
-							   pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
 						   TickToMicroSeconds) +
 					 MinTick * TickToMicroSeconds;
 			}
@@ -1763,7 +1763,7 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f * (1.0f + sin(2.0f * pi * Seconds / 3.f)) / 2.0f);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1 + sin(2 * (double)pi * Seconds / 3)) / 2);
 
 								RenderTools()->RenderTileRectangle(-201, -201, pTMap->m_Width + 402, pTMap->m_Height + 402,
 									0, TILE_DEATH, // display air inside, death outside
@@ -1782,7 +1782,7 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f + 0.7f * (1.0 + sin(2.0f * pi * Seconds / 3.f)) / 2.0f);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1.0 + sin(2 * (double)pi * Seconds / 3)) / 2);
 
 								ColorRGBA ColorKill(Color.x * ColorHint.x, Color.y * ColorHint.y, Color.z * ColorHint.z, Color.w * ColorHint.w);
 								RenderKillTileBorder(TileLayerCounter - 1, &ColorKill, pTMap, pGroup);
