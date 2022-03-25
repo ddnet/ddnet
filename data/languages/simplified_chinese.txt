@@ -1368,3 +1368,6 @@ auto
 
 Tutorial
 == 进入教学
+
+Can't find a Tutorial server
+== 

@@ -1350,3 +1350,6 @@ auto
 
 Tutorial
 == 
+
+Can't find a Tutorial server
+== 

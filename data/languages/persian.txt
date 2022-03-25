@@ -1187,6 +1187,9 @@ https://wiki.ddnet.tw/
 Tutorial
 == 
 
+Can't find a Tutorial server
+== 
+
 Server executable not found, can't run server
 == 
 

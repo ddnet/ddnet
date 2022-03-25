@@ -1364,3 +1364,6 @@ Chat command (e.g. showall 1)
 
 Tutorial
 == 
+
+Can't find a Tutorial server
+== 

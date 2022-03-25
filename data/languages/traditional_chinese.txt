@@ -1361,3 +1361,6 @@ auto
 
 Tutorial
 == 進入教學
+
+Can't find a Tutorial server
+== 
