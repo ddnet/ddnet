@@ -4,7 +4,7 @@
 
 #if defined(CONF_PLATFORM_MACOS)
 // Code is in src/macos/notification.mm.
-#elif defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_PLATFORM_HAIKU)
+#elif defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_PLATFORM_HAIKU) && !defined(CONF_WEBASM)
 #include <libnotify/notify.h>
 void NotificationsInit()
 {

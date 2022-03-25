@@ -123,11 +123,16 @@ void CGraphicsBackend_Threaded::StopProcessor()
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
+#ifdef CONF_WEBASM
+	// run everything single threaded for now, context binding in a thread seems to not work as of now
+	RunBufferSingleThreadedUnsafe(pBuffer);
+#else
 	WaitForIdle();
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_pBuffer = pBuffer;
 	m_BufferInProcess.store(true, std::memory_order_relaxed);
 	m_BufferSwapCond.notify_all();
+#endif
 }
 
 void CGraphicsBackend_Threaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer)
@@ -668,6 +673,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		pName = "OpenGL";
+#ifndef CONF_BACKEND_OPENGL_ES
 		if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_LEGACY)
 		{
 			Major = 1;
@@ -689,6 +695,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 			Patch = 0;
 			return true;
 		}
+#endif
 	}
 	else if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{

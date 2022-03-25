@@ -2932,6 +2932,7 @@ void CClient::Run()
 	CVideo::Init();
 #endif
 
+#ifndef CONF_WEBASM
 	// open socket
 	{
 		NETADDR BindAddr;
@@ -2954,6 +2955,7 @@ void CClient::Run()
 			}
 		}
 	}
+#endif
 
 	// init font rendering
 	Kernel()->RequestInterface<IEngineTextRender>()->Init();
