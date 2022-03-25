@@ -303,8 +303,11 @@ bool CReplyToPing::Reply()
 	// help
 	if(str_find_nocase(m_pMessage, "help") || str_find_nocase(m_pMessage, "hilfe"))
 	{
-		str_format(m_pResponse, m_SizeOfResponse, "%s where? what?", m_pMessageAuthor);
-		return true;
+        if(!str_find_nocase(m_pMessage, "helper"))
+        {
+            str_format(m_pResponse, m_SizeOfResponse, "%s where? what?", m_pMessageAuthor);
+            return true;
+        }
 	}
 	// small talk
 	if(str_find_nocase(m_pMessage, "how are you") ||
