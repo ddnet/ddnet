@@ -4,6 +4,8 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 
+#include "chathelper/replytoping.h"
+
 #include <engine/shared/chillerbot/langparser.h>
 
 #define MAX_CHAT_BUFFER_LEN 8
@@ -79,16 +81,14 @@ class CChatHelper : public CComponent
 		for(int i = 0; i < PING_QUEUE_SIZE - 1; i++)
 			m_aLastPings[i] = m_aLastPings[i + 1];
 	}
+	CReplyToPing *m_pReplyToPing;
 
 	char m_aGreetName[32];
 	char m_aLastAfkPing[2048];
 	char m_aSendBuffer[MAX_CHAT_BUFFER_LEN][2048];
 	char m_aaChatFilter[MAX_CHAT_FILTERS][MAX_CHAT_FILTER_LEN];
 
-	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void DoGreet();
-	bool ReplyToLastPing(const char *pMessageAuthor, const char *pMessageAuthorClan, const char *pMessage, char *pResponse, int SizeOfResponse);
-	bool HowToJoinClan(const char *pClan, char *pResponse, int SizeOfResponse);
 	void SayFormat(const char *pMsg);
 	void AddChatFilter(const char *pFilter);
 	void ListChatFilter();
@@ -106,6 +106,7 @@ class CChatHelper : public CComponent
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual void OnConsoleInit() override;
 	virtual void OnInit() override;
+	virtual void OnShutdown() override;
 
 	static void ConReplyToLastPing(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayHi(IConsole::IResult *pResult, void *pUserData);
@@ -117,11 +118,14 @@ class CChatHelper : public CComponent
 public:
 	CChatHelper();
 	virtual int Sizeof() const override { return sizeof(*this); }
+	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 	int Get128Name(const char *pMsg, char *pName);
 	const char *GetGreetName() { return m_aGreetName; }
 	const char *LastAfkPingMessage() { return m_aLastAfkPing; }
 	void ClearLastAfkPingMessage() { m_aLastAfkPing[0] = '\0'; }
+	bool HowToJoinClan(const char *pClan, char *pResponse, int SizeOfResponse);
+	CLangParser &LangParser() { return m_LangParser; }
 	/*
 		Function: SayBuffer
 			Adds message to spam safe queue.
