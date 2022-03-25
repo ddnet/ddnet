@@ -17,6 +17,16 @@
 
 #include <engine/client/backend/glsl_shader_compiler.h>
 
+#ifdef CONF_WEBASM
+// WebGL2 defines the type of a buffer at the first bind to a buffer target
+// this is different to GLES 3 (https://www.khronos.org/registry/webgl/specs/latest/2.0/#5.1)
+static constexpr GLenum BUFFER_INIT_INDEX_TARGET = GL_ELEMENT_ARRAY_BUFFER;
+static constexpr GLenum BUFFER_INIT_VERTEX_TARGET = GL_ARRAY_BUFFER;
+#else
+static constexpr GLenum BUFFER_INIT_INDEX_TARGET = GL_COPY_WRITE_BUFFER;
+static constexpr GLenum BUFFER_INIT_VERTEX_TARGET = GL_COPY_WRITE_BUFFER;
+#endif
+
 // ------------ CCommandProcessorFragment_OpenGL3_3
 int CCommandProcessorFragment_OpenGL3_3::TexFormatToNewOpenGLFormat(int TexFormat)
 {
@@ -458,7 +468,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	glBindVertexArray(0);
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_QuadDrawIndexBufferID);
+	glBindBuffer(BUFFER_INIT_INDEX_TARGET, m_QuadDrawIndexBufferID);
 
 	unsigned int Indices[CCommandBuffer::MAX_VERTICES / 4 * 6];
 	int Primq = 0;
@@ -472,7 +482,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		Indices[i + 5] = Primq + 3;
 		Primq += 4;
 	}
-	glBufferData(GL_COPY_WRITE_BUFFER, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES / 4 * 6, Indices, GL_STATIC_DRAW);
+	glBufferData(BUFFER_INIT_INDEX_TARGET, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES / 4 * 6, Indices, GL_STATIC_DRAW);
 
 	m_CurrentIndicesInBuffer = CCommandBuffer::MAX_VERTICES / 4 * 6;
 
@@ -944,12 +954,12 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	glBindBuffer(GL_COPY_READ_BUFFER, m_QuadDrawIndexBufferID);
 	GLuint NewIndexBufferID;
 	glGenBuffers(1, &NewIndexBufferID);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, NewIndexBufferID);
+	glBindBuffer(BUFFER_INIT_INDEX_TARGET, NewIndexBufferID);
 	GLsizeiptr size = sizeof(unsigned int);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)NewIndicesCount * size, NULL, GL_STATIC_DRAW);
-	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, (GLsizeiptr)m_CurrentIndicesInBuffer * size);
-	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)m_CurrentIndicesInBuffer * size, (GLsizeiptr)AddCount * size, Indices);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+	glBufferData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)NewIndicesCount * size, NULL, GL_STATIC_DRAW);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, BUFFER_INIT_INDEX_TARGET, 0, 0, (GLsizeiptr)m_CurrentIndicesInBuffer * size);
+	glBufferSubData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)m_CurrentIndicesInBuffer * size, (GLsizeiptr)AddCount * size, Indices);
+	glBindBuffer(BUFFER_INIT_INDEX_TARGET, 0);
 	glBindBuffer(GL_COPY_READ_BUFFER, 0);
 
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
@@ -982,8 +992,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferObject(const CCommandB
 	GLuint VertBufferID = 0;
 
 	glGenBuffers(1, &VertBufferID);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, VertBufferID);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
+	glBindBuffer(BUFFER_INIT_VERTEX_TARGET, VertBufferID);
+	glBufferData(BUFFER_INIT_VERTEX_TARGET, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
 
 	m_BufferObjectIndices[Index] = VertBufferID;
 
@@ -996,8 +1006,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RecreateBufferObject(const CComman
 	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]);
-	glBufferData(GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
+	glBindBuffer(BUFFER_INIT_VERTEX_TARGET, m_BufferObjectIndices[Index]);
+	glBufferData(BUFFER_INIT_VERTEX_TARGET, (GLsizeiptr)(pCommand->m_DataSize), pUploadData, GL_STATIC_DRAW);
 
 	if(pCommand->m_DeletePointer)
 		free(pUploadData);
@@ -1008,8 +1018,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferObject(const CCommandB
 	void *pUploadData = pCommand->m_pUploadData;
 	int Index = pCommand->m_BufferIndex;
 
-	glBindBuffer(GL_COPY_WRITE_BUFFER, m_BufferObjectIndices[Index]);
-	glBufferSubData(GL_COPY_WRITE_BUFFER, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pUploadData);
+	glBindBuffer(BUFFER_INIT_VERTEX_TARGET, m_BufferObjectIndices[Index]);
+	glBufferSubData(BUFFER_INIT_VERTEX_TARGET, (GLintptr)(pCommand->m_pOffset), (GLsizeiptr)(pCommand->m_DataSize), pUploadData);
 
 	if(pCommand->m_DeletePointer)
 		free(pUploadData);

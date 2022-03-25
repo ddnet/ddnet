@@ -189,6 +189,34 @@ Install MinGW cross-compilers of the form `i686-w64-mingw32-gcc` (32 bit) or
 Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
 **initial** CMake command line.
 
+Cross-compiling on Linux to Web Assembler vis Emscripten
+--------------------------------------------------------
+
+Install Emscripten cross-compilers (e.g. `sudo apt install emscripten`) on a modern linux distro.
+
+Then run `emcmake cmake .. -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory.
+
+To test the compiled code locally, just use `emrun --browser firefox DDNet.html`
+
+To host the compiled .html file copy all `.data`, `.html`, `.js`, `.wasm` files to the web server. (see /other/emscripten/minimal.html for a minimal html example)
+
+Then enable cross origin policies. Example for apache2 on debian based distros:
+```bash
+sudo a2enmod header
+
+# edit the apache2 config to allow .htaccess files
+sudo nano /etc/apache2/apache2.conf
+
+# set AllowOverride to All for your directory
+# then create a .htaccess file on the web server (where the .html is)
+# and add these lines
+Header add Cross-Origin-Embedder-Policy "require-corp"
+Header add Cross-Origin-Opener-Policy "same-origin"
+
+# now restart apache2
+sudo service apache2 restart
+```
+
 Cross-compiling on Linux to macOS
 ---------------------------------
 
