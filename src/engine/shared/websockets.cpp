@@ -94,7 +94,10 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
 		dbg_msg("websockets", "connection established with %s", addr_str);
 
-		pss->addr_str = addr_str;
+		std::string addr_str_final;
+		addr_str_final.append(addr_str);
+
+		pss->addr_str = addr_str_final;
 		ctx_data->port_map[pss->addr_str] = pss;
 	}
 	break;
