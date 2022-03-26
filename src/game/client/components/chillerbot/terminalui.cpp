@@ -564,7 +564,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		/* m_pClient->m_Controls.SetCursesDir(1); */ return 0;
 	else if(KeyInHistory(' ', 3) || Key == ' ')
 		/* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
-	else if(Key == '?' && m_LastKeyPress < time_get() - time_freq() / 2)
+	else if(Key == '?')
 	{
 		m_RenderHelpPage = !m_RenderHelpPage;
 		gs_NeedLogDraw = true;
