@@ -395,7 +395,7 @@ void CItems::OnRender()
 				{
 					bool IsOtherTeam = m_pClient->IsOtherTeam(pProj->GetOwner());
 					if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
-						&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
+						&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02f) // workaround to skip grenades on ball mod
 						&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
 						&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{

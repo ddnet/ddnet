@@ -802,9 +802,6 @@ Destination file already exist
 Reload
 == Przeładuj
 
-Multiple texture units (disable for macOS)
-== Jednostki z wieloma teksturami (wyłącz dla macOS)
-
 Replay feature is disabled!
 == Funkcja odtwarzania jest wyłączona!
 
@@ -1035,9 +1032,6 @@ Dummy copy
 
 9+ new mentions
 == 9+ razy wspomniano o tobie
-
-Preinit VBO (iGPUs only)
-== Zainicjuj VBO (tylko iGPU)
 
 Statboard
 == Tabela wyników
@@ -1283,7 +1277,19 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Show client IDs
@@ -1341,4 +1347,10 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
 == 

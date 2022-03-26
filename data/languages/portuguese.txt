@@ -985,11 +985,6 @@ Editor
 == Editor
 
 [Start menu]
-%d new mentions
-== %d novas menções
-
-9+ new mentions
-== 9+ novas menções
 
 Successfully saved the replay!
 == 
@@ -1180,16 +1175,22 @@ Windowed fullscreen
 may cause delay
 == 
 
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
-== 
-
 Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1291,6 +1292,12 @@ Emoticons
 Assets directory
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Run server
 == 
 
@@ -1341,4 +1348,10 @@ Grabs
 == 
 
 1 new mention
+== 
+
+%d new mentions
+== 
+
+9+ new mentions
 == 

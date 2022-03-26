@@ -905,14 +905,8 @@ Deactivate
 Welcome to DDNet
 == Bem-vindo ao DDNet
 
-Preinit VBO (iGPUs only)
-== Pré-iniciar VNO (iGPU somente) 
-
 Activate
 == Ativar
-
-Multiple texture units (disable for macOS)
-== Várias unidades de textura (desabilite para macOS)
 
 UI mouse s.
 == Sens. mouse de UI
@@ -1293,9 +1287,6 @@ Windowed borderless
 Desktop fullscreen
 == Tela cheia de desktop
 
-Use modern OpenGL
-== Usar OpenGL moderno
-
 Hookline
 == Linha do gancho
 
@@ -1333,25 +1324,46 @@ Show local player's key presses
 == Mostrar pressionamento de teclas de jogadores locais
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== O formato da textura %s não é RGBA, o que vai causar falhas visuais.
 
 Join Tutorial Server
-== 
+== Entrar no servidor de tutorial
 
 Skip Tutorial
-== 
+== Pular tutorial
 
 Settings file
-== 
+== Arquivo de configurações
 
 Config directory
-== 
+== Diretório de configurações
 
 Windowed fullscreen
-== 
+== Tela cheia em janela
+
+Renderer
+== Renderizador
+
+default
+== padrão
+
+custom
+== personalizado
+
+Graphics cards
+== Placas de vídeo
+
+auto
+== auto
 
 Run on join
-== 
+== Executar ao entrar
 
 Chat command (e.g. showall 1)
-== 
+== Comando de chat (p. ex., showall 1)
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== Não foi possível encontrar o servidor de tutorial
