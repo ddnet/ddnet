@@ -189,10 +189,20 @@ Install MinGW cross-compilers of the form `i686-w64-mingw32-gcc` (32 bit) or
 Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
 **initial** CMake command line.
 
-Cross-compiling on Linux to Web Assembler vis Emscripten
+Cross-compiling on Linux to WebAssembly via Emscripten
 --------------------------------------------------------
 
 Install Emscripten cross-compilers (e.g. `sudo apt install emscripten`) on a modern linux distro.
+
+If you need to compile the ddnet-libs for WebAssembly, simply call
+
+```bash
+# <directory to build in> should be a directory outside of the project's source directory
+scripts/compile_libs/gen_libs.sh <directory to build in> webasm
+```
+
+from the project's source directory. It will automatically create a directory called `ddnet-libs`.
+You can then manually merge this directory with the one in the ddnet source directory.
 
 Then run `emcmake cmake .. -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory.
 
