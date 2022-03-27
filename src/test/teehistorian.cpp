@@ -463,6 +463,47 @@ TEST_F(TeeHistorian, JoinLeave)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
+TEST_F(TeeHistorian, Input)
+{
+	CNetObj_PlayerInput Input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	const unsigned char EXPECTED[] = {
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// new player -> InputNew
+		0x45,
+		0x00, // ClientID 0
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+		// same unique id, same input -> nothing
+		// same unique id, different input -> InputDiff
+		0x44,
+		0x00, // ClientID 0
+		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		// different unique id, same input -> InputNew
+		0x45,
+		0x00, // ClientID 0
+		0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+		// FINISH
+		0x40};
+
+	Tick(1);
+
+	// new player -> InputNew
+	m_TH.RecordPlayerInput(0, 1, &Input);
+	// same unique id, same input -> nothing
+	m_TH.RecordPlayerInput(0, 1, &Input);
+
+	Input.m_Direction = 0;
+
+	// same unique id, different input -> InputDiff
+	m_TH.RecordPlayerInput(0, 1, &Input);
+
+	// different unique id, same input -> InputNew
+	m_TH.RecordPlayerInput(0, 2, &Input);
+
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
 TEST_F(TeeHistorian, SaveSuccess)
 {
 	const unsigned char EXPECTED[] = {

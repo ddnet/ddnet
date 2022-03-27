@@ -3,6 +3,7 @@
 #include "player.h"
 #include <engine/shared/config.h>
 
+#include "base/system.h"
 #include "entities/character.h"
 #include "gamecontext.h"
 #include <engine/server.h>
@@ -13,7 +14,8 @@ MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 
-CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
+CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team) :
+	m_UniqueClientID(UniqueClientID)
 {
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;

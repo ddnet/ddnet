@@ -3,6 +3,7 @@
 #include <base/tl/sorted_array.h>
 #include <iostream>
 
+#include "base/system.h"
 #include "gamecontext.h"
 #include "teeinfo.h"
 #include <antibot/antibot_data.h>
@@ -72,6 +73,9 @@ void CGameContext::Construct(int Resetting)
 
 	for(auto &pPlayer : m_apPlayers)
 		pPlayer = 0;
+
+	mem_zero(&m_aLastPlayerInput, sizeof(m_aLastPlayerInput));
+	mem_zero(&m_aPlayerHasInput, sizeof(m_aPlayerHasInput));
 
 	m_pController = 0;
 	m_aVoteCommand[0] = 0;
@@ -1153,18 +1157,49 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 
 void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 {
+	// early return if no input at all has been sent by a player
+	if(pInput == nullptr && !m_aPlayerHasInput[ClientID])
+		return;
+
+	// set to last sent input when no new input has been sent
+	CNetObj_PlayerInput *pApplyInput = (CNetObj_PlayerInput *)pInput;
+	if(pApplyInput == nullptr)
+	{
+		pApplyInput = &m_aLastPlayerInput[ClientID];
+	}
+
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientID]->OnPredictedInput((CNetObj_PlayerInput *)pInput);
+		m_apPlayers[ClientID]->OnPredictedInput(pApplyInput);
 }
 
 void CGameContext::OnClientPredictedEarlyInput(int ClientID, void *pInput)
 {
+	// early return if no input at all has been sent by a player
+	if(pInput == nullptr && !m_aPlayerHasInput[ClientID])
+		return;
+
+	// set to last sent input when no new input has been sent
+	CNetObj_PlayerInput *pApplyInput = (CNetObj_PlayerInput *)pInput;
+	if(pApplyInput == nullptr)
+	{
+		pApplyInput = &m_aLastPlayerInput[ClientID];
+	}
+	else
+	{
+		// Store input in this function and not in `OnClientPredictedInput`,
+		// because this function is called on all inputs, while
+		// `OnClientPredictedInput` is only called on the first input of each
+		// tick.
+		mem_copy(&m_aLastPlayerInput[ClientID], pApplyInput, sizeof(m_aLastPlayerInput[ClientID]));
+		m_aPlayerHasInput[ClientID] = true;
+	}
+
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientID]->OnPredictedEarlyInput((CNetObj_PlayerInput *)pInput);
+		m_apPlayers[ClientID]->OnPredictedEarlyInput(pApplyInput);
 
 	if(m_TeeHistorianActive)
 	{
-		m_TeeHistorian.RecordPlayerInput(ClientID, (CNetObj_PlayerInput *)pInput);
+		m_TeeHistorian.RecordPlayerInput(ClientID, m_apPlayers[ClientID]->GetUniqueCID(), pApplyInput);
 	}
 }
 
@@ -1348,6 +1383,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	Server()->ExpireServerInfo();
 
 	CPlayer *pNewPlayer = m_apPlayers[ClientID];
+	mem_zero(&m_aLastPlayerInput[ClientID], sizeof(m_aLastPlayerInput[ClientID]));
+	m_aPlayerHasInput[ClientID] = false;
 
 	// new info for others
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
@@ -1457,7 +1494,8 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 
 	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
+	NextUniqueClientID += 1;
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)

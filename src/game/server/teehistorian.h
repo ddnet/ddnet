@@ -12,6 +12,7 @@
 class CConfig;
 class CTuningParams;
 class CUuidManager;
+class CPlayer;
 
 class CTeeHistorian
 {
@@ -62,7 +63,7 @@ public:
 	void EndPlayers();
 
 	void BeginInputs();
-	void RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *pInput);
+	void RecordPlayerInput(int ClientID, uint32_t UniqueClientID, const CNetObj_PlayerInput *pInput);
 	void RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize);
 	void RecordPlayerJoin(int ClientID, int Protocol);
 	void RecordPlayerReady(int ClientID);
@@ -106,14 +107,14 @@ private:
 		NUM_STATES,
 	};
 
-	struct CPlayer
+	struct CTeehistorianPlayer
 	{
 		bool m_Alive;
 		int m_X;
 		int m_Y;
 
 		CNetObj_PlayerInput m_Input;
-		bool m_InputExists;
+		uint32_t m_UniqueClientID;
 
 		// DDNet team
 		int m_Team;
@@ -134,7 +135,7 @@ private:
 	int m_Tick;
 	int m_PrevMaxClientID;
 	int m_MaxClientID;
-	CPlayer m_aPrevPlayers[MAX_CLIENTS];
+	CTeehistorianPlayer m_aPrevPlayers[MAX_CLIENTS];
 	CTeam m_aPrevTeams[MAX_CLIENTS];
 };
 
