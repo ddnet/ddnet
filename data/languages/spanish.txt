@@ -1355,7 +1355,7 @@ Graphics cards
 == Tarjetas de video
 
 auto
-== auto.
+== auto. 
 
 Tutorial
 == Tutorial
