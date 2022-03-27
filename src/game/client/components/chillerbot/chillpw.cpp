@@ -12,6 +12,15 @@ void CChillPw::OnMapLoad()
 	m_ChatDelay[0] = time_get() + time_freq() * 2;
 	m_ChatDelay[1] = time_get() + time_freq() * 2;
 	str_copy(m_aCurrentServerAddr, g_Config.m_UiServerAddress, sizeof(m_aCurrentServerAddr));
+	str_copy(m_aCurrentServerAddrNoPort, g_Config.m_UiServerAddress, sizeof(m_aCurrentServerAddrNoPort));
+	for(int i = 0; i < str_length(m_aCurrentServerAddr); i++)
+	{
+		if(m_aCurrentServerAddr[i] == ':')
+		{
+			m_aCurrentServerAddrNoPort[i] = '\0';
+			break;
+		}
+	}
 }
 
 void CChillPw::OnRender()
@@ -72,6 +81,10 @@ void CChillPw::OnInit()
 		m_aDummy[Line] = atoi(pRow2 + 1);
 		pRow2[0] = '\0';
 		str_copy(m_aaHostnames[Line], pRow1, sizeof(m_aaHostnames[Line]));
+		// if the format is "hostname:*" cut of the globbed port to "hostname"
+		for(int i = 0; i < str_length(pRow1); i++)
+			if(pRow1[i] == ':' && pRow1[i + 1] == '*')
+				m_aaHostnames[Line][i] = '\0';
 		Line++;
 	}
 	str_format(aBuf, sizeof(aBuf), "loaded %d passwords from '%s'", Line, g_Config.m_ClPasswordFile);
@@ -98,8 +111,30 @@ bool CChillPw::AuthChatAccount(int Dummy, int Offset)
 	int found = 0;
 	for(int i = 0; i < MAX_PASSWORDS; i++)
 	{
-		if(str_comp(m_aCurrentServerAddr, m_aaHostnames[i]))
+		if(m_aaHostnames[i][0] == '\0')
 			continue;
+		if(!str_find(m_aaHostnames[i], ":") || str_find(m_aaHostnames[i], ":*"))
+		{
+			if(str_comp(m_aCurrentServerAddrNoPort, m_aaHostnames[i]))
+				continue;
+		}
+		else
+		{
+			if(str_comp(m_aCurrentServerAddr, m_aaHostnames[i]))
+			{
+				// if it has a port and it does not match skip to next entry
+				if(str_find(m_aCurrentServerAddr, ":"))
+					continue;
+
+				// skip all non default port entrys
+				if(!str_endswith(m_aaHostnames[i], ":8303"))
+					continue;
+
+				// if hostname without port does not match skip
+				if(!str_startswith(m_aaHostnames[i], m_aCurrentServerAddr) || m_aaHostnames[i][str_length(m_aCurrentServerAddr)] != ':')
+					continue;
+			}
+		}
 		if(Dummy != m_aDummy[i])
 			continue;
 		if(Offset > ++found)

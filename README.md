@@ -24,8 +24,18 @@ example:
 
 ~/.teeworlds/chillerbot/chillpw_secret.txt
 ```
+# this is a comment
 51.210.171.47:7303,0,say /login ChillerDragon password
 51.210.171.47:7303,1,say /login ChillerDragon2 password2
+
+# you can also omit the port like this
+# it will try to login on all ports if the ip matches 51.210.171.47
+# BUT BE CAREFUL!
+# this might leak your password in shared hosting scenarios
+# or might even send it to public chat if one hoster also has vanilla servers
+# only omit the port if you know what you are doing
+51.210.171.47,0,say /login ChillerDragon password
+51.210.171.47,1,say /login ChillerDragon2 password2
 ```
 
 ### Render pictures
