@@ -308,6 +308,7 @@ bool CReplyToPing::Reply()
 	if(str_find_nocase(m_pMessage, "spec") || str_find_nocase(m_pMessage, "watch") || (str_find_nocase(m_pMessage, "look") && !str_find_nocase(m_pMessage, "looks")) || str_find_nocase(m_pMessage, "schau"))
 	{
 		str_format(m_pResponse, m_SizeOfResponse, "/pause %s", m_pMessageAuthor);
+		ChatHelper()->GameClient()->m_Chat.Say(0, m_pResponse);
 		str_format(m_pResponse, m_SizeOfResponse, "%s ok i am watching you", m_pMessageAuthor);
 		return true;
 	}
