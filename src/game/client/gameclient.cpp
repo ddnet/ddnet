@@ -1346,6 +1346,19 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_Predicted.ReadDDNet(pCharacterData);
 				}
 			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTERDISPLAYINFO)
+			{
+				const CNetObj_DDNetCharacterDisplayInfo *pCharacterDisplayInfo = (const CNetObj_DDNetCharacterDisplayInfo *)pData;
+
+				if(Item.m_ID < MAX_CLIENTS)
+				{
+					m_Snap.m_aCharacters[Item.m_ID].m_ExtendedDisplayInfo = *pCharacterDisplayInfo;
+					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = true;
+
+					CClientData *pClient = &m_aClients[Item.m_ID];
+					pClient->m_Predicted.ReadDDNetDisplayInfo(pCharacterDisplayInfo);
+				}
+			}
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
 			{
 				const CNetObj_SpecChar *pSpecCharData = (const CNetObj_SpecChar *)pData;

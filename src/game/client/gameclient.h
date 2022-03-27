@@ -318,6 +318,9 @@ public:
 			CNetObj_DDNetCharacter m_ExtendedData;
 			bool m_HasExtendedData;
 
+			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
+			bool m_HasExtendedDisplayInfo;
+
 			// interpolated position
 			vec2 m_Position;
 		};

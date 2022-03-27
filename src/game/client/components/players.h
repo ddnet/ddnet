@@ -40,8 +40,6 @@ public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnInit() override;
 	virtual void OnRender() override;
-	
-	bool IsPlayerInfoAvailable(int ClientID) const;
 };
 
 #endif

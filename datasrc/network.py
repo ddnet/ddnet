@@ -245,6 +245,13 @@ Objects = [
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
 	]),
 
+	NetObjectEx("DDNetCharacterDisplayInfo", "character-display-info@netobj.ddnet.tw", [
+		NetIntRange("m_JumpedTotal", -2, 255),
+		NetTick("m_NinjaActivationTick"),
+		NetTick("m_FreezeTick"),
+		NetBool("m_IsInFreeze"),
+	]),
+
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),

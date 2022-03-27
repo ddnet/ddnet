@@ -1242,6 +1242,14 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
+
+	CNetObj_DDNetCharacterDisplayInfo *pDDNetCharacterDisplayInfo = static_cast<CNetObj_DDNetCharacterDisplayInfo *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, ID, sizeof(CNetObj_DDNetCharacterDisplayInfo)));
+	if(!pDDNetCharacterDisplayInfo)
+		return;
+	pDDNetCharacterDisplayInfo->m_JumpedTotal = m_Core.m_JumpedTotal;
+	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
+	pDDNetCharacterDisplayInfo->m_FreezeTick = m_Core.m_FreezeTick;
+	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_Core.m_IsInFreeze;
 }
 
 // DDRace
@@ -1476,7 +1484,13 @@ void CCharacter::HandleTiles(int Index)
 
 	// freeze
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
+	{
 		Freeze();
+		if(IsGrounded())
+		{
+			m_Core.m_IsInFreeze = true;
+		}
+	}
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 		UnFreeze();
 
@@ -1699,7 +1713,13 @@ void CCharacter::HandleTiles(int Index)
 	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
 	{
 		if(GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		{
 			Freeze(GameServer()->Collision()->GetSwitchDelay(MapIndex));
+			if(IsGrounded())
+			{
+				m_Core.m_IsInFreeze = true;
+			}
+		}
 	}
 	else if(GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
 	{
@@ -2095,16 +2115,16 @@ void CCharacter::DDRaceTick()
 			GameServer()->Collision()->GetSwitchType(Index)};
 		if(IsGrounded() && !m_DeepFreeze)
 		{
-			bool IsInFreeze = false;
+			bool IsInAnyFreeze = false;
 			for(const int Tile : aTiles)
 			{
 				if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE || Tile == TILE_LFREEZE)
 				{
-					IsInFreeze = true;
+					IsInAnyFreeze = true;
 					break;
 				}
 			}
-			if(!IsInFreeze)
+			if(!IsInAnyFreeze)
 			{
 				SetRescue();
 			}
@@ -2122,6 +2142,7 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_HookTick = 0;
 
 	m_FrozenLastTick = false;
+	m_Core.m_IsInFreeze = false;
 
 	if(m_DeepFreeze && !m_Super)
 		Freeze();

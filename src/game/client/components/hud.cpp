@@ -830,14 +830,14 @@ void CHud::RenderPlayerState(const int ClientID)
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	// pCharacter contains the predicted character for local players and the last snap for spectated players.
+	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
 
 	int TotalJumpsToDisplay, AvailableJumpsToDisplay;
 	// If the player is predicted in the Game World, we take the predicted jump values, otherwise the values from a snap
-	if(m_pClient->m_Snap.m_pLocalCharacter)
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
-		float PhysSize = 28.0f;
+		const float PhysSize = 28.0f;
 		bool Grounded = false;
 		if(Collision()->CheckPoint(pCharacter->m_Pos.x + PhysSize / 2, pCharacter->m_Pos.y + PhysSize / 2 + 5))
 			Grounded = true;
@@ -960,9 +960,9 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * m_pClient->m_GameWorld.GameTickSpeed() / 1000;
-		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * m_pClient->m_GameWorld.GameTickSpeed() / 1000 - m_pClient->m_GameWorld.GameTick(), 0, Max) / (float)Max;
-		if(NinjaProgress > 0.0f)
+		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
+		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+		if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
 			x = 5;
 			y += 12;
@@ -1117,7 +1117,7 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 	const float MiddleProgressProportion = MiddleBarWidth / ProgressBarWidth;
 
 	// we cut 10% of both sides (right and left) of all sprites so we don't get edge bleeding
-	
+
 	// beginning piece
 	float BeginningPieceProgress = 1;
 	if(Progress <= EndProgressProportion)

@@ -586,6 +586,14 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_Jumps = pObjDDNet->m_Jumps;
 }
 
+void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInfo *pObjDDNet)
+{
+	m_JumpedTotal = pObjDDNet->m_JumpedTotal;
+	m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
+	m_FreezeTick = pObjDDNet->m_FreezeTick;
+	m_IsInFreeze = pObjDDNet->m_IsInFreeze;
+}
+
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;

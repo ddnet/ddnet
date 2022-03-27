@@ -5,6 +5,7 @@
 class CFreezeBars : public CComponent
 {
 	void RenderFreezeBar(const int ClientID);
+	bool IsPlayerInfoAvailable(int ClientID) const;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

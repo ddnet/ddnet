@@ -697,7 +697,13 @@ void CCharacter::HandleTiles(int Index)
 	if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		{
 			Freeze(Collision()->GetSwitchDelay(MapIndex));
+			if(IsGrounded())
+			{
+				m_Core.m_IsInFreeze = true;
+			}
+		}
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
 	{
@@ -781,6 +787,10 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 	{
 		Freeze();
+		if(IsGrounded())
+		{
+			m_Core.m_IsInFreeze = true;
+		}
 	}
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 	{
@@ -946,6 +956,7 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_HookTick = 0;
 
 	m_FrozenLastTick = false;
+	m_Core.m_IsInFreeze = false;
 
 	if(m_DeepFreeze && !m_Super)
 		Freeze();
@@ -1101,6 +1112,7 @@ void CCharacter::ResetPrediction()
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_Core.m_FreezeTick = 0;
+	m_Core.m_IsInFreeze = false;
 	m_DeepFreeze = false;
 	m_LiveFreeze = false;
 	m_FrozenLastTick = false;
