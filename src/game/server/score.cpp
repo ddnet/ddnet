@@ -210,7 +210,7 @@ void CScore::ShowTeamTop5(int ClientID, int Offset)
 	ExecPlayerThread(CScoreWorker::ShowTeamTop5, "show team top5", ClientID, "", Offset);
 }
 
-void CScore::ShowTeamTop5(int ClientID, const char *pName, int Offset)
+void CScore::ShowPlayerTeamTop5(int ClientID, const char *pName, int Offset)
 {
 	if(RateLimitPlayer(ClientID))
 		return;
