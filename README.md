@@ -134,7 +134,12 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 0 - normal
 1 - on, you will change to ninja skin as soon as you enter freeze
 ```
-
+### **Render colored all feet with maximum brightness**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_white_feet**
+```
+0 - off
+1 - on
+```
 ### **Anti Latency Tools for gores**
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_pred_remove**
 ```
