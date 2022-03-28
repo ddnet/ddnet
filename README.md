@@ -8,7 +8,7 @@ Not guarenteed to be bug free, but I will try to fix them.
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
-![image](https://user-images.githubusercontent.com/22122579/158047968-a1b2ddf8-31b3-4127-95e2-0836add2f33a.png)
+![image](https://user-images.githubusercontent.com/22122579/160224795-7fe8e255-f599-4059-889b-b3f35e7cb6ee.png)
 
 # Features:
 ### **Display frozen tees in your team on your HUD** 
@@ -108,8 +108,14 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 ```
 
 ### **Display screen center for lineups**
-
 &nbsp;&nbsp;&nbsp;&nbsp;**-tc_show_center**
+```
+0 - off
+1 - on
+```
+
+### **Ping Circles Next to nameplates**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_nameplate_ping_circle**
 ```
 0 - off
 1 - on
@@ -129,21 +135,26 @@ set this between 15 and 25 if you are having lag, you can put it on a bind if it
 1 - on, you will change to ninja skin as soon as you enter freeze
 ```
 
-### **Reduce Unfreeze Delay on high ping servers (EXPERIMENTAL)**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_react_helper**
+### **Anti Latency Tools for gores**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_pred_remove**
 ```
 0 - off
-1 - on, removes a portion of the delay after you get hammered/saved on a high ping server. 
-
-ONLY USE ON GORES MAPS! May cause jittering when using with dummy!
+1 - on, removes prediction margin while in freeze. 
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_react_helper_percent**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_pred_negative**
 ```
-(0-90) default: 30. Choose what percent of your ping should attempt to be removed from the unfreeze delay. 
+(0-40) Negative prediction margin while in freeze, can improve jitter but may cause buggy inputs after being saved. 
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_react_helper_limit**
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_remove_anti**
 ```
-(0-500) default: 45. The maximum amount of delay that will be removed, regardless of ping. 
-Higher values will likely cause extra jittering after you are unfrozen
+0 - off
+1 - on, enable removing prediction and antiping while in freeze. 
 ```
-
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_remove_anti_ticks**
+```
+(0-10) how many ticks of prediction/antiping are removed while in freeze
+```
+&nbsp;&nbsp;&nbsp;&nbsp;**-tc_remove_anti_delay_ticks**
+```
+(0-200) how many ticks it takes for all of your configured preidction/antiping to be removed
+```
