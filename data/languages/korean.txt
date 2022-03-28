@@ -1028,7 +1028,7 @@ Show names in chat in team colors
 == 이름을 팀 색상으로 표시
 
 Show votes window after voting
-== 투표 완료 후에도 투표 창 표시
+== 투표 후에도 투표 창 표시
 
 Show kill messages
 == 킬 메시지 표시
