@@ -6,7 +6,7 @@ void CFreezeBars::RenderFreezeBar(const int ClientID)
 {
 	const float FreezeBarWidth = 64.0f;
 	const float FreezeBarHalfWidth = 32.0f;
-	const float FreezeBarHight = 16.0f;
+	const float FreezeBarHight = 32.0f;
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;

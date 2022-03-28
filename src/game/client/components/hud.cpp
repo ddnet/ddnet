@@ -1107,14 +1107,15 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
 	// half of the ends are also used for the progress display
-	const float EndWidth = 6.0f;
+	const float EndWidth = height / 2.0f; // the height of the sprite is twice as long as the width
 	const float BarHeight = height;
-	const float WholeBarWidth = width;
+	const float WholeBarWidth = width + EndWidth;
 	const float MiddleBarWidth = WholeBarWidth - (EndWidth * 2.0f);
 	const float EndProgressWidth = EndWidth / 2.0f;
 	const float ProgressBarWidth = WholeBarWidth - (EndProgressWidth * 2.0f);
 	const float EndProgressProportion = EndProgressWidth / ProgressBarWidth;
 	const float MiddleProgressProportion = MiddleBarWidth / ProgressBarWidth;
+	x -= EndProgressWidth;
 
 	// we cut 10% of both sides (right and left) of all sprites so we don't get edge bleeding
 
@@ -1129,7 +1130,7 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	Graphics()->QuadsSetSubset(0.1f, 0, 0.1f + 0.8f * BeginningPiecePercentVisible, 1);
+	Graphics()->QuadsSetSubset(0.1f, 0.1f, 0.1f + 0.8f * BeginningPiecePercentVisible, 0.9f);
 	IGraphics::CQuadItem QuadFullBeginning(x, y, EndWidth * BeginningPiecePercentVisible, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
 	Graphics()->QuadsEnd();
@@ -1139,14 +1140,13 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		Graphics()->QuadsSetSubset(0.1f, 1, 0.1f + 0.8f * (1.0f - BeginningPiecePercentVisible), 0);
+		Graphics()->QuadsSetSubset(0.1f, 0.9f, 0.1f + 0.8f * (1.0f - BeginningPiecePercentVisible), 0.1f);
 		Graphics()->QuadsSetRotation(pi);
 		IGraphics::CQuadItem QuadEmptyBeginning(x + (EndWidth * BeginningPiecePercentVisible), y, EndWidth * (1.0f - BeginningPiecePercentVisible), BarHeight);
 		Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
 		Graphics()->QuadsEnd();
 		Graphics()->QuadsSetRotation(0);
 	}
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 
 	// middle piece
 	x += EndWidth;
@@ -1175,11 +1175,11 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 	if(MiddlePieceProgress * MiddleBarWidth <= EndWidth * 0.8f)
 	{
 		// prevent pixel puree, select only a small slice
-		Graphics()->QuadsSetSubset(0.1f, 0, 0.17f, 1);
+		Graphics()->QuadsSetSubset(0.1f, 0.1f, 0.17f, 0.9f);
 	}
 	else
 	{
-		Graphics()->QuadsSetSubset(0.1f, 0, 0.9f, 1);
+		Graphics()->QuadsSetSubset(0.1f, 0.1f, 0.9f, 0.9f);
 	}
 	IGraphics::CQuadItem QuadFull(x, y, FullMiddleBarWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFull, 1);
@@ -1193,17 +1193,16 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 	if((1.0f - MiddlePieceProgress) * MiddleBarWidth <= EndWidth * 0.8f)
 	{
 		// prevent pixel puree, select only a small slice
-		Graphics()->QuadsSetSubset(0.1f, 0, 0.17f, 1);
+		Graphics()->QuadsSetSubset(0.1f, 0.1f, 0.17f, 0.9f);
 	}
 	else
 	{
-		Graphics()->QuadsSetSubset(0.1f, 0, 0.9f, 1);
+		Graphics()->QuadsSetSubset(0.1f, 0.1f, 0.9f, 0.9f);
 	}
 
 	IGraphics::CQuadItem QuadEmpty(x + FullMiddleBarWidth, y, EmptyMiddleBarWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadEmpty, 1);
 	Graphics()->QuadsEnd();
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 
 	// end piece
 	x += MiddleBarWidth;
@@ -1225,7 +1224,7 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		Graphics()->QuadsSetSubset(0.5f + 0.4f * (1.0f - EndingPieceProgress), 1, 0.90f, 0);
+		Graphics()->QuadsSetSubset(0.5f + 0.4f * (1.0f - EndingPieceProgress), 0.9f, 0.90f, 0.1f);
 		Graphics()->QuadsSetRotation(pi);
 		IGraphics::CQuadItem QuadFullEnding(x, y, (EndWidth / 2) * EndingPieceProgress, BarHeight);
 		Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
@@ -1236,7 +1235,7 @@ void CHud::RenderProgressBar(float x, const float y, const float width, const fl
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	Graphics()->QuadsSetSubset(0.5f - 0.4f * (1.0f - EndingPieceProgress), 0, 0.9f, 1);
+	Graphics()->QuadsSetSubset(0.5f - 0.4f * (1.0f - EndingPieceProgress), 0.1f, 0.9f, 0.9f);
 	IGraphics::CQuadItem QuadEmptyEnding(x + ((EndWidth / 2) * EndingPieceProgress), y, (EndWidth / 2) * (1.0f - EndingPieceProgress) + (EndWidth / 2), BarHeight);
 	Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
 	Graphics()->QuadsEnd();
