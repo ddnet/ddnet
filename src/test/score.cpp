@@ -164,7 +164,8 @@ TEST_P(SingleScore, TopServer)
 	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
 			"1. nameless tee Time: 01:40.00",
-			"---------------------------------------"});
+			"------------ USA Top ------------",
+			"1. nameless tee Time: 01:40.00"});
 }
 
 TEST_P(SingleScore, RankServer)
