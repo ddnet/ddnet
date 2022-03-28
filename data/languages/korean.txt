@@ -971,7 +971,7 @@ Enable gun sound
 == 총 소리 활성화
 
 Enable long pain sound (used when shooting in freeze)
-== 프리즈(동결) 상태 비명 활성화
+== 동결(프리즈) 상태 비명 활성화
 
 Enable server message sound
 == 서버 메시지 소리 활성화
@@ -1160,10 +1160,10 @@ Regular Background Color
 == 기본 배경 색상
 
 Try fast HTTP map download first
-== 우선 HTTP로 빠른 맵 다운로드 시도
+== 빠른 HTTP 맵 다운로드 우선 시도
 
 New random timeout code
-== 새로운 타임아웃 코드를 무작위로 생성
+== 새로운 무작위 타임아웃 코드 생성
 
 Run on join
 == 참가 시 실행
