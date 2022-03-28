@@ -726,7 +726,22 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 
 			Graphics()->SetColor(pInfo->m_ColorFeet.r * cs, pInfo->m_ColorFeet.g * cs, pInfo->m_ColorFeet.b * cs, Alpha);
 
-			Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
+			if(g_Config.m_ClWhiteFeet && pInfo->m_CustomColoredSkin)
+			{
+				CTeeRenderInfo WhiteFeetInfo;
+				int Skin = GameClient()->m_Skins.Find("x_ninja");
+				if(Skin != -1)
+				{
+					const CSkin *pSkin = GameClient()->m_Skins.Get(Skin);
+					WhiteFeetInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+					WhiteFeetInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+					const CSkin::SSkinTextures *pWhiteFeetTextures = &WhiteFeetInfo.m_OriginalRenderSkin;
+					Graphics()->TextureSet(OutLine == 1 ? pWhiteFeetTextures->m_FeetOutline : pWhiteFeetTextures->m_Feet);
+				}
+			}
+			else
+				Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
+
 			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
 		}
 	}

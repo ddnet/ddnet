@@ -654,6 +654,7 @@ private:
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
+	vec2 GetFreezePos(int ClientID);
 
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;

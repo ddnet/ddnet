@@ -60,6 +60,7 @@ MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIE
 
 //Tater Variables
 MACRO_CONFIG_INT(ClRunOnJoinConsole, tc_run_on_join_console, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether to use run on join in chat or console")
+MACRO_CONFIG_INT(ClRunOnJoinDelay, tc_run_on_join_delay, 2, 2, 50000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tick Delay before using run on join")
 
 MACRO_CONFIG_INT(ClShowFrozenText, tc_frozen_tees_text, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show how many tees in your team are currently frozen. (0 - off, 1 - show alive, 2 - show frozen)")
 MACRO_CONFIG_INT(ClShowFrozenHud, tc_frozen_tees_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show frozen tee HUD")
@@ -70,15 +71,18 @@ MACRO_CONFIG_INT(ClFrozenMaxRows, tc_frozen_tees_max_rows, 1, 1, 6, CFGFLAG_CLIE
 MACRO_CONFIG_INT(ClFrozenHudTeamOnly, tc_frozen_tees_only_inteam, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Only render frozen tee HUD display while in team")
 
 MACRO_CONFIG_INT(ClFixKoGSpec, tc_kog_spec_skin, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "A fix to display spectating tees on KoG.")
+MACRO_CONFIG_INT(ClFixKoGSpecNames, tc_kog_spec_names, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplates of spectating tees on KoG")
 
 MACRO_CONFIG_INT(ClPingNameCircle, tc_nameplate_ping_circle, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows a circle next to nameplate to indicate ping")
 
-
 MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
 
-MACRO_CONFIG_INT(ClUnfreezeDelayHelper, tc_react_helper, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "!EXPERIMENTAL! Removes some of the delay after unfrozen, ONLY USE ON GORES SERVERS!")
-MACRO_CONFIG_INT(ClUnfreezeHelperPercent, tc_react_helper_percent, 25, 0, 90, CFGFLAG_CLIENT | CFGFLAG_SAVE, "What percent of your current ping should be subtracted from the delay. Default: 30")
-MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_react_helper_limit, 30, 0, 60, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of delay that is removed, high values may cause stutter. Default: 45")
+MACRO_CONFIG_INT(ClUnfreezeDelayHelper, tc_pred_remove, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Remove your excess prediction margin when in freeze")
+MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_pred_negative, 0, 0, 40, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Remove move than your excess prediction margin (will cause jitter)")
+
+MACRO_CONFIG_INT(ClRemoveAnti, tc_remove_anti, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Removes some amount of antiping & player prediction in freeze")
+MACRO_CONFIG_INT(ClUnfreezeLagTicks, tc_remove_anti_ticks, 5, 0, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of prediction ticks that are removed")
+MACRO_CONFIG_INT(ClUnfreezeLagDelayTicks, tc_remove_anti_delay_ticks, 100, 0, 200, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many ticks it takes to remove the maximum prediction after being frozen")
 
 //MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Adjustable hookline width, set to 0 for old default rendering")
 
@@ -99,6 +103,8 @@ MACRO_CONFIG_COL(ClOutlineColorSolid, tc_outline_color_solid, 0, CFGFLAG_CLIENT 
 MACRO_CONFIG_COL(ClOutlineColorFreeze, tc_outline_color_freeze, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Freeze outline color") //0 0 0
 MACRO_CONFIG_COL(ClOutlineColorTele, tc_outline_color_tele, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tele outline color") //0 0 0
 MACRO_CONFIG_COL(ClOutlineColorUnfreeze, tc_outline_color_unfreeez, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Unfreeze outline color") //0 0 0
+
+MACRO_CONFIG_INT(ClWhiteFeet, tc_white_feet, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render all feet as perfectly white base color")
 
 
 //AAAAAAA

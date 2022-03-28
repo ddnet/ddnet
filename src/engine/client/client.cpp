@@ -2099,7 +2099,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_GameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
 
-					if((m_ReceivedSnapshots[Conn] > 50 || (g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > 2)) && !m_CodeRunAfterJoin[Conn])
+					if((m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay || (g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay)) && !m_CodeRunAfterJoin[Conn])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
@@ -2109,8 +2109,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							}
 							else
 							{
-								CNetMsg_Cl_Say Msg;
-								Msg.m_Team = 0;
+								CNetMsg_Cl_Say MsgP;
+								MsgP.m_Team = 0;
 								char aBuf[256];
 								if(g_Config.m_ClRunOnJoin[0])
 								{
@@ -2120,10 +2120,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 								{
 									str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
 								}
-								Msg.m_pMessage = aBuf;
-								CMsgPacker Packer(Msg.MsgID(), false);
-								Msg.Pack(&Packer);
-								SendMsg(Conn, &Packer, MSGFLAG_VITAL);
+								MsgP.m_pMessage = aBuf;
+								CMsgPacker PackerTimeout(MsgP.MsgID(), false);
+								MsgP.Pack(&PackerTimeout);
+								SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 							}
 						}
 						m_CodeRunAfterJoin[Conn] = true;
@@ -4564,7 +4564,17 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 	*pSmoothTick = (int)(SmoothTime * 50 / time_freq()) + 1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / 50) / (float)(time_freq() / 50);
 }
+void CClient::GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount)
+{
+	int64_t GameTime = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+	int64_t PredTime = m_PredictedTime.Get(time_get());
+	int64_t UpperPredTime = clamp(PredTime - (time_freq() / 50) * g_Config.m_ClUnfreezeLagTicks, GameTime, PredTime);
+	int64_t LowestPredTime = clamp(PredTime, GameTime, UpperPredTime);
+	int64_t SmoothTime = clamp(LowestPredTime + (int64_t)(MixAmount * (PredTime - LowestPredTime)), LowestPredTime, PredTime);
 
+	*pSmoothTick = (int)(SmoothTime * 50 / time_freq()) + 1;
+	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / 50) / (float)(time_freq() / 50);
+}
 SWarning *CClient::GetCurWarning()
 {
 	if(m_Warnings.empty())
@@ -4592,8 +4602,8 @@ int CClient::PredictionMargin() const
 	if(g_Config.m_ClAmIFrozen && g_Config.m_ClUnfreezeDelayHelper && m_CurGameTick[g_Config.m_ClDummy] - g_Config.m_ClFreezeTick > 17)
 	{
 		//min macro is broken on linux, manually typing it instead.
-		if(g_Config.m_ClWhatsMyPing * g_Config.m_ClUnfreezeHelperPercent / 100 < g_Config.m_ClUnfreezeHelperLimit)
-			return -g_Config.m_ClWhatsMyPing * g_Config.m_ClUnfreezeHelperPercent / 100;
+		if(g_Config.m_ClWhatsMyPing  < g_Config.m_ClUnfreezeHelperLimit)
+			return -g_Config.m_ClWhatsMyPing;
 		else
 			return -g_Config.m_ClUnfreezeHelperLimit;
 	}

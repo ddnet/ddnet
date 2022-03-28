@@ -701,7 +701,7 @@ void CPlayers::OnRender()
 	{
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
 		m_aRenderInfo[i].m_ShineDecoration = m_pClient->m_aClients[i].m_LiveFrozen;
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i) && g_Config.m_ClShowNinja)
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja))
 			{
 				// change the skin for the player to the ninja
 				int Skin = m_pClient->m_Skins.Find("x_ninja");

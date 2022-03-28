@@ -520,6 +520,7 @@ public:
 	virtual IFriends *Foes() { return &m_Foes; }
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
+	virtual void GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
 
 	virtual SWarning *GetCurWarning();
 	virtual CChecksumData *ChecksumData() { return &m_Checksum.m_Data; }

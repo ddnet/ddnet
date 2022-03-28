@@ -178,7 +178,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
-				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_paPlayerInfos[ClientID]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.6f));
+				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_paPlayerInfos[ClientID]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.8f));
 				Graphics()->SetColor(rgb);
 				float CircleSize = 7.0f;
 				RenderTools()->DrawCircle(Position.x - tw / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
@@ -340,9 +340,14 @@ void CNamePlates::OnRender()
 			continue;
 		}
 
-		if(m_pClient->m_aClients[i].m_SpecCharPresent)
+		if(m_pClient->m_aClients[i].m_SpecCharPresent || (g_Config.m_ClFixKoGSpec && g_Config.m_ClFixKoGSpecNames && m_pClient->m_aClients[i].m_Team== TEAM_SPECTATORS))
 		{
-			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+			vec2 Pos = m_pClient->m_aClients[i].m_SpecChar;
+
+			if(g_Config.m_ClFixKoGSpec && g_Config.m_ClFixKoGSpecNames && m_pClient->m_aClients[i].m_Team == TEAM_SPECTATORS)
+				Pos = m_pClient->m_aClients[i].m_RenderPos;
+
+			RenderNameplatePos(Pos, pInfo, 0.4f, true);
 		}
 
 		// only render active characters
