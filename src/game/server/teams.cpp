@@ -277,7 +277,6 @@ void CGameTeams::Tick()
 				}
 				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
 				NumPlayersNotStarted += 1;
-				break;
 			}
 		}
 		if(!aPlayerNames[0])
