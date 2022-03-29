@@ -738,7 +738,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		CLine *pCurrentLine = &m_aLines[m_CurrentLine];
 
-		// Team Number: 
+		// Team Number:
 		// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
 
 		// If it's a client message, m_aText will have ": " prepended so we have to work around it.
