@@ -13,6 +13,7 @@
 # Headshot        2021-05-30 17:00:00
 # Deëivid!        2021-10-27 00:49:00
 # Deëivid!        2022-02-05 21:53:00
+# Deëivid!        2022-03-27 18:40:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1330,34 +1331,34 @@ Chat command (e.g. showall 1)
 == Comando de chat (Ej. showall 1)
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== El formato de la textura %s no es RGBA, lo que puede causar errores visuales.
 
 Join Tutorial Server
-== 
+== Ir a un servidor Tutorial
 
 Skip Tutorial
-== 
+== Saltar Tutorial
 
 Windowed fullscreen
-== 
+== Ventana a pantalla completa
 
 Renderer
-== 
+== Renderizador
 
 default
-== 
+== por defecto
 
 custom
-== 
+== personalizado
 
 Graphics cards
-== 
+== Tarjetas de video
 
 auto
-== 
+== auto. 
 
 Tutorial
-== 
+== Tutorial
 
 Can't find a Tutorial server
-== 
+== No se pudo encontrar un servidor Tutorial

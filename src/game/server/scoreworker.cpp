@@ -593,10 +593,10 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Ranking, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, MIN(Time) AS Time, Name "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
-		"  AND Server LIKE ?"
+		"  AND Server LIKE ? "
 		"  GROUP BY Name "
 		"  WINDOW w AS (ORDER BY MIN(Time))"
 		") as a "
@@ -698,8 +698,8 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
-		"  GROUP BY ID, Time "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  GROUP BY ID "
+		"  WINDOW w AS (ORDER BY Min(Time))"
 		") AS TeamRank INNER JOIN (" // select rank with Name in team
 		"  SELECT ID "
 		"  FROM %s_teamrace "
@@ -781,11 +781,11 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Name, Time, Ranking, Server "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, Name, MIN(Time) AS Time, Server "
+		"  SELECT RANK() OVER w AS Ranking, MIN(Time) AS Time, MAX(Server) AS Server, Name "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ? "
-		"  GROUP BY Name, Server "
+		"  GROUP BY Name "
 		"  WINDOW w AS (ORDER BY MIN(Time))"
 		") as a "
 		"ORDER BY Ranking %s "
@@ -885,11 +885,11 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 		"FROM (" // limit to 5
 		"  SELECT TeamSize, Ranking, ID "
 		"  FROM (" // teamrank score board
-		"    SELECT RANK() OVER w AS Ranking, ID, COUNT(*) AS Teamsize "
+		"    SELECT RANK() OVER w AS Ranking, COUNT(*) AS Teamsize, ID "
 		"    FROM %s_teamrace "
 		"    WHERE Map = ? "
-		"    GROUP BY ID, Time "
-		"    WINDOW w AS (ORDER BY Time)"
+		"    GROUP BY ID "
+		"    WINDOW w AS (ORDER BY Min(Time))"
 		"  ) as l1 "
 		"  ORDER BY Ranking %s "
 		"  LIMIT %d, 5"
@@ -968,13 +968,13 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank "
+		"SELECT l.ID, Name, Time, Ranking "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, ID "
+		"  SELECT RANK() OVER w AS Ranking, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  WINDOW w AS (ORDER BY Min(Time))"
 		") AS TeamRank INNER JOIN (" // select rank with Name in team
 		"  SELECT ID "
 		"  FROM %s_teamrace "
