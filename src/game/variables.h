@@ -102,7 +102,7 @@ MACRO_CONFIG_INT(ClOutlineAlphaSolid, tc_outline_alpha_solid, 100, 0, 100, CFGFL
 MACRO_CONFIG_COL(ClOutlineColorSolid, tc_outline_color_solid, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Solid outline color") //0 0 0
 MACRO_CONFIG_COL(ClOutlineColorFreeze, tc_outline_color_freeze, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Freeze outline color") //0 0 0
 MACRO_CONFIG_COL(ClOutlineColorTele, tc_outline_color_tele, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tele outline color") //0 0 0
-MACRO_CONFIG_COL(ClOutlineColorUnfreeze, tc_outline_color_unfreeez, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Unfreeze outline color") //0 0 0
+MACRO_CONFIG_COL(ClOutlineColorUnfreeze, tc_outline_color_unfreeze, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Unfreeze outline color") //0 0 0
 
 MACRO_CONFIG_INT(ClWhiteFeet, tc_white_feet, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render all feet as perfectly white base color")
 

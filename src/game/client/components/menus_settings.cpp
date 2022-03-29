@@ -2648,6 +2648,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
 
 	{
 		CUIRect Button, Label;

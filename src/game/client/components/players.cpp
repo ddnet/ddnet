@@ -794,8 +794,8 @@ void CPlayers::OnRender()
 			continue;
 		}
 
-		if(g_Config.m_ClFrozenHudTeamOnly)
-			RenderHookCollLine(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, ClientID);
+		
+		RenderHookCollLine(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, ClientID);
 
 		//don't render offscreen
 		vec2 *pRenderPos = &m_pClient->m_aClients[ClientID].m_RenderPos;
