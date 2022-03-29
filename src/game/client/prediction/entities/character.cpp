@@ -1058,7 +1058,7 @@ CTeamsCore *CCharacter::TeamsCore()
 	return m_Core.m_pTeams;
 }
 
-CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
+CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
 {
 	m_ID = ID;
@@ -1093,7 +1093,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
 
 	ResetPrediction();
-	Read(pChar, pExtended, false);
+	Read(pChar, pExtended, pExtendedDisplayInfo, false);
 
 	GameWorld()->InsertEntity(this);
 }
@@ -1131,7 +1131,7 @@ void CCharacter::ResetPrediction()
 	m_LastTuneZoneTick = 0;
 }
 
-void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
+void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, bool IsLocal)
 {
 	m_Core.ReadCharacterCore((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
@@ -1307,6 +1307,17 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
 		}
+	}
+
+	if(pExtendedDisplayInfo)
+	{
+		if(GameWorld()->m_WorldConfig.m_PredictFreeze)
+		{
+			m_Core.m_FreezeTick = pExtendedDisplayInfo->m_FreezeTick;
+		}
+		m_Core.m_IsInFreeze = pExtendedDisplayInfo->m_IsInFreeze;
+		m_Core.m_Ninja.m_ActivationTick = pExtendedDisplayInfo->m_NinjaActivationTick;
+		m_Core.m_JumpedTotal = pExtendedDisplayInfo->m_JumpedTotal;
 	}
 }
 

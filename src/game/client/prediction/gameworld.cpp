@@ -347,16 +347,16 @@ void CGameWorld::NetObjBegin()
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, int GameTeam, bool IsLocal)
 {
 	CCharacter *pChar;
 	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
 	{
-		pChar->Read(pCharObj, pExtended, IsLocal);
+		pChar->Read(pCharObj, pExtended, pExtendedDisplayInfo, IsLocal);
 		pChar->Keep();
 	}
 	else
-		pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
+		pChar = new CCharacter(this, ObjID, pCharObj, pExtended, pExtendedDisplayInfo);
 
 	if(pChar)
 		pChar->m_GameTeam = GameTeam;
