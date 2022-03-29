@@ -770,7 +770,7 @@ Show tiles layers from BG map
 == 显示实体层背景地图的图块层
 
 Try fast HTTP map download first
-== 优先尝试用 HTTP 快速下载地图
+== 优先尝试使用 HTTP 协议快速下载地图
 
 DDNet %s is available:
 == DDNet %s 现已可用：
