@@ -1301,46 +1301,46 @@ CHN
 == CHN
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== El format de la textura %s no és RGBA i pot causar errors visuals.
 
 Join Tutorial Server
-== 
+== Entrar al tutorial
 
 Skip Tutorial
-== 
+== Saltar el Tutorial
 
 Settings file
-== 
+== Arxiu de configuració
 
 Config directory
-== 
+== Directori amb la configuració
 
 Windowed fullscreen
-== 
+== Windowed fullscreen
 
 Renderer
-== 
+== Renderitzador
 
 default
-== 
+== predeterminat
 
 custom
-== 
+== personalitzat
 
 Graphics cards
-== 
+== Tarjetes gràfiques
 
 auto
-== 
+== auto
 
 Run on join
-== 
+== Córrer en unir-se
 
 Chat command (e.g. showall 1)
-== 
+== Commanda del xat (e.g showall 1)
 
 Tutorial
-== 
+== Tutorial
 
 Can't find a Tutorial server
-== 
+== No s'ha pogut trobar un servidor del tutorial
