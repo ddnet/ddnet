@@ -699,10 +699,6 @@ void CCharacter::HandleTiles(int Index)
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 		{
 			Freeze(Collision()->GetSwitchDelay(MapIndex));
-			if(IsGrounded())
-			{
-				m_Core.m_IsInFreeze = true;
-			}
 		}
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
@@ -787,10 +783,6 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
 	{
 		Freeze();
-		if(IsGrounded())
-		{
-			m_Core.m_IsInFreeze = true;
-		}
 	}
 	else if(((m_TileIndex == TILE_UNFREEZE) || (m_TileFIndex == TILE_UNFREEZE)) && !m_DeepFreeze)
 	{
@@ -945,6 +937,22 @@ void CCharacter::DDRaceTick()
 	}
 
 	HandleTuneLayer();
+
+	// check if the tee is in any type of freeze
+	int Index = Collision()->GetPureMapIndex(m_Pos);
+	const int aTiles[] = {
+		Collision()->GetTileIndex(Index),
+		Collision()->GetFTileIndex(Index),
+		Collision()->GetSwitchType(Index)};
+	m_Core.m_IsInFreeze = false;
+	for(const int Tile : aTiles)
+	{
+		if(Tile == TILE_FREEZE || Tile == TILE_DFREEZE || Tile == TILE_LFREEZE)
+		{
+			m_Core.m_IsInFreeze = true;
+			break;
+		}
+	}
 }
 
 void CCharacter::DDRacePostCoreTick()
@@ -956,7 +964,6 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_HookTick = 0;
 
 	m_FrozenLastTick = false;
-	m_Core.m_IsInFreeze = false;
 
 	if(m_DeepFreeze && !m_Super)
 		Freeze();
