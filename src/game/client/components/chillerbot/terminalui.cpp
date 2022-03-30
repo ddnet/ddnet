@@ -187,7 +187,8 @@ void CTerminalUI::RenderHelpPage()
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aLine);
-		aBuf[mx - 2] = '\0'; // ensure no line wrapping
+		if(sizeof(aBuf) > (unsigned long)(mx - 2))
+			aBuf[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(g_pLogWindow, offY + i++, offX, "%s", aBuf);
 	}
 }
@@ -252,7 +253,8 @@ void CTerminalUI::RenderServerList()
 			str_format(aLine, sizeof(aLine), "< %-*s>", width - 3, aBuf);
 		else
 			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
-		aLine[mx - 2] = '\0'; // ensure no line wrapping
+		if(sizeof(aBuf) > (unsigned long)(mx - 2))
+			aLine[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(g_pLogWindow, offY + k, offX, "%s", aLine);
 	}
 }
@@ -308,7 +310,8 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 			m_pClient->m_aClients[pInfo->m_ClientID].m_aName,
 			m_pClient->m_aClients[pInfo->m_ClientID].m_aClan);
 		str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
-		aLine[mx - 2] = '\0'; // ensure no line wrapping
+		if(sizeof(aBuf) > (unsigned long)(mx - 2))
+			aLine[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(pWin, offY + i, offX, "%s", aLine);
 
 		if(offY + i > my - 8)
@@ -396,7 +399,8 @@ void CTerminalUI::RenderConnecting()
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Connecting to %s", g_Config.m_UiServerAddress);
-	aBuf[mx - 2] = '\0'; // ensure no line wrapping
+	if(sizeof(aBuf) > (unsigned long)(mx - 2))
+		aBuf[mx - 2] = '\0'; // ensure no line wrapping
 	mvwprintw(g_pLogWindow, offY, offX, "|%-*s|", width - 2, aBuf);
 }
 
@@ -434,7 +438,8 @@ bool CTerminalUI::RenderDownload()
 	aProgress[width - 2] = '\0';
 	char aBuf[1024];
 	str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aProgress);
-	aBuf[mx - 2] = '\0'; // ensure no line wrapping
+	if(sizeof(aBuf) > (unsigned long)(mx - 2))
+		aBuf[mx - 2] = '\0'; // ensure no line wrapping
 	mvwprintw(g_pLogWindow, offY, offX, "%s", aBuf);
 	char aMapName[128];
 	str_format(aMapName, sizeof(aMapName), "Downloading map %s ", Client()->MapDownloadName());
@@ -450,7 +455,8 @@ bool CTerminalUI::RenderDownload()
 	}
 	aMapName[width - 2] = '\0';
 	str_format(aBuf, sizeof(aBuf), "|%-*s|", width - 2, aMapName);
-	aBuf[mx - 2] = '\0'; // ensure no line wrapping
+	if(sizeof(aBuf) > (unsigned long)(mx - 2))
+		aBuf[mx - 2] = '\0'; // ensure no line wrapping
 	mvwprintw(g_pLogWindow, offY + 2, offX, "%s", aBuf);
 	static int LastDownload = Download;
 	if(LastDownload != Download)
