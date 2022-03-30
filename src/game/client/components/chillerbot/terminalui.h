@@ -135,6 +135,7 @@ class CTerminalUI : public CComponent
 	void InfoDraw();
 	void InputDraw();
 	int CursesTick();
+	void SetServerBrowserPage(int NewPage);
 	int AimX;
 	int AimY;
 	bool m_ScoreboardActive;

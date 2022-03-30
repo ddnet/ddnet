@@ -161,15 +161,24 @@ void CTerminalUI::RenderHelpPage()
 		offY = 2;
 
 	const char aHelpLines[][128] = {
-		"?  - toggle this help",
-		"t  - chat",
-		"z  - team chat",
-		"f1 - local console",
-		"f2 - remote console",
-		"b  - toggle server browser",
-		"c  - connect to currently selected server",
-		"h  - auto reply to known chat messages",
-		"k  - selfkill"};
+		"** basic",
+		" ?     - toggle this help",
+		"",
+		"** serverbrowser",
+		" b     - toggle server browser. Opens search prompt then waits for navigation.",
+		" c     - connect to currently selected server",
+		" down  - select next server",
+		" up    - select previous server",
+		" right - switch to next tab (internet/lan/favorites/ddnet/kog)",
+		" left  - switch to previous tab (internet/lan/favorites/ddnet/kog)",
+		"",
+		"** in game",
+		" t     - chat",
+		" z     - team chat",
+		" f1    - local console",
+		" f2    - remote console",
+		" h     - auto reply to known chat messages",
+		" k     - selfkill"};
 
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, sizeof(aHelpLines) / 128 + 2);
 
@@ -187,6 +196,19 @@ void CTerminalUI::RenderServerList()
 {
 	if(!m_RenderServerList)
 		return;
+
+	char aTab[128];
+	aTab[0] = '\0';
+	if(g_Config.m_UiPage == CMenus::PAGE_INTERNET)
+		str_copy(aTab, "internet", sizeof(aTab));
+	else if(g_Config.m_UiPage == CMenus::PAGE_LAN)
+		str_copy(aTab, "lan", sizeof(aTab));
+	else if(g_Config.m_UiPage == CMenus::PAGE_FAVORITES)
+		str_copy(aTab, "favorites", sizeof(aTab));
+	else if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
+		str_copy(aTab, "ddnet", sizeof(aTab));
+	else if(g_Config.m_UiPage == CMenus::PAGE_KOG)
+		str_copy(aTab, "KoG", sizeof(aTab));
 	int mx = getmaxx(g_pLogWindow);
 	int my = getmaxy(g_pLogWindow);
 	int offY = 5;
@@ -197,8 +219,17 @@ void CTerminalUI::RenderServerList()
 		offY = 2;
 	int width = minimum(128, mx - 3);
 	m_NumServers = ServerBrowser()->NumSortedServers();
-	DrawBorders(g_pLogWindow, offX, offY - 1, width, m_NumServers + 2);
-	for(int i = 0; i < m_NumServers; i++)
+	int height = minimum(m_NumServers, my - 4);
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
+	mvwprintw(g_pLogWindow, offY - 1, offX + 3, "[ %s ]", aTab);
+	int From = 0;
+	int To = height;
+	if(To > 1 && m_SelectedServer >= To - 1)
+	{
+		From = m_SelectedServer - (To - 1);
+		To = m_SelectedServer + 1;
+	}
+	for(int i = From, k = 0; i < To && k < height; i++, k++)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
 		if(!pItem)
@@ -219,7 +250,7 @@ void CTerminalUI::RenderServerList()
 		else
 			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
 		aLine[mx - 2] = '\0'; // ensure no line wrapping
-		mvwprintw(g_pLogWindow, offY + i, offX, "%s", aLine);
+		mvwprintw(g_pLogWindow, offY + k, offX, "%s", aLine);
 	}
 }
 
@@ -460,6 +491,7 @@ int CTerminalUI::GetInput()
 				m_pClient->m_Chat.Say(1, g_aInputStr);
 			else if(m_InputMode == INPUT_BROWSER_SEARCH)
 			{
+				m_SelectedServer = 0;
 				str_copy(g_Config.m_BrFilterString, g_aInputStr, sizeof(g_Config.m_BrFilterString));
 				ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 			}
@@ -585,9 +617,17 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		m_NewInput = true;
 	}
 	else if(Key == KEY_LEFT)
+	{
 		AimX = maximum(AimX - 10, -20);
+		if(m_RenderServerList)
+			SetServerBrowserPage(g_Config.m_UiPage - 1);
+	}
 	else if(Key == KEY_RIGHT)
+	{
 		AimX = minimum(AimX + 10, 20);
+		if(m_RenderServerList)
+			SetServerBrowserPage(g_Config.m_UiPage + 1);
+	}
 	else if(Key == KEY_UP)
 	{
 		AimY = maximum(AimY - 10, -20);
@@ -630,6 +670,27 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 
 	// dbg_msg("termUI", "got key d=%d c=%c", Key, Key);
 	return 0;
+}
+
+void CTerminalUI::SetServerBrowserPage(int NewPage)
+{
+	if(NewPage >= CMenus::PAGE_INTERNET && NewPage <= CMenus::PAGE_KOG)
+	{
+		m_SelectedServer = 0;
+		g_Config.m_UiPage = NewPage;
+		if(g_Config.m_UiPage == CMenus::PAGE_INTERNET)
+			ServerBrowser()->Refresh(CServerBrowser::TYPE_INTERNET);
+		else if(g_Config.m_UiPage == CMenus::PAGE_LAN)
+			ServerBrowser()->Refresh(CServerBrowser::TYPE_LAN);
+		else if(g_Config.m_UiPage == CMenus::PAGE_FAVORITES)
+			ServerBrowser()->Refresh(CServerBrowser::TYPE_FAVORITES);
+		else if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
+			ServerBrowser()->Refresh(CServerBrowser::TYPE_DDNET);
+		else if(g_Config.m_UiPage == CMenus::PAGE_KOG)
+			ServerBrowser()->Refresh(CServerBrowser::TYPE_KOG);
+		gs_NeedLogDraw = true;
+		m_NewInput = true;
+	}
 }
 
 #endif
