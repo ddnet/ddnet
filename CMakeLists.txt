@@ -167,7 +167,11 @@ else()
 endif()
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE chillerbot-ux CACHE STRING "Name of the build client executable")
+if(CURSES_CLIENT)
+  set(CLIENT_EXECUTABLE term-ux CACHE STRING "Name of the build client executable")
+else()
+  set(CLIENT_EXECUTABLE chillerbot-ux CACHE STRING "Name of the build client executable")
+endif()
 
 ########################################################################
 # Compiler flags
