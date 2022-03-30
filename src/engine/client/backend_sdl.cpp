@@ -885,6 +885,15 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	{
 		if(m_BackendType == BACKEND_TYPE_VULKAN)
 		{
+			// try default opengl settings
+			str_copy(g_Config.m_GfxBackend, "OpenGL", std::size(g_Config.m_GfxBackend));
+			g_Config.m_GfxGLMajor = 3;
+			g_Config.m_GfxGLMinor = 0;
+			g_Config.m_GfxGLPatch = 0;
+			// do another analysis round too, just in case
+			g_Config.m_Gfx3DTextureAnalysisDone = 0;
+			g_Config.m_GfxDriverIsBlocked = 0;
+
 			SDL_setenv("DDNET_DRIVER", "OpenGL", 1);
 			m_BackendType = DetectBackend();
 		}
