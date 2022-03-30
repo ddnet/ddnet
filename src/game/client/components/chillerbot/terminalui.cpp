@@ -214,11 +214,11 @@ void CTerminalUI::RenderServerList()
 	int my = getmaxy(g_pLogWindow);
 	int offY = 5;
 	int offX = 40;
-	if(mx < 128)
-		offX = 2;
 	if(my < 60)
 		offY = 2;
 	int width = minimum(128, mx - 3);
+	if(mx < width + 2 + offX)
+		offX = 2;
 	m_NumServers = ServerBrowser()->NumSortedServers();
 	int height = minimum(m_NumServers, my - (offY + 2));
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
