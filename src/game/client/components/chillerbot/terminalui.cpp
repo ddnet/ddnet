@@ -123,7 +123,7 @@ int CTerminalUI::CursesTick()
 	LogDraw();
 	InfoDraw();
 	RenderServerList();
-	RenderDownload();
+	RenderConnecting();
 	RenderHelpPage();
 	if(m_pClient->m_Snap.m_pLocalCharacter)
 		RenderScoreboard(0, g_pLogWindow);
@@ -378,14 +378,37 @@ void CTerminalUI::OnRender()
 		m_ScoreboardActive);
 }
 
-void CTerminalUI::RenderDownload()
+void CTerminalUI::RenderConnecting()
+{
+	if(RenderDownload())
+		return;
+	if(Client()->State() != IClient::STATE_CONNECTING)
+		return;
+
+	int mx = getmaxx(g_pLogWindow);
+	int my = getmaxy(g_pLogWindow);
+	int offY = 5;
+	int offX = 2;
+	if(my < 20)
+		offY = 2;
+	int width = minimum(128, mx - 3);
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, 3);
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Connecting to %s", g_Config.m_UiServerAddress);
+	aBuf[mx - 2] = '\0'; // ensure no line wrapping
+	mvwprintw(g_pLogWindow, offY, offX, "|%-*s|", width - 2, aBuf);
+}
+
+
+bool CTerminalUI::RenderDownload()
 {
 	if(Client()->State() != IClient::STATE_LOADING)
-		return;
+		return false;
 	if(Client()->MapDownloadAmount() < 1)
-		return;
+		return false;
 	if(Client()->MapDownloadTotalsize() < 1)
-		return;
+		return false;
 
 	int mx = getmaxx(g_pLogWindow);
 	int my = getmaxy(g_pLogWindow);
@@ -437,6 +460,7 @@ void CTerminalUI::RenderDownload()
 		m_NewInput = false;
 		gs_NeedLogDraw = true;
 	}
+	return true;
 }
 
 int CTerminalUI::GetInput()
