@@ -219,7 +219,7 @@ void CTerminalUI::RenderServerList()
 		offY = 2;
 	int width = minimum(128, mx - 3);
 	m_NumServers = ServerBrowser()->NumSortedServers();
-	int height = minimum(m_NumServers, my - 4);
+	int height = minimum(m_NumServers, my - (offY + 2));
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
 	mvwprintw(g_pLogWindow, offY - 1, offX + 3, "[ %s ]", aTab);
 	int From = 0;
