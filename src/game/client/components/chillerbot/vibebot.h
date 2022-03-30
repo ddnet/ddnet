@@ -57,6 +57,7 @@ public:
 	vec2 m_WantedAim[NUM_DUMMIES];
 
 	int MoveID() { return m_MoveID; };
+	bool IsVibing(int ClientID) { return m_Mode[ClientID] != VB_OFF; }
 
 	enum
 	{

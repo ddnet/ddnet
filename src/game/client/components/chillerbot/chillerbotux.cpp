@@ -94,6 +94,11 @@ void CChillerBotUX::OnRender()
 	{
 		m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
+		if(m_pClient->m_VibeBot.IsVibing(g_Config.m_ClDummy))
+		{
+			m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_Direction = 0;
+			m_pClient->m_VibeBot.m_InputData[g_Config.m_ClDummy].m_Direction = 0;
+		}
 	}
 	m_LastForceDir = m_ForceDir;
 }
@@ -333,12 +338,22 @@ void CChillerBotUX::CampHackTick()
 		m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 1;
 		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
 		m_ForceDir = 1;
+		if(m_pClient->m_VibeBot.IsVibing(g_Config.m_ClDummy))
+		{
+			m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_Direction = 1;
+			m_pClient->m_VibeBot.m_InputData[g_Config.m_ClDummy].m_Direction = 1;
+		}
 	}
 	else if(m_CampHackX2 < GameClient()->m_Snap.m_pLocalCharacter->m_X)
 	{
 		m_pClient->m_Controls.m_InputDirectionRight[g_Config.m_ClDummy] = 0;
 		m_pClient->m_Controls.m_InputDirectionLeft[g_Config.m_ClDummy] = 1;
 		m_ForceDir = -1;
+		if(m_pClient->m_VibeBot.IsVibing(g_Config.m_ClDummy))
+		{
+			m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_Direction = -1;
+			m_pClient->m_VibeBot.m_InputData[g_Config.m_ClDummy].m_Direction = -1;
+		}
 	}
 }
 
