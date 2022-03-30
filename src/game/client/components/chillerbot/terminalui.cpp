@@ -400,7 +400,6 @@ void CTerminalUI::RenderConnecting()
 	mvwprintw(g_pLogWindow, offY, offX, "|%-*s|", width - 2, aBuf);
 }
 
-
 bool CTerminalUI::RenderDownload()
 {
 	if(Client()->State() != IClient::STATE_LOADING)
