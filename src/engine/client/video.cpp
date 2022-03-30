@@ -7,6 +7,7 @@
 #include <engine/client/graphics_threaded.h>
 #include <engine/sound.h>
 
+#include <libavutil/channel_layout.h>
 #include <memory>
 #include <mutex>
 
