@@ -64,11 +64,6 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		MEMORY_BLOCK_USAGE_DUMMY,
 	};
 
-	void NotImplemented()
-	{
-		dbg_assert(false, "function not implemented!");
-	}
-
 	bool IsVerbose()
 	{
 		return g_Config.m_DbgGfx == DEBUG_GFX_MODE_VERBOSE || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL;
@@ -584,15 +579,21 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SShaderModule
 	{
-		VkShaderModule m_VertShaderModule;
-		VkShaderModule m_FragShaderModule;
+		VkShaderModule m_VertShaderModule = VK_NULL_HANDLE;
+		VkShaderModule m_FragShaderModule = VK_NULL_HANDLE;
 
-		VkDevice m_VKDevice;
+		VkDevice m_VKDevice = VK_NULL_HANDLE;
 
 		~SShaderModule()
 		{
-			vkDestroyShaderModule(m_VKDevice, m_VertShaderModule, nullptr);
-			vkDestroyShaderModule(m_VKDevice, m_FragShaderModule, nullptr);
+			if(m_VKDevice != VK_NULL_HANDLE)
+			{
+				if(m_VertShaderModule != VK_NULL_HANDLE)
+					vkDestroyShaderModule(m_VKDevice, m_VertShaderModule, nullptr);
+
+				if(m_FragShaderModule != VK_NULL_HANDLE)
+					vkDestroyShaderModule(m_VKDevice, m_FragShaderModule, nullptr);
+			}
 		}
 	};
 
@@ -1082,6 +1083,8 @@ protected:
 	************************/
 
 	char m_aError[1024];
+	bool m_HasError = false;
+	bool m_CanAssert = false;
 
 	void SetError(const char *pErr, const char *pErrStrExtra = nullptr)
 	{
@@ -1091,7 +1094,8 @@ protected:
 		else
 			str_format(aError, std::size(aError), "%s: %s", pErr, pErrStrExtra);
 		dbg_msg("vulkan", "vulkan error: %s", aError);
-		dbg_assert(false, aError);
+		m_HasError = true;
+		dbg_assert(!m_CanAssert, aError);
 	}
 
 	void SetWarning(const char *pErr)
@@ -4216,6 +4220,8 @@ public:
 		ShaderLoaded &= LoadShader(pVertName, pVertBuff);
 		ShaderLoaded &= LoadShader(pFragName, pFragBuff);
 
+		ShaderModule.m_VKDevice = m_VKDevice;
+
 		if(!ShaderLoaded)
 		{
 			SetError("A shader file could not load correctly");
@@ -4241,8 +4247,6 @@ public:
 		FragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		FragShaderStageInfo.module = ShaderModule.m_FragShaderModule;
 		FragShaderStageInfo.pName = "main";
-
-		ShaderModule.m_VKDevice = m_VKDevice;
 		return true;
 	}
 
@@ -6119,11 +6123,16 @@ public:
 
 		if(m_VKInstance == VK_NULL_HANDLE)
 		{
+			*pCommand->m_pInitError = -2;
 			return;
 		}
 
 		m_pStorage = pCommand->m_pStorage;
-		InitVulkan<true>();
+		if(InitVulkan<true>() != 0)
+		{
+			*pCommand->m_pInitError = -2;
+			return;
+		}
 
 		std::array<uint32_t, (size_t)CCommandBuffer::MAX_VERTICES / 4 * 6> aIndices;
 		int Primq = 0;
@@ -6137,11 +6146,27 @@ public:
 			aIndices[i + 5] = Primq + 3;
 			Primq += 4;
 		}
-		PrepareFrame();
 
-		CreateIndexBuffer(aIndices.data(), sizeof(uint32_t) * aIndices.size(), m_IndexBuffer, m_IndexBufferMemory);
-		CreateIndexBuffer(aIndices.data(), sizeof(uint32_t) * aIndices.size(), m_RenderIndexBuffer, m_RenderIndexBufferMemory);
+		PrepareFrame();
+		if(m_HasError)
+		{
+			*pCommand->m_pInitError = -2;
+			return;
+		}
+
+		if(!CreateIndexBuffer(aIndices.data(), sizeof(uint32_t) * aIndices.size(), m_IndexBuffer, m_IndexBufferMemory))
+		{
+			*pCommand->m_pInitError = -2;
+			return;
+		}
+		if(!CreateIndexBuffer(aIndices.data(), sizeof(uint32_t) * aIndices.size(), m_RenderIndexBuffer, m_RenderIndexBufferMemory))
+		{
+			*pCommand->m_pInitError = -2;
+			return;
+		}
 		m_CurRenderIndexPrimitiveCount = CCommandBuffer::MAX_VERTICES / 4;
+
+		m_CanAssert = true;
 	}
 
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand)
