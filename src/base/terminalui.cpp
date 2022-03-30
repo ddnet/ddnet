@@ -105,13 +105,7 @@ void curses_log_push(const char *pStr)
 		puts(pStr);
 		return;
 	}
-	int x, y;
-	getmaxyx(g_pLogWindow, y, x);
-	int Max = CHILLER_LOGGER_HEIGHT > y ? y : CHILLER_LOGGER_HEIGHT;
-	int Top = CHILLER_LOGGER_HEIGHT - 2;
-	int Bottom = CHILLER_LOGGER_HEIGHT - Max;
-	str_format(g_aInfoStr, sizeof(g_aInfoStr), "?=help max=%d HEIGHT=%d y=%d top=%d bottom=%d                                            ",
-		Max, CHILLER_LOGGER_HEIGHT, y, Top, Bottom);
+	str_copy(g_aInfoStr, "?=help", sizeof(g_aInfoStr));
 	gs_NeedLogDraw = true;
 	// shift all
 	for(int i = CHILLER_LOGGER_HEIGHT - 1; i > 0; i--)
