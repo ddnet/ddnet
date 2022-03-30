@@ -239,12 +239,15 @@ void CTerminalUI::RenderServerList()
 		char aLine[1024];
 		char aBuf[1024];
 		char aName[64];
+		char aPlayers[16];
+		str_format(aPlayers, sizeof(aPlayers), "%d/%d", pItem->m_NumPlayers, pItem->m_MaxPlayers);
 		str_copy(aName, pItem->m_aName, sizeof(aName));
 		aName[60] = '\0';
 		str_format(aBuf, sizeof(aBuf),
-			"%-60s | %-20s |",
+			"%-60s | %-20s | %-16s",
 			aName,
-			pItem->m_aMap);
+			pItem->m_aMap,
+			aPlayers);
 		if(m_SelectedServer == i)
 			str_format(aLine, sizeof(aLine), "< %-*s>", width - 3, aBuf);
 		else
@@ -259,10 +262,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 	if(!m_ScoreboardActive)
 		return;
 
-	int RenderScoreIDs[MAX_CLIENTS];
 	int NumRenderScoreIDs = 0;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-		RenderScoreIDs[i] = -1;
 
 	int mx = getmaxx(pWin);
 	int my = getmaxy(pWin);
@@ -281,7 +281,6 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 
-		RenderScoreIDs[NumRenderScoreIDs] = i;
 		NumRenderScoreIDs++;
 		if(offY + i > my - 8)
 			break;
@@ -290,30 +289,30 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 	DrawBorders(pWin, offX, offY - 1, width, NumRenderScoreIDs + 2);
 	// DrawBorders(pWin, 10, 5, 10, 5);
 
-	for(int i = 0; i < NumRenderScoreIDs; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(RenderScoreIDs[i] >= 0)
-		{
-			// if(rendered++ < 0) continue;
+		// if(rendered++ < 0) continue;
 
-			// make sure that we render the correct team
-			const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
-			if(!pInfo || pInfo->m_Team != Team)
-				continue;
+		// make sure that we render the correct team
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
+		if(!pInfo || pInfo->m_Team != Team)
+			continue;
 
-			// dbg_msg("scoreboard", "i=%d name=%s", i, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+		// dbg_msg("scoreboard", "i=%d name=%s", i, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
 
-			char aLine[1024];
-			char aBuf[1024];
-			str_format(aBuf, sizeof(aBuf),
-				"%4d| %-20s | %-20s |",
-				clamp(pInfo->m_Score, -999, 9999),
-				m_pClient->m_aClients[pInfo->m_ClientID].m_aName,
-				m_pClient->m_aClients[pInfo->m_ClientID].m_aClan);
-			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
-			aLine[mx - 2] = '\0'; // ensure no line wrapping
-			mvwprintw(pWin, offY + i, offX, "%s", aLine);
-		}
+		char aLine[1024];
+		char aBuf[1024];
+		str_format(aBuf, sizeof(aBuf),
+			"%4d| %-20s | %-20s |",
+			clamp(pInfo->m_Score, -999, 9999),
+			m_pClient->m_aClients[pInfo->m_ClientID].m_aName,
+			m_pClient->m_aClients[pInfo->m_ClientID].m_aClan);
+		str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
+		aLine[mx - 2] = '\0'; // ensure no line wrapping
+		mvwprintw(pWin, offY + i, offX, "%s", aLine);
+
+		if(offY + i > my - 8)
+			break;
 	}
 }
 
