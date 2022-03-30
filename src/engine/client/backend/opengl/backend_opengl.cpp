@@ -1777,12 +1777,12 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 			glUseProgram(0);
 		}
 
-		if(g_Config.m_Gfx3DTextureAnalysisDone == 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString) != 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString) != 0)
+		if(g_Config.m_Gfx3DTextureAnalysisRan == 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString) != 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString) != 0)
 		{
 			AnalysisCorrect = IsTileMapAnalysisSucceeded();
 			if(AnalysisCorrect)
 			{
-				g_Config.m_Gfx3DTextureAnalysisDone = 1;
+				g_Config.m_Gfx3DTextureAnalysisRan = 1;
 				str_copy(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString, sizeof(g_Config.m_Gfx3DTextureAnalysisRenderer) / sizeof(g_Config.m_Gfx3DTextureAnalysisRenderer[0]));
 				str_copy(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString, sizeof(g_Config.m_Gfx3DTextureAnalysisVersion) / sizeof(g_Config.m_Gfx3DTextureAnalysisVersion[0]));
 			}

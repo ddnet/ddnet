@@ -884,7 +884,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			g_Config.m_GfxGLMinor = 0;
 			g_Config.m_GfxGLPatch = 0;
 			// do another analysis round too, just in case
-			g_Config.m_Gfx3DTextureAnalysisDone = 0;
+			g_Config.m_Gfx3DTextureAnalysisRan = 0;
 			g_Config.m_GfxDriverIsBlocked = 0;
 
 			SDL_setenv("DDNET_DRIVER", "OpenGL", 1);
