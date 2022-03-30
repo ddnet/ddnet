@@ -158,8 +158,8 @@ private:
 	OutputStream m_VideoStream;
 	OutputStream m_AudioStream;
 
-	const AVCodec *m_VideoCodec;
-	const AVCodec *m_AudioCodec;
+	const AVCodec *m_pVideoCodec;
+	const AVCodec *m_pAudioCodec;
 
 	AVDictionary *m_pOptDict;
 

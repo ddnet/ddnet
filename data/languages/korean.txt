@@ -2,8 +2,11 @@
 #originally created by:
 #	ksgcln72
 #contributors:
-#   Pathos
-#   CHaBek
+#	Pathos
+#modified by:
+# 2022-03-23 CHaBek
+# 2022-03-28 CHaBek
+##### /authors #####
 
 ##### translated strings #####
 
@@ -92,7 +95,7 @@ Connecting to
 == 연결 중
 
 Connection Problems...
-== 연결에 문제가 있음...
+== 연결 문제 발생...
 
 Console
 == 콘솔
@@ -200,7 +203,7 @@ Grenade
 == 유탄 발사기
 
 Hammer
-== 해머
+== 망치
 
 Has people playing
 == 플레이어가 있는 서버
@@ -266,7 +269,7 @@ No
 == 아니오
 
 No password
-== 비밀번호 없음
+== 비밀번호가 없는 서버
 
 No servers found
 == 서버를 찾을 수 없음
@@ -287,7 +290,7 @@ Password
 == 비밀번호
 
 Password incorrect
-== 비밀번호 오류
+== 잘못된 비밀번호
 
 Ping
 == 핑
@@ -435,7 +438,7 @@ The server is running a non-standard tuning on a pure game type.
 == 이 서버는 조정된 비표준 게임 모드를 실행하고 있습니다.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 편집기에서 맵이 저장되지 않았습니다. 종료 전에 저장하실 수 있습니다.
+== 편집기에서 맵이 저장되지 않았습니다. 종료 전에 되돌아가 저장하실 수 있습니다.
 
 Time limit
 == 시간 제한
@@ -665,22 +668,22 @@ Disconnect Dummy
 == 더미 연결 끊기
 
 Are you sure that you want to disconnect your dummy?
-== 더미 연결을 끊으시겠습니까?
+== 더미의 연결을 끊으시겠습니까?
 
 Welcome to DDNet
 == DDNet에 오신 것을 환영합니다
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork는 온라인 협동 게임으로, 여러분과 여러분의 Tee 그룹이 맵의 결승점에 도달하는 것이 목표입니다. 여러분이 초보자라면 가장 쉬운 맵들을 진행하는 Novice 서버에서 시작하는 것을 권장합니다. 핑을 고려하여 여러분 가까이에 있는 서버를 선택하십시오.
+== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승점에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 쉬운 맵들을 진행하는 Novice 서버에서 시작하는 것을 권장합니다. 핑을 고려하여 당신의 근처에 있는 서버를 선택하십시오.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 죽기(재시작) 위해서는 K 키를 눌러야 합니다. Q 키를 눌러 일시정지하여 다른 플레이어를 관전할 수 있습니다. 다른 키 바인드는 설정 창을 참고하십시오.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 서버 접속 전에 설정을 확인하고 여러분의 편의에 따라 조정하는 것을 권장드립니다.
+== 서버 접속 전에 설정을 확인하고 여러분의 편의에 따라 조정하는 것을 권장합니다.
 
 Please enter your nickname below.
-== 닉네임을 입력해 주십시오.
+== 아래에 닉네임을 입력해 주십시오.
 
 Existing Player
 == 기존 플레이어
@@ -707,10 +710,10 @@ Video name:
 == 동영상 이름
 
 Show DDNet map finishes in server browser
-== 완료된 DDNet 맵을 서버 브라우저에 표시
+== DDNet 맵 완주를 서버 브라우저에 표시
 
 transmits your player name to info2.ddnet.tw
-== info2.ddnet.tw에 당신의 닉네임 전송
+== info2.ddnet.tw에 당신의 닉네임을 전송함
 
 Theme
 == 테마
@@ -869,10 +872,10 @@ Download skins
 == 스킨 다운로드하기
 
 Vanilla skins only
-== 원본 스킨만 표시
+== 원판 스킨만 표시
 
 Fat skins (DDFat)
-== 거대 스킨 (DDFat)
+== 살찐 스킨 (DDFat)
 
 Skin prefix
 == 스킨 접두사
@@ -958,15 +961,6 @@ may cause delay
 Screen
 == 화면
 
-Use modern OpenGL
-== 최신 OpenGL 사용
-
-Preinit VBO (iGPUs only)
-== VBO 사전 초기화 (내장 그래픽만)
-
-Multiple texture units (disable for macOS)
-== 다중 텍스처 유닛 (macOS 제외)
-
 Use high DPI
 == 높은 DPI 사용
 
@@ -977,7 +971,7 @@ Enable gun sound
 == 총 소리 활성화
 
 Enable long pain sound (used when shooting in freeze)
-== 동결 상태 비명 활성화
+== 동결(프리즈) 상태 비명 활성화
 
 Enable server message sound
 == 서버 메시지 소리 활성화
@@ -1034,7 +1028,7 @@ Show names in chat in team colors
 == 이름을 팀 색상으로 표시
 
 Show votes window after voting
-== 투표 완료 후에도 투표 창 표시
+== 투표 후에도 투표 창 표시
 
 Show kill messages
 == 킬 메시지 표시
@@ -1094,13 +1088,13 @@ Preview
 == 미리보기
 
 Save the best demo of each race
-== 레이스의 최고 기록의 데모를 저장
+== 레이스 최고 기록의 데모를 저장
 
 Default length: %d
 == 기본 길이: %d
 
 Enable replays
-== 리플레이 기능
+== 리플레이 활성화
 
 Show ghost
 == 고스트 표시
@@ -1166,10 +1160,10 @@ Regular Background Color
 == 기본 배경 색상
 
 Try fast HTTP map download first
-== 맵 다운로드에 HTTP를 우선시
+== 빠른 HTTP 맵 다운로드 우선 시도
 
 New random timeout code
-== 새로운 타임아웃 코드를 무작위 생성
+== 새로운 무작위 타임아웃 코드 생성
 
 Run on join
 == 참가 시 실행
@@ -1269,22 +1263,22 @@ Follow
 == 팔로우
 
 Frags
-== 킬
+== 처치
 
 Deaths
-== 데스
+== 사망
 
 Suicides
 == 자살
 
 Ratio
-== 킬/데스
+== 처치율
 
 Net
-== 순수킬
+== 순처치
 
 FPM
-== 킬/분
+== 처치/분
 
 Spree
 == 연속
@@ -1296,46 +1290,67 @@ Grabs
 == 획득
 
 1 new mention
-== 1 건의 새로운 언급
+== 1 건의 새 언급
 
 %d new mentions
-== %d 건의 새로운 언급
+== %d 건의 새 언급
 
 9+ new mentions
-== 9+ 건의 새로운 언급
+== 9+ 건의 새 언급
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 텍스처 %s 의 형식이 RGBA가 아닙니다. 이는 시각적 오류를 발생시킬 수 있습니다.
+== 텍스처 %s 의 형식이 RGBA가 아닙니다. 이는 시각적 오류를 발생시킬 것입니다.
 
 Join Tutorial Server
-== 
+== 튜토리얼 서버 입장
 
 Skip Tutorial
-== 
+== 튜토리얼 건너뛰기
 
 AFR
-== 
+== 아프리카
 
 ASI
-== 
+== 아시아
 
 AUS
-== 
+== 호주
 
 EUR
-== 
+== 유럽 
 
 NA
-== 
+== 북미 
 
 SA
-== 
+== 남미 
 
 CHN
-== 
+== 중국
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
+
+Renderer
+== 렌더러
+
+default
+== 기본
+
+custom
+== 커스텀
+
+Graphics cards
+== 그래픽 카드
+
+auto
+== 자동
+
+Tutorial
+== 튜토리얼
+
+Can't find a Tutorial server
+== 튜토리얼 서버를 찾을 수 없음

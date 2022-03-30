@@ -4,6 +4,8 @@
 #include <base/system.h>
 #include <engine/shared/protocol.h>
 
+#include <array> // std::size
+
 enum
 {
 	MAX_NAME_SKELETON_LENGTH = MAX_NAME_LENGTH * 4,
@@ -18,7 +20,7 @@ public:
 		m_Distance(Distance), m_IsSubstring(IsSubstring)
 	{
 		str_copy(m_aName, pName, sizeof(m_aName));
-		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, sizeof(m_aSkeleton) / sizeof(m_aSkeleton[0]));
+		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, std::size(m_aSkeleton));
 		str_copy(m_aReason, pReason, sizeof(m_aReason));
 	}
 	char m_aName[MAX_NAME_LENGTH];

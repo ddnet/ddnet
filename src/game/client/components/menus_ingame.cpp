@@ -321,7 +321,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		//Cursor.m_LineWidth = Button.w;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
 		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[Index].m_Country, &Color,
-			Button2.x, Button2.y + Button2.h / 2.0f - 0.75 * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
+			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore chat button
 		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
@@ -1014,7 +1014,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		{COL_TIME, "Time", 200.0f, {0}, {0}}, // Localize("Time")
 	};
 
-	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
+	int NumCols = std::size(s_aCols);
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)

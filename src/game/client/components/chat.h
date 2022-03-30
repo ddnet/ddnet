@@ -27,6 +27,7 @@ class CChat : public CComponent
 		int64_t m_Time;
 		float m_YOffset[2];
 		int m_ClientID;
+		int m_TeamNumber;
 		bool m_Team;
 		bool m_Whisper;
 		int m_NameColor;
@@ -38,7 +39,7 @@ class CChat : public CComponent
 		int m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
-		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
+		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
 		CSkin::SSkinTextures m_RenderSkin;
 		CSkin::SSkinMetrics m_RenderSkinMetrics;
 		bool m_CustomColoredSkin;

@@ -55,7 +55,7 @@ public:
 	void ShowRank(int ClientID, const char *pName);
 
 	void ShowTeamTop5(int ClientID, int Offset = 1);
-	void ShowTeamTop5(int ClientID, const char *pName, int Offset = 1);
+	void ShowPlayerTeamTop5(int ClientID, const char *pName, int Offset = 1);
 	void ShowTeamRank(int ClientID, const char *pName);
 
 	void ShowTopPoints(int ClientID, int Offset = 1);

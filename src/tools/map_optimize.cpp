@@ -305,7 +305,7 @@ int main(int argc, const char **argv)
 				GetImageSHA256(pImgBuff, ImgSize, Width, Height, aSHA256Str);
 
 				char aNewName[IO_MAX_PATH_LENGTH];
-				int StrLen = str_format(aNewName, sizeof(aNewName) / sizeof(aNewName[0]), "%s_cut_%s", pImgName, aSHA256Str);
+				int StrLen = str_format(aNewName, std::size(aNewName), "%s_cut_%s", pImgName, aSHA256Str);
 
 				DeletePtr = true;
 				// make the new name ready

@@ -16,12 +16,12 @@ public:
 	vec2 m_TargetPos[NUM_DUMMIES];
 	float m_OldMouseX;
 	float m_OldMouseY;
-	SDL_Joystick *m_Joystick;
+	SDL_Joystick *m_pJoystick;
 	bool m_JoystickFirePressed;
 	bool m_JoystickRunPressed;
 	int64_t m_JoystickTapTime;
 
-	SDL_Joystick *m_Gamepad;
+	SDL_Joystick *m_pGamepad;
 	bool m_UsingGamepad;
 
 	int m_AmmoCount[NUM_WEAPONS];

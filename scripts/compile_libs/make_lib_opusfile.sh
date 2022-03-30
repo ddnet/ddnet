@@ -5,6 +5,11 @@ ANDROID_NDK="$(find "$ANDROID_HOME/ndk" -maxdepth 1 | sort -n | tail -1)"
 
 export MAKEFLAGS=-j32
 
+export CXXFLAGS="$3"
+export CFLAGS="$3"
+export CPPFLAGS="$4"
+export LDFLAGS="$4"
+
 export ANDROID_NDK_ROOT="$ANDROID_NDK"
 
 function make_opusfile() {
@@ -24,7 +29,18 @@ function make_opusfile() {
 			cp ../../ogg/"$2"/libogg.a libogg.a
 			cp ../../opus/"$2"/libopus.a libopus.a
 		fi
-		"$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/$3$4-clang" \
+
+		TMP_COMPILER=""
+		TMP_AR=""
+		if [[ "${5}" == "android" ]]; then
+			TMP_COMPILER="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/$3$4-clang"
+			TMP_AR="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
+		elif [[ "${5}" == "webasm" ]]; then
+			TMP_COMPILER="emcc"
+			TMP_AR="emar"
+		fi
+
+		${TMP_COMPILER} \
 			-c \
 			-fPIC \
 			-I"${PWD}"/../include \
@@ -32,16 +48,14 @@ function make_opusfile() {
 			../src/opusfile.c \
 			../src/info.c \
 			../src/internal.c
-		"$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/$3$4-clang" \
+		${TMP_COMPILER} \
 			-c \
 			-fPIC \
 			-I"${PWD}"/../include \
 			-I"${PWD}"/include \
 			-include stdio.h \
-			-Dftello=ftell \
-			-Dfseek=fseek \
 			../src/stream.c
-		"$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar" \
+		${TMP_AR} \
 			rvs \
 			libopusfile.a \
 			opusfile.o \
@@ -52,11 +66,15 @@ function make_opusfile() {
 }
 
 function compile_all_opusfile() {
-	make_opusfile build_arm build_android_arm armv7a-linux-androideabi "$1"
-	make_opusfile build_arm64 build_android_arm64 aarch64-linux-android "$1"
-	make_opusfile build_x86 build_android_x86 i686-linux-android "$1"
-	make_opusfile build_x86_64 build_android_x86_64 x86_64-linux-android "$1"
+	if [[ "${2}" == "android" ]]; then
+		make_opusfile build_"$2"_arm build_"$2"_arm armv7a-linux-androideabi "$1" "$2"
+		make_opusfile build_"$2"_arm64 build_"$2"_arm64 aarch64-linux-android "$1" "$2"
+		make_opusfile build_"$2"_x86 build_"$2"_x86 i686-linux-android "$1" "$2"
+		make_opusfile build_"$2"_x86_64 build_"$2"_x86_64 x86_64-linux-android "$1" "$2"
+	elif [[ "${2}" == "webasm" ]]; then
+		make_opusfile build_"$2"_wasm build_"$2"_wasm "" "$1" "$2"
+	fi
 }
 
-compile_all_opusfile "$1"
+compile_all_opusfile "$1" "$2"
 

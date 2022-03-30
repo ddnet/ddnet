@@ -30,6 +30,8 @@
 
 #include <engine/external/json-parser/json.h>
 
+#include <game/client/components/menus.h> // PAGE_DDNET
+
 class SortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -1522,6 +1524,11 @@ void CServerBrowser::LoadDDNetInfoJson()
 
 const char *CServerBrowser::GetTutorialServer()
 {
+	// Use DDNet tab as default after joining tutorial, also makes sure Find() actually works
+	// Note that when no server info has been loaded yet, this will not return a result immediately.
+	g_Config.m_UiPage = CMenus::PAGE_DDNET;
+	Refresh(IServerBrowser::TYPE_DDNET);
+
 	CNetwork *pNetwork = &m_aNetworks[NETWORK_DDNET];
 	const char *pBestAddr = nullptr;
 	int BestLatency = std::numeric_limits<int>::max();
@@ -1714,7 +1721,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		"sa", // LOC_SOUTH_AMERICA
 		"as:cn", // LOC_CHINA
 	};
-	for(int i = sizeof(LOCATIONS) / sizeof(LOCATIONS[0]) - 1; i >= 0; i--)
+	for(int i = std::size(LOCATIONS) - 1; i >= 0; i--)
 	{
 		if(str_startswith(pString, LOCATIONS[i]))
 		{

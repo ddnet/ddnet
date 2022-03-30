@@ -1088,6 +1088,15 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 		pRect->HSplitTop(24.0f, &Button, pRect);
 		if(DoButton_MenuTab(pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
 			CurDropDownState = 1;
+
+		CUIRect DropDownIcon = Button;
+		DropDownIcon.HMargin(2.0f, &DropDownIcon);
+		DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		UI()->DoLabelScaled(&DropDownIcon, "\xEF\x84\xBA", DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_RIGHT);
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(NULL);
 		return CurSelection;
 	}
 }
@@ -1178,7 +1187,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// switches
 	static float s_ScrollValueDrop = 0;
 	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
-	static const int s_NumWindowMode = sizeof(pWindowModes) / sizeof(pWindowModes[0]);
+	static const int s_NumWindowMode = std::size(pWindowModes);
 	static int s_aWindowModeIDs[s_NumWindowMode];
 	const void *aWindowModeIDs[s_NumWindowMode];
 	for(int i = 0; i < s_NumWindowMode; ++i)
@@ -1756,7 +1765,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Assets"),
 		("TClient")};
 
-	int NumTabs = (int)(sizeof(aTabs) / sizeof(*aTabs));
+	int NumTabs = (int)std::size(aTabs);
 	int PreviousPage = g_Config.m_UiSettingsPage;
 
 	for(int i = 0; i < NumTabs; i++)
@@ -2244,7 +2253,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 	if(s_CurTab == 0)
 	{ // ***** GENERAL TAB ***** //
 
-		MainView.VSplitLeft(MainView.w * 0.55, &MainView, &Column);
+		MainView.VSplitLeft(MainView.w * 0.55f, &MainView, &Column);
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 		UI()->DoLabelScaled(&Section, Localize("HUD"), 20.0f, TEXTALIGN_LEFT);

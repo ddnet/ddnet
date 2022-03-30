@@ -277,7 +277,6 @@ void CGameTeams::Tick()
 				}
 				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
 				NumPlayersNotStarted += 1;
-				break;
 			}
 		}
 		if(!aPlayerNames[0])
@@ -484,7 +483,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 	int64_t Mask = 0;
 
 	if(Team == TEAM_SUPER)
-		return 0xffffffffffffffff;
+		return 0xffffffffffffffff & ~(1 << ExceptID);
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{

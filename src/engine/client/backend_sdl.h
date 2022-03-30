@@ -75,7 +75,7 @@ private:
 	std::atomic_bool m_Shutdown;
 	bool m_Started = false;
 	std::atomic_bool m_BufferInProcess;
-	void *m_Thread;
+	void *m_pThread;
 
 	static void ThreadFunc(void *pUser);
 };

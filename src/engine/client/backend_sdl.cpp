@@ -105,7 +105,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	m_Thread = thread_init(ThreadFunc, this, "Graphics thread");
+	m_pThread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
 	m_BufferSwapCond.wait(Lock, [this]() -> bool { return m_Started; });
 }
@@ -118,16 +118,21 @@ void CGraphicsBackend_Threaded::StopProcessor()
 		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 		m_BufferSwapCond.notify_all();
 	}
-	thread_wait(m_Thread);
+	thread_wait(m_pThread);
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
+#ifdef CONF_WEBASM
+	// run everything single threaded for now, context binding in a thread seems to not work as of now
+	RunBufferSingleThreadedUnsafe(pBuffer);
+#else
 	WaitForIdle();
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_pBuffer = pBuffer;
 	m_BufferInProcess.store(true, std::memory_order_relaxed);
 	m_BufferSwapCond.notify_all();
+#endif
 }
 
 void CGraphicsBackend_Threaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer)
@@ -668,6 +673,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		pName = "OpenGL";
+#ifndef CONF_BACKEND_OPENGL_ES
 		if(DriverAgeType == GRAPHICS_DRIVER_AGE_TYPE_LEGACY)
 		{
 			Major = 1;
@@ -689,6 +695,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 			Patch = 0;
 			return true;
 		}
+#endif
 	}
 	else if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
@@ -846,7 +853,7 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 
 CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL()
 {
-	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
 
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
@@ -878,6 +885,15 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	{
 		if(m_BackendType == BACKEND_TYPE_VULKAN)
 		{
+			// try default opengl settings
+			str_copy(g_Config.m_GfxBackend, "OpenGL", std::size(g_Config.m_GfxBackend));
+			g_Config.m_GfxGLMajor = 3;
+			g_Config.m_GfxGLMinor = 0;
+			g_Config.m_GfxGLPatch = 0;
+			// do another analysis round too, just in case
+			g_Config.m_Gfx3DTextureAnalysisRan = 0;
+			g_Config.m_GfxDriverIsBlocked = 0;
+
 			SDL_setenv("DDNET_DRIVER", "OpenGL", 1);
 			m_BackendType = DetectBackend();
 		}
@@ -950,7 +966,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CVideoMode aModes[256];
 	int ModesCount = 0;
 	int IndexOfResolution = -1;
-	GetVideoModes(aModes, sizeof(aModes) / sizeof(aModes[0]), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
+	GetVideoModes(aModes, std::size(aModes), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
 
 	for(int i = 0; i < ModesCount; i++)
 	{
@@ -979,7 +995,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	bool IsFullscreen = (SdlFlags & SDL_WINDOW_FULLSCREEN) != 0 || g_Config.m_GfxFullscreen == 3;
 	// use desktop resolution as default resolution, clamp resolution if users's display is smaller than we remembered
 	// if the user starts in fullscreen, and the resolution was not found use the desktop one
-	if((IsFullscreen && !SupportedResolution) || *pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
+	if((IsFullscreen && !SupportedResolution) || *pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (!SupportedResolution || !IsFullscreen) && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
@@ -1190,7 +1206,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		if(pErrorStr != NULL)
 		{
-			str_copy(m_aErrorString, pErrorStr, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+			str_copy(m_aErrorString, pErrorStr, std::size(m_aErrorString));
 		}
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;
