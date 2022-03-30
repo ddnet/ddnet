@@ -233,7 +233,7 @@ public:
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
 				"/opt/ddnet"};
-			const int DirsCount = sizeof(apDirs) / sizeof(apDirs[0]);
+			const int DirsCount = std::size(apDirs);
 
 			int i;
 			for(i = 0; i < DirsCount; i++)

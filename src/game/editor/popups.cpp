@@ -1427,7 +1427,7 @@ int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContex
 		"Live Freeze",
 		"Live Unfreeze",
 	};
-	static unsigned s_NumButtons = sizeof(s_pButtonNames) / sizeof(char *);
+	static unsigned s_NumButtons = std::size(s_pButtonNames);
 	CUIRect Button;
 
 	for(unsigned i = 0; i < s_NumButtons; ++i)

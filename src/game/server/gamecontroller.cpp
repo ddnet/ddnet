@@ -199,7 +199,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		int Type = Index - ENTITY_SPAWN;
 		m_aaSpawnPoints[Type][m_aNumSpawnPoints[Type]] = Pos;
-		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)(sizeof(m_aaSpawnPoints[0]) / sizeof(m_aaSpawnPoints[0][0])));
+		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)std::size(m_aaSpawnPoints[0]));
 	}
 
 	else if(Index == ENTITY_DOOR)

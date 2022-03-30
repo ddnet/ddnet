@@ -87,7 +87,7 @@ void CDbConnectionPool::Execute(
 	const char *pName)
 {
 	m_aTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
-	m_FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
+	m_FirstElem %= std::size(m_aTasks);
 	m_NumElem.Signal();
 }
 
@@ -97,7 +97,7 @@ void CDbConnectionPool::ExecuteWrite(
 	const char *pName)
 {
 	m_aTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
-	m_FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
+	m_FirstElem %= std::size(m_aTasks);
 	m_NumElem.Signal();
 }
 
@@ -144,7 +144,7 @@ void CDbConnectionPool::Worker()
 			m_Shutdown.store(false);
 			return;
 		}
-		m_LastElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
+		m_LastElem %= std::size(m_aTasks);
 		bool Success = false;
 		switch(pThreadData->m_Mode)
 		{

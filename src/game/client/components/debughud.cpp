@@ -32,7 +32,7 @@ void CDebugHud::RenderNetCorrections()
 	float Ramp = VelocityRamp(Velspeed, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
 
 	const char *paStrings[] = {"velspeed:", "velspeed*ramp:", "ramp:", "checkpoint:", "Pos", " x:", " y:", "angle:", "netobj corrections", " num:", " on:"};
-	const int Num = sizeof(paStrings) / sizeof(char *);
+	const int Num = std::size(paStrings);
 	const float LineHeight = 6.0f;
 	const float Fontsize = 5.0f;
 

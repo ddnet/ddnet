@@ -329,7 +329,7 @@ void CGameClient::OnInit()
 	pChecksum->m_NumComponents = m_All.m_Num;
 	for(int i = 0; i < m_All.m_Num; i++)
 	{
-		if(i >= (int)(sizeof(pChecksum->m_aComponentsChecksum) / sizeof(pChecksum->m_aComponentsChecksum[0])))
+		if(i >= (int)(std::size(pChecksum->m_aComponentsChecksum)))
 		{
 			break;
 		}

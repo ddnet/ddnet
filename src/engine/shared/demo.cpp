@@ -969,7 +969,7 @@ void CDemoPlayer::SetSpeed(float Speed)
 
 void CDemoPlayer::SetSpeedIndex(int Offset)
 {
-	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
+	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(std::size(g_aSpeeds) - 1));
 	SetSpeed(g_aSpeeds[m_SpeedIndex]);
 }
 

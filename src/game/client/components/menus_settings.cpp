@@ -1187,7 +1187,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// switches
 	static float s_ScrollValueDrop = 0;
 	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
-	static const int s_NumWindowMode = sizeof(pWindowModes) / sizeof(pWindowModes[0]);
+	static const int s_NumWindowMode = std::size(pWindowModes);
 	static int s_aWindowModeIDs[s_NumWindowMode];
 	const void *aWindowModeIDs[s_NumWindowMode];
 	for(int i = 0; i < s_NumWindowMode; ++i)
@@ -1764,7 +1764,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("DDNet"),
 		Localize("Assets")};
 
-	int NumTabs = (int)(sizeof(aTabs) / sizeof(*aTabs));
+	int NumTabs = (int)std::size(aTabs);
 	int PreviousPage = g_Config.m_UiSettingsPage;
 
 	for(int i = 0; i < NumTabs; i++)
