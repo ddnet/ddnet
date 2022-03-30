@@ -924,7 +924,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	std::vector<std::vector<CTexture>> m_FrameDelayedTextureCleanup;
 	std::vector<std::vector<std::pair<CTexture, CTexture>>> m_FrameDelayedTextTexturesCleanup;
 
-	size_t m_ThreadCount = 7;
+	size_t m_ThreadCount = 1;
 	static constexpr size_t ms_MainThreadIndex = 0;
 	size_t m_CurCommandInPipe = 0;
 	size_t m_CurRenderCallCountInPipe = 0;
@@ -7022,6 +7022,8 @@ public:
 		m_RenderThreads.clear();
 		m_ThreadCommandLists.clear();
 		m_ThreadHelperHadCommands.clear();
+
+		m_ThreadCount = 1;
 
 		CleanupVulkanSDL();
 	}
