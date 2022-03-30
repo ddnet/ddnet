@@ -1014,7 +1014,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		{COL_TIME, "Time", 200.0f, {0}, {0}}, // Localize("Time")
 	};
 
-	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
+	int NumCols = std::size(s_aCols);
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)

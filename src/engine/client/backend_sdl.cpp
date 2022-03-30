@@ -853,7 +853,7 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 
 CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL()
 {
-	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
 
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
@@ -966,7 +966,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CVideoMode aModes[256];
 	int ModesCount = 0;
 	int IndexOfResolution = -1;
-	GetVideoModes(aModes, sizeof(aModes) / sizeof(aModes[0]), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
+	GetVideoModes(aModes, std::size(aModes), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
 
 	for(int i = 0; i < ModesCount; i++)
 	{
@@ -1206,7 +1206,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		if(pErrorStr != NULL)
 		{
-			str_copy(m_aErrorString, pErrorStr, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+			str_copy(m_aErrorString, pErrorStr, std::size(m_aErrorString));
 		}
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;

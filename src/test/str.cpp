@@ -115,7 +115,7 @@ TEST(Str, Utf8FixTruncation)
 		"привет Наташа",
 		"до свидания\xffОлег",
 	};
-	for(unsigned i = 0; i < sizeof(aaBuf) / sizeof(aaBuf[0]); i++)
+	for(unsigned i = 0; i < std::size(aaBuf); i++)
 	{
 		EXPECT_EQ(str_utf8_fix_truncation(aaBuf[i]), str_length(apExpected[i]));
 		EXPECT_STREQ(aaBuf[i], apExpected[i]);

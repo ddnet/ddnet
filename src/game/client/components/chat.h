@@ -39,7 +39,7 @@ class CChat : public CComponent
 		int m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
-		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
+		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
 		CSkin::SSkinTextures m_RenderSkin;
 		CSkin::SSkinMetrics m_RenderSkinMetrics;
 		bool m_CustomColoredSkin;

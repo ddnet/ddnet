@@ -2069,9 +2069,9 @@ int CMenus::Render()
 			UI()->DoLabel(&Part, aBuffer, 12.8f, TEXTALIGN_LEFT);
 
 			if(IncDemoSpeed)
-				m_Speed = clamp(m_Speed + 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
+				m_Speed = clamp(m_Speed + 1, 0, (int)(std::size(g_aSpeeds) - 1));
 			else if(DecDemoSpeed)
-				m_Speed = clamp(m_Speed - 1, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
+				m_Speed = clamp(m_Speed - 1, 0, (int)(std::size(g_aSpeeds) - 1));
 
 			Part.VSplitLeft(207.0f, 0, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Part))
