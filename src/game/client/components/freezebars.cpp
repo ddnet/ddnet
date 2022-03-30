@@ -34,18 +34,28 @@ void CFreezeBars::RenderFreezeBar(const int ClientID)
 void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, const float height, float Progress, const float Alpha)
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
-	// half of the ends are also used for the progress display
+
+	// what percentage of the end pieces is used for the progress indicator and how much is the rest
+	// half of the ends are used for the progress display
+	const float RestPct = 0.5f;
+	const float ProgPct = 0.5f;
+
 	const float EndWidth = height; // to keep the correct scale - the height of the sprite is as long as the width
 	const float BarHeight = height;
-	const float WholeBarWidth = width + EndWidth; // add the two empty halves to the total width
+	const float WholeBarWidth = width;
 	const float MiddleBarWidth = WholeBarWidth - (EndWidth * 2.0f);
-	const float EndProgressWidth = EndWidth / 2.0f;
+	const float EndProgressWidth = EndWidth * ProgPct;
+	const float EndRestWidth = EndWidth * RestPct;
 	const float ProgressBarWidth = WholeBarWidth - (EndProgressWidth * 2.0f);
 	const float EndProgressProportion = EndProgressWidth / ProgressBarWidth;
 	const float MiddleProgressProportion = MiddleBarWidth / ProgressBarWidth;
-	x -= EndProgressWidth; // half of the first sprite is empty
 
-	// we cut 1% of all sides of all sprites so we don't get edge bleeding
+	// we cut 2% of all sides of all sprites so we don't get edge bleeding
+	const float CutL = 0.02f;
+	const float CutR = 0.98f;
+	const float CutT = 0.02f;
+	const float CutB = 0.98f;
+	const float Slice = 0.02f;
 
 	// beginning piece
 	float BeginningPieceProgress = 1;
@@ -53,27 +63,28 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	{
 		BeginningPieceProgress = Progress / EndProgressProportion;
 	}
-	const float BeginningPiecePercentVisible = 0.5f + 0.5f * BeginningPieceProgress;
+
 	// full
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	Graphics()->QuadsSetSubset(0.01f, 0.01f, 0.01f + 0.98f * BeginningPiecePercentVisible, 0.99f);
-	IGraphics::CQuadItem QuadFullBeginning(x, y, EndWidth * BeginningPiecePercentVisible, BarHeight);
+	// Subset: top_l, top_m, btm_m, btm_l
+	Graphics()->QuadsSetSubsetFree(CutL, CutT, RestPct + (ProgPct - CutL) * BeginningPieceProgress, CutT, RestPct + (ProgPct - CutL) * BeginningPieceProgress, CutB, CutL, CutB);
+	IGraphics::CQuadItem QuadFullBeginning(x, y, EndRestWidth + EndProgressWidth * BeginningPieceProgress, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
 	Graphics()->QuadsEnd();
-	if(BeginningPiecePercentVisible < 1.0f)
+
+	// empty
+	if(BeginningPieceProgress < 1.0f)
 	{
-		// empty
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		Graphics()->QuadsSetSubset(0.01f, 0.99f, 0.01f + 0.98f * (1.0f - BeginningPiecePercentVisible), 0.01f);
-		Graphics()->QuadsSetRotation(pi);
-		IGraphics::CQuadItem QuadEmptyBeginning(x + (EndWidth * BeginningPiecePercentVisible), y, EndWidth * (1.0f - BeginningPiecePercentVisible), BarHeight);
+		// Subset: top_m, top_l, btm_l, btm_m | it is mirrored on the horizontal axe and rotated 180 degrees
+		Graphics()->QuadsSetSubsetFree(ProgPct - (ProgPct - CutL) * BeginningPieceProgress, CutT, CutL, CutT, CutL, CutB, ProgPct - (ProgPct - CutL) * BeginningPieceProgress, CutB);
+		IGraphics::CQuadItem QuadEmptyBeginning(x + EndRestWidth + EndProgressWidth * BeginningPieceProgress, y, EndProgressWidth * (1.0f - BeginningPieceProgress), BarHeight);
 		Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
 		Graphics()->QuadsEnd();
-		Graphics()->QuadsSetRotation(0);
 	}
 
 	// middle piece
@@ -95,37 +106,41 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	const float FullMiddleBarWidth = MiddleBarWidth * MiddlePieceProgress;
 	const float EmptyMiddleBarWidth = MiddleBarWidth - FullMiddleBarWidth;
 
-	// full ninja bar
+	// full freeze bar
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFull);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// select the middle portion of the sprite so we don't get edge bleeding
-	if(MiddlePieceProgress * MiddleBarWidth <= EndWidth * 0.98f)
+	if(FullMiddleBarWidth <= EndWidth)
 	{
 		// prevent pixel puree, select only a small slice
-		Graphics()->QuadsSetSubset(0.01f, 0.01f, 0.01f + 0.98f * MiddlePieceProgress, 0.99f);
+		// Subset: top_l, top_m, btm_m, btm_l
+		Graphics()->QuadsSetSubsetFree(CutL, CutT, CutL + Slice, CutT, CutL + Slice, CutB, CutL, CutB);
 	}
 	else
 	{
-		Graphics()->QuadsSetSubset(0.01f, 0.01f, 0.99f, 0.99f);
+		// Subset: top_l, top_r, btm_r, btm_l
+		Graphics()->QuadsSetSubsetFree(CutL, CutT, CutR, CutT, CutR, CutB, CutL, CutB);
 	}
 	IGraphics::CQuadItem QuadFull(x, y, FullMiddleBarWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFull, 1);
 	Graphics()->QuadsEnd();
 
-	// empty ninja bar
+	// empty freeze bar
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmpty);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// select the middle portion of the sprite so we don't get edge bleeding
-	if((1.0f - MiddlePieceProgress) * MiddleBarWidth <= EndWidth * 0.98f)
+	if(EmptyMiddleBarWidth <= EndWidth)
 	{
 		// prevent pixel puree, select only a small slice
-		Graphics()->QuadsSetSubset(0.01f, 0.01f, 0.01f + 0.98f * (1.0f - MiddlePieceProgress), 0.99f);
+		// Subset: top_m, top_l, btm_l, btm_m | it is mirrored on the horizontal axe and rotated 180 degrees
+		Graphics()->QuadsSetSubsetFree(CutL + Slice, CutT, CutL, CutT, CutL, CutB, CutL + Slice, CutB);
 	}
 	else
 	{
-		Graphics()->QuadsSetSubset(0.01f, 0.01f, 0.99f, 0.99f);
+		// Subset: top_r, top_l, btm_l, btm_r | it is mirrored on the horizontal axe and rotated 180 degrees
+		Graphics()->QuadsSetSubsetFree(CutR, CutT, CutL, CutT, CutL, CutB, CutR, CutB);
 	}
 
 	IGraphics::CQuadItem QuadEmpty(x + FullMiddleBarWidth, y, EmptyMiddleBarWidth, BarHeight);
@@ -146,27 +161,28 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 			EndingPieceProgress = (Progress - EndProgressProportion - MiddleProgressProportion) / EndProgressProportion;
 		}
 	}
-	// full
 	if(EndingPieceProgress > 0.0f)
 	{
+		// full
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		Graphics()->QuadsSetSubset(0.5f + 0.49f * (1.0f - EndingPieceProgress), 0.99f, 0.99f, 0.01f);
-		Graphics()->QuadsSetRotation(pi);
-		IGraphics::CQuadItem QuadFullEnding(x, y, (EndWidth / 2) * EndingPieceProgress, BarHeight);
+		// Subset: top_r, top_m, btm_m, btm_r | it is mirrored on the horizontal axe and rotated 180 degrees
+		Graphics()->QuadsSetSubsetFree(CutR, CutT, CutR - (ProgPct - CutL) * EndingPieceProgress, CutT, CutR - (ProgPct - CutL) * EndingPieceProgress, CutB, CutR, CutB);
+		IGraphics::CQuadItem QuadFullEnding(x, y, EndProgressWidth * EndingPieceProgress, BarHeight);
 		Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
 		Graphics()->QuadsEnd();
-		Graphics()->QuadsSetRotation(0);
 	}
 	// empty
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	Graphics()->QuadsSetSubset(0.5f - 0.49f * (1.0f - EndingPieceProgress), 0.01f, 0.99f, 0.99f);
-	IGraphics::CQuadItem QuadEmptyEnding(x + ((EndWidth / 2) * EndingPieceProgress), y, (EndWidth / 2) * (1.0f - EndingPieceProgress) + (EndWidth / 2), BarHeight);
+	// Subset: top_m, top_r, btm_r, btm_m
+	Graphics()->QuadsSetSubsetFree(ProgPct - (ProgPct - CutL) * (1.0f - EndingPieceProgress), CutT, CutR, CutT, CutR, CutB, ProgPct - (ProgPct - CutL) * (1.0f - EndingPieceProgress), CutB);
+	IGraphics::CQuadItem QuadEmptyEnding(x + EndProgressWidth * EndingPieceProgress, y, EndProgressWidth * (1.0f - EndingPieceProgress) + EndRestWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
 	Graphics()->QuadsEnd();
+
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 }

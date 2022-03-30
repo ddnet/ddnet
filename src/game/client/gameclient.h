@@ -660,12 +660,10 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudFreezeBarFull;
 		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmpty;
 		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmptyRight;
-		IGraphics::CTextureHandle m_SpriteHudFreezeBar[4];
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarFullLeft;
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarFull;
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
-		IGraphics::CTextureHandle m_SpriteHudNinjaBar[4];
 		IGraphics::CTextureHandle m_SpriteHudNoHookHit;
 		IGraphics::CTextureHandle m_SpriteHudNoHammerHit;
 		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;

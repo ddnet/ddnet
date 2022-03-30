@@ -575,7 +575,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_HUD)
 			{
-				str_copy(g_Config.m_ClAssetParticles, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetHud));
+				str_copy(g_Config.m_ClAssetHud, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetHud));
 				GameClient()->LoadHudSkin(g_Config.m_ClAssetHud);
 			}
 		}
