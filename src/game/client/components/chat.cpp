@@ -686,9 +686,6 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	bool Highlighted = false;
 	char *p = const_cast<char *>(pLine);
 
-	bool IsTeamLine = Team == 1;
-	bool IsWhisperLine = Team >= 2;
-
 	// Only empty string left
 	if(*p == 0)
 		return;
@@ -741,8 +738,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		CLine *pCurrentLine = &m_aLines[m_CurrentLine];
 
+		// Team Number:
+		// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
+
 		// If it's a client message, m_aText will have ": " prepended so we have to work around it.
-		if(pCurrentLine->m_Team == IsTeamLine && pCurrentLine->m_Whisper == IsWhisperLine && pCurrentLine->m_ClientID == ClientID && str_comp(pCurrentLine->m_aText, pLine) == 0)
+		if(pCurrentLine->m_TeamNumber == Team && pCurrentLine->m_ClientID == ClientID && str_comp(pCurrentLine->m_aText, pLine) == 0)
 		{
 			pCurrentLine->m_TimesRepeated++;
 			if(pCurrentLine->m_TextContainerIndex != -1)
@@ -768,8 +768,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		pCurrentLine->m_YOffset[0] = -1.0f;
 		pCurrentLine->m_YOffset[1] = -1.0f;
 		pCurrentLine->m_ClientID = ClientID;
-		pCurrentLine->m_Team = IsTeamLine;
-		pCurrentLine->m_Whisper = IsWhisperLine;
+		pCurrentLine->m_TeamNumber = Team;
+		pCurrentLine->m_Team = Team == 1;
+		pCurrentLine->m_Whisper = Team >= 2;
 		pCurrentLine->m_NameColor = -2;
 
 		if(pCurrentLine->m_TextContainerIndex != -1)

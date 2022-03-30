@@ -19,6 +19,7 @@
 # 2022-03-19 cheeser0613
 # 2022-03-22 cheeser0613
 # 2022-03-24 cheeser0613
+# 2022-03-29 Dan_cao
 ##### /authors #####
 
 ##### translated strings #####
@@ -72,7 +73,7 @@ Automatically record demos
 == 自动录制回放
 
 Automatically take game over screenshot
-== 自动截取游戏结束画面
+== 自动对游戏结束画面截图
 
 Blue team
 == 蓝队
@@ -132,7 +133,7 @@ Delete demo
 == 删除回放
 
 Demo details
-== 回放详细信息
+== 回放详情
 
 Demofile: %s
 == 回放文件：%s
@@ -168,13 +169,13 @@ Favorite
 == 收藏
 
 Favorites
-== 收藏
+== 收藏夹
 
 Feet
 == 脚
 
 Filter
-== 过滤器
+== 筛选
 
 Fire
 == 开火
@@ -186,7 +187,7 @@ Force vote
 == 强制投票
 
 Free-View
-== 自由视角
+== 自由视野
 
 Friends
 == 好友
@@ -225,7 +226,7 @@ Hammer
 == 锤子
 
 Has people playing
-== 有人在玩
+== 有玩家
 
 High Detail
 == 显示地图细节
@@ -246,13 +247,13 @@ Jump
 == 跳跃
 
 Kick player
-== 踢除玩家
+== 踢出玩家
 
 Language
 == 语言
 
 DDNet Client needs to be restarted to complete update!
-== DDNet客户端需要重新启动才能完成更新！
+== DDNet 客户端需要重新启动才能完成更新！
 
 MOTD
 == 公告
@@ -282,25 +283,25 @@ Enable game sounds
 == 启用游戏声音
 
 Enable gun sound
-== 启用枪声
+== 启用手枪声
 
 Enable server message sound
-== 启用服务器通知声音
+== 启用服务器消息提示音
 
 Enable regular chat sound
-== 启用聊天提示音
+== 启用聊天消息提示音
 
 Enable team chat sound
-== 启用队伍聊天提示音
+== 启用队伍聊天消息提示音
 
 Enable highlighted chat sound
-== 启用被提及时的提示音
+== 启用聊天被提及消息提示音
 
 Threaded sound loading
 == 启用多线程音频加载
 
 Name
-== 名称
+== 昵称
 
 Next weapon
 == 下一个武器
@@ -318,7 +319,7 @@ No servers found
 == 找不到任何服务器
 
 No servers match your filter criteria
-== 没有服务器满足设置的过滤条件
+== 没有服务器满足设置的筛选条件
 
 Ok
 == 确定
@@ -388,7 +389,7 @@ Remote console
 == 远程控制台
 
 Remove
-== 移除
+== 删除
 
 Remove friend
 == 删除好友
@@ -400,7 +401,7 @@ Rename demo
 == 重命名回放
 
 Reset filter
-== 重置过滤器
+== 重置筛选
 
 Sample rate
 == 采样率
@@ -421,10 +422,10 @@ Server address:
 == 服务器地址：
 
 Server details
-== 服务器详细信息
+== 服务器详情
 
 Server filter
-== 服务器过滤器
+== 服务器筛选
 
 Server info
 == 服务器信息
@@ -436,7 +437,7 @@ Shotgun
 == 霰弹枪
 
 Show chat
-== 显示聊天
+== 显示聊天框
 
 Show friends only
 == 只显示好友
@@ -478,7 +479,7 @@ Stop record
 == 停止录制
 
 Strict gametype filter
-== 严格过滤游戏模式
+== 严格游戏模式筛选
 
 Sudden Death
 == 决胜
@@ -511,7 +512,7 @@ The server is running a non-standard tuning on a pure game type.
 == 此服务器运行着经过调整的非标准游戏模式。
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 编辑器中的地图尚未保存，建议您在退出游戏之前返回编辑器进行保存。
+== 编辑器中的地图尚未保存，建议你在退出游戏之前返回编辑器进行保存。
 
 Time limit
 == 规定时限
@@ -568,7 +569,7 @@ Yes
 == 是
 
 You must restart the game for all settings to take effect.
-== 你需要重启游戏来使某些设置生效。
+== 你需要重启游戏来使新设置生效。
 
 Demo
 == 回放
@@ -601,7 +602,7 @@ Join game
 == 加入游戏
 
 FSAA samples
-== 全屏抗锯齿(FSAA)采样倍数
+== 全屏抗锯齿（FSAA）采样倍数
 
 Sound volume
 == 音量
@@ -724,7 +725,7 @@ Friend message
 == 好友消息
 
 Save the best demo of each race
-== 保存竞速模式最高记录的回放
+== 保存每场游戏最好记录的回放
 
 Ghost
 == 影子
@@ -757,7 +758,7 @@ AntiPing: predict weapons
 == 延迟补偿：预测武器
 
 AntiPing: predict grenade paths
-== 延迟补偿：预测榴弹路径
+== 延迟补偿：预测榴弹枪路径
 
 Show other players' hook collision lines
 == 显示其他玩家的钩索辅助线
@@ -769,7 +770,7 @@ Show tiles layers from BG map
 == 显示实体层背景地图的图块层
 
 Try fast HTTP map download first
-== 优先尝试用HTTP快速下载地图
+== 优先尝试使用 HTTP 协议快速下载地图
 
 DDNet %s is available:
 == DDNet %s 现已可用：
@@ -802,13 +803,13 @@ Search
 == 搜索
 
 UI mouse s.
-== 主页面灵敏度
+== 界面鼠标灵敏度
 
 Vanilla skins only
 == 只显示原生皮肤
 
 Fat skins (DDFat)
-== 胖胖的皮肤 (DDFat)
+== 胖胖的皮肤（DDFat）
 
 Ratio
 == K/D
@@ -849,7 +850,7 @@ Follow
 == 跟随
 
 Automatically create statboard csv
-== 自动将统计板导出为csv文件
+== 自动将统计板导出为 csv 文件
 
 Are you sure that you want to disconnect?
 == 确定要断开连接吗？
@@ -864,7 +865,7 @@ Frags
 == 击杀数
 
 Enable long pain sound (used when shooting in freeze)
-== 启用冻结呼救声
+== 启用冻结呼叫声
 
 %.2f MiB
 == %.2f MiB
@@ -873,7 +874,7 @@ Refresh Rate
 == 刷新率
 
 New random timeout code
-== 随机生成新的超时代码(Timeout代码)
+== 随机生成新的超时代码（Timeout 代码）
 
 Suicides
 == 自杀数
@@ -892,7 +893,7 @@ Spree
 == 连杀
 
 Max CSVs
-== 最大csv文件数
+== 最大 csv 文件数
 
 %.2f KiB
 == %.2f KiB
@@ -934,7 +935,7 @@ Show DDNet map finishes in server browser
 == 在服务器浏览器中显示已完成的 DDNet 地图
 
 transmits your player name to info2.ddnet.tw
-== 将会发送您的玩家名称到 info2.ddnet.tw
+== 将会发送你的玩家昵称到 info2.ddnet.tw
 
 Reload
 == 刷新
@@ -955,7 +956,7 @@ Downloading %s:
 == 正在下载 %s:
 
 %d new mentions
-== %d 条新提及
+== %d 条新被提及消息
 
 Toggle dummy
 == 切换分身
@@ -964,7 +965,7 @@ Replay feature is disabled!
 == 短时回放功能未启用！
 
 Are you sure that you want to disconnect your dummy?
-== 确定要断连分身吗？
+== 确定要断开分身连接吗？
 
 Hook collisions
 == 钩索辅助线
@@ -976,7 +977,7 @@ Markers
 == 书签
 
 Filter connecting players
-== 过滤正在连接的玩家
+== 筛选正在连接的玩家
 
 Markers:
 == 书签
@@ -994,10 +995,10 @@ Pause
 == 暂停
 
 Length
-== 长度
+== 时长
 
 Converse
-== 继续会话
+== 继续私聊
 
 Successfully saved the replay!
 == 成功保存短时回放！
@@ -1015,22 +1016,22 @@ Dummy copy
 == 分身同步动作
 
 9+ new mentions
-== 9+ 条新提及
+== 9+ 条新被提及消息
 
 Statboard
 == 统计板
 
 Disconnect Dummy
-== 中断分身的连接
+== 断开分身连接
 
 Show HUD
-== 游戏HUD开关
+== HUD 开关
 
 Hammerfly dummy
-== 分身Hammerfly开关
+== 分身 Hammerfly 开关
 
 Default length: %d
-== 默认长度: %d
+== 时长: %d
 
 Toggle ghost
 == 影子记录开关
@@ -1048,16 +1049,16 @@ Skin prefix
 == 皮肤名称前缀
 
 Toggle dyncam
-== 动态镜头开关
+== 动态视野开关
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork 是以到达地图终点为目标，单人或组队的在线合作游戏。如果你是新手，你可以从有入门级地图的 Novice 服务器开始。记得选择 Ping 值低的服务器。
+== DDraceNetwork 是一款在线合作游戏，你和你的团体里的 Tee 的目标是抵达地图的终点。作为新手你应该从有着最简单的地图的简单（Novice）服务器入门。根据延迟来选择离你相近的服务器。
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 推荐在进入服务器前，先将设置调整到符合你的习惯。
+== 建议你在进入服务器前检查一下设置并根据你的喜好进行调整。
 
 Please enter your nickname below.
-== 请输入你的昵称。
+== 请在下方输入你的昵称。
 
 Render
 == 渲染
@@ -1093,10 +1094,10 @@ Client message
 == 客户端消息
 
 Show others (own team only)
-== 显示其他玩家 (仅同队伍)
+== 显示其他玩家（仅同队伍）
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 使用 k键 自杀以重新开始，使用 q键 可以暂停以旁观他人或查看地图。 请在设置中查看其他按键。
+== 使用 K键 自杀以重新开始，使用 Q键 可以暂停以旁观他人或查看地图。在设置中可以查看其他按键绑定。
 
 Country / Region
 == 国家 / 地区
@@ -1111,7 +1112,7 @@ Speed
 == 速度
 
 Skip the main menu
-== 跳过主菜单
+== 跳过主界面
 
 Website
 == 官网
@@ -1139,7 +1140,7 @@ Manual
 == 手动
 
 Race
-== 竞速
+== 游戏
 
 Auto
 == 自动
@@ -1157,10 +1158,10 @@ Existing Player
 == 玩家已存在
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的昵称"%s"在DDNet中有%d分的记录，这可能代表该昵称已经被其他人使用过。确认要使用这个名字吗？
+== 你使用的昵称 "%s" 在 DDNet 中有 %d 分的记录，这可能表示该昵称已经被其他玩家使用过。确认要使用这个名字吗？
 
 Checking for existing player with your name
-== 正在查找该昵称的DDNet记录
+== 正在查找该昵称的 DDNet 记录
 
 Theme
 == 主题
@@ -1181,7 +1182,7 @@ Demos directory
 == 回放目录
 
 Smooth Dynamic Camera
-== 平滑动态镜头
+== 平滑动态视野
 
 Themes directory
 == 主题目录
@@ -1205,7 +1206,7 @@ Background music volume
 == 背景音乐音量
 
 Assets
-== 材质
+== 资源
 
 Use old chat style
 == 旧版聊天框
@@ -1223,7 +1224,7 @@ Particles
 == 粒子
 
 Assets directory
-== 材质目录
+== 资源目录
 
 https://ddnet.tw/discord
 == http://chat.teeworlds.cn/
@@ -1232,7 +1233,7 @@ Discord
 == 开黑啦
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 材质 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致视觉错误。
+== 纹理文件 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致视觉错误。
 
 Chat command
 == 聊天框指令（/）
@@ -1304,13 +1305,13 @@ No hit
 == 未命中
 
 Hookable
-== 可钩墙壁
+== 可钩砖块
 
 Tee
 == 其他玩家
 
 Are you sure that you want to disconnect and switch to a different server?
-== 您确定要断开此服务器并尝试加入其他服务器吗？
+== 你确定要断开此服务器连接并进入其他服务器吗？
 
 Refreshing...
 == 正在刷新...
@@ -1319,31 +1320,31 @@ Kill Messages
 == 击杀消息
 
 Kill Message Normal Color
-== 其他玩家击杀消息颜色
+== 击杀消息普通颜色
 
 Kill Message Highlight Color
-== 玩家击杀消息颜色
+== 击杀消息强调颜色
 
 Show local player's key presses
-== 显示周围玩家的按键输入
+== 显示自己的按键
 
 Settings file
 == 设置文件
 
 Config directory
-== 配置目录 (cfg)
+== 配置目录（cfg）
 
 Run on join
-== 加入时执行
+== 进入时执行
 
 Chat command (e.g. showall 1)
-== 聊天指令 (例如: showall 1)
+== 聊天指令（例如: showall 1）
 
 Windowed fullscreen
 == 窗口化全屏
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== %s 材质文件并非RGBA格式因此可能会导致视觉错误
+== 纹理文件 %s 并非RGBA格式，这可能会导致视觉错误。
 
 Join Tutorial Server
 == 进入教学服务器
@@ -1370,4 +1371,4 @@ Tutorial
 == 进入教学
 
 Can't find a Tutorial server
-== 
+== 无法找到教学服务器
