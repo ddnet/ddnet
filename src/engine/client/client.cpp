@@ -2099,7 +2099,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_GameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
 
-					if((m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay || (g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay)) && !m_CodeRunAfterJoin[Conn])
+					if((m_ReceivedSnapshots[Conn] > 50 || (g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay)) && !m_CodeRunAfterJoin[Conn])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{

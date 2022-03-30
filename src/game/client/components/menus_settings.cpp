@@ -2644,7 +2644,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClRunOnJoinDelay * 20);
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		int Delay = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 2) / 98.0f) * 98.0f) + 2;
+		int Delay = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 7) / 93.0f) * 93.0f) + 7;
 		if(Delay < 100 || g_Config.m_ClRunOnJoinDelay <= 100)
 		{
 			g_Config.m_ClRunOnJoinDelay = Delay;
