@@ -30,7 +30,9 @@ MACRO_CONFIG_INT(ClSendOnlineTime, cl_send_online_time, 1, 0, 1, CFGFLAG_CLIENT 
 MACRO_CONFIG_STR(ClChillerbotId, cl_chillerbot_id, 64, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "chillerbot id do not change")
 MACRO_CONFIG_INT(ClChatSpamFilter, cl_chat_spam_filter, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Filter spam pings in chat (0=off 1=hide 2=hide and autoreply)")
 MACRO_CONFIG_INT(ClChatSpamFilterInsults, cl_chat_spam_filter_insults, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Activates insult filtering when cl_chat_spam_filter is 1")
-MACRO_CONFIG_INT(ClReconnectWhenEmpty, sv_reconnect_when_empty, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reconnect to the current server when the last player leaves")
+MACRO_CONFIG_INT(ClReconnectWhenEmpty, cl_reconnect_when_empty, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reconnect to the current server when the last player leaves")
+MACRO_CONFIG_INT(ClSpikeTracer, cl_spike_tracer, 0, 0, 512, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Radius in which spike tiles are traced (0=off)")
+MACRO_CONFIG_INT(ClSpikeTracerWalls, cl_spike_tracer_walls, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Trace spikes through walls")
 
 // warlist
 MACRO_CONFIG_INT(ClWarList, cl_war_list, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplate color based on chillerbot/warlist directory")

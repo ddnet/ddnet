@@ -88,6 +88,7 @@ void CChillerBotUX::OnRender()
 	RenderWeaponHud();
 	FinishRenameTick();
 	ChangeTileNotifyTick();
+	TraceSpikes();
 	m_ForceDir = 0;
 	CampHackTick();
 	if(!m_ForceDir && m_LastForceDir)
@@ -878,6 +879,56 @@ set_view:
 	str_format(aBuf, sizeof(aBuf), "set_view %d %d", MatchX, MatchY);
 	Console()->ExecuteLine(aBuf);
 	m_GotoSwitchOffset++;
+}
+
+void CChillerBotUX::TraceSpikes()
+{
+	if(!g_Config.m_ClSpikeTracer)
+		return;
+	if(!m_pClient->m_Snap.m_pLocalCharacter)
+		return;
+
+	// int CurrentX = (int)(m_pClient->m_Snap.m_aCharacters[m_pClient->m_LocalIDs[0]].m_Cur.m_X / 32);
+	// int CurrentY = (int)(m_pClient->m_Snap.m_aCharacters[m_pClient->m_LocalIDs[0]].m_Cur.m_Y / 32);
+	int CurrentX = (int)(m_pClient->m_Snap.m_pLocalCharacter->m_X / 32);
+	int CurrentY = (int)(m_pClient->m_Snap.m_pLocalCharacter->m_Y / 32);
+	int FromX = maximum(0, CurrentX - g_Config.m_ClSpikeTracer);
+	int ToX = minimum(Collision()->GetWidth(), CurrentX + g_Config.m_ClSpikeTracer);
+	int FromY = maximum(0, CurrentY - g_Config.m_ClSpikeTracer);
+	int ToY = minimum(Collision()->GetHeight(), CurrentY + g_Config.m_ClSpikeTracer);
+	static float m_ScreenX0;
+	static float m_ScreenX1;
+	static float m_ScreenY0;
+	static float m_ScreenY1;
+	Graphics()->GetScreen(&m_ScreenX0, &m_ScreenY0, &m_ScreenX1, &m_ScreenY1);
+	MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup(), m_pClient->m_Camera.m_Zoom);
+	for(int x = FromX; x < ToX; x++)
+	{
+		for(int y = FromY; y < ToY; y++)
+		{
+			int Tile = Collision()->GetIndex(x, y);
+			if(Tile == TILE_DEATH)
+			{
+				Graphics()->TextureClear();
+				bool IsIntersect = false;
+				if(Collision()->IntersectLine(vec2(x * 32, y * 32), vec2(CurrentX * 32, CurrentY * 32), 0, 0))
+				{
+					IsIntersect = true;
+					if(!g_Config.m_ClSpikeTracerWalls)
+						continue;
+				}
+				Graphics()->LinesBegin();
+				if(IsIntersect)
+					Graphics()->SetColor(1.f, 1.f, 1.f, 0.45f);
+				else
+					Graphics()->SetColor(1.f, 0.f, 0.f, 0.75f);
+				IGraphics::CLineItem LineItem(x * 32, y * 32, CurrentX * 32, CurrentY * 32);
+				Graphics()->LinesDraw(&LineItem, 1);
+				Graphics()->LinesEnd();
+			}
+		}
+	}
+	Graphics()->MapScreen(m_ScreenX0, m_ScreenY0, m_ScreenX1, m_ScreenY1);
 }
 
 void CChillerBotUX::GotoTele(int Number, int Offset)

@@ -94,6 +94,7 @@ class CChillerBotUX : public CComponent
 	void RenderEnabledComponents();
 	void GotoSwitch(int Number, int Offset = -1);
 	void GotoTele(int Number, int Offset = -1);
+	void TraceSpikes();
 	void DumpPlayers(const char *pSearch = 0);
 
 	// helpers
