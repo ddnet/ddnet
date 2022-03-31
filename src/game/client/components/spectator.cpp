@@ -96,6 +96,19 @@ void CSpectator::ConSpectate(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Spectate(pResult->GetInteger(0));
 }
 
+void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
+{
+	CSpectator *pSelf = (CSpectator *)pUserData;
+	if(pResult->GetInteger(0) == -1)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			pSelf->GameClient()->m_aMultiView[i] = false;
+		}
+	}
+	pSelf->GameClient()->m_aMultiView[pResult->GetInteger(0)] = !pSelf->GameClient()->m_aMultiView[pResult->GetInteger(0)];
+}
+
 void CSpectator::ConSpectateNext(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
@@ -160,6 +173,7 @@ void CSpectator::OnConsoleInit()
 {
 	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector");
 	Console()->Register("spectate", "i[spectator-id]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
+	Console()->Register("sm", "i[id]", CFGFLAG_CLIENT, ConMultiView, this, "Add Client-IDs to multi-spectate them exclusivly (-1 to reset)");
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
 	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
 	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
@@ -214,6 +228,7 @@ void CSpectator::OnRender()
 	float TeeSizeMod = 1.0f;
 	float RoundRadius = 30.0f;
 	bool Selected = false;
+	bool SelectedM = false;
 	int TotalPlayers = 0;
 	int PerLine = 8;
 	float BoxMove = -10.0f;
@@ -279,10 +294,21 @@ void CSpectator::OnRender()
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorID = SPEC_FREEVIEW;
+		GameClient()->m_isMultiView = false;
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
 	TextRender()->Text(0, Width / 2.0f - (ObjWidth - 60.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
+	
+	if(m_SelectorMouse.x <= (300.0f - 20.0f) && m_SelectorMouse.x >= 20.0f &&
+		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
+	{
+		m_SelectedSpectatorID = SPEC_FOLLOW;
+		GameClient()->m_isMultiView = true;
+		SelectedM = true;
+	}
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, SelectedM ? 1.0f : 0.5f);
+	TextRender()->Text(0, Width / 2.0f + (40.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{

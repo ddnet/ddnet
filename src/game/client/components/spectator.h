@@ -27,6 +27,7 @@ class CSpectator : public CComponent
 
 	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectate(IConsole::IResult *pResult, void *pUserData);
+	static void ConMultiView(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectateNext(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectateClosest(IConsole::IResult *pResult, void *pUserData);

@@ -329,6 +329,16 @@ public:
 	int m_ExpectingTuningForZone[2];
 	int m_ExpectingTuningSince[2];
 
+	bool m_aMultiView[64];
+	bool m_isMultiView;
+	int m_prMultiViewZoom;
+	bool m_firstMultiViewEntry;
+	float m_distView;
+	float m_distPlayer;
+	bool m_idsActivated;
+	float m_multiplierMultiView;
+	float m_velMultiView;
+
 	// client data
 	struct CClientData
 	{
@@ -654,12 +664,18 @@ private:
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
+	float MapValue(float valuemax, float valuemin, float rangemax, float rangemin, float value);
 
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 	int m_SwitchStateTeam[NUM_DUMMIES];
+
+	vec2 m_oldMultiViewPos;
+	int m_oldSpecMultiViewID;
+	float m_oldZoomMulti;
+	bool m_cleanIds;
 
 	enum
 	{

@@ -48,6 +48,8 @@ public:
 	virtual void OnConsoleInit() override;
 	virtual void OnReset() override;
 
+	void SetZoom(float Target);
+
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
