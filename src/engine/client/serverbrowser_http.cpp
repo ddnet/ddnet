@@ -515,7 +515,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 	if(NumUrls == 0)
 	{
 		ppUrls = DEFAULT_SERVERLIST_URLS;
-		NumUrls = sizeof(DEFAULT_SERVERLIST_URLS) / sizeof(DEFAULT_SERVERLIST_URLS[0]);
+		NumUrls = std::size(DEFAULT_SERVERLIST_URLS);
 	}
 	int PreviousBestIndex = -1;
 	for(int i = 0; i < NumUrls; i++)

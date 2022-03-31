@@ -1721,7 +1721,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		"sa", // LOC_SOUTH_AMERICA
 		"as:cn", // LOC_CHINA
 	};
-	for(int i = sizeof(LOCATIONS) / sizeof(LOCATIONS[0]) - 1; i >= 0; i--)
+	for(int i = std::size(LOCATIONS) - 1; i >= 0; i--)
 	{
 		if(str_startswith(pString, LOCATIONS[i]))
 		{

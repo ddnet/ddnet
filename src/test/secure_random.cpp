@@ -22,7 +22,7 @@ TEST(SecureRandom, Below1)
 TEST(SecureRandom, Below)
 {
 	int BOUNDS[] = {2, 3, 4, 5, 10, 100, 127, 128, 129};
-	for(unsigned i = 0; i < sizeof(BOUNDS) / sizeof(BOUNDS[0]); i++)
+	for(unsigned i = 0; i < std::size(BOUNDS); i++)
 	{
 		int Below = BOUNDS[i];
 		for(int j = 0; j < 10; j++)

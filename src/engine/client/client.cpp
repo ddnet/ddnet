@@ -2946,7 +2946,7 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		for(unsigned int i = 0; i < sizeof(m_NetClient) / sizeof(m_NetClient[0]); i++)
+		for(unsigned int i = 0; i < std::size(m_NetClient); i++)
 		{
 			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr))
@@ -4132,7 +4132,7 @@ void CClient::LoadFont()
 
 			if(!FontLoaded)
 			{
-				str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
+				str_format(aBuff, std::size(aBuff), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
 			}
 		}
@@ -4142,7 +4142,7 @@ void CClient::LoadFont()
 
 	if(!pDefaultFont)
 	{
-		str_format(aBuff, sizeof(aBuff) / sizeof(aBuff[0]), "failed to load font. filename='%s'", pFontFile);
+		str_format(aBuff, std::size(aBuff), "failed to load font. filename='%s'", pFontFile);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
 	}
 }

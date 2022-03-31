@@ -924,7 +924,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	std::vector<std::vector<CTexture>> m_FrameDelayedTextureCleanup;
 	std::vector<std::vector<std::pair<CTexture, CTexture>>> m_FrameDelayedTextTexturesCleanup;
 
-	size_t m_ThreadCount = 7;
+	size_t m_ThreadCount = 1;
 	static constexpr size_t ms_MainThreadIndex = 0;
 	size_t m_CurCommandInPipe = 0;
 	size_t m_CurRenderCallCountInPipe = 0;
@@ -7009,9 +7009,6 @@ public:
 
 	void Cmd_PostShutdown(const CCommandProcessorFragment_GLBase::SCommand_PostShutdown *pCommand)
 	{
-		m_ThreadCommandLists.clear();
-		m_ThreadHelperHadCommands.clear();
-
 		for(size_t i = 0; i < m_ThreadCount - 1; ++i)
 		{
 			auto *pThread = m_RenderThreads[i].get();
@@ -7023,6 +7020,10 @@ public:
 			pThread->m_Thread.join();
 		}
 		m_RenderThreads.clear();
+		m_ThreadCommandLists.clear();
+		m_ThreadHelperHadCommands.clear();
+
+		m_ThreadCount = 1;
 
 		CleanupVulkanSDL();
 	}
@@ -7066,14 +7067,14 @@ public:
 				ThreadRenderTime = time_get_microseconds();
 			}
 
-			for(auto &NextCmd : m_ThreadCommandLists[ThreadIndex])
-			{
-				m_aCommandCallbacks[CommandBufferCMDOff(NextCmd.m_Command)].m_CommandCB(NextCmd.m_pRawCommand, NextCmd);
-			}
-			m_ThreadCommandLists[ThreadIndex].clear();
-
 			if(!pThread->m_Finished)
 			{
+				for(auto &NextCmd : m_ThreadCommandLists[ThreadIndex])
+				{
+					m_aCommandCallbacks[CommandBufferCMDOff(NextCmd.m_Command)].m_CommandCB(NextCmd.m_pRawCommand, NextCmd);
+				}
+				m_ThreadCommandLists[ThreadIndex].clear();
+
 				if(m_UsedThreadDrawCommandBuffer[ThreadIndex + 1][m_CurImageIndex])
 				{
 					auto &GraphicThreadCommandBuffer = m_ThreadDrawCommandBuffers[ThreadIndex + 1][m_CurImageIndex];
