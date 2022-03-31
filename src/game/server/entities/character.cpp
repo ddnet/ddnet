@@ -1250,6 +1250,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
 	pDDNetCharacterDisplayInfo->m_FreezeTick = m_Core.m_FreezeTick;
 	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_Core.m_IsInFreeze;
+	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
 }
 
 // DDRace

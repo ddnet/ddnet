@@ -125,6 +125,7 @@ private:
 	int m_LiveFrozenOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
+	int m_PracticeModeOffset;
 };
 
 #endif

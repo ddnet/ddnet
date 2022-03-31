@@ -674,6 +674,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;
 		IGraphics::CTextureHandle m_SpriteHudTeleportGun;
 		IGraphics::CTextureHandle m_SpriteHudTeleportLaser;
+		IGraphics::CTextureHandle m_SpriteHudPracticeMode;
 		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
 		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
 	};

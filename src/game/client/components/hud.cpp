@@ -138,6 +138,17 @@ void CHud::RenderGameTimer()
 		}
 		TextRender()->Text(0, Half - w / 2, 2, FontSize, aBuf, -1.0f);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		int DisplayedClientID = m_pClient->m_Snap.m_LocalClientID;
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		{
+			DisplayedClientID = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
+		}
+		if(m_pClient->m_Snap.m_aCharacters[DisplayedClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[DisplayedClientID].m_ExtendedDisplayInfo.m_IsInPracticeMode)
+		{
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudPracticeMode);
+			Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_PracticeModeOffset, Half + w / 2 + 6, 2 + 5);
+		}
 	}
 }
 
@@ -820,11 +831,16 @@ void CHud::PreparePlayerStateQuads()
 	m_NoGrenadeHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoLaserHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
-	// Quads for displaying dummy actions and freeze status
+	// Quads for displaying freeze status
 	m_DeepFrozenOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_LiveFrozenOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+
+	// Quads for displaying dummy actions
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+
+	// Quad for displaying practice mode
+	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 12.f, 12.f);
 }
 
 void CHud::RenderPlayerState(const int ClientID)

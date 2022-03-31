@@ -250,6 +250,7 @@ Objects = [
 		NetTick("m_NinjaActivationTick"),
 		NetTick("m_FreezeTick"),
 		NetBool("m_IsInFreeze"),
+		NetBool("m_IsInPracticeMode"),
 	]),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [

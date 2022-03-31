@@ -102,7 +102,9 @@ void CCharacterCore::Reset()
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
+	m_FreezeTick = 0;
 	m_FreezeEnd = 0;
+	m_IsInFreeze = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
 
