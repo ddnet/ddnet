@@ -90,6 +90,7 @@ void CPlayers::RenderHookCollLine(
 	bool Local = m_pClient->m_Snap.m_LocalClientID == ClientID;
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
 	float Alpha = (OtherTeam || ClientID < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
 
 	float IntraTick = Intra;
 	if(ClientID >= 0)
