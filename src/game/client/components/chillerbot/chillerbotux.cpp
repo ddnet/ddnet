@@ -175,19 +175,50 @@ void CChillerBotUX::RenderSpeedHud()
 	const float LineHeight = 12.0f;
 	const float Fontsize = 15.0f;
 
+	static int LastVelX = 0;
+	static int LastVelXChange = 0;
+	int CurVelX = abs(m_pClient->m_Snap.m_pLocalCharacter->m_VelX);
+	if(LastVelX < CurVelX)
+		LastVelXChange = 1;
+	else if(LastVelX > CurVelX)
+		LastVelXChange = -1;
+	LastVelX = CurVelX;
+
+	static int LastVelY = 0;
+	static int LastVelYChange = 0;
+	int CurVelY = abs(m_pClient->m_Snap.m_pLocalCharacter->m_VelY);
+	if(LastVelY < CurVelY)
+		LastVelYChange = 1;
+	else if(LastVelY > CurVelY)
+		LastVelYChange = -1;
+	LastVelY = CurVelY;
+
 	float x = Width - 100.0f, y = 50.0f;
 	for(int i = 0; i < Num; ++i)
 		TextRender()->Text(0, x, y + i * LineHeight, Fontsize, paStrings[i], -1.0f);
 
 	x = Width - 10.0f;
 	char aBuf[128];
+
+	if(LastVelXChange == 1)
+		TextRender()->TextColor(0.0f, 1.0f, 0.0f, 1.0f);
+	else if(LastVelXChange == -1)
+		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
+
 	str_format(aBuf, sizeof(aBuf), "%.0f", m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 32.f);
 	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
+
+	if(LastVelYChange == 1)
+		TextRender()->TextColor(0.0f, 1.0f, 0.0f, 1.0f);
+	else if(LastVelYChange == -1)
+		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
+
 	str_format(aBuf, sizeof(aBuf), "%.0f", m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 32.f);
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void CChillerBotUX::RenderEnabledComponents()
