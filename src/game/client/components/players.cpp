@@ -787,7 +787,7 @@ void CPlayers::OnRender()
 			Pos = m_aClient.m_SpecChar;
 
 		bool spec = false;
-		spec = m_aClient.m_Team == TEAM_SPECTATORS && !(m_pClient->IsOtherTeam(ClientID));
+		spec = (m_aClient.m_Team == TEAM_SPECTATORS || m_aClient.m_SpecCharPresent) && !(m_pClient->IsOtherTeam(ClientID));
 
 		if(spec)
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &m_RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Pos);
