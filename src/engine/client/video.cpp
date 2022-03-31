@@ -44,7 +44,6 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 
 	m_NextFrame = false;
 
-	// TODO:
 	m_HasAudio = g_Config.m_ClVideoSndEnable;
 
 	dbg_assert(ms_pCurrentVideo == 0, "ms_pCurrentVideo is NOT set to NULL while creating a new Video.");
@@ -760,7 +759,7 @@ bool CVideo::OpenAudio()
 
 	/* create resampler context */
 	m_AudioStream.m_vpSwrCtxs.clear();
-	m_AudioStream.m_vpSwrCtxs.reserve(m_AudioThreads);
+	m_AudioStream.m_vpSwrCtxs.resize(m_AudioThreads);
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		m_AudioStream.m_vpSwrCtxs[i] = swr_alloc();
@@ -876,8 +875,6 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		if(CodecId == AV_CODEC_ID_H264)
 		{
 			const char *presets[10] = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo"};
-			//av_opt_set(c->priv_data, "preset", "slow", 0);
-			//av_opt_set_int(c->priv_data, "crf", 22, 0);
 			av_opt_set(c->priv_data, "preset", presets[g_Config.m_ClVideoX264Preset], 0);
 			av_opt_set_int(c->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0);
 		}
@@ -959,7 +956,6 @@ void CVideo::FinishFrames(OutputStream *pStream)
 		if(!RetRecv)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			//if(pStream->pSt->codec->codec_type == AVMEDIA_TYPE_AUDIO)
 			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
 			pPacket->stream_index = pStream->pSt->index;
 
