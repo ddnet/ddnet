@@ -343,9 +343,37 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		m_pClient->m_Players.RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		CTeeRenderInfo *RenderInfo = &Ghost.m_RenderInfo;
+		CTeeRenderInfo GhostNinjaRenderInfo;
+		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+		{
+			// change the skin for the ghost to the ninja
+			int Skin = m_pClient->m_Skins.Find("x_ninja");
+			if(Skin != -1)
+			{
+				bool IsTeamplay = false;
+				if(m_pClient->m_Snap.m_pGameInfoObj)
+					IsTeamplay = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
+
+				GhostNinjaRenderInfo = Ghost.m_RenderInfo;
+				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+				GhostNinjaRenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				GhostNinjaRenderInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				GhostNinjaRenderInfo.m_BloodColor = pSkin->m_BloodColor;
+				GhostNinjaRenderInfo.m_SkinMetrics = pSkin->m_Metrics;
+				GhostNinjaRenderInfo.m_CustomColoredSkin = IsTeamplay;
+				if(!IsTeamplay)
+				{
+					GhostNinjaRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
+					GhostNinjaRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+				}
+				RenderInfo = &GhostNinjaRenderInfo;
+			}
+		}
+
+		m_pClient->m_Players.RenderHook(&Prev, &Player, RenderInfo, -2, IntraTick);
 		m_pClient->m_Players.RenderHookCollLine(&Prev, &Player, -2, IntraTick);
-		m_pClient->m_Players.RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderPlayer(&Prev, &Player, RenderInfo, -2, IntraTick);
 	}
 }
 

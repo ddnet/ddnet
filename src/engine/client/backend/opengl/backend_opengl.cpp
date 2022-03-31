@@ -1777,14 +1777,14 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 			glUseProgram(0);
 		}
 
-		if(g_Config.m_Gfx3DTextureAnalysisDone == 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString) != 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString) != 0)
+		if(g_Config.m_Gfx3DTextureAnalysisRan == 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString) != 0 || str_comp(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString) != 0)
 		{
 			AnalysisCorrect = IsTileMapAnalysisSucceeded();
 			if(AnalysisCorrect)
 			{
-				g_Config.m_Gfx3DTextureAnalysisDone = 1;
-				str_copy(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString, sizeof(g_Config.m_Gfx3DTextureAnalysisRenderer) / sizeof(g_Config.m_Gfx3DTextureAnalysisRenderer[0]));
-				str_copy(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString, sizeof(g_Config.m_Gfx3DTextureAnalysisVersion) / sizeof(g_Config.m_Gfx3DTextureAnalysisVersion[0]));
+				g_Config.m_Gfx3DTextureAnalysisRan = 1;
+				str_copy(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString, std::size(g_Config.m_Gfx3DTextureAnalysisRenderer));
+				str_copy(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString, std::size(g_Config.m_Gfx3DTextureAnalysisVersion));
 			}
 		}
 	}
@@ -2095,7 +2095,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 			Vertex.m_Pos.x += pOffset[0] + pDir[0] * XCount;
 			Vertex.m_Pos.y += pOffset[1] + pDir[1] * YCount;
 
-			if(VertexCount >= sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]))
+			if(VertexCount >= std::size(m_aStreamVertices))
 			{
 				glDrawArrays(GL_QUADS, 0, VertexCount);
 				VertexCount = 0;
@@ -2178,7 +2178,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferCon
 			Vertex.m_Pos.x += pOffset[0] + pDir[0] * i;
 			Vertex.m_Pos.y += pOffset[1] + pDir[1] * i;
 
-			if(VertexCount >= sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]))
+			if(VertexCount >= std::size(m_aStreamVertices))
 			{
 				glDrawArrays(GL_QUADS, 0, VertexCount);
 				VertexCount = 0;
@@ -2318,7 +2318,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 					mem_copy(&Vertex.m_Tex, pTex, sizeof(vec3));
 				}
 
-				if(VertexCount >= sizeof(m_aStreamVertices) / sizeof(m_aStreamVertices[0]))
+				if(VertexCount >= std::size(m_aStreamVertices))
 				{
 					glDrawArrays(GL_QUADS, 0, VertexCount);
 					VertexCount = 0;

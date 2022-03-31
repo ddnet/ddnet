@@ -5100,7 +5100,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				const char *paTypeName[] = {
 					"N", "L", "S", "F", "M"};
 				const char *pTypeName = "Invalid";
-				if(0 <= pEnvelope->m_lPoints[i].m_Curvetype && pEnvelope->m_lPoints[i].m_Curvetype < (int)(sizeof(paTypeName) / sizeof(const char *)))
+				if(0 <= pEnvelope->m_lPoints[i].m_Curvetype && pEnvelope->m_lPoints[i].m_Curvetype < (int)std::size(paTypeName))
 					pTypeName = paTypeName[pEnvelope->m_lPoints[i].m_Curvetype];
 				if(DoButton_Editor(pID, pTypeName, 0, &v, 0, "Switch curve type"))
 					pEnvelope->m_lPoints[i].m_Curvetype = (pEnvelope->m_lPoints[i].m_Curvetype + 1) % NUM_CURVETYPES;

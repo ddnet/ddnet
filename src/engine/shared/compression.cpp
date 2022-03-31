@@ -4,6 +4,8 @@
 
 #include "compression.h"
 
+#include <array> // std::size
+
 // Format: ESDDDDDD EDDDDDDD EDD... Extended, Data, Sign
 unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
 {
@@ -47,7 +49,7 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 	const static int s_aMasks[] = {0x7F, 0x7F, 0x7F, 0x0F};
 	const static int s_aShifts[] = {6, 6 + 7, 6 + 7 + 7, 6 + 7 + 7 + 7};
 
-	for(unsigned i = 0; i < sizeof(s_aMasks) / sizeof(int); i++)
+	for(unsigned i = 0; i < std::size(s_aMasks); i++)
 	{
 		if(!(*pSrc & 0x80))
 			break;

@@ -2820,7 +2820,7 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 {
 	if(g_Config.m_GfxDisplayAllVideoModes)
 	{
-		int Count = sizeof(g_aFakeModes) / sizeof(CVideoMode);
+		int Count = std::size(g_aFakeModes);
 		mem_copy(pModes, g_aFakeModes, sizeof(g_aFakeModes));
 		if(MaxModes < Count)
 			Count = MaxModes;

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
 
+#include <array> // std::size
 #include <cstdlib>
 
 struct CPacket
@@ -37,7 +38,7 @@ static CPingConfig m_aConfigPings[] = {
 	{140, 40, 200, 0, 0, 0},
 };
 
-static int m_ConfigNumpingconfs = sizeof(m_aConfigPings) / sizeof(CPingConfig);
+static int m_ConfigNumpingconfs = std::size(m_aConfigPings);
 static int m_ConfigInterval = 10; // seconds between different pingconfigs
 static int m_ConfigLog = 0;
 static int m_ConfigReorder = 0;

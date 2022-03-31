@@ -853,7 +853,7 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 
 CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL()
 {
-	mem_zero(m_aErrorString, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
 
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
@@ -885,6 +885,15 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	{
 		if(m_BackendType == BACKEND_TYPE_VULKAN)
 		{
+			// try default opengl settings
+			str_copy(g_Config.m_GfxBackend, "OpenGL", std::size(g_Config.m_GfxBackend));
+			g_Config.m_GfxGLMajor = 3;
+			g_Config.m_GfxGLMinor = 0;
+			g_Config.m_GfxGLPatch = 0;
+			// do another analysis round too, just in case
+			g_Config.m_Gfx3DTextureAnalysisRan = 0;
+			g_Config.m_GfxDriverIsBlocked = 0;
+
 			SDL_setenv("DDNET_DRIVER", "OpenGL", 1);
 			m_BackendType = DetectBackend();
 		}
@@ -957,7 +966,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CVideoMode aModes[256];
 	int ModesCount = 0;
 	int IndexOfResolution = -1;
-	GetVideoModes(aModes, sizeof(aModes) / sizeof(aModes[0]), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
+	GetVideoModes(aModes, std::size(aModes), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
 
 	for(int i = 0; i < ModesCount; i++)
 	{
@@ -986,7 +995,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	bool IsFullscreen = (SdlFlags & SDL_WINDOW_FULLSCREEN) != 0 || g_Config.m_GfxFullscreen == 3;
 	// use desktop resolution as default resolution, clamp resolution if users's display is smaller than we remembered
 	// if the user starts in fullscreen, and the resolution was not found use the desktop one
-	if((IsFullscreen && !SupportedResolution) || *pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
+	if((IsFullscreen && !SupportedResolution) || *pWidth == 0 || *pHeight == 0 || (IsDesktopChanged && (!SupportedResolution || !IsFullscreen) && (*pWidth > *pDesktopWidth || *pHeight > *pDesktopHeight)))
 	{
 		*pWidth = *pDesktopWidth;
 		*pHeight = *pDesktopHeight;
@@ -1197,7 +1206,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		if(pErrorStr != NULL)
 		{
-			str_copy(m_aErrorString, pErrorStr, sizeof(m_aErrorString) / sizeof(m_aErrorString[0]));
+			str_copy(m_aErrorString, pErrorStr, std::size(m_aErrorString));
 		}
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;

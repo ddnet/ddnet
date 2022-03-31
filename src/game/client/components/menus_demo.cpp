@@ -216,7 +216,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// seek to 0-90%
 		const int SeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
-		for(unsigned i = 0; i < sizeof(SeekPercentKeys) / sizeof(SeekPercentKeys[0]); i++)
+		for(unsigned i = 0; i < std::size(SeekPercentKeys); i++)
 		{
 			if(Input()->KeyPress(SeekPercentKeys[i]))
 			{
@@ -1016,7 +1016,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	RenderTools()->DrawUIRect(&Headers, ColorRGBA(0.0f, 0, 0, 0.15f), 0, 0);
 
-	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
+	int NumCols = std::size(s_aCols);
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)

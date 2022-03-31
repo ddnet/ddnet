@@ -30,7 +30,7 @@ CMapImages::CMapImages(int TextureSize)
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
 
-	static_assert(sizeof(gs_aModEntitiesNames) / sizeof(gs_aModEntitiesNames[0]) == MAP_IMAGE_MOD_TYPE_COUNT, "Mod name string count is not equal to mod type count");
+	static_assert(std::size(gs_aModEntitiesNames) == MAP_IMAGE_MOD_TYPE_COUNT, "Mod name string count is not equal to mod type count");
 }
 
 void CMapImages::OnInit()
@@ -74,7 +74,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(std::size(m_aTextures)))
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pTLayer->m_Image] |= 1;
 				}
@@ -82,7 +82,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(std::size(m_aTextures)))
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pQLayer->m_Image] |= 2;
 				}
