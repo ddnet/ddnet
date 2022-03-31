@@ -597,6 +597,17 @@ void CHud::RenderTextInfo()
 		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
 		TextRender()->Text(0, m_Width - 10 - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
+
+	//vec2 ExDirection1;
+	//vec2 ExDirection2;
+	//ExDirection1 = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
+	//ExDirection2 = normalize(vec2(m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_TargetX, m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_TargetY));
+	//char aBuf[64];
+	//str_format(aBuf, sizeof(aBuf), "%.26f %.26f", ExDirection1.x, ExDirection1.y);
+	//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
+	//str_format(aBuf, sizeof(aBuf), "%.26f %.26f", ExDirection2.x, ExDirection2.y);
+	//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 40, 10, aBuf, -1.0f);
+
 	//render team in freeze text
 	if((g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0) && GameClient()->m_GameInfo.m_EntitiesDDRace)
 	{
