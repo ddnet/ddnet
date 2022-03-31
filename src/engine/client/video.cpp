@@ -760,7 +760,7 @@ bool CVideo::OpenAudio()
 
 	/* create resampler context */
 	m_AudioStream.m_vpSwrCtxs.clear();
-	m_AudioStream.m_vpSwrCtxs.reserve(m_AudioThreads);
+	m_AudioStream.m_vpSwrCtxs.resize(m_AudioThreads);
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		m_AudioStream.m_vpSwrCtxs[i] = swr_alloc();
