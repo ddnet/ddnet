@@ -18,7 +18,7 @@ class CLineInput
 	int m_CursorPos;
 	int m_NumChars;
 
-	char m_DisplayStr[MAX_SIZE + IInput::INPUT_TEXT_SIZE + 2];
+	char m_aDisplayStr[MAX_SIZE + IInput::INPUT_TEXT_SIZE + 2];
 	int m_FakeLen;
 	int m_FakeCursorPos;
 
@@ -48,7 +48,7 @@ public:
 	void SetRange(const char *pString, int Begin, int End);
 	void Insert(const char *pString, int Begin);
 	void Append(const char *pString);
-	const char *GetString(bool Editing = false) const { return Editing ? m_DisplayStr : m_aStr; }
+	const char *GetString(bool Editing = false) const { return Editing ? m_aDisplayStr : m_aStr; }
 	int GetLength(bool Editing = false) const { return Editing ? m_FakeLen : m_Len; }
 	int GetCursorOffset(bool Editing = false) const { return Editing ? m_FakeCursorPos : m_CursorPos; }
 	void SetCursorOffset(int Offset) { m_CursorPos = Offset > m_Len ? m_Len : Offset < 0 ? 0 : Offset; }

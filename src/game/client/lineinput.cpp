@@ -60,17 +60,18 @@ void CLineInput::SetRange(const char *pString, int Begin, int End)
 
 void CLineInput::Editing(const char *pString, int Cursor)
 {
-	str_copy(m_DisplayStr, m_aStr, sizeof(m_DisplayStr));
+	str_copy(m_aDisplayStr, m_aStr, sizeof(m_aDisplayStr));
 	char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
 	str_format(aEditingText, sizeof(aEditingText), "[%s]", pString);
 	int NewTextLen = str_length(aEditingText);
-	int CharsLeft = (int)sizeof(m_DisplayStr) - str_length(m_DisplayStr) - 1;
+	int CharsLeft = (int)sizeof(m_aDisplayStr) - str_length(m_aDisplayStr) - 1;
 	int FillCharLen = NewTextLen < CharsLeft ? NewTextLen : CharsLeft;
-	for(int i = str_length(m_DisplayStr) - 1; i >= m_CursorPos; i--)
-		m_DisplayStr[i + FillCharLen] = m_DisplayStr[i];
+	for(int i = str_length(m_aDisplayStr) - 1; i >= m_CursorPos; i--)
+		m_aDisplayStr[i + FillCharLen] = m_aDisplayStr[i];
 	for(int i = 0; i < FillCharLen; i++)
-		m_DisplayStr[m_CursorPos + i] = aEditingText[i];
-	m_FakeLen = str_length(m_DisplayStr);
+		m_aDisplayStr[m_CursorPos + i] = aEditingText[i];
+	m_aDisplayStr[m_CursorPos + FillCharLen] = '\0';
+	m_FakeLen = str_length(m_aDisplayStr);
 	m_FakeCursorPos = m_CursorPos + Cursor + 1;
 }
 
