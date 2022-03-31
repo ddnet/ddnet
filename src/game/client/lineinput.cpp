@@ -70,6 +70,7 @@ void CLineInput::Editing(const char *pString, int Cursor)
 		m_aDisplayStr[i + FillCharLen] = m_aDisplayStr[i];
 	for(int i = 0; i < FillCharLen; i++)
 		m_aDisplayStr[m_CursorPos + i] = aEditingText[i];
+	m_aDisplayStr[m_CursorPos + FillCharLen] = '\0';
 	m_FakeLen = str_length(m_aDisplayStr);
 	m_FakeCursorPos = m_CursorPos + Cursor + 1;
 }
