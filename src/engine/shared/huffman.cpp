@@ -92,8 +92,6 @@ void CHuffman::ConstructTree(const unsigned *pFrequencies)
 
 void CHuffman::Init(const unsigned *pFrequencies)
 {
-	int i;
-
 	// make sure to cleanout every thing
 	mem_zero(m_aNodes, sizeof(m_aNodes));
 	mem_zero(m_apDecodeLut, sizeof(m_apDecodeLut));
@@ -104,7 +102,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 	ConstructTree(pFrequencies);
 
 	// build decode LUT
-	for(i = 0; i < HUFFMAN_LUTSIZE; i++)
+	for(int i = 0; i < HUFFMAN_LUTSIZE; i++)
 	{
 		unsigned Bits = i;
 		int k;
