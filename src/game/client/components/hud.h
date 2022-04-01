@@ -54,6 +54,7 @@ class CHud : public CComponent
 
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(const int ClientID);
+	void RenderDummyActions();
 
 	void RenderGameTimer();
 	void RenderPauseNotification();

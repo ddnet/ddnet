@@ -128,7 +128,7 @@ void CHud::RenderGameTimer()
 		str_time((int64_t)Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
 		float w = TextRender()->TextWidth(0, FontSize,
-			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
+			Time >= 3600 * 24 * 10 ? "00d 00:00:00" : Time >= 3600 * 24 ? "0d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
 			-1, -1.0f);
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
@@ -138,17 +138,6 @@ void CHud::RenderGameTimer()
 		}
 		TextRender()->Text(0, Half - w / 2, 2, FontSize, aBuf, -1.0f);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		int DisplayedClientID = m_pClient->m_Snap.m_LocalClientID;
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
-		{
-			DisplayedClientID = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
-		}
-		if(m_pClient->m_Snap.m_aCharacters[DisplayedClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[DisplayedClientID].m_ExtendedDisplayInfo.m_IsInPracticeMode)
-		{
-			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudPracticeMode);
-			Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_PracticeModeOffset, Half + w / 2 + 6, 2 + 5);
-		}
 	}
 }
 
@@ -840,7 +829,7 @@ void CHud::PreparePlayerStateQuads()
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
 	// Quad for displaying practice mode
-	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 12.f, 12.f);
+	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 }
 
 void CHud::RenderPlayerState(const int ClientID)
@@ -1099,6 +1088,12 @@ void CHud::RenderPlayerState(const int ClientID)
 	{
 		y += 12;
 	}
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_IsInPracticeMode)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudPracticeMode);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_PracticeModeOffset, x, y);
+		x += 12;
+	}
 	if(pCharacter->m_DeepFrozen)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDeepFrozen);
@@ -1109,18 +1104,6 @@ void CHud::RenderPlayerState(const int ClientID)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLiveFrozen);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LiveFrozenOffset, x, y);
-		x += 12;
-	}
-	if(g_Config.m_ClDummyHammer)
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHammer);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHammerOffset, x, y);
-		x += 12;
-	}
-	if(g_Config.m_ClDummyCopyMoves)
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
 	}
 }
 
@@ -1280,6 +1263,46 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 }
 
+void CHud::RenderDummyActions()
+{
+	// render small dummy actions hud
+	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && Client()->DummyConnected())
+	{
+		float Whole = 300 * Graphics()->ScreenAspect();
+
+		const float BoxHeight = 27.0f;
+		const float BoxWidth = 14.0f;
+
+		float StartX = Whole - BoxWidth;
+		float StartY = 198.0f;
+
+		Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+		int ContainerId = RenderTools()->CreateRoundRectQuadContainer(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
+
+		Graphics()->TextureClear();
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		if(ContainerId != -1)
+			Graphics()->RenderQuadContainer(ContainerId, -1);
+
+		float y = StartY + 1;
+		float x = StartX + 1;
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		if(g_Config.m_ClDummyHammer)
+		{
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHammer);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHammerOffset, x, y);
+		y += 13;
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		if(g_Config.m_ClDummyCopyMoves)
+		{
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
+	}
+}
 void CHud::RenderSpectatorHud()
 {
 	// draw the box
@@ -1361,6 +1384,7 @@ void CHud::OnRender()
 		RenderSuddenDeath();
 		if(g_Config.m_ClShowhudScore)
 			RenderScoreHud();
+		RenderDummyActions();
 		RenderWarmupTimer();
 		RenderTextInfo();
 		RenderLocalTime((m_Width / 7) * 3);
