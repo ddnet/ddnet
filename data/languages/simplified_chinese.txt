@@ -302,7 +302,7 @@ Threaded sound loading
 == 启用多线程音频加载
 
 Name
-== 昵称
+== 名称
 
 Next weapon
 == 下一个武器
