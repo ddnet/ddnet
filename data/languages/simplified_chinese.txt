@@ -20,30 +20,31 @@
 # 2022-03-22 cheeser0613
 # 2022-03-24 cheeser0613
 # 2022-03-29 Dan_cao
+# 2022-04-01 Dan_cao
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== 还剩%d秒
+== 还剩 %d 秒
 
 %i minute left
-== 还剩下%i分钟
+== 还剩下 %i 分钟
 
 %i minutes left
-== 还剩下%i分钟
+== 还剩下 %i 分钟
 
 %i second left
-== 还剩下%i秒钟
+== 还剩下 %i 秒钟
 
 %i seconds left
-== 还剩下%i秒钟
+== 还剩下 %i 秒钟
 
 %s wins!
-== %s胜利!
+== %s 胜利！
 
 -Page %d-
-== -第%d页-
+== -第 %d 页-
 
 Abort
 == 取消
@@ -58,7 +59,7 @@ Address
 == 地址
 
 All
-== 全部
+== 全体
 
 Are you sure that you want to delete the demo?
 == 你确定要删除这个回放吗？
@@ -163,7 +164,7 @@ Error
 == 错误
 
 Error loading demo
-== 回放读取错误
+== 回放加载错误
 
 Favorite
 == 收藏
@@ -283,7 +284,7 @@ Enable game sounds
 == 启用游戏声音
 
 Enable gun sound
-== 启用手枪声
+== 启用手枪声音
 
 Enable server message sound
 == 启用服务器消息提示音
@@ -301,7 +302,7 @@ Threaded sound loading
 == 启用多线程音频加载
 
 Name
-== 昵称
+== 名称
 
 Next weapon
 == 下一个武器
@@ -356,7 +357,7 @@ HUD
 == HUD
 
 Player country:
-== 玩家国家/地区：
+== 玩家国家 / 地区：
 
 Player options
 == 玩家选项
@@ -443,7 +444,7 @@ Show friends only
 == 只显示好友
 
 Show ingame HUD
-== 显示HUD
+== 显示 HUD
 
 Show name plates
 == 显示昵称
@@ -620,7 +621,7 @@ Dummy settings
 == 分身设置
 
 Length:
-== 长度：
+== 时长：
 
 Laser
 == 激光枪
@@ -692,7 +693,7 @@ Use DDRace Scoreboard
 == 使用 DDRace 计分板
 
 Show score
-== 显示比分
+== 显示分数
 
 Show health + ammo
 == 显示生命与弹药
@@ -923,7 +924,7 @@ File already exists, do you want to overwrite it?
 == 文件已存在，是否覆盖？
 
 Indicate map finish
-== 标记已完成地图
+== 标记已完成的地图
 
 Save
 == 保存
@@ -974,19 +975,19 @@ DDNet %s is out!
 == DDNet %s 已经更新了！
 
 Markers
-== 书签
+== 标记
 
 Filter connecting players
 == 筛选正在连接的玩家
 
 Markers:
-== 书签
+== 标记
 
 Zoom in
-== 视野放大
+== 放大视野
 
 1 new mention
-== 1 条新提及
+== 1 条新被提及消息
 
 Update failed! Check log...
 == 更新失败！请检查日志...
@@ -1004,7 +1005,7 @@ Successfully saved the replay!
 == 成功保存短时回放！
 
 Fetch Info
-== 回放详情
+== 回放信息
 
 Lock team
 == 锁定队伍
@@ -1031,7 +1032,7 @@ Hammerfly dummy
 == 分身 Hammerfly 开关
 
 Default length: %d
-== 时长: %d
+== 默认时长: %d
 
 Toggle ghost
 == 影子记录开关
@@ -1040,7 +1041,7 @@ Kill
 == 自杀
 
 Zoom out
-== 视野缩小
+== 缩小视野
 
 Show text entities
 == 显示文本实体
@@ -1052,7 +1053,7 @@ Toggle dyncam
 == 动态视野开关
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork 是一款在线合作游戏，你和你的团体里的 Tee 的目标是抵达地图的终点。作为新手你应该从有着最简单的地图的简单（Novice）服务器入门。根据延迟来选择离你相近的服务器。
+== DDraceNetwork 是一款在线合作游戏，你和你团体里的 Tee 的目标是抵达地图的终点。作为新手你应该从有着最简单地图 的简单（Novice）服务器入门。根据延迟来选择离你相近的服务器。
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 建议你在进入服务器前检查一下设置并根据你的喜好进行调整。
@@ -1067,7 +1068,7 @@ Server best:
 == 服务器最佳
 
 Learn
-== 教程Wiki
+== 教程 Wiki
 
 Use high DPI
 == 使用高 DPI
@@ -1131,7 +1132,7 @@ Run server
 == 运行服务器
 
 Server executable not found, can't run server
-== 找不到服务器的可执行文件，无法运行
+== 找不到服务器的可执行文件，无法运行服务器
 
 Editor
 == 编辑器
@@ -1233,7 +1234,7 @@ Discord
 == 开黑啦
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 纹理文件 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致视觉错误。
+== 纹理文件 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致显示错误。
 
 Chat command
 == 聊天框指令（/）
@@ -1242,7 +1243,7 @@ Dummy
 == 分身
 
 Show client IDs
-== 显示客户端ID
+== 显示客户端 ID
 
 Laser Outline Color
 == 激光边框颜色
@@ -1344,7 +1345,7 @@ Windowed fullscreen
 == 窗口化全屏
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 纹理文件 %s 并非RGBA格式，这可能会导致视觉错误。
+== 纹理文件 %s 并非 RGBA 格式，这可能会导致显示错误。
 
 Join Tutorial Server
 == 进入教学服务器
@@ -1362,7 +1363,7 @@ custom
 == 自定义
 
 Graphics cards
-== 显示卡
+== 显卡
 
 auto
 == 自动
