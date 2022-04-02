@@ -77,36 +77,6 @@ R find_binary(R range, T value)
 }
 
 template<class R>
-void sort_bubble(R range)
-{
-	concept_empty::check(range);
-	concept_forwarditeration::check(range);
-	concept_backwarditeration::check(range);
-
-	// slow bubblesort :/
-	for(; !range.empty(); range.pop_back())
-	{
-		R section = range;
-		typename R::type *prev = &section.front();
-		section.pop_front();
-		for(; !section.empty(); section.pop_front())
-		{
-			typename R::type *cur = &section.front();
-			if(*cur < *prev)
-				swap(*cur, *prev);
-			prev = cur;
-		}
-	}
-}
-
-/*
-template<class R>
-void sort_quick(R range)
-{
-	concept_index::check(range);
-}*/
-
-template<class R>
 void sort(R range)
 {
 	std::stable_sort(&range.front(), &range.back() + 1);
