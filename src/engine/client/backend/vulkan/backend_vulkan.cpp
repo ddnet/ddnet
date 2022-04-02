@@ -1419,7 +1419,7 @@ protected:
 			MemRange.size = VK_WHOLE_SIZE;
 			vkInvalidateMappedMemoryRanges(m_VKDevice, 1, &MemRange);
 
-			size_t RealFullImageSize = maximum(ImageTotalSize, Height * m_GetPresentedImgDataHelperMappedLayoutPitch);
+			size_t RealFullImageSize = maximum(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
 			if(DstData.size() < RealFullImageSize + (Width * 4))
 				DstData.resize(RealFullImageSize + (Width * 4)); // extra space for flipping
 
