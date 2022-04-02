@@ -43,9 +43,16 @@ CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char 
 {
 }
 
+struct SSkinScanUser
+{
+	CSkins *m_pThis;
+	CSkins::TSkinLoadedCBFunc m_SkinLoadedFunc;
+};
+
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CSkins *pSelf = (CSkins *)pUser;
+	auto *pUserReal = (SSkinScanUser *)pUser;
+	CSkins *pSelf = pUserReal->m_pThis;
 
 	if(IsDir || !str_endswith(pName, ".png"))
 		return 0;
@@ -65,7 +72,9 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
-	return pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
+	auto SkinID = pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
+	pUserReal->m_SkinLoadedFunc(SkinID);
+	return SkinID;
 }
 
 static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, uint8_t *pImg, int ImgWidth, int ImgX, int ImgY, int CheckWidth, int CheckHeight)
@@ -303,11 +312,13 @@ void CSkins::OnInit()
 		}
 	}
 
-	// load skins
-	Refresh();
+	// load skins;
+	Refresh([this](int SkinID) {
+		GameClient()->m_Menus.RenderLoading(false);
+	});
 }
 
-void CSkins::Refresh()
+void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 {
 	for(int i = 0; i < m_aSkins.size(); ++i)
 	{
@@ -332,7 +343,10 @@ void CSkins::Refresh()
 
 	m_aSkins.clear();
 	m_aDownloadSkins.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
+	SSkinScanUser SkinScanUser;
+	SkinScanUser.m_pThis = this;
+	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, &SkinScanUser);
 	if(!m_aSkins.size())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");

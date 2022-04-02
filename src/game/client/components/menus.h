@@ -243,6 +243,8 @@ protected:
 	sorted_array<SCustomEmoticon> m_EmoticonList;
 	sorted_array<SCustomParticle> m_ParticlesList;
 
+	bool m_IsInit = false;
+
 	static void LoadEntities(struct SCustomEntities *pEntitiesItem, void *pUser);
 	static int EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser);
 
@@ -417,6 +419,8 @@ protected:
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 
+	int64_t m_DemoPopulateStartTime = 0;
+
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
 	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
@@ -520,8 +524,9 @@ public:
 	CMenus();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void RenderLoading();
-	void RenderUpdating(const char *pCaption, int current = 0, int total = 0);
+	void RenderLoading(bool IncreaseCounter, bool RenderLoadingBar = true);
+
+	bool IsInit() { return m_IsInit; }
 
 	bool IsActive() const { return m_MenuActive; }
 	void KillServer();
@@ -620,6 +625,8 @@ public:
 	};
 
 	sorted_array<CGhostItem> m_lGhosts;
+
+	int64_t m_GhostPopulateStartTime = 0;
 
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();
