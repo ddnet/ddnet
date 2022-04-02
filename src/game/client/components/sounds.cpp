@@ -26,10 +26,13 @@ void CSoundLoading::Run()
 		{
 			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
+			// try to render a frame
+			if(m_Render)
+				m_pGameClient->m_Menus.RenderLoading(false);
 		}
 
 		if(m_Render)
-			m_pGameClient->m_Menus.RenderLoading();
+			m_pGameClient->m_Menus.RenderLoading(true);
 	}
 }
 
@@ -79,6 +82,7 @@ void CSounds::OnInit()
 		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
 		m_pClient->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
+		m_pClient->m_Menus.RenderLoading(true);
 	}
 	else
 	{
