@@ -97,9 +97,16 @@ void CVideo::Start()
 
 	m_pFormat = m_pFormatContext->oformat;
 
+#if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
+	// use only the minimum of 2 threads on 32-bit to save memory
+	m_VideoThreads = 2;
+	m_AudioThreads = 2;
+#else
 	m_VideoThreads = std::thread::hardware_concurrency() + 2;
 	// audio gets a bit less
 	m_AudioThreads = (std::thread::hardware_concurrency() / 2) + 2;
+#endif
+
 	m_CurVideoThreadIndex = 0;
 	m_CurAudioThreadIndex = 0;
 
@@ -817,6 +824,11 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		return false;
 	}
 	pStream->pEnc = c;
+
+#if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
+	// use only 1 ffmpeg thread on 32-bit to save memory
+	c->thread_count = 1;
+#endif
 
 	switch((*ppCodec)->type)
 	{
