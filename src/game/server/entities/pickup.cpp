@@ -10,6 +10,8 @@
 
 #include "character.h"
 
+static constexpr int PickupPhysSize = 14;
+
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), PickupPhysSize)
 {
