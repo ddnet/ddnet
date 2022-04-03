@@ -35,10 +35,12 @@ public:
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
+	typedef std::function<void(int)> TSkinLoadedCBFunc;
+
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 
-	void Refresh();
+	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);

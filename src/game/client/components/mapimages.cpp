@@ -14,6 +14,16 @@
 
 #include <game/client/gameclient.h>
 
+const char *const gs_aModEntitiesNames[] = {
+	"ddnet",
+	"ddrace",
+	"race",
+	"blockworlds",
+	"fng",
+	"vanilla",
+	"f-ddrace",
+};
+
 CMapImages::CMapImages() :
 	CMapImages(100)
 {

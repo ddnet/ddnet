@@ -905,6 +905,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	VkImage m_GetPresentedImgDataHelperImage = VK_NULL_HANDLE;
 	uint8_t *m_pGetPresentedImgDataHelperMappedMemory = nullptr;
 	VkDeviceSize m_GetPresentedImgDataHelperMappedLayoutOffset = 0;
+	VkDeviceSize m_GetPresentedImgDataHelperMappedLayoutPitch = 0;
 	uint32_t m_GetPresentedImgDataHelperWidth = 0;
 	uint32_t m_GetPresentedImgDataHelperHeight = 0;
 	VkFence m_GetPresentedImgDataHelperFence = VK_NULL_HANDLE;
@@ -1290,6 +1291,7 @@ protected:
 
 			vkMapMemory(m_VKDevice, m_GetPresentedImgDataHelperMem.m_Mem, 0, VK_WHOLE_SIZE, 0, (void **)&m_pGetPresentedImgDataHelperMappedMemory);
 			m_GetPresentedImgDataHelperMappedLayoutOffset = SubResourceLayout.offset;
+			m_GetPresentedImgDataHelperMappedLayoutPitch = SubResourceLayout.rowPitch;
 			m_pGetPresentedImgDataHelperMappedMemory += m_GetPresentedImgDataHelperMappedLayoutOffset;
 
 			VkFenceCreateInfo FenceInfo{};
@@ -1332,8 +1334,6 @@ protected:
 			Format = CImageInfo::FORMAT_RGBA;
 
 			size_t ImageTotalSize = (size_t)Width * Height * 4;
-			if(DstData.size() < ImageTotalSize + (Width * 4))
-				DstData.resize(ImageTotalSize + (Width * 4)); // extra space for flipping
 
 			PreparePresentedImageDataImage(Width, Height);
 
@@ -1419,7 +1419,22 @@ protected:
 			MemRange.size = VK_WHOLE_SIZE;
 			vkInvalidateMappedMemoryRanges(m_VKDevice, 1, &MemRange);
 
-			mem_copy(DstData.data(), m_pGetPresentedImgDataHelperMappedMemory, ImageTotalSize);
+			size_t RealFullImageSize = maximum(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
+			if(DstData.size() < RealFullImageSize + (Width * 4))
+				DstData.resize(RealFullImageSize + (Width * 4)); // extra space for flipping
+
+			mem_copy(DstData.data(), m_pGetPresentedImgDataHelperMappedMemory, RealFullImageSize);
+
+			// pack image data together without any offset that the driver might require
+			if(Width * 4 < m_GetPresentedImgDataHelperMappedLayoutPitch)
+			{
+				for(uint32_t Y = 0; Y < Height; ++Y)
+				{
+					size_t OffsetImagePacked = (Y * Width * 4);
+					size_t OffsetImageUnpacked = (Y * m_GetPresentedImgDataHelperMappedLayoutPitch);
+					mem_copy(DstData.data() + OffsetImagePacked, DstData.data() + OffsetImageUnpacked, Width * 4);
+				}
+			}
 
 			if(IsB8G8R8A8 || ResetAlpha)
 			{
