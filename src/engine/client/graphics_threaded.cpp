@@ -845,7 +845,7 @@ void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
 	Cmd.m_Color.g = g;
 	Cmd.m_Color.b = b;
 	Cmd.m_Color.a = 0;
-	Cmd.m_ForceClear = ForceClearNow || m_IsForcedViewport;
+	Cmd.m_ForceClear = ForceClearNow;
 	AddCmd(
 		Cmd, [] { return true; }, "failed to clear graphics.");
 }
