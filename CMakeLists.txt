@@ -1516,11 +1516,12 @@ function(generate_source7 output_file script_parameter)
   )
 endfunction()
 
-function(generate_maps output_file)
+function(generate_maps output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
+      datasrc/crosscompile.py
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
@@ -1568,7 +1569,8 @@ generate_source7("src/game/generated/protocol7.h" "network_header")
 generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
-generate_maps("src/game/generated/protocolglue.h")
+generate_maps("src/game/generated/protocolglue.h" "map_header")
+generate_maps("src/game/generated/protocolglue.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/game/generated/wordlist.h"
   COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
@@ -1743,6 +1745,7 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.cpp
   src/game/generated/protocolglue.h
   src/game/generated/protocol7.cpp
   src/game/generated/protocol7.h
