@@ -847,6 +847,13 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		VkExtent2D m_Viewport;
 	};
 
+	struct SSwapChainMultiSampleImage
+	{
+		VkImage m_Image = VK_NULL_HANDLE;
+		SMemoryImageBlock<s_ImageBufferCacheID> m_ImgMem;
+		VkImageView m_ImgView = VK_NULL_HANDLE;
+	};
+
 	/************************
 	* MEMBER VARIABLES
 	************************/
@@ -946,6 +953,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 private:
 	std::vector<VkImageView> m_SwapChainImageViewList;
+	std::vector<SSwapChainMultiSampleImage> m_SwapChainMultiSamplingImages;
 	std::vector<VkFramebuffer> m_FramebufferList;
 	std::vector<VkCommandBuffer> m_MainDrawCommandBuffers;
 
@@ -2757,7 +2765,7 @@ protected:
 		return ImageView;
 	}
 
-	void CreateImage(uint32_t Width, uint32_t Height, uint32_t Depth, size_t MipMapLevelCount, VkFormat Format, VkImageTiling Tiling, VkImage &Image, SMemoryImageBlock<s_ImageBufferCacheID> &ImageMemory)
+	void CreateImage(uint32_t Width, uint32_t Height, uint32_t Depth, size_t MipMapLevelCount, VkFormat Format, VkImageTiling Tiling, VkImage &Image, SMemoryImageBlock<s_ImageBufferCacheID> &ImageMemory, VkImageUsageFlags ImageUsage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
 	{
 		VkImageCreateInfo ImageInfo{};
 		ImageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -2770,8 +2778,8 @@ protected:
 		ImageInfo.format = Format;
 		ImageInfo.tiling = Tiling;
 		ImageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		ImageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		ImageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		ImageInfo.usage = ImageUsage;
+		ImageInfo.samples = (ImageUsage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) == 0 ? VK_SAMPLE_COUNT_1_BIT : GetSampleCount();
 		ImageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 		if(vkCreateImage(m_VKDevice, &ImageInfo, nullptr, &Image) != VK_SUCCESS)
@@ -4060,26 +4068,76 @@ public:
 		m_SwapChainImageViewList.clear();
 	}
 
+	bool CreateMultiSamplerImageAttachments()
+	{
+		m_SwapChainMultiSamplingImages.resize(m_SwapChainImageCount);
+		if(HasMultiSampling())
+		{
+			for(size_t i = 0; i < m_SwapChainImageCount; ++i)
+			{
+				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImg.width, m_VKSwapImgAndViewportExtent.m_SwapImg.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_SwapChainMultiSamplingImages[i].m_Image, m_SwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+				m_SwapChainMultiSamplingImages[i].m_ImgView = CreateImageView(m_SwapChainMultiSamplingImages[i].m_Image, m_VKSurfFormat.format, VK_IMAGE_VIEW_TYPE_2D, 1, 1);
+			}
+		}
+
+		return true;
+	}
+
+	void DestroyMultiSamplerImageAttachments()
+	{
+		if(HasMultiSampling())
+		{
+			m_SwapChainMultiSamplingImages.resize(m_SwapChainImageCount);
+			for(size_t i = 0; i < m_SwapChainImageCount; ++i)
+			{
+				vkDestroyImage(m_VKDevice, m_SwapChainMultiSamplingImages[i].m_Image, nullptr);
+				vkDestroyImageView(m_VKDevice, m_SwapChainMultiSamplingImages[i].m_ImgView, nullptr);
+				FreeImageMemBlock(m_SwapChainMultiSamplingImages[i].m_ImgMem);
+			}
+		}
+		m_SwapChainMultiSamplingImages.clear();
+	}
+
 	bool CreateRenderPass(bool ClearAttachs)
 	{
+		bool HasMultiSamplingTargets = HasMultiSampling();
+		VkAttachmentDescription MultiSamplingColorAttachment{};
+		MultiSamplingColorAttachment.format = m_VKSurfFormat.format;
+		MultiSamplingColorAttachment.samples = GetSampleCount();
+		MultiSamplingColorAttachment.loadOp = ClearAttachs ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		MultiSamplingColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		MultiSamplingColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		MultiSamplingColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		MultiSamplingColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		MultiSamplingColorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
 		VkAttachmentDescription ColorAttachment{};
 		ColorAttachment.format = m_VKSurfFormat.format;
-		ColorAttachment.samples = GetSampleCount();
-		ColorAttachment.loadOp = ClearAttachs ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		ColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		ColorAttachment.loadOp = ClearAttachs && !HasMultiSamplingTargets ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		ColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		ColorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+		VkAttachmentReference MultiSamplingColorAttachmentRef{};
+		MultiSamplingColorAttachmentRef.attachment = 0;
+		MultiSamplingColorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
 		VkAttachmentReference ColorAttachmentRef{};
-		ColorAttachmentRef.attachment = 0;
+		ColorAttachmentRef.attachment = HasMultiSamplingTargets ? 1 : 0;
 		ColorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		VkSubpassDescription Subpass{};
 		Subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		Subpass.colorAttachmentCount = 1;
-		Subpass.pColorAttachments = &ColorAttachmentRef;
+		Subpass.pColorAttachments = HasMultiSamplingTargets ? &MultiSamplingColorAttachmentRef : &ColorAttachmentRef;
+		Subpass.pResolveAttachments = HasMultiSamplingTargets ? &ColorAttachmentRef : nullptr;
+
+		std::array<VkAttachmentDescription, 2> aAttachments;
+		aAttachments[0] = MultiSamplingColorAttachment;
+		aAttachments[1] = ColorAttachment;
 
 		VkSubpassDependency Dependency{};
 		Dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -4091,8 +4149,8 @@ public:
 
 		VkRenderPassCreateInfo CreateRenderPassInfo{};
 		CreateRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		CreateRenderPassInfo.attachmentCount = 1;
-		CreateRenderPassInfo.pAttachments = &ColorAttachment;
+		CreateRenderPassInfo.attachmentCount = HasMultiSamplingTargets ? 2 : 1;
+		CreateRenderPassInfo.pAttachments = HasMultiSamplingTargets ? aAttachments.data() : aAttachments.data() + 1;
 		CreateRenderPassInfo.subpassCount = 1;
 		CreateRenderPassInfo.pSubpasses = &Subpass;
 		CreateRenderPassInfo.dependencyCount = 1;
@@ -4118,13 +4176,17 @@ public:
 
 		for(size_t i = 0; i < m_SwapChainImageCount; i++)
 		{
-			std::array<VkImageView, 1> aAttachments = {m_SwapChainImageViewList[i]};
+			std::array<VkImageView, 2> aAttachments = {
+				m_SwapChainMultiSamplingImages[i].m_ImgView,
+				m_SwapChainImageViewList[i]};
+
+			bool HasMultiSamplingTargets = HasMultiSampling();
 
 			VkFramebufferCreateInfo FramebufferInfo{};
 			FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			FramebufferInfo.renderPass = m_VKRenderPass;
-			FramebufferInfo.attachmentCount = aAttachments.size();
-			FramebufferInfo.pAttachments = aAttachments.data();
+			FramebufferInfo.attachmentCount = HasMultiSamplingTargets ? aAttachments.size() : aAttachments.size() - 1;
+			FramebufferInfo.pAttachments = HasMultiSamplingTargets ? aAttachments.data() : aAttachments.data() + 1;
 			FramebufferInfo.width = m_VKSwapImgAndViewportExtent.m_SwapImg.width;
 			FramebufferInfo.height = m_VKSwapImgAndViewportExtent.m_SwapImg.height;
 			FramebufferInfo.layers = 1;
@@ -5082,6 +5144,8 @@ public:
 
 		DestroyRenderPass();
 
+		DestroyMultiSamplerImageAttachments();
+
 		DestroyImageViews();
 		ClearSwapChainImageHandles();
 
@@ -5095,6 +5159,9 @@ public:
 	{
 		if(IsLastCleanup)
 		{
+			if(m_SwapchainCreated)
+				CleanupVulkanSwapChain(true);
+
 			// clean all images, buffers, buffer containers
 			for(auto &Texture : m_Textures)
 			{
@@ -5167,9 +5234,6 @@ public:
 
 		if(IsLastCleanup)
 		{
-			if(m_SwapchainCreated)
-				CleanupVulkanSwapChain(true);
-
 			DestroyUniformDescriptorSetLayouts();
 			DestroyTextDescriptorSetLayout();
 			DestroyDescriptorSetLayouts();
@@ -5621,6 +5685,11 @@ public:
 			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_Pools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
 	}
 
+	bool HasMultiSampling()
+	{
+		return GetSampleCount() != VK_SAMPLE_COUNT_1_BIT;
+	}
+
 	VkSampleCountFlagBits GetSampleCount()
 	{
 		if(m_MultiSamplingCount >= 64 && m_MaxMultiSample & VK_SAMPLE_COUNT_64_BIT)
@@ -5650,6 +5719,11 @@ public:
 
 		if(!CreateImageViews())
 			return -1;
+
+		if(!CreateMultiSamplerImageAttachments())
+		{
+			return -1;
+		}
 
 		m_LastPresentedSwapChainImageIndex = std::numeric_limits<decltype(m_LastPresentedSwapChainImageIndex)>::max();
 
