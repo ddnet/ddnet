@@ -843,8 +843,25 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SSwapImgViewportExtent
 	{
-		VkExtent2D m_SwapImg;
-		VkExtent2D m_Viewport;
+		VkExtent2D m_SwapImageViewport;
+		bool m_HasForcedViewport = false;
+		VkExtent2D m_ForcedViewport;
+
+		// the viewport of the resulting presented image on the screen
+		// if there is a forced viewport the resulting image is smaller
+		// than the full swap image size
+		VkExtent2D GetPresentedImageViewport()
+		{
+			uint32_t ViewportWidth = m_SwapImageViewport.width;
+			uint32_t ViewportHeight = m_SwapImageViewport.height;
+			if(m_HasForcedViewport)
+			{
+				ViewportWidth = m_ForcedViewport.width;
+				ViewportHeight = m_ForcedViewport.height;
+			}
+
+			return {ViewportWidth, ViewportHeight};
+		}
 	};
 
 	struct SSwapChainMultiSampleImage
@@ -1330,8 +1347,9 @@ protected:
 		bool UsesRGBALikeFormat = m_VKSurfFormat.format == VK_FORMAT_R8G8B8A8_UNORM || IsB8G8R8A8;
 		if(UsesRGBALikeFormat && m_LastPresentedSwapChainImageIndex != std::numeric_limits<decltype(m_LastPresentedSwapChainImageIndex)>::max())
 		{
-			Width = m_VKSwapImgAndViewportExtent.m_Viewport.width;
-			Height = m_VKSwapImgAndViewportExtent.m_Viewport.height;
+			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
+			Width = Viewport.width;
+			Height = Viewport.height;
 			Format = CImageInfo::FORMAT_RGBA;
 
 			size_t ImageTotalSize = (size_t)Width * Height * 4;
@@ -1349,7 +1367,7 @@ protected:
 			Region.imageSubresource.baseArrayLayer = 0;
 			Region.imageSubresource.layerCount = 1;
 			Region.imageOffset = {0, 0, 0};
-			Region.imageExtent = {m_VKSwapImgAndViewportExtent.m_Viewport.width, m_VKSwapImgAndViewportExtent.m_Viewport.height, 1};
+			Region.imageExtent = {Viewport.width, Viewport.height, 1};
 
 			auto &SwapImg = m_SwapChainImages[m_LastPresentedSwapChainImageIndex];
 
@@ -2328,7 +2346,7 @@ protected:
 		RenderPassInfo.renderPass = m_VKRenderPass;
 		RenderPassInfo.framebuffer = m_FramebufferList[m_CurImageIndex];
 		RenderPassInfo.renderArea.offset = {0, 0};
-		RenderPassInfo.renderArea.extent = m_VKSwapImgAndViewportExtent.m_Viewport;
+		RenderPassInfo.renderArea.extent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 
 		VkClearValue ClearColorVal = {{{m_aClearColor[0], m_aClearColor[1], m_aClearColor[2], m_aClearColor[3]}}};
 		RenderPassInfo.clearValueCount = 1;
@@ -3016,7 +3034,7 @@ protected:
 
 	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State)
 	{
-		return (State.m_ClipEnable || m_HasDynamicViewport) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
+		return (State.m_ClipEnable || m_HasDynamicViewport || m_VKSwapImgAndViewportExtent.m_HasForcedViewport) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
 	}
 
 	size_t GetDynamicModeIndexFromExecBuffer(const SRenderCommandExecuteBuffer &ExecBuffer)
@@ -3093,21 +3111,35 @@ protected:
 				Viewport.minDepth = 0.0f;
 				Viewport.maxDepth = 1.0f;
 			}
+			// else check if there is a forced viewport
+			else if(m_VKSwapImgAndViewportExtent.m_HasForcedViewport)
+			{
+				Viewport.x = 0.0f;
+				Viewport.y = 0.0f;
+				Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_ForcedViewport.width;
+				Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_ForcedViewport.height;
+				Viewport.minDepth = 0.0f;
+				Viewport.maxDepth = 1.0f;
+			}
 			else
 			{
 				Viewport.x = 0.0f;
 				Viewport.y = 0.0f;
-				Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_Viewport.width;
-				Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_Viewport.height;
+				Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+				Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 				Viewport.minDepth = 0.0f;
 				Viewport.maxDepth = 1.0f;
 			}
 
 			VkRect2D Scissor;
 			// convert from OGL to vulkan clip
+
+			// the scissor always assumes the presented viewport, because the front-end keeps the calculation
+			// for the forced viewport in sync
+			auto ScissorViewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
 			if(State.m_ClipEnable)
 			{
-				int32_t ScissorY = (int32_t)m_VKSwapImgAndViewportExtent.m_Viewport.height - ((int32_t)State.m_ClipY + (int32_t)State.m_ClipH);
+				int32_t ScissorY = (int32_t)ScissorViewport.height - ((int32_t)State.m_ClipY + (int32_t)State.m_ClipH);
 				uint32_t ScissorH = (int32_t)State.m_ClipH;
 				Scissor.offset = {(int32_t)State.m_ClipX, ScissorY};
 				Scissor.extent = {(uint32_t)State.m_ClipW, ScissorH};
@@ -3115,7 +3147,16 @@ protected:
 			else
 			{
 				Scissor.offset = {0, 0};
-				Scissor.extent = {m_VKSwapImgAndViewportExtent.m_Viewport.width, m_VKSwapImgAndViewportExtent.m_Viewport.height};
+				Scissor.extent = {(uint32_t)ScissorViewport.width, (uint32_t)ScissorViewport.height};
+			}
+
+			// if there is a dynamic viewport make sure the scissor data is scaled down to that
+			if(m_HasDynamicViewport)
+			{
+				Scissor.offset.x = (int32_t)(((float)Scissor.offset.x / (float)ScissorViewport.width) * (float)m_DynamicViewportSize.width) + m_DynamicViewportOffset.x;
+				Scissor.offset.y = (int32_t)(((float)Scissor.offset.y / (float)ScissorViewport.height) * (float)m_DynamicViewportSize.height) + m_DynamicViewportOffset.y;
+				Scissor.extent.width = (uint32_t)(((float)Scissor.extent.width / (float)ScissorViewport.width) * (float)m_DynamicViewportSize.width);
+				Scissor.extent.height = (uint32_t)(((float)Scissor.extent.height / (float)ScissorViewport.height) * (float)m_DynamicViewportSize.height);
 			}
 
 			Viewport.x = clamp(Viewport.x, 0.0f, std::numeric_limits<decltype(Viewport.x)>::max());
@@ -3775,11 +3816,20 @@ public:
 		}
 
 		VkExtent2D AutoViewportExtent = RetSize;
+		bool UsesForcedViewport = false;
 		// keep this in sync with graphics_threaded AdjustViewport's check
 		if(AutoViewportExtent.height > 4 * AutoViewportExtent.width / 5)
+		{
 			AutoViewportExtent.height = 4 * AutoViewportExtent.width / 5;
+			UsesForcedViewport = true;
+		}
 
-		return {RetSize, AutoViewportExtent};
+		SSwapImgViewportExtent Ext;
+		Ext.m_SwapImageViewport = RetSize;
+		Ext.m_ForcedViewport = AutoViewportExtent;
+		Ext.m_HasForcedViewport = UsesForcedViewport;
+
+		return Ext;
 	}
 
 	bool GetImageUsage(const VkSurfaceCapabilitiesKHR &VKCapabilities, VkImageUsageFlags &VKOutUsage)
@@ -3898,7 +3948,7 @@ public:
 		SwapInfo.minImageCount = SwapImgCount;
 		SwapInfo.imageFormat = m_VKSurfFormat.format;
 		SwapInfo.imageColorSpace = m_VKSurfFormat.colorSpace;
-		SwapInfo.imageExtent = m_VKSwapImgAndViewportExtent.m_SwapImg;
+		SwapInfo.imageExtent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 		SwapInfo.imageArrayLayers = 1;
 		SwapInfo.imageUsage = UsageFlags;
 		SwapInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -4081,7 +4131,7 @@ public:
 		{
 			for(size_t i = 0; i < m_SwapChainImageCount; ++i)
 			{
-				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImg.width, m_VKSwapImgAndViewportExtent.m_SwapImg.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_SwapChainMultiSamplingImages[i].m_Image, m_SwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_SwapChainMultiSamplingImages[i].m_Image, m_SwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 				m_SwapChainMultiSamplingImages[i].m_ImgView = CreateImageView(m_SwapChainMultiSamplingImages[i].m_Image, m_VKSurfFormat.format, VK_IMAGE_VIEW_TYPE_2D, 1, 1);
 			}
 		}
@@ -4193,8 +4243,8 @@ public:
 			FramebufferInfo.renderPass = m_VKRenderPass;
 			FramebufferInfo.attachmentCount = HasMultiSamplingTargets ? aAttachments.size() : aAttachments.size() - 1;
 			FramebufferInfo.pAttachments = HasMultiSamplingTargets ? aAttachments.data() : aAttachments.data() + 1;
-			FramebufferInfo.width = m_VKSwapImgAndViewportExtent.m_SwapImg.width;
-			FramebufferInfo.height = m_VKSwapImgAndViewportExtent.m_SwapImg.height;
+			FramebufferInfo.width = m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+			FramebufferInfo.height = m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 			FramebufferInfo.layers = 1;
 
 			if(vkCreateFramebuffer(m_VKDevice, &FramebufferInfo, nullptr, &m_FramebufferList[i]) != VK_SUCCESS)
@@ -4348,13 +4398,13 @@ public:
 
 		Viewport.x = 0.0f;
 		Viewport.y = 0.0f;
-		Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_Viewport.width;
-		Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_Viewport.height;
+		Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+		Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 		Viewport.minDepth = 0.0f;
 		Viewport.maxDepth = 1.0f;
 
 		Scissor.offset = {0, 0};
-		Scissor.extent = m_VKSwapImgAndViewportExtent.m_Viewport;
+		Scissor.extent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 
 		ViewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		ViewportState.viewportCount = 1;
@@ -6379,7 +6429,7 @@ public:
 		if(ExecBuffer.m_ClearColorInRenderThread)
 		{
 			std::array<VkClearAttachment, 1> aAttachments = {VkClearAttachment{VK_IMAGE_ASPECT_COLOR_BIT, 0, VkClearValue{VkClearColorValue{{pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, pCommand->m_Color.a}}}}};
-			std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImg}, 0, 1}};
+			std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImageViewport}, 0, 1}};
 			vkCmdClearAttachments(GetGraphicCommandBuffer(ExecBuffer.m_ThreadIndex), aAttachments.size(), aAttachments.data(), aClearRects.size(), aClearRects.data());
 		}
 	}
@@ -6469,12 +6519,13 @@ public:
 		}
 		else if(!pCommand->m_ByResize)
 		{
-			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != m_VKSwapImgAndViewportExtent.m_Viewport.width || (uint32_t)pCommand->m_Height != m_VKSwapImgAndViewportExtent.m_Viewport.height)
+			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
+			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != Viewport.width || (uint32_t)pCommand->m_Height != Viewport.height)
 			{
 				m_HasDynamicViewport = true;
 
 				// convert viewport from OGL to vulkan
-				int32_t ViewportY = (int32_t)m_VKSwapImgAndViewportExtent.m_Viewport.height - ((int32_t)pCommand->m_Y + (int32_t)pCommand->m_Height);
+				int32_t ViewportY = (int32_t)Viewport.height - ((int32_t)pCommand->m_Y + (int32_t)pCommand->m_Height);
 				uint32_t ViewportH = (int32_t)pCommand->m_Height;
 				m_DynamicViewportOffset = {(int32_t)pCommand->m_X, ViewportY};
 				m_DynamicViewportSize = {(uint32_t)pCommand->m_Width, ViewportH};
