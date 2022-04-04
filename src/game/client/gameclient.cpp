@@ -292,6 +292,15 @@ void CGameClient::OnInit()
 	m_LastZoom = .0;
 	m_LastScreenAspect = .0;
 	m_LastDummyConnected = false;
+	
+	m_SmartPauseReq[0] = false;
+	m_SmartPauseReq[1] = false;
+	m_UnpauseCmdSent[0] = false;
+	m_UnpauseCmdSent[1] = false;
+	m_SmartPauseStarting[0] = false;
+	m_SmartPauseStarting[1] = false;
+	m_SmartPauseArmed[0] = false;
+	m_SmartPauseArmed[1] = false;
 
 	// Set free binds to DDRace binds if it's active
 	m_Binds.SetDDRaceBinds(true);
@@ -584,6 +593,115 @@ void CGameClient::UpdatePositions()
 	}
 
 	UpdateRenderedCharacters();
+
+	if(m_NewTick)
+	{
+		SmartPauseCheck();
+	}
+}
+
+void CGameClient::SmartPauseCheck()
+{
+	// SmartPause is a feature to unpause snapped client whenever tee is moved while in spect mode.
+	// A variable (g_Config.m_ClNextPauseIsUnpauseIfMoved) must be set before each "say /pause" to enable SmartPause.
+	// On-going SmartPause request is saved in a new variable (m_SmartPauseReq), the global var (g_Config.m_ClNextPauseIsUnpauseIfMoved) is reset after every entry.
+	// This feature works only with "/showall 1", because camera can be far away from tee position, so it is automatically sent to the server.
+	// SmartPause is designed as Finite State Machine, it has following states:
+	// 1) [WAIT SPEC PHASE] Wait to be paused and enter the spec mode.
+	// 2) [START PHASE] SmartPause cannot start until tee is motionless, start wait tick counter (m_SmartPauseStartingCnt), set m_SmartPauseStarting.
+	// 3) [ARMED PHASE] When velocity stays zero for a SMARTPAUSE_STARTING_SEC period of time, save golden position (m_LocalCharacterPosBeforePause) and set m_SmartPauseArmed;
+	// 4) [UNPAUSE PHASE] Every tick check if current position is different from saved position, then send "unpause" command only once, guard variable is used (m_UnpauseCmdSent).
+	// 5) Wait to be unpaused from server, go to 1)
+	// 
+	// Unpause command doesn't exist, /pause is just a toggle.
+	// Unpause can be reliably obtained (thanks @Deen) with:
+	// "/mc; /pause /; /pause"
+	// /mc is multiple commands: first send "pause username", sending and invalid username "/" the client will be forced in SPEC_FREEVIEW;
+	// then send /pause to toggle to unpause.
+
+	const float SMARTPAUSE_STARTING_SEC = 0.5;
+	//[WAIT SPEC PHASE] Wait for spec mode, reset state variables
+	if( (g_Config.m_ClNextPauseIsUnpauseIfMoved || m_SmartPauseReq[g_Config.m_ClDummy]) &&
+		(m_Snap.m_LocalClientID != -1) &&
+		m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Active &&
+		m_Snap.m_SpecInfo.m_Active &&
+		(m_aClients[m_Snap.m_LocalClientID].m_Paused ||	 m_aClients[m_Snap.m_LocalClientID].m_Spec)
+	  )
+	{
+		// [START PHASE] Start SmartPause, reset tick counter, update tick counter end
+		if(	!m_SmartPauseStarting[g_Config.m_ClDummy] &&
+			!m_SmartPauseArmed[g_Config.m_ClDummy] &&
+			!m_UnpauseCmdSent[g_Config.m_ClDummy])
+		{
+			m_SmartPauseReq[g_Config.m_ClDummy] = true;
+			g_Config.m_ClNextPauseIsUnpauseIfMoved = 0;
+			m_SmartPauseStarting[g_Config.m_ClDummy] = true;
+			m_SmartPauseStartingCnt[g_Config.m_ClDummy] = 0;
+			m_SmartPauseStartingCntEnd[g_Config.m_ClDummy] = SMARTPAUSE_STARTING_SEC * Client()->GameTickSpeed();
+			
+			// Send /showall, otherwise tee position is not updated if camera is far away
+			m_Chat.Echo("Smart pause starting, you have to stay still... [/showall 1]");
+			m_Chat.Say(0, "/showall 1");
+		}
+
+		// [ARMED PHASE] Wait for stationary tee until ticks reach end, then save position
+		if(	m_SmartPauseStarting[g_Config.m_ClDummy] &&
+			!m_SmartPauseArmed[g_Config.m_ClDummy] &&
+			!m_UnpauseCmdSent[g_Config.m_ClDummy])
+		{
+			if( (m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_VelX <=  1) &&
+				(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_VelX >= -1) &&
+				(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_VelY <=  1) &&
+				(m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_VelY >= -1))
+			{
+				m_SmartPauseStartingCnt[g_Config.m_ClDummy]++; // tick counter, m_NewTick protected
+
+				if(m_SmartPauseStartingCnt[g_Config.m_ClDummy] >= m_SmartPauseStartingCntEnd[g_Config.m_ClDummy])
+				{
+					m_LocalCharacterPosBeforePause[g_Config.m_ClDummy].x = m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_X;
+					m_LocalCharacterPosBeforePause[g_Config.m_ClDummy].y = m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_Y;
+					m_SmartPauseArmed[g_Config.m_ClDummy] = true;
+					m_Chat.Echo("Smart pause ON: you will UNPAUSED if moved.");
+				}
+			}
+			else // tee has been moved during starting phase, still unarmed, reset tick counter end
+			{
+				m_SmartPauseStartingCnt[g_Config.m_ClDummy] = 0;
+			}
+		}
+
+		//[UNPAUSE PHASE] Continuosly check if current position is equal to saved position, otherwise send "unpause"
+		if( m_SmartPauseStarting[g_Config.m_ClDummy] &&
+			m_SmartPauseArmed[g_Config.m_ClDummy] &&
+			!m_UnpauseCmdSent[g_Config.m_ClDummy])
+		{
+			if((m_LocalCharacterPosBeforePause[g_Config.m_ClDummy].x != m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_X) ||
+			   (m_LocalCharacterPosBeforePause[g_Config.m_ClDummy].y != m_Snap.m_aCharacters[m_Snap.m_LocalClientID].m_Cur.m_Y)
+			  )
+			{
+				m_Chat.Say(0, "/mc; pause /; pause");
+				m_Chat.Echo("UNPAUSED BECAUSE MOVED!!!");
+
+				m_UnpauseCmdSent[g_Config.m_ClDummy] = true; //not spam unpause command to the server
+				m_SmartPauseReq[g_Config.m_ClDummy] = false;
+			}
+		}
+
+	}
+	else
+	{
+		//[WAIT SPEC PHASE] when not in spec mode, just reset variables.
+		if(m_SmartPauseStarting[g_Config.m_ClDummy] &&
+			(g_Config.m_ClShowallAfterSmartpause == 0))
+		{
+			m_Chat.Say(0, "/showall 0");
+		}
+		m_SmartPauseReq[g_Config.m_ClDummy]      = false;
+		m_SmartPauseStarting[g_Config.m_ClDummy] = false;
+		m_SmartPauseArmed[g_Config.m_ClDummy]    = false;
+		m_UnpauseCmdSent[g_Config.m_ClDummy]     = false;
+	}
+
 }
 
 void CGameClient::OnRender()

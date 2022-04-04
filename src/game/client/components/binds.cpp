@@ -493,6 +493,7 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_MOUSE_3, "+spectate", FreeOnly);
 		Bind(KEY_MINUS, "spectate_previous", FreeOnly);
 		Bind(KEY_EQUALS, "spectate_next", FreeOnly);
+		Bind(KEY_P, "cl_next_pause_is_unpause_if_moved 1; say /pause", FreeOnly, (1<<MODIFIER_CTRL));
 	}
 
 	g_Config.m_ClDDRaceBindsSet = 1;

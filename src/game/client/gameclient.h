@@ -197,6 +197,14 @@ private:
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
+	bool m_SmartPauseReq[2];
+	bool m_UnpauseCmdSent[2];
+	bool m_SmartPauseStarting[2];
+	bool m_SmartPauseArmed[2];
+	int  m_SmartPauseStartingCnt[2];
+	int  m_SmartPauseStartingCntEnd[2];
+	vec2 m_LocalCharacterPosBeforePause[2];
+
 	int m_CheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
@@ -654,6 +662,7 @@ private:
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
+	void SmartPauseCheck();
 
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
