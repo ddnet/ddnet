@@ -1352,7 +1352,7 @@ int CMenus::Render()
 
 	if(m_Popup == POPUP_NONE)
 	{
-		if(m_JoinTutorial && !Client()->InfoTaskRunning())
+		if(m_JoinTutorial && !Client()->InfoTaskRunning() && !ServerBrowser()->IsGettingServerlist())
 		{
 			m_JoinTutorial = false;
 			const char *pAddr = ServerBrowser()->GetTutorialServer();
