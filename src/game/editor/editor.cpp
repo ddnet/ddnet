@@ -3101,7 +3101,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			static int s_ColorPicker, s_ColorPickerID;
 			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &ColorPick))
 			{
-				ms_PickerColor = color_cast<ColorHSVA>(Color);
+				ms_PickerColor = color_cast<ColorHSVA>(ColorPick);
 				UiInvokePopupMenu(&s_ColorPickerID, 0, UI()->MouseX(), UI()->MouseY(), 180, 150, PopupColorPicker);
 			}
 
