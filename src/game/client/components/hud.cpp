@@ -598,18 +598,32 @@ void CHud::RenderTextInfo()
 		TextRender()->Text(0, m_Width - 10 - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 
-	//vec2 ExDirection1;
-	//vec2 ExDirection2;
-	//ExDirection1 = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
-	//ExDirection2 = normalize(vec2(m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_TargetX, m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy].m_TargetY));
-	//char aBuf[64];
-	//str_format(aBuf, sizeof(aBuf), "%.26f %.26f", ExDirection1.x, ExDirection1.y);
-	//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
-	//str_format(aBuf, sizeof(aBuf), "%.26f %.26f", ExDirection2.x, ExDirection2.y);
-	//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 40, 10, aBuf, -1.0f);
+	if(g_Config.m_ClMiniDebug && m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalPrevCharacter)
+	{
+		float FontSize = 8;
+		float TextHeight = 11;
+		char aBuf[64];
+		float yOff = 3;
 
-	//render team in freeze text
-	if((g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0) && GameClient()->m_GameInfo.m_EntitiesDDRace)
+		if(g_Config.m_ClShowhudHealthAmmo)
+			yOff += 27;
+
+		str_format(aBuf, sizeof(aBuf), "X: %.2f", m_pClient->m_Snap.m_pLocalCharacter->m_X / 32.0f);
+		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+
+		yOff += TextHeight;
+		str_format(aBuf, sizeof(aBuf), "Y: %.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Y / 32.0f);
+		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+
+		yOff += TextHeight;
+		str_format(aBuf, sizeof(aBuf), "Angle: %.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Angle / 32.0f);
+		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+
+
+	}
+
+	//render team in freeze text and last notify
+	if((g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0 || g_Config.m_ClNotifyWhenLast) && GameClient()->m_GameInfo.m_EntitiesDDRace)
 	{
 		int NumInTeam = 0;
 		int NumFrozen = 0;
@@ -626,7 +640,18 @@ void CHud::RenderTextInfo()
 					NumFrozen++;
 			}
 		}
+		
+		//Notify when last
+		if (g_Config.m_ClNotifyWhenLast) {
+			
+			if (NumInTeam > 2 && NumInTeam - NumFrozen == 1 && m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderCur.m_Weapon != 5) {
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "Last!");
+				TextRender()->Text(0, 170, 4, 14, aBuf, -1.0f);
+			}
 
+		}
+		//Show freeze text
 		char aBuf[64];
 		if(g_Config.m_ClShowFrozenText == 1)
 			str_format(aBuf, sizeof(aBuf), "%d / %d", NumInTeam - NumFrozen, NumInTeam);
