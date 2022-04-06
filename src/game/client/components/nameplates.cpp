@@ -340,11 +340,11 @@ void CNamePlates::OnRender()
 			continue;
 		}
 
-		if(m_pClient->m_aClients[i].m_SpecCharPresent || (g_Config.m_ClFixKoGSpec && g_Config.m_ClFixKoGSpecNames && m_pClient->m_aClients[i].m_Team== TEAM_SPECTATORS))
+		if(m_pClient->m_aClients[i].m_SpecCharPresent || (g_Config.m_ClFixKoGSpec && g_Config.m_ClFixKoGSpecNames && m_pClient->m_aClients[i].m_Team== TEAM_SPECTATORS && !(m_pClient->IsOtherTeam(i))))
 		{
 			vec2 Pos = m_pClient->m_aClients[i].m_SpecChar;
 
-			if(g_Config.m_ClFixKoGSpec && g_Config.m_ClFixKoGSpecNames && m_pClient->m_aClients[i].m_Team == TEAM_SPECTATORS)
+			if(g_Config.m_ClFixKoGSpec && g_Config.m_ClFixKoGSpecNames && m_pClient->m_aClients[i].m_Team == TEAM_SPECTATORS && !(m_pClient->IsOtherTeam(i)))
 				Pos = m_pClient->m_aClients[i].m_RenderPos;
 
 			RenderNameplatePos(Pos, pInfo, 0.4f, true);

@@ -440,10 +440,16 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 	int StartX = (int)(ScreenX0 / Scale) - 1;
 	int EndY = (int)(ScreenY1 / Scale) + 1;
 	int EndX = (int)(ScreenX1 / Scale) + 1;
-
-	if(EndX - StartX > Graphics()->ScreenWidth() / 12 || EndY - StartY > Graphics()->ScreenHeight() / 12)
-		return;
-
+	int MaxScale = 12;
+	if(EndX - StartX > Graphics()->ScreenWidth() / MaxScale || EndY - StartY > Graphics()->ScreenHeight() / MaxScale)
+	{
+		int EdgeX = (EndX - StartX)-(Graphics()->ScreenWidth() / MaxScale);
+		StartX += EdgeX / 2;
+		EndX -= EdgeX / 2;
+		int EdgeY = (EndY - StartY) - (Graphics()->ScreenHeight() / MaxScale);
+		StartY += EdgeY / 2;
+		EndY -= EdgeY / 2;
+	}
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
@@ -634,8 +640,17 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 	int EndY = (int)(ScreenY1 / Scale) + 1;
 	int EndX = (int)(ScreenX1 / Scale) + 1;
 
-	if(EndX - StartX > Graphics()->ScreenWidth() / 12 || EndY - StartY > Graphics()->ScreenHeight() / 12)
-		return;
+	int MaxScale = 12;
+	if(EndX - StartX > Graphics()->ScreenWidth() / MaxScale || EndY - StartY > Graphics()->ScreenHeight() / MaxScale)
+	{
+		int EdgeX = (EndX - StartX) - (Graphics()->ScreenWidth() / MaxScale);
+		StartX += EdgeX / 2;
+		EndX -= EdgeX / 2;
+		int EdgeY = (EndY - StartY) - (Graphics()->ScreenHeight() / MaxScale);
+		StartY += EdgeY / 2;
+		EndY -= EdgeY / 2;
+	}
+
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
