@@ -3851,6 +3851,13 @@ void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 	m_BenchmarkStopTime = time_get() + time_freq() * Seconds;
 }
 
+void CClient::UpdateAndSwap()
+{
+	Input()->Update();
+	Graphics()->Swap();
+	Graphics()->Clear(0, 0, 0);
+}
+
 void CClient::ServerBrowserUpdate()
 {
 	m_ResortServerBrowser = true;

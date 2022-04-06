@@ -1516,11 +1516,12 @@ function(generate_source7 output_file script_parameter)
   )
 endfunction()
 
-function(generate_maps output_file)
+function(generate_maps output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
+      datasrc/crosscompile.py
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
@@ -1568,7 +1569,8 @@ generate_source7("src/game/generated/protocol7.h" "network_header")
 generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
-generate_maps("src/game/generated/protocolglue.h")
+generate_maps("src/game/generated/protocolglue.h" "map_header")
+generate_maps("src/game/generated/protocolglue.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/game/generated/wordlist.h"
   COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
@@ -1743,6 +1745,7 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.cpp
   src/game/generated/protocolglue.h
   src/game/generated/protocol7.cpp
   src/game/generated/protocol7.h
@@ -1764,7 +1767,10 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
 )
-
+set(MASTERSRV_SHARED
+  src/mastersrv/mastersrv.cpp
+  src/mastersrv/mastersrv.h
+)
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
@@ -1782,7 +1788,8 @@ set(LIBS
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
-list(APPEND TARGETS_OWN engine-shared game-shared)
+add_library(mastersrv-shared EXCLUDE_FROM_ALL OBJECT ${MASTERSRV_SHARED})
+list(APPEND TARGETS_OWN engine-shared game-shared mastersrv-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
   add_library(discord-shared SHARED IMPORTED)
@@ -2064,6 +2071,7 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:mastersrv-shared>
     )
   else()
     add_executable(${TARGET_CLIENT} WIN32
@@ -2073,6 +2081,7 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:mastersrv-shared>
     )
   endif()
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
@@ -2260,6 +2269,7 @@ if(SERVER)
     ${SERVER_ICON}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
+    $<TARGET_OBJECTS:mastersrv-shared>
   )
   target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
   list(APPEND TARGETS_OWN ${TARGET_SERVER})
@@ -2280,14 +2290,15 @@ endif()
 ########################################################################
 
 if(TOOLS)
-  set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+  set(MASTERSRV_SRC src/mastersrv/main_mastersrv.cpp)
   set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
   set(TARGET_MASTERSRV mastersrv)
   set(TARGET_TWPING twping)
 
-  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
-  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
+
+  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
 
   target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
   target_link_libraries(${TARGET_TWPING} ${LIBS})
@@ -2327,6 +2338,9 @@ if(TOOLS)
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
+      endif()
+      if(TOOL MATCHES "^fake_server")
+          list(APPEND TOOL_DEPS $<TARGET_OBJECTS:mastersrv-shared>)
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
@@ -2453,6 +2467,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     ${TESTS_EXTRA}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
+    $<TARGET_OBJECTS:mastersrv-shared>
     ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})

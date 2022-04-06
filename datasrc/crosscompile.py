@@ -1,3 +1,4 @@
+import sys
 import network
 import seven.network
 
@@ -23,30 +24,52 @@ def generate_map(a, b):
 
 	return result
 
-
-def output_map(name, m):
-	print("static const int gs_{}[{}] = {{".format(name, len(m)))
-	print(*m, sep=',')
-	print("};")
+def output_map_header(name, m):
+	print("extern const int gs_{}[{}];".format(name, len(m)))
 	print("inline int {0}(int a) {{ if(a < 0 || a >= {1}) return -1; return gs_{0}[a]; }}".format(name, len(m)))
 
+def output_map_source(name, m):
+	print("const int gs_{}[{}] = {{".format(name, len(m)))
+	print(*m, sep=',')
+	print("};")
+
 def main():
+	map_header = "map_header" in sys.argv
+	map_source = "map_source" in sys.argv
 	guard = "GAME_GENERATED_PROTOCOLGLUE"
-	print("#ifndef " + guard)
-	print("#define " + guard)
+	if map_header:
+		print("#ifndef " + guard)
+		print("#define " + guard)
+	elif map_source:
+		print("#include \"protocolglue.h\"")
 
 	msgs = get_msgs()
 	msgs7 = get_msgs_7()
 
-	output_map("Msg_SixToSeven", generate_map(msgs, msgs7))
-	output_map("Msg_SevenToSix", generate_map(msgs7, msgs))
+	map6to7 = generate_map(msgs, msgs7)
+	map7to6 = generate_map(msgs7, msgs)
+
+	if map_header:
+		output_map_header("Msg_SixToSeven", map6to7)
+		output_map_header("Msg_SevenToSix", map7to6)
+	elif map_source:
+		output_map_source("Msg_SixToSeven", map6to7)
+		output_map_source("Msg_SevenToSix", map7to6)
 
 	objs = get_objs()
 	objs7 = get_objs_7()
-	output_map("Obj_SixToSeven", generate_map(objs, objs7))
-	output_map("Obj_SevenToSix", generate_map(objs7, objs))
 
-	print("#endif //" + guard)
+	objs6to7 = generate_map(objs, objs7)
+	objs7to6 = generate_map(objs7, objs)
+
+	if map_header:
+		output_map_header("Obj_SixToSeven", objs6to7)
+		output_map_header("Obj_SevenToSix", objs7to6)
+		print("#endif //" + guard)
+	elif map_source:
+		output_map_source("Obj_SixToSeven", objs6to7)
+		output_map_source("Obj_SevenToSix", objs7to6)
+
 
 if __name__ == "__main__":
 	main()

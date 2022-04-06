@@ -25,12 +25,14 @@ class CRaceDemo : public CComponent
 	int m_RecordStopTick;
 	int m_Time;
 
+	int64_t m_RaceDemosLoadStartTime = 0;
+
 	static int RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	void GetPath(char *pBuf, int Size, int Time = -1) const;
 
 	void StopRecord(int Time = -1);
-	bool CheckDemo(int Time) const;
+	bool CheckDemo(int Time);
 
 public:
 	bool m_AllowRestart;
