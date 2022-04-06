@@ -265,7 +265,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
 	CUIRect List = Options;
-	//List.HSplitTop(28.0f, 0, &List);
+	// List.HSplitTop(28.0f, 0, &List);
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
 
 	// options
@@ -317,8 +317,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Cursor.m_LineWidth = Button.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
 
-		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		//Cursor.m_LineWidth = Button.w;
+		// TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		// Cursor.m_LineWidth = Button.w;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
 		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[Index].m_Country, &Color,
 			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
@@ -915,6 +915,12 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_lGhosts.add(Item);
+
+	if(time_get_microseconds() - pSelf->m_GhostPopulateStartTime > 500000)
+	{
+		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
+	}
+
 	return 0;
 }
 
@@ -922,6 +928,7 @@ void CMenus::GhostlistPopulate()
 {
 	CGhostItem *pOwnGhost = 0;
 	m_lGhosts.clear();
+	m_GhostPopulateStartTime = time_get_microseconds();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 
 	for(int i = 0; i < m_lGhosts.size(); i++)

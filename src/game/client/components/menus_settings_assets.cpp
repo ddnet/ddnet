@@ -7,9 +7,18 @@
 
 #include "menus.h"
 
+typedef std::function<void()> TMenuAssetScanLoadedFunc;
+
+struct SMenuAssetScanUser
+{
+	void *m_pUser;
+	TMenuAssetScanLoadedFunc m_LoadedFunc;
+};
+
 void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 {
-	CMenus *pThis = (CMenus *)pUser;
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
 
 	char aBuff[IO_MAX_PATH_LENGTH];
 
@@ -61,7 +70,8 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 
 int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pThis = (CMenus *)pUser;
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	if(IsDir)
 	{
 		if(pName[0] == '.')
@@ -92,6 +102,8 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 			pThis->m_EntitiesList.add(EntitiesItem);
 		}
 	}
+
+	pRealUser->m_LoadedFunc();
 
 	return 0;
 }
@@ -135,6 +147,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 template<typename TName>
 static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TName> &AssetList, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	if(IsDir)
 	{
 		if(pName[0] == '.')
@@ -166,28 +179,33 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 		}
 	}
 
+	pRealUser->m_LoadedFunc();
+
 	return 0;
 }
 
 int CMenus::GameScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pMenus = (CMenus *)pUser;
-	IGraphics *pGraphics = pMenus->Graphics();
-	return AssetScan(pName, IsDir, DirType, pMenus->m_GameList, "game", pGraphics, pUser);
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
+	IGraphics *pGraphics = pThis->Graphics();
+	return AssetScan(pName, IsDir, DirType, pThis->m_GameList, "game", pGraphics, pUser);
 }
 
 int CMenus::EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pMenus = (CMenus *)pUser;
-	IGraphics *pGraphics = pMenus->Graphics();
-	return AssetScan(pName, IsDir, DirType, pMenus->m_EmoticonList, "emoticons", pGraphics, pUser);
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
+	IGraphics *pGraphics = pThis->Graphics();
+	return AssetScan(pName, IsDir, DirType, pThis->m_EmoticonList, "emoticons", pGraphics, pUser);
 }
 
 int CMenus::ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pMenus = (CMenus *)pUser;
-	IGraphics *pGraphics = pMenus->Graphics();
-	return AssetScan(pName, IsDir, DirType, pMenus->m_ParticlesList, "particles", pGraphics, pUser);
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
+	IGraphics *pGraphics = pThis->Graphics();
+	return AssetScan(pName, IsDir, DirType, pThis->m_ParticlesList, "particles", pGraphics, pUser);
 }
 
 static sorted_array<const CMenus::SCustomEntities *> s_SearchEntitiesList;
@@ -331,32 +349,39 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	if(DoButton_MenuTab((void *)&s_aPageTabs[3], Localize("Particles"), s_CurCustomTab == 3, &Page4Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 3;
 
+	int64_t LoadStartTime = time_get_microseconds();
+	SMenuAssetScanUser User;
+	User.m_pUser = this;
+	User.m_LoadedFunc = [&]() {
+		if(time_get_microseconds() - LoadStartTime > 500000)
+			RenderLoading(false, false);
+	};
 	if(s_CurCustomTab == 0)
 	{
 		if(m_EntitiesList.size() == 0)
 		{
 			SCustomEntities EntitiesItem;
 			str_copy(EntitiesItem.m_aName, "default", sizeof(EntitiesItem.m_aName));
-			LoadEntities(&EntitiesItem, this);
+			LoadEntities(&EntitiesItem, &User);
 			m_EntitiesList.add(EntitiesItem);
 
 			// load entities
-			Storage()->ListDirectory(IStorage::TYPE_ALL, "assets/entities", EntitiesScan, this);
+			Storage()->ListDirectory(IStorage::TYPE_ALL, "assets/entities", EntitiesScan, &User);
 		}
 		if(m_EntitiesList.size() != s_CustomListSize[s_CurCustomTab])
 			s_InitCustomList[s_CurCustomTab] = true;
 	}
 	else if(s_CurCustomTab == 1)
 	{
-		InitAssetList(m_GameList, "assets/game", "game", GameScan, Graphics(), Storage(), this);
+		InitAssetList(m_GameList, "assets/game", "game", GameScan, Graphics(), Storage(), &User);
 	}
 	else if(s_CurCustomTab == 2)
 	{
-		InitAssetList(m_EmoticonList, "assets/emoticons", "emoticons", EmoticonsScan, Graphics(), Storage(), this);
+		InitAssetList(m_EmoticonList, "assets/emoticons", "emoticons", EmoticonsScan, Graphics(), Storage(), &User);
 	}
 	else if(s_CurCustomTab == 3)
 	{
-		InitAssetList(m_ParticlesList, "assets/particles", "particles", ParticlesScan, Graphics(), Storage(), this);
+		InitAssetList(m_ParticlesList, "assets/particles", "particles", ParticlesScan, Graphics(), Storage(), &User);
 	}
 
 	MainView.HSplitTop(10.0f, 0, &MainView);

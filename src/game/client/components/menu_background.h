@@ -28,6 +28,8 @@ public:
 
 class CMenuBackground : public CBackground
 {
+	int64_t m_ThemeScanStartTime = 0;
+
 public:
 	enum
 	{

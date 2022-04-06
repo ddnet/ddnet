@@ -142,6 +142,8 @@ public:
 	virtual void LoadFont() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
+	virtual void UpdateAndSwap() = 0;
+
 	// networking
 	virtual void EnterGame(int Conn) = 0;
 

@@ -781,7 +781,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_SkinRefreshButtonID = 0;
 	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
-		m_pClient->m_Skins.Refresh();
+		// reset render flags for possible loading screen
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(NULL);
+		int64_t SkinStartLoadTime = time_get_microseconds();
+		m_pClient->m_Skins.Refresh([&](int) {
+			// if skin refreshing takes to long, swap to a loading screen
+			if(time_get_microseconds() - SkinStartLoadTime > 500000)
+			{
+				RenderLoading(false, false);
+			}
+		});
 		s_InitSkinlist = true;
 		if(Client()->State() >= IClient::STATE_ONLINE)
 		{
@@ -2325,11 +2335,19 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 			CUIRect Button, Label;
 			MainView.HSplitTop(5.0f, &Button, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(40.0f, &Label, &Button);
+			Button.VSplitLeft(45.0f, &Label, &Button);
 			UI()->DoLabelScaled(&Label, Localize("Size"), 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
 		}
 
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(45.0f, &Label, &Button);
+			UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClHookCollAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollAlpha, &Button, g_Config.m_ClHookCollAlpha / 100.0f) * 100.0f);
+		}
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 

@@ -494,6 +494,8 @@ public:
 	virtual void Notify(const char *pTitle, const char *pMessage);
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
+	virtual void UpdateAndSwap();
+
 	// DDRace
 
 	virtual void GenerateTimeoutSeed();

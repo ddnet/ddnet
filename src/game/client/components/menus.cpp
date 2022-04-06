@@ -926,19 +926,22 @@ int CMenus::RenderMenubar(CUIRect r)
 	return 0;
 }
 
-void CMenus::RenderLoading()
+void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 {
 	// TODO: not supported right now due to separate render thread
 
 	static int64_t LastLoadRender = 0;
-	float Percent = m_LoadCurrent++ / (float)m_LoadTotal;
+	auto CurLoadRenderCount = m_LoadCurrent;
+	if(IncreaseCounter)
+		++m_LoadCurrent;
+	float Percent = CurLoadRenderCount / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get() - LastLoadRender < time_freq() / 60)
+	if(time_get_microseconds() - LastLoadRender < 1000000 / 60)
 		return;
 
-	LastLoadRender = time_get();
+	LastLoadRender = time_get_microseconds();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
@@ -973,13 +976,16 @@ void CMenus::RenderLoading()
 	r.h = h - 130;
 	UI()->DoLabel(&r, pCaption, 48.0f, TEXTALIGN_CENTER);
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1, 1, 1, 0.75f);
-	RenderTools()->DrawRoundRect(x + 40, y + h - 75, (w - 80) * Percent, 25, 5.0f);
-	Graphics()->QuadsEnd();
+	if(RenderLoadingBar)
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(1, 1, 1, 0.75f);
+		RenderTools()->DrawRoundRect(x + 40, y + h - 75, (w - 80) * Percent, 25, 5.0f);
+		Graphics()->QuadsEnd();
+	}
 
-	Graphics()->Swap();
+	Client()->UpdateAndSwap();
 }
 
 void CMenus::RenderNews(CUIRect MainView)
@@ -1042,6 +1048,8 @@ void CMenus::OnInit()
 	m_LoadTotal = g_pData->m_NumImages + NumMenuImages;
 	if(!g_Config.m_ClThreadsoundloading)
 		m_LoadTotal += g_pData->m_NumSounds;
+
+	m_IsInit = true;
 
 	// load menu images
 	m_lMenuImages.clear();
@@ -1344,7 +1352,7 @@ int CMenus::Render()
 
 	if(m_Popup == POPUP_NONE)
 	{
-		if(m_JoinTutorial && !Client()->InfoTaskRunning())
+		if(m_JoinTutorial && !Client()->InfoTaskRunning() && !ServerBrowser()->IsGettingServerlist())
 		{
 			m_JoinTutorial = false;
 			const char *pAddr = ServerBrowser()->GetTutorialServer();
@@ -2069,9 +2077,9 @@ int CMenus::Render()
 			UI()->DoLabel(&Part, aBuffer, 12.8f, TEXTALIGN_LEFT);
 
 			if(IncDemoSpeed)
-				m_Speed = clamp(m_Speed + 1, 0, (int)(std::size(g_aSpeeds) - 1));
+				m_Speed = clamp(m_Speed + 1, 0, (int)(g_DemoSpeeds - 1));
 			else if(DecDemoSpeed)
-				m_Speed = clamp(m_Speed - 1, 0, (int)(std::size(g_aSpeeds) - 1));
+				m_Speed = clamp(m_Speed - 1, 0, (int)(g_DemoSpeeds - 1));
 
 			Part.VSplitLeft(207.0f, 0, &Part);
 			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Part))
@@ -2655,56 +2663,6 @@ int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int C
 	}
 }
 
-void CMenus::RenderUpdating(const char *pCaption, int current, int total)
-{
-	// make sure that we don't render for each little thing we load
-	// because that will slow down loading if we have vsync
-	static int64_t LastLoadRender = 0;
-	if(time_get() - LastLoadRender < time_freq() / 60)
-		return;
-	LastLoadRender = time_get();
-
-	// need up date this here to get correct
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
-
-	CUIRect Screen = *UI()->Screen();
-	UI()->MapScreen();
-
-	RenderBackground();
-
-	float w = 700;
-	float h = 200;
-	float x = Screen.w / 2 - w / 2;
-	float y = Screen.h / 2 - h / 2;
-
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.50f);
-	RenderTools()->DrawRoundRect(0, y, Screen.w, h, 0.0f);
-	Graphics()->QuadsEnd();
-
-	CUIRect r;
-	r.x = x;
-	r.y = y + 20;
-	r.w = w;
-	r.h = h;
-	UI()->DoLabel(&r, Localize(pCaption), 32.0f, TEXTALIGN_CENTER);
-
-	if(total > 0)
-	{
-		float Percent = current / (float)total;
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0.15f, 0.15f, 0.15f, 0.75f);
-		RenderTools()->DrawRoundRect(x + 40, y + h - 75, w - 80, 30, 5.0f);
-		Graphics()->SetColor(1, 1, 1, 0.75f);
-		RenderTools()->DrawRoundRect(x + 45, y + h - 70, (w - 85) * Percent, 20, 5.0f);
-		Graphics()->QuadsEnd();
-	}
-
-	Graphics()->Swap();
-}
-
 int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
@@ -2781,7 +2739,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	// set menu image data
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
 	pSelf->m_lMenuImages.add(MenuImage);
-	pSelf->RenderLoading();
+	pSelf->RenderLoading(true);
 
 	return 0;
 }

@@ -5,8 +5,6 @@
 
 #include <game/client/prediction/entity.h>
 
-const int PickupPhysSize = 14;
-
 class CPickup : public CEntity
 {
 public:

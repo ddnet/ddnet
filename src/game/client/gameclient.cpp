@@ -245,9 +245,17 @@ void CGameClient::OnInit()
 
 	Client()->LoadFont();
 
+	// update and swap after font loading, they are quite huge
+	Client()->UpdateAndSwap();
+
 	// init all components
 	for(int i = m_All.m_Num - 1; i >= 0; --i)
+	{
 		m_All.m_paComponents[i]->OnInit();
+		// try to render a frame after each component, also flushes GPU uploads
+		if(m_Menus.IsInit())
+			m_Menus.RenderLoading(false);
+	}
 
 	char aBuf[256];
 
@@ -266,7 +274,7 @@ void CGameClient::OnInit()
 			LoadParticlesSkin(g_Config.m_ClAssetParticles);
 		else
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		m_Menus.RenderLoading();
+		m_Menus.RenderLoading(false);
 	}
 
 	for(int i = 0; i < m_All.m_Num; i++)
