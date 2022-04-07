@@ -2833,3 +2833,63 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 
 	return NewIndex != -1;
 }
+
+void CMenus::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
+{
+	static int64_t HoverTime = -1;
+
+	if(!UI()->MouseInside(pNearRect))
+	{
+		if(pID == UI()->ActiveTooltipItem())
+			HoverTime = -1;
+		return;
+	}
+
+	UI()->SetActiveTooltipItem(pID);
+
+	if(HoverTime == -1)
+		HoverTime = time_get();
+
+	// Delay tooltip until 1 second passed.
+	if(HoverTime > time_get() - time_freq())
+		return;
+
+	const float MARGIN = 5.0f;
+
+	CUIRect Rect;
+	Rect.w = WidthHint;
+	if(WidthHint < 0.0f)
+		Rect.w = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f) + 4.0f;
+	Rect.h = 30.0f;
+
+	CUIRect *pScreen = UI()->Screen();
+
+	// Try the top side.
+	if(pNearRect->y - Rect.h - MARGIN > pScreen->y)
+	{
+		Rect.x = clamp(UI()->MouseX() - Rect.w / 2.0f, MARGIN, pScreen->w - Rect.w - MARGIN);
+		Rect.y = pNearRect->y - Rect.h - MARGIN;
+	}
+	// Try the bottom side.
+	else if(pNearRect->y + pNearRect->h + MARGIN < pScreen->h)
+	{
+		Rect.x = clamp(UI()->MouseX() - Rect.w / 2.0f, MARGIN, pScreen->w - Rect.w - MARGIN);
+		Rect.y = pNearRect->y + pNearRect->h + MARGIN;
+	}
+	// Try the right side.
+	else if(pNearRect->x + pNearRect->w + MARGIN + Rect.w < pScreen->w)
+	{
+		Rect.x = pNearRect->x + pNearRect->w + MARGIN;
+		Rect.y = clamp(UI()->MouseY() - Rect.h / 2.0f, MARGIN, pScreen->h - Rect.h - MARGIN);
+	}
+	// Try the left side.
+	else if(pNearRect->x - Rect.w - MARGIN > pScreen->x)
+	{
+		Rect.x = pNearRect->x - Rect.w - MARGIN;
+		Rect.y = clamp(UI()->MouseY() - Rect.h / 2.0f, MARGIN, pScreen->h - Rect.h - MARGIN);
+	}
+
+	RenderTools()->DrawUIRect(&Rect, ColorRGBA(0.2, 0.2, 0.2, 0.80f), CUI::CORNER_ALL, 5.0f);
+	Rect.Margin(2.0f, &Rect);
+	UI()->DoLabel(&Rect, pText, 14.0f, TEXTALIGN_LEFT);
+}

@@ -530,6 +530,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
+	DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings."));
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -1264,6 +1265,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
+	DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail."));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))

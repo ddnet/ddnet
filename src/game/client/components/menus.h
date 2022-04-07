@@ -205,6 +205,15 @@ class CMenus : public CComponent
 
 	int UiLogicGetCurrentClickedItem();
 
+	/**
+	 * Places and renders a tooltip near pNearRect.
+	 * For now only works correctly with single line tooltips, since Text width calculation gets broken when there are multiple lines.
+	 *
+	 * @param pID The ID of the tooltip. Usually a reference to some g_Config value.
+	 * @param pNearTo Place the tooltip near this rect.
+	 * @param pText The text to display in the tooltip
+	 */
+	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 	// menus_settings_assets.cpp
 public:
 	struct SCustomItem
