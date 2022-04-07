@@ -312,12 +312,20 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 		char aLine[1024];
 		char aBuf[1024];
+		int NameSize;
+		int NameCount;
+		int ClanSize;
+		int ClanCount;
+		str_utf8_stats(m_pClient->m_aClients[pInfo->m_ClientID].m_aName, 60, 60, &NameSize, &NameCount);
+		str_utf8_stats(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, 60, 60, &ClanSize, &ClanCount);
 		str_format(aBuf, sizeof(aBuf),
-			"%4d| %-20s | %-20s |",
+			"%4d| %-*s | %-*s |",
 			clamp(pInfo->m_Score, -999, 9999),
+			20 + (NameSize - NameCount),
 			m_pClient->m_aClients[pInfo->m_ClientID].m_aName,
+			20 + (ClanSize - ClanCount),
 			m_pClient->m_aClients[pInfo->m_ClientID].m_aClan);
-		str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
+		str_format(aLine, sizeof(aLine), "|%-*s|", (width - 2) + (NameSize - NameCount) + (ClanSize - ClanCount), aBuf);
 		if(sizeof(aBuf) > (unsigned long)(mx - 2))
 			aLine[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(pWin, offY + k, offX, "%s", aLine);

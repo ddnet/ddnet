@@ -1,6 +1,7 @@
 #if defined(CONF_CURSES_CLIENT)
 
 #include <ncursesw/ncurses.h>
+
 #include <base/system.h>
 
 #include "terminalui.h"
