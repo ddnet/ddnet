@@ -244,16 +244,20 @@ void CTerminalUI::RenderServerList()
 		str_format(aPlayers, sizeof(aPlayers), "%d/%d", pItem->m_NumPlayers, pItem->m_MaxPlayers);
 		str_copy(aName, pItem->m_aName, sizeof(aName));
 		aName[60] = '\0';
+		int NameSize;
+		int NameCount;
+		str_utf8_stats(aName, 60, 60, &NameSize, &NameCount);
 		str_format(aBuf, sizeof(aBuf),
-			"%-60s | %-20s | %-16s",
+			"%-*s | %-20s | %-16s",
+			60 + ((NameSize - NameCount) / 2),
 			aName,
 			pItem->m_aMap,
 			aPlayers);
 		if(m_SelectedServer == i)
-			str_format(aLine, sizeof(aLine), "< %-*s>", width - 3, aBuf);
+			str_format(aLine, sizeof(aLine), "< %-*s>", (width - 3) + ((NameSize - NameCount) / 2), aBuf);
 		else
-			str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
-		if(sizeof(aBuf) > (unsigned long)(mx - 2))
+			str_format(aLine, sizeof(aLine), "|%-*s|", (width - 2) + ((NameSize - NameCount) / 2), aBuf);
+		if(sizeof(aLine) > (unsigned long)(mx - 2))
 			aLine[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(g_pLogWindow, offY + k, offX, "%s", aLine);
 	}
