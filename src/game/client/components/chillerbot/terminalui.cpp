@@ -240,9 +240,20 @@ void CTerminalUI::RenderServerList()
 		char aLine[1024];
 		char aBuf[1024];
 		char aName[64];
+		char aMap[64];
 		char aPlayers[16];
-		str_format(aPlayers, sizeof(aPlayers), "%d/%d", pItem->m_NumPlayers, pItem->m_MaxPlayers);
-		str_copy(aName, pItem->m_aName, sizeof(aName));
+		if(m_SelectedServer == i)
+		{
+			str_format(aName, sizeof(aName), " %s", pItem->m_aName);
+			str_format(aMap, sizeof(aMap), " %s", pItem->m_aMap);
+			str_format(aPlayers, sizeof(aPlayers), " %d/%d", pItem->m_NumPlayers, pItem->m_MaxPlayers);
+		}
+		else
+		{
+			str_copy(aName, pItem->m_aName, sizeof(aName));
+			str_copy(aMap, pItem->m_aMap, sizeof(aMap));
+			str_format(aPlayers, sizeof(aPlayers), "%d/%d", pItem->m_NumPlayers, pItem->m_MaxPlayers);
+		}
 		aName[60] = '\0';
 		int NameSize;
 		int NameCount;
@@ -251,12 +262,18 @@ void CTerminalUI::RenderServerList()
 			"%-*s | %-20s | %-16s",
 			60 + ((NameSize - NameCount) / 2),
 			aName,
-			pItem->m_aMap,
+			aMap,
 			aPlayers);
 		if(m_SelectedServer == i)
-			str_format(aLine, sizeof(aLine), "< %-*s>", (width - 3) + ((NameSize - NameCount) / 2), aBuf);
+		{
+			wattron(g_pLogWindow, A_BOLD);
+			str_format(aLine, sizeof(aLine), "<%-*s>", (width - 2) + ((NameSize - NameCount) / 2), aBuf);
+		}
 		else
+		{
+			wattroff(g_pLogWindow, A_BOLD);
 			str_format(aLine, sizeof(aLine), "|%-*s|", (width - 2) + ((NameSize - NameCount) / 2), aBuf);
+		}
 		if(sizeof(aLine) > (unsigned long)(mx - 2))
 			aLine[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(g_pLogWindow, offY + k, offX, "%s", aLine);
