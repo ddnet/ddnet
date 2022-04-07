@@ -287,10 +287,14 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 		if(offY + i > my - 8)
 			break;
 	}
+	int height = minimum(NumRenderScoreIDs, my - 5);
+	if(height < 2)
+		return;
 
-	DrawBorders(pWin, offX, offY - 1, width, NumRenderScoreIDs + 2);
+	DrawBorders(pWin, offX, offY - 1, width, height + 2);
 	// DrawBorders(pWin, 10, 5, 10, 5);
 
+	int k = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// if(rendered++ < 0) continue;
@@ -312,9 +316,9 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 		str_format(aLine, sizeof(aLine), "|%-*s|", width - 2, aBuf);
 		if(sizeof(aBuf) > (unsigned long)(mx - 2))
 			aLine[mx - 2] = '\0'; // ensure no line wrapping
-		mvwprintw(pWin, offY + i, offX, "%s", aLine);
+		mvwprintw(pWin, offY + k, offX, "%s", aLine);
 
-		if(offY + i > my - 8)
+		if(k++ >= height - 1)
 			break;
 	}
 }
