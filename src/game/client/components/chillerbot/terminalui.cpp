@@ -336,6 +336,7 @@ void CTerminalUI::OnInit()
 	mem_zero(m_InputHistory, sizeof(m_InputHistory));
 	AimX = 20;
 	AimY = 0;
+	setlocale(LC_CTYPE, "");
 	curses_init();
 	m_InputMode = INPUT_NORMAL;
 	initscr();

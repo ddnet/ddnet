@@ -6,7 +6,7 @@
 
 #if defined(CONF_CURSES_CLIENT)
 #include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 #include <unistd.h>
 #endif
 

@@ -663,6 +663,9 @@ elseif(TARGET_OS STREQUAL "android")
 else()
   find_package(Notify)
   find_package(OpenGL)
+  # ncurses wide for utf8 support
+  # https://github.com/Kitware/CMake/blob/f0a2ec12e2743a7be39201e2bc563ab37debd791/Modules/FindCurses.cmake#L56
+  set(CURSES_NEED_WIDE TRUE)
   find_package(Curses)
   set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${NOTIFY_LIBRARIES} ${CURSES_LIBRARIES})
   set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${NOTIFY_INCLUDE_DIRS} ${CURSES_INCLUDE_DIRS})
