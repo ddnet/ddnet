@@ -2525,7 +2525,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_pTooltip = Explain(EXPLANATION_VANILLA, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 			}
 			else if(m_Brush.IsEmpty())
-				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
+				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Use ctrl+left mouse to select layer.";
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
 
@@ -3559,6 +3559,73 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			m_SelectedGroup = m_Map.m_lGroups.size() - 1;
 		}
 	}
+
+	SelectLayerByTile(s_ScrollValue);
+}
+
+void CEditor::SelectLayerByTile(float &Scroll)
+{
+	// ctrl+leftclick a map index to select the layer that has a tile there
+	static bool s_CtrlClick = false;
+	static int s_Selected = 0;
+	int MatchedGroup = -1;
+	int MatchedLayer = -1;
+	int Matches = 0;
+	bool IsFound = false;
+	int TotalLayers = 0;
+	int SelectedLayer = 0;
+	if(UI()->MouseButton(1) && Input()->ModifierIsPressed())
+	{
+		if(s_CtrlClick)
+			return;
+		s_CtrlClick = true;
+		for(int g = 0; g < m_Map.m_lGroups.size(); g++)
+		{
+			for(int l = 0; l < m_Map.m_lGroups[g]->m_lLayers.size(); l++)
+			{
+				TotalLayers++;
+				if(IsFound)
+					continue;
+				if(m_Map.m_lGroups[g]->m_lLayers[l]->m_Type != LAYERTYPE_TILES)
+					continue;
+
+				CLayerTiles *pTiles = (CLayerTiles *)m_Map.m_lGroups[g]->m_lLayers[l];
+				int x = (int)UI()->MouseWorldX() / 32 + m_Map.m_lGroups[g]->m_OffsetX;
+				int y = (int)UI()->MouseWorldY() / 32 + m_Map.m_lGroups[g]->m_OffsetY;
+				if(x < 0 || x >= pTiles->m_Width)
+					continue;
+				if(y < 0 || y >= pTiles->m_Height)
+					continue;
+				CTile Tile = pTiles->GetTile(x, y);
+				if(Tile.m_Index)
+				{
+					if(MatchedGroup == -1)
+					{
+						MatchedGroup = g;
+						MatchedLayer = l;
+						SelectedLayer = TotalLayers;
+					}
+					if(++Matches > s_Selected)
+					{
+						s_Selected++;
+						MatchedGroup = g;
+						MatchedLayer = l;
+						IsFound = true;
+						SelectedLayer = TotalLayers;
+					}
+				}
+			}
+		}
+		if(MatchedGroup != -1 && MatchedLayer != -1)
+		{
+			if(!IsFound)
+				s_Selected = 1;
+			Scroll = (float)SelectedLayer / (float)TotalLayers;
+			SelectLayer(MatchedLayer, MatchedGroup);
+		}
+	}
+	else
+		s_CtrlClick = false;
 }
 
 void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
