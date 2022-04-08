@@ -598,6 +598,17 @@ int CTerminalUI::GetInput()
 			DrawBorders(g_pInputWin);
 			return 0;
 		}
+		else if(keyname(c)[0] == '^')
+		{
+			if(keyname(c)[1] == 'U') // ctrl+u
+			{
+				g_aInputStr[0] = '\0';
+				wclear(g_pInputWin);
+				InputDraw();
+				DrawBorders(g_pInputWin);
+			}
+			return 0;
+		}
 		else if(c == 260) // left arrow
 		{
 			// could be used for cursor movement
