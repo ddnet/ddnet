@@ -667,8 +667,7 @@ void CClient::SetState(int s)
 void CClient::OnEnterGame(bool Dummy)
 {
 	// reset input
-	int i;
-	for(i = 0; i < 200; i++)
+	for(int i = 0; i < 200; i++)
 	{
 		m_aInputs[Dummy][i].m_Tick = -1;
 	}
@@ -966,9 +965,8 @@ int CClient::LoadData()
 
 void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const
 {
-	CSnapshotItem *i;
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
+	CSnapshotItem *i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
 	pItem->m_DataSize = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
 	pItem->m_Type = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(Index);
 	pItem->m_ID = i->ID();
@@ -983,9 +981,8 @@ int CClient::SnapItemSize(int SnapID, int Index) const
 
 void CClient::SnapInvalidateItem(int SnapID, int Index)
 {
-	CSnapshotItem *i;
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
+	CSnapshotItem *i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
 	if(i)
 	{
 		if((char *)i < (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap || (char *)i > (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap + m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_SnapSize)
@@ -1076,8 +1073,7 @@ void CClient::DebugRender()
 	// render rates
 	{
 		int y = 0;
-		int i;
-		for(i = 0; i < 256; i++)
+		for(int i = 0; i < 256; i++)
 		{
 			if(m_SnapshotDelta.GetDataRate(i))
 			{
@@ -1899,13 +1895,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
-			int NumParts = 1;
-			int Part = 0;
 			int GameTick = Unpacker.GetInt();
 			int DeltaTick = GameTick - Unpacker.GetInt();
-			int PartSize = 0;
-			unsigned int Crc = 0;
-			const char *pData = 0;
 
 			// only allow packets from the server we actually want
 			if(net_addr_comp(&pPacket->m_Address, &m_ServerAddress))
@@ -1915,19 +1906,23 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(State() < IClient::STATE_LOADING)
 				return;
 
+			int NumParts = 1;
+			int Part = 0;
 			if(Msg == NETMSG_SNAP)
 			{
 				NumParts = Unpacker.GetInt();
 				Part = Unpacker.GetInt();
 			}
 
+			unsigned int Crc = 0;
+			int PartSize = 0;
 			if(Msg != NETMSG_SNAPEMPTY)
 			{
 				Crc = Unpacker.GetInt();
 				PartSize = Unpacker.GetInt();
 			}
 
-			pData = (const char *)Unpacker.GetRaw(PartSize);
+			const char *pData = (const char *)Unpacker.GetRaw(PartSize);
 
 			if(Unpacker.Error() || NumParts < 1 || NumParts > CSnapshot::MAX_PARTS || Part < 0 || Part >= NumParts || PartSize < 0 || PartSize > MAX_SNAPSHOT_PACKSIZE)
 				return;
@@ -2165,7 +2160,6 @@ void CClient::ResetMapDownload()
 
 void CClient::FinishMapDownload()
 {
-	const char *pError;
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
 	int Prev = m_MapdownloadTotalsize;
@@ -2176,7 +2170,7 @@ void CClient::FinishMapDownload()
 	Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 
 	// load map
-	pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
+	const char *pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
 		ResetMapDownload();
@@ -2550,7 +2544,7 @@ void CClient::Update()
 		if(m_ReceivedSnapshots[g_Config.m_ClDummy] >= 3)
 		{
 			// switch snapshot
-			int Repredict = 0;
+			bool Repredict = false;
 			int64_t Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
 			int64_t PredNow = m_PredictedTime.Get(time_get());
 
@@ -2558,7 +2552,7 @@ void CClient::Update()
 			{
 				// Load snapshot for m_ClDummy
 				GameClient()->OnNewSnapshot();
-				Repredict = 1;
+				Repredict = true;
 			}
 
 			while(true)
@@ -2581,7 +2575,7 @@ void CClient::Update()
 						if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 						{
 							GameClient()->OnNewSnapshot();
-							Repredict = 1;
+							Repredict = true;
 						}
 					}
 					else
@@ -2615,7 +2609,7 @@ void CClient::Update()
 				if(NewPredTick > m_PredTick[g_Config.m_ClDummy])
 				{
 					m_PredTick[g_Config.m_ClDummy] = NewPredTick;
-					Repredict = 1;
+					Repredict = true;
 
 					// send input
 					SendInput();
@@ -3590,11 +3584,11 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aFilename[IO_MAX_PATH_LENGTH];
 
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
 
+		char aFilename[IO_MAX_PATH_LENGTH];
 		if(str_comp(pFilename, "") == 0)
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
 		else
@@ -3629,8 +3623,6 @@ void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void 
 
 const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
-	const char *pError;
-
 	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!File)
 		return "error opening demo file";
@@ -3649,7 +3641,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	// load map
 	int Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
 	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-	pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
+	const char *pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)
 	{
 		if(!m_DemoPlayer.ExtractMap(Storage()))
@@ -3694,8 +3686,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 #if defined(CONF_VIDEORECORDER)
 const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
 {
-	const char *pError;
-	pError = DemoPlayer_Play(pFilename, StorageType);
+	const char *pError = DemoPlayer_Play(pFilename, StorageType);
 	if(pError)
 		return pError;
 	m_ButtonRender = true;
