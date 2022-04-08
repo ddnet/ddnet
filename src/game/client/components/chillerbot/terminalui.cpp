@@ -538,7 +538,7 @@ int CTerminalUI::GetInput()
 	{
 		if(c == ERR) // nonblocking empty read
 			return 0;
-		else if(c == EOF || c == 10) // return
+		if(c == EOF || c == 10) // return
 		{
 			if(m_InputMode == INPUT_LOCAL_CONSOLE)
 				m_pClient->Console()->ExecuteLine(g_aInputStr);
@@ -582,11 +582,80 @@ int CTerminalUI::GetInput()
 			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_REMOTE_CONSOLE ? INPUT_NORMAL : INPUT_REMOTE_CONSOLE;
 		}
-		else if(c == 27) // ESC
+		else if(keyname(c)[0] == '^' && keyname(c)[1] == '[')
 		{
-			// esc detection is buggy idk some event sequence what ever
-			m_InputMode = INPUT_NORMAL;
-			return 0;
+			c = getch();
+			if(c == EOF) // ESC
+			{
+				m_InputMode = INPUT_NORMAL;
+				return 0;
+			}
+			// TODO: make this code nicer omg xd
+			else if(keyname(c)[0] == '[')
+			{
+				c = getch();
+				if(keyname(c)[0] == '1')
+				{
+					c = getch();
+					if(keyname(c)[0] == ';')
+					{
+						c = getch();
+						if(keyname(c)[0] == '5')
+						{
+							c = getch();
+							if(keyname(c)[0] == 'D') // ctrl+left
+							{
+								bool IsSpace = true;
+								for(int i = m_InputCursor; i > 0; i--)
+								{
+									if(g_aInputStr[i] == ' ' && IsSpace)
+										continue;
+									if(i == 1) // reach beginning of line no spaces
+									{
+										m_InputCursor = 0;
+										wmove(g_pInputWin, 1, m_InputCursor + 1);
+										break;
+									}
+									if(g_aInputStr[i] != ' ')
+									{
+										IsSpace = false;
+										continue;
+									}
+									m_InputCursor = i;
+									wmove(g_pInputWin, 1, m_InputCursor + 1);
+									break;
+								}
+								return 0;
+							}
+							else if(keyname(c)[0] == 'C') // ctrl+right
+							{
+								bool IsSpace = true;
+								int InputLen = str_length(g_aInputStr);
+								for(int i = m_InputCursor; i < InputLen; i++)
+								{
+									if(g_aInputStr[i] == ' ' && IsSpace)
+										continue;
+									if(i == InputLen - 1) // reach end of line no spaces
+									{
+										m_InputCursor = InputLen;
+										wmove(g_pInputWin, 1, m_InputCursor + 1);
+										break;
+									}
+									if(g_aInputStr[i] != ' ')
+									{
+										IsSpace = false;
+										continue;
+									}
+									m_InputCursor = i;
+									wmove(g_pInputWin, 1, m_InputCursor + 1);
+									break;
+								}
+								return 0;
+							}
+						}
+					}
+				}
+			}
 		}
 		else if(c == KEY_BACKSPACE || c == 127) // delete
 		{
