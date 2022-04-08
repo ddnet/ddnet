@@ -2525,7 +2525,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_pTooltip = Explain(EXPLANATION_VANILLA, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 			}
 			else if(m_Brush.IsEmpty())
-				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads.";
+				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Use ctrl+left mouse to select layer.";
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
 
