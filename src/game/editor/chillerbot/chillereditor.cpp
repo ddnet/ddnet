@@ -87,8 +87,49 @@ void CChillerEditor::ExitTextMode()
 	m_EditorMode = CE_MODE_NONE;
 }
 
+void CChillerEditor::GetLayerByTile()
+{
+	// ctrl+left click
+	static bool s_CtrlClick = false;
+	if(m_pEditor->UI()->MouseButton(1) && m_pEditor->Input()->ModifierIsPressed())
+	{
+		if(s_CtrlClick)
+			return;
+		s_CtrlClick = true;
+		dbg_msg("chillerbot", "ctrl clciked");
+		for(int g = 0; g < m_pEditor->m_Map.m_lGroups.size(); g++)
+		{
+			for(int l = 0; l < m_pEditor->m_Map.m_lGroups[g]->m_lLayers.size(); l++)
+			{
+				if(m_pEditor->m_Map.m_lGroups[g]->m_lLayers[l]->m_Type != LAYERTYPE_TILES)
+					continue;
+
+				CLayerTiles *pTiles = (CLayerTiles *)m_pEditor->m_Map.m_lGroups[g]->m_lLayers[l];
+				int x = (int)m_pEditor->UI()->MouseWorldX() / 32 + m_pEditor->m_Map.m_lGroups[g]->m_OffsetX;
+				int y = (int)m_pEditor->UI()->MouseWorldY() / 32 + m_pEditor->m_Map.m_lGroups[g]->m_OffsetY;
+				dbg_msg("chillerbot", "layer=%s x=%d y=%d", pTiles->m_aName, x, y);
+				if(x < 0 || x >= pTiles->m_Width)
+					continue;
+				if(y < 0 || y >= pTiles->m_Height)
+					continue;
+				CTile Tile = pTiles->GetTile(x, y);
+				dbg_msg("chillerbot", "layer=%s tile=%d x=%d y=%d OK", pTiles->m_aName, Tile.m_Index, x, y);
+				if(Tile.m_Index)
+				{
+					m_pEditor->SelectLayer(l, g);
+					dbg_msg("chillerbot", "selected group=%d layer=%d", g, l);
+					break;
+				}
+			}
+		}
+	}
+	else
+		s_CtrlClick = false;
+}
+
 void CChillerEditor::DoMapEditor()
 {
+	GetLayerByTile();
 	// debug
 	if(m_pEditor->Input()->KeyPress(KEY_D))
 		dbg_msg("chillerbot", "editormode=%d dialog=%d editbox=%d", m_EditorMode, m_pEditor->m_Dialog, m_pEditor->m_EditBoxActive);
