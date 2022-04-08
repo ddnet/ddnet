@@ -91,12 +91,16 @@ void CChillerEditor::GetLayerByTile()
 {
 	// ctrl+left click
 	static bool s_CtrlClick = false;
+	static int s_Selected = 0;
+	int MatchedGroup = -1;
+	int MatchedLayer = -1;
+	int Matches = 0;
+	bool IsFound = false;
 	if(m_pEditor->UI()->MouseButton(1) && m_pEditor->Input()->ModifierIsPressed())
 	{
 		if(s_CtrlClick)
 			return;
 		s_CtrlClick = true;
-		dbg_msg("chillerbot", "ctrl clciked");
 		for(int g = 0; g < m_pEditor->m_Map.m_lGroups.size(); g++)
 		{
 			for(int l = 0; l < m_pEditor->m_Map.m_lGroups[g]->m_lLayers.size(); l++)
@@ -107,20 +111,34 @@ void CChillerEditor::GetLayerByTile()
 				CLayerTiles *pTiles = (CLayerTiles *)m_pEditor->m_Map.m_lGroups[g]->m_lLayers[l];
 				int x = (int)m_pEditor->UI()->MouseWorldX() / 32 + m_pEditor->m_Map.m_lGroups[g]->m_OffsetX;
 				int y = (int)m_pEditor->UI()->MouseWorldY() / 32 + m_pEditor->m_Map.m_lGroups[g]->m_OffsetY;
-				dbg_msg("chillerbot", "layer=%s x=%d y=%d", pTiles->m_aName, x, y);
 				if(x < 0 || x >= pTiles->m_Width)
 					continue;
 				if(y < 0 || y >= pTiles->m_Height)
 					continue;
 				CTile Tile = pTiles->GetTile(x, y);
-				dbg_msg("chillerbot", "layer=%s tile=%d x=%d y=%d OK", pTiles->m_aName, Tile.m_Index, x, y);
 				if(Tile.m_Index)
 				{
-					m_pEditor->SelectLayer(l, g);
-					dbg_msg("chillerbot", "selected group=%d layer=%d", g, l);
-					break;
+					if(MatchedGroup == -1)
+					{
+						MatchedGroup = g;
+						MatchedLayer = l;
+					}
+					if(++Matches > s_Selected)
+					{
+						s_Selected++;
+						MatchedGroup = g;
+						MatchedLayer = l;
+						IsFound = true;
+						break;
+					}
 				}
 			}
+		}
+		if(MatchedGroup != -1 && MatchedLayer != -1)
+		{
+			if(!IsFound)
+				s_Selected = 1;
+			m_pEditor->SelectLayer(MatchedLayer, MatchedGroup);
 		}
 	}
 	else
