@@ -517,8 +517,7 @@ void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 
 	pTeams->ChangeTeamState(Team, m_TeamState);
 	pTeams->SetTeamLock(Team, m_TeamLocked);
-	if(m_Practice)
-		pTeams->EnablePractice(Team);
+	pTeams->SetPractice(Team, m_Practice);
 
 	for(int i = m_MembersCount; i-- > 0;)
 	{
