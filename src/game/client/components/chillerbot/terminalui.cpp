@@ -701,6 +701,14 @@ int CTerminalUI::GetInput()
 				m_InputCursor = 0;
 				wmove(g_pInputWin, 1, m_InputCursor + 1);
 			}
+			if(keyname(c)[1] == 'K') // ctrl+k
+			{
+				g_aInputStr[m_InputCursor] = '\0';
+				wclear(g_pInputWin);
+				InputDraw();
+				DrawBorders(g_pInputWin);
+				wmove(g_pInputWin, 1, m_InputCursor + 1);
+			}
 			else if(keyname(c)[1] == 'E') // ctrl+e
 			{
 				m_InputCursor = str_length(g_aInputStr);
