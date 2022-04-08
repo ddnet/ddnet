@@ -710,6 +710,18 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 			m_NewInput = true;
 		}
 	}
+	else if(Key == 'G' && m_RenderServerList && m_NumServers)
+	{
+		m_SelectedServer = m_NumServers - 1;
+		gs_NeedLogDraw = true;
+		m_NewInput = true;
+	}
+	else if(Key == 'g' && m_LastKeyPressed == 'g')
+	{
+		m_SelectedServer = 0;
+		gs_NeedLogDraw = true;
+		m_NewInput = true;
+	}
 	else if(Key == 'c' && m_RenderServerList)
 	{
 		m_RenderServerList = false;
@@ -730,6 +742,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	if(Key == EOF)
 		return 0;
 
+	m_LastKeyPressed = Key;
 	// dbg_msg("termUI", "got key d=%d c=%c", Key, Key);
 	return 0;
 }

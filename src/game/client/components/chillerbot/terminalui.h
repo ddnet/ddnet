@@ -145,6 +145,7 @@ class CTerminalUI : public CComponent
 	int m_SelectedServer;
 	int m_InputMode;
 	int64_t m_LastKeyPress;
+	char m_LastKeyPressed;
 	int m_NumServers;
 	bool m_NewInput;
 
