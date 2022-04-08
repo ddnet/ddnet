@@ -709,6 +709,11 @@ int CTerminalUI::GetInput()
 				DrawBorders(g_pInputWin);
 				wmove(g_pInputWin, 1, m_InputCursor + 1);
 			}
+			if(keyname(c)[1] == 'R' && m_InputMode > INPUT_NORMAL && m_InputMode < NUM_INPUTS) // ctrl+r
+			{
+				m_InputMode += NUM_INPUTS - 1;
+				str_copy(g_aInputStr, "(reverse-i-search)`TODO': TODO", sizeof(g_aInputStr));
+			}
 			else if(keyname(c)[1] == 'E') // ctrl+e
 			{
 				m_InputCursor = str_length(g_aInputStr);
