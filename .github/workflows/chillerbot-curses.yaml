@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  integration-tests:
+  curses-build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -55,4 +55,4 @@ jobs:
       env: ${{ matrix.env }}
       run: |
         cd debug
-        ./term-ux "quit"
+        TERM=linux ./term-ux "quit"
