@@ -2550,7 +2550,7 @@ void CClient::Update()
 		if(m_ReceivedSnapshots[g_Config.m_ClDummy] >= 3)
 		{
 			// switch snapshot
-			int Repredict = 0;
+			bool Repredict = false;
 			int64_t Now = m_GameTime[g_Config.m_ClDummy].Get(time_get());
 			int64_t PredNow = m_PredictedTime.Get(time_get());
 
@@ -2558,7 +2558,7 @@ void CClient::Update()
 			{
 				// Load snapshot for m_ClDummy
 				GameClient()->OnNewSnapshot();
-				Repredict = 1;
+				Repredict = true;
 			}
 
 			while(true)
@@ -2581,7 +2581,7 @@ void CClient::Update()
 						if(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 						{
 							GameClient()->OnNewSnapshot();
-							Repredict = 1;
+							Repredict = true;
 						}
 					}
 					else
@@ -2615,7 +2615,7 @@ void CClient::Update()
 				if(NewPredTick > m_PredTick[g_Config.m_ClDummy])
 				{
 					m_PredTick[g_Config.m_ClDummy] = NewPredTick;
-					Repredict = 1;
+					Repredict = true;
 
 					// send input
 					SendInput();
