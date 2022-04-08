@@ -30,8 +30,6 @@ class CChillerEditor
 	void ExitTextMode();
 	void LoadMapresMetaFile(const char *pImage);
 
-	void GetLayerByTile();
-
 public:
 	CChillerEditor();
 	void DoMapEditor();

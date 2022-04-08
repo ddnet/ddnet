@@ -87,67 +87,8 @@ void CChillerEditor::ExitTextMode()
 	m_EditorMode = CE_MODE_NONE;
 }
 
-void CChillerEditor::GetLayerByTile()
-{
-	// ctrl+left click
-	static bool s_CtrlClick = false;
-	static int s_Selected = 0;
-	int MatchedGroup = -1;
-	int MatchedLayer = -1;
-	int Matches = 0;
-	bool IsFound = false;
-	if(m_pEditor->UI()->MouseButton(1) && m_pEditor->Input()->ModifierIsPressed())
-	{
-		if(s_CtrlClick)
-			return;
-		s_CtrlClick = true;
-		for(int g = 0; g < m_pEditor->m_Map.m_lGroups.size(); g++)
-		{
-			for(int l = 0; l < m_pEditor->m_Map.m_lGroups[g]->m_lLayers.size(); l++)
-			{
-				if(m_pEditor->m_Map.m_lGroups[g]->m_lLayers[l]->m_Type != LAYERTYPE_TILES)
-					continue;
-
-				CLayerTiles *pTiles = (CLayerTiles *)m_pEditor->m_Map.m_lGroups[g]->m_lLayers[l];
-				int x = (int)m_pEditor->UI()->MouseWorldX() / 32 + m_pEditor->m_Map.m_lGroups[g]->m_OffsetX;
-				int y = (int)m_pEditor->UI()->MouseWorldY() / 32 + m_pEditor->m_Map.m_lGroups[g]->m_OffsetY;
-				if(x < 0 || x >= pTiles->m_Width)
-					continue;
-				if(y < 0 || y >= pTiles->m_Height)
-					continue;
-				CTile Tile = pTiles->GetTile(x, y);
-				if(Tile.m_Index)
-				{
-					if(MatchedGroup == -1)
-					{
-						MatchedGroup = g;
-						MatchedLayer = l;
-					}
-					if(++Matches > s_Selected)
-					{
-						s_Selected++;
-						MatchedGroup = g;
-						MatchedLayer = l;
-						IsFound = true;
-						break;
-					}
-				}
-			}
-		}
-		if(MatchedGroup != -1 && MatchedLayer != -1)
-		{
-			if(!IsFound)
-				s_Selected = 1;
-			m_pEditor->SelectLayer(MatchedLayer, MatchedGroup);
-		}
-	}
-	else
-		s_CtrlClick = false;
-}
-
 void CChillerEditor::DoMapEditor()
 {
-	GetLayerByTile();
 	// debug
 	if(m_pEditor->Input()->KeyPress(KEY_D))
 		dbg_msg("chillerbot", "editormode=%d dialog=%d editbox=%d", m_EditorMode, m_pEditor->m_Dialog, m_pEditor->m_EditBoxActive);
