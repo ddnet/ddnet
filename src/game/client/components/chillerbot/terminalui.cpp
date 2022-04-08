@@ -91,6 +91,7 @@ void CTerminalUI::InputDraw()
 	int x = getmaxx(g_pInfoWin);
 	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
 	mvwprintw(g_pInputWin, 1, 1, "%s", aBuf);
+	wmove(g_pInputWin, 1, m_InputCursor + 1);
 }
 
 int CTerminalUI::CursesTick()
@@ -354,6 +355,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_InputCursor = 0;
 	m_NumServers = 0;
 	m_SelectedServer = 0;
 	m_RenderServerList = false;
@@ -370,7 +372,7 @@ void CTerminalUI::OnInit()
 	m_InputMode = INPUT_NORMAL;
 	initscr();
 	noecho();
-	curs_set(FALSE);
+	curs_set(TRUE);
 
 	// set up initial windows
 	getmaxyx(stdscr, g_ParentY, g_ParentX);
@@ -590,32 +592,57 @@ int CTerminalUI::GetInput()
 		{
 			if(str_length(g_aInputStr) < 1)
 				return 0;
-			char aBuf[1024];
-			str_truncate(aBuf, sizeof(aBuf), g_aInputStr, str_length(g_aInputStr) - 1);
-			str_copy(g_aInputStr, aBuf, sizeof(g_aInputStr));
+			char aRight[1024];
+			char aLeft[1024];
+			str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
+			str_copy(aLeft, g_aInputStr, sizeof(aLeft));
+			aLeft[m_InputCursor > 0 ? m_InputCursor - 1 : m_InputCursor] = '\0';
+			str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aLeft, aRight);
+			m_InputCursor = clamp(m_InputCursor - 1, 0, str_length(g_aInputStr));
 			wclear(g_pInputWin);
 			InputDraw();
 			DrawBorders(g_pInputWin);
+			wmove(g_pInputWin, 1, m_InputCursor + 1);
+			return 0;
+		}
+		else if(c == 260) // left arrow
+		{
+			// could be used for cursor movement
+			m_InputCursor = clamp(m_InputCursor - 1, 0, str_length(g_aInputStr));
+			wmove(g_pInputWin, 1, m_InputCursor + 1);
+			return 0;
+		}
+		else if(c == 261) // right arrow
+		{
+			// could be used for cursor movement
+			m_InputCursor = clamp(m_InputCursor + 1, 0, str_length(g_aInputStr));
+			wmove(g_pInputWin, 1, m_InputCursor + 1);
 			return 0;
 		}
 		else if(keyname(c)[0] == '^')
 		{
 			if(keyname(c)[1] == 'U') // ctrl+u
 			{
-				g_aInputStr[0] = '\0';
+				char aRight[1024];
+				str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
+				str_copy(g_aInputStr, aRight, sizeof(g_aInputStr));
 				wclear(g_pInputWin);
 				InputDraw();
 				DrawBorders(g_pInputWin);
+				m_InputCursor = 0;
+				wmove(g_pInputWin, 1, m_InputCursor + 1);
+			}
+			else if(keyname(c)[1] == 'E') // ctrl+e
+			{
+				m_InputCursor = str_length(g_aInputStr);
+				wmove(g_pInputWin, 1, m_InputCursor + 1);
+			}
+			else if(keyname(c)[1] == 'A') // ctrl+a
+			{
+				m_InputCursor = 0;
+				wmove(g_pInputWin, 1, m_InputCursor + 1);
 			}
 			return 0;
-		}
-		else if(c == 260) // left arrow
-		{
-			// could be used for cursor movement
-		}
-		else if(c == 261) // right arrow
-		{
-			// could be used for cursor movement
 		}
 		if((c == 258 || c == 259) && m_InputMode >= 0) // up/down arrow scroll history
 		{
@@ -638,7 +665,14 @@ int CTerminalUI::GetInput()
 		{
 			char aKey[8];
 			str_format(aKey, sizeof(aKey), "%c", c);
-			str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
+			// str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
+			char aRight[1024];
+			char aLeft[1024];
+			str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
+			str_copy(aLeft, g_aInputStr, sizeof(aLeft));
+			aLeft[m_InputCursor] = '\0';
+			str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s%s", aLeft, aKey, aRight);
+			m_InputCursor += str_length(aKey);
 		}
 		// dbg_msg("yeee", "got key d=%d c=%c", c, c);
 	}
