@@ -34,7 +34,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev -y
-        sudo apt-get install libncursesw5-dev -y
+        sudo apt-get install libncursesw5-dev gdb -y
 
     - name: Build in debug mode
       env: ${{ matrix.env }}
@@ -55,4 +55,4 @@ jobs:
       env: ${{ matrix.env }}
       run: |
         cd debug
-        TERM=linux ./term-ux "quit"
+        TERM=linux gdb -ex='run' -ex='bt' -ex='quit' --args ./term-ux "quit"
