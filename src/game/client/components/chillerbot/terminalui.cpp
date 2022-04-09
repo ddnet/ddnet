@@ -91,7 +91,7 @@ void CTerminalUI::InputDraw()
 	int x = getmaxx(g_pInfoWin);
 	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
 	mvwprintw(g_pInputWin, 1, 1, "%s", aBuf);
-	wmove(g_pInputWin, 1, m_InputCursor + 1);
+	UpdateCursor();
 }
 
 int CTerminalUI::CursesTick()
@@ -534,7 +534,13 @@ int CTerminalUI::GetInput()
 		m_InputMode == INPUT_REMOTE_CONSOLE ||
 		m_InputMode == INPUT_CHAT ||
 		m_InputMode == INPUT_CHAT_TEAM ||
-		m_InputMode == INPUT_BROWSER_SEARCH)
+		m_InputMode == INPUT_BROWSER_SEARCH ||
+
+		m_InputMode == INPUT_SEARCH_LOCAL_CONSOLE ||
+		m_InputMode == INPUT_SEARCH_REMOTE_CONSOLE ||
+		m_InputMode == INPUT_SEARCH_CHAT ||
+		m_InputMode == INPUT_SEARCH_CHAT_TEAM ||
+		m_InputMode == INPUT_SEARCH_BROWSER_SEARCH)
 	{
 		if(c == ERR) // nonblocking empty read
 			return 0;
@@ -559,13 +565,24 @@ int CTerminalUI::GetInput()
 				str_copy(g_Config.m_BrFilterString, g_aInputStr, sizeof(g_Config.m_BrFilterString));
 				ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 			}
-			AddInputHistory(m_InputMode, g_aInputStr);
-			m_InputHistory[m_InputMode] = 0;
-			g_aInputStr[0] = '\0';
+
+			if(IsSearchInputMode())
+			{
+				m_InputMode -= NUM_INPUTS - 1;
+				str_copy(g_aInputStr, m_aInputSearchMatch, sizeof(g_aInputStr));
+			}
+			else
+			{
+				AddInputHistory(m_InputMode, g_aInputStr);
+				m_InputHistory[m_InputMode] = 0;
+				g_aInputStr[0] = '\0';
+				if(m_InputMode != INPUT_LOCAL_CONSOLE && m_InputMode != INPUT_REMOTE_CONSOLE)
+					m_InputMode = INPUT_NORMAL;
+			}
+			m_InputCursor = 0;
 			wclear(g_pInputWin);
+			InputDraw();
 			DrawBorders(g_pInputWin);
-			if(m_InputMode != INPUT_LOCAL_CONSOLE && m_InputMode != INPUT_REMOTE_CONSOLE)
-				m_InputMode = INPUT_NORMAL;
 			return 0;
 		}
 		else if(c == KEY_F(1)) // f1 hard toggle local console
@@ -606,23 +623,26 @@ int CTerminalUI::GetInput()
 							if(keyname(c)[0] == 'D') // ctrl+left
 							{
 								bool IsSpace = true;
+								const char *pInput = g_aInputStr;
+								if(m_InputMode > NUM_INPUTS) // reverse i search
+									pInput = m_aInputSearch;
 								for(int i = m_InputCursor; i > 0; i--)
 								{
-									if(g_aInputStr[i] == ' ' && IsSpace)
+									if(pInput[i] == ' ' && IsSpace)
 										continue;
 									if(i == 1) // reach beginning of line no spaces
 									{
 										m_InputCursor = 0;
-										wmove(g_pInputWin, 1, m_InputCursor + 1);
+										UpdateCursor();
 										break;
 									}
-									if(g_aInputStr[i] != ' ')
+									if(pInput[i] != ' ')
 									{
 										IsSpace = false;
 										continue;
 									}
 									m_InputCursor = i;
-									wmove(g_pInputWin, 1, m_InputCursor + 1);
+									UpdateCursor();
 									break;
 								}
 								return 0;
@@ -631,23 +651,29 @@ int CTerminalUI::GetInput()
 							{
 								bool IsSpace = true;
 								int InputLen = str_length(g_aInputStr);
+								const char *pInput = g_aInputStr;
+								if(m_InputMode > NUM_INPUTS) // reverse i search
+								{
+									InputLen = str_length(m_aInputSearch);
+									pInput = m_aInputSearch;
+								}
 								for(int i = m_InputCursor; i < InputLen; i++)
 								{
-									if(g_aInputStr[i] == ' ' && IsSpace)
+									if(pInput[i] == ' ' && IsSpace)
 										continue;
 									if(i == InputLen - 1) // reach end of line no spaces
 									{
 										m_InputCursor = InputLen;
-										wmove(g_pInputWin, 1, m_InputCursor + 1);
+										UpdateCursor();
 										break;
 									}
-									if(g_aInputStr[i] != ' ')
+									if(pInput[i] != ' ')
 									{
 										IsSpace = false;
 										continue;
 									}
 									m_InputCursor = i;
-									wmove(g_pInputWin, 1, m_InputCursor + 1);
+									UpdateCursor();
 									break;
 								}
 								return 0;
@@ -663,29 +689,41 @@ int CTerminalUI::GetInput()
 				return 0;
 			char aRight[1024];
 			char aLeft[1024];
-			str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
-			str_copy(aLeft, g_aInputStr, sizeof(aLeft));
-			aLeft[m_InputCursor > 0 ? m_InputCursor - 1 : m_InputCursor] = '\0';
-			str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aLeft, aRight);
+
+			if(m_InputMode > NUM_INPUTS) // reverse i search
+			{
+				str_copy(aRight, m_aInputSearch + m_InputCursor, sizeof(aRight));
+				str_copy(aLeft, m_aInputSearch, sizeof(aLeft));
+				aLeft[m_InputCursor > 0 ? m_InputCursor - 1 : m_InputCursor] = '\0';
+				str_format(m_aInputSearch, sizeof(m_aInputSearch), "%s%s", aLeft, aRight);
+				RenderInputSearch();
+			}
+			else
+			{
+				str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
+				str_copy(aLeft, g_aInputStr, sizeof(aLeft));
+				aLeft[m_InputCursor > 0 ? m_InputCursor - 1 : m_InputCursor] = '\0';
+				str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aLeft, aRight);
+			}
 			m_InputCursor = clamp(m_InputCursor - 1, 0, str_length(g_aInputStr));
 			wclear(g_pInputWin);
 			InputDraw();
 			DrawBorders(g_pInputWin);
-			wmove(g_pInputWin, 1, m_InputCursor + 1);
+			UpdateCursor();
 			return 0;
 		}
 		else if(c == 260) // left arrow
 		{
 			// could be used for cursor movement
 			m_InputCursor = clamp(m_InputCursor - 1, 0, str_length(g_aInputStr));
-			wmove(g_pInputWin, 1, m_InputCursor + 1);
+			UpdateCursor();
 			return 0;
 		}
 		else if(c == 261) // right arrow
 		{
 			// could be used for cursor movement
 			m_InputCursor = clamp(m_InputCursor + 1, 0, str_length(g_aInputStr));
-			wmove(g_pInputWin, 1, m_InputCursor + 1);
+			UpdateCursor();
 			return 0;
 		}
 		else if(keyname(c)[0] == '^')
@@ -693,36 +731,60 @@ int CTerminalUI::GetInput()
 			if(keyname(c)[1] == 'U') // ctrl+u
 			{
 				char aRight[1024];
-				str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
-				str_copy(g_aInputStr, aRight, sizeof(g_aInputStr));
-				wclear(g_pInputWin);
-				InputDraw();
-				DrawBorders(g_pInputWin);
+				if(m_InputMode > NUM_INPUTS) // reverse i search
+				{
+					str_copy(aRight, m_aInputSearch + m_InputCursor, sizeof(aRight));
+					str_copy(m_aInputSearch, aRight, sizeof(m_aInputSearch));
+					RenderInputSearch();
+				}
+				else
+				{
+					str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
+					str_copy(g_aInputStr, aRight, sizeof(g_aInputStr));
+					wclear(g_pInputWin);
+					InputDraw();
+					DrawBorders(g_pInputWin);
+				}
 				m_InputCursor = 0;
-				wmove(g_pInputWin, 1, m_InputCursor + 1);
+				UpdateCursor();
 			}
 			if(keyname(c)[1] == 'K') // ctrl+k
 			{
-				g_aInputStr[m_InputCursor] = '\0';
+				if(m_InputMode > NUM_INPUTS) // reverse i search
+				{
+					m_aInputSearch[m_InputCursor] = '\0';
+					RenderInputSearch();
+				}
+				else
+				{
+					g_aInputStr[m_InputCursor] = '\0';
+					wclear(g_pInputWin);
+					InputDraw();
+					DrawBorders(g_pInputWin);
+				}
+				UpdateCursor();
+			}
+			if(keyname(c)[1] == 'R' && m_InputMode > INPUT_NORMAL && !IsSearchInputMode()) // ctrl+r
+			{
+				m_InputMode += NUM_INPUTS - 1;
+				m_aInputSearch[0] = '\0';
+				str_copy(g_aInputStr, "(reverse-i-search)`': ", sizeof(g_aInputStr));
 				wclear(g_pInputWin);
 				InputDraw();
 				DrawBorders(g_pInputWin);
-				wmove(g_pInputWin, 1, m_InputCursor + 1);
-			}
-			if(keyname(c)[1] == 'R' && m_InputMode > INPUT_NORMAL && m_InputMode < NUM_INPUTS) // ctrl+r
-			{
-				m_InputMode += NUM_INPUTS - 1;
-				str_copy(g_aInputStr, "(reverse-i-search)`TODO': TODO", sizeof(g_aInputStr));
+				UpdateCursor();
 			}
 			else if(keyname(c)[1] == 'E') // ctrl+e
 			{
 				m_InputCursor = str_length(g_aInputStr);
-				wmove(g_pInputWin, 1, m_InputCursor + 1);
+				if(m_InputMode > NUM_INPUTS) // reverse i search
+					m_InputCursor = str_length(m_aInputSearch);
+				UpdateCursor();
 			}
 			else if(keyname(c)[1] == 'A') // ctrl+a
 			{
 				m_InputCursor = 0;
-				wmove(g_pInputWin, 1, m_InputCursor + 1);
+				UpdateCursor();
 			}
 			return 0;
 		}
@@ -750,16 +812,64 @@ int CTerminalUI::GetInput()
 			// str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
 			char aRight[1024];
 			char aLeft[1024];
-			str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
-			str_copy(aLeft, g_aInputStr, sizeof(aLeft));
-			aLeft[m_InputCursor] = '\0';
-			str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s%s", aLeft, aKey, aRight);
+			if(m_InputMode > NUM_INPUTS) // reverse i search
+			{
+				str_copy(aRight, m_aInputSearch + m_InputCursor, sizeof(aRight));
+				str_copy(aLeft, m_aInputSearch, sizeof(aLeft));
+				aLeft[m_InputCursor] = '\0';
+				str_format(m_aInputSearch, sizeof(m_aInputSearch), "%s%s%s", aLeft, aKey, aRight);
+				RenderInputSearch();
+			}
+			else
+			{
+				str_copy(aRight, g_aInputStr + m_InputCursor, sizeof(aRight));
+				str_copy(aLeft, g_aInputStr, sizeof(aLeft));
+				aLeft[m_InputCursor] = '\0';
+				str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s%s", aLeft, aKey, aRight);
+			}
 			m_InputCursor += str_length(aKey);
 		}
 		// dbg_msg("yeee", "got key d=%d c=%c", c, c);
 	}
 	InputDraw();
 	return 0;
+}
+
+void CTerminalUI::UpdateCursor()
+{
+	int Offset = 0;
+	if(IsSearchInputMode())
+		Offset = str_length("(reverse-i-search)`");
+	wmove(g_pInputWin, 1, m_InputCursor + 1 + Offset);
+}
+
+void CTerminalUI::_UpdateInputSearch()
+{
+	m_aInputSearchMatch[0] = '\0';
+	if(!IsSearchInputMode())
+		return;
+	if(!m_aInputSearch[0])
+		return;
+	int Type = m_InputMode - NUM_INPUTS + 1;
+	for(auto &HistEntry : m_aaInputHistory[Type])
+	{
+		if(!HistEntry[0])
+			continue;
+		if(!str_find(HistEntry, m_aInputSearch))
+			continue;
+
+		str_copy(m_aInputSearchMatch, HistEntry, sizeof(m_aInputSearchMatch));
+		break;
+	}
+}
+
+void CTerminalUI::RenderInputSearch()
+{
+	_UpdateInputSearch();
+	str_format(g_aInputStr, sizeof(g_aInputStr), "(reverse-i-search)`%s': %s", m_aInputSearch, m_aInputSearchMatch);
+	wclear(g_pInputWin);
+	InputDraw();
+	DrawBorders(g_pInputWin);
 }
 
 int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)

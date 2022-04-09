@@ -154,6 +154,48 @@ class CTerminalUI : public CComponent
 	void InputDraw();
 	int CursesTick();
 	void SetServerBrowserPage(int NewPage);
+	bool IsSearchInputMode() { return m_InputMode > NUM_INPUTS; }
+	/*
+		UpdateCursor
+
+		Update the terminal cursor position
+		Used for the input textbox
+	*/
+	void UpdateCursor();
+	/*
+		_UpdateInputSearch
+
+		When in reverse i search input mode.
+		This function computes the m_aInputSearchMatch
+		based on the current input search type (chat/console/etc)
+		and the current search term m_aInputSearch
+
+		Do not call me! Call my daddy RenderInputSearch()
+	*/
+	void _UpdateInputSearch();
+	/*
+		RenderInputSearch
+
+		Implementation of the reverse i search mode
+		Call this when the search term changed
+
+		It will do a new search and redraw the input window
+	*/
+	void RenderInputSearch();
+	/*
+		m_aInputSearch
+
+		When in reverse i search input mode.
+		This variable holds the current search term.
+	*/
+	char m_aInputSearch[1024];
+	/*
+		m_aInputSearchMatch
+
+		When in reverse i search input mode.
+		This variable holds the current search match.
+	*/
+	char m_aInputSearchMatch[1024];
 	int AimX;
 	int AimY;
 	bool m_ScoreboardActive;
