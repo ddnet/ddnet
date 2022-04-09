@@ -616,7 +616,7 @@ void CHud::RenderTextInfo()
 		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 
 		yOff += TextHeight;
-		str_format(aBuf, sizeof(aBuf), "Angle: %.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Angle / 32.0f);
+		str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle );
 		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 
 

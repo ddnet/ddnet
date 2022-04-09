@@ -2689,6 +2689,25 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
 	}
 
+	{
+		CUIRect Button;
+		CUIRect ExtMenu;
+		MainView.VSplitLeft(0, 0, &ExtMenu);
+		ExtMenu.VSplitLeft(130.0f, &ExtMenu, 0);
+		ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
+		static int s_DiscordButton;
+		if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+		{
+			if(!open_link("https://discord.gg/fBvhH93Bt6"))
+			{
+				dbg_msg("menus", "couldn't open link");
+			}
+			m_DoubleClickIndex = -1;
+		}
+	}
+
+
+
 	MainView.HSplitTop(10.0f, 0x0, &MainView);
 
 	// ***** OUTLINES ***** //
@@ -2807,7 +2826,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 		g_Config.m_ClUnfreezeLagTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
 	}
-
 }
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
