@@ -5,7 +5,7 @@
 
 #if defined(CONF_CURSES_CLIENT)
 
-#include <ncursesw/ncurses.h>
+#include <base/curses.h>
 
 #define CHILLER_LOGGER_WIDTH 1024 * 4
 #define CHILLER_LOGGER_HEIGHT 128

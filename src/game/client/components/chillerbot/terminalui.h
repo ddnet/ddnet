@@ -6,9 +6,11 @@
 
 #if defined(CONF_CURSES_CLIENT)
 #include "terminalui_keys.h" /* undefines conflicting ncurses key codes */
-#include <ncursesw/ncurses.h>
+
+#include <base/curses.h>
+
 #include <unistd.h>
-#endif
+#endif /* CONF_CURSES_CLIENT */
 
 extern CGameClient *g_pClient;
 

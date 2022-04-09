@@ -1,6 +1,6 @@
 #if defined(CONF_CURSES_CLIENT)
 
-#include <ncursesw/ncurses.h>
+#include <base/curses.h>
 
 #include <base/system.h>
 

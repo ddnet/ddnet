@@ -1605,6 +1605,7 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 # Sources
 set_src(BASE GLOB_RECURSE src/base
   color.h
+  curses.h
   detect.h
   dynamic.h
   hash.cpp
