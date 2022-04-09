@@ -3,6 +3,8 @@
 ### Taters custom ddnet client with some small modifications
 Not guarenteed to be bug free, but I will try to fix them. 
 
+If ddnet devs are reading this and want to steal my changes please feel free.  
+
 # Installation:
 
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
