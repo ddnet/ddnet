@@ -153,6 +153,7 @@ class CTerminalUI : public CComponent
 	void InfoDraw();
 	void InputDraw();
 	int CursesTick();
+	void ResetCompletion();
 	void SetServerBrowserPage(int NewPage);
 	bool IsSearchInputMode() { return m_InputMode > NUM_INPUTS; }
 	/*
@@ -208,6 +209,9 @@ class CTerminalUI : public CComponent
 	int m_NumServers;
 	bool m_NewInput;
 	int m_InputCursor;
+	int m_CompletionIndex;
+	int m_LastCompletionLength;
+	char m_aCompletionBuffer[1024];
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);

@@ -355,6 +355,8 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_aCompletionBuffer[0] = '\0';
+	ResetCompletion();
 	m_InputCursor = 0;
 	m_NumServers = 0;
 	m_SelectedServer = 0;
@@ -601,59 +603,81 @@ int CTerminalUI::GetInput()
 		}
 		else if(keyname(c)[0] == '^' && keyname(c)[1] == 'I') // tab
 		{
+			m_CompletionIndex++;
 			bool IsSpace = true;
-			char aCompletionBuffer[1024];
 			const char *pInput = g_aInputStr;
 			if(m_InputMode > NUM_INPUTS) // reverse i search
 				pInput = m_aInputSearch;
 			int Count = 0;
-			for(int i = m_InputCursor; i > 0; i--)
+			if(m_CompletionIndex == 0)
 			{
-				if(pInput[i] == ' ' && IsSpace)
-					continue;
-				Count++;
-				if(i == 1) // reach beginning of line no spaces
+				for(int i = m_InputCursor; i > 0; i--)
 				{
-					str_copy(aCompletionBuffer, pInput, sizeof(aCompletionBuffer));
+					if(pInput[i] == ' ' && IsSpace)
+						continue;
+					Count++;
+					if(i == 1) // reach beginning of line no spaces
+					{
+						str_copy(m_aCompletionBuffer, pInput, sizeof(m_aCompletionBuffer));
+						break;
+					}
+					if(pInput[i] != ' ')
+					{
+						IsSpace = false;
+						continue;
+					}
+					// tbh idk what this is. Helps with offset on multiple words
+					// probably counting the space in front of the word or something
+					if(Count > 1)
+						Count -= 2;
+					str_copy(m_aCompletionBuffer, pInput + i + 1, sizeof(m_aCompletionBuffer));
 					break;
 				}
-				if(pInput[i] != ' ')
-				{
-					IsSpace = false;
-					continue;
-				}
-				// tbh idk what this is. Helps with offset on multiple words
-				// probably counting the space in front of the word or something
-				if(Count > 1)
-					Count -= 2;
-				str_copy(aCompletionBuffer, pInput + i + 1, sizeof(aCompletionBuffer));
-				break;
+				m_aCompletionBuffer[Count] = '\0';
 			}
-			aCompletionBuffer[Count] = '\0';
 			const char *PlayerName, *FoundInput;
+			int Matches = 0;
+			const char *pMatch = NULL;
+			bool Found = false;
 			for(auto &PlayerInfo : m_pClient->m_Snap.m_paInfoByName)
 			{
 				if(!PlayerInfo)
 					continue;
 
 				PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
-				FoundInput = str_utf8_find_nocase(PlayerName, aCompletionBuffer);
+				FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
 				if(!FoundInput)
 					continue;
+				if(!pMatch)
+					pMatch = PlayerName;
+				if(Matches++ < m_CompletionIndex)
+					continue;
 
-				char aBuf[1024];
-				str_copy(aBuf, g_aInputStr, sizeof(aBuf));
-				aBuf[str_length(aBuf) - Count] = '\0';
-				str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aBuf, PlayerName);
-				wclear(g_pInputWin);
-				InputDraw();
-				DrawBorders(g_pInputWin);
-				m_InputCursor += str_length(PlayerName) - Count;
-				UpdateCursor();
+				pMatch = PlayerName;
+				Found = true;
+				break;
+			}
+			if(!pMatch)
+			{
+				m_CompletionIndex = 0;
 				return 0;
 			}
-			// remove this return to allow inputing tabs
-			// would probably only work when not connected to a server tho
+			char aBuf[1024];
+			str_copy(aBuf, g_aInputStr, sizeof(aBuf));
+			int BufLen = str_length(aBuf);
+			if(BufLen >= m_LastCompletionLength + Count)
+				Count += m_LastCompletionLength;
+			aBuf[BufLen - Count] = '\0';
+			str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aBuf, pMatch);
+			wclear(g_pInputWin);
+			InputDraw();
+			DrawBorders(g_pInputWin);
+			int MatchLen = str_length(pMatch);
+			m_LastCompletionLength = MatchLen;
+			m_InputCursor += MatchLen - Count;
+			UpdateCursor();
+			if(!Found)
+				m_CompletionIndex = 0;
 			return 0;
 		}
 		else if(keyname(c)[0] == '^' && keyname(c)[1] == '[')
@@ -742,6 +766,7 @@ int CTerminalUI::GetInput()
 		}
 		else if(c == KEY_BACKSPACE || c == 127) // delete
 		{
+			ResetCompletion();
 			if(str_length(g_aInputStr) < 1)
 				return 0;
 			char aRight[1024];
@@ -787,6 +812,7 @@ int CTerminalUI::GetInput()
 		{
 			if(keyname(c)[1] == 'U') // ctrl+u
 			{
+				ResetCompletion();
 				char aRight[1024];
 				if(m_InputMode > NUM_INPUTS) // reverse i search
 				{
@@ -807,6 +833,7 @@ int CTerminalUI::GetInput()
 			}
 			if(keyname(c)[1] == 'K') // ctrl+k
 			{
+				ResetCompletion();
 				if(m_InputMode > NUM_INPUTS) // reverse i search
 				{
 					m_aInputSearch[m_InputCursor] = '\0';
@@ -833,6 +860,7 @@ int CTerminalUI::GetInput()
 			}
 			else if(keyname(c)[1] == 'E') // ctrl+e
 			{
+				ResetCompletion();
 				m_InputCursor = str_length(g_aInputStr);
 				if(m_InputMode > NUM_INPUTS) // reverse i search
 					m_InputCursor = str_length(m_aInputSearch);
@@ -840,6 +868,7 @@ int CTerminalUI::GetInput()
 			}
 			else if(keyname(c)[1] == 'A') // ctrl+a
 			{
+				ResetCompletion();
 				m_InputCursor = 0;
 				UpdateCursor();
 			}
@@ -847,6 +876,7 @@ int CTerminalUI::GetInput()
 		}
 		if((c == 258 || c == 259) && m_InputMode >= 0) // up/down arrow scroll history
 		{
+			ResetCompletion();
 			str_copy(g_aInputStr, m_aaInputHistory[m_InputMode][m_InputHistory[m_InputMode]], sizeof(g_aInputStr));
 			wclear(g_pInputWin);
 			InputDraw();
@@ -864,6 +894,7 @@ int CTerminalUI::GetInput()
 		}
 		else
 		{
+			ResetCompletion();
 			char aKey[8];
 			str_format(aKey, sizeof(aKey), "%c", c);
 			// str_append(g_aInputStr, aKey, sizeof(g_aInputStr));
@@ -890,6 +921,12 @@ int CTerminalUI::GetInput()
 	}
 	InputDraw();
 	return 0;
+}
+
+void CTerminalUI::ResetCompletion()
+{
+	m_LastCompletionLength = 0;
+	m_CompletionIndex = -1;
 }
 
 void CTerminalUI::UpdateCursor()
