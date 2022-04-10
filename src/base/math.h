@@ -38,7 +38,10 @@ constexpr inline T mix(const T a, const T b, TB amount)
 	return a + (b - a) * amount;
 }
 
-inline float random_float() { return rand() / (float)(RAND_MAX); }
+inline float random_float()
+{
+	return rand() / (float)(RAND_MAX);
+}
 
 constexpr int fxpscale = 1 << 10;
 
