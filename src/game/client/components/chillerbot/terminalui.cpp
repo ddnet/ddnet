@@ -599,6 +599,63 @@ int CTerminalUI::GetInput()
 			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_REMOTE_CONSOLE ? INPUT_NORMAL : INPUT_REMOTE_CONSOLE;
 		}
+		else if(keyname(c)[0] == '^' && keyname(c)[1] == 'I') // tab
+		{
+			bool IsSpace = true;
+			char aCompletionBuffer[1024];
+			const char *pInput = g_aInputStr;
+			if(m_InputMode > NUM_INPUTS) // reverse i search
+				pInput = m_aInputSearch;
+			int Count = 0;
+			for(int i = m_InputCursor; i > 0; i--)
+			{
+				if(pInput[i] == ' ' && IsSpace)
+					continue;
+				Count++;
+				if(i == 1) // reach beginning of line no spaces
+				{
+					str_copy(aCompletionBuffer, pInput, sizeof(aCompletionBuffer));
+					break;
+				}
+				if(pInput[i] != ' ')
+				{
+					IsSpace = false;
+					continue;
+				}
+				// tbh idk what this is. Helps with offset on multiple words
+				// probably counting the space in front of the word or something
+				if(Count > 1)
+					Count -= 2;
+				str_copy(aCompletionBuffer, pInput + i + 1, sizeof(aCompletionBuffer));
+				break;
+			}
+			aCompletionBuffer[Count] = '\0';
+			const char *PlayerName, *FoundInput;
+			for(auto &PlayerInfo : m_pClient->m_Snap.m_paInfoByName)
+			{
+				if(!PlayerInfo)
+					continue;
+
+				PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
+				FoundInput = str_utf8_find_nocase(PlayerName, aCompletionBuffer);
+				if(!FoundInput)
+					continue;
+
+				char aBuf[1024];
+				str_copy(aBuf, g_aInputStr, sizeof(aBuf));
+				aBuf[str_length(aBuf) - Count] = '\0';
+				str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aBuf, PlayerName);
+				wclear(g_pInputWin);
+				InputDraw();
+				DrawBorders(g_pInputWin);
+				m_InputCursor += str_length(PlayerName) - Count;
+				UpdateCursor();
+				return 0;
+			}
+			// remove this return to allow inputing tabs
+			// would probably only work when not connected to a server tho
+			return 0;
+		}
 		else if(keyname(c)[0] == '^' && keyname(c)[1] == '[')
 		{
 			c = getch();
