@@ -144,6 +144,7 @@ class CTerminalUI : public CComponent
 	virtual void OnInit() override;
 	virtual void OnRender() override;
 	virtual void OnShutdown() override;
+	virtual void OnStateChange(int NewState, int OldState) override;
 	void RenderConnecting();
 	bool RenderDownload();
 	bool RconAuthed() { return Client()->RconAuthed(); }
@@ -155,6 +156,7 @@ class CTerminalUI : public CComponent
 	int CursesTick();
 	void ResetCompletion();
 	void SetServerBrowserPage(int NewPage);
+	void RenderPopup();
 	bool IsSearchInputMode() { return m_InputMode > NUM_INPUTS; }
 	/*
 		UpdateCursor
@@ -197,6 +199,23 @@ class CTerminalUI : public CComponent
 		This variable holds the current search match.
 	*/
 	char m_aInputSearchMatch[1024];
+	/*
+		m_Popup
+
+		Curses UI popups inspired by CMenus::m_Popup
+	*/
+	int m_Popup;
+	char m_aPopupTitle[128];
+	bool DoPopup(int Popup, const char *pTitle);
+	enum
+	{
+		POPUP_NONE = 0,
+		// POPUP_CONNECTING, // TODO: use this
+		POPUP_MESSAGE,
+		POPUP_DISCONNECTED, // TODO: implement
+		// POPUP_QUIT, // TODO: implement
+		POPUP_WARNING, // TODO: implement
+	};
 	int AimX;
 	int AimY;
 	bool m_ScoreboardActive;

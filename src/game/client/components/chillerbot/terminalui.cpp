@@ -125,6 +125,7 @@ int CTerminalUI::CursesTick()
 	InfoDraw();
 	RenderServerList();
 	RenderConnecting();
+	RenderPopup();
 	RenderHelpPage();
 	if(m_pClient->m_Snap.m_pLocalCharacter)
 		RenderScoreboard(0, g_pLogWindow);
@@ -355,6 +356,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_aPopupTitle[0] = '\0';
 	m_aCompletionBuffer[0] = '\0';
 	ResetCompletion();
 	m_InputCursor = 0;
@@ -417,6 +419,72 @@ void CTerminalUI::OnRender()
 		"%.2f %.2f scoreboard=%d",
 		X / 32, Y / 32,
 		m_ScoreboardActive);
+}
+
+bool CTerminalUI::DoPopup(int Popup, const char *pTitle)
+{
+	if(m_Popup != POPUP_NONE)
+		return false;
+
+	m_Popup = Popup;
+	str_copy(m_aPopupTitle, pTitle, sizeof(m_aPopupTitle));
+	// TODO: m_NewInput, gs_NeedLogDraw do not really work here
+	m_NewInput = false;
+	gs_NeedLogDraw = true;
+	return true;
+}
+
+void CTerminalUI::RenderPopup()
+{
+	if(m_Popup == POPUP_NONE)
+		return;
+
+	int mx = getmaxx(g_pLogWindow);
+	int my = getmaxy(g_pLogWindow);
+	int offY = 5;
+	int offX = 2;
+	if(my < 20)
+		offY = 2;
+	int width = minimum(128, mx - 3);
+	int height = minimum(3, my - 2);
+	if(height < 2)
+		return;
+	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
+
+	char aExtraText[1024];
+	aExtraText[0] = '\0';
+	if(m_Popup == POPUP_DISCONNECTED)
+	{
+		if(Client()->m_ReconnectTime > 0)
+		{
+			int ReconnectSecs = (int)((Client()->m_ReconnectTime - time_get()) / time_freq());
+			str_format(aExtraText, sizeof(aExtraText), Localize("Reconnect in %d sec"), ReconnectSecs);
+			str_copy(m_aPopupTitle, Client()->ErrorString(), sizeof(m_aPopupTitle));
+			// pButtonText = Localize("Abort");
+			static int LastReconnectSecs = ReconnectSecs;
+			if(LastReconnectSecs != ReconnectSecs)
+			{
+				LastReconnectSecs = ReconnectSecs;
+				m_NewInput = false;
+				gs_NeedLogDraw = true;
+			}
+		}
+	}
+
+	if(sizeof(m_aPopupTitle) > (unsigned long)(mx - 2))
+		m_aPopupTitle[mx - 2] = '\0'; // ensure no line wrapping
+
+	int TitleLen = str_length(m_aPopupTitle);
+	int ExtraTextLen = str_length(aExtraText);
+	int TitleMid = TitleLen / 2;
+	int ExtraTextMid = ExtraTextLen / 2;
+	char aBuf[1024];
+	str_format(aBuf, sizeof(aBuf), "%*s", (width - TitleLen) < 1 ? 0 : ((width - TitleMid) / 2), m_aPopupTitle);
+	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%*s", (width - ExtraTextLen) < 1 ? 0 : ((width - ExtraTextMid) / 2), aExtraText);
+	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%*s", (width - 6) < 1 ? 0 : ((width - 6) / 2), "[ OK ]");
+	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
 }
 
 void CTerminalUI::RenderConnecting()
@@ -995,6 +1063,19 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		gs_NeedLogDraw = true;
 		m_NewInput = true;
 	}
+	// else if(Key == 'p')
+	// {
+	// 	DoPopup(POPUP_MESSAGE, "henlo");
+	// 	gs_NeedLogDraw = true;
+	// 	m_NewInput = true;
+	// }
+	else if(Key == 10 && (m_Popup == POPUP_MESSAGE || m_Popup == POPUP_DISCONNECTED)) // return
+	{
+		// click "[ OK ]" on popups using enter
+		m_Popup = POPUP_NONE;
+		gs_NeedLogDraw = true;
+		m_NewInput = true;
+	}
 	else if(Key == 'h' && m_LastKeyPress < time_get() - time_freq() / 2)
 	{
 		Console()->ExecuteLine("reply_to_last_ping");
@@ -1076,6 +1157,39 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	m_LastKeyPressed = Key;
 	// dbg_msg("termUI", "got key d=%d c=%c", Key, Key);
 	return 0;
+}
+
+void CTerminalUI::OnStateChange(int NewState, int OldState)
+{
+	if(NewState == IClient::STATE_OFFLINE)
+	{
+		m_Popup = POPUP_NONE;
+		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
+		{
+			// if(str_find(Client()->ErrorString(), "password"))
+			// {
+			// 	m_Popup = POPUP_PASSWORD;
+			// }
+			// else
+			DoPopup(POPUP_DISCONNECTED, "Disconnected");
+		}
+	}
+	// else if(NewState == IClient::STATE_LOADING)
+	// {
+	// 	m_Popup = POPUP_CONNECTING;
+	// 	m_DownloadLastCheckTime = time_get();
+	// 	m_DownloadLastCheckSize = 0;
+	// 	m_DownloadSpeed = 0.0f;
+	// }
+	// else if(NewState == IClient::STATE_CONNECTING)
+	// 	m_Popup = POPUP_CONNECTING;
+	else if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
+	{
+		if(m_Popup != POPUP_WARNING)
+		{
+			m_Popup = POPUP_NONE;
+		}
+	}
 }
 
 void CTerminalUI::SetServerBrowserPage(int NewPage)
