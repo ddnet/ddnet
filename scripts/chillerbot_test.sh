@@ -102,6 +102,7 @@ ins+=('why do you war fooslongalt CLIENT2');outs+=('client1: fooslongalt has war
 ins+=('why do you war fooslongalt cLIEnT2???????');outs+=('client1: fooslongalt has war because: bullied me in school')
 ins+=('how do you chat so fast?? client2');outs+=('client1 I bound the chillerbot-ux command "reply_to_last_ping" to automate chat')
 ins+=('client2: how do always drop money?');outs+=('client1 I auto drop money using "auto_drop_money" in chillerbot-ux')
+ins+=('client2 why is my name red');outs+=('client1 has war because: bullied me in school')
 ins+=('client2 ah nice where can i download chillerbot?');outs+=('client1 I use chillerbot-ux ( https://chillerbot.github.io )')
 ins+=('client2 me is join your clan? yes?');outs+=('client1 Chilli.* is a fun clan everybody that uses the skin greensward can join')
 
