@@ -221,6 +221,8 @@ void CTerminalUI::RenderServerList()
 	int width = minimum(128, mx - 3);
 	if(mx < width + 2 + offX)
 		offX = 2;
+	if(width < 2)
+		return;
 	m_NumServers = ServerBrowser()->NumSortedServers();
 	int height = minimum(m_NumServers, my - (offY + 2));
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
@@ -266,6 +268,7 @@ void CTerminalUI::RenderServerList()
 			aName,
 			aMap,
 			aPlayers);
+		aBuf[width - 1] = '\0'; // ensure no line wrapping
 		if(m_SelectedServer == i)
 		{
 			wattron(g_pLogWindow, A_BOLD);
@@ -276,8 +279,6 @@ void CTerminalUI::RenderServerList()
 			wattroff(g_pLogWindow, A_BOLD);
 			str_format(aLine, sizeof(aLine), "|%-*s|", (width - 2) + ((NameSize - NameCount) / 2), aBuf);
 		}
-		if(sizeof(aLine) > (unsigned long)(mx - 2))
-			aLine[mx - 2] = '\0'; // ensure no line wrapping
 		mvwprintw(g_pLogWindow, offY + k, offX, "%s", aLine);
 	}
 }
