@@ -1090,6 +1090,10 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		gs_NeedLogDraw = true;
 		m_NewInput = true;
 	}
+	else if((Key == KEY_F(5) || (keyname(Key)[0] == '^' && keyname(Key)[1] == 'R')) && m_RenderServerList)
+	{
+		ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+	}
 	else if(Key == KEY_LEFT)
 	{
 		AimX = maximum(AimX - 10, -20);
