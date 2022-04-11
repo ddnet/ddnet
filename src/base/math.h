@@ -38,20 +38,31 @@ constexpr inline T mix(const T a, const T b, TB amount)
 	return a + (b - a) * amount;
 }
 
-inline float random_float() { return rand() / (float)(RAND_MAX); }
+inline float random_float()
+{
+	return rand() / (float)(RAND_MAX);
+}
+
+constexpr int fxpscale = 1 << 10;
 
 // float to fixed
-constexpr inline int f2fx(float v) { return (int)(v * (float)(1 << 10)); }
-constexpr inline float fx2f(int v) { return v * (1.0f / (1 << 10)); }
+constexpr inline int f2fx(float v)
+{
+	return (int)(v * fxpscale);
+}
+constexpr inline float fx2f(int v)
+{
+	return v / (float)fxpscale;
+}
 
 // int to fixed
-inline int i2fx(int v)
+constexpr inline int i2fx(int v)
 {
-	return v << 10;
+	return v * fxpscale;
 }
-inline int fx2i(int v)
+constexpr inline int fx2i(int v)
 {
-	return v >> 10;
+	return v / fxpscale;
 }
 
 inline int gcd(int a, int b)
@@ -70,19 +81,32 @@ class fxp
 	int value;
 
 public:
-	void set(int v) { value = v; }
-	int get() const { return value; }
+	void set(int v)
+	{
+		value = v;
+	}
+	int get() const
+	{
+		return value;
+	}
 	fxp &operator=(int v)
 	{
-		value = v << 10;
+		value = i2fx(v);
 		return *this;
 	}
 	fxp &operator=(float v)
 	{
-		value = (int)(v * (float)(1 << 10));
+		value = f2fx(v);
 		return *this;
 	}
-	operator float() const { return value / (float)(1 << 10); }
+	operator int() const
+	{
+		return fx2i(value);
+	}
+	operator float() const
+	{
+		return fx2f(value);
+	}
 };
 
 constexpr float pi = 3.1415926535897932384626433f;

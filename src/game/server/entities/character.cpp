@@ -1132,6 +1132,10 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			return;
 
 		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(pCharacter)));
+		if(pCharacter->m_Angle > (int)(pi * 256.0f))
+		{
+			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);
+		}
 
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
