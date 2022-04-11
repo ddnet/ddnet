@@ -123,6 +123,7 @@ int CTerminalUI::CursesTick()
 	// draw to our windows
 	LogDraw();
 	InfoDraw();
+	RenderGame();
 	RenderServerList();
 	RenderConnecting();
 	RenderPopup();
@@ -222,6 +223,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_NextRender = 0;
 	m_aPopupTitle[0] = '\0';
 	m_aCompletionBuffer[0] = '\0';
 	ResetCompletion();

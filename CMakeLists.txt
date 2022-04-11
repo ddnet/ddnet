@@ -1939,6 +1939,7 @@ if(CLIENT)
     components/chillerbot/playerpics.h
     components/chillerbot/remotecontrol.cpp
     components/chillerbot/remotecontrol.h
+    components/chillerbot/terminalui/maplayers.cpp
     components/chillerbot/terminalui/menus.cpp
     components/chillerbot/terminalui/terminalui.cpp
     components/chillerbot/terminalui/terminalui.h

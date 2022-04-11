@@ -232,6 +232,11 @@ class CTerminalUI : public CComponent
 	int m_LastCompletionLength;
 	char m_aCompletionBuffer[1024];
 
+	// render in game
+	void RenderGame();
+	void RenderTilemap(CTile *pTiles, int WinWidth, int WinHeight, int w, int h, float Scale, vec4 Color, int RenderFlags, void *pUser, int ColorEnv, int ColorEnvOffset);
+	int m_NextRender; // TODO: remove
+
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);
 #endif
