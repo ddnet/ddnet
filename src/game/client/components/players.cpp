@@ -138,8 +138,13 @@ void CPlayers::RenderHookCollLine(
 			vec2 ExDirection = Direction;
 
 			if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+			{
 				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
 
+				// fix direction if mouse is exactly in the center
+				if(!(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y)
+					ExDirection = vec2(1, 0);
+			}
 			Graphics()->TextureClear();
 			vec2 InitPos = Position;
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
