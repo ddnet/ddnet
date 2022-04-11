@@ -2525,7 +2525,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_pTooltip = Explain(EXPLANATION_VANILLA, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 			}
 			else if(m_Brush.IsEmpty())
-				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Use ctrl+left mouse to select layer.";
+				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Use ctrl+right mouse to select layer.";
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
 
@@ -3565,7 +3565,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 
 void CEditor::SelectLayerByTile(float &Scroll)
 {
-	// ctrl+leftclick a map index to select the layer that has a tile there
+	// ctrl+rightclick a map index to select the layer that has a tile there
 	static bool s_CtrlClick = false;
 	static int s_Selected = 0;
 	int MatchedGroup = -1;
