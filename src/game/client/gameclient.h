@@ -62,7 +62,7 @@
 #include "components/chillerbot/city.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
-#include "components/chillerbot/terminalui.h"
+#include "components/chillerbot/terminalui/terminalui.h"
 #include "components/chillerbot/unix.h"
 #include "components/chillerbot/vibebot.h"
 #include "components/chillerbot/warlist.h"
