@@ -424,6 +424,11 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		mem_copy(pData, &m_VibeBot.m_InputData[CurrentTee], sizeof(m_VibeBot.m_InputData[CurrentTee]));
 		return sizeof(m_VibeBot.m_InputData[CurrentTee]);
 	}
+	if(m_TerminalUI.m_SendData[CurrentTee])
+	{
+		mem_copy(pData, &m_TerminalUI.m_InputData[CurrentTee], sizeof(m_TerminalUI.m_InputData[CurrentTee]));
+		return sizeof(m_TerminalUI.m_InputData[CurrentTee]);
+	}
 	if(!Dummy)
 	{
 		return m_Controls.SnapInput(pData);

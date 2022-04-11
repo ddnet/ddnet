@@ -223,6 +223,8 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_SendData[0] = false;
+	m_SendData[1] = false;
 	m_NextRender = 0;
 	m_aPopupTitle[0] = '\0';
 	m_aCompletionBuffer[0] = '\0';
@@ -274,6 +276,8 @@ void CTerminalUI::OnShutdown()
 
 void CTerminalUI::OnRender()
 {
+	m_SendData[0] = false;
+	m_SendData[1] = false;
 	CursesTick();
 
 	if(cl_InterruptSignaled)
@@ -767,9 +771,17 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	else if(Key == 'k')
 		m_pClient->SendKill(g_Config.m_ClDummy);
 	else if(KeyInHistory('a', 5) || Key == 'a')
-		/* m_pClient->m_Controls.SetCursesDir(-1); */ return 0;
+	{
+		m_InputData[g_Config.m_ClDummy] = m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy];
+		m_InputData[g_Config.m_ClDummy].m_Direction = -1;
+		m_SendData[g_Config.m_ClDummy] = true;
+	}
 	else if(KeyInHistory('d', 5) || Key == 'd')
-		/* m_pClient->m_Controls.SetCursesDir(1); */ return 0;
+	{
+		m_InputData[g_Config.m_ClDummy] = m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy];
+		m_InputData[g_Config.m_ClDummy].m_Direction = 1;
+		m_SendData[g_Config.m_ClDummy] = true;
+	}
 	else if(KeyInHistory(' ', 3) || Key == ' ')
 		/* m_pClient->m_Controls.SetCursesJump(1); */ return 0;
 	else if(Key == '?')

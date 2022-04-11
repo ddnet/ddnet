@@ -57,6 +57,8 @@ void CTerminalUI::RenderHelpPage()
 		" f1    - local console",
 		" f2    - remote console",
 		" h     - auto reply to known chat messages",
+		" a     - walk left",
+		" d     - walk right",
 		" k     - selfkill"};
 
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, sizeof(aHelpLines) / 128 + 2);
