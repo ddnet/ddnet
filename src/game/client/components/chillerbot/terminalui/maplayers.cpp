@@ -23,16 +23,13 @@ void CTerminalUI::RenderGame()
 	if(my < 20)
 		offY = 2;
 	int width = minimum(128, mx - 3);
-	int height = minimum(3, my - 2);
+	int height = minimum(32, my - 2);
 	if(height < 2)
 		return;
 	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
 
-	char aBuf[1024];
-	str_format(aBuf, sizeof(aBuf), "%*s", width / 2, " this is a preview  ");
-	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
-	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
-	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
+	for(int i = 0; i < height; i++)
+		mvwprintw(g_pLogWindow, offY + i, offX, "|%-*s|", width - 2, " loading ... ");
 
 	CMapItemLayer *pLayer = (CMapItemLayer *)Layers()->GameLayer();
 	if(!pLayer)
@@ -44,20 +41,38 @@ void CTerminalUI::RenderGame()
 	if(Size >= pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
 	{
 		vec4 Color = vec4(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f);
-		RenderTilemap(pTiles, width, height, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, 0,
-			this, pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
+		RenderTilemap(pTiles, offX, offY, width, height, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, 0,
+			pTMap->m_ColorEnv, pTMap->m_ColorEnvOffset);
 	}
 }
 
-void CTerminalUI::RenderTilemap(CTile *pTiles, int WinWidth, int WinHeight, int w, int h, float Scale, vec4 Color, int RenderFlags, void *pUser, int ColorEnv, int ColorEnvOffset)
+void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth, int WinHeight, int w, int h, float Scale, vec4 Color, int RenderFlags, int ColorEnv, int ColorEnvOffset)
 {
 	if(!m_pClient->m_Snap.m_pLocalCharacter) // TODO: also render map if tee is dead and also add possibility to spectate
 		return;
+	if(WinWidth < 3)
+		return;
+	if(WinHeight < 3)
+		return;
 
-	char aFrame[32][64]; // tee aka center is at 8/16   y/x
+	static const int MAX_FRAME_WIDTH = 64;
+	/*
+		aFrame
+
+		First dimension is the height
+		Second dimension is the width
+
+		The second dimension is supposed to hold 64 letters max
+		but has more byte size for utf8 characters
+	*/
+	char aFrame[32][MAX_FRAME_WIDTH * 4]; // tee aka center is at 8/16   y/x
+	int aFrameLetterCount[32] = {0}; // TODO: do we need this? Should always be 32
+	int aFrameByteCount[32] = {0};
+	// init with spaces
 	for(int i = 0; i < 32; i++)
 	{
-		str_copy(aFrame[i], "                               ", sizeof(aFrame[i]));
+		mem_zero(aFrame[i], sizeof(aFrame[i]));
+		// str_format(aFrame[i], sizeof(aFrame[i]), "%*s", (int)sizeof(aFrame[i]), " ");
 	}
 	int rendered_tiles = 0;
 	// dbg_msg("render", "teeX: %.2f", static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f);
@@ -117,6 +132,10 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int WinWidth, int WinHeight, int 
 
 			int c = mx + my * w;
 			unsigned char Index = pTiles[c].m_Index;
+			int renderX = (x * Scale) - (static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X) / 32.0f);
+			int renderY = (y * Scale) - (static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y) / 32.0f);
+			renderX += 32;
+			renderY += 16;
 			if(Index)
 			{
 				unsigned char Flags = pTiles[c].m_Flags;
@@ -170,24 +189,38 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int WinWidth, int WinHeight, int 
 						y1 = Tmp;
 					}
 					// dbg_msg("map", "draw tile=%d at x: %.2f y: %.2f w: %.2f h: %.2f", Index, x*Scale, y*Scale, Scale, Scale);
-					int renderX = (x * Scale) - (static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X) / 32.0f);
-					int renderY = (y * Scale) - (static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y) / 32.0f);
 					// dbg_msg("map", "absolut tile x: %d y: %d       tee x: %.2f y: %.2f", renderX, renderY, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f);
-					renderX += 32;
-					renderY += 16;
 					// dbg_msg("map", "array pos  tile x: %d y: %d\n", renderX, renderY);
 					if(renderX > 0 && renderX < 64 && renderY > 0 && renderY < 32)
 					{
-						aFrame[renderY][renderX] = '#';
+						if(Index == TILE_SOLID)
+						{
+							// TODO: use ▆
+							// aFrame[renderY][renderX] = '#';
+							str_append(aFrame[renderY], "█", sizeof(aFrame));
+							aFrameByteCount[renderY] += (int)sizeof("█");
+						}
+						// else if(Index == TILE_FREEZE)
+						// {
+						// 	aFrame[renderY][renderX] = 'x'; // TODO: use ▒
+						// }
+						else
+						{
+							// aFrame[renderY][renderX] = '?';
+							str_append(aFrame[renderY], "?", sizeof(aFrame));
+							aFrameByteCount[renderY]++;
+						}
 						rendered_tiles++;
+						aFrameLetterCount[renderY]++;
 					}
-					aFrame[16][32] = 'o'; // tee in center
-					aFrame[15][32] = 'o'; // tee in center
-					aFrame[17][32] = 'o'; // tee in center
+					// aFrame[15][32] = 'o'; // tee in center
 				}
 			}
 			else
 			{
+				str_append(aFrame[renderY], " ", sizeof(aFrame));
+				aFrameLetterCount[renderY]++;
+				aFrameByteCount[renderY]++;
 				// dbg_msg("map", "skip at x: %.2f y: %.2f w: %.2f h: %.2f", x*Scale, y*Scale, Scale, Scale);
 			}
 			x += pTiles[c].m_Skip;
@@ -200,15 +233,14 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int WinWidth, int WinHeight, int 
 	if(m_NextRender == 0)
 		return;
 	m_NextRender = 60; // render every 60 what every this isy
-	// system("clear");
 	// render frame
-	int offY = 2; // TODO: pass this as arg to this func
-	int offX = 2; // TODO: pass this as arg to this func
-	for(int y = 0; y < 32; y++)
+	int RenderToHeight = minimum(32, WinHeight);
+	for(int y = 0; y < RenderToHeight; y++)
 	{
 		// printf("%s\n", aFrame[y]);
-		aFrame[y][WinWidth - 2] = '\0';
-		mvwprintw(g_pLogWindow, offY + y, offX, "|%-*s|", WinWidth - 2, aFrame[y]);
+		if(WinWidth < (int)sizeof(WinWidth))
+			aFrame[y][WinWidth - 2] = '\0';
+		mvwprintw(g_pLogWindow, offY + y, offX, "|%-*s|", (WinWidth - 2) + (aFrameByteCount[y] - aFrameLetterCount[y]), aFrame[y]);
 	}
 	// printf("------------- tiles: %d \n\n", rendered_tiles);
 	// printf("%s\n-------------\n", aFrame[15]);
