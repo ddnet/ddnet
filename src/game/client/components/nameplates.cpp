@@ -327,6 +327,10 @@ void CNamePlates::OnRender()
 
 		// don't render offscreen
 		vec2 *pRenderPos = &m_pClient->m_aClients[i].m_RenderPos;
+		if(m_pClient->m_aClients[i].m_SpecCharPresent)
+		{
+			pRenderPos = &m_pClient->m_aClients[i].m_SpecChar;
+		}
 		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
 		{
 			continue;
@@ -336,10 +340,9 @@ void CNamePlates::OnRender()
 		{
 			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
 		}
-
-		// only render active characters
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
+		else if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
 		{
+			// only render nameplates for active characters
 			RenderNameplate(
 				&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
 				&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
