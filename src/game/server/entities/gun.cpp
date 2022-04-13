@@ -45,7 +45,7 @@ void CGun::Fire()
 	for(int i = 0; i < Num; i++)
 	{
 		CCharacter *Target = Ents[i];
-		//now gun doesn't affect on super
+		// Gun doesn't affect super players
 		if(Target->Team() == TEAM_SUPER)
 			continue;
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Target->Team()])
@@ -53,11 +53,23 @@ void CGun::Fire()
 		int res = GameServer()->Collision()->IntersectLine(m_Pos, Target->m_Pos, 0, 0);
 		if(!res)
 		{
-			int Len = length(Target->m_Pos - m_Pos);
-			if(LenInTeam[Target->Team()] == 0 || LenInTeam[Target->Team()] > Len)
+			if(Target->IsAlive())
 			{
-				LenInTeam[Target->Team()] = Len;
-				IdInTeam[Target->Team()] = i;
+				if(Target->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID()))
+				{
+					// Handle solo players separately
+					new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, Target->Team());
+					m_LastFire = Server()->Tick();
+				}
+				else
+				{
+					int Len = length(Target->m_Pos - m_Pos);
+					if(LenInTeam[Target->Team()] == 0 || LenInTeam[Target->Team()] > Len)
+					{
+						LenInTeam[Target->Team()] = Len;
+						IdInTeam[Target->Team()] = i;
+					}
+				}
 			}
 		}
 	}
@@ -68,24 +80,6 @@ void CGun::Fire()
 			CCharacter *Target = Ents[IdInTeam[i]];
 			new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, i);
 			m_LastFire = Server()->Tick();
-		}
-	}
-	for(int i = 0; i < Num; i++)
-	{
-		CCharacter *Target = Ents[i];
-		//now gun doesn't affect on super in solo
-		if(Target->Team() == TEAM_SUPER)
-			continue;
-		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Target->Team()])
-			continue;
-		if(Target->IsAlive() && Target->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID()))
-		{
-			int res = GameServer()->Collision()->IntersectLine(m_Pos, Target->m_Pos, 0, 0);
-			if(!res)
-			{
-				new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, Target->Team());
-				m_LastFire = Server()->Tick();
-			}
 		}
 	}
 }
