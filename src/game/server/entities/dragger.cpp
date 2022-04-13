@@ -83,15 +83,16 @@ void CDragger::Move()
 
 		if(Res == 0)
 		{
-			int Len = length(Temp->m_Pos - m_Pos);
-			if(MinLen == 0 || MinLen > Len)
-			{
-				MinLen = Len;
-				Id = i;
-			}
-
 			if(!Temp->Teams()->m_Core.GetSolo(Temp->GetPlayer()->GetCID()))
+			{
+				int Len = length(Temp->m_Pos - m_Pos);
+				if(MinLen == 0 || MinLen > Len)
+				{
+					MinLen = Len;
+					Id = i;
+				}
 				m_SoloEntIDs[i] = -1;
+			}
 		}
 		else
 		{
@@ -115,15 +116,17 @@ void CDragger::Move()
 
 void CDragger::Drag()
 {
-	if(m_TargetID < 0)
-		return;
-
-	CCharacter *pTarget = GameServer()->GetPlayerChar(m_TargetID);
-
+	CCharacter *pTarget = nullptr;
 	for(int i = -1; i < MAX_CLIENTS; i++)
 	{
 		if(i >= 0)
+		{
 			pTarget = GameServer()->GetPlayerChar(m_SoloEntIDs[i]);
+		}
+		else if(m_TargetID >= 0)
+		{
+			pTarget = GameServer()->GetPlayerChar(m_TargetID);
+		}
 
 		if(!pTarget)
 			continue;
