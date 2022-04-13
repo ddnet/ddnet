@@ -73,16 +73,18 @@ void CGun::Fire()
 	for(int i = 0; i < Num; i++)
 	{
 		CCharacter *Target = Ents[i];
+		//now gun doesn't affect on super in solo
+		if(Target->Team() == TEAM_SUPER)
+			continue;
+		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Target->Team()])
+			continue;
 		if(Target->IsAlive() && Target->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID()))
 		{
-			if(IdInTeam[Target->Team()] != i)
+			int res = GameServer()->Collision()->IntersectLine(m_Pos, Target->m_Pos, 0, 0);
+			if(!res)
 			{
-				int res = GameServer()->Collision()->IntersectLine(m_Pos, Target->m_Pos, 0, 0);
-				if(!res)
-				{
-					new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, Target->Team());
-					m_LastFire = Server()->Tick();
-				}
+				new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, Target->Team());
+				m_LastFire = Server()->Tick();
 			}
 		}
 	}
