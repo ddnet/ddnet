@@ -251,6 +251,9 @@ Objects = [
 		NetTick("m_FreezeTick"),
 		NetBool("m_IsInFreeze"),
 		NetBool("m_IsInPracticeMode"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+		NetIntAny("m_RampValue"),
 	]),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [

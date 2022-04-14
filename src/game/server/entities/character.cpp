@@ -1251,6 +1251,9 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacterDisplayInfo->m_FreezeTick = m_Core.m_FreezeTick;
 	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_Core.m_IsInFreeze;
 	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
+	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
+	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
+	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, m_Core.m_Tuning.m_VelrampStart, m_Core.m_Tuning.m_VelrampRange, m_Core.m_Tuning.m_VelrampCurvature) * 1000.0f);
 }
 
 // DDRace

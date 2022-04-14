@@ -104,7 +104,7 @@ void CHud::OnInit()
 
 void CHud::RenderGameTimer()
 {
-	float Half = 300.0f * Graphics()->ScreenAspect() / 2.0f;
+	float Half = m_Width / 2.0f;
 
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_SUDDENDEATH))
 	{
@@ -157,7 +157,7 @@ void CHud::RenderSuddenDeath()
 {
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_SUDDENDEATH)
 	{
-		float Half = 300.0f * Graphics()->ScreenAspect() / 2.0f;
+		float Half = m_Width / 2.0f;
 		const char *pText = Localize("Sudden Death");
 		float FontSize = 12.0f;
 		float w = TextRender()->TextWidth(0, FontSize, pText, -1, -1.0f);
@@ -171,8 +171,7 @@ void CHud::RenderScoreHud()
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
 	{
 		int GameFlags = m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags;
-		float Whole = 300 * Graphics()->ScreenAspect();
-		float StartY = 229.0f;
+		float StartY = 229.0f; // the height of the display is 56, so EndY is 285
 
 		const float ScoreSingleBoxHeight = 18.0f;
 
@@ -218,7 +217,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
 					else
 						Graphics()->SetColor(0.0f, 0.0f, 1.0f, 0.25f);
-					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
+					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(m_Width - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
 				}
 				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -232,7 +231,7 @@ void CHud::RenderScoreHud()
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
-					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
+					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScoreTeam[t]);
 				}
@@ -254,7 +253,7 @@ void CHud::RenderScoreHud()
 						// draw flag
 						Graphics()->TextureSet(t == 0 ? m_pClient->m_GameSkin.m_SpriteFlagRed : m_pClient->m_GameSkin.m_SpriteFlagBlue);
 						Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-						Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_FlagOffset, Whole - ScoreWidthMax - ImageSize, StartY + 1.0f + t * 20);
+						Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_FlagOffset, m_Width - ScoreWidthMax - ImageSize, StartY + 1.0f + t * 20);
 					}
 					else if(FlagCarrier[t] >= 0)
 					{
@@ -271,7 +270,7 @@ void CHud::RenderScoreHud()
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 
 							CTextCursor Cursor;
-							TextRender()->SetCursor(&Cursor, minimum(Whole - w - 1.0f, Whole - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
+							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
 						}
@@ -290,7 +289,7 @@ void CHud::RenderScoreHud()
 						CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-						vec2 TeeRenderPos(Whole - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
+						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
 
 						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					}
@@ -400,7 +399,7 @@ void CHud::RenderScoreHud()
 						Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 					else
 						Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.25f);
-					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
+					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = RenderTools()->CreateRoundRectQuadContainer(m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split + PosSize, ScoreSingleBoxHeight, 5.0f, CUI::CORNER_L);
 				}
 				Graphics()->TextureClear();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -413,7 +412,7 @@ void CHud::RenderScoreHud()
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
-					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
+					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScore[t]);
 				}
@@ -442,7 +441,7 @@ void CHud::RenderScoreHud()
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 
 							CTextCursor Cursor;
-							TextRender()->SetCursor(&Cursor, minimum(Whole - w - 1.0f, Whole - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
+							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
 						}
@@ -461,7 +460,7 @@ void CHud::RenderScoreHud()
 						CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-						vec2 TeeRenderPos(Whole - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
+						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
 
 						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 					}
@@ -482,7 +481,7 @@ void CHud::RenderScoreHud()
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex);
 
 					CTextCursor Cursor;
-					TextRender()->SetCursor(&Cursor, Whole - ScoreWidthMax - ImageSize - Split - PosSize, StartY + t * 20 + (18.f - 10.f) / 2.f, 10.0f, TEXTFLAG_RENDER);
+					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax - ImageSize - Split - PosSize, StartY + t * 20 + (18.f - 10.f) / 2.f, 10.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextRankContainerIndex = TextRender()->CreateTextContainer(&Cursor, aBuf);
 				}
@@ -544,9 +543,7 @@ void CHud::RenderTextInfo()
 		static float s_TextWidth00000 = TextRender()->TextWidth(0, 12.f, "00000", -1, -1.0f);
 		static float s_TextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
 
-		int DigitIndex = (int)log10((FrameTime ? FrameTime : 1));
-		if(DigitIndex > 4)
-			DigitIndex = 4;
+		int DigitIndex = GetDigitsIndex(FrameTime, 4);
 		//TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1.0f);
 
 		CTextCursor Cursor;
@@ -1265,44 +1262,213 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 
 void CHud::RenderDummyActions()
 {
-	// render small dummy actions hud
-	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && Client()->DummyConnected())
+	if(!g_Config.m_ClShowhudDummyActions || (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) || !Client()->DummyConnected())
 	{
-		float Whole = 300 * Graphics()->ScreenAspect();
+		return;
+	}
+	// render small dummy actions hud
+	const float BoxHeight = 27.0f;
+	const float BoxWidth = 14.0f;
 
-		const float BoxHeight = 27.0f;
-		const float BoxWidth = 14.0f;
+	float StartX = m_Width - BoxWidth;
+	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	{
+		StartY -= 4;
+	}
+	StartY -= 30 * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 20 * g_Config.m_ClShowhudPlayerAngle;
 
-		float StartX = Whole - BoxWidth;
-		float StartY = 198.0f;
+	if(g_Config.m_ClShowhudScore)
+	{
+		StartY -= 56;
+	}
 
-		Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-		int ContainerId = RenderTools()->CreateRoundRectQuadContainer(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	RenderTools()->DrawRoundRectExt(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
+	Graphics()->QuadsEnd();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		Graphics()->TextureClear();
+	float y = StartY + 1;
+	float x = StartX + 1;
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+	if(g_Config.m_ClDummyHammer)
+	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		if(ContainerId != -1)
-			Graphics()->RenderQuadContainer(ContainerId, -1);
+	}
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHammer);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHammerOffset, x, y);
+	y += 13;
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+	if(g_Config.m_ClDummyCopyMoves)
+	{
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
+}
 
-		float y = StartY + 1;
-		float x = StartX + 1;
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		if(g_Config.m_ClDummyHammer)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHammer);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHammerOffset, x, y);
-		y += 13;
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		if(g_Config.m_ClDummyCopyMoves)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
+inline int CHud::GetDigitsIndex(int Value, float Max)
+{
+	if(Value < 0)
+	{
+		Value *= -1;
+	}
+	int DigitsIndex = (int)log10((Value ? Value : 1));
+	if(DigitsIndex > Max)
+	{
+		DigitsIndex = Max;
+	}
+	if(DigitsIndex < 0)
+	{
+		DigitsIndex = 0;
+	}
+	return DigitsIndex;
+}
+
+void CHud::RenderMovementInformation(const int ClientID)
+{
+	// Draw the infomations depending on settings: Position, speed and target angle
+	// This display is only to present the available information from the last snapshot, not to interpolate or predict
+	if(!g_Config.m_ClShowhudPlayerPosition && !g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)
+	{
+		return;
+	}
+	const float LineHeight = 10.0f;
+	const float LineSpacer = 1.0f; // above and below each entry
+	const float Fontsize = 8.0f;
+
+	float BoxHeight = 30 * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 20 * g_Config.m_ClShowhudPlayerAngle;
+	const float BoxWidth = 62.0f;
+
+	float StartX = m_Width - BoxWidth;
+	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
+	if(g_Config.m_ClShowhudScore)
+	{
+		StartY -= 56;
+	}
+
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	RenderTools()->DrawRoundRectExt(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
+	Graphics()->QuadsEnd();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	CNetObj_Character *Character = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
+	const float TicksPerSecond = 50.0f;
+
+	// To make the player position relative to blocks we need to divide by the block size
+	float PosX = Character->m_X / 32.0f;
+	float PosY = Character->m_Y / 32.0f;
+
+	float VelspeedX = Character->m_VelX / 256.0f * TicksPerSecond;
+	if(Character->m_VelX >= -1 && Character->m_VelX <= 1)
+	{
+		VelspeedX = 0;
+	}
+	float VelspeedY = Character->m_VelY / 256.0f * TicksPerSecond;
+	if(Character->m_VelY >= -128 && Character->m_VelY <= 128)
+	{
+		VelspeedY = 0;
+	}
+	// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
+	float DisplaySpeedX = VelspeedX / 32;
+	float DisplaySpeedY = VelspeedY / 32;
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	{
+		// On DDNet servers the actual speed on X axis is displayed, i.e. VelspeedX * Ramp
+		DisplaySpeedX *= (m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_RampValue / 1000.0f);
+	}
+
+	float Angle = Character->m_Angle / 256.0f;
+	if(Angle > pi)
+	{
+		Angle -= 2.0f * pi;
+	}
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	{
+		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
+		CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
+		Angle = atan2f(CharacterDisplayInfo->m_TargetY, CharacterDisplayInfo->m_TargetX);
+	}
+	float DisplayAngle = Angle * 180.0f / pi;
+
+	char aBuf[128];
+	float w;
+
+	float y = StartY + LineSpacer;
+	float xl = StartX + 1;
+	float xr = m_Width - 1;
+	int DigitsIndex = 0;
+
+	static float s_TextWidth0 = TextRender()->TextWidth(0, Fontsize, "0.00", -1, -1.0f);
+	static float s_TextWidth00 = TextRender()->TextWidth(0, Fontsize, "00.00", -1, -1.0f);
+	static float s_TextWidth000 = TextRender()->TextWidth(0, Fontsize, "000.00", -1, -1.0f);
+	static float s_TextWidth0000 = TextRender()->TextWidth(0, Fontsize, "0000.00", -1, -1.0f);
+	static float s_TextWidth00000 = TextRender()->TextWidth(0, Fontsize, "00000.00", -1, -1.0f);
+	static float s_TextWidth000000 = TextRender()->TextWidth(0, Fontsize, "000000.00", -1, -1.0f);
+	static float s_TextWidth[6] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000, s_TextWidth000000};
+	static float s_TextWidthMinus0 = TextRender()->TextWidth(0, Fontsize, "-0.00", -1, -1.0f);
+	static float s_TextWidthMinus00 = TextRender()->TextWidth(0, Fontsize, "-00.00", -1, -1.0f);
+	static float s_TextWidthMinus000 = TextRender()->TextWidth(0, Fontsize, "-000.00", -1, -1.0f);
+	static float s_TextWidthMinus0000 = TextRender()->TextWidth(0, Fontsize, "-0000.00", -1, -1.0f);
+	static float s_TextWidthMinus00000 = TextRender()->TextWidth(0, Fontsize, "-00000.00", -1, -1.0f);
+	static float s_TextWidthMinus000000 = TextRender()->TextWidth(0, Fontsize, "-000000.00", -1, -1.0f);
+	static float s_TextWidthMinus[6] = {s_TextWidthMinus0, s_TextWidthMinus00, s_TextWidthMinus000, s_TextWidthMinus0000, s_TextWidthMinus00000, s_TextWidthMinus000000};
+
+	if(g_Config.m_ClShowhudPlayerPosition)
+	{
+		TextRender()->Text(0, xl, y, Fontsize, "Position:", -1.0f);
+		y += LineHeight;
+
+		TextRender()->Text(0, xl, y, Fontsize, "X:", -1.0f);
+		str_format(aBuf, sizeof(aBuf), "%.2f", PosX);
+		DigitsIndex = GetDigitsIndex(PosX, 5);
+		w = (PosX < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
+		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
+		y += LineHeight;
+
+		TextRender()->Text(0, xl, y, Fontsize, "Y:", -1.0f);
+		str_format(aBuf, sizeof(aBuf), "%.2f", PosY);
+		DigitsIndex = GetDigitsIndex(PosY, 5);
+		w = (PosY < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
+		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
+		y += LineHeight;
+	}
+
+	if(g_Config.m_ClShowhudPlayerSpeed)
+	{
+		TextRender()->Text(0, xl, y, Fontsize, "Speed:", -1.0f);
+		y += LineHeight;
+
+		TextRender()->Text(0, xl, y, Fontsize, "X:", -1.0f);
+		str_format(aBuf, sizeof(aBuf), "%.2f", DisplaySpeedX);
+		DigitsIndex = GetDigitsIndex(DisplaySpeedX, 5);
+		w = (DisplaySpeedX < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
+		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
+		y += LineHeight;
+
+		TextRender()->Text(0, xl, y, Fontsize, "Y:", -1.0f);
+		str_format(aBuf, sizeof(aBuf), "%.2f", DisplaySpeedY);
+		DigitsIndex = GetDigitsIndex(DisplaySpeedY, 5);
+		w = (DisplaySpeedY < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
+		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
+		y += LineHeight;
+	}
+
+	if(g_Config.m_ClShowhudPlayerAngle)
+	{
+		TextRender()->Text(0, xl, y, Fontsize, "Angle:", -1.0f);
+		y += LineHeight;
+		str_format(aBuf, sizeof(aBuf), "%.2f", DisplayAngle);
+		DigitsIndex = GetDigitsIndex(DisplayAngle, 5);
+		w = (DisplayAngle < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
+		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
 	}
 }
+
 void CHud::RenderSpectatorHud()
 {
 	// draw the box
@@ -1362,6 +1528,7 @@ void CHud::OnRender()
 			{
 				RenderPlayerState(m_pClient->m_Snap.m_LocalClientID);
 			}
+			RenderMovementInformation(m_pClient->m_Snap.m_LocalClientID);
 			RenderDDRaceEffects();
 		}
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
@@ -1374,6 +1541,10 @@ void CHud::OnRender()
 			if(SpectatorID != SPEC_FREEVIEW && m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData)
 			{
 				RenderPlayerState(SpectatorID);
+			}
+			if(SpectatorID != SPEC_FREEVIEW)
+			{
+				RenderMovementInformation(SpectatorID);
 			}
 			RenderSpectatorHud();
 		}

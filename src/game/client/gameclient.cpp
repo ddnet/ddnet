@@ -1353,6 +1353,7 @@ void CGameClient::OnNewSnapshot()
 				if(Item.m_ID < MAX_CLIENTS)
 				{
 					m_Snap.m_aCharacters[Item.m_ID].m_ExtendedDisplayInfo = *pCharacterDisplayInfo;
+					m_Snap.m_aCharacters[Item.m_ID].m_PrevExtendedDisplayInfo = (const CNetObj_DDNetCharacterDisplayInfo *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, Item.m_ID);
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = true;
 
 					CClientData *pClient = &m_aClients[Item.m_ID];

@@ -1325,6 +1325,11 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Core.m_IsInFreeze = pExtendedDisplayInfo->m_IsInFreeze;
 		m_Core.m_Ninja.m_ActivationTick = pExtendedDisplayInfo->m_NinjaActivationTick;
 		m_Core.m_JumpedTotal = pExtendedDisplayInfo->m_JumpedTotal;
+		if(!IsLocal)
+		{
+			m_Input.m_TargetX = pExtendedDisplayInfo->m_TargetX;
+			m_Input.m_TargetY = pExtendedDisplayInfo->m_TargetY;
+		}
 	}
 }
 

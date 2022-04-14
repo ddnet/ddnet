@@ -55,6 +55,7 @@ class CHud : public CComponent
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(const int ClientID);
 	void RenderDummyActions();
+	void RenderMovementInformation(const int ClientID);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -92,6 +93,8 @@ private:
 	int m_CheckpointTick;
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
+
+	inline int GetDigitsIndex(int Value, float Max);
 
 	// Quad Offsets
 	int m_AmmoOffset[NUM_WEAPONS];

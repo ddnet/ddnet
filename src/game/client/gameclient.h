@@ -318,6 +318,7 @@ public:
 			CNetObj_DDNetCharacter m_ExtendedData;
 			bool m_HasExtendedData;
 
+			const CNetObj_DDNetCharacterDisplayInfo *m_PrevExtendedDisplayInfo;
 			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
 			bool m_HasExtendedDisplayInfo;
 
