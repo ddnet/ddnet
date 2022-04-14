@@ -94,7 +94,7 @@ private:
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
 
-	inline int GetDigitsIndex(int Value, float Max);
+	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets
 	int m_AmmoOffset[NUM_WEAPONS];

@@ -1242,8 +1242,8 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		// Subset: btm_l, top_l, top_m, btm_m | it is rotated 90 degrees clockwise
 		Graphics()->QuadsSetSubsetFree(CutL, CutB, CutL, CutT, ProgPct - (ProgPct - CutL) * EndingPieceProgress, CutT, ProgPct - (ProgPct - CutL) * EndingPieceProgress, CutB);
-		IGraphics::CQuadItem QuadEmptyBeginning(x, y, BarWidth, EndProgressHeight * (1.0f - EndingPieceProgress));
-		Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
+		IGraphics::CQuadItem QuadEmptyEnding(x, y, BarWidth, EndProgressHeight * (1.0f - EndingPieceProgress));
+		Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
 		Graphics()->QuadsEnd();
 	}
 	// full
@@ -1252,8 +1252,8 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// Subset: btm_m, top_m, top_l, btm_l | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
 	Graphics()->QuadsSetSubsetFree(RestPct + (ProgPct - CutL) * EndingPieceProgress, CutB, RestPct + (ProgPct - CutL) * EndingPieceProgress, CutT, CutL, CutT, CutL, CutB);
-	IGraphics::CQuadItem QuadFullBeginning(x, y + (EndProgressHeight * (1.0f - EndingPieceProgress)), BarWidth, EndRestHeight + EndProgressHeight * EndingPieceProgress);
-	Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
+	IGraphics::CQuadItem QuadFullEnding(x, y + (EndProgressHeight * (1.0f - EndingPieceProgress)), BarWidth, EndRestHeight + EndProgressHeight * EndingPieceProgress);
+	Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
 	Graphics()->QuadsEnd();
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
@@ -1309,7 +1309,7 @@ void CHud::RenderDummyActions()
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
 }
 
-inline int CHud::GetDigitsIndex(int Value, float Max)
+inline int CHud::GetDigitsIndex(int Value, int Max)
 {
 	if(Value < 0)
 	{

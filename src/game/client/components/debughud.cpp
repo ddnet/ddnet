@@ -132,8 +132,7 @@ void CDebugHud::RenderTuning()
 		Count++;
 	}
 
-	y = y + Count * 6;
-
+	// Rander Velspeed.X*Ramp Graphs
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	float GraphW = Graphics()->ScreenWidth() / 4.0f;
 	float GraphH = Graphics()->ScreenHeight() / 6.0f;
