@@ -23,8 +23,9 @@ bool CNetClient::Open(NETADDR BindAddr)
 
 int CNetClient::Close()
 {
-	// TODO: implement me
-	return 0;
+	if(!m_Socket)
+		return 0;
+	return net_udp_close(m_Socket);
 }
 
 int CNetClient::Disconnect(const char *pReason)
