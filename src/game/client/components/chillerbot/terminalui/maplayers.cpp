@@ -120,9 +120,12 @@ void CTerminalUI::RenderPlayers(int offX, int offY, int w, int h)
 				// dbg_msg("chiller", "%d / %d", m_pClient->m_aClients[ClientID].m_RenderCur.m_X, mx);
 				int PlayerX = m_pClient->m_aClients[ClientID].m_RenderCur.m_X;
 				int PlayerY = m_pClient->m_aClients[ClientID].m_RenderCur.m_Y;
+				const char *pPlayerSkin = "o";
+				if(m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Weapon == WEAPON_NINJA)
+					pPlayerSkin = "ø";
 				if(PlayerX > mx - 16 && PlayerX < mx + 16)
 					if(PlayerY > my - 16 && PlayerY < my + 16)
-						mvwprintw(g_pGameWindow, offY + renderY, offX + renderX, "o");
+						mvwprintw(g_pGameWindow, offY + renderY, offX + renderX, pPlayerSkin);
 			}
 		}
 	}

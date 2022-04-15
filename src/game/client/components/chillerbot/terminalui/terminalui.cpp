@@ -779,6 +779,12 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	}
 	else if(Key == 'k')
 		m_pClient->SendKill(g_Config.m_ClDummy);
+	else if(KeyInHistory(' ', 5) || Key == ' ')
+	{
+		m_InputData[g_Config.m_ClDummy] = m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy];
+		m_InputData[g_Config.m_ClDummy].m_Jump = 1;
+		m_SendData[g_Config.m_ClDummy] = true;
+	}
 	else if(KeyInHistory('a', 5) || Key == 'a')
 	{
 		m_InputData[g_Config.m_ClDummy] = m_pClient->m_Controls.m_InputData[g_Config.m_ClDummy];
