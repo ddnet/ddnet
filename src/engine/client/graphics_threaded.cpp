@@ -2246,14 +2246,17 @@ int CGraphics_Threaded::IssueInit()
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
-	m_GLUseTrianglesAsQuad = m_pBackend->UseTrianglesAsQuad();
-	m_GLTileBufferingEnabled = m_pBackend->HasTileBuffering();
-	m_GLQuadBufferingEnabled = m_pBackend->HasQuadBuffering();
-	m_GLQuadContainerBufferingEnabled = m_pBackend->HasQuadContainerBuffering();
-	m_GLTextBufferingEnabled = (m_GLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
-	m_GLHasTextureArrays = m_pBackend->Has2DTextureArrays();
-	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
-	m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
+	if(r == 0)
+	{
+		m_GLUseTrianglesAsQuad = m_pBackend->UseTrianglesAsQuad();
+		m_GLTileBufferingEnabled = m_pBackend->HasTileBuffering();
+		m_GLQuadBufferingEnabled = m_pBackend->HasQuadBuffering();
+		m_GLQuadContainerBufferingEnabled = m_pBackend->HasQuadContainerBuffering();
+		m_GLTextBufferingEnabled = (m_GLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
+		m_GLHasTextureArrays = m_pBackend->Has2DTextureArrays();
+		m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+		m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
+	}
 	return r;
 }
 
