@@ -54,6 +54,11 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 		return;
 	if(WinHeight < 3)
 		return;
+	m_NextRender--;
+	if(m_NextRender > 0)
+		return;
+	m_NextRender = 60; // render every 60 what every this isy
+
 
 	static const int MAX_FRAME_WIDTH = 64;
 	/*
@@ -200,10 +205,12 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 							str_append(aFrame[renderY], "█", sizeof(aFrame));
 							aFrameByteCount[renderY] += (int)sizeof("█");
 						}
-						// else if(Index == TILE_FREEZE)
-						// {
-						// 	aFrame[renderY][renderX] = 'x'; // TODO: use ▒
-						// }
+						else if(Index == TILE_FREEZE)
+						{
+							// aFrame[renderY][renderX] = 'x'; // TODO: use ▒
+							str_append(aFrame[renderY], "▒", sizeof(aFrame));
+							aFrameByteCount[renderY] += (int)sizeof("▒");
+						}
 						else
 						{
 							// aFrame[renderY][renderX] = '?';
@@ -228,11 +235,6 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 	}
 	if(rendered_tiles == 0)
 		return;
-
-	m_NextRender--;
-	if(m_NextRender == 0)
-		return;
-	m_NextRender = 60; // render every 60 what every this isy
 	// render frame
 	int RenderToHeight = minimum(32, WinHeight);
 	for(int y = 0; y < RenderToHeight; y++)
@@ -242,6 +244,7 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 			aFrame[y][WinWidth - 2] = '\0';
 		mvwprintw(g_pLogWindow, offY + y, offX, "|%-*s|", (WinWidth - 2) + (aFrameByteCount[y] - aFrameLetterCount[y]), aFrame[y]);
 	}
+	wrefresh(g_pLogWindow);
 	// printf("------------- tiles: %d \n\n", rendered_tiles);
 	// printf("%s\n-------------\n", aFrame[15]);
 }
