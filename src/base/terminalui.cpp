@@ -9,6 +9,7 @@
 static char gs_aaChillerLogger[CHILLER_LOGGER_HEIGHT][CHILLER_LOGGER_WIDTH];
 
 WINDOW *g_pLogWindow = NULL;
+WINDOW *g_pGameWindow = NULL;
 WINDOW *g_pInfoWin = NULL;
 WINDOW *g_pInputWin = NULL;
 

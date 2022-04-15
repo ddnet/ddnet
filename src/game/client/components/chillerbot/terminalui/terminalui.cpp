@@ -110,20 +110,28 @@ int CTerminalUI::CursesTick()
 		mvwin(g_pInputWin, g_NewY - NC_INFO_SIZE, 0);
 
 		wclear(stdscr);
-		wclear(g_pLogWindow);
 		wclear(g_pInfoWin);
 		wclear(g_pInputWin);
 
 		DrawBorders(g_pLogWindow);
 		DrawBorders(g_pInfoWin);
 		DrawBorders(g_pInputWin);
+
+		if(m_pClient->m_Snap.m_pLocalCharacter)
+		{
+			wresize(g_pGameWindow, g_NewY - NC_INFO_SIZE * 2, g_NewX); // TODO: fix this size
+			wclear(g_pLogWindow);
+			DrawBorders(g_pGameWindow);
+		}
+
 		gs_NeedLogDraw = true;
 	}
 
 	// draw to our windows
 	LogDraw();
 	InfoDraw();
-	RenderGame();
+	if(m_pClient->m_Snap.m_pLocalCharacter)
+		RenderGame();
 	RenderServerList();
 	RenderConnecting();
 	RenderPopup();
@@ -252,6 +260,7 @@ void CTerminalUI::OnInit()
 	getmaxyx(stdscr, g_ParentY, g_ParentX);
 
 	g_pLogWindow = newwin(g_ParentY - NC_INFO_SIZE * 2, g_ParentX, 0, 0);
+	g_pGameWindow = newwin(g_ParentY - NC_INFO_SIZE * 2, g_ParentX, 0, 0); // TODO: fix this size
 	g_pInfoWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE * 2, 0);
 	g_pInputWin = newwin(NC_INFO_SIZE, g_ParentX, g_ParentY - NC_INFO_SIZE, 0);
 

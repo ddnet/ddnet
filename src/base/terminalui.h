@@ -11,6 +11,7 @@
 #define CHILLER_LOGGER_HEIGHT 128
 
 extern WINDOW *g_pLogWindow;
+extern WINDOW *g_pGameWindow;
 extern WINDOW *g_pInfoWin;
 extern WINDOW *g_pInputWin;
 

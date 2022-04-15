@@ -16,8 +16,8 @@
 
 void CTerminalUI::RenderGame()
 {
-	int mx = getmaxx(g_pLogWindow);
-	int my = getmaxy(g_pLogWindow);
+	int mx = getmaxx(g_pGameWindow);
+	int my = getmaxy(g_pGameWindow);
 	int offY = 5;
 	int offX = 2;
 	if(my < 20)
@@ -26,10 +26,10 @@ void CTerminalUI::RenderGame()
 	int height = minimum(32, my - 2);
 	if(height < 2)
 		return;
-	DrawBorders(g_pLogWindow, offX, offY - 1, width, height + 2);
+	DrawBorders(g_pGameWindow, offX, offY - 1, width, height + 2);
 
 	for(int i = 0; i < height; i++)
-		mvwprintw(g_pLogWindow, offY + i, offX, "|%-*s|", width - 2, " loading ... ");
+		mvwprintw(g_pGameWindow, offY + i, offX, "|%-*s|", width - 2, " loading ... ");
 
 	CMapItemLayer *pLayer = (CMapItemLayer *)Layers()->GameLayer();
 	if(!pLayer)
@@ -90,20 +90,10 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 	ScreenY1 = (static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y) / 32.0f) + (render_dist / 2);
 	// dbg_msg("screen", "x0: %2.f y0: %.2f x1: %.2f y1: %.2f", ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 
-	// calculate the final pixelsize for the tiles
-	float TilePixelSize = 1024 / 32.0f;
-	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * 16; // 16 = chillerbot screen width
-	float FinalTilesetScale = FinalTileSize / TilePixelSize;
-
 	int StartY = (int)(ScreenY0 / Scale) - 1;
 	int StartX = (int)(ScreenX0 / Scale) - 1;
 	int EndY = (int)(ScreenY1 / Scale) + 1;
 	int EndX = (int)(ScreenX1 / Scale) + 1;
-
-	// adjust the texture shift according to mipmap level
-	float TexSize = 1024.0f;
-	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
-	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
 
 	for(int y = StartY; y < EndY; y++)
 	{
@@ -143,85 +133,54 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 			renderY += 16;
 			if(Index)
 			{
-				unsigned char Flags = pTiles[c].m_Flags;
-				bool Render = true;
-
-				if(Render)
+				// dbg_msg("map", "draw tile=%d at x: %.2f y: %.2f w: %.2f h: %.2f", Index, x*Scale, y*Scale, Scale, Scale);
+				// dbg_msg("map", "absolut tile x: %d y: %d       tee x: %.2f y: %.2f", renderX, renderY, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f);
+				// dbg_msg("map", "array pos  tile x: %d y: %d\n", renderX, renderY);
+				if(renderX > 0 && renderX < 64 && renderY > 0 && renderY < 32)
 				{
-					int tx = Index % 16;
-					int ty = Index / 16;
-					int Px0 = tx * (1024 / 16);
-					int Py0 = ty * (1024 / 16);
-					int Px1 = Px0 + (1024 / 16) - 1;
-					int Py1 = Py0 + (1024 / 16) - 1;
-
-					float x0 = Nudge + Px0 / TexSize + Frac;
-					float y0 = Nudge + Py0 / TexSize + Frac;
-					float x1 = Nudge + Px1 / TexSize - Frac;
-					float y1 = Nudge + Py0 / TexSize + Frac;
-					float x2 = Nudge + Px1 / TexSize - Frac;
-					float y2 = Nudge + Py1 / TexSize - Frac;
-					float x3 = Nudge + Px0 / TexSize + Frac;
-					float y3 = Nudge + Py1 / TexSize - Frac;
-
-					if(Flags & TILEFLAG_VFLIP)
+					if(Index == TILE_SOLID)
 					{
-						x0 = x2;
-						x1 = x3;
-						x2 = x3;
-						x3 = x0;
+						// TODO: use ▆
+						// aFrame[renderY][renderX] = '#';
+						str_append(aFrame[renderY], "█", sizeof(aFrame));
+						aFrameByteCount[renderY] += (int)sizeof("█");
 					}
-
-					if(Flags & TILEFLAG_HFLIP)
+					else if(Index == TILE_FREEZE)
 					{
-						y0 = y3;
-						y2 = y1;
-						y3 = y1;
-						y1 = y0;
+						// aFrame[renderY][renderX] = 'x'; // TODO: use ▒
+						str_append(aFrame[renderY], "▒", sizeof(aFrame));
+						aFrameByteCount[renderY] += (int)sizeof("▒");
 					}
-
-					if(Flags & TILEFLAG_ROTATE)
+					else if(Index == TILE_UNFREEZE)
 					{
-						float Tmp = x0;
-						x0 = x3;
-						x3 = x2;
-						x2 = x1;
-						x1 = Tmp;
-						Tmp = y0;
-						y0 = y3;
-						y3 = y2;
-						y2 = y1;
-						y1 = Tmp;
+						str_append(aFrame[renderY], "░", sizeof(aFrame));
+						aFrameByteCount[renderY] += (int)sizeof("░");
 					}
-					// dbg_msg("map", "draw tile=%d at x: %.2f y: %.2f w: %.2f h: %.2f", Index, x*Scale, y*Scale, Scale, Scale);
-					// dbg_msg("map", "absolut tile x: %d y: %d       tee x: %.2f y: %.2f", renderX, renderY, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_X)/32.0f, static_cast<float>(m_pClient->m_Snap.m_pLocalCharacter->m_Y)/32.0f);
-					// dbg_msg("map", "array pos  tile x: %d y: %d\n", renderX, renderY);
-					if(renderX > 0 && renderX < 64 && renderY > 0 && renderY < 32)
+					else if(Index == TILE_DEATH)
 					{
-						if(Index == TILE_SOLID)
-						{
-							// TODO: use ▆
-							// aFrame[renderY][renderX] = '#';
-							str_append(aFrame[renderY], "█", sizeof(aFrame));
-							aFrameByteCount[renderY] += (int)sizeof("█");
-						}
-						else if(Index == TILE_FREEZE)
-						{
-							// aFrame[renderY][renderX] = 'x'; // TODO: use ▒
-							str_append(aFrame[renderY], "▒", sizeof(aFrame));
-							aFrameByteCount[renderY] += (int)sizeof("▒");
-						}
-						else
-						{
-							// aFrame[renderY][renderX] = '?';
-							str_append(aFrame[renderY], "?", sizeof(aFrame));
-							aFrameByteCount[renderY]++;
-						}
-						rendered_tiles++;
-						aFrameLetterCount[renderY]++;
+						str_append(aFrame[renderY], "x", sizeof(aFrame));
+						aFrameByteCount[renderY] += (int)sizeof("x");
 					}
-					// aFrame[15][32] = 'o'; // tee in center
+					else if(Index == TILE_NOHOOK)
+					{
+						// 🮽
+						str_append(aFrame[renderY], "🮽", sizeof(aFrame));
+						aFrameByteCount[renderY] += (int)sizeof("🮽");
+					}
+					else
+					{
+						// aFrame[renderY][renderX] = '?';
+						str_append(aFrame[renderY], " ", sizeof(aFrame));
+						aFrameByteCount[renderY]++;
+						// char aIndex[16];
+						// str_format(aIndex, sizeof(aIndex), "[%d]", Index);
+						// str_append(aFrame[renderY], aIndex, sizeof(aFrame));
+						// aFrameByteCount[renderY] += str_length(aIndex);
+					}
+					rendered_tiles++;
+					aFrameLetterCount[renderY]++;
 				}
+				// aFrame[15][32] = 'o'; // tee in center
 			}
 			else
 			{
@@ -242,9 +201,9 @@ void CTerminalUI::RenderTilemap(CTile *pTiles, int offX, int offY, int WinWidth,
 		// printf("%s\n", aFrame[y]);
 		if(WinWidth < (int)sizeof(WinWidth))
 			aFrame[y][WinWidth - 2] = '\0';
-		mvwprintw(g_pLogWindow, offY + y, offX, "|%-*s|", (WinWidth - 2) + (aFrameByteCount[y] - aFrameLetterCount[y]), aFrame[y]);
+		mvwprintw(g_pGameWindow, offY + y, offX, "|%-*s|", (WinWidth - 2) + (aFrameByteCount[y] - aFrameLetterCount[y]), aFrame[y]);
 	}
-	wrefresh(g_pLogWindow);
+	wrefresh(g_pGameWindow);
 	// printf("------------- tiles: %d \n\n", rendered_tiles);
 	// printf("%s\n-------------\n", aFrame[15]);
 }
