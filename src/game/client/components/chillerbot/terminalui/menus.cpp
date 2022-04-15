@@ -211,7 +211,10 @@ void CTerminalUI::RenderPopup()
 	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
 	str_format(aBuf, sizeof(aBuf), "%*s", (width - ExtraTextLen) < 1 ? 0 : ((width - ExtraTextMid) / 2), aExtraText);
 	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
-	str_format(aBuf, sizeof(aBuf), "%*s", (width - 6) < 1 ? 0 : ((width - 6) / 2), "[ OK ]");
+	if(m_Popup == POPUP_DISCONNECTED)
+		str_format(aBuf, sizeof(aBuf), "%*s", (width - 9) < 1 ? 0 : ((width - 9) / 2), "[ ABORT ]");
+	else
+		str_format(aBuf, sizeof(aBuf), "%*s", (width - 6) < 1 ? 0 : ((width - 6) / 2), "[ OK ]");
 	mvwprintw(g_pLogWindow, offY++, offX, "|%-*s|", width - 2, aBuf);
 }
 

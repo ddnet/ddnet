@@ -799,6 +799,8 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	else if(Key == 10 && (m_Popup == POPUP_MESSAGE || m_Popup == POPUP_DISCONNECTED)) // return
 	{
 		// click "[ OK ]" on popups using enter
+		if(m_Popup == POPUP_DISCONNECTED && Client()->m_ReconnectTime > 0)
+			Client()->m_ReconnectTime = 0;
 		m_Popup = POPUP_NONE;
 		gs_NeedLogDraw = true;
 		m_NewInput = true;
