@@ -57,6 +57,7 @@ void CTerminalUI::RenderHelpPage()
 		" f1    - local console",
 		" f2    - remote console",
 		" h     - auto reply to known chat messages",
+		" v     - toggle visual mode (render game world)",
 		" a     - walk left",
 		" d     - walk right",
 		" k     - selfkill"};

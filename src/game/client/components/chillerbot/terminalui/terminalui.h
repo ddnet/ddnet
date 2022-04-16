@@ -238,6 +238,7 @@ class CTerminalUI : public CComponent
 	void RenderPlayers(int offX, int offY, int w, int h);
 	bool IsPlayerInfoAvailable(int ClientID) const;
 	int m_NextRender; // TODO: remove
+	bool m_RenderGame;
 
 public:
 	int OnKeyPress(int Key, WINDOW *pWin);

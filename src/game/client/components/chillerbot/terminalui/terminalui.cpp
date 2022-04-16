@@ -117,7 +117,7 @@ int CTerminalUI::CursesTick()
 		DrawBorders(g_pInfoWin);
 		DrawBorders(g_pInputWin);
 
-		if(m_pClient->m_Snap.m_pLocalCharacter)
+		if(m_pClient->m_Snap.m_pLocalCharacter && m_RenderGame)
 		{
 			wresize(g_pGameWindow, g_NewY - NC_INFO_SIZE * 2, g_NewX); // TODO: fix this size
 			wclear(g_pLogWindow);
@@ -130,7 +130,7 @@ int CTerminalUI::CursesTick()
 	// draw to our windows
 	LogDraw();
 	InfoDraw();
-	if(m_pClient->m_Snap.m_pLocalCharacter)
+	if(m_pClient->m_Snap.m_pLocalCharacter && m_RenderGame)
 		RenderGame();
 	RenderServerList();
 	RenderConnecting();
@@ -231,6 +231,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_RenderGame = false;
 	m_SendData[0] = false;
 	m_SendData[1] = false;
 	m_NextRender = 0;
@@ -802,6 +803,12 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 	else if(Key == '?')
 	{
 		m_RenderHelpPage = !m_RenderHelpPage;
+		gs_NeedLogDraw = true;
+		m_NewInput = true;
+	}
+	else if(Key == 'v')
+	{
+		m_RenderGame = !m_RenderGame;
 		gs_NeedLogDraw = true;
 		m_NewInput = true;
 	}
