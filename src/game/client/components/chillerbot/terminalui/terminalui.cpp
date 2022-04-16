@@ -89,8 +89,26 @@ void CTerminalUI::InputDraw()
 	else
 		str_copy(aBuf, g_aInputStr, sizeof(aBuf));
 	int x = getmaxx(g_pInfoWin);
-	aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
+	if(x < (int)sizeof(aBuf))
+		aBuf[x - 2] = '\0'; // prevent line wrapping and cut on screen border
+	wattron(g_pInputWin, COLOR_PAIR(1));
+	wattron(g_pInputWin, A_BOLD);
 	mvwprintw(g_pInputWin, 1, 1, "%s", aBuf);
+	refresh();
+	wattroff(g_pInputWin, A_BOLD);
+	wattroff(g_pInputWin, COLOR_PAIR(2));
+	if(m_aCompletionPreview[0])
+	{
+		int Offset = str_length(aBuf) + 1;
+		int LineWrap = x - (Offset + 2);
+		if(LineWrap > 0)
+		{
+			m_aCompletionPreview[LineWrap] = '\0';
+			dbg_msg("comp", "prev=%s", m_aCompletionPreview);
+			mvwprintw(g_pInputWin, 1, Offset, " %s", m_aCompletionPreview);
+		}
+	}
+	refresh();
 	UpdateCursor();
 }
 
@@ -231,6 +249,10 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_LastInputMode = -1;
+	m_aCompletionPreview[0] = '\0';
+	m_CompletionEnumerationCount = -1;
+	m_CompletionChosen = -1;
 	m_RenderGame = false;
 	m_SendData[0] = false;
 	m_SendData[1] = false;
@@ -256,6 +278,9 @@ void CTerminalUI::OnInit()
 	initscr();
 	noecho();
 	curs_set(TRUE);
+	start_color();
+	init_pair(1, COLOR_WHITE, COLOR_BLACK);
+	init_pair(2, COLOR_CYAN, COLOR_BLACK);
 
 	// set up initial windows
 	getmaxyx(stdscr, g_ParentY, g_ParentX);
@@ -293,6 +318,13 @@ void CTerminalUI::OnRender()
 	if(cl_InterruptSignaled)
 		Console()->ExecuteLine("quit");
 
+	if(m_InputMode != m_LastInputMode)
+	{
+		if(m_LastInputMode != -1)
+			OnInputModeChange(m_LastInputMode, m_InputMode);
+		m_LastInputMode = m_InputMode;
+	}
+
 	if(!m_pClient->m_Snap.m_pLocalCharacter)
 		return;
 	float X = m_pClient->m_Snap.m_pLocalCharacter->m_X;
@@ -301,6 +333,17 @@ void CTerminalUI::OnRender()
 		"%.2f %.2f scoreboard=%d",
 		X / 32, Y / 32,
 		m_ScoreboardActive);
+}
+
+void CTerminalUI::OnInputModeChange(int Old, int New)
+{
+	ResetCompletion();
+	m_InputCursor = 0;
+	m_aCompletionPreview[0] = '\0';
+	wclear(g_pInputWin);
+	InputDraw();
+	DrawBorders(g_pInputWin);
+	UpdateCursor();
 }
 
 int CTerminalUI::GetInput()
@@ -400,81 +443,10 @@ int CTerminalUI::GetInput()
 		}
 		else if(keyname(c)[0] == '^' && keyname(c)[1] == 'I') // tab
 		{
-			m_CompletionIndex++;
-			bool IsSpace = true;
-			const char *pInput = g_aInputStr;
-			if(m_InputMode > NUM_INPUTS) // reverse i search
-				pInput = m_aInputSearch;
-			int Count = 0;
-			if(m_CompletionIndex == 0)
-			{
-				for(int i = m_InputCursor; i > 0; i--)
-				{
-					if(pInput[i] == ' ' && IsSpace)
-						continue;
-					Count++;
-					if(i == 1) // reach beginning of line no spaces
-					{
-						str_copy(m_aCompletionBuffer, pInput, sizeof(m_aCompletionBuffer));
-						break;
-					}
-					if(pInput[i] != ' ')
-					{
-						IsSpace = false;
-						continue;
-					}
-					// tbh idk what this is. Helps with offset on multiple words
-					// probably counting the space in front of the word or something
-					if(Count > 1)
-						Count -= 2;
-					str_copy(m_aCompletionBuffer, pInput + i + 1, sizeof(m_aCompletionBuffer));
-					break;
-				}
-				m_aCompletionBuffer[Count] = '\0';
-			}
-			const char *PlayerName, *FoundInput;
-			int Matches = 0;
-			const char *pMatch = NULL;
-			bool Found = false;
-			for(auto &PlayerInfo : m_pClient->m_Snap.m_paInfoByName)
-			{
-				if(!PlayerInfo)
-					continue;
-
-				PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
-				FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
-				if(!FoundInput)
-					continue;
-				if(!pMatch)
-					pMatch = PlayerName;
-				if(Matches++ < m_CompletionIndex)
-					continue;
-
-				pMatch = PlayerName;
-				Found = true;
-				break;
-			}
-			if(!pMatch)
-			{
-				m_CompletionIndex = 0;
-				return 0;
-			}
-			char aBuf[1024];
-			str_copy(aBuf, g_aInputStr, sizeof(aBuf));
-			int BufLen = str_length(aBuf);
-			if(BufLen >= m_LastCompletionLength + Count)
-				Count += m_LastCompletionLength;
-			aBuf[BufLen - Count] = '\0';
-			str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aBuf, pMatch);
-			wclear(g_pInputWin);
-			InputDraw();
-			DrawBorders(g_pInputWin);
-			int MatchLen = str_length(pMatch);
-			m_LastCompletionLength = MatchLen;
-			m_InputCursor += MatchLen - Count;
-			UpdateCursor();
-			if(!Found)
-				m_CompletionIndex = 0;
+			if(m_InputMode == INPUT_REMOTE_CONSOLE || m_InputMode == INPUT_LOCAL_CONSOLE)
+				CompleteCommands();
+			else
+				CompleteNames();
 			return 0;
 		}
 		else if(keyname(c)[0] == '^' && keyname(c)[1] == '[')
@@ -720,10 +692,138 @@ int CTerminalUI::GetInput()
 	return 0;
 }
 
+void CTerminalUI::CompleteCommands()
+{
+	int CompletionFlagmask = 0;
+	if(m_InputMode == INPUT_LOCAL_CONSOLE)
+		CompletionFlagmask = CFGFLAG_CLIENT;
+	else
+		CompletionFlagmask = CFGFLAG_SERVER;
+
+	if(m_CompletionEnumerationCount == -1)
+		str_copy(m_aCompletionBuffer, g_aInputStr, sizeof(m_aCompletionBuffer));
+
+	dbg_msg("complete", "buffer='%s' index=%d count=%d", m_aCompletionBuffer, m_CompletionChosen, m_CompletionEnumerationCount);
+
+	m_aCompletionPreview[0] = '\0';
+	m_CompletionEnumerationCount = 0;
+	m_CompletionChosen++;
+	Console()->PossibleCommands(m_aCompletionBuffer, CompletionFlagmask, m_InputMode != INPUT_LOCAL_CONSOLE && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
+
+	// handle wrapping
+	if(m_CompletionEnumerationCount && (m_CompletionChosen >= m_CompletionEnumerationCount || m_CompletionChosen < 0))
+	{
+		m_CompletionChosen = (m_CompletionChosen + m_CompletionEnumerationCount) % m_CompletionEnumerationCount;
+		m_CompletionEnumerationCount = 0;
+		Console()->PossibleCommands(m_aCompletionBuffer, CompletionFlagmask, m_InputMode != INPUT_LOCAL_CONSOLE && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
+	}
+}
+
+void CTerminalUI::PossibleCommandsCompleteCallback(const char *pStr, void *pUser)
+{
+	CTerminalUI *pSelf = (CTerminalUI *)pUser;
+	if(pSelf->m_CompletionChosen == pSelf->m_CompletionEnumerationCount)
+	{
+		str_copy(g_aInputStr, pStr, sizeof(g_aInputStr));
+		wclear(g_pInputWin);
+		pSelf->m_InputCursor = str_length(pStr);
+		pSelf->InputDraw();
+		pSelf->DrawBorders(g_pInputWin);
+		pSelf->UpdateCursor();
+	}
+	else
+	{
+		str_append(pSelf->m_aCompletionPreview, pStr, sizeof(pSelf->m_aCompletionPreview));
+		str_append(pSelf->m_aCompletionPreview, " ", sizeof(pSelf->m_aCompletionPreview));
+	}
+	pSelf->m_CompletionEnumerationCount++;
+}
+
+void CTerminalUI::CompleteNames()
+{
+	m_CompletionIndex++;
+	bool IsSpace = true;
+	const char *pInput = g_aInputStr;
+	if(m_InputMode > NUM_INPUTS) // reverse i search
+		pInput = m_aInputSearch;
+	int Count = 0;
+	if(m_CompletionIndex == 0)
+	{
+		for(int i = m_InputCursor; i > 0; i--)
+		{
+			if(pInput[i] == ' ' && IsSpace)
+				continue;
+			Count++;
+			if(i == 1) // reach beginning of line no spaces
+			{
+				str_copy(m_aCompletionBuffer, pInput, sizeof(m_aCompletionBuffer));
+				break;
+			}
+			if(pInput[i] != ' ')
+			{
+				IsSpace = false;
+				continue;
+			}
+			// tbh idk what this is. Helps with offset on multiple words
+			// probably counting the space in front of the word or something
+			if(Count > 1)
+				Count -= 2;
+			str_copy(m_aCompletionBuffer, pInput + i + 1, sizeof(m_aCompletionBuffer));
+			break;
+		}
+		m_aCompletionBuffer[Count] = '\0';
+	}
+	const char *PlayerName, *FoundInput;
+	int Matches = 0;
+	const char *pMatch = NULL;
+	bool Found = false;
+	for(auto &PlayerInfo : m_pClient->m_Snap.m_paInfoByName)
+	{
+		if(!PlayerInfo)
+			continue;
+
+		PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
+		FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
+		if(!FoundInput)
+			continue;
+		if(!pMatch)
+			pMatch = PlayerName;
+		if(Matches++ < m_CompletionIndex)
+			continue;
+
+		pMatch = PlayerName;
+		Found = true;
+		break;
+	}
+	if(!pMatch)
+	{
+		m_CompletionIndex = 0;
+		return;
+	}
+	char aBuf[1024];
+	str_copy(aBuf, g_aInputStr, sizeof(aBuf));
+	int BufLen = str_length(aBuf);
+	if(BufLen >= m_LastCompletionLength + Count)
+		Count += m_LastCompletionLength;
+	aBuf[BufLen - Count] = '\0';
+	str_format(g_aInputStr, sizeof(g_aInputStr), "%s%s", aBuf, pMatch);
+	wclear(g_pInputWin);
+	InputDraw();
+	DrawBorders(g_pInputWin);
+	int MatchLen = str_length(pMatch);
+	m_LastCompletionLength = MatchLen;
+	m_InputCursor += MatchLen - Count;
+	UpdateCursor();
+	if(!Found)
+		m_CompletionIndex = 0;
+}
+
 void CTerminalUI::ResetCompletion()
 {
+	m_aCompletionBuffer[0] = '\0';
 	m_LastCompletionLength = 0;
 	m_CompletionIndex = -1;
+	m_CompletionEnumerationCount = -1;
 }
 
 void CTerminalUI::UpdateCursor()

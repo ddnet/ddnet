@@ -158,6 +158,7 @@ class CTerminalUI : public CComponent
 	void SetServerBrowserPage(int NewPage);
 	void RenderPopup();
 	bool IsSearchInputMode() { return m_InputMode > NUM_INPUTS; }
+	void OnInputModeChange(int Old, int New);
 	/*
 		UpdateCursor
 
@@ -223,6 +224,7 @@ class CTerminalUI : public CComponent
 	bool m_RenderHelpPage;
 	int m_SelectedServer;
 	int m_InputMode;
+	int m_LastInputMode;
 	int64_t m_LastKeyPress;
 	char m_LastKeyPressed;
 	int m_NumServers;
@@ -231,6 +233,20 @@ class CTerminalUI : public CComponent
 	int m_CompletionIndex;
 	int m_LastCompletionLength;
 	char m_aCompletionBuffer[1024];
+	char m_aCompletionPreview[1024];
+	/*
+		m_CompletionChosen
+
+		Somehow a dupe of m_CompletionIndex
+		but m_CompletionIndex is used for my own completion implementation
+		and m_CompletionChosen for a more teeworlds style implementation
+	*/
+	int m_CompletionChosen;
+	int m_CompletionEnumerationCount;
+	void CompleteNames();
+	void CompleteCommands();
+
+	static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
 
 	// render in game
 	void RenderGame();
