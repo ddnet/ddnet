@@ -31,7 +31,6 @@
 #endif
 
 #include "graphics_threaded.h"
-#include "graphics_threaded_null.h"
 
 static CVideoMode g_aFakeModes[] = {
 	{8192, 4320, 8192, 4320, 0, 8, 8, 8, 0}, {7680, 4320, 7680, 4320, 0, 8, 8, 8, 0}, {5120, 2880, 5120, 2880, 0, 8, 8, 8, 0},
@@ -2842,9 +2841,5 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()
 {
-#ifdef CONF_HEADLESS_CLIENT
-	return new CGraphics_ThreadedNull();
-#else
 	return new CGraphics_Threaded();
-#endif
 }
