@@ -2747,6 +2747,8 @@ int CServer::Run()
 		free(Client.m_pPersistentData);
 	}
 
+	m_NetServer.Close();
+
 	return ErrorShutdown();
 }
 

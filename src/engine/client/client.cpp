@@ -3316,6 +3316,10 @@ void CClient::Run()
 	GameClient()->OnShutdown();
 	Disconnect();
 
+	// close socket
+	for(unsigned int i = 0; i < std::size(m_NetClient); i++)
+		m_NetClient[i].Close();
+
 	delete m_pEditor;
 	m_pGraphics->Shutdown();
 

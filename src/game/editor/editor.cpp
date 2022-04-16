@@ -280,8 +280,9 @@ void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void
 	}
 
 	CEnvelope *e = pThis->m_Map.m_lEnvelopes[Env];
-	float t = pThis->m_AnimateTime + (TimeOffsetMillis / 1000.0f);
+	float t = pThis->m_AnimateTime;
 	t *= pThis->m_AnimateSpeed;
+	t += (TimeOffsetMillis / 1000.0f);
 	e->Eval(t, pChannels);
 }
 
