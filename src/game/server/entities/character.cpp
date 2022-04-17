@@ -58,6 +58,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
+	m_NumInputs = 0;
 	m_SpawnTick = Server()->Tick();
 	m_WeaponChangeTick = Server()->Tick();
 	Antibot()->OnSpawn(m_pPlayer->GetCID());
