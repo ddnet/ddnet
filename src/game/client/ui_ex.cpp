@@ -339,6 +339,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
+			SetHasSelection(false);
 			ReturnValue = true;
 		}
 
