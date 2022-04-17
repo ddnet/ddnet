@@ -92,6 +92,8 @@ enum
 	ENTITY_DOOR = 49,
 	//End Of Lower Tiles
 	NUM_ENTITIES,
+	//Tiles used on Blockworlds server
+	TILE_BLOCKWORLD_DUNFREEZE = 7,
 	//Start From Top Left
 	//Tile Controllers
 	TILE_AIR = 0,

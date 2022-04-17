@@ -1412,32 +1412,60 @@ static int s_GametileOpSelected = -1;
 
 int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static const char *s_pButtonNames[] = {
-		"Air",
-		"Hookable",
-		"Death",
-		"Unhookable",
-		"Hookthrough",
-		"Freeze",
-		"Unfreeze",
-		"Deep Freeze",
-		"Deep Unfreeze",
-		"Blue Check-Tele",
-		"Red Check-Tele",
-		"Live Freeze",
-		"Live Unfreeze",
-	};
-	static unsigned s_NumButtons = std::size(s_pButtonNames);
-	CUIRect Button;
-
-	for(unsigned i = 0; i < s_NumButtons; ++i)
+	if (pEditor->m_SelectEntitiesImage == "blockworlds")
 	{
-		View.HSplitTop(2.0f, 0, &View);
-		View.HSplitTop(12.0f, &Button, &View);
-		if(pEditor->DoButton_Editor(&s_pButtonNames[i], s_pButtonNames[i], 0, &Button, 0, 0))
-			s_GametileOpSelected = i;
+		static const char *s_pButtonNames[] = {
+		
+			"Air",
+			"Hookable",
+			"Death",
+			"Unhookable",
+			"Freeze",
+			"Unfreeze",
+			"Deep Freeze",
+			"Deep Unfreeze",
+		};
+		static unsigned s_NumButtons = std::size(s_pButtonNames);
+		CUIRect Button;
+
+		for(unsigned i = 0; i < s_NumButtons; ++i)
+		{
+			View.HSplitTop(2.0f, 0, &View);
+			View.HSplitTop(20.0f, &Button, &View); // 20 instead of 13 because like that it fills the whole space
+			if(pEditor->DoButton_Editor(&s_pButtonNames[i], s_pButtonNames[i], 0, &Button, 0, 0))
+				s_GametileOpSelected = i;
+		}
 	}
 
+	else if (pEditor->m_SelectEntitiesImage == "DDNet")
+	{
+		static const char *s_pButtonNames[] = {
+		
+			"Air",
+			"Hookable",
+			"Death",
+			"Unhookable",
+			"Hookthrough",
+			"Freeze",
+			"Unfreeze",
+			"Deep Freeze",
+			"Deep Unfreeze",
+			"Blue Check-Tele",
+			"Red Check-Tele",
+			"Live Freeze",
+			"Live Unfreeze",
+		};
+		static unsigned s_NumButtons = std::size(s_pButtonNames);
+		CUIRect Button;
+
+		for(unsigned i = 0; i < s_NumButtons; ++i)
+		{
+			View.HSplitTop(2.0f, 0, &View);
+			View.HSplitTop(12.0f, &Button, &View);
+			if(pEditor->DoButton_Editor(&s_pButtonNames[i], s_pButtonNames[i], 0, &Button, 0, 0))
+				s_GametileOpSelected = i;
+		}
+	}
 	return 0;
 }
 
@@ -1877,7 +1905,7 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				pEditor->m_AllowPlaceUnusedTiles = pEditor->m_SelectEntitiesImage == "DDNet" ? 0 : -1;
 				pEditor->m_PreventUnusedTilesWasWarned = false;
 
-				char aBuf[512];
+				char aBuf[512]; // usefull
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
 
 				if(pEditor->m_EntitiesTexture.IsValid())

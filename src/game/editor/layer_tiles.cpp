@@ -712,92 +712,118 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		if(m_pEditor->DoButton_Editor(&s_ColclButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
 			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
 
-		int Result = m_pEditor->PopupSelectGameTileOpResult();
-		switch(Result)
-		{
-		case 4:
-			Result = TILE_THROUGH_CUT;
-			break;
-		case 5:
-			Result = TILE_FREEZE;
-			break;
-		case 6:
-			Result = TILE_UNFREEZE;
-			break;
-		case 7:
-			Result = TILE_DFREEZE;
-			break;
-		case 8:
-			Result = TILE_DUNFREEZE;
-			break;
-		case 9:
-			Result = TILE_TELECHECKIN;
-			break;
-		case 10:
-			Result = TILE_TELECHECKINEVIL;
-			break;
-		case 11:
-			Result = TILE_LFREEZE;
-			break;
-		case 12:
-			Result = TILE_LUNFREEZE;
-			break;
-		default:
-			break;
-		}
-		if(Result > -1)
-		{
-			int OffsetX = -pGroup->m_OffsetX / 32;
-			int OffsetY = -pGroup->m_OffsetY / 32;
+			int Result = m_pEditor->PopupSelectGameTileOpResult();
 
-			if(Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
+			if (m_pEditor->m_SelectEntitiesImage == "DDNet")
 			{
-				CLayerTiles *pGLayer = m_pEditor->m_Map.m_pGameLayer;
-
-				if(pGLayer->m_Width < m_Width + OffsetX || pGLayer->m_Height < m_Height + OffsetY)
+				switch(Result)
 				{
-					int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
-					int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
-					pGLayer->Resize(NewW, NewH);
+				case 4:
+					Result = TILE_THROUGH_CUT;
+					break;
+				case 5:
+					Result = TILE_FREEZE;
+					break;
+				case 6:
+					Result = TILE_UNFREEZE;
+					break;
+				case 7:
+					Result = TILE_DFREEZE;
+					break;
+				case 8:
+					Result = TILE_DUNFREEZE;
+					break;
+				case 9:
+					Result = TILE_TELECHECKIN;
+					break;
+				case 10:
+					Result = TILE_TELECHECKINEVIL;
+					break;
+				case 11:
+					Result = TILE_LFREEZE;
+					break;
+				case 12:
+					Result = TILE_LUNFREEZE;
+					break;
+				default:
+					break;
 				}
-
-				for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
-					for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
-						if(GetTile(x, y).m_Index)
-						{
-							CTile ResultTile = {(unsigned char)Result};
-							pGLayer->SetTile(x + OffsetX, y + OffsetY, ResultTile);
-						}
-			}
-			else
-			{
-				if(!m_pEditor->m_Map.m_pTeleLayer)
-				{
-					CLayer *pLayer = new CLayerTele(m_Width, m_Height);
-					m_pEditor->m_Map.MakeTeleLayer(pLayer);
-					m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
-				}
-
-				CLayerTele *pTLayer = m_pEditor->m_Map.m_pTeleLayer;
-
-				if(pTLayer->m_Width < m_Width + OffsetX || pTLayer->m_Height < m_Height + OffsetY)
-				{
-					int NewW = pTLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pTLayer->m_Width;
-					int NewH = pTLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pTLayer->m_Height;
-					pTLayer->Resize(NewW, NewH);
-				}
-
-				for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
-					for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
-						if(GetTile(x, y).m_Index)
-						{
-							pTLayer->m_pTiles[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Index = TILE_AIR + Result;
-							pTLayer->m_pTeleTile[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Number = 1;
-							pTLayer->m_pTeleTile[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Type = TILE_AIR + Result;
-						}
 			}
 
-			return 1;
+			else if (m_pEditor->m_SelectEntitiesImage == "blockworlds")
+			{
+				switch(Result)
+				{
+				case 4:
+					Result = TILE_NOLASER; // Freeze
+					break;
+				case 5:
+					Result = TILE_THROUGH_CUT; // UnFreeze
+					break;
+				case 6:
+					Result = TILE_THROUGH; // Deep Freeze
+					break;
+				case 7:
+					Result = TILE_BLOCKWORLD_DUNFREEZE; // UnDeep Freeze
+					break;
+				default:
+					break;
+				}
+			}
+
+			if(Result > -1)
+			{
+				int OffsetX = -pGroup->m_OffsetX / 32;
+				int OffsetY = -pGroup->m_OffsetY / 32;
+
+				if(Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
+				{
+					CLayerTiles *pGLayer = m_pEditor->m_Map.m_pGameLayer;
+
+					if(pGLayer->m_Width < m_Width + OffsetX || pGLayer->m_Height < m_Height + OffsetY)
+					{
+						int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
+						int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
+						pGLayer->Resize(NewW, NewH);
+					}	
+
+					for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+						for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+							if(GetTile(x, y).m_Index)
+							{
+								CTile ResultTile = {(unsigned char)Result};
+								pGLayer->SetTile(x + OffsetX, y + OffsetY, ResultTile);
+							}
+			}
+				else
+				{
+					if(!m_pEditor->m_Map.m_pTeleLayer)
+					{
+						CLayer *pLayer = new CLayerTele(m_Width, m_Height);
+						m_pEditor->m_Map.MakeTeleLayer(pLayer);
+						m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
+					}
+
+					CLayerTele *pTLayer = m_pEditor->m_Map.m_pTeleLayer;
+
+					if(pTLayer->m_Width < m_Width + OffsetX || pTLayer->m_Height < m_Height + OffsetY)
+					{
+						int NewW = pTLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pTLayer->m_Width;
+						int NewH = pTLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pTLayer->m_Height;
+						pTLayer->Resize(NewW, NewH);
+					}
+
+					for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+						for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+							if(GetTile(x, y).m_Index)
+							{
+								pTLayer->m_pTiles[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Index = TILE_AIR + Result;
+								pTLayer->m_pTeleTile[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Number = 1;
+								pTLayer->m_pTeleTile[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Type = TILE_AIR + Result;
+							}
+				}
+
+				return 1;
 		}
 	}
 
