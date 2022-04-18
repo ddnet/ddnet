@@ -36,9 +36,9 @@ void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char 
 	if(it == m_Tooltips.end())
 	{
 		CTooltip NewTooltip = {
-			.m_Rect = *pNearRect,
-			.m_pText = pText,
-			.m_WidthHint = WidthHint,
+			*pNearRect,
+			pText,
+			WidthHint,
 		};
 
 		m_Tooltips[ID] = NewTooltip;
