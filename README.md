@@ -10,7 +10,8 @@ If ddnet devs are reading this and want to steal my changes please feel free.
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
-![image](https://user-images.githubusercontent.com/22122579/160224795-7fe8e255-f599-4059-889b-b3f35e7cb6ee.png)
+![image](https://user-images.githubusercontent.com/22122579/163861467-672f522d-7782-4d5b-97e4-b931122167e7.png)
+
 
 # Features:
 ### **Display frozen tees in your team on your HUD** 
