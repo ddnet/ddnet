@@ -845,7 +845,7 @@ void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
 	Cmd.m_Color.g = g;
 	Cmd.m_Color.b = b;
 	Cmd.m_Color.a = 0;
-	Cmd.m_ForceClear = ForceClearNow || m_IsForcedViewport;
+	Cmd.m_ForceClear = ForceClearNow;
 	AddCmd(
 		Cmd, [] { return true; }, "failed to clear graphics.");
 }
@@ -2270,23 +2270,28 @@ void CGraphics_Threaded::AdjustViewport(bool SendViewportChangeToBackend)
 
 		if(SendViewportChangeToBackend)
 		{
-			CCommandBuffer::SCommand_Update_Viewport Cmd;
-			Cmd.m_X = 0;
-			Cmd.m_Y = 0;
-			Cmd.m_Width = m_ScreenWidth;
-			Cmd.m_Height = m_ScreenHeight;
-			Cmd.m_ByResize = true;
-
-			if(!AddCmd(
-				   Cmd, [] { return true; }, "failed to add resize command"))
-			{
-				return;
-			}
+			UpdateViewport(0, 0, m_ScreenWidth, m_ScreenWidth, true);
 		}
 	}
 	else
 	{
 		m_IsForcedViewport = false;
+	}
+}
+
+void CGraphics_Threaded::UpdateViewport(int X, int Y, int W, int H, bool ByResize)
+{
+	CCommandBuffer::SCommand_Update_Viewport Cmd;
+	Cmd.m_X = X;
+	Cmd.m_Y = Y;
+	Cmd.m_Width = W;
+	Cmd.m_Height = H;
+	Cmd.m_ByResize = ByResize;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add resize command"))
+	{
+		return;
 	}
 }
 
@@ -2589,18 +2594,7 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 
-	CCommandBuffer::SCommand_Update_Viewport Cmd;
-	Cmd.m_X = 0;
-	Cmd.m_Y = 0;
-	Cmd.m_Width = m_ScreenWidth;
-	Cmd.m_Height = m_ScreenHeight;
-	Cmd.m_ByResize = true;
-
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add resize command"))
-	{
-		return;
-	}
+	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenWidth, true);
 
 	// kick the command buffer and wait
 	KickCommandBuffer();

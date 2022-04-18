@@ -530,7 +530,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
-	DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings."));
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings."));
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -1265,7 +1265,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
-	DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail."));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
@@ -2635,6 +2635,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time."));
 
 	if(g_Config.m_ClRaceGhost)
 	{
@@ -2686,13 +2687,15 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Button.VSplitMid(&LeftLeft, &Button);
 
 		Button.VSplitLeft(50.0f, &Label, &Button);
-		UI()->DoLabelScaled(&Label, Localize("Alpha"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Label, Localize("Opacity"), 14.0f, TEXTALIGN_LEFT);
 		g_Config.m_ClShowOthersAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClShowOthersAlpha, &Button, g_Config.m_ClShowOthersAlpha / 100.0f) * 100.0f);
 
 		if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers == SHOW_OTHERS_ON, &LeftLeft))
 		{
 			g_Config.m_ClShowOthers = g_Config.m_ClShowOthers != SHOW_OTHERS_ON ? SHOW_OTHERS_ON : SHOW_OTHERS_OFF;
 		}
+
+		GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, "Adjust the opacity of entities belonging to other teams, such as tees and nameplates");
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
@@ -2707,6 +2710,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClShowQuads ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowQuads, &Button, Localize("Quads are used for background decoration"));
 
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
@@ -2720,6 +2724,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency."));
 
 	if(g_Config.m_ClAntiPing)
 	{
