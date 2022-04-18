@@ -2061,7 +2061,7 @@ void CCharacter::DDRaceTick()
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
-	if(m_LiveFreeze)
+	if(m_LiveFreeze && !m_Super)
 	{
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;
