@@ -1123,7 +1123,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 	static int s_GfxFsaaSamples = g_Config.m_GfxFsaaSamples;
 	static bool s_GfxBackendChanged = false;
+	static bool s_GfxGPUChanged = false;
 	static int s_GfxHighdpi = g_Config.m_GfxHighdpi;
+
 	static int s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
 
 	static bool s_WasInit = false;
@@ -1206,6 +1208,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static int s_WindowModeDropDownState = 0;
 
 	static int s_OldSelectedBackend = -1;
+	static int s_OldSelectedGPU = -1;
 
 	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
 
@@ -1475,6 +1478,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		static int s_GPUCount = 0;
 		s_GPUCount = GPUCount;
 
+		if(s_OldSelectedGPU == -1)
+			s_OldSelectedGPU = OldSelectedGPU;
+
 		const int NewGPU = RenderDropDown(s_GPUDropDownState, &MainView, OldSelectedGPU, vGPUIDPtrs.data(), vGPUIDNames.data(), s_GPUCount, &s_GPUCount, s_ScrollValueDropGPU);
 		if(OldSelectedGPU != NewGPU)
 		{
@@ -1482,6 +1488,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 				str_copy(g_Config.m_GfxGPUName, "auto", sizeof(g_Config.m_GfxGPUName));
 			else
 				str_copy(g_Config.m_GfxGPUName, GPUList.m_GPUs[NewGPU - 1].m_Name, sizeof(g_Config.m_GfxGPUName));
+			CheckSettings = true;
+			s_GfxGPUChanged = NewGPU != s_OldSelectedGPU;
 		}
 	}
 
@@ -1490,6 +1498,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	{
 		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
 					  !s_GfxBackendChanged &&
+					  !s_GfxGPUChanged &&
 					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
 	}
 }
