@@ -248,6 +248,7 @@ void CTerminalUI::RenderScoreboard(int Team, WINDOW *pWin)
 
 void CTerminalUI::OnInit()
 {
+	m_UpdateCompletionBuffer = true;
 	m_LastInputMode = -1;
 	m_aCompletionPreview[0] = '\0';
 	m_CompletionEnumerationCount = -1;
@@ -440,6 +441,14 @@ int CTerminalUI::GetInput()
 			wclear(g_pInputWin);
 			DrawBorders(g_pInputWin);
 			m_InputMode = m_InputMode == INPUT_REMOTE_CONSOLE ? INPUT_NORMAL : INPUT_REMOTE_CONSOLE;
+		}
+		else if(c == KEY_BTAB)
+		{
+			if(m_InputMode == INPUT_REMOTE_CONSOLE || m_InputMode == INPUT_LOCAL_CONSOLE)
+				CompleteCommands(true);
+			else
+				CompleteNames(true);
+			return 0;
 		}
 		else if(keyname(c)[0] == '^' && keyname(c)[1] == 'I') // tab
 		{
@@ -692,7 +701,7 @@ int CTerminalUI::GetInput()
 	return 0;
 }
 
-void CTerminalUI::CompleteCommands()
+void CTerminalUI::CompleteCommands(bool IsReverse)
 {
 	int CompletionFlagmask = 0;
 	if(m_InputMode == INPUT_LOCAL_CONSOLE)
@@ -707,7 +716,11 @@ void CTerminalUI::CompleteCommands()
 
 	m_aCompletionPreview[0] = '\0';
 	m_CompletionEnumerationCount = 0;
-	m_CompletionChosen++;
+	if(IsReverse)
+		m_CompletionChosen--;
+	else
+		m_CompletionChosen++;
+
 	Console()->PossibleCommands(m_aCompletionBuffer, CompletionFlagmask, m_InputMode != INPUT_LOCAL_CONSOLE && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
 
 	// handle wrapping
@@ -740,16 +753,23 @@ void CTerminalUI::PossibleCommandsCompleteCallback(const char *pStr, void *pUser
 	pSelf->m_CompletionEnumerationCount++;
 }
 
-void CTerminalUI::CompleteNames()
+void CTerminalUI::CompleteNames(bool IsReverse)
 {
-	m_CompletionIndex++;
+	bool IsReverseEnd = false;
+	if(IsReverse)
+		m_CompletionIndex--;
+	else
+		m_CompletionIndex++;
+	if(m_CompletionIndex < 0 && IsReverse)
+		IsReverseEnd = true;
 	bool IsSpace = true;
 	const char *pInput = g_aInputStr;
 	if(m_InputMode > NUM_INPUTS) // reverse i search
 		pInput = m_aInputSearch;
 	int Count = 0;
-	if(m_CompletionIndex == 0)
+	if(m_UpdateCompletionBuffer)
 	{
+		m_UpdateCompletionBuffer = false;
 		for(int i = m_InputCursor; i > 0; i--)
 		{
 			if(pInput[i] == ' ' && IsSpace)
@@ -790,11 +810,13 @@ void CTerminalUI::CompleteNames()
 		if(!pMatch)
 			pMatch = PlayerName;
 		if(Matches++ < m_CompletionIndex)
-			continue;
+			if(!IsReverseEnd)
+				continue;
 
 		pMatch = PlayerName;
 		Found = true;
-		break;
+		if(!IsReverseEnd)
+			break;
 	}
 	if(!pMatch)
 	{
@@ -817,10 +839,13 @@ void CTerminalUI::CompleteNames()
 	UpdateCursor();
 	if(!Found)
 		m_CompletionIndex = 0;
+	if(IsReverseEnd)
+		m_CompletionIndex = Matches - 1;
 }
 
 void CTerminalUI::ResetCompletion()
 {
+	m_UpdateCompletionBuffer = true;
 	m_aCompletionBuffer[0] = '\0';
 	m_LastCompletionLength = 0;
 	m_CompletionIndex = -1;

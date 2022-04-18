@@ -234,6 +234,7 @@ class CTerminalUI : public CComponent
 	int m_LastCompletionLength;
 	char m_aCompletionBuffer[1024];
 	char m_aCompletionPreview[1024];
+	bool m_UpdateCompletionBuffer;
 	/*
 		m_CompletionChosen
 
@@ -243,8 +244,8 @@ class CTerminalUI : public CComponent
 	*/
 	int m_CompletionChosen;
 	int m_CompletionEnumerationCount;
-	void CompleteNames();
-	void CompleteCommands();
+	void CompleteNames(bool IsReverse = false);
+	void CompleteCommands(bool IsReverse = false);
 
 	static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
 
