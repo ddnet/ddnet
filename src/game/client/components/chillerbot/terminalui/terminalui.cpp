@@ -104,7 +104,6 @@ void CTerminalUI::InputDraw()
 		if(LineWrap > 0)
 		{
 			m_aCompletionPreview[LineWrap] = '\0';
-			dbg_msg("comp", "prev=%s", m_aCompletionPreview);
 			mvwprintw(g_pInputWin, 1, Offset, " %s", m_aCompletionPreview);
 		}
 	}
@@ -338,6 +337,7 @@ void CTerminalUI::OnRender()
 void CTerminalUI::OnInputModeChange(int Old, int New)
 {
 	ResetCompletion();
+	g_aInputStr[0] = '\0';
 	m_InputCursor = 0;
 	m_aCompletionPreview[0] = '\0';
 	wclear(g_pInputWin);
@@ -703,7 +703,7 @@ void CTerminalUI::CompleteCommands()
 	if(m_CompletionEnumerationCount == -1)
 		str_copy(m_aCompletionBuffer, g_aInputStr, sizeof(m_aCompletionBuffer));
 
-	dbg_msg("complete", "buffer='%s' index=%d count=%d", m_aCompletionBuffer, m_CompletionChosen, m_CompletionEnumerationCount);
+	// dbg_msg("complete", "buffer='%s' index=%d count=%d", m_aCompletionBuffer, m_CompletionChosen, m_CompletionEnumerationCount);
 
 	m_aCompletionPreview[0] = '\0';
 	m_CompletionEnumerationCount = 0;
@@ -717,6 +717,11 @@ void CTerminalUI::CompleteCommands()
 		m_CompletionEnumerationCount = 0;
 		Console()->PossibleCommands(m_aCompletionBuffer, CompletionFlagmask, m_InputMode != INPUT_LOCAL_CONSOLE && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
 	}
+
+	wclear(g_pInputWin);
+	InputDraw();
+	DrawBorders(g_pInputWin);
+	UpdateCursor();
 }
 
 void CTerminalUI::PossibleCommandsCompleteCallback(const char *pStr, void *pUser)
@@ -725,13 +730,9 @@ void CTerminalUI::PossibleCommandsCompleteCallback(const char *pStr, void *pUser
 	if(pSelf->m_CompletionChosen == pSelf->m_CompletionEnumerationCount)
 	{
 		str_copy(g_aInputStr, pStr, sizeof(g_aInputStr));
-		wclear(g_pInputWin);
 		pSelf->m_InputCursor = str_length(pStr);
-		pSelf->InputDraw();
-		pSelf->DrawBorders(g_pInputWin);
-		pSelf->UpdateCursor();
 	}
-	else
+	else if(pSelf->m_CompletionChosen < pSelf->m_CompletionEnumerationCount)
 	{
 		str_append(pSelf->m_aCompletionPreview, pStr, sizeof(pSelf->m_aCompletionPreview));
 		str_append(pSelf->m_aCompletionPreview, " ", sizeof(pSelf->m_aCompletionPreview));
