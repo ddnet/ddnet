@@ -54,6 +54,7 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
+#include "components/tooltips.h"
 
 class CGameInfo
 {
@@ -143,6 +144,8 @@ public:
 
 	CRaceDemo m_RaceDemo;
 	CGhost m_Ghost;
+
+	CTooltips m_Tooltips;
 
 private:
 	class CStack
