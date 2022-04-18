@@ -3456,6 +3456,20 @@ public:
 		return true;
 	}
 
+	STWGraphicGPU::ETWGraphicsGPUType VKGPUTypeToGraphicsGPUType(VkPhysicalDeviceType VKGPUType)
+	{
+		if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_DISCRETE;
+		else if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INTEGRATED;
+		else if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_VIRTUAL;
+		else if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_CPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_CPU;
+
+		return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_CPU;
+	}
+
 	bool SelectGPU(char *pRendererName, char *pVendorName, char *pVersionName)
 	{
 		uint32_t DevicesCount = 0;
@@ -3474,7 +3488,9 @@ public:
 		m_pGPUList->m_GPUs.reserve(DeviceList.size());
 
 		size_t FoundDeviceIndex = 0;
-		size_t AutoGPUIndex = 0;
+		size_t FoundGPUType = STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INVALID;
+
+		STWGraphicGPU::ETWGraphicsGPUType AutoGPUType = STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INVALID;
 
 		bool IsAutoGPU = str_comp(g_Config.m_GfxGPUName, "auto") == 0;
 
@@ -3484,9 +3500,11 @@ public:
 
 			auto &DeviceProp = DevicePropList[Index];
 
+			STWGraphicGPU::ETWGraphicsGPUType GPUType = VKGPUTypeToGraphicsGPUType(DeviceProp.deviceType);
+
 			STWGraphicGPU::STWGraphicGPUItem NewGPU;
 			str_copy(NewGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_Name)));
-			NewGPU.m_IsDiscreteGPU = DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+			NewGPU.m_GPUType = GPUType;
 			m_pGPUList->m_GPUs.push_back(NewGPU);
 
 			Index++;
@@ -3494,17 +3512,18 @@ public:
 			int DevAPIMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
 			int DevAPIMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
 
-			if((AutoGPUIndex == 0 && DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
+			if(GPUType < AutoGPUType && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
 				str_copy(m_pGPUList->m_AutoGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_Name)));
-				m_pGPUList->m_AutoGPU.m_IsDiscreteGPU = DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+				m_pGPUList->m_AutoGPU.m_GPUType = GPUType;
 
-				AutoGPUIndex = Index;
+				AutoGPUType = GPUType;
 			}
 
-			if(((IsAutoGPU && FoundDeviceIndex == 0 && DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGPUName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
+			if(((IsAutoGPU && GPUType < FoundGPUType) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGPUName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
 				FoundDeviceIndex = Index;
+				FoundGPUType = GPUType;
 			}
 		}
 

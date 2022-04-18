@@ -179,10 +179,21 @@ enum EBackendType
 
 struct STWGraphicGPU
 {
+	enum ETWGraphicsGPUType
+	{
+		GRAPHICS_GPU_TYPE_DISCRETE = 0,
+		GRAPHICS_GPU_TYPE_INTEGRATED,
+		GRAPHICS_GPU_TYPE_VIRTUAL,
+		GRAPHICS_GPU_TYPE_CPU,
+
+		// should stay at last position in this enum
+		GRAPHICS_GPU_TYPE_INVALID,
+	};
+
 	struct STWGraphicGPUItem
 	{
 		char m_Name[256];
-		bool m_IsDiscreteGPU;
+		ETWGraphicsGPUType m_GPUType;
 	};
 	std::vector<STWGraphicGPUItem> m_GPUs;
 	STWGraphicGPUItem m_AutoGPU;
