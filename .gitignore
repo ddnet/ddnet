@@ -78,6 +78,7 @@ generated
 target
 
 /build*
+/test/*
 
 # IDE project files
 .cache
