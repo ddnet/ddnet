@@ -249,6 +249,7 @@ public:
 	virtual void Move(int x, int y) = 0;
 	virtual void Resize(int w, int h, int RefreshRate) = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
+	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
 	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
 
 	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;

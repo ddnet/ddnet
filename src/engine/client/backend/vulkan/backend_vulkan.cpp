@@ -1228,14 +1228,7 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); return true; }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand)); return true; }};
 
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {
-			const auto* pCommand = static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand);
-			if(pCommand->m_ByResize) {
-				Cmd_Update_Viewport(pCommand, true);
-			}
-			else {
-				Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, pCommand);
-			} }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand), false); return true; }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {false, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); return true; }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_CREATE_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommand_WindowCreateNtf *>(pBaseCommand)); return false; }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_DESTROY_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommand_WindowDestroyNtf *>(pBaseCommand)); return false; }};
@@ -3021,9 +3014,14 @@ protected:
 		return State.m_BlendMode == CCommandBuffer::BLEND_ADDITIVE ? VULKAN_BACKEND_BLEND_MODE_ADDITATIVE : (State.m_BlendMode == CCommandBuffer::BLEND_NONE ? VULKAN_BACKEND_BLEND_MODE_NONE : VULKAN_BACKEND_BLEND_MODE_ALPHA);
 	}
 
-	size_t GetDynamicModeIndex(const CCommandBuffer::SState &State)
+	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State)
 	{
 		return (State.m_ClipEnable || m_HasDynamicViewport) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
+	}
+
+	size_t GetDynamicModeIndexFromExecBuffer(const SRenderCommandExecuteBuffer &ExecBuffer)
+	{
+		return (ExecBuffer.m_HasDynamicState) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
 	}
 
 	VkPipeline &GetPipeline(SPipelineContainer &Container, bool IsTextured, size_t BlendModeIndex, size_t DynamicIndex)
@@ -3072,17 +3070,17 @@ protected:
 			return GetPipeline(m_TileBorderLinePipeline, IsTextured, BlendModeIndex, DynamicIndex);
 	}
 
-	void GetStateIndices(const CCommandBuffer::SState &State, bool &IsTextured, size_t &BlendModeIndex, size_t &DynamicIndex, size_t &AddressModeIndex)
+	void GetStateIndices(const SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, bool &IsTextured, size_t &BlendModeIndex, size_t &DynamicIndex, size_t &AddressModeIndex)
 	{
 		IsTextured = GetIsTextured(State);
 		AddressModeIndex = GetAddressModeIndex(State);
 		BlendModeIndex = GetBlendModeIndex(State);
-		DynamicIndex = GetDynamicModeIndex(State);
+		DynamicIndex = GetDynamicModeIndexFromExecBuffer(ExecBuffer);
 	}
 
 	void ExecBufferFillDynamicStates(const CCommandBuffer::SState &State, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
-		size_t DynamicStateIndex = GetDynamicModeIndex(State);
+		size_t DynamicStateIndex = GetDynamicModeIndexFromState(State);
 		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
 		{
 			VkViewport Viewport;
@@ -3107,10 +3105,18 @@ protected:
 
 			VkRect2D Scissor;
 			// convert from OGL to vulkan clip
-			int32_t ScissorY = (int32_t)m_VKSwapImgAndViewportExtent.m_Viewport.height - ((int32_t)State.m_ClipY + (int32_t)State.m_ClipH);
-			uint32_t ScissorH = (int32_t)State.m_ClipH;
-			Scissor.offset = {(int32_t)State.m_ClipX, ScissorY};
-			Scissor.extent = {(uint32_t)State.m_ClipW, ScissorH};
+			if(State.m_ClipEnable)
+			{
+				int32_t ScissorY = (int32_t)m_VKSwapImgAndViewportExtent.m_Viewport.height - ((int32_t)State.m_ClipY + (int32_t)State.m_ClipH);
+				uint32_t ScissorH = (int32_t)State.m_ClipH;
+				Scissor.offset = {(int32_t)State.m_ClipX, ScissorY};
+				Scissor.extent = {(uint32_t)State.m_ClipW, ScissorH};
+			}
+			else
+			{
+				Scissor.offset = {0, 0};
+				Scissor.extent = {m_VKSwapImgAndViewportExtent.m_Viewport.width, m_VKSwapImgAndViewportExtent.m_Viewport.height};
+			}
 
 			Viewport.x = clamp(Viewport.x, 0.0f, std::numeric_limits<decltype(Viewport.x)>::max());
 			Viewport.y = clamp(Viewport.y, 0.0f, std::numeric_limits<decltype(Viewport.y)>::max());
@@ -3136,7 +3142,7 @@ protected:
 			m_vLastPipeline[RenderThreadIndex] = BindingPipe;
 		}
 
-		size_t DynamicStateIndex = GetDynamicModeIndex(State);
+		size_t DynamicStateIndex = GetDynamicModeIndexFromExecBuffer(ExecBuffer);
 		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
 		{
 			vkCmdSetViewport(CommandBuffer, 0, 1, &ExecBuffer.m_Viewport);
@@ -3179,7 +3185,7 @@ protected:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetTileLayerPipeLayout(Type, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetTileLayerPipe(Type, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -3243,7 +3249,7 @@ protected:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = Is3DTextured ? GetPipeLayout(m_Standard3DPipeline, IsTextured, BlendModeIndex, DynamicIndex) : GetStandardPipeLayout(IsLineGeometry, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = Is3DTextured ? GetPipeline(m_Standard3DPipeline, IsTextured, BlendModeIndex, DynamicIndex) : GetStandardPipe(IsLineGeometry, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6449,9 +6455,9 @@ public:
 		ExecBuffer.m_EstimatedRenderCallCount = 0;
 	}
 
-	void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand, bool CalledByMainRenderThread)
+	void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
 	{
-		if(pCommand->m_ByResize && CalledByMainRenderThread)
+		if(pCommand->m_ByResize)
 		{
 			if(IsVerbose())
 			{
@@ -6461,7 +6467,7 @@ public:
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
 			m_RecreateSwapChain = true;
 		}
-		else if(!pCommand->m_ByResize && !CalledByMainRenderThread)
+		else if(!pCommand->m_ByResize)
 		{
 			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != m_VKSwapImgAndViewportExtent.m_Viewport.width || (uint32_t)pCommand->m_Height != m_VKSwapImgAndViewportExtent.m_Viewport.height)
 			{
@@ -6687,7 +6693,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetPipeLayout(CanBePushed ? m_QuadPushPipeline : m_QuadPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(CanBePushed ? m_QuadPushPipeline : m_QuadPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6783,7 +6789,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		IsTextured = true; // text is always textured
 		auto &PipeLayout = GetPipeLayout(m_TextPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(m_TextPipeline, IsTextured, BlendModeIndex, DynamicIndex);
@@ -6852,7 +6858,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetStandardPipeLayout(false, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetStandardPipe(false, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6893,7 +6899,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetPipeLayout(IsRotationless ? m_PrimExRotationlessPipeline : m_PrimExPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(IsRotationless ? m_PrimExRotationlessPipeline : m_PrimExPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6954,7 +6960,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetPipeLayout(CanBePushed ? m_SpriteMultiPushPipeline : m_SpriteMultiPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(CanBePushed ? m_SpriteMultiPushPipeline : m_SpriteMultiPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 
