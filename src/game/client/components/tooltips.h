@@ -10,9 +10,9 @@
 
 struct CTooltip
 {
-    CUIRect m_Rect;
-    const char *m_pText;
-    float m_WidthHint;
+	CUIRect m_Rect;
+	const char *m_pText;
+	float m_WidthHint;
 };
 
 /**
@@ -22,24 +22,24 @@ struct CTooltip
  */
 class CTooltips : public CComponent
 {
-    std::unordered_map<uintptr_t, CTooltip> m_Tooltips;
-    std::optional<std::reference_wrapper<CTooltip>> m_ActiveTooltip;
-    int64_t HoverTime;
+	std::unordered_map<uintptr_t, CTooltip> m_Tooltips;
+	std::optional<std::reference_wrapper<CTooltip>> m_ActiveTooltip;
+	int64_t HoverTime;
 
-    /**
+	/**
      * The passed tooltip is only actually set if there is no currently active tooltip.
      * 
      * @param Tooltip A reference to the tooltip that should be active.
      */
-    void SetActiveTooltip(CTooltip &Tooltip);
+	void SetActiveTooltip(CTooltip &Tooltip);
 
-    inline void ClearActiveTooltip();
+	inline void ClearActiveTooltip();
 
 public:
-    CTooltips();
-    virtual int Sizeof() const override { return sizeof(*this); }
+	CTooltips();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
-    /**
+	/**
 	 * Adds the tooltip to a cache and renders it when active.
      * 
      * On the first call to this function, the data passed is cached, afterwards the calls are used to detect if the tooltip should be activated.
@@ -50,10 +50,10 @@ public:
 	 * @param pNearTo Place the tooltip near this rect.
 	 * @param pText The text to display in the tooltip
 	 */
-    void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
+	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 
-    virtual void OnReset() override;
-    virtual void OnRender() override;
+	virtual void OnReset() override;
+	virtual void OnRender() override;
 };
 
 #endif

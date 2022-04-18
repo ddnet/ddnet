@@ -53,8 +53,8 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
-#include "components/voting.h"
 #include "components/tooltips.h"
+#include "components/voting.h"
 
 class CGameInfo
 {
