@@ -912,7 +912,7 @@ void CCharacter::HandleTuneLayer()
 void CCharacter::DDRaceTick()
 {
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
-	if(m_LiveFreeze && !m_CanMoveInFreeze)
+	if(m_LiveFreeze && !m_CanMoveInFreeze && !m_Super)
 	{
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;

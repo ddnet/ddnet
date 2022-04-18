@@ -186,7 +186,7 @@ Friends
 == Друзья
 
 Fullscreen
-== Полноэкранный режим
+== Полноэкранный（настр.)
 
 Game
 == Игра
@@ -1316,46 +1316,46 @@ Show local player's key presses
 == Показывать нажатия клавиш игрока
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Формат текстуры %s не соотвествует RGBA, что может повлечь артефакты.
 
 Join Tutorial Server
-== 
+== Начать туториал
 
 Skip Tutorial
-== 
+== Пропустить туториал
 
 Settings file
-== 
+== Файл настроек
 
 Config directory
-== 
+== Путь к настройкам
 
 Windowed fullscreen
-== 
+== Оконный на весь экран
 
 Renderer
-== 
+== Рендерер
 
 default
-== 
+== станд.
 
 custom
-== 
+== перс.
 
 Graphics cards
-== 
+== Видеокарты
 
 auto
-== 
+== авто
 
 Run on join
-== 
+== Запускать при входе
 
 Chat command (e.g. showall 1)
-== 
+== Чат-команда (напр. showall 1)
 
 Tutorial
-== 
+== Туториал
 
 Can't find a Tutorial server
-== 
+== Обучающий сервер не найден

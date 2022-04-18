@@ -194,6 +194,7 @@ class CUI
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
 	const void *m_pBecomingHotItem;
+	const void *m_pActiveTooltipItem;
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
@@ -261,10 +262,12 @@ public:
 		if(pID)
 			m_pLastActiveItem = pID;
 	}
+	void SetActiveTooltipItem(const void *pID) { m_pActiveTooltipItem = pID; }
 	void ClearLastActiveItem() { m_pLastActiveItem = 0; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
+	const void *ActiveTooltipItem() const { return m_pActiveTooltipItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	bool MouseInside(const CUIRect *pRect) const;
