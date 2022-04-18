@@ -47,6 +47,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
+	void SetLiveFrozen(bool Active);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
