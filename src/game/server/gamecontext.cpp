@@ -3129,7 +3129,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
+	m_TelePrng.Seed(aSeed);
 	m_World.m_Core.m_pPrng = &m_Prng;
+	m_World.m_Core.m_TelePrng = &m_TelePrng;
 
 	DeleteTempfile();
 

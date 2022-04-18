@@ -81,6 +81,7 @@ class CGameContext : public IGameServer
 	CUuid m_GameUuid;
 	CMapBugs m_MapBugs;
 	CPrng m_Prng;
+	CPrng m_TelePrng;
 
 	bool m_Resetting;
 

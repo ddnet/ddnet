@@ -1921,7 +1921,16 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				//int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = 0;
+				
+				if(GameWorld()->m_Core.m_TelePrng)
+				{
+					auto Tick = static_cast<uint64_t>(GameServer()->Server()->Tick());
+					GameWorld()->m_Core.m_TelePrng->Seed(&Tick);
+					TeleOut = GameWorld()->m_Core.m_TelePrng->RandomBits() % (*m_pTeleCheckOuts)[k].size();
+				}
+				
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 

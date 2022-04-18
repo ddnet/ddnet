@@ -200,6 +200,7 @@ public:
 	CTuningParams m_Tuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
+	CPrng *m_TelePrng;
 };
 
 class CCharacterCore
