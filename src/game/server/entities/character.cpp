@@ -126,6 +126,12 @@ void CCharacter::SetSolo(bool Solo)
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 }
 
+void CCharacter::SetLiveFrozen(bool Active)
+{
+	m_LiveFreeze = Active;
+	m_Core.m_LiveFrozen = Active;
+}
+
 bool CCharacter::IsGrounded()
 {
 	if(GameServer()->Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
@@ -1490,13 +1496,11 @@ void CCharacter::HandleTiles(int Index)
 	// live freeze
 	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Super)
 	{
-		m_LiveFreeze = true;
-		m_Core.m_LiveFrozen = true;
+		SetLiveFrozen(true);
 	}
 	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Super)
 	{
-		m_LiveFreeze = false;
-		m_Core.m_LiveFrozen = false;
+		SetLiveFrozen(false);
 	}
 
 	// endless hook

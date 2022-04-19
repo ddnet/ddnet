@@ -2270,7 +2270,7 @@ void CGraphics_Threaded::AdjustViewport(bool SendViewportChangeToBackend)
 
 		if(SendViewportChangeToBackend)
 		{
-			UpdateViewport(0, 0, m_ScreenWidth, m_ScreenWidth, true);
+			UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 		}
 	}
 	else
@@ -2594,7 +2594,7 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 
-	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenWidth, true);
+	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 
 	// kick the command buffer and wait
 	KickCommandBuffer();
