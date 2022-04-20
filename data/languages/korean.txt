@@ -6,6 +6,7 @@
 #modified by:
 # 2022-03-23 CHaBek
 # 2022-03-28 CHaBek
+# 2022-04-21 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -608,7 +609,7 @@ Length:
 == 길이:
 
 Name plates size
-== 이름 글꼴 크기
+== 이름 표시 크기
 
 Type:
 == 종류:
@@ -851,7 +852,7 @@ Settings file
 == 설정 파일
 
 Config directory
-== 구성 파일
+== 구성 폴더
 
 Themes directory
 == 테마 폴더
