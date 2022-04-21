@@ -35,10 +35,10 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 
 	CGameWorld *pWorld = GameWorld();
 
-	// gets non predicted world if player positions is disabled
+	// gets non predicted world if player antiping is disabled
 	if(!g_Config.m_ClAntiPingPlayers && !GameWorld()->m_WorldConfig.m_IsDDRace)
 	{
-		while(pWorld->m_pParent != nullptr)
+		if(pWorld->m_pParent != nullptr)
 		{
 			pWorld = pWorld->m_pParent;
 		}
