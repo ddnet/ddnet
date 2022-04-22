@@ -70,7 +70,7 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 void CGameConsole::CInstance::ClearBacklog()
 {
 	m_Backlog.Init();
-	m_BacklogActPage = 0;
+	m_BacklogCurPage = 0;
 }
 
 void CGameConsole::CInstance::ClearBacklogYOffsets()
@@ -303,26 +303,26 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
-			++m_BacklogActPage;
+			++m_BacklogCurPage;
 			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
 			m_pGameConsole->m_HasSelection = false;
-			--m_BacklogActPage;
-			if(m_BacklogActPage < 0)
-				m_BacklogActPage = 0;
+			--m_BacklogCurPage;
+			if(m_BacklogCurPage < 0)
+				m_BacklogCurPage = 0;
 		}
 		// in order not to conflict with CLineInput's handling of Home/End only
 		// react to it when the input is empty
 		else if(Event.m_Key == KEY_HOME && m_Input.GetString()[0] == '\0')
 		{
-			m_BacklogActPage = INT_MAX;
+			m_BacklogCurPage = INT_MAX;
 			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.GetString()[0] == '\0')
 		{
-			m_BacklogActPage = 0;
+			m_BacklogCurPage = 0;
 			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
@@ -685,7 +685,7 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		//	render log (actual page, wrap lines)
+		// render log (current page, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 		float OffsetY = 0.0f;
 		float LineOffset = 1.0f;
@@ -714,7 +714,7 @@ void CGameConsole::OnRender()
 			m_MouseIsPress = false;
 		}
 
-		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
+		for(int Page = 0; Page <= pConsole->m_BacklogCurPage; ++Page, OffsetY = 0.0f)
 		{
 			while(pEntry)
 			{
@@ -742,8 +742,8 @@ void CGameConsole::OnRender()
 				if(y - OffsetY <= RowHeight)
 					break;
 
-				// just render output from actual backlog page (render bottom up)
-				if(Page == pConsole->m_BacklogActPage)
+				// just render output from current backlog page (render bottom up)
+				if(Page == pConsole->m_BacklogCurPage)
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
@@ -788,10 +788,10 @@ void CGameConsole::OnRender()
 				Input()->SetClipboardText(SelectionString.c_str());
 			}
 
-			//	actual backlog page number is too high, render last available page (current checked one, render top down)
-			if(!pEntry && Page < pConsole->m_BacklogActPage)
+			// current backlog page number is too high, render last available page (current checked one, render top down)
+			if(!pEntry && Page < pConsole->m_BacklogCurPage)
 			{
-				pConsole->m_BacklogActPage = Page;
+				pConsole->m_BacklogCurPage = Page;
 				pEntry = pConsole->m_Backlog.First();
 				while(OffsetY > 0.0f && pEntry)
 				{
@@ -808,7 +808,7 @@ void CGameConsole::OnRender()
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1, 1, 1, 1);
-		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage + 1);
+		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogCurPage + 1);
 		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 
 		// render version
@@ -941,15 +941,15 @@ void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData,
 void CGameConsole::ConConsolePageUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
-	pConsole->m_BacklogActPage++;
+	pConsole->m_BacklogCurPage++;
 }
 
 void CGameConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserData)
 {
 	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
-	--pConsole->m_BacklogActPage;
-	if(pConsole->m_BacklogActPage < 0)
-		pConsole->m_BacklogActPage = 0;
+	--pConsole->m_BacklogCurPage;
+	if(pConsole->m_BacklogCurPage < 0)
+		pConsole->m_BacklogCurPage = 0;
 }
 
 void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
