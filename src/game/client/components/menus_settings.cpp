@@ -2860,6 +2860,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndikator, ("Show any enabled Indikators"), &g_Config.m_ClPlayerIndikator, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndikatorFreeze, ("Show only freeze Players"), &g_Config.m_ClPlayerIndikatorFreeze, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndikatorTeamOnly, ("Only show after joining a team"), &g_Config.m_ClIndikatorTeamOnly, &MainView, LineMargin);
 
 		static int IndikatorAliveColorID, IndikatorDeadColorID;
 	
