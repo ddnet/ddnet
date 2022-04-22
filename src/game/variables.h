@@ -95,6 +95,8 @@ MACRO_CONFIG_INT(ClOutlineFreeze, tc_outline_freeze, 1, 0, 1, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClOutlineUnFreeze, tc_outline_unfreeze, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outline around unfreeze and undeep")
 MACRO_CONFIG_INT(ClOutlineTele, tc_outline_tele, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outline around teleporters")
 MACRO_CONFIG_INT(ClOutlineSolid, tc_outline_solid, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws outline around hook and unhook")
+MACRO_CONFIG_INT(ClPlayerIndikator, tc_player_indikator, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a circle with Player position in Team")
+MACRO_CONFIG_INT(ClPlayerIndikatorFreeze, tc_player_indikator_freeze, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show a circle with failed players in Team")
 
 MACRO_CONFIG_INT(ClOutlineWidth, tc_outline_width, 5, 1, 16, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(1-16) Width of freeze outline")
 MACRO_CONFIG_INT(ClOutlineAlpha, tc_outline_alpha, 50, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(0-100) Outline alpha")
@@ -103,6 +105,10 @@ MACRO_CONFIG_COL(ClOutlineColorSolid, tc_outline_color_solid, 0, CFGFLAG_CLIENT 
 MACRO_CONFIG_COL(ClOutlineColorFreeze, tc_outline_color_freeze, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Freeze outline color") //0 0 0
 MACRO_CONFIG_COL(ClOutlineColorTele, tc_outline_color_tele, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tele outline color") //0 0 0
 MACRO_CONFIG_COL(ClOutlineColorUnfreeze, tc_outline_color_unfreeze, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Unfreeze outline color") //0 0 0
+MACRO_CONFIG_COL(ClIndikatorAlive, tc_indikator_alive, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Indikator for player alive") //0 0 0
+MACRO_CONFIG_COL(ClIndikatorFreeze, tc_indikator_freeze, 65407, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Indikator for player dead") // 0 0 0
+MACRO_CONFIG_INT(ClIndikatorOffset, tc_indikator_offset, 42, 1, 64, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(1-64) Offset of indikator to player")
+MACRO_CONFIG_INT(ClIndikatorRadius, tc_indikator_radius, 4, 1, 16, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(1-16) Radius of indikator")
 
 MACRO_CONFIG_INT(ClWhiteFeet, tc_white_feet, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render all feet as perfectly white base color")
 
