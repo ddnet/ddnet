@@ -66,6 +66,17 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 #endif
 
 /**
+ * Checks whether the program is currently shutting down due to a failed
+ * assert.
+ *
+ * @ingroup Debug
+ *
+ * @return indication whether the program is currently shutting down due to a
+ * failed assert.
+ */
+bool dbg_assert_has_failed();
+
+/**
  * Breaks into the debugger.
  *
  * @ingroup Debug
@@ -1898,17 +1909,6 @@ int open_link(const char *link);
 int open_file(const char *path);
 
 void swap_endian(void *data, unsigned elem_size, unsigned num);
-
-typedef void (*DBG_LOGGER)(const char *line, void *user);
-typedef void (*DBG_LOGGER_FINISH)(void *user);
-void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
-
-typedef void (*DBG_LOGGER_ASSERTION)(void *user);
-void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user);
-
-void dbg_logger_stdout();
-void dbg_logger_debugger();
-void dbg_logger_file(const char *filename);
 
 typedef struct
 {

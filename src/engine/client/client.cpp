@@ -10,6 +10,7 @@
 #include <tuple>
 
 #include <base/hash_ctxt.h>
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
@@ -35,6 +36,7 @@
 
 #include <engine/client/http.h>
 #include <engine/client/notifications.h>
+#include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
@@ -4339,6 +4341,23 @@ int main(int argc, const char **argv)
 	init_exception_handler();
 #endif
 
+	std::vector<std::shared_ptr<ILogger>> apLoggers;
+#if defined(CONF_PLATFORM_ANDROID)
+	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+#else
+	if(!Silent)
+	{
+		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+	}
+#endif
+	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureFileLogger);
+	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureConsoleLogger);
+	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+
 	if(secure_random_init() != 0)
 	{
 		RandInitFailed = true;
@@ -4352,7 +4371,7 @@ int main(int argc, const char **argv)
 	pClient->RegisterInterfaces();
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, Silent, 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
@@ -4363,6 +4382,7 @@ int main(int argc, const char **argv)
 	IDiscord *pDiscord = CreateDiscord();
 	ISteam *pSteam = CreateSteam();
 
+	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 #if defined(CONF_EXCEPTION_HANDLING)
 	char aBufPath[IO_MAX_PATH_LENGTH];
 	char aBufName[IO_MAX_PATH_LENGTH];
@@ -4484,7 +4504,18 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
-	pClient->Engine()->InitLogfile();
+	if(g_Config.m_Logfile[0])
+	{
+		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
+		if(Logfile)
+		{
+			pFutureFileLogger->Set(log_logger_file(Logfile));
+		}
+		else
+		{
+			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+		}
+	}
 
 	// run the client
 	dbg_msg("client", "starting...");

@@ -1,8 +1,9 @@
+#include <base/logger.h>
 #include <engine/shared/uuid_manager.h>
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 	if(argc != 2)
 	{
 		dbg_msg("usage", "uuid <NAME>");

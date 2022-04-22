@@ -9,6 +9,7 @@
 
 static const ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
+enum LEVEL : char;
 struct CChecksumData;
 
 class IConsole : public IInterface
@@ -104,8 +105,6 @@ public:
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
-	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
-	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
@@ -114,6 +113,8 @@ public:
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 
 	virtual void ResetServerGameSettings() = 0;
+
+	static LEVEL ToLogLevel(int ConsoleLevel);
 
 	// DDRace
 

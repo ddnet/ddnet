@@ -3,6 +3,7 @@
 #include <new>
 
 #include <base/color.h>
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
@@ -290,23 +291,6 @@ char CConsole::NextParam(const char *&pFormat)
 	return *pFormat;
 }
 
-int CConsole::RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData)
-{
-	if(m_NumPrintCB == MAX_PRINT_CB)
-		return -1;
-
-	m_aPrintCB[m_NumPrintCB].m_OutputLevel = clamp(OutputLevel, (int)(OUTPUT_LEVEL_STANDARD), (int)(OUTPUT_LEVEL_DEBUG));
-	m_aPrintCB[m_NumPrintCB].m_pfnPrintCallback = pfnPrintCallback;
-	m_aPrintCB[m_NumPrintCB].m_pPrintCallbackUserdata = pUserData;
-	return m_NumPrintCB++;
-}
-
-void CConsole::SetPrintOutputLevel(int Index, int OutputLevel)
-{
-	if(Index >= 0 && Index < MAX_PRINT_CB)
-		m_aPrintCB[Index].m_OutputLevel = clamp(OutputLevel, (int)(OUTPUT_LEVEL_STANDARD), (int)(OUTPUT_LEVEL_DEBUG));
-}
-
 char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr)
 {
 	char aTimeBuf[80];
@@ -316,26 +300,40 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 	return pBuf;
 }
 
+LEVEL IConsole::ToLogLevel(int Level)
+{
+	switch(Level)
+	{
+	case IConsole::OUTPUT_LEVEL_STANDARD:
+		return LEVEL_INFO;
+	case IConsole::OUTPUT_LEVEL_ADDINFO:
+		return LEVEL_DEBUG;
+	case IConsole::OUTPUT_LEVEL_DEBUG:
+		return LEVEL_TRACE;
+	}
+	dbg_assert(0, "invalid log level");
+	return LEVEL_INFO;
+}
+
+LOG_COLOR ColorToLogColor(ColorRGBA Color)
+{
+	return LOG_COLOR{
+		(uint8_t)(Color.r * 255.0),
+		(uint8_t)(Color.g * 255.0),
+		(uint8_t)(Color.b * 255.0)};
+}
+
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
 {
-	if(g_Config.m_ConsoleEnableColors)
+	LEVEL LogLevel = IConsole::ToLogLevel(Level);
+	// if the color is pure white, use default terminal color
+	if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) != 0)
 	{
-		// if the color is pure white, use default terminal color
-		if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) == 0)
-			set_console_msg_color(NULL);
-		else
-			set_console_msg_color(&PrintColor);
+		log_log_color(LogLevel, ColorToLogColor(PrintColor), pFrom, "%s", pStr);
 	}
-	dbg_msg(pFrom, "%s", pStr);
-	set_console_msg_color(NULL);
-	char aBuf[1024];
-	Format(aBuf, sizeof(aBuf), pFrom, pStr);
-	for(int i = 0; i < m_NumPrintCB; ++i)
+	else
 	{
-		if(Level <= m_aPrintCB[i].m_OutputLevel && m_aPrintCB[i].m_pfnPrintCallback)
-		{
-			m_aPrintCB[i].m_pfnPrintCallback(aBuf, m_aPrintCB[i].m_pPrintCallbackUserdata, PrintColor);
-		}
+		log_log(LogLevel, pFrom, "%s", pStr);
 	}
 }
 
@@ -966,8 +964,6 @@ CConsole::CConsole(int FlagMask)
 	m_ExecutionQueue.Reset();
 	m_pFirstCommand = 0;
 	m_pFirstExec = 0;
-	mem_zero(m_aPrintCB, sizeof(m_aPrintCB));
-	m_NumPrintCB = 0;
 	m_pfnTeeHistorianCommandCallback = 0;
 	m_pTeeHistorianCommandUserdata = 0;
 
