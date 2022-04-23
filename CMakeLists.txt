@@ -2012,6 +2012,8 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
+    components/tooltips.cpp
+    components/tooltips.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp

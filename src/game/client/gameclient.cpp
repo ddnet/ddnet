@@ -150,6 +150,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_Statboard);
 	m_All.Add(&m_Motd);
 	m_All.Add(&m_Menus);
+	m_All.Add(&m_Tooltips);
 	m_All.Add(&CMenus::m_Binder);
 	m_All.Add(&m_GameConsole);
 

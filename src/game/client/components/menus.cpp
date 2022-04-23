@@ -1854,9 +1854,9 @@ int CMenus::Render()
 			Box.HSplitBottom(20.f, &Box, 0);
 			Box.VMargin(20.0f, &Box);
 
-			static int ActSelection = -2;
-			if(ActSelection == -2)
-				ActSelection = g_Config.m_BrFilterCountryIndex;
+			static int CurSelection = -2;
+			if(CurSelection == -2)
+				CurSelection = g_Config.m_BrFilterCountryIndex;
 			static float s_ScrollValue = 0.0f;
 			int OldSelected = -1;
 			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
@@ -1864,7 +1864,7 @@ int CMenus::Render()
 			for(int i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 			{
 				const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
-				if(pEntry->m_CountryCode == ActSelection)
+				if(pEntry->m_CountryCode == CurSelection)
 					OldSelected = i;
 
 				CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
@@ -1884,21 +1884,21 @@ int CMenus::Render()
 
 			const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 			if(OldSelected != NewSelected)
-				ActSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
+				CurSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
 
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
 			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EnterPressed)
 			{
-				g_Config.m_BrFilterCountryIndex = ActSelection;
+				g_Config.m_BrFilterCountryIndex = CurSelection;
 				Client()->ServerBrowserUpdate();
 				m_Popup = POPUP_NONE;
 			}
 
 			if(m_EscapePressed)
 			{
-				ActSelection = g_Config.m_BrFilterCountryIndex;
+				CurSelection = g_Config.m_BrFilterCountryIndex;
 				m_Popup = POPUP_NONE;
 			}
 		}
@@ -2844,64 +2844,4 @@ bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const flo
 	}
 
 	return NewIndex != -1;
-}
-
-void CMenus::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
-{
-	static int64_t HoverTime = -1;
-
-	if(!UI()->MouseInside(pNearRect))
-	{
-		if(pID == UI()->ActiveTooltipItem())
-			HoverTime = -1;
-		return;
-	}
-
-	UI()->SetActiveTooltipItem(pID);
-
-	if(HoverTime == -1)
-		HoverTime = time_get();
-
-	// Delay tooltip until 1 second passed.
-	if(HoverTime > time_get() - time_freq())
-		return;
-
-	const float MARGIN = 5.0f;
-
-	CUIRect Rect;
-	Rect.w = WidthHint;
-	if(WidthHint < 0.0f)
-		Rect.w = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f) + 4.0f;
-	Rect.h = 30.0f;
-
-	CUIRect *pScreen = UI()->Screen();
-
-	// Try the top side.
-	if(pNearRect->y - Rect.h - MARGIN > pScreen->y)
-	{
-		Rect.x = clamp(UI()->MouseX() - Rect.w / 2.0f, MARGIN, pScreen->w - Rect.w - MARGIN);
-		Rect.y = pNearRect->y - Rect.h - MARGIN;
-	}
-	// Try the bottom side.
-	else if(pNearRect->y + pNearRect->h + MARGIN < pScreen->h)
-	{
-		Rect.x = clamp(UI()->MouseX() - Rect.w / 2.0f, MARGIN, pScreen->w - Rect.w - MARGIN);
-		Rect.y = pNearRect->y + pNearRect->h + MARGIN;
-	}
-	// Try the right side.
-	else if(pNearRect->x + pNearRect->w + MARGIN + Rect.w < pScreen->w)
-	{
-		Rect.x = pNearRect->x + pNearRect->w + MARGIN;
-		Rect.y = clamp(UI()->MouseY() - Rect.h / 2.0f, MARGIN, pScreen->h - Rect.h - MARGIN);
-	}
-	// Try the left side.
-	else if(pNearRect->x - Rect.w - MARGIN > pScreen->x)
-	{
-		Rect.x = pNearRect->x - Rect.w - MARGIN;
-		Rect.y = clamp(UI()->MouseY() - Rect.h / 2.0f, MARGIN, pScreen->h - Rect.h - MARGIN);
-	}
-
-	RenderTools()->DrawUIRect(&Rect, ColorRGBA(0.2, 0.2, 0.2, 0.80f), CUI::CORNER_ALL, 5.0f);
-	Rect.Margin(2.0f, &Rect);
-	UI()->DoLabel(&Rect, pText, 14.0f, TEXTALIGN_LEFT);
 }

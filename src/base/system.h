@@ -1778,7 +1778,7 @@ int fs_remove(const char *filename);
 		Renames the file or directory. If the paths differ the file will be moved.
 
 	Parameters:
-		oldname - The actual name
+		oldname - The current name
 		newname - The new name
 
 	Returns:
