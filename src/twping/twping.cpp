@@ -36,7 +36,7 @@ int main(int argc, const char **argv)
 
 	mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
 
-	int CurToken = rand() % 256;
+	int CurToken = random_int() % 256;
 	Buffer[sizeof(SERVERBROWSE_GETINFO)] = CurToken;
 
 	Packet.m_ClientID = -1;

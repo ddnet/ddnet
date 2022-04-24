@@ -228,7 +228,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		{
 			//make sure to load themes
 			std::vector<CTheme> &ThemesRef = GetThemes();
-			int RandomThemeIndex = rand() % (ThemesRef.size() - PREDEFINED_THEMES_COUNT);
+			int RandomThemeIndex = random_int() % (ThemesRef.size() - PREDEFINED_THEMES_COUNT);
 			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)ThemesRef.size())
 				pMenuMap = ThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.cstr();
 		}

@@ -485,7 +485,7 @@ void CPlayers::RenderPlayer(
 			// HADOKEN
 			if(AttackTime <= 1 / 6.f && g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)
 			{
-				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
+				int IteX = random_int() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
 				static int s_LastIteX = IteX;
 				if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 				{
@@ -567,7 +567,7 @@ void CPlayers::RenderPlayer(
 					AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
 				}
 
-				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
+				int IteX = random_int() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
 				static int s_LastIteX = IteX;
 				if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 				{

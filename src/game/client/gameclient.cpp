@@ -301,10 +301,10 @@ void CGameClient::OnInit()
 	{
 		for(unsigned int i = 0; i < 16; i++)
 		{
-			if(rand() % 2)
-				g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 97);
+			if(random_int() % 2)
+				g_Config.m_ClTimeoutCode[i] = (char)((random_int() % 26) + 97);
 			else
-				g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 65);
+				g_Config.m_ClTimeoutCode[i] = (char)((random_int() % 26) + 65);
 		}
 	}
 
@@ -312,10 +312,10 @@ void CGameClient::OnInit()
 	{
 		for(unsigned int i = 0; i < 16; i++)
 		{
-			if(rand() % 2)
-				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 97);
+			if(random_int() % 2)
+				g_Config.m_ClDummyTimeoutCode[i] = (char)((random_int() % 26) + 97);
 			else
-				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
+				g_Config.m_ClDummyTimeoutCode[i] = (char)((random_int() % 26) + 65);
 		}
 	}
 
@@ -1142,13 +1142,13 @@ void CGameClient::OnNewSnapshot()
 		if((Client()->GameTick(g_Config.m_ClDummy) % 100) == 0)
 		{
 			char aMessage[64];
-			int MsgLen = rand() % (sizeof(aMessage) - 1);
+			int MsgLen = random_int() % (sizeof(aMessage) - 1);
 			for(int i = 0; i < MsgLen; i++)
-				aMessage[i] = (char)('a' + (rand() % ('z' - 'a')));
+				aMessage[i] = (char)('a' + (random_int() % ('z' - 'a')));
 			aMessage[MsgLen] = 0;
 
 			CNetMsg_Cl_Say Msg;
-			Msg.m_Team = rand() & 1;
+			Msg.m_Team = random_int() & 1;
 			Msg.m_pMessage = aMessage;
 			Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 		}

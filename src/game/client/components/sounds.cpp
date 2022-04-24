@@ -52,7 +52,7 @@ int CSounds::GetSampleId(int SetId)
 	int Id;
 	do
 	{
-		Id = rand() % pSet->m_NumSounds;
+		Id = random_int() % pSet->m_NumSounds;
 	} while(Id == pSet->m_Last);
 	pSet->m_Last = Id;
 	return pSet->m_aSounds[Id].m_Id;

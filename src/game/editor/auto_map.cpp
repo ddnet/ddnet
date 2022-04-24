@@ -432,7 +432,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 		return;
 
 	if(Seed == 0)
-		Seed = rand();
+		Seed = random_int();
 
 	CConfiguration *pConf = &m_lConfigs[ConfigID];
 

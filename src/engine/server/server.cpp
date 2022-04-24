@@ -3772,7 +3772,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 		unsigned Rand;
 		do
 		{
-			Rand = rand() % Lines.size();
+			Rand = random_int() % Lines.size();
 		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;

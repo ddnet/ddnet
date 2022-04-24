@@ -141,7 +141,7 @@ static int Run()
 		/* send heartbeats if needed */
 		if(NextHeartBeat < time_get())
 		{
-			NextHeartBeat = time_get() + time_freq() * (15 + (rand() % 15));
+			NextHeartBeat = time_get() + time_freq() * (15 + (random_int() % 15));
 			SendHeartBeats();
 		}
 

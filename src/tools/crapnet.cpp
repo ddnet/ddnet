@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/math.h>
 #include <base/system.h>
 
 #include <array> // std::size
@@ -72,7 +73,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			if(Bytes <= 0)
 				break;
 
-			if((rand() % 100) < Ping.m_Loss) // drop the packet
+			if((random_int() % 100) < Ping.m_Loss) // drop the packet
 			{
 				if(m_ConfigLog)
 					dbg_msg("crapnet", "dropped packet");
@@ -110,10 +111,10 @@ void Run(unsigned short Port, NETADDR Dest)
 
 			if(ID > 20 && Bytes > 6 && DataTrash)
 			{
-				p->m_aData[6 + (rand() % (Bytes - 6))] = rand() & 255; // modify a byte
-				if((rand() % 10) == 0)
+				p->m_aData[6 + (random_int() % (Bytes - 6))] = random_int() & 255; // modify a byte
+				if((random_int() % 10) == 0)
 				{
-					p->m_DataSize -= rand() % 32;
+					p->m_DataSize -= random_int() % 32;
 					if(p->m_DataSize < 6)
 						p->m_DataSize = 6;
 				}
@@ -151,7 +152,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			{
 				char aFlags[] = "  ";
 
-				if(m_ConfigReorder && (rand() % 2) == 0 && p->m_pNext)
+				if(m_ConfigReorder && (random_int() % 2) == 0 && p->m_pNext)
 				{
 					aFlags[0] = 'R';
 					p = m_pFirst->m_pNext;
@@ -175,11 +176,11 @@ void Run(unsigned short Port, NETADDR Dest)
 				}*/
 
 				// send and remove packet
-				//if((rand()%20) != 0) // heavy packetloss
+				//if((random_int()%20) != 0) // heavy packetloss
 				net_udp_send(Socket, &p->m_SendTo, p->m_aData, p->m_DataSize);
 
 				// update lag
-				double Flux = rand() / (double)RAND_MAX;
+				double Flux = random_int() / (double)RAND_MAX;
 				int MsSpike = Ping.m_Spike;
 				int MsFlux = Ping.m_Flux;
 				int MsPing = Ping.m_Base;
