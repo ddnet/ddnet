@@ -9,11 +9,6 @@
 
 using std::clamp;
 
-constexpr inline float sign(float f)
-{
-	return f < 0.0f ? -1.0f : 1.0f;
-}
-
 constexpr inline int round_to_int(float f)
 {
 	return f > 0 ? (int)(f + 0.5f) : (int)(f - 0.5f);
