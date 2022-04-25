@@ -415,7 +415,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	}
 	else
 	{
-		if((m_DummyFire / 12.5f) - (int)(m_DummyFire / 12.5f) > 0.01f)
+		if(m_DummyFire % 25 != 0)
 		{
 			m_DummyFire++;
 			return 0;
