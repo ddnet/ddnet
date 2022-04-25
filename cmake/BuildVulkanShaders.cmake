@@ -21,7 +21,7 @@ if(NOT GLSLANG_VALIDATOR_PROGRAM)
     endif()
   endif()
 
-  if(${GLSLANG_VALIDATOR_PROGRAM_FOUND} EQUAL FALSE)
+  if(NOT GLSLANG_VALIDATOR_PROGRAM_FOUND)
     message(FATAL_ERROR "glslangValidator binary was not found. Did you install the Vulkan SDK / packages ?")
   endif()
 endif()
