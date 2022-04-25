@@ -781,9 +781,9 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			if(pUnpacker->Error())
 				WentWrong = true;
 
-			if(!WentWrong && Team >= TEAM_FLOCK && Team <= TEAM_SUPER)
+			if(!WentWrong && Team >= TEAM_FLOCK && Team < TEAM_SUPER)
 				m_Teams.Team(i, Team);
-			else
+			else if(Team != TEAM_SUPER)
 				WentWrong = true;
 
 			if(WentWrong)
@@ -2614,14 +2614,14 @@ bool CGameClient::IsOtherTeam(int ClientID)
 		return false;
 	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 	{
-		if(m_Teams.Team(ClientID) == TEAM_SUPER || m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID) == TEAM_SUPER)
+		if(m_aClients[ClientID].m_Super || m_aClients[m_Snap.m_SpecInfo.m_SpectatorID].m_Super)
 			return false;
 		return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
 	}
 	else if((m_aClients[m_Snap.m_LocalClientID].m_Solo || m_aClients[ClientID].m_Solo) && !Local)
 		return true;
 
-	if(m_Teams.Team(ClientID) == TEAM_SUPER || m_Teams.Team(m_Snap.m_LocalClientID) == TEAM_SUPER)
+	if(m_aClients[ClientID].m_Super || m_aClients[m_Snap.m_LocalClientID].m_Super)
 		return false;
 
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
