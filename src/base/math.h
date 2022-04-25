@@ -3,14 +3,11 @@
 #ifndef BASE_MATH_H
 #define BASE_MATH_H
 
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 
-template<typename T>
-constexpr inline T clamp(T val, T min, T max)
-{
-	return val < min ? min : (val > max ? max : val);
-}
+using std::clamp;
 
 constexpr inline float sign(float f)
 {
