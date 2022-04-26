@@ -7146,7 +7146,7 @@ public:
 			m_ThreadCount = 1;
 		else
 		{
-			m_ThreadCount = clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::thread::hardware_concurrency());
+			m_ThreadCount = clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::max<decltype(m_ThreadCount)>(3, std::thread::hardware_concurrency()));
 		}
 
 		// start threads

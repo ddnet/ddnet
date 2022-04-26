@@ -526,7 +526,7 @@ public:
 	int m_LocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
-	int m_DummyFire;
+	unsigned int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 
 	class CTeamsCore m_Teams;
