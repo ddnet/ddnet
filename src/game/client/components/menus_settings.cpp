@@ -1251,18 +1251,44 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 	}
 
+	bool MultiSamplingChanged = false;
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("may cause delay"));
 	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, aBuf, g_Config.m_GfxFsaaSamples, &Button);
+	int CurFSAA = g_Config.m_GfxFsaaSamples == 0 ? 1 : g_Config.m_GfxFsaaSamples;
 	if(GfxFsaaSamples_MouseButton == 1) // inc
 	{
-		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples + 1) % 17;
-		CheckSettings = true;
+		g_Config.m_GfxFsaaSamples = std::pow(2, (int)std::log2(CurFSAA) + 1);
+		if(g_Config.m_GfxFsaaSamples > 64)
+			g_Config.m_GfxFsaaSamples = 0;
+		MultiSamplingChanged = true;
 	}
 	else if(GfxFsaaSamples_MouseButton == 2) // dec
 	{
-		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples - 1 + 17) % 17;
-		CheckSettings = true;
+		if(CurFSAA == 1)
+			g_Config.m_GfxFsaaSamples = 64;
+		else if(CurFSAA == 2)
+			g_Config.m_GfxFsaaSamples = 0;
+		else
+			g_Config.m_GfxFsaaSamples = std::pow(2, (int)std::log2(CurFSAA) - 1);
+		MultiSamplingChanged = true;
+	}
+
+	uint32_t MultiSamplingCountBackend = 0;
+	if(MultiSamplingChanged)
+	{
+		if(Graphics()->SetMultiSampling(g_Config.m_GfxFsaaSamples, MultiSamplingCountBackend))
+		{
+			// try again with 0 if mouse click was increasing multi sampling
+			// else just accept the current value as is
+			if((uint32_t)g_Config.m_GfxFsaaSamples > MultiSamplingCountBackend && GfxFsaaSamples_MouseButton == 1)
+				Graphics()->SetMultiSampling(0, MultiSamplingCountBackend);
+			g_Config.m_GfxFsaaSamples = (int)MultiSamplingCountBackend;
+		}
+		else
+		{
+			CheckSettings = true;
+		}
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
