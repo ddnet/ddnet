@@ -2600,16 +2600,17 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	CUIRect Column, Section, Page1Tab, Page2Tab,Label;
 
-	
+	MainView.HMargin(-15.0f, &MainView);
+
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
 	Label.VSplitLeft(TabsW / 2, &Page1Tab, &Page2Tab); 
 
 	static int s_aPageTabs[2] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("1"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Page 1"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 0;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("2"), s_CurCustomTab == 1, &Page2Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Page 2"), s_CurCustomTab == 1, &Page2Tab, 5, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 1;
 
 	
@@ -2776,7 +2777,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
 		}
-		static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID, IndikatorAliveColorID, IndikatorDeadColorID;
+		static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
@@ -2854,25 +2855,25 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, ("Player Indikator"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Section, ("Player Indicator"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 	
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndikator, ("Show any enabled Indikators"), &g_Config.m_ClPlayerIndikator, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndikatorFreeze, ("Show only freeze Players"), &g_Config.m_ClPlayerIndikatorFreeze, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndikatorTeamOnly, ("Only show after joining a team"), &g_Config.m_ClIndikatorTeamOnly, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicator, ("Show any enabled Indicators"), &g_Config.m_ClPlayerIndicator, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicatorFreeze, ("Show only freeze Players"), &g_Config.m_ClPlayerIndicatorFreeze, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTeamOnly, ("Only show after joining a team"), &g_Config.m_ClIndicatorTeamOnly, &MainView, LineMargin);
 
-		static int IndikatorAliveColorID, IndikatorDeadColorID;
+		static int IndicatorAliveColorID, IndicatorDeadColorID;
 	
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndikatorAliveColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indikator alive color"), &g_Config.m_ClIndikatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&IndicatorAliveColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndikatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indikator dead color"), &g_Config.m_ClIndikatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		{
 			CUIRect Button, Label;
@@ -2880,9 +2881,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indikator offset", g_Config.m_ClIndikatorOffset);
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator offset", g_Config.m_ClIndicatorOffset);
 			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndikatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndikatorOffset, &Button, (g_Config.m_ClIndikatorOffset - 1) / 63.0f) * 63.0f) + 1;
+			g_Config.m_ClIndicatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 1) / 63.0f) * 63.0f) + 1;
 		}
 		{
 			CUIRect Button, Label;
@@ -2890,9 +2891,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indikator width", g_Config.m_ClIndikatorRadius);
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator width", g_Config.m_ClIndicatorRadius);
 			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndikatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndikatorRadius, &Button, (g_Config.m_ClIndikatorRadius - 1) / 15.0f) * 15.0f) + 1;
+			g_Config.m_ClIndicatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
 		}
 	}
 }

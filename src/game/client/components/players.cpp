@@ -711,12 +711,12 @@ void CPlayers::RenderPlayer(
 	}
 
 	
-    if(g_Config.m_ClPlayerIndikator == 1)
+    if(g_Config.m_ClPlayerIndicator == 1)
 	{
 		Graphics()->TextureClear();
 		float CircleSize = 7.0f;
 		ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
-		if(Local && !(m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID) == 0 && g_Config.m_ClIndikatorTeamOnly))
+		if(Local && !(m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID) == 0 && g_Config.m_ClIndicatorTeamOnly))
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -729,29 +729,29 @@ void CPlayers::RenderPlayer(
 				{
 					vec2 norm = NormalizedDirection(m_pClient->m_aClients[i].m_RenderPos, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos) * (-1);
 
-					vec2 cPoint(norm.x * g_Config.m_ClIndikatorOffset + Position.x, norm.y * g_Config.m_ClIndikatorOffset + Position.y);
+					vec2 cPoint(norm.x * g_Config.m_ClIndicatorOffset + Position.x, norm.y * g_Config.m_ClIndicatorOffset + Position.y);
 					Graphics()->QuadsBegin();
 					
 					if(enemy.m_RenderCur.m_Weapon == WEAPON_NINJA)
 					{
-						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndikatorFreeze)); 
+						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorFreeze)); 
 					}
 					else
 					{
-						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndikatorAlive)); 
+						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorAlive)); 
 					} 
 
 					Graphics()->SetColor(col); 
 
-					if (g_Config.m_ClPlayerIndikatorFreeze)
+					if (g_Config.m_ClPlayerIndicatorFreeze)
 					{
 						if(enemy.m_RenderCur.m_Weapon == WEAPON_NINJA)
 						{
-							RenderTools()->DrawCircle(cPoint.x, cPoint.y, g_Config.m_ClIndikatorRadius, 16);
+							RenderTools()->DrawCircle(cPoint.x, cPoint.y, g_Config.m_ClIndicatorRadius, 16);
 						}
 					}
 					else {
-						RenderTools()->DrawCircle(cPoint.x, cPoint.y, g_Config.m_ClIndikatorRadius, 16);
+						RenderTools()->DrawCircle(cPoint.x, cPoint.y, g_Config.m_ClIndicatorRadius, 16);
 					}
 					
 					Graphics()->QuadsEnd();
