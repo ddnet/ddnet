@@ -2740,7 +2740,7 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	if(!m_pCommandBuffer)
 		return true;
 
-	// add vsnc command
+	// add vsync command
 	bool RetOk = false;
 	CCommandBuffer::SCommand_VSync Cmd;
 	Cmd.m_VSync = State ? 1 : 0;
@@ -2748,6 +2748,30 @@ bool CGraphics_Threaded::SetVSync(bool State)
 
 	if(!AddCmd(
 		   Cmd, [] { return true; }, "failed to add vsync command"))
+	{
+		return false;
+	}
+
+	// kick the command buffer
+	KickCommandBuffer();
+	WaitForIdle();
+	return RetOk;
+}
+
+bool CGraphics_Threaded::SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend)
+{
+	if(!m_pCommandBuffer)
+		return true;
+
+	// add multisampling command
+	bool RetOk = false;
+	CCommandBuffer::SCommand_MultiSampling Cmd;
+	Cmd.m_RequestedMultiSamplingCount = ReqMultiSamplingCount;
+	Cmd.m_pRetMultiSamplingCount = &MultiSamplingCountBackend;
+	Cmd.m_pRetOk = &RetOk;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add multi sampling command"))
 	{
 		return false;
 	}
