@@ -1190,7 +1190,8 @@ void CCharacter::Snap(int SnappingClient)
 	if(!Server()->Translate(ID, SnappingClient))
 		return;
 
-	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))
+	// Always send the character when his hook position is in our range, to show hooks of tees that are far away
+	if((NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient)) && NetworkClipped(SnappingClient, m_Core.m_HookPos))
 		return;
 
 	SnapCharacter(SnappingClient, ID);

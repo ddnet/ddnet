@@ -181,11 +181,7 @@ void CDragger::Snap(int SnappingClient)
 	if(((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
-	if(NetworkClipped(SnappingClient, m_Pos))
-		return;
-
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
-
 	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
@@ -193,31 +189,11 @@ void CDragger::Snap(int SnappingClient)
 		return;
 
 	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
-
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
-	{
-		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-		if(pEntData)
-		{
-			pEntData->m_SwitchNumber = m_Number;
-			pEntData->m_Layer = m_Layer;
-			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
-		}
-	}
-
 	CCharacter *pTarget = m_TargetID < 0 ? 0 : GameServer()->GetPlayerChar(m_TargetID);
-
-	for(int &SoloID : m_SoloIDs)
-	{
-		if(SoloID == -1)
-			break;
-
-		Server()->SnapFreeID(SoloID);
-		SoloID = -1;
-	}
-
-	int pos = 0;
+	
+	bool AtLeastOne = false;
+	bool aShouldSnap[MAX_CLIENTS + 1];
+	mem_zero(aShouldSnap, sizeof(aShouldSnap));
 
 	for(int i = -1; i < MAX_CLIENTS; i++)
 	{
@@ -247,6 +223,43 @@ void CDragger::Snap(int SnappingClient)
 		{
 			continue;
 		}
+
+		AtLeastOne = true;
+		aShouldSnap[i == -1 ? MAX_CLIENTS : i] = true;
+	}
+
+	if(!AtLeastOne)
+		return;
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
+	{
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(pEntData)
+		{
+			pEntData->m_SwitchNumber = m_Number;
+			pEntData->m_Layer = m_Layer;
+			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
+		}
+	}
+
+	pTarget = m_TargetID < 0 ? 0 : GameServer()->GetPlayerChar(m_TargetID);
+
+	for(int &SoloID : m_SoloIDs)
+	{
+		if(SoloID == -1)
+			break;
+
+		Server()->SnapFreeID(SoloID);
+		SoloID = -1;
+	}
+
+	int pos = 0;
+
+	for(int i = -1; i < MAX_CLIENTS; i++)
+	{
+		if(!aShouldSnap[i == -1 ? MAX_CLIENTS : i])
+			continue;
 
 		CNetObj_Laser *obj;
 
