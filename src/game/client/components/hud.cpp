@@ -598,28 +598,38 @@ void CHud::RenderTextInfo()
 		TextRender()->Text(0, m_Width - 10 - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 
-	if(g_Config.m_ClMiniDebug && m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalPrevCharacter)
+	if(g_Config.m_ClMiniDebug)
 	{
 		float FontSize = 8;
 		float TextHeight = 11;
 		char aBuf[64];
 		float yOff = 3;
 
-		if(g_Config.m_ClShowhudHealthAmmo)
+		if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 27;
 
-		str_format(aBuf, sizeof(aBuf), "X: %.2f", m_pClient->m_Snap.m_pLocalCharacter->m_X / 32.0f);
+		int PlayerId = m_pClient->m_Snap.m_LocalClientID;
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
+
+		vec2 Pos;
+		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+			Pos = vec2(GameClient()->m_Controls.m_MousePos[g_Config.m_ClDummy].x, GameClient()->m_Controls.m_MousePos[g_Config.m_ClDummy].y);
+		else
+			Pos = m_pClient->m_aClients[PlayerId].m_RenderPos;
+
+		str_format(aBuf, sizeof(aBuf), "X: %.2f", Pos.x / 32.0f);
 		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 
 		yOff += TextHeight;
-		str_format(aBuf, sizeof(aBuf), "Y: %.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Y / 32.0f);
+		str_format(aBuf, sizeof(aBuf), "Y: %.2f", Pos.y / 32.0f);
 		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
-
-		yOff += TextHeight;
-		str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle );
-		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
-
-
+		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		{
+			yOff += TextHeight;
+			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
+			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+		}
 	}
 
 	//render team in freeze text and last notify
@@ -640,16 +650,16 @@ void CHud::RenderTextInfo()
 					NumFrozen++;
 			}
 		}
-		
+
 		//Notify when last
-		if (g_Config.m_ClNotifyWhenLast) {
-			
-			if (NumInTeam > 2 && NumInTeam - NumFrozen == 1 && m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderCur.m_Weapon != 5) {
+		if(g_Config.m_ClNotifyWhenLast)
+		{
+			if(NumInTeam > 2 && NumInTeam - NumFrozen == 1 && m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderCur.m_Weapon != 5)
+			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "Last!");
 				TextRender()->Text(0, 170, 4, 14, aBuf, -1.0f);
 			}
-
 		}
 		//Show freeze text
 		char aBuf[64];
@@ -687,7 +697,6 @@ void CHud::RenderTextInfo()
 				MaxTees = (int)(9.5 * (m_Width / m_Height) * 13.0f / TeeSize);
 			int MaxRows = g_Config.m_ClFrozenMaxRows;
 			float StartPos = m_Width / 2 + 38.0f * (m_Width / m_Height) / 1.78;
-
 
 			int TotalRows = std::min(MaxRows, (NumInTeam + MaxTees - 1) / MaxTees);
 			Graphics()->TextureClear();
@@ -737,7 +746,7 @@ void CHud::RenderTextInfo()
 						CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-						vec2 TeeRenderPos(StartPos + progressiveOffset, TeeSize *(0.7f) + CurrentRow * TeeSize);
+						vec2 TeeRenderPos(StartPos + progressiveOffset, TeeSize * (0.7f) + CurrentRow * TeeSize);
 						float Alpha = 1.0f;
 						CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
 						if(g_Config.m_ClShowFrozenHudSkins && Frozen)
@@ -842,19 +851,26 @@ void CHud::RenderVoting()
 
 void CHud::RenderCursor()
 {
-	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	int CurWeapon = 1;
+	vec2 Pos = vec2(m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
 	MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
-	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
-
+	if(m_pClient->m_Snap.m_pLocalCharacter)
+		 CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+	else
+	{
+		Pos = vec2(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
+		Graphics()->SetColor(1.f, 1.f, 1.f, 0.2f);
+	}
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
 
 	// render cursor
 	int QuadOffset = NUM_WEAPONS * 10 * 2 + 40 * 2 + (CurWeapon);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
 }
 
 void CHud::PrepareHealthAmoQuads()
