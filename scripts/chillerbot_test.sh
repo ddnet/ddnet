@@ -62,12 +62,14 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 	"cl_input_fifo client1.fifo;
 	cl_chat_spam_filter 0;
 	player_name client1;
+	cl_tabbed_out_msg 0;
 	connect localhost:17822" > client1.log &
 # shellcheck disable=SC2211
 ./chillerbot-* \
 	'cl_input_fifo client2.fifo;
 	cl_chat_spam_filter 0;
 	player_name client2;
+	cl_tabbed_out_msg 0;
 	connect localhost:17822;
 	player_clan "Chilli.*";
 	inp_mousesens 1000' > client2.log &
