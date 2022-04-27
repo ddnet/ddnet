@@ -15,7 +15,12 @@ vec2 NormalizedDirection(vec2 src, vec2 dst)
 
 void CPlayerIndicator::OnRender()
 {
+	//Don't Render if we can't find our own tee
 	if(m_pClient->m_Snap.m_LocalClientID == -1 || !m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active)
+		return;
+
+	//Don't Render if not race gamemode or in demo
+	if(!GameClient()->m_GameInfo.m_Race || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	vec2 Position = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos;
