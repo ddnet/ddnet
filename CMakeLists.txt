@@ -1944,6 +1944,8 @@ if(CLIENT)
     components/nameplates.h
     components/particles.cpp
     components/particles.h
+    components/player_indicator.cpp
+    components/player_indicator.h
     components/players.cpp
     components/players.h
     components/race_demo.cpp

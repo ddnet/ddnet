@@ -46,6 +46,7 @@
 #include "components/motd.h"
 #include "components/nameplates.h"
 #include "components/particles.h"
+#include "components/player_indicator.h"
 #include "components/players.h"
 #include "components/race_demo.h"
 #include "components/scoreboard.h"
@@ -131,6 +132,7 @@ public:
 	CSpectator m_Spectator;
 
 	CPlayers m_Players;
+	CPlayerIndicator m_PlayerIndicator;
 	CNamePlates m_NamePlates;
 	CItems m_Items;
 	CMapImages m_MapImages;
