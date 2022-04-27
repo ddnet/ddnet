@@ -2598,13 +2598,13 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 {
 	static int s_CurCustomTab = 0;
 
-	CUIRect Column, Section, Page1Tab, Page2Tab,Label;
+	CUIRect Column, Section, Page1Tab, Page2Tab, Label;
 
 	MainView.HMargin(-15.0f, &MainView);
 
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
-	Label.VSplitLeft(TabsW / 2, &Page1Tab, &Page2Tab); 
+	Label.VSplitLeft(TabsW / 2, &Page1Tab, &Page2Tab);
 
 	static int s_aPageTabs[2] = {};
 
@@ -2613,7 +2613,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Page 2"), s_CurCustomTab == 1, &Page2Tab, 5, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = 1;
 
-	
 	const float LineMargin = 20.0f;
 
 	//MainView.HSplitTop(10.0f, 0x0, &MainView);
@@ -2746,7 +2745,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline walls"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, ("Outline teleporter"), &g_Config.m_ClOutlineTele, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, ("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &MainView, LineMargin);
-		
+
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(5.0f, &Button, &MainView);
@@ -2858,13 +2857,12 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		UI()->DoLabelScaled(&Section, ("Player Indicator"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
-	
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicator, ("Show any enabled Indicators"), &g_Config.m_ClPlayerIndicator, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicatorFreeze, ("Show only freeze Players"), &g_Config.m_ClPlayerIndicatorFreeze, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTeamOnly, ("Only show after joining a team"), &g_Config.m_ClIndicatorTeamOnly, &MainView, LineMargin);
 
 		static int IndicatorAliveColorID, IndicatorDeadColorID;
-	
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
