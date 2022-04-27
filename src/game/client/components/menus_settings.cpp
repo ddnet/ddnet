@@ -2862,6 +2862,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicator, ("Show any enabled Indicators"), &g_Config.m_ClPlayerIndicator, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicatorFreeze, ("Show only freeze Players"), &g_Config.m_ClPlayerIndicatorFreeze, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTeamOnly, ("Only show after joining a team"), &g_Config.m_ClIndicatorTeamOnly, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTees, ("Render tiny tees instead of circles"), &g_Config.m_ClIndicatorTees, &MainView, LineMargin);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorVariableDistance, ("Change indicator offset based on distance to other tees"), &g_Config.m_ClIndicatorVariableDistance, &MainView, LineMargin);
 
 		static int IndicatorAliveColorID, IndicatorDeadColorID;
 
@@ -2873,16 +2876,15 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
 		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(5.0f, &Button, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator offset", g_Config.m_ClIndicatorOffset);
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator size", g_Config.m_ClIndicatorRadius);
 			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndicatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 1) / 63.0f) * 63.0f) + 1;
+			g_Config.m_ClIndicatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
 		}
 		{
 			CUIRect Button, Label;
@@ -2890,9 +2892,45 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator width", g_Config.m_ClIndicatorRadius);
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator opacity", g_Config.m_ClIndicatorOpacity);
 			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndicatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
+			g_Config.m_ClIndicatorOpacity = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOpacity, &Button, (g_Config.m_ClIndicatorOpacity) / 100.0f) * 100.0f);
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator offset", g_Config.m_ClIndicatorOffset);
+			if(g_Config.m_ClIndicatorVariableDistance)
+				str_format(aBuf, sizeof(aBuf), "%s: %i ", "Min offset", g_Config.m_ClIndicatorOffset);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClIndicatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 16) / 184.0f) * 184.0f) + 16;
+		}
+		if(g_Config.m_ClIndicatorVariableDistance)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max offset", g_Config.m_ClIndicatorOffsetMax);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClIndicatorOffsetMax = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffsetMax, &Button, (g_Config.m_ClIndicatorOffsetMax - 16) / 184.0f) * 184.0f) + 16;
+		}
+		if(g_Config.m_ClIndicatorVariableDistance)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max distance", g_Config.m_ClIndicatorMaxDistance);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			int NewValue = (g_Config.m_ClIndicatorMaxDistance) / 50.0f;
+			NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
+			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
 		}
 	}
 }

@@ -1,6 +1,8 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
+#include <game/client/animstate.h>
+#include <game/client/render.h>
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
@@ -13,13 +15,18 @@ vec2 NormalizedDirection(vec2 src, vec2 dst)
 	return normalize(vec2(dst.x - src.x, dst.y - src.y));
 }
 
+float DistanceBetweenTwoPoints(vec2 src, vec2 dst)
+{
+	return sqrt(pow(dst.x - src.x, 2) + pow(dst.y - src.y, 2));
+}
+
 void CPlayerIndicator::OnRender()
 {
-	//Don't Render if we can't find our own tee
+	// Don't render if we can't find our own tee
 	if(m_pClient->m_Snap.m_LocalClientID == -1 || !m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active)
 		return;
 
-	//Don't Render if not race gamemode or in demo
+	// Don't render if not race gamemode or in demo
 	if(!GameClient()->m_GameInfo.m_Race || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
@@ -34,51 +41,67 @@ void CPlayerIndicator::OnRender()
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				CGameClient::CClientData enemy = m_pClient->m_aClients[i];
+				if(!m_pClient->m_Snap.m_paPlayerInfos[i] || i == m_pClient->m_Snap.m_LocalClientID)
+					continue;
+
+				CGameClient::CClientData OtherTee = m_pClient->m_aClients[i];
 				if(
-					enemy.m_Team == m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team &&
-					!enemy.m_Paused &&
-					!enemy.m_Spec &&
+					OtherTee.m_Team == m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team &&
+					!OtherTee.m_Paused &&
+					!OtherTee.m_Spec &&
 					m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				{
+					if(g_Config.m_ClPlayerIndicatorFreeze && OtherTee.m_RenderCur.m_Weapon != WEAPON_NINJA)
+						continue;
+
 					vec2 norm = NormalizedDirection(m_pClient->m_aClients[i].m_RenderPos, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos) * (-1);
 
-					vec2 cPoint(norm.x * g_Config.m_ClIndicatorOffset + Position.x, norm.y * g_Config.m_ClIndicatorOffset + Position.y);
-					Graphics()->QuadsBegin();
+					float Offset = g_Config.m_ClIndicatorOffset;
+					if(g_Config.m_ClIndicatorVariableDistance)
+					{
+						Offset = mix((float)g_Config.m_ClIndicatorOffset, (float)g_Config.m_ClIndicatorOffsetMax,
+							std::min(DistanceBetweenTwoPoints(Position, OtherTee.m_RenderPos) / g_Config.m_ClIndicatorMaxDistance, 1.0f));
+					}
 
-					if(enemy.m_RenderCur.m_Weapon == WEAPON_NINJA)
+					vec2 IndicatorPos(norm.x * Offset + Position.x, norm.y * Offset + Position.y);
+					CTeeRenderInfo TeeInfo = OtherTee.m_RenderInfo;
+					float Alpha = g_Config.m_ClIndicatorOpacity / 100.0f;
+					if(OtherTee.m_RenderCur.m_Weapon == WEAPON_NINJA)
 					{
 						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorFreeze));
+						if(g_Config.m_ClIndicatorTees)
+						{
+							TeeInfo.m_ColorBody.r *= 0.4;
+							TeeInfo.m_ColorBody.g *= 0.4;
+							TeeInfo.m_ColorBody.b *= 0.4;
+							TeeInfo.m_ColorFeet.r *= 0.4;
+							TeeInfo.m_ColorFeet.g *= 0.4;
+							TeeInfo.m_ColorFeet.b *= 0.4;
+							Alpha *= 0.8;
+						}
 					}
 					else
 					{
 						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorAlive));
 					}
+					col.a = Alpha;
 
-					Graphics()->SetColor(col);
+					CAnimState *pIdleState = CAnimState::GetIdle();
+					TeeInfo.m_Size = g_Config.m_ClIndicatorRadius * 4.f;
 
-					if(g_Config.m_ClPlayerIndicatorFreeze)
+					if(g_Config.m_ClIndicatorTees)
 					{
-						if(enemy.m_RenderCur.m_Weapon == WEAPON_NINJA)
-						{
-							RenderTools()->DrawCircle(cPoint.x, cPoint.y, g_Config.m_ClIndicatorRadius, 16);
-						}
+						RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, OtherTee.m_RenderCur.m_Emote, vec2(1.0f, 0.0f), IndicatorPos, col.a);
 					}
 					else
 					{
-						RenderTools()->DrawCircle(cPoint.x, cPoint.y, g_Config.m_ClIndicatorRadius, 16);
+						Graphics()->QuadsBegin();
+						Graphics()->SetColor(col);
+						RenderTools()->DrawCircle(IndicatorPos.x, IndicatorPos.y, g_Config.m_ClIndicatorRadius, 16);
+						Graphics()->QuadsEnd();
 					}
-
-					Graphics()->QuadsEnd();
 				}
 			}
 		}
-		Graphics()->QuadsBegin();
-		ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(100.0f / 1000.0f, 1.0f, 0.5f, 0.8f));
-
-		Graphics()->SetColor(rgb);
-
-		// RenderTools()->DrawCircle(InitPos.x, InitPos.y, 32, 360);
-		Graphics()->QuadsEnd();
 	}
 }
