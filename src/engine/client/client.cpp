@@ -2103,13 +2103,42 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							CNetMsg_Cl_Say MsgP;
 							MsgP.m_Team = 0;
 							char aBuf[256];
+							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
+								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
+							else
+								str_format(aBuf, sizeof(aBuf), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+
 							if(g_Config.m_ClRunOnJoin[0])
 							{
-								str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[Conn], g_Config.m_ClRunOnJoin);
+								str_format(aBuf, sizeof(aBuf), "%s;%s", aBuf, g_Config.m_ClRunOnJoin);
 							}
-							else
+							if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
 							{
-								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
+								int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+								char aBufEmote[128];
+								aBufEmote[0] = '\0';
+								switch(Emote)
+								{
+								case EMOTE_NORMAL:
+									break;
+								case EMOTE_PAIN:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_HAPPY:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_SURPRISE:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_ANGRY:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_BLINK:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
+									break;
+								}
+								if(aBufEmote[0])
+									str_format(aBuf, sizeof(aBuf), "%s;%s", aBuf, aBufEmote);
 							}
 							MsgP.m_pMessage = aBuf;
 							CMsgPacker PackerTimeout(MsgP.MsgID(), false);
