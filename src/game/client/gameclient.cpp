@@ -56,6 +56,7 @@
 #include "components/motd.h"
 #include "components/nameplates.h"
 #include "components/particles.h"
+#include "components/player_indicator.h"
 #include "components/players.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
@@ -123,6 +124,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_Ghost);
 	m_All.Add(&m_MapLayersForeGround);
 	m_All.Add(&m_Particles.m_RenderExplosions);
+	m_All.Add(&m_PlayerIndicator);
 	m_All.Add(&m_NamePlates);
 	m_All.Add(&m_Particles.m_RenderGeneral);
 	m_All.Add(&m_DamageInd);
@@ -415,7 +417,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	}
 	else
 	{
-		if((m_DummyFire / 12.5f) - (int)(m_DummyFire / 12.5f) > 0.01f)
+		if(m_DummyFire % 25 != 0)
 		{
 			m_DummyFire++;
 			return 0;

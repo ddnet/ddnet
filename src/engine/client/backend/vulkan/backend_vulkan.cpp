@@ -896,6 +896,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	int m_GlobalTextureLodBIAS;
 	uint32_t m_MultiSamplingCount = 1;
 
+	uint32_t m_NextMultiSamplingCount = std::numeric_limits<uint32_t>::max();
+
 	bool m_RecreateSwapChain = false;
 	bool m_SwapchainCreated = false;
 	bool m_RenderingPaused = false;
@@ -1243,6 +1245,7 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_FINISH)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Finish(static_cast<const CCommandBuffer::SCommand_Finish *>(pBaseCommand)); return true; }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); return true; }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_MULTISAMPLING)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_MultiSampling(static_cast<const CCommandBuffer::SCommand_MultiSampling *>(pBaseCommand)); return true; }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand)); return true; }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {false, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); return true; }};
@@ -5345,6 +5348,14 @@ public:
 
 		if(m_SwapchainCreated)
 			CleanupVulkanSwapChain(false);
+
+		// set new multi sampling if it was requested
+		if(m_NextMultiSamplingCount != std::numeric_limits<uint32_t>::max())
+		{
+			m_MultiSamplingCount = m_NextMultiSamplingCount;
+			m_NextMultiSamplingCount = std::numeric_limits<uint32_t>::max();
+		}
+
 		if(!m_SwapchainCreated)
 			Ret = InitVulkanSwapChain(OldSwapChain);
 
@@ -5765,19 +5776,38 @@ public:
 		return GetSampleCount() != VK_SAMPLE_COUNT_1_BIT;
 	}
 
+	VkSampleCountFlagBits GetMaxSampleCount()
+	{
+		if(m_MaxMultiSample & VK_SAMPLE_COUNT_64_BIT)
+			return VK_SAMPLE_COUNT_64_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_32_BIT)
+			return VK_SAMPLE_COUNT_32_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_16_BIT)
+			return VK_SAMPLE_COUNT_16_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_8_BIT)
+			return VK_SAMPLE_COUNT_8_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_4_BIT)
+			return VK_SAMPLE_COUNT_4_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_2_BIT)
+			return VK_SAMPLE_COUNT_2_BIT;
+
+		return VK_SAMPLE_COUNT_1_BIT;
+	}
+
 	VkSampleCountFlagBits GetSampleCount()
 	{
-		if(m_MultiSamplingCount >= 64 && m_MaxMultiSample & VK_SAMPLE_COUNT_64_BIT)
+		auto MaxSampleCount = GetMaxSampleCount();
+		if(m_MultiSamplingCount >= 64 && MaxSampleCount >= VK_SAMPLE_COUNT_64_BIT)
 			return VK_SAMPLE_COUNT_64_BIT;
-		else if(m_MultiSamplingCount >= 32 && m_MaxMultiSample & VK_SAMPLE_COUNT_32_BIT)
+		else if(m_MultiSamplingCount >= 32 && MaxSampleCount >= VK_SAMPLE_COUNT_32_BIT)
 			return VK_SAMPLE_COUNT_32_BIT;
-		else if(m_MultiSamplingCount >= 16 && m_MaxMultiSample & VK_SAMPLE_COUNT_16_BIT)
+		else if(m_MultiSamplingCount >= 16 && MaxSampleCount >= VK_SAMPLE_COUNT_16_BIT)
 			return VK_SAMPLE_COUNT_16_BIT;
-		else if(m_MultiSamplingCount >= 8 && m_MaxMultiSample & VK_SAMPLE_COUNT_8_BIT)
+		else if(m_MultiSamplingCount >= 8 && MaxSampleCount >= VK_SAMPLE_COUNT_8_BIT)
 			return VK_SAMPLE_COUNT_8_BIT;
-		else if(m_MultiSamplingCount >= 4 && m_MaxMultiSample & VK_SAMPLE_COUNT_4_BIT)
+		else if(m_MultiSamplingCount >= 4 && MaxSampleCount >= VK_SAMPLE_COUNT_4_BIT)
 			return VK_SAMPLE_COUNT_4_BIT;
-		else if(m_MultiSamplingCount >= 2 && m_MaxMultiSample & VK_SAMPLE_COUNT_2_BIT)
+		else if(m_MultiSamplingCount >= 2 && MaxSampleCount >= VK_SAMPLE_COUNT_2_BIT)
 			return VK_SAMPLE_COUNT_2_BIT;
 
 		return VK_SAMPLE_COUNT_1_BIT;
@@ -6566,6 +6596,21 @@ public:
 		*pCommand->m_pRetOk = true;
 	}
 
+	void Cmd_MultiSampling(const CCommandBuffer::SCommand_MultiSampling *pCommand)
+	{
+		if(IsVerbose())
+		{
+			dbg_msg("vulkan", "queueing swap chain recreation because multi sampling was changed");
+		}
+		m_RecreateSwapChain = true;
+
+		uint32_t MSCount = (std::min(pCommand->m_RequestedMultiSamplingCount, (uint32_t)GetMaxSampleCount()) & 0xFFFFFFFE); // ignore the uneven bits
+		m_NextMultiSamplingCount = MSCount;
+
+		*pCommand->m_pRetMultiSamplingCount = MSCount;
+		*pCommand->m_pRetOk = true;
+	}
+
 	void Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand)
 	{ // just ignore it with vulkan
 	}
@@ -7146,7 +7191,7 @@ public:
 			m_ThreadCount = 1;
 		else
 		{
-			m_ThreadCount = clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::thread::hardware_concurrency());
+			m_ThreadCount = clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::max<decltype(m_ThreadCount)>(3, std::thread::hardware_concurrency()));
 		}
 
 		// start threads

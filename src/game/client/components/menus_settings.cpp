@@ -1251,18 +1251,44 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 	}
 
+	bool MultiSamplingChanged = false;
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("may cause delay"));
 	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, aBuf, g_Config.m_GfxFsaaSamples, &Button);
+	int CurFSAA = g_Config.m_GfxFsaaSamples == 0 ? 1 : g_Config.m_GfxFsaaSamples;
 	if(GfxFsaaSamples_MouseButton == 1) // inc
 	{
-		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples + 1) % 17;
-		CheckSettings = true;
+		g_Config.m_GfxFsaaSamples = std::pow(2, (int)std::log2(CurFSAA) + 1);
+		if(g_Config.m_GfxFsaaSamples > 64)
+			g_Config.m_GfxFsaaSamples = 0;
+		MultiSamplingChanged = true;
 	}
 	else if(GfxFsaaSamples_MouseButton == 2) // dec
 	{
-		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples - 1 + 17) % 17;
-		CheckSettings = true;
+		if(CurFSAA == 1)
+			g_Config.m_GfxFsaaSamples = 64;
+		else if(CurFSAA == 2)
+			g_Config.m_GfxFsaaSamples = 0;
+		else
+			g_Config.m_GfxFsaaSamples = std::pow(2, (int)std::log2(CurFSAA) - 1);
+		MultiSamplingChanged = true;
+	}
+
+	uint32_t MultiSamplingCountBackend = 0;
+	if(MultiSamplingChanged)
+	{
+		if(Graphics()->SetMultiSampling(g_Config.m_GfxFsaaSamples, MultiSamplingCountBackend))
+		{
+			// try again with 0 if mouse click was increasing multi sampling
+			// else just accept the current value as is
+			if((uint32_t)g_Config.m_GfxFsaaSamples > MultiSamplingCountBackend && GfxFsaaSamples_MouseButton == 1)
+				Graphics()->SetMultiSampling(0, MultiSamplingCountBackend);
+			g_Config.m_GfxFsaaSamples = (int)MultiSamplingCountBackend;
+		}
+		else
+		{
+			CheckSettings = true;
+		}
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -2596,92 +2622,104 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 void CMenus::RenderSettingsTClient(CUIRect MainView)
 {
-	static int s_CurTab = 0;
+	static int s_CurCustomTab = 0;
 
-	CUIRect Column, Section;
+	CUIRect Column, Section, Page1Tab, Page2Tab, Label;
 
-	//MainView.HSplitTop(10.0f, 0x0, &MainView);
+	MainView.HMargin(-15.0f, &MainView);
+
+	MainView.HSplitTop(20, &Label, &MainView);
+	float TabsW = Label.w;
+	Label.VSplitLeft(TabsW / 2, &Page1Tab, &Page2Tab);
+
+	static int s_aPageTabs[2] = {};
+
+	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Page 1"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = 0;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Page 2"), s_CurCustomTab == 1, &Page2Tab, 5, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = 1;
 
 	const float LineMargin = 20.0f;
 
-	MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
-
-	MainView.HSplitTop(30.0f, &Section, &MainView);
-	UI()->DoLabelScaled(&Section, ("Frozen Tee Display"), 20.0f, TEXTALIGN_LEFT);
-	MainView.VSplitLeft(5.0f, 0x0, &MainView);
-	MainView.HSplitTop(5.0f, 0x0, &MainView);
-
-	// ***** FROZEN TEE HUD ***** //
-
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHud, ("Show frozen tee display"), &g_Config.m_ClShowFrozenHud, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHudSkins, ("Use skins instead of ninja tees"), &g_Config.m_ClShowFrozenHudSkins, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFrozenHudTeamOnly, ("Only show after joining a team"), &g_Config.m_ClFrozenHudTeamOnly, &MainView, LineMargin);
+	//MainView.HSplitTop(10.0f, 0x0, &MainView);
+	if(s_CurCustomTab == 0)
 	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(140.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i", "Max Rows", g_Config.m_ClFrozenMaxRows);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClFrozenMaxRows = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenMaxRows, &Button, (g_Config.m_ClFrozenMaxRows - 1) / 5.0f) * 5.0f) + 1;
-	}
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(140.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i", "Tee Size", g_Config.m_ClFrozenHudTeeSize);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClFrozenHudTeeSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenHudTeeSize, &Button, (g_Config.m_ClFrozenHudTeeSize - 8) / 19.0f) * 19.0f) + 8;
-	}
-	
-	{
-		CUIRect CheckBoxRect, CheckBoxRect2;
-		MainView.HSplitTop(LineMargin, &CheckBoxRect, &MainView);
-		CheckBoxRect.VSplitMid(&CheckBoxRect, &CheckBoxRect2);
-		if(DoButton_CheckBox(&g_Config.m_ClShowFrozenText, Localize("Tees Left Alive Text"), g_Config.m_ClShowFrozenText >= 1, &CheckBoxRect))
+		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
+
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabelScaled(&Section, ("Frozen Tee Display"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+
+		// ***** FROZEN TEE HUD ***** //
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHud, ("Show frozen tee display"), &g_Config.m_ClShowFrozenHud, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHudSkins, ("Use skins instead of ninja tees"), &g_Config.m_ClShowFrozenHudSkins, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFrozenHudTeamOnly, ("Only show after joining a team"), &g_Config.m_ClFrozenHudTeamOnly, &MainView, LineMargin);
 		{
-			g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText >= 1 ? 0 : 1;
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(140.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i", "Max Rows", g_Config.m_ClFrozenMaxRows);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClFrozenMaxRows = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenMaxRows, &Button, (g_Config.m_ClFrozenMaxRows - 1) / 5.0f) * 5.0f) + 1;
 		}
-		if(g_Config.m_ClShowFrozenText)
 		{
-			static int s_CountFrozenText = 0;
-			if(DoButton_CheckBox(&s_CountFrozenText, Localize("Count Frozen Tees"), g_Config.m_ClShowFrozenText == 2, &CheckBoxRect2))
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(140.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i", "Tee Size", g_Config.m_ClFrozenHudTeeSize);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClFrozenHudTeeSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenHudTeeSize, &Button, (g_Config.m_ClFrozenHudTeeSize - 8) / 19.0f) * 19.0f) + 8;
+		}
+
+		{
+			CUIRect CheckBoxRect, CheckBoxRect2;
+			MainView.HSplitTop(LineMargin, &CheckBoxRect, &MainView);
+			CheckBoxRect.VSplitMid(&CheckBoxRect, &CheckBoxRect2);
+			if(DoButton_CheckBox(&g_Config.m_ClShowFrozenText, Localize("Tees Left Alive Text"), g_Config.m_ClShowFrozenText >= 1, &CheckBoxRect))
 			{
-				g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText != 2 ? 2 : 1;
+				g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText >= 1 ? 0 : 1;
+			}
+			if(g_Config.m_ClShowFrozenText)
+			{
+				static int s_CountFrozenText = 0;
+				if(DoButton_CheckBox(&s_CountFrozenText, Localize("Count Frozen Tees"), g_Config.m_ClShowFrozenText == 2, &CheckBoxRect2))
+				{
+					g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText != 2 ? 2 : 1;
+				}
 			}
 		}
-	}
 
+		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
+		// ***** MISCELLANEOUS ***** //
+		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabelScaled(&Section, ("Miscellaneous"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
-	MainView.HSplitTop(10.0f, 0x0, &MainView);
-
-	// ***** MISCELLANEOUS ***** //
-	MainView.VSplitLeft(-5.0f, 0x0, &MainView);
-	MainView.HSplitTop(30.0f, &Section, &MainView);
-	UI()->DoLabelScaled(&Section, ("Miscellaneous"), 20.0f, TEXTALIGN_LEFT);
-	MainView.VSplitLeft(5.0f, 0x0, &MainView);
-	MainView.HSplitTop(5.0f, 0x0, &MainView);
-
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRunOnJoinConsole, ("Run cl_run_on_join as console command"), &g_Config.m_ClRunOnJoinConsole, &MainView, LineMargin);
-	if(g_Config.m_ClRunOnJoinConsole)
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(150.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClRunOnJoinDelay * 20);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		int Delay = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 7) / 93.0f) * 93.0f) + 7;
-		if(Delay < 100 || g_Config.m_ClRunOnJoinDelay <= 100)
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRunOnJoinConsole, ("Run cl_run_on_join as console command"), &g_Config.m_ClRunOnJoinConsole, &MainView, LineMargin);
+		if(g_Config.m_ClRunOnJoinConsole)
 		{
-			g_Config.m_ClRunOnJoinDelay = Delay;
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClRunOnJoinDelay * 20);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			int Delay = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 7) / 93.0f) * 93.0f) + 7;
+			if(Delay < 100 || g_Config.m_ClRunOnJoinDelay <= 100)
+			{
+				g_Config.m_ClRunOnJoinDelay = Delay;
+			}
 		}
-	}
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpec, ("Spectator outline fix on KoG (slightly buggy)"), &g_Config.m_ClFixKoGSpec, &MainView, LineMargin);
-	if(g_Config.m_ClFixKoGSpec)
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpecNames, ("Show names of spectating players on KoG"), &g_Config.m_ClFixKoGSpecNames, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpec, ("Spectator outline fix on KoG (slightly buggy)"), &g_Config.m_ClFixKoGSpec, &MainView, LineMargin);
+		if(g_Config.m_ClFixKoGSpec)
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpecNames, ("Show names of spectating players on KoG"), &g_Config.m_ClFixKoGSpecNames, &MainView, LineMargin);
 
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
@@ -2690,153 +2728,236 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
-
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(150.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
-	}
-
-	{
-		CUIRect Button;
-		CUIRect ExtMenu;
-		MainView.VSplitLeft(0, 0, &ExtMenu);
-		ExtMenu.VSplitLeft(130.0f, &ExtMenu, 0);
-		ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
-		static int s_DiscordButton;
-		if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+    
 		{
-			if(!open_link("https://discord.gg/fBvhH93Bt6"))
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
+		}
+
+		{
+			CUIRect Button;
+			CUIRect ExtMenu;
+			MainView.VSplitLeft(0, 0, &ExtMenu);
+			ExtMenu.VSplitLeft(130.0f, &ExtMenu, 0);
+			ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
+			static int s_DiscordButton;
+			if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 			{
-				dbg_msg("menus", "couldn't open link");
+				if(!open_link("https://discord.gg/fBvhH93Bt6"))
+				{
+					dbg_msg("menus", "couldn't open link");
+				}
+				m_DoubleClickIndex = -1;
 			}
-			m_DoubleClickIndex = -1;
 		}
-	}
 
+		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
+		// ***** OUTLINES ***** //
 
-	MainView.HSplitTop(10.0f, 0x0, &MainView);
+		MainView = Column;
 
-	// ***** OUTLINES ***** //
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabelScaled(&Section, Localize("Tile Outlines"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
-	MainView = Column;
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, ("Show any enabled outlines"), &g_Config.m_ClOutline, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, ("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline walls"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, ("Outline teleporter"), &g_Config.m_ClOutlineTele, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, ("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &MainView, LineMargin);
 
-	MainView.HSplitTop(30.0f, &Section, &MainView);
-	UI()->DoLabelScaled(&Section, Localize("Tile Outlines"), 20.0f, TEXTALIGN_LEFT);
-	MainView.VSplitLeft(5.0f, 0x0, &MainView);
-	MainView.HSplitTop(5.0f, 0x0, &MainView);
-
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, ("Show any enabled outlines"), &g_Config.m_ClOutline, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, ("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline walls"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, ("Outline teleporter"), &g_Config.m_ClOutlineTele, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, ("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &MainView, LineMargin);
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(5.0f, &Button, &MainView);
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(150.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Width", g_Config.m_ClOutlineWidth);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClOutlineWidth = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineWidth, &Button, (g_Config.m_ClOutlineWidth - 1) / 15.0f) * 15.0f) + 1;
-	}
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(5.0f, &Button, &MainView);
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(150.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha", g_Config.m_ClOutlineAlpha);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClOutlineAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlpha, &Button, (g_Config.m_ClOutlineAlpha) / 100.0f) * 100.0f);
-	}
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(5.0f, &Button, &MainView);
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(185.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha (walls)", g_Config.m_ClOutlineAlphaSolid);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
-	}
-	static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
-
-	MainView.HSplitTop(5.0f, 0x0, &MainView);
-	MainView.VSplitLeft(-5.0f, 0x0, &MainView);
-
-	MainView.HSplitTop(25.0f, &Section, &MainView);
-	DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-
-	MainView.HSplitTop(25.0f, &Section, &MainView);
-	DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-
-	MainView.HSplitTop(25.0f, &Section, &MainView);
-	DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-
-	MainView.HSplitTop(25.0f, &Section, &MainView);
-	DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-
-
-	// ***** ANTI LATENCY ***** //
-	MainView.HSplitTop(10.0f, 0x0, &MainView);
-
-	//MainView.VSplitLeft(-5.0f, 0x0, &MainView);
-	MainView.HSplitTop(30.0f, &Section, &MainView);
-	UI()->DoLabelScaled(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
-	MainView.VSplitLeft(15.0f, 0x0, &MainView);
-
-	MainView.HSplitTop(20.0f, &Section, &MainView);
-	UI()->DoLabelScaled(&Section, ("Only use on gores maps! Can help mitigate latency."), 14.0f, TEXTALIGN_LEFT);
-
-	MainView.HSplitTop(5.0f, 0x0, &MainView);
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(165.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %ims", "Prediction Margin", g_Config.m_ClPredictionMargin);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		int PredictionMargin = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
-		if((PredictionMargin < 25 || g_Config.m_ClPredictionMargin <= 25) && g_Config.m_ClPredictionMargin >= 10)
 		{
-			g_Config.m_ClPredictionMargin = PredictionMargin;
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Width", g_Config.m_ClOutlineWidth);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClOutlineWidth = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineWidth, &Button, (g_Config.m_ClOutlineWidth - 1) / 15.0f) * 15.0f) + 1;
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha", g_Config.m_ClOutlineAlpha);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClOutlineAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlpha, &Button, (g_Config.m_ClOutlineAlpha) / 100.0f) * 100.0f);
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(185.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha (walls)", g_Config.m_ClOutlineAlphaSolid);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
+		}
+		static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+		// ***** ANTI LATENCY ***** //
+		MainView.HSplitTop(10.0f, 0x0, &MainView);
+
+		// MainView.VSplitLeft(-5.0f, 0x0, &MainView);
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabelScaled(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(15.0f, 0x0, &MainView);
+
+		MainView.HSplitTop(20.0f, &Section, &MainView);
+		UI()->DoLabelScaled(&Section, ("Only use on gores maps! Can help mitigate latency."), 14.0f, TEXTALIGN_LEFT);
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(165.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Prediction Margin", g_Config.m_ClPredictionMargin);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			int PredictionMargin = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
+			if((PredictionMargin < 25 || g_Config.m_ClPredictionMargin <= 25) && g_Config.m_ClPredictionMargin >= 10)
+			{
+				g_Config.m_ClPredictionMargin = PredictionMargin;
+			}
+		}
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnfreezeDelayHelper, ("Remove prediction margin in freeze"), &g_Config.m_ClUnfreezeDelayHelper, &MainView, LineMargin);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(220.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Negative margin (may lag)", g_Config.m_ClUnfreezeHelperLimit);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClUnfreezeHelperLimit = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
+		}
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(115.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(200.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClUnfreezeLagTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
 		}
 	}
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnfreezeDelayHelper, ("Remove prediction margin in freeze"), &g_Config.m_ClUnfreezeDelayHelper, &MainView, LineMargin);
+
+	if(s_CurCustomTab == 1)
 	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(220.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %ims", "Negative margin (may lag)", g_Config.m_ClUnfreezeHelperLimit);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClUnfreezeHelperLimit = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
-	}
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(115.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClUnfreezeLagDelayTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
-	}
-	{
-		CUIRect Button, Label;
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Button.VSplitLeft(200.0f, &Label, &Button);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-		g_Config.m_ClUnfreezeLagTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
+		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
+
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabelScaled(&Section, ("Player Indicator"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicator, ("Show any enabled Indicators"), &g_Config.m_ClPlayerIndicator, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicatorFreeze, ("Show only freeze Players"), &g_Config.m_ClPlayerIndicatorFreeze, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTeamOnly, ("Only show after joining a team"), &g_Config.m_ClIndicatorTeamOnly, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTees, ("Render tiny tees instead of circles"), &g_Config.m_ClIndicatorTees, &MainView, LineMargin);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorVariableDistance, ("Change indicator offset based on distance to other tees"), &g_Config.m_ClIndicatorVariableDistance, &MainView, LineMargin);
+
+		static int IndicatorAliveColorID, IndicatorDeadColorID;
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&IndicatorAliveColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator size", g_Config.m_ClIndicatorRadius);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClIndicatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator opacity", g_Config.m_ClIndicatorOpacity);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClIndicatorOpacity = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOpacity, &Button, (g_Config.m_ClIndicatorOpacity) / 100.0f) * 100.0f);
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator offset", g_Config.m_ClIndicatorOffset);
+			if(g_Config.m_ClIndicatorVariableDistance)
+				str_format(aBuf, sizeof(aBuf), "%s: %i ", "Min offset", g_Config.m_ClIndicatorOffset);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClIndicatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 16) / 184.0f) * 184.0f) + 16;
+		}
+		if(g_Config.m_ClIndicatorVariableDistance)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max offset", g_Config.m_ClIndicatorOffsetMax);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClIndicatorOffsetMax = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffsetMax, &Button, (g_Config.m_ClIndicatorOffsetMax - 16) / 184.0f) * 184.0f) + 16;
+		}
+		if(g_Config.m_ClIndicatorVariableDistance)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(5.0f, &Button, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(150.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max distance", g_Config.m_ClIndicatorMaxDistance);
+			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			int NewValue = (g_Config.m_ClIndicatorMaxDistance) / 50.0f;
+			NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
+			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
+		}
 	}
 }
 

@@ -76,6 +76,7 @@ inline float AngularApproach(float Src, float Dst, float Amount)
 		return Dst;
 	return n;
 }
+
 void CPlayers::RenderHookCollLine(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
@@ -132,7 +133,7 @@ void CPlayers::RenderHookCollLine(
 		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
-			
+
 			if(!(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y)
 			{
 				ExDirection = vec2(1, 0);
@@ -409,7 +410,12 @@ void CPlayers::RenderPlayer(
 	bool WantOtherDir = (Player.m_Direction == -1 && Vel.x > 0) || (Player.m_Direction == 1 && Vel.x < 0);
 
 	// evaluate animation
-	float WalkTime = fmod(absolute(Position.x), 100.0f) / 100.0f;
+	float WalkTime = fmod(Position.x, 100.0f) / 100.0f;
+	if(WalkTime < 0)
+	{
+		// Don't do a moon walk outside the left border
+		WalkTime += 1;
+	}
 	CAnimState State;
 	State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
 
@@ -718,24 +724,24 @@ void CPlayers::OnRender()
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
 		m_aRenderInfo[i].m_ShineDecoration = m_pClient->m_aClients[i].m_LiveFrozen;
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja))
+		{
+			// change the skin for the player to the ninja
+			int Skin = m_pClient->m_Skins.Find("x_ninja");
+			if(Skin != -1)
 			{
-				// change the skin for the player to the ninja
-				int Skin = m_pClient->m_Skins.Find("x_ninja");
-				if(Skin != -1)
+				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
+				m_aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
+				m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
+				if(!IsTeamplay)
 				{
-					const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
-					m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-					m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-					m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
-					m_aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
-					m_aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
-					if(!IsTeamplay)
-					{
-						m_aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
-						m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
-					}
+					m_aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
+					m_aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
 				}
 			}
+		}
 	}
 	int Skin = m_pClient->m_Skins.Find("x_spec");
 	const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
@@ -788,7 +794,7 @@ void CPlayers::OnRender()
 		{
 			continue;
 		}
-		
+
 		vec2 Pos;
 		if(g_Config.m_ClFixKoGSpec)
 			Pos = m_aClient.m_RenderPos;
@@ -810,7 +816,6 @@ void CPlayers::OnRender()
 			continue;
 		}
 
-		
 		RenderHookCollLine(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, ClientID);
 
 		//don't render offscreen

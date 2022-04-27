@@ -902,8 +902,8 @@ void CGameContext::OnTick()
 					if(g_Config.m_SvDnsblVote && !m_pServer->DnsblWhite(i) && !SinglePlayer)
 						continue;
 
-					int ActVote = m_apPlayers[i]->m_Vote;
-					int ActVotePos = m_apPlayers[i]->m_VotePos;
+					int CurVote = m_apPlayers[i]->m_Vote;
+					int CurVotePos = m_apPlayers[i]->m_VotePos;
 
 					// only allow IPs to vote once, but keep veto ability
 					// check for more players with the same ip (only use the vote of the one who voted first)
@@ -913,19 +913,19 @@ void CGameContext::OnTick()
 							continue;
 
 						// count the latest vote by this ip
-						if(ActVotePos < m_apPlayers[j]->m_VotePos)
+						if(CurVotePos < m_apPlayers[j]->m_VotePos)
 						{
-							ActVote = m_apPlayers[j]->m_Vote;
-							ActVotePos = m_apPlayers[j]->m_VotePos;
+							CurVote = m_apPlayers[j]->m_Vote;
+							CurVotePos = m_apPlayers[j]->m_VotePos;
 						}
 
 						aVoteChecked[j] = true;
 					}
 
 					Total++;
-					if(ActVote > 0)
+					if(CurVote > 0)
 						Yes++;
-					else if(ActVote < 0)
+					else if(CurVote < 0)
 						No++;
 
 					// veto right for players who have been active on server for long and who're not afk
@@ -943,9 +943,9 @@ void CGameContext::OnTick()
 									(m_apPlayers[j]->GetCharacter() && m_apPlayers[j]->GetCharacter()->m_DDRaceState == DDRACE_STARTED &&
 										(Server()->Tick() - m_apPlayers[j]->GetCharacter()->m_StartTime) / (Server()->TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)))
 							{
-								if(ActVote == 0)
+								if(CurVote == 0)
 									Veto = true;
-								else if(ActVote < 0)
+								else if(CurVote < 0)
 									VetoStop = true;
 								break;
 							}

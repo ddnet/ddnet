@@ -17,7 +17,7 @@ CDemoEdit::CDemoEdit(const char *pNetVersion, class CSnapshotDelta *pSnapshotDel
 
 void CDemoEdit::Run()
 {
-	// Slice the actual demo
+	// Slice the current demo
 	m_DemoEditor.Slice(m_aDemo, m_aDst, m_StartTick, m_EndTick, NULL, 0);
 	// We remove the temporary demo file
 	m_pStorage->RemoveFile(m_aDemo, IStorage::TYPE_SAVE);
