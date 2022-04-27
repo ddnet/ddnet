@@ -654,7 +654,7 @@ void CHud::RenderTextInfo()
 		//Notify when last
 		if(g_Config.m_ClNotifyWhenLast)
 		{
-			if(NumInTeam > 2 && NumInTeam - NumFrozen == 1 && m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderCur.m_Weapon != 5)
+			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1 && m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderCur.m_Weapon != 5)
 			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "Last!");
