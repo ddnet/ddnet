@@ -34,7 +34,7 @@ class CGameConsole : public CComponent
 		CLineInput m_Input;
 		int m_Type;
 		int m_CompletionEnumerationCount;
-		int m_BacklogActPage;
+		int m_BacklogCurPage;
 
 		CGameConsole *m_pGameConsole;
 

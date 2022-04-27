@@ -177,6 +177,7 @@ protected:
 
 #ifndef BACKEND_GL_MODERN_API
 	bool Cmd_Init(const SCommand_Init *pCommand) override;
+	void Cmd_Shutdown(const SCommand_Shutdown *pCommand) override;
 
 	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
 
