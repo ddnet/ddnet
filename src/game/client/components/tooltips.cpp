@@ -30,32 +30,19 @@ inline void CTooltips::ClearActiveTooltip()
 void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
 	uintptr_t ID = reinterpret_cast<uintptr_t>(pID);
+	const auto result = m_Tooltips.emplace(ID, CTooltip{
+							   *pNearRect,
+							   pText,
+							   WidthHint});
+	CTooltip &Tooltip = result.first->second;
 
-	const auto &it = m_Tooltips.find(ID);
-
-	if(it == m_Tooltips.end())
+	if(!result.second)
 	{
-		CTooltip NewTooltip = {
-			*pNearRect,
-			pText,
-			WidthHint,
-		};
-
-		m_Tooltips[ID] = NewTooltip;
-
-		CTooltip &Tooltip = m_Tooltips[ID];
-
-		if(UI()->MouseInside(&Tooltip.m_Rect))
-		{
-			SetActiveTooltip(Tooltip);
-		}
+		Tooltip.m_Rect = *pNearRect; // update in case of window resize
 	}
-	else
+	if(UI()->MouseInside(&Tooltip.m_Rect))
 	{
-		if(UI()->MouseInside(&it->second.m_Rect))
-		{
-			SetActiveTooltip(it->second);
-		}
+		SetActiveTooltip(Tooltip);
 	}
 }
 

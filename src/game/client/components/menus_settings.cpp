@@ -478,10 +478,11 @@ struct CUISkin
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton;
+	CUIRect Button, Label, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton, Eyes, EyesLabel, EyesTee, EyesRight;
 
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
+	Eyes = MainView;
 
 	char *pSkinName = g_Config.m_ClPlayerSkin;
 	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
@@ -519,7 +520,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
 	Dummy.VSplitLeft(170.0f, &Dummy, &SkinPrefix);
-	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, 0);
+	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, &EyesRight);
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
@@ -586,9 +587,61 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	vec2 OffsetToMid;
 	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
 	vec2 TeeRenderPos(Label.x + 30.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
-	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, 0, vec2(1, 0), TeeRenderPos);
+	int Emote = m_Dummy ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, Emote, vec2(1, 0), TeeRenderPos);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	Label.HMargin(15.0f, &Label);
+
+	// default eyes
+	bool RenderEyesBelow = MainView.w < 750.0f;
+	if(RenderEyesBelow)
+	{
+		Eyes.VSplitLeft(190.0f, 0, &Eyes);
+		Eyes.HSplitTop(85.0f, 0, &Eyes);
+	}
+	else
+	{
+		Eyes = EyesRight;
+		if(MainView.w < 810.0f)
+			Eyes.VSplitRight(205.0f, 0, &Eyes);
+		Eyes.HSplitTop(50.0f, &Eyes, 0);
+	}
+	Eyes.HSplitTop(120.0f, &EyesLabel, &Eyes);
+	EyesLabel.VSplitLeft(20.0f, 0, &EyesLabel);
+	EyesLabel.HSplitTop(50.0f, &EyesLabel, &Eyes);
+
+	float Highlight = 0.0f;
+	static int s_aEyeButtons[6];
+	static int s_aEyesToolTip[6];
+	for(int CurrentEyeEmote = 0; CurrentEyeEmote < 6; CurrentEyeEmote++)
+	{
+		EyesLabel.VSplitLeft(10.0f, 0, &EyesLabel);
+		EyesLabel.VSplitLeft(50.0f, &EyesTee, &EyesLabel);
+
+		if(CurrentEyeEmote == 2 && !RenderEyesBelow)
+		{
+			Eyes.HSplitTop(60.0f, &EyesLabel, 0);
+			EyesLabel.HSplitTop(10.0f, 0, &EyesLabel);
+		}
+		Highlight = (m_Dummy) ? g_Config.m_ClDummyDefaultEyes == CurrentEyeEmote : g_Config.m_ClPlayerDefaultEyes == CurrentEyeEmote;
+		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, CUI::CORNER_ALL, 10.0f, 0.0f, vec4(1, 1, 1, 0.5f + Highlight * 0.25f), vec4(1, 1, 1, 0.25f + Highlight * 0.25f)))
+		{
+			if(m_Dummy)
+			{
+				g_Config.m_ClDummyDefaultEyes = CurrentEyeEmote;
+				if(g_Config.m_ClDummy)
+					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
+			}
+			else
+			{
+				g_Config.m_ClPlayerDefaultEyes = CurrentEyeEmote;
+				if(!g_Config.m_ClDummy)
+					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
+			}
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server."));
+		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
+	}
 
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
@@ -600,9 +653,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	// custom color selector
-	MainView.HSplitTop(20.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f + RenderEyesBelow * 25.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitMid(&Button, &Button2);
+	Button.VSplitLeft(150.0f, &Button, 0);
 	static int s_CustomColorID = 0;
 	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
@@ -639,7 +692,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(230.0f, &SkinList, &MainView);
+	MainView.HSplitTop(230.0f - RenderEyesBelow * 25.0f, &SkinList, &MainView);
 	static sorted_array<CUISkin> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
@@ -1251,18 +1304,44 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		}
 	}
 
+	bool MultiSamplingChanged = false;
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("may cause delay"));
 	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, aBuf, g_Config.m_GfxFsaaSamples, &Button);
+	int CurFSAA = g_Config.m_GfxFsaaSamples == 0 ? 1 : g_Config.m_GfxFsaaSamples;
 	if(GfxFsaaSamples_MouseButton == 1) // inc
 	{
-		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples + 1) % 17;
-		CheckSettings = true;
+		g_Config.m_GfxFsaaSamples = std::pow(2, (int)std::log2(CurFSAA) + 1);
+		if(g_Config.m_GfxFsaaSamples > 64)
+			g_Config.m_GfxFsaaSamples = 0;
+		MultiSamplingChanged = true;
 	}
 	else if(GfxFsaaSamples_MouseButton == 2) // dec
 	{
-		g_Config.m_GfxFsaaSamples = (g_Config.m_GfxFsaaSamples - 1 + 17) % 17;
-		CheckSettings = true;
+		if(CurFSAA == 1)
+			g_Config.m_GfxFsaaSamples = 64;
+		else if(CurFSAA == 2)
+			g_Config.m_GfxFsaaSamples = 0;
+		else
+			g_Config.m_GfxFsaaSamples = std::pow(2, (int)std::log2(CurFSAA) - 1);
+		MultiSamplingChanged = true;
+	}
+
+	uint32_t MultiSamplingCountBackend = 0;
+	if(MultiSamplingChanged)
+	{
+		if(Graphics()->SetMultiSampling(g_Config.m_GfxFsaaSamples, MultiSamplingCountBackend))
+		{
+			// try again with 0 if mouse click was increasing multi sampling
+			// else just accept the current value as is
+			if((uint32_t)g_Config.m_GfxFsaaSamples > MultiSamplingCountBackend && GfxFsaaSamples_MouseButton == 1)
+				Graphics()->SetMultiSampling(0, MultiSamplingCountBackend);
+			g_Config.m_GfxFsaaSamples = (int)MultiSamplingCountBackend;
+		}
+		else
+		{
+			CheckSettings = true;
+		}
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
