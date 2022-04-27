@@ -2695,13 +2695,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		if(g_Config.m_ClFixKoGSpec)
 			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpecNames, ("Show names of spectating players on KoG"), &g_Config.m_ClFixKoGSpecNames, &MainView, LineMargin);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last in a team bigger than two"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
-
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last in a team bigger than two"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
+    
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(20.0f, &Button, &MainView);
