@@ -17,15 +17,11 @@ bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 
 		// Look for a composed bind
 		bool ret = false;
-		for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+		if(m_pBinds->m_aapKeyBindings[Mask][Event.m_Key])
 		{
-			if(Mask == Mod && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
-			{
-				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
-				ret = true;
-			}
+			m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mask][Event.m_Key]);
+			ret = true;
 		}
-
 		// Look for a non composed bind
 		if(!ret && m_pBinds->m_aapKeyBindings[0][Event.m_Key])
 		{
@@ -138,16 +134,13 @@ bool CBinds::OnInput(IInput::CEvent e)
 	Mask &= ~KeyModifierMask;
 
 	bool ret = false;
-	for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+	if(m_aapKeyBindings[Mask][e.m_Key])
 	{
-		if(m_aapKeyBindings[Mod][e.m_Key] && (Mask == Mod))
-		{
-			if(e.m_Flags & IInput::FLAG_PRESS)
-				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mod][e.m_Key]);
-			if(e.m_Flags & IInput::FLAG_RELEASE)
-				Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mod][e.m_Key]);
-			ret = true;
-		}
+		if(e.m_Flags & IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][e.m_Key]);
+		if(e.m_Flags & IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][e.m_Key]);
+		ret = true;
 	}
 
 	if(m_aapKeyBindings[0][e.m_Key] && !ret)
