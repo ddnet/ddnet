@@ -677,7 +677,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 	Antibot()->OnDirectInput(m_pPlayer->GetCID());
 
-	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
+	if(m_NumInputs > 1 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		HandleWeaponSwitch();
 		FireWeapon();
