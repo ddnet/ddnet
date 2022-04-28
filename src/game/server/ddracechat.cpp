@@ -697,7 +697,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || Team >= TEAM_SUPER)
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -735,13 +735,22 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(!Teams.IsStarted(Team))
+	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+	if(Team == TEAM_FLOCK && g_Config.m_SvTeam != 3)
+	{
+		CCharacter *pChr = pPlayer->GetCharacter();
+		CCharacter *pSwapChr = pSwapPlayer->GetCharacter();
+		if(!pChr || !pSwapChr || pChr->m_DDRaceState != DDRACE_STARTED || pSwapChr->m_DDRaceState != DDRACE_STARTED)
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "You and other player need to have started the map");
+			return;
+		}
+	}
+	else if(!Teams.IsStarted(Team))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Need to have started the map to swap with a player.");
 		return;
 	}
-
-	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
 
 	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)
