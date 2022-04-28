@@ -81,7 +81,7 @@ int main(int argc, const char **argv)
 	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	int ID = 0, Type = 0, Size;
 	void *pPtr;
 	char aFileName[IO_MAX_PATH_LENGTH];

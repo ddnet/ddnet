@@ -1799,7 +1799,7 @@ int fs_rename(const char *oldname, const char *newname);
 		modified - Pointer to time_t
 
 	Returns:
-		0 on success non-zero on failure
+		0 on success, non-zero on failure
 
 	Remarks:
 		- Returned time is in seconds since UNIX Epoch

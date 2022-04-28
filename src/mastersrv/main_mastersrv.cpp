@@ -333,7 +333,7 @@ int main(int argc, const char **argv)
 	mem_copy(m_CountDataLegacy.m_Header, SERVERBROWSE_COUNT_LEGACY, sizeof(SERVERBROWSE_COUNT_LEGACY));
 
 	IKernel *pKernel = IKernel::Create();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
 
