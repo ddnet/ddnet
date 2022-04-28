@@ -531,7 +531,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings."));
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings"));
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -639,7 +639,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server."));
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
 		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
 	}
 
@@ -1347,7 +1347,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail"));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
@@ -2723,7 +2723,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time"));
 
 	if(g_Config.m_ClRaceGhost)
 	{
@@ -2812,7 +2812,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency"));
 
 	if(g_Config.m_ClAntiPing)
 	{
