@@ -1,3 +1,4 @@
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
@@ -101,8 +102,14 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 int main(int argc, const char *argv[])
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
-	dbg_logger_file("map_diff.txt");
+	std::vector<std::shared_ptr<ILogger>> apLoggers;
+	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+	IOHANDLE LogFile = io_open("map_diff.txt", IOFLAG_WRITE);
+	if(LogFile)
+	{
+		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_file(LogFile)));
+	}
+	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
 
 	IStorage *pStorage = CreateLocalStorage();
 

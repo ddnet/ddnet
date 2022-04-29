@@ -6,6 +6,7 @@
 #include "gamecontext.h"
 #include "teeinfo.h"
 #include <antibot/antibot_data.h>
+#include <base/logger.h>
 #include <base/math.h>
 #include <cstring>
 #include <engine/console.h>
@@ -28,6 +29,26 @@
 #include "gamemodes/DDRace.h"
 #include "player.h"
 #include "score.h"
+
+// Not thread-safe!
+class CClientChatLogger : public ILogger
+{
+	CGameContext *m_pGameServer;
+	int m_ClientID;
+
+public:
+	CClientChatLogger(CGameContext *pGameServer, int ClientID) :
+		m_pGameServer(pGameServer),
+		m_ClientID(ClientID)
+	{
+	}
+	void Log(const CLogMessage *pMessage) override;
+};
+
+void CClientChatLogger::Log(const CLogMessage *pMessage)
+{
+	m_pGameServer->SendChatTarget(m_ClientID, pMessage->Message());
+}
 
 enum
 {
@@ -1824,7 +1845,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
 
 					m_ChatResponseTargetID = ClientID;
-					Server()->RestrictRconOutput(ClientID);
 					Console()->SetFlagMask(CFGFLAG_CHAT);
 
 					int Authed = Server()->GetAuthedState(ClientID);
@@ -1832,9 +1852,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
 					else
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
-					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
-					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
+					{
+						CClientChatLogger Logger(this, ClientID);
+						CLogScope Scope(&Logger);
+						Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
+					}
 					// m_apPlayers[ClientID] can be NULL, if the player used a
 					// timeout code and replaced another client.
 					char aBuf[256];
@@ -1844,7 +1867,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 					Console()->SetFlagMask(CFGFLAG_SERVER);
 					m_ChatResponseTargetID = -1;
-					Server()->RestrictRconOutput(-1);
 				}
 			}
 			else
@@ -3072,8 +3094,6 @@ void CGameContext::OnConsoleInit()
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(0, SendChatResponse, this);
-
 	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("toggle_tune", "s[tuning] i[value 1] i[value 2]", CFGFLAG_SERVER | CFGFLAG_GAME, ConToggleTuneParam, this, "Toggle tune variable");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
@@ -3672,58 +3692,6 @@ const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
-
-void CGameContext::SendChatResponseAll(const char *pLine, void *pUser)
-{
-	CGameContext *pSelf = (CGameContext *)pUser;
-
-	static int ReentryGuard = 0;
-	const char *pLineOrig = pLine;
-
-	if(ReentryGuard)
-		return;
-	ReentryGuard++;
-
-	if(*pLine == '[')
-		do
-			pLine++;
-		while((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0); // remove the category (e.g. [Console]: No Such Command)
-
-	pSelf->SendChat(-1, CHAT_ALL, pLine);
-
-	ReentryGuard--;
-}
-
-void CGameContext::SendChatResponse(const char *pLine, void *pUser, ColorRGBA PrintColor)
-{
-	CGameContext *pSelf = (CGameContext *)pUser;
-	int ClientID = pSelf->m_ChatResponseTargetID;
-
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-		return;
-
-	const char *pLineOrig = pLine;
-
-	static int ReentryGuard = 0;
-
-	if(ReentryGuard)
-		return;
-	ReentryGuard++;
-
-	if(pLine[0] == '[')
-	{
-		// Remove time and category: [20:39:00][Console]
-		pLine = str_find(pLine, "]: ");
-		if(pLine)
-			pLine += 3;
-		else
-			pLine = pLineOrig;
-	}
-
-	pSelf->SendChatTarget(ClientID, pLine);
-
-	ReentryGuard--;
-}
 
 bool CGameContext::PlayerCollision()
 {

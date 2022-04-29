@@ -1594,6 +1594,9 @@ set_src(BASE GLOB_RECURSE src/base
   hash_ctxt.h
   hash_libtomcrypt.cpp
   hash_openssl.cpp
+  log.cpp
+  log.h
+  logger.h
   math.h
   system.cpp
   system.h

@@ -1,3 +1,4 @@
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
@@ -47,7 +48,7 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 	IStorage *pStorage = CreateLocalStorage();
 	if(argc == 1)
 	{
