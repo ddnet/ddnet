@@ -22,6 +22,7 @@
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/editor.h>
+#include <engine/encryption.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
@@ -4362,6 +4363,7 @@ int main(int argc, const char **argv)
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IDiscord *pDiscord = CreateDiscord();
 	ISteam *pSteam = CreateSteam();
+	IEncryption *pEncryption = CreateEncryption();
 
 #if defined(CONF_EXCEPTION_HANDLING)
 	char aBufPath[IO_MAX_PATH_LENGTH];
@@ -4403,6 +4405,7 @@ int main(int argc, const char **argv)
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pDiscord);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pSteam);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEncryption);
 
 		if(RegisterFail)
 		{

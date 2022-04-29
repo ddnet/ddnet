@@ -10,6 +10,7 @@
 
 #include <engine/config.h>
 #include <engine/console.h>
+#include <engine/encryption.h>
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/masterserver.h>
@@ -3649,6 +3650,7 @@ int main(int argc, const char **argv)
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
+	IEncryption *pEncryption = CreateEncryption();
 
 #if defined(CONF_EXCEPTION_HANDLING)
 	char aBuf[IO_MAX_PATH_LENGTH];
@@ -3677,6 +3679,7 @@ int main(int argc, const char **argv)
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer *>(pEngineMasterServer), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IAntibot *>(pEngineAntibot), false);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEncryption);
 
 		if(RegisterFail)
 		{

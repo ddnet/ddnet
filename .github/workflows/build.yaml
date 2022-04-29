@@ -58,7 +58,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get upgrade -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libsodium-dev -y
 
     - name: Prepare Linux (non-fancy)
       if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
@@ -95,7 +95,7 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2 ffmpeg python3 ninja molten-vk vulkan-headers glslang spirv-tools
+        brew install pkg-config sdl2 ffmpeg python3 ninja molten-vk vulkan-headers glslang spirv-tools libsodium
         brew upgrade freetype
         pip3 install dmgbuild
         sudo rm -rf /Library/Developer/CommandLineTools

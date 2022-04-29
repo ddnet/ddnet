@@ -454,6 +454,7 @@ if(MYSQL)
 else()
   set(MYSQL_LIBRARIES)
 endif()
+find_package(LibSodium)
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
@@ -539,6 +540,7 @@ endif()
 if(MYSQL)
   show_dependency_status("MySQL" MYSQL)
 endif()
+show_dependency_status("LibSodium" LIBSODIUM)
 show_dependency_status("Ogg" OGG)
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
@@ -1479,6 +1481,7 @@ set(COPY_FILES
   ${WEBSOCKETS_COPY_FILES}
   ${DISCORDSDK_COPY_FILES}
   ${VULKAN_COPY_FILES}
+  ${LIBSODIUM_COPY_FILES}
   ${EXCEPTION_HANDLING_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
@@ -1619,6 +1622,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   demo.h
   discord.h
   editor.h
+  encryption.h
   engine.h
   friends.h
   ghost.h
@@ -1658,6 +1662,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   demo.h
   econ.cpp
   econ.h
+  encryption.cpp
   engine.cpp
   fifo.cpp
   fifo.h
@@ -1780,6 +1785,7 @@ set(LIBS
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
+  ${LIBSODIUM_LIBRARIES}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
@@ -2105,6 +2111,7 @@ if(CLIENT)
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
     ${DISCORDSDK_INCLUDE_DIRS}
+    ${LIBSODIUM_INCLUDE_DIRS}
 
     ${VULKAN_INCLUDE_DIRS}
 
@@ -2951,7 +2958,7 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
-  target_include_directories(${target} SYSTEM PRIVATE ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+  target_include_directories(${target} SYSTEM PRIVATE ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${LIBSODIUM_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(CRYPTO_FOUND)
     target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
