@@ -769,7 +769,9 @@ void CGameConsole::OnRender()
 			m_MouseIsPress = false;
 		}
 
-		for(int Page = 0; Page <= pConsole->m_BacklogCurPage; ++Page, OffsetY = 0.0f)
+		static int s_LastActivePage = pConsole->m_BacklogCurPage;
+		int TotalPages = 1;
+		for(int Page = 0; Page <= s_LastActivePage; ++Page, OffsetY = 0.0f)
 		{
 			while(pEntry)
 			{
@@ -798,7 +800,7 @@ void CGameConsole::OnRender()
 					break;
 
 				// just render output from current backlog page (render bottom up)
-				if(Page == pConsole->m_BacklogCurPage)
+				if(Page == s_LastActivePage)
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
@@ -843,22 +845,12 @@ void CGameConsole::OnRender()
 				Input()->SetClipboardText(SelectionString.c_str());
 			}
 
-			// current backlog page number is too high, render last available page (current checked one, render top down)
-			if(!pEntry && Page < pConsole->m_BacklogCurPage)
-			{
-				pConsole->m_BacklogCurPage = Page;
-				pEntry = pConsole->m_Backlog.First();
-				while(OffsetY > 0.0f && pEntry)
-				{
-					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
-					Cursor.m_LineWidth = Screen.w - 10.0f;
-					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					OffsetY -= pEntry->m_YOffset;
-					pEntry = pConsole->m_Backlog.Next(pEntry);
-				}
+			if(!pEntry)
 				break;
-			}
+			TotalPages++;
 		}
+		pConsole->m_BacklogCurPage = clamp(pConsole->m_BacklogCurPage, 0, TotalPages - 1);
+		s_LastActivePage = pConsole->m_BacklogCurPage;
 
 		pConsole->m_BacklogLock.unlock();
 
