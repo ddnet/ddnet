@@ -130,6 +130,12 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	pSelf->m_lThemes.push_back(Theme);
+	int64_t TimeNow = time_get_microseconds();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= 1000000 / 60)
+	{
+		pSelf->Client()->UpdateAndSwap();
+		pSelf->m_ThemeScanStartTime = TimeNow;
+	}
 	return 0;
 }
 
@@ -139,6 +145,13 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	const char *pSuffix = str_endswith(pName, ".png");
 	if(IsDir || !pSuffix)
 		return 0;
+
+	int64_t TimeNow = time_get_microseconds();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= 1000000 / 60)
+	{
+		pSelf->Client()->UpdateAndSwap();
+		pSelf->m_ThemeScanStartTime = TimeNow;
+	}
 
 	char aThemeName[128];
 	str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - pName);
@@ -394,6 +407,7 @@ std::vector<CTheme> &CMenuBackground::GetThemes()
 		m_lThemes.emplace_back("auto", true, true); // auto theme
 		m_lThemes.emplace_back("rand", true, true); // random theme
 
+		m_ThemeScanStartTime = time_get_microseconds();
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
 

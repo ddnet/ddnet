@@ -142,9 +142,6 @@ Dynamic Camera
 Emoticon
 == Осећања
 
-Enter
-== Започни
-
 Error
 == Грешка
 
@@ -687,18 +684,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork је кооперативна онлајн игра у којој је циљ да ви и ваша група teeova дођете до циља на мапи. Као новајлија требали бисте започети на Novice серверима, на којима се налазе најједноставније мапе. Размислите о пингу да бисте изабрали сервер који вам је близу.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Мапе садрже замрзавање, што привремено teeu онемогућава кретање. Морате радити заједно да бисте прошли кроз ове делове.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Точак миша мења оружје. Чекићем (леви миш) може се користити за ударање других teeova и њихово буђење из смрзавања.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Кука (десни миш) се може користити за пролазак кроз мапу и за причвршћивање других teeova уз вас.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Најважније је да је комуникација кључна: не постоји водич, па ћете морати да се дописујете (тастер т) са другим играчима да бисте научили основе и трикове игре.
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Користите тастер к за убијање (поновно покретање), q за паузирање и гледање других играча. Погледајте подешавања за остале пречице тастера.
 
@@ -927,12 +912,6 @@ UI mouse s.
 
 may cause delay
 == може проузроковати кашњење
-
-Preinit VBO (iGPUs only)
-== Preinit VBO (само у iGPUs)
-
-Multiple texture units (disable for macOS)
-== Вишеструке текстурне јединице (угашено за macOS)
 
 Use high DPI
 == Користи високи DPI
@@ -1199,6 +1178,9 @@ Saving ddnet-settings.cfg failed
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1212,6 +1194,12 @@ Checking for existing player with your name
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR
@@ -1253,6 +1241,12 @@ Settings file
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
 Chat command
 == 
 
@@ -1271,7 +1265,22 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1319,6 +1328,18 @@ Use old chat style
 Preview
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Show local player's key presses
 == 
 
@@ -1344,4 +1365,16 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

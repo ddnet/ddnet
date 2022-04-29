@@ -70,7 +70,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(TARGET_OS "windows")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   set(TARGET_OS "linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
@@ -83,7 +83,9 @@ endif()
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckSymbolExists)
-include(CheckAtomic)
+if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
+  include(CheckAtomic)
+endif()
 
 check_symbol_exists(__i386 "" TARGET_ARCH_X86_i386)
 if(TARGET_ARCH_X86_i386)
@@ -93,9 +95,14 @@ else()
 endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
+set(AUTO_VULKAN_BACKEND ON)
 if(TARGET_OS STREQUAL "windows")
   set(AUTO_DEPENDENCIES_DEFAULT ON)
-elseif(TARGET_OS STREQUAL "linux")
+  if(TARGET_CPU_ARCHITECTURE STREQUAL "x86")
+    set(AUTO_VULKAN_BACKEND OFF)
+  endif()
+elseif(TARGET_OS STREQUAL "mac")
+  set(AUTO_VULKAN_BACKEND OFF)
 endif()
 
 option(WEBSOCKETS "Enable websockets support" OFF)
@@ -103,7 +110,7 @@ option(MYSQL "Enable mysql support" OFF)
 option(TEST_MYSQL "Test mysql support in unit tests (also sets -DMYSQL=ON)" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
 option(INFORM_UPDATE "Inform about available updates" ON)
-option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
+option(VIDEORECORDER "Enable video recording support via FFmpeg" ON)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(HEADLESS_CLIENT "Build the client without graphics" OFF)
@@ -116,6 +123,13 @@ option(DISCORD "Enable Discord rich presence support" OFF)
 option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at runtime (Linux only)" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
+option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
+
+option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
+endif()
 
 if(TEST_MYSQL)
   set(MYSQL ON)
@@ -217,6 +231,14 @@ if(NOT MSVC AND NOT HAIKU)
     add_c_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
   endif()
 
+  if(EXCEPTION_HANDLING)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -DCONF_EXCEPTION_HANDLING)
+    # use the frame pointer (frame pointer usage is disabled by default in
+    # some architectures like x86_64 and for some optimization levels; and it
+    # may be impossible to walk the call stack without it)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -fno-omit-frame-pointer)
+  endif()
+
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
   if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
     add_c_compiler_flag_if_supported(OUR_FLAGS_OWN
@@ -234,9 +256,18 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
-  # TODO: Enable for C++ code except gtest
-  #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
+endif()
+
+if(MSVC)
+  if(EXCEPTION_HANDLING)
+  add_c_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
+  endif()
 endif()
 
 if(NOT MSVC AND NOT HAIKU)
@@ -333,6 +364,8 @@ endif()
 
 if(FAT)
   set(LIB_DIR "${TARGET_OS}/libfat")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(LIB_DIR "webasm/libwasm")
 elseif(TARGET_CPU_ARCHITECTURE STREQUAL "arm" OR TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
   set(LIB_DIR "${TARGET_OS}/lib${TARGET_CPU_ARCHITECTURE}")
 else()
@@ -359,12 +392,16 @@ function(set_extra_dirs_include VARIABLE NAME LIBRARY)
   set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
   is_bundled(IS_BUNDLED "${LIBRARY}")
   if(IS_BUNDLED)
-    set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TARGET_OS}" PARENT_SCOPE)
+    set(TMP_TARGET_OS ${TARGET_OS})
+    if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+     set(TMP_TARGET_OS webasm)
+    endif()
+    set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TMP_TARGET_OS}" PARENT_SCOPE)
   endif()
 endfunction()
 
 if(CMAKE_CROSSCOMPILING)
-  if(TARGET_OS STREQUAL "android")
+  if(TARGET_OS STREQUAL "android" OR CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     # be more aggressive with android toolchain
     set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   else()
@@ -398,7 +435,7 @@ endif()
 find_package(ZLIB)
 find_package(Crypto)
 find_package(Curl)
-if(VIDEORECORDER)
+if(CLIENT AND VIDEORECORDER)
   find_package(FFMPEG)
 endif()
 find_package(Freetype)
@@ -440,9 +477,22 @@ else()
   set(WEBSOCKETS_INCLUDE_DIRS)
 endif()
 
+if(EXCEPTION_HANDLING)
+  find_package(ExceptionHandling)
+endif()
+
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(CMAKE_OTOOL otool)
   find_program(DMGBUILD dmgbuild)
+endif()
+
+set(VULKAN_SHADER_FILE_LIST "" CACHE STRING "Vulkan shader file list")
+if(CLIENT AND VULKAN)
+  find_package(Vulkan)
+  include(cmake/BuildVulkanShaders.cmake)
+else()
+  set(VULKAN_LIBRARIES)
+  set(VULKAN_INCLUDE_DIRS)
 endif()
 
 message(STATUS "******** ${CMAKE_PROJECT_NAME} ********")
@@ -471,7 +521,7 @@ show_dependency_status("Curl" CURL)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
-if(VIDEORECORDER)
+if(CLIENT AND VIDEORECORDER)
   show_dependency_status("FFmpeg" FFMPEG)
 endif()
 show_dependency_status("Freetype" FREETYPE)
@@ -504,6 +554,10 @@ if(DISCORD)
 endif()
 if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
+endif()
+
+if(CLIENT AND VULKAN)
+  show_dependency_status("Vulkan" VULKAN)
 endif()
 
 if(CLIENT AND NOT(CURL_FOUND))
@@ -569,6 +623,10 @@ if(NOT(GTEST_FOUND))
   endif()
 endif()
 
+if(CLIENT AND VULKAN AND NOT(VULKAN_FOUND))
+  message(SEND_ERROR "You must install Vulkan libraries to compile the DDNet client")
+endif()
+
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 winmm)
@@ -608,6 +666,12 @@ else()
   else()
     set(PLATFORM_LIBS)
   endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(PLATFORM_CLIENT_LIBS GL)
+  set(PLATFORM_CLIENT_INCLUDE_DIRS "")
+  set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 ########################################################################
@@ -819,7 +883,6 @@ set(EXPECTED_DATA
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
   blob.png
-  browse_icons.png
   censorlist.txt
   console.png
   console_bar.png
@@ -1118,7 +1181,7 @@ set(EXPECTED_DATA
   file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
-  fonts/Icons.ttf
+  fonts/Icons.otf
   fonts/SourceHanSansSC-Regular.otf
   game.png
   gui_buttons.png
@@ -1215,6 +1278,7 @@ set(EXPECTED_DATA
   maps/LearnToPlay.map
   maps/Sunny\ Side\ Up.map
   maps/Tsunami.map
+  maps/Tutorial.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1233,6 +1297,7 @@ set(EXPECTED_DATA
   maps7/LearnToPlay.map
   maps7/Sunny\ Side\ Up.map
   maps7/Tsunami.map
+  maps7/Tutorial.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png
@@ -1254,6 +1319,20 @@ set(EXPECTED_DATA
   shader/text.vert
   shader/tile.frag
   shader/tile.vert
+  shader/vulkan/prim.frag
+  shader/vulkan/prim.vert
+  shader/vulkan/prim3d.frag
+  shader/vulkan/prim3d.vert
+  shader/vulkan/primex.frag
+  shader/vulkan/primex.vert
+  shader/vulkan/quad.frag
+  shader/vulkan/quad.vert
+  shader/vulkan/spritemulti.frag
+  shader/vulkan/spritemulti.vert
+  shader/vulkan/text.frag
+  shader/vulkan/text.vert
+  shader/vulkan/tile.frag
+  shader/vulkan/tile.vert
   skins/Aoe4leg.png
   skins/PaladiN.png
   skins/antiantey.png
@@ -1399,6 +1478,8 @@ set(COPY_FILES
   ${FFMPEG_COPY_FILES}
   ${WEBSOCKETS_COPY_FILES}
   ${DISCORDSDK_COPY_FILES}
+  ${VULKAN_COPY_FILES}
+  ${EXCEPTION_HANDLING_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -1435,11 +1516,12 @@ function(generate_source7 output_file script_parameter)
   )
 endfunction()
 
-function(generate_maps output_file)
+function(generate_maps output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
+      datasrc/crosscompile.py
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
@@ -1487,7 +1569,8 @@ generate_source7("src/game/generated/protocol7.h" "network_header")
 generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
-generate_maps("src/game/generated/protocolglue.h")
+generate_maps("src/game/generated/protocolglue.h" "map_header")
+generate_maps("src/game/generated/protocolglue.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/game/generated/wordlist.h"
   COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
@@ -1557,7 +1640,9 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   uuid.h
   warning.h
 )
-set_src(ENGINE_SHARED GLOB src/engine/shared
+set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
+  assertion_logger.cpp
+  assertion_logger.h
   compression.cpp
   compression.h
   config.cpp
@@ -1660,6 +1745,7 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.cpp
   src/game/generated/protocolglue.h
   src/game/generated/protocol7.cpp
   src/game/generated/protocol7.h
@@ -1681,7 +1767,10 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
 )
-
+set(MASTERSRV_SHARED
+  src/mastersrv/mastersrv.cpp
+  src/mastersrv/mastersrv.h
+)
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
@@ -1699,7 +1788,8 @@ set(LIBS
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
-list(APPEND TARGETS_OWN engine-shared game-shared)
+add_library(mastersrv-shared EXCLUDE_FROM_ALL OBJECT ${MASTERSRV_SHARED})
+list(APPEND TARGETS_OWN engine-shared game-shared mastersrv-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
   add_library(discord-shared SHARED IMPORTED)
@@ -1730,8 +1820,12 @@ if(CLIENT)
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
   set_src(ENGINE_CLIENT GLOB_RECURSE src/engine/client
+    backend/backend_base.cpp
+    backend/backend_base.h
     backend/glsl_shader_compiler.cpp
     backend/glsl_shader_compiler.h
+    backend/null/backend_null.cpp
+    backend/null/backend_null.h
     backend/opengl/backend_opengl.cpp
     backend/opengl/backend_opengl.h
     backend/opengl/backend_opengl3.cpp
@@ -1747,6 +1841,8 @@ if(CLIENT)
     backend/opengles/gles_class_defines.h
     backend/opengles/opengles_sl.cpp
     backend/opengles/opengles_sl_program.cpp
+    backend/vulkan/backend_vulkan.cpp
+    backend/vulkan/backend_vulkan.h
     backend_sdl.cpp
     backend_sdl.h
     blocklist_driver.cpp
@@ -1764,7 +1860,6 @@ if(CLIENT)
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
-    graphics_threaded_null.h
     http.cpp
     http.h
     input.cpp
@@ -1863,6 +1958,8 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
+    components/tooltips.cpp
+    components/tooltips.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp
@@ -1934,6 +2031,8 @@ if(CLIENT)
     ${OPUS_LIBRARIES}
     ${OGG_LIBRARIES}
 
+    ${VULKAN_LIBRARIES}
+
     ${TARGET_STEAMAPI}
 
     ${PLATFORM_CLIENT_LIBS}
@@ -1975,6 +2074,7 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:mastersrv-shared>
     )
   else()
     add_executable(${TARGET_CLIENT} WIN32
@@ -1984,6 +2084,7 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:mastersrv-shared>
     )
   endif()
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
@@ -2004,6 +2105,8 @@ if(CLIENT)
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
     ${DISCORDSDK_INCLUDE_DIRS}
+
+    ${VULKAN_INCLUDE_DIRS}
 
     ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
@@ -2035,6 +2138,10 @@ if(CLIENT)
 
   if(GLEW_BUNDLED)
 	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+  endif()
+
+  if(VULKAN)
+	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_BACKEND_VULKAN)
   endif()
 
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
@@ -2165,6 +2272,7 @@ if(SERVER)
     ${SERVER_ICON}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
+    $<TARGET_OBJECTS:mastersrv-shared>
   )
   target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
   list(APPEND TARGETS_OWN ${TARGET_SERVER})
@@ -2185,14 +2293,15 @@ endif()
 ########################################################################
 
 if(TOOLS)
-  set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
+  set(MASTERSRV_SRC src/mastersrv/main_mastersrv.cpp)
   set_src(TWPING_SRC GLOB src/twping twping.cpp)
 
   set(TARGET_MASTERSRV mastersrv)
   set(TARGET_TWPING twping)
 
-  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
-  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
+  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
+
+  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
 
   target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
   target_link_libraries(${TARGET_TWPING} ${LIBS})
@@ -2232,6 +2341,9 @@ if(TOOLS)
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
+      endif()
+      if(TOOL MATCHES "^fake_server")
+          list(APPEND TOOL_DEPS $<TARGET_OBJECTS:mastersrv-shared>)
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
@@ -2358,6 +2470,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     ${TESTS_EXTRA}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
+    $<TARGET_OBJECTS:mastersrv-shared>
     ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
@@ -2550,8 +2663,15 @@ set(CPACK_FILES
   storage.cfg
   ${COPY_FILES}
 )
+
+set(CPACK_GEN_FILES
+  ${VULKAN_SHADER_FILE_LIST}
+)
+
 if(TARGET_OS STREQUAL "windows")
   list(APPEND CPACK_FILES other/config_directory.bat)
+else()
+  list(APPEND CPACK_FILES other/config_directory.sh)
 endif()
 
 if(NOT DEV)
@@ -2572,6 +2692,9 @@ if(NOT DEV)
     install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
     install(FILES other/icons/DDNet-Server_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet-server.png COMPONENT server)
   endforeach()
+  foreach(file ${VULKAN_SHADER_FILE_LIST})
+    install(FILES ${PROJECT_BINARY_DIR}/${file} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet/data/shader/vulkan COMPONENT client)
+  endforeach()
 endif()
 
 if(DEV)
@@ -2582,7 +2705,8 @@ else()
   set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
   install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
   install(DIRECTORY ${CPACK_DIRS} ${EXTRA_ARGS})
-  install(FILES ${CPACK_FILES} ${EXTRA_ARGS})
+  set(CPACK_FILES_TMP ${CPACK_FILES} ${CPACK_GEN_FILES})
+  install(FILES ${CPACK_FILES_TMP} ${EXTRA_ARGS})
 endif()
 
 set(PACKAGE_TARGETS)
@@ -2686,6 +2810,9 @@ foreach(ext zip tar.gz tar.xz)
   foreach(file ${CPACK_FILES})
     list(APPEND COPY_FILE_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/${file} ${TMPDIR}/)
   endforeach()
+  foreach(file ${CPACK_GEN_FILES})
+    list(APPEND COPY_FILE_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${file} ${TMPDIR}/${file})
+  endforeach()
   foreach(dir ${CPACK_DIRS})
     list(APPEND COPY_DIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${TMPDIR}/${dir})
   endforeach()
@@ -2733,6 +2860,7 @@ unset(CPACK_SOURCE_FILES_INVERTED)
 unset(CPACK_TARGETS)
 unset(CPACK_DIRS)
 unset(CPACK_FILES)
+unset(CPACK_GEN_FILES)
 
 include(CPack)
 
@@ -2803,7 +2931,7 @@ foreach(target ${TARGETS_LINK})
 endforeach()
 
 foreach(target ${TARGETS_OWN})
-  if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1) AND NOT TARGET_OS STREQUAL "mac")
+  if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1))
     set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
   endif()
@@ -2870,6 +2998,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(VERSION)
     target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
+  endif()
+  if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+   target_compile_definitions(${target} PRIVATE CONF_WEBASM)
   endif()
 endforeach()
 

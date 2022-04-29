@@ -129,28 +129,28 @@ void CRenderTools::DrawSprite(float x, float y, float ScaledWidth, float ScaledH
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
 {
 	IGraphics::CQuadItem QuadItem(x, y, Size, Size);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
 {
 	IGraphics::CQuadItem QuadItem(-(Size) / 2.f, -(Size) / 2.f, (Size), (Size));
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(-(Width) / 2.f, -(Height) / 2.f, (Width), (Height));
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(X, Y, Width, Height);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
@@ -345,25 +345,25 @@ void CRenderTools::DrawRoundRectExt4(float x, float y, float w, float h, vec4 Co
 	if(!(Corners & 1))
 	{
 		Graphics()->SetColor(ColorTopLeft.r, ColorTopLeft.g, ColorTopLeft.b, ColorTopLeft.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y, r, r); // TL
+		ItemQ = IGraphics::CQuadItem(x, y, r, r); // TL
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 2))
 	{
 		Graphics()->SetColor(ColorTopRight.r, ColorTopRight.g, ColorTopRight.b, ColorTopRight.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x + w, y, -r, r); // TR
+		ItemQ = IGraphics::CQuadItem(x + w, y, -r, r); // TR
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 4))
 	{
 		Graphics()->SetColor(ColorBottomLeft.r, ColorBottomLeft.g, ColorBottomLeft.b, ColorBottomLeft.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y + h, r, -r); // BL
+		ItemQ = IGraphics::CQuadItem(x, y + h, r, -r); // BL
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 8))
 	{
 		Graphics()->SetColor(ColorBottomRight.r, ColorBottomRight.g, ColorBottomRight.b, ColorBottomRight.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
+		ItemQ = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 }

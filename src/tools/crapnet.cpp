@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
 
+#include <array> // std::size
 #include <cstdlib>
 
 struct CPacket
@@ -37,7 +38,7 @@ static CPingConfig m_aConfigPings[] = {
 	{140, 40, 200, 0, 0, 0},
 };
 
-static int m_ConfigNumpingconfs = sizeof(m_aConfigPings) / sizeof(CPingConfig);
+static int m_ConfigNumpingconfs = std::size(m_aConfigPings);
 static int m_ConfigInterval = 10; // seconds between different pingconfigs
 static int m_ConfigLog = 0;
 static int m_ConfigReorder = 0;
@@ -47,11 +48,8 @@ void Run(unsigned short Port, NETADDR Dest)
 	NETADDR Src = {NETTYPE_IPV4, {0, 0, 0, 0}, Port};
 	NETSOCKET Socket = net_udp_create(Src);
 
-	char aBuffer[1024 * 2];
 	int ID = 0;
 	int Delaycounter = 0;
-	MMSGS m;
-	net_init_mmsgs(&m);
 
 	while(true)
 	{
@@ -70,7 +68,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			int DataTrash = 0;
 			NETADDR From;
 			unsigned char *pData;
-			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024 * 2, &m, &pData);
+			int Bytes = net_udp_recv(Socket, &From, &pData);
 			if(Bytes <= 0)
 				break;
 

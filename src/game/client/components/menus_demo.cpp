@@ -216,7 +216,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// seek to 0-90%
 		const int SeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
-		for(unsigned i = 0; i < sizeof(SeekPercentKeys) / sizeof(SeekPercentKeys[0]); i++)
+		for(unsigned i = 0; i < std::size(SeekPercentKeys); i++)
 		{
 			if(Input()->KeyPress(SeekPercentKeys[i]))
 			{
@@ -339,17 +339,16 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			else
 			{
 				static float PrevAmount = 0.0f;
-				float Amount = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
+				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
-					Amount = PrevAmount + (Amount - PrevAmount) * 0.05f;
+					AmountSeek = PrevAmount + (AmountSeek - PrevAmount) * 0.05f;
 
-					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount - Amount) >= 0.0001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.0001f)
 					{
-						//PrevAmount = Amount;
 						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(Amount);
+						DemoPlayer()->SeekPercent(AmountSeek);
 						m_pClient->m_SuppressEvents = false;
 						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
 						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
@@ -357,11 +356,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				}
 				else
 				{
-					if(Amount > 0.0f && Amount < 1.0f && absolute(PrevAmount - Amount) >= 0.001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.001f)
 					{
-						PrevAmount = Amount;
+						PrevAmount = AmountSeek;
 						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(Amount);
+						DemoPlayer()->SeekPercent(AmountSeek);
 						m_pClient->m_SuppressEvents = false;
 						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
 						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
@@ -634,8 +633,10 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 
 	HitRect.h = minimum(HitRect.h, (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) - HitRect.y);
 
+	bool DoubleClickable = false;
 	if(Item.m_Visible && UI()->DoButtonLogic(pId, "", gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &HitRect))
 	{
+		DoubleClickable |= gs_ListBoxNewSelected == ThisItemIndex;
 		gs_ListBoxClicked = true;
 		gs_ListBoxNewSelected = ThisItemIndex;
 	}
@@ -647,7 +648,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (UI()->ActiveItem() == pId && Input()->MouseDoubleClick()))
+			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
@@ -767,6 +768,11 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	Item.m_StorageType = StorageType;
 	pSelf->m_lDemos.add_unsorted(Item);
 
+	if(time_get_microseconds() - pSelf->m_DemoPopulateStartTime > 500000)
+	{
+		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
+	}
+
 	return 0;
 }
 
@@ -775,6 +781,7 @@ void CMenus::DemolistPopulate()
 	m_lDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
+	m_DemoPopulateStartTime = time_get_microseconds();
 	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 
 	if(g_Config.m_BrDemoFetchInfo)
@@ -1015,7 +1022,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	RenderTools()->DrawUIRect(&Headers, ColorRGBA(0.0f, 0, 0, 0.15f), 0, 0);
 
-	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
+	int NumCols = std::size(s_aCols);
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)
@@ -1110,15 +1117,15 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(Selected)
 			{
-				CUIRect r = Row;
-				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
+				CUIRect Rect = Row;
+				Rect.Margin(0.5f, &Rect);
+				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 			else if(UI()->MouseInside(&SelectHitBox))
 			{
-				CUIRect r = Row;
-				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
+				CUIRect Rect = Row;
+				Rect.Margin(0.5f, &Rect);
+				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
 			// clip the selection

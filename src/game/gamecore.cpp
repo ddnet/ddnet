@@ -138,16 +138,15 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float a = 0;
-		if(m_Input.m_TargetX == 0)
-			a = atanf((float)m_Input.m_TargetY);
+		float tmp_angle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
+		if(tmp_angle < -(pi / 2.0f))
+		{
+			m_Angle = (int)((tmp_angle + (2.0f * pi)) * 256.0f);
+		}
 		else
-			a = atanf((float)m_Input.m_TargetY / (float)m_Input.m_TargetX);
-
-		if(m_Input.m_TargetX < 0)
-			a = a + pi;
-
-		m_Angle = (int)(a * 256.0f);
+		{
+			m_Angle = (int)(tmp_angle * 256.0f);
+		}
 
 		// handle jump
 		if(m_Input.m_Jump)
@@ -402,8 +401,8 @@ void CCharacterCore::Tick(bool UseInput)
 
 					// make sure that we don't add excess force by checking the
 					// direction against the current velocity. if not zero.
-					if(length(m_Vel) > 0.0001)
-						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2;
+					if(length(m_Vel) > 0.0001f)
+						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
 					m_Vel += Dir * a * (Velocity * 0.75f);
 					m_Vel *= 0.85f;
@@ -414,17 +413,17 @@ void CCharacterCore::Tick(bool UseInput)
 				{
 					if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
 					{
-						float Accel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
+						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
 						float DragSpeed = m_Tuning.m_HookDragSpeed;
 
 						vec2 Temp;
 						// add force to the hooked player
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, HookAccel * Dir.x * 1.5f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, HookAccel * Dir.y * 1.5f);
 						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
 						// add a little bit force to the guy who has the grip
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -HookAccel * Dir.x * 0.25f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -HookAccel * Dir.y * 0.25f);
 						m_Vel = ClampVel(m_MoveRestrictions, Temp);
 					}
 				}

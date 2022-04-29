@@ -31,8 +31,8 @@ public:
 	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
 	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg = true);
-	int GetTeam() const { return m_Team; };
-	int GetCID() const { return m_ClientID; };
+	int GetTeam() const { return m_Team; }
+	int GetCID() const { return m_ClientID; }
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
@@ -64,7 +64,7 @@ public:
 	int m_PlayerFlags;
 
 	// used for snapping to just update latency if the scoreboard is active
-	int m_aActLatency[MAX_CLIENTS];
+	int m_aCurLatency[MAX_CLIENTS];
 
 	// used for spectator mode
 	int m_SpectatorID;

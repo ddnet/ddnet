@@ -496,6 +496,14 @@ enum
 	PROPTYPE_AUTOMAPPER,
 };
 
+enum
+{
+	DIRECTION_LEFT = 1,
+	DIRECTION_RIGHT = 2,
+	DIRECTION_UP = 4,
+	DIRECTION_DOWN = 8,
+};
+
 typedef struct
 {
 	int x, y;
@@ -633,15 +641,27 @@ class CEditor : public IEditor
 	CUI m_UI;
 	CUIEx m_UIEx;
 
+	bool m_EditorWasUsedBefore = false;
+
+	IGraphics::CTextureHandle m_EntitiesTexture;
+
+	IGraphics::CTextureHandle m_FrontTexture;
+	IGraphics::CTextureHandle m_TeleTexture;
+	IGraphics::CTextureHandle m_SpeedupTexture;
+	IGraphics::CTextureHandle m_SwitchTexture;
+	IGraphics::CTextureHandle m_TuneTexture;
+
+	int GetTextureUsageFlag();
+
 public:
-	class IInput *Input() { return m_pInput; };
-	class IClient *Client() { return m_pClient; };
+	class IInput *Input() { return m_pInput; }
+	class IClient *Client() { return m_pClient; }
 	class CConfig *Config() { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; };
-	class IGraphics *Graphics() { return m_pGraphics; };
+	class IConsole *Console() { return m_pConsole; }
+	class IGraphics *Graphics() { return m_pGraphics; }
 	class ISound *Sound() { return m_pSound; }
-	class ITextRender *TextRender() { return m_pTextRender; };
-	class IStorage *Storage() { return m_pStorage; };
+	class ITextRender *TextRender() { return m_pTextRender; }
+	class IStorage *Storage() { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
 	CUIEx *UIEx() { return &m_UIEx; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
@@ -722,6 +742,9 @@ public:
 		m_SelectedQuadEnvelope = -1;
 		m_SelectedEnvelopePoint = -1;
 
+		m_QuadKnifeActive = false;
+		m_QuadKnifeCount = 0;
+
 		m_CommandBox = 0.0f;
 		m_aSettingsCommand[0] = 0;
 
@@ -770,6 +793,7 @@ public:
 	CLayerGroup *GetSelectedGroup() const;
 	CSoundSource *GetSelectedSource();
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
+	void AddSelectedLayer(int LayerIndex);
 	void SelectQuad(int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
@@ -905,10 +929,15 @@ public:
 	int m_SelectedSound;
 	int m_SelectedSource;
 
+	bool m_QuadKnifeActive;
+	int m_QuadKnifeCount;
+	vec2 m_aQuadKnifePoints[4];
+
 	IGraphics::CTextureHandle m_CheckerTexture;
 	IGraphics::CTextureHandle m_BackgroundTexture;
 	IGraphics::CTextureHandle m_CursorTexture;
-	IGraphics::CTextureHandle m_EntitiesTexture;
+
+	IGraphics::CTextureHandle GetEntitiesTexture();
 
 	CLayerGroup m_Brush;
 	CLayerTiles m_TilesetPicker;
@@ -1000,6 +1029,10 @@ public:
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
 
+	float TriangleArea(vec2 A, vec2 B, vec2 C);
+	bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C);
+	void DoQuadKnife(int QuadIndex);
+
 	void DoSoundSource(CSoundSource *pSource, int Index);
 
 	void DoMapEditor(CUIRect View);
@@ -1028,6 +1061,7 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
+	void SelectLayerByTile(float &Scroll);
 
 	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
@@ -1114,11 +1148,12 @@ public:
 
 	// DDRace
 
-	IGraphics::CTextureHandle m_FrontTexture;
-	IGraphics::CTextureHandle m_TeleTexture;
-	IGraphics::CTextureHandle m_SpeedupTexture;
-	IGraphics::CTextureHandle m_SwitchTexture;
-	IGraphics::CTextureHandle m_TuneTexture;
+	IGraphics::CTextureHandle GetFrontTexture();
+	IGraphics::CTextureHandle GetTeleTexture();
+	IGraphics::CTextureHandle GetSpeedupTexture();
+	IGraphics::CTextureHandle GetSwitchTexture();
+	IGraphics::CTextureHandle GetTuneTexture();
+
 	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);

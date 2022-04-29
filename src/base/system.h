@@ -768,13 +768,7 @@ int64_t time_get_microseconds();
 /**
  * @ingroup Network-General
  */
-typedef struct
-{
-	int type;
-	int ipv4sock;
-	int ipv6sock;
-	int web_ipv4sock;
-} NETSOCKET;
+typedef struct NETSOCKET_INTERNAL *NETSOCKET;
 
 /**
  * @ingroup Network-General
@@ -783,12 +777,15 @@ enum
 {
 	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
 
+	NETTYPE_LINK_BROADCAST = 4,
+
 	NETTYPE_INVALID = 0,
 	NETTYPE_IPV4 = 1,
 	NETTYPE_IPV6 = 2,
-	NETTYPE_LINK_BROADCAST = 4,
 	NETTYPE_WEBSOCKET_IPV4 = 8,
-	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4
+
+	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4,
+	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
 };
 
 /**
@@ -890,16 +887,30 @@ int net_addr_from_str(NETADDR *addr, const char *string);
  * @ingroup Network-General
  */
 
-/**
- * Creates a UDP socket and binds it to a port.
- *
- * @ingroup Network-UDP
- *
- * @param bindaddr Address to bind the socket to.
- *
- * @return On success it returns an handle to the socket. On failure it
- * returns NETSOCKET_INVALID.
- */
+/*
+	Function: net_socket_type
+		Determine a socket's type.
+
+	Parameters:
+		sock - Socket whose type should be determined.
+
+	Returns:
+		The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6` and
+		`NETTYPE_WEBSOCKET_IPV4`.
+*/
+int net_socket_type(NETSOCKET sock);
+
+/*
+	Function: net_udp_create
+		Creates a UDP socket and binds it to a port.
+
+	Parameters:
+		bindaddr - Address to bind the socket to.
+
+	Returns:
+		On success it returns an handle to the socket. On failure it
+		returns NETSOCKET_INVALID.
+*/
 NETSOCKET net_udp_create(NETADDR bindaddr);
 
 /**
@@ -917,45 +928,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr);
  */
 int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size);
 
-#define VLEN 128
-#define PACKETSIZE 1400
-/**
- * @ingroup Network-General
- */
-typedef struct
-{
-#ifdef CONF_PLATFORM_LINUX
-	int pos;
-	int size;
-	struct mmsghdr msgs[VLEN];
-	struct iovec iovecs[VLEN];
-	char bufs[VLEN][PACKETSIZE];
-	char sockaddrs[VLEN][128];
-#else
-	int dummy;
-#endif
-} MMSGS;
+/*
+	Function: net_udp_recv
+		Receives a packet over an UDP socket.
 
-/**
- * @ingroup Network-General
- */
-void net_init_mmsgs(MMSGS *m);
+	Parameters:
+		sock - Socket to use.
+		addr - Pointer to an NETADDR that will receive the address.
+		data - Received data. Will be invalidated when this function is
+		called again.
 
-/**
- * Receives a packet over an UDP socket.
- *
- * @ingroup Network-UDP
- *
- * @param sock Socket to use.
- * @param addr Pointer to an NETADDR that will receive the address.
- * @param buffer Pointer to a buffer that can be used to receive the data.
- * @param maxsize Maximum size to receive.
- * @param data Will get set to the actual data, might be the passed buffer or an internal one
- *
- * @return On success it returns the number of bytes received. Returns -1
- * on error.
- */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *buffer, int maxsize, MMSGS *m, unsigned char **data);
+	Returns:
+		On success it returns the number of bytes received. Returns -1
+		on error.
+*/
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 
 /**
  * Closes an UDP socket.
@@ -1388,8 +1375,25 @@ int str_comp_num(const char *a, const char *b, int num);
  */
 int str_comp_filenames(const char *a, const char *b);
 
+/*
+       Function: str_startswith_nocase
+               Checks case insensitive whether the string begins with a certain prefix.
+
+       Parameter:
+               str - String to check.
+               prefix - Prefix to look for.
+
+       Returns:
+               A pointer to the string str after the string prefix, or 0 if
+               the string prefix isn't a prefix of the string str.
+
+       Remarks:
+               - The strings are treated as zero-terminated strings.
+*/
+const char *str_startswith_nocase(const char *str, const char *prefix);
+
 /**
- * Checks whether the string begins with a certain prefix.
+ * Checks case sensitive whether the string begins with a certain prefix.
  *
  * @ingroup Strings
  *
@@ -1403,18 +1407,37 @@ int str_comp_filenames(const char *a, const char *b);
  */
 const char *str_startswith(const char *str, const char *prefix);
 
-/**
- * Checks whether the string ends with a certain suffix.
- *
- * @ingroup Strings
- *
- * @param str String to check.
- * @param suffix Suffix to look for.
- *
- * @return A pointer to the beginning of the suffix in the string str, or
- *		   0 if the string suffix isn't a suffix of the string str.
- *
- * @return The strings are treated as zero-terminated strings.
+/*
+       Function: str_endswith_nocase
+               Checks case insensitive whether the string ends with a certain suffix.
+
+       Parameter:
+               str - String to check.
+               suffix - Suffix to look for.
+
+       Returns:
+               A pointer to the beginning of the suffix in the string str, or
+               0 if the string suffix isn't a suffix of the string str.
+
+       Remarks:
+               - The strings are treated as zero-terminated strings.
+*/
+const char *str_endswith_nocase(const char *str, const char *suffix);
+
+/*
+	Function: str_endswith
+		Checks case sensitive whether the string ends with a certain suffix.
+
+	Parameter:
+		str - String to check.
+		suffix - Suffix to look for.
+
+	Returns:
+		A pointer to the beginning of the suffix in the string str, or
+		0 if the string suffix isn't a suffix of the string str.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
 */
 const char *str_endswith(const char *str, const char *suffix);
 
@@ -1775,7 +1798,7 @@ int fs_remove(const char *filename);
 		Renames the file or directory. If the paths differ the file will be moved.
 
 	Parameters:
-		oldname - The actual name
+		oldname - The current name
 		newname - The new name
 
 	Returns:
@@ -1796,7 +1819,7 @@ int fs_rename(const char *oldname, const char *newname);
 		modified - Pointer to time_t
 
 	Returns:
-		0 on success non-zero on failure
+		0 on success, non-zero on failure
 
 	Remarks:
 		- Returned time is in seconds since UNIX Epoch
@@ -1879,6 +1902,9 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 typedef void (*DBG_LOGGER)(const char *line, void *user);
 typedef void (*DBG_LOGGER_FINISH)(void *user);
 void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user);
+
+typedef void (*DBG_LOGGER_ASSERTION)(void *user);
+void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user);
 
 void dbg_logger_stdout();
 void dbg_logger_debugger();
@@ -2389,6 +2415,11 @@ void set_console_msg_color(const void *rgbvoid);
 		1 - Failure in getting the version.
 */
 int os_version_str(char *version, int length);
+
+#if defined(CONF_EXCEPTION_HANDLING)
+void init_exception_handler();
+void set_exception_handler_log_file(const char *log_file_path);
+#endif
 
 #if defined(__cplusplus)
 }

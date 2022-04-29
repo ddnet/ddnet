@@ -15,6 +15,8 @@
 #include "console.h"
 #include "linereader.h"
 
+#include <array> // std::size
+
 // todo: rework this
 
 const char *CConsole::CResult::GetString(unsigned Index)
@@ -348,7 +350,7 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 	pData->m_NumCommands = 0;
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pData->m_NumCommands < (int)(sizeof(pData->m_aCommandsChecksum) / sizeof(pData->m_aCommandsChecksum[0])))
+		if(pData->m_NumCommands < (int)(std::size(pData->m_aCommandsChecksum)))
 		{
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 			void *pUserData = pCommand->m_pUserData;

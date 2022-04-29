@@ -177,27 +177,27 @@ public:
 	{
 		if(TeamID < TEAM_FLOCK || TeamID >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvTeam != 3 && TeamID == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamID == TEAM_FLOCK)
 			return false;
 
 		return m_pSaveTeamResult[TeamID] != nullptr;
 	}
 
-	void EnablePractice(int Team)
+	void SetPractice(int Team, bool Enabled)
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return;
 
-		m_Practice[Team] = true;
+		m_Practice[Team] = Enabled;
 	}
 
 	bool IsPractice(int Team)
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvTeam != 3 && Team == TEAM_FLOCK)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return false;
 
 		return m_Practice[Team];

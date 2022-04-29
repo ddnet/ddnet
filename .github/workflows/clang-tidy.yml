@@ -11,7 +11,7 @@ on:
 
 jobs:
   check-clang-tidy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
@@ -20,7 +20,7 @@ jobs:
     - name: Install clang-tidy
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev clang-tidy -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev clang-tidy libvulkan-dev glslang-tools spirv-tools -y
     - name: Build with clang-tidy
       run: |
         mkdir clang-tidy

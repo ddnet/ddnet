@@ -222,14 +222,17 @@ class NetObject:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def emit_validate(self):
+	def emit_validate(self, base_item):
 		lines = ["case %s:" % self.enum_name]
 		lines += ["{"]
 		if self.validate_size:
 			lines += ["\t%s *pObj = (%s *)pData;"%(self.struct_name, self.struct_name)]
 			lines += ["\tif((int)sizeof(*pObj) > Size) return -1;"]
 		prev_len = len(lines)
-		for v in self.variables:
+		variables = self.variables
+		if base_item:
+			variables += base_item.variables
+		for v in variables:
 			lines += ["\t"+line for line in v.emit_validate()]
 		if not self.validate_size and prev_len != len(lines):
 			raise ValueError("Can't use members that need validation in a struct whose size isn't validated")

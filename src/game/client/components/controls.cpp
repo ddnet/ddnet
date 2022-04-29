@@ -41,14 +41,14 @@ CControls::CControls()
 	if(g_Config.m_InpJoystick)
 	{
 		SDL_Init(SDL_INIT_JOYSTICK);
-		m_Joystick = SDL_JoystickOpen(0);
-		if(m_Joystick && SDL_JoystickNumAxes(m_Joystick) < NUM_JOYSTICK_AXES)
+		m_pJoystick = SDL_JoystickOpen(0);
+		if(m_pJoystick && SDL_JoystickNumAxes(m_pJoystick) < NUM_JOYSTICK_AXES)
 		{
-			SDL_JoystickClose(m_Joystick);
-			m_Joystick = NULL;
+			SDL_JoystickClose(m_pJoystick);
+			m_pJoystick = NULL;
 		}
 
-		m_Gamepad = SDL_JoystickOpen(2);
+		m_pGamepad = SDL_JoystickOpen(2);
 
 		SDL_JoystickEventState(SDL_QUERY);
 
@@ -60,8 +60,8 @@ CControls::CControls()
 	}
 	else
 	{
-		m_Joystick = NULL;
-		m_Gamepad = NULL;
+		m_pJoystick = NULL;
+		m_pGamepad = NULL;
 		m_UsingGamepad = false;
 	}
 }
@@ -402,19 +402,19 @@ void CControls::OnRender()
 	int64_t CurTime = time_get();
 	bool FireWasPressed = false;
 
-	if(m_Joystick)
+	if(m_pJoystick)
 	{
 		// Get input from left joystick
-		int RunX = SDL_JoystickGetAxis(m_Joystick, LEFT_JOYSTICK_X);
-		int RunY = SDL_JoystickGetAxis(m_Joystick, LEFT_JOYSTICK_Y);
+		int RunX = SDL_JoystickGetAxis(m_pJoystick, LEFT_JOYSTICK_X);
+		int RunY = SDL_JoystickGetAxis(m_pJoystick, LEFT_JOYSTICK_Y);
 		bool RunPressed = (RunX != 0 || RunY != 0);
 		// Get input from right joystick
-		int AimX = SDL_JoystickGetAxis(m_Joystick, SECOND_RIGHT_JOYSTICK_X);
-		int AimY = SDL_JoystickGetAxis(m_Joystick, SECOND_RIGHT_JOYSTICK_Y);
+		int AimX = SDL_JoystickGetAxis(m_pJoystick, SECOND_RIGHT_JOYSTICK_X);
+		int AimY = SDL_JoystickGetAxis(m_pJoystick, SECOND_RIGHT_JOYSTICK_Y);
 		bool AimPressed = (AimX != 0 || AimY != 0);
 		// Get input from another right joystick
-		int HookX = SDL_JoystickGetAxis(m_Joystick, RIGHT_JOYSTICK_X);
-		int HookY = SDL_JoystickGetAxis(m_Joystick, RIGHT_JOYSTICK_Y);
+		int HookX = SDL_JoystickGetAxis(m_pJoystick, RIGHT_JOYSTICK_X);
+		int HookY = SDL_JoystickGetAxis(m_pJoystick, RIGHT_JOYSTICK_Y);
 		bool HookPressed = (HookX != 0 || HookY != 0);
 
 		if(m_JoystickRunPressed != RunPressed)
@@ -476,11 +476,11 @@ void CControls::OnRender()
 		m_JoystickFirePressed = AimPressed;
 	}
 
-	if(m_Gamepad)
+	if(m_pGamepad)
 	{
 		// Get input from left joystick
-		int RunX = SDL_JoystickGetAxis(m_Gamepad, LEFT_JOYSTICK_X);
-		int RunY = SDL_JoystickGetAxis(m_Gamepad, LEFT_JOYSTICK_Y);
+		int RunX = SDL_JoystickGetAxis(m_pGamepad, LEFT_JOYSTICK_X);
+		int RunY = SDL_JoystickGetAxis(m_pGamepad, LEFT_JOYSTICK_Y);
 		if(m_UsingGamepad)
 		{
 			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -GAMEPAD_DEAD_ZONE);
@@ -488,8 +488,8 @@ void CControls::OnRender()
 		}
 
 		// Get input from right joystick
-		int AimX = SDL_JoystickGetAxis(m_Gamepad, RIGHT_JOYSTICK_X);
-		int AimY = SDL_JoystickGetAxis(m_Gamepad, RIGHT_JOYSTICK_Y);
+		int AimX = SDL_JoystickGetAxis(m_pGamepad, RIGHT_JOYSTICK_X);
+		int AimY = SDL_JoystickGetAxis(m_pGamepad, RIGHT_JOYSTICK_Y);
 		if(abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE)
 		{
 			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
@@ -561,8 +561,8 @@ void CControls::ClampMousePos()
 {
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
-		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 200.0f, Collision()->GetWidth() * 32 - 200.0f);
-		m_MousePos[g_Config.m_ClDummy].y = clamp(m_MousePos[g_Config.m_ClDummy].y, 200.0f, Collision()->GetHeight() * 32 - 200.0f);
+		m_MousePos[g_Config.m_ClDummy].x = clamp(m_MousePos[g_Config.m_ClDummy].x, 0.0f, Collision()->GetWidth() * 32.0f);
+		m_MousePos[g_Config.m_ClDummy].y = clamp(m_MousePos[g_Config.m_ClDummy].y, 0.0f, Collision()->GetHeight() * 32.0f);
 	}
 	else
 	{

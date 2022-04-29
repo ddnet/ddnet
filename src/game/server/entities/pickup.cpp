@@ -10,6 +10,8 @@
 
 #include "character.h"
 
+static constexpr int PickupPhysSize = 14;
+
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), PickupPhysSize)
 {
@@ -72,12 +74,12 @@ void CPickup::Tick()
 			case POWERUP_ARMOR:
 				if(pChr->Team() == TEAM_SUPER)
 					continue;
-				for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
+				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
 				{
-					if(pChr->GetWeaponGot(i))
+					if(pChr->GetWeaponGot(j))
 					{
-						pChr->SetWeaponGot(i, false);
-						pChr->SetWeaponAmmo(i, 0);
+						pChr->SetWeaponGot(j, false);
+						pChr->SetWeaponAmmo(j, 0);
 						Sound = true;
 					}
 				}
@@ -90,6 +92,56 @@ void CPickup::Tick()
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 				}
 				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_SHOTGUN:
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_SHOTGUN))
+				{
+					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
+					pChr->SetWeaponAmmo(WEAPON_SHOTGUN, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_SHOTGUN)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_GRENADE:
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_GRENADE))
+				{
+					pChr->SetWeaponGot(WEAPON_GRENADE, false);
+					pChr->SetWeaponAmmo(WEAPON_GRENADE, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_GRENADE)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_NINJA:
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				pChr->SetNinjaActivationDir(vec2(0, 0));
+				pChr->SetNinjaActivationTick(-500);
+				pChr->SetNinjaCurrentMoveTime(0);
+				break;
+
+			case POWERUP_ARMOR_LASER:
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_LASER))
+				{
+					pChr->SetWeaponGot(WEAPON_LASER, false);
+					pChr->SetWeaponAmmo(WEAPON_LASER, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_LASER)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
 				break;
 
@@ -157,10 +209,10 @@ void CPickup::Snap(int SnappingClient)
 
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
-	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))

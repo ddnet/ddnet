@@ -418,12 +418,12 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		}
 		pSqlServer->BindString(1, pData->m_aMap);
 
-		bool End;
-		if(pSqlServer->Step(&End, pError, ErrorSize))
+		bool End2;
+		if(pSqlServer->Step(&End2, pError, ErrorSize))
 		{
 			return true;
 		}
-		if(!End)
+		if(!End2)
 		{
 			int Points = pSqlServer->GetInt(1);
 			if(pSqlServer->AddPoints(pData->m_aName, Points, pError, ErrorSize))
@@ -591,14 +591,14 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	// check sort method
 	char aBuf[600];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Rank, Time, PercentRank "
+		"SELECT Ranking, Time, PercentRank "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w as PercentRank, Name, MIN(Time) AS Time "
+		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, MIN(Time) AS Time, Name "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
-		"  AND Server LIKE ?"
+		"  AND Server LIKE ? "
 		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  WINDOW w AS (ORDER BY MIN(Time))"
 		") as a "
 		"WHERE Name = ?",
 		pSqlServer->GetPrefix());
@@ -647,7 +647,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(3));
+		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
@@ -693,13 +693,13 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank, PercentRank "
+		"SELECT l.ID, Name, Time, Ranking, PercentRank "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, PERCENT_RANK() OVER w AS PercentRank, ID "
+		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w AS PercentRank, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  WINDOW w AS (ORDER BY Min(Time))"
 		") AS TeamRank INNER JOIN (" // select rank with Name in team
 		"  SELECT ID "
 		"  FROM %s_teamrace "
@@ -728,7 +728,7 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
 		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(100.0 - 100.0 * pSqlServer->GetFloat(5));
+		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(5));
 		CTeamrank Teamrank;
 		if(Teamrank.NextSqlResult(pSqlServer, &End, pError, ErrorSize))
 		{
@@ -779,16 +779,16 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	// check sort method
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Rank, Server "
+		"SELECT Name, Time, Ranking "
 		"FROM ("
-		"  SELECT RANK() OVER w AS Rank, Name, MIN(Time) AS Time, Server "
+		"  SELECT RANK() OVER w AS Ranking, MIN(Time) AS Time, Name "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ? "
 		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  WINDOW w AS (ORDER BY MIN(Time))"
 		") as a "
-		"ORDER BY Rank %s "
+		"ORDER BY Ranking %s "
 		"LIMIT %d, ?",
 		pSqlServer->GetPrefix(),
 		pOrder,
@@ -809,7 +809,6 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 	char aTime[32];
 	bool End = false;
-	bool HasLocal = false;
 
 	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
@@ -821,48 +820,35 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 			"%d. %s Time: %s", Rank, aName, aTime);
 
-		char aRecordServer[6];
-		pSqlServer->GetString(4, aRecordServer, sizeof(aRecordServer));
-
-		HasLocal = HasLocal || str_comp(aRecordServer, pData->m_aServer) == 0;
-
 		Line++;
 	}
 
-	if(!HasLocal)
+	char aServerLike[16];
+	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
+
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
-		char aServerLike[16];
-		str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, aServerLike);
+	pSqlServer->BindInt(3, 3);
 
-		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
-		{
-			return true;
-		}
-		pSqlServer->BindString(1, pData->m_aMap);
-		pSqlServer->BindString(2, aServerLike);
-		pSqlServer->BindInt(3, 3);
+	str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
+		"------------ %s Top ------------", pData->m_aServer);
+	Line++;
 
+	// show top
+	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
+	{
+		char aName[MAX_NAME_LENGTH];
+		pSqlServer->GetString(1, aName, sizeof(aName));
+		float Time = pSqlServer->GetFloat(2);
+		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		int Rank = pSqlServer->GetInt(3);
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
-			"------------ %s Top ------------", pData->m_aServer);
+			"%d. %s Time: %s", Rank, aName, aTime);
 		Line++;
-
-		// show top
-		while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
-		{
-			char aName[MAX_NAME_LENGTH];
-			pSqlServer->GetString(1, aName, sizeof(aName));
-			float Time = pSqlServer->GetFloat(2);
-			str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
-			int Rank = pSqlServer->GetInt(3);
-			str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
-				"%d. %s Time: %s", Rank, aName, aTime);
-			Line++;
-		}
-	}
-	else
-	{
-		str_copy(pResult->m_Data.m_aaMessages[Line], "---------------------------------------",
-			sizeof(pResult->m_Data.m_aaMessages[Line]));
 	}
 
 	return !End;
@@ -881,21 +867,21 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 	char aBuf[512];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Name, Time, Rank, TeamSize "
+		"SELECT Name, Time, Ranking, TeamSize "
 		"FROM (" // limit to 5
-		"  SELECT TeamSize, Rank, ID "
+		"  SELECT TeamSize, Ranking, ID "
 		"  FROM (" // teamrank score board
-		"    SELECT RANK() OVER w AS Rank, ID, COUNT(*) AS Teamsize "
+		"    SELECT RANK() OVER w AS Ranking, COUNT(*) AS Teamsize, ID "
 		"    FROM %s_teamrace "
 		"    WHERE Map = ? "
-		"    GROUP BY Id "
-		"    WINDOW w AS (ORDER BY Time)"
+		"    GROUP BY ID "
+		"    WINDOW w AS (ORDER BY Min(Time))"
 		"  ) as l1 "
-		"  ORDER BY Rank %s "
+		"  ORDER BY Ranking %s "
 		"  LIMIT %d, 5"
 		") as l2 "
 		"INNER JOIN %s_teamrace as r ON l2.ID = r.ID "
-		"ORDER BY Rank %s, r.ID, Name ASC",
+		"ORDER BY Ranking %s, r.ID, Name ASC",
 		pSqlServer->GetPrefix(), pOrder, LimitStart, pSqlServer->GetPrefix(), pOrder);
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -968,13 +954,13 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 	char aBuf[2400];
 
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time, Rank "
+		"SELECT l.ID, Name, Time, Ranking "
 		"FROM (" // teamrank score board
-		"  SELECT RANK() OVER w AS Rank, ID "
+		"  SELECT RANK() OVER w AS Ranking, ID "
 		"  FROM %s_teamrace "
 		"  WHERE Map = ? "
 		"  GROUP BY ID "
-		"  WINDOW w AS (ORDER BY Time)"
+		"  WINDOW w AS (ORDER BY Min(Time))"
 		") AS TeamRank INNER JOIN (" // select rank with Name in team
 		"  SELECT ID "
 		"  FROM %s_teamrace "
@@ -1172,8 +1158,8 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT ("
 		"  SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
-		"    SELECT points FROM %s_points WHERE Name = ?"
-		")) as Rank, Points, Name "
+		"    SELECT Points FROM %s_points WHERE Name = ?"
+		")) as Ranking, Points, Name "
 		"FROM %s_points WHERE Name = ?",
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
@@ -1217,13 +1203,13 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT RANK() OVER (ORDER BY a.Points DESC) as Rank, Points, Name "
+		"SELECT RANK() OVER (ORDER BY a.Points DESC) as Ranking, Points, Name "
 		"FROM ("
 		"  SELECT Points, Name "
 		"  FROM %s_points "
 		"  ORDER BY Points DESC LIMIT ?"
 		") as a "
-		"ORDER BY Rank ASC, Name ASC LIMIT ?, 5",
+		"ORDER BY Ranking ASC, Name ASC LIMIT ?, 5",
 		pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{

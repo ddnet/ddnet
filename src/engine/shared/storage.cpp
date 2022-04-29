@@ -28,10 +28,17 @@ public:
 		m_aUserdir[0] = 0;
 	}
 
-	int Init(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+	int Init(int StorageType, int NumArgs, const char **ppArguments)
 	{
 		// get userdir
-		fs_storage_path(pApplicationName, m_aUserdir, sizeof(m_aUserdir));
+		char aFallbackUserdir[IO_MAX_PATH_LENGTH];
+		fs_storage_path("DDNet", m_aUserdir, sizeof(m_aUserdir));
+		fs_storage_path("Teeworlds", aFallbackUserdir, sizeof(aFallbackUserdir));
+
+		if(!fs_is_dir(m_aUserdir) && fs_is_dir(aFallbackUserdir))
+		{
+			str_copy(m_aUserdir, aFallbackUserdir, sizeof(m_aUserdir));
+		}
 
 		// get datadir
 		FindDatadir(ppArguments[0]);
@@ -53,7 +60,7 @@ public:
 		}
 
 		// add save directories
-		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
+		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			if(StorageType == STORAGETYPE_CLIENT)
@@ -233,7 +240,7 @@ public:
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
 				"/opt/ddnet"};
-			const int DirsCount = sizeof(apDirs) / sizeof(apDirs[0]);
+			const int DirsCount = std::size(apDirs);
 
 			int i;
 			for(i = 0; i < DirsCount; i++)
@@ -282,10 +289,10 @@ public:
 #if defined(CONF_PLATFORM_MACOS)
 					str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
 					str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
-					IOHANDLE File = io_open(aBuf, IOFLAG_READ);
-					if(File)
+					IOHANDLE FileBis = io_open(aBuf, IOFLAG_READ);
+					if(FileBis)
 					{
-						io_close(File);
+						io_close(FileBis);
 						return;
 					}
 					else
@@ -559,10 +566,10 @@ public:
 		return pBuffer;
 	}
 
-	static IStorage *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+	static IStorage *Create(int StorageType, int NumArgs, const char **ppArguments)
 	{
 		CStorage *p = new CStorage();
-		if(p && p->Init(pApplicationName, StorageType, NumArgs, ppArguments))
+		if(p && p->Init(StorageType, NumArgs, ppArguments))
 		{
 			dbg_msg("storage", "initialisation failed");
 			delete p;
@@ -600,9 +607,9 @@ const char *IStorage::FormatTmpPath(char *aBuf, unsigned BufSize, const char *pP
 	return aBuf;
 }
 
-IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+IStorage *CreateStorage(int StorageType, int NumArgs, const char **ppArguments)
 {
-	return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments);
+	return CStorage::Create(StorageType, NumArgs, ppArguments);
 }
 
 IStorage *CreateLocalStorage()

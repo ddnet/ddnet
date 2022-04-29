@@ -125,8 +125,8 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 
 	IDbConnection *m_pConn{GetParam()};
 	char m_aError[256] = {};
-	std::shared_ptr<CScorePlayerResult> pPlayerResult{std::make_shared<CScorePlayerResult>()};
-	CSqlPlayerRequest m_PlayerRequest{pPlayerResult};
+	std::shared_ptr<CScorePlayerResult> m_pPlayerResult{std::make_shared<CScorePlayerResult>()};
+	CSqlPlayerRequest m_PlayerRequest{m_pPlayerResult};
 };
 
 struct SingleScore : public Score
@@ -145,7 +145,7 @@ struct SingleScore : public Score
 TEST_P(SingleScore, Top)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
 			"1. nameless tee Time: 01:40.00",
 			"------------ GER Top ------------"});
@@ -154,41 +154,42 @@ TEST_P(SingleScore, Top)
 TEST_P(SingleScore, Rank)
 {
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER unranked"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER unranked"}, true);
 }
 
 TEST_P(SingleScore, TopServer)
 {
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
 			"1. nameless tee Time: 01:40.00",
-			"---------------------------------------"});
+			"------------ USA Top ------------",
+			"1. nameless tee Time: 01:40.00"});
 }
 
 TEST_P(SingleScore, RankServer)
 {
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
 }
 
 TEST_P(SingleScore, TimesExists)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTimes(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
-	EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[0], "------------- Last Times -------------");
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[0], "------------- Last Times -------------");
 	char aBuf[128];
-	str_copy(aBuf, pPlayerResult->m_Data.m_aaMessages[1], 7);
+	str_copy(aBuf, m_pPlayerResult->m_Data.m_aaMessages[1], 7);
 	EXPECT_STREQ(aBuf, "[USA] ");
 
-	str_copy(aBuf, pPlayerResult->m_Data.m_aaMessages[1] + str_length(pPlayerResult->m_Data.m_aaMessages[1]) - 10, 11);
+	str_copy(aBuf, m_pPlayerResult->m_Data.m_aaMessages[1] + str_length(m_pPlayerResult->m_Data.m_aaMessages[1]) - 10, 11);
 	EXPECT_STREQ(aBuf, ", 01:40.00");
-	EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[2], "----------------------------------------------------");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[2], "----------------------------------------------------");
 	for(int i = 3; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
-		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
 	}
 }
 
@@ -196,7 +197,7 @@ TEST_P(SingleScore, TimesDoesntExist)
 {
 	str_copy(m_PlayerRequest.m_aName, "foo", sizeof(m_PlayerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowTimes(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"There are no times in the specified range"});
+	ExpectLines(m_pPlayerResult, {"There are no times in the specified range"});
 }
 
 struct TeamScore : public Score
@@ -222,7 +223,7 @@ struct TeamScore : public Score
 TEST_P(TeamScore, All)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTeamTop5(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"------- Team Top 5 -------",
 			"1. brainless tee & nameless tee Team Time: 01:40.00",
 			"-------------------------------"});
@@ -232,7 +233,7 @@ TEST_P(TeamScore, PlayerExists)
 {
 	str_copy(m_PlayerRequest.m_aName, "brainless tee", sizeof(m_PlayerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowPlayerTeamTop5(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"------- Team Top 5 -------",
 			"1. brainless tee & nameless tee Team Time: 01:40.00",
 			"-------------------------------"});
@@ -242,7 +243,7 @@ TEST_P(TeamScore, PlayerDoesntExist)
 {
 	str_copy(m_PlayerRequest.m_aName, "foo", sizeof(m_PlayerRequest.m_aMap));
 	ASSERT_FALSE(CScoreWorker::ShowPlayerTeamTop5(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"foo has no team ranks"});
+	ExpectLines(m_pPlayerResult, {"foo has no team ranks"});
 }
 
 struct MapInfo : public Score
@@ -258,11 +259,11 @@ TEST_P(MapInfo, ExactNoFinish)
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
-	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
-	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 0 finishes by 0 tees"));
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(m_pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 0 finishes by 0 tees"));
 	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
-		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
 	}
 }
 
@@ -272,11 +273,11 @@ TEST_P(MapInfo, ExactFinish)
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
-	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
-	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(m_pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
 	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
-		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
 	}
 }
 
@@ -286,11 +287,11 @@ TEST_P(MapInfo, Fuzzy)
 	str_copy(m_PlayerRequest.m_aName, "k3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
-	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
-	EXPECT_THAT(pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(m_pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Kobra 3\" by Zerodin on Novice, ★★★★★, 5 points, released .* ago, 1 finish by 1 tee in 01:40 median"));
 	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
-		EXPECT_STREQ(pPlayerResult->m_Data.m_aaMessages[i], "");
+		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
 	}
 }
 
@@ -298,7 +299,7 @@ TEST_P(MapInfo, DoesntExit)
 {
 	str_copy(m_PlayerRequest.m_aName, "f", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"No map like \"f\" found."});
+	ExpectLines(m_pPlayerResult, {"No map like \"f\" found."});
 }
 
 struct MapVote : public Score
@@ -313,27 +314,27 @@ TEST_P(MapVote, Exact)
 {
 	str_copy(m_PlayerRequest.m_aName, "Kobra 3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapVote(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::MAP_VOTE);
-	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aMap, "Kobra 3");
-	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aReason, "/map");
-	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::MAP_VOTE);
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aMap, "Kobra 3");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aReason, "/map");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
 }
 
 TEST_P(MapVote, Fuzzy)
 {
 	str_copy(m_PlayerRequest.m_aName, "k3", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapVote(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(pPlayerResult->m_MessageKind, CScorePlayerResult::MAP_VOTE);
-	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aMap, "Kobra 3");
-	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aReason, "/map");
-	EXPECT_STREQ(pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::MAP_VOTE);
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aMap, "Kobra 3");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aReason, "/map");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
 }
 
 TEST_P(MapVote, DoesntExist)
 {
 	str_copy(m_PlayerRequest.m_aName, "f", sizeof(m_PlayerRequest.m_aName));
 	ASSERT_FALSE(CScoreWorker::MapVote(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"No map like \"f\" found. Try adding a '%' at the start if you don't know the first character. Example: /map %castle for \"Out of Castle\""});
+	ExpectLines(m_pPlayerResult, {"No map like \"f\" found. Try adding a '%' at the start if you don't know the first character. Example: /map %castle for \"Out of Castle\""});
 }
 
 struct Points : public Score
@@ -349,28 +350,28 @@ struct Points : public Score
 TEST_P(Points, NoPoints)
 {
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"nameless tee has not collected any points so far"});
+	ExpectLines(m_pPlayerResult, {"nameless tee has not collected any points so far"});
 }
 
 TEST_P(Points, NoPointsTop)
 {
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"-------- Top Points --------",
-					   "-------------------------------"});
+	ExpectLines(m_pPlayerResult, {"-------- Top Points --------",
+					     "-------------------------------"});
 }
 
 TEST_P(Points, OnePoints)
 {
 	m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"1. nameless tee Points: 2, requested by brainless tee"}, true);
+	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 2, requested by brainless tee"}, true);
 }
 
 TEST_P(Points, OnePointsTop)
 {
 	m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"-------- Top Points --------",
 			"1. nameless tee Points: 2",
 			"-------------------------------"});
@@ -381,7 +382,7 @@ TEST_P(Points, TwoPoints)
 	m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError));
 	m_pConn->AddPoints("brainless tee", 3, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"2. nameless tee Points: 2, requested by brainless tee"}, true);
+	ExpectLines(m_pPlayerResult, {"2. nameless tee Points: 2, requested by brainless tee"}, true);
 }
 
 TEST_P(Points, TwoPointsTop)
@@ -389,7 +390,7 @@ TEST_P(Points, TwoPointsTop)
 	m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError));
 	m_pConn->AddPoints("brainless tee", 3, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"-------- Top Points --------",
 			"1. brainless tee Points: 3",
 			"2. nameless tee Points: 2",
@@ -402,7 +403,7 @@ TEST_P(Points, EqualPoints)
 	m_pConn->AddPoints("brainless tee", 3, m_aError, sizeof(m_aError));
 	m_pConn->AddPoints("nameless tee", 1, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult, {"1. nameless tee Points: 3, requested by brainless tee"}, true);
+	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 3, requested by brainless tee"}, true);
 }
 
 TEST_P(Points, EqualPointsTop)
@@ -411,7 +412,7 @@ TEST_P(Points, EqualPointsTop)
 	m_pConn->AddPoints("brainless tee", 3, m_aError, sizeof(m_aError));
 	m_pConn->AddPoints("nameless tee", 1, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowTopPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(pPlayerResult,
+	ExpectLines(m_pPlayerResult,
 		{"-------- Top Points --------",
 			"1. brainless tee Points: 3",
 			"1. nameless tee Points: 3",

@@ -46,12 +46,16 @@
 #define PLATFORM_STRING "openbsd"
 #endif
 
-#if(defined(__LINUX__) || defined(__linux__)) && !defined(__ANDROID__)
+#if(defined(__LINUX__) || defined(__linux__) || defined(CONF_WEBASM)) && !defined(__ANDROID__)
 #define CONF_FAMILY_UNIX 1
 #define CONF_FAMILY_STRING "unix"
 #define CONF_PLATFORM_LINUX 1
 #define PLATFORM_STRING "linux"
 #define CONF_BACKEND_OPENGL_ES3 1
+#ifdef CONF_WEBASM
+// GLES only
+#define CONF_BACKEND_OPENGL_ES 1
+#endif
 #endif
 
 #if defined(__ANDROID__)

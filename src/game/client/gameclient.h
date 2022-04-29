@@ -53,6 +53,7 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+#include "components/tooltips.h"
 #include "components/voting.h"
 
 class CGameInfo
@@ -63,6 +64,7 @@ public:
 	bool m_UnlimitedAmmo;
 	bool m_DDRaceRecordMessage;
 	bool m_RaceRecordMessage;
+	bool m_RaceSounds;
 
 	bool m_AllowEyeWheel;
 	bool m_AllowHookColl;
@@ -142,6 +144,8 @@ public:
 
 	CRaceDemo m_RaceDemo;
 	CGhost m_Ghost;
+
+	CTooltips m_Tooltips;
 
 private:
 	class CStack
@@ -228,8 +232,8 @@ public:
 	class IDemoRecorder *DemoRecorder(int Recorder) const { return Client()->DemoRecorder(Recorder); }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
-	class CLayers *Layers() { return &m_Layers; };
-	class CCollision *Collision() { return &m_Collision; };
+	class CLayers *Layers() { return &m_Layers; }
+	class CCollision *Collision() { return &m_Collision; }
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
@@ -438,8 +442,8 @@ public:
 			m_Active = false;
 			m_IngameTicks += Tick - m_JoinTick;
 		};
-		int GetIngameTicks(int Tick) const { return m_IngameTicks + Tick - m_JoinTick; };
-		float GetFPM(int Tick, int TickSpeed) const { return (float)(m_Frags * TickSpeed * 60) / GetIngameTicks(Tick); };
+		int GetIngameTicks(int Tick) const { return m_IngameTicks + Tick - m_JoinTick; }
+		float GetFPM(int Tick, int TickSpeed) const { return (float)(m_Frags * TickSpeed * 60) / GetIngameTicks(Tick); }
 	};
 
 	CClientStats m_aStats[MAX_CLIENTS];
@@ -495,7 +499,7 @@ public:
 	int m_LocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
-	int m_DummyFire;
+	unsigned int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 
 	class CTeamsCore m_Teams;
@@ -588,6 +592,10 @@ public:
 		// pickups
 		IGraphics::CTextureHandle m_SpritePickupHealth;
 		IGraphics::CTextureHandle m_SpritePickupArmor;
+		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
+		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
+		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;

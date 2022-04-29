@@ -26,9 +26,14 @@ class CPlayers : public CComponent
 		const CTeeRenderInfo *pRenderInfo,
 		int ClientID,
 		float Intra = 0.f);
+	void RenderHookCollLine(
+		const CNetObj_Character *pPrevChar,
+		const CNetObj_Character *pPlayerChar,
+		int ClientID,
+		float Intra = 0.f);
+	bool IsPlayerInfoAvailable(int ClientID) const;
 
 	int m_WeaponEmoteQuadContainerIndex;
-	int m_DirectionQuadContainerIndex;
 	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:

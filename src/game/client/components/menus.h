@@ -166,7 +166,9 @@ class CMenus : public CComponent
 						if(pText == NULL)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, -1, AlignVertically);
+						SLabelProperties Props;
+						Props.m_AlignVertically = AlignVertically;
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 					}
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
@@ -203,6 +205,15 @@ class CMenus : public CComponent
 
 	int UiLogicGetCurrentClickedItem();
 
+	/**
+	 * Places and renders a tooltip near pNearRect.
+	 * For now only works correctly with single line tooltips, since Text width calculation gets broken when there are multiple lines.
+	 *
+	 * @param pID The ID of the tooltip. Usually a reference to some g_Config value.
+	 * @param pNearTo Place the tooltip near this rect.
+	 * @param pText The text to display in the tooltip
+	 */
+	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 	// menus_settings_assets.cpp
 public:
 	struct SCustomItem
@@ -241,6 +252,8 @@ protected:
 	sorted_array<SCustomEmoticon> m_EmoticonList;
 	sorted_array<SCustomParticle> m_ParticlesList;
 
+	bool m_IsInit = false;
+
 	static void LoadEntities(struct SCustomEntities *pEntitiesItem, void *pUser);
 	static int EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser);
 
@@ -263,6 +276,7 @@ protected:
 	bool m_MenuActive;
 	bool m_UseMouseButtons;
 	vec2 m_MousePos;
+	bool m_JoinTutorial;
 
 	char m_aNextServer[256];
 
@@ -414,6 +428,8 @@ protected:
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 
+	int64_t m_DemoPopulateStartTime = 0;
+
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
 	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
@@ -517,8 +533,9 @@ public:
 	CMenus();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void RenderLoading();
-	void RenderUpdating(const char *pCaption, int current = 0, int total = 0);
+	void RenderLoading(bool IncreaseCounter, bool RenderLoadingBar = true);
+
+	bool IsInit() { return m_IsInit; }
 
 	bool IsActive() const { return m_MenuActive; }
 	void KillServer();
@@ -617,6 +634,8 @@ public:
 	};
 
 	sorted_array<CGhostItem> m_lGhosts;
+
+	int64_t m_GhostPopulateStartTime = 0;
 
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();

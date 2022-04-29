@@ -307,6 +307,8 @@ private:
 	static void ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnDeep(IConsole::IResult *pResult, void *pUserData);
+	static void ConLiveFreeze(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
@@ -449,9 +451,9 @@ public:
 	int m_VoteVictim;
 	int m_VoteEnforcer;
 
-	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; };
-	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; };
-	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; };
+	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
+	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
+	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientID);
 	static void SendChatResponse(const char *pLine, void *pUser, ColorRGBA PrintColor = {1, 1, 1, 1});

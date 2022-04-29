@@ -50,6 +50,8 @@ class CNamePlates : public CComponent
 
 	void ResetNamePlates();
 
+	int m_DirectionQuadContainerIndex;
+
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;

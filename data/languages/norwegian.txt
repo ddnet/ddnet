@@ -144,9 +144,6 @@ Dynamic Camera
 Emoticon
 == Uttrykksikoner
 
-Enter
-== Enter
-
 Error
 == Feil
 
@@ -666,18 +663,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork er et kooperativt onlinespill der målet er at du og gruppen din skal nå banens målstrek. Som nybegynner anbefales det at du starter på Novice-serverne, som har de letteste banene. Se på serverens ping for å finne en som er nærme deg.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Banene inneholder freeze, som midlertidig gjør at en tee ikke kan bevege seg. Du må samarbeide med andre for å komme gjennom disse partiene.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Scrollehjulet bytter våpen. Hammer (venstre museknapp) kan brukes til å slå andre tees og vekke dem opp fra freeze.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Gripekrok (høyre museknapp) kan brukes til å svinge seg gjennom banen og til å dra andre spillere mot deg.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Viktigst av alt er kommunikasjon: Det fins ingen tutorial, så du er nødt til å snakke (t-knappen) med andre spillere for å lære det grunnleggende og triksene i spillet.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Det anbefales å sjekke innstillingene og justere dem slik det passer deg før du går inn på en server.
 
@@ -893,12 +878,6 @@ may cause delay
 
 Screen
 == Skjerm
-
-Preinit VBO (iGPUs only)
-== Preinit. VBO (kun iGPU)
-
-Multiple texture units (disable for macOS)
-== Multiple texture units (slå av for macOS)
 
 Use high DPI
 == Bruk høy DPI
@@ -1231,7 +1210,16 @@ Play
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR
@@ -1270,6 +1258,12 @@ Settings file
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
 Chat command
 == 
 
@@ -1288,7 +1282,22 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Show client IDs
@@ -1324,6 +1333,18 @@ Tee
 Preview
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Show local player's key presses
 == 
 
@@ -1346,4 +1367,16 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

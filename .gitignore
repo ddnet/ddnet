@@ -35,7 +35,9 @@ install_manifest*.txt
 ninja_package
 pack_*/
 rules.ninja
+SAN.*
 testrunner\[1\]_include.cmake
+vulkan_shaders_sha256.txt
 
 /SDL2.framework
 
@@ -73,7 +75,10 @@ versionsrv
 
 generated
 
+/build*
+
 # IDE project files
+.cache
 .cproject
 .cmake
 .idea
@@ -99,6 +104,7 @@ tags
 *.dtb
 *.dylib
 *.exe
+*.fifo
 *.filters
 *.lnk
 *.log

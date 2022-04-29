@@ -87,15 +87,17 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 		getpeername(fd, (struct sockaddr *)&pss->addr, &addr_size);
 		int orig_port = ntohs(pss->addr.sin_port);
 		pss->send_buffer.Init();
+
 		char addr_str[NETADDR_MAXSTRSIZE];
 		int ip_uint32 = pss->addr.sin_addr.s_addr;
-		str_format(addr_str, sizeof(addr_str), "%d.%d.%d.%d", (ip_uint32)&0xff, (ip_uint32 >> 8) & 0xff, (ip_uint32 >> 16) & 0xff, (ip_uint32 >> 24) & 0xff);
-		dbg_msg("websockets",
-			"connection established with %s:%d",
-			addr_str, orig_port);
-		char buf[100];
-		snprintf(buf, sizeof(buf), "%s:%d", addr_str, orig_port);
-		pss->addr_str = std::string(buf);
+		str_format(addr_str, sizeof(addr_str), "%d.%d.%d.%d:%d", (ip_uint32)&0xff, (ip_uint32 >> 8) & 0xff, (ip_uint32 >> 16) & 0xff, (ip_uint32 >> 24) & 0xff, orig_port);
+
+		dbg_msg("websockets", "connection established with %s", addr_str);
+
+		std::string addr_str_final;
+		addr_str_final.append(addr_str);
+
+		pss->addr_str = addr_str_final;
 		ctx_data->port_map[pss->addr_str] = pss;
 	}
 	break;
@@ -120,13 +122,13 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 		websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.First();
 		if(chunk == NULL)
 			break;
-		int len = chunk->size - chunk->read;
+		int chunk_len = chunk->size - chunk->read;
 		int n =
 			lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read],
 				chunk->size - chunk->read, LWS_WRITE_BINARY);
 		if(n < 0)
 			return 1;
-		if(n < len)
+		if(n < chunk_len)
 		{
 			chunk->read += n;
 			lws_callback_on_writable(wsi);

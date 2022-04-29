@@ -430,7 +430,7 @@ CSaveTeam::~CSaveTeam()
 
 int CSaveTeam::Save(int Team)
 {
-	if(g_Config.m_SvTeam == 3 || (Team > 0 && Team < MAX_CLIENTS))
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team > 0 && Team < MAX_CLIENTS))
 	{
 		CGameTeams *Teams = &(((CGameControllerDDRace *)m_pController)->m_Teams);
 
@@ -517,8 +517,7 @@ void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 
 	pTeams->ChangeTeamState(Team, m_TeamState);
 	pTeams->SetTeamLock(Team, m_TeamLocked);
-	if(m_Practice)
-		pTeams->EnablePractice(Team);
+	pTeams->SetPractice(Team, m_Practice);
 
 	for(int i = m_MembersCount; i-- > 0;)
 	{

@@ -393,6 +393,7 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
+	virtual const char *ServerAddress() const { return m_aServerAddressStr; }
 	virtual const char *MapDownloadName() const { return m_aMapdownloadName; }
 	virtual int MapDownloadAmount() const { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	virtual int MapDownloadTotalsize() const { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
@@ -427,7 +428,7 @@ public:
 	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
-	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideName);
+	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName);
 	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
 	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
 	const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex);
@@ -493,6 +494,8 @@ public:
 	virtual void Notify(const char *pTitle, const char *pMessage);
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
+	virtual void UpdateAndSwap();
+
 	// DDRace
 
 	virtual void GenerateTimeoutSeed();
@@ -512,7 +515,7 @@ public:
 	virtual void DemoSliceBegin();
 	virtual void DemoSliceEnd();
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser);
-	virtual void SaveReplay(int Length);
+	virtual void SaveReplay(int Length, const char *pFilename = "");
 
 	virtual bool EditorHasUnsavedData() const { return m_pEditor->HasUnsavedData(); }
 
@@ -522,6 +525,7 @@ public:
 
 	virtual SWarning *GetCurWarning();
 	virtual CChecksumData *ChecksumData() { return &m_Checksum.m_Data; }
+	virtual bool InfoTaskRunning() { return m_pDDNetInfoTask != nullptr; }
 };
 
 #endif

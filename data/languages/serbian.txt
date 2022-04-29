@@ -145,9 +145,6 @@ Dynamic Camera
 Emoticon
 == Emotikon
 
-Enter
-== Započni
-
 Error
 == Greška
 
@@ -644,6 +641,9 @@ Saving ddnet-settings.cfg failed
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Warning
 == 
 
@@ -686,18 +686,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
@@ -723,6 +711,12 @@ Destination file already exist
 == 
 
 Speed
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Show DDNet map finishes in server browser
@@ -911,6 +905,9 @@ Max CSVs
 Dummy settings
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
 == 
 
@@ -921,6 +918,9 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1004,16 +1004,25 @@ may cause delay
 Screen
 == 
 
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
+Allows maps to render with more detail
 == 
 
 Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable game sounds
@@ -1103,6 +1112,9 @@ Laser Inner Color
 Hookline
 == 
 
+Size
+== 
+
 No hit
 == 
 
@@ -1142,10 +1154,13 @@ Preview
 Save the best demo of each race
 == 
 
+Enable replays
+== 
+
 Default length: %d
 == 
 
-Enable replays
+When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Show ghost
@@ -1160,10 +1175,10 @@ Gameplay
 Overlay entities
 == 
 
-Size
+Show text entities
 == 
 
-Show text entities
+Opacity
 == 
 
 Show others (own team only)
@@ -1172,7 +1187,13 @@ Show others (own team only)
 Show quads
 == 
 
+Quads are used for background decoration
+== 
+
 AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 AntiPing: predict other players
@@ -1262,6 +1283,12 @@ https://ddnet.tw/discord
 https://wiki.ddnet.tw/
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Website
 == 
 
@@ -1294,6 +1321,12 @@ Update failed! Check log...
 == 
 
 Restart
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

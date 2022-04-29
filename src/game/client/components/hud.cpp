@@ -125,7 +125,7 @@ void CHud::RenderGameTimer()
 		else
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
 
-		str_time(Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
+		str_time((int64_t)Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
 		float w = TextRender()->TextWidth(0, FontSize,
 			Time >= 3600 * 24 ? "00d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
@@ -553,9 +553,13 @@ void CHud::RenderTextInfo()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_TextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
+		auto OldFlags = TextRender()->GetRenderFlags();
+		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
 		if(m_FPSTextContainerIndex == -1)
 			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
-		TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
+		else
+			TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
+		TextRender()->SetRenderFlags(OldFlags);
 		STextRenderColor TColor;
 		TColor.m_R = 1.f;
 		TColor.m_G = 1.f;

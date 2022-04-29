@@ -142,10 +142,13 @@ public:
 	virtual void LoadFont() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
+	virtual void UpdateAndSwap() = 0;
+
 	// networking
 	virtual void EnterGame(int Conn) = 0;
 
 	//
+	virtual const char *ServerAddress() const = 0;
 	virtual const char *MapDownloadName() const = 0;
 	virtual int MapDownloadAmount() const = 0;
 	virtual int MapDownloadTotalsize() const = 0;
@@ -233,6 +236,7 @@ public:
 
 	virtual SWarning *GetCurWarning() = 0;
 	virtual CChecksumData *ChecksumData() = 0;
+	virtual bool InfoTaskRunning() = 0;
 };
 
 class IGameClient : public IInterface

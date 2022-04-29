@@ -4,6 +4,7 @@
 #modified by:
 #	Boti.
 #	Cellegen
+#       bencie
 ##### /authors #####
 
 ##### translated strings #####
@@ -139,9 +140,6 @@ Dynamic Camera
 
 Emoticon
 == Hangulatjel
-
-Enter
-== Belépés
 
 Error
 == Hiba
@@ -493,7 +491,7 @@ Yes
 == Igen
 
 You must restart the game for all settings to take effect.
-== Újra kell indítani a játékot, a beállítások érvénybe lépéséhez.
+== Újra kell indítania a játékot ahhoz, hogy minden beállítás érvénybe lépjen.
 
 New name:
 == Új Név:
@@ -523,7 +521,7 @@ Created:
 == Készült:
 
 Max Screenshots
-== Maximum Fotó
+== Maximum Fotók
 
 Length:
 == Hossza:
@@ -541,7 +539,7 @@ Info
 == Infó
 
 Miscellaneous
-== Vegyes
+== Egyéb
 
 Record demo
 == Demó felvétele
@@ -835,7 +833,7 @@ Clan plates size
 == Klán felirat mérete
 
 Update now
-== frissíts most
+== Frissíts most
 
 Show clan above name plates
 == Klán mutatása a nevek fölött
@@ -888,17 +886,11 @@ Deactivate
 Welcome to DDNet
 == Üdvözlet a DDNet-en
 
-Preinit VBO (iGPUs only)
-== VBO használata (csak iGPU)
-
 Threaded sound loading
 == Csavarmenetes hang betöltése
 
 Activate
 == Aktiválás
-
-Multiple texture units (disable for macOS)
-== Több textúra egységek (kapcsolja ki macOS esetén)
 
 UI mouse s.
 == UI egér sebesség
@@ -922,7 +914,7 @@ Show DDNet map finishes in server browser
 == Mutassa a befejezett pályákat a keresőben
 
 transmits your player name to info2.ddnet.tw
-== Keress rá a játékosnevedre az info2.ddnet.tw oldalon
+== továbbítja a játékosnevedet az info2.ddnet.tw oldalra
 
 Reload
 == újratöltés
@@ -1041,18 +1033,6 @@ Markers:
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == A DDraceNetwork együttműködésen alapuló online játékként tekinthető, ahol a cél az, hogy te és egy csapat Tee elérje a célvonalat. Ha újonc vagy, a kezdő (Novice) szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. A lehető legkisebb ping választása alapján válassz egy szervert.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== A pályákon fagyasztó részeket találtok, melyek ideiglenesen blokkolják a játékos mozgását. Együtt kell dolgoznod a pályarészekkel az átjutáshoz.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== A görgő megváltoztatja a fegyvereket. A kalapács (bal egérgomb) segítségével más Játékosokat megüthetsz és ütésekkel kiolvadhatnak a fagyásból.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== A horoggal (jobb egérgomb) megkapaszkodhatsz néhány platformon és más Játékosokat is megragadhatsz vele.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== A legfontosabb kulcs a sikerhez: Nincs oktatóprogram, így mindenki magától tanulja meg más játékosok által. (T gombbal tudsz Chattelni)
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Ajánlott, hogy ellenőrizd a beállításokat, hogy a kedvedhez igazítsd őket, mielőtt csatlakoznál egy szerverhez. (Tipp: szűrők)
 
@@ -1084,10 +1064,10 @@ Length
 == Hossz
 
 Are you sure that you want to disconnect your dummy?
-== Biztos, hogy kiakarod léptetni a dummy-d?
+== Biztos, hogy kiakarod léptetni a másolatod?
 
 Saving ddnet-settings.cfg failed
-== nem sikerült elmenteni ddnet-settings.cfg fájlt
+== Nem sikerült elmenteni ddnet-settings.cfg fájlt
 
 Warning
 == Figyelmeztetés
@@ -1135,7 +1115,7 @@ Smooth Dynamic Camera
 == Egyenletes dinamikus kamera
 
 Skip the main menu
-== Főmenű kihagyása
+== Főmenü kihagyása
 
 Themes directory
 == Témák Helye
@@ -1159,7 +1139,7 @@ Chat sound volume
 == Chat Hangerő
 
 Background music volume
-== Háttér Zene hangerő
+== Háttérzene hangerő
 
 Assets
 == Kinézet
@@ -1201,7 +1181,7 @@ Run server
 == Szerver indítása
 
 Server executable not found, can't run server
-== nem sikerült elindítani a szervert
+== Nem sikerült elindítani a szervert
 
 Editor
 == Szerkesztő
@@ -1226,7 +1206,7 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 == A Struktúra Szélessége %s nem osztható %d al, vagy a magasság nem osztható %d al, ami vizuális hibákhoz vezethet.
 
 Getting server list from master server
-== Szerver Lista Lekérése
+== Szerverlista lekérése
 
 Leak IP
 == IP Mutatása
@@ -1245,9 +1225,6 @@ Windowed borderless
 
 Desktop fullscreen
 == Asztalos Teljesképernyő
-
-Use modern OpenGL
-== Modern OpenGL Használata
 
 Show client IDs
 == Kliens ID-k Mutatása
@@ -1292,7 +1269,7 @@ ASI
 == ÁZSIA
 
 AUS
-== AUSZTRIA
+== AUSZTRÁLIA
 
 EUR
 == EURÓPA
@@ -1330,17 +1307,74 @@ https://ddnet.tw/discord
 https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat.
+
+Join Tutorial Server
+== Belépés a Bemutató Szerverre
+
+Skip Tutorial
+== Bemutató átugrása
+
 Settings file
-== 
+== Beállítások fájl
 
 Config directory
-== 
+== Konfigurációs fájl helye
 
 Windowed fullscreen
-== 
+== Ablakos Teljesképernyő
 
 Run on join
-== 
+== Futtatás belépéskor
 
 Chat command (e.g. showall 1)
+== Chat parancs (például showall 1)
+
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

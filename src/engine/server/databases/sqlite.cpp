@@ -20,8 +20,8 @@ public:
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
 	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
 	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
-	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
-	virtual const char *Random() const { return "RANDOM()"; };
+	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; }
+	virtual const char *Random() const { return "RANDOM()"; }
 	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
 	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
 	// > For compatibility, if there exist columns named "true" or "false", then
@@ -230,7 +230,11 @@ extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak)); //
 
 void CSqliteConnection::Print()
 {
-	if(m_pStmt != nullptr && sqlite3_expanded_sql != nullptr)
+	if(m_pStmt != nullptr
+#if defined(__GNUC__) && !defined(__MINGW32__)
+		&& sqlite3_expanded_sql != nullptr
+#endif
+	)
 	{
 		char *pExpandedStmt = sqlite3_expanded_sql(m_pStmt);
 		dbg_msg("sql", "SQLite statement: %s", pExpandedStmt);

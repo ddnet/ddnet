@@ -12,6 +12,7 @@
 
 #include <base/system.h>
 
+#include <engine/client/backend/backend_base.h>
 #include <engine/client/backend_sdl.h>
 
 class CGLSLProgram;
@@ -28,7 +29,7 @@ class CGLSLSpriteMultipleProgram;
 #endif
 
 // takes care of opengl related rendering
-class CCommandProcessorFragment_OpenGL : public CCommandProcessorFragment_OpenGLBase
+class CCommandProcessorFragment_OpenGL : public CCommandProcessorFragment_GLBase
 {
 protected:
 	struct CTexture
@@ -39,9 +40,9 @@ protected:
 		}
 
 		TWGLuint m_Tex;
-		TWGLuint m_Tex2DArray; //or 3D texture as fallback
+		TWGLuint m_Tex2DArray; // or 3D texture as fallback
 		TWGLuint m_Sampler;
-		TWGLuint m_Sampler2DArray; //or 3D texture as fallback
+		TWGLuint m_Sampler2DArray; // or 3D texture as fallback
 		int m_LastWrapMode;
 
 		int m_MemSize;
@@ -53,7 +54,10 @@ protected:
 		float m_ResizeHeight;
 	};
 	std::vector<CTexture> m_Textures;
-	std::atomic<int> *m_pTextureMemoryUsage;
+	std::atomic<uint64_t> *m_pTextureMemoryUsage;
+
+	uint32_t m_CanvasWidth = 0;
+	uint32_t m_CanvasHeight = 0;
 
 	TWGLint m_MaxTexSize;
 
@@ -65,7 +69,7 @@ protected:
 	bool m_HasNPOTTextures;
 
 	bool m_HasShaders;
-	int m_LastBlendMode; //avoid all possible opengl state changes
+	int m_LastBlendMode; // avoid all possible opengl state changes
 	bool m_LastClipEnable;
 
 	int m_OpenGLTextureLodBIAS;
@@ -73,7 +77,6 @@ protected:
 	bool m_IsOpenGLES;
 
 	bool IsTexturedState(const CCommandBuffer::SState &State);
-	static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
 
 	bool InitOpenGL(const SCommand_Init *pCommand);
 
@@ -81,19 +84,26 @@ protected:
 	virtual bool IsNewApi() { return false; }
 	void DestroyTexture(int Slot);
 
+	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData);
+
 	static int TexFormatToOpenGLFormat(int TexFormat);
-	static int TexFormatToImageColorChannelCount(int TexFormat);
-	static void *Resize(int Width, int Height, int NewWidth, int NewHeight, int Format, const unsigned char *pData);
+	static size_t GLFormatToImageColorChannelCount(int GLFormat);
+
+	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData);
+	void TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData);
 
 	virtual bool Cmd_Init(const SCommand_Init *pCommand);
 	virtual void Cmd_Shutdown(const SCommand_Shutdown *pCommand) {}
 	virtual void Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand);
 	virtual void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand);
 	virtual void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand);
+	virtual void Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand);
+	virtual void Cmd_TextTextures_Destroy(const CCommandBuffer::SCommand_TextTextures_Destroy *pCommand);
+	virtual void Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand);
 	virtual void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand);
 	virtual void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand);
 	virtual void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderTex3D"); }
-	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_Screenshot *pCommand);
+	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand);
 
 	virtual void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand);
 	virtual void Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand);
@@ -114,7 +124,6 @@ protected:
 	virtual void Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderBorderTileLine"); }
 	virtual void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadLayer"); }
 	virtual void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderText"); }
-	virtual void Cmd_RenderTextStream(const CCommandBuffer::SCommand_RenderTextStream *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderTextStream"); }
 	virtual void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainer"); }
 	virtual void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainerEx"); }
 	virtual void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainerAsSpriteMultiple"); }
@@ -130,7 +139,6 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 {
 	struct SBufferContainer
 	{
-		SBufferContainer() {}
 		SBufferContainerInfo m_ContainerInfo;
 	};
 	std::vector<SBufferContainer> m_BufferContainers;
@@ -169,6 +177,7 @@ protected:
 
 #ifndef BACKEND_GL_MODERN_API
 	bool Cmd_Init(const SCommand_Init *pCommand) override;
+	void Cmd_Shutdown(const SCommand_Shutdown *pCommand) override;
 
 	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
 
@@ -202,7 +211,7 @@ protected:
 		int m_TextureSlot;
 		bool m_Is2DArray;
 	};
-	std::vector<STextureBound> m_TextureSlotBoundToUnit; //the texture index generated by loadtextureraw is stored in an index calculated by max texture units
+	std::vector<STextureBound> m_TextureSlotBoundToUnit; // the texture index generated by loadtextureraw is stored in an index calculated by max texture units
 
 	bool IsAndUpdateTextureSlotBound(int IDX, int Slot, bool Is2DArray = false);
 
