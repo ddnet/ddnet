@@ -10,6 +10,10 @@
 #include <memory>
 #include <vector>
 
+#ifndef LIBMARIADB
+typedef bool my_bool;
+#endif
+
 enum
 {
 	MYSQLSTATE_UNINITIALIZED,

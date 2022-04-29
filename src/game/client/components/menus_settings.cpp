@@ -36,6 +36,7 @@
 #include <vector>
 
 #include <array>
+#include <numeric>
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -531,7 +532,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings."));
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings"));
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -639,7 +640,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server."));
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
 		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
 	}
 
@@ -1212,7 +1213,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_FontSizeResList = 10.0f;
 	int OldSelected = -1;
 	{
-		int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
+		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
 	}
 
@@ -1233,7 +1234,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&s_aModes[i], OldSelected == i);
 		if(Item.m_Visible)
 		{
-			int G = gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
+			int G = std::gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
 			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, sc_FontSizeResList, TEXTALIGN_LEFT);
 		}
@@ -1347,7 +1348,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail"));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
@@ -2723,7 +2724,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time"));
 
 	if(g_Config.m_ClRaceGhost)
 	{
@@ -2812,7 +2813,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency"));
 
 	if(g_Config.m_ClAntiPing)
 	{
