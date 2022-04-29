@@ -1197,7 +1197,13 @@ Config directory
 Themes directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1222,6 +1228,9 @@ Windowed fullscreen
 == 
 
 Desktop fullscreen
+== 
+
+Allows maps to render with more detail
 == 
 
 Renderer
@@ -1285,6 +1294,18 @@ Use old chat style
 == 
 
 Preview
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show local player's key presses
@@ -1355,4 +1376,10 @@ Editor
 
 [Start menu]
 Play
+== 
+
+Super
+== 
+
+Team %d
 == 

@@ -402,6 +402,22 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 				return "BULLET: Bounces off the walls without explosion. Touching the bullet works like FREEZE tile (freezes for 3 seconds by default).";
 			break;
+		case ENTITY_OFFSET + ENTITY_ARMOR_SHOTGUN:
+			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+				return "SHOTGUN SHIELD: Takes shotgun away.";
+			break;
+		case ENTITY_OFFSET + ENTITY_ARMOR_GRENADE:
+			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+				return "GRENADE SHIELD: Takes grenade away.";
+			break;
+		case ENTITY_OFFSET + ENTITY_ARMOR_NINJA:
+			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+				return "NINJA SHIELD: Takes ninja away.";
+			break;
+		case ENTITY_OFFSET + ENTITY_ARMOR_LASER:
+			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
+				return "LASER SHIELD: Takes laser away.";
+			break;
 		case ENTITY_OFFSET + ENTITY_DRAGGER_WEAK:
 			if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 				return "DRAGGING LASER: Grabs and attracts the closest tee to it. Can't reach tees through walls and LASER BLOCKER. Weak.";

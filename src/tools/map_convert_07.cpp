@@ -138,7 +138,7 @@ int main(int argc, const char **argv)
 	cmdline_fix(&argc, &argv);
 	dbg_logger_stdout();
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 
 	if(argc < 2 || argc > 3)
 	{

@@ -1367,3 +1367,30 @@ Tutorial
 
 Can't find a Tutorial server
 == Não foi possível encontrar o servidor de tutorial
+
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
+Allows maps to render with more detail
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Super
+== 
+
+Team %d
+== 

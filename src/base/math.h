@@ -3,19 +3,11 @@
 #ifndef BASE_MATH_H
 #define BASE_MATH_H
 
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 
-template<typename T>
-constexpr inline T clamp(T val, T min, T max)
-{
-	return val < min ? min : (val > max ? max : val);
-}
-
-constexpr inline float sign(float f)
-{
-	return f < 0.0f ? -1.0f : 1.0f;
-}
+using std::clamp;
 
 constexpr inline int round_to_int(float f)
 {
@@ -63,17 +55,6 @@ constexpr inline int i2fx(int v)
 constexpr inline int fx2i(int v)
 {
 	return v / fxpscale;
-}
-
-inline int gcd(int a, int b)
-{
-	while(b != 0)
-	{
-		int c = a % b;
-		a = b;
-		b = c;
-	}
-	return a;
 }
 
 class fxp

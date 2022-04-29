@@ -2355,14 +2355,23 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 #if defined(CONF_PLATFORM_HAIKU)
 	str_format(path, max, "%s/config/settings/%s", home, appname);
-	return 0;
-#endif
-
-#if defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS)
 	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
-	str_format(path, max, "%s/.%s", home, appname);
-	for(int i = str_length(home) + 2; path[i]; i++)
+	if(str_comp(appname, "Teeworlds") == 0)
+	{
+		// fallback for old directory for Teeworlds compatibility
+		str_format(path, max, "%s/.%s", home, appname);
+	}
+	else
+	{
+		char *data_home = getenv("XDG_DATA_HOME");
+		if(data_home)
+			str_format(path, max, "%s/%s", data_home, appname);
+		else
+			str_format(path, max, "%s/.local/share/%s", home, appname);
+	}
+	for(int i = str_length(path) - str_length(appname); path[i]; i++)
 		path[i] = tolower((unsigned char)path[i]);
 #endif
 

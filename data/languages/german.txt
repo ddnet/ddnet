@@ -1366,3 +1366,30 @@ Tutorial
 
 Can't find a Tutorial server
 == Tutorial-Server kann nicht gefunden werden
+
+Toggle to edit your dummy settings
+== Umschalten um Dummy-Einstellungen zu bearbeiten
+
+Choose default eyes when joining a server
+== Standard-Augen beim Betreten eines Servers auswählen
+
+Allows maps to render with more detail
+== Erlaubt es Karten mit mehr Detail zu rendern
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Wenn du die Startlinie überschreitest, wird ein Geist-Tee mit den Bewegungen deiner besten Zeit gezeigt
+
+Opacity
+== Deckkraft
+
+Quads are used for background decoration
+== Quads werden als Hintergrund-Dekoration benutzt
+
+Tries to predict other entities to give a feel of low latency
+== Versucht das Verhalten andere Entitäten vorherzusagen um das Gefühl einer niederigeren Latenz zu geben
+
+Super
+== Super
+
+Team %d
+== Team %d

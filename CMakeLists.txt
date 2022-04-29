@@ -2727,6 +2727,8 @@ set(CPACK_GEN_FILES
 
 if(TARGET_OS STREQUAL "windows")
   list(APPEND CPACK_FILES other/config_directory.bat)
+else()
+  list(APPEND CPACK_FILES other/config_directory.sh)
 endif()
 
 if(NOT DEV)
