@@ -872,33 +872,41 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 		return;
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	const int PlayerID = pPlayer->GetCID();
+	const int TargetPlayerID = pTargetPlayer->GetCID();
+	for(CCharacter *pChr = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChr != nullptr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		CCharacterCore *pCore = pChr->Core();
+		if(pCore->m_HookedPlayer == PlayerID)
 		{
-			GameServer()->m_apPlayers[i]->GetCharacter()->ResetHook();
-			GameServer()->m_World.ReleaseHooked(i);
+			pCore->m_HookedPlayer = TargetPlayerID;
+		}
+		else if(pCore->m_HookedPlayer == TargetPlayerID)
+		{
+			pCore->m_HookedPlayer = PlayerID;
 		}
 	}
 
+	CCharacter *pPlayerChar = pPlayer->GetCharacter();
+	CCharacter *pTargetPlayerChar = pTargetPlayer->GetCharacter();
 	CSaveTee PrimarySavedTee;
-	PrimarySavedTee.Save(pPlayer->GetCharacter());
+	PrimarySavedTee.Save(pPlayerChar);
 
 	CSaveTee SecondarySavedTee;
-	SecondarySavedTee.Save(pTargetPlayer->GetCharacter());
+	SecondarySavedTee.Save(pTargetPlayerChar);
 
-	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
-	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
+	PrimarySavedTee.Load(pTargetPlayerChar, Team, true);
+	SecondarySavedTee.Load(pPlayerChar, Team, true);
 
-	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
-	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
-	swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+	swap(m_TeeStarted[PlayerID], m_TeeStarted[TargetPlayerID]);
+	swap(m_TeeFinished[PlayerID], m_TeeFinished[TargetPlayerID]);
+	swap(pPlayerChar->GetRescueTeeRef(), pTargetPlayerChar->GetRescueTeeRef());
 
-	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
+	GameServer()->m_World.SwapClients(PlayerID, TargetPlayerID);
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
-		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
+		Server()->ClientName(PlayerID), Server()->ClientName(TargetPlayerID));
 
 	GameServer()->SendChatTeam(Team, aBuf);
 }

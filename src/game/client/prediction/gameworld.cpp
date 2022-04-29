@@ -271,13 +271,13 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		CCharacterCore *Core = pChr->Core();
-		if(Core->m_HookedPlayer == ClientID)
+		CCharacterCore *pCore = pChr->Core();
+		if(pCore->m_HookedPlayer == ClientID)
 		{
-			Core->m_HookedPlayer = -1;
-			Core->m_HookState = HOOK_RETRACTED;
-			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			Core->m_HookState = HOOK_RETRACTED;
+			pCore->m_HookedPlayer = -1;
+			pCore->m_HookState = HOOK_RETRACTED;
+			pCore->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			pCore->m_HookState = HOOK_RETRACTED;
 		}
 	}
 }
