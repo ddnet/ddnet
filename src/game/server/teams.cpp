@@ -822,17 +822,33 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 		return;
 	}
 
-	//Message for the the team
+	// Notification for the swap initiator
+	str_format(aBuf, sizeof(aBuf),
+		"You have requested to swap with %s.",
+		Server()->ClientName(pTargetPlayer->GetCID()));
+	GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+
+	// Notification to the target swap player
+	str_format(aBuf, sizeof(aBuf),
+		"%s has requested to swap with you. To complete the swap process please wait %d seconds and then type /swap %s.",
+		Server()->ClientName(pPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
+	GameServer()->SendChatTarget(pTargetPlayer->GetCID(), aBuf);
+
+	// Notification for the remaining team
 	str_format(aBuf, sizeof(aBuf),
 		"%s has requested to swap with %s.",
 		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
-	GameServer()->SendChatTeam(Team, aBuf);
-
-	// Message to the target swap player
-	str_format(aBuf, sizeof(aBuf),
-		"To complete the swap process please wait %d seconds and then type /swap %s.",
-		g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
-	GameServer()->SendChatTarget(pTargetPlayer->GetCID(), aBuf);
+	// Do not send the team notification for team 0
+	if(Team != 0)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Core.Team(i) == Team && i != pTargetPlayer->GetCID() && i != pPlayer->GetCID())
+			{
+				GameServer()->SendChatTarget(i, aBuf);
+			}
+		}
+	}
 
 	pPlayer->m_SwapTargetsClientID = pTargetPlayer->GetCID();
 	m_LastSwap[Team] = Server()->Tick();
