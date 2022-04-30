@@ -125,7 +125,7 @@ void CTerminalUI::RenderPlayers(int offX, int offY, int w, int h)
 					pPlayerSkin = "ø";
 				if(PlayerX > mx - 16 && PlayerX < mx + 16)
 					if(PlayerY > my - 16 && PlayerY < my + 16)
-						mvwprintw(g_pGameWindow, offY + renderY, offX + renderX, pPlayerSkin);
+						mvwprintw(g_pGameWindow, offY + renderY, offX + renderX, "%s", pPlayerSkin);
 			}
 		}
 	}
