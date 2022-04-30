@@ -8,11 +8,14 @@ class CEncryption : public IEncryption
 public:
 	CEncryption() = default;
 
-	virtual std::pair<CKeyPair, bool> CreateKeyPair()
+	virtual std::optional<CKeyPair> CreateKeyPair()
 	{
 		CKeyPair KeyPair;
-		bool Success = crypto_box_keypair(KeyPair.m_aPublicKey, KeyPair.m_aSecretKey) == 0;
-		return std::make_pair(KeyPair, Success);
+		if(crypto_box_keypair(KeyPair.m_aPublicKey, KeyPair.m_aSecretKey) == 0)
+		{
+			return KeyPair;
+		}
+		return std::nullopt;
 	}
 
 	virtual void FillNonce(unsigned char *pNonce, size_t NonceSize)

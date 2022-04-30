@@ -4,7 +4,7 @@
 #include "kernel.h"
 #include "sodium.h"
 #include <sodium/crypto_box.h>
-#include <tuple>
+#include <optional>
 
 /*
 	Key exchange: X25519
@@ -40,14 +40,14 @@ public:
 	 * 
 	 * @todo Use std::optional when available.
 	 */
-	virtual std::pair<CKeyPair, bool> CreateKeyPair() = 0;
+	virtual std::optional<CKeyPair> CreateKeyPair() = 0;
 
 	/**
 	 * Fills the passed buffer with a nonce.
 	 * 
 	 * Should be atleast of length ENCRYPTION_NONCE_BYTES.
 	 * 
-	 * The nonce doesn't have to be confidential, but it should be used with just one invocation of FillNonce for a particular pair of public and secret keys.
+	 * The nonce doesn't have to be confidential, but it should be used with just one invocation of EncryptMessage for a particular pair of public and secret keys.
 	 */
 	virtual void FillNonce(unsigned char pNonce[ENCRYPTION_NONCE_BYTES], size_t NonceSize) = 0;
 
