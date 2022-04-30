@@ -75,7 +75,6 @@ class CChillConsole : public CComponent
 
 	CInstance *CurrentConsole();
 	float TimeNow();
-	int m_PrintCBIndex;
 
 	int m_ConsoleType;
 	int m_ConsoleState;
