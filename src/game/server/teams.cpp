@@ -816,18 +816,23 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 	if(pPlayer->m_SwapTargetsClientID == pTargetPlayer->GetCID())
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"%s has already requested to swap with %s.",
-			Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
+			"You have already requested to swap with %s.", Server()->ClientName(pTargetPlayer->GetCID()));
 
-		GameServer()->SendChatTeam(Team, aBuf);
+		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 		return;
 	}
 
+	//Message for the the team
 	str_format(aBuf, sizeof(aBuf),
-		"%s has requested to swap with %s. Please wait %d seconds then type /swap %s.",
-		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
-
+		"%s has requested to swap with %s.",
+		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
 	GameServer()->SendChatTeam(Team, aBuf);
+
+	// Message to the target swap player
+	str_format(aBuf, sizeof(aBuf),
+		"To complete the swap process please wait %d seconds and then type /swap %s.",
+		g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
+	GameServer()->SendChatTarget(pTargetPlayer->GetCID(), aBuf);
 
 	pPlayer->m_SwapTargetsClientID = pTargetPlayer->GetCID();
 	m_LastSwap[Team] = Server()->Tick();
@@ -847,7 +852,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 			"You have to wait %d seconds until you can swap.",
 			g_Config.m_SvSaveSwapGamesDelay - Since);
 
-		GameServer()->SendChatTeam(Team, aBuf);
+		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 
 		return;
 	}
@@ -867,11 +872,10 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 			"Your swap request timed out %d seconds ago. Use /swap again to re-initiate it.",
 			Since - g_Config.m_SvSwapTimeout);
 
-		GameServer()->SendChatTeam(Team, aBuf);
+		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 
 		return;
 	}
-
 
 	CSaveTee PrimarySavedTee;
 	PrimarySavedTee.Save(pPlayer->GetCharacter());
