@@ -869,16 +869,6 @@ void CChillConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserDa
 		pConsole->m_BacklogActPage = 0;
 }
 
-void CChillConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 1)
-	{
-		CChillConsole *pThis = static_cast<CChillConsole *>(pUserData);
-		pThis->Console()->SetPrintOutputLevel(pThis->m_PrintCBIndex, pResult->GetInteger(0));
-	}
-}
-
 void CChillConsole::RequireUsername(bool UsernameReq)
 {
 	if((m_RemoteConsole.m_UsernameReq = UsernameReq))
@@ -904,9 +894,6 @@ void CChillConsole::OnConsoleInit()
 
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	//
-	m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_ConsoleOutputLevel, ClientConsolePrintCallback, this);
-
 	Console()->Register("toggle_local_chill_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_chill_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
 	Console()->Register("clear_local_chill_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
@@ -916,8 +903,6 @@ void CChillConsole::OnConsoleInit()
 
 	Console()->Register("console_page_up", "", CFGFLAG_CLIENT, ConConsolePageUp, this, "Previous page in console");
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
-
-	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 }
 
 void CChillConsole::OnStateChange(int NewState, int OldState)
