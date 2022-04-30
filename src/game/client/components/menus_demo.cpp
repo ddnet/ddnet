@@ -80,8 +80,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		CUIRect Screen = *UI()->Screen();
 		CUIRect Box, Part, Part2;
 		Box = Screen;
-		Box.VMargin(150.0f / UI()->Scale(), &Box);
-		Box.HMargin(150.0f / UI()->Scale(), &Box);
+		Box.Margin(150.0f / UI()->Scale(), &Box);
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, ColorRGBA(0, 0, 0, 0.5f), CUI::CORNER_ALL, 15.0f);
