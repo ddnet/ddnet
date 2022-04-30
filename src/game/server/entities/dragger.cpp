@@ -211,7 +211,7 @@ void CDragger::Snap(int SnappingClient)
 	for(int &SoloID : m_SoloIDs)
 	{
 		if(SoloID == -1)
-			break;
+			continue;
 
 		Server()->SnapFreeID(SoloID);
 		SoloID = -1;
