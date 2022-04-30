@@ -223,7 +223,6 @@ void CCharacterCore::Tick(bool UseInput)
 	}
 	else if(m_HookState == HOOK_RETRACT_END)
 	{
-		m_HookState = HOOK_RETRACTED;
 		m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 		m_HookState = HOOK_RETRACTED;
 	}
