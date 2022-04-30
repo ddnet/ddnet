@@ -3,6 +3,7 @@
 #include "gameclient.h"
 
 class IKernel *CComponent::Kernel() const { return m_pClient->Kernel(); }
+class IEngine *CComponent::Engine() const { return m_pClient->Engine(); }
 class IGraphics *CComponent::Graphics() const { return m_pClient->Graphics(); }
 class ITextRender *CComponent::TextRender() const { return m_pClient->TextRender(); }
 class IInput *CComponent::Input() const { return m_pClient->Input(); }

@@ -36,6 +36,7 @@ protected:
 	 * Get the kernel interface.
 	 */
 	class IKernel *Kernel() const;
+	class IEngine *Engine() const;
 	/**
 	 * Get the graphics interface.
 	 */

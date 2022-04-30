@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <engine/shared/image_manipulation.h>
@@ -74,7 +75,7 @@ int DilateFile(const char *pFilename)
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 	if(argc == 1)
 	{
 		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);

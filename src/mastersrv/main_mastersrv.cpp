@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/logger.h>
 #include <base/system.h>
 
 #include <engine/config.h>
@@ -326,7 +327,7 @@ int main(int argc, const char **argv)
 
 	cmdline_fix(&argc, &argv);
 
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 	net_init();
 
 	mem_copy(m_CountData.m_Header, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT));

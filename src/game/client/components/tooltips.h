@@ -5,6 +5,7 @@
 #include <game/client/component.h>
 #include <game/client/ui.h>
 
+#include <optional>
 #include <unordered_map>
 
 struct CTooltip
@@ -22,7 +23,7 @@ struct CTooltip
 class CTooltips : public CComponent
 {
 	std::unordered_map<uintptr_t, CTooltip> m_Tooltips;
-	CTooltip *m_pActiveTooltip;
+	std::optional<std::reference_wrapper<CTooltip>> m_ActiveTooltip;
 	int64_t HoverTime;
 
 	/**

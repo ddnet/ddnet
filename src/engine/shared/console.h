@@ -63,14 +63,6 @@ class CConsole : public IConsole
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true);
 
-	struct
-	{
-		int m_OutputLevel;
-		FPrintCallback m_pfnPrintCallback;
-		void *m_pPrintCallbackUserdata;
-	} m_aPrintCB[MAX_PRINT_CB];
-	int m_NumPrintCB;
-
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
 
@@ -217,8 +209,6 @@ public:
 	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true);
 	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
 
-	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
-	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);

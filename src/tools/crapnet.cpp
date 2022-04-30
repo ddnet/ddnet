@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/logger.h>
 #include <base/system.h>
 
 #include <array> // std::size
@@ -209,8 +210,8 @@ void Run(unsigned short Port, NETADDR Dest)
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
+	log_set_global_logger_default();
 	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
-	dbg_logger_stdout();
 	Run(8302, Addr);
 	cmdline_free(argc, argv);
 	return 0;
