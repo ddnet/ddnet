@@ -365,7 +365,7 @@ container.sprites.Add(Sprite("pickup_armor", set_game, 12,2,2,2))
 container.sprites.Add(Sprite("pickup_armor_shotgun", set_game, 15,2,2,2))
 container.sprites.Add(Sprite("pickup_armor_grenade", set_game, 17,2,2,2))
 container.sprites.Add(Sprite("pickup_armor_laser", set_game, 19,2,2,2))
-container.sprites.Add(Sprite("pickup_armor_ninja", set_game, 19,4,2,2))
+container.sprites.Add(Sprite("pickup_armor_ninja", set_game, 10,10,2,2))
 container.sprites.Add(Sprite("pickup_weapon", set_game, 3,0,6,2))
 container.sprites.Add(Sprite("pickup_ninja", set_game, 2,10,8,2))
 
