@@ -15,16 +15,16 @@ void CTooltips::OnReset()
 
 void CTooltips::SetActiveTooltip(CTooltip &Tooltip)
 {
-	if(m_pActiveTooltip != nullptr)
+	if(m_ActiveTooltip.has_value())
 		return;
 
-	m_pActiveTooltip = &Tooltip;
+	m_ActiveTooltip.emplace(Tooltip);
 	HoverTime = time_get();
 }
 
 inline void CTooltips::ClearActiveTooltip()
 {
-	m_pActiveTooltip = nullptr;
+	m_ActiveTooltip.reset();
 }
 
 void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
@@ -48,9 +48,9 @@ void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char 
 
 void CTooltips::OnRender()
 {
-	if(m_pActiveTooltip != nullptr)
+	if(m_ActiveTooltip.has_value())
 	{
-		CTooltip &Tooltip = *m_pActiveTooltip;
+		CTooltip &Tooltip = m_ActiveTooltip.value();
 
 		if(!UI()->MouseInside(&Tooltip.m_Rect))
 		{
