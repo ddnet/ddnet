@@ -85,17 +85,17 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// render the box
 		RenderTools()->DrawUIRect(&Box, ColorRGBA(0, 0, 0, 0.5f), CUI::CORNER_ALL, 15.0f);
 
-		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
 		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
 		UI()->DoLabelScaled(&Part, Localize("Select a name"), 24.f, TEXTALIGN_CENTER);
-		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
 		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f / UI()->Scale(), &Part);
 		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 24.f, TEXTALIGN_CENTER);
 
 		CUIRect Label, TextBox, Ok, Abort;
 
-		Box.HSplitBottom(20.f, &Box, &Part);
+		Box.HSplitBottom(20.f, &Box, 0);
 		Box.HSplitBottom(24.f, &Box, &Part);
 		Part.VMargin(80.0f, &Part);
 
@@ -140,8 +140,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			}
 		}
 
-		Box.HSplitBottom(60.f, &Box, &Part);
-		Box.HSplitBottom(60.f, &Box, &Part2);
+		Box.HSplitBottom(120.f, &Box, 0);
 		Box.HSplitBottom(24.f, &Box, &Part2);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
