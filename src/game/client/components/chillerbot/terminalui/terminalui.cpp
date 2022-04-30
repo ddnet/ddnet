@@ -988,7 +988,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		AimY = maximum(AimY - 10, -20);
 		if(m_RenderServerList && m_NumServers)
 		{
-			m_SelectedServer = clamp(--m_SelectedServer, 0, m_NumServers - 1);
+			m_SelectedServer = clamp(m_SelectedServer - 1, 0, m_NumServers - 1);
 			gs_NeedLogDraw = true;
 			m_NewInput = true;
 		}
@@ -998,7 +998,7 @@ int CTerminalUI::OnKeyPress(int Key, WINDOW *pWin)
 		AimY = minimum(AimY + 10, 20);
 		if(m_RenderServerList && m_NumServers)
 		{
-			m_SelectedServer = clamp(++m_SelectedServer, 0, m_NumServers - 1);
+			m_SelectedServer = clamp(m_SelectedServer + 1, 0, m_NumServers - 1);
 			gs_NeedLogDraw = true;
 			m_NewInput = true;
 		}
