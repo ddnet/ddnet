@@ -872,14 +872,6 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 		return;
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-		{
-			GameServer()->m_apPlayers[i]->GetCharacter()->ResetHook();
-			GameServer()->m_World.ReleaseHooked(i);
-		}
-	}
 
 	CSaveTee PrimarySavedTee;
 	PrimarySavedTee.Save(pPlayer->GetCharacter());
