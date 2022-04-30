@@ -13,6 +13,7 @@ struct CTooltip
 	CUIRect m_Rect;
 	const char *m_pText;
 	float m_WidthHint;
+	bool m_OnScreen; // used to know if the tooltip should be rendered.
 };
 
 /**

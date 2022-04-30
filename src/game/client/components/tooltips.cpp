@@ -33,13 +33,17 @@ void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char 
 	const auto result = m_Tooltips.emplace(ID, CTooltip{
 							   *pNearRect,
 							   pText,
-							   WidthHint});
+							   WidthHint,
+							   false});
 	CTooltip &Tooltip = result.first->second;
 
 	if(!result.second)
 	{
 		Tooltip.m_Rect = *pNearRect; // update in case of window resize
 	}
+
+	Tooltip.m_OnScreen = true;
+
 	if(UI()->MouseInside(&Tooltip.m_Rect))
 	{
 		SetActiveTooltip(Tooltip);
@@ -54,9 +58,13 @@ void CTooltips::OnRender()
 
 		if(!UI()->MouseInside(&Tooltip.m_Rect))
 		{
+			Tooltip.m_OnScreen = false;
 			ClearActiveTooltip();
 			return;
 		}
+
+		if(!Tooltip.m_OnScreen)
+			return;
 
 		// Delay tooltip until 1 second passed.
 		if(HoverTime > time_get() - time_freq())
@@ -100,5 +108,6 @@ void CTooltips::OnRender()
 		RenderTools()->DrawUIRect(&Rect, ColorRGBA(0.2, 0.2, 0.2, 0.80f), CUI::CORNER_ALL, 5.0f);
 		Rect.Margin(2.0f, &Rect);
 		UI()->DoLabel(&Rect, Tooltip.m_pText, 14.0f, TEXTALIGN_LEFT);
+		Tooltip.m_OnScreen = false;
 	}
 }
