@@ -72,7 +72,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float ButtonbarHeight = 20.0f;
 	const float NameBarHeight = 20.0f;
 	const float Margins = 5.0f;
-	float TotalHeight;
 	static int64_t LastSpeedChange = 0;
 
 	// render popups
@@ -236,7 +235,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 	}
 
-	TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
+	float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
 	// render speed info
 	if(g_Config.m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)
