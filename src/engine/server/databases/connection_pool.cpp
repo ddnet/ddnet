@@ -109,8 +109,10 @@ void CDbConnectionPool::OnShutdown()
 	while(m_Shutdown.load())
 	{
 		// print a log about every two seconds
-		if(i % 20 == 0)
-			dbg_msg("sql", "Waiting for score-threads to complete (%ds)", i / 10);
+		if(i % 20 == 0 && i > 0)
+		{
+			dbg_msg("sql", "Waiting for score threads to complete (%ds)", i / 10);
+		}
 		++i;
 		thread_sleep(100000);
 	}
