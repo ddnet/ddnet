@@ -2104,15 +2104,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						{
 							CNetMsg_Cl_Say MsgP;
 							MsgP.m_Team = 0;
-							char aBuf[256];
+							char aBuf[128];
+							char aBufMsg[256];
 							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
-								str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
+								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
 							else
-								str_format(aBuf, sizeof(aBuf), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
 
 							if(g_Config.m_ClRunOnJoin[0])
 							{
-								str_format(aBuf, sizeof(aBuf), "%s;%s", aBuf, g_Config.m_ClRunOnJoin);
+								str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
+								str_append(aBufMsg, aBuf, sizeof(aBufMsg));
 							}
 							if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
 							{
@@ -2140,9 +2142,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 									break;
 								}
 								if(aBufEmote[0])
-									str_format(aBuf, sizeof(aBuf), "%s;%s", aBuf, aBufEmote);
+								{
+									str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
+									str_append(aBufMsg, aBuf, sizeof(aBufMsg));
+								}
 							}
-							MsgP.m_pMessage = aBuf;
+							MsgP.m_pMessage = aBufMsg;
 							CMsgPacker PackerTimeout(MsgP.MsgID(), false);
 							MsgP.Pack(&PackerTimeout);
 							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
