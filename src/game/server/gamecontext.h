@@ -462,9 +462,6 @@ public:
 	virtual float PlayerJetpack();
 
 	void ResetTuning();
-
-	int m_ChatResponseTargetID;
-	int m_ChatPrintCBIndex;
 };
 
 inline int64_t CmaskAll() { return -1LL; }
