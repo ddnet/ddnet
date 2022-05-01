@@ -534,24 +534,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 
-	if(NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
-	{
-		// skip the input if chat is active
-		if(m_PlayerFlags & PLAYERFLAG_CHATTING)
-			return;
-
-		m_PlayerFlags = NewInput->m_PlayerFlags;
-		return;
-	}
-
-	m_PlayerFlags = NewInput->m_PlayerFlags;
-
-	if(m_pCharacter && m_Paused)
-		m_pCharacter->ResetInput();
-
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
-		m_Spawning = true;
-
 	// check for activity
 	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
@@ -566,6 +548,11 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
 {
+	m_PlayerFlags = NewInput->m_PlayerFlags;
+
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
+		m_Spawning = true;
+
 	// skip the input if chat is active
 	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
 		return;
