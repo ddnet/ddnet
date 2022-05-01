@@ -57,14 +57,11 @@ void CGameTeams::ResetRoundState(int Team)
 
 void CGameTeams::ResetSwitchers(int Team)
 {
-	if(GameServer()->Collision()->m_NumSwitchers > 0)
+	for(auto &Switcher : GameServer()->Switchers())
 	{
-		for(int i = 0; i < GameServer()->Collision()->m_NumSwitchers + 1; ++i)
-		{
-			GameServer()->Switchers()[i].m_Status[Team] = GameServer()->Switchers()[i].m_Initial;
-			GameServer()->Switchers()[i].m_EndTick[Team] = 0;
-			GameServer()->Switchers()[i].m_Type[Team] = TILE_SWITCHOPEN;
-		}
+		Switcher.m_Status[Team] = Switcher.m_Initial;
+		Switcher.m_EndTick[Team] = 0;
+		Switcher.m_Type[Team] = TILE_SWITCHOPEN;
 	}
 }
 

@@ -445,7 +445,7 @@ void CGameClient::OnConnected()
 {
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
-	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_NumSwitchers);
+	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 
 	CRaceHelper::ms_aFlagIndex[0] = -1;
 	CRaceHelper::ms_aFlagIndex[1] = -1;
@@ -1438,14 +1438,14 @@ void CGameClient::OnNewSnapshot()
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
 				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
 
-				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
-				if(Switchers().empty() || NumSwitchers != (int)Switchers().size())
+				int HighestSwitchNumber = clamp(pSwitchStateData->m_HighestSwitchNumber, 0, 255);
+				if(HighestSwitchNumber != maximum(0, (int)Switchers().size() - 1))
 				{
-					m_GameWorld.m_Core.InitSwitchers(NumSwitchers);
-					Collision()->m_NumSwitchers = NumSwitchers;
+					m_GameWorld.m_Core.InitSwitchers(HighestSwitchNumber);
+					Collision()->m_HighestSwitchNumber = HighestSwitchNumber;
 				}
 
-				for(int j = 0; j < NumSwitchers + 1; j++)
+				for(int j = 0; j < (int)Switchers().size(); j++)
 				{
 					Switchers()[j].m_Status[Team] = (pSwitchStateData->m_Status[j / 32] >> (j % 32)) & 1;
 
@@ -2238,19 +2238,19 @@ void CGameClient::UpdatePrediction()
 		if(Item.m_Type == NETOBJTYPE_SWITCHTIMESTATE)
 		{
 			const CNetObj_SwitchTimeState *pSwitchTimeStateData = (const CNetObj_SwitchTimeState *)pData;
-			for(int i = 0; i < (int)(sizeof(pSwitchTimeStateData->m_EndTick) / sizeof(pSwitchTimeStateData->m_EndTick[0])); i++)
+			for(int j = 0; j < (int)(sizeof(pSwitchTimeStateData->m_EndTick) / sizeof(pSwitchTimeStateData->m_EndTick[0])); j++)
 			{
 				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
-				int Num = pSwitchTimeStateData->m_SwitchNumber[i];
-				int EndTick = pSwitchTimeStateData->m_EndTick[i];
-				if(in_range(Num, 0, (int)Switchers().size()) && EndTick > 0)
+				int SwitchNum = pSwitchTimeStateData->m_SwitchNumber[j];
+				int EndTick = pSwitchTimeStateData->m_EndTick[j];
+				if(in_range(SwitchNum, 0, (int)Switchers().size()) && EndTick > 0)
 				{
 					// update EndTick
-					if(Switchers()[Num].m_Status[Team])
-						Switchers()[Num].m_Type[Team] = TILE_SWITCHTIMEDOPEN;
+					if(Switchers()[SwitchNum].m_Status[Team])
+						Switchers()[SwitchNum].m_Type[Team] = TILE_SWITCHTIMEDOPEN;
 					else
-						Switchers()[Num].m_Type[Team] = TILE_SWITCHTIMEDCLOSE;
-					Switchers()[Num].m_EndTick[Team] = EndTick;
+						Switchers()[SwitchNum].m_Type[Team] = TILE_SWITCHTIMEDCLOSE;
+					Switchers()[SwitchNum].m_EndTick[Team] = EndTick;
 				}
 			}
 		}

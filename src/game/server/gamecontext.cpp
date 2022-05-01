@@ -1077,24 +1077,21 @@ void CGameContext::OnTick()
 			SendChat(-1, CGameContext::CHAT_ALL, Line);
 	}
 
-	if(Collision()->m_NumSwitchers > 0)
+	for(auto &Switcher : Switchers())
 	{
-		for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
+		for(int j = 0; j < MAX_CLIENTS; ++j)
 		{
-			for(int j = 0; j < MAX_CLIENTS; ++j)
+			if(Switcher.m_EndTick[j] <= Server()->Tick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDOPEN)
 			{
-				if(Switchers()[i].m_EndTick[j] <= Server()->Tick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
-				{
-					Switchers()[i].m_Status[j] = false;
-					Switchers()[i].m_EndTick[j] = 0;
-					Switchers()[i].m_Type[j] = TILE_SWITCHCLOSE;
-				}
-				else if(Switchers()[i].m_EndTick[j] <= Server()->Tick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
-				{
-					Switchers()[i].m_Status[j] = true;
-					Switchers()[i].m_EndTick[j] = 0;
-					Switchers()[i].m_Type[j] = TILE_SWITCHOPEN;
-				}
+				Switcher.m_Status[j] = false;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHCLOSE;
+			}
+			else if(Switcher.m_EndTick[j] <= Server()->Tick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+			{
+				Switcher.m_Status[j] = true;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHOPEN;
 			}
 		}
 	}
@@ -2727,7 +2724,7 @@ void CGameContext::ConSwitchOpen(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Switch = pResult->GetInteger(0);
 
-	if(pSelf->Collision()->m_NumSwitchers > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_NumSwitchers + 1)
+	if(!in_range(Switch, (int)pSelf->Switchers().size() - 1))
 	{
 		pSelf->Switchers()[Switch].m_Initial = false;
 		char aBuf[256];
@@ -3203,7 +3200,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
-	m_World.m_Core.InitSwitchers(m_Collision.m_NumSwitchers);
+	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
@@ -3259,9 +3256,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvTeam = SV_TEAM_ALLOWED;
 		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_OFF;
 
-		if(Collision()->m_NumSwitchers > 0)
-			for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
-				Switchers()[i].m_Initial = true;
+		for(auto &Switcher : Switchers())
+			Switcher.m_Initial = true;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);

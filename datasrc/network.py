@@ -312,7 +312,7 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntRange("m_NumSwitchers", 0, 256),
+		NetIntRange("m_HighestSwitchNumber", 0, 256),
 		# 256 switches / 32 bits = 8 int32
 		NetArray(NetIntAny("m_Status"), 8),
 	]),

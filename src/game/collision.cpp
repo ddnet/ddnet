@@ -59,7 +59,7 @@ CCollision::~CCollision()
 void CCollision::Init(class CLayers *pLayers)
 {
 	Dest();
-	m_NumSwitchers = 0;
+	m_HighestSwitchNumber = 0;
 	m_pLayers = pLayers;
 	m_Width = m_pLayers->GameLayer()->m_Width;
 	m_Height = m_pLayers->GameLayer()->m_Height;
@@ -112,8 +112,8 @@ void CCollision::Init(class CLayers *pLayers)
 		int Index;
 		if(m_pSwitch)
 		{
-			if(m_pSwitch[i].m_Number > m_NumSwitchers)
-				m_NumSwitchers = m_pSwitch[i].m_Number;
+			if(m_pSwitch[i].m_Number > m_HighestSwitchNumber)
+				m_HighestSwitchNumber = m_pSwitch[i].m_Number;
 
 			if(m_pSwitch[i].m_Number)
 				m_pDoor[i].m_Number = m_pSwitch[i].m_Number;

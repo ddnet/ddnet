@@ -208,7 +208,7 @@ public:
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
 
-	void InitSwitchers(int Num);
+	void InitSwitchers(int HighestSwitchNumber);
 	std::vector<SSwitchers> m_aSwitchers;
 };
 

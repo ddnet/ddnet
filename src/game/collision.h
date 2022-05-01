@@ -114,7 +114,7 @@ public:
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
-	int m_NumSwitchers;
+	int m_HighestSwitchNumber;
 
 private:
 	class CTeleTile *m_pTele;

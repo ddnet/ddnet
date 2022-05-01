@@ -200,24 +200,21 @@ void CGameWorld::Tick()
 	RemoveEntities();
 
 	// update switch state
-	if(Collision()->m_NumSwitchers > 0)
+	for(auto &Switcher : Switchers())
 	{
-		for(int i = 0; i < (int)Switchers().size(); ++i)
+		for(int j = 0; j < MAX_CLIENTS; ++j)
 		{
-			for(int j = 0; j < MAX_CLIENTS; ++j)
+			if(Switcher.m_EndTick[j] <= GameTick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDOPEN)
 			{
-				if(Switchers()[i].m_EndTick[j] <= GameTick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
-				{
-					Switchers()[i].m_Status[j] = false;
-					Switchers()[i].m_EndTick[j] = 0;
-					Switchers()[i].m_Type[j] = TILE_SWITCHCLOSE;
-				}
-				else if(Switchers()[i].m_EndTick[j] <= GameTick() && Switchers()[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
-				{
-					Switchers()[i].m_Status[j] = true;
-					Switchers()[i].m_EndTick[j] = 0;
-					Switchers()[i].m_Type[j] = TILE_SWITCHOPEN;
-				}
+				Switcher.m_Status[j] = false;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHCLOSE;
+			}
+			else if(Switcher.m_EndTick[j] <= GameTick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+			{
+				Switcher.m_Status[j] = true;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHOPEN;
 			}
 		}
 	}

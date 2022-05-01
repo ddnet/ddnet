@@ -658,19 +658,22 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 	return false;
 }
 
-void CWorldCore::InitSwitchers(int NumSwitchers)
+void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 {
-	m_aSwitchers.resize(NumSwitchers + 1);
+	if(HighestSwitchNumber > 0)
+		m_aSwitchers.resize(HighestSwitchNumber + 1);
+	else
+		m_aSwitchers.clear();
 
-	for(int i = 0; i < NumSwitchers + 1; i++)
+	for(auto &Switcher : m_aSwitchers)
 	{
-		m_aSwitchers[i].m_Initial = true;
+		Switcher.m_Initial = true;
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
-			m_aSwitchers[i].m_Status[j] = true;
-			m_aSwitchers[i].m_EndTick[j] = 0;
-			m_aSwitchers[i].m_Type[j] = 0;
-			m_aSwitchers[i].m_LastUpdateTick[j] = 0;
+			Switcher.m_Status[j] = true;
+			Switcher.m_EndTick[j] = 0;
+			Switcher.m_Type[j] = 0;
+			Switcher.m_LastUpdateTick[j] = 0;
 		}
 	}
 }
