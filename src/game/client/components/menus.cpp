@@ -1603,10 +1603,7 @@ int CMenus::Render()
 		CUIRect Box, Part;
 		Box = Screen;
 		if(m_Popup != POPUP_FIRST_LAUNCH)
-		{
-			Box.VMargin(150.0f / UI()->Scale(), &Box);
-			Box.HMargin(150.0f / UI()->Scale(), &Box);
-		}
+			Box.Margin(150.0f / UI()->Scale(), &Box);
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, BgColor, CUI::CORNER_ALL, 15.0f);
@@ -1750,8 +1747,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			Box = Screen;
-			Box.VMargin(150.0f, &Box);
-			Box.HMargin(150.0f, &Box);
+			Box.Margin(150.0f, &Box);
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(120.0f, &Part);
@@ -1817,8 +1813,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_LANGUAGE)
 		{
 			Box = Screen;
-			Box.VMargin(150.0f, &Box);
-			Box.HMargin(150.0f, &Box);
+			Box.Margin(150.0f, &Box);
 			Box.HSplitTop(20.f, &Part, &Box);
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
@@ -1834,8 +1829,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_COUNTRY)
 		{
 			Box = Screen;
-			Box.VMargin(150.0f, &Box);
-			Box.HMargin(150.0f, &Box);
+			Box.Margin(150.0f, &Box);
 			Box.HSplitTop(20.f, &Part, &Box);
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
