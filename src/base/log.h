@@ -30,6 +30,12 @@ struct LOG_COLOR
 	uint8_t b;
 };
 
+#define log_error(sys, ...) log_log(LEVEL_ERROR, sys, __VA_ARGS__)
+#define log_warn(sys, ...) log_log(LEVEL_WARN, sys, __VA_ARGS__)
+#define log_info(sys, ...) log_log(LEVEL_INFO, sys, __VA_ARGS__)
+#define log_debug(sys, ...) log_log(LEVEL_DEBUG, sys, __VA_ARGS__)
+#define log_trace(sys, ...) log_log(LEVEL_TRACE, sys, __VA_ARGS__)
+
 /**
  * @defgroup Log
  *
