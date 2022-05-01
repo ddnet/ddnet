@@ -35,11 +35,13 @@ class CClientChatLogger : public ILogger
 {
 	CGameContext *m_pGameServer;
 	int m_ClientID;
+	ILogger *m_pOuterLogger;
 
 public:
-	CClientChatLogger(CGameContext *pGameServer, int ClientID) :
+	CClientChatLogger(CGameContext *pGameServer, int ClientID, ILogger *pOuterLogger) :
 		m_pGameServer(pGameServer),
-		m_ClientID(ClientID)
+		m_ClientID(ClientID),
+		m_pOuterLogger(pOuterLogger)
 	{
 	}
 	void Log(const CLogMessage *pMessage) override;
@@ -47,7 +49,14 @@ public:
 
 void CClientChatLogger::Log(const CLogMessage *pMessage)
 {
-	m_pGameServer->SendChatTarget(m_ClientID, pMessage->Message());
+	if(str_comp(pMessage->m_aSystem, "chatresp") == 0)
+	{
+		m_pGameServer->SendChatTarget(m_ClientID, pMessage->Message());
+	}
+	else
+	{
+		m_pOuterLogger->Log(pMessage);
+	}
 }
 
 enum
@@ -85,7 +94,6 @@ void CGameContext::Construct(int Resetting)
 		m_pVoteOptionHeap = new CHeap();
 	}
 
-	m_ChatResponseTargetID = -1;
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
 }
@@ -1844,9 +1852,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
 					pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
 
-					m_ChatResponseTargetID = ClientID;
 					Console()->SetFlagMask(CFGFLAG_CHAT);
-
 					int Authed = Server()->GetAuthedState(ClientID);
 					if(Authed)
 						Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
@@ -1854,7 +1860,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 
 					{
-						CClientChatLogger Logger(this, ClientID);
+						CClientChatLogger Logger(this, ClientID, log_get_scope_logger());
 						CLogScope Scope(&Logger);
 						Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
 					}
@@ -1866,7 +1872,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 					Console()->SetFlagMask(CFGFLAG_SERVER);
-					m_ChatResponseTargetID = -1;
 				}
 			}
 			else
