@@ -84,7 +84,11 @@ bool dbg_assert_has_failed();
  *
  * @see dbg_assert
  */
-void dbg_break();
+#if defined(__cplusplus)
+[[noreturn]]
+#endif
+void
+dbg_break();
 
 /**
  * Prints a debug message.
