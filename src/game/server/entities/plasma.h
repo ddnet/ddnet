@@ -4,8 +4,6 @@
 
 #include <game/server/entity.h>
 
-class CGun;
-
 class CPlasma : public CEntity
 {
 	vec2 m_Core;

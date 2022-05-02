@@ -43,6 +43,14 @@ class CSnapIDPool
 		MAX_IDS = 32 * 1024,
 	};
 
+	// State of a Snap ID
+	enum
+	{
+		ID_FREE = 0,
+		ID_ALLOCATED = 1,
+		ID_TIMED = 2,
+	};
+
 	class CID
 	{
 	public:

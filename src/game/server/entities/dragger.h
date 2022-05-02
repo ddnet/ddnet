@@ -3,38 +3,27 @@
 #define GAME_SERVER_ENTITIES_DRAGGER_H
 
 #include <game/server/entity.h>
-class CCharacter;
+class CDraggerBeam;
 
 class CDragger : public CEntity
 {
+	// m_Core is the direction vector by which a dragger is shifted at each movement tick (every 150ms)
 	vec2 m_Core;
 	float m_Strength;
 	int m_EvalTick;
-	void Move();
-	void Drag();
-	int m_TargetID;
-	bool m_NW;
-	int m_CaughtTeam;
+	void LookForPlayersToDrag();
+	bool m_IgnoreWalls;
 
-	int m_SoloEntIDs[MAX_CLIENTS];
-	int m_SoloIDs[MAX_CLIENTS];
+	CDraggerBeam *m_apDraggerBeam[MAX_CLIENTS];
 
 public:
-	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
-		int CaughtTeam, int Layer = 0, int Number = 0);
+	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool IgnoreWalls, int Layer = 0, int Number = 0);
+
+	void RemoveDraggerBeam(int ClientID);
 
 	void Reset() override;
 	void Tick() override;
 	void Snap(int SnappingClient) override;
-};
-
-class CDraggerTeam
-{
-	CDragger *m_Draggers[MAX_CLIENTS];
-
-public:
-	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW = false, int Layer = 0, int Number = 0);
-	//~CDraggerTeam();
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAGGER_H

@@ -6,8 +6,6 @@
 #include <game/gamecore.h>
 #include <game/server/entity.h>
 
-class CCharacter;
-
 class CGun : public CEntity
 {
 	int m_EvalTick;
