@@ -991,8 +991,18 @@ CConsole::~CConsole()
 	while(pCommand)
 	{
 		CCommand *pNext = pCommand->m_pNext;
-		if(pCommand->m_pfnCallback == Con_Chain)
-			delete static_cast<CChain *>(pCommand->m_pUserData);
+		{
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
+			void *pUserData = pCommand->m_pUserData;
+			CChain *pChain = nullptr;
+			while(pfnCallback == Con_Chain)
+			{
+				pChain = static_cast<CChain *>(pUserData);
+				pfnCallback = pChain->m_pfnCallback;
+				pUserData = pChain->m_pCallbackUserData;
+				delete pChain;
+			}
+		}
 		// Temp commands are on m_TempCommands heap, so don't delete them
 		if(!pCommand->m_Temp)
 			delete pCommand;
