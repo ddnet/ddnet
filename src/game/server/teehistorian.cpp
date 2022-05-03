@@ -576,6 +576,18 @@ void CTeeHistorian::RecordTestExtra()
 	WriteExtra(UUID_TEEHISTORIAN_TEST, "", 0);
 }
 
+void CTeeHistorian::RecordPlayerSwap(int ClientID1, int ClientID2)
+{
+	EnsureTickWritten();
+
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID1);
+	Buffer.AddInt(ClientID2);
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_SWITCH, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave)
 {
 	EnsureTickWritten();
