@@ -1,5 +1,7 @@
 /* See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "dragger_beam.h"
+#include "character.h"
+#include "dragger.h"
 #include <engine/config.h>
 #include <engine/server.h>
 #include <game/generated/protocol.h>
@@ -7,9 +9,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
-
-#include "character.h"
-#include "dragger.h"
 
 CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls,
 	int ForClientID) :
@@ -58,12 +57,12 @@ void CDraggerBeam::Tick()
 		m_IgnoreWalls ?
 			!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
 			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
-	if(!IsReachable || length(m_Pos - pTarget->m_Pos) > g_Config.m_SvDraggerRange || !pTarget->IsAlive())
+	if(!IsReachable || distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange + pTarget->GetProximityRadius() || !pTarget->IsAlive())
 	{
 		Reset();
 		return;
 	}
-	else if(length(m_Pos - pTarget->m_Pos) > 28)
+	else if(distance(pTarget->m_Pos, m_Pos) > 28)
 	{
 		vec2 Temp = pTarget->Core()->m_Vel + (normalize(m_Pos - pTarget->m_Pos) * m_Strength);
 		pTarget->Core()->m_Vel = ClampVel(pTarget->m_MoveRestrictions, Temp);
