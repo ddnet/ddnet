@@ -1191,7 +1191,8 @@ void CCharacter::Snap(int SnappingClient)
 	if(!Server()->Translate(ID, SnappingClient))
 		return;
 
-	if(NetworkClipped(SnappingClient) || !CanSnapCharacter(SnappingClient))
+	// A player may not be clipped away if his hook is in the field of view
+	if(NetworkClippedLine(SnappingClient, m_Pos, m_Core.m_HookPos) || !CanSnapCharacter(SnappingClient))
 		return;
 
 	SnapCharacter(SnappingClient, ID);
