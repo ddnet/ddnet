@@ -7,19 +7,18 @@
 class CPlasma : public CEntity
 {
 	vec2 m_Core;
+	int m_Freeze;
+	bool m_Explosive;
+	int m_ForClientID;
 	int m_EvalTick;
 	int m_LifeTime;
 
-	int m_ResponsibleTeam;
-	int m_Freeze;
-
-	bool m_Explosive;
-	bool HitCharacter();
+	bool HitCharacter(CCharacter *pTarget);
 	void Move();
 
 public:
 	CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
-		bool Explosive, int ResponsibleTeam);
+		bool Explosive, int ForClientId);
 
 	void Reset() override;
 	void Tick() override;

@@ -16,12 +16,12 @@
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool IgnoreWalls, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
-	m_Layer = Layer;
-	m_Number = Number;
 	m_Pos = Pos;
 	m_Strength = Strength;
-	m_EvalTick = Server()->Tick();
 	m_IgnoreWalls = IgnoreWalls;
+	m_Layer = Layer;
+	m_Number = Number;
+	m_EvalTick = Server()->Tick();
 
 	mem_zero(m_apDraggerBeam, sizeof(m_apDraggerBeam));
 	GameWorld()->InsertEntity(this);
@@ -55,7 +55,7 @@ void CDragger::Tick()
 
 void CDragger::LookForPlayersToDrag()
 {
-	// Create a list of players who are in the range of the dragger.
+	// Create a list of players who are in the range of the dragger
 	CCharacter *pPlayersInRange[MAX_CLIENTS];
 	mem_zero(pPlayersInRange, sizeof(pPlayersInRange));
 
@@ -65,8 +65,8 @@ void CDragger::LookForPlayersToDrag()
 	// The closest player (within range) in a team is selected as the target
 	int TargetIdInTeam[MAX_CLIENTS];
 	bool IsTarget[MAX_CLIENTS];
-	int MinLenInTeam[MAX_CLIENTS];
-	mem_zero(MinLenInTeam, sizeof(MinLenInTeam));
+	int MinDistInTeam[MAX_CLIENTS];
+	mem_zero(MinDistInTeam, sizeof(MinDistInTeam));
 	mem_zero(IsTarget, sizeof(IsTarget));
 	for(int &TargetId : TargetIdInTeam)
 	{
@@ -81,13 +81,14 @@ void CDragger::LookForPlayersToDrag()
 		{
 			continue;
 		}
-		// If the Dragger is disabled for the target's team, no dragger beam will be generated.
-		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTarget->Team()])
+		// If the dragger is disabled for the target's team, no dragger beam will be generated
+		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
+			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTarget->Team()])
 		{
 			continue;
 		}
 
-		// Dragger beams can be created only for reachable alive players
+		// Dragger beams can be created only for reachable, alive players
 		int IsReachable =
 			m_IgnoreWalls ?
 				!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
@@ -101,10 +102,10 @@ void CDragger::LookForPlayersToDrag()
 			}
 			else
 			{
-				int Len = length(pTarget->m_Pos - m_Pos);
-				if(MinLenInTeam[pTarget->Team()] == 0 || MinLenInTeam[pTarget->Team()] > Len)
+				int Distance = distance(pTarget->m_Pos, m_Pos);
+				if(MinDistInTeam[pTarget->Team()] == 0 || MinDistInTeam[pTarget->Team()] > Distance)
 				{
-					MinLenInTeam[pTarget->Team()] = Len;
+					MinDistInTeam[pTarget->Team()] = Distance;
 					TargetIdInTeam[pTarget->Team()] = pTarget->GetPlayer()->GetCID();
 				}
 			}
@@ -181,17 +182,19 @@ void CDragger::Snap(int SnappingClient)
 				(int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
 		}
 	}
-
-	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
+	else
 	{
 		// Emulate turned off blinking dragger for old clients
 		CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
-		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
+		if(SnappingClient != SERVER_DEMO_CLIENT &&
+			(GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
+				GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
 			GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(pChar && m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChar->Team()] && (!Tick))
+		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
+			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChar->Team()] && (!Tick))
 			return;
 	}
 

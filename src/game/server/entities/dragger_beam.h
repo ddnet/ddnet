@@ -7,12 +7,12 @@
 
 class CDraggerBeam : public CEntity
 {
-	bool m_IgnoreWalls;
+	CDragger *m_pDragger;
 	float m_Strength;
+	bool m_IgnoreWalls;
 	int m_ForClientID;
 	int m_EvalTick;
 	bool m_Active;
-	CDragger *m_pDragger;
 
 public:
 	CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls, int ForClientID);

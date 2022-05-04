@@ -16,12 +16,47 @@ CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos,
 {
 	m_pDragger = pDragger;
 	m_Pos = Pos;
-	m_IgnoreWalls = IgnoreWalls;
 	m_Strength = Strength;
+	m_IgnoreWalls = IgnoreWalls;
 	m_ForClientID = ForClientID;
 	m_Active = true;
 	m_EvalTick = Server()->Tick();
+
 	GameWorld()->InsertEntity(this);
+}
+
+void CDraggerBeam::Tick()
+{
+	if(!m_Active)
+	{
+		return;
+	}
+
+	// Drag only if the player is reachable and alive
+	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
+	if(!pTarget)
+	{
+		Reset();
+		return;
+	}
+
+	int IsReachable =
+		m_IgnoreWalls ?
+			!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
+			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
+	// This check is necessary because the check in CDragger::LookForPlayersToDrag only happens every 150ms
+	if(!IsReachable ||
+		distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange + pTarget->GetProximityRadius() ||
+		!pTarget->IsAlive())
+	{
+		Reset();
+		return;
+	}
+	else if(distance(pTarget->m_Pos, m_Pos) > 28)
+	{
+		vec2 Temp = pTarget->Core()->m_Vel + (normalize(m_Pos - pTarget->m_Pos) * m_Strength);
+		pTarget->Core()->m_Vel = ClampVel(pTarget->m_MoveRestrictions, Temp);
+	}
 }
 
 void CDraggerBeam::SetPos(vec2 Pos)
@@ -37,38 +72,6 @@ void CDraggerBeam::Reset()
 	m_pDragger->RemoveDraggerBeam(m_ForClientID);
 }
 
-void CDraggerBeam::Tick()
-{
-	if(!m_Active)
-	{
-		return;
-	}
-
-	// Drag only if the player is reachable and alive
-	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
-
-	if(!pTarget)
-	{
-		Reset();
-		return;
-	}
-
-	int IsReachable =
-		m_IgnoreWalls ?
-			!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
-			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
-	if(!IsReachable || distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange + pTarget->GetProximityRadius() || !pTarget->IsAlive())
-	{
-		Reset();
-		return;
-	}
-	else if(distance(pTarget->m_Pos, m_Pos) > 28)
-	{
-		vec2 Temp = pTarget->Core()->m_Vel + (normalize(m_Pos - pTarget->m_Pos) * m_Strength);
-		pTarget->Core()->m_Vel = ClampVel(pTarget->m_MoveRestrictions, Temp);
-	}
-}
-
 void CDraggerBeam::Snap(int SnappingClient)
 {
 	if(!m_Active)
@@ -76,7 +79,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 		return;
 	}
 
-	// Only players who can see the player attached to the dragger can see the dragger beam.
+	// Only players who can see the player attached to the dragger can see the dragger beam
 	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
 	if(!pTarget->CanSnapCharacter(SnappingClient))
 	{
