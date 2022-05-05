@@ -183,9 +183,10 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 	curl_easy_setopt(pHandle, CURLOPT_IPRESOLVE, m_IpResolve == IPRESOLVE::V4 ? CURL_IPRESOLVE_V4 : m_IpResolve == IPRESOLVE::V6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_WHATEVER);
 
-	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x076800)
+	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x074400)
 	{
-		// Causes crashes, see https://github.com/ddnet/ddnet/issues/4342
+		// Causes crashes, see https://github.com/ddnet/ddnet/issues/4342.
+		// No longer a problem in curl 7.68 and above, and 0x44 = 68.
 		curl_easy_setopt(pHandle, CURLOPT_FORBID_REUSE, 1L);
 	}
 
