@@ -12,8 +12,8 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN
-#include "curl/curl.h"
-#include "curl/easy.h"
+#include <curl/curl.h>
+#include <curl/easy.h>
 
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
@@ -86,19 +86,31 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
-CRequest::CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress, IPRESOLVE IpResolve) :
-	m_Timeout(Timeout),
-	m_Size(0),
-	m_Progress(0),
-	m_LogProgress(LogProgress),
-	m_IpResolve(IpResolve),
-	m_State(HTTP_QUEUED),
-	m_Abort(false)
+CHttpRequest::CHttpRequest(const char *pUrl)
 {
 	str_copy(m_aUrl, pUrl, sizeof(m_aUrl));
 }
 
-void CRequest::Run()
+CHttpRequest::~CHttpRequest()
+{
+	if(!m_WriteToFile)
+	{
+		m_BufferSize = 0;
+		m_BufferLength = 0;
+		free(m_pBuffer);
+		m_pBuffer = nullptr;
+	}
+	curl_slist_free_all((curl_slist *)m_pHeaders);
+	m_pHeaders = nullptr;
+	if(m_pBody)
+	{
+		m_BodyLength = 0;
+		free(m_pBody);
+		m_pBody = nullptr;
+	}
+}
+
+void CHttpRequest::Run()
 {
 	int FinalState;
 	if(!BeforeInit())
@@ -115,8 +127,29 @@ void CRequest::Run()
 	m_State = OnCompletion(FinalState);
 }
 
-int CRequest::RunImpl(CURL *pHandle)
+bool CHttpRequest::BeforeInit()
 {
+	if(m_WriteToFile)
+	{
+		if(fs_makedir_rec_for(m_aDestAbsolute) < 0)
+		{
+			dbg_msg("http", "i/o error, cannot create folder for: %s", m_aDest);
+			return false;
+		}
+
+		m_File = io_open(m_aDestAbsolute, IOFLAG_WRITE);
+		if(!m_File)
+		{
+			dbg_msg("http", "i/o error, cannot open file: %s", m_aDest);
+			return false;
+		}
+	}
+	return true;
+}
+
+int CHttpRequest::RunImpl(CURL *pUser)
+{
+	CURL *pHandle = (CURL *)pUser;
 	if(!pHandle)
 	{
 		return HTTP_ERROR;
@@ -160,10 +193,21 @@ int CRequest::RunImpl(CURL *pHandle)
 	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
 #endif
 
-	if(!AfterInit(pHandle))
+	switch(m_Type)
 	{
-		return HTTP_ERROR;
+	case REQUEST::GET:
+		break;
+	case REQUEST::HEAD:
+		curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
+		break;
+	case REQUEST::POST_JSON:
+		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, m_pBody);
+		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDSIZE, m_BodyLength);
+		m_pHeaders = curl_slist_append((curl_slist *)m_pHeaders, "Content-Type: application/json");
+		break;
 	}
+
+	curl_easy_setopt(pHandle, CURLOPT_HTTPHEADER, m_pHeaders);
 
 	if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
 		dbg_msg("http", "fetching %s", m_aUrl);
@@ -183,14 +227,47 @@ int CRequest::RunImpl(CURL *pHandle)
 	}
 }
 
-size_t CRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pUser)
+size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 {
-	return ((CRequest *)pUser)->OnData(pData, Size * Number);
+	if(!m_WriteToFile)
+	{
+		if(DataSize == 0)
+		{
+			return DataSize;
+		}
+		bool Reallocate = false;
+		if(m_BufferSize == 0)
+		{
+			m_BufferSize = 1024;
+			Reallocate = true;
+		}
+		while(m_BufferLength + DataSize > m_BufferSize)
+		{
+			m_BufferSize *= 2;
+			Reallocate = true;
+		}
+		if(Reallocate)
+		{
+			m_pBuffer = (unsigned char *)realloc(m_pBuffer, m_BufferSize);
+		}
+		mem_copy(m_pBuffer + m_BufferLength, pData, DataSize);
+		m_BufferLength += DataSize;
+		return DataSize;
+	}
+	else
+	{
+		return io_write(m_File, pData, DataSize);
+	}
 }
 
-int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+size_t CHttpRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pUser)
 {
-	CGetFile *pTask = (CGetFile *)pUser;
+	return ((CHttpRequest *)pUser)->OnData(pData, Size * Number);
+}
+
+int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+{
+	CHttpRequest *pTask = (CHttpRequest *)pUser;
 	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
 	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
 	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
@@ -198,159 +275,58 @@ int CRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, doubl
 	return pTask->m_Abort ? -1 : 0;
 }
 
-CHead::CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
-	CRequest(pUrl, Timeout, LogProgress)
+int CHttpRequest::OnCompletion(int State)
 {
-}
-
-CHead::~CHead() = default;
-
-bool CHead::AfterInit(void *pCurl)
-{
-	CURL *pHandle = pCurl;
-	curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
-	return true;
-}
-
-CGet::CGet(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress) :
-	CRequest(pUrl, Timeout, LogProgress),
-	m_BufferSize(0),
-	m_BufferLength(0),
-	m_pBuffer(NULL)
-{
-}
-
-CGet::~CGet()
-{
-	m_BufferSize = 0;
-	m_BufferLength = 0;
-	free(m_pBuffer);
-	m_pBuffer = NULL;
-}
-
-unsigned char *CGet::Result() const
-{
-	if(State() != HTTP_DONE)
+	if(m_WriteToFile)
 	{
-		return NULL;
-	}
-	return m_pBuffer;
-}
+		if(m_File && io_close(m_File) != 0)
+		{
+			dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
+			State = HTTP_ERROR;
+		}
 
-unsigned char *CGet::TakeResult()
-{
-	unsigned char *pResult = Result();
-	if(pResult)
-	{
-		m_BufferSize = 0;
-		m_BufferLength = 0;
-		m_pBuffer = NULL;
+		if(State == HTTP_ERROR || State == HTTP_ABORTED)
+		{
+			fs_remove(m_aDestAbsolute);
+		}
 	}
-	return pResult;
-}
-
-json_value *CGet::ResultJson() const
-{
-	unsigned char *pResult = Result();
-	if(!pResult)
-	{
-		return NULL;
-	}
-	return json_parse((char *)pResult, m_BufferLength);
-}
-
-size_t CGet::OnData(char *pData, size_t DataSize)
-{
-	if(DataSize == 0)
-	{
-		return DataSize;
-	}
-	bool Reallocate = false;
-	if(m_BufferSize == 0)
-	{
-		m_BufferSize = 1024;
-		Reallocate = true;
-	}
-	while(m_BufferLength + DataSize > m_BufferSize)
-	{
-		m_BufferSize *= 2;
-		Reallocate = true;
-	}
-	if(Reallocate)
-	{
-		m_pBuffer = (unsigned char *)realloc(m_pBuffer, m_BufferSize);
-	}
-	mem_copy(m_pBuffer + m_BufferLength, pData, DataSize);
-	m_BufferLength += DataSize;
-	return DataSize;
-}
-
-CGetFile::CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress, IPRESOLVE IpResolve) :
-	CRequest(pUrl, Timeout, LogProgress, IpResolve),
-	m_pStorage(pStorage),
-	m_File(0),
-	m_StorageType(StorageType)
-{
-	str_copy(m_aDest, pDest, sizeof(m_aDest));
-
-	if(m_StorageType == -2)
-		m_pStorage->GetBinaryPath(m_aDest, m_aDestFull, sizeof(m_aDestFull));
-	else
-		m_pStorage->GetCompletePath(m_StorageType, m_aDest, m_aDestFull, sizeof(m_aDestFull));
-}
-
-bool CGetFile::BeforeInit()
-{
-	if(fs_makedir_rec_for(m_aDestFull) < 0)
-	{
-		dbg_msg("http", "i/o error, cannot create folder for: %s", m_aDestFull);
-		return false;
-	}
-
-	m_File = io_open(m_aDestFull, IOFLAG_WRITE);
-	if(!m_File)
-	{
-		dbg_msg("http", "i/o error, cannot open file: %s", m_aDest);
-		return false;
-	}
-	return true;
-}
-
-size_t CGetFile::OnData(char *pData, size_t DataSize)
-{
-	return io_write(m_File, pData, DataSize);
-}
-
-int CGetFile::OnCompletion(int State)
-{
-	if(m_File && io_close(m_File) != 0)
-	{
-		dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
-		State = HTTP_ERROR;
-	}
-
-	if(State == HTTP_ERROR || State == HTTP_ABORTED)
-	{
-		m_pStorage->RemoveFile(m_aDestFull, IStorage::TYPE_ABSOLUTE);
-	}
-
 	return State;
 }
 
-CPostJson::CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson) :
-	CRequest(pUrl, Timeout)
+void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)
 {
-	str_copy(m_aJson, pJson, sizeof(m_aJson));
+	m_WriteToFile = true;
+	str_copy(m_aDest, pDest, sizeof(m_aDest));
+	if(StorageType == -2)
+	{
+		pStorage->GetBinaryPath(m_aDest, m_aDestAbsolute, sizeof(m_aDestAbsolute));
+	}
+	else
+	{
+		pStorage->GetCompletePath(StorageType, m_aDest, m_aDestAbsolute, sizeof(m_aDestAbsolute));
+	}
 }
 
-bool CPostJson::AfterInit(void *pCurl)
+void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
 {
-	CURL *pHandle = pCurl;
+	if(m_WriteToFile || State() != HTTP_DONE)
+	{
+		*ppResult = nullptr;
+		*pResultLength = 0;
+		return;
+	}
+	*ppResult = m_pBuffer;
+	*pResultLength = m_BufferLength;
+}
 
-	curl_slist *pHeaders = NULL;
-	pHeaders = curl_slist_append(pHeaders, "Content-Type: application/json");
-	curl_easy_setopt(pHandle, CURLOPT_HTTPHEADER, pHeaders);
-	curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, m_aJson);
-
-	return true;
+json_value *CHttpRequest::ResultJson() const
+{
+	unsigned char *pResult;
+	size_t ResultLength;
+	Result(&pResult, &ResultLength);
+	if(!pResult)
+	{
+		return nullptr;
+	}
+	return json_parse((char *)pResult, ResultLength);
 }

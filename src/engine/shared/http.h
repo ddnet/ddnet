@@ -2,12 +2,10 @@
 #define ENGINE_SHARED_HTTP_H
 
 #include <atomic>
-#include <engine/kernel.h>
 #include <engine/shared/jobs.h>
-#include <engine/storage.h>
 
 typedef struct _json_value json_value;
-typedef void CURL;
+class IStorage;
 
 enum
 {
@@ -39,119 +37,125 @@ struct CTimeout
 	long LowSpeedTime;
 };
 
-class CRequest : public IJob
+class CHttpRequest : public IJob
 {
-	// Abort the request with an error if `BeforeInit()` or `AfterInit()`
-	// returns false. Also abort the request if `OnData()` returns
-	// something other than `DataSize`.
-	virtual bool BeforeInit() { return true; }
-	virtual bool AfterInit(void *pCurl) { return true; }
-	virtual size_t OnData(char *pData, size_t DataSize) = 0;
+	enum class REQUEST
+	{
+		GET = 0,
+		HEAD,
+		POST_JSON,
+	};
+	char m_aUrl[256] = {0};
 
-	virtual void OnProgress() {}
+	void *m_pHeaders = nullptr;
+	unsigned char *m_pBody = nullptr;
+	size_t m_BodyLength = 0;
 
-	char m_aUrl[256];
+	CTimeout m_Timeout = CTimeout{0, 0, 0};
+	REQUEST m_Type = REQUEST::GET;
 
-	CTimeout m_Timeout;
+	bool m_WriteToFile = false;
 
-	std::atomic<double> m_Size;
-	std::atomic<double> m_Current;
-	std::atomic<int> m_Progress;
-	HTTPLOG m_LogProgress;
-	IPRESOLVE m_IpResolve;
+	// If `m_WriteToFile` is false.
+	size_t m_BufferSize = 0;
+	size_t m_BufferLength = 0;
+	unsigned char *m_pBuffer = nullptr;
 
-	std::atomic<int> m_State;
-	std::atomic<bool> m_Abort;
+	// If `m_WriteToFile` is true.
+	IOHANDLE m_File = nullptr;
+	char m_aDestAbsolute[IO_MAX_PATH_LENGTH] = {0};
+	char m_aDest[IO_MAX_PATH_LENGTH] = {0};
+
+	std::atomic<double> m_Size{0.0};
+	std::atomic<double> m_Current{0.0};
+	std::atomic<int> m_Progress{0};
+	HTTPLOG m_LogProgress = HTTPLOG::ALL;
+	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
+
+	std::atomic<int> m_State{HTTP_QUEUED};
+	std::atomic<bool> m_Abort{false};
+
+	void Run();
+	// Abort the request with an error if `BeforeInit()` returns false.
+	bool BeforeInit();
+	int RunImpl(void *pUser);
+
+	// Abort the request if `OnData()` returns something other than
+	// `DataSize`.
+	size_t OnData(char *pData, size_t DataSize);
 
 	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
-	void Run();
-	int RunImpl(CURL *pHandle);
-
 protected:
-	virtual int OnCompletion(int State) { return State; }
+	virtual void OnProgress() {}
+	virtual int OnCompletion(int State);
 
 public:
-	CRequest(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL, IPRESOLVE IpResolve = IPRESOLVE::WHATEVER);
+	CHttpRequest(const char *pUrl);
+	~CHttpRequest();
+
+	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
+	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
+	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
+	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
+	void Head() { m_Type = REQUEST::HEAD; }
+	void PostJson(const char *pJson)
+	{
+		m_Type = REQUEST::POST_JSON;
+		m_BodyLength = str_length(pJson);
+		m_pBody = (unsigned char *)malloc(m_BodyLength);
+		mem_copy(m_pBody, pJson, m_BodyLength);
+	}
+
+	const char *Dest()
+	{
+		if(m_WriteToFile)
+		{
+			return m_aDest;
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
 
 	double Current() const { return m_Current.load(std::memory_order_relaxed); }
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
 	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
 	int State() const { return m_State; }
 	void Abort() { m_Abort = true; }
-};
 
-class CHead : public CRequest
-{
-	virtual size_t OnData(char *pData, size_t DataSize) { return DataSize; }
-	virtual bool AfterInit(void *pCurl);
-
-public:
-	CHead(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
-	~CHead();
-};
-
-class CGet : public CRequest
-{
-	virtual size_t OnData(char *pData, size_t DataSize);
-
-	size_t m_BufferSize;
-	size_t m_BufferLength;
-	unsigned char *m_pBuffer;
-
-public:
-	CGet(const char *pUrl, CTimeout Timeout, HTTPLOG LogProgress = HTTPLOG::ALL);
-	~CGet();
-
-	size_t ResultSize() const
-	{
-		if(!Result())
-		{
-			return 0;
-		}
-		else
-		{
-			return m_BufferSize;
-		}
-	}
-	unsigned char *Result() const;
-	unsigned char *TakeResult();
+	void Result(unsigned char **ppResult, size_t *pResultLength) const;
 	json_value *ResultJson() const;
 };
 
-class CGetFile : public CRequest
+inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)
 {
-	virtual size_t OnData(char *pData, size_t DataSize);
-	virtual bool BeforeInit();
+	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	pResult->Head();
+	return pResult;
+}
 
-	IStorage *m_pStorage;
-
-	char m_aDestFull[IO_MAX_PATH_LENGTH];
-	IOHANDLE m_File;
-
-protected:
-	char m_aDest[IO_MAX_PATH_LENGTH];
-	int m_StorageType;
-
-	virtual int OnCompletion(int State);
-
-public:
-	CGetFile(IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL, IPRESOLVE IpResolve = IPRESOLVE::WHATEVER);
-
-	const char *Dest() const { return m_aDest; }
-};
-
-class CPostJson : public CRequest
+inline std::unique_ptr<CHttpRequest> HttpGet(const char *pUrl)
 {
-	virtual size_t OnData(char *pData, size_t DataSize) { return DataSize; }
-	virtual bool AfterInit(void *pCurl);
+	return std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+}
 
-	char m_aJson[1024];
+inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pStorage, const char *pOutputFile, int StorageType)
+{
+	std::unique_ptr<CHttpRequest> pResult = HttpGet(pUrl);
+	pResult->WriteToFile(pStorage, pOutputFile, StorageType);
+	pResult->Timeout(CTimeout{4000, 500, 5});
+	return pResult;
+}
 
-public:
-	CPostJson(const char *pUrl, CTimeout Timeout, const char *pJson);
-};
+inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *pJson)
+{
+	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	pResult->PostJson(pJson);
+	return pResult;
+}
 
 bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);

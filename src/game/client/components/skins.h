@@ -12,7 +12,7 @@
 class CSkins : public CComponent
 {
 public:
-	class CGetPngFile : public CGetFile
+	class CGetPngFile : public CHttpRequest
 	{
 		CSkins *m_pSkins;
 
@@ -20,7 +20,7 @@ public:
 		virtual int OnCompletion(int State) override;
 
 	public:
-		CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
+		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
 		CImageInfo m_Info;
 	};
 

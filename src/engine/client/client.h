@@ -180,7 +180,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
-	std::shared_ptr<CGetFile> m_pMapdownloadTask;
+	std::shared_ptr<CHttpRequest> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadFilenameTemp[256];
 	char m_aMapdownloadName[256];
@@ -198,7 +198,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	SHA256_DIGEST m_MapDetailsSha256;
 
 	char m_aDDNetInfoTmp[64];
-	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
+	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask;
 
 	// time
 	CSmoothTime m_GameTime[NUM_DUMMIES];

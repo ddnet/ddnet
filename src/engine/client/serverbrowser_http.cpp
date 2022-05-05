@@ -46,8 +46,8 @@ private:
 	{
 		LOCK m_Lock;
 		std::shared_ptr<CData> m_pData;
-		std::unique_ptr<CHead> m_pHead PT_GUARDED_BY(m_Lock);
-		std::unique_ptr<CGet> m_pGet PT_GUARDED_BY(m_Lock);
+		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
+		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
 		virtual void Run();
 
 	public:
@@ -166,9 +166,11 @@ void CChooseMaster::CJob::Run()
 	{
 		aTimeMs[i] = -1;
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		CHead *pHead = new CHead(pUrl, Timeout, HTTPLOG::FAILURE);
+		CHttpRequest *pHead = HttpHead(pUrl).release();
+		pHead->Timeout(Timeout);
+		pHead->LogProgress(HTTPLOG::FAILURE);
 		lock_wait(m_Lock);
-		m_pHead = std::unique_ptr<CHead>(pHead);
+		m_pHead = std::unique_ptr<CHttpRequest>(pHead);
 		lock_unlock(m_Lock);
 		IEngine::RunJobBlocking(pHead);
 		if(pHead->State() == HTTP_ABORTED)
@@ -181,9 +183,11 @@ void CChooseMaster::CJob::Run()
 			continue;
 		}
 		int64_t StartTime = time_get_microseconds();
-		CGet *pGet = new CGet(pUrl, Timeout, HTTPLOG::FAILURE);
+		CHttpRequest *pGet = HttpGet(pUrl).release();
+		pGet->Timeout(Timeout);
+		pGet->LogProgress(HTTPLOG::FAILURE);
 		lock_wait(m_Lock);
-		m_pGet = std::unique_ptr<CGet>(pGet);
+		m_pGet = std::unique_ptr<CHttpRequest>(pGet);
 		lock_unlock(m_Lock);
 		IEngine::RunJobBlocking(pGet);
 		int Time = (time_get_microseconds() - StartTime) / 1000;
@@ -290,7 +294,7 @@ private:
 	IConsole *m_pConsole;
 
 	int m_State = STATE_DONE;
-	std::shared_ptr<CGet> m_pGetServers;
+	std::shared_ptr<CHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
 	std::vector<CEntry> m_aServers;
@@ -327,9 +331,10 @@ void CServerBrowserHttp::Update()
 			}
 			return;
 		}
+		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
-		CTimeout Timeout{10000, 8000, 10};
-		m_pEngine->AddJob(m_pGetServers = std::make_shared<CGet>(pBestUrl, Timeout));
+		m_pGetServers->Timeout(CTimeout{10000, 8000, 10});
+		m_pEngine->AddJob(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
 	else if(m_State == STATE_REFRESHING)
@@ -339,7 +344,7 @@ void CServerBrowserHttp::Update()
 			return;
 		}
 		m_State = STATE_DONE;
-		std::shared_ptr<CGet> pGetServers = nullptr;
+		std::shared_ptr<CHttpRequest> pGetServers = nullptr;
 		std::swap(m_pGetServers, pGetServers);
 
 		bool Success = true;
