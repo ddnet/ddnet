@@ -200,10 +200,14 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	case REQUEST::HEAD:
 		curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
 		break;
+	case REQUEST::POST:
 	case REQUEST::POST_JSON:
+		if(m_Type == REQUEST::POST_JSON)
+		{
+			Header("Content-Type: application/json");
+		}
 		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, m_pBody);
 		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDSIZE, m_BodyLength);
-		m_pHeaders = curl_slist_append((curl_slist *)m_pHeaders, "Content-Type: application/json");
 		break;
 	}
 
@@ -305,6 +309,11 @@ void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int Storag
 	{
 		pStorage->GetCompletePath(StorageType, m_aDest, m_aDestAbsolute, sizeof(m_aDestAbsolute));
 	}
+}
+
+void CHttpRequest::Header(const char *pNameColonValue)
+{
+	m_pHeaders = curl_slist_append((curl_slist *)m_pHeaders, pNameColonValue);
 }
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const

@@ -43,6 +43,7 @@ class CHttpRequest : public IJob
 	{
 		GET = 0,
 		HEAD,
+		POST,
 		POST_JSON,
 	};
 	char m_aUrl[256] = {0};
@@ -100,12 +101,32 @@ public:
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
 	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
 	void Head() { m_Type = REQUEST::HEAD; }
+	void Post(const unsigned char *pData, size_t DataLength)
+	{
+		m_Type = REQUEST::POST;
+		m_BodyLength = DataLength;
+		m_pBody = (unsigned char *)malloc(DataLength);
+		mem_copy(m_pBody, pData, DataLength);
+	}
 	void PostJson(const char *pJson)
 	{
 		m_Type = REQUEST::POST_JSON;
 		m_BodyLength = str_length(pJson);
 		m_pBody = (unsigned char *)malloc(m_BodyLength);
 		mem_copy(m_pBody, pJson, m_BodyLength);
+	}
+	void Header(const char *pNameColonValue);
+	void HeaderString(const char *pName, const char *pValue)
+	{
+		char aHeader[256];
+		str_format(aHeader, sizeof(aHeader), "%s: %s", pName, pValue);
+		Header(aHeader);
+	}
+	void HeaderInt(const char *pName, int Value)
+	{
+		char aHeader[256];
+		str_format(aHeader, sizeof(aHeader), "%s: %d", pName, Value);
+		Header(aHeader);
 	}
 
 	const char *Dest()
@@ -147,6 +168,13 @@ inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pSt
 	std::unique_ptr<CHttpRequest> pResult = HttpGet(pUrl);
 	pResult->WriteToFile(pStorage, pOutputFile, StorageType);
 	pResult->Timeout(CTimeout{4000, 500, 5});
+	return pResult;
+}
+
+inline std::unique_ptr<CHttpRequest> HttpPost(const char *pUrl, const unsigned char *pData, size_t DataLength)
+{
+	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	pResult->Post(pData, DataLength);
 	return pResult;
 }
 
