@@ -1731,10 +1731,10 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 		char *pCurLoc = pCensoredMessage;
 		do
 		{
-			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].cstr());
+			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].c_str());
 			if(pCurLoc)
 			{
-				memset(pCurLoc, '*', str_length(m_aCensorlist[i].cstr()));
+				memset(pCurLoc, '*', m_aCensorlist[i].length());
 				pCurLoc++;
 			}
 		} while(pCurLoc);

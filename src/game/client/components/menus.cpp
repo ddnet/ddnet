@@ -2293,7 +2293,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 	int SelectedTheme = -1;
 	for(int i = 0; i < (int)ThemesRef.size(); i++)
 	{
-		if(str_comp(ThemesRef[i].m_Name, g_Config.m_ClMenuMap) == 0)
+		if(str_comp(ThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
 		{
 			SelectedTheme = i;
 			break;
@@ -2330,20 +2330,20 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		}
 
 		char aName[128];
-		if(!Theme.m_Name[0])
+		if(Theme.m_Name.empty())
 			str_copy(aName, "(none)", sizeof(aName));
-		else if(str_comp(Theme.m_Name, "auto") == 0)
+		else if(str_comp(Theme.m_Name.c_str(), "auto") == 0)
 			str_copy(aName, "(seasons)", sizeof(aName));
-		else if(str_comp(Theme.m_Name, "rand") == 0)
+		else if(str_comp(Theme.m_Name.c_str(), "rand") == 0)
 			str_copy(aName, "(random)", sizeof(aName));
 		else if(Theme.m_HasDay && Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
 		else if(Theme.m_HasDay && !Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.c_str());
 		else if(!Theme.m_HasDay && Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.c_str());
 		else // generic
-			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
 
 		UI()->DoLabel(&Item.m_Rect, aName, 16 * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
 	}
@@ -2353,7 +2353,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	if(ItemActive && NewSelected != SelectedTheme)
 	{
-		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.cstr());
+		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.c_str());
 		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
 	}
 }
