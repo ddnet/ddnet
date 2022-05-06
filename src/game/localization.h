@@ -3,7 +3,8 @@
 #ifndef GAME_LOCALIZATION_H
 #define GAME_LOCALIZATION_H
 #include <base/tl/sorted_array.h>
-#include <base/tl/string.h>
+
+#include <engine/shared/memheap.h>
 
 class CLocalizationDatabase
 {
@@ -12,9 +13,7 @@ class CLocalizationDatabase
 	public:
 		unsigned m_Hash;
 		unsigned m_ContextHash;
-
-		// TODO: do this as an const char * and put everything on a incremental heap
-		string m_Replacement;
+		const char *m_pReplacement;
 
 		bool operator<(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash < Other.m_ContextHash); }
 		bool operator<=(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash <= Other.m_ContextHash); }
@@ -22,6 +21,7 @@ class CLocalizationDatabase
 	};
 
 	sorted_array<CString> m_Strings;
+	CHeap m_StringsHeap;
 	int m_VersionCounter;
 	int m_CurrentVersion;
 
@@ -30,10 +30,10 @@ public:
 
 	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
 
-	int Version() { return m_CurrentVersion; }
+	int Version() const { return m_CurrentVersion; }
 
 	void AddString(const char *pOrgStr, const char *pNewStr, const char *pContext);
-	const char *FindString(unsigned Hash, unsigned ContextHash);
+	const char *FindString(unsigned Hash, unsigned ContextHash) const;
 };
 
 extern CLocalizationDatabase g_Localization;

@@ -1606,7 +1606,6 @@ set_src(BASE GLOB_RECURSE src/base
   tl/base.h
   tl/range.h
   tl/sorted_array.h
-  tl/string.h
   tl/threading.h
   unicode/confusables.cpp
   unicode/confusables_data.h

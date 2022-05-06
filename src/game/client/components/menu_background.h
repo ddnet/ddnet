@@ -4,6 +4,7 @@
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
+#include <string>
 #include <vector>
 
 class CMenuMap : public CBackgroundEngineMap
@@ -19,7 +20,7 @@ public:
 	CTheme(const char *n, bool HasDay, bool HasNight) :
 		m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
-	string m_Name;
+	std::string m_Name;
 	bool m_HasDay;
 	bool m_HasNight;
 	IGraphics::CTextureHandle m_IconTexture;
