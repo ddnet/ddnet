@@ -26,7 +26,6 @@
 #include "voting.h"
 
 #include "ghost.h"
-#include <base/tl/string.h>
 #include <engine/keys.h>
 #include <engine/storage.h>
 

@@ -19,7 +19,6 @@
 
 #include "scoreboard.h"
 
-#include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 
 CScoreboard::CScoreboard()
