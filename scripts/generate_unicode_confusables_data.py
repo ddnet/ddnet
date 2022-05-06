@@ -5,8 +5,8 @@
 # - http://www.unicode.org/Public/<VERSION>/ucd/UnicodeData.txt
 #
 # If executed as a script, it will generate the contents of the files
-# python3 scripts/generate_unicode_confusables_data.py header > `src/base/unicode/confusables_data.h`,
-# python3 scripts/generate_unicode_confusables_data.py source > `src/base/unicode/confusables_data.h`.
+# python3 scripts/generate_unicode_confusables_data.py header > `src/base/unicode/confusables.h`,
+# python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.h`.
 
 import unicode
 import sys
@@ -72,7 +72,7 @@ struct DECOMP_SLICE
 	print("extern const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS];")
 	print("extern const int32_t decomp_data[];")
 
-def gen_source(decompositions, decomposition_set, decomposition_offsets, len_set):
+def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
 	print("""\
 #ifndef CONFUSABLES_DATA
 #error "This file should only be included in `confusables.cpp`"
@@ -123,12 +123,12 @@ def main():
 		cur_offset += len(d)
 
 	header = "header" in sys.argv
-	source = "source" in sys.argv
+	data = "data" in sys.argv
 
 	if header:
 	    gen_header(decompositions, len_set)
-	elif source:
-	    gen_source(decompositions, decomposition_set, decomposition_offsets, len_set)
+	elif data:
+	    gen_data(decompositions, decomposition_set, decomposition_offsets, len_set)
 
 if __name__ == '__main__':
 	main()

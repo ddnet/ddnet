@@ -4,8 +4,8 @@
 # - http://www.unicode.org/Public/<VERSION>/ucd/UnicodeData.txt
 #
 # If executed as a script, it will generate the contents of the file
-# python3 scripts/generate_unicode_tolower.py header > `src/base/unicode/tolower_data.h`,
-# python3 scripts/generate_unicode_tolower.py source > `src/base/unicode/tolower_data.c`.
+# python3 scripts/generate_unicode_tolower.py header > `src/base/unicode/tolower.h`,
+# python3 scripts/generate_unicode_tolower.py data > `src/base/unicode/tolower_data.h`.
 
 import unicode
 import sys
@@ -31,7 +31,7 @@ enum
 
 extern const struct UPPER_LOWER tolowermap[];""".format(len(cases)))
 
-def gen_source(cases):
+def gen_data(cases):
 	print("""\
 #ifndef TOLOWER_DATA
 #error "This file must only be included in `tolower.cpp`"
@@ -46,12 +46,12 @@ def main():
 	cases = generate_cases()
 
 	header = "header" in sys.argv
-	source = "source" in sys.argv
+	data = "data" in sys.argv
 
 	if header:
 		gen_header(cases)
-	elif source:
-		gen_source(cases)
+	elif data:
+		gen_data(cases)
 
 if __name__ == '__main__':
 	main()
