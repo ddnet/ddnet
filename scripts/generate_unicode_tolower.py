@@ -4,17 +4,17 @@
 # - http://www.unicode.org/Public/<VERSION>/ucd/UnicodeData.txt
 #
 # If executed as a script, it will generate the contents of the file
-# `src/base/unicode/tolower_data.h`.
+# python3 scripts/generate_unicode_tolower.py header > `src/base/unicode/tolower_data.h`,
+# python3 scripts/generate_unicode_tolower.py source > `src/base/unicode/tolower_data.c`.
 
 import unicode
+import sys
 
 def generate_cases():
 	ud = unicode.data()
 	return [(unicode.unhex(u["Value"]), unicode.unhex(u["Simple_Lowercase_Mapping"])) for u in ud if u["Simple_Lowercase_Mapping"]]
 
-def main():
-	cases = generate_cases()
-
+def gen_header(cases):
 	print("""\
 #include <stdint.h>
 
@@ -26,13 +26,32 @@ struct UPPER_LOWER
 
 enum
 {{
-\tNUM_TOLOWER={},
+\tNUM_TOLOWER = {},
 }};
 
-static const struct UPPER_LOWER tolower[NUM_TOLOWER] = {{""".format(len(cases)))
+extern const struct UPPER_LOWER tolowermap[];""".format(len(cases)))
+
+def gen_source(cases):
+	print("""\
+#ifndef TOLOWER_DATA
+#error "This file must only be included in `tolower.cpp`"
+#endif
+
+const struct UPPER_LOWER tolowermap[] = {""")
 	for upper_code, lower_code in cases:
 		print("\t{{{}, {}}},".format(upper_code, lower_code))
 	print("};")
+
+def main():
+	cases = generate_cases()
+
+	header = "header" in sys.argv
+	source = "source" in sys.argv
+
+	if header:
+		gen_header(cases)
+	elif source:
+		gen_source(cases)
 
 if __name__ == '__main__':
 	main()
