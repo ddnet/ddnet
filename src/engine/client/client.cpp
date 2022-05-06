@@ -698,7 +698,7 @@ void CClient::EnterGame(int Conn)
 		return;
 
 	m_CodeRunAfterJoin[Conn] = false;
-
+	m_CodeRunAfterJoinConsole[Conn] = false;
 	// now we will wait for two snapshots
 	// to finish the connection
 	SendEnterGame(Conn);
@@ -2095,12 +2095,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_GameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
-					if(g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay)
+					if(g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay && !m_CodeRunAfterJoinConsole[Conn])
 					{
 						m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
+						m_CodeRunAfterJoinConsole[Conn] = true;
 					}
 
-					if((m_ReceivedSnapshots[Conn] > 50 !m_CodeRunAfterJoin[Conn])
+					if(m_ReceivedSnapshots[Conn] > 50 && !m_CodeRunAfterJoin[Conn])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{

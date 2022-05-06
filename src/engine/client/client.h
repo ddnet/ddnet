@@ -172,6 +172,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
 	bool m_CodeRunAfterJoin[NUM_DUMMIES];
+	bool m_CodeRunAfterJoinConsole[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
