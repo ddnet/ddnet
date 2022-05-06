@@ -277,7 +277,6 @@ void CGameWorld::ReleaseHooked(int ClientID)
 			Core->m_HookedPlayer = -1;
 			Core->m_HookState = HOOK_RETRACTED;
 			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			Core->m_HookState = HOOK_RETRACTED;
 		}
 	}
 }

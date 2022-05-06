@@ -2367,3 +2367,8 @@ int64_t CCharacter::TeamMask()
 {
 	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID());
 }
+
+void CCharacter::SwapClients(int Client1, int Client2)
+{
+	m_Core.m_HookedPlayer = m_Core.m_HookedPlayer == Client1 ? Client2 : m_Core.m_HookedPlayer == Client2 ? Client1 : m_Core.m_HookedPlayer;
+}

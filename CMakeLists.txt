@@ -1594,6 +1594,9 @@ set_src(BASE GLOB_RECURSE src/base
   hash_ctxt.h
   hash_libtomcrypt.cpp
   hash_openssl.cpp
+  log.cpp
+  log.h
+  logger.h
   math.h
   system.cpp
   system.h
@@ -2672,6 +2675,8 @@ set(CPACK_GEN_FILES
 
 if(TARGET_OS STREQUAL "windows")
   list(APPEND CPACK_FILES other/config_directory.bat)
+else()
+  list(APPEND CPACK_FILES other/config_directory.sh)
 endif()
 
 if(NOT DEV)

@@ -1,4 +1,5 @@
 // Adapted from TWMapImagesRecovery by Tardo: https://github.com/Tardo/TWMapImagesRecovery
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
@@ -96,7 +97,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 int main(int argc, const char *argv[])
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 
 	char aMap[512];
 	char aDir[512];

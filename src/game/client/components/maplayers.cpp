@@ -1410,8 +1410,12 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			// render quads of the current offset directly(cancel batching)
 			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_QuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
 			QuadsRenderCount = 0;
-			// since this quad is ignored, the offset is the next quad
-			CurQuadOffset = i + 1;
+			CurQuadOffset = i;
+			if(aColor[3] == 0)
+			{
+				// since this quad is ignored, the offset is the next quad
+				++CurQuadOffset;
+			}
 		}
 
 		if(aColor[3] > 0)

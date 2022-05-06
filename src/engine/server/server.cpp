@@ -5,6 +5,7 @@
 
 #include "server.h"
 
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -16,6 +17,7 @@
 #include <engine/server.h>
 #include <engine/storage.h>
 
+#include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
@@ -36,6 +38,7 @@
 
 // DDRace
 #include <engine/shared/linereader.h>
+#include <thread>
 #include <vector>
 #include <zlib.h>
 
@@ -272,6 +275,77 @@ void CServerBan::ConBanRegionRange(IConsole::IResult *pResult, void *pUser)
 	ConBanRange(pResult, static_cast<CNetBan *>(pServerBan));
 }
 
+class CServerLogger : public ILogger
+{
+	CServer *m_pServer;
+	std::mutex m_PendingLock;
+	std::vector<CLogMessage> m_aPending;
+	std::thread::id m_MainThread;
+
+public:
+	CServerLogger(CServer *pServer) :
+		m_pServer(pServer),
+		m_MainThread(std::this_thread::get_id())
+	{
+		dbg_assert(pServer != nullptr, "server pointer must not be null");
+	}
+	void Log(const CLogMessage *pMessage) override;
+	// Must be called from the main thread!
+	void OnServerDeletion();
+};
+
+void CServerLogger::Log(const CLogMessage *pMessage)
+{
+	m_PendingLock.lock();
+	if(m_MainThread == std::this_thread::get_id())
+	{
+		if(!m_aPending.empty())
+		{
+			if(m_pServer)
+			{
+				for(const auto &Message : m_aPending)
+				{
+					m_pServer->SendLogLine(&Message);
+				}
+			}
+			m_aPending.clear();
+		}
+		m_PendingLock.unlock();
+		m_pServer->SendLogLine(pMessage);
+	}
+	else
+	{
+		m_aPending.push_back(*pMessage);
+		m_PendingLock.unlock();
+	}
+}
+
+void CServerLogger::OnServerDeletion()
+{
+	dbg_assert(m_MainThread == std::this_thread::get_id(), "CServerLogger::OnServerDeletion not called from the main thread");
+	m_pServer = nullptr;
+}
+
+// Not thread-safe!
+class CRconClientLogger : public ILogger
+{
+	CServer *m_pServer;
+	int m_ClientID;
+
+public:
+	CRconClientLogger(CServer *pServer, int ClientID) :
+		m_pServer(pServer),
+		m_ClientID(ClientID)
+	{
+	}
+	void Log(const CLogMessage *pMessage) override;
+};
+
+void CRconClientLogger::Log(const CLogMessage *pMessage)
+{
+	m_pServer->SendRconLogLine(m_ClientID, pMessage);
+}
+
 void CServer::CClient::Reset()
 {
 	// reset input
@@ -318,8 +392,6 @@ CServer::CServer() :
 
 	m_RconClientID = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
-
-	m_RconRestrict = -1;
 
 	m_ServerInfoFirstRequest = 0;
 	m_ServerInfoNumRequests = 0;
@@ -537,6 +609,18 @@ int CServer::Init()
 	memset(m_aPrevStates, CClient::STATE_EMPTY, MAX_CLIENTS * sizeof(int));
 
 	return 0;
+}
+
+void CServer::SendLogLine(const CLogMessage *pMessage)
+{
+	if(pMessage->m_Level <= IConsole::ToLogLevel(g_Config.m_ConsoleOutputLevel))
+	{
+		SendRconLogLine(-1, pMessage);
+	}
+	if(pMessage->m_Level <= IConsole::ToLogLevel(g_Config.m_EcOutputLevel))
+	{
+		m_Econ.Send(-1, pMessage->m_aLine);
+	}
 }
 
 void CServer::SetRconCID(int ClientID)
@@ -1232,15 +1316,9 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor)
+void CServer::SendRconLogLine(int ClientID, const CLogMessage *pMessage)
 {
-	CServer *pThis = (CServer *)pUser;
-	static int s_ReentryGuard = 0;
-
-	if(s_ReentryGuard)
-		return;
-	s_ReentryGuard++;
-
+	const char *pLine = pMessage->m_aLine;
 	const char *pStart = str_find(pLine, "<{");
 	const char *pEnd = pStart == NULL ? NULL : str_find(pStart + 2, "}>");
 	const char *pLineWithoutIps;
@@ -1267,13 +1345,19 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA Print
 		pLineWithoutIps = aLineWithoutIps;
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	if(ClientID == -1)
 	{
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i))
-			pThis->SendRconLine(i, pThis->m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_Authed >= AUTHED_ADMIN)
+				SendRconLine(i, m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
+		}
 	}
-
-	s_ReentryGuard--;
+	else
+	{
+		if(m_aClients[ClientID].m_State != CClient::STATE_EMPTY)
+			SendRconLine(ClientID, m_aClients[ClientID].m_ShowIps ? pLine : pLineWithoutIps);
+	}
 }
 
 void CServer::SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID)
@@ -1587,7 +1671,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					m_RconClientID = ClientID;
 					m_RconAuthLevel = m_aClients[ClientID].m_Authed;
 					Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientID].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : m_aClients[ClientID].m_Authed == AUTHED_HELPER ? IConsole::ACCESS_LEVEL_HELPER : IConsole::ACCESS_LEVEL_USER);
-					Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientID);
+					{
+						CRconClientLogger Logger(this, ClientID);
+						CLogScope Scope(&Logger);
+						Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientID);
+					}
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 					m_RconClientID = IServer::RCON_CID_SERV;
 					m_RconAuthLevel = AUTHED_ADMIN;
@@ -2400,8 +2488,6 @@ int CServer::Run()
 	{
 		g_UuidManager.DebugDump();
 	}
-
-	m_PrintCBIndex = Console()->RegisterPrintCallback(Config()->m_ConsoleOutputLevel, SendRconLineAuthed, this);
 
 	{
 		int Size = GameServer()->PersistentClientDataSize();
@@ -3357,16 +3443,6 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 		pfnCallback(pResult, pCallbackUserData);
 }
 
-void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 1)
-	{
-		CServer *pThis = static_cast<CServer *>(pUserData);
-		pThis->Console()->SetPrintOutputLevel(pThis->m_PrintCBIndex, pResult->GetInteger(0));
-	}
-}
-
 void CServer::LogoutClient(int ClientID, const char *pReason)
 {
 	if(!IsSixup(ClientID))
@@ -3549,7 +3625,6 @@ void CServer::RegisterCommands()
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("access_level", ConchainCommandAccessUpdate, this);
-	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
@@ -3619,6 +3694,23 @@ int main(int argc, const char **argv)
 		}
 	}
 
+	std::vector<std::shared_ptr<ILogger>> apLoggers;
+#if defined(CONF_PLATFORM_ANDROID)
+	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+#else
+	if(!Silent)
+	{
+		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+	}
+#endif
+	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureFileLogger);
+	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureConsoleLogger);
+	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+
 	if(secure_random_init() != 0)
 	{
 		dbg_msg("secure", "could not initialize secure RNG");
@@ -3641,15 +3733,16 @@ int main(int argc, const char **argv)
 	IKernel *pKernel = IKernel::Create();
 
 	// create the components
-	IEngine *pEngine = CreateEngine("DDNet", Silent, 2);
+	IEngine *pEngine = CreateEngine("DDNet", pFutureConsoleLogger, 2);
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 
+	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 #if defined(CONF_EXCEPTION_HANDLING)
 	char aBuf[IO_MAX_PATH_LENGTH];
 	char aBufName[IO_MAX_PATH_LENGTH];
@@ -3713,7 +3806,19 @@ int main(int argc, const char **argv)
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
 
-	pEngine->InitLogfile();
+	if(g_Config.m_Logfile[0])
+	{
+		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
+		if(Logfile)
+		{
+			pFutureFileLogger->Set(log_logger_file(Logfile));
+		}
+		else
+		{
+			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+		}
+	}
+	pEngine->SetAdditionalLogger(std::unique_ptr<ILogger>(new CServerLogger(pServer)));
 
 	// run the server
 	dbg_msg("server", "starting...");

@@ -5,6 +5,7 @@
 #include <game/client/component.h>
 #include <game/client/ui.h>
 
+#include <optional>
 #include <unordered_map>
 
 struct CTooltip
@@ -12,6 +13,7 @@ struct CTooltip
 	CUIRect m_Rect;
 	const char *m_pText;
 	float m_WidthHint;
+	bool m_OnScreen; // used to know if the tooltip should be rendered.
 };
 
 /**
@@ -22,7 +24,7 @@ struct CTooltip
 class CTooltips : public CComponent
 {
 	std::unordered_map<uintptr_t, CTooltip> m_Tooltips;
-	CTooltip *m_pActiveTooltip;
+	std::optional<std::reference_wrapper<CTooltip>> m_ActiveTooltip;
 	int64_t HoverTime;
 
 	/**

@@ -82,10 +82,10 @@ public:
 
 	void DrawSprite(float x, float y, float size);
 	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);
-	void QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
-	void QuadContainerAddSprite(int QuadContainerIndex, float size);
-	void QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
-	void QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
+	int QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
+	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
 	// rects
 	void DrawRoundRect(float x, float y, float w, float h, float r);

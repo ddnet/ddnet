@@ -33,11 +33,13 @@
 #include "upnp.h"
 #endif
 
+class CLogMessage;
+
 class CSnapIDPool
 {
 	enum
 	{
-		MAX_IDS = 16 * 1024,
+		MAX_IDS = 32 * 1024,
 	};
 
 	class CID
@@ -88,6 +90,8 @@ public:
 
 class CServer : public IServer
 {
+	friend class CServerLogger;
+
 	class IGameServer *m_pGameServer;
 	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
@@ -251,8 +255,6 @@ public:
 	CRegister m_RegSixup;
 	CAuthManager m_AuthManager;
 
-	int m_RconRestrict;
-
 	int64_t m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
@@ -285,6 +287,7 @@ public:
 
 	int Init();
 
+	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCID(int ClientID);
 	int GetAuthedState(int ClientID) const;
 	const char *GetAuthName(int ClientID) const;
@@ -318,7 +321,8 @@ public:
 	void SendMapData(int ClientID, int Chunk);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
-	static void SendRconLineAuthed(const char *pLine, void *pUser, ColorRGBA PrintColor = {1, 1, 1, 1});
+	// Accepts -1 as ClientID to mean "all clients with at least auth level admin"
+	void SendRconLogLine(int ClientID, const CLogMessage *pMessage);
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
@@ -403,7 +407,6 @@ public:
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	void LogoutClient(int ClientID, const char *pReason);
 	void LogoutKey(int Key, const char *pReason);
@@ -432,7 +435,6 @@ public:
 	int m_aPrevStates[MAX_CLIENTS];
 	const char *GetAnnouncementLine(char const *pFileName);
 	unsigned m_AnnouncementLastLine;
-	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
 	virtual int *GetIdMap(int ClientID);
 

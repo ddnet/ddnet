@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <cstdint>
@@ -79,9 +80,9 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	int ID = 0, Type = 0, Size;
 	void *pPtr;
 	char aFileName[IO_MAX_PATH_LENGTH];

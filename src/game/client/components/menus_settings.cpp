@@ -36,6 +36,7 @@
 #include <vector>
 
 #include <array>
+#include <numeric>
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -478,10 +479,11 @@ struct CUISkin
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Button2, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton;
+	CUIRect Button, Label, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton, Eyes, EyesLabel, EyesTee, EyesRight;
 
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
+	Eyes = MainView;
 
 	char *pSkinName = g_Config.m_ClPlayerSkin;
 	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
@@ -519,7 +521,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
 	Dummy.VSplitLeft(170.0f, &Dummy, &SkinPrefix);
-	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, 0);
+	SkinPrefix.VSplitLeft(120.0f, &SkinPrefix, &EyesRight);
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
@@ -530,7 +532,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings."));
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings"));
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
 
@@ -586,9 +588,61 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	vec2 OffsetToMid;
 	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
 	vec2 TeeRenderPos(Label.x + 30.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
-	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, 0, vec2(1, 0), TeeRenderPos);
+	int Emote = m_Dummy ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, Emote, vec2(1, 0), TeeRenderPos);
 	Label.VSplitLeft(70.0f, 0, &Label);
 	Label.HMargin(15.0f, &Label);
+
+	// default eyes
+	bool RenderEyesBelow = MainView.w < 750.0f;
+	if(RenderEyesBelow)
+	{
+		Eyes.VSplitLeft(190.0f, 0, &Eyes);
+		Eyes.HSplitTop(85.0f, 0, &Eyes);
+	}
+	else
+	{
+		Eyes = EyesRight;
+		if(MainView.w < 810.0f)
+			Eyes.VSplitRight(205.0f, 0, &Eyes);
+		Eyes.HSplitTop(50.0f, &Eyes, 0);
+	}
+	Eyes.HSplitTop(120.0f, &EyesLabel, &Eyes);
+	EyesLabel.VSplitLeft(20.0f, 0, &EyesLabel);
+	EyesLabel.HSplitTop(50.0f, &EyesLabel, &Eyes);
+
+	float Highlight = 0.0f;
+	static int s_aEyeButtons[6];
+	static int s_aEyesToolTip[6];
+	for(int CurrentEyeEmote = 0; CurrentEyeEmote < 6; CurrentEyeEmote++)
+	{
+		EyesLabel.VSplitLeft(10.0f, 0, &EyesLabel);
+		EyesLabel.VSplitLeft(50.0f, &EyesTee, &EyesLabel);
+
+		if(CurrentEyeEmote == 2 && !RenderEyesBelow)
+		{
+			Eyes.HSplitTop(60.0f, &EyesLabel, 0);
+			EyesLabel.HSplitTop(10.0f, 0, &EyesLabel);
+		}
+		Highlight = (m_Dummy) ? g_Config.m_ClDummyDefaultEyes == CurrentEyeEmote : g_Config.m_ClPlayerDefaultEyes == CurrentEyeEmote;
+		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, CUI::CORNER_ALL, 10.0f, 0.0f, vec4(1, 1, 1, 0.5f + Highlight * 0.25f), vec4(1, 1, 1, 0.25f + Highlight * 0.25f)))
+		{
+			if(m_Dummy)
+			{
+				g_Config.m_ClDummyDefaultEyes = CurrentEyeEmote;
+				if(g_Config.m_ClDummy)
+					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
+			}
+			else
+			{
+				g_Config.m_ClPlayerDefaultEyes = CurrentEyeEmote;
+				if(!g_Config.m_ClDummy)
+					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
+			}
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
+		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
+	}
 
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
@@ -600,9 +654,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	// custom color selector
-	MainView.HSplitTop(20.0f, 0, &MainView);
+	MainView.HSplitTop(20.0f + RenderEyesBelow * 25.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitMid(&Button, &Button2);
+	Button.VSplitLeft(150.0f, &Button, 0);
 	static int s_CustomColorID = 0;
 	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
@@ -639,7 +693,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(230.0f, &SkinList, &MainView);
+	MainView.HSplitTop(230.0f - RenderEyesBelow * 25.0f, &SkinList, &MainView);
 	static sorted_array<CUISkin> s_paSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
@@ -1159,7 +1213,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_FontSizeResList = 10.0f;
 	int OldSelected = -1;
 	{
-		int G = gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
+		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
 	}
 
@@ -1180,7 +1234,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&s_aModes[i], OldSelected == i);
 		if(Item.m_Visible)
 		{
-			int G = gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
+			int G = std::gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
 			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, sc_FontSizeResList, TEXTALIGN_LEFT);
 		}
@@ -1294,7 +1348,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail"));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
@@ -3017,7 +3071,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClRaceGhost, &Button, Localize("When you cross the start line, show a ghost tee replicating the movements of your best time"));
 
 	if(g_Config.m_ClRaceGhost)
 	{
@@ -3106,7 +3160,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	{
 		g_Config.m_ClAntiPing ^= 1;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency."));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClAntiPing, &Button, Localize("Tries to predict other entities to give a feel of low latency"));
 
 	if(g_Config.m_ClAntiPing)
 	{

@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/logger.h>
 #include <base/system.h>
 
 #include <engine/config.h>
@@ -326,14 +327,14 @@ int main(int argc, const char **argv)
 
 	cmdline_fix(&argc, &argv);
 
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 	net_init();
 
 	mem_copy(m_CountData.m_Header, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT));
 	mem_copy(m_CountDataLegacy.m_Header, SERVERBROWSE_COUNT_LEGACY, sizeof(SERVERBROWSE_COUNT_LEGACY));
 
 	IKernel *pKernel = IKernel::Create();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
 

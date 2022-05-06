@@ -1257,6 +1257,12 @@ Settings file
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
 Chat command
 == 
 
@@ -1273,6 +1279,9 @@ Windowed fullscreen
 == 
 
 Desktop fullscreen
+== 
+
+Allows maps to render with more detail
 == 
 
 Renderer
@@ -1323,6 +1332,18 @@ Tee
 Preview
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Show local player's key presses
 == 
 
@@ -1351,4 +1372,10 @@ Tutorial
 == 
 
 Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

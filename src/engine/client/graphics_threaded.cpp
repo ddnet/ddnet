@@ -1470,12 +1470,14 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 	}
 }
 
-void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num)
+int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num)
 {
 	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
 	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
-		return;
+		return -1;
+
+	int RetOff = (int)Container.m_Quads.size();
 
 	for(int i = 0; i < Num; ++i)
 	{
@@ -1514,14 +1516,18 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pA
 
 	if(Container.m_AutomaticUpload)
 		QuadContainerUpload(ContainerIndex);
+
+	return RetOff;
 }
 
-void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num)
+int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num)
 {
 	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
 
 	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
-		return;
+		return -1;
+
+	int RetOff = (int)Container.m_Quads.size();
 
 	for(int i = 0; i < Num; ++i)
 	{
@@ -1551,6 +1557,8 @@ void CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem
 
 	if(Container.m_AutomaticUpload)
 		QuadContainerUpload(ContainerIndex);
+
+	return RetOff;
 }
 
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)

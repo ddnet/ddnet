@@ -926,7 +926,13 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Vanilla skins only
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skins
@@ -981,6 +987,9 @@ may cause delay
 == 
 
 FSAA samples
+== 
+
+Allows maps to render with more detail
 == 
 
 Use high DPI
@@ -1097,6 +1106,9 @@ Save the best demo of each race
 Default length: %d
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Show ghost
 == 
 
@@ -1109,10 +1121,19 @@ Overlay entities
 Show text entities
 == 
 
+Opacity
+== 
+
 Show others (own team only)
 == 
 
 Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 AntiPing: predict other players
@@ -1200,6 +1221,12 @@ Time limit: %d min
 == 
 
 Round
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

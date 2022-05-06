@@ -15,61 +15,56 @@ void CTooltips::OnReset()
 
 void CTooltips::SetActiveTooltip(CTooltip &Tooltip)
 {
-	if(m_pActiveTooltip != nullptr)
+	if(m_ActiveTooltip.has_value())
 		return;
 
-	m_pActiveTooltip = &Tooltip;
+	m_ActiveTooltip.emplace(Tooltip);
 	HoverTime = time_get();
 }
 
 inline void CTooltips::ClearActiveTooltip()
 {
-	m_pActiveTooltip = nullptr;
+	m_ActiveTooltip.reset();
 }
 
 void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
 	uintptr_t ID = reinterpret_cast<uintptr_t>(pID);
+	const auto result = m_Tooltips.emplace(ID, CTooltip{
+							   *pNearRect,
+							   pText,
+							   WidthHint,
+							   false});
+	CTooltip &Tooltip = result.first->second;
 
-	const auto &it = m_Tooltips.find(ID);
-
-	if(it == m_Tooltips.end())
+	if(!result.second)
 	{
-		CTooltip NewTooltip = {
-			*pNearRect,
-			pText,
-			WidthHint,
-		};
-
-		m_Tooltips[ID] = NewTooltip;
-
-		CTooltip &Tooltip = m_Tooltips[ID];
-
-		if(UI()->MouseInside(&Tooltip.m_Rect))
-		{
-			SetActiveTooltip(Tooltip);
-		}
+		Tooltip.m_Rect = *pNearRect; // update in case of window resize
 	}
-	else
+
+	Tooltip.m_OnScreen = true;
+
+	if(UI()->MouseInside(&Tooltip.m_Rect))
 	{
-		if(UI()->MouseInside(&it->second.m_Rect))
-		{
-			SetActiveTooltip(it->second);
-		}
+		SetActiveTooltip(Tooltip);
 	}
 }
 
 void CTooltips::OnRender()
 {
-	if(m_pActiveTooltip != nullptr)
+	if(m_ActiveTooltip.has_value())
 	{
-		CTooltip &Tooltip = *m_pActiveTooltip;
+		CTooltip &Tooltip = m_ActiveTooltip.value();
 
 		if(!UI()->MouseInside(&Tooltip.m_Rect))
 		{
+			Tooltip.m_OnScreen = false;
 			ClearActiveTooltip();
 			return;
 		}
+
+		if(!Tooltip.m_OnScreen)
+			return;
 
 		// Delay tooltip until 1 second passed.
 		if(HoverTime > time_get() - time_freq())
@@ -113,5 +108,6 @@ void CTooltips::OnRender()
 		RenderTools()->DrawUIRect(&Rect, ColorRGBA(0.2, 0.2, 0.2, 0.80f), CUI::CORNER_ALL, 5.0f);
 		Rect.Margin(2.0f, &Rect);
 		UI()->DoLabel(&Rect, Tooltip.m_pText, 14.0f, TEXTALIGN_LEFT);
+		Tooltip.m_OnScreen = false;
 	}
 }

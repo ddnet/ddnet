@@ -1362,5 +1362,32 @@ auto
 Tutorial
 == 進入教學
 
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
+Allows maps to render with more detail
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

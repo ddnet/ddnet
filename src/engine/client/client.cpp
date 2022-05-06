@@ -10,6 +10,7 @@
 #include <tuple>
 
 #include <base/hash_ctxt.h>
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
@@ -35,6 +36,7 @@
 
 #include <engine/client/http.h>
 #include <engine/client/notifications.h>
+#include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
@@ -2093,33 +2095,64 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_GameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
+					if(g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay)
+					{
+						m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
+					}
 
-					if((m_ReceivedSnapshots[Conn] > 50 || (g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay)) && !m_CodeRunAfterJoin[Conn])
+					if((m_ReceivedSnapshots[Conn] > 50 !m_CodeRunAfterJoin[Conn])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							if(g_Config.m_ClRunOnJoinConsole)
-							{
-								m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
-							}
+							CNetMsg_Cl_Say MsgP;
+							MsgP.m_Team = 0;
+							char aBuf[128];
+							char aBufMsg[256];
+							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
+								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
 							else
+								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+
+							if(g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClRunOnJoinConsole)
 							{
-								CNetMsg_Cl_Say MsgP;
-								MsgP.m_Team = 0;
-								char aBuf[256];
-								if(g_Config.m_ClRunOnJoin[0])
-								{
-									str_format(aBuf, sizeof(aBuf), "/mc;timeout %s;%s", m_aTimeoutCodes[Conn], g_Config.m_ClRunOnJoin);
-								}
-								else
-								{
-									str_format(aBuf, sizeof(aBuf), "/timeout %s", m_aTimeoutCodes[Conn]);
-								}
-								MsgP.m_pMessage = aBuf;
-								CMsgPacker PackerTimeout(MsgP.MsgID(), false);
-								MsgP.Pack(&PackerTimeout);
-								SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
+								str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
+								str_append(aBufMsg, aBuf, sizeof(aBufMsg));
 							}
+							if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
+							{
+								int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+								char aBufEmote[128];
+								aBufEmote[0] = '\0';
+								switch(Emote)
+								{
+								case EMOTE_NORMAL:
+									break;
+								case EMOTE_PAIN:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_HAPPY:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_SURPRISE:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_ANGRY:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
+									break;
+								case EMOTE_BLINK:
+									str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
+									break;
+								}
+								if(aBufEmote[0])
+								{
+									str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
+									str_append(aBufMsg, aBuf, sizeof(aBufMsg));
+								}
+							}
+							MsgP.m_pMessage = aBufMsg;
+							CMsgPacker PackerTimeout(MsgP.MsgID(), false);
+							MsgP.Pack(&PackerTimeout);
+							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
 						m_CodeRunAfterJoin[Conn] = true;
 					}
@@ -4315,6 +4348,23 @@ int main(int argc, const char **argv)
 	init_exception_handler();
 #endif
 
+	std::vector<std::shared_ptr<ILogger>> apLoggers;
+#if defined(CONF_PLATFORM_ANDROID)
+	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+#else
+	if(!Silent)
+	{
+		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+	}
+#endif
+	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureFileLogger);
+	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureConsoleLogger);
+	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
+	apLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+
 	if(secure_random_init() != 0)
 	{
 		RandInitFailed = true;
@@ -4328,9 +4378,9 @@ int main(int argc, const char **argv)
 	pClient->RegisterInterfaces();
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, Silent, 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
@@ -4339,6 +4389,7 @@ int main(int argc, const char **argv)
 	IDiscord *pDiscord = CreateDiscord();
 	ISteam *pSteam = CreateSteam();
 
+	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 #if defined(CONF_EXCEPTION_HANDLING)
 	char aBufPath[IO_MAX_PATH_LENGTH];
 	char aBufName[IO_MAX_PATH_LENGTH];
@@ -4460,7 +4511,18 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
-	pClient->Engine()->InitLogfile();
+	if(g_Config.m_Logfile[0])
+	{
+		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
+		if(Logfile)
+		{
+			pFutureFileLogger->Set(log_logger_file(Logfile));
+		}
+		else
+		{
+			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+		}
+	}
 
 	// run the client
 	dbg_msg("client", "starting...");

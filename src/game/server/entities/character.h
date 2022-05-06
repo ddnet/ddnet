@@ -40,6 +40,7 @@ public:
 	virtual void TickDefered();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
+	virtual void SwapClients(int Client1, int Client2);
 
 	bool CanSnapCharacter(int SnappingClient);
 

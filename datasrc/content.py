@@ -259,6 +259,10 @@ container.images.Add(image_strongweak)
 
 container.pickups.Add(Pickup("health"))
 container.pickups.Add(Pickup("armor"))
+container.pickups.Add(Pickup("armor_shotgun"))
+container.pickups.Add(Pickup("armor_grenade"))
+container.pickups.Add(Pickup("armor_laser"))
+container.pickups.Add(Pickup("armor_ninja"))
 container.pickups.Add(Pickup("weapon"))
 container.pickups.Add(Pickup("ninja", 90, 90))
 
@@ -358,6 +362,10 @@ container.sprites.Add(Sprite("weapon_ninja_muzzle3", set_game, 25,8,7,4))
 
 container.sprites.Add(Sprite("pickup_health", set_game, 10,2,2,2))
 container.sprites.Add(Sprite("pickup_armor", set_game, 12,2,2,2))
+container.sprites.Add(Sprite("pickup_armor_shotgun", set_game, 15,2,2,2))
+container.sprites.Add(Sprite("pickup_armor_grenade", set_game, 17,2,2,2))
+container.sprites.Add(Sprite("pickup_armor_laser", set_game, 19,2,2,2))
+container.sprites.Add(Sprite("pickup_armor_ninja", set_game, 10,10,2,2))
 container.sprites.Add(Sprite("pickup_weapon", set_game, 3,0,6,2))
 container.sprites.Add(Sprite("pickup_ninja", set_game, 2,10,8,2))
 

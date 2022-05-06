@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <array> // std::size
+#include <atomic>
 #include <cctype>
 #include <cmath>
 #include <cstdarg>
@@ -10,6 +11,9 @@
 #include <ctime>
 
 #include "system.h"
+
+#include "logger.h"
+
 #if !defined(CONF_PLATFORM_MACOS)
 #include <base/color.h>
 #endif
@@ -133,22 +137,6 @@ IOHANDLE io_current_exe()
 #endif
 }
 
-struct DBG_LOGGER_DATA
-{
-	DBG_LOGGER logger;
-	DBG_LOGGER_FINISH finish;
-	DBG_LOGGER_ASSERTION on_assert = nullptr;
-	void *user;
-};
-
-static DBG_LOGGER_DATA loggers[16];
-static int has_stdout_logger = 0;
-static int num_loggers = 0;
-
-#ifndef CONF_FAMILY_WINDOWS
-static DBG_LOGGER_DATA stdout_nonewline_logger;
-#endif
-
 static NETSTATS network_stats = {0};
 
 #define VLEN 128
@@ -183,21 +171,20 @@ static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
-static void dbg_assert_notify_loggers()
+std::atomic_bool dbg_assert_failing = false;
+
+bool dbg_assert_has_failed()
 {
-	for(int i = 0; i < num_loggers; i++)
-	{
-		if(loggers[i].on_assert)
-			loggers[i].on_assert(loggers[i].user);
-	}
+	return dbg_assert_failing.load(std::memory_order_acquire);
 }
 
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
 	{
+		dbg_assert_failing.store(true, std::memory_order_release);
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
-		dbg_assert_notify_loggers();
+		log_global_logger_finish();
 		dbg_break();
 	}
 }
@@ -214,177 +201,11 @@ void dbg_break()
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
 	va_list args;
-	char *msg;
-	int len;
-
-	char str[1024 * 4];
-	int i;
-
-	char timestr[80];
-	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
-
-	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
-
-	len = str_length(str);
-	msg = (char *)str + len;
-
 	va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(msg, sizeof(str) - len, fmt, args);
-#elif defined(CONF_PLATFORM_ANDROID)
-	__android_log_vprint(ANDROID_LOG_DEBUG, sys, fmt, args);
-#else
-	vsnprintf(msg, sizeof(str) - len, fmt, args);
-#endif
-
+	log_log_v(LEVEL_INFO, sys, fmt, args);
 	va_end(args);
-
-	for(i = 0; i < num_loggers; i++)
-		loggers[i].logger(str, loggers[i].user);
 }
 
-#if defined(CONF_FAMILY_WINDOWS)
-static void logger_win_debugger(const char *line, void *user)
-{
-	(void)user;
-	WCHAR wBuffer[512];
-	MultiByteToWideChar(CP_UTF8, 0, line, -1, wBuffer, std::size(wBuffer));
-	OutputDebugStringW(wBuffer);
-	OutputDebugStringW(L"\n");
-}
-#endif
-
-static void logger_file(const char *line, void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_lock(logfile);
-	aio_write_unlocked(logfile, line, str_length(line));
-	aio_write_newline_unlocked(logfile);
-	aio_unlock(logfile);
-}
-
-#if !defined(CONF_FAMILY_WINDOWS)
-static void logger_file_no_newline(const char *line, void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_lock(logfile);
-	aio_write_unlocked(logfile, line, str_length(line));
-	aio_unlock(logfile);
-}
-#else
-static void logger_stdout_sync(const char *line, void *user)
-{
-	size_t length = str_length(line);
-	wchar_t *wide = (wchar_t *)malloc(length * sizeof(*wide));
-	const char *p = line;
-	int wlen = 0;
-	HANDLE console;
-
-	(void)user;
-	mem_zero(wide, length * sizeof *wide);
-
-	for(int codepoint = 0; (codepoint = str_utf8_decode(&p)); wlen++)
-	{
-		char u16[4] = {0};
-
-		if(codepoint < 0)
-		{
-			free(wide);
-			return;
-		}
-
-		if(str_utf16le_encode(u16, codepoint) != 2)
-		{
-			free(wide);
-			return;
-		}
-
-		mem_copy(&wide[wlen], u16, 2);
-	}
-
-	console = GetStdHandle(STD_OUTPUT_HANDLE);
-	WriteConsoleW(console, wide, wlen, NULL, NULL);
-	WriteConsoleA(console, "\n", 1, NULL, NULL);
-	free(wide);
-}
-#endif
-
-static void logger_stdout_finish(void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_wait(logfile);
-	aio_free(logfile);
-}
-
-static void logger_file_finish(void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_close(logfile);
-	logger_stdout_finish(user);
-}
-
-static void dbg_logger_finish()
-{
-	int i;
-	for(i = 0; i < num_loggers; i++)
-	{
-		if(loggers[i].finish)
-		{
-			loggers[i].finish(loggers[i].user);
-		}
-	}
-}
-
-void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
-{
-	DBG_LOGGER_DATA data;
-	if(num_loggers == 0)
-	{
-		atexit(dbg_logger_finish);
-	}
-	data.logger = logger;
-	data.finish = finish;
-	data.user = user;
-	loggers[num_loggers] = data;
-	num_loggers++;
-}
-
-void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user)
-{
-	dbg_logger(logger, finish, user);
-
-	loggers[num_loggers - 1].on_assert = on_assert;
-}
-
-void dbg_logger_stdout()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	dbg_logger(logger_stdout_sync, 0, 0);
-#else
-	ASYNCIO *logger_obj = aio_new(io_stdout());
-	dbg_logger(logger_file, logger_stdout_finish, logger_obj);
-	dbg_logger(logger_file_no_newline, 0, logger_obj);
-	stdout_nonewline_logger = loggers[num_loggers - 1];
-	--num_loggers;
-#endif
-	has_stdout_logger = 1;
-}
-
-void dbg_logger_debugger()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	dbg_logger(logger_win_debugger, 0, 0);
-#endif
-}
-
-void dbg_logger_file(const char *filename)
-{
-	IOHANDLE logfile = io_open(filename, IOFLAG_WRITE);
-	if(logfile)
-		dbg_logger(logger_file, logger_file_finish, aio_new(logfile));
-	else
-		dbg_msg("dbg/logger", "failed to open '%s' for logging", filename);
-}
 /* */
 
 void mem_copy(void *dest, const void *source, unsigned size)
@@ -2346,14 +2167,23 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 #if defined(CONF_PLATFORM_HAIKU)
 	str_format(path, max, "%s/config/settings/%s", home, appname);
-	return 0;
-#endif
-
-#if defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS)
 	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
-	str_format(path, max, "%s/.%s", home, appname);
-	for(int i = str_length(home) + 2; path[i]; i++)
+	if(str_comp(appname, "Teeworlds") == 0)
+	{
+		// fallback for old directory for Teeworlds compatibility
+		str_format(path, max, "%s/.%s", home, appname);
+	}
+	else
+	{
+		char *data_home = getenv("XDG_DATA_HOME");
+		if(data_home)
+			str_format(path, max, "%s/%s", data_home, appname);
+		else
+			str_format(path, max, "%s/.local/share/%s", home, appname);
+	}
+	for(int i = str_length(path) - str_length(appname); path[i]; i++)
 		path[i] = tolower((unsigned char)path[i]);
 #endif
 
@@ -4024,76 +3854,6 @@ int secure_rand_below(int below)
 			return n;
 		}
 	}
-}
-
-#if defined(CONF_FAMILY_WINDOWS)
-static int color_hsv_to_windows_console_color(const ColorHSVA *hsv)
-{
-	int h = hsv->h * 255.0f;
-	int s = hsv->s * 255.0f;
-	int v = hsv->v * 255.0f;
-	if(s >= 0 && s <= 10)
-	{
-		if(v <= 150)
-			return 8;
-		return 15;
-	}
-	else if(h >= 0 && h < 15)
-		return 12;
-	else if(h >= 15 && h < 30)
-		return 6;
-	else if(h >= 30 && h < 60)
-		return 14;
-	else if(h >= 60 && h < 110)
-		return 10;
-	else if(h >= 110 && h < 140)
-		return 11;
-	else if(h >= 140 && h < 170)
-		return 9;
-	else if(h >= 170 && h < 195)
-		return 5;
-	else if(h >= 195 && h < 240)
-		return 13;
-	else if(h >= 240)
-		return 12;
-	else
-		return 15;
-}
-#endif
-
-void set_console_msg_color(const void *rgbvoid)
-{
-	static const char *pNoColor = getenv("NO_COLOR");
-	if(pNoColor)
-		return;
-
-#if defined(CONF_FAMILY_WINDOWS)
-	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
-	int color = 15;
-	if(rgb)
-	{
-		ColorHSVA hsv = color_cast<ColorHSVA>(*rgb);
-		color = color_hsv_to_windows_console_color(&hsv);
-	}
-	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(console, color);
-#elif CONF_PLATFORM_LINUX
-	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
-	// set true color terminal escape codes refering
-	// https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
-	int esc_seq = 0x1B;
-	char buff[32];
-	if(rgb == NULL)
-		// reset foreground color
-		str_format(buff, sizeof(buff), "%c[39m", esc_seq);
-	else
-		// set rgb foreground color
-		// if not used by a true color terminal it is still converted refering
-		// https://wiki.archlinux.org/title/Color_output_in_console#True_color_support
-		str_format(buff, sizeof(buff), "%c[38;2;%d;%d;%dm", esc_seq, (int)uint8_t(rgb->r * 255.0f), (int)uint8_t(rgb->g * 255.0f), (int)uint8_t(rgb->b * 255.0f));
-	if(has_stdout_logger)
-		stdout_nonewline_logger.logger(buff, stdout_nonewline_logger.user);
-#endif
 }
 
 int os_version_str(char *version, int length)
