@@ -274,7 +274,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 		if(pRuleLine[0])
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-				"rules", pRuleLine);
+				"chatresp", pRuleLine);
 			Printed = true;
 		}
 	}
