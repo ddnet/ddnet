@@ -8,8 +8,8 @@
 # python3 scripts/generate_unicode_confusables_data.py header > `src/base/unicode/confusables.h`,
 # python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.h`.
 
-import unicode
 import sys
+import unicode
 
 def generate_decompositions():
 	ud = unicode.data()
@@ -126,10 +126,9 @@ def main():
 	data = "data" in sys.argv
 
 	if header:
-	    gen_header(decompositions, len_set)
+		gen_header(decompositions, len_set)
 	elif data:
-	    gen_data(decompositions, decomposition_set, decomposition_offsets, len_set)
+		gen_data(decompositions, decomposition_set, decomposition_offsets, len_set)
 
 if __name__ == '__main__':
 	main()
-

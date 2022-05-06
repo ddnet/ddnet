@@ -7,8 +7,8 @@
 # python3 scripts/generate_unicode_tolower.py header > `src/base/unicode/tolower.h`,
 # python3 scripts/generate_unicode_tolower.py data > `src/base/unicode/tolower_data.h`.
 
-import unicode
 import sys
+import unicode
 
 def generate_cases():
 	ud = unicode.data()
