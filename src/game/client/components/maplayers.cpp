@@ -1994,34 +1994,6 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-
-			if(g_Config.m_ClOutline && (IsGameLayer || g_Config.m_ClOutlineTele && IsTeleLayer))
-			{
-				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
-				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
-				if(IsGameLayer)
-					pGameTiles = pTiles;
-				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid || g_Config.m_ClOutlineUnFreeze) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
-				{
-					if(g_Config.m_ClOutlineUnFreeze)
-						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_UNFREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
-					if(g_Config.m_ClOutlineFreeze)
-						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_FREEZE, (float)g_Config.m_ClOutlineAlpha / 100.0f);
-					if(g_Config.m_ClOutlineSolid && EntityOverlayVal)
-						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_SOLID, (float)g_Config.m_ClOutlineAlphaSolid / 100.0f);
-				}
-				if(g_Config.m_ClOutlineTele && IsTeleLayer)
-				{
-					CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
-					unsigned int TeleSize = m_pLayers->Map()->GetDataSize(pTMap->m_Tele);
-					if(TeleSize >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTeleTile))
-					{
-						if(pGameTiles != NULL)
-							RenderTools()->RenderTeleOutlines(pGameTiles, pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, (float)g_Config.m_ClOutlineAlpha / 100.0f);
-					}
-				}
-			}
 		}
 		if(!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
 			Graphics()->ClipDisable();

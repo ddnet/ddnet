@@ -57,6 +57,7 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
+#include "components/outlines.h"
 #include "components/players.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
@@ -124,6 +125,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_Ghost);
 	m_All.Add(&m_MapLayersForeGround);
 	m_All.Add(&m_Particles.m_RenderExplosions);
+	m_All.Add(&m_Outlines);
 	m_All.Add(&m_PlayerIndicator);
 	m_All.Add(&m_NamePlates);
 	m_All.Add(&m_Particles.m_RenderGeneral);

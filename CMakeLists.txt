@@ -1949,6 +1949,8 @@ if(CLIENT)
     components/particles.h
     components/player_indicator.cpp
     components/player_indicator.h
+    components/outlines.cpp
+    components/outlines.h
     components/players.cpp
     components/players.h
     components/race_demo.cpp

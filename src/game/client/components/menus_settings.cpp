@@ -656,14 +656,25 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// custom color selector
 	MainView.HSplitTop(20.0f + RenderEyesBelow * 25.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(150.0f, &Button, 0);
+	CUIRect RandomColorsButton;
+	Button.VSplitLeft(150.0f, &Button, &RandomColorsButton);
 	static int s_CustomColorID = 0;
 	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *UseCustomColor, &Button))
 	{
 		*UseCustomColor = *UseCustomColor ? 0 : 1;
 		SetNeedSendInfo();
 	}
-
+	static int s_RandomizeColors = 0;
+	if(*UseCustomColor)
+	{
+		RandomColorsButton.VSplitLeft(150.0f, &RandomColorsButton, 0);
+		if(DoButton_Menu(&s_RandomizeColors, "Randomize Colors", 0, &RandomColorsButton, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0, 0, 0, 0.5f), vec4(0, 0, 0, 0.25f)))
+		{
+			g_Config.m_ClPlayerColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+			g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+			m_DoubleClickIndex = -1;
+		}
+	}
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(82.5f, &Label, &MainView);
 	if(*UseCustomColor)
@@ -2822,6 +2833,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, ("Show any enabled outlines"), &g_Config.m_ClOutline, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineEntities, ("Only show outlines in entities"), &g_Config.m_ClOutlineEntities, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, ("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline walls"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, ("Outline teleporter"), &g_Config.m_ClOutlineTele, &MainView, LineMargin);
@@ -2875,17 +2887,17 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		// ***** ANTI LATENCY ***** //
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
+		//MainView.HSplitTop(5.0f, 0, &MainView);
 
 		// MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 		UI()->DoLabelScaled(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
-		MainView.VSplitLeft(15.0f, 0x0, &MainView);
+		MainView.VSplitLeft(15.0f, 0, &MainView);
 
 		MainView.HSplitTop(20.0f, &Section, &MainView);
 		UI()->DoLabelScaled(&Section, ("Only use on gores maps! Can help mitigate latency."), 14.0f, TEXTALIGN_LEFT);
 
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0, &MainView);
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(20.0f, &Button, &MainView);
