@@ -672,6 +672,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		{
 			g_Config.m_ClPlayerColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
 			g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+			SetNeedSendInfo();
 			m_DoubleClickIndex = -1;
 		}
 	}

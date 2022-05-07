@@ -33,8 +33,6 @@ class CMapLayers : public CComponent
 	int m_LastLocalTick;
 	bool m_EnvelopeUpdate;
 
-	bool m_OnlineOnly;
-
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
 
 	struct STileLayerVisuals
@@ -135,6 +133,9 @@ class CMapLayers : public CComponent
 	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float *pColor, offset_ptr_size IndexBufferOffset, float *pOffset, float *pDir);
 
 public:
+	bool m_OnlineOnly;
+
+
 	enum
 	{
 		TYPE_BACKGROUND = 0,

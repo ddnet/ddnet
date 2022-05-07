@@ -12,6 +12,8 @@
 
 void COutlines::OnRender()
 {
+	if(GameClient()->m_MapLayersBackGround.m_OnlineOnly && Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
 	if(!g_Config.m_ClOverlayEntities && g_Config.m_ClOutlineEntities)
 		return;
 
@@ -20,13 +22,18 @@ void COutlines::OnRender()
 		CMapItemGroup *pGroup = GameClient()->Layers()->GetGroup(g);
 
 		if(!pGroup)
+		
 			continue;
+		
+		bool PassedGameLayer = false;
 
 		CTile *pGameTiles = NULL;
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = GameClient()->Layers()->GetLayer(pGroup->m_StartLayer + l);
+			if(!pLayer)
+				return;
 			bool Render = false;
 			bool IsGameLayer = false;
 			bool IsFrontLayer = false;
@@ -37,8 +44,10 @@ void COutlines::OnRender()
 			bool IsEntityLayer = false;
 
 			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->GameLayer())
+			{
 				IsEntityLayer = IsGameLayer = true;
-
+				PassedGameLayer = true;
+			}
 			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->FrontLayer())
 				IsEntityLayer = IsFrontLayer = true;
 
@@ -57,8 +66,11 @@ void COutlines::OnRender()
 			if(g_Config.m_ClOutline && IsGameLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+
 				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
 				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
+				if(!pTiles || !pTMap)
+					return;
 				if(IsGameLayer)
 					pGameTiles = pTiles;
 				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid || g_Config.m_ClOutlineUnFreeze) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
@@ -76,6 +88,8 @@ void COutlines::OnRender()
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
 				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
+				if(!pTiles || !pTMap)
+					return;
 				if(IsGameLayer)
 					pGameTiles = pTiles;
 				if(g_Config.m_ClOutlineTele && IsTeleLayer)
