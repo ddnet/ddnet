@@ -1191,9 +1191,33 @@ void CCharacter::Snap(int SnappingClient)
 	if(!Server()->Translate(ID, SnappingClient))
 		return;
 
-	// A player may not be clipped away if his hook is in the field of view
-	if(NetworkClippedLine(SnappingClient, m_Pos, m_Core.m_HookPos) || !CanSnapCharacter(SnappingClient))
+	if(!CanSnapCharacter(SnappingClient))
+	{
 		return;
+	}
+
+	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
+	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClient, m_Pos, m_Core.m_HookPos);
+	bool AttachedHookInView = false;
+	if(PlayerAndHookNotInView)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			CCharacter *OtherPlayer = GameServer()->GetPlayerChar(i);
+			if(OtherPlayer && OtherPlayer->m_Core.m_HookedPlayer == ID)
+			{
+				if(!NetworkClippedLine(SnappingClient, m_Pos, OtherPlayer->m_Pos))
+				{
+					AttachedHookInView = true;
+					break;
+				}
+			}
+		}
+	}
+	if(PlayerAndHookNotInView && !AttachedHookInView)
+	{
+		return;
+	}
 
 	SnapCharacter(SnappingClient, ID);
 
