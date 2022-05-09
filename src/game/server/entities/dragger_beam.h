@@ -12,7 +12,7 @@
  * met. Dragger beams exist until these criteria are no longer met. Dragger beams dissolve and automatically
  * de-register from their dragger source as soon as the player for whom they were created:
  * - is no longer alive
- * - is no longer in range (m_SvDraggerRange)
+ * - is no longer in range (sv_dragger_range)
  * - can no longer be dragged because the beam is intercepted by a laser stopper (or if !IgnoreWalls by solid blocks)
  * 
  * Dragger beams accelerate the selected player every tick towards their center. The length of the speed vector, which

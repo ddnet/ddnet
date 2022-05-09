@@ -39,7 +39,7 @@ void CGun::Tick()
 		}
 		m_Pos += m_Core;
 	}
-	if(g_Config.m_SvPlasmaPerSec != 0)
+	if(g_Config.m_SvPlasmaPerSec > 0)
 	{
 		Fire();
 	}
@@ -81,7 +81,7 @@ void CGun::Fire()
 			continue;
 		}
 
-		// Turrets can only shoot at a speed of m_SvPlasmaPerSec
+		// Turrets can only shoot at a speed of sv_plasma_per_sec
 		const int &TargetClientId = pTarget->GetPlayer()->GetCID();
 		const bool &TargetIsSolo = pTarget->Teams()->m_Core.GetSolo(TargetClientId);
 		if((TargetIsSolo &&
