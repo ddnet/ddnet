@@ -29,35 +29,35 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 
 void CPlasma::Tick()
 {
-	// A plasma ball has only a limited lifetime
+	// A plasma bullet has only a limited lifetime
 	if(m_LifeTime == 0)
 	{
 		Reset();
 		return;
 	}
 	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
-	// Without a target, a plasma ball has no reason to live
+	// Without a target, a plasma bullet has no reason to live
 	if(!pTarget)
 	{
-		// This can allow you to make plasma balls disappear by disconnecting, but this is not a serious cheat
 		Reset();
 		return;
 	}
 	m_LifeTime--;
 	Move();
-	HitCharacter(pTarget);
-
-	// Check if the plasma ball is stopped by a solid block or a laser stopper
-	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
-	if(HasIntersection)
+	if(!HitCharacter(pTarget))
 	{
-		if(m_Explosive)
+		// Check if the plasma bullet is stopped by a solid block or a laser stopper
+		int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
+		if(HasIntersection)
 		{
-			// Even in the case of an explosion due to a collision with obstacles, only one player is affected
-			GameServer()->CreateExplosion(
-				m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
+			if(m_Explosive)
+			{
+				// Even in the case of an explosion due to a collision with obstacles, only one player is affected
+				GameServer()->CreateExplosion(
+					m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
+			}
+			Reset();
 		}
-		Reset();
 	}
 }
 
@@ -77,7 +77,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 		return false;
 	}
 
-	// Super player should not be able to stop the plasma balls
+	// Super player should not be able to stop the plasma bullets
 	if(HitPlayer->Team() == TEAM_SUPER)
 	{
 		return false;
@@ -91,7 +91,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 		GameServer()->CreateExplosion(
 			m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
 	}
-	m_MarkedForDestroy = true;
+	Reset();
 	return true;
 }
 
@@ -102,14 +102,14 @@ void CPlasma::Reset()
 
 void CPlasma::Snap(int SnappingClient)
 {
-	// Only players who can see the targeted player can see the plasma ball
+	// Only players who can see the targeted player can see the plasma bullet
 	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
 	if(!pTarget->CanSnapCharacter(SnappingClient))
 	{
 		return;
 	}
 
-	// Only players with the plasma ball in their field of view or who want to see everything will receive the snap
+	// Only players with the plasma bullet in their field of view or who want to see everything will receive the snap
 	if(NetworkClipped(SnappingClient))
 		return;
 

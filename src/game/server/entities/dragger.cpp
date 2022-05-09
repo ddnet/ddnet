@@ -23,6 +23,10 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool Ignore
 	m_Number = Number;
 	m_EvalTick = Server()->Tick();
 
+	for(auto &TargetId : m_TargetIdInTeam)
+	{
+		TargetId = -1;
+	}
 	mem_zero(m_apDraggerBeam, sizeof(m_apDraggerBeam));
 	GameWorld()->InsertEntity(this);
 }
@@ -63,12 +67,14 @@ void CDragger::LookForPlayersToDrag()
 		(CEntity **)pPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
-	int TargetIdInTeam[MAX_CLIENTS];
+	int ClosestTargetIdInTeam[MAX_CLIENTS];
+	bool CanStillBeTeamTarget[MAX_CLIENTS];
 	bool IsTarget[MAX_CLIENTS];
 	int MinDistInTeam[MAX_CLIENTS];
+	mem_zero(CanStillBeTeamTarget, sizeof(CanStillBeTeamTarget));
 	mem_zero(MinDistInTeam, sizeof(MinDistInTeam));
 	mem_zero(IsTarget, sizeof(IsTarget));
-	for(int &TargetId : TargetIdInTeam)
+	for(int &TargetId : ClosestTargetIdInTeam)
 	{
 		TargetId = -1;
 	}
@@ -76,14 +82,16 @@ void CDragger::LookForPlayersToDrag()
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
 		CCharacter *pTarget = pPlayersInRange[i];
+		const int &TargetTeam = pTarget->Team();
+
 		// Do not create a dragger beam for super player
-		if(pTarget->Team() == TEAM_SUPER)
+		if(TargetTeam == TEAM_SUPER)
 		{
 			continue;
 		}
 		// If the dragger is disabled for the target's team, no dragger beam will be generated
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTarget->Team()])
+			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[TargetTeam])
 		{
 			continue;
 		}
@@ -95,29 +103,35 @@ void CDragger::LookForPlayersToDrag()
 				!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
 		if(IsReachable && pTarget->IsAlive())
 		{
+			const int &TargetClientId = pTarget->GetPlayer()->GetCID();
 			// Solo players are dragged independently from the rest of the team
-			if(pTarget->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID()))
+			if(pTarget->Teams()->m_Core.GetSolo(TargetClientId))
 			{
-				IsTarget[pTarget->GetPlayer()->GetCID()] = true;
+				IsTarget[TargetClientId] = true;
 			}
 			else
 			{
 				int Distance = distance(pTarget->m_Pos, m_Pos);
-				if(MinDistInTeam[pTarget->Team()] == 0 || MinDistInTeam[pTarget->Team()] > Distance)
+				if(MinDistInTeam[TargetTeam] == 0 || MinDistInTeam[TargetTeam] > Distance)
 				{
-					MinDistInTeam[pTarget->Team()] = Distance;
-					TargetIdInTeam[pTarget->Team()] = pTarget->GetPlayer()->GetCID();
+					MinDistInTeam[TargetTeam] = Distance;
+					ClosestTargetIdInTeam[TargetTeam] = TargetClientId;
 				}
+				CanStillBeTeamTarget[TargetClientId] = true;
 			}
 		}
 	}
 
-	// Set the closest player for each team as a target
-	for(int &TargetId : TargetIdInTeam)
+	// Set the closest player for each team as a target if the team does not have a target player yet
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(TargetId != -1)
+		if((m_TargetIdInTeam[i] != -1 && !CanStillBeTeamTarget[m_TargetIdInTeam[i]]) || m_TargetIdInTeam[i] == -1)
 		{
-			IsTarget[TargetId] = true;
+			m_TargetIdInTeam[i] = ClosestTargetIdInTeam[i];
+		}
+		if(m_TargetIdInTeam[i] != -1)
+		{
+			IsTarget[m_TargetIdInTeam[i]] = true;
 		}
 	}
 
