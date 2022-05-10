@@ -1875,8 +1875,7 @@ CServer::CCache::~CCache()
 
 CServer::CCache::CCacheChunk::CCacheChunk(const void *pData, int Size)
 {
-	mem_copy(m_aData, pData, Size);
-	m_DataSize = Size;
+	m_vData.assign((const uint8_t *)pData, (const uint8_t *)pData + Size);
 }
 
 void CServer::CCache::AddChunk(const void *pData, int Size)
@@ -2194,7 +2193,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 			dbg_assert(false, "unknown serverinfo type");
 		}
 
-		p.AddRaw(Chunk.m_aData, Chunk.m_DataSize);
+		p.AddRaw(Chunk.m_vData.data(), Chunk.m_vData.size());
 		Packet.m_pData = p.Data();
 		Packet.m_DataSize = p.Size();
 		m_NetServer.Send(&Packet);
@@ -2213,7 +2212,7 @@ void CServer::GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients)
 	SendClients = SendClients && Token != -1;
 
 	CCache::CCacheChunk &FirstChunk = m_aSixupServerInfoCache[SendClients].m_Cache.front();
-	pPacker->AddRaw(FirstChunk.m_aData, FirstChunk.m_DataSize);
+	pPacker->AddRaw(FirstChunk.m_vData.data(), FirstChunk.m_vData.size());
 }
 
 void CServer::ExpireServerInfo()
