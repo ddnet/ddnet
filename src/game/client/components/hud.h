@@ -67,6 +67,8 @@ class CHud : public CComponent
 
 	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
 
+	static constexpr float MOVEMENT_INFORMATION_LINE_HEIGHT = 8.0f;
+
 public:
 	CHud();
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -94,6 +96,7 @@ private:
 	bool m_FinishTime;
 	bool m_DDRaceTimeReceived;
 
+	inline float GetMovementInformationBoxHeight();
 	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets

@@ -127,9 +127,12 @@ void CHud::RenderGameTimer()
 
 		str_time((int64_t)Time * 100, TIME_DAYS, aBuf, sizeof(aBuf));
 		float FontSize = 10.0f;
-		float w = TextRender()->TextWidth(0, FontSize,
-			Time >= 3600 * 24 * 10 ? "00d 00:00:00" : Time >= 3600 * 24 ? "0d 00:00:00" : Time >= 3600 ? "00:00:00" : "00:00",
-			-1, -1.0f);
+		static float s_TextWidthM = TextRender()->TextWidth(0, FontSize, "00:00", -1, -1.0f);
+		static float s_TextWidthH = TextRender()->TextWidth(0, FontSize, "00:00:00", -1, -1.0f);
+		static float s_TextWidth0D = TextRender()->TextWidth(0, FontSize, "0d 00:00:00", -1, -1.0f);
+		static float s_TextWidth00D = TextRender()->TextWidth(0, FontSize, "00d 00:00:00", -1, -1.0f);
+		static float s_TextWidth000D = TextRender()->TextWidth(0, FontSize, "000d 00:00:00", -1, -1.0f);
+		float w = Time >= 3600 * 24 * 100 ? s_TextWidth000D : Time >= 3600 * 24 * 10 ? s_TextWidth00D : Time >= 3600 * 24 ? s_TextWidth0D : Time >= 3600 ? s_TextWidthH : s_TextWidthM;
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
@@ -171,7 +174,7 @@ void CHud::RenderScoreHud()
 	if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
 	{
 		int GameFlags = m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags;
-		float StartY = 229.0f; // the height of the display is 56, so EndY is 285
+		float StartY = 229.0f; // the height of this display is 56, so EndY is 285
 
 		const float ScoreSingleBoxHeight = 18.0f;
 
@@ -1276,7 +1279,7 @@ void CHud::RenderDummyActions()
 	{
 		StartY -= 4;
 	}
-	StartY -= 30 * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 20 * g_Config.m_ClShowhudPlayerAngle;
+	StartY -= GetMovementInformationBoxHeight();
 
 	if(g_Config.m_ClShowhudScore)
 	{
@@ -1327,6 +1330,16 @@ inline int CHud::GetDigitsIndex(int Value, int Max)
 	return DigitsIndex;
 }
 
+inline float CHud::GetMovementInformationBoxHeight()
+{
+	float BoxHeight = 3 * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2 * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	{
+		BoxHeight += 2;
+	}
+	return BoxHeight;
+}
+
 void CHud::RenderMovementInformation(const int ClientID)
 {
 	// Draw the infomations depending on settings: Position, speed and target angle
@@ -1335,11 +1348,10 @@ void CHud::RenderMovementInformation(const int ClientID)
 	{
 		return;
 	}
-	const float LineHeight = 10.0f;
 	const float LineSpacer = 1.0f; // above and below each entry
-	const float Fontsize = 8.0f;
+	const float Fontsize = 6.0f;
 
-	float BoxHeight = 30 * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 20 * g_Config.m_ClShowhudPlayerAngle;
+	float BoxHeight = GetMovementInformationBoxHeight();
 	const float BoxWidth = 62.0f;
 
 	float StartX = m_Width - BoxWidth;
@@ -1398,9 +1410,9 @@ void CHud::RenderMovementInformation(const int ClientID)
 	char aBuf[128];
 	float w;
 
-	float y = StartY + LineSpacer;
-	float xl = StartX + 1;
-	float xr = m_Width - 1;
+	float y = StartY + LineSpacer * 2;
+	float xl = StartX + 2;
+	float xr = m_Width - 2;
 	int DigitsIndex = 0;
 
 	static float s_TextWidth0 = TextRender()->TextWidth(0, Fontsize, "0.00", -1, -1.0f);
@@ -1420,48 +1432,48 @@ void CHud::RenderMovementInformation(const int ClientID)
 
 	if(g_Config.m_ClShowhudPlayerPosition)
 	{
-		TextRender()->Text(0, xl, y, Fontsize, "Position:", -1.0f);
-		y += LineHeight;
+		TextRender()->Text(0, xl, y, Fontsize, Localize("Position:"), -1.0f);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(0, xl, y, Fontsize, "X:", -1.0f);
 		str_format(aBuf, sizeof(aBuf), "%.2f", PosX);
 		DigitsIndex = GetDigitsIndex(PosX, 5);
 		w = (PosX < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
 		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
-		y += LineHeight;
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(0, xl, y, Fontsize, "Y:", -1.0f);
 		str_format(aBuf, sizeof(aBuf), "%.2f", PosY);
 		DigitsIndex = GetDigitsIndex(PosY, 5);
 		w = (PosY < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
 		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
-		y += LineHeight;
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
 
 	if(g_Config.m_ClShowhudPlayerSpeed)
 	{
-		TextRender()->Text(0, xl, y, Fontsize, "Speed:", -1.0f);
-		y += LineHeight;
+		TextRender()->Text(0, xl, y, Fontsize, Localize("Speed:"), -1.0f);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(0, xl, y, Fontsize, "X:", -1.0f);
 		str_format(aBuf, sizeof(aBuf), "%.2f", DisplaySpeedX);
 		DigitsIndex = GetDigitsIndex(DisplaySpeedX, 5);
 		w = (DisplaySpeedX < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
 		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
-		y += LineHeight;
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(0, xl, y, Fontsize, "Y:", -1.0f);
 		str_format(aBuf, sizeof(aBuf), "%.2f", DisplaySpeedY);
 		DigitsIndex = GetDigitsIndex(DisplaySpeedY, 5);
 		w = (DisplaySpeedY < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
 		TextRender()->Text(0, xr - w, y, Fontsize, aBuf, -1.0f);
-		y += LineHeight;
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
 
 	if(g_Config.m_ClShowhudPlayerAngle)
 	{
-		TextRender()->Text(0, xl, y, Fontsize, "Angle:", -1.0f);
-		y += LineHeight;
+		TextRender()->Text(0, xl, y, Fontsize, Localize("Angle:"), -1.0f);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 		str_format(aBuf, sizeof(aBuf), "%.2f", DisplayAngle);
 		DigitsIndex = GetDigitsIndex(DisplayAngle, 5);
 		w = (DisplayAngle < 0) ? s_TextWidthMinus[DigitsIndex] : s_TextWidth[DigitsIndex];
@@ -1520,11 +1532,11 @@ void CHud::OnRender()
 	{
 		if(m_pClient->m_Snap.m_pLocalCharacter && !m_pClient->m_Snap.m_SpecInfo.m_Active && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
 		{
-			if(g_Config.m_ClShowhudHealthAmmo && !m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
+			if(g_Config.m_ClShowhudHealthAmmo && (!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData || !g_Config.m_ClDDRaceHud))
 			{
 				RenderAmmoHealthAndArmor(m_pClient->m_Snap.m_pLocalCharacter);
 			}
-			if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
+			if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData && g_Config.m_ClDDRaceHud)
 			{
 				RenderPlayerState(m_pClient->m_Snap.m_LocalClientID);
 			}
@@ -1534,11 +1546,11 @@ void CHud::OnRender()
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 		{
 			int SpectatorID = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
-			if(SpectatorID != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo && !m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData)
+			if(SpectatorID != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo && (!m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData || !g_Config.m_ClDDRaceHud))
 			{
 				RenderAmmoHealthAndArmor(&m_pClient->m_Snap.m_aCharacters[SpectatorID].m_Cur);
 			}
-			if(SpectatorID != SPEC_FREEVIEW && m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData)
+			if(SpectatorID != SPEC_FREEVIEW && m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData && g_Config.m_ClDDRaceHud)
 			{
 				RenderPlayerState(SpectatorID);
 			}

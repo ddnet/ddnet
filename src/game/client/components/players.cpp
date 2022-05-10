@@ -76,6 +76,54 @@ inline float AngularApproach(float Src, float Dst, float Amount)
 		return Dst;
 	return n;
 }
+
+float CPlayers::GetPlayerTargetAngle(
+	const CNetObj_Character *pPrevChar,
+	const CNetObj_Character *pPlayerChar,
+	int ClientID,
+	float Intra)
+{
+	float AngleIntraTick = Intra;
+	// using unpredicted angle when rendering other players in-game
+	if(ClientID >= 0)
+		AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+	if(ClientID >= 0 && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	{
+		CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
+		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedDisplayInfo)
+		{
+			const CNetObj_DDNetCharacterDisplayInfo *PrevCharacterDisplayInfo = m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedDisplayInfo;
+
+			float MixX = mix((float)PrevCharacterDisplayInfo->m_TargetX, (float)CharacterDisplayInfo->m_TargetX, AngleIntraTick);
+			float MixY = mix((float)PrevCharacterDisplayInfo->m_TargetY, (float)CharacterDisplayInfo->m_TargetY, AngleIntraTick);
+
+			return angle(vec2(MixX, MixY));
+		}
+		else
+		{
+			return angle(vec2(CharacterDisplayInfo->m_TargetX, CharacterDisplayInfo->m_TargetY));
+		}
+	}
+	else
+	{
+		// If the player moves their weapon through top, then change
+		// the end angle by 2*Pi, so that the mix function will use the
+		// short path and not the long one.
+		if(pPlayerChar->m_Angle > (256.0f * pi) && pPrevChar->m_Angle < 0)
+		{
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+		}
+		else if(pPlayerChar->m_Angle < 0 && pPrevChar->m_Angle > (256.0f * pi))
+		{
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+		}
+		else
+		{
+			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, AngleIntraTick) / 256.0f;
+		}
+	}
+}
+
 void CPlayers::RenderHookCollLine(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
@@ -104,39 +152,7 @@ void CPlayers::RenderHookCollLine(
 	}
 	else
 	{
-		float AngleIntraTick = IntraTick;
-		// using unpredicted angle when rendering other players in-game
-		if(ClientID >= 0)
-			AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
-		{
-			CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
-			if(m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedDisplayInfo)
-			{
-				const CNetObj_DDNetCharacterDisplayInfo *PrevCharacterDisplayInfo = m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedDisplayInfo;
-
-				float MixX = mix((float)PrevCharacterDisplayInfo->m_TargetX, (float)CharacterDisplayInfo->m_TargetX, AngleIntraTick);
-				float MixY = mix((float)PrevCharacterDisplayInfo->m_TargetY, (float)CharacterDisplayInfo->m_TargetY, AngleIntraTick);
-
-				Angle = angle(vec2(MixX, MixY));
-			}
-			else
-			{
-				Angle = angle(vec2(CharacterDisplayInfo->m_TargetX, CharacterDisplayInfo->m_TargetY));
-			}
-		}
-		else
-		{
-			// If the player moves their weapon through top, then change
-			// the end angle by 2*Pi, so that the mix function will use the
-			// short path and not the long one.
-			if(Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
-				Player.m_Angle -= 256.0f * 2 * pi;
-			else if(Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
-				Player.m_Angle += 256.0f * 2 * pi;
-
-			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
-		}
+		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientID, IntraTick);
 	}
 
 	vec2 Direction = direction(Angle);
@@ -385,19 +401,7 @@ void CPlayers::RenderPlayer(
 	}
 	else
 	{
-		float AngleIntraTick = IntraTick;
-		// using unpredicted angle when rendering other players in-game
-		if(ClientID >= 0)
-			AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-		// If the player moves their weapon through top, then change
-		// the end angle by 2*Pi, so that the mix function will use the
-		// short path and not the long one.
-		if(Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
-			Player.m_Angle -= 256.0f * 2 * pi;
-		else if(Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
-			Player.m_Angle += 256.0f * 2 * pi;
-
-		Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
+		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientID, IntraTick);
 	}
 
 	vec2 Direction = direction(Angle);

@@ -196,6 +196,10 @@ inline bool CFreezeBars::IsPlayerInfoAvailable(int ClientID) const
 
 void CFreezeBars::OnRender()
 {
+	if(!g_Config.m_ClShowFreezeBars)
+	{
+		return;
+	}
 	// get screen edges to avoid rendering offscreen
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
