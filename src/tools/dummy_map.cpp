@@ -1,3 +1,4 @@
+#include <base/logger.h>
 #include <base/system.h>
 #include <base/tl/array.h>
 #include <engine/shared/datafile.h>
@@ -74,8 +75,8 @@ void CreateEmptyMap(IStorage *pStorage)
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv);
+	log_set_global_logger_default();
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
 	CreateEmptyMap(pStorage);
 	cmdline_free(argc, argv);
 	return 0;

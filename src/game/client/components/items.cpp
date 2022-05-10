@@ -139,15 +139,23 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 {
 	int CurWeapon = clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 
-	if(pCurrent->m_Type == PICKUP_HEALTH)
+	if(pCurrent->m_Type == POWERUP_HEALTH)
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupHealth);
-	else if(pCurrent->m_Type == PICKUP_ARMOR)
+	else if(pCurrent->m_Type == POWERUP_ARMOR)
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmor);
-	else if(pCurrent->m_Type == PICKUP_WEAPON)
+	else if(pCurrent->m_Type == POWERUP_ARMOR_SHOTGUN)
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmorShotgun);
+	else if(pCurrent->m_Type == POWERUP_ARMOR_GRENADE)
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmorGrenade);
+	else if(pCurrent->m_Type == POWERUP_ARMOR_LASER)
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmorLaser);
+	else if(pCurrent->m_Type == POWERUP_ARMOR_NINJA)
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmorNinja);
+	else if(pCurrent->m_Type == POWERUP_WEAPON)
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupWeapons[CurWeapon]);
 	}
-	else if(pCurrent->m_Type == PICKUP_NINJA)
+	else if(pCurrent->m_Type == POWERUP_NINJA)
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -166,11 +174,15 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	{
 		QuadOffset += pCurrent->m_Type;
 
-		if(pCurrent->m_Type == PICKUP_NINJA)
+		if(pCurrent->m_Type == POWERUP_NINJA)
 		{
 			QuadOffset = 2 + 8 - 1; // ninja is the last weapon
 			m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
 			Pos.x -= 10.0f;
+		}
+		else if(pCurrent->m_Type >= POWERUP_ARMOR_SHOTGUN && pCurrent->m_Type <= POWERUP_ARMOR_NINJA)
+		{
+			QuadOffset = m_WeaponArmorQuadOffset + (pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN);
 		}
 	}
 
@@ -542,6 +554,19 @@ void CItems::OnInit()
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
+
+	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_WeaponArmorQuadOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
 }

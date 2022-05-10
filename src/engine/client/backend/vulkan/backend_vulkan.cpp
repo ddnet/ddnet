@@ -843,8 +843,25 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SSwapImgViewportExtent
 	{
-		VkExtent2D m_SwapImg;
-		VkExtent2D m_Viewport;
+		VkExtent2D m_SwapImageViewport;
+		bool m_HasForcedViewport = false;
+		VkExtent2D m_ForcedViewport;
+
+		// the viewport of the resulting presented image on the screen
+		// if there is a forced viewport the resulting image is smaller
+		// than the full swap image size
+		VkExtent2D GetPresentedImageViewport()
+		{
+			uint32_t ViewportWidth = m_SwapImageViewport.width;
+			uint32_t ViewportHeight = m_SwapImageViewport.height;
+			if(m_HasForcedViewport)
+			{
+				ViewportWidth = m_ForcedViewport.width;
+				ViewportHeight = m_ForcedViewport.height;
+			}
+
+			return {ViewportWidth, ViewportHeight};
+		}
 	};
 
 	struct SSwapChainMultiSampleImage
@@ -878,6 +895,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	int m_GlobalTextureLodBIAS;
 	uint32_t m_MultiSamplingCount = 1;
+
+	uint32_t m_NextMultiSamplingCount = std::numeric_limits<uint32_t>::max();
 
 	bool m_RecreateSwapChain = false;
 	bool m_SwapchainCreated = false;
@@ -1226,16 +1245,10 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_FINISH)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Finish(static_cast<const CCommandBuffer::SCommand_Finish *>(pBaseCommand)); return true; }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); return true; }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_MULTISAMPLING)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_MultiSampling(static_cast<const CCommandBuffer::SCommand_MultiSampling *>(pBaseCommand)); return true; }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand)); return true; }};
 
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {
-			const auto* pCommand = static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand);
-			if(pCommand->m_ByResize) {
-				Cmd_Update_Viewport(pCommand, true);
-			}
-			else {
-				Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, pCommand);
-			} }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand), false); return true; }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {false, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); return true; }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_CREATE_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommand_WindowCreateNtf *>(pBaseCommand)); return false; }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_DESTROY_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommand_WindowDestroyNtf *>(pBaseCommand)); return false; }};
@@ -1337,8 +1350,9 @@ protected:
 		bool UsesRGBALikeFormat = m_VKSurfFormat.format == VK_FORMAT_R8G8B8A8_UNORM || IsB8G8R8A8;
 		if(UsesRGBALikeFormat && m_LastPresentedSwapChainImageIndex != std::numeric_limits<decltype(m_LastPresentedSwapChainImageIndex)>::max())
 		{
-			Width = m_VKSwapImgAndViewportExtent.m_Viewport.width;
-			Height = m_VKSwapImgAndViewportExtent.m_Viewport.height;
+			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
+			Width = Viewport.width;
+			Height = Viewport.height;
 			Format = CImageInfo::FORMAT_RGBA;
 
 			size_t ImageTotalSize = (size_t)Width * Height * 4;
@@ -1356,7 +1370,7 @@ protected:
 			Region.imageSubresource.baseArrayLayer = 0;
 			Region.imageSubresource.layerCount = 1;
 			Region.imageOffset = {0, 0, 0};
-			Region.imageExtent = {m_VKSwapImgAndViewportExtent.m_Viewport.width, m_VKSwapImgAndViewportExtent.m_Viewport.height, 1};
+			Region.imageExtent = {Viewport.width, Viewport.height, 1};
 
 			auto &SwapImg = m_SwapChainImages[m_LastPresentedSwapChainImageIndex];
 
@@ -2335,7 +2349,7 @@ protected:
 		RenderPassInfo.renderPass = m_VKRenderPass;
 		RenderPassInfo.framebuffer = m_FramebufferList[m_CurImageIndex];
 		RenderPassInfo.renderArea.offset = {0, 0};
-		RenderPassInfo.renderArea.extent = m_VKSwapImgAndViewportExtent.m_Viewport;
+		RenderPassInfo.renderArea.extent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 
 		VkClearValue ClearColorVal = {{{m_aClearColor[0], m_aClearColor[1], m_aClearColor[2], m_aClearColor[3]}}};
 		RenderPassInfo.clearValueCount = 1;
@@ -3021,9 +3035,14 @@ protected:
 		return State.m_BlendMode == CCommandBuffer::BLEND_ADDITIVE ? VULKAN_BACKEND_BLEND_MODE_ADDITATIVE : (State.m_BlendMode == CCommandBuffer::BLEND_NONE ? VULKAN_BACKEND_BLEND_MODE_NONE : VULKAN_BACKEND_BLEND_MODE_ALPHA);
 	}
 
-	size_t GetDynamicModeIndex(const CCommandBuffer::SState &State)
+	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State)
 	{
-		return (State.m_ClipEnable || m_HasDynamicViewport) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
+		return (State.m_ClipEnable || m_HasDynamicViewport || m_VKSwapImgAndViewportExtent.m_HasForcedViewport) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
+	}
+
+	size_t GetDynamicModeIndexFromExecBuffer(const SRenderCommandExecuteBuffer &ExecBuffer)
+	{
+		return (ExecBuffer.m_HasDynamicState) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
 	}
 
 	VkPipeline &GetPipeline(SPipelineContainer &Container, bool IsTextured, size_t BlendModeIndex, size_t DynamicIndex)
@@ -3072,17 +3091,17 @@ protected:
 			return GetPipeline(m_TileBorderLinePipeline, IsTextured, BlendModeIndex, DynamicIndex);
 	}
 
-	void GetStateIndices(const CCommandBuffer::SState &State, bool &IsTextured, size_t &BlendModeIndex, size_t &DynamicIndex, size_t &AddressModeIndex)
+	void GetStateIndices(const SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, bool &IsTextured, size_t &BlendModeIndex, size_t &DynamicIndex, size_t &AddressModeIndex)
 	{
 		IsTextured = GetIsTextured(State);
 		AddressModeIndex = GetAddressModeIndex(State);
 		BlendModeIndex = GetBlendModeIndex(State);
-		DynamicIndex = GetDynamicModeIndex(State);
+		DynamicIndex = GetDynamicModeIndexFromExecBuffer(ExecBuffer);
 	}
 
 	void ExecBufferFillDynamicStates(const CCommandBuffer::SState &State, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
-		size_t DynamicStateIndex = GetDynamicModeIndex(State);
+		size_t DynamicStateIndex = GetDynamicModeIndexFromState(State);
 		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
 		{
 			VkViewport Viewport;
@@ -3095,22 +3114,53 @@ protected:
 				Viewport.minDepth = 0.0f;
 				Viewport.maxDepth = 1.0f;
 			}
+			// else check if there is a forced viewport
+			else if(m_VKSwapImgAndViewportExtent.m_HasForcedViewport)
+			{
+				Viewport.x = 0.0f;
+				Viewport.y = 0.0f;
+				Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_ForcedViewport.width;
+				Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_ForcedViewport.height;
+				Viewport.minDepth = 0.0f;
+				Viewport.maxDepth = 1.0f;
+			}
 			else
 			{
 				Viewport.x = 0.0f;
 				Viewport.y = 0.0f;
-				Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_Viewport.width;
-				Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_Viewport.height;
+				Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+				Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 				Viewport.minDepth = 0.0f;
 				Viewport.maxDepth = 1.0f;
 			}
 
 			VkRect2D Scissor;
 			// convert from OGL to vulkan clip
-			int32_t ScissorY = (int32_t)m_VKSwapImgAndViewportExtent.m_Viewport.height - ((int32_t)State.m_ClipY + (int32_t)State.m_ClipH);
-			uint32_t ScissorH = (int32_t)State.m_ClipH;
-			Scissor.offset = {(int32_t)State.m_ClipX, ScissorY};
-			Scissor.extent = {(uint32_t)State.m_ClipW, ScissorH};
+
+			// the scissor always assumes the presented viewport, because the front-end keeps the calculation
+			// for the forced viewport in sync
+			auto ScissorViewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
+			if(State.m_ClipEnable)
+			{
+				int32_t ScissorY = (int32_t)ScissorViewport.height - ((int32_t)State.m_ClipY + (int32_t)State.m_ClipH);
+				uint32_t ScissorH = (int32_t)State.m_ClipH;
+				Scissor.offset = {(int32_t)State.m_ClipX, ScissorY};
+				Scissor.extent = {(uint32_t)State.m_ClipW, ScissorH};
+			}
+			else
+			{
+				Scissor.offset = {0, 0};
+				Scissor.extent = {(uint32_t)ScissorViewport.width, (uint32_t)ScissorViewport.height};
+			}
+
+			// if there is a dynamic viewport make sure the scissor data is scaled down to that
+			if(m_HasDynamicViewport)
+			{
+				Scissor.offset.x = (int32_t)(((float)Scissor.offset.x / (float)ScissorViewport.width) * (float)m_DynamicViewportSize.width) + m_DynamicViewportOffset.x;
+				Scissor.offset.y = (int32_t)(((float)Scissor.offset.y / (float)ScissorViewport.height) * (float)m_DynamicViewportSize.height) + m_DynamicViewportOffset.y;
+				Scissor.extent.width = (uint32_t)(((float)Scissor.extent.width / (float)ScissorViewport.width) * (float)m_DynamicViewportSize.width);
+				Scissor.extent.height = (uint32_t)(((float)Scissor.extent.height / (float)ScissorViewport.height) * (float)m_DynamicViewportSize.height);
+			}
 
 			Viewport.x = clamp(Viewport.x, 0.0f, std::numeric_limits<decltype(Viewport.x)>::max());
 			Viewport.y = clamp(Viewport.y, 0.0f, std::numeric_limits<decltype(Viewport.y)>::max());
@@ -3136,7 +3186,7 @@ protected:
 			m_vLastPipeline[RenderThreadIndex] = BindingPipe;
 		}
 
-		size_t DynamicStateIndex = GetDynamicModeIndex(State);
+		size_t DynamicStateIndex = GetDynamicModeIndexFromExecBuffer(ExecBuffer);
 		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
 		{
 			vkCmdSetViewport(CommandBuffer, 0, 1, &ExecBuffer.m_Viewport);
@@ -3179,7 +3229,7 @@ protected:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetTileLayerPipeLayout(Type, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetTileLayerPipe(Type, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -3243,7 +3293,7 @@ protected:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = Is3DTextured ? GetPipeLayout(m_Standard3DPipeline, IsTextured, BlendModeIndex, DynamicIndex) : GetStandardPipeLayout(IsLineGeometry, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = Is3DTextured ? GetPipeline(m_Standard3DPipeline, IsTextured, BlendModeIndex, DynamicIndex) : GetStandardPipe(IsLineGeometry, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -3456,6 +3506,20 @@ public:
 		return true;
 	}
 
+	STWGraphicGPU::ETWGraphicsGPUType VKGPUTypeToGraphicsGPUType(VkPhysicalDeviceType VKGPUType)
+	{
+		if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_DISCRETE;
+		else if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INTEGRATED;
+		else if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_VIRTUAL;
+		else if(VKGPUType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_CPU)
+			return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_CPU;
+
+		return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_CPU;
+	}
+
 	bool SelectGPU(char *pRendererName, char *pVendorName, char *pVersionName)
 	{
 		uint32_t DevicesCount = 0;
@@ -3474,7 +3538,9 @@ public:
 		m_pGPUList->m_GPUs.reserve(DeviceList.size());
 
 		size_t FoundDeviceIndex = 0;
-		size_t AutoGPUIndex = 0;
+		size_t FoundGPUType = STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INVALID;
+
+		STWGraphicGPU::ETWGraphicsGPUType AutoGPUType = STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INVALID;
 
 		bool IsAutoGPU = str_comp(g_Config.m_GfxGPUName, "auto") == 0;
 
@@ -3484,9 +3550,11 @@ public:
 
 			auto &DeviceProp = DevicePropList[Index];
 
+			STWGraphicGPU::ETWGraphicsGPUType GPUType = VKGPUTypeToGraphicsGPUType(DeviceProp.deviceType);
+
 			STWGraphicGPU::STWGraphicGPUItem NewGPU;
 			str_copy(NewGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_Name)));
-			NewGPU.m_IsDiscreteGPU = DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+			NewGPU.m_GPUType = GPUType;
 			m_pGPUList->m_GPUs.push_back(NewGPU);
 
 			Index++;
@@ -3494,17 +3562,18 @@ public:
 			int DevAPIMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
 			int DevAPIMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
 
-			if((AutoGPUIndex == 0 && DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
+			if(GPUType < AutoGPUType && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
 				str_copy(m_pGPUList->m_AutoGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_Name)));
-				m_pGPUList->m_AutoGPU.m_IsDiscreteGPU = DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+				m_pGPUList->m_AutoGPU.m_GPUType = GPUType;
 
-				AutoGPUIndex = Index;
+				AutoGPUType = GPUType;
 			}
 
-			if(((IsAutoGPU && FoundDeviceIndex == 0 && DeviceProp.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGPUName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
+			if(((IsAutoGPU && GPUType < FoundGPUType) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGPUName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
 				FoundDeviceIndex = Index;
+				FoundGPUType = GPUType;
 			}
 		}
 
@@ -3769,11 +3838,20 @@ public:
 		}
 
 		VkExtent2D AutoViewportExtent = RetSize;
+		bool UsesForcedViewport = false;
 		// keep this in sync with graphics_threaded AdjustViewport's check
 		if(AutoViewportExtent.height > 4 * AutoViewportExtent.width / 5)
+		{
 			AutoViewportExtent.height = 4 * AutoViewportExtent.width / 5;
+			UsesForcedViewport = true;
+		}
 
-		return {RetSize, AutoViewportExtent};
+		SSwapImgViewportExtent Ext;
+		Ext.m_SwapImageViewport = RetSize;
+		Ext.m_ForcedViewport = AutoViewportExtent;
+		Ext.m_HasForcedViewport = UsesForcedViewport;
+
+		return Ext;
 	}
 
 	bool GetImageUsage(const VkSurfaceCapabilitiesKHR &VKCapabilities, VkImageUsageFlags &VKOutUsage)
@@ -3892,7 +3970,7 @@ public:
 		SwapInfo.minImageCount = SwapImgCount;
 		SwapInfo.imageFormat = m_VKSurfFormat.format;
 		SwapInfo.imageColorSpace = m_VKSurfFormat.colorSpace;
-		SwapInfo.imageExtent = m_VKSwapImgAndViewportExtent.m_SwapImg;
+		SwapInfo.imageExtent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 		SwapInfo.imageArrayLayers = 1;
 		SwapInfo.imageUsage = UsageFlags;
 		SwapInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -4075,7 +4153,7 @@ public:
 		{
 			for(size_t i = 0; i < m_SwapChainImageCount; ++i)
 			{
-				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImg.width, m_VKSwapImgAndViewportExtent.m_SwapImg.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_SwapChainMultiSamplingImages[i].m_Image, m_SwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_SwapChainMultiSamplingImages[i].m_Image, m_SwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 				m_SwapChainMultiSamplingImages[i].m_ImgView = CreateImageView(m_SwapChainMultiSamplingImages[i].m_Image, m_VKSurfFormat.format, VK_IMAGE_VIEW_TYPE_2D, 1, 1);
 			}
 		}
@@ -4187,8 +4265,8 @@ public:
 			FramebufferInfo.renderPass = m_VKRenderPass;
 			FramebufferInfo.attachmentCount = HasMultiSamplingTargets ? aAttachments.size() : aAttachments.size() - 1;
 			FramebufferInfo.pAttachments = HasMultiSamplingTargets ? aAttachments.data() : aAttachments.data() + 1;
-			FramebufferInfo.width = m_VKSwapImgAndViewportExtent.m_SwapImg.width;
-			FramebufferInfo.height = m_VKSwapImgAndViewportExtent.m_SwapImg.height;
+			FramebufferInfo.width = m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+			FramebufferInfo.height = m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 			FramebufferInfo.layers = 1;
 
 			if(vkCreateFramebuffer(m_VKDevice, &FramebufferInfo, nullptr, &m_FramebufferList[i]) != VK_SUCCESS)
@@ -4342,13 +4420,13 @@ public:
 
 		Viewport.x = 0.0f;
 		Viewport.y = 0.0f;
-		Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_Viewport.width;
-		Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_Viewport.height;
+		Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+		Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 		Viewport.minDepth = 0.0f;
 		Viewport.maxDepth = 1.0f;
 
 		Scissor.offset = {0, 0};
-		Scissor.extent = m_VKSwapImgAndViewportExtent.m_Viewport;
+		Scissor.extent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 
 		ViewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		ViewportState.viewportCount = 1;
@@ -5270,6 +5348,14 @@ public:
 
 		if(m_SwapchainCreated)
 			CleanupVulkanSwapChain(false);
+
+		// set new multi sampling if it was requested
+		if(m_NextMultiSamplingCount != std::numeric_limits<uint32_t>::max())
+		{
+			m_MultiSamplingCount = m_NextMultiSamplingCount;
+			m_NextMultiSamplingCount = std::numeric_limits<uint32_t>::max();
+		}
+
 		if(!m_SwapchainCreated)
 			Ret = InitVulkanSwapChain(OldSwapChain);
 
@@ -5690,19 +5776,38 @@ public:
 		return GetSampleCount() != VK_SAMPLE_COUNT_1_BIT;
 	}
 
+	VkSampleCountFlagBits GetMaxSampleCount()
+	{
+		if(m_MaxMultiSample & VK_SAMPLE_COUNT_64_BIT)
+			return VK_SAMPLE_COUNT_64_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_32_BIT)
+			return VK_SAMPLE_COUNT_32_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_16_BIT)
+			return VK_SAMPLE_COUNT_16_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_8_BIT)
+			return VK_SAMPLE_COUNT_8_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_4_BIT)
+			return VK_SAMPLE_COUNT_4_BIT;
+		else if(m_MaxMultiSample & VK_SAMPLE_COUNT_2_BIT)
+			return VK_SAMPLE_COUNT_2_BIT;
+
+		return VK_SAMPLE_COUNT_1_BIT;
+	}
+
 	VkSampleCountFlagBits GetSampleCount()
 	{
-		if(m_MultiSamplingCount >= 64 && m_MaxMultiSample & VK_SAMPLE_COUNT_64_BIT)
+		auto MaxSampleCount = GetMaxSampleCount();
+		if(m_MultiSamplingCount >= 64 && MaxSampleCount >= VK_SAMPLE_COUNT_64_BIT)
 			return VK_SAMPLE_COUNT_64_BIT;
-		else if(m_MultiSamplingCount >= 32 && m_MaxMultiSample & VK_SAMPLE_COUNT_32_BIT)
+		else if(m_MultiSamplingCount >= 32 && MaxSampleCount >= VK_SAMPLE_COUNT_32_BIT)
 			return VK_SAMPLE_COUNT_32_BIT;
-		else if(m_MultiSamplingCount >= 16 && m_MaxMultiSample & VK_SAMPLE_COUNT_16_BIT)
+		else if(m_MultiSamplingCount >= 16 && MaxSampleCount >= VK_SAMPLE_COUNT_16_BIT)
 			return VK_SAMPLE_COUNT_16_BIT;
-		else if(m_MultiSamplingCount >= 8 && m_MaxMultiSample & VK_SAMPLE_COUNT_8_BIT)
+		else if(m_MultiSamplingCount >= 8 && MaxSampleCount >= VK_SAMPLE_COUNT_8_BIT)
 			return VK_SAMPLE_COUNT_8_BIT;
-		else if(m_MultiSamplingCount >= 4 && m_MaxMultiSample & VK_SAMPLE_COUNT_4_BIT)
+		else if(m_MultiSamplingCount >= 4 && MaxSampleCount >= VK_SAMPLE_COUNT_4_BIT)
 			return VK_SAMPLE_COUNT_4_BIT;
-		else if(m_MultiSamplingCount >= 2 && m_MaxMultiSample & VK_SAMPLE_COUNT_2_BIT)
+		else if(m_MultiSamplingCount >= 2 && MaxSampleCount >= VK_SAMPLE_COUNT_2_BIT)
 			return VK_SAMPLE_COUNT_2_BIT;
 
 		return VK_SAMPLE_COUNT_1_BIT;
@@ -6373,7 +6478,7 @@ public:
 		if(ExecBuffer.m_ClearColorInRenderThread)
 		{
 			std::array<VkClearAttachment, 1> aAttachments = {VkClearAttachment{VK_IMAGE_ASPECT_COLOR_BIT, 0, VkClearValue{VkClearColorValue{{pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, pCommand->m_Color.a}}}}};
-			std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImg}, 0, 1}};
+			std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImageViewport}, 0, 1}};
 			vkCmdClearAttachments(GetGraphicCommandBuffer(ExecBuffer.m_ThreadIndex), aAttachments.size(), aAttachments.data(), aClearRects.size(), aClearRects.data());
 		}
 	}
@@ -6449,9 +6554,9 @@ public:
 		ExecBuffer.m_EstimatedRenderCallCount = 0;
 	}
 
-	void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand, bool CalledByMainRenderThread)
+	void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand)
 	{
-		if(pCommand->m_ByResize && CalledByMainRenderThread)
+		if(pCommand->m_ByResize)
 		{
 			if(IsVerbose())
 			{
@@ -6461,14 +6566,15 @@ public:
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
 			m_RecreateSwapChain = true;
 		}
-		else if(!pCommand->m_ByResize && !CalledByMainRenderThread)
+		else if(!pCommand->m_ByResize)
 		{
-			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != m_VKSwapImgAndViewportExtent.m_Viewport.width || (uint32_t)pCommand->m_Height != m_VKSwapImgAndViewportExtent.m_Viewport.height)
+			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
+			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != Viewport.width || (uint32_t)pCommand->m_Height != Viewport.height)
 			{
 				m_HasDynamicViewport = true;
 
 				// convert viewport from OGL to vulkan
-				int32_t ViewportY = (int32_t)m_VKSwapImgAndViewportExtent.m_Viewport.height - ((int32_t)pCommand->m_Y + (int32_t)pCommand->m_Height);
+				int32_t ViewportY = (int32_t)Viewport.height - ((int32_t)pCommand->m_Y + (int32_t)pCommand->m_Height);
 				uint32_t ViewportH = (int32_t)pCommand->m_Height;
 				m_DynamicViewportOffset = {(int32_t)pCommand->m_X, ViewportY};
 				m_DynamicViewportSize = {(uint32_t)pCommand->m_Width, ViewportH};
@@ -6487,6 +6593,21 @@ public:
 			dbg_msg("vulkan", "queueing swap chain recreation because vsync was changed");
 		}
 		m_RecreateSwapChain = true;
+		*pCommand->m_pRetOk = true;
+	}
+
+	void Cmd_MultiSampling(const CCommandBuffer::SCommand_MultiSampling *pCommand)
+	{
+		if(IsVerbose())
+		{
+			dbg_msg("vulkan", "queueing swap chain recreation because multi sampling was changed");
+		}
+		m_RecreateSwapChain = true;
+
+		uint32_t MSCount = (std::min(pCommand->m_RequestedMultiSamplingCount, (uint32_t)GetMaxSampleCount()) & 0xFFFFFFFE); // ignore the uneven bits
+		m_NextMultiSamplingCount = MSCount;
+
+		*pCommand->m_pRetMultiSamplingCount = MSCount;
 		*pCommand->m_pRetOk = true;
 	}
 
@@ -6687,7 +6808,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetPipeLayout(CanBePushed ? m_QuadPushPipeline : m_QuadPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(CanBePushed ? m_QuadPushPipeline : m_QuadPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6783,7 +6904,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		IsTextured = true; // text is always textured
 		auto &PipeLayout = GetPipeLayout(m_TextPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(m_TextPipeline, IsTextured, BlendModeIndex, DynamicIndex);
@@ -6852,7 +6973,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetStandardPipeLayout(false, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetStandardPipe(false, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6893,7 +7014,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetPipeLayout(IsRotationless ? m_PrimExRotationlessPipeline : m_PrimExPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(IsRotationless ? m_PrimExRotationlessPipeline : m_PrimExPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -6954,7 +7075,7 @@ public:
 		size_t BlendModeIndex;
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
-		GetStateIndices(pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
 		auto &PipeLayout = GetPipeLayout(CanBePushed ? m_SpriteMultiPushPipeline : m_SpriteMultiPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		auto &PipeLine = GetPipeline(CanBePushed ? m_SpriteMultiPushPipeline : m_SpriteMultiPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 
@@ -7070,7 +7191,7 @@ public:
 			m_ThreadCount = 1;
 		else
 		{
-			m_ThreadCount = clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::thread::hardware_concurrency());
+			m_ThreadCount = clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::max<decltype(m_ThreadCount)>(3, std::thread::hardware_concurrency()));
 		}
 
 		// start threads

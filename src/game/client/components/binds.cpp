@@ -4,26 +4,24 @@
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
+#include <game/client/gameclient.h>
+
 static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 
 bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
 {
 	// only handle F and composed F binds
-	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
+	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && (Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
 	{
 		int Mask = CBinds::GetModifierMask(Input());
 
 		// Look for a composed bind
 		bool ret = false;
-		for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+		if(m_pBinds->m_aapKeyBindings[Mask][Event.m_Key])
 		{
-			if(Mask == Mod && m_pBinds->m_aapKeyBindings[Mod][Event.m_Key])
-			{
-				m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mod][Event.m_Key]);
-				ret = true;
-			}
+			m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mask][Event.m_Key]);
+			ret = true;
 		}
-
 		// Look for a non composed bind
 		if(!ret && m_pBinds->m_aapKeyBindings[0][Event.m_Key])
 		{
@@ -136,16 +134,13 @@ bool CBinds::OnInput(IInput::CEvent e)
 	Mask &= ~KeyModifierMask;
 
 	bool ret = false;
-	for(int Mod = 1; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+	if(m_aapKeyBindings[Mask][e.m_Key])
 	{
-		if(m_aapKeyBindings[Mod][e.m_Key] && (Mask == Mod))
-		{
-			if(e.m_Flags & IInput::FLAG_PRESS)
-				Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mod][e.m_Key]);
-			if(e.m_Flags & IInput::FLAG_RELEASE)
-				Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mod][e.m_Key]);
-			ret = true;
-		}
+		if(e.m_Flags & IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][e.m_Key]);
+		if(e.m_Flags & IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][e.m_Key]);
+		ret = true;
 	}
 
 	if(m_aapKeyBindings[0][e.m_Key] && !ret)
@@ -482,7 +477,6 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_X, "toggle cl_dummy 0 1", FreeOnly);
 		Bind(KEY_H, "toggle cl_dummy_hammer 0 1", FreeOnly);
 		Bind(KEY_SLASH, "+show_chat; chat all /", FreeOnly);
-		Bind(KEY_PAGEDOWN, "toggle cl_show_quads 0 1", FreeOnly);
 		Bind(KEY_PAGEUP, "toggle cl_overlay_entities 0 100", FreeOnly);
 		Bind(KEY_KP_0, "say /emote normal 999999", FreeOnly);
 		Bind(KEY_KP_1, "say /emote happy 999999", FreeOnly);

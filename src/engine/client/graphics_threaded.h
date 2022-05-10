@@ -128,6 +128,7 @@ public:
 		CMD_FINISH,
 
 		// misc
+		CMD_MULTISAMPLING,
 		CMD_VSYNC,
 		CMD_TRY_SWAP_AND_SCREENSHOT,
 		CMD_UPDATE_VIEWPORT,
@@ -505,6 +506,16 @@ public:
 			SCommand(CMD_VSYNC) {}
 
 		int m_VSync;
+		bool *m_pRetOk;
+	};
+
+	struct SCommand_MultiSampling : public SCommand
+	{
+		SCommand_MultiSampling() :
+			SCommand(CMD_MULTISAMPLING) {}
+
+		uint32_t m_RequestedMultiSamplingCount;
+		uint32_t *m_pRetMultiSamplingCount;
 		bool *m_pRetOk;
 	};
 
@@ -1246,6 +1257,7 @@ public:
 	void Move(int x, int y) override;
 	void Resize(int w, int h, int RefreshRate) override;
 	void GotResized(int w, int h, int RefreshRate) override;
+	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
 	int GetWindowScreen() override;
 
@@ -1265,6 +1277,7 @@ public:
 	void TakeCustomScreenshot(const char *pFilename) override;
 	void Swap() override;
 	bool SetVSync(bool State) override;
+	bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) override;
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
 

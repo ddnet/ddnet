@@ -901,6 +901,9 @@ Max CSVs
 Dummy settings
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
 == 
 
@@ -911,6 +914,9 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -992,6 +998,9 @@ may cause delay
 == 
 
 Screen
+== 
+
+Allows maps to render with more detail
 == 
 
 Use high DPI
@@ -1147,6 +1156,9 @@ Enable replays
 Default length: %d
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Show ghost
 == 
 
@@ -1162,13 +1174,22 @@ Overlay entities
 Show text entities
 == 
 
+Opacity
+== 
+
 Show others (own team only)
 == 
 
 Show quads
 == 
 
+Quads are used for background decoration
+== 
+
 AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 AntiPing: predict other players
@@ -1299,6 +1320,12 @@ Update failed! Check log...
 == 
 
 Restart
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

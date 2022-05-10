@@ -54,6 +54,7 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+#include "components/tooltips.h"
 #include "components/voting.h"
 
 class CGameInfo
@@ -145,6 +146,8 @@ public:
 
 	CRaceDemo m_RaceDemo;
 	CGhost m_Ghost;
+
+	CTooltips m_Tooltips;
 
 private:
 	class CStack
@@ -502,7 +505,7 @@ public:
 	int m_LocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
-	int m_DummyFire;
+	unsigned int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 
 	class CTeamsCore m_Teams;
@@ -596,6 +599,10 @@ public:
 		// pickups
 		IGraphics::CTextureHandle m_SpritePickupHealth;
 		IGraphics::CTextureHandle m_SpritePickupArmor;
+		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
+		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
+		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;

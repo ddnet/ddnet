@@ -34,6 +34,8 @@
 
 #include "backend_sdl.h"
 
+#include "backend/null/backend_null.h"
+
 #if !defined(CONF_BACKEND_OPENGL_ES)
 #include "backend/opengl/backend_opengl3.h"
 #endif
@@ -229,6 +231,7 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 	case CCommandBuffer::CMD_WINDOW_DESTROY_NTF: Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommand_WindowDestroyNtf *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_VSYNC: Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_MULTISAMPLING: break;
 	case CMD_INIT: Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)); break;
 	case CMD_SHUTDOWN: Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)); break;
 	case CCommandProcessorFragment_GLBase::CMD_PRE_INIT: break;
@@ -266,6 +269,9 @@ CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int
 {
 	m_BackendType = BackendType;
 
+#if defined(CONF_HEADLESS_CLIENT)
+	m_pGLBackend = new CCommandProcessorFragment_Null();
+#else
 	if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
 #if defined(CONF_BACKEND_OPENGL_ES) || defined(CONF_BACKEND_OPENGL_ES3)
@@ -306,6 +312,7 @@ CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int
 		m_pGLBackend = CreateVulkanCommandProcessorFragment();
 #endif
 	}
+#endif
 }
 
 CCommandProcessor_SDL_GL::~CCommandProcessor_SDL_GL()
@@ -858,6 +865,15 @@ CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL()
 
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
+#if defined(CONF_HEADLESS_CLIENT)
+	int InitError = 0;
+	const char *pErrorStr = NULL;
+	int GlewMajor = 0;
+	int GlewMinor = 0;
+	int GlewPatch = 0;
+	IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
+	BackendInitGlew(m_BackendType, GlewMajor, GlewMinor, GlewPatch);
+#else
 	// print sdl version
 	{
 		SDL_version Compiled;
@@ -1102,6 +1118,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;
 	}
+#endif // CONF_HEADLESS_CLIENT
 
 	// start the command processor
 	dbg_assert(m_pProcessor == nullptr, "Processor was not cleaned up properly.");

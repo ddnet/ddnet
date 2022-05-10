@@ -1,6 +1,7 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
@@ -114,6 +115,7 @@ CTestInfo::~CTestInfo()
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
+	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
 	if(secure_random_init())

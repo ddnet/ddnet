@@ -339,6 +339,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
+			SetHasSelection(false);
 			ReturnValue = true;
 		}
 
@@ -450,8 +451,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 
 	CUIRect Textbox = *pRect;
 	RenderTools()->DrawUIRect(&Textbox, ColorRGBA(1, 1, 1, 0.5f), Corners, 3.0f);
-	Textbox.VMargin(2.0f, &Textbox);
-	Textbox.HMargin(2.0f, &Textbox);
+	Textbox.Margin(2.0f, &Textbox);
 
 	const char *pDisplayStr = pStr;
 	char aStars[128];

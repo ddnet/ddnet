@@ -31,5 +31,6 @@ public:
 	~CHeap();
 	void Reset();
 	void *Allocate(unsigned Size, unsigned Alignment = alignof(std::max_align_t));
+	const char *StoreString(const char *pSrc);
 };
 #endif

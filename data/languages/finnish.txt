@@ -1244,7 +1244,13 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Fat skins (DDFat)
+== 
+
+Choose default eyes when joining a server
 == 
 
 Dummy copy
@@ -1263,6 +1269,9 @@ Show entities
 == 
 
 Windowed fullscreen
+== 
+
+Allows maps to render with more detail
 == 
 
 Renderer
@@ -1295,13 +1304,25 @@ Kill Message Normal Color
 Kill Message Highlight Color
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Overlay entities
 == 
 
 Show text entities
 == 
 
+Opacity
+== 
+
 Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show local player's key presses
@@ -1341,6 +1362,12 @@ Can't find a Tutorial server
 == 
 
 Server executable not found, can't run server
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Auto

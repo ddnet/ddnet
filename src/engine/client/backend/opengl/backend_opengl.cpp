@@ -1635,6 +1635,11 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 	if(!CCommandProcessorFragment_OpenGL::Cmd_Init(pCommand))
 		return false;
 
+	m_pTileProgram = nullptr;
+	m_pTileProgramTextured = nullptr;
+	m_pPrimitive3DProgram = nullptr;
+	m_pPrimitive3DProgramTextured = nullptr;
+
 	m_OpenGLTextureLodBIAS = g_Config.m_GfxGLTextureLODBIAS;
 
 	m_HasShaders = pCommand->m_pCapabilities->m_ShaderSupport;
@@ -1801,6 +1806,15 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 	}
 
 	return true;
+}
+
+void CCommandProcessorFragment_OpenGL2::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
+{
+	// TODO: cleanup the OpenGL context too
+	delete m_pTileProgram;
+	delete m_pTileProgramTextured;
+	delete m_pPrimitive3DProgram;
+	delete m_pPrimitive3DProgramTextured;
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand)

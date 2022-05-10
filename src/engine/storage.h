@@ -42,7 +42,7 @@ public:
 	static const char *FormatTmpPath(char *aBuf, unsigned BufSize, const char *pPath);
 };
 
-extern IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments);
+extern IStorage *CreateStorage(int StorageType, int NumArgs, const char **ppArguments);
 extern IStorage *CreateLocalStorage();
 extern IStorage *CreateTempStorage(const char *pDirectory);
 

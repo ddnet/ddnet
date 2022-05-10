@@ -19,7 +19,6 @@
 
 #include "scoreboard.h"
 
-#include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 
 CScoreboard::CScoreboard()
@@ -394,13 +393,19 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			{
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 				{
-					str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
+					if(DDTeam == TEAM_SUPER)
+						str_copy(aBuf, Localize("Super"), sizeof(aBuf));
+					else
+						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize / 1.5f), FontSize / 1.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength + 3;
 				}
 				else
 				{
-					str_format(aBuf, sizeof(aBuf), "Team %d", DDTeam);
+					if(DDTeam == TEAM_SUPER)
+						str_copy(aBuf, Localize("Super"), sizeof(aBuf));
+					else
+						str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
 					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
 					TextRender()->SetCursor(&Cursor, ScoreOffset + w / 2.0f - tw / 2.0f, y + LineHeight, FontSize / 1.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength + 3;

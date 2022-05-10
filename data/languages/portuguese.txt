@@ -1106,6 +1106,9 @@ Skip the main menu
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
 == 
 
@@ -1116,6 +1119,9 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1173,6 +1179,9 @@ Windowed fullscreen
 == 
 
 may cause delay
+== 
+
+Allows maps to render with more detail
 == 
 
 Use high DPI
@@ -1241,16 +1250,28 @@ Enable replays
 Default length: %d
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Overlay entities
 == 
 
 Show text entities
 == 
 
+Opacity
+== 
+
 Show others (own team only)
 == 
 
 Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show other players' hook collision lines
@@ -1315,6 +1336,12 @@ Downloading %s:
 == 
 
 Update failed! Check log...
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

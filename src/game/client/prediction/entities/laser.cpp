@@ -112,7 +112,12 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			m_Energy -= distance(m_From, m_Pos) + GetTuning(m_TuneZone)->m_LaserBounceCost;
+			const float Distance = distance(m_From, m_Pos);
+			// Prevent infinite bounces
+			if(Distance == 0.0f)
+				m_Energy = -1;
+			else
+				m_Energy -= Distance + GetTuning(m_TuneZone)->m_LaserBounceCost;
 
 			m_Bounces++;
 			m_WasTele = false;

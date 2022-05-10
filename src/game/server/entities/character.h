@@ -40,6 +40,7 @@ public:
 	virtual void TickDefered();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
+	virtual void SwapClients(int Client1, int Client2);
 
 	bool CanSnapCharacter(int SnappingClient);
 
@@ -47,6 +48,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
+	void SetLiveFrozen(bool Active);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 

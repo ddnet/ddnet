@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
-
 #include <base/hash.h>
 #include <base/math.h>
 
@@ -72,7 +70,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float ButtonbarHeight = 20.0f;
 	const float NameBarHeight = 20.0f;
 	const float Margins = 5.0f;
-	float TotalHeight;
 	static int64_t LastSpeedChange = 0;
 
 	// render popups
@@ -81,23 +78,23 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		CUIRect Screen = *UI()->Screen();
 		CUIRect Box, Part, Part2;
 		Box = Screen;
-		Box.VMargin(150.0f / UI()->Scale(), &Box);
-		Box.HMargin(150.0f / UI()->Scale(), &Box);
+		Box.Margin(150.0f / UI()->Scale(), &Box);
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, ColorRGBA(0, 0, 0, 0.5f), CUI::CORNER_ALL, 15.0f);
 
-		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
+		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
 		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
 		UI()->DoLabelScaled(&Part, Localize("Select a name"), 24.f, TEXTALIGN_CENTER);
+		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
 		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
 		Part.VMargin(20.f / UI()->Scale(), &Part);
-		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 24.f, TEXTALIGN_CENTER);
+		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_CENTER);
+		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
 
 		CUIRect Label, TextBox, Ok, Abort;
 
-		Box.HSplitBottom(20.f, &Box, &Part);
+		Box.HSplitBottom(20.f, &Box, 0);
 		Box.HSplitBottom(24.f, &Box, &Part);
 		Part.VMargin(80.0f, &Part);
 
@@ -142,10 +139,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			}
 		}
 
-		Box.HSplitBottom(60.f, &Box, &Part);
-		Box.HSplitBottom(60.f, &Box, &Part2);
-		Box.HSplitBottom(24.f, &Box, &Part2);
-		Box.HSplitBottom(24.f, &Box, &Part);
+		Box.HSplitTop(24.f, &Part, &Box);
+		Box.HSplitTop(10.f, 0, &Box);
+		Box.HSplitTop(24.f, &Part2, &Box);
 
 		Part2.VSplitLeft(60.0f, 0, &Label);
 		if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
@@ -157,7 +153,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Label.VSplitLeft(120.0f, 0, &TextBox);
 		TextBox.VSplitLeft(20.0f, 0, &TextBox);
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
-		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
 		static float s_Offset = 0.0f;
 		if(UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
 		{
@@ -236,7 +232,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 	}
 
-	TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
+	float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
 	// render speed info
 	if(g_Config.m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)

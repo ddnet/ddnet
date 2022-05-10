@@ -31,7 +31,6 @@
 #endif
 
 #include "graphics_threaded.h"
-#include "graphics_threaded_null.h"
 
 static CVideoMode g_aFakeModes[] = {
 	{8192, 4320, 8192, 4320, 0, 8, 8, 8, 0}, {7680, 4320, 7680, 4320, 0, 8, 8, 8, 0}, {5120, 2880, 5120, 2880, 0, 8, 8, 8, 0},
@@ -846,7 +845,7 @@ void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
 	Cmd.m_Color.g = g;
 	Cmd.m_Color.b = b;
 	Cmd.m_Color.a = 0;
-	Cmd.m_ForceClear = ForceClearNow || m_IsForcedViewport;
+	Cmd.m_ForceClear = ForceClearNow;
 	AddCmd(
 		Cmd, [] { return true; }, "failed to clear graphics.");
 }
@@ -2254,14 +2253,17 @@ int CGraphics_Threaded::IssueInit()
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
-	m_GLUseTrianglesAsQuad = m_pBackend->UseTrianglesAsQuad();
-	m_GLTileBufferingEnabled = m_pBackend->HasTileBuffering();
-	m_GLQuadBufferingEnabled = m_pBackend->HasQuadBuffering();
-	m_GLQuadContainerBufferingEnabled = m_pBackend->HasQuadContainerBuffering();
-	m_GLTextBufferingEnabled = (m_GLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
-	m_GLHasTextureArrays = m_pBackend->Has2DTextureArrays();
-	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
-	m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
+	if(r == 0)
+	{
+		m_GLUseTrianglesAsQuad = m_pBackend->UseTrianglesAsQuad();
+		m_GLTileBufferingEnabled = m_pBackend->HasTileBuffering();
+		m_GLQuadBufferingEnabled = m_pBackend->HasQuadBuffering();
+		m_GLQuadContainerBufferingEnabled = m_pBackend->HasQuadContainerBuffering();
+		m_GLTextBufferingEnabled = (m_GLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
+		m_GLHasTextureArrays = m_pBackend->Has2DTextureArrays();
+		m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+		m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
+	}
 	return r;
 }
 
@@ -2276,23 +2278,28 @@ void CGraphics_Threaded::AdjustViewport(bool SendViewportChangeToBackend)
 
 		if(SendViewportChangeToBackend)
 		{
-			CCommandBuffer::SCommand_Update_Viewport Cmd;
-			Cmd.m_X = 0;
-			Cmd.m_Y = 0;
-			Cmd.m_Width = m_ScreenWidth;
-			Cmd.m_Height = m_ScreenHeight;
-			Cmd.m_ByResize = true;
-
-			if(!AddCmd(
-				   Cmd, [] { return true; }, "failed to add resize command"))
-			{
-				return;
-			}
+			UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 		}
 	}
 	else
 	{
 		m_IsForcedViewport = false;
+	}
+}
+
+void CGraphics_Threaded::UpdateViewport(int X, int Y, int W, int H, bool ByResize)
+{
+	CCommandBuffer::SCommand_Update_Viewport Cmd;
+	Cmd.m_X = X;
+	Cmd.m_Y = Y;
+	Cmd.m_Width = W;
+	Cmd.m_Height = H;
+	Cmd.m_ByResize = ByResize;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add resize command"))
+	{
+		return;
 	}
 }
 
@@ -2595,18 +2602,7 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 
-	CCommandBuffer::SCommand_Update_Viewport Cmd;
-	Cmd.m_X = 0;
-	Cmd.m_Y = 0;
-	Cmd.m_Width = m_ScreenWidth;
-	Cmd.m_Height = m_ScreenHeight;
-	Cmd.m_ByResize = true;
-
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add resize command"))
-	{
-		return;
-	}
+	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 
 	// kick the command buffer and wait
 	KickCommandBuffer();
@@ -2752,7 +2748,7 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	if(!m_pCommandBuffer)
 		return true;
 
-	// add vsnc command
+	// add vsync command
 	bool RetOk = false;
 	CCommandBuffer::SCommand_VSync Cmd;
 	Cmd.m_VSync = State ? 1 : 0;
@@ -2760,6 +2756,30 @@ bool CGraphics_Threaded::SetVSync(bool State)
 
 	if(!AddCmd(
 		   Cmd, [] { return true; }, "failed to add vsync command"))
+	{
+		return false;
+	}
+
+	// kick the command buffer
+	KickCommandBuffer();
+	WaitForIdle();
+	return RetOk;
+}
+
+bool CGraphics_Threaded::SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend)
+{
+	if(!m_pCommandBuffer)
+		return true;
+
+	// add multisampling command
+	bool RetOk = false;
+	CCommandBuffer::SCommand_MultiSampling Cmd;
+	Cmd.m_RequestedMultiSamplingCount = ReqMultiSamplingCount;
+	Cmd.m_pRetMultiSamplingCount = &MultiSamplingCountBackend;
+	Cmd.m_pRetOk = &RetOk;
+
+	if(!AddCmd(
+		   Cmd, [] { return true; }, "failed to add multi sampling command"))
 	{
 		return false;
 	}
@@ -2847,9 +2867,5 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()
 {
-#ifdef CONF_HEADLESS_CLIENT
-	return new CGraphics_ThreadedNull();
-#else
 	return new CGraphics_Threaded();
-#endif
 }

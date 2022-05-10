@@ -12,7 +12,6 @@
 #include <game/voting.h>
 
 #include <base/tl/array.h>
-#include <base/tl/string.h>
 
 #include "eventhandler.h"
 //#include "gamecontroller.h"
@@ -20,6 +19,7 @@
 #include "teehistorian.h"
 
 #include <memory>
+#include <string>
 
 /*
 	Tick
@@ -73,7 +73,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	array<string> m_aCensorlist;
+	array<std::string> m_aCensorlist;
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
@@ -307,6 +307,8 @@ private:
 	static void ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnDeep(IConsole::IResult *pResult, void *pUserData);
+	static void ConLiveFreeze(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
@@ -454,17 +456,12 @@ public:
 	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientID);
-	static void SendChatResponse(const char *pLine, void *pUser, ColorRGBA PrintColor = {1, 1, 1, 1});
-	static void SendChatResponseAll(const char *pLine, void *pUser);
 	virtual void OnSetAuthed(int ClientID, int Level);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();
 
 	void ResetTuning();
-
-	int m_ChatResponseTargetID;
-	int m_ChatPrintCBIndex;
 };
 
 inline int64_t CmaskAll() { return -1LL; }

@@ -6,6 +6,7 @@
 #modified by:
 # 2022-03-23 CHaBek
 # 2022-03-28 CHaBek
+# 2022-04-21 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -608,7 +609,7 @@ Length:
 == 길이:
 
 Name plates size
-== 이름 글꼴 크기
+== 이름 표시 크기
 
 Type:
 == 종류:
@@ -851,7 +852,7 @@ Settings file
 == 설정 파일
 
 Config directory
-== 구성 파일
+== 구성 폴더
 
 Themes directory
 == 테마 폴더
@@ -1354,3 +1355,30 @@ Tutorial
 
 Can't find a Tutorial server
 == 튜토리얼 서버를 찾을 수 없음
+
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
+Allows maps to render with more detail
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Super
+== 
+
+Team %d
+== 
