@@ -114,7 +114,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	// try to edit an existing theme
 	for(auto &Theme : pSelf->m_lThemes)
 	{
-		if(str_comp(Theme.m_Name, aThemeName) == 0)
+		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0)
 		{
 			if(IsDay)
 				Theme.m_HasDay = true;
@@ -159,7 +159,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	// save icon for an existing theme
 	for(CTheme &Theme : pSelf->m_lThemes) // bit slow but whatever
 	{
-		if(str_comp(Theme.m_Name, aThemeName) == 0 || (!Theme.m_Name[0] && str_comp(aThemeName, "none") == 0))
+		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0 || (Theme.m_Name.empty() && str_comp(aThemeName, "none") == 0))
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
@@ -230,7 +230,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 			std::vector<CTheme> &ThemesRef = GetThemes();
 			int RandomThemeIndex = rand() % (ThemesRef.size() - PREDEFINED_THEMES_COUNT);
 			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)ThemesRef.size())
-				pMenuMap = ThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.cstr();
+				pMenuMap = ThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.c_str();
 		}
 
 		char aBuf[128];

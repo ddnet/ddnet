@@ -1,7 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/tl/string.h>
-
 #include <base/math.h>
 
 #include <engine/engine.h>
@@ -32,6 +30,7 @@
 #include "skins.h"
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -1721,8 +1720,8 @@ public:
 	CLanguage(const char *n, const char *f, int Code) :
 		m_Name(n), m_FileName(f), m_CountryCode(Code) {}
 
-	string m_Name;
-	string m_FileName;
+	std::string m_Name;
+	std::string m_FileName;
 	int m_CountryCode;
 
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
@@ -1800,7 +1799,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 		s_Languages.add(CLanguage("English", "", 826));
 		LoadLanguageIndexfile(Storage(), Console(), &s_Languages);
 		for(int i = 0; i < s_Languages.size(); i++)
-			if(str_comp(s_Languages[i].m_FileName, g_Config.m_ClLanguagefile) == 0)
+			if(str_comp(s_Languages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
 				break;
@@ -1824,7 +1823,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			m_pClient->m_CountryFlags.Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
-			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, TEXTALIGN_LEFT);
+			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name.c_str(), 16.0f, TEXTALIGN_LEFT);
 		}
 	}
 
@@ -1832,8 +1831,8 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	if(OldSelected != s_SelectedLanguage)
 	{
-		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName, sizeof(g_Config.m_ClLanguagefile));
-		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName, Storage(), Console());
+		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName.c_str(), sizeof(g_Config.m_ClLanguagefile));
+		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
 		GameClient()->OnLanguageChange();
 	}
 }
