@@ -9,7 +9,9 @@
 #include <unordered_map>
 #include <engine/shared/jobs.h>
 
-#include <curl/curl.h>
+typedef void CURL;
+typedef void CURLM;
+typedef void CURLSH;
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -57,7 +59,7 @@ class CHttpRequest
 	};
 	char m_aUrl[256] = {0};
 
-	char m_aErr[CURL_ERROR_SIZE] = {0};
+	char m_aErr[256 /* CURL_ERROR_SIZE */] = {0};
 
 	void *m_pHeaders = nullptr;
 	unsigned char *m_pBody = nullptr;
@@ -84,11 +86,13 @@ class CHttpRequest
 	HTTPLOG m_LogProgress = HTTPLOG::ALL;
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
 
-	std::mutex m_StateLock;
-	std::condition_variable m_DoneCV;
-	std::atomic<int> m_State{HTTP_QUEUED} GUARDED_BY(m_StateLock);
-
+	std::atomic<int> m_State{HTTP_QUEUED};
 	std::atomic<bool> m_Abort{false};
+
+	std::mutex m_DoneLock;
+	std::condition_variable m_DoneCV;
+	std::atomic<bool> m_Done;
+
 
 	bool ConfigureHandle(CURL *pHandle, CURLSH *pShare);
 	// Abort the request with an error if `BeforeInit()` returns false.
@@ -102,14 +106,14 @@ class CHttpRequest
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
 	void OnStart();
-	void OnCompletionInternal(CURLcode Result);
+	void OnCompletionInternal(unsigned int Result);
 protected:
 	virtual void OnProgress() {}
 	virtual void OnCompletion() {}
 
 public:
 	CHttpRequest(const char *pUrl);
-	~CHttpRequest();
+	virtual ~CHttpRequest();
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
@@ -162,7 +166,6 @@ public:
 	int State() const { return m_State; }
 	void Abort() { m_Abort = true; }
 
-	bool IsDone() const;
 	void Wait();
 
 	void Result(unsigned char **ppResult, size_t *pResultLength) const;
@@ -209,13 +212,14 @@ class CHttp
 	std::atomic<bool> m_Shutdown = false;
 
 	std::mutex m_Lock;
-	std::queue<std::shared_ptr<CHttpRequest>> m_PendingRequests GUARDED_BY(m_Lock);
+	std::queue<std::shared_ptr<CHttpRequest>> m_PendingRequests;
 
 	CURLSH *m_pShare = nullptr;
 	CURLM *m_pHandle = nullptr;
 	std::unordered_map<CURL *, std::shared_ptr<CHttpRequest>> m_RunningRequests;
 
 public:
+	~CHttp();
 	void Init();
 	void AddRequest(std::shared_ptr<CHttpRequest> pRequest);
 

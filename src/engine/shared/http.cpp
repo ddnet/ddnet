@@ -14,7 +14,9 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN
+#include <curl/curl.h>
 #include <curl/easy.h>
+#include <curl/multi.h>
 
 int CHttp::CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
@@ -215,7 +217,7 @@ void CHttpRequest::OnStart()
 		dbg_msg("http", "fetching %s", m_aUrl);
 }
 
-void CHttpRequest::OnCompletionInternal(CURLcode Result)
+void CHttpRequest::OnCompletionInternal(unsigned int Result)
 {
 	int State = m_State;
 	int FinalState = State;
@@ -248,6 +250,9 @@ void CHttpRequest::OnCompletionInternal(CURLcode Result)
 
 	m_State = FinalState;
 	OnCompletion();
+
+	std::lock_guard l(m_DoneLock);
+	m_Done = true;
 	m_DoneCV.notify_one();
 }
 
@@ -270,22 +275,10 @@ void CHttpRequest::Header(const char *pNameColonValue)
 	m_pHeaders = curl_slist_append((curl_slist *)m_pHeaders, pNameColonValue);
 }
 
-bool CHttpRequest::IsDone() const
-{
-	switch(m_State) {
-		case HTTP_ERROR:
-		case HTTP_ABORTED:
-		case HTTP_DONE:
-			return true;
-		default:
-			return false;
-	}
-}
-
 void CHttpRequest::Wait()
 {
-	std::unique_lock l(m_StateLock);
-	m_DoneCV.wait(l, [this]{return IsDone(); });
+	std::unique_lock l(m_DoneLock);
+	m_DoneCV.wait(l, [this]{return m_Done.load(); });
 }
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
@@ -338,6 +331,8 @@ void CHttp::ThreadMain(void *pUser)
 
 void CHttp::Run()
 {
+	static_assert(CURL_ERROR_SIZE == 256); // CHttpRequest::m_aErr
+	static_assert(std::is_same_v<std::underlying_type_t<CURLcode>, unsigned int>); // CHttpRequest::OnCompletionInternal
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
 		return; //TODO: Report the error somehow
@@ -437,4 +432,14 @@ void CHttp::Run()
 	curl_share_cleanup(m_pShare);
 	curl_multi_cleanup(m_pHandle);
 	curl_global_cleanup();
+}
+
+CHttp::~CHttp()
+{
+	if(m_pThread)
+	{
+		m_Shutdown = true;
+		curl_multi_wakeup(m_pHandle);
+		thread_wait(m_pThread);
+	}
 }
