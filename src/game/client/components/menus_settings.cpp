@@ -670,8 +670,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		RandomColorsButton.VSplitLeft(150.0f, &RandomColorsButton, 0);
 		if(DoButton_Menu(&s_RandomizeColors, "Randomize Colors", 0, &RandomColorsButton, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0, 0, 0, 0.5f), vec4(0, 0, 0, 0.25f)))
 		{
-			g_Config.m_ClPlayerColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
-			g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+			if(m_Dummy)
+			{
+				g_Config.m_ClDummyColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+				g_Config.m_ClDummyColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+			}
+			else
+			{
+				g_Config.m_ClPlayerColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+				g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+			}
 			SetNeedSendInfo();
 			m_DoubleClickIndex = -1;
 		}

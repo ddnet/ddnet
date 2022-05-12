@@ -22,9 +22,9 @@ void COutlines::OnRender()
 		CMapItemGroup *pGroup = GameClient()->Layers()->GetGroup(g);
 
 		if(!pGroup)
-		
+
 			continue;
-		
+
 		bool PassedGameLayer = false;
 
 		CTile *pGameTiles = NULL;
@@ -48,29 +48,18 @@ void COutlines::OnRender()
 				IsEntityLayer = IsGameLayer = true;
 				PassedGameLayer = true;
 			}
-			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->FrontLayer())
-				IsEntityLayer = IsFrontLayer = true;
-
-			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->SwitchLayer())
-				IsEntityLayer = IsSwitchLayer = true;
-
 			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->TeleLayer())
 				IsEntityLayer = IsTeleLayer = true;
-
-			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->SpeedupLayer())
-				IsEntityLayer = IsSpeedupLayer = true;
-
-			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->TuneLayer())
-				IsEntityLayer = IsTuneLayer = true;
 
 			if(g_Config.m_ClOutline && IsGameLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-
-				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
-				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
-				if(!pTiles || !pTMap)
+				if(!pTMap)
 					return;
+				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
+				if(!pTiles)
+					return;
+				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
 				if(IsGameLayer)
 					pGameTiles = pTiles;
 				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid || g_Config.m_ClOutlineUnFreeze) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
@@ -86,10 +75,12 @@ void COutlines::OnRender()
 			if(g_Config.m_ClOutline && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
-				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
-				if(!pTiles || !pTMap)
+				if(!pTMap)
 					return;
+				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
+				if(!pTiles)
+					return;
+				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
 				if(IsGameLayer)
 					pGameTiles = pTiles;
 				if(g_Config.m_ClOutlineTele && IsTeleLayer)
