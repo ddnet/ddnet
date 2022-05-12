@@ -17,11 +17,13 @@ public:
 		CSkins *m_pSkins;
 
 	protected:
-		virtual int OnCompletion(int State) override;
+		virtual void OnCompletion() override;
 
 	public:
-		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
+		bool m_Loaded{false};
 		CImageInfo m_Info;
+
+		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
 	};
 
 	struct CDownloadSkin

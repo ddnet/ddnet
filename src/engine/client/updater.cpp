@@ -21,7 +21,7 @@ class CUpdaterFetchTask : public CHttpRequest
 	void OnProgress() override;
 
 protected:
-	int OnCompletion(int State) override;
+	void OnCompletion() override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -58,10 +58,9 @@ void CUpdaterFetchTask::OnProgress()
 	lock_unlock(m_pUpdater->m_Lock);
 }
 
-int CUpdaterFetchTask::OnCompletion(int State)
+void CUpdaterFetchTask::OnCompletion()
 {
-	State = CHttpRequest::OnCompletion(State);
-
+	int State = this->State();
 	const char *b = 0;
 	for(const char *a = Dest(); *a; a++)
 		if(*a == '/')
@@ -81,8 +80,6 @@ int CUpdaterFetchTask::OnCompletion(int State)
 		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
-
-	return State;
 }
 
 CUpdater::CUpdater()
@@ -142,7 +139,7 @@ int CUpdater::GetCurrentPercent()
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	m_pEngine->AddJob(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
+	m_pClient->Http()->AddRequest(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
 }
 
 bool CUpdater::MoveFile(const char *pFile)

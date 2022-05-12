@@ -127,6 +127,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CUpdater m_Updater;
 	class CFriends m_Friends;
 	class CFriends m_Foes;
+	CHttp m_Http;
 
 	char m_aConnectAddressStr[256];
 
@@ -303,6 +304,8 @@ public:
 	IUpdater *Updater() { return m_pUpdater; }
 	IDiscord *Discord() { return m_pDiscord; }
 	ISteam *Steam() { return m_pSteam; }
+
+	virtual CHttp *Http() { return &m_Http; }
 
 	CClient();
 

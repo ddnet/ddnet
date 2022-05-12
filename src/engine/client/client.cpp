@@ -1739,13 +1739,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						char aUrl[256];
 						char aEscaped[256];
-						EscapeUrl(aEscaped, sizeof(aEscaped), m_aMapdownloadFilename + 15); // cut off downloadedmaps/
+						CHttp::EscapeUrl(aEscaped, sizeof(aEscaped), m_aMapdownloadFilename + 15); // cut off downloadedmaps/
 						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps2.ddnet.tw") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
 						m_pMapdownloadTask = HttpGetFile(aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
-						Engine()->AddJob(m_pMapdownloadTask);
+						Http()->AddRequest(m_pMapdownloadTask);
 					}
 					else
 						SendMapRequest();
@@ -2893,9 +2893,8 @@ void CClient::InitInterfaces()
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 
-	m_ServerBrowser.SetBaseInfo(&m_NetClient[CONN_CONTACT], m_pGameClient->NetVersion());
-
-	HttpInit(m_pStorage);
+	m_Http.Init();
+	m_ServerBrowser.SetBaseInfo(&m_NetClient[CONN_CONTACT], m_pGameClient->NetVersion(), &m_Http);
 
 #if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();
@@ -4637,7 +4636,7 @@ void CClient::RequestDDNetInfo()
 	if(g_Config.m_BrIndicateFinished)
 	{
 		char aEscaped[128];
-		EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
+		CHttp::EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
 		str_append(aUrl, "?name=", sizeof(aUrl));
 		str_append(aUrl, aEscaped, sizeof(aUrl));
 	}
@@ -4646,7 +4645,7 @@ void CClient::RequestDDNetInfo()
 	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 	m_pDDNetInfoTask->Timeout(CTimeout{10000, 500, 10});
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
-	Engine()->AddJob(m_pDDNetInfoTask);
+	Http()->AddRequest(m_pDDNetInfoTask);
 }
 
 int CClient::GetPredictionTime()

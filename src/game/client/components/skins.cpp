@@ -27,15 +27,12 @@ static bool IsVanillaSkin(const char *pName)
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
-int CSkins::CGetPngFile::OnCompletion(int State)
+void CSkins::CGetPngFile::OnCompletion()
 {
-	State = CHttpRequest::OnCompletion(State);
-
-	if(State != HTTP_ERROR && State != HTTP_ABORTED && !m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE))
+	if(State() != HTTP_ERROR && State() != HTTP_ABORTED)
 	{
-		State = HTTP_ERROR;
+		m_Loaded = m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
 	}
-	return State;
 }
 
 CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest) :
@@ -418,17 +415,22 @@ int CSkins::FindImpl(const char *pName)
 	auto d = ::find_binary(m_aDownloadSkins.all(), pName);
 	if(!d.empty())
 	{
-		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
+		auto &Skin = d.front();
+		if(Skin.m_pTask)
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
-			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
-			LoadSkin(d.front().m_aName, d.front().m_pTask->m_Info);
-			d.front().m_pTask = nullptr;
-		}
-		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
-		{
-			d.front().m_pTask = nullptr;
+			int State = Skin.m_pTask->State();
+			if(State == HTTP_DONE && Skin.m_pTask->m_Loaded)
+			{
+				char aPath[IO_MAX_PATH_LENGTH];
+				str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", Skin.m_aName);
+				Storage()->RenameFile(Skin.m_aPath, aPath, IStorage::TYPE_SAVE);
+				LoadSkin(Skin.m_aName, Skin.m_pTask->m_Info);
+				Skin.m_pTask = nullptr;
+			}
+			else if((State == HTTP_DONE && !Skin.m_pTask->m_Loaded) || (State == HTTP_ERROR || State == HTTP_ABORTED))
+			{
+				Skin.m_pTask = nullptr;
+			}
 		}
 		return -1;
 	}
@@ -438,12 +440,12 @@ int CSkins::FindImpl(const char *pName)
 
 	char aUrl[IO_MAX_PATH_LENGTH];
 	char aEscapedName[256];
-	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
+	CHttp::EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, aEscapedName);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
-	m_pClient->Engine()->AddJob(Skin.m_pTask);
+	m_pClient->Client()->Http()->AddRequest(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;
 }

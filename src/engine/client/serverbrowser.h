@@ -136,7 +136,7 @@ public:
 	void RequestCurrentServerWithRandomToken(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
 	void SetCurrentServerPing(const NETADDR &Addr, int Ping);
 
-	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
+	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion, CHttp *pHttp);
 	void OnInit();
 
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
@@ -150,6 +150,7 @@ private:
 	class IEngine *m_pEngine;
 	class IFriends *m_pFriends;
 	class IStorage *m_pStorage;
+	class CHttp *m_pHttpClient;
 	char m_aNetVersion[128];
 
 	bool m_RefreshingHttp = false;

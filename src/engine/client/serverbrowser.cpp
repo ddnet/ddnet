@@ -87,7 +87,7 @@ CServerBrowser::~CServerBrowser()
 	m_pPingCache = nullptr;
 }
 
-void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
+void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion, CHttp *pHttpClient)
 {
 	m_pNetClient = pClient;
 	str_copy(m_aNetVersion, pNetVersion, sizeof(m_aNetVersion));
@@ -100,12 +100,13 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 	m_pPingCache = CreateServerBrowserPingCache(m_pConsole, m_pStorage);
 
+	m_pHttpClient = pHttpClient;
 	RegisterCommands();
 }
 
 void CServerBrowser::OnInit()
 {
-	m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pConsole, m_pStorage, g_Config.m_BrCachedBestServerinfoUrl);
+	m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pConsole, m_pHttpClient, m_pStorage, g_Config.m_BrCachedBestServerinfoUrl);
 }
 
 void CServerBrowser::RegisterCommands()
