@@ -487,7 +487,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	static float s_Value;
 	static char s_NumStr[64];
 	static void *s_LastTextpID = pID;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 
 	if(Inside)
 		UI()->SetHotItem(pID);
@@ -608,7 +608,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	static void *pGrabbedID = 0;
 	static bool MouseReleased = true;
 	static int ButtonUsed = 0;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 	int NewKey = Key;
 	*NewModifierCombination = ModifierCombination;
 

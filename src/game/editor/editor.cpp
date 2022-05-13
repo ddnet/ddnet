@@ -528,7 +528,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	static char s_aNumStr[64];
 	static bool s_TextMode = false;
 	static void *s_LastTextpID = pID;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 
 	if(UI()->MouseButton(1) && UI()->HotItem() == pID)
 	{
@@ -2326,7 +2326,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	static void *s_pEditorID = (void *)&s_pEditorID;
-	int Inside = UI()->MouseInside(&View);
+	const bool Inside = UI()->MouseInside(&View);
 
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();

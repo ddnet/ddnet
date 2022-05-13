@@ -214,7 +214,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 
 bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 	bool ReturnValue = false;
 	bool UpdateOffset = false;
 

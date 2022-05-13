@@ -434,7 +434,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 {
 	// logic
 	int ReturnValue = 0;
-	int Inside = MouseInside(pRect);
+	const bool Inside = MouseInside(pRect);
 	static int ButtonUsed = 0;
 
 	if(ActiveItem() == pID)
@@ -466,7 +466,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 
 int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
 {
-	int Inside = MouseInside(pRect);
+	const bool Inside = MouseInside(pRect);
 
 	if(Inside)
 		SetHotItem(pID);
