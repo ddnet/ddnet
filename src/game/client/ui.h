@@ -275,6 +275,8 @@ public:
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	bool MouseInside(const CUIRect *pRect) const;
+	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
+	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *x, float *y) const;
 
 	float ButtonColorMulActive() { return 0.5f; }
