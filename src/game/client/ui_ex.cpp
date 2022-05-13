@@ -639,7 +639,7 @@ bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIR
 	Props.m_AlignVertically = 0;
 	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 	TextRender()->SetRenderFlags(0);
-	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
+	if(UI()->DoButtonLogic(pClearID, 0, &ClearButton))
 	{
 		pStr[0] = 0;
 		UI()->SetActiveItem(pID);

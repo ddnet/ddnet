@@ -298,7 +298,6 @@ public:
 	float Scale() const;
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
-	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
 	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});

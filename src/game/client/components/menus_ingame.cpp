@@ -1074,7 +1074,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			if(UI()->DoButtonLogic(pItem, "", 0, &Row))
+			if(UI()->DoButtonLogic(pItem, 0, &Row))
 			{
 				NewSelected = i;
 				DoubleClicked |= NewSelected == m_DoubleClickIndex;
