@@ -234,7 +234,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
-	bool MouseInside = UI()->MouseInside(pRect);
+	const bool MouseInside = UI()->MouseInside(pRect);
 	CUIRect Rect = *pRect;
 
 	if(pAnimator != NULL)
@@ -272,7 +272,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 	else
 	{
-		if(UI()->MouseInside(pRect))
+		if(MouseInside)
 		{
 			ColorRGBA HoverColorMenuTab = ms_ColorTabbarHover;
 			if(pHoverColor)
