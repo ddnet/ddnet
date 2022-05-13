@@ -939,21 +939,18 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRec
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
-		if(Button.y >= ScopeView.y && Button.y + Button.h <= ScopeView.y + ScopeView.h)
-		{
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
 
-			UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
-			int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-			int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
-			if(NewId != OldId || NewModifierCombination != OldModifierCombination)
-			{
-				if(OldId != 0 || NewId == 0)
-					m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
-				if(NewId != 0)
-					m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifierCombination);
-			}
+		UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+		{
+			if(OldId != 0 || NewId == 0)
+				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+			if(NewId != 0)
+				m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifierCombination);
 		}
 
 		View.HSplitTop(2.0f, 0, &View);

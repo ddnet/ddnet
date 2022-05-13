@@ -607,7 +607,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	static void *pGrabbedID = 0;
 	static bool MouseReleased = true;
 	static int s_ButtonUsed = 0;
-	const bool Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseHovered(pRect);
 	int NewKey = Key;
 	*NewModifierCombination = ModifierCombination;
 
