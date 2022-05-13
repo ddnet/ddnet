@@ -144,6 +144,27 @@ protected:
 		}
 
 		ASSERT_FALSE(m_Buffer.Error());
+
+		printf("pOutput = {");
+		int Start = 0; // skip over header;
+		for(int i = 0; i < m_Buffer.Size(); i++)
+		{
+			if(Start == 0)
+			{
+				if(m_Buffer.Data()[i] == 0)
+					Start = i + 1;
+				continue;
+			}
+			if(Start + i != 0)
+			{
+				if((Start + i) % 10 == 0)
+					printf("\n\t");
+				else
+					printf(", ");
+			}
+			printf("0x%.2x", m_Buffer.Data()[i]);
+		}
+		printf("\n}\n");
 		ASSERT_EQ(m_Buffer.Size(), OutputSize);
 		ASSERT_TRUE(mem_comp(m_Buffer.Data(), pOutput, OutputSize) == 0);
 	}

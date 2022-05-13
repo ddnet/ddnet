@@ -116,7 +116,7 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"help",
+				"chatresp",
 				"Command is either unknown or you have given a blank command without any parameters.");
 	}
 }
@@ -611,7 +611,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Practice mode is disabled");
 		return;
 	}
@@ -624,7 +624,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Join a team to enable practice mode, which means you can use /r, but can't earn a rank.");
 		return;
 	}
@@ -633,7 +633,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Team is already in practice mode");
 		return;
 	}
@@ -688,7 +688,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Swap is disabled on this server.");
 		return;
 	}
@@ -701,7 +701,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Join a team to use swap feature, which means you can swap positions with each other.");
 		return;
 	}
@@ -815,7 +815,7 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"teamrank",
+				"chatresp",
 				"Showing the team rank of other players is not allowed on this server.");
 	}
 	else
@@ -836,7 +836,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"rank",
+				"chatresp",
 				"Showing the rank of other players is not allowed on this server.");
 	}
 	else
@@ -868,7 +868,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"This team can't be locked");
 		return;
 	}
@@ -1002,7 +1002,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"join",
+			"chatresp",
 			"You are running a vote please try again after the vote is done!");
 		return;
 	}
@@ -1016,7 +1016,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"join",
+			"chatresp",
 			"You must join a team and play with somebody or else you can\'t play");
 		pPlayer->GetCharacter()->m_LastStartWarning = pSelf->Server()->Tick();
 	}
@@ -1078,7 +1078,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"join",
+				"chatresp",
 				"You can't check your team while you are dead/a spectator.");
 		}
 		else
@@ -1110,7 +1110,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"me",
+			"chatresp",
 			"/me is disabled on this server");
 }
 
@@ -1138,7 +1138,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
+			"chatresp",
 			(pPlayer->m_EyeEmoteEnabled) ?
 				"You can now use the preset eye emotes." :
 				"You don't have any eye emotes, remember to bind some. (until you die)");
@@ -1152,7 +1152,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 		pPlayer->m_EyeEmoteEnabled = !pPlayer->m_EyeEmoteEnabled;
 	pSelf->Console()->Print(
 		IConsole::OUTPUT_LEVEL_STANDARD,
-		"emote",
+		"chatresp",
 		(pPlayer->m_EyeEmoteEnabled) ?
 			"You can now use the preset eye emotes." :
 			"You don't have any eye emotes, remember to bind some. (until you die)");
@@ -1179,11 +1179,11 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
+			"chatresp",
 			"Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain /emote normal");
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
+			"chatresp",
 			"Example: /emote surprise 10 for 10 seconds or /emote surprise (default 1 second)");
 	}
 	else
@@ -1209,7 +1209,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-				"emote", "Unknown emote... Say /emote");
+				"chatresp", "Unknown emote... Say /emote");
 			return;
 		}
 
@@ -1255,7 +1255,7 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"showotherschat",
+			"chatresp",
 			"Showing players from other teams is disabled");
 }
 
@@ -1552,7 +1552,7 @@ void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"points",
+				"chatresp",
 				"Showing the global points of other players is not allowed on this server.");
 	}
 	else
