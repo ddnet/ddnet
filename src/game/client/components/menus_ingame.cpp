@@ -1062,10 +1062,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	{
 		const CGhostItem *pItem = &m_lGhosts[i];
 		CUIRect Row;
-		CUIRect SelectHitBox;
-
 		View.HSplitTop(17.0f, &Row, &View);
-		SelectHitBox = Row;
 
 		// make sure that only those in view can be selected
 		if(Row.y + Row.h > OriginalView.y && Row.y < OriginalView.y + OriginalView.h)
@@ -1077,16 +1074,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			// clip the selection
-			if(SelectHitBox.y < OriginalView.y) // top
-			{
-				SelectHitBox.h -= OriginalView.y - SelectHitBox.y;
-				SelectHitBox.y = OriginalView.y;
-			}
-			else if(SelectHitBox.y + SelectHitBox.h > OriginalView.y + OriginalView.h) // bottom
-				SelectHitBox.h = OriginalView.y + OriginalView.h - SelectHitBox.y;
-
-			if(UI()->DoButtonLogic(pItem, "", 0, &SelectHitBox))
+			if(UI()->DoButtonLogic(pItem, "", 0, &Row))
 			{
 				NewSelected = i;
 				DoubleClicked |= NewSelected == m_DoubleClickIndex;

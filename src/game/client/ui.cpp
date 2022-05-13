@@ -434,7 +434,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 {
 	// logic
 	int ReturnValue = 0;
-	const bool Inside = MouseInside(pRect);
+	const bool Inside = MouseHovered(pRect);
 	static int s_ButtonUsed = 0;
 
 	if(ActiveItem() == pID)

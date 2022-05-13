@@ -245,7 +245,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
 		NumPlayers += pItem->m_NumFilteredPlayers;
 		CUIRect Row;
-		CUIRect SelectHitBox;
 
 		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
@@ -257,7 +256,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
 
 		View.HSplitTop(ms_ListheaderHeight, &Row, &View);
-		SelectHitBox = Row;
 
 		if(Selected)
 			m_SelectedIndex = i;
@@ -295,23 +293,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(0), &r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			// clip the selection
-			if(SelectHitBox.y < OriginalView.y) // top
-			{
-				SelectHitBox.h -= OriginalView.y - SelectHitBox.y;
-				SelectHitBox.y = OriginalView.y;
-			}
-			else if(SelectHitBox.y + SelectHitBox.h > OriginalView.y + OriginalView.h) // bottom
-				SelectHitBox.h = OriginalView.y + OriginalView.h - SelectHitBox.y;
-
-			if(!Selected && UI()->MouseInside(&SelectHitBox))
+			if(!Selected && UI()->MouseHovered(&Row))
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(1), &r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox))
+			if(UI()->DoButtonLogic(pItem, "", Selected, &Row))
 			{
 				NewSelected = ItemIndex;
 				if(NewSelected == m_DoubleClickIndex)
