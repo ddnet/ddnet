@@ -305,7 +305,7 @@ public:
 	IDiscord *Discord() { return m_pDiscord; }
 	ISteam *Steam() { return m_pSteam; }
 
-	virtual CHttp *Http() { return &m_Http; }
+	CHttp *Http() override { return &m_Http; }
 
 	CClient();
 

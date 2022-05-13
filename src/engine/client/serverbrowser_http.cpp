@@ -309,7 +309,6 @@ private:
 	static bool Validate(json_value *pJson);
 	static bool Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers);
 
-	IEngine *m_pEngine;
 	IConsole *m_pConsole;
 	CHttp *m_pHttp;
 
@@ -322,7 +321,6 @@ private:
 };
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, CHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
-	m_pEngine(pEngine),
 	m_pConsole(pConsole),
 	m_pHttp(pHttp),
 	m_pChooseMaster(new CChooseMaster(pEngine, pHttp, Validate, ppUrls, NumUrls, PreviousBestIndex))

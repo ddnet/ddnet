@@ -18,6 +18,11 @@
 #include <curl/easy.h>
 #include <curl/multi.h>
 
+#ifdef CONF_FAMILY_WINDOWS
+#undef min
+#undef max
+#endif
+
 int CHttp::CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
 	char TypeChar;
@@ -219,19 +224,18 @@ void CHttpRequest::OnStart()
 
 void CHttpRequest::OnCompletionInternal(unsigned int Result)
 {
-	int State = m_State;
-	int FinalState = State;
+	int State;
 	if(Result != CURLE_OK)
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, m_aErr);
-		FinalState = (Result == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
+		State = (Result == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
 			dbg_msg("http", "task done %s", m_aUrl);
-		FinalState = HTTP_DONE;
+		State = HTTP_DONE;
 	}
 
 	if(m_WriteToFile)
@@ -239,7 +243,7 @@ void CHttpRequest::OnCompletionInternal(unsigned int Result)
 		if(m_File && io_close(m_File) != 0)
 		{
 			dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
-			FinalState = HTTP_ERROR;
+			State = HTTP_ERROR;
 		}
 
 		if(State == HTTP_ERROR || State == HTTP_ABORTED)
@@ -248,7 +252,7 @@ void CHttpRequest::OnCompletionInternal(unsigned int Result)
 		}
 	}
 
-	m_State = FinalState;
+	m_State = State;
 	OnCompletion();
 
 	std::lock_guard l(m_DoneLock);
@@ -278,7 +282,7 @@ void CHttpRequest::Header(const char *pNameColonValue)
 void CHttpRequest::Wait()
 {
 	std::unique_lock l(m_DoneLock);
-	m_DoneCV.wait(l, [this]{return m_Done.load(); });
+	m_DoneCV.wait(l, [this] { return m_Done.load(); });
 }
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
@@ -332,7 +336,10 @@ void CHttp::ThreadMain(void *pUser)
 void CHttp::Run()
 {
 	static_assert(CURL_ERROR_SIZE == 256); // CHttpRequest::m_aErr
-	static_assert(std::is_same_v<std::underlying_type_t<CURLcode>, unsigned int>); // CHttpRequest::OnCompletionInternal
+	// CHttpRequest::OnCompletionInternal
+	static_assert(std::numeric_limits<std::underlying_type_t<CURLcode>>::min() >= std::numeric_limits<unsigned int>::min() && // NOLINT(misc-redundant-expression)
+		      std::numeric_limits<std::underlying_type_t<CURLcode>>::max() <= std::numeric_limits<unsigned int>::max()); // NOLINT(misc-redundant-expression)
+
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
 		return; //TODO: Report the error somehow

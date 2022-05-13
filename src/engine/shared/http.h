@@ -3,11 +3,11 @@
 
 #include <algorithm>
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
+#include <engine/shared/jobs.h>
+#include <mutex>
 #include <queue>
 #include <unordered_map>
-#include <engine/shared/jobs.h>
 
 typedef void CURL;
 typedef void CURLM;
@@ -91,8 +91,7 @@ class CHttpRequest
 
 	std::mutex m_DoneLock;
 	std::condition_variable m_DoneCV;
-	std::atomic<bool> m_Done;
-
+	std::atomic<bool> m_Done{false};
 
 	bool ConfigureHandle(CURL *pHandle, CURLSH *pShare);
 	// Abort the request with an error if `BeforeInit()` returns false.
@@ -107,6 +106,7 @@ class CHttpRequest
 
 	void OnStart();
 	void OnCompletionInternal(unsigned int Result);
+
 protected:
 	virtual void OnProgress() {}
 	virtual void OnCompletion() {}
@@ -148,18 +148,7 @@ public:
 		Header(aHeader);
 	}
 
-	const char *Dest()
-	{
-		if(m_WriteToFile)
-		{
-			return m_aDest;
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
+	const char *Dest() const { return m_WriteToFile ? m_aDest : nullptr; }
 	double Current() const { return m_Current.load(std::memory_order_relaxed); }
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
 	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }

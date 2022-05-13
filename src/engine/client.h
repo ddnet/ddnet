@@ -7,8 +7,8 @@
 #include "graphics.h"
 #include "message.h"
 #include <base/hash.h>
-#include <engine/shared/http.h>
 #include <engine/friends.h>
+#include <engine/shared/http.h>
 
 struct SWarning;
 
