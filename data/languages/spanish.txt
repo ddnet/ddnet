@@ -14,6 +14,7 @@
 # Deëivid!        2021-10-27 00:49:00
 # Deëivid!        2022-02-05 21:53:00
 # Deëivid!        2022-03-27 18:40:00
+# Deëivid!        2022-05-13 18:44:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1364,28 +1365,28 @@ Can't find a Tutorial server
 == No se pudo encontrar un servidor Tutorial
 
 Toggle to edit your dummy settings
-== 
+== Actívalo para editar la configuración de tu dummy
 
 Choose default eyes when joining a server
-== 
+== Escoge los ojos predeterminados al unirte a un servidor
 
 Allows maps to render with more detail
-== 
+== Permite que los mapas tengan más detalles
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Cuando cruzas la línea de inicio, se muestra un tee fantasma replicando los movimientos de tu mejor tiempo
 
 Opacity
-== 
+== Opacidad
 
 Quads are used for background decoration
-== 
+== Las quads se usan para la decoración del fondo
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Intenta predecir a otras entidades para dar una sensación de baja latencia
 
 Super
-== 
+== Súper
 
 Team %d
-== 
+== Equipo %d
