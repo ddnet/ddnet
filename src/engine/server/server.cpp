@@ -3656,7 +3656,7 @@ void *CServer::SnapNewItem(int Type, int ID, int Size)
 	{
 		g_UuidManager.GetUuid(Type);
 	}
-	dbg_assert(ID >= 0 && ID <= 0xffff, "incorrect id");
+	dbg_assert(ID >= -1 && ID <= 0xffff, "incorrect id");
 	return ID < 0 ? 0 : m_SnapshotBuilder.NewItem(Type, ID, Size);
 }
 
