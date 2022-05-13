@@ -234,7 +234,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
-	bool MouseInside = UI()->MouseInside(pRect);
+	const bool MouseInside = UI()->MouseInside(pRect);
 	CUIRect Rect = *pRect;
 
 	if(pAnimator != NULL)
@@ -272,7 +272,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 	else
 	{
-		if(UI()->MouseInside(pRect))
+		if(MouseInside)
 		{
 			ColorRGBA HoverColorMenuTab = ms_ColorTabbarHover;
 			if(pHoverColor)
@@ -290,8 +290,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
-	CUIRect Temp;
-
 	if(pAnimator != NULL)
 	{
 		if(pAnimator->m_RepositionLabel)
@@ -307,6 +305,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
+	CUIRect Temp;
 	Rect.HMargin(2.0f, &Temp);
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVertically;
@@ -339,10 +338,10 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	c.Margin(2.0f, &c);
 	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
 
-	bool CheckAble = *pBoxText == 'X';
+	const bool Checkable = *pBoxText == 'X';
 	SLabelProperties Props;
 	Props.m_AlignVertically = 0;
-	if(CheckAble)
+	if(Checkable)
 	{
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -487,7 +486,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	static float s_Value;
 	static char s_NumStr[64];
 	static void *s_LastTextpID = pID;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 
 	if(Inside)
 		UI()->SetHotItem(pID);
@@ -607,8 +606,8 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	// process
 	static void *pGrabbedID = 0;
 	static bool MouseReleased = true;
-	static int ButtonUsed = 0;
-	int Inside = UI()->MouseInside(pRect);
+	static int s_ButtonUsed = 0;
+	const bool Inside = UI()->MouseHovered(pRect);
 	int NewKey = Key;
 	*NewModifierCombination = ModifierCombination;
 
@@ -631,7 +630,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 			pGrabbedID = pID;
 		}
 
-		if(ButtonUsed == 1 && !UI()->MouseButton(1))
+		if(s_ButtonUsed == 1 && !UI()->MouseButton(1))
 		{
 			if(Inside)
 				NewKey = 0;
@@ -647,13 +646,13 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 				m_Binder.m_TakeKey = true;
 				m_Binder.m_GotKey = false;
 				UI()->SetActiveItem(pID);
-				ButtonUsed = 0;
+				s_ButtonUsed = 0;
 			}
 
 			if(UI()->MouseButton(1))
 			{
 				UI()->SetActiveItem(pID);
-				ButtonUsed = 1;
+				s_ButtonUsed = 1;
 			}
 		}
 	}
@@ -662,7 +661,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		UI()->SetHotItem(pID);
 
 	// draw
-	if(UI()->ActiveItem() == pID && ButtonUsed == 0)
+	if(UI()->ActiveItem() == pID && s_ButtonUsed == 0)
 		DoButton_KeySelect(pID, "???", 0, pRect);
 	else
 	{

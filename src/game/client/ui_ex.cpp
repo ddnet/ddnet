@@ -57,8 +57,8 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 
 	// logic
 	static float s_OffsetY;
-	const bool InsideRail = UI()->MouseInside(&Rail);
-	const bool InsideHandle = UI()->MouseInside(&Handle);
+	const bool InsideRail = UI()->MouseHovered(&Rail);
+	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
 	if(UI()->ActiveItem() == pID)
@@ -137,8 +137,8 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 
 	// logic
 	static float s_OffsetX;
-	const bool InsideRail = UI()->MouseInside(&Rail);
-	const bool InsideHandle = UI()->MouseInside(&Handle);
+	const bool InsideRail = UI()->MouseHovered(&Rail);
+	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
 	if(UI()->ActiveItem() == pID)
@@ -214,7 +214,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 
 bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseHovered(pRect);
 	bool ReturnValue = false;
 	bool UpdateOffset = false;
 

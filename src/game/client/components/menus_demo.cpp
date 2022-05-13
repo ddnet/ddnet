@@ -326,7 +326,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		UI()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, TEXTALIGN_CENTER);
 
 		// do the logic
-		int Inside = UI()->MouseInside(&SeekBar);
+		const bool Inside = UI()->MouseInside(&SeekBar);
 
 		if(UI()->ActiveItem() == id)
 		{
@@ -1101,10 +1101,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		ItemIndex++;
 
 		CUIRect Row;
-		CUIRect SelectHitBox;
-
 		ListBox.HSplitTop(ms_ListheaderHeight, &Row, &ListBox);
-		SelectHitBox = Row;
 
 		int Selected = ItemIndex == m_DemolistSelectedIndex;
 
@@ -1117,23 +1114,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				Rect.Margin(0.5f, &Rect);
 				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
-			else if(UI()->MouseInside(&SelectHitBox))
+			else if(UI()->MouseHovered(&Row))
 			{
 				CUIRect Rect = Row;
 				Rect.Margin(0.5f, &Rect);
 				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			// clip the selection
-			if(SelectHitBox.y < OriginalView.y) // top
-			{
-				SelectHitBox.h -= OriginalView.y - SelectHitBox.y;
-				SelectHitBox.y = OriginalView.y;
-			}
-			else if(SelectHitBox.y + SelectHitBox.h > OriginalView.y + OriginalView.h) // bottom
-				SelectHitBox.h = OriginalView.y + OriginalView.h - SelectHitBox.y;
-
-			if(UI()->DoButtonLogic(r.front().m_aName /* TODO: */, "", Selected, &SelectHitBox))
+			if(UI()->DoButtonLogic(r.front().m_aName /* TODO: */, "", Selected, &Row))
 			{
 				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
 				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
