@@ -466,9 +466,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 
 int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
 {
-	const bool Inside = MouseInside(pRect);
-
-	if(Inside)
+	if(MouseHovered(pRect))
 		SetHotItem(pID);
 
 	if(HotItem() == pID && MouseButtonClicked(0))
