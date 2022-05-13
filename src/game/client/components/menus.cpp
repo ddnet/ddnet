@@ -338,10 +338,10 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	c.Margin(2.0f, &c);
 	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
 
-	bool CheckAble = *pBoxText == 'X';
+	const bool Checkable = *pBoxText == 'X';
 	SLabelProperties Props;
 	Props.m_AlignVertically = 0;
-	if(CheckAble)
+	if(Checkable)
 	{
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
