@@ -1,5 +1,6 @@
 #include "http.h"
 
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
@@ -240,20 +241,15 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 		{
 			return DataSize;
 		}
-		bool Reallocate = false;
-		if(m_BufferSize == 0)
+		size_t NewBufferSize = maximum((size_t)1024, m_BufferSize);
+		while(m_BufferLength + DataSize > NewBufferSize)
 		{
-			m_BufferSize = 1024;
-			Reallocate = true;
+			NewBufferSize *= 2;
 		}
-		while(m_BufferLength + DataSize > m_BufferSize)
+		if(NewBufferSize != m_BufferSize)
 		{
-			m_BufferSize *= 2;
-			Reallocate = true;
-		}
-		if(Reallocate)
-		{
-			m_pBuffer = (unsigned char *)realloc(m_pBuffer, m_BufferSize);
+			m_pBuffer = (unsigned char *)realloc(m_pBuffer, NewBufferSize);
+			m_BufferSize = NewBufferSize;
 		}
 		mem_copy(m_pBuffer + m_BufferLength, pData, DataSize);
 		m_BufferLength += DataSize;
