@@ -290,8 +290,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
-	CUIRect Temp;
-
 	if(pAnimator != NULL)
 	{
 		if(pAnimator->m_RepositionLabel)
@@ -307,6 +305,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
+	CUIRect Temp;
 	Rect.HMargin(2.0f, &Temp);
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVertically;
