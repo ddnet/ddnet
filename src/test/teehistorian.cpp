@@ -155,13 +155,10 @@ protected:
 					Start = i + 1;
 				continue;
 			}
-			if(Start + i != 0)
-			{
-				if((Start + i) % 10 == 0)
-					printf("\n\t");
-				else
-					printf(", ");
-			}
+			if((i - Start) % 10 == 0)
+				printf("\n\t");
+			else
+				printf(", ");
 			printf("0x%.2x", m_Buffer.Data()[i]);
 		}
 		printf("\n}\n");
