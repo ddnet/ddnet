@@ -165,7 +165,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	}
 	Graphics()->QuadsEnd();
 
-	return Active ? UI()->DoButtonLogic(pID, "", Checked, pRect) : 0;
+	return Active ? UI()->DoButtonLogic(pID, Checked, pRect) : 0;
 }
 
 int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically, bool CheckForActiveColorPicker)
@@ -221,7 +221,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	if(MouseInsideColorPicker)
 		return 0;
 
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -311,7 +311,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	Props.m_AlignVertically = AlignVertically;
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -323,7 +323,7 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 	UI()->DoLabel(&t, pText, pRect->h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect)
@@ -353,7 +353,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	TextRender()->SetRenderFlags(0);
 	UI()->DoLabel(&t, pText, c.h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
 
-	return UI()->DoButtonLogic(pID, pText, 0, pRect);
+	return UI()->DoButtonLogic(pID, 0, pRect);
 }
 
 void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineColor, const ColorHSLA LaserInnerColor)

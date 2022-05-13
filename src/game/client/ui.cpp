@@ -425,11 +425,6 @@ bool CUIRect::Inside(float x_, float y_) const
 	return x_ >= this->x && x_ < this->x + this->w && y_ >= this->y && y_ < this->y + this->h;
 }
 
-int CUI::DoButtonLogic(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
-{
-	return DoButtonLogic(pID, Checked, pRect);
-}
-
 int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 {
 	// logic
