@@ -208,14 +208,49 @@ float CUIRect::Scale() const
 
 void CUI::ClipEnable(const CUIRect *pRect)
 {
-	float XScale = Graphics()->ScreenWidth() / Screen()->w;
-	float YScale = Graphics()->ScreenHeight() / Screen()->h;
-	Graphics()->ClipEnable((int)(pRect->x * XScale), (int)(pRect->y * YScale), (int)(pRect->w * XScale), (int)(pRect->h * YScale));
+	if(IsClipped())
+	{
+		const CUIRect *pOldRect = ClipArea();
+		CUIRect Intersection;
+		Intersection.x = std::max(pRect->x, pOldRect->x);
+		Intersection.y = std::max(pRect->y, pOldRect->y);
+		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - pRect->x;
+		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - pRect->y;
+		m_Clips.push_back(Intersection);
+	}
+	else
+	{
+		m_Clips.push_back(*pRect);
+	}
+	UpdateClipping();
 }
 
 void CUI::ClipDisable()
 {
-	Graphics()->ClipDisable();
+	dbg_assert(IsClipped(), "no clip region");
+	m_Clips.pop_back();
+	UpdateClipping();
+}
+
+const CUIRect *CUI::ClipArea() const
+{
+	dbg_assert(IsClipped(), "no clip region");
+	return &m_Clips.back();
+}
+
+void CUI::UpdateClipping()
+{
+	if(IsClipped())
+	{
+		const CUIRect *pRect = ClipArea();
+		const float XScale = Graphics()->ScreenWidth() / Screen()->w;
+		const float YScale = Graphics()->ScreenHeight() / Screen()->h;
+		Graphics()->ClipEnable((int)(pRect->x * XScale), (int)(pRect->y * YScale), (int)(pRect->w * XScale), (int)(pRect->h * YScale));
+	}
+	else
+	{
+		Graphics()->ClipDisable();
+	}
 }
 
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const

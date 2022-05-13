@@ -202,6 +202,10 @@ class CUI
 	unsigned m_LastMouseButtons;
 
 	CUIRect m_Screen;
+
+	std::vector<CUIRect> m_Clips;
+	void UpdateClipping();
+
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
@@ -281,8 +285,11 @@ public:
 	CUIRect *Screen();
 	void MapScreen();
 	float PixelSize();
+
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
+	const CUIRect *ClipArea() const;
+	inline bool IsClipped() const { return !m_Clips.empty(); }
 
 	// TODO: Refactor: Redo UI scaling
 	void SetScale(float s);
