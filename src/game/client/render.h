@@ -53,6 +53,9 @@ typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, float *pChannels, v
 
 class CRenderTools
 {
+	class IGraphics *m_pGraphics;
+	class ITextRender *m_pTextRender;
+
 	int m_TeeQuadContainerIndex;
 
 	void GetRenderTeeAnimScaleAndBaseSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize);
@@ -60,17 +63,10 @@ class CRenderTools
 	void GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, float &FeetScaleHeight);
 
 public:
-	class IGraphics *m_pGraphics;
-	class CUI *m_pUI;
-	class CGameClient *m_pGameClient;
-
 	class IGraphics *Graphics() const { return m_pGraphics; }
-	class CUI *UI() const { return m_pUI; }
-	class CGameClient *GameClient() const { return m_pGameClient; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
 
-	void Init(class IGraphics *pGraphics, class CUI *pUI, class CGameClient *pGameClient);
-
-	//typedef struct SPRITE;
+	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
 
 	void SelectSprite(struct CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
 	void SelectSprite(int id, int Flags = 0, int sx = 0, int sy = 0);
