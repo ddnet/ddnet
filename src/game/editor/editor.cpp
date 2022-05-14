@@ -366,7 +366,7 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 	if(UI()->HotItem() == pID && pToolTip)
 		m_pTooltip = pToolTip;
 
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 
 	// Draw here
 	//return UI()->DoButton(id, text, checked, r, draw_func, 0);
@@ -528,7 +528,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	static char s_aNumStr[64];
 	static bool s_TextMode = false;
 	static void *s_LastTextpID = pID;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 
 	if(UI()->MouseButton(1) && UI()->HotItem() == pID)
 	{
@@ -2326,7 +2326,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	static void *s_pEditorID = (void *)&s_pEditorID;
-	int Inside = UI()->MouseInside(&View);
+	const bool Inside = UI()->MouseInside(&View);
 
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();
@@ -4446,7 +4446,7 @@ void CEditor::RenderFileDialog()
 			static int s_ClearButton = 0;
 			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
 			UI()->DoLabel(&ClearBox, "×", 10.0f, TEXTALIGN_CENTER);
-			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &ClearBox))
+			if(UI()->DoButtonLogic(&s_ClearButton, 0, &ClearBox))
 			{
 				m_aFileDialogSearchText[0] = 0;
 				UI()->SetActiveItem(&s_SearchBoxID);

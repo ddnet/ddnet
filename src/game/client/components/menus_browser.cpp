@@ -245,7 +245,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
 		NumPlayers += pItem->m_NumFilteredPlayers;
 		CUIRect Row;
-		CUIRect SelectHitBox;
 
 		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
@@ -257,7 +256,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
 
 		View.HSplitTop(ms_ListheaderHeight, &Row, &View);
-		SelectHitBox = Row;
 
 		if(Selected)
 			m_SelectedIndex = i;
@@ -295,23 +293,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(0), &r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			// clip the selection
-			if(SelectHitBox.y < OriginalView.y) // top
-			{
-				SelectHitBox.h -= OriginalView.y - SelectHitBox.y;
-				SelectHitBox.y = OriginalView.y;
-			}
-			else if(SelectHitBox.y + SelectHitBox.h > OriginalView.y + OriginalView.h) // bottom
-				SelectHitBox.h = OriginalView.y + OriginalView.h - SelectHitBox.y;
-
-			if(!Selected && UI()->MouseInside(&SelectHitBox))
+			if(!Selected && UI()->MouseHovered(&Row))
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(1), &r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox))
+			if(UI()->DoButtonLogic(pItem, Selected, &Row))
 			{
 				NewSelected = ItemIndex;
 				if(NewSelected == m_DoubleClickIndex)
@@ -765,7 +754,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry ? 1.0f : 0.5f);
 		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
-		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
+		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
 	}
 
@@ -872,7 +861,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = TypesWidth;
 					Rect.h = TypesHeight;
 
-					int Click = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
+					int Click = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], 0, &Rect);
 					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
@@ -967,7 +956,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = FlagWidth;
 					Rect.h = FlagHeight;
 
-					int Click = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
+					int Click = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], 0, &Rect);
 					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter

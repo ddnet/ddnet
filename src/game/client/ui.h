@@ -202,6 +202,10 @@ class CUI
 	unsigned m_LastMouseButtons;
 
 	CUIRect m_Screen;
+
+	std::vector<CUIRect> m_Clips;
+	void UpdateClipping();
+
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
@@ -271,6 +275,8 @@ public:
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	bool MouseInside(const CUIRect *pRect) const;
+	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
+	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *x, float *y) const;
 
 	float ButtonColorMulActive() { return 0.5f; }
@@ -281,15 +287,17 @@ public:
 	CUIRect *Screen();
 	void MapScreen();
 	float PixelSize();
+
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
+	const CUIRect *ClipArea() const;
+	inline bool IsClipped() const { return !m_Clips.empty(); }
 
 	// TODO: Refactor: Redo UI scaling
 	void SetScale(float s);
 	float Scale() const;
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
-	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
 	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
