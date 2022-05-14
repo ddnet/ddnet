@@ -396,7 +396,7 @@ CClient::CClient() :
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 
 	m_State = IClient::STATE_OFFLINE;
-	m_aServerAddressStr[0] = 0;
+	m_aConnectAddressStr[0] = 0;
 
 	mem_zero(m_aSnapshots, sizeof(m_aSnapshots));
 	m_SnapshotStorage[0].Init();
@@ -771,20 +771,20 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 
 	m_ConnectionID = RandomUuid();
-	if(pAddress != m_aServerAddressStr)
-		str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
+	if(pAddress != m_aConnectAddressStr)
+		str_copy(m_aConnectAddressStr, pAddress, sizeof(m_aConnectAddressStr));
 
-	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
+	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aConnectAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkPrintColor);
 	bool is_websocket = false;
-	if(strncmp(m_aServerAddressStr, "ws://", 5) == 0)
+	if(strncmp(m_aConnectAddressStr, "ws://", 5) == 0)
 	{
 		is_websocket = true;
-		str_copy(m_aServerAddressStr, pAddress + 5, sizeof(m_aServerAddressStr));
+		str_copy(m_aConnectAddressStr, pAddress + 5, sizeof(m_aConnectAddressStr));
 	}
 
 	ServerInfoRequest();
-	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[CONN_MAIN].NetType()) != 0)
+	if(net_host_lookup(m_aConnectAddressStr, &m_ServerAddress, m_NetClient[CONN_MAIN].NetType()) != 0)
 	{
 		char aBufMsg[256];
 		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
@@ -2812,7 +2812,7 @@ void CClient::Update()
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
 		if(State() != STATE_ONLINE)
-			Connect(m_aServerAddressStr);
+			Connect(m_aConnectAddressStr);
 		m_ReconnectTime = 0;
 	}
 

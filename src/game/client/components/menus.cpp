@@ -1462,7 +1462,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = Client()->ServerAddress();
+			pExtraText = Client()->ConnectAddressString();
 			pButtonText = Localize("Abort");
 			if(Client()->MapDownloadTotalsize() > 0)
 			{

@@ -129,7 +129,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CFriends m_Friends;
 	class CFriends m_Foes;
 
-	char m_aServerAddressStr[256];
+	char m_aConnectAddressStr[256];
 
 	CUuid m_ConnectionID;
 
@@ -394,7 +394,8 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
-	const char *ServerAddress() const override { return m_aServerAddressStr; }
+	NETADDR ServerAddress() const override { return m_ServerAddress; }
+	const char *ConnectAddressString() const override { return m_aConnectAddressStr; }
 	const char *MapDownloadName() const override { return m_aMapdownloadName; }
 	int MapDownloadAmount() const override { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
 	int MapDownloadTotalsize() const override { return !m_pMapdownloadTask ? m_MapdownloadTotalsize : (int)m_pMapdownloadTask->Size(); }
