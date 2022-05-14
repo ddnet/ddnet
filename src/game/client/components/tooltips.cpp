@@ -40,6 +40,7 @@ void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char 
 	if(!result.second)
 	{
 		Tooltip.m_Rect = *pNearRect; // update in case of window resize
+		Tooltip.m_pText = pText; // update in case of language change
 	}
 
 	Tooltip.m_OnScreen = true;
