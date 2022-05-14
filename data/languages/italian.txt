@@ -1371,6 +1371,9 @@ Overlay entities
 Opacity
 == 
 
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
 Quads are used for background decoration
 == 
 
