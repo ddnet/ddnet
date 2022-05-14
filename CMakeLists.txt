@@ -1755,6 +1755,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  stun.cpp
+  stun.h
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
@@ -2377,6 +2379,7 @@ if(TOOLS)
     map_replace_image.cpp
     map_resave.cpp
     packetgen.cpp
+    stun.cpp
     unicode_confusables.cpp
     uuid.cpp
   )
