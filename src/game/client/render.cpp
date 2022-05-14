@@ -64,21 +64,12 @@ void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
 	float x2 = (x + w) / (float)cx - 0.5f / (float)(cx * 32);
 	float y1 = y / (float)cy + 0.5f / (float)(cy * 32);
 	float y2 = (y + h) / (float)cy - 0.5f / (float)(cy * 32);
-	float Temp = 0;
 
 	if(Flags & SPRITE_FLAG_FLIP_Y)
-	{
-		Temp = y1;
-		y1 = y2;
-		y2 = Temp;
-	}
+		std::swap(y1, y2);
 
 	if(Flags & SPRITE_FLAG_FLIP_X)
-	{
-		Temp = x1;
-		x1 = x2;
-		x2 = Temp;
-	}
+		std::swap(x1, x2);
 
 	Graphics()->QuadsSetSubset(x1, y1, x2, y2);
 }
