@@ -42,6 +42,7 @@ public:
 	void Reset();
 	void SetSolo(int ClientID, bool Value)
 	{
+		dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "Invalid client id");
 		m_IsSolo[ClientID] = Value;
 	}
 
