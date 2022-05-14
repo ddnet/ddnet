@@ -10,6 +10,7 @@
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -7148,7 +7149,7 @@ public:
 
 	void Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
 	{
-		dbg_msg("vulkan", "creating new surface.");
+		log_debug("vulkan", "creating new surface.");
 		m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowID);
 		if(m_RenderingPaused)
 		{
@@ -7164,7 +7165,7 @@ public:
 
 	void Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand)
 	{
-		dbg_msg("vulkan", "surface got destroyed.");
+		log_debug("vulkan", "surface got destroyed.");
 		if(!m_RenderingPaused)
 		{
 			WaitFrame();
