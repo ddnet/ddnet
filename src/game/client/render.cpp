@@ -95,9 +95,9 @@ void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, fl
 	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
-void CRenderTools::GetSpriteScale(int id, float &ScaleX, float &ScaleY)
+void CRenderTools::GetSpriteScale(int Id, float &ScaleX, float &ScaleY)
 {
-	GetSpriteScale(&g_pData->m_aSprites[id], ScaleX, ScaleY);
+	GetSpriteScale(&g_pData->m_aSprites[Id], ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
