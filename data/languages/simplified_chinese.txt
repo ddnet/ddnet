@@ -21,6 +21,8 @@
 # 2022-03-24 cheeser0613
 # 2022-03-29 Dan_cao
 # 2022-04-01 Dan_cao
+# 2022-05-14 Dan_cao
+# 2022-05-14 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -726,7 +728,7 @@ Friend message
 == 好友消息
 
 Save the best demo of each race
-== 保存每场游戏最好记录的回放
+== 保存每场游戏最佳记录的回放
 
 Ghost
 == 影子
@@ -818,7 +820,7 @@ Ratio
 ##### Ratio的算法是击杀除以死亡次数 #####
 
 AntiPing
-== 延迟补偿
+== 延迟补偿（AntiPing）
 
 Countries
 == 国家
@@ -1369,37 +1371,37 @@ auto
 == 自动
 
 Tutorial
-== 进入教学
+== 教学
 
 Can't find a Tutorial server
 == 无法找到教学服务器
 
 Toggle to edit your dummy settings
-== 
+== 编辑分身设置
 
 Choose default eyes when joining a server
-== 
+== 进入服务器时的默认表情
 
 Allows maps to render with more detail
-== 
+== 允许地图渲染更多细节
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== 当越过起跑线时，游戏里将有影子回放你的最佳成绩
 
 Opacity
-== 
+== 不透明度
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== 调整单人区域或其他队伍中玩家的不透明度
 
 Quads are used for background decoration
-== 
+== 显示用作背景装饰的贴图
 
 Tries to predict other entities to give a feel of low latency
-== 
+== 尝试预测其他实体物以带来低延迟的游玩体验
 
 Super
-== 
+== 无敌
 
 Team %d
-== 
+== 队伍 %d
