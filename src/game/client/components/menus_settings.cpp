@@ -2783,7 +2783,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			g_Config.m_ClShowOthers = g_Config.m_ClShowOthers != SHOW_OTHERS_ON ? SHOW_OTHERS_ON : SHOW_OTHERS_OFF;
 		}
 
-		GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, "Adjust the opacity of entities belonging to other teams, such as tees and nameplates");
+		GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, Localize("Adjust the opacity of entities belonging to other teams, such as tees and nameplates"));
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);

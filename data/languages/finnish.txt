@@ -1316,6 +1316,9 @@ Show text entities
 Opacity
 == 
 
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
 Show quads
 == 
 

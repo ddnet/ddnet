@@ -1338,6 +1338,9 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == 
 
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
 Quads are used for background decoration
 == 
 
