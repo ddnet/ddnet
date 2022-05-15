@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 #include <base/system.h>
-#include <base/tl/base.h>
 
 #include "lineinput.h"
 #include <engine/keys.h>
@@ -27,7 +26,7 @@ void CLineInput::Set(const char *pString)
 void CLineInput::SetRange(const char *pString, int Begin, int End)
 {
 	if(Begin > End)
-		swap(Begin, End);
+		std::swap(Begin, End);
 	Begin = clamp(Begin, 0, m_Len);
 	End = clamp(End, 0, m_Len);
 

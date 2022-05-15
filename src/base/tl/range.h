@@ -3,7 +3,7 @@
 #ifndef BASE_TL_RANGE_H
 #define BASE_TL_RANGE_H
 
-#include "base/tl/base.h"
+#include <base/system.h>
 
 /*
 	Group: Range concepts
@@ -186,27 +186,27 @@ public:
 	bool empty() const { return begin >= end; }
 	void pop_front()
 	{
-		tl_assert(!empty());
+		dbg_assert(!empty(), "empty");
 		begin++;
 	}
 	void pop_back()
 	{
-		tl_assert(!empty());
+		dbg_assert(!empty(), "empty");
 		end--;
 	}
 	T &front()
 	{
-		tl_assert(!empty());
+		dbg_assert(!empty(), "empty");
 		return *begin;
 	}
 	T &back()
 	{
-		tl_assert(!empty());
+		dbg_assert(!empty(), "empty");
 		return *(end - 1);
 	}
 	T &index(unsigned i)
 	{
-		tl_assert(i < (unsigned)(end - begin));
+		dbg_assert(i < (unsigned)(end - begin), "out of range");
 		return begin[i];
 	}
 	unsigned size() const { return (unsigned)(end - begin); }
