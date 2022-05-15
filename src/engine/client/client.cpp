@@ -34,7 +34,6 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <engine/client/http.h>
 #include <engine/client/notifications.h>
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
@@ -43,6 +42,7 @@
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
@@ -1721,7 +1721,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps2.ddnet.tw") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
-						m_pMapdownloadTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE, CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
+						m_pMapdownloadTask = HttpGetFile(aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -4609,7 +4610,9 @@ void CClient::RequestDDNetInfo()
 	}
 
 	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
-	m_pDDNetInfoTask = std::make_shared<CGetFile>(Storage(), aUrl, m_aDDNetInfoTmp, IStorage::TYPE_SAVE, CTimeout{10000, 500, 10}, HTTPLOG::ALL, IPRESOLVE::V4);
+	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+	m_pDDNetInfoTask->Timeout(CTimeout{10000, 500, 10});
+	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

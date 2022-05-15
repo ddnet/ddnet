@@ -3012,6 +3012,152 @@ int str_hex_decode(void *dst, int dst_size, const char *src)
 	return 0;
 }
 
+void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
+{
+	static const char DIGITS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+	const unsigned char *data = (const unsigned char *)data_raw;
+	unsigned value = 0;
+	int num_bits = 0;
+	int i = 0;
+	int o = 0;
+
+	dst_size -= 1;
+	dst[dst_size] = 0;
+	while(true)
+	{
+		if(num_bits < 6 && i < data_size)
+		{
+			value = (value << 8) | data[i];
+			num_bits += 8;
+			i += 1;
+		}
+		if(o == dst_size)
+		{
+			return;
+		}
+		if(num_bits > 0)
+		{
+			unsigned padded;
+			if(num_bits >= 6)
+			{
+				padded = (value >> (num_bits - 6)) & 0x3f;
+			}
+			else
+			{
+				padded = (value << (6 - num_bits)) & 0x3f;
+			}
+			dst[o] = DIGITS[padded];
+			num_bits -= 6;
+			o += 1;
+		}
+		else if(o % 4 != 0)
+		{
+			dst[o] = '=';
+			o += 1;
+		}
+		else
+		{
+			dst[o] = 0;
+			return;
+		}
+	}
+}
+
+static int base64_digit_value(char digit)
+{
+	if('A' <= digit && digit <= 'Z')
+	{
+		return digit - 'A';
+	}
+	else if('a' <= digit && digit <= 'z')
+	{
+		return digit - 'a' + 26;
+	}
+	else if('0' <= digit && digit <= '9')
+	{
+		return digit - '0' + 52;
+	}
+	else if(digit == '+')
+	{
+		return 62;
+	}
+	else if(digit == '/')
+	{
+		return 63;
+	}
+	return -1;
+}
+
+int str_base64_decode(void *dst_raw, int dst_size, const char *data)
+{
+	unsigned char *dst = (unsigned char *)dst_raw;
+	int data_len = str_length(data);
+
+	int i;
+	int o = 0;
+
+	if(data_len % 4 != 0)
+	{
+		return -3;
+	}
+	if(data_len / 4 * 3 > dst_size)
+	{
+		// Output buffer too small.
+		return -2;
+	}
+	for(i = 0; i < data_len; i += 4)
+	{
+		int num_output_bytes = 3;
+		char copy[4];
+		int d[4];
+		int value;
+		int b;
+		mem_copy(copy, data + i, sizeof(copy));
+		if(i == data_len - 4)
+		{
+			if(copy[3] == '=')
+			{
+				copy[3] = 'A';
+				num_output_bytes = 2;
+				if(copy[2] == '=')
+				{
+					copy[2] = 'A';
+					num_output_bytes = 1;
+				}
+			}
+		}
+		d[0] = base64_digit_value(copy[0]);
+		d[1] = base64_digit_value(copy[1]);
+		d[2] = base64_digit_value(copy[2]);
+		d[3] = base64_digit_value(copy[3]);
+		if(d[0] == -1 || d[1] == -1 || d[2] == -1 || d[3] == -1)
+		{
+			// Invalid digit.
+			return -1;
+		}
+		value = (d[0] << 18) | (d[1] << 12) | (d[2] << 6) | d[3];
+		for(b = 0; b < 3; b++)
+		{
+			unsigned char byte_value = (value >> (16 - 8 * b)) & 0xff;
+			if(b < num_output_bytes)
+			{
+				dst[o] = byte_value;
+				o += 1;
+			}
+			else
+			{
+				if(byte_value != 0)
+				{
+					// Padding not zeroed.
+					return -2;
+				}
+			}
+		}
+	}
+	return o;
+}
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"

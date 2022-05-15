@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <vector>
 
 #include <base/hash_ctxt.h>
 #include <base/math.h>

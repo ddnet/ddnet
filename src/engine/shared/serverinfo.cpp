@@ -1,8 +1,11 @@
 #include "serverinfo.h"
 
 #include "json.h"
+#include <base/math.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+
+#include <cstdio>
 
 static bool IsAllowedHex(char c)
 {
