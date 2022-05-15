@@ -396,6 +396,7 @@ CClient::CClient() :
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 
 	m_State = IClient::STATE_OFFLINE;
+	m_StateStartTime = time_get();
 	m_aConnectAddressStr[0] = 0;
 
 	mem_zero(m_aSnapshots, sizeof(m_aSnapshots));
@@ -655,6 +656,7 @@ void CClient::SetState(int s)
 	m_State = s;
 	if(Old != s)
 	{
+		m_StateStartTime = time_get();
 		GameClient()->OnStateChange(m_State, Old);
 
 		if(s == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
@@ -815,6 +817,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		m_ServerAddress.type = NETTYPE_WEBSOCKET_IPV4;
 	}
 	m_NetClient[CONN_MAIN].Connect(&m_ServerAddress);
+	m_NetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
 
 	for(int i = 0; i < RECORDER_MAX; i++)
@@ -2340,16 +2343,17 @@ void CClient::LoadDDNetInfo()
 	if(!pDDNetInfo)
 		return;
 
-	const json_value *pVersion = json_object_get(pDDNetInfo, "version");
-	if(pVersion->type == json_string)
+	const json_value &DDNetInfo = *pDDNetInfo;
+	const json_value &CurrentVersion = DDNetInfo["version"];
+	if(CurrentVersion.type == json_string)
 	{
 		char aNewVersionStr[64];
-		str_copy(aNewVersionStr, json_string_get(pVersion), sizeof(aNewVersionStr));
+		str_copy(aNewVersionStr, CurrentVersion, sizeof(aNewVersionStr));
 		char aCurVersionStr[64];
 		str_copy(aCurVersionStr, GAME_RELEASE_VERSION, sizeof(aCurVersionStr));
 		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
 		{
-			str_copy(m_aVersionStr, json_string_get(pVersion), sizeof(m_aVersionStr));
+			str_copy(m_aVersionStr, CurrentVersion, sizeof(m_aVersionStr));
 		}
 		else
 		{
@@ -2358,28 +2362,57 @@ void CClient::LoadDDNetInfo()
 		}
 	}
 
-	const json_value *pNews = json_object_get(pDDNetInfo, "news");
-	if(pNews->type == json_string)
+	const json_value &News = DDNetInfo["news"];
+	if(News.type == json_string)
 	{
-		const char *pNewsString = json_string_get(pNews);
-
 		// Only mark news button if something new was added to the news
-		if(m_aNews[0] && str_find(m_aNews, pNewsString) == nullptr)
+		if(m_aNews[0] && str_find(m_aNews, News) == nullptr)
 			g_Config.m_UiUnreadNews = true;
 
-		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
+		str_copy(m_aNews, News, sizeof(m_aNews));
 	}
 
-	const json_value *pMapDownloadUrl = json_object_get(pDDNetInfo, "map-download-url");
-	if(pMapDownloadUrl->type == json_string)
+	const json_value &MapDownloadUrl = DDNetInfo["map-download-url"];
+	if(MapDownloadUrl.type == json_string)
 	{
-		const char *pMapDownloadUrlString = json_string_get(pMapDownloadUrl);
-		str_copy(m_aMapDownloadUrl, pMapDownloadUrlString, sizeof(m_aMapDownloadUrl));
+		str_copy(m_aMapDownloadUrl, MapDownloadUrl, sizeof(m_aMapDownloadUrl));
 	}
 
-	const json_value *pPoints = json_object_get(pDDNetInfo, "points");
-	if(pPoints->type == json_integer)
-		m_Points = pPoints->u.integer;
+	const json_value &Points = DDNetInfo["points"];
+	if(Points.type == json_integer)
+	{
+		m_Points = Points.u.integer;
+	}
+
+	const json_value &StunServersIpv6 = DDNetInfo["stun-servers-ipv6"];
+	if(StunServersIpv6.type == json_array && StunServersIpv6[0].type == json_string)
+	{
+		NETADDR Addr;
+		if(!net_addr_from_str(&Addr, StunServersIpv6[0]))
+		{
+			m_NetClient->FeedStunServer(Addr);
+		}
+	}
+	const json_value &StunServersIpv4 = DDNetInfo["stun-servers-ipv4"];
+	if(StunServersIpv4.type == json_array && StunServersIpv4[0].type == json_string)
+	{
+		NETADDR Addr;
+		if(!net_addr_from_str(&Addr, StunServersIpv4[0]))
+		{
+			m_NetClient->FeedStunServer(Addr);
+		}
+	}
+	const json_value &ConnectingIp = DDNetInfo["connecting-ip"];
+	if(ConnectingIp.type == json_string)
+	{
+		NETADDR Addr;
+		if(!net_addr_from_str(&Addr, ConnectingIp))
+		{
+			m_HaveGlobalTcpAddr = true;
+			m_GlobalTcpAddr = Addr;
+			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
+		}
+	}
 }
 
 void CClient::PumpNetwork()
@@ -4670,4 +4703,31 @@ int CClient::MaxLatencyTicks() const
 int CClient::PredictionMargin() const
 {
 	return m_ServerCapabilities.m_SyncWeaponInput ? g_Config.m_ClPredictionMargin : 10;
+}
+
+int CClient::UdpConnectivity(int NetType)
+{
+	NETADDR GlobalUdpAddr;
+	CONNECTIVITY Connectivity = m_NetClient->GetConnectivity(NetType, &GlobalUdpAddr);
+	GlobalUdpAddr.port = 0;
+	switch(Connectivity)
+	{
+	case CONNECTIVITY::UNKNOWN:
+		return CONNECTIVITY_UNKNOWN;
+	case CONNECTIVITY::CHECKING:
+		return CONNECTIVITY_CHECKING;
+	case CONNECTIVITY::UNREACHABLE:
+		return CONNECTIVITY_UNREACHABLE;
+	case CONNECTIVITY::REACHABLE:
+		return CONNECTIVITY_REACHABLE;
+	case CONNECTIVITY::ADDRESS_KNOWN:
+		if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+		{
+			return CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+		}
+		return CONNECTIVITY_REACHABLE;
+	default:
+		dbg_assert(0, "invalid connectivity value");
+		return CONNECTIVITY_UNKNOWN;
+	}
 }

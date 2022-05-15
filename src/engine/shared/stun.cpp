@@ -154,9 +154,5 @@ bool StunMessageParse(const unsigned char *pMessage, size_t MessageSize, const C
 		}
 		Offset += 4 + Length;
 	}
-	if(*pSuccess && !FoundAddr)
-	{
-		return true;
-	}
-	return false;
+	return *pSuccess && !FoundAddr;
 }

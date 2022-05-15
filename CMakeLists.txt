@@ -1742,6 +1742,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   network_console.cpp
   network_console_conn.cpp
   network_server.cpp
+  network_stun.cpp
   packer.cpp
   packer.h
   protocol.h

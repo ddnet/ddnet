@@ -133,6 +133,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CUuid m_ConnectionID;
 
+	bool m_HaveGlobalTcpAddr = false;
+	NETADDR m_GlobalTcpAddr;
+
 	unsigned m_SnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
 
@@ -528,6 +531,7 @@ public:
 	SWarning *GetCurWarning() override;
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
+	int UdpConnectivity(int NetType) override;
 };
 
 #endif

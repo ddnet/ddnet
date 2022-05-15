@@ -1464,7 +1464,34 @@ int CMenus::Render()
 			pTitle = Localize("Connecting to");
 			pExtraText = Client()->ConnectAddressString();
 			pButtonText = Localize("Abort");
-			if(Client()->MapDownloadTotalsize() > 0)
+			if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
+			{
+				int Connectivity = Client()->UdpConnectivity(Client()->ServerAddress().type);
+				const char *pMessage = nullptr;
+				switch(Connectivity)
+				{
+				case IClient::CONNECTIVITY_UNKNOWN:
+					break;
+				case IClient::CONNECTIVITY_CHECKING:
+					pMessage = Localize("Trying to determine UDP connectivity...");
+					break;
+				case IClient::CONNECTIVITY_UNREACHABLE:
+					pMessage = Localize("UDP seems to be filtered.");
+					break;
+				case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
+					pMessage = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
+					break;
+				case IClient::CONNECTIVITY_REACHABLE:
+					pMessage = Localize("No answer from server yet.");
+					break;
+				}
+				if(pMessage)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Client()->ConnectAddressString(), pMessage);
+					pExtraText = aBuf;
+				}
+			}
+			else if(Client()->MapDownloadTotalsize() > 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
 				pTitle = aBuf;
@@ -2475,7 +2502,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 		m_DownloadSpeed = 0.0f;
 	}
 	else if(NewState == IClient::STATE_CONNECTING)
+	{
 		m_Popup = POPUP_CONNECTING;
+	}
 	else if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_Popup != POPUP_WARNING)
