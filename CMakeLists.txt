@@ -95,6 +95,19 @@ else()
 endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(AUTO_IPO OFF)
+else()
+  set(AUTO_IPO ON)
+endif()
+
+if(MSVC)
+  # For some reason on MSVC platform the client and server binaries
+  # become even bigger with IPO enabled.
+  set(AUTO_IPO OFF)
+endif()
+
 set(AUTO_VULKAN_BACKEND ON)
 if(TARGET_OS STREQUAL "windows")
   set(AUTO_DEPENDENCIES_DEFAULT ON)
@@ -126,6 +139,7 @@ option(DEV "Don't generate stuff necessary for packaging" OFF)
 option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
 
 option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
+option(IPO "Enable interprocedural optimizations" ${AUTO_IPO})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
@@ -156,6 +170,21 @@ if(NOT(CMAKE_BUILD_TYPE MATCHES "^(Release|Debug|RelWithDebInfo|MinSizeRel)$"))
 endif()
 
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
+
+if(IPO)
+  if(CMAKE_VERSION VERSION_GREATER 3.9)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
+    if(ipo_supported)
+      message(STATUS "IPO is enabled")
+      set(ENABLE_IPO TRUE)
+    else()
+      message(WARNING "IPO is not supported: ${ipo_output}")
+    endif()
+  else()
+      message(WARNING "IPO enablement requires CMake 3.9+")
+  endif()
+endif()
 
 if(CMAKE_VERSION VERSION_LESS 3.0)
   configure_file(src/game/version.h vd.h)
@@ -262,6 +291,23 @@ if(NOT MSVC AND NOT HAIKU)
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
+endif()
+
+if(UNIX AND NOT APPLE)
+  # This can be disabled by configuring with -DUSE_GOLD=FALSE
+  if(NOT DEFINED USE_GOLD)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
+    if("${ld_version}" MATCHES "GNU gold")
+      set(USE_GOLD TRUE CACHE BOOL "Use GNU gold linker")
+    else()
+      set(USE_GOLD FALSE CACHE BOOL "Use GNU gold linker")
+    endif()
+  endif()
+  message(STATUS "GNU gold linker enabled: ${USE_GOLD}")
+  if(USE_GOLD)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
+  endif()
 endif()
 
 if(MSVC)
@@ -2915,6 +2961,9 @@ foreach(target ${TARGETS})
     else()
       target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
     endif()
+  endif()
+  if(ENABLE_IPO)
+    set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
 endforeach()
 
