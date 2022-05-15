@@ -6,7 +6,9 @@ os.chdir(os.path.dirname(__file__) + "/..")
 
 PATH = "src/"
 EXCEPTIONS = [
+        "src/base/unicode/confusables.h",
 	"src/base/unicode/confusables_data.h",
+        "src/base/unicode/tolower.h",
 	"src/base/unicode/tolower_data.h",
 	"src/tools/config_common.h"
 ]

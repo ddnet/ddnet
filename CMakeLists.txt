@@ -1608,8 +1608,10 @@ set_src(BASE GLOB_RECURSE src/base
   tl/sorted_array.h
   tl/threading.h
   unicode/confusables.cpp
+  unicode/confusables.h
   unicode/confusables_data.h
   unicode/tolower.cpp
+  unicode/tolower.h
   unicode/tolower_data.h
   vmath.h
 )
