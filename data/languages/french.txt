@@ -1374,15 +1374,15 @@ Renderer
 == Moteur de rendu graphique
 
 default
-== défault
+== défaut
 
-Custom
+custom
 == Personnalisé
 
 Graphics cards
 == Carte graphique
 
-Auto
+auto
 == Automatique
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1410,4 +1410,4 @@ Super
 == Super
 
 Team %d
-== Équipe
+== Équipe %d
