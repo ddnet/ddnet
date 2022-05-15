@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 #include <base/system.h>
-#include <base/tl/base.h>
 
 #include "lineinput.h"
 #include <engine/keys.h>
