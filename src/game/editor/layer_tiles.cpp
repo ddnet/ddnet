@@ -509,11 +509,7 @@ void CLayerTiles::BrushFlipX()
 {
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width / 2; x++)
-		{
-			CTile Tmp = m_pTiles[y * m_Width + x];
-			m_pTiles[y * m_Width + x] = m_pTiles[y * m_Width + m_Width - 1 - x];
-			m_pTiles[y * m_Width + m_Width - 1 - x] = Tmp;
-		}
+			std::swap(m_pTiles[y * m_Width + x], m_pTiles[y * m_Width + m_Width - 1 - x]);
 
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
@@ -531,11 +527,7 @@ void CLayerTiles::BrushFlipY()
 {
 	for(int y = 0; y < m_Height / 2; y++)
 		for(int x = 0; x < m_Width; x++)
-		{
-			CTile Tmp = m_pTiles[y * m_Width + x];
-			m_pTiles[y * m_Width + x] = m_pTiles[(m_Height - 1 - y) * m_Width + x];
-			m_pTiles[(m_Height - 1 - y) * m_Width + x] = Tmp;
-		}
+			std::swap(m_pTiles[y * m_Width + x], m_pTiles[(m_Height - 1 - y) * m_Width + x]);
 
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
@@ -576,9 +568,7 @@ void CLayerTiles::BrushRotate(float Amount)
 				}
 			}
 
-		int Temp = m_Width;
-		m_Width = m_Height;
-		m_Height = Temp;
+		std::swap(m_Width, m_Height);
 		delete[] pTempData;
 	}
 
@@ -1246,11 +1236,7 @@ void CLayerTele::BrushFlipX()
 
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width / 2; x++)
-		{
-			CTeleTile Tmp = m_pTeleTile[y * m_Width + x];
-			m_pTeleTile[y * m_Width + x] = m_pTeleTile[y * m_Width + m_Width - 1 - x];
-			m_pTeleTile[y * m_Width + m_Width - 1 - x] = Tmp;
-		}
+			std::swap(m_pTeleTile[y * m_Width + x], m_pTeleTile[y * m_Width + m_Width - 1 - x]);
 }
 
 void CLayerTele::BrushFlipY()
@@ -1259,11 +1245,7 @@ void CLayerTele::BrushFlipY()
 
 	for(int y = 0; y < m_Height / 2; y++)
 		for(int x = 0; x < m_Width; x++)
-		{
-			CTeleTile Tmp = m_pTeleTile[y * m_Width + x];
-			m_pTeleTile[y * m_Width + x] = m_pTeleTile[(m_Height - 1 - y) * m_Width + x];
-			m_pTeleTile[(m_Height - 1 - y) * m_Width + x] = Tmp;
-		}
+			std::swap(m_pTeleTile[y * m_Width + x], m_pTeleTile[(m_Height - 1 - y) * m_Width + x]);
 }
 
 void CLayerTele::BrushRotate(float Amount)
@@ -1288,9 +1270,7 @@ void CLayerTele::BrushRotate(float Amount)
 				*pDst2 = pTempData2[y * m_Width + x];
 			}
 
-		int Temp = m_Width;
-		m_Width = m_Height;
-		m_Height = Temp;
+		std::swap(m_Width, m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -1539,11 +1519,7 @@ void CLayerSpeedup::BrushFlipX()
 
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width / 2; x++)
-		{
-			CSpeedupTile Tmp = m_pSpeedupTile[y * m_Width + x];
-			m_pSpeedupTile[y * m_Width + x] = m_pSpeedupTile[y * m_Width + m_Width - 1 - x];
-			m_pSpeedupTile[y * m_Width + m_Width - 1 - x] = Tmp;
-		}
+			std::swap(m_pSpeedupTile[y * m_Width + x], m_pSpeedupTile[y * m_Width + m_Width - 1 - x]);
 }
 
 void CLayerSpeedup::BrushFlipY()
@@ -1552,11 +1528,7 @@ void CLayerSpeedup::BrushFlipY()
 
 	for(int y = 0; y < m_Height / 2; y++)
 		for(int x = 0; x < m_Width; x++)
-		{
-			CSpeedupTile Tmp = m_pSpeedupTile[y * m_Width + x];
-			m_pSpeedupTile[y * m_Width + x] = m_pSpeedupTile[(m_Height - 1 - y) * m_Width + x];
-			m_pSpeedupTile[(m_Height - 1 - y) * m_Width + x] = Tmp;
-		}
+			std::swap(m_pSpeedupTile[y * m_Width + x], m_pSpeedupTile[(m_Height - 1 - y) * m_Width + x]);
 }
 
 void CLayerSpeedup::BrushRotate(float Amount)
@@ -1581,9 +1553,7 @@ void CLayerSpeedup::BrushRotate(float Amount)
 				*pDst2 = pTempData2[y * m_Width + x];
 			}
 
-		int Temp = m_Width;
-		m_Width = m_Height;
-		m_Height = Temp;
+		std::swap(m_Width, m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -1868,11 +1838,7 @@ void CLayerSwitch::BrushFlipX()
 
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width / 2; x++)
-		{
-			CSwitchTile Tmp = m_pSwitchTile[y * m_Width + x];
-			m_pSwitchTile[y * m_Width + x] = m_pSwitchTile[y * m_Width + m_Width - 1 - x];
-			m_pSwitchTile[y * m_Width + m_Width - 1 - x] = Tmp;
-		}
+			std::swap(m_pSwitchTile[y * m_Width + x], m_pSwitchTile[y * m_Width + m_Width - 1 - x]);
 }
 
 void CLayerSwitch::BrushFlipY()
@@ -1881,11 +1847,7 @@ void CLayerSwitch::BrushFlipY()
 
 	for(int y = 0; y < m_Height / 2; y++)
 		for(int x = 0; x < m_Width; x++)
-		{
-			CSwitchTile Tmp = m_pSwitchTile[y * m_Width + x];
-			m_pSwitchTile[y * m_Width + x] = m_pSwitchTile[(m_Height - 1 - y) * m_Width + x];
-			m_pSwitchTile[(m_Height - 1 - y) * m_Width + x] = Tmp;
-		}
+			std::swap(m_pSwitchTile[y * m_Width + x], m_pSwitchTile[(m_Height - 1 - y) * m_Width + x]);
 }
 
 void CLayerSwitch::BrushRotate(float Amount)
@@ -1916,9 +1878,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				}
 			}
 
-		int Temp = m_Width;
-		m_Width = m_Height;
-		m_Height = Temp;
+		std::swap(m_Width, m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -2160,11 +2120,7 @@ void CLayerTune::BrushFlipX()
 
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width / 2; x++)
-		{
-			CTuneTile Tmp = m_pTuneTile[y * m_Width + x];
-			m_pTuneTile[y * m_Width + x] = m_pTuneTile[y * m_Width + m_Width - 1 - x];
-			m_pTuneTile[y * m_Width + m_Width - 1 - x] = Tmp;
-		}
+			std::swap(m_pTuneTile[y * m_Width + x], m_pTuneTile[y * m_Width + m_Width - 1 - x]);
 }
 
 void CLayerTune::BrushFlipY()
@@ -2173,11 +2129,7 @@ void CLayerTune::BrushFlipY()
 
 	for(int y = 0; y < m_Height / 2; y++)
 		for(int x = 0; x < m_Width; x++)
-		{
-			CTuneTile Tmp = m_pTuneTile[y * m_Width + x];
-			m_pTuneTile[y * m_Width + x] = m_pTuneTile[(m_Height - 1 - y) * m_Width + x];
-			m_pTuneTile[(m_Height - 1 - y) * m_Width + x] = Tmp;
-		}
+			std::swap(m_pTuneTile[y * m_Width + x], m_pTuneTile[(m_Height - 1 - y) * m_Width + x]);
 }
 
 void CLayerTune::BrushRotate(float Amount)
@@ -2202,9 +2154,7 @@ void CLayerTune::BrushRotate(float Amount)
 				*pDst2 = pTempData2[y * m_Width + x];
 			}
 
-		int Temp = m_Width;
-		m_Width = m_Height;
-		m_Height = Temp;
+		std::swap(m_Width, m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
