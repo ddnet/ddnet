@@ -1410,4 +1410,4 @@ Super
 == Super
 
 Team %d
-== Equipe
+== Équipe
