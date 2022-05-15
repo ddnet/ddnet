@@ -706,7 +706,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 			}
 			else
 			{
-				pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName, sizeof(aBuf));
 				Used = Length;
@@ -714,7 +714,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 		}
 	}
 	if(Used > 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
 void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
