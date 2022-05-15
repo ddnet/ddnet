@@ -302,15 +302,8 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 {
 	m_Width = Width;
 	m_Height = Height;
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
 	if(Width == 0 || Height == 0 || Width >= std::numeric_limits<std::ptrdiff_t>::max() || Height >= std::numeric_limits<std::ptrdiff_t>::max())
 		return false;
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 	m_pTilesOfLayer = new CMapLayers::STileLayerVisuals::STileVisual[Height * Width];
 

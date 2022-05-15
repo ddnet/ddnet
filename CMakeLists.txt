@@ -106,6 +106,9 @@ if(MSVC)
   # For some reason on MSVC platform the client and server binaries
   # become even bigger with IPO enabled.
   set(AUTO_IPO OFF)
+elseif(MINGW AND TARGET_CPU_ARCHITECTURE STREQUAL "x86")
+  # DWARF error: could not find variable specification and further failures
+  set(AUTO_IPO OFF)
 endif()
 
 set(AUTO_VULKAN_BACKEND ON)
@@ -281,6 +284,7 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
