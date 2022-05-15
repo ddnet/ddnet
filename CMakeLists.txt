@@ -95,6 +95,19 @@ else()
 endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(AUTO_IPO OFF)
+else()
+  set(AUTO_IPO ON)
+endif()
+
+if(MSVC)
+  # For some reason on MSVC platform the client and server binaries
+  # become even bigger with IPO enabled.
+  set(AUTO_IPO OFF)
+endif()
+
 set(AUTO_VULKAN_BACKEND ON)
 if(TARGET_OS STREQUAL "windows")
   set(AUTO_DEPENDENCIES_DEFAULT ON)
@@ -126,7 +139,7 @@ option(DEV "Don't generate stuff necessary for packaging" OFF)
 option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
 
 option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
-option(IPO "Enable interprocedural optimizations" OFF)
+option(IPO "Enable interprocedural optimizations" ${AUTO_IPO})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
