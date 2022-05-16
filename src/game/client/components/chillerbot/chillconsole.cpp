@@ -386,7 +386,7 @@ static float ConsoleScaleFunc(float t)
 	return sinf(acosf(1.0f - t));
 }
 
-struct CRenderInfo
+struct CChillRenderInfo
 {
 	CChillConsole *m_pSelf;
 	CTextCursor m_Cursor;
@@ -399,7 +399,7 @@ struct CRenderInfo
 
 void CChillConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
 {
-	CRenderInfo *pInfo = static_cast<CRenderInfo *>(pUser);
+	CChillRenderInfo *pInfo = static_cast<CChillRenderInfo *>(pUser);
 
 	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
 	{
@@ -557,7 +557,7 @@ void CChillConsole::OnRender()
 		float x = 3;
 		float y = ConsoleHeight - RowHeight - 5.0f;
 
-		CRenderInfo Info;
+		CChillRenderInfo Info;
 		Info.m_pSelf = this;
 		Info.m_WantedCompletion = pConsole->m_CompletionChosen;
 		Info.m_EnumCount = 0;

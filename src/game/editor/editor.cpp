@@ -231,7 +231,7 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 	if(Index0 == Index1)
 		return Index0;
 	m_pMap->m_Modified = true;
-	swap(m_lLayers[Index0], m_lLayers[Index1]);
+	std::swap(m_lLayers[Index0], m_lLayers[Index1]);
 	return Index1;
 }
 
@@ -1946,11 +1946,11 @@ void CEditor::DoQuadKnife(int QuadIndex)
 			IsInTriangle(m_aQuadKnifePoints[1], m_aQuadKnifePoints[0], m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]))
 		{
 			// Fix concave order
-			swap(m_aQuadKnifePoints[0], m_aQuadKnifePoints[3]);
-			swap(m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]);
+			std::swap(m_aQuadKnifePoints[0], m_aQuadKnifePoints[3]);
+			std::swap(m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]);
 		}
 
-		swap(m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]);
+		std::swap(m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]);
 
 		CQuad *pResult = pLayer->NewQuad(64, 64, 64, 64);
 		pQuad = &pLayer->m_lQuads[QuadIndex];
@@ -6344,9 +6344,8 @@ void CEditor::Init()
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
-	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	m_UI.Init(m_pGraphics, m_pTextRender);
-	m_RenderTools.Init(m_pGraphics, &m_UI, pGameClient);
+	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 
 	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());

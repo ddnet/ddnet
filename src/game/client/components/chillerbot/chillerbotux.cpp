@@ -48,9 +48,11 @@ void CChillerBotUX::OnRender()
 				else
 					str_copy(aEscaped, "nameless tee", sizeof(aEscaped));
 				str_append(aUrl, aEscaped, sizeof(aUrl));
+
+				m_pAliveGet = HttpGet(aUrl);
 				// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
-				CTimeout Timeout{10000, 8000, 10};
-				m_pClient->Engine()->AddJob(m_pAliveGet = std::make_shared<CGet>(aUrl, Timeout));
+				m_pAliveGet->Timeout(CTimeout{10000, 8000, 10});
+				m_pClient->Engine()->AddJob(m_pAliveGet);
 				m_HeartbeatState = STATE_REFRESHING;
 			}
 			else if(m_HeartbeatState == STATE_REFRESHING)
@@ -60,7 +62,7 @@ void CChillerBotUX::OnRender()
 					return;
 				}
 				m_HeartbeatState = STATE_DONE;
-				std::shared_ptr<CGet> pGetServers = nullptr;
+				std::shared_ptr<CHttpRequest> pGetServers = nullptr;
 				std::swap(m_pAliveGet, pGetServers);
 
 				bool Success = true;

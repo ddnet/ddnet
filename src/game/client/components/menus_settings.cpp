@@ -751,7 +751,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
 			SLabelProperties Props;
 			Props.m_MaxWidth = Item.m_Rect.w;
-			RenderTools()->UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, TEXTALIGN_LEFT, Props);
+			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, TEXTALIGN_LEFT, Props);
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;

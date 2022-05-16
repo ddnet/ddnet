@@ -29,18 +29,22 @@ static bool IsVanillaSkin(const char *pName)
 
 int CSkins::CGetPngFile::OnCompletion(int State)
 {
-	State = CGetFile::OnCompletion(State);
+	State = CHttpRequest::OnCompletion(State);
 
-	if(State != HTTP_ERROR && State != HTTP_ABORTED && !m_pSkins->LoadSkinPNG(m_Info, m_aDest, m_aDest, m_StorageType))
+	if(State != HTTP_ERROR && State != HTTP_ABORTED && !m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE))
 	{
 		State = HTTP_ERROR;
 	}
 	return State;
 }
 
-CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType, CTimeout Timeout, HTTPLOG LogProgress) :
-	CGetFile(pStorage, pUrl, pDest, StorageType, Timeout, LogProgress), m_pSkins(pSkins)
+CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest) :
+	CHttpRequest(pUrl),
+	m_pSkins(pSkins)
 {
+	WriteToFile(pStorage, pDest, IStorage::TYPE_SAVE);
+	Timeout(CTimeout{0, 0, 0});
+	LogProgress(HTTPLOG::NONE);
 }
 
 struct SSkinScanUser
@@ -438,7 +442,7 @@ int CSkins::FindImpl(const char *pName)
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClSkinDownloadUrl, aEscapedName);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
-	Skin.m_pTask = std::make_shared<CGetPngFile>(this, Storage(), aUrl, Skin.m_aPath, IStorage::TYPE_SAVE, CTimeout{0, 0, 0}, HTTPLOG::NONE);
+	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_aDownloadSkins.add(Skin);
 	return -1;

@@ -10,10 +10,10 @@
 
 class CUIRect
 {
+public:
 	// TODO: Refactor: Redo UI scaling
 	float Scale() const;
 
-public:
 	float x, y, w, h;
 
 	/**

@@ -19,11 +19,10 @@
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient)
+void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 {
 	m_pGraphics = pGraphics;
-	m_pUI = pUI;
-	m_pGameClient = (CGameClient *)pGameClient;
+	m_pTextRender = pTextRender;
 	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
@@ -65,21 +64,12 @@ void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
 	float x2 = (x + w) / (float)cx - 0.5f / (float)(cx * 32);
 	float y1 = y / (float)cy + 0.5f / (float)(cy * 32);
 	float y2 = (y + h) / (float)cy - 0.5f / (float)(cy * 32);
-	float Temp = 0;
 
 	if(Flags & SPRITE_FLAG_FLIP_Y)
-	{
-		Temp = y1;
-		y1 = y2;
-		y2 = Temp;
-	}
+		std::swap(y1, y2);
 
 	if(Flags & SPRITE_FLAG_FLIP_X)
-	{
-		Temp = x1;
-		x1 = x2;
-		x2 = Temp;
-	}
+		std::swap(x1, x2);
 
 	Graphics()->QuadsSetSubset(x1, y1, x2, y2);
 }
@@ -105,9 +95,9 @@ void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, fl
 	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
-void CRenderTools::GetSpriteScale(int id, float &ScaleX, float &ScaleY)
+void CRenderTools::GetSpriteScale(int Id, float &ScaleX, float &ScaleY)
 {
-	GetSpriteScale(&g_pData->m_aSprites[id], ScaleX, ScaleY);
+	GetSpriteScale(&g_pData->m_aSprites[Id], ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
@@ -483,7 +473,7 @@ void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners
 	// TODO: FIX US
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
-	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding * UI()->Scale(), Corners);
+	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding * pRect->Scale(), Corners);
 	Graphics()->QuadsEnd();
 }
 
@@ -715,16 +705,16 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
 
 			bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
-			float cs = 1.0f; // color scale
+			float ColorScale = 1.0f;
 
 			if(!OutLine)
 			{
 				++QuadOffset;
 				if(Indicate)
-					cs = 0.5f;
+					ColorScale = 0.5f;
 			}
 
-			Graphics()->SetColor(pInfo->m_ColorFeet.r * cs, pInfo->m_ColorFeet.g * cs, pInfo->m_ColorFeet.b * cs, Alpha);
+			Graphics()->SetColor(pInfo->m_ColorFeet.r * ColorScale, pInfo->m_ColorFeet.g * ColorScale, pInfo->m_ColorFeet.b * ColorScale, Alpha);
 
 			Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
 			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);

@@ -2383,6 +2383,8 @@ void CServer::ChangeMap(const char *pMap)
 
 int CServer::LoadMap(const char *pMapName)
 {
+	m_MapReload = false;
+
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
 	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
@@ -2602,8 +2604,6 @@ int CServer::Run()
 			// load new map TODO: don't poll this
 			if(m_MapReload)
 			{
-				m_MapReload = false;
-
 				// load map
 				if(LoadMap(Config()->m_SvMap))
 				{
