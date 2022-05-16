@@ -601,8 +601,8 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupArmor;
 		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
 		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
-		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;
@@ -611,6 +611,7 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupHammer;
 
 		IGraphics::CTextureHandle m_SpritePickupWeapons[6];
+		IGraphics::CTextureHandle m_SpritePickupWeaponArmor[4];
 
 		// flags
 		IGraphics::CTextureHandle m_SpriteFlagBlue;
