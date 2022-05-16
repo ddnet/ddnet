@@ -71,6 +71,7 @@
 #include "components/chillerbot/city.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/stresser.h"
 #include "components/chillerbot/terminalui/terminalui.h"
 #include "components/chillerbot/unix.h"
 #include "components/chillerbot/vibebot.h"
@@ -162,6 +163,7 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(&m_VibeBot);
 	m_All.Add(&m_CityHelper);
 	m_All.Add(&m_TerminalUI);
+	m_All.Add(&m_Stresser);
 	m_All.Add(&m_ChillConsole);
 	m_All.Add(&m_Unix);
 
@@ -428,6 +430,11 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	{
 		mem_copy(pData, &m_TerminalUI.m_InputData[CurrentTee], sizeof(m_TerminalUI.m_InputData[CurrentTee]));
 		return sizeof(m_TerminalUI.m_InputData[CurrentTee]);
+	}
+	if(m_Stresser.m_SendData[CurrentTee])
+	{
+		mem_copy(pData, &m_Stresser.m_InputData[CurrentTee], sizeof(m_Stresser.m_InputData[CurrentTee]));
+		return sizeof(m_Stresser.m_InputData[CurrentTee]);
 	}
 	if(!Dummy)
 	{

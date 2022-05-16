@@ -63,6 +63,7 @@
 #include "components/chillerbot/city.h"
 #include "components/chillerbot/playerpics.h"
 #include "components/chillerbot/remotecontrol.h"
+#include "components/chillerbot/stresser.h"
 #include "components/chillerbot/terminalui/terminalui.h"
 #include "components/chillerbot/unix.h"
 #include "components/chillerbot/vibebot.h"
@@ -172,6 +173,7 @@ public:
 	CVibeBot m_VibeBot;
 	CCityHelper m_CityHelper;
 	CTerminalUI m_TerminalUI;
+	CStresser m_Stresser;
 
 private:
 	class CStack
