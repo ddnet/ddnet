@@ -46,8 +46,7 @@ void CDraggerBeam::Tick()
 			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
 	// This check is necessary because the check in CDragger::LookForPlayersToDrag only happens every 150ms
 	if(!IsReachable ||
-		distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange + pTarget->GetProximityRadius() ||
-		!pTarget->IsAlive())
+		distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange || !pTarget->IsAlive())
 	{
 		Reset();
 		return;

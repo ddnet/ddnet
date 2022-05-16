@@ -63,7 +63,8 @@ void CDragger::LookForPlayersToDrag()
 	CCharacter *pPlayersInRange[MAX_CLIENTS];
 	mem_zero(pPlayersInRange, sizeof(pPlayersInRange));
 
-	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvDraggerRange,
+	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
+		g_Config.m_SvDraggerRange - CCharacter::ms_PhysSize,
 		(CEntity **)pPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
