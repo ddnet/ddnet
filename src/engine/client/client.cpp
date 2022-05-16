@@ -129,6 +129,19 @@ void CGraph::Add(float v, float r, float g, float b)
 	m_aColors[m_Index][2] = b;
 }
 
+bool CGraph::InsertAt(int i, float v, float r, float g, float b)
+{
+	if(i < 0 || i > MAX_VALUES - 1)
+	{
+		return false;
+	}
+	m_aValues[i] = v;
+	m_aColors[i][0] = r;
+	m_aColors[i][1] = g;
+	m_aColors[i][2] = b;
+	return true;
+}
+
 void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
 {
 	//m_pGraphics->BlendNormal();

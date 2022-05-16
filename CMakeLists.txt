@@ -1234,6 +1234,7 @@ set(EXPECTED_DATA
   gui_cursor.png
   gui_icons.png
   gui_logo.png
+  hud.png
   languages/arabic.txt
   languages/belarusian.txt
   languages/bosnian.txt
@@ -1964,6 +1965,8 @@ if(CLIENT)
     components/emoticon.h
     components/flow.cpp
     components/flow.h
+    components/freezebars.cpp
+    components/freezebars.h
     components/ghost.cpp
     components/ghost.h
     components/hud.cpp

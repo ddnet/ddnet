@@ -26,10 +26,10 @@ void CSaveTee::Save(CCharacter *pChr)
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
-		m_aWeapons[i].m_AmmoRegenStart = pChr->m_aWeapons[i].m_AmmoRegenStart;
-		m_aWeapons[i].m_Ammo = pChr->m_aWeapons[i].m_Ammo;
-		m_aWeapons[i].m_Ammocost = pChr->m_aWeapons[i].m_Ammocost;
-		m_aWeapons[i].m_Got = pChr->m_aWeapons[i].m_Got;
+		m_aWeapons[i].m_AmmoRegenStart = pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart;
+		m_aWeapons[i].m_Ammo = pChr->m_Core.m_aWeapons[i].m_Ammo;
+		m_aWeapons[i].m_Ammocost = pChr->m_Core.m_aWeapons[i].m_Ammocost;
+		m_aWeapons[i].m_Got = pChr->m_Core.m_aWeapons[i].m_Got;
 	}
 
 	m_LastWeapon = pChr->m_LastWeapon;
@@ -39,7 +39,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_Jetpack = pChr->m_Jetpack;
 	m_NinjaJetpack = pChr->m_NinjaJetpack;
 	m_FreezeTime = pChr->m_FreezeTime;
-	m_FreezeTick = pChr->Server()->Tick() - pChr->m_FreezeTick;
+	m_FreezeTick = pChr->Server()->Tick() - pChr->m_Core.m_FreezeTick;
 
 	m_DeepFreeze = pChr->m_DeepFreeze;
 	m_LiveFreeze = pChr->m_LiveFreeze;
@@ -120,11 +120,11 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
-		pChr->m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
+		pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
 		// m_Ammo not used anymore for tracking freeze following https://github.com/ddnet/ddnet/pull/2086
-		pChr->m_aWeapons[i].m_Ammo = -1;
-		pChr->m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
-		pChr->m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
+		pChr->m_Core.m_aWeapons[i].m_Ammo = -1;
+		pChr->m_Core.m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
+		pChr->m_Core.m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
 	}
 
 	pChr->m_LastWeapon = m_LastWeapon;
@@ -134,7 +134,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Jetpack = m_Jetpack;
 	pChr->m_NinjaJetpack = m_NinjaJetpack;
 	pChr->m_FreezeTime = m_FreezeTime;
-	pChr->m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
+	pChr->m_Core.m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
 
 	pChr->m_DeepFreeze = m_DeepFreeze;
 	pChr->m_LiveFreeze = m_LiveFreeze;

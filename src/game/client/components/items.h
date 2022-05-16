@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_ITEMS_H
 #define GAME_CLIENT_COMPONENTS_ITEMS_H
 #include <game/client/component.h>
+#include <game/generated/protocol.h>
 
 class CProjectileData;
 
@@ -15,14 +16,23 @@ class CItems : public CComponent
 
 	int m_ItemsQuadContainerIndex;
 
-	int m_WeaponArmorQuadOffset = 0;
-
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnRender() override;
 	virtual void OnInit() override;
 
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
+
+private:
+	int m_BlueFlagOffset;
+	int m_RedFlagOffset;
+	int m_PickupHealthOffset;
+	int m_PickupArmorOffset;
+	int m_PickupWeaponOffset[NUM_WEAPONS];
+	int m_PickupNinjaOffset;
+	int m_PickupWeaponArmorOffset[4];
+	int m_ProjectileOffset[NUM_WEAPONS];
+	int m_ParticleSplatOffset[3];
 };
 
 #endif

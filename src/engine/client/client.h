@@ -53,6 +53,7 @@ public:
 	void ScaleMin();
 
 	void Add(float v, float r, float g, float b);
+	bool InsertAt(int i, float v, float r, float g, float b);
 	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
 
