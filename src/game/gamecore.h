@@ -243,6 +243,7 @@ public:
 	bool m_NewHook;
 
 	int m_Jumped;
+	// m_JumpedTotal counts the jumps performed in the air
 	int m_JumpedTotal;
 	int m_Jumps;
 

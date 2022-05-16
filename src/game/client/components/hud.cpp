@@ -840,37 +840,47 @@ void CHud::RenderPlayerState(const int ClientID)
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
 
 	int TotalJumpsToDisplay, AvailableJumpsToDisplay;
-	// If the player is predicted in the Game World, we take the predicted jump values, otherwise the values from a snap
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
-		const float PhysSize = 28.0f;
 		bool Grounded = false;
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x + PhysSize / 2, pCharacter->m_Pos.y + PhysSize / 2 + 5))
+		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacter::ms_PhysSize / 2,
+			   pCharacter->m_Pos.y + CCharacter::ms_PhysSize / 2 + 5))
+		{
 			Grounded = true;
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x - PhysSize / 2, pCharacter->m_Pos.y + PhysSize / 2 + 5))
+		}
+		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacter::ms_PhysSize / 2,
+			   pCharacter->m_Pos.y + CCharacter::ms_PhysSize / 2 + 5))
+		{
 			Grounded = true;
+		}
 
 		int UsedJumps = pCharacter->m_JumpedTotal;
-		if(UsedJumps < pCharacter->m_Jumps && pCharacter->m_Jumps > 1 && !Grounded)
+		if(pCharacter->m_Jumps > 1)
 		{
-			UsedJumps += 1;
+			UsedJumps += !Grounded;
 		}
-		if(pCharacter->m_Jumps == -1)
+		else if(pCharacter->m_Jumps == 1)
 		{
+			// If the player has only one jump, each jump is the last one
+			UsedJumps = pCharacter->m_Jumped & 2;
+		}
+		else if(pCharacter->m_Jumps == -1)
+		{
+			// The player has only one ground jump
 			UsedJumps = !Grounded;
 		}
-		if(pCharacter->m_EndlessJump)
+
+		if(pCharacter->m_EndlessJump && UsedJumps >= abs(pCharacter->m_Jumps))
 		{
-			UsedJumps = 0;
+			UsedJumps = abs(pCharacter->m_Jumps) - 1;
 		}
 
 		int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
-		if(!(pCharacter->m_Jumped & 2) && UnusedJumps == 0)
+		if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
 		{
-			// In some edge cases when the player just got another number of jumps, the prediction of m_JumpedTotal is not correct
-			UnusedJumps += 1;
+			// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
+			UnusedJumps = 1;
 		}
-
 		TotalJumpsToDisplay = maximum(minimum(abs(pCharacter->m_Jumps), 10), 0);
 		AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 	}

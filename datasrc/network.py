@@ -244,7 +244,7 @@ Objects = [
 	]),
 
 	NetObjectEx("DDNetCharacterDisplayInfo", "character-display-info@netobj.ddnet.tw", [
-		NetIntRange("m_JumpedTotal", -2, 255),
+		NetIntRange("m_JumpedTotal", 0, 255),
 		NetTick("m_NinjaActivationTick"),
 		NetTick("m_FreezeTick"),
 		NetBool("m_IsInFreeze"),

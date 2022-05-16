@@ -134,6 +134,15 @@ void CCharacterCore::Tick(bool UseInput)
 	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
 	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
 
+	// handle jumping
+	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
+	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
+	if(Grounded)
+	{
+		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
+
 	// handle input
 	if(UseInput)
 	{
@@ -153,16 +162,23 @@ void CCharacterCore::Tick(bool UseInput)
 		// handle jump
 		if(m_Input.m_Jump)
 		{
-			if(!(m_Jumped & 1))
+			if(!(m_Jumped & 1) && m_Jumps != 0)
 			{
 				if(Grounded)
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
 					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
-					m_Jumped |= 1;
-					m_JumpedTotal = 1;
+					if(m_Jumps > 1)
+					{
+						m_Jumped |= 1;
+					}
+					else
+					{
+						m_Jumped |= 3;
+					}
+					m_JumpedTotal = 0;
 				}
-				else if(!(m_Jumped & 2))
+				else if(!(m_Jumped & 2) && m_Jumps >= 1)
 				{
 					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
 					m_Vel.y = -m_Tuning.m_AirJumpImpulse;
@@ -172,7 +188,9 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 		}
 		else
+		{
 			m_Jumped &= ~1;
+		}
 
 		// handle hook
 		if(m_Input.m_Hook)
@@ -202,15 +220,6 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
-
-	// handle jumping
-	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
-	// 2 bit = to keep track if a air-jump has been made (tee gets dark feet)
-	if(Grounded)
-	{
-		m_Jumped &= ~2;
-		m_JumpedTotal = 0;
-	}
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)
