@@ -96,19 +96,17 @@ endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR DEV)
   set(AUTO_IPO OFF)
-else()
-  set(AUTO_IPO ON)
-endif()
-
-if(MSVC)
+elseif(MSVC)
   # For some reason on MSVC platform the client and server binaries
   # become even bigger with IPO enabled.
   set(AUTO_IPO OFF)
 elseif(MINGW AND TARGET_CPU_ARCHITECTURE STREQUAL "x86")
   # DWARF error: could not find variable specification and further failures
   set(AUTO_IPO OFF)
+else()
+  set(AUTO_IPO ON)
 endif()
 
 set(AUTO_VULKAN_BACKEND ON)
