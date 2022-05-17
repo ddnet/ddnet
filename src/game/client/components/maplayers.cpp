@@ -55,14 +55,6 @@ void CMapLayers::EnvelopeUpdate()
 	}
 }
 
-void CMapLayers::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
-{
-	float Points[4];
-	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
-}
-
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser)
 {
 	CMapLayers *pThis = (CMapLayers *)pUser;
@@ -1567,7 +1559,7 @@ void CMapLayers::OnRender()
 		{
 			// set clipping
 			float Points[4];
-			MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
 			Graphics()->GetScreen(&Points[0], &Points[1], &Points[2], &Points[3]);
 			float x0 = (pGroup->m_ClipX - Points[0]) / (Points[2] - Points[0]);
 			float y0 = (pGroup->m_ClipY - Points[1]) / (Points[3] - Points[1]);
@@ -1587,10 +1579,10 @@ void CMapLayers::OnRender()
 
 		if((!g_Config.m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
 		{
-			MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
 		}
 		else
-			MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{

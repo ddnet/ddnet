@@ -752,7 +752,7 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *w, float *h
 	*h *= Zoom;
 }
 
-void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 	float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
 {
 	float Width, Height;
@@ -763,4 +763,12 @@ void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[1] = OffsetY + CenterY - Height / 2;
 	pPoints[2] = pPoints[0] + Width;
 	pPoints[3] = pPoints[1] + Height;
+}
+
+void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
+{
+	float Points[4];
+	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
+	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
 }
