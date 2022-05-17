@@ -231,7 +231,7 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 	if(Index0 == Index1)
 		return Index0;
 	m_pMap->m_Modified = true;
-	swap(m_lLayers[Index0], m_lLayers[Index1]);
+	std::swap(m_lLayers[Index0], m_lLayers[Index1]);
 	return Index1;
 }
 
@@ -366,7 +366,7 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 	if(UI()->HotItem() == pID && pToolTip)
 		m_pTooltip = pToolTip;
 
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 
 	// Draw here
 	//return UI()->DoButton(id, text, checked, r, draw_func, 0);
@@ -528,7 +528,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	static char s_aNumStr[64];
 	static bool s_TextMode = false;
 	static void *s_LastTextpID = pID;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 
 	if(UI()->MouseButton(1) && UI()->HotItem() == pID)
 	{
@@ -1946,11 +1946,11 @@ void CEditor::DoQuadKnife(int QuadIndex)
 			IsInTriangle(m_aQuadKnifePoints[1], m_aQuadKnifePoints[0], m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]))
 		{
 			// Fix concave order
-			swap(m_aQuadKnifePoints[0], m_aQuadKnifePoints[3]);
-			swap(m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]);
+			std::swap(m_aQuadKnifePoints[0], m_aQuadKnifePoints[3]);
+			std::swap(m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]);
 		}
 
-		swap(m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]);
+		std::swap(m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]);
 
 		CQuad *pResult = pLayer->NewQuad(64, 64, 64, 64);
 		pQuad = &pLayer->m_lQuads[QuadIndex];
@@ -2326,7 +2326,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	static void *s_pEditorID = (void *)&s_pEditorID;
-	int Inside = UI()->MouseInside(&View);
+	const bool Inside = UI()->MouseInside(&View);
 
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();
@@ -4445,7 +4445,7 @@ void CEditor::RenderFileDialog()
 			static int s_ClearButton = 0;
 			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
 			UI()->DoLabel(&ClearBox, "×", 10.0f, TEXTALIGN_CENTER);
-			if(UI()->DoButtonLogic(&s_ClearButton, "×", 0, &ClearBox))
+			if(UI()->DoButtonLogic(&s_ClearButton, 0, &ClearBox))
 			{
 				m_aFileDialogSearchText[0] = 0;
 				UI()->SetActiveItem(&s_SearchBoxID);
@@ -6342,9 +6342,8 @@ void CEditor::Init()
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
-	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	m_UI.Init(m_pGraphics, m_pTextRender);
-	m_RenderTools.Init(m_pGraphics, &m_UI, pGameClient);
+	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 
 	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());

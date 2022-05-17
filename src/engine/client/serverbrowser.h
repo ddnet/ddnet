@@ -3,13 +3,13 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
-#include <engine/client/http.h>
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
 class IServerBrowserHttp;

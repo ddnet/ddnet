@@ -12,7 +12,6 @@
 #include <engine/client/demoedit.h>
 #include <engine/client/friends.h>
 #include <engine/client/ghost.h>
-#include <engine/client/http.h>
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
 #include <engine/discord.h>
@@ -25,6 +24,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
+#include <engine/shared/http.h>
 #include <engine/shared/network.h>
 #include <engine/sound.h>
 #include <engine/steam.h>
@@ -53,6 +53,7 @@ public:
 	void ScaleMin();
 
 	void Add(float v, float r, float g, float b);
+	bool InsertAt(int i, float v, float r, float g, float b);
 	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
 
@@ -181,7 +182,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
-	std::shared_ptr<CGetFile> m_pMapdownloadTask;
+	std::shared_ptr<CHttpRequest> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadFilenameTemp[256];
 	char m_aMapdownloadName[256];
@@ -199,7 +200,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	SHA256_DIGEST m_MapDetailsSha256;
 
 	char m_aDDNetInfoTmp[64];
-	std::shared_ptr<CGetFile> m_pDDNetInfoTask;
+	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask;
 
 	// time
 	CSmoothTime m_GameTime[NUM_DUMMIES];

@@ -34,6 +34,7 @@
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
+#include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
@@ -136,6 +137,7 @@ public:
 	CPlayerIndicator m_PlayerIndicator;
 	COutlines m_Outlines;
 	CNamePlates m_NamePlates;
+	CFreezeBars m_FreezeBars;
 	CItems m_Items;
 	CMapImages m_MapImages;
 
@@ -322,6 +324,10 @@ public:
 
 			CNetObj_DDNetCharacter m_ExtendedData;
 			bool m_HasExtendedData;
+
+			const CNetObj_DDNetCharacterDisplayInfo *m_PrevExtendedDisplayInfo;
+			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
+			bool m_HasExtendedDisplayInfo;
 
 			// interpolated position
 			vec2 m_Position;
@@ -537,6 +543,7 @@ public:
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+	void LoadHudSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
 
@@ -598,8 +605,8 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupArmor;
 		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
 		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
-		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;
@@ -608,6 +615,7 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupHammer;
 
 		IGraphics::CTextureHandle m_SpritePickupWeapons[6];
+		IGraphics::CTextureHandle m_SpritePickupWeaponArmor[4];
 
 		// flags
 		IGraphics::CTextureHandle m_SpriteFlagBlue;
@@ -651,6 +659,41 @@ public:
 
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
+
+	struct SClientHudSkin
+	{
+		IGraphics::CTextureHandle m_SpriteHudAirjump;
+		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
+		IGraphics::CTextureHandle m_SpriteHudSolo;
+		IGraphics::CTextureHandle m_SpriteHudNoCollision;
+		IGraphics::CTextureHandle m_SpriteHudEndlessJump;
+		IGraphics::CTextureHandle m_SpriteHudEndlessHook;
+		IGraphics::CTextureHandle m_SpriteHudJetpack;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFull;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarFull;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNoHookHit;
+		IGraphics::CTextureHandle m_SpriteHudNoHammerHit;
+		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;
+		IGraphics::CTextureHandle m_SpriteHudNoGrenadeHit;
+		IGraphics::CTextureHandle m_SpriteHudNoLaserHit;
+		IGraphics::CTextureHandle m_SpriteHudDeepFrozen;
+		IGraphics::CTextureHandle m_SpriteHudLiveFrozen;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGun;
+		IGraphics::CTextureHandle m_SpriteHudTeleportLaser;
+		IGraphics::CTextureHandle m_SpriteHudPracticeMode;
+		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
+		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
+	};
+
+	SClientHudSkin m_HudSkin;
+	bool m_HudSkinLoaded;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
 

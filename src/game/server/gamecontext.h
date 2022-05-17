@@ -12,7 +12,6 @@
 #include <game/voting.h>
 
 #include <base/tl/array.h>
-#include <base/tl/string.h>
 
 #include "eventhandler.h"
 //#include "gamecontroller.h"
@@ -20,6 +19,7 @@
 #include "teehistorian.h"
 
 #include <memory>
+#include <string>
 
 /*
 	Tick
@@ -73,7 +73,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	array<string> m_aCensorlist;
+	array<std::string> m_aCensorlist;
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;

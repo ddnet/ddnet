@@ -19,7 +19,6 @@
 
 #include "scoreboard.h"
 
-#include <base/tl/string.h>
 #include <engine/serverbrowser.h>
 
 CScoreboard::CScoreboard()
@@ -694,7 +693,7 @@ void CScoreboard::OnRender()
 
 	RenderGoals(Width / 2 - w / 2, 150 + 760 + 10, w);
 	RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10 + 50 + 10, w);
-	RenderRecordingNotification((Width / 7) * 4);
+	RenderRecordingNotification((Width / 7) * 4 + 20);
 }
 
 bool CScoreboard::Active()

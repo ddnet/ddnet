@@ -391,10 +391,8 @@ void CNamePlates::OnInit()
 {
 	ResetNamePlates();
 
-	// the direction
+	// Quad for the direction arrows above the player
 	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
-
-	IGraphics::CQuadItem QuadItem(0.f, 0.f, 22.f, 22.f);
-	Graphics()->QuadContainerAddQuads(m_DirectionQuadContainerIndex, &QuadItem, 1);
+	RenderTools()->QuadContainerAddSprite(m_DirectionQuadContainerIndex, 0.f, 0.f, 22.f);
 	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
 }

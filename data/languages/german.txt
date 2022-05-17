@@ -1393,3 +1393,6 @@ Super
 
 Team %d
 == Team %d
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Deckkraft von Entities die zu einem anderen Team gehören, z.B. Tees und Namensschilder

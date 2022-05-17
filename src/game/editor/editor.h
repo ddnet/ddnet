@@ -13,7 +13,6 @@
 #include <base/tl/algorithm.h>
 #include <base/tl/array.h>
 #include <base/tl/sorted_array.h>
-#include <base/tl/string.h>
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -417,7 +416,7 @@ public:
 		if(Index0 == Index1)
 			return Index0;
 		m_Modified = true;
-		swap(m_lGroups[Index0], m_lGroups[Index1]);
+		std::swap(m_lGroups[Index0], m_lGroups[Index1]);
 		return Index1;
 	}
 

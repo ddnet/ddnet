@@ -162,7 +162,9 @@ static void Mix(short *pFinalOut, unsigned Frames)
 					float r = Voice.m_Circle.m_Radius;
 					RangeX = r;
 
-					int Dist = (int)sqrtf((float)dx * dx + (float)dy * dy); // nasty float
+					// dx and dy can be larger than 46341 and thus the calculation would go beyond the limits of a integer,
+					// therefore we cast them into float
+					int Dist = (int)sqrtf((float)dx * dx + (float)dy * dy);
 					if(Dist < r)
 					{
 						InVoiceField = true;

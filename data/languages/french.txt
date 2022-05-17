@@ -20,6 +20,7 @@
 #	Chairn			2021-05-31 20:00:00
 #	T tee			2021-06-01 00:39:00
 #	T tee & NRK & Chairn	2022-03-23 20:52:52
+#	Nouaa			2022-05-14 23:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1361,49 +1362,52 @@ Skip Tutorial
 == Passer le tutoriel
 
 Toggle to edit your dummy settings
-== 
+== Basculer pour modifier les paramètres du dummy
 
 Choose default eyes when joining a server
-== 
+== Choisissez les yeux par défaut lorsque vous rejoignez un serveur
 
 Allows maps to render with more detail
-== 
+== Permet de rendre les cartes avec plus de détails
 
 Renderer
-== 
+== Moteur de rendu graphique
 
 default
-== 
+== défaut
 
 custom
-== 
+== Personnalisé
 
 Graphics cards
-== 
+== Carte graphique
 
 auto
-== 
+== Automatique
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Lorsque vous franchissez la ligne de départ, montrez un fantôme reproduisant les mouvements de votre meilleur temps
 
 Opacity
-== 
+== Opacité
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Ajustez l'opacité des entités appartenant à d'autres équipes, telles que les tees et les noms des joueurs
 
 Quads are used for background decoration
-== 
+== Les quads sont utilisés pour la décoration de l'arrière-plan
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Essaie de prédire les autres entités pour donner une impression de faible latence
 
 Tutorial
-== 
+== Tutoriel
 
 Can't find a Tutorial server
-== 
+== Impossible de trouver un serveur tutoriel
 
 Super
-== 
+== Super
 
 Team %d
-== 
+== Équipe %d

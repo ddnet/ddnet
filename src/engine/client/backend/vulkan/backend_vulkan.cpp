@@ -10,6 +10,7 @@
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -3520,6 +3521,41 @@ public:
 		return STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_CPU;
 	}
 
+	// from: https://github.com/SaschaWillems/vulkan.gpuinfo.org/blob/5c3986798afc39d736b825bf8a5fbf92b8d9ed49/includes/functions.php#L364
+	const char *GetDriverVerson(char (&aBuff)[256], uint32_t DriverVersion, uint32_t VendorID)
+	{
+		// NVIDIA
+		if(VendorID == 4318)
+		{
+			str_format(aBuff, std::size(aBuff), "%d.%d.%d.%d",
+				(DriverVersion >> 22) & 0x3ff,
+				(DriverVersion >> 14) & 0x0ff,
+				(DriverVersion >> 6) & 0x0ff,
+				(DriverVersion)&0x003f);
+		}
+#ifdef CONF_FAMILY_WINDOWS
+		// windows only
+		else if(VendorID == 0x8086)
+		{
+			str_format(aBuff, std::size(aBuff),
+				"%d.%d",
+				(DriverVersion >> 14),
+				(DriverVersion)&0x3fff);
+		}
+#endif
+		else
+		{
+			// Use Vulkan version conventions if vendor mapping is not available
+			str_format(aBuff, std::size(aBuff),
+				"%d.%d.%d",
+				(DriverVersion >> 22),
+				(DriverVersion >> 12) & 0x3ff,
+				DriverVersion & 0xfff);
+		}
+
+		return aBuff;
+	}
+
 	bool SelectGPU(char *pRendererName, char *pVendorName, char *pVersionName)
 	{
 		uint32_t DevicesCount = 0;
@@ -3620,8 +3656,10 @@ public:
 				pVendorNameStr = "unknown";
 				break;
 			}
+
+			char aBuff[256];
 			str_copy(pVendorName, pVendorNameStr, gs_GPUInfoStringSize);
-			str_format(pVersionName, gs_GPUInfoStringSize, "Vulkan %d.%d.%d", DevAPIMajor, DevAPIMinor, DevAPIPatch);
+			str_format(pVersionName, gs_GPUInfoStringSize, "Vulkan %d.%d.%d (driver: %s)", DevAPIMajor, DevAPIMinor, DevAPIPatch, GetDriverVerson(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
 
 			// get important device limits
 			m_NonCoherentMemAlignment = DeviceProp.limits.nonCoherentAtomSize;
@@ -7148,7 +7186,7 @@ public:
 
 	void Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
 	{
-		dbg_msg("vulkan", "creating new surface.");
+		log_debug("vulkan", "creating new surface.");
 		m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowID);
 		if(m_RenderingPaused)
 		{
@@ -7164,7 +7202,7 @@ public:
 
 	void Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand)
 	{
-		dbg_msg("vulkan", "surface got destroyed.");
+		log_debug("vulkan", "surface got destroyed.");
 		if(!m_RenderingPaused)
 		{
 			WaitFrame();

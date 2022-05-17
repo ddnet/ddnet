@@ -7,6 +7,7 @@
 # 2022-03-23 CHaBek
 # 2022-03-28 CHaBek
 # 2022-04-21 CHaBek
+# 2022-05-16 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -433,7 +434,7 @@ Team chat
 == 팀 채팅
 
 The audio device couldn't be initialised.
-== 오디오 장치를 초기화할 수 없음
+== 오디오 장치를 초기화할 수 없습니다.
 
 The server is running a non-standard tuning on a pure game type.
 == 이 서버는 조정된 비표준 게임 모드를 실행하고 있습니다.
@@ -510,7 +511,7 @@ Player country:
 == 플레이어 국가:
 
 Show only chat messages from friends
-== 친구가 보낸 메세지만 표시
+== 친구가 보낸 메시지만 표시
 
 Spectate next
 == 다음 플레이어 관전
@@ -702,7 +703,7 @@ Country / Region
 == 국가 / 지역
 
 Destination file already exist
-== 대상 파일이 이미 존재합니다
+== 대상 파일이 이미 존재함
 
 Speed
 == 속도
@@ -1185,7 +1186,7 @@ DDNet Client updated!
 == DDNet 클라이언트가 업데이트되었습니다!
 
 No updates available
-== 현재 업데이트 사항이 없습니다
+== 현재 업데이트 사항 없음
 
 Check now
 == 지금 확인
@@ -1227,7 +1228,7 @@ Run server
 == 서버 시작
 
 Server executable not found, can't run server
-== 서버 실행 파일이 없어 서버를 구동할 수 없습니다
+== 서버 실행 파일을 찾을 수 없어, 서버를 구동할 수 없습니다.
 
 Editor
 == 맵 편집기
@@ -1357,28 +1358,31 @@ Can't find a Tutorial server
 == 튜토리얼 서버를 찾을 수 없음
 
 Toggle to edit your dummy settings
-== 
+== 더미 설정으로 전환합니다.
 
 Choose default eyes when joining a server
-== 
+== 서버 입장 시의 기본 눈을 선택합니다.
 
 Allows maps to render with more detail
-== 
+== 맵의 세부사항을 렌더링합니다.
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다. 
 
 Opacity
-== 
+== 불투명도
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Tee와 이름 표시 등 다른 팀에 속한 엔티티의 불투명도를 조정합니다.
 
 Quads are used for background decoration
-== 
+== 맵 배경을 표시합니다.
 
 Tries to predict other entities to give a feel of low latency
-== 
+== 다른 엔티티를 예측하여 지연 시간을 줄입니다.
 
 Super
-== 
+== 무적
 
 Team %d
-== 
+== 팀 %d

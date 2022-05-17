@@ -24,6 +24,7 @@
 #include <base/tl/array.h>
 
 #include <list>
+#include <vector>
 
 #include "antibot.h"
 #include "authmanager.h"
@@ -339,8 +340,7 @@ public:
 			CCacheChunk(const void *pData, int Size);
 			CCacheChunk(const CCacheChunk &) = delete;
 
-			int m_DataSize;
-			unsigned char m_aData[NET_MAX_PAYLOAD];
+			std::vector<uint8_t> m_vData;
 		};
 
 		std::list<CCacheChunk> m_Cache;

@@ -1875,8 +1875,7 @@ CServer::CCache::~CCache()
 
 CServer::CCache::CCacheChunk::CCacheChunk(const void *pData, int Size)
 {
-	mem_copy(m_aData, pData, Size);
-	m_DataSize = Size;
+	m_vData.assign((const uint8_t *)pData, (const uint8_t *)pData + Size);
 }
 
 void CServer::CCache::AddChunk(const void *pData, int Size)
@@ -2194,7 +2193,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 			dbg_assert(false, "unknown serverinfo type");
 		}
 
-		p.AddRaw(Chunk.m_aData, Chunk.m_DataSize);
+		p.AddRaw(Chunk.m_vData.data(), Chunk.m_vData.size());
 		Packet.m_pData = p.Data();
 		Packet.m_DataSize = p.Size();
 		m_NetServer.Send(&Packet);
@@ -2213,7 +2212,7 @@ void CServer::GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients)
 	SendClients = SendClients && Token != -1;
 
 	CCache::CCacheChunk &FirstChunk = m_aSixupServerInfoCache[SendClients].m_Cache.front();
-	pPacker->AddRaw(FirstChunk.m_aData, FirstChunk.m_DataSize);
+	pPacker->AddRaw(FirstChunk.m_vData.data(), FirstChunk.m_vData.size());
 }
 
 void CServer::ExpireServerInfo()
@@ -2384,6 +2383,8 @@ void CServer::ChangeMap(const char *pMap)
 
 int CServer::LoadMap(const char *pMapName)
 {
+	m_MapReload = false;
+
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
 	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
@@ -2603,8 +2604,6 @@ int CServer::Run()
 			// load new map TODO: don't poll this
 			if(m_MapReload)
 			{
-				m_MapReload = false;
-
 				// load map
 				if(LoadMap(Config()->m_SvMap))
 				{
@@ -3657,7 +3656,7 @@ void *CServer::SnapNewItem(int Type, int ID, int Size)
 	{
 		g_UuidManager.GetUuid(Type);
 	}
-	dbg_assert(ID >= 0 && ID <= 0xffff, "incorrect id");
+	dbg_assert(ID >= -1 && ID <= 0xffff, "incorrect id");
 	return ID < 0 ? 0 : m_SnapshotBuilder.NewItem(Type, ID, Size);
 }
 

@@ -74,6 +74,7 @@ versionsrv
 !src/twping
 
 generated
+target
 
 /build*
 

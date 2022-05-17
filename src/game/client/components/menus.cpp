@@ -165,7 +165,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	}
 	Graphics()->QuadsEnd();
 
-	return Active ? UI()->DoButtonLogic(pID, "", Checked, pRect) : 0;
+	return Active ? UI()->DoButtonLogic(pID, Checked, pRect) : 0;
 }
 
 int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically, bool CheckForActiveColorPicker)
@@ -221,7 +221,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	if(MouseInsideColorPicker)
 		return 0;
 
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -234,7 +234,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 
 int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
-	bool MouseInside = UI()->MouseInside(pRect);
+	const bool MouseInside = UI()->MouseInside(pRect);
 	CUIRect Rect = *pRect;
 
 	if(pAnimator != NULL)
@@ -272,7 +272,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	}
 	else
 	{
-		if(UI()->MouseInside(pRect))
+		if(MouseInside)
 		{
 			ColorRGBA HoverColorMenuTab = ms_ColorTabbarHover;
 			if(pHoverColor)
@@ -290,8 +290,6 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
-	CUIRect Temp;
-
 	if(pAnimator != NULL)
 	{
 		if(pAnimator->m_RepositionLabel)
@@ -307,12 +305,13 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
+	CUIRect Temp;
 	Rect.HMargin(2.0f, &Temp);
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVertically;
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -324,7 +323,7 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 	UI()->DoLabel(&t, pText, pRect->h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
-	return UI()->DoButtonLogic(pID, pText, Checked, pRect);
+	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect)
@@ -339,10 +338,10 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	c.Margin(2.0f, &c);
 	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
 
-	bool CheckAble = *pBoxText == 'X';
+	const bool Checkable = *pBoxText == 'X';
 	SLabelProperties Props;
 	Props.m_AlignVertically = 0;
-	if(CheckAble)
+	if(Checkable)
 	{
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -354,7 +353,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	TextRender()->SetRenderFlags(0);
 	UI()->DoLabel(&t, pText, c.h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
 
-	return UI()->DoButtonLogic(pID, pText, 0, pRect);
+	return UI()->DoButtonLogic(pID, 0, pRect);
 }
 
 void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineColor, const ColorHSLA LaserInnerColor)
@@ -487,7 +486,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	static float s_Value;
 	static char s_NumStr[64];
 	static void *s_LastTextpID = pID;
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseInside(pRect);
 
 	if(Inside)
 		UI()->SetHotItem(pID);
@@ -607,8 +606,8 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	// process
 	static void *pGrabbedID = 0;
 	static bool MouseReleased = true;
-	static int ButtonUsed = 0;
-	int Inside = UI()->MouseInside(pRect);
+	static int s_ButtonUsed = 0;
+	const bool Inside = UI()->MouseHovered(pRect);
 	int NewKey = Key;
 	*NewModifierCombination = ModifierCombination;
 
@@ -631,7 +630,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 			pGrabbedID = pID;
 		}
 
-		if(ButtonUsed == 1 && !UI()->MouseButton(1))
+		if(s_ButtonUsed == 1 && !UI()->MouseButton(1))
 		{
 			if(Inside)
 				NewKey = 0;
@@ -647,13 +646,13 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 				m_Binder.m_TakeKey = true;
 				m_Binder.m_GotKey = false;
 				UI()->SetActiveItem(pID);
-				ButtonUsed = 0;
+				s_ButtonUsed = 0;
 			}
 
 			if(UI()->MouseButton(1))
 			{
 				UI()->SetActiveItem(pID);
-				ButtonUsed = 1;
+				s_ButtonUsed = 1;
 			}
 		}
 	}
@@ -662,7 +661,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		UI()->SetHotItem(pID);
 
 	// draw
-	if(UI()->ActiveItem() == pID && ButtonUsed == 0)
+	if(UI()->ActiveItem() == pID && s_ButtonUsed == 0)
 		DoButton_KeySelect(pID, "???", 0, pRect);
 	else
 	{
@@ -1039,6 +1038,7 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
 	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
 	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
+	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
@@ -2293,7 +2293,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 	int SelectedTheme = -1;
 	for(int i = 0; i < (int)ThemesRef.size(); i++)
 	{
-		if(str_comp(ThemesRef[i].m_Name, g_Config.m_ClMenuMap) == 0)
+		if(str_comp(ThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
 		{
 			SelectedTheme = i;
 			break;
@@ -2330,20 +2330,20 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		}
 
 		char aName[128];
-		if(!Theme.m_Name[0])
+		if(Theme.m_Name.empty())
 			str_copy(aName, "(none)", sizeof(aName));
-		else if(str_comp(Theme.m_Name, "auto") == 0)
+		else if(str_comp(Theme.m_Name.c_str(), "auto") == 0)
 			str_copy(aName, "(seasons)", sizeof(aName));
-		else if(str_comp(Theme.m_Name, "rand") == 0)
+		else if(str_comp(Theme.m_Name.c_str(), "rand") == 0)
 			str_copy(aName, "(random)", sizeof(aName));
 		else if(Theme.m_HasDay && Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
 		else if(Theme.m_HasDay && !Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.c_str());
 		else if(!Theme.m_HasDay && Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.c_str());
 		else // generic
-			str_format(aName, sizeof(aName), "%s", Theme.m_Name.cstr());
+			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
 
 		UI()->DoLabel(&Item.m_Rect, aName, 16 * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
 	}
@@ -2353,7 +2353,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	if(ItemActive && NewSelected != SelectedTheme)
 	{
-		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.cstr());
+		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.c_str());
 		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
 	}
 }
