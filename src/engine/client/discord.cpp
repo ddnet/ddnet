@@ -100,9 +100,9 @@ IDiscord *CreateDiscordImpl()
 
 class CDiscordStub : public IDiscord
 {
-	void Update() {}
-	void ClearGameInfo() {}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) {}
+	void Update() override {}
+	void ClearGameInfo() override {}
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override {}
 };
 
 IDiscord *CreateDiscord()

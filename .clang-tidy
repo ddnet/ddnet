@@ -57,6 +57,7 @@ Checks: >
   modernize-use-emplace,
   modernize-use-equals-default,
   modernize-use-equals-delete,
+  modernize-use-override,
   modernize-use-transparent-functors,
   modernize-use-uncaught-exceptions,
   readability-*,
@@ -78,3 +79,7 @@ Checks: >
   -readability-uppercase-literal-suffix,
   performance-*,
   -performance-no-int-to-ptr,
+
+CheckOptions:
+  - key:             modernize-use-override.IgnoreDestructors
+    value:           true

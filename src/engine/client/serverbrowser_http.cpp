@@ -48,7 +48,7 @@ private:
 		std::shared_ptr<CData> m_pData;
 		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
 		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
-		virtual void Run();
+		void Run() override;
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
@@ -243,30 +243,30 @@ class CServerBrowserHttp : public IServerBrowserHttp
 public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	virtual ~CServerBrowserHttp();
-	void Update();
-	bool IsRefreshing() { return m_State != STATE_DONE; }
-	void Refresh();
-	bool GetBestUrl(const char **pBestUrl) const { return m_pChooseMaster->GetBestUrl(pBestUrl); }
+	void Update() override;
+	bool IsRefreshing() override { return m_State != STATE_DONE; }
+	void Refresh() override;
+	bool GetBestUrl(const char **pBestUrl) const override { return m_pChooseMaster->GetBestUrl(pBestUrl); }
 
-	int NumServers() const
+	int NumServers() const override
 	{
 		return m_aServers.size();
 	}
-	const NETADDR &ServerAddress(int Index) const
+	const NETADDR &ServerAddress(int Index) const override
 	{
 		return m_aServers[Index].m_Addr;
 	}
-	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const
+	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const override
 	{
 		const CEntry &Entry = m_aServers[Index];
 		*pAddr = Entry.m_Addr;
 		*pInfo = Entry.m_Info;
 	}
-	int NumLegacyServers() const
+	int NumLegacyServers() const override
 	{
 		return m_aLegacyServers.size();
 	}
-	const NETADDR &LegacyServer(int Index) const
+	const NETADDR &LegacyServer(int Index) const override
 	{
 		return m_aLegacyServers[Index];
 	}
