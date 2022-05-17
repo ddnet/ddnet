@@ -44,21 +44,9 @@ void CPlasma::Tick()
 	}
 	m_LifeTime--;
 	Move();
-	if(!HitCharacter(pTarget))
-	{
-		// Check if the plasma bullet is stopped by a solid block or a laser stopper
-		int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
-		if(HasIntersection)
-		{
-			if(m_Explosive)
-			{
-				// Even in the case of an explosion due to a collision with obstacles, only one player is affected
-				GameServer()->CreateExplosion(
-					m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
-			}
-			Reset();
-		}
-	}
+	HitCharacter(pTarget);
+	// Plasma bullets may explode twice if they would hit both a player and an obstacle in the next move step
+	HitObstacle(pTarget);
 }
 
 void CPlasma::Move()
@@ -93,6 +81,24 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 	}
 	Reset();
 	return true;
+}
+
+bool CPlasma::HitObstacle(CCharacter *pTarget)
+{
+	// Check if the plasma bullet is stopped by a solid block or a laser stopper
+	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
+	if(HasIntersection)
+	{
+		if(m_Explosive)
+		{
+			// Even in the case of an explosion due to a collision with obstacles, only one player is affected
+			GameServer()->CreateExplosion(
+				m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
+		}
+		Reset();
+		return true;
+	}
+	return false;
 }
 
 void CPlasma::Reset()

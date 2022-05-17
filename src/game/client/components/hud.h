@@ -66,6 +66,7 @@ class CHud : public CComponent
 	void RenderLocalTime(float x);
 
 	static constexpr float MOVEMENT_INFORMATION_LINE_HEIGHT = 8.0f;
+
 public:
 	CHud();
 	virtual int Sizeof() const override { return sizeof(*this); }

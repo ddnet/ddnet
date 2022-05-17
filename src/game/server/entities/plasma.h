@@ -14,6 +14,7 @@
  * impact but at the last position of the plasma bullet. The same applies if a plasma bullet explodes due to a collision
  * with a laser stopper or a solid block
  * Plasma bullets move every tick in the assigned direction and then accelerate by the factor PLASMA_ACCEL
+ * Plasma bullets can explode twice if they would hit both a player and an obstacle in the next movement step
  * Plasma bullets will stop existing as soon as:
  * - The player they were created for do no longer exist
  * - They have had a collision with a player, a solid block or a laser stopper
@@ -28,8 +29,9 @@ class CPlasma : public CEntity
 	int m_EvalTick;
 	int m_LifeTime;
 
-	bool HitCharacter(CCharacter *pTarget);
 	void Move();
+	bool HitCharacter(CCharacter *pTarget);
+	bool HitObstacle(CCharacter *pTarget);
 
 public:
 	CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
