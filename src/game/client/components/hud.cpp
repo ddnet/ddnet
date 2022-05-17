@@ -858,10 +858,10 @@ void CHud::RenderCursor()
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	// render cursor
-	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+	int Wep = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CursorOffset[CurWeapon], m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
+	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponCursors[Wep]);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CursorOffset[Wep], m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()

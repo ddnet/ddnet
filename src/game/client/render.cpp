@@ -16,13 +16,15 @@
 #include <game/generated/protocol.h>
 #include <game/layers.h>
 
+
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
+void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender, class CGameClient *pGameClient)
 {
 	m_pGraphics = pGraphics;
 	m_pTextRender = pTextRender;
+	m_pGameClient = (CGameClient *)pGameClient;
 	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
@@ -719,6 +721,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			if(g_Config.m_ClWhiteFeet && pInfo->m_CustomColoredSkin)
 			{
 				CTeeRenderInfo WhiteFeetInfo;
+
 				int Skin = GameClient()->m_Skins.Find("x_ninja");
 				if(Skin != -1)
 				{
