@@ -298,14 +298,20 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 
 class CWindowsConsoleLogger : public ILogger
 {
+	HANDLE m_pConsole;
+
 public:
+	CWindowsConsoleLogger(HANDLE pConsole) :
+		m_pConsole(pConsole)
+	{
+	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 1) * sizeof(*pWide));
+		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 2) * sizeof(*pWide));
 		const char *p = pMessage->m_aLine;
 		int WLen = 0;
 
-		mem_zero(pWide, pMessage->m_LineLength * sizeof(*pWide));
+		mem_zero(pWide, (pMessage->m_LineLength + 2) * sizeof(*pWide));
 
 		for(int Codepoint = 0; (Codepoint = str_utf8_decode(&p)); WLen++)
 		{
@@ -325,8 +331,8 @@ public:
 
 			mem_copy(&pWide[WLen], aU16, 2);
 		}
-		pWide[WLen] = '\n';
-		HANDLE pConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		pWide[WLen++] = '\r';
+		pWide[WLen++] = '\n';
 		int Color = 15;
 		if(pMessage->m_HaveColor)
 		{
@@ -336,9 +342,24 @@ public:
 			Rgba.b = pMessage->m_Color.b / 255.0;
 			Color = color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
 		}
-		SetConsoleTextAttribute(pConsole, Color);
-		WriteConsoleW(pConsole, pWide, WLen + 1, NULL, NULL);
+		SetConsoleTextAttribute(m_pConsole, Color);
+		WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
 		free(pWide);
+	}
+};
+class CWindowsFileLogger : public ILogger
+{
+	HANDLE m_pFile;
+
+public:
+	CWindowsFileLogger(HANDLE pFile) :
+		m_pFile(pFile)
+	{
+	}
+	void Log(const CLogMessage *pMessage) override
+	{
+		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
+		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
 	}
 };
 #endif
@@ -350,7 +371,14 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
 	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), getenv("NO_COLOR") == nullptr, false));
 #else
-	return std::unique_ptr<ILogger>(new CWindowsConsoleLogger());
+	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	switch(GetFileType(pOutput))
+	{
+	case FILE_TYPE_CHAR: return std::unique_ptr<ILogger>(new CWindowsConsoleLogger(pOutput));
+	case FILE_TYPE_PIPE: // fall through, writing to pipe works the same as writing to a file
+	case FILE_TYPE_DISK: return std::unique_ptr<ILogger>(new CWindowsFileLogger(pOutput));
+	default: return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), false, false));
+	}
 #endif
 }
 
