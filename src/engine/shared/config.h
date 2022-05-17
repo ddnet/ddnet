@@ -66,15 +66,15 @@ class CConfigManager : public IConfigManager
 public:
 	CConfigManager();
 
-	virtual void Init();
-	virtual void Reset();
-	virtual void Reset(const char *pScriptName);
-	virtual bool Save();
-	virtual CConfig *Values() { return &g_Config; }
+	void Init() override;
+	void Reset() override;
+	void Reset(const char *pScriptName) override;
+	bool Save() override;
+	CConfig *Values() override { return &g_Config; }
 
-	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData);
+	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
 
-	virtual void WriteLine(const char *pLine);
+	void WriteLine(const char *pLine) override;
 };
 
 #endif

@@ -12,7 +12,7 @@ class CLaser : public CEntity
 public:
 	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
 
-	virtual void Tick();
+	void Tick() override;
 
 	const vec2 &GetFrom() { return m_From; }
 	const int &GetOwner() { return m_Owner; }
