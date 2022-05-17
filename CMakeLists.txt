@@ -293,23 +293,6 @@ if(NOT MSVC AND NOT HAIKU)
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
 endif()
 
-if(UNIX AND NOT APPLE)
-  # This can be disabled by configuring with -DUSE_GOLD=FALSE
-  if(NOT DEFINED USE_GOLD)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
-    if("${ld_version}" MATCHES "GNU gold")
-      set(USE_GOLD TRUE CACHE BOOL "Use GNU gold linker")
-    else()
-      set(USE_GOLD FALSE CACHE BOOL "Use GNU gold linker")
-    endif()
-  endif()
-  message(STATUS "GNU gold linker enabled: ${USE_GOLD}")
-  if(USE_GOLD)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-  endif()
-endif()
-
 if(MSVC)
   if(EXCEPTION_HANDLING)
   add_c_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
