@@ -13,7 +13,7 @@ class CSoundLoading : public IJob
 
 public:
 	CSoundLoading(CGameClient *pGameClient, bool Render);
-	void Run();
+	void Run() override;
 };
 
 class CSounds : public CComponent

@@ -285,12 +285,12 @@ class CTextRender : public IEngineTextRender
 
 	FT_Library m_FTLibrary;
 
-	virtual void SetRenderFlags(unsigned int Flags)
+	void SetRenderFlags(unsigned int Flags) override
 	{
 		m_RenderFlags = Flags;
 	}
 
-	virtual unsigned int GetRenderFlags()
+	unsigned int GetRenderFlags() override
 	{
 		return m_RenderFlags;
 	}
@@ -651,7 +651,7 @@ public:
 			FT_Done_FreeType(m_FTLibrary);
 	}
 
-	virtual void Init()
+	void Init() override
 	{
 		m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 		FT_Init_FreeType(&m_FTLibrary);
@@ -704,7 +704,7 @@ public:
 		}
 	}
 
-	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size)
+	CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size) override
 	{
 		CFont *pFont = new CFont();
 
@@ -738,7 +738,7 @@ public:
 		return pFont;
 	}
 
-	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size)
+	bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) override
 	{
 		CFont::SFontFallBack FallbackFont;
 		FallbackFont.m_pBuf = (void *)pBuf;
@@ -755,7 +755,7 @@ public:
 		return false;
 	}
 
-	virtual CFont *GetFont(int FontIndex)
+	CFont *GetFont(int FontIndex) override
 	{
 		if(FontIndex >= 0 && FontIndex < (int)m_Fonts.size())
 			return m_Fonts[FontIndex];
@@ -763,7 +763,7 @@ public:
 		return NULL;
 	}
 
-	CFont *GetFont(const char *pFilename)
+	CFont *GetFont(const char *pFilename) override
 	{
 		for(auto &pFont : m_Fonts)
 		{
@@ -774,14 +774,14 @@ public:
 		return NULL;
 	}
 
-	virtual void SetDefaultFont(CFont *pFont)
+	void SetDefaultFont(CFont *pFont) override
 	{
 		dbg_msg("textrender", "default pFont set %p", pFont);
 		m_pDefaultFont = pFont;
 		m_pCurFont = m_pDefaultFont;
 	}
 
-	virtual void SetCurFont(CFont *pFont)
+	void SetCurFont(CFont *pFont) override
 	{
 		if(pFont == NULL)
 			m_pCurFont = m_pDefaultFont;
@@ -789,7 +789,7 @@ public:
 			m_pCurFont = pFont;
 	}
 
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags)
+	void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) override
 	{
 		mem_zero(pCursor, sizeof(*pCursor));
 		pCursor->m_FontSize = FontSize;
@@ -817,19 +817,19 @@ public:
 		pCursor->m_CursorCharacter = -1;
 	}
 
-	virtual void MoveCursor(CTextCursor *pCursor, float x, float y)
+	void MoveCursor(CTextCursor *pCursor, float x, float y) override
 	{
 		pCursor->m_X += x;
 		pCursor->m_Y += y;
 	}
 
-	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y)
+	void SetCursorPosition(CTextCursor *pCursor, float x, float y) override
 	{
 		pCursor->m_X = x;
 		pCursor->m_Y = y;
 	}
 
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth)
+	void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
@@ -841,7 +841,7 @@ public:
 		SetRenderFlags(OldRenderFlags);
 	}
 
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL)
+	float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
@@ -858,7 +858,7 @@ public:
 		return Cursor.m_X;
 	}
 
-	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth)
+	int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
@@ -871,38 +871,38 @@ public:
 		return Cursor.m_LineCount;
 	}
 
-	virtual void TextColor(float r, float g, float b, float a)
+	void TextColor(float r, float g, float b, float a) override
 	{
 		m_Color.r = r;
 		m_Color.g = g;
 		m_Color.b = b;
 		m_Color.a = a;
 	}
-	virtual void TextColor(ColorRGBA rgb) { m_Color = rgb; }
+	void TextColor(ColorRGBA rgb) override { m_Color = rgb; }
 
-	virtual void TextOutlineColor(float r, float g, float b, float a)
+	void TextOutlineColor(float r, float g, float b, float a) override
 	{
 		m_OutlineColor.r = r;
 		m_OutlineColor.g = g;
 		m_OutlineColor.b = b;
 		m_OutlineColor.a = a;
 	}
-	virtual void TextOutlineColor(ColorRGBA rgb) { m_OutlineColor = rgb; }
+	void TextOutlineColor(ColorRGBA rgb) override { m_OutlineColor = rgb; }
 
-	virtual void TextSelectionColor(float r, float g, float b, float a)
+	void TextSelectionColor(float r, float g, float b, float a) override
 	{
 		m_SelectionColor.r = r;
 		m_SelectionColor.g = g;
 		m_SelectionColor.b = b;
 		m_SelectionColor.a = a;
 	}
-	virtual void TextSelectionColor(ColorRGBA rgb) { m_SelectionColor = rgb; }
+	void TextSelectionColor(ColorRGBA rgb) override { m_SelectionColor = rgb; }
 
-	virtual ColorRGBA GetTextColor() { return m_Color; }
-	virtual ColorRGBA GetTextOutlineColor() { return m_OutlineColor; }
-	virtual ColorRGBA GetTextSelectionColor() { return m_SelectionColor; }
+	ColorRGBA GetTextColor() override { return m_Color; }
+	ColorRGBA GetTextOutlineColor() override { return m_OutlineColor; }
+	ColorRGBA GetTextSelectionColor() override { return m_SelectionColor; }
 
-	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length)
+	void TextEx(CTextCursor *pCursor, const char *pText, int Length) override
 	{
 		int OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
@@ -920,7 +920,7 @@ public:
 		}
 	}
 
-	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1)
+	int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		CFont *pFont = pCursor->m_pFont;
 
@@ -1009,7 +1009,7 @@ public:
 		return ContainerIndex;
 	}
 
-	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
+	void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
@@ -1492,14 +1492,14 @@ public:
 	}
 
 	// just deletes and creates text container
-	virtual void
-	RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
+	void
+	RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
 	{
 		DeleteTextContainer(TextContainerIndex);
 		CreateTextContainer(pCursor, pText, Length);
 	}
 
-	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1)
+	void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_StringInfo.m_CharacterQuads.clear();
@@ -1508,7 +1508,7 @@ public:
 		AppendTextContainer(pCursor, TextContainerIndex, pText, Length);
 	}
 
-	virtual void DeleteTextContainer(int TextContainerIndex)
+	void DeleteTextContainer(int TextContainerIndex) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		if(Graphics()->IsTextBufferingEnabled())
@@ -1521,7 +1521,7 @@ public:
 		FreeTextContainer(TextContainerIndex);
 	}
 
-	virtual void UploadTextContainer(int TextContainerIndex)
+	void UploadTextContainer(int TextContainerIndex) override
 	{
 		if(Graphics()->IsTextBufferingEnabled())
 		{
@@ -1537,7 +1537,7 @@ public:
 		}
 	}
 
-	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor)
+	void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		CFont *pFont = TextContainer.m_pFont;
@@ -1630,7 +1630,7 @@ public:
 		}
 	}
 
-	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y)
+	void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
@@ -1655,7 +1655,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	virtual void UploadEntityLayerText(void *pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
+	void UploadEntityLayerText(void *pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
 		if(FontSize < 1)
 			return;
@@ -1731,7 +1731,7 @@ public:
 		}
 	}
 
-	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth)
+	int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) override
 	{
 		int WidthOfText = CalculateTextWidth(pText, TextLength, 0, 100);
 
@@ -1743,7 +1743,7 @@ public:
 		return FontSize;
 	}
 
-	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter)
+	float GetGlyphOffsetX(int FontSize, char TextCharacter) override
 	{
 		CFont *pFont = m_pDefaultFont;
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
@@ -1769,7 +1769,7 @@ public:
 		return 0;
 	}
 
-	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight)
+	int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) override
 	{
 		CFont *pFont = m_pDefaultFont;
 		const char *pCurrent = (char *)pText;
@@ -1805,7 +1805,7 @@ public:
 		return WidthOfText;
 	}
 
-	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End)
+	bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) override
 	{
 		const char *pIt = pText;
 
@@ -1839,7 +1839,7 @@ public:
 		return OffUTF8Start != -1 && OffUTF8End != -1;
 	}
 
-	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff)
+	bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) override
 	{
 		const char *pIt = pText;
 
@@ -1872,7 +1872,7 @@ public:
 		return false;
 	}
 
-	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off)
+	bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) override
 	{
 		const char *pIt = pText;
 
@@ -1902,7 +1902,7 @@ public:
 		return UTF8Off != -1;
 	}
 
-	virtual void OnWindowResize()
+	void OnWindowResize() override
 	{
 		for(auto *pTextContainer : m_TextContainers)
 		{

@@ -44,7 +44,7 @@ public:
 		m_pStorage = 0;
 	}
 
-	virtual int RefreshAddresses(int Nettype)
+	int RefreshAddresses(int Nettype) override
 	{
 		if(m_State != STATE_INIT && m_State != STATE_READY)
 			return -1;
@@ -64,7 +64,7 @@ public:
 		return 0;
 	}
 
-	virtual void Update()
+	void Update() override
 	{
 		// check if we need to update
 		if(m_State != STATE_UPDATE)
@@ -97,43 +97,43 @@ public:
 		}
 	}
 
-	virtual bool IsRefreshing() const
+	bool IsRefreshing() const override
 	{
 		return m_State != STATE_READY;
 	}
 
-	virtual NETADDR GetAddr(int Index) const
+	NETADDR GetAddr(int Index) const override
 	{
 		return m_aMasterServers[Index].m_Addr;
 	}
 
-	virtual void SetCount(int Index, int Count)
+	void SetCount(int Index, int Count) override
 	{
 		m_aMasterServers[Index].m_Count = Count;
 	}
 
-	virtual int GetCount(int Index) const
+	int GetCount(int Index) const override
 	{
 		return m_aMasterServers[Index].m_Count;
 	}
 
-	virtual const char *GetName(int Index) const
+	const char *GetName(int Index) const override
 	{
 		return m_aMasterServers[Index].m_aHostname;
 	}
 
-	virtual bool IsValid(int Index) const
+	bool IsValid(int Index) const override
 	{
 		return m_aMasterServers[Index].m_Valid;
 	}
 
-	virtual void Init()
+	void Init() override
 	{
 		m_pEngine = Kernel()->RequestInterface<IEngine>();
 		m_pStorage = Kernel()->RequestInterface<IStorage>();
 	}
 
-	virtual void SetDefault()
+	void SetDefault() override
 	{
 		mem_zero(m_aMasterServers, sizeof(m_aMasterServers));
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
@@ -143,7 +143,7 @@ public:
 		}
 	}
 
-	virtual int Load()
+	int Load() override
 	{
 		if(!m_pStorage)
 			return -1;
@@ -200,7 +200,7 @@ public:
 		return 0;
 	}
 
-	virtual int Save()
+	int Save() override
 	{
 		if(!m_pStorage)
 			return -1;

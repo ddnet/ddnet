@@ -34,13 +34,13 @@ public:
 
 	CCharacter(CGameWorld *pWorld);
 
-	virtual void Reset();
-	virtual void Destroy();
-	virtual void Tick();
-	virtual void TickDefered();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
-	virtual void SwapClients(int Client1, int Client2);
+	void Reset() override;
+	void Destroy() override;
+	void Tick() override;
+	void TickDefered() override;
+	void TickPaused() override;
+	void Snap(int SnappingClient) override;
+	void SwapClients(int Client1, int Client2) override;
 
 	bool CanSnapCharacter(int SnappingClient);
 

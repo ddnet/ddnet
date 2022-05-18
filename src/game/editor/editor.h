@@ -522,7 +522,7 @@ public:
 	virtual void Shift(int Direction);
 
 	void MakePalette();
-	virtual void Render(bool Tileset = false);
+	void Render(bool Tileset = false) override;
 
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
@@ -531,16 +531,16 @@ public:
 	void Clamp(RECTi *pRect);
 
 	virtual bool IsEmpty(CLayerTiles *pLayer);
-	virtual void BrushSelecting(CUIRect Rect);
-	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void BrushFlipX();
-	virtual void BrushFlipY();
-	virtual void BrushRotate(float Amount);
+	void BrushSelecting(CUIRect Rect) override;
+	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
+	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
 
 	virtual void ShowInfo();
-	virtual int RenderProperties(CUIRect *pToolbox);
+	int RenderProperties(CUIRect *pToolbox) override;
 
 	struct SCommonPropState
 	{
@@ -551,12 +551,12 @@ public:
 	};
 	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers);
 
-	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
-	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
+	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	void PrepareForSave();
 
-	void GetSize(float *w, float *h)
+	void GetSize(float *w, float *h) override
 	{
 		*w = m_Width * 32.0f;
 		*h = m_Height * 32.0f;
@@ -593,22 +593,22 @@ public:
 	CLayerQuads();
 	~CLayerQuads();
 
-	virtual void Render(bool QuadPicker = false);
+	void Render(bool QuadPicker = false) override;
 	CQuad *NewQuad(int x, int y, int Width, int Height);
 
-	virtual void BrushSelecting(CUIRect Rect);
-	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
-	virtual void BrushPlace(CLayer *pBrush, float wx, float wy);
-	virtual void BrushFlipX();
-	virtual void BrushFlipY();
-	virtual void BrushRotate(float Amount);
+	void BrushSelecting(CUIRect Rect) override;
+	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
+	void BrushPlace(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
 
-	virtual int RenderProperties(CUIRect *pToolbox);
+	int RenderProperties(CUIRect *pToolbox) override;
 
-	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc);
-	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
+	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
-	void GetSize(float *w, float *h);
+	void GetSize(float *w, float *h) override;
 
 	int m_Image;
 	array<CQuad> m_lQuads;
@@ -620,10 +620,10 @@ public:
 	CLayerGame(int w, int h);
 	~CLayerGame();
 
-	virtual CTile GetTile(int x, int y);
-	virtual void SetTile(int x, int y, CTile tile);
+	CTile GetTile(int x, int y) override;
+	void SetTile(int x, int y, CTile tile) override;
 
-	virtual int RenderProperties(CUIRect *pToolbox);
+	int RenderProperties(CUIRect *pToolbox) override;
 };
 
 class CEditor : public IEditor
@@ -766,11 +766,11 @@ public:
 		m_Mentions = 0;
 	}
 
-	virtual void Init();
-	virtual void UpdateAndRender();
-	virtual bool HasUnsavedData() const { return m_Map.m_Modified; }
-	virtual void UpdateMentions() { m_Mentions++; }
-	virtual void ResetMentions() { m_Mentions = 0; }
+	void Init() override;
+	void UpdateAndRender() override;
+	bool HasUnsavedData() const override { return m_Map.m_Modified; }
+	void UpdateMentions() override { m_Mentions++; }
+	void ResetMentions() override { m_Mentions = 0; }
 
 	CLayerGroup *m_apSavedBrushes[10];
 
@@ -780,8 +780,8 @@ public:
 		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 
 	void Reset(bool CreateDefault = true);
-	virtual int Save(const char *pFilename);
-	virtual int Load(const char *pFilename, int StorageType);
+	int Save(const char *pFilename) override;
+	int Load(const char *pFilename, int StorageType) override;
 	int Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
@@ -1184,14 +1184,14 @@ public:
 	CTeleTile *m_pTeleTile;
 	unsigned char m_TeleNum;
 
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual bool IsEmpty(CLayerTiles *pLayer);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void BrushFlipX();
-	virtual void BrushFlipY();
-	virtual void BrushRotate(float Amount);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	void Resize(int NewW, int NewH) override;
+	void Shift(int Direction) override;
+	bool IsEmpty(CLayerTiles *pLayer) override;
+	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 	virtual bool ContainsElementWithId(int Id);
 };
 
@@ -1206,14 +1206,14 @@ public:
 	int m_SpeedupMaxSpeed;
 	int m_SpeedupAngle;
 
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual bool IsEmpty(CLayerTiles *pLayer);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void BrushFlipX();
-	virtual void BrushFlipY();
-	virtual void BrushRotate(float Amount);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	void Resize(int NewW, int NewH) override;
+	void Shift(int Direction) override;
+	bool IsEmpty(CLayerTiles *pLayer) override;
+	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 };
 
 class CLayerFront : public CLayerTiles
@@ -1221,8 +1221,8 @@ class CLayerFront : public CLayerTiles
 public:
 	CLayerFront(int w, int h);
 
-	virtual void Resize(int NewW, int NewH);
-	virtual void SetTile(int x, int y, CTile tile);
+	void Resize(int NewW, int NewH) override;
+	void SetTile(int x, int y, CTile tile) override;
 };
 
 class CLayerSwitch : public CLayerTiles
@@ -1235,14 +1235,14 @@ public:
 	unsigned char m_SwitchNumber;
 	unsigned char m_SwitchDelay;
 
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual bool IsEmpty(CLayerTiles *pLayer);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void BrushFlipX();
-	virtual void BrushFlipY();
-	virtual void BrushRotate(float Amount);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	void Resize(int NewW, int NewH) override;
+	void Shift(int Direction) override;
+	bool IsEmpty(CLayerTiles *pLayer) override;
+	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 	virtual bool ContainsElementWithId(int Id);
 };
 
@@ -1255,14 +1255,14 @@ public:
 	CTuneTile *m_pTuneTile;
 	unsigned char m_TuningNumber;
 
-	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
-	virtual bool IsEmpty(CLayerTiles *pLayer);
-	virtual void BrushDraw(CLayer *pBrush, float wx, float wy);
-	virtual void BrushFlipX();
-	virtual void BrushFlipY();
-	virtual void BrushRotate(float Amount);
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect);
+	void Resize(int NewW, int NewH) override;
+	void Shift(int Direction) override;
+	bool IsEmpty(CLayerTiles *pLayer) override;
+	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 };
 
 class CLayerSounds : public CLayer
@@ -1271,17 +1271,17 @@ public:
 	CLayerSounds();
 	~CLayerSounds();
 
-	virtual void Render(bool Tileset = false);
+	void Render(bool Tileset = false) override;
 	CSoundSource *NewSource(int x, int y);
 
-	virtual void BrushSelecting(CUIRect Rect);
-	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect);
-	virtual void BrushPlace(CLayer *pBrush, float wx, float wy);
+	void BrushSelecting(CUIRect Rect) override;
+	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
+	void BrushPlace(CLayer *pBrush, float wx, float wy) override;
 
-	virtual int RenderProperties(CUIRect *pToolbox);
+	int RenderProperties(CUIRect *pToolbox) override;
 
-	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc);
-	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc);
+	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	int m_Sound;
 	array<CSoundSource> m_lSources;

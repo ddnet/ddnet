@@ -288,6 +288,7 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest

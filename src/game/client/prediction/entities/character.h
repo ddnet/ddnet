@@ -36,8 +36,8 @@ public:
 	//character's size
 	static const int ms_PhysSize = 28;
 
-	virtual void Tick();
-	virtual void TickDefered();
+	void Tick() override;
+	void TickDefered() override;
 
 	bool IsGrounded();
 

@@ -18,10 +18,10 @@ class CUpdaterFetchTask : public CHttpRequest
 	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
-	virtual void OnProgress();
+	void OnProgress() override;
 
 protected:
-	virtual int OnCompletion(int State);
+	int OnCompletion(int State) override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
