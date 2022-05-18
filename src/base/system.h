@@ -806,7 +806,7 @@ enum
 /**
  * @ingroup Network-General
  */
-typedef struct
+typedef struct NETADDR
 {
 	unsigned int type;
 	unsigned char ip[16];
