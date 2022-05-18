@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/system.h>
 
 #include <engine/config.h>
 #include <engine/demo.h>
@@ -28,6 +29,10 @@
 #include "ghost.h"
 #include <engine/keys.h>
 #include <engine/storage.h>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 void CMenus::RenderGame(CUIRect MainView)
 {
@@ -915,7 +920,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	if(Item.m_Time > 0)
 		pSelf->m_lGhosts.add(Item);
 
-	if(time_get_microseconds() - pSelf->m_GhostPopulateStartTime > 500000)
+	if(tw::time_get() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
 		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -927,7 +932,7 @@ void CMenus::GhostlistPopulate()
 {
 	CGhostItem *pOwnGhost = 0;
 	m_lGhosts.clear();
-	m_GhostPopulateStartTime = time_get_microseconds();
+	m_GhostPopulateStartTime = tw::time_get();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 
 	for(int i = 0; i < m_lGhosts.size(); i++)

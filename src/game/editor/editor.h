@@ -28,6 +28,10 @@
 
 #include "auto_map.h"
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
 //CRenderTools m_RenderTools;
@@ -89,7 +93,7 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64_t)((double)Time * 1000000.0), pResult);
+		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count()), pResult);
 		return m_Channels;
 	}
 

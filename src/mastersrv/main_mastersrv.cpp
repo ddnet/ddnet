@@ -12,6 +12,9 @@
 #include <engine/shared/netban.h>
 #include <engine/shared/network.h>
 
+#include <chrono>
+#include <thread>
+
 #include "mastersrv.h"
 
 enum
@@ -539,7 +542,7 @@ int main(int argc, const char **argv)
 		}
 
 		// be nice to the CPU
-		thread_sleep(1000);
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 	}
 
 	return 0;

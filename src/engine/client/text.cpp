@@ -24,6 +24,10 @@ enum
 #include <map>
 #include <vector>
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 struct SFontSizeChar
 {
 	int m_ID;
@@ -222,7 +226,7 @@ class CTextRender : public IEngineTextRender
 	std::vector<CFont *> m_Fonts;
 	CFont *m_pCurFont;
 
-	int64_t m_CursorRenderTime;
+	std::chrono::nanoseconds m_CursorRenderTime;
 
 	int GetFreeTextContainerIndex()
 	{
@@ -623,7 +627,7 @@ public:
 		m_FTLibrary = 0;
 
 		m_RenderFlags = 0;
-		m_CursorRenderTime = time_get_microseconds();
+		m_CursorRenderTime = tw::time_get();
 	}
 
 	virtual ~CTextRender()
@@ -1613,18 +1617,18 @@ public:
 		{
 			if(TextContainer.m_HasCursor)
 			{
-				int64_t CurTime = time_get_microseconds();
+				auto CurTime = tw::time_get();
 
 				Graphics()->TextureClear();
-				if((CurTime - m_CursorRenderTime) > 500000)
+				if((CurTime - m_CursorRenderTime) > 500ms)
 				{
 					Graphics()->SetColor(*pTextOutlineColor);
 					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1, 0, 0);
 					Graphics()->SetColor(*pTextColor);
 					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
 				}
-				if((CurTime - m_CursorRenderTime) > 1000000)
-					m_CursorRenderTime = time_get_microseconds();
+				if((CurTime - m_CursorRenderTime) > 1s)
+					m_CursorRenderTime = tw::time_get();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}

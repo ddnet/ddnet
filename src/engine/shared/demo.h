@@ -121,9 +121,6 @@ private:
 
 	int64_t time();
 
-	int64_t m_TickTime;
-	int64_t m_Time;
-
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
