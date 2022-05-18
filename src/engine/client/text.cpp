@@ -1904,14 +1904,17 @@ public:
 
 	void OnWindowResize() override
 	{
+		bool HasNonEmptyTextContainer = false;
 		for(auto *pTextContainer : m_TextContainers)
 		{
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
-				dbg_msg("textrender", "Found non empty text container with index %d", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex);
-				dbg_assert(false, "text container was not empty");
+				dbg_msg("textrender", "Found non empty text container with index %d with %d quads", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum);
+				HasNonEmptyTextContainer = true;
 			}
 		}
+
+		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");
 
 		for(auto &pFont : m_Fonts)
 		{
