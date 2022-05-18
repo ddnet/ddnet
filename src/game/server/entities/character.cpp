@@ -19,7 +19,7 @@
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
-CCharacter::CCharacter(CGameWorld *pWorld) :
+CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	CEntity(pWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), ms_PhysSize)
 {
 	m_Health = 0;
@@ -27,6 +27,7 @@ CCharacter::CCharacter(CGameWorld *pWorld) :
 	m_StrongWeakID = 0;
 
 	// never intilize both to zero
+	m_Input = LastInput;
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
 

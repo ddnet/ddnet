@@ -154,6 +154,10 @@ public:
 	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
 	bool m_aPlayerHasInput[MAX_CLIENTS];
 
+	// returns last input if available otherwise nulled PlayerInput object
+	// ClientID has to be valid
+	CNetObj_PlayerInput GetLastPlayerInput(int ClientID) const;
+
 	IGameController *m_pController;
 	CGameWorld m_World;
 

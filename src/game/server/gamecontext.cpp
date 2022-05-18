@@ -166,6 +166,12 @@ void CGameContext::CommandCallback(int ClientID, int FlagMask, const char *pCmd,
 	}
 }
 
+CNetObj_PlayerInput CGameContext::GetLastPlayerInput(int ClientID) const
+{
+	dbg_assert(0 <= ClientID && ClientID < MAX_CLIENTS, "invalid ClientID");
+	return m_aLastPlayerInput[ClientID];
+}
+
 class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || !m_apPlayers[ClientID])
