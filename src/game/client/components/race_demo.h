@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_RACE_DEMO_H
 #define GAME_CLIENT_COMPONENTS_RACE_DEMO_H
 
+#include <chrono>
 #include <game/client/component.h>
 
 class CRaceDemo : public CComponent
@@ -25,7 +26,7 @@ class CRaceDemo : public CComponent
 	int m_RecordStopTick;
 	int m_Time;
 
-	int64_t m_RaceDemosLoadStartTime = 0;
+	std::chrono::nanoseconds m_RaceDemosLoadStartTime{0};
 
 	static int RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 

@@ -10,8 +10,14 @@
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
+#include <base/system.h>
+
 #include <memory>
 #include <vector>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 class CChooseMaster
 {
@@ -182,7 +188,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		int64_t StartTime = time_get_microseconds();
+		auto StartTime = tw::time_get();
 		CHttpRequest *pGet = HttpGet(pUrl).release();
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
@@ -190,7 +196,7 @@ void CChooseMaster::CJob::Run()
 		m_pGet = std::unique_ptr<CHttpRequest>(pGet);
 		lock_unlock(m_Lock);
 		IEngine::RunJobBlocking(pGet);
-		int Time = (time_get_microseconds() - StartTime) / 1000;
+		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
@@ -211,8 +217,8 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, Time);
-		aTimeMs[i] = Time;
+		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, (int)Time.count());
+		aTimeMs[i] = Time.count();
 	}
 	// Determine index of the minimum time.
 	int BestIndex = -1;

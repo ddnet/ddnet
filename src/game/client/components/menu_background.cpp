@@ -16,6 +16,10 @@
 
 #include "menu_background.h"
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 CMenuBackground::CMenuBackground() :
 	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
@@ -130,8 +134,8 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	pSelf->m_lThemes.push_back(Theme);
-	int64_t TimeNow = time_get_microseconds();
-	if(TimeNow - pSelf->m_ThemeScanStartTime >= 1000000 / 60)
+	auto TimeNow = tw::time_get();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
 	{
 		pSelf->Client()->UpdateAndSwap();
 		pSelf->m_ThemeScanStartTime = TimeNow;
@@ -146,8 +150,8 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	if(IsDir || !pSuffix)
 		return 0;
 
-	int64_t TimeNow = time_get_microseconds();
-	if(TimeNow - pSelf->m_ThemeScanStartTime >= 1000000 / 60)
+	auto TimeNow = tw::time_get();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
 	{
 		pSelf->Client()->UpdateAndSwap();
 		pSelf->m_ThemeScanStartTime = TimeNow;
@@ -407,7 +411,7 @@ std::vector<CTheme> &CMenuBackground::GetThemes()
 		m_lThemes.emplace_back("auto", true, true); // auto theme
 		m_lThemes.emplace_back("rand", true, true); // random theme
 
-		m_ThemeScanStartTime = time_get_microseconds();
+		m_ThemeScanStartTime = tw::time_get();
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
 

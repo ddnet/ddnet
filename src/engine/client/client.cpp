@@ -52,6 +52,8 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <base/system.h>
+
 #include <game/version.h>
 
 #include <mastersrv/mastersrv.h>
@@ -87,6 +89,11 @@
 #ifndef PRIu64
 #define PRIu64 "I64u"
 #endif
+
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 static const ColorRGBA ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
 static const ColorRGBA ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
@@ -3059,7 +3066,7 @@ void CClient::Run()
 	bool LastE = false;
 	bool LastG = false;
 
-	int64_t LastTime = time_get_microseconds();
+	auto LastTime = tw::time_get();
 	int64_t LastRenderTime = time_get();
 
 	while(true)
@@ -3298,8 +3305,8 @@ void CClient::Run()
 #endif
 
 		// beNice
-		int64_t Now = time_get_microseconds();
-		int64_t SleepTimeInMicroSeconds = 0;
+		auto Now = tw::time_get();
+		decltype(Now) SleepTimeInNanoSeconds{0};
 		bool Slept = false;
 		if(
 #ifdef CONF_DEBUG
@@ -3307,39 +3314,38 @@ void CClient::Run()
 #endif
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
-			SleepTimeInMicroSeconds = ((int64_t)1000000 / (int64_t)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
-			if(SleepTimeInMicroSeconds / (int64_t)1000 > (int64_t)0)
-				thread_sleep(SleepTimeInMicroSeconds);
+			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
+			std::this_thread::sleep_for(SleepTimeInNanoSeconds);
 			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
-			SleepTimeInMicroSeconds = ((int64_t)1000000 / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
-			if(SleepTimeInMicroSeconds > (int64_t)0)
-				net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInMicroSeconds);
+			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
+			if(SleepTimeInNanoSeconds > 0ns)
+				tw::net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
 			Slept = true;
 		}
 		if(Slept)
 		{
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
-			if(SleepTimeInMicroSeconds < (int64_t)-16666)
-				SleepTimeInMicroSeconds = (int64_t)-16666;
+			if(SleepTimeInNanoSeconds < -16666666ns)
+				SleepTimeInNanoSeconds = -16666666ns;
 			// don't go higher than the frametime of a 60 fps frame
-			else if(SleepTimeInMicroSeconds > (int64_t)16666)
-				SleepTimeInMicroSeconds = (int64_t)16666;
+			else if(SleepTimeInNanoSeconds > 16666666ns)
+				SleepTimeInNanoSeconds = 16666666ns;
 			// the time diff between the time that was used actually used and the time the thread should sleep/wait
 			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
 			// so two cases (and the case it slept exactly the time it should):
 			//	- the thread slept/waited too long, then it adjust the time to sleep/wait less in the next update tick
 			//	- the thread slept/waited too less, then it adjust the time to sleep/wait more in the next update tick
-			LastTime = Now + SleepTimeInMicroSeconds;
+			LastTime = Now + SleepTimeInNanoSeconds;
 		}
 		else
 			LastTime = Now;
 
 		if(g_Config.m_DbgHitch)
 		{
-			thread_sleep(g_Config.m_DbgHitch * 1000);
+			std::this_thread::sleep_for(g_Config.m_DbgHitch * 1ms);
 			g_Config.m_DbgHitch = 0;
 		}
 

@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/system.h>
 
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -22,7 +23,6 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 
-#include "base/system.h"
 #include "binds.h"
 #include "camera.h"
 #include "countryflags.h"
@@ -36,6 +36,10 @@
 
 #include <array>
 #include <numeric>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -838,10 +842,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
-		int64_t SkinStartLoadTime = time_get_microseconds();
+		auto SkinStartLoadTime = tw::time_get();
 		m_pClient->m_Skins.Refresh([&](int) {
 			// if skin refreshing takes to long, swap to a loading screen
-			if(time_get_microseconds() - SkinStartLoadTime > 500000)
+			if(tw::time_get() - SkinStartLoadTime > 500ms)
 			{
 				RenderLoading(false, false);
 			}

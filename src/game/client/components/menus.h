@@ -6,6 +6,7 @@
 #include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
+#include <chrono>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -435,7 +436,7 @@ protected:
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 
-	int64_t m_DemoPopulateStartTime = 0;
+	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
@@ -642,7 +643,7 @@ public:
 
 	sorted_array<CGhostItem> m_lGhosts;
 
-	int64_t m_GhostPopulateStartTime = 0;
+	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();
@@ -653,10 +654,10 @@ public:
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
-	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration);
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration);
 
-	int64_t m_PopupWarningLastTime;
-	int64_t m_PopupWarningDuration;
+	std::chrono::nanoseconds m_PopupWarningLastTime;
+	std::chrono::nanoseconds m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];

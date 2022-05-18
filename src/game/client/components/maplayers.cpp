@@ -19,6 +19,10 @@
 
 #include "maplayers.h"
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 CMapLayers::CMapLayers(int t, bool OnlineOnly)
 {
 	m_Type = t;
@@ -87,7 +91,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 	const int64_t TickToMicroSeconds = (1000000ll / (int64_t)pThis->Client()->GameTickSpeed());
 
 	static int64_t s_Time = 0;
-	static int64_t s_LastLocalTime = time_get_microseconds();
+	static int64_t s_LastLocalTime = time_get_nanoseconds();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -142,11 +146,11 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 		}
 		else
 		{
-			int64_t CurTime = time_get_microseconds();
+			int64_t CurTime = time_get_nanoseconds();
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)).count(), pChannels);
 	}
 }
 

@@ -6,6 +6,8 @@
 #include <engine/shared/network.h>
 #include <mastersrv/mastersrv.h>
 
+#include <thread>
+
 CNetServer *pNet;
 
 int Progression = 50;
@@ -145,7 +147,7 @@ static int Run()
 			SendHeartBeats();
 		}
 
-		thread_sleep(100000);
+		std::this_thread::sleep_for(std::chrono::microseconds(100000));
 	}
 }
 

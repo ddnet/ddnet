@@ -3,6 +3,7 @@
 
 #include <base/hash.h>
 #include <base/math.h>
+#include <base/system.h>
 
 #include <engine/demo.h>
 #include <engine/graphics.h>
@@ -21,6 +22,10 @@
 
 #include "maplayers.h"
 #include "menus.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
@@ -764,7 +769,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	Item.m_StorageType = StorageType;
 	pSelf->m_lDemos.add_unsorted(Item);
 
-	if(time_get_microseconds() - pSelf->m_DemoPopulateStartTime > 500000)
+	if(tw::time_get() - pSelf->m_DemoPopulateStartTime > 500ms)
 	{
 		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -777,7 +782,7 @@ void CMenus::DemolistPopulate()
 	m_lDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
-	m_DemoPopulateStartTime = time_get_microseconds();
+	m_DemoPopulateStartTime = tw::time_get();
 	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 
 	if(g_Config.m_BrDemoFetchInfo)

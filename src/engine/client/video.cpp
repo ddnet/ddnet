@@ -12,6 +12,11 @@
 
 #include "video.h"
 
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
+
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
@@ -257,7 +262,7 @@ void CVideo::Stop()
 	m_vAudioThreads.clear();
 
 	while(m_ProcessingVideoFrame > 0 || m_ProcessingAudioFrame > 0)
-		thread_sleep(10);
+		std::this_thread::sleep_for(10us);
 
 	m_Recording = false;
 
@@ -352,21 +357,10 @@ void CVideo::NextVideoFrame()
 {
 	if(m_Recording)
 	{
-		// #ifdef CONF_PLATFORM_MACOS
-		// 	CAutoreleasePool AutoreleasePool;
-		// #endif
-
-		//dbg_msg("video_recorder", "called");
-
 		ms_Time += ms_TickTime;
 		ms_LocalTime = (ms_Time - ms_LocalStartTime) / (float)time_freq();
 		m_NextFrame = true;
 		m_Vframe += 1;
-
-		// m_pGraphics->KickCommandBuffer();
-		//thread_sleep(500);
-
-		// m_Semaphore.wait();
 	}
 }
 

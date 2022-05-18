@@ -1,4 +1,7 @@
 #include "binds.h"
+
+#include <base/system.h>
+
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
@@ -6,6 +9,10 @@
 #include <game/client/gameclient.h>
 
 #include "menus.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 typedef std::function<void()> TMenuAssetScanLoadedFunc;
 
@@ -380,11 +387,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
 
-	int64_t LoadStartTime = time_get_microseconds();
+	auto LoadStartTime = tw::time_get();
 	SMenuAssetScanUser User;
 	User.m_pUser = this;
 	User.m_LoadedFunc = [&]() {
-		if(time_get_microseconds() - LoadStartTime > 500000)
+		if(tw::time_get() - LoadStartTime > 500ms)
 			RenderLoading(false, false);
 	};
 	if(s_CurCustomTab == ASSETS_TAB_ENTITIES)

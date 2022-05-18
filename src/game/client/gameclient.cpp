@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <chrono>
 #include <limits>
 
 #include <engine/client/checksum.h>
@@ -68,6 +69,8 @@
 #include "components/ghost.h"
 #include "components/race_demo.h"
 #include <base/system.h>
+
+using namespace std::chrono_literals;
 
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
@@ -601,7 +604,7 @@ void CGameClient::OnRender()
 	{
 		if(pWarning != NULL && m_Menus.CanDisplayWarning())
 		{
-			m_Menus.PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10000000);
+			m_Menus.PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10s);
 			pWarning->m_WasShown = true;
 		}
 	}
