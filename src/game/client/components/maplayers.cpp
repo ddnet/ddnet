@@ -302,7 +302,7 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 {
 	m_Width = Width;
 	m_Height = Height;
-	if(Width == 0 || Height == 0)
+	if(Width == 0 || Height == 0 || Width >= std::numeric_limits<std::ptrdiff_t>::max() || Height >= std::numeric_limits<std::ptrdiff_t>::max())
 		return false;
 
 	m_pTilesOfLayer = new CMapLayers::STileLayerVisuals::STileVisual[Height * Width];

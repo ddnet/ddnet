@@ -96,16 +96,17 @@ endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR DEV)
   set(AUTO_IPO OFF)
-else()
-  set(AUTO_IPO ON)
-endif()
-
-if(MSVC)
+elseif(MSVC)
   # For some reason on MSVC platform the client and server binaries
   # become even bigger with IPO enabled.
   set(AUTO_IPO OFF)
+elseif(MINGW AND TARGET_CPU_ARCHITECTURE STREQUAL "x86")
+  # DWARF error: could not find variable specification and further failures
+  set(AUTO_IPO OFF)
+else()
+  set(AUTO_IPO ON)
 endif()
 
 set(AUTO_VULKAN_BACKEND ON)
@@ -281,6 +282,7 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
@@ -292,23 +294,6 @@ if(NOT MSVC AND NOT HAIKU)
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
-endif()
-
-if(UNIX AND NOT APPLE)
-  # This can be disabled by configuring with -DUSE_GOLD=FALSE
-  if(NOT DEFINED USE_GOLD)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
-    if("${ld_version}" MATCHES "GNU gold")
-      set(USE_GOLD TRUE CACHE BOOL "Use GNU gold linker")
-    else()
-      set(USE_GOLD FALSE CACHE BOOL "Use GNU gold linker")
-    endif()
-  endif()
-  message(STATUS "GNU gold linker enabled: ${USE_GOLD}")
-  if(USE_GOLD)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-  endif()
 endif()
 
 if(MSVC)
