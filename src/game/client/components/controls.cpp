@@ -258,7 +258,7 @@ int CControls::SnapInput(int *pData)
 	{
 		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags == PLAYERFLAG_CHATTING)
 		{
-			if(GameClient()->m_GameInfo.m_BugDDRaceInput)
+			if(!GameClient()->m_GameInfo.m_BugDDRaceInput)
 				ResetInput(g_Config.m_ClDummy);
 		}
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
