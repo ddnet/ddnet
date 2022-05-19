@@ -255,14 +255,7 @@ int CControls::SnapInput(int *pData)
 	else if(m_pClient->m_Menus.IsActive())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
 	else
-	{
-		if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags == PLAYERFLAG_CHATTING)
-		{
-			if(!GameClient()->m_GameInfo.m_BugDDRaceInput)
-				ResetInput(g_Config.m_ClDummy);
-		}
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
-	}
 
 	if(m_pClient->m_Scoreboard.Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
