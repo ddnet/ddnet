@@ -4383,12 +4383,6 @@ int main(int argc, const char **argv)
 		{
 			Silent = true;
 		}
-		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0)
-		{
-#if defined(CONF_FAMILY_WINDOWS)
-			AllocConsole();
-#endif
-		}
 	}
 
 #if defined(CONF_PLATFORM_ANDROID)
@@ -4510,18 +4504,6 @@ int main(int argc, const char **argv)
 		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
-
-#if defined(CONF_FAMILY_WINDOWS)
-	if(g_Config.m_ClShowConsole)
-	{
-		AllocConsole();
-		HANDLE hInput;
-		DWORD prev_mode;
-		hInput = GetStdHandle(STD_INPUT_HANDLE);
-		GetConsoleMode(hInput, &prev_mode);
-		SetConsoleMode(hInput, prev_mode & ENABLE_EXTENDED_FLAGS);
-	}
-#endif
 
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
