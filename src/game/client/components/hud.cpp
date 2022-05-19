@@ -897,9 +897,14 @@ void CHud::RenderPlayerState(const int ClientID)
 	float y = 5 + 12;
 
 	// render weapons
+	int ActiveWeapon = pCharacter->m_ActiveWeapon;
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	{
+		ActiveWeapon = m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_ActiveWeapon;
+	}
 	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_HAMMER)
+		if(ActiveWeapon != WEAPON_HAMMER)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -913,7 +918,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_GUN].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_GUN)
+		if(ActiveWeapon != WEAPON_GUN)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -926,7 +931,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_SHOTGUN)
+		if(ActiveWeapon != WEAPON_SHOTGUN)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -939,7 +944,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_GRENADE)
+		if(ActiveWeapon != WEAPON_GRENADE)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -952,7 +957,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_LASER].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_LASER)
+		if(ActiveWeapon != WEAPON_LASER)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -965,7 +970,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_NINJA)
+		if(ActiveWeapon != WEAPON_NINJA)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}

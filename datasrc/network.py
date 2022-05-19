@@ -253,7 +253,8 @@ Objects = [
 		NetIntAny("m_TargetY"),
 		NetIntAny("m_RampValue"),
 		NetIntRange("m_InputDirection", -1, 1),
-		NetIntRange("m_InputJump", 0, 1),
+		NetBool("m_InputJump"),
+		NetIntRange("m_ActiveWeapon", 0, 'NUM_WEAPONS-1'),
 	]),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
