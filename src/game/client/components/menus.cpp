@@ -35,7 +35,6 @@
 #include <game/client/lineinput.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
-#include <mastersrv/mastersrv.h>
 
 #include "controls.h"
 #include "countryflags.h"

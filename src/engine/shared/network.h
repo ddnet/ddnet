@@ -425,6 +425,7 @@ public:
 	const char *ErrorString(int ClientID);
 
 	// anti spoof
+	SECURITY_TOKEN GetGlobalToken();
 	SECURITY_TOKEN GetToken(const NETADDR &Addr);
 	// vanilla token/gametick shouldn't be negative
 	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) { return absolute(GetToken(Addr)); }

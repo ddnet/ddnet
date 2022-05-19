@@ -15,6 +15,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
+#include <engine/shared/masterserver.h>
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
@@ -26,8 +27,6 @@
 #include <engine/friends.h>
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
-
-#include <mastersrv/mastersrv.h>
 
 #include <engine/external/json-parser/json.h>
 

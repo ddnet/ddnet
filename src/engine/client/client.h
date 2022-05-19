@@ -20,7 +20,6 @@
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/map.h>
-#include <engine/masterserver.h>
 #include <engine/shared/config.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
