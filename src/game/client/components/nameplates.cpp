@@ -65,18 +65,28 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		YOffset -= ShowDirectionImgSize;
 		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
 
-		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
+		int Direction = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction;
+		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedDisplayInfo)
+		{
+			Direction = m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_InputDirection;
+		}
+		bool Jump = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped;
+		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedDisplayInfo)
+		{
+			Jump = m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_InputJump;
+		}
+		if(Direction == -1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
 		}
-		else if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1)
+		else if(Direction == 1)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
 		}
-		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
+		if(Jump)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);

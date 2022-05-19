@@ -252,6 +252,8 @@ Objects = [
 		NetIntAny("m_TargetX"),
 		NetIntAny("m_TargetY"),
 		NetIntAny("m_RampValue"),
+		NetIntRange("m_InputDirection", -1, 1),
+		NetIntRange("m_InputJump", 0, 1),
 	]),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
