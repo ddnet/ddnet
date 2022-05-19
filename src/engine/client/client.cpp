@@ -4383,13 +4383,12 @@ int main(int argc, const char **argv)
 		{
 			Silent = true;
 		}
-		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0)
-		{
-#if defined(CONF_FAMILY_WINDOWS)
-			AllocConsole();
-#endif
-		}
 	}
+
+#if defined(CONF_FAMILY_WINDOWS)
+	if(Silent)
+		FreeConsole();
+#endif
 
 #if defined(CONF_PLATFORM_ANDROID)
 	InitAndroid();
@@ -4514,12 +4513,14 @@ int main(int argc, const char **argv)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(g_Config.m_ClShowConsole)
 	{
-		AllocConsole();
-		HANDLE hInput;
-		DWORD prev_mode;
-		hInput = GetStdHandle(STD_INPUT_HANDLE);
-		GetConsoleMode(hInput, &prev_mode);
-		SetConsoleMode(hInput, prev_mode & ENABLE_EXTENDED_FLAGS);
+		HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+		DWORD ConsoleMode;
+		if(GetConsoleMode(hInput, &ConsoleMode))
+			SetConsoleMode(hInput, ConsoleMode & ENABLE_EXTENDED_FLAGS);
+	}
+	else if(!Silent) // already freed earlier
+	{
+		FreeConsole();
 	}
 #endif
 
