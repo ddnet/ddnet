@@ -669,8 +669,8 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
+    src/macos/client.mm
     src/macos/notifications.mm
-    src/macoslaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
@@ -2319,7 +2319,7 @@ if(SERVER)
   list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
   if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-    set(SERVER_LAUNCHER_SRC src/macoslaunch/server.mm)
+    set(SERVER_LAUNCHER_SRC src/macos/server.mm)
     set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
     add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
     target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
