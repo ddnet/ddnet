@@ -209,7 +209,7 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
     set(CHECKED_FLAG "${FLAG}")
   endif()
   string(REGEX REPLACE "[^A-Za-z0-9]" "_" CONFIG_VARIABLE "FLAG_SUPPORTED${CHECKED_FLAG}")
-  check_c_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
+  check_cxx_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
   if(${CONFIG_VARIABLE})
     if(${VARIABLE})
       set("${VARIABLE}" "${${VARIABLE}};${FLAG}" PARENT_SCOPE)
@@ -228,14 +228,7 @@ endif()
 
 if(NOT MSVC AND NOT HAIKU)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-    check_cxx_compiler_flag(-std=gnu++17 FLAG_SUPPORTED_std_gnu__17)
-    if(FLAG_SUPPORTED_std_gnu__17)
-      if(CMAKE_CXX_FLAGS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17")
-      else()
-        set(CMAKE_CXX_FLAGS -std=gnu++17)
-      endif()
-    endif()
+    add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
   # Protect the stack pointer.
@@ -669,8 +662,8 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
+    src/macos/client.mm
     src/macos/notifications.mm
-    src/macoslaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
@@ -2319,7 +2312,7 @@ if(SERVER)
   list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
   if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-    set(SERVER_LAUNCHER_SRC src/macoslaunch/server.mm)
+    set(SERVER_LAUNCHER_SRC src/macos/server.mm)
     set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
     add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
     target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
