@@ -1153,6 +1153,7 @@ set(EXPECTED_DATA
   countryflags/XEN.png
   countryflags/XEU.png
   countryflags/XNI.png
+  countryflags/XRU.png
   countryflags/XSC.png
   countryflags/XWA.png
   countryflags/YE.png
