@@ -2146,6 +2146,7 @@ void CCharacter::DDRacePostCoreTick()
 	if(m_DeepFreeze && !m_Super)
 		Freeze();
 
+	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
 	if(m_Core.m_Jumps == -1)
 	{
 		// The player has only one ground jump, so his feet are always dark

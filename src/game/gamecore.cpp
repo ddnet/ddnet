@@ -134,15 +134,6 @@ void CCharacterCore::Tick(bool UseInput)
 	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
 	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
 
-	// handle jumping
-	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
-	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
-	if(Grounded)
-	{
-		m_Jumped &= ~2;
-		m_JumpedTotal = 0;
-	}
-
 	// handle input
 	if(UseInput)
 	{
@@ -159,12 +150,18 @@ void CCharacterCore::Tick(bool UseInput)
 			m_Angle = (int)(TmpAngle * 256.0f);
 		}
 
+		// Special jump cases:
+		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set
+		// m_Jumps == 0: A tee may not make a jump. Second jumped bit is always set
+		// m_Jumps == 1: A tee may do either a ground jump or an air jump. Second jumped bit is set after the first jump
+		// The second jump bit can be overridden by special tiles so that the tee can nevertheless jump.
+
 		// handle jump
 		if(m_Input.m_Jump)
 		{
-			if(!(m_Jumped & 1) && m_Jumps != 0)
+			if(!(m_Jumped & 1))
 			{
-				if(Grounded)
+				if(Grounded && (!(m_Jumped & 2) || m_Jumps == -1))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
 					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
@@ -178,7 +175,7 @@ void CCharacterCore::Tick(bool UseInput)
 					}
 					m_JumpedTotal = 0;
 				}
-				else if(!(m_Jumped & 2) && m_Jumps >= 1)
+				else if(!(m_Jumped & 2))
 				{
 					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
 					m_Vel.y = -m_Tuning.m_AirJumpImpulse;
@@ -211,6 +208,16 @@ void CCharacterCore::Tick(bool UseInput)
 			m_HookState = HOOK_IDLE;
 			m_HookPos = m_Pos;
 		}
+	}
+
+	// handle jumping
+	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
+	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
+	if(Grounded)
+	{
+		// A tee must touch the ground for one tick before it can jump again.
+		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
 	}
 
 	// add the speed modification according to players wanted direction
