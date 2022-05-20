@@ -2253,6 +2253,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_UseTuneZones = m_GameInfo.m_PredictDDRaceTiles;
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
+	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
 
 	// always update default tune zone, even without character
 	if(!m_GameWorld.m_WorldConfig.m_UseTuneZones)

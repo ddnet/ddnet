@@ -72,6 +72,7 @@ public:
 		bool m_PredictDDRace;
 		bool m_IsSolo;
 		bool m_UseTuneZones;
+		bool m_BugDDRaceInput;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;
