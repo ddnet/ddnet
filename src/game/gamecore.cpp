@@ -154,14 +154,14 @@ void CCharacterCore::Tick(bool UseInput)
 		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set
 		// m_Jumps == 0: A tee may not make a jump. Second jumped bit is always set
 		// m_Jumps == 1: A tee may do either a ground jump or an air jump. Second jumped bit is set after the first jump
-		// The second jump bit can be overridden by special tiles so that the tee can nevertheless jump.
+		// The second jumped bit can be overridden by special tiles so that the tee can nevertheless jump.
 
 		// handle jump
 		if(m_Input.m_Jump)
 		{
 			if(!(m_Jumped & 1))
 			{
-				if(Grounded && (!(m_Jumped & 2) || m_Jumps == -1))
+				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
 					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
@@ -215,7 +215,6 @@ void CCharacterCore::Tick(bool UseInput)
 	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
 	if(Grounded)
 	{
-		// A tee must touch the ground for one tick before it can jump again.
 		m_Jumped &= ~2;
 		m_JumpedTotal = 0;
 	}
