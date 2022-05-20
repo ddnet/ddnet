@@ -75,11 +75,6 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	bool CheckSettings = false;
-	static int s_ClShowConsole = g_Config.m_ClShowConsole;
-#endif
-
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	CUIRect Label, Button, Left, Right, Game, Client;
 	MainView.HSplitTop(150.0f, &Game, &Client);
@@ -247,19 +242,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		g_Config.m_ClRefreshRate = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
-
-#if defined(CONF_FAMILY_WINDOWS)
-		Left.HSplitTop(10.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowConsole, Localize("Show console window"), g_Config.m_ClShowConsole, &Button))
-		{
-			g_Config.m_ClShowConsole ^= 1;
-			CheckSettings = true;
-		}
-
-		if(CheckSettings)
-			m_NeedRestartGeneral = s_ClShowConsole != g_Config.m_ClShowConsole;
-#endif
 
 		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect SettingsButton;

@@ -371,6 +371,8 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
 	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), getenv("NO_COLOR") == nullptr, false));
 #else
+	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)
+		AttachConsole(ATTACH_PARENT_PROCESS);
 	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	switch(GetFileType(pOutput))
 	{
