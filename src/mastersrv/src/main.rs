@@ -1,7 +1,8 @@
 use arrayvec::ArrayString;
 use arrayvec::ArrayVec;
+use clap::value_t_or_exit;
+use clap::App;
 use clap::Arg;
-use clap::Command;
 use headers::HeaderMapExt as _;
 use rand::random;
 use serde::Deserialize;
@@ -52,7 +53,7 @@ mod locations;
 
 const SERVER_TIMEOUT_SECONDS: u64 = 30;
 
-type ShortString = ArrayString<64>;
+type ShortString = ArrayString<[u8; 64]>;
 
 // TODO: delete action for server shutdown
 
@@ -289,7 +290,7 @@ impl Challenger {
                 base64::encode_config_slice(&hash.finalize()[..16], base64::STANDARD, &mut buf);
             ShortString::from(str::from_utf8(&buf[..len]).unwrap()).unwrap()
         }
-        let mut buf: ArrayVec<u8, 128> = ArrayVec::new();
+        let mut buf: ArrayVec<[u8; 128]> = ArrayVec::new();
         write!(&mut buf, "{}", addr).unwrap();
         Challenge {
             current: hash(&self.seed, &buf),
@@ -854,47 +855,47 @@ impl<T> panic::RefUnwindSafe for AssertUnwindSafe<T> {}
 async fn main() {
     env_logger::init();
 
-    let mut command = Command::new("mastersrv")
+    let mut command = App::new("mastersrv")
         .about("Collects game server info via an HTTP endpoint and aggregates them.")
-        .arg(Arg::new("listen")
+        .arg(Arg::with_name("listen")
             .long("listen")
             .value_name("ADDRESS")
             .default_value("[::]:8080")
             .help("Listen address for the HTTP endpoint.")
         )
-        .arg(Arg::new("connecting-ip-header")
+        .arg(Arg::with_name("connecting-ip-header")
             .long("connecting-ip-header")
             .value_name("HEADER")
             .help("HTTP header to use to determine the client IP address.")
         )
-        .arg(Arg::new("locations")
+        .arg(Arg::with_name("locations")
             .long("locations")
             .value_name("LOCATIONS")
             .help("IP to continent locations database filename (CSV file with network,continent_code header).")
         )
-        .arg(Arg::new("write-addresses")
+        .arg(Arg::with_name("write-addresses")
             .long("write-addresses")
             .value_name("FILENAME")
             .help("Dump all new-style addresses to a file each second.")
         )
-        .arg(Arg::new("write-dump")
+        .arg(Arg::with_name("write-dump")
             .long("write-dump")
             .value_name("DUMP")
             .help("Dump the internal state to a JSON file each second.")
         )
-        .arg(Arg::new("read-write-dump")
+        .arg(Arg::with_name("read-write-dump")
             .long("read-write-dump")
             .value_name("DUMP")
             .conflicts_with("write-dump")
             .help("Dump the internal state to a JSON file each second, but also read it at the start.")
         )
-        .arg(Arg::new("read-dump-dir")
+        .arg(Arg::with_name("read-dump-dir")
             .long("read-dump-dir")
             .takes_value(true)
             .value_name("DUMP_DIR")
             .help("Read dumps from other mastersrv instances from the specified directory (looking only at *.json files).")
         )
-        .arg(Arg::new("out")
+        .arg(Arg::with_name("out")
             .long("out")
             .value_name("OUT")
             .default_value("servers.json")
@@ -903,7 +904,7 @@ async fn main() {
 
     if cfg!(unix) {
         command = command.arg(
-            Arg::new("listen-unix")
+            Arg::with_name("listen-unix")
                 .long("listen-unix")
                 .value_name("PATH")
                 .requires("connecting-ip-header")
@@ -914,7 +915,7 @@ async fn main() {
 
     let matches = command.get_matches();
 
-    let listen_address: SocketAddr = matches.value_of_t_or_exit("listen");
+    let listen_address = value_t_or_exit!(matches.value_of("listen"), SocketAddr);
     let connecting_ip_header = matches
         .value_of("connecting-ip-header")
         .map(|s| s.to_owned());

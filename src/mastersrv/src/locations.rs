@@ -4,7 +4,7 @@ use serde::Deserialize;
 use std::net::IpAddr;
 use std::path::Path;
 
-pub type Location = ArrayString<12>;
+pub type Location = ArrayString<[u8; 12]>;
 
 #[derive(Deserialize)]
 struct LocationRecord {

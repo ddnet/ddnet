@@ -89,7 +89,7 @@ impl Protocol {
 
 impl fmt::Display for Addr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut buf: ArrayString<128> = ArrayString::new();
+        let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
         write!(
             &mut buf,
             "{}://{}",
@@ -109,7 +109,7 @@ impl FromStr for Addr {
     fn from_str(s: &str) -> Result<Addr, InvalidAddr> {
         let url = Url::parse(s).map_err(|_| InvalidAddr)?;
         let protocol: Protocol = url.scheme().parse().map_err(|_| InvalidAddr)?;
-        let mut ip_port: ArrayString<64> = ArrayString::new();
+        let mut ip_port: ArrayString<[u8; 64]> = ArrayString::new();
         write!(
             &mut ip_port,
             "{}:{}",
@@ -131,7 +131,7 @@ impl serde::Serialize for Addr {
     where
         S: serde::Serializer,
     {
-        let mut buf: ArrayString<128> = ArrayString::new();
+        let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
         write!(&mut buf, "{}", self).unwrap();
         serializer.serialize_str(&buf)
     }
