@@ -227,9 +227,10 @@ int CMenus::ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser
 
 int CMenus::HudScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pMenus = (CMenus *)pUser;
-	IGraphics *pGraphics = pMenus->Graphics();
-	return AssetScan(pName, IsDir, DirType, pMenus->m_HudList, "hud", pGraphics, pUser);
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
+	IGraphics *pGraphics = pThis->Graphics();
+	return AssetScan(pName, IsDir, DirType, pThis->m_HudList, "hud", pGraphics, pUser);
 }
 
 static sorted_array<const CMenus::SCustomEntities *> s_SearchEntitiesList;
@@ -423,7 +424,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_HUD)
 	{
-		InitAssetList(m_HudList, "assets/hud", "hud", HudScan, Graphics(), Storage(), this);
+		InitAssetList(m_HudList, "assets/hud", "hud", HudScan, Graphics(), Storage(), &User);
 	}
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
