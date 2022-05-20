@@ -3,6 +3,7 @@
 ## Checklist
 
 - [ ] Tested the change ingame
+- [ ] Used smart pointers whenever possible (`unique_ptr`, `shared_ptr`, etc).
 - [ ] Provided screenshots if it is a visual change
 - [ ] Tested in combination with possibly related configuration options
 - [ ] Written a unit test if it works standalone, system.c especially
