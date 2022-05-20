@@ -1,6 +1,7 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <engine/graphics.h>
@@ -136,9 +137,9 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 
 	if(argc < 2 || argc > 3)
 	{

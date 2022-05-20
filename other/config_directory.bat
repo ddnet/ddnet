@@ -1,1 +1,5 @@
-@start explorer %APPDATA%\Teeworlds
+if exist %APPDATA%\DDNet\ (
+	@start explorer %APPDATA%\DDNet\
+) else (
+	@start explorer %APPDATA%\Teeworlds\
+)

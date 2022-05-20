@@ -1,19 +1,19 @@
 #include <base/math.h>
 #include <base/system.h>
+#include <cstdio>
+#include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
-#include <mastersrv/mastersrv.h>
-#include <stdio.h>
 
 static CNetClient g_NetOp; // main
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
-	g_NetOp.Open(BindAddr, 0);
+	g_NetOp.Open(BindAddr);
 
 	if(argc != 2)
 	{

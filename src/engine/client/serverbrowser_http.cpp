@@ -1,17 +1,23 @@
 #include "serverbrowser_http.h"
 
-#include "http.h"
-
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/http.h>
 #include <engine/shared/jobs.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
+#include <base/system.h>
+
 #include <memory>
+#include <vector>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 class CChooseMaster
 {
@@ -23,7 +29,7 @@ public:
 		MAX_URLS = 16,
 	};
 	CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CChooseMaster() {}
+	virtual ~CChooseMaster();
 
 	bool GetBestUrl(const char **pBestUrl) const;
 	void Reset();
@@ -44,13 +50,17 @@ private:
 	};
 	class CJob : public IJob
 	{
+		LOCK m_Lock;
 		std::shared_ptr<CData> m_pData;
-		virtual void Run();
+		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
+		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
+		void Run() override;
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
-			m_pData(std::move(pData)) {}
-		virtual ~CJob() {}
+			m_pData(std::move(pData)) { m_Lock = lock_create(); }
+		virtual ~CJob() { lock_destroy(m_Lock); }
+		void Abort();
 	};
 
 	IEngine *m_pEngine;
@@ -73,6 +83,14 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const cha
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		str_copy(m_pData->m_aaUrls[i], ppUrls[i], sizeof(m_pData->m_aaUrls[i]));
+	}
+}
+
+CChooseMaster::~CChooseMaster()
+{
+	if(m_pJob)
+	{
+		m_pJob->Abort();
 	}
 }
 
@@ -113,6 +131,21 @@ void CChooseMaster::Refresh()
 		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
 }
 
+void CChooseMaster::CJob::Abort()
+{
+	lock_wait(m_Lock);
+	if(m_pHead != nullptr)
+	{
+		m_pHead->Abort();
+	}
+
+	if(m_pGet != nullptr)
+	{
+		m_pGet->Abort();
+	}
+	lock_unlock(m_Lock);
+}
+
 void CChooseMaster::CJob::Run()
 {
 	// Check masters in a random order.
@@ -139,21 +172,41 @@ void CChooseMaster::CJob::Run()
 	{
 		aTimeMs[i] = -1;
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		CHead Head(pUrl, Timeout, HTTPLOG::FAILURE);
-		IEngine::RunJobBlocking(&Head);
-		if(Head.State() != HTTP_DONE)
+		CHttpRequest *pHead = HttpHead(pUrl).release();
+		pHead->Timeout(Timeout);
+		pHead->LogProgress(HTTPLOG::FAILURE);
+		lock_wait(m_Lock);
+		m_pHead = std::unique_ptr<CHttpRequest>(pHead);
+		lock_unlock(m_Lock);
+		IEngine::RunJobBlocking(pHead);
+		if(pHead->State() == HTTP_ABORTED)
+		{
+			dbg_msg("serverbrowse_http", "master chooser aborted");
+			return;
+		}
+		if(pHead->State() != HTTP_DONE)
 		{
 			continue;
 		}
-		int64_t StartTime = time_get_microseconds();
-		CGet Get(pUrl, Timeout, HTTPLOG::FAILURE);
-		IEngine::RunJobBlocking(&Get);
-		int Time = (time_get_microseconds() - StartTime) / 1000;
-		if(Get.State() != HTTP_DONE)
+		auto StartTime = tw::time_get();
+		CHttpRequest *pGet = HttpGet(pUrl).release();
+		pGet->Timeout(Timeout);
+		pGet->LogProgress(HTTPLOG::FAILURE);
+		lock_wait(m_Lock);
+		m_pGet = std::unique_ptr<CHttpRequest>(pGet);
+		lock_unlock(m_Lock);
+		IEngine::RunJobBlocking(pGet);
+		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
+		if(pHead->State() == HTTP_ABORTED)
+		{
+			dbg_msg("serverbrowse_http", "master chooser aborted");
+			return;
+		}
+		if(pGet->State() != HTTP_DONE)
 		{
 			continue;
 		}
-		json_value *pJson = Get.ResultJson();
+		json_value *pJson = pGet->ResultJson();
 		if(!pJson)
 		{
 			continue;
@@ -164,8 +217,8 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, Time);
-		aTimeMs[i] = Time;
+		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, (int)Time.count());
+		aTimeMs[i] = Time.count();
 	}
 	// Determine index of the minimum time.
 	int BestIndex = -1;
@@ -195,31 +248,31 @@ class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CServerBrowserHttp() {}
-	void Update();
-	bool IsRefreshing() { return m_State != STATE_DONE; }
-	void Refresh();
-	bool GetBestUrl(const char **pBestUrl) const { return m_pChooseMaster->GetBestUrl(pBestUrl); }
+	virtual ~CServerBrowserHttp();
+	void Update() override;
+	bool IsRefreshing() override { return m_State != STATE_DONE; }
+	void Refresh() override;
+	bool GetBestUrl(const char **pBestUrl) const override { return m_pChooseMaster->GetBestUrl(pBestUrl); }
 
-	int NumServers() const
+	int NumServers() const override
 	{
 		return m_aServers.size();
 	}
-	const NETADDR &ServerAddress(int Index) const
+	const NETADDR &ServerAddress(int Index) const override
 	{
 		return m_aServers[Index].m_Addr;
 	}
-	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const
+	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const override
 	{
 		const CEntry &Entry = m_aServers[Index];
 		*pAddr = Entry.m_Addr;
 		*pInfo = Entry.m_Info;
 	}
-	int NumLegacyServers() const
+	int NumLegacyServers() const override
 	{
 		return m_aLegacyServers.size();
 	}
-	const NETADDR &LegacyServer(int Index) const
+	const NETADDR &LegacyServer(int Index) const override
 	{
 		return m_aLegacyServers[Index];
 	}
@@ -247,7 +300,7 @@ private:
 	IConsole *m_pConsole;
 
 	int m_State = STATE_DONE;
-	std::shared_ptr<CGet> m_pGetServers;
+	std::shared_ptr<CHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
 	std::vector<CEntry> m_aServers;
@@ -261,6 +314,15 @@ CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, con
 {
 	m_pChooseMaster->Refresh();
 }
+
+CServerBrowserHttp::~CServerBrowserHttp()
+{
+	if(m_pGetServers != nullptr)
+	{
+		m_pGetServers->Abort();
+	}
+}
+
 void CServerBrowserHttp::Update()
 {
 	if(m_State == STATE_WANTREFRESH)
@@ -275,9 +337,10 @@ void CServerBrowserHttp::Update()
 			}
 			return;
 		}
+		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
-		CTimeout Timeout{10000, 8000, 10};
-		m_pEngine->AddJob(m_pGetServers = std::make_shared<CGet>(pBestUrl, Timeout));
+		m_pGetServers->Timeout(CTimeout{10000, 8000, 10});
+		m_pEngine->AddJob(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
 	else if(m_State == STATE_REFRESHING)
@@ -287,7 +350,7 @@ void CServerBrowserHttp::Update()
 			return;
 		}
 		m_State = STATE_DONE;
-		std::shared_ptr<CGet> pGetServers = nullptr;
+		std::shared_ptr<CHttpRequest> pGetServers = nullptr;
 		std::swap(m_pGetServers, pGetServers);
 
 		bool Success = true;
@@ -344,11 +407,7 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 		}
 	}
 	str_truncate(aHost, sizeof(aHost), pRest + Start, End - Start);
-	if(net_addr_from_str(pOut, aHost))
-	{
-		return true;
-	}
-	return false;
+	return net_addr_from_str(pOut, aHost) != 0;
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
@@ -467,7 +526,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 	if(NumUrls == 0)
 	{
 		ppUrls = DEFAULT_SERVERLIST_URLS;
-		NumUrls = sizeof(DEFAULT_SERVERLIST_URLS) / sizeof(DEFAULT_SERVERLIST_URLS[0]);
+		NumUrls = std::size(DEFAULT_SERVERLIST_URLS);
 	}
 	int PreviousBestIndex = -1;
 	for(int i = 0; i < NumUrls; i++)

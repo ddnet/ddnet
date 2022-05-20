@@ -17,9 +17,7 @@ CLayerQuads::CLayerQuads()
 	m_Image = -1;
 }
 
-CLayerQuads::~CLayerQuads()
-{
-}
+CLayerQuads::~CLayerQuads() = default;
 
 void CLayerQuads::Render(bool QuadPicker)
 {
@@ -155,27 +153,14 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 	m_pEditor->m_Map.m_Modified = true;
 }
 
-void Swap(CPoint &a, CPoint &b)
-{
-	CPoint Tmp;
-	Tmp.x = a.x;
-	Tmp.y = a.y;
-
-	a.x = b.x;
-	a.y = b.y;
-
-	b.x = Tmp.x;
-	b.y = Tmp.y;
-}
-
 void CLayerQuads::BrushFlipX()
 {
 	for(int i = 0; i < m_lQuads.size(); i++)
 	{
 		CQuad *q = &m_lQuads[i];
 
-		Swap(q->m_aPoints[0], q->m_aPoints[1]);
-		Swap(q->m_aPoints[2], q->m_aPoints[3]);
+		std::swap(q->m_aPoints[0], q->m_aPoints[1]);
+		std::swap(q->m_aPoints[2], q->m_aPoints[3]);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }
@@ -186,8 +171,8 @@ void CLayerQuads::BrushFlipY()
 	{
 		CQuad *q = &m_lQuads[i];
 
-		Swap(q->m_aPoints[0], q->m_aPoints[2]);
-		Swap(q->m_aPoints[1], q->m_aPoints[3]);
+		std::swap(q->m_aPoints[0], q->m_aPoints[2]);
+		std::swap(q->m_aPoints[1], q->m_aPoints[3]);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }

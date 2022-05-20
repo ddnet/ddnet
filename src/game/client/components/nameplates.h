@@ -50,10 +50,13 @@ class CNamePlates : public CComponent
 
 	void ResetNamePlates();
 
+	int m_DirectionQuadContainerIndex;
+
 public:
-	virtual void OnWindowResize();
-	virtual void OnInit();
-	virtual void OnRender();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnWindowResize() override;
+	virtual void OnInit() override;
+	virtual void OnRender() override;
 
 	void SetPlayers(class CPlayers *pPlayers);
 };

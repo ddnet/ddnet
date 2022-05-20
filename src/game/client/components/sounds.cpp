@@ -26,10 +26,13 @@ void CSoundLoading::Run()
 		{
 			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
+			// try to render a frame
+			if(m_Render)
+				m_pGameClient->m_Menus.RenderLoading(false);
 		}
 
 		if(m_Render)
-			m_pGameClient->m_Menus.RenderLoading();
+			m_pGameClient->m_Menus.RenderLoading(true);
 	}
 }
 
@@ -79,6 +82,7 @@ void CSounds::OnInit()
 		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
 		m_pClient->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
+		m_pClient->m_Menus.RenderLoading(true);
 	}
 	else
 	{
@@ -180,18 +184,18 @@ void CSounds::Enqueue(int Channel, int SetId)
 	}
 }
 
-void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
+void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
 {
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundID = SetId;
-	Client()->SendPackMsg(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
-	Play(Chn, SetId, Vol);
+	Play(Channel, SetId, Vol);
 }
 
-void CSounds::Play(int Chn, int SetId, float Vol)
+void CSounds::Play(int Channel, int SetId, float Vol)
 {
-	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
+	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
 	int SampleId = GetSampleId(SetId);
@@ -199,15 +203,15 @@ void CSounds::Play(int Chn, int SetId, float Vol)
 		return;
 
 	int Flags = 0;
-	if(Chn == CHN_MUSIC)
+	if(Channel == CHN_MUSIC)
 		Flags = ISound::FLAG_LOOP;
 
-	Sound()->Play(Chn, SampleId, Flags);
+	Sound()->Play(Channel, SampleId, Flags);
 }
 
-void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
+void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
 {
-	if(Chn == CHN_MUSIC && !g_Config.m_SndMusic)
+	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
 	int SampleId = GetSampleId(SetId);
@@ -215,10 +219,10 @@ void CSounds::PlayAt(int Chn, int SetId, float Vol, vec2 Pos)
 		return;
 
 	int Flags = 0;
-	if(Chn == CHN_MUSIC)
+	if(Channel == CHN_MUSIC)
 		Flags = ISound::FLAG_LOOP;
 
-	Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y);
+	Sound()->PlayAt(Channel, SampleId, Flags, Pos.x, Pos.y);
 }
 
 void CSounds::Stop(int SetId)
@@ -232,24 +236,24 @@ void CSounds::Stop(int SetId)
 		Sound()->Stop(pSet->m_aSounds[i].m_Id);
 }
 
-ISound::CVoiceHandle CSounds::PlaySample(int Chn, int SampleId, float Vol, int Flags)
+ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, int Flags)
 {
-	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
-	if(Chn == CHN_MUSIC)
+	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->Play(Chn, SampleId, Flags);
+	return Sound()->Play(Channel, SampleId, Flags);
 }
 
-ISound::CVoiceHandle CSounds::PlaySampleAt(int Chn, int SampleId, float Vol, vec2 Pos, int Flags)
+ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags)
 {
-	if((Chn == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
-	if(Chn == CHN_MUSIC)
+	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->PlayAt(Chn, SampleId, Flags, Pos.x, Pos.y);
+	return Sound()->PlayAt(Channel, SampleId, Flags, Pos.x, Pos.y);
 }

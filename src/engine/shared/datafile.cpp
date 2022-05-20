@@ -126,12 +126,12 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		sha256_init(&Sha256Ctxt);
 		unsigned char aBuffer[BUFFER_SIZE];
 
-		while(1)
+		while(true)
 		{
 			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
 			if(Bytes <= 0)
 				break;
-			Crc = crc32(Crc, aBuffer, Bytes); // ignore_convention
+			Crc = crc32(Crc, aBuffer, Bytes);
 			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
 		}
 		Sha256 = sha256_finish(&Sha256Ctxt);
@@ -144,14 +144,14 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	if(sizeof(Header) != io_read(File, &Header, sizeof(Header)))
 	{
 		dbg_msg("datafile", "couldn't load header");
-		return 0;
+		return false;
 	}
 	if(Header.m_aID[0] != 'A' || Header.m_aID[1] != 'T' || Header.m_aID[2] != 'A' || Header.m_aID[3] != 'D')
 	{
 		if(Header.m_aID[0] != 'D' || Header.m_aID[1] != 'A' || Header.m_aID[2] != 'T' || Header.m_aID[3] != 'A')
 		{
 			dbg_msg("datafile", "wrong signature. %x %x %x %x", Header.m_aID[0], Header.m_aID[1], Header.m_aID[2], Header.m_aID[3]);
-			return 0;
+			return false;
 		}
 	}
 
@@ -161,7 +161,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	if(Header.m_Version != 3 && Header.m_Version != 4)
 	{
 		dbg_msg("datafile", "wrong version. version=%x", Header.m_Version);
-		return 0;
+		return false;
 	}
 
 	// read in the rest except the data
@@ -337,7 +337,7 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 
 			// decompress the data, TODO: check for errors
 			s = UncompressedSize;
-			uncompress((Bytef *)m_pDataFile->m_ppDataPtrs[Index], &s, (Bytef *)pTemp, DataSize); // ignore_convention
+			uncompress((Bytef *)m_pDataFile->m_ppDataPtrs[Index], &s, (Bytef *)pTemp, DataSize);
 #if defined(CONF_ARCH_ENDIAN_BIG)
 			SwapSize = s;
 #endif
@@ -578,11 +578,9 @@ CDataFileWriter::~CDataFileWriter()
 	free(m_pItemTypes);
 	m_pItemTypes = 0;
 	for(int i = 0; i < m_NumItems; i++)
-		if(m_pItems[i].m_pData)
-			free(m_pItems[i].m_pData);
+		free(m_pItems[i].m_pData);
 	for(int i = 0; i < m_NumDatas; ++i)
-		if(m_pDatas[i].m_pCompressedData)
-			free(m_pDatas[i].m_pCompressedData);
+		free(m_pDatas[i].m_pCompressedData);
 	free(m_pItems);
 	m_pItems = 0;
 	free(m_pDatas);
@@ -686,7 +684,7 @@ int CDataFileWriter::AddData(int Size, void *pData, int CompressionLevel)
 	unsigned long s = compressBound(Size);
 	void *pCompData = malloc(s); // temporary buffer that we use during compression
 
-	int Result = compress2((Bytef *)pCompData, &s, (Bytef *)pData, Size, CompressionLevel); // ignore_convention
+	int Result = compress2((Bytef *)pCompData, &s, (Bytef *)pData, Size, CompressionLevel);
 	if(Result != Z_OK)
 	{
 		dbg_msg("datafile", "compression error %d", Result);

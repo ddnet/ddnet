@@ -73,7 +73,7 @@ public:
 	virtual bool NativeMousePressed(int index) = 0;
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
-	virtual int MouseDoubleClick() = 0;
+	virtual bool MouseDoubleClick() = 0;
 	virtual const char *GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *Text) = 0;
 
@@ -93,7 +93,6 @@ class IEngineInput : public IInput
 public:
 	virtual void Init() = 0;
 	virtual int Update() = 0;
-	virtual void NextFrame() = 0;
 	virtual int VideoRestartNeeded() = 0;
 };
 

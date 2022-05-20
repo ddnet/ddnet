@@ -1,6 +1,7 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
+#include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <engine/graphics.h>
@@ -32,7 +33,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
 	{
-		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		dbg_msg("map_replace_image", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
 	int Error = png_open_read(&Png, 0, File);
@@ -54,7 +55,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		dbg_msg("map_replace_image", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
 		free(pBuffer);
 		io_close(File);
 		return 0;
@@ -111,9 +112,9 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	log_set_global_logger_default();
 
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 
 	if(argc != 5)
 	{
@@ -181,7 +182,7 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
 	{
 		if(Index == g_NewDataID)
 		{

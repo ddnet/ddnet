@@ -14,6 +14,16 @@
 
 #include <game/client/gameclient.h>
 
+const char *const gs_aModEntitiesNames[] = {
+	"ddnet",
+	"ddrace",
+	"race",
+	"blockworlds",
+	"fng",
+	"vanilla",
+	"f-ddrace",
+};
+
 CMapImages::CMapImages() :
 	CMapImages(100)
 {
@@ -30,7 +40,7 @@ CMapImages::CMapImages(int TextureSize)
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
 
-	static_assert(sizeof(gs_aModEntitiesNames) / sizeof(gs_aModEntitiesNames[0]) == MAP_IMAGE_MOD_TYPE_COUNT, "Mod name string count is not equal to mod type count");
+	static_assert(std::size(gs_aModEntitiesNames) == MAP_IMAGE_MOD_TYPE_COUNT, "Mod name string count is not equal to mod type count");
 }
 
 void CMapImages::OnInit()
@@ -74,7 +84,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(std::size(m_aTextures)))
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pTLayer->m_Image] |= 1;
 				}
@@ -82,7 +92,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(sizeof(m_aTextures) / sizeof(m_aTextures[0])))
+				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(std::size(m_aTextures)))
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pQLayer->m_Image] |= 2;
 				}
@@ -189,7 +199,9 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknwon;
 		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknwon;
 
-		int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+		int TextureLoadFlag = 0;
+		if(Graphics()->IsTileBufferingEnabled())
+			TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 
 		CImageInfo ImgInfo;
 		bool ImagePNGLoaded = false;
@@ -223,7 +235,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
 		{
 			int ColorChannelCount = 4;
-			if(ImgInfo.m_Format == CImageInfo::FORMAT_ALPHA)
+			if(ImgInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT)
 				ColorChannelCount = 1;
 			else if(ImgInfo.m_Format == CImageInfo::FORMAT_RGB)
 				ColorChannelCount = 3;

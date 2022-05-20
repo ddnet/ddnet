@@ -277,7 +277,6 @@ void CGameWorld::ReleaseHooked(int ClientID)
 			Core->m_HookedPlayer = -1;
 			Core->m_HookState = HOOK_RETRACTED;
 			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			Core->m_HookState = HOOK_RETRACTED;
 		}
 	}
 }
@@ -287,9 +286,9 @@ CTuningParams *CGameWorld::Tuning()
 	return &m_Core.m_Tuning[g_Config.m_ClDummy];
 }
 
-CEntity *CGameWorld::GetEntity(int ID, int EntType)
+CEntity *CGameWorld::GetEntity(int ID, int EntityType)
 {
-	for(CEntity *pEnt = m_apFirstEntityTypes[EntType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
+	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
 		if(pEnt->m_ID == ID)
 			return pEnt;
 	return 0;
@@ -347,16 +346,16 @@ void CGameWorld::NetObjBegin()
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, int GameTeam, bool IsLocal)
 {
 	CCharacter *pChar;
 	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
 	{
-		pChar->Read(pCharObj, pExtended, IsLocal);
+		pChar->Read(pCharObj, pExtended, pExtendedDisplayInfo, IsLocal);
 		pChar->Keep();
 	}
 	else
-		pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
+		pChar = new CCharacter(this, ObjID, pCharObj, pExtended, pExtendedDisplayInfo);
 
 	if(pChar)
 		pChar->m_GameTeam = GameTeam;

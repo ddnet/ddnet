@@ -12,47 +12,47 @@ class CSqliteConnection : public IDbConnection
 public:
 	CSqliteConnection(const char *pFilename, bool Setup);
 	virtual ~CSqliteConnection();
-	virtual void Print(IConsole *pConsole, const char *Mode);
+	void Print(IConsole *pConsole, const char *Mode) override;
 
-	virtual CSqliteConnection *Copy();
+	CSqliteConnection *Copy() override;
 
-	virtual const char *BinaryCollate() const { return "BINARY"; }
-	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
-	virtual const char *InsertTimestampAsUtc() const { return "DATETIME(?, 'utc')"; }
-	virtual const char *CollateNocase() const { return "? COLLATE NOCASE"; }
-	virtual const char *InsertIgnore() const { return "INSERT OR IGNORE"; };
-	virtual const char *Random() const { return "RANDOM()"; };
-	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
+	const char *BinaryCollate() const override { return "BINARY"; }
+	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
+	const char *InsertTimestampAsUtc() const override { return "DATETIME(?, 'utc')"; }
+	const char *CollateNocase() const override { return "? COLLATE NOCASE"; }
+	const char *InsertIgnore() const override { return "INSERT OR IGNORE"; }
+	const char *Random() const override { return "RANDOM()"; }
+	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
 	// Since SQLite 3.23.0 true/false literals are recognized, but still cleaner to use 1/0, because:
 	// > For compatibility, if there exist columns named "true" or "false", then
 	// > the identifiers refer to the columns rather than Boolean constants.
-	virtual const char *False() const { return "0"; }
-	virtual const char *True() const { return "1"; }
+	const char *False() const override { return "0"; }
+	const char *True() const override { return "1"; }
 
-	virtual bool Connect(char *pError, int ErrorSize);
-	virtual void Disconnect();
+	bool Connect(char *pError, int ErrorSize) override;
+	void Disconnect() override;
 
-	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize);
+	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
-	virtual void BindString(int Idx, const char *pString);
-	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
-	virtual void BindInt(int Idx, int Value);
-	virtual void BindInt64(int Idx, int64_t Value);
-	virtual void BindFloat(int Idx, float Value);
+	void BindString(int Idx, const char *pString) override;
+	void BindBlob(int Idx, unsigned char *pBlob, int Size) override;
+	void BindInt(int Idx, int Value) override;
+	void BindInt64(int Idx, int64_t Value) override;
+	void BindFloat(int Idx, float Value) override;
 
-	virtual void Print();
-	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
-	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
+	void Print() override;
+	bool Step(bool *pEnd, char *pError, int ErrorSize) override;
+	bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) override;
 
-	virtual bool IsNull(int Col);
-	virtual float GetFloat(int Col);
-	virtual int GetInt(int Col);
-	virtual int64_t GetInt64(int Col);
-	virtual void GetString(int Col, char *pBuffer, int BufferSize);
+	bool IsNull(int Col) override;
+	float GetFloat(int Col) override;
+	int GetInt(int Col) override;
+	int64_t GetInt64(int Col) override;
+	void GetString(int Col, char *pBuffer, int BufferSize) override;
 	// passing a negative buffer size is undefined behavior
-	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
+	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize);
+	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	// copy of config vars
@@ -222,14 +222,19 @@ void CSqliteConnection::BindFloat(int Idx, float Value)
 	m_Done = false;
 }
 
-// TODO(2020-09-07): remove extern declaration, when all supported systems ship SQLite3 version 3.14 or above
-#if defined(__GNUC__)
-extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak));
+// Keep support for SQLite < 3.14 on older Linux distributions. MinGW does not
+// support __attribute__((weak)): https://sourceware.org/bugzilla/show_bug.cgi?id=9687
+#if defined(__GNUC__) && !defined(__MINGW32__)
+extern char *sqlite3_expanded_sql(sqlite3_stmt *pStmt) __attribute__((weak)); // NOLINT(readability-redundant-declaration)
 #endif
 
 void CSqliteConnection::Print()
 {
-	if(m_pStmt != nullptr && sqlite3_expanded_sql != nullptr)
+	if(m_pStmt != nullptr
+#if defined(__GNUC__) && !defined(__MINGW32__)
+		&& sqlite3_expanded_sql != nullptr
+#endif
+	)
 	{
 		char *pExpandedStmt = sqlite3_expanded_sql(m_pStmt);
 		dbg_msg("sql", "SQLite statement: %s", pExpandedStmt);
@@ -377,11 +382,7 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	BindInt(2, Points);
 	BindInt(3, Points);
 	bool End;
-	if(Step(&End, pError, ErrorSize))
-	{
-		return true;
-	}
-	return false;
+	return Step(&End, pError, ErrorSize);
 }
 
 std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup)

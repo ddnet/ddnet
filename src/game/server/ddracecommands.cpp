@@ -172,6 +172,26 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 		pChr->m_DeepFreeze = false;
 }
 
+void CGameContext::ConLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetLiveFrozen(true);
+}
+
+void CGameContext::ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetLiveFrozen(false);
+}
+
 void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -277,23 +297,27 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
+void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
+{
+	pChr->Core()->m_Pos = Pos;
+	pChr->m_Pos = Pos;
+	pChr->m_PrevPos = Pos;
+	pChr->m_DDRaceState = DDRACE_CHEAT;
+}
+
 void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
 	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(pGameControllerDDRace->m_TeleOuts[TeleTo - 1].size())
+	if(!pGameControllerDDRace->m_TeleOuts[TeleTo - 1].empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if(pChr)
 		{
 			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pGameControllerDDRace->m_TeleOuts[TeleTo - 1].size());
-			vec2 TelePos = pGameControllerDDRace->m_TeleOuts[TeleTo - 1][TeleOut];
-			pChr->Core()->m_Pos = TelePos;
-			pChr->m_Pos = TelePos;
-			pChr->m_PrevPos = TelePos;
-			pChr->m_DDRaceState = DDRACE_CHEAT;
+			pSelf->Teleport(pChr, pGameControllerDDRace->m_TeleOuts[TeleTo - 1][TeleOut]);
 		}
 	}
 }
@@ -304,17 +328,13 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 	unsigned int TeleTo = pResult->GetInteger(0);
 	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].size())
+	if(!pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if(pChr)
 		{
 			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].size());
-			vec2 TelePos = pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1][TeleOut];
-			pChr->Core()->m_Pos = TelePos;
-			pChr->m_Pos = TelePos;
-			pChr->m_PrevPos = TelePos;
-			pChr->m_DDRaceState = DDRACE_CHEAT;
+			pSelf->Teleport(pChr, pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1][TeleOut]);
 			pChr->m_TeleCheckpoint = TeleTo;
 		}
 	}
@@ -336,10 +356,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
 	if(pChr && pSelf->GetPlayerChar(TeleTo))
 	{
-		pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-		pChr->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-		pChr->m_PrevPos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-		pChr->m_DDRaceState = DDRACE_CHEAT;
+		pSelf->Teleport(pChr, pSelf->m_apPlayers[TeleTo]->m_ViewPos);
 	}
 }
 
@@ -469,6 +486,8 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason, 
 
 void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason, bool InitialChatDelay)
 {
+	if(Secs <= 0)
+		return;
 	if(!TryMute(pAddr, Secs, pReason, InitialChatDelay))
 		return;
 	if(InitialChatDelay)
@@ -710,7 +729,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(g_Config.m_SvTeam == 0 || g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
 			"Teams are disabled");

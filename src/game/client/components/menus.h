@@ -6,6 +6,7 @@
 #include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
+#include <chrono>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -50,9 +51,10 @@ public:
 	bool m_TakeKey;
 	bool m_GotKey;
 	IInput::CEvent m_Key;
-	int m_Modifier;
+	int m_ModifierCombination;
 	CMenusKeyBinder();
-	virtual bool OnInput(IInput::CEvent Event);
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual bool OnInput(IInput::CEvent Event) override;
 };
 
 class CMenus : public CComponent
@@ -87,16 +89,16 @@ class CMenus : public CComponent
 	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_CheckBoxAutoVMarginAndSet(const void *pID, const char *pText, int *pValue, CUIRect *pRect, float VMargin);
 	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	ColorHSLA DoLine_ColorPicker(int *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing = true, bool UseCheckBox = false, int *pCheckBoxValue = NULL);
-	void DoLaserPreview(const CUIRect *pRect, const ColorHSLA OutlineColor, const ColorHSLA InnerColor);
+	ColorHSLA DoLine_ColorPicker(int *pResetID, float LineSize, float WantedPickerPosition, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, bool UseCheckBox = false, int *pCheckBoxValue = NULL);
+	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor);
 	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color);
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int Modifier, int *NewModifier);
+	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination);
 
-	void UiDoGetButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
+	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
 
 	void RenderColorPicker();
 
@@ -165,7 +167,9 @@ class CMenus : public CComponent
 						if(pText == NULL)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, 0, -1, AlignVertically);
+						SLabelProperties Props;
+						Props.m_AlignVertically = AlignVertically;
+						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 					}
 				}
 				Graphics()->SetColor(1, 1, 1, 1);
@@ -202,6 +206,15 @@ class CMenus : public CComponent
 
 	int UiLogicGetCurrentClickedItem();
 
+	/**
+	 * Places and renders a tooltip near pNearRect.
+	 * For now only works correctly with single line tooltips, since Text width calculation gets broken when there are multiple lines.
+	 *
+	 * @param pID The ID of the tooltip. Usually a reference to some g_Config value.
+	 * @param pNearTo Place the tooltip near this rect.
+	 * @param pText The text to display in the tooltip
+	 */
+	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 	// menus_settings_assets.cpp
 public:
 	struct SCustomItem
@@ -234,11 +247,18 @@ public:
 	{
 	};
 
+	struct SCustomHud : public SCustomItem
+	{
+	};
+
 protected:
 	sorted_array<SCustomEntities> m_EntitiesList;
 	sorted_array<SCustomGame> m_GameList;
 	sorted_array<SCustomEmoticon> m_EmoticonList;
 	sorted_array<SCustomParticle> m_ParticlesList;
+	sorted_array<SCustomHud> m_HudList;
+
+	bool m_IsInit = false;
 
 	static void LoadEntities(struct SCustomEntities *pEntitiesItem, void *pUser);
 	static int EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser);
@@ -246,11 +266,13 @@ protected:
 	static int GameScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int HudScan(const char *pName, int IsDir, int DirType, void *pUser);
 
 	static void ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAssetHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	void ClearCustomItems(int CurTab);
 
@@ -262,6 +284,7 @@ protected:
 	bool m_MenuActive;
 	bool m_UseMouseButtons;
 	vec2 m_MousePos;
+	bool m_JoinTutorial;
 
 	char m_aNextServer[256];
 
@@ -413,6 +436,8 @@ protected:
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 
+	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
+
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
 	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
@@ -514,20 +539,23 @@ public:
 	static CMenusKeyBinder m_Binder;
 
 	CMenus();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void RenderLoading();
-	void RenderUpdating(const char *pCaption, int current = 0, int total = 0);
+	void RenderLoading(bool IncreaseCounter, bool RenderLoadingBar = true);
+
+	bool IsInit() { return m_IsInit; }
 
 	bool IsActive() const { return m_MenuActive; }
 	void KillServer();
 
-	virtual void OnInit();
+	virtual void OnInit() override;
 
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual bool OnInput(IInput::CEvent Event);
-	virtual bool OnMouseMove(float x, float y);
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnReset() override;
+	virtual void OnRender() override;
+	virtual bool OnInput(IInput::CEvent Event) override;
+	virtual bool OnMouseMove(float x, float y) override;
+	virtual void OnShutdown() override;
 
 	enum
 	{
@@ -615,6 +643,8 @@ public:
 
 	sorted_array<CGhostItem> m_lGhosts;
 
+	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
+
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();
 	void UpdateOwnGhost(CGhostItem Item);
@@ -624,10 +654,10 @@ public:
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
-	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration);
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration);
 
-	int64_t m_PopupWarningLastTime;
-	int64_t m_PopupWarningDuration;
+	std::chrono::nanoseconds m_PopupWarningLastTime;
+	std::chrono::nanoseconds m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];

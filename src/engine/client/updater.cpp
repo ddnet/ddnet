@@ -7,21 +7,21 @@
 #include <engine/storage.h>
 #include <game/version.h>
 
-#include <stdlib.h> // system
+#include <cstdlib> // system
 
 using std::map;
 using std::string;
 
-class CUpdaterFetchTask : public CGetFile
+class CUpdaterFetchTask : public CHttpRequest
 {
 	char m_aBuf[256];
 	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
-	virtual void OnProgress();
+	void OnProgress() override;
 
 protected:
-	virtual int OnCompletion(int State);
+	int OnCompletion(int State) override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -44,9 +44,10 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 }
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
-	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, CTimeout{0, 0, 0}),
+	CHttpRequest(GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile)),
 	m_pUpdater(pUpdater)
 {
+	WriteToFile(pUpdater->m_pStorage, GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf2), pFile, pDestPath), -2);
 }
 
 void CUpdaterFetchTask::OnProgress()
@@ -59,7 +60,7 @@ void CUpdaterFetchTask::OnProgress()
 
 int CUpdaterFetchTask::OnCompletion(int State)
 {
-	State = CGetFile::OnCompletion(State);
+	State = CHttpRequest::OnCompletion(State);
 
 	const char *b = 0;
 	for(const char *a = Dest(); *a; a++)

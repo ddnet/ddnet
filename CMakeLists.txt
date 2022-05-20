@@ -70,7 +70,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(TARGET_OS "windows")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   set(TARGET_OS "linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(TARGET_OS "mac")
@@ -83,6 +83,9 @@ endif()
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckSymbolExists)
+if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
+  include(CheckAtomic)
+endif()
 
 check_symbol_exists(__i386 "" TARGET_ARCH_X86_i386)
 if(TARGET_ARCH_X86_i386)
@@ -92,9 +95,28 @@ else()
 endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR DEV)
+  set(AUTO_IPO OFF)
+elseif(MSVC)
+  # For some reason on MSVC platform the client and server binaries
+  # become even bigger with IPO enabled.
+  set(AUTO_IPO OFF)
+elseif(MINGW AND TARGET_CPU_ARCHITECTURE STREQUAL "x86")
+  # DWARF error: could not find variable specification and further failures
+  set(AUTO_IPO OFF)
+else()
+  set(AUTO_IPO ON)
+endif()
+
+set(AUTO_VULKAN_BACKEND ON)
 if(TARGET_OS STREQUAL "windows")
   set(AUTO_DEPENDENCIES_DEFAULT ON)
-elseif(TARGET_OS STREQUAL "linux")
+  if(TARGET_CPU_ARCHITECTURE STREQUAL "x86")
+    set(AUTO_VULKAN_BACKEND OFF)
+  endif()
+elseif(TARGET_OS STREQUAL "mac")
+  set(AUTO_VULKAN_BACKEND OFF)
 endif()
 
 option(WEBSOCKETS "Enable websockets support" OFF)
@@ -102,7 +124,7 @@ option(MYSQL "Enable mysql support" OFF)
 option(TEST_MYSQL "Test mysql support in unit tests (also sets -DMYSQL=ON)" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
 option(INFORM_UPDATE "Inform about available updates" ON)
-option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
+option(VIDEORECORDER "Enable video recording support via FFmpeg" ON)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(HEADLESS_CLIENT "Build the client without graphics" OFF)
@@ -115,6 +137,14 @@ option(DISCORD "Enable Discord rich presence support" OFF)
 option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at runtime (Linux only)" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
+option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
+
+option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
+option(IPO "Enable interprocedural optimizations" ${AUTO_IPO})
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
+endif()
 
 if(TEST_MYSQL)
   set(MYSQL ON)
@@ -142,6 +172,21 @@ endif()
 
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
+if(IPO)
+  if(CMAKE_VERSION VERSION_GREATER 3.9)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
+    if(ipo_supported)
+      message(STATUS "IPO is enabled")
+      set(ENABLE_IPO TRUE)
+    else()
+      message(WARNING "IPO is not supported: ${ipo_output}")
+    endif()
+  else()
+      message(WARNING "IPO enablement requires CMake 3.9+")
+  endif()
+endif()
+
 if(CMAKE_VERSION VERSION_LESS 3.0)
   configure_file(src/game/version.h vd.h)
 else()
@@ -164,7 +209,7 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
     set(CHECKED_FLAG "${FLAG}")
   endif()
   string(REGEX REPLACE "[^A-Za-z0-9]" "_" CONFIG_VARIABLE "FLAG_SUPPORTED${CHECKED_FLAG}")
-  check_c_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
+  check_cxx_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
   if(${CONFIG_VARIABLE})
     if(${VARIABLE})
       set("${VARIABLE}" "${${VARIABLE}};${FLAG}" PARENT_SCOPE)
@@ -183,14 +228,7 @@ endif()
 
 if(NOT MSVC AND NOT HAIKU)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-    check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
-    if(FLAG_SUPPORTED_std_gnu__11)
-      if(CMAKE_CXX_FLAGS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-      else()
-        set(CMAKE_CXX_FLAGS -std=gnu++11)
-      endif()
-    endif()
+    add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
   # Protect the stack pointer.
@@ -216,6 +254,14 @@ if(NOT MSVC AND NOT HAIKU)
     add_c_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
   endif()
 
+  if(EXCEPTION_HANDLING)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -DCONF_EXCEPTION_HANDLING)
+    # use the frame pointer (frame pointer usage is disabled by default in
+    # some architectures like x86_64 and for some optimization levels; and it
+    # may be impossible to walk the call stack without it)
+    add_c_compiler_flag_if_supported(OUR_FLAGS -fno-omit-frame-pointer)
+  endif()
+
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
   if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
     add_c_compiler_flag_if_supported(OUR_FLAGS_OWN
@@ -229,13 +275,24 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
-  # TODO: Enable for C++ code except gtest
-  #add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN "-Wuseless-cast")
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
+  # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
+endif()
+
+if(MSVC)
+  if(EXCEPTION_HANDLING)
+  add_c_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
+  endif()
 endif()
 
 if(NOT MSVC AND NOT HAIKU)
@@ -292,7 +349,9 @@ endfunction()
 function(set_src VAR GLOBBING DIRECTORY) # ...
   set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
+  set(CHECKSUM_SRC ${CHECKSUM_SRC} ${${VAR}} PARENT_SCOPE)
 endfunction()
+set(CHECKSUM_SRC)
 
 function(set_own_rpath TARGET)
   if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac")
@@ -330,6 +389,8 @@ endif()
 
 if(FAT)
   set(LIB_DIR "${TARGET_OS}/libfat")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(LIB_DIR "webasm/libwasm")
 elseif(TARGET_CPU_ARCHITECTURE STREQUAL "arm" OR TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
   set(LIB_DIR "${TARGET_OS}/lib${TARGET_CPU_ARCHITECTURE}")
 else()
@@ -356,12 +417,16 @@ function(set_extra_dirs_include VARIABLE NAME LIBRARY)
   set("HINTS_${VARIABLE}_INCLUDEDIR" PARENT_SCOPE)
   is_bundled(IS_BUNDLED "${LIBRARY}")
   if(IS_BUNDLED)
-    set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TARGET_OS}" PARENT_SCOPE)
+    set(TMP_TARGET_OS ${TARGET_OS})
+    if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+     set(TMP_TARGET_OS webasm)
+    endif()
+    set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TMP_TARGET_OS}" PARENT_SCOPE)
   endif()
 endfunction()
 
 if(CMAKE_CROSSCOMPILING)
-  if(TARGET_OS STREQUAL "android")
+  if(TARGET_OS STREQUAL "android" OR CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     # be more aggressive with android toolchain
     set(CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH NO_CMAKE_SYSTEM_PATH NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   else()
@@ -395,7 +460,7 @@ endif()
 find_package(ZLIB)
 find_package(Crypto)
 find_package(Curl)
-if(VIDEORECORDER)
+if(CLIENT AND VIDEORECORDER)
   find_package(FFMPEG)
 endif()
 find_package(Freetype)
@@ -437,12 +502,25 @@ else()
   set(WEBSOCKETS_INCLUDE_DIRS)
 endif()
 
+if(EXCEPTION_HANDLING)
+  find_package(ExceptionHandling)
+endif()
+
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(CMAKE_OTOOL otool)
   find_program(DMGBUILD dmgbuild)
 endif()
 
-message(STATUS "******** DDNet ********")
+set(VULKAN_SHADER_FILE_LIST "" CACHE STRING "Vulkan shader file list")
+if(CLIENT AND VULKAN)
+  find_package(Vulkan)
+  include(cmake/BuildVulkanShaders.cmake)
+else()
+  set(VULKAN_LIBRARIES)
+  set(VULKAN_INCLUDE_DIRS)
+endif()
+
+message(STATUS "******** ${CMAKE_PROJECT_NAME} ********")
 set(TARGET "Target OS: ${TARGET_OS} ${CMAKE_SYSTEM_PROCESSOR}")
 if(TARGET_OS STREQUAL "mac")
   set(TARGET "${TARGET} (SDK: ${CMAKE_OSX_SYSROOT}, architectures: ${CMAKE_OSX_ARCHITECTURES})")
@@ -468,7 +546,7 @@ show_dependency_status("Curl" CURL)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
-if(VIDEORECORDER)
+if(CLIENT AND VIDEORECORDER)
   show_dependency_status("FFmpeg" FFMPEG)
 endif()
 show_dependency_status("Freetype" FREETYPE)
@@ -503,7 +581,11 @@ if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
 endif()
 
-if(CLIENT AND NOT(CURL_FOUND))
+if(CLIENT AND VULKAN)
+  show_dependency_status("Vulkan" VULKAN)
+endif()
+
+if(NOT(CURL_FOUND))
   message(SEND_ERROR "You must install Curl to compile DDNet")
 endif()
 if(NOT(PYTHONINTERP_FOUND))
@@ -566,18 +648,22 @@ if(NOT(GTEST_FOUND))
   endif()
 endif()
 
+if(CLIENT AND VULKAN AND NOT(VULKAN_FOUND))
+  message(SEND_ERROR "You must install Vulkan libraries to compile the DDNet client")
+endif()
+
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 winmm)
-  set(PLATFORM_LIBS ws2_32) # Windows sockets
+  set(PLATFORM_LIBS version ws2_32) # Windows sockets
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
+    src/macos/client.mm
     src/macos/notifications.mm
-    src/macoslaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
@@ -605,6 +691,12 @@ else()
   else()
     set(PLATFORM_LIBS)
   endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set(PLATFORM_CLIENT_LIBS GL)
+  set(PLATFORM_CLIENT_INCLUDE_DIRS "")
+  set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 ########################################################################
@@ -816,7 +908,6 @@ set(EXPECTED_DATA
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
   blob.png
-  browse_icons.png
   censorlist.txt
   console.png
   console_bar.png
@@ -1115,13 +1206,14 @@ set(EXPECTED_DATA
   file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
-  fonts/Icons.ttf
+  fonts/Icons.otf
   fonts/SourceHanSansSC-Regular.otf
   game.png
   gui_buttons.png
   gui_cursor.png
   gui_icons.png
   gui_logo.png
+  hud.png
   languages/arabic.txt
   languages/belarusian.txt
   languages/bosnian.txt
@@ -1212,6 +1304,7 @@ set(EXPECTED_DATA
   maps/LearnToPlay.map
   maps/Sunny\ Side\ Up.map
   maps/Tsunami.map
+  maps/Tutorial.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1230,6 +1323,7 @@ set(EXPECTED_DATA
   maps7/LearnToPlay.map
   maps7/Sunny\ Side\ Up.map
   maps7/Tsunami.map
+  maps7/Tutorial.map
   maps7/readme.txt
   menuimages/demos.png
   menuimages/editor.png
@@ -1251,6 +1345,20 @@ set(EXPECTED_DATA
   shader/text.vert
   shader/tile.frag
   shader/tile.vert
+  shader/vulkan/prim.frag
+  shader/vulkan/prim.vert
+  shader/vulkan/prim3d.frag
+  shader/vulkan/prim3d.vert
+  shader/vulkan/primex.frag
+  shader/vulkan/primex.vert
+  shader/vulkan/quad.frag
+  shader/vulkan/quad.vert
+  shader/vulkan/spritemulti.frag
+  shader/vulkan/spritemulti.vert
+  shader/vulkan/text.frag
+  shader/vulkan/text.vert
+  shader/vulkan/tile.frag
+  shader/vulkan/tile.vert
   skins/Aoe4leg.png
   skins/PaladiN.png
   skins/antiantey.png
@@ -1396,6 +1504,8 @@ set(COPY_FILES
   ${FFMPEG_COPY_FILES}
   ${WEBSOCKETS_COPY_FILES}
   ${DISCORDSDK_COPY_FILES}
+  ${VULKAN_COPY_FILES}
+  ${EXCEPTION_HANDLING_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -1432,11 +1542,12 @@ function(generate_source7 output_file script_parameter)
   )
 endfunction()
 
-function(generate_maps output_file)
+function(generate_maps output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py
+    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
+      datasrc/crosscompile.py
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
@@ -1484,7 +1595,8 @@ generate_source7("src/game/generated/protocol7.h" "network_header")
 generate_source7("src/game/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/game/generated/client_data7.h" "client_content_header")
 
-generate_maps("src/game/generated/protocolglue.h")
+generate_maps("src/game/generated/protocolglue.h" "map_header")
+generate_maps("src/game/generated/protocolglue.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/game/generated/wordlist.h"
   COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
@@ -1508,20 +1620,23 @@ set_src(BASE GLOB_RECURSE src/base
   hash_ctxt.h
   hash_libtomcrypt.cpp
   hash_openssl.cpp
+  log.cpp
+  log.h
+  logger.h
   math.h
   system.cpp
   system.h
   tl/algorithm.h
   tl/allocator.h
   tl/array.h
-  tl/base.h
   tl/range.h
   tl/sorted_array.h
-  tl/string.h
   tl/threading.h
   unicode/confusables.cpp
+  unicode/confusables.h
   unicode/confusables_data.h
   unicode/tolower.cpp
+  unicode/tolower.h
   unicode/tolower_data.h
   vmath.h
 )
@@ -1541,7 +1656,6 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   kernel.h
   keys.h
   map.h
-  masterserver.h
   message.h
   server.h
   serverbrowser.h
@@ -1554,7 +1668,9 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   uuid.h
   warning.h
 )
-set_src(ENGINE_SHARED GLOB src/engine/shared
+set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
+  assertion_logger.cpp
+  assertion_logger.h
   compression.cpp
   compression.h
   config.cpp
@@ -1576,6 +1692,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   filecollection.cpp
   filecollection.h
   global_uuid_manager.cpp
+  http.cpp
+  http.h
   huffman.cpp
   huffman.h
   image_manipulation.cpp
@@ -1590,6 +1708,7 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   map.cpp
   map.h
   masterserver.cpp
+  masterserver.h
   memheap.cpp
   memheap.h
   netban.cpp
@@ -1601,6 +1720,7 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   network_console.cpp
   network_console_conn.cpp
   network_server.cpp
+  network_stun.cpp
   packer.cpp
   packer.h
   protocol.h
@@ -1614,6 +1734,8 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  stun.cpp
+  stun.h
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
@@ -1657,6 +1779,7 @@ set_src(GAME_SHARED GLOB src/game
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
+  src/game/generated/protocolglue.cpp
   src/game/generated/protocolglue.h
   src/game/generated/protocol7.cpp
   src/game/generated/protocol7.h
@@ -1678,12 +1801,12 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
 )
-
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
 set(LIBS
   ${CRYPTO_LIBRARIES}
+  ${CURL_LIBRARIES}
   ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
@@ -1727,8 +1850,12 @@ if(CLIENT)
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
   set_src(ENGINE_CLIENT GLOB_RECURSE src/engine/client
+    backend/backend_base.cpp
+    backend/backend_base.h
     backend/glsl_shader_compiler.cpp
     backend/glsl_shader_compiler.h
+    backend/null/backend_null.cpp
+    backend/null/backend_null.h
     backend/opengl/backend_opengl.cpp
     backend/opengl/backend_opengl.h
     backend/opengl/backend_opengl3.cpp
@@ -1744,10 +1871,13 @@ if(CLIENT)
     backend/opengles/gles_class_defines.h
     backend/opengles/opengles_sl.cpp
     backend/opengles/opengles_sl_program.cpp
+    backend/vulkan/backend_vulkan.cpp
+    backend/vulkan/backend_vulkan.h
     backend_sdl.cpp
     backend_sdl.h
     blocklist_driver.cpp
     blocklist_driver.h
+    checksum.h
     client.cpp
     client.h
     demoedit.cpp
@@ -1760,9 +1890,6 @@ if(CLIENT)
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
-    graphics_threaded_null.h
-    http.cpp
-    http.h
     input.cpp
     input.h
     keynames.h
@@ -1815,6 +1942,8 @@ if(CLIENT)
     components/emoticon.h
     components/flow.cpp
     components/flow.h
+    components/freezebars.cpp
+    components/freezebars.h
     components/ghost.cpp
     components/ghost.h
     components/hud.cpp
@@ -1859,6 +1988,8 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
+    components/tooltips.cpp
+    components/tooltips.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp
@@ -1904,6 +2035,7 @@ if(CLIENT)
     popups.cpp
   )
   set(GAME_GENERATED_CLIENT
+    src/game/generated/checksum.cpp
     src/game/generated/client_data.cpp
     src/game/generated/client_data.h
     src/game/generated/client_data7.cpp
@@ -1916,7 +2048,6 @@ if(CLIENT)
   # Libraries
   set(LIBS_CLIENT
     ${LIBS}
-    ${CURL_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNGLITE_LIBRARIES}
@@ -1928,6 +2059,8 @@ if(CLIENT)
     ${OPUSFILE_LIBRARIES}
     ${OPUS_LIBRARIES}
     ${OGG_LIBRARIES}
+
+    ${VULKAN_LIBRARIES}
 
     ${TARGET_STEAMAPI}
 
@@ -1987,8 +2120,7 @@ if(CLIENT)
     target_link_options(${TARGET_CLIENT} PRIVATE /ENTRY:mainCRTStartup)
   endif()
 
-  target_include_directories(${TARGET_CLIENT} PRIVATE
-    ${CURL_INCLUDE_DIRS}
+  target_include_directories(${TARGET_CLIENT} SYSTEM PRIVATE
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -1999,6 +2131,8 @@ if(CLIENT)
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
     ${DISCORDSDK_INCLUDE_DIRS}
+
+    ${VULKAN_INCLUDE_DIRS}
 
     ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
@@ -2030,6 +2164,10 @@ if(CLIENT)
 
   if(GLEW_BUNDLED)
 	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+  endif()
+
+  if(VULKAN)
+	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_BACKEND_VULKAN)
   endif()
 
   list(APPEND TARGETS_OWN ${TARGET_CLIENT})
@@ -2166,7 +2304,7 @@ if(SERVER)
   list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
   if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-    set(SERVER_LAUNCHER_SRC src/macoslaunch/server.mm)
+    set(SERVER_LAUNCHER_SRC src/macos/server.mm)
     set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
     add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
     target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
@@ -2180,30 +2318,22 @@ endif()
 ########################################################################
 
 if(TOOLS)
-  set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
   set_src(TWPING_SRC GLOB src/twping twping.cpp)
-
-  set(TARGET_MASTERSRV mastersrv)
   set(TARGET_TWPING twping)
-
-  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
   add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
-
-  target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
   target_link_libraries(${TARGET_TWPING} ${LIBS})
 
-  list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING})
-  list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
+  list(APPEND TARGETS_OWN ${TARGET_TWPING})
+  list(APPEND TARGETS_LINK ${TARGET_TWPING})
 
   set(TARGETS_TOOLS)
-  set_src(TOOLS GLOB src/tools
+  set_src(TOOLS_SRC GLOB src/tools
     config_common.h
     config_retrieve.cpp
     config_store.cpp
     crapnet.cpp
     dilate.cpp
     dummy_map.cpp
-    fake_server.cpp
     map_convert_07.cpp
     map_diff.cpp
     map_extract.cpp
@@ -2211,10 +2341,11 @@ if(TOOLS)
     map_replace_image.cpp
     map_resave.cpp
     packetgen.cpp
+    stun.cpp
     unicode_confusables.cpp
     uuid.cpp
   )
-  foreach(ABS_T ${TOOLS})
+  foreach(ABS_T ${TOOLS_SRC})
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
     if(T MATCHES "\\.cpp$")
       string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
@@ -2238,7 +2369,7 @@ if(TOOLS)
         ${EXTRA_TOOL_SRC}
         $<TARGET_OBJECTS:engine-shared>
       )
-      target_include_directories(${TOOL} PRIVATE ${TOOL_INCLUDE_DIRS})
+      target_include_directories(${TOOL} SYSTEM PRIVATE ${TOOL_INCLUDE_DIRS})
       target_link_libraries(${TOOL} ${TOOL_LIBS})
       list(APPEND TARGETS_TOOLS ${TOOL})
     endif()
@@ -2250,6 +2381,36 @@ if(TOOLS)
   add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 endif()
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
+
+########################################################################
+# CHECKSUM
+########################################################################
+
+if(DEV)
+  # Only do minimal checksumming in a DEV build.
+  set(CHECKSUM_SRC)
+endif()
+list(APPEND CHECKSUM_SRC
+  ${PROJECT_SOURCE_DIR}/CMakeLists.txt
+  ${PROJECT_SOURCE_DIR}/scripts/checksum.py
+)
+configure_file(cmake/checksummed_extra.txt checksummed_extra.txt)
+string(REPLACE ";" "\n" CHECKSUM_SRC_FILE "${CHECKSUM_SRC}")
+file(WRITE ${PROJECT_BINARY_DIR}/checksummed_files.txt ${CHECKSUM_SRC_FILE})
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+  COMMAND ${PYTHON_EXECUTABLE}
+    scripts/checksum.py
+    ${PROJECT_BINARY_DIR}/checksummed_files.txt
+    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+    > ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS
+    ${CHECKSUM_SRC}
+    ${PROJECT_BINARY_DIR}/checksummed_files.txt
+    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+    scripts/checksum.py
+)
 
 ########################################################################
 # TESTS
@@ -2274,6 +2435,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     mapbugs.cpp
     name_ban.cpp
     netaddr.cpp
+    os.cpp
     packer.cpp
     prng.cpp
     score.cpp
@@ -2293,8 +2455,6 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set(TESTS_EXTRA
     src/engine/client/blocklist_driver.cpp
     src/engine/client/blocklist_driver.h
-    src/engine/client/http.cpp
-    src/engine/client/http.h
     src/engine/client/serverbrowser.cpp
     src/engine/client/serverbrowser.h
     src/engine/client/serverbrowser_http.cpp
@@ -2324,8 +2484,8 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     $<TARGET_OBJECTS:game-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
-  target_include_directories(${TARGET_TESTRUNNER} PRIVATE ${CURL_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
+  target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
   list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
@@ -2514,8 +2674,15 @@ set(CPACK_FILES
   storage.cfg
   ${COPY_FILES}
 )
+
+set(CPACK_GEN_FILES
+  ${VULKAN_SHADER_FILE_LIST}
+)
+
 if(TARGET_OS STREQUAL "windows")
   list(APPEND CPACK_FILES other/config_directory.bat)
+else()
+  list(APPEND CPACK_FILES other/config_directory.sh)
 endif()
 
 if(NOT DEV)
@@ -2532,9 +2699,12 @@ if(NOT DEV)
   install(TARGETS ${TARGETS_TOOLS} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT tools)
   install(FILES other/ddnet.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT client)
   install(FILES other/ddnet.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
-  foreach(SIZE 16 32 48 128 256 512)
+  foreach(SIZE 16 32 48 256)
     install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
     install(FILES other/icons/DDNet-Server_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet-server.png COMPONENT server)
+  endforeach()
+  foreach(file ${VULKAN_SHADER_FILE_LIST})
+    install(FILES ${PROJECT_BINARY_DIR}/${file} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet/data/shader/vulkan COMPONENT client)
   endforeach()
 endif()
 
@@ -2546,7 +2716,8 @@ else()
   set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
   install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
   install(DIRECTORY ${CPACK_DIRS} ${EXTRA_ARGS})
-  install(FILES ${CPACK_FILES} ${EXTRA_ARGS})
+  set(CPACK_FILES_TMP ${CPACK_FILES} ${CPACK_GEN_FILES})
+  install(FILES ${CPACK_FILES_TMP} ${EXTRA_ARGS})
 endif()
 
 set(PACKAGE_TARGETS)
@@ -2597,11 +2768,11 @@ if(CLIENT AND DMGBUILD)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     ${DMG_DISCORD_COPY_COMMAND}
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.3.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.5.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.59.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.59.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.57.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.4.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
@@ -2650,6 +2821,9 @@ foreach(ext zip tar.gz tar.xz)
   foreach(file ${CPACK_FILES})
     list(APPEND COPY_FILE_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/${file} ${TMPDIR}/)
   endforeach()
+  foreach(file ${CPACK_GEN_FILES})
+    list(APPEND COPY_FILE_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${file} ${TMPDIR}/${file})
+  endforeach()
   foreach(dir ${CPACK_DIRS})
     list(APPEND COPY_DIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/${dir} ${TMPDIR}/${dir})
   endforeach()
@@ -2697,6 +2871,7 @@ unset(CPACK_SOURCE_FILES_INVERTED)
 unset(CPACK_TARGETS)
 unset(CPACK_DIRS)
 unset(CPACK_FILES)
+unset(CPACK_GEN_FILES)
 
 include(CPack)
 
@@ -2733,6 +2908,7 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
+    target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
   endif()
   if(OUR_FLAGS_LINK)
     target_link_libraries(${target} ${OUR_FLAGS_LINK})
@@ -2746,6 +2922,9 @@ foreach(target ${TARGETS})
     else()
       target_compile_definitions(${target} PRIVATE $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=2>) # Detect some buffer overflows.
     endif()
+  endif()
+  if(ENABLE_IPO)
+    set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
 endforeach()
 
@@ -2766,8 +2945,8 @@ foreach(target ${TARGETS_LINK})
 endforeach()
 
 foreach(target ${TARGETS_OWN})
-  if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1) AND NOT TARGET_OS STREQUAL "mac")
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD 11)
+  if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1))
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
   endif()
 
@@ -2786,19 +2965,19 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
-  target_include_directories(${target} PRIVATE ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+  target_include_directories(${target} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   if(CRYPTO_FOUND)
     target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
-    target_include_directories(${target} PRIVATE ${CRYPTO_INCLUDE_DIRS})
+    target_include_directories(${target} SYSTEM PRIVATE ${CRYPTO_INCLUDE_DIRS})
   endif()
   if(WEBSOCKETS)
     target_compile_definitions(${target} PRIVATE CONF_WEBSOCKETS)
-    target_include_directories(${target} PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})
+    target_include_directories(${target} SYSTEM PRIVATE ${WEBSOCKETS_INCLUDE_DIRS})
   endif()
   if(UPNP)
     target_compile_definitions(${target} PRIVATE CONF_UPNP)
-    target_include_directories(${target} PRIVATE ${MINIUPNPC_INCLUDE_DIRS})
+    target_include_directories(${target} SYSTEM PRIVATE ${MINIUPNPC_INCLUDE_DIRS})
   endif()
   if(VIDEORECORDER)
     target_compile_definitions(${target} PRIVATE CONF_VIDEORECORDER)
@@ -2811,7 +2990,7 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_MYSQL)
-    target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
+    target_include_directories(${target} SYSTEM PRIVATE ${MYSQL_INCLUDE_DIRS})
   endif()
   if(TEST_MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_TEST_MYSQL)
@@ -2833,6 +3012,9 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(VERSION)
     target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
+  endif()
+  if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+   target_compile_definitions(${target} PRIVATE CONF_WEBASM)
   endif()
 endforeach()
 

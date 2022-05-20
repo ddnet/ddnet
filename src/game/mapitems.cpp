@@ -7,6 +7,7 @@ bool IsValidGameTile(int Index)
 		(Index >= TILE_SOLID && Index <= TILE_THROUGH) ||
 		Index == TILE_FREEZE ||
 		(Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) ||
+		(Index >= TILE_LFREEZE && Index <= TILE_LUNFREEZE) ||
 		(Index >= TILE_WALLJUMP && Index <= TILE_SOLO_DISABLE) ||
 		(Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) ||
 		(Index >= TILE_CP && Index <= TILE_THROUGH_DIR) ||
@@ -28,6 +29,7 @@ bool IsValidFrontTile(int Index)
 		(Index >= TILE_NOLASER && Index <= TILE_THROUGH) ||
 		Index == TILE_FREEZE ||
 		(Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) ||
+		(Index >= TILE_LFREEZE && Index <= TILE_LUNFREEZE) ||
 		(Index >= TILE_WALLJUMP && Index <= TILE_SOLO_DISABLE) ||
 		(Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) ||
 		(Index >= TILE_CP && Index <= TILE_THROUGH_DIR) ||
@@ -67,6 +69,8 @@ bool IsValidSwitchTile(int Index)
 		Index == TILE_FREEZE ||
 		Index == TILE_DFREEZE ||
 		Index == TILE_DUNFREEZE ||
+		Index == TILE_LFREEZE ||
+		Index == TILE_LUNFREEZE ||
 		Index == TILE_HIT_ENABLE ||
 		Index == TILE_HIT_DISABLE ||
 		(Index >= TILE_SWITCHTIMEDOPEN && Index <= TILE_SWITCHCLOSE) ||
@@ -87,7 +91,7 @@ bool IsValidEntity(int Index)
 	Index -= ENTITY_OFFSET;
 	return (
 		(Index >= ENTITY_SPAWN && Index <= ENTITY_LASER_O_FAST) ||
-		(Index >= ENTITY_PLASMAE && Index <= ENTITY_CRAZY_SHOTGUN) ||
+		(Index >= ENTITY_PLASMAE && Index <= ENTITY_ARMOR_LASER) ||
 		(Index >= ENTITY_DRAGGER_WEAK && Index <= ENTITY_DRAGGER_STRONG_NW) ||
 		Index == ENTITY_DOOR);
 }

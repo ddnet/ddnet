@@ -3,7 +3,7 @@
 #include <base/hash_ctxt.h>
 #include <engine/shared/packer.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
 	0xe0, 0x5d, 0xda, 0xaa, 0xc4, 0xe6, 0x4c, 0xfb,
@@ -67,8 +67,7 @@ int ParseUuid(CUuid *pUuid, const char *pBuffer)
 		return 1;
 	}
 	aCopy[8] = aCopy[13] = aCopy[18] = aCopy[23] = 0;
-	if(0 ||
-		str_hex_decode(pUuid->m_aData + 0, 4, aCopy + 0) ||
+	if(static_cast<bool>(str_hex_decode(pUuid->m_aData + 0, 4, aCopy + 0)) ||
 		str_hex_decode(pUuid->m_aData + 4, 2, aCopy + 9) ||
 		str_hex_decode(pUuid->m_aData + 6, 2, aCopy + 14) ||
 		str_hex_decode(pUuid->m_aData + 8, 2, aCopy + 19) ||

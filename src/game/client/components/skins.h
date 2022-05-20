@@ -5,22 +5,22 @@
 #include <base/color.h>
 #include <base/tl/sorted_array.h>
 #include <base/vmath.h>
-#include <engine/client/http.h>
+#include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>
 
 class CSkins : public CComponent
 {
 public:
-	class CGetPngFile : public CGetFile
+	class CGetPngFile : public CHttpRequest
 	{
 		CSkins *m_pSkins;
 
 	protected:
-		virtual int OnCompletion(int State);
+		virtual int OnCompletion(int State) override;
 
 	public:
-		CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
+		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
 		CImageInfo m_Info;
 	};
 
@@ -35,9 +35,12 @@ public:
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
-	void OnInit();
+	typedef std::function<void(int)> TSkinLoadedCBFunc;
 
-	void Refresh();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	void OnInit() override;
+
+	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);

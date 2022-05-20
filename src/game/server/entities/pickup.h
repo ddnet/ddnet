@@ -5,17 +5,15 @@
 
 #include <game/server/entity.h>
 
-const int PickupPhysSize = 14;
-
 class CPickup : public CEntity
 {
 public:
 	CPickup(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
+	void Reset() override;
+	void Tick() override;
+	void TickPaused() override;
+	void Snap(int SnappingClient) override;
 
 private:
 	int m_Type;

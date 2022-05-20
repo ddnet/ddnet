@@ -23,9 +23,9 @@ public:
 	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 		int CaughtTeam, int Layer = 0, int Number = 0);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void Snap(int snapping_client);
+	void Reset() override;
+	void Tick() override;
+	void Snap(int SnappingClient) override;
 };
 
 class CDraggerTeam

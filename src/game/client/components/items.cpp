@@ -17,11 +17,6 @@
 
 #include "items.h"
 
-void CItems::OnReset()
-{
-	m_NumExtraProjectiles = 0;
-}
-
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 {
 	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
@@ -49,7 +44,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	bool LocalPlayerInGame = false;
 
 	if(m_pClient->m_Snap.m_pLocalInfo)
-		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
+		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != TEAM_SPECTATORS;
 
 	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
@@ -63,7 +58,27 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	else
 		Ct = (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) / (float)SERVER_TICK_SPEED + s_LastGameTickTime;
 	if(Ct < 0)
-		return; // projectile haven't been shot yet
+	{
+		if(Ct > -s_LastGameTickTime / 2)
+		{
+			// Fixup the timing which might be screwed during demo playback because
+			// s_LastGameTickTime depends on the system timer, while the other part
+			// (Client()->PrevGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) / (float)SERVER_TICK_SPEED
+			// is virtually constant (for projectiles fired on the current game tick):
+			// (x - (x+2)) / 50 = -0.04
+			//
+			// We have a strict comparison for the passed time being more than the time between ticks
+			// if(CurtickStart > m_Info.m_CurrentTime) in CDemoPlayer::Update()
+			// so on the practice the typical value of s_LastGameTickTime varies from 0.02386 to 0.03999
+			// which leads to Ct from -0.00001 to -0.01614.
+			// Round up those to 0.0 to fix missing rendering of the projectile.
+			Ct = 0;
+		}
+		else
+		{
+			return; // projectile haven't been shot yet
+		}
+	}
 
 	vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct);
 	vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, Ct - 0.001f);
@@ -113,58 +128,46 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-
-		int QuadOffset = 2 + 8 + NUM_WEAPONS + CurWeapon;
-
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ProjectileOffset[CurWeapon], Pos.x, Pos.y);
 	}
 }
 
 void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
 {
-	const int c[] = {
-		SPRITE_PICKUP_HEALTH,
-		SPRITE_PICKUP_ARMOR,
-		SPRITE_PICKUP_WEAPON,
-		SPRITE_PICKUP_NINJA};
-
 	int CurWeapon = clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
-
-	if(c[pCurrent->m_Type] == SPRITE_PICKUP_HEALTH)
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupHealth);
-	else if(c[pCurrent->m_Type] == SPRITE_PICKUP_ARMOR)
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmor);
-	else if(c[pCurrent->m_Type] == SPRITE_PICKUP_WEAPON)
-	{
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupWeapons[CurWeapon]);
-	}
-	else if(c[pCurrent->m_Type] == SPRITE_PICKUP_NINJA)
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
-	Graphics()->QuadsSetRotation(0);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-
 	int QuadOffset = 2;
-
+	float Angle = 0.0f;
 	float IntraTick = IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), IntraTick);
-	float Angle = 0.0f;
-	if(pCurrent->m_Type == POWERUP_WEAPON)
+	if(pCurrent->m_Type == POWERUP_HEALTH)
 	{
-		Angle = 0; //-pi/6;//-0.25f * pi * 2.0f;
-		QuadOffset += 2 + CurWeapon;
+		QuadOffset = m_PickupHealthOffset;
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupHealth);
 	}
-	else
+	else if(pCurrent->m_Type == POWERUP_ARMOR)
 	{
-		QuadOffset += pCurrent->m_Type;
-
-		if(c[pCurrent->m_Type] == SPRITE_PICKUP_NINJA)
-		{
-			QuadOffset = 2 + 8 - 1; // ninja is the last weapon
-			m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
-			Pos.x -= 10.0f;
-		}
+		QuadOffset = m_PickupArmorOffset;
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupArmor);
 	}
-
+	else if(pCurrent->m_Type == POWERUP_WEAPON)
+	{
+		QuadOffset = m_PickupWeaponOffset[CurWeapon];
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupWeapons[CurWeapon]);
+	}
+	else if(pCurrent->m_Type == POWERUP_NINJA)
+	{
+		QuadOffset = m_PickupNinjaOffset;
+		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
+		Pos.x -= 10.0f;
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
+	}
+	else if(pCurrent->m_Type >= POWERUP_ARMOR_SHOTGUN && pCurrent->m_Type <= POWERUP_ARMOR_LASER)
+	{
+		QuadOffset = m_PickupWeaponArmorOffset[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN];
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupWeaponArmor[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN]);
+	}
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->QuadsSetRotation(Angle);
 
 	static float s_Time = 0.0f;
@@ -199,10 +202,15 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	int QuadOffset = 0;
-
-	if(pCurrent->m_Team != TEAM_RED)
-		++QuadOffset;
+	int QuadOffset;
+	if(pCurrent->m_Team == TEAM_RED)
+	{
+		QuadOffset = m_RedFlagOffset;
+	}
+	else
+	{
+		QuadOffset = m_BlueFlagOffset;
+	}
 
 	Graphics()->QuadsSetRotation(Angle);
 
@@ -286,14 +294,12 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	// render head
 	{
 		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
-		int QuadOffset = 2 + 8 + NUM_WEAPONS * 2 + CurParticle;
-
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[CurParticle]);
 		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
 		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ParticleSplatOffset[CurParticle], Pos.x, Pos.y);
 		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
 	}
 }
 
@@ -377,20 +383,17 @@ void CItems::OnRender()
 			{
 				if(auto *pProj = (CProjectile *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
 				{
-					if(pProj->GetOwner() >= 0)
+					bool IsOtherTeam = m_pClient->IsOtherTeam(pProj->GetOwner());
+					if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
+						&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02f) // workaround to skip grenades on ball mod
+						&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
+						&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{
-						bool IsOtherTeam = m_pClient->IsOtherTeam(pProj->GetOwner());
-						if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
-							&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02) // workaround to skip grenades on ball mod
-							&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
-							&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
-						{
-							ReconstructSmokeTrail(&Data, pProj->m_DestroyTick);
-						}
-						pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
-						if(!IsOtherTeam)
-							continue;
+						ReconstructSmokeTrail(&Data, pProj->m_DestroyTick);
 					}
+					pProj->m_LastRenderTick = Client()->GameTick(g_Config.m_ClDummy);
+					if(!IsOtherTeam)
+						continue;
 				}
 			}
 			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
@@ -475,21 +478,6 @@ void CItems::OnRender()
 		}
 	}
 
-	// render extra projectiles
-	for(int i = 0; i < m_NumExtraProjectiles; i++)
-	{
-		if(m_aExtraProjectiles[i].m_StartTick < Client()->GameTick(g_Config.m_ClDummy))
-		{
-			m_aExtraProjectiles[i] = m_aExtraProjectiles[m_NumExtraProjectiles - 1];
-			m_NumExtraProjectiles--;
-		}
-		else if(!UsePredicted)
-		{
-			CProjectileData Data = ExtractProjectileInfo(&m_aExtraProjectiles[i], &GameClient()->m_GameWorld);
-			RenderProjectile(&Data, 0);
-		}
-	}
-
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 }
@@ -502,66 +490,48 @@ void CItems::OnInit()
 	m_ItemsQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
+	m_RedFlagOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
+	m_BlueFlagOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, -21.f, -42.f, 42.f, 84.f);
 
 	float ScaleX, ScaleY;
 	RenderTools()->GetSpriteScale(SPRITE_PICKUP_HEALTH, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+	m_PickupHealthOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 	RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
-	RenderTools()->GetSpriteScale(&client_data7::g_pData->m_aSprites[client_data7::SPRITE_PICKUP_HAMMER], ScaleX, ScaleY);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, client_data7::g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_VisualSize * ScaleX, client_data7::g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_VisualSize * ScaleY);
-	RenderTools()->GetSpriteScale(&client_data7::g_pData->m_aSprites[client_data7::SPRITE_PICKUP_GUN], ScaleX, ScaleY);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, client_data7::g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleX, client_data7::g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleY);
-	RenderTools()->GetSpriteScale(&client_data7::g_pData->m_aSprites[client_data7::SPRITE_PICKUP_SHOTGUN], ScaleX, ScaleY);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, client_data7::g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize * ScaleX, client_data7::g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize * ScaleY);
-	RenderTools()->GetSpriteScale(&client_data7::g_pData->m_aSprites[client_data7::SPRITE_PICKUP_GRENADE], ScaleX, ScaleY);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, client_data7::g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize * ScaleX, client_data7::g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize * ScaleY);
-	RenderTools()->GetSpriteScale(&client_data7::g_pData->m_aSprites[client_data7::SPRITE_PICKUP_LASER], ScaleX, ScaleY);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, client_data7::g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize * ScaleX, client_data7::g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize * ScaleY);
-	RenderTools()->GetSpriteScale(SPRITE_PICKUP_NINJA, ScaleX, ScaleY);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 128.f * ScaleX, 128.f * ScaleY);
+	m_PickupArmorOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+		m_PickupWeaponOffset[i] = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+	}
+	RenderTools()->GetSpriteScale(SPRITE_PICKUP_NINJA, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_PickupNinjaOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 128.f * ScaleX, 128.f * ScaleY);
+
+	for(int i = 0; i < 4; i++)
+	{
+		RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN + i, ScaleX, ScaleY);
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		m_PickupWeaponArmorOffset[i] = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 	}
 
-	for(int i = 0; i < NUM_WEAPONS; ++i)
+	for(int &ProjectileOffset : m_ProjectileOffset)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
+		ProjectileOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
 	}
 
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
+	for(int &ParticleSplatOffset : m_ParticleSplatOffset)
+	{
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		ParticleSplatOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
+	}
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
-}
-
-void CItems::AddExtraProjectile(CNetObj_Projectile *pProj)
-{
-	if(m_NumExtraProjectiles != MAX_EXTRA_PROJECTILES)
-	{
-		m_aExtraProjectiles[m_NumExtraProjectiles] = *pProj;
-		m_NumExtraProjectiles++;
-	}
 }
 
 void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick)
@@ -569,7 +539,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	bool LocalPlayerInGame = false;
 
 	if(m_pClient->m_Snap.m_pLocalInfo)
-		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != -1;
+		LocalPlayerInGame = m_pClient->m_aClients[m_pClient->m_Snap.m_pLocalInfo->m_ClientID].m_Team != TEAM_SPECTATORS;
 	if(!m_pClient->AntiPingGunfire() || !LocalPlayerInGame)
 		return;
 	if(Client()->PredGameTick(g_Config.m_ClDummy) == pCurrent->m_StartTick)

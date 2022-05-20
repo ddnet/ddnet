@@ -6,7 +6,8 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <limits.h>
+#include <climits>
+#include <vector>
 
 #include <base/hash_ctxt.h>
 #include <base/math.h>
@@ -14,6 +15,7 @@
 
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
+#include <engine/shared/masterserver.h>
 #include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
@@ -26,9 +28,9 @@
 #include <engine/serverbrowser.h>
 #include <engine/storage.h>
 
-#include <mastersrv/mastersrv.h>
-
 #include <engine/external/json-parser/json.h>
+
+#include <game/client/components/menus.h> // PAGE_DDNET
 
 class SortWrap
 {
@@ -75,14 +77,9 @@ CServerBrowser::CServerBrowser()
 
 CServerBrowser::~CServerBrowser()
 {
-	if(m_ppServerlist)
-		free(m_ppServerlist);
-
-	if(m_pSortedServerlist)
-		free(m_pSortedServerlist);
-
-	if(m_pDDNetInfo)
-		json_value_free(m_pDDNetInfo);
+	free(m_ppServerlist);
+	free(m_pSortedServerlist);
+	json_value_free(m_pDDNetInfo);
 
 	delete m_pHttp;
 	m_pHttp = nullptr;
@@ -206,7 +203,7 @@ bool CServerBrowser::SortCompareName(int Index1, int Index2) const
 	CServerEntry *b = m_ppServerlist[Index2];
 	//	make sure empty entries are listed last
 	return (a->m_GotInfo && b->m_GotInfo) || (!a->m_GotInfo && !b->m_GotInfo) ? str_comp(a->m_Info.m_aName, b->m_Info.m_aName) < 0 :
-										    a->m_GotInfo ? true : false;
+										    a->m_GotInfo != 0;
 }
 
 bool CServerBrowser::SortCompareMap(int Index1, int Index2) const
@@ -265,8 +262,7 @@ void CServerBrowser::Filter()
 	// allocate the sorted list
 	if(m_NumSortedServersCapacity < m_NumServers)
 	{
-		if(m_pSortedServerlist)
-			free(m_pSortedServerlist);
+		free(m_pSortedServerlist);
 		m_NumSortedServersCapacity = m_NumServers;
 		m_pSortedServerlist = (int *)calloc(m_NumSortedServersCapacity, sizeof(int));
 	}
@@ -684,10 +680,10 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			NETADDR Broadcast;
 			mem_zero(&Broadcast, sizeof(Broadcast));
 			Broadcast.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
-			int Token = GenerateToken(Broadcast);
+			int TokenBC = GenerateToken(Broadcast);
 			bool Drop = false;
-			Drop = Drop || BasicToken != GetBasicToken(Token);
-			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			Drop = Drop || BasicToken != GetBasicToken(TokenBC);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(TokenBC));
 			if(Drop)
 			{
 				return;
@@ -702,10 +698,10 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			{
 				return;
 			}
-			int Token = GenerateToken(Addr);
+			int TokenAddr = GenerateToken(Addr);
 			bool Drop = false;
-			Drop = Drop || BasicToken != GetBasicToken(Token);
-			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(Token));
+			Drop = Drop || BasicToken != GetBasicToken(TokenAddr);
+			Drop = Drop || (pInfo->m_Type == SERVERINFO_EXTENDED && ExtraToken != GetExtraToken(TokenAddr));
 			if(Drop)
 			{
 				return;
@@ -1194,7 +1190,7 @@ void CServerBrowser::Update(bool ForceResort)
 
 	CServerEntry *pEntry = m_pFirstReqServer;
 	int Count = 0;
-	while(1)
+	while(true)
 	{
 		if(!pEntry) // no more entries
 			break;
@@ -1223,7 +1219,7 @@ void CServerBrowser::Update(bool ForceResort)
 	{
 		//reset old ones
 		pEntry = m_pFirstReqServer;
-		while(1)
+		while(true)
 		{
 			if(!pEntry) // no more entries
 				break;
@@ -1239,7 +1235,7 @@ void CServerBrowser::Update(bool ForceResort)
 	else if(Count == 0 && m_CurrentMaxRequests == 1) //we reached the limit, just release all left requests. IF a server sends us a packet, a new request will be added automatically, so we can delete all
 	{
 		pEntry = m_pFirstReqServer;
-		while(1)
+		while(true)
 		{
 			if(!pEntry) // no more entries
 				break;
@@ -1501,8 +1497,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 	io_read(File, pBuf, Length);
 	io_close(File);
 
-	if(m_pDDNetInfo)
-		json_value_free(m_pDDNetInfo);
+	json_value_free(m_pDDNetInfo);
 
 	m_pDDNetInfo = json_parse(pBuf, Length);
 
@@ -1525,6 +1520,38 @@ void CServerBrowser::LoadDDNetInfoJson()
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
 		}
 	}
+}
+
+const char *CServerBrowser::GetTutorialServer()
+{
+	// Use DDNet tab as default after joining tutorial, also makes sure Find() actually works
+	// Note that when no server info has been loaded yet, this will not return a result immediately.
+	g_Config.m_UiPage = CMenus::PAGE_DDNET;
+	Refresh(IServerBrowser::TYPE_DDNET);
+
+	CNetwork *pNetwork = &m_aNetworks[NETWORK_DDNET];
+	const char *pBestAddr = nullptr;
+	int BestLatency = std::numeric_limits<int>::max();
+
+	for(int i = 0; i < pNetwork->m_NumCountries; i++)
+	{
+		CNetworkCountry *pCntr = &pNetwork->m_aCountries[i];
+		for(int j = 0; j < pCntr->m_NumServers; j++)
+		{
+			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+			if(!pEntry)
+				continue;
+			if(str_find(pEntry->m_Info.m_aName, "(Tutorial)") == 0)
+				continue;
+			if(pEntry->m_Info.m_NumPlayers > pEntry->m_Info.m_MaxPlayers - 10)
+				continue;
+			if(pEntry->m_Info.m_Latency >= BestLatency)
+				continue;
+			BestLatency = pEntry->m_Info.m_Latency;
+			pBestAddr = pEntry->m_Info.m_aAddress;
+		}
+	}
+	return pBestAddr;
 }
 
 const json_value *CServerBrowser::LoadDDNetInfo()
@@ -1626,11 +1653,11 @@ void CServerBrowser::CountryFilterClean(int Network)
 	char aNewList[128];
 	aNewList[0] = '\0';
 
-	for(auto &Network : m_aNetworks)
+	for(auto &Net : m_aNetworks)
 	{
-		for(int i = 0; i < Network.m_NumCountries; i++)
+		for(int i = 0; i < Net.m_NumCountries; i++)
 		{
-			const char *pName = Network.m_aCountries[i].m_aName;
+			const char *pName = Net.m_aCountries[i].m_aName;
 			if(DDNetFiltered(pExcludeCountries, pName))
 			{
 				char aBuf[128];
@@ -1694,7 +1721,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		"sa", // LOC_SOUTH_AMERICA
 		"as:cn", // LOC_CHINA
 	};
-	for(int i = sizeof(LOCATIONS) / sizeof(LOCATIONS[0]) - 1; i >= 0; i--)
+	for(int i = std::size(LOCATIONS) - 1; i >= 0; i--)
 	{
 		if(str_startswith(pString, LOCATIONS[i]))
 		{
@@ -1743,7 +1770,7 @@ bool IsBlockInfectionZ(const CServerInfo *pInfo)
 
 bool IsBlockWorlds(const CServerInfo *pInfo)
 {
-	return (str_comp_nocase_num(pInfo->m_aGameType, "bw  ", 4) == 0) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
+	return (str_startswith(pInfo->m_aGameType, "bw  ")) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
 }
 
 bool IsCity(const CServerInfo *pInfo)

@@ -14,8 +14,15 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
+#include <game/version.h>
 
 struct CAntibotRoundData;
+
+// When recording a demo on the server, the ClientID -1 is used
+enum
+{
+	SERVER_DEMO_CLIENT = -1
+};
 
 class IServer : public IInterface
 {
@@ -53,7 +60,6 @@ public:
 	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
-	virtual void RestrictRconOutput(int ClientID) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
@@ -64,7 +70,7 @@ public:
 		T tmp;
 		if(ClientID == -1)
 		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
+			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i))
 				{
 					mem_copy(&tmp, pMsg, sizeof(T));
@@ -85,7 +91,7 @@ public:
 		int Result = 0;
 		if(ClientID == -1)
 		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
+			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i) && IsSixup(i))
 					Result = SendPackMsgOne(pMsg, Flags, i);
 		}
@@ -150,13 +156,19 @@ public:
 		return SendMsg(&Packer, Flags, ClientID);
 	}
 
+	int GetClientVersion(int ClientID) const
+	{
+		CClientInfo Info;
+		GetClientInfo(ClientID, &Info);
+		return Info.m_DDNetVersion;
+	}
+
 	bool Translate(int &Target, int Client)
 	{
 		if(IsSixup(Client))
 			return true;
-		CClientInfo Info;
-		GetClientInfo(Client, &Info);
-		if(Info.m_DDNetVersion >= VERSION_DDNET_OLD)
+		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
+		if(ClientVersion >= VERSION_DDNET_OLD)
 			return true;
 		int *pMap = GetIdMap(Client);
 		bool Found = false;
@@ -176,9 +188,8 @@ public:
 	{
 		if(IsSixup(Client))
 			return true;
-		CClientInfo Info;
-		GetClientInfo(Client, &Info);
-		if(Info.m_DDNetVersion >= VERSION_DDNET_OLD)
+		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
+		if(ClientVersion >= VERSION_DDNET_OLD)
 			return true;
 		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
 		int *pMap = GetIdMap(Client);

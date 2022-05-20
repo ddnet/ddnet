@@ -16,12 +16,12 @@ public:
 	vec2 m_TargetPos[NUM_DUMMIES];
 	float m_OldMouseX;
 	float m_OldMouseY;
-	SDL_Joystick *m_Joystick;
+	SDL_Joystick *m_pJoystick;
 	bool m_JoystickFirePressed;
 	bool m_JoystickRunPressed;
 	int64_t m_JoystickTapTime;
 
-	SDL_Joystick *m_Gamepad;
+	SDL_Joystick *m_pGamepad;
 	bool m_UsingGamepad;
 
 	int m_AmmoCount[NUM_WEAPONS];
@@ -35,13 +35,14 @@ public:
 	int m_OtherFire;
 
 	CControls();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnReset();
-	virtual void OnRelease();
-	virtual void OnRender();
-	virtual void OnMessage(int MsgType, void *pRawMsg);
-	virtual bool OnMouseMove(float x, float y);
-	virtual void OnConsoleInit();
+	virtual void OnReset() override;
+	virtual void OnRelease() override;
+	virtual void OnRender() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual bool OnMouseMove(float x, float y) override;
+	virtual void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 
 	int SnapInput(int *pData);

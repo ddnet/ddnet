@@ -12,7 +12,15 @@ enum
 {
 	TEXTFLAG_RENDER = 1,
 	TEXTFLAG_ALLOW_NEWLINE = 2,
-	TEXTFLAG_STOP_AT_END = 4
+	TEXTFLAG_STOP_AT_END = 4,
+	TEXTFLAG_ELLIPSIS_AT_END = 8,
+};
+
+enum ETextAlignment
+{
+	TEXTALIGN_LEFT = 1 << 0,
+	TEXTALIGN_CENTER = 1 << 1,
+	TEXTALIGN_RIGHT = 1 << 2,
 };
 
 enum ETextRenderFlags
@@ -26,6 +34,8 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
 	TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE = 1 << 7,
 	TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD = 1 << 8,
+	// text is only rendered once and then discarded (a hint for buffer creation)
+	TEXT_RENDER_FLAG_ONE_TIME_USE = 1 << 9,
 };
 
 enum

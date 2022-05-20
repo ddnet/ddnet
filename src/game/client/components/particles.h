@@ -62,12 +62,13 @@ public:
 	};
 
 	CParticles();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void Add(int Group, CParticle *pPart, float TimePassed = 0.f);
 
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual void OnInit();
+	virtual void OnReset() override;
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 
 private:
 	int m_ParticleQuadContainerIndex;
@@ -89,7 +90,8 @@ private:
 	{
 	public:
 		CParticles *m_pParts;
-		virtual void OnRender() { m_pParts->RenderGroup(TGROUP); }
+		virtual int Sizeof() const override { return sizeof(*this); }
+		virtual void OnRender() override { m_pParts->RenderGroup(TGROUP); }
 	};
 
 	CRenderGroup<GROUP_PROJECTILE_TRAIL> m_RenderTrail;

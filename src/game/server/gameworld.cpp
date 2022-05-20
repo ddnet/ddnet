@@ -196,13 +196,13 @@ void CGameWorld::UpdatePlayerMaps()
 			// copypasted chunk from character.cpp Snap() follows
 			CCharacter *SnapChar = GameServer()->GetPlayerChar(i);
 			if(SnapChar && !SnapChar->m_Super &&
-				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
+				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
 				!ch->CanCollide(i) &&
 				(!GameServer()->m_apPlayers[i] ||
 					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
 					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
-						(GameServer()->m_apPlayers[i]->m_ShowOthers == 0 ||
-							(GameServer()->m_apPlayers[i]->m_ShowOthers == 2 && !GameServer()->m_apPlayers[i]->GetCharacter()->SameTeam(j))))))
+						(GameServer()->m_apPlayers[i]->m_ShowOthers == SHOW_OTHERS_OFF ||
+							(GameServer()->m_apPlayers[i]->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !GameServer()->m_apPlayers[i]->GetCharacter()->SameTeam(j))))))
 				Dist[j].first = 1e8;
 			else
 				Dist[j].first = 0;
@@ -223,7 +223,7 @@ void CGameWorld::UpdatePlayerMaps()
 		{
 			if(pMap[j] == -1)
 				continue;
-			if(Dist[pMap[j]].first > 5e9)
+			if(Dist[pMap[j]].first > 5e9f)
 				pMap[j] = -1;
 			else
 				rMap[pMap[j]] = j;
@@ -236,7 +236,7 @@ void CGameWorld::UpdatePlayerMaps()
 		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
 			int k = Dist[j].second;
-			if(rMap[k] != -1 || Dist[j].first > 5e9)
+			if(rMap[k] != -1 || Dist[j].first > 5e9f)
 				continue;
 			while(Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1)
 				Mapc++;
@@ -417,7 +417,6 @@ void CGameWorld::ReleaseHooked(int ClientID)
 		if(Core->m_HookedPlayer == ClientID && !pChr->m_Super)
 		{
 			Core->m_HookedPlayer = -1;
-			Core->m_HookState = HOOK_RETRACTED;
 			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			Core->m_HookState = HOOK_RETRACTED;
 		}

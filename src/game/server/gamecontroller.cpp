@@ -45,9 +45,7 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_CurrentRecord = 0;
 }
 
-IGameController::~IGameController()
-{
-}
+IGameController::~IGameController() = default;
 
 void IGameController::DoActivityCheck()
 {
@@ -99,25 +97,24 @@ void IGameController::DoActivityCheck()
 	}
 }
 
-float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
+float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 {
 	float Score = 0.0f;
 	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 	for(; pC; pC = (CCharacter *)pC->TypeNext())
 	{
-		// team mates are not as dangerous as enemies
-		float Scoremod = 1.0f;
-		if(pEval->m_FriendlyTeam != -1 && pC->GetPlayer()->GetTeam() == pEval->m_FriendlyTeam)
-			Scoremod = 0.5f;
+		// ignore players in other teams
+		if(GameServer()->GetDDRaceTeam(pC->GetPlayer()->GetCID()) != DDTeam)
+			continue;
 
 		float d = distance(Pos, pC->m_Pos);
-		Score += Scoremod * (d == 0 ? 1000000000.0f : 1.0f / d);
+		Score += d == 0 ? 1000000000.0f : 1.0f / d;
 	}
 
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 {
 	// j == 0: Find an empty slot, j == 1: Take any slot if no empty one found
 	for(int j = 0; j < 2 && !pEval->m_Got; j++)
@@ -153,7 +150,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 				P += Positions[Result];
 			}
 
-			float S = EvaluateSpawnPos(pEval, P);
+			float S = EvaluateSpawnPos(pEval, P, DDTeam);
 			if(!pEval->m_Got || (j == 0 && pEval->m_Score > S))
 			{
 				pEval->m_Got = true;
@@ -164,7 +161,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 	}
 }
 
-bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
+bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 {
 	CSpawnEval Eval;
 
@@ -172,9 +169,9 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
-	EvaluateSpawnType(&Eval, 0);
-	EvaluateSpawnType(&Eval, 1);
-	EvaluateSpawnType(&Eval, 2);
+	EvaluateSpawnType(&Eval, 0, DDTeam);
+	EvaluateSpawnType(&Eval, 1, DDTeam);
+	EvaluateSpawnType(&Eval, 2, DDTeam);
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
@@ -184,9 +181,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 {
 	if(Index < 0)
 		return false;
-
-	int Type = -1;
-	int SubType = 0;
 
 	int x, y;
 	x = (Pos.x - 16.0f) / 32.0f;
@@ -205,7 +199,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		int Type = Index - ENTITY_SPAWN;
 		m_aaSpawnPoints[Type][m_aNumSpawnPoints[Type]] = Pos;
-		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)(sizeof(m_aaSpawnPoints[0]) / sizeof(m_aaSpawnPoints[0][0])));
+		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)std::size(m_aaSpawnPoints[0]));
 	}
 
 	else if(Index == ENTITY_DOOR)
@@ -279,8 +273,19 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		bullet->SetBouncing(2 - (Dir % 2));
 	}
 
+	int Type = -1;
+	int SubType = 0;
+
 	if(Index == ENTITY_ARMOR_1)
 		Type = POWERUP_ARMOR;
+	else if(Index == ENTITY_ARMOR_SHOTGUN)
+		Type = POWERUP_ARMOR_SHOTGUN;
+	else if(Index == ENTITY_ARMOR_GRENADE)
+		Type = POWERUP_ARMOR_GRENADE;
+	else if(Index == ENTITY_ARMOR_NINJA)
+		Type = POWERUP_ARMOR_NINJA;
+	else if(Index == ENTITY_ARMOR_LASER)
+		Type = POWERUP_ARMOR_LASER;
 	else if(Index == ENTITY_HEALTH_1)
 		Type = POWERUP_HEALTH;
 	else if(Index == ENTITY_WEAPON_SHOTGUN)
@@ -558,12 +563,12 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
 
 	CCharacter *pChr;
-	CPlayer *pPlayer = SnappingClient > -1 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	CPlayer *pPlayer2;
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == -1 || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
+		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
 		{
 			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{

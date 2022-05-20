@@ -52,7 +52,7 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 	pChar->m_VelY = 0;
 	pChar->m_Angle = pGhostChar->m_Angle;
 	pChar->m_Direction = pGhostChar->m_Direction;
-	pChar->m_Weapon = pGhostChar->m_Weapon == WEAPON_GRENADE ? WEAPON_GRENADE : WEAPON_GUN;
+	pChar->m_Weapon = pGhostChar->m_Weapon;
 	pChar->m_HookState = pGhostChar->m_HookState;
 	pChar->m_HookX = pGhostChar->m_HookX;
 	pChar->m_HookY = pGhostChar->m_HookY;
@@ -343,8 +343,37 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		m_pClient->m_Players.RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
-		m_pClient->m_Players.RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		CTeeRenderInfo *RenderInfo = &Ghost.m_RenderInfo;
+		CTeeRenderInfo GhostNinjaRenderInfo;
+		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+		{
+			// change the skin for the ghost to the ninja
+			int Skin = m_pClient->m_Skins.Find("x_ninja");
+			if(Skin != -1)
+			{
+				bool IsTeamplay = false;
+				if(m_pClient->m_Snap.m_pGameInfoObj)
+					IsTeamplay = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
+
+				GhostNinjaRenderInfo = Ghost.m_RenderInfo;
+				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+				GhostNinjaRenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				GhostNinjaRenderInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				GhostNinjaRenderInfo.m_BloodColor = pSkin->m_BloodColor;
+				GhostNinjaRenderInfo.m_SkinMetrics = pSkin->m_Metrics;
+				GhostNinjaRenderInfo.m_CustomColoredSkin = IsTeamplay;
+				if(!IsTeamplay)
+				{
+					GhostNinjaRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
+					GhostNinjaRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+				}
+				RenderInfo = &GhostNinjaRenderInfo;
+			}
+		}
+
+		m_pClient->m_Players.RenderHook(&Prev, &Player, RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderHookCollLine(&Prev, &Player, -2, IntraTick);
+		m_pClient->m_Players.RenderPlayer(&Prev, &Player, RenderInfo, -2, IntraTick);
 	}
 }
 
@@ -363,8 +392,8 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
-		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody));
-		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet));
+		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody).UnclampLighting());
+		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet).UnclampLighting());
 	}
 	else
 	{
@@ -616,6 +645,11 @@ void CGhost::OnReset()
 	StopRender();
 	m_LastDeathTick = -1;
 	m_LastRaceTick = -1;
+}
+
+void CGhost::OnShutdown()
+{
+	OnReset();
 }
 
 void CGhost::OnMapLoad()

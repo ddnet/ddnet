@@ -1,6 +1,7 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
@@ -72,15 +73,11 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 	return 0;
 }
 
-void CTestInfo::DeleteTestStorageFilesOnSuccess()
+void TestDeleteTestStorageFiles(const char *pPath)
 {
-	if(::testing::Test::HasFailure())
-	{
-		return;
-	}
 	std::vector<CTestInfoPath> aEntries;
 	CTestCollectData Data;
-	str_copy(Data.m_aCurrentDir, m_aFilename, sizeof(Data.m_aCurrentDir));
+	str_copy(Data.m_aCurrentDir, pPath, sizeof(Data.m_aCurrentDir));
 	Data.m_paEntries = &aEntries;
 	fs_listdir(Data.m_aCurrentDir, TestCollect, 0, &Data);
 
@@ -107,9 +104,18 @@ void CTestInfo::DeleteTestStorageFilesOnSuccess()
 	}
 }
 
+CTestInfo::~CTestInfo()
+{
+	if(!::testing::Test::HasFailure() && m_DeleteTestStorageFilesOnSuccess)
+	{
+		TestDeleteTestStorageFiles(m_aFilename);
+	}
+}
+
 int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
+	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
 	if(secure_random_init())
@@ -118,6 +124,7 @@ int main(int argc, const char **argv)
 		return 1;
 	}
 	int Result = RUN_ALL_TESTS();
+	secure_random_uninit();
 	cmdline_free(argc, argv);
 	return Result;
 }

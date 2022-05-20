@@ -167,6 +167,15 @@ enum
 	//COREEVENT_HOOK_TELE=0x80,
 };
 
+// show others values - do not change them
+enum
+{
+	SHOW_OTHERS_NOT_SET = -1, // show others value before it is set
+	SHOW_OTHERS_OFF = 0, // show no other players in solo or other teams
+	SHOW_OTHERS_ON = 1, // show all other players in solo and other teams
+	SHOW_OTHERS_ONLY_TEAM = 2 // show players that are in solo and are in the same team
+};
+
 class CWorldCore
 {
 public:
@@ -212,11 +221,29 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+
 	int m_ActiveWeapon;
+	struct WeaponStat
+	{
+		int m_AmmoRegenStart;
+		int m_Ammo;
+		int m_Ammocost;
+		bool m_Got;
+	} m_aWeapons[NUM_WEAPONS];
+
+	// ninja
+	struct
+	{
+		vec2 m_ActivationDir;
+		int m_ActivationTick;
+		int m_CurrentMoveTime;
+		int m_OldVelAmount;
+	} m_Ninja;
 
 	bool m_NewHook;
 
 	int m_Jumped;
+	// m_JumpedTotal counts the jumps performed in the air
 	int m_JumpedTotal;
 	int m_Jumps;
 
@@ -231,7 +258,8 @@ public:
 	void Tick(bool UseInput);
 	void Move();
 
-	void Read(const CNetObj_CharacterCore *pObjCore);
+	void ReadCharacterCore(const CNetObj_CharacterCore *pObjCore);
+	void ReadCharacter(const CNetObj_Character *pObjChar);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
 
@@ -249,6 +277,7 @@ public:
 	void SetTeamsCore(CTeamsCore *pTeams);
 	void SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts);
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
+	void ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInfo *pObjDDNet);
 	bool m_Solo;
 	bool m_Jetpack;
 	bool m_NoCollision;
@@ -263,8 +292,11 @@ public:
 	bool m_HasTelegunGun;
 	bool m_HasTelegunGrenade;
 	bool m_HasTelegunLaser;
+	int m_FreezeTick;
 	int m_FreezeEnd;
+	bool m_IsInFreeze;
 	bool m_DeepFrozen;
+	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
 
 private:

@@ -31,7 +31,7 @@ void CVoting::Callvote(const char *pType, const char *pValue, const char *pReaso
 	Msg.m_Type = pType;
 	Msg.m_Value = pValue;
 	Msg.m_Reason = pReason;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote)
@@ -76,7 +76,13 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 			if(ForceVote)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "force_vote option \"%s\" %s", pOption->m_aDescription, pReason);
+				str_copy(aBuf, "force_vote option \"", sizeof(aBuf));
+				char *pDst = aBuf + str_length(aBuf);
+				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
+				str_append(aBuf, "\" \"", sizeof(aBuf));
+				pDst = aBuf + str_length(aBuf);
+				str_escape(&pDst, pReason, aBuf + sizeof(aBuf));
+				str_append(aBuf, "\"", sizeof(aBuf));
 				Client()->Rcon(aBuf);
 			}
 			else
@@ -97,7 +103,10 @@ void CVoting::RemovevoteOption(int OptionID)
 		if(OptionID == 0)
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "remove_vote \"%s\"", pOption->m_aDescription);
+			str_copy(aBuf, "remove_vote \"", sizeof(aBuf));
+			char *pDst = aBuf + str_length(aBuf);
+			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
+			str_append(aBuf, "\"", sizeof(aBuf));
 			Client()->Rcon(aBuf);
 			break;
 		}
@@ -110,7 +119,13 @@ void CVoting::RemovevoteOption(int OptionID)
 void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "add_vote \"%s\" %s", pDescription, pCommand);
+	str_copy(aBuf, "add_vote \"", sizeof(aBuf));
+	char *pDst = aBuf + str_length(aBuf);
+	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
+	str_append(aBuf, "\" \"", sizeof(aBuf));
+	pDst = aBuf + str_length(aBuf);
+	str_escape(&pDst, pCommand, aBuf + sizeof(aBuf));
+	str_append(aBuf, "\"", sizeof(aBuf));
 	Client()->Rcon(aBuf);
 }
 
@@ -118,7 +133,7 @@ void CVoting::Vote(int v)
 {
 	m_Voted = v;
 	CNetMsg_Cl_Vote Msg = {v};
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 CVoting::CVoting()
@@ -182,7 +197,7 @@ void CVoting::OnReset()
 
 void CVoting::OnConsoleInit()
 {
-	Console()->Register("callvote", "s[name] s[command] ?r[reason]", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
+	Console()->Register("callvote", "s[command] s[id] ?r[reason]", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
 }
 
@@ -311,7 +326,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "%d", m_Yes);
-				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, 0);
+				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, TEXTALIGN_CENTER);
 			}
 
 			PassArea.x += YesArea.w;
@@ -329,7 +344,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "%d", m_No);
-				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, 0);
+				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, TEXTALIGN_CENTER);
 			}
 
 			PassArea.w -= NoArea.w;
@@ -339,7 +354,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%d", m_Pass);
-			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, 0);
+			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, TEXTALIGN_CENTER);
 		}
 	}
 }

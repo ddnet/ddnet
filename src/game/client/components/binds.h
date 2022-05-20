@@ -24,20 +24,22 @@ class CBinds : public CComponent
 public:
 	CBinds();
 	~CBinds();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	class CBindsSpecial : public CComponent
 	{
 	public:
 		CBinds *m_pBinds;
-		virtual bool OnInput(IInput::CEvent Event);
+		virtual int Sizeof() const override { return sizeof(*this); }
+		virtual bool OnInput(IInput::CEvent Event) override;
 	};
 
 	enum
 	{
 		MODIFIER_NONE = 0,
-		MODIFIER_SHIFT,
 		MODIFIER_CTRL,
 		MODIFIER_ALT,
+		MODIFIER_SHIFT,
 		MODIFIER_GUI,
 		MODIFIER_COUNT,
 		MODIFIER_COMBINATION_COUNT = 1 << MODIFIER_COUNT
@@ -45,20 +47,19 @@ public:
 
 	CBindsSpecial m_SpecialBinds;
 
-	void Bind(int KeyID, const char *pStr, bool FreeOnly = false, int Modifier = MODIFIER_NONE);
+	void Bind(int KeyID, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
 	void SetDefaults();
 	void UnbindAll();
-	const char *Get(int KeyID, int Modifier);
+	const char *Get(int KeyID, int ModifierCombination);
 	void GetKey(const char *pBindStr, char *aBuf, unsigned BufSize);
-	int GetBindSlot(const char *pBindString, int *Modifier);
+	int GetBindSlot(const char *pBindString, int *pModifierCombination);
 	static int GetModifierMask(IInput *i);
 	static int GetModifierMaskOfKey(int Key);
-	static bool ModifierMatchesKey(int Modifier, int Key);
 	static const char *GetModifierName(int Modifier);
-	static const char *GetKeyBindModifiersName(int Modifier);
+	static const char *GetKeyBindModifiersName(int ModifierCombination);
 
-	virtual void OnConsoleInit();
-	virtual bool OnInput(IInput::CEvent Event);
+	virtual void OnConsoleInit() override;
+	virtual bool OnInput(IInput::CEvent Event) override;
 
 	// DDRace
 

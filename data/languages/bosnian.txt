@@ -145,9 +145,6 @@ Dynamic Camera
 Emoticon
 == Emotikoni
 
-Enter
-== Započni
-
 Error
 == Greška
 
@@ -667,18 +664,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork je kooperativna online igra gdje je cilj da ti i tvoja grupa igrača dođete do finiša na mapi. Kao početnik trebalo bi da počneš igrati na Novice serverima, gdje se nalaze najlakše mape. U zavisnosti od ping-a izaberite server najbliži vama.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Mapa sadrži zaleđivanje, koje privremeno igrača napravi nepokretnim. Potrebno je surađivati sa ostalima da prođete te dijelove.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Kuglica na mišu mijenja oružja. Čekić (lijevi klik na mišu) može se koristiti da udariš ostale igrače i tako da ih odlediš.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Lanac (desni klik na mišu) može se koristiti da se ljuljaš kroz mapu i da povučeš ostale igrače prema sebi.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Najvažnija je komunikacija: Tutorijala nema, stoga je potrebno čatovati (t tipka) sa ostalim igračima i tako naučiti osnove i trikove igre.
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Koristi k tipku da se ubiješ (restart), q da pauziraš i posmatraš ostale igrače. Pogledaj podešavanja za ostale bindove za tipke.
 
@@ -889,12 +874,6 @@ may cause delay
 Screen
 == Ekran
 
-Preinit VBO (iGPUs only)
-== Inicijalizuj VBO (samo iGPU-ovi)
-
-Multiple texture units (disable for macOS)
-== Više tekturnih jedinica (isljučeno za macOS)
-
 Use high DPI
 == Koristi visoki DPI
 
@@ -1081,6 +1060,9 @@ Saving ddnet-settings.cfg failed
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
 Warning
 == 
 
@@ -1100,6 +1082,12 @@ Are you sure that you want to disconnect and switch to a different server?
 == 
 
 Speed
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Theme
@@ -1174,7 +1162,13 @@ Themes directory
 Max CSVs
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1195,10 +1189,28 @@ Windowed
 Windowed borderless
 == 
 
+Windowed fullscreen
+== 
+
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1255,10 +1267,25 @@ Use old chat style
 Preview
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Overlay entities
 == 
 
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
 AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show local player's key presses
@@ -1303,6 +1330,12 @@ https://ddnet.tw/discord
 https://wiki.ddnet.tw/
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Website
 == 
 
@@ -1323,6 +1356,12 @@ Editor
 
 [Start menu]
 Play
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

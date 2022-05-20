@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/system.h>
 
 #include <engine/config.h>
 #include <engine/demo.h>
@@ -26,9 +27,12 @@
 #include "voting.h"
 
 #include "ghost.h"
-#include <base/tl/string.h>
 #include <engine/keys.h>
 #include <engine/storage.h>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 void CMenus::RenderGame(CUIRect MainView)
 {
@@ -170,10 +174,7 @@ void CMenus::RenderGame(CUIRect MainView)
 				}
 			}
 		}
-	}
 
-	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
-	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
@@ -215,12 +216,12 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	RenderTools()->DrawUIRect(&Options, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
 	Options.Margin(10.0f, &Options);
 	Options.HSplitTop(50.0f, &Button, &Options);
-	UI()->DoLabelScaled(&Button, Localize("Player options"), 34.0f, -1);
+	UI()->DoLabelScaled(&Button, Localize("Player options"), 34.0f, TEXTALIGN_LEFT);
 
 	// headline
 	Options.HSplitTop(34.0f, &ButtonBar, &Options);
 	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
-	UI()->DoLabelScaled(&Player, Localize("Player"), 24.0f, -1);
+	UI()->DoLabelScaled(&Player, Localize("Player"), 24.0f, TEXTALIGN_LEFT);
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
 	float Width = ButtonBar.h * 2.0f;
@@ -268,7 +269,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	static int s_VoteList = 0;
 	static float s_ScrollValue = 0;
 	CUIRect List = Options;
-	//List.HSplitTop(28.0f, 0, &List);
+	// List.HSplitTop(28.0f, 0, &List);
 	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
 
 	// options
@@ -320,11 +321,11 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Cursor.m_LineWidth = Button.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
 
-		//TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		//Cursor.m_LineWidth = Button.w;
+		// TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		// Cursor.m_LineWidth = Button.w;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
 		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[Index].m_Country, &Color,
-			Button2.x, Button2.y + Button2.h / 2.0f - 0.75 * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
+			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore chat button
 		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
@@ -392,13 +393,13 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		votearea.VSplitRight(50.0f, &votearea, &button);
 		char buf[256];
 		str_format(buf, sizeof(buf), "%d", gameclient.voting->seconds_left());
-		UI()->DoLabel(&button, buf, 24.0f, 0);
+		UI()->DoLabel(&button, buf, 24.0f, TEXTALIGN_CENTER);
 
 		// do description and command
 		votearea.VSplitLeft(5.0f, 0, &votearea);
-		UI()->DoLabel(&votearea, gameclient.voting->vote_description(), 14.0f, -1);
+		UI()->DoLabel(&votearea, gameclient.voting->vote_description(), 14.0f, TEXTALIGN_LEFT);
 		votearea.HSplitTop(16.0f, 0, &votearea);
-		UI()->DoLabel(&votearea, gameclient.voting->vote_command(), 10.0f, -1);
+		UI()->DoLabel(&votearea, gameclient.voting->vote_command(), 10.0f, TEXTALIGN_LEFT);
 
 		// do bars
 		bars.HSplitTop(10.0f, 0, &bars);
@@ -409,7 +410,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	}
 	else
 	{
-		UI()->DoLabel(&votearea, "No vote in progress", 18.0f, -1);
+		UI()->DoLabel(&votearea, "No vote in progress", 18.0f, TEXTALIGN_LEFT);
 	}*/
 }
 
@@ -553,7 +554,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(pOption);
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 13.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, pOption->m_aDescription, 13.0f, TEXTALIGN_LEFT);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
@@ -611,7 +612,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 			RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 
 			Item.m_Rect.x += TeeInfo.m_Size;
-			UI()->DoLabelScaled(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_LEFT);
 		}
 	}
 
@@ -667,16 +668,19 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// vote menu
 	{
-		CUIRect Button, QuickSearch;
+		CUIRect QuickSearch;
 
 		// render quick search
 		{
 			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
 			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-			const char *pSearchLabel = "\xEE\xA2\xB6";
+			const char *pSearchLabel = "\xEF\x80\x82";
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, -1, -1, 0);
+
+			SLabelProperties Props;
+			Props.m_AlignVertically = 0;
+			UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, Props);
 			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
 			TextRender()->SetRenderFlags(0);
 			TextRender()->SetCurFont(NULL);
@@ -684,12 +688,16 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 			static int s_ClearButton = 0;
 			static float s_Offset = 0.0f;
+
+			SUIExEditBoxProperties EditProps;
 			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
 			{
 				UI()->SetActiveItem(&m_aFilterString);
 				m_ControlPageOpening = false;
+				EditProps.m_SelectText = true;
 			}
-			UIEx()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, Localize("Search"));
+			EditProps.m_pEmptyText = Localize("Search");
+			UIEx()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps);
 		}
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
@@ -730,7 +738,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Bottom.VSplitRight(160.0f, &Bottom, &Reason);
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
-		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
+		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, TEXTALIGN_LEFT);
 		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w + 10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
@@ -789,10 +797,10 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-				UI()->DoLabelScaled(&Button, Localize("Vote description:"), 14.0f, -1);
+				UI()->DoLabelScaled(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_LEFT);
 
 				Bottom.VSplitLeft(20.0f, 0, &Button);
-				UI()->DoLabelScaled(&Button, Localize("Vote command:"), 14.0f, -1);
+				UI()->DoLabelScaled(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_LEFT);
 
 				static char s_aVoteDescription[64] = {0};
 				static char s_aVoteCommand[512] = {0};
@@ -888,7 +896,6 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	}
 
 	RenderServerbrowser(MainView);
-	return;
 }
 
 // ghost stuff
@@ -912,6 +919,12 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_lGhosts.add(Item);
+
+	if(tw::time_get() - pSelf->m_GhostPopulateStartTime > 500ms)
+	{
+		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
+	}
+
 	return 0;
 }
 
@@ -919,6 +932,7 @@ void CMenus::GhostlistPopulate()
 {
 	CGhostItem *pOwnGhost = 0;
 	m_lGhosts.clear();
+	m_GhostPopulateStartTime = tw::time_get();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 
 	for(int i = 0; i < m_lGhosts.size(); i++)
@@ -1011,7 +1025,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		{COL_TIME, "Time", 200.0f, {0}, {0}}, // Localize("Time")
 	};
 
-	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
+	int NumCols = std::size(s_aCols);
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)
@@ -1047,15 +1061,13 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int NewSelected = -1;
+	bool DoubleClicked = false;
 
 	for(int i = 0; i < NumGhosts; i++)
 	{
 		const CGhostItem *pItem = &m_lGhosts[i];
 		CUIRect Row;
-		CUIRect SelectHitBox;
-
 		View.HSplitTop(17.0f, &Row, &View);
-		SelectHitBox = Row;
 
 		// make sure that only those in view can be selected
 		if(Row.y + Row.h > OriginalView.y && Row.y < OriginalView.y + OriginalView.h)
@@ -1067,18 +1079,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			// clip the selection
-			if(SelectHitBox.y < OriginalView.y) // top
-			{
-				SelectHitBox.h -= OriginalView.y - SelectHitBox.y;
-				SelectHitBox.y = OriginalView.y;
-			}
-			else if(SelectHitBox.y + SelectHitBox.h > OriginalView.y + OriginalView.h) // bottom
-				SelectHitBox.h = OriginalView.y + OriginalView.h - SelectHitBox.y;
-
-			if(UI()->DoButtonLogic(pItem, "", 0, &SelectHitBox))
+			if(UI()->DoButtonLogic(pItem, 0, &Row))
 			{
 				NewSelected = i;
+				DoubleClicked |= NewSelected == m_DoubleClickIndex;
+				m_DoubleClickIndex = NewSelected;
 			}
 		}
 
@@ -1166,7 +1171,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 		static int s_GhostButton = 0;
 		const char *pText = pGhost->Active() ? Localize("Deactivate") : Localize("Activate");
-		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (NewSelected != -1 && Input()->MouseDoubleClick()))
+		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (DoubleClicked && Input()->MouseDoubleClick()))
 		{
 			if(pGhost->Active())
 			{

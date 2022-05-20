@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <cmath>
 #include <engine/graphics.h>
-#include <math.h>
 
 #include "render.h"
 
@@ -11,7 +11,11 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64_t TimeMicros, float *pResult)
+#include <chrono>
+
+using namespace std::chrono_literals;
+
+void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64_t TimeNanos, float *pResult)
 {
 	if(NumPoints == 0)
 	{
@@ -31,19 +35,19 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 		return;
 	}
 
-	int64_t MaxPointTime = (int64_t)pPoints[NumPoints - 1].m_Time * 1000ll;
+	int64_t MaxPointTime = (int64_t)pPoints[NumPoints - 1].m_Time * std::chrono::nanoseconds(1ms).count();
 	if(MaxPointTime > 0) // TODO: remove this check when implementing a IO check for maps(in this case broken envelopes)
-		TimeMicros = TimeMicros % MaxPointTime;
+		TimeNanos = TimeNanos % MaxPointTime;
 	else
-		TimeMicros = 0;
+		TimeNanos = 0;
 
-	int TimeMillis = (int)(TimeMicros / 1000ll);
+	int TimeMillis = (int)(TimeNanos / std::chrono::nanoseconds(1ms).count());
 	for(int i = 0; i < NumPoints - 1; i++)
 	{
 		if(TimeMillis >= pPoints[i].m_Time && TimeMillis <= pPoints[i + 1].m_Time)
 		{
 			float Delta = pPoints[i + 1].m_Time - pPoints[i].m_Time;
-			float a = (float)(((double)TimeMicros / 1000.0) - pPoints[i].m_Time) / Delta;
+			float a = (float)(((double)TimeNanos / (double)std::chrono::nanoseconds(1ms).count()) - pPoints[i].m_Time) / Delta;
 
 			if(pPoints[i].m_Curvetype == CURVETYPE_SMOOTH)
 				a = -2 * a * a * a + 3 * a * a; // second hermite basis
@@ -76,7 +80,6 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 	pResult[1] = fx2f(pPoints[NumPoints - 1].m_aValues[1]);
 	pResult[2] = fx2f(pPoints[NumPoints - 1].m_aValues[2]);
 	pResult[3] = fx2f(pPoints[NumPoints - 1].m_aValues[3]);
-	return;
 }
 
 static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
@@ -473,9 +476,9 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+				TextRender()->Text(0, mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
@@ -535,15 +538,15 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					// draw force
 					char aBuf[16];
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
-					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					UI()->TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-					UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+					TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-						UI()->TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-						UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+						TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+						TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 				}
 			}
@@ -592,9 +595,9 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+				TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
@@ -602,9 +605,9 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+				TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
@@ -651,9 +654,9 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				UI()->TextRender()->Text(0, mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
-				UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+				TextRender()->Text(0, mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 

@@ -38,7 +38,7 @@ jobs:
       if: matrix.language == 'cpp'
       run: |
        sudo apt-get update -y
-       sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libmariadbclient-dev libwebsockets-dev -y
+       sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libmariadbclient-dev libwebsockets-dev libvulkan-dev glslang-tools spirv-tools -y
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -55,7 +55,7 @@ jobs:
       run: |
        mkdir release
        cd release
-       cmake -G "Ninja" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
+       cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
        cmake --build . --config RelWithDebInfo --target everything
 
     - name: Perform CodeQL Analysis

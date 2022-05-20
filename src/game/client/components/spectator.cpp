@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <limits.h>
+#include <climits>
 
 #include <engine/demo.h>
 #include <engine/graphics.h>
@@ -136,7 +136,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	int ClosestDistance = INT_MAX;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == SpectatorID || !Snap.m_paPlayerInfos[i] || Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+		if(i == SpectatorID || !Snap.m_paPlayerInfos[i] || Snap.m_paPlayerInfos[i]->m_Team == TEAM_SPECTATORS || (SpectatorID == SPEC_FREEVIEW && i == Snap.m_LocalClientID))
 			continue;
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
@@ -466,5 +466,5 @@ void CSpectator::Spectate(int SpectatorID)
 
 	CNetMsg_Cl_SetSpectatorMode Msg;
 	Msg.m_SpectatorID = SpectatorID;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }

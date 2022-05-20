@@ -31,10 +31,11 @@ class CDamageInd : public CComponent
 
 public:
 	CDamageInd();
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void Create(vec2 Pos, vec2 Dir);
 	void Reset();
-	virtual void OnRender();
-	virtual void OnInit();
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 };
 #endif

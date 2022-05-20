@@ -5,24 +5,27 @@
 
 #include <base/system.h>
 #include <engine/textrender.h>
+
+#include <chrono>
 #include <string>
 #include <vector>
 
 class CUIRect
 {
+public:
 	// TODO: Refactor: Redo UI scaling
 	float Scale() const;
 
-public:
 	float x, y, w, h;
 
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
 	 *
-	 * @param pTop This rect will end up taking the top half of this CUIRect
-	 * @param pBottom This rect will end up taking the bottom half of this CUIRect
+	 * @param pTop This rect will end up taking the top half of this CUIRect.
+	 * @param pBottom This rect will end up taking the bottom half of this CUIRect.
+	 * @param Spacing Total size of margin between split rects.
 	 */
-	void HSplitMid(CUIRect *pTop, CUIRect *pBottom) const;
+	void HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing = 0.0f) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect.
 	 *
@@ -52,8 +55,9 @@ public:
 	 *
 	 * @param pLeft This rect will take up the left half of *this* CUIRect.
 	 * @param pRight This rect will take up the right half of *this* CUIRect.
+	 * @param Spacing Total size of margin between split rects.
 	 */
-	void VSplitMid(CUIRect *pLeft, CUIRect *pRight) const;
+	void VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing = 0.0f) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect.
 	 *
@@ -101,7 +105,7 @@ public:
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 
-	bool Inside(float x, float y) const;
+	bool Inside(float x_, float y_) const;
 };
 
 struct SUIAnimator
@@ -110,7 +114,7 @@ struct SUIAnimator
 	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
-	int64_t m_Time;
+	std::chrono::nanoseconds m_Time;
 	float m_Value;
 
 	float m_XOffset;
@@ -171,10 +175,19 @@ public:
 
 	bool AreRectsInit()
 	{
-		return m_UIRects.size() != 0;
+		return !m_UIRects.empty();
 	}
 
 	void InitRects(int RequestedRectCount);
+};
+
+struct SLabelProperties
+{
+	float m_MaxWidth = -1;
+	int m_AlignVertically = 1;
+	bool m_StopAtEnd = false;
+	class CTextCursor *m_pSelCursor = nullptr;
+	bool m_EnableWidthCheck = true;
 };
 
 class CUI
@@ -183,6 +196,7 @@ class CUI
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
 	const void *m_pBecomingHotItem;
+	const void *m_pActiveTooltipItem;
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
@@ -190,6 +204,10 @@ class CUI
 	unsigned m_LastMouseButtons;
 
 	CUIRect m_Screen;
+
+	std::vector<CUIRect> m_Clips;
+	void UpdateClipping();
+
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
@@ -250,13 +268,17 @@ public:
 		if(pID)
 			m_pLastActiveItem = pID;
 	}
+	void SetActiveTooltipItem(const void *pID) { m_pActiveTooltipItem = pID; }
 	void ClearLastActiveItem() { m_pLastActiveItem = 0; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
+	const void *ActiveTooltipItem() const { return m_pActiveTooltipItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	bool MouseInside(const CUIRect *pRect) const;
+	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
+	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *x, float *y) const;
 
 	float ButtonColorMulActive() { return 0.5f; }
@@ -267,22 +289,24 @@ public:
 	CUIRect *Screen();
 	void MapScreen();
 	float PixelSize();
+
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
+	const CUIRect *ClipArea() const;
+	inline bool IsClipped() const { return !m_Clips.empty(); }
 
 	// TODO: Refactor: Redo UI scaling
 	void SetScale(float s);
 	float Scale() const;
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
-	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
-	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, class CTextCursor *pSelCursor = NULL);
-	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, class CTextCursor *pSelCursor = NULL);
-	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1);
+	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
+	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
+	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
-	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
 };

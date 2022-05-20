@@ -21,7 +21,7 @@ public:
 		vec2 Pos,
 		vec2 Dir,
 		int Span,
-		bool Freeeze,
+		bool Freeze,
 		bool Explosive,
 		float Force,
 		int SoundImpact,
@@ -31,7 +31,7 @@ public:
 	vec2 GetPos(float Time);
 	CProjectileData GetData() const;
 
-	virtual void Tick();
+	void Tick() override;
 
 	bool Match(CProjectile *pProj);
 	void SetBouncing(int Value);

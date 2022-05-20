@@ -96,7 +96,7 @@ public:
 		z = ((col >> 0) & 0xFF) / 255.0f;
 	}
 
-	vec4 v4() const { return vec4(x, y, z, a); };
+	vec4 v4() const { return vec4(x, y, z, a); }
 
 	unsigned Pack(bool Alpha = true)
 	{
@@ -155,7 +155,7 @@ public:
 };
 
 template<typename T, typename F>
-T color_cast(const F &f) = delete;
+T color_cast(const F &) = delete;
 
 template<>
 inline ColorHSLA color_cast(const ColorRGBA &rgb)
@@ -177,8 +177,8 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 	vec3 rgb = vec3(0, 0, 0);
 
 	float h1 = hsl.h * 6;
-	float c = (1 - absolute(2 * hsl.l - 1)) * hsl.s;
-	float x = c * (1 - absolute(fmod(h1, 2) - 1));
+	float c = (1.f - absolute(2 * hsl.l - 1)) * hsl.s;
+	float x = c * (1.f - absolute(fmodf(h1, 2) - 1.f));
 
 	switch(round_truncate(h1))
 	{

@@ -15,7 +15,7 @@ public:
 		vec2 Pos,
 		vec2 Dir,
 		int Span,
-		bool Freeeze,
+		bool Freeze,
 		bool Explosive,
 		float Force,
 		int SoundImpact,
@@ -47,6 +47,7 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+	bool m_BelongsToPracticeTeam;
 
 public:
 	void SetBouncing(int Value);

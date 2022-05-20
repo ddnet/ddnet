@@ -5,12 +5,10 @@
 
 #include <game/client/prediction/entity.h>
 
-const int PickupPhysSize = 14;
-
 class CPickup : public CEntity
 {
 public:
-	virtual void Tick();
+	void Tick() override;
 
 	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx = 0);
 	void FillInfo(CNetObj_Pickup *pPickup);

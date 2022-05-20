@@ -88,9 +88,6 @@ Dynamic Camera
 Emoticon
 == Емоція
 
-Enter
-== Вхід
-
 Error
 == Помилка
 
@@ -511,18 +508,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork кооперативна онлайн гра, де Вашою головною метою і метою вашої команди є досягненням фінішу карти. Новачкам рекомендовано починати свій шлях на Novice серверах, на яких стоять легкі карти. Також враховуйте пінг щоб вибрати найближчий до вас сервер.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Карта містить фриз-тайли, які тимчасово позбавляють вас можливості рухатися. Ви повинні працювати спільно, щоб пройти такі рівні.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Колесо миші змінює зброю. Молот (ЛКМ) можна використовувати для удару інших і пробудження їх від замерзання.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Гак (ПКМ) можна використовувати для переміщення по карті та притягання до вас інших граців.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Найголовніше, що спілкування є ключовим: туторіалу немає, тому вам доведеться спілкуватися з іншими гравцями, щоб засвоїти основи та хитрощі гри.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Рекомендується перевірити налаштування, щоб підлаштувати їх для комфортної гри перед тим, як приєднатися до сервера.
 
@@ -883,12 +868,6 @@ may cause delay
 Screen
 == Екран
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (iGPUs only)
-
-Multiple texture units (disable for macOS)
-== Декілька текстурних одиниць (вимкнути для macOS)
-
 Use high DPI
 == Використовувати високий DPI
 
@@ -1222,9 +1201,6 @@ Windowed borderless
 Desktop fullscreen
 == Повний робочий стіл
 
-Use modern OpenGL
-== Використовувати сучасний OpenGL
-
 Game sound volume
 == Гучність звуку гри
 
@@ -1331,14 +1307,77 @@ Editor
 Play
 == Грати
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
 Settings file
 == 
 
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Choose default eyes when joining a server
+== 
+
+Windowed fullscreen
+== 
+
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

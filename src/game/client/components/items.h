@@ -3,19 +3,12 @@
 #ifndef GAME_CLIENT_COMPONENTS_ITEMS_H
 #define GAME_CLIENT_COMPONENTS_ITEMS_H
 #include <game/client/component.h>
+#include <game/generated/protocol.h>
 
 class CProjectileData;
 
 class CItems : public CComponent
 {
-	enum
-	{
-		MAX_EXTRA_PROJECTILES = 32,
-	};
-
-	CNetObj_Projectile m_aExtraProjectiles[MAX_EXTRA_PROJECTILES];
-	int m_NumExtraProjectiles;
-
 	void RenderProjectile(const CProjectileData *pCurrent, int ItemID);
 	void RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted = false);
 	void RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData);
@@ -24,13 +17,22 @@ class CItems : public CComponent
 	int m_ItemsQuadContainerIndex;
 
 public:
-	virtual void OnReset();
-	virtual void OnRender();
-	virtual void OnInit();
-
-	void AddExtraProjectile(CNetObj_Projectile *pProj);
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnRender() override;
+	virtual void OnInit() override;
 
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
+
+private:
+	int m_BlueFlagOffset;
+	int m_RedFlagOffset;
+	int m_PickupHealthOffset;
+	int m_PickupArmorOffset;
+	int m_PickupWeaponOffset[NUM_WEAPONS];
+	int m_PickupNinjaOffset;
+	int m_PickupWeaponArmorOffset[4];
+	int m_ProjectileOffset[NUM_WEAPONS];
+	int m_ParticleSplatOffset[3];
 };
 
 #endif

@@ -40,8 +40,7 @@ CInput::CInput()
 	m_InputCounter = 1;
 	m_InputGrabbed = 0;
 
-	m_LastRelease = 0;
-	m_ReleaseDelta = -1;
+	m_MouseDoubleClick = false;
 
 	m_NumEvents = 0;
 	m_MouseFocus = true;
@@ -124,23 +123,19 @@ bool CInput::NativeMousePressed(int index)
 	return (i & SDL_BUTTON(index)) != 0;
 }
 
-int CInput::MouseDoubleClick()
+bool CInput::MouseDoubleClick()
 {
-	if(m_ReleaseDelta >= 0 && m_ReleaseDelta < (time_freq() / 3))
+	if(m_MouseDoubleClick)
 	{
-		m_LastRelease = 0;
-		m_ReleaseDelta = -1;
-		return 1;
+		m_MouseDoubleClick = false;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 const char *CInput::GetClipboardText()
 {
-	if(m_pClipboardText)
-	{
-		SDL_free(m_pClipboardText);
-	}
+	SDL_free(m_pClipboardText);
 	m_pClipboardText = SDL_GetClipboardText();
 	return m_pClipboardText;
 }
@@ -162,17 +157,6 @@ bool CInput::KeyState(int Key) const
 	if(Key < 0 || Key >= KEY_LAST)
 		return false;
 	return m_aInputState[Key];
-}
-
-void CInput::NextFrame()
-{
-	int i;
-	const Uint8 *pState = SDL_GetKeyboardState(&i);
-	if(i >= KEY_LAST)
-		i = KEY_LAST - 1;
-	mem_copy(m_aInputState, pState, i);
-	if(m_EditingTextLen == 0)
-		m_EditingTextLen = -1;
 }
 
 bool CInput::GetIMEState()
@@ -234,189 +218,198 @@ int CInput::Update()
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
 
+	int NumKeyStates;
+	const Uint8 *pState = SDL_GetKeyboardState(&NumKeyStates);
+	if(NumKeyStates >= KEY_MOUSE_1)
+		NumKeyStates = KEY_MOUSE_1;
+	mem_copy(m_aInputState, pState, NumKeyStates);
+	mem_zero(m_aInputState + NumKeyStates, KEY_LAST - NumKeyStates);
+	if(m_EditingTextLen == 0)
+		m_EditingTextLen = -1;
+
 	// these states must always be updated manually because they are not in the GetKeyState from SDL
-	int i = SDL_GetMouseState(NULL, NULL);
-	if(i & SDL_BUTTON(1))
-		m_aInputState[KEY_MOUSE_1] = 1; // 1 is left
-	if(i & SDL_BUTTON(3))
-		m_aInputState[KEY_MOUSE_2] = 1; // 3 is right
-	if(i & SDL_BUTTON(2))
-		m_aInputState[KEY_MOUSE_3] = 1; // 2 is middle
-	if(i & SDL_BUTTON(4))
+	const int MouseState = SDL_GetMouseState(NULL, NULL);
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+		m_aInputState[KEY_MOUSE_1] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
+		m_aInputState[KEY_MOUSE_2] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+		m_aInputState[KEY_MOUSE_3] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
 		m_aInputState[KEY_MOUSE_4] = 1;
-	if(i & SDL_BUTTON(5))
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
 		m_aInputState[KEY_MOUSE_5] = 1;
-	if(i & SDL_BUTTON(6))
+	if(MouseState & SDL_BUTTON(6))
 		m_aInputState[KEY_MOUSE_6] = 1;
-	if(i & SDL_BUTTON(7))
+	if(MouseState & SDL_BUTTON(7))
 		m_aInputState[KEY_MOUSE_7] = 1;
-	if(i & SDL_BUTTON(8))
+	if(MouseState & SDL_BUTTON(8))
 		m_aInputState[KEY_MOUSE_8] = 1;
-	if(i & SDL_BUTTON(9))
+	if(MouseState & SDL_BUTTON(9))
 		m_aInputState[KEY_MOUSE_9] = 1;
 
+	SDL_Event Event;
+	bool IgnoreKeys = false;
+	while(SDL_PollEvent(&Event))
 	{
-		SDL_Event Event;
-		bool IgnoreKeys = false;
-		while(SDL_PollEvent(&Event))
+		int Scancode = 0;
+		int Action = IInput::FLAG_PRESS;
+		switch(Event.type)
 		{
-			int Scancode = 0;
-			int Action = IInput::FLAG_PRESS;
-			switch(Event.type)
+		case SDL_TEXTEDITING:
+		{
+			m_EditingTextLen = str_length(Event.edit.text);
+			if(m_EditingTextLen)
 			{
-			case SDL_TEXTEDITING:
-			{
-				m_EditingTextLen = str_length(Event.edit.text);
-				if(m_EditingTextLen)
-				{
-					str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
-					m_EditingCursor = 0;
-					for(int i = 0; i < Event.edit.start; i++)
-						m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
-				}
-				else
-				{
-					m_aEditingText[0] = 0;
-				}
-				break;
+				str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
+				m_EditingCursor = 0;
+				for(int i = 0; i < Event.edit.start; i++)
+					m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
 			}
-			case SDL_TEXTINPUT:
-				m_EditingTextLen = -1;
-				AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
-				break;
-			// handle keys
-			case SDL_KEYDOWN:
-				// See SDL_Keymod for possible modifiers:
-				// NONE   =     0
-				// LSHIFT =     1
-				// RSHIFT =     2
-				// LCTRL  =    64
-				// RCTRL  =   128
-				// LALT   =   256
-				// RALT   =   512
-				// LGUI   =  1024
-				// RGUI   =  2048
-				// NUM    =  4096
-				// CAPS   =  8192
-				// MODE   = 16384
-				// Sum if you want to ignore multiple modifiers.
-				if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
-				{
-					Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
-				}
-				break;
-			case SDL_KEYUP:
-				Action = IInput::FLAG_RELEASE;
+			else
+			{
+				m_aEditingText[0] = 0;
+			}
+			break;
+		}
+		case SDL_TEXTINPUT:
+			m_EditingTextLen = -1;
+			AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
+			break;
+		// handle keys
+		case SDL_KEYDOWN:
+			// See SDL_Keymod for possible modifiers:
+			// NONE   =     0
+			// LSHIFT =     1
+			// RSHIFT =     2
+			// LCTRL  =    64
+			// RCTRL  =   128
+			// LALT   =   256
+			// RALT   =   512
+			// LGUI   =  1024
+			// RGUI   =  2048
+			// NUM    =  4096
+			// CAPS   =  8192
+			// MODE   = 16384
+			// Sum if you want to ignore multiple modifiers.
+			if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
+			{
 				Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
-				break;
-
-			// handle mouse buttons
-			case SDL_MOUSEBUTTONUP:
-				Action = IInput::FLAG_RELEASE;
-
-				if(Event.button.button == 1) // ignore_convention
-				{
-					m_ReleaseDelta = time_get() - m_LastRelease;
-					m_LastRelease = time_get();
-				}
-
-				// fall through
-			case SDL_MOUSEBUTTONDOWN:
-				if(Event.button.button == SDL_BUTTON_LEFT)
-					Scancode = KEY_MOUSE_1; // ignore_convention
-				if(Event.button.button == SDL_BUTTON_RIGHT)
-					Scancode = KEY_MOUSE_2; // ignore_convention
-				if(Event.button.button == SDL_BUTTON_MIDDLE)
-					Scancode = KEY_MOUSE_3; // ignore_convention
-				if(Event.button.button == SDL_BUTTON_X1)
-					Scancode = KEY_MOUSE_4; // ignore_convention
-				if(Event.button.button == SDL_BUTTON_X2)
-					Scancode = KEY_MOUSE_5; // ignore_convention
-				if(Event.button.button == 6)
-					Scancode = KEY_MOUSE_6; // ignore_convention
-				if(Event.button.button == 7)
-					Scancode = KEY_MOUSE_7; // ignore_convention
-				if(Event.button.button == 8)
-					Scancode = KEY_MOUSE_8; // ignore_convention
-				if(Event.button.button == 9)
-					Scancode = KEY_MOUSE_9; // ignore_convention
-				break;
-
-			case SDL_MOUSEWHEEL:
-				if(Event.wheel.y > 0)
-					Scancode = KEY_MOUSE_WHEEL_UP; // ignore_convention
-				if(Event.wheel.y < 0)
-					Scancode = KEY_MOUSE_WHEEL_DOWN; // ignore_convention
-				if(Event.wheel.x > 0)
-					Scancode = KEY_MOUSE_WHEEL_LEFT; // ignore_convention
-				if(Event.wheel.x < 0)
-					Scancode = KEY_MOUSE_WHEEL_RIGHT; // ignore_convention
-				Action |= IInput::FLAG_RELEASE;
-				break;
-
-			case SDL_WINDOWEVENT:
-				// Ignore keys following a focus gain as they may be part of global
-				// shortcuts
-				switch(Event.window.event)
-				{
-				case SDL_WINDOWEVENT_MOVED:
-					Graphics()->Move(Event.window.data1, Event.window.data2);
-					break;
-				// listen to size changes, this includes our manual changes and the ones by the window manager
-				case SDL_WINDOWEVENT_SIZE_CHANGED:
-					Graphics()->Resize(Event.window.data1, Event.window.data2, -1);
-					break;
-				case SDL_WINDOWEVENT_FOCUS_GAINED:
-					if(m_InputGrabbed)
-					{
-						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
-						// MouseModeRelative();
-						// Clear pending relative mouse motion
-						SDL_GetRelativeMouseState(0x0, 0x0);
-					}
-					m_MouseFocus = true;
-					IgnoreKeys = true;
-					break;
-				case SDL_WINDOWEVENT_FOCUS_LOST:
-					m_MouseFocus = false;
-					IgnoreKeys = true;
-					if(m_InputGrabbed)
-					{
-						// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
-						// MouseModeAbsolute();
-						// Remember that we had relative mouse
-						m_InputGrabbed = true;
-					}
-					break;
-				case SDL_WINDOWEVENT_MINIMIZED:
-					Graphics()->WindowDestroyNtf(Event.window.windowID);
-					break;
-				case SDL_WINDOWEVENT_MAXIMIZED:
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
-					MouseModeAbsolute();
-					MouseModeRelative();
-#endif
-					// fallthrough
-				case SDL_WINDOWEVENT_RESTORED:
-					Graphics()->WindowCreateNtf(Event.window.windowID);
-					break;
-				}
-				break;
-
-			// other messages
-			case SDL_QUIT:
-				return 1;
 			}
+			break;
+		case SDL_KEYUP:
+			Action = IInput::FLAG_RELEASE;
+			Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
+			break;
 
-			if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
+		// handle mouse buttons
+		case SDL_MOUSEBUTTONUP:
+			Action = IInput::FLAG_RELEASE;
+
+			// fall through
+		case SDL_MOUSEBUTTONDOWN:
+			if(Event.button.button == SDL_BUTTON_LEFT)
+				Scancode = KEY_MOUSE_1;
+			if(Event.button.button == SDL_BUTTON_RIGHT)
+				Scancode = KEY_MOUSE_2;
+			if(Event.button.button == SDL_BUTTON_MIDDLE)
+				Scancode = KEY_MOUSE_3;
+			if(Event.button.button == SDL_BUTTON_X1)
+				Scancode = KEY_MOUSE_4;
+			if(Event.button.button == SDL_BUTTON_X2)
+				Scancode = KEY_MOUSE_5;
+			if(Event.button.button == 6)
+				Scancode = KEY_MOUSE_6;
+			if(Event.button.button == 7)
+				Scancode = KEY_MOUSE_7;
+			if(Event.button.button == 8)
+				Scancode = KEY_MOUSE_8;
+			if(Event.button.button == 9)
+				Scancode = KEY_MOUSE_9;
+			if(Event.button.button == SDL_BUTTON_LEFT)
 			{
-				if(Action & IInput::FLAG_PRESS)
-				{
-					m_aInputState[Scancode] = 1;
-					m_aInputCount[Scancode] = m_InputCounter;
-				}
-				AddEvent(0, Scancode, Action);
+				if(Event.button.clicks % 2 == 0)
+					m_MouseDoubleClick = true;
+				if(Event.button.clicks == 1)
+					m_MouseDoubleClick = false;
 			}
+			break;
+
+		case SDL_MOUSEWHEEL:
+			if(Event.wheel.y > 0)
+				Scancode = KEY_MOUSE_WHEEL_UP;
+			if(Event.wheel.y < 0)
+				Scancode = KEY_MOUSE_WHEEL_DOWN;
+			if(Event.wheel.x > 0)
+				Scancode = KEY_MOUSE_WHEEL_LEFT;
+			if(Event.wheel.x < 0)
+				Scancode = KEY_MOUSE_WHEEL_RIGHT;
+			Action |= IInput::FLAG_RELEASE;
+			break;
+
+		case SDL_WINDOWEVENT:
+			// Ignore keys following a focus gain as they may be part of global
+			// shortcuts
+			switch(Event.window.event)
+			{
+			case SDL_WINDOWEVENT_MOVED:
+				Graphics()->Move(Event.window.data1, Event.window.data2);
+				break;
+			// listen to size changes, this includes our manual changes and the ones by the window manager
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
+				break;
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				if(m_InputGrabbed)
+				{
+					// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+					// MouseModeRelative();
+					// Clear pending relative mouse motion
+					SDL_GetRelativeMouseState(0x0, 0x0);
+				}
+				m_MouseFocus = true;
+				IgnoreKeys = true;
+				break;
+			case SDL_WINDOWEVENT_FOCUS_LOST:
+				m_MouseFocus = false;
+				IgnoreKeys = true;
+				if(m_InputGrabbed)
+				{
+					// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
+					// MouseModeAbsolute();
+					// Remember that we had relative mouse
+					m_InputGrabbed = true;
+				}
+				break;
+			case SDL_WINDOWEVENT_MINIMIZED:
+				Graphics()->WindowDestroyNtf(Event.window.windowID);
+				break;
+
+			case SDL_WINDOWEVENT_MAXIMIZED:
+#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
+				MouseModeAbsolute();
+				MouseModeRelative();
+#endif
+				// fallthrough
+			case SDL_WINDOWEVENT_RESTORED:
+				Graphics()->WindowCreateNtf(Event.window.windowID);
+				break;
+			}
+			break;
+
+		// other messages
+		case SDL_QUIT:
+			return 1;
+		}
+
+		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
+		{
+			if(Action & IInput::FLAG_PRESS)
+			{
+				m_aInputState[Scancode] = 1;
+				m_aInputCount[Scancode] = m_InputCounter;
+			}
+			AddEvent(0, Scancode, Action);
 		}
 	}
 

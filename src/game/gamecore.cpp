@@ -102,8 +102,11 @@ void CCharacterCore::Reset()
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
+	m_FreezeTick = 0;
 	m_FreezeEnd = 0;
+	m_IsInFreeze = false;
 	m_DeepFrozen = false;
+	m_LiveFrozen = false;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -137,28 +140,40 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float a = 0;
-		if(m_Input.m_TargetX == 0)
-			a = atanf((float)m_Input.m_TargetY);
+		float TmpAngle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
+		if(TmpAngle < -(pi / 2.0f))
+		{
+			m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
+		}
 		else
-			a = atanf((float)m_Input.m_TargetY / (float)m_Input.m_TargetX);
+		{
+			m_Angle = (int)(TmpAngle * 256.0f);
+		}
 
-		if(m_Input.m_TargetX < 0)
-			a = a + pi;
-
-		m_Angle = (int)(a * 256.0f);
+		// Special jump cases:
+		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set
+		// m_Jumps == 0: A tee may not make a jump. Second jumped bit is always set
+		// m_Jumps == 1: A tee may do either a ground jump or an air jump. Second jumped bit is set after the first jump
+		// The second jump bit can be overridden by special tiles so that the tee can nevertheless jump.
 
 		// handle jump
 		if(m_Input.m_Jump)
 		{
 			if(!(m_Jumped & 1))
 			{
-				if(Grounded)
+				if(Grounded && (!(m_Jumped & 2) || m_Jumps == -1))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
 					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
-					m_Jumped |= 1;
-					m_JumpedTotal = 1;
+					if(m_Jumps > 1)
+					{
+						m_Jumped |= 1;
+					}
+					else
+					{
+						m_Jumped |= 3;
+					}
+					m_JumpedTotal = 0;
 				}
 				else if(!(m_Jumped & 2))
 				{
@@ -170,7 +185,9 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 		}
 		else
+		{
 			m_Jumped &= ~1;
+		}
 
 		// handle hook
 		if(m_Input.m_Hook)
@@ -181,7 +198,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookPos = m_Pos + TargetDirection * PhysSize * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookedPlayer = -1;
-				m_HookTick = SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
+				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
 				m_TriggeredEvents |= COREEVENT_HOOK_LAUNCH;
 			}
 		}
@@ -193,6 +210,16 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
+	// handle jumping
+	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
+	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
+	if(Grounded)
+	{
+		// A tee must touch the ground for one tick before it can jump again.
+		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
+
 	// add the speed modification according to players wanted direction
 	if(m_Direction < 0)
 		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
@@ -200,15 +227,6 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
-
-	// handle jumping
-	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
-	// 2 bit = to keep track if a air-jump has been made (tee gets dark feet)
-	if(Grounded)
-	{
-		m_Jumped &= ~2;
-		m_JumpedTotal = 0;
-	}
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)
@@ -223,7 +241,6 @@ void CCharacterCore::Tick(bool UseInput)
 	}
 	else if(m_HookState == HOOK_RETRACT_END)
 	{
-		m_HookState = HOOK_RETRACTED;
 		m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 		m_HookState = HOOK_RETRACTED;
 	}
@@ -298,7 +315,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && m_pWorld && m_pTeleOuts && m_pTeleOuts->size() && (*m_pTeleOuts)[teleNr - 1].size())
+			if(GoingThroughTele && m_pWorld && m_pTeleOuts && !m_pTeleOuts->empty() && !(*m_pTeleOuts)[teleNr - 1].empty())
 			{
 				m_TriggeredEvents = 0;
 				m_HookedPlayer = -1;
@@ -401,8 +418,8 @@ void CCharacterCore::Tick(bool UseInput)
 
 					// make sure that we don't add excess force by checking the
 					// direction against the current velocity. if not zero.
-					if(length(m_Vel) > 0.0001)
-						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2;
+					if(length(m_Vel) > 0.0001f)
+						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
 					m_Vel += Dir * a * (Velocity * 0.75f);
 					m_Vel *= 0.85f;
@@ -413,17 +430,17 @@ void CCharacterCore::Tick(bool UseInput)
 				{
 					if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
 					{
-						float Accel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
+						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
 						float DragSpeed = m_Tuning.m_HookDragSpeed;
 
 						vec2 Temp;
 						// add force to the hooked player
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, HookAccel * Dir.x * 1.5f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, HookAccel * Dir.y * 1.5f);
 						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
 						// add a little bit force to the guy who has the grip
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
+						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -HookAccel * Dir.x * 0.25f);
+						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -HookAccel * Dir.y * 0.25f);
 						m_Vel = ClampVel(m_MoveRestrictions, Temp);
 					}
 				}
@@ -521,7 +538,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
 {
 	m_Pos.x = pObjCore->m_X;
 	m_Pos.y = pObjCore->m_Y;
@@ -539,6 +556,11 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
+void CCharacterCore::ReadCharacter(const CNetObj_Character *pObjChar)
+{
+	m_ActiveWeapon = pObjChar->m_Weapon;
+	ReadCharacterCore((const CNetObj_CharacterCore *)pObjChar);
+}
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
@@ -562,20 +584,38 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	// Freeze
 	m_FreezeEnd = pObjDDNet->m_FreezeEnd;
 	m_DeepFrozen = pObjDDNet->m_FreezeEnd == -1;
+	m_LiveFrozen = (pObjDDNet->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
 
 	// Telegun
 	m_HasTelegunGrenade = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
 	m_HasTelegunGun = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
 	m_HasTelegunLaser = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
+	// Weapons
+	m_aWeapons[WEAPON_HAMMER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_HAMMER) != 0;
+	m_aWeapons[WEAPON_GUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GUN) != 0;
+	m_aWeapons[WEAPON_SHOTGUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_SHOTGUN) != 0;
+	m_aWeapons[WEAPON_GRENADE].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GRENADE) != 0;
+	m_aWeapons[WEAPON_LASER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_LASER) != 0;
+	m_aWeapons[WEAPON_NINJA].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
+
+	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
+}
+
+void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInfo *pObjDDNet)
+{
+	m_JumpedTotal = pObjDDNet->m_JumpedTotal;
+	m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
+	m_FreezeTick = pObjDDNet->m_FreezeTick;
+	m_IsInFreeze = pObjDDNet->m_IsInFreeze;
 }
 
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
 	Write(&Core);
-	Read(&Core);
+	ReadCharacterCore(&Core);
 }
 
 // DDRace

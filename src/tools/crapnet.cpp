@@ -1,8 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/logger.h>
 #include <base/system.h>
 
+#include <array> // std::size
 #include <cstdlib>
+
+#include <thread>
 
 struct CPacket
 {
@@ -37,7 +41,7 @@ static CPingConfig m_aConfigPings[] = {
 	{140, 40, 200, 0, 0, 0},
 };
 
-static int m_ConfigNumpingconfs = sizeof(m_aConfigPings) / sizeof(CPingConfig);
+static int m_ConfigNumpingconfs = std::size(m_aConfigPings);
 static int m_ConfigInterval = 10; // seconds between different pingconfigs
 static int m_ConfigLog = 0;
 static int m_ConfigReorder = 0;
@@ -47,13 +51,10 @@ void Run(unsigned short Port, NETADDR Dest)
 	NETADDR Src = {NETTYPE_IPV4, {0, 0, 0, 0}, Port};
 	NETSOCKET Socket = net_udp_create(Src);
 
-	char aBuffer[1024 * 2];
 	int ID = 0;
 	int Delaycounter = 0;
-	MMSGS m;
-	net_init_mmsgs(&m);
 
-	while(1)
+	while(true)
 	{
 		static int Lastcfg = 0;
 		int n = ((time_get() / time_freq()) / m_ConfigInterval) % m_ConfigNumpingconfs;
@@ -64,13 +65,13 @@ void Run(unsigned short Port, NETADDR Dest)
 		Lastcfg = n;
 
 		// handle incoming packets
-		while(1)
+		while(true)
 		{
 			// fetch data
 			int DataTrash = 0;
 			NETADDR From;
 			unsigned char *pData;
-			int Bytes = net_udp_recv(Socket, &From, aBuffer, 1024 * 2, &m, &pData);
+			int Bytes = net_udp_recv(Socket, &From, &pData);
 			if(Bytes <= 0)
 				break;
 
@@ -142,7 +143,7 @@ void Run(unsigned short Port, NETADDR Dest)
 		{*/
 		CPacket *p = 0;
 		CPacket *pNext = m_pFirst;
-		while(1)
+		while(true)
 		{
 			p = pNext;
 			if(!p)
@@ -204,15 +205,15 @@ void Run(unsigned short Port, NETADDR Dest)
 			}
 		}
 
-		thread_sleep(1000);
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 	}
 }
 
-int main(int argc, const char **argv) // ignore_convention
+int main(int argc, const char **argv)
 {
 	cmdline_fix(&argc, &argv);
+	log_set_global_logger_default();
 	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
-	dbg_logger_stdout();
 	Run(8302, Addr);
 	cmdline_free(argc, argv);
 	return 0;

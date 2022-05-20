@@ -57,8 +57,8 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 
 	// logic
 	static float s_OffsetY;
-	const bool InsideRail = UI()->MouseInside(&Rail);
-	const bool InsideHandle = UI()->MouseInside(&Handle);
+	const bool InsideRail = UI()->MouseHovered(&Rail);
+	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
 	if(UI()->ActiveItem() == pID)
@@ -137,8 +137,8 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 
 	// logic
 	static float s_OffsetX;
-	const bool InsideRail = UI()->MouseInside(&Rail);
-	const bool InsideHandle = UI()->MouseInside(&Handle);
+	const bool InsideRail = UI()->MouseHovered(&Rail);
+	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
 	if(UI()->ActiveItem() == pID)
@@ -212,9 +212,9 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	return ReturnValue;
 }
 
-bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText)
+bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
-	int Inside = UI()->MouseInside(pRect);
+	const bool Inside = UI()->MouseHovered(pRect);
 	bool ReturnValue = false;
 	bool UpdateOffset = false;
 
@@ -223,6 +223,14 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	auto &&SetHasSelection = [&](bool HasSelection) {
 		m_HasSelection = HasSelection;
 		m_pSelItem = m_HasSelection ? pID : nullptr;
+	};
+
+	auto &&SelectAllText = [&]() {
+		m_CurSelStart = 0;
+		int StrLen = str_length(pStr);
+		TextRender()->UTF8OffToDecodedOff(pStr, StrLen, m_CurSelEnd);
+		SetHasSelection(true);
+		m_CurCursor = StrLen;
 	};
 
 	if(UI()->LastActiveItem() == pID)
@@ -322,19 +330,16 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 				Input()->SetClipboardText(pStr);
 		}
 
-		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_A))
+		if(Properties.m_SelectText || (!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_A)))
 		{
-			m_CurSelStart = 0;
-			int StrLen = str_length(pStr);
-			TextRender()->UTF8OffToDecodedOff(pStr, StrLen, m_CurSelEnd);
-			SetHasSelection(true);
-			m_CurCursor = StrLen;
+			SelectAllText();
 		}
 
 		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_U))
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
+			SetHasSelection(false);
 			ReturnValue = true;
 		}
 
@@ -446,8 +451,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 
 	CUIRect Textbox = *pRect;
 	RenderTools()->DrawUIRect(&Textbox, ColorRGBA(1, 1, 1, 0.5f), Corners, 3.0f);
-	Textbox.VMargin(2.0f, &Textbox);
-	Textbox.HMargin(2.0f, &Textbox);
+	Textbox.Margin(2.0f, &Textbox);
 
 	const char *pDisplayStr = pStr;
 	char aStars[128];
@@ -495,7 +499,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	bool IsEmptyText = false;
 	if(pDisplayStr[0] == '\0')
 	{
-		pDisplayStr = pEmptyText;
+		pDisplayStr = Properties.m_pEmptyText;
 		IsEmptyText = true;
 		TextRender()->TextColor(1, 1, 1, 0.75f);
 	}
@@ -586,7 +590,10 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 		SelCursor.m_SelectionEnd = m_CurSelEnd;
 	}
 
-	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, -1, -1, 1, &SelCursor);
+	SLabelProperties Props;
+	Props.m_pSelCursor = &SelCursor;
+	Props.m_EnableWidthCheck = IsEmptyText;
+	UI()->DoLabel(&Textbox, pDisplayStr, FontSize, TEXTALIGN_LEFT, Props);
 
 	if(UI()->LastActiveItem() == pID)
 	{
@@ -618,18 +625,21 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	return ReturnValue;
 }
 
-bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pEmptyText)
+bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
 	CUIRect EditBox;
 	CUIRect ClearButton;
 	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
-	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~CUI::CORNER_R, pEmptyText);
+	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~CUI::CORNER_R, Properties);
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
-	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, 0, -1, 0);
+
+	SLabelProperties Props;
+	Props.m_AlignVertically = 0;
+	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 	TextRender()->SetRenderFlags(0);
-	if(UI()->DoButtonLogic(pClearID, "×", 0, &ClearButton))
+	if(UI()->DoButtonLogic(pClearID, 0, &ClearButton))
 	{
 		pStr[0] = 0;
 		UI()->SetActiveItem(pID);

@@ -71,6 +71,7 @@ void CPlayer::Reset()
 	m_aTimeoutCode[0] = '\0';
 	delete m_pLastTarget;
 	m_pLastTarget = new CNetObj_PlayerInput({0});
+	m_LastTargetInit = false;
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -105,7 +106,7 @@ void CPlayer::Reset()
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_ShowDistance = vec2(1200, 800);
-	m_SpecTeam = 0;
+	m_SpecTeam = false;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;
@@ -295,7 +296,7 @@ void CPlayer::PostTick()
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
 			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-				m_aActLatency[i] = GameServer()->m_apPlayers[i]->m_Latency.m_Min;
+				m_aCurLatency[i] = GameServer()->m_apPlayers[i]->m_Latency.m_Min;
 		}
 	}
 
@@ -325,7 +326,7 @@ void CPlayer::Snap(int SnappingClient)
 			return;
 
 	int id = m_ClientID;
-	if(SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
+	if(!Server()->Translate(id, SnappingClient))
 		return;
 
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
@@ -340,15 +341,15 @@ void CPlayer::Snap(int SnappingClient)
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
 
-	int SnappingClientVersion = SnappingClient >= 0 ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
-	int Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
+	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
 	int Score = abs(m_Score) * -1;
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
 		Score = -9999;
 
-	if(SnappingClient < 0 || !Server()->IsSixup(SnappingClient))
+	if(!Server()->IsSixup(SnappingClient))
 	{
 		CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(CNetObj_PlayerInfo)));
 		if(!pPlayerInfo)
@@ -358,10 +359,12 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Score = Score;
 		pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
 		pPlayerInfo->m_ClientID = id;
-		pPlayerInfo->m_Team = (SnappingClientVersion < VERSION_DDNET_OLD || m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
-
-		if(m_ClientID == SnappingClient && m_Paused == PAUSE_PAUSED && SnappingClientVersion < VERSION_DDNET_OLD)
-			pPlayerInfo->m_Team = TEAM_SPECTATORS;
+		pPlayerInfo->m_Team = m_Team;
+		if(SnappingClientVersion < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
+		{
+			// In older versions the SPECTATORS TEAM was also used if the own player is in PAUSE_PAUSED or if any player is in PAUSE_SPEC.
+			pPlayerInfo->m_Team = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
+		}
 	}
 	else
 	{
@@ -382,7 +385,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
-		if(SnappingClient < 0 || !Server()->IsSixup(SnappingClient))
+		if(!Server()->IsSixup(SnappingClient))
 		{
 			CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
 			if(!pSpectatorInfo)
@@ -418,7 +421,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
-	if(SnappingClient >= 0 && Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
+	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
 	{
 		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = static_cast<protocol7::CNetObj_PlayerInfoRace *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_PLAYERINFORACE, id, sizeof(protocol7::CNetObj_PlayerInfoRace)));
@@ -429,10 +432,10 @@ void CPlayer::Snap(int SnappingClient)
 
 	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused() && m_pCharacter->CanSnapCharacter(SnappingClient);
 
-	if(SnappingClient >= 0)
+	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
 		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
+		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == SHOW_OTHERS_ON || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
 	}
 
 	if(ShowSpec)
@@ -535,10 +538,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 			return;
 
-		// reset input
-		if(m_pCharacter)
-			m_pCharacter->ResetInput();
-
 		m_PlayerFlags = NewInput->m_PlayerFlags;
 		return;
 	}
@@ -555,8 +554,11 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
 		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
-		UpdatePlaytime();
+		// Ignore the first direct input and keep the player afk as it is sent automatically
+		if(m_LastTargetInit)
+			UpdatePlaytime();
 		m_LastActionTick = Server()->Tick();
+		m_LastTargetInit = true;
 	}
 }
 
@@ -688,7 +690,7 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, GameServer()->GetDDRaceTeam(m_ClientID)))
 		return;
 
 	m_WeakHookSpawn = false;
@@ -698,7 +700,7 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 
-	if(g_Config.m_SvTeam == 3)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		m_pCharacter->SetSolo(true);
 }
 
@@ -885,9 +887,7 @@ int CPlayer::IsPaused()
 
 bool CPlayer::IsPlaying()
 {
-	if(m_pCharacter && m_pCharacter->IsAlive())
-		return true;
-	return false;
+	return m_pCharacter && m_pCharacter->IsAlive();
 }
 
 void CPlayer::SpectatePlayerName(const char *pName)

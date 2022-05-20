@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
-
 #include <engine/shared/config.h>
 
 #include <base/math.h>
@@ -211,7 +209,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
-	float TargetLevel = pResult->NumArguments() ? clamp<float>(pResult->GetFloat(0), 0, 20) : g_Config.m_ClDefaultZoom;
+	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, TargetLevel - 10));
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)

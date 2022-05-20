@@ -112,7 +112,12 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			m_Energy -= distance(m_From, m_Pos) + GetTuning(m_TuneZone)->m_LaserBounceCost;
+			const float Distance = distance(m_From, m_Pos);
+			// Prevent infinite bounces
+			if(Distance == 0.0f)
+				m_Energy = -1;
+			else
+				m_Energy -= Distance + GetTuning(m_TuneZone)->m_LaserBounceCost;
 
 			m_Bounces++;
 			m_WasTele = false;
@@ -192,7 +197,5 @@ bool CLaser::Match(CLaser *pLaser)
 	const vec2 ThisDiff = m_Pos - m_From;
 	const vec2 OtherDiff = pLaser->m_Pos - pLaser->m_From;
 	const float DirError = distance(normalize(OtherDiff) * length(ThisDiff), ThisDiff);
-	if(DirError > 2.f)
-		return false;
-	return true;
+	return DirError <= 2.f;
 }

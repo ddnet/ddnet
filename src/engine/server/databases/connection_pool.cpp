@@ -3,6 +3,13 @@
 
 #include <engine/console.h>
 
+#include <memory>
+
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
+
 // helper struct to hold thread data
 struct CSqlExecData
 {
@@ -14,7 +21,7 @@ struct CSqlExecData
 		CDbConnectionPool::FWrite pFunc,
 		std::unique_ptr<const ISqlData> pThreadData,
 		const char *pName);
-	~CSqlExecData() {}
+	~CSqlExecData() = default;
 
 	enum
 	{
@@ -54,16 +61,14 @@ CSqlExecData::CSqlExecData(
 }
 
 CDbConnectionPool::CDbConnectionPool() :
-	m_NumElem(),
-	FirstElem(0),
-	LastElem(0)
+
+	m_FirstElem(0),
+	m_LastElem(0)
 {
 	thread_init_and_detach(CDbConnectionPool::Worker, this, "database worker thread");
 }
 
-CDbConnectionPool::~CDbConnectionPool()
-{
-}
+CDbConnectionPool::~CDbConnectionPool() = default;
 
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {
@@ -83,21 +88,21 @@ void CDbConnectionPool::RegisterDatabase(std::unique_ptr<IDbConnection> pDatabas
 
 void CDbConnectionPool::Execute(
 	FRead pFunc,
-	std::unique_ptr<const ISqlData> pThreadData,
+	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
-	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
+	m_aTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
+	m_FirstElem %= std::size(m_aTasks);
 	m_NumElem.Signal();
 }
 
 void CDbConnectionPool::ExecuteWrite(
 	FWrite pFunc,
-	std::unique_ptr<const ISqlData> pThreadData,
+	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[FirstElem++].reset(new CSqlExecData(pFunc, std::move(pThreadData), pName));
-	FirstElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
+	m_aTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
+	m_FirstElem %= std::size(m_aTasks);
 	m_NumElem.Signal();
 }
 
@@ -109,10 +114,12 @@ void CDbConnectionPool::OnShutdown()
 	while(m_Shutdown.load())
 	{
 		// print a log about every two seconds
-		if(i % 20 == 0)
-			dbg_msg("sql", "Waiting for score-threads to complete (%ds)", i / 10);
+		if(i % 20 == 0 && i > 0)
+		{
+			dbg_msg("sql", "Waiting for score threads to complete (%ds)", i / 10);
+		}
 		++i;
-		thread_sleep(100000);
+		std::this_thread::sleep_for(100ms);
 	}
 }
 
@@ -127,17 +134,24 @@ void CDbConnectionPool::Worker()
 	// remember last working server and try to connect to it first
 	int ReadServer = 0;
 	int WriteServer = 0;
-	while(1)
+	// enter fail mode when a sql request fails, skip read request during it and
+	// write to the backup database until all requests are handled
+	bool FailMode = false;
+	while(true)
 	{
+		if(FailMode && m_NumElem.GetApproximateValue() == 0)
+		{
+			FailMode = false;
+		}
 		m_NumElem.Wait();
-		auto pThreadData = std::move(m_aTasks[LastElem++]);
+		auto pThreadData = std::move(m_aTasks[m_LastElem++]);
 		// work through all database jobs after OnShutdown is called before exiting the thread
 		if(pThreadData == nullptr)
 		{
 			m_Shutdown.store(false);
 			return;
 		}
-		LastElem %= sizeof(m_aTasks) / sizeof(m_aTasks[0]);
+		m_LastElem %= std::size(m_aTasks);
 		bool Success = false;
 		switch(pThreadData->m_Mode)
 		{
@@ -145,6 +159,16 @@ void CDbConnectionPool::Worker()
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::READ].size(); i++)
 			{
+				if(m_Shutdown)
+				{
+					dbg_msg("sql", "%s dismissed read request during shutdown", pThreadData->m_pName);
+					break;
+				}
+				if(FailMode)
+				{
+					dbg_msg("sql", "%s dismissed read request during FailMode", pThreadData->m_pName);
+					break;
+				}
 				int CurServer = (ReadServer + i) % (int)m_aapDbConnections[Mode::READ].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::READ][CurServer].get(), pThreadData.get(), false))
 				{
@@ -154,12 +178,26 @@ void CDbConnectionPool::Worker()
 					break;
 				}
 			}
+			if(!Success)
+			{
+				FailMode = true;
+			}
 		}
 		break;
 		case CSqlExecData::WRITE_ACCESS:
 		{
 			for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE].size(); i++)
 			{
+				if(m_Shutdown && !m_aapDbConnections[Mode::WRITE_BACKUP].empty())
+				{
+					dbg_msg("sql", "%s skipped to backup database during shutdown", pThreadData->m_pName);
+					break;
+				}
+				if(FailMode && !m_aapDbConnections[Mode::WRITE_BACKUP].empty())
+				{
+					dbg_msg("sql", "%s skipped to backup database during FailMode", pThreadData->m_pName);
+					break;
+				}
 				int CurServer = (WriteServer + i) % (int)m_aapDbConnections[Mode::WRITE].size();
 				if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE][i].get(), pThreadData.get(), false))
 				{
@@ -171,6 +209,7 @@ void CDbConnectionPool::Worker()
 			}
 			if(!Success)
 			{
+				FailMode = true;
 				for(int i = 0; i < (int)m_aapDbConnections[Mode::WRITE_BACKUP].size(); i++)
 				{
 					if(ExecSqlFunc(m_aapDbConnections[Mode::WRITE_BACKUP][i].get(), pThreadData.get(), true))

@@ -104,7 +104,8 @@ function build_for_type() {
 		-DTOOLS=OFF \
 		-DDEV=TRUE \
 		-DCMAKE_CROSSCOMPILING=ON \
-		-DPREFER_BUNDLED_LIBS=ON
+		-DPREFER_BUNDLED_LIBS=ON \
+		-DVULKAN=ON
 	(
 		cd "build_android/$_ANDROID_SUB_BUILD_DIR/$1" || exit 1
 		cmake --build . --target DDNet
@@ -158,8 +159,8 @@ copy_dummy_files scripts/android/files/proguard-rules.pro proguard-rules.pro
 copy_dummy_files scripts/android/files/settings.gradle settings.gradle
 copy_dummy_files scripts/android/files/AndroidManifest.xml src/main/AndroidManifest.xml
 copy_dummy_files_rec scripts/android/files/res src/main
-copy_dummy_files other/icons/DDNet_512x512x32.png src/main/res/mipmap/ic_launcher.png
-copy_dummy_files other/icons/DDNet_512x512x32.png src/main/res/mipmap/ic_launcher_round.png
+copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
+copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
 
 function copy_libs() {
 	mkdir -p "lib/$2"

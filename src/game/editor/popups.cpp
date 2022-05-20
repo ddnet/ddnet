@@ -306,7 +306,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
+		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
 		Button.VSplitLeft(40.0f, 0, &Button);
 		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_aName), 10.0f, &s_Name))
@@ -421,7 +421,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
-		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, -1, -1);
+		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
 		Button.VSplitLeft(40.0f, 0, &Button);
 		static float s_Name = 0;
 		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->GetSelectedLayer(0)->m_aName, sizeof(pEditor->GetSelectedLayer(0)->m_aName), 10.0f, &s_Name))
@@ -600,6 +600,17 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 			lQuads[i]->m_aPoints[3].y = Bottom;
 			pEditor->m_Map.m_Modified = true;
 		}
+		return 1;
+	}
+
+	// slice button
+	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_SliceButton = 0;
+	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, 0, "Enables quad knife mode"))
+	{
+		pEditor->m_QuadKnifeCount = 0;
+		pEditor->m_QuadKnifeActive = true;
 		return 1;
 	}
 
@@ -975,7 +986,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 	// title
 	View.HSplitTop(10.0f, 0, &View);
 	View.HSplitTop(30.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Create new folder", 20.0f, 0);
+	pEditor->UI()->DoLabel(&Label, "Create new folder", 20.0f, TEXTALIGN_CENTER);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -989,7 +1000,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		static float s_FolderBox = 0;
 		pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 15.0f, &s_FolderBox);
 		View.HSplitBottom(20.0f, &View, &Label);
-		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, -1);
+		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_LEFT);
 
 		// button bar
 		ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1023,9 +1034,11 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitTop(30.0f, 0, &View);
 		View.VMargin(40.0f, &View);
 		View.HSplitTop(20.0f, &Label, &View);
-		pEditor->UI()->DoLabel(&Label, "Error:", 10.0f, -1);
+		pEditor->UI()->DoLabel(&Label, "Error:", 10.0f, TEXTALIGN_LEFT);
 		View.HSplitTop(20.0f, &Label, &View);
-		pEditor->UI()->DoLabel(&Label, "Unable to create the folder", 10.0f, -1, View.w);
+		SLabelProperties Props;
+		Props.m_MaxWidth = View.w;
+		pEditor->UI()->DoLabel(&Label, "Unable to create the folder", 10.0f, TEXTALIGN_LEFT, Props);
 
 		// button
 		ButtonBar.VMargin(ButtonBar.w / 2.0f - 55.0f, &ButtonBar);
@@ -1044,7 +1057,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 	// title
 	View.HSplitTop(10.0f, 0, &View);
 	View.HSplitTop(30.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Map details", 20.0f, 0);
+	pEditor->UI()->DoLabel(&Label, "Map details", 20.0f, TEXTALIGN_CENTER);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1053,7 +1066,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// author box
 	View.HSplitTop(20.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Author:", 10.0f, -1);
+	pEditor->UI()->DoLabel(&Label, "Author:", 10.0f, TEXTALIGN_LEFT);
 	Label.VSplitLeft(45.0f, 0, &Button);
 	Button.HMargin(3, &Button);
 	static float s_AuthorBox = 0;
@@ -1061,7 +1074,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// version box
 	View.HSplitTop(20.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Version:", 10.0f, -1);
+	pEditor->UI()->DoLabel(&Label, "Version:", 10.0f, TEXTALIGN_LEFT);
 	Label.VSplitLeft(45.0f, 0, &Button);
 	Button.HMargin(3, &Button);
 	static float s_VersionBox = 0;
@@ -1069,7 +1082,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// credits box
 	View.HSplitTop(20.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Credits:", 10.0f, -1);
+	pEditor->UI()->DoLabel(&Label, "Credits:", 10.0f, TEXTALIGN_LEFT);
 	Label.VSplitLeft(45.0f, 0, &Button);
 	Button.HMargin(3, &Button);
 	static float s_CreditsBox = 0;
@@ -1077,7 +1090,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// license box
 	View.HSplitTop(20.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "License:", 10.0f, -1);
+	pEditor->UI()->DoLabel(&Label, "License:", 10.0f, TEXTALIGN_LEFT);
 	Label.VSplitLeft(45.0f, 0, &Button);
 	Button.HMargin(3, &Button);
 	static float s_LicenseBox = 0;
@@ -1113,23 +1126,23 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitTop(10.0f, 0, &View);
 	View.HSplitTop(30.0f, &Label, &View);
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
-		pEditor->UI()->DoLabel(&Label, "Exit the editor", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Exit the editor", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
-		pEditor->UI()->DoLabel(&Label, "Load map", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Load map", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		pEditor->UI()->DoLabel(&Label, "New map", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "New map", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-		pEditor->UI()->DoLabel(&Label, "Save map", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Save map", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
-		pEditor->UI()->DoLabel(&Label, "Large layer", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Large layer", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
-		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "Image width/height", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Image width/height", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
-		pEditor->UI()->DoLabel(&Label, "Max images", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Max images", 20.0f, TEXTALIGN_CENTER);
 	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
-		pEditor->UI()->DoLabel(&Label, "Place border tiles", 20.0f, 0);
+		pEditor->UI()->DoLabel(&Label, "Place border tiles", 20.0f, TEXTALIGN_CENTER);
 
 	View.HSplitBottom(10.0f, &View, 0);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
@@ -1138,24 +1151,26 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitTop(30.0f, 0, &View);
 	View.VMargin(40.0f, &View);
 	View.HSplitTop(20.0f, &Label, &View);
+	SLabelProperties Props;
+	Props.m_MaxWidth = Label.w - 10.0f;
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you exit the editor.\nContinue anyway?", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you exit the editor.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
 	else if((pEditor->m_PopupEventType == POPEVENT_LOAD) || (pEditor->m_PopupEventType == POPEVENT_LOADCURRENT))
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you load a new map.\nContinue anyway?", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you load a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you create a new map.\nContinue anyway?", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you create a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-		pEditor->UI()->DoLabel(&Label, "The file already exists.\nDo you want to overwrite the map?", 10.0f, -1);
+		pEditor->UI()->DoLabel(&Label, "The file already exists.\nDo you want to overwrite the map?", 10.0f, TEXTALIGN_LEFT);
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
-		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
-		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
-		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, TEXTALIGN_LEFT, Props);
 	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
-		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, -1, Label.w - 10.0f);
+		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, TEXTALIGN_LEFT, Props);
 
 	// button bar
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
@@ -1166,7 +1181,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 			g_Config.m_ClEditor = 0;
 		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
-			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
+			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CEditor::CallbackOpenMap, pEditor);
 		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
 			pEditor->LoadCurrentMap();
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
@@ -1175,7 +1190,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_aFileName[0] = 0;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-			pEditor->CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			CEditor::CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 			pEditor->PlaceBorderTiles();
 		pEditor->m_PopupEventWasActivated = false;
@@ -1397,8 +1412,22 @@ static int s_GametileOpSelected = -1;
 
 int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static const char *s_pButtonNames[] = {"Air", "Hookable", "Death", "Unhookable", "Hookthrough", "Freeze", "Unfreeze", "Deep Freeze", "Deep Unfreeze", "Blue Check-Tele", "Red Check-Tele"};
-	static unsigned s_NumButtons = sizeof(s_pButtonNames) / sizeof(char *);
+	static const char *s_pButtonNames[] = {
+		"Air",
+		"Hookable",
+		"Death",
+		"Unhookable",
+		"Hookthrough",
+		"Freeze",
+		"Unfreeze",
+		"Deep Freeze",
+		"Deep Unfreeze",
+		"Blue Check-Tele",
+		"Red Check-Tele",
+		"Live Freeze",
+		"Live Unfreeze",
+	};
+	static unsigned s_NumButtons = std::size(s_pButtonNames);
 	CUIRect Button;
 
 	for(unsigned i = 0; i < s_NumButtons; ++i)
@@ -1416,7 +1445,7 @@ void CEditor::PopupSelectGametileOpInvoke(float x, float y)
 {
 	static int s_SelectGametileOpPopupId = 0;
 	s_GametileOpSelected = -1;
-	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 165.0f, PopupSelectGametileOp);
+	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 189.0f, PopupSelectGametileOp);
 }
 
 int CEditor::PopupSelectGameTileOpResult()
@@ -1739,7 +1768,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 	pEditor->Graphics()->QuadsBegin();
 
 	// base: white - hue
-	ColorHSVA hsv = pEditor->ms_PickerColor;
+	ColorHSVA hsv = CEditor::ms_PickerColor;
 	IGraphics::CColorVertex ColorArray[4];
 
 	ColorRGBA c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
@@ -1780,7 +1809,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// logic
 	float X, Y;
-	if(pEditor->UI()->DoPickerLogic(&pEditor->ms_SVPicker, &SVPicker, &X, &Y))
+	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y))
 	{
 		hsv.y = X / SVPicker.w;
 		hsv.z = 1.0f - Y / SVPicker.h;
@@ -1810,7 +1839,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 		ColorArray[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
 		ColorArray[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
 		pEditor->Graphics()->SetColorVertex(ColorArray, 4);
-		IGraphics::CQuadItem QuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
+		QuadItem = IGraphics::CQuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
 		pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 	}
 
@@ -1821,12 +1850,12 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	pEditor->Graphics()->QuadsEnd();
 
-	if(pEditor->UI()->DoPickerLogic(&pEditor->ms_HuePicker, &HuePicker, &X, &Y))
+	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y))
 	{
 		hsv.x = 1.0f - Y / HuePicker.h;
 	}
 
-	pEditor->ms_PickerColor = hsv;
+	CEditor::ms_PickerColor = hsv;
 
 	return 0;
 }
@@ -1851,8 +1880,9 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
 
-				pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
-				int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+				if(pEditor->m_EntitiesTexture.IsValid())
+					pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
+				int TextureLoadFlag = pEditor->GetTextureUsageFlag();
 				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
 				g_UiNumPopups--;
 			}
