@@ -23,12 +23,6 @@ using namespace std::chrono_literals;
 CMenuBackground::CMenuBackground() :
 	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
-	m_RotationCenter = vec2(0.0f, 0.0f);
-	m_AnimationStartPos = vec2(0.0f, 0.0f);
-	m_Camera.m_Center = vec2(0.0f, 0.0f);
-	m_Camera.m_PrevCenter = vec2(0.0f, 0.0f);
-	m_MenuCenter = vec2(0.0f, 0.0f);
-
 	m_ChangedPosition = false;
 
 	ResetPositions();
