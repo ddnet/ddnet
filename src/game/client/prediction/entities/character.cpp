@@ -519,6 +519,8 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	{
 		// reset input
 		ResetInput();
+		// mods that do not allow inputs to be held while chatting also do not allow to hold hook
+		m_Input.m_Hook = 0;
 		return;
 	}
 
@@ -542,7 +544,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
-	//m_Input.m_Hook = 0;
+	// m_Input.m_Hook = 0;
 	// simulate releasing the fire button
 	if((m_Input.m_Fire & 1) != 0)
 		m_Input.m_Fire++;
