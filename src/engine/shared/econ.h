@@ -45,6 +45,7 @@ class CEcon
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 public:
+	CEcon();
 	IConsole *Console() { return m_pConsole; }
 
 	void Init(CConfig *pConfig, IConsole *pConsole, class CNetBan *pNetBan);
