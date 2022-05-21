@@ -554,7 +554,7 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
 		m_Spawning = true;
 
 	// skip the input if chat is active
-	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
+	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 		return;
 
 	if(m_pCharacter && !m_Paused)
