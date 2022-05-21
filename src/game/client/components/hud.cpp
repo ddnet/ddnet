@@ -442,8 +442,8 @@ void CHud::RenderScoreHud()
 								TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
 
 							CTextCursor Cursor;
-							TextRender()->SetCursor(&Cursor, minimum(m_Width - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
-							Cursor.m_LineWidth = -1;
+							TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize, StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
+							Cursor.m_LineWidth = m_Width - Cursor.m_X - Split;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
 						}
 
