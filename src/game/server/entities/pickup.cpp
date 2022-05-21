@@ -17,6 +17,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int N
 {
 	m_Type = Type;
 	m_Subtype = SubType;
+	m_Core = vec2(0, 0);
 
 	m_Layer = Layer;
 	m_Number = Number;
