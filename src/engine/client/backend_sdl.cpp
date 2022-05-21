@@ -575,6 +575,7 @@ static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, in
 EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 {
 	EBackendType RetBackendType = BACKEND_TYPE_OPENGL;
+#if defined(CONF_BACKEND_VULKAN)
 	const char *pEnvDriver = SDL_getenv("DDNET_DRIVER");
 	if(pEnvDriver && str_comp_nocase(pEnvDriver, "GLES") == 0)
 		RetBackendType = BACKEND_TYPE_OPENGL_ES;
@@ -593,7 +594,7 @@ EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 		else if(str_comp_nocase(pConfBackend, "OpenGL") == 0)
 			RetBackendType = BACKEND_TYPE_OPENGL;
 	}
-#if !defined(CONF_BACKEND_VULKAN)
+#else
 	RetBackendType = BACKEND_TYPE_OPENGL;
 #endif
 #if !defined(CONF_BACKEND_OPENGL_ES) && !defined(CONF_BACKEND_OPENGL_ES3)

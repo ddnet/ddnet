@@ -35,7 +35,6 @@
 #include <game/client/lineinput.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
-#include <mastersrv/mastersrv.h>
 
 #include "controls.h"
 #include "countryflags.h"
@@ -43,6 +42,10 @@
 #include "skins.h"
 
 #include <limits>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 ColorRGBA CMenus::ms_GuiColor;
 ColorRGBA CMenus::ms_ColorTabbarInactiveOutgame;
@@ -239,9 +242,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		int64_t Time = time_get_microseconds();
+		auto Time = tw::time_get();
 
-		if(pAnimator->m_Time + (int64_t)100000 < Time)
+		if(pAnimator->m_Time + 100ms < Time)
 		{
 			pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
 			pAnimator->m_Time = Time;
@@ -250,9 +253,9 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		pAnimator->m_Active = Checked || MouseInside;
 
 		if(pAnimator->m_Active)
-			pAnimator->m_Value = clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time) / 100000.f, 0, 1);
+			pAnimator->m_Value = clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
 		else
-			pAnimator->m_Value = clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time) / 100000.f, 0, 1);
+			pAnimator->m_Value = clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
 
 		Rect.w += pAnimator->m_Value * pAnimator->m_WOffset;
 		Rect.h += pAnimator->m_Value * pAnimator->m_HOffset;
@@ -929,7 +932,7 @@ void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 {
 	// TODO: not supported right now due to separate render thread
 
-	static int64_t LastLoadRender = 0;
+	static std::chrono::nanoseconds LastLoadRender{0};
 	auto CurLoadRenderCount = m_LoadCurrent;
 	if(IncreaseCounter)
 		++m_LoadCurrent;
@@ -937,10 +940,10 @@ void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get_microseconds() - LastLoadRender < 1000000 / 60)
+	if(tw::time_get() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	LastLoadRender = time_get_microseconds();
+	LastLoadRender = tw::time_get();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
@@ -1050,6 +1053,7 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
 	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
 	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
+	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
@@ -1078,7 +1082,7 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	m_Popup = POPUP_MESSAGE;
 }
 
-void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration)
+void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration)
 {
 	dbg_msg(pTopic, "%s", pBody);
 
@@ -1092,7 +1096,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	SetActive(true);
 
 	m_PopupWarningDuration = Duration;
-	m_PopupWarningLastTime = time_get_microseconds();
+	m_PopupWarningLastTime = tw::time_get();
 }
 
 bool CMenus::CanDisplayWarning()
@@ -1473,9 +1477,36 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = Client()->ServerAddress();
+			pExtraText = Client()->ConnectAddressString();
 			pButtonText = Localize("Abort");
-			if(Client()->MapDownloadTotalsize() > 0)
+			if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
+			{
+				int Connectivity = Client()->UdpConnectivity(Client()->ServerAddress().type);
+				const char *pMessage = nullptr;
+				switch(Connectivity)
+				{
+				case IClient::CONNECTIVITY_UNKNOWN:
+					break;
+				case IClient::CONNECTIVITY_CHECKING:
+					pMessage = Localize("Trying to determine UDP connectivity...");
+					break;
+				case IClient::CONNECTIVITY_UNREACHABLE:
+					pMessage = Localize("UDP seems to be filtered.");
+					break;
+				case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
+					pMessage = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
+					break;
+				case IClient::CONNECTIVITY_REACHABLE:
+					pMessage = Localize("No answer from server yet.");
+					break;
+				}
+				if(pMessage)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Client()->ConnectAddressString(), pMessage);
+					pExtraText = aBuf;
+				}
+			}
+			else if(Client()->MapDownloadTotalsize() > 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
 				pTitle = aBuf;
@@ -2247,7 +2278,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (time_get_microseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (tw::time_get() - m_PopupWarningLastTime >= m_PopupWarningDuration))
 			{
 				m_Popup = POPUP_NONE;
 				SetActive(false);
@@ -2486,7 +2517,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 		m_DownloadSpeed = 0.0f;
 	}
 	else if(NewState == IClient::STATE_CONNECTING)
+	{
 		m_Popup = POPUP_CONNECTING;
+	}
 	else if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_Popup != POPUP_WARNING)

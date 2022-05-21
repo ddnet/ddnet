@@ -6,6 +6,8 @@
 #include <array> // std::size
 #include <cstdlib>
 
+#include <thread>
+
 struct CPacket
 {
 	CPacket *m_pPrev;
@@ -203,7 +205,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			}
 		}
 
-		thread_sleep(1000);
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 	}
 }
 

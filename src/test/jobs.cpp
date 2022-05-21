@@ -32,7 +32,7 @@ protected:
 class CJob : public IJob
 {
 	std::function<void()> m_JobFunction;
-	void Run() { m_JobFunction(); }
+	void Run() override { m_JobFunction(); }
 
 public:
 	CJob(std::function<void()> &&JobFunction) :

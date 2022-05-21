@@ -83,7 +83,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10000000);
+			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
 			s_JoinTutorialTime = 0.0f;
 		}
 		m_DoubleClickIndex = -1;
@@ -152,7 +152,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			}
 			else
 			{
-				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10000000);
+				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10s);
 			}
 		}
 	}

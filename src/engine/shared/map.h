@@ -15,29 +15,29 @@ class CMap : public IEngineMap
 public:
 	CMap();
 
-	virtual void *GetData(int Index);
-	virtual int GetDataSize(int Index);
-	virtual void *GetDataSwapped(int Index);
-	virtual void UnloadData(int Index);
-	virtual void *GetItem(int Index, int *pType, int *pID);
-	virtual int GetItemSize(int Index);
-	virtual void GetType(int Type, int *pStart, int *pNum);
-	virtual void *FindItem(int Type, int ID);
-	virtual int NumItems();
+	void *GetData(int Index) override;
+	int GetDataSize(int Index) override;
+	void *GetDataSwapped(int Index) override;
+	void UnloadData(int Index) override;
+	void *GetItem(int Index, int *pType, int *pID) override;
+	int GetItemSize(int Index) override;
+	void GetType(int Type, int *pStart, int *pNum) override;
+	void *FindItem(int Type, int ID) override;
+	int NumItems() override;
 
-	virtual void Unload();
+	void Unload() override;
 
-	virtual bool Load(const char *pMapName);
+	bool Load(const char *pMapName) override;
 
-	virtual bool IsLoaded();
+	bool IsLoaded() override;
 
-	virtual SHA256_DIGEST Sha256();
+	SHA256_DIGEST Sha256() override;
 
-	virtual unsigned Crc();
+	unsigned Crc() override;
 
-	virtual int MapSize();
+	int MapSize() override;
 
-	virtual IOHANDLE File();
+	IOHANDLE File() override;
 };
 
 #endif

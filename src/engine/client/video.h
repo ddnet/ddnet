@@ -50,16 +50,16 @@ public:
 	CVideo(class CGraphics_Threaded *pGraphics, class ISound *pSound, class IStorage *pStorage, class IConsole *pConsole, int width, int height, const char *name);
 	~CVideo();
 
-	virtual void Start();
-	virtual void Stop();
-	virtual void Pause(bool Pause);
-	virtual bool IsRecording() { return m_Recording; }
+	void Start() override;
+	void Stop() override;
+	void Pause(bool Pause) override;
+	bool IsRecording() override { return m_Recording; }
 
-	virtual void NextVideoFrame();
-	virtual void NextVideoFrameThread();
+	void NextVideoFrame() override;
+	void NextVideoFrameThread() override;
 
-	virtual void NextAudioFrame(ISoundMixFunc Mix);
-	virtual void NextAudioFrameTimeline(ISoundMixFunc Mix);
+	void NextAudioFrame(ISoundMixFunc Mix) override;
+	void NextAudioFrameTimeline(ISoundMixFunc Mix) override;
 
 	static IVideo *Current() { return IVideo::ms_pCurrentVideo; }
 

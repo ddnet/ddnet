@@ -13,7 +13,6 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/map.h>
-#include <engine/masterserver.h>
 #include <engine/server.h>
 #include <engine/storage.h>
 
@@ -25,14 +24,14 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
+#include <engine/shared/json.h>
+#include <engine/shared/masterserver.h>
 #include <engine/shared/netban.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/snapshot.h>
-
-#include <mastersrv/mastersrv.h>
 
 #include <game/version.h>
 
@@ -363,8 +362,7 @@ void CServer::CClient::Reset()
 	m_Flags = 0;
 }
 
-CServer::CServer() :
-	m_Register(false), m_RegSixup(true)
+CServer::CServer()
 {
 	m_pConfig = &g_Config;
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -402,6 +400,7 @@ CServer::CServer() :
 #endif
 
 	m_pConnectionPool = new CDbConnectionPool();
+	m_pRegister = nullptr;
 
 	m_aErrorShutdownReason[0] = 0;
 
@@ -415,6 +414,7 @@ CServer::~CServer()
 		free(pCurrentMapData);
 	}
 
+	delete m_pRegister;
 	delete m_pConnectionPool;
 }
 
@@ -2220,10 +2220,95 @@ void CServer::ExpireServerInfo()
 	m_ServerInfoNeedsUpdate = true;
 }
 
+void CServer::UpdateRegisterServerInfo()
+{
+	// count the players
+	int PlayerCount = 0, ClientCount = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		{
+			if(GameServer()->IsClientPlayer(i))
+				PlayerCount++;
+
+			ClientCount++;
+		}
+	}
+
+	int MaxPlayers = maximum(m_NetServer.MaxClients() - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
+	int MaxClients = maximum(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
+	char aName[256];
+	char aGameType[32];
+	char aMapName[64];
+	char aVersion[64];
+	char aMapSha256[SHA256_MAXSTRSIZE];
+
+	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aMapSha256, sizeof(aMapSha256));
+
+	char aInfo[16384];
+	str_format(aInfo, sizeof(aInfo),
+		"{"
+		"\"max_clients\":%d,"
+		"\"max_players\":%d,"
+		"\"passworded\":%s,"
+		"\"game_type\":\"%s\","
+		"\"name\":\"%s\","
+		"\"map\":{"
+		"\"name\":\"%s\","
+		"\"sha256\":\"%s\","
+		"\"size\":%d"
+		"},"
+		"\"version\":\"%s\","
+		"\"clients\":[",
+		MaxClients,
+		MaxPlayers,
+		JsonBool(g_Config.m_Password[0]),
+		EscapeJson(aGameType, sizeof(aGameType), GameServer()->GameType()),
+		EscapeJson(aName, sizeof(aName), g_Config.m_SvName),
+		EscapeJson(aMapName, sizeof(aMapName), m_aCurrentMap),
+		aMapSha256,
+		m_aCurrentMapSize[MAP_TYPE_SIX],
+		EscapeJson(aVersion, sizeof(aVersion), GameServer()->Version()));
+
+	bool FirstPlayer = true;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		{
+			char aCName[32];
+			char aCClan[32];
+
+			char aClientInfo[256];
+			str_format(aClientInfo, sizeof(aClientInfo),
+				"%s{"
+				"\"name\":\"%s\","
+				"\"clan\":\"%s\","
+				"\"country\":%d,"
+				"\"score\":%d,"
+				"\"is_player\":%s"
+				"}",
+				!FirstPlayer ? "," : "",
+				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
+				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
+				m_aClients[i].m_Country,
+				m_aClients[i].m_Score,
+				JsonBool(GameServer()->IsClientPlayer(i)));
+			str_append(aInfo, aClientInfo, sizeof(aInfo));
+			FirstPlayer = false;
+		}
+	}
+
+	str_append(aInfo, "]}", sizeof(aInfo));
+
+	m_pRegister->OnNewInfo(aInfo);
+}
+
 void CServer::UpdateServerInfo(bool Resend)
 {
 	if(m_RunServer == UNINITIALIZED)
 		return;
+
+	UpdateRegisterServerInfo();
 
 	for(int i = 0; i < 3; i++)
 		for(int j = 0; j < 2; j++)
@@ -2267,17 +2352,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 		{
 			if(Packet.m_ClientID == -1)
 			{
-				// stateless
-				if(!(Packet.m_Flags & NETSENDFLAG_CONNLESS))
-				{
-					m_RegSixup.FeedToken(Packet.m_Address, ResponseToken);
-					continue;
-				}
-
-				if(ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && Config()->m_SvSixup &&
-					m_RegSixup.RegisterProcessPacket(&Packet, ResponseToken))
-					continue;
-				if(ResponseToken == NET_SECURITY_TOKEN_UNKNOWN && m_Register.RegisterProcessPacket(&Packet))
+				if(ResponseToken == NET_SECURITY_TOKEN_UNKNOWN && m_pRegister->OnPacket(&Packet))
 					continue;
 
 				{
@@ -2441,6 +2516,10 @@ int CServer::LoadMap(const char *pMapName)
 		if(!File)
 		{
 			Config()->m_SvSixup = 0;
+			if(m_pRegister)
+			{
+				m_pRegister->OnConfigChange();
+			}
 			str_format(aBufMsg, sizeof(aBufMsg), "couldn't load map %s", aBuf);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "disabling 0.7 compatibility");
@@ -2470,12 +2549,6 @@ int CServer::LoadMap(const char *pMapName)
 		m_aPrevStates[i] = m_aClients[i].m_State;
 
 	return 1;
-}
-
-void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole)
-{
-	m_Register.Init(pNetServer, pMasterServer, pConfig, pConsole);
-	m_RegSixup.Init(pNetServer, pMasterServer, pConfig, pConsole);
 }
 
 int CServer::Run()
@@ -2548,6 +2621,9 @@ int CServer::Run()
 	m_UPnP.Open(BindAddr);
 #endif
 
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	m_pRegister = CreateRegister(&g_Config, m_pConsole, pEngine, this->Port(), m_NetServer.GetGlobalToken());
+
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
@@ -2575,6 +2651,7 @@ int CServer::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
+	m_pRegister->OnConfigChange();
 
 	if(m_AuthManager.IsGenerated())
 	{
@@ -2742,9 +2819,7 @@ int CServer::Run()
 			}
 
 			// master server stuff
-			m_Register.RegisterUpdate(m_NetServer.NetType());
-			if(Config()->m_SvSixup)
-				m_RegSixup.RegisterUpdate(m_NetServer.NetType());
+			m_pRegister->Update();
 
 			if(m_ServerInfoNeedsUpdate)
 				UpdateServerInfo();
@@ -3736,7 +3811,6 @@ int main(int argc, const char **argv)
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON);
-	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
@@ -3752,8 +3826,6 @@ int main(int argc, const char **argv)
 	set_exception_handler_log_file(aBuf);
 #endif
 
-	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConfigManager->Values(), pConsole);
-
 	{
 		bool RegisterFail = false;
 
@@ -3765,8 +3837,6 @@ int main(int argc, const char **argv)
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMasterServer); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer *>(pEngineMasterServer), false);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IAntibot *>(pEngineAntibot), false);
 
@@ -3780,8 +3850,6 @@ int main(int argc, const char **argv)
 	pEngine->Init();
 	pConfigManager->Init();
 	pConsole->Init();
-	pEngineMasterServer->Init();
-	pEngineMasterServer->Load();
 
 	// register all console commands
 	pServer->RegisterCommands();

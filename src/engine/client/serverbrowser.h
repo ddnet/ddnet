@@ -6,7 +6,6 @@
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/external/json-parser/json.h>
-#include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
@@ -83,52 +82,52 @@ public:
 	virtual ~CServerBrowser();
 
 	// interface functions
-	void Refresh(int Type);
-	bool IsRefreshing() const;
-	bool IsGettingServerlist() const;
-	int LoadingProgression() const;
+	void Refresh(int Type) override;
+	bool IsRefreshing() const override;
+	bool IsGettingServerlist() const override;
+	int LoadingProgression() const override;
 
-	int NumServers() const { return m_NumServers; }
+	int NumServers() const override { return m_NumServers; }
 
-	int Players(const CServerInfo &Item) const
+	int Players(const CServerInfo &Item) const override
 	{
 		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
 	}
 
-	int Max(const CServerInfo &Item) const
+	int Max(const CServerInfo &Item) const override
 	{
 		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
 	}
 
-	int NumSortedServers() const { return m_NumSortedServers; }
-	const CServerInfo *SortedGet(int Index) const;
+	int NumSortedServers() const override { return m_NumSortedServers; }
+	const CServerInfo *SortedGet(int Index) const override;
 
-	bool GotInfo(const NETADDR &Addr) const;
-	bool IsFavorite(const NETADDR &Addr) const;
-	bool IsFavoritePingAllowed(const NETADDR &Addr) const;
-	void AddFavorite(const NETADDR &Addr);
-	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing);
-	void RemoveFavorite(const NETADDR &Addr);
+	bool GotInfo(const NETADDR &Addr) const override;
+	bool IsFavorite(const NETADDR &Addr) const override;
+	bool IsFavoritePingAllowed(const NETADDR &Addr) const override;
+	void AddFavorite(const NETADDR &Addr) override;
+	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing) override;
+	void RemoveFavorite(const NETADDR &Addr) override;
 
-	virtual const char *GetTutorialServer();
+	const char *GetTutorialServer() override;
 	void LoadDDNetRanks();
 	void RecheckOfficial();
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	int HasRank(const char *pMap);
-	int NumCountries(int Network) { return m_aNetworks[Network].m_NumCountries; }
-	int GetCountryFlag(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; }
-	const char *GetCountryName(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
+	int NumCountries(int Network) override { return m_aNetworks[Network].m_NumCountries; }
+	int GetCountryFlag(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; }
+	const char *GetCountryName(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
 
-	int NumTypes(int Network) { return m_aNetworks[Network].m_NumTypes; }
-	const char *GetType(int Network, int Index) { return m_aNetworks[Network].m_aTypes[Index]; }
+	int NumTypes(int Network) override { return m_aNetworks[Network].m_NumTypes; }
+	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aTypes[Index]; }
 
-	void DDNetFilterAdd(char *pFilter, const char *pName);
-	void DDNetFilterRem(char *pFilter, const char *pName);
-	bool DDNetFiltered(char *pFilter, const char *pName);
-	void CountryFilterClean(int Network);
-	void TypeFilterClean(int Network);
+	void DDNetFilterAdd(char *pFilter, const char *pName) override;
+	void DDNetFilterRem(char *pFilter, const char *pName) override;
+	bool DDNetFiltered(char *pFilter, const char *pName) override;
+	void CountryFilterClean(int Network) override;
+	void TypeFilterClean(int Network) override;
 
 	//
 	void Update(bool ForceResort);
@@ -143,7 +142,7 @@ public:
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
-	int GetCurrentType() { return m_ServerlistType; }
+	int GetCurrentType() override { return m_ServerlistType; }
 
 private:
 	CNetClient *m_pNetClient;

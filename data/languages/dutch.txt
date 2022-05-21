@@ -15,6 +15,7 @@
 #	Syntax Error	2011-07-02 20:09:24
 #	Yared Hufkens	2012-02-03 19:57:59
 #	Yared Hufkens	2012-12-08 10:51:30
+#   Ronan           2022-05-17 22:22:22
 ##### /authors #####
 
 ##### translated strings #####
@@ -635,7 +636,7 @@ Personal best:
 == Persoonlijk record:
 
 Learn
-== Leren:
+== Leren
 
 Browser
 == Verkenner
@@ -793,7 +794,7 @@ Show only chat messages from friends
 == Laat alleen berichten van vrienden zien
 
 Show clan above name plates
-== Laat clan boven naam platen zien
+== Laat clan boven naamplaten zien
 
 Clan plates size
 == Clan plaat grootte
@@ -1090,305 +1091,305 @@ Replay
 == Herhaling
 
 Saving ddnet-settings.cfg failed
-== 
+== Het opslaan van ddnet-settings.cfg is mislukt
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== De wijdte van de texture %s is niet te delen door %d, of de hoogte is niet te delen door %d wat visuele bugs kan veroorzaken.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Het format van de texture %s is niet RGBA, hetgeen zal visuele bugs veroorzaken.
 
 Warning
-== 
+== Waarschuwing
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Debug mode is geactiveerd. Gebruik Ctrl+Shift+D om debug mode te deactiveren.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Gebruik de k toets om jezelf te doden (herstarten), q om te pauzeren en andere spelers te bekijken. Zie instellingen voor andere toetsen bindingen.
 
 Existing Player
-== 
+== Bestaande speler
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Jouw gebruikersnaam '%s' is al in gebruik (%d points). Wil je deze naam alsnog gebruiken?
 
 Checking for existing player with your name
-== 
+== Aan het zoeken naar bestaande spelers met jouw naam
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Weet u zeker dat u de verbinding wilt verbreken en wilt verbinden met een andere server?
 
 Country / Region
-== 
+== Land / regio
 
 Speed
-== 
+== Snelheid
 
 Join Tutorial Server
-== 
+== Tutorial server betreden
 
 Skip Tutorial
-== 
+== Tutorial overslaan
 
 Theme
-== 
+== Thema
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== AZI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== ZA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Serverlijst ophalen bij masterserver
 
 %d of %d servers
-== 
+== %d van de %d servers
 
 %d of %d server
-== 
+== %d van %d server
 
 %d players
-== 
+== %d spelers
 
 %d player
-== 
+== %d speler
 
 Refreshing...
-== 
+== Aan het verversen...
 
 Leak IP
-== 
+== Lek IP
 
 Demos directory
-== 
+== Demo's map
 
 Smooth Dynamic Camera
-== 
+== Vloeiende Dynamische Camera
 
 Skip the main menu
-== 
+== Sla het hoofdmenu over
 
 Settings file
-== 
+== Instellingen bestand
 
 Config directory
-== 
+== Configuratie map
 
 Themes directory
-== 
+== Thema map
 
 Toggle to edit your dummy settings
-== 
+== Schakel in om je dummy instellingen te bewerken
 
 Download skins
-== 
+== Skins downloaden
 
 Choose default eyes when joining a server
-== 
+== Kies standaard ogen wanneer je een server betreedt
 
 Skin Database
-== 
+== Skin database
 
 Skins directory
-== 
+== Skins map
 
 Chat command
-== 
+== Chat command
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Venster
 
 Windowed borderless
-== 
+== Randloos venster
 
 Windowed fullscreen
-== 
+== Volledigscherm (in venster)
 
 Desktop fullscreen
-== 
+== Bureaublad volledigscherm
 
 Allows maps to render with more detail
-== 
+== Maakt het mogelijk om kaarten met meer detail te renderen
 
 Renderer
-== 
+== Renderer
 
 default
-== 
+== standaard
 
 custom
-== 
+== aangepast
 
 Graphics cards
-== 
+== Grafische kaart
 
 auto
-== 
+== Automatisch
 
 Game sound volume
-== 
+== Game geluid volume
 
 Chat sound volume
-== 
+== Chat geluid volume
 
 Background music volume
-== 
+== Achtergrond geluid volume
 
 Assets
-== 
+== Assets
 
 Show client IDs
-== 
+== Laat client ID's zien
 
 Kill Messages
-== 
+== Kill berichten
 
 Kill Message Normal Color
-== 
+== Kill Berichten Normale Kleur
 
 Kill Message Highlight Color
-== 
+== Kill Berichten Uitgelichte Kleur
 
 Laser Outline Color
-== 
+== Laser contour kleur
 
 Laser Inner Color
-== 
+== Laser binnen kleur
 
 Hookline
-== 
+== Haaklijn
 
 No hit
-== 
+== Geen treffer
 
 Hookable
-== 
+== Haakbaar
 
 Tee
-== 
+== Tee
 
 Use old chat style
-== 
+== Oude chat stijl gebruiken
 
 Client message
-== 
+== Client bericht
 
 Preview
-== 
+== Voorbeeld
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Wanneer je over de startlijn gaat, laat een spook tee zien die jouw beste tijd repliceert
 
 Opacity
-== 
+== Ondoorzichtigheid
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Pas de ondoorzichtigheid van eniteiten die tot andere teams behoren aan, zoals de tee's en de naamplaten
 
 Quads are used for background decoration
-== 
+== Quads worden gebruikt voor achtergronddecoratie
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Probeert andere entiteiten te voorspellen om een gevoel van "low latency" te geven
 
 Show local player's key presses
-== 
+== Laat lokale spelers hun toetsaanslagen zien
 
 Background
-== 
+== Achtergrond
 
 Entities Background color
-== 
+== Entiteiten Achtergrond kleur
 
 Use current map as background
-== 
+== Gebruik de huidige map als achtergrond
 
 Regular Background Color
-== 
+== Reguliere Achtergrond Kleur
 
 Run on join
-== 
+== Starten bij deelnemen
 
 Chat command (e.g. showall 1)
-== 
+== Chat command (bijv. showall 1)
 
 Entities
-== 
+== Entiteiten
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Deeltjes
 
 Assets directory
-== 
+== Assets map
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
 
 Tutorial
-== 
+== Tutorial
 
 Can't find a Tutorial server
-== 
+== De Tutorial server is niet gevonden
 
 Website
-== 
+== Website
 
 Settings
-== 
+== Instellingen
 
 Stop server
-== 
+== Stop server
 
 Run server
-== 
+== Laad server
 
 Server executable not found, can't run server
-== 
+== Server executable niet gevonden, de server kan niet gestart worden
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
-== 
+== Speel
 
 Super
-== 
+== Super
 
 Team %d
-== 
+== Team %d
 
 Net
-== 
+== Net
 
 FPM
-== 
+== FPM

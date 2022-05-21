@@ -114,7 +114,7 @@ void CChillerBotUX::CheckEmptyTick()
 	static int s_LastPlayerCount = 0;
 	int PlayerCount = CountOnlinePlayers();
 	if(s_LastPlayerCount > PlayerCount && PlayerCount == 1)
-		m_pClient->Client()->Connect(m_pClient->Client()->ServerAddress());
+		m_pClient->Client()->Connect(m_pClient->Client()->ConnectAddressString());
 	else
 		s_LastPlayerCount = CountOnlinePlayers();
 }

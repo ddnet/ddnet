@@ -6,6 +6,7 @@
 #include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
+#include <chrono>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -246,11 +247,16 @@ public:
 	{
 	};
 
+	struct SCustomHud : public SCustomItem
+	{
+	};
+
 protected:
 	sorted_array<SCustomEntities> m_EntitiesList;
 	sorted_array<SCustomGame> m_GameList;
 	sorted_array<SCustomEmoticon> m_EmoticonList;
 	sorted_array<SCustomParticle> m_ParticlesList;
+	sorted_array<SCustomHud> m_HudList;
 
 	bool m_IsInit = false;
 
@@ -260,11 +266,13 @@ protected:
 	static int GameScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser);
+	static int HudScan(const char *pName, int IsDir, int DirType, void *pUser);
 
 	static void ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetGame(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetParticles(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAssetEmoticons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAssetHud(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	void ClearCustomItems(int CurTab);
 
@@ -428,7 +436,7 @@ protected:
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 
-	int64_t m_DemoPopulateStartTime = 0;
+	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
@@ -636,7 +644,7 @@ public:
 
 	sorted_array<CGhostItem> m_lGhosts;
 
-	int64_t m_GhostPopulateStartTime = 0;
+	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();
@@ -647,10 +655,10 @@ public:
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
-	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration);
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration);
 
-	int64_t m_PopupWarningLastTime;
-	int64_t m_PopupWarningDuration;
+	std::chrono::nanoseconds m_PopupWarningLastTime;
+	std::chrono::nanoseconds m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];

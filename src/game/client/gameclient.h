@@ -34,6 +34,7 @@
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
+#include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
@@ -145,6 +146,7 @@ public:
 
 	CPlayers m_Players;
 	CNamePlates m_NamePlates;
+	CFreezeBars m_FreezeBars;
 	CItems m_Items;
 	CMapImages m_MapImages;
 
@@ -347,6 +349,10 @@ public:
 			CNetObj_DDNetCharacter m_ExtendedData;
 			bool m_HasExtendedData;
 
+			const CNetObj_DDNetCharacterDisplayInfo *m_PrevExtendedDisplayInfo;
+			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
+			bool m_HasExtendedDisplayInfo;
+
 			// interpolated position
 			vec2 m_Position;
 		};
@@ -481,25 +487,25 @@ public:
 	void OnReset();
 
 	// hooks
-	virtual void OnConnected();
-	virtual void OnRender();
-	virtual void OnUpdate();
-	virtual void OnDummyDisconnect();
+	void OnConnected() override;
+	void OnRender() override;
+	void OnUpdate() override;
+	void OnDummyDisconnect() override;
 	virtual void OnRelease();
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy);
-	virtual void InvalidateSnapshot();
-	virtual void OnNewSnapshot();
-	virtual void OnPredict();
-	virtual void OnActivateEditor();
-	virtual void OnDummySwap();
-	virtual int OnSnapInput(int *pData, bool Dummy, bool Force);
-	virtual void OnShutdown();
-	virtual void OnEnterGame();
-	virtual void OnRconType(bool UsernameReq);
-	virtual void OnRconLine(const char *pLine);
+	void OnInit() override;
+	void OnConsoleInit() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy) override;
+	void InvalidateSnapshot() override;
+	void OnNewSnapshot() override;
+	void OnPredict() override;
+	void OnActivateEditor() override;
+	void OnDummySwap() override;
+	int OnSnapInput(int *pData, bool Dummy, bool Force) override;
+	void OnShutdown() override;
+	void OnEnterGame() override;
+	void OnRconType(bool UsernameReq) override;
+	void OnRconLine(const char *pLine) override;
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
@@ -509,18 +515,18 @@ public:
 
 	void OnLanguageChange();
 
-	virtual const char *GetItemName(int Type) const;
-	virtual const char *Version() const;
-	virtual const char *NetVersion() const;
-	virtual int DDNetVersion() const;
-	virtual const char *DDNetVersionStr() const;
+	const char *GetItemName(int Type) const override;
+	const char *Version() const override;
+	const char *NetVersion() const override;
+	int DDNetVersion() const override;
+	const char *DDNetVersionStr() const override;
 
 	// actions
 	// TODO: move these
 	void SendFinishName();
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
-	virtual void SendDummyInfo(bool Start);
+	void SendDummyInfo(bool Start) override;
 	void SendKill(int ClientID);
 
 	// DDRace
@@ -535,7 +541,7 @@ public:
 
 	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID);
 
-	virtual int GetLastRaceTick();
+	int GetLastRaceTick() override;
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
@@ -551,17 +557,18 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
-	void DummyResetInput();
-	void Echo(const char *pString);
+	void DummyResetInput() override;
+	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientID);
 	int SwitchStateTeam();
 	bool IsLocalCharSuper();
-	bool CanDisplayWarning();
-	bool IsDisplayingWarning();
+	bool CanDisplayWarning() override;
+	bool IsDisplayingWarning() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+	void LoadHudSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
 
@@ -623,8 +630,8 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupArmor;
 		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
 		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
-		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;
@@ -633,6 +640,7 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupHammer;
 
 		IGraphics::CTextureHandle m_SpritePickupWeapons[6];
+		IGraphics::CTextureHandle m_SpritePickupWeaponArmor[4];
 
 		// flags
 		IGraphics::CTextureHandle m_SpriteFlagBlue;
@@ -676,6 +684,41 @@ public:
 
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
+
+	struct SClientHudSkin
+	{
+		IGraphics::CTextureHandle m_SpriteHudAirjump;
+		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
+		IGraphics::CTextureHandle m_SpriteHudSolo;
+		IGraphics::CTextureHandle m_SpriteHudNoCollision;
+		IGraphics::CTextureHandle m_SpriteHudEndlessJump;
+		IGraphics::CTextureHandle m_SpriteHudEndlessHook;
+		IGraphics::CTextureHandle m_SpriteHudJetpack;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFull;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarFull;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNoHookHit;
+		IGraphics::CTextureHandle m_SpriteHudNoHammerHit;
+		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;
+		IGraphics::CTextureHandle m_SpriteHudNoGrenadeHit;
+		IGraphics::CTextureHandle m_SpriteHudNoLaserHit;
+		IGraphics::CTextureHandle m_SpriteHudDeepFrozen;
+		IGraphics::CTextureHandle m_SpriteHudLiveFrozen;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGun;
+		IGraphics::CTextureHandle m_SpriteHudTeleportLaser;
+		IGraphics::CTextureHandle m_SpriteHudPracticeMode;
+		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
+		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
+	};
+
+	SClientHudSkin m_HudSkin;
+	bool m_HudSkinLoaded;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
 

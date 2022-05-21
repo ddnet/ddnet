@@ -538,10 +538,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 			return;
 
-		// reset input
-		if(m_pCharacter)
-			m_pCharacter->ResetInput();
-
 		m_PlayerFlags = NewInput->m_PlayerFlags;
 		return;
 	}

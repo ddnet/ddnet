@@ -5,6 +5,8 @@
 
 #include <base/system.h>
 #include <engine/textrender.h>
+
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -112,7 +114,7 @@ struct SUIAnimator
 	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
-	int64_t m_Time;
+	std::chrono::nanoseconds m_Time;
 	float m_Value;
 
 	float m_XOffset;

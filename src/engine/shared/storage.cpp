@@ -79,6 +79,7 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "assets/entities", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/game", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/particles", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "assets/hud", aPath, sizeof(aPath)));
 #if defined(CONF_VIDEORECORDER)
 				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
 #endif
@@ -309,7 +310,7 @@ public:
 		// no binary directory found, use $PATH on Posix, $PWD on Windows
 	}
 
-	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser)
+	void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
@@ -325,7 +326,7 @@ public:
 		}
 	}
 
-	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser)
+	void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
@@ -354,7 +355,7 @@ public:
 		return pBuffer;
 	}
 
-	virtual IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0)
+	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(!pBuffer)
@@ -446,7 +447,7 @@ public:
 		return 0;
 	}
 
-	virtual bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize)
+	bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize) override
 	{
 		if(BufferSize < 1)
 			return false;
@@ -479,7 +480,7 @@ public:
 		return pBuffer[0] != 0;
 	}
 
-	virtual bool RemoveFile(const char *pFilename, int Type)
+	bool RemoveFile(const char *pFilename, int Type) override
 	{
 		if(Type < TYPE_ABSOLUTE || Type == TYPE_ALL || Type >= m_NumPaths)
 			return false;
@@ -493,7 +494,7 @@ public:
 		return Success;
 	}
 
-	virtual bool RemoveBinaryFile(const char *pFilename)
+	bool RemoveBinaryFile(const char *pFilename) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
@@ -504,7 +505,7 @@ public:
 		return Success;
 	}
 
-	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type)
+	bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type) override
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 			return false;
@@ -520,7 +521,7 @@ public:
 		return Success;
 	}
 
-	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename)
+	bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename) override
 	{
 		char aOldBuffer[IO_MAX_PATH_LENGTH];
 		char aNewBuffer[IO_MAX_PATH_LENGTH];
@@ -536,7 +537,7 @@ public:
 		return Success;
 	}
 
-	virtual bool CreateFolder(const char *pFoldername, int Type)
+	bool CreateFolder(const char *pFoldername, int Type) override
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 			return false;
@@ -550,7 +551,7 @@ public:
 		return Success;
 	}
 
-	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 		{
@@ -562,7 +563,7 @@ public:
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
-	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
+	const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) override
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
 		return pBuffer;

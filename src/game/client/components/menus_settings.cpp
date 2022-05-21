@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/system.h>
 
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -22,7 +23,6 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 
-#include "base/system.h"
 #include "binds.h"
 #include "camera.h"
 #include "countryflags.h"
@@ -36,6 +36,10 @@
 
 #include <array>
 #include <numeric>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 CMenusKeyBinder CMenus::m_Binder;
 
@@ -71,11 +75,6 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	bool CheckSettings = false;
-	static int s_ClShowConsole = g_Config.m_ClShowConsole;
-#endif
-
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
 	CUIRect Label, Button, Left, Right, Game, Client;
 	MainView.HSplitTop(150.0f, &Game, &Client);
@@ -243,19 +242,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		UI()->DoLabelScaled(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		g_Config.m_ClRefreshRate = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
-
-#if defined(CONF_FAMILY_WINDOWS)
-		Left.HSplitTop(10.0f, 0, &Left);
-		Left.HSplitTop(20.0f, &Button, &Left);
-		if(DoButton_CheckBox(&g_Config.m_ClShowConsole, Localize("Show console window"), g_Config.m_ClShowConsole, &Button))
-		{
-			g_Config.m_ClShowConsole ^= 1;
-			CheckSettings = true;
-		}
-
-		if(CheckSettings)
-			m_NeedRestartGeneral = s_ClShowConsole != g_Config.m_ClShowConsole;
-#endif
 
 		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect SettingsButton;
@@ -838,10 +824,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
-		int64_t SkinStartLoadTime = time_get_microseconds();
+		auto SkinStartLoadTime = tw::time_get();
 		m_pClient->m_Skins.Refresh([&](int) {
 			// if skin refreshing takes to long, swap to a loading screen
-			if(time_get_microseconds() - SkinStartLoadTime > 500000)
+			if(tw::time_get() - SkinStartLoadTime > 500ms)
 			{
 				RenderLoading(false, false);
 			}
@@ -2357,8 +2343,14 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		// ***** HUD ***** //
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceHud, Localize("Use DDRace HUD"), &g_Config.m_ClDDRaceHud, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs"), &g_Config.m_ClShowIDs, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudScore, Localize("Show score"), &g_Config.m_ClShowhudScore, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), &g_Config.m_ClShowhudHealthAmmo, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChat, Localize("Show chat"), &g_Config.m_ClShowChat, &MainView, LineMargin);

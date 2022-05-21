@@ -239,51 +239,51 @@ public:
 	void LoadMapSettings();
 
 	// engine events
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnMapChange(char *pNewMapName, int MapNameSize);
-	virtual void OnShutdown();
+	void OnInit() override;
+	void OnConsoleInit() override;
+	void OnMapChange(char *pNewMapName, int MapNameSize) override;
+	void OnShutdown() override;
 
-	virtual void OnTick();
-	virtual void OnPreSnap();
-	virtual void OnSnap(int ClientID);
-	virtual void OnPostSnap();
+	void OnTick() override;
+	void OnPreSnap() override;
+	void OnSnap(int ClientID) override;
+	void OnPostSnap() override;
 
 	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
-	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
+	void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) override;
 
-	virtual bool OnClientDataPersist(int ClientID, void *pData);
-	virtual void OnClientConnected(int ClientID, void *pData);
-	virtual void OnClientEnter(int ClientID);
-	virtual void OnClientDrop(int ClientID, const char *pReason);
-	virtual void OnClientDirectInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
+	bool OnClientDataPersist(int ClientID, void *pData) override;
+	void OnClientConnected(int ClientID, void *pData) override;
+	void OnClientEnter(int ClientID) override;
+	void OnClientDrop(int ClientID, const char *pReason) override;
+	void OnClientDirectInput(int ClientID, void *pInput) override;
+	void OnClientPredictedInput(int ClientID, void *pInput) override;
+	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
 
-	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
-	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
+	void OnClientEngineJoin(int ClientID, bool Sixup) override;
+	void OnClientEngineDrop(int ClientID, const char *pReason) override;
 
-	virtual bool IsClientReady(int ClientID) const;
-	virtual bool IsClientPlayer(int ClientID) const;
-	virtual int PersistentClientDataSize() const { return sizeof(CPersistentClientData); }
+	bool IsClientReady(int ClientID) const override;
+	bool IsClientPlayer(int ClientID) const override;
+	int PersistentClientDataSize() const override { return sizeof(CPersistentClientData); }
 
-	virtual CUuid GameUuid() const;
-	virtual const char *GameType() const;
-	virtual const char *Version() const;
-	virtual const char *NetVersion() const;
+	CUuid GameUuid() const override;
+	const char *GameType() const override;
+	const char *Version() const override;
+	const char *NetVersion() const override;
 
 	// DDRace
-	void OnPreTickTeehistorian();
+	void OnPreTickTeehistorian() override;
 	bool OnClientDDNetVersionKnown(int ClientID);
-	virtual void FillAntibot(CAntibotRoundData *pData);
+	void FillAntibot(CAntibotRoundData *pData) override;
 	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
-	bool PlayerExists(int ClientID) const { return m_apPlayers[ClientID]; }
+	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
 	void ForceVote(int EnforcerID, bool Success);
@@ -456,7 +456,7 @@ public:
 	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientID);
-	virtual void OnSetAuthed(int ClientID, int Level);
+	void OnSetAuthed(int ClientID, int Level) override;
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();

@@ -96,16 +96,17 @@ endif()
 
 set(AUTO_DEPENDENCIES_DEFAULT OFF)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR DEV)
   set(AUTO_IPO OFF)
-else()
-  set(AUTO_IPO ON)
-endif()
-
-if(MSVC)
+elseif(MSVC)
   # For some reason on MSVC platform the client and server binaries
   # become even bigger with IPO enabled.
   set(AUTO_IPO OFF)
+elseif(MINGW AND TARGET_CPU_ARCHITECTURE STREQUAL "x86")
+  # DWARF error: could not find variable specification and further failures
+  set(AUTO_IPO OFF)
+else()
+  set(AUTO_IPO ON)
 endif()
 
 set(AUTO_VULKAN_BACKEND ON)
@@ -213,7 +214,7 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
     set(CHECKED_FLAG "${FLAG}")
   endif()
   string(REGEX REPLACE "[^A-Za-z0-9]" "_" CONFIG_VARIABLE "FLAG_SUPPORTED${CHECKED_FLAG}")
-  check_c_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
+  check_cxx_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
   if(${CONFIG_VARIABLE})
     if(${VARIABLE})
       set("${VARIABLE}" "${${VARIABLE}};${FLAG}" PARENT_SCOPE)
@@ -232,14 +233,7 @@ endif()
 
 if(NOT MSVC AND NOT HAIKU)
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-    check_cxx_compiler_flag(-std=gnu++17 FLAG_SUPPORTED_std_gnu__17)
-    if(FLAG_SUPPORTED_std_gnu__17)
-      if(CMAKE_CXX_FLAGS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17")
-      else()
-        set(CMAKE_CXX_FLAGS -std=gnu++17)
-      endif()
-    endif()
+    add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
   # Protect the stack pointer.
@@ -286,6 +280,7 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
@@ -293,26 +288,10 @@ if(NOT MSVC AND NOT HAIKU)
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
   add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
+  add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
   # add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
-endif()
-
-if(UNIX AND NOT APPLE)
-  # This can be disabled by configuring with -DUSE_GOLD=FALSE
-  if(NOT DEFINED USE_GOLD)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
-    if("${ld_version}" MATCHES "GNU gold")
-      set(USE_GOLD TRUE CACHE BOOL "Use GNU gold linker")
-    else()
-      set(USE_GOLD FALSE CACHE BOOL "Use GNU gold linker")
-    endif()
-  endif()
-  message(STATUS "GNU gold linker enabled: ${USE_GOLD}")
-  if(USE_GOLD)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-  endif()
 endif()
 
 if(MSVC)
@@ -688,8 +667,8 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
+    src/macos/client.mm
     src/macos/notifications.mm
-    src/macoslaunch/client.m
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
@@ -1246,6 +1225,7 @@ set(EXPECTED_DATA
   gui_cursor.png
   gui_icons.png
   gui_logo.png
+  hud.png
   languages/arabic.txt
   languages/belarusian.txt
   languages/bosnian.txt
@@ -1698,7 +1678,6 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   kernel.h
   keys.h
   map.h
-  masterserver.h
   message.h
   server.h
   serverbrowser.h
@@ -1753,6 +1732,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   map.cpp
   map.h
   masterserver.cpp
+  masterserver.h
   memheap.cpp
   memheap.h
   netban.cpp
@@ -1764,6 +1744,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   network_console.cpp
   network_console_conn.cpp
   network_server.cpp
+  network_stun.cpp
   packer.cpp
   packer.h
   protocol.h
@@ -1777,6 +1758,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  stun.cpp
+  stun.h
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
@@ -1842,10 +1825,6 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
 )
-set(MASTERSRV_SHARED
-  src/mastersrv/mastersrv.cpp
-  src/mastersrv/mastersrv.h
-)
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
@@ -1865,8 +1844,7 @@ set(LIBS
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
-add_library(mastersrv-shared EXCLUDE_FROM_ALL OBJECT ${MASTERSRV_SHARED})
-list(APPEND TARGETS_OWN engine-shared game-shared mastersrv-shared)
+list(APPEND TARGETS_OWN engine-shared game-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
   add_library(discord-shared SHARED IMPORTED)
@@ -2020,6 +1998,8 @@ if(CLIENT)
     components/emoticon.h
     components/flow.cpp
     components/flow.h
+    components/freezebars.cpp
+    components/freezebars.h
     components/ghost.cpp
     components/ghost.h
     components/hud.cpp
@@ -2181,7 +2161,6 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:mastersrv-shared>
     )
   else()
     add_executable(${TARGET_CLIENT} WIN32
@@ -2191,7 +2170,6 @@ if(CLIENT)
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:mastersrv-shared>
     )
   endif()
   target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
@@ -2378,14 +2356,13 @@ if(SERVER)
     ${SERVER_ICON}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
-    $<TARGET_OBJECTS:mastersrv-shared>
   )
   target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
   list(APPEND TARGETS_OWN ${TARGET_SERVER})
   list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
   if(TARGET_OS AND TARGET_OS STREQUAL "mac")
-    set(SERVER_LAUNCHER_SRC src/macoslaunch/server.mm)
+    set(SERVER_LAUNCHER_SRC src/macos/server.mm)
     set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
     add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
     target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
@@ -2399,21 +2376,13 @@ endif()
 ########################################################################
 
 if(TOOLS)
-  set(MASTERSRV_SRC src/mastersrv/main_mastersrv.cpp)
   set_src(TWPING_SRC GLOB src/twping twping.cpp)
-
-  set(TARGET_MASTERSRV mastersrv)
   set(TARGET_TWPING twping)
-
-  add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
-
-  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> $<TARGET_OBJECTS:mastersrv-shared> ${DEPS})
-
-  target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
+  add_executable(${TARGET_TWPING} EXCLUDE_FROM_ALL ${TWPING_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
   target_link_libraries(${TARGET_TWPING} ${LIBS})
 
-  list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_TWPING})
-  list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_TWPING})
+  list(APPEND TARGETS_OWN ${TARGET_TWPING})
+  list(APPEND TARGETS_LINK ${TARGET_TWPING})
 
   set(TARGETS_TOOLS)
   set_src(TOOLS_SRC GLOB src/tools
@@ -2423,7 +2392,6 @@ if(TOOLS)
     crapnet.cpp
     dilate.cpp
     dummy_map.cpp
-    fake_server.cpp
     map_convert_07.cpp
     map_diff.cpp
     map_extract.cpp
@@ -2431,6 +2399,7 @@ if(TOOLS)
     map_replace_image.cpp
     map_resave.cpp
     packetgen.cpp
+    stun.cpp
     unicode_confusables.cpp
     uuid.cpp
   )
@@ -2447,9 +2416,6 @@ if(TOOLS)
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
-      endif()
-      if(TOOL MATCHES "^fake_server")
-          list(APPEND TOOL_DEPS $<TARGET_OBJECTS:mastersrv-shared>)
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
@@ -2575,10 +2541,9 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     ${TESTS_EXTRA}
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
-    $<TARGET_OBJECTS:mastersrv-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${CURL_LIBRARIES} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
   target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})

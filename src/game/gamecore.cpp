@@ -102,7 +102,9 @@ void CCharacterCore::Reset()
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
+	m_FreezeTick = 0;
 	m_FreezeEnd = 0;
+	m_IsInFreeze = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
 
@@ -138,27 +140,40 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float tmp_angle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
-		if(tmp_angle < -(pi / 2.0f))
+		float TmpAngle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
+		if(TmpAngle < -(pi / 2.0f))
 		{
-			m_Angle = (int)((tmp_angle + (2.0f * pi)) * 256.0f);
+			m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
 		}
 		else
 		{
-			m_Angle = (int)(tmp_angle * 256.0f);
+			m_Angle = (int)(TmpAngle * 256.0f);
 		}
+
+		// Special jump cases:
+		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set
+		// m_Jumps == 0: A tee may not make a jump. Second jumped bit is always set
+		// m_Jumps == 1: A tee may do either a ground jump or an air jump. Second jumped bit is set after the first jump
+		// The second jumped bit can be overridden by special tiles so that the tee can nevertheless jump.
 
 		// handle jump
 		if(m_Input.m_Jump)
 		{
 			if(!(m_Jumped & 1))
 			{
-				if(Grounded)
+				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
 					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
-					m_Jumped |= 1;
-					m_JumpedTotal = 1;
+					if(m_Jumps > 1)
+					{
+						m_Jumped |= 1;
+					}
+					else
+					{
+						m_Jumped |= 3;
+					}
+					m_JumpedTotal = 0;
 				}
 				else if(!(m_Jumped & 2))
 				{
@@ -170,7 +185,9 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 		}
 		else
+		{
 			m_Jumped &= ~1;
+		}
 
 		// handle hook
 		if(m_Input.m_Hook)
@@ -193,6 +210,15 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
+	// handle jumping
+	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
+	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
+	if(Grounded)
+	{
+		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
+
 	// add the speed modification according to players wanted direction
 	if(m_Direction < 0)
 		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
@@ -200,15 +226,6 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
-
-	// handle jumping
-	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
-	// 2 bit = to keep track if a air-jump has been made (tee gets dark feet)
-	if(Grounded)
-	{
-		m_Jumped &= ~2;
-		m_JumpedTotal = 0;
-	}
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)
@@ -520,7 +537,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
 {
 	m_Pos.x = pObjCore->m_X;
 	m_Pos.y = pObjCore->m_Y;
@@ -538,6 +555,11 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
+void CCharacterCore::ReadCharacter(const CNetObj_Character *pObjChar)
+{
+	m_ActiveWeapon = pObjChar->m_Weapon;
+	ReadCharacterCore((const CNetObj_CharacterCore *)pObjChar);
+}
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
@@ -568,14 +590,31 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_HasTelegunGun = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
 	m_HasTelegunLaser = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
+	// Weapons
+	m_aWeapons[WEAPON_HAMMER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_HAMMER) != 0;
+	m_aWeapons[WEAPON_GUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GUN) != 0;
+	m_aWeapons[WEAPON_SHOTGUN].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_SHOTGUN) != 0;
+	m_aWeapons[WEAPON_GRENADE].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_GRENADE) != 0;
+	m_aWeapons[WEAPON_LASER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_LASER) != 0;
+	m_aWeapons[WEAPON_NINJA].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
+
+	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
+}
+
+void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInfo *pObjDDNet)
+{
+	m_JumpedTotal = pObjDDNet->m_JumpedTotal;
+	m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
+	m_FreezeTick = pObjDDNet->m_FreezeTick;
+	m_IsInFreeze = pObjDDNet->m_IsInFreeze;
 }
 
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
 	Write(&Core);
-	Read(&Core);
+	ReadCharacterCore(&Core);
 }
 
 // DDRace

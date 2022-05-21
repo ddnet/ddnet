@@ -15,10 +15,10 @@ public:
 	CServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage);
 	virtual ~CServerBrowserPingCache() = default;
 
-	void Load();
+	void Load() override;
 
-	void CachePing(NETADDR Addr, int Ping);
-	void GetPingCache(const CEntry **ppEntries, int *pNumEntries);
+	void CachePing(NETADDR Addr, int Ping) override;
+	void GetPingCache(const CEntry **ppEntries, int *pNumEntries) override;
 
 private:
 	IConsole *m_pConsole;
