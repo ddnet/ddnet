@@ -494,7 +494,7 @@ void CCharacter::GiveNinja()
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// save reseted input
 		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
@@ -515,10 +515,12 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// reset input
 		ResetInput();
+		// mods that do not allow inputs to be held while chatting also do not allow to hold hook
+		m_Input.m_Hook = 0;
 		return;
 	}
 
@@ -542,7 +544,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
-	//m_Input.m_Hook = 0;
+	// m_Input.m_Hook = 0;
 	// simulate releasing the fire button
 	if((m_Input.m_Fire & 1) != 0)
 		m_Input.m_Fire++;
