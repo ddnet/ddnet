@@ -494,7 +494,7 @@ void CCharacter::GiveNinja()
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// save reseted input
 		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
@@ -515,7 +515,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// reset input
 		ResetInput();
