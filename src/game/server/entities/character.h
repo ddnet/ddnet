@@ -32,7 +32,7 @@ public:
 	//character's size
 	static const int ms_PhysSize = 28;
 
-	CCharacter(CGameWorld *pWorld);
+	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
 
 	void Reset() override;
 	void Destroy() override;

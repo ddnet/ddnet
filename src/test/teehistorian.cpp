@@ -89,7 +89,7 @@ protected:
 	void Expect(const unsigned char *pOutput, int OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"3\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"4\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -463,6 +463,47 @@ TEST_F(TeeHistorian, JoinLeave)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
+TEST_F(TeeHistorian, Input)
+{
+	CNetObj_PlayerInput Input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	const unsigned char EXPECTED[] = {
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// new player -> InputNew
+		0x45,
+		0x00, // ClientID 0
+		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+		// same unique id, same input -> nothing
+		// same unique id, different input -> InputDiff
+		0x44,
+		0x00, // ClientID 0
+		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		// different unique id, same input -> InputNew
+		0x45,
+		0x00, // ClientID 0
+		0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+		// FINISH
+		0x40};
+
+	Tick(1);
+
+	// new player -> InputNew
+	m_TH.RecordPlayerInput(0, 1, &Input);
+	// same unique id, same input -> nothing
+	m_TH.RecordPlayerInput(0, 1, &Input);
+
+	Input.m_Direction = 0;
+
+	// same unique id, different input -> InputDiff
+	m_TH.RecordPlayerInput(0, 1, &Input);
+
+	// different unique id, same input -> InputNew
+	m_TH.RecordPlayerInput(0, 2, &Input);
+
+	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
 TEST_F(TeeHistorian, SaveSuccess)
 {
 	const unsigned char EXPECTED[] = {
@@ -548,6 +589,29 @@ TEST_F(TeeHistorian, LoadFailed)
 
 	m_TH.RecordTeamLoadFailure(12);
 	Finish();
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, PlayerSwap)
+{
+	const unsigned char EXPECTED[] = {
+		// TICK_SKIP dt=0
+		0x41, 0x00,
+		// EX uuid=5de9b633-49cf-3e99-9a25-d4a78e9717d7 datalen=2
+		0x4a,
+		0x5d, 0xe9, 0xb6, 0x33, 0x49, 0xcf, 0x3e, 0x99,
+		0x9a, 0x25, 0xd4, 0xa7, 0x8e, 0x97, 0x17, 0xd7,
+		0x02,
+		// playerId1=11
+		0x0b,
+		// playerId2=21
+		0x15,
+		// FINISH
+		0x40};
+	Tick(1);
+	m_TH.RecordPlayerSwap(11, 21);
+	Finish();
+
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 

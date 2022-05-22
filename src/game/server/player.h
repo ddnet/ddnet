@@ -22,7 +22,7 @@ class CPlayer
 	MACRO_ALLOC_POOL_ID()
 
 public:
-	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
+	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team);
 	~CPlayer();
 
 	void Reset();
@@ -33,6 +33,7 @@ public:
 	void SetTeam(int Team, bool DoChatMsg = true);
 	int GetTeam() const { return m_Team; }
 	int GetCID() const { return m_ClientID; }
+	uint32_t GetUniqueCID() const { return m_UniqueClientID; }
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
@@ -113,6 +114,7 @@ public:
 	} m_Latency;
 
 private:
+	const uint32_t m_UniqueClientID;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
 	CGameContext *m_pGameServer;
