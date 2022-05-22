@@ -431,10 +431,16 @@ void CHttp::Run()
 
 	for(auto &ReqPair : m_RunningRequests)
 	{
-		CURL *pHandle = ReqPair.first;
+		auto &[pHandle, pRequest] = ReqPair;
 		curl_multi_remove_handle(m_pHandle, pHandle);
 		curl_easy_cleanup(pHandle);
+
+		// Emulate CURLE_ABORTED_BY_CALLBACK
+		str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
+		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
 	}
+
+	m_RunningRequests.clear();
 
 	curl_share_cleanup(m_pShare);
 	curl_multi_cleanup(m_pHandle);
