@@ -33,9 +33,9 @@ public:
 
 	void SetPos(vec2 Pos);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void Snap(int SnappingClient);
+	void Reset() override;
+	void Tick() override;
+	void Snap(int SnappingClient) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAGGER_BEAM_H
