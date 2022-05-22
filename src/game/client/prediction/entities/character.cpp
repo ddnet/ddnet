@@ -1112,7 +1112,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
-	// never intilize both to zero
+	// never initialize both to zero
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
 

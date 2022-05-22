@@ -26,8 +26,8 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_Armor = 0;
 	m_StrongWeakID = 0;
 
-	// never intilize both to zero
 	m_Input = LastInput;
+	// never initialize both to zero
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
 
