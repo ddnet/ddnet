@@ -193,7 +193,24 @@ set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 # Compiler flags
 ########################################################################
 
-function(add_compiler_flag_if_supported VARIABLE FLAG)
+function(add_c_compiler_flag_if_supported VARIABLE FLAG)
+  if(ARGC GREATER 2)
+    set(CHECKED_FLAG "${ARGV2}")
+  else()
+    set(CHECKED_FLAG "${FLAG}")
+  endif()
+  string(REGEX REPLACE "[^A-Za-z0-9]" "_" CONFIG_VARIABLE "FLAG_SUPPORTED${CHECKED_FLAG}")
+  check_c_compiler_flag("${CHECKED_FLAG}" ${CONFIG_VARIABLE})
+  if(${CONFIG_VARIABLE})
+    if(${VARIABLE})
+      set("${VARIABLE}" "${${VARIABLE}};${FLAG}" PARENT_SCOPE)
+    else()
+      set("${VARIABLE}" "${FLAG}" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
+function(add_cxx_compiler_flag_if_supported VARIABLE FLAG)
   if(ARGC GREATER 2)
     set(CHECKED_FLAG "${ARGV2}")
   else()
@@ -234,8 +251,8 @@ endfunction()
 # Force compiler colors on when using ninja. Ninja filters the colors out when
 # it's not printing to a terminal on its own.
 if(CMAKE_GENERATOR STREQUAL "Ninja")
-  add_compiler_flag_if_supported(OUR_FLAGS -fdiagnostics-color=always)
-  add_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS -fdiagnostics-color=always)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
 endif()
 
 if(NOT MSVC AND NOT HAIKU)
@@ -271,70 +288,70 @@ if(NOT MSVC AND NOT HAIKU)
   endif()
 
   if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
-    add_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
   # Protect the stack pointer.
   # -fstack-protector-all doesn't work on MinGW.
-  add_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
 
   # Disable exceptions as DDNet does not use them.
-  add_compiler_flag_if_supported(OUR_FLAGS -fno-exceptions)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS -fno-exceptions)
 
   # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
   # compiling for x86, might cause problems elsewhere. So don't store floats
   # in registers but keep them at higher accuracy.
   if(TARGET_ARCH STREQUAL "x86")
-    add_compiler_flag_if_supported(OUR_FLAGS -ffloat-store)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -ffloat-store)
   endif()
 
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
-    add_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
   endif()
 
   if(TARGET_OS STREQUAL "mac")
-    add_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -stdlib=libc++)
   endif()
 
   if(EXCEPTION_HANDLING)
-    add_compiler_flag_if_supported(OUR_FLAGS -DCONF_EXCEPTION_HANDLING)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -DCONF_EXCEPTION_HANDLING)
     # use the frame pointer (frame pointer usage is disabled by default in
     # some architectures like x86_64 and for some optimization levels; and it
     # may be impossible to walk the call stack without it)
-    add_compiler_flag_if_supported(OUR_FLAGS -fno-omit-frame-pointer)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fno-omit-frame-pointer)
   endif()
 
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
   if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
-    add_compiler_flag_if_supported(OUR_FLAGS_OWN
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN
       $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>
       -Wdeclaration-after-statement
     )
   endif()
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
-  add_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
-  add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
-  # add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
-  # add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
-  # add_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
+  add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
+  # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
+  # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurences
+  # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
 endif()
 
 if(MSVC)
   if(EXCEPTION_HANDLING)
-  add_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
   endif()
 endif()
 
@@ -2938,7 +2955,7 @@ source_group_tree(src)
 
 if(ANTIBOT)
   # Allow the antibot library to use functions from the server binary.
-  add_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
   set_own_rpath(${TARGET_SERVER})
 endif()
 
