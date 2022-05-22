@@ -93,7 +93,7 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, (int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count()), pResult);
+		CRenderTools::RenderEvalEnvelope(m_lPoints.base_ptr(), m_lPoints.size(), m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), pResult);
 		return m_Channels;
 	}
 
