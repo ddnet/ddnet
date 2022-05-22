@@ -108,7 +108,7 @@ public:
 	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f);
 
 	// map render methods (render_map.cpp)
-	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64_t TimeNanos, float *pResult);
+	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, std::chrono::nanoseconds TimeNanos, float *pResult);
 	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser);
 	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha = 1.0f);
 	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
