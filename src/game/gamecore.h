@@ -7,8 +7,8 @@
 #include <base/system.h>
 
 #include <map>
-#include <vector>
 #include <set>
+#include <vector>
 
 #include "collision.h"
 #include <engine/shared/protocol.h>

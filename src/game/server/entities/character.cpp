@@ -1202,9 +1202,9 @@ void CCharacter::Snap(int SnappingClient)
 	bool AttachedHookInView = false;
 	if(PlayerAndHookNotInView)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
 		{
-			CCharacter *OtherPlayer = GameServer()->GetPlayerChar(i);
+			CCharacter *OtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
 			if(OtherPlayer && OtherPlayer->m_Core.m_HookedPlayer == ID)
 			{
 				if(!NetworkClippedLine(SnappingClient, m_Pos, OtherPlayer->m_Pos))
