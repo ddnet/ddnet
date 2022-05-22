@@ -29,7 +29,6 @@ public:
 		MAX_URLS = 16,
 	};
 	CChooseMaster(IEngine *pEngine, CHttp *pHttp, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CChooseMaster();
 
 	bool GetBestUrl(const char **pBestUrl) const;
 	void Reset();
@@ -50,18 +49,13 @@ private:
 	};
 	class CJob : public IJob
 	{
-		LOCK m_Lock;
 		CHttp *m_pHttp;
 		std::shared_ptr<CData> m_pData;
-		std::shared_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
-		std::shared_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
 		void Run() override;
 
 	public:
 		CJob(std::shared_ptr<CData> pData, CHttp *pHttp) :
-			m_pHttp(pHttp), m_pData(std::move(pData)) { m_Lock = lock_create(); }
-		virtual ~CJob() { lock_destroy(m_Lock); }
-		void Abort();
+			m_pHttp(pHttp), m_pData(std::move(pData)) {}
 	};
 
 	IEngine *m_pEngine;
@@ -86,14 +80,6 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, CHttp *pHttp, VALIDATOR pfnValida
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		str_copy(m_pData->m_aaUrls[i], ppUrls[i], sizeof(m_pData->m_aaUrls[i]));
-	}
-}
-
-CChooseMaster::~CChooseMaster()
-{
-	if(m_pJob)
-	{
-		m_pJob->Abort();
 	}
 }
 
@@ -134,21 +120,6 @@ void CChooseMaster::Refresh()
 		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData, m_pHttp));
 }
 
-void CChooseMaster::CJob::Abort()
-{
-	lock_wait(m_Lock);
-	if(m_pHead != nullptr)
-	{
-		m_pHead->Abort();
-	}
-
-	if(m_pGet != nullptr)
-	{
-		m_pGet->Abort();
-	}
-	lock_unlock(m_Lock);
-}
-
 void CChooseMaster::CJob::Run()
 {
 	// Check masters in a random order.
@@ -179,10 +150,6 @@ void CChooseMaster::CJob::Run()
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
 
-		lock_wait(m_Lock);
-		m_pHead = pHead;
-		lock_unlock(m_Lock);
-
 		m_pHttp->AddRequest(pHead);
 		pHead->Wait();
 		if(pHead->State() == HTTP_ABORTED)
@@ -199,10 +166,6 @@ void CChooseMaster::CJob::Run()
 		std::shared_ptr<CHttpRequest> pGet = HttpGet(pUrl);
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
-
-		lock_wait(m_Lock);
-		m_pGet = pGet;
-		lock_unlock(m_Lock);
 
 		m_pHttp->AddRequest(pGet);
 		pGet->Wait();
@@ -261,7 +224,6 @@ class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, CHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CServerBrowserHttp();
 	void Update() override;
 	bool IsRefreshing() override { return m_State != STATE_DONE; }
 	void Refresh() override;
@@ -326,14 +288,6 @@ CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, CHt
 	m_pChooseMaster(new CChooseMaster(pEngine, pHttp, Validate, ppUrls, NumUrls, PreviousBestIndex))
 {
 	m_pChooseMaster->Refresh();
-}
-
-CServerBrowserHttp::~CServerBrowserHttp()
-{
-	if(m_pGetServers != nullptr)
-	{
-		m_pGetServers->Abort();
-	}
 }
 
 void CServerBrowserHttp::Update()
