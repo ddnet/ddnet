@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_HTTP_H
 #define ENGINE_SHARED_HTTP_H
 
+#include <algorithm>
 #include <atomic>
 #include <engine/shared/jobs.h>
 
@@ -105,7 +106,7 @@ public:
 	{
 		m_Type = REQUEST::POST;
 		m_BodyLength = DataLength;
-		m_pBody = (unsigned char *)malloc(DataLength);
+		m_pBody = (unsigned char *)malloc(std::max((size_t)1, DataLength));
 		mem_copy(m_pBody, pData, DataLength);
 	}
 	void PostJson(const char *pJson)
