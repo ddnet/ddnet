@@ -2557,6 +2557,7 @@ int CServer::Run()
 	if(m_RunServer == UNINITIALIZED)
 		m_RunServer = RUNNING;
 
+	m_Http.Init();
 	m_AuthManager.Init();
 
 	if(Config()->m_Debug)
@@ -2623,7 +2624,7 @@ int CServer::Run()
 #endif
 
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	m_pRegister = CreateRegister(&g_Config, m_pConsole, pEngine, this->Port(), m_NetServer.GetGlobalToken());
+	m_pRegister = CreateRegister(&g_Config, m_pConsole, pEngine, &m_Http, this->Port(), m_NetServer.GetGlobalToken());
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 

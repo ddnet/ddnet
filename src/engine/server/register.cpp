@@ -77,16 +77,18 @@ class CRegister : public IRegister
 			int m_InfoSerial;
 			std::shared_ptr<CShared> m_pShared;
 			std::unique_ptr<CHttpRequest> m_pRegister;
+			CHttp *m_pHttp;
 			void Run() override;
 
 		public:
-			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::unique_ptr<CHttpRequest> &&pRegister) :
+			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::unique_ptr<CHttpRequest> &&pRegister, CHttp *pHttp) :
 				m_Protocol(Protocol),
 				m_ServerPort(ServerPort),
 				m_Index(Index),
 				m_InfoSerial(InfoSerial),
 				m_pShared(std::move(pShared)),
-				m_pRegister(std::move(pRegister))
+				m_pRegister(std::move(pRegister)),
+				m_pHttp(pHttp)
 			{
 			}
 			virtual ~CJob() = default;
@@ -115,6 +117,7 @@ class CRegister : public IRegister
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
+	CHttp *m_pHttp;
 	int m_ServerPort;
 	char m_aConnlessTokenHex[16];
 
@@ -132,7 +135,7 @@ class CRegister : public IRegister
 	char m_aServerInfo[16384];
 
 public:
-	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken);
+	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
 	void Update() override;
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
@@ -305,7 +308,7 @@ void CRegister::CProtocol::SendRegister()
 	int RequestIndex = m_pShared->m_NumTotalRequests;
 	m_pShared->m_NumTotalRequests += 1;
 	lock_unlock(m_pShared->m_Lock);
-	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister)));
+	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pHttp));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
@@ -367,15 +370,17 @@ void CRegister::CProtocol::OnToken(const char *pToken)
 
 void CRegister::CProtocol::CJob::Run()
 {
-	IEngine::RunJobBlocking(m_pRegister.get());
-	if(m_pRegister->State() != HTTP_DONE)
+	std::shared_ptr<CHttpRequest> pRegisterTask = std::move(m_pRegister);
+	m_pHttp->AddRequest(pRegisterTask);
+	pRegisterTask->Wait();
+	if(pRegisterTask->State() != HTTP_DONE)
 	{
 		// TODO: log the error response content from master
 		// TODO: exponential backoff
 		log_error(ProtocolToSystem(m_Protocol), "error response from master");
 		return;
 	}
-	json_value *pJson = m_pRegister->ResultJson();
+	json_value *pJson = pRegisterTask->ResultJson();
 	if(!pJson)
 	{
 		log_error(ProtocolToSystem(m_Protocol), "non-JSON response from master");
@@ -434,10 +439,11 @@ void CRegister::CProtocol::CJob::Run()
 	}
 }
 
-CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken) :
+CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CHttp *pHttp, int ServerPort, unsigned SixupSecurityToken) :
 	m_pConfig(pConfig),
 	m_pConsole(pConsole),
 	m_pEngine(pEngine),
+	m_pHttp(pHttp),
 	m_ServerPort(ServerPort),
 	m_aProtocols{
 		CProtocol(this, PROTOCOL_TW6_IPV6),
@@ -650,7 +656,7 @@ void CRegister::OnNewInfo(const char *pInfo)
 	}
 }
 
-IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken)
+IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CHttp *pHttp, int ServerPort, unsigned SixupSecurityToken)
 {
-	return new CRegister(pConfig, pConsole, pEngine, ServerPort, SixupSecurityToken);
+	return new CRegister(pConfig, pConsole, pEngine, pHttp, ServerPort, SixupSecurityToken);
 }

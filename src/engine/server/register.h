@@ -4,6 +4,7 @@
 class CConfig;
 class IConsole;
 class IEngine;
+class CHttp;
 struct CNetChunk;
 
 class IRegister
@@ -22,6 +23,6 @@ public:
 	virtual void OnNewInfo(const char *pInfo) = 0;
 };
 
-IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken);
+IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
 
 #endif
