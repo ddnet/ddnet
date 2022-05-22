@@ -63,6 +63,7 @@ map_resave
 map_version
 mastersrv
 packetgen
+stun
 testrunner
 twping
 unicode_confusables
