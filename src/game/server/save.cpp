@@ -635,8 +635,15 @@ int CSaveTeam::FromString(const char *String)
 		m_pSavedTees = 0;
 	}
 
-	if(m_MembersCount)
+	if(m_MembersCount > 64)
+	{
+		dbg_msg("load", "savegame: team has too many players");
+		return 1;
+	}
+	else if(m_MembersCount)
+	{
 		m_pSavedTees = new CSaveTee[m_MembersCount];
+	}
 
 	for(int n = 0; n < m_MembersCount; n++)
 	{

@@ -11,7 +11,6 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType)
 	m_pGameWorld = pGameWorld;
 
 	m_ObjType = ObjType;
-	m_Pos = vec2(0, 0);
 	m_ProximityRadius = 0;
 
 	m_MarkedForDestroy = false;
