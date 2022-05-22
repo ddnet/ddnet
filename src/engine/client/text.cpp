@@ -1256,8 +1256,7 @@ public:
 							if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
 								CharKerningEllipsis = Kerning(TextContainer.m_pFont, pChr->m_GlyphIndex, pEllipsisChr->m_GlyphIndex) * Scale * Size;
 
-							const int WidthOfRemainingText = CalculateTextWidth(pTmp, str_length(pTmp), 0, 100);
-							if(DrawX + CharKerning + Advance + WidthOfRemainingText - pCursor->m_StartX > pCursor->m_LineWidth && DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+							if(DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
 							{
 								// we hit the end, only render ellipsis and finish
 								pTmp = pEllipsis;
