@@ -23,10 +23,11 @@
 #undef max
 #endif
 
-int CHttp::CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
+int CHttp::CurlDebug(CURL *pHandle, unsigned int Type, char *pData, size_t DataSize, void *pUser)
 {
+	curl_infotype InfoType = static_cast<curl_infotype>(Type);
 	char TypeChar;
-	switch(Type)
+	switch(InfoType)
 	{
 	case CURLINFO_TEXT:
 		TypeChar = '*';
@@ -40,6 +41,7 @@ int CHttp::CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t Data
 	default:
 		return 0;
 	}
+
 	while(const char *pLineEnd = (const char *)memchr(pData, '\n', DataSize))
 	{
 		int LineLength = pLineEnd - pData;
@@ -224,12 +226,13 @@ void CHttpRequest::OnStart()
 
 void CHttpRequest::OnCompletionInternal(unsigned int Result)
 {
+	CURLcode Code = static_cast<CURLcode>(Result);
 	int State;
-	if(Result != CURLE_OK)
+	if(Code != CURLE_OK)
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, m_aErr);
-		State = (Result == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
+		State = (Code == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
@@ -339,6 +342,10 @@ void CHttp::Run()
 	// CHttpRequest::OnCompletionInternal
 	static_assert(std::numeric_limits<std::underlying_type_t<CURLcode>>::min() >= std::numeric_limits<unsigned int>::min() && // NOLINT(misc-redundant-expression)
 		      std::numeric_limits<std::underlying_type_t<CURLcode>>::max() <= std::numeric_limits<unsigned int>::max()); // NOLINT(misc-redundant-expression)
+
+	// CHttp::CurlDebug
+	static_assert(std::numeric_limits<std::underlying_type_t<curl_infotype>>::min() >= std::numeric_limits<unsigned int>::min() && // NOLINT(misc-redundant-expression)
+		      std::numeric_limits<std::underlying_type_t<curl_infotype>>::max() <= std::numeric_limits<unsigned int>::max()); // NOLINT(misc-redundant-expression)
 
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{

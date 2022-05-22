@@ -213,7 +213,7 @@ public:
 	void AddRequest(std::shared_ptr<CHttpRequest> pRequest);
 
 	static void EscapeUrl(char *pBuf, int Size, const char *pStr);
-	static int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser);
+	static int CurlDebug(CURL *pHandle, unsigned int Type, char *pData, size_t DataSize, void *pUser);
 
 private:
 	static void ThreadMain(void *pUser);
