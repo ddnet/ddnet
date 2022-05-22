@@ -8,6 +8,7 @@
 
 #include <map>
 #include <vector>
+#include <set>
 
 #include "collision.h"
 #include <engine/shared/protocol.h>
@@ -221,6 +222,8 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+	std::set<int> m_AttachedPlayers;
+	void SetHookedPlayer(int HookedPlayer);
 
 	int m_ActiveWeapon;
 	struct WeaponStat
