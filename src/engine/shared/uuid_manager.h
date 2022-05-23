@@ -1,8 +1,9 @@
 #ifndef ENGINE_SHARED_UUID_MANAGER_H
 #define ENGINE_SHARED_UUID_MANAGER_H
 
-#include <base/tl/array.h>
 #include <vector>
+
+#include <base/system.h>
 
 enum
 {
@@ -50,8 +51,8 @@ class CUnpacker;
 
 class CUuidManager
 {
-	array<CName> m_aNames;
-	std::vector<CNameIndexed> m_aNamesSorted;
+	std::vector<CName> m_vNames;
+	std::vector<CNameIndexed> m_vNamesSorted;
 
 public:
 	void RegisterName(int ID, const char *pName);
