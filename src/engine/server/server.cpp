@@ -2847,8 +2847,13 @@ int CServer::Run()
 			NonActive = true;
 
 			for(auto &Client : m_aClients)
+			{
 				if(Client.m_State != CClient::STATE_EMPTY)
+				{
 					NonActive = false;
+					break;
+				}
+			}
 
 			// wait for incoming data
 			if(NonActive)
