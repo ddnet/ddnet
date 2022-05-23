@@ -20,6 +20,7 @@
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
 static LOCK gs_aLocks[CURL_LOCK_DATA_LAST + 1];
+static bool gs_Initialized = false;
 
 static int GetLockIndex(int Data)
 {
@@ -105,6 +106,8 @@ bool HttpInit(IStorage *pStorage)
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
+	gs_Initialized = true;
+
 	return false;
 }
 
@@ -141,6 +144,7 @@ CHttpRequest::~CHttpRequest()
 
 void CHttpRequest::Run()
 {
+	dbg_assert(gs_Initialized, "must initialize HTTP before running HTTP requests");
 	int FinalState;
 	if(!BeforeInit())
 	{
