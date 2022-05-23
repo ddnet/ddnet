@@ -8,6 +8,7 @@
 #include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>
+#include <vector>
 
 class CSkins : public CComponent
 {
@@ -46,7 +47,7 @@ public:
 	int Find(const char *pName);
 
 private:
-	sorted_array<CSkin> m_aSkins;
+	std::vector<CSkin> m_Skins;
 	sorted_array<CDownloadSkin> m_aDownloadSkins;
 	char m_EventSkinPrefix[24];
 
