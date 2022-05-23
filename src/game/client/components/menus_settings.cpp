@@ -679,12 +679,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f - RenderEyesBelow * 25.0f, &SkinList, &MainView);
-	static sorted_array<CUISkin> s_paSkinList;
+	static std::vector<CUISkin> s_SkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount)
 	{
-		s_paSkinList.clear();
+		s_SkinList.clear();
 		for(int i = 0; i < m_pClient->m_Skins.Num(); ++i)
 		{
 			const CSkin *s = m_pClient->m_Skins.Get(i);
@@ -704,22 +704,23 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(s == 0)
 				continue;
 
-			s_paSkinList.add(CUISkin(s));
+			s_SkinList.emplace_back(s);
 		}
+		std::sort(s_SkinList.begin(), s_SkinList.end());
 		s_InitSkinlist = false;
 		s_SkinCount = m_pClient->m_Skins.Num();
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
-	for(int i = 0; i < s_paSkinList.size(); ++i)
+	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_SkinList.size(), 4, OldSelected, s_ScrollValue);
+	for(size_t i = 0; i < s_SkinList.size(); ++i)
 	{
-		const CSkin *s = s_paSkinList[i].m_pSkin;
+		const CSkin *s = s_SkinList[i].m_pSkin;
 
 		if(str_comp(s->m_aName, pSkinName) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(s, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
@@ -734,10 +735,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			RenderTools()->RenderTee(pIdleState, &Info, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
-			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
 			SLabelProperties Props;
 			Props.m_MaxWidth = Item.m_Rect.w;
-			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, TEXTALIGN_LEFT, Props);
+			UI()->DoLabelScaled(&Item.m_Rect, s->m_aName, 12.0f, TEXTALIGN_LEFT, Props);
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
@@ -754,7 +754,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(pSkinName, s_paSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(pSkinName, s_SkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
