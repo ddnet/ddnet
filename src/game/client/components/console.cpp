@@ -770,6 +770,8 @@ void CGameConsole::OnRender()
 		}
 
 		static int s_LastActivePage = pConsole->m_BacklogCurPage;
+		if(pConsole->m_BacklogCurPage == INT_MAX)
+			s_LastActivePage = INT_MAX;
 		int TotalPages = 1;
 		for(int Page = 0; Page <= s_LastActivePage; ++Page, OffsetY = 0.0f)
 		{
