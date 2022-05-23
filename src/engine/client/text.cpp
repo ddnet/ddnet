@@ -1061,7 +1061,18 @@ public:
 		const char *pEllipsis = "…";
 		SFontSizeChar *pEllipsisChr = nullptr;
 		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
-			pEllipsisChr = GetChar(TextContainer.m_pFont, pSizeData, 0x2026); // …
+		{
+			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(0, pCursor->m_FontSize, pText, -1, -1.0f))
+			{
+				pEllipsisChr = GetChar(TextContainer.m_pFont, pSizeData, 0x2026); // …
+				if(pEllipsisChr == nullptr)
+				{
+					// no ellipsis char in font, just stop at end instead
+					pCursor->m_Flags &= ~TEXTFLAG_ELLIPSIS_AT_END;
+					pCursor->m_Flags |= TEXTFLAG_STOP_AT_END;
+				}
+			}
+		}
 
 		int RenderFlags = TextContainer.m_RenderFlags;
 
@@ -1247,29 +1258,23 @@ public:
 						CharKerning = Kerning(TextContainer.m_pFont, LastCharGlyphIndex, pChr->m_GlyphIndex) * Scale * Size;
 					LastCharGlyphIndex = pChr->m_GlyphIndex;
 
-					if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END && pCurrent < pBatchEnd && pCurrent != pEllipsis)
+					if(pEllipsisChr != nullptr && pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END && pCurrent < pBatchEnd && pCurrent != pEllipsis)
 					{
-						if(pEllipsisChr)
-						{
-							float AdvanceEllipsis = ((((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pEllipsisChr->m_Width) : (pEllipsisChr->m_AdvanceX + ((!ApplyBearingX) ? (-pEllipsisChr->m_OffsetX) : 0.f)))) * Scale * Size;
-							float CharKerningEllipsis = 0.f;
-							if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
-								CharKerningEllipsis = Kerning(TextContainer.m_pFont, pChr->m_GlyphIndex, pEllipsisChr->m_GlyphIndex) * Scale * Size;
+						float AdvanceEllipsis = ((((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pEllipsisChr->m_Width) : (pEllipsisChr->m_AdvanceX + ((!ApplyBearingX) ? (-pEllipsisChr->m_OffsetX) : 0.f)))) * Scale * Size;
+						float CharKerningEllipsis = 0.f;
+						if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
+							CharKerningEllipsis = Kerning(TextContainer.m_pFont, pChr->m_GlyphIndex, pEllipsisChr->m_GlyphIndex) * Scale * Size;
 
+						if(DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+						{
 							const int WidthOfRemainingText = CalculateTextWidth(pTmp, str_length(pTmp), 0, 100);
-							if(DrawX + CharKerning + Advance + WidthOfRemainingText - pCursor->m_StartX > pCursor->m_LineWidth && DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+							if(DrawX + CharKerning + Advance + WidthOfRemainingText - pCursor->m_StartX > pCursor->m_LineWidth)
 							{
 								// we hit the end, only render ellipsis and finish
 								pTmp = pEllipsis;
 								NextCharacter = 0x2026;
 								continue;
 							}
-						}
-						else
-						{
-							// no ellipsis char in font, just stop
-							pCurrent = pEnd;
-							break;
 						}
 					}
 
