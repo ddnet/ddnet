@@ -295,7 +295,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	}
 
-	m_aSkins.add(Skin);
+	m_aSkins.insert(std::lower_bound(m_aSkins.begin(), m_aSkins.end(), Skin), Skin);
 
 	return 0;
 }
@@ -324,24 +324,24 @@ void CSkins::OnInit()
 
 void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 {
-	for(int i = 0; i < m_aSkins.size(); ++i)
+	for(auto &Skin : m_aSkins)
 	{
-		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Body);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_BodyOutline);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Feet);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_FeetOutline);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_Hands);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_OriginalSkin.m_HandsOutline);
-		for(auto &Eye : m_aSkins[i].m_OriginalSkin.m_Eyes)
+		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_Body);
+		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_Feet);
+		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_Hands);
+		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_HandsOutline);
+		for(auto &Eye : Skin.m_OriginalSkin.m_Eyes)
 			Graphics()->UnloadTexture(&Eye);
 
-		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Body);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_BodyOutline);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Feet);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_FeetOutline);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_Hands);
-		Graphics()->UnloadTexture(&m_aSkins[i].m_ColorableSkin.m_HandsOutline);
-		for(auto &Eye : m_aSkins[i].m_ColorableSkin.m_Eyes)
+		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_Body);
+		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_BodyOutline);
+		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_Feet);
+		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_FeetOutline);
+		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_Hands);
+		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_HandsOutline);
+		for(auto &Eye : Skin.m_ColorableSkin.m_Eyes)
 			Graphics()->UnloadTexture(&Eye);
 	}
 
@@ -351,14 +351,14 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 	SkinScanUser.m_pThis = this;
 	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, &SkinScanUser);
-	if(!m_aSkins.size())
+	if(m_aSkins.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
 		DummySkin.m_IsVanilla = true;
 		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
 		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
-		m_aSkins.add(DummySkin);
+		m_aSkins.push_back(DummySkin);
 	}
 }
 
@@ -402,9 +402,12 @@ int CSkins::Find(const char *pName)
 
 int CSkins::FindImpl(const char *pName)
 {
-	auto r = ::find_binary(m_aSkins.all(), pName);
-	if(!r.empty())
-		return &r.front() - m_aSkins.base_ptr();
+	CSkin Needle;
+	mem_zero(&Needle, sizeof(Needle));
+	str_copy(Needle.m_aName, pName, sizeof(Needle.m_aName));
+	auto Range = std::equal_range(m_aSkins.begin(), m_aSkins.end(), Needle);
+	if(std::distance(Range.first, Range.second) == 1)
+		return Range.first - m_aSkins.begin();
 
 	if(str_comp(pName, "default") == 0)
 		return -1;
