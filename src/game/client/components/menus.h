@@ -466,7 +466,7 @@ protected:
 		}
 	};
 
-	sorted_array<CFriendItem> m_lFriends;
+	std::vector<CFriendItem> m_lFriends;
 	int m_FriendlistSelectedIndex;
 
 	void FriendlistOnUpdate();
