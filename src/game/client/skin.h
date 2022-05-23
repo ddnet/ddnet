@@ -1,8 +1,6 @@
-
 #ifndef GAME_CLIENT_SKIN_H
 #define GAME_CLIENT_SKIN_H
 #include <base/color.h>
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 #include <engine/graphics.h>
 #include <limits>
