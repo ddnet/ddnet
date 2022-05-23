@@ -1710,7 +1710,7 @@ public:
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };
 
-void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
+void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &Languages)
 {
 	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
@@ -1765,7 +1765,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<
 
 		char aFileName[IO_MAX_PATH_LENGTH];
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
-		pLanguages->add(CLanguage(aReplacement, aFileName, str_toint(pLine + 3)));
+		Languages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
 	}
 	io_close(File);
 }
@@ -1774,14 +1774,15 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
 	static int s_LanguageList = 0;
 	static int s_SelectedLanguage = 0;
-	static sorted_array<CLanguage> s_Languages;
+	static std::vector<CLanguage> s_Languages;
 	static float s_ScrollValue = 0;
 
-	if(s_Languages.size() == 0)
+	if(s_Languages.empty())
 	{
-		s_Languages.add(CLanguage("English", "", 826));
-		LoadLanguageIndexfile(Storage(), Console(), &s_Languages);
-		for(int i = 0; i < s_Languages.size(); i++)
+		s_Languages.emplace_back("English", "", 826);
+		LoadLanguageIndexfile(Storage(), Console(), s_Languages);
+		std::sort(s_Languages.begin(), s_Languages.end());
+		for(size_t i = 0; i < s_Languages.size(); i++)
 			if(str_comp(s_Languages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
@@ -1793,10 +1794,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	UiDoListboxStart(&s_LanguageList, &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 
-	for(sorted_array<CLanguage>::range r = s_Languages.all(); !r.empty(); r.pop_front())
+	for(auto &Language : s_Languages)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&r.front());
-
+		CListboxItem Item = UiDoListboxNextItem(&Language.m_Name);
 		if(Item.m_Visible)
 		{
 			CUIRect Rect;
@@ -1804,9 +1804,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			Rect.VMargin(6.0f, &Rect);
 			Rect.HMargin(3.0f, &Rect);
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_CountryFlags.Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+			m_pClient->m_CountryFlags.Render(Language.m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
-			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name.c_str(), 16.0f, TEXTALIGN_LEFT);
+			UI()->DoLabelScaled(&Item.m_Rect, Language.m_Name.c_str(), 16.0f, TEXTALIGN_LEFT);
 		}
 	}
 
