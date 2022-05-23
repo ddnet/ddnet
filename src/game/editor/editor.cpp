@@ -4331,7 +4331,7 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 	Item.m_IsDir = IsDir != 0;
 	Item.m_IsLink = false;
 	Item.m_StorageType = StorageType;
-	pEditor->m_FileList.add(Item);
+	pEditor->m_FileList.push_back(Item);
 
 	return 0;
 }
@@ -4462,7 +4462,7 @@ void CEditor::RenderFileDialog()
 	m_FileDialogScrollValue = UIEx()->DoScrollbarV(&m_FileDialogScrollValue, &Scroll, m_FileDialogScrollValue);
 
 	int ScrollNum = 0;
-	for(int i = 0; i < m_FileList.size(); i++)
+	for(size_t i = 0; i < m_FileList.size(); i++)
 	{
 		m_FileList[i].m_IsVisible = false;
 		if(!m_aFileDialogSearchText[0] || str_utf8_find_nocase(m_FileList[i].m_aName, m_aFileDialogSearchText))
@@ -4498,7 +4498,7 @@ void CEditor::RenderFileDialog()
 			{
 				if(Input()->GetEvent(i).m_Key == KEY_DOWN)
 				{
-					for(NewIndex = m_FilesSelectedIndex + 1; NewIndex < m_FileList.size(); NewIndex++)
+					for(NewIndex = m_FilesSelectedIndex + 1; NewIndex < (int)m_FileList.size(); NewIndex++)
 					{
 						if(m_FileList[NewIndex].m_IsVisible)
 							break;
@@ -4513,7 +4513,7 @@ void CEditor::RenderFileDialog()
 					}
 				}
 			}
-			if(NewIndex > -1 && NewIndex < m_FileList.size())
+			if(NewIndex > -1 && NewIndex < (int)m_FileList.size())
 			{
 				//scroll
 				float IndexY = View.y - m_FileDialogScrollValue * ScrollNum * 17.0f + NewIndex * 17.0f;
@@ -4710,10 +4710,11 @@ void CEditor::FilelistPopulate(int StorageType)
 		Item.m_IsDir = true;
 		Item.m_IsLink = true;
 		Item.m_StorageType = IStorage::TYPE_SAVE;
-		m_FileList.add(Item);
+		m_FileList.push_back(Item);
 	}
 	Storage()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
-	m_FilesSelectedIndex = m_FileList.size() ? 0 : -1;
+	std::sort(m_FileList.begin(), m_FileList.end());
+	m_FilesSelectedIndex = m_FileList.empty() ? -1 : 0;
 	m_PreviewImageIsLoaded = false;
 	m_FileDialogActivate = false;
 
