@@ -1770,15 +1770,15 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 {
 	str_copy(pCensoredMessage, pMessage, Size);
 
-	for(int i = 0; i < m_aCensorlist.size(); i++)
+	for(auto &Item : m_vCensorlist)
 	{
 		char *pCurLoc = pCensoredMessage;
 		do
 		{
-			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].c_str());
+			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, Item.c_str());
 			if(pCurLoc)
 			{
-				memset(pCurLoc, '*', m_aCensorlist[i].length());
+				memset(pCurLoc, '*', Item.length());
 				pCurLoc++;
 			}
 		} while(pCurLoc);
@@ -3304,7 +3304,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		char *pLine;
 		while((pLine = LineReader.Get()))
 		{
-			m_aCensorlist.add(pLine);
+			m_vCensorlist.emplace_back(pLine);
 		}
 		io_close(File);
 	}
