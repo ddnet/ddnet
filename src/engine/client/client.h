@@ -110,6 +110,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IEngineInput *m_pInput;
 	IEngineGraphics *m_pGraphics;
 	IEngineSound *m_pSound;
+	IFavorites *m_pFavorites;
 	IGameClient *m_pGameClient;
 	IEngineMap *m_pMap;
 	IConfigManager *m_pConfigManager;
@@ -291,6 +292,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_OwnExecutableSize = 0;
 	IOHANDLE m_OwnExecutable;
 
+	// favorite command handling
+	bool m_FavoritesGroup = false;
+	bool m_FavoritesGroupAllowPing = false;
+	int m_FavoritesGroupNum = 0;
+	NETADDR m_aFavoritesGroupAddresses[MAX_SERVER_ADDRESSES];
+
 	void UpdateDemoIntraTimers();
 	int MaxLatencyTicks() const;
 	int PredictionMargin() const;
@@ -446,6 +453,8 @@ public:
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconAuth(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RconLogin(IConsole::IResult *pResult, void *pUserData);
+	static void Con_BeginFavoriteGroup(IConsole::IResult *pResult, void *pUserData);
+	static void Con_EndFavoriteGroup(IConsole::IResult *pResult, void *pUserData);
 	static void Con_AddFavorite(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Play(IConsole::IResult *pResult, void *pUserData);

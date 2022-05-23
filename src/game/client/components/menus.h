@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
+#include <base/types.h>
 #include <base/vmath.h>
 
 #include <chrono>
@@ -631,7 +632,7 @@ public:
 	SUIAnimator m_aAnimatorsSettingsTab[SETTINGS_LENGTH];
 
 	// DDRace
-	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect);
 	std::vector<CDemoItem> m_vDemos;
 	void DemolistPopulate();
 	bool m_Dummy;

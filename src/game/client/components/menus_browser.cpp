@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/log.h>
+
+#include <engine/favorites.h>
 #include <engine/friends.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
@@ -330,7 +333,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
-				if(pItem->m_Favorite)
+				if(pItem->m_Favorite != TRISTATE::NONE)
 				{
 					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
 				}
@@ -1072,28 +1075,29 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			ButtonAddFav.VSplitLeft(5.0f, 0, &ButtonAddFav);
 			static int s_AddFavButton = 0;
 			static int s_LeakIpButton = 0;
-			if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
+			if(DoButton_CheckBox_Tristate(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
 			{
-				if(pSelectedServer->m_Favorite)
+				if(pSelectedServer->m_Favorite != TRISTATE::NONE)
 				{
-					ServerBrowser()->RemoveFavorite(pSelectedServer->m_NetAddr);
+					Favorites()->Remove(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses);
 				}
 				else
 				{
-					ServerBrowser()->AddFavorite(pSelectedServer->m_NetAddr);
+					Favorites()->Add(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses);
 					if(g_Config.m_UiPage == PAGE_LAN)
 					{
-						ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, true);
+						Favorites()->AllowPing(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses, true);
 					}
 				}
+				Client()->ServerBrowserUpdate();
 			}
-			if(pSelectedServer->m_Favorite)
+			if(pSelectedServer->m_Favorite != TRISTATE::NONE)
 			{
-				bool IpLeak = ServerBrowser()->IsFavoritePingAllowed(pSelectedServer->m_NetAddr);
-				if(DoButton_CheckBox(&s_LeakIpButton, Localize("Leak IP"), IpLeak, &ButtonLeakIp))
+				if(DoButton_CheckBox_Tristate(&s_LeakIpButton, Localize("Leak IP"), pSelectedServer->m_FavoriteAllowPing, &ButtonLeakIp))
 				{
-					ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, !IpLeak);
+					Favorites()->AllowPing(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses, pSelectedServer->m_FavoriteAllowPing == TRISTATE::NONE);
 				}
+				Client()->ServerBrowserUpdate();
 			}
 		}
 

@@ -11,10 +11,17 @@
 #include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
+#include <unordered_map>
+
 class CNetClient;
 class IConfigManager;
+class IConsole;
+class IEngine;
+class IFavorites;
+class IFriends;
 class IServerBrowserHttp;
 class IServerBrowserPingCache;
+class IStorage;
 
 class CServerBrowser : public IServerBrowser
 {
@@ -22,14 +29,11 @@ public:
 	class CServerEntry
 	{
 	public:
-		NETADDR m_Addr;
 		int64_t m_RequestTime;
 		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
 		bool m_Request64Legacy;
 		CServerInfo m_Info;
-
-		CServerEntry *m_pNextIp; // ip hashed list
 
 		CServerEntry *m_pPrevReq; // request list
 		CServerEntry *m_pNextReq;
@@ -54,14 +58,6 @@ public:
 			m_FlagID = -1;
 			m_aName[0] = '\0';
 		};
-		/*void Add(NETADDR Addr, char* pType) {
-			if (m_NumServers < MAX_SERVERS)
-			{
-				m_vServers[m_NumServers] = Addr;
-				str_copy(m_aTypes[m_NumServers], pType, sizeof(m_aTypes[0]));
-				m_NumServers++;
-			}
-		};*/
 	};
 
 	enum
@@ -104,13 +100,6 @@ public:
 	int NumSortedServers() const override { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
-	bool GotInfo(const NETADDR &Addr) const override;
-	bool IsFavorite(const NETADDR &Addr) const override;
-	bool IsFavoritePingAllowed(const NETADDR &Addr) const override;
-	void AddFavorite(const NETADDR &Addr) override;
-	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing) override;
-	void RemoveFavorite(const NETADDR &Addr) override;
-
 	const char *GetTutorialServer() override;
 	void LoadDDNetRanks();
 	void RecheckOfficial();
@@ -133,7 +122,8 @@ public:
 
 	//
 	void Update(bool ForceResort);
-	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
+	void OnServerInfoUpdate(const NETADDR &Addr, int Token, const CServerInfo *pInfo);
+	void SetHttpInfo(const CServerInfo *pInfo);
 	void RequestCurrentServer(const NETADDR &Addr) const;
 	void RequestCurrentServerWithRandomToken(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
 	void SetCurrentServerPing(const NETADDR &Addr, int Ping);
@@ -147,11 +137,12 @@ public:
 	int GetCurrentType() override { return m_ServerlistType; }
 
 private:
-	CNetClient *m_pNetClient;
-	class IConsole *m_pConsole;
-	class IEngine *m_pEngine;
-	class IFriends *m_pFriends;
-	class IStorage *m_pStorage;
+	CNetClient *m_pNetClient = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IEngine *m_pEngine = nullptr;
+	IFriends *m_pFriends = nullptr;
+	IFavorites *m_pFavorites = nullptr;
+	IStorage *m_pStorage = nullptr;
 	char m_aNetVersion[128];
 
 	bool m_RefreshingHttp = false;
@@ -162,17 +153,12 @@ private:
 	CHeap m_ServerlistHeap;
 	CServerEntry **m_ppServerlist;
 	int *m_pSortedServerlist;
-
-	NETADDR m_aFavoriteServers[MAX_FAVORITES];
-	bool m_aFavoriteServersAllowPing[MAX_FAVORITES];
-	int m_NumFavoriteServers;
+	std::unordered_map<NETADDR, int> m_ByAddr;
 
 	CNetwork m_aNetworks[NUM_NETWORKS];
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
-
-	CServerEntry *m_apServerlistIp[256]; // ip hash list
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;
@@ -198,8 +184,6 @@ private:
 
 	bool m_SortOnNextUpdate;
 
-	int FindFavorite(const NETADDR &Addr) const;
-
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);
 	static int GetExtraToken(int Token);
@@ -221,7 +205,7 @@ private:
 	void CleanUp();
 
 	void UpdateFromHttp();
-	CServerEntry *Add(const NETADDR &Addr);
+	CServerEntry *Add(const NETADDR *pAddrs, int NumAddrs);
 
 	void RemoveRequest(CServerEntry *pEntry);
 
@@ -232,8 +216,6 @@ private:
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 	void SetLatency(NETADDR Addr, int Latency);
-
-	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };
 
 #endif

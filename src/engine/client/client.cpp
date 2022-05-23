@@ -22,6 +22,7 @@
 #include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
+#include <engine/favorites.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -1519,7 +1520,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	{
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
-			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info);
+			m_ServerBrowser.OnServerInfoUpdate(*pFrom, Token, &Info);
 		}
 
 		// Player info is irrelevant for the client (while connected),
@@ -1535,7 +1536,8 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			if(SavedType >= m_CurrentServerInfo.m_Type)
 			{
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
-				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
+				m_CurrentServerInfo.m_NumAddresses = 1;
+				m_CurrentServerInfo.m_aAddresses[0] = m_ServerAddress;
 				m_CurrentServerInfoRequestTime = -1;
 			}
 
@@ -2954,6 +2956,7 @@ void CClient::InitInterfaces()
 	// fetch interfaces
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
+	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	//m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pSound = Kernel()->RequestInterface<IEngineSound>();
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
@@ -2978,6 +2981,7 @@ void CClient::InitInterfaces()
 	m_Updater.Init();
 #endif
 
+	m_pConfigManager->RegisterCallback(IFavorites::ConfigSaveCallback, m_pFavorites);
 	m_Friends.Init();
 	m_Foes.Init(true);
 
@@ -3672,6 +3676,41 @@ void CClient::Con_RconLogin(IConsole::IResult *pResult, void *pUserData)
 	pSelf->RconAuth(pResult->GetString(0), pResult->GetString(1));
 }
 
+void CClient::Con_BeginFavoriteGroup(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->m_FavoritesGroup)
+	{
+		log_error("client", "opening favorites group while there is already one, discarding old one");
+		for(int i = 0; i < pSelf->m_FavoritesGroupNum; i++)
+		{
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&pSelf->m_aFavoritesGroupAddresses[i], aAddr, sizeof(aAddr), true);
+			log_warn("client", "discarding %s", aAddr);
+		}
+	}
+	pSelf->m_FavoritesGroup = true;
+	pSelf->m_FavoritesGroupAllowPing = false;
+	pSelf->m_FavoritesGroupNum = 0;
+}
+
+void CClient::Con_EndFavoriteGroup(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(!pSelf->m_FavoritesGroup)
+	{
+		log_error("client", "closing favorites group while there is none, ignoring");
+		return;
+	}
+	log_info("client", "adding group of %d favorites", pSelf->m_FavoritesGroupNum);
+	pSelf->m_pFavorites->Add(pSelf->m_aFavoritesGroupAddresses, pSelf->m_FavoritesGroupNum);
+	if(pSelf->m_FavoritesGroupAllowPing)
+	{
+		pSelf->m_pFavorites->AllowPing(pSelf->m_aFavoritesGroupAddresses, pSelf->m_FavoritesGroupNum, true);
+	}
+	pSelf->m_FavoritesGroup = false;
+}
+
 void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3683,10 +3722,29 @@ void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		return;
 	}
-	pSelf->m_ServerBrowser.AddFavorite(Addr);
-	if(pResult->NumArguments() > 1 && str_find(pResult->GetString(1), "allow_ping"))
+	bool AllowPing = pResult->NumArguments() > 1 && str_find(pResult->GetString(1), "allow_ping");
+	char aAddr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&Addr, aAddr, sizeof(aAddr), true);
+	if(pSelf->m_FavoritesGroup)
 	{
-		pSelf->m_ServerBrowser.FavoriteAllowPing(Addr, true);
+		if(pSelf->m_FavoritesGroupNum == (int)std::size(pSelf->m_aFavoritesGroupAddresses))
+		{
+			log_error("client", "discarding %s because groups can have at most a size of %d", aAddr, pSelf->m_FavoritesGroupNum);
+			return;
+		}
+		log_info("client", "adding %s to favorites group", aAddr);
+		pSelf->m_aFavoritesGroupAddresses[pSelf->m_FavoritesGroupNum] = Addr;
+		pSelf->m_FavoritesGroupAllowPing = pSelf->m_FavoritesGroupAllowPing || AllowPing;
+		pSelf->m_FavoritesGroupNum += 1;
+	}
+	else
+	{
+		log_info("client", "adding %s to favorites", aAddr);
+		pSelf->m_pFavorites->Add(&Addr, 1);
+		if(AllowPing)
+		{
+			pSelf->m_pFavorites->AllowPing(&Addr, 1, true);
+		}
 	}
 }
 
@@ -3695,7 +3753,7 @@ void CClient::Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData)
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
 	if(net_addr_from_str(&Addr, pResult->GetString(0)) == 0)
-		pSelf->m_ServerBrowser.RemoveFavorite(Addr);
+		pSelf->m_pFavorites->Remove(&Addr, 1);
 }
 
 void CClient::DemoSliceBegin()
@@ -4383,6 +4441,8 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("record", "?r[file]", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
 	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");
 	m_pConsole->Register("add_demomarker", "", CFGFLAG_CLIENT, Con_AddDemoMarker, this, "Add demo timeline marker");
+	m_pConsole->Register("begin_favorite_group", "", CFGFLAG_CLIENT, Con_BeginFavoriteGroup, this, "Use this before `add_favorite` to group favorites. End with `end_favorite_group`");
+	m_pConsole->Register("end_favorite_group", "", CFGFLAG_CLIENT, Con_EndFavoriteGroup, this, "Use this after `add_favorite` to group favorites. Start with `begin_favorite_group`");
 	m_pConsole->Register("add_favorite", "s[host|ip] ?s['allow_ping']", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
 	m_pConsole->Register("remove_favorite", "r[host|ip]", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
 	m_pConsole->Register("demo_slice_start", "", CFGFLAG_CLIENT, Con_DemoSliceBegin, this, "");
@@ -4403,6 +4463,9 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("add_favorite", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("remove_favorite", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("end_favorite_group", ConchainServerBrowserUpdate, this);
 
 	m_pConsole->Chain("gfx_screen", ConchainWindowScreen, this);
 	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
@@ -4567,6 +4630,7 @@ int main(int argc, const char **argv)
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateFavorites().release());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pDiscord);
