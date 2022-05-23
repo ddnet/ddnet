@@ -21,8 +21,6 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
-#include <base/tl/array.h>
-
 #include <list>
 #include <vector>
 
@@ -268,7 +266,7 @@ public:
 
 	char m_aErrorShutdownReason[128];
 
-	array<CNameBan> m_aNameBans;
+	std::vector<CNameBan> m_vNameBans;
 
 	CServer();
 	~CServer();
