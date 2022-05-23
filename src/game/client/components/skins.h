@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
 #include <base/color.h>
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 #include <engine/shared/http.h>
 #include <game/client/component.h>
@@ -48,7 +47,7 @@ public:
 
 private:
 	std::vector<CSkin> m_Skins;
-	sorted_array<CDownloadSkin> m_aDownloadSkins;
+	std::vector<CDownloadSkin> m_DownloadSkins;
 	char m_EventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);

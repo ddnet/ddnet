@@ -346,7 +346,7 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 	}
 
 	m_Skins.clear();
-	m_aDownloadSkins.clear();
+	m_DownloadSkins.clear();
 	SSkinScanUser SkinScanUser;
 	SkinScanUser.m_pThis = this;
 	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
@@ -418,20 +418,23 @@ int CSkins::FindImpl(const char *pName)
 	if(str_find(pName, "/") != 0)
 		return -1;
 
-	auto d = ::find_binary(m_aDownloadSkins.all(), pName);
-	if(!d.empty())
+	CDownloadSkin DownloadNeedle;
+	mem_zero(&DownloadNeedle, sizeof(DownloadNeedle));
+	str_copy(DownloadNeedle.m_aName, pName, sizeof(DownloadNeedle.m_aName));
+	const auto &[RangeBegin, RangeEnd] = std::equal_range(m_DownloadSkins.begin(), m_DownloadSkins.end(), DownloadNeedle);
+	if(std::distance(RangeBegin, RangeEnd) == 1)
 	{
-		if(d.front().m_pTask && d.front().m_pTask->State() == HTTP_DONE)
+		if(RangeBegin->m_pTask && RangeBegin->m_pTask->State() == HTTP_DONE)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", d.front().m_aName);
-			Storage()->RenameFile(d.front().m_aPath, aPath, IStorage::TYPE_SAVE);
-			LoadSkin(d.front().m_aName, d.front().m_pTask->m_Info);
-			d.front().m_pTask = nullptr;
+			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", RangeBegin->m_aName);
+			Storage()->RenameFile(RangeBegin->m_aPath, aPath, IStorage::TYPE_SAVE);
+			LoadSkin(RangeBegin->m_aName, RangeBegin->m_pTask->m_Info);
+			RangeBegin->m_pTask = nullptr;
 		}
-		if(d.front().m_pTask && (d.front().m_pTask->State() == HTTP_ERROR || d.front().m_pTask->State() == HTTP_ABORTED))
+		if(RangeBegin->m_pTask && (RangeBegin->m_pTask->State() == HTTP_ERROR || RangeBegin->m_pTask->State() == HTTP_ABORTED))
 		{
-			d.front().m_pTask = nullptr;
+			RangeBegin->m_pTask = nullptr;
 		}
 		return -1;
 	}
@@ -447,6 +450,6 @@ int CSkins::FindImpl(const char *pName)
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
-	m_aDownloadSkins.add(Skin);
+	m_DownloadSkins.insert(std::lower_bound(m_DownloadSkins.begin(), m_DownloadSkins.end(), Skin), Skin);
 	return -1;
 }
