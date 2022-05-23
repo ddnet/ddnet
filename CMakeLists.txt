@@ -1691,7 +1691,6 @@ set_src(BASE GLOB_RECURSE src/base
   tl/allocator.h
   tl/array.h
   tl/range.h
-  tl/sorted_array.h
   tl/threading.h
   unicode/confusables.cpp
   unicode/confusables.h
@@ -2503,7 +2502,6 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     secure_random.cpp
     serverbrowser.cpp
     serverinfo.cpp
-    sorted_array.cpp
     str.cpp
     strip_path_and_extension.cpp
     teehistorian.cpp
