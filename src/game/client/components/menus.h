@@ -7,6 +7,8 @@
 #include <base/vmath.h>
 
 #include <chrono>
+#include <vector>
+
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -252,11 +254,11 @@ public:
 	};
 
 protected:
-	sorted_array<SCustomEntities> m_EntitiesList;
-	sorted_array<SCustomGame> m_GameList;
-	sorted_array<SCustomEmoticon> m_EmoticonList;
-	sorted_array<SCustomParticle> m_ParticlesList;
-	sorted_array<SCustomHud> m_HudList;
+	std::vector<SCustomEntities> m_EntitiesList;
+	std::vector<SCustomGame> m_GameList;
+	std::vector<SCustomEmoticon> m_EmoticonList;
+	std::vector<SCustomParticle> m_ParticlesList;
+	std::vector<SCustomHud> m_HudList;
 
 	bool m_IsInit = false;
 
