@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
 #include <chrono>
@@ -642,7 +641,7 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
-	sorted_array<CGhostItem> m_lGhosts;
+	std::vector<CGhostItem> m_lGhosts;
 
 	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 
