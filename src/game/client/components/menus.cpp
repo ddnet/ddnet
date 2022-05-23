@@ -2178,8 +2178,8 @@ int CMenus::Render()
 				// remove friend
 				if(m_FriendlistSelectedIndex >= 0)
 				{
-					m_pClient->Friends()->RemoveFriend(m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName,
-						m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aClan);
+					m_pClient->Friends()->RemoveFriend(m_Friends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName,
+						m_Friends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aClan);
 					FriendlistOnUpdate();
 					Client()->ServerBrowserUpdate();
 				}
