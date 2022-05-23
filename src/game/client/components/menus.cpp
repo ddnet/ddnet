@@ -1053,7 +1053,7 @@ void CMenus::OnInit()
 	m_IsInit = true;
 
 	// load menu images
-	m_lMenuImages.clear();
+	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
 }
 
@@ -2762,7 +2762,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 	// set menu image data
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
-	pSelf->m_lMenuImages.add(MenuImage);
+	pSelf->m_vMenuImages.push_back(MenuImage);
 	pSelf->RenderLoading(true);
 
 	return 0;
@@ -2770,12 +2770,10 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 {
-	for(int i = 0; i < m_lMenuImages.size(); i++)
-	{
-		if(str_comp(m_lMenuImages[i].m_aName, pName) == 0)
-			return &m_lMenuImages[i];
-	}
-	return 0;
+	for(auto &Image : m_vMenuImages)
+		if(str_comp(Image.m_aName, pName) == 0)
+			return &Image;
+	return nullptr;
 }
 
 void CMenus::SetMenuPage(int NewPage)
