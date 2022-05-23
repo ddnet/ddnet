@@ -27,6 +27,7 @@
 #endif
 
 #include <chrono>
+#include <functional>
 
 extern "C" {
 
@@ -834,6 +835,9 @@ typedef struct NETADDR
 	unsigned int type;
 	unsigned char ip[16];
 	unsigned short port;
+
+	bool operator==(const NETADDR &other) const;
+	bool operator!=(const NETADDR &other) const { return !(*this == other); }
 } NETADDR;
 
 #ifdef CONF_FAMILY_UNIX
@@ -2518,5 +2522,11 @@ void str_copy(char (&dst)[N], const char *src)
 {
 	str_copy(dst, src, N);
 }
+
+template<>
+struct std::hash<NETADDR>
+{
+	size_t operator()(const NETADDR &Addr) const noexcept;
+};
 
 #endif

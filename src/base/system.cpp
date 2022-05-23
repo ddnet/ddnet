@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iterator> // std::size
+#include <string_view>
 
 #include "system.h"
 
@@ -1038,6 +1039,11 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 int net_addr_comp(const NETADDR *a, const NETADDR *b)
 {
 	return mem_comp(a, b, sizeof(NETADDR));
+}
+
+bool NETADDR::operator==(const NETADDR &other) const
+{
+	return net_addr_comp(this, &other) == 0;
 }
 
 int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
@@ -4154,4 +4160,9 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 {
 	using namespace std::chrono_literals;
 	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());
+}
+
+size_t std::hash<NETADDR>::operator()(const NETADDR &Addr) const noexcept
+{
+	return std::hash<std::string_view>{}(std::string_view((const char *)&Addr, sizeof(Addr)));
 }
