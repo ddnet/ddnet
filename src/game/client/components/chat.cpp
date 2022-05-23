@@ -34,7 +34,7 @@ CChat::CChat()
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include <game/ddracechat.h>
-	m_Commands.sort_range();
+	std::sort(m_Commands.begin(), m_Commands.end());
 
 	m_Mode = MODE_NONE;
 	Reset();
@@ -42,7 +42,7 @@ CChat::CChat()
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
 {
-	m_Commands.add_unsorted(CCommand{pName, pParams});
+	m_Commands.push_back(CCommand{pName, pParams});
 }
 
 void CChat::RebuildChat()
