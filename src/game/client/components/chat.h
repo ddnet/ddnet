@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CHAT_H
 #define GAME_CLIENT_COMPONENTS_CHAT_H
+#include <vector>
+
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 
@@ -99,7 +101,7 @@ class CChat : public CComponent
 		bool operator==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
 	};
 
-	sorted_array<CCommand> m_Commands;
+	std::vector<CCommand> m_Commands;
 	bool m_ReverseTAB;
 
 	struct CHistoryEntry
