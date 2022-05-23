@@ -1,14 +1,15 @@
+#include <base/math.h>
 #include <base/system.h>
-#include <base/tl/array.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
+#include <vector>
 
 void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
 	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
-	array<char *> aLines;
+	std::vector<char *> vLines;
 	char *pSettings = NULL;
 	if(!File)
 	{
@@ -26,19 +27,19 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		int Length = str_length(pLine) + 1;
 		char *pCopy = (char *)malloc(Length);
 		mem_copy(pCopy, pLine, Length);
-		aLines.add(pCopy);
+		vLines.push_back(pCopy);
 		TotalLength += Length;
 	}
 	io_close(File);
 
 	pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
-	for(int i = 0; i < aLines.size(); i++)
+	for(auto &Line : vLines)
 	{
-		int Length = str_length(aLines[i]) + 1;
-		mem_copy(pSettings + Offset, aLines[i], Length);
+		int Length = str_length(Line) + 1;
+		mem_copy(pSettings + Offset, Line, Length);
 		Offset += Length;
-		free(aLines[i]);
+		free(Line);
 	}
 
 	CDataFileReader Reader;
