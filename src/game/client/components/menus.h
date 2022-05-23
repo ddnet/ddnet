@@ -430,7 +430,6 @@ protected:
 		}
 	};
 
-	//sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
 	char m_aCurrentDemoFile[64];
 	int m_DemolistSelectedIndex;
@@ -618,7 +617,7 @@ public:
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	sorted_array<CDemoItem> m_lDemos;
+	std::vector<CDemoItem> m_lDemos;
 	void DemolistPopulate();
 	bool m_Dummy;
 
