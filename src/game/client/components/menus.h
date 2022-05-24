@@ -448,6 +448,12 @@ protected:
 		const CFriendInfo *m_pFriendInfo;
 		int m_NumFound;
 
+		CFriendItem() {}
+		CFriendItem(const CFriendInfo *pFriendInfo) :
+			m_pFriendInfo(pFriendInfo), m_NumFound(0)
+		{
+		}
+
 		bool operator<(const CFriendItem &Other) const
 		{
 			if(m_NumFound && !Other.m_NumFound)
