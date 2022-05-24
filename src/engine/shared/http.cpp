@@ -23,6 +23,8 @@
 #undef max
 #endif
 
+static const char g_Wakeup = 'w';
+
 int CHttp::CurlDebug(CURL *pHandle, unsigned int Type, char *pData, size_t DataSize, void *pUser)
 {
 	curl_infotype InfoType = static_cast<curl_infotype>(Type);
@@ -312,7 +314,7 @@ json_value *CHttpRequest::ResultJson() const
 	return json_parse((char *)pResult, ResultLength);
 }
 
-void CHttp::Init()
+bool CHttp::Init()
 {
 #if !defined(CONF_FAMILY_WINDOWS)
 	// As a multithreaded application we have to tell curl to not install signal
@@ -320,14 +322,43 @@ void CHttp::Init()
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
+	NETSOCKET SockPair[2];
+	if(!net_tcp_socketpair(SockPair))
+		return false;
+
+	if(net_set_non_blocking(SockPair[0]) || net_set_non_blocking(SockPair[1]))
+		goto error;
+
+	m_WaitSocket = SockPair[0];
+	m_InterruptSocket = SockPair[1];
+
 	m_pThread = thread_init(CHttp::ThreadMain, this, "http");
+	if(!m_pThread)
+		goto error;
+
+	return true;
+
+error:
+	// Should probably mark CHttp as inop, unless CHttp::Init failing should be fatal
+	net_tcp_close(SockPair[0]);
+	net_tcp_close(SockPair[1]);
+	return false;
+}
+
+// Only call when holding m_Lock
+void CHttp::WakeUp()
+{
+	net_tcp_send(m_InterruptSocket, &g_Wakeup, sizeof(g_Wakeup));
 }
 
 void CHttp::AddRequest(std::shared_ptr<CHttpRequest> pRequest)
 {
 	std::lock_guard l(m_Lock);
+	if(m_Shutdown)
+		return;
+
 	m_PendingRequests.emplace(std::move(pRequest));
-	curl_multi_wakeup(m_pHandle); // Is it appropriate to use this as a CV?
+	WakeUp();
 }
 
 void CHttp::ThreadMain(void *pUser)
@@ -370,11 +401,18 @@ void CHttp::Run()
 		return; //TODO: Report the error somehow
 	}
 
-	while(!m_Shutdown.load(std::memory_order_relaxed))
+	curl_waitfd ExtraFds[] = {{net_socket_v4_getraw(m_WaitSocket), CURL_POLL_IN, 0}};
+	while(!m_Shutdown.load(std::memory_order_seq_cst))
 	{
 		int Running = 0;
-		CURLMcode mc = curl_multi_poll(m_pHandle, NULL, 0, 100, NULL);
-		if(m_Shutdown.load(std::memory_order_relaxed))
+		CURLMcode mc = curl_multi_wait(m_pHandle, ExtraFds, sizeof(ExtraFds) / sizeof(ExtraFds[0]), 100, NULL);
+
+		// Discard any data on m_WaitSocket so it doesn't wake us up again
+		char aBuf[64];
+		while(net_tcp_recv(m_WaitSocket, aBuf, sizeof(aBuf)) > 0)
+			;
+
+		if(m_Shutdown.load(std::memory_order_seq_cst))
 			break;
 
 		if(mc != CURLM_OK)
@@ -436,6 +474,9 @@ void CHttp::Run()
 		}
 	}
 
+	std::unique_lock l(m_Lock);
+	m_Shutdown = true;
+
 	for(auto &ReqPair : m_RunningRequests)
 	{
 		auto &[pHandle, pRequest] = ReqPair;
@@ -449,6 +490,16 @@ void CHttp::Run()
 
 	m_RunningRequests.clear();
 
+	while(!m_PendingRequests.empty())
+	{
+		auto pRequest = std::move(m_PendingRequests.front());
+		m_PendingRequests.pop();
+
+		// Emulate CURLE_ABORTED_BY_CALLBACK
+		str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
+		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+	}
+
 	curl_share_cleanup(m_pShare);
 	curl_multi_cleanup(m_pHandle);
 	curl_global_cleanup();
@@ -458,8 +509,13 @@ CHttp::~CHttp()
 {
 	if(m_pThread)
 	{
+		std::unique_lock l(m_Lock);
 		m_Shutdown = true;
-		curl_multi_wakeup(m_pHandle);
+		WakeUp();
+		l.unlock();
 		thread_wait(m_pThread);
 	}
+
+	net_tcp_close(m_WaitSocket);
+	net_tcp_close(m_InterruptSocket);
 }

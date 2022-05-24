@@ -907,6 +907,15 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 int net_socket_type(NETSOCKET sock);
 
 /*
+	Function: net_socket_v4_getraw
+		Get an ipv4 sockets underlying socket id.
+
+	Parameters:
+		sock - Socket to get the id from.
+*/
+int net_socket_v4_getraw(NETSOCKET sock);
+
+/*
 	Function: net_udp_create
 		Creates a UDP socket and binds it to a port.
 

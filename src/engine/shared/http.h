@@ -200,6 +200,9 @@ class CHttp
 	void *m_pThread = nullptr;
 	std::atomic<bool> m_Shutdown = false;
 
+	NETSOCKET m_WaitSocket = nullptr;
+	NETSOCKET m_InterruptSocket = nullptr;
+
 	std::mutex m_Lock;
 	std::queue<std::shared_ptr<CHttpRequest>> m_PendingRequests;
 
@@ -209,7 +212,7 @@ class CHttp
 
 public:
 	~CHttp();
-	void Init();
+	bool Init();
 	void AddRequest(std::shared_ptr<CHttpRequest> pRequest);
 
 	static void EscapeUrl(char *pBuf, int Size, const char *pStr);
@@ -218,6 +221,7 @@ public:
 private:
 	static void ThreadMain(void *pUser);
 	void Run();
+	void WakeUp();
 };
 
 #endif // ENGINE_SHARED_HTTP_H

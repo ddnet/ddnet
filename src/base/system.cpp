@@ -1449,6 +1449,12 @@ int net_socket_type(NETSOCKET sock)
 	return sock->type;
 }
 
+int net_socket_v4_getraw(NETSOCKET sock)
+{
+	dbg_assert(sock->type & NETTYPE_IPV4 && sock->ipv4sock > 0, "Non ipv4 socket");
+	return sock->ipv4sock;
+}
+
 NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
