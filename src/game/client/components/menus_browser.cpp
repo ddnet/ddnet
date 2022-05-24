@@ -1250,12 +1250,7 @@ void CMenus::FriendlistOnUpdate()
 {
 	m_lFriends.clear();
 	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
-	{
-		CFriendItem Item;
-		Item.m_pFriendInfo = m_pClient->Friends()->GetFriend(i);
-		Item.m_NumFound = 0;
-		m_lFriends.push_back(Item);
-	}
+		m_lFriends.emplace_back(m_pClient->Friends()->GetFriend(i));
 	std::sort(m_lFriends.begin(), m_lFriends.end());
 }
 
