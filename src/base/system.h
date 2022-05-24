@@ -196,7 +196,7 @@ typedef struct IOINTERNAL *IOHANDLE;
  * @ingroup File-IO
  *
  * @param File to open.
- * @param flags A set of IOFLAG flags. 
+ * @param flags A set of IOFLAG flags.
  *
  * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
  *
@@ -976,6 +976,18 @@ int net_udp_close(NETSOCKET sock);
  * @return On success it returns an handle to the socket. On failure it returns NETSOCKET_INVALID.
  */
 NETSOCKET net_tcp_create(NETADDR bindaddr);
+
+/**
+ * Creates a TCP socketpair.
+ *
+ * @ingroup Network-TCP
+ *
+ * @param socks Array to write the sockets to
+ *
+ * @return On success it returns true. On failure it returns false.
+ * @remark On failure unlike socketpair(2) on linux, socks will be guaranteed to contain two NETSOCKET_INVALID.
+ */
+bool net_tcp_socketpair(NETSOCKET socks[2]);
 
 /**
  * Makes the socket start listening for new connections.
@@ -1881,7 +1893,11 @@ int net_tcp_connect_non_blocking(NETSOCKET sock, NETADDR bindaddr);
 /*
 	Function: net_set_non_blocking
 
-	DOCTODO: serp
+	Parameters:
+		sock - The socket
+
+	Returns:
+		0 on success, -1 on failure
 */
 int net_set_non_blocking(NETSOCKET sock);
 
@@ -2288,7 +2304,7 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 /*
 	Function: pid
 		Returns the pid of the current process.
-	
+
 	Returns:
 		pid of the current process
 */

@@ -167,6 +167,8 @@ struct NETSOCKET_INTERNAL
 	int web_ipv4sock;
 
 	NETSOCKET_BUFFER buffer;
+
+	bool operator==(const NETSOCKET_INTERNAL &b) { return std::tie(type, ipv4sock, ipv6sock, web_ipv4sock) == std::tie(b.type, b.ipv4sock, b.ipv6sock, b.web_ipv4sock); };
 };
 static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
@@ -1417,22 +1419,25 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 #endif
 
 	/* bind the socket */
-	e = bind(sock, addr, sockaddrlen);
-	if(e != 0)
+	if(addr)
 	{
+		e = bind(sock, addr, sockaddrlen);
+		if(e != 0)
+		{
 #if defined(CONF_FAMILY_WINDOWS)
-		char buf[128];
-		WCHAR wBuffer[128];
-		int error = WSAGetLastError();
-		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, std::size(wBuffer), 0) == 0)
-			wBuffer[0] = 0;
-		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
+			char buf[128];
+			WCHAR wBuffer[128];
+			int error = WSAGetLastError();
+			if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, std::size(wBuffer), 0) == 0)
+				wBuffer[0] = 0;
+			WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
+			dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
 #else
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
+			dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
-		priv_net_close_socket(sock);
-		return -1;
+			priv_net_close_socket(sock);
+			return -1;
+		}
 	}
 
 	/* return the newly created socket */
@@ -1774,57 +1779,134 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	return sock;
 }
 
+bool net_tcp_socketpair(NETSOCKET socks[2])
+{
+	socks[0] = (NETSOCKET_INTERNAL *)malloc(sizeof *socks[0]);
+	socks[1] = (NETSOCKET_INTERNAL *)malloc(sizeof *socks[1]);
+	*socks[0] = *socks[1] = invalid_socket;
+
+#if defined(CONF_FAMILY_UNIX)
+	int s[2];
+	if(!socketpair(AF_UNIX, SOCK_STREAM, 0, s))
+	{
+		socks[0]->type = NETTYPE_IPV4;
+		socks[0]->ipv4sock = s[0];
+		socks[1]->type = NETTYPE_IPV4;
+		socks[1]->ipv4sock = s[1];
+	}
+#elif defined(CONF_FAMILY_WINDOWS)
+	NETADDR l_addr, p_addr;
+	sockaddr a, b;
+	sockaddr_in *a_in = reinterpret_cast<sockaddr_in *>(&a), *b_in = reinterpret_cast<sockaddr_in *>(&b);
+	int addrlen, s = -1;
+	struct timeval tv;
+	fd_set fds_read;
+	NETADDR local{NETTYPE_IPV4, {0x7f, 0x00, 0x00, 0x01}, 0};
+
+	NETSOCKET listener = net_tcp_create(local);
+	if(*listener == invalid_socket)
+		return false;
+
+	if(net_set_non_blocking(listener))
+		goto error;
+
+	addrlen = sizeof(a);
+	if(getsockname(listener->ipv4sock, &a, &addrlen) || addrlen < (int)sizeof(a))
+		goto error;
+
+	sockaddr_to_netaddr(&a, &l_addr);
+
+	if(net_tcp_listen(listener, 1))
+		goto error;
+
+	s = priv_net_create_socket(AF_INET, SOCK_STREAM, NULL, 0);
+	if(s < 0)
+		goto error;
+
+	socks[0]->type = NETTYPE_IPV4;
+	socks[0]->ipv4sock = s;
+
+	net_tcp_connect(socks[0], &l_addr);
+
+	tv.tv_sec = 10;
+	tv.tv_usec = 0;
+	FD_ZERO(&fds_read);
+	FD_SET(listener->ipv4sock, &fds_read);
+	select(1, &fds_read, NULL, NULL, &tv);
+
+	if(net_tcp_accept(listener, &socks[1], &p_addr))
+		goto error;
+
+	addrlen = sizeof(a);
+	if(getsockname(socks[0]->ipv4sock, &a, &addrlen) || addrlen < (int)sizeof(a))
+		goto error;
+
+	addrlen = sizeof(b);
+	if(getpeername(socks[1]->ipv4sock, &b, &addrlen) || addrlen < (int)sizeof(b))
+		goto error;
+
+	if(a_in->sin_family != b_in->sin_family || a_in->sin_addr.s_addr != b_in->sin_addr.s_addr || a_in->sin_port != b_in->sin_port)
+		goto error;
+
+	net_tcp_close(listener);
+
+error:
+	net_tcp_close(listener);
+	net_tcp_close(socks[0]);
+	net_tcp_close(socks[1]);
+	*socks[0] = *socks[1] = invalid_socket;
+	return false;
+#endif
+
+	return true;
+}
+
+#if defined(CONF_FAMILY_WINDOWS)
+#define PRIV_IOCTL ioctlsocket
+#else
+#define PRIV_IOCTL ioctl
+#endif
 int net_set_non_blocking(NETSOCKET sock)
 {
 	unsigned long mode = 1;
-	if(sock->ipv4sock >= 0)
+	bool failed = false;
+
+	if(sock->ipv4sock >= 0 && PRIV_IOCTL(sock->ipv4sock, FIONBIO, (unsigned long *)&mode))
 	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv4sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
-#endif
+		dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
+		failed = true;
 	}
 
-	if(sock->ipv6sock >= 0)
+	if(sock->ipv6sock >= 0 && PRIV_IOCTL(sock->ipv6sock, FIONBIO, (unsigned long *)&mode))
 	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv6sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv6 non-blocking failed: %d", errno);
-#endif
+		dbg_msg("socket", "setting ipv6 non-blocking failed: %d", errno);
+		failed = true;
 	}
 
-	return 0;
+	return failed ? -1 : 0;
 }
 
 int net_set_blocking(NETSOCKET sock)
 {
 	unsigned long mode = 0;
-	if(sock->ipv4sock >= 0)
+	bool failed = false;
+
+	if(sock->ipv4sock >= 0 && PRIV_IOCTL(sock->ipv4sock, FIONBIO, (unsigned long *)&mode))
 	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv4sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv4 blocking failed: %d", errno);
-#endif
+		dbg_msg("socket", "setting ipv4 blocking failed: %d", errno);
+		failed = true;
 	}
 
-	if(sock->ipv6sock >= 0)
+	if(sock->ipv6sock >= 0 && PRIV_IOCTL(sock->ipv4sock, FIONBIO, (unsigned long *)&mode))
 	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv6sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv6 blocking failed: %d", errno);
-#endif
+		dbg_msg("socket", "setting ipv6 blocking failed: %d", errno);
+		failed = true;
 	}
 
-	return 0;
+	return failed ? -1 : 0;
 }
+
+#undef PRIV_IOCTL
 
 int net_tcp_listen(NETSOCKET sock, int backlog)
 {
@@ -1994,6 +2076,11 @@ void net_unix_close(UNIXSOCKET sock)
 {
 	close(sock);
 }
+#endif
+
+#if defined(CONF_FAMILY_UNIX)
+
+#elif defined(CONF_FAMILY_WINDOWS)
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
