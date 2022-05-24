@@ -37,11 +37,7 @@ CLocalizationDatabase::CLocalizationDatabase()
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
 {
-	CString s;
-	s.m_Hash = str_quickhash(pOrgStr);
-	s.m_ContextHash = str_quickhash(pContext);
-	s.m_pReplacement = m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr);
-	m_Strings.push_back(s);
+	m_Strings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
