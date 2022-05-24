@@ -401,7 +401,7 @@ void CHttp::Run()
 		return; //TODO: Report the error somehow
 	}
 
-	curl_waitfd ExtraFds[] = {{net_socket_v4_getraw(m_WaitSocket), CURL_POLL_IN, 0}};
+	curl_waitfd ExtraFds[] = {{static_cast<curl_socket_t>(net_socket_v4_getraw(m_WaitSocket)), CURL_POLL_IN, 0}};
 	while(!m_Shutdown.load(std::memory_order_seq_cst))
 	{
 		int Running = 0;
