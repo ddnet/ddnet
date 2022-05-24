@@ -11,7 +11,7 @@ CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JU
                   "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
                   "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA",
-				  "NO_MOVEMENTS"]
+				  "NO_MOVEMENTS", "IN_FREEZE", "PRACTICE_MODE"]
 GameInfoFlags = [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
 	"GAMETYPE_DDRACE", "GAMETYPE_DDNET", "GAMETYPE_BLOCK_WORLDS",
@@ -237,21 +237,20 @@ Objects = [
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetTick("m_FreezeEnd"),
-		NetIntRange("m_Jumps", -1, 255),
+		NetIntRange("m_Jumps", -1, 255, 2),
 		NetIntAny("m_TeleCheckpoint"),
-		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
-	]),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1', 0),
 
-	NetObjectEx("DDNetCharacterDisplayInfo", "character-display-info@netobj.ddnet.tw", [
-		NetIntRange("m_JumpedTotal", 0, 255),
-		NetTick("m_NinjaActivationTick"),
-		NetTick("m_FreezeTick"),
-		NetBool("m_IsInFreeze"),
-		NetBool("m_IsInPracticeMode"),
-		NetIntAny("m_TargetX"),
-		NetIntAny("m_TargetY"),
-		NetIntAny("m_RampValue"),
-	]),
+		# New data fields for jump display, freeze bar and ninja bar
+		# Default values indicate that these values should not be used
+		NetIntRange("m_JumpedTotal", -1, 255, -1),
+		NetTick("m_NinjaActivationTick", -1),
+		NetTick("m_FreezeStart", -1),
+		# New data fields for improved target accuracy and speed display
+		NetIntAny("m_TargetX", 0),
+		NetIntAny("m_TargetY", 0),
+		NetIntAny("m_RampValue", 1),
+	], validate_size=False),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),

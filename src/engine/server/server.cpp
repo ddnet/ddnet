@@ -974,11 +974,11 @@ void CServer::DoSnapshot()
 
 			int Crc = pData->Crc();
 
-			// remove old snapshos
+			// remove old snapshots
 			// keep 3 seconds worth of snapshots
 			m_aClients[i].m_Snapshots.PurgeUntil(m_CurrentGameTick - SERVER_TICK_SPEED * 3);
 
-			// save it the snapshot
+			// save the snapshot
 			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0);
 
 			// find snapshot that we can perform delta against

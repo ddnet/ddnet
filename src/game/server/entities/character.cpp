@@ -12,6 +12,7 @@
 #include <game/server/player.h>
 
 #include "character.h"
+#include "game/generated/protocol.h"
 #include "laser.h"
 #include "projectile.h"
 
@@ -1045,7 +1046,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		pCharacter->m_AmmoCount = AmmoCount;
 
 		if(m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
-			pCharacter->m_AmmoCount = m_Core.m_FreezeTick + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
+			pCharacter->m_AmmoCount = m_Core.m_FreezeStart + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
 		else if(Weapon == WEAPON_NINJA)
 			pCharacter->m_AmmoCount = m_Core.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 
@@ -1166,17 +1167,21 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
 
-	CNetObj_DDNetCharacterDisplayInfo *pDDNetCharacterDisplayInfo = static_cast<CNetObj_DDNetCharacterDisplayInfo *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, ID, sizeof(CNetObj_DDNetCharacterDisplayInfo)));
-	if(!pDDNetCharacterDisplayInfo)
-		return;
-	pDDNetCharacterDisplayInfo->m_JumpedTotal = m_Core.m_JumpedTotal;
-	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
-	pDDNetCharacterDisplayInfo->m_FreezeTick = m_Core.m_FreezeTick;
-	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_Core.m_IsInFreeze;
-	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
-	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
-	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
-	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, m_Core.m_Tuning.m_VelrampStart, m_Core.m_Tuning.m_VelrampRange, m_Core.m_Tuning.m_VelrampCurvature) * 1000.0f);
+	// Display Informations
+	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
+	pDDNetCharacter->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
+	pDDNetCharacter->m_FreezeStart = m_Core.m_FreezeStart;
+	if(m_Core.m_IsInFreeze)
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IN_FREEZE;
+	}
+	if(Teams()->IsPractice(Team()))
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_PRACTICE_MODE;
+	}
+	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
+	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
+	pDDNetCharacter->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, m_Core.m_Tuning.m_VelrampStart, m_Core.m_Tuning.m_VelrampRange, m_Core.m_Tuning.m_VelrampCurvature) * 1000.0f);
 }
 
 // DDRace
@@ -2207,11 +2212,11 @@ bool CCharacter::Freeze(int Seconds)
 {
 	if((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * Server()->TickSpeed()) && Seconds != -1)
 		return false;
-	if(m_Core.m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
+	if(m_Core.m_FreezeStart < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
 		m_Armor = 0;
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
-		m_Core.m_FreezeTick = Server()->Tick();
+		m_Core.m_FreezeStart = Server()->Tick();
 		return true;
 	}
 	return false;
@@ -2230,7 +2235,7 @@ bool CCharacter::UnFreeze()
 		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
-		m_Core.m_FreezeTick = 0;
+		m_Core.m_FreezeStart = 0;
 		m_FrozenLastTick = true;
 		return true;
 	}

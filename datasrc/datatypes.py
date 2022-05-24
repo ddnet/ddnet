@@ -225,17 +225,22 @@ class NetObject:
 	def emit_validate(self, base_item):
 		lines = ["case %s:" % self.enum_name]
 		lines += ["{"]
-		if self.validate_size:
-			lines += ["\t%s *pObj = (%s *)pData;"%(self.struct_name, self.struct_name)]
-			lines += ["\tif((int)sizeof(*pObj) > Size) return -1;"]
-		prev_len = len(lines)
+
 		variables = self.variables
 		if base_item:
 			variables += base_item.variables
+		validate_variables_lines = []
 		for v in variables:
-			lines += ["\t"+line for line in v.emit_validate()]
-		if not self.validate_size and prev_len != len(lines):
-			raise ValueError("Can't use members that need validation in a struct whose size isn't validated")
+			validate_variable_lines = ["\t"+line for line in v.emit_validate()]
+			if not self.validate_size and len(validate_variable_lines) > 0 and v.default is None:
+				raise ValueError("Members that require validation and do not have a default value cannot be used in a structure whose size is not validated")
+			validate_variables_lines += validate_variable_lines
+
+		if self.validate_size or validate_variables_lines:
+			lines += ["\t%s *pObj = (%s *)pData;"%(self.struct_name, self.struct_name)]
+		if self.validate_size:
+			lines += ["\tif((int)sizeof(*pObj) > Size) return -1;"]
+		lines += validate_variables_lines
 		lines += ["\treturn 0;"]
 		lines += ["}"]
 		return lines
@@ -297,8 +302,9 @@ class NetMessageEx(NetMessage):
 
 
 class NetVariable:
-	def __init__(self, name):
+	def __init__(self, name, default=None):
 		self.name = name
+		self.default = None if default is None else str(default)
 	def emit_declaration(self):
 		return []
 	def emit_validate(self):
@@ -338,13 +344,15 @@ class NetIntAny(NetVariable):
 	def emit_declaration(self):
 		return ["int %s;"%self.name]
 	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetInt();" % self.name]
+		if self.default is None:
+			return ["pMsg->%s = pUnpacker->GetInt();" % self.name]
+		return ["pMsg->%s = pUnpacker->GetIntOrDefault(%s);" % (self.name, self.default)]
 	def emit_pack(self):
 		return ["pPacker->AddInt(%s);" % self.name]
 
 class NetIntRange(NetIntAny):
-	def __init__(self, name, min_val, max_val):
-		NetIntAny.__init__(self,name)
+	def __init__(self, name, min_val, max_val, default=None):
+		NetIntAny.__init__(self,name,default=default)
 		self.min = str(min_val)
 		self.max = str(max_val)
 	def emit_validate(self):
@@ -353,12 +361,13 @@ class NetIntRange(NetIntAny):
 		return ["if(pMsg->%s < %s || pMsg->%s > %s) { m_pMsgFailedOn = \"%s\"; break; }" % (self.name, self.min, self.name, self.max, self.name)]
 
 class NetBool(NetIntRange):
-	def __init__(self, name):
-		NetIntRange.__init__(self,name,0,1)
+	def __init__(self, name, default=None):
+		default = None if default is None else int(default)
+		NetIntRange.__init__(self,name,0,1,default=default)
 
 class NetTick(NetIntAny):
-	def __init__(self, name):
-		NetIntAny.__init__(self,name)
+	def __init__(self, name, default=None):
+		NetIntAny.__init__(self,name,default=default)
 
 class NetArray(NetVariable):
 	def __init__(self, var, size):

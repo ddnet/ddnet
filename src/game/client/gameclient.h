@@ -305,10 +305,8 @@ public:
 			CNetObj_Character m_Cur;
 
 			CNetObj_DDNetCharacter m_ExtendedData;
+			const CNetObj_DDNetCharacter *m_PrevExtendedData;
 			bool m_HasExtendedData;
-
-			const CNetObj_DDNetCharacterDisplayInfo *m_PrevExtendedDisplayInfo;
-			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
 			bool m_HasExtendedDisplayInfo;
 
 			// interpolated position

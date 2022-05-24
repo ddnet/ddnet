@@ -1321,8 +1321,13 @@ void CGameClient::OnNewSnapshot()
 				if(Item.m_ID < MAX_CLIENTS)
 				{
 					m_Snap.m_aCharacters[Item.m_ID].m_ExtendedData = *pCharacterData;
+					m_Snap.m_aCharacters[Item.m_ID].m_PrevExtendedData = (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_ID);
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedData = true;
-
+					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = false;
+					if(Item.m_DataSize >= 44)
+					{
+						m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = true;
+					}
 					CClientData *pClient = &m_aClients[Item.m_ID];
 					// Collision
 					pClient->m_Solo = pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
@@ -1350,20 +1355,6 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_HasTelegunLaser = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
 					pClient->m_Predicted.ReadDDNet(pCharacterData);
-				}
-			}
-			else if(Item.m_Type == NETOBJTYPE_DDNETCHARACTERDISPLAYINFO)
-			{
-				const CNetObj_DDNetCharacterDisplayInfo *pCharacterDisplayInfo = (const CNetObj_DDNetCharacterDisplayInfo *)pData;
-
-				if(Item.m_ID < MAX_CLIENTS)
-				{
-					m_Snap.m_aCharacters[Item.m_ID].m_ExtendedDisplayInfo = *pCharacterDisplayInfo;
-					m_Snap.m_aCharacters[Item.m_ID].m_PrevExtendedDisplayInfo = (const CNetObj_DDNetCharacterDisplayInfo *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, Item.m_ID);
-					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = true;
-
-					CClientData *pClient = &m_aClients[Item.m_ID];
-					pClient->m_Predicted.ReadDDNetDisplayInfo(pCharacterDisplayInfo);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
@@ -2432,7 +2423,6 @@ void CGameClient::UpdatePrediction()
 			int GameTeam = (m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
-				m_Snap.m_aCharacters[i].m_HasExtendedDisplayInfo ? &m_Snap.m_aCharacters[i].m_ExtendedDisplayInfo : 0,
 				GameTeam, IsLocal);
 		}
 
