@@ -1447,14 +1447,31 @@ void CGameClient::OnNewSnapshot()
 
 				for(int j = 0; j < (int)Switchers().size(); j++)
 				{
-					Switchers()[j].m_Status[Team] = (pSwitchStateData->m_Status[j / 32] >> (j % 32)) & 1;
+					Switchers()[j].m_Status[Team] = (pSwitchStateData->m_aStatus[j / 32] >> (j % 32)) & 1;
+				}
 
-					// update
-					if(Switchers()[j].m_Status[Team])
-						Switchers()[j].m_Type[Team] = TILE_SWITCHOPEN;
+				const int SnapItemSize = Client()->SnapItemSize(IClient::SNAP_CURRENT, i);
+				if(SnapItemSize >= 68)
+				{
+					// update the endtick of up to four timed switchers
+					for(int j = 0; j < (int)std::size(pSwitchStateData->m_aEndTicks); j++)
+					{
+						int SwitchNumber = pSwitchStateData->m_aSwitchNumbers[j];
+						int EndTick = pSwitchStateData->m_aEndTicks[j];
+						if(EndTick > 0 && in_range(SwitchNumber, 0, (int)Switchers().size()))
+						{
+							Switchers()[SwitchNumber].m_EndTick[Team] = EndTick;
+						}
+					}
+				}
+
+				// update switch types
+				for(auto &Switcher : Switchers())
+				{
+					if(Switcher.m_Status[Team])
+						Switcher.m_Type[Team] = Switcher.m_EndTick[Team] ? TILE_SWITCHTIMEDOPEN : TILE_SWITCHOPEN;
 					else
-						Switchers()[j].m_Type[Team] = TILE_SWITCHCLOSE;
-					Switchers()[j].m_EndTick[Team] = 0;
+						Switcher.m_Type[Team] = Switcher.m_EndTick[Team] ? TILE_SWITCHTIMEDCLOSE : TILE_SWITCHCLOSE;
 				}
 
 				if(!GotSwitchStateTeam)
@@ -2229,32 +2246,6 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
-
-	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
-	for(int i = 0; i < Num; i++)
-	{
-		IClient::CSnapItem Item;
-		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
-		if(Item.m_Type == NETOBJTYPE_SWITCHTIMESTATE)
-		{
-			const CNetObj_SwitchTimeState *pSwitchTimeStateData = (const CNetObj_SwitchTimeState *)pData;
-			for(int j = 0; j < (int)(sizeof(pSwitchTimeStateData->m_EndTick) / sizeof(pSwitchTimeStateData->m_EndTick[0])); j++)
-			{
-				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
-				int SwitchNum = pSwitchTimeStateData->m_SwitchNumber[j];
-				int EndTick = pSwitchTimeStateData->m_EndTick[j];
-				if(in_range(SwitchNum, 0, (int)Switchers().size()) && EndTick > 0)
-				{
-					// update EndTick
-					if(Switchers()[SwitchNum].m_Status[Team])
-						Switchers()[SwitchNum].m_Type[Team] = TILE_SWITCHTIMEDOPEN;
-					else
-						Switchers()[SwitchNum].m_Type[Team] = TILE_SWITCHTIMEDCLOSE;
-					Switchers()[SwitchNum].m_EndTick[Team] = EndTick;
-				}
-			}
-		}
-	}
 
 	// always update default tune zone, even without character
 	if(!m_GameWorld.m_WorldConfig.m_UseTuneZones)

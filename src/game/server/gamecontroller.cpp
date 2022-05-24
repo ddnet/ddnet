@@ -647,14 +647,14 @@ void IGameController::Snap(int SnappingClient)
 			return;
 
 		pSwitchState->m_HighestSwitchNumber = clamp((int)GameServer()->Switchers().size() - 1, 0, 255);
-		mem_zero(pSwitchState->m_Status, sizeof(pSwitchState->m_Status));
+		mem_zero(pSwitchState->m_aStatus, sizeof(pSwitchState->m_aStatus));
 
 		std::vector<std::pair<int, int>> aEndTicks; // <EndTick, SwitchNumber>
 
 		for(int i = 0; i <= pSwitchState->m_HighestSwitchNumber; i++)
 		{
 			int Status = (int)GameServer()->Switchers()[i].m_Status[Team];
-			pSwitchState->m_Status[i / 32] |= (Status << (i % 32));
+			pSwitchState->m_aStatus[i / 32] |= (Status << (i % 32));
 
 			int EndTick = GameServer()->Switchers()[i].m_EndTick[Team];
 			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_LastUpdateTick[Team] < Server()->Tick())
@@ -664,24 +664,17 @@ void IGameController::Snap(int SnappingClient)
 			}
 		}
 
-		// send the endtick of switchers that are about to toggle back (up to some number, prioritizing those with the earliest endticks)
-		CNetObj_SwitchTimeState *pSwitchTimeState = static_cast<CNetObj_SwitchTimeState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHTIMESTATE, Team, sizeof(CNetObj_SwitchTimeState)));
-		if(!pSwitchTimeState)
-			return;
+		// send the endtick of switchers that are about to toggle back (up to four, prioritizing those with the earliest endticks)
+		mem_zero(pSwitchState->m_aSwitchNumbers, sizeof(pSwitchState->m_aSwitchNumbers));
+		mem_zero(pSwitchState->m_aEndTicks, sizeof(pSwitchState->m_aEndTicks));
 
 		std::sort(aEndTicks.begin(), aEndTicks.end());
-		for(int i = 0; i < (int)(sizeof(pSwitchTimeState->m_EndTick) / sizeof(pSwitchTimeState->m_EndTick[0])); i++)
+		const int NumTimedSwitchers = minimum((int)aEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+
+		for(int i = 0; i < NumTimedSwitchers; i++)
 		{
-			if(i < (int)aEndTicks.size())
-			{
-				pSwitchTimeState->m_EndTick[i] = aEndTicks[i].first;
-				pSwitchTimeState->m_SwitchNumber[i] = aEndTicks[i].second;
-			}
-			else
-			{
-				pSwitchTimeState->m_SwitchNumber[i] = -1;
-				pSwitchTimeState->m_EndTick[i] = 0;
-			}
+			pSwitchState->m_aSwitchNumbers[i] = aEndTicks[i].second;
+			pSwitchState->m_aEndTicks[i] = aEndTicks[i].first;
 		}
 	}
 }
