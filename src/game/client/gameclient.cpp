@@ -1324,7 +1324,7 @@ void CGameClient::OnNewSnapshot()
 					m_Snap.m_aCharacters[Item.m_ID].m_PrevExtendedData = (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_ID);
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedData = true;
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = false;
-					if(Item.m_DataSize >= 44)
+					if(Item.m_DataSize >= 40)
 					{
 						m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = true;
 					}

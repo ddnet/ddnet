@@ -246,10 +246,9 @@ Objects = [
 		NetIntRange("m_JumpedTotal", -1, 255, -1),
 		NetTick("m_NinjaActivationTick", -1),
 		NetTick("m_FreezeStart", -1),
-		# New data fields for improved target accuracy and speed display
+		# New data fields for improved target accuracy
 		NetIntAny("m_TargetX", 0),
 		NetIntAny("m_TargetY", 0),
-		NetIntAny("m_RampValue", 1),
 	], validate_size=False),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
