@@ -787,9 +787,6 @@ Save
 Switch weapon when out of ammo
 == Verander wapen wanneer de munitie op is
 
-Reset wanted weapon on death
-== Reset gewild wapen bij het doodgaan
-
 Show only chat messages from friends
 == Laat alleen berichten van vrienden zien
 

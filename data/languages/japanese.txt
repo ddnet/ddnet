@@ -817,9 +817,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 弾薬切れの時に武器を切り替え
 
-Reset wanted weapon on death
-== 死亡時に武器をデフォルトにリセット
-
 Show only chat messages from friends
 == 友たちからのメッセージのみを表示
 

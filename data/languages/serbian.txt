@@ -863,9 +863,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 
 
-Reset wanted weapon on death
-== 
-
 Show only chat messages from friends
 == 
 

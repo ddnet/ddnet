@@ -609,7 +609,7 @@ Type:
 == Type:
 
 Successfully saved the replay!
-== Afspilning blev gemt! 
+== Afspilning blev gemt!
 
 Saving ddnet-settings.cfg failed
 == Gemning af ddnet-settings.cfg mislykkedes
@@ -808,9 +808,6 @@ Smooth Dynamic Camera
 
 Switch weapon when out of ammo
 == Skift våben, når du er ude af ammunition
-
-Reset wanted weapon on death
-== Nulstil ønsket våben ved døden
 
 Show only chat messages from friends
 == Vis kun chatbeskeder fra venner
@@ -1131,7 +1128,7 @@ Run server
 == Kør server
 
 Server executable not found, can't run server
-== Server eksekverbar blev ikke fundet, kan ikke køre server 
+== Server eksekverbar blev ikke fundet, kan ikke køre server
 
 Editor
 == Redaktør

@@ -21,7 +21,7 @@
 == ﺖﻀﻣ ﻦﻧﺍﻮﺛ %i
 
 %s wins!
-== !ﺯﺎﻓ %s 
+== !ﺯﺎﻓ %s
 
 -Page %d-
 == -ﺔﺤﻔﺻ &d-
@@ -765,9 +765,6 @@ AntiPing: predict weapons
 Highlighted message
 == ﻪﻴﺒﻨﺘﻟﺍ ﻞﺋﺎﺳﺭ
 
-Reset wanted weapon on death
-== ﺕﻮﻤﻟﺍ ﺪﻨﻋ ﺏﻮﻠﻄﻣ ﺡﻼﺳ ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
-
 Switch weapon when out of ammo
 == ﺓﺮﻴﺧﺬﻟﺍ ﺫﺎﻔﻧ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﺮﻴﻴﻐﺗ
 
@@ -802,7 +799,7 @@ Reset
 == ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
 
 Automatically create statboard csv
-== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ 
+== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ
 
 Show tiles layers from BG map
 == ﺔﻴﻔﻠﺨﻟﺍ ﺏﺎﻤﻠﻟ ﺐﻧﺎﺠﺘﻟﺍ ﺕﺎﻘﺒﻃ ﺭﺎﻬﻇﺇ
