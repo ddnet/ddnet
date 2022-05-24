@@ -16,6 +16,12 @@ class CLocalizationDatabase
 		unsigned m_ContextHash;
 		const char *m_pReplacement;
 
+		CString() {}
+		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
+			m_Hash(Hash), m_ContextHash(ContextHash), m_pReplacement(pReplacement)
+		{
+		}
+
 		bool operator<(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash < Other.m_ContextHash); }
 		bool operator<=(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash <= Other.m_ContextHash); }
 		bool operator==(const CString &Other) const { return m_Hash == Other.m_Hash && m_ContextHash == Other.m_ContextHash; }
