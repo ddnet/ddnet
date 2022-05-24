@@ -2280,6 +2280,8 @@ if(SERVER)
     entities/door.h
     entities/dragger.cpp
     entities/dragger.h
+    entities/dragger_beam.cpp
+    entities/dragger_beam.h
     entities/flag.cpp
     entities/flag.h
     entities/gun.cpp

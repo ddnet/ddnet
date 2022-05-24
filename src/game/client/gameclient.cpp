@@ -2341,7 +2341,7 @@ void CGameClient::UpdatePrediction()
 					pCopy->m_FreezeTime = 0;
 				if(pCopy->Core()->m_HookedPlayer > 0)
 				{
-					pCopy->Core()->m_HookedPlayer = -1;
+					pCopy->Core()->SetHookedPlayer(-1);
 					pCopy->Core()->m_HookState = HOOK_IDLE;
 				}
 			}

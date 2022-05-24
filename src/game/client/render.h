@@ -119,8 +119,9 @@ public:
 
 	// helpers
 	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
-	void MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
 
 	// DDRace
 

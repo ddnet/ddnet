@@ -37,8 +37,6 @@ struct SPlayerNamePlate
 
 class CNamePlates : public CComponent
 {
-	void MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup);
-
 	void RenderNameplate(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,

@@ -1152,7 +1152,7 @@ void CCharacter::ResetPrediction()
 	}
 	if(m_Core.m_HookedPlayer >= 0)
 	{
-		m_Core.m_HookedPlayer = -1;
+		m_Core.SetHookedPlayer(-1);
 		m_Core.m_HookState = HOOK_IDLE;
 	}
 	m_LastWeaponSwitchTick = 0;
