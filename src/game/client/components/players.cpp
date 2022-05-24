@@ -82,19 +82,19 @@ float CPlayers::GetPlayerTargetAngle(
 		AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 	if(ClientID >= 0 && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
-		CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
-		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedDisplayInfo)
+		CNetObj_DDNetCharacter *ExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
+		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedData)
 		{
-			const CNetObj_DDNetCharacterDisplayInfo *PrevCharacterDisplayInfo = m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedDisplayInfo;
+			const CNetObj_DDNetCharacter *PrevExtendedData = m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedData;
 
-			float MixX = mix((float)PrevCharacterDisplayInfo->m_TargetX, (float)CharacterDisplayInfo->m_TargetX, AngleIntraTick);
-			float MixY = mix((float)PrevCharacterDisplayInfo->m_TargetY, (float)CharacterDisplayInfo->m_TargetY, AngleIntraTick);
+			float MixX = mix((float)PrevExtendedData->m_TargetX, (float)ExtendedData->m_TargetX, AngleIntraTick);
+			float MixY = mix((float)PrevExtendedData->m_TargetY, (float)ExtendedData->m_TargetY, AngleIntraTick);
 
 			return angle(vec2(MixX, MixY));
 		}
 		else
 		{
-			return angle(vec2(CharacterDisplayInfo->m_TargetX, CharacterDisplayInfo->m_TargetY));
+			return angle(vec2(ExtendedData->m_TargetX, ExtendedData->m_TargetY));
 		}
 	}
 	else

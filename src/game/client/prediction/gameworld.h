@@ -83,7 +83,7 @@ public:
 
 	void OnModified();
 	void NetObjBegin();
-	void NetCharAdd(int ObjID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, int GameTeam, bool IsLocal);
+	void NetCharAdd(int ObjID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
 	void NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
 	void NetObjEnd(int LocalID);
 	void CopyWorld(CGameWorld *pFrom);

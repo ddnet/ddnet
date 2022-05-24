@@ -129,8 +129,8 @@ public:
 	int GetAttackTick() { return m_AttackTick; }
 	int GetStrongWeakID() { return m_StrongWeakID; }
 
-	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo = 0);
-	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, bool IsLocal);
+	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
+	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;

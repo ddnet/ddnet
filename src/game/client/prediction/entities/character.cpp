@@ -1049,10 +1049,10 @@ bool CCharacter::Freeze(int Seconds)
 		return false;
 	if((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed()) && Seconds != -1)
 		return false;
-	if(m_Core.m_FreezeTick < GameWorld()->GameTick() - GameWorld()->GameTickSpeed() || Seconds == -1)
+	if(m_Core.m_FreezeStart < GameWorld()->GameTick() - GameWorld()->GameTickSpeed() || Seconds == -1)
 	{
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * GameWorld()->GameTickSpeed();
-		m_Core.m_FreezeTick = GameWorld()->GameTick();
+		m_Core.m_FreezeStart = GameWorld()->GameTick();
 		return true;
 	}
 	return false;
@@ -1070,7 +1070,7 @@ bool CCharacter::UnFreeze()
 		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
-		m_Core.m_FreezeTick = 0;
+		m_Core.m_FreezeStart = 0;
 		m_FrozenLastTick = true;
 		return true;
 	}
@@ -1114,7 +1114,7 @@ CTeamsCore *CCharacter::TeamsCore()
 	return m_Core.m_pTeams;
 }
 
-CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo) :
+CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), CCharacterCore::PhysicalSize())
 {
 	m_ID = ID;
@@ -1147,7 +1147,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
 
 	ResetPrediction();
-	Read(pChar, pExtended, pExtendedDisplayInfo, false);
+	Read(pChar, pExtended, false);
 }
 
 void CCharacter::ResetPrediction()
@@ -1163,7 +1163,7 @@ void CCharacter::ResetPrediction()
 	m_Core.m_NoCollision = false;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
-	m_Core.m_FreezeTick = 0;
+	m_Core.m_FreezeStart = 0;
 	m_Core.m_IsInFreeze = false;
 	m_DeepFreeze = false;
 	m_LiveFreeze = false;
@@ -1183,15 +1183,13 @@ void CCharacter::ResetPrediction()
 	m_LastTuneZoneTick = 0;
 }
 
-void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, bool IsLocal)
+void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
 	m_Core.ReadCharacterCore((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
 
 	if(pExtended)
 	{
-		m_Core.ReadDDNet(pExtended);
-
 		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
 		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
 		if(m_Super)
@@ -1234,6 +1232,8 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 		else
 			UnFreeze();
+
+		m_Core.ReadDDNet(pExtended);
 	}
 	else
 	{
@@ -1305,7 +1305,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		// detect unfreeze (in case the player was frozen in the tile prediction and not correctly unfrozen)
 		if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
 			m_DeepFreeze = false;
-		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_Core.m_FreezeTick || absolute(pChar->m_VelX) == 256 * 10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
+		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_Core.m_FreezeStart || absolute(pChar->m_VelX) == 256 * 10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
 		{
 			m_DeepFreeze = false;
 			UnFreeze();
@@ -1343,8 +1343,17 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 		m_Input.m_Direction = m_SavedInput.m_Direction = m_Core.m_Direction;
 		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
-		m_Input.m_TargetX = m_SavedInput.m_TargetX = cosf(pChar->m_Angle / 256.0f) * 256.0f;
-		m_Input.m_TargetY = m_SavedInput.m_TargetY = sinf(pChar->m_Angle / 256.0f) * 256.0f;
+
+		if(pExtended)
+		{
+			m_Input.m_TargetX = m_SavedInput.m_TargetX = pExtended->m_TargetX;
+			m_Input.m_TargetY = m_SavedInput.m_TargetY = pExtended->m_TargetY;
+		}
+		else
+		{
+			m_Input.m_TargetX = m_SavedInput.m_TargetX = cosf(pChar->m_Angle / 256.0f) * 256.0f;
+			m_Input.m_TargetY = m_SavedInput.m_TargetY = sinf(pChar->m_Angle / 256.0f) * 256.0f;
+		}
 	}
 
 	// in most cases the reload timer can be determined from the last attack tick
@@ -1357,22 +1366,6 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
-		}
-	}
-
-	if(pExtendedDisplayInfo)
-	{
-		if(GameWorld()->m_WorldConfig.m_PredictFreeze)
-		{
-			m_Core.m_FreezeTick = pExtendedDisplayInfo->m_FreezeTick;
-		}
-		m_Core.m_IsInFreeze = pExtendedDisplayInfo->m_IsInFreeze;
-		m_Core.m_Ninja.m_ActivationTick = pExtendedDisplayInfo->m_NinjaActivationTick;
-		m_Core.m_JumpedTotal = pExtendedDisplayInfo->m_JumpedTotal;
-		if(!IsLocal)
-		{
-			m_Input.m_TargetX = pExtendedDisplayInfo->m_TargetX;
-			m_Input.m_TargetY = pExtendedDisplayInfo->m_TargetY;
 		}
 	}
 }

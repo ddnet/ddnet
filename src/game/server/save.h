@@ -56,7 +56,7 @@ private:
 	int m_Jetpack;
 	int m_NinjaJetpack;
 	int m_FreezeTime;
-	int m_FreezeTick;
+	int m_FreezeStart;
 	int m_DeepFreeze;
 	int m_LiveFreeze;
 	int m_EndlessHook;

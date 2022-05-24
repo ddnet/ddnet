@@ -102,7 +102,7 @@ void CCharacterCore::Reset()
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
-	m_FreezeTick = 0;
+	m_FreezeStart = 0;
 	m_FreezeEnd = 0;
 	m_IsInFreeze = false;
 	m_DeepFrozen = false;
@@ -596,14 +596,22 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 
 	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
-}
 
-void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInfo *pObjDDNet)
-{
-	m_JumpedTotal = pObjDDNet->m_JumpedTotal;
-	m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
-	m_FreezeTick = pObjDDNet->m_FreezeTick;
-	m_IsInFreeze = pObjDDNet->m_IsInFreeze;
+	// Display Information
+	// We only accept the display information when it is received, which means it is not -1 in each case.
+	if(pObjDDNet->m_JumpedTotal != -1)
+	{
+		m_JumpedTotal = pObjDDNet->m_JumpedTotal;
+	}
+	if(pObjDDNet->m_NinjaActivationTick != -1)
+	{
+		m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
+	}
+	if(pObjDDNet->m_FreezeStart != -1)
+	{
+		m_FreezeStart = pObjDDNet->m_FreezeStart;
+		m_IsInFreeze = pObjDDNet->m_Flags & CHARACTERFLAG_IN_FREEZE;
+	}
 }
 
 void CCharacterCore::Quantize()
