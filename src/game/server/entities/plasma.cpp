@@ -110,7 +110,7 @@ void CPlasma::Snap(int SnappingClient)
 {
 	// Only players who can see the targeted player can see the plasma bullet
 	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
-	if(!pTarget->CanSnapCharacter(SnappingClient))
+	if(!pTarget || !pTarget->CanSnapCharacter(SnappingClient))
 	{
 		return;
 	}

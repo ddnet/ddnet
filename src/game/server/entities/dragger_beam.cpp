@@ -81,7 +81,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 
 	// Only players who can see the player attached to the dragger can see the dragger beam
 	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
-	if(!pTarget->CanSnapCharacter(SnappingClient))
+	if(!pTarget || !pTarget->CanSnapCharacter(SnappingClient))
 	{
 		return;
 	}
