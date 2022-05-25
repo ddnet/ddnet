@@ -908,7 +908,10 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 
 	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
 
-	GameServer()->TeeHistorian()->RecordPlayerSwap(pPlayer->GetCID(), pTargetPlayer->GetCID());
+	if(GameServer()->TeeHistorianActive())
+	{
+		GameServer()->TeeHistorian()->RecordPlayerSwap(pPlayer->GetCID(), pTargetPlayer->GetCID());
+	}
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
