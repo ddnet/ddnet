@@ -1183,7 +1183,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	return 0;
 }
 
-int net_host_lookup(const char *hostname, NETADDR *addr, int types)
+int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 {
 	struct addrinfo hints;
 	struct addrinfo *result = NULL;
@@ -1204,10 +1204,6 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 		hints.ai_family = AF_INET;
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
-#if defined(CONF_WEBSOCKETS)
-	if(types & NETTYPE_WEBSOCKET_IPV4)
-		hints.ai_family = AF_INET;
-#endif
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 
@@ -1224,6 +1220,25 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 	addr->port = port;
 	freeaddrinfo(result);
 	return 0;
+}
+
+int net_host_lookup(const char *hostname, NETADDR *addr, int types)
+{
+	const char *ws_hostname = str_startswith(hostname, "ws://");
+	if(ws_hostname)
+	{
+		if((types & NETTYPE_WEBSOCKET_IPV4) == 0)
+		{
+			return -1;
+		}
+		int result = net_host_lookup_impl(ws_hostname, addr, NETTYPE_IPV4);
+		if(result == 0 && addr->type == NETTYPE_IPV4)
+		{
+			addr->type = NETTYPE_WEBSOCKET_IPV4;
+		}
+		return result;
+	}
+	return net_host_lookup_impl(hostname, addr, types & ~NETTYPE_WEBSOCKET_IPV4);
 }
 
 static int parse_int(int *out, const char **str)

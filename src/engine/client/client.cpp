@@ -764,12 +764,6 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aConnectAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
-	bool is_websocket = false;
-	if(strncmp(m_aConnectAddressStr, "ws://", 5) == 0)
-	{
-		is_websocket = true;
-		str_copy(m_aConnectAddressStr, pAddress + 5);
-	}
 
 	ServerInfoRequest();
 	if(net_host_lookup(m_aConnectAddressStr, &m_ServerAddress, m_aNetClient[CONN_MAIN].NetType()) != 0)
@@ -798,10 +792,6 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_pConsole->DeregisterTempAll();
 	if(m_ServerAddress.port == 0)
 		m_ServerAddress.port = Port;
-	if(is_websocket)
-	{
-		m_ServerAddress.type = NETTYPE_WEBSOCKET_IPV4;
-	}
 	m_aNetClient[CONN_MAIN].Connect(&m_ServerAddress);
 	m_aNetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
