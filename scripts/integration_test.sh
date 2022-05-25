@@ -53,10 +53,10 @@ then
 	exit 1
 fi
 
-mkdir -p test
-cp "$arg_build_dir"/DDNet* test
+mkdir -p integration_test
+cp "$arg_build_dir"/DDNet* integration_test
 
-cd test || exit 1
+cd integration_test || exit 1
 
 function kill_all() {
 	if [ "$arg_verbose" == "1" ]
