@@ -120,8 +120,14 @@ port=17822
 
 cp ../ubsan.supp .
 
+if [[ $OSTYPE == 'darwin'* ]]; then
+  DETECT_LEAKS=0
+else
+  DETECT_LEAKS=1
+fi
+
 export UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
-export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0
+export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=$DETECT_LEAKS:halt_on_errors=0
 
 function print_san() {
 	if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
@@ -181,14 +187,15 @@ wait
 sleep 1
 
 ranks="$(sqlite3 ddnet-server.sqlite < <(echo "select * from record_race;"))"
+num_ranks="$(echo "$ranks" | wc -l | xargs)"
 if [ "$ranks" == "" ]
 then
 	touch fail_ranks.txt
 	echo "[-] Error: no ranks found in database"
-elif [ "$(echo "$ranks" | wc -l)" != "1" ]
+elif [ "$num_ranks" != "1" ]
 then
 	touch fail_ranks.txt
-	echo "[-] Error: expected 1 rank got $(echo "$ranks" | wc -l)"
+	echo "[-] Error: expected 1 rank got $num_ranks"
 elif ! echo "$ranks" | grep -q client1
 then
 	touch fail_ranks.txt
@@ -213,4 +220,3 @@ else
 fi
 
 print_san || exit 1
-
