@@ -45,7 +45,7 @@ CStun::CProtocol::CProtocol(int Index, NETSOCKET Socket) :
 
 void CStun::CProtocol::FeedStunServer(NETADDR StunServer)
 {
-	if(net_addr_comp(&m_StunServer, &StunServer) == 0)
+	if(m_HaveStunServer && net_addr_comp(&m_StunServer, &StunServer) == 0)
 	{
 		return;
 	}
