@@ -550,7 +550,7 @@ void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
 	m_HookPos.y = pObjCore->m_HookY;
 	m_HookDir.x = pObjCore->m_HookDx / 256.0f;
 	m_HookDir.y = pObjCore->m_HookDy / 256.0f;
-	SetHookedPlayer(pObjCore->m_HookedPlayer);
+	m_HookedPlayer = pObjCore->m_HookedPlayer;
 	m_Jumped = pObjCore->m_Jumped;
 	m_Direction = pObjCore->m_Direction;
 	m_Angle = pObjCore->m_Angle;
