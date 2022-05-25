@@ -255,7 +255,7 @@ if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_cxx_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
 endif()
 
-if(NOT MSVC AND NOT HAIKU)
+if(NOT MSVC AND NOT HAIKU AND NOT TARGET_OS STREQUAL "mac")
   if(NOT FUSE_LD STREQUAL OFF)
     add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=${FUSE_LD})
     if(FLAG_SUPPORTED_fuse_ld_${FUSE_LD})
