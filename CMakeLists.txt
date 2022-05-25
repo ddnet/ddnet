@@ -335,7 +335,6 @@ if(NOT MSVC AND NOT HAIKU AND NOT TARGET_OS STREQUAL "mac")
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
