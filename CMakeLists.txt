@@ -3,9 +3,9 @@ if(CMAKE_VERSION VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_VERSION})
 endif()
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.9 CACHE INTERNAL "")
-if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.9)
-  message(WARNING "Building for macOS < 10.9 is not supported")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE INTERNAL "")
+if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.13)
+  message(WARNING "Building for macOS < 10.13 is not supported")
 endif()
 
 file(STRINGS src/game/version.h VERSION_LINE
@@ -255,7 +255,7 @@ if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_cxx_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
 endif()
 
-if(NOT MSVC AND NOT HAIKU)
+if(NOT MSVC AND NOT HAIKU AND NOT TARGET_OS STREQUAL "mac")
   if(NOT FUSE_LD STREQUAL OFF)
     add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=${FUSE_LD})
     if(FLAG_SUPPORTED_fuse_ld_${FUSE_LD})
@@ -335,7 +335,6 @@ if(NOT MSVC AND NOT HAIKU)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-tautological-constant-out-of-range-compare) # Check needed for x86, but warns on x86-64
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
