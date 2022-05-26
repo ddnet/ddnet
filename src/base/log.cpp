@@ -11,6 +11,8 @@
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 extern "C" {
@@ -369,7 +371,8 @@ std::unique_ptr<ILogger> log_logger_stdout()
 #if !defined(CONF_FAMILY_WINDOWS)
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
-	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), getenv("NO_COLOR") == nullptr, false));
+	const bool colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
+	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), colors, false));
 #else
 	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)
 		AttachConsole(ATTACH_PARENT_PROCESS);
