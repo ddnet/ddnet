@@ -70,7 +70,6 @@ public:
 		m_SnapTicks = 0;
 		m_MarkedForDestroy = false;
 	}
-	void DetachFromGameWorld() { m_pGameWorld = 0; }
 
 	CEntity()
 	{

@@ -63,9 +63,6 @@ public:
 	void GiveNinja();
 	void RemoveNinja();
 
-	bool IsAlive() { return m_Alive; }
-
-	bool m_Alive;
 	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
@@ -146,7 +143,6 @@ public:
 
 	bool Match(CCharacter *pChar);
 	void ResetPrediction();
-	CCharacter() { m_Alive = false; }
 	void SetTuneZone(int Zone);
 
 private:
