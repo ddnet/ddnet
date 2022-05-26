@@ -775,9 +775,6 @@ Save
 Switch weapon when out of ammo
 == Promijeni oružje kada nestane municije
 
-Reset wanted weapon on death
-== Resetuj željeno oružije prilikom smrti
-
 Show only chat messages from friends
 == Prikaži čat poruke samo od prijatelja
 

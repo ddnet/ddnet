@@ -727,9 +727,6 @@ Remove chat
 Check now
 == Nézd meg
 
-Reset wanted weapon on death
-== Újraéledéskor váltson az akart fegyverre
-
 Frags
 == Zászlók
 

@@ -1154,10 +1154,8 @@ void CGameClient::OnNewSnapshot()
 {
 	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
 		CWorldCore TempWorld;
-		CCharacterCore TempCore;
-		CTeamsCore TempTeams;
-		mem_zero(&TempCore, sizeof(TempCore));
-		mem_zero(&TempTeams, sizeof(TempTeams));
+		CCharacterCore TempCore = CCharacterCore();
+		CTeamsCore TempTeams = CTeamsCore();
 		TempCore.Init(&TempWorld, Collision(), &TempTeams);
 		TempCore.ReadCharacter(pCharacter);
 
@@ -2413,7 +2411,7 @@ void CGameClient::UpdatePrediction()
 					pCopy->m_FreezeTime = 0;
 				if(pCopy->Core()->m_HookedPlayer > 0)
 				{
-					pCopy->Core()->m_HookedPlayer = -1;
+					pCopy->Core()->SetHookedPlayer(-1);
 					pCopy->Core()->m_HookState = HOOK_IDLE;
 				}
 			}

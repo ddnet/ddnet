@@ -691,7 +691,7 @@ Countries
 == Země
 
 Types
-== Typy 
+== Typy
 
 DDNet %s is out!
 == DDNet %s je venku!
@@ -764,9 +764,6 @@ Save
 
 Switch weapon when out of ammo
 == Změnit zbraň když vám dojdou náboje
-
-Reset wanted weapon on death
-== Resetujte hledanou zbraň po smrti
 
 Show only chat messages from friends
 == Zobrazit pouze zprávy od přátel

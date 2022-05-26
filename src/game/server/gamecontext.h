@@ -15,6 +15,7 @@
 
 #include "eventhandler.h"
 //#include "gamecontroller.h"
+#include "game/generated/protocol.h"
 #include "gameworld.h"
 #include "teehistorian.h"
 
@@ -149,6 +150,13 @@ public:
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
+	// keep last input to always apply when none is sent
+	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
+	bool m_aPlayerHasInput[MAX_CLIENTS];
+
+	// returns last input if available otherwise nulled PlayerInput object
+	// ClientID has to be valid
+	CNetObj_PlayerInput GetLastPlayerInput(int ClientID) const;
 
 	IGameController *m_pController;
 	CGameWorld m_World;
@@ -295,6 +303,8 @@ public:
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
+	// starting 1 to make 0 the special value "no client id"
+	uint32_t NextUniqueClientID = 1;
 	bool m_VoteWillPass;
 	class CScore *m_pScore;
 

@@ -55,14 +55,6 @@ void CMapLayers::EnvelopeUpdate()
 	}
 }
 
-void CMapLayers::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
-{
-	float Points[4];
-	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
-}
-
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser)
 {
 	CMapLayers *pThis = (CMapLayers *)pUser;
@@ -88,10 +80,10 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 
 	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start + Env, 0, 0);
 
-	const int64_t TickToMicroSeconds = (1000000ll / (int64_t)pThis->Client()->GameTickSpeed());
+	const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
 
-	static int64_t s_Time = 0;
-	static int64_t s_LastLocalTime = time_get_nanoseconds();
+	static std::chrono::nanoseconds s_Time{0};
+	static auto s_LastLocalTime = tw::time_get();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -108,24 +100,24 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = (int64_t)(mix<double>(
-							   0,
-							   (CurTick - MinTick),
-							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						   TickToMicroSeconds) +
-					 MinTick * TickToMicroSeconds;
+				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
+										    0,
+										    (CurTick - MinTick),
+										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+									    TickToNanoSeconds.count())) +
+					 MinTick * TickToNanoSeconds;
 			}
 			else
 			{
 				int MinTick = pThis->m_LastLocalTick;
-				s_Time = (int64_t)(mix<double>(0,
-							   pThis->m_CurrentLocalTick - MinTick,
-							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						   TickToMicroSeconds) +
-					 MinTick * TickToMicroSeconds;
+				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(0,
+										    pThis->m_CurrentLocalTick - MinTick,
+										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+									    TickToNanoSeconds.count())) +
+					 MinTick * TickToNanoSeconds;
 			}
 		}
-		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * 1000ll, pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * std::chrono::nanoseconds(1ms), pChannels);
 	}
 	else
 	{
@@ -136,21 +128,21 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = (int64_t)(mix<double>(
-							   0,
-							   (CurTick - MinTick),
-							   (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-						   TickToMicroSeconds) +
-					 MinTick * TickToMicroSeconds;
+				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
+										    0,
+										    (CurTick - MinTick),
+										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+									    TickToNanoSeconds.count())) +
+					 MinTick * TickToNanoSeconds;
 			}
 		}
 		else
 		{
-			int64_t CurTime = time_get_nanoseconds();
+			auto CurTime = tw::time_get();
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)).count(), pChannels);
+		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), pChannels);
 	}
 }
 
@@ -306,8 +298,11 @@ bool CMapLayers::STileLayerVisuals::Init(unsigned int Width, unsigned int Height
 {
 	m_Width = Width;
 	m_Height = Height;
-	if(Width == 0 || Height == 0 || Width >= std::numeric_limits<std::ptrdiff_t>::max() || Height >= std::numeric_limits<std::ptrdiff_t>::max())
+	if(Width == 0 || Height == 0)
 		return false;
+	if constexpr(sizeof(unsigned int) >= sizeof(ptrdiff_t))
+		if(Width >= std::numeric_limits<std::ptrdiff_t>::max() || Height >= std::numeric_limits<std::ptrdiff_t>::max())
+			return false;
 
 	m_pTilesOfLayer = new CMapLayers::STileLayerVisuals::STileVisual[Height * Width];
 
@@ -1567,7 +1562,7 @@ void CMapLayers::OnRender()
 		{
 			// set clipping
 			float Points[4];
-			MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
 			Graphics()->GetScreen(&Points[0], &Points[1], &Points[2], &Points[3]);
 			float x0 = (pGroup->m_ClipX - Points[0]) / (Points[2] - Points[0]);
 			float y0 = (pGroup->m_ClipY - Points[1]) / (Points[3] - Points[1]);
@@ -1587,10 +1582,10 @@ void CMapLayers::OnRender()
 
 		if((!g_Config.m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
 		{
-			MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
 		}
 		else
-			MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{

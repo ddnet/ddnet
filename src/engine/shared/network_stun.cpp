@@ -37,6 +37,7 @@ CStun::CProtocol::CProtocol(int Index, NETSOCKET Socket) :
 	m_Index(Index),
 	m_Socket(Socket)
 {
+	mem_zero(&m_StunServer, sizeof(NETADDR));
 	// Initialize `m_Stun` with random data.
 	unsigned char aBuf[32];
 	StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);

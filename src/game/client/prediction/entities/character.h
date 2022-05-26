@@ -33,6 +33,8 @@ class CCharacter : public CEntity
 	friend class CGameWorld;
 
 public:
+	~CCharacter();
+
 	//character's size
 	static const int ms_PhysSize = 28;
 

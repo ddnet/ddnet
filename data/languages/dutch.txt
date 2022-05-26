@@ -5,17 +5,17 @@
 #	vierkant		2010-06-03 19:06:34
 #	vierkant		2010-06-04 13:20:25
 #	vierkant		2010-06-09 14:40:12
-#	Sijmen Schoon	2010-11-21 16:08:46
+#	Sijmen Schoon	        2010-11-21 16:08:46
 #	vierkant		2010-11-21 18:19:48
 #	vierkant		2010-12-16 19:44:49
 #	vierkant		2011-01-03 12:22:05
 #	vierkant		2011-01-29 18:40:28
 #	vierkant		2011-04-02 22:19:30
 #	Vijfhoek		2011-05-02 18:09:31
-#	Syntax Error	2011-07-02 20:09:24
-#	Yared Hufkens	2012-02-03 19:57:59
-#	Yared Hufkens	2012-12-08 10:51:30
-#   Ronan           2022-05-17 22:22:22
+#	Syntax Error	        2011-07-02 20:09:24
+#	Yared Hufkens	        2012-02-03 19:57:59
+#	Yared Hufkens	        2012-12-08 10:51:30
+#       Ronan                   2022-05-17 22:22:22
 ##### /authors #####
 
 ##### translated strings #####
@@ -66,10 +66,10 @@ Are you sure that you want to remove the player from your friends list?
 == Weet je zeker dat je deze speler uit je vriendenlijst wilt verwijderen?
 
 Automatically record demos
-== Automatisch demos opnemen
+== Automatisch demo's opnemen
 
 Automatically take game over screenshot
-== Automatisch schermafbeeldingen nemen
+== Automatisch schermafbeeldingen nemen bij einde spel
 
 Blue team
 == Blauwe team
@@ -114,7 +114,7 @@ Controls
 == Besturing
 
 Count players only
-== Tel alleen spelers
+== Alleen spelers tellen
 
 Current
 == Huidig
@@ -144,13 +144,13 @@ Disconnected
 == Verbinding verbroken
 
 Downloading map
-== Kaart downloaden
+== Kaart aan het downloaden
 
 Draw!
 == Gelijkspel!
 
 Dynamic Camera
-== Dynamische camera
+== Dynamische Camera
 
 Emoticon
 == Emoticon
@@ -180,7 +180,7 @@ Folder
 == Map
 
 Force vote
-== Forceer stem
+== Stem forceren
 
 Free-View
 == Vrij bewegen
@@ -222,7 +222,7 @@ Has people playing
 == Mensen in server
 
 High Detail
-== Veel details
+== Hoge Details
 
 Hook
 == Haak
@@ -252,7 +252,7 @@ Map
 == Kaart
 
 Mouse sens.
-== Muis resolutie
+== Muisgevoeligheid
 
 Move left
 == Naar links
@@ -288,7 +288,7 @@ No servers found
 == Geen servers gevonden
 
 No servers match your filter criteria
-== Geen servers gevonden bij zoekopdracht
+== Geen servers komen overeen met je filtercriteria
 
 Ok
 == Oké
@@ -433,7 +433,7 @@ Spectate previous
 == Volg vorige speler
 
 Spectator mode
-== Toeschouwer modus
+== Toeschouwermode
 
 Spectators
 == Toeschouwers
@@ -457,7 +457,7 @@ Team chat
 == Team chat
 
 The audio device couldn't be initialised.
-== Het geluid kon niet worden geladen.
+== Het audioapparaat kon niet worden geïnitialiseerd.
 
 The server is running a non-standard tuning on a pure game type.
 == The server draait geen standaard spel type.
@@ -484,7 +484,7 @@ Unable to rename the demo
 == Niet mogelijk om de demo te hernoemen
 
 Use sounds
-== Gebruik geluid
+== Gebruik geluiden
 
 Use team colors for name plates
 == Gebruik teamkleuren voor naamplaten
@@ -496,10 +496,10 @@ Version
 == Versie
 
 Vote command:
-== Stem commando:
+== Stemcommando:
 
 Vote description:
-== Stem omschrijving:
+== Stemomschrijving:
 
 Vote no
 == Stem nee
@@ -585,13 +585,13 @@ Size:
 == Grootte:
 
 Reset to defaults
-== Standaardinstellingen
+== Terugzetten naar standaardinstellingen
 
 Quit anyway?
 == Toch afsluiten?
 
 Display Modes
-== Laat modes zien
+== Resoluties
 
 Version:
 == Versie:
@@ -603,7 +603,7 @@ Lht.
 == Licht
 
 UI Color
-== UI kleur
+== UI Kleur
 
 Crc:
 == Crc:
@@ -624,7 +624,7 @@ Successfully saved the replay!
 == De replay is succesvol opgeslagen!
 
 Replay feature is disabled!
-== Herhaling functie is uitgeschakeld!
+== Replay functie is uitgeschakeld!
 
 Game paused
 == Spel gepauzeerd
@@ -651,7 +651,7 @@ Reconnect in %d sec
 == Opnieuw verbinden in %d sec
 
 Render demo
-== Demo verwerken
+== Demo renderen
 
 Replace video
 == Video vervangen
@@ -690,7 +690,7 @@ Show DDNet map finishes in server browser
 == Laat gefinishte maps zien in de verkenner
 
 transmits your player name to info2.ddnet.tw
-== Verzend je speler naam naar info2.ddnet.tw
+== verzendt je speler naam naar info2.ddnet.tw
 
 Search
 == Zoek
@@ -705,7 +705,7 @@ Indicate map finish
 == Laat map finish zien
 
 Unfinished map
-== niet gefinishte map
+== Niet gefinishte map
 
 Countries
 == Landen
@@ -787,9 +787,6 @@ Save
 Switch weapon when out of ammo
 == Verander wapen wanneer de munitie op is
 
-Reset wanted weapon on death
-== Reset gewild wapen bij het doodgaan
-
 Show only chat messages from friends
 == Laat alleen berichten van vrienden zien
 
@@ -803,7 +800,7 @@ Refresh Rate
 == Vernieuwingsfrequentie
 
 Show console window
-== Laat console scherm zien
+== Laat consolescherm zien
 
 Automatically take statboard screenshot
 == Automatisch statistiekbord screenshot nemen
@@ -821,7 +818,7 @@ Vanilla skins only
 == Alleen vanilla skins
 
 Fat skins (DDFat)
-== Dikke skins (DDdik)
+== Fat skins (DDFat)
 
 Skin prefix
 == Skin prefix
@@ -881,7 +878,7 @@ Show HUD
 == Laat HUD zien
 
 UI mouse s.
-== UI mouse s.
+== UI muisgevoeligheid
 
 may cause delay
 == kan voor vertraging zorgen
@@ -893,7 +890,7 @@ Use high DPI
 == Gebruik hoge DPI
 
 Enable game sounds
-== Schakel spel geluid in
+== Schakel spelgeluid in
 
 Enable gun sound
 == Schakel pistool geluid in
@@ -941,7 +938,7 @@ Show names in chat in team colors
 == Laat namen in chat in de kleuren van het team zien
 
 Show kill messages
-== Laat Sterfberichten zien
+== Laat sterfberichten zien
 
 Show votes window after voting
 == Laat stemscherm zien na het stemmen
@@ -950,7 +947,7 @@ Messages
 == Berichten
 
 System message
-== Systeem bericht
+== Systeembericht
 
 Reset
 == Reset
@@ -959,7 +956,7 @@ Highlighted message
 == Gemarkeerd bericht
 
 Team message
-== Team bericht
+== Teambericht
 
 Friend message
 == Bericht van een vriend
@@ -971,10 +968,10 @@ Save the best demo of each race
 == Sla de beste demo op van elke race
 
 Default length: %d
-== Standaart lengte: %d
+== Standaard lengte: %d
 
 Enable replays
-== Replays aan zetten
+== Replays aanzetten
 
 Show ghost
 == Laat spook zien
@@ -986,7 +983,7 @@ Gameplay
 == Gameplay
 
 Overlay entities
-== Laat entities zien over de normale map
+== Overlay entities
 
 Size
 == Grootte
@@ -995,7 +992,7 @@ Show text entities
 == Laat text entities zien
 
 Show others (own team only)
-== Laat anderen zien (Alleen in team)
+== Laat anderen zien (alleen eigen team)
 
 Show quads
 == Laat quads zien
@@ -1004,7 +1001,7 @@ AntiPing
 == AntiPing
 
 AntiPing: predict other players
-== AntiPing: voorspel andere spelers
+== AntiPing: Voorspel andere spelers
 
 AntiPing: predict weapons
 == AntiPing: Voorspel wapens
@@ -1016,13 +1013,13 @@ Show other players' hook collision lines
 == Laat de hookraaklijn van andere spelers zien
 
 Show other players' key presses
-== Laat toetsinput van andere spelers zien
+== Laat toetsaanslagen van andere spelers zien
 
 Old mouse mode
 == Oude muis modus
 
 Show tiles layers from BG map
-== Laat tegel lagen van achtergrondmap zien
+== Laat tegellagen van achtergrondmap zien
 
 Try fast HTTP map download first
 == Probeer eerst een snelle HTTP download voor deze map
@@ -1106,7 +1103,7 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Debug mode is geactiveerd. Gebruik Ctrl+Shift+D om debug mode te deactiveren.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Gebruik de k toets om jezelf te doden (herstarten), q om te pauzeren en andere spelers te bekijken. Zie instellingen voor andere toetsen bindingen.
+== Gebruik de k toets om jezelf te doden (herstarten), q om te pauzeren en andere spelers te bekijken. Zie instellingen voor andere toetsenbindingen.
 
 Existing Player
 == Bestaande speler
@@ -1118,10 +1115,10 @@ Checking for existing player with your name
 == Aan het zoeken naar bestaande spelers met jouw naam
 
 Are you sure that you want to disconnect and switch to a different server?
-== Weet u zeker dat u de verbinding wilt verbreken en wilt verbinden met een andere server?
+== Weet je zeker dat je de verbinding wilt verbreken en wilt verbinden met een andere server?
 
 Country / Region
-== Land / regio
+== Land / Regio
 
 Speed
 == Snelheid
@@ -1187,7 +1184,7 @@ Skip the main menu
 == Sla het hoofdmenu over
 
 Settings file
-== Instellingen bestand
+== Instellingenbestand
 
 Config directory
 == Configuratie map
@@ -1196,7 +1193,7 @@ Themes directory
 == Thema map
 
 Toggle to edit your dummy settings
-== Schakel in om je dummy instellingen te bewerken
+== Schakel in om je dummyinstellingen te bewerken
 
 Download skins
 == Skins downloaden
@@ -1238,7 +1235,7 @@ default
 == standaard
 
 custom
-== aangepast
+== custom
 
 Graphics cards
 == Grafische kaart
@@ -1262,7 +1259,7 @@ Show client IDs
 == Laat client ID's zien
 
 Kill Messages
-== Kill berichten
+== Kill Berichten
 
 Kill Message Normal Color
 == Kill Berichten Normale Kleur
@@ -1271,16 +1268,16 @@ Kill Message Highlight Color
 == Kill Berichten Uitgelichte Kleur
 
 Laser Outline Color
-== Laser contour kleur
+== Laser Kleur Buitenzijde
 
 Laser Inner Color
-== Laser binnen kleur
+== Laser Kleur Binnenzijde
 
 Hookline
-== Haaklijn
+== Hookline
 
 No hit
-== Geen treffer
+== Niet raak
 
 Hookable
 == Haakbaar
@@ -1289,10 +1286,10 @@ Tee
 == Tee
 
 Use old chat style
-== Oude chat stijl gebruiken
+== Oude chatstijl gebruiken
 
 Client message
-== Client bericht
+== Clientbericht
 
 Preview
 == Voorbeeld
@@ -1304,13 +1301,13 @@ Opacity
 == Ondoorzichtigheid
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Pas de ondoorzichtigheid van eniteiten die tot andere teams behoren aan, zoals de tee's en de naamplaten
+== Pas de ondoorzichtigheid van entities die tot andere teams behoren aan, zoals de tee's en de naamplaten
 
 Quads are used for background decoration
 == Quads worden gebruikt voor achtergronddecoratie
 
 Tries to predict other entities to give a feel of low latency
-== Probeert andere entiteiten te voorspellen om een gevoel van "low latency" te geven
+== Probeert andere entities te voorspellen om een gevoel van "low latency" te geven
 
 Show local player's key presses
 == Laat lokale spelers hun toetsaanslagen zien
@@ -1319,28 +1316,28 @@ Background
 == Achtergrond
 
 Entities Background color
-== Entiteiten Achtergrond kleur
+== Entities Achtergrondkleur
 
 Use current map as background
 == Gebruik de huidige map als achtergrond
 
 Regular Background Color
-== Reguliere Achtergrond Kleur
+== Reguliere Achtergrondkleur
 
 Run on join
-== Starten bij deelnemen
+== Run bij deelnemen
 
 Chat command (e.g. showall 1)
 == Chat command (bijv. showall 1)
 
 Entities
-== Entiteiten
+== Entities
 
 Emoticons
 == Emoticons
 
 Particles
-== Deeltjes
+== Particles
 
 Assets directory
 == Assets map
@@ -1373,7 +1370,7 @@ Run server
 == Laad server
 
 Server executable not found, can't run server
-== Server executable niet gevonden, de server kan niet gestart worden
+== Server executable niet gevonden, de server kon niet worden gestart
 
 Editor
 == Editor

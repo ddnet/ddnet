@@ -65,8 +65,6 @@ class CHud : public CComponent
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);
 
-	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
-
 	static constexpr float MOVEMENT_INFORMATION_LINE_HEIGHT = 8.0f;
 
 public:

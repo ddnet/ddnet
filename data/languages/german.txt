@@ -790,9 +790,6 @@ AntiPing: predict weapons
 Highlighted message
 == Hervorgehobene Nachricht
 
-Reset wanted weapon on death
-== Waffe beim Tod zurücksetzen
-
 Switch weapon when out of ammo
 == Waffe wechseln wenn Munition leer ist
 

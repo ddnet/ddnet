@@ -142,20 +142,19 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	pEnt->m_pNextTypeEntity = 0;
 	pEnt->m_pPrevTypeEntity = 0;
 
-	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
-	{
-		CCharacter *pChar = (CCharacter *)pEnt;
-		int ID = pChar->GetCID();
-		if(ID >= 0 && ID < MAX_CLIENTS)
-		{
-			m_apCharacters[ID] = 0;
-			m_Core.m_apCharacters[ID] = 0;
-		}
-	}
-
 	if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this && pEnt->m_pParent)
 		pEnt->m_pParent->m_DestroyTick = GameTick();
 	pEnt->m_pParent = 0;
+}
+
+void CGameWorld::RemoveCharacter(CCharacter *pChar)
+{
+	int ID = pChar->GetCID();
+	if(ID >= 0 && ID < MAX_CLIENTS)
+	{
+		m_apCharacters[ID] = 0;
+		m_Core.m_apCharacters[ID] = 0;
+	}
 }
 
 void CGameWorld::RemoveEntities()
@@ -274,7 +273,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 		CCharacterCore *Core = pChr->Core();
 		if(Core->m_HookedPlayer == ClientID)
 		{
-			Core->m_HookedPlayer = -1;
+			Core->SetHookedPlayer(-1);
 			Core->m_HookState = HOOK_RETRACTED;
 			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 		}

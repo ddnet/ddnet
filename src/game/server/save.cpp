@@ -186,12 +186,12 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Core.m_HookState = m_HookState;
 	if(m_HookedPlayer != -1 && pChr->Teams()->m_Core.Team(m_HookedPlayer) != Team)
 	{
-		pChr->m_Core.m_HookedPlayer = -1;
+		pChr->m_Core.SetHookedPlayer(-1);
 		pChr->m_Core.m_HookState = HOOK_FLYING;
 	}
 	else
 	{
-		pChr->m_Core.m_HookedPlayer = m_HookedPlayer;
+		pChr->m_Core.SetHookedPlayer(m_HookedPlayer);
 	}
 	pChr->m_Core.m_NewHook = m_NewHook;
 	pChr->m_SavedInput.m_Direction = m_InputDirection;
@@ -635,8 +635,15 @@ int CSaveTeam::FromString(const char *String)
 		m_pSavedTees = 0;
 	}
 
-	if(m_MembersCount)
+	if(m_MembersCount > 64)
+	{
+		dbg_msg("load", "savegame: team has too many players");
+		return 1;
+	}
+	else if(m_MembersCount)
+	{
 		m_pSavedTees = new CSaveTee[m_MembersCount];
+	}
 
 	for(int n = 0; n < m_MembersCount; n++)
 	{

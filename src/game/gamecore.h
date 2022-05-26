@@ -7,6 +7,7 @@
 #include <base/system.h>
 
 #include <map>
+#include <set>
 #include <vector>
 
 #include "collision.h"
@@ -205,7 +206,7 @@ public:
 class CCharacterCore
 {
 	friend class CCharacter;
-	CWorldCore *m_pWorld;
+	CWorldCore *m_pWorld = nullptr;
 	CCollision *m_pCollision;
 	std::map<int, std::vector<vec2>> *m_pTeleOuts;
 
@@ -221,6 +222,8 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+	std::set<int> m_AttachedPlayers;
+	void SetHookedPlayer(int HookedPlayer);
 
 	int m_ActiveWeapon;
 	struct WeaponStat

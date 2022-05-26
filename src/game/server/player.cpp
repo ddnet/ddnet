@@ -3,6 +3,7 @@
 #include "player.h"
 #include <engine/shared/config.h>
 
+#include "base/system.h"
 #include "entities/character.h"
 #include "gamecontext.h"
 #include <engine/server.h>
@@ -13,7 +14,8 @@ MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 
-CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
+CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team) :
+	m_UniqueClientID(UniqueClientID)
 {
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;
@@ -532,24 +534,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 
-	if(NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
-	{
-		// skip the input if chat is active
-		if(m_PlayerFlags & PLAYERFLAG_CHATTING)
-			return;
-
-		m_PlayerFlags = NewInput->m_PlayerFlags;
-		return;
-	}
-
-	m_PlayerFlags = NewInput->m_PlayerFlags;
-
-	if(m_pCharacter && m_Paused)
-		m_pCharacter->ResetInput();
-
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
-		m_Spawning = true;
-
 	// check for activity
 	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
@@ -564,8 +548,13 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
 {
+	m_PlayerFlags = NewInput->m_PlayerFlags;
+
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
+		m_Spawning = true;
+
 	// skip the input if chat is active
-	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
+	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 		return;
 
 	if(m_pCharacter && !m_Paused)
@@ -607,7 +596,7 @@ void CPlayer::Respawn(bool WeakHook)
 CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 {
 	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
 	m_pCharacter->Spawn(this, Pos);
 	m_Team = 0;
 	return m_pCharacter;
@@ -695,7 +684,7 @@ void CPlayer::TryRespawn()
 
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
 	m_ViewPos = SpawnPos;
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
