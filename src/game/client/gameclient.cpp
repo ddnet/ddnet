@@ -1098,10 +1098,8 @@ void CGameClient::OnNewSnapshot()
 {
 	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
 		CWorldCore TempWorld;
-		CCharacterCore TempCore;
-		CTeamsCore TempTeams;
-		mem_zero(&TempCore, sizeof(TempCore));
-		mem_zero(&TempTeams, sizeof(TempTeams));
+		CCharacterCore TempCore = CCharacterCore();
+		CTeamsCore TempTeams = CTeamsCore();
 		TempCore.Init(&TempWorld, Collision(), &TempTeams);
 		TempCore.ReadCharacter(pCharacter);
 
