@@ -142,22 +142,19 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	pEnt->m_pNextTypeEntity = 0;
 	pEnt->m_pPrevTypeEntity = 0;
 
-	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
-	{
-		if(CCharacter *pChar = dynamic_cast<CCharacter *>(pEnt))
-		{
-			int ID = pChar->GetCID();
-			if(ID >= 0 && ID < MAX_CLIENTS)
-			{
-				m_apCharacters[ID] = 0;
-				m_Core.m_apCharacters[ID] = 0;
-			}
-		}
-	}
-
 	if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this && pEnt->m_pParent)
 		pEnt->m_pParent->m_DestroyTick = GameTick();
 	pEnt->m_pParent = 0;
+}
+
+void CGameWorld::RemoveCharacter(CCharacter *pChar)
+{
+	int ID = pChar->GetCID();
+	if(ID >= 0 && ID < MAX_CLIENTS)
+	{
+		m_apCharacters[ID] = 0;
+		m_Core.m_apCharacters[ID] = 0;
+	}
 }
 
 void CGameWorld::RemoveEntities()
