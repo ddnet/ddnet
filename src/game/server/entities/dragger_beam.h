@@ -29,7 +29,7 @@ class CDraggerBeam : public CEntity
 	bool m_Active;
 
 public:
-	CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls, int ForClientID);
+	CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls, int ForClientID, int Layer, int Number);
 
 	void SetPos(vec2 Pos);
 

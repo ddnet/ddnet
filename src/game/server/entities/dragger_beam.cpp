@@ -11,7 +11,7 @@
 #include <game/server/teams.h>
 
 CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls,
-	int ForClientID) :
+	int ForClientID, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_pDragger = pDragger;
@@ -20,6 +20,8 @@ CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos,
 	m_IgnoreWalls = IgnoreWalls;
 	m_ForClientID = ForClientID;
 	m_Active = true;
+	m_Layer = Layer;
+	m_Number = Number;
 	m_EvalTick = Server()->Tick();
 
 	GameWorld()->InsertEntity(this);
@@ -40,11 +42,20 @@ void CDraggerBeam::Tick()
 		return;
 	}
 
+	// The following checks are necessary, because the checks in CDragger::LookForPlayersToDrag only take place every 150ms
+	// When the dragger is disabled for the target player's team, the dragger beam dissolves
+	if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
+		!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTarget->Team()])
+	{
+		Reset();
+		return;
+	}
+
+	// When the dragger can no longer reach the target player, the dragger beam dissolves
 	int IsReachable =
 		m_IgnoreWalls ?
 			!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
 			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
-	// This check is necessary because the check in CDragger::LookForPlayersToDrag only happens every 150ms
 	if(!IsReachable ||
 		distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange || !pTarget->IsAlive())
 	{
