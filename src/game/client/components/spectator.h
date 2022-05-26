@@ -13,10 +13,10 @@ class CSpectator : public CComponent
 		NO_SELECTION = -3,
 	};
 
-	bool m_Active;
-	bool m_WasActive;
+	bool m_Active{};
+	bool m_WasActive{};
 
-	int m_SelectedSpectatorID;
+	int m_SelectedSpectatorID{};
 	vec2 m_SelectorMouse;
 
 	float m_OldMouseX;

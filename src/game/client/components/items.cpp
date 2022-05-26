@@ -336,7 +336,7 @@ void CItems::OnRender()
 			auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
 			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 				continue;
-			CNetObj_Laser Data;
+			CNetObj_Laser Data{};
 			pLaser->FillInfo(&Data);
 			RenderLaser(&Data, true);
 		}
@@ -349,7 +349,7 @@ void CItems::OnRender()
 			{
 				if(auto *pPrev = (CPickup *)GameClient()->m_PrevPredictedWorld.GetEntity(pPickup->ID(), CGameWorld::ENTTYPE_PICKUP))
 				{
-					CNetObj_Pickup Data, Prev;
+					CNetObj_Pickup Data{}, Prev{};
 					pPickup->FillInfo(&Data);
 					pPrev->FillInfo(&Prev);
 					RenderPickup(&Prev, &Data, true);
@@ -463,7 +463,7 @@ void CItems::OnRender()
 	// render flag
 	for(int i = 0; i < Num; i++)
 	{
-		IClient::CSnapItem Item;
+		IClient::CSnapItem Item{};
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
 
 		if(Item.m_Type == NETOBJTYPE_FLAG)

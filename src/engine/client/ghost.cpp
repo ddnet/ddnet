@@ -38,7 +38,7 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST
 	}
 
 	// write header
-	CGhostHeader Header;
+	CGhostHeader Header{};
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
@@ -363,7 +363,7 @@ void CGhostLoader::Close()
 
 bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc)
 {
-	CGhostHeader Header;
+	CGhostHeader Header{};
 	mem_zero(&Header, sizeof(Header));
 
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);

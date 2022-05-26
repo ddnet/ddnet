@@ -114,7 +114,7 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
 	dbg_msg("map_convert_07", "embedding image '%s'", pName);
 
-	CImageInfo ImgInfo;
+	CImageInfo ImgInfo{};
 	char aStr[64];
 	str_format(aStr, sizeof(aStr), "data/mapres/%s.png", pName);
 	if(!LoadPNG(&ImgInfo, aStr))
@@ -220,7 +220,7 @@ int main(int argc, const char **argv)
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		CMapItemImage NewImageItem;
+		CMapItemImage NewImageItem{};
 		pItem = g_DataReader.GetItem(Index, &Type, &ID);
 		Size = g_DataReader.GetItemSize(Index);
 

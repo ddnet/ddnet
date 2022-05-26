@@ -464,7 +464,7 @@ void CSpectator::Spectate(int SpectatorID)
 	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SpectatorID)
 		return;
 
-	CNetMsg_Cl_SetSpectatorMode Msg;
+	CNetMsg_Cl_SetSpectatorMode Msg{};
 	Msg.m_SpectatorID = SpectatorID;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }

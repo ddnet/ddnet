@@ -86,7 +86,7 @@ public:
 	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogout(int ClientID);
 
-	int m_Debug; // Possible values: 0, 1, 2.
+	int m_Debug{}; // Possible values: 0, 1, 2.
 
 private:
 	void WriteHeader(const CGameInfo *pGameInfo);
@@ -131,13 +131,13 @@ private:
 
 	int m_State;
 
-	int m_LastWrittenTick;
-	bool m_TickWritten;
-	int m_Tick;
-	int m_PrevMaxClientID;
-	int m_MaxClientID;
-	CTeehistorianPlayer m_aPrevPlayers[MAX_CLIENTS];
-	CTeam m_aPrevTeams[MAX_CLIENTS];
+	int m_LastWrittenTick{};
+	bool m_TickWritten{};
+	int m_Tick{};
+	int m_PrevMaxClientID{};
+	int m_MaxClientID{};
+	CTeehistorianPlayer m_aPrevPlayers[MAX_CLIENTS]{};
+	CTeam m_aPrevTeams[MAX_CLIENTS]{};
 };
 
 #endif // GAME_SERVER_TEEHISTORIAN_H

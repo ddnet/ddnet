@@ -56,8 +56,8 @@ void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo 
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)
 {
-	CUIRect Headers;
-	CUIRect Status;
+	CUIRect Headers{};
+	CUIRect Status{};
 
 	View.HSplitTop(ms_ListheaderHeight, &Headers, &View);
 	View.HSplitBottom(70.0f, &View, &Status);
@@ -68,14 +68,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	struct CColumn
 	{
-		int m_ID;
-		int m_Sort;
+		int m_ID{};
+		int m_Sort{};
 		CLocConstString m_Caption;
-		int m_Direction;
-		float m_Width;
-		int m_Flags;
-		CUIRect m_Rect;
-		CUIRect m_Spacer;
+		int m_Direction{};
+		float m_Width{};
+		int m_Flags{};
+		CUIRect m_Rect{};
+		CUIRect m_Spacer{};
 	};
 
 	enum
@@ -170,7 +170,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
-	CUIRect Scroll;
+	CUIRect Scroll{};
 	View.VSplitRight(20.0f, &View, &Scroll);
 
 	int NumServers = ServerBrowser()->NumSortedServers();
@@ -244,7 +244,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		int ItemIndex = i;
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
 		NumPlayers += pItem->m_NumFilteredPlayers;
-		CUIRect Row;
+		CUIRect Row{};
 
 		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
@@ -320,7 +320,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		for(int c = 0; c < NumCols; c++)
 		{
-			CUIRect Button;
+			CUIRect Button{};
 			char aTemp[64];
 			Button.x = s_aCols[c].m_Rect.x;
 			Button.y = Row.y;
@@ -377,7 +377,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				if(g_Config.m_UiPage == PAGE_DDNET)
 				{
-					CUIRect Icon;
+					CUIRect Icon{};
 					Button.VMargin(4.0f, &Button);
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
@@ -410,7 +410,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_PLAYERS)
 			{
-				CUIRect Icon;
+				CUIRect Icon{};
 				Button.VMargin(4.0f, &Button);
 				if(pItem->m_FriendState != IFriends::FRIEND_NO)
 				{
@@ -502,14 +502,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	//RenderTools()->DrawUIRect(&Status, ms_ColorTabbarActive, CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
-	CUIRect SearchInfoAndAddr, ServersAndConnect, Status3;
+	CUIRect SearchInfoAndAddr{}, ServersAndConnect{}, Status3{};
 	Status.VSplitRight(250.0f, &SearchInfoAndAddr, &ServersAndConnect);
 	if(SearchInfoAndAddr.w > 350.0f)
 		SearchInfoAndAddr.VSplitLeft(350.0f, &SearchInfoAndAddr, NULL);
-	CUIRect SearchAndInfo, ServerAddr, ConnectButtons;
+	CUIRect SearchAndInfo{}, ServerAddr{}, ConnectButtons{};
 	SearchInfoAndAddr.HSplitTop(40.0f, &SearchAndInfo, &ServerAddr);
 	ServersAndConnect.HSplitTop(35.0f, &Status3, &ConnectButtons);
-	CUIRect QuickSearch, QuickExclude;
+	CUIRect QuickSearch{}, QuickExclude{};
 
 	SearchAndInfo.HSplitTop(20.f, &QuickSearch, &QuickExclude);
 	QuickSearch.Margin(2.f, &QuickSearch);
@@ -597,7 +597,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	else
 		str_format(aBufPyr, sizeof(aBufPyr), Localize("%d player"), NumPlayers);
 
-	CUIRect SvrsOnline, PlysOnline;
+	CUIRect SvrsOnline{}, PlysOnline{};
 	Status3.HSplitTop(20.f, &PlysOnline, &SvrsOnline);
 	PlysOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufPyr, -1, -1.0f), 0, &PlysOnline);
 	UI()->DoLabelScaled(&PlysOnline, aBufPyr, 12.0f, TEXTALIGN_LEFT);
@@ -606,7 +606,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// status box
 	{
-		CUIRect ButtonRefresh, ButtonConnect, ButtonArea;
+		CUIRect ButtonRefresh{}, ButtonConnect{}, ButtonArea{};
 
 		ServerAddr.Margin(2.0f, &ServerAddr);
 
@@ -679,7 +679,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
-	CUIRect ServerFilter = View, FilterHeader;
+	CUIRect ServerFilter = View, FilterHeader{};
 	const float FontSize = 12.0f;
 	ServerFilter.HSplitBottom(0.0f, &ServerFilter, 0);
 
@@ -689,7 +689,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	RenderTools()->DrawUIRect(&ServerFilter, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_B, 4.0f);
 	UI()->DoLabelScaled(&FilterHeader, Localize("Server filter"), FontSize + 2.0f, TEXTALIGN_CENTER);
-	CUIRect Button, Button2;
+	CUIRect Button{}, Button2{};
 
 	ServerFilter.VSplitLeft(5.0f, 0, &ServerFilter);
 	ServerFilter.Margin(3.0f, &ServerFilter);
@@ -740,7 +740,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	// player country
 	{
-		CUIRect Rect;
+		CUIRect Rect{};
 		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 		ServerFilter.HSplitTop(26.0f, &Button, &ServerFilter);
 		Button.VSplitRight(60.0f, &Button, &Rect);
@@ -762,10 +762,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(DoButton_CheckBox(&g_Config.m_BrFilterConnectingPlayers, Localize("Filter connecting players"), g_Config.m_BrFilterConnectingPlayers, &Button))
 		g_Config.m_BrFilterConnectingPlayers ^= 1;
 
-	CUIRect FilterTabs;
+	CUIRect FilterTabs{};
 	ServerFilter.HSplitBottom(23, &ServerFilter, &FilterTabs);
 
-	CUIRect ResetButton;
+	CUIRect ResetButton{};
 
 	//ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
 	ServerFilter.HSplitBottom(ms_ButtonHeight - 5.0f, &ServerFilter, &ResetButton);
@@ -833,7 +833,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			const float TypesWidth = 40.0f;
 			const float TypesHeight = ServerFilter.h / ceil(MaxTypes / (float)PerLine);
 
-			CUIRect TypesRect, Left, Right;
+			CUIRect TypesRect{}, Left{}, Right{};
 
 			static int s_aTypeButtons[64];
 
@@ -854,7 +854,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Pos.x -= TypesWidth / 2.0f;
 
 					// create button logic
-					CUIRect Rect;
+					CUIRect Rect{};
 
 					Rect.x = Pos.x;
 					Rect.y = Pos.y;
@@ -927,7 +927,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			int NumFlags = ServerBrowser()->NumCountries(Network);
 			int PerLine = MaxFlags > 8 ? 5 : 4;
 
-			CUIRect FlagsRect;
+			CUIRect FlagsRect{};
 
 			static int s_aFlagButtons[64];
 
@@ -949,7 +949,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Pos.y -= FlagHeight / 2.0f;
 
 					// create button logic
-					CUIRect Rect;
+					CUIRect Rect{};
 
 					Rect.x = Pos.x;
 					Rect.y = Pos.y;
@@ -1040,7 +1040,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 {
 	CUIRect ServerDetails = View;
-	CUIRect ServerScoreBoard, ServerHeader;
+	CUIRect ServerScoreBoard{}, ServerHeader{};
 
 	const CServerInfo *pSelectedServer = ServerBrowser()->SortedGet(m_SelectedIndex);
 
@@ -1049,7 +1049,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	ServerDetails.HSplitBottom(2.5f, &ServerDetails, 0x0);
 
 	// server details
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 	const float FontSize = 12.0f;
 	ServerDetails.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerDetails);
 	RenderTools()->DrawUIRect(&ServerHeader, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 4.0f);
@@ -1061,21 +1061,21 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		ServerDetails.VSplitLeft(5.0f, 0, &ServerDetails);
 		ServerDetails.Margin(3.0f, &ServerDetails);
 
-		CUIRect Row;
+		CUIRect Row{};
 		static CLocConstString s_aLabels[] = {
 			"Version", // Localize - these strings are localized within CLocConstString
 			"Game type",
 			"Ping"};
 
-		CUIRect LeftColumn;
-		CUIRect RightColumn;
+		CUIRect LeftColumn{};
+		CUIRect RightColumn{};
 
 		//
 		{
-			CUIRect Button;
+			CUIRect Button{};
 			ServerDetails.HSplitBottom(20.0f, &ServerDetails, &Button);
-			CUIRect ButtonAddFav;
-			CUIRect ButtonLeakIp;
+			CUIRect ButtonAddFav{};
+			CUIRect ButtonLeakIp{};
 			Button.VSplitMid(&ButtonAddFav, &ButtonLeakIp);
 			ButtonAddFav.VSplitLeft(5.0f, 0, &ButtonAddFav);
 			static int s_AddFavButton = 0;
@@ -1148,7 +1148,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(!Item.m_Visible)
 				continue;
 
-			CUIRect Name, Clan, Score, Flag;
+			CUIRect Name{}, Clan{}, Score{}, Flag{};
 			Item.m_Rect.HSplitTop(25.0f, &Name, &Item.m_Rect);
 			if(UiLogicGetCurrentClickedItem() == i)
 			{
@@ -1251,7 +1251,7 @@ void CMenus::FriendlistOnUpdate()
 	m_lFriends.clear();
 	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
 	{
-		CFriendItem Item;
+		CFriendItem Item{};
 		Item.m_pFriendInfo = m_pClient->Friends()->GetFriend(i);
 		Item.m_NumFound = 0;
 		m_lFriends.add_unsorted(Item);
@@ -1268,7 +1268,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		s_Inited = 1;
 	}
 
-	CUIRect ServerFriends = View, FilterHeader;
+	CUIRect ServerFriends = View, FilterHeader{};
 	const float FontSize = 10.0f;
 
 	ServerFriends.HSplitBottom(18.0f, &ServerFriends, NULL);
@@ -1278,7 +1278,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 4.0f);
 	RenderTools()->DrawUIRect(&ServerFriends, ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
 	UI()->DoLabelScaled(&FilterHeader, Localize("Friends"), FontSize + 4.0f, TEXTALIGN_CENTER);
-	CUIRect Button, List;
+	CUIRect Button{}, List{};
 
 	ServerFriends.Margin(3.0f, &ServerFriends);
 	ServerFriends.VMargin(3.0f, &ServerFriends);
@@ -1298,7 +1298,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		if(Item.m_Visible)
 		{
 			Item.m_Rect.Margin(1.5f, &Item.m_Rect);
-			CUIRect OnState;
+			CUIRect OnState{};
 			Item.m_Rect.VSplitRight(30.0f, &Item.m_Rect, &OnState);
 			RenderTools()->DrawUIRect(&Item.m_Rect, ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), CUI::CORNER_L, 4.0f);
 
@@ -1403,7 +1403,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			status box	tab	+-------+
 	*/
 
-	CUIRect ServerList, ToolBox;
+	CUIRect ServerList{}, ToolBox{};
 
 	// background
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
@@ -1434,9 +1434,9 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	// tab bar
 	{
-		CUIRect TabBar;
+		CUIRect TabBar{};
 		ToolBox.HSplitBottom(18, &ToolBox, &TabBar);
-		CUIRect TabButton0, TabButton1, TabButton2;
+		CUIRect TabButton0{}, TabButton1{}, TabButton2{};
 		float CurTabBarWidth = ToolBox.w;
 		TabBar.VSplitLeft(0.333f * CurTabBarWidth, &TabButton0, &TabBar);
 		TabBar.VSplitLeft(0.333f * CurTabBarWidth, &TabButton1, &TabBar);

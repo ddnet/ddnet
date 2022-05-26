@@ -158,7 +158,7 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
-			CSoundSource n;
+			CSoundSource n{};
 			n = *pSource;
 
 			n.m_Position.x -= f2fx(Rect.x);

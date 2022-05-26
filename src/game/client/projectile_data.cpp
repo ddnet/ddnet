@@ -17,7 +17,7 @@ CProjectileData ExtractProjectileInfo(const CNetObj_Projectile *pProj, CGameWorl
 {
 	if(UseProjectileExtraInfo(pProj))
 	{
-		CNetObj_DDNetProjectile Proj;
+		CNetObj_DDNetProjectile Proj{};
 		mem_copy(&Proj, pProj, sizeof(Proj));
 		return ExtractProjectileInfoDDNet(&Proj, pGameWorld);
 	}

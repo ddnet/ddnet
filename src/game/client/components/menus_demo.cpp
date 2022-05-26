@@ -57,7 +57,7 @@ bool CMenus::DemoFilterChat(const void *pData, int Size, void *pUser)
 		return false;
 	}
 
-	CUnpacker Unpacker;
+	CUnpacker Unpacker{};
 	Unpacker.Reset(pData, Size);
 
 	int Msg = Unpacker.GetInt();
@@ -81,7 +81,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
 	{
 		CUIRect Screen = *UI()->Screen();
-		CUIRect Box, Part, Part2;
+		CUIRect Box{}, Part{}, Part2{};
 		Box = Screen;
 		Box.Margin(150.0f / UI()->Scale(), &Box);
 
@@ -97,7 +97,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_CENTER);
 		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
 
-		CUIRect Label, TextBox, Ok, Abort;
+		CUIRect Label{}, TextBox{}, Ok{}, Abort{};
 
 		Box.HSplitBottom(20.f, &Box, 0);
 		Box.HSplitBottom(24.f, &Box, &Part);
@@ -260,7 +260,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	MainView.Margin(5.0f, &MainView);
 
-	CUIRect SeekBar, ButtonBar, NameBar;
+	CUIRect SeekBar{}, ButtonBar{}, NameBar{};
 
 	int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
 	int TotalTicks = pInfo->m_LastTick - pInfo->m_FirstTick;
@@ -388,7 +388,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
 
 	// do buttons
-	CUIRect Button;
+	CUIRect Button{};
 
 	// combined play and pause button
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
@@ -485,7 +485,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y + (NameBar.h - (Button.h * 0.5f)) / 2.f, Button.h * 0.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = MainView.w;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -518,7 +518,7 @@ static bool gs_ListBoxClicked;
 void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
 	int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly)
 {
-	CUIRect Scroll, Row;
+	CUIRect Scroll{}, Row{};
 	CUIRect View = *pRect;
 
 	if(!LogicOnly)
@@ -750,7 +750,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 		return 0;
 	}
 
-	CDemoItem Item;
+	CDemoItem Item{};
 	str_copy(Item.m_aFilename, pInfo->m_pName, sizeof(Item.m_aFilename));
 	if(IsDir)
 	{
@@ -870,10 +870,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	MainView.Margin(10.0f, &MainView);
 
 #if defined(CONF_VIDEORECORDER)
-	CUIRect RenderRect;
+	CUIRect RenderRect{};
 #endif
-	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, LabelRect, ListBox;
-	CUIRect ButtonBar2, DirectoryButton;
+	CUIRect ButtonBar{}, RefreshRect{}, FetchRect{}, PlayRect{}, DeleteRect{}, RenameRect{}, LabelRect{}, ListBox{};
+	CUIRect ButtonBar2{}, DirectoryButton{};
 
 	MainView.HSplitBottom((ms_ButtonHeight + 5.0f) * 2.0f, &MainView, &ButtonBar2);
 	ButtonBar2.HSplitTop(5.0f, 0, &ButtonBar2);
@@ -903,7 +903,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	RenderTools()->DrawUIRect(&MainView, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_B, 4.0f);
 	if(!m_DemolistSelectedIsDir && m_DemolistSelectedIndex >= 0 && m_lDemos[m_DemolistSelectedIndex].m_Valid)
 	{
-		CUIRect Left, Right, Labels;
+		CUIRect Left{}, Right{}, Labels{};
 		MainView.VMargin(20.0f, &MainView);
 		MainView.HMargin(10.0f, &MainView);
 		MainView.VSplitMid(&Labels, &MainView);
@@ -985,20 +985,20 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	// demo list
 
-	CUIRect Headers;
+	CUIRect Headers{};
 
 	ListBox.HSplitTop(ms_ListheaderHeight, &Headers, &ListBox);
 
 	struct CColumn
 	{
-		int m_ID;
-		int m_Sort;
+		int m_ID{};
+		int m_Sort{};
 		CLocConstString m_Caption;
-		int m_Direction;
-		float m_Width;
-		int m_Flags;
-		CUIRect m_Rect;
-		CUIRect m_Spacer;
+		int m_Direction{};
+		float m_Width{};
+		int m_Flags{};
+		CUIRect m_Rect{};
+		CUIRect m_Spacer{};
 	};
 
 	enum
@@ -1076,7 +1076,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	// scrollbar
-	CUIRect Scroll;
+	CUIRect Scroll{};
 	ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
 
 	static float s_ScrollValue = 0;
@@ -1105,7 +1105,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	{
 		ItemIndex++;
 
-		CUIRect Row;
+		CUIRect Row{};
 		ListBox.HSplitTop(ms_ListheaderHeight, &Row, &ListBox);
 
 		int Selected = ItemIndex == m_DemolistSelectedIndex;
@@ -1142,7 +1142,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 		for(int c = 0; c < NumCols; c++)
 		{
-			CUIRect Button;
+			CUIRect Button{};
 			Button.x = s_aCols[c].m_Rect.x;
 			Button.y = Row.y;
 			Button.h = Row.h;
@@ -1156,7 +1156,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 			else if(ID == COL_DEMONAME)
 			{
-				CTextCursor Cursor;
+				CTextCursor Cursor{};
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 

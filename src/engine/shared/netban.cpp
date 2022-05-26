@@ -453,7 +453,7 @@ void CNetBan::ConBanRange(IConsole::IResult *pResult, void *pUser)
 	int Minutes = pResult->NumArguments() > 2 ? clamp(pResult->GetInteger(2), 0, 525600) : 30;
 	const char *pReason = pResult->NumArguments() > 3 ? pResult->GetString(3) : "No reason given";
 
-	CNetRange Range;
+	CNetRange Range{};
 	if(net_addr_from_str(&Range.m_LB, pStr1) == 0 && net_addr_from_str(&Range.m_UB, pStr2) == 0)
 		pThis->BanRange(&Range, Minutes * 60, pReason);
 	else
@@ -484,7 +484,7 @@ void CNetBan::ConUnbanRange(IConsole::IResult *pResult, void *pUser)
 	const char *pStr1 = pResult->GetString(0);
 	const char *pStr2 = pResult->GetString(1);
 
-	CNetRange Range;
+	CNetRange Range{};
 	if(net_addr_from_str(&Range.m_LB, pStr1) == 0 && net_addr_from_str(&Range.m_UB, pStr2) == 0)
 		pThis->UnbanByRange(&Range);
 	else

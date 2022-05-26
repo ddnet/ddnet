@@ -19,8 +19,8 @@ class CAssertionLogger : public ILogger
 	std::mutex m_DbgMessageMutex;
 	CStaticRingBuffer<SDebugMessageItem, sizeof(SDebugMessageItem) * 64, CRingBufferBase::FLAG_RECYCLE> m_DbgMessages;
 
-	char m_aAssertLogPath[IO_MAX_PATH_LENGTH];
-	char m_aGameName[256];
+	char m_aAssertLogPath[IO_MAX_PATH_LENGTH]{};
+	char m_aGameName[256]{};
 
 public:
 	CAssertionLogger(const char *pAssertLogPath, const char *pGameName);

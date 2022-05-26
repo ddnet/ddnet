@@ -975,7 +975,7 @@ void CChat::OnPrepareLines()
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
 	float Begin = x;
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
 	for(int i = 0; i < MAX_LINES; i++)
@@ -1210,7 +1210,7 @@ void CChat::OnRender()
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Width - 190.0f;
 		Cursor.m_MaxLines = 2;
@@ -1363,7 +1363,7 @@ void CChat::Say(int Team, const char *pLine)
 	m_LastChatSend = time();
 
 	// send chat message
-	CNetMsg_Cl_Say Msg;
+	CNetMsg_Cl_Say Msg{};
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);

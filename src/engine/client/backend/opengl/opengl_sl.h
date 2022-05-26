@@ -32,8 +32,8 @@ public:
 	virtual ~CGLSL();
 
 private:
-	TWGLuint m_ShaderID;
-	int m_Type;
+	TWGLuint m_ShaderID{};
+	int m_Type{};
 	bool m_IsLoaded;
 };
 

@@ -35,7 +35,7 @@ class CConsole : public IConsole
 
 	int m_FlagMask;
 	bool m_StoreCommands;
-	const char *m_apStrokeStr[2];
+	const char *m_apStrokeStr[2]{};
 	CCommand *m_pFirstCommand;
 
 	class CExecFile
@@ -46,7 +46,7 @@ class CConsole : public IConsole
 	};
 
 	CExecFile *m_pFirstExec;
-	class CConfig *m_pConfig;
+	class CConfig *m_pConfig{};
 	class IStorage *m_pStorage;
 	int m_AccessLevel;
 

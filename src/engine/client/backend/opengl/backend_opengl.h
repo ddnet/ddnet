@@ -54,27 +54,27 @@ protected:
 		float m_ResizeHeight;
 	};
 	std::vector<CTexture> m_Textures;
-	std::atomic<uint64_t> *m_pTextureMemoryUsage;
+	std::atomic<uint64_t> *m_pTextureMemoryUsage{};
 
 	uint32_t m_CanvasWidth = 0;
 	uint32_t m_CanvasHeight = 0;
 
-	TWGLint m_MaxTexSize;
+	TWGLint m_MaxTexSize{};
 
-	bool m_Has2DArrayTextures;
-	bool m_Has2DArrayTexturesAsExtension;
-	TWGLenum m_2DArrayTarget;
-	bool m_Has3DTextures;
-	bool m_HasMipMaps;
-	bool m_HasNPOTTextures;
+	bool m_Has2DArrayTextures{};
+	bool m_Has2DArrayTexturesAsExtension{};
+	TWGLenum m_2DArrayTarget{};
+	bool m_Has3DTextures{};
+	bool m_HasMipMaps{};
+	bool m_HasNPOTTextures{};
 
 	bool m_HasShaders;
-	int m_LastBlendMode; // avoid all possible opengl state changes
-	bool m_LastClipEnable;
+	int m_LastBlendMode{}; // avoid all possible opengl state changes
+	bool m_LastClipEnable{};
 
-	int m_OpenGLTextureLodBIAS;
+	int m_OpenGLTextureLodBIAS{};
 
-	bool m_IsOpenGLES;
+	bool m_IsOpenGLES{};
 
 	bool IsTexturedState(const CCommandBuffer::SState &State);
 

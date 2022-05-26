@@ -48,10 +48,10 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	Current = clamp(Current, 0.0f, 1.0f);
 
 	// layout
-	CUIRect Rail;
+	CUIRect Rail{};
 	pRect->Margin(5.0f, &Rail);
 
-	CUIRect Handle;
+	CUIRect Handle{};
 	Rail.HSplitTop(clamp(33.0f, Rail.w, Rail.h / 3.0f), &Handle, 0);
 	Handle.y = Rail.y + (Rail.h - Handle.h) * Current;
 
@@ -125,13 +125,13 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	Current = clamp(Current, 0.0f, 1.0f);
 
 	// layout
-	CUIRect Rail;
+	CUIRect Rail{};
 	if(pColorInner)
 		Rail = *pRect;
 	else
 		pRect->HMargin(5.0f, &Rail);
 
-	CUIRect Handle;
+	CUIRect Handle{};
 	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.0f), &Handle, 0);
 	Handle.x += (Rail.w - Handle.w) * Current;
 
@@ -187,7 +187,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	// render
 	if(pColorInner)
 	{
-		CUIRect Slider;
+		CUIRect Slider{};
 		Handle.VMargin(-2.0f, &Slider);
 		Slider.HMargin(-3.0f, &Slider);
 		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
@@ -549,7 +549,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	UI()->ClipEnable(pRect);
 	Textbox.x -= *pOffset;
 
-	CTextCursor SelCursor;
+	CTextCursor SelCursor{};
 	TextRender()->SetCursor(&SelCursor, 0, 0, 16, 0);
 
 	bool HasMouseSel = false;
@@ -627,8 +627,8 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 
 bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
-	CUIRect EditBox;
-	CUIRect ClearButton;
+	CUIRect EditBox{};
+	CUIRect ClearButton{};
 	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
 	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~CUI::CORNER_R, Properties);
 

@@ -449,13 +449,13 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer)
 
 int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 {
-	CNetChunk Packet;
+	CNetChunk Packet{};
 
 	if(State() == IClient::STATE_OFFLINE)
 		return 0;
 
 	// repack message (inefficient)
-	CPacker Pack;
+	CPacker Pack{};
 	if(RepackMsg(pMsg, Pack))
 		return 0;
 
@@ -1375,7 +1375,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 
 	net_addr_str(pFrom, Info.m_aAddress, sizeof(Info.m_aAddress), true);
 
-	CUnpacker Up;
+	CUnpacker Up{};
 	Up.Reset(pData, DataSize);
 
 #define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
@@ -1572,7 +1572,7 @@ bool CClient::ShouldSendChatTimeoutCodeHeuristic()
 
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 {
-	CServerCapabilities Result;
+	CServerCapabilities Result{};
 	bool DDNet = false;
 	if(Version >= 1)
 	{
@@ -1608,14 +1608,14 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
-	CUnpacker Unpacker;
+	CUnpacker Unpacker{};
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
 	int Msg;
 	bool Sys;
-	CUuid Uuid;
+	CUuid Uuid{};
 
 	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 	if(Result == UNPACKMESSAGE_ERROR)
@@ -2125,7 +2125,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
-							CNetMsg_Cl_Say MsgP;
+							CNetMsg_Cl_Say MsgP{};
 							MsgP.m_Team = 0;
 							char aBuf[128];
 							char aBufMsg[256];
@@ -2460,7 +2460,7 @@ void CClient::PumpNetwork()
 	}
 
 	// process packets
-	CNetChunk Packet;
+	CNetChunk Packet{};
 	for(int i = 0; i < NUM_CONNS; i++)
 	{
 		while(m_NetClient[i].Recv(&Packet))
@@ -2500,14 +2500,14 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 
 void CClient::OnDemoPlayerMessage(void *pData, int Size)
 {
-	CUnpacker Unpacker;
+	CUnpacker Unpacker{};
 	Unpacker.Reset(pData, Size);
 	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
 	int Msg;
 	bool Sys;
-	CUuid Uuid;
+	CUuid Uuid{};
 
 	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 	if(Result == UNPACKMESSAGE_ERROR)
@@ -3459,7 +3459,7 @@ void CClient::AutoScreenshot_Cleanup()
 		if(g_Config.m_ClAutoScreenshotMax)
 		{
 			// clean up auto taken screens
-			CFileCollection AutoScreens;
+			CFileCollection AutoScreens{};
 			AutoScreens.Init(Storage(), "screenshots/auto", "autoscreen", ".png", g_Config.m_ClAutoScreenshotMax);
 		}
 		m_AutoScreenshotRecycle = false;
@@ -3473,7 +3473,7 @@ void CClient::AutoStatScreenshot_Cleanup()
 		if(g_Config.m_ClAutoStatboardScreenshotMax)
 		{
 			// clean up auto taken screens
-			CFileCollection AutoScreens;
+			CFileCollection AutoScreens{};
 			AutoScreens.Init(Storage(), "screenshots/auto/stats", "autoscreen", ".png", g_Config.m_ClAutoStatboardScreenshotMax);
 		}
 		m_AutoStatScreenshotRecycle = false;
@@ -3493,7 +3493,7 @@ void CClient::AutoCSV_Cleanup()
 		if(g_Config.m_ClAutoCSVMax)
 		{
 			// clean up auto csvs
-			CFileCollection AutoRecord;
+			CFileCollection AutoRecord{};
 			AutoRecord.Init(Storage(), "record/csv", "autorecord", ".csv", g_Config.m_ClAutoCSVMax);
 		}
 		m_AutoCSVRecycle = false;
@@ -3853,7 +3853,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 		if(g_Config.m_ClAutoDemoMax)
 		{
 			// clean up auto recorded demos
-			CFileCollection AutoDemos;
+			CFileCollection AutoDemos{};
 			AutoDemos.Init(Storage(), "demos/auto", "" /* empty for wild card */, ".demo", g_Config.m_ClAutoDemoMax);
 		}
 	}

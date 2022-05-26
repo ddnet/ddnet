@@ -90,7 +90,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 
 	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
-	CImageInfo ImgInfo;
+	CImageInfo ImgInfo{};
 	if(!LoadPNG(&ImgInfo, pImgFile))
 		return 0;
 
@@ -159,7 +159,7 @@ int main(int argc, const char **argv)
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		CMapItemImage NewImageItem;
+		CMapItemImage NewImageItem{};
 		pItem = g_DataReader.GetItem(Index, &Type, &ID);
 		Size = g_DataReader.GetItemSize(Index);
 

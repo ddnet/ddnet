@@ -161,7 +161,7 @@ private:
 		CStack();
 		void Add(class CComponent *pComponent);
 
-		class CComponent *m_paComponents[MAX_COMPONENTS];
+		class CComponent *m_paComponents[MAX_COMPONENTS]{};
 		int m_Num;
 	};
 
@@ -417,23 +417,23 @@ public:
 
 	class CClientStats
 	{
-		int m_IngameTicks;
-		int m_JoinTick;
-		bool m_Active;
+		int m_IngameTicks{};
+		int m_JoinTick{};
+		bool m_Active{};
 
 	public:
 		CClientStats();
 
-		int m_aFragsWith[NUM_WEAPONS];
-		int m_aDeathsFrom[NUM_WEAPONS];
-		int m_Frags;
-		int m_Deaths;
-		int m_Suicides;
-		int m_BestSpree;
-		int m_CurrentSpree;
+		int m_aFragsWith[NUM_WEAPONS]{};
+		int m_aDeathsFrom[NUM_WEAPONS]{};
+		int m_Frags{};
+		int m_Deaths{};
+		int m_Suicides{};
+		int m_BestSpree{};
+		int m_CurrentSpree{};
 
-		int m_FlagGrabs;
-		int m_FlagCaptures;
+		int m_FlagGrabs{};
+		int m_FlagCaptures{};
 
 		void Reset();
 

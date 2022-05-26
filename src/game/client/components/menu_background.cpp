@@ -161,7 +161,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
-			CImageInfo Info;
+			CImageInfo Info{};
 			if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
 			{
 				str_format(aBuf, sizeof(aBuf), "failed to load theme icon from %s", pName);

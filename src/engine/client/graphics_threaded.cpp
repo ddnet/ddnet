@@ -510,7 +510,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 {
 	int l = str_length(pFilename);
 	IGraphics::CTextureHandle ID;
-	CImageInfo Img;
+	CImageInfo Img{};
 
 	if(l < 3)
 		return CTextureHandle();
@@ -789,7 +789,7 @@ void CGraphics_Threaded::KickCommandBuffer()
 bool CGraphics_Threaded::ScreenshotDirect()
 {
 	// add swap command
-	CImageInfo Image;
+	CImageInfo Image{};
 	mem_zero(&Image, sizeof(Image));
 
 	bool DidSwap = false;
@@ -2531,7 +2531,7 @@ void CGraphics_Threaded::Maximize()
 void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing)
 {
 	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless, AllowResizing);
-	CVideoMode CurMode;
+	CVideoMode CurMode{};
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
 }
@@ -2577,7 +2577,7 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
 	// if the size is changed manually, only set the window resize, a window size changed event is triggered anyway
 	if(m_pBackend->ResizeWindow(w, h, RefreshRate))
 	{
-		CVideoMode CurMode;
+		CVideoMode CurMode{};
 		m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 		GotResized(w, h, RefreshRate);
 	}
@@ -2860,7 +2860,7 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	}
 
 	// add videomodes command
-	CImageInfo Image;
+	CImageInfo Image{};
 	mem_zero(&Image, sizeof(Image));
 
 	int NumModes = 0;

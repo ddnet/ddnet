@@ -116,7 +116,7 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 		Flush();
 
 	// pack all the data
-	CNetChunkHeader Header;
+	CNetChunkHeader Header{};
 	Header.m_Flags = Flags;
 	Header.m_Size = DataSize;
 	Header.m_Sequence = Sequence;

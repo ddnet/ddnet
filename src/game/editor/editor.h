@@ -179,7 +179,7 @@ public:
 class CLayerGroup
 {
 public:
-	class CEditorMap *m_pMap;
+	class CEditorMap *m_pMap{};
 
 	array<CLayer *> m_lLayers;
 
@@ -195,7 +195,7 @@ public:
 	int m_ClipW;
 	int m_ClipH;
 
-	char m_aName[12];
+	char m_aName[12]{};
 	bool m_GameGroup;
 	bool m_Visible;
 	bool m_Collapse;
@@ -573,7 +573,7 @@ public:
 	int m_Image;
 	int m_Width;
 	int m_Height;
-	CColor m_Color;
+	CColor m_Color{};
 	int m_ColorEnv;
 	int m_ColorEnvOffset;
 	CTile *m_pTiles;
@@ -588,7 +588,7 @@ public:
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
-	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileName[IO_MAX_PATH_LENGTH]{};
 };
 
 class CLayerQuads : public CLayer
@@ -1186,7 +1186,7 @@ public:
 	~CLayerTele();
 
 	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
+	unsigned char m_TeleNum{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1206,9 +1206,9 @@ public:
 	~CLayerSpeedup();
 
 	CSpeedupTile *m_pSpeedupTile;
-	int m_SpeedupForce;
-	int m_SpeedupMaxSpeed;
-	int m_SpeedupAngle;
+	int m_SpeedupForce{};
+	int m_SpeedupMaxSpeed{};
+	int m_SpeedupAngle{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1236,8 +1236,8 @@ public:
 	~CLayerSwitch();
 
 	CSwitchTile *m_pSwitchTile;
-	unsigned char m_SwitchNumber;
-	unsigned char m_SwitchDelay;
+	unsigned char m_SwitchNumber{};
+	unsigned char m_SwitchDelay{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1257,7 +1257,7 @@ public:
 	~CLayerTune();
 
 	CTuneTile *m_pTuneTile;
-	unsigned char m_TuningNumber;
+	unsigned char m_TuningNumber{};
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;

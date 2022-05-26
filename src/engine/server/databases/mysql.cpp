@@ -111,7 +111,7 @@ private:
 		void operator()(MYSQL_STMT *pStmt) const;
 	};
 
-	char m_aErrorDetail[128];
+	char m_aErrorDetail[128]{};
 	void StoreErrorMysql(const char *pContext);
 	void StoreErrorStmt(const char *pContext);
 	bool ConnectImpl();
@@ -127,16 +127,16 @@ private:
 
 	bool m_NewQuery = false;
 	bool m_HaveConnection = false;
-	MYSQL m_Mysql;
+	MYSQL m_Mysql{};
 	std::unique_ptr<MYSQL_STMT, CStmtDeleter> m_pStmt = nullptr;
 	std::vector<MYSQL_BIND> m_aStmtParameters;
 	std::vector<UParameterExtra> m_aStmtParameterExtras;
 
 	// copy of config vars
-	char m_aDatabase[64];
-	char m_aUser[64];
-	char m_aPass[64];
-	char m_aIp[64];
+	char m_aDatabase[64]{};
+	char m_aUser[64]{};
+	char m_aPass[64]{};
+	char m_aIp[64]{};
 	int m_Port;
 	bool m_Setup;
 

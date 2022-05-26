@@ -119,7 +119,7 @@ bool CEditor::UiPopupOpen()
 int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	// remove group button
-	CUIRect Button;
+	CUIRect Button{};
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
 
@@ -388,7 +388,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	CLayerPopupContext *pPopup = (CLayerPopupContext *)pContext;
 
 	// remove layer button
-	CUIRect Button;
+	CUIRect Button{};
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
 
@@ -490,7 +490,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	array<CQuad *> lQuads = pEditor->GetSelectedQuads();
 	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
 
-	CUIRect Button;
+	CUIRect Button{};
 
 	// delete button
 	View.HSplitBottom(12.0f, &View, &Button);
@@ -698,7 +698,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CSoundSource *pSource = pEditor->GetSelectedSource();
 
-	CUIRect Button;
+	CUIRect Button{};
 
 	// delete button
 	View.HSplitBottom(12.0f, &View, &Button);
@@ -716,7 +716,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// Sound shape button
-	CUIRect ShapeButton;
+	CUIRect ShapeButton{};
 	View.HSplitBottom(3.0f, &View, 0x0);
 	View.HSplitBottom(12.0f, &View, &ShapeButton);
 	static int s_ShapeTypeButton = 0;
@@ -981,7 +981,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Label, ButtonBar;
+	CUIRect Label{}, ButtonBar{};
 
 	// title
 	View.HSplitTop(10.0f, 0, &View);
@@ -1052,7 +1052,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Label, ButtonBar, Button;
+	CUIRect Label{}, ButtonBar{}, Button{};
 
 	// title
 	View.HSplitTop(10.0f, 0, &View);
@@ -1120,7 +1120,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Label, ButtonBar;
+	CUIRect Label{}, ButtonBar{};
 
 	// title
 	View.HSplitTop(10.0f, 0, &View);
@@ -1216,7 +1216,7 @@ static int g_SelectImageCurrent = -100;
 
 int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect ButtonBar, ImageView;
+	CUIRect ButtonBar{}, ImageView{};
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &ImageView);
 
@@ -1228,7 +1228,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 	if(pEditor->m_Map.m_lImages.size() > 20) // Do we need a scrollbar?
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
 		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -1262,7 +1262,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 		ImageCur += 14.0f;
 
-		CUIRect Button;
+		CUIRect Button{};
 		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
 
 		if(pEditor->UI()->MouseInside(&Button))
@@ -1325,7 +1325,7 @@ static int g_SelectSoundCurrent = -100;
 
 int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect ButtonBar, SoundView;
+	CUIRect ButtonBar{}, SoundView{};
 	View.VSplitLeft(80.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &SoundView);
 
@@ -1335,7 +1335,7 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 
 	if(pEditor->m_Map.m_lSounds.size() > 20) // Do we need a scrollbar?
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
 		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -1369,7 +1369,7 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 		SoundCur += 14.0f;
 
-		CUIRect Button;
+		CUIRect Button{};
 		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
 
 		//if(pEditor->UI()->MouseInside(&Button))
@@ -1428,7 +1428,7 @@ int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContex
 		"Live Unfreeze",
 	};
 	static unsigned s_NumButtons = std::size(s_pButtonNames);
-	CUIRect Button;
+	CUIRect Button{};
 
 	for(unsigned i = 0; i < s_NumButtons; ++i)
 	{
@@ -1464,7 +1464,7 @@ static int s_AutoMapConfigCurrent = -100;
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
-	CUIRect Button;
+	CUIRect Button{};
 	static int s_AutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_lImages[pLayer->m_Image]->m_AutoMapper;
 
@@ -1480,7 +1480,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	// Disable scrollbar if not needed.
 	if(ListHeight > View.h)
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		View.VSplitRight(20.0f, &View, &Scroll);
 		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -1561,8 +1561,8 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	static int s_PreviousNumber = -1;
 
-	CUIRect NumberPicker;
-	CUIRect FindEmptySlot;
+	CUIRect NumberPicker{};
+	CUIRect FindEmptySlot{};
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, 0);
@@ -1625,7 +1625,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
+	CUIRect Button{};
 	View.HSplitBottom(12.0f, &View, &Button);
 
 	enum
@@ -1661,10 +1661,10 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	static int s_PreviousNumber = -1;
 
-	CUIRect NumberPicker;
-	CUIRect FindEmptySlot;
+	CUIRect NumberPicker{};
+	CUIRect FindEmptySlot{};
 
-	CUIRect DelayPicker;
+	CUIRect DelayPicker{};
 
 	View.HSplitMid(&NumberPicker, &DelayPicker);
 	NumberPicker.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
@@ -1734,7 +1734,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
+	CUIRect Button{};
 	View.HSplitBottom(12.0f, &View, &Button);
 
 	enum
@@ -1760,7 +1760,7 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect SVPicker, HuePicker;
+	CUIRect SVPicker{}, HuePicker{};
 	View.VSplitRight(20.0f, &SVPicker, &HuePicker);
 	HuePicker.VSplitLeft(4.0f, 0x0, &HuePicker);
 
@@ -1864,7 +1864,7 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	for(int i = 0; i < (int)pEditor->m_SelectEntitiesFiles.size(); i++)
 	{
-		CUIRect Button;
+		CUIRect Button{};
 		View.HSplitTop(14.0f, &Button, &View);
 
 		const char *Name = pEditor->m_SelectEntitiesFiles[i].c_str();

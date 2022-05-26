@@ -47,13 +47,13 @@ private:
 	int m_Owner;
 	int m_Type;
 	int m_SoundImpact;
-	float m_Force;
+	float m_Force{};
 	int m_StartTick;
 	bool m_Explosive;
 
 	// DDRace
 
-	int m_Bouncing;
+	int m_Bouncing{};
 	bool m_Freeze;
 	int m_TuneZone;
 };

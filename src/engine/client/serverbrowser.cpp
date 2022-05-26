@@ -769,7 +769,7 @@ void CServerBrowser::Refresh(int Type)
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
 		unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-		CNetChunk Packet;
+		CNetChunk Packet{};
 		int i;
 
 		/* do the broadcast version */
@@ -817,7 +817,7 @@ void CServerBrowser::Refresh(int Type)
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken, bool RandomToken) const
 {
 	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-	CNetChunk Packet;
+	CNetChunk Packet{};
 
 	if(g_Config.m_Debug)
 	{
@@ -868,7 +868,7 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const
 {
 	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY) + 1];
-	CNetChunk Packet;
+	CNetChunk Packet{};
 
 	if(g_Config.m_Debug)
 	{
@@ -1084,7 +1084,7 @@ void CServerBrowser::UpdateFromHttp()
 			}
 			aWantedAddresses[i].m_Got = true;
 			NETADDR Addr;
-			CServerInfo Info;
+			CServerInfo Info{};
 			m_pHttp->Server(aSortedServers[j], &Addr, &Info);
 			ServerBrowserFillEstimatedLatency(OwnLocation, pPingEntries, NumPingEntries, &p, Addr, &Info);
 			Info.m_HasRank = HasRank(Info.m_aMap);
@@ -1138,7 +1138,7 @@ void CServerBrowser::UpdateFromHttp()
 	for(int i = 0; i < NumServers; i++)
 	{
 		NETADDR Addr;
-		CServerInfo Info;
+		CServerInfo Info{};
 		m_pHttp->Server(i, &Addr, &Info);
 		ServerBrowserFillEstimatedLatency(OwnLocation, pPingEntries, NumPingEntries, &p, Addr, &Info);
 		Info.m_HasRank = HasRank(Info.m_aMap);

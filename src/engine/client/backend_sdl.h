@@ -72,10 +72,10 @@ private:
 	std::mutex m_BufferSwapMutex;
 	std::condition_variable m_BufferSwapCond;
 	CCommandBuffer *m_pBuffer;
-	std::atomic_bool m_Shutdown;
+	std::atomic_bool m_Shutdown{};
 	bool m_Started = false;
-	std::atomic_bool m_BufferInProcess;
-	void *m_pThread;
+	std::atomic_bool m_BufferInProcess{};
+	void *m_pThread{};
 
 	static void ThreadFunc(void *pUser);
 };
@@ -116,8 +116,8 @@ struct SBackendCapabilites
 class CCommandProcessorFragment_SDL
 {
 	// SDL stuff
-	SDL_Window *m_pWindow;
-	SDL_GLContext m_GLContext;
+	SDL_Window *m_pWindow{};
+	SDL_GLContext m_GLContext{};
 
 public:
 	enum
@@ -175,7 +175,7 @@ static constexpr size_t gs_GPUInfoStringSize = 256;
 class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 {
 	SDL_Window *m_pWindow = NULL;
-	SDL_GLContext m_GLContext;
+	SDL_GLContext m_GLContext{};
 	ICommandProcessor *m_pProcessor = nullptr;
 	std::atomic<uint64_t> m_TextureMemoryUsage{0};
 	std::atomic<uint64_t> m_BufferMemoryUsage{0};
@@ -186,9 +186,9 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
-	int m_NumScreens;
+	int m_NumScreens{};
 
-	SBackendCapabilites m_Capabilites;
+	SBackendCapabilites m_Capabilites{};
 
 	char m_aVendorString[gs_GPUInfoStringSize] = {};
 	char m_aVersionString[gs_GPUInfoStringSize] = {};
@@ -196,7 +196,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	EBackendType m_BackendType = BACKEND_TYPE_AUTO;
 
-	char m_aErrorString[256];
+	char m_aErrorString[256]{};
 
 	static EBackendType DetectBackend();
 	static void ClampDriverVersion(EBackendType BackendType);

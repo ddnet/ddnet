@@ -18,22 +18,22 @@ class CGameTeams
 	// could go around the startline on a map, leave one tee behind at
 	// start, go to the finish line, let the tee start and kill, allowing
 	// the team to finish instantly.
-	bool m_TeeStarted[MAX_CLIENTS];
-	bool m_TeeFinished[MAX_CLIENTS];
-	int m_LastChat[MAX_CLIENTS];
+	bool m_TeeStarted[MAX_CLIENTS]{};
+	bool m_TeeFinished[MAX_CLIENTS]{};
+	int m_LastChat[MAX_CLIENTS]{};
 
-	int m_TeamState[NUM_TEAMS];
-	bool m_TeamLocked[NUM_TEAMS];
-	uint64_t m_Invited[NUM_TEAMS];
-	bool m_Practice[NUM_TEAMS];
+	int m_TeamState[NUM_TEAMS]{};
+	bool m_TeamLocked[NUM_TEAMS]{};
+	uint64_t m_Invited[NUM_TEAMS]{};
+	bool m_Practice[NUM_TEAMS]{};
 	std::shared_ptr<CScoreSaveResult> m_pSaveTeamResult[NUM_TEAMS];
-	uint64_t m_LastSwap[NUM_TEAMS];
-	bool m_TeamSentStartWarning[NUM_TEAMS];
+	uint64_t m_LastSwap[NUM_TEAMS]{};
+	bool m_TeamSentStartWarning[NUM_TEAMS]{};
 	// `m_TeamUnfinishableKillTick` is -1 by default and gets set when a
 	// team becomes unfinishable. If the team hasn't entered practice mode
 	// by that time, it'll get killed to prevent people not understanding
 	// the message from playing for a long time in an unfinishable team.
-	int m_TeamUnfinishableKillTick[NUM_TEAMS];
+	int m_TeamUnfinishableKillTick[NUM_TEAMS]{};
 
 	class CGameContext *m_pGameContext;
 

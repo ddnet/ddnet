@@ -201,7 +201,7 @@ int main(int argc, const char **argv)
 			CMapItemImage *pImg = (CMapItemImage *)pPtr;
 			if(!pImg->m_External)
 			{
-				SMapOptimizeItem Item;
+				SMapOptimizeItem Item{};
 				Item.m_pImage = pImg;
 				Item.m_Index = i;
 				Item.m_Data = pImg->m_ImageData;

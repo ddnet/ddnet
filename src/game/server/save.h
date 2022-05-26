@@ -27,19 +27,19 @@ public:
 	void SetClientID(int ClientID) { m_ClientID = ClientID; }
 
 private:
-	int m_ClientID;
+	int m_ClientID{};
 
-	char m_aString[2048];
-	char m_aName[16];
+	char m_aString[2048]{};
+	char m_aName[16]{};
 
-	int m_Alive;
-	int m_Paused;
-	int m_NeededFaketuning;
+	int m_Alive{};
+	int m_Paused{};
+	int m_NeededFaketuning{};
 
 	// Teamstuff
-	int m_TeeStarted;
-	int m_TeeFinished;
-	int m_IsSolo;
+	int m_TeeStarted{};
+	int m_TeeFinished{};
+	int m_IsSolo{};
 
 	struct WeaponStat
 	{
@@ -47,67 +47,67 @@ private:
 		int m_Ammo;
 		int m_Ammocost;
 		int m_Got;
-	} m_aWeapons[NUM_WEAPONS];
+	} m_aWeapons[NUM_WEAPONS]{};
 
-	int m_LastWeapon;
-	int m_QueuedWeapon;
+	int m_LastWeapon{};
+	int m_QueuedWeapon{};
 
-	int m_SuperJump;
-	int m_Jetpack;
-	int m_NinjaJetpack;
-	int m_FreezeTime;
-	int m_FreezeTick;
-	int m_DeepFreeze;
-	int m_LiveFreeze;
-	int m_EndlessHook;
-	int m_DDRaceState;
+	int m_SuperJump{};
+	int m_Jetpack{};
+	int m_NinjaJetpack{};
+	int m_FreezeTime{};
+	int m_FreezeTick{};
+	int m_DeepFreeze{};
+	int m_LiveFreeze{};
+	int m_EndlessHook{};
+	int m_DDRaceState{};
 
-	int m_Hit;
-	int m_Collision;
-	int m_TuneZone;
-	int m_TuneZoneOld;
-	int m_Hook;
-	int m_Time;
+	int m_Hit{};
+	int m_Collision{};
+	int m_TuneZone{};
+	int m_TuneZoneOld{};
+	int m_Hook{};
+	int m_Time{};
 	vec2 m_Pos;
 	vec2 m_PrevPos;
-	int m_TeleCheckpoint;
-	int m_LastPenalty;
+	int m_TeleCheckpoint{};
+	int m_LastPenalty{};
 
-	int m_CpTime;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_aCpCurrent[25];
+	int m_CpTime{};
+	int m_CpActive{};
+	int m_CpLastBroadcast{};
+	float m_aCpCurrent[25]{};
 
-	int m_NotEligibleForFinish;
+	int m_NotEligibleForFinish{};
 
-	int m_HasTelegunGun;
-	int m_HasTelegunGrenade;
-	int m_HasTelegunLaser;
+	int m_HasTelegunGun{};
+	int m_HasTelegunGrenade{};
+	int m_HasTelegunLaser{};
 
 	// Core
 	vec2 m_CorePos;
 	vec2 m_Vel;
-	int m_ActiveWeapon;
-	int m_Jumped;
-	int m_JumpedTotal;
-	int m_Jumps;
+	int m_ActiveWeapon{};
+	int m_Jumped{};
+	int m_JumpedTotal{};
+	int m_Jumps{};
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
-	int m_HookTick;
-	int m_HookState;
-	int m_HookedPlayer;
-	int m_NewHook;
+	int m_HookTick{};
+	int m_HookState{};
+	int m_HookedPlayer{};
+	int m_NewHook{};
 
 	// player input
-	int m_InputDirection;
-	int m_InputJump;
-	int m_InputFire;
-	int m_InputHook;
+	int m_InputDirection{};
+	int m_InputJump{};
+	int m_InputFire{};
+	int m_InputHook{};
 
-	int m_ReloadTimer;
+	int m_ReloadTimer{};
 
-	char m_aGameUuid[UUID_MAXSTRSIZE];
+	char m_aGameUuid[UUID_MAXSTRSIZE]{};
 };
 
 class CSaveTeam
@@ -133,7 +133,7 @@ private:
 
 	IGameController *m_pController;
 
-	char m_aString[65536];
+	char m_aString[65536]{};
 
 	struct SSimpleSwitchers
 	{
@@ -143,11 +143,11 @@ private:
 	};
 	SSimpleSwitchers *m_pSwitchers;
 
-	int m_TeamState;
-	int m_MembersCount;
-	int m_NumSwitchers;
-	int m_TeamLocked;
-	int m_Practice;
+	int m_TeamState{};
+	int m_MembersCount{};
+	int m_NumSwitchers{};
+	int m_TeamLocked{};
+	int m_Practice{};
 };
 
 #endif // GAME_SERVER_SAVE_H

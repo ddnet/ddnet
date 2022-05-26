@@ -14,7 +14,7 @@ class CAntibot : public IEngineAntibot
 	class IConsole *Console() const { return m_pConsole; }
 	class IGameServer *GameServer() const { return m_pGameServer; }
 
-	CAntibotData m_Data;
+	CAntibotData m_Data{};
 	CAntibotRoundData m_RoundData;
 	bool m_Initialized;
 

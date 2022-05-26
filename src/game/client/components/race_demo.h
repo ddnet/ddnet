@@ -19,7 +19,7 @@ class CRaceDemo : public CComponent
 
 	static const char *ms_pRaceDemoDir;
 
-	char m_aTmpFilename[128];
+	char m_aTmpFilename[128]{};
 
 	int m_RaceState;
 	int m_RaceStartTick;
@@ -36,7 +36,7 @@ class CRaceDemo : public CComponent
 	bool CheckDemo(int Time);
 
 public:
-	bool m_AllowRestart;
+	bool m_AllowRestart{};
 
 	CRaceDemo();
 	virtual int Sizeof() const override { return sizeof(*this); }

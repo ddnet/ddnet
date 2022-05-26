@@ -837,7 +837,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
-	CNetChunk Packet;
+	CNetChunk Packet{};
 	if(!pMsg)
 		return -1;
 
@@ -849,7 +849,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 
 	if(ClientID < 0)
 	{
-		CPacker Pack6, Pack7;
+		CPacker Pack6{}, Pack7{};
 		if(RepackMsg(pMsg, Pack6, false))
 			return -1;
 		if(RepackMsg(pMsg, Pack7, true))
@@ -880,7 +880,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	}
 	else
 	{
-		CPacker Pack;
+		CPacker Pack{};
 		if(RepackMsg(pMsg, Pack, m_aClients[ClientID].m_Sixup))
 			return -1;
 
@@ -908,7 +908,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 
 void CServer::SendMsgRaw(int ClientID, const void *pData, int Size, int Flags)
 {
-	CNetChunk Packet;
+	CNetChunk Packet{};
 	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = ClientID;
 	Packet.m_pData = pData;
@@ -1412,14 +1412,14 @@ static inline int MsgFromSixup(int Msg, bool System)
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientID = pPacket->m_ClientID;
-	CUnpacker Unpacker;
+	CUnpacker Unpacker{};
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
 
 	// unpack msgid and system flag
 	int Msg;
 	bool Sys;
-	CUuid Uuid;
+	CUuid Uuid{};
 
 	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 	if(Result == UNPACKMESSAGE_ERROR)
@@ -1894,7 +1894,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	pCache->Clear();
 
 	// One chance to improve the protocol!
-	CPacker p;
+	CPacker p{};
 	char aBuf[128];
 
 	// count the players
@@ -1980,7 +1980,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	const void *pPrefix = p.Data();
 	int PrefixSize = p.Size();
 
-	CPacker q;
+	CPacker q{};
 	int ChunksStored = 0;
 	int PlayersStored = 0;
 
@@ -2089,7 +2089,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 {
 	pCache->Clear();
 
-	CPacker Packer;
+	CPacker Packer{};
 	Packer.Reset();
 
 	// Could be moved to a separate function and cached
@@ -2149,7 +2149,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 
 void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients)
 {
-	CPacker p;
+	CPacker p{};
 	char aBuf[128];
 	p.Reset();
 
@@ -2163,7 +2163,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
-	CNetChunk Packet;
+	CNetChunk Packet{};
 	Packet.m_ClientID = -1;
 	Packet.m_Address = *pAddr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
@@ -2341,7 +2341,7 @@ void CServer::UpdateServerInfo(bool Resend)
 
 void CServer::PumpNetwork(bool PacketWaiting)
 {
-	CNetChunk Packet;
+	CNetChunk Packet{};
 	SECURITY_TOKEN ResponseToken;
 
 	m_NetServer.Update();
@@ -2377,14 +2377,14 @@ void CServer::PumpNetwork(bool PacketWaiting)
 					}
 					if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && Config()->m_SvSixup)
 					{
-						CUnpacker Unpacker;
+						CUnpacker Unpacker{};
 						Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
 						int SrvBrwsToken = Unpacker.GetInt();
 						if(Unpacker.Error())
 							continue;
 
-						CPacker Packer;
-						CNetChunk Response;
+						CPacker Packer{};
+						CNetChunk Response{};
 
 						GetServerInfoSixup(&Packer, SrvBrwsToken, RateLimitServerInfoConnless());
 
@@ -3311,7 +3311,7 @@ void CServer::DemoRecorder_HandleAutoStart()
 		if(Config()->m_SvAutoDemoMax)
 		{
 			// clean up auto recorded demos
-			CFileCollection AutoDemos;
+			CFileCollection AutoDemos{};
 			AutoDemos.Init(Storage(), "demos/server", "autorecord", ".demo", Config()->m_SvAutoDemoMax);
 		}
 	}
@@ -3942,7 +3942,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 
 	std::vector<char *> Lines;
 	char *pLine;
-	CLineReader Reader;
+	CLineReader Reader{};
 	Reader.Init(File);
 	while((pLine = Reader.Get()))
 		if(str_length(pLine))

@@ -16,7 +16,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		return;
 	}
 
-	CLineReader LineReader;
+	CLineReader LineReader{};
 	LineReader.Init(File);
 
 	char *pLine;
@@ -55,7 +55,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		int ItemID;
 		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
 		int Size = Reader.GetItemSize(i);
-		CMapItemInfoSettings MapInfo;
+		CMapItemInfoSettings MapInfo{};
 		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{
 			FoundInfo = true;
@@ -99,7 +99,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 
 	if(!FoundInfo)
 	{
-		CMapItemInfoSettings Info;
+		CMapItemInfoSettings Info{};
 		Info.m_Version = 1;
 		Info.m_Author = -1;
 		Info.m_MapVersion = -1;

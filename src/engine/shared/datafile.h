@@ -90,14 +90,14 @@ class CDataFileWriter
 	};
 
 	IOHANDLE m_File;
-	int m_NumItems;
-	int m_NumDatas;
-	int m_NumItemTypes;
-	int m_NumExtendedItemTypes;
+	int m_NumItems{};
+	int m_NumDatas{};
+	int m_NumItemTypes{};
+	int m_NumExtendedItemTypes{};
 	CItemTypeInfo *m_pItemTypes;
 	CItemInfo *m_pItems;
 	CDataInfo *m_pDatas;
-	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
+	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES]{};
 
 	int GetExtendedItemTypeIndex(int Type);
 

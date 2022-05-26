@@ -18,7 +18,7 @@ private:
 	};
 	array<CKey> m_aKeys;
 
-	int m_aDefault[3];
+	int m_aDefault[3]{};
 	bool m_Generated;
 
 public:

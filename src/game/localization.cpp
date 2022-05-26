@@ -38,7 +38,7 @@ CLocalizationDatabase::CLocalizationDatabase()
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
 {
-	CString s;
+	CString s{};
 	s.m_Hash = str_quickhash(pOrgStr);
 	s.m_ContextHash = str_quickhash(pContext);
 	s.m_pReplacement = m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr);
@@ -68,7 +68,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 	char aContext[512];
 	char aOrigin[512];
-	CLineReader LineReader;
+	CLineReader LineReader{};
 	LineReader.Init(IoHandle);
 	char *pLine;
 	int Line = 0;
@@ -125,7 +125,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHash) const
 {
-	CString String;
+	CString String{};
 	String.m_Hash = Hash;
 	String.m_ContextHash = ContextHash;
 	String.m_pReplacement = 0x0;

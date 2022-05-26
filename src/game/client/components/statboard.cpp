@@ -289,7 +289,7 @@ void CStatboard::RenderGlobalStats()
 		RenderTools()->RenderTee(pIdleState, &Teeinfo, EMOTE_NORMAL, vec2(1, 0), TeeRenderPos);
 
 		char aBuf[128];
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, x + 64, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 220;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
@@ -441,7 +441,7 @@ std::string CStatboard::ReplaceCommata(char *pStr)
 void CStatboard::FormatStats(char *pDest, size_t DestSize)
 {
 	// server stats
-	CServerInfo CurrentServerInfo;
+	CServerInfo CurrentServerInfo{};
 	Client()->GetServerInfo(&CurrentServerInfo);
 	char aServerStats[1024];
 	str_format(aServerStats, sizeof(aServerStats), "Servername,Game-type,Map\n%s,%s,%s", ReplaceCommata(CurrentServerInfo.m_aName).c_str(), ReplaceCommata(CurrentServerInfo.m_aGameType).c_str(), ReplaceCommata(CurrentServerInfo.m_aMap).c_str());

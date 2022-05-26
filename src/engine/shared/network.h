@@ -173,11 +173,11 @@ class CStun
 	{
 		int m_Index;
 		NETSOCKET m_Socket;
-		CStunData m_Stun;
+		CStunData m_Stun{};
 		bool m_HaveStunServer = false;
-		NETADDR m_StunServer;
+		NETADDR m_StunServer{};
 		bool m_HaveAddr = false;
-		NETADDR m_Addr;
+		NETADDR m_Addr{};
 		int64_t m_LastResponse = -1;
 		int64_t m_NextTry = -1;
 		int m_NumUnsuccessfulTries = -1;

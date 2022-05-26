@@ -603,7 +603,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 		return;
 
 	// push this one to the stack
-	CExecFile ThisFile;
+	CExecFile ThisFile{};
 	CExecFile *pPrev = m_pFirstExec;
 	ThisFile.m_pFilename = pFilename;
 	ThisFile.m_pPrev = m_pFirstExec;
@@ -616,7 +616,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	if(File)
 	{
 		char *pLine;
-		CLineReader Reader;
+		CLineReader Reader{};
 
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);

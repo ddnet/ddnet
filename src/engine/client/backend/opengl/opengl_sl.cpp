@@ -82,7 +82,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 			Lines.emplace_back("#extension GL_EXT_texture_array : enable\r\n");
 		}
 
-		CLineReader LineReader;
+		CLineReader LineReader{};
 		LineReader.Init(f);
 		char *ReadLine = NULL;
 		while((ReadLine = LineReader.Get()))

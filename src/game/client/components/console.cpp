@@ -628,7 +628,7 @@ void CGameConsole::OnRender()
 		float x = 3;
 		float y = ConsoleHeight - RowHeight - 5.0f;
 
-		CRenderInfo Info;
+		CRenderInfo Info{};
 		Info.m_pSelf = this;
 		Info.m_WantedCompletion = pConsole->m_CompletionUsed ? pConsole->m_CompletionChosen : -1;
 		Info.m_EnumCount = 0;
@@ -639,7 +639,7 @@ void CGameConsole::OnRender()
 		Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 
 		// render prompt
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
 		const char *pPrompt = "> ";
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)

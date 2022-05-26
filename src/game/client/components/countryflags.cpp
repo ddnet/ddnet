@@ -24,7 +24,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	}
 
 	char aOrigin[128];
-	CLineReader LineReader;
+	CLineReader LineReader{};
 	LineReader.Init(File);
 	char *pLine;
 	while((pLine = LineReader.Get()))
@@ -59,7 +59,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 		// load the graphic file
 		char aBuf[128];
-		CImageInfo Info;
+		CImageInfo Info{};
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
 		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
 		{

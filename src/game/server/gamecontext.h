@@ -62,12 +62,12 @@ struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
 {
-	IServer *m_pServer;
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
-	IEngine *m_pEngine;
-	IStorage *m_pStorage;
-	IAntibot *m_pAntibot;
+	IServer *m_pServer{};
+	CConfig *m_pConfig{};
+	IConsole *m_pConsole{};
+	IEngine *m_pEngine{};
+	IStorage *m_pStorage{};
+	IAntibot *m_pAntibot{};
 	CLayers m_Layers;
 	CCollision m_Collision;
 	protocol7::CNetObjHandler m_NetObjHandler7;
@@ -76,14 +76,14 @@ class CGameContext : public IGameServer
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	array<std::string> m_aCensorlist;
 
-	bool m_TeeHistorianActive;
+	bool m_TeeHistorianActive{};
 	CTeeHistorian m_TeeHistorian;
-	ASYNCIO *m_pTeeHistorianFile;
-	CUuid m_GameUuid;
-	CMapBugs m_MapBugs;
+	ASYNCIO *m_pTeeHistorianFile{};
+	CUuid m_GameUuid{};
+	CMapBugs m_MapBugs{};
 	CPrng m_Prng;
 
-	bool m_Resetting;
+	bool m_Resetting{};
 
 	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
@@ -149,16 +149,16 @@ public:
 	void Clear();
 
 	CEventHandler m_Events;
-	CPlayer *m_apPlayers[MAX_CLIENTS];
+	CPlayer *m_apPlayers[MAX_CLIENTS]{};
 	// keep last input to always apply when none is sent
-	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
-	bool m_aPlayerHasInput[MAX_CLIENTS];
+	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS]{};
+	bool m_aPlayerHasInput[MAX_CLIENTS]{};
 
 	// returns last input if available otherwise nulled PlayerInput object
 	// ClientID has to be valid
 	CNetObj_PlayerInput GetLastPlayerInput(int ClientID) const;
 
-	IGameController *m_pController;
+	IGameController *m_pController{};
 	CGameWorld m_World;
 
 	// helper functions
@@ -172,21 +172,21 @@ public:
 	void SendVoteStatus(int ClientID, int Total, int Yes, int No);
 	void AbortVoteKickOnDisconnect(int ClientID);
 
-	int m_VoteCreator;
-	int m_VoteType;
-	int64_t m_VoteCloseTime;
-	bool m_VoteUpdate;
-	int m_VotePos;
-	char m_aVoteDescription[VOTE_DESC_LENGTH];
-	char m_aSixupVoteDescription[VOTE_DESC_LENGTH];
-	char m_aVoteCommand[VOTE_CMD_LENGTH];
-	char m_aVoteReason[VOTE_REASON_LENGTH];
-	int m_NumVoteOptions;
-	int m_VoteEnforce;
-	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
-	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
+	int m_VoteCreator{};
+	int m_VoteType{};
+	int64_t m_VoteCloseTime{};
+	bool m_VoteUpdate{};
+	int m_VotePos{};
+	char m_aVoteDescription[VOTE_DESC_LENGTH]{};
+	char m_aSixupVoteDescription[VOTE_DESC_LENGTH]{};
+	char m_aVoteCommand[VOTE_CMD_LENGTH]{};
+	char m_aVoteReason[VOTE_REASON_LENGTH]{};
+	int m_NumVoteOptions{};
+	int m_VoteEnforce{};
+	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]{}; // 0 is used for switching from or to area without tunings
+	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256]{};
 
-	char m_aDeleteTempfile[128];
+	char m_aDeleteTempfile[128]{};
 	void DeleteTempfile();
 
 	enum
@@ -196,9 +196,9 @@ public:
 		VOTE_ENFORCE_YES,
 		VOTE_ENFORCE_ABORT,
 	};
-	CHeap *m_pVoteOptionHeap;
-	CVoteOptionServer *m_pVoteOptionFirst;
-	CVoteOptionServer *m_pVoteOptionLast;
+	CHeap *m_pVoteOptionHeap{};
+	CVoteOptionServer *m_pVoteOptionFirst{};
+	CVoteOptionServer *m_pVoteOptionLast{};
 
 	// helper functions
 	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64_t Mask = -1);
@@ -288,8 +288,8 @@ public:
 	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
-	int64_t m_NonEmptySince;
-	int64_t m_LastMapVote;
+	int64_t m_NonEmptySince{};
+	int64_t m_LastMapVote{};
 	int GetClientVersion(int ClientID) const;
 	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
@@ -305,8 +305,8 @@ public:
 private:
 	// starting 1 to make 0 the special value "no client id"
 	uint32_t NextUniqueClientID = 1;
-	bool m_VoteWillPass;
-	class CScore *m_pScore;
+	bool m_VoteWillPass{};
+	class CScore *m_pScore{};
 
 	//DDRace Console Commands
 
@@ -429,10 +429,10 @@ private:
 		bool m_InitialChatDelay;
 	};
 
-	CMute m_aMutes[MAX_MUTES];
-	int m_NumMutes;
-	CMute m_aVoteMutes[MAX_VOTE_MUTES];
-	int m_NumVoteMutes;
+	CMute m_aMutes[MAX_MUTES]{};
+	int m_NumMutes{};
+	CMute m_aVoteMutes[MAX_VOTE_MUTES]{};
+	int m_NumVoteMutes{};
 	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
 	bool TryVoteMute(const NETADDR *pAddr, int Secs);
@@ -458,8 +458,8 @@ public:
 		VOTE_TYPE_KICK,
 		VOTE_TYPE_SPECTATE,
 	};
-	int m_VoteVictim;
-	int m_VoteEnforcer;
+	int m_VoteVictim{};
+	int m_VoteEnforcer{};
 
 	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
 	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }

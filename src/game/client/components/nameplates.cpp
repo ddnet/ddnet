@@ -95,7 +95,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
 				TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex);
 
-			CTextCursor Cursor;
+			CTextCursor Cursor{};
 			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
 			Cursor.m_LineWidth = -1;
 
@@ -121,7 +121,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
 					TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex);
 
-				CTextCursor Cursor;
+				CTextCursor Cursor{};
 				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
 				Cursor.m_LineWidth = -1;
 

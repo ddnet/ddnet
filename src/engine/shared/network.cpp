@@ -25,7 +25,7 @@ void CNetRecvUnpacker::Start(const NETADDR *pAddr, CNetConnection *pConnection, 
 // TODO: rename this function
 int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 {
-	CNetChunkHeader Header;
+	CNetChunkHeader Header{};
 	unsigned char *pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
 
 	while(true)
@@ -306,7 +306,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Sixup)
 {
-	CNetPacketConstruct Construct;
+	CNetPacketConstruct Construct{};
 	Construct.m_Flags = NET_PACKETFLAG_CONTROL;
 	Construct.m_Ack = Ack;
 	Construct.m_NumChunks = 0;

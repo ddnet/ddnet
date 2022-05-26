@@ -21,7 +21,7 @@ public:
 
 	public:
 		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
-		CImageInfo m_Info;
+		CImageInfo m_Info{};
 	};
 
 	struct CDownloadSkin

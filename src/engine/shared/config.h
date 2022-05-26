@@ -60,7 +60,7 @@ class CConfigManager : public IConfigManager
 	class IStorage *m_pStorage;
 	IOHANDLE m_ConfigFile;
 	bool m_Failed;
-	CCallback m_aCallbacks[MAX_CALLBACKS];
+	CCallback m_aCallbacks[MAX_CALLBACKS]{};
 	int m_NumCallbacks;
 
 public:

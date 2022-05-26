@@ -47,7 +47,7 @@ int CAuthManager::AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned
 	if(FindKey(pIdent) >= 0)
 		return -1;
 
-	CKey Key;
+	CKey Key{};
 	str_copy(Key.m_aIdent, pIdent, sizeof(Key.m_aIdent));
 	Key.m_Pw = Hash;
 	mem_copy(Key.m_aSalt, pSalt, SALT_BYTES);

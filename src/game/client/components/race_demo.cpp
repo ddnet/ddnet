@@ -198,7 +198,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 	if(IsDir || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
 		return 0;
 
-	CDemoItem Item;
+	CDemoItem Item{};
 	str_truncate(Item.m_aName, sizeof(Item.m_aName), pInfo->m_pName, str_length(pInfo->m_pName) - 5);
 
 	const char *pTime = Item.m_aName + MapLen + 1;
@@ -235,7 +235,7 @@ bool CRaceDemo::CheckDemo(int Time)
 	std::vector<CDemoItem> lDemos;
 	CDemoListParam Param = {this, &lDemos, Client()->GetCurrentMap()};
 	m_RaceDemosLoadStartTime = tw::time_get();
-	SRaceDemoFetchUser User;
+	SRaceDemoFetchUser User{};
 	User.m_pParam = &Param;
 	User.m_pThis = this;
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &User);

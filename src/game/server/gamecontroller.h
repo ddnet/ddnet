@@ -16,7 +16,7 @@ class IGameController
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
 	vec2 m_aaSpawnPoints[3][64];
-	int m_aNumSpawnPoints[3];
+	int m_aNumSpawnPoints[3]{};
 
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
@@ -49,13 +49,13 @@ protected:
 
 	void ResetGame();
 
-	char m_aMapWish[MAX_MAP_LENGTH];
+	char m_aMapWish[MAX_MAP_LENGTH]{};
 
 	int m_RoundStartTick;
 	int m_GameOverTick;
 	int m_SuddenDeath;
 
-	int m_Warmup;
+	int m_Warmup{};
 	int m_RoundCount;
 
 	int m_GameFlags;

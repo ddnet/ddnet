@@ -119,7 +119,7 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
-			CQuad n;
+			CQuad n{};
 			n = *q;
 
 			for(auto &Point : n.m_aPoints)

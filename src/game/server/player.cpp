@@ -205,7 +205,7 @@ void CPlayer::Tick()
 
 	// do latency stuff
 	{
-		IServer::CClientInfo Info;
+		IServer::CClientInfo Info{};
 		if(Server()->GetClientInfo(m_ClientID, &Info))
 		{
 			m_Latency.m_Accum += Info.m_Latency;
@@ -611,7 +611,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_LastActionTick = Server()->Tick();
 	m_SpectatorID = SPEC_FREEVIEW;
 
-	protocol7::CNetMsg_Sv_Team Msg;
+	protocol7::CNetMsg_Sv_Team Msg{};
 	Msg.m_ClientID = m_ClientID;
 	Msg.m_Team = m_Team;
 	Msg.m_Silent = !DoChatMsg;
@@ -843,7 +843,7 @@ int CPlayer::Pause(int State, bool Force)
 		m_LastPause = Server()->Tick();
 
 		// Sixup needs a teamchange
-		protocol7::CNetMsg_Sv_Team Msg;
+		protocol7::CNetMsg_Sv_Team Msg{};
 		Msg.m_ClientID = m_ClientID;
 		Msg.m_CooldownTick = Server()->Tick();
 		Msg.m_Silent = true;

@@ -32,7 +32,7 @@ int main(int argc, const char **argv)
 		return 2;
 	}
 
-	CStunData Stun;
+	CStunData Stun{};
 	unsigned char aRequest[32];
 	int RequestSize = StunMessagePrepare(aRequest, sizeof(aRequest), &Stun);
 	if(net_udp_send(Socket, &Addr, aRequest, RequestSize) == -1)

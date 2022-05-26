@@ -1537,7 +1537,7 @@ void CMapLayers::OnRender()
 	if(m_OnlineOnly && Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	CUIRect Screen;
+	CUIRect Screen{};
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	vec2 Center = GetCurCamera()->m_Center;
@@ -1649,7 +1649,7 @@ void CMapLayers::OnRender()
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
-				CServerInfo CurrentServerInfo;
+				CServerInfo CurrentServerInfo{};
 				Client()->GetServerInfo(&CurrentServerInfo);
 				char aFilename[IO_MAX_PATH_LENGTH];
 				str_format(aFilename, sizeof(aFilename), "dumps/tilelayer_dump_%s-%d-%d-%dx%d.txt", CurrentServerInfo.m_aMap, g, l, pTMap->m_Width, pTMap->m_Height);

@@ -88,44 +88,44 @@ public:
 
 private:
 	// player controlling this character
-	class CPlayer *m_pPlayer;
+	class CPlayer *m_pPlayer{};
 
-	bool m_Alive;
-	bool m_Paused;
-	int m_NeededFaketuning;
+	bool m_Alive{};
+	bool m_Paused{};
+	int m_NeededFaketuning{};
 
 	// weapon info
-	CEntity *m_apHitObjects[10];
-	int m_NumObjectsHit;
+	CEntity *m_apHitObjects[10]{};
+	int m_NumObjectsHit{};
 
-	int m_LastWeapon;
-	int m_QueuedWeapon;
+	int m_LastWeapon{};
+	int m_QueuedWeapon{};
 
-	int m_ReloadTimer;
-	int m_AttackTick;
+	int m_ReloadTimer{};
+	int m_AttackTick{};
 
-	int m_DamageTaken;
+	int m_DamageTaken{};
 
-	int m_EmoteType;
-	int m_EmoteStop;
+	int m_EmoteType{};
+	int m_EmoteStop{};
 
 	// last tick that the player took any action ie some input
-	int m_LastAction;
-	int m_LastNoAmmoSound;
+	int m_LastAction{};
+	int m_LastNoAmmoSound{};
 
 	// these are non-heldback inputs
-	CNetObj_PlayerInput m_LatestPrevPrevInput;
-	CNetObj_PlayerInput m_LatestPrevInput;
-	CNetObj_PlayerInput m_LatestInput;
+	CNetObj_PlayerInput m_LatestPrevPrevInput{};
+	CNetObj_PlayerInput m_LatestPrevInput{};
+	CNetObj_PlayerInput m_LatestInput{};
 
 	// input
-	CNetObj_PlayerInput m_PrevInput;
-	CNetObj_PlayerInput m_Input;
-	CNetObj_PlayerInput m_SavedInput;
-	int m_NumInputs;
-	int m_Jumped;
+	CNetObj_PlayerInput m_PrevInput{};
+	CNetObj_PlayerInput m_Input{};
+	CNetObj_PlayerInput m_SavedInput{};
+	int m_NumInputs{};
+	int m_Jumped{};
 
-	int m_DamageTakenTick;
+	int m_DamageTakenTick{};
 
 	int m_Health;
 	int m_Armor;
@@ -138,7 +138,7 @@ private:
 	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
 
 	// info for dead reckoning
-	int m_ReckoningTick; // tick that we are performing dead reckoning From
+	int m_ReckoningTick{}; // tick that we are performing dead reckoning From
 	CCharacterCore m_SendCore; // core that we should send
 	CCharacterCore m_ReckoningCore; // the dead reckoning core
 
@@ -147,8 +147,8 @@ private:
 	void SnapCharacter(int SnappingClient, int ID);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
-	float m_Time;
-	int m_LastBroadcast;
+	float m_Time{};
+	int m_LastBroadcast{};
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
 	void SetRescue();
@@ -159,9 +159,9 @@ private:
 	void SendZoneMsgs();
 	IAntibot *Antibot();
 
-	bool m_SetSavePos;
+	bool m_SetSavePos{};
 	CSaveTee m_RescueTee;
-	bool m_Solo;
+	bool m_Solo{};
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }
@@ -175,21 +175,21 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	void ResetPickups();
-	int m_DDRaceState;
+	int m_DDRaceState{};
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
-	bool m_Super;
-	bool m_SuperJump;
-	bool m_Jetpack;
-	bool m_NinjaJetpack;
-	int m_TeamBeforeSuper;
-	int m_FreezeTime;
-	bool m_FrozenLastTick;
-	bool m_DeepFreeze;
-	bool m_LiveFreeze;
-	bool m_EndlessHook;
-	bool m_FreezeHammer;
+	bool m_Super{};
+	bool m_SuperJump{};
+	bool m_Jetpack{};
+	bool m_NinjaJetpack{};
+	int m_TeamBeforeSuper{};
+	int m_FreezeTime{};
+	bool m_FrozenLastTick{};
+	bool m_DeepFreeze{};
+	bool m_LiveFreeze{};
+	bool m_EndlessHook{};
+	bool m_FreezeHammer{};
 	enum
 	{
 		HIT_ALL = 0,
@@ -198,36 +198,36 @@ public:
 		DISABLE_HIT_GRENADE = 4,
 		DISABLE_HIT_LASER = 8
 	};
-	int m_Hit;
-	int m_TuneZone;
-	int m_TuneZoneOld;
-	int m_PainSoundTimer;
-	int m_LastMove;
-	int m_StartTime;
+	int m_Hit{};
+	int m_TuneZone{};
+	int m_TuneZoneOld{};
+	int m_PainSoundTimer{};
+	int m_LastMove{};
+	int m_StartTime{};
 	vec2 m_PrevPos;
-	int m_TeleCheckpoint;
-	int m_CpTick;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_CpCurrent[25];
-	int m_TileIndex;
-	int m_TileFIndex;
+	int m_TeleCheckpoint{};
+	int m_CpTick{};
+	int m_CpActive{};
+	int m_CpLastBroadcast{};
+	float m_CpCurrent[25]{};
+	int m_TileIndex{};
+	int m_TileFIndex{};
 
-	int m_MoveRestrictions;
+	int m_MoveRestrictions{};
 
 	vec2 m_Intersection;
-	int64_t m_LastStartWarning;
-	int64_t m_LastRescue;
-	bool m_LastRefillJumps;
-	bool m_LastPenalty;
-	bool m_LastBonus;
+	int64_t m_LastStartWarning{};
+	int64_t m_LastRescue{};
+	bool m_LastRefillJumps{};
+	bool m_LastPenalty{};
+	bool m_LastBonus{};
 	vec2 m_TeleGunPos;
-	bool m_TeleGunTeleport;
-	bool m_IsBlueTeleGunTeleport;
+	bool m_TeleGunTeleport{};
+	bool m_IsBlueTeleGunTeleport{};
 	int m_StrongWeakID;
 
-	int m_SpawnTick;
-	int m_WeaponChangeTick;
+	int m_SpawnTick{};
+	int m_WeaponChangeTick{};
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; }

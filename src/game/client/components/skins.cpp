@@ -49,7 +49,7 @@ CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pSt
 
 struct SSkinScanUser
 {
-	CSkins *m_pThis;
+	CSkins *m_pThis{};
 	CSkins::TSkinLoadedCBFunc m_SkinLoadedFunc;
 };
 
@@ -118,7 +118,7 @@ static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, uint8_t *pImg, int
 
 int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
-	CImageInfo Info;
+	CImageInfo Info{};
 	if(!LoadSkinPNG(Info, pName, pPath, DirType))
 		return 0;
 	return LoadSkin(pName, Info);

@@ -41,9 +41,9 @@ extern CLocalizationDatabase g_Localization;
 class CLocConstString
 {
 	const char *m_pDefaultStr;
-	const char *m_pCurrentStr;
+	const char *m_pCurrentStr{};
 	unsigned m_Hash;
-	unsigned m_ContextHash;
+	unsigned m_ContextHash{};
 	int m_Version;
 
 public:

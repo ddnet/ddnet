@@ -18,7 +18,7 @@ typedef std::function<void()> TMenuAssetScanLoadedFunc;
 
 struct SMenuAssetScanUser
 {
-	void *m_pUser;
+	void *m_pUser{};
 	TMenuAssetScanLoadedFunc m_LoadedFunc;
 };
 
@@ -44,7 +44,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 		for(int i = 0; i < MAP_IMAGE_MOD_TYPE_COUNT; ++i)
 		{
 			str_format(aBuff, sizeof(aBuff), "editor/entities_clear/%s.png", gs_aModEntitiesNames[i]);
-			CImageInfo ImgInfo;
+			CImageInfo ImgInfo{};
 			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
@@ -60,7 +60,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 		for(int i = 0; i < MAP_IMAGE_MOD_TYPE_COUNT; ++i)
 		{
 			str_format(aBuff, sizeof(aBuff), "assets/entities/%s/%s.png", pEntitiesItem->m_aName, gs_aModEntitiesNames[i]);
-			CImageInfo ImgInfo;
+			CImageInfo ImgInfo{};
 			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
@@ -133,7 +133,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 	if(str_comp(pAssetItem->m_aName, "default") == 0)
 	{
 		str_format(aBuff, sizeof(aBuff), "%s.png", pAssetName);
-		CImageInfo ImgInfo;
+		CImageInfo ImgInfo{};
 		if(pGraphics->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 		{
 			pAssetItem->m_RenderTexture = pGraphics->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
@@ -143,7 +143,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 	else
 	{
 		str_format(aBuff, sizeof(aBuff), "assets/%s/%s.png", pAssetName, pAssetItem->m_aName);
-		CImageInfo ImgInfo;
+		CImageInfo ImgInfo{};
 		if(pGraphics->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 		{
 			pAssetItem->m_RenderTexture = pGraphics->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
@@ -366,7 +366,7 @@ int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> 
 
 void CMenus::RenderSettingsCustom(CUIRect MainView)
 {
-	CUIRect Label, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, ReloadButton;
+	CUIRect Label{}, CustomList{}, QuickSearch{}, QuickSearchClearButton{}, DirectoryButton{}, Page1Tab{}, Page2Tab{}, Page3Tab{}, Page4Tab{}, Page5Tab{}, ReloadButton{};
 
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
@@ -538,7 +538,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		ItemRect.Margin(Margin / 2, &ItemRect);
 		if(Item.m_Visible)
 		{
-			CUIRect TextureRect;
+			CUIRect TextureRect{};
 			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
 			TextureRect.HSplitTop(10, NULL, &TextureRect);
 			UI()->DoLabelScaled(&ItemRect, s->m_aName, ItemRect.h - 2, TEXTALIGN_CENTER);

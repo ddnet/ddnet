@@ -26,8 +26,8 @@ class CGun : public CEntity
 	bool m_Freeze;
 	bool m_Explosive;
 	int m_EvalTick;
-	int m_LastFireTeam[MAX_CLIENTS];
-	int m_LastFireSolo[MAX_CLIENTS];
+	int m_LastFireTeam[MAX_CLIENTS]{};
+	int m_LastFireSolo[MAX_CLIENTS]{};
 
 	void Fire();
 

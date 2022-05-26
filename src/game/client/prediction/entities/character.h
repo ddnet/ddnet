@@ -75,14 +75,14 @@ public:
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
 	bool m_Super;
-	bool m_SuperJump;
-	bool m_Jetpack;
-	bool m_NinjaJetpack;
-	int m_FreezeTime;
-	bool m_FrozenLastTick;
-	bool m_DeepFreeze;
-	bool m_LiveFreeze;
-	bool m_EndlessHook;
+	bool m_SuperJump{};
+	bool m_Jetpack{};
+	bool m_NinjaJetpack{};
+	int m_FreezeTime{};
+	bool m_FrozenLastTick{};
+	bool m_DeepFreeze{};
+	bool m_LiveFreeze{};
+	bool m_EndlessHook{};
 	enum
 	{
 		HIT_ALL = 0,
@@ -91,16 +91,16 @@ public:
 		DISABLE_HIT_GRENADE = 4,
 		DISABLE_HIT_LASER = 8
 	};
-	int m_Hit;
-	int m_TuneZone;
+	int m_Hit{};
+	int m_TuneZone{};
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
 	int m_TeleCheckpoint;
 
-	int m_TileIndex;
-	int m_TileFIndex;
+	int m_TileIndex{};
+	int m_TileFIndex{};
 
-	int m_MoveRestrictions;
+	int m_MoveRestrictions{};
 	bool m_LastRefillJumps;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
@@ -136,10 +136,10 @@ public:
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
-	int m_LastSnapWeapon;
+	int m_LastSnapWeapon{};
 	int m_LastJetpackStrength;
-	bool m_KeepHooked;
-	int m_GameTeam;
+	bool m_KeepHooked{};
+	int m_GameTeam{};
 	bool m_CanMoveInFreeze;
 
 	bool Match(CCharacter *pChar);
@@ -149,25 +149,25 @@ public:
 
 private:
 	// weapon info
-	int m_aHitObjects[10];
+	int m_aHitObjects[10]{};
 	int m_NumObjectsHit;
 
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
 	int m_ReloadTimer;
-	int m_AttackTick;
+	int m_AttackTick{};
 
 	// these are non-heldback inputs
-	CNetObj_PlayerInput m_LatestPrevInput;
-	CNetObj_PlayerInput m_LatestInput;
+	CNetObj_PlayerInput m_LatestPrevInput{};
+	CNetObj_PlayerInput m_LatestInput{};
 
 	// input
-	CNetObj_PlayerInput m_PrevInput;
-	CNetObj_PlayerInput m_Input;
-	CNetObj_PlayerInput m_SavedInput;
+	CNetObj_PlayerInput m_PrevInput{};
+	CNetObj_PlayerInput m_Input{};
+	CNetObj_PlayerInput m_SavedInput{};
 
-	int m_NumInputs;
+	int m_NumInputs{};
 
 	// the player core for the physics
 	CCharacterCore m_Core;
@@ -185,8 +185,8 @@ private:
 
 	int m_StrongWeakID;
 
-	int m_LastWeaponSwitchTick;
-	int m_LastTuneZoneTick;
+	int m_LastWeaponSwitchTick{};
+	int m_LastTuneZoneTick{};
 };
 
 enum

@@ -11,7 +11,7 @@ static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0
 
 CUuid RandomUuid()
 {
-	CUuid Result;
+	CUuid Result{};
 	secure_random_fill(&Result, sizeof(Result));
 
 	Result.m_aData[6] &= 0x0f;
@@ -31,7 +31,7 @@ CUuid CalculateUuid(const char *pName)
 	md5_update(&Md5, (const unsigned char *)pName, str_length(pName));
 	MD5_DIGEST Digest = md5_finish(&Md5);
 
-	CUuid Result;
+	CUuid Result{};
 	for(unsigned i = 0; i < sizeof(Result.m_aData); i++)
 	{
 		Result.m_aData[i] = Digest.data[i];
@@ -102,14 +102,14 @@ void CUuidManager::RegisterName(int ID, const char *pName)
 {
 	int Index = GetIndex(ID);
 	dbg_assert(Index == m_aNames.size(), "names must be registered with increasing ID");
-	CName Name;
+	CName Name{};
 	Name.m_pName = pName;
 	Name.m_Uuid = CalculateUuid(pName);
 	dbg_assert(LookupUuid(Name.m_Uuid) == -1, "duplicate uuid");
 
 	m_aNames.add(Name);
 
-	CNameIndexed NameIndexed;
+	CNameIndexed NameIndexed{};
 	NameIndexed.m_Uuid = Name.m_Uuid;
 	NameIndexed.m_ID = GetIndex(ID);
 	m_aNamesSorted.add(NameIndexed);
@@ -142,7 +142,7 @@ int CUuidManager::NumUuids() const
 
 int CUuidManager::UnpackUuid(CUnpacker *pUnpacker) const
 {
-	CUuid Temp;
+	CUuid Temp{};
 	return UnpackUuid(pUnpacker, &Temp);
 }
 

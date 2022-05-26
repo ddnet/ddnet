@@ -903,7 +903,7 @@ void CGameClient::ProcessEvents()
 	int Num = Client()->SnapNumItems(SnapType);
 	for(int Index = 0; Index < Num; Index++)
 	{
-		IClient::CSnapItem Item;
+		IClient::CSnapItem Item{};
 		const void *pData = Client()->SnapGetItem(SnapType, Index, &Item);
 
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
@@ -1011,7 +1011,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Race = Race || FastCap || DDRace;
 	}
 
-	CGameInfo Info;
+	CGameInfo Info{};
 	Info.m_FlagStartsRace = FastCap;
 	Info.m_TimeScore = Race;
 	Info.m_UnlimitedAmmo = Race;
@@ -1125,7 +1125,7 @@ void CGameClient::OnNewSnapshot()
 		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 		for(int Index = 0; Index < Num; Index++)
 		{
-			IClient::CSnapItem Item;
+			IClient::CSnapItem Item{};
 			void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 			if(m_NetObjHandler.ValidateObj(Item.m_Type, pData, Item.m_DataSize) != 0)
 			{
@@ -1153,7 +1153,7 @@ void CGameClient::OnNewSnapshot()
 				aMessage[i] = (char)('a' + (rand() % ('z' - 'a')));
 			aMessage[MsgLen] = 0;
 
-			CNetMsg_Cl_Say Msg;
+			CNetMsg_Cl_Say Msg{};
 			Msg.m_Team = rand() & 1;
 			Msg.m_pMessage = aMessage;
 			Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
@@ -1177,7 +1177,7 @@ void CGameClient::OnNewSnapshot()
 		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
-			IClient::CSnapItem Item;
+			IClient::CSnapItem Item{};
 			const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
 
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
@@ -1411,7 +1411,7 @@ void CGameClient::OnNewSnapshot()
 					continue;
 				}
 				FoundGameInfoEx = true;
-				CServerInfo ServerInfo;
+				CServerInfo ServerInfo{};
 				Client()->GetServerInfo(&ServerInfo);
 				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)pData, Client()->SnapItemSize(IClient::SNAP_CURRENT, i), &ServerInfo);
 			}
@@ -1494,7 +1494,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(!FoundGameInfoEx)
 	{
-		CServerInfo ServerInfo;
+		CServerInfo ServerInfo{};
 		Client()->GetServerInfo(&ServerInfo);
 		m_GameInfo = GetGameInfo(0, 0, &ServerInfo);
 	}
@@ -1599,7 +1599,7 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
-	CServerInfo CurrentServerInfo;
+	CServerInfo CurrentServerInfo{};
 	Client()->GetServerInfo(&CurrentServerInfo);
 	CTuningParams StandardTuning;
 	if(CurrentServerInfo.m_aGameType[0] != '0')
@@ -1648,7 +1648,7 @@ void CGameClient::OnNewSnapshot()
 	if(m_ShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || (m_ShowOthers[g_Config.m_ClDummy] != SHOW_OTHERS_NOT_SET && m_ShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
 	{
 		{
-			CNetMsg_Cl_ShowOthers Msg;
+			CNetMsg_Cl_ShowOthers Msg{};
 			Msg.m_Show = g_Config.m_ClShowOthers;
 			Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 		}
@@ -1668,7 +1668,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(ZoomToSend != m_LastZoom || Graphics()->ScreenAspect() != m_LastScreenAspect || (Client()->DummyConnected() && !m_LastDummyConnected))
 	{
-		CNetMsg_Cl_ShowDistance Msg;
+		CNetMsg_Cl_ShowDistance Msg{};
 		float x, y;
 		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), ZoomToSend, &x, &y);
 		Msg.m_X = x;
@@ -2055,7 +2055,7 @@ void CGameClient::CClientData::Reset()
 
 void CGameClient::SendSwitchTeam(int Team)
 {
-	CNetMsg_Cl_SetTeam Msg;
+	CNetMsg_Cl_SetTeam Msg{};
 	Msg.m_Team = Team;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 
@@ -2067,7 +2067,7 @@ void CGameClient::SendInfo(bool Start)
 {
 	if(Start)
 	{
-		CNetMsg_Cl_StartInfo Msg;
+		CNetMsg_Cl_StartInfo Msg{};
 		Msg.m_pName = Client()->PlayerName();
 		Msg.m_pClan = g_Config.m_PlayerClan;
 		Msg.m_Country = g_Config.m_PlayerCountry;
@@ -2082,7 +2082,7 @@ void CGameClient::SendInfo(bool Start)
 	}
 	else
 	{
-		CNetMsg_Cl_ChangeInfo Msg;
+		CNetMsg_Cl_ChangeInfo Msg{};
 		Msg.m_pName = Client()->PlayerName();
 		Msg.m_pClan = g_Config.m_PlayerClan;
 		Msg.m_Country = g_Config.m_PlayerCountry;
@@ -2101,7 +2101,7 @@ void CGameClient::SendDummyInfo(bool Start)
 {
 	if(Start)
 	{
-		CNetMsg_Cl_StartInfo Msg;
+		CNetMsg_Cl_StartInfo Msg{};
 		Msg.m_pName = Client()->DummyName();
 		Msg.m_pClan = g_Config.m_ClDummyClan;
 		Msg.m_Country = g_Config.m_ClDummyCountry;
@@ -2116,7 +2116,7 @@ void CGameClient::SendDummyInfo(bool Start)
 	}
 	else
 	{
-		CNetMsg_Cl_ChangeInfo Msg;
+		CNetMsg_Cl_ChangeInfo Msg{};
 		Msg.m_pName = Client()->DummyName();
 		Msg.m_pClan = g_Config.m_ClDummyClan;
 		Msg.m_Country = g_Config.m_ClDummyCountry;
@@ -2787,7 +2787,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 			str_format(aPath, sizeof(aPath), "assets/game/%s.png", pPath);
 	}
 
-	CImageInfo ImgInfo;
+	CImageInfo ImgInfo{};
 	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
@@ -2949,7 +2949,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 			str_format(aPath, sizeof(aPath), "assets/emoticons/%s.png", pPath);
 	}
 
-	CImageInfo ImgInfo;
+	CImageInfo ImgInfo{};
 	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
@@ -3003,7 +3003,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 			str_format(aPath, sizeof(aPath), "assets/particles/%s.png", pPath);
 	}
 
-	CImageInfo ImgInfo;
+	CImageInfo ImgInfo{};
 	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
@@ -3089,7 +3089,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 			str_format(aPath, sizeof(aPath), "assets/hud/%s.png", pPath);
 	}
 
-	CImageInfo ImgInfo;
+	CImageInfo ImgInfo{};
 	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
@@ -3259,7 +3259,7 @@ void CGameClient::SnapCollectEntities()
 
 	for(int Index = 0; Index < NumSnapItems; Index++)
 	{
-		IClient::CSnapItem Item;
+		IClient::CSnapItem Item{};
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
 			aItemEx.push_back({Item, pData, 0});

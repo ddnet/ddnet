@@ -27,8 +27,8 @@ class CDragger : public CEntity
 	bool m_IgnoreWalls;
 	int m_EvalTick;
 
-	int m_TargetIdInTeam[MAX_CLIENTS];
-	CDraggerBeam *m_apDraggerBeam[MAX_CLIENTS];
+	int m_TargetIdInTeam[MAX_CLIENTS]{};
+	CDraggerBeam *m_apDraggerBeam[MAX_CLIENTS]{};
 
 	void LookForPlayersToDrag();
 

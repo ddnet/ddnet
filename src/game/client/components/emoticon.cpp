@@ -183,7 +183,7 @@ void CEmoticon::OnRender()
 
 void CEmoticon::Emote(int Emoticon)
 {
-	CNetMsg_Cl_Emoticon Msg;
+	CNetMsg_Cl_Emoticon Msg{};
 	Msg.m_Emoticon = Emoticon;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 

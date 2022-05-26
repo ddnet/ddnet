@@ -14,8 +14,8 @@ using std::string;
 
 class CUpdaterFetchTask : public CHttpRequest
 {
-	char m_aBuf[256];
-	char m_aBuf2[256];
+	char m_aBuf[256]{};
+	char m_aBuf2[256]{};
 	CUpdater *m_pUpdater;
 
 	void OnProgress() override;

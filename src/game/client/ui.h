@@ -135,17 +135,17 @@ public:
 	struct SUIElementRect
 	{
 	public:
-		int m_UIRectQuadContainer;
-		int m_UITextContainer;
+		int m_UIRectQuadContainer{};
+		int m_UITextContainer{};
 
-		float m_X;
-		float m_Y;
-		float m_Width;
-		float m_Height;
+		float m_X{};
+		float m_Y{};
+		float m_Width{};
+		float m_Height{};
 
 		std::string m_Text;
 
-		CTextCursor m_Cursor;
+		CTextCursor m_Cursor{};
 
 		STextRenderColor m_TextColor;
 		STextRenderColor m_TextOutlineColor;
@@ -198,18 +198,18 @@ class CUI
 	const void *m_pBecomingHotItem;
 	const void *m_pActiveTooltipItem;
 	float m_MouseX, m_MouseY; // in gui space
-	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
+	float m_MouseDeltaX{}, m_MouseDeltaY{}; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
 
-	CUIRect m_Screen;
+	CUIRect m_Screen{};
 
 	std::vector<CUIRect> m_Clips;
 	void UpdateClipping();
 
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
+	class IGraphics *m_pGraphics{};
+	class ITextRender *m_pTextRender{};
 
 	std::vector<CUIElement *> m_OwnUIElements; // ui elements maintained by CUI class
 	std::vector<CUIElement *> m_UIElements;

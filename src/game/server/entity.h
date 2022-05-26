@@ -148,8 +148,8 @@ public: // TODO: Maybe make protected
 	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
 	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos);
 
-	int m_Number;
-	int m_Layer;
+	int m_Number{};
+	int m_Layer{};
 };
 
 bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);

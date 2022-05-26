@@ -106,13 +106,13 @@ private:
 
 	static const char *ms_pGhostDir;
 
-	class IGhostLoader *m_pGhostLoader;
-	class IGhostRecorder *m_pGhostRecorder;
+	class IGhostLoader *m_pGhostLoader{};
+	class IGhostRecorder *m_pGhostRecorder{};
 
 	CGhostItem m_aActiveGhosts[MAX_ACTIVE_GHOSTS];
 	CGhostItem m_CurGhost;
 
-	char m_aTmpFilename[128];
+	char m_aTmpFilename[128]{};
 
 	int m_NewRenderTick;
 	int m_StartRenderTick;
@@ -121,7 +121,7 @@ private:
 	bool m_Recording;
 	bool m_Rendering;
 
-	bool m_RenderingStartedByServer;
+	bool m_RenderingStartedByServer{};
 
 	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar);
@@ -146,7 +146,7 @@ private:
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
 public:
-	bool m_AllowRestart;
+	bool m_AllowRestart{};
 
 	CGhost();
 	virtual int Sizeof() const override { return sizeof(*this); }

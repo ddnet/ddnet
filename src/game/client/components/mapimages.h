@@ -37,10 +37,10 @@ class CMapImages : public CComponent
 	friend class CMenuBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
-	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
+	int m_aTextureUsedByTileOrQuadLayerFlag[64]{}; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
-	char m_aEntitiesPath[IO_MAX_PATH_LENGTH];
+	char m_aEntitiesPath[IO_MAX_PATH_LENGTH]{};
 
 	bool HasFrontLayer(EMapImageModType ModType);
 	bool HasSpeedupLayer(EMapImageModType ModType);
@@ -75,7 +75,7 @@ public:
 	void ChangeEntitiesPath(const char *pPath);
 
 private:
-	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];
+	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2]{};
 	bool m_SpeedupArrowIsLoaded;
 	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;

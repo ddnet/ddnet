@@ -151,7 +151,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, m_CurGhost.m_Path.Get(i), sizeof(CGhostCharacter));
 	}
 
-	CGhostCharacter GhostChar;
+	CGhostCharacter GhostChar{};
 	GetGhostCharacter(&GhostChar, pChar);
 	m_CurGhost.m_Path.Add(GhostChar);
 	if(GhostRecorder()->IsRecording())
@@ -332,7 +332,7 @@ void CGhost::OnRender()
 		if(Ghost.m_Path.Get(PrevPos)->m_Tick > GhostTick)
 			continue;
 
-		CNetObj_Character Player, Prev;
+		CNetObj_Character Player{}, Prev{};
 		GetNetObjCharacter(&Player, Ghost.m_Path.Get(CurPos));
 		GetNetObjCharacter(&Prev, Ghost.m_Path.Get(PrevPos));
 

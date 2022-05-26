@@ -65,8 +65,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		return -1;
 	}
 
-	CDemoHeader Header;
-	CTimelineMarkers TimelineMarkers;
+	CDemoHeader Header{};
+	CTimelineMarkers TimelineMarkers{};
 	if(m_File)
 	{
 		io_close(DemoFile);

@@ -145,12 +145,12 @@ public:
 	int GetCurrentType() override { return m_ServerlistType; }
 
 private:
-	CNetClient *m_pNetClient;
-	class IConsole *m_pConsole;
-	class IEngine *m_pEngine;
-	class IFriends *m_pFriends;
-	class IStorage *m_pStorage;
-	char m_aNetVersion[128];
+	CNetClient *m_pNetClient{};
+	class IConsole *m_pConsole{};
+	class IEngine *m_pEngine{};
+	class IFriends *m_pFriends{};
+	class IStorage *m_pStorage{};
+	char m_aNetVersion[128]{};
 
 	bool m_RefreshingHttp = false;
 	IServerBrowserHttp *m_pHttp = nullptr;
@@ -161,25 +161,25 @@ private:
 	CServerEntry **m_ppServerlist;
 	int *m_pSortedServerlist;
 
-	NETADDR m_aFavoriteServers[MAX_FAVORITES];
-	bool m_aFavoriteServersAllowPing[MAX_FAVORITES];
+	NETADDR m_aFavoriteServers[MAX_FAVORITES]{};
+	bool m_aFavoriteServersAllowPing[MAX_FAVORITES]{};
 	int m_NumFavoriteServers;
 
-	CNetwork m_aNetworks[NUM_NETWORKS];
+	CNetwork m_aNetworks[NUM_NETWORKS]{};
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
 
-	CServerEntry *m_aServerlistIp[256]; // ip hash list
+	CServerEntry *m_aServerlistIp[256]{}; // ip hash list
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
 
 	// used instead of g_Config.br_max_requests to get more servers
-	int m_CurrentMaxRequests;
+	int m_CurrentMaxRequests{};
 
-	int m_NeedRefresh;
+	int m_NeedRefresh{};
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
@@ -187,12 +187,12 @@ private:
 	int m_NumServerCapacity;
 
 	int m_Sorthash;
-	char m_aFilterString[64];
-	char m_aFilterGametypeString[128];
+	char m_aFilterString[64]{};
+	char m_aFilterGametypeString[128]{};
 
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;
-	unsigned char m_aTokenSeed[16];
+	unsigned char m_aTokenSeed[16]{};
 
 	bool m_SortOnNextUpdate;
 

@@ -203,7 +203,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		if(Graphics()->IsTileBufferingEnabled())
 			TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 
-		CImageInfo ImgInfo;
+		CImageInfo ImgInfo{};
 		bool ImagePNGLoaded = false;
 		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
 			ImagePNGLoaded = true;

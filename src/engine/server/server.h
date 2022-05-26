@@ -59,13 +59,13 @@ class CSnapIDPool
 		int m_Timeout;
 	};
 
-	CID m_aIDs[MAX_IDS];
+	CID m_aIDs[MAX_IDS]{};
 
-	int m_FirstFree;
-	int m_FirstTimed;
-	int m_LastTimed;
-	int m_Usage;
-	int m_InUsage;
+	int m_FirstFree{};
+	int m_FirstTimed{};
+	int m_LastTimed{};
+	int m_Usage{};
+	int m_InUsage{};
 
 public:
 	CSnapIDPool();
@@ -103,19 +103,19 @@ class CServer : public IServer
 
 	class IGameServer *m_pGameServer;
 	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
-	class IEngineAntibot *m_pAntibot;
+	class IConsole *m_pConsole{};
+	class IStorage *m_pStorage{};
+	class IEngineAntibot *m_pAntibot{};
 	class IRegister *m_pRegister;
 
 #if defined(CONF_UPNP)
-	CUPnP m_UPnP;
+	CUPnP m_UPnP{};
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-	UNIXSOCKETADDR m_ConnLoggingDestAddr;
+	UNIXSOCKETADDR m_ConnLoggingDestAddr{};
 	bool m_ConnLoggingSocketCreated;
-	UNIXSOCKET m_ConnLoggingSocket;
+	UNIXSOCKET m_ConnLoggingSocket{};
 #endif
 
 	class CDbConnectionPool *m_pConnectionPool;
@@ -214,7 +214,7 @@ public:
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
-	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
+	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS]{};
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -222,13 +222,13 @@ public:
 	CNetServer m_NetServer;
 	CEcon m_Econ;
 #if defined(CONF_FAMILY_UNIX)
-	CFifo m_Fifo;
+	CFifo m_Fifo{};
 #endif
 	CServerBan m_ServerBan;
 
-	IEngineMap *m_pMap;
+	IEngineMap *m_pMap{};
 
-	int64_t m_GameStartTime;
+	int64_t m_GameStartTime{};
 	//int m_CurrentGameTick;
 
 	enum
@@ -244,8 +244,8 @@ public:
 	bool m_ReloadedWhenEmpty;
 	int m_RconClientID;
 	int m_RconAuthLevel;
-	int m_PrintCBIndex;
-	char m_aShutdownReason[128];
+	int m_PrintCBIndex{};
+	char m_aShutdownReason[128]{};
 
 	enum
 	{
@@ -254,11 +254,11 @@ public:
 		NUM_MAP_TYPES
 	};
 
-	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
-	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
-	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
-	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
-	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH]{};
+	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES]{};
+	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES]{};
+	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES]{};
+	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES]{};
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS + 1];
 	CAuthManager m_AuthManager;
@@ -266,7 +266,7 @@ public:
 	int64_t m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
 
-	char m_aErrorShutdownReason[128];
+	char m_aErrorShutdownReason[128]{};
 
 	array<CNameBan> m_aNameBans;
 
@@ -439,9 +439,9 @@ public:
 	// DDRace
 
 	void GetClientAddr(int ClientID, NETADDR *pAddr) const override;
-	int m_aPrevStates[MAX_CLIENTS];
+	int m_aPrevStates[MAX_CLIENTS]{};
 	const char *GetAnnouncementLine(char const *pFileName) override;
-	unsigned m_AnnouncementLastLine;
+	unsigned m_AnnouncementLastLine{};
 
 	int *GetIdMap(int ClientID) override;
 

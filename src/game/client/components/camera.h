@@ -22,8 +22,8 @@ class CCamera : public CComponent
 	vec2 m_PrevCenter;
 
 	CCubicBezier m_ZoomSmoothing;
-	float m_ZoomSmoothingStart;
-	float m_ZoomSmoothingEnd;
+	float m_ZoomSmoothingStart{};
+	float m_ZoomSmoothingEnd{};
 
 	void ScaleZoom(float Factor);
 	void ChangeZoom(float Target);
@@ -37,7 +37,7 @@ public:
 	bool m_ZoomSet;
 	bool m_Zooming;
 	float m_Zoom;
-	float m_ZoomSmoothingTarget;
+	float m_ZoomSmoothingTarget{};
 
 	CCamera();
 	virtual int Sizeof() const override { return sizeof(*this); }

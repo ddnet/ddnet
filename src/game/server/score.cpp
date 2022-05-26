@@ -90,7 +90,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(File)
 	{
-		CLineReader LineReader;
+		CLineReader LineReader{};
 		LineReader.Init(File);
 		char *pLine;
 		while((pLine = LineReader.Get()))

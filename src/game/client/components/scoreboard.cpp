@@ -114,7 +114,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	y += 30.0f;
 	bool Multiple = false;
 
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 	TextRender()->SetCursor(&Cursor, x + 10.0f, y, 22.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = w - 20.0f;
 	Cursor.m_MaxLines = 4;
@@ -321,7 +321,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 	// render player entries
 	y += HeadlineFontsize * 2.0f;
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 
 	int rendered = 0;
 	if(upper16)

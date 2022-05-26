@@ -17,8 +17,8 @@ class CVoting : public CComponent
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 
 	int64_t m_Closetime;
-	char m_aDescription[VOTE_DESC_LENGTH];
-	char m_aReason[VOTE_REASON_LENGTH];
+	char m_aDescription[VOTE_DESC_LENGTH]{};
+	char m_aReason[VOTE_REASON_LENGTH]{};
 	int m_Voted;
 	int m_Yes, m_No, m_Pass, m_Total;
 
@@ -27,12 +27,12 @@ class CVoting : public CComponent
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
 
 public:
-	int m_NumVoteOptions;
-	CVoteOptionClient *m_pFirst;
-	CVoteOptionClient *m_pLast;
+	int m_NumVoteOptions{};
+	CVoteOptionClient *m_pFirst{};
+	CVoteOptionClient *m_pLast{};
 
-	CVoteOptionClient *m_pRecycleFirst;
-	CVoteOptionClient *m_pRecycleLast;
+	CVoteOptionClient *m_pRecycleFirst{};
+	CVoteOptionClient *m_pRecycleLast{};
 
 	CVoting();
 	virtual int Sizeof() const override { return sizeof(*this); }

@@ -38,7 +38,7 @@ int CSnapshot::GetItemType(int Index) const
 	}
 
 	CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
-	CUuid Uuid;
+	CUuid Uuid{};
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
 		int_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
 

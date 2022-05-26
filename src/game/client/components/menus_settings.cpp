@@ -76,7 +76,7 @@ bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
-	CUIRect Label, Button, Left, Right, Game, Client;
+	CUIRect Label{}, Button{}, Left{}, Right{}, Game{}, Client{};
 	MainView.HSplitTop(150.0f, &Game, &Client);
 
 	// game
@@ -238,7 +238,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		g_Config.m_ClRefreshRate = static_cast<int>(UIEx()->DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
 
 		Left.HSplitTop(15.0f, 0, &Left);
-		CUIRect SettingsButton;
+		CUIRect SettingsButton{};
 		Left.HSplitBottom(25.0f, &Left, &SettingsButton);
 
 		SettingsButton.HSplitTop(5.0f, 0, &SettingsButton);
@@ -253,7 +253,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 
 		Left.HSplitTop(15.0f, 0, &Left);
-		CUIRect ConfigButton;
+		CUIRect ConfigButton{};
 		Left.HSplitBottom(25.0f, &Left, &ConfigButton);
 
 		ConfigButton.HSplitTop(5.0f, 0, &ConfigButton);
@@ -268,7 +268,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 
 		Left.HSplitTop(15.0f, 0, &Left);
-		CUIRect DirectoryButton;
+		CUIRect DirectoryButton{};
 		Left.HSplitBottom(25.0f, &Left, &DirectoryButton);
 		RenderThemeSelection(Left);
 
@@ -348,7 +348,7 @@ void CMenus::SetNeedSendInfo()
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect Button, Label, Dummy;
+	CUIRect Button{}, Label{}, Dummy{};
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
 	char *pName = g_Config.m_PlayerName;
@@ -458,7 +458,7 @@ struct CUISkin
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect Button, Label, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton, Eyes, EyesLabel, EyesTee, EyesRight;
+	CUIRect Button{}, Label{}, Dummy{}, DummyLabel{}, SkinList{}, QuickSearch{}, QuickSearchClearButton{}, SkinDB{}, SkinPrefix{}, SkinPrefixLabel{}, DirectoryButton{}, RefreshButton{}, Eyes{}, EyesLabel{}, EyesTee{}, EyesRight{};
 
 	static bool s_InitSkinlist = true;
 	MainView.HSplitTop(10.0f, 0, &MainView);
@@ -836,12 +836,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(NULL);
 }
 
-typedef struct
+typedef struct CKeyInfo
 {
 	CLocConstString m_Name;
-	const char *m_pCommand;
-	int m_KeyId;
-	int m_ModifierCombination;
+	const char *m_pCommand{};
+	int m_KeyId{};
+	int m_ModifierCombination{};
 } CKeyInfo;
 
 static CKeyInfo gs_aKeys[] =
@@ -915,7 +915,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRec
 	for(int i = Start; i < Stop; i++)
 	{
 		CKeyInfo &Key = gs_aKeys[i];
-		CUIRect Button, Label;
+		CUIRect Button{}, Label{};
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
@@ -972,7 +972,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// fits the current size of controls settings
 	UiDoListboxStart(&s_ControlsList, &MainView, 10.0f, Localize("Controls"), "", 72, 1, s_SelectedControl, s_ScrollValue);
 
-	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
+	CUIRect MovementSettings{}, WeaponSettings{}, VotingSettings{}, ChatSettings{}, DummySettings{}, MiscSettings{}, ResetButton{};
 	CListboxItem Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
 	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
 	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
@@ -989,7 +989,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		MovementSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &MovementSettings);
 
 		{
-			CUIRect Button, Label;
+			CUIRect Button{}, Label{};
 			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
 			Button.VSplitLeft(160.0f, &Label, &Button);
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
@@ -1001,7 +1001,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		}
 
 		{
-			CUIRect Button, Label;
+			CUIRect Button{}, Label{};
 			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
 			Button.VSplitLeft(160.0f, &Label, &Button);
 			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
@@ -1100,7 +1100,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 {
 	if(CurDropDownState != 0)
 	{
-		CUIRect ListRect;
+		CUIRect ListRect{};
 		pRect->HSplitTop(24.0f * PickNum, &ListRect, pRect);
 		char aBuf[1024];
 		UiDoListboxStart(&pID, &ListRect, 24.0f, "", aBuf, PickNum, 1, CurSelection, ScrollVal);
@@ -1125,7 +1125,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 	}
 	else
 	{
-		CUIRect Button;
+		CUIRect Button{};
 		pRect->HSplitTop(24.0f, &Button, pRect);
 		if(DoButton_MenuTab(pID, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, CUI::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
 			CurDropDownState = 1;
@@ -1144,7 +1144,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
-	CUIRect Button, Label;
+	CUIRect Button{}, Label{};
 	char aBuf[128];
 	bool CheckSettings = false;
 
@@ -1177,7 +1177,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
 	}
 
-	CUIRect ModeList, ModeLabel;
+	CUIRect ModeList{}, ModeLabel{};
 	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
 	ModeList.HSplitTop(24.0f, &ModeLabel, &ModeList);
 	MainView.VSplitLeft(340.0f, &MainView, 0);
@@ -1344,7 +1344,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(g_Config.m_GfxRefreshRate <= 1000 || NewRefreshRate < 1000)
 		g_Config.m_GfxRefreshRate = NewRefreshRate;
 
-	CUIRect Text;
+	CUIRect Text{};
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Text, &MainView);
 	//text.VSplitLeft(15.0f, 0, &text);
@@ -1561,7 +1561,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
-	CUIRect Button, Label;
+	CUIRect Button{}, Label{};
 	static int s_SndEnable = g_Config.m_SndEnable;
 	static int s_SndRate = g_Config.m_SndRate;
 
@@ -1699,7 +1699,7 @@ public:
 
 	std::string m_Name;
 	std::string m_FileName;
-	int m_CountryCode;
+	int m_CountryCode{};
 
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };
@@ -1715,7 +1715,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<
 
 	char aOrigin[128];
 	char aReplacement[128];
-	CLineReader LineReader;
+	CLineReader LineReader{};
 	LineReader.Init(File);
 	char *pLine;
 	while((pLine = LineReader.Get()))
@@ -1793,7 +1793,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 		if(Item.m_Visible)
 		{
-			CUIRect Rect;
+			CUIRect Rect{};
 			Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Rect, &Item.m_Rect);
 			Rect.VMargin(6.0f, &Rect);
 			Rect.HMargin(3.0f, &Rect);
@@ -1817,7 +1817,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 void CMenus::RenderSettings(CUIRect MainView)
 {
 	// render background
-	CUIRect Temp, TabBar, RestartWarning;
+	CUIRect Temp{}, TabBar{}, RestartWarning{};
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
@@ -1827,7 +1827,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
-	CUIRect Button;
+	CUIRect Button{};
 
 	const char *aTabs[] = {
 		Localize("Language"),
@@ -1929,7 +1929,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 	const float OutlineSize = 3.0f;
 	Outline.a *= UI()->ButtonColorMul(pColor);
 
-	CUIRect Rect;
+	CUIRect Rect{};
 	pRect->Margin(OutlineSize, &Rect);
 
 	RenderTools()->DrawUIRect(pRect, Outline, CUI::CORNER_ALL, 4.0f);
@@ -1939,7 +1939,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 	{
 		if(ms_ColorPicker.m_Active)
 		{
-			CUIRect PickerRect;
+			CUIRect PickerRect{};
 			PickerRect.x = ms_ColorPicker.m_X;
 			PickerRect.y = ms_ColorPicker.m_Y;
 			PickerRect.w = ms_ColorPicker.ms_Width;
@@ -1964,7 +1964,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, bool ClampedLight)
 {
 	ColorHSLA Color(*pColor, Alpha);
-	CUIRect Preview, Button, Label;
+	CUIRect Preview{}, Button{}, Label{};
 	char aBuf[32];
 	float *paComponent[] = {&Color.h, &Color.s, &Color.l, &Color.a};
 	const char *aLabels[] = {Localize("Hue"), Localize("Sat."), Localize("Lht."), Localize("Alpha")};
@@ -2254,7 +2254,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 
 		RenderTools()->DrawUIRect(&Button, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 1.0f);
 
-		CUIRect Rail;
+		CUIRect Rail{};
 		Button.Margin(2.0f, &Rail);
 
 		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 255));
@@ -2304,8 +2304,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	static int s_CurTab = 0;
 
-	CUIRect TabLabel1, TabLabel2, Column,
-		Section, SectionTwo;
+	CUIRect TabLabel1{}, TabLabel2{}, Column{},
+		Section{}, SectionTwo{};
 
 	MainView.HSplitTop(20, &TabLabel1, &MainView);
 	TabLabel1.VSplitMid(&TabLabel1, &TabLabel2);
@@ -2399,7 +2399,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.Margin(5.0f, &MainView);
 
 		{
-			CUIRect Button, Label;
+			CUIRect Button{}, Label{};
 			MainView.HSplitTop(5.0f, &Button, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(45.0f, &Label, &Button);
@@ -2408,7 +2408,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		}
 
 		{
-			CUIRect Button, Label;
+			CUIRect Button{}, Label{};
 			MainView.HSplitTop(5.0f, &Button, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(45.0f, &Label, &Button);
@@ -2497,7 +2497,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		const float X = 5.0f + RealMsgPaddingX / 2.0f + MainView.x;
 		float Y = MainView.y;
 
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
 
 		str_copy(aBuf, Client()->PlayerName(), sizeof(aBuf));
@@ -2652,7 +2652,7 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 
 void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
-	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
+	CUIRect Button{}, Left{}, Right{}, LeftLeft{}, Demo{}, Gameplay{}, Miscellaneous{}, Label{}, Background{};
 
 	bool CheckSettings = false;
 	static int s_InpMouseOld = g_Config.m_InpMouseOld;
@@ -2858,7 +2858,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Left.VSplitRight(10.0f, &Left, 0x0);
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
-	CUIRect TempLabel;
+	CUIRect TempLabel{};
 	Left.HSplitTop(25.0f, &TempLabel, &Left);
 	Left.HSplitTop(5.0f, 0x0, &Left);
 

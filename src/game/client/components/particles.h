@@ -71,7 +71,7 @@ public:
 	virtual void OnInit() override;
 
 private:
-	int m_ParticleQuadContainerIndex;
+	int m_ParticleQuadContainerIndex{};
 
 	enum
 	{
@@ -79,8 +79,8 @@ private:
 	};
 
 	CParticle m_aParticles[MAX_PARTICLES];
-	int m_FirstFree;
-	int m_aFirstPart[NUM_GROUPS];
+	int m_FirstFree{};
+	int m_aFirstPart[NUM_GROUPS]{};
 
 	void RenderGroup(int Group);
 	void Update(float TimePassed);

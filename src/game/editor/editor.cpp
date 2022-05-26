@@ -824,8 +824,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	bool ModPressed = Input()->ModifierIsPressed();
 	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 
-	CUIRect TB_Top, TB_Bottom;
-	CUIRect Button;
+	CUIRect TB_Top{}, TB_Bottom{};
+	CUIRect Button{};
 
 	ToolBar.HSplitMid(&TB_Top, &TB_Bottom, 5.0f);
 
@@ -2532,7 +2532,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			if(UI()->ActiveItem() == s_pEditorID)
 			{
-				CUIRect r;
+				CUIRect r{};
 				r.x = s_StartWx;
 				r.y = s_StartWy;
 				r.w = wx - s_StartWx;
@@ -2828,7 +2828,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		Graphics()->TextureClear();
 		Graphics()->LinesBegin();
 
-		CUIRect r;
+		CUIRect r{};
 		r.x = GetSelectedGroup()->m_ClipX;
 		r.y = GetSelectedGroup()->m_ClipY;
 		r.w = GetSelectedGroup()->m_ClipW;
@@ -2910,7 +2910,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_WorldOffsetX, m_WorldOffsetY,
 					100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
 
-				CUIRect r;
+				CUIRect r{};
 				r.x = aPoints[0];
 				r.y = aPoints[1];
 				r.w = aPoints[2] - aPoints[0];
@@ -2977,16 +2977,16 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 	for(int i = 0; pProps[i].m_pName; i++)
 	{
-		CUIRect Slot;
+		CUIRect Slot{};
 		pToolBox->HSplitTop(13.0f, &Slot, pToolBox);
-		CUIRect Label, Shifter;
+		CUIRect Label{}, Shifter{};
 		Slot.VSplitMid(&Label, &Shifter);
 		Shifter.HMargin(1.0f, &Shifter);
 		UI()->DoLabel(&Label, pProps[i].m_pName, 10.0f, TEXTALIGN_LEFT);
 
 		if(pProps[i].m_Type == PROPTYPE_INT_STEP)
 		{
-			CUIRect Inc, Dec;
+			CUIRect Inc{}, Dec{};
 			char aBuf[64];
 
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
@@ -3011,7 +3011,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_BOOL)
 		{
-			CUIRect No, Yes;
+			CUIRect No{}, Yes{};
 			Shifter.VSplitMid(&No, &Yes);
 			if(DoButton_ButtonDec(&pIDs[i], "No", !pProps[i].m_Value, &No, 0, ""))
 			{
@@ -3035,7 +3035,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_ANGLE_SCROLL)
 		{
-			CUIRect Inc, Dec;
+			CUIRect Inc{}, Dec{};
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			bool Shift = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
@@ -3065,7 +3065,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			int NewColor = 0;
 
 			// extra space
-			CUIRect ColorBox, ColorSlots;
+			CUIRect ColorBox{}, ColorSlots{};
 
 			pToolBox->HSplitTop(3.0f * 13.0f, &Slot, pToolBox);
 			Slot.VSplitMid(&ColorBox, &ColorSlots);
@@ -3145,7 +3145,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_SHIFT)
 		{
-			CUIRect Left, Right, Up, Down;
+			CUIRect Left{}, Right{}, Up{}, Down{};
 			Shifter.VSplitMid(&Left, &Up, 2.0f);
 			Left.VSplitLeft(10.0f, &Left, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Right);
@@ -3216,7 +3216,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_ENVELOPE)
 		{
-			CUIRect Inc, Dec;
+			CUIRect Inc{}, Dec{};
 			char aBuf[64];
 			int CurValue = pProps[i].m_Value;
 
@@ -3256,7 +3256,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		return;
 
 	CUIRect LayersBox = ToolBox;
-	CUIRect Slot, Button;
+	CUIRect Slot{}, Button{};
 	char aBuf[64];
 
 	float LayersHeight = 12.0f; // Height of AddGroup button
@@ -3275,7 +3275,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 
 	if(LayersHeight > LayersBox.h) // Do we even need a scrollbar?
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		LayersBox.VSplitRight(20.0f, &LayersBox, &Scroll);
 		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -3311,7 +3311,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				continue;
 			}
 
-			CUIRect VisibleToggle;
+			CUIRect VisibleToggle{};
 			if(LayerCur >= LayerStartAt)
 			{
 				LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
@@ -3842,7 +3842,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 
-	CUIRect Slot;
+	CUIRect Slot{};
 	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	CEditorImage *pImg = pEditor->m_Map.m_lImages[pEditor->m_SelectedImage];
@@ -3894,7 +3894,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 
-	CUIRect Slot;
+	CUIRect Slot{};
 	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
@@ -3982,7 +3982,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 	if(ImagesHeight > ToolBox.h) // Do we even need a scrollbar?
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
 		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -4008,7 +4008,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 	for(int e = 0; e < 2; e++) // two passes, first embedded, then external
 	{
-		CUIRect Slot;
+		CUIRect Slot{};
 
 		if(ImageCur > ImageStopAt)
 			break;
@@ -4158,7 +4158,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 	int i = m_SelectedImage;
 	if(i != -1 && i < m_Map.m_lImages.size())
 	{
-		CUIRect r;
+		CUIRect r{};
 		View.Margin(10.0f, &r);
 		if(r.h < r.w)
 			r.w = r.h;
@@ -4179,7 +4179,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 	//if(ImageCur + 27.0f > ImageStopAt)
 	//	return;
 
-	CUIRect Slot;
+	CUIRect Slot{};
 	ToolBox.HSplitTop(5.0f, &Slot, &ToolBox);
 
 	// new image
@@ -4200,7 +4200,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 
 	if(SoundsHeight > ToolBox.h) // Do we even need a scrollbar?
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
 		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -4224,7 +4224,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 	float SoundStopAt = SoundsHeight - ScrollDifference * (1 - s_ScrollValue);
 	float SoundCur = 0.0f;
 
-	CUIRect Slot;
+	CUIRect Slot{};
 
 	ToolBox.HSplitTop(15.0f, &Slot, &ToolBox);
 	UI()->DoLabel(&Slot, "Embedded", 12.0f, TEXTALIGN_CENTER);
@@ -4319,7 +4319,7 @@ static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, 
 				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pName, ".opus")))))
 		return 0;
 
-	CEditor::CFilelistItem Item;
+	CEditor::CFilelistItem Item{};
 	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
 	if(IsDir)
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pName);
@@ -4342,7 +4342,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 	if(m_FilesCur - 1 < m_FilesStartAt || m_FilesCur >= m_FilesStopAt)
 		return;
 
-	CUIRect Button, FileIcon;
+	CUIRect Button{}, FileIcon{};
 	pView->HSplitTop(15.0f, &Button, pView);
 	pView->HSplitTop(2.0f, 0, pView);
 	Button.VSplitLeft(Button.h, &FileIcon, &Button);
@@ -4372,7 +4372,7 @@ void CEditor::RenderFileDialog()
 	// GUI coordsys
 	UI()->MapScreen();
 	CUIRect View = *UI()->Screen();
-	CUIRect Preview;
+	CUIRect Preview{};
 	float Width = View.w, Height = View.h;
 
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.25f), 0, 0);
@@ -4381,7 +4381,7 @@ void CEditor::RenderFileDialog()
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.75f), CUI::CORNER_ALL, 5.0f);
 	View.Margin(10.0f, &View);
 
-	CUIRect Title, FileBox, FileBoxLabel, ButtonBar, Scroll, PathBox;
+	CUIRect Title{}, FileBox{}, FileBoxLabel{}, ButtonBar{}, Scroll{}, PathBox{};
 	View.HSplitTop(18.0f, &Title, &View);
 	View.HSplitTop(5.0f, 0, &View); // some spacing
 	View.HSplitBottom(14.0f, &View, &ButtonBar);
@@ -4430,7 +4430,7 @@ void CEditor::RenderFileDialog()
 	{
 		//searchbox
 		FileBox.VSplitRight(250, &FileBox, 0);
-		CUIRect ClearBox;
+		CUIRect ClearBox{};
 		FileBox.VSplitRight(15, &FileBox, &ClearBox);
 
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, TEXTALIGN_LEFT);
@@ -4610,7 +4610,7 @@ void CEditor::RenderFileDialog()
 	static int s_NewFolderButton = 0;
 	static int s_MapInfoButton = 0;
 
-	CUIRect Button;
+	CUIRect Button{};
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	bool IsDir = m_FilesSelectedIndex >= 0 && m_FileList[m_FilesSelectedIndex].m_IsDir;
 	if(DoButton_Editor(&s_OkButton, IsDir ? "Open" : m_pFileDialogButtonText, 0, &Button, 0, 0) || m_FileDialogActivate)
@@ -4704,7 +4704,7 @@ void CEditor::FilelistPopulate(int StorageType)
 	m_FileList.clear();
 	if(m_FileDialogStorageType != IStorage::TYPE_SAVE && !str_comp(m_pFileDialogPath, "maps"))
 	{
-		CFilelistItem Item;
+		CFilelistItem Item{};
 		str_copy(Item.m_aFilename, "downloadedmaps", sizeof(Item.m_aFilename));
 		str_copy(Item.m_aName, "downloadedmaps/", sizeof(Item.m_aName));
 		Item.m_IsDir = true;
@@ -4755,7 +4755,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 
 void CEditor::RenderModebar(CUIRect View)
 {
-	CUIRect Button;
+	CUIRect Button{};
 
 	// mode buttons
 	{
@@ -4797,7 +4797,7 @@ void CEditor::RenderModebar(CUIRect View)
 
 void CEditor::RenderStatusbar(CUIRect View)
 {
-	CUIRect Button;
+	CUIRect Button{};
 	View.VSplitRight(60.0f, &View, &Button);
 	static int s_EnvelopeButton = 0;
 	int MouseButton = DoButton_Editor(&s_EnvelopeButton, "Envelopes", m_ShowEnvelopeEditor, &Button, 0, "Toggles the envelope editor.");
@@ -4885,7 +4885,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	if(m_SelectedEnvelope >= 0 && m_SelectedEnvelope < m_Map.m_lEnvelopes.size())
 		pEnvelope = m_Map.m_lEnvelopes[m_SelectedEnvelope];
 
-	CUIRect ToolBar, CurveBar, ColorBar;
+	CUIRect ToolBar{}, CurveBar{}, ColorBar{};
 	View.HSplitTop(15.0f, &ToolBar, &View);
 	View.HSplitTop(15.0f, &CurveBar, &View);
 	ToolBar.Margin(2.0f, &ToolBar);
@@ -4895,7 +4895,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	// do the toolbar
 	{
-		CUIRect Button;
+		CUIRect Button{};
 		CEnvelope *pNewEnv = 0;
 
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
@@ -4954,7 +4954,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 		}
 
-		CUIRect Shifter, Inc, Dec;
+		CUIRect Shifter{}, Inc{}, Dec{};
 		ToolBar.VSplitLeft(60.0f, &Shifter, &ToolBar);
 		Shifter.VSplitRight(15.0f, &Shifter, &Inc);
 		Shifter.VSplitLeft(15.0f, &Dec, &Shifter);
@@ -5027,7 +5027,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(pEnvelope)
 		{
-			CUIRect Button;
+			CUIRect Button{};
 
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
@@ -5158,7 +5158,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 				//dbg_msg("", "%f", end_time);
 
-				CUIRect v;
+				CUIRect v{};
 				v.x = CurveBar.x + (t0 + (t1 - t0) * 0.5f) * CurveBar.w;
 				v.y = CurveBar.y;
 				v.h = CurveBar.h;
@@ -5201,7 +5201,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				//				float y0 = (fx2f(envelope->points[i].values[c])-bottom)/(top-bottom);
 				float x1 = pEnvelope->m_lPoints[i + 1].m_Time / 1000.0f / EndTime;
 				//float y1 = (fx2f(envelope->points[i+1].values[c])-bottom)/(top-bottom);
-				CUIRect v;
+				CUIRect v{};
 				v.x = ColorBar.x + x0 * ColorBar.w;
 				v.y = ColorBar.y;
 				v.w = (x1 - x0) * ColorBar.w;
@@ -5245,7 +5245,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				{
 					float x0 = pEnvelope->m_lPoints[i].m_Time / 1000.0f / EndTime;
 					float y0 = (fx2f(pEnvelope->m_lPoints[i].m_aValues[c]) - Bottom) / (Top - Bottom);
-					CUIRect Final;
+					CUIRect Final{};
 					Final.x = View.x + x0 * View.w;
 					Final.y = View.y + View.h - y0 * View.h;
 					Final.x -= 2.0f;
@@ -5374,8 +5374,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 
-			CUIRect ToolBar1;
-			CUIRect ToolBar2;
+			CUIRect ToolBar1{};
+			CUIRect ToolBar2{};
 
 			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
 			if(ToolBar.w > ToolBar.h * 21)
@@ -5383,8 +5383,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				ToolBar1.VMargin(3.0f, &ToolBar1);
 				ToolBar2.VMargin(3.0f, &ToolBar2);
 
-				CUIRect Label1;
-				CUIRect Label2;
+				CUIRect Label1{};
+				CUIRect Label2{};
 
 				ToolBar1.VSplitMid(&Label1, &ToolBar1);
 				ToolBar2.VSplitMid(&Label2, &ToolBar2);
@@ -5405,13 +5405,13 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 {
 	static int s_CommandSelectedIndex = -1;
 
-	CUIRect ToolBar;
+	CUIRect ToolBar{};
 	View.HSplitTop(20.0f, &ToolBar, &View);
 	ToolBar.Margin(2.0f, &ToolBar);
 
 	// do the toolbar
 	{
-		CUIRect Button;
+		CUIRect Button{};
 
 		// command line
 		ToolBar.VSplitLeft(5.0f, 0, &Button);
@@ -5442,7 +5442,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 
 				if(!Found)
 				{
-					CEditorMap::CSetting Setting;
+					CEditorMap::CSetting Setting{};
 					str_copy(Setting.m_aCommand, m_aSettingsCommand, sizeof(Setting.m_aCommand));
 					m_Map.m_lSettings.add(Setting);
 					s_CommandSelectedIndex = m_Map.m_lSettings.size() - 1;
@@ -5517,7 +5517,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	View.HSplitTop(2.0f, 0, &View);
 	RenderBackground(View, m_CheckerTexture, 32.0f, 0.1f);
 
-	CUIRect ListBox;
+	CUIRect ListBox{};
 	View.Margin(1.0f, &ListBox);
 
 	float ListHeight = 17.0f * m_Map.m_lSettings.size();
@@ -5527,7 +5527,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 
 	if(ListHeight > ListBox.h) // Do we even need a scrollbar?
 	{
-		CUIRect Scroll;
+		CUIRect Scroll{};
 		ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
 		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
@@ -5559,7 +5559,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 
 		if(ListCur >= ListStartAt)
 		{
-			CUIRect Button;
+			CUIRect Button{};
 			ListBox.HSplitTop(15.0f, &Button, &ListBox);
 			ListBox.HSplitTop(2.0f, 0, &ListBox);
 			Button.VSplitLeft(5.0f, 0, &Button);
@@ -5587,7 +5587,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_AppendButton = 0;
 	static int s_ExitButton = 0;
 
-	CUIRect Slot;
+	CUIRect Slot{};
 	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map (ctrl+n)"))
@@ -5711,7 +5711,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		(void)0;
 		*/
 
-	CUIRect Info, Close;
+	CUIRect Info{}, Close{};
 	MenuBar.VSplitLeft(40.0f, 0, &MenuBar);
 	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
 	Close.VSplitLeft(5.0f, 0, &Close);
@@ -5750,7 +5750,7 @@ void CEditor::Render()
 	// render checker
 	RenderBackground(View, m_CheckerTexture, 32.0f, 1.0f);
 
-	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
+	CUIRect MenuBar{}, CModeBar{}, ToolBar{}, StatusBar{}, ExtraEditor{}, ToolBox{};
 	m_ShowPicker = Input()->KeyIsPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && UI()->LastActiveItem() != &m_CommandBox && m_lSelectedLayers.size() == 1;
 
 	if(m_GuiActive)
@@ -6052,7 +6052,7 @@ void CEditor::Render()
 	if(g_Config.m_EdShowkeys)
 	{
 		UI()->MapScreen();
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, View.x + 10, View.y + View.h - 24 - 10, 24.0f, TEXTFLAG_RENDER);
 
 		int NKeys = 0;

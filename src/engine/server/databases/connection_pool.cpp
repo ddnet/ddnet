@@ -32,7 +32,7 @@ struct CSqlExecData
 	{
 		CDbConnectionPool::FRead m_pReadFunc;
 		CDbConnectionPool::FWrite m_pWriteFunc;
-	} m_Ptr;
+	} m_Ptr{};
 
 	std::unique_ptr<const ISqlData> m_pThreadData;
 	const char *m_pName;

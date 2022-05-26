@@ -50,7 +50,7 @@ class CMenusKeyBinder : public CComponent
 public:
 	bool m_TakeKey;
 	bool m_GotKey;
-	IInput::CEvent m_Key;
+	IInput::CEvent m_Key{};
 	int m_ModifierCombination;
 	CMenusKeyBinder();
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -73,7 +73,7 @@ class CMenus : public CComponent
 	static SColorPicker ms_ColorPicker;
 	static bool ms_ValueSelectorTextMode;
 
-	char m_aLocalStringHelper[1024];
+	char m_aLocalStringHelper[1024]{};
 
 	CUIEx m_UIEx;
 
@@ -286,7 +286,7 @@ protected:
 	vec2 m_MousePos;
 	bool m_JoinTutorial;
 
-	char m_aNextServer[256];
+	char m_aNextServer[256]{};
 
 	// images
 	struct CMenuImage
@@ -302,13 +302,13 @@ protected:
 	const CMenuImage *FindMenuImage(const char *pName);
 
 	// loading
-	int m_LoadCurrent;
-	int m_LoadTotal;
+	int m_LoadCurrent{};
+	int m_LoadTotal{};
 
 	//
-	char m_aMessageTopic[512];
-	char m_aMessageBody[512];
-	char m_aMessageButton[512];
+	char m_aMessageTopic[512]{};
+	char m_aMessageBody[512]{};
+	char m_aMessageButton[512]{};
 
 	CUIElement m_RefreshButton;
 	CUIElement m_ConnectButton;
@@ -329,15 +329,15 @@ protected:
 	static float ms_ListitemAdditionalHeight;
 
 	// for settings
-	bool m_NeedRestartGeneral;
-	bool m_NeedRestartSkins;
+	bool m_NeedRestartGeneral{};
+	bool m_NeedRestartSkins{};
 	bool m_NeedRestartGraphics;
 	bool m_NeedRestartSound;
-	bool m_NeedRestartUpdate;
-	bool m_NeedRestartDDNet;
+	bool m_NeedRestartUpdate{};
+	bool m_NeedRestartDDNet{};
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
-	int m_SettingPlayerPage;
+	int m_SettingPlayerPage{};
 
 	//
 	bool m_EscapePressed;
@@ -345,16 +345,16 @@ protected:
 	bool m_DeletePressed;
 
 	// for map download popup
-	int64_t m_DownloadLastCheckTime;
-	int m_DownloadLastCheckSize;
-	float m_DownloadSpeed;
+	int64_t m_DownloadLastCheckTime{};
+	int m_DownloadLastCheckSize{};
+	float m_DownloadSpeed{};
 
 	// for call vote
-	int m_CallvoteSelectedOption;
-	int m_CallvoteSelectedPlayer;
-	char m_aCallvoteReason[VOTE_REASON_LENGTH];
-	char m_aFilterString[25];
-	bool m_ControlPageOpening;
+	int m_CallvoteSelectedOption{};
+	int m_CallvoteSelectedPlayer{};
+	char m_aCallvoteReason[VOTE_REASON_LENGTH]{};
+	char m_aFilterString[25]{};
+	bool m_ControlPageOpening{};
 
 	// demo
 	enum
@@ -429,11 +429,11 @@ protected:
 	};
 
 	//sorted_array<CDemoItem> m_lDemos;
-	char m_aCurrentDemoFolder[256];
-	char m_aCurrentDemoFile[64];
-	int m_DemolistSelectedIndex;
-	bool m_DemolistSelectedIsDir;
-	int m_DemolistStorageType;
+	char m_aCurrentDemoFolder[256]{};
+	char m_aCurrentDemoFile[64]{};
+	int m_DemolistSelectedIndex{};
+	bool m_DemolistSelectedIsDir{};
+	int m_DemolistStorageType{};
 	int m_Speed = 4;
 
 	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
@@ -496,9 +496,9 @@ protected:
 	bool RenderServerControlServer(CUIRect MainView);
 
 	// found in menus_browser.cpp
-	int m_SelectedIndex;
+	int m_SelectedIndex{};
 	int m_DoubleClickIndex;
-	int m_ScrollOffset;
+	int m_ScrollOffset{};
 	void RenderServerbrowserServerList(CUIRect View);
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
@@ -527,7 +527,7 @@ protected:
 
 	bool CheckHotKey(int Key) const;
 
-	class CMenuBackground *m_pBackground;
+	class CMenuBackground *m_pBackground{};
 
 public:
 	void RenderBackground();
@@ -610,9 +610,9 @@ public:
 		SMALL_TAB_LENGTH,
 	};
 
-	SUIAnimator m_aAnimatorsBigPage[BIG_TAB_LENGTH];
-	SUIAnimator m_aAnimatorsSmallPage[SMALL_TAB_LENGTH];
-	SUIAnimator m_aAnimatorsSettingsTab[SETTINGS_LENGTH];
+	SUIAnimator m_aAnimatorsBigPage[BIG_TAB_LENGTH]{};
+	SUIAnimator m_aAnimatorsSmallPage[SMALL_TAB_LENGTH]{};
+	SUIAnimator m_aAnimatorsSettingsTab[SETTINGS_LENGTH]{};
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
@@ -656,11 +656,11 @@ public:
 
 	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration);
 
-	std::chrono::nanoseconds m_PopupWarningLastTime;
-	std::chrono::nanoseconds m_PopupWarningDuration;
+	std::chrono::nanoseconds m_PopupWarningLastTime{};
+	std::chrono::nanoseconds m_PopupWarningDuration{};
 
 	int m_DemoPlayerState;
-	char m_aDemoPlayerPopupHint[256];
+	char m_aDemoPlayerPopupHint[256]{};
 
 	enum
 	{
@@ -708,6 +708,6 @@ private:
 
 	int RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, const void *pID, float &ScrollVal);
 
-	CServerProcess m_ServerProcess;
+	CServerProcess m_ServerProcess{};
 };
 #endif

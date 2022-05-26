@@ -13,12 +13,12 @@
 class CStorage : public IStorage
 {
 public:
-	char m_aaStoragePaths[MAX_PATHS][IO_MAX_PATH_LENGTH];
+	char m_aaStoragePaths[MAX_PATHS][IO_MAX_PATH_LENGTH]{};
 	int m_NumPaths;
-	char m_aDatadir[IO_MAX_PATH_LENGTH];
-	char m_aUserdir[IO_MAX_PATH_LENGTH];
-	char m_aCurrentdir[IO_MAX_PATH_LENGTH];
-	char m_aBinarydir[IO_MAX_PATH_LENGTH];
+	char m_aDatadir[IO_MAX_PATH_LENGTH]{};
+	char m_aUserdir[IO_MAX_PATH_LENGTH]{};
+	char m_aCurrentdir[IO_MAX_PATH_LENGTH]{};
+	char m_aBinarydir[IO_MAX_PATH_LENGTH]{};
 
 	CStorage()
 	{
@@ -124,7 +124,7 @@ public:
 		}
 
 		char *pLine;
-		CLineReader LineReader;
+		CLineReader LineReader{};
 		LineReader.Init(File);
 
 		while((pLine = LineReader.Get()))
@@ -452,7 +452,7 @@ public:
 
 		pBuffer[0] = 0;
 		char aBuf[IO_MAX_PATH_LENGTH];
-		CFindCBData Data;
+		CFindCBData Data{};
 		Data.m_pStorage = this;
 		Data.m_pFilename = pFilename;
 		Data.m_pPath = pPath;

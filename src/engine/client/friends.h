@@ -9,7 +9,7 @@
 
 class CFriends : public IFriends
 {
-	CFriendInfo m_aFriends[MAX_FRIENDS];
+	CFriendInfo m_aFriends[MAX_FRIENDS]{};
 	int m_Foes;
 	int m_NumFriends;
 

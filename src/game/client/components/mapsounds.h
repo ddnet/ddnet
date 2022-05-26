@@ -11,7 +11,7 @@ struct CSoundSource;
 
 class CMapSounds : public CComponent
 {
-	int m_aSounds[64];
+	int m_aSounds[64]{};
 	int m_Count;
 
 	struct CSourceQueueEntry

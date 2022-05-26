@@ -27,7 +27,7 @@ void CBroadcast::OnRender()
 
 	if(Client()->GameTick(g_Config.m_ClDummy) < m_BroadcastTick)
 	{
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect() - m_BroadcastRenderOffset;
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
@@ -40,7 +40,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
 		str_copy(m_aBroadcastText, pMsg->m_pMessage, sizeof(m_aBroadcastText));
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, 0, 0, 12.0f, TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);

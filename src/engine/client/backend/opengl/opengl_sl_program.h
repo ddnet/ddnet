@@ -47,7 +47,7 @@ public:
 	virtual ~CGLSLProgram();
 
 protected:
-	TWGLuint m_ProgramID;
+	TWGLuint m_ProgramID{};
 	bool m_IsLinked;
 };
 

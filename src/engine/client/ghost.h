@@ -59,14 +59,14 @@ public:
 class CGhostRecorder : public IGhostRecorder
 {
 	IOHANDLE m_File;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
+	class IConsole *m_pConsole{};
+	class IStorage *m_pStorage{};
 
 	CGhostItem m_LastItem;
 
-	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK];
-	char *m_pBufferPos;
-	int m_BufferNumItems;
+	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK]{};
+	char *m_pBufferPos{};
+	int m_BufferNumItems{};
 
 	void ResetBuffer();
 	void FlushChunk();
@@ -86,19 +86,19 @@ public:
 class CGhostLoader : public IGhostLoader
 {
 	IOHANDLE m_File;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
+	class IConsole *m_pConsole{};
+	class IStorage *m_pStorage{};
 
-	CGhostHeader m_Header;
-	CGhostInfo m_Info;
+	CGhostHeader m_Header{};
+	CGhostInfo m_Info{};
 
 	CGhostItem m_LastItem;
 
-	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK];
-	char *m_pBufferPos;
-	int m_BufferNumItems;
-	int m_BufferCurItem;
-	int m_BufferPrevItem;
+	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK]{};
+	char *m_pBufferPos{};
+	int m_BufferNumItems{};
+	int m_BufferCurItem{};
+	int m_BufferPrevItem{};
 
 	void ResetBuffer();
 	int ReadChunk(int *pType);

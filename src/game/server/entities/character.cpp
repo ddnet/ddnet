@@ -792,7 +792,7 @@ void CCharacter::TickDefered()
 		{
 			float f;
 			unsigned u;
-		} StartPosX, StartPosY, StartVelX, StartVelY;
+		} StartPosX{}, StartPosY{}, StartVelX{}, StartVelY{};
 
 		StartPosX.f = StartPos.x;
 		StartPosY.f = StartPos.y;
@@ -843,8 +843,8 @@ void CCharacter::TickDefered()
 
 	// update the m_SendCore if needed
 	{
-		CNetObj_Character Predicted;
-		CNetObj_Character Current;
+		CNetObj_Character Predicted{};
+		CNetObj_Character Current{};
 		mem_zero(&Predicted, sizeof(Predicted));
 		mem_zero(&Current, sizeof(Current));
 		m_ReckoningCore.Write(&Predicted);
@@ -905,7 +905,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// send the kill message
-	CNetMsg_Sv_KillMsg Msg;
+	CNetMsg_Sv_KillMsg Msg{};
 	Msg.m_Killer = Killer;
 	Msg.m_Victim = m_pPlayer->GetCID();
 	Msg.m_Weapon = Weapon;
@@ -1471,7 +1471,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
 		{
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-			CNetMsg_Sv_DDRaceTime Msg;
+			CNetMsg_Sv_DDRaceTime Msg{};
 			Msg.m_Time = (int)m_Time;
 			Msg.m_Check = 0;
 			Msg.m_Finish = 0;
@@ -1497,7 +1497,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
 		{
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-			CNetMsg_Sv_DDRaceTime Msg;
+			CNetMsg_Sv_DDRaceTime Msg{};
 			Msg.m_Time = (int)m_Time;
 			Msg.m_Check = 0;
 			Msg.m_Finish = 0;

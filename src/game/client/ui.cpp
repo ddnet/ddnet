@@ -211,7 +211,7 @@ void CUI::ClipEnable(const CUIRect *pRect)
 	if(IsClipped())
 	{
 		const CUIRect *pOldRect = ClipArea();
-		CUIRect Intersection;
+		CUIRect Intersection{};
 		Intersection.x = std::max(pRect->x, pOldRect->x);
 		Intersection.y = std::max(pRect->y, pOldRect->y);
 		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - pRect->x;
@@ -522,7 +522,7 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 		AlignmentHori = x + w - tw;
 	}
 
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 	TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	if(LabelProps.m_pSelCursor)
@@ -578,7 +578,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	float AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f;
 	float AlignmentHori = 0;
 
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 
 	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
 
@@ -661,7 +661,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 		else
 			RectEl.m_Text.clear();
 
-		CUIRect TmpRect;
+		CUIRect TmpRect{};
 		TmpRect.x = x;
 		TmpRect.y = y;
 		TmpRect.w = w;

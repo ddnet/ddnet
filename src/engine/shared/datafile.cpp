@@ -23,7 +23,7 @@ struct CItemEx
 
 	static CItemEx FromUuid(CUuid Uuid)
 	{
-		CItemEx Result;
+		CItemEx Result{};
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
 			Result.m_aUuid[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
 		return Result;
@@ -31,7 +31,7 @@ struct CItemEx
 
 	CUuid ToUuid() const
 	{
-		CUuid Result;
+		CUuid Result{};
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
 			int_to_bytes_be(&Result.m_aData[i * 4], m_aUuid[i]);
 		return Result;
@@ -140,7 +140,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	}
 
 	// TODO: change this header
-	CDatafileHeader Header;
+	CDatafileHeader Header{};
 	if(sizeof(Header) != io_read(File, &Header, sizeof(Header)))
 	{
 		dbg_msg("datafile", "couldn't load header");
@@ -725,7 +725,7 @@ int CDataFileWriter::Finish()
 	int ItemSize = 0;
 	int TypesSize, HeaderSize, OffsetSize, FileSize, SwapSize;
 	int DataSize = 0;
-	CDatafileHeader Header;
+	CDatafileHeader Header{};
 
 	// we should now write this file!
 	if(DEBUG)
@@ -784,7 +784,7 @@ int CDataFileWriter::Finish()
 		if(m_pItemTypes[i].m_Num)
 		{
 			// write info
-			CDatafileItemType Info;
+			CDatafileItemType Info{};
 			Info.m_Type = i;
 			Info.m_Start = Count;
 			Info.m_Num = m_pItemTypes[i].m_Num;
@@ -856,7 +856,7 @@ int CDataFileWriter::Finish()
 			int k = m_pItemTypes[i].m_First;
 			while(k != -1)
 			{
-				CDatafileItem Item;
+				CDatafileItem Item{};
 				Item.m_TypeAndID = (i << 16) | m_pItems[k].m_ID;
 				Item.m_Size = m_pItems[k].m_Size;
 				if(DEBUG)

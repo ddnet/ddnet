@@ -428,7 +428,7 @@ static void aio_thread(void *user)
 	lock_wait(aio->lock);
 	while(true)
 	{
-		struct BUFFERS buffers;
+		struct BUFFERS buffers{};
 		int result_io_error;
 		unsigned char local_buffer[ASYNC_LOCAL_BUFSIZE];
 		unsigned int local_buffer_len = 0;
@@ -579,7 +579,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 		unsigned int next_len = 0;
 		unsigned char *next_buffer = (unsigned char *)malloc(next_size);
 
-		struct BUFFERS buffers;
+		struct BUFFERS buffers{};
 		buffer_ptrs(aio, &buffers);
 		if(buffers.buf1)
 		{
@@ -1152,7 +1152,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 
 int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 {
-	struct addrinfo hints;
+	struct addrinfo hints{};
 	struct addrinfo *result = NULL;
 	int e;
 	char host[256];
@@ -1256,7 +1256,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 	if(str[0] == '[')
 	{
 		/* ipv6 */
-		struct sockaddr_in6 sa6;
+		struct sockaddr_in6 sa6{};
 		char buf[128];
 		int i;
 		str++;
@@ -1453,7 +1453,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
-		struct sockaddr_in addr;
+		struct sockaddr_in addr{};
 		int socket = -1;
 
 		/* bind, we should check for error */
@@ -1501,7 +1501,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
-		struct sockaddr_in6 addr;
+		struct sockaddr_in6 addr{};
 		int socket = -1;
 
 		/* bind, we should check for error */
@@ -1544,7 +1544,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	{
 		if(sock->ipv4sock >= 0)
 		{
-			struct sockaddr_in sa;
+			struct sockaddr_in sa{};
 			if(addr->type & NETTYPE_LINK_BROADCAST)
 			{
 				mem_zero(&sa, sizeof(sa));
@@ -1580,7 +1580,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	{
 		if(sock->ipv6sock >= 0)
 		{
-			struct sockaddr_in6 sa;
+			struct sockaddr_in6 sa{};
 			if(addr->type & NETTYPE_LINK_BROADCAST)
 			{
 				mem_zero(&sa, sizeof(sa));
@@ -1740,7 +1740,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
-		struct sockaddr_in addr;
+		struct sockaddr_in addr{};
 		int socket = -1;
 
 		/* bind, we should check for error */
@@ -1756,7 +1756,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
-		struct sockaddr_in6 addr;
+		struct sockaddr_in6 addr{};
 		int socket = -1;
 
 		/* bind, we should check for error */
@@ -1845,7 +1845,7 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 
 	if(sock->ipv4sock >= 0)
 	{
-		struct sockaddr_in addr;
+		struct sockaddr_in addr{};
 		sockaddr_len = sizeof(addr);
 
 		s = accept(sock->ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
@@ -1864,7 +1864,7 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 
 	if(sock->ipv6sock >= 0)
 	{
-		struct sockaddr_in6 addr;
+		struct sockaddr_in6 addr{};
 		sockaddr_len = sizeof(addr);
 
 		s = accept(sock->ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
@@ -1887,14 +1887,14 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 {
 	if(a->type & NETTYPE_IPV4)
 	{
-		struct sockaddr_in addr;
+		struct sockaddr_in addr{};
 		netaddr_to_sockaddr_in(a, &addr);
 		return connect(sock->ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
 	if(a->type & NETTYPE_IPV6)
 	{
-		struct sockaddr_in6 addr;
+		struct sockaddr_in6 addr{};
 		netaddr_to_sockaddr_in6(a, &addr);
 		return connect(sock->ipv6sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
@@ -2244,7 +2244,7 @@ int fs_is_dir(const char *path)
 	DWORD attributes = GetFileAttributesW(wPath);
 	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
-	struct stat sb;
+	struct stat sb{};
 	if(stat(path, &sb) == -1)
 		return 0;
 	return S_ISDIR(sb.st_mode) ? 1 : 0;
@@ -2348,7 +2348,7 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 	*modified = filetime_to_unixtime(&finddata.ftLastWriteTime);
 	FindClose(handle);
 #elif defined(CONF_FAMILY_UNIX)
-	struct stat sb;
+	struct stat sb{};
 	if(stat(name, &sb))
 		return 1;
 
@@ -2389,7 +2389,7 @@ void swap_endian(void *data, unsigned elem_size, unsigned num)
 
 int net_socket_read_wait(NETSOCKET sock, int time)
 {
-	struct timeval tv;
+	struct timeval tv{};
 	fd_set readfds;
 	int sockid;
 
@@ -4021,7 +4021,7 @@ int os_version_str(char *version, int length)
 	free(data);
 	return 0;
 #else
-	struct utsname u;
+	struct utsname u{};
 	if(uname(&u))
 	{
 		return 1;

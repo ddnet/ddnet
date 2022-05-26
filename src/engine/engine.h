@@ -18,10 +18,10 @@ public:
 	CHostLookup();
 	CHostLookup(const char *pHostname, int Nettype);
 
-	int m_Result;
-	char m_aHostname[128];
-	int m_Nettype;
-	NETADDR m_Addr;
+	int m_Result{};
+	char m_aHostname[128]{};
+	int m_Nettype{};
+	NETADDR m_Addr{};
 };
 
 class IEngine : public IInterface

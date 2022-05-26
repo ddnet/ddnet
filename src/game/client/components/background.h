@@ -15,15 +15,15 @@ class CBackgroundEngineMap : public CMap
 class CBackground : public CMapLayers
 {
 protected:
-	IEngineMap *m_pMap;
+	IEngineMap *m_pMap{};
 	bool m_Loaded;
-	char m_aMapName[MAX_MAP_LENGTH];
+	char m_aMapName[MAX_MAP_LENGTH]{};
 
 	//to avoid spam when in menu
 	int64_t m_LastLoad;
 
 	//to avoid memory leak when switching to %current%
-	CBackgroundEngineMap *m_pBackgroundMap;
+	CBackgroundEngineMap *m_pBackgroundMap{};
 	CLayers *m_pBackgroundLayers;
 	CMapImages *m_pBackgroundImages;
 

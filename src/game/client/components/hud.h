@@ -35,10 +35,10 @@ struct SScoreInfo
 
 class CHud : public CComponent
 {
-	float m_Width, m_Height;
+	float m_Width{}, m_Height{};
 	float m_FrameTimeAvg;
 
-	int m_HudQuadContainerIndex;
+	int m_HudQuadContainerIndex{};
 	SScoreInfo m_aScoreInfo[2];
 	int m_FPSTextContainerIndex;
 
@@ -85,52 +85,52 @@ public:
 private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
-	float m_CheckpointDiff;
-	float m_ServerRecord;
-	float m_PlayerRecord[NUM_DUMMIES];
-	int m_DDRaceTime;
-	int m_LastReceivedTimeTick;
-	int m_CheckpointTick;
-	bool m_FinishTime;
-	bool m_DDRaceTimeReceived;
+	float m_CheckpointDiff{};
+	float m_ServerRecord{};
+	float m_PlayerRecord[NUM_DUMMIES]{};
+	int m_DDRaceTime{};
+	int m_LastReceivedTimeTick{};
+	int m_CheckpointTick{};
+	bool m_FinishTime{};
+	bool m_DDRaceTimeReceived{};
 
 	inline float GetMovementInformationBoxHeight();
 	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets
-	int m_AmmoOffset[NUM_WEAPONS];
-	int m_HealthOffset;
-	int m_EmptyHealthOffset;
-	int m_ArmorOffset;
-	int m_EmptyArmorOffset;
-	int m_CursorOffset[NUM_WEAPONS];
-	int m_FlagOffset;
-	int m_AirjumpOffset;
-	int m_AirjumpEmptyOffset;
-	int m_WeaponHammerOffset;
-	int m_WeaponGunOffset;
-	int m_WeaponShotgunOffset;
-	int m_WeaponGrenadeOffset;
-	int m_WeaponLaserOffset;
-	int m_WeaponNinjaOffset;
-	int m_EndlessJumpOffset;
-	int m_EndlessHookOffset;
-	int m_JetpackOffset;
-	int m_TeleportGrenadeOffset;
-	int m_TeleportGunOffset;
-	int m_TeleportLaserOffset;
-	int m_SoloOffset;
-	int m_NoCollisionOffset;
-	int m_NoHookHitOffset;
-	int m_NoHammerHitOffset;
-	int m_NoShotgunHitOffset;
-	int m_NoGrenadeHitOffset;
-	int m_NoLaserHitOffset;
-	int m_DeepFrozenOffset;
-	int m_LiveFrozenOffset;
-	int m_DummyHammerOffset;
-	int m_DummyCopyOffset;
-	int m_PracticeModeOffset;
+	int m_AmmoOffset[NUM_WEAPONS]{};
+	int m_HealthOffset{};
+	int m_EmptyHealthOffset{};
+	int m_ArmorOffset{};
+	int m_EmptyArmorOffset{};
+	int m_CursorOffset[NUM_WEAPONS]{};
+	int m_FlagOffset{};
+	int m_AirjumpOffset{};
+	int m_AirjumpEmptyOffset{};
+	int m_WeaponHammerOffset{};
+	int m_WeaponGunOffset{};
+	int m_WeaponShotgunOffset{};
+	int m_WeaponGrenadeOffset{};
+	int m_WeaponLaserOffset{};
+	int m_WeaponNinjaOffset{};
+	int m_EndlessJumpOffset{};
+	int m_EndlessHookOffset{};
+	int m_JetpackOffset{};
+	int m_TeleportGrenadeOffset{};
+	int m_TeleportGunOffset{};
+	int m_TeleportLaserOffset{};
+	int m_SoloOffset{};
+	int m_NoCollisionOffset{};
+	int m_NoHookHitOffset{};
+	int m_NoHammerHitOffset{};
+	int m_NoShotgunHitOffset{};
+	int m_NoGrenadeHitOffset{};
+	int m_NoLaserHitOffset{};
+	int m_DeepFrozenOffset{};
+	int m_LiveFrozenOffset{};
+	int m_DummyHammerOffset{};
+	int m_DummyCopyOffset{};
+	int m_PracticeModeOffset{};
 };
 
 #endif

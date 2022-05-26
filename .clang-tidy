@@ -37,6 +37,7 @@ Checks: >
   -clang-analyzer-osx.cocoa.RetainCount,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   -clang-analyzer-security.insecureAPI.rand,
+  cppcoreguidelines-pro-type-member-init,
   misc-*,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,

@@ -52,11 +52,11 @@ class CChat : public CComponent
 		int m_TimesRepeated;
 	};
 
-	bool m_PrevScoreBoardShowed;
-	bool m_PrevShowChat;
+	bool m_PrevScoreBoardShowed{};
+	bool m_PrevShowChat{};
 
 	CLine m_aLines[MAX_LINES];
-	int m_CurrentLine;
+	int m_CurrentLine{};
 
 	// chat
 	enum
@@ -72,22 +72,22 @@ class CChat : public CComponent
 	};
 
 	int m_Mode;
-	bool m_Show;
-	bool m_InputUpdate;
-	int m_ChatStringOffset;
-	int m_OldChatStringLength;
-	bool m_CompletionUsed;
-	int m_CompletionChosen;
-	char m_aCompletionBuffer[256];
-	int m_PlaceholderOffset;
-	int m_PlaceholderLength;
+	bool m_Show{};
+	bool m_InputUpdate{};
+	int m_ChatStringOffset{};
+	int m_OldChatStringLength{};
+	bool m_CompletionUsed{};
+	int m_CompletionChosen{};
+	char m_aCompletionBuffer[256]{};
+	int m_PlaceholderOffset{};
+	int m_PlaceholderLength{};
 	struct CRateablePlayer
 	{
 		int ClientID;
 		int Score;
 	};
-	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
-	int m_PlayerCompletionListLength;
+	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS]{};
+	int m_PlayerCompletionListLength{};
 
 	struct CCommand
 	{
@@ -100,18 +100,18 @@ class CChat : public CComponent
 	};
 
 	sorted_array<CCommand> m_Commands;
-	bool m_ReverseTAB;
+	bool m_ReverseTAB{};
 
 	struct CHistoryEntry
 	{
 		int m_Team;
 		char m_aText[1];
 	};
-	CHistoryEntry *m_pHistoryEntry;
+	CHistoryEntry *m_pHistoryEntry{};
 	CStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
-	int m_PendingChatCounter;
-	int64_t m_LastChatSend;
-	int64_t m_aLastSoundPlayed[CHAT_NUM];
+	int m_PendingChatCounter{};
+	int64_t m_LastChatSend{};
+	int64_t m_aLastSoundPlayed[CHAT_NUM]{};
 
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);

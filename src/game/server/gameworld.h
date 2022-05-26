@@ -33,7 +33,7 @@ private:
 	void RemoveEntities();
 
 	CEntity *m_pNextTraverseEntity = nullptr;
-	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
+	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES]{};
 
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;

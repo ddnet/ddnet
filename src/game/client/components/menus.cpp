@@ -181,7 +181,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	{
 		if(ms_ColorPicker.m_Active)
 		{
-			CUIRect PickerRect;
+			CUIRect PickerRect{};
 			PickerRect.x = ms_ColorPicker.m_X;
 			PickerRect.y = ms_ColorPicker.m_Y;
 			PickerRect.w = ms_ColorPicker.ms_Width;
@@ -197,7 +197,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 
 	if(pImageName)
 	{
-		CUIRect Image;
+		CUIRect Image{};
 		pRect->VSplitRight(pRect->h * 4.0f, &Text, &Image); // always correct ratio for image
 
 		// render image
@@ -230,7 +230,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
-	CUIRect Temp;
+	CUIRect Temp{};
 	pRect->HMargin(1.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER);
 }
@@ -308,7 +308,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 		}
 	}
 
-	CUIRect Temp;
+	CUIRect Temp{};
 	Rect.HMargin(2.0f, &Temp);
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVertically;
@@ -323,7 +323,7 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 0.98f, 0.5f, 0.55f), CUI::CORNER_T, 5.0f);
 	else if(Checked)
 		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_T, 5.0f);
-	CUIRect t;
+	CUIRect t{};
 	pRect->VSplitLeft(5.0f, 0, &t);
 	UI()->DoLabel(&t, pText, pRect->h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
 	return UI()->DoButtonLogic(pID, Checked, pRect);
@@ -410,7 +410,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 
 ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, bool UseCheckBox, int *pCheckBoxValue)
 {
-	CUIRect Section, Button, Label;
+	CUIRect Section{}, Button{}, Label{};
 
 	pMainRect->HSplitTop(LineSize, &Section, pMainRect);
 	pMainRect->HSplitTop(BottomMargin, 0x0, pMainRect);
@@ -422,7 +422,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const 
 
 	if(UseCheckBox)
 	{
-		CUIRect CheckBox;
+		CUIRect CheckBox{};
 		Button.Margin(2.0f, &CheckBox);
 
 		if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
@@ -460,7 +460,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const 
 
 int CMenus::DoButton_CheckBoxAutoVMarginAndSet(const void *pID, const char *pText, int *pValue, CUIRect *pRect, float VMargin)
 {
-	CUIRect CheckBoxRect;
+	CUIRect CheckBoxRect{};
 	pRect->HSplitTop(VMargin, &CheckBoxRect, pRect);
 
 	int Logic = DoButton_CheckBox_Common(pID, pText, *pValue ? "X" : "", &CheckBoxRect);
@@ -687,7 +687,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 int CMenus::RenderMenubar(CUIRect r)
 {
 	CUIRect Box = r;
-	CUIRect Button;
+	CUIRect Button{};
 
 	m_ActivePage = m_MenuPage;
 	int NewPage = -1;
@@ -971,7 +971,7 @@ void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 
 	const char *pCaption = Localize("Loading DDNet Client");
 
-	CUIRect r;
+	CUIRect r{};
 	r.x = x;
 	r.y = y + 20;
 	r.w = w;
@@ -999,7 +999,7 @@ void CMenus::RenderNews(CUIRect MainView)
 	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
 
-	CUIRect Label;
+	CUIRect Label{};
 
 	const char *pStr = Client()->m_aNews;
 	char aLine[256];
@@ -1105,7 +1105,7 @@ void CMenus::RenderColorPicker()
 		return;
 
 	// First check if we should disable color picker
-	CUIRect PickerRect;
+	CUIRect PickerRect{};
 	PickerRect.x = ms_ColorPicker.m_X;
 	PickerRect.y = ms_ColorPicker.m_Y;
 	PickerRect.w = ms_ColorPicker.ms_Width;
@@ -1123,7 +1123,7 @@ void CMenus::RenderColorPicker()
 	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
 	RenderTools()->DrawUIRect(&PickerRect, BackgroundColor, 0, 0);
 
-	CUIRect ColorsArea, HueArea, ValuesHitbox, BottomArea, HSVHRect, HSVSRect, HSVVRect, HEXRect, ALPHARect;
+	CUIRect ColorsArea{}, HueArea{}, ValuesHitbox{}, BottomArea{}, HSVHRect{}, HSVSRect{}, HSVVRect{}, HEXRect{}, ALPHARect{};
 	PickerRect.Margin(3, &ColorsArea);
 
 	ColorsArea.HSplitBottom(ms_ColorPicker.ms_Height - 140.0f, &ColorsArea, &ValuesHitbox);
@@ -1272,7 +1272,7 @@ void CMenus::RenderColorPicker()
 	Graphics()->QuadsEnd();
 
 	// Marker Hue Area
-	CUIRect HueMarker;
+	CUIRect HueMarker{};
 	HueArea.Margin(-2.5f, &HueMarker);
 	HueMarker.h = 6.5f;
 	HueMarker.y = (HueArea.y + HueArea.h * (1.0f - PickerColorHSV.x)) - HueMarker.h / 2.0f;
@@ -1339,8 +1339,8 @@ int CMenus::Render()
 		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
 	}
 
-	CUIRect TabBar;
-	CUIRect MainView;
+	CUIRect TabBar{};
+	CUIRect MainView{};
 
 	// some margin around the screen
 	Screen.Margin(10.0f, &Screen);
@@ -1630,7 +1630,7 @@ int CMenus::Render()
 			ExtraAlign = -1;
 		}
 
-		CUIRect Box, Part;
+		CUIRect Box{}, Part{};
 		Box = Screen;
 		if(m_Popup != POPUP_FIRST_LAUNCH)
 			Box.Margin(150.0f / UI()->Scale(), &Box);
@@ -1666,7 +1666,7 @@ int CMenus::Render()
 
 		if(m_Popup == POPUP_QUIT)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
@@ -1698,7 +1698,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
@@ -1718,7 +1718,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_DISCONNECT_DUMMY)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
@@ -1742,7 +1742,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_PASSWORD)
 		{
-			CUIRect Label, TextBox, TryAgain, Abort;
+			CUIRect Label{}, TextBox{}, TryAgain{}, Abort{};
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
@@ -1882,7 +1882,7 @@ int CMenus::Render()
 				CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
 				if(Item.m_Visible)
 				{
-					CUIRect Label;
+					CUIRect Label{};
 					Item.m_Rect.Margin(5.0f, &Item.m_Rect);
 					Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
 					float OldWidth = Item.m_Rect.w;
@@ -1916,7 +1916,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_DELETE_DEMO)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(80.0f, &Part);
@@ -1950,7 +1950,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{
-			CUIRect Label, TextBox, Ok, Abort;
+			CUIRect Label{}, TextBox{}, Ok{}, Abort{};
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
@@ -2004,7 +2004,7 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button, Buttons;
+			CUIRect Label{}, TextBox{}, Ok{}, Abort{}, IncSpeed{}, DecSpeed{}, Button{}, Buttons{};
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -2126,7 +2126,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_REPLACE_VIDEO)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
 			Box.HSplitBottom(60.f, &Box, &Part);
@@ -2159,7 +2159,7 @@ int CMenus::Render()
 #endif
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(80.0f, &Part);
@@ -2189,7 +2189,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
-			CUIRect Label, TextBox, Skip, Join;
+			CUIRect Label{}, TextBox{}, Skip{}, Join{};
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
@@ -2240,7 +2240,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
@@ -2274,7 +2274,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_SWITCH_SERVER)
 		{
-			CUIRect Yes, No;
+			CUIRect Yes{}, No{};
 			Box.HSplitBottom(20.f, &Box, &Part);
 			Box.HSplitBottom(24.f, &Box, &Part);
 
@@ -2343,7 +2343,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		if(!Item.m_Visible)
 			continue;
 
-		CUIRect Icon;
+		CUIRect Icon{};
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Item.m_Rect);
 
 		// draw icon if it exists
@@ -2607,7 +2607,7 @@ void CMenus::OnRender()
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 	}
@@ -2697,7 +2697,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
-	CImageInfo Info;
+	CImageInfo Info{};
 	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load menu image from %s", pName);

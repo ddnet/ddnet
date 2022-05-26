@@ -39,26 +39,26 @@ class CGameConsole : public CComponent
 
 		CLineInput m_Input;
 		int m_Type;
-		int m_CompletionEnumerationCount;
-		int m_BacklogCurPage;
+		int m_CompletionEnumerationCount{};
+		int m_BacklogCurPage{};
 
-		CGameConsole *m_pGameConsole;
+		CGameConsole *m_pGameConsole{};
 
-		char m_aCompletionBuffer[128];
+		char m_aCompletionBuffer[128]{};
 		bool m_CompletionUsed;
 		int m_CompletionChosen;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
 		bool m_ReverseTAB;
 
-		char m_aUser[32];
+		char m_aUser[32]{};
 		bool m_UserGot;
 		bool m_UsernameReq;
 
 		bool m_IsCommand;
-		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
-		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
-		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH]{};
+		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH]{};
+		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH]{};
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
@@ -76,7 +76,7 @@ class CGameConsole : public CComponent
 		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
 	};
 
-	class IConsole *m_pConsole;
+	class IConsole *m_pConsole{};
 	CConsoleLogger *m_pConsoleLogger = nullptr;
 
 	CInstance m_LocalConsole;

@@ -770,8 +770,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	}
 
 	{
-		CNetMsg_Sv_DDRaceTime Msg;
-		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy;
+		CNetMsg_Sv_DDRaceTime Msg{};
+		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy{};
 		MsgLegacy.m_Time = Msg.m_Time = (int)(Time * 100.0f);
 		MsgLegacy.m_Check = Msg.m_Check = 0;
 		MsgLegacy.m_Finish = Msg.m_Finish = 1;
@@ -790,7 +790,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	}
 
 	{
-		protocol7::CNetMsg_Sv_RaceFinish Msg;
+		protocol7::CNetMsg_Sv_RaceFinish Msg{};
 		Msg.m_ClientID = ClientID;
 		Msg.m_Time = Time * 1000;
 		Msg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);

@@ -33,10 +33,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	const float Rounding = 10.0f;
 	const float VMargin = MainView.w / 2 - 190.0f;
 
-	CUIRect Button;
+	CUIRect Button{};
 	int NewPage = -1;
 
-	CUIRect ExtMenu;
+	CUIRect ExtMenu{};
 	MainView.VSplitLeft(30.0f, 0, &ExtMenu);
 	ExtMenu.VSplitLeft(100.0f, &ExtMenu, 0);
 
@@ -107,7 +107,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	if(DoButton_Menu(&s_NewsButton, Localize("News"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), g_Config.m_UiUnreadNews ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_N))
 		NewPage = PAGE_NEWS;
 
-	CUIRect Menu;
+	CUIRect Menu{};
 	MainView.VMargin(VMargin, &Menu);
 	Menu.HSplitBottom(25.0f, &Menu, 0);
 
@@ -191,7 +191,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	// render version
-	CUIRect VersionUpdate, CurVersion;
+	CUIRect VersionUpdate{}, CurVersion{};
 	MainView.HSplitBottom(30.0f, 0, 0);
 	MainView.HSplitBottom(20.0f, 0, &VersionUpdate);
 

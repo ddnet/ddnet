@@ -27,7 +27,7 @@ class CMapLayers : public CComponent
 	friend class CMenuBackground;
 
 	CLayers *m_pLayers;
-	class CMapImages *m_pImages;
+	class CMapImages *m_pImages{};
 	int m_Type;
 	int m_CurrentLocalTick;
 	int m_LastLocalTick;

@@ -58,10 +58,10 @@ struct STextCharQuadVertex
 	{
 		m_Color.m_R = m_Color.m_G = m_Color.m_B = m_Color.m_A = 255;
 	}
-	float m_X, m_Y;
+	float m_X{}, m_Y{};
 	// do not use normalized floats as coordinates, since the texture might grow
-	float m_U, m_V;
-	STextCharQuadVertexColor m_Color;
+	float m_U{}, m_V{};
+	STextCharQuadVertexColor m_Color{};
 };
 
 struct STextCharQuad
@@ -77,8 +77,8 @@ struct STextureSkyline
 
 struct CFontSizeData
 {
-	int m_FontSize;
-	FT_Face *m_pFace;
+	int m_FontSize{};
+	FT_Face *m_pFace{};
 
 	std::map<int, SFontSizeChar> m_Chars;
 };
@@ -118,9 +118,9 @@ public:
 		return &m_aFontSizes[FontSize - MIN_FONT_SIZE];
 	}
 
-	void *m_pBuf;
-	char m_aFilename[IO_MAX_PATH_LENGTH];
-	FT_Face m_FtFace;
+	void *m_pBuf{};
+	char m_aFilename[IO_MAX_PATH_LENGTH]{};
+	FT_Face m_FtFace{};
 
 	struct SFontFallBack
 	{
@@ -135,20 +135,20 @@ public:
 
 	IGraphics::CTextureHandle m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
-	uint8_t *m_TextureData[2];
+	uint8_t *m_TextureData[2]{};
 
 	// width and height are the same
-	int m_CurTextureDimensions[2];
+	int m_CurTextureDimensions[2]{};
 
 	STextureSkyline m_TextureSkyline[2];
 };
 
 struct STextString
 {
-	int m_QuadBufferObjectIndex;
-	int m_QuadBufferContainerIndex;
-	size_t m_QuadNum;
-	int m_SelectionQuadContainerIndex;
+	int m_QuadBufferObjectIndex{};
+	int m_QuadBufferContainerIndex{};
+	size_t m_QuadNum{};
+	int m_SelectionQuadContainerIndex{};
 
 	std::vector<STextCharQuad> m_CharacterQuads;
 };
@@ -157,33 +157,33 @@ struct STextContainer
 {
 	STextContainer() { Reset(); }
 
-	CFont *m_pFont;
-	int m_FontSize;
+	CFont *m_pFont{};
+	int m_FontSize{};
 	STextString m_StringInfo;
 
 	// keep these values to calculate offsets
-	float m_AlignedStartX;
-	float m_AlignedStartY;
-	float m_X;
-	float m_Y;
+	float m_AlignedStartX{};
+	float m_AlignedStartY{};
+	float m_X{};
+	float m_Y{};
 
-	int m_Flags;
-	int m_LineCount;
-	int m_GlyphCount;
-	int m_CharCount;
-	int m_MaxLines;
+	int m_Flags{};
+	int m_LineCount{};
+	int m_GlyphCount{};
+	int m_CharCount{};
+	int m_MaxLines{};
 
-	float m_StartX;
-	float m_StartY;
-	float m_LineWidth;
-	float m_UnscaledFontSize;
+	float m_StartX{};
+	float m_StartY{};
+	float m_LineWidth{};
+	float m_UnscaledFontSize{};
 
-	int m_RenderFlags;
+	int m_RenderFlags{};
 
-	bool m_HasCursor;
-	bool m_HasSelection;
+	bool m_HasCursor{};
+	bool m_HasSelection{};
 
-	bool m_SingleTimeUse;
+	bool m_SingleTimeUse{};
 
 	void Reset()
 	{
@@ -219,14 +219,14 @@ class CTextRender : public IEngineTextRender
 
 	std::vector<STextContainer *> m_TextContainers;
 	std::vector<int> m_TextContainerIndices;
-	int m_FirstFreeTextContainerIndex;
+	int m_FirstFreeTextContainerIndex{};
 
 	SBufferContainerInfo m_DefaultTextContainerInfo;
 
 	std::vector<CFont *> m_Fonts;
 	CFont *m_pCurFont;
 
-	std::chrono::nanoseconds m_CursorRenderTime;
+	std::chrono::nanoseconds m_CursorRenderTime{};
 
 	int GetFreeTextContainerIndex()
 	{
@@ -390,8 +390,8 @@ class CTextRender : public IEngineTextRender
 	}
 
 	// 128k * 2 of data used for rendering glyphs
-	unsigned char ms_aGlyphData[(1024 / 4) * (1024 / 4)];
-	unsigned char ms_aGlyphDataOutlined[(1024 / 4) * (1024 / 4)];
+	unsigned char ms_aGlyphData[(1024 / 4) * (1024 / 4)]{};
+	unsigned char ms_aGlyphDataOutlined[(1024 / 4) * (1024 / 4)]{};
 
 	bool GetCharacterSpace(CFont *pFont, int TextureIndex, int Width, int Height, int &PosX, int &PosY)
 	{
@@ -744,7 +744,7 @@ public:
 
 	bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) override
 	{
-		CFont::SFontFallBack FallbackFont;
+		CFont::SFontFallBack FallbackFont{};
 		FallbackFont.m_pBuf = (void *)pBuf;
 		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
 
@@ -835,7 +835,7 @@ public:
 
 	void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) override
 	{
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 		int OldRenderFlags = m_RenderFlags;
@@ -847,7 +847,7 @@ public:
 
 	float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) override
 	{
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		SetCursor(&Cursor, 0, 0, Size, 0);
 		Cursor.m_LineWidth = LineWidth;
 		int OldRenderFlags = m_RenderFlags;
@@ -864,7 +864,7 @@ public:
 
 	int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) override
 	{
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		SetCursor(&Cursor, 0, 0, Size, 0);
 		Cursor.m_LineWidth = LineWidth;
 		int OldRenderFlags = m_RenderFlags;

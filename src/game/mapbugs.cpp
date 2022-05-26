@@ -48,7 +48,7 @@ static CMapBugsInternal MAP_BUGS[] =
 CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
 {
 	CMapDescription Map = {pName, Size, Sha256};
-	CMapBugs Result;
+	CMapBugs Result{};
 	Result.m_Extra = 0;
 	for(auto &MapBug : MAP_BUGS)
 	{

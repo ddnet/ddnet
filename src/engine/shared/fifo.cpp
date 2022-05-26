@@ -24,7 +24,7 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 
 	mkfifo(m_aFilename, 0600);
 
-	struct stat Attribute;
+	struct stat Attribute{};
 	stat(m_aFilename, &Attribute);
 
 	if(!S_ISFIFO(Attribute.st_mode))

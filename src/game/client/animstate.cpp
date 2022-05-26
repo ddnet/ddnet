@@ -76,7 +76,7 @@ void CAnimState::Set(CAnimation *pAnim, float Time)
 
 void CAnimState::Add(CAnimation *pAnim, float Time, float Amount)
 {
-	CAnimState Add;
+	CAnimState Add{};
 	Add.Set(pAnim, Time);
 	AnimAdd(this, &Add, Amount);
 }

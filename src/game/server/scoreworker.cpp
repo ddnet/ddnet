@@ -62,7 +62,7 @@ bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pErro
 	bool End = false;
 	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
-		CUuid TeamID;
+		CUuid TeamID{};
 		pSqlServer->GetBlob(1, TeamID.m_aData, sizeof(TeamID.m_aData));
 		if(m_TeamID != TeamID)
 		{

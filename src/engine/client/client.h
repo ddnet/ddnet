@@ -97,7 +97,7 @@ public:
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
-	IEngine *m_pEngine;
+	IEngine *m_pEngine{};
 	IEditor *m_pEditor;
 	IEngineInput *m_pInput;
 	IEngineGraphics *m_pGraphics;
@@ -107,10 +107,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IConfigManager *m_pConfigManager;
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
-	IStorage *m_pStorage;
-	IUpdater *m_pUpdater;
-	IDiscord *m_pDiscord;
-	ISteam *m_pSteam;
+	IStorage *m_pStorage{};
+	IUpdater *m_pUpdater{};
+	IDiscord *m_pDiscord{};
+	ISteam *m_pSteam{};
 
 	enum
 	{
@@ -128,15 +128,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	class CFriends m_Friends;
 	class CFriends m_Foes;
 
-	char m_aConnectAddressStr[256];
+	char m_aConnectAddressStr[256]{};
 
-	CUuid m_ConnectionID;
+	CUuid m_ConnectionID{};
 
 	bool m_HaveGlobalTcpAddr = false;
-	NETADDR m_GlobalTcpAddr;
+	NETADDR m_GlobalTcpAddr{};
 
-	unsigned m_SnapshotParts[NUM_DUMMIES];
-	int64_t m_LocalStartTime;
+	unsigned m_SnapshotParts[NUM_DUMMIES]{};
+	int64_t m_LocalStartTime{};
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
@@ -146,66 +146,66 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	float m_RenderFrameTimeHigh;
 	int m_RenderFrames;
 
-	NETADDR m_ServerAddress;
+	NETADDR m_ServerAddress{};
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
 	bool m_AutoStatScreenshotRecycle;
 	bool m_AutoCSVRecycle;
 	bool m_EditorActive;
-	bool m_SoundInitFailed;
-	bool m_ResortServerBrowser;
+	bool m_SoundInitFailed{};
+	bool m_ResortServerBrowser{};
 
-	int m_AckGameTick[NUM_DUMMIES];
-	int m_CurrentRecvTick[NUM_DUMMIES];
-	int m_RconAuthed[NUM_DUMMIES];
-	char m_RconPassword[32];
-	int m_UseTempRconCommands;
-	char m_Password[32];
-	bool m_SendPassword;
+	int m_AckGameTick[NUM_DUMMIES]{};
+	int m_CurrentRecvTick[NUM_DUMMIES]{};
+	int m_RconAuthed[NUM_DUMMIES]{};
+	char m_RconPassword[32]{};
+	int m_UseTempRconCommands{};
+	char m_Password[32]{};
+	bool m_SendPassword{};
 	bool m_ButtonRender = false;
 
 	// version-checking
-	char m_aVersionStr[10];
+	char m_aVersionStr[10]{};
 
 	// pinging
 	int64_t m_PingStartTime;
 
-	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
-	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH]{};
+	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH]{};
 
-	char m_aTimeoutCodes[NUM_DUMMIES][32];
-	bool m_CodeRunAfterJoin[NUM_DUMMIES];
+	char m_aTimeoutCodes[NUM_DUMMIES][32]{};
+	bool m_CodeRunAfterJoin[NUM_DUMMIES]{};
 	bool m_GenerateTimeoutSeed;
 
 	//
-	char m_aCmdConnect[256];
-	char m_aCmdPlayDemo[IO_MAX_PATH_LENGTH];
-	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
+	char m_aCmdConnect[256]{};
+	char m_aCmdPlayDemo[IO_MAX_PATH_LENGTH]{};
+	char m_aCmdEditMap[IO_MAX_PATH_LENGTH]{};
 
 	// map download
 	std::shared_ptr<CHttpRequest> m_pMapdownloadTask;
-	char m_aMapdownloadFilename[256];
-	char m_aMapdownloadFilenameTemp[256];
-	char m_aMapdownloadName[256];
+	char m_aMapdownloadFilename[256]{};
+	char m_aMapdownloadFilenameTemp[256]{};
+	char m_aMapdownloadName[256]{};
 	IOHANDLE m_MapdownloadFileTemp;
 	int m_MapdownloadChunk;
 	int m_MapdownloadCrc;
 	int m_MapdownloadAmount;
 	int m_MapdownloadTotalsize;
 	bool m_MapdownloadSha256Present;
-	SHA256_DIGEST m_MapdownloadSha256;
+	SHA256_DIGEST m_MapdownloadSha256{};
 
 	bool m_MapDetailsPresent;
-	char m_aMapDetailsName[256];
+	char m_aMapDetailsName[256]{};
 	int m_MapDetailsCrc;
-	SHA256_DIGEST m_MapDetailsSha256;
+	SHA256_DIGEST m_MapDetailsSha256{};
 
-	char m_aDDNetInfoTmp[64];
+	char m_aDDNetInfoTmp[64]{};
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask;
 
 	// time
-	CSmoothTime m_GameTime[NUM_DUMMIES];
-	CSmoothTime m_PredictedTime;
+	CSmoothTime m_GameTime[NUM_DUMMIES]{};
+	CSmoothTime m_PredictedTime{};
 
 	// input
 	struct // TODO: handle input better
@@ -215,45 +215,45 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int64_t m_PredictedTime; // prediction latency when we sent this input
 		int64_t m_PredictionMargin; // prediction margin when we sent this input
 		int64_t m_Time;
-	} m_aInputs[NUM_DUMMIES][200];
+	} m_aInputs[NUM_DUMMIES][200]{};
 
-	int m_CurrentInput[NUM_DUMMIES];
+	int m_CurrentInput[NUM_DUMMIES]{};
 	bool m_LastDummy;
-	bool m_DummySendConnInfo;
+	bool m_DummySendConnInfo{};
 
 	// graphs
-	CGraph m_InputtimeMarginGraph;
-	CGraph m_GametimeMarginGraph;
-	CGraph m_FpsGraph;
+	CGraph m_InputtimeMarginGraph{};
+	CGraph m_GametimeMarginGraph{};
+	CGraph m_FpsGraph{};
 
 	// the game snapshots are modifiable by the game
 	class CSnapshotStorage m_SnapshotStorage[NUM_DUMMIES];
-	CSnapshotStorage::CHolder *m_aSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES];
+	CSnapshotStorage::CHolder *m_aSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES]{};
 
-	int m_ReceivedSnapshots[NUM_DUMMIES];
-	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
+	int m_ReceivedSnapshots[NUM_DUMMIES]{};
+	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE]{};
 
-	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	class CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES]{};
+	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE]{};
 
 	class CSnapshotDelta m_SnapshotDelta;
 
 	std::list<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
-	bool m_CanReceiveServerCapabilities;
-	bool m_ServerSentCapabilities;
-	CServerCapabilities m_ServerCapabilities;
+	bool m_CanReceiveServerCapabilities{};
+	bool m_ServerSentCapabilities{};
+	CServerCapabilities m_ServerCapabilities{};
 
 	bool ShouldSendChatTimeoutCodeHeuristic();
 
-	class CServerInfo m_CurrentServerInfo;
+	class CServerInfo m_CurrentServerInfo{};
 	int64_t m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
 	int m_CurrentServerPingInfoType;
 	int m_CurrentServerPingBasicToken;
 	int m_CurrentServerPingToken;
-	CUuid m_CurrentServerPingUuid;
+	CUuid m_CurrentServerPingUuid{};
 	int64_t m_CurrentServerCurrentPingTime; // >= 0 request running
 	int64_t m_CurrentServerNextPingTime; // >= 0 should request
 
@@ -277,15 +277,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::vector<SWarning> m_Warnings;
 
 #if defined(CONF_FAMILY_UNIX)
-	CFifo m_Fifo;
+	CFifo m_Fifo{};
 #endif
 
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
 
-	CChecksum m_Checksum;
+	CChecksum m_Checksum{};
 	int m_OwnExecutableSize = 0;
-	IOHANDLE m_OwnExecutable;
+	IOHANDLE m_OwnExecutable{};
 
 	void UpdateDemoIntraTimers();
 	int MaxLatencyTicks() const;
@@ -352,7 +352,7 @@ public:
 	bool DummyConnected() override;
 	bool DummyConnecting() override;
 	bool DummyAllowed() override;
-	int m_DummyConnected;
+	int m_DummyConnected{};
 	int m_LastDummyConnectTime;
 
 	void GetServerInfo(CServerInfo *pServerInfo) const override;

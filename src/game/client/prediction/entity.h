@@ -56,8 +56,8 @@ public:
 	bool GameLayerClipped(vec2 CheckPos);
 	float m_ProximityRadius;
 	vec2 m_Pos;
-	int m_Number;
-	int m_Layer;
+	int m_Number{};
+	int m_Layer{};
 
 	int m_SnapTicks;
 	int m_DestroyTick;

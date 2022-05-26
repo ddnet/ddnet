@@ -44,9 +44,9 @@ private:
 	public:
 		std::atomic_int m_BestIndex{-1};
 		// Constant after construction.
-		VALIDATOR m_pfnValidator;
-		int m_NumUrls;
-		char m_aaUrls[MAX_URLS][256];
+		VALIDATOR m_pfnValidator{};
+		int m_NumUrls{};
+		char m_aaUrls[MAX_URLS][256]{};
 	};
 	class CJob : public IJob
 	{
@@ -434,7 +434,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 		const json_value &Info = Server["info"];
 		const json_value &Location = Server["location"];
 		int ParsedLocation = CServerInfo::LOC_UNKNOWN;
-		CServerInfo2 ParsedInfo;
+		CServerInfo2 ParsedInfo{};
 		if(Addresses.type != json_array || (Location.type != json_string && Location.type != json_none))
 		{
 			return true;
@@ -509,7 +509,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(File)
 	{
-		CLineReader Lines;
+		CLineReader Lines{};
 		Lines.Init(File);
 		while(NumUrls < CChooseMaster::MAX_URLS)
 		{

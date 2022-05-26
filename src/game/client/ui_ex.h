@@ -21,15 +21,15 @@ struct SUIExEditBoxProperties
 
 class CUIEx
 {
-	CUI *m_pUI;
-	IInput *m_pInput;
-	ITextRender *m_pTextRender;
-	IKernel *m_pKernel;
-	IGraphics *m_pGraphics;
-	CRenderTools *m_pRenderTools;
+	CUI *m_pUI{};
+	IInput *m_pInput{};
+	ITextRender *m_pTextRender{};
+	IKernel *m_pKernel{};
+	IGraphics *m_pGraphics{};
+	CRenderTools *m_pRenderTools{};
 
-	IInput::CEvent *m_pInputEventsArray;
-	int *m_pInputEventCount;
+	IInput::CEvent *m_pInputEventsArray{};
+	int *m_pInputEventCount{};
 
 	bool m_MouseIsPress = false;
 	bool m_HasSelection = false;

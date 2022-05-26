@@ -73,10 +73,10 @@ private:
 	{
 		MAX_NETOBJSIZES = 64
 	};
-	short m_aItemSizes[MAX_NETOBJSIZES];
-	int m_aSnapshotDataRate[CSnapshot::MAX_TYPE + 1];
-	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
-	CData m_Empty;
+	short m_aItemSizes[MAX_NETOBJSIZES]{};
+	int m_aSnapshotDataRate[CSnapshot::MAX_TYPE + 1]{};
+	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1]{};
+	CData m_Empty{};
 
 	static void UndiffItem(int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate);
 
@@ -130,19 +130,19 @@ class CSnapshotBuilder
 		MAX_EXTENDED_ITEM_TYPES = 64,
 	};
 
-	char m_aData[CSnapshot::MAX_SIZE];
-	int m_DataSize;
+	char m_aData[CSnapshot::MAX_SIZE]{};
+	int m_DataSize{};
 
-	int m_aOffsets[CSnapshot::MAX_ITEMS];
-	int m_NumItems;
+	int m_aOffsets[CSnapshot::MAX_ITEMS]{};
+	int m_NumItems{};
 
-	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
+	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES]{};
 	int m_NumExtendedItemTypes;
 
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
 
-	bool m_Sixup;
+	bool m_Sixup{};
 
 public:
 	CSnapshotBuilder();

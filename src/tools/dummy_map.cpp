@@ -13,7 +13,7 @@ void CreateEmptyMap(IStorage *pStorage)
 		dbg_msg("empty_map", "couldn't open map file 'dummy3.map' for writing");
 		return;
 	}
-	CMapItemGroup_v1 Group;
+	CMapItemGroup_v1 Group{};
 	Group.m_Version = 1;
 	Group.m_OffsetX = 0;
 	Group.m_OffsetY = 0;
@@ -23,7 +23,7 @@ void CreateEmptyMap(IStorage *pStorage)
 	Group.m_NumLayers = 2;
 	Writer.AddItem(MAPITEMTYPE_GROUP, 0, sizeof(Group), &Group);
 
-	CMapItemLayerTilemap GameLayer;
+	CMapItemLayerTilemap GameLayer{};
 	GameLayer.m_Layer.m_Version = 0; // Not set by the official client.
 	GameLayer.m_Layer.m_Type = LAYERTYPE_TILES;
 	GameLayer.m_Layer.m_Flags = 0;
@@ -41,7 +41,7 @@ void CreateEmptyMap(IStorage *pStorage)
 	GameLayer.m_Data = 0;
 	Writer.AddItem(MAPITEMTYPE_LAYER, 0, sizeof(GameLayer) - sizeof(GameLayer.m_aName), &GameLayer);
 
-	CMapItemLayerTilemap Layer;
+	CMapItemLayerTilemap Layer{};
 	Layer.m_Layer.m_Version = 0;
 	Layer.m_Layer.m_Type = LAYERTYPE_TILES;
 	Layer.m_Layer.m_Flags = 0;

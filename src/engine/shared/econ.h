@@ -28,15 +28,15 @@ class CEcon
 		int64_t m_TimeConnected;
 		int m_AuthTries;
 	};
-	CClient m_aClients[NET_MAX_CONSOLE_CLIENTS];
+	CClient m_aClients[NET_MAX_CONSOLE_CLIENTS]{};
 
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
+	CConfig *m_pConfig{};
+	IConsole *m_pConsole{};
 	CNetConsole m_NetConsole;
 
 	bool m_Ready;
-	int m_PrintCBIndex;
-	int m_UserClientID;
+	int m_PrintCBIndex{};
+	int m_UserClientID{};
 
 	static void SendLineCB(const char *pLine, void *pUserData, ColorRGBA PrintColor = {1, 1, 1, 1});
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);

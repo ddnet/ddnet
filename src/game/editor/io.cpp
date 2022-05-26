@@ -234,14 +234,14 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	// save version
 	{
-		CMapItemVersion Item;
+		CMapItemVersion Item{};
 		Item.m_Version = 1;
 		df.AddItem(MAPITEMTYPE_VERSION, 0, sizeof(Item), &Item);
 	}
 
 	// save map info
 	{
-		CMapItemInfoSettings Item;
+		CMapItemInfoSettings Item{};
 		Item.m_Version = 1;
 
 		if(m_MapInfo.m_aAuthor[0])
@@ -294,7 +294,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		// TODO!
 		pImg->AnalyseTileFlags();
 
-		CMapItemImage Item;
+		CMapItemImage Item{};
 		Item.m_Version = 1;
 
 		Item.m_Width = pImg->m_Width;
@@ -333,7 +333,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		CEditorSound *pSound = m_lSounds[i];
 
-		CMapItemSound Item;
+		CMapItemSound Item{};
 		Item.m_Version = 1;
 
 		Item.m_External = 0;
@@ -350,7 +350,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	for(int g = 0; g < m_lGroups.size(); g++)
 	{
 		CLayerGroup *pGroup = m_lGroups[g];
-		CMapItemGroup GItem;
+		CMapItemGroup GItem{};
 		GItem.m_Version = CMapItemGroup::CURRENT_VERSION;
 
 		GItem.m_ParallaxX = pGroup->m_ParallaxX;
@@ -376,7 +376,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				CLayerTiles *pLayer = (CLayerTiles *)pGroup->m_lLayers[l];
 				pLayer->PrepareForSave();
 
-				CMapItemLayerTilemap Item;
+				CMapItemLayerTilemap Item{};
 				Item.m_Version = 3;
 
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
@@ -442,7 +442,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				// save auto mapper of each tile layer (not physics layer)
 				if(!Item.m_Flags)
 				{
-					CMapItemAutoMapperConfig ItemAutomapper;
+					CMapItemAutoMapperConfig ItemAutomapper{};
 					ItemAutomapper.m_Version = CMapItemAutoMapperConfig::CURRENT_VERSION;
 					ItemAutomapper.m_GroupId = GroupCount;
 					ItemAutomapper.m_LayerId = GItem.m_NumLayers;
@@ -465,7 +465,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				CLayerQuads *pLayer = (CLayerQuads *)pGroup->m_lLayers[l];
 				if(pLayer->m_lQuads.size())
 				{
-					CMapItemLayerQuads Item;
+					CMapItemLayerQuads Item{};
 					Item.m_Version = 2;
 					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
@@ -494,7 +494,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				CLayerSounds *pLayer = (CLayerSounds *)pGroup->m_lLayers[l];
 				if(pLayer->m_lSources.size())
 				{
-					CMapItemLayerSounds Item;
+					CMapItemLayerSounds Item{};
 					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
 					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 					Item.m_Layer.m_Flags = pLayer->m_Flags;
@@ -522,7 +522,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	int PointCount = 0;
 	for(int e = 0; e < m_lEnvelopes.size(); e++)
 	{
-		CMapItemEnvelope Item;
+		CMapItemEnvelope Item{};
 		Item.m_Version = CMapItemEnvelope::CURRENT_VERSION;
 		Item.m_Channels = m_lEnvelopes[e]->m_Channels;
 		Item.m_StartPoint = PointCount;
@@ -556,7 +556,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	// send rcon.. if we can
 	if(m_pEditor->Client()->RconAuthed())
 	{
-		CServerInfo CurrentServerInfo;
+		CServerInfo CurrentServerInfo{};
 		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
 		const unsigned char ipv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		const unsigned char ipv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
@@ -649,7 +649,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				while(pNext < pSettings + Size)
 				{
 					int StrSize = str_length(pNext) + 1;
-					CSetting Setting;
+					CSetting Setting{};
 					str_copy(Setting.m_aCommand, pNext, sizeof(Setting.m_aCommand));
 					m_lSettings.add(Setting);
 					pNext += StrSize;

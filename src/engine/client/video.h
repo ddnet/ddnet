@@ -90,11 +90,11 @@ private:
 
 	int m_Width;
 	int m_Height;
-	char m_Name[256];
+	char m_Name[256]{};
 	//FILE *m_dbgfile;
 	uint64_t m_VSeq = 0;
 	uint64_t m_ASeq = 0;
-	uint64_t m_Vframe;
+	uint64_t m_Vframe{};
 
 	int m_FPS;
 
@@ -141,10 +141,10 @@ private:
 
 	std::vector<std::unique_ptr<SAudioRecorderThread>> m_vAudioThreads;
 
-	std::atomic<int32_t> m_ProcessingVideoFrame;
-	std::atomic<int32_t> m_ProcessingAudioFrame;
+	std::atomic<int32_t> m_ProcessingVideoFrame{};
+	std::atomic<int32_t> m_ProcessingAudioFrame{};
 
-	std::atomic<bool> m_NextFrame;
+	std::atomic<bool> m_NextFrame{};
 
 	bool m_HasAudio;
 

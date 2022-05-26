@@ -19,10 +19,10 @@ class CLight : public CEntity
 	void Step();
 
 public:
-	int m_CurveLength;
-	int m_LengthL;
-	float m_AngularSpeed;
-	int m_Speed;
+	int m_CurveLength{};
+	int m_LengthL{};
+	float m_AngularSpeed{};
+	int m_Speed{};
 	int m_Length;
 
 	CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,

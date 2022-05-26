@@ -130,8 +130,8 @@ void CPlayers::RenderHookCollLine(
 	int ClientID,
 	float Intra)
 {
-	CNetObj_Character Prev;
-	CNetObj_Character Player;
+	CNetObj_Character Prev{};
+	CNetObj_Character Player{};
 	Prev = *pPrevChar;
 	Player = *pPlayerChar;
 
@@ -275,8 +275,8 @@ void CPlayers::RenderHook(
 	int ClientID,
 	float Intra)
 {
-	CNetObj_Character Prev;
-	CNetObj_Character Player;
+	CNetObj_Character Prev{};
+	CNetObj_Character Player{};
 	Prev = *pPrevChar;
 	Player = *pPlayerChar;
 
@@ -356,8 +356,8 @@ void CPlayers::RenderPlayer(
 	int ClientID,
 	float Intra)
 {
-	CNetObj_Character Prev;
-	CNetObj_Character Player;
+	CNetObj_Character Prev{};
+	CNetObj_Character Player{};
 	Prev = *pPrevChar;
 	Player = *pPlayerChar;
 
@@ -427,7 +427,7 @@ void CPlayers::RenderPlayer(
 		// Don't do a moon walk outside the left border
 		WalkTime += 1;
 	}
-	CAnimState State;
+	CAnimState State{};
 	State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
 
 	if(InAir)

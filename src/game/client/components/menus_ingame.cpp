@@ -36,7 +36,7 @@ using namespace std::chrono_literals;
 
 void CMenus::RenderGame(CUIRect MainView)
 {
-	CUIRect Button, ButtonBar, ButtonBar2;
+	CUIRect Button{}, ButtonBar{}, ButtonBar2{};
 	MainView.HSplitTop(45.0f, &ButtonBar, &MainView);
 	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
@@ -208,7 +208,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 void CMenus::RenderPlayers(CUIRect MainView)
 {
-	CUIRect Button, Button2, ButtonBar, Options, Player;
+	CUIRect Button{}, Button2{}, ButtonBar{}, Options{}, Player{};
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
 	// player options
@@ -312,7 +312,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Player.HSplitTop(1.5f, 0, &Player);
 		Player.VSplitMid(&Player, &Button);
 		Item.m_Rect.VSplitRight(200.0f, &Button2, &Item.m_Rect);
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, Player.x, Player.y + (Player.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
 		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aName, -1);
@@ -420,13 +420,13 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		return;
 
 	// fetch server info
-	CServerInfo CurrentServerInfo;
+	CServerInfo CurrentServerInfo{};
 	Client()->GetServerInfo(&CurrentServerInfo);
 
 	// render background
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
 
-	CUIRect View, ServerInfo, GameInfo, Motd;
+	CUIRect View{}, ServerInfo{}, GameInfo{}, Motd{};
 
 	float x = 0.0f;
 	float y = 0.0f;
@@ -467,7 +467,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
 
 	{
-		CUIRect Button;
+		CUIRect Button{};
 		int IsFavorite = ServerBrowser()->IsFavorite(CurrentServerInfo.m_NetAddr);
 		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
 		static int s_AddFavButton = 0;
@@ -627,7 +627,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	static int s_ControlPage = 0;
 
 	// render background
-	CUIRect Bottom, RconExtension, TabBar, Button;
+	CUIRect Bottom{}, RconExtension{}, TabBar{}, Button{};
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
 	RenderTools()->DrawUIRect(&Bottom, ms_ColorTabbarActive, 0, 10.0f);
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
@@ -668,7 +668,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// vote menu
 	{
-		CUIRect QuickSearch;
+		CUIRect QuickSearch{};
 
 		// render quick search
 		{
@@ -733,7 +733,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		}
 
 		// render kick reason
-		CUIRect Reason;
+		CUIRect Reason{};
 		Bottom.VSplitRight(40.0f, &Bottom, 0);
 		Bottom.VSplitRight(160.0f, &Bottom, &Reason);
 		Reason.HSplitTop(5.0f, 0, &Reason);
@@ -828,7 +828,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 void CMenus::RenderInGameNetwork(CUIRect MainView)
 {
 	CUIRect Box = MainView;
-	CUIRect Button;
+	CUIRect Button{};
 
 	int Page = g_Config.m_UiPage;
 	int NewPage = -1;
@@ -909,7 +909,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_Ghost.GetGhostDir(), pName);
 
-	CGhostInfo Info;
+	CGhostInfo Info{};
 	if(!pSelf->m_pClient->m_Ghost.GhostLoader()->GetGhostInfo(aFilename, &Info, pMap, pSelf->Client()->GetCurrentMapSha256(), pSelf->Client()->GetCurrentMapCrc()))
 		return 0;
 
@@ -992,7 +992,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	MainView.VSplitLeft(5.0f, 0, &MainView);
 	MainView.VSplitRight(5.0f, &MainView, 0);
 
-	CUIRect Headers, Status;
+	CUIRect Headers{}, Status{};
 	CUIRect View = MainView;
 
 	View.HSplitTop(17.0f, &Headers, &View);
@@ -1004,11 +1004,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	struct CColumn
 	{
-		int m_Id;
+		int m_Id{};
 		CLocConstString m_Caption;
-		float m_Width;
-		CUIRect m_Rect;
-		CUIRect m_Spacer;
+		float m_Width{};
+		CUIRect m_Rect{};
+		CUIRect m_Spacer{};
 	};
 
 	enum
@@ -1042,7 +1042,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
-	CUIRect Scroll;
+	CUIRect Scroll{};
 	View.VSplitRight(20.0f, &View, &Scroll);
 
 	static float s_ScrollValue = 0;
@@ -1066,7 +1066,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	for(int i = 0; i < NumGhosts; i++)
 	{
 		const CGhostItem *pItem = &m_lGhosts[i];
-		CUIRect Row;
+		CUIRect Row{};
 		View.HSplitTop(17.0f, &Row, &View);
 
 		// make sure that only those in view can be selected
@@ -1095,7 +1095,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 		for(int c = 0; c < NumCols; c++)
 		{
-			CUIRect Button;
+			CUIRect Button{};
 			Button.x = s_aCols[c].m_Rect.x;
 			Button.y = Row.y;
 			Button.h = Row.h;
@@ -1119,7 +1119,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 			else if(Id == COL_NAME)
 			{
-				CTextCursor Cursor;
+				CTextCursor Cursor{};
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
@@ -1127,7 +1127,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			}
 			else if(Id == COL_TIME)
 			{
-				CTextCursor Cursor;
+				CTextCursor Cursor{};
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
@@ -1148,7 +1148,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	RenderTools()->DrawUIRect(&Status, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
-	CUIRect Button;
+	CUIRect Button{};
 	Status.VSplitLeft(120.0f, &Button, &Status);
 
 	static int s_ReloadButton = 0;

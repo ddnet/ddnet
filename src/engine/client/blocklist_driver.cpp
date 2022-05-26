@@ -65,7 +65,7 @@ const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVe
 
 	char aVersionStrHelper[512]; // the size is random, but shouldn't be too small probably
 
-	SVersion Version;
+	SVersion Version{};
 	for(int &VersionPart : Version.m_Parts)
 	{
 		pVersionStrStart = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));

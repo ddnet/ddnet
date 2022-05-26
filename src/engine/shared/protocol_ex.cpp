@@ -52,7 +52,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 		{
 		case NETMSG_WHATIS:
 		{
-			CUuid Uuid2;
+			CUuid Uuid2{};
 			int ID2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
 			if(ID2 == UUID_INVALID)
 			{
@@ -74,7 +74,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 		case NETMSG_IDONTKNOW:
 			if(g_Config.m_Debug)
 			{
-				CUuid Uuid2;
+				CUuid Uuid2{};
 				g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
 				if(pUnpacker->Error())
 					break;
@@ -86,7 +86,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 		case NETMSG_ITIS:
 			if(g_Config.m_Debug)
 			{
-				CUuid Uuid2;
+				CUuid Uuid2{};
 				g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
 				const char *pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
 				if(pUnpacker->Error())

@@ -354,7 +354,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	if(Sound < 0)
 		return;
 
-	CNetMsg_Sv_SoundGlobal Msg;
+	CNetMsg_Sv_SoundGlobal Msg{};
 	Msg.m_SoundID = Sound;
 	if(Target == -2)
 		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, -1);
@@ -392,7 +392,7 @@ void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, c
 
 void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 {
-	CNetMsg_Sv_Chat Msg;
+	CNetMsg_Sv_Chat Msg{};
 	Msg.m_Team = 0;
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
@@ -450,7 +450,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 
 	if(Team == CHAT_ALL)
 	{
-		CNetMsg_Sv_Chat Msg;
+		CNetMsg_Sv_Chat Msg{};
 		Msg.m_Team = 0;
 		Msg.m_ClientID = ChatterClientID;
 		Msg.m_pMessage = aText;
@@ -474,7 +474,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	else
 	{
 		CTeamsCore *Teams = &((CGameControllerDDRace *)m_pController)->m_Teams.m_Core;
-		CNetMsg_Sv_Chat Msg;
+		CNetMsg_Sv_Chat Msg{};
 		Msg.m_Team = 1;
 		Msg.m_ClientID = ChatterClientID;
 		Msg.m_pMessage = aText;
@@ -519,7 +519,7 @@ void CGameContext::SendStartWarning(int ClientID, const char *pMessage)
 
 void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
-	CNetMsg_Sv_Emoticon Msg;
+	CNetMsg_Sv_Emoticon Msg{};
 	Msg.m_ClientID = ClientID;
 	Msg.m_Emoticon = Emoticon;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
@@ -527,14 +527,14 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 {
-	CNetMsg_Sv_WeaponPickup Msg;
+	CNetMsg_Sv_WeaponPickup Msg{};
 	Msg.m_Weapon = Weapon;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 void CGameContext::SendMotd(int ClientID)
 {
-	CNetMsg_Sv_Motd Msg;
+	CNetMsg_Sv_Motd Msg{};
 	Msg.m_pMessage = g_Config.m_SvMotd;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
@@ -543,7 +543,7 @@ void CGameContext::SendSettings(int ClientID)
 {
 	if(Server()->IsSixup(ClientID))
 	{
-		protocol7::CNetMsg_Sv_ServerSettings Msg;
+		protocol7::CNetMsg_Sv_ServerSettings Msg{};
 		Msg.m_KickVote = g_Config.m_SvVoteKick;
 		Msg.m_KickMin = g_Config.m_SvVoteKickMin;
 		Msg.m_SpecVote = g_Config.m_SvVoteSpectate;
@@ -556,7 +556,7 @@ void CGameContext::SendSettings(int ClientID)
 
 void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImportant)
 {
-	CNetMsg_Sv_Broadcast Msg;
+	CNetMsg_Sv_Broadcast Msg{};
 	Msg.m_pMessage = pText;
 
 	if(ClientID == -1)
@@ -618,8 +618,8 @@ void CGameContext::EndVote()
 
 void CGameContext::SendVoteSet(int ClientID)
 {
-	::CNetMsg_Sv_VoteSet Msg6;
-	protocol7::CNetMsg_Sv_VoteSet Msg7;
+	::CNetMsg_Sv_VoteSet Msg6{};
+	protocol7::CNetMsg_Sv_VoteSet Msg7{};
 
 	Msg7.m_ClientID = m_VoteCreator;
 	if(m_VoteCloseTime)
@@ -1133,7 +1133,7 @@ void CGameContext::OnTick()
 		{
 			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
 			{
-				CNetObj_CharacterCore Char;
+				CNetObj_CharacterCore Char{};
 				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
 				m_TeeHistorian.RecordPlayer(i, &Char);
 			}
@@ -1244,7 +1244,7 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 	// build vote option list msg
 	int CurIndex = 0;
 
-	CNetMsg_Sv_VoteOptionListAdd OptionMsg;
+	CNetMsg_Sv_VoteOptionListAdd OptionMsg{};
 	OptionMsg.m_pDescription0 = "";
 	OptionMsg.m_pDescription1 = "";
 	OptionMsg.m_pDescription2 = "";
@@ -1307,7 +1307,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	if(Server()->IsSixup(ClientID))
 	{
 		{
-			protocol7::CNetMsg_Sv_GameInfo Msg;
+			protocol7::CNetMsg_Sv_GameInfo Msg{};
 			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
@@ -1318,7 +1318,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		// /team is essential
 		{
-			protocol7::CNetMsg_Sv_CommandInfoRemove Msg;
+			protocol7::CNetMsg_Sv_CommandInfoRemove Msg{};
 			Msg.m_Name = "team";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 		}
@@ -1333,7 +1333,7 @@ void CGameContext::OnClientEnter(int ClientID)
 			if(!str_comp_nocase(pCmd->m_pName, "r"))
 				pName = "rescue";
 
-			protocol7::CNetMsg_Sv_CommandInfo Msg;
+			protocol7::CNetMsg_Sv_CommandInfo Msg{};
 			Msg.m_Name = pName;
 			Msg.m_ArgsFormat = pCmd->m_pParams;
 			Msg.m_HelpText = pCmd->m_pHelp;
@@ -1351,7 +1351,7 @@ void CGameContext::OnClientEnter(int ClientID)
 				break;
 			}
 		}
-		CNetMsg_Sv_Chat Msg;
+		CNetMsg_Sv_Chat Msg{};
 		Msg.m_Team = 0;
 		Msg.m_ClientID = Empty;
 		Msg.m_pMessage = "Do you know someone who uses a bot? Please report them to the moderators.";
@@ -1359,7 +1359,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
 
-	IServer::CClientInfo Info;
+	IServer::CClientInfo Info{};
 	Server()->GetClientInfo(ClientID, &Info);
 	if(Info.m_GotDDNetVersion)
 	{
@@ -1393,7 +1393,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_aPlayerHasInput[ClientID] = false;
 
 	// new info for others
-	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg{};
 	NewClientInfoMsg.m_ClientID = ClientID;
 	NewClientInfoMsg.m_Local = 0;
 	NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
@@ -1423,7 +1423,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(Server()->IsSixup(ClientID))
 		{
 			// existing infos for new player
-			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
+			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg{};
 			ClientInfoMsg.m_ClientID = i;
 			ClientInfoMsg.m_Local = 0;
 			ClientInfoMsg.m_Team = pPlayer->GetTeam();
@@ -1541,7 +1541,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 			pPlayer->m_LastWhisperTo = -1;
 	}
 
-	protocol7::CNetMsg_Sv_ClientDrop Msg;
+	protocol7::CNetMsg_Sv_ClientDrop Msg{};
 	Msg.m_ClientID = ClientID;
 	Msg.m_pReason = pReason;
 	Msg.m_Silent = false;
@@ -1568,7 +1568,7 @@ void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
 
 bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 {
-	IServer::CClientInfo Info;
+	IServer::CClientInfo Info{};
 	Server()->GetClientInfo(ClientID, &Info);
 	int ClientVersion = Info.m_DDNetVersion;
 	dbg_msg("ddnet", "cid=%d version=%d", ClientID, ClientVersion);
@@ -1679,7 +1679,7 @@ void *CGameContext::PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID
 			Info.FromSixup();
 			pPlayer->m_TeeInfos = Info;
 
-			protocol7::CNetMsg_Sv_SkinChange Msg;
+			protocol7::CNetMsg_Sv_SkinChange Msg{};
 			Msg.m_ClientID = ClientID;
 			for(int p = 0; p < 6; p++)
 			{
@@ -2252,7 +2252,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
 		{
-			IServer::CClientInfo Info;
+			IServer::CClientInfo Info{};
 			Server()->GetClientInfo(ClientID, &Info);
 			if(Info.m_GotDDNetVersion)
 			{
@@ -2359,12 +2359,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if(SixupNeedsUpdate)
 			{
-				protocol7::CNetMsg_Sv_ClientDrop Drop;
+				protocol7::CNetMsg_Sv_ClientDrop Drop{};
 				Drop.m_ClientID = ClientID;
 				Drop.m_pReason = "";
 				Drop.m_Silent = true;
 
-				protocol7::CNetMsg_Sv_ClientInfo Info;
+				protocol7::CNetMsg_Sv_ClientInfo Info{};
 				Info.m_ClientID = ClientID;
 				Info.m_pName = Server()->ClientName(ClientID);
 				Info.m_Country = pMsg->m_Country;
@@ -2391,7 +2391,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
-				protocol7::CNetMsg_Sv_SkinChange Msg;
+				protocol7::CNetMsg_Sv_SkinChange Msg{};
 				Msg.m_ClientID = ClientID;
 				for(int p = 0; p < 6; p++)
 				{
@@ -3107,7 +3107,7 @@ int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUser
 	if(IsDir || !str_endswith(pName, ".map"))
 		return 0;
 
-	CMapNameItem Item;
+	CMapNameItem Item{};
 	int Length = str_length(pName);
 	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, Length - 4);
 	pMapList->add(Item);
@@ -3301,7 +3301,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	}
 	else
 	{
-		CLineReader LineReader;
+		CLineReader LineReader{};
 		LineReader.Init(File);
 		char *pLine;
 		while((pLine = LineReader.Get()))
@@ -3342,7 +3342,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		{
 			str_format(aVersion, sizeof(aVersion), "%s", GAME_VERSION);
 		}
-		CTeeHistorian::CGameInfo GameInfo;
+		CTeeHistorian::CGameInfo GameInfo{};
 		GameInfo.m_GameUuid = m_GameUuid;
 		GameInfo.m_pServerVersion = aVersion;
 		GameInfo.m_StartTime = time(0);
@@ -3515,7 +3515,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		// No map-specific config, just return.
 		return;
 	}
-	CLineReader LineReader;
+	CLineReader LineReader{};
 	LineReader.Init(File);
 
 	array<char *> aLines;
@@ -3555,7 +3555,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		int ItemID;
 		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
 		int Size = Reader.GetItemSize(i);
-		CMapItemInfoSettings MapInfo;
+		CMapItemInfoSettings MapInfo{};
 		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{
 			FoundInfo = true;
@@ -3596,7 +3596,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 
 	if(!FoundInfo)
 	{
-		CMapItemInfoSettings Info;
+		CMapItemInfoSettings Info{};
 		Info.m_Version = 1;
 		Info.m_Author = -1;
 		Info.m_MapVersion = -1;
@@ -3791,8 +3791,8 @@ void CGameContext::OnSetAuthed(int ClientID, int Level)
 
 void CGameContext::SendRecord(int ClientID)
 {
-	CNetMsg_Sv_Record Msg;
-	CNetMsg_Sv_RecordLegacy MsgLegacy;
+	CNetMsg_Sv_Record Msg{};
+	CNetMsg_Sv_RecordLegacy MsgLegacy{};
 	MsgLegacy.m_PlayerTimeBest = Msg.m_PlayerTimeBest = Score()->PlayerData(ClientID)->m_BestTime * 100.0f;
 	MsgLegacy.m_ServerTimeBest = Msg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; //TODO: finish this
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
@@ -3999,7 +3999,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 
 	if(Server()->IsSixup(ClientID))
 	{
-		protocol7::CNetMsg_Sv_Chat Msg;
+		protocol7::CNetMsg_Sv_Chat Msg{};
 		Msg.m_ClientID = ClientID;
 		Msg.m_Mode = protocol7::CHAT_WHISPER;
 		Msg.m_pMessage = aCensoredMessage;
@@ -4009,7 +4009,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 	}
 	else if(GetClientVersion(ClientID) >= VERSION_DDNET_WHISPER)
 	{
-		CNetMsg_Sv_Chat Msg;
+		CNetMsg_Sv_Chat Msg{};
 		Msg.m_Team = CHAT_WHISPER_SEND;
 		Msg.m_ClientID = VictimID;
 		Msg.m_pMessage = aCensoredMessage;
@@ -4026,7 +4026,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 
 	if(Server()->IsSixup(VictimID))
 	{
-		protocol7::CNetMsg_Sv_Chat Msg;
+		protocol7::CNetMsg_Sv_Chat Msg{};
 		Msg.m_ClientID = ClientID;
 		Msg.m_Mode = protocol7::CHAT_WHISPER;
 		Msg.m_pMessage = aCensoredMessage;
@@ -4036,7 +4036,7 @@ void CGameContext::WhisperID(int ClientID, int VictimID, const char *pMessage)
 	}
 	else if(GetClientVersion(VictimID) >= VERSION_DDNET_WHISPER)
 	{
-		CNetMsg_Sv_Chat Msg2;
+		CNetMsg_Sv_Chat Msg2{};
 		Msg2.m_Team = CHAT_WHISPER_RECV;
 		Msg2.m_ClientID = ClientID;
 		Msg2.m_pMessage = aCensoredMessage;

@@ -9,9 +9,9 @@ class CSteam : public ISteam
 	HSteamPipe m_SteamPipe;
 	ISteamApps *m_pSteamApps;
 	ISteamFriends *m_pSteamFriends;
-	char m_aPlayerName[16];
-	bool m_GotConnectAddr;
-	NETADDR m_ConnectAddr;
+	char m_aPlayerName[16]{};
+	bool m_GotConnectAddr{};
+	NETADDR m_ConnectAddr{};
 
 public:
 	CSteam()
@@ -88,7 +88,7 @@ public:
 	void Update() override
 	{
 		SteamAPI_ManualDispatch_RunFrame(m_SteamPipe);
-		CallbackMsg_t Callback;
+		CallbackMsg_t Callback{};
 		while(SteamAPI_ManualDispatch_GetNextCallback(m_SteamPipe, &Callback))
 		{
 			switch(Callback.m_iCallback)

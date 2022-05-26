@@ -20,7 +20,7 @@ class CKernel : public IKernel
 			m_AutoDestroy = false;
 		}
 
-		char m_aName[64];
+		char m_aName[64]{};
 		IInterface *m_pInterface;
 		bool m_AutoDestroy;
 	};

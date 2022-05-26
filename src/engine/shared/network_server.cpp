@@ -284,14 +284,14 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *apMsgs[], int Num)
 {
-	CNetPacketConstruct Construct;
+	CNetPacketConstruct Construct{};
 	mem_zero(&Construct, sizeof(Construct));
 	unsigned char *pChunkData = &Construct.m_aChunkData[Construct.m_DataSize];
 
 	for(int i = 0; i < Num; i++)
 	{
 		const CMsgPacker *pMsg = apMsgs[i];
-		CNetChunkHeader Header;
+		CNetChunkHeader Header{};
 		Header.m_Flags = NET_CHUNKFLAG_VITAL;
 		Header.m_Size = pMsg->Size();
 		Header.m_Sequence = i + 1;
@@ -441,11 +441,11 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 	}
 	else if(!IsCtrl && g_Config.m_SvVanillaAntiSpoof && g_Config.m_Password[0] == '\0')
 	{
-		CNetChunkHeader h;
+		CNetChunkHeader h{};
 
 		unsigned char *pData = Packet.m_aChunkData;
 		pData = h.Unpack(pData);
-		CUnpacker Unpacker;
+		CUnpacker Unpacker{};
 		Unpacker.Reset(pData, h.m_Size);
 		int Msg = Unpacker.GetInt() >> 1;
 

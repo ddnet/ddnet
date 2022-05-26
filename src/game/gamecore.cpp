@@ -613,7 +613,7 @@ void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInf
 
 void CCharacterCore::Quantize()
 {
-	CNetObj_CharacterCore Core;
+	CNetObj_CharacterCore Core{};
 	Write(&Core);
 	ReadCharacterCore(&Core);
 }

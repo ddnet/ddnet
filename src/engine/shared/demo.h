@@ -15,18 +15,18 @@ typedef std::function<void()> TUpdateIntraTimesFunc;
 
 class CDemoRecorder : public IDemoRecorder
 {
-	class IConsole *m_pConsole;
+	class IConsole *m_pConsole{};
 	IOHANDLE m_File;
-	char m_aCurrentFilename[256];
+	char m_aCurrentFilename[256]{};
 	int m_LastTickMarker;
-	int m_LastKeyFrame;
-	int m_FirstTick;
-	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
+	int m_LastKeyFrame{};
+	int m_FirstTick{};
+	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE]{};
 	class CSnapshotDelta *m_pSnapshotDelta;
-	int m_NumTimelineMarkers;
-	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
+	int m_NumTimelineMarkers{};
+	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS]{};
 	bool m_NoMapData;
-	unsigned char *m_pMapData;
+	unsigned char *m_pMapData{};
 
 	DEMOFUNC_FILTER m_pfnFilter;
 	void *m_pUser;
@@ -83,7 +83,7 @@ public:
 	};
 
 private:
-	IListener *m_pListener;
+	IListener *m_pListener{};
 
 	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
@@ -100,19 +100,19 @@ private:
 		CKeyFrameSearch *m_pNext;
 	};
 
-	class IConsole *m_pConsole;
-	IOHANDLE m_File;
-	long m_MapOffset;
-	char m_aFilename[IO_MAX_PATH_LENGTH];
-	CKeyFrame *m_pKeyFrames;
-	CMapInfo m_MapInfo;
-	int m_SpeedIndex;
+	class IConsole *m_pConsole{};
+	IOHANDLE m_File{};
+	long m_MapOffset{};
+	char m_aFilename[IO_MAX_PATH_LENGTH]{};
+	CKeyFrame *m_pKeyFrames{};
+	CMapInfo m_MapInfo{};
+	int m_SpeedIndex{};
 
-	CPlaybackInfo m_Info;
-	int m_DemoType;
-	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
-	int m_LastSnapshotDataSize;
-	class CSnapshotDelta *m_pSnapshotDelta;
+	CPlaybackInfo m_Info{};
+	int m_DemoType{};
+	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE]{};
+	int m_LastSnapshotDataSize{};
+	class CSnapshotDelta *m_pSnapshotDelta{};
 
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();

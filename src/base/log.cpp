@@ -81,7 +81,7 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 		return;
 	}
 
-	CLogMessage Msg;
+	CLogMessage Msg{};
 	Msg.m_Level = level;
 	Msg.m_HaveColor = have_color;
 	Msg.m_Color = color;

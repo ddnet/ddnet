@@ -27,7 +27,7 @@ class CDamageInd : public CComponent
 	CItem *CreateI();
 	void DestroyI(CItem *i);
 
-	int m_DmgIndQuadContainerIndex;
+	int m_DmgIndQuadContainerIndex{};
 
 public:
 	CDamageInd();

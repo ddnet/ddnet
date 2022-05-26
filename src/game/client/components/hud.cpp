@@ -233,7 +233,7 @@ void CHud::RenderScoreHud()
 					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
-					CTextCursor Cursor;
+					CTextCursor Cursor{};
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScoreTeam[t]);
@@ -272,7 +272,7 @@ void CHud::RenderScoreHud()
 
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 
-							CTextCursor Cursor;
+							CTextCursor Cursor{};
 							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
@@ -414,7 +414,7 @@ void CHud::RenderScoreHud()
 					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
-					CTextCursor Cursor;
+					CTextCursor Cursor{};
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScore[t]);
@@ -443,7 +443,7 @@ void CHud::RenderScoreHud()
 
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 
-							CTextCursor Cursor;
+							CTextCursor Cursor{};
 							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
 							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
@@ -483,7 +483,7 @@ void CHud::RenderScoreHud()
 					if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
 						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex);
 
-					CTextCursor Cursor;
+					CTextCursor Cursor{};
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax - ImageSize - Split - PosSize, StartY + t * 20 + (18.f - 10.f) / 2.f, 10.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
 					m_aScoreInfo[t].m_TextRankContainerIndex = TextRender()->CreateTextContainer(&Cursor, aBuf);
@@ -541,7 +541,7 @@ void CHud::RenderTextInfo()
 		int DigitIndex = GetDigitsIndex(FrameTime, 4);
 		//TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1.0f);
 
-		CTextCursor Cursor;
+		CTextCursor Cursor{};
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_TextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 		auto OldFlags = TextRender()->GetRenderFlags();
@@ -615,7 +615,7 @@ void CHud::RenderVoting()
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
-	CTextCursor Cursor;
+	CTextCursor Cursor{};
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), m_pClient->m_Voting.SecondsLeft());
 	float tw = TextRender()->TextWidth(0x0, 6, aBuf, -1, -1.0f);

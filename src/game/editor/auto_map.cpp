@@ -51,7 +51,7 @@ void CAutoMapper::Load(const char *pTileName)
 	if(!RulesFile)
 		return;
 
-	CLineReader LineReader;
+	CLineReader LineReader{};
 	LineReader.Init(RulesFile);
 
 	CConfiguration *pCurrentConf = 0;
@@ -186,7 +186,7 @@ void CAutoMapper::Load(const char *pTileName)
 						char aOrientation4[128] = "";
 						sscanf(str_trim_words(pLine, pWord), "%d %127s %127s %127s %127s", &ID, aOrientation1, aOrientation2, aOrientation3, aOrientation4);
 
-						CIndexInfo NewIndexInfo;
+						CIndexInfo NewIndexInfo{};
 						NewIndexInfo.m_ID = ID;
 						NewIndexInfo.m_Flag = 0;
 						NewIndexInfo.m_TestFlag = false;

@@ -11,7 +11,7 @@
 
 class CInput : public IEngineInput
 {
-	IEngineGraphics *m_pGraphics;
+	IEngineGraphics *m_pGraphics{};
 
 	int m_LastX;
 	int m_LastY;
@@ -29,15 +29,15 @@ class CInput : public IEngineInput
 	bool IsEventValid(CEvent *pEvent) const override { return pEvent->m_InputCount == m_InputCounter; }
 
 	// quick access to input
-	unsigned short m_aInputCount[g_MaxKeys]; // tw-KEY
-	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
+	unsigned short m_aInputCount[g_MaxKeys]{}; // tw-KEY
+	unsigned char m_aInputState[g_MaxKeys]{}; // SDL_SCANCODE
 	int m_InputCounter;
 
 	// IME support
 	int m_NumTextInputInstances;
-	char m_aEditingText[INPUT_TEXT_SIZE];
+	char m_aEditingText[INPUT_TEXT_SIZE]{};
 	int m_EditingTextLen;
-	int m_EditingCursor;
+	int m_EditingCursor{};
 
 	bool KeyState(int Key) const;
 

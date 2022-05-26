@@ -783,43 +783,43 @@ class CGraphics_Threaded : public IEngineGraphics
 		DRAWING_TRIANGLES = 3
 	};
 
-	CCommandBuffer::SState m_State;
-	IGraphicsBackend *m_pBackend;
-	bool m_GLTileBufferingEnabled;
-	bool m_GLQuadBufferingEnabled;
-	bool m_GLTextBufferingEnabled;
-	bool m_GLQuadContainerBufferingEnabled;
-	bool m_GLHasTextureArrays;
-	bool m_GLUseTrianglesAsQuad;
+	CCommandBuffer::SState m_State{};
+	IGraphicsBackend *m_pBackend{};
+	bool m_GLTileBufferingEnabled{};
+	bool m_GLQuadBufferingEnabled{};
+	bool m_GLTextBufferingEnabled{};
+	bool m_GLQuadContainerBufferingEnabled{};
+	bool m_GLHasTextureArrays{};
+	bool m_GLUseTrianglesAsQuad{};
 
-	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
+	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS]{};
 	CCommandBuffer *m_pCommandBuffer;
 	unsigned m_CurrentCommandBuffer;
 
 	//
-	class IStorage *m_pStorage;
-	class IConsole *m_pConsole;
+	class IStorage *m_pStorage{};
+	class IConsole *m_pConsole{};
 
-	int m_CurIndex;
+	int m_CurIndex{};
 
-	CCommandBuffer::SVertex m_aVertices[CCommandBuffer::MAX_VERTICES];
-	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[CCommandBuffer::MAX_VERTICES];
+	CCommandBuffer::SVertex m_aVertices[CCommandBuffer::MAX_VERTICES]{};
+	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[CCommandBuffer::MAX_VERTICES]{};
 	int m_NumVertices;
 
-	CCommandBuffer::SColor m_aColor[4];
-	CCommandBuffer::STexCoord m_aTexture[4];
+	CCommandBuffer::SColor m_aColor[4]{};
+	CCommandBuffer::STexCoord m_aTexture[4]{};
 
 	bool m_RenderEnable;
 
 	float m_Rotation;
 	int m_Drawing;
 	bool m_DoScreenshot;
-	char m_aScreenshotName[128];
+	char m_aScreenshotName[128]{};
 
 	CTextureHandle m_InvalidTexture;
 
 	std::vector<int> m_TextureIndices;
-	int m_FirstFreeTexture;
+	int m_FirstFreeTexture{};
 	int m_TextureMemoryUsage;
 
 	std::vector<uint8_t> m_SpriteHelper;
@@ -840,10 +840,10 @@ class CGraphics_Threaded : public IEngineGraphics
 		int m_FreeIndex;
 	};
 	std::vector<SVertexArrayInfo> m_VertexArrayInfo;
-	int m_FirstFreeVertexArrayInfo;
+	int m_FirstFreeVertexArrayInfo{};
 
 	std::vector<int> m_BufferObjectIndices;
-	int m_FirstFreeBufferObjectIndex;
+	int m_FirstFreeBufferObjectIndex{};
 
 	struct SQuadContainer
 	{
@@ -871,7 +871,7 @@ class CGraphics_Threaded : public IEngineGraphics
 		bool m_AutomaticUpload;
 	};
 	std::vector<SQuadContainer> m_QuadContainers;
-	int m_FirstFreeQuadContainer;
+	int m_FirstFreeQuadContainer{};
 
 	struct SWindowResizeListener
 	{

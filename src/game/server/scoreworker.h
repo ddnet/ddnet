@@ -39,7 +39,7 @@ struct CScorePlayerResult : ISqlResult
 		BROADCAST,
 		MAP_VOTE,
 		PLAYER_INFO,
-	} m_MessageKind;
+	} m_MessageKind{DIRECT};
 	union
 	{
 		char m_aaMessages[MAX_MESSAGES][512];
@@ -58,7 +58,7 @@ struct CScorePlayerResult : ISqlResult
 			char m_aServer[32 + 1];
 			char m_aMap[MAX_MAP_LENGTH + 1];
 		} m_MapVote;
-	} m_Data; // PLAYER_INFO
+	} m_Data{}; // PLAYER_INFO
 
 	void SetVariant(Variant v);
 };
@@ -253,8 +253,8 @@ public:
 
 struct CTeamrank
 {
-	CUuid m_TeamID;
-	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	CUuid m_TeamID{};
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH]{};
 	unsigned int m_NumNames;
 	CTeamrank();
 

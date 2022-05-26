@@ -688,7 +688,7 @@ void CLayerTiles::ShowInfo()
 
 int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
-	CUIRect Button;
+	CUIRect Button{};
 
 	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this);
 
@@ -802,7 +802,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 			if(m_Seed != 0)
 			{
-				CUIRect ButtonAuto;
+				CUIRect ButtonAuto{};
 				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
 				Button.VSplitRight(2.0f, &Button, 0);
 				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, 0, "Automatically run automap after modifications."))
@@ -961,7 +961,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 {
 	if(State.Modified)
 	{
-		CUIRect Commit;
+		CUIRect Commit{};
 		pToolbox->HSplitBottom(20.0f, pToolbox, &Commit);
 		static int s_CommitButton = 0;
 		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
@@ -991,7 +991,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 	}
 
 	{
-		CUIRect Warning;
+		CUIRect Warning{};
 		pToolbox->HSplitTop(13.0f, &Warning, pToolbox);
 		Warning.HMargin(0.5f, &Warning);
 

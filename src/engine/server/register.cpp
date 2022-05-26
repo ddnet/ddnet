@@ -116,20 +116,20 @@ class CRegister : public IRegister
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
 	int m_ServerPort;
-	char m_aConnlessTokenHex[16];
+	char m_aConnlessTokenHex[16]{};
 
 	std::shared_ptr<CGlobal> m_pGlobal = std::make_shared<CGlobal>();
 	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
 	CProtocol m_aProtocols[NUM_PROTOCOLS];
 
 	int m_NumExtraHeaders = 0;
-	char m_aaExtraHeaders[8][128];
+	char m_aaExtraHeaders[8][128]{};
 
-	char m_aVerifyPacketPrefix[sizeof(SERVERBROWSE_CHALLENGE) + UUID_MAXSTRSIZE];
+	char m_aVerifyPacketPrefix[sizeof(SERVERBROWSE_CHALLENGE) + UUID_MAXSTRSIZE]{};
 	CUuid m_Secret = RandomUuid();
 	CUuid m_ChallengeSecret = RandomUuid();
 	bool m_GotServerInfo = false;
-	char m_aServerInfo[16384];
+	char m_aServerInfo[16384]{};
 
 public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken);
@@ -568,7 +568,7 @@ bool CRegister::OnPacket(const CNetChunk *pPacket)
 	if(pPacket->m_DataSize >= (int)sizeof(m_aVerifyPacketPrefix) &&
 		mem_comp(pPacket->m_pData, m_aVerifyPacketPrefix, sizeof(m_aVerifyPacketPrefix)) == 0)
 	{
-		CUnpacker Unpacker;
+		CUnpacker Unpacker{};
 		Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 		Unpacker.GetRaw(sizeof(m_aVerifyPacketPrefix));
 		const char *pProtocol = Unpacker.GetString(0);

@@ -44,7 +44,7 @@ public:
 	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis = 0);
 
 	int m_GameTick;
-	int m_GameTickSpeed;
+	int m_GameTickSpeed{};
 	CCollision *m_pCollision;
 
 	// getter for server variables
@@ -73,9 +73,9 @@ public:
 		bool m_IsSolo;
 		bool m_UseTuneZones;
 		bool m_BugDDRaceInput;
-	} m_WorldConfig;
+	} m_WorldConfig{};
 
-	bool m_IsValidCopy;
+	bool m_IsValidCopy{};
 	CGameWorld *m_pParent;
 	CGameWorld *m_pChild;
 
@@ -88,7 +88,7 @@ public:
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
 	void Clear();
 
-	CTuningParams *m_pTuningList;
+	CTuningParams *m_pTuningList{};
 	CTuningParams *TuningList() { return m_pTuningList; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 
@@ -96,9 +96,9 @@ private:
 	void RemoveEntities();
 
 	CEntity *m_pNextTraverseEntity = nullptr;
-	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
+	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES]{};
 
-	class CCharacter *m_apCharacters[MAX_CLIENTS];
+	class CCharacter *m_apCharacters[MAX_CLIENTS]{};
 };
 
 class CCharOrder
