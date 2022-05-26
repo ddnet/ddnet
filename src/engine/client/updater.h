@@ -43,7 +43,7 @@ class CUpdater : public IUpdater
 	LOCK m_Lock;
 
 	int m_State;
-	char m_aStatus[256] GUARDED_BY(m_Lock) {};
+	char m_aStatus[256] GUARDED_BY(m_Lock){};
 	int m_Percent GUARDED_BY(m_Lock);
 	char m_aLastFile[256]{};
 	char m_aClientExecTmp[64]{};

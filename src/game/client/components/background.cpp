@@ -14,15 +14,13 @@
 #include "background.h"
 
 CBackground::CBackground(int MapType, bool OnlineOnly) :
-	CMapLayers(MapType, OnlineOnly)
+	CMapLayers(MapType, OnlineOnly), m_pBackgroundLayers(m_pLayers), m_pBackgroundImages(m_pImages), m_Loaded(false), m_LastLoad(0)
 {
 	m_pLayers = new CLayers;
-	m_pBackgroundLayers = m_pLayers;
+
 	m_pImages = new CMapImages;
-	m_pBackgroundImages = m_pImages;
-	m_Loaded = false;
+
 	m_aMapName[0] = '\0';
-	m_LastLoad = 0;
 }
 
 CBackground::~CBackground()

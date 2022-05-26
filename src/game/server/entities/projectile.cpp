@@ -25,24 +25,14 @@ CProjectile::CProjectile(
 	int SoundImpact,
 	int Layer,
 	int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE), m_Type(Type), m_Direction(Dir), m_LifeSpan(Span), m_Owner(Owner), m_Force(Force), m_SoundImpact(SoundImpact), m_StartTick(Server()->Tick()), m_Explosive(Explosive), m_Freeze(Freeze), m_TuneZone(GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos)))
 {
-	m_Type = Type;
 	m_Pos = Pos;
-	m_Direction = Dir;
-	m_LifeSpan = Span;
-	m_Owner = Owner;
-	m_Force = Force;
+
 	//m_Damage = Damage;
-	m_SoundImpact = SoundImpact;
-	m_StartTick = Server()->Tick();
-	m_Explosive = Explosive;
 
 	m_Layer = Layer;
 	m_Number = Number;
-	m_Freeze = Freeze;
-
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());

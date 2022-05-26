@@ -11,10 +11,9 @@
 
 #include <game/client/gameclient.h>
 
-CDamageInd::CDamageInd()
+CDamageInd::CDamageInd() :
+	m_Lastupdate(0), m_NumItems(0)
 {
-	m_Lastupdate = 0;
-	m_NumItems = 0;
 }
 
 CDamageInd::CItem *CDamageInd::CreateI()

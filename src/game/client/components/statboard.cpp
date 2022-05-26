@@ -9,11 +9,9 @@
 #include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 
-CStatboard::CStatboard()
+CStatboard::CStatboard() :
+	m_Active(false), m_ScreenshotTaken(false), m_ScreenshotTime(-1)
 {
-	m_Active = false;
-	m_ScreenshotTaken = false;
-	m_ScreenshotTime = -1;
 }
 
 void CStatboard::OnReset()

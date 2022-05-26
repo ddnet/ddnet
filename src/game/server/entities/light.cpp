@@ -12,15 +12,13 @@
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_Tick(Server()->TickSpeed() * 0.15f), m_Rotation(Rotation), m_Length(Length), m_EvalTick(Server()->Tick())
 {
 	m_Layer = Layer;
 	m_Number = Number;
-	m_Tick = (Server()->TickSpeed() * 0.15f);
+
 	m_Pos = Pos;
-	m_Rotation = Rotation;
-	m_Length = Length;
-	m_EvalTick = Server()->Tick();
+
 	GameWorld()->InsertEntity(this);
 	Step();
 }

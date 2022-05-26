@@ -21,10 +21,9 @@
 
 inline vec2 RandomDir() { return normalize(vec2(random_float() - 0.5f, random_float() - 0.5f)); }
 
-CEffects::CEffects()
+CEffects::CEffects() :
+	m_Add50hz(false), m_Add100hz(false)
 {
-	m_Add50hz = false;
-	m_Add100hz = false;
 }
 
 void CEffects::AirJump(vec2 Pos)

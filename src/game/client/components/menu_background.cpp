@@ -21,16 +21,9 @@
 using namespace std::chrono_literals;
 
 CMenuBackground::CMenuBackground() :
-	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
+	CBackground(CMapLayers::TYPE_FULL_DESIGN, false), m_ChangedPosition(false), m_CurrentPosition(-1), m_MoveTime(0.0f), m_IsInit(false)
 {
-	m_ChangedPosition = false;
-
 	ResetPositions();
-
-	m_CurrentPosition = -1;
-	m_MoveTime = 0.0f;
-
-	m_IsInit = false;
 }
 
 CBackgroundEngineMap *CMenuBackground::CreateBGMap()

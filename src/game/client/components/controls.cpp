@@ -32,11 +32,10 @@ enum
 	NUM_JOYSTICK_AXES = 22
 };
 
-CControls::CControls()
+CControls::CControls() :
+	m_LastDummy(0), m_OtherFire(0)
 {
 	mem_zero(&m_LastData, sizeof(m_LastData));
-	m_LastDummy = 0;
-	m_OtherFire = 0;
 
 	if(g_Config.m_InpJoystick)
 	{

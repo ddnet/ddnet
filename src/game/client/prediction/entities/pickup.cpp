@@ -140,14 +140,13 @@ void CPickup::Move()
 }
 
 CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP), m_Type(pPickup->m_Type), m_Subtype(pPickup->m_Subtype), m_IsCoreActive(false)
 {
 	m_Pos.x = pPickup->m_X;
 	m_Pos.y = pPickup->m_Y;
-	m_Type = pPickup->m_Type;
-	m_Subtype = pPickup->m_Subtype;
+
 	m_Core = vec2(0.f, 0.f);
-	m_IsCoreActive = false;
+
 	m_ID = ID;
 	m_Layer = LAYER_GAME;
 	m_Number = 0;

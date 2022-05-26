@@ -10,11 +10,11 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-CLayerQuads::CLayerQuads()
+CLayerQuads::CLayerQuads() :
+	m_Image(-1)
 {
 	m_Type = LAYERTYPE_QUADS;
 	m_aName[0] = '\0';
-	m_Image = -1;
 }
 
 CLayerQuads::~CLayerQuads() = default;

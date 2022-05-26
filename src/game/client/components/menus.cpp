@@ -67,35 +67,13 @@ float CMenus::ms_ListheaderHeight = 17.0f;
 IInput::CEvent CMenus::m_aInputEvents[MAX_INPUTEVENTS];
 int CMenus::m_NumInputEvents;
 
-CMenus::CMenus()
+CMenus::CMenus() :
+	m_Popup(POPUP_NONE), m_ActivePage(PAGE_INTERNET), m_MenuPage(0), m_GamePage(PAGE_GAME), m_JoinTutorial(false), m_NeedRestartGraphics(false), m_NeedRestartSound(false), m_NeedSendinfo(false), m_NeedSendDummyinfo(false), m_MenuActive(true), m_ShowStart(true), m_UseMouseButtons(true), m_EscapePressed(false), m_EnterPressed(false), m_DeletePressed(false), m_FriendlistSelectedIndex(-1), m_DoubleClickIndex(-1), m_DemoPlayerState(DEMOPLAYER_NONE), m_Dummy(false)
 {
-	m_Popup = POPUP_NONE;
-	m_ActivePage = PAGE_INTERNET;
-	m_MenuPage = 0;
-	m_GamePage = PAGE_GAME;
-	m_JoinTutorial = false;
-
-	m_NeedRestartGraphics = false;
-	m_NeedRestartSound = false;
-	m_NeedSendinfo = false;
-	m_NeedSendDummyinfo = false;
-	m_MenuActive = true;
-	m_ShowStart = true;
-	m_UseMouseButtons = true;
-
-	m_EscapePressed = false;
-	m_EnterPressed = false;
-	m_DeletePressed = false;
 	m_NumInputEvents = 0;
 
 	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
 	m_aCallvoteReason[0] = 0;
-
-	m_FriendlistSelectedIndex = -1;
-	m_DoubleClickIndex = -1;
-
-	m_DemoPlayerState = DEMOPLAYER_NONE;
-	m_Dummy = false;
 
 	m_ServerProcess.Process = 0;
 	m_ServerProcess.Initialized = false;

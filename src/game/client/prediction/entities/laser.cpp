@@ -7,11 +7,10 @@
 #include <engine/shared/config.h>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_Owner(Owner), m_Energy(StartEnergy)
 {
 	m_Pos = Pos;
-	m_Owner = Owner;
-	m_Energy = StartEnergy;
+
 	if(pGameWorld->m_WorldConfig.m_IsFNG && m_Energy < 10.f)
 		m_Energy = 800.0f;
 	m_Dir = Direction;
@@ -155,15 +154,13 @@ void CLaser::Tick()
 }
 
 CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_EvalTick(pLaser->m_StartTick), m_TuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0), m_Owner(-2)
 {
 	m_Pos.x = pLaser->m_X;
 	m_Pos.y = pLaser->m_Y;
 	m_From.x = pLaser->m_FromX;
 	m_From.y = pLaser->m_FromY;
-	m_EvalTick = pLaser->m_StartTick;
-	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
-	m_Owner = -2;
+
 	m_Energy = GetTuning(m_TuneZone)->m_LaserReach;
 	if(pGameWorld->m_WorldConfig.m_IsFNG && m_Energy < 10.f)
 		m_Energy = 800.0f;

@@ -32,28 +32,15 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 	}
 }
 
-CInput::CInput()
+CInput::CInput() :
+	m_InputCounter(1), m_InputGrabbed(0), m_MouseDoubleClick(false), m_MouseFocus(true), m_VideoRestartNeeded(0), m_pClipboardText(NULL), m_NumTextInputInstances(0), m_EditingTextLen(-1), m_LastX(0), m_LastY(0)
 {
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 
-	m_InputCounter = 1;
-	m_InputGrabbed = 0;
-
-	m_MouseDoubleClick = false;
-
 	m_NumEvents = 0;
-	m_MouseFocus = true;
 
-	m_VideoRestartNeeded = 0;
-	m_pClipboardText = NULL;
-
-	m_NumTextInputInstances = 0;
-	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
-
-	m_LastX = 0;
-	m_LastY = 0;
 }
 
 void CInput::Init()

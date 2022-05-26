@@ -14,11 +14,9 @@ const char *Localize(const char *pStr, const char *pContext)
 	return pNewStr ? pNewStr : pStr;
 }
 
-CLocConstString::CLocConstString(const char *pStr, const char *pContext)
+CLocConstString::CLocConstString(const char *pStr, const char *pContext) :
+	m_pDefaultStr(pStr), m_Hash(str_quickhash(m_pDefaultStr)), m_Version(-1)
 {
-	m_pDefaultStr = pStr;
-	m_Hash = str_quickhash(m_pDefaultStr);
-	m_Version = -1;
 }
 
 void CLocConstString::Reload()
@@ -30,10 +28,9 @@ void CLocConstString::Reload()
 		m_pCurrentStr = m_pDefaultStr;
 }
 
-CLocalizationDatabase::CLocalizationDatabase()
+CLocalizationDatabase::CLocalizationDatabase() :
+	m_VersionCounter(0), m_CurrentVersion(0)
 {
-	m_VersionCounter = 0;
-	m_CurrentVersion = 0;
 }
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)

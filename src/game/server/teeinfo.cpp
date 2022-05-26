@@ -29,12 +29,10 @@ static StdSkin g_StdSkins[] = {
 	{"twintri", {"standard", "twintri", "", "standard", "standard", "standard"}, {true, true, false, true, true, false}, {3447932, -14098717, 0, 185, 9634888, 0}},
 	{"warpaint", {"standard", "warpaint", "", "standard", "standard", "standard"}, {true, false, false, true, true, false}, {1944919, 0, 0, 750337, 1944919, 0}}};
 
-CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet) :
+	m_UseCustomColor(UseCustomColor), m_ColorBody(ColorBody), m_ColorFeet(ColorFeet)
 {
 	str_copy(m_SkinName, pSkinName, sizeof(m_SkinName));
-	m_UseCustomColor = UseCustomColor;
-	m_ColorBody = ColorBody;
-	m_ColorFeet = ColorFeet;
 }
 
 CTeeInfo::CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors)

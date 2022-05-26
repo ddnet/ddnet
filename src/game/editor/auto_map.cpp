@@ -37,10 +37,9 @@ static int HashLocation(uint32_t Seed, uint32_t Run, uint32_t Rule, uint32_t X, 
 	return Hash % HASH_MAX;
 }
 
-CAutoMapper::CAutoMapper(CEditor *pEditor)
+CAutoMapper::CAutoMapper(CEditor *pEditor) :
+	m_pEditor(pEditor), m_FileLoaded(false)
 {
-	m_pEditor = pEditor;
-	m_FileLoaded = false;
 }
 
 void CAutoMapper::Load(const char *pTileName)

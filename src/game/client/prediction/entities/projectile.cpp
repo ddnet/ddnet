@@ -19,23 +19,12 @@ CProjectile::CProjectile(
 	int SoundImpact,
 	int Layer,
 	int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE), m_Type(Type), m_Direction(Dir), m_LifeSpan(Span), m_Owner(Owner), m_Force(Force), m_SoundImpact(SoundImpact), m_StartTick(GameWorld()->GameTick()), m_Explosive(Explosive), m_Freeze(Freeze), m_TuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0)
 {
-	m_Type = Type;
 	m_Pos = Pos;
-	m_Direction = Dir;
-	m_LifeSpan = Span;
-	m_Owner = Owner;
-	m_Force = Force;
-	m_SoundImpact = SoundImpact;
-	m_StartTick = GameWorld()->GameTick();
-	m_Explosive = Explosive;
 
 	m_Layer = Layer;
 	m_Number = Number;
-	m_Freeze = Freeze;
-
-	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -153,10 +142,10 @@ void CProjectile::SetBouncing(int Value)
 }
 
 CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj, const CNetObj_EntityEx *pEntEx) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE), m_Direction(pProj->m_StartVel)
 {
 	m_Pos = pProj->m_StartPos;
-	m_Direction = pProj->m_StartVel;
+
 	if(pProj->m_ExtraInfo)
 	{
 		m_Owner = pProj->m_Owner;

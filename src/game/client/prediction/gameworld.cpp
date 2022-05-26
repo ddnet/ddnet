@@ -15,16 +15,13 @@
 //////////////////////////////////////////////////
 // game world
 //////////////////////////////////////////////////
-CGameWorld::CGameWorld()
+CGameWorld::CGameWorld() :
+	m_pCollision(0), m_GameTick(0), m_pParent(0), m_pChild(0)
 {
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		pFirstEntityType = 0;
 	for(auto &pCharacter : m_apCharacters)
 		pCharacter = 0;
-	m_pCollision = 0;
-	m_GameTick = 0;
-	m_pParent = 0;
-	m_pChild = 0;
 }
 
 CGameWorld::~CGameWorld()

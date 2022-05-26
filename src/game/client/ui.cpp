@@ -51,21 +51,9 @@ void CUI::Init(class IGraphics *pGraphics, class ITextRender *pTextRender)
 	m_pTextRender = pTextRender;
 }
 
-CUI::CUI()
+CUI::CUI() :
+	m_pHotItem(0), m_pActiveItem(0), m_pLastActiveItem(0), m_pBecomingHotItem(0), m_pActiveTooltipItem(0), m_MouseX(0), m_MouseY(0), m_MouseWorldX(0), m_MouseWorldY(0), m_MouseButtons(0), m_LastMouseButtons(0)
 {
-	m_pHotItem = 0;
-	m_pActiveItem = 0;
-	m_pLastActiveItem = 0;
-	m_pBecomingHotItem = 0;
-	m_pActiveTooltipItem = 0;
-
-	m_MouseX = 0;
-	m_MouseY = 0;
-	m_MouseWorldX = 0;
-	m_MouseWorldY = 0;
-	m_MouseButtons = 0;
-	m_LastMouseButtons = 0;
-
 	m_Screen.x = 0;
 	m_Screen.y = 0;
 	m_Screen.w = 848.0f;

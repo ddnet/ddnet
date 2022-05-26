@@ -153,9 +153,9 @@ TWGLuint CGLSL::GetShaderID()
 	return m_ShaderID;
 }
 
-CGLSL::CGLSL()
+CGLSL::CGLSL() :
+	m_IsLoaded(false)
 {
-	m_IsLoaded = false;
 }
 
 CGLSL::~CGLSL()

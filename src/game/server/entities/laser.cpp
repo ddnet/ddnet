@@ -11,19 +11,10 @@
 #include "character.h"
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_Owner(Owner), m_Energy(StartEnergy), m_Dir(Direction), m_Bounces(0), m_EvalTick(0), m_WasTele(false), m_Type(Type), m_TeleportCancelled(false), m_IsBlueTeleport(false), m_TuneZone(GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos)))
 {
 	m_Pos = Pos;
-	m_Owner = Owner;
-	m_Energy = StartEnergy;
-	m_Dir = Direction;
-	m_Bounces = 0;
-	m_EvalTick = 0;
-	m_WasTele = false;
-	m_Type = Type;
-	m_TeleportCancelled = false;
-	m_IsBlueTeleport = false;
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
+
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : 0;
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());

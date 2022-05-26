@@ -247,7 +247,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	bool ShouldSendChatTimeoutCodeHeuristic();
 
-	class CServerInfo m_CurrentServerInfo{};
+	class CServerInfo m_CurrentServerInfo
+	{
+	};
 	int64_t m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 
 	int m_CurrentServerPingInfoType;

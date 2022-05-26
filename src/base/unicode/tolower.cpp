@@ -12,7 +12,9 @@ static int compul(const void *a, const void *b)
 extern "C" {
 int str_utf8_tolower(int code)
 {
-	struct UPPER_LOWER key{};
+	struct UPPER_LOWER key
+	{
+	};
 	struct UPPER_LOWER *res;
 	key.upper = code;
 	res = (UPPER_LOWER *)bsearch(&key, tolowermap, NUM_TOLOWER, sizeof(struct UPPER_LOWER), compul);

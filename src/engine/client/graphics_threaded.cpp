@@ -104,7 +104,8 @@ void CGraphics_Threaded::AddVertices(int Count, CCommandBuffer::SVertexTex3DStre
 		FlushVerticesTex3D();
 }
 
-CGraphics_Threaded::CGraphics_Threaded()
+CGraphics_Threaded::CGraphics_Threaded() :
+	m_CurrentCommandBuffer(0), m_pCommandBuffer(0x0), m_NumVertices(0), m_Rotation(0), m_Drawing(0), m_TextureMemoryUsage(0), m_RenderEnable(true), m_DoScreenshot(false)
 {
 	m_State.m_ScreenTL.x = 0;
 	m_State.m_ScreenTL.y = 0;
@@ -119,24 +120,12 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_State.m_BlendMode = CCommandBuffer::BLEND_NONE;
 	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
 
-	m_CurrentCommandBuffer = 0;
-	m_pCommandBuffer = 0x0;
 	m_apCommandBuffers[0] = 0x0;
 	m_apCommandBuffers[1] = 0x0;
-
-	m_NumVertices = 0;
 
 	m_ScreenWidth = -1;
 	m_ScreenHeight = -1;
 	m_ScreenRefreshRate = -1;
-
-	m_Rotation = 0;
-	m_Drawing = 0;
-
-	m_TextureMemoryUsage = 0;
-
-	m_RenderEnable = true;
-	m_DoScreenshot = false;
 
 	png_init(0, 0);
 }

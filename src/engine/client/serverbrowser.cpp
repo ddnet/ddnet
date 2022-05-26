@@ -44,35 +44,17 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
-CServerBrowser::CServerBrowser()
+CServerBrowser::CServerBrowser() :
+	m_ppServerlist(0), m_pSortedServerlist(0), m_NumFavoriteServers(0), m_pFirstReqServer(0), m_pLastReqServer(0), m_NumRequests(0), m_NumSortedServers(0), m_NumSortedServersCapacity(0), m_NumServers(0), m_NumServerCapacity(0), m_Sorthash(0), m_ServerlistType(0), m_BroadcastTime(0), m_pDDNetInfo(0), m_SortOnNextUpdate(false)
 {
-	m_ppServerlist = 0;
-	m_pSortedServerlist = 0;
-
-	m_NumFavoriteServers = 0;
-
 	mem_zero(m_aServerlistIp, sizeof(m_aServerlistIp));
 
-	m_pFirstReqServer = 0; // request list
-	m_pLastReqServer = 0;
-	m_NumRequests = 0;
+	// request list
 
-	m_NumSortedServers = 0;
-	m_NumSortedServersCapacity = 0;
-	m_NumServers = 0;
-	m_NumServerCapacity = 0;
-
-	m_Sorthash = 0;
 	m_aFilterString[0] = 0;
 	m_aFilterGametypeString[0] = 0;
 
-	m_ServerlistType = 0;
-	m_BroadcastTime = 0;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
-
-	m_pDDNetInfo = 0;
-
-	m_SortOnNextUpdate = false;
 }
 
 CServerBrowser::~CServerBrowser()

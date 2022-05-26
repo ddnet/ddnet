@@ -3,18 +3,9 @@
 #include <base/system.h>
 #include <engine/client/backend_sdl.h>
 
-CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias)
+CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias) :
+	m_OpenGLVersionMajor(OpenGLVersionMajor), m_OpenGLVersionMinor(OpenGLVersionMinor), m_OpenGLVersionPatch(OpenGLVersionPatch), m_IsOpenGLES(IsOpenGLES), m_TextureLODBias(TextureLODBias), m_HasTextureArray(false), m_TextureReplaceType(0)
 {
-	m_OpenGLVersionMajor = OpenGLVersionMajor;
-	m_OpenGLVersionMinor = OpenGLVersionMinor;
-	m_OpenGLVersionPatch = OpenGLVersionPatch;
-
-	m_IsOpenGLES = IsOpenGLES;
-
-	m_TextureLODBias = TextureLODBias;
-
-	m_HasTextureArray = false;
-	m_TextureReplaceType = 0;
 }
 
 void CGLSLCompiler::AddDefine(const std::string &DefineName, const std::string &DefineValue)

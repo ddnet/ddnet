@@ -2,21 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "layers.h"
 
-CLayers::CLayers()
+CLayers::CLayers() :
+	m_GroupsNum(0), m_GroupsStart(0), m_LayersNum(0), m_LayersStart(0), m_pGameGroup(0), m_pGameLayer(0), m_pMap(0), m_pTeleLayer(0), m_pSpeedupLayer(0), m_pFrontLayer(0), m_pSwitchLayer(0), m_pTuneLayer(0)
 {
-	m_GroupsNum = 0;
-	m_GroupsStart = 0;
-	m_LayersNum = 0;
-	m_LayersStart = 0;
-	m_pGameGroup = 0;
-	m_pGameLayer = 0;
-	m_pMap = 0;
-
-	m_pTeleLayer = 0;
-	m_pSpeedupLayer = 0;
-	m_pFrontLayer = 0;
-	m_pSwitchLayer = 0;
-	m_pTuneLayer = 0;
 }
 
 void CLayers::Init(class IKernel *pKernel)

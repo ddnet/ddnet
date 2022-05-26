@@ -16,31 +16,17 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-CLayerTiles::CLayerTiles(int w, int h)
+CLayerTiles::CLayerTiles(int w, int h) :
+	m_Width(w), m_Height(h), m_Image(-1), m_Game(0), m_ColorEnv(-1), m_ColorEnvOffset(0), m_Tele(0), m_Speedup(0), m_Front(0), m_Switch(0), m_Tune(0), m_AutoMapperConfig(-1), m_Seed(0), m_AutoAutoMap(false), m_pTiles(new CTile[m_Width * m_Height])
 {
 	m_Type = LAYERTYPE_TILES;
 	m_aName[0] = '\0';
-	m_Width = w;
-	m_Height = h;
-	m_Image = -1;
-	m_Game = 0;
+
 	m_Color.r = 255;
 	m_Color.g = 255;
 	m_Color.b = 255;
 	m_Color.a = 255;
-	m_ColorEnv = -1;
-	m_ColorEnvOffset = 0;
 
-	m_Tele = 0;
-	m_Speedup = 0;
-	m_Front = 0;
-	m_Switch = 0;
-	m_Tune = 0;
-	m_AutoMapperConfig = -1;
-	m_Seed = 0;
-	m_AutoAutoMap = false;
-
-	m_pTiles = new CTile[m_Width * m_Height];
 	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 }
 
@@ -1087,13 +1073,12 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 }
 
 CLayerTele::CLayerTele(int w, int h) :
-	CLayerTiles(w, h)
+	CLayerTiles(w, h), m_pTeleTile(new CTeleTile[w * h])
 {
 	//m_Type = LAYERTYPE_TELE;
 	str_copy(m_aName, "Tele", sizeof(m_aName));
 	m_Tele = 1;
 
-	m_pTeleTile = new CTeleTile[w * h];
 	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
 }
 
@@ -1353,13 +1338,12 @@ bool CLayerTele::ContainsElementWithId(int Id)
 }
 
 CLayerSpeedup::CLayerSpeedup(int w, int h) :
-	CLayerTiles(w, h)
+	CLayerTiles(w, h), m_pSpeedupTile(new CSpeedupTile[w * h])
 {
 	//m_Type = LAYERTYPE_SPEEDUP;
 	str_copy(m_aName, "Speedup", sizeof(m_aName));
 	m_Speedup = 1;
 
-	m_pSpeedupTile = new CSpeedupTile[w * h];
 	mem_zero(m_pSpeedupTile, (size_t)w * h * sizeof(CSpeedupTile));
 }
 
@@ -1675,13 +1659,12 @@ void CLayerFront::Resize(int NewW, int NewH)
 }
 
 CLayerSwitch::CLayerSwitch(int w, int h) :
-	CLayerTiles(w, h)
+	CLayerTiles(w, h), m_pSwitchTile(new CSwitchTile[w * h])
 {
 	//m_Type = LAYERTYPE_SWITCH;
 	str_copy(m_aName, "Switch", sizeof(m_aName));
 	m_Switch = 1;
 
-	m_pSwitchTile = new CSwitchTile[w * h];
 	mem_zero(m_pSwitchTile, (size_t)w * h * sizeof(CSwitchTile));
 }
 
@@ -1969,13 +1952,12 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 //------------------------------------------------------
 
 CLayerTune::CLayerTune(int w, int h) :
-	CLayerTiles(w, h)
+	CLayerTiles(w, h), m_pTuneTile(new CTuneTile[w * h])
 {
 	//m_Type = LAYERTYPE_TUNE;
 	str_copy(m_aName, "Tune", sizeof(m_aName));
 	m_Tune = 1;
 
-	m_pTuneTile = new CTuneTile[w * h];
 	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
 }
 

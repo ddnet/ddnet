@@ -14,10 +14,10 @@
 
 CHostLookup::CHostLookup() = default;
 
-CHostLookup::CHostLookup(const char *pHostname, int Nettype)
+CHostLookup::CHostLookup(const char *pHostname, int Nettype) :
+	m_Nettype(Nettype)
 {
 	str_copy(m_aHostname, pHostname, sizeof(m_aHostname));
-	m_Nettype = Nettype;
 }
 
 void CHostLookup::Run()

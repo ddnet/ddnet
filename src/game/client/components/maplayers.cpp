@@ -23,14 +23,9 @@
 
 using namespace std::chrono_literals;
 
-CMapLayers::CMapLayers(int t, bool OnlineOnly)
+CMapLayers::CMapLayers(int t, bool OnlineOnly) :
+	m_Type(t), m_pLayers(0), m_CurrentLocalTick(0), m_LastLocalTick(0), m_EnvelopeUpdate(false), m_OnlineOnly(OnlineOnly)
 {
-	m_Type = t;
-	m_pLayers = 0;
-	m_CurrentLocalTick = 0;
-	m_LastLocalTick = 0;
-	m_EnvelopeUpdate = false;
-	m_OnlineOnly = OnlineOnly;
 }
 
 void CMapLayers::OnInit()

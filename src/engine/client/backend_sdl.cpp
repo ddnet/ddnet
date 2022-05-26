@@ -93,11 +93,9 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 	}
 }
 
-CGraphicsBackend_Threaded::CGraphicsBackend_Threaded()
+CGraphicsBackend_Threaded::CGraphicsBackend_Threaded() :
+	m_pBuffer(nullptr), m_pProcessor(nullptr), m_Shutdown(true)
 {
-	m_pBuffer = nullptr;
-	m_pProcessor = nullptr;
-	m_Shutdown = true;
 	m_BufferInProcess.store(false, std::memory_order_relaxed);
 }
 
@@ -265,10 +263,9 @@ void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
 	m_pGLBackend->EndCommands();
 }
 
-CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch)
+CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch) :
+	m_BackendType(BackendType)
 {
-	m_BackendType = BackendType;
-
 #if defined(CONF_HEADLESS_CLIENT)
 	m_pGLBackend = new CCommandProcessorFragment_Null();
 #else

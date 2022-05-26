@@ -1047,10 +1047,10 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	pCommand->m_pImage->m_pData = pPixelData;
 }
 
-CCommandProcessorFragment_OpenGL::CCommandProcessorFragment_OpenGL()
+CCommandProcessorFragment_OpenGL::CCommandProcessorFragment_OpenGL() :
+	m_HasShaders(false)
 {
 	m_Textures.resize(CCommandBuffer::MAX_TEXTURES);
-	m_HasShaders = false;
 }
 
 bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)

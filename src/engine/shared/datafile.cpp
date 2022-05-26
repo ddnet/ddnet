@@ -565,12 +565,9 @@ IOHANDLE CDataFileReader::File()
 	return m_pDataFile->m_File;
 }
 
-CDataFileWriter::CDataFileWriter()
+CDataFileWriter::CDataFileWriter() :
+	m_File(0), m_pItemTypes(static_cast<CItemTypeInfo *>(calloc(MAX_ITEM_TYPES, sizeof(CItemTypeInfo)))), m_pItems(static_cast<CItemInfo *>(calloc(MAX_ITEMS, sizeof(CItemInfo)))), m_pDatas(static_cast<CDataInfo *>(calloc(MAX_DATAS, sizeof(CDataInfo))))
 {
-	m_File = 0;
-	m_pItemTypes = static_cast<CItemTypeInfo *>(calloc(MAX_ITEM_TYPES, sizeof(CItemTypeInfo)));
-	m_pItems = static_cast<CItemInfo *>(calloc(MAX_ITEMS, sizeof(CItemInfo)));
-	m_pDatas = static_cast<CDataInfo *>(calloc(MAX_DATAS, sizeof(CDataInfo)));
 }
 
 CDataFileWriter::~CDataFileWriter()

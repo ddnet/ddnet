@@ -415,11 +415,9 @@ bool CSaveTee::IsHooking() const
 	return m_HookState == HOOK_GRABBED || m_HookState == HOOK_FLYING;
 }
 
-CSaveTeam::CSaveTeam(IGameController *Controller)
+CSaveTeam::CSaveTeam(IGameController *Controller) :
+	m_pController(Controller), m_pSwitchers(0), m_pSavedTees(0)
 {
-	m_pController = Controller;
-	m_pSwitchers = 0;
-	m_pSavedTees = 0;
 }
 
 CSaveTeam::~CSaveTeam()

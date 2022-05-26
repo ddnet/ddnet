@@ -12,9 +12,9 @@
 
 #include "mapsounds.h"
 
-CMapSounds::CMapSounds()
+CMapSounds::CMapSounds() :
+	m_Count(0)
 {
-	m_Count = 0;
 }
 
 void CMapSounds::OnMapLoad()

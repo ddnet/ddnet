@@ -14,14 +14,12 @@
 #include "dragger_beam.h"
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool IgnoreWalls, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_Strength(Strength), m_IgnoreWalls(IgnoreWalls), m_EvalTick(Server()->Tick())
 {
 	m_Pos = Pos;
-	m_Strength = Strength;
-	m_IgnoreWalls = IgnoreWalls;
+
 	m_Layer = Layer;
 	m_Number = Number;
-	m_EvalTick = Server()->Tick();
 
 	for(auto &TargetId : m_TargetIdInTeam)
 	{

@@ -22,11 +22,11 @@
 #include "hud.h"
 #include "voting.h"
 
-CHud::CHud()
+CHud::CHud() :
+	m_FrameTimeAvg(0.0f), m_FPSTextContainerIndex(-1)
 {
 	// won't work if zero
-	m_FrameTimeAvg = 0.0f;
-	m_FPSTextContainerIndex = -1;
+
 	OnReset();
 }
 

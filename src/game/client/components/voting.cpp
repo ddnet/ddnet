@@ -136,15 +136,14 @@ void CVoting::Vote(int v)
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-CVoting::CVoting()
+CVoting::CVoting() :
+	m_Closetime(0), m_Voted(0)
 {
 	ClearOptions();
 
-	m_Closetime = 0;
 	m_aDescription[0] = 0;
 	m_aReason[0] = 0;
 	m_Yes = m_No = m_Pass = m_Total = 0;
-	m_Voted = 0;
 }
 
 void CVoting::AddOption(const char *pDescription)

@@ -18,30 +18,17 @@
 #include "entities/projectile.h"
 #include <game/layers.h>
 
-IGameController::IGameController(class CGameContext *pGameServer)
+IGameController::IGameController(class CGameContext *pGameServer) :
+	m_pGameServer(pGameServer), m_pConfig(m_pGameServer->Config()), m_pServer(m_pGameServer->Server()), m_pGameType("unknown"), m_GameOverTick(-1), m_SuddenDeath(0), m_RoundStartTick(Server()->Tick()), m_RoundCount(0), m_GameFlags(0), m_UnbalancedTick(-1), m_ForceBalanced(false), m_CurrentRecord(0)
 {
-	m_pGameServer = pGameServer;
-	m_pConfig = m_pGameServer->Config();
-	m_pServer = m_pGameServer->Server();
-	m_pGameType = "unknown";
-
 	//
 	DoWarmup(g_Config.m_SvWarmup);
-	m_GameOverTick = -1;
-	m_SuddenDeath = 0;
-	m_RoundStartTick = Server()->Tick();
-	m_RoundCount = 0;
-	m_GameFlags = 0;
-	m_aMapWish[0] = 0;
 
-	m_UnbalancedTick = -1;
-	m_ForceBalanced = false;
+	m_aMapWish[0] = 0;
 
 	m_aNumSpawnPoints[0] = 0;
 	m_aNumSpawnPoints[1] = 0;
 	m_aNumSpawnPoints[2] = 0;
-
-	m_CurrentRecord = 0;
 }
 
 IGameController::~IGameController() = default;

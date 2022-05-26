@@ -13,11 +13,10 @@ class CKernel : public IKernel
 	class CInterfaceInfo
 	{
 	public:
-		CInterfaceInfo()
+		CInterfaceInfo() :
+			m_pInterface(0x0), m_AutoDestroy(false)
 		{
 			m_aName[0] = 0;
-			m_pInterface = 0x0;
-			m_AutoDestroy = false;
 		}
 
 		char m_aName[64]{};
@@ -39,9 +38,9 @@ class CKernel : public IKernel
 	}
 
 public:
-	CKernel()
+	CKernel() :
+		m_NumInterfaces(0)
 	{
-		m_NumInterfaces = 0;
 	}
 
 	virtual ~CKernel()

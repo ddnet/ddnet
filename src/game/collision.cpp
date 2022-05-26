@@ -37,20 +37,9 @@ vec2 ClampVel(int MoveRestriction, vec2 Vel)
 	return Vel;
 }
 
-CCollision::CCollision()
+CCollision::CCollision() :
+	m_pTiles(0), m_Width(0), m_Height(0), m_pLayers(0), m_pTele(0), m_pSpeedup(0), m_pFront(0), m_pSwitch(0), m_pDoor(0), m_pSwitchers(0), m_pTune(0)
 {
-	m_pTiles = 0;
-	m_Width = 0;
-	m_Height = 0;
-	m_pLayers = 0;
-
-	m_pTele = 0;
-	m_pSpeedup = 0;
-	m_pFront = 0;
-	m_pSwitch = 0;
-	m_pDoor = 0;
-	m_pSwitchers = 0;
-	m_pTune = 0;
 }
 
 CCollision::~CCollision()

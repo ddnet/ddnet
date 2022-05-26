@@ -5,13 +5,12 @@
 
 CDemoEdit::CDemoEdit(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick) :
 	m_SnapshotDelta(*pSnapshotDelta),
-	m_pStorage(pStorage)
+	m_pStorage(pStorage),
+	m_StartTick(StartTick),
+	m_EndTick(EndTick)
 {
 	str_copy(m_aDemo, pDemo, sizeof(m_aDemo));
 	str_copy(m_aDst, pDst, sizeof(m_aDst));
-
-	m_StartTick = StartTick;
-	m_EndTick = EndTick;
 
 	// Init the demoeditor
 	m_DemoEditor.Init(pNetVersion, &m_SnapshotDelta, NULL, pStorage);

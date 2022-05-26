@@ -6,24 +6,10 @@
 //////////////////////////////////////////////////
 // Entity
 //////////////////////////////////////////////////
-CEntity::CEntity(CGameWorld *pGameWorld, int ObjType)
+CEntity::CEntity(CGameWorld *pGameWorld, int ObjType) :
+	m_pGameWorld(pGameWorld), m_ObjType(ObjType), m_ProximityRadius(0), m_MarkedForDestroy(false), m_ID(-1), m_pPrevTypeEntity(0), m_pNextTypeEntity(0), m_SnapTicks(-1), m_pParent(0), m_DestroyTick(-1), m_LastRenderTick(-1)
 {
-	m_pGameWorld = pGameWorld;
-
-	m_ObjType = ObjType;
-	m_ProximityRadius = 0;
-
-	m_MarkedForDestroy = false;
-	m_ID = -1;
-
-	m_pPrevTypeEntity = 0;
-	m_pNextTypeEntity = 0;
-	m_SnapTicks = -1;
-
 	// DDRace
-	m_pParent = 0;
-	m_DestroyTick = -1;
-	m_LastRenderTick = -1;
 }
 
 CEntity::~CEntity()

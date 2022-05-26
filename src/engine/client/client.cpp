@@ -314,34 +314,14 @@ void CSmoothTime::UpdateMargin(int64_t TargetMargin)
 }
 
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta, [&]() { UpdateDemoIntraTimers(); })
+	m_pEditor(0), m_pInput(0), m_pGraphics(0), m_pSound(0), m_pGameClient(0), m_pMap(0), m_pConfigManager(0), m_pConfig(0), m_pConsole(0), m_DemoPlayer(&m_SnapshotDelta, [&]() { UpdateDemoIntraTimers(); }), m_RenderFrameTimeLow(1.0f), m_RenderFrameTimeHigh(0.0f), m_RenderFrames(0), m_LastRenderTime(time_get()), m_SnapCrcErrors(0), m_AutoScreenshotRecycle(false), m_AutoStatScreenshotRecycle(false), m_AutoCSVRecycle(false), m_EditorActive(false), m_PingStartTime(0), m_MapdownloadFileTemp(0), m_MapdownloadChunk(0), m_MapdownloadSha256Present(false), m_MapdownloadSha256(SHA256_ZEROED), m_MapdownloadCrc(0), m_MapdownloadAmount(-1), m_MapdownloadTotalsize(-1), m_MapDetailsPresent(false), m_MapDetailsSha256(SHA256_ZEROED), m_MapDetailsCrc(0), m_CurrentServerInfoRequestTime(-1), m_CurrentServerPingInfoType(-1), m_CurrentServerPingBasicToken(-1), m_CurrentServerPingToken(-1), m_CurrentServerCurrentPingTime(-1), m_CurrentServerNextPingTime(-1), m_LastDummy(false)
 {
 	for(auto &DemoRecorder : m_DemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
-	m_pEditor = 0;
-	m_pInput = 0;
-	m_pGraphics = 0;
-	m_pSound = 0;
-	m_pGameClient = 0;
-	m_pMap = 0;
-	m_pConfigManager = 0;
-	m_pConfig = 0;
-	m_pConsole = 0;
-
 	m_RenderFrameTime = 0.0001f;
-	m_RenderFrameTimeLow = 1.0f;
-	m_RenderFrameTimeHigh = 0.0f;
-	m_RenderFrames = 0;
-	m_LastRenderTime = time_get();
 
 	m_GameTickSpeed = SERVER_TICK_SPEED;
-
-	m_SnapCrcErrors = 0;
-	m_AutoScreenshotRecycle = false;
-	m_AutoStatScreenshotRecycle = false;
-	m_AutoCSVRecycle = false;
-	m_EditorActive = false;
 
 	m_AckGameTick[0] = -1;
 	m_AckGameTick[1] = -1;
@@ -357,7 +337,6 @@ CClient::CClient() :
 	m_aVersionStr[1] = '\0';
 
 	// pinging
-	m_PingStartTime = 0;
 
 	m_aCurrentMap[0] = 0;
 
@@ -368,18 +347,8 @@ CClient::CClient() :
 	m_aMapdownloadFilenameTemp[0] = 0;
 	m_aMapdownloadName[0] = 0;
 	m_pMapdownloadTask = NULL;
-	m_MapdownloadFileTemp = 0;
-	m_MapdownloadChunk = 0;
-	m_MapdownloadSha256Present = false;
-	m_MapdownloadSha256 = SHA256_ZEROED;
-	m_MapdownloadCrc = 0;
-	m_MapdownloadAmount = -1;
-	m_MapdownloadTotalsize = -1;
 
-	m_MapDetailsPresent = false;
 	m_aMapDetailsName[0] = 0;
-	m_MapDetailsSha256 = SHA256_ZEROED;
-	m_MapDetailsCrc = 0;
 
 	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO);
 	m_pDDNetInfoTask = NULL;
@@ -387,17 +356,10 @@ CClient::CClient() :
 	m_aMapDownloadUrl[0] = '\0';
 	m_Points = -1;
 
-	m_CurrentServerInfoRequestTime = -1;
-	m_CurrentServerPingInfoType = -1;
-	m_CurrentServerPingBasicToken = -1;
-	m_CurrentServerPingToken = -1;
 	mem_zero(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
-	m_CurrentServerCurrentPingTime = -1;
-	m_CurrentServerNextPingTime = -1;
 
 	m_CurrentInput[0] = 0;
 	m_CurrentInput[1] = 0;
-	m_LastDummy = false;
 
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 

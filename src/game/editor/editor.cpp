@@ -97,22 +97,10 @@ CEditorSound::~CEditorSound()
 	m_pData = 0x0;
 }
 
-CLayerGroup::CLayerGroup()
+CLayerGroup::CLayerGroup() :
+	m_Visible(true), m_Collapse(false), m_GameGroup(false), m_OffsetX(0), m_OffsetY(0), m_ParallaxX(100), m_ParallaxY(100), m_UseClipping(0), m_ClipX(0), m_ClipY(0), m_ClipW(0), m_ClipH(0)
 {
 	m_aName[0] = 0;
-	m_Visible = true;
-	m_Collapse = false;
-	m_GameGroup = false;
-	m_OffsetX = 0;
-	m_OffsetY = 0;
-	m_ParallaxX = 100;
-	m_ParallaxY = 100;
-
-	m_UseClipping = 0;
-	m_ClipX = 0;
-	m_ClipY = 0;
-	m_ClipW = 0;
-	m_ClipH = 0;
 }
 
 CLayerGroup::~CLayerGroup()

@@ -14,15 +14,9 @@ const float PLASMA_ACCEL = 1.1f;
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 	bool Explosive, int ForClientID) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_Core(Dir), m_Freeze(Freeze), m_Explosive(Explosive), m_ForClientID(ForClientID), m_EvalTick(Server()->Tick()), m_LifeTime(Server()->TickSpeed() * 1.5f)
 {
 	m_Pos = Pos;
-	m_Core = Dir;
-	m_Freeze = Freeze;
-	m_Explosive = Explosive;
-	m_ForClientID = ForClientID;
-	m_EvalTick = Server()->Tick();
-	m_LifeTime = Server()->TickSpeed() * 1.5f;
 
 	GameWorld()->InsertEntity(this);
 }

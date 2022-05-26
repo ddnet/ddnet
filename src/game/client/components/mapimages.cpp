@@ -29,12 +29,10 @@ CMapImages::CMapImages() :
 {
 }
 
-CMapImages::CMapImages(int TextureSize)
+CMapImages::CMapImages(int TextureSize) :
+	m_Count(0), m_TextureScale(TextureSize), m_SpeedupArrowIsLoaded(false)
 {
-	m_Count = 0;
-	m_TextureScale = TextureSize;
 	mem_zero(m_EntitiesIsLoaded, sizeof(m_EntitiesIsLoaded));
-	m_SpeedupArrowIsLoaded = false;
 
 	mem_zero(m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_aTextureUsedByTileOrQuadLayerFlag));
 

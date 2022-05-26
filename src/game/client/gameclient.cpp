@@ -72,7 +72,8 @@
 
 using namespace std::chrono_literals;
 
-CGameClient::CStack::CStack() { m_Num = 0; }
+CGameClient::CStack::CStack() :
+	m_Num(0) {}
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
 
 const char *CGameClient::Version() const { return GAME_VERSION; }

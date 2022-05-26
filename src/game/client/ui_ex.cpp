@@ -13,9 +13,9 @@
 
 #include <limits>
 
-CUIEx::CUIEx()
+CUIEx::CUIEx() :
+	m_MouseSlow(false)
 {
-	m_MouseSlow = false;
 }
 
 void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount)

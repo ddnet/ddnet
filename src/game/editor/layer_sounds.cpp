@@ -5,11 +5,11 @@
 
 static const float s_SourceVisualSize = 32.0f;
 
-CLayerSounds::CLayerSounds()
+CLayerSounds::CLayerSounds() :
+	m_Sound(-1)
 {
 	m_Type = LAYERTYPE_SOUNDS;
 	m_aName[0] = '\0';
-	m_Sound = -1;
 }
 
 CLayerSounds::~CLayerSounds() = default;

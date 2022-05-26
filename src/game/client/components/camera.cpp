@@ -16,12 +16,9 @@
 
 const float ZoomStep = 0.866025f;
 
-CCamera::CCamera()
+CCamera::CCamera() :
+	m_CamType(CAMTYPE_UNDEFINED), m_ZoomSet(false), m_Zoom(1.0f), m_Zooming(false)
 {
-	m_CamType = CAMTYPE_UNDEFINED;
-	m_ZoomSet = false;
-	m_Zoom = 1.0f;
-	m_Zooming = false;
 	m_ForceFreeviewPos = vec2(-1, -1);
 }
 

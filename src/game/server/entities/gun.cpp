@@ -12,14 +12,12 @@
 #include "plasma.h"
 
 CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_Freeze(Freeze), m_Explosive(Explosive), m_EvalTick(Server()->Tick())
 {
 	m_Pos = Pos;
-	m_Freeze = Freeze;
-	m_Explosive = Explosive;
+
 	m_Layer = Layer;
 	m_Number = Number;
-	m_EvalTick = Server()->Tick();
 
 	mem_zero(m_LastFireTeam, sizeof(m_LastFireTeam));
 	mem_zero(m_LastFireSolo, sizeof(m_LastFireSolo));

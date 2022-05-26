@@ -27,29 +27,23 @@ LOCK g_WriteLock = 0;
 CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, IConsole *pConsole, int Width, int Height, const char *pName) :
 	m_pGraphics(pGraphics),
 	m_pStorage(pStorage),
-	m_pSound(pSound)
+	m_pSound(pSound),
+	m_pFormatContext(0),
+	m_pFormat(0),
+	m_pOptDict(0),
+	m_pVideoCodec(0),
+	m_pAudioCodec(0),
+	m_Width(Width),
+	m_Height(Height),
+	m_FPS(g_Config.m_ClVideoRecorderFPS),
+	m_Recording(false),
+	m_Started(false),
+	m_ProcessingVideoFrame(0),
+	m_ProcessingAudioFrame(0),
+	m_NextFrame(false),
+	m_HasAudio(g_Config.m_ClVideoSndEnable)
 {
-	m_pFormatContext = 0;
-	m_pFormat = 0;
-	m_pOptDict = 0;
-
-	m_pVideoCodec = 0;
-	m_pAudioCodec = 0;
-
-	m_Width = Width;
-	m_Height = Height;
 	str_copy(m_Name, pName, sizeof(m_Name));
-
-	m_FPS = g_Config.m_ClVideoRecorderFPS;
-
-	m_Recording = false;
-	m_Started = false;
-	m_ProcessingVideoFrame = 0;
-	m_ProcessingAudioFrame = 0;
-
-	m_NextFrame = false;
-
-	m_HasAudio = g_Config.m_ClVideoSndEnable;
 
 	dbg_assert(ms_pCurrentVideo == 0, "ms_pCurrentVideo is NOT set to NULL while creating a new Video.");
 

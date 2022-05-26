@@ -20,10 +20,11 @@ public:
 	char m_aCurrentdir[IO_MAX_PATH_LENGTH]{};
 	char m_aBinarydir[IO_MAX_PATH_LENGTH]{};
 
-	CStorage()
+	CStorage() :
+		m_NumPaths(0)
 	{
 		mem_zero(m_aaStoragePaths, sizeof(m_aaStoragePaths));
-		m_NumPaths = 0;
+
 		m_aDatadir[0] = 0;
 		m_aUserdir[0] = 0;
 	}

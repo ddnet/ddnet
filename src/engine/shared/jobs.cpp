@@ -25,12 +25,11 @@ int IJob::Status()
 	return m_Status.load();
 }
 
-CJobPool::CJobPool()
+CJobPool::CJobPool() :
+	m_NumThreads(0), m_Shutdown(false), m_Lock(lock_create())
 {
 	// empty the pool
-	m_NumThreads = 0;
-	m_Shutdown = false;
-	m_Lock = lock_create();
+
 	sphore_init(&m_Semaphore);
 	m_pFirstJob = 0;
 	m_pLastJob = 0;

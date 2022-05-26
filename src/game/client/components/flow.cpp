@@ -5,12 +5,9 @@
 #include <game/layers.h>
 #include <game/mapitems.h>
 
-CFlow::CFlow()
+CFlow::CFlow() :
+	m_pCells(0), m_Height(0), m_Width(0), m_Spacing(16)
 {
-	m_pCells = 0;
-	m_Height = 0;
-	m_Width = 0;
-	m_Spacing = 16;
 }
 
 void CFlow::DbgRender()

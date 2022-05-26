@@ -43,11 +43,9 @@ using namespace std::chrono_literals;
 
 CMenusKeyBinder CMenus::m_Binder;
 
-CMenusKeyBinder::CMenusKeyBinder()
+CMenusKeyBinder::CMenusKeyBinder() :
+	m_TakeKey(false), m_GotKey(false), m_ModifierCombination(0)
 {
-	m_TakeKey = false;
-	m_GotKey = false;
-	m_ModifierCombination = 0;
 }
 
 bool CMenusKeyBinder::OnInput(IInput::CEvent Event)

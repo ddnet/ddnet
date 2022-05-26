@@ -12,15 +12,9 @@
 
 CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls,
 	int ForClientID) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER), m_pDragger(pDragger), m_Strength(Strength), m_IgnoreWalls(IgnoreWalls), m_ForClientID(ForClientID), m_Active(true), m_EvalTick(Server()->Tick())
 {
-	m_pDragger = pDragger;
 	m_Pos = Pos;
-	m_Strength = Strength;
-	m_IgnoreWalls = IgnoreWalls;
-	m_ForClientID = ForClientID;
-	m_Active = true;
-	m_EvalTick = Server()->Tick();
 
 	GameWorld()->InsertEntity(this);
 }

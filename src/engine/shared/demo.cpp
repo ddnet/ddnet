@@ -33,15 +33,10 @@ static const int s_NumMarkersOffset = 176;
 
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
-CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
+CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData) :
+	m_File(0), m_pfnFilter(0), m_pUser(0), m_LastTickMarker(-1), m_pSnapshotDelta(pSnapshotDelta), m_NoMapData(NoMapData)
 {
-	m_File = 0;
 	m_aCurrentFilename[0] = '\0';
-	m_pfnFilter = 0;
-	m_pUser = 0;
-	m_LastTickMarker = -1;
-	m_pSnapshotDelta = pSnapshotDelta;
-	m_NoMapData = NoMapData;
 }
 
 // Record
@@ -387,11 +382,10 @@ void CDemoRecorder::AddDemoMarker()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker", gs_DemoPrintColor);
 }
 
-CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
+CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc) :
+	m_UpdateIntraTimesFunc(UpdateIntraTimesFunc)
 {
 	Construct(pSnapshotDelta);
-
-	m_UpdateIntraTimesFunc = UpdateIntraTimesFunc;
 }
 
 CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta)

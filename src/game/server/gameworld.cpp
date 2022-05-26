@@ -13,14 +13,9 @@
 //////////////////////////////////////////////////
 // game world
 //////////////////////////////////////////////////
-CGameWorld::CGameWorld()
+CGameWorld::CGameWorld() :
+	m_pGameServer(0x0), m_pConfig(0x0), m_pServer(0x0), m_Paused(false), m_ResetRequested(false)
 {
-	m_pGameServer = 0x0;
-	m_pConfig = 0x0;
-	m_pServer = 0x0;
-
-	m_Paused = false;
-	m_ResetRequested = false;
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		pFirstEntityType = 0;
 }

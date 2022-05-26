@@ -58,7 +58,7 @@ private:
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
-			m_pData(std::move(pData)) { m_Lock = lock_create(); }
+			m_Lock(lock_create()), m_pData(std::move(pData)) {}
 		virtual ~CJob() { lock_destroy(m_Lock); }
 		void Abort();
 	};

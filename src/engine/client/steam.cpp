@@ -14,12 +14,10 @@ class CSteam : public ISteam
 	NETADDR m_ConnectAddr{};
 
 public:
-	CSteam()
+	CSteam() :
+		m_SteamPipe(SteamAPI_GetHSteamPipe()), m_pSteamApps(SteamAPI_SteamApps_v008()), m_pSteamFriends(SteamAPI_SteamFriends_v017())
 	{
 		SteamAPI_ManualDispatch_Init();
-		m_SteamPipe = SteamAPI_GetHSteamPipe();
-		m_pSteamApps = SteamAPI_SteamApps_v008();
-		m_pSteamFriends = SteamAPI_SteamFriends_v017();
 
 		ReadLaunchCommandLine();
 		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends), sizeof(m_aPlayerName));

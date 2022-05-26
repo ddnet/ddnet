@@ -9,11 +9,10 @@
 
 #include "friends.h"
 
-CFriends::CFriends()
+CFriends::CFriends() :
+	m_NumFriends(0), m_Foes(false)
 {
 	mem_zero(m_aFriends, sizeof(m_aFriends));
-	m_NumFriends = 0;
-	m_Foes = false;
 }
 
 void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData)

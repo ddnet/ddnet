@@ -17,12 +17,12 @@ static MD5_DIGEST HashPassword(const char *pPassword, const unsigned char aSalt[
 	return md5_finish(&Md5);
 }
 
-CAuthManager::CAuthManager()
+CAuthManager::CAuthManager() :
+	m_Generated(false)
 {
 	m_aDefault[0] = -1;
 	m_aDefault[1] = -1;
 	m_aDefault[2] = -1;
-	m_Generated = false;
 }
 
 void CAuthManager::Init()

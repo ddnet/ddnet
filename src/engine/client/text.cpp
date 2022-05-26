@@ -614,19 +614,13 @@ class CTextRender : public IEngineTextRender
 	}
 
 public:
-	CTextRender()
+	CTextRender() :
+		m_pGraphics(0), m_pCurFont(0), m_pDefaultFont(0), m_FTLibrary(0), m_RenderFlags(0)
 	{
-		m_pGraphics = 0;
-
 		m_Color = DefaultTextColor();
 		m_OutlineColor = DefaultTextOutlineColor();
 		m_SelectionColor = DefaultSelectionColor();
 
-		m_pCurFont = 0;
-		m_pDefaultFont = 0;
-		m_FTLibrary = 0;
-
-		m_RenderFlags = 0;
 		m_CursorRenderTime = tw::time_get();
 	}
 

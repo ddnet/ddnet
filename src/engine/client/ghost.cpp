@@ -13,9 +13,9 @@ static const int gs_NumTicksOffset = 93;
 
 static const ColorRGBA gs_GhostPrintColor{0.65f, 0.6f, 0.6f, 1.0f};
 
-CGhostRecorder::CGhostRecorder()
+CGhostRecorder::CGhostRecorder() :
+	m_File(0)
 {
-	m_File = 0;
 	ResetBuffer();
 }
 
@@ -157,9 +157,9 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	return 0;
 }
 
-CGhostLoader::CGhostLoader()
+CGhostLoader::CGhostLoader() :
+	m_File(0)
 {
-	m_File = 0;
 	ResetBuffer();
 }
 

@@ -17,10 +17,9 @@ CNetBan::CNetHash::CNetHash(const NETADDR *pAddr)
 	m_HashIndex = 0;
 }
 
-CNetBan::CNetHash::CNetHash(const CNetRange *pRange)
+CNetBan::CNetHash::CNetHash(const CNetRange *pRange) :
+	m_Hash(0), m_HashIndex(0)
 {
-	m_Hash = 0;
-	m_HashIndex = 0;
 	for(int i = 0; pRange->m_LB.ip[i] == pRange->m_UB.ip[i]; ++i)
 	{
 		m_Hash += pRange->m_LB.ip[i];

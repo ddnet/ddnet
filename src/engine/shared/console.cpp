@@ -943,22 +943,14 @@ void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
-CConsole::CConsole(int FlagMask)
+CConsole::CConsole(int FlagMask) :
+	m_FlagMask(FlagMask), m_AccessLevel(ACCESS_LEVEL_ADMIN), m_pRecycleList(0), m_StoreCommands(true), m_pFirstCommand(0), m_pFirstExec(0), m_pfnTeeHistorianCommandCallback(0), m_pTeeHistorianCommandUserdata(0), m_pStorage(0)
 {
-	m_FlagMask = FlagMask;
-	m_AccessLevel = ACCESS_LEVEL_ADMIN;
-	m_pRecycleList = 0;
 	m_TempCommands.Reset();
-	m_StoreCommands = true;
+
 	m_apStrokeStr[0] = "0";
 	m_apStrokeStr[1] = "1";
 	m_ExecutionQueue.Reset();
-	m_pFirstCommand = 0;
-	m_pFirstExec = 0;
-	m_pfnTeeHistorianCommandCallback = 0;
-	m_pTeeHistorianCommandUserdata = 0;
-
-	m_pStorage = 0;
 
 	// register some basic commands
 	Register("echo", "r[text]", CFGFLAG_SERVER, Con_Echo, this, "Echo the text");

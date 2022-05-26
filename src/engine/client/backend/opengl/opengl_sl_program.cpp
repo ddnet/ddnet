@@ -135,9 +135,9 @@ TWGLuint CGLSLProgram::GetProgramID()
 	return m_ProgramID;
 }
 
-CGLSLProgram::CGLSLProgram()
+CGLSLProgram::CGLSLProgram() :
+	m_IsLinked(false)
 {
-	m_IsLinked = false;
 }
 
 CGLSLProgram::~CGLSLProgram()

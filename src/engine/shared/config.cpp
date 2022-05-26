@@ -12,12 +12,9 @@ void EscapeParam(char *pDst, const char *pSrc, int Size)
 	str_escape(&pDst, pSrc, pDst + Size);
 }
 
-CConfigManager::CConfigManager()
+CConfigManager::CConfigManager() :
+	m_pStorage(0), m_ConfigFile(0), m_NumCallbacks(0), m_Failed(false)
 {
-	m_pStorage = 0;
-	m_ConfigFile = 0;
-	m_NumCallbacks = 0;
-	m_Failed = false;
 }
 
 void CConfigManager::Init()

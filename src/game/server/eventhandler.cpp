@@ -9,9 +9,9 @@
 //////////////////////////////////////////////////
 // Event handler
 //////////////////////////////////////////////////
-CEventHandler::CEventHandler()
+CEventHandler::CEventHandler() :
+	m_pGameServer(0)
 {
-	m_pGameServer = 0;
 	Clear();
 }
 

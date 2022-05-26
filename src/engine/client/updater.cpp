@@ -85,15 +85,9 @@ int CUpdaterFetchTask::OnCompletion(int State)
 	return State;
 }
 
-CUpdater::CUpdater()
+CUpdater::CUpdater() :
+	m_pClient(NULL), m_pStorage(NULL), m_pEngine(NULL), m_State(CLEAN), m_Percent(0), m_Lock(lock_create())
 {
-	m_pClient = NULL;
-	m_pStorage = NULL;
-	m_pEngine = NULL;
-	m_State = CLEAN;
-	m_Percent = 0;
-	m_Lock = lock_create();
-
 	IStorage::FormatTmpPath(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC);
 	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
 }

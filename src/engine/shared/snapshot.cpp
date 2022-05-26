@@ -529,9 +529,9 @@ int CSnapshotStorage::Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnap
 }
 
 // CSnapshotBuilder
-CSnapshotBuilder::CSnapshotBuilder()
+CSnapshotBuilder::CSnapshotBuilder() :
+	m_NumExtendedItemTypes(0)
 {
-	m_NumExtendedItemTypes = 0;
 }
 
 void CSnapshotBuilder::Init(bool Sixup)

@@ -23,7 +23,8 @@
 
 #include "chat.h"
 
-CChat::CChat()
+CChat::CChat() :
+	m_Mode(MODE_NONE)
 {
 	for(auto &Line : m_aLines)
 	{
@@ -36,7 +37,6 @@ CChat::CChat()
 #include <game/ddracechat.h>
 	m_Commands.sort_range();
 
-	m_Mode = MODE_NONE;
 	Reset();
 }
 

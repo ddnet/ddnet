@@ -46,9 +46,9 @@ void *CHeap::AllocateFromChunk(unsigned int Size, unsigned Alignment)
 }
 
 // creates a heap
-CHeap::CHeap()
+CHeap::CHeap() :
+	m_pCurrent(0x0)
 {
-	m_pCurrent = 0x0;
 	Reset();
 }
 

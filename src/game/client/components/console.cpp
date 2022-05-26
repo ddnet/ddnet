@@ -82,12 +82,9 @@ void CConsoleLogger::OnConsoleDeletion()
 	m_pConsole = nullptr;
 }
 
-CGameConsole::CInstance::CInstance(int Type)
+CGameConsole::CInstance::CInstance(int Type) :
+	m_pHistoryEntry(0x0), m_Type(Type)
 {
-	m_pHistoryEntry = 0x0;
-
-	m_Type = Type;
-
 	if(Type == CGameConsole::CONSOLETYPE_LOCAL)
 		m_CompletionFlagmask = CFGFLAG_CLIENT;
 	else
@@ -439,12 +436,8 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA Pr
 }
 
 CGameConsole::CGameConsole() :
-	m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
+	m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE), m_ConsoleType(CONSOLETYPE_LOCAL), m_ConsoleState(CONSOLE_CLOSED), m_StateChangeEnd(0.0f), m_StateChangeDuration(0.1f)
 {
-	m_ConsoleType = CONSOLETYPE_LOCAL;
-	m_ConsoleState = CONSOLE_CLOSED;
-	m_StateChangeEnd = 0.0f;
-	m_StateChangeDuration = 0.1f;
 }
 
 CGameConsole::~CGameConsole()

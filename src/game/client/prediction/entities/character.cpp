@@ -1087,14 +1087,10 @@ CTeamsCore *CCharacter::TeamsCore()
 }
 
 CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER), m_IsLocal(false), m_LastWeapon(WEAPON_HAMMER), m_QueuedWeapon(-1), m_ReloadTimer(0), m_NumObjectsHit(0), m_LastRefillJumps(false), m_LastJetpackStrength(400.0f), m_Super(false), m_CanMoveInFreeze(false), m_Alive(true), m_TeleCheckpoint(0), m_StrongWeakID(0)
 {
 	m_ID = ID;
-	m_IsLocal = false;
 
-	m_LastWeapon = WEAPON_HAMMER;
-	m_QueuedWeapon = -1;
-	m_LastRefillJumps = false;
 	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
@@ -1104,15 +1100,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
 	m_ProximityRadius = ms_PhysSize;
 	m_Core.m_LeftWall = true;
-	m_ReloadTimer = 0;
-	m_NumObjectsHit = 0;
-	m_LastRefillJumps = false;
-	m_LastJetpackStrength = 400.0f;
-	m_Super = false;
-	m_CanMoveInFreeze = false;
-	m_Alive = true;
-	m_TeleCheckpoint = 0;
-	m_StrongWeakID = 0;
 
 	// never initialize both to zero
 	m_Input.m_TargetX = 0;
