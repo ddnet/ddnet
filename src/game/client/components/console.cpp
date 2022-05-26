@@ -449,7 +449,8 @@ CGameConsole::CGameConsole() :
 
 CGameConsole::~CGameConsole()
 {
-	m_pConsoleLogger->OnConsoleDeletion();
+	if(m_pConsoleLogger)
+		m_pConsoleLogger->OnConsoleDeletion();
 }
 
 float CGameConsole::TimeNow()
