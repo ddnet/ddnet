@@ -84,3 +84,4 @@ Checks: >
   -readability-uppercase-literal-suffix,
   performance-*,
   -performance-no-int-to-ptr,
+  portability-*,
