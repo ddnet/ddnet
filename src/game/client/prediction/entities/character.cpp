@@ -1379,3 +1379,9 @@ void CCharacter::SetTuneZone(int Zone)
 	m_TuneZone = Zone;
 	m_LastTuneZoneTick = GameWorld()->GameTick();
 }
+
+CCharacter::~CCharacter()
+{
+	if(GameWorld())
+		GameWorld()->RemoveCharacter(this);
+}
