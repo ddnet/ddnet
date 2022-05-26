@@ -2283,12 +2283,15 @@ if(SERVER)
     databases/connection_pool.h
     databases/mysql.cpp
     databases/sqlite.cpp
+    main.cpp
     name_ban.cpp
     name_ban.h
     register.cpp
     register.h
     server.cpp
     server.h
+    server_logger.cpp
+    server_logger.h
     sql_string_helpers.cpp
     sql_string_helpers.h
     upnp.cpp
