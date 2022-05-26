@@ -1,3 +1,4 @@
 shift-base:pnglite.c
 null:json.c
 pointer-overflow:json.c
+vptr:gameworld.cpp
