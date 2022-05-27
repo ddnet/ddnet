@@ -2575,18 +2575,8 @@ void CMenus::OnRender()
 
 	UI()->Update(mx, my, mx * 3.0f, my * 3.0f);
 
-	// render
 	Render();
-
-	// render cursor
-	Graphics()->WrapClamp();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1, 1, 1, 1);
-	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-	Graphics()->WrapNormal();
+	RenderTools()->RenderCursor(vec2(mx, my), 24.0f);
 
 	// render debug information
 	if(g_Config.m_Debug)
