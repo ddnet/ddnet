@@ -283,7 +283,6 @@ protected:
 	int m_ActivePage;
 	bool m_ShowStart;
 	bool m_MenuActive;
-	bool m_UseMouseButtons;
 	vec2 m_MousePos;
 	bool m_JoinTutorial;
 
@@ -539,8 +538,6 @@ public:
 	void RenderBackground();
 
 	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
-
-	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }
 
 	static CMenusKeyBinder m_Binder;
 

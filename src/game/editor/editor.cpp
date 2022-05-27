@@ -6343,7 +6343,7 @@ void CEditor::Init()
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
-	m_UI.Init(m_pGraphics, m_pTextRender);
+	m_UI.Init(m_pInput, m_pGraphics, m_pTextRender);
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
 
@@ -6445,15 +6445,7 @@ void CEditor::UpdateAndRender()
 			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->ScreenHeight());
 		}
 
-		int Buttons = 0;
-		if(Input()->KeyIsPressed(KEY_MOUSE_1))
-			Buttons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2))
-			Buttons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3))
-			Buttons |= 4;
-
-		UI()->Update(mx, my, Mwx, Mwy, Buttons);
+		UI()->Update(mx, my, Mwx, Mwy);
 	}
 
 	// toggle gui

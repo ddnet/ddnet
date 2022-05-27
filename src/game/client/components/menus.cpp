@@ -79,7 +79,6 @@ CMenus::CMenus()
 	m_NeedSendDummyinfo = false;
 	m_MenuActive = true;
 	m_ShowStart = true;
-	m_UseMouseButtons = true;
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;
@@ -2542,6 +2541,7 @@ void CMenus::OnRender()
 		m_EnterPressed = false;
 		m_DeletePressed = false;
 		m_NumInputEvents = 0;
+		UI()->FinishCheck();
 		return;
 	}
 
@@ -2574,31 +2574,10 @@ void CMenus::OnRender()
 	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
 	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
-	int Buttons = 0;
-	if(m_UseMouseButtons)
-	{
-		if(Input()->KeyIsPressed(KEY_MOUSE_1))
-			Buttons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2))
-			Buttons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3))
-			Buttons |= 4;
-	}
+	UI()->Update(mx, my, mx * 3.0f, my * 3.0f);
 
-	UI()->Update(mx, my, mx * 3.0f, my * 3.0f, Buttons);
-
-	// render
 	Render();
-
-	// render cursor
-	Graphics()->WrapClamp();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1, 1, 1, 1);
-	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-	Graphics()->WrapNormal();
+	RenderTools()->RenderCursor(vec2(mx, my), 24.0f);
 
 	// render debug information
 	if(g_Config.m_Debug)
