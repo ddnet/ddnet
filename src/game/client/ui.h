@@ -192,6 +192,8 @@ struct SLabelProperties
 
 class CUI
 {
+	bool m_Enabled;
+
 	const void *m_pHotItem;
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
@@ -210,6 +212,7 @@ class CUI
 	std::vector<CUIRect> m_Clips;
 	void UpdateClipping();
 
+	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
@@ -220,7 +223,8 @@ public:
 	static float ms_FontmodHeight;
 
 	// TODO: Refactor: Fill this in
-	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
+	void Init(class IInput *pInput, class IGraphics *pGraphics, class ITextRender *pTextRender);
+	class IInput *Input() const { return m_pInput; }
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 
@@ -251,7 +255,9 @@ public:
 		CORNER_ALL = CORNER_T | CORNER_B
 	};
 
-	int Update(float mx, float my, float Mwx, float Mwy, int m_Buttons);
+	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
+	bool Enabled() const { return m_Enabled; }
+	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
 	float MouseDeltaY() const { return m_MouseDeltaY; }

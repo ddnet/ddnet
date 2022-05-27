@@ -79,7 +79,6 @@ CMenus::CMenus()
 	m_NeedSendDummyinfo = false;
 	m_MenuActive = true;
 	m_ShowStart = true;
-	m_UseMouseButtons = true;
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;
@@ -2574,18 +2573,7 @@ void CMenus::OnRender()
 	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
 	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
-	int Buttons = 0;
-	if(m_UseMouseButtons)
-	{
-		if(Input()->KeyIsPressed(KEY_MOUSE_1))
-			Buttons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2))
-			Buttons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3))
-			Buttons |= 4;
-	}
-
-	UI()->Update(mx, my, mx * 3.0f, my * 3.0f, Buttons);
+	UI()->Update(mx, my, mx * 3.0f, my * 3.0f);
 
 	// render
 	Render();
