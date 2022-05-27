@@ -144,8 +144,6 @@ private:
 	std::atomic<int32_t> m_ProcessingVideoFrame;
 	std::atomic<int32_t> m_ProcessingAudioFrame;
 
-	std::atomic<bool> m_NextFrame;
-
 	bool m_HasAudio;
 
 	struct SVideoSoundBuffer
