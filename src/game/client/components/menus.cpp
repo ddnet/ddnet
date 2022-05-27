@@ -2542,6 +2542,7 @@ void CMenus::OnRender()
 		m_EnterPressed = false;
 		m_DeletePressed = false;
 		m_NumInputEvents = 0;
+		UI()->FinishCheck();
 		return;
 	}
 
