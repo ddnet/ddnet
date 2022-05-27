@@ -72,8 +72,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 
 	m_ReckoningTick = 0;
-	mem_zero(&m_SendCore, sizeof(m_SendCore));
-	mem_zero(&m_ReckoningCore, sizeof(m_ReckoningCore));
+	m_SendCore = CCharacterCore();
+	m_ReckoningCore = CCharacterCore();
 
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
