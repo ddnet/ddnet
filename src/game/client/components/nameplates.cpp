@@ -322,28 +322,29 @@ void CNamePlates::OnRender()
 			continue;
 		}
 
-		// don't render offscreen
-		vec2 *pRenderPos = &m_pClient->m_aClients[i].m_RenderPos;
+		vec2 *pRenderPos;
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)
 		{
+			// Each player can also have a spec char whose nameplate is displayed independently
 			pRenderPos = &m_pClient->m_aClients[i].m_SpecChar;
+			// don't render offscreen
+			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
+			{
+				RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+			}
 		}
-		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
 		{
-			continue;
-		}
-
-		if(m_pClient->m_aClients[i].m_SpecCharPresent)
-		{
-			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
-		}
-		else if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
-		{
-			// only render nameplates for active characters
-			RenderNameplate(
-				&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
-				&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
-				pInfo);
+			// Only render nameplates for active characters
+			pRenderPos = &m_pClient->m_aClients[i].m_RenderPos;
+			// don't render offscreen
+			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
+			{
+				RenderNameplate(
+					&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
+					&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
+					pInfo);
+			}
 		}
 	}
 }

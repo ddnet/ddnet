@@ -141,7 +141,7 @@ void CDragger::LookForPlayersToDrag()
 		// Create Dragger Beams which have not been created yet
 		if(IsTarget[i] && m_apDraggerBeam[i] == nullptr)
 		{
-			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i);
+			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i, m_Layer, m_Number);
 		}
 		// Remove dragger beams that have not yet been deleted
 		else if(!IsTarget[i] && m_apDraggerBeam[i] != nullptr)
