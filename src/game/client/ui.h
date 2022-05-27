@@ -291,8 +291,12 @@ public:
 	void StartCheck() { m_ActiveItemValid = false; }
 	void FinishCheck()
 	{
-		if(!m_ActiveItemValid)
+		if(!m_ActiveItemValid && m_pActiveItem != nullptr)
+		{
 			SetActiveItem(nullptr);
+			m_pHotItem = nullptr;
+			m_pBecomingHotItem = nullptr;
+		}
 	}
 
 	bool MouseInside(const CUIRect *pRect) const;
