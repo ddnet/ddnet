@@ -1750,7 +1750,9 @@ void CGameClient::OnPredict()
 	{
 		pProjNext = (CProjectile *)pProj->TypeNext();
 		if(IsOtherTeam(pProj->GetOwner()))
-			m_PredictedWorld.RemoveEntity(pProj);
+		{
+			pProj->Destroy();
+		}
 	}
 
 	CCharacter *pLocalChar = m_PredictedWorld.GetCharacterByID(m_Snap.m_LocalClientID);

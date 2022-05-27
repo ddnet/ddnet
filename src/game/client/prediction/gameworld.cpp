@@ -166,7 +166,6 @@ void CGameWorld::RemoveEntities()
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			if(pEnt->m_MarkedForDestroy)
 			{
-				RemoveEntity(pEnt);
 				pEnt->Destroy();
 			}
 			pEnt = m_pNextTraverseEntity;
@@ -354,7 +353,10 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 		pChar->Keep();
 	}
 	else
+	{
 		pChar = new CCharacter(this, ObjID, pCharObj, pExtended, pExtendedDisplayInfo);
+		InsertEntity(pChar);
+	}
 
 	if(pChar)
 		pChar->m_GameTeam = GameTeam;
@@ -423,7 +425,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 			}
 		}
 		CProjectile *pProj = new CProjectile(NetProj);
-		InsertEntity((CEntity *)pProj);
+		InsertEntity(pProj);
 	}
 	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{

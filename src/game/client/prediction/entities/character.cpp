@@ -1121,8 +1121,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 
 	ResetPrediction();
 	Read(pChar, pExtended, pExtendedDisplayInfo, false);
-
-	GameWorld()->InsertEntity(this);
 }
 
 void CCharacter::ResetPrediction()

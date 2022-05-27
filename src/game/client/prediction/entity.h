@@ -49,7 +49,7 @@ public:
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
 
-	virtual void Destroy() { delete this; }
+	void Destroy() { delete this; }
 	virtual void Tick() {}
 	virtual void TickDefered() {}
 
