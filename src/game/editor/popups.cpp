@@ -54,7 +54,7 @@ void CEditor::UiDoPopupMenu()
 		if(Inside)
 			m_MouseInsidePopup = true;
 
-		if(UI()->ActiveItem() == &s_UiPopups[i].m_pId)
+		if(UI()->CheckActiveItem(&s_UiPopups[i].m_pId))
 		{
 			if(!UI()->MouseButton(0))
 			{
@@ -63,7 +63,7 @@ void CEditor::UiDoPopupMenu()
 					g_UiNumPopups--;
 					m_PopupEventWasActivated = false;
 				}
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 		else if(UI()->HotItem() == &s_UiPopups[i].m_pId)
@@ -85,7 +85,7 @@ void CEditor::UiDoPopupMenu()
 		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))
 		{
 			m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			g_UiNumPopups--;
 			m_PopupEventWasActivated = false;
 		}
@@ -93,7 +93,7 @@ void CEditor::UiDoPopupMenu()
 		if(Input()->KeyPress(KEY_ESCAPE))
 		{
 			m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			g_UiNumPopups--;
 			m_PopupEventWasActivated = false;
 		}

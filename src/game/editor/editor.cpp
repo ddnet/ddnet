@@ -540,12 +540,12 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			str_format(s_aNumStr, sizeof(s_aNumStr), "%d", Current);
 	}
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
 			m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			s_TextMode = false;
 		}
 	}
@@ -567,20 +567,20 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			else
 				Current = clamp(str_toint(s_aNumStr), Min, Max);
 			m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			s_TextMode = false;
 		}
 
 		if(Input()->KeyIsPressed(KEY_ESCAPE))
 		{
 			m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			s_TextMode = false;
 		}
 	}
 	else
 	{
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 		{
 			if(UI()->MouseButton(0))
 			{
@@ -1243,7 +1243,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	bool IgnoreGrid;
 	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
@@ -1286,7 +1286,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 		else
@@ -1295,7 +1295,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 			{
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 
@@ -1372,7 +1372,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
@@ -1481,7 +1481,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 		else if(s_Operation == OP_DELETE)
@@ -1495,7 +1495,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					DeleteSelectedQuads();
 				}
 				s_Operation = OP_NONE;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 		else
@@ -1504,7 +1504,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			{
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 
@@ -1625,7 +1625,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	bool IgnoreGrid;
 	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!s_Moved)
 		{
@@ -1718,7 +1718,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					static int s_PointPopupID = 0;
 					UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
 				}
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 		else
@@ -1734,7 +1734,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				}
 
 				m_LockMouse = false;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 
@@ -2184,7 +2184,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 
 	float dx = (CenterX - wx) / m_WorldZoom;
 	float dy = (CenterY - wy) / m_WorldZoom;
-	if(dx * dx + dy * dy < 50.0f && UI()->ActiveItem() == 0)
+	if(dx * dx + dy * dy < 50.0f && UI()->CheckActiveItem(nullptr))
 	{
 		UI()->SetHotItem(pID);
 		s_CurQIndex = QIndex;
@@ -2193,7 +2193,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	bool IgnoreGrid;
 	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
-	if(UI()->ActiveItem() == pID && s_CurQIndex == QIndex)
+	if(UI()->CheckActiveItem(pID) && s_CurQIndex == QIndex)
 	{
 		if(s_Operation == OP_MOVE)
 		{
@@ -2228,7 +2228,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		{
 			m_LockMouse = false;
 			s_Operation = OP_NONE;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -2479,7 +2479,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		UI()->SetHotItem(s_pEditorID);
 
 		// do global operations like pan and zoom
-		if(UI()->ActiveItem() == 0 && (UI()->MouseButton(0) || UI()->MouseButton(2)))
+		if(UI()->CheckActiveItem(nullptr) && (UI()->MouseButton(0) || UI()->MouseButton(2)))
 		{
 			s_StartWx = wx;
 			s_StartWy = wy;
@@ -2530,7 +2530,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
 
-			if(UI()->ActiveItem() == s_pEditorID)
+			if(UI()->CheckActiveItem(s_pEditorID))
 			{
 				CUIRect r;
 				r.x = s_StartWx;
@@ -2775,7 +2775,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		// do panning
-		if(UI()->ActiveItem() == s_pEditorID)
+		if(UI()->CheckActiveItem(s_pEditorID))
 		{
 			if(s_Operation == OP_PAN_WORLD)
 			{
@@ -2792,7 +2792,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			if(!UI()->MouseButton(0))
 			{
 				s_Operation = OP_NONE;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 		}
 		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) &&
@@ -2810,13 +2810,13 @@ void CEditor::DoMapEditor(CUIRect View)
 				m_WorldOffsetY += PanSpeed * m_WorldZoom;
 		}
 	}
-	else if(UI()->ActiveItem() == s_pEditorID)
+	else if(UI()->CheckActiveItem(s_pEditorID))
 	{
 		// release mouse
 		if(!UI()->MouseButton(0))
 		{
 			s_Operation = OP_NONE;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 
@@ -4678,7 +4678,7 @@ void CEditor::RenderFileDialog()
 			m_FileDialogErrString[0] = 0;
 			static int s_NewFolderPopupID = 0;
 			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 
@@ -4694,7 +4694,7 @@ void CEditor::RenderFileDialog()
 			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense, sizeof(m_Map.m_MapInfo.m_aLicenseTmp));
 			static int s_MapInfoPopupID = 0;
 			UiInvokePopupMenu(&s_MapInfoPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupMapInfo);
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 }
@@ -5261,14 +5261,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 					float ColorMod = 1.0f;
 
-					if(UI()->ActiveItem() == pID)
+					if(UI()->CheckActiveItem(pID))
 					{
 						if(!UI()->MouseButton(0))
 						{
 							m_SelectedQuadEnvelope = -1;
 							m_SelectedEnvelopePoint = -1;
 
-							UI()->SetActiveItem(0);
+							UI()->SetActiveItem(nullptr);
 						}
 						else
 						{
@@ -5355,7 +5355,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						pEnvelope->m_lPoints[i].m_aValues[c] = f2fx(str_tofloat(s_aStrCurValue));
 					}
 
-					if(UI()->ActiveItem() == pID /* || UI()->HotItem() == pID*/)
+					if(UI()->CheckActiveItem(pID) /* || UI()->HotItem() == pID*/)
 					{
 						CurrentTime = pEnvelope->m_lPoints[i].m_Time;
 						CurrentValue = pEnvelope->m_lPoints[i].m_aValues[c];
@@ -6403,6 +6403,8 @@ void CEditor::UpdateAndRender()
 		m_AnimateTime = 0;
 	ms_pUiGotContext = 0;
 
+	UI()->StartCheck();
+
 	// handle mouse movement
 	float mx, my, Mwx, Mwy;
 	float rx = 0, ry = 0;
@@ -6469,6 +6471,7 @@ void CEditor::UpdateAndRender()
 		m_ShowMousePointer = true;
 	}
 
+	UI()->FinishCheck();
 	Input()->Clear();
 }
 

@@ -159,7 +159,7 @@ void CUI::ConvertMouseMove(float *x, float *y) const
 
 float CUI::ButtonColorMul(const void *pID)
 {
-	if(ActiveItem() == pID)
+	if(CheckActiveItem(pID))
 		return ButtonColorMulActive();
 	else if(HotItem() == pID)
 		return ButtonColorMulHot();
@@ -432,13 +432,13 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 	const bool Inside = MouseHovered(pRect);
 	static int s_ButtonUsed = 0;
 
-	if(ActiveItem() == pID)
+	if(CheckActiveItem(pID))
 	{
 		if(!MouseButton(s_ButtonUsed))
 		{
 			if(Inside && Checked >= 0)
 				ReturnValue = 1 + s_ButtonUsed;
-			SetActiveItem(0);
+			SetActiveItem(nullptr);
 		}
 	}
 	else if(HotItem() == pID)
@@ -467,10 +467,10 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	if(HotItem() == pID && MouseButtonClicked(0))
 		SetActiveItem(pID);
 
-	if(ActiveItem() == pID && !MouseButton(0))
-		SetActiveItem(0);
+	if(CheckActiveItem(pID) && !MouseButton(0))
+		SetActiveItem(nullptr);
 
-	if(ActiveItem() != pID)
+	if(!CheckActiveItem(pID))
 		return 0;
 
 	if(pX)

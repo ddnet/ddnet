@@ -399,7 +399,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 
 	static bool s_ListBoxUsed = false;
-	if(UI()->ActiveItem() == pClan || UI()->ActiveItem() == pName)
+	if(UI()->CheckActiveItem(pClan) || UI()->CheckActiveItem(pName))
 		s_ListBoxUsed = false;
 
 	// country flag selector

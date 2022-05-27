@@ -178,7 +178,7 @@ class CMenus : public CComponent
 		}
 		// render
 		size_t Index = 2;
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 			Index = 0;
 		else if(UI()->HotItem() == pID)
 			Index = 1;
