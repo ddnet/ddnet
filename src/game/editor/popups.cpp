@@ -54,7 +54,7 @@ void CEditor::UiDoPopupMenu()
 		if(Inside)
 			m_MouseInsidePopup = true;
 
-		if(UI()->ActiveItem() == &s_UiPopups[i].m_pId)
+		if(UI()->CheckActiveItem(&s_UiPopups[i].m_pId))
 		{
 			if(!UI()->MouseButton(0))
 			{

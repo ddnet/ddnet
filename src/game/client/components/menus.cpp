@@ -502,7 +502,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
 	}
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
@@ -540,7 +540,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	}
 	else
 	{
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 		{
 			if(UseScroll)
 			{
@@ -615,7 +615,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
 		MouseReleased = true;
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_Binder.m_GotKey)
 		{
@@ -662,7 +662,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		UI()->SetHotItem(pID);
 
 	// draw
-	if(UI()->ActiveItem() == pID && s_ButtonUsed == 0)
+	if(UI()->CheckActiveItem(pID) && s_ButtonUsed == 0)
 		DoButton_KeySelect(pID, "???", 0, pRect);
 	else
 	{
@@ -2518,6 +2518,8 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 void CMenus::OnRender()
 {
+	UI()->StartCheck();
+
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
@@ -2609,6 +2611,8 @@ void CMenus::OnRender()
 		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 	}
+
+	UI()->FinishCheck();
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;

@@ -540,7 +540,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			str_format(s_aNumStr, sizeof(s_aNumStr), "%d", Current);
 	}
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
@@ -580,7 +580,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	}
 	else
 	{
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 		{
 			if(UI()->MouseButton(0))
 			{
@@ -1243,7 +1243,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	bool IgnoreGrid;
 	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
@@ -1372,7 +1372,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
@@ -1625,7 +1625,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	bool IgnoreGrid;
 	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!s_Moved)
 		{
@@ -2184,7 +2184,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 
 	float dx = (CenterX - wx) / m_WorldZoom;
 	float dy = (CenterY - wy) / m_WorldZoom;
-	if(dx * dx + dy * dy < 50.0f && UI()->ActiveItem() == 0)
+	if(dx * dx + dy * dy < 50.0f && UI()->CheckActiveItem(nullptr))
 	{
 		UI()->SetHotItem(pID);
 		s_CurQIndex = QIndex;
@@ -2193,7 +2193,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	bool IgnoreGrid;
 	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
-	if(UI()->ActiveItem() == pID && s_CurQIndex == QIndex)
+	if(UI()->CheckActiveItem(pID) && s_CurQIndex == QIndex)
 	{
 		if(s_Operation == OP_MOVE)
 		{
@@ -2479,7 +2479,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		UI()->SetHotItem(s_pEditorID);
 
 		// do global operations like pan and zoom
-		if(UI()->ActiveItem() == 0 && (UI()->MouseButton(0) || UI()->MouseButton(2)))
+		if(UI()->CheckActiveItem(nullptr) && (UI()->MouseButton(0) || UI()->MouseButton(2)))
 		{
 			s_StartWx = wx;
 			s_StartWy = wy;
@@ -2530,7 +2530,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			else
 				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
 
-			if(UI()->ActiveItem() == s_pEditorID)
+			if(UI()->CheckActiveItem(s_pEditorID))
 			{
 				CUIRect r;
 				r.x = s_StartWx;
@@ -2775,7 +2775,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		// do panning
-		if(UI()->ActiveItem() == s_pEditorID)
+		if(UI()->CheckActiveItem(s_pEditorID))
 		{
 			if(s_Operation == OP_PAN_WORLD)
 			{
@@ -2810,7 +2810,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				m_WorldOffsetY += PanSpeed * m_WorldZoom;
 		}
 	}
-	else if(UI()->ActiveItem() == s_pEditorID)
+	else if(UI()->CheckActiveItem(s_pEditorID))
 	{
 		// release mouse
 		if(!UI()->MouseButton(0))
@@ -5261,7 +5261,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 					float ColorMod = 1.0f;
 
-					if(UI()->ActiveItem() == pID)
+					if(UI()->CheckActiveItem(pID))
 					{
 						if(!UI()->MouseButton(0))
 						{
@@ -5355,7 +5355,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						pEnvelope->m_lPoints[i].m_aValues[c] = f2fx(str_tofloat(s_aStrCurValue));
 					}
 
-					if(UI()->ActiveItem() == pID /* || UI()->HotItem() == pID*/)
+					if(UI()->CheckActiveItem(pID) /* || UI()->HotItem() == pID*/)
 					{
 						CurrentTime = pEnvelope->m_lPoints[i].m_Time;
 						CurrentValue = pEnvelope->m_lPoints[i].m_aValues[c];
@@ -6403,6 +6403,8 @@ void CEditor::UpdateAndRender()
 		m_AnimateTime = 0;
 	ms_pUiGotContext = 0;
 
+	UI()->StartCheck();
+
 	// handle mouse movement
 	float mx, my, Mwx, Mwy;
 	float rx = 0, ry = 0;
@@ -6469,6 +6471,7 @@ void CEditor::UpdateAndRender()
 		m_ShowMousePointer = true;
 	}
 
+	UI()->FinishCheck();
 	Input()->Clear();
 }
 

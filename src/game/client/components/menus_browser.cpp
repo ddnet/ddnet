@@ -311,7 +311,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		else
 		{
 			// reset active item, if not visible
-			if(UI()->ActiveItem() == pItem)
+			if(UI()->CheckActiveItem(pItem))
 				UI()->SetActiveItem(0);
 
 			// don't render invisible items
