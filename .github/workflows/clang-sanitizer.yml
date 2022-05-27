@@ -31,6 +31,7 @@ jobs:
         export CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"
         cmake -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON ..
         make -j"$(nproc)"
+        mv chillerbot-ux DDNet
     - name: Run server and headless client with ASan and UBSan
       run: |
         cd san
