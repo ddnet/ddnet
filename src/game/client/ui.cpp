@@ -430,15 +430,16 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 	// logic
 	int ReturnValue = 0;
 	const bool Inside = MouseHovered(pRect);
-	static int s_ButtonUsed = 0;
+	static int s_ButtonUsed = -1;
 
 	if(CheckActiveItem(pID))
 	{
-		if(!MouseButton(s_ButtonUsed))
+		if(s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
 		{
 			if(Inside && Checked >= 0)
 				ReturnValue = 1 + s_ButtonUsed;
 			SetActiveItem(nullptr);
+			s_ButtonUsed = -1;
 		}
 	}
 	else if(HotItem() == pID)
@@ -453,7 +454,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 		}
 	}
 
-	if(Inside)
+	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
 		SetHotItem(pID);
 
 	return ReturnValue;
