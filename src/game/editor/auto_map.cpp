@@ -537,7 +537,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 		}
 
 		// clean-up
-		if(pRun->m_AutomapCopy)
+		if(pRun->m_AutomapCopy && pReadLayer != pLayer)
 			delete pReadLayer;
 	}
 }
