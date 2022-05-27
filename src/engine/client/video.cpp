@@ -47,8 +47,6 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 	m_ProcessingVideoFrame = 0;
 	m_ProcessingAudioFrame = 0;
 
-	m_NextFrame = false;
-
 	m_HasAudio = g_Config.m_ClVideoSndEnable;
 
 	dbg_assert(ms_pCurrentVideo == 0, "ms_pCurrentVideo is NOT set to NULL while creating a new Video.");
@@ -294,7 +292,7 @@ void CVideo::Stop()
 
 void CVideo::NextVideoFrameThread()
 {
-	if(m_NextFrame && m_Recording)
+	if(m_Recording)
 	{
 		// #ifdef CONF_PLATFORM_MACOS
 		// 	CAutoreleasePool AutoreleasePool;
@@ -347,7 +345,6 @@ void CVideo::NextVideoFrameThread()
 				m_CurVideoThreadIndex = 0;
 		}
 
-		m_NextFrame = false;
 		// sync_barrier();
 		// m_Semaphore.signal();
 	}
@@ -359,7 +356,6 @@ void CVideo::NextVideoFrame()
 	{
 		ms_Time += ms_TickTime;
 		ms_LocalTime = (ms_Time - ms_LocalStartTime) / (float)time_freq();
-		m_NextFrame = true;
 		m_Vframe += 1;
 	}
 }
