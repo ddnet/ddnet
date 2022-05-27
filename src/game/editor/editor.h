@@ -12,7 +12,6 @@
 
 #include <base/tl/algorithm.h>
 #include <base/tl/array.h>
-#include <base/tl/sorted_array.h>
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -884,7 +883,7 @@ public:
 
 		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
 	};
-	sorted_array<CFilelistItem> m_FileList;
+	std::vector<CFilelistItem> m_FileList;
 	int m_FilesStartAt;
 	int m_FilesCur;
 	int m_FilesStopAt;

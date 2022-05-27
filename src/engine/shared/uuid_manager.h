@@ -2,7 +2,7 @@
 #define ENGINE_SHARED_UUID_MANAGER_H
 
 #include <base/tl/array.h>
-#include <base/tl/sorted_array.h>
+#include <vector>
 
 enum
 {
@@ -42,8 +42,7 @@ struct CNameIndexed
 	int m_ID;
 
 	bool operator<(const CNameIndexed &Other) const { return m_Uuid < Other.m_Uuid; }
-	bool operator<(const CUuid &Other) const { return m_Uuid < Other; }
-	bool operator==(const CUuid &Other) const { return m_Uuid == Other; }
+	bool operator==(const CNameIndexed &Other) const { return m_Uuid == Other.m_Uuid; }
 };
 
 class CPacker;
@@ -52,7 +51,7 @@ class CUnpacker;
 class CUuidManager
 {
 	array<CName> m_aNames;
-	sorted_array<CNameIndexed> m_aNamesSorted;
+	std::vector<CNameIndexed> m_aNamesSorted;
 
 public:
 	void RegisterName(int ID, const char *pName);

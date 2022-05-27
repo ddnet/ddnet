@@ -3,10 +3,11 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
 #include <chrono>
+#include <vector>
+
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -252,11 +253,11 @@ public:
 	};
 
 protected:
-	sorted_array<SCustomEntities> m_EntitiesList;
-	sorted_array<SCustomGame> m_GameList;
-	sorted_array<SCustomEmoticon> m_EmoticonList;
-	sorted_array<SCustomParticle> m_ParticlesList;
-	sorted_array<SCustomHud> m_HudList;
+	std::vector<SCustomEntities> m_EntitiesList;
+	std::vector<SCustomGame> m_GameList;
+	std::vector<SCustomEmoticon> m_EmoticonList;
+	std::vector<SCustomParticle> m_ParticlesList;
+	std::vector<SCustomHud> m_HudList;
 
 	bool m_IsInit = false;
 
@@ -428,7 +429,6 @@ protected:
 		}
 	};
 
-	//sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
 	char m_aCurrentDemoFile[64];
 	int m_DemolistSelectedIndex;
@@ -448,6 +448,12 @@ protected:
 		const CFriendInfo *m_pFriendInfo;
 		int m_NumFound;
 
+		CFriendItem() {}
+		CFriendItem(const CFriendInfo *pFriendInfo) :
+			m_pFriendInfo(pFriendInfo), m_NumFound(0)
+		{
+		}
+
 		bool operator<(const CFriendItem &Other) const
 		{
 			if(m_NumFound && !Other.m_NumFound)
@@ -465,7 +471,7 @@ protected:
 		}
 	};
 
-	sorted_array<CFriendItem> m_lFriends;
+	std::vector<CFriendItem> m_lFriends;
 	int m_FriendlistSelectedIndex;
 
 	void FriendlistOnUpdate();
@@ -616,7 +622,7 @@ public:
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	sorted_array<CDemoItem> m_lDemos;
+	std::vector<CDemoItem> m_lDemos;
 	void DemolistPopulate();
 	bool m_Dummy;
 
@@ -641,7 +647,7 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
-	sorted_array<CGhostItem> m_lGhosts;
+	std::vector<CGhostItem> m_lGhosts;
 
 	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 

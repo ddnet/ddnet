@@ -112,7 +112,7 @@ void CUuidManager::RegisterName(int ID, const char *pName)
 	CNameIndexed NameIndexed;
 	NameIndexed.m_Uuid = Name.m_Uuid;
 	NameIndexed.m_ID = GetIndex(ID);
-	m_aNamesSorted.add(NameIndexed);
+	m_aNamesSorted.insert(std::lower_bound(m_aNamesSorted.begin(), m_aNamesSorted.end(), NameIndexed), NameIndexed);
 }
 
 CUuid CUuidManager::GetUuid(int ID) const
@@ -127,10 +127,13 @@ const char *CUuidManager::GetName(int ID) const
 
 int CUuidManager::LookupUuid(CUuid Uuid) const
 {
-	sorted_array<CNameIndexed>::range Pos = ::find_binary(m_aNamesSorted.all(), Uuid);
-	if(!Pos.empty())
+	CNameIndexed Needle;
+	Needle.m_Uuid = Uuid;
+	Needle.m_ID = 0;
+	auto Range = std::equal_range(m_aNamesSorted.begin(), m_aNamesSorted.end(), Needle);
+	if(std::distance(Range.first, Range.second) == 1)
 	{
-		return GetID(Pos.front().m_ID);
+		return GetID(Range.first->m_ID);
 	}
 	return UUID_UNKNOWN;
 }

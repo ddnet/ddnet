@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/logger.h>
-#include <base/tl/sorted_array.h>
 
 #include <climits>
 #include <cmath>
