@@ -2455,7 +2455,6 @@ void set_exception_handler_log_file(const char *log_file_path);
 void curses_logf(const char *sys, const char *fmt, ...);
 #define dbg_msg(sys, fmt, ...) curses_logf(sys, fmt, ##__VA_ARGS__)
 #endif
-
 }
 
 /**

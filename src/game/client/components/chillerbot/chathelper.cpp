@@ -239,6 +239,8 @@ int CChatHelper::Get128Name(const char *pMsg, char *pName)
 
 void CChatHelper::OnChatMessage(int ClientID, int Team, const char *pMsg)
 {
+	if(ClientID < 0 || ClientID > MAX_CLIENTS)
+		return;
 	bool Highlighted = false;
 	if(LineShouldHighlight(pMsg, m_pClient->m_aClients[m_pClient->m_LocalIDs[0]].m_aName))
 		Highlighted = true;
