@@ -438,7 +438,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 		{
 			if(Inside && Checked >= 0)
 				ReturnValue = 1 + s_ButtonUsed;
-			SetActiveItem(0);
+			SetActiveItem(nullptr);
 		}
 	}
 	else if(HotItem() == pID)
@@ -468,7 +468,7 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 		SetActiveItem(pID);
 
 	if(CheckActiveItem(pID) && !MouseButton(0))
-		SetActiveItem(0);
+		SetActiveItem(nullptr);
 
 	if(!CheckActiveItem(pID))
 		return 0;

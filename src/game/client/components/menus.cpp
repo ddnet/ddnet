@@ -507,7 +507,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 		if(!UI()->MouseButton(0))
 		{
 			//m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
 		}
 	}
@@ -527,14 +527,14 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			else
 				Current = clamp(str_toint(s_NumStr), Min, Max);
 			//m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
 		}
 
 		if(Input()->KeyIsPressed(KEY_ESCAPE))
 		{
 			//m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
 		}
 	}
@@ -626,7 +626,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 				*NewModifierCombination = m_Binder.m_ModifierCombination;
 			}
 			m_Binder.m_GotKey = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			MouseReleased = false;
 			pGrabbedID = pID;
 		}
@@ -635,7 +635,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		{
 			if(Inside)
 				NewKey = 0;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
@@ -1060,7 +1060,7 @@ void CMenus::OnInit()
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
 {
 	// reset active item
-	UI()->SetActiveItem(0);
+	UI()->SetActiveItem(nullptr);
 
 	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
 	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
@@ -1073,7 +1073,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	dbg_msg(pTopic, "%s", pBody);
 
 	// reset active item
-	UI()->SetActiveItem(0);
+	UI()->SetActiveItem(nullptr);
 
 	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
 	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
@@ -1096,7 +1096,7 @@ void CMenus::RenderColorPicker()
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 	}
 
 	if(!ms_ColorPicker.m_Active)
@@ -1113,7 +1113,7 @@ void CMenus::RenderColorPicker()
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 		return;
 	}
 
@@ -1151,7 +1151,7 @@ void CMenus::RenderColorPicker()
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 		return;
 	}
 
@@ -1446,7 +1446,7 @@ int CMenus::Render()
 	{
 		// make sure that other windows doesn't do anything funnay!
 		//UI()->SetHotItem(0);
-		//UI()->SetActiveItem(0);
+		//UI()->SetActiveItem(nullptr);
 		char aBuf[1536];
 		const char *pTitle = "";
 		const char *pExtraText = "";
@@ -2309,7 +2309,7 @@ int CMenus::Render()
 		}
 
 		if(m_Popup == POPUP_NONE)
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 	}
 	return 0;
 }
@@ -2476,7 +2476,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 void CMenus::OnStateChange(int NewState, int OldState)
 {
 	// reset active item
-	UI()->SetActiveItem(0);
+	UI()->SetActiveItem(nullptr);
 
 	if(NewState == IClient::STATE_OFFLINE)
 	{

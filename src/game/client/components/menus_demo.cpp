@@ -336,7 +336,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(UI()->CheckActiveItem(id))
 		{
 			if(!UI()->MouseButton(0))
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			else
 			{
 				static float PrevAmount = 0.0f;
@@ -652,7 +652,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 			else if(KeyEvents)
 			{
@@ -1192,7 +1192,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	bool Activated = false;
 	if(m_EnterPressed || (DoubleClicked && Input()->MouseDoubleClick()))
 	{
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 		Activated = true;
 	}
 
@@ -1238,7 +1238,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 				else
 				{
-					UI()->SetActiveItem(0);
+					UI()->SetActiveItem(nullptr);
 					return;
 				}
 			}
@@ -1264,7 +1264,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_DELETE_DEMO;
 				return;
 			}
@@ -1275,7 +1275,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENAME_DEMO;
 				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;
@@ -1288,7 +1288,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENDER_DEMO;
 				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;
