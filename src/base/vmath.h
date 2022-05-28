@@ -22,12 +22,12 @@ public:
 		T y, v;
 	};
 
-	vector2_base() :
+	constexpr vector2_base() :
 		x(T()), y(T())
 	{
 	}
 
-	vector2_base(T nx, T ny) :
+	constexpr vector2_base(T nx, T ny) :
 		x(nx), y(ny)
 	{
 	}
