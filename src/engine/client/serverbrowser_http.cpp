@@ -54,13 +54,13 @@ private:
 		std::shared_ptr<CData> m_pData;
 		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
 		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
-		void Run() override;
+		void Run() override REQUIRES(!m_Lock);
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
 			m_pData(std::move(pData)) { m_Lock = lock_create(); }
 		virtual ~CJob() { lock_destroy(m_Lock); }
-		void Abort();
+		void Abort() REQUIRES(!m_Lock);
 	};
 
 	IEngine *m_pEngine;

@@ -50,7 +50,7 @@ public:
 	CVideo(class CGraphics_Threaded *pGraphics, class ISound *pSound, class IStorage *pStorage, class IConsole *pConsole, int width, int height, const char *name);
 	~CVideo();
 
-	void Start() override;
+	void Start() override REQUIRES(!g_WriteLock);
 	void Stop() override;
 	void Pause(bool Pause) override;
 	bool IsRecording() override { return m_Recording; }
@@ -66,11 +66,11 @@ public:
 	static void Init() { av_log_set_level(AV_LOG_DEBUG); }
 
 private:
-	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex);
-	void FillVideoFrame(size_t ThreadIndex);
+	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
+	void FillVideoFrame(size_t ThreadIndex) REQUIRES(!g_WriteLock);
 	void ReadRGBFromGL(size_t ThreadIndex);
 
-	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex);
+	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
 	void FillAudioFrame(size_t ThreadIndex);
 
 	bool OpenVideo();

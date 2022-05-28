@@ -152,7 +152,7 @@ void CVideo::Start()
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
 		std::unique_lock<std::mutex> Lock(m_vVideoThreads[i]->m_Mutex);
-		m_vVideoThreads[i]->m_Thread = std::thread([this, i]() { RunVideoThread(i == 0 ? (m_VideoThreads - 1) : (i - 1), i); });
+		m_vVideoThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunVideoThread(i == 0 ? (m_VideoThreads - 1) : (i - 1), i); });
 		m_vVideoThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vVideoThreads[i]->m_Started; });
 	}
 
@@ -164,7 +164,7 @@ void CVideo::Start()
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		std::unique_lock<std::mutex> Lock(m_vAudioThreads[i]->m_Mutex);
-		m_vAudioThreads[i]->m_Thread = std::thread([this, i]() { RunAudioThread(i == 0 ? (m_AudioThreads - 1) : (i - 1), i); });
+		m_vAudioThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunAudioThread(i == 0 ? (m_AudioThreads - 1) : (i - 1), i); });
 		m_vAudioThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vAudioThreads[i]->m_Started; });
 	}
 
