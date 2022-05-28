@@ -2190,7 +2190,6 @@ IGameClient *CreateGameClient()
 
 int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID)
 {
-	float PhysSize = 28.0f;
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
@@ -2220,7 +2219,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		vec2 ClosestPoint;
 		if(closest_point_on_line(HookPos, NewPos, Position, ClosestPoint))
 		{
-			if(distance(Position, ClosestPoint) < PhysSize + 2.0f)
+			if(distance(Position, ClosestPoint) < CCharacterCore::PhysicalSize() + 2.0f)
 			{
 				if(ClosestID == -1 || distance(HookPos, Position) < Distance)
 				{

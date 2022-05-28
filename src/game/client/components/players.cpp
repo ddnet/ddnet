@@ -190,9 +190,7 @@ void CPlayers::RenderHookCollLine(
 
 			ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
-			float PhysSize = 28.0f;
-
-			vec2 OldPos = InitPos + ExDirection * PhysSize * 1.5f;
+			vec2 OldPos = InitPos + ExDirection * CCharacterCore::PhysicalSize() * 1.5f;
 			vec2 NewPos = OldPos;
 
 			bool DoBreak = false;
