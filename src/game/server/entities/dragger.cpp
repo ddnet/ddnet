@@ -142,6 +142,10 @@ void CDragger::LookForPlayersToDrag()
 		if(IsTarget[i] && m_apDraggerBeam[i] == nullptr)
 		{
 			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i, m_Layer, m_Number);
+			// The generated dragger beam is placed in the first position in the tick sequence and would therefore
+			// no longer be executed automatically in this tick. To execute the dragger beam nevertheless already
+			// this tick we call it manually (we do this to keep the old game logic)
+			m_apDraggerBeam[i]->Tick();
 		}
 		// Remove dragger beams that have not yet been deleted
 		else if(!IsTarget[i] && m_apDraggerBeam[i] != nullptr)
