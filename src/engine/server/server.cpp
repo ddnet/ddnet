@@ -3908,7 +3908,7 @@ int main(int argc, const char **argv)
 			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
-	pEngine->SetAdditionalLogger(std::unique_ptr<ILogger>(new CServerLogger(pServer)));
+	pEngine->SetAdditionalLogger(std::make_unique<CServerLogger>(pServer));
 
 	// run the server
 	dbg_msg("server", "starting...");
