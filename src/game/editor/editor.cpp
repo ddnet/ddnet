@@ -4563,7 +4563,7 @@ void CEditor::RenderFileDialog()
 			}
 			if(h > Preview.h)
 			{
-				w = w * Preview.h / h,
+				w = w * Preview.h / h;
 				h = Preview.h;
 			}
 
