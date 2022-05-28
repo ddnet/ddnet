@@ -43,7 +43,7 @@ CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pSt
 	m_pSkins(pSkins)
 {
 	WriteToFile(pStorage, pDest, IStorage::TYPE_SAVE);
-	Timeout(CTimeout{0, 0, 0});
+	Timeout(CTimeout{0, 0, 0, 0});
 	LogProgress(HTTPLOG::NONE);
 }
 
