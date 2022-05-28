@@ -295,7 +295,7 @@ protected:
 		IGraphics::CTextureHandle m_OrgTexture;
 		IGraphics::CTextureHandle m_GreyTexture;
 	};
-	array<CMenuImage> m_lMenuImages;
+	std::vector<CMenuImage> m_vMenuImages;
 
 	static int MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser);
 

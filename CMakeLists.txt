@@ -1686,10 +1686,6 @@ set_src(BASE GLOB_RECURSE src/base
   math.h
   system.cpp
   system.h
-  tl/algorithm.h
-  tl/allocator.h
-  tl/array.h
-  tl/range.h
   tl/threading.h
   unicode/confusables.cpp
   unicode/confusables.h
