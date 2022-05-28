@@ -183,23 +183,29 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 	switch(round_truncate(h1))
 	{
 	case 0:
-		rgb.r = c, rgb.g = x;
+		rgb.r = c;
+		rgb.g = x;
 		break;
 	case 1:
-		rgb.r = x, rgb.g = c;
+		rgb.r = x;
+		rgb.g = c;
 		break;
 	case 2:
-		rgb.g = c, rgb.b = x;
+		rgb.g = c;
+		rgb.b = x;
 		break;
 	case 3:
-		rgb.g = x, rgb.b = c;
+		rgb.g = x;
+		rgb.b = c;
 		break;
 	case 4:
-		rgb.r = x, rgb.b = c;
+		rgb.r = x;
+		rgb.b = c;
 		break;
 	case 5:
 	case 6:
-		rgb.r = c, rgb.b = x;
+		rgb.r = c;
+		rgb.b = x;
 		break;
 	}
 
