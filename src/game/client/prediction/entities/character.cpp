@@ -305,7 +305,7 @@ void CCharacter::FireWeapon()
 		{
 			CCharacter *pTarget = apEnts[i];
 
-			if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetCID()))))
+			if((pTarget == this || !CanCollide(pTarget->GetCID())))
 				continue;
 
 			// set his velocity to fast upward (for now)
@@ -1110,7 +1110,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastJetpackStrength = 400.0f;
 	m_Super = false;
 	m_CanMoveInFreeze = false;
-	m_Alive = true;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
@@ -1122,8 +1121,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 
 	ResetPrediction();
 	Read(pChar, pExtended, pExtendedDisplayInfo, false);
-
-	GameWorld()->InsertEntity(this);
 }
 
 void CCharacter::ResetPrediction()
@@ -1301,7 +1298,6 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Core.m_JumpedTotal = m_Core.m_Jumps;
 	m_AttackTick = pChar->m_AttackTick;
 	m_LastSnapWeapon = pChar->m_Weapon;
-	m_Alive = true;
 
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 
