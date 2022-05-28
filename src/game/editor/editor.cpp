@@ -4053,33 +4053,15 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 			int Selected = m_SelectedImage == i;
 
-			bool ImageUsed = false;
-			for(const auto &pGroup : m_Map.m_lGroups)
-			{
-				for(const auto &pLayer : pGroup->m_lLayers)
-				{
+			const bool ImageUsed = std::any_of(m_Map.m_lGroups.cbegin(), m_Map.m_lGroups.cend(), [i](const auto &pGroup) {
+				return std::any_of(pGroup->m_lLayers.cbegin(), pGroup->m_lLayers.cend(), [i](const auto &pLayer) {
 					if(pLayer->m_Type == LAYERTYPE_QUADS)
-					{
-						CLayerQuads *pQuadsLayer = static_cast<CLayerQuads *>(pLayer);
-						if(pQuadsLayer->m_Image == i)
-						{
-							ImageUsed = true;
-							break;
-						}
-					}
+						return static_cast<CLayerQuads *>(pLayer)->m_Image == i;
 					else if(pLayer->m_Type == LAYERTYPE_TILES)
-					{
-						CLayerTiles *pTilesLayer = static_cast<CLayerTiles *>(pLayer);
-						if(pTilesLayer->m_Image == i)
-						{
-							ImageUsed = true;
-							break;
-						}
-					}
-				}
-				if(ImageUsed)
-					break;
-			}
+						return static_cast<CLayerTiles *>(pLayer)->m_Image == i;
+					return false;
+				});
+			});
 
 			if(!ImageUsed)
 				Selected += 2; // Image is unused
@@ -4268,24 +4250,13 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 		ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
 
 		int Selected = m_SelectedSound == i;
-		bool SoundUsed = false;
-		for(const auto &pGroup : m_Map.m_lGroups)
-		{
-			for(const auto &pLayer : pGroup->m_lLayers)
-			{
+		const bool SoundUsed = std::any_of(m_Map.m_lGroups.cbegin(), m_Map.m_lGroups.cend(), [i](const auto &pGroup) {
+			return std::any_of(pGroup->m_lLayers.cbegin(), pGroup->m_lLayers.cend(), [i](const auto &pLayer) {
 				if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-				{
-					CLayerSounds *pSoundsLayer = static_cast<CLayerSounds *>(pLayer);
-					if(pSoundsLayer->m_Sound == i)
-					{
-						SoundUsed = true;
-						break;
-					}
-				}
-			}
-			if(SoundUsed)
-				break;
-		}
+					return static_cast<CLayerSounds *>(pLayer)->m_Sound == i;
+				return false;
+			});
+		});
 
 		if(!SoundUsed)
 			Selected += 2; // Sound is unused
