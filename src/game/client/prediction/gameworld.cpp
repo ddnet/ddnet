@@ -405,7 +405,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 			// otherwise try to determine its owner by checking if there is only one player nearby
 			if(NetProj.m_StartTick >= GameTick() - 4)
 			{
-				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * 28.0 * 0.75;
+				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * CCharacterCore::PhysicalSize() * 0.75;
 				const bool Prev = (GameTick() - NetProj.m_StartTick) > 1;
 				float First = 200.0f, Second = 200.0f;
 				CCharacter *pClosest = 0;

@@ -38,7 +38,7 @@ protected:
 	int m_ObjType;
 
 public:
-	CEntity(CGameWorld *pGameWorld, int Objtype);
+	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 	virtual ~CEntity();
 
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
@@ -48,6 +48,7 @@ public:
 	class CCollision *Collision() { return GameWorld()->Collision(); }
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
+	float GetProximityRadius() const { return m_ProximityRadius; }
 
 	void Destroy() { delete this; }
 	virtual void Tick() {}
