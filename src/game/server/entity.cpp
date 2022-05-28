@@ -11,6 +11,7 @@
 CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRadius)
 {
 	m_pGameWorld = pGameWorld;
+	m_pCCollision = GameServer()->Collision();
 
 	m_ObjType = ObjType;
 	m_Pos = Pos;
