@@ -154,14 +154,14 @@ public:
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)
 {
-	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->Head();
 	return pResult;
 }
 
 inline std::unique_ptr<CHttpRequest> HttpGet(const char *pUrl)
 {
-	return std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	return std::make_unique<CHttpRequest>(pUrl);
 }
 
 inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pStorage, const char *pOutputFile, int StorageType)
@@ -174,14 +174,14 @@ inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pSt
 
 inline std::unique_ptr<CHttpRequest> HttpPost(const char *pUrl, const unsigned char *pData, size_t DataLength)
 {
-	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->Post(pData, DataLength);
 	return pResult;
 }
 
 inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *pJson)
 {
-	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->PostJson(pJson);
 	return pResult;
 }
