@@ -2,10 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_BINDS_H
 #define GAME_CLIENT_COMPONENTS_BINDS_H
-#include <engine/keys.h>
-#include <game/client/component.h>
 
-#include "console.h"
+#include <engine/console.h>
+#include <engine/keys.h>
+
+#include <game/client/component.h>
 
 class IConfigManager;
 

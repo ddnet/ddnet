@@ -7,14 +7,10 @@
 #include "animstate.h"
 #include "render.h"
 #include <engine/graphics.h>
-#include <engine/map.h>
 #include <engine/shared/config.h>
-#include <game/client/components/skins.h>
-#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
-#include <game/layers.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;

@@ -8,6 +8,7 @@
 #include <chrono>
 #include <vector>
 
+#include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>

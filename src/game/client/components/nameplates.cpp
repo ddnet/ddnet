@@ -9,8 +9,8 @@
 #include "camera.h"
 #include "controls.h"
 #include "nameplates.h"
-#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
+#include <game/client/prediction/entities/character.h>
 
 #include "players.h"
 

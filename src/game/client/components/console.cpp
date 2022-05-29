@@ -14,21 +14,16 @@
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <cstdio>
-#include <cstring>
-
 #include <game/client/ui.h>
 
+#include <game/localization.h>
 #include <game/version.h>
 
-#include <game/client/components/controls.h>
-#include <game/client/components/menus.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 

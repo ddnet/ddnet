@@ -8,9 +8,6 @@
 
 #include "editor.h"
 #include <game/client/render.h>
-#include <game/generated/client_data.h>
-
-#include <game/localization.h>
 
 #include <engine/input.h>
 #include <engine/keys.h>

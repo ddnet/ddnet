@@ -1,12 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
 #include "editor.h"
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
+#include <engine/shared/datafile.h>
+#include <engine/sound.h>
 #include <engine/storage.h>
+
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
 

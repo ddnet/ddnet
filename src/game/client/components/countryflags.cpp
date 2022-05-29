@@ -8,7 +8,6 @@
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-#include <engine/textrender.h>
 
 #include "countryflags.h"
 

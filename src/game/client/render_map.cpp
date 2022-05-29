@@ -9,7 +9,6 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 #include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
 #include <chrono>
 

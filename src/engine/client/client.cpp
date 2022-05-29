@@ -48,6 +48,7 @@
 
 #include <base/system.h>
 
+#include <game/localization.h>
 #include <game/version.h>
 
 #include <engine/client/demoedit.h>

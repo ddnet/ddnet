@@ -2,13 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
-#include <engine/console.h>
 #include <engine/graphics.h>
 
 #include "editor.h"
 #include <game/client/render.h>
-#include <game/generated/client_data.h>
-#include <game/localization.h>
 
 CLayerQuads::CLayerQuads()
 {

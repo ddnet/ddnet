@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <engine/demo.h>
-#include <engine/engine.h>
 
 #include <engine/shared/config.h>
 
@@ -11,7 +10,6 @@
 #include <game/client/components/damageind.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/particles.h>
-#include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 

@@ -5,7 +5,6 @@
 #include <base/math.h>
 #include <engine/textrender.h>
 
-#include <engine/client/input.h>
 #include <engine/keys.h>
 
 #include <game/client/lineinput.h>

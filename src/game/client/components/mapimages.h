@@ -2,6 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_MAPIMAGES_H
 #define GAME_CLIENT_COMPONENTS_MAPIMAGES_H
+
+#include <engine/graphics.h>
+
 #include <game/client/component.h>
 
 enum EMapImageEntityLayerType
