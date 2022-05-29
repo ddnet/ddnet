@@ -10,12 +10,7 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_H_AS_ES
 #endif
 
-#include <base/detect.h>
-
 #include <engine/client/graphics_defines.h>
-
-#include <string>
-#include <vector>
 
 class CGLSLCompiler;
 

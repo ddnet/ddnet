@@ -12,17 +12,14 @@
 
 #include <engine/storage.h>
 
-#include "SDL.h"
+#include <SDL.h>
+#include <SDL_hints.h>
+#include <SDL_pixels.h>
+#include <SDL_video.h>
 
-#include "SDL_syswm.h"
 #include <base/detect.h>
 #include <base/math.h>
-#include <cmath>
 #include <cstdlib>
-
-#include "SDL_hints.h"
-#include "SDL_pixels.h"
-#include "SDL_video.h"
 
 #include <engine/shared/config.h>
 
@@ -45,14 +42,10 @@
 #endif
 
 #if defined(CONF_BACKEND_VULKAN)
-#include <SDL_vulkan.h>
-
 #include "backend/vulkan/backend_vulkan.h"
 #endif
 
 #include "graphics_threaded.h"
-
-#include <engine/shared/image_manipulation.h>
 
 #include <engine/graphics.h>
 

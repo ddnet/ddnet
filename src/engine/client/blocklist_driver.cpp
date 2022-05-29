@@ -2,6 +2,8 @@
 
 #include <base/system.h>
 
+#include <cstddef>
+
 #define VERSION_PARTS 4
 
 struct SVersion
