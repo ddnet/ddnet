@@ -1,5 +1,4 @@
 #include "score.h"
-#include "entities/character.h"
 #include "gamemodes/DDRace.h"
 #include "player.h"
 #include "save.h"
@@ -8,7 +7,6 @@
 #include <base/system.h>
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
-#include <engine/server/sql_string_helpers.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
 #include <engine/shared/linereader.h>
@@ -16,10 +14,7 @@
 #include <game/generated/wordlist.h>
 
 #include <algorithm>
-#include <cstring>
-#include <fstream>
 #include <memory>
-#include <random>
 
 std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 {

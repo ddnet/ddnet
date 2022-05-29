@@ -5,8 +5,6 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
-#include "entities/laser.h"
-#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :

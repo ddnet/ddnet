@@ -2,13 +2,10 @@
 #include "dragger_beam.h"
 #include "character.h"
 #include "dragger.h"
-#include <engine/config.h>
 #include <engine/server.h>
+#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
-#include <game/server/player.h>
-#include <game/server/teams.h>
 
 CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls,
 	int ForClientID, int Layer, int Number) :

@@ -5,7 +5,6 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 
-#include <game/server/teams.h>
 #include <game/version.h>
 
 #include "character.h"
