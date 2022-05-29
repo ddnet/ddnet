@@ -31,12 +31,12 @@ void CCharacter::SetSolo(bool Solo)
 
 bool CCharacter::IsGrounded()
 {
-	if(Collision()->CheckPoint(m_Pos.x + m_ProximityRadius / 2, m_Pos.y + m_ProximityRadius / 2 + 5))
+	if(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
 		return true;
-	if(Collision()->CheckPoint(m_Pos.x - m_ProximityRadius / 2, m_Pos.y + m_ProximityRadius / 2 + 5))
+	if(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
 		return true;
 
-	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, m_ProximityRadius / 2 + 4), 0.0f);
+	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f);
 	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
 }
 
@@ -305,7 +305,7 @@ void CCharacter::FireWeapon()
 		{
 			CCharacter *pTarget = apEnts[i];
 
-			if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetCID()))))
+			if((pTarget == this || !CanCollide(pTarget->GetCID())))
 				continue;
 
 			// set his velocity to fast upward (for now)
@@ -1087,7 +1087,7 @@ CTeamsCore *CCharacter::TeamsCore()
 }
 
 CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), CCharacterCore::PhysicalSize())
 {
 	m_ID = ID;
 	m_IsLocal = false;
@@ -1102,7 +1102,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
-	m_ProximityRadius = ms_PhysSize;
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
@@ -1110,7 +1109,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastJetpackStrength = 400.0f;
 	m_Super = false;
 	m_CanMoveInFreeze = false;
-	m_Alive = true;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
@@ -1122,8 +1120,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 
 	ResetPrediction();
 	Read(pChar, pExtended, pExtendedDisplayInfo, false);
-
-	GameWorld()->InsertEntity(this);
 }
 
 void CCharacter::ResetPrediction()
@@ -1301,7 +1297,6 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Core.m_JumpedTotal = m_Core.m_Jumps;
 	m_AttackTick = pChar->m_AttackTick;
 	m_LastSnapWeapon = pChar->m_Weapon;
-	m_Alive = true;
 
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 

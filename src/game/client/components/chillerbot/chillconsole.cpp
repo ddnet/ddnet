@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/sorted_array.h>
-
 #include <climits>
 #include <cmath>
 
@@ -772,7 +770,7 @@ void CChillConsole::Toggle(int Type)
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
 			/*Input()->MouseModeAbsolute();*/
-			m_pClient->m_Menus.UseMouseButtons(false);
+			UI()->SetEnabled(false);
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls
 			m_pClient->m_pControls->OnReset();*/
@@ -787,7 +785,7 @@ void CChillConsole::Toggle(int Type)
 		{
 			m_ConsoleState = CONSOLE_CLOSING;
 			Input()->MouseModeRelative();
-			m_pClient->m_Menus.UseMouseButtons(true);
+			UI()->SetEnabled(true);
 			m_pClient->OnRelease();
 			Input()->SetIMEState(false);
 		}

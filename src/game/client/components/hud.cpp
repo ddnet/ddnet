@@ -835,13 +835,13 @@ void CHud::RenderPlayerState(const int ClientID)
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		bool Grounded = false;
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacter::ms_PhysSize / 2,
-			   pCharacter->m_Pos.y + CCharacter::ms_PhysSize / 2 + 5))
+		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
+			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
 		{
 			Grounded = true;
 		}
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacter::ms_PhysSize / 2,
-			   pCharacter->m_Pos.y + CCharacter::ms_PhysSize / 2 + 5))
+		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
+			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
 		{
 			Grounded = true;
 		}

@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/logger.h>
-#include <base/tl/sorted_array.h>
 
 #include <climits>
 #include <cmath>
@@ -913,7 +912,7 @@ void CGameConsole::Toggle(int Type)
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
 			/*Input()->MouseModeAbsolute();*/
-			m_pClient->m_Menus.UseMouseButtons(false);
+			UI()->SetEnabled(false);
 			m_ConsoleState = CONSOLE_OPENING;
 			/*// reset controls
 			m_pClient->m_Controls.OnReset();*/
@@ -923,7 +922,7 @@ void CGameConsole::Toggle(int Type)
 		else
 		{
 			Input()->MouseModeRelative();
-			m_pClient->m_Menus.UseMouseButtons(true);
+			UI()->SetEnabled(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 

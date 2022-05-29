@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/sorted_array.h>
-
 #include <engine/demo.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -192,9 +190,7 @@ void CPlayers::RenderHookCollLine(
 
 			ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
-			float PhysSize = 28.0f;
-
-			vec2 OldPos = InitPos + ExDirection * PhysSize * 1.5f;
+			vec2 OldPos = InitPos + ExDirection * CCharacterCore::PhysicalSize() * 1.5f;
 			vec2 NewPos = OldPos;
 
 			bool DoBreak = false;

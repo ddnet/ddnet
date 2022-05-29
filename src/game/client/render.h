@@ -80,6 +80,7 @@ public:
 
 	void DrawSprite(float x, float y, float size);
 	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);
+	void RenderCursor(vec2 Center, float Size);
 	int QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
 	int QuadContainerAddSprite(int QuadContainerIndex, float size);
 	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);

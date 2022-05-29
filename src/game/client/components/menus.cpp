@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <base/tl/array.h>
-
 #include <cmath>
 
 #include <base/math.h>
@@ -81,7 +79,6 @@ CMenus::CMenus()
 	m_NeedSendDummyinfo = false;
 	m_MenuActive = true;
 	m_ShowStart = true;
-	m_UseMouseButtons = true;
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;
@@ -504,12 +501,12 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
 	}
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
 			//m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
 		}
 	}
@@ -529,20 +526,20 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			else
 				Current = clamp(str_toint(s_NumStr), Min, Max);
 			//m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
 		}
 
 		if(Input()->KeyIsPressed(KEY_ESCAPE))
 		{
 			//m_LockMouse = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
 		}
 	}
 	else
 	{
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 		{
 			if(UseScroll)
 			{
@@ -617,7 +614,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
 		MouseReleased = true;
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_Binder.m_GotKey)
 		{
@@ -628,7 +625,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 				*NewModifierCombination = m_Binder.m_ModifierCombination;
 			}
 			m_Binder.m_GotKey = false;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 			MouseReleased = false;
 			pGrabbedID = pID;
 		}
@@ -637,7 +634,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		{
 			if(Inside)
 				NewKey = 0;
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
@@ -664,7 +661,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		UI()->SetHotItem(pID);
 
 	// draw
-	if(UI()->ActiveItem() == pID && s_ButtonUsed == 0)
+	if(UI()->CheckActiveItem(pID) && s_ButtonUsed == 0)
 		DoButton_KeySelect(pID, "???", 0, pRect);
 	else
 	{
@@ -1067,14 +1064,14 @@ void CMenus::OnInit()
 	m_IsInit = true;
 
 	// load menu images
-	m_lMenuImages.clear();
+	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
 {
 	// reset active item
-	UI()->SetActiveItem(0);
+	UI()->SetActiveItem(nullptr);
 
 	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
 	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
@@ -1087,7 +1084,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	dbg_msg(pTopic, "%s", pBody);
 
 	// reset active item
-	UI()->SetActiveItem(0);
+	UI()->SetActiveItem(nullptr);
 
 	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
 	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
@@ -1110,7 +1107,7 @@ void CMenus::RenderColorPicker()
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 	}
 
 	if(!ms_ColorPicker.m_Active)
@@ -1127,7 +1124,7 @@ void CMenus::RenderColorPicker()
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 		return;
 	}
 
@@ -1165,7 +1162,7 @@ void CMenus::RenderColorPicker()
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 		return;
 	}
 
@@ -1460,7 +1457,7 @@ int CMenus::Render()
 	{
 		// make sure that other windows doesn't do anything funnay!
 		//UI()->SetHotItem(0);
-		//UI()->SetActiveItem(0);
+		//UI()->SetActiveItem(nullptr);
 		char aBuf[1536];
 		const char *pTitle = "";
 		const char *pExtraText = "";
@@ -1885,13 +1882,13 @@ int CMenus::Render()
 			int OldSelected = -1;
 			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
 
-			for(int i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
+			for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 			{
 				const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
 				if(pEntry->m_CountryCode == CurSelection)
 					OldSelected = i;
 
-				CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i);
+				CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i);
 				if(Item.m_Visible)
 				{
 					CUIRect Label;
@@ -2323,7 +2320,7 @@ int CMenus::Render()
 		}
 
 		if(m_Popup == POPUP_NONE)
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 	}
 	return 0;
 }
@@ -2490,7 +2487,7 @@ bool CMenus::OnInput(IInput::CEvent e)
 void CMenus::OnStateChange(int NewState, int OldState)
 {
 	// reset active item
-	UI()->SetActiveItem(0);
+	UI()->SetActiveItem(nullptr);
 
 	if(NewState == IClient::STATE_OFFLINE)
 	{
@@ -2532,6 +2529,8 @@ void CMenus::OnStateChange(int NewState, int OldState)
 
 void CMenus::OnRender()
 {
+	UI()->StartCheck();
+
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
@@ -2554,6 +2553,7 @@ void CMenus::OnRender()
 		m_EnterPressed = false;
 		m_DeletePressed = false;
 		m_NumInputEvents = 0;
+		UI()->FinishCheck();
 		return;
 	}
 
@@ -2586,31 +2586,10 @@ void CMenus::OnRender()
 	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
 	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 
-	int Buttons = 0;
-	if(m_UseMouseButtons)
-	{
-		if(Input()->KeyIsPressed(KEY_MOUSE_1))
-			Buttons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2))
-			Buttons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3))
-			Buttons |= 4;
-	}
+	UI()->Update(mx, my, mx * 3.0f, my * 3.0f);
 
-	UI()->Update(mx, my, mx * 3.0f, my * 3.0f, Buttons);
-
-	// render
 	Render();
-
-	// render cursor
-	Graphics()->WrapClamp();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1, 1, 1, 1);
-	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-	Graphics()->WrapNormal();
+	RenderTools()->RenderCursor(vec2(mx, my), 24.0f);
 
 	// render debug information
 	if(g_Config.m_Debug)
@@ -2623,6 +2602,8 @@ void CMenus::OnRender()
 		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 	}
+
+	UI()->FinishCheck();
 
 	m_EscapePressed = false;
 	m_EnterPressed = false;
@@ -2776,7 +2757,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 	// set menu image data
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
-	pSelf->m_lMenuImages.add(MenuImage);
+	pSelf->m_vMenuImages.push_back(MenuImage);
 	pSelf->RenderLoading(true);
 
 	return 0;
@@ -2784,12 +2765,10 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 {
-	for(int i = 0; i < m_lMenuImages.size(); i++)
-	{
-		if(str_comp(m_lMenuImages[i].m_aName, pName) == 0)
-			return &m_lMenuImages[i];
-	}
-	return 0;
+	for(auto &Image : m_vMenuImages)
+		if(str_comp(Image.m_aName, pName) == 0)
+			return &Image;
+	return nullptr;
 }
 
 void CMenus::SetMenuPage(int NewPage)

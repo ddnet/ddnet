@@ -2,11 +2,12 @@
 #define GAME_CLIENT_COMPONENTS_CHILLERBOT_PLAYERPICS_H
 
 // nobo copy and edit of countryflags.h
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 #include <game/client/component.h>
 
 #include <game/client/components/nameplates.h>
+
+#include <vector>
 
 struct SChillerNamePlate
 {
@@ -62,7 +63,7 @@ private:
 		CODE_UB = 999,
 		CODE_RANGE = CODE_UB - CODE_LB + 1,
 	};
-	sorted_array<CPlayerPic> m_aPlayerPics;
+	std::vector<CPlayerPic> m_vPlayerPics;
 
 	static int LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadPlayerpicsIndexfile();

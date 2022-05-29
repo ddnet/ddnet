@@ -116,15 +116,14 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput)
 {
-	float PhysSize = 28.0f;
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
 	m_TriggeredEvents = 0;
 
 	// get ground state
 	bool Grounded = false;
-	if(m_pCollision->CheckPoint(m_Pos.x + PhysSize / 2, m_Pos.y + PhysSize / 2 + 5))
+	if(m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
 		Grounded = true;
-	if(m_pCollision->CheckPoint(m_Pos.x - PhysSize / 2, m_Pos.y + PhysSize / 2 + 5))
+	if(m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
 		Grounded = true;
 
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
@@ -196,7 +195,7 @@ void CCharacterCore::Tick(bool UseInput)
 			if(m_HookState == HOOK_IDLE)
 			{
 				m_HookState = HOOK_FLYING;
-				m_HookPos = m_Pos + TargetDirection * PhysSize * 1.5f;
+				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
 				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
@@ -287,7 +286,7 @@ void CCharacterCore::Tick(bool UseInput)
 				vec2 ClosestPoint;
 				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
 				{
-					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize + 2.0f)
+					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysicalSize() + 2.0f)
 					{
 						if(m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
 						{
@@ -322,7 +321,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 				m_NewHook = true;
 				int RandomOut = m_pWorld->RandomOr0((*m_pTeleOuts)[teleNr - 1].size());
-				m_HookPos = (*m_pTeleOuts)[teleNr - 1][RandomOut] + TargetDirection * PhysSize * 1.5f;
+				m_HookPos = (*m_pTeleOuts)[teleNr - 1][RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
 			}
@@ -411,9 +410,9 @@ void CCharacterCore::Tick(bool UseInput)
 
 				bool CanCollide = (m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && m_Collision && !m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
 
-				if(CanCollide && Distance < PhysSize * 1.25f && Distance > 0.0f)
+				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
 				{
-					float a = (PhysSize * 1.45f - Distance);
+					float a = (PhysicalSize() * 1.45f - Distance);
 					float Velocity = 0.5f;
 
 					// make sure that we don't add excess force by checking the
@@ -428,7 +427,7 @@ void CCharacterCore::Tick(bool UseInput)
 				// handle hook influence
 				if(m_Hook && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
 				{
-					if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
+					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
 					{
 						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
 						float DragSpeed = m_Tuning.m_HookDragSpeed;
@@ -467,7 +466,7 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(&NewPos, &m_Vel, vec2(28.0f, 28.0f), 0);
+	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(), 0);
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001f && m_Vel.x > -0.001f)
@@ -502,7 +501,7 @@ void CCharacterCore::Move()
 					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || !pCharCore->m_Collision || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
 					float D = distance(Pos, pCharCore->m_Pos);
-					if(D < 28.0f && D >= 0.0f)
+					if(D < PhysicalSize() && D >= 0.0f)
 					{
 						if(a > 0.0f)
 							m_Pos = LastPos;

@@ -11,8 +11,6 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
-#include <base/tl/array.h>
-
 #include "eventhandler.h"
 //#include "gamecontroller.h"
 #include "game/generated/protocol.h"
@@ -74,7 +72,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	array<std::string> m_aCensorlist;
+	std::vector<std::string> m_vCensorlist;
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;

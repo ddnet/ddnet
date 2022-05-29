@@ -63,50 +63,50 @@ int CPlayerPics::LoadImageByName(const char *pImgName, int IsDir, int DirType, v
 		str_format(aBuf, sizeof(aBuf), "loaded player pic '%s'", pImgName);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "playerpics", aBuf);
 	}
-	pSelf->m_aPlayerPics.add_unsorted(CountryFlag);
+	pSelf->m_vPlayerPics.push_back(CountryFlag);
 	return 0;
 }
 
 void CPlayerPics::LoadPlayerpicsIndexfile()
 {
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "playerpics", LoadImageByName, this);
-	m_aPlayerPics.sort_range();
+	std::sort(m_vPlayerPics.begin(), m_vPlayerPics.end());
 }
 
 void CPlayerPics::OnInit()
 {
 	// load country flags
-	m_aPlayerPics.clear();
+	m_vPlayerPics.clear();
 	LoadPlayerpicsIndexfile();
-	if(!m_aPlayerPics.size())
+	if(m_vPlayerPics.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "playerpics", "failed to load directory 'playerpics/'.");
 		CPlayerPic DummyEntry;
 		mem_zero(DummyEntry.m_aPlayerName, sizeof(DummyEntry.m_aPlayerName));
-		m_aPlayerPics.add(DummyEntry);
+		m_vPlayerPics.push_back(DummyEntry);
 	}
 }
 
 int CPlayerPics::Num() const
 {
-	return m_aPlayerPics.size();
+	return m_vPlayerPics.size();
 }
 
 const CPlayerPics::CPlayerPic *CPlayerPics::GetByName(const char *pName) const
 {
-	for(int i = 0; i < m_aPlayerPics.size(); i++)
+	int i = 0;
+	for(const auto &PlayerPic : m_vPlayerPics)
 	{
-		if(str_comp(m_aPlayerPics[i].m_aPlayerName, pName) == 0)
-		{
+		if(str_comp(PlayerPic.m_aPlayerName, pName) == 0)
 			return GetByIndex(i);
-		}
+		i++;
 	}
 	return NULL;
 }
 
 const CPlayerPics::CPlayerPic *CPlayerPics::GetByIndex(int Index) const
 {
-	return &m_aPlayerPics[maximum(0, Index % m_aPlayerPics.size())];
+	return &m_vPlayerPics[Index % m_vPlayerPics.size()];
 }
 
 void CPlayerPics::Render(const char *pName, const vec4 *pColor, float x, float y, float w, float h)

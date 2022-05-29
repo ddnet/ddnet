@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/tl/sorted_array.h>
 #include <iostream>
+#include <vector>
 
 #include "base/system.h"
 #include "gamecontext.h"
@@ -1770,15 +1770,15 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 {
 	str_copy(pCensoredMessage, pMessage, Size);
 
-	for(int i = 0; i < m_aCensorlist.size(); i++)
+	for(auto &Item : m_vCensorlist)
 	{
 		char *pCurLoc = pCensoredMessage;
 		do
 		{
-			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, m_aCensorlist[i].c_str());
+			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, Item.c_str());
 			if(pCurLoc)
 			{
-				memset(pCurLoc, '*', m_aCensorlist[i].length());
+				memset(pCurLoc, '*', Item.length());
 				pCurLoc++;
 			}
 		} while(pCurLoc);
@@ -3080,18 +3080,19 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	sorted_array<CMapNameItem> MapList;
+	std::vector<CMapNameItem> MapList;
 	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, "maps", MapScan, &MapList);
+	std::sort(MapList.begin(), MapList.end());
 
-	for(int i = 0; i < MapList.size(); i++)
+	for(auto &Item : MapList)
 	{
 		char aDescription[64];
-		str_format(aDescription, sizeof(aDescription), "Map: %s", MapList[i].m_aName);
+		str_format(aDescription, sizeof(aDescription), "Map: %s", Item.m_aName);
 
 		char aCommand[IO_MAX_PATH_LENGTH * 2 + 10];
 		char aMapEscaped[IO_MAX_PATH_LENGTH * 2];
 		char *pDst = aMapEscaped;
-		str_escape(&pDst, MapList[i].m_aName, aMapEscaped + sizeof(aMapEscaped));
+		str_escape(&pDst, Item.m_aName, aMapEscaped + sizeof(aMapEscaped));
 		str_format(aCommand, sizeof(aCommand), "change_map \"%s\"", aMapEscaped);
 
 		pSelf->AddVote(aDescription, aCommand);
@@ -3102,15 +3103,12 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 
 int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUserData)
 {
-	sorted_array<CMapNameItem> *pMapList = (sorted_array<CMapNameItem> *)pUserData;
-
 	if(IsDir || !str_endswith(pName, ".map"))
 		return 0;
 
 	CMapNameItem Item;
-	int Length = str_length(pName);
-	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, Length - 4);
-	pMapList->add(Item);
+	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - str_length(".map"));
+	static_cast<std::vector<CMapNameItem> *>(pUserData)->push_back(Item);
 
 	return 0;
 }
@@ -3306,7 +3304,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		char *pLine;
 		while((pLine = LineReader.Get()))
 		{
-			m_aCensorlist.add(pLine);
+			m_vCensorlist.emplace_back(pLine);
 		}
 		io_close(File);
 	}
@@ -3518,7 +3516,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	CLineReader LineReader;
 	LineReader.Init(File);
 
-	array<char *> aLines;
+	std::vector<char *> vLines;
 	char *pLine;
 	int TotalLength = 0;
 	while((pLine = LineReader.Get()))
@@ -3526,19 +3524,19 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		int Length = str_length(pLine) + 1;
 		char *pCopy = (char *)malloc(Length);
 		mem_copy(pCopy, pLine, Length);
-		aLines.add(pCopy);
+		vLines.push_back(pCopy);
 		TotalLength += Length;
 	}
 	io_close(File);
 
 	char *pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
-	for(int i = 0; i < aLines.size(); i++)
+	for(auto &Line : vLines)
 	{
-		int Length = str_length(aLines[i]) + 1;
-		mem_copy(pSettings + Offset, aLines[i], Length);
+		int Length = str_length(Line) + 1;
+		mem_copy(pSettings + Offset, Line, Length);
 		Offset += Length;
-		free(aLines[i]);
+		free(Line);
 	}
 
 	CDataFileReader Reader;

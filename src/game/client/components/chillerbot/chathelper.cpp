@@ -13,12 +13,12 @@ CChatHelper::CChatHelper()
 	mem_zero(m_aaChatFilter, sizeof(m_aaChatFilter));
 #define CHILLERBOT_CHAT_CMD(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include "chatcommands.h"
-	m_Commands.sort_range();
+	std::sort(m_vCommands.begin(), m_vCommands.end());
 }
 
 void CChatHelper::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
 {
-	m_Commands.add_unsorted(CCommand{pName, pParams});
+	m_vCommands.push_back(CCommand{pName, pParams});
 }
 
 void CChatHelper::OnInit()
@@ -476,7 +476,7 @@ bool CChatHelper::OnAutocomplete(CLineInput *pInput, const char *pCompletionBuff
 
 	CCommand *pCompletionCommand = 0;
 
-	const size_t NumCommands = m_Commands.size();
+	const size_t NumCommands = m_vCommands.size();
 
 	if(ReverseTAB)
 		*pCompletionChosen = (*pCompletionChosen - 1 + 2 * NumCommands) % (2 * NumCommands);
@@ -500,7 +500,7 @@ bool CChatHelper::OnAutocomplete(CLineInput *pInput, const char *pCompletionBuff
 			Index = (*pCompletionChosen + i) % NumCommands;
 		}
 
-		auto &Command = m_Commands[Index];
+		auto &Command = m_vCommands[Index];
 
 		if(str_comp_nocase_num(Command.pName, pCommandStart, str_length(pCommandStart)) == 0)
 		{

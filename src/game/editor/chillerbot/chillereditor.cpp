@@ -100,7 +100,7 @@ void CChillerEditor::DoMapEditor()
 		m_pEditor->m_Dialog = -1; // hack to not close editor when pressing Escape
 		SetCursor();
 		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
-		if(pLayer->m_Image >= 0 && pLayer->m_Image < m_pEditor->m_Map.m_lImages.size())
+		if(pLayer->m_Image >= 0 && pLayer->m_Image < (int)m_pEditor->m_Map.m_lImages.size())
 			LoadMapresMetaFile(m_pEditor->m_Map.m_lImages[pLayer->m_Image]->m_aName);
 	}
 	if(m_EditorMode == CE_MODE_TEXT)

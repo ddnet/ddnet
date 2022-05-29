@@ -399,7 +399,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 
 	static bool s_ListBoxUsed = false;
-	if(UI()->ActiveItem() == pClan || UI()->ActiveItem() == pName)
+	if(UI()->CheckActiveItem(pClan) || UI()->CheckActiveItem(pName))
 		s_ListBoxUsed = false;
 
 	// country flag selector
@@ -408,13 +408,13 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	int OldSelected = -1;
 	UiDoListboxStart(&s_ScrollValue, &MainView, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
 
-	for(int i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
+	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
 		if(pEntry->m_CountryCode == *pCountry)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected == i, s_ListBoxUsed);
+		CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i, s_ListBoxUsed);
 		if(Item.m_Visible)
 		{
 			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
@@ -673,12 +673,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f - RenderEyesBelow * 25.0f, &SkinList, &MainView);
-	static sorted_array<CUISkin> s_paSkinList;
+	static std::vector<CUISkin> s_vSkinList;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
 	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount)
 	{
-		s_paSkinList.clear();
+		s_vSkinList.clear();
 		for(int i = 0; i < m_pClient->m_Skins.Num(); ++i)
 		{
 			const CSkin *s = m_pClient->m_Skins.Get(i);
@@ -698,22 +698,23 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(s == 0)
 				continue;
 
-			s_paSkinList.add(CUISkin(s));
+			s_vSkinList.emplace_back(s);
 		}
+		std::sort(s_vSkinList.begin(), s_vSkinList.end());
 		s_InitSkinlist = false;
 		s_SkinCount = m_pClient->m_Skins.Num();
 	}
 
 	int OldSelected = -1;
-	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_paSkinList.size(), 4, OldSelected, s_ScrollValue);
-	for(int i = 0; i < s_paSkinList.size(); ++i)
+	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_vSkinList.size(), 4, OldSelected, s_ScrollValue);
+	for(size_t i = 0; i < s_vSkinList.size(); ++i)
 	{
-		const CSkin *s = s_paSkinList[i].m_pSkin;
+		const CSkin *s = s_vSkinList[i].m_pSkin;
 
 		if(str_comp(s->m_aName, pSkinName) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(s_paSkinList[i].m_pSkin, OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(s, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
@@ -728,10 +729,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			RenderTools()->RenderTee(pIdleState, &Info, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
-			str_format(aBuf, sizeof(aBuf), "%s", s->m_aName);
 			SLabelProperties Props;
 			Props.m_MaxWidth = Item.m_Rect.w;
-			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 12.0f, TEXTALIGN_LEFT, Props);
+			UI()->DoLabelScaled(&Item.m_Rect, s->m_aName, 12.0f, TEXTALIGN_LEFT, Props);
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
@@ -748,7 +748,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(pSkinName, s_paSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(pSkinName, s_vSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
@@ -1704,7 +1704,7 @@ public:
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };
 
-void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
+void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &Languages)
 {
 	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
@@ -1759,7 +1759,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<
 
 		char aFileName[IO_MAX_PATH_LENGTH];
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
-		pLanguages->add(CLanguage(aReplacement, aFileName, str_toint(pLine + 3)));
+		Languages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
 	}
 	io_close(File);
 }
@@ -1768,14 +1768,15 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
 	static int s_LanguageList = 0;
 	static int s_SelectedLanguage = 0;
-	static sorted_array<CLanguage> s_Languages;
+	static std::vector<CLanguage> s_Languages;
 	static float s_ScrollValue = 0;
 
-	if(s_Languages.size() == 0)
+	if(s_Languages.empty())
 	{
-		s_Languages.add(CLanguage("English", "", 826));
-		LoadLanguageIndexfile(Storage(), Console(), &s_Languages);
-		for(int i = 0; i < s_Languages.size(); i++)
+		s_Languages.emplace_back("English", "", 826);
+		LoadLanguageIndexfile(Storage(), Console(), s_Languages);
+		std::sort(s_Languages.begin(), s_Languages.end());
+		for(size_t i = 0; i < s_Languages.size(); i++)
 			if(str_comp(s_Languages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
@@ -1787,10 +1788,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	UiDoListboxStart(&s_LanguageList, &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 
-	for(sorted_array<CLanguage>::range r = s_Languages.all(); !r.empty(); r.pop_front())
+	for(auto &Language : s_Languages)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&r.front());
-
+		CListboxItem Item = UiDoListboxNextItem(&Language.m_Name);
 		if(Item.m_Visible)
 		{
 			CUIRect Rect;
@@ -1798,9 +1798,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 			Rect.VMargin(6.0f, &Rect);
 			Rect.HMargin(3.0f, &Rect);
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pClient->m_CountryFlags.Render(r.front().m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+			m_pClient->m_CountryFlags.Render(Language.m_CountryCode, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 			Item.m_Rect.HSplitTop(2.0f, 0, &Item.m_Rect);
-			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name.c_str(), 16.0f, TEXTALIGN_LEFT);
+			UI()->DoLabelScaled(&Item.m_Rect, Language.m_Name.c_str(), 16.0f, TEXTALIGN_LEFT);
 		}
 	}
 

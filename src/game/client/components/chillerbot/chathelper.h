@@ -26,7 +26,7 @@ class CChatHelper : public CComponent
 		bool operator==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
 	};
 
-	sorted_array<CCommand> m_Commands;
+	std::vector<CCommand> m_vCommands;
 
 	int64_t m_NextGreetClear;
 	int64_t m_NextMessageSend;

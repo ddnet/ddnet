@@ -221,8 +221,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	m_SelectedIndex = -1;
 
 	// reset friend counter
-	for(int i = 0; i < m_lFriends.size(); m_lFriends[i++].m_NumFound = 0)
-		;
+	for(auto &Friend : m_lFriends)
+		Friend.m_NumFound = 0;
 
 	auto RenderBrowserIcons = [this](CUIElement::SUIElementRect &UIRect, CUIRect *pRect, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, const char *pText, ETextAlignment TextAlign, bool SmallFont = false) {
 		float FontSize = 14.0f * UI()->Scale();
@@ -269,13 +269,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					unsigned NameHash = str_quickhash(pItem->m_aClients[j].m_aName);
 					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
-					for(int f = 0; f < m_lFriends.size(); ++f)
+					for(auto &Friend : m_lFriends)
 					{
-						if(((g_Config.m_ClFriendsIgnoreClan && m_lFriends[f].m_pFriendInfo->m_aName[0]) || (ClanHash == m_lFriends[f].m_pFriendInfo->m_ClanHash && !str_comp(m_lFriends[f].m_pFriendInfo->m_aClan, pItem->m_aClients[j].m_aClan))) &&
-							(!m_lFriends[f].m_pFriendInfo->m_aName[0] || (NameHash == m_lFriends[f].m_pFriendInfo->m_NameHash && !str_comp(m_lFriends[f].m_pFriendInfo->m_aName, pItem->m_aClients[j].m_aName))))
+						if(((g_Config.m_ClFriendsIgnoreClan && Friend.m_pFriendInfo->m_aName[0]) || (ClanHash == Friend.m_pFriendInfo->m_ClanHash && !str_comp(Friend.m_pFriendInfo->m_aClan, pItem->m_aClients[j].m_aClan))) &&
+							(!Friend.m_pFriendInfo->m_aName[0] || (NameHash == Friend.m_pFriendInfo->m_NameHash && !str_comp(Friend.m_pFriendInfo->m_aName, pItem->m_aClients[j].m_aName))))
 						{
-							m_lFriends[f].m_NumFound++;
-							if(m_lFriends[f].m_pFriendInfo->m_aName[0])
+							Friend.m_NumFound++;
+							if(Friend.m_pFriendInfo->m_aName[0])
 								break;
 						}
 					}
@@ -311,8 +311,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		else
 		{
 			// reset active item, if not visible
-			if(UI()->ActiveItem() == pItem)
-				UI()->SetActiveItem(0);
+			if(UI()->CheckActiveItem(pItem))
+				UI()->SetActiveItem(nullptr);
 
 			// don't render invisible items
 			continue;
@@ -1250,13 +1250,8 @@ void CMenus::FriendlistOnUpdate()
 {
 	m_lFriends.clear();
 	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
-	{
-		CFriendItem Item;
-		Item.m_pFriendInfo = m_pClient->Friends()->GetFriend(i);
-		Item.m_NumFound = 0;
-		m_lFriends.add_unsorted(Item);
-	}
-	m_lFriends.sort_range();
+		m_lFriends.emplace_back(m_pClient->Friends()->GetFriend(i));
+	std::sort(m_lFriends.begin(), m_lFriends.end());
 }
 
 void CMenus::RenderServerbrowserFriends(CUIRect View)
@@ -1286,14 +1281,14 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// friends list(remove friend)
 	static float s_ScrollValue = 0;
-	if(m_FriendlistSelectedIndex >= m_lFriends.size())
+	if(m_FriendlistSelectedIndex >= (int)m_lFriends.size())
 		m_FriendlistSelectedIndex = m_lFriends.size() - 1;
 	UiDoListboxStart(&m_lFriends, &List, 30.0f, "", "", m_lFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
 
-	m_lFriends.sort_range();
-	for(int i = 0; i < m_lFriends.size(); ++i)
+	std::sort(m_lFriends.begin(), m_lFriends.end());
+	for(auto &Friend : m_lFriends)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&m_lFriends[i], false, false);
+		CListboxItem Item = UiDoListboxNextItem(&Friend.m_NumFound, false, false);
 
 		if(Item.m_Visible)
 		{
@@ -1304,14 +1299,14 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 			Item.m_Rect.VMargin(2.5f, &Item.m_Rect);
 			Item.m_Rect.HSplitTop(12.0f, &Item.m_Rect, &Button);
-			UI()->DoLabelScaled(&Item.m_Rect, m_lFriends[i].m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
-			UI()->DoLabelScaled(&Button, m_lFriends[i].m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
+			UI()->DoLabelScaled(&Item.m_Rect, Friend.m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
+			UI()->DoLabelScaled(&Button, Friend.m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
 
-			RenderTools()->DrawUIRect(&OnState, m_lFriends[i].m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_R, 4.0f);
+			RenderTools()->DrawUIRect(&OnState, Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_R, 4.0f);
 			OnState.HMargin((OnState.h - FontSize) / 3, &OnState);
 			OnState.VMargin(5.0f, &OnState);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%i", m_lFriends[i].m_NumFound);
+			str_format(aBuf, sizeof(aBuf), "%i", Friend.m_NumFound);
 			UI()->DoLabelScaled(&OnState, aBuf, FontSize + 2, TEXTALIGN_RIGHT);
 		}
 	}

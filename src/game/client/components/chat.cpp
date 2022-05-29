@@ -37,7 +37,7 @@ CChat::CChat()
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include <game/ddracechat.h>
-	m_Commands.sort_range();
+	std::sort(m_Commands.begin(), m_Commands.end());
 
 	m_Mode = MODE_NONE;
 	Reset();
@@ -45,7 +45,7 @@ CChat::CChat()
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
 {
-	m_Commands.add_unsorted(CCommand{pName, pParams});
+	m_Commands.emplace_back(pName, pParams);
 }
 
 void CChat::RebuildChat()
@@ -383,7 +383,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 				auto &Command = m_Commands[Index];
 
-				if(str_startswith(Command.pName, pCommandStart))
+				if(str_startswith(Command.m_pName, pCommandStart))
 				{
 					pCompletionCommand = &Command;
 					m_CompletionChosen = Index + SearchType * NumCommands;
@@ -400,10 +400,10 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 				// add the command
 				str_append(aBuf, "/", sizeof(aBuf));
-				str_append(aBuf, pCompletionCommand->pName, sizeof(aBuf));
+				str_append(aBuf, pCompletionCommand->m_pName, sizeof(aBuf));
 
 				// add separator
-				const char *pSeparator = pCompletionCommand->pParams[0] == '\0' ? "" : " ";
+				const char *pSeparator = pCompletionCommand->m_pParams[0] == '\0' ? "" : " ";
 				str_append(aBuf, pSeparator, sizeof(aBuf));
 				if(*pSeparator)
 					str_append(aBuf, pSeparator, sizeof(aBuf));
@@ -411,7 +411,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				// add part after the name
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength, sizeof(aBuf));
 
-				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->pName) + 1;
+				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->m_pName) + 1;
 				m_OldChatStringLength = m_Input.GetLength();
 				m_Input.Set(aBuf); // TODO: Use Add instead
 				m_Input.SetCursorOffset(m_PlaceholderOffset + m_PlaceholderLength);

@@ -162,7 +162,7 @@ public:
 };
 std::unique_ptr<ILogger> log_logger_android()
 {
-	return std::unique_ptr<ILogger>(new CLoggerAndroid());
+	return std::make_unique<CLoggerAndroid>();
 }
 #else
 std::unique_ptr<ILogger> log_logger_android()
@@ -199,7 +199,7 @@ public:
 
 std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers)
 {
-	return std::unique_ptr<ILogger>(new CLoggerCollection(std::move(loggers)));
+	return std::make_unique<CLoggerCollection>(std::move(loggers));
 }
 
 class CLoggerAsync : public ILogger
@@ -261,7 +261,7 @@ public:
 
 std::unique_ptr<ILogger> log_logger_file(IOHANDLE logfile)
 {
-	return std::unique_ptr<ILogger>(new CLoggerAsync(logfile, false, true));
+	return std::make_unique<CLoggerAsync>(logfile, false, true);
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -372,17 +372,17 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
 	const bool colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
-	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), colors, false));
+	return std::make_unique<CLoggerAsync>(io_stdout(), colors, false);
 #else
 	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)
 		AttachConsole(ATTACH_PARENT_PROCESS);
 	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	switch(GetFileType(pOutput))
 	{
-	case FILE_TYPE_CHAR: return std::unique_ptr<ILogger>(new CWindowsConsoleLogger(pOutput));
+	case FILE_TYPE_CHAR: return std::make_unique<CWindowsConsoleLogger>(pOutput);
 	case FILE_TYPE_PIPE: // fall through, writing to pipe works the same as writing to a file
-	case FILE_TYPE_DISK: return std::unique_ptr<ILogger>(new CWindowsFileLogger(pOutput));
-	default: return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), false, false));
+	case FILE_TYPE_DISK: return std::make_unique<CWindowsFileLogger>(pOutput);
+	default: return std::make_unique<CLoggerAsync>(io_stdout(), false, false);
 	}
 #endif
 }
@@ -400,7 +400,7 @@ public:
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()
 {
-	return std::unique_ptr<ILogger>(new CLoggerWindowsDebugger());
+	return std::make_unique<CLoggerWindowsDebugger>();
 }
 #else
 std::unique_ptr<ILogger> log_logger_windows_debugger()

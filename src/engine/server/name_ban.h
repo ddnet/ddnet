@@ -4,7 +4,7 @@
 #include <base/system.h>
 #include <engine/shared/protocol.h>
 
-#include <array> // std::size
+#include <vector>
 
 enum
 {
@@ -31,6 +31,6 @@ public:
 	int m_IsSubstring;
 };
 
-CNameBan *IsNameBanned(const char *pName, CNameBan *pNameBans, int NumNameBans);
+CNameBan *IsNameBanned(const char *pName, std::vector<CNameBan> &vNameBans);
 
 #endif // ENGINE_SERVER_NAME_BAN_H

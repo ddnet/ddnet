@@ -3031,7 +3031,12 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < std::size(m_NetClient); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			if(PortRef < 1024) // Reject users setting ports that we don't want to use
+			{
+				PortRef = 0;
+			}
+			BindAddr.port = PortRef;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
