@@ -3,7 +3,6 @@
 #include <cctype>
 
 #include <base/system.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 

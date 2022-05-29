@@ -13,7 +13,6 @@
 #include <engine/map.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
-#include <engine/shared/demo.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -24,6 +23,7 @@
 #include <game/generated/protocol.h>
 
 #include <base/math.h>
+#include <base/system.h>
 #include <base/vmath.h>
 
 #include "race.h"
@@ -45,8 +45,8 @@
 #include "components/debughud.h"
 #include "components/effects.h"
 #include "components/emoticon.h"
-#include "components/flow.h"
 #include "components/freezebars.h"
+#include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
 #include "components/killmessages.h"
@@ -59,16 +59,15 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/players.h"
+#include "components/race_demo.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
-
-#include "components/ghost.h"
-#include "components/race_demo.h"
-#include <base/system.h>
+#include "prediction/entities/character.h"
+#include "prediction/entities/projectile.h"
 
 using namespace std::chrono_literals;
 

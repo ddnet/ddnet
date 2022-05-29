@@ -7,6 +7,11 @@
 #include <engine/client/graphics_threaded.h>
 #include <engine/sound.h>
 
+extern "C" {
+#include <libavutil/avutil.h>
+#include <libavutil/opt.h>
+};
+
 #include <memory>
 #include <mutex>
 

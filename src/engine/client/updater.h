@@ -1,7 +1,6 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
-#include <engine/shared/http.h>
 #include <engine/updater.h>
 #include <map>
 #include <string>

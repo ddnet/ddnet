@@ -3,6 +3,7 @@
 #include "pickup.h"
 #include "character.h"
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 void CPickup::Tick()
 {

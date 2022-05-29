@@ -2,7 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SOUNDS_H
 #define GAME_CLIENT_COMPONENTS_SOUNDS_H
-#include <engine/engine.h>
+
+#include <base/vmath.h>
+#include <engine/shared/jobs.h>
 #include <engine/sound.h>
 #include <game/client/component.h>
 

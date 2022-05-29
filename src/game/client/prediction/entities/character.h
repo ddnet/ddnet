@@ -3,11 +3,9 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 
-#include "projectile.h"
 #include <game/client/prediction/entity.h>
 
 #include <game/gamecore.h>
-#include <game/generated/client_data.h>
 
 enum
 {

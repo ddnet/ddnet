@@ -1,12 +1,10 @@
-#include "binds.h"
-
 #include <base/system.h>
 
-#include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 #include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include "menus.h"
 

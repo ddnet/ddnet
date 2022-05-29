@@ -4,9 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #include <game/client/component.h>
 
-struct CNetObj_Character;
-struct CNetObj_PlayerInfo;
-struct CMapItemGroup;
+#include <game/generated/protocol.h>
 
 struct SPlayerNamePlate
 {

@@ -3,9 +3,9 @@
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/storage.h>
-#include <game/version.h>
 
 #include <cstdlib> // system
 

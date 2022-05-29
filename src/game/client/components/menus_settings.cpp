@@ -3,7 +3,6 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
@@ -11,7 +10,6 @@
 #include <engine/textrender.h>
 #include <engine/updater.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
@@ -24,20 +22,16 @@
 #include <game/localization.h>
 
 #include "binds.h"
-#include "camera.h"
 #include "countryflags.h"
 #include "menus.h"
 #include "skins.h"
 
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include <array>
-#include <numeric>
-
 #include <chrono>
+#include <memory>
+#include <numeric>
+#include <string>
+#include <vector>
 
 using namespace std::chrono_literals;
 

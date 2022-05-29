@@ -1,6 +1,5 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
-#include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/server/gamemodes/DDRace.h>

@@ -1,7 +1,6 @@
 #ifndef GAME_SERVER_SCOREWORKER_H
 #define GAME_SERVER_SCOREWORKER_H
 
-#include <atomic>
 #include <memory>
 #include <string>
 #include <utility>

@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_CHAT_H
 #include <vector>
 
+#include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 

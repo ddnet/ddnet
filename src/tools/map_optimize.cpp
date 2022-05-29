@@ -1,13 +1,11 @@
 #include <algorithm>
 #include <base/logger.h>
-#include <base/math.h>
 #include <base/system.h>
 #include <cstdint>
 #include <engine/shared/datafile.h>
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
-#include <utility>
 #include <vector>
 
 void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)

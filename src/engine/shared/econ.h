@@ -3,9 +3,8 @@
 
 #include "network.h"
 
+#include <engine/config.h>
 #include <engine/console.h>
-
-class CConfig;
 
 class CEcon
 {

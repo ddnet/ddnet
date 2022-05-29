@@ -3,7 +3,6 @@
 #ifndef GAME_GAMECORE_H
 #define GAME_GAMECORE_H
 
-#include <base/math.h>
 #include <base/system.h>
 
 #include <map>
@@ -13,9 +12,7 @@
 #include "collision.h"
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
-#include <math.h>
 
-#include "mapitems.h"
 #include "prng.h"
 #include "teamscore.h"
 

@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_PROJECTILE_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_PROJECTILE_H
 
-#include "character.h"
 #include <game/client/prediction/entity.h>
 
 class CProjectileData;

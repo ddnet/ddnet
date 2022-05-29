@@ -6,7 +6,6 @@
 #include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
-#include <game/version.h>
 
 bool CheckClientID(int ClientID);
 

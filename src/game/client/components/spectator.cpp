@@ -3,16 +3,15 @@
 
 #include <climits>
 
-#include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
 #include <game/client/render.h>
+#include <game/localization.h>
 
 #include "camera.h"
 #include "spectator.h"

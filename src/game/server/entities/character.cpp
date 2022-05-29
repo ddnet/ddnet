@@ -6,13 +6,11 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
-#include <new>
 
 #include "character.h"
 #include "laser.h"
 #include "projectile.h"
 
-#include "light.h"
 #include <game/server/score.h>
 #include <game/server/teams.h>
 

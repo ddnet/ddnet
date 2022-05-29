@@ -10,9 +10,8 @@
 #include <string>
 #include <vector>
 
-#include <engine/client/backend_sdl.h>
-
 #include <engine/client/backend/glsl_shader_compiler.h>
+#include <engine/graphics.h>
 
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
