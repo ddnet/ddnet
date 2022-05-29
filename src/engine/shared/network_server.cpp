@@ -3,14 +3,11 @@
 #include <base/hash_ctxt.h>
 #include <base/system.h>
 
-#include <engine/console.h>
-
 #include "config.h"
 #include "netban.h"
 #include "network.h"
 #include <engine/message.h>
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
 
 const int DummyMapCrc = 0x6c760ac4;
 unsigned char g_aDummyMapData[] = {

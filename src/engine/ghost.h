@@ -2,7 +2,6 @@
 #define ENGINE_GHOST_H
 
 #include <base/hash.h>
-#include <engine/map.h>
 #include <engine/shared/protocol.h>
 
 #include "kernel.h"

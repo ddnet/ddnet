@@ -2,8 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
 
-#include <engine/console.h>
-
 #include "netban.h"
 #include "network.h"
 
