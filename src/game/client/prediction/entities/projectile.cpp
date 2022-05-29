@@ -3,6 +3,7 @@
 #include "projectile.h"
 #include <game/client/projectile_data.h>
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 #include <engine/shared/config.h>
 

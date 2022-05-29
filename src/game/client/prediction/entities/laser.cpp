@@ -3,6 +3,7 @@
 #include "laser.h"
 #include "character.h"
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 #include <engine/shared/config.h>
 
