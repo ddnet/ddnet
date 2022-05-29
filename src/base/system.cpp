@@ -1450,11 +1450,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1478,11 +1478,9 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
-
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		int socket = -1;
 		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
@@ -1502,7 +1500,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1527,10 +1524,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	/* set non-blocking */
-	net_set_non_blocking(sock);
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
+	}
+	else
+	{
+		/* set non-blocking */
+		net_set_non_blocking(sock);
 
-	net_buffer_init(&sock->buffer);
+		net_buffer_init(&sock->buffer);
+	}
 
 	/* return */
 	return sock;
@@ -1737,11 +1742,11 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1757,7 +1762,6 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1768,6 +1772,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 		}
+	}
+
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
 	}
 
 	/* return */
