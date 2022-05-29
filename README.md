@@ -137,3 +137,21 @@ Building on windows
     cmake --build .
 
 If you use MinGW as a compiler the client is in build/DDNet.exe if vs in build/Debug/DDNet.exe
+
+## Development
+
+There is a custom merge driver that auto solves some conflicts in CMakeLists.txt
+when merging into ddnet. To set it up run this script before merging into ddnet.
+
+Install the lib-teeworlds repo to get the `tw_cmake` tool
+
+    mkdir -p ~/.lib-crash
+    (cd ~/.lib-crash && git clone git@github.com:lib-crash/lib-teeworlds.git)
+
+Add it to your PATH by adding this line to your `.bashrc` or `.bash_profile`
+
+    export PATH="$PATH:/home/chiller/.lib-crash/lib-teeworlds/bin"
+
+Then configure the git merge driver
+
+    ./scripts/setup-merge-tools.sh
