@@ -15,9 +15,6 @@
 
 #include "logger.h"
 
-#if !defined(CONF_PLATFORM_MACOS)
-#include <base/color.h>
-#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 
