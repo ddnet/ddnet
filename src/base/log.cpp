@@ -306,11 +306,24 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 class CWindowsConsoleLogger : public ILogger
 {
 	HANDLE m_pConsole;
+	int m_BackgroundColor;
+	int m_ForegroundColor;
 
 public:
 	CWindowsConsoleLogger(HANDLE pConsole) :
 		m_pConsole(pConsole)
 	{
+		CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
+		if(GetConsoleScreenBufferInfo(pConsole, &ConsoleInfo))
+		{
+			m_BackgroundColor = ConsoleInfo.wAttributes & (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY);
+			m_ForegroundColor = ConsoleInfo.wAttributes & (FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+		}
+		else
+		{
+			m_BackgroundColor = 0;
+			m_ForegroundColor = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+		}
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
@@ -340,18 +353,25 @@ public:
 		}
 		pWide[WLen++] = '\r';
 		pWide[WLen++] = '\n';
-		int Color = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+		int Color = m_BackgroundColor;
 		if(pMessage->m_HaveColor)
 		{
 			ColorRGBA Rgba(1.0, 1.0, 1.0, 1.0);
 			Rgba.r = pMessage->m_Color.r / 255.0;
 			Rgba.g = pMessage->m_Color.g / 255.0;
 			Rgba.b = pMessage->m_Color.b / 255.0;
-			Color = color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
+			Color |= color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
 		}
+		else
+			Color |= FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 		SetConsoleTextAttribute(m_pConsole, Color);
 		WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
 		free(pWide);
+	}
+	void GlobalFinish() override
+	{
+		// Restore original color
+		SetConsoleTextAttribute(m_pConsole, m_BackgroundColor | m_ForegroundColor);
 	}
 };
 class CWindowsFileLogger : public ILogger
