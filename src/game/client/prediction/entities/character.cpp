@@ -829,23 +829,23 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// collide with others
-	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && m_Core.m_Collision)
+	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_NoCollision)
 	{
-		m_Core.m_Collision = false;
+		m_Core.m_NoCollision = true;
 	}
-	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && !m_Core.m_Collision)
+	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_NoCollision)
 	{
-		m_Core.m_Collision = true;
+		m_Core.m_NoCollision = false;
 	}
 
 	// hook others
-	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && m_Core.m_Hook)
+	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_NoHookHit)
 	{
-		m_Core.m_Hook = false;
+		m_Core.m_NoHookHit = true;
 	}
-	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && !m_Core.m_Hook)
+	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_NoHookHit)
 	{
-		m_Core.m_Hook = true;
+		m_Core.m_NoHookHit = false;
 	}
 
 	// unlimited air jumps
@@ -1131,8 +1131,8 @@ void CCharacter::ResetPrediction()
 	m_Jetpack = false;
 	m_NinjaJetpack = false;
 	m_Core.m_Jumps = 2;
-	m_Core.m_Hook = true;
-	m_Core.m_Collision = true;
+	m_Core.m_NoHookHit = false;
+	m_Core.m_NoCollision = false;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_Core.m_FreezeTick = 0;
@@ -1268,8 +1268,8 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		// set player collision
 		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
-		m_Core.m_Collision = Tuning()->m_PlayerCollision;
-		m_Core.m_Hook = Tuning()->m_PlayerHooking;
+		m_Core.m_NoCollision = !Tuning()->m_PlayerCollision;
+		m_Core.m_NoHookHit = !Tuning()->m_PlayerHooking;
 
 		if(m_Core.m_HookTick != 0)
 			m_EndlessHook = false;

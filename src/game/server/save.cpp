@@ -77,8 +77,8 @@ void CSaveTee::Save(CCharacter *pChr)
 	// Core
 	m_CorePos = pChr->m_Core.m_Pos;
 	m_Vel = pChr->m_Core.m_Vel;
-	m_Hook = pChr->m_Core.m_Hook;
-	m_Collision = pChr->m_Core.m_Collision;
+	m_Hook = !pChr->m_Core.m_NoHookHit;
+	m_Collision = !pChr->m_Core.m_NoCollision;
 	m_ActiveWeapon = pChr->m_Core.m_ActiveWeapon;
 	m_Jumped = pChr->m_Core.m_Jumped;
 	m_JumpedTotal = pChr->m_Core.m_JumpedTotal;
@@ -170,8 +170,8 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	// Core
 	pChr->m_Core.m_Pos = m_CorePos;
 	pChr->m_Core.m_Vel = m_Vel;
-	pChr->m_Core.m_Hook = m_Hook;
-	pChr->m_Core.m_Collision = m_Collision;
+	pChr->m_Core.m_NoHookHit = !m_Hook;
+	pChr->m_Core.m_NoCollision = !m_Collision;
 	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
 	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;

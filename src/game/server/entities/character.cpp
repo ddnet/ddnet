@@ -1231,9 +1231,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !GameServer()->Tuning()->m_PlayerCollision)
+	if(m_Core.m_NoCollision || !GameServer()->Tuning()->m_PlayerCollision)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !GameServer()->Tuning()->m_PlayerHooking)
+	if(m_Core.m_NoHookHit || !GameServer()->Tuning()->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -1577,36 +1577,32 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// collide with others
-	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && m_Core.m_Collision)
+	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_NoCollision)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others");
-		m_Core.m_Collision = false;
 		m_Core.m_NoCollision = true;
 		m_NeededFaketuning |= FAKETUNE_NOCOLL;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && !m_Core.m_Collision)
+	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_NoCollision)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can collide with others");
-		m_Core.m_Collision = true;
 		m_Core.m_NoCollision = false;
 		m_NeededFaketuning &= ~FAKETUNE_NOCOLL;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 
 	// hook others
-	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && m_Core.m_Hook)
+	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_NoHookHit)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others");
-		m_Core.m_Hook = false;
 		m_Core.m_NoHookHit = true;
 		m_NeededFaketuning |= FAKETUNE_NOHOOK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
-	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && !m_Core.m_Hook)
+	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_NoHookHit)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hook others");
-		m_Core.m_Hook = true;
 		m_Core.m_NoHookHit = false;
 		m_NeededFaketuning &= ~FAKETUNE_NOHOOK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
