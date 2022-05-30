@@ -281,26 +281,26 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 			return FOREGROUND_INTENSITY;
 		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 	}
-	else if(h >= 0 && h < 15)
-		return FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else if(h >= 15 && h < 30)
-		return FOREGROUND_GREEN | FOREGROUND_RED;
-	else if(h >= 30 && h < 60)
-		return FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else if(h >= 60 && h < 110)
-		return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-	else if(h >= 110 && h < 140)
-		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-	else if(h >= 140 && h < 170)
-		return FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-	else if(h >= 170 && h < 195)
-		return FOREGROUND_BLUE | FOREGROUND_RED;
-	else if(h >= 195 && h < 240)
-		return FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else if(h >= 240)
-		return FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else
+	if(h < 0)
 		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h < 15)
+		return FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h < 30)
+		return FOREGROUND_GREEN | FOREGROUND_RED;
+	else if(h < 60)
+		return FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h < 110)
+		return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	else if(h < 140)
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	else if(h < 170)
+		return FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	else if(h < 195)
+		return FOREGROUND_BLUE | FOREGROUND_RED;
+	else if(h < 240)
+		return FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else
+		return FOREGROUND_RED | FOREGROUND_INTENSITY;
 }
 
 class CWindowsConsoleLogger : public ILogger
