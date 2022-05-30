@@ -1,10 +1,12 @@
 // ChillerDragon 2020 - chillerbot ux
 
-#include <game/client/components/chat.h>
 #include <game/client/components/chillerbot/chillerbotux.h>
 #include <game/client/gameclient.h>
 
 #include <cinttypes>
+#include <engine/shared/protocol.h>
+
+#include <game/client/components/chat.h>
 
 #include "chathelper.h"
 

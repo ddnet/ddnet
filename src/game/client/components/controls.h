@@ -2,11 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CONTROLS_H
 #define GAME_CLIENT_COMPONENTS_CONTROLS_H
-#include <SDL_joystick.h>
-#include <base/system.h>
-#include <base/vmath.h>
-#include <game/client/component.h>
 
+#include <SDL_joystick.h>
+
+#include <base/vmath.h>
+
+#include <engine/client.h>
+
+#include <game/client/component.h>
 #include <game/generated/protocol.h>
 
 class CControls : public CComponent

@@ -7,8 +7,6 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <stddef.h>
-
 class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;

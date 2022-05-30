@@ -12,8 +12,6 @@
 
 #include <game/layers.h>
 
-#include <game/client/render.h>
-
 #include "menu_background.h"
 
 #include <chrono>

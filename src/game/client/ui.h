@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
-#include <base/system.h>
 #include <engine/textrender.h>
 
 #include <chrono>

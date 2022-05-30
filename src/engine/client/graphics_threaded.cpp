@@ -15,7 +15,6 @@
 
 #include <engine/console.h>
 #include <engine/graphics.h>
-#include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <game/generated/client_data.h>
@@ -23,8 +22,6 @@
 #include <game/localization.h>
 
 #include <engine/shared/image_manipulation.h>
-
-#include <cmath> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"

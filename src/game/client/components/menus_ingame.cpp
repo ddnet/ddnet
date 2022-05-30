@@ -3,7 +3,6 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/config.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/ghost.h>

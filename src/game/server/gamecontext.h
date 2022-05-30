@@ -12,7 +12,6 @@
 #include <game/voting.h>
 
 #include "eventhandler.h"
-//#include "gamecontroller.h"
 #include "game/generated/protocol.h"
 #include "gameworld.h"
 #include "teehistorian.h"

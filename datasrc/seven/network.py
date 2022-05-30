@@ -23,8 +23,6 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 
 RawHeader = '''
 
-#include <engine/message.h>
-
 enum
 {
 	INPUT_STATE_MASK=0x3f
@@ -58,7 +56,6 @@ enum
 '''
 
 RawSource = '''
-#include <engine/message.h>
 #include "protocol.h"
 '''
 

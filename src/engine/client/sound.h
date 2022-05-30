@@ -7,7 +7,7 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
-#include "SDL.h"
+#include <SDL_audio.h>
 
 class CSound : public IEngineSound
 {

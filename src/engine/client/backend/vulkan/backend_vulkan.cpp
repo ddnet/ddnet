@@ -35,8 +35,7 @@
 
 #include <unordered_map>
 
-#include <SDL.h>
-#include <SDL_error.h>
+#include <SDL_video.h>
 #include <SDL_vulkan.h>
 
 #include <vulkan/vulkan.h>

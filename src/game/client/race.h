@@ -1,7 +1,6 @@
 #ifndef GAME_CLIENT_RACE_H
 #define GAME_CLIENT_RACE_H
 
-#include <base/system.h>
 #include <base/vmath.h>
 
 class CRaceHelper

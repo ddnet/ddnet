@@ -1,8 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/logger.h>
+
 #include <climits>
 #include <cmath>
+#include <limits>
 
 #include <game/generated/client_data.h>
 
@@ -11,25 +14,22 @@
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <cstdio>
-#include <cstring>
-
 #include <game/client/ui.h>
 
+#include <game/localization.h>
 #include <game/version.h>
 
-#include <game/client/components/controls.h>
-#include <game/client/components/menus.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 
 #include <game/client/gameclient.h>
+
+#include <base/math.h>
 
 #include "chillconsole.h"
 

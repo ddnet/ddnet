@@ -1,7 +1,7 @@
 #ifndef GAME_PRNG_H
 #define GAME_PRNG_H
 
-#include <base/system.h>
+#include <stdint.h>
 
 class CPrng
 {

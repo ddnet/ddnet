@@ -6,7 +6,6 @@
 #include <sqlite3.h>
 
 #include <algorithm>
-#include <cstdio>
 #include <vector>
 
 class CServerBrowserPingCache : public IServerBrowserPingCache

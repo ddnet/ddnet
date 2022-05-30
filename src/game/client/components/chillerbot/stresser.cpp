@@ -76,10 +76,10 @@ void CStresser::OnRender()
 		{
 			char aBuf[2048];
 			str_copy(aBuf, "", sizeof(aBuf));
-			for(std::vector<char *>::size_type i = 0; i != m_vChatCmds.size(); i++)
+			for(const auto &ChatCmd : m_vChatCmds)
 			{
-				str_append(aBuf, m_vChatCmds[i], sizeof(aBuf));
-				// dbg_msg("pentest", "append chat cmd=%s", m_vChatCmds[i]);
+				str_append(aBuf, ChatCmd, sizeof(aBuf));
+				// dbg_msg("pentest", "append chat cmd=%s", ChatCmd);
 			}
 			// m_pChat->SayChat(aBuf);
 			dbg_msg("pentest", "found chat cmds=%s", aBuf);

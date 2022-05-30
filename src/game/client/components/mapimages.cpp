@@ -2,10 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/map.h>
-#include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <game/client/component.h>
+#include <game/generated/client_data.h>
 #include <game/mapitems.h>
 
 #include <game/layers.h>

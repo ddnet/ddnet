@@ -16,16 +16,13 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
 #include <game/client/components/camera.h>
 #include <game/client/gameclient.h>
-#include <game/client/lineinput.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/gamecore.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 

@@ -3,6 +3,7 @@
 #include <engine/client/serverbrowser.h>
 #include <game/client/components/controls.h>
 #include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include <base/terminalui.h>
 

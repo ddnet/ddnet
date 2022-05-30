@@ -2,14 +2,12 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <engine/editor.h>
-#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/shared/csv.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>

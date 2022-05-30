@@ -3,11 +3,9 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
-#include <math.h>
 #include <string>
 #include <vector>
 
-#include <base/math.h>
 #include <base/system.h>
 
 #include <game/client/render.h>
@@ -17,10 +15,6 @@
 
 #include <engine/editor.h>
 #include <engine/graphics.h>
-#include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
-#include <engine/sound.h>
-#include <engine/storage.h>
 
 #include "auto_map.h"
 

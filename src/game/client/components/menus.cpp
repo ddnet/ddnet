@@ -1,17 +1,15 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <vector>
-
+#include <chrono>
 #include <cmath>
+#include <vector>
 
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
 
-#include <engine/config.h>
 #include <engine/editor.h>
-#include <engine/engine.h>
 #include <engine/friends.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
@@ -21,7 +19,6 @@
 #include <engine/textrender.h>
 
 #include <game/generated/protocol.h>
-#include <game/version.h>
 
 #include <engine/client/updater.h>
 
@@ -30,18 +27,11 @@
 #include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
-#include <game/client/lineinput.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-#include "controls.h"
 #include "countryflags.h"
 #include "menus.h"
-#include "skins.h"
-
-#include <limits>
-
-#include <chrono>
 
 using namespace std::chrono_literals;
 

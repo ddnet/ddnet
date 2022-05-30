@@ -13,7 +13,6 @@
 #include <base/system.h>
 
 #include <engine/client/backend/backend_base.h>
-#include <engine/client/backend_sdl.h>
 
 class CGLSLProgram;
 class CGLSLTWProgram;

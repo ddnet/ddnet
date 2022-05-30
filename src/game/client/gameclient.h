@@ -11,13 +11,9 @@
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
-#include <game/localization.h>
 
 #include <game/teamscore.h>
 
-#include <game/client/prediction/entities/character.h>
-#include <game/client/prediction/entities/laser.h>
-#include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/gameworld.h>
 
 // components

@@ -3,7 +3,6 @@
 #include <base/system.h>
 
 #include "compression.h"
-#include "config.h"
 #include "packer.h"
 
 void CPacker::Reset()

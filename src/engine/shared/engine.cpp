@@ -10,8 +10,6 @@
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
-#include <engine/shared/assertion_logger.h>
-
 CHostLookup::CHostLookup() = default;
 
 CHostLookup::CHostLookup(const char *pHostname, int Nettype)

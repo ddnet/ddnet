@@ -7,15 +7,12 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
-#include <game/client/component.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/layers.h>
 
 #include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>
-
-#include <game/generated/client_data.h>
 
 #include "maplayers.h"
 

@@ -2,8 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
-#include <base/color.h>
-#include <base/vmath.h>
+
 #include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>

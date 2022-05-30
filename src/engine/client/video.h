@@ -3,18 +3,13 @@
 
 #include <base/system.h>
 
-#include "graphics_defines.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/opt.h>
 #include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 };
 
-#include <engine/shared/demo.h>
 #include <engine/shared/video.h>
 
 #include <atomic>

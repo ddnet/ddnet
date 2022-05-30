@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
@@ -10,9 +9,10 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
+
 #include <game/layers.h>
+#include <game/localization.h>
 
 #include <cmath>
 

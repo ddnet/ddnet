@@ -8,17 +8,17 @@
 #include <engine/client/updater.h>
 #include <engine/shared/config.h>
 
-#include <game/client/components/console.h>
-#include <game/client/render.h>
+#include <game/client/gameclient.h>
 #include <game/client/ui.h>
-#include <game/editor/editor.h>
-#include <game/version.h>
 
 #include <game/generated/client_data.h>
-
-#include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include "menus.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 void CMenus::RenderStartMenu(CUIRect MainView)
 {

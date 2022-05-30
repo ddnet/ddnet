@@ -4,7 +4,6 @@
 #define ENGINE_SERVER_SERVER_H
 
 #include <base/hash.h>
-#include <base/math.h>
 
 #include <engine/engine.h>
 #include <engine/server.h>

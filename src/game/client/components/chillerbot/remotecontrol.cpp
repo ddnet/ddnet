@@ -1,5 +1,7 @@
 // ChillerDragon 2021 - chillerbot ux
 
+#include <game/generated/protocol.h>
+
 #include <game/client/components/chat.h>
 #include <game/client/components/chillerbot/chathelper.h>
 #include <game/client/components/chillerbot/chillerbotux.h>

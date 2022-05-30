@@ -4,16 +4,17 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/projectile_data.h>
 #include <game/client/render.h>
-#include <game/client/ui.h>
+
+#include <game/client/prediction/entities/laser.h>
+#include <game/client/prediction/entities/pickup.h>
+#include <game/client/prediction/entities/projectile.h>
 
 #include <game/client/components/effects.h>
-#include <game/client/components/flow.h>
 
 #include "items.h"
 

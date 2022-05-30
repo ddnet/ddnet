@@ -5,6 +5,8 @@
 #include <game/client/render.h>
 #include <game/mapitems.h>
 
+#include <engine/console.h>
+
 #include <engine/shared/http.h>
 
 #define MAX_COMPONENT_LEN 16

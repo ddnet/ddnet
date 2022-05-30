@@ -1,5 +1,9 @@
 // ChillerDragon 2020 - chillerbot ux
 
+#include <game/generated/protocol.h>
+
+#include <game/client/gameclient.h>
+
 #include <engine/shared/linereader.h>
 #include <game/client/components/chat.h>
 

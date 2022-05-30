@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <engine/graphics.h>
-#include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 

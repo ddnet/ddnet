@@ -16,7 +16,6 @@
 #include "entities/gun.h"
 #include "entities/light.h"
 #include "entities/projectile.h"
-#include <game/layers.h>
 
 IGameController::IGameController(class CGameContext *pGameServer)
 {

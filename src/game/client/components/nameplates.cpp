@@ -9,9 +9,8 @@
 #include "camera.h"
 #include "controls.h"
 #include "nameplates.h"
-#include <game/client/animstate.h>
-#include <game/client/components/countryflags.h>
 #include <game/client/gameclient.h>
+#include <game/client/prediction/entities/character.h>
 
 #include <game/client/components/chillerbot/warlist.h>
 

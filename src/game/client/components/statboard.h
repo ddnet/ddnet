@@ -1,6 +1,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_STATBOARD_H
 #define GAME_CLIENT_COMPONENTS_STATBOARD_H
 
+#include <engine/console.h>
+
 #include <game/client/component.h>
 #include <string>
 
