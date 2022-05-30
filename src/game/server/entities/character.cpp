@@ -718,6 +718,15 @@ void CCharacter::Tick()
 		m_pPlayer->m_ForceBalanced = false;
 	}*/
 
+	if(m_StartTime > Server()->Tick())
+	{
+		// Prevent the player from getting a negative time
+		// The main reason why this can happen is because of time penalty tiles
+		// However, other reasons are hereby also excluded
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You died of old age");
+		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+	}
+
 	if(m_Paused)
 		return;
 

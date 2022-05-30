@@ -2679,7 +2679,7 @@ int CServer::Run()
 			int NewTicks = 0;
 
 			// load new map TODO: don't poll this
-			if(m_MapReload)
+			if(m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) // force reload to make sure the ticks stay within a valid range
 			{
 				// load map
 				if(LoadMap(Config()->m_SvMap))
