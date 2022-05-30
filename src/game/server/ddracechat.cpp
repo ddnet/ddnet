@@ -577,8 +577,6 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 			{
 				if(pSelf->m_apPlayers[i]->GetCharacter())
 					pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
-				/*if(pSelf->Server()->IsSixup(i))
-					pSelf->SendClientInfo(i, i);*/
 				return;
 			}
 		}

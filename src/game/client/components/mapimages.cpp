@@ -307,10 +307,6 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 							{
 								ValidTile = false;
 							}
-							/*else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE_BLOCKWORLD) && ...)
-							{
-								ValidTile = false;
-							}*/
 						}
 
 						if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)

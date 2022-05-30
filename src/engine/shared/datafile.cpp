@@ -226,42 +226,6 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 
 	dbg_msg("datafile", "loading done. datafile='%s'", pFilename);
 
-	if(DEBUG)
-	{
-		/*
-		for(int i = 0; i < m_pDataFile->data.num_raw_data; i++)
-		{
-			void *p = datafile_get_data(df, i);
-			dbg_msg("datafile", "%d %d", (int)((char*)p - (char*)(&m_pDataFile->data)), size);
-		}
-
-		for(int i = 0; i < datafile_num_items(df); i++)
-		{
-			int type, id;
-			void *data = datafile_get_item(df, i, &type, &id);
-			dbg_msg("map", "\t%d: type=%x id=%x p=%p offset=%d", i, type, id, data, m_pDataFile->info.item_offsets[i]);
-			int *idata = (int*)data;
-			for(int k = 0; k < 3; k++)
-				dbg_msg("datafile", "\t\t%d=%d (%x)", k, idata[k], idata[k]);
-		}
-
-		for(int i = 0; i < m_pDataFile->data.num_m_aItemTypes; i++)
-		{
-			dbg_msg("map", "\t%d: type=%x start=%d num=%d", i,
-				m_pDataFile->info.m_aItemTypes[i].type,
-				m_pDataFile->info.m_aItemTypes[i].start,
-				m_pDataFile->info.m_aItemTypes[i].num);
-			for(int k = 0; k < m_pDataFile->info.m_aItemTypes[i].num; k++)
-			{
-				int type, id;
-				datafile_get_item(df, m_pDataFile->info.m_aItemTypes[i].start+k, &type, &id);
-				if(type != m_pDataFile->info.m_aItemTypes[i].type)
-					dbg_msg("map", "\tERROR");
-			}
-		}
-		*/
-	}
-
 	return true;
 }
 

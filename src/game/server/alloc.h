@@ -63,7 +63,6 @@ private:
 	{ \
 		dbg_assert(sizeof(POOLTYPE) >= Size, "size error"); \
 		dbg_assert(!gs_PoolUsed##POOLTYPE[id], "already used"); \
-		/*dbg_msg("pool", "++ %s %d", #POOLTYPE, id);*/ \
 		ASAN_UNPOISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
 		gs_PoolUsed##POOLTYPE[id] = 1; \
 		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
@@ -73,7 +72,6 @@ private:
 	{ \
 		dbg_assert(gs_PoolUsed##POOLTYPE[id], "not used"); \
 		dbg_assert(id == (POOLTYPE *)p - (POOLTYPE *)gs_PoolData##POOLTYPE, "invalid id"); \
-		/*dbg_msg("pool", "-- %s %d", #POOLTYPE, id);*/ \
 		gs_PoolUsed##POOLTYPE[id] = 0; \
 		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
 		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
@@ -82,7 +80,6 @@ private:
 	{ \
 		int id = (POOLTYPE *)p - (POOLTYPE *)gs_PoolData##POOLTYPE; \
 		dbg_assert(gs_PoolUsed##POOLTYPE[id], "not used"); \
-		/*dbg_msg("pool", "-- %s %d", #POOLTYPE, id);*/ \
 		gs_PoolUsed##POOLTYPE[id] = 0; \
 		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
 		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
