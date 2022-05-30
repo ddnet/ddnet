@@ -205,7 +205,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	swap_endian(m_pDataFile->m_pData, sizeof(int), minimum(static_cast<unsigned>(Header.m_Swaplen), Size) / sizeof(int));
 #endif
 
-	//if(DEBUG)
+	if(DEBUG)
 	{
 		dbg_msg("datafile", "allocsize=%d", AllocSize);
 		dbg_msg("datafile", "readsize=%d", ReadSize);
