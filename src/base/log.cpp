@@ -278,29 +278,29 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 	if(s >= 0 && s <= 10)
 	{
 		if(v <= 150)
-			return 8;
-		return 15;
+			return FOREGROUND_INTENSITY;
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 	}
 	else if(h >= 0 && h < 15)
-		return 12;
+		return FOREGROUND_RED | FOREGROUND_INTENSITY;
 	else if(h >= 15 && h < 30)
-		return 6;
+		return FOREGROUND_GREEN | FOREGROUND_RED;
 	else if(h >= 30 && h < 60)
-		return 14;
+		return FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 	else if(h >= 60 && h < 110)
-		return 10;
+		return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 	else if(h >= 110 && h < 140)
-		return 11;
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 	else if(h >= 140 && h < 170)
-		return 9;
+		return FOREGROUND_BLUE | FOREGROUND_INTENSITY;
 	else if(h >= 170 && h < 195)
-		return 5;
+		return FOREGROUND_BLUE | FOREGROUND_RED;
 	else if(h >= 195 && h < 240)
-		return 13;
+		return FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
 	else if(h >= 240)
-		return 12;
+		return FOREGROUND_RED | FOREGROUND_INTENSITY;
 	else
-		return 15;
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 }
 
 class CWindowsConsoleLogger : public ILogger
@@ -340,7 +340,7 @@ public:
 		}
 		pWide[WLen++] = '\r';
 		pWide[WLen++] = '\n';
-		int Color = 15;
+		int Color = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 		if(pMessage->m_HaveColor)
 		{
 			ColorRGBA Rgba(1.0, 1.0, 1.0, 1.0);
