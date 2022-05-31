@@ -11,6 +11,7 @@
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
+#include <game/client/gameclient.h>
 
 
 static float gs_SpriteWScale;
