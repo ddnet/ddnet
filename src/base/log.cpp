@@ -308,6 +308,8 @@ class CWindowsConsoleLogger : public ILogger
 	HANDLE m_pConsole;
 	int m_BackgroundColor;
 	int m_ForegroundColor;
+	std::mutex m_OutputLock;
+	bool m_Finished = false;
 
 public:
 	CWindowsConsoleLogger(HANDLE pConsole) :
@@ -364,19 +366,29 @@ public:
 		}
 		else
 			Color |= FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-		SetConsoleTextAttribute(m_pConsole, Color);
-		WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
+
+		m_OutputLock.lock();
+		if(!m_Finished)
+		{
+			SetConsoleTextAttribute(m_pConsole, Color);
+			WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
+		}
+		m_OutputLock.unlock();
 		free(pWide);
 	}
 	void GlobalFinish() override
 	{
 		// Restore original color
+		m_OutputLock.lock();
 		SetConsoleTextAttribute(m_pConsole, m_BackgroundColor | m_ForegroundColor);
+		m_Finished = true;
+		m_OutputLock.unlock();
 	}
 };
 class CWindowsFileLogger : public ILogger
 {
 	HANDLE m_pFile;
+	std::mutex m_OutputLock;
 
 public:
 	CWindowsFileLogger(HANDLE pFile) :
@@ -385,8 +397,10 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
+		m_OutputLock.lock();
 		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
 		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
+		m_OutputLock.unlock();
 	}
 };
 #endif
