@@ -3,6 +3,8 @@
 #include "color.h"
 #include "system.h"
 
+#include <engine/shared/config.h>
+
 #include <atomic>
 #include <cstdio>
 
@@ -67,6 +69,9 @@ void log_set_scope_logger(ILogger *logger)
 
 void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
+	if(level > g_Config.m_Loglevel)
+		return;
+
 	// Make sure we're not logging recursively.
 	if(in_logger)
 	{
