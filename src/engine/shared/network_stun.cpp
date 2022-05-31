@@ -90,16 +90,14 @@ bool CStun::CProtocol::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize
 	{
 		return false;
 	}
-	int64_t Now = time_get();
-	int64_t Freq = time_freq();
-	m_LastResponse = Now;
+	m_LastResponse = time_get();
 	if(!Success)
 	{
 		m_HaveAddr = false;
 		log_debug(IndexToSystem(m_Index), "got error response");
 		return true;
 	}
-	m_NextTry = Now + 600 * Freq;
+	m_NextTry = -1;
 	m_NumUnsuccessfulTries = -1;
 	m_HaveAddr = true;
 	m_Addr = StunAddr;
