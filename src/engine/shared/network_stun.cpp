@@ -30,7 +30,7 @@ static const char *IndexToSystem(int Index)
 
 static int RetryWaitSeconds(int NumUnsuccessfulTries)
 {
-	return (1 << clamp(0, NumUnsuccessfulTries, 9));
+	return (1 << clamp(NumUnsuccessfulTries, 0, 9));
 }
 
 CStun::CProtocol::CProtocol(int Index, NETSOCKET Socket) :
