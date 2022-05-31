@@ -73,7 +73,7 @@ void CStun::CProtocol::Update()
 	int Size = StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);
 	if(net_udp_send(m_Socket, &m_StunServer, aBuf, Size) == -1)
 	{
-		log_error(IndexToSystem(m_Index), "couldn't send stun request");
+		log_debug(IndexToSystem(m_Index), "couldn't send stun request");
 		return;
 	}
 }
