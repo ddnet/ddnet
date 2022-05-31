@@ -34,6 +34,7 @@ enum class IPRESOLVE
 struct CTimeout
 {
 	long ConnectTimeoutMs;
+	long TimeoutMs;
 	long LowSpeedLimit;
 	long LowSpeedTime;
 };
@@ -53,7 +54,7 @@ class CHttpRequest : public IJob
 	unsigned char *m_pBody = nullptr;
 	size_t m_BodyLength = 0;
 
-	CTimeout m_Timeout = CTimeout{0, 0, 0};
+	CTimeout m_Timeout = CTimeout{0, 0, 0, 0};
 	REQUEST m_Type = REQUEST::GET;
 
 	bool m_WriteToFile = false;
@@ -168,7 +169,7 @@ inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pSt
 {
 	std::unique_ptr<CHttpRequest> pResult = HttpGet(pUrl);
 	pResult->WriteToFile(pStorage, pOutputFile, StorageType);
-	pResult->Timeout(CTimeout{4000, 500, 5});
+	pResult->Timeout(CTimeout{4000, 0, 500, 5});
 	return pResult;
 }
 
@@ -176,6 +177,7 @@ inline std::unique_ptr<CHttpRequest> HttpPost(const char *pUrl, const unsigned c
 {
 	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->Post(pData, DataLength);
+	pResult->Timeout(CTimeout{4000, 15000, 500, 5});
 	return pResult;
 }
 
@@ -183,6 +185,7 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 {
 	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->PostJson(pJson);
+	pResult->Timeout(CTimeout{4000, 15000, 500, 5});
 	return pResult;
 }
 
