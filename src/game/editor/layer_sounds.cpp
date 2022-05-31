@@ -116,12 +116,6 @@ CSoundSource *CLayerSounds::NewSource(int x, int y)
 	pSource->m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
 	pSource->m_Shape.m_Circle.m_Radius = 1500;
 
-	/*
-	pSource->m_Shape.m_Type = CSoundShape::SHAPE_RECTANGLE;
-	pSource->m_Shape.m_Rectangle.m_Width = f2fx(1500.0f);
-	pSource->m_Shape.m_Rectangle.m_Height = f2fx(1000.0f);
-	*/
-
 	return pSource;
 }
 

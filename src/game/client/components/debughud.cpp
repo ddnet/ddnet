@@ -20,9 +20,6 @@ void CDebugHud::RenderNetCorrections()
 	float Width = 300 * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0, 0, Width, 300);
 
-	/*float speed = distance(vec2(netobjects.local_prev_character->x, netobjects.local_prev_character->y),
-		vec2(netobjects.local_character->x, netobjects.local_character->y));*/
-
 	const float TicksPerSecond = 50.0f;
 	float Velspeed = length(vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * TicksPerSecond;
 	float VelspeedX = m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f * TicksPerSecond;

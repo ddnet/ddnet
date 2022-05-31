@@ -2694,42 +2694,6 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		d[i * Step + 2] = v;
 	}
 
-	/* same grey like sinks
-	int Freq[256] = {0};
-	int OrgWeight = 0;
-	int NewWeight = 192;
-
-	// find most common frequence
-	for(int y = 0; y < Info.m_Height; y++)
-		for(int x = 0; x < Info.m_Width; x++)
-		{
-			if(d[y*Pitch+x*4+3] > 128)
-				Freq[d[y*Pitch+x*4]]++;
-		}
-
-	for(int i = 1; i < 256; i++)
-	{
-		if(Freq[OrgWeight] < Freq[i])
-			OrgWeight = i;
-	}
-
-	// reorder
-	int InvOrgWeight = 255-OrgWeight;
-	int InvNewWeight = 255-NewWeight;
-	for(int y = 0; y < Info.m_Height; y++)
-		for(int x = 0; x < Info.m_Width; x++)
-		{
-			int v = d[y*Pitch+x*4];
-			if(v <= OrgWeight)
-				v = (int)(((v/(float)OrgWeight) * NewWeight));
-			else
-				v = (int)(((v-OrgWeight)/(float)InvOrgWeight)*InvNewWeight + NewWeight);
-			d[y*Pitch+x*4] = v;
-			d[y*Pitch+x*4+1] = v;
-			d[y*Pitch+x*4+2] = v;
-		}
-	*/
-
 	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 	pSelf->Graphics()->FreePNG(&Info);
 

@@ -906,11 +906,8 @@ void CGameConsole::Toggle(int Type)
 
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			/*Input()->MouseModeAbsolute();*/
 			UI()->SetEnabled(false);
 			m_ConsoleState = CONSOLE_OPENING;
-			/*// reset controls
-			m_pClient->m_Controls.OnReset();*/
 
 			Input()->SetIMEState(true);
 		}

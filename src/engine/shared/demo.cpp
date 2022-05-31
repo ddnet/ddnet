@@ -682,12 +682,7 @@ void CDemoPlayer::Pause()
 
 void CDemoPlayer::Unpause()
 {
-	if(m_Info.m_Info.m_Paused)
-	{
-		/*m_Info.start_tick = m_Info.current_tick;
-		m_Info.start_time = time_get();*/
-		m_Info.m_Info.m_Paused = false;
-	}
+	m_Info.m_Info.m_Paused = false;
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
 		IVideo::Current()->Pause(false);
@@ -909,8 +904,6 @@ int CDemoPlayer::Play()
 		DoTick();
 
 	// set start info
-	/*m_Info.start_tick = m_Info.previous_tick;
-	m_Info.start_time = time_get();*/
 	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
 	m_Info.m_LastUpdate = time();
 	return 0;

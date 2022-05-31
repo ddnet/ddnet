@@ -138,9 +138,6 @@ void Run(unsigned short Port, NETADDR Dest)
 			}
 		}
 
-		//
-		/*while(1)
-		{*/
 		CPacket *p = 0;
 		CPacket *pNext = m_pFirst;
 		while(true)
@@ -170,15 +167,7 @@ void Run(unsigned short Port, NETADDR Dest)
 				else
 					m_pFirst = p->m_pNext;
 
-				/*CPacket *cur = first;
-				while(cur)
-				{
-					dbg_assert(cur != p, "p still in list");
-					cur = cur->next;
-				}*/
-
 				// send and remove packet
-				//if((rand()%20) != 0) // heavy packetloss
 				net_udp_send(Socket, &p->m_SendTo, p->m_aData, p->m_DataSize);
 
 				// update lag

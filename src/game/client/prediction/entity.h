@@ -11,13 +11,11 @@ public: \
 	void *operator new(size_t Size) \
 	{ \
 		void *p = malloc(Size); \
-		/*dbg_msg("", "++ %p %d", p, size);*/ \
 		mem_zero(p, Size); \
 		return p; \
 	} \
 	void operator delete(void *pPtr) \
 	{ \
-		/*dbg_msg("", "-- %p", p);*/ \
 		free(pPtr); \
 	} \
 \
