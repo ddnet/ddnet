@@ -3,18 +3,13 @@
 
 #include <base/system.h>
 
-#include "graphics_defines.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/opt.h>
 #include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 };
 
-#include <engine/shared/demo.h>
 #include <engine/shared/video.h>
 
 #include <atomic>
@@ -50,16 +45,16 @@ public:
 	CVideo(class CGraphics_Threaded *pGraphics, class ISound *pSound, class IStorage *pStorage, class IConsole *pConsole, int width, int height, const char *name);
 	~CVideo();
 
-	virtual void Start();
-	virtual void Stop();
-	virtual void Pause(bool Pause);
-	virtual bool IsRecording() { return m_Recording; }
+	void Start() override;
+	void Stop() override;
+	void Pause(bool Pause) override;
+	bool IsRecording() override { return m_Recording; }
 
-	virtual void NextVideoFrame();
-	virtual void NextVideoFrameThread();
+	void NextVideoFrame() override;
+	void NextVideoFrameThread() override;
 
-	virtual void NextAudioFrame(ISoundMixFunc Mix);
-	virtual void NextAudioFrameTimeline(ISoundMixFunc Mix);
+	void NextAudioFrame(ISoundMixFunc Mix) override;
+	void NextAudioFrameTimeline(ISoundMixFunc Mix) override;
 
 	static IVideo *Current() { return IVideo::ms_pCurrentVideo; }
 
@@ -143,8 +138,6 @@ private:
 
 	std::atomic<int32_t> m_ProcessingVideoFrame;
 	std::atomic<int32_t> m_ProcessingAudioFrame;
-
-	std::atomic<bool> m_NextFrame;
 
 	bool m_HasAudio;
 

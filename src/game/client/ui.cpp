@@ -1,12 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/math.h>
-#include <base/system.h>
-
 #include "ui.h"
+
+#include <base/math.h>
 #include <engine/graphics.h>
+#include <engine/input.h>
+#include <engine/keys.h>
 #include <engine/shared/config.h>
-#include <engine/textrender.h>
+
 #include <limits>
 
 void CUIElement::Init(CUI *pUI, int RequestedRectCount)
@@ -45,14 +46,17 @@ void CUIElement::SUIElementRect::Reset()
 
 float CUI::ms_FontmodHeight = 0.8f;
 
-void CUI::Init(class IGraphics *pGraphics, class ITextRender *pTextRender)
+void CUI::Init(IInput *pInput, IGraphics *pGraphics, ITextRender *pTextRender)
 {
+	m_pInput = pInput;
 	m_pGraphics = pGraphics;
 	m_pTextRender = pTextRender;
 }
 
 CUI::CUI()
 {
+	m_Enabled = true;
+
 	m_pHotItem = 0;
 	m_pActiveItem = 0;
 	m_pLastActiveItem = 0;
@@ -128,21 +132,31 @@ void CUI::OnLanguageChange()
 	OnElementsReset();
 }
 
-int CUI::Update(float Mx, float My, float Mwx, float Mwy, int Buttons)
+void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY)
 {
-	m_MouseDeltaX = Mx - m_MouseX;
-	m_MouseDeltaY = My - m_MouseY;
-	m_MouseX = Mx;
-	m_MouseY = My;
-	m_MouseWorldX = Mwx;
-	m_MouseWorldY = Mwy;
+	unsigned MouseButtons = 0;
+	if(Enabled())
+	{
+		if(Input()->KeyIsPressed(KEY_MOUSE_1))
+			MouseButtons |= 1;
+		if(Input()->KeyIsPressed(KEY_MOUSE_2))
+			MouseButtons |= 2;
+		if(Input()->KeyIsPressed(KEY_MOUSE_3))
+			MouseButtons |= 4;
+	}
+
+	m_MouseDeltaX = MouseX - m_MouseX;
+	m_MouseDeltaY = MouseY - m_MouseY;
+	m_MouseX = MouseX;
+	m_MouseY = MouseY;
+	m_MouseWorldX = MouseWorldX;
+	m_MouseWorldY = MouseWorldY;
 	m_LastMouseButtons = m_MouseButtons;
-	m_MouseButtons = Buttons;
+	m_MouseButtons = MouseButtons;
 	m_pHotItem = m_pBecomingHotItem;
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
 	m_pBecomingHotItem = 0;
-	return 0;
 }
 
 bool CUI::MouseInside(const CUIRect *pRect) const
@@ -159,7 +173,7 @@ void CUI::ConvertMouseMove(float *x, float *y) const
 
 float CUI::ButtonColorMul(const void *pID)
 {
-	if(ActiveItem() == pID)
+	if(CheckActiveItem(pID))
 		return ButtonColorMulActive();
 	else if(HotItem() == pID)
 		return ButtonColorMulHot();
@@ -430,15 +444,16 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 	// logic
 	int ReturnValue = 0;
 	const bool Inside = MouseHovered(pRect);
-	static int s_ButtonUsed = 0;
+	static int s_ButtonUsed = -1;
 
-	if(ActiveItem() == pID)
+	if(CheckActiveItem(pID))
 	{
-		if(!MouseButton(s_ButtonUsed))
+		if(s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
 		{
 			if(Inside && Checked >= 0)
 				ReturnValue = 1 + s_ButtonUsed;
-			SetActiveItem(0);
+			SetActiveItem(nullptr);
+			s_ButtonUsed = -1;
 		}
 	}
 	else if(HotItem() == pID)
@@ -453,7 +468,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 		}
 	}
 
-	if(Inside)
+	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
 		SetHotItem(pID);
 
 	return ReturnValue;
@@ -467,10 +482,10 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	if(HotItem() == pID && MouseButtonClicked(0))
 		SetActiveItem(pID);
 
-	if(ActiveItem() == pID && !MouseButton(0))
-		SetActiveItem(0);
+	if(CheckActiveItem(pID) && !MouseButton(0))
+		SetActiveItem(nullptr);
 
-	if(ActiveItem() != pID)
+	if(!CheckActiveItem(pID))
 		return 0;
 
 	if(pX)

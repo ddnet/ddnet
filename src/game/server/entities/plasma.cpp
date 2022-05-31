@@ -1,47 +1,48 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "plasma.h"
-#include <engine/config.h>
 #include <engine/server.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
-#include <game/server/player.h>
-#include <game/server/teams.h>
 
 #include "character.h"
 
 const float PLASMA_ACCEL = 1.1f;
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
-	bool Explosive, int ResponsibleTeam) :
+	bool Explosive, int ForClientID) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos = Pos;
 	m_Core = Dir;
 	m_Freeze = Freeze;
 	m_Explosive = Explosive;
+	m_ForClientID = ForClientID;
 	m_EvalTick = Server()->Tick();
 	m_LifeTime = Server()->TickSpeed() * 1.5f;
-	m_ResponsibleTeam = ResponsibleTeam;
+
 	GameWorld()->InsertEntity(this);
 }
 
-bool CPlasma::HitCharacter()
+void CPlasma::Tick()
 {
-	vec2 To2;
-	CCharacter *Hit = GameServer()->m_World.IntersectCharacter(m_Pos,
-		m_Pos + m_Core, 0.0f, To2);
-	if(!Hit)
-		return false;
-
-	if(Hit->Team() != m_ResponsibleTeam)
-		return false;
-	m_Freeze ? Hit->Freeze() : Hit->UnFreeze();
-	if(m_Explosive)
-		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true,
-			m_ResponsibleTeam, Hit->Teams()->TeamMask(m_ResponsibleTeam));
-	m_MarkedForDestroy = true;
-	return true;
+	// A plasma bullet has only a limited lifetime
+	if(m_LifeTime == 0)
+	{
+		Reset();
+		return;
+	}
+	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
+	// Without a target, a plasma bullet has no reason to live
+	if(!pTarget)
+	{
+		Reset();
+		return;
+	}
+	m_LifeTime--;
+	Move();
+	HitCharacter(pTarget);
+	// Plasma bullets may explode twice if they would hit both a player and an obstacle in the next move step
+	HitObstacle(pTarget);
 }
 
 void CPlasma::Move()
@@ -50,62 +51,72 @@ void CPlasma::Move()
 	m_Core *= PLASMA_ACCEL;
 }
 
+bool CPlasma::HitCharacter(CCharacter *pTarget)
+{
+	vec2 IntersectPos;
+	CCharacter *HitPlayer = GameServer()->m_World.IntersectCharacter(
+		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, 0, m_ForClientID);
+	if(!HitPlayer)
+	{
+		return false;
+	}
+
+	// Super player should not be able to stop the plasma bullets
+	if(HitPlayer->Team() == TEAM_SUPER)
+	{
+		return false;
+	}
+
+	m_Freeze ? HitPlayer->Freeze() : HitPlayer->UnFreeze();
+	if(m_Explosive)
+	{
+		// Plasma Turrets are very precise weapons only one tee gets speed from it,
+		// other tees near the explosion remain unaffected
+		GameServer()->CreateExplosion(
+			m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
+	}
+	Reset();
+	return true;
+}
+
+bool CPlasma::HitObstacle(CCharacter *pTarget)
+{
+	// Check if the plasma bullet is stopped by a solid block or a laser stopper
+	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
+	if(HasIntersection)
+	{
+		if(m_Explosive)
+		{
+			// Even in the case of an explosion due to a collision with obstacles, only one player is affected
+			GameServer()->CreateExplosion(
+				m_Pos, m_ForClientID, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
+		}
+		Reset();
+		return true;
+	}
+	return false;
+}
+
 void CPlasma::Reset()
 {
 	m_MarkedForDestroy = true;
 }
 
-void CPlasma::Tick()
-{
-	if(m_LifeTime == 0)
-	{
-		Reset();
-		return;
-	}
-	m_LifeTime--;
-	Move();
-	HitCharacter();
-
-	int Res = 0;
-	Res = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0,
-		0);
-	if(Res)
-	{
-		if(m_Explosive)
-			GameServer()->CreateExplosion(
-				m_Pos,
-				-1,
-				WEAPON_GRENADE,
-				true,
-				m_ResponsibleTeam,
-				((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.TeamMask(m_ResponsibleTeam));
-		Reset();
-	}
-}
-
 void CPlasma::Snap(int SnappingClient)
 {
+	// Only players who can see the targeted player can see the plasma bullet
+	CCharacter *pTarget = GameServer()->GetPlayerChar(m_ForClientID);
+	if(!pTarget || !pTarget->CanSnapCharacter(SnappingClient))
+	{
+		return;
+	}
+
+	// Only players with the plasma bullet in their field of view or who want to see everything will receive the snap
 	if(NetworkClipped(SnappingClient))
-		return;
-	CCharacter *SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	CPlayer *SnapPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-
-	if(SnapChar && SnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[SnapChar->Team()]) && (!Tick))
-		return;
-
-	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID) && GameServer()->GetPlayerChar(SnapPlayer->m_SpectatorID)->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != SHOW_OTHERS_ON)
-		return;
-
-	if(SnapPlayer && SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar && SnapChar->Team() != m_ResponsibleTeam && SnapPlayer->m_ShowOthers != SHOW_OTHERS_ON)
-		return;
-
-	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->m_SpectatorID == SPEC_FREEVIEW && SnapChar && SnapChar->Team() != m_ResponsibleTeam && SnapPlayer->m_SpecTeam)
 		return;
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
 	if(!pObj)
 		return;
 

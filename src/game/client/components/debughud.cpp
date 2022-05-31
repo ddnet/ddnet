@@ -4,17 +4,12 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include <game/layers.h>
-
-#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
+#include <game/client/prediction/entities/character.h>
+#include <game/localization.h>
 
-//#include "controls.h"
-//#include "camera.h"
 #include "debughud.h"
 
 void CDebugHud::RenderNetCorrections()

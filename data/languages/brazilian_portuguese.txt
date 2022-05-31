@@ -860,9 +860,6 @@ Highlighted message
 Alpha
 == Alfa
 
-Reset wanted weapon on death
-== Redefinir arma desejada ao morrer
-
 Length:
 == Duração:
 

@@ -738,9 +738,6 @@ Threaded sound loading
 Check now
 == Comprova ara
 
-Reset wanted weapon on death
-== Reiniciar l'arma desitjada al morir
-
 Frags
 == Morts causades
 
@@ -1084,7 +1081,7 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 == La mida de la textura %s no es divisible per %d, o l'altura no es divisible per %d, el qual pot resultar en errors visuals.
 
 Warning
-== Advertència 
+== Advertència
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Mode de depuració activat. Utilitza Ctrl+Shift+D per desactivar-lo.
@@ -1219,7 +1216,7 @@ Client message
 == Missatge del client
 
 Preview
-== Vista prèvia 
+== Vista prèvia
 
 Show local player's key presses
 == Mostrar les tecles premudes del jugador local
@@ -1277,7 +1274,7 @@ Editor
 
 [Start menu]
 Play
-== Jugar 
+== Jugar
 
 AFR
 == AFR

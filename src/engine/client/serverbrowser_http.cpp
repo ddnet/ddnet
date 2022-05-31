@@ -10,8 +10,14 @@
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
+#include <base/system.h>
+
 #include <memory>
 #include <vector>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 class CChooseMaster
 {
@@ -48,7 +54,7 @@ private:
 		std::shared_ptr<CData> m_pData;
 		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
 		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
-		virtual void Run();
+		void Run() override;
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
@@ -182,7 +188,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		int64_t StartTime = time_get_microseconds();
+		auto StartTime = tw::time_get();
 		CHttpRequest *pGet = HttpGet(pUrl).release();
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
@@ -190,7 +196,7 @@ void CChooseMaster::CJob::Run()
 		m_pGet = std::unique_ptr<CHttpRequest>(pGet);
 		lock_unlock(m_Lock);
 		IEngine::RunJobBlocking(pGet);
-		int Time = (time_get_microseconds() - StartTime) / 1000;
+		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
@@ -211,8 +217,8 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, Time);
-		aTimeMs[i] = Time;
+		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, (int)Time.count());
+		aTimeMs[i] = Time.count();
 	}
 	// Determine index of the minimum time.
 	int BestIndex = -1;
@@ -243,30 +249,30 @@ class CServerBrowserHttp : public IServerBrowserHttp
 public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	virtual ~CServerBrowserHttp();
-	void Update();
-	bool IsRefreshing() { return m_State != STATE_DONE; }
-	void Refresh();
-	bool GetBestUrl(const char **pBestUrl) const { return m_pChooseMaster->GetBestUrl(pBestUrl); }
+	void Update() override;
+	bool IsRefreshing() override { return m_State != STATE_DONE; }
+	void Refresh() override;
+	bool GetBestUrl(const char **pBestUrl) const override { return m_pChooseMaster->GetBestUrl(pBestUrl); }
 
-	int NumServers() const
+	int NumServers() const override
 	{
 		return m_aServers.size();
 	}
-	const NETADDR &ServerAddress(int Index) const
+	const NETADDR &ServerAddress(int Index) const override
 	{
 		return m_aServers[Index].m_Addr;
 	}
-	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const
+	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const override
 	{
 		const CEntry &Entry = m_aServers[Index];
 		*pAddr = Entry.m_Addr;
 		*pInfo = Entry.m_Info;
 	}
-	int NumLegacyServers() const
+	int NumLegacyServers() const override
 	{
 		return m_aLegacyServers.size();
 	}
-	const NETADDR &LegacyServer(int Index) const
+	const NETADDR &LegacyServer(int Index) const override
 	{
 		return m_aLegacyServers[Index];
 	}

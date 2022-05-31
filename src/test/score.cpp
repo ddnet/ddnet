@@ -202,7 +202,7 @@ TEST_P(SingleScore, TimesDoesntExist)
 
 struct TeamScore : public Score
 {
-	void SetUp()
+	void SetUp() override
 	{
 		CSqlTeamScoreData teamScoreData;
 		str_copy(teamScoreData.m_aMap, "Kobra 3", sizeof(teamScoreData.m_aMap));

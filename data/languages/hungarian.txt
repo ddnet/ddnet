@@ -727,9 +727,6 @@ Remove chat
 Check now
 == Nézd meg
 
-Reset wanted weapon on death
-== Újraéledéskor váltson az akart fegyverre
-
 Frags
 == Zászlók
 
@@ -1332,52 +1329,52 @@ Chat command (e.g. showall 1)
 == Chat parancs (például showall 1)
 
 Toggle to edit your dummy settings
-== 
+== Átkapcsolás a másolatod beállításainak szerkesztéséhez
 
 Choose default eyes when joining a server
-== 
+== Alapértelmezett szemek kiválasztása, amikor egy szerverre csatlakozol
 
 Allows maps to render with more detail
-== 
+== Engedélyezi, pályákat részletesebben jelenítse meg
 
 Renderer
-== 
+== Renderelő
 
 default
-== 
+== alapértelmezett
 
 custom
-== 
+== egyedi
 
 Graphics cards
-== 
+== Videókártyák
 
 auto
-== 
+== automatikus
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Amikor átléped a rajtvonalat, mutat egy szellemjátákost amely megismétli a legjobb időd mozdulatait
 
 Opacity
-== 
+== Átlátszóság
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Más csapatokhoz tartozó entitások átláthatóságának beállítása, például játékosok és névtáblák
 
 Quads are used for background decoration
-== 
+== A quadok háttérdekorációért használhatóak
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Megpróbálja megjósolni más entitásokat, hogy az alacsony késleltetés érzetét keltse
 
 Tutorial
-== 
+== Bemutató
 
 Can't find a Tutorial server
-== 
+== Nem található bemutató szerver
 
 Super
-== 
+== Szuper
 
 Team %d
-== 
+== Csapat %d

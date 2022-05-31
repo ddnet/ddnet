@@ -3,9 +3,8 @@
 
 #include "network.h"
 
+#include <engine/config.h>
 #include <engine/console.h>
-
-class CConfig;
 
 class CEcon
 {
@@ -45,6 +44,7 @@ class CEcon
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 public:
+	CEcon();
 	IConsole *Console() { return m_pConsole; }
 
 	void Init(CConfig *pConfig, IConsole *pConsole, class CNetBan *pNetBan);

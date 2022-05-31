@@ -1,13 +1,11 @@
 #include <algorithm>
 #include <base/logger.h>
-#include <base/math.h>
 #include <base/system.h>
 #include <cstdint>
 #include <engine/shared/datafile.h>
 #include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
-#include <utility>
 #include <vector>
 
 void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)
@@ -34,7 +32,7 @@ void CopyOpaquePixels(uint8_t *pDestImg, uint8_t *pSrcImg, int Width, int Height
 		for(int x = 0; x < Width; ++x)
 		{
 			int Index = y * Width * 4 + x * 4;
-			if(pSrcImg[Index + 3] > TW_DILATE_ALPHA_THRESHOLD)
+			if(pSrcImg[Index + 3] > 0)
 				mem_copy(&pDestImg[Index], &pSrcImg[Index], sizeof(uint8_t) * 4);
 			else
 				mem_zero(&pDestImg[Index], sizeof(uint8_t) * 4);
@@ -66,9 +64,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 {
 	uint8_t *pNewImgBuff = (uint8_t *)malloc(ImgSize);
 
-	// Get all image pixels, that have a alpha threshold over the default threshold,
-	// all other pixels are cleared to zero.
-	// This is required since dilate modifies pixels under the alpha threshold, which would alter the SHA.
+	// Clear fully transparent pixels, so the SHA is easier to identify with the original image
 	CopyOpaquePixels(pNewImgBuff, pImgBuff, Width, Height);
 	SHA256_DIGEST SHAStr = sha256(pNewImgBuff, (size_t)ImgSize);
 

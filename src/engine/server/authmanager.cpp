@@ -27,14 +27,14 @@ CAuthManager::CAuthManager()
 
 void CAuthManager::Init()
 {
-	int NumDefaultKeys = 0;
+	size_t NumDefaultKeys = 0;
 	if(g_Config.m_SvRconPassword[0])
 		NumDefaultKeys++;
 	if(g_Config.m_SvRconModPassword[0])
 		NumDefaultKeys++;
 	if(g_Config.m_SvRconHelperPassword[0])
 		NumDefaultKeys++;
-	if(m_aKeys.size() == NumDefaultKeys && !g_Config.m_SvRconPassword[0])
+	if(m_vKeys.size() == NumDefaultKeys && !g_Config.m_SvRconPassword[0])
 	{
 		secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
 		AddDefaultKey(AUTHED_ADMIN, g_Config.m_SvRconPassword);
@@ -53,7 +53,8 @@ int CAuthManager::AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned
 	mem_copy(Key.m_aSalt, pSalt, SALT_BYTES);
 	Key.m_Level = AuthLevel;
 
-	return m_aKeys.add(Key);
+	m_vKeys.push_back(Key);
+	return m_vKeys.size() - 1;
 }
 
 int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
@@ -66,25 +67,25 @@ int CAuthManager::AddKey(const char *pIdent, const char *pPw, int AuthLevel)
 
 int CAuthManager::RemoveKey(int Slot)
 {
-	m_aKeys.remove_index_fast(Slot);
+	m_vKeys.erase(m_vKeys.begin() + Slot);
 	for(int &Default : m_aDefault)
 	{
 		if(Default == Slot)
 		{
 			Default = -1;
 		}
-		else if(Default == m_aKeys.size())
+		else if(Default == (int)m_vKeys.size())
 		{
 			Default = Slot;
 		}
 	}
-	return m_aKeys.size();
+	return m_vKeys.size();
 }
 
 int CAuthManager::FindKey(const char *pIdent) const
 {
-	for(int i = 0; i < m_aKeys.size(); i++)
-		if(!str_comp(m_aKeys[i].m_aIdent, pIdent))
+	for(size_t i = 0; i < m_vKeys.size(); i++)
+		if(!str_comp(m_vKeys[i].m_aIdent, pIdent))
 			return i;
 
 	return -1;
@@ -92,9 +93,9 @@ int CAuthManager::FindKey(const char *pIdent) const
 
 bool CAuthManager::CheckKey(int Slot, const char *pPw) const
 {
-	if(Slot < 0 || Slot >= m_aKeys.size())
+	if(Slot < 0 || Slot >= (int)m_vKeys.size())
 		return false;
-	return m_aKeys[Slot].m_Pw == HashPassword(pPw, m_aKeys[Slot].m_aSalt);
+	return m_vKeys[Slot].m_Pw == HashPassword(pPw, m_vKeys[Slot].m_aSalt);
 }
 
 int CAuthManager::DefaultKey(int AuthLevel) const
@@ -106,24 +107,24 @@ int CAuthManager::DefaultKey(int AuthLevel) const
 
 int CAuthManager::KeyLevel(int Slot) const
 {
-	if(Slot < 0 || Slot >= m_aKeys.size())
+	if(Slot < 0 || Slot >= (int)m_vKeys.size())
 		return false;
-	return m_aKeys[Slot].m_Level;
+	return m_vKeys[Slot].m_Level;
 }
 
 const char *CAuthManager::KeyIdent(int Slot) const
 {
-	if(Slot < 0 || Slot >= m_aKeys.size())
+	if(Slot < 0 || Slot >= (int)m_vKeys.size())
 		return NULL;
-	return m_aKeys[Slot].m_aIdent;
+	return m_vKeys[Slot].m_aIdent;
 }
 
 void CAuthManager::UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel)
 {
-	if(Slot < 0 || Slot >= m_aKeys.size())
+	if(Slot < 0 || Slot >= (int)m_vKeys.size())
 		return;
 
-	CKey *pKey = &m_aKeys[Slot];
+	CKey *pKey = &m_vKeys[Slot];
 	pKey->m_Pw = Hash;
 	mem_copy(pKey->m_aSalt, pSalt, SALT_BYTES);
 	pKey->m_Level = AuthLevel;
@@ -131,7 +132,7 @@ void CAuthManager::UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char 
 
 void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 {
-	if(Slot < 0 || Slot >= m_aKeys.size())
+	if(Slot < 0 || Slot >= (int)m_vKeys.size())
 		return;
 
 	// Generate random salt
@@ -142,8 +143,8 @@ void CAuthManager::UpdateKey(int Slot, const char *pPw, int AuthLevel)
 
 void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
 {
-	for(int i = 0; i < m_aKeys.size(); i++)
-		pfnListCallback(m_aKeys[i].m_aIdent, m_aKeys[i].m_Level, pUser);
+	for(auto &Key : m_vKeys)
+		pfnListCallback(Key.m_aIdent, Key.m_Level, pUser);
 }
 
 void CAuthManager::AddDefaultKey(int Level, const char *pPw)
@@ -166,5 +167,5 @@ bool CAuthManager::IsGenerated() const
 int CAuthManager::NumNonDefaultKeys() const
 {
 	int DefaultCount = (m_aDefault[0] >= 0) + (m_aDefault[1] >= 0) + (m_aDefault[2] >= 0);
-	return m_aKeys.size() - DefaultCount;
+	return m_vKeys.size() - DefaultCount;
 }

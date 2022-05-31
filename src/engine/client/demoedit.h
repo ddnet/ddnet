@@ -21,7 +21,7 @@ class CDemoEdit : public IJob
 
 public:
 	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
-	void Run();
+	void Run() override;
 	char *Destination() { return m_aDst; }
 };
 #endif

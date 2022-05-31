@@ -556,9 +556,6 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == ﺕﺎﻤﻬﻣ ﻥﺪﺷ ﻡﺎﻤﺗ ﻡﺎﮕﻨﻫ ﻪﺤﻠﺳﺍ ﺮﯿﯿﻐﺗ
 
-Reset wanted weapon on death
-== گﺮﻣ ﺯﺍ ﺪﻌﺑ ﻪﺤﻠﺳﺍ ﯽﻧﺎﺸﻧﺯﺎﺑ
-
 Show only chat messages from friends
 == ﻩﺪﺑ ﻥﺎﺸﻧ ﺍﺭ ﻥﺎﺘﺳﻭﺩ ﺖﭼ ﻂﻘﻓ
 

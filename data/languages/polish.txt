@@ -679,9 +679,6 @@ Select a name
 Switch weapon when out of ammo
 == Zmień broń, gdy skończy się amunicja
 
-Reset wanted weapon on death
-== Zresetuj broń, którą chcesz podnieść po śmierci
-
 Dummy settings
 == Ustawienia dummy
 

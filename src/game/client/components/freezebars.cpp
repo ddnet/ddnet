@@ -10,7 +10,7 @@ void CFreezeBars::RenderFreezeBar(const int ClientID)
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	if(pCharacter->m_FreezeEnd <= 0.0f || !m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo || pCharacter->m_IsInFreeze)
+	if(pCharacter->m_FreezeEnd <= 0.0f || pCharacter->m_FreezeTick == 0 || !m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo || pCharacter->m_IsInFreeze)
 	{
 		return;
 	}

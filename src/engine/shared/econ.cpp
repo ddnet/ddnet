@@ -4,6 +4,11 @@
 #include "econ.h"
 #include "netban.h"
 
+CEcon::CEcon() :
+	m_Ready(false)
+{
+}
+
 int CEcon::NewClientCallback(int ClientID, void *pUser)
 {
 	CEcon *pThis = (CEcon *)pUser;

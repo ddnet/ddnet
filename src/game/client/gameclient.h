@@ -11,13 +11,9 @@
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
-#include <game/localization.h>
 
 #include <game/teamscore.h>
 
-#include <game/client/prediction/entities/character.h>
-#include <game/client/prediction/entities/laser.h>
-#include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/gameworld.h>
 
 // components
@@ -463,25 +459,25 @@ public:
 	void OnReset();
 
 	// hooks
-	virtual void OnConnected();
-	virtual void OnRender();
-	virtual void OnUpdate();
-	virtual void OnDummyDisconnect();
+	void OnConnected() override;
+	void OnRender() override;
+	void OnUpdate() override;
+	void OnDummyDisconnect() override;
 	virtual void OnRelease();
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy);
-	virtual void InvalidateSnapshot();
-	virtual void OnNewSnapshot();
-	virtual void OnPredict();
-	virtual void OnActivateEditor();
-	virtual void OnDummySwap();
-	virtual int OnSnapInput(int *pData, bool Dummy, bool Force);
-	virtual void OnShutdown();
-	virtual void OnEnterGame();
-	virtual void OnRconType(bool UsernameReq);
-	virtual void OnRconLine(const char *pLine);
+	void OnInit() override;
+	void OnConsoleInit() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy) override;
+	void InvalidateSnapshot() override;
+	void OnNewSnapshot() override;
+	void OnPredict() override;
+	void OnActivateEditor() override;
+	void OnDummySwap() override;
+	int OnSnapInput(int *pData, bool Dummy, bool Force) override;
+	void OnShutdown() override;
+	void OnEnterGame() override;
+	void OnRconType(bool UsernameReq) override;
+	void OnRconLine(const char *pLine) override;
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
@@ -491,17 +487,17 @@ public:
 
 	void OnLanguageChange();
 
-	virtual const char *GetItemName(int Type) const;
-	virtual const char *Version() const;
-	virtual const char *NetVersion() const;
-	virtual int DDNetVersion() const;
-	virtual const char *DDNetVersionStr() const;
+	const char *GetItemName(int Type) const override;
+	const char *Version() const override;
+	const char *NetVersion() const override;
+	int DDNetVersion() const override;
+	const char *DDNetVersionStr() const override;
 
 	// actions
 	// TODO: move these
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
-	virtual void SendDummyInfo(bool Start);
+	void SendDummyInfo(bool Start) override;
 	void SendKill(int ClientID);
 
 	// DDRace
@@ -516,7 +512,7 @@ public:
 
 	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID);
 
-	virtual int GetLastRaceTick();
+	int GetLastRaceTick() override;
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
@@ -532,13 +528,13 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
-	void DummyResetInput();
-	void Echo(const char *pString);
+	void DummyResetInput() override;
+	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientID);
 	int SwitchStateTeam();
 	bool IsLocalCharSuper();
-	bool CanDisplayWarning();
-	bool IsDisplayingWarning();
+	bool CanDisplayWarning() override;
+	bool IsDisplayingWarning() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
@@ -713,7 +709,6 @@ private:
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
-	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 	int m_SwitchStateTeam[NUM_DUMMIES];
 
 	enum

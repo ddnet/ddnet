@@ -37,6 +37,7 @@ public:
 	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CCharacter *pNotThis = 0, int CollideWith = -1, class CCharacter *pThisOnly = 0);
 	void InsertEntity(CEntity *pEntity, bool Last = false);
 	void RemoveEntity(CEntity *pEntity);
+	void RemoveCharacter(CCharacter *pChar);
 	void Tick();
 
 	// DDRace
@@ -72,6 +73,7 @@ public:
 		bool m_PredictDDRace;
 		bool m_IsSolo;
 		bool m_UseTuneZones;
+		bool m_BugDDRaceInput;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;

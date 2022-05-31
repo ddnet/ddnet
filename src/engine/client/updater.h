@@ -1,7 +1,6 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
-#include <engine/shared/http.h>
 #include <engine/updater.h>
 #include <map>
 #include <string>
@@ -71,13 +70,13 @@ public:
 	CUpdater();
 	~CUpdater();
 
-	int GetCurrentState();
-	void GetCurrentFile(char *pBuf, int BufSize);
-	int GetCurrentPercent();
+	int GetCurrentState() override;
+	void GetCurrentFile(char *pBuf, int BufSize) override;
+	int GetCurrentPercent() override;
 
-	virtual void InitiateUpdate();
+	void InitiateUpdate() override;
 	void Init();
-	virtual void Update();
+	void Update() override;
 };
 
 #endif

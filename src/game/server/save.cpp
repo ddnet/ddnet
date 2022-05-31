@@ -1,7 +1,6 @@
 #include "save.h"
 
 #include <cstdio>
-#include <new>
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
@@ -78,8 +77,8 @@ void CSaveTee::Save(CCharacter *pChr)
 	// Core
 	m_CorePos = pChr->m_Core.m_Pos;
 	m_Vel = pChr->m_Core.m_Vel;
-	m_Hook = pChr->m_Core.m_Hook;
-	m_Collision = pChr->m_Core.m_Collision;
+	m_Hook = !pChr->m_Core.m_NoHookHit;
+	m_Collision = !pChr->m_Core.m_NoCollision;
 	m_ActiveWeapon = pChr->m_Core.m_ActiveWeapon;
 	m_Jumped = pChr->m_Core.m_Jumped;
 	m_JumpedTotal = pChr->m_Core.m_JumpedTotal;
@@ -171,8 +170,8 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	// Core
 	pChr->m_Core.m_Pos = m_CorePos;
 	pChr->m_Core.m_Vel = m_Vel;
-	pChr->m_Core.m_Hook = m_Hook;
-	pChr->m_Core.m_Collision = m_Collision;
+	pChr->m_Core.m_NoHookHit = !m_Hook;
+	pChr->m_Core.m_NoCollision = !m_Collision;
 	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
 	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
@@ -186,12 +185,12 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Core.m_HookState = m_HookState;
 	if(m_HookedPlayer != -1 && pChr->Teams()->m_Core.Team(m_HookedPlayer) != Team)
 	{
-		pChr->m_Core.m_HookedPlayer = -1;
+		pChr->m_Core.SetHookedPlayer(-1);
 		pChr->m_Core.m_HookState = HOOK_FLYING;
 	}
 	else
 	{
-		pChr->m_Core.m_HookedPlayer = m_HookedPlayer;
+		pChr->m_Core.SetHookedPlayer(m_HookedPlayer);
 	}
 	pChr->m_Core.m_NewHook = m_NewHook;
 	pChr->m_SavedInput.m_Direction = m_InputDirection;
@@ -635,8 +634,15 @@ int CSaveTeam::FromString(const char *String)
 		m_pSavedTees = 0;
 	}
 
-	if(m_MembersCount)
+	if(m_MembersCount > 64)
+	{
+		dbg_msg("load", "savegame: team has too many players");
+		return 1;
+	}
+	else if(m_MembersCount)
+	{
 		m_pSavedTees = new CSaveTee[m_MembersCount];
+	}
 
 	for(int n = 0; n < m_MembersCount; n++)
 	{

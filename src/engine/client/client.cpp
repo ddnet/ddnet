@@ -5,19 +5,15 @@
 
 #include <climits>
 #include <new>
-
-#include <cstdarg>
 #include <tuple>
 
 #include <base/hash_ctxt.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
-#include <base/vmath.h>
 
 #include <game/client/components/menus.h>
-#include <game/client/gameclient.h>
-#include <game/editor/editor.h>
+#include <game/generated/protocol.h>
 
 #include <engine/client.h>
 #include <engine/config.h>
@@ -38,26 +34,24 @@
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/http.h>
-#include <engine/shared/json.h>
+#include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocol_ex.h>
-#include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <base/system.h>
+
+#include <game/localization.h>
 #include <game/version.h>
 
-#include <mastersrv/mastersrv.h>
-
 #include <engine/client/demoedit.h>
-#include <engine/client/serverbrowser.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
@@ -72,21 +66,22 @@
 #include "video.h"
 #endif
 
-#include <zlib.h>
-
 #include "SDL.h"
 #ifdef main
 #undef main
 #endif
 
-// for android
-#include "SDL_rwops.h"
 #include "base/hash.h"
 
 // for msvc
 #ifndef PRIu64
 #define PRIu64 "I64u"
 #endif
+
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 static const ColorRGBA ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
 static const ColorRGBA ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
@@ -396,7 +391,8 @@ CClient::CClient() :
 	mem_zero(&m_aInputs, sizeof(m_aInputs));
 
 	m_State = IClient::STATE_OFFLINE;
-	m_aServerAddressStr[0] = 0;
+	m_StateStartTime = time_get();
+	m_aConnectAddressStr[0] = 0;
 
 	mem_zero(m_aSnapshots, sizeof(m_aSnapshots));
 	m_SnapshotStorage[0].Init();
@@ -653,6 +649,7 @@ void CClient::SetState(int s)
 	m_State = s;
 	if(Old != s)
 	{
+		m_StateStartTime = time_get();
 		GameClient()->OnStateChange(m_State, Old);
 
 		if(s == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
@@ -769,20 +766,20 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 
 	m_ConnectionID = RandomUuid();
-	if(pAddress != m_aServerAddressStr)
-		str_copy(m_aServerAddressStr, pAddress, sizeof(m_aServerAddressStr));
+	if(pAddress != m_aConnectAddressStr)
+		str_copy(m_aConnectAddressStr, pAddress, sizeof(m_aConnectAddressStr));
 
-	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
+	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aConnectAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ClientNetworkPrintColor);
 	bool is_websocket = false;
-	if(strncmp(m_aServerAddressStr, "ws://", 5) == 0)
+	if(strncmp(m_aConnectAddressStr, "ws://", 5) == 0)
 	{
 		is_websocket = true;
-		str_copy(m_aServerAddressStr, pAddress + 5, sizeof(m_aServerAddressStr));
+		str_copy(m_aConnectAddressStr, pAddress + 5, sizeof(m_aConnectAddressStr));
 	}
 
 	ServerInfoRequest();
-	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[CONN_MAIN].NetType()) != 0)
+	if(net_host_lookup(m_aConnectAddressStr, &m_ServerAddress, m_NetClient[CONN_MAIN].NetType()) != 0)
 	{
 		char aBufMsg[256];
 		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
@@ -813,6 +810,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		m_ServerAddress.type = NETTYPE_WEBSOCKET_IPV4;
 	}
 	m_NetClient[CONN_MAIN].Connect(&m_ServerAddress);
+	m_NetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
 
 	for(int i = 0; i < RECORDER_MAX; i++)
@@ -2343,16 +2341,17 @@ void CClient::LoadDDNetInfo()
 	if(!pDDNetInfo)
 		return;
 
-	const json_value *pVersion = json_object_get(pDDNetInfo, "version");
-	if(pVersion->type == json_string)
+	const json_value &DDNetInfo = *pDDNetInfo;
+	const json_value &CurrentVersion = DDNetInfo["version"];
+	if(CurrentVersion.type == json_string)
 	{
 		char aNewVersionStr[64];
-		str_copy(aNewVersionStr, json_string_get(pVersion), sizeof(aNewVersionStr));
+		str_copy(aNewVersionStr, CurrentVersion, sizeof(aNewVersionStr));
 		char aCurVersionStr[64];
 		str_copy(aCurVersionStr, GAME_RELEASE_VERSION, sizeof(aCurVersionStr));
 		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
 		{
-			str_copy(m_aVersionStr, json_string_get(pVersion), sizeof(m_aVersionStr));
+			str_copy(m_aVersionStr, CurrentVersion, sizeof(m_aVersionStr));
 		}
 		else
 		{
@@ -2361,28 +2360,57 @@ void CClient::LoadDDNetInfo()
 		}
 	}
 
-	const json_value *pNews = json_object_get(pDDNetInfo, "news");
-	if(pNews->type == json_string)
+	const json_value &News = DDNetInfo["news"];
+	if(News.type == json_string)
 	{
-		const char *pNewsString = json_string_get(pNews);
-
 		// Only mark news button if something new was added to the news
-		if(m_aNews[0] && str_find(m_aNews, pNewsString) == nullptr)
+		if(m_aNews[0] && str_find(m_aNews, News) == nullptr)
 			g_Config.m_UiUnreadNews = true;
 
-		str_copy(m_aNews, pNewsString, sizeof(m_aNews));
+		str_copy(m_aNews, News, sizeof(m_aNews));
 	}
 
-	const json_value *pMapDownloadUrl = json_object_get(pDDNetInfo, "map-download-url");
-	if(pMapDownloadUrl->type == json_string)
+	const json_value &MapDownloadUrl = DDNetInfo["map-download-url"];
+	if(MapDownloadUrl.type == json_string)
 	{
-		const char *pMapDownloadUrlString = json_string_get(pMapDownloadUrl);
-		str_copy(m_aMapDownloadUrl, pMapDownloadUrlString, sizeof(m_aMapDownloadUrl));
+		str_copy(m_aMapDownloadUrl, MapDownloadUrl, sizeof(m_aMapDownloadUrl));
 	}
 
-	const json_value *pPoints = json_object_get(pDDNetInfo, "points");
-	if(pPoints->type == json_integer)
-		m_Points = pPoints->u.integer;
+	const json_value &Points = DDNetInfo["points"];
+	if(Points.type == json_integer)
+	{
+		m_Points = Points.u.integer;
+	}
+
+	const json_value &StunServersIpv6 = DDNetInfo["stun-servers-ipv6"];
+	if(StunServersIpv6.type == json_array && StunServersIpv6[0].type == json_string)
+	{
+		NETADDR Addr;
+		if(!net_addr_from_str(&Addr, StunServersIpv6[0]))
+		{
+			m_NetClient->FeedStunServer(Addr);
+		}
+	}
+	const json_value &StunServersIpv4 = DDNetInfo["stun-servers-ipv4"];
+	if(StunServersIpv4.type == json_array && StunServersIpv4[0].type == json_string)
+	{
+		NETADDR Addr;
+		if(!net_addr_from_str(&Addr, StunServersIpv4[0]))
+		{
+			m_NetClient->FeedStunServer(Addr);
+		}
+	}
+	const json_value &ConnectingIp = DDNetInfo["connecting-ip"];
+	if(ConnectingIp.type == json_string)
+	{
+		NETADDR Addr;
+		if(!net_addr_from_str(&Addr, ConnectingIp))
+		{
+			m_HaveGlobalTcpAddr = true;
+			m_GlobalTcpAddr = Addr;
+			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
+		}
+	}
 }
 
 void CClient::PumpNetwork()
@@ -2815,7 +2843,7 @@ void CClient::Update()
 	if(m_ReconnectTime > 0 && time_get() > m_ReconnectTime)
 	{
 		if(State() != STATE_ONLINE)
-			Connect(m_aServerAddressStr);
+			Connect(m_aConnectAddressStr);
 		m_ReconnectTime = 0;
 	}
 
@@ -2951,7 +2979,12 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < std::size(m_NetClient); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			if(PortRef < 1024) // Reject users setting ports that we don't want to use
+			{
+				PortRef = 0;
+			}
+			BindAddr.port = PortRef;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
@@ -3029,7 +3062,7 @@ void CClient::Run()
 	bool LastE = false;
 	bool LastG = false;
 
-	int64_t LastTime = time_get_microseconds();
+	auto LastTime = tw::time_get();
 	int64_t LastRenderTime = time_get();
 
 	while(true)
@@ -3268,8 +3301,8 @@ void CClient::Run()
 #endif
 
 		// beNice
-		int64_t Now = time_get_microseconds();
-		int64_t SleepTimeInMicroSeconds = 0;
+		auto Now = tw::time_get();
+		decltype(Now) SleepTimeInNanoSeconds{0};
 		bool Slept = false;
 		if(
 #ifdef CONF_DEBUG
@@ -3277,39 +3310,38 @@ void CClient::Run()
 #endif
 			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
 		{
-			SleepTimeInMicroSeconds = ((int64_t)1000000 / (int64_t)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
-			if(SleepTimeInMicroSeconds / (int64_t)1000 > (int64_t)0)
-				thread_sleep(SleepTimeInMicroSeconds);
+			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
+			std::this_thread::sleep_for(SleepTimeInNanoSeconds);
 			Slept = true;
 		}
 		else if(g_Config.m_ClRefreshRate)
 		{
-			SleepTimeInMicroSeconds = ((int64_t)1000000 / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
-			if(SleepTimeInMicroSeconds > (int64_t)0)
-				net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInMicroSeconds);
+			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
+			if(SleepTimeInNanoSeconds > 0ns)
+				tw::net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
 			Slept = true;
 		}
 		if(Slept)
 		{
 			// if the diff gets too small it shouldn't get even smaller (drop the updates, that could not be handled)
-			if(SleepTimeInMicroSeconds < (int64_t)-16666)
-				SleepTimeInMicroSeconds = (int64_t)-16666;
+			if(SleepTimeInNanoSeconds < -16666666ns)
+				SleepTimeInNanoSeconds = -16666666ns;
 			// don't go higher than the frametime of a 60 fps frame
-			else if(SleepTimeInMicroSeconds > (int64_t)16666)
-				SleepTimeInMicroSeconds = (int64_t)16666;
+			else if(SleepTimeInNanoSeconds > 16666666ns)
+				SleepTimeInNanoSeconds = 16666666ns;
 			// the time diff between the time that was used actually used and the time the thread should sleep/wait
 			// will be calculated in the sleep time of the next update tick by faking the time it should have slept/wait.
 			// so two cases (and the case it slept exactly the time it should):
 			//	- the thread slept/waited too long, then it adjust the time to sleep/wait less in the next update tick
 			//	- the thread slept/waited too less, then it adjust the time to sleep/wait more in the next update tick
-			LastTime = Now + SleepTimeInMicroSeconds;
+			LastTime = Now + SleepTimeInNanoSeconds;
 		}
 		else
 			LastTime = Now;
 
 		if(g_Config.m_DbgHitch)
 		{
-			thread_sleep(g_Config.m_DbgHitch * 1000);
+			std::this_thread::sleep_for(g_Config.m_DbgHitch * 1ms);
 			g_Config.m_DbgHitch = 0;
 		}
 
@@ -4347,12 +4379,6 @@ int main(int argc, const char **argv)
 		{
 			Silent = true;
 		}
-		else if(str_comp("-c", argv[i]) == 0 || str_comp("--console", argv[i]) == 0)
-		{
-#if defined(CONF_FAMILY_WINDOWS)
-			AllocConsole();
-#endif
-		}
 	}
 
 #if defined(CONF_PLATFORM_ANDROID)
@@ -4474,18 +4500,6 @@ int main(int argc, const char **argv)
 		io_close(File);
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
-
-#if defined(CONF_FAMILY_WINDOWS)
-	if(g_Config.m_ClShowConsole)
-	{
-		AllocConsole();
-		HANDLE hInput;
-		DWORD prev_mode;
-		hInput = GetStdHandle(STD_INPUT_HANDLE);
-		GetConsoleMode(hInput, &prev_mode);
-		SetConsoleMode(hInput, prev_mode & ENABLE_EXTENDED_FLAGS);
-	}
-#endif
 
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
@@ -4691,4 +4705,31 @@ int CClient::PredictionMargin() const
 			return -g_Config.m_ClUnfreezeHelperLimit;
 	}
 	return g_Config.m_ClPredictionMargin;
+}
+
+int CClient::UdpConnectivity(int NetType)
+{
+	NETADDR GlobalUdpAddr;
+	CONNECTIVITY Connectivity = m_NetClient->GetConnectivity(NetType, &GlobalUdpAddr);
+	GlobalUdpAddr.port = 0;
+	switch(Connectivity)
+	{
+	case CONNECTIVITY::UNKNOWN:
+		return CONNECTIVITY_UNKNOWN;
+	case CONNECTIVITY::CHECKING:
+		return CONNECTIVITY_CHECKING;
+	case CONNECTIVITY::UNREACHABLE:
+		return CONNECTIVITY_UNREACHABLE;
+	case CONNECTIVITY::REACHABLE:
+		return CONNECTIVITY_REACHABLE;
+	case CONNECTIVITY::ADDRESS_KNOWN:
+		if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+		{
+			return CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+		}
+		return CONNECTIVITY_REACHABLE;
+	default:
+		dbg_assert(0, "invalid connectivity value");
+		return CONNECTIVITY_UNKNOWN;
+	}
 }

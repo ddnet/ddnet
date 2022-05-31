@@ -9,6 +9,8 @@
 #include "gamecontext.h"
 #include "gameworld.h"
 
+class CCollision;
+
 /*
 	Class: Entity
 		Basic entity class.
@@ -24,6 +26,7 @@ private:
 
 	/* Identity */
 	class CGameWorld *m_pGameWorld;
+	CCollision *m_pCCollision;
 
 	int m_ID;
 	int m_ObjType;
@@ -59,6 +62,7 @@ public: // TODO: Maybe make protected
 	class CConfig *Config() { return m_pGameWorld->Config(); }
 	class CGameContext *GameServer() { return m_pGameWorld->GameServer(); }
 	class IServer *Server() { return m_pGameWorld->Server(); }
+	CCollision *Collision() { return m_pCCollision; }
 
 	/* Getters */
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
@@ -139,6 +143,7 @@ public: // TODO: Maybe make protected
 	*/
 	bool NetworkClipped(int SnappingClient) const;
 	bool NetworkClipped(int SnappingClient, vec2 CheckPos) const;
+	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos) const;
 
 	bool GameLayerClipped(vec2 CheckPos);
 
@@ -152,5 +157,6 @@ public: // TODO: Maybe make protected
 };
 
 bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);
+bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos);
 
 #endif

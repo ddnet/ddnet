@@ -841,9 +841,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == Cambia arma quando senza munizioni
 
-Reset wanted weapon on death
-== Resetta l'arma voluta quando muori
-
 Show only chat messages from friends
 == Mostra solo messaggi da parte di amici
 
@@ -923,10 +920,10 @@ Toggle ghost
 == Attiva/disattiva ghost
 
 Dummy copy
-== Dummy copy 
+== Dummy copy
 
 Hammerfly dummy
-== Hammerfly dummy 
+== Hammerfly dummy
 
 Laser
 == Laser/cecchino

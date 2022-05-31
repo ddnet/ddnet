@@ -7,6 +7,7 @@
 
 #include <engine/client/backend/opengl/opengl_sl.h>
 #include <engine/client/backend/opengl/opengl_sl_program.h>
+#include <engine/client/blocklist_driver.h>
 
 #include <engine/client/backend/glsl_shader_compiler.h>
 

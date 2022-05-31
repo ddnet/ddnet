@@ -450,9 +450,6 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == Переключать оружие без патронов
 
-Reset wanted weapon on death
-== Сбрасывать выбор оружия при смерти
-
 Show only chat messages from friends
 == Показывать сообщения только от друзей
 
@@ -616,7 +613,7 @@ Join game
 == Играть
 
 FSAA samples
-== FSAA сэмплов 
+== FSAA сэмплов
 
 Sound volume
 == Громкость звука

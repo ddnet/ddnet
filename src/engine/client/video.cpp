@@ -7,10 +7,20 @@
 #include <engine/client/graphics_threaded.h>
 #include <engine/sound.h>
 
+extern "C" {
+#include <libavutil/avutil.h>
+#include <libavutil/opt.h>
+};
+
 #include <memory>
 #include <mutex>
 
 #include "video.h"
+
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
@@ -41,8 +51,6 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 	m_Started = false;
 	m_ProcessingVideoFrame = 0;
 	m_ProcessingAudioFrame = 0;
-
-	m_NextFrame = false;
 
 	m_HasAudio = g_Config.m_ClVideoSndEnable;
 
@@ -257,7 +265,7 @@ void CVideo::Stop()
 	m_vAudioThreads.clear();
 
 	while(m_ProcessingVideoFrame > 0 || m_ProcessingAudioFrame > 0)
-		thread_sleep(10);
+		std::this_thread::sleep_for(10us);
 
 	m_Recording = false;
 
@@ -289,7 +297,7 @@ void CVideo::Stop()
 
 void CVideo::NextVideoFrameThread()
 {
-	if(m_NextFrame && m_Recording)
+	if(m_Recording)
 	{
 		// #ifdef CONF_PLATFORM_MACOS
 		// 	CAutoreleasePool AutoreleasePool;
@@ -342,7 +350,6 @@ void CVideo::NextVideoFrameThread()
 				m_CurVideoThreadIndex = 0;
 		}
 
-		m_NextFrame = false;
 		// sync_barrier();
 		// m_Semaphore.signal();
 	}
@@ -352,21 +359,9 @@ void CVideo::NextVideoFrame()
 {
 	if(m_Recording)
 	{
-		// #ifdef CONF_PLATFORM_MACOS
-		// 	CAutoreleasePool AutoreleasePool;
-		// #endif
-
-		//dbg_msg("video_recorder", "called");
-
 		ms_Time += ms_TickTime;
 		ms_LocalTime = (ms_Time - ms_LocalStartTime) / (float)time_freq();
-		m_NextFrame = true;
 		m_Vframe += 1;
-
-		// m_pGraphics->KickCommandBuffer();
-		//thread_sleep(500);
-
-		// m_Semaphore.wait();
 	}
 }
 

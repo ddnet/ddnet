@@ -11,6 +11,8 @@
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 extern "C" {
@@ -160,7 +162,7 @@ public:
 };
 std::unique_ptr<ILogger> log_logger_android()
 {
-	return std::unique_ptr<ILogger>(new CLoggerAndroid());
+	return std::make_unique<CLoggerAndroid>();
 }
 #else
 std::unique_ptr<ILogger> log_logger_android()
@@ -197,7 +199,7 @@ public:
 
 std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers)
 {
-	return std::unique_ptr<ILogger>(new CLoggerCollection(std::move(loggers)));
+	return std::make_unique<CLoggerCollection>(std::move(loggers));
 }
 
 class CLoggerAsync : public ILogger
@@ -259,7 +261,7 @@ public:
 
 std::unique_ptr<ILogger> log_logger_file(IOHANDLE logfile)
 {
-	return std::unique_ptr<ILogger>(new CLoggerAsync(logfile, false, true));
+	return std::make_unique<CLoggerAsync>(logfile, false, true);
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -298,14 +300,20 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 
 class CWindowsConsoleLogger : public ILogger
 {
+	HANDLE m_pConsole;
+
 public:
+	CWindowsConsoleLogger(HANDLE pConsole) :
+		m_pConsole(pConsole)
+	{
+	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 1) * sizeof(*pWide));
+		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 2) * sizeof(*pWide));
 		const char *p = pMessage->m_aLine;
 		int WLen = 0;
 
-		mem_zero(pWide, pMessage->m_LineLength * sizeof(*pWide));
+		mem_zero(pWide, (pMessage->m_LineLength + 2) * sizeof(*pWide));
 
 		for(int Codepoint = 0; (Codepoint = str_utf8_decode(&p)); WLen++)
 		{
@@ -325,8 +333,8 @@ public:
 
 			mem_copy(&pWide[WLen], aU16, 2);
 		}
-		pWide[WLen] = '\n';
-		HANDLE pConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		pWide[WLen++] = '\r';
+		pWide[WLen++] = '\n';
 		int Color = 15;
 		if(pMessage->m_HaveColor)
 		{
@@ -336,9 +344,24 @@ public:
 			Rgba.b = pMessage->m_Color.b / 255.0;
 			Color = color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
 		}
-		SetConsoleTextAttribute(pConsole, Color);
-		WriteConsoleW(pConsole, pWide, WLen + 1, NULL, NULL);
+		SetConsoleTextAttribute(m_pConsole, Color);
+		WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
 		free(pWide);
+	}
+};
+class CWindowsFileLogger : public ILogger
+{
+	HANDLE m_pFile;
+
+public:
+	CWindowsFileLogger(HANDLE pFile) :
+		m_pFile(pFile)
+	{
+	}
+	void Log(const CLogMessage *pMessage) override
+	{
+		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
+		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
 	}
 };
 #endif
@@ -348,9 +371,19 @@ std::unique_ptr<ILogger> log_logger_stdout()
 #if !defined(CONF_FAMILY_WINDOWS)
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
-	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), getenv("NO_COLOR") == nullptr, false));
+	const bool colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
+	return std::make_unique<CLoggerAsync>(io_stdout(), colors, false);
 #else
-	return std::unique_ptr<ILogger>(new CWindowsConsoleLogger());
+	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)
+		AttachConsole(ATTACH_PARENT_PROCESS);
+	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	switch(GetFileType(pOutput))
+	{
+	case FILE_TYPE_CHAR: return std::make_unique<CWindowsConsoleLogger>(pOutput);
+	case FILE_TYPE_PIPE: // fall through, writing to pipe works the same as writing to a file
+	case FILE_TYPE_DISK: return std::make_unique<CWindowsFileLogger>(pOutput);
+	default: return std::make_unique<CLoggerAsync>(io_stdout(), false, false);
+	}
 #endif
 }
 
@@ -367,7 +400,7 @@ public:
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()
 {
-	return std::unique_ptr<ILogger>(new CLoggerWindowsDebugger());
+	return std::make_unique<CLoggerWindowsDebugger>();
 }
 #else
 std::unique_ptr<ILogger> log_logger_windows_debugger()

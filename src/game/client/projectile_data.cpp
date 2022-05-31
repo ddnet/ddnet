@@ -3,7 +3,6 @@
 
 #include "projectile_data.h"
 
-#include <base/math.h>
 #include <engine/shared/snapshot.h>
 #include <game/client/prediction/gameworld.h>
 #include <game/generated/protocol.h>

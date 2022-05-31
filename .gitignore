@@ -63,6 +63,7 @@ map_resave
 map_version
 mastersrv
 packetgen
+stun
 testrunner
 twping
 unicode_confusables
@@ -77,6 +78,7 @@ generated
 target
 
 /build*
+/integration_test/*
 
 # IDE project files
 .cache

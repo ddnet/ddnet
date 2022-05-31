@@ -489,9 +489,6 @@ Show clan above name plates
 Clan plates size
 == 戰隊名稱大小
 
-Reset wanted weapon on death
-== 死亡後自動切換回預設武器
-
 Team
 == 隊伍
 

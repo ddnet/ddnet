@@ -14,8 +14,6 @@
 #define __USE_GNU
 #endif
 
-#include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -28,9 +26,9 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(__cplusplus)
+#include <chrono>
+
 extern "C" {
-#endif
 
 /**
  * @defgroup Debug
@@ -492,15 +490,6 @@ void aio_free(ASYNCIO *aio);
  */
 
 /**
- * Suspends the current thread for a given period.
- *
- * @ingroup Threads
- *
- * @param microseconds Number of microseconds to sleep.
- */
-void thread_sleep(int microseconds);
-
-/**
  * Creates a new thread.
  *
  * @ingroup Threads
@@ -768,13 +757,13 @@ enum
 int time_season();
 
 /**
- * Fetches a sample from a high resolution timer and converts it in microseconds.
+ * Fetches a sample from a high resolution timer and converts it in nanoseconds.
  *
  * @ingroup Time
  *
- * @return Current value of the timer in microseconds.
+ * @return Current value of the timer in nanoseconds.
 */
-int64_t time_get_microseconds();
+int64_t time_get_nanoseconds();
 
 /**
  * @defgroup Network-General
@@ -806,7 +795,7 @@ enum
 /**
  * @ingroup Network-General
  */
-typedef struct
+typedef struct NETADDR
 {
 	unsigned int type;
 	unsigned char ip[16];
@@ -2459,9 +2448,25 @@ int os_version_str(char *version, int length);
 void init_exception_handler();
 void set_exception_handler_log_file(const char *log_file_path);
 #endif
-
-#if defined(__cplusplus)
 }
-#endif
+
+/**
+	Type safe wrappers for the c system
+*/
+
+namespace tw {
+
+/**
+ * Fetches a sample from a high resolution timer and converts it in nanoseconds.
+ *
+ * @ingroup Time
+ *
+ * @return Current value of the timer in nanoseconds.
+*/
+std::chrono::nanoseconds time_get();
+
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
+
+} // namespace tw
 
 #endif

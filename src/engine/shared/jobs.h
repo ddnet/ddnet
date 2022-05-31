@@ -8,7 +8,6 @@
 #include <atomic>
 #include <memory>
 
-class IJob;
 class CJobPool;
 
 class IJob

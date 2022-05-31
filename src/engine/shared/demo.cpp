@@ -158,6 +158,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		while(true)
 		{
 			unsigned char aChunk[1024 * 64];
+			mem_zero(aChunk, sizeof(aChunk));
 			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
 			if(Bytes <= 0)
 				break;
@@ -403,9 +404,6 @@ void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta)
 	m_File = 0;
 	m_pKeyFrames = 0;
 	m_SpeedIndex = 4;
-
-	m_TickTime = 0;
-	m_Time = 0;
 
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
@@ -1030,7 +1028,6 @@ int CDemoPlayer::Update(bool RealTime)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 			}
 		}
-		m_Time += m_TickTime;
 	}
 	return 0;
 }

@@ -8,17 +8,17 @@
 #include <engine/client/updater.h>
 #include <engine/shared/config.h>
 
-#include <game/client/components/console.h>
-#include <game/client/render.h>
+#include <game/client/gameclient.h>
 #include <game/client/ui.h>
-#include <game/editor/editor.h>
-#include <game/version.h>
 
 #include <game/generated/client_data.h>
-
-#include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include "menus.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 void CMenus::RenderStartMenu(CUIRect MainView)
 {
@@ -83,7 +83,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10000000);
+			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
 			s_JoinTutorialTime = 0.0f;
 		}
 		m_DoubleClickIndex = -1;
@@ -152,7 +152,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			}
 			else
 			{
-				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10000000);
+				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10s);
 			}
 		}
 	}

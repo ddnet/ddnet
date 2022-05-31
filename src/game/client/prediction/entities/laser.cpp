@@ -3,6 +3,7 @@
 #include "laser.h"
 #include "character.h"
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 #include <engine/shared/config.h>
 
@@ -17,7 +18,6 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
-	m_TelePos = vec2(0, 0);
 	m_WasTele = false;
 	m_Type = Type;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
@@ -27,6 +27,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 
 bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
+	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	vec2 At;
 	CCharacter *pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
 	CCharacter *pHit;
@@ -45,14 +46,36 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	if(m_Type == WEAPON_SHOTGUN)
 	{
 		vec2 Temp;
-
 		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
-
-		if(g_Config.m_SvOldLaser && pOwnerChar)
-			Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
+		vec2 &HitPos = pHit->Core()->m_Pos;
+		if(!g_Config.m_SvOldLaser)
+		{
+			if(m_PrevPos != HitPos)
+			{
+				Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - HitPos) * Strength;
+				pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
+			}
+			else
+			{
+				pHit->Core()->m_Vel = StackedLaserShotgunBugSpeed;
+			}
+		}
+		else if(g_Config.m_SvOldLaser && pOwnerChar)
+		{
+			if(pOwnerChar->Core()->m_Pos != HitPos)
+			{
+				Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - HitPos) * Strength;
+				pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
+			}
+			else
+			{
+				pHit->Core()->m_Vel = StackedLaserShotgunBugSpeed;
+			}
+		}
 		else
-			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
-		pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
+		{
+			pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, pHit->Core()->m_Vel);
+		}
 	}
 	else if(m_Type == WEAPON_LASER)
 	{

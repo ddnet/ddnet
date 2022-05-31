@@ -65,44 +65,44 @@ public:
 		const char *pIp,
 		int Port,
 		bool Setup);
-	virtual ~CMysqlConnection();
-	virtual void Print(IConsole *pConsole, const char *Mode);
+	~CMysqlConnection();
+	void Print(IConsole *pConsole, const char *Mode) override;
 
-	virtual CMysqlConnection *Copy();
+	CMysqlConnection *Copy() override;
 
-	virtual const char *BinaryCollate() const { return "utf8mb4_bin"; }
-	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
-	virtual const char *InsertTimestampAsUtc() const { return "?"; }
-	virtual const char *CollateNocase() const { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
-	virtual const char *InsertIgnore() const { return "INSERT IGNORE"; }
-	virtual const char *Random() const { return "RAND()"; }
-	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
-	virtual const char *False() const { return "FALSE"; }
-	virtual const char *True() const { return "TRUE"; }
+	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
+	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
+	const char *InsertTimestampAsUtc() const override { return "?"; }
+	const char *CollateNocase() const override { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
+	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
+	const char *Random() const override { return "RAND()"; }
+	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
+	const char *False() const override { return "FALSE"; }
+	const char *True() const override { return "TRUE"; }
 
-	virtual bool Connect(char *pError, int ErrorSize);
-	virtual void Disconnect();
+	bool Connect(char *pError, int ErrorSize) override;
+	void Disconnect() override;
 
-	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize);
+	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
-	virtual void BindString(int Idx, const char *pString);
-	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
-	virtual void BindInt(int Idx, int Value);
-	virtual void BindInt64(int Idx, int64_t Value);
-	virtual void BindFloat(int Idx, float Value);
+	void BindString(int Idx, const char *pString) override;
+	void BindBlob(int Idx, unsigned char *pBlob, int Size) override;
+	void BindInt(int Idx, int Value) override;
+	void BindInt64(int Idx, int64_t Value) override;
+	void BindFloat(int Idx, float Value) override;
 
-	virtual void Print() {}
-	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
-	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
+	void Print() override {}
+	bool Step(bool *pEnd, char *pError, int ErrorSize) override;
+	bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) override;
 
-	virtual bool IsNull(int Col);
-	virtual float GetFloat(int Col);
-	virtual int GetInt(int Col);
-	virtual int64_t GetInt64(int Col);
-	virtual void GetString(int Col, char *pBuffer, int BufferSize);
-	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
+	bool IsNull(int Col) override;
+	float GetFloat(int Col) override;
+	int GetInt(int Col) override;
+	int64_t GetInt64(int Col) override;
+	void GetString(int Col, char *pBuffer, int BufferSize) override;
+	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize);
+	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	class CStmtDeleter
@@ -701,11 +701,7 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	BindInt(2, Points);
 	BindInt(3, Points);
 	int NumUpdated;
-	if(ExecuteUpdate(&NumUpdated, pError, ErrorSize))
-	{
-		return true;
-	}
-	return false;
+	return ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 }
 
 std::unique_ptr<IDbConnection> CreateMysqlConnection(
@@ -717,7 +713,7 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	int Port,
 	bool Setup)
 {
-	return std::unique_ptr<IDbConnection>(new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup));
+	return std::make_unique<CMysqlConnection>(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup);
 }
 #else
 int MysqlInit()

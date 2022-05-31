@@ -35,8 +35,7 @@
 
 #include <unordered_map>
 
-#include <SDL.h>
-#include <SDL_error.h>
+#include <SDL_video.h>
 #include <SDL_vulkan.h>
 
 #include <vulkan/vulkan.h>
@@ -51,6 +50,8 @@
 #ifndef PRIu64
 #define PRIu64 "I64u"
 #endif
+
+using namespace std::chrono_literals;
 
 class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 {
@@ -7309,10 +7310,10 @@ public:
 
 			// set this to true, if you want to benchmark the render thread times
 			static constexpr bool s_BenchmarkRenderThreads = false;
-			int64_t ThreadRenderTime = 0;
+			std::chrono::nanoseconds ThreadRenderTime = 0ns;
 			if(IsVerbose() && s_BenchmarkRenderThreads)
 			{
-				ThreadRenderTime = time_get_microseconds();
+				ThreadRenderTime = tw::time_get();
 			}
 
 			if(!pThread->m_Finished)
@@ -7332,7 +7333,7 @@ public:
 
 			if(IsVerbose() && s_BenchmarkRenderThreads)
 			{
-				dbg_msg("vulkan", "render thread %" PRIu64 " took %d microseconds to finish", ThreadIndex, (int)(time_get_microseconds() - ThreadRenderTime));
+				dbg_msg("vulkan", "render thread %" PRIu64 " took %d ns to finish", ThreadIndex, (int)(tw::time_get() - ThreadRenderTime).count());
 			}
 
 			pThread->m_IsRendering = false;

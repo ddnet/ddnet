@@ -6,7 +6,7 @@
 
 #include <climits>
 
-#include <game/generated/protocol.h>
+#include <base/system.h>
 #include <game/generated/protocolglue.h>
 
 // CSnapshot

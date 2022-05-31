@@ -1,7 +1,7 @@
 #ifndef GAME_EDITOR_AUTO_MAP_H
 #define GAME_EDITOR_AUTO_MAP_H
 
-#include <base/tl/array.h>
+#include <vector>
 
 class CAutoMapper
 {
@@ -17,7 +17,7 @@ class CAutoMapper
 		int m_X;
 		int m_Y;
 		int m_Value;
-		array<CIndexInfo> m_aIndexList;
+		std::vector<CIndexInfo> m_aIndexList;
 
 		enum
 		{
@@ -30,7 +30,7 @@ class CAutoMapper
 	struct CIndexRule
 	{
 		int m_ID;
-		array<CPosRule> m_aRules;
+		std::vector<CPosRule> m_aRules;
 		int m_Flag;
 		float m_RandomProbability;
 		bool m_DefaultRule;
@@ -40,13 +40,13 @@ class CAutoMapper
 
 	struct CRun
 	{
-		array<CIndexRule> m_aIndexRules;
+		std::vector<CIndexRule> m_aIndexRules;
 		bool m_AutomapCopy;
 	};
 
 	struct CConfiguration
 	{
-		array<CRun> m_aRuns;
+		std::vector<CRun> m_aRuns;
 		char m_aName[128];
 		int m_StartX;
 		int m_StartY;
@@ -67,7 +67,7 @@ public:
 	bool IsLoaded() const { return m_FileLoaded; }
 
 private:
-	array<CConfiguration> m_lConfigs;
+	std::vector<CConfiguration> m_lConfigs;
 	class CEditor *m_pEditor;
 	bool m_FileLoaded;
 };

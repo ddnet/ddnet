@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "projectile.h"
+#include <engine/shared/config.h>
+
 #include <game/client/projectile_data.h>
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
-#include <engine/shared/config.h>
+#include "character.h"
+#include "projectile.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -90,8 +93,6 @@ void CProjectile::Tick()
 	if(
 		pOwnerChar &&
 		pTargetChr &&
-		pOwnerChar->IsAlive() &&
-		pTargetChr->IsAlive() &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
 		isWeaponCollide = true;

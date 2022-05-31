@@ -1,7 +1,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
 #define GAME_CLIENT_COMPONENTS_MAPSOUNDS_H
 
-#include <base/tl/array.h>
+#include <vector>
 
 #include <engine/sound.h>
 
@@ -24,7 +24,7 @@ class CMapSounds : public CComponent
 		bool operator==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
 	};
 
-	array<CSourceQueueEntry> m_lSourceQueue;
+	std::vector<CSourceQueueEntry> m_vSourceQueue;
 
 	void Clear();
 

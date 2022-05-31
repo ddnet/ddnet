@@ -841,9 +841,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == Vaihda asetta ammusten loppuessa
 
-Reset wanted weapon on death
-== Palauta haluttu ase kuollessa
-
 Show only chat messages from friends
 == Näytä chattiviestit vain ystäviltä
 

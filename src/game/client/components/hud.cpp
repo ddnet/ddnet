@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
@@ -10,9 +9,10 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
+
 #include <game/layers.h>
+#include <game/localization.h>
 
 #include <cmath>
 
@@ -539,14 +539,6 @@ void CHud::RenderWarmupTimer()
 	}
 }
 
-void CHud::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
-{
-	float Points[4];
-	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), 1.0f, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
-}
-
 void CHud::RenderTextInfo()
 {
 	if(g_Config.m_ClShowfps)
@@ -854,8 +846,7 @@ void CHud::RenderCursor()
 
 	int CurWeapon = 1;
 	vec2 Pos = vec2(m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
-	MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 	// render cursor
 	int Wep = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
@@ -1036,13 +1027,13 @@ void CHud::RenderPlayerState(const int ClientID)
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		bool Grounded = false;
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacter::ms_PhysSize / 2,
-			   pCharacter->m_Pos.y + CCharacter::ms_PhysSize / 2 + 5))
+		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
+			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
 		{
 			Grounded = true;
 		}
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacter::ms_PhysSize / 2,
-			   pCharacter->m_Pos.y + CCharacter::ms_PhysSize / 2 + 5))
+		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
+			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
 		{
 			Grounded = true;
 		}

@@ -142,20 +142,19 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	pEnt->m_pNextTypeEntity = 0;
 	pEnt->m_pPrevTypeEntity = 0;
 
-	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
-	{
-		CCharacter *pChar = (CCharacter *)pEnt;
-		int ID = pChar->GetCID();
-		if(ID >= 0 && ID < MAX_CLIENTS)
-		{
-			m_apCharacters[ID] = 0;
-			m_Core.m_apCharacters[ID] = 0;
-		}
-	}
-
 	if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this && pEnt->m_pParent)
 		pEnt->m_pParent->m_DestroyTick = GameTick();
 	pEnt->m_pParent = 0;
+}
+
+void CGameWorld::RemoveCharacter(CCharacter *pChar)
+{
+	int ID = pChar->GetCID();
+	if(ID >= 0 && ID < MAX_CLIENTS)
+	{
+		m_apCharacters[ID] = 0;
+		m_Core.m_apCharacters[ID] = 0;
+	}
 }
 
 void CGameWorld::RemoveEntities()
@@ -167,7 +166,6 @@ void CGameWorld::RemoveEntities()
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			if(pEnt->m_MarkedForDestroy)
 			{
-				RemoveEntity(pEnt);
 				pEnt->Destroy();
 			}
 			pEnt = m_pNextTraverseEntity;
@@ -274,7 +272,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 		CCharacterCore *Core = pChr->Core();
 		if(Core->m_HookedPlayer == ClientID)
 		{
-			Core->m_HookedPlayer = -1;
+			Core->SetHookedPlayer(-1);
 			Core->m_HookState = HOOK_RETRACTED;
 			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 		}
@@ -323,9 +321,9 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		if((int)Dmg)
 			if((GetCharacterByID(Owner) ? !(GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
 			{
-				if(Owner != -1 && pChar->IsAlive() && !pChar->CanCollide(Owner))
+				if(Owner != -1 && !pChar->CanCollide(Owner))
 					continue;
-				if(Owner == -1 && ActivatedTeam != -1 && pChar->IsAlive() && pChar->Team() != ActivatedTeam)
+				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
 					continue;
 				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
@@ -355,7 +353,10 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 		pChar->Keep();
 	}
 	else
+	{
 		pChar = new CCharacter(this, ObjID, pCharObj, pExtended, pExtendedDisplayInfo);
+		InsertEntity(pChar);
+	}
 
 	if(pChar)
 		pChar->m_GameTeam = GameTeam;
@@ -404,7 +405,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 			// otherwise try to determine its owner by checking if there is only one player nearby
 			if(NetProj.m_StartTick >= GameTick() - 4)
 			{
-				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * 28.0 * 0.75;
+				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * CCharacterCore::PhysicalSize() * 0.75;
 				const bool Prev = (GameTick() - NetProj.m_StartTick) > 1;
 				float First = 200.0f, Second = 200.0f;
 				CCharacter *pClosest = 0;
@@ -424,7 +425,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 			}
 		}
 		CProjectile *pProj = new CProjectile(NetProj);
-		InsertEntity((CEntity *)pProj);
+		InsertEntity(pProj);
 	}
 	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{

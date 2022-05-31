@@ -3,7 +3,6 @@
 #include <engine/shared/config.h>
 
 #include "voting.h"
-#include <base/vmath.h>
 #include <game/client/components/sounds.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>

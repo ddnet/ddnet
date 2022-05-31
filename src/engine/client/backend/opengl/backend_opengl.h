@@ -13,7 +13,6 @@
 #include <base/system.h>
 
 #include <engine/client/backend/backend_base.h>
-#include <engine/client/backend_sdl.h>
 
 class CGLSLProgram;
 class CGLSLTWProgram;
@@ -84,7 +83,7 @@ protected:
 	virtual bool IsNewApi() { return false; }
 	void DestroyTexture(int Slot);
 
-	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData);
+	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) override;
 
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static size_t GLFormatToImageColorChannelCount(int GLFormat);
@@ -132,7 +131,7 @@ public:
 	CCommandProcessorFragment_OpenGL();
 	virtual ~CCommandProcessorFragment_OpenGL() = default;
 
-	virtual bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand);
+	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
 };
 
 class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenGL

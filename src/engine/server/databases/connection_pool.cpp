@@ -5,6 +5,11 @@
 
 #include <memory>
 
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
+
 // helper struct to hold thread data
 struct CSqlExecData
 {
@@ -114,7 +119,7 @@ void CDbConnectionPool::OnShutdown()
 			dbg_msg("sql", "Waiting for score threads to complete (%ds)", i / 10);
 		}
 		++i;
-		thread_sleep(100000);
+		std::this_thread::sleep_for(100ms);
 	}
 }
 

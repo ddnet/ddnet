@@ -2,9 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_COUNTRYFLAGS_H
 #define GAME_CLIENT_COMPONENTS_COUNTRYFLAGS_H
-#include <base/tl/sorted_array.h>
-#include <base/vmath.h>
+
 #include <game/client/component.h>
+#include <vector>
 
 class CCountryFlags : public CComponent
 {
@@ -21,9 +21,9 @@ public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 
-	int Num() const;
+	size_t Num() const;
 	const CCountryFlag *GetByCountryCode(int CountryCode) const;
-	const CCountryFlag *GetByIndex(int Index) const;
+	const CCountryFlag *GetByIndex(size_t Index) const;
 	void Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h);
 
 private:
@@ -33,8 +33,8 @@ private:
 		CODE_UB = 999,
 		CODE_RANGE = CODE_UB - CODE_LB + 1,
 	};
-	sorted_array<CCountryFlag> m_aCountryFlags;
-	int m_CodeIndexLUT[CODE_RANGE];
+	std::vector<CCountryFlag> m_aCountryFlags;
+	size_t m_CodeIndexLUT[CODE_RANGE];
 
 	int m_FlagsQuadContainerIndex;
 

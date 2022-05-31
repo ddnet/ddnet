@@ -3,9 +3,9 @@
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/storage.h>
-#include <game/version.h>
 
 #include <cstdlib> // system
 
@@ -18,10 +18,10 @@ class CUpdaterFetchTask : public CHttpRequest
 	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
-	virtual void OnProgress();
+	void OnProgress() override;
 
 protected:
-	virtual int OnCompletion(int State);
+	int OnCompletion(int State) override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);

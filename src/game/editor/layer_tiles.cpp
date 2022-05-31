@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
-#include <base/tl/algorithm.h>
 
 #include <engine/client.h>
 #include <engine/graphics.h>
@@ -9,9 +8,6 @@
 
 #include "editor.h"
 #include <game/client/render.h>
-#include <game/generated/client_data.h>
-
-#include <game/localization.h>
 
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -82,7 +78,7 @@ void CLayerTiles::MakePalette()
 
 void CLayerTiles::Render(bool Tileset)
 {
-	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
+	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_lImages.size())
 		m_Texture = m_pEditor->m_Map.m_lImages[m_Image]->m_Texture;
 	Graphics()->TextureSet(m_Texture);
 	ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f);
@@ -793,7 +789,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	if(m_pEditor->m_Map.m_pGameLayer != this)
 	{
-		if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.IsLoaded() &&
+		if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.IsLoaded() &&
 			m_AutoMapperConfig != -1)
 		{
 			static int s_AutoMapperButton = 0;
@@ -926,11 +922,11 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	if(Prop == PROP_COLOR_ENV)
 	{
-		int Index = clamp(NewVal - 1, -1, m_pEditor->m_Map.m_lEnvelopes.size() - 1);
+		int Index = clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_lEnvelopes.size() - 1);
 		int Step = (Index - m_ColorEnv) % 2;
 		if(Step != 0)
 		{
-			for(; Index >= -1 && Index < m_pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
+			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
 				if(Index == -1 || m_pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 4)
 				{
 					m_ColorEnv = Index;
@@ -957,7 +953,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	return 0;
 }
 
-int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
+int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &pLayers)
 {
 	if(State.Modified)
 	{
@@ -967,7 +963,8 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
 		{
 			dbg_msg("editor", "applying changes");
-			for_each(pLayers.all(), [&State](CLayerTiles *pLayer) {
+			for(auto &pLayer : pLayers)
+			{
 				pLayer->Resize(State.Width, State.Height);
 
 				pLayer->m_Color.r = (State.Color >> 24) & 0xff;
@@ -976,18 +973,19 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 				pLayer->m_Color.a = State.Color & 0xff;
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
-			});
+			}
 			State.Modified = false;
 		}
 	}
 	else
 	{
-		for_each(pLayers.all(), [&State](CLayerTiles *pLayer) {
+		for(auto &pLayer : pLayers)
+		{
 			if(pLayer->m_Width > State.Width)
 				State.Width = pLayer->m_Width;
 			if(pLayer->m_Height > State.Height)
 				State.Height = pLayer->m_Height;
-		});
+		}
 	}
 
 	{
@@ -1048,9 +1046,8 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 	}
 	else if(Prop == PROP_SHIFT)
 	{
-		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer) {
+		for(auto &pLayer : pLayers)
 			pLayer->Shift(NewVal);
-		});
 	}
 	else if(Prop == PROP_SHIFT_BY)
 		pEditor->m_ShiftBy = NewVal;

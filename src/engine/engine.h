@@ -12,7 +12,7 @@ class ILogger;
 class CHostLookup : public IJob
 {
 private:
-	virtual void Run();
+	void Run() override;
 
 public:
 	CHostLookup();
