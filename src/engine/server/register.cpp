@@ -401,7 +401,7 @@ void CRegister::CProtocol::CJob::Run()
 	{
 		log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
 	}
-	if(Status == m_pShared->m_LatestResponseStatus)
+	if(Status == m_pShared->m_LatestResponseStatus && Status == STATUS_NEEDCHALLENGE)
 	{
 		log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
 		log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
