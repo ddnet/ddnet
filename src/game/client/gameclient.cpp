@@ -101,62 +101,58 @@ void CGameClient::OnConsoleInit()
 	m_NamePlates.SetPlayers(&m_Players);
 
 	// make a list of all the systems, make sure to add them in the correct render order
-	m_vpAll.reserve(40);
-	m_vpAll.push_back(&m_Skins);
-	m_vpAll.push_back(&m_CountryFlags);
-	m_vpAll.push_back(&m_MapImages);
-	m_vpAll.push_back(&m_Effects); // doesn't render anything, just updates effects
-	m_vpAll.push_back(&m_Binds);
-	m_vpAll.push_back(&m_Binds.m_SpecialBinds);
-	m_vpAll.push_back(&m_Controls);
-	m_vpAll.push_back(&m_Camera);
-	m_vpAll.push_back(&m_Sounds);
-	m_vpAll.push_back(&m_Voting);
-	m_vpAll.push_back(&m_Particles); // doesn't render anything, just updates all the particles
-	m_vpAll.push_back(&m_RaceDemo);
-	m_vpAll.push_back(&m_MapSounds);
-
-	m_vpAll.push_back(&m_BackGround); //render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
-	m_vpAll.push_back(&m_MapLayersBackGround); // first to render
-	m_vpAll.push_back(&m_Particles.m_RenderTrail);
-	m_vpAll.push_back(&m_Items);
-	m_vpAll.push_back(&m_Players);
-	m_vpAll.push_back(&m_Ghost);
-	m_vpAll.push_back(&m_MapLayersForeGround);
-	m_vpAll.push_back(&m_Particles.m_RenderExplosions);
-	m_vpAll.push_back(&m_NamePlates);
-	m_vpAll.push_back(&m_Particles.m_RenderGeneral);
-	m_vpAll.push_back(&m_FreezeBars);
-	m_vpAll.push_back(&m_DamageInd);
-	m_vpAll.push_back(&m_Hud);
-	m_vpAll.push_back(&m_Spectator);
-	m_vpAll.push_back(&m_Emoticon);
-	m_vpAll.push_back(&m_KillMessages);
-	m_vpAll.push_back(&m_Chat);
-	m_vpAll.push_back(&m_Broadcast);
-	m_vpAll.push_back(&m_DebugHud);
-	m_vpAll.push_back(&m_Scoreboard);
-	m_vpAll.push_back(&m_Statboard);
-	m_vpAll.push_back(&m_Motd);
-	m_vpAll.push_back(&m_Menus);
-	m_vpAll.push_back(&m_Tooltips);
-	m_vpAll.push_back(&CMenus::m_Binder);
-	m_vpAll.push_back(&m_GameConsole);
-
-	m_vpAll.push_back(&m_MenuBackground);
+	m_vpAll.insert(m_vpInput.end(), {&m_Skins,
+						&m_CountryFlags,
+						&m_MapImages,
+						&m_Effects, // doesn't render anything, just updates effects
+						&m_Binds,
+						&m_Binds.m_SpecialBinds,
+						&m_Controls,
+						&m_Camera,
+						&m_Sounds,
+						&m_Voting,
+						&m_Particles, // doesn't render anything, just updates all the particles
+						&m_RaceDemo,
+						&m_MapSounds,
+						&m_BackGround, // render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
+						&m_MapLayersBackGround, // first to render
+						&m_Particles.m_RenderTrail,
+						&m_Items,
+						&m_Players,
+						&m_Ghost,
+						&m_MapLayersForeGround,
+						&m_Particles.m_RenderExplosions,
+						&m_NamePlates,
+						&m_Particles.m_RenderGeneral,
+						&m_FreezeBars,
+						&m_DamageInd,
+						&m_Hud,
+						&m_Spectator,
+						&m_Emoticon,
+						&m_KillMessages,
+						&m_Chat,
+						&m_Broadcast,
+						&m_DebugHud,
+						&m_Scoreboard,
+						&m_Statboard,
+						&m_Motd,
+						&m_Menus,
+						&m_Tooltips,
+						&CMenus::m_Binder,
+						&m_GameConsole,
+						&m_MenuBackground});
 
 	// build the input stack
-	m_vpInput.reserve(10);
-	m_vpInput.push_back(&CMenus::m_Binder); // this will take over all input when we want to bind a key
-	m_vpInput.push_back(&m_Binds.m_SpecialBinds);
-	m_vpInput.push_back(&m_GameConsole);
-	m_vpInput.push_back(&m_Chat); // chat has higher prio due to tha you can quit it by pressing esc
-	m_vpInput.push_back(&m_Motd); // for pressing esc to remove it
-	m_vpInput.push_back(&m_Menus);
-	m_vpInput.push_back(&m_Spectator);
-	m_vpInput.push_back(&m_Emoticon);
-	m_vpInput.push_back(&m_Controls);
-	m_vpInput.push_back(&m_Binds);
+	m_vpInput.insert(m_vpInput.end(), {&CMenus::m_Binder, // this will take over all input when we want to bind a key
+						  &m_Binds.m_SpecialBinds,
+						  &m_GameConsole,
+						  &m_Chat, // chat has higher prio due to tha you can quit it by pressing esc
+						  &m_Motd, // for pressing esc to remove it
+						  &m_Menus,
+						  &m_Spectator,
+						  &m_Emoticon,
+						  &m_Controls,
+						  &m_Binds});
 
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
