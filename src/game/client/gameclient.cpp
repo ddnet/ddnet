@@ -71,9 +71,6 @@
 
 using namespace std::chrono_literals;
 
-CGameClient::CStack::CStack() { m_Num = 0; }
-void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
-
 const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
 int CGameClient::DDNetVersion() const { return CLIENT_VERSIONNR; }
@@ -104,60 +101,58 @@ void CGameClient::OnConsoleInit()
 	m_NamePlates.SetPlayers(&m_Players);
 
 	// make a list of all the systems, make sure to add them in the correct render order
-	m_All.Add(&m_Skins);
-	m_All.Add(&m_CountryFlags);
-	m_All.Add(&m_MapImages);
-	m_All.Add(&m_Effects); // doesn't render anything, just updates effects
-	m_All.Add(&m_Binds);
-	m_All.Add(&m_Binds.m_SpecialBinds);
-	m_All.Add(&m_Controls);
-	m_All.Add(&m_Camera);
-	m_All.Add(&m_Sounds);
-	m_All.Add(&m_Voting);
-	m_All.Add(&m_Particles); // doesn't render anything, just updates all the particles
-	m_All.Add(&m_RaceDemo);
-	m_All.Add(&m_MapSounds);
-
-	m_All.Add(&m_BackGround); //render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
-	m_All.Add(&m_MapLayersBackGround); // first to render
-	m_All.Add(&m_Particles.m_RenderTrail);
-	m_All.Add(&m_Items);
-	m_All.Add(&m_Players);
-	m_All.Add(&m_Ghost);
-	m_All.Add(&m_MapLayersForeGround);
-	m_All.Add(&m_Particles.m_RenderExplosions);
-	m_All.Add(&m_NamePlates);
-	m_All.Add(&m_Particles.m_RenderGeneral);
-	m_All.Add(&m_FreezeBars);
-	m_All.Add(&m_DamageInd);
-	m_All.Add(&m_Hud);
-	m_All.Add(&m_Spectator);
-	m_All.Add(&m_Emoticon);
-	m_All.Add(&m_KillMessages);
-	m_All.Add(&m_Chat);
-	m_All.Add(&m_Broadcast);
-	m_All.Add(&m_DebugHud);
-	m_All.Add(&m_Scoreboard);
-	m_All.Add(&m_Statboard);
-	m_All.Add(&m_Motd);
-	m_All.Add(&m_Menus);
-	m_All.Add(&m_Tooltips);
-	m_All.Add(&CMenus::m_Binder);
-	m_All.Add(&m_GameConsole);
-
-	m_All.Add(&m_MenuBackground);
+	m_vpAll.insert(m_vpInput.end(), {&m_Skins,
+						&m_CountryFlags,
+						&m_MapImages,
+						&m_Effects, // doesn't render anything, just updates effects
+						&m_Binds,
+						&m_Binds.m_SpecialBinds,
+						&m_Controls,
+						&m_Camera,
+						&m_Sounds,
+						&m_Voting,
+						&m_Particles, // doesn't render anything, just updates all the particles
+						&m_RaceDemo,
+						&m_MapSounds,
+						&m_BackGround, // render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
+						&m_MapLayersBackGround, // first to render
+						&m_Particles.m_RenderTrail,
+						&m_Items,
+						&m_Players,
+						&m_Ghost,
+						&m_MapLayersForeGround,
+						&m_Particles.m_RenderExplosions,
+						&m_NamePlates,
+						&m_Particles.m_RenderGeneral,
+						&m_FreezeBars,
+						&m_DamageInd,
+						&m_Hud,
+						&m_Spectator,
+						&m_Emoticon,
+						&m_KillMessages,
+						&m_Chat,
+						&m_Broadcast,
+						&m_DebugHud,
+						&m_Scoreboard,
+						&m_Statboard,
+						&m_Motd,
+						&m_Menus,
+						&m_Tooltips,
+						&CMenus::m_Binder,
+						&m_GameConsole,
+						&m_MenuBackground});
 
 	// build the input stack
-	m_Input.Add(&CMenus::m_Binder); // this will take over all input when we want to bind a key
-	m_Input.Add(&m_Binds.m_SpecialBinds);
-	m_Input.Add(&m_GameConsole);
-	m_Input.Add(&m_Chat); // chat has higher prio due to tha you can quit it by pressing esc
-	m_Input.Add(&m_Motd); // for pressing esc to remove it
-	m_Input.Add(&m_Menus);
-	m_Input.Add(&m_Spectator);
-	m_Input.Add(&m_Emoticon);
-	m_Input.Add(&m_Controls);
-	m_Input.Add(&m_Binds);
+	m_vpInput.insert(m_vpInput.end(), {&CMenus::m_Binder, // this will take over all input when we want to bind a key
+						  &m_Binds.m_SpecialBinds,
+						  &m_GameConsole,
+						  &m_Chat, // chat has higher prio due to tha you can quit it by pressing esc
+						  &m_Motd, // for pressing esc to remove it
+						  &m_Menus,
+						  &m_Spectator,
+						  &m_Emoticon,
+						  &m_Controls,
+						  &m_Binds});
 
 	// add the some console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
@@ -185,12 +180,12 @@ void CGameClient::OnConsoleInit()
 	// register tune zone command to allow the client prediction to load tunezones from the map
 	Console()->Register("tune_zone", "i[zone] s[tuning] i[value]", CFGFLAG_CLIENT | CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
 
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->m_pClient = this;
+	for(auto &pComponent : m_vpAll)
+		pComponent->m_pClient = this;
 
 	// let all the other components register their console commands
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnConsoleInit();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnConsoleInit();
 
 	//
 	Console()->Chain("player_name", ConchainSpecialInfoupdate, this);
@@ -253,9 +248,9 @@ void CGameClient::OnInit()
 	Client()->UpdateAndSwap();
 
 	// init all components
-	for(int i = m_All.m_Num - 1; i >= 0; --i)
+	for(int i = m_vpAll.size() - 1; i >= 0; --i)
 	{
-		m_All.m_paComponents[i]->OnInit();
+		m_vpAll[i]->OnInit();
 		// try to render a frame after each component, also flushes GPU uploads
 		if(m_Menus.IsInit())
 			m_Menus.RenderLoading(false);
@@ -284,8 +279,8 @@ void CGameClient::OnInit()
 		m_Menus.RenderLoading(false);
 	}
 
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnReset();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnReset();
 
 	m_ServerMode = SERVERMODE_PURE;
 
@@ -341,14 +336,14 @@ void CGameClient::OnInit()
 
 	CChecksumData *pChecksum = Client()->ChecksumData();
 	pChecksum->m_SizeofGameClient = sizeof(*this);
-	pChecksum->m_NumComponents = m_All.m_Num;
-	for(int i = 0; i < m_All.m_Num; i++)
+	pChecksum->m_NumComponents = m_vpAll.size();
+	for(size_t i = 0; i < m_vpAll.size(); i++)
 	{
-		if(i >= (int)(std::size(pChecksum->m_aComponentsChecksum)))
+		if(i >= std::size(pChecksum->m_aComponentsChecksum))
 		{
 			break;
 		}
-		int Size = m_All.m_paComponents[i]->Sizeof();
+		int Size = m_vpAll[i]->Sizeof();
 		pChecksum->m_aComponentsChecksum[i] = Size;
 	}
 }
@@ -360,9 +355,9 @@ void CGameClient::OnUpdate()
 	Input()->MouseRelative(&x, &y);
 	if(x != 0.0f || y != 0.0f)
 	{
-		for(int h = 0; h < m_Input.m_Num; h++)
+		for(auto &pComponent : m_vpInput)
 		{
-			if(m_Input.m_paComponents[h]->OnMouseMove(x, y))
+			if(pComponent->OnMouseMove(x, y))
 				break;
 		}
 	}
@@ -374,9 +369,9 @@ void CGameClient::OnUpdate()
 		if(!Input()->IsEventValid(&e))
 			continue;
 
-		for(int h = 0; h < m_Input.m_Num; h++)
+		for(auto &pComponent : m_vpInput)
 		{
-			if(m_Input.m_paComponents[h]->OnInput(e))
+			if(pComponent->OnInput(e))
 				break;
 		}
 	}
@@ -466,10 +461,10 @@ void CGameClient::OnConnected()
 		i += pGameTiles[i].m_Skip;
 	}
 
-	for(int i = 0; i < m_All.m_Num; i++)
+	for(auto &pComponent : m_vpAll)
 	{
-		m_All.m_paComponents[i]->OnMapLoad();
-		m_All.m_paComponents[i]->OnReset();
+		pComponent->OnMapLoad();
+		pComponent->OnReset();
 	}
 
 	m_ServerMode = SERVERMODE_PURE;
@@ -510,8 +505,8 @@ void CGameClient::OnReset()
 	for(auto &Client : m_aClients)
 		Client.Reset();
 
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnReset();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnReset();
 
 	m_DemoSpecID = SPEC_FOLLOW;
 	m_FlagDropTick[TEAM_RED] = 0;
@@ -607,8 +602,8 @@ void CGameClient::OnRender()
 	}
 
 	// render all systems
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnRender();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnRender();
 
 	// clear all events/input for this frame
 	Input()->Clear();
@@ -680,8 +675,8 @@ int CGameClient::GetLastRaceTick()
 void CGameClient::OnRelease()
 {
 	// release all systems
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnRelease();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnRelease();
 }
 
 void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy)
@@ -737,8 +732,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	}
 
 	// TODO: this should be done smarter
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnMessage(MsgId, pRawMsg);
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnMessage(MsgId, pRawMsg);
 
 	if(MsgId == NETMSGTYPE_SV_READYTOENTER)
 	{
@@ -824,14 +819,14 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 		OnReset();
 
 	// then change the state
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnStateChange(NewState, OldState);
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnStateChange(NewState, OldState);
 }
 
 void CGameClient::OnShutdown()
 {
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnShutdown();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnShutdown();
 }
 
 void CGameClient::OnEnterGame()
@@ -862,8 +857,8 @@ void CGameClient::OnFlagGrab(int TeamID)
 
 void CGameClient::OnWindowResize()
 {
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnWindowResize();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnWindowResize();
 
 	UI()->OnWindowResize();
 	TextRender()->OnWindowResize();
