@@ -2192,14 +2192,14 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	CClientData OwnClientData = m_aClients[ownID];
+	CClientData &OwnClientData = m_aClients[ownID];
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == ownID)
 			continue;
 
-		CClientData cData = m_aClients[i];
+		CClientData &cData = m_aClients[i];
 
 		if(!cData.m_Active)
 			continue;
