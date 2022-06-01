@@ -278,39 +278,54 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 	if(s >= 0 && s <= 10)
 	{
 		if(v <= 150)
-			return 8;
-		return 15;
+			return FOREGROUND_INTENSITY;
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 	}
-	else if(h >= 0 && h < 15)
-		return 12;
-	else if(h >= 15 && h < 30)
-		return 6;
-	else if(h >= 30 && h < 60)
-		return 14;
-	else if(h >= 60 && h < 110)
-		return 10;
-	else if(h >= 110 && h < 140)
-		return 11;
-	else if(h >= 140 && h < 170)
-		return 9;
-	else if(h >= 170 && h < 195)
-		return 5;
-	else if(h >= 195 && h < 240)
-		return 13;
-	else if(h >= 240)
-		return 12;
+	if(h < 0)
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h < 15)
+		return FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h < 30)
+		return FOREGROUND_GREEN | FOREGROUND_RED;
+	else if(h < 60)
+		return FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h < 110)
+		return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	else if(h < 140)
+		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	else if(h < 170)
+		return FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	else if(h < 195)
+		return FOREGROUND_BLUE | FOREGROUND_RED;
+	else if(h < 240)
+		return FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
 	else
-		return 15;
+		return FOREGROUND_RED | FOREGROUND_INTENSITY;
 }
 
 class CWindowsConsoleLogger : public ILogger
 {
 	HANDLE m_pConsole;
+	int m_BackgroundColor;
+	int m_ForegroundColor;
+	std::mutex m_OutputLock;
+	bool m_Finished = false;
 
 public:
 	CWindowsConsoleLogger(HANDLE pConsole) :
 		m_pConsole(pConsole)
 	{
+		CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
+		if(GetConsoleScreenBufferInfo(pConsole, &ConsoleInfo))
+		{
+			m_BackgroundColor = ConsoleInfo.wAttributes & (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY);
+			m_ForegroundColor = ConsoleInfo.wAttributes & (FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+		}
+		else
+		{
+			m_BackgroundColor = 0;
+			m_ForegroundColor = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+		}
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
@@ -340,23 +355,40 @@ public:
 		}
 		pWide[WLen++] = '\r';
 		pWide[WLen++] = '\n';
-		int Color = 15;
+		int Color = m_BackgroundColor;
 		if(pMessage->m_HaveColor)
 		{
 			ColorRGBA Rgba(1.0, 1.0, 1.0, 1.0);
 			Rgba.r = pMessage->m_Color.r / 255.0;
 			Rgba.g = pMessage->m_Color.g / 255.0;
 			Rgba.b = pMessage->m_Color.b / 255.0;
-			Color = color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
+			Color |= color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
 		}
-		SetConsoleTextAttribute(m_pConsole, Color);
-		WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
+		else
+			Color |= FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+
+		m_OutputLock.lock();
+		if(!m_Finished)
+		{
+			SetConsoleTextAttribute(m_pConsole, Color);
+			WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
+		}
+		m_OutputLock.unlock();
 		free(pWide);
+	}
+	void GlobalFinish() override
+	{
+		// Restore original color
+		m_OutputLock.lock();
+		SetConsoleTextAttribute(m_pConsole, m_BackgroundColor | m_ForegroundColor);
+		m_Finished = true;
+		m_OutputLock.unlock();
 	}
 };
 class CWindowsFileLogger : public ILogger
 {
 	HANDLE m_pFile;
+	std::mutex m_OutputLock;
 
 public:
 	CWindowsFileLogger(HANDLE pFile) :
@@ -365,8 +397,10 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
+		m_OutputLock.lock();
 		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
 		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
+		m_OutputLock.unlock();
 	}
 };
 #endif
