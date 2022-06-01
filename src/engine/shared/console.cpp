@@ -304,11 +304,11 @@ LEVEL IConsole::ToLogLevel(int Level)
 	switch(Level)
 	{
 	case IConsole::OUTPUT_LEVEL_STANDARD:
-		return LEVEL_INFO;
+		return LEVEL_WARN;
 	case IConsole::OUTPUT_LEVEL_ADDINFO:
-		return LEVEL_DEBUG;
+		return LEVEL_INFO;
 	case IConsole::OUTPUT_LEVEL_DEBUG:
-		return LEVEL_TRACE;
+		return LEVEL_DEBUG;
 	}
 	dbg_assert(0, "invalid log level");
 	return LEVEL_INFO;
