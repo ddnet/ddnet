@@ -653,8 +653,8 @@ void CClient::SetState(EClientState s)
 
 		if(s == IClient::STATE_ONLINE)
 		{
-			Discord()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
-			Steam()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
+			Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap);
+			Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap);
 		}
 		else if(Old == IClient::STATE_ONLINE)
 		{
@@ -711,14 +711,17 @@ void CClient::EnterGame(int Conn)
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 }
 
-void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
+void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
 {
 	MD5_CTX Md5;
 	md5_init(&Md5);
 	const char *pDummy = Dummy ? "dummy" : "normal";
 	md5_update(&Md5, (unsigned char *)pDummy, str_length(pDummy) + 1);
 	md5_update(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
-	md5_update(&Md5, (unsigned char *)&Addr, sizeof(Addr));
+	for(int i = 0; i < NumAddrs; i++)
+	{
+		md5_update(&Md5, (unsigned char *)&pAddrs[i], sizeof(pAddrs[i]));
+	}
 	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	unsigned short aRandom[8];
@@ -731,13 +734,13 @@ void CClient::GenerateTimeoutSeed()
 	secure_random_password(g_Config.m_ClTimeoutSeed, sizeof(g_Config.m_ClTimeoutSeed), 16);
 }
 
-void CClient::GenerateTimeoutCodes()
+void CClient::GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs)
 {
 	if(g_Config.m_ClTimeoutSeed[0])
 	{
 		for(int i = 0; i < 2; i++)
 		{
-			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, m_ServerAddress, i);
+			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, i);
 
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "timeout code '%s' (%s)", m_aTimeoutCodes[i], i == 0 ? "normal" : "dummy");
@@ -753,25 +756,52 @@ void CClient::GenerateTimeoutCodes()
 
 void CClient::Connect(const char *pAddress, const char *pPassword)
 {
-	char aBuf[512];
-	int Port = 8303;
-
 	Disconnect();
 
 	m_ConnectionID = RandomUuid();
 	if(pAddress != m_aConnectAddressStr)
 		str_copy(m_aConnectAddressStr, pAddress);
 
-	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aConnectAddressStr);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
+	char aMsg[512];
+	str_format(aMsg, sizeof(aMsg), "connecting to '%s'", m_aConnectAddressStr);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aMsg, gs_ClientNetworkPrintColor);
 
 	ServerInfoRequest();
-	if(net_host_lookup(m_aConnectAddressStr, &m_ServerAddress, m_aNetClient[CONN_MAIN].NetType()) != 0)
+
+	int NumConnectAddrs = 0;
+	NETADDR aConnectAddrs[MAX_SERVER_ADDRESSES];
+	mem_zero(aConnectAddrs, sizeof(aConnectAddrs));
+	const char *pNextAddr = pAddress;
+	char aBuffer[128];
+	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
-		char aBufMsg[256];
-		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
-		net_host_lookup("localhost", &m_ServerAddress, m_aNetClient[CONN_MAIN].NetType());
+		NETADDR NextAddr;
+		if(net_host_lookup(aBuffer, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		{
+			log_error("client", "could not find address of %s", aBuffer);
+			continue;
+		}
+		if(NumConnectAddrs == (int)std::size(aConnectAddrs))
+		{
+			log_warn("client", "too many connect addresses, ignoring %s", aBuffer);
+			continue;
+		}
+		if(NextAddr.port == 0)
+		{
+			NextAddr.port = 8303;
+		}
+		char aNextAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
+		log_debug("client", "resolved connect address '%s' to %s", aBuffer, aNextAddr);
+		aConnectAddrs[NumConnectAddrs] = NextAddr;
+		NumConnectAddrs += 1;
+	}
+
+	if(NumConnectAddrs == 0)
+	{
+		log_error("client", "could not find any connect address, defaulting to localhost for whatever reason...");
+		net_host_lookup("localhost", &aConnectAddrs[0], m_aNetClient[CONN_MAIN].NetType());
+		NumConnectAddrs = 1;
 	}
 
 	if(m_SendPassword)
@@ -790,9 +820,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_aRconAuthed[0] = 0;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
-	if(m_ServerAddress.port == 0)
-		m_ServerAddress.port = Port;
-	m_aNetClient[CONN_MAIN].Connect(&m_ServerAddress);
+
+	m_aNetClient[CONN_MAIN].Connect(aConnectAddrs, NumConnectAddrs);
 	m_aNetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
 
@@ -803,7 +832,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_InputtimeMarginGraph.Init(-150.0f, 150.0f);
 	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
 
-	GenerateTimeoutCodes();
+	GenerateTimeoutCodes(aConnectAddrs, NumConnectAddrs);
 }
 
 void CClient::DisconnectWithReason(const char *pReason)
@@ -851,7 +880,6 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
-	mem_zero(&m_ServerAddress, sizeof(m_ServerAddress));
 
 	// clear snapshots
 	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
@@ -904,8 +932,8 @@ void CClient::DummyConnect()
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
 
-	//connecting to the server
-	m_aNetClient[CONN_DUMMY].Connect(&m_ServerAddress);
+	// connect to the server
+	m_aNetClient[CONN_DUMMY].Connect(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -1518,7 +1546,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		//
 		// SERVERINFO_EXTENDED_MORE doesn't carry any server
 		// information, so just skip it.
-		if(net_addr_comp(&m_ServerAddress, pFrom) == 0 && RawType != SERVERINFO_EXTENDED_MORE)
+		if(net_addr_comp(&ServerAddress(), pFrom) == 0 && RawType != SERVERINFO_EXTENDED_MORE)
 		{
 			// Only accept server info that has a type that is
 			// newer or equal to something the server already sent
@@ -1527,7 +1555,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
 				m_CurrentServerInfo.m_NumAddresses = 1;
-				m_CurrentServerInfo.m_aAddresses[0] = m_ServerAddress;
+				m_CurrentServerInfo.m_aAddresses[0] = ServerAddress();
 				m_CurrentServerInfoRequestTime = -1;
 			}
 
@@ -1546,7 +1574,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			if(ValidPong)
 			{
 				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
-				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
+				m_ServerBrowser.SetCurrentServerPing(ServerAddress(), LatencyMs);
 				m_CurrentServerPingInfoType = SavedType;
 				m_CurrentServerCurrentPingTime = -1;
 
@@ -1833,7 +1861,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(m_ServerCapabilities.m_PingEx && m_CurrentServerCurrentPingTime >= 0 && *pID == m_CurrentServerPingUuid)
 			{
 				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
-				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
+				m_ServerBrowser.SetCurrentServerPing(ServerAddress(), LatencyMs);
 				m_CurrentServerCurrentPingTime = -1;
 
 				char aBuf[64];
@@ -1925,7 +1953,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			int DeltaTick = GameTick - Unpacker.GetInt();
 
 			// only allow packets from the server we actually want
-			if(net_addr_comp(&pPacket->m_Address, &m_ServerAddress))
+			if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
 				return;
 
 			// we are not allowed to process snapshot yet
@@ -2477,6 +2505,19 @@ void CClient::LoadDDNetInfo()
 	}
 }
 
+int CClient::ConnectNetTypes() const
+{
+	const NETADDR *pConnectAddrs;
+	int NumConnectAddrs;
+	m_aNetClient[CONN_MAIN].ConnectAddresses(&pConnectAddrs, &NumConnectAddrs);
+	int NetType = 0;
+	for(int i = 0; i < NumConnectAddrs; i++)
+	{
+		NetType |= pConnectAddrs[i].type;
+	}
+	return NetType;
+}
+
 void CClient::PumpNetwork()
 {
 	for(auto &NetClient : m_aNetClient)
@@ -2784,7 +2825,7 @@ void CClient::Update()
 				m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
-				m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
+				m_ServerBrowser.RequestCurrentServer(ServerAddress());
 				m_CurrentServerInfoRequestTime = time_get() + time_freq() * 2;
 			}
 
@@ -2803,7 +2844,7 @@ void CClient::Update()
 				m_CurrentServerPingUuid = RandomUuid();
 				if(!m_ServerCapabilities.m_PingEx)
 				{
-					m_ServerBrowser.RequestCurrentServerWithRandomToken(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+					m_ServerBrowser.RequestCurrentServerWithRandomToken(ServerAddress(), &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
 				}
 				else
 				{
@@ -4845,27 +4886,44 @@ int CClient::PredictionMargin() const
 
 int CClient::UdpConnectivity(int NetType)
 {
-	NETADDR GlobalUdpAddr;
-	CONNECTIVITY Connectivity = m_aNetClient->GetConnectivity(NetType, &GlobalUdpAddr);
-	GlobalUdpAddr.port = 0;
-	switch(Connectivity)
+	static const int NETTYPES[2] = {NETTYPE_IPV6, NETTYPE_IPV4};
+	int Connectivity = CONNECTIVITY_UNKNOWN;
+	for(int PossibleNetType : NETTYPES)
 	{
-	case CONNECTIVITY::UNKNOWN:
-		return CONNECTIVITY_UNKNOWN;
-	case CONNECTIVITY::CHECKING:
-		return CONNECTIVITY_CHECKING;
-	case CONNECTIVITY::UNREACHABLE:
-		return CONNECTIVITY_UNREACHABLE;
-	case CONNECTIVITY::REACHABLE:
-		return CONNECTIVITY_REACHABLE;
-	case CONNECTIVITY::ADDRESS_KNOWN:
-		if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+		if((NetType & PossibleNetType) == 0)
 		{
-			return CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+			continue;
 		}
-		return CONNECTIVITY_REACHABLE;
-	default:
-		dbg_assert(0, "invalid connectivity value");
-		return CONNECTIVITY_UNKNOWN;
+		NETADDR GlobalUdpAddr;
+		int NewConnectivity;
+		switch(m_aNetClient[PossibleNetType].GetConnectivity(PossibleNetType, &GlobalUdpAddr))
+		{
+		case CONNECTIVITY::UNKNOWN:
+			NewConnectivity = CONNECTIVITY_UNKNOWN;
+			break;
+		case CONNECTIVITY::CHECKING:
+			NewConnectivity = CONNECTIVITY_CHECKING;
+			break;
+		case CONNECTIVITY::UNREACHABLE:
+			NewConnectivity = CONNECTIVITY_UNREACHABLE;
+			break;
+		case CONNECTIVITY::REACHABLE:
+			NewConnectivity = CONNECTIVITY_REACHABLE;
+			break;
+		case CONNECTIVITY::ADDRESS_KNOWN:
+			GlobalUdpAddr.port = 0;
+			if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+			{
+				NewConnectivity = CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+				break;
+			}
+			NewConnectivity = CONNECTIVITY_REACHABLE;
+			break;
+		default:
+			dbg_assert(0, "invalid connectivity value");
+			return CONNECTIVITY_UNKNOWN;
+		}
+		Connectivity = std::max(Connectivity, NewConnectivity);
 	}
+	return Connectivity;
 }
