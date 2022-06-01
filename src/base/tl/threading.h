@@ -45,8 +45,8 @@ public:
 
 	CLock(const CLock &) = delete;
 
-	void Take() ACQUIRE(m_Lock) { lock_wait(m_Lock); }
-	void Release() RELEASE() { lock_unlock(m_Lock); }
+	void Take() ACQUIRE(m_Lock) REQUIRES(!m_Lock) { lock_wait(m_Lock); }
+	void Release() RELEASE() REQUIRES(m_Lock) { lock_unlock(m_Lock); }
 };
 
 class CScopeLock

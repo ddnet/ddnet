@@ -50,7 +50,7 @@ class CJobPool
 	std::shared_ptr<IJob> m_pFirstJob GUARDED_BY(m_Lock);
 	std::shared_ptr<IJob> m_pLastJob GUARDED_BY(m_Lock);
 
-	static void WorkerThread(void *pUser);
+	static void WorkerThread(void *pUser) NO_THREAD_SAFETY_ANALYSIS;
 
 public:
 	CJobPool();
@@ -58,7 +58,7 @@ public:
 
 	void Init(int NumThreads);
 	void Destroy();
-	void Add(std::shared_ptr<IJob> pJob);
+	void Add(std::shared_ptr<IJob> pJob) REQUIRES(!m_Lock);
 	static void RunBlocking(IJob *pJob);
 };
 #endif

@@ -212,8 +212,6 @@ public:
 	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); };
 	vec2 m_Pos;
 	vec2 m_Vel;
-	bool m_Hook;
-	bool m_Collision;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;

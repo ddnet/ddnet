@@ -86,8 +86,6 @@ void CCharacterCore::Reset()
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
 	m_TriggeredEvents = 0;
-	m_Hook = true;
-	m_Collision = true;
 
 	// DDNet Character
 	m_Solo = false;
@@ -275,7 +273,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// Check against other players first
-		if(this->m_Hook && m_pWorld && m_Tuning.m_PlayerHooking)
+		if(!this->m_NoHookHit && m_pWorld && m_Tuning.m_PlayerHooking)
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -409,7 +407,7 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				bool CanCollide = (m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && m_Collision && !m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
+				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
 
 				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
 				{
@@ -426,7 +424,7 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 
 				// handle hook influence
-				if(m_Hook && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
+				if(!m_NoHookHit && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
 				{
 					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
 					{
@@ -482,7 +480,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
-	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && m_Collision && !m_NoCollision && !m_Solo)))
+	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_NoCollision && !m_Solo)))
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
@@ -499,7 +497,7 @@ void CCharacterCore::Move()
 					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
 					if(!pCharCore || pCharCore == this)
 						continue;
-					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || !pCharCore->m_Collision || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
 					float D = distance(Pos, pCharCore->m_Pos);
 					if(D < PhysicalSize() && D >= 0.0f)
@@ -573,9 +571,6 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
 	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
-
-	m_Hook = !m_NoHookHit;
-	m_Collision = !m_NoCollision;
 
 	// Endless
 	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;

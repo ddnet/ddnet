@@ -54,13 +54,13 @@ private:
 		std::shared_ptr<CData> m_pData;
 		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
 		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
-		void Run() override;
+		void Run() override REQUIRES(!m_Lock);
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
 			m_pData(std::move(pData)) { m_Lock = lock_create(); }
 		virtual ~CJob() { lock_destroy(m_Lock); }
-		void Abort();
+		void Abort() REQUIRES(!m_Lock);
 	};
 
 	IEngine *m_pEngine;
@@ -166,7 +166,7 @@ void CChooseMaster::CJob::Run()
 	//
 	// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to
 	// fail.
-	CTimeout Timeout{10000, 8000, 10};
+	CTimeout Timeout{10000, 0, 8000, 10};
 	int aTimeMs[MAX_URLS];
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
@@ -339,7 +339,7 @@ void CServerBrowserHttp::Update()
 		}
 		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
-		m_pGetServers->Timeout(CTimeout{10000, 8000, 10});
+		m_pGetServers->Timeout(CTimeout{10000, 0, 8000, 10});
 		m_pEngine->AddJob(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
