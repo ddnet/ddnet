@@ -138,6 +138,10 @@ function run_tests() {
 			do
 				echo "  $line"
 			done < <(echo "$srv_log")
+			if [ "$srv_log" == "" ]
+			then
+				tail server.log
+			fi
 			echo ""
 			exit 1
 		else
