@@ -626,15 +626,6 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 	return 0;
 }
 
-int *CClient::GetDirectInput(int Tick, int IsDummy) const
-{
-	const int d = IsDummy ^ g_Config.m_ClDummy;
-	for(int i = 0; i < 200; i++)
-		if(m_aInputs[d][i].m_Tick == Tick)
-			return (int *)m_aInputs[d][i].m_aData;
-	return 0;
-}
-
 // ------ state handling -----
 void CClient::SetState(int s)
 {
