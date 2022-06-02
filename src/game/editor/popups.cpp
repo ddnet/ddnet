@@ -430,6 +430,8 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_pTuneLayer = nullptr;
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pMaterialLayer)
 			pEditor->m_Map.m_pMaterialLayer = 0x0;
+		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pMaterialLayer)
+			pEditor->m_Map.m_pMaterialLayer = 0x0;
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->DeleteLayer(pEditor->m_vSelectedLayers[0]);
 		return 1;
 	}

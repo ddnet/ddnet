@@ -391,6 +391,35 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				}
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
+	else if(this->m_Material)
+	{
+		CLayerMaterial *pGrabbed = new CLayerMaterial(r.w, r.h);
+		pGrabbed->m_pEditor = m_pEditor;
+		pGrabbed->m_Texture = m_Texture;
+		pGrabbed->m_Image = m_Image;
+		pGrabbed->m_Game = m_Game;
+		if(m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
+
+		pBrush->AddLayer(pGrabbed);
+
+		// copy the tiles
+		for(int y = 0; y < r.h; y++)
+			for(int x = 0; x < r.w; x++)
+				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+
+		// copy the tiles
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+			for(int y = 0; y < r.h; y++)
+				for(int x = 0; x < r.w; x++)
+				{
+					pGrabbed->m_pMaterialTile[y * pGrabbed->m_Width + x] = ((CLayerMaterial *)this)->m_pMaterialTile[(r.y + y) * m_Width + (r.x + x)];
+				}
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+	}
 	else if(this->m_Front)
 	{
 		CLayerFront *pGrabbed = new CLayerFront(r.w, r.h);

@@ -6251,6 +6251,7 @@ void CEditorMap::Clean()
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
 	m_pMaterialLayer = 0x0;
+	m_pMaterialLayer = 0x0;
 }
 
 void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
@@ -6280,6 +6281,7 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	m_pSpeedupLayer = nullptr;
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
+	m_pMaterialLayer = 0x0;
 	m_pMaterialLayer = 0x0;
 }
 
