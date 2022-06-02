@@ -32,6 +32,7 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_Front = 0;
 	m_Switch = 0;
 	m_Tune = 0;
+	m_Material = 0;
 	m_AutoMapperConfig = -1;
 	m_Seed = 0;
 	m_AutoAutoMap = false;
@@ -100,6 +101,8 @@ void CLayerTiles::Render(bool Tileset)
 			m_pEditor->RenderTools()->RenderSwitchOverlay(((CLayerSwitch *)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
 		if(m_Tune)
 			m_pEditor->RenderTools()->RenderTuneOverlay(((CLayerTune *)this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+		if(m_Material)
+			m_pEditor->RenderTools()->RenderMaterialOverlay(((CLayerMaterial *)this)->m_pMaterialTile, m_Width, m_Height, 32.0f);
 	}
 }
 
@@ -361,6 +364,35 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNum;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
 	}
+	else if(this->m_Material)
+	{
+		CLayerMaterial *pGrabbed = new CLayerMaterial(r.w, r.h);
+		pGrabbed->m_pEditor = m_pEditor;
+		pGrabbed->m_Texture = m_Texture;
+		pGrabbed->m_Image = m_Image;
+		pGrabbed->m_Game = m_Game;
+		if(m_pEditor->m_BrushColorEnabled)
+		{
+			pGrabbed->m_Color = m_Color;
+			pGrabbed->m_Color.a = 255;
+		}
+
+		pBrush->AddLayer(pGrabbed);
+
+		// copy the tiles
+		for(int y = 0; y < r.h; y++)
+			for(int x = 0; x < r.w; x++)
+				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+
+		// copy the tiles
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+			for(int y = 0; y < r.h; y++)
+				for(int x = 0; x < r.w; x++)
+				{
+					pGrabbed->m_pMaterialTile[y * pGrabbed->m_Width + x] = ((CLayerMaterial *)this)->m_pMaterialTile[(r.y + y) * m_Width + (r.x + x)];
+				}
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+	}
 	else if(this->m_Front)
 	{
 		CLayerFront *pGrabbed = new CLayerFront(r.w, r.h);
@@ -505,7 +537,7 @@ void CLayerTiles::BrushFlipX()
 {
 	BrushFlipXImpl(m_pTiles);
 
-	if(m_Tele || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune || m_Material)
 		return;
 
 	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
@@ -521,7 +553,7 @@ void CLayerTiles::BrushFlipY()
 {
 	BrushFlipYImpl(m_pTiles);
 
-	if(m_Tele || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune || m_Material)
 		return;
 
 	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
@@ -605,6 +637,10 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	// resize tune layer if available
 	if(m_Game && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_Height != NewH))
 		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
+
+	//resize material layer if available (and necessary)
+	if(m_Game && m_pEditor->m_Map.m_pMaterialLayer && (m_pEditor->m_Map.m_pMaterialLayer->m_Width > NewW || m_pEditor->m_Map.m_pMaterialLayer->m_Height > NewH))
+		m_pEditor->m_Map.m_pMaterialLayer->Resize(minimum(NewW, m_pEditor->m_Map.m_pMaterialLayer->m_Width), minimum(NewH, m_pEditor->m_Map.m_pMaterialLayer->m_Height));
 }
 
 void CLayerTiles::Shift(int Direction)
@@ -651,7 +687,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
-	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this);
+	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this || m_pEditor->m_Map.m_pMaterialLayer == this);
 
 	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
@@ -2025,6 +2061,233 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 					else
 						m_pTuneTile[fy * m_Width + fx].m_Number = pLt->m_pTuneTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number;
 					m_pTuneTile[fy * m_Width + fx].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
+				}
+			}
+		}
+	}
+
+	FlagModified(sx, sy, w, h);
+}
+
+//------------------------------------------------------
+
+CLayerMaterial::CLayerMaterial(int w, int h) :
+	CLayerTiles(w, h)
+{
+	str_copy(m_aName, "Material", sizeof(m_aName));
+	m_Material = 1;
+
+	m_pMaterialTile = new CMaterialTile[w * h];
+	mem_zero(m_pMaterialTile, (size_t)w * h * sizeof(CMaterialTile));
+}
+
+CLayerMaterial::~CLayerMaterial()
+{
+	delete[] m_pMaterialTile;
+}
+
+void CLayerMaterial::Resize(int NewW, int NewH)
+{
+	// resize Material data
+	CMaterialTile *pNewMaterialData = new CMaterialTile[NewW * NewH];
+	mem_zero(pNewMaterialData, (size_t)NewW * NewH * sizeof(CMaterialTile));
+
+	// copy old data
+	for(int y = 0; y < minimum(NewH, m_Height); y++)
+		mem_copy(&pNewMaterialData[y * NewW], &m_pMaterialTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CMaterialTile));
+
+	// replace old
+	delete[] m_pMaterialTile;
+	m_pMaterialTile = pNewMaterialData;
+
+	// resize tile data
+	CLayerTiles::Resize(NewW, NewH);
+
+	// resize gamelayer too, allow material layer only to be smaller
+	if(NewW > m_pEditor->m_Map.m_pGameLayer->m_Width || NewH > m_pEditor->m_Map.m_pGameLayer->m_Height)
+	{
+		int NewGamelayerWidth = maximum(m_pEditor->m_Map.m_pGameLayer->m_Width, NewW);
+		int NewGameLayerHeight = maximum(m_pEditor->m_Map.m_pGameLayer->m_Height, NewH);
+		m_pEditor->m_Map.m_pGameLayer->Resize(NewGamelayerWidth, NewGameLayerHeight);
+	}
+}
+
+void CLayerMaterial::Shift(int Direction)
+{
+	CLayerTiles::Shift(Direction);
+	int o = m_pEditor->m_ShiftBy;
+
+	switch(Direction)
+	{
+	case DIRECTION_LEFT:
+		for(int y = 0; y < m_Height; ++y)
+		{
+			mem_move(&m_pMaterialTile[y * m_Width], &m_pMaterialTile[y * m_Width + o], (m_Width - o) * sizeof(CMaterialTile));
+			mem_zero(&m_pMaterialTile[y * m_Width + (m_Width - o)], o * sizeof(CMaterialTile));
+		}
+		break;
+	case DIRECTION_RIGHT:
+		for(int y = 0; y < m_Height; ++y)
+		{
+			mem_move(&m_pMaterialTile[y * m_Width + o], &m_pMaterialTile[y * m_Width], (m_Width - o) * sizeof(CMaterialTile));
+			mem_zero(&m_pMaterialTile[y * m_Width], o * sizeof(CMaterialTile));
+		}
+		break;
+	case DIRECTION_UP:
+		for(int y = 0; y < m_Height - o; ++y)
+		{
+			mem_copy(&m_pMaterialTile[y * m_Width], &m_pMaterialTile[(y + o) * m_Width], m_Width * sizeof(CMaterialTile));
+			mem_zero(&m_pMaterialTile[(y + o) * m_Width], m_Width * sizeof(CMaterialTile));
+		}
+		break;
+	case DIRECTION_DOWN:
+		for(int y = m_Height - 1; y >= o; --y)
+		{
+			mem_copy(&m_pMaterialTile[y * m_Width], &m_pMaterialTile[(y - o) * m_Width], m_Width * sizeof(CMaterialTile));
+			mem_zero(&m_pMaterialTile[(y - o) * m_Width], m_Width * sizeof(CMaterialTile));
+		}
+	}
+}
+
+bool CLayerMaterial::IsEmpty(CLayerTiles *pLayer)
+{
+	for(int y = 0; y < pLayer->m_Height; y++)
+		for(int x = 0; x < pLayer->m_Width; x++)
+			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidMaterialTile(pLayer->GetTile(x, y).m_Index))
+				return false;
+
+	return true;
+}
+
+void CLayerMaterial::BrushDraw(CLayer *pBrush, float wx, float wy)
+{
+	if(m_Readonly)
+		return;
+
+	CLayerMaterial *l = (CLayerMaterial *)pBrush;
+	int sx = ConvertX(wx);
+	int sy = ConvertY(wy);
+
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+
+	for(int y = 0; y < l->m_Height; y++)
+		for(int x = 0; x < l->m_Width; x++)
+		{
+			int fx = x + sx;
+			int fy = y + sy;
+
+			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+				continue;
+
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidMaterialTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
+			{
+				m_pMaterialTile[fy * m_Width + fx].m_Material = l->m_pTiles[y * l->m_Width + x].m_Index;
+				m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
+			}
+			else
+			{
+				m_pMaterialTile[fy * m_Width + fx].m_Material = 0;
+				m_pTiles[fy * m_Width + fx].m_Index = 0;
+			}
+		}
+	FlagModified(sx, sy, l->m_Width, l->m_Height);
+}
+
+void CLayerMaterial::BrushFlipX()
+{
+	CLayerTiles::BrushFlipX();
+
+	for(int y = 0; y < m_Height; y++)
+		for(int x = 0; x < m_Width / 2; x++)
+			std::swap(m_pMaterialTile[y * m_Width + x], m_pMaterialTile[y * m_Width + m_Width - 1 - x]);
+}
+
+void CLayerMaterial::BrushFlipY()
+{
+	CLayerTiles::BrushFlipY();
+
+	for(int y = 0; y < m_Height / 2; y++)
+		for(int x = 0; x < m_Width; x++)
+			std::swap(m_pMaterialTile[y * m_Width + x], m_pMaterialTile[(m_Height - 1 - y) * m_Width + x]);
+}
+
+void CLayerMaterial::BrushRotate(float Amount)
+{
+	int Rotation = (round_to_int(360.0f * Amount / (pi * 2)) / 90) % 4; // 0=0°, 1=90°, 2=180°, 3=270°
+	if(Rotation < 0)
+		Rotation += 4;
+
+	if(Rotation == 1 || Rotation == 3)
+	{
+		// 90° rotation
+		CMaterialTile *pTempData1 = new CMaterialTile[m_Width * m_Height];
+		CTile *pTempData2 = new CTile[m_Width * m_Height];
+		mem_copy(pTempData1, m_pMaterialTile, (size_t)m_Width * m_Height * sizeof(CMaterialTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+		CMaterialTile *pDst1 = m_pMaterialTile;
+		CTile *pDst2 = m_pTiles;
+		for(int x = 0; x < m_Width; ++x)
+			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
+			{
+				*pDst1 = pTempData1[y * m_Width + x];
+				*pDst2 = pTempData2[y * m_Width + x];
+			}
+
+		std::swap(m_Width, m_Height);
+		delete[] pTempData1;
+		delete[] pTempData2;
+	}
+
+	if(Rotation == 2 || Rotation == 3)
+	{
+		BrushFlipX();
+		BrushFlipY();
+	}
+}
+
+void CLayerMaterial::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
+{
+	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
+		return;
+
+	Snap(&Rect); // corrects Rect; no need of <=
+
+	int sx = ConvertX(Rect.x);
+	int sy = ConvertY(Rect.y);
+	int w = ConvertX(Rect.w);
+	int h = ConvertY(Rect.h);
+
+	CLayerMaterial *pMl = static_cast<CLayerMaterial *>(pBrush);
+
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pMl);
+
+	for(int y = 0; y < h; y++)
+	{
+		for(int x = 0; x < w; x++)
+		{
+			int fx = x + sx;
+			int fy = y + sy;
+
+			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+				continue;
+
+			if(!Destructive && GetTile(fx, fy).m_Index)
+				continue;
+
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidMaterialTile((pMl->m_pTiles[(y * pMl->m_Width + x % pMl->m_Width) % (pMl->m_Width * pMl->m_Height)]).m_Index))) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here; possible copy pasta, what bug?
+			{
+				m_pTiles[fy * m_Width + fx].m_Index = 0;
+				m_pMaterialTile[fy * m_Width + fx].m_Material = 0;
+			}
+			else
+			{
+				m_pTiles[fy * m_Width + fx] = pMl->m_pTiles[(y * pMl->m_Width + x % pMl->m_Width) % (pMl->m_Width * pMl->m_Height)];
+				if(m_pTiles[fy * m_Width + fx].m_Index > 0)
+				{
+					m_pMaterialTile[fy * m_Width + fx].m_Material = m_pTiles[fy * m_Width + fx].m_Index;
 				}
 			}
 		}

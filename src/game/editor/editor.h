@@ -458,11 +458,13 @@ public:
 	class CLayerFront *m_pFrontLayer;
 	class CLayerSwitch *m_pSwitchLayer;
 	class CLayerTune *m_pTuneLayer;
+	class CLayerMaterial *m_pMaterialLayer;
 	void MakeTeleLayer(CLayer *pLayer);
 	void MakeSpeedupLayer(CLayer *pLayer);
 	void MakeFrontLayer(CLayer *pLayer);
 	void MakeSwitchLayer(CLayer *pLayer);
 	void MakeTuneLayer(CLayer *pLayer);
+	void MakeMaterialLayer(CLayer *pLayer);
 };
 
 struct CProperty
@@ -628,6 +630,7 @@ public:
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
+	int m_Material;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
 };
 
@@ -693,6 +696,7 @@ class CEditor : public IEditor
 	IGraphics::CTextureHandle m_SpeedupTexture;
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
+	IGraphics::CTextureHandle m_MaterialTexture;
 
 	int GetTextureUsageFlag();
 
@@ -1196,6 +1200,7 @@ public:
 	IGraphics::CTextureHandle GetSpeedupTexture();
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
+	IGraphics::CTextureHandle GetMaterialTexture();
 
 	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
@@ -1329,6 +1334,24 @@ public:
 
 	int m_Sound;
 	std::vector<CSoundSource> m_vSources;
+};
+
+class CLayerMaterial : public CLayerTiles
+{
+public:
+	CLayerMaterial(int w, int h);
+	~CLayerMaterial();
+
+	CMaterialTile *m_pMaterialTile;
+
+	void Resize(int NewW, int NewH) override;
+	void Shift(int Direction) override;
+	bool IsEmpty(CLayerTiles *pLayer) override;
+	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	void BrushFlipX() override;
+	void BrushFlipY() override;
+	void BrushRotate(float Amount) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 };
 
 #endif
