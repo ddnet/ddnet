@@ -6204,6 +6204,21 @@ void CEditorMap::DeleteEnvelope(int Index)
 				if(pLayer->m_ColorEnv > Index)
 					pLayer->m_ColorEnv--;
 			}
+			else if (m_lGroups[i]->m_lLayers[j]->m_Type == LAYERTYPE_SOUNDS)
+			{
+				CLayerSounds *pLayer = static_cast<CLayerSounds *>(m_lGroups[i]->m_lLayers[j]);
+				for(int k = 0; k < pLayer->m_lSources.size(); ++k)
+				{
+					if(pLayer->m_lSources[k].m_PosEnv == Index)
+						pLayer->m_lSources[k].m_PosEnv = -1;
+					else if(pLayer->m_lSources[k].m_PosEnv > Index)
+						pLayer->m_lSources[k].m_PosEnv--;
+					if(pLayer->m_lSources[k].m_SoundEnv == Index)
+						pLayer->m_lSources[k].m_SoundEnv = -1;
+					else if(pLayer->m_lSources[k].m_SoundEnv > Index)
+						pLayer->m_lSources[k].m_SoundEnv--;
+				}
+			}
 
 	m_lEnvelopes.remove_index(Index);
 }
