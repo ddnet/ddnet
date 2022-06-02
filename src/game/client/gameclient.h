@@ -509,6 +509,9 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
+	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_aSwitchers; }
+	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_aSwitchers; }
+
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientID);

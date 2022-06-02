@@ -445,6 +445,7 @@ void CGameClient::OnConnected()
 {
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
+	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 
 	CRaceHelper::ms_aFlagIndex[0] = -1;
 	CRaceHelper::ms_aFlagIndex[1] = -1;
@@ -1437,39 +1438,40 @@ void CGameClient::OnNewSnapshot()
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
 				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
 
-				int NumSwitchers = clamp(pSwitchStateData->m_NumSwitchers, 0, 255);
-				if(!Collision()->m_pSwitchers || NumSwitchers != Collision()->m_NumSwitchers)
+				int HighestSwitchNumber = clamp(pSwitchStateData->m_HighestSwitchNumber, 0, 255);
+				if(HighestSwitchNumber != maximum(0, (int)Switchers().size() - 1))
 				{
-					delete[] Collision()->m_pSwitchers;
-					Collision()->m_pSwitchers = new CCollision::SSwitchers[NumSwitchers + 1];
-					Collision()->m_NumSwitchers = NumSwitchers;
+					m_GameWorld.m_Core.InitSwitchers(HighestSwitchNumber);
+					Collision()->m_HighestSwitchNumber = HighestSwitchNumber;
 				}
 
-				for(int j = 0; j < NumSwitchers + 1; j++)
+				for(int j = 0; j < (int)Switchers().size(); j++)
 				{
-					if(j < 32)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status1 & (1 << j);
-					else if(j < 64)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status2 & (1 << (j - 32));
-					else if(j < 96)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status3 & (1 << (j - 64));
-					else if(j < 128)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status4 & (1 << (j - 96));
-					else if(j < 160)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status5 & (1 << (j - 128));
-					else if(j < 192)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status6 & (1 << (j - 160));
-					else if(j < 224)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status7 & (1 << (j - 192));
-					else if(j < 256)
-						Collision()->m_pSwitchers[j].m_Status[Team] = pSwitchStateData->m_Status8 & (1 << (j - 224));
+					Switchers()[j].m_Status[Team] = (pSwitchStateData->m_aStatus[j / 32] >> (j % 32)) & 1;
+				}
 
-					// update
-					if(Collision()->m_pSwitchers[j].m_Status[Team])
-						Collision()->m_pSwitchers[j].m_Type[Team] = TILE_SWITCHOPEN;
+				const int SnapItemSize = Client()->SnapItemSize(IClient::SNAP_CURRENT, i);
+				if(SnapItemSize >= 68)
+				{
+					// update the endtick of up to four timed switchers
+					for(int j = 0; j < (int)std::size(pSwitchStateData->m_aEndTicks); j++)
+					{
+						int SwitchNumber = pSwitchStateData->m_aSwitchNumbers[j];
+						int EndTick = pSwitchStateData->m_aEndTicks[j];
+						if(EndTick > 0 && in_range(SwitchNumber, 0, (int)Switchers().size()))
+						{
+							Switchers()[SwitchNumber].m_EndTick[Team] = EndTick;
+						}
+					}
+				}
+
+				// update switch types
+				for(auto &Switcher : Switchers())
+				{
+					if(Switcher.m_Status[Team])
+						Switcher.m_Type[Team] = Switcher.m_EndTick[Team] ? TILE_SWITCHTIMEDOPEN : TILE_SWITCHOPEN;
 					else
-						Collision()->m_pSwitchers[j].m_Type[Team] = TILE_SWITCHCLOSE;
-					Collision()->m_pSwitchers[j].m_EndTick[Team] = 0;
+						Switcher.m_Type[Team] = Switcher.m_EndTick[Team] ? TILE_SWITCHTIMEDCLOSE : TILE_SWITCHCLOSE;
 				}
 
 				if(!GotSwitchStateTeam)

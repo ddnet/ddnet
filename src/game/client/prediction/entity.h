@@ -38,6 +38,7 @@ public:
 	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 	virtual ~CEntity();
 
+	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->Switchers(); }
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
 	CTuningParams *Tuning() { return GameWorld()->Tuning(); }
 	CTuningParams *TuningList() { return GameWorld()->TuningList(); }

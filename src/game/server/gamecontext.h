@@ -161,6 +161,7 @@ public:
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
 	bool EmulateBug(int Bug);
+	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_aSwitchers; }
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);

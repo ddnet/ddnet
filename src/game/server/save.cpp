@@ -446,7 +446,7 @@ int CSaveTeam::Save(int Team)
 			return 4;
 		}
 
-		m_NumSwitchers = m_pController->GameServer()->Collision()->m_NumSwitchers;
+		m_HighestSwitchNumber = m_pController->GameServer()->Collision()->m_HighestSwitchNumber;
 		m_TeamLocked = Teams->TeamLocked(Team);
 		m_Practice = Teams->IsPractice(Team);
 
@@ -465,18 +465,18 @@ int CSaveTeam::Save(int Team)
 		if(m_MembersCount != j)
 			return 3;
 
-		if(m_pController->GameServer()->Collision()->m_NumSwitchers)
+		if(m_pController->GameServer()->Collision()->m_HighestSwitchNumber)
 		{
-			m_pSwitchers = new SSimpleSwitchers[m_pController->GameServer()->Collision()->m_NumSwitchers + 1];
+			m_pSwitchers = new SSimpleSwitchers[m_pController->GameServer()->Collision()->m_HighestSwitchNumber + 1];
 
-			for(int i = 1; i < m_pController->GameServer()->Collision()->m_NumSwitchers + 1; i++)
+			for(int i = 1; i < m_pController->GameServer()->Collision()->m_HighestSwitchNumber + 1; i++)
 			{
-				m_pSwitchers[i].m_Status = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
-				if(m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team])
-					m_pSwitchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team];
+				m_pSwitchers[i].m_Status = m_pController->GameServer()->Switchers()[i].m_Status[Team];
+				if(m_pController->GameServer()->Switchers()[i].m_EndTick[Team])
+					m_pSwitchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Switchers()[i].m_EndTick[Team];
 				else
 					m_pSwitchers[i].m_EndTime = 0;
-				m_pSwitchers[i].m_Type = m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team];
+				m_pSwitchers[i].m_Type = m_pController->GameServer()->Switchers()[i].m_Type[Team];
 			}
 		}
 		return 0;
@@ -528,14 +528,14 @@ void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
 		}
 	}
 
-	if(m_pController->GameServer()->Collision()->m_NumSwitchers)
+	if(m_pController->GameServer()->Collision()->m_HighestSwitchNumber)
 	{
-		for(int i = 1; i < minimum(m_NumSwitchers, m_pController->GameServer()->Collision()->m_NumSwitchers) + 1; i++)
+		for(int i = 1; i < minimum(m_HighestSwitchNumber, m_pController->GameServer()->Collision()->m_HighestSwitchNumber) + 1; i++)
 		{
-			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = m_pSwitchers[i].m_Status;
+			m_pController->GameServer()->Switchers()[i].m_Status[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)
-				m_pController->GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
-			m_pController->GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = m_pSwitchers[i].m_Type;
+				m_pController->GameServer()->Switchers()[i].m_EndTick[Team] = m_pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
+			m_pController->GameServer()->Switchers()[i].m_Type[Team] = m_pSwitchers[i].m_Type;
 		}
 	}
 }
@@ -553,7 +553,7 @@ CCharacter *CSaveTeam::MatchCharacter(int ClientID, int SaveID, bool KeepCurrent
 
 char *CSaveTeam::GetString()
 {
-	str_format(m_aString, sizeof(m_aString), "%d\t%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked, m_Practice);
+	str_format(m_aString, sizeof(m_aString), "%d\t%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_HighestSwitchNumber, m_TeamLocked, m_Practice);
 
 	for(int i = 0; i < m_MembersCount; i++)
 	{
@@ -562,9 +562,9 @@ char *CSaveTeam::GetString()
 		str_append(m_aString, aBuf, sizeof(m_aString));
 	}
 
-	if(m_pSwitchers && m_NumSwitchers)
+	if(m_pSwitchers && m_HighestSwitchNumber)
 	{
-		for(int i = 1; i < m_NumSwitchers + 1; i++)
+		for(int i = 1; i < m_HighestSwitchNumber + 1; i++)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_pSwitchers[i].m_Status, m_pSwitchers[i].m_EndTime, m_pSwitchers[i].m_Type);
@@ -608,7 +608,7 @@ int CSaveTeam::FromString(const char *String)
 	if(StrSize < sizeof(aTeamStats))
 	{
 		str_copy(aTeamStats, CopyPos, StrSize);
-		int Num = sscanf(aTeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked, &m_Practice);
+		int Num = sscanf(aTeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_HighestSwitchNumber, &m_TeamLocked, &m_Practice);
 		switch(Num) // Don't forget to update this when you save / load more / less.
 		{
 		case 4:
@@ -687,10 +687,10 @@ int CSaveTeam::FromString(const char *String)
 		m_pSwitchers = 0;
 	}
 
-	if(m_NumSwitchers)
-		m_pSwitchers = new SSimpleSwitchers[m_NumSwitchers + 1];
+	if(m_HighestSwitchNumber)
+		m_pSwitchers = new SSimpleSwitchers[m_HighestSwitchNumber + 1];
 
-	for(int n = 1; n < m_NumSwitchers + 1; n++)
+	for(int n = 1; n < m_HighestSwitchNumber + 1; n++)
 	{
 		while(m_aString[Pos] != '\n' && Pos < sizeof(m_aString) && m_aString[Pos]) // find next \n or \0
 			Pos++;

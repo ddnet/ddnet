@@ -145,7 +145,7 @@ private:
 
 	int m_TeamState;
 	int m_MembersCount;
-	int m_NumSwitchers;
+	int m_HighestSwitchNumber;
 	int m_TeamLocked;
 	int m_Practice;
 };
