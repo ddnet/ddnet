@@ -46,7 +46,7 @@ void CDraggerBeam::Tick()
 	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTarget->Team()])
+			!Switchers()[m_Number].m_Status[pTarget->Team()])
 		{
 			Reset();
 			return;

@@ -174,23 +174,8 @@ public:
 	CStresser m_Stresser;
 
 private:
-	class CStack
-	{
-	public:
-		enum
-		{
-			MAX_COMPONENTS = 64,
-		};
-
-		CStack();
-		void Add(class CComponent *pComponent);
-
-		class CComponent *m_paComponents[MAX_COMPONENTS];
-		int m_Num;
-	};
-
-	CStack m_All;
-	CStack m_Input;
+	std::vector<class CComponent *> m_vpAll;
+	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
 
 	class IEngine *m_pEngine;
@@ -552,6 +537,9 @@ public:
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
+
+	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_aSwitchers; }
+	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_aSwitchers; }
 
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;

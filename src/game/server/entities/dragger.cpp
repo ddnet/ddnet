@@ -90,7 +90,7 @@ void CDragger::LookForPlayersToDrag()
 		}
 		// If the dragger is disabled for the target's team, no dragger beam will be generated
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[TargetTeam])
+			!Switchers()[m_Number].m_Status[TargetTeam])
 		{
 			continue;
 		}
@@ -211,7 +211,7 @@ void CDragger::Snap(int SnappingClient)
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChar->Team()] && (!Tick))
+			!Switchers()[m_Number].m_Status[pChar->Team()] && !Tick)
 			return;
 	}
 
