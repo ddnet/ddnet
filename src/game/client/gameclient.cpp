@@ -1435,6 +1435,10 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_paFlags[Item.m_ID % 2] = (const CNetObj_Flag *)pData;
 			else if(Item.m_Type == NETOBJTYPE_SWITCHSTATE)
 			{
+				if(Item.m_DataSize < 36)
+				{
+					continue;
+				}
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)pData;
 				int Team = clamp(Item.m_ID, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
 
@@ -1450,8 +1454,7 @@ void CGameClient::OnNewSnapshot()
 					Switchers()[j].m_Status[Team] = (pSwitchStateData->m_aStatus[j / 32] >> (j % 32)) & 1;
 				}
 
-				const int SnapItemSize = Client()->SnapItemSize(IClient::SNAP_CURRENT, i);
-				if(SnapItemSize >= 68)
+				if(Item.m_DataSize >= 68)
 				{
 					// update the endtick of up to four timed switchers
 					for(int j = 0; j < (int)std::size(pSwitchStateData->m_aEndTicks); j++)
