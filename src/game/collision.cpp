@@ -565,6 +565,7 @@ void CCollision::Dest()
 	m_pFront = 0;
 	m_pSwitch = 0;
 	m_pTune = 0;
+	m_pMaterial = 0;
 	m_pDoor = 0;
 }
 
@@ -842,6 +843,8 @@ bool CCollision::TileExists(int Index) const
 	if(m_pSwitch && m_pSwitch[Index].m_Type)
 		return true;
 	if(m_pTune && m_pTune[Index].m_Type)
+		return true;
+	if(m_pMaterial && m_pMaterial[Index].m_Material)
 		return true;
 	return TileExistsNext(Index);
 }
