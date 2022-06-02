@@ -101,6 +101,8 @@ void CLayerTiles::Render(bool Tileset)
 			m_pEditor->RenderTools()->RenderSwitchOverlay(((CLayerSwitch *)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
 		if(m_Tune)
 			m_pEditor->RenderTools()->RenderTuneOverlay(((CLayerTune *)this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+		if(m_Material)
+			m_pEditor->RenderTools()->RenderMaterialOverlay(((CLayerMaterial *)this)->m_pMaterialTile, m_Width, m_Height, 32.0f);
 	}
 }
 

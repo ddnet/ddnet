@@ -175,7 +175,7 @@ void CLayerGroup::Render()
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CLayerTiles *pTiles = static_cast<CLayerTiles *>(pLayer);
-				if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch || pTiles->m_Material)
+				if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Material || pTiles->m_Switch || pTiles->m_Material)
 					continue;
 			}
 			if(m_pMap->m_pEditor->m_ShowDetail || !(pLayer->m_Flags & LAYERFLAG_DETAIL))
@@ -188,7 +188,7 @@ void CLayerGroup::Render()
 		if(pLayer->m_Visible && pLayer->m_Type == LAYERTYPE_TILES && pLayer != m_pMap->m_pGameLayer && pLayer != m_pMap->m_pFrontLayer && pLayer != m_pMap->m_pTeleLayer && pLayer != m_pMap->m_pSpeedupLayer && pLayer != m_pMap->m_pSwitchLayer && pLayer != m_pMap->m_pTuneLayer)
 		{
 			CLayerTiles *pTiles = static_cast<CLayerTiles *>(pLayer);
-			if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch || pTiles->m_Material)
+			if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Material || pTiles->m_Switch || pTiles->m_Material)
 			{
 				pLayer->Render();
 			}
@@ -3419,7 +3419,8 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pFrontLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSwitchLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTuneLayer ||
-					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSpeedupLayer ||
+					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pMaterialLayer ||
+					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pSpeedupLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTeleLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pMaterialLayer)
 				{
