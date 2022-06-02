@@ -2724,7 +2724,7 @@ void CGameContext::ConSwitchOpen(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Switch = pResult->GetInteger(0);
 
-	if(!in_range(Switch, (int)pSelf->Switchers().size() - 1))
+	if(in_range(Switch, (int)pSelf->Switchers().size() - 1))
 	{
 		pSelf->Switchers()[Switch].m_Initial = false;
 		char aBuf[256];
