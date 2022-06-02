@@ -88,7 +88,7 @@ bool IsValidTuneTile(int Index)
 
 bool IsValidMaterialTile(int Index)
 {
-	return Index > 0 && Index < NUM_MATERIALS;
+	return Index > MAT_DEFAULT && Index < NUM_MATERIALS;
 }
 
 bool IsValidEntity(int Index)
