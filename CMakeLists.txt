@@ -1257,6 +1257,7 @@ set(EXPECTED_DATA
   editor/grass_main_0.7.rules
   editor/jungle_main.rules
   editor/jungle_midground.rules
+  editor/material.png
   editor/round_tiles.rules
   editor/speed_arrow.png
   editor/speedup.png
