@@ -162,6 +162,11 @@ bool CMapImages::HasTuneLayer(EMapImageModType ModType)
 	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
 }
 
+bool CMapImages::HasMaterialLayer(EMapImageModType ModType)
+{
+	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
+}
+
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
 {
 	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
@@ -197,6 +202,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		bool GameTypeHasSwitchLayer = HasSwitchLayer(EntitiesModType) || WasUnknwon;
 		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknwon;
 		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknwon;
+		bool GameTypeHasMaterialLayer = HasMaterialLayer(EntitiesModType) || WasUnknwon;
 
 		int TextureLoadFlag = 0;
 		if(Graphics()->IsTileBufferingEnabled())
@@ -260,6 +266,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 					BuildThisLayer = false;
 				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !GameTypeHasTuneLayer)
 					BuildThisLayer = false;
+				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_MATERIAL && !GameTypeHasMaterialLayer)
+					BuildThisLayer = false;
 
 				dbg_assert(!m_EntitiesTextures[(EntitiesModType * 2) + (int)EntitesAreMasked][n].IsValid(), "entities texture already loaded when it should not be");
 
@@ -292,6 +300,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !IsValidTeleTile((int)TileIndex))
 										ValidTile = false;
 									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !IsValidTuneTile((int)TileIndex))
+										ValidTile = false;
+									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_MATERIAL && !IsValidMaterialTile((int)TileIndex))
 										ValidTile = false;
 								}
 							}

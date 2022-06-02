@@ -662,6 +662,25 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
+void CRenderTools::RenderMaterialOverlay(CMaterialTile *pMaterial, int w, int h, float Scale, float Alpha)
+{
+	if(!g_Config.m_ClTextEntities)
+		return;
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	int StartY = (int)(ScreenY0 / Scale) - 1;
+	int StartX = (int)(ScreenX0 / Scale) - 1;
+	int EndY = (int)(ScreenY1 / Scale) + 1;
+	int EndX = (int)(ScreenX1 / Scale) + 1;
+
+	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
+		return; // its useless to render text at this distance
+
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
 void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -1066,5 +1085,12 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Co
 		}
 
 	Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderTools::RenderMaterialmap(CMaterialTile *pMaterial, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
+{
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }

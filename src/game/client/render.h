@@ -130,10 +130,12 @@ public:
 	void RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderMaterialOverlay(CMaterialTile *pMaterial, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderMaterialmap(CMaterialTile *pMaterial, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 };
 
 #endif
