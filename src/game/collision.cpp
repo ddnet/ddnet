@@ -49,6 +49,7 @@ CCollision::CCollision()
 	m_pSwitch = 0;
 	m_pDoor = 0;
 	m_pTune = 0;
+	m_pMaterial = 0;
 }
 
 CCollision::~CCollision()
@@ -98,6 +99,13 @@ void CCollision::Init(class CLayers *pLayers)
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->TuneLayer()->m_Tune);
 		if(Size >= (size_t)m_Width * m_Height * sizeof(CTuneTile))
 			m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
+	}
+
+	if(m_pLayers->MaterialLayer())
+	{
+		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->MaterialLayer()->m_Material);
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CMaterialTile))
+			m_pMaterial = static_cast<CMaterialTile *>(m_pLayers->Map()->GetData(m_pLayers->MaterialLayer()->m_Material));
 	}
 
 	if(m_pLayers->FrontLayer())
@@ -1062,6 +1070,9 @@ int CCollision::Entity(int x, int y, int Layer) const
 		case LAYER_TUNE:
 			str_format(aBuf, sizeof(aBuf), "Tune");
 			break;
+		case LAYER_MATERIAL:
+			str_format(aBuf, sizeof(aBuf), "Material");
+			break;
 		default:
 			str_format(aBuf, sizeof(aBuf), "Unknown");
 		}
@@ -1082,6 +1093,8 @@ int CCollision::Entity(int x, int y, int Layer) const
 		return m_pSpeedup[y * m_Width + x].m_Type - ENTITY_OFFSET;
 	case LAYER_TUNE:
 		return m_pTune[y * m_Width + x].m_Type - ENTITY_OFFSET;
+	case LAYER_MATERIAL:
+		return m_pMaterial[y * m_Width + x].m_Material - ENTITY_OFFSET;
 	default:
 		return 0;
 		break;

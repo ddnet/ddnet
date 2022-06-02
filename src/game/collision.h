@@ -113,6 +113,7 @@ public:
 	class CTeleTile *TeleLayer() { return m_pTele; }
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
 	class CTuneTile *TuneLayer() { return m_pTune; }
+	class CMaterialTile *MaterialLayer() { return m_pMaterial; }
 	class CLayers *Layers() { return m_pLayers; }
 	int m_HighestSwitchNumber;
 
@@ -123,6 +124,7 @@ private:
 	class CSwitchTile *m_pSwitch;
 	class CTuneTile *m_pTune;
 	class CDoorTile *m_pDoor;
+	class CMaterialTile *m_pMaterial;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy);
