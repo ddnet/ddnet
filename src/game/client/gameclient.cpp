@@ -136,6 +136,7 @@ void CGameClient::OnConsoleInit()
 						&m_MapLayersForeGround,
 						&m_Particles.m_RenderExplosions,
 						&m_NamePlates,
+						&m_PlayerPics, // chillerbot-ux
 						&m_Particles.m_RenderGeneral,
 						&m_FreezeBars,
 						&m_DamageInd,
