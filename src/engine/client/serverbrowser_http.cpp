@@ -10,6 +10,7 @@
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
+#include <base/lock_scope.h>
 #include <base/system.h>
 
 #include <memory>
@@ -133,7 +134,7 @@ void CChooseMaster::Refresh()
 
 void CChooseMaster::CJob::Abort()
 {
-	lock_wait(m_Lock);
+	CLockScope ls(m_Lock);
 	if(m_pHead != nullptr)
 	{
 		m_pHead->Abort();
@@ -143,7 +144,6 @@ void CChooseMaster::CJob::Abort()
 	{
 		m_pGet->Abort();
 	}
-	lock_unlock(m_Lock);
 }
 
 void CChooseMaster::CJob::Run()
@@ -175,9 +175,10 @@ void CChooseMaster::CJob::Run()
 		CHttpRequest *pHead = HttpHead(pUrl).release();
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
-		lock_wait(m_Lock);
-		m_pHead = std::unique_ptr<CHttpRequest>(pHead);
-		lock_unlock(m_Lock);
+		{
+			CLockScope ls(m_Lock);
+			m_pHead = std::unique_ptr<CHttpRequest>(pHead);
+		}
 		IEngine::RunJobBlocking(pHead);
 		if(pHead->State() == HTTP_ABORTED)
 		{
@@ -192,9 +193,10 @@ void CChooseMaster::CJob::Run()
 		CHttpRequest *pGet = HttpGet(pUrl).release();
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
-		lock_wait(m_Lock);
-		m_pGet = std::unique_ptr<CHttpRequest>(pGet);
-		lock_unlock(m_Lock);
+		{
+			CLockScope ls(m_Lock);
+			m_pGet = std::unique_ptr<CHttpRequest>(pGet);
+		}
 		IEngine::RunJobBlocking(pGet);
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
