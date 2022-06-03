@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <memory>
+#include <mutex>
 
 class CJobPool;
 
@@ -45,7 +46,7 @@ class CJobPool
 	void *m_apThreads[MAX_THREADS];
 	std::atomic<bool> m_Shutdown;
 
-	LOCK m_Lock;
+	std::mutex m_Lock;
 	SEMAPHORE m_Semaphore;
 	std::shared_ptr<IJob> m_pFirstJob GUARDED_BY(m_Lock);
 	std::shared_ptr<IJob> m_pLastJob GUARDED_BY(m_Lock);

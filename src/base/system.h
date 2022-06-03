@@ -608,38 +608,7 @@ void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char 
 #define NO_THREAD_SAFETY_ANALYSIS \
 	THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
 
-/**
- * @defgroup Locks
- *
- * Synchronization primitives.
- *
- * @see Threads
- */
-
-typedef CAPABILITY("mutex") void *LOCK;
-
-/**
- * @ingroup Locks
- */
-LOCK lock_create();
-/**
- * @ingroup Locks
- */
-void lock_destroy(LOCK lock);
-
-/**
- * @ingroup Locks
- */
-int lock_trylock(LOCK lock) TRY_ACQUIRE(1, lock);
-/**
- * @ingroup Locks
- */
-void lock_wait(LOCK lock) ACQUIRE(lock);
-/**
- * @ingroup Locks
- */
-void lock_unlock(LOCK lock) RELEASE(lock);
-
+// TODO: Remove semaphores too
 /* Group: Semaphores */
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *SEMAPHORE;
