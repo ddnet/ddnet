@@ -114,62 +114,62 @@ void CGameClient::OnConsoleInit()
 	m_NamePlates.SetPlayers(&m_Players);
 
 	// make a list of all the systems, make sure to add them in the correct render order
-	m_vpAll.insert(m_vpInput.end(), {&m_Skins,
-						&m_CountryFlags,
-						&m_MapImages,
-						&m_Effects, // doesn't render anything, just updates effects
-						&m_Binds,
-						&m_Binds.m_SpecialBinds,
-						&m_Controls,
-						&m_Camera,
-						&m_Sounds,
-						&m_Voting,
-						&m_Particles, // doesn't render anything, just updates all the particles
-						&m_RaceDemo,
-						&m_MapSounds,
-						&m_BackGround, // render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
-						&m_MapLayersBackGround, // first to render
-						&m_Particles.m_RenderTrail,
-						&m_Items,
-						&m_Players,
-						&m_Ghost,
-						&m_MapLayersForeGround,
-						&m_Particles.m_RenderExplosions,
-						&m_NamePlates,
-						&m_PlayerPics, // chillerbot-ux
-						&m_Particles.m_RenderGeneral,
-						&m_FreezeBars,
-						&m_DamageInd,
-						&m_Hud,
-						&m_Spectator,
-						&m_Emoticon,
-						&m_KillMessages,
-						&m_Chat,
-						&m_Broadcast,
-						&m_DebugHud,
-						&m_Scoreboard,
-						&m_Statboard,
-						&m_Motd,
-						&m_Menus,
-						&m_Tooltips,
-						&CMenus::m_Binder,
-						&m_GameConsole,
+	m_vpAll.insert(m_vpAll.end(), {&m_Skins,
+						  &m_CountryFlags,
+						  &m_MapImages,
+						  &m_Effects, // doesn't render anything, just updates effects
+						  &m_Binds,
+						  &m_Binds.m_SpecialBinds,
+						  &m_Controls,
+						  &m_Camera,
+						  &m_Sounds,
+						  &m_Voting,
+						  &m_Particles, // doesn't render anything, just updates all the particles
+						  &m_RaceDemo,
+						  &m_MapSounds,
+						  &m_BackGround, // render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
+						  &m_MapLayersBackGround, // first to render
+						  &m_Particles.m_RenderTrail,
+						  &m_Items,
+						  &m_Players,
+						  &m_Ghost,
+						  &m_MapLayersForeGround,
+						  &m_Particles.m_RenderExplosions,
+						  &m_NamePlates,
+						  &m_PlayerPics, // chillerbot-ux
+						  &m_Particles.m_RenderGeneral,
+						  &m_FreezeBars,
+						  &m_DamageInd,
+						  &m_Hud,
+						  &m_Spectator,
+						  &m_Emoticon,
+						  &m_KillMessages,
+						  &m_Chat,
+						  &m_Broadcast,
+						  &m_DebugHud,
+						  &m_Scoreboard,
+						  &m_Statboard,
+						  &m_Motd,
+						  &m_Menus,
+						  &m_Tooltips,
+						  &CMenus::m_Binder,
+						  &m_GameConsole,
 
-						/* <<< chillerbot-ux */
-						&m_ChillerBotUX,
-						&m_ChatHelper,
-						&m_ChillPw,
-						&m_RemoteControl,
-						&m_WarList,
-						&m_VibeBot,
-						&m_CityHelper,
-						&m_TerminalUI,
-						&m_Stresser,
-						&m_ChillConsole,
-						&m_Unix,
-						/* >>> chillerbot-ux */
+						  /* <<< chillerbot-ux */
+						  &m_ChillerBotUX,
+						  &m_ChatHelper,
+						  &m_ChillPw,
+						  &m_RemoteControl,
+						  &m_WarList,
+						  &m_VibeBot,
+						  &m_CityHelper,
+						  &m_TerminalUI,
+						  &m_Stresser,
+						  &m_ChillConsole,
+						  &m_Unix,
+						  /* >>> chillerbot-ux */
 
-						&m_MenuBackground});
+						  &m_MenuBackground});
 
 	// build the input stack
 	m_vpInput.insert(m_vpInput.end(), {&CMenus::m_Binder, // this will take over all input when we want to bind a key
@@ -2270,14 +2270,14 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	CClientData OwnClientData = m_aClients[ownID];
+	CClientData &OwnClientData = m_aClients[ownID];
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == ownID)
 			continue;
 
-		CClientData cData = m_aClients[i];
+		CClientData &cData = m_aClients[i];
 
 		if(!cData.m_Active)
 			continue;

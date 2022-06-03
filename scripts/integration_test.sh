@@ -170,6 +170,7 @@ $tool ./DDNet \
 	"cl_input_fifo client1.fifo;
 	player_name client1;
 	cl_download_skins 0;
+	gfx_fullscreen 0;
 	$client_args
 	connect localhost:$port" &> client1.log || fail client1 "$?" &
 
@@ -183,6 +184,7 @@ $tool ./DDNet \
 	"cl_input_fifo client2.fifo;
 	player_name client2;
 	cl_download_skins 0;
+	gfx_fullscreen 0;
 	$client_args
 	connect localhost:$port" &> client2.log || fail client2 "$?" &
 
