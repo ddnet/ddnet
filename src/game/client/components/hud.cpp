@@ -1127,13 +1127,6 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	const float EndProgressProportion = EndProgressHeight / ProgressBarHeight;
 	const float MiddleProgressProportion = MiddleBarHeight / ProgressBarHeight;
 
-	// we cut 2% of all sides of all sprites so we don't get edge bleeding
-	const float CutL = 0.02f;
-	const float CutR = 0.98f;
-	const float CutT = 0.02f;
-	const float CutB = 0.98f;
-	const float Slice = 0.02f;
-
 	// beginning piece
 	float BeginningPieceProgress = 1;
 	if(Progress <= 1)
@@ -1148,11 +1141,12 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 		}
 	}
 	// empty
+	Graphics()->WrapClamp();
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarEmptyRight);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// Subset: btm_r, top_r, top_m, btm_m | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-	Graphics()->QuadsSetSubsetFree(CutR, CutB, CutR, CutT, ProgPct - (ProgPct - CutL) * (1.0f - BeginningPieceProgress), CutT, ProgPct - (ProgPct - CutL) * (1.0f - BeginningPieceProgress), CutB);
+	Graphics()->QuadsSetSubsetFree(1, 1, 1, 0, ProgPct - ProgPct * (1.0f - BeginningPieceProgress), 0, ProgPct - ProgPct * (1.0f - BeginningPieceProgress), 1);
 	IGraphics::CQuadItem QuadEmptyBeginning(x, y, BarWidth, EndRestHeight + EndProgressHeight * (1.0f - BeginningPieceProgress));
 	Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
 	Graphics()->QuadsEnd();
@@ -1163,7 +1157,7 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		// Subset: btm_m, top_m, top_r, btm_r | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(RestPct + (ProgPct - CutL) * (1.0f - BeginningPieceProgress), CutB, RestPct + (ProgPct - CutL) * (1.0f - BeginningPieceProgress), CutT, CutR, CutT, CutR, CutB);
+		Graphics()->QuadsSetSubsetFree(RestPct + ProgPct * (1.0f - BeginningPieceProgress), 1, RestPct + ProgPct * (1.0f - BeginningPieceProgress), 0, 1, 0, 1, 1);
 		IGraphics::CQuadItem QuadFullBeginning(x, y + (EndRestHeight + EndProgressHeight * (1.0f - BeginningPieceProgress)), BarWidth, EndProgressHeight * BeginningPieceProgress);
 		Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
 		Graphics()->QuadsEnd();
@@ -1199,12 +1193,12 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 		{
 			// prevent pixel puree, select only a small slice
 			// Subset: btm_r, top_r, top_m, btm_m | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-			Graphics()->QuadsSetSubsetFree(CutR, CutB, CutR, CutT, CutR - Slice, CutT, CutR - Slice, CutB);
+			Graphics()->QuadsSetSubsetFree(1, 1, 1, 0, 1.0f - (EmptyMiddleBarHeight / EndHeight), 0, 1.0f - (EmptyMiddleBarHeight / EndHeight), 1);
 		}
 		else
 		{
 			// Subset: btm_r, top_r, top_l, btm_l | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-			Graphics()->QuadsSetSubsetFree(CutR, CutB, CutR, CutT, CutL, CutT, CutL, CutB);
+			Graphics()->QuadsSetSubsetFree(1, 1, 1, 0, 0, 0, 0, 1);
 		}
 		IGraphics::CQuadItem QuadEmpty(x, y, BarWidth, EmptyMiddleBarHeight);
 		Graphics()->QuadsDrawTL(&QuadEmpty, 1);
@@ -1220,12 +1214,12 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	{
 		// prevent pixel puree, select only a small slice
 		// Subset: btm_m, top_m, top_r, btm_r | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(CutR - Slice, CutB, CutR - Slice, CutT, CutR, CutT, CutR, CutB);
+		Graphics()->QuadsSetSubsetFree(1.0f - (FullMiddleBarHeight / EndHeight), 1, 1.0f - (FullMiddleBarHeight / EndHeight), 0, 1, 0, 1, 1);
 	}
 	else
 	{
 		// Subset: btm_l, top_l, top_r, btm_r | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(CutL, CutB, CutL, CutT, CutR, CutT, CutR, CutB);
+		Graphics()->QuadsSetSubsetFree(0, 1, 0, 0, 1, 0, 1, 1);
 	}
 	IGraphics::CQuadItem QuadFull(x, y + EmptyMiddleBarHeight, BarWidth, FullMiddleBarHeight);
 	Graphics()->QuadsDrawTL(&QuadFull, 1);
@@ -1245,7 +1239,7 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		// Subset: btm_l, top_l, top_m, btm_m | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(CutL, CutB, CutL, CutT, ProgPct - (ProgPct - CutL) * EndingPieceProgress, CutT, ProgPct - (ProgPct - CutL) * EndingPieceProgress, CutB);
+		Graphics()->QuadsSetSubsetFree(0, 1, 0, 0, ProgPct - ProgPct * EndingPieceProgress, 0, ProgPct - ProgPct * EndingPieceProgress, 1);
 		IGraphics::CQuadItem QuadEmptyEnding(x, y, BarWidth, EndProgressHeight * (1.0f - EndingPieceProgress));
 		Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
 		Graphics()->QuadsEnd();
@@ -1255,13 +1249,14 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// Subset: btm_m, top_m, top_l, btm_l | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-	Graphics()->QuadsSetSubsetFree(RestPct + (ProgPct - CutL) * EndingPieceProgress, CutB, RestPct + (ProgPct - CutL) * EndingPieceProgress, CutT, CutL, CutT, CutL, CutB);
+	Graphics()->QuadsSetSubsetFree(RestPct + ProgPct * EndingPieceProgress, 1, RestPct + ProgPct * EndingPieceProgress, 0, 0, 0, 0, 1);
 	IGraphics::CQuadItem QuadFullEnding(x, y + (EndProgressHeight * (1.0f - EndingPieceProgress)), BarWidth, EndRestHeight + EndProgressHeight * EndingPieceProgress);
 	Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
 	Graphics()->QuadsEnd();
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->WrapNormal();
 }
 
 void CHud::RenderDummyActions()
