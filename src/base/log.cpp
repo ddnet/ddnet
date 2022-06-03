@@ -398,8 +398,10 @@ public:
 	void Log(const CLogMessage *pMessage) override
 	{
 		m_OutputLock.lock();
-		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
-		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
+		OVERLAPPED Overlapped1{};
+		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, &Overlapped1);
+		OVERLAPPED Overlapped2{};
+		WriteFile(m_pFile, "\r\n", 2, NULL, &Overlapped2);
 		m_OutputLock.unlock();
 	}
 };
