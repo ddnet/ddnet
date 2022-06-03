@@ -235,13 +235,13 @@ public:
 					pMessage->m_Color.g,
 					pMessage->m_Color.b);
 			}
-			else
-			{
-				str_copy(aAnsi, "\x1b[39m", sizeof(aAnsi));
-			}
 			aio_write_unlocked(m_pAio, aAnsi, str_length(aAnsi));
 		}
 		aio_write_unlocked(m_pAio, pMessage->m_aLine, pMessage->m_LineLength);
+		if(m_AnsiTruecolor && pMessage->m_HaveColor)
+		{
+			aio_write_unlocked(m_pAio, "\x1b[0m", 4); // reset
+		}
 		aio_write_newline_unlocked(m_pAio);
 		aio_unlock(m_pAio);
 	}
