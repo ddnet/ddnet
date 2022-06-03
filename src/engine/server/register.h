@@ -20,6 +20,7 @@ public:
 	virtual bool OnPacket(const CNetChunk *pPacket) = 0;
 	// `pInfo` must be an encoded JSON object.
 	virtual void OnNewInfo(const char *pInfo) = 0;
+	virtual void OnShutdown() = 0;
 };
 
 IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken);

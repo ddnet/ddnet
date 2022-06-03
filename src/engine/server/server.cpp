@@ -2919,6 +2919,8 @@ int CServer::Run()
 
 	m_NetServer.Close();
 
+	m_pRegister->OnShutdown();
+
 	return ErrorShutdown();
 }
 
