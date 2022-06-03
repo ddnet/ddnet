@@ -4,6 +4,7 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <base/lock_scope.h>
 #include <engine/client/graphics_threaded.h>
 #include <engine/sound.h>
 
@@ -467,10 +468,11 @@ void CVideo::RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex)
 			{
 				std::unique_lock<std::mutex> LockAudio(pThreadData->m_AudioFillMutex);
 
-				lock_wait(g_WriteLock);
-				m_AudioStream.m_vpFrames[ThreadIndex]->pts = av_rescale_q(pThreadData->m_SampleCountStart, AVRational{1, m_AudioStream.pEnc->sample_rate}, m_AudioStream.pEnc->time_base);
-				WriteFrame(&m_AudioStream, ThreadIndex);
-				lock_unlock(g_WriteLock);
+				{
+					CLockScope ls(g_WriteLock);
+					m_AudioStream.m_vpFrames[ThreadIndex]->pts = av_rescale_q(pThreadData->m_SampleCountStart, AVRational{1, m_AudioStream.pEnc->sample_rate}, m_AudioStream.pEnc->time_base);
+					WriteFrame(&m_AudioStream, ThreadIndex);
+				}
 
 				pThreadData->m_AudioFrameToFill = 0;
 				pThreadData->m_AudioFillCond.notify_all();
@@ -547,10 +549,11 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 			}
 			{
 				std::unique_lock<std::mutex> LockVideo(pThreadData->m_VideoFillMutex);
-				lock_wait(g_WriteLock);
-				m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->frame_number;
-				WriteFrame(&m_VideoStream, ThreadIndex);
-				lock_unlock(g_WriteLock);
+				{
+					CLockScope ls(g_WriteLock);
+					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->frame_number;
+					WriteFrame(&m_VideoStream, ThreadIndex);
+				}
 
 				pThreadData->m_VideoFrameToFill = 0;
 				pThreadData->m_VideoFillCond.notify_all();
