@@ -22,6 +22,7 @@ use std::mem;
 use std::net::IpAddr;
 use std::net::SocketAddr;
 use std::panic;
+use std::panic::UnwindSafe;
 use std::path::Path;
 use std::process;
 use std::str;
@@ -35,7 +36,6 @@ use tokio::fs;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use tokio::time;
-use url::Url;
 use warp::Filter;
 
 #[macro_use]
@@ -43,6 +43,7 @@ extern crate log;
 
 use crate::addr::Addr;
 use crate::addr::Protocol;
+use crate::addr::RegisterAddr;
 use crate::locations::Location;
 use crate::locations::Locations;
 
@@ -55,17 +56,21 @@ const SERVER_TIMEOUT_SECONDS: u64 = 30;
 
 type ShortString = ArrayString<[u8; 64]>;
 
-// TODO: delete action for server shutdown
-
 #[derive(Debug, Deserialize)]
 struct Register {
-    address: Url,
+    address: RegisterAddr,
     secret: ShortString,
     connless_request_token: Option<ShortString>,
     challenge_secret: ShortString,
     challenge_token: Option<ShortString>,
     info_serial: i64,
     info: Option<json::Value>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Delete {
+    address: RegisterAddr,
+    secret: ShortString,
 }
 
 #[derive(Debug, Serialize)]
@@ -337,6 +342,11 @@ enum AddResult {
     Obsolete,
 }
 
+enum RemoveResult {
+    Removed,
+    NotFound,
+}
+
 struct FromDumpError;
 
 impl Servers {
@@ -414,6 +424,19 @@ impl Servers {
         } else {
             AddResult::Refreshed
         }
+    }
+    fn remove(&mut self, addr: Addr, secret: ShortString) -> RemoveResult {
+        match self.addresses.get(&addr) {
+            Some(a_info) if secret == a_info.secret => {}
+            _ => return RemoveResult::NotFound,
+        }
+        assert!(self.addresses.remove(&addr).is_some());
+        let server = self.servers.get_mut(&secret).unwrap();
+        server.addresses.retain(|&a| a != addr);
+        if server.addresses.is_empty() {
+            assert!(self.servers.remove(&secret).is_some());
+        }
+        RemoveResult::Removed
     }
     fn prune_before(&mut self, time: Timestamp, log: bool) {
         let mut remove = Vec::new();
@@ -658,11 +681,7 @@ fn handle_register(
     remote_addr: IpAddr,
     register: Register,
 ) -> Result<RegisterResponse, RegisterError> {
-    let protocol: Protocol = register.address.scheme().parse().map_err(|_| {
-        "register address must start with one of tw-0.5+udp://, tw-0.6+udp://, tw-0.7+udp://"
-    })?;
-
-    let connless_request_token_7 = match protocol {
+    let connless_request_token_7 = match register.address.protocol {
         Protocol::V5 => None,
         Protocol::V6 => None,
         Protocol::V7 => {
@@ -677,20 +696,8 @@ fn handle_register(
             Some(token)
         }
     };
-    if register.address.host_str() != Some("connecting-address.invalid") {
-        return Err("register address must have domain connecting-address.invalid".into());
-    }
-    let port = if let Some(p) = register.address.port() {
-        p
-    } else {
-        return Err("register address must specify port".into());
-    };
 
-    let addr = Addr {
-        ip: remote_addr,
-        port,
-        protocol,
-    };
+    let addr = register.address.with_ip(remote_addr);
     let challenge = shared.challenge_for_addr(&addr);
 
     let correct_challenge = register
@@ -756,7 +763,7 @@ fn handle_register(
         tokio::spawn(send_challenge(
             connless_request_token_7,
             shared.socket.clone(),
-            SocketAddr::new(remote_addr, port),
+            SocketAddr::new(addr.ip, addr.port),
             register.challenge_secret,
             challenge.current,
         ));
@@ -765,37 +772,50 @@ fn handle_register(
     Ok(result)
 }
 
+fn handle_delete(
+    shared: Shared,
+    remote_addr: IpAddr,
+    delete: Delete,
+) -> Result<RegisterResponse, RegisterError> {
+    let addr = delete.address.with_ip(remote_addr);
+    match shared.lock_servers().remove(addr, delete.secret) {
+        RemoveResult::Removed => {
+            debug!("successfully removed {}", addr);
+            Ok(RegisterResponse::Success)
+        }
+        RemoveResult::NotFound => Err("could not find registered server".into()),
+    }
+}
+
+fn parse_opt<T: str::FromStr>(
+    headers: &warp::http::HeaderMap,
+    name: &str,
+) -> Result<Option<T>, RegisterError>
+where
+    T::Err: fmt::Display,
+{
+    headers
+        .get(name)
+        .map(|v| -> Result<T, RegisterError> {
+            v.to_str()
+                .map_err(|e| RegisterError::new(format!("invalid header {}: {}", name, e)))?
+                .parse()
+                .map_err(|e| RegisterError::new(format!("invalid header {}: {}", name, e)))
+        })
+        .transpose()
+}
+fn parse<T: str::FromStr>(headers: &warp::http::HeaderMap, name: &str) -> Result<T, RegisterError>
+where
+    T::Err: fmt::Display,
+{
+    parse_opt(headers, name)?
+        .ok_or_else(|| RegisterError::new(format!("missing required header {}", name)))
+}
+
 fn register_from_headers(
     headers: &warp::http::HeaderMap,
     info: &[u8],
 ) -> Result<Register, RegisterError> {
-    fn parse_opt<T: str::FromStr>(
-        headers: &warp::http::HeaderMap,
-        name: &str,
-    ) -> Result<Option<T>, RegisterError>
-    where
-        T::Err: fmt::Display,
-    {
-        headers
-            .get(name)
-            .map(|v| -> Result<T, RegisterError> {
-                v.to_str()
-                    .map_err(|e| RegisterError::new(format!("invalid header {}: {}", name, e)))?
-                    .parse()
-                    .map_err(|e| RegisterError::new(format!("invalid header {}: {}", name, e)))
-            })
-            .transpose()
-    }
-    fn parse<T: str::FromStr>(
-        headers: &warp::http::HeaderMap,
-        name: &str,
-    ) -> Result<T, RegisterError>
-    where
-        T::Err: fmt::Display,
-    {
-        parse_opt(headers, name)?
-            .ok_or_else(|| RegisterError::new(format!("missing required header {}", name)))
-    }
     Ok(Register {
         address: parse(headers, "Address")?,
         secret: parse(headers, "Secret")?,
@@ -813,6 +833,13 @@ fn register_from_headers(
         } else {
             None
         },
+    })
+}
+
+fn delete_from_headers(headers: &warp::http::HeaderMap) -> Result<Delete, RegisterError> {
+    Ok(Delete {
+        address: parse(headers, "Address")?,
+        secret: parse(headers, "Secret")?,
     })
 }
 
@@ -967,16 +994,58 @@ async fn main() {
         timekeeper,
     ));
 
-    let register = warp::post()
-        .and(warp::path!("ddnet" / "15" / "register"))
+    let connecting_addr = move |addr: Option<SocketAddr>,
+                                headers: &warp::http::HeaderMap|
+          -> Result<IpAddr, RegisterError> {
+        let mut addr = if let Some(header) = &connecting_ip_header {
+            headers
+                .get(header)
+                .ok_or_else(|| RegisterError::new(format!("missing {} header", header)))?
+                .to_str()
+                .map_err(|_| RegisterError::from("non-ASCII in connecting IP header"))?
+                .parse()
+                .map_err(|e| RegisterError::new(format!("{}", e)))?
+        } else {
+            addr.unwrap().ip()
+        };
+        if let IpAddr::V6(v6) = addr {
+            if let Some(v4) = v6.to_ipv4() {
+                // TODO: switch to `to_ipv4_mapped` in the future.
+                if !v6.is_loopback() {
+                    addr = IpAddr::from(v4);
+                }
+            }
+        }
+        Ok(addr)
+    };
+
+    fn build_response<F>(f: F) -> Result<warp::http::Response<String>, warp::http::Error>
+    where
+        F: FnOnce() -> Result<RegisterResponse, RegisterError> + UnwindSafe,
+    {
+        let (http_status, body) = match panic::catch_unwind(f) {
+            Ok(Ok(r)) => (warp::http::StatusCode::OK, r),
+            Ok(Err(e)) => (e.status(), RegisterResponse::Error(e)),
+            Err(_) => (
+                warp::http::StatusCode::INTERNAL_SERVER_ERROR,
+                RegisterResponse::Error("unexpected panic".into()),
+            ),
+        };
+        warp::http::Response::builder()
+            .status(http_status)
+            .header(warp::http::header::CONTENT_TYPE, "application/json")
+            .body(json::to_string(&body).unwrap() + "\n")
+    }
+
+    let register = warp::path!("ddnet" / "15" / "register")
+        .and(warp::post())
         .and(warp::header::headers_cloned())
         .and(warp::addr::remote())
         .and(warp::body::content_length_limit(16 * 1024)) // limit body size to 16 KiB
         .and(warp::body::bytes())
         .map(
             move |headers: warp::http::HeaderMap, addr: Option<SocketAddr>, info: bytes::Bytes| {
-                let (http_status, body) = match panic::catch_unwind(|| {
-                    let register = register_from_headers(&headers, &info)?;
+                build_response(|| {
                     let shared = Shared {
                         challenger: &challenger,
                         locations: &locations,
@@ -984,40 +1053,21 @@ async fn main() {
                         socket: &socket.0,
                         timekeeper,
                     };
-                    let mut addr = if let Some(header) = &connecting_ip_header {
-                        headers
-                            .get(header)
-                            .ok_or_else(|| {
-                                RegisterError::new(format!("missing {} header", header))
-                            })?
-                            .to_str()
-                            .map_err(|_| RegisterError::from("non-ASCII in connecting IP header"))?
-                            .parse()
-                            .map_err(|e| RegisterError::new(format!("{}", e)))?
-                    } else {
-                        addr.unwrap().ip()
-                    };
-                    if let IpAddr::V6(v6) = addr {
-                        if let Some(v4) = v6.to_ipv4() {
-                            // TODO: switch to `to_ipv4_mapped` in the future.
-                            if !v6.is_loopback() {
-                                addr = IpAddr::from(v4);
-                            }
+                    let addr = connecting_addr(addr, &headers)?;
+                    match headers.get("Action").map(warp::http::HeaderValue::as_bytes) {
+                        None => {
+                            let register = register_from_headers(&headers, &info)?;
+                            handle_register(shared, addr, register)
+                        }
+                        Some(b"delete") => {
+                            let delete = delete_from_headers(&headers)?;
+                            handle_delete(shared, addr, delete)
+                        }
+                        Some(action) => {
+                            Err(RegisterError::new(format!("Unknown Action header value {:?} (must either not be present or have value \"delete\"", String::from_utf8_lossy(action))))
                         }
                     }
-                    handle_register(shared, addr, register)
-                }) {
-                    Ok(Ok(r)) => (warp::http::StatusCode::OK, r),
-                    Ok(Err(e)) => (e.status(), RegisterResponse::Error(e)),
-                    Err(_) => (
-                        warp::http::StatusCode::INTERNAL_SERVER_ERROR,
-                        RegisterResponse::Error("unexpected panic".into()),
-                    ),
-                };
-                warp::http::Response::builder()
-                    .status(http_status)
-                    .header(warp::http::header::CONTENT_TYPE, "application/json")
-                    .body(json::to_string(&body).unwrap() + "\n")
+                })
             },
         )
         .recover(recover);

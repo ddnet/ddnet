@@ -22,14 +22,28 @@ pub struct Addr {
     pub protocol: Protocol,
 }
 
+/// A register address, serialized like
+/// tw-0.6+udp://connecting-address.invalid:8303.
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct RegisterAddr {
+    pub port: u16,
+    pub protocol: Protocol,
+}
+
 impl fmt::Display for Protocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.as_str().fmt(f)
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct UnknownProtocol;
+
+impl fmt::Display for UnknownProtocol {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        "protocol must be one of tw-0.5+udp, tw-0.6+udp or tw-0.7+udp".fmt(f)
+    }
+}
 
 impl FromStr for Protocol {
     type Err = UnknownProtocol;
@@ -101,7 +115,7 @@ impl fmt::Display for Addr {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct InvalidAddr;
 
 impl FromStr for Addr {
@@ -160,6 +174,100 @@ impl<'de> serde::Deserialize<'de> for Addr {
     }
 }
 
+impl RegisterAddr {
+    pub fn with_ip(self, ip: IpAddr) -> Addr {
+        Addr {
+            ip,
+            port: self.port,
+            protocol: self.protocol,
+        }
+    }
+}
+
+impl fmt::Display for RegisterAddr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
+        write!(
+            &mut buf,
+            "{}://connecting-address.invalid:{}",
+            self.protocol, self.port,
+        )
+        .unwrap();
+        buf.fmt(f)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum ParseRegisterAddrError {
+    Url(url::ParseError),
+    Protocol(UnknownProtocol),
+    HostNotConnectingAddressInvalid,
+    PortNotPresent,
+}
+
+impl fmt::Display for ParseRegisterAddrError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::ParseRegisterAddrError::*;
+        match *self {
+            Url(e) => write!(f, "URL parse error: {}", e),
+            Protocol(e) => write!(f, "protocol parse error: {}", e),
+            HostNotConnectingAddressInvalid => write!(
+                f,
+                "register address must have domain connecting-address.invalid"
+            ),
+            PortNotPresent => write!(f, "register address must specify port"),
+        }
+    }
+}
+
+impl FromStr for RegisterAddr {
+    type Err = ParseRegisterAddrError;
+    fn from_str(s: &str) -> Result<RegisterAddr, ParseRegisterAddrError> {
+        use self::ParseRegisterAddrError as Error;
+        let url = Url::parse(s).map_err(Error::Url)?;
+        let protocol: Protocol = url.scheme().parse().map_err(Error::Protocol)?;
+        if url.host_str() != Some("connecting-address.invalid") {
+            return Err(Error::HostNotConnectingAddressInvalid);
+        }
+        let port = url.port().ok_or(Error::PortNotPresent)?;
+        Ok(RegisterAddr { port, protocol })
+    }
+}
+
+impl serde::Serialize for RegisterAddr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
+        write!(&mut buf, "{}", self).unwrap();
+        serializer.serialize_str(&buf)
+    }
+}
+
+struct RegisterAddrVisitor;
+
+impl<'de> serde::de::Visitor<'de> for RegisterAddrVisitor {
+    type Value = RegisterAddr;
+
+    fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("a URL like tw-0.6+udp://connecting-address.invalid:8303")
+    }
+    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<RegisterAddr, E> {
+        let invalid_value = || E::invalid_value(serde::de::Unexpected::Str(v), &self);
+        Ok(RegisterAddr::from_str(v).map_err(|_| invalid_value())?)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for RegisterAddr {
+    fn deserialize<D>(deserializer: D) -> Result<RegisterAddr, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        deserializer.deserialize_str(RegisterAddrVisitor)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Addr;
@@ -181,6 +289,17 @@ mod test {
             Addr::from_str("tw-0.6+udp://[::1]:8303").unwrap(),
             Addr {
                 ip: IpAddr::from_str("::1").unwrap(),
+                port: 8303,
+                protocol: Protocol::V6,
+            }
+        );
+    }
+
+    #[test]
+    fn register_addr_from_str() {
+        assert_eq!(
+            RegisterAddr::from_str("tw-0.6+udp://connecting-address.invalid:8303").unwrap(),
+            RegisterAddr {
                 port: 8303,
                 protocol: Protocol::V6,
             }

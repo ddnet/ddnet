@@ -109,6 +109,7 @@ class CRegister : public IRegister
 		CProtocol(CRegister *pParent, int Protocol);
 		void OnToken(const char *pToken);
 		void SendRegister();
+		void SendDeleteIfRegistered(bool Shutdown);
 		void Update();
 	};
 
@@ -137,6 +138,7 @@ public:
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
 	void OnNewInfo(const char *pInfo) override;
+	void OnShutdown() override;
 };
 
 bool CRegister::StatusFromString(int *pResult, const char *pString)
@@ -312,6 +314,42 @@ void CRegister::CProtocol::SendRegister()
 	m_NextRegister = Now + 15 * Freq;
 }
 
+void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
+{
+	lock_wait(m_pShared->m_Lock);
+	bool ShouldSendDelete = m_pShared->m_LatestResponseStatus == STATUS_OK;
+	m_pShared->m_LatestResponseStatus = STATUS_NONE;
+	lock_unlock(m_pShared->m_Lock);
+	if(!ShouldSendDelete)
+	{
+		return;
+	}
+
+	char aAddress[64];
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+
+	char aSecret[UUID_MAXSTRSIZE];
+	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
+
+	std::unique_ptr<CHttpRequest> pDelete = HttpPost(m_pParent->m_pConfig->m_SvRegisterUrl, (const unsigned char *)"", 0);
+	pDelete->HeaderString("Action", "delete");
+	pDelete->HeaderString("Address", aAddress);
+	pDelete->HeaderString("Secret", aSecret);
+	for(int i = 0; i < m_pParent->m_NumExtraHeaders; i++)
+	{
+		pDelete->Header(m_pParent->m_aaExtraHeaders[i]);
+	}
+	pDelete->LogProgress(HTTPLOG::FAILURE);
+	pDelete->IpResolve(ProtocolToIpresolve(m_Protocol));
+	if(Shutdown)
+	{
+		// On shutdown, wait at most 1 second for the delete requests.
+		pDelete->Timeout(CTimeout{1000, 1000, 0, 0});
+	}
+	log_info(ProtocolToSystem(m_Protocol), "deleting...");
+	m_pParent->m_pEngine->AddJob(std::move(pDelete));
+}
+
 CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
 	m_pParent(pParent),
 	m_Protocol(Protocol),
@@ -478,6 +516,11 @@ void CRegister::Update()
 
 void CRegister::OnConfigChange()
 {
+	bool aOldProtocolEnabled[NUM_PROTOCOLS];
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		aOldProtocolEnabled[i] = m_aProtocolEnabled[i];
+	}
 	const char *pProtocols = m_pConfig->m_SvRegister;
 	if(str_comp(pProtocols, "1") == 0)
 	{
@@ -556,6 +599,21 @@ void CRegister::OnConfigChange()
 		}
 		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader, sizeof(m_aaExtraHeaders));
 		m_NumExtraHeaders += 1;
+	}
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(aOldProtocolEnabled[i] == m_aProtocolEnabled[i])
+		{
+			continue;
+		}
+		if(m_aProtocolEnabled[i])
+		{
+			m_aProtocols[i].SendRegister();
+		}
+		else
+		{
+			m_aProtocols[i].SendDeleteIfRegistered(false);
+		}
 	}
 }
 
@@ -647,6 +705,18 @@ void CRegister::OnNewInfo(const char *pInfo)
 		{
 			m_aProtocols[i].SendRegister();
 		}
+	}
+}
+
+void CRegister::OnShutdown()
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(!m_aProtocolEnabled[i])
+		{
+			continue;
+		}
+		m_aProtocols[i].SendDeleteIfRegistered(true);
 	}
 }
 
