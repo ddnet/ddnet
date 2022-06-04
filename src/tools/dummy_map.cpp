@@ -58,15 +58,15 @@ void CreateEmptyMap(IStorage *pStorage)
 	Layer.m_Data = 0;
 	Writer.AddItem(MAPITEMTYPE_LAYER, 1, sizeof(Layer) - sizeof(Layer.m_aName), &Layer);
 
-	CTile Tiles[4];
-	for(auto &Tile : Tiles)
+	CTile aTiles[4];
+	for(auto &Tile : aTiles)
 	{
 		Tile.m_Index = 1;
 		Tile.m_Flags = 0;
 		Tile.m_Skip = 0;
 		Tile.m_Reserved = 0;
 	}
-	Writer.AddData(sizeof(Tiles), &Tiles);
+	Writer.AddData(sizeof(aTiles), &aTiles);
 
 	Writer.Finish();
 }
@@ -76,6 +76,8 @@ int main(int argc, const char **argv)
 	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
+	if(!pStorage)
+		return -1;
 	CreateEmptyMap(pStorage);
 	cmdline_free(argc, argv);
 	return 0;
