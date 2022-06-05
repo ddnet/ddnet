@@ -1515,6 +1515,7 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->Teleport(pChr, Pos);
+	pChr->UnFreeze();
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)

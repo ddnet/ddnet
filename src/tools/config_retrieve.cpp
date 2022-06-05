@@ -5,21 +5,21 @@
 
 void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
-	CDataFileReader Map;
-	if(!Map.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
+	CDataFileReader Reader;
+	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("config_retrieve", "error opening map '%s'", pMapName);
 		return;
 	}
 	bool ConfigFound = false;
 	int Start, Num;
-	Map.GetType(MAPITEMTYPE_INFO, &Start, &Num);
+	Reader.GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
 	{
-		int ItemID;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map.GetItem(i, 0, &ItemID);
-		int ItemSize = Map.GetItemSize(i);
-		if(!pItem || ItemID != 0)
+		int ID;
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Reader.GetItem(i, nullptr, &ID);
+		int ItemSize = Reader.GetItemSize(i);
+		if(!pItem || ID != 0)
 			continue;
 
 		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
@@ -32,11 +32,12 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 		if(!Config)
 		{
 			dbg_msg("config_retrieve", "error opening config for writing '%s'", pConfigName);
+			Reader.Close();
 			return;
 		}
 
-		int Size = Map.GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)Map.GetData(pItem->m_Settings);
+		int Size = Reader.GetDataSize(pItem->m_Settings);
+		char *pSettings = (char *)Reader.GetData(pItem->m_Settings);
 		char *pNext = pSettings;
 		while(pNext < pSettings + Size)
 		{
@@ -45,11 +46,11 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 			io_write_newline(Config);
 			pNext += StrSize;
 		}
-		Map.UnloadData(pItem->m_Settings);
+		Reader.UnloadData(pItem->m_Settings);
 		io_close(Config);
 		break;
 	}
-	Map.Close();
+	Reader.Close();
 	if(!ConfigFound)
 	{
 		fs_remove(pConfigName);

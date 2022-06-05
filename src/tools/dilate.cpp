@@ -7,16 +7,15 @@
 
 int DilateFile(const char *pFilename)
 {
-	png_t Png;
-
-	png_init(0, 0);
-
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
 	{
 		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
+
+	png_init(0, 0);
+	png_t Png;
 	int Error = png_open_read(&Png, 0, File);
 	if(Error != PNG_NO_ERROR)
 	{
