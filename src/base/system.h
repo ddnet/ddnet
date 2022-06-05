@@ -2452,6 +2452,28 @@ std::chrono::nanoseconds time_get();
 
 int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
+/**
+ * Fixes the command line arguments to be encoded in UTF-8 on all systems.
+ * This is a RAII wrapper for cmdline_fix and cmdline_free.
+ */
+class CCmdlineFix
+{
+	int m_Argc;
+	const char **m_ppArgv;
+
+public:
+	CCmdlineFix(int *pArgc, const char ***pppArgv)
+	{
+		cmdline_fix(pArgc, pppArgv);
+		m_Argc = *pArgc;
+		m_ppArgv = *pppArgv;
+	}
+	~CCmdlineFix()
+	{
+		cmdline_free(m_Argc, m_ppArgv);
+	}
+};
+
 } // namespace tw
 
 #endif

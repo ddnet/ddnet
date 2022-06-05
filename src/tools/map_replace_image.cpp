@@ -109,7 +109,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc != 5)
@@ -201,6 +201,5 @@ int main(int argc, const char **argv)
 	Writer.Finish();
 
 	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
-	cmdline_free(argc, argv);
 	return 0;
 }

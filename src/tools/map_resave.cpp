@@ -6,7 +6,7 @@
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	if(!pStorage || argc != 3)
@@ -44,6 +44,5 @@ int main(int argc, const char **argv)
 
 	Reader.Close();
 	Writer.Finish();
-	cmdline_free(argc, argv);
 	return 0;
 }

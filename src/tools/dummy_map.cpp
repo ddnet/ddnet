@@ -73,12 +73,11 @@ void CreateEmptyMap(IStorage *pStorage)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
 	if(!pStorage)
 		return -1;
 	CreateEmptyMap(pStorage);
-	cmdline_free(argc, argv);
 	return 0;
 }
