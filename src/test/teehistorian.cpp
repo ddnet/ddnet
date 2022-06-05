@@ -13,7 +13,7 @@ class TeeHistorian : public ::testing::Test
 protected:
 	CTeeHistorian m_TH;
 	CConfig m_Config;
-	CTuningParams m_Tuning;
+	CMatDefault m_Tuning;
 	CUuidManager m_UuidManager;
 	CTeeHistorian::CGameInfo m_GameInfo;
 

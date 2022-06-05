@@ -158,7 +158,7 @@ public:
 		return m_pPrng->RandomBits() % BelowThis;
 	}
 
-	CTuningParams m_Tuning[2];
+	CMatDefault m_Tuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
 
@@ -263,7 +263,7 @@ public:
 	bool m_IsInFreeze;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
-	CTuningParams m_Tuning;
+	CMatDefault m_Tuning;
 
 private:
 	CTeamsCore *m_pTeams;

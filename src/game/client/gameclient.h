@@ -239,7 +239,7 @@ public:
 	int m_FlagDropTick[2];
 
 	// TODO: move this
-	CTuningParams m_Tuning[NUM_DUMMIES];
+	CMatDefault m_Tuning[NUM_DUMMIES];
 
 	enum
 	{
@@ -503,7 +503,7 @@ public:
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
 	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0 && !m_aClients[m_PredictedDummyID].m_Paused; }
-	CTuningParams GetTunes(int i) { return m_aTuningList[i]; }
+	CMatDefault GetTunes(int i) { return m_aTuningList[i]; }
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
@@ -699,8 +699,8 @@ private:
 		NUM_TUNEZONES = 256
 	};
 	void LoadMapSettings();
-	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	CTuningParams *TuningList() { return m_aTuningList; }
+	CMatDefault m_aTuningList[NUM_TUNEZONES];
+	CMatDefault *TuningList() { return m_aTuningList; }
 
 	float m_LastZoom;
 	float m_LastScreenAspect;

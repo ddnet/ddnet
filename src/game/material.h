@@ -27,10 +27,10 @@ public:
 	operator float() const { return m_Value / 100.0f; }
 };
 
-class CTuningParams
+class CMatDefault
 {
 public:
-	CTuningParams()
+	CMatDefault()
 	{
 		const float TicksPerSecond = 50.0f;
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) m_##Name.Set((int)(Value * 100.0f));
@@ -46,7 +46,7 @@ public:
 
 	static int Num()
 	{
-		return sizeof(CTuningParams) / sizeof(CTuneParam);
+		return sizeof(CMatDefault) / sizeof(CTuneParam);
 	}
 	bool Set(int Index, float Value);
 	bool Set(const char *pName, float Value);
