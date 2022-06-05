@@ -43,3 +43,10 @@ bool CMatDefault::Get(const char *pName, float *pValue) const
 
 	return false;
 }
+
+CMatDefault &CMaterials::operator[](int Index) const
+{
+	if(Index >= ms_aMaterials.size())
+		return const_cast<CMatDefault &>(ms_aMaterials[0]); //Unknown material, maybe the map is too new?
+	return const_cast<CMatDefault &>(ms_aMaterials[Index]);
+}

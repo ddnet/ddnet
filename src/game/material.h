@@ -6,6 +6,7 @@
 #define DDNET_MATERIAL_H
 
 #include <base/system.h>
+#include <vector>
 
 class CTuneParam
 {
@@ -29,7 +30,7 @@ public:
 
 /* Materials ---------------------------------------------------------------------------- */
 
-class CMatDefault
+class CMatDefault //Note: this was CTuneParams before
 {
 public:
 	CMatDefault()
@@ -65,5 +66,17 @@ public:
 	}
 };
 
+/* Material handling ---------------------------------------------------------------------------- */
+
+class CMaterials
+{
+	CMaterials() = default;
+	static const inline std::vector<CMatDefault> ms_aMaterials {
+		CMatDefault(),
+		CMatPlaceholder(),
+	};
+
+	CMatDefault& operator [](int Index) const;
+};
 
 #endif //DDNET_MATERIAL_H
