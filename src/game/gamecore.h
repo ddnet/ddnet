@@ -263,7 +263,7 @@ public:
 	bool m_IsInFreeze;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
-	CMatDefault m_Tuning;
+	CMaterials m_Material;
 
 private:
 	CTeamsCore *m_pTeams;

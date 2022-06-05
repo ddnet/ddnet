@@ -941,7 +941,7 @@ void CCharacter::HandleTuneLayer()
 
 	if(m_IsLocal)
 		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
-	m_Core.m_Tuning = *GetTuning(m_TuneZone);
+	m_Core.m_Material[MAT_DEFAULT] = *GetTuning(m_TuneZone);
 }
 
 void CCharacter::DDRaceTick()
