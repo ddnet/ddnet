@@ -1,6 +1,7 @@
 // Adapted from TWMapImagesRecovery by Tardo: https://github.com/Tardo/TWMapImagesRecovery
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
@@ -95,6 +96,11 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 int main(int argc, const char *argv[])
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
 

@@ -1,9 +1,15 @@
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
 #include <engine/shared/stun.h>
 
 int main(int argc, const char **argv)
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 
 	secure_random_init();

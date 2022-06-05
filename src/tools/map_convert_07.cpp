@@ -3,6 +3,7 @@
 
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
 #include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
@@ -134,6 +135,11 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 
 int main(int argc, const char **argv)
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
 

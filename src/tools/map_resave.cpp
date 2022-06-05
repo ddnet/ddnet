@@ -1,11 +1,17 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
+#include <engine/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
 int main(int argc, const char **argv)
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);

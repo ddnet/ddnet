@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
 
 #include <array> // std::size
 #include <cstdlib>
@@ -200,6 +201,11 @@ void Run(unsigned short Port, NETADDR Dest)
 
 int main(int argc, const char **argv)
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
 	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};

@@ -1,7 +1,13 @@
 #include <base/logger.h>
+#include <engine/config.h>
 #include <engine/shared/uuid_manager.h>
 int main(int argc, const char **argv)
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc != 2)

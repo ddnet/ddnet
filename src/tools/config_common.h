@@ -1,5 +1,7 @@
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
+#include <engine/shared/config.h>
 #include <engine/storage.h>
 
 struct SListDirectoryContext
@@ -53,6 +55,11 @@ int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 	IStorage *pStorage = CreateLocalStorage();
 	if(!pStorage)
 		return -1;
+
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
 
 	if(argc == 1)
 	{

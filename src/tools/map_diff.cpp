@@ -1,5 +1,6 @@
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 #include <game/gamecore.h>
@@ -95,6 +96,11 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 
 int main(int argc, const char *argv[])
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/config.h>
 #include <engine/shared/image_manipulation.h>
 #include <pnglite.h>
 
@@ -72,6 +73,11 @@ int DilateFile(const char *pFilename)
 
 int main(int argc, const char **argv)
 {
+	IConfigManager *pConfigManager = CreateConfigManager();
+	if(!pConfigManager)
+		return -1;
+	pConfigManager->Reset();
+
 	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc == 1)
