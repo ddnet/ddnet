@@ -540,6 +540,20 @@ protected:
 			}
 		}
 	}
+	template<typename T>
+	void BrushFlipXImpl(T *pTiles)
+	{
+		for(int y = 0; y < m_Height; y++)
+			for(int x = 0; x < m_Width / 2; x++)
+				std::swap(pTiles[y * m_Width + x], pTiles[(y + 1) * m_Width - 1 - x]);
+	}
+	template<typename T>
+	void BrushFlipYImpl(T *pTiles)
+	{
+		for(int y = 0; y < m_Height / 2; y++)
+			for(int x = 0; x < m_Width; x++)
+				std::swap(pTiles[y * m_Width + x], pTiles[(m_Height - 1 - y) * m_Width + x]);
+	}
 
 public:
 	CLayerTiles(int w, int h);
