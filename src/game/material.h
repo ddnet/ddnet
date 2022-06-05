@@ -27,6 +27,8 @@ public:
 	operator float() const { return m_Value / 100.0f; }
 };
 
+/* Materials ---------------------------------------------------------------------------- */
+
 class CMatDefault
 {
 public:
@@ -53,5 +55,15 @@ public:
 	bool Get(int Index, float *pValue) const;
 	bool Get(const char *pName, float *pValue) const;
 };
+
+class CMatPlaceholder : public CMatDefault
+{
+public:
+	CMatPlaceholder()
+	{
+		m_GroundFriction = 0.99f;
+	}
+};
+
 
 #endif //DDNET_MATERIAL_H
