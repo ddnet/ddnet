@@ -46,7 +46,7 @@ public:
 
 	static int Num()
 	{
-		return sizeof(CTuningParams) / sizeof(int);
+		return sizeof(CTuningParams) / sizeof(CTuneParam);
 	}
 	bool Set(int Index, float Value);
 	bool Set(const char *pName, float Value);
