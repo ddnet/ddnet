@@ -639,7 +639,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
 
 	//resize material layer if available
-	if(m_Game && m_pEditor->m_Map.m_pMaterialLayer && (m_pEditor->m_Map.m_pMaterialLayer->m_Width > NewW || m_pEditor->m_Map.m_pMaterialLayer->m_Height > NewH))
+	if(m_Game && m_pEditor->m_Map.m_pMaterialLayer && (m_pEditor->m_Map.m_pMaterialLayer->m_Width != NewW || m_pEditor->m_Map.m_pMaterialLayer->m_Height != NewH))
 		m_pEditor->m_Map.m_pMaterialLayer->Resize(NewW, NewH);
 }
 
