@@ -399,8 +399,9 @@ public:
 	void Log(const CLogMessage *pMessage) override
 	{
 		m_OutputLock.lock();
-		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
-		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
+		DWORD Written; // we don't care about the value, but Windows 7 crashes if we pass NULL
+		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, &Written, NULL);
+		WriteFile(m_pFile, "\r\n", 2, &Written, NULL);
 		m_OutputLock.unlock();
 	}
 };
