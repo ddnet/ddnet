@@ -7,6 +7,7 @@
 
 #include <base/system.h>
 #include <vector>
+#include <functional>
 
 class CTuneParam
 {
@@ -63,6 +64,7 @@ public:
 	CMatPlaceholder()
 	{
 		m_GroundFriction = 0.99f;
+		m_Gravity = 0.1f;
 	}
 };
 
@@ -74,7 +76,14 @@ public:
 	CMaterials() = default;
 	CMatDefault& operator [](int Index) const;
 	CMatDefault* Tuning() { return const_cast<CMatDefault *>(&ms_aMaterials[0]); }
+
+	//multi material interactions (ground)
+	float GetGroundControlSpeed(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
+	float GetGroundControlAccel(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
+	float GetGroundFriction(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
+	float GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 private:
+	float HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, std::function<float(float, float)> function);
 	static const inline std::vector<CMatDefault> ms_aMaterials {
 		CMatDefault(),
 		CMatPlaceholder(),
