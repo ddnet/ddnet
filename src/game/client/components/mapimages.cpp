@@ -323,6 +323,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						{
 							if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
 								TileIndex = 8;
+							if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_MATERIAL)
+								TileIndex += TILE_MATERIAL_PLACEHOLDER1;
 						}
 
 						int X = TileIndex % 16;
