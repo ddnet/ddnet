@@ -723,7 +723,7 @@ int CServer::Port() const
 
 int CServer::MaxClients() const
 {
-	return m_NetServer.MaxClients();
+	return m_RunServer == UNINITIALIZED ? 0 : m_NetServer.MaxClients();
 }
 
 int CServer::ClientCount() const

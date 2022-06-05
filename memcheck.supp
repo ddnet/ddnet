@@ -1,16 +1,4 @@
 {
-   Motd
-   Memcheck:Cond
-   fun:_ZN7IServer11SendPackMsgI15CNetMsg_Sv_MotdLi0EEEiPT_ii
-   fun:_ZN12CGameContext8SendMotdEi
-   fun:_ZN12CGameContext25ConchainSpecialMotdupdateEPN8IConsole7IResultEPvPFvS2_S3_ES3_
-   fun:_ZN8CConsole9Con_ChainEPN8IConsole7IResultEPv
-   fun:_ZN8CConsole18ExecuteLineStrokedEiPKcib
-   fun:_ZN8CConsole11ExecuteLineEPKcib
-   fun:_ZN8CConsole11ExecuteFileEPKcibi
-   fun:main
-}
-{
    DemoRecorderWrite
    Memcheck:Param
    write(buf)
