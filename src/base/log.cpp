@@ -234,13 +234,14 @@ public:
 					pMessage->m_Color.r,
 					pMessage->m_Color.g,
 					pMessage->m_Color.b);
+				aio_write_unlocked(m_pAio, aAnsi, str_length(aAnsi));
 			}
-			aio_write_unlocked(m_pAio, aAnsi, str_length(aAnsi));
 		}
 		aio_write_unlocked(m_pAio, pMessage->m_aLine, pMessage->m_LineLength);
 		if(m_AnsiTruecolor && pMessage->m_HaveColor)
 		{
-			aio_write_unlocked(m_pAio, "\x1b[0m", 4); // reset
+			const char aResetColor[] = "\x1b[0m";
+			aio_write_unlocked(m_pAio, aResetColor, sizeof(aResetColor)); // reset
 		}
 		aio_write_newline_unlocked(m_pAio);
 		aio_unlock(m_pAio);
