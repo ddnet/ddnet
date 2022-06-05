@@ -124,8 +124,7 @@ fi
 # TODO: check for open ports instead
 port=17822
 
-cp ../ubsan.supp .
-cp ../memcheck.supp .
+cp ../ubsan.supp ../lsan.supp ../memcheck.supp .
 
 if [[ $OSTYPE == 'darwin'* ]]; then
 	DETECT_LEAKS=0
@@ -135,6 +134,7 @@ fi
 
 export UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
 export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=$DETECT_LEAKS:halt_on_errors=0
+export LSAN_OPTIONS=suppressions=./lsan.supp
 
 function print_results() {
 	if [ "$arg_valgrind_memcheck" == "1" ]; then
@@ -153,7 +153,7 @@ function print_results() {
 }
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=memcheck.supp"
+	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=memcheck.supp --track-origins=yes"
 	client_args="cl_menu_map \"\";"
 else
 	tool=""
@@ -242,6 +242,7 @@ say "/mc
 ;cmdlist
 ;saytime"
 EOF
+sleep 1
 echo "[*] test rcon commands"
 tr -d '\n' > client1.fifo << EOF
 rcon say hello from admin;
