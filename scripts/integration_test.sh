@@ -162,6 +162,7 @@ fi
 
 $tool ./DDNet-Server \
 	"sv_input_fifo server.fifo;
+	sv_rcon_password rcon;
 	sv_map coverage;
 	sv_sqlite_file ddnet-server.sqlite;
 	sv_port $port" &> server.log || fail server "$?" &
@@ -219,6 +220,61 @@ else
 	sleep 2
 fi
 
+echo "[*] test chat and chat commands"
+echo "say hello world" > client1.fifo
+echo "rcon_auth rcon" > client1.fifo
+sleep 1
+tr -d '\n' > client1.fifo << EOF
+say "/mc
+;top5
+;rank
+;team 512
+;emote happy -999
+;pause
+;points
+;mapinfo
+;list
+;whisper client2 hi
+;kill
+;settings cheats
+;timeout 123
+;timer broadcast
+;cmdlist
+;saytime"
+EOF
+echo "[*] test rcon commands"
+tr -d '\n' > client1.fifo << EOF
+rcon say hello from admin;
+rcon broadcast test;
+rcon status;
+rcon echo test;
+muteid 1 900 spam;
+unban_all;
+EOF
+sleep 1
+
+
+# TODO: remove the first grep after https://github.com/ddnet/ddnet/pull/5036 is merged
+if ! grep -qE '^\[[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2}\]\[chat\]: 0:-2:client1: hello world$' server.log && \
+	! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} D chat: 0:-2:client1: hello world$' server.log
+then
+	touch fail_chat.txt
+	echo "[-] Error: chat message not found in server log"
+fi
+if ! grep -q 'cmdlist' client1.log || \
+	! grep -q 'pause' client1.log || \
+	! grep -q 'rank' client1.log || \
+	! grep -q 'points' client1.log
+then
+	touch fail_chatcommand.txt
+	echo "[-] Error: did not find output of /cmdlist command"
+fi
+
+if ! grep -q "hello from admin" server.log
+then
+	touch fail_rcon.txt
+	echo "[-] Error: admin message not found in server log"
+fi
 
 kill_all
 wait
