@@ -638,9 +638,9 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	if(m_Game && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_Height != NewH))
 		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
 
-	//resize material layer if available (and necessary)
+	//resize material layer if available
 	if(m_Game && m_pEditor->m_Map.m_pMaterialLayer && (m_pEditor->m_Map.m_pMaterialLayer->m_Width > NewW || m_pEditor->m_Map.m_pMaterialLayer->m_Height > NewH))
-		m_pEditor->m_Map.m_pMaterialLayer->Resize(minimum(NewW, m_pEditor->m_Map.m_pMaterialLayer->m_Width), minimum(NewH, m_pEditor->m_Map.m_pMaterialLayer->m_Height));
+		m_pEditor->m_Map.m_pMaterialLayer->Resize(NewW, NewH);
 }
 
 void CLayerTiles::Shift(int Direction)
@@ -2103,13 +2103,9 @@ void CLayerMaterial::Resize(int NewW, int NewH)
 	// resize tile data
 	CLayerTiles::Resize(NewW, NewH);
 
-	// resize gamelayer too, allow material layer only to be smaller
-	if(NewW > m_pEditor->m_Map.m_pGameLayer->m_Width || NewH > m_pEditor->m_Map.m_pGameLayer->m_Height)
-	{
-		int NewGamelayerWidth = maximum(m_pEditor->m_Map.m_pGameLayer->m_Width, NewW);
-		int NewGameLayerHeight = maximum(m_pEditor->m_Map.m_pGameLayer->m_Height, NewH);
-		m_pEditor->m_Map.m_pGameLayer->Resize(NewGamelayerWidth, NewGameLayerHeight);
-	}
+	// resize gamelayer
+	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
+		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
 void CLayerMaterial::Shift(int Direction)
