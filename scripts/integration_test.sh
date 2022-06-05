@@ -175,9 +175,9 @@ $tool ./DDNet \
 	connect localhost:$port" &> client1.log || fail client1 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-  sleep 10
+	sleep 10
 else
-  sleep 1
+	sleep 1
 fi
 
 $tool ./DDNet \
@@ -214,10 +214,11 @@ do
 done
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-  sleep 20
+	sleep 20
 else
-  sleep 2
+	sleep 2
 fi
+
 
 kill_all
 wait
