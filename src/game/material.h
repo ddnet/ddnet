@@ -70,13 +70,15 @@ public:
 
 class CMaterials
 {
+public:
 	CMaterials() = default;
+	CMatDefault& operator [](int Index) const;
+	CMatDefault* Tuning() { return const_cast<CMatDefault *>(&ms_aMaterials[0]); }
+private:
 	static const inline std::vector<CMatDefault> ms_aMaterials {
 		CMatDefault(),
 		CMatPlaceholder(),
 	};
-
-	CMatDefault& operator [](int Index) const;
 };
 
 #endif //DDNET_MATERIAL_H
