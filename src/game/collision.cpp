@@ -785,6 +785,18 @@ int CCollision::IsMover(int x, int y, int *pFlags) const
 		return 0;
 }
 
+int CCollision::GetMaterial(int x, int y) const
+{
+	if(!m_pMaterial)
+		return 0;
+	int Nx = clamp(x / 32, 0, m_Width - 1);
+	int Ny = clamp(y / 32, 0, m_Height - 1);
+	int Material = m_pMaterial[Ny * m_Width + Nx].m_Material;
+	if(Material <= 0)
+		return 0;
+	return Material;
+}
+
 vec2 CCollision::CpSpeed(int Index, int Flags) const
 {
 	if(Index < 0)

@@ -95,6 +95,7 @@ public:
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
+	int GetMaterial(int x, int y) const;
 
 	int IsSolid(int x, int y) const;
 	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1) const;
