@@ -241,7 +241,7 @@ public:
 		if(m_AnsiTruecolor && pMessage->m_HaveColor)
 		{
 			const char aResetColor[] = "\x1b[0m";
-			aio_write_unlocked(m_pAio, aResetColor, sizeof(aResetColor)); // reset
+			aio_write_unlocked(m_pAio, aResetColor, str_length(aResetColor)); // reset
 		}
 		aio_write_newline_unlocked(m_pAio);
 		aio_unlock(m_pAio);
