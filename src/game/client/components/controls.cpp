@@ -365,26 +365,46 @@ void CControls::OnRender()
 		m_TargetPos[g_Config.m_ClDummy] = m_MousePos[g_Config.m_ClDummy];
 }
 
-bool CControls::OnMouseMove(float x, float y)
+bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
-	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+	if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
 		return false;
 
+	if(CursorType == IInput::CURSOR_JOYSTICK && g_Config.m_InpJoystickAbsolute && m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		float AbsX = 0.0f, AbsY = 0.0f;
+		if(Input()->GetActiveJoystick()->Absolute(&AbsX, &AbsY))
+			m_MousePos[g_Config.m_ClDummy] = vec2(AbsX, AbsY) * GetMaxMouseDistance();
+		return true;
+	}
+
+	float Factor = 1.0f;
 	if(g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens)
 	{
-		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
-		y = y * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
+		Factor = g_Config.m_ClDyncamMousesens / 100.0f;
+	}
+	else
+	{
+		switch(CursorType)
+		{
+		case IInput::CURSOR_MOUSE:
+			Factor = g_Config.m_InpMousesens / 100.0f;
+			break;
+		case IInput::CURSOR_JOYSTICK:
+			Factor = g_Config.m_InpJoystickSens / 100.0f;
+			break;
+		default:
+			dbg_msg("assert", "CControls::OnCursorMove CursorType %d", (int)CursorType);
+			dbg_break();
+			break;
+		}
 	}
 
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
-	{
-		x = x * m_pClient->m_Camera.m_Zoom;
-		y = y * m_pClient->m_Camera.m_Zoom;
-	}
+		Factor *= m_pClient->m_Camera.m_Zoom;
 
-	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
+	m_MousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
 	ClampMousePos();
-
 	return true;
 }
 
@@ -397,11 +417,7 @@ void CControls::ClampMousePos()
 	}
 	else
 	{
-		float CameraMaxDistance = 200.0f;
-		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		float MouseMax = minimum((FollowFactor != 0 ? CameraMaxDistance / FollowFactor + DeadZone : MaxDistance), MaxDistance);
+		float MouseMax = GetMaxMouseDistance();
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 		float MouseMin = MinDistance;
 
@@ -418,4 +434,13 @@ void CControls::ClampMousePos()
 		if(MDistance > MouseMax)
 			m_MousePos[g_Config.m_ClDummy] = normalize_pre_length(m_MousePos[g_Config.m_ClDummy], MDistance) * MouseMax;
 	}
+}
+
+float CControls::GetMaxMouseDistance() const
+{
+	float CameraMaxDistance = 200.0f;
+	float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+	float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+	float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
+	return minimum((FollowFactor != 0 ? CameraMaxDistance / FollowFactor + DeadZone : MaxDistance), MaxDistance);
 }

@@ -12,6 +12,8 @@
 
 class CControls : public CComponent
 {
+	float GetMaxMouseDistance() const;
+
 public:
 	vec2 m_MousePos[NUM_DUMMIES];
 	vec2 m_TargetPos[NUM_DUMMIES];
@@ -35,7 +37,7 @@ public:
 	virtual void OnRelease() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 

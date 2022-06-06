@@ -255,8 +255,6 @@ bool CInput::MouseRelative(float *pX, float *pY)
 		return false;
 
 	int nx = 0, ny = 0;
-	float Sens = g_Config.m_InpMousesens / 100.0f;
-
 #if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
 	static int s_LastX = 0;
 	static int s_LastY = 0;
@@ -267,13 +265,12 @@ bool CInput::MouseRelative(float *pX, float *pY)
 	s_LastY = ny;
 	nx = XTmp;
 	ny = YTmp;
-	Sens = 1;
 #else
 	SDL_GetRelativeMouseState(&nx, &ny);
 #endif
 
-	*pX = nx * Sens;
-	*pY = ny * Sens;
+	*pX = nx;
+	*pY = ny;
 	return *pX != 0.0f || *pY != 0.0f;
 }
 

@@ -164,12 +164,12 @@ void CSpectator::OnConsoleInit()
 	Console()->Register("spectate_closest", "", CFGFLAG_CLIENT, ConSpectateClosest, this, "Spectate the closest player");
 }
 
-bool CSpectator::OnMouseMove(float x, float y)
+bool CSpectator::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_Active)
 		return false;
 
-	UI()->ConvertMouseMove(&x, &y);
+	UI()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
 	return true;
 }

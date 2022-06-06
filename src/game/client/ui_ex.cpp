@@ -30,9 +30,9 @@ void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput:
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 }
 
-void CUIEx::ConvertMouseMove(float *pX, float *pY) const
+void CUIEx::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
 {
-	UI()->ConvertMouseMove(pX, pY);
+	UI()->ConvertMouseMove(pX, pY, CursorType);
 
 	if(m_MouseSlow)
 	{

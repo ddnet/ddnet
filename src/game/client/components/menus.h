@@ -558,7 +558,7 @@ public:
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual bool OnInput(IInput::CEvent Event) override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnShutdown() override;
 
 	enum

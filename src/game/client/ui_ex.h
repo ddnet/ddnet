@@ -57,7 +57,7 @@ public:
 
 	void Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount);
 
-	void ConvertMouseMove(float *pX, float *pY) const;
+	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
 	void ResetMouseSlow() { m_MouseSlow = false; }
 
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
