@@ -31,6 +31,8 @@ class CInput : public IEngineInput
 	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
 	int m_InputCounter;
 
+	void UpdateMouseState();
+
 	// IME support
 	int m_NumTextInputInstances;
 	char m_aEditingText[INPUT_TEXT_SIZE];
