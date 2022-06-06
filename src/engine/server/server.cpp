@@ -414,6 +414,14 @@ CServer::~CServer()
 		free(pCurrentMapData);
 	}
 
+	if(m_RunServer != UNINITIALIZED)
+	{
+		for(auto &Client : m_aClients)
+		{
+			free(Client.m_pPersistentData);
+		}
+	}
+
 	delete m_pRegister;
 	delete m_pConnectionPool;
 }
@@ -2911,11 +2919,6 @@ int CServer::Run()
 #if defined(CONF_UPNP)
 	m_UPnP.Shutdown();
 #endif
-
-	for(auto &Client : m_aClients)
-	{
-		free(Client.m_pPersistentData);
-	}
 
 	m_NetServer.Close();
 

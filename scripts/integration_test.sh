@@ -15,8 +15,9 @@ do
 			echo "  Runs a simple integration test of the client and server"
 			echo "  binaries from the given build dir"
 			echo "options:"
-			echo "  --help|-h     show this help"
-			echo "	--verbose|-v  verbose output"
+			echo "  --help|-h           show this help"
+			echo "	--verbose|-v        verbose output"
+			echo "	--valgrind-memcheck use valgrind's memcheck to run server and client"
 		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
 		then
 			arg_verbose=1
@@ -72,13 +73,6 @@ function cleanup() {
 
 trap cleanup EXIT
 
-{
-	echo $'add_path $CURRENTDIR'
-	echo $'add_path $USERDIR'
-	echo $'add_path $DATADIR'
-	echo $'add_path ../data'
-} > storage.cfg
-
 function fail()
 {
 	sleep 1
@@ -120,6 +114,13 @@ rm -rf integration_test
 mkdir -p integration_test/data/maps
 cp data/maps/coverage.map integration_test/data/maps
 cd integration_test || exit 1
+
+{
+	echo $'add_path $CURRENTDIR'
+	echo $'add_path $USERDIR'
+	echo $'add_path $DATADIR'
+	echo $'add_path ../data'
+} > storage.cfg
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=../memcheck.supp --track-origins=yes"
