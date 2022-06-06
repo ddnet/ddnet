@@ -55,9 +55,6 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
-
-	m_LastX = 0;
-	m_LastY = 0;
 }
 
 void CInput::Init()
@@ -78,11 +75,13 @@ bool CInput::MouseRelative(float *pX, float *pY)
 	float Sens = g_Config.m_InpMousesens / 100.0f;
 
 #if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	static int s_LastX = 0;
+	static int s_LastY = 0;
 	SDL_GetMouseState(&nx, &ny);
-	int XTmp = nx - m_LastX;
-	int YTmp = ny - m_LastY;
-	m_LastX = nx;
-	m_LastY = ny;
+	int XTmp = nx - s_LastX;
+	int YTmp = ny - s_LastY;
+	s_LastX = nx;
+	s_LastY = ny;
 	nx = XTmp;
 	ny = YTmp;
 	Sens = 1;
