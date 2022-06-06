@@ -39,8 +39,6 @@ struct SChillerNamePlate
 class CPlayerPics : public CComponent
 {
 public:
-	virtual int Sizeof() const override { return sizeof(*this); }
-
 	struct CPlayerPic
 	{
 		char m_aPlayerName[32];
@@ -48,8 +46,6 @@ public:
 
 		bool operator<(const CPlayerPic &Other) const { return str_comp(m_aPlayerName, Other.m_aPlayerName) < 0; }
 	};
-
-	virtual void OnInit() override;
 
 	int Num() const;
 	const CPlayerPic *GetByName(const char *pName) const;
@@ -76,6 +72,12 @@ private:
 		const CNetObj_PlayerInfo *pPlayerInfo);
 	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
 
+	void ResetNamePlates();
+
+public:
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnWindowResize() override;
+	virtual void OnInit() override;
 	virtual void OnRender() override;
 };
 #endif

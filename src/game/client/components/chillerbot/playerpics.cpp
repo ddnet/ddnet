@@ -73,20 +73,6 @@ void CPlayerPics::LoadPlayerpicsIndexfile()
 	std::sort(m_vPlayerPics.begin(), m_vPlayerPics.end());
 }
 
-void CPlayerPics::OnInit()
-{
-	// load country flags
-	m_vPlayerPics.clear();
-	LoadPlayerpicsIndexfile();
-	if(m_vPlayerPics.empty())
-	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "playerpics", "failed to load directory 'playerpics/'.");
-		CPlayerPic DummyEntry;
-		mem_zero(DummyEntry.m_aPlayerName, sizeof(DummyEntry.m_aPlayerName));
-		m_vPlayerPics.push_back(DummyEntry);
-	}
-}
-
 int CPlayerPics::Num() const
 {
 	return m_vPlayerPics.size();
@@ -240,5 +226,36 @@ void CPlayerPics::OnRender()
 				&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
 				pInfo);
 		}
+	}
+}
+
+void CPlayerPics::ResetNamePlates()
+{
+	for(auto &NamePlate : m_aNamePlates)
+	{
+		if(NamePlate.m_NameTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(NamePlate.m_NameTextContainerIndex);
+
+		NamePlate.Reset();
+	}
+}
+
+void CPlayerPics::OnWindowResize()
+{
+	ResetNamePlates();
+}
+
+void CPlayerPics::OnInit()
+{
+	ResetNamePlates();
+	// load country flags
+	m_vPlayerPics.clear();
+	LoadPlayerpicsIndexfile();
+	if(m_vPlayerPics.empty())
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "playerpics", "failed to load directory 'playerpics/'.");
+		CPlayerPic DummyEntry;
+		mem_zero(DummyEntry.m_aPlayerName, sizeof(DummyEntry.m_aPlayerName));
+		m_vPlayerPics.push_back(DummyEntry);
 	}
 }
