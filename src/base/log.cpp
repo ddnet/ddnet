@@ -330,32 +330,25 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 2) * sizeof(*pWide));
-		const char *p = pMessage->m_aLine;
-		int WLen = 0;
-
-		mem_zero(pWide, (pMessage->m_LineLength + 2) * sizeof(*pWide));
-
-		for(int Codepoint = 0; (Codepoint = str_utf8_decode(&p)); WLen++)
+		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, NULL, 0);
+		if(!WLen)
 		{
-			char aU16[4] = {0};
-
-			if(Codepoint < 0)
-			{
-				free(pWide);
-				return;
-			}
-
-			if(str_utf16le_encode(aU16, Codepoint) != 2)
-			{
-				free(pWide);
-				return;
-			}
-
-			mem_copy(&pWide[WLen], aU16, 2);
+			WCHAR aError[] = L"Failed to obtain length of log message\r\n";
+			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
+			return;
+		}
+		WCHAR *pWide = (WCHAR *)malloc((WLen + 2) * sizeof(*pWide));
+		WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen);
+		if(!WLen)
+		{
+			WCHAR aError[] = L"Failed to convert log message encoding\r\n";
+			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
+			free(pWide);
+			return;
 		}
 		pWide[WLen++] = '\r';
 		pWide[WLen++] = '\n';
+
 		int Color = m_BackgroundColor;
 		if(pMessage->m_HaveColor)
 		{
