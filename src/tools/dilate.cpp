@@ -72,7 +72,7 @@ int DilateFile(const char *pFilename)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc == 1)
 	{
@@ -82,6 +82,6 @@ int main(int argc, const char **argv)
 
 	for(int i = 1; i < argc; i++)
 		DilateFile(argv[i]);
-	cmdline_free(argc, argv);
+
 	return 0;
 }

@@ -75,7 +75,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
@@ -315,6 +315,5 @@ int main(int argc, const char **argv)
 	Reader.Close();
 	Writer.Finish();
 
-	cmdline_free(argc, argv);
 	return 0;
 }
