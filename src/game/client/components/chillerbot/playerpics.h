@@ -64,7 +64,6 @@ private:
 	static int LoadImageByName(const char *pImgName, int IsDir, int DirType, void *pUser);
 	void LoadPlayerpicsIndexfile();
 
-	void MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup);
 	SChillerNamePlate m_aNamePlates[MAX_CLIENTS];
 	void RenderNameplate(
 		const CNetObj_Character *pPrevChar,

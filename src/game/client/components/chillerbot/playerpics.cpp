@@ -105,7 +105,7 @@ void CPlayerPics::Render(const char *pName, const vec4 *pColor, float x, float y
 	{
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+		RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 		Graphics()->TextureSet(pFlag->m_Texture);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(pColor->r, pColor->g, pColor->b, pColor->a);
@@ -114,13 +114,6 @@ void CPlayerPics::Render(const char *pName, const vec4 *pColor, float x, float y
 		Graphics()->QuadsEnd();
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
-}
-
-void CPlayerPics::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
-{
-	float Points[4];
-	RenderTools()->MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY, pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), m_pClient->m_Camera.m_Zoom, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
 }
 
 void CPlayerPics::RenderNameplate(
@@ -180,7 +173,7 @@ void CPlayerPics::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				// create nameplates at standard zoom
 				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-				MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+				RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 				m_aNamePlates[ClientID].m_WarReasonTextWidth = TextRender()->TextWidth(0, FontSizeClan, aWarReason, -1, -1.0f);
 
