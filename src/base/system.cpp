@@ -3483,32 +3483,6 @@ int str_utf8_encode(char *ptr, int chr)
 	return 0;
 }
 
-int str_utf16le_encode(char *ptr, int chr)
-{
-	if(chr < 0x10000)
-	{
-		ptr[0] = chr;
-		ptr[1] = chr >> 0x8;
-		return 2;
-	}
-	else if(chr <= 0x10FFFF)
-	{
-		int U = chr - 0x10000;
-		int W1 = 0xD800, W2 = 0xDC00;
-
-		W1 |= ((U >> 10) & 0x3FF);
-		W2 |= (U & 0x3FF);
-
-		ptr[0] = W1;
-		ptr[1] = W1 >> 0x8;
-		ptr[2] = W2;
-		ptr[3] = W2 >> 0x8;
-		return 4;
-	}
-
-	return 0;
-}
-
 static unsigned char str_byte_next(const char **ptr)
 {
 	unsigned char byte = **ptr;

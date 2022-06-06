@@ -664,7 +664,7 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 	}
 
 	if(Best != -1)
-		return (int *)m_aInputs[g_Config.m_ClDummy][Best].m_aData;
+		return (int *)m_aInputs[d][Best].m_aData;
 	return 0;
 }
 

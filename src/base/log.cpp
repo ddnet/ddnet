@@ -241,7 +241,7 @@ public:
 		if(m_AnsiTruecolor && pMessage->m_HaveColor)
 		{
 			const char aResetColor[] = "\x1b[0m";
-			aio_write_unlocked(m_pAio, aResetColor, sizeof(aResetColor)); // reset
+			aio_write_unlocked(m_pAio, aResetColor, str_length(aResetColor)); // reset
 		}
 		aio_write_newline_unlocked(m_pAio);
 		aio_unlock(m_pAio);
@@ -330,32 +330,25 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 2) * sizeof(*pWide));
-		const char *p = pMessage->m_aLine;
-		int WLen = 0;
-
-		mem_zero(pWide, (pMessage->m_LineLength + 2) * sizeof(*pWide));
-
-		for(int Codepoint = 0; (Codepoint = str_utf8_decode(&p)); WLen++)
+		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, NULL, 0);
+		if(!WLen)
 		{
-			char aU16[4] = {0};
-
-			if(Codepoint < 0)
-			{
-				free(pWide);
-				return;
-			}
-
-			if(str_utf16le_encode(aU16, Codepoint) != 2)
-			{
-				free(pWide);
-				return;
-			}
-
-			mem_copy(&pWide[WLen], aU16, 2);
+			WCHAR aError[] = L"Failed to obtain length of log message\r\n";
+			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
+			return;
+		}
+		WCHAR *pWide = (WCHAR *)malloc((WLen + 2) * sizeof(*pWide));
+		WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen);
+		if(!WLen)
+		{
+			WCHAR aError[] = L"Failed to convert log message encoding\r\n";
+			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
+			free(pWide);
+			return;
 		}
 		pWide[WLen++] = '\r';
 		pWide[WLen++] = '\n';
+
 		int Color = m_BackgroundColor;
 		if(pMessage->m_HaveColor)
 		{
@@ -399,8 +392,9 @@ public:
 	void Log(const CLogMessage *pMessage) override
 	{
 		m_OutputLock.lock();
-		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, NULL, NULL);
-		WriteFile(m_pFile, "\r\n", 2, NULL, NULL);
+		DWORD Written; // we don't care about the value, but Windows 7 crashes if we pass NULL
+		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, &Written, NULL);
+		WriteFile(m_pFile, "\r\n", 2, &Written, NULL);
 		m_OutputLock.unlock();
 	}
 };
