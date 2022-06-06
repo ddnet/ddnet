@@ -105,7 +105,7 @@ void CPlayerPics::Render(const char *pName, const vec4 *pColor, float x, float y
 	{
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+		RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup(), m_pClient->m_Camera.m_Zoom);
 		Graphics()->TextureSet(pFlag->m_Texture);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(pColor->r, pColor->g, pColor->b, pColor->a);
