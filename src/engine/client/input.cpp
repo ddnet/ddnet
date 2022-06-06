@@ -69,7 +69,7 @@ void CInput::Init()
 	MouseModeRelative();
 }
 
-void CInput::MouseRelative(float *x, float *y)
+void CInput::MouseRelative(float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return;
@@ -90,8 +90,8 @@ void CInput::MouseRelative(float *x, float *y)
 	SDL_GetRelativeMouseState(&nx, &ny);
 #endif
 
-	*x = nx * Sens;
-	*y = ny * Sens;
+	*pX = nx * Sens;
+	*pY = ny * Sens;
 }
 
 void CInput::MouseModeAbsolute()
@@ -112,19 +112,15 @@ void CInput::MouseModeRelative()
 	SDL_GetRelativeMouseState(0x0, 0x0);
 }
 
-void CInput::NativeMousePos(int *x, int *y) const
+void CInput::NativeMousePos(int *pX, int *pY) const
 {
-	int nx = 0, ny = 0;
-	SDL_GetMouseState(&nx, &ny);
-
-	*x = nx;
-	*y = ny;
+	SDL_GetMouseState(pX, pY);
 }
 
-bool CInput::NativeMousePressed(int index)
+bool CInput::NativeMousePressed(int Index)
 {
 	int i = SDL_GetMouseState(NULL, NULL);
-	return (i & SDL_BUTTON(index)) != 0;
+	return (i & SDL_BUTTON(Index)) != 0;
 }
 
 bool CInput::MouseDoubleClick()
@@ -144,9 +140,9 @@ const char *CInput::GetClipboardText()
 	return m_pClipboardText;
 }
 
-void CInput::SetClipboardText(const char *Text)
+void CInput::SetClipboardText(const char *pText)
 {
-	SDL_SetClipboardText(Text);
+	SDL_SetClipboardText(pText);
 }
 
 void CInput::Clear()

@@ -50,14 +50,15 @@ public:
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
-	void MouseRelative(float *x, float *y) override;
+	void MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
-	void NativeMousePos(int *x, int *y) const override;
-	bool NativeMousePressed(int index) override;
+	void NativeMousePos(int *pX, int *pY) const override;
+	bool NativeMousePressed(int Index) override;
 	bool MouseDoubleClick() override;
+
 	const char *GetClipboardText() override;
-	void SetClipboardText(const char *Text) override;
+	void SetClipboardText(const char *pText) override;
 
 	int Update() override;
 
