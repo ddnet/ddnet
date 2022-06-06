@@ -1,12 +1,5 @@
 #!/bin/bash
 
-if [ ! -f scripts/integration_test.sh ] || [ ! -f CMakeLists.txt ]
-then
-	echo "Error: make sure your are in the root of the repo"
-	exit 1
-fi
-
-arg_build_dir="build"
 arg_end_args=0
 arg_verbose=0
 arg_valgrind_memcheck=0
@@ -37,30 +30,20 @@ do
 			echo "Error: unknown arg '$arg'"
 		fi
 	else
-		arg_build_dir="$arg"
+		echo "Error: unknown arg '$arg'"
 	fi
 done
 
-if [ ! -d "$arg_build_dir" ]
+if [ ! -f DDNet ]
 then
-	echo "Error: build directory '$arg_build_dir' not found"
+	echo "Error: client binary not found DDNet' not found"
 	exit 1
 fi
-if [ ! -f "$arg_build_dir"/DDNet ]
+if [ ! -f DDNet-Server ]
 then
-	echo "Error: client binary not found '$arg_build_dir/DDNet' not found"
+	echo "Error: server binary not found DDNet-Server' not found"
 	exit 1
 fi
-if [ ! -f "$arg_build_dir"/DDNet-Server ]
-then
-	echo "Error: server binary not found '$arg_build_dir/DDNet-Server' not found"
-	exit 1
-fi
-
-mkdir -p integration_test
-cp "$arg_build_dir"/DDNet* integration_test
-
-cd integration_test || exit 1
 
 got_killed=0
 
@@ -104,27 +87,8 @@ function fail()
 	echo "[-] $1 exited with code $2"
 }
 
-if test -n "$(find . -maxdepth 1 -name '*.fifo' -print -quit)"
-then
-	rm ./*.fifo
-fi
-if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
-then
-	rm SAN.*
-fi
-if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"
-then
-	rm fail_*
-fi
-if [ -f ddnet-server.sqlite ]
-then
-	rm ddnet-server.sqlite
-fi
-
 # TODO: check for open ports instead
 port=17822
-
-cp ../ubsan.supp ../lsan.supp ../memcheck.supp .
 
 if [[ $OSTYPE == 'darwin'* ]]; then
 	DETECT_LEAKS=0
@@ -132,9 +96,9 @@ else
 	DETECT_LEAKS=1
 fi
 
-export UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
+export UBSAN_OPTIONS=suppressions=../ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
 export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=$DETECT_LEAKS:halt_on_errors=0
-export LSAN_OPTIONS=suppressions=./lsan.supp
+export LSAN_OPTIONS=suppressions=../lsan.supp:print_suppressions=0
 
 function print_results() {
 	if [ "$arg_valgrind_memcheck" == "1" ]; then
@@ -152,22 +116,27 @@ function print_results() {
 	return 0
 }
 
+rm -rf integration_test
+mkdir -p integration_test/data/maps
+cp data/maps/coverage.map integration_test/data/maps
+cd integration_test || exit 1
+
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=memcheck.supp --track-origins=yes"
+	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=../memcheck.supp --track-origins=yes"
 	client_args="cl_menu_map \"\";"
 else
 	tool=""
 	client_args=""
 fi
 
-$tool ./DDNet-Server \
+$tool ../DDNet-Server \
 	"sv_input_fifo server.fifo;
 	sv_rcon_password rcon;
 	sv_map coverage;
 	sv_sqlite_file ddnet-server.sqlite;
 	sv_port $port" &> server.log || fail server "$?" &
 
-$tool ./DDNet \
+$tool ../DDNet \
 	"cl_input_fifo client1.fifo;
 	player_name client1;
 	cl_download_skins 0;
@@ -181,7 +150,7 @@ else
 	sleep 1
 fi
 
-$tool ./DDNet \
+$tool ../DDNet \
 	"cl_input_fifo client2.fifo;
 	player_name client2;
 	cl_download_skins 0;

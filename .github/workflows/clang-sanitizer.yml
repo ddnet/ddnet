@@ -46,4 +46,5 @@ jobs:
         fi
     - name: Run integration tests with ASan and UBSan
       run: |
-        scripts/integration_test.sh san
+        cd san
+        make run_integration_tests

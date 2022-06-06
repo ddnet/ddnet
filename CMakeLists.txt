@@ -1368,6 +1368,7 @@ set(EXPECTED_DATA
   maps/Sunny\ Side\ Up.map
   maps/Tsunami.map
   maps/Tutorial.map
+  maps/coverage.map
   maps/ctf1.map
   maps/ctf2.map
   maps/ctf3.map
@@ -1558,6 +1559,13 @@ foreach(datafile ${DATA})
   file(MAKE_DIRECTORY ${DESTINATION})
   file(COPY ${datafile} DESTINATION ${DESTINATION})
 endforeach()
+set(INTEGRATION_TEST_COPY_FILES
+  lsan.supp
+  memcheck.supp
+  ubsan.supp
+  valgrind.supp
+  scripts/integration_test.sh
+)
 set(COPY_FILES
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
@@ -1569,6 +1577,7 @@ set(COPY_FILES
   ${DISCORDSDK_COPY_FILES}
   ${VULKAN_COPY_FILES}
   ${EXCEPTION_HANDLING_COPY_FILES}
+  ${INTEGRATION_TEST_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 
@@ -2552,11 +2561,18 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
 
   add_custom_target(run_tests
     COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> ${TESTRUNNER_ARGS}
-    COMMENT Running tests
+    COMMENT Running unit tests
     DEPENDS ${TARGET_TESTRUNNER}
     USES_TERMINAL
   )
 endif()
+
+add_custom_target(run_integration_tests
+  COMMAND ${PROJECT_BINARY_DIR}/integration_test.sh ${INTEGRATIONTESTRUNNER_ARGS}
+  COMMENT Running integration tests
+  DEPENDS ${TARGET_CLIENT} ${TARGET_SERVER}
+  USES_TERMINAL
+)
 
 ########################################################################
 # INSTALLATION
@@ -2683,10 +2699,14 @@ set(CPACK_SOURCE_FILES
   datasrc/
   ddnet-libs/
   license.txt
+  lsan.supp
+  memcheck.supp
   other/
   scripts/
   src/
   storage.cfg
+  ubsan.supp
+  valgrind.supp
 )
 set(CPACK_SOURCE_IGNORE_FILES
   "\\\\.pyc$"
