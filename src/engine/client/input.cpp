@@ -69,10 +69,10 @@ void CInput::Init()
 	MouseModeRelative();
 }
 
-void CInput::MouseRelative(float *pX, float *pY)
+bool CInput::MouseRelative(float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
-		return;
+		return false;
 
 	int nx = 0, ny = 0;
 	float Sens = g_Config.m_InpMousesens / 100.0f;
@@ -92,6 +92,7 @@ void CInput::MouseRelative(float *pX, float *pY)
 
 	*pX = nx * Sens;
 	*pY = ny * Sens;
+	return *pX != 0.0f || *pY != 0.0f;
 }
 
 void CInput::MouseModeAbsolute()
