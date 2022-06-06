@@ -99,7 +99,7 @@ dbg_break();
  * @remark Also works in release mode.
  *
  * @see dbg_assert
-*/
+ */
 void dbg_msg(const char *sys, const char *fmt, ...)
 	GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
@@ -194,7 +194,7 @@ typedef struct IOINTERNAL *IOHANDLE;
  * @ingroup File-IO
  *
  * @param File to open.
- * @param flags A set of IOFLAG flags. 
+ * @param flags A set of IOFLAG flags.
  *
  * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
  *
@@ -479,7 +479,7 @@ void aio_wait(ASYNCIO *aio);
  *
  * @param aio Handle to the file.
  *
-i */
+ */
 void aio_free(ASYNCIO *aio);
 
 /**
@@ -524,7 +524,7 @@ void thread_yield();
  * @ingroup Threads
  *
  * @param thread Thread to detach
-*/
+ */
 void thread_detach(void *thread);
 
 /**
@@ -762,7 +762,7 @@ int time_season();
  * @ingroup Time
  *
  * @return Current value of the timer in nanoseconds.
-*/
+ */
 int64_t time_get_nanoseconds();
 
 /**
@@ -1175,7 +1175,7 @@ void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
  * @param str Pointer to the string.
  *
  * @return Length of string in bytes excluding the zero termination.
-*/
+ */
 int str_length(const char *str);
 
 /**
@@ -1231,7 +1231,7 @@ void str_sanitize_cc(char *str);
  * @param str String to sanitize.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 void str_sanitize(char *str);
 
 /**
@@ -1240,7 +1240,7 @@ void str_sanitize(char *str);
  * @param str String to sanitize.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 void str_sanitize_filename(char *str);
 
 /**
@@ -1285,7 +1285,7 @@ const char *str_skip_to_whitespace_const(const char *str);
  * within the string.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 char *str_skip_whitespaces(char *str);
 
 /**
@@ -1360,7 +1360,7 @@ int str_comp(const char *a, const char *b);
  * @return `> 0` - String a is greater than string b
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 int str_comp_num(const char *a, const char *b, int num);
 
 /**
@@ -1454,7 +1454,7 @@ const char *str_endswith(const char *str, const char *suffix);
  * @return The edit distance between the both strings.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 int str_utf8_dist(const char *a, const char *b);
 
 /**
@@ -1472,7 +1472,7 @@ int str_utf8_dist(const char *a, const char *b);
  * @return The edit distance between the both strings.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 int str_utf8_dist_buffer(const char *a, const char *b, int *buf, int buf_len);
 
 /*
@@ -2271,7 +2271,7 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 /*
 	Function: pid
 		Returns the pid of the current process.
-	
+
 	Returns:
 		pid of the current process
 */
@@ -2447,7 +2447,7 @@ namespace tw {
  * @ingroup Time
  *
  * @return Current value of the timer in nanoseconds.
-*/
+ */
 std::chrono::nanoseconds time_get();
 
 int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
