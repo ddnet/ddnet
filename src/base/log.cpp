@@ -332,12 +332,17 @@ public:
 	{
 		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, NULL, 0);
 		if(!WLen)
+		{
+			WCHAR aError[] = L"Failed to obtain length of log message\r\n";
+			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
 			return;
-
+		}
 		WCHAR *pWide = (WCHAR *)malloc((WLen + 2) * sizeof(*pWide));
 		WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen);
 		if(!WLen)
 		{
+			WCHAR aError[] = L"Failed to convert log message encoding\r\n";
+			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
 			free(pWide);
 			return;
 		}
