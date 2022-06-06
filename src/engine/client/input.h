@@ -42,6 +42,7 @@ class CInput : public IEngineInput
 
 public:
 	CInput();
+	~CInput();
 
 	void Init() override;
 

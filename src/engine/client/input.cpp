@@ -57,6 +57,11 @@ CInput::CInput()
 	m_aEditingText[0] = 0;
 }
 
+CInput::~CInput()
+{
+	SDL_free(m_pClipboardText);
+}
+
 void CInput::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
