@@ -169,7 +169,8 @@ void CSounds::OnRender()
 
 void CSounds::ClearQueue()
 {
-	mem_zero(m_aQueue, sizeof(m_aQueue));
+	new(m_aQueue) std::remove_pointer<decltype(m_aQueue)>::type;
+	dbg_assert(mem_is_null(m_aQueue, sizeof(*m_aQueue)), "mem not null");
 	m_QueuePos = 0;
 	m_QueueWaitTime = time();
 }

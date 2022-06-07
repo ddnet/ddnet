@@ -352,7 +352,8 @@ void CServer::CClient::Reset()
 	for(auto &Input : m_aInputs)
 		Input.m_GameTick = -1;
 	m_CurrentInput = 0;
-	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
+	m_LatestInput = CInput();
+	dbg_assert(mem_is_null(&m_LatestInput, sizeof(m_LatestInput)), "mem not null");
 
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
@@ -835,7 +836,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
 	CNetChunk Packet;
-	mem_zero(&Packet, sizeof(CNetChunk));
+	mem_zero(&Packet.m_Address, sizeof(NETADDR));
 	if(Flags & MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
 	if(Flags & MSGFLAG_FLUSH)
@@ -903,7 +904,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 void CServer::SendMsgRaw(int ClientID, const void *pData, int Size, int Flags)
 {
 	CNetChunk Packet;
-	mem_zero(&Packet, sizeof(CNetChunk));
+	mem_zero(&Packet.m_Address, sizeof(NETADDR));
 	Packet.m_ClientID = ClientID;
 	Packet.m_pData = pData;
 	Packet.m_DataSize = Size;
@@ -2417,7 +2418,8 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	{
 		unsigned char aBuffer[NET_MAX_PAYLOAD];
 		int Flags;
-		mem_zero(&Packet, sizeof(Packet));
+		Packet = CNetChunk();
+		mem_zero(&Packet.m_Address, sizeof(NETADDR));
 		Packet.m_pData = aBuffer;
 		while(Antibot()->OnEngineSimulateClientMessage(&Packet.m_ClientID, aBuffer, sizeof(aBuffer), &Packet.m_DataSize, &Flags))
 		{

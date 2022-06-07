@@ -232,7 +232,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				if(Item.m_Flags && !(pLayerTiles->m_Game))
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
-					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
+					new(pEmptyTiles) CTile[(size_t)pLayerTiles->m_Width * pLayerTiles->m_Height];
+					dbg_assert(mem_is_null(pEmptyTiles, sizeof(*pEmptyTiles)), "mem not null");
 					Item.m_Data = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 

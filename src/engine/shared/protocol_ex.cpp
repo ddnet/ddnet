@@ -18,7 +18,7 @@ int UnpackMessageID(int *pID, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CM
 {
 	*pID = 0;
 	*pSys = false;
-	mem_zero(pUuid, sizeof(*pUuid));
+	*pUuid = CUuid();
 
 	int MsgID = pUnpacker->GetInt();
 

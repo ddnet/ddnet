@@ -61,25 +61,17 @@ void CDragger::Tick()
 void CDragger::LookForPlayersToDrag()
 {
 	// Create a list of players who are in the range of the dragger
-	CCharacter *apPlayersInRange[MAX_CLIENTS];
-	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
+	CCharacter *apPlayersInRange[MAX_CLIENTS] = {nullptr};
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
 		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),
 		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
-	int aClosestTargetIdInTeam[MAX_CLIENTS];
-	bool aCanStillBeTeamTarget[MAX_CLIENTS];
-	bool aIsTarget[MAX_CLIENTS];
-	int aMinDistInTeam[MAX_CLIENTS];
-	mem_zero(aCanStillBeTeamTarget, sizeof(aCanStillBeTeamTarget));
-	mem_zero(aMinDistInTeam, sizeof(aMinDistInTeam));
-	mem_zero(aIsTarget, sizeof(aIsTarget));
-	for(int &TargetId : aClosestTargetIdInTeam)
-	{
-		TargetId = -1;
-	}
+	int aClosestTargetIdInTeam[MAX_CLIENTS] = {-1};
+	bool aCanStillBeTeamTarget[MAX_CLIENTS] = {false};
+	bool aIsTarget[MAX_CLIENTS] = {false};
+	int aMinDistInTeam[MAX_CLIENTS] = {0};
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{

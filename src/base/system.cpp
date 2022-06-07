@@ -198,20 +198,21 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 /* */
 
-void mem_copy(void *dest, const void *source, unsigned size)
-{
-	memcpy(dest, source, size);
-}
+//void mem_copy(void *dest, const void *source, unsigned size)
+//{
+//	memcpy(dest, source, size);
+//}
 
-void mem_move(void *dest, const void *source, unsigned size)
-{
-	memmove(dest, source, size);
-}
+//void mem_move(void *dest, const void *source, unsigned size)
+//{
+//	memmove(dest, source, size);
+//}
 
-void mem_zero(void *block, unsigned size)
-{
-	memset(block, 0, size);
-}
+//template<>
+//void mem_zero<void>(void *block, unsigned size)
+//{
+//	memset(block, 0, size);
+//}
 
 IOHANDLE io_open_impl(const char *filename, int flags)
 {
@@ -3295,10 +3296,10 @@ void str_escape(char **dst, const char *src, const char *end)
 	**dst = 0;
 }
 
-int mem_comp(const void *a, const void *b, int size)
-{
-	return memcmp(a, b, size);
-}
+//int mem_comp(const void *a, const void *b, int size)
+//{
+//	return memcmp(a, b, size);
+//}
 
 int mem_has_null(const void *block, unsigned size)
 {
@@ -4180,4 +4181,18 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 size_t std::hash<NETADDR>::operator()(const NETADDR &Addr) const noexcept
 {
 	return std::hash<std::string_view>{}(std::string_view((const char *)&Addr, sizeof(Addr)));
+}
+
+int mem_is_null(const void* block, size_t size)
+{
+	const unsigned char *bytes = (const unsigned char *)block;
+	size_t i;
+	for(i = 0; i < size; i++)
+	{
+		if(bytes[i] != 0)
+		{
+			return 0;
+		}
+	}
+	return 1;
 }

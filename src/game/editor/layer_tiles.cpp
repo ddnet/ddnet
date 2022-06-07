@@ -37,7 +37,7 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_AutoAutoMap = false;
 
 	m_pTiles = new CTile[m_Width * m_Height];
-	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+	dbg_assert(mem_is_null(m_pTiles, sizeof(*m_pTiles)), "mem not null");
 }
 
 CLayerTiles::~CLayerTiles()
@@ -574,7 +574,7 @@ void CLayerTiles::BrushRotate(float Amount)
 void CLayerTiles::Resize(int NewW, int NewH)
 {
 	CTile *pNewData = new CTile[NewW * NewH];
-	mem_zero(pNewData, (size_t)NewW * NewH * sizeof(CTile));
+	dbg_assert(mem_is_null(pNewData, sizeof(*pNewData)), "mem not null");
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1060,7 +1060,7 @@ CLayerTele::CLayerTele(int w, int h) :
 	m_Tele = 1;
 
 	m_pTeleTile = new CTeleTile[w * h];
-	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
+	dbg_assert(mem_is_null(m_pTeleTile, sizeof(*m_pTeleTile)), "mem not null");
 }
 
 CLayerTele::~CLayerTele()
@@ -1072,7 +1072,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 {
 	// resize tele data
 	CTeleTile *pNewTeleData = new CTeleTile[NewW * NewH];
-	mem_zero(pNewTeleData, (size_t)NewW * NewH * sizeof(CTeleTile));
+	dbg_assert(mem_is_null(pNewTeleData, sizeof(*pNewTeleData)), "mem not null");
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1289,7 +1289,7 @@ CLayerSpeedup::CLayerSpeedup(int w, int h) :
 	m_Speedup = 1;
 
 	m_pSpeedupTile = new CSpeedupTile[w * h];
-	mem_zero(m_pSpeedupTile, (size_t)w * h * sizeof(CSpeedupTile));
+	dbg_assert(mem_is_null(m_pSpeedupTile, sizeof(*m_pSpeedupTile)), "mem not null");
 }
 
 CLayerSpeedup::~CLayerSpeedup()
@@ -1301,7 +1301,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 {
 	// resize speedup data
 	CSpeedupTile *pNewSpeedupData = new CSpeedupTile[NewW * NewH];
-	mem_zero(pNewSpeedupData, (size_t)NewW * NewH * sizeof(CSpeedupTile));
+	dbg_assert(mem_is_null(pNewSpeedupData, sizeof(*pNewSpeedupData)), "mem not null");
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1574,7 +1574,7 @@ CLayerSwitch::CLayerSwitch(int w, int h) :
 	m_Switch = 1;
 
 	m_pSwitchTile = new CSwitchTile[w * h];
-	mem_zero(m_pSwitchTile, (size_t)w * h * sizeof(CSwitchTile));
+	dbg_assert(mem_is_null(m_pSwitchTile, sizeof(*m_pSwitchTile)), "mem not null");
 }
 
 CLayerSwitch::~CLayerSwitch()
@@ -1586,7 +1586,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 {
 	// resize switch data
 	CSwitchTile *pNewSwitchData = new CSwitchTile[NewW * NewH];
-	mem_zero(pNewSwitchData, (size_t)NewW * NewH * sizeof(CSwitchTile));
+	dbg_assert(mem_is_null(pNewSwitchData, sizeof(*pNewSwitchData)), "mem not null");
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)
@@ -1831,7 +1831,7 @@ CLayerTune::CLayerTune(int w, int h) :
 	m_Tune = 1;
 
 	m_pTuneTile = new CTuneTile[w * h];
-	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
+	dbg_assert(mem_is_null(m_pTuneTile, sizeof(*m_pTuneTile)), "mem not null");
 }
 
 CLayerTune::~CLayerTune()
@@ -1843,7 +1843,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 {
 	// resize Tune data
 	CTuneTile *pNewTuneData = new CTuneTile[NewW * NewH];
-	mem_zero(pNewTuneData, (size_t)NewW * NewH * sizeof(CTuneTile));
+	dbg_assert(mem_is_null(pNewTuneData, sizeof(*pNewTuneData)), "mem not null");
 
 	// copy old data
 	for(int y = 0; y < minimum(NewH, m_Height); y++)

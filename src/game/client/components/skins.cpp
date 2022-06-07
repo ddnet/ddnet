@@ -403,7 +403,6 @@ int CSkins::Find(const char *pName)
 int CSkins::FindImpl(const char *pName)
 {
 	CSkin Needle;
-	mem_zero(&Needle, sizeof(Needle));
 	str_copy(Needle.m_aName, pName);
 	auto Range = std::equal_range(m_vSkins.begin(), m_vSkins.end(), Needle);
 	if(std::distance(Range.first, Range.second) == 1)
@@ -419,7 +418,7 @@ int CSkins::FindImpl(const char *pName)
 		return -1;
 
 	CDownloadSkin DownloadNeedle;
-	mem_zero(&DownloadNeedle, sizeof(DownloadNeedle));
+	dbg_assert(mem_is_null(&DownloadNeedle, sizeof(DownloadNeedle)), "mem not null");
 	str_copy(DownloadNeedle.m_aName, pName);
 	const auto &[RangeBegin, RangeEnd] = std::equal_range(m_vDownloadSkins.begin(), m_vDownloadSkins.end(), DownloadNeedle);
 	if(std::distance(RangeBegin, RangeEnd) == 1)

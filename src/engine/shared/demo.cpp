@@ -128,7 +128,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		MapSize = io_length(MapFile);
 
 	// write header
-	mem_zero(&Header, sizeof(Header));
+	Header = CDemoHeader();
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
 	str_copy(Header.m_aNetversion, pNetVersion);
@@ -708,7 +708,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	str_copy(m_aFilename, pFilename);
 
 	// clear the playback info
-	mem_zero(&m_Info, sizeof(m_Info));
+	m_Info = CDemoPlayer::CPlaybackInfo();
 	m_Info.m_Info.m_FirstTick = -1;
 	m_Info.m_Info.m_LastTick = -1;
 	m_Info.m_NextTick = -1;
@@ -1067,8 +1067,8 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	if(!pDemoHeader || !pTimelineMarkers || !pMapInfo)
 		return false;
 
-	mem_zero(pDemoHeader, sizeof(CDemoHeader));
-	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
+	*pDemoHeader = CDemoHeader();
+	*pTimelineMarkers = CTimelineMarkers();
 
 	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!File)

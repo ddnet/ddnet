@@ -45,22 +45,18 @@ struct CScorePlayerResult : ISqlResult
 		char m_aBroadcast[1024] /* = {0} */;
 		struct
 		{
-			float m_Time = 0;
-			float m_aTimeCp[NUM_CHECKPOINTS] = {0};
-			int m_Score = 0;
-			int m_HasFinishScore = 0;
-			int m_Birthday = 0; // 0 indicates no birthday
+			float m_Time;
+			float m_aTimeCp[NUM_CHECKPOINTS];
+			int m_Score;
+			int m_HasFinishScore;
+			int m_Birthday; // 0 indicates no birthday
 		} m_Info;
 		struct
 		{
-			char m_aReason[VOTE_REASON_LENGTH] = {0};
-			char m_aServer[32 + 1] = {0};
-			char m_aMap[MAX_MAP_LENGTH + 1] = {0};
+			char m_aReason[VOTE_REASON_LENGTH];
+			char m_aServer[32 + 1];
+			char m_aMap[MAX_MAP_LENGTH + 1];
 		} m_MapVote;
-		UPlayerInfo()
-		{
-			mem_zero(this, sizeof(*this));
-		}
 	} m_Data; // PLAYER_INFO
 
 	void SetVariant(Variant v);

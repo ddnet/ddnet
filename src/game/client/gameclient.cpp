@@ -79,6 +79,32 @@ int CGameClient::DDNetVersion() const { return CLIENT_VERSIONNR; }
 const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
 const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
 
+bool operator==(const CNetObj_Character &lhs, const CNetObj_Character &rhs)
+{
+	return lhs.m_Tick == rhs.m_Tick &&
+	lhs.m_X == rhs.m_X &&
+	lhs.m_Y == rhs.m_Y &&
+	lhs.m_VelX == rhs.m_VelX &&
+	lhs.m_VelY == rhs.m_VelY &&
+	lhs.m_Angle == rhs.m_Angle &&
+	lhs.m_Direction == rhs.m_Direction &&
+	lhs.m_Jumped == rhs.m_Jumped &&
+	lhs.m_HookedPlayer == rhs.m_HookedPlayer &&
+	lhs.m_HookState == rhs.m_HookState &&
+	lhs.m_HookTick == rhs.m_HookTick &&
+	lhs.m_HookX == rhs.m_HookX &&
+	lhs.m_HookY == rhs.m_HookY &&
+	lhs.m_HookDx == rhs.m_HookDx &&
+	lhs.m_HookDy == rhs.m_HookDy &&
+	lhs.m_PlayerFlags == rhs.m_PlayerFlags &&
+	lhs.m_Health == rhs.m_Health &&
+	lhs.m_Armor == rhs.m_Armor &&
+	lhs.m_AmmoCount == rhs.m_AmmoCount &&
+	lhs.m_Weapon == rhs.m_Weapon &&
+	lhs.m_Emote == rhs.m_Emote &&
+	lhs.m_AttackTick == rhs.m_AttackTick;
+}
+
 void CGameClient::OnConsoleInit()
 {
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
@@ -512,7 +538,8 @@ void CGameClient::OnConnected()
 
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
-	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
+	m_GameInfo = CGameInfo();
+	dbg_assert(mem_is_null(&m_GameInfo, sizeof(m_GameInfo)), "mem not null");
 	m_PredictedDummyID = -1;
 	LoadMapSettings();
 
@@ -1124,7 +1151,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 void CGameClient::InvalidateSnapshot()
 {
 	// clear all pointers
-	mem_zero(&m_Snap, sizeof(m_Snap));
+	m_Snap = CGameClient::CSnapState();
 	m_Snap.m_LocalClientID = -1;
 	SnapCollectEntities();
 }
@@ -1304,9 +1331,9 @@ void CGameClient::OnNewSnapshot()
 						// reuse the result from the previous evolve if the snapped character didn't change since the previous snapshot
 						if(EvolveCur && m_aClients[Item.m_ID].m_Evolved.m_Tick == Client()->PrevGameTick(g_Config.m_ClDummy))
 						{
-							if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
+							if(m_Snap.m_aCharacters[Item.m_ID].m_Prev == m_aClients[Item.m_ID].m_Snapped)
 								m_Snap.m_aCharacters[Item.m_ID].m_Prev = m_aClients[Item.m_ID].m_Evolved;
-							if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
+							if(m_Snap.m_aCharacters[Item.m_ID].m_Cur == m_aClients[Item.m_ID].m_Snapped)
 								m_Snap.m_aCharacters[Item.m_ID].m_Cur = m_aClients[Item.m_ID].m_Evolved;
 						}
 

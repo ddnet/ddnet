@@ -28,6 +28,8 @@
 
 #include <chrono>
 #include <functional>
+#include <type_traits>
+#include <cstring>
 
 extern "C" {
 
@@ -103,79 +105,6 @@ dbg_break();
  */
 void dbg_msg(const char *sys, const char *fmt, ...)
 	GNUC_ATTRIBUTE((format(printf, 2, 3)));
-
-/**
- * @defgroup Memory
- * Memory management utilities.
- */
-
-/**
- * Copies a a memory block.
- *
- * @ingroup Memory
- *
- * @param dest Destination.
- * @param source Source to copy.
- * @param size Size of the block to copy.
- *
- * @remark This functions DOES NOT handle cases where the source and destination is overlapping.
- *
- * @see mem_move
- */
-void mem_copy(void *dest, const void *source, unsigned size);
-
-/**
- * Copies a a memory block.
- *
- * @ingroup Memory
- *
- * @param dest Destination.
- * @param source Source to copy.
- * @param size Size of the block to copy.
- *
- * @remark This functions handles the cases where the source and destination is overlapping.
- *
- * @see mem_copy
- */
-void mem_move(void *dest, const void *source, unsigned size);
-
-/**
- * Sets a complete memory block to 0.
- *
- * @ingroup Memory
- *
- * @param block Pointer to the block to zero out.
- * @param size Size of the block.
- */
-void mem_zero(void *block, unsigned size);
-
-/**
- * Compares two blocks of memory
- *
- * @ingroup Memory
- *
- * @param a First block of data
- * @param b Second block of data
- * @param size Size of the data to compare
- *
- * @return < 0 - Block a is less than block b.
- * @return 0 - Block a is equal to block b.
- * @return > 0 - Block a is greater than block b.
- */
-int mem_comp(const void *a, const void *b, int size);
-
-/**
- * Checks whether a block of memory contains null bytes.
- *
- * @ingroup Memory
- *
- * @param block Pointer to the block to check for nulls.
- * @param size Size of the block.
- *
- * @return 1 - The block has a null byte.
- * @return 0 - The block does not have a null byte.
- */
-int mem_has_null(const void *block, unsigned size);
 
 /**
  * @defgroup File-IO
@@ -2347,6 +2276,8 @@ typedef void *PROCESS;
 typedef pid_t PROCESS;
 #endif
 
+int mem_has_null(const void *block, unsigned size);
+
 /*
 	Function: shell_execute
 		Executes a given file.
@@ -2518,9 +2449,114 @@ public:
  * @remark Guarantees that dst string will contain zero-termination.
  */
 template<int N>
-void str_copy(char (&dst)[N], const char *src)
+inline void str_copy(char (&dst)[N], const char *src)
 {
 	str_copy(dst, src, N);
+}
+
+/**
+ * @defgroup Memory
+ * Memory management utilities.
+ */
+
+/**
+ * Copies a a memory block.
+ *
+ * @ingroup Memory
+ *
+ * @param dest Destination.
+ * @param source Source to copy.
+ * @param size Size of the block to copy.
+ *
+ * @remark This functions DOES NOT handle cases where the source and destination is overlapping.
+ *
+ * @see mem_move
+ */
+template<typename T1, typename T2>
+inline void mem_copy(T1 *__restrict__ dest, const T2 *__restrict__ source, unsigned size)
+{
+	static_assert(std::is_same<T1, void>::value || std::is_trivial<T1>::value || std::is_standard_layout<T1>::value);
+	static_assert(std::is_same<T2, void>::value || std::is_trivial<T2>::value || std::is_standard_layout<T2>::value);
+	memcpy(dest, source, size);
+}
+
+/**
+ * Copies a a memory block.
+ *
+ * @ingroup Memory
+ *
+ * @param dest Destination.
+ * @param source Source to copy.
+ * @param size Size of the block to copy.
+ *
+ * @remark This functions handles the cases where the source and destination is overlapping.
+ *
+ * @see mem_copy
+ */
+//void mem_move(void *dest, const void *source, unsigned size);
+
+/**
+ * Sets a complete memory block to 0.
+ *
+ * @ingroup Memory
+ *
+ * @param block Pointer to the block to zero out.
+ * @param size Size of the block.
+ */
+//extern template void mem_zero<void>(void *block, unsigned size);
+//void mem_zero(void *block, unsigned size);
+
+/**
+ * Compares two blocks of memory
+ *
+ * @ingroup Memory
+ *
+ * @param a First block of data
+ * @param b Second block of data
+ * @param size Size of the data to compare
+ *
+ * @return < 0 - Block a is less than block b.
+ * @return 0 - Block a is equal to block b.
+ * @return > 0 - Block a is greater than block b.
+ */
+//int mem_comp(const void *a, const void *b, int size);
+
+/**
+ * Checks whether a block of memory contains null bytes.
+ *
+ * @ingroup Memory
+ *
+ * @param block Pointer to the block to check for nulls.
+ * @param size Size of the block.
+ *
+ * @return 1 - The block has a null byte.
+ * @return 0 - The block does not have a null byte.
+ */
+
+int mem_is_null(const void* block, size_t size);
+
+
+template<typename T1, typename T2>
+inline void mem_move(T1 *dest, const T2 *source, unsigned size)
+{
+	static_assert(std::is_same<T1, void>::value || std::is_trivial<T1>::value || std::is_standard_layout<T1>::value);
+	static_assert(std::is_same<T2, void>::value || std::is_trivial<T2>::value || std::is_standard_layout<T2>::value);
+	memmove(dest, source, size);
+}
+template<typename T1, typename T2>
+inline int mem_comp(const T1 *a, const T2 *b, int size)
+{
+	static_assert(std::is_same<T1, void>::value || std::is_trivial<T1>::value || std::is_standard_layout<T1>::value);
+	static_assert(std::is_same<T2, void>::value || std::is_trivial<T2>::value || std::is_standard_layout<T2>::value);
+
+	return memcmp(a, b, size);
+}
+template<typename T>
+inline void mem_zero(T *block, unsigned size)
+{
+	static_assert(std::is_same<T, void>::value || std::is_trivial<T>::value || std::is_standard_layout<T>::value);
+
+	memset(block, 0, size);
 }
 
 template<>

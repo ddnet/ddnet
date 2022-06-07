@@ -46,7 +46,7 @@ static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP)
 {
 	// zero out the whole structure
-	mem_zero(this, sizeof(*this));
+	*this = CNetServer();
 
 	// open socket
 	m_Socket = net_udp_create(BindAddr);
@@ -276,7 +276,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *apMsgs[], int Num)
 {
 	CNetPacketConstruct Construct;
-	mem_zero(&Construct, sizeof(Construct));
+	dbg_assert(mem_is_null(&Construct, sizeof(Construct)), "mem not null");
 	unsigned char *pChunkData = &Construct.m_aChunkData[Construct.m_DataSize];
 
 	for(int i = 0; i < Num; i++)

@@ -103,6 +103,7 @@ public:
 	ETextCursorCursorMode m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
 	// note this is the decoded character offset
 	int m_CursorCharacter = 0;
+	int m_Padding = 0;
 };
 
 class ITextRender : public IInterface

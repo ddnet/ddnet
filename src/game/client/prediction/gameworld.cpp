@@ -513,7 +513,7 @@ void CGameWorld::NetObjEnd(int LocalID)
 					{
 						pHookedChar->m_Pos = pHookedChar->m_Core.m_Pos = pChar->m_Core.m_HookPos;
 						pHookedChar->m_Core.m_Vel = vec2(0, 0);
-						mem_zero(&pHookedChar->m_SavedInput, sizeof(pHookedChar->m_SavedInput));
+						pHookedChar->m_SavedInput = CNetObj_PlayerInput();
 						pHookedChar->m_SavedInput.m_TargetY = -1;
 						pHookedChar->m_KeepHooked = true;
 						pHookedChar->m_MarkedForDestroy = false;

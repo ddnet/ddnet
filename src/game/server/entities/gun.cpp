@@ -58,15 +58,10 @@ void CGun::Fire()
 		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
-	int aTargetIdInTeam[MAX_CLIENTS];
-	bool aIsTarget[MAX_CLIENTS];
-	int aMinDistInTeam[MAX_CLIENTS];
-	mem_zero(aMinDistInTeam, sizeof(aMinDistInTeam));
-	mem_zero(aIsTarget, sizeof(aIsTarget));
-	for(int &TargetId : aTargetIdInTeam)
-	{
-		TargetId = -1;
-	}
+	int aTargetIdInTeam[MAX_CLIENTS] = {-1};
+	bool aIsTarget[MAX_CLIENTS] = {false};
+	dbg_assert(mem_is_null(aIsTarget, sizeof aIsTarget), "mem not null");
+	int aMinDistInTeam[MAX_CLIENTS] = {0};
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
@@ -133,6 +128,7 @@ void CGun::Fire()
 		if(aIsTarget[i])
 		{
 			CCharacter *pTarget = GameServer()->GetPlayerChar(i);
+			dbg_msg("abvcd", "%p", pTarget);
 			new CPlasma(&GameServer()->m_World, m_Pos, normalize(pTarget->m_Pos - m_Pos), m_Freeze, m_Explosive, i);
 		}
 	}

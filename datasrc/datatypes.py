@@ -195,9 +195,6 @@ def EmitDefinition(root, name):
 
 # Network stuff after this
 
-class Object:
-	pass
-
 class Enum:
 	def __init__(self, name, values):
 		self.name = name

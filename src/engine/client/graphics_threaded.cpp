@@ -804,7 +804,7 @@ bool CGraphics_Threaded::ScreenshotDirect()
 {
 	// add swap command
 	CImageInfo Image;
-	mem_zero(&Image, sizeof(Image));
+	dbg_assert(mem_is_null(&Image, sizeof(Image)), "mem not null");
 
 	bool DidSwap = false;
 
@@ -1647,8 +1647,14 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		}
 		else
 		{
-			mem_copy(m_aVertices, &Container.m_vQuads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
-			m_NumVertices += 4 * QuadDrawNum;
+			// constexpr int ArraySize = std::size(SQuadContainer::SQuad::m_aVertices);
+			constexpr int ArraySize = sizeof(Container.m_vQuads[0].m_aVertices)/sizeof(Container.m_vQuads[0].m_aVertices[0]);
+			for(int i = 0; i < QuadDrawNum; ++i)
+			{
+				for(int j = 0; j < ArraySize; ++j)
+					m_aVertices[i * ArraySize + j] = Container.m_vQuads[QuadOffset + i].m_aVertices[j];
+			}
+			m_NumVertices += ArraySize * QuadDrawNum;
 		}
 		m_Drawing = DRAWING_QUADS;
 		if(ChangeWrapMode)
@@ -1749,31 +1755,32 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 		}
 		else
 		{
-			mem_copy(m_aVertices, &Container.m_vQuads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
+			constexpr int ArraySize = sizeof(Container.m_vQuads[0].m_aVertices)/sizeof(Container.m_vQuads[0].m_aVertices[0]);
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				for(int n = 0; n < 4; ++n)
+				for(int j = 0; j < ArraySize; ++j)
 				{
-					m_aVertices[i * 4 + n].m_Pos.x *= ScaleX;
-					m_aVertices[i * 4 + n].m_Pos.y *= ScaleY;
-					SetColor(&m_aVertices[i * 4 + n], 0);
+					m_aVertices[i * ArraySize + j] = Container.m_vQuads[QuadOffset+i].m_aVertices[j];
+					m_aVertices[i * ArraySize + j].m_Pos.x *= ScaleX;
+					m_aVertices[i * ArraySize + j].m_Pos.y *= ScaleY;
+					SetColor(&m_aVertices[i * ArraySize + j], 0);
 				}
 
 				if(m_Rotation != 0)
 				{
 					CCommandBuffer::SPoint Center;
-					Center.x = m_aVertices[i * 4 + 0].m_Pos.x + (m_aVertices[i * 4 + 1].m_Pos.x - m_aVertices[i * 4 + 0].m_Pos.x) / 2.f;
-					Center.y = m_aVertices[i * 4 + 0].m_Pos.y + (m_aVertices[i * 4 + 2].m_Pos.y - m_aVertices[i * 4 + 0].m_Pos.y) / 2.f;
+					Center.x = m_aVertices[i * ArraySize + 0].m_Pos.x + (m_aVertices[i * ArraySize + 1].m_Pos.x - m_aVertices[i * ArraySize + 0].m_Pos.x) / 2.f;
+					Center.y = m_aVertices[i * ArraySize + 0].m_Pos.y + (m_aVertices[i * ArraySize + 2].m_Pos.y - m_aVertices[i * ArraySize + 0].m_Pos.y) / 2.f;
 
-					Rotate(Center, &m_aVertices[i * 4 + 0], 4);
+					Rotate(Center, &m_aVertices[i * ArraySize + 0], ArraySize);
 				}
 
-				for(int n = 0; n < 4; ++n)
+				for(int j = 0; j < ArraySize; ++j)
 				{
-					m_aVertices[i * 4 + n].m_Pos.x += X;
-					m_aVertices[i * 4 + n].m_Pos.y += Y;
+					m_aVertices[i * ArraySize + j].m_Pos.x += X;
+					m_aVertices[i * ArraySize + j].m_Pos.y += Y;
 				}
-				m_NumVertices += 4;
+				m_NumVertices += ArraySize;
 			}
 		}
 		m_Drawing = DRAWING_QUADS;
@@ -2876,7 +2883,7 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 
 	// add videomodes command
 	CImageInfo Image;
-	mem_zero(&Image, sizeof(Image));
+	dbg_assert(mem_is_null(&Image, sizeof(Image)), "mem not null");
 
 	int NumModes = 0;
 	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);

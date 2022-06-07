@@ -29,13 +29,13 @@ struct CChecksumData
 
 union CChecksum
 {
-	char m_aBytes[sizeof(CChecksumData)] /* = {0} */;
 	CChecksumData m_Data;
+	char m_aBytes[sizeof(CChecksumData)] /* = {0} */;
 
-	CChecksum()
-	{
-		mem_zero(this, sizeof(this));
-	};
+    CChecksum()
+    {
+        mem_zero(m_aBytes, sizeof(CChecksum));
+    }
 };
 
 #endif // ENGINE_CLIENT_CHECKSUM_H

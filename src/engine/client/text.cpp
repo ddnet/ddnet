@@ -792,7 +792,8 @@ public:
 
 	void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) override
 	{
-		mem_zero(pCursor, sizeof(*pCursor));
+		*pCursor = CTextCursor();
+		dbg_assert(mem_is_null(pCursor, sizeof(*pCursor)), "mem not null");
 		pCursor->m_FontSize = FontSize;
 		pCursor->m_StartX = x;
 		pCursor->m_StartY = y;
