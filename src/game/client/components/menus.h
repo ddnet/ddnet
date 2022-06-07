@@ -100,7 +100,7 @@ class CMenus : public CComponent
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination);
 
-	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
+	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View);
 
 	void RenderColorPicker();
 

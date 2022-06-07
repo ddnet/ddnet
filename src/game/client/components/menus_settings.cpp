@@ -910,7 +910,7 @@ static CKeyInfo gs_aKeys[] =
 	Localize("Lock team");Localize("Show entities");Localize("Show HUD");Localize("Chat command");
 */
 
-void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView)
+void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
@@ -1012,7 +1012,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
 		}
 
-		DoSettingsControlsButtons(0, 15, MovementSettings, MainView);
+		DoSettingsControlsButtons(0, 15, MovementSettings);
 	}
 
 	// weapon settings
@@ -1025,7 +1025,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Weapon"), -1.0f);
 
 		WeaponSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &WeaponSettings);
-		DoSettingsControlsButtons(15, 22, WeaponSettings, MainView);
+		DoSettingsControlsButtons(15, 22, WeaponSettings);
 	}
 
 	// defaults
@@ -1051,7 +1051,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Voting"), -1.0f);
 
 		VotingSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &VotingSettings);
-		DoSettingsControlsButtons(22, 24, VotingSettings, MainView);
+		DoSettingsControlsButtons(22, 24, VotingSettings);
 	}
 
 	// chat settings
@@ -1064,7 +1064,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Chat"), -1.0f);
 
 		ChatSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &ChatSettings);
-		DoSettingsControlsButtons(24, 29, ChatSettings, MainView);
+		DoSettingsControlsButtons(24, 29, ChatSettings);
 	}
 
 	// dummy settings
@@ -1077,7 +1077,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, DummySettings.x, DummySettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Dummy"), -1.0f);
 
 		DummySettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &DummySettings);
-		DoSettingsControlsButtons(29, 32, DummySettings, MainView);
+		DoSettingsControlsButtons(29, 32, DummySettings);
 	}
 
 	// misc settings
@@ -1090,7 +1090,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &MiscSettings);
-		DoSettingsControlsButtons(32, 44, MiscSettings, MainView);
+		DoSettingsControlsButtons(32, 44, MiscSettings);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
