@@ -12,6 +12,57 @@ class IGraphics;
 
 class CRenderTools;
 
+class IScrollbarScale
+{
+public:
+	virtual float ToRelative(int AbsoluteValue, int Min, int Max) const = 0;
+	virtual int ToAbsolute(float RelativeValue, int Min, int Max) const = 0;
+};
+class CLinearScrollbarScale : public IScrollbarScale
+{
+public:
+	float ToRelative(int AbsoluteValue, int Min, int Max) const override
+	{
+		return (AbsoluteValue - Min) / (float)(Max - Min);
+	}
+	int ToAbsolute(float RelativeValue, int Min, int Max) const override
+	{
+		return round_to_int(RelativeValue * (Max - Min) + Min + 0.1f);
+	}
+};
+class CLogarithmicScrollbarScale : public IScrollbarScale
+{
+private:
+	int m_MinAdjustment;
+
+public:
+	CLogarithmicScrollbarScale(int MinAdjustment)
+	{
+		m_MinAdjustment = maximum(MinAdjustment, 1); // must be at least 1 to support Min == 0 with logarithm
+	}
+	float ToRelative(int AbsoluteValue, int Min, int Max) const override
+	{
+		if(Min < m_MinAdjustment)
+		{
+			AbsoluteValue += m_MinAdjustment;
+			Min += m_MinAdjustment;
+			Max += m_MinAdjustment;
+		}
+		return (log(AbsoluteValue) - log(Min)) / (float)(log(Max) - log(Min));
+	}
+	int ToAbsolute(float RelativeValue, int Min, int Max) const override
+	{
+		int ResultAdjustment = 0;
+		if(Min < m_MinAdjustment)
+		{
+			Min += m_MinAdjustment;
+			Max += m_MinAdjustment;
+			ResultAdjustment = -m_MinAdjustment;
+		}
+		return round_to_int(exp(RelativeValue * (log(Max) - log(Min)) + log(Min))) + ResultAdjustment;
+	}
+};
+
 struct SUIExEditBoxProperties
 {
 	bool m_SelectText = false;
@@ -53,6 +104,9 @@ protected:
 	CRenderTools *RenderTools() const { return m_pRenderTools; }
 
 public:
+	static const CLinearScrollbarScale ms_LinearScrollbarScale;
+	static const CLogarithmicScrollbarScale ms_LogarithmicScrollbarScale;
+
 	CUIEx();
 
 	void Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput::CEvent *pInputEventsArray, int *pInputEventCount);
@@ -62,6 +116,7 @@ public:
 
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
+	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, bool Infinite = false);
 
 	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
 	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});

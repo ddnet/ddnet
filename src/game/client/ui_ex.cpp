@@ -12,6 +12,9 @@
 
 #include <limits>
 
+const CLinearScrollbarScale CUIEx::ms_LinearScrollbarScale;
+const CLogarithmicScrollbarScale CUIEx::ms_LogarithmicScrollbarScale(25);
+
 CUIEx::CUIEx()
 {
 	m_MouseSlow = false;
@@ -209,6 +212,39 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	}
 
 	return ReturnValue;
+}
+
+void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, bool Infinite)
+{
+	int Value = *pOption;
+	if(Infinite)
+	{
+		Min += 1;
+		Max += 1;
+		if(Value == 0)
+			Value = Max;
+	}
+
+	char aBufMax[256];
+	str_format(aBufMax, sizeof(aBufMax), "%s: %i", pStr, Max);
+	char aBuf[256];
+	if(!Infinite || Value != Max)
+		str_format(aBuf, sizeof(aBuf), "%s: %i", pStr, Value);
+	else
+		str_format(aBuf, sizeof(aBuf), "%s: ∞", pStr);
+
+	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
+	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(0, FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(0, FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
+
+	CUIRect Label, ScrollBar;
+	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);
+	UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
+
+	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
+	if(Infinite && Value == Max)
+		Value = 0;
+
+	*pOption = Value;
 }
 
 bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
