@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Application
-Name=DDNet
+Name=chillerbot-ux
 GenericName=Platform Game
-Exec=DDNet %u
-Icon=ddnet
+Exec=chillerbot-ux %u
+Icon=chillerbot-ux
 Terminal=false
 Keywords=game;multiplayer;
 Categories=Game;ArcadeGame;
-MimeType=x-scheme-handler/ddnet;
-Comment=Launch DDNet
+MimeType=x-scheme-handler/chillerbot-ux;
+Comment=Launch chillerbot-ux
