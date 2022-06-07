@@ -247,6 +247,29 @@ void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRec
 	*pOption = Value;
 }
 
+void CUIEx::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale)
+{
+	const int Max = NumLabels - 1;
+	int Value = clamp(*pOption, 0, Max);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s: %s", pStr, ppLabels[Value]);
+
+	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
+
+	CUIRect Label, ScrollBar;
+	pRect->VSplitRight(60.0f, &Label, &ScrollBar);
+	Label.VSplitRight(10.0f, &Label, 0);
+	UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
+
+	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
+
+	if(UI()->HotItem() != pID && !UI()->CheckActiveItem(pID) && UI()->MouseHovered(pRect) && UI()->MouseButtonClicked(0))
+		Value = (Value + 1) % NumLabels;
+
+	*pOption = clamp(Value, 0, Max);
+}
+
 bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
 	const bool Inside = UI()->MouseHovered(pRect);

@@ -117,6 +117,7 @@ public:
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
 	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, bool Infinite = false);
+	void DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale = &ms_LinearScrollbarScale);
 
 	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
 	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
