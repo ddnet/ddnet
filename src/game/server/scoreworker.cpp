@@ -166,12 +166,9 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 		pResult->m_Data.m_Info.m_Score = -Time;
 		pResult->m_Data.m_Info.m_HasFinishScore = true;
 
-		if(g_Config.m_SvCheckpointSave)
+		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		{
-			for(int i = 0; i < NUM_CHECKPOINTS; i++)
-			{
-				pResult->m_Data.m_Info.m_CpTime[i] = pSqlServer->GetFloat(i + 2);
-			}
+			pResult->m_Data.m_Info.m_CpTime[i] = pSqlServer->GetFloat(i + 2);
 		}
 	}
 
