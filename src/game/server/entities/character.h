@@ -81,7 +81,7 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
-	int64_t TeamMask();
+	int64_t TeamMask(int ExcludeClientVersionAndHigher = -1);
 
 private:
 	// player controlling this character

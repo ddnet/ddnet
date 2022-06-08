@@ -473,7 +473,7 @@ bool CGameTeams::TeamFinished(int Team)
 	return true;
 }
 
-int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
+int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker, int ExcludeClientVersionAndHigher)
 {
 	int64_t Mask = 0;
 
@@ -486,6 +486,8 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			continue; // Explicitly excluded
 		if(!GetPlayer(i))
 			continue; // Player doesn't exist
+		if(ExcludeClientVersionAndHigher != -1 && GetPlayer(i)->GetClientVersion() >= ExcludeClientVersionAndHigher)
+			continue; // The player is excluded from this team mask because of his client version
 
 		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
 		{ // Not spectator
@@ -671,7 +673,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		Server()->ClientName(ClientID), (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
 	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
-		GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
+		GameServer()->SendChatTarget(ClientID, aBuf, -1, CGameContext::CHAT_SIX);
 	else
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1., CGameContext::CHAT_SIX);
 
@@ -689,9 +691,9 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 				Diff);
 		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
-			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
+			GameServer()->SendChatTarget(ClientID, aBuf, -1, CGameContext::CHAT_SIX);
 		else
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 	}
 	else if(pData->m_BestTime != 0) // tee has already finished?
 	{
@@ -711,7 +713,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 				str_format(aBuf, sizeof(aBuf),
 					"%5.2f second(s) worse, better luck next time.",
 					Diff);
-			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX); // this is private, sent only to the tee
+			GameServer()->SendChatTarget(ClientID, aBuf, -1, CGameContext::CHAT_SIX); // this is private, sent only to the tee
 		}
 	}
 	else
