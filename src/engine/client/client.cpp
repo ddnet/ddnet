@@ -4241,7 +4241,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, 0, 0, "Kick player with specified id for any reason");
 	m_pConsole->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER, 0, 0, "Ban player with ip/id for x minutes for any reason");
 	m_pConsole->Register("unban", "r[ip]", CFGFLAG_SERVER, 0, 0, "Unban ip");
-	m_pConsole->Register("bans", "", CFGFLAG_SERVER, 0, 0, "Show banlist");
+	m_pConsole->Register("bans", "?i[page]", CFGFLAG_SERVER, 0, 0, "Show banlist (page 0 by default, 20 entries per page)");
 	m_pConsole->Register("status", "?r[name]", CFGFLAG_SERVER, 0, 0, "List players containing name or all players");
 	m_pConsole->Register("shutdown", "", CFGFLAG_SERVER, 0, 0, "Shut down");
 	m_pConsole->Register("record", "r[file]", CFGFLAG_SERVER, 0, 0, "Record to a file");
