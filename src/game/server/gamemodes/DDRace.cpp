@@ -39,7 +39,7 @@ void CGameControllerDDRace::OnCharacterSpawn(CCharacter *pChr)
 void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 {
 	CPlayer *pPlayer = pChr->GetPlayer();
-	int ClientID = pPlayer->GetCID();
+	const int ClientID = pPlayer->GetCID();
 
 	int m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	int m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
@@ -105,12 +105,12 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// solo part
 	if(((m_TileIndex == TILE_SOLO_ENABLE) || (m_TileFIndex == TILE_SOLO_ENABLE)) && !m_Teams.m_Core.GetSolo(ClientID))
 	{
-		GameServer()->SendChatTarget(ClientID, "You are now in a solo part");
+		GameServer()->SendChatTarget(ClientID, "You are now in a solo part", VERSION_DDNET_NEW_HUD);
 		pChr->SetSolo(true);
 	}
 	else if(((m_TileIndex == TILE_SOLO_DISABLE) || (m_TileFIndex == TILE_SOLO_DISABLE)) && m_Teams.m_Core.GetSolo(ClientID))
 	{
-		GameServer()->SendChatTarget(ClientID, "You are now out of the solo part");
+		GameServer()->SendChatTarget(ClientID, "You are now out of the solo part", VERSION_DDNET_NEW_HUD);
 		pChr->SetSolo(false);
 	}
 }

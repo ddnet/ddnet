@@ -8,6 +8,7 @@
 #include <game/server/player.h>
 
 #include "character.h"
+#include "engine/shared/protocol.h"
 #include "laser.h"
 #include "projectile.h"
 
@@ -203,7 +204,7 @@ void CCharacter::HandleNinja()
 
 	if(NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
 	{
-		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask());
+		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask(VERSION_DDNET_NEW_HUD));
 	}
 
 	m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
@@ -1440,7 +1441,7 @@ void CCharacter::HandleTiles(int Index)
 	// hit others
 	if(((m_TileIndex == TILE_HIT_DISABLE) || (m_TileFIndex == TILE_HIT_DISABLE)) && m_Hit != (DISABLE_HIT_GRENADE | DISABLE_HIT_HAMMER | DISABLE_HIT_LASER | DISABLE_HIT_SHOTGUN))
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hit others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hit others", VERSION_DDNET_NEW_HUD);
 		m_Hit = DISABLE_HIT_GRENADE | DISABLE_HIT_HAMMER | DISABLE_HIT_LASER | DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = true;
 		m_Core.m_NoGrenadeHit = true;
@@ -1451,7 +1452,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(((m_TileIndex == TILE_HIT_ENABLE) || (m_TileFIndex == TILE_HIT_ENABLE)) && m_Hit != HIT_ALL)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hit others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hit others", VERSION_DDNET_NEW_HUD);
 		m_Hit = HIT_ALL;
 		m_Core.m_NoShotgunHit = false;
 		m_Core.m_NoGrenadeHit = false;
@@ -1464,14 +1465,14 @@ void CCharacter::HandleTiles(int Index)
 	// collide with others
 	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_NoCollision)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others", VERSION_DDNET_NEW_HUD);
 		m_Core.m_NoCollision = true;
 		m_NeededFaketuning |= FAKETUNE_NOCOLL;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_NoCollision)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can collide with others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can collide with others", VERSION_DDNET_NEW_HUD);
 		m_Core.m_NoCollision = false;
 		m_NeededFaketuning &= ~FAKETUNE_NOCOLL;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
@@ -1480,14 +1481,14 @@ void CCharacter::HandleTiles(int Index)
 	// hook others
 	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_NoHookHit)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others", VERSION_DDNET_NEW_HUD);
 		m_Core.m_NoHookHit = true;
 		m_NeededFaketuning |= FAKETUNE_NOHOOK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_NoHookHit)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hook others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hook others", VERSION_DDNET_NEW_HUD);
 		m_Core.m_NoHookHit = false;
 		m_NeededFaketuning &= ~FAKETUNE_NOHOOK;
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
@@ -1496,7 +1497,7 @@ void CCharacter::HandleTiles(int Index)
 	// unlimited air jumps
 	if(((m_TileIndex == TILE_UNLIMITED_JUMPS_ENABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_ENABLE)) && !m_SuperJump)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have unlimited air jumps");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have unlimited air jumps", VERSION_DDNET_NEW_HUD);
 		m_SuperJump = true;
 		m_Core.m_EndlessJump = true;
 		if(m_Core.m_Jumps == 0)
@@ -1507,7 +1508,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(((m_TileIndex == TILE_UNLIMITED_JUMPS_DISABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_DISABLE)) && m_SuperJump)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have unlimited air jumps");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have unlimited air jumps", VERSION_DDNET_NEW_HUD);
 		m_SuperJump = false;
 		m_Core.m_EndlessJump = false;
 		if(m_Core.m_Jumps == 0)
@@ -1531,13 +1532,13 @@ void CCharacter::HandleTiles(int Index)
 	// jetpack gun
 	if(((m_TileIndex == TILE_JETPACK_ENABLE) || (m_TileFIndex == TILE_JETPACK_ENABLE)) && !m_Jetpack)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have a jetpack gun");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have a jetpack gun", VERSION_DDNET_NEW_HUD);
 		m_Jetpack = true;
 		m_Core.m_Jetpack = true;
 	}
 	else if(((m_TileIndex == TILE_JETPACK_DISABLE) || (m_TileFIndex == TILE_JETPACK_DISABLE)) && m_Jetpack)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You lost your jetpack gun", VERSION_DDNET_NEW_HUD);
 		m_Jetpack = false;
 		m_Core.m_Jetpack = false;
 	}
@@ -1558,34 +1559,34 @@ void CCharacter::HandleTiles(int Index)
 	if(((m_TileIndex == TILE_TELE_GUN_ENABLE) || (m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !m_Core.m_HasTelegunGun)
 	{
 		m_Core.m_HasTelegunGun = true;
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun enabled");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun enabled", VERSION_DDNET_NEW_HUD);
 	}
 	else if(((m_TileIndex == TILE_TELE_GUN_DISABLE) || (m_TileFIndex == TILE_TELE_GUN_DISABLE)) && m_Core.m_HasTelegunGun)
 	{
 		m_Core.m_HasTelegunGun = false;
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun disabled");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport gun disabled", VERSION_DDNET_NEW_HUD);
 	}
 
 	if(((m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !m_Core.m_HasTelegunGrenade)
 	{
 		m_Core.m_HasTelegunGrenade = true;
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade enabled");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade enabled", VERSION_DDNET_NEW_HUD);
 	}
 	else if(((m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && m_Core.m_HasTelegunGrenade)
 	{
 		m_Core.m_HasTelegunGrenade = false;
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade disabled");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport grenade disabled", VERSION_DDNET_NEW_HUD);
 	}
 
 	if(((m_TileIndex == TILE_TELE_LASER_ENABLE) || (m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !m_Core.m_HasTelegunLaser)
 	{
 		m_Core.m_HasTelegunLaser = true;
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser enabled");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser enabled", VERSION_DDNET_NEW_HUD);
 	}
 	else if(((m_TileIndex == TILE_TELE_LASER_DISABLE) || (m_TileFIndex == TILE_TELE_LASER_DISABLE)) && m_Core.m_HasTelegunLaser)
 	{
 		m_Core.m_HasTelegunLaser = false;
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser disabled");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser disabled", VERSION_DDNET_NEW_HUD);
 	}
 
 	// stopper
@@ -1660,7 +1661,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_HAMMER && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hammer hit others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hammer hit others", VERSION_DDNET_NEW_HUD);
 		m_Hit &= ~DISABLE_HIT_HAMMER;
 		m_NeededFaketuning &= ~FAKETUNE_NOHAMMER;
 		m_Core.m_NoHammerHit = false;
@@ -1668,7 +1669,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_HAMMER) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hammer hit others");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hammer hit others", VERSION_DDNET_NEW_HUD);
 		m_Hit |= DISABLE_HIT_HAMMER;
 		m_NeededFaketuning |= FAKETUNE_NOHAMMER;
 		m_Core.m_NoHammerHit = true;
@@ -1676,37 +1677,37 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_SHOTGUN && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with shotgun");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with shotgun", VERSION_DDNET_NEW_HUD);
 		m_Hit &= ~DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = false;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_SHOTGUN) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with shotgun");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with shotgun", VERSION_DDNET_NEW_HUD);
 		m_Hit |= DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = true;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_GRENADE && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with grenade");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with grenade", VERSION_DDNET_NEW_HUD);
 		m_Hit &= ~DISABLE_HIT_GRENADE;
 		m_Core.m_NoGrenadeHit = false;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_GRENADE) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with grenade");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with grenade", VERSION_DDNET_NEW_HUD);
 		m_Hit |= DISABLE_HIT_GRENADE;
 		m_Core.m_NoGrenadeHit = true;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_LASER && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with laser");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can shoot others with laser", VERSION_DDNET_NEW_HUD);
 		m_Hit &= ~DISABLE_HIT_LASER;
 		m_Core.m_NoLaserHit = false;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_LASER) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with laser");
+		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't shoot others with laser", VERSION_DDNET_NEW_HUD);
 		m_Hit |= DISABLE_HIT_LASER;
 		m_Core.m_NoLaserHit = true;
 	}
@@ -1727,8 +1728,7 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
 			else
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
-
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf, VERSION_DDNET_NEW_HUD);
 			if(NewJumps == 0 && !m_SuperJump)
 			{
 				m_NeededFaketuning |= FAKETUNE_NOJUMP;
@@ -2001,7 +2001,7 @@ void CCharacter::DDRaceTick()
 	{
 		if(m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1 || m_FreezeTime == -1)
 		{
-			GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), TeamMask());
+			GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), TeamMask(VERSION_DDNET_NEW_HUD));
 		}
 		if(m_FreezeTime > 0)
 			m_FreezeTime--;
@@ -2205,8 +2205,7 @@ void CCharacter::SetEndlessHook(bool Enable)
 	{
 		return;
 	}
-
-	GameServer()->SendChatTarget(GetPlayer()->GetCID(), Enable ? "Endless hook has been activated" : "Endless hook has been deactivated");
+	GameServer()->SendChatTarget(GetPlayer()->GetCID(), Enable ? "Endless hook has been activated" : "Endless hook has been deactivated", VERSION_DDNET_NEW_HUD);
 	m_EndlessHook = Enable;
 	m_Core.m_EndlessHook = Enable;
 }
@@ -2304,9 +2303,9 @@ void CCharacter::Rescue()
 	}
 }
 
-int64_t CCharacter::TeamMask()
+int64_t CCharacter::TeamMask(int ExcludeClientVersionAndHigher)
 {
-	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID());
+	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID(), ExcludeClientVersionAndHigher);
 }
 
 void CCharacter::SwapClients(int Client1, int Client2)

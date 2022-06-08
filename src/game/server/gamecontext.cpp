@@ -389,7 +389,7 @@ void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, c
 	pPlayer->m_LastVoteCall = Now;
 }
 
-void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
+void CGameContext::SendChatTarget(int To, const char *pText, int ExcludeClientVersionAndHigher, int Flags)
 {
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
@@ -412,6 +412,11 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 	}
 	else
 	{
+		if(ExcludeClientVersionAndHigher != -1 && Server()->GetClientVersion(To) >= ExcludeClientVersionAndHigher)
+		{
+			return;
+		}
+
 		if(!((Server()->IsSixup(To) && (Flags & CHAT_SIXUP)) ||
 			   (!Server()->IsSixup(To) && (Flags & CHAT_SIX))))
 			return;
