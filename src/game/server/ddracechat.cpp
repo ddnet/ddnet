@@ -1576,3 +1576,24 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->Score()->ShowTopPoints(pResult->m_ClientID);
 }
+
+void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(g_Config.m_SvHideScore)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Showing the checkpoint times is not allowed on this server.");
+		return;
+	}
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	const char *pName = pResult->GetString(0);
+	pSelf->Score()->LoadPlayerData(pResult->m_ClientID, pName);
+}

@@ -179,6 +179,7 @@ TEST_P(SingleScore, LoadPlayerData)
 {
 	g_Config.m_SvCheckpointSave = true;
 	InsertRank(120.0, true);
+	str_copy(m_PlayerRequest.m_aName, "", sizeof(m_PlayerRequest.m_aRequestingPlayer));
 	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
@@ -189,6 +190,7 @@ TEST_P(SingleScore, LoadPlayerData)
 	}
 
 	str_copy(m_PlayerRequest.m_aRequestingPlayer, "nameless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));
+	str_copy(m_PlayerRequest.m_aName, "", sizeof(m_PlayerRequest.m_aRequestingPlayer));
 	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);

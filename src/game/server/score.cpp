@@ -113,9 +113,9 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pPool->Execute(CScoreWorker::Init, std::move(Tmp), "load best time");
 }
 
-void CScore::LoadPlayerData(int ClientID)
+void CScore::LoadPlayerData(int ClientID, const char *pName)
 {
-	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientID, "", 0);
+	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientID, pName, 0);
 }
 
 void CScore::MapVote(int ClientID, const char *MapName)

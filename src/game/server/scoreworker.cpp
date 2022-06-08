@@ -146,10 +146,12 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	{
 		return true;
 	}
+
+	const char *pPlayer = pData->m_aName[0] != '\0' ? pData->m_aName : pData->m_aRequestingPlayer;
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pData->m_aRequestingPlayer);
 	pSqlServer->BindString(3, pData->m_aMap);
-	pSqlServer->BindString(4, pData->m_aRequestingPlayer);
+	pSqlServer->BindString(4, pPlayer);
 
 	bool End;
 	if(pSqlServer->Step(&End, pError, ErrorSize))
