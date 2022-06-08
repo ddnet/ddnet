@@ -95,7 +95,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 
 int main(int argc, const char *argv[])
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
 	IOHANDLE LogFile = io_open("map_diff.txt", IOFLAG_WRITE);
@@ -115,7 +115,5 @@ int main(int argc, const char *argv[])
 	if(!pStorage)
 		return -1;
 
-	int Result = Process(pStorage, &argv[1]) ? 0 : 1;
-	cmdline_free(argc, argv);
-	return Result;
+	return Process(pStorage, &argv[1]) ? 0 : 1;
 }

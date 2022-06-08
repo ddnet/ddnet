@@ -114,7 +114,7 @@ CTestInfo::~CTestInfo()
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
@@ -125,6 +125,5 @@ int main(int argc, const char **argv)
 	}
 	int Result = RUN_ALL_TESTS();
 	secure_random_uninit();
-	cmdline_free(argc, argv);
 	return Result;
 }

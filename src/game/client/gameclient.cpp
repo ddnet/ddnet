@@ -387,8 +387,7 @@ void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
-	Input()->MouseRelative(&x, &y);
-	if(x != 0.0f || y != 0.0f)
+	if(Input()->MouseRelative(&x, &y))
 	{
 		for(auto &pComponent : m_vpInput)
 		{

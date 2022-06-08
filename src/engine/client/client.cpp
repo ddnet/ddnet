@@ -4402,7 +4402,7 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
 #endif
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -4606,7 +4606,6 @@ int main(int argc, const char **argv)
 
 	delete pKernel;
 
-	cmdline_free(argc, argv);
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
 	std::exit(0);

@@ -507,6 +507,56 @@ typedef struct
 
 class CLayerTiles : public CLayer
 {
+protected:
+	template<typename T>
+	void ShiftImpl(T *pTiles, int Direction, int ShiftBy)
+	{
+		switch(Direction)
+		{
+		case DIRECTION_LEFT:
+			for(int y = 0; y < m_Height; ++y)
+			{
+				mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
+				mem_zero(&pTiles[y * m_Width + (m_Width - ShiftBy)], ShiftBy * sizeof(T));
+			}
+			break;
+		case DIRECTION_RIGHT:
+			for(int y = 0; y < m_Height; ++y)
+			{
+				mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
+				mem_zero(&pTiles[y * m_Width], ShiftBy * sizeof(T));
+			}
+			break;
+		case DIRECTION_UP:
+			for(int y = 0; y < m_Height - ShiftBy; ++y)
+			{
+				mem_copy(&pTiles[y * m_Width], &pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
+				mem_zero(&pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
+			}
+			break;
+		case DIRECTION_DOWN:
+			for(int y = m_Height - 1; y >= ShiftBy; --y)
+			{
+				mem_copy(&pTiles[y * m_Width], &pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
+				mem_zero(&pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
+			}
+		}
+	}
+	template<typename T>
+	void BrushFlipXImpl(T *pTiles)
+	{
+		for(int y = 0; y < m_Height; y++)
+			for(int x = 0; x < m_Width / 2; x++)
+				std::swap(pTiles[y * m_Width + x], pTiles[(y + 1) * m_Width - 1 - x]);
+	}
+	template<typename T>
+	void BrushFlipYImpl(T *pTiles)
+	{
+		for(int y = 0; y < m_Height / 2; y++)
+			for(int x = 0; x < m_Width; x++)
+				std::swap(pTiles[y * m_Width + x], pTiles[(m_Height - 1 - y) * m_Width + x]);
+	}
+
 public:
 	CLayerTiles(int w, int h);
 	~CLayerTiles();

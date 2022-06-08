@@ -95,7 +95,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 int main(int argc, const char *argv[])
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateLocalStorage();
@@ -126,6 +126,5 @@ int main(int argc, const char *argv[])
 	png_init(0, 0);
 
 	int Result = Process(pStorage, argv[1], pDir) ? 0 : 1;
-	cmdline_free(argc, argv);
 	return Result;
 }

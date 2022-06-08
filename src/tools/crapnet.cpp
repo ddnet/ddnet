@@ -200,10 +200,9 @@ void Run(unsigned short Port, NETADDR Dest)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(8302, Addr);
-	cmdline_free(argc, argv);
 	return 0;
 }
