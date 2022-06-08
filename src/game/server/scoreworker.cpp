@@ -131,20 +131,25 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	char aBuf[512];
 	// get best race time
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, "
-		"  cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, "
-		"  cp21, cp22, cp23, cp24, cp25 "
+		"SELECT"
+		"  (SELECT Time FROM %s_race WHERE Map = ? AND Name = ? ORDER BY Time ASC LIMIT 1) AS Time, "
+		"  cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, "
+		"  cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
+		"  (cp1 + cp2 + cp3 + cp4 + cp5 + cp6 + cp7 + cp8 + cp9 + cp10 + cp11 + cp12 + cp13 + cp14 + "
+		"  cp15 + cp16 + cp17 + cp18 + cp19 + cp20 + cp21 + cp22 + cp23 + cp24 + cp25 > 0) AS hasCP "
 		"FROM %s_race "
 		"WHERE Map = ? AND Name = ? "
-		"ORDER BY Time ASC "
+		"ORDER BY hasCP DESC, Time ASC "
 		"LIMIT 1",
-		pSqlServer->GetPrefix());
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
 	}
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pData->m_aRequestingPlayer);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, pData->m_aRequestingPlayer);
 
 	bool End;
 	if(pSqlServer->Step(&End, pError, ErrorSize))
