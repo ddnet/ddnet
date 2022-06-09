@@ -53,6 +53,7 @@ On macOS you can use [homebrew](https://brew.sh/) to install build dependencies 
     brew install cmake freetype glew googletest opusfile SDL2 wavpack x264 ffmpeg molten-vk vulkan-headers glslang spirv-tools
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
+*Note that ddnet-libs do not include all needed libraries to build.*
 
 Building on Linux and macOS
 ---------------------------
