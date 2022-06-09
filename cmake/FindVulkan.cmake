@@ -27,7 +27,7 @@ if(NOT VULKAN_FOUND)
       VULKAN_INCLUDE_DIRS
       NAMES vulkan/vulkan.h
     )
-  else()
+  elseif(TARGET_OS STREQUAL "windows")
     set_extra_dirs_lib(VULKAN vulkan)
     find_library(VULKAN_LIBRARIES
       NAMES vulkan vulkan-1
@@ -42,6 +42,20 @@ if(NOT VULKAN_FOUND)
       NAMES vulkan/vulkan.h
       HINTS ${HINTS_VULKAN_INCLUDEDIR} ${PC_VULKAN_INCLUDEDIR} ${PC_VULKAN_INCLUDE_DIRS}
       PATHS ${PATHS_VULKAN_INCLUDEDIR}
+      ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
+    )
+  else()
+    # no Vulkan in ddnet-libs for other platforms
+    find_library(VULKAN_LIBRARIES
+      NAMES vulkan vulkan-1
+      HINTS ${PC_VULKAN_LIBDIR} ${PC_VULKAN_LIBRARY_DIRS}
+      ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
+    )
+
+    find_path(
+      VULKAN_INCLUDE_DIRS
+      NAMES vulkan/vulkan.h
+      HINTS ${PC_VULKAN_INCLUDEDIR} ${PC_VULKAN_INCLUDE_DIRS}
       ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
     )
   endif()
