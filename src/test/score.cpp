@@ -90,7 +90,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		ASSERT_EQ(NumInserted, 1);
 	}
 
-	void InsertRank()
+	void InsertRank(float Time = 100.0, bool WithTimeCheckPoints = false)
 	{
 		str_copy(g_Config.m_SvSqlServerName, "USA", sizeof(g_Config.m_SvSqlServerName));
 		CSqlScoreData ScoreData(std::make_shared<CScorePlayerResult>());
@@ -98,10 +98,10 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		str_copy(ScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320", sizeof(ScoreData.m_aGameUuid));
 		str_copy(ScoreData.m_aName, "nameless tee", sizeof(ScoreData.m_aName));
 		ScoreData.m_ClientID = 0;
-		ScoreData.m_Time = 100.0;
+		ScoreData.m_Time = Time;
 		str_copy(ScoreData.m_aTimestamp, "2021-11-24 19:24:08", sizeof(ScoreData.m_aTimestamp));
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
-			ScoreData.m_aCpCurrent[i] = i;
+			ScoreData.m_aCpCurrent[i] = WithTimeCheckPoints ? i : 0;
 		str_copy(ScoreData.m_aRequestingPlayer, "deen", sizeof(ScoreData.m_aRequestingPlayer));
 		ASSERT_FALSE(CScoreWorker::SaveScore(m_pConn, &ScoreData, false, m_aError, sizeof(m_aError))) << m_aError;
 	}
@@ -173,6 +173,31 @@ TEST_P(SingleScore, RankServer)
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
+}
+
+TEST_P(SingleScore, LoadPlayerData)
+{
+	InsertRank(120.0, true);
+	str_copy(m_PlayerRequest.m_aName, "", sizeof(m_PlayerRequest.m_aRequestingPlayer));
+	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
+	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
+	for(int i = 0; i < NUM_CHECKPOINTS; i++)
+	{
+		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], 0);
+	}
+
+	str_copy(m_PlayerRequest.m_aRequestingPlayer, "nameless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));
+	str_copy(m_PlayerRequest.m_aName, "", sizeof(m_PlayerRequest.m_aRequestingPlayer));
+	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
+	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 100.0);
+	for(int i = 0; i < NUM_CHECKPOINTS; i++)
+	{
+		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], i);
+	}
 }
 
 TEST_P(SingleScore, TimesExists)
