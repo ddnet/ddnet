@@ -56,24 +56,24 @@ void CEditor::UiDoPopupMenu()
 
 		if(UI()->CheckActiveItem(&s_UiPopups[i].m_pId))
 		{
-			if(!UI()->MouseButton(0))
+			if(UI()->MouseButton(0) == 0)
 			{
 				if(!Inside)
 				{
 					g_UiNumPopups--;
-					m_PopupEventWasActivated = false;
+					m_PopupEventWasActivated = 0;
 				}
 				UI()->SetActiveItem(nullptr);
 			}
 		}
 		else if(UI()->HotItem() == &s_UiPopups[i].m_pId)
 		{
-			if(UI()->MouseButton(0))
+			if(UI()->MouseButton(0) != 0)
 				UI()->SetActiveItem(&s_UiPopups[i].m_pId);
 		}
 
 		int Corners = CUI::CORNER_ALL;
-		if(s_UiPopups[i].m_IsMenu)
+		if(s_UiPopups[i].m_IsMenu != 0)
 			Corners = CUI::CORNER_R | CUI::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
@@ -82,12 +82,12 @@ void CEditor::UiDoPopupMenu()
 		RenderTools()->DrawUIRect(&r, ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
-		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))
+		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext) != 0)
 		{
 			m_LockMouse = false;
 			UI()->SetActiveItem(nullptr);
 			g_UiNumPopups--;
-			m_PopupEventWasActivated = false;
+			m_PopupEventWasActivated = 0;
 		}
 
 		if(Input()->KeyPress(KEY_ESCAPE))
@@ -95,7 +95,7 @@ void CEditor::UiDoPopupMenu()
 			m_LockMouse = false;
 			UI()->SetActiveItem(nullptr);
 			g_UiNumPopups--;
-			m_PopupEventWasActivated = false;
+			m_PopupEventWasActivated = 0;
 		}
 	}
 }
@@ -126,7 +126,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	// don't allow deletion of game group
 	if(pEditor->m_Map.m_pGameGroup != pEditor->GetSelectedGroup())
 	{
-		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete group", 0, &Button, 0, "Delete group"))
+		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete group", 0, &Button, 0, "Delete group") != 0)
 		{
 			pEditor->m_Map.DeleteGroup(pEditor->m_SelectedGroup);
 			pEditor->m_SelectedGroup = maximum(0, pEditor->m_SelectedGroup - 1);
@@ -135,7 +135,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 	else
 	{
-		if(pEditor->DoButton_Editor(&s_DeleteButton, "Clean up game tiles", 0, &Button, 0, "Removes game tiles that aren't based on a layer"))
+		if(pEditor->DoButton_Editor(&s_DeleteButton, "Clean up game tiles", 0, &Button, 0, "Removes game tiles that aren't based on a layer") != 0)
 		{
 			// gather all tile layers
 			std::vector<CLayerTiles *> Layers;
@@ -156,7 +156,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 					bool Found = false;
 					for(const auto &pLayer : Layers)
 					{
-						if(x < pLayer->m_Width && y < pLayer->m_Height && pLayer->m_pTiles[y * pLayer->m_Width + x].m_Index)
+						if(x < pLayer->m_Width && y < pLayer->m_Height && (pLayer->m_pTiles[y * pLayer->m_Width + x].m_Index != 0u))
 						{
 							Found = true;
 							break;
@@ -180,7 +180,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewTeleLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
+		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer") != 0)
 		{
 			CLayer *l = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTeleLayer(l);
@@ -197,7 +197,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewSpeedupLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
+		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer") != 0)
 		{
 			CLayer *l = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSpeedupLayer(l);
@@ -214,7 +214,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewTuneLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
+		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer") != 0)
 		{
 			CLayer *l = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTuneLayer(l);
@@ -231,7 +231,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewFrontLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
+		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer") != 0)
 		{
 			CLayer *l = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeFrontLayer(l);
@@ -248,7 +248,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewSwitchLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
+		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer") != 0)
 		{
 			CLayer *l = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSwitchLayer(l);
@@ -263,7 +263,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(5.0f, &View, &Button);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_NewQuadLayerButton = 0;
-	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
+	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer") != 0)
 	{
 		CLayer *l = new CLayerQuads;
 		l->m_pEditor = pEditor;
@@ -277,7 +277,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(5.0f, &View, &Button);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_NewTileLayerButton = 0;
-	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
+	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer") != 0)
 	{
 		CLayer *l = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 		l->m_pEditor = pEditor;
@@ -291,7 +291,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(5.0f, &View, &Button);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_NewSoundLayerButton = 0;
-	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
+	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer") != 0)
 	{
 		CLayer *l = new CLayerSounds;
 		l->m_pEditor = pEditor;
@@ -399,7 +399,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// don't allow deletion of game layer
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
-		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))
+		(pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer") != 0))
 	{
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pFrontLayer)
 			pEditor->m_Map.m_pFrontLayer = 0x0;
@@ -444,7 +444,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_lGroups.size() - 1},
 		{"Order", pEditor->m_lSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_lLayers.size()},
-		{"Detail", pCurrentLayer && pCurrentLayer->m_Flags & LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
+		{"Detail", static_cast<int>((static_cast<int>(pCurrentLayer != nullptr) != 0) && ((pCurrentLayer->m_Flags & LAYERFLAG_DETAIL)) != 0), PROPTYPE_BOOL, 0, 1},
 		{0},
 	};
 
@@ -478,12 +478,12 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	else if(Prop == PROP_HQ && pCurrentLayer)
 	{
 		pCurrentLayer->m_Flags &= ~LAYERFLAG_DETAIL;
-		if(NewVal)
+		if(NewVal != 0)
 			pCurrentLayer->m_Flags |= LAYERFLAG_DETAIL;
 	}
 
 	if(!pCurrentLayer)
-		return true;
+		return 1;
 	return pCurrentLayer->RenderProperties(&View);
 }
 
@@ -497,7 +497,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	// delete button
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
-	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current quad"))
+	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current quad") != 0)
 	{
 		CLayerQuads *pLayer = (CLayerQuads *)pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS);
 		if(pLayer)
@@ -515,7 +515,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pLayer && pLayer->m_Image >= 0 && (size_t)pLayer->m_Image < pEditor->m_Map.m_lImages.size())
 	{
 		static int s_AspectRatioButton = 0;
-		if(pEditor->DoButton_Editor(&s_AspectRatioButton, "Aspect ratio", 0, &Button, 0, "Resizes the current Quad based on the aspect ratio of the image"))
+		if(pEditor->DoButton_Editor(&s_AspectRatioButton, "Aspect ratio", 0, &Button, 0, "Resizes the current Quad based on the aspect ratio of the image") != 0)
 		{
 			for(auto &pQuad : lQuads)
 			{
@@ -553,7 +553,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(6.0f, &View, &Button);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_AlignButton = 0;
-	if(pEditor->DoButton_Editor(&s_AlignButton, "Align", 0, &Button, 0, "Aligns coordinates of the quad points"))
+	if(pEditor->DoButton_Editor(&s_AlignButton, "Align", 0, &Button, 0, "Aligns coordinates of the quad points") != 0)
 	{
 		for(auto &pQuad : lQuads)
 		{
@@ -571,7 +571,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(6.0f, &View, &Button);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_Button = 0;
-	if(pEditor->DoButton_Editor(&s_Button, "Square", 0, &Button, 0, "Squares the current quad"))
+	if(pEditor->DoButton_Editor(&s_Button, "Square", 0, &Button, 0, "Squares the current quad") != 0)
 	{
 		for(auto &pQuad : lQuads)
 		{
@@ -609,7 +609,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(6.0f, &View, &Button);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_SliceButton = 0;
-	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, 0, "Enables quad knife mode"))
+	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, 0, "Enables quad knife mode") != 0)
 	{
 		pEditor->m_QuadKnifeCount = 0;
 		pEditor->m_QuadKnifeActive = true;
@@ -705,7 +705,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	// delete button
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
-	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current source"))
+	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current source") != 0)
 	{
 		CLayerSounds *pLayer = (CLayerSounds *)pEditor->GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
 		if(pLayer)
@@ -729,7 +729,7 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 
 	pSource->m_Shape.m_Type = pSource->m_Shape.m_Type % CSoundShape::NUM_SHAPES; // prevent out of array errors
 
-	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_aShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, 0, "Change shape"))
+	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_aShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, 0, "Change shape") != 0)
 	{
 		pSource->m_Shape.m_Type = (pSource->m_Shape.m_Type + 1) % CSoundShape::NUM_SHAPES;
 
@@ -942,20 +942,20 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		if(Prop == PROP_POS_X)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints & (1 << v))
+				if((pEditor->m_SelectedPoints & (1 << v)) != 0)
 					pQuad->m_aPoints[v].x = i2fx(NewVal);
 		}
 		if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints & (1 << v))
+				if((pEditor->m_SelectedPoints & (1 << v)) != 0)
 					pQuad->m_aPoints[v].y = i2fx(NewVal);
 		}
 		if(Prop == PROP_COLOR)
 		{
 			for(int v = 0; v < 4; v++)
 			{
-				if(pEditor->m_SelectedPoints & (1 << v))
+				if((pEditor->m_SelectedPoints & (1 << v)) != 0)
 				{
 					pQuad->m_aColors[v].r = (NewVal >> 24) & 0xff;
 					pQuad->m_aColors[v].g = (NewVal >> 16) & 0xff;
@@ -967,13 +967,13 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		if(Prop == PROP_TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints & (1 << v))
+				if((pEditor->m_SelectedPoints & (1 << v)) != 0)
 					pQuad->m_aTexcoords[v].x = f2fx(NewVal / 1024.0f);
 		}
 		if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
-				if(pEditor->m_SelectedPoints & (1 << v))
+				if((pEditor->m_SelectedPoints & (1 << v)) != 0)
 					pQuad->m_aTexcoords[v].y = f2fx(NewVal / 1024.0f);
 		}
 	}
@@ -1008,10 +1008,10 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
 		static int s_CreateButton = 0;
-		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
+		if((pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, 0) != 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 		{
 			// create the folder
-			if(pEditor->m_aFileDialogNewFolderName[0])
+			if(pEditor->m_aFileDialogNewFolderName[0] != 0)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
@@ -1027,7 +1027,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 		ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
 		static int s_AbortButton = 0;
-		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
+		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0) != 0)
 			return 1;
 	}
 	else
@@ -1045,7 +1045,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 		// button
 		ButtonBar.VMargin(ButtonBar.w / 2.0f - 55.0f, &ButtonBar);
 		static int s_CreateButton = 0;
-		if(pEditor->DoButton_Editor(&s_CreateButton, "Ok", 0, &ButtonBar, 0, 0))
+		if(pEditor->DoButton_Editor(&s_CreateButton, "Ok", 0, &ButtonBar, 0, 0) != 0)
 			return 1;
 	}
 
@@ -1102,7 +1102,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
 	static int s_CreateButton = 0;
-	if(pEditor->DoButton_Editor(&s_CreateButton, "Ok", 0, &Label, 0, 0))
+	if(pEditor->DoButton_Editor(&s_CreateButton, "Ok", 0, &Label, 0, 0) != 0)
 	{
 		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthor, pEditor->m_Map.m_MapInfo.m_aAuthorTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aAuthor));
 		str_copy(pEditor->m_Map.m_MapInfo.m_aVersion, pEditor->m_Map.m_MapInfo.m_aVersionTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aVersion));
@@ -1114,7 +1114,7 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 	ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
 	static int s_AbortButton = 0;
-	if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0))
+	if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0) != 0)
 		return 1;
 
 	return 0;
@@ -1178,7 +1178,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	ButtonBar.VSplitLeft(30.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
 	static int s_OkButton = 0;
-	if(pEditor->DoButton_Editor(&s_OkButton, "Ok", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
+	if((pEditor->DoButton_Editor(&s_OkButton, "Ok", 0, &Label, 0, 0) != 0) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 			g_Config.m_ClEditor = 0;
@@ -1195,7 +1195,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 			CEditor::CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 			pEditor->PlaceBorderTiles();
-		pEditor->m_PopupEventWasActivated = false;
+		pEditor->m_PopupEventWasActivated = 0;
 		return 1;
 	}
 	ButtonBar.VSplitRight(30.0f, &ButtonBar, 0);
@@ -1203,9 +1203,9 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
 	{
 		static int s_AbortButton = 0;
-		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0) || pEditor->Input()->KeyPress(KEY_ESCAPE))
+		if((pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, 0) != 0) || pEditor->Input()->KeyPress(KEY_ESCAPE))
 		{
-			pEditor->m_PopupEventWasActivated = false;
+			pEditor->m_PopupEventWasActivated = 0;
 			return 1;
 		}
 	}
@@ -1272,12 +1272,12 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 		if(i == -1)
 		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lImages[i], "None", i == g_SelectImageCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lImages[i], "None", static_cast<int>(i == g_SelectImageCurrent), &Button) != 0)
 				g_SelectImageSelected = -1;
 		}
 		else
 		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lImages[i], pEditor->m_Map.m_lImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lImages[i], pEditor->m_Map.m_lImages[i]->m_aName, static_cast<int>(i == g_SelectImageCurrent), &Button) != 0)
 				g_SelectImageSelected = i;
 		}
 	}
@@ -1379,12 +1379,12 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 
 		if(i == -1)
 		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lSounds[i], "None", i == g_SelectSoundCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lSounds[i], "None", static_cast<int>(i == g_SelectSoundCurrent), &Button) != 0)
 				g_SelectSoundSelected = -1;
 		}
 		else
 		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lSounds[i], pEditor->m_Map.m_lSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_lSounds[i], pEditor->m_Map.m_lSounds[i]->m_aName, static_cast<int>(i == g_SelectSoundCurrent), &Button) != 0)
 				g_SelectSoundSelected = i;
 		}
 	}
@@ -1436,7 +1436,7 @@ int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContex
 	{
 		View.HSplitTop(2.0f, 0, &View);
 		View.HSplitTop(12.0f, &Button, &View);
-		if(pEditor->DoButton_Editor(&s_pButtonNames[i], s_pButtonNames[i], 0, &Button, 0, 0))
+		if(pEditor->DoButton_Editor(&s_pButtonNames[i], s_pButtonNames[i], 0, &Button, 0, 0) != 0)
 			s_GametileOpSelected = i;
 	}
 
@@ -1521,7 +1521,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		{
 			View.HSplitTop(ButtonMargin, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, 0))
+			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), static_cast<int>(i == s_AutoMapConfigCurrent), &Button, 0, 0) != 0)
 			{
 				s_AutoMapConfigSelected = i;
 			}
@@ -1572,7 +1572,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if((pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") != 0) || pEditor->Input()->KeyPress(KEY_F))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
@@ -1675,7 +1675,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if((pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") != 0) || pEditor->Input()->KeyPress(KEY_F))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
@@ -1811,7 +1811,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// logic
 	float X, Y;
-	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y))
+	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y) != 0)
 	{
 		hsv.y = X / SVPicker.w;
 		hsv.z = 1.0f - Y / SVPicker.h;
@@ -1852,7 +1852,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	pEditor->Graphics()->QuadsEnd();
 
-	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y))
+	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y) != 0)
 	{
 		hsv.x = 1.0f - Y / HuePicker.h;
 	}
@@ -1871,7 +1871,7 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 
 		const char *Name = pEditor->m_SelectEntitiesFiles[i].c_str();
 
-		if(pEditor->DoButton_MenuItem(Name, Name, pEditor->m_SelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button))
+		if(pEditor->DoButton_MenuItem(Name, Name, static_cast<int>(pEditor->m_SelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage), &Button) != 0)
 		{
 			if(pEditor->m_SelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage)
 			{

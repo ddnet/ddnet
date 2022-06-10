@@ -448,7 +448,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 
 	if(CheckActiveItem(pID))
 	{
-		if(s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
+		if(s_ButtonUsed >= 0 && (MouseButton(s_ButtonUsed) == 0))
 		{
 			if(Inside && Checked >= 0)
 				ReturnValue = 1 + s_ButtonUsed;
@@ -460,7 +460,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 	{
 		for(int i = 0; i < 3; ++i)
 		{
-			if(MouseButton(i))
+			if(MouseButton(i) != 0)
 			{
 				SetActiveItem(pID);
 				s_ButtonUsed = i;
@@ -468,7 +468,7 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 		}
 	}
 
-	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
+	if(Inside && (MouseButton(0) == 0) && (MouseButton(1) == 0) && (MouseButton(2) == 0))
 		SetHotItem(pID);
 
 	return ReturnValue;
@@ -479,10 +479,10 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	if(MouseHovered(pRect))
 		SetHotItem(pID);
 
-	if(HotItem() == pID && MouseButtonClicked(0))
+	if(HotItem() == pID && (MouseButtonClicked(0) != 0))
 		SetActiveItem(pID);
 
-	if(CheckActiveItem(pID) && !MouseButton(0))
+	if(CheckActiveItem(pID) && (MouseButton(0) == 0))
 		SetActiveItem(nullptr);
 
 	if(!CheckActiveItem(pID))
@@ -522,17 +522,17 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 		AlignmentVert = y + (h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
 	// if(Align == 0)
-	if(Align & TEXTALIGN_CENTER)
+	if((Align & TEXTALIGN_CENTER) != 0)
 	{
 		AlignmentHori = x + (w - tw) / 2.f;
 	}
 	// else if(Align < 0)
-	else if(Align & TEXTALIGN_LEFT)
+	else if((Align & TEXTALIGN_LEFT) != 0)
 	{
 		AlignmentHori = x;
 	}
 	// else if(Align > 0)
-	else if(Align & TEXTALIGN_RIGHT)
+	else if((Align & TEXTALIGN_RIGHT) != 0)
 	{
 		AlignmentHori = x + w - tw;
 	}
@@ -602,17 +602,17 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 		AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
 	}
 	// if(Align == 0)
-	if(Align & TEXTALIGN_CENTER)
+	if((Align & TEXTALIGN_CENTER) != 0)
 	{
 		AlignmentHori = pRect->x + (pRect->w - tw) / 2.f;
 	}
 	// else if(Align < 0)
-	else if(Align & TEXTALIGN_LEFT)
+	else if((Align & TEXTALIGN_LEFT) != 0)
 	{
 		AlignmentHori = pRect->x;
 	}
 	// else if(Align > 0)
-	else if(Align & TEXTALIGN_RIGHT)
+	else if((Align & TEXTALIGN_RIGHT) != 0)
 	{
 		AlignmentHori = pRect->x + pRect->w - tw;
 	}

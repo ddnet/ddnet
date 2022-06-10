@@ -31,7 +31,7 @@ public:
 
 	void ParseConnectString(const char *pConnect)
 	{
-		if(pConnect[0])
+		if(pConnect[0] != 0)
 		{
 			NETADDR Connect;
 			if(net_host_lookup(pConnect, &Connect, NETTYPE_ALL) == 0)
@@ -100,7 +100,7 @@ public:
 				OnGameRichPresenceJoinRequested((GameRichPresenceJoinRequested_t *)Callback.m_pubParam);
 				break;
 			default:
-				if(g_Config.m_Debug)
+				if(g_Config.m_Debug != 0)
 				{
 					dbg_msg("steam/dbg", "unhandled callback id=%d", Callback.m_iCallback);
 				}
@@ -115,7 +115,7 @@ public:
 	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override
 	{
 		char aServerAddr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&ServerAddr, aServerAddr, sizeof(aServerAddr), true);
+		net_addr_str(&ServerAddr, aServerAddr, sizeof(aServerAddr), 1);
 
 		SteamAPI_ISteamFriends_SetRichPresence(m_pSteamFriends, "connect", aServerAddr);
 		SteamAPI_ISteamFriends_SetRichPresence(m_pSteamFriends, "map", pMapName);

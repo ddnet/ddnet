@@ -106,7 +106,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	{
 		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start + i, 0, 0);
-		if(pImg->m_External)
+		if(pImg->m_External != 0)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
@@ -204,7 +204,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 
 		CImageInfo ImgInfo;
 		bool ImagePNGLoaded = false;
-		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL) != 0)
 			ImagePNGLoaded = true;
 		else
 		{
@@ -213,7 +213,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
 			{
 				str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
-				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL) != 0)
 				{
 					ImagePNGLoaded = true;
 					TryDefault = false;
@@ -224,7 +224,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			{
 				// try default
 				str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_aModEntitiesNames[EntitiesModType]);
-				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL) != 0)
 				{
 					ImagePNGLoaded = true;
 				}

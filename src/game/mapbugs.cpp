@@ -31,7 +31,7 @@ static unsigned int BugToFlag(int Bug)
 
 static unsigned int IsBugFlagSet(int Bug, unsigned int BugFlags)
 {
-	return (BugFlags & BugToFlag(Bug)) != 0;
+	return static_cast<unsigned int>((BugFlags & BugToFlag(Bug)) != 0);
 }
 
 static SHA256_DIGEST s(const char *pSha256)
@@ -67,9 +67,9 @@ bool CMapBugs::Contains(int Bug) const
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
 	if(!pInternal)
 	{
-		return IsBugFlagSet(Bug, m_Extra);
+		return IsBugFlagSet(Bug, m_Extra) != 0u;
 	}
-	return IsBugFlagSet(Bug, pInternal->m_BugFlags);
+	return IsBugFlagSet(Bug, pInternal->m_BugFlags) != 0u;
 }
 
 int CMapBugs::Update(const char *pBug)
@@ -101,7 +101,7 @@ void CMapBugs::Dump() const
 	{
 		Flags = pInternal->m_BugFlags;
 	}
-	else if(m_Extra)
+	else if(m_Extra != 0u)
 	{
 		Flags = m_Extra;
 	}
@@ -112,7 +112,7 @@ void CMapBugs::Dump() const
 	char aBugs[NUM_BUGS + 1] = {0};
 	for(int i = 0; i < NUM_BUGS; i++)
 	{
-		aBugs[i] = IsBugFlagSet(i, Flags) ? 'X' : 'O';
+		aBugs[i] = IsBugFlagSet(i, Flags) != 0u ? 'X' : 'O';
 	}
 
 	dbg_msg("mapbugs", "enabling map compatibility mode %s", aBugs);

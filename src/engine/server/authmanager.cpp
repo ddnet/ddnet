@@ -28,13 +28,13 @@ CAuthManager::CAuthManager()
 void CAuthManager::Init()
 {
 	size_t NumDefaultKeys = 0;
-	if(g_Config.m_SvRconPassword[0])
+	if(g_Config.m_SvRconPassword[0] != 0)
 		NumDefaultKeys++;
-	if(g_Config.m_SvRconModPassword[0])
+	if(g_Config.m_SvRconModPassword[0] != 0)
 		NumDefaultKeys++;
-	if(g_Config.m_SvRconHelperPassword[0])
+	if(g_Config.m_SvRconHelperPassword[0] != 0)
 		NumDefaultKeys++;
-	if(m_vKeys.size() == NumDefaultKeys && !g_Config.m_SvRconPassword[0])
+	if(m_vKeys.size() == NumDefaultKeys && (g_Config.m_SvRconPassword[0] == 0))
 	{
 		secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
 		AddDefaultKey(AUTHED_ADMIN, g_Config.m_SvRconPassword);
@@ -85,7 +85,7 @@ int CAuthManager::RemoveKey(int Slot)
 int CAuthManager::FindKey(const char *pIdent) const
 {
 	for(size_t i = 0; i < m_vKeys.size(); i++)
-		if(!str_comp(m_vKeys[i].m_aIdent, pIdent))
+		if(str_comp(m_vKeys[i].m_aIdent, pIdent) == 0)
 			return i;
 
 	return -1;
@@ -108,7 +108,7 @@ int CAuthManager::DefaultKey(int AuthLevel) const
 int CAuthManager::KeyLevel(int Slot) const
 {
 	if(Slot < 0 || Slot >= (int)m_vKeys.size())
-		return false;
+		return 0;
 	return m_vKeys[Slot].m_Level;
 }
 
@@ -166,6 +166,6 @@ bool CAuthManager::IsGenerated() const
 
 int CAuthManager::NumNonDefaultKeys() const
 {
-	int DefaultCount = (m_aDefault[0] >= 0) + (m_aDefault[1] >= 0) + (m_aDefault[2] >= 0);
+	int DefaultCount = static_cast<int>(m_aDefault[0] >= 0) + static_cast<int>(m_aDefault[1] >= 0) + static_cast<int>(m_aDefault[2] >= 0);
 	return m_vKeys.size() - DefaultCount;
 }

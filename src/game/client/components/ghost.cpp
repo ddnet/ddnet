@@ -139,7 +139,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	int NumTicks = m_CurGhost.m_Path.Size();
 
 	// do not start writing to file as long as we still touch the start line
-	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
+	if((g_Config.m_ClRaceSaveGhost != 0) && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);
 		GhostRecorder()->Start(m_aTmpFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), m_CurGhost.m_aPlayer);
@@ -268,10 +268,10 @@ void CGhost::OnNewSnapshot()
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
-	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
-	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
+	bool RaceFlag = (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME) != 0;
+	bool ServerControl = RaceFlag && (g_Config.m_ClRaceGhostServerControl != 0);
 
-	if(g_Config.m_ClRaceGhost)
+	if(g_Config.m_ClRaceGhost != 0)
 	{
 		if(!ServerControl)
 			CheckStartLocal(false);
@@ -289,13 +289,13 @@ void CGhost::OnNewSnapshot()
 
 void CGhost::OnNewPredictedSnapshot()
 {
-	if(!GameClient()->m_GameInfo.m_Race || !g_Config.m_ClRaceGhost || Client()->State() != IClient::STATE_ONLINE)
+	if(!GameClient()->m_GameInfo.m_Race || (g_Config.m_ClRaceGhost == 0) || Client()->State() != IClient::STATE_ONLINE)
 		return;
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
-	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
-	bool ServerControl = RaceFlag && g_Config.m_ClRaceGhostServerControl;
+	bool RaceFlag = (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME) != 0;
+	bool ServerControl = RaceFlag && (g_Config.m_ClRaceGhostServerControl != 0);
 
 	if(!ServerControl)
 		CheckStartLocal(true);
@@ -304,7 +304,7 @@ void CGhost::OnNewPredictedSnapshot()
 void CGhost::OnRender()
 {
 	// Play the ghost
-	if(!m_Rendering || !g_Config.m_ClRaceShowGhost)
+	if(!m_Rendering || (g_Config.m_ClRaceShowGhost == 0))
 		return;
 
 	int PlaybackTick = Client()->PredGameTick(g_Config.m_ClDummy) - m_StartRenderTick;
@@ -344,7 +344,7 @@ void CGhost::OnRender()
 
 		CTeeRenderInfo *RenderInfo = &Ghost.m_RenderInfo;
 		CTeeRenderInfo GhostNinjaRenderInfo;
-		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+		if(Player.m_Weapon == WEAPON_NINJA && (g_Config.m_ClShowNinja != 0))
 		{
 			// change the skin for the ghost to the ninja
 			int Skin = m_pClient->m_Skins.Find("x_ninja");
@@ -388,8 +388,8 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
 	pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
-	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
-	if(pGhost->m_Skin.m_UseCustomColor)
+	pRenderInfo->m_CustomColoredSkin = (pGhost->m_Skin.m_UseCustomColor != 0);
+	if(pGhost->m_Skin.m_UseCustomColor != 0)
 	{
 		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody).UnclampLighting());
 		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet).UnclampLighting());

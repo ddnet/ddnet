@@ -105,17 +105,17 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 
 void CStatboard::OnRender()
 {
-	if((g_Config.m_ClAutoStatboardScreenshot || g_Config.m_ClAutoCSV) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(((g_Config.m_ClAutoStatboardScreenshot != 0) || (g_Config.m_ClAutoCSV != 0)) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER)
+		if(m_ScreenshotTime < 0 && m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) != 0))
 			m_ScreenshotTime = time_get() + time_freq() * 3;
 		if(m_ScreenshotTime > -1 && m_ScreenshotTime < time_get())
 			m_Active = true;
 		if(!m_ScreenshotTaken && m_ScreenshotTime > -1 && m_ScreenshotTime + time_freq() / 5 < time_get())
 		{
-			if(g_Config.m_ClAutoStatboardScreenshot)
+			if(g_Config.m_ClAutoStatboardScreenshot != 0)
 				AutoStatScreenshot();
-			if(g_Config.m_ClAutoCSV)
+			if(g_Config.m_ClAutoCSV != 0)
 				AutoStatCSV();
 			m_ScreenshotTaken = true;
 		}
@@ -145,7 +145,7 @@ void CStatboard::RenderGlobalStats()
 	}
 
 	// sort blue players by score after
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0))
 	{
 		for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 		{
@@ -165,8 +165,8 @@ void CStatboard::RenderGlobalStats()
 	if(m_pClient->m_Motd.IsActive())
 		m_pClient->m_Motd.Clear();
 
-	bool GameWithFlags = m_pClient->m_Snap.m_pGameInfoObj &&
-			     m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS;
+	bool GameWithFlags = (m_pClient->m_Snap.m_pGameInfoObj != nullptr) &&
+			     ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) != 0);
 
 	StatboardContentWidth += 7 * 85 + 95; // Suicides 95; other labels 85
 
@@ -178,7 +178,7 @@ void CStatboard::RenderGlobalStats()
 	{
 		const CGameClient::CClientStats *pStats = &m_pClient->m_aStats[apPlayers[i]->m_ClientID];
 		for(int j = 0; j < NUM_WEAPONS; j++)
-			aDisplayWeapon[j] = aDisplayWeapon[j] || pStats->m_aFragsWith[j] || pStats->m_aDeathsFrom[j];
+			aDisplayWeapon[j] = aDisplayWeapon[j] || (pStats->m_aFragsWith[j] != 0) || (pStats->m_aDeathsFrom[j] != 0);
 	}
 	for(bool DisplayWeapon : aDisplayWeapon)
 		if(DisplayWeapon)
@@ -463,7 +463,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	}
 
 	// sort blue players by score after
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0))
 	{
 		for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
 		{
@@ -502,7 +502,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 		bool localPlayer = (m_pClient->m_Snap.m_LocalClientID == pInfo->m_ClientID || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID));
 
 		// Game with flags
-		bool GameWithFlags = (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS);
+		bool GameWithFlags = ((m_pClient->m_Snap.m_pGameInfoObj != nullptr) && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) != 0));
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%d,%d,%s,%s,%d,%d,%d,%d,%.2f,%i,%.1f,%d,%d,%s,%d,%d,%d\n",

@@ -276,11 +276,11 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		m_Input.SetRange("", m_Input.GetCursorOffset(), m_Input.GetLength());
 	}
 
-	if(Event.m_Flags & IInput::FLAG_PRESS)
+	if((Event.m_Flags & IInput::FLAG_PRESS) != 0)
 	{
 		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 		{
-			if(m_Input.GetString()[0] || (m_UsernameReq && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
+			if((m_Input.GetString()[0] != 0) || (m_UsernameReq && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 			{
 				if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
@@ -335,7 +335,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				m_CompletionUsed = true;
 
 				// handle wrapping
-				if(m_CompletionEnumerationCount && (m_CompletionChosen >= m_CompletionEnumerationCount || m_CompletionChosen < 0))
+				if((m_CompletionEnumerationCount != 0) && (m_CompletionChosen >= m_CompletionEnumerationCount || m_CompletionChosen < 0))
 				{
 					m_CompletionChosen = (m_CompletionChosen + m_CompletionEnumerationCount) % m_CompletionEnumerationCount;
 					m_CompletionEnumerationCount = 0;
@@ -373,7 +373,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			Handled = true;
 		}
 	}
-	if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
+	if(((Event.m_Flags & IInput::FLAG_RELEASE) != 0) && Event.m_Key == KEY_LSHIFT)
 	{
 		m_ReverseTAB = false;
 		Handled = true;
@@ -382,7 +382,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	if(!Handled)
 		m_Input.ProcessInput(Event);
 
-	if(Event.m_Flags & (IInput::FLAG_PRESS | IInput::FLAG_TEXT))
+	if((Event.m_Flags & (IInput::FLAG_PRESS | IInput::FLAG_TEXT)) != 0)
 	{
 		if((Event.m_Key != KEY_TAB) && (Event.m_Key != KEY_LSHIFT))
 		{
@@ -397,7 +397,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			char aBuf[64] = {0};
 			const char *pSrc = GetString();
 			int i = 0;
-			for(; i < (int)sizeof(aBuf) - 1 && *pSrc && *pSrc != ' '; i++, pSrc++)
+			for(; i < (int)sizeof(aBuf) - 1 && (*pSrc != 0) && *pSrc != ' '; i++, pSrc++)
 				aBuf[i] = *pSrc;
 			aBuf[i] = 0;
 
@@ -546,7 +546,7 @@ void CGameConsole::OnRender()
 		Progress = 1.0f;
 	}
 
-	if(m_ConsoleState == CONSOLE_OPEN && g_Config.m_ClEditor)
+	if(m_ConsoleState == CONSOLE_OPEN && (g_Config.m_ClEditor != 0))
 		Toggle(CONSOLETYPE_LOCAL);
 
 	if(m_ConsoleState == CONSOLE_CLOSED)
@@ -668,7 +668,7 @@ void CGameConsole::OnRender()
 		int EditingCursor = Input()->GetEditingCursor();
 		if(Input()->GetIMEState())
 		{
-			if(str_length(Input()->GetIMEEditingText()))
+			if(str_length(Input()->GetIMEEditingText()) != 0)
 			{
 				pConsole->m_Input.Editing(Input()->GetIMEEditingText(), EditingCursor);
 				Editing = true;
@@ -876,7 +876,7 @@ bool CGameConsole::OnInput(IInput::CEvent Event)
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
 
-	if(Event.m_Key == KEY_ESCAPE && (Event.m_Flags & IInput::FLAG_PRESS))
+	if(Event.m_Key == KEY_ESCAPE && ((Event.m_Flags & IInput::FLAG_PRESS) != 0))
 		Toggle(m_ConsoleType);
 	else
 		CurrentConsole()->OnInput(Event);

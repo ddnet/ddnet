@@ -64,7 +64,7 @@ void CGhostRecorder::ResetBuffer()
 
 static void DiffItem(int *pPast, int *pCurrent, int *pOut, int Size)
 {
-	while(Size)
+	while(Size != 0)
 	{
 		*pOut = *pCurrent - *pPast;
 		pOut++;
@@ -109,7 +109,7 @@ void CGhostRecorder::FlushChunk()
 	if(!m_File || Size == 0)
 		return;
 
-	while(Size & 3)
+	while((Size & 3) != 0)
 		m_aBuffer[Size++] = 0;
 
 	Size = CVariableInt::Compress(m_aBuffer, Size, s_aBuffer, sizeof(s_aBuffer));
@@ -312,7 +312,7 @@ bool CGhostLoader::ReadNextType(int *pType)
 	}
 	else
 	{
-		if(ReadChunk(pType))
+		if(ReadChunk(pType) != 0)
 			return false; // error or eof
 	}
 
@@ -323,7 +323,7 @@ bool CGhostLoader::ReadNextType(int *pType)
 
 static void UndiffItem(int *pPast, int *pDiff, int *pOut, int Size)
 {
-	while(Size)
+	while(Size != 0)
 	{
 		*pOut = *pPast + *pDiff;
 		pOut++;
@@ -373,7 +373,7 @@ bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, c
 	io_read(File, &Header, sizeof(Header));
 	io_close(File);
 
-	if(mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || !(4 <= Header.m_Version && Header.m_Version <= gs_CurVersion))
+	if((mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0) || !(4 <= Header.m_Version && Header.m_Version <= gs_CurVersion))
 		return false;
 
 	if(str_comp(Header.m_aMap, pMap) != 0)

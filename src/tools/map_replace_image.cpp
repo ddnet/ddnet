@@ -89,7 +89,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
 	CImageInfo ImgInfo;
-	if(!LoadPNG(&ImgInfo, pImgFile))
+	if(LoadPNG(&ImgInfo, pImgFile) == 0)
 		return 0;
 
 	*pNewImgItem = *pImgItem;

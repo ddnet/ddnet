@@ -33,7 +33,7 @@ void CGun::Tick()
 		int Flags;
 		m_EvalTick = Server()->Tick();
 		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
+		if(index != 0)
 		{
 			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
 		}
@@ -93,8 +93,8 @@ void CGun::Fire()
 		}
 
 		// Turrets can shoot only at reachable, alive players
-		int IsReachable = !GameServer()->Collision()->IntersectLine(m_Pos, pTarget->m_Pos, 0, 0);
-		if(IsReachable && pTarget->IsAlive())
+		int IsReachable = static_cast<int>(static_cast<int>(GameServer()->Collision()->IntersectLine(m_Pos, pTarget->m_Pos, 0, 0)) == 0);
+		if((IsReachable != 0) && pTarget->IsAlive())
 		{
 			// Turrets fire on solo players regardless of the rest of the team
 			if(TargetIsSolo)
@@ -176,13 +176,13 @@ void CGun::Snap(int SnappingClient)
 
 		if(SnappingClient != SERVER_DEMO_CLIENT &&
 			(GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
-				GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
+				(GameServer()->m_apPlayers[SnappingClient]->IsPaused() != 0)) &&
 			GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_Status[pChar->Team()] && (!Tick))
+			!Switchers()[m_Number].m_Status[pChar->Team()] && (Tick == 0))
 			return;
 	}
 

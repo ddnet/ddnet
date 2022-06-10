@@ -21,7 +21,7 @@ CRingBufferBase::CItem *CRingBufferBase::PrevBlock(CItem *pItem)
 CRingBufferBase::CItem *CRingBufferBase::MergeBack(CItem *pItem)
 {
 	// make sure that this block and previous block is free
-	if(!pItem->m_Free || !pItem->m_pPrev || !pItem->m_pPrev->m_Free)
+	if((pItem->m_Free == 0) || !pItem->m_pPrev || (pItem->m_pPrev->m_Free == 0))
 		return pItem;
 
 	// merge the blocks
@@ -69,14 +69,14 @@ void *CRingBufferBase::Allocate(int Size)
 	while(true)
 	{
 		// check for space
-		if(m_pProduce->m_Free)
+		if(m_pProduce->m_Free != 0)
 		{
 			if(m_pProduce->m_Size >= WantedSize)
 				pBlock = m_pProduce;
 			else
 			{
 				// wrap around to try to find a block
-				if(m_pFirst->m_Free && m_pFirst->m_Size >= WantedSize)
+				if((m_pFirst->m_Free != 0) && m_pFirst->m_Size >= WantedSize)
 					pBlock = m_pFirst;
 			}
 		}
@@ -86,9 +86,9 @@ void *CRingBufferBase::Allocate(int Size)
 		else
 		{
 			// we have no block, check our policy and see what todo
-			if(m_Flags & FLAG_RECYCLE)
+			if((m_Flags & FLAG_RECYCLE) != 0)
 			{
-				if(!PopFirst())
+				if(PopFirst() == 0)
 					return 0;
 			}
 			else
@@ -126,7 +126,7 @@ void *CRingBufferBase::Allocate(int Size)
 
 int CRingBufferBase::PopFirst()
 {
-	if(m_pConsume->m_Free)
+	if(m_pConsume->m_Free != 0)
 		return 0;
 
 	// set the free flag
@@ -137,7 +137,7 @@ int CRingBufferBase::PopFirst()
 
 	// advance the consume pointer
 	m_pConsume = NextBlock(m_pConsume);
-	while(m_pConsume->m_Free && m_pConsume != m_pProduce)
+	while((m_pConsume->m_Free != 0) && m_pConsume != m_pProduce)
 	{
 		m_pConsume = MergeBack(m_pConsume);
 		m_pConsume = NextBlock(m_pConsume);
@@ -158,7 +158,7 @@ void *CRingBufferBase::Prev(void *pCurrent)
 		pItem = PrevBlock(pItem);
 		if(pItem == m_pProduce)
 			return 0;
-		if(!pItem->m_Free)
+		if(pItem->m_Free == 0)
 			return pItem + 1;
 	}
 }
@@ -172,14 +172,14 @@ void *CRingBufferBase::Next(void *pCurrent)
 		pItem = NextBlock(pItem);
 		if(pItem == m_pProduce)
 			return 0;
-		if(!pItem->m_Free)
+		if(pItem->m_Free == 0)
 			return pItem + 1;
 	}
 }
 
 void *CRingBufferBase::First()
 {
-	if(m_pConsume->m_Free)
+	if(m_pConsume->m_Free != 0)
 		return 0;
 	return (void *)(m_pConsume + 1);
 }

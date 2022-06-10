@@ -57,7 +57,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	auto *pUserReal = (SSkinScanUser *)pUser;
 	CSkins *pSelf = pUserReal->m_pThis;
 
-	if(IsDir || !str_endswith(pName, ".png"))
+	if((IsDir != 0) || !str_endswith(pName, ".png"))
 		return 0;
 
 	char aNameWithoutPng[128];
@@ -126,7 +126,7 @@ int CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 bool CSkins::LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
 {
 	char aBuf[512];
-	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
+	if(Graphics()->LoadPNG(&Info, pPath, DirType) == 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
@@ -288,7 +288,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
-	if(g_Config.m_Debug)
+	if(g_Config.m_Debug != 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
@@ -303,7 +303,7 @@ void CSkins::OnInit()
 {
 	m_EventSkinPrefix[0] = '\0';
 
-	if(g_Config.m_Events)
+	if(g_Config.m_Events != 0)
 	{
 		time_t rawtime;
 		struct tm *timeinfo;
@@ -380,12 +380,12 @@ const CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName)
 {
-	const char *pSkinPrefix = m_EventSkinPrefix[0] ? m_EventSkinPrefix : g_Config.m_ClSkinPrefix;
-	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
+	const char *pSkinPrefix = m_EventSkinPrefix[0] != 0 ? m_EventSkinPrefix : g_Config.m_ClSkinPrefix;
+	if((g_Config.m_ClVanillaSkinsOnly != 0) && !IsVanillaSkin(pName))
 	{
 		return -1;
 	}
-	else if(pSkinPrefix && pSkinPrefix[0])
+	else if(pSkinPrefix && (pSkinPrefix[0] != 0))
 	{
 		char aBuf[24];
 		str_format(aBuf, sizeof(aBuf), "%s_%s", pSkinPrefix, pName);
@@ -411,7 +411,7 @@ int CSkins::FindImpl(const char *pName)
 	if(str_comp(pName, "default") == 0)
 		return -1;
 
-	if(!g_Config.m_ClDownloadSkins)
+	if(g_Config.m_ClDownloadSkins == 0)
 		return -1;
 
 	if(str_find(pName, "/") != 0)

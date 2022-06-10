@@ -423,7 +423,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 {
 	// don't waste memory on texture if we are stress testing
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress != 0)
 		return m_InvalidTexture;
 #endif
 
@@ -474,7 +474,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 
 	// flags
 	Cmd.m_Flags = 0;
-	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
+	if((Flags & IGraphics::TEXLOAD_NOMIPMAPS) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
@@ -511,14 +511,14 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 
 	if(l < 3)
 		return CTextureHandle();
-	if(LoadPNG(&Img, pFilename, StorageType))
+	if(LoadPNG(&Img, pFilename, StorageType) != 0)
 	{
 		if(StoreFormat == CImageInfo::FORMAT_AUTO)
 			StoreFormat = Img.m_Format;
 
 		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags, pFilename);
 		free(Img.m_pData);
-		if(ID.Id() != m_InvalidTexture.Id() && g_Config.m_Debug)
+		if(ID.Id() != m_InvalidTexture.Id() && (g_Config.m_Debug != 0))
 			dbg_msg("graphics/texture", "loaded %s", pFilename);
 		return ID;
 	}
@@ -993,7 +993,7 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 
 void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
+	if((g_Config.m_GfxQuadAsTriangle != 0) && !m_GLUseTrianglesAsQuad)
 	{
 		m_aVertices[QuadOffset * 6].m_Color.r = r;
 		m_aVertices[QuadOffset * 6].m_Color.g = g;
@@ -1098,7 +1098,7 @@ void CGraphics_Threaded::QuadsTex3DDrawTL(const CQuadItem *pArray, int Num)
 	int CurNumVert = m_NumVertices;
 
 	int VertNum = 0;
-	if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
+	if((g_Config.m_GfxQuadAsTriangle != 0) && !m_GLUseTrianglesAsQuad)
 	{
 		VertNum = 6;
 	}
@@ -1125,7 +1125,7 @@ void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
 	dbg_assert(m_Drawing == DRAWING_QUADS || m_Drawing == DRAWING_TRIANGLES, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if((g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad) || m_Drawing == DRAWING_TRIANGLES)
+	if(((g_Config.m_GfxQuadAsTriangle != 0) && !m_GLUseTrianglesAsQuad) || m_Drawing == DRAWING_TRIANGLES)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1195,7 +1195,7 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 {
 	float StartX = x;
 
-	while(*pText)
+	while(*pText != 0)
 	{
 		char c = *pText;
 		pText++;
@@ -1618,7 +1618,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 	}
 	else
 	{
-		if(g_Config.m_GfxQuadAsTriangle)
+		if(g_Config.m_GfxQuadAsTriangle != 0)
 		{
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
@@ -1697,7 +1697,7 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 	}
 	else
 	{
-		if(g_Config.m_GfxQuadAsTriangle)
+		if(g_Config.m_GfxQuadAsTriangle != 0)
 		{
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
@@ -2235,7 +2235,7 @@ int CGraphics_Threaded::IssueInit()
 	IsDesktopFullscreen |= g_Config.m_GfxFullscreen == 3;
 #endif
 
-	if(g_Config.m_GfxBorderless)
+	if(g_Config.m_GfxBorderless != 0)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 	if(IsExclusiveFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
@@ -2243,9 +2243,9 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
 	if(IsPurlyWindowed || IsExclusiveFullscreen || IsDesktopFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
-	if(g_Config.m_GfxVsync)
+	if(g_Config.m_GfxVsync != 0)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
-	if(g_Config.m_GfxHighdpi)
+	if(g_Config.m_GfxHighdpi != 0)
 		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
@@ -2318,7 +2318,7 @@ int CGraphics_Threaded::InitWindow()
 		return 0;
 
 	// try disabling fsaa
-	while(g_Config.m_GfxFsaaSamples)
+	while(g_Config.m_GfxFsaaSamples != 0)
 	{
 		// 4 is the minimum required by OpenGL ES spec (GL_MAX_SAMPLES - https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glGet.xhtml), so can probably also be assumed for OpenGL
 		if(g_Config.m_GfxFsaaSamples > 4)
@@ -2326,7 +2326,7 @@ int CGraphics_Threaded::InitWindow()
 		else
 			g_Config.m_GfxFsaaSamples = 0;
 
-		if(g_Config.m_GfxFsaaSamples)
+		if(g_Config.m_GfxFsaaSamples != 0)
 			dbg_msg("gfx", "lowering FSAA to %d and trying again", g_Config.m_GfxFsaaSamples);
 		else
 			dbg_msg("gfx", "disabling FSAA and trying again");
@@ -2709,7 +2709,7 @@ void CGraphics_Threaded::Swap()
 
 	if(m_DoScreenshot)
 	{
-		if(WindowActive())
+		if(WindowActive() != 0)
 			TookScreenshotAndSwapped = ScreenshotDirect();
 		m_DoScreenshot = false;
 	}
@@ -2725,7 +2725,7 @@ void CGraphics_Threaded::Swap()
 		}
 	}
 
-	if(g_Config.m_GfxFinish)
+	if(g_Config.m_GfxFinish != 0)
 	{
 		CCommandBuffer::SCommand_Finish Cmd;
 		if(!AddCmd(
@@ -2847,7 +2847,7 @@ TGLBackendReadPresentedImageData &CGraphics_Threaded::GetReadPresentedImageDataF
 
 int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
 {
-	if(g_Config.m_GfxDisplayAllVideoModes)
+	if(g_Config.m_GfxDisplayAllVideoModes != 0)
 	{
 		int Count = std::size(g_aFakeModes);
 		mem_copy(pModes, g_aFakeModes, sizeof(g_aFakeModes));

@@ -133,7 +133,7 @@ void CEmoticon::OnRender()
 	}
 	Graphics()->WrapNormal();
 
-	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
+	if(GameClient()->m_GameInfo.m_AllowEyeWheel && (g_Config.m_ClEyeWheel != 0))
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
@@ -177,11 +177,11 @@ void CEmoticon::Emote(int Emoticon)
 	Msg.m_Emoticon = Emoticon;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 
-	if(g_Config.m_ClDummyCopyMoves)
+	if(g_Config.m_ClDummyCopyMoves != 0)
 	{
 		CMsgPacker MsgDummy(NETMSGTYPE_CL_EMOTICON, false);
 		MsgDummy.AddInt(Emoticon);
-		Client()->SendMsg(!g_Config.m_ClDummy, &MsgDummy, MSGFLAG_VITAL);
+		Client()->SendMsg(static_cast<int>(static_cast<int>(g_Config.m_ClDummy) == 0), &MsgDummy, MSGFLAG_VITAL);
 	}
 }
 

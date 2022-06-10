@@ -65,7 +65,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 	{
 		int Start, Num;
 		pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
-		if(Num)
+		if(Num != 0)
 			pPoints = (CEnvPoint *)pThis->m_pLayers->Map()->GetItem(Start, 0, 0);
 	}
 
@@ -92,7 +92,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 				pThis->m_LastLocalTick = pThis->m_CurrentLocalTick;
 				pThis->m_CurrentLocalTick = pInfo->m_CurrentTick;
 			}
-			if(pItem->m_Version < 2 || pItem->m_Synchronized)
+			if(pItem->m_Version < 2 || (pItem->m_Synchronized != 0))
 			{
 				// get the lerp of the current tick and prev
 				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
@@ -118,7 +118,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 	}
 	else
 	{
-		if(pThis->m_OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
+		if(pThis->m_OnlineOnly && (pItem->m_Version < 2 || (pItem->m_Synchronized != 0)))
 		{
 			if(pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 			{
@@ -226,7 +226,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 		unsigned char x3 = x0;
 		unsigned char y3 = y0 + 1;
 
-		if(Flags & TILEFLAG_VFLIP)
+		if((Flags & TILEFLAG_VFLIP) != 0)
 		{
 			x0 = x2;
 			x1 = x3;
@@ -234,7 +234,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 			x3 = x0;
 		}
 
-		if(Flags & TILEFLAG_HFLIP)
+		if((Flags & TILEFLAG_HFLIP) != 0)
 		{
 			y0 = y3;
 			y2 = y1;
@@ -242,7 +242,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 			y1 = y0;
 		}
 
-		if(Flags & TILEFLAG_ROTATE)
+		if((Flags & TILEFLAG_ROTATE) != 0)
 		{
 			unsigned char Tmp = x0;
 			x0 = x3;
@@ -333,7 +333,7 @@ CMapLayers::STileLayerVisuals::~STileLayerVisuals()
 
 bool AddTile(std::vector<SGraphicTile> &TmpTiles, std::vector<SGraphicTileTexureCoords> &TmpTileTexCoords, bool As3DTextureCoord, unsigned char Index, unsigned char Flags, int x, int y, CMapItemGroup *pGroup, bool DoTextureCoords, bool FillSpeedup = false, int AngleRotate = -1)
 {
-	if(Index)
+	if(Index != 0u)
 	{
 		TmpTiles.emplace_back();
 		SGraphicTile &Tile = TmpTiles.back();
@@ -1059,7 +1059,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA *pColor, CMapItemLaye
 
 			unsigned int NumVertices = ((Visuals.m_pTilesOfLayer[y * pTileLayer->m_Width + X1].IndexBufferByteOffset() - Visuals.m_pTilesOfLayer[y * pTileLayer->m_Width + X0].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_pTilesOfLayer[y * pTileLayer->m_Width + X1].DoDraw() ? 6lu : 0lu);
 
-			if(NumVertices)
+			if(NumVertices != 0u)
 			{
 				s_IndexOffsets.push_back((offset_ptr_size)Visuals.m_pTilesOfLayer[y * pTileLayer->m_Width + X0].IndexBufferByteOffset());
 				s_DrawCounts.push_back(NumVertices);
@@ -1365,7 +1365,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 
-	if(!Force && (!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100))
+	if(!Force && ((g_Config.m_ClShowQuads == 0) || g_Config.m_ClOverlayEntities == 100))
 		return;
 
 	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
@@ -1555,7 +1555,7 @@ void CMapLayers::OnRender()
 			continue;
 		}
 
-		if((!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN) && pGroup->m_Version >= 2 && pGroup->m_UseClipping)
+		if(((g_Config.m_GfxNoclip == 0) || m_Type == TYPE_FULL_DESIGN) && pGroup->m_Version >= 2 && (pGroup->m_UseClipping != 0))
 		{
 			// set clipping
 			float Points[4];
@@ -1577,7 +1577,7 @@ void CMapLayers::OnRender()
 				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
 		}
 
-		if((!g_Config.m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
+		if(((g_Config.m_ClZoomBackgroundLayers == 0) || m_Type == TYPE_FULL_DESIGN) && (pGroup->m_ParallaxX == 0) && (pGroup->m_ParallaxY == 0))
 		{
 			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
 		}
@@ -1627,7 +1627,7 @@ void CMapLayers::OnRender()
 
 				if(m_Type == TYPE_BACKGROUND_FORCE)
 				{
-					if(pLayer->m_Type == LAYERTYPE_TILES && !g_Config.m_ClBackgroundShowTilesLayers)
+					if(pLayer->m_Type == LAYERTYPE_TILES && (g_Config.m_ClBackgroundShowTilesLayers == 0))
 						continue;
 				}
 			}
@@ -1718,14 +1718,14 @@ void CMapLayers::OnRender()
 			}
 
 			// skip rendering if detail layers if not wanted, or is entity layer and we are a background map
-			if((pLayer->m_Flags & LAYERFLAG_DETAIL && (!g_Config.m_GfxHighDetail && !(m_Type == TYPE_FULL_DESIGN)) && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer) || (m_Type == TYPE_FULL_DESIGN && IsEntityLayer))
+			if((((pLayer->m_Flags & LAYERFLAG_DETAIL) != 0) && ((g_Config.m_GfxHighDetail == 0) && !(m_Type == TYPE_FULL_DESIGN)) && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer) || (m_Type == TYPE_FULL_DESIGN && IsEntityLayer))
 				continue;
 
 			int EntityOverlayVal = g_Config.m_ClOverlayEntities;
 			if(m_Type == TYPE_FULL_DESIGN)
 				EntityOverlayVal = 0;
 
-			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
+			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || ((EntityOverlayVal != 0) && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
 			{
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
@@ -1746,9 +1746,9 @@ void CMapLayers::OnRender()
 					if(Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
 					{
 						ColorRGBA Color = ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f);
-						if(IsGameLayer && EntityOverlayVal)
+						if(IsGameLayer && (EntityOverlayVal != 0))
 							Color = ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f * EntityOverlayVal / 100.0f);
-						else if(!IsGameLayer && EntityOverlayVal && !(m_Type == TYPE_BACKGROUND_FORCE))
+						else if(!IsGameLayer && (EntityOverlayVal != 0) && !(m_Type == TYPE_BACKGROUND_FORCE))
 							Color = ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f * (100 - EntityOverlayVal) / 100.0f);
 						if(!Graphics()->IsTileBufferingEnabled())
 						{
@@ -1802,7 +1802,7 @@ void CMapLayers::OnRender()
 					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
 					if(m_Type == TYPE_BACKGROUND_FORCE || m_Type == TYPE_FULL_DESIGN)
 					{
-						if(g_Config.m_ClShowQuads || m_Type == TYPE_FULL_DESIGN)
+						if((g_Config.m_ClShowQuads != 0) || m_Type == TYPE_FULL_DESIGN)
 						{
 							if(!Graphics()->IsQuadBufferingEnabled())
 							{
@@ -1833,7 +1833,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsFrontLayer)
+			else if(Render && (EntityOverlayVal != 0) && IsFrontLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT));
@@ -1860,7 +1860,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsSwitchLayer)
+			else if(Render && (EntityOverlayVal != 0) && IsSwitchLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH));
@@ -1883,7 +1883,7 @@ void CMapLayers::OnRender()
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 3, &Color, pTMap, pGroup);
-						if(g_Config.m_ClTextEntities)
+						if(g_Config.m_ClTextEntities != 0)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter - 2, &Color, pTMap, pGroup);
@@ -1893,7 +1893,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsTeleLayer)
+			else if(Render && (EntityOverlayVal != 0) && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_TELE));
@@ -1916,7 +1916,7 @@ void CMapLayers::OnRender()
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 2, &Color, pTMap, pGroup);
-						if(g_Config.m_ClTextEntities)
+						if(g_Config.m_ClTextEntities != 0)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayCenter());
 							RenderTileLayer(TileLayerCounter - 1, &Color, pTMap, pGroup);
@@ -1924,7 +1924,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsSpeedupLayer)
+			else if(Render && (EntityOverlayVal != 0) && IsSpeedupLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP));
@@ -1952,7 +1952,7 @@ void CMapLayers::OnRender()
 						Graphics()->TextureSet(m_pImages->GetSpeedupArrow());
 						RenderTileLayer(TileLayerCounter - 3, &Color, pTMap, pGroup);
 						Graphics()->WrapNormal();
-						if(g_Config.m_ClTextEntities)
+						if(g_Config.m_ClTextEntities != 0)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter - 2, &Color, pTMap, pGroup);
@@ -1962,7 +1962,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsTuneLayer)
+			else if(Render && (EntityOverlayVal != 0) && IsTuneLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE));
@@ -1989,11 +1989,11 @@ void CMapLayers::OnRender()
 				}
 			}
 		}
-		if(!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
+		if((g_Config.m_GfxNoclip == 0) || m_Type == TYPE_FULL_DESIGN)
 			Graphics()->ClipDisable();
 	}
 
-	if(!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
+	if((g_Config.m_GfxNoclip == 0) || m_Type == TYPE_FULL_DESIGN)
 		Graphics()->ClipDisable();
 
 	// reset the screen like it was before

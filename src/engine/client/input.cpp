@@ -73,7 +73,7 @@ void CInput::Init()
 
 bool CInput::MouseRelative(float *pX, float *pY)
 {
-	if(!m_MouseFocus || !m_InputGrabbed)
+	if(!m_MouseFocus || (m_InputGrabbed == 0))
 		return false;
 
 	int nx = 0, ny = 0;
@@ -161,29 +161,29 @@ bool CInput::KeyState(int Key) const
 {
 	if(Key < 0 || Key >= KEY_LAST)
 		return false;
-	return m_aInputState[Key];
+	return m_aInputState[Key] != 0u;
 }
 
 void CInput::UpdateMouseState()
 {
 	const int MouseState = SDL_GetMouseState(NULL, NULL);
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+	if((MouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0)
 		m_aInputState[KEY_MOUSE_1] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
+	if((MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0)
 		m_aInputState[KEY_MOUSE_2] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+	if((MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0)
 		m_aInputState[KEY_MOUSE_3] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
+	if((MouseState & SDL_BUTTON(SDL_BUTTON_X1)) != 0)
 		m_aInputState[KEY_MOUSE_4] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
+	if((MouseState & SDL_BUTTON(SDL_BUTTON_X2)) != 0)
 		m_aInputState[KEY_MOUSE_5] = 1;
-	if(MouseState & SDL_BUTTON(6))
+	if((MouseState & SDL_BUTTON(6)) != 0)
 		m_aInputState[KEY_MOUSE_6] = 1;
-	if(MouseState & SDL_BUTTON(7))
+	if((MouseState & SDL_BUTTON(7)) != 0)
 		m_aInputState[KEY_MOUSE_7] = 1;
-	if(MouseState & SDL_BUTTON(8))
+	if((MouseState & SDL_BUTTON(8)) != 0)
 		m_aInputState[KEY_MOUSE_8] = 1;
-	if(MouseState & SDL_BUTTON(9))
+	if((MouseState & SDL_BUTTON(9)) != 0)
 		m_aInputState[KEY_MOUSE_9] = 1;
 }
 
@@ -260,7 +260,7 @@ int CInput::Update()
 
 	SDL_Event Event;
 	bool IgnoreKeys = false;
-	while(SDL_PollEvent(&Event))
+	while(SDL_PollEvent(&Event) != 0)
 	{
 		int Scancode = 0;
 		int Action = IInput::FLAG_PRESS;
@@ -269,7 +269,7 @@ int CInput::Update()
 		case SDL_TEXTEDITING:
 		{
 			m_EditingTextLen = str_length(Event.edit.text);
-			if(m_EditingTextLen)
+			if(m_EditingTextLen != 0)
 			{
 				str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
 				m_EditingCursor = 0;
@@ -302,14 +302,14 @@ int CInput::Update()
 			// CAPS   =  8192
 			// MODE   = 16384
 			// Sum if you want to ignore multiple modifiers.
-			if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
+			if((Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers) == 0)
 			{
-				Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
+				Scancode = g_Config.m_InpTranslatedKeys != 0 ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 			}
 			break;
 		case SDL_KEYUP:
 			Action = IInput::FLAG_RELEASE;
-			Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
+			Scancode = g_Config.m_InpTranslatedKeys != 0 ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 			break;
 
 		// handle mouse buttons
@@ -370,7 +370,7 @@ int CInput::Update()
 				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
 				break;
 			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				if(m_InputGrabbed)
+				if(m_InputGrabbed != 0)
 				{
 					// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
 					// MouseModeRelative();
@@ -383,12 +383,12 @@ int CInput::Update()
 			case SDL_WINDOWEVENT_FOCUS_LOST:
 				m_MouseFocus = false;
 				IgnoreKeys = true;
-				if(m_InputGrabbed)
+				if(m_InputGrabbed != 0)
 				{
 					// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
 					// MouseModeAbsolute();
 					// Remember that we had relative mouse
-					m_InputGrabbed = true;
+					m_InputGrabbed = 1;
 				}
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:
@@ -412,9 +412,9 @@ int CInput::Update()
 			return 1;
 		}
 
-		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
+		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && ((SDL_IsTextInputActive() == 0u) || m_EditingTextLen == -1))
 		{
-			if(Action & IInput::FLAG_PRESS)
+			if((Action & IInput::FLAG_PRESS) != 0)
 			{
 				m_aInputState[Scancode] = 1;
 				m_aInputCount[Scancode] = m_InputCounter;
@@ -428,7 +428,7 @@ int CInput::Update()
 
 int CInput::VideoRestartNeeded()
 {
-	if(m_VideoRestartNeeded)
+	if(m_VideoRestartNeeded != 0)
 	{
 		m_VideoRestartNeeded = 0;
 		return 1;

@@ -32,7 +32,7 @@ void CMapSounds::OnMapLoad()
 		m_aSounds[i] = 0;
 
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i, 0, 0);
-		if(pSound->m_External)
+		if(pSound->m_External != 0)
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pSound->m_SoundName);
@@ -83,7 +83,7 @@ void CMapSounds::OnMapLoad()
 					CSourceQueueEntry source;
 					source.m_Sound = pSoundLayer->m_Sound;
 					source.m_pSource = &pSources[i];
-					source.m_HighDetail = pLayer->m_Flags & LAYERFLAG_DETAIL;
+					source.m_HighDetail = ((pLayer->m_Flags & LAYERFLAG_DETAIL) != 0);
 
 					if(!source.m_pSource || source.m_Sound == -1)
 						continue;
@@ -113,7 +113,7 @@ void CMapSounds::OnRender()
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
 		float Offset = s_Time - Source.m_pSource->m_TimeDelay;
-		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !Source.m_HighDetail))
+		if(!DemoPlayerPaused && Offset >= 0.0f && (g_Config.m_SndEnable != 0) && ((g_Config.m_GfxHighDetail != 0) || !Source.m_HighDetail))
 		{
 			if(Source.m_Voice.IsValid())
 			{
@@ -124,9 +124,9 @@ void CMapSounds::OnRender()
 			{
 				// need to enqueue
 				int Flags = 0;
-				if(Source.m_pSource->m_Loop)
+				if(Source.m_pSource->m_Loop != 0)
 					Flags |= ISound::FLAG_LOOP;
-				if(!Source.m_pSource->m_Pan)
+				if(Source.m_pSource->m_Pan == 0)
 					Flags |= ISound::FLAG_NO_PANNING;
 
 				Source.m_Voice = m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[Source.m_Sound], 1.0f, vec2(fx2f(Source.m_pSource->m_Position.x), fx2f(Source.m_pSource->m_Position.y)), Flags);

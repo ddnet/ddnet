@@ -36,7 +36,7 @@ void CCamera::ScaleZoom(float Factor)
 
 float CCamera::MaxZoomLevel()
 {
-	return (g_Config.m_ClLimitMaxZoomLevel) ? ((Graphics()->IsTileBufferingEnabled() ? 60 : 30)) : std::numeric_limits<float>::max();
+	return (g_Config.m_ClLimitMaxZoomLevel) != 0 ? ((Graphics()->IsTileBufferingEnabled() ? 60 : 30)) : std::numeric_limits<float>::max();
 }
 
 float CCamera::MinZoomLevel()
@@ -133,7 +133,7 @@ void CCamera::OnRender()
 			float CameraStabilizingFactor = 1 + g_Config.m_ClDyncamStabilizing / 100.0f;
 
 			s_SpeedBias += CameraSpeed * DeltaTime;
-			if(g_Config.m_ClDyncam)
+			if(g_Config.m_ClDyncam != 0)
 			{
 				s_SpeedBias -= length(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy] - s_LastMousePos) * log10f(CameraStabilizingFactor) * 0.02f;
 				s_SpeedBias = clamp(s_SpeedBias, 0.5f, CameraSpeed);
@@ -149,8 +149,8 @@ void CCamera::OnRender()
 		float l = length(s_LastMousePos);
 		if(l > 0.0001f) // make sure that this isn't 0
 		{
-			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+			float DeadZone = g_Config.m_ClDyncam != 0 ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+			float FollowFactor = (g_Config.m_ClDyncam != 0 ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 			float OffsetAmount = maximum(l - DeadZone, 0.0f) * FollowFactor;
 
 			TargetCameraOffset = normalize(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]) * OffsetAmount;
@@ -207,7 +207,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
-	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
+	float TargetLevel = pResult->NumArguments() != 0 ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, TargetLevel - 10));
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)

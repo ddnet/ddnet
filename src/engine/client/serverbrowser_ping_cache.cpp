@@ -74,7 +74,7 @@ void CServerBrowserPingCache::Load()
 				const char *pIpAddress = (const char *)sqlite3_column_text(m_pLoadStmt.get(), 0);
 				int Ping = sqlite3_column_int(m_pLoadStmt.get(), 1);
 				NETADDR Addr;
-				if(net_addr_from_str(&Addr, pIpAddress))
+				if(net_addr_from_str(&Addr, pIpAddress) != 0)
 				{
 					if(!WarnedForBadAddress)
 					{
@@ -109,7 +109,7 @@ void CServerBrowserPingCache::CachePing(NETADDR Addr, int Ping)
 		sqlite3 *pSqlite = m_pDisk.get();
 		IConsole *pConsole = m_pConsole;
 		char aAddr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Addr, aAddr, sizeof(aAddr), false);
+		net_addr_str(&Addr, aAddr, sizeof(aAddr), 0);
 
 		bool Error = false;
 		Error = Error || !m_pStoreStmt;

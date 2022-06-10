@@ -113,7 +113,7 @@ IOHANDLE io_current_exe()
 #elif defined(CONF_PLATFORM_MACOS)
 	char path[IO_MAX_PATH_LENGTH];
 	uint32_t path_size = sizeof(path);
-	if(_NSGetExecutablePath(path, &path_size))
+	if(_NSGetExecutablePath(path, &path_size) != 0)
 	{
 		return 0;
 	}
@@ -179,7 +179,7 @@ bool dbg_assert_has_failed()
 
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
-	if(!test)
+	if(test == 0)
 	{
 		dbg_assert_failing.store(true, std::memory_order_release);
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
@@ -329,7 +329,7 @@ unsigned io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
-	return fclose((FILE *)io) != 0;
+	return static_cast<int>(fclose((FILE *)io) != 0);
 }
 
 int io_flush(IOHANDLE io)
@@ -339,14 +339,14 @@ int io_flush(IOHANDLE io)
 
 int io_sync(IOHANDLE io)
 {
-	if(io_flush(io))
+	if(io_flush(io) != 0)
 	{
 		return 1;
 	}
 #if defined(CONF_FAMILY_WINDOWS)
 	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == 0;
 #else
-	return fsync(fileno((FILE *)io)) != 0;
+	return static_cast<int>(fsync(fileno((FILE *)io)) != 0);
 #endif
 }
 
@@ -408,9 +408,9 @@ static void aio_handle_free_and_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 	int do_free;
 	aio->refcount--;
 
-	do_free = aio->refcount == 0;
+	do_free = static_cast<int>(aio->refcount == 0);
 	lock_unlock(aio->lock);
-	if(do_free)
+	if(do_free != 0)
 	{
 		free(aio->buffer);
 		sphore_destroy(&aio->sphore);
@@ -1099,7 +1099,7 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 		int port = -1;
 		unsigned short ip[8];
 		int i;
-		if(add_port)
+		if(add_port != 0)
 		{
 			port = addr->port;
 		}
@@ -1123,7 +1123,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	if(hostname[0] == '[')
 	{
 		// ipv6 mode
-		for(i = 1; i < max_host && hostname[i] && hostname[i] != ']'; i++)
+		for(i = 1; i < max_host && (hostname[i] != 0) && hostname[i] != ']'; i++)
 			host[i - 1] = hostname[i];
 		host[i - 1] = 0;
 		if(hostname[i] != ']') // malformatted
@@ -1136,7 +1136,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	else
 	{
 		// generic mode (ipv4, hostname etc)
-		for(i = 0; i < max_host - 1 && hostname[i] && hostname[i] != ':'; i++)
+		for(i = 0; i < max_host - 1 && (hostname[i] != 0) && hostname[i] != ':'; i++)
 			host[i] = hostname[i];
 		host[i] = 0;
 
@@ -1155,7 +1155,7 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 	char host[256];
 	int port = 0;
 
-	if(priv_net_extract(hostname, host, sizeof(host), &port))
+	if(priv_net_extract(hostname, host, sizeof(host), &port) != 0)
 		return -1;
 
 	dbg_msg("host_lookup", "host='%s' port=%d %d", host, port, types);
@@ -1257,7 +1257,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 		char buf[128];
 		int i;
 		str++;
-		for(i = 0; i < 127 && str[i] && str[i] != ']'; i++)
+		for(i = 0; i < 127 && (str[i] != 0) && str[i] != ']'; i++)
 			buf[i] = str[i];
 		buf[i] = 0;
 		str += i;
@@ -1283,7 +1283,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			if(*str == ':')
 			{
 				str++;
-				if(parse_uint16(&addr->port, &str))
+				if(parse_uint16(&addr->port, &str) != 0)
 					return -1;
 			}
 			else
@@ -1299,24 +1299,24 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 	else
 	{
 		/* ipv4 */
-		if(parse_uint8(&addr->ip[0], &str))
+		if(parse_uint8(&addr->ip[0], &str) != 0)
 			return -1;
-		if(parse_char('.', &str))
+		if(parse_char('.', &str) != 0)
 			return -1;
-		if(parse_uint8(&addr->ip[1], &str))
+		if(parse_uint8(&addr->ip[1], &str) != 0)
 			return -1;
-		if(parse_char('.', &str))
+		if(parse_char('.', &str) != 0)
 			return -1;
-		if(parse_uint8(&addr->ip[2], &str))
+		if(parse_uint8(&addr->ip[2], &str) != 0)
 			return -1;
-		if(parse_char('.', &str))
+		if(parse_char('.', &str) != 0)
 			return -1;
-		if(parse_uint8(&addr->ip[3], &str))
+		if(parse_uint8(&addr->ip[3], &str) != 0)
 			return -1;
 		if(*str == ':')
 		{
 			str++;
-			if(parse_uint16(&addr->port, &str))
+			if(parse_uint16(&addr->port, &str) != 0)
 				return -1;
 		}
 		if(*str != '\0')
@@ -1449,7 +1449,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	int broadcast = 1;
 	int socket = -1;
 
-	if(bindaddr.type & NETTYPE_IPV4)
+	if((bindaddr.type & NETTYPE_IPV4) != 0u)
 	{
 		struct sockaddr_in addr;
 
@@ -1494,7 +1494,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	}
 #endif
 
-	if(bindaddr.type & NETTYPE_IPV6)
+	if((bindaddr.type & NETTYPE_IPV6) != 0u)
 	{
 		struct sockaddr_in6 addr;
 
@@ -1542,12 +1542,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 {
 	int d = -1;
 
-	if(addr->type & NETTYPE_IPV4)
+	if((addr->type & NETTYPE_IPV4) != 0u)
 	{
 		if(sock->ipv4sock >= 0)
 		{
 			struct sockaddr_in sa;
-			if(addr->type & NETTYPE_LINK_BROADCAST)
+			if((addr->type & NETTYPE_LINK_BROADCAST) != 0u)
 			{
 				mem_zero(&sa, sizeof(sa));
 				sa.sin_port = htons(addr->port);
@@ -1578,12 +1578,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	}
 #endif
 
-	if(addr->type & NETTYPE_IPV6)
+	if((addr->type & NETTYPE_IPV6) != 0u)
 	{
 		if(sock->ipv6sock >= 0)
 		{
 			struct sockaddr_in6 sa;
-			if(addr->type & NETTYPE_LINK_BROADCAST)
+			if((addr->type & NETTYPE_LINK_BROADCAST) != 0u)
 			{
 				mem_zero(&sa, sizeof(sa));
 				sa.sin6_port = htons(addr->port);
@@ -1741,7 +1741,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETADDR tmpbindaddr = bindaddr;
 	int socket = -1;
 
-	if(bindaddr.type & NETTYPE_IPV4)
+	if((bindaddr.type & NETTYPE_IPV4) != 0u)
 	{
 		struct sockaddr_in addr;
 
@@ -1756,7 +1756,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(bindaddr.type & NETTYPE_IPV6)
+	if((bindaddr.type & NETTYPE_IPV6) != 0u)
 	{
 		struct sockaddr_in6 addr;
 
@@ -1892,14 +1892,14 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 
 int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 {
-	if(a->type & NETTYPE_IPV4)
+	if((a->type & NETTYPE_IPV4) != 0u)
 	{
 		struct sockaddr_in addr;
 		netaddr_to_sockaddr_in(a, &addr);
 		return connect(sock->ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
-	if(a->type & NETTYPE_IPV6)
+	if((a->type & NETTYPE_IPV6) != 0u)
 	{
 		struct sockaddr_in6 addr;
 		netaddr_to_sockaddr_in6(a, &addr);
@@ -1963,7 +1963,7 @@ int net_would_block()
 #if defined(CONF_FAMILY_WINDOWS)
 	return net_errno() == WSAEWOULDBLOCK;
 #else
-	return net_errno() == EWOULDBLOCK;
+	return static_cast<int>(net_errno() == EWOULDBLOCK);
 #endif
 }
 
@@ -2064,7 +2064,7 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	while((entry = readdir(d)) != NULL)
 	{
 		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
-		if(cb(entry->d_name, entry->d_type == DT_UNKNOWN ? fs_is_dir(buffer) : entry->d_type == DT_DIR, type, user))
+		if(cb(entry->d_name, entry->d_type == DT_UNKNOWN ? fs_is_dir(buffer) : static_cast<int>(entry->d_type == DT_DIR), type, user) != 0)
 			break;
 	}
 
@@ -2133,7 +2133,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 		info.m_TimeCreated = created;
 		info.m_TimeModified = modified;
 
-		if(cb(&info, entry->d_type == DT_UNKNOWN ? fs_is_dir(buffer) : entry->d_type == DT_DIR, type, user))
+		if(cb(&info, entry->d_type == DT_UNKNOWN ? fs_is_dir(buffer) : static_cast<int>(entry->d_type == DT_DIR), type, user) != 0)
 			break;
 	}
 
@@ -2260,7 +2260,7 @@ int fs_is_dir(const char *path)
 
 int fs_chdir(const char *path)
 {
-	if(fs_is_dir(path))
+	if(fs_is_dir(path) != 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
@@ -2270,7 +2270,7 @@ int fs_chdir(const char *path)
 		else
 			return 0;
 #else
-		if(chdir(path))
+		if(chdir(path) != 0)
 			return 1;
 		else
 			return 0;
@@ -2298,7 +2298,7 @@ char *fs_getcwd(char *buffer, int buffer_size)
 int fs_parent_dir(char *path)
 {
 	char *parent = 0;
-	for(; *path; ++path)
+	for(; *path != 0; ++path)
 	{
 		if(*path == '/' || *path == '\\')
 			parent = path;
@@ -2319,7 +2319,7 @@ int fs_remove(const char *filename)
 	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wFilename, std::size(wFilename));
 	return DeleteFileW(wFilename) == 0;
 #else
-	return unlink(filename) != 0;
+	return static_cast<int>(unlink(filename) != 0);
 #endif
 }
 
@@ -2356,7 +2356,7 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 	FindClose(handle);
 #elif defined(CONF_FAMILY_UNIX)
 	struct stat sb;
-	if(stat(name, &sb))
+	if(stat(name, &sb) != 0)
 		return 1;
 
 	*created = sb.st_ctime;
@@ -2373,11 +2373,11 @@ void swap_endian(void *data, unsigned elem_size, unsigned num)
 	char *src = (char *)data;
 	char *dst = src + (elem_size - 1);
 
-	while(num)
+	while(num != 0u)
 	{
 		unsigned n = elem_size >> 1;
 		char tmp;
-		while(n)
+		while(n != 0u)
 		{
 			tmp = *src;
 			*src = *dst;
@@ -2503,7 +2503,7 @@ void str_append(char *dst, const char *src, int dst_size)
 	while(s < dst_size)
 	{
 		dst[s] = src[i];
-		if(!src[i]) /* check for null termination */
+		if(src[i] == 0) /* check for null termination */
 			break;
 		s++;
 		i++;
@@ -2574,9 +2574,9 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 
 char *str_trim_words(char *str, int words)
 {
-	while(words && *str)
+	while((words != 0) && (*str != 0))
 	{
-		if(isspace(*str) && !isspace(*(str + 1)))
+		if((isspace(*str) != 0) && (isspace(*(str + 1)) == 0))
 			words--;
 		str++;
 	}
@@ -2587,7 +2587,7 @@ char *str_trim_words(char *str, int words)
 void str_sanitize_cc(char *str_in)
 {
 	unsigned char *str = (unsigned char *)str_in;
-	while(*str)
+	while(*str != 0u)
 	{
 		if(*str < 32)
 			*str = ' ';
@@ -2599,7 +2599,7 @@ void str_sanitize_cc(char *str_in)
 void str_sanitize(char *str_in)
 {
 	unsigned char *str = (unsigned char *)str_in;
-	while(*str)
+	while(*str != 0u)
 	{
 		if(*str < 32 && !(*str == '\r') && !(*str == '\n') && !(*str == '\t'))
 			*str = ' ';
@@ -2610,7 +2610,7 @@ void str_sanitize(char *str_in)
 void str_sanitize_filename(char *str_in)
 {
 	unsigned char *str = (unsigned char *)str_in;
-	while(*str)
+	while(*str != 0u)
 	{
 		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
 			*str = ' ';
@@ -2636,9 +2636,9 @@ void str_clean_whitespaces(char *str_in)
 		for(; *read == ' '; read++)
 			found_whitespace = 1;
 		/* if not at the end of the string, put a found whitespace here */
-		if(*read)
+		if(*read != 0)
 		{
-			if(found_whitespace)
+			if(found_whitespace != 0)
 				*write++ = ' ';
 			*write++ = *read++;
 		}
@@ -2652,28 +2652,28 @@ void str_clean_whitespaces(char *str_in)
 
 char *str_skip_to_whitespace(char *str)
 {
-	while(*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	while((*str != 0) && (*str != ' ' && *str != '\t' && *str != '\n'))
 		str++;
 	return str;
 }
 
 const char *str_skip_to_whitespace_const(const char *str)
 {
-	while(*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	while((*str != 0) && (*str != ' ' && *str != '\t' && *str != '\n'))
 		str++;
 	return str;
 }
 
 char *str_skip_whitespaces(char *str)
 {
-	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+	while((*str != 0) && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
 		str++;
 	return str;
 }
 
 const char *str_skip_whitespaces_const(const char *str)
 {
-	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+	while((*str != 0) && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
 		str++;
 	return str;
 }
@@ -2711,14 +2711,14 @@ int str_comp_filenames(const char *a, const char *b)
 {
 	int result;
 
-	for(; *a && *b; ++a, ++b)
+	for(; (*a != 0) && (*b != 0); ++a, ++b)
 	{
 		if(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9')
 		{
 			result = 0;
 			do
 			{
-				if(!result)
+				if(result == 0)
 					result = *a - *b;
 				++a;
 				++b;
@@ -2728,7 +2728,7 @@ int str_comp_filenames(const char *a, const char *b)
 				return 1;
 			else if(*b >= '0' && *b <= '9')
 				return -1;
-			else if(result)
+			else if(result != 0)
 				return result;
 		}
 
@@ -2826,7 +2826,7 @@ int str_utf8_dist(const char *a, const char *b)
 static int str_to_utf32_unchecked(const char *str, int **out)
 {
 	int out_len = 0;
-	while((**out = str_utf8_decode(&str)))
+	while((**out = str_utf8_decode(&str)) != 0)
 	{
 		(*out)++;
 		out_len++;
@@ -2859,7 +2859,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 		B(0, j) = j;
 		for(i = 1; i <= a_len; i++)
 		{
-			int subst = (a[i - 1] != b[j - 1]);
+			int subst = static_cast<int>(a[i - 1] != b[j - 1]);
 			B(i, j) = min3(
 				B(i - 1, j) + 1,
 				B(i, j - 1) + 1,
@@ -2892,16 +2892,16 @@ int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int b
 
 const char *str_find_nocase(const char *haystack, const char *needle)
 {
-	while(*haystack) /* native implementation */
+	while(*haystack != 0) /* native implementation */
 	{
 		const char *a = haystack;
 		const char *b = needle;
-		while(*a && *b && tolower((unsigned char)*a) == tolower((unsigned char)*b))
+		while((*a != 0) && (*b != 0) && tolower((unsigned char)*a) == tolower((unsigned char)*b))
 		{
 			a++;
 			b++;
 		}
-		if(!(*b))
+		if((*b) == 0)
 			return haystack;
 		haystack++;
 	}
@@ -2911,16 +2911,16 @@ const char *str_find_nocase(const char *haystack, const char *needle)
 
 const char *str_find(const char *haystack, const char *needle)
 {
-	while(*haystack) /* native implementation */
+	while(*haystack != 0) /* native implementation */
 	{
 		const char *a = haystack;
 		const char *b = needle;
-		while(*a && *b && *a == *b)
+		while((*a != 0) && (*b != 0) && *a == *b)
 		{
 			a++;
 			b++;
 		}
-		if(!(*b))
+		if((*b) == 0)
 			return haystack;
 		haystack++;
 	}
@@ -2999,9 +2999,9 @@ int str_hex_decode(void *dst, int dst_size, const char *src)
 	if(slen != dst_size * 2)
 		return 2;
 
-	for(i = 0; i < len && dst_size; i++, dst_size--)
+	for(i = 0; i < len && (dst_size != 0); i++, dst_size--)
 	{
-		if(byteval(src + i * 2, cdst++))
+		if(byteval(src + i * 2, cdst++) != 0)
 			return 1;
 	}
 	return 0;
@@ -3230,7 +3230,7 @@ int str_time_float(float secs, int format, char *buffer, int buffer_size)
 
 void str_escape(char **dst, const char *src, const char *end)
 {
-	while(*src && *dst + 1 < end)
+	while((*src != 0) && *dst + 1 < end)
 	{
 		if(*src == '"' || *src == '\\') // escape \ and "
 		{
@@ -3254,7 +3254,7 @@ void net_stats(NETSTATS *stats_inout)
 	*stats_inout = network_stats;
 }
 
-int str_isspace(char c) { return c == ' ' || c == '\n' || c == '\t'; }
+int str_isspace(char c) { return static_cast<int>(c == ' ' || c == '\n' || c == '\t'); }
 
 char str_uppercase(char c)
 {
@@ -3265,7 +3265,7 @@ char str_uppercase(char c)
 
 int str_isallnum(const char *str)
 {
-	while(*str)
+	while(*str != 0)
 	{
 		if(!(*str >= '0' && *str <= '9'))
 			return 0;
@@ -3284,7 +3284,7 @@ int str_utf8_comp_nocase(const char *a, const char *b)
 	int code_a;
 	int code_b;
 
-	while(*a && *b)
+	while((*a != 0) && (*b != 0))
 	{
 		code_a = str_utf8_tolower(str_utf8_decode(&a));
 		code_b = str_utf8_tolower(str_utf8_decode(&b));
@@ -3304,7 +3304,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 	if(num <= 0)
 		return 0;
 
-	while(*a && *b)
+	while((*a != 0) && (*b != 0))
 	{
 		code_a = str_utf8_tolower(str_utf8_decode(&a));
 		code_b = str_utf8_tolower(str_utf8_decode(&b));
@@ -3321,18 +3321,18 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 
 const char *str_utf8_find_nocase(const char *haystack, const char *needle)
 {
-	while(*haystack) /* native implementation */
+	while(*haystack != 0) /* native implementation */
 	{
 		const char *a = haystack;
 		const char *b = needle;
 		const char *a_next = a;
 		const char *b_next = b;
-		while(*a && *b && str_utf8_tolower(str_utf8_decode(&a_next)) == str_utf8_tolower(str_utf8_decode(&b_next)))
+		while((*a != 0) && (*b != 0) && str_utf8_tolower(str_utf8_decode(&a_next)) == str_utf8_tolower(str_utf8_decode(&b_next)))
 		{
 			a = a_next;
 			b = b_next;
 		}
-		if(!(*b))
+		if((*b) == 0)
 			return haystack;
 		str_utf8_decode(&haystack);
 	}
@@ -3342,13 +3342,13 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle)
 
 int str_utf8_isspace(int code)
 {
-	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
-	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
-	       (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
-	       (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
-	       code == 0x2800 || code == 0x3000 || code == 0x3164 ||
-	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
-	       (code >= 0xFFF9 && code <= 0xFFFC);
+	return static_cast<int>(code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
+				code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
+				(code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
+				(code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
+				code == 0x2800 || code == 0x3000 || code == 0x3164 ||
+				(code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
+				(code >= 0xFFF9 && code <= 0xFFFC));
 }
 
 const char *str_utf8_skip_whitespaces(const char *str)
@@ -3356,13 +3356,13 @@ const char *str_utf8_skip_whitespaces(const char *str)
 	const char *str_old;
 	int code;
 
-	while(*str)
+	while(*str != 0)
 	{
 		str_old = str;
 		code = str_utf8_decode(&str);
 
 		// check if unicode is not empty
-		if(!str_utf8_isspace(code))
+		if(str_utf8_isspace(code) == 0)
 		{
 			return str_old;
 		}
@@ -3375,13 +3375,13 @@ void str_utf8_trim_right(char *param)
 {
 	const char *str = param;
 	char *end = 0;
-	while(*str)
+	while(*str != 0)
 	{
 		char *str_old = (char *)str;
 		int code = str_utf8_decode(&str);
 
 		// check if unicode is not empty
-		if(!str_utf8_isspace(code))
+		if(str_utf8_isspace(code) == 0)
 		{
 			end = 0;
 		}
@@ -3405,10 +3405,10 @@ int str_utf8_isstart(char c)
 
 int str_utf8_rewind(const char *str, int cursor)
 {
-	while(cursor)
+	while(cursor != 0)
 	{
 		cursor--;
-		if(str_utf8_isstart(*(str + cursor)))
+		if(str_utf8_isstart(*(str + cursor)) != 0)
 			break;
 	}
 	return cursor;
@@ -3556,7 +3556,7 @@ int str_utf8_decode(const char **ptr)
 int str_utf8_check(const char *str)
 {
 	int codepoint;
-	while((codepoint = str_utf8_decode(&str)))
+	while((codepoint = str_utf8_decode(&str)) != 0)
 	{
 		if(codepoint == -1)
 		{
@@ -3589,7 +3589,7 @@ void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int
 unsigned str_quickhash(const char *str)
 {
 	unsigned hash = 5381;
-	for(; *str; str++)
+	for(; *str != 0; str++)
 		hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
 	return hash;
 }
@@ -3601,7 +3601,7 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 		str++;
 	else
 		str += len;
-	if(!*str)
+	if(*str == 0)
 		return NULL;
 
 	*length = strcspn(str, delim);
@@ -3613,13 +3613,13 @@ int str_in_list(const char *list, const char *delim, const char *needle)
 	const char *tok = list;
 	int len = 0, notfound = 1, needlelen = str_length(needle);
 
-	while(notfound && (tok = str_token_get(tok, delim, &len)))
+	while((notfound != 0) && (tok = str_token_get(tok, delim, &len)))
 	{
-		notfound = needlelen != len || str_comp_num(tok, needle, len);
+		notfound = static_cast<int>(needlelen != len || (str_comp_num(tok, needle, len)) != 0);
 		tok = tok + len;
 	}
 
-	return !notfound;
+	return static_cast<int>(static_cast<int>(notfound) == 0);
 }
 
 const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
@@ -3773,7 +3773,7 @@ int kill_process(PROCESS process)
 #elif defined(CONF_FAMILY_UNIX)
 	int status;
 	kill(process, SIGTERM);
-	return !waitpid(process, &status, 0);
+	return static_cast<int>(static_cast<int>(waitpid(process, &status, 0)) == 0);
 #endif
 }
 
@@ -3792,7 +3792,7 @@ int open_link(const char *link)
 	const int pid = fork();
 	if(pid == 0)
 		execlp("open", "open", link, nullptr);
-	return pid > 0;
+	return static_cast<int>(pid > 0);
 #endif
 }
 
@@ -3821,7 +3821,7 @@ static struct SECURE_RANDOM_DATA secure_random_data = {0};
 
 int secure_random_init()
 {
-	if(secure_random_data.initialized)
+	if(secure_random_data.initialized != 0)
 	{
 		return 0;
 	}
@@ -3851,7 +3851,7 @@ int secure_random_init()
 
 int secure_random_uninit()
 {
-	if(!secure_random_data.initialized)
+	if(secure_random_data.initialized == 0)
 	{
 		return 0;
 	}
@@ -3866,7 +3866,7 @@ int secure_random_uninit()
 		return 1;
 	}
 #else
-	if(!io_close(secure_random_data.urandom))
+	if(io_close(secure_random_data.urandom) == 0)
 	{
 		secure_random_data.initialized = 0;
 		return 0;
@@ -3916,7 +3916,7 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 
 void secure_random_fill(void *bytes, unsigned length)
 {
-	if(!secure_random_data.initialized)
+	if(secure_random_data.initialized == 0)
 	{
 		dbg_msg("secure", "called secure_random_fill before secure_random_init");
 		dbg_break();
@@ -4003,7 +4003,7 @@ int os_version_str(char *version, int length)
 	return 0;
 #else
 	struct utsname u;
-	if(uname(&u))
+	if(uname(&u) != 0)
 	{
 		return 1;
 	}

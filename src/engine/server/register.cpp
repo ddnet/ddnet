@@ -245,7 +245,7 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments())
+	if(pResult->NumArguments() != 0)
 	{
 		((CRegister *)pUserData)->OnConfigChange();
 	}
@@ -581,7 +581,7 @@ void CRegister::OnConfigChange()
 			}
 		}
 	}
-	if(!m_pConfig->m_SvSixup)
+	if(m_pConfig->m_SvSixup == 0)
 	{
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = false;

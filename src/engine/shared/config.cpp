@@ -64,7 +64,7 @@ void CConfigManager::Reset(const char *pScriptName)
 
 bool CConfigManager::Save()
 {
-	if(!m_pStorage || !g_Config.m_ClSaveSettings)
+	if(!m_pStorage || (g_Config.m_ClSaveSettings == 0))
 		return true;
 
 	char aConfigFileTmp[IO_MAX_PATH_LENGTH];

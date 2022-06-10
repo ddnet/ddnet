@@ -829,7 +829,7 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 	// if "real" fullscreen, obtain the video mode for that
 	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN)
 	{
-		if(SDL_GetCurrentDisplayMode(ScreenID, &DPMode))
+		if(SDL_GetCurrentDisplayMode(ScreenID, &DPMode) != 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}
@@ -879,7 +879,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			Compiled.major, Compiled.minor, Compiled.patch);
 	}
 
-	if(!SDL_WasInit(SDL_INIT_VIDEO))
+	if(SDL_WasInit(SDL_INIT_VIDEO) == 0u)
 	{
 		if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
 		{
@@ -964,7 +964,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	// store desktop resolution for settings reset button
 	SDL_DisplayMode DisplayMode;
-	if(SDL_GetDesktopDisplayMode(*pScreen, &DisplayMode))
+	if(SDL_GetDesktopDisplayMode(*pScreen, &DisplayMode) != 0)
 	{
 		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED;
@@ -996,15 +996,15 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	// set flags
 	int SdlFlags = SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
 	SdlFlags |= (IsOpenGLFamilyBackend) ? SDL_WINDOW_OPENGL : SDL_WINDOW_VULKAN;
-	if(Flags & IGraphicsBackend::INITFLAG_HIGHDPI)
+	if((Flags & IGraphicsBackend::INITFLAG_HIGHDPI) != 0)
 		SdlFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
-	if(Flags & IGraphicsBackend::INITFLAG_RESIZABLE)
+	if((Flags & IGraphicsBackend::INITFLAG_RESIZABLE) != 0)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
-	if(Flags & IGraphicsBackend::INITFLAG_BORDERLESS)
+	if((Flags & IGraphicsBackend::INITFLAG_BORDERLESS) != 0)
 		SdlFlags |= SDL_WINDOW_BORDERLESS;
-	if(Flags & IGraphicsBackend::INITFLAG_FULLSCREEN)
+	if((Flags & IGraphicsBackend::INITFLAG_FULLSCREEN) != 0)
 		SdlFlags |= SDL_WINDOW_FULLSCREEN;
-	else if(Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN))
+	else if((Flags & (IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN)) != 0)
 		SdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 
 	bool IsFullscreen = (SdlFlags & SDL_WINDOW_FULLSCREEN) != 0 || g_Config.m_GfxFullscreen == 3;
@@ -1031,7 +1031,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	if(IsOpenGLFamilyBackend)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		if(*pFsaaSamples)
+		if(*pFsaaSamples != 0)
 		{
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, *pFsaaSamples);
@@ -1043,7 +1043,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		}
 	}
 
-	if(g_Config.m_InpMouseOld)
+	if(g_Config.m_InpMouseOld != 0)
 		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
 	m_pWindow = SDL_CreateWindow(
@@ -1093,14 +1093,14 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
 	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_ALLOW_HIGHDPI not set, which is wrong
-	if(SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI && IsOpenGLFamilyBackend)
+	if(((SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI) != 0) && IsOpenGLFamilyBackend)
 		SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
 	else
 		SDL_GetWindowSize(m_pWindow, pCurrentWidth, pCurrentHeight);
 
 	if(IsOpenGLFamilyBackend)
 	{
-		SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
+		SDL_GL_SetSwapInterval((Flags & IGraphicsBackend::INITFLAG_VSYNC) != 0 ? 1 : 0);
 		SDL_GL_MakeCurrent(NULL, NULL);
 	}
 
@@ -1405,12 +1405,12 @@ int CGraphicsBackend_SDL_GL::GetWindowScreen()
 
 int CGraphicsBackend_SDL_GL::WindowActive()
 {
-	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_INPUT_FOCUS;
+	return static_cast<int>((static_cast<int>(m_pWindow != nullptr) != 0) && ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_INPUT_FOCUS)) != 0u);
 }
 
 int CGraphicsBackend_SDL_GL::WindowOpen()
 {
-	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_SHOWN;
+	return static_cast<int>((static_cast<int>(m_pWindow != nullptr) != 0) && ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_SHOWN)) != 0u);
 }
 
 void CGraphicsBackend_SDL_GL::SetWindowGrab(bool Grab)
@@ -1425,7 +1425,7 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 		return false;
 
 	// if the window is at fullscreen use SDL_SetWindowDisplayMode instead, suggested by SDL
-	if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN)
+	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0u)
 	{
 #ifdef CONF_FAMILY_WINDOWS
 		// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
@@ -1448,7 +1448,7 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 	else
 	{
 		SDL_SetWindowSize(m_pWindow, w, h);
-		if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_MAXIMIZED)
+		if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_MAXIMIZED) != 0u)
 			// remove maximize flag
 			SDL_RestoreWindow(m_pWindow);
 	}

@@ -32,7 +32,7 @@ void *CHeap::AllocateFromChunk(unsigned int Size, unsigned Alignment)
 {
 	char *pMem;
 	size_t Offset = reinterpret_cast<uintptr_t>(m_pCurrent->m_pCurrent) % Alignment;
-	if(Offset)
+	if(Offset != 0u)
 		Offset = Alignment - Offset;
 
 	// check if we need can fit the allocation

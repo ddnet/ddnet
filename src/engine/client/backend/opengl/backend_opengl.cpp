@@ -194,7 +194,7 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 		size_t TotalNumbersPassed = 0;
 		int aNumbers[3] = {0};
 		bool LastWasNumber = false;
-		while(*pStr && TotalNumbersPassed < 3)
+		while((*pStr != 0) && TotalNumbersPassed < 3)
 		{
 			if(*pStr >= '0' && *pStr <= '9')
 			{
@@ -791,7 +791,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 		glBindTexture(GL_TEXTURE_2D, m_Textures[Slot].m_Tex);
 	}
 
-	if(Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
+	if(((Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS) != 0) || !m_HasMipMaps)
 	{
 		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 		{
@@ -1314,7 +1314,7 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		};
 
 		// transpose bcs of column-major order of opengl
-		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float *)&m);
+		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, 1u, (float *)&m);
 	}
 }
 
@@ -1344,7 +1344,7 @@ bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t StepN, size_t Check
 			0, 1, 0, 0};
 
 		// transpose bcs of column-major order of opengl
-		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, true, (float *)&m);
+		glUniformMatrix4x2fv(pProgram->m_LocPos, 1, 1u, (float *)&m);
 	}
 	else
 	{
@@ -1361,9 +1361,9 @@ bool CCommandProcessorFragment_OpenGL2::DoAnalyzeStep(size_t StepN, size_t Check
 		glBufferData(GL_ARRAY_BUFFER, VerticesCount * sizeof((m_aStreamVertices[0])), m_aStreamVertices, GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof((m_aStreamVertices[0])), 0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, 0u, sizeof((m_aStreamVertices[0])), 0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof((m_aStreamVertices[0])), (GLvoid *)(sizeof(vec4) + sizeof(vec2)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, 0u, sizeof((m_aStreamVertices[0])), (GLvoid *)(sizeof(vec4) + sizeof(vec2)));
 	}
 	else
 	{
@@ -2291,11 +2291,11 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 	if(m_HasShaders)
 	{
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, BufferContainer.m_ContainerInfo.m_Stride, BufferContainer.m_ContainerInfo.m_Attributes[0].m_pOffset);
+		glVertexAttribPointer(0, 2, GL_FLOAT, 0u, BufferContainer.m_ContainerInfo.m_Stride, BufferContainer.m_ContainerInfo.m_Attributes[0].m_pOffset);
 		if(IsTextured)
 		{
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, false, BufferContainer.m_ContainerInfo.m_Stride, BufferContainer.m_ContainerInfo.m_Attributes[1].m_pOffset);
+			glVertexAttribPointer(1, 3, GL_FLOAT, 0u, BufferContainer.m_ContainerInfo.m_Stride, BufferContainer.m_ContainerInfo.m_Attributes[1].m_pOffset);
 		}
 
 		for(int i = 0; i < pCommand->m_IndicesDrawNum; ++i)

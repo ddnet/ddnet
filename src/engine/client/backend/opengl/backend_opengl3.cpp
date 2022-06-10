@@ -82,7 +82,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	m_OpenGLTextureLodBIAS = g_Config.m_GfxGLTextureLODBIAS;
 
-	m_UseMultipleTextureUnits = g_Config.m_GfxEnableTextureUnitOptimization;
+	m_UseMultipleTextureUnits = (g_Config.m_GfxEnableTextureUnitOptimization != 0);
 	if(!m_UseMultipleTextureUnits)
 	{
 		glActiveTexture(GL_TEXTURE0);
@@ -421,7 +421,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	glGenBuffers(1, &m_PrimitiveDrawBufferIDTex3D);
 	glGenVertexArrays(1, &m_PrimitiveDrawVertexIDTex3D);
 
-	m_UsePreinitializedVertexBuffer = g_Config.m_GfxUsePreinitBuffer;
+	m_UsePreinitializedVertexBuffer = (g_Config.m_GfxUsePreinitBuffer != 0);
 
 	for(int i = 0; i < MAX_STREAM_BUFFER_COUNT; ++i)
 	{
@@ -665,7 +665,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 		glBindSampler(SamplerSlot, m_Textures[Slot].m_Sampler);
 	}
 
-	if(Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS)
+	if((Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS) != 0)
 	{
 		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 		{
@@ -1103,7 +1103,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferContainer(const CComma
 		glBindBuffer(GL_ARRAY_BUFFER, m_BufferObjectIndices[pCommand->m_VertBufferBindingIndex]);
 		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
 		if(Attr.m_FuncType == 0)
-			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, Attr.m_Normalized, pCommand->m_Stride, Attr.m_pOffset);
+			glVertexAttribPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, static_cast<GLboolean>(Attr.m_Normalized), pCommand->m_Stride, Attr.m_pOffset);
 		else if(Attr.m_FuncType == 1)
 			glVertexAttribIPointer((GLuint)i, Attr.m_DataTypeCount, Attr.m_Type, pCommand->m_Stride, Attr.m_pOffset);
 

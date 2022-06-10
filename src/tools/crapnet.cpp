@@ -77,7 +77,7 @@ void Run(unsigned short Port, NETADDR Dest)
 
 			if((rand() % 100) < Ping.m_Loss) // drop the packet
 			{
-				if(g_ConfigLog)
+				if(g_ConfigLog != 0)
 					dbg_msg("crapnet", "dropped packet");
 				continue;
 			}
@@ -111,7 +111,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			p->m_ID = ID++;
 			mem_copy(p->m_aData, pData, Bytes);
 
-			if(ID > 20 && Bytes > 6 && DataTrash)
+			if(ID > 20 && Bytes > 6 && (DataTrash != 0))
 			{
 				p->m_aData[6 + (rand() % (Bytes - 6))] = rand() & 255; // modify a byte
 				if((rand() % 10) == 0)
@@ -124,16 +124,16 @@ void Run(unsigned short Port, NETADDR Dest)
 
 			if(Delaycounter <= 0)
 			{
-				if(Ping.m_Delay)
+				if(Ping.m_Delay != 0)
 					p->m_Timestamp += (time_freq() * 1000) / Ping.m_Delay;
 				Delaycounter = Ping.m_DelayFreq;
 			}
 			Delaycounter--;
 
-			if(g_ConfigLog)
+			if(g_ConfigLog != 0)
 			{
 				char aAddrStr[NETADDR_MAXSTRSIZE];
-				net_addr_str(&From, aAddrStr, sizeof(aAddrStr), true);
+				net_addr_str(&From, aAddrStr, sizeof(aAddrStr), 1);
 				dbg_msg("crapnet", "<< %08d %s (%d)", p->m_ID, aAddrStr, p->m_DataSize);
 			}
 		}
@@ -151,7 +151,7 @@ void Run(unsigned short Port, NETADDR Dest)
 			{
 				char aFlags[] = "  ";
 
-				if(g_ConfigReorder && (rand() % 2) == 0 && p->m_pNext)
+				if((g_ConfigReorder != 0) && (rand() % 2) == 0 && p->m_pNext)
 				{
 					aFlags[0] = 'R';
 					p = g_pFirst->m_pNext;
@@ -177,16 +177,16 @@ void Run(unsigned short Port, NETADDR Dest)
 				int MsPing = Ping.m_Base;
 				g_CurrentLatency = ((time_freq() * MsPing) / 1000) + (int64_t)(((time_freq() * MsFlux) / 1000) * Flux); // 50ms
 
-				if(MsSpike && (p->m_ID % 100) == 0)
+				if((MsSpike != 0) && (p->m_ID % 100) == 0)
 				{
 					g_CurrentLatency += (time_freq() * MsSpike) / 1000;
 					aFlags[1] = 'S';
 				}
 
-				if(g_ConfigLog)
+				if(g_ConfigLog != 0)
 				{
 					char aAddrStr[NETADDR_MAXSTRSIZE];
-					net_addr_str(&p->m_SendTo, aAddrStr, sizeof(aAddrStr), true);
+					net_addr_str(&p->m_SendTo, aAddrStr, sizeof(aAddrStr), 1);
 					dbg_msg("crapnet", ">> %08d %s (%d) %s", p->m_ID, aAddrStr, p->m_DataSize, aFlags);
 				}
 

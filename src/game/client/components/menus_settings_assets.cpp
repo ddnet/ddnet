@@ -43,7 +43,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 		{
 			str_format(aBuff, sizeof(aBuff), "editor/entities_clear/%s.png", gs_aModEntitiesNames[i]);
 			CImageInfo ImgInfo;
-			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
+			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL) != 0)
 			{
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
@@ -59,7 +59,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 		{
 			str_format(aBuff, sizeof(aBuff), "assets/entities/%s/%s.png", pEntitiesItem->m_aName, gs_aModEntitiesNames[i]);
 			CImageInfo ImgInfo;
-			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
+			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL) != 0)
 			{
 				pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 				pThis->Graphics()->FreePNG(&ImgInfo);
@@ -70,7 +70,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 			else
 			{
 				str_format(aBuff, sizeof(aBuff), "assets/entities/%s.png", pEntitiesItem->m_aName);
-				if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
+				if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL) != 0)
 				{
 					pEntitiesItem->m_aImages[i].m_Texture = pThis->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, ImgInfo.m_Format, 0);
 					pThis->Graphics()->FreePNG(&ImgInfo);
@@ -87,7 +87,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
-	if(IsDir)
+	if(IsDir != 0)
 	{
 		if(pName[0] == '.')
 			return 0;
@@ -376,15 +376,15 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	static int s_aPageTabs[NumberOfAssetsTabs] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Entities"), static_cast<int>(s_CurCustomTab == ASSETS_TAB_ENTITIES), &Page1Tab, 5, NULL, NULL, NULL, NULL, 4) != 0)
 		s_CurCustomTab = ASSETS_TAB_ENTITIES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Game"), static_cast<int>(s_CurCustomTab == ASSETS_TAB_GAME), &Page2Tab, 0, NULL, NULL, NULL, NULL, 4) != 0)
 		s_CurCustomTab = ASSETS_TAB_GAME;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[2], Localize("Emoticons"), s_CurCustomTab == ASSETS_TAB_EMOTICONS, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[2], Localize("Emoticons"), static_cast<int>(s_CurCustomTab == ASSETS_TAB_EMOTICONS), &Page3Tab, 0, NULL, NULL, NULL, NULL, 4) != 0)
 		s_CurCustomTab = ASSETS_TAB_EMOTICONS;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[3], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[3], Localize("Particles"), static_cast<int>(s_CurCustomTab == ASSETS_TAB_PARTICLES), &Page4Tab, 0, NULL, NULL, NULL, NULL, 4) != 0)
 		s_CurCustomTab = ASSETS_TAB_PARTICLES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), static_cast<int>(s_CurCustomTab == ASSETS_TAB_HUD), &Page5Tab, 10, NULL, NULL, NULL, NULL, 4) != 0)
 		s_CurCustomTab = ASSETS_TAB_HUD;
 
 	auto LoadStartTime = tw::time_get();
@@ -536,7 +536,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(s, OldSelected >= 0 && (size_t)OldSelected == i);
 		CUIRect ItemRect = Item.m_Rect;
 		ItemRect.Margin(Margin / 2, &ItemRect);
-		if(Item.m_Visible)
+		if(Item.m_Visible != 0)
 		{
 			CUIRect TextureRect;
 			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
@@ -625,7 +625,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &ReloadButton);
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
 	static int s_AssetsDirID = 0;
-	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton))
+	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton) != 0)
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
 		char aBufFull[IO_MAX_PATH_LENGTH + 7];
@@ -642,7 +642,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, aBufFull, aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("assets", IStorage::TYPE_SAVE);
 		Storage()->CreateFolder(aBufFull, IStorage::TYPE_SAVE);
-		if(!open_file(aBuf))
+		if(open_file(aBuf) == 0)
 		{
 			dbg_msg("menus", "couldn't open file");
 		}
@@ -651,7 +651,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static int s_AssetsReloadBtnID = 0;
-	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0) != 0)
 	{
 		ClearCustomItems(s_CurCustomTab);
 	}

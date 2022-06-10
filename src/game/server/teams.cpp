@@ -166,7 +166,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			}
 		}
 
-		if(g_Config.m_SvTeam < SV_TEAM_FORCED_SOLO && g_Config.m_SvMaxTeamSize != 2 && g_Config.m_SvPauseable)
+		if(g_Config.m_SvTeam < SV_TEAM_FORCED_SOLO && g_Config.m_SvMaxTeamSize != 2 && (g_Config.m_SvPauseable != 0))
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -245,7 +245,7 @@ void CGameTeams::Tick()
 		}
 	}
 	TeamHasWantedStartTime &= ~(uint64_t)1;
-	if(!TeamHasWantedStartTime)
+	if(TeamHasWantedStartTime == 0u)
 	{
 		return;
 	}
@@ -266,7 +266,7 @@ void CGameTeams::Tick()
 		{
 			if(m_Core.Team(j) == i && !m_TeeStarted[j])
 			{
-				if(aPlayerNames[0])
+				if(aPlayerNames[0] != 0)
 				{
 					str_append(aPlayerNames, ", ", sizeof(aPlayerNames));
 				}
@@ -274,7 +274,7 @@ void CGameTeams::Tick()
 				NumPlayersNotStarted += 1;
 			}
 		}
-		if(!aPlayerNames[0])
+		if(aPlayerNames[0] == 0)
 		{
 			continue;
 		}
@@ -487,7 +487,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		if(!GetPlayer(i))
 			continue; // Player doesn't exist
 
-		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
+		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || (GetPlayer(i)->IsPaused() != 0)))
 		{ // Not spectator
 			if(i != Asker)
 			{ // Actions of other players
@@ -641,7 +641,7 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 	{
 		PlayerCIDs[i] = Players[i]->GetCID();
 
-		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
+		if((g_Config.m_SvRejoinTeam0 != 0) && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
 		{
 			SetForceCharacterTeam(Players[i]->GetCID(), TEAM_FLOCK);
 			char aBuf[512];
@@ -670,7 +670,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		"%s finished in: %d minute(s) %5.2f second(s)",
 		Server()->ClientName(ClientID), (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
-	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
+	if((g_Config.m_SvHideScore != 0) || (g_Config.m_SvSaveWorseScores == 0))
 		GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
 	else
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1., CGameContext::CHAT_SIX);
@@ -688,7 +688,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		else
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 				Diff);
-		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
+		if((g_Config.m_SvHideScore != 0) || (g_Config.m_SvSaveWorseScores == 0))
 			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
 		else
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
@@ -719,9 +719,9 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		Server()->SaveDemo(ClientID, Time);
 	}
 
-	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
+	bool CallSaveScore = g_Config.m_SvSaveWorseScores != 0;
 
-	if(!pData->m_BestTime || Time < pData->m_BestTime)
+	if((pData->m_BestTime == 0.0f) || Time < pData->m_BestTime)
 	{
 		// update the score
 		pData->Set(Time, GetCpCurrent(Player));
@@ -729,7 +729,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	}
 
 	if(CallSaveScore)
-		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
+		if((g_Config.m_SvNamelessScore != 0) || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
 			GameServer()->Score()->SaveScore(ClientID, Time, pTimestamp,
 				GetCpCurrent(Player), Player->m_NotEligibleForFinish);
 
@@ -738,7 +738,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	if(GameServer()->m_pController->m_CurrentRecord == 0 || Time < GameServer()->m_pController->m_CurrentRecord)
 	{
 		// check for nameless
-		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
+		if((g_Config.m_SvNamelessScore != 0) || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
 		{
 			GameServer()->m_pController->m_CurrentRecord = Time;
 			NeedToSendNewRecord = true;
@@ -747,7 +747,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 	SetDDRaceState(Player, DDRACE_FINISHED);
 	// set player score
-	if(!pData->m_CurrentTime || pData->m_CurrentTime > Time)
+	if((pData->m_CurrentTime == 0.0f) || pData->m_CurrentTime > Time)
 	{
 		pData->m_CurrentTime = Time;
 		NeedToSendNewRecord = true;
@@ -771,7 +771,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		MsgLegacy.m_Check = Msg.m_Check = 0;
 		MsgLegacy.m_Finish = Msg.m_Finish = 1;
 
-		if(pData->m_BestTime)
+		if(pData->m_BestTime != 0.0f)
 		{
 			float Diff100 = (Time - pData->m_BestTime) * 100;
 			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
@@ -789,8 +789,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		Msg.m_ClientID = ClientID;
 		Msg.m_Time = Time * 1000;
 		Msg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
-		Msg.m_RecordPersonal = Time < pData->m_BestTime;
-		Msg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
+		Msg.m_RecordPersonal = static_cast<int>(Time < pData->m_BestTime);
+		Msg.m_RecordServer = static_cast<int>(Time < GameServer()->m_pController->m_CurrentRecord);
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 	}
 

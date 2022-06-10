@@ -62,7 +62,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 
 	if(UI()->CheckActiveItem(pID))
 	{
-		if(UI()->MouseButton(0))
+		if(UI()->MouseButton(0) != 0)
 		{
 			Grabbed = true;
 			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
@@ -75,14 +75,14 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	}
 	else if(UI()->HotItem() == pID)
 	{
-		if(UI()->MouseButton(0))
+		if(UI()->MouseButton(0) != 0)
 		{
 			UI()->SetActiveItem(pID);
 			s_OffsetY = UI()->MouseY() - Handle.y;
 			Grabbed = true;
 		}
 	}
-	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	else if((UI()->MouseButtonClicked(0) != 0) && !InsideHandle && InsideRail)
 	{
 		UI()->SetActiveItem(pID);
 		s_OffsetY = Handle.h / 2.0f;
@@ -142,7 +142,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 
 	if(UI()->CheckActiveItem(pID))
 	{
-		if(UI()->MouseButton(0))
+		if(UI()->MouseButton(0) != 0)
 		{
 			Grabbed = true;
 			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
@@ -155,14 +155,14 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	}
 	else if(UI()->HotItem() == pID)
 	{
-		if(UI()->MouseButton(0))
+		if(UI()->MouseButton(0) != 0)
 		{
 			UI()->SetActiveItem(pID);
 			s_OffsetX = UI()->MouseX() - Handle.x;
 			Grabbed = true;
 		}
 	}
-	else if(UI()->MouseButtonClicked(0) && !InsideHandle && InsideRail)
+	else if((UI()->MouseButtonClicked(0) != 0) && !InsideHandle && InsideRail)
 	{
 		UI()->SetActiveItem(pID);
 		s_OffsetX = Handle.w / 2.0f;
@@ -271,7 +271,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 				int WrittenChars = 0;
 
 				const char *pIt = pText;
-				while(*pIt)
+				while(*pIt != 0)
 				{
 					const char *pTmp = pIt;
 					int Character = str_utf8_decode(&pTmp);
@@ -508,14 +508,14 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	bool JustGotActive = false;
 	if(UI()->CheckActiveItem(pID))
 	{
-		if(!UI()->MouseButton(0))
+		if(UI()->MouseButton(0) == 0)
 		{
 			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
 	{
-		if(UI()->MouseButton(0))
+		if(UI()->MouseButton(0) != 0)
 		{
 			if(UI()->LastActiveItem() != pID)
 				JustGotActive = true;
@@ -524,7 +524,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	}
 
 	// check if the text has to be moved
-	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
+	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || (*m_pInputEventCount != 0)))
 	{
 		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *pOffset > Textbox.w)
@@ -554,7 +554,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	bool HasMouseSel = false;
 	if(UI()->LastActiveItem() == pID)
 	{
-		if(!m_MouseIsPress && UI()->MouseButtonClicked(0))
+		if(!m_MouseIsPress && (UI()->MouseButtonClicked(0) != 0))
 		{
 			m_MouseIsPress = true;
 			m_MousePressX = UI()->MouseX();
@@ -568,7 +568,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 		m_MouseCurY = UI()->MouseY();
 	}
 	HasMouseSel = m_MouseIsPress && !IsEmptyText;
-	if(m_MouseIsPress && UI()->MouseButtonReleased(0))
+	if(m_MouseIsPress && (UI()->MouseButtonReleased(0) != 0))
 	{
 		m_MouseIsPress = false;
 	}
@@ -638,7 +638,7 @@ bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIR
 	Props.m_AlignVertically = 0;
 	UI()->DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 	TextRender()->SetRenderFlags(0);
-	if(UI()->DoButtonLogic(pClearID, 0, &ClearButton))
+	if(UI()->DoButtonLogic(pClearID, 0, &ClearButton) != 0)
 	{
 		pStr[0] = 0;
 		UI()->SetActiveItem(pID);

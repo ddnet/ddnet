@@ -239,12 +239,12 @@ uint8_t *ResizeImage(const uint8_t *pImageData, int Width, int Height, int NewWi
 
 int HighestBit(int OfVar)
 {
-	if(!OfVar)
+	if(OfVar == 0)
 		return 0;
 
 	int RetV = 1;
 
-	while(OfVar >>= 1)
+	while(OfVar >>= static_cast<int>(1 != 0 != 0))
 		RetV <<= 1;
 
 	return RetV;

@@ -271,7 +271,7 @@ void CTeeHistorian::RecordPlayer(int ClientID, const CNetObj_CharacterCore *pCha
 			Buffer.AddInt(ClientID);
 			Buffer.AddInt(dx);
 			Buffer.AddInt(dy);
-			if(m_Debug)
+			if(m_Debug != 0)
 			{
 				dbg_msg("teehistorian", "diff cid=%d dx=%d dy=%d", ClientID, dx, dy);
 			}
@@ -284,7 +284,7 @@ void CTeeHistorian::RecordPlayer(int ClientID, const CNetObj_CharacterCore *pCha
 			Buffer.AddInt(ClientID);
 			Buffer.AddInt(x);
 			Buffer.AddInt(y);
-			if(m_Debug)
+			if(m_Debug != 0)
 			{
 				dbg_msg("teehistorian", "new cid=%d x=%d y=%d", ClientID, x, y);
 			}
@@ -309,7 +309,7 @@ void CTeeHistorian::RecordDeadPlayer(int ClientID)
 		Buffer.Reset();
 		Buffer.AddInt(-TEEHISTORIAN_PLAYER_OLD);
 		Buffer.AddInt(ClientID);
-		if(m_Debug)
+		if(m_Debug != 0)
 		{
 			dbg_msg("teehistorian", "old cid=%d", ClientID);
 		}
@@ -331,7 +331,7 @@ void CTeeHistorian::RecordPlayerTeam(int ClientID, int Team)
 		Buffer.AddInt(ClientID);
 		Buffer.AddInt(Team);
 
-		if(m_Debug)
+		if(m_Debug != 0)
 		{
 			dbg_msg("teehistorian", "player_team cid=%d team=%d", ClientID, Team);
 		}
@@ -351,11 +351,11 @@ void CTeeHistorian::RecordTeamPractice(int Team, bool Practice)
 		CPacker Buffer;
 		Buffer.Reset();
 		Buffer.AddInt(Team);
-		Buffer.AddInt(Practice);
+		Buffer.AddInt(static_cast<int>(Practice));
 
-		if(m_Debug)
+		if(m_Debug != 0)
 		{
-			dbg_msg("teehistorian", "team_practice team=%d practice=%d", Team, Practice);
+			dbg_msg("teehistorian", "team_practice team=%d practice=%d", Team, static_cast<int>(Practice));
 		}
 
 		WriteExtra(UUID_TEEHISTORIAN_TEAM_PRACTICE, Buffer.Data(), Buffer.Size());
@@ -383,7 +383,7 @@ void CTeeHistorian::WriteTick()
 	int dt = m_Tick - m_LastWrittenTick - 1;
 	TickPacker.AddInt(-TEEHISTORIAN_TICK_SKIP);
 	TickPacker.AddInt(dt);
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "skip_ticks dt=%d", dt);
 	}
@@ -424,7 +424,7 @@ void CTeeHistorian::RecordPlayerInput(int ClientID, uint32_t UniqueClientID, con
 
 		Buffer.AddInt(-TEEHISTORIAN_INPUT_DIFF);
 		CSnapshotDelta::DiffItem((int *)&pPrev->m_Input, (int *)pInput, (int *)&DiffInput, sizeof(DiffInput) / sizeof(int));
-		if(m_Debug)
+		if(m_Debug != 0)
 		{
 			const int *pData = (const int *)&DiffInput;
 			dbg_msg("teehistorian", "diff_input cid=%d %d %d %d %d %d %d %d %d %d %d", ClientID,
@@ -438,7 +438,7 @@ void CTeeHistorian::RecordPlayerInput(int ClientID, uint32_t UniqueClientID, con
 		Buffer.Reset();
 		Buffer.AddInt(-TEEHISTORIAN_INPUT_NEW);
 		DiffInput = *pInput;
-		if(m_Debug)
+		if(m_Debug != 0)
 		{
 			dbg_msg("teehistorian", "new_input cid=%d", ClientID);
 		}
@@ -465,7 +465,7 @@ void CTeeHistorian::RecordPlayerMessage(int ClientID, const void *pMsg, int MsgS
 	Buffer.AddInt(MsgSize);
 	Buffer.AddRaw(pMsg, MsgSize);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		CUnpacker Unpacker;
 		Unpacker.Reset(pMsg, MsgSize);
@@ -487,7 +487,7 @@ void CTeeHistorian::RecordPlayerJoin(int ClientID, int Protocol)
 		CPacker Buffer;
 		Buffer.Reset();
 		Buffer.AddInt(ClientID);
-		if(m_Debug)
+		if(m_Debug != 0)
 		{
 			dbg_msg("teehistorian", "joinver%d cid=%d", Protocol == PROTOCOL_6 ? 6 : 7, ClientID);
 		}
@@ -500,7 +500,7 @@ void CTeeHistorian::RecordPlayerJoin(int ClientID, int Protocol)
 	Buffer.AddInt(-TEEHISTORIAN_JOIN);
 	Buffer.AddInt(ClientID);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "join cid=%d", ClientID);
 	}
@@ -516,7 +516,7 @@ void CTeeHistorian::RecordPlayerReady(int ClientID)
 	Buffer.Reset();
 	Buffer.AddInt(ClientID);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "player_ready cid=%d", ClientID);
 	}
@@ -534,7 +534,7 @@ void CTeeHistorian::RecordPlayerDrop(int ClientID, const char *pReason)
 	Buffer.AddInt(ClientID);
 	Buffer.AddString(pReason, 0);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "drop cid=%d reason='%s'", ClientID, pReason);
 	}
@@ -558,7 +558,7 @@ void CTeeHistorian::RecordConsoleCommand(int ClientID, int FlagMask, const char 
 		Buffer.AddString(pResult->GetString(i), 0);
 	}
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "ccmd cid=%d cmd='%s'", ClientID, pCmd);
 	}
@@ -568,7 +568,7 @@ void CTeeHistorian::RecordConsoleCommand(int ClientID, int FlagMask, const char 
 
 void CTeeHistorian::RecordTestExtra()
 {
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "test");
 	}
@@ -598,7 +598,7 @@ void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pT
 	Buffer.AddRaw(&SaveID, sizeof(SaveID));
 	Buffer.AddString(pTeamSave, 0);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		char aSaveID[UUID_MAXSTRSIZE];
 		FormatUuid(SaveID, aSaveID, sizeof(aSaveID));
@@ -616,7 +616,7 @@ void CTeeHistorian::RecordTeamSaveFailure(int Team)
 	Buffer.Reset();
 	Buffer.AddInt(Team);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "save_failure team=%d", Team);
 	}
@@ -634,7 +634,7 @@ void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveID, const char *pT
 	Buffer.AddRaw(&SaveID, sizeof(SaveID));
 	Buffer.AddString(pTeamSave, 0);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		char aSaveID[UUID_MAXSTRSIZE];
 		FormatUuid(SaveID, aSaveID, sizeof(aSaveID));
@@ -652,7 +652,7 @@ void CTeeHistorian::RecordTeamLoadFailure(int Team)
 	Buffer.Reset();
 	Buffer.AddInt(Team);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "load_failure team=%d", Team);
 	}
@@ -680,7 +680,7 @@ void CTeeHistorian::RecordDDNetVersionOld(int ClientID, int DDNetVersion)
 	Buffer.AddInt(ClientID);
 	Buffer.AddInt(DDNetVersion);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "ddnetver_old cid=%d ddnet_version=%d", ClientID, DDNetVersion);
 	}
@@ -697,7 +697,7 @@ void CTeeHistorian::RecordDDNetVersion(int ClientID, CUuid ConnectionID, int DDN
 	Buffer.AddInt(DDNetVersion);
 	Buffer.AddString(pDDNetVersionStr, 0);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		char aConnnectionID[UUID_MAXSTRSIZE];
 		FormatUuid(ConnectionID, aConnnectionID, sizeof(aConnnectionID));
@@ -715,7 +715,7 @@ void CTeeHistorian::RecordAuthInitial(int ClientID, int Level, const char *pAuth
 	Buffer.AddInt(Level);
 	Buffer.AddString(pAuthName, 0);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "auth_init cid=%d level=%d auth_name=%s", ClientID, Level, pAuthName);
 	}
@@ -731,7 +731,7 @@ void CTeeHistorian::RecordAuthLogin(int ClientID, int Level, const char *pAuthNa
 	Buffer.AddInt(Level);
 	Buffer.AddString(pAuthName, 0);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "auth_login cid=%d level=%d auth_name=%s", ClientID, Level, pAuthName);
 	}
@@ -745,7 +745,7 @@ void CTeeHistorian::RecordAuthLogout(int ClientID)
 	Buffer.Reset();
 	Buffer.AddInt(ClientID);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "auth_logout cid=%d", ClientID);
 	}
@@ -770,7 +770,7 @@ void CTeeHistorian::Finish()
 	Buffer.Reset();
 	Buffer.AddInt(-TEEHISTORIAN_FINISH);
 
-	if(m_Debug)
+	if(m_Debug != 0)
 	{
 		dbg_msg("teehistorian", "finish");
 	}

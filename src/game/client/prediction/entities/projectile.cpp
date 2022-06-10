@@ -98,9 +98,9 @@ void CProjectile::Tick()
 		isWeaponCollide = true;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) == 0 : (g_Config.m_SvHit != 0) || m_Owner == -1 || pTargetChr == pOwnerChar)) || (Collide != 0) || GameLayerClipped(CurPos)) && !isWeaponCollide)
 	{
-		if(m_Explosive && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
+		if(m_Explosive && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && (Collide != 0))))))
 		{
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), -1LL);
 		}
@@ -112,7 +112,7 @@ void CProjectile::Tick()
 				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_Status[apEnts[i]->Team()])))
 					apEnts[i]->Freeze();
 		}
-		if(Collide && m_Bouncing != 0)
+		if((Collide != 0) && m_Bouncing != 0)
 		{
 			m_StartTick = GameWorld()->GameTick();
 			m_Pos = NewPos + (-(m_Direction * 4));

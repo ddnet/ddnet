@@ -13,7 +13,7 @@ CLayerGame::~CLayerGame() = default;
 
 CTile CLayerGame::GetTile(int x, int y)
 {
-	if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+	if((m_pEditor->m_Map.m_pFrontLayer != nullptr) && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
 		CTile through_cut = {TILE_THROUGH_CUT};
 		return through_cut;
@@ -41,12 +41,12 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 	}
 	else
 	{
-		if(m_pEditor->m_SelectEntitiesImage == "DDNet" && m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+		if(m_pEditor->m_SelectEntitiesImage == "DDNet" && (m_pEditor->m_Map.m_pFrontLayer != nullptr) && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 		{
 			CTile air = {TILE_AIR};
 			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 		}
-		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(tile.m_Index))
+		if((m_pEditor->m_AllowPlaceUnusedTiles != 0) || IsValidGameTile(tile.m_Index))
 		{
 			CLayerTiles::SetTile(x, y, tile);
 		}
@@ -57,7 +57,7 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 			if(!m_pEditor->m_PreventUnusedTilesWasWarned)
 			{
 				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_PREVENTUNUSEDTILES;
-				m_pEditor->m_PopupEventActivated = true;
+				m_pEditor->m_PopupEventActivated = 1;
 				m_pEditor->m_PreventUnusedTilesWasWarned = true;
 			}
 		}

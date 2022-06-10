@@ -329,7 +329,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		vec2 Diff = pChar->m_Pos - Pos;
 		vec2 ForceDir(0, 1);
 		float l = length(Diff);
-		if(l)
+		if(l != 0.0f)
 			ForceDir = normalize(Diff);
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
@@ -339,15 +339,15 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 			Strength = GetCharacterByID(Owner)->Tuning()->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
-		if((int)Dmg)
-			if((GetCharacterByID(Owner) ? !(GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
+		if((int)Dmg != 0)
+			if((GetCharacterByID(Owner) ? (GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) == 0 : (g_Config.m_SvHit != 0) || NoDamage) || Owner == pChar->GetCID())
 			{
 				if(Owner != -1 && !pChar->CanCollide(Owner))
 					continue;
 				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
 					continue;
 				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
-				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
+				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : static_cast<int>((g_Config.m_SvHit == 0) || static_cast<int>(NoDamage) != 0) != 0)
 					break;
 			}
 	}
@@ -610,7 +610,7 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
 		}
 		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
-		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))
+		if((pEnt != nullptr) && CProjectile(this, ObjID, &Data).Match(pEnt))
 		{
 			return pEnt;
 		}

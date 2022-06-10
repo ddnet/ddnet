@@ -405,7 +405,7 @@ std::unique_ptr<ILogger> log_logger_stdout()
 #if !defined(CONF_FAMILY_WINDOWS)
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
-	const bool colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
+	const bool colors = getenv("NO_COLOR") == nullptr && (isatty(STDOUT_FILENO) != 0);
 	return std::make_unique<CLoggerAsync>(io_stdout(), colors, false);
 #else
 	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)

@@ -357,7 +357,7 @@ void CServerBrowserHttp::Update()
 
 		bool Success = true;
 		json_value *pJson = pGetServers->ResultJson();
-		Success = Success && pJson;
+		Success = Success && (pJson != nullptr);
 		Success = Success && !Parse(pJson, &m_aServers, &m_aLegacyServers);
 		json_value_free(pJson);
 		if(!Success)
@@ -483,7 +483,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 		{
 			const json_value &Address = LegacyServers[i];
 			NETADDR ParsedAddr;
-			if(Address.type != json_string || net_addr_from_str(&ParsedAddr, Address))
+			if(Address.type != json_string || (net_addr_from_str(&ParsedAddr, Address) != 0))
 			{
 				return true;
 			}

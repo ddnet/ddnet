@@ -43,7 +43,7 @@ void CLayers::Init(class IKernel *pKernel)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 
-				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_GAME) != 0)
 				{
 					m_pGameLayer = pTilemap;
 					m_pGameGroup = pGroup;
@@ -65,7 +65,7 @@ void CLayers::Init(class IKernel *pKernel)
 
 					//break;
 				}
-				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_TELE) != 0)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
@@ -73,7 +73,7 @@ void CLayers::Init(class IKernel *pKernel)
 					}
 					m_pTeleLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP) != 0)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
@@ -81,7 +81,7 @@ void CLayers::Init(class IKernel *pKernel)
 					}
 					m_pSpeedupLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags & TILESLAYERFLAG_FRONT)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_FRONT) != 0)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
@@ -89,7 +89,7 @@ void CLayers::Init(class IKernel *pKernel)
 					}
 					m_pFrontLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags & TILESLAYERFLAG_SWITCH)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_SWITCH) != 0)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
@@ -97,7 +97,7 @@ void CLayers::Init(class IKernel *pKernel)
 					}
 					m_pSwitchLayer = pTilemap;
 				}
-				if(pTilemap->m_Flags & TILESLAYERFLAG_TUNE)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_TUNE) != 0)
 				{
 					if(pTilemap->m_Version <= 2)
 					{
@@ -136,7 +136,7 @@ void CLayers::InitBackground(class IMap *pMap)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 
-				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
+				if((pTilemap->m_Flags & TILESLAYERFLAG_GAME) != 0)
 				{
 					m_pGameLayer = pTilemap;
 					m_pGameGroup = pGroup;
@@ -185,7 +185,7 @@ void CLayers::InitTilemapSkip()
 						int SkippedX;
 						for(SkippedX = 1; x + SkippedX < pTilemap->m_Width && SkippedX < 255; SkippedX++)
 						{
-							if(pTiles[y * pTilemap->m_Width + x + SkippedX].m_Index)
+							if(pTiles[y * pTilemap->m_Width + x + SkippedX].m_Index != 0u)
 								break;
 						}
 

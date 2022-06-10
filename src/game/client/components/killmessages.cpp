@@ -180,7 +180,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 void CKillMessages::OnRender()
 {
-	if(!g_Config.m_ClShowKillMessages)
+	if(g_Config.m_ClShowKillMessages == 0)
 		return;
 
 	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
@@ -190,7 +190,7 @@ void CKillMessages::OnRender()
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	float StartX = Width * 1.5f - 10.0f;
-	float y = 30.0f + 100.0f * ((g_Config.m_ClShowfps ? 1 : 0) + g_Config.m_ClShowpred);
+	float y = 30.0f + 100.0f * ((g_Config.m_ClShowfps != 0 ? 1 : 0) + g_Config.m_ClShowpred);
 
 	for(int i = 1; i <= MAX_KILLMSGS; i++)
 	{
@@ -205,7 +205,7 @@ void CKillMessages::OnRender()
 
 		// render victim name
 		x -= m_aKillmsgs[r].m_VitctimTextWidth;
-		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
+		if(m_aKillmsgs[r].m_VictimID >= 0 && (g_Config.m_ClChatTeamColors != 0) && (m_aKillmsgs[r].m_VictimDDTeam != 0))
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
 			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0f);
@@ -219,9 +219,9 @@ void CKillMessages::OnRender()
 		// render victim tee
 		x -= 24.0f;
 
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS)
+		if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) != 0))
 		{
-			if(m_aKillmsgs[r].m_ModeSpecial & 1)
+			if((m_aKillmsgs[r].m_ModeSpecial & 1) != 0)
 			{
 				int QuadOffset = 0;
 				if(m_aKillmsgs[r].m_VictimID == m_aKillmsgs[r].m_FlagCarrierBlue)
@@ -261,9 +261,9 @@ void CKillMessages::OnRender()
 
 		if(m_aKillmsgs[r].m_VictimID != m_aKillmsgs[r].m_KillerID)
 		{
-			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS)
+			if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) != 0))
 			{
-				if(m_aKillmsgs[r].m_ModeSpecial & 2)
+				if((m_aKillmsgs[r].m_ModeSpecial & 2) != 0)
 				{
 					int QuadOffset = 2;
 					if(m_aKillmsgs[r].m_KillerID == m_aKillmsgs[r].m_FlagCarrierBlue)

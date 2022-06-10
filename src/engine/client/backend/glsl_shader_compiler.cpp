@@ -41,15 +41,15 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 		const char *pBuff = pReadLine;
 		char aTmpStr[1024];
 		size_t TmpStrSize = 0;
-		while(*pBuff)
+		while(*pBuff != 0)
 		{
-			while(*pBuff && str_isspace(*pBuff))
+			while((*pBuff != 0) && (str_isspace(*pBuff) != 0))
 			{
 				Line.append(1, *pBuff);
 				++pBuff;
 			}
 
-			while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+			while((*pBuff != 0) && (str_isspace(*pBuff) == 0) && *pBuff != '(' && *pBuff != '.')
 			{
 				aTmpStr[TmpStrSize++] = *pBuff;
 				++pBuff;
@@ -62,12 +62,12 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				if(str_comp(aTmpStr, "layout") == 0)
 				{
 					//search for ' in'
-					while(*pBuff && (*pBuff != ' ' || (*(pBuff + 1) && *(pBuff + 1) != 'i') || *(pBuff + 2) != 'n'))
+					while((*pBuff != 0) && (*pBuff != ' ' || ((*(pBuff + 1) != 0) && *(pBuff + 1) != 'i') || *(pBuff + 2) != 'n'))
 					{
 						++pBuff;
 					}
 
-					if(*pBuff == ' ' && *(pBuff + 1) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
+					if(*pBuff == ' ' && (*(pBuff + 1) != 0) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
 					{
 						pBuff += 3;
 						Line.append("attribute");
@@ -82,20 +82,20 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				else if(str_comp(aTmpStr, "noperspective") == 0 || str_comp(aTmpStr, "smooth") == 0 || str_comp(aTmpStr, "flat") == 0)
 				{
 					//search for 'in' or 'out'
-					while(*pBuff && ((*pBuff != 'i' || *(pBuff + 1) != 'n') && (*pBuff != 'o' || (*(pBuff + 1) && *(pBuff + 1) != 'u') || *(pBuff + 2) != 't')))
+					while((*pBuff != 0) && ((*pBuff != 'i' || *(pBuff + 1) != 'n') && (*pBuff != 'o' || ((*(pBuff + 1) != 0) && *(pBuff + 1) != 'u') || *(pBuff + 2) != 't')))
 					{
 						++pBuff;
 					}
 
 					bool Found = false;
-					if(*pBuff)
+					if(*pBuff != 0)
 					{
 						if(*pBuff == 'i' && *(pBuff + 1) == 'n')
 						{
 							pBuff += 2;
 							Found = true;
 						}
-						else if(*pBuff == 'o' && *(pBuff + 1) && *(pBuff + 1) == 'u' && *(pBuff + 2) == 't')
+						else if(*pBuff == 'o' && (*(pBuff + 1) != 0) && *(pBuff + 1) == 'u' && *(pBuff + 2) == 't')
 						{
 							pBuff += 3;
 							Found = true;
@@ -144,7 +144,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				}
 			}
 
-			if(*pBuff)
+			if(*pBuff != 0)
 			{
 				Line.append(1, *pBuff);
 				++pBuff;
@@ -158,15 +158,15 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 			const char *pBuff = pReadLine;
 			char aTmpStr[1024];
 			size_t TmpStrSize = 0;
-			while(*pBuff)
+			while(*pBuff != 0)
 			{
-				while(*pBuff && str_isspace(*pBuff))
+				while((*pBuff != 0) && (str_isspace(*pBuff) != 0))
 				{
 					Line.append(1, *pBuff);
 					++pBuff;
 				}
 
-				while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+				while((*pBuff != 0) && (str_isspace(*pBuff) == 0) && *pBuff != '(' && *pBuff != '.')
 				{
 					aTmpStr[TmpStrSize++] = *pBuff;
 					++pBuff;
@@ -189,20 +189,20 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 						Line.append("texture");
 						// check opening and closing brackets to find the end
 						int CurBrackets = 1;
-						while(*pBuff && *pBuff != '(')
+						while((*pBuff != 0) && *pBuff != '(')
 						{
 							Line.append(1, *pBuff);
 
 							++pBuff;
 						}
 
-						if(*pBuff)
+						if(*pBuff != 0)
 						{
 							Line.append(1, *pBuff);
 							++pBuff;
 						}
 
-						while(*pBuff)
+						while(*pBuff != 0)
 						{
 							if(*pBuff == '(')
 								++CurBrackets;
@@ -231,7 +231,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 					}
 				}
 
-				if(*pBuff)
+				if(*pBuff != 0)
 				{
 					Line.append(1, *pBuff);
 					++pBuff;

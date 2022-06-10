@@ -134,7 +134,7 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 	else
 		((CChat *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
 
-	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
+	if((pResult->GetString(1)[0] != 0) || (g_Config.m_ClChatReset != 0))
 		((CChat *)pUserData)->m_Input.Set(pResult->GetString(1));
 }
 
@@ -267,16 +267,16 @@ bool CChat::OnInput(IInput::CEvent Event)
 		}
 	}
 
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && Event.m_Key == KEY_ESCAPE)
 	{
 		DisableMode();
 		m_pClient->OnRelease();
-		if(g_Config.m_ClChatReset)
+		if(g_Config.m_ClChatReset != 0)
 			m_Input.Clear();
 	}
-	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
+	else if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
-		if(m_Input.GetString()[0])
+		if(m_Input.GetString()[0] != 0)
 		{
 			bool AddEntry = false;
 
@@ -303,7 +303,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_pClient->OnRelease();
 		m_Input.Clear();
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
+	if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && Event.m_Key == KEY_TAB)
 	{
 		// fill the completion buffer
 		if(!m_CompletionUsed)
@@ -313,7 +313,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				;
 			m_PlaceholderOffset = pCursor - m_Input.GetString();
 
-			for(m_PlaceholderLength = 0; *pCursor && *pCursor != ' '; ++pCursor)
+			for(m_PlaceholderLength = 0; (*pCursor != 0) && *pCursor != ' '; ++pCursor)
 				++m_PlaceholderLength;
 
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
@@ -400,7 +400,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				// add separator
 				const char *pSeparator = pCompletionCommand->m_pParams[0] == '\0' ? "" : " ";
 				str_append(aBuf, pSeparator, sizeof(aBuf));
-				if(*pSeparator)
+				if(*pSeparator != 0)
 					str_append(aBuf, pSeparator, sizeof(aBuf));
 
 				// add part after the name
@@ -465,7 +465,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 					pSeparator = m_PlaceholderOffset == 0 ? ": " : " ";
 				else if(m_PlaceholderOffset == 0)
 					pSeparator = ":";
-				if(*pSeparator)
+				if(*pSeparator != 0)
 					str_append(aBuf, pSeparator, sizeof(aBuf));
 
 				// add part after the name
@@ -482,7 +482,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 	else
 	{
 		// reset name completion process
-		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
+		if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && Event.m_Key != KEY_TAB)
 		{
 			if(Event.m_Key != KEY_LSHIFT)
 			{
@@ -495,15 +495,15 @@ bool CChat::OnInput(IInput::CEvent Event)
 		m_Input.ProcessInput(Event);
 		m_InputUpdate = true;
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_LSHIFT)
+	if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && Event.m_Key == KEY_LSHIFT)
 	{
 		m_ReverseTAB = true;
 	}
-	else if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
+	else if(((Event.m_Flags & IInput::FLAG_RELEASE) != 0) && Event.m_Key == KEY_LSHIFT)
 	{
 		m_ReverseTAB = false;
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
+	if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && Event.m_Key == KEY_UP)
 	{
 		if(m_pHistoryEntry)
 		{
@@ -518,7 +518,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		if(m_pHistoryEntry)
 			m_Input.Set(m_pHistoryEntry->m_aText);
 	}
-	else if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_DOWN)
+	else if(((Event.m_Flags & IInput::FLAG_PRESS) != 0) && Event.m_Key == KEY_DOWN)
 	{
 		if(m_pHistoryEntry)
 			m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
@@ -539,7 +539,7 @@ void CChat::EnableMode(int Team)
 
 	if(m_Mode == MODE_NONE)
 	{
-		if(Team)
+		if(Team != 0)
 			m_Mode = MODE_TEAM;
 		else
 			m_Mode = MODE_ALL;
@@ -646,10 +646,10 @@ void CChat::StoreSave(const char *pText)
 void CChat::AddLine(int ClientID, int Team, const char *pLine)
 {
 	if(*pLine == 0 ||
-		(ClientID == -1 && !g_Config.m_ClShowChatSystem) ||
+		(ClientID == -1 && (g_Config.m_ClShowChatSystem == 0)) ||
 		(ClientID >= 0 && (m_pClient->m_aClients[ClientID].m_aName[0] == '\0' || // unknown client
 					  m_pClient->m_aClients[ClientID].m_ChatIgnore ||
-					  (m_pClient->m_Snap.m_LocalClientID != ClientID && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientID].m_Friend) ||
+					  (m_pClient->m_Snap.m_LocalClientID != ClientID && (g_Config.m_ClShowChatFriends != 0) && !m_pClient->m_aClients[ClientID].m_Friend) ||
 					  (m_pClient->m_Snap.m_LocalClientID != ClientID && m_pClient->m_aClients[ClientID].m_Foe))))
 		return;
 
@@ -657,13 +657,13 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	int Length = 0;
 	const char *pStr = pLine;
 	const char *pEnd = 0;
-	while(*pStr)
+	while(*pStr != 0)
 	{
 		const char *pStrOld = pStr;
 		int Code = str_utf8_decode(&pStr);
 
 		// check if unicode is not empty
-		if(!str_utf8_isspace(Code))
+		if(str_utf8_isspace(Code) == 0)
 		{
 			pEnd = 0;
 		}
@@ -703,7 +703,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		}
 		else
 		{
-			if(pLine_->m_Friend && g_Config.m_ClMessageFriend)
+			if(pLine_->m_Friend && (g_Config.m_ClMessageFriend != 0))
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
 			else if(pLine_->m_Team)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
@@ -718,12 +718,12 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine_->m_Whisper ? "whisper" : (pLine_->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
 	};
 
-	while(*p)
+	while(*p != 0)
 	{
 		Highlighted = false;
 		pLine = p;
 		// find line separator and strip multiline
-		while(*p)
+		while(*p != 0)
 		{
 			if(*p++ == '\n')
 			{
@@ -810,7 +810,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			if(m_pClient->m_aClients[ClientID].m_Team == TEAM_SPECTATORS)
 				pCurrentLine->m_NameColor = TEAM_SPECTATORS;
 
-			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+			if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0))
 			{
 				if(m_pClient->m_aClients[ClientID].m_Team == TEAM_RED)
 					pCurrentLine->m_NameColor = TEAM_RED;
@@ -845,7 +845,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		if(pCurrentLine->m_ClientID >= 0 && pCurrentLine->m_aName[0] != '\0')
 		{
-			if(!g_Config.m_ClChatOld)
+			if(g_Config.m_ClChatOld == 0)
 			{
 				pCurrentLine->m_CustomColoredSkin = m_pClient->m_aClients[pCurrentLine->m_ClientID].m_RenderInfo.m_CustomColoredSkin;
 				if(pCurrentLine->m_CustomColoredSkin)
@@ -871,7 +871,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_SERVER] >= time_freq() * 3 / 10)
 		{
-			if(g_Config.m_SndServerMessage)
+			if(g_Config.m_SndServerMessage != 0)
 			{
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
@@ -889,13 +889,13 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "%s: %s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
 			Client()->Notify("DDNet Chat", aBuf);
-			if(g_Config.m_SndHighlight)
+			if(g_Config.m_SndHighlight != 0)
 			{
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
-			if(g_Config.m_ClEditor)
+			if(g_Config.m_ClEditor != 0)
 			{
 				GameClient()->Editor()->UpdateMentions();
 			}
@@ -905,7 +905,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
-			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndChat;
+			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : static_cast<int>(g_Config.m_SndChat != 0 != 0);
 #if defined(CONF_VIDEORECORDER)
 			if(IVideo::Current())
 			{
@@ -960,7 +960,7 @@ void CChat::OnPrepareLines()
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
 	float RealMsgPaddingTee = MESSAGE_TEE_SIZE + MESSAGE_TEE_PADDING_RIGHT;
 
-	if(g_Config.m_ClChatOld)
+	if(g_Config.m_ClChatOld != 0)
 	{
 		RealMsgPaddingX = 0;
 		RealMsgPaddingY = 0;
@@ -998,7 +998,7 @@ void CChat::OnPrepareLines()
 
 		char aName[64 + 12] = "";
 
-		if(g_Config.m_ClShowIDs && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
+		if((g_Config.m_ClShowIDs != 0) && m_aLines[r].m_ClientID >= 0 && m_aLines[r].m_aName[0] != '\0')
 		{
 			if(m_aLines[r].m_ClientID < 10)
 				str_format(aName, sizeof(aName), " %d: ", m_aLines[r].m_ClientID);
@@ -1014,7 +1014,7 @@ void CChat::OnPrepareLines()
 		else
 			str_format(aCount, sizeof(aCount), " [%d]", m_aLines[r].m_TimesRepeated + 1);
 
-		if(g_Config.m_ClChatOld)
+		if(g_Config.m_ClChatOld != 0)
 		{
 			m_aLines[r].m_HasRenderTee = false;
 		}
@@ -1029,7 +1029,7 @@ void CChat::OnPrepareLines()
 			{
 				Cursor.m_X += RealMsgPaddingTee;
 
-				if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+				if(m_aLines[r].m_Friend && (g_Config.m_ClMessageFriend != 0))
 				{
 					TextRender()->TextEx(&Cursor, "♥ ", -1);
 				}
@@ -1046,7 +1046,7 @@ void CChat::OnPrepareLines()
 
 			CTextCursor AppendCursor = Cursor;
 
-			if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
+			if(!IsScoreBoardOpen && (g_Config.m_ClChatOld == 0))
 			{
 				AppendCursor.m_StartX = Cursor.m_X;
 				AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
@@ -1078,7 +1078,7 @@ void CChat::OnPrepareLines()
 		{
 			Cursor.m_X += RealMsgPaddingTee;
 
-			if(m_aLines[r].m_Friend && g_Config.m_ClMessageFriend)
+			if(m_aLines[r].m_Friend && (g_Config.m_ClMessageFriend != 0))
 			{
 				const char *pHeartStr = "♥ ";
 				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
@@ -1110,7 +1110,7 @@ void CChat::OnPrepareLines()
 			NameColor = ColorRGBA(0.7f, 0.7f, 1.0f, 1.f); // blue
 		else if(m_aLines[r].m_NameColor == TEAM_SPECTATORS)
 			NameColor = ColorRGBA(0.75f, 0.5f, 0.75f, 1.f); // spectator
-		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
+		else if(m_aLines[r].m_ClientID >= 0 && (g_Config.m_ClChatTeamColors != 0) && (m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) != 0))
 		{
 			NameColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
 		}
@@ -1158,7 +1158,7 @@ void CChat::OnPrepareLines()
 		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
-		if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
+		if(!IsScoreBoardOpen && (g_Config.m_ClChatOld == 0))
 		{
 			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
 			AppendCursor.m_StartX = Cursor.m_X;
@@ -1169,7 +1169,7 @@ void CChat::OnPrepareLines()
 		else
 			TextRender()->AppendTextContainer(&AppendCursor, m_aLines[r].m_TextContainerIndex, m_aLines[r].m_aText);
 
-		if(!g_Config.m_ClChatOld && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
+		if((g_Config.m_ClChatOld == 0) && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
 		{
 			float Height = m_aLines[r].m_YOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
@@ -1227,7 +1227,7 @@ void CChat::OnRender()
 		int EditingCursor = Input()->GetEditingCursor();
 		if(Input()->GetIMEState())
 		{
-			if(str_length(Input()->GetIMEEditingText()))
+			if(str_length(Input()->GetIMEEditingText()) != 0)
 			{
 				m_Input.Editing(Input()->GetIMEEditingText(), EditingCursor);
 				Editing = true;
@@ -1271,7 +1271,7 @@ void CChat::OnRender()
 	}
 
 #if defined(CONF_VIDEORECORDER)
-	if(!((g_Config.m_ClShowChat && !IVideo::Current()) || (g_Config.m_ClVideoShowChat && IVideo::Current())))
+	if(!(((g_Config.m_ClShowChat != 0) && !IVideo::Current()) || ((g_Config.m_ClVideoShowChat != 0) && IVideo::Current())))
 #else
 	if(!g_Config.m_ClShowChat)
 #endif
@@ -1291,7 +1291,7 @@ void CChat::OnRender()
 	float RealMsgPaddingX = MESSAGE_PADDING_X;
 	float RealMsgPaddingY = MESSAGE_PADDING_Y;
 
-	if(g_Config.m_ClChatOld)
+	if(g_Config.m_ClChatOld != 0)
 	{
 		RealMsgPaddingX = 0;
 		RealMsgPaddingY = 0;
@@ -1312,7 +1312,7 @@ void CChat::OnRender()
 		float Blend = Now > m_aLines[r].m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - m_aLines[r].m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
 
 		// Draw backgrounds for messages in one batch
-		if(!g_Config.m_ClChatOld)
+		if(g_Config.m_ClChatOld == 0)
 		{
 			Graphics()->TextureClear();
 			if(m_aLines[r].m_QuadContainerIndex != -1)
@@ -1324,7 +1324,7 @@ void CChat::OnRender()
 
 		if(m_aLines[r].m_TextContainerIndex != -1)
 		{
-			if(!g_Config.m_ClChatOld && m_aLines[r].m_HasRenderTee)
+			if((g_Config.m_ClChatOld == 0) && m_aLines[r].m_HasRenderTee)
 			{
 				CTeeRenderInfo RenderInfo;
 				RenderInfo.m_CustomColoredSkin = m_aLines[r].m_CustomColoredSkin;

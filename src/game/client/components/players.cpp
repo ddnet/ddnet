@@ -150,17 +150,17 @@ void CPlayers::RenderHookCollLine(
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
-	if(in_range(ClientID, MAX_CLIENTS - 1))
+	if(in_range(ClientID, MAX_CLIENTS - 1) != 0)
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	// draw hook collision line
 	{
 		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
-		bool RenderHookCollPlayer = ClientID >= 0 && Player.m_PlayerFlags & PLAYERFLAG_AIM && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
+		bool RenderHookCollPlayer = ClientID >= 0 && ((Player.m_PlayerFlags & PLAYERFLAG_AIM) != 0) && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
 		bool RenderHookCollVideo = true;
 #if defined(CONF_VIDEORECORDER)
-		RenderHookCollVideo = !IVideo::Current() || g_Config.m_ClVideoShowHookCollOther || Local;
+		RenderHookCollVideo = (IVideo::Current() == nullptr) || (g_Config.m_ClVideoShowHookCollOther != 0) || Local;
 #endif
 		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
@@ -171,7 +171,7 @@ void CPlayers::RenderHookCollLine(
 				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
 
 				// fix direction if mouse is exactly in the center
-				if(!(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y)
+				if(((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x == 0) && ((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y == 0))
 					ExDirection = vec2(1, 0);
 			}
 			Graphics()->TextureClear();
@@ -205,7 +205,7 @@ void CPlayers::RenderHookCollLine(
 				int TeleNr = 0;
 				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
 
-				if(!DoBreak && Hit)
+				if(!DoBreak && (Hit != 0))
 				{
 					if(Hit != TILE_NOHOOK)
 					{
@@ -219,7 +219,7 @@ void CPlayers::RenderHookCollLine(
 					break;
 				}
 
-				if(Hit)
+				if(Hit != 0)
 					break;
 
 				NewPos.x = round_to_int(NewPos.x);
@@ -287,7 +287,7 @@ void CPlayers::RenderHook(
 	RenderInfo.m_Size = 64.0f;
 
 	vec2 Position;
-	if(in_range(ClientID, MAX_CLIENTS - 1))
+	if(in_range(ClientID, MAX_CLIENTS - 1) != 0)
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
@@ -302,7 +302,7 @@ void CPlayers::RenderHook(
 		vec2 Pos = Position;
 		vec2 HookPos;
 
-		if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
+		if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1) != 0)
 			HookPos = m_pClient->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
 		else
 			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
@@ -367,7 +367,7 @@ void CPlayers::RenderPlayer(
 
 	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 	static float s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
-	if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+	if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED) == 0))
 	{
 		s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 		s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
@@ -397,7 +397,7 @@ void CPlayers::RenderPlayer(
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
-	if(in_range(ClientID, MAX_CLIENTS - 1))
+	if(in_range(ClientID, MAX_CLIENTS - 1) != 0)
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
@@ -405,7 +405,7 @@ void CPlayers::RenderPlayer(
 
 	m_pClient->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
-	RenderInfo.m_GotAirJump = Player.m_Jumped & 2 ? 0 : 1;
+	RenderInfo.m_GotAirJump = (Player.m_Jumped & 2) != 0 ? 0 : 1;
 
 	bool Stationary = Player.m_VelX <= 1 && Player.m_VelX >= -1;
 	bool InAir = !Collision()->CheckPoint(Player.m_X, Player.m_Y + 16);
@@ -439,7 +439,7 @@ void CPlayers::RenderPlayer(
 		static int64_t SkidSoundTime = 0;
 		if(time() - SkidSoundTime > time_freq() / 10)
 		{
-			if(g_Config.m_SndGame)
+			if(g_Config.m_SndGame != 0)
 				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
 			SkidSoundTime = time();
 		}
@@ -503,7 +503,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, p.x, p.y);
 
 			// HADOKEN
-			if(AttackTime <= 1 / 6.f && g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)
+			if(AttackTime <= 1 / 6.f && (g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles != 0))
 			{
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
 				static int s_LastIteX = IteX;
@@ -517,7 +517,7 @@ void CPlayers::RenderPlayer(
 				}
 				else
 				{
-					if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+					if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED) != 0))
 						IteX = s_LastIteX;
 					else
 						s_LastIteX = IteX;
@@ -558,12 +558,12 @@ void CPlayers::RenderPlayer(
 				Recoil = sinf(a * pi);
 			p = Position + Dir * g_pData->m_Weapons.m_aId[iw].m_Offsetx - Dir * Recoil * 10.0f;
 			p.y += g_pData->m_Weapons.m_aId[iw].m_Offsety;
-			if(Player.m_Weapon == WEAPON_GUN && g_Config.m_ClOldGunPosition)
+			if(Player.m_Weapon == WEAPON_GUN && (g_Config.m_ClOldGunPosition != 0))
 				p.y -= 8;
 			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, p.x, p.y);
 		}
 
-		if(RenderInfo.m_ShineDecoration)
+		if(RenderInfo.m_ShineDecoration != 0)
 		{
 			if(Direction.x < 0)
 			{
@@ -578,7 +578,7 @@ void CPlayers::RenderPlayer(
 		if(Player.m_Weapon == WEAPON_GUN || Player.m_Weapon == WEAPON_SHOTGUN)
 		{
 			// check if we're firing stuff
-			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles) //prev.attackticks)
+			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles != 0) //prev.attackticks)
 			{
 				float AlphaMuzzle = 0.0f;
 				if(AttackTicksPassed < g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3)
@@ -599,7 +599,7 @@ void CPlayers::RenderPlayer(
 				}
 				else
 				{
-					if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+					if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED) != 0))
 						IteX = s_LastIteX;
 					else
 						s_LastIteX = IteX;
@@ -630,7 +630,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// render the "shadow" tee
-	if(Local && ((g_Config.m_Debug && g_Config.m_ClUnpredictedShadow >= 0) || g_Config.m_ClUnpredictedShadow == 1))
+	if(Local && (((g_Config.m_Debug != 0) && g_Config.m_ClUnpredictedShadow >= 0) || g_Config.m_ClUnpredictedShadow == 1))
 	{
 		vec2 GhostPosition = Position;
 		if(ClientID >= 0)
@@ -646,7 +646,7 @@ void CPlayers::RenderPlayer(
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
-	if((Player.m_PlayerFlags & PLAYERFLAG_CHATTING) && !m_pClient->m_aClients[ClientID].m_Afk)
+	if(((Player.m_PlayerFlags & PLAYERFLAG_CHATTING) != 0) && !m_pClient->m_aClients[ClientID].m_Afk)
 	{
 		int CurEmoticon = (SPRITE_DOTDOT - SPRITE_OOP);
 		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[CurEmoticon]);
@@ -661,7 +661,7 @@ void CPlayers::RenderPlayer(
 	if(ClientID < 0)
 		return;
 
-	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
+	if((g_Config.m_ClAfkEmote != 0) && m_pClient->m_aClients[ClientID].m_Afk && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[g_Config.m_ClDummy == 0]))
 	{
 		int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
 		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[CurEmoticon]);
@@ -673,7 +673,7 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStartTick != -1)
+	if((g_Config.m_ClShowEmotes != 0) && !m_pClient->m_aClients[ClientID].m_EmoticonIgnore && m_pClient->m_aClients[ClientID].m_EmoticonStartTick != -1)
 	{
 		float SinceStart = (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStartTick) + (Client()->IntraGameTickSincePrev(g_Config.m_ClDummy) - m_pClient->m_aClients[ClientID].m_EmoticonStartFraction);
 		float FromEnd = (2 * Client()->GameTickSpeed()) - SinceStart;
@@ -713,7 +713,7 @@ inline bool CPlayers::IsPlayerInfoAvailable(int ClientID) const
 {
 	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientID);
 	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientID);
-	return pPrevInfo && pInfo;
+	return (pPrevInfo != nullptr) && (pInfo != nullptr);
 }
 
 void CPlayers::OnRender()
@@ -725,8 +725,8 @@ void CPlayers::OnRender()
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		m_aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
-		m_aRenderInfo[i].m_ShineDecoration = m_pClient->m_aClients[i].m_LiveFrozen;
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+		m_aRenderInfo[i].m_ShineDecoration = static_cast<int>(m_pClient->m_aClients[i].m_LiveFrozen);
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Cur.m_Weapon == WEAPON_NINJA && (g_Config.m_ClShowNinja != 0))
 		{
 			// change the skin for the player to the ninja
 			int Skin = m_pClient->m_Skins.Find("x_ninja");

@@ -22,8 +22,8 @@ bool CFileCollection::IsFilenameValid(const char *pFilename)
 	else
 	{
 		if(str_length(pFilename) != m_FileDescLength + TIMESTAMP_LENGTH + m_FileExtLength ||
-			str_comp_num(pFilename, m_aFileDesc, m_FileDescLength) ||
-			str_comp(pFilename + m_FileDescLength + TIMESTAMP_LENGTH, m_aFileExt))
+			(str_comp_num(pFilename, m_aFileDesc, m_FileDescLength) != 0) ||
+			(str_comp(pFilename + m_FileDescLength + TIMESTAMP_LENGTH, m_aFileExt) != 0))
 			return false;
 
 		pFilename += m_FileDescLength;
@@ -236,7 +236,7 @@ int CFileCollection::FilelistCallback(const char *pFilename, int IsDir, int Stor
 	CFileCollection *pThis = static_cast<CFileCollection *>(pUser);
 
 	// check for valid file name format
-	if(IsDir || !pThis->IsFilenameValid(pFilename))
+	if((IsDir != 0) || !pThis->IsFilenameValid(pFilename))
 		return 0;
 
 	// extract the timestamp
@@ -253,7 +253,7 @@ int CFileCollection::RemoveCallback(const char *pFilename, int IsDir, int Storag
 	CFileCollection *pThis = static_cast<CFileCollection *>(pUser);
 
 	// check for valid file name format
-	if(IsDir || !pThis->IsFilenameValid(pFilename))
+	if((IsDir != 0) || !pThis->IsFilenameValid(pFilename))
 		return 0;
 
 	// extract the timestamp

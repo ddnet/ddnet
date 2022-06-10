@@ -156,11 +156,11 @@ void CCharacterCore::Tick(bool UseInput)
 		// The second jumped bit can be overridden by special tiles so that the tee can nevertheless jump.
 
 		// handle jump
-		if(m_Input.m_Jump)
+		if(m_Input.m_Jump != 0)
 		{
-			if(!(m_Jumped & 1))
+			if((m_Jumped & 1) == 0)
 			{
-				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
+				if(Grounded && (((m_Jumped & 2) == 0) || m_Jumps != 0))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
 					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
@@ -174,7 +174,7 @@ void CCharacterCore::Tick(bool UseInput)
 					}
 					m_JumpedTotal = 0;
 				}
-				else if(!(m_Jumped & 2))
+				else if((m_Jumped & 2) == 0)
 				{
 					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
 					m_Vel.y = -m_Tuning.m_AirJumpImpulse;
@@ -189,7 +189,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// handle hook
-		if(m_Input.m_Hook)
+		if(m_Input.m_Hook != 0)
 		{
 			if(m_HookState == HOOK_IDLE)
 			{
@@ -261,7 +261,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		//m_NewHook = false;
 
-		if(Hit)
+		if(Hit != 0)
 		{
 			if(Hit == TILE_NOHOOK)
 				GoingToRetract = true;
@@ -273,7 +273,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// Check against other players first
-		if(!this->m_NoHookHit && m_pWorld && m_Tuning.m_PlayerHooking)
+		if(!this->m_NoHookHit && m_pWorld && (m_Tuning.m_PlayerHooking != 0.0f))
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -313,7 +313,7 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && m_pWorld && m_pTeleOuts && !m_pTeleOuts->empty() && !(*m_pTeleOuts)[teleNr - 1].empty())
+			if(GoingThroughTele && (m_pWorld != nullptr) && (m_pTeleOuts != nullptr) && !m_pTeleOuts->empty() && !(*m_pTeleOuts)[teleNr - 1].empty())
 			{
 				m_TriggeredEvents = 0;
 				SetHookedPlayer(-1);
@@ -407,7 +407,7 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
+				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_NoCollision && !pCharCore->m_NoCollision && (m_Tuning.m_PlayerCollision != 0.0f));
 
 				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
 				{
@@ -424,7 +424,7 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 
 				// handle hook influence
-				if(!m_NoHookHit && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
+				if(!m_NoHookHit && m_HookedPlayer == i && (m_Tuning.m_PlayerHooking != 0.0f))
 				{
 					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
 					{
@@ -480,7 +480,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
-	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_NoCollision && !m_Solo)))
+	if(m_pWorld && (m_Super || ((m_Tuning.m_PlayerCollision != 0.0f) && !m_NoCollision && !m_Solo)))
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
@@ -562,19 +562,19 @@ void CCharacterCore::ReadCharacter(const CNetObj_Character *pObjChar)
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
-	m_Solo = pObjDDNet->m_Flags & CHARACTERFLAG_SOLO;
-	m_Jetpack = pObjDDNet->m_Flags & CHARACTERFLAG_JETPACK;
-	m_NoCollision = pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION;
-	m_NoHammerHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
-	m_NoGrenadeHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
-	m_NoLaserHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_LASER_HIT;
-	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
-	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
-	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
+	m_Solo = ((pObjDDNet->m_Flags & CHARACTERFLAG_SOLO) != 0);
+	m_Jetpack = ((pObjDDNet->m_Flags & CHARACTERFLAG_JETPACK) != 0);
+	m_NoCollision = ((pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION) != 0);
+	m_NoHammerHit = ((pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT) != 0);
+	m_NoGrenadeHit = ((pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT) != 0);
+	m_NoLaserHit = ((pObjDDNet->m_Flags & CHARACTERFLAG_NO_LASER_HIT) != 0);
+	m_NoShotgunHit = ((pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT) != 0);
+	m_NoHookHit = ((pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK) != 0);
+	m_Super = ((pObjDDNet->m_Flags & CHARACTERFLAG_SUPER) != 0);
 
 	// Endless
-	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
-	m_EndlessJump = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
+	m_EndlessHook = ((pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK) != 0);
+	m_EndlessJump = ((pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_JUMP) != 0);
 
 	// Freeze
 	m_FreezeEnd = pObjDDNet->m_FreezeEnd;
@@ -582,9 +582,9 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_LiveFrozen = (pObjDDNet->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
 
 	// Telegun
-	m_HasTelegunGrenade = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
-	m_HasTelegunGun = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GUN;
-	m_HasTelegunLaser = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
+	m_HasTelegunGrenade = ((pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE) != 0);
+	m_HasTelegunGun = ((pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GUN) != 0);
+	m_HasTelegunLaser = ((pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_LASER) != 0);
 
 	// Weapons
 	m_aWeapons[WEAPON_HAMMER].m_Got = (pObjDDNet->m_Flags & CHARACTERFLAG_WEAPON_HAMMER) != 0;
@@ -603,7 +603,7 @@ void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInf
 	m_JumpedTotal = pObjDDNet->m_JumpedTotal;
 	m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
 	m_FreezeTick = pObjDDNet->m_FreezeTick;
-	m_IsInFreeze = pObjDDNet->m_IsInFreeze;
+	m_IsInFreeze = (pObjDDNet->m_IsInFreeze != 0);
 }
 
 void CCharacterCore::Quantize()

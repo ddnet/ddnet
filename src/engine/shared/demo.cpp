@@ -219,13 +219,13 @@ enum
 
 void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 {
-	if(m_LastTickMarker == -1 || Tick - m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
+	if(m_LastTickMarker == -1 || Tick - m_LastTickMarker > CHUNKMASK_TICK || (Keyframe != 0))
 	{
 		unsigned char aChunk[5];
 		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER;
 		uint_to_bytes_be(aChunk + 1, Tick);
 
-		if(Keyframe)
+		if(Keyframe != 0)
 			aChunk[0] |= CHUNKTICKFLAG_KEYFRAME;
 
 		io_write(m_File, aChunk, sizeof(aChunk));
@@ -257,7 +257,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	/* pad the data with 0 so we get an alignment of 4,
 	else the compression won't work and miss some bytes */
 	mem_copy(aBuffer2, pData, Size);
-	while(Size & 3)
+	while((Size & 3) != 0)
 		aBuffer2[Size++] = 0;
 	Size = CVariableInt::Compress(aBuffer2, Size, aBuffer, sizeof(aBuffer)); // buffer2 -> buffer
 	if(Size < 0)
@@ -316,7 +316,7 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 		WriteTickMarker(Tick, 0);
 
 		DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)pData, &aDeltaData);
-		if(DeltaSize)
+		if(DeltaSize != 0)
 		{
 			// record delta
 			Write(CHUNKTYPE_DELTA, aDeltaData, DeltaSize);
@@ -427,7 +427,7 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 	if(io_read(m_File, &Chunk, sizeof(Chunk)) != sizeof(Chunk))
 		return -1;
 
-	if(Chunk & CHUNKTYPEFLAG_TICKMARKER)
+	if((Chunk & CHUNKTYPEFLAG_TICKMARKER) != 0)
 	{
 		// decode tick marker
 		int Tickdelta_legacy = Chunk & (CHUNKMASK_TICK_LEGACY); // compatibility
@@ -437,7 +437,7 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		{
 			*pTick += Tickdelta_legacy;
 		}
-		else if(Chunk & (CHUNKTICKFLAG_TICK_COMPRESSED))
+		else if((Chunk & (CHUNKTICKFLAG_TICK_COMPRESSED)) != 0)
 		{
 			int Tickdelta = Chunk & (CHUNKMASK_TICK);
 			*pTick += Tickdelta;
@@ -492,13 +492,13 @@ void CDemoPlayer::ScanFile()
 	{
 		long CurrentPos = io_tell(m_File);
 
-		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
+		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick) != 0)
 			break;
 
 		// read the chunk
-		if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
+		if((ChunkType & CHUNKTYPEFLAG_TICKMARKER) != 0)
 		{
-			if(ChunkType & CHUNKTICKFLAG_KEYFRAME)
+			if((ChunkType & CHUNKTICKFLAG_KEYFRAME) != 0)
 			{
 				CKeyFrameSearch *pKey;
 
@@ -519,7 +519,7 @@ void CDemoPlayer::ScanFile()
 				m_Info.m_Info.m_FirstTick = ChunkTick;
 			m_Info.m_Info.m_LastTick = ChunkTick;
 		}
-		else if(ChunkSize)
+		else if(ChunkSize != 0)
 			io_skip(m_File, ChunkSize);
 	}
 
@@ -557,7 +557,7 @@ void CDemoPlayer::DoTick()
 
 	while(true)
 	{
-		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
+		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick) != 0)
 		{
 			// stop on error or eof
 			if(m_pConsole)
@@ -578,7 +578,7 @@ void CDemoPlayer::DoTick()
 		}
 
 		// read the chunk
-		if(ChunkSize)
+		if(ChunkSize != 0)
 		{
 			if(io_read(m_File, s_aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
 			{
@@ -650,14 +650,14 @@ void CDemoPlayer::DoTick()
 		else
 		{
 			// if there were no snapshots in this tick, replay the last one
-			if(!GotSnapshot && m_pListener && m_LastSnapshotDataSize != -1)
+			if((GotSnapshot == 0) && m_pListener && m_LastSnapshotDataSize != -1)
 			{
 				GotSnapshot = 1;
 				m_pListener->OnDemoPlayerSnapshot(m_aLastSnapshotData, m_LastSnapshotDataSize);
 			}
 
 			// check the remaining types
-			if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
+			if((ChunkType & CHUNKTYPEFLAG_TICKMARKER) != 0)
 			{
 				m_Info.m_NextTick = ChunkTick;
 				break;
@@ -675,7 +675,7 @@ void CDemoPlayer::Pause()
 {
 	m_Info.m_Info.m_Paused = true;
 #if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
+	if(IVideo::Current() && (g_Config.m_ClVideoPauseWithDemo != 0))
 		IVideo::Current()->Pause(true);
 #endif
 }
@@ -684,7 +684,7 @@ void CDemoPlayer::Unpause()
 {
 	m_Info.m_Info.m_Paused = false;
 #if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
+	if(IVideo::Current() && (g_Config.m_ClVideoPauseWithDemo != 0))
 		IVideo::Current()->Pause(false);
 #endif
 }
@@ -768,9 +768,9 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	}
 
 	// get demo type
-	if(!str_comp(m_Info.m_Header.m_aType, "client"))
+	if(str_comp(m_Info.m_Header.m_aType, "client") == 0)
 		m_DemoType = DEMOTYPE_CLIENT;
-	else if(!str_comp(m_Info.m_Header.m_aType, "server"))
+	else if(str_comp(m_Info.m_Header.m_aType, "server") == 0)
 		m_DemoType = DEMOTYPE_SERVER;
 	else
 		m_DemoType = DEMOTYPE_INVALID;
@@ -816,7 +816,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 unsigned char *CDemoPlayer::GetMapData(class IStorage *pStorage)
 {
-	if(!m_MapInfo.m_Size)
+	if(m_MapInfo.m_Size == 0)
 		return 0;
 
 	long CurSeek = io_tell(m_File);
@@ -866,7 +866,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 int CDemoPlayer::NextFrame()
 {
 	DoTick();
-	return IsPlaying();
+	return static_cast<int>(IsPlaying());
 }
 
 int64_t CDemoPlayer::time()
@@ -1050,7 +1050,7 @@ void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
 	const char *pFileName = m_aFilename;
 	const char *pExtractedName = pFileName;
 	const char *pEnd = 0;
-	for(; *pFileName; ++pFileName)
+	for(; *pFileName != 0; ++pFileName)
 	{
 		if(*pFileName == '/' || *pFileName == '\\')
 			pExtractedName = pFileName + 1;
@@ -1102,7 +1102,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Size = bytes_be_to_int(pDemoHeader->m_aMapSize);
 
 	io_close(File);
-	return !(mem_comp(pDemoHeader->m_aMarker, s_aHeaderMarker, sizeof(s_aHeaderMarker)) || pDemoHeader->m_Version < s_OldVersion);
+	return !((mem_comp(pDemoHeader->m_aMarker, s_aHeaderMarker, sizeof(s_aHeaderMarker)) != 0) || pDemoHeader->m_Version < s_OldVersion);
 }
 
 int CDemoPlayer::GetDemoType() const
@@ -1148,7 +1148,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	}
 
 	unsigned char *pMapData = m_pDemoPlayer->GetMapData(m_pStorage);
-	const int Result = m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1;
+	const int Result = static_cast<const int>(m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1);
 	free(pMapData);
 	if(Result != 0)
 		return;

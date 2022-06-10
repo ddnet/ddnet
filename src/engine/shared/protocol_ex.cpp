@@ -26,7 +26,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 	}
 
 	*pID = MsgID >> 1;
-	*pSys = MsgID & 1;
+	*pSys = ((MsgID & 1) != 0);
 
 	if(*pID < 0 || *pID >= OFFSET_UUID)
 	{
@@ -71,7 +71,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 			return UNPACKMESSAGE_ANSWER;
 		}
 		case NETMSG_IDONTKNOW:
-			if(g_Config.m_Debug)
+			if(g_Config.m_Debug != 0)
 			{
 				CUuid Uuid2;
 				g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
@@ -83,7 +83,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 			}
 			break;
 		case NETMSG_ITIS:
-			if(g_Config.m_Debug)
+			if(g_Config.m_Debug != 0)
 			{
 				CUuid Uuid2;
 				g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);

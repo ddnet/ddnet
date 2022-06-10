@@ -14,7 +14,7 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 {
 	m_Pos = Pos;
 	m_Core = Dir;
-	m_Freeze = Freeze;
+	m_Freeze = static_cast<int>(Freeze);
 	m_Explosive = Explosive;
 	m_ForClientID = ForClientID;
 	m_EvalTick = Server()->Tick();
@@ -67,7 +67,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 		return false;
 	}
 
-	m_Freeze ? HitPlayer->Freeze() : HitPlayer->UnFreeze();
+	m_Freeze != 0 ? HitPlayer->Freeze() : HitPlayer->UnFreeze();
 	if(m_Explosive)
 	{
 		// Plasma Turrets are very precise weapons only one tee gets speed from it,
@@ -83,7 +83,7 @@ bool CPlasma::HitObstacle(CCharacter *pTarget)
 {
 	// Check if the plasma bullet is stopped by a solid block or a laser stopper
 	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
-	if(HasIntersection)
+	if(HasIntersection != 0)
 	{
 		if(m_Explosive)
 		{

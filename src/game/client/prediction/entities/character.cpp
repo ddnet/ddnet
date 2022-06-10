@@ -55,17 +55,17 @@ void CCharacter::HandleJetpack()
 
 	// check if we gonna fire
 	bool WillFire = false;
-	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses != 0)
 		WillFire = true;
 
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(FullAuto && ((m_LatestInput.m_Fire & 1) != 0) && (m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo != 0))
 		WillFire = true;
 
 	if(!WillFire)
 		return;
 
 	// check for ammo
-	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo || m_FreezeTime)
+	if((m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo == 0) || (m_FreezeTime != 0))
 	{
 		return;
 	}
@@ -77,7 +77,7 @@ void CCharacter::HandleJetpack()
 		if(m_Jetpack)
 		{
 			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
-			if(!m_TuneZone)
+			if(m_TuneZone == 0)
 				Strength = m_LastJetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
 		}
@@ -212,7 +212,7 @@ void CCharacter::HandleWeaponSwitch()
 
 	if(Next < 128) // make sure we only try sane stuff
 	{
-		while(Next) // Next Weapon selection
+		while(Next != 0) // Next Weapon selection
 		{
 			WantedWeapon = (WantedWeapon + 1) % NUM_WEAPONS;
 			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
@@ -222,7 +222,7 @@ void CCharacter::HandleWeaponSwitch()
 
 	if(Prev < 128) // make sure we only try sane stuff
 	{
-		while(Prev) // Prev Weapon selection
+		while(Prev != 0) // Prev Weapon selection
 		{
 			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_WEAPONS - 1 : WantedWeapon - 1;
 			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
@@ -231,7 +231,7 @@ void CCharacter::HandleWeaponSwitch()
 	}
 
 	// Direct Weapon selection
-	if(m_LatestInput.m_WantedWeapon)
+	if(m_LatestInput.m_WantedWeapon != 0)
 		WantedWeapon = m_Input.m_WantedWeapon - 1;
 
 	// check for insane values
@@ -264,22 +264,22 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 
 	// don't fire hammer when player is deep and sv_deepfly is disabled
-	if(!g_Config.m_SvDeepfly && m_Core.m_ActiveWeapon == WEAPON_HAMMER && m_DeepFreeze)
+	if((g_Config.m_SvDeepfly == 0) && m_Core.m_ActiveWeapon == WEAPON_HAMMER && m_DeepFreeze)
 		return;
 
 	// check if we gonna fire
 	bool WillFire = false;
-	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses != 0)
 		WillFire = true;
 
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(FullAuto && ((m_LatestInput.m_Fire & 1) != 0) && (m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo != 0))
 		WillFire = true;
 
 	if(!WillFire)
 		return;
 
 	// check for ammo
-	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo || m_FreezeTime)
+	if((m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo == 0) || (m_FreezeTime != 0))
 	{
 		return;
 	}
@@ -293,7 +293,7 @@ void CCharacter::FireWeapon()
 		// reset objects Hit
 		m_NumObjectsHit = 0;
 
-		if(m_Hit & DISABLE_HIT_HAMMER)
+		if((m_Hit & DISABLE_HIT_HAMMER) != 0)
 			break;
 
 		CCharacter *apEnts[MAX_CLIENTS];
@@ -348,7 +348,7 @@ void CCharacter::FireWeapon()
 		}
 
 		// if we Hit anything, we have to wait for the reload
-		if(Hits)
+		if(Hits != 0)
 		{
 			float FireDelay = GetTuning(m_TuneZone)->m_HammerHitFireDelay;
 			m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
@@ -454,7 +454,7 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = GameWorld()->GameTick();
 
-	if(!m_ReloadTimer)
+	if(m_ReloadTimer == 0)
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
@@ -470,7 +470,7 @@ void CCharacter::HandleWeapons()
 	HandleJetpack();
 
 	// check reload timer
-	if(m_ReloadTimer)
+	if(m_ReloadTimer != 0)
 	{
 		m_ReloadTimer--;
 		return;
@@ -484,7 +484,7 @@ void CCharacter::GiveNinja()
 {
 	m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
-	if(!m_FreezeTime)
+	if(m_FreezeTime == 0)
 		m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
@@ -494,7 +494,7 @@ void CCharacter::GiveNinja()
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && ((pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING) != 0))
 	{
 		// save reseted input
 		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
@@ -515,7 +515,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && ((pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING) != 0))
 	{
 		// reset input
 		ResetInput();
@@ -609,13 +609,13 @@ void CCharacter::HandleSkippableTiles(int Index)
 		return;
 
 	// handle speedup tiles
-	if(Collision()->IsSpeedup(Index))
+	if(Collision()->IsSpeedup(Index) != 0)
 	{
 		vec2 Direction, TempVel = m_Core.m_Vel;
 		int Force, MaxSpeed = 0;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
-		if(Force == 255 && MaxSpeed)
+		if(Force == 255 && (MaxSpeed != 0))
 		{
 			m_Core.m_Vel = Direction * (MaxSpeed / 5);
 		}
@@ -682,7 +682,7 @@ void CCharacter::HandleTiles(int Index)
 	m_MoveRestrictions = Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos);
 
 	// stopper
-	if(m_Core.m_Vel.y > 0 && (m_MoveRestrictions & CANTMOVE_DOWN))
+	if(m_Core.m_Vel.y > 0 && ((m_MoveRestrictions & CANTMOVE_DOWN) != 0))
 	{
 		m_Core.m_Jumped = 0;
 		m_Core.m_JumpedTotal = 0;
@@ -744,42 +744,42 @@ void CCharacter::HandleTiles(int Index)
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_HAMMER && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && ((m_Hit & DISABLE_HIT_HAMMER) != 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		m_Hit &= ~DISABLE_HIT_HAMMER;
 		m_Core.m_NoHammerHit = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_HAMMER) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && ((m_Hit & DISABLE_HIT_HAMMER) == 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		m_Hit |= DISABLE_HIT_HAMMER;
 		m_Core.m_NoHammerHit = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_SHOTGUN && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && ((m_Hit & DISABLE_HIT_SHOTGUN) != 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
 		m_Hit &= ~DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_SHOTGUN) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && ((m_Hit & DISABLE_HIT_SHOTGUN) == 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
 		m_Hit |= DISABLE_HIT_SHOTGUN;
 		m_Core.m_NoShotgunHit = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_GRENADE && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && ((m_Hit & DISABLE_HIT_GRENADE) != 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
 		m_Hit &= ~DISABLE_HIT_GRENADE;
 		m_Core.m_NoGrenadeHit = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_GRENADE) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && ((m_Hit & DISABLE_HIT_GRENADE) == 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
 		m_Hit |= DISABLE_HIT_GRENADE;
 		m_Core.m_NoGrenadeHit = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_LASER && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && ((m_Hit & DISABLE_HIT_LASER) != 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
 		m_Hit &= ~DISABLE_HIT_LASER;
 		m_Core.m_NoLaserHit = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Hit & DISABLE_HIT_LASER) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && ((m_Hit & DISABLE_HIT_LASER) == 0) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
 		m_Hit |= DISABLE_HIT_LASER;
 		m_Core.m_NoLaserHit = true;
@@ -891,7 +891,7 @@ void CCharacter::HandleTiles(int Index)
 	// walljump
 	if((m_TileIndex == TILE_WALLJUMP) || (m_TileFIndex == TILE_WALLJUMP))
 	{
-		if(m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
+		if(m_Core.m_Vel.y > 0 && (m_Core.m_Colliding != 0) && m_Core.m_LeftWall)
 		{
 			m_Core.m_LeftWall = false;
 			m_Core.m_JumpedTotal = m_Core.m_Jumps >= 2 ? m_Core.m_Jumps - 2 : 0;
@@ -1045,7 +1045,7 @@ void CCharacter::DDRacePostCoreTick()
 
 bool CCharacter::Freeze(int Seconds)
 {
-	if(!GameWorld()->m_WorldConfig.m_PredictFreeze)
+	if(GameWorld()->m_WorldConfig.m_PredictFreeze == 0)
 		return false;
 	if((Seconds <= 0 || m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed()) && Seconds != -1)
 		return false;
@@ -1192,25 +1192,25 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	{
 		m_Core.ReadDDNet(pExtended);
 
-		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
-		m_Super = pExtended->m_Flags & CHARACTERFLAG_SUPER;
+		SetSolo((pExtended->m_Flags & CHARACTERFLAG_SOLO) != 0);
+		m_Super = ((pExtended->m_Flags & CHARACTERFLAG_SUPER) != 0);
 		if(m_Super)
 			TeamsCore()->Team(GetCID(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
 
-		m_EndlessHook = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
-		m_SuperJump = pExtended->m_Flags & CHARACTERFLAG_ENDLESS_JUMP;
-		m_Jetpack = pExtended->m_Flags & CHARACTERFLAG_JETPACK;
+		m_EndlessHook = ((pExtended->m_Flags & CHARACTERFLAG_ENDLESS_HOOK) != 0);
+		m_SuperJump = ((pExtended->m_Flags & CHARACTERFLAG_ENDLESS_JUMP) != 0);
+		m_Jetpack = ((pExtended->m_Flags & CHARACTERFLAG_JETPACK) != 0);
 		m_TeleCheckpoint = pExtended->m_TeleCheckpoint;
 		m_StrongWeakID = pExtended->m_StrongWeakID;
 
 		m_Hit = HIT_ALL;
-		if(pExtended->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT)
+		if((pExtended->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT) != 0)
 			m_Hit |= DISABLE_HIT_GRENADE;
-		if(pExtended->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT)
+		if((pExtended->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT) != 0)
 			m_Hit |= DISABLE_HIT_HAMMER;
-		if(pExtended->m_Flags & CHARACTERFLAG_NO_LASER_HIT)
+		if((pExtended->m_Flags & CHARACTERFLAG_NO_LASER_HIT) != 0)
 			m_Hit |= DISABLE_HIT_LASER;
-		if(pExtended->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT)
+		if((pExtended->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT) != 0)
 			m_Hit |= DISABLE_HIT_SHOTGUN;
 
 		const bool Ninja = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
@@ -1221,7 +1221,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		m_DeepFreeze = false;
 		m_LiveFreeze = (pExtended->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
-		if(GameWorld()->m_WorldConfig.m_PredictFreeze && pExtended->m_FreezeEnd != 0)
+		if((GameWorld()->m_WorldConfig.m_PredictFreeze != 0) && pExtended->m_FreezeEnd != 0)
 		{
 			if(pExtended->m_FreezeEnd > 0)
 			{
@@ -1279,7 +1279,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		// number of jumps
 		if(GameWorld()->m_WorldConfig.m_PredictTiles)
 		{
-			if(pChar->m_Jumped & 2)
+			if((pChar->m_Jumped & 2) != 0)
 			{
 				m_SuperJump = false;
 				if(m_Core.m_Jumps > m_Core.m_JumpedTotal && m_Core.m_JumpedTotal > 0 && m_Core.m_Jumps > 2)
@@ -1295,9 +1295,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 
 		// set player collision
-		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
-		m_Core.m_NoCollision = !Tuning()->m_PlayerCollision;
-		m_Core.m_NoHookHit = !Tuning()->m_PlayerHooking;
+		SetSolo((Tuning()->m_PlayerCollision == 0.0f) && (Tuning()->m_PlayerHooking == 0.0f));
+		m_Core.m_NoCollision = (Tuning()->m_PlayerCollision == 0.0f);
+		m_Core.m_NoHookHit = (Tuning()->m_PlayerHooking == 0.0f);
 
 		if(m_Core.m_HookTick != 0)
 			m_EndlessHook = false;
@@ -1305,7 +1305,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		// detect unfreeze (in case the player was frozen in the tile prediction and not correctly unfrozen)
 		if(pChar->m_Emote != EMOTE_PAIN && pChar->m_Emote != EMOTE_NORMAL)
 			m_DeepFreeze = false;
-		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_Core.m_FreezeTick || absolute(pChar->m_VelX) == 256 * 10 || !GameWorld()->m_WorldConfig.m_PredictFreeze)
+		if(pChar->m_Weapon != WEAPON_NINJA || pChar->m_AttackTick > m_Core.m_FreezeTick || absolute(pChar->m_VelX) == 256 * 10 || (GameWorld()->m_WorldConfig.m_PredictFreeze == 0))
 		{
 			m_DeepFreeze = false;
 			UnFreeze();
@@ -1321,7 +1321,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	if(distance(m_PrevPos, m_Pos) > 10.f * 32.f) // reset prevpos if the distance is high
 		m_PrevPos = m_Pos;
 
-	if(pChar->m_Jumped & 2)
+	if((pChar->m_Jumped & 2) != 0)
 		m_Core.m_JumpedTotal = m_Core.m_Jumps;
 	m_AttackTick = pChar->m_AttackTick;
 	m_LastSnapWeapon = pChar->m_Weapon;
@@ -1342,7 +1342,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		mem_zero(&m_Input, sizeof(m_Input));
 		mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 		m_Input.m_Direction = m_SavedInput.m_Direction = m_Core.m_Direction;
-		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
+		m_Input.m_Hook = m_SavedInput.m_Hook = static_cast<int>(m_Core.m_HookState != HOOK_IDLE);
 		m_Input.m_TargetX = m_SavedInput.m_TargetX = cosf(pChar->m_Angle / 256.0f) * 256.0f;
 		m_Input.m_TargetY = m_SavedInput.m_TargetY = sinf(pChar->m_Angle / 256.0f) * 256.0f;
 	}
@@ -1362,11 +1362,11 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 	if(pExtendedDisplayInfo)
 	{
-		if(GameWorld()->m_WorldConfig.m_PredictFreeze)
+		if(GameWorld()->m_WorldConfig.m_PredictFreeze != 0)
 		{
 			m_Core.m_FreezeTick = pExtendedDisplayInfo->m_FreezeTick;
 		}
-		m_Core.m_IsInFreeze = pExtendedDisplayInfo->m_IsInFreeze;
+		m_Core.m_IsInFreeze = (pExtendedDisplayInfo->m_IsInFreeze != 0);
 		m_Core.m_Ninja.m_ActivationTick = pExtendedDisplayInfo->m_NinjaActivationTick;
 		m_Core.m_JumpedTotal = pExtendedDisplayInfo->m_JumpedTotal;
 		if(!IsLocal)

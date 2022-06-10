@@ -37,7 +37,7 @@ CLocalizationDatabase::CLocalizationDatabase()
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
 {
-	m_Strings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
+	m_Strings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr != 0 ? pNewStr : pOrgStr));
 }
 
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
@@ -70,7 +70,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	while((pLine = LineReader.Get()))
 	{
 		Line++;
-		if(!str_length(pLine))
+		if(str_length(pLine) == 0)
 			continue;
 
 		if(pLine[0] == '#') // skip comments

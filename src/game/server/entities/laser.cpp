@@ -23,11 +23,11 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Type = Type;
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
-	m_ZeroEnergyBounceInLastTick = false;
+	m_ZeroEnergyBounceInLastTick = 0;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : 0;
-	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+	m_BelongsToPracticeTeam = (pOwnerChar != nullptr) && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
 	GameWorld()->InsertEntity(this);
 	DoBounce();
@@ -39,14 +39,14 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	vec2 At;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	CCharacter *pHit;
-	bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
+	bool pDontHitSelf = (g_Config.m_SvOldLaser != 0) || (m_Bounces == 0 && !m_WasTele);
 
-	if(pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) && m_Type == WEAPON_LASER) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
+	if(pOwnerChar ? static_cast<int>((((pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) == 0) && m_Type == WEAPON_LASER) || (((pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) == 0) && m_Type == WEAPON_SHOTGUN)) : static_cast<int>(g_Config.m_SvHit != 0 != 0))
 		pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
 	else
 		pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
 
-	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER && m_Type == WEAPON_LASER) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
+	if(!pHit || (pHit == pOwnerChar && (g_Config.m_SvOldLaser != 0)) || (pHit != pOwnerChar && pOwnerChar ? (((pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) != 0) && m_Type == WEAPON_LASER) || (((pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) != 0) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit == 0))
 		return false;
 	m_From = From;
 	m_Pos = At;
@@ -56,13 +56,13 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		vec2 Temp;
 
 		float Strength;
-		if(!m_TuneZone)
+		if(m_TuneZone == 0)
 			Strength = GameServer()->Tuning()->m_ShotgunStrength;
 		else
 			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
 
 		vec2 &HitPos = pHit->Core()->m_Pos;
-		if(!g_Config.m_SvOldLaser)
+		if(g_Config.m_SvOldLaser == 0)
 		{
 			if(m_PrevPos != HitPos)
 			{
@@ -74,7 +74,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 				pHit->Core()->m_Vel = StackedLaserShotgunBugSpeed;
 			}
 		}
-		else if(g_Config.m_SvOldLaser && pOwnerChar)
+		else if((g_Config.m_SvOldLaser != 0) && pOwnerChar)
 		{
 			if(pOwnerChar->Core()->m_Pos != HitPos)
 			{
@@ -124,7 +124,7 @@ void CLaser::DoBounce()
 
 	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
 
-	if(Res)
+	if(Res != 0)
 	{
 		if(!HitCharacter(m_Pos, To))
 		{
@@ -151,11 +151,11 @@ void CLaser::DoBounce()
 
 			const float Distance = distance(m_From, m_Pos);
 			// Prevent infinite bounces
-			if(Distance == 0.0f && m_ZeroEnergyBounceInLastTick)
+			if(Distance == 0.0f && (m_ZeroEnergyBounceInLastTick != 0))
 			{
 				m_Energy = -1;
 			}
-			else if(!m_TuneZone)
+			else if(m_TuneZone == 0)
 			{
 				m_Energy -= Distance + GameServer()->Tuning()->m_LaserBounceCost;
 			}
@@ -163,7 +163,7 @@ void CLaser::DoBounce()
 			{
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
 			}
-			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
+			m_ZeroEnergyBounceInLastTick = static_cast<int>(Distance == 0.0f);
 
 			CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
 			if(Res == TILE_TELEINWEAPON && !pControllerDDRace->m_TeleOuts[z - 1].empty())
@@ -179,7 +179,7 @@ void CLaser::DoBounce()
 			}
 
 			int BounceNum = GameServer()->Tuning()->m_LaserBounceNum;
-			if(m_TuneZone)
+			if(m_TuneZone != 0)
 				BounceNum = GameServer()->TuningList()[m_TuneZone].m_LaserBounceNum;
 
 			if(m_Bounces > BounceNum)
@@ -206,10 +206,10 @@ void CLaser::DoBounce()
 		bool Found = false;
 
 		// Check if the laser hits a player.
-		bool pDontHitSelf = g_Config.m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
+		bool pDontHitSelf = (g_Config.m_SvOldLaser != 0) || (m_Bounces == 0 && !m_WasTele);
 		vec2 At;
 		CCharacter *pHit;
-		if(pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) && m_Type == WEAPON_LASER) : g_Config.m_SvHit)
+		if(pOwnerChar ? static_cast<int>(((pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) == 0) && m_Type == WEAPON_LASER) : static_cast<int>(g_Config.m_SvHit != 0 != 0))
 			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
 		else
 			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
@@ -234,7 +234,7 @@ void CLaser::DoBounce()
 		bool IsBlueSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
 		int IsTeleInWeapon = GameServer()->Collision()->IsTeleportWeapon(MapIndex);
 
-		if(!IsTeleInWeapon)
+		if(IsTeleInWeapon == 0)
 		{
 			if(IsSwitchTeleGun || IsBlueSwitchTeleGun)
 			{
@@ -267,7 +267,7 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	if((g_Config.m_SvDestroyLasersOnDeath || m_BelongsToPracticeTeam) && m_Owner >= 0)
+	if(((g_Config.m_SvDestroyLasersOnDeath != 0) || m_BelongsToPracticeTeam) && m_Owner >= 0)
 	{
 		CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 		if(!(pOwnerChar && pOwnerChar->IsAlive()))
@@ -277,7 +277,7 @@ void CLaser::Tick()
 	}
 
 	float Delay;
-	if(m_TuneZone)
+	if(m_TuneZone != 0)
 		Delay = GameServer()->TuningList()[m_TuneZone].m_LaserBounceDelay;
 	else
 		Delay = GameServer()->Tuning()->m_LaserBounceDelay;

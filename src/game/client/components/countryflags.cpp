@@ -28,7 +28,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	char *pLine;
 	while((pLine = LineReader.Get()))
 	{
-		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
+		if((str_length(pLine) == 0) || pLine[0] == '#') // skip empty lines and comments
 			continue;
 
 		str_copy(aOrigin, pLine, sizeof(aOrigin));
@@ -60,7 +60,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		char aBuf[128];
 		CImageInfo Info;
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
-		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+		if(Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL) == 0)
 		{
 			char aMsg[128];
 			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
@@ -75,7 +75,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0, aOrigin);
 		Graphics()->FreePNG(&Info);
 
-		if(g_Config.m_Debug)
+		if(g_Config.m_Debug != 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);

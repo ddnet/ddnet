@@ -102,7 +102,7 @@ public:
 
 	void AddJob(std::shared_ptr<IJob> pJob) override
 	{
-		if(g_Config.m_Debug)
+		if(g_Config.m_Debug != 0)
 			dbg_msg("engine", "job added");
 		m_JobPool.Add(std::move(pJob));
 	}

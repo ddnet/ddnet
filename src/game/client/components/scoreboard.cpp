@@ -68,19 +68,19 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	// render goals
 	if(m_pClient->m_Snap.m_pGameInfoObj)
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit)
+		if(m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit != 0)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit);
 			TextRender()->Text(0, x + 10.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 		}
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit)
+		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit != 0)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit);
 			TextRender()->Text(0, x + 230.0f, y + (h - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 		}
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum && m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent)
+		if((m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum != 0) && (m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent != 0))
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Round"), m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent, m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum);
@@ -123,13 +123,13 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 		if(Multiple)
 			TextRender()->TextEx(&Cursor, ", ", 2);
 
-		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
+		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel != 0)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
 			TextRender()->TextColor(Color);
 		}
 
-		if(g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIDs != 0)
 		{
 			char aBuffer[5];
 			int size = str_format(aBuffer, sizeof(aBuffer), "%d: ", pInfo->m_ClientID);
@@ -197,21 +197,21 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	int TitleWidth = (lower32 || lower24 || lower16) ? 1140 : 440;
 	if(!pTitle)
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER)
+		if((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) != 0)
 			pTitle = Localize("Game over");
 		else
 		{
 			str_copy(aBuf, Client()->GetCurrentMap(), sizeof(aBuf));
 			while(TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
 				aBuf[str_length(aBuf) - 1] = '\0';
-			if(str_comp(aBuf, Client()->GetCurrentMap()))
+			if(str_comp(aBuf, Client()->GetCurrentMap()) != 0)
 				str_append(aBuf, "…", sizeof(aBuf));
 			pTitle = aBuf;
 		}
 	}
 	TextRender()->Text(0, x + 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1.0f);
 
-	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0)
 	{
 		if(m_pClient->m_Snap.m_pGameDataObj)
 		{
@@ -234,7 +234,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 	}
 
-	if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+	if(m_pClient->m_GameInfo.m_TimeScore && (g_Config.m_ClDDRaceScoreBoard != 0))
 	{
 		if(m_ServerRecord > 0)
 			str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
@@ -303,7 +303,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	x += 10.0f;
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
+	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && (g_Config.m_ClDDRaceScoreBoard != 0)) ? Localize("Time") : Localize("Score");
 	tw = TextRender()->TextWidth(0, HeadlineFontsize, pScore, -1, -1.0f);
 	TextRender()->Text(0, ScoreOffset + ScoreLength - tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
 
@@ -413,7 +413,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		OldDDTeam = DDTeam;
 
 		// background so it's easy to find the local player or the followed one in spectator mode
-		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
+		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && (pInfo->m_Local != 0)) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && (pInfo->m_Local != 0)) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
@@ -423,7 +423,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
-		if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+		if(m_pClient->m_GameInfo.m_TimeScore && (g_Config.m_ClDDRaceScoreBoard != 0))
 		{
 			if(pInfo->m_Score == -9999)
 				aBuf[0] = 0;
@@ -437,7 +437,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 
 		// flag
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS &&
+		if(((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) != 0) &&
 			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == pInfo->m_ClientID || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientID))
 		{
 			Graphics()->BlendNormal();
@@ -467,13 +467,13 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
-		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
+		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel != 0)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
 			TextRender()->TextColor(Color);
 		}
 
-		if(g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIDs != 0)
 		{
 			char aId[64] = "";
 			if(pInfo->m_ClientID < 10)
@@ -516,7 +516,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			CountryOffset, y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
-		if(g_Config.m_ClEnablePingColor)
+		if(g_Config.m_ClEnablePingColor != 0)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb);
@@ -626,7 +626,7 @@ void CScoreboard::OnRender()
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
 	{
-		if(!(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS))
+		if((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) == 0)
 		{
 			if(m_pClient->m_Snap.m_aTeamSize[0] > 48)
 			{
@@ -654,7 +654,7 @@ void CScoreboard::OnRender()
 			const char *pRedClanName = GetClanName(TEAM_RED);
 			const char *pBlueClanName = GetClanName(TEAM_BLUE);
 
-			if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER && m_pClient->m_Snap.m_pGameDataObj)
+			if(((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) != 0) && m_pClient->m_Snap.m_pGameDataObj)
 			{
 				char aText[256];
 				str_copy(aText, Localize("Draw!"), sizeof(aText));
@@ -704,12 +704,12 @@ bool CScoreboard::Active()
 	if(m_pClient->m_Snap.m_pLocalInfo && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
 		// we are not a spectator, check if we are dead
-		if(!m_pClient->m_Snap.m_pLocalCharacter && g_Config.m_ClScoreboardOnDeath)
+		if(!m_pClient->m_Snap.m_pLocalCharacter && (g_Config.m_ClScoreboardOnDeath != 0))
 			return true;
 	}
 
 	// if the game is over
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER)
+	if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) != 0))
 		return true;
 
 	return false;
@@ -738,7 +738,7 @@ const char *CScoreboard::GetClanName(int Team)
 		}
 	}
 
-	if(ClanPlayers > 1 && pClanName[0])
+	if(ClanPlayers > 1 && (pClanName[0] != 0))
 		return pClanName;
 	else
 		return 0;

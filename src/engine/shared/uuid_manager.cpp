@@ -69,10 +69,10 @@ int ParseUuid(CUuid *pUuid, const char *pBuffer)
 	}
 	aCopy[8] = aCopy[13] = aCopy[18] = aCopy[23] = 0;
 	if(static_cast<bool>(str_hex_decode(pUuid->m_aData + 0, 4, aCopy + 0)) ||
-		str_hex_decode(pUuid->m_aData + 4, 2, aCopy + 9) ||
-		str_hex_decode(pUuid->m_aData + 6, 2, aCopy + 14) ||
-		str_hex_decode(pUuid->m_aData + 8, 2, aCopy + 19) ||
-		str_hex_decode(pUuid->m_aData + 10, 6, aCopy + 24))
+		(str_hex_decode(pUuid->m_aData + 4, 2, aCopy + 9) != 0) ||
+		(str_hex_decode(pUuid->m_aData + 6, 2, aCopy + 14) != 0) ||
+		(str_hex_decode(pUuid->m_aData + 8, 2, aCopy + 19) != 0) ||
+		(str_hex_decode(pUuid->m_aData + 10, 6, aCopy + 24) != 0))
 	{
 		return 1;
 	}

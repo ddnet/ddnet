@@ -57,7 +57,7 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 		}
 
 		// handle sequence stuff
-		if(m_pConnection && (Header.m_Flags & NET_CHUNKFLAG_VITAL))
+		if(m_pConnection && ((Header.m_Flags & NET_CHUNKFLAG_VITAL) != 0))
 		{
 			// anti spoof: ignore unknown sequence
 			if(Header.m_Sequence == (m_pConnection->m_Ack + 1) % NET_MAX_SEQUENCE || m_pConnection->m_UnknownSeq)
@@ -70,11 +70,11 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 			else
 			{
 				// old packet that we already got
-				if(CNetBase::IsSeqInBackroom(Header.m_Sequence, m_pConnection->m_Ack))
+				if(CNetBase::IsSeqInBackroom(Header.m_Sequence, m_pConnection->m_Ack) != 0)
 					continue;
 
 				// out of sequence, request resend
-				if(g_Config.m_Debug)
+				if(g_Config.m_Debug != 0)
 					dbg_msg("conn", "asking for resend %d %d", Header.m_Sequence, (m_pConnection->m_Ack + 1) % NET_MAX_SEQUENCE);
 				m_pConnection->SignalResend();
 				continue; // take the next chunk in the packet
@@ -162,11 +162,11 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	if(Sixup)
 	{
 		unsigned Flags = 0;
-		if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
+		if((pPacket->m_Flags & NET_PACKETFLAG_CONTROL) != 0)
 			Flags |= 1;
-		if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
+		if((pPacket->m_Flags & NET_PACKETFLAG_RESEND) != 0)
 			Flags |= 2;
-		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
+		if((pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION) != 0)
 			Flags |= 4;
 		pPacket->m_Flags = Flags;
 	}
@@ -215,7 +215,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	// read the packet
 	pPacket->m_Flags = pBuffer[0] >> 2;
 
-	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
+	if((pPacket->m_Flags & NET_PACKETFLAG_CONNLESS) != 0)
 	{
 		if(Size < 1)
 			return -1;
@@ -245,7 +245,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 	else
 	{
-		if(pPacket->m_Flags & NET_PACKETFLAG_UNUSED)
+		if((pPacket->m_Flags & NET_PACKETFLAG_UNUSED) != 0)
 			Sixup = true;
 		int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
 		if(Size < DataStart)
@@ -258,21 +258,21 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		if(Sixup)
 		{
 			unsigned Flags = 0;
-			if(pPacket->m_Flags & 1)
+			if((pPacket->m_Flags & 1) != 0)
 				Flags |= NET_PACKETFLAG_CONTROL;
-			if(pPacket->m_Flags & 2)
+			if((pPacket->m_Flags & 2) != 0)
 				Flags |= NET_PACKETFLAG_RESEND;
-			if(pPacket->m_Flags & 4)
+			if((pPacket->m_Flags & 4) != 0)
 				Flags |= NET_PACKETFLAG_COMPRESSION;
 			pPacket->m_Flags = Flags;
 
 			mem_copy(pSecurityToken, &pBuffer[3], 4);
 		}
 
-		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
+		if((pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION) != 0)
 		{
 			// Don't allow compressed control packets.
-			if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
+			if((pPacket->m_Flags & NET_PACKETFLAG_CONTROL) != 0)
 			{
 				return -1;
 			}
@@ -285,7 +285,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	// check for errors
 	if(pPacket->m_DataSize < 0)
 	{
-		if(g_Config.m_Debug)
+		if(g_Config.m_Debug != 0)
 			dbg_msg("network", "error during packet decoding");
 		return -1;
 	}
@@ -323,7 +323,7 @@ unsigned char *CNetChunkHeader::Pack(unsigned char *pData, int Split)
 {
 	pData[0] = ((m_Flags & 3) << 6) | ((m_Size >> Split) & 0x3f);
 	pData[1] = (m_Size & ((1 << Split) - 1));
-	if(m_Flags & NET_CHUNKFLAG_VITAL)
+	if((m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 	{
 		pData[1] |= (m_Sequence >> 2) & (~((1 << Split) - 1));
 		pData[2] = m_Sequence & 0xff;
@@ -337,7 +337,7 @@ unsigned char *CNetChunkHeader::Unpack(unsigned char *pData, int Split)
 	m_Flags = (pData[0] >> 6) & 3;
 	m_Size = ((pData[0] & 0x3f) << Split) | (pData[1] & ((1 << Split) - 1));
 	m_Sequence = -1;
-	if(m_Flags & NET_CHUNKFLAG_VITAL)
+	if((m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 	{
 		m_Sequence = ((pData[1] & (~((1 << Split) - 1))) << 2) | pData[2];
 		return pData + 3;

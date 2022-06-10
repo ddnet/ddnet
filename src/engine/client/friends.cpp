@@ -13,7 +13,7 @@ CFriends::CFriends()
 {
 	mem_zero(m_aFriends, sizeof(m_aFriends));
 	m_NumFriends = 0;
-	m_Foes = false;
+	m_Foes = 0;
 }
 
 void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData)
@@ -36,7 +36,7 @@ void CFriends::ConFriends(IConsole::IResult *pResult, void *pUserData)
 
 void CFriends::Init(bool Foes)
 {
-	m_Foes = Foes;
+	m_Foes = static_cast<int>(Foes);
 
 	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	if(pConfigManager)
@@ -72,11 +72,11 @@ int CFriends::GetFriendState(const char *pName, const char *pClan) const
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan)))
+		if(((g_Config.m_ClFriendsIgnoreClan != 0) && (m_aFriends[i].m_aName[0] != 0)) || (m_aFriends[i].m_ClanHash == ClanHash && (str_comp(m_aFriends[i].m_aClan, pClan) == 0)))
 		{
 			if(m_aFriends[i].m_aName[0] == 0)
 				Result = FRIEND_CLAN;
-			else if(m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName))
+			else if(m_aFriends[i].m_NameHash == NameHash && (str_comp(m_aFriends[i].m_aName, pName) == 0))
 			{
 				Result = FRIEND_PLAYER;
 				break;
@@ -92,8 +92,8 @@ bool CFriends::IsFriend(const char *pName, const char *pClan, bool PlayersOnly) 
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if(((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))) &&
-			((!PlayersOnly && m_aFriends[i].m_aName[0] == 0) || (m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName))))
+		if((((g_Config.m_ClFriendsIgnoreClan != 0) && (m_aFriends[i].m_aName[0] != 0)) || (m_aFriends[i].m_ClanHash == ClanHash && (str_comp(m_aFriends[i].m_aClan, pClan) == 0))) &&
+			((!PlayersOnly && m_aFriends[i].m_aName[0] == 0) || (m_aFriends[i].m_NameHash == NameHash && (str_comp(m_aFriends[i].m_aName, pName) == 0))))
 			return true;
 	}
 	return false;
@@ -109,7 +109,7 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) && ((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))))
+		if((m_aFriends[i].m_NameHash == NameHash && (str_comp(m_aFriends[i].m_aName, pName) == 0)) && (((g_Config.m_ClFriendsIgnoreClan != 0) && (m_aFriends[i].m_aName[0] != 0)) || (m_aFriends[i].m_ClanHash == ClanHash && (str_comp(m_aFriends[i].m_aClan, pClan) == 0))))
 			return;
 	}
 
@@ -126,8 +126,8 @@ void CFriends::RemoveFriend(const char *pName, const char *pClan)
 	unsigned ClanHash = str_quickhash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
-		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) &&
-			((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))))
+		if((m_aFriends[i].m_NameHash == NameHash && (str_comp(m_aFriends[i].m_aName, pName) == 0)) &&
+			(((g_Config.m_ClFriendsIgnoreClan != 0) && (m_aFriends[i].m_aName[0] != 0)) || (m_aFriends[i].m_ClanHash == ClanHash && (str_comp(m_aFriends[i].m_aClan, pClan) == 0))))
 		{
 			RemoveFriend(i);
 			return;
@@ -154,7 +154,7 @@ void CFriends::Friends()
 		{
 			str_format(aBuf, sizeof(aBuf), "Name: %s, Clan: %s", m_aFriends[i].m_aName, m_aFriends[i].m_aClan);
 
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes ? "foes" : "friends", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes != 0 ? "foes" : "friends", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		}
 	}
 }
@@ -166,7 +166,7 @@ void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 	const char *pEnd = aBuf + sizeof(aBuf) - 4;
 	for(int i = 0; i < pSelf->m_NumFriends; ++i)
 	{
-		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ", sizeof(aBuf));
+		str_copy(aBuf, pSelf->m_Foes != 0 ? "add_foe " : "add_friend ", sizeof(aBuf));
 
 		str_append(aBuf, "\"", sizeof(aBuf));
 		char *pDst = aBuf + str_length(aBuf);

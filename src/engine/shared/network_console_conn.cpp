@@ -41,7 +41,7 @@ void CConsoleNetConnection::Disconnect(const char *pReason)
 	if(State() == NET_CONNSTATE_OFFLINE)
 		return;
 
-	if(pReason && pReason[0])
+	if(pReason && (pReason[0] != 0))
 		Send(pReason);
 
 	net_tcp_close(m_Socket);
@@ -68,7 +68,7 @@ int CConsoleNetConnection::Update()
 		}
 		else if(Bytes < 0)
 		{
-			if(net_would_block()) // no data received
+			if(net_would_block() != 0) // no data received
 				return 0;
 
 			m_State = NET_CONNSTATE_ERROR; // error
@@ -90,7 +90,7 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 {
 	if(State() == NET_CONNSTATE_ONLINE)
 	{
-		if(m_BufferOffset)
+		if(m_BufferOffset != 0)
 		{
 			// find message start
 			int StartOffset = 0;

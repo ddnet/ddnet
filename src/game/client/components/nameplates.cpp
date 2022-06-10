@@ -49,7 +49,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	if(IVideo::Current())
 		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
-	if((pPlayerInfo->m_Local && ShowDirection == 2) || (!pPlayerInfo->m_Local && ShowDirection >= 1))
+	if(((pPlayerInfo->m_Local != 0) && ShowDirection == 2) || ((pPlayerInfo->m_Local == 0) && ShowDirection >= 1))
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
@@ -69,7 +69,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
 		}
-		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
+		if((m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1) != 0)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);
@@ -80,7 +80,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	}
 
 	// render name plate
-	if((!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn) && g_Config.m_ClNameplates)
+	if(((pPlayerInfo->m_Local == 0) || (g_Config.m_ClNameplatesOwn != 0)) && (g_Config.m_ClNameplates != 0))
 	{
 		float a = 1;
 		if(g_Config.m_ClNameplatesAlways == 0)
@@ -110,7 +110,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
 
-		if(g_Config.m_ClNameplatesClan)
+		if(g_Config.m_ClNameplatesClan != 0)
 		{
 			const char *pClan = m_pClient->m_aClients[ClientID].m_aClan;
 			if(str_comp(pClan, m_aNamePlates[ClientID].m_aClanName) != 0 || FontSizeClan != m_aNamePlates[ClientID].m_ClanNameTextFontSize)
@@ -138,7 +138,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
-		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
+		if((g_Config.m_ClNameplatesTeamcolors != 0) && (m_pClient->m_Teams.Team(ClientID) != 0))
 			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
 
 		STextRenderColor TColor;
@@ -154,7 +154,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TOutlineColor.Set(0.0f, 0.0f, 0.0f, 0.5f * a);
 			TColor.Set(rgb.r, rgb.g, rgb.b, a);
 		}
-		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+		if((g_Config.m_ClNameplatesTeamcolors != 0) && m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0))
 		{
 			if(m_pClient->m_aClients[ClientID].m_Team == TEAM_RED)
 				TColor.Set(1.0f, 0.5f, 0.5f, a);
@@ -171,14 +171,14 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &TColor, &TOutlineColor, Position.x - tw / 2.0f, YOffset);
 		}
 
-		if(g_Config.m_ClNameplatesClan)
+		if(g_Config.m_ClNameplatesClan != 0)
 		{
 			YOffset -= FontSizeClan;
 			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &TColor, &TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
 		}
 
-		if(g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
+		if((g_Config.m_ClNameplatesFriendMark != 0) && m_pClient->m_aClients[ClientID].m_Friend)
 		{
 			YOffset -= FontSize;
 			char aFriendMark[] = "♥";
@@ -187,7 +187,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->Text(0, Position.x - XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
 
-		if(g_Config.m_Debug || g_Config.m_ClNameplatesIDs) // render client id when in debug as well
+		if((g_Config.m_Debug != 0) || (g_Config.m_ClNameplatesIDs != 0)) // render client id when in debug as well
 		{
 			YOffset -= FontSize;
 			char aBuf[128];
@@ -197,7 +197,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
-		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
+		if(g_Config.m_ClNameplatesHA != 0) // render health and armor in nameplate
 		{
 			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
 			int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
@@ -232,7 +232,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		}
 	}
 
-	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
+	if(((g_Config.m_Debug != 0) || (g_Config.m_ClNameplatesStrong != 0)) && (g_Config.m_ClNameplates != 0))
 	{
 		if(m_pClient->m_Snap.m_LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_HasExtendedData && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData)
 		{
@@ -240,7 +240,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(pPlayerInfo->m_ClientID);
 			if(pCharacter && pLocalChar)
 			{
-				if(pPlayerInfo->m_Local)
+				if(pPlayerInfo->m_Local != 0)
 					TextRender()->TextColor(rgb);
 				else
 				{
@@ -270,7 +270,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 					RenderTools()->DrawSprite(Position.x, YOffset + (StrongWeakImgSize / 2.0f) * ScaleY, StrongWeakImgSize);
 					Graphics()->QuadsEnd();
 				}
-				if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
+				if((g_Config.m_Debug != 0) || g_Config.m_ClNameplatesStrong == 2)
 				{
 					YOffset -= FontSize;
 					char aBuf[12];
@@ -295,7 +295,7 @@ void CNamePlates::OnRender()
 	if(IVideo::Current())
 		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
-	if(!g_Config.m_ClNameplates && ShowDirection == 0)
+	if((g_Config.m_ClNameplates == 0) && ShowDirection == 0)
 		return;
 
 	// get screen edges to avoid rendering offscreen

@@ -186,12 +186,12 @@ inline bool CFreezeBars::IsPlayerInfoAvailable(int ClientID) const
 {
 	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientID);
 	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientID);
-	return pPrevInfo && pInfo;
+	return (pPrevInfo != nullptr) && (pInfo != nullptr);
 }
 
 void CFreezeBars::OnRender()
 {
-	if(!g_Config.m_ClShowFreezeBars)
+	if(g_Config.m_ClShowFreezeBars == 0)
 	{
 		return;
 	}

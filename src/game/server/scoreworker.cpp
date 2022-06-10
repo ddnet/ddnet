@@ -39,7 +39,7 @@ void CScorePlayerResult::SetVariant(Variant v)
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Score = -9999;
 		m_Data.m_Info.m_Birthday = 0;
-		m_Data.m_Info.m_HasFinishScore = false;
+		m_Data.m_Info.m_HasFinishScore = 0;
 		m_Data.m_Info.m_Time = 0;
 		for(float &CpTime : m_Data.m_Info.m_CpTime)
 			CpTime = 0;
@@ -164,7 +164,7 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 		float Time = pSqlServer->GetFloat(1);
 		pResult->m_Data.m_Info.m_Time = Time;
 		pResult->m_Data.m_Info.m_Score = -Time;
-		pResult->m_Data.m_Info.m_HasFinishScore = true;
+		pResult->m_Data.m_Info.m_HasFinishScore = 1;
 
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		{
@@ -248,7 +248,7 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		pSqlServer->GetString(2, MapVote->m_aServer, sizeof(MapVote->m_aServer));
 		str_copy(MapVote->m_aReason, "/map", sizeof(MapVote->m_aReason));
 
-		for(char *p = MapVote->m_aServer; *p; p++) // lower case server
+		for(char *p = MapVote->m_aServer; *p != 0; p++) // lower case server
 			*p = tolower(*p);
 	}
 	else
@@ -653,7 +653,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		// CEIL and FLOOR are not supported in SQLite
 		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
-		if(g_Config.m_SvHideScore)
+		if(g_Config.m_SvHideScore != 0)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 				"Your time: %s, better than %d%%", aBuf, BetterThanPercent);
@@ -750,7 +750,7 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 				str_append(aFormattedNames, " & ", sizeof(aFormattedNames));
 		}
 
-		if(g_Config.m_SvHideScore)
+		if(g_Config.m_SvHideScore != 0)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 				"Your team time: %s, better than %d%%", aBuf, BetterThanPercent);
@@ -1499,7 +1499,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	{
 		char aSaveID[UUID_MAXSTRSIZE];
 		pSqlServer->GetString(3, aSaveID, sizeof(aSaveID));
-		if(ParseUuid(&pResult->m_SaveID, aSaveID) || pResult->m_SaveID == UUID_NO_SAVE_ID)
+		if((ParseUuid(&pResult->m_SaveID, aSaveID) != 0) || pResult->m_SaveID == UUID_NO_SAVE_ID)
 		{
 			str_copy(pResult->m_aMessage, "Unable to load savegame: SaveID corrupted", sizeof(pResult->m_aMessage));
 			return false;

@@ -22,7 +22,7 @@ unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
 
 	*pDst |= i & 0x3F; // pack 6bit into dst
 	i >>= 6; // discard 6 bits
-	while(i)
+	while(i != 0)
 	{
 		if(DstSize <= 0)
 			return 0;
@@ -51,7 +51,7 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 
 	for(unsigned i = 0; i < std::size(s_aMasks); i++)
 	{
-		if(!(*pSrc & 0x80))
+		if((*pSrc & 0x80) == 0)
 			break;
 		if(SrcSize <= 0)
 			return 0;
@@ -93,7 +93,7 @@ long CVariableInt::Compress(const void *pSrc_, int SrcSize, void *pDst_, int Dst
 	unsigned char *pDst = (unsigned char *)pDst_;
 	const unsigned char *pDstEnd = pDst + DstSize;
 	SrcSize /= sizeof(int);
-	while(SrcSize)
+	while(SrcSize != 0)
 	{
 		pDst = CVariableInt::Pack(pDst, *pSrc, pDstEnd - pDst);
 		if(!pDst)

@@ -142,7 +142,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				pInR = pInL;
 
 			// volume calculation
-			if(Voice.m_Flags & ISound::FLAG_POS && Voice.m_pChannel->m_Pan)
+			if(((Voice.m_Flags & ISound::FLAG_POS) != 0) && (Voice.m_pChannel->m_Pan != 0))
 			{
 				// TODO: we should respect the channel panning value
 				int dx = Voice.m_X - m_CenterX.load(std::memory_order_relaxed);
@@ -213,7 +213,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				if(InVoiceField)
 				{
 					// panning
-					if(!(Voice.m_Flags & ISound::FLAG_NO_PANNING))
+					if((Voice.m_Flags & ISound::FLAG_NO_PANNING) == 0)
 					{
 						if(dx > 0)
 							Lvol = ((RangeX - p) * Lvol) / RangeX;
@@ -246,7 +246,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 			// free voice if not used any more
 			if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
 			{
-				if(Voice.m_Flags & ISound::FLAG_LOOP)
+				if((Voice.m_Flags & ISound::FLAG_LOOP) != 0)
 					Voice.m_Tick = 0;
 				else
 				{
@@ -285,7 +285,7 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 {
 	(void)pUnused;
 #if defined(CONF_VIDEORECORDER)
-	if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
+	if(!(IVideo::Current() && (g_Config.m_ClVideoSndEnable != 0)))
 	{
 		Mix((short *)pStream, Len / sizeof(int16_t) / 2);
 	}
@@ -306,7 +306,7 @@ int CSound::Init()
 
 	SDL_AudioSpec Format, FormatOut;
 
-	if(!g_Config.m_SndEnable)
+	if(g_Config.m_SndEnable == 0)
 		return 0;
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
@@ -354,7 +354,7 @@ int CSound::Update()
 	// update volume
 	int WantedVolume = g_Config.m_SndVolume;
 
-	if(!m_pGraphics->WindowActive() && g_Config.m_SndNonactiveMute)
+	if((m_pGraphics->WindowActive() == 0) && (g_Config.m_SndNonactiveMute != 0))
 		WantedVolume = 0;
 
 	if(WantedVolume != m_SoundVolume)
@@ -598,12 +598,12 @@ int CSound::LoadOpus(const char *pFilename)
 {
 	// don't waste memory on sound when we are stress testing
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress != 0)
 		return -1;
 #endif
 
 	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled)
+	if(m_SoundEnabled == 0)
 		return -1;
 
 	if(!m_pStorage)
@@ -636,7 +636,7 @@ int CSound::LoadOpus(const char *pFilename)
 	io_close(File);
 	File = NULL;
 
-	if(g_Config.m_Debug)
+	if(g_Config.m_Debug != 0)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
 
 	RateConvert(SampleID);
@@ -647,12 +647,12 @@ int CSound::LoadWV(const char *pFilename)
 {
 	// don't waste memory on sound when we are stress testing
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress != 0)
 		return -1;
 #endif
 
 	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled)
+	if(m_SoundEnabled == 0)
 		return -1;
 
 	if(!m_pStorage)
@@ -685,7 +685,7 @@ int CSound::LoadWV(const char *pFilename)
 	io_close(File);
 	File = NULL;
 
-	if(g_Config.m_Debug)
+	if(g_Config.m_Debug != 0)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
 
 	RateConvert(SampleID);
@@ -696,12 +696,12 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 {
 	// don't waste memory on sound when we are stress testing
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress != 0)
 		return -1;
 #endif
 
 	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled && !FromEditor)
+	if((m_SoundEnabled == 0) && !FromEditor)
 		return -1;
 
 	if(!pData)
@@ -721,12 +721,12 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 {
 	// don't waste memory on sound when we are stress testing
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress != 0)
 		return -1;
 #endif
 
 	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled && !FromEditor)
+	if((m_SoundEnabled == 0) && !FromEditor)
 		return -1;
 
 	if(!pData)
@@ -827,7 +827,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 		if(m_aVoices[VoiceID].m_pSample)
 		{
 			int Tick = 0;
-			bool IsLooping = m_aVoices[VoiceID].m_Flags & ISound::FLAG_LOOP;
+			bool IsLooping = (m_aVoices[VoiceID].m_Flags & ISound::FLAG_LOOP) != 0;
 			uint64_t TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
 			if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && IsLooping)
 				Tick = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
@@ -910,7 +910,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 	{
 		m_aVoices[VoiceID].m_pSample = &m_aSamples[SampleID];
 		m_aVoices[VoiceID].m_pChannel = &m_aChannels[ChannelID];
-		if(Flags & FLAG_LOOP)
+		if((Flags & FLAG_LOOP) != 0)
 			m_aVoices[VoiceID].m_Tick = m_aSamples[SampleID].m_PausedAt;
 		else
 			m_aVoices[VoiceID].m_Tick = 0;
@@ -947,7 +947,7 @@ void CSound::Stop(int SampleID)
 	{
 		if(Voice.m_pSample == pSample)
 		{
-			if(Voice.m_Flags & FLAG_LOOP)
+			if((Voice.m_Flags & FLAG_LOOP) != 0)
 				Voice.m_pSample->m_PausedAt = Voice.m_Tick;
 			else
 				Voice.m_pSample->m_PausedAt = 0;
@@ -964,7 +964,7 @@ void CSound::StopAll()
 	{
 		if(Voice.m_pSample)
 		{
-			if(Voice.m_Flags & FLAG_LOOP)
+			if((Voice.m_Flags & FLAG_LOOP) != 0)
 				Voice.m_pSample->m_PausedAt = Voice.m_Tick;
 			else
 				Voice.m_pSample->m_PausedAt = 0;

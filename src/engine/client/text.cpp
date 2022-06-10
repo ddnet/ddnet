@@ -512,7 +512,7 @@ class CTextRender : public IEngineTextRender
 			}
 		}
 
-		if(FT_Load_Glyph(FtFace, GlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP))
+		if(FT_Load_Glyph(FtFace, GlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP) != 0)
 		{
 			dbg_msg("textrender", "error loading glyph %d", Chr);
 			return;
@@ -713,7 +713,7 @@ public:
 
 		str_copy(pFont->m_aFilename, pFilename, sizeof(pFont->m_aFilename));
 
-		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &pFont->m_FtFace))
+		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &pFont->m_FtFace) != 0)
 		{
 			delete pFont;
 			return NULL;
@@ -1059,7 +1059,7 @@ public:
 		const char *pEnd = pCurrent + Length;
 		const char *pEllipsis = "…";
 		SFontSizeChar *pEllipsisChr = nullptr;
-		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
+		if((pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END) != 0)
 		{
 			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(0, pCursor->m_FontSize, pText, -1, -1.0f))
 			{
@@ -1182,7 +1182,7 @@ public:
 		{
 			int NewLine = 0;
 			const char *pBatchEnd = pEnd;
-			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
+			if(pCursor->m_LineWidth > 0 && ((pCursor->m_Flags & TEXTFLAG_STOP_AT_END) == 0) && ((pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END) == 0))
 			{
 				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
@@ -1257,7 +1257,7 @@ public:
 						CharKerning = Kerning(TextContainer.m_pFont, LastCharGlyphIndex, pChr->m_GlyphIndex) * Scale * Size;
 					LastCharGlyphIndex = pChr->m_GlyphIndex;
 
-					if(pEllipsisChr != nullptr && pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END && pCurrent < pBatchEnd && pCurrent != pEllipsis)
+					if(pEllipsisChr != nullptr && ((pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END) != 0) && pCurrent < pBatchEnd && pCurrent != pEllipsis)
 					{
 						float AdvanceEllipsis = ((((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pEllipsisChr->m_Width) : (pEllipsisChr->m_AdvanceX + ((!ApplyBearingX) ? (-pEllipsisChr->m_OffsetX) : 0.f)))) * Scale * Size;
 						float CharKerningEllipsis = 0.f;
@@ -1274,7 +1274,7 @@ public:
 						}
 					}
 
-					if(pCursor->m_Flags & TEXTFLAG_STOP_AT_END && (DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
+					if(((pCursor->m_Flags & TEXTFLAG_STOP_AT_END) != 0) && (DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
 					{
 						// we hit the end of the line, no more to render or count
 						pCurrent = pEnd;
@@ -1422,7 +1422,7 @@ public:
 					pCursor->m_LongestLineWidth = DrawX;
 			}
 
-			if(NewLine)
+			if(NewLine != 0)
 			{
 				StartNewLine();
 				GotNewLine = 1;
@@ -1522,7 +1522,7 @@ public:
 		pCursor->m_X = DrawX;
 		pCursor->m_LineCount = LineCount;
 
-		if(GotNewLine)
+		if(GotNewLine != 0)
 			pCursor->m_Y = DrawY;
 	}
 
@@ -1706,13 +1706,13 @@ public:
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 
-			if(NextCharacter)
+			if(NextCharacter != 0)
 			{
 				unsigned int px, py;
 
 				FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
 
-				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP))
+				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP) != 0)
 				{
 					dbg_msg("textrender", "error loading glyph %d", NextCharacter);
 					pCurrent = pTmp;
@@ -1785,7 +1785,7 @@ public:
 		const char *pTmp = &TextCharacter;
 		int NextCharacter = str_utf8_decode(&pTmp);
 
-		if(NextCharacter)
+		if(NextCharacter != 0)
 		{
 			FT_Int32 FTFlags = 0;
 #if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
@@ -1793,7 +1793,7 @@ public:
 #else
 			FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
 #endif
-			if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
+			if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags) != 0)
 			{
 				dbg_msg("textrender", "error loading glyph %d in GetGlyphOffsetX", NextCharacter);
 				return -1;
@@ -1817,7 +1817,7 @@ public:
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 
-			if(NextCharacter)
+			if(NextCharacter != 0)
 			{
 				FT_Int32 FTFlags = 0;
 #if FREETYPE_MAJOR >= 2 && FREETYPE_MINOR >= 7 && (FREETYPE_MINOR > 7 || FREETYPE_PATCH >= 1)
@@ -1825,7 +1825,7 @@ public:
 #else
 				FTFlags = FT_LOAD_RENDER | FT_LOAD_NO_BITMAP;
 #endif
-				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags))
+				if(FT_Load_Char(pFont->m_FtFace, NextCharacter, FTFlags) != 0)
 				{
 					dbg_msg("textrender", "error loading glyph %d in CalculateTextWidth", NextCharacter);
 					pCurrent = pTmp;
@@ -1848,7 +1848,7 @@ public:
 		OffUTF8End = -1;
 
 		int CharCount = 0;
-		while(*pIt)
+		while(*pIt != 0)
 		{
 			const char *pTmp = pIt;
 			int Character = str_utf8_decode(&pTmp);
@@ -1881,7 +1881,7 @@ public:
 		DecodedOff = -1;
 
 		int CharCount = 0;
-		while(*pIt)
+		while(*pIt != 0)
 		{
 			if((int)(intptr_t)(pIt - pText) == UTF8Off)
 			{
@@ -1914,7 +1914,7 @@ public:
 		UTF8Off = -1;
 
 		int CharCount = 0;
-		while(*pIt)
+		while(*pIt != 0)
 		{
 			const char *pTmp = pIt;
 			int Character = str_utf8_decode(&pTmp);

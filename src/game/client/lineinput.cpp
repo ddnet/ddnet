@@ -36,11 +36,11 @@ void CLineInput::SetRange(const char *pString, int Begin, int End)
 	int AddedCharSize, AddedCharCount;
 	str_utf8_stats(pString, MAX_SIZE - m_Len + RemovedCharSize, MAX_CHARS - m_NumChars + RemovedCharCount, &AddedCharSize, &AddedCharCount);
 
-	if(RemovedCharSize || AddedCharSize)
+	if((RemovedCharSize != 0) || (AddedCharSize != 0))
 	{
 		if(AddedCharSize < RemovedCharSize)
 		{
-			if(AddedCharSize)
+			if(AddedCharSize != 0)
 				mem_copy(m_aStr + Begin, pString, AddedCharSize);
 			mem_move(m_aStr + Begin + AddedCharSize, m_aStr + Begin + RemovedCharSize, m_Len - Begin - AddedCharSize);
 		}
@@ -99,7 +99,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 	if(CursorPos > Len)
 		CursorPos = Len;
 
-	if(Event.m_Flags & IInput::FLAG_TEXT)
+	if((Event.m_Flags & IInput::FLAG_TEXT) != 0)
 	{
 		// gather string stats
 		int CharCount = 0;
@@ -107,7 +107,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		str_utf8_stats(Event.m_aText, MAX_SIZE, MAX_CHARS, &CharSize, &CharCount);
 
 		// add new string
-		if(CharCount)
+		if(CharCount != 0)
 		{
 			if(Len + CharSize < StrMaxSize && CursorPos + CharSize < StrMaxSize && NumChars + CharCount < StrMaxChars)
 			{
@@ -122,7 +122,7 @@ int32_t CLineInput::Manipulate(IInput::CEvent Event, char *pStr, int StrMaxSize,
 		}
 	}
 
-	if(Event.m_Flags & IInput::FLAG_PRESS)
+	if((Event.m_Flags & IInput::FLAG_PRESS) != 0)
 	{
 		int Key = Event.m_Key;
 		if(Key == KEY_BACKSPACE)

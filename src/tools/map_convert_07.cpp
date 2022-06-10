@@ -106,7 +106,7 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 
 	CMapItemImage *pImgItem = (CMapItemImage *)pItem;
 
-	if(!pImgItem->m_External)
+	if(pImgItem->m_External == 0)
 		return pItem;
 
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
@@ -115,14 +115,14 @@ void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
 	CImageInfo ImgInfo;
 	char aStr[64];
 	str_format(aStr, sizeof(aStr), "data/mapres/%s.png", pName);
-	if(!LoadPNG(&ImgInfo, aStr))
+	if(LoadPNG(&ImgInfo, aStr) == 0)
 		return pItem; // keep as external if we don't have a mapres to replace
 
 	*pNewImgItem = *pImgItem;
 
 	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
-	pNewImgItem->m_External = false;
+	pNewImgItem->m_External = 0;
 	pNewImgItem->m_ImageData = g_NextDataItemID++;
 
 	g_apNewData[g_Index] = ImgInfo.m_pData;

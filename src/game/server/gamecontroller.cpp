@@ -53,7 +53,7 @@ void IGameController::DoActivityCheck()
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 #ifdef CONF_DEBUG
-		if(g_Config.m_DbgDummies)
+		if(g_Config.m_DbgDummies != 0)
 		{
 			if(i >= MAX_CLIENTS - g_Config.m_DbgDummies)
 				break;
@@ -132,7 +132,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
 				{
 					Result = Index;
-					if(!GameServer()->m_World.m_Core.m_Tuning[0].m_PlayerCollision)
+					if(GameServer()->m_World.m_Core.m_Tuning[0].m_PlayerCollision == 0.0f)
 						break;
 					for(int c = 0; c < Num; ++c)
 						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + Positions[Index]) ||
@@ -219,7 +219,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	else if(Index == ENTITY_CRAZY_SHOTGUN_EX)
 	{
 		int Dir;
-		if(!Flags)
+		if(Flags == 0)
 			Dir = 0;
 		else if(Flags == ROTATION_90)
 			Dir = 1;
@@ -238,7 +238,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			true, //Freeze
 			true, //Explosive
 			0, //Force
-			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
+			(g_Config.m_SvShotgunBulletSound) != 0 ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
 			Layer,
 			Number);
 		bullet->SetBouncing(2 - (Dir % 2));
@@ -246,7 +246,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	else if(Index == ENTITY_CRAZY_SHOTGUN)
 	{
 		int Dir;
-		if(!Flags)
+		if(Flags == 0)
 			Dir = 0;
 		else if(Flags == (TILEFLAG_ROTATE))
 			Dir = 1;
@@ -417,7 +417,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 	if(Server()->ClientIngame(ClientID))
 	{
 		char aBuf[512];
-		if(pReason && *pReason)
+		if(pReason && (*pReason != 0))
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
@@ -430,7 +430,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 
 void IGameController::EndRound()
 {
-	if(m_Warmup) // game can't end when we are running warmup
+	if(m_Warmup != 0) // game can't end when we are running warmup
 		return;
 
 	GameServer()->m_World.m_Paused = true;
@@ -520,10 +520,10 @@ bool IGameController::CanBeMovedOnBalance(int ClientID)
 void IGameController::Tick()
 {
 	// do warmup
-	if(m_Warmup)
+	if(m_Warmup != 0)
 	{
 		m_Warmup--;
-		if(!m_Warmup)
+		if(m_Warmup == 0)
 			StartRound();
 	}
 
@@ -550,7 +550,7 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_GameStateFlags = 0;
 	if(m_GameOverTick != -1)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_GAMEOVER;
-	if(m_SuddenDeath)
+	if(m_SuddenDeath != 0)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
@@ -566,7 +566,7 @@ void IGameController::Snap(int SnappingClient)
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
+		if((pPlayer->GetTeam() == TEAM_SPECTATORS || (pPlayer->IsPaused() != 0)) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
 		{
 			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{
@@ -616,7 +616,7 @@ void IGameController::Snap(int SnappingClient)
 		pGameData->m_GameStateFlags = 0;
 		if(m_GameOverTick != -1)
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
-		if(m_SuddenDeath)
+		if(m_SuddenDeath != 0)
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_SUDDENDEATH;
 		if(GameServer()->m_World.m_Paused)
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_PAUSED;
@@ -636,7 +636,7 @@ void IGameController::Snap(int SnappingClient)
 	{
 		int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
 
-		if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorID] && GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter())
+		if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || (pPlayer->IsPaused() != 0)) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorID] && GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter())
 			Team = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter()->Team();
 
 		if(Team == TEAM_SUPER)
@@ -683,7 +683,7 @@ int IGameController::GetAutoTeam(int NotThisID)
 {
 	// this will force the auto balancer to work overtime as well
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress != 0)
 		return 0;
 #endif
 

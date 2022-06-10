@@ -43,7 +43,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		CMapItemImage *pItem = (CMapItemImage *)Reader.GetItem(Start + i, nullptr, nullptr);
 		char *pName = (char *)Reader.GetData(pItem->m_ImageName);
 
-		if(pItem->m_External)
+		if(pItem->m_External != 0)
 			continue;
 
 		char aBuf[512];
@@ -78,7 +78,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i, nullptr, nullptr);
 		char *pName = (char *)Reader.GetData(pItem->m_SoundName);
 
-		if(pItem->m_External)
+		if(pItem->m_External != 0)
 			continue;
 
 		char aBuf[512];
@@ -117,7 +117,7 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	if(!fs_is_dir(pDir))
+	if(fs_is_dir(pDir) == 0)
 	{
 		dbg_msg("usage", "directory '%s' does not exist", pDir);
 		return -1;

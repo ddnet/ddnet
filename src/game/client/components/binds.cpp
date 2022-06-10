@@ -53,7 +53,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombin
 	if(KeyID < 0 || KeyID >= KEY_LAST)
 		return;
 
-	if(FreeOnly && Get(KeyID, ModifierCombination)[0])
+	if(FreeOnly && (Get(KeyID, ModifierCombination)[0] != 0))
 		return;
 
 	free(m_aapKeyBindings[ModifierCombination][KeyID]);
@@ -64,7 +64,7 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombin
 		ModifierCombination = 0;
 
 	char aBuf[256];
-	if(!pStr[0])
+	if(pStr[0] == 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "unbound %s%s (%d)", GetKeyBindModifiersName(ModifierCombination), Input()->KeyName(KeyID), KeyID);
 	}
@@ -136,9 +136,9 @@ bool CBinds::OnInput(IInput::CEvent e)
 	bool ret = false;
 	if(m_aapKeyBindings[Mask][e.m_Key])
 	{
-		if(e.m_Flags & IInput::FLAG_PRESS)
+		if((e.m_Flags & IInput::FLAG_PRESS) != 0)
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_RELEASE)
+		if((e.m_Flags & IInput::FLAG_RELEASE) != 0)
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][e.m_Key]);
 		ret = true;
 	}
@@ -146,9 +146,9 @@ bool CBinds::OnInput(IInput::CEvent e)
 	if(m_aapKeyBindings[0][e.m_Key] && !ret)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
-		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
+		if(((e.m_Flags & IInput::FLAG_PRESS) != 0) && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_RELEASE)
+		if((e.m_Flags & IInput::FLAG_RELEASE) != 0)
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
 		ret = true;
 	}
@@ -183,12 +183,12 @@ void CBinds::GetKey(const char *pBindStr, char *aBuf, unsigned BufSize)
 		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
 		{
 			const char *pBind = Get(KeyId, Mod);
-			if(!pBind[0])
+			if(pBind[0] == 0)
 				continue;
 
 			if(str_comp(pBind, pBindStr) == 0)
 			{
-				if(Mod)
+				if(Mod != 0)
 					str_format(aBuf, BufSize, "%s+%s", GetModifierName(Mod), Input()->KeyName(KeyId));
 				else
 					str_format(aBuf, BufSize, "%s", Input()->KeyName(KeyId));
@@ -269,7 +269,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	int Modifier;
 	int KeyID = pBinds->GetBindSlot(pBindStr, &Modifier);
 
-	if(!KeyID)
+	if(KeyID == 0)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pBindStr);
@@ -290,7 +290,7 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 
 		int Modifier;
 		int id = pBinds->GetBindSlot(pKeyName, &Modifier);
-		if(!id)
+		if(id == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
@@ -329,7 +329,7 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 	int Modifier;
 	int id = pBinds->GetBindSlot(pKeyName, &Modifier);
 
-	if(!id)
+	if(id == 0)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
@@ -372,15 +372,15 @@ int CBinds::GetBindSlot(const char *pBindString, int *pModifierCombination)
 	char aMod[32];
 	aMod[0] = '\0';
 	const char *pKey = str_next_token(pBindString, "+", aMod, sizeof(aMod));
-	while(aMod[0] && *(pKey))
+	while((aMod[0] != 0) && (*(pKey) != 0))
 	{
-		if(!str_comp(aMod, "shift"))
+		if(str_comp(aMod, "shift") == 0)
 			*pModifierCombination |= (1 << MODIFIER_SHIFT);
-		else if(!str_comp(aMod, "ctrl"))
+		else if(str_comp(aMod, "ctrl") == 0)
 			*pModifierCombination |= (1 << MODIFIER_CTRL);
-		else if(!str_comp(aMod, "alt"))
+		else if(str_comp(aMod, "alt") == 0)
 			*pModifierCombination |= (1 << MODIFIER_ALT);
-		else if(!str_comp(aMod, "gui"))
+		else if(str_comp(aMod, "gui") == 0)
 			*pModifierCombination |= (1 << MODIFIER_GUI);
 		else
 			return 0;
@@ -417,7 +417,7 @@ const char *CBinds::GetKeyBindModifiersName(int ModifierCombination)
 	aModifier[0] = '\0';
 	for(int k = 1; k < MODIFIER_COUNT; k++)
 	{
-		if(ModifierCombination & (1 << k))
+		if((ModifierCombination & (1 << k)) != 0)
 		{
 			str_append(aModifier, GetModifierName(k), sizeof(aModifier));
 			str_append(aModifier, "+", sizeof(aModifier));

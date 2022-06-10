@@ -44,7 +44,7 @@ void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
 
 	if(Time < 0)
 		str_format(pBuf, Size, "%s/%s_tmp_%d.demo", ms_pRaceDemoDir, pMap, pid());
-	else if(g_Config.m_ClDemoName)
+	else if(g_Config.m_ClDemoName != 0)
 		str_format(pBuf, Size, "%s/%s_%d.%03d_%s.demo", ms_pRaceDemoDir, pMap, Time / 1000, Time % 1000, aPlayerName);
 	else
 		str_format(pBuf, Size, "%s/%s_%d.%03d.demo", ms_pRaceDemoDir, pMap, Time / 1000, Time % 1000);
@@ -58,7 +58,7 @@ void CRaceDemo::OnStateChange(int NewState, int OldState)
 
 void CRaceDemo::OnNewSnapshot()
 {
-	if(!GameClient()->m_GameInfo.m_Race || !g_Config.m_ClAutoRaceRecord || Client()->State() != IClient::STATE_ONLINE)
+	if(!GameClient()->m_GameInfo.m_Race || (g_Config.m_ClAutoRaceRecord == 0) || Client()->State() != IClient::STATE_ONLINE)
 		return;
 
 	if(!m_pClient->m_Snap.m_pGameInfoObj || m_pClient->m_Snap.m_SpecInfo.m_Active || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
@@ -66,8 +66,8 @@ void CRaceDemo::OnNewSnapshot()
 
 	static int s_LastRaceTick = -1;
 
-	bool RaceFlag = m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
-	bool ServerControl = RaceFlag && g_Config.m_ClRaceRecordServerControl;
+	bool RaceFlag = (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME) != 0;
+	bool ServerControl = RaceFlag && (g_Config.m_ClRaceRecordServerControl != 0);
 	int RaceTick = -m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer;
 
 	// start the demo
@@ -194,7 +194,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 	auto *pRealUser = (SRaceDemoFetchUser *)pUser;
 	auto *pParam = pRealUser->m_pParam;
 	int MapLen = str_length(pParam->pMap);
-	if(IsDir || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
+	if((IsDir != 0) || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
 		return 0;
 
 	CDemoItem Item;
@@ -202,10 +202,10 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	const char *pTime = Item.m_aName + MapLen + 1;
 	const char *pTEnd = pTime;
-	while(isdigit(*pTEnd) || *pTEnd == ' ' || *pTEnd == '.' || *pTEnd == ',')
+	while((isdigit(*pTEnd) != 0) || *pTEnd == ' ' || *pTEnd == '.' || *pTEnd == ',')
 		pTEnd++;
 
-	if(g_Config.m_ClDemoName)
+	if(g_Config.m_ClDemoName != 0)
 	{
 		char aPlayerName[MAX_NAME_LENGTH];
 		str_copy(aPlayerName, pParam->m_pThis->Client()->PlayerName(), sizeof(aPlayerName));
@@ -214,7 +214,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 		if(pTEnd[0] != '_' || str_comp(pTEnd + 1, aPlayerName) != 0)
 			return 0;
 	}
-	else if(pTEnd[0])
+	else if(pTEnd[0] != 0)
 		return 0;
 
 	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);

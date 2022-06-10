@@ -36,11 +36,11 @@ void CSoundLoading::Run()
 
 int CSounds::GetSampleId(int SetId)
 {
-	if(!g_Config.m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
+	if((g_Config.m_SndEnable == 0) || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
 		return -1;
 
 	CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
-	if(!pSet->m_NumSounds)
+	if(pSet->m_NumSounds == 0)
 		return -1;
 
 	if(pSet->m_NumSounds == 1)
@@ -75,7 +75,7 @@ void CSounds::OnInit()
 	ClearQueue();
 
 	// load sounds
-	if(g_Config.m_ClThreadsoundloading)
+	if(g_Config.m_ClThreadsoundloading != 0)
 	{
 		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
 		m_pClient->Engine()->AddJob(m_pSoundJob);
@@ -174,7 +174,7 @@ void CSounds::Enqueue(int Channel, int SetId)
 	// add sound to the queue
 	if(m_QueuePos < QUEUE_SIZE)
 	{
-		if(Channel == CHN_MUSIC || !g_Config.m_ClEditor)
+		if(Channel == CHN_MUSIC || (g_Config.m_ClEditor == 0))
 		{
 			m_aQueue[m_QueuePos].m_Channel = Channel;
 			m_aQueue[m_QueuePos++].m_SetId = SetId;
@@ -193,7 +193,7 @@ void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
 
 void CSounds::Play(int Channel, int SetId, float Vol)
 {
-	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
+	if(Channel == CHN_MUSIC && (g_Config.m_SndMusic == 0))
 		return;
 
 	int SampleId = GetSampleId(SetId);
@@ -209,7 +209,7 @@ void CSounds::Play(int Channel, int SetId, float Vol)
 
 void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
 {
-	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
+	if(Channel == CHN_MUSIC && (g_Config.m_SndMusic == 0))
 		return;
 
 	int SampleId = GetSampleId(SetId);
@@ -236,7 +236,7 @@ void CSounds::Stop(int SetId)
 
 ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, int Flags)
 {
-	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if((Channel == CHN_MUSIC && (g_Config.m_SndMusic == 0)) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)
@@ -247,7 +247,7 @@ ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, i
 
 ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags)
 {
-	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if((Channel == CHN_MUSIC && (g_Config.m_SndMusic == 0)) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)

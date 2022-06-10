@@ -37,7 +37,7 @@ void CHuffman::Setbits_r(CNode *pNode, int Bits, unsigned Depth)
 	if(pNode->m_aLeafs[0] != 0xffff)
 		Setbits_r(&m_aNodes[pNode->m_aLeafs[0]], Bits, Depth + 1);
 
-	if(pNode->m_NumBits)
+	if(pNode->m_NumBits != 0u)
 	{
 		pNode->m_Bits = Bits;
 		pNode->m_NumBits = Depth;
@@ -115,7 +115,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 			if(!pNode)
 				break;
 
-			if(pNode->m_NumBits)
+			if(pNode->m_NumBits != 0u)
 			{
 				m_apDecodeLut[i] = pNode;
 				break;
@@ -157,7 +157,7 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	unsigned Bitcount = 0;
 
 	// make sure that we have data that we want to compress
-	if(InputSize)
+	if(InputSize != 0)
 	{
 		// {A} load the first symbol
 		int Symbol = *pSrc++;
@@ -231,7 +231,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 			return -1;
 
 		// {D} check if we hit a symbol already
-		if(pNode->m_NumBits)
+		if(pNode->m_NumBits != 0u)
 		{
 			// remove the bits for that symbol
 			Bits >>= pNode->m_NumBits;
@@ -254,7 +254,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 				Bits >>= 1;
 
 				// check if we hit a symbol
-				if(pNode->m_NumBits)
+				if(pNode->m_NumBits != 0u)
 					break;
 
 				// no more bits, decoding error

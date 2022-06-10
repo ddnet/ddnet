@@ -206,7 +206,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_VoteSet *pMsg = (CNetMsg_Sv_VoteSet *)pRawMsg;
 		OnReset();
-		if(pMsg->m_Timeout)
+		if(pMsg->m_Timeout != 0)
 		{
 			str_copy(m_aDescription, pMsg->m_pDescription, sizeof(m_aDescription));
 			str_copy(m_aReason, pMsg->m_pReason, sizeof(m_aReason));
@@ -312,10 +312,10 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 	Splitter.x -= Splitter.w / 2;
 	RenderTools()->DrawUIRect(&Splitter, ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), CUI::CORNER_ALL, Splitter.h / 4);
 
-	if(m_Total)
+	if(m_Total != 0)
 	{
 		CUIRect PassArea = Bars;
-		if(m_Yes)
+		if(m_Yes != 0)
 		{
 			CUIRect YesArea = Bars;
 			YesArea.w *= m_Yes / (float)m_Total;
@@ -332,7 +332,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			PassArea.w -= YesArea.w;
 		}
 
-		if(m_No)
+		if(m_No != 0)
 		{
 			CUIRect NoArea = Bars;
 			NoArea.w *= m_No / (float)m_Total;
@@ -349,7 +349,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			PassArea.w -= NoArea.w;
 		}
 
-		if(Text && m_Pass)
+		if(Text && (m_Pass != 0))
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%d", m_Pass);

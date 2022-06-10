@@ -61,7 +61,7 @@ void CDamageInd::OnRender()
 		}
 		else
 		{
-			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+			if(m_pClient->m_Snap.m_pGameInfoObj && ((m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED) != 0))
 				m_aItems[i].m_StartTime += LocalTime() - s_LastLocalTime;
 		}
 

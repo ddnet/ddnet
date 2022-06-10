@@ -117,31 +117,31 @@ void CAutoMapper::Load(const char *pTileName)
 
 				if(str_length(aOrientation1) > 0)
 				{
-					if(!str_comp(aOrientation1, "XFLIP"))
+					if(str_comp(aOrientation1, "XFLIP") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
-					else if(!str_comp(aOrientation1, "YFLIP"))
+					else if(str_comp(aOrientation1, "YFLIP") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
-					else if(!str_comp(aOrientation1, "ROTATE"))
+					else if(str_comp(aOrientation1, "ROTATE") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 				}
 
 				if(str_length(aOrientation2) > 0)
 				{
-					if(!str_comp(aOrientation2, "XFLIP"))
+					if(str_comp(aOrientation2, "XFLIP") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
-					else if(!str_comp(aOrientation2, "YFLIP"))
+					else if(str_comp(aOrientation2, "YFLIP") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
-					else if(!str_comp(aOrientation2, "ROTATE"))
+					else if(str_comp(aOrientation2, "ROTATE") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 				}
 
 				if(str_length(aOrientation3) > 0)
 				{
-					if(!str_comp(aOrientation3, "XFLIP"))
+					if(str_comp(aOrientation3, "XFLIP") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
-					else if(!str_comp(aOrientation3, "YFLIP"))
+					else if(str_comp(aOrientation3, "YFLIP") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
-					else if(!str_comp(aOrientation3, "ROTATE"))
+					else if(str_comp(aOrientation3, "ROTATE") == 0)
 						NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 				}
 
@@ -159,13 +159,13 @@ void CAutoMapper::Load(const char *pTileName)
 
 				sscanf(pLine, "Pos %d %d %127s", &x, &y, aValue);
 
-				if(!str_comp(aValue, "EMPTY"))
+				if(str_comp(aValue, "EMPTY") == 0)
 				{
 					Value = CPosRule::INDEX;
 					CIndexInfo NewIndexInfo = {0, 0, false};
 					NewIndexList.push_back(NewIndexInfo);
 				}
-				else if(!str_comp(aValue, "FULL"))
+				else if(str_comp(aValue, "FULL") == 0)
 				{
 					Value = CPosRule::NOTINDEX;
 					CIndexInfo NewIndexInfo1 = {0, 0, false};
@@ -173,9 +173,9 @@ void CAutoMapper::Load(const char *pTileName)
 					NewIndexList.push_back(NewIndexInfo1);
 					//NewIndexList.push_back(NewIndexInfo2);
 				}
-				else if(!str_comp(aValue, "INDEX") || !str_comp(aValue, "NOTINDEX"))
+				else if((str_comp(aValue, "INDEX") == 0) || (str_comp(aValue, "NOTINDEX") == 0))
 				{
-					if(!str_comp(aValue, "INDEX"))
+					if(str_comp(aValue, "INDEX") == 0)
 						Value = CPosRule::INDEX;
 					else
 						Value = CPosRule::NOTINDEX;
@@ -195,7 +195,7 @@ void CAutoMapper::Load(const char *pTileName)
 						NewIndexInfo.m_Flag = 0;
 						NewIndexInfo.m_TestFlag = false;
 
-						if(!str_comp(aOrientation1, "OR"))
+						if(str_comp(aOrientation1, "OR") == 0)
 						{
 							NewIndexList.push_back(NewIndexInfo);
 							pWord += 2;
@@ -204,13 +204,13 @@ void CAutoMapper::Load(const char *pTileName)
 						else if(str_length(aOrientation1) > 0)
 						{
 							NewIndexInfo.m_TestFlag = true;
-							if(!str_comp(aOrientation1, "XFLIP"))
+							if(str_comp(aOrientation1, "XFLIP") == 0)
 								NewIndexInfo.m_Flag = TILEFLAG_VFLIP;
-							else if(!str_comp(aOrientation1, "YFLIP"))
+							else if(str_comp(aOrientation1, "YFLIP") == 0)
 								NewIndexInfo.m_Flag = TILEFLAG_HFLIP;
-							else if(!str_comp(aOrientation1, "ROTATE"))
+							else if(str_comp(aOrientation1, "ROTATE") == 0)
 								NewIndexInfo.m_Flag = TILEFLAG_ROTATE;
-							else if(!str_comp(aOrientation1, "NONE"))
+							else if(str_comp(aOrientation1, "NONE") == 0)
 								NewIndexInfo.m_Flag = 0;
 							else
 								NewIndexInfo.m_TestFlag = false;
@@ -221,7 +221,7 @@ void CAutoMapper::Load(const char *pTileName)
 							break;
 						}
 
-						if(!str_comp(aOrientation2, "OR"))
+						if(str_comp(aOrientation2, "OR") == 0)
 						{
 							NewIndexList.push_back(NewIndexInfo);
 							pWord += 3;
@@ -229,11 +229,11 @@ void CAutoMapper::Load(const char *pTileName)
 						}
 						else if(str_length(aOrientation2) > 0 && NewIndexInfo.m_Flag != 0)
 						{
-							if(!str_comp(aOrientation2, "XFLIP"))
+							if(str_comp(aOrientation2, "XFLIP") == 0)
 								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
-							else if(!str_comp(aOrientation2, "YFLIP"))
+							else if(str_comp(aOrientation2, "YFLIP") == 0)
 								NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
-							else if(!str_comp(aOrientation2, "ROTATE"))
+							else if(str_comp(aOrientation2, "ROTATE") == 0)
 								NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
 						}
 						else
@@ -242,7 +242,7 @@ void CAutoMapper::Load(const char *pTileName)
 							break;
 						}
 
-						if(!str_comp(aOrientation3, "OR"))
+						if(str_comp(aOrientation3, "OR") == 0)
 						{
 							NewIndexList.push_back(NewIndexInfo);
 							pWord += 4;
@@ -250,11 +250,11 @@ void CAutoMapper::Load(const char *pTileName)
 						}
 						else if(str_length(aOrientation3) > 0 && NewIndexInfo.m_Flag != 0)
 						{
-							if(!str_comp(aOrientation3, "XFLIP"))
+							if(str_comp(aOrientation3, "XFLIP") == 0)
 								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
-							else if(!str_comp(aOrientation3, "YFLIP"))
+							else if(str_comp(aOrientation3, "YFLIP") == 0)
 								NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
-							else if(!str_comp(aOrientation3, "ROTATE"))
+							else if(str_comp(aOrientation3, "ROTATE") == 0)
 								NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
 						}
 						else
@@ -263,7 +263,7 @@ void CAutoMapper::Load(const char *pTileName)
 							break;
 						}
 
-						if(!str_comp(aOrientation4, "OR"))
+						if(str_comp(aOrientation4, "OR") == 0)
 						{
 							NewIndexList.push_back(NewIndexInfo);
 							pWord += 5;

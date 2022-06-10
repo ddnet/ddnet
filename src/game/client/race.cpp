@@ -12,16 +12,16 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 {
 	while(*pStr == ' ') // skip leading spaces
 		pStr++;
-	if(!isdigit(*pStr))
+	if(isdigit(*pStr) == 0)
 		return -1;
 	int Time = str_toint(pStr) * 1000;
-	while(isdigit(*pStr))
+	while(isdigit(*pStr) != 0)
 		pStr++;
 	if(*pStr == '.' || *pStr == ',')
 	{
 		pStr++;
 		static const int s_aMult[3] = {100, 10, 1};
-		for(int i = 0; isdigit(pStr[i]) && i < 3; i++)
+		for(int i = 0; (isdigit(pStr[i]) != 0) && i < 3; i++)
 			Time += (pStr[i] - '0') * s_aMult[i];
 	}
 	return Time;
@@ -42,7 +42,7 @@ int CRaceHelper::TimeFromStr(const char *pStr)
 		while(*pStr == ' ') // skip leading spaces
 			pStr++;
 		int SecondsTime = TimeFromSecondsStr(pMinutes + str_length(s_pMinutesStr));
-		if(SecondsTime == -1 || !isdigit(*pStr))
+		if(SecondsTime == -1 || (isdigit(*pStr) == 0))
 			return -1;
 		return str_toint(pStr) * 60 * 1000 + SecondsTime;
 	}

@@ -15,7 +15,7 @@ int main(int argc, const char **argv)
 		return 1;
 	}
 	NETADDR Addr;
-	if(net_addr_from_str(&Addr, argv[1]))
+	if(net_addr_from_str(&Addr, argv[1]) != 0)
 	{
 		log_error("stun", "couldn't parse address");
 		return 2;
@@ -45,7 +45,7 @@ int main(int argc, const char **argv)
 	unsigned char *pResponse;
 	while(true)
 	{
-		if(!net_socket_read_wait(Socket, 1000000))
+		if(net_socket_read_wait(Socket, 1000000) == 0)
 		{
 			log_error("stun", "no udp message received from server until timeout");
 			return 3;
@@ -64,8 +64,8 @@ int main(int argc, const char **argv)
 		{
 			char aResponseAddr[NETADDR_MAXSTRSIZE];
 			char aAddr[NETADDR_MAXSTRSIZE];
-			net_addr_str(&ResponseAddr, aResponseAddr, sizeof(aResponseAddr), true);
-			net_addr_str(&Addr, aAddr, sizeof(aAddr), true);
+			net_addr_str(&ResponseAddr, aResponseAddr, sizeof(aResponseAddr), 1);
+			net_addr_str(&Addr, aAddr, sizeof(aAddr), 1);
 			log_debug("stun", "got message from %s while expecting one from %s", aResponseAddr, aAddr);
 			continue;
 		}

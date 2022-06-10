@@ -73,7 +73,7 @@ int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, v
 
 bool HttpInit(IStorage *pStorage)
 {
-	if(curl_global_init(CURL_GLOBAL_DEFAULT))
+	if(curl_global_init(CURL_GLOBAL_DEFAULT) != 0u)
 	{
 		return true;
 	}
@@ -186,7 +186,7 @@ int CHttpRequest::RunImpl(CURL *pUser)
 		return HTTP_ERROR;
 	}
 
-	if(g_Config.m_DbgCurl)
+	if(g_Config.m_DbgCurl != 0)
 	{
 		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(pHandle, CURLOPT_DEBUGFUNCTION, CurlDebug);
@@ -251,19 +251,19 @@ int CHttpRequest::RunImpl(CURL *pUser)
 
 	curl_easy_setopt(pHandle, CURLOPT_HTTPHEADER, m_pHeaders);
 
-	if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
+	if((g_Config.m_DbgCurl != 0) || m_LogProgress >= HTTPLOG::ALL)
 		dbg_msg("http", "fetching %s", m_aUrl);
 	m_State = HTTP_RUNNING;
 	int Ret = curl_easy_perform(pHandle);
 	if(Ret != CURLE_OK)
 	{
-		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
+		if((g_Config.m_DbgCurl != 0) || m_LogProgress >= HTTPLOG::FAILURE)
 			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, aErr);
 		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
 	{
-		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
+		if((g_Config.m_DbgCurl != 0) || m_LogProgress >= HTTPLOG::ALL)
 			dbg_msg("http", "task done %s", m_aUrl);
 		return HTTP_DONE;
 	}
@@ -307,7 +307,7 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 	CHttpRequest *pTask = (CHttpRequest *)pUser;
 	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
 	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
-	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
+	pTask->m_Progress.store((100 * DlCurr) / (DlTotal != 0.0 ? DlTotal : 1), std::memory_order_relaxed);
 	pTask->OnProgress();
 	return pTask->m_Abort ? -1 : 0;
 }

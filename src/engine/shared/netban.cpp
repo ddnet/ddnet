@@ -465,7 +465,7 @@ void CNetBan::ConUnban(IConsole::IResult *pResult, void *pUser)
 	CNetBan *pThis = static_cast<CNetBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	if(str_isallnum(pStr))
+	if(str_isallnum(pStr) != 0)
 		pThis->UnbanByIndex(str_toint(pStr));
 	else
 	{
@@ -552,7 +552,7 @@ void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)
 	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext)
 	{
 		int Min = pBan->m_Info.m_Expires > -1 ? (pBan->m_Info.m_Expires - Now + 59) / 60 : -1;
-		net_addr_str(&pBan->m_Data, aAddrStr1, sizeof(aAddrStr1), false);
+		net_addr_str(&pBan->m_Data, aAddrStr1, sizeof(aAddrStr1), 0);
 		str_format(aBuf, sizeof(aBuf), "ban %s %i %s", aAddrStr1, Min, pBan->m_Info.m_aReason);
 		io_write(File, aBuf, str_length(aBuf));
 		io_write_newline(File);
@@ -560,8 +560,8 @@ void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)
 	for(CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext)
 	{
 		int Min = pBan->m_Info.m_Expires > -1 ? (pBan->m_Info.m_Expires - Now + 59) / 60 : -1;
-		net_addr_str(&pBan->m_Data.m_LB, aAddrStr1, sizeof(aAddrStr1), false);
-		net_addr_str(&pBan->m_Data.m_UB, aAddrStr2, sizeof(aAddrStr2), false);
+		net_addr_str(&pBan->m_Data.m_LB, aAddrStr1, sizeof(aAddrStr1), 0);
+		net_addr_str(&pBan->m_Data.m_UB, aAddrStr2, sizeof(aAddrStr2), 0);
 		str_format(aBuf, sizeof(aBuf), "ban_range %s %s %i %s", aAddrStr1, aAddrStr2, Min, pBan->m_Info.m_aReason);
 		io_write(File, aBuf, str_length(aBuf));
 		io_write_newline(File);

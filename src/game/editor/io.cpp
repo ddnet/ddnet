@@ -61,19 +61,19 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		CMapItemInfoSettings Item;
 		Item.m_Version = 1;
 
-		if(m_MapInfo.m_aAuthor[0])
+		if(m_MapInfo.m_aAuthor[0] != 0)
 			Item.m_Author = df.AddData(str_length(m_MapInfo.m_aAuthor) + 1, m_MapInfo.m_aAuthor);
 		else
 			Item.m_Author = -1;
-		if(m_MapInfo.m_aVersion[0])
+		if(m_MapInfo.m_aVersion[0] != 0)
 			Item.m_MapVersion = df.AddData(str_length(m_MapInfo.m_aVersion) + 1, m_MapInfo.m_aVersion);
 		else
 			Item.m_MapVersion = -1;
-		if(m_MapInfo.m_aCredits[0])
+		if(m_MapInfo.m_aCredits[0] != 0)
 			Item.m_Credits = df.AddData(str_length(m_MapInfo.m_aCredits) + 1, m_MapInfo.m_aCredits);
 		else
 			Item.m_Credits = -1;
-		if(m_MapInfo.m_aLicense[0])
+		if(m_MapInfo.m_aLicense[0] != 0)
 			Item.m_License = df.AddData(str_length(m_MapInfo.m_aLicense) + 1, m_MapInfo.m_aLicense);
 		else
 			Item.m_License = -1;
@@ -118,7 +118,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		Item.m_Height = pImg->m_Height;
 		Item.m_External = pImg->m_External;
 		Item.m_ImageName = df.AddData(str_length(pImg->m_aName) + 1, pImg->m_aName);
-		if(pImg->m_External)
+		if(pImg->m_External != 0)
 			Item.m_ImageData = -1;
 		else
 		{
@@ -207,18 +207,18 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Item.m_Height = pLayerTiles->m_Height;
 				// Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
 
-				if(pLayerTiles->m_Tele)
+				if(pLayerTiles->m_Tele != 0)
 					Item.m_Flags = TILESLAYERFLAG_TELE;
-				else if(pLayerTiles->m_Speedup)
+				else if(pLayerTiles->m_Speedup != 0)
 					Item.m_Flags = TILESLAYERFLAG_SPEEDUP;
-				else if(pLayerTiles->m_Front)
+				else if(pLayerTiles->m_Front != 0)
 					Item.m_Flags = TILESLAYERFLAG_FRONT;
-				else if(pLayerTiles->m_Switch)
+				else if(pLayerTiles->m_Switch != 0)
 					Item.m_Flags = TILESLAYERFLAG_SWITCH;
-				else if(pLayerTiles->m_Tune)
+				else if(pLayerTiles->m_Tune != 0)
 					Item.m_Flags = TILESLAYERFLAG_TUNE;
 				else
-					Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
+					Item.m_Flags = pLayerTiles->m_Game != 0 ? TILESLAYERFLAG_GAME : 0;
 
 				Item.m_Image = pLayerTiles->m_Image;
 
@@ -229,22 +229,22 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
 
-				if(Item.m_Flags && !(pLayerTiles->m_Game))
+				if((Item.m_Flags != 0) && ((pLayerTiles->m_Game) == 0))
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
 					Item.m_Data = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 
-					if(pLayerTiles->m_Tele)
+					if(pLayerTiles->m_Tele != 0)
 						Item.m_Tele = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTeleTile), ((CLayerTele *)pLayerTiles)->m_pTeleTile);
-					else if(pLayerTiles->m_Speedup)
+					else if(pLayerTiles->m_Speedup != 0)
 						Item.m_Speedup = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSpeedupTile), ((CLayerSpeedup *)pLayerTiles)->m_pSpeedupTile);
-					else if(pLayerTiles->m_Front)
+					else if(pLayerTiles->m_Front != 0)
 						Item.m_Front = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
-					else if(pLayerTiles->m_Switch)
+					else if(pLayerTiles->m_Switch != 0)
 						Item.m_Switch = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), ((CLayerSwitch *)pLayerTiles)->m_pSwitchTile);
-					else if(pLayerTiles->m_Tune)
+					else if(pLayerTiles->m_Tune != 0)
 						Item.m_Tune = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), ((CLayerTune *)pLayerTiles)->m_pTuneTile);
 				}
 				else
@@ -256,7 +256,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 				// save auto mapper of each tile layer (not physics layer)
-				if(!Item.m_Flags)
+				if(Item.m_Flags == 0)
 				{
 					CMapItemAutoMapperConfig ItemAutomapper;
 					ItemAutomapper.m_Version = CMapItemAutoMapperConfig::CURRENT_VERSION;
@@ -343,7 +343,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		Item.m_Channels = m_lEnvelopes[e]->m_Channels;
 		Item.m_StartPoint = PointCount;
 		Item.m_NumPoints = m_lEnvelopes[e]->m_lPoints.size();
-		Item.m_Synchronized = m_lEnvelopes[e]->m_Synchronized;
+		Item.m_Synchronized = static_cast<int>(m_lEnvelopes[e]->m_Synchronized);
 		StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_lEnvelopes[e]->m_aName);
 
 		df.AddItem(MAPITEMTYPE_ENVELOPE, e, sizeof(Item), &Item);
@@ -378,11 +378,11 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		const unsigned char ipv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 		// and if we're on localhost
-		if(!mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv4Localhost, sizeof(ipv4Localhost)) || !mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv6Localhost, sizeof(ipv6Localhost)))
+		if((mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv4Localhost, sizeof(ipv4Localhost)) == 0) || (mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv6Localhost, sizeof(ipv6Localhost)) == 0))
 		{
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));
-			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
+			if(str_comp(aMapName, CurrentServerInfo.m_aMap) == 0)
 				m_pEditor->Client()->Rcon("reload");
 		}
 	}
@@ -394,7 +394,7 @@ int CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
 	int result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
-	if(result)
+	if(result != 0)
 	{
 		str_copy(m_aFileName, pFileName, 512);
 		SortImages();
@@ -478,14 +478,14 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				CEditorImage *pImg = new CEditorImage(m_pEditor);
 				pImg->m_External = pItem->m_External;
 
-				if(pItem->m_External)
+				if(pItem->m_External != 0)
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pName);
 
 					// load external
 					CEditorImage ImgInfo(m_pEditor);
-					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
+					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL) != 0)
 					{
 						*pImg = ImgInfo;
 						int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
@@ -539,7 +539,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				// copy base info
 				CEditorSound *pSound = new CEditorSound(m_pEditor);
 
-				if(pItem->m_External)
+				if(pItem->m_External != 0)
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
@@ -631,13 +631,13 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
 						CLayerTiles *pTiles = 0;
 
-						if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
+						if((pTilemapItem->m_Flags & TILESLAYERFLAG_GAME) != 0)
 						{
 							pTiles = new CLayerGame(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeGameLayer(pTiles);
 							MakeGameGroup(pGroup);
 						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TELE)
+						else if((pTilemapItem->m_Flags & TILESLAYERFLAG_TELE) != 0)
 						{
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Tele = *((int *)(pTilemapItem) + 15);
@@ -645,7 +645,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pTiles = new CLayerTele(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeTeleLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SPEEDUP)
+						else if((pTilemapItem->m_Flags & TILESLAYERFLAG_SPEEDUP) != 0)
 						{
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Speedup = *((int *)(pTilemapItem) + 16);
@@ -653,7 +653,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pTiles = new CLayerSpeedup(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSpeedupLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_FRONT)
+						else if((pTilemapItem->m_Flags & TILESLAYERFLAG_FRONT) != 0)
 						{
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Front = *((int *)(pTilemapItem) + 17);
@@ -661,7 +661,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pTiles = new CLayerFront(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeFrontLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SWITCH)
+						else if((pTilemapItem->m_Flags & TILESLAYERFLAG_SWITCH) != 0)
 						{
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Switch = *((int *)(pTilemapItem) + 18);
@@ -669,7 +669,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pTiles = new CLayerSwitch(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSwitchLayer(pTiles);
 						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TUNE)
+						else if((pTilemapItem->m_Flags & TILESLAYERFLAG_TUNE) != 0)
 						{
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Tune = *((int *)(pTilemapItem) + 19);
@@ -697,7 +697,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(pTilemapItem->m_Version >= 3)
 							IntsToStr(pTilemapItem->m_aName, sizeof(pTiles->m_aName) / sizeof(int), pTiles->m_aName);
 
-						if(pTiles->m_Tele)
+						if(pTiles->m_Tele != 0)
 						{
 							void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
@@ -727,7 +727,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tele);
 						}
-						else if(pTiles->m_Speedup)
+						else if(pTiles->m_Speedup != 0)
 						{
 							void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
@@ -747,7 +747,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 							DataFile.UnloadData(pTilemapItem->m_Speedup);
 						}
-						else if(pTiles->m_Front)
+						else if(pTiles->m_Front != 0)
 						{
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
@@ -756,7 +756,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 							DataFile.UnloadData(pTilemapItem->m_Front);
 						}
-						else if(pTiles->m_Switch)
+						else if(pTiles->m_Switch != 0)
 						{
 							void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
@@ -805,7 +805,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							}
 							DataFile.UnloadData(pTilemapItem->m_Switch);
 						}
-						else if(pTiles->m_Tune)
+						else if(pTiles->m_Tune != 0)
 						{
 							void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
@@ -831,11 +831,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							{
 								mem_copy(pTiles->m_pTiles, pData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
 
-								if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
+								if((pTiles->m_Game != 0) && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
 								{
 									for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 									{
-										if(pTiles->m_pTiles[i].m_Index)
+										if(pTiles->m_pTiles[i].m_Index != 0u)
 											pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
 									}
 								}
@@ -922,7 +922,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							CSoundSource &Source = pSounds->m_lSources[i];
 							Source.m_Position = pOldSource->m_Position;
 							Source.m_Loop = pOldSource->m_Loop;
-							Source.m_Pan = true;
+							Source.m_Pan = 1;
 							Source.m_TimeDelay = pOldSource->m_TimeDelay;
 							Source.m_Falloff = 0;
 
@@ -951,7 +951,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			{
 				int Start, Num;
 				DataFile.GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
-				if(Num)
+				if(Num != 0)
 					pPoints = (CEnvPoint *)DataFile.GetItem(Start, 0, 0);
 			}
 
@@ -967,7 +967,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
 				m_lEnvelopes.push_back(pEnv);
 				if(pItem->m_Version >= 2)
-					pEnv->m_Synchronized = pItem->m_Synchronized;
+					pEnv->m_Synchronized = (pItem->m_Synchronized != 0);
 			}
 		}
 
@@ -987,12 +987,12 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						{
 							CLayerTiles *pTiles = (CLayerTiles *)m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
 							// only load auto mappers for tile layers (not physics layers)
-							if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
-								   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
+							if(!((pTiles->m_Game != 0) || (pTiles->m_Tele != 0) || (pTiles->m_Speedup != 0) ||
+								   (pTiles->m_Front != 0) || (pTiles->m_Switch != 0) || (pTiles->m_Tune != 0)))
 							{
 								pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
 								pTiles->m_Seed = pItem->m_AutomapperSeed;
-								pTiles->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
+								pTiles->m_AutoAutoMap = !((pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC) == 0);
 							}
 						}
 					}
@@ -1021,7 +1021,7 @@ int CEditor::Append(const char *pFileName, int StorageType)
 
 	int Err;
 	Err = NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
-	if(!Err)
+	if(Err == 0)
 		return Err;
 
 	// modify indecies

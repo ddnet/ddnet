@@ -91,7 +91,7 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
 {
-	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
+	if((g_Config.m_ClShowQuads == 0) || g_Config.m_ClOverlayEntities == 100)
 		return;
 
 	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100 - g_Config.m_ClOverlayEntities) / 100.0f);
@@ -125,9 +125,9 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 		if(a < 0.01f || (q->m_aColors[0].a < 0.01f && q->m_aColors[1].a < 0.01f && q->m_aColors[2].a < 0.01f && q->m_aColors[3].a < 0.01f))
 			Opaque = true;
 		*/
-		if(Opaque && !(RenderFlags & LAYERRENDERFLAG_OPAQUE))
+		if(Opaque && ((RenderFlags & LAYERRENDERFLAG_OPAQUE) == 0))
 			continue;
-		if(!Opaque && !(RenderFlags & LAYERRENDERFLAG_TRANSPARENT))
+		if(!Opaque && ((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) == 0))
 			continue;
 
 		Graphics()->QuadsSetSubsetFree(
@@ -226,10 +226,10 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 		for(int x = StartX; x < EndX; x++)
 		{
 			unsigned char Index = (x >= RectX && x < RectX + RectW && y >= RectY && y < RectY + RectH) ? IndexIn : IndexOut;
-			if(Index)
+			if(Index != 0u)
 			{
 				bool Render = false;
-				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+				if((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) != 0)
 					Render = true;
 
 				if(Render)
@@ -307,7 +307,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 			int mx = x;
 			int my = y;
 
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
+			if((RenderFlags & TILERENDERFLAG_EXTEND) != 0)
 			{
 				if(mx < 0)
 					mx = 0;
@@ -333,19 +333,19 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 			int c = mx + my * w;
 
 			unsigned char Index = pTiles[c].m_Index;
-			if(Index)
+			if(Index != 0u)
 			{
 				unsigned char Flags = pTiles[c].m_Flags;
 
 				bool Render = false;
-				if(Flags & TILEFLAG_OPAQUE && Color.a * a > 254.0f / 255.0f)
+				if(((Flags & TILEFLAG_OPAQUE) != 0) && Color.a * a > 254.0f / 255.0f)
 				{
-					if(RenderFlags & LAYERRENDERFLAG_OPAQUE)
+					if((RenderFlags & LAYERRENDERFLAG_OPAQUE) != 0)
 						Render = true;
 				}
 				else
 				{
-					if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+					if((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) != 0)
 						Render = true;
 				}
 
@@ -379,7 +379,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						y3 = y0 + 1;
 					}
 
-					if(Flags & TILEFLAG_VFLIP)
+					if((Flags & TILEFLAG_VFLIP) != 0)
 					{
 						x0 = x2;
 						x1 = x3;
@@ -387,7 +387,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						x3 = x0;
 					}
 
-					if(Flags & TILEFLAG_HFLIP)
+					if((Flags & TILEFLAG_HFLIP) != 0)
 					{
 						y0 = y3;
 						y2 = y1;
@@ -395,7 +395,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						y1 = y0;
 					}
 
-					if(Flags & TILEFLAG_ROTATE)
+					if((Flags & TILEFLAG_ROTATE) != 0)
 					{
 						float Tmp = x0;
 						x0 = x3;
@@ -436,7 +436,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 
 void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha)
 {
-	if(!g_Config.m_ClTextEntities)
+	if(g_Config.m_ClTextEntities == 0)
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -471,7 +471,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Number;
-			if(Index && pTele[c].m_Type != TILE_TELECHECKIN && pTele[c].m_Type != TILE_TELECHECKINEVIL)
+			if((Index != 0u) && pTele[c].m_Type != TILE_TELECHECKIN && pTele[c].m_Type != TILE_TELECHECKINEVIL)
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
@@ -519,7 +519,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
-			if(Force)
+			if(Force != 0)
 			{
 				// draw arrow
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
@@ -532,7 +532,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 				Graphics()->QuadsEnd();
 
-				if(g_Config.m_ClTextEntities)
+				if(g_Config.m_ClTextEntities != 0)
 				{
 					// draw force
 					char aBuf[16];
@@ -540,7 +540,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 					TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-					if(MaxSpeed)
+					if(MaxSpeed != 0)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
@@ -555,7 +555,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha)
 {
-	if(!g_Config.m_ClTextEntities)
+	if(g_Config.m_ClTextEntities == 0)
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -590,7 +590,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			int c = mx + my * w;
 
 			unsigned char Index = pSwitch[c].m_Number;
-			if(Index)
+			if(Index != 0u)
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
@@ -600,7 +600,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
-			if(Delay)
+			if(Delay != 0u)
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
@@ -615,7 +615,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 
 void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha)
 {
-	if(!g_Config.m_ClTextEntities)
+	if(g_Config.m_ClTextEntities == 0)
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -649,7 +649,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			int c = mx + my * w;
 
 			unsigned char Index = pTune[c].m_Number;
-			if(Index)
+			if(Index != 0u)
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
@@ -691,7 +691,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Co
 			int mx = x;
 			int my = y;
 
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
+			if((RenderFlags & TILERENDERFLAG_EXTEND) != 0)
 			{
 				if(mx < 0)
 					mx = 0;
@@ -717,10 +717,10 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Co
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Type;
-			if(Index)
+			if(Index != 0u)
 			{
 				bool Render = false;
-				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+				if((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) != 0)
 					Render = true;
 
 				if(Render)
@@ -783,7 +783,7 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, fl
 			int mx = x;
 			int my = y;
 
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
+			if((RenderFlags & TILERENDERFLAG_EXTEND) != 0)
 			{
 				if(mx < 0)
 					mx = 0;
@@ -809,10 +809,10 @@ void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, fl
 			int c = mx + my * w;
 
 			unsigned char Index = pSpeedupTile[c].m_Type;
-			if(Index)
+			if(Index != 0u)
 			{
 				bool Render = false;
-				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+				if((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) != 0)
 					Render = true;
 
 				if(Render)
@@ -875,7 +875,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 			int mx = x;
 			int my = y;
 
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
+			if((RenderFlags & TILERENDERFLAG_EXTEND) != 0)
 			{
 				if(mx < 0)
 					mx = 0;
@@ -901,7 +901,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 			int c = mx + my * w;
 
 			unsigned char Index = pSwitchTile[c].m_Type;
-			if(Index)
+			if(Index != 0u)
 			{
 				if(Index == TILE_SWITCHTIMEDOPEN)
 					Index = 8;
@@ -909,14 +909,14 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 				unsigned char Flags = pSwitchTile[c].m_Flags;
 
 				bool Render = false;
-				if(Flags & TILEFLAG_OPAQUE)
+				if((Flags & TILEFLAG_OPAQUE) != 0)
 				{
-					if(RenderFlags & LAYERRENDERFLAG_OPAQUE)
+					if((RenderFlags & LAYERRENDERFLAG_OPAQUE) != 0)
 						Render = true;
 				}
 				else
 				{
-					if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+					if((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) != 0)
 						Render = true;
 				}
 
@@ -938,7 +938,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 					float x3 = Nudge + Px0 / TexSize + Frac;
 					float y3 = Nudge + Py1 / TexSize - Frac;
 
-					if(Flags & TILEFLAG_VFLIP)
+					if((Flags & TILEFLAG_VFLIP) != 0)
 					{
 						x0 = x2;
 						x1 = x3;
@@ -946,7 +946,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 						x3 = x0;
 					}
 
-					if(Flags & TILEFLAG_HFLIP)
+					if((Flags & TILEFLAG_HFLIP) != 0)
 					{
 						y0 = y3;
 						y2 = y1;
@@ -954,7 +954,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 						y1 = y0;
 					}
 
-					if(Flags & TILEFLAG_ROTATE)
+					if((Flags & TILEFLAG_ROTATE) != 0)
 					{
 						float Tmp = x0;
 						x0 = x3;
@@ -1008,7 +1008,7 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Co
 			int mx = x;
 			int my = y;
 
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
+			if((RenderFlags & TILERENDERFLAG_EXTEND) != 0)
 			{
 				if(mx < 0)
 					mx = 0;
@@ -1034,10 +1034,10 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Co
 			int c = mx + my * w;
 
 			unsigned char Index = pTune[c].m_Type;
-			if(Index)
+			if(Index != 0u)
 			{
 				bool Render = false;
-				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
+				if((RenderFlags & LAYERRENDERFLAG_TRANSPARENT) != 0)
 					Render = true;
 
 				if(Render)

@@ -20,7 +20,7 @@ void CBroadcast::OnReset()
 
 void CBroadcast::OnRender()
 {
-	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
+	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || (g_Config.m_ClShowBroadcasts == 0))
 		return;
 
 	Graphics()->MapScreen(0, 0, 300 * Graphics()->ScreenAspect(), 300);
@@ -46,7 +46,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 		m_BroadcastRenderOffset = 150 * Graphics()->ScreenAspect() - Cursor.m_X / 2;
 		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
-		if(g_Config.m_ClPrintBroadcasts)
+		if(g_Config.m_ClPrintBroadcasts != 0)
 		{
 			char aBuf[1024];
 			int i, ii;
@@ -56,7 +56,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 				{
 					aBuf[ii] = '\0';
 					ii = 0;
-					if(aBuf[0])
+					if(aBuf[0] != 0)
 						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 				}
 				else
@@ -66,7 +66,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 				}
 			}
 			aBuf[ii] = '\0';
-			if(aBuf[0])
+			if(aBuf[0] != 0)
 				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		}
 	}

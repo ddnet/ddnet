@@ -343,7 +343,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tele = pResult->NumArguments() == 2 ? pResult->GetInteger(0) : pResult->m_ClientID;
-	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientID;
+	int TeleTo = pResult->NumArguments() != 0 ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientID;
 	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientID);
 
 	if(Tele != pResult->m_ClientID && AuthLevel < g_Config.m_SvTeleOthersAuthLevel)
@@ -366,7 +366,7 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 
-	if(!pPlayer || (pPlayer->m_LastKill && pPlayer->m_LastKill + pSelf->Server()->TickSpeed() * g_Config.m_SvKillDelay > pSelf->Server()->Tick()))
+	if(!pPlayer || ((pPlayer->m_LastKill != 0) && pPlayer->m_LastKill + pSelf->Server()->TickSpeed() * g_Config.m_SvKillDelay > pSelf->Server()->Tick()))
 		return;
 
 	pPlayer->m_LastKill = pSelf->Server()->Tick();
@@ -495,7 +495,7 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 		return;
 
 	char aBuf[128];
-	if(pReason[0])
+	if(pReason[0] != 0)
 		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds (%s)", pDisplayName, Secs, pReason);
 	else
 		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds", pDisplayName, Secs);
@@ -571,7 +571,7 @@ void CGameContext::ConVoteMutes(IConsole::IResult *pResult, void *pUserData)
 		"Active vote mutes:");
 	for(int i = 0; i < pSelf->m_NumVoteMutes; i++)
 	{
-		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), 0);
 		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i,
 			aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes", aBuf);
@@ -613,7 +613,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	NETADDR Addr;
-	if(net_addr_from_str(&Addr, pResult->GetString(0)))
+	if(net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 			"Invalid network address to mute");
@@ -633,7 +633,7 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 
 	char aIpBuf[64];
 	char aBuf[64];
-	net_addr_str(&pSelf->m_aMutes[Index].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+	net_addr_str(&pSelf->m_aMutes[Index].m_Addr, aIpBuf, sizeof(aIpBuf), 0);
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 
@@ -659,7 +659,7 @@ void CGameContext::ConUnmuteID(IConsole::IResult *pResult, void *pUserData)
 		{
 			char aIpBuf[64];
 			char aBuf[64];
-			net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+			net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), 0);
 			str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 			pSelf->m_NumMutes--;
@@ -689,7 +689,7 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 		"Active mutes:");
 	for(int i = 0; i < pSelf->m_NumMutes; i++)
 	{
-		net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
+		net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), 0);
 		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left (%s)", i, aIpBuf,
 			(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aMutes[i].m_aReason);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
@@ -743,7 +743,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);
 
-	if((pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
+	if(((pController->m_Teams.m_Core.Team(Target) != 0) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
 		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_GAME);
 
 	pController->m_Teams.SetForceCharacterTeam(Target, Team);

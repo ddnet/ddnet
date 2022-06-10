@@ -9,7 +9,7 @@ const struct _json_value *json_object_get(const json_value *object, const char *
 		return &json_value_none;
 
 	for(i = 0; i < object->u.object.length; ++i)
-		if(!str_comp(object->u.object.values[i].name, index))
+		if(str_comp(object->u.object.values[i].name, index) == 0)
 			return object->u.object.values[i].value;
 
 	return &json_value_none;
@@ -40,7 +40,7 @@ int json_int_get(const json_value *integer)
 
 int json_boolean_get(const json_value *boolean)
 {
-	return boolean->u.boolean != 0;
+	return static_cast<int>(boolean->u.boolean != 0);
 }
 
 static char EscapeJsonChar(char c)
@@ -65,12 +65,12 @@ char *EscapeJson(char *pBuffer, int BufferSize, const char *pString)
 	BufferSize--;
 
 	char *pResult = pBuffer;
-	while(BufferSize && *pString)
+	while((BufferSize != 0) && (*pString != 0))
 	{
 		char c = *pString;
 		pString++;
 		char Escaped = EscapeJsonChar(c);
-		if(Escaped)
+		if(Escaped != 0)
 		{
 			if(BufferSize < 2)
 			{

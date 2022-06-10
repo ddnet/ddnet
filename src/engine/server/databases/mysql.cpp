@@ -192,12 +192,12 @@ void CMysqlConnection::StoreErrorStmt(const char *pContext)
 
 bool CMysqlConnection::PrepareAndExecuteStatement(const char *pStmt)
 {
-	if(mysql_stmt_prepare(m_pStmt.get(), pStmt, str_length(pStmt)))
+	if(mysql_stmt_prepare(m_pStmt.get(), pStmt, str_length(pStmt)) != 0)
 	{
 		StoreErrorStmt("prepare");
 		return true;
 	}
-	if(mysql_stmt_execute(m_pStmt.get()))
+	if(mysql_stmt_execute(m_pStmt.get()) != 0)
 	{
 		StoreErrorStmt("execute");
 		return true;
@@ -250,7 +250,7 @@ bool CMysqlConnection::ConnectImpl()
 			StoreErrorStmt("free_result");
 			dbg_msg("mysql", "can't free last result %s", m_aErrorDetail);
 		}
-		if(!mysql_select_db(&m_Mysql, m_aDatabase))
+		if(mysql_select_db(&m_Mysql, m_aDatabase) == 0)
 		{
 			// Success.
 			return false;
@@ -300,7 +300,7 @@ bool CMysqlConnection::ConnectImpl()
 	}
 
 	// Connect to specific database
-	if(mysql_select_db(&m_Mysql, m_aDatabase))
+	if(mysql_select_db(&m_Mysql, m_aDatabase) != 0)
 	{
 		StoreErrorMysql("select_db");
 		return true;
@@ -340,7 +340,7 @@ void CMysqlConnection::Disconnect()
 
 bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int ErrorSize)
 {
-	if(mysql_stmt_prepare(m_pStmt.get(), pStmt, str_length(pStmt)))
+	if(mysql_stmt_prepare(m_pStmt.get(), pStmt, str_length(pStmt)) != 0)
 	{
 		StoreErrorStmt("prepare");
 		str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -452,7 +452,7 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 			str_copy(pError, m_aErrorDetail, ErrorSize);
 			return true;
 		}
-		if(mysql_stmt_execute(m_pStmt.get()))
+		if(mysql_stmt_execute(m_pStmt.get()) != 0)
 		{
 			StoreErrorStmt("execute");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -483,7 +483,7 @@ bool CMysqlConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSi
 			str_copy(pError, m_aErrorDetail, ErrorSize);
 			return true;
 		}
-		if(mysql_stmt_execute(m_pStmt.get()))
+		if(mysql_stmt_execute(m_pStmt.get()) != 0)
 		{
 			StoreErrorStmt("execute");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -510,7 +510,7 @@ bool CMysqlConnection::IsNull(int Col)
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
 	Bind.error = nullptr;
-	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0) != 0)
 	{
 		StoreErrorStmt("fetch_column:null");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
@@ -534,7 +534,7 @@ float CMysqlConnection::GetFloat(int Col)
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
 	Bind.error = nullptr;
-	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0) != 0)
 	{
 		StoreErrorStmt("fetch_column:float");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
@@ -562,7 +562,7 @@ int CMysqlConnection::GetInt(int Col)
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
 	Bind.error = nullptr;
-	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0) != 0)
 	{
 		StoreErrorStmt("fetch_column:int");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
@@ -590,7 +590,7 @@ int64_t CMysqlConnection::GetInt64(int Col)
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
 	Bind.error = nullptr;
-	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0) != 0)
 	{
 		StoreErrorStmt("fetch_column:int64");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
@@ -624,7 +624,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize)
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
 	Bind.error = &Error;
-	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0) != 0)
 	{
 		StoreErrorStmt("fetch_column:string");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);
@@ -656,7 +656,7 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
 	Bind.error = &Error;
-	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
+	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0) != 0)
 	{
 		StoreErrorStmt("fetch_column:blob");
 		dbg_msg("mysql", "error fetching column %s", m_aErrorDetail);

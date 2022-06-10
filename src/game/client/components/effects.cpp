@@ -43,7 +43,7 @@ void CEffects::AirJump(vec2 Pos)
 	p.m_Pos = Pos + vec2(6.0f, 16.0f);
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 
-	if(g_Config.m_SndGame)
+	if(g_Config.m_SndGame != 0)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, 1.0f, Pos);
 }
 
@@ -152,7 +152,7 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.m_Color = ColorRGBA(0xb5 / 255.0f, 0x50 / 255.0f, 0xcb / 255.0f, 1.0f);
 		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
-	if(g_Config.m_SndGame)
+	if(g_Config.m_SndGame != 0)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
 }
 
@@ -249,7 +249,7 @@ void CEffects::HammerHit(vec2 Pos)
 	p.m_EndSize = 0;
 	p.m_Rot = random_float() * pi * 2;
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
-	if(g_Config.m_SndGame)
+	if(g_Config.m_SndGame != 0)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
 }
 

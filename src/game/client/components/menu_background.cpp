@@ -83,7 +83,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 {
 	CMenuBackground *pSelf = (CMenuBackground *)pUser;
 	const char *pSuffix = str_endswith(pName, ".map");
-	if(IsDir || !pSuffix)
+	if((IsDir != 0) || !pSuffix)
 		return 0;
 	char aFullName[128];
 	char aThemeName[128];
@@ -139,7 +139,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 {
 	CMenuBackground *pSelf = (CMenuBackground *)pUser;
 	const char *pSuffix = str_endswith(pName, ".png");
-	if(IsDir || !pSuffix)
+	if((IsDir != 0) || !pSuffix)
 		return 0;
 
 	auto TimeNow = tw::time_get();
@@ -160,7 +160,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
 			CImageInfo Info;
-			if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+			if(pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType) == 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "failed to load theme icon from %s", pName);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);

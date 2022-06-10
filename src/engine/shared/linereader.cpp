@@ -27,7 +27,7 @@ char *CLineReader::Get()
 
 			if(LineStart > m_BufferSize)
 				Left = 0;
-			if(Left)
+			if(Left != 0u)
 				mem_move(m_aBuffer, &m_aBuffer[LineStart], Left);
 			m_BufferPos = Left;
 
@@ -36,9 +36,9 @@ char *CLineReader::Get()
 			m_BufferSize = Left + Read;
 			LineStart = 0;
 
-			if(!Read)
+			if(Read == 0u)
 			{
-				if(Left)
+				if(Left != 0u)
 				{
 					m_aBuffer[Left] = 0; // return the last line
 					m_BufferPos = Left;

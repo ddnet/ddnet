@@ -103,7 +103,7 @@ bool CStun::CProtocol::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize
 	m_Addr = StunAddr;
 
 	char aStunAddr[NETADDR_MAXSTRSIZE];
-	net_addr_str(&StunAddr, aStunAddr, sizeof(aStunAddr), true);
+	net_addr_str(&StunAddr, aStunAddr, sizeof(aStunAddr), 1);
 	log_debug(IndexToSystem(m_Index), "got address: %s", aStunAddr);
 	return true;
 }

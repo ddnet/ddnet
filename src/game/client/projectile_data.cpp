@@ -48,14 +48,14 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj,
 
 	Result.m_ExtraInfo = true;
 	Result.m_Owner = pProj->m_Data & 255;
-	if(pProj->m_Data & PROJECTILEFLAG_NO_OWNER || Result.m_Owner < 0 || Result.m_Owner >= MAX_CLIENTS)
+	if(((pProj->m_Data & PROJECTILEFLAG_NO_OWNER) != 0) || Result.m_Owner < 0 || Result.m_Owner >= MAX_CLIENTS)
 	{
 		Result.m_Owner = -1;
 	}
 	// PROJECTILEFLAG_BOUNCE_HORIZONTAL, PROJECTILEFLAG_BOUNCE_VERTICAL
 	Result.m_Bouncing = (pProj->m_Data >> 10) & 3;
-	Result.m_Explosive = pProj->m_Data & PROJECTILEFLAG_EXPLOSIVE;
-	Result.m_Freeze = pProj->m_Data & PROJECTILEFLAG_FREEZE;
+	Result.m_Explosive = ((pProj->m_Data & PROJECTILEFLAG_EXPLOSIVE) != 0);
+	Result.m_Freeze = ((pProj->m_Data & PROJECTILEFLAG_FREEZE) != 0);
 	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
 	return Result;
 }

@@ -63,18 +63,18 @@ int CUpdaterFetchTask::OnCompletion(int State)
 	State = CHttpRequest::OnCompletion(State);
 
 	const char *b = 0;
-	for(const char *a = Dest(); *a; a++)
+	for(const char *a = Dest(); *a != 0; a++)
 		if(*a == '/')
 			b = a + 1;
 	b = b ? b : Dest();
-	if(!str_comp(b, "update.json"))
+	if(str_comp(b, "update.json") == 0)
 	{
 		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
 		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
-	else if(!str_comp(b, m_pUpdater->m_aLastFile))
+	else if(str_comp(b, m_pUpdater->m_aLastFile) == 0)
 	{
 		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
@@ -146,16 +146,16 @@ bool CUpdater::MoveFile(const char *pFile)
 	bool Success = true;
 
 #if !defined(CONF_FAMILY_WINDOWS)
-	if(!str_comp_nocase(pFile + len - 4, ".dll"))
+	if(str_comp_nocase(pFile + len - 4, ".dll") == 0)
 		return Success;
 #endif
 
 #if !defined(CONF_PLATFORM_LINUX)
-	if(!str_comp_nocase(pFile + len - 3, ".so"))
+	if(str_comp_nocase(pFile + len - 3, ".so") == 0)
 		return Success;
 #endif
 
-	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf") || !str_comp_nocase(pFile + len - 3, ".so"))
+	if((str_comp_nocase(pFile + len - 4, ".dll") == 0) || (str_comp_nocase(pFile + len - 4, ".ttf") == 0) || (str_comp_nocase(pFile + len - 3, ".so") == 0))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
@@ -206,7 +206,7 @@ bool CUpdater::ReplaceClient()
 	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
 	char aBuf[512];
 	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-	if(system(aBuf))
+	if(system(aBuf) != 0)
 	{
 		dbg_msg("updater", "ERROR: failed to set client executable bit");
 		Success = false;
@@ -230,7 +230,7 @@ bool CUpdater::ReplaceServer()
 	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
 	char aBuf[512];
 	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
-	if(system(aBuf))
+	if(system(aBuf) != 0)
 	{
 		dbg_msg("updater", "ERROR: failed to set server executable bit");
 		Success = false;
@@ -261,11 +261,11 @@ void CUpdater::ParseUpdate()
 		{
 			const json_value *pTemp;
 			const json_value *pCurrent = json_array_get(pVersions, i);
-			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
+			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION) != 0)
 			{
-				if(json_boolean_get(json_object_get(pCurrent, "client")))
+				if(json_boolean_get(json_object_get(pCurrent, "client")) != 0)
 					m_ClientUpdate = true;
-				if(json_boolean_get(json_object_get(pCurrent, "server")))
+				if(json_boolean_get(json_object_get(pCurrent, "server")) != 0)
 					m_ServerUpdate = true;
 				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
 				{
@@ -314,7 +314,7 @@ void CUpdater::PerformUpdate()
 		{
 			const char *pFile = FileJob.first.c_str();
 			size_t len = str_length(pFile);
-			if(!str_comp_nocase(pFile + len - 4, ".dll"))
+			if(str_comp_nocase(pFile + len - 4, ".dll") == 0)
 			{
 #if defined(CONF_FAMILY_WINDOWS)
 				char aBuf[512];
@@ -325,7 +325,7 @@ void CUpdater::PerformUpdate()
 #endif
 				// Ignore DLL downloads on other platforms
 			}
-			else if(!str_comp_nocase(pFile + len - 3, ".so"))
+			else if(str_comp_nocase(pFile + len - 3, ".so") == 0)
 			{
 #if defined(CONF_PLATFORM_LINUX)
 				char aBuf[512];

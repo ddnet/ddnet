@@ -131,7 +131,7 @@ void CPickup::Move()
 	{
 		int Flags;
 		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
+		if(index != 0)
 		{
 			m_IsCoreActive = true;
 			m_Core = Collision()->CpSpeed(index, Flags);

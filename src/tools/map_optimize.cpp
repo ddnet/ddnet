@@ -189,7 +189,7 @@ int main(int argc, const char **argv)
 		else if(Type == MAPITEMTYPE_IMAGE)
 		{
 			CMapItemImage *pImg = (CMapItemImage *)pPtr;
-			if(!pImg->m_External)
+			if(pImg->m_External == 0)
 			{
 				SMapOptimizeItem Item;
 				Item.m_pImage = pImg;

@@ -169,7 +169,7 @@ void CPickup::Snap(int SnappingClient)
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || (GameServer()->m_apPlayers[SnappingClient]->IsPaused() != 0)) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
@@ -187,7 +187,7 @@ void CPickup::Snap(int SnappingClient)
 	else
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pChar->Team()] && !Tick)
+		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pChar->Team()] && (Tick == 0))
 			return;
 	}
 
@@ -223,7 +223,7 @@ void CPickup::Move()
 	{
 		int Flags;
 		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
+		if(index != 0)
 		{
 			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
 		}

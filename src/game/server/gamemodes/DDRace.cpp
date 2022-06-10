@@ -16,7 +16,7 @@
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer), m_Teams(pGameServer), m_pInitResult(nullptr)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	m_pGameType = g_Config.m_SvTestingCommands != 0 ? TEST_TYPE_NAME : GAME_TYPE_NAME;
 
 	InitTeleporter();
 }
@@ -82,7 +82,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 			str_format(aBuf, sizeof(aBuf), "Your team has fewer than %d players, so your team rank won't count", g_Config.m_SvMinTeamSize);
 			GameServer()->SendStartWarning(ClientID, aBuf);
 		}
-		if(g_Config.m_SvResetPickups)
+		if(g_Config.m_SvResetPickups != 0)
 		{
 			pChr->ResetPickups();
 		}
@@ -122,7 +122,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 	// init the player
 	Score()->PlayerData(ClientID)->Reset();
-	pPlayer->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
+	pPlayer->m_Score = Score()->PlayerData(ClientID)->m_BestTime != 0.0f ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead

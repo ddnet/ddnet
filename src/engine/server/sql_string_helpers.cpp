@@ -10,11 +10,11 @@ void sqlstr::FuzzyString(char *pString, int Size)
 
 	for(int i = 0; i < Size; i++)
 	{
-		if(!pString[i])
+		if(pString[i] == 0)
 			break;
 
 		pNewString[OutPos++] = pString[i];
-		if(pString[i] != '\\' && str_utf8_isstart(pString[i + 1]))
+		if(pString[i] != '\\' && (str_utf8_isstart(pString[i + 1]) != 0))
 			pNewString[OutPos++] = '%';
 	}
 

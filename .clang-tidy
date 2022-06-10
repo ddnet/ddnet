@@ -73,7 +73,6 @@ Checks: >
   -readability-function-size,
   -readability-identifier-length,
   -readability-identifier-naming,
-  -readability-implicit-bool-conversion,
   -readability-isolate-declaration,
   -readability-magic-numbers,
   -readability-make-member-function-const,
@@ -85,3 +84,7 @@ Checks: >
   performance-*,
   -performance-no-int-to-ptr,
   portability-*,
+
+CheckOptions:
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: true

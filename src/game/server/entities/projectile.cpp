@@ -44,7 +44,7 @@ CProjectile::CProjectile(
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+	m_BelongsToPracticeTeam = (pOwnerChar != nullptr) && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
 	GameWorld()->InsertEntity(this);
 }
@@ -63,7 +63,7 @@ vec2 CProjectile::GetPos(float Time)
 	switch(m_Type)
 	{
 	case WEAPON_GRENADE:
-		if(!m_TuneZone)
+		if(m_TuneZone == 0)
 		{
 			Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
 			Speed = GameServer()->Tuning()->m_GrenadeSpeed;
@@ -77,7 +77,7 @@ vec2 CProjectile::GetPos(float Time)
 		break;
 
 	case WEAPON_SHOTGUN:
-		if(!m_TuneZone)
+		if(m_TuneZone == 0)
 		{
 			Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
 			Speed = GameServer()->Tuning()->m_ShotgunSpeed;
@@ -91,7 +91,7 @@ vec2 CProjectile::GetPos(float Time)
 		break;
 
 	case WEAPON_GUN:
-		if(!m_TuneZone)
+		if(m_TuneZone == 0)
 		{
 			Curvature = GameServer()->Tuning()->m_GunCurvature;
 			Speed = GameServer()->Tuning()->m_GunSpeed;
@@ -123,7 +123,7 @@ void CProjectile::Tick()
 
 	CCharacter *pTargetChr = 0;
 
-	if(pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit)
+	if(pOwnerChar ? static_cast<int>((pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE)) == 0 : g_Config.m_SvHit != 0)
 		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(m_LifeSpan > -1)
@@ -144,15 +144,15 @@ void CProjectile::Tick()
 	{
 		TeamMask = pOwnerChar->TeamMask();
 	}
-	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath || m_BelongsToPracticeTeam))
+	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || (g_Config.m_SvDestroyBulletsOnDeath != 0) || m_BelongsToPracticeTeam))
 	{
 		m_MarkedForDestroy = true;
 		return;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) == 0 : (g_Config.m_SvHit != 0) || m_Owner == -1 || pTargetChr == pOwnerChar)) || (Collide != 0) || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{
-		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
+		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && (Collide != 0))))))
 		{
 			int Number = 1;
 			if(GameServer()->EmulateBug(BUG_GRENADE_DOUBLEEXPLOSION) && m_LifeSpan == -1)
@@ -203,7 +203,7 @@ void CProjectile::Tick()
 				bool Found;
 				vec2 PossiblePos;
 
-				if(!Collide)
+				if(Collide == 0)
 					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->m_Pos : ColPos, &PossiblePos);
 				else
 					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
@@ -217,7 +217,7 @@ void CProjectile::Tick()
 			}
 		}
 
-		if(Collide && m_Bouncing != 0)
+		if((Collide != 0) && m_Bouncing != 0)
 		{
 			m_StartTick = Server()->Tick();
 			m_Pos = NewPos + (-(m_Direction * 4));
@@ -270,12 +270,12 @@ void CProjectile::Tick()
 
 	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
 	int z;
-	if(g_Config.m_SvOldTeleportWeapons)
+	if(g_Config.m_SvOldTeleportWeapons != 0)
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
 	CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
-	if(z && !pControllerDDRace->m_TeleOuts[z - 1].empty())
+	if((z != 0) && !pControllerDDRace->m_TeleOuts[z - 1].empty())
 	{
 		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size());
 		m_Pos = pControllerDDRace->m_TeleOuts[z - 1][TeleOut];
@@ -321,7 +321,7 @@ void CProjectile::Snap(int SnappingClient)
 	{
 		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
-		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
+		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pSnapChar->Team()] && (Tick == 0)))
 			return;
 	}
 

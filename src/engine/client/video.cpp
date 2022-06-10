@@ -53,7 +53,7 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 	m_ProcessingVideoFrame = 0;
 	m_ProcessingAudioFrame = 0;
 
-	m_HasAudio = g_Config.m_ClVideoSndEnable;
+	m_HasAudio = (g_Config.m_ClVideoSndEnable != 0);
 
 	dbg_assert(ms_pCurrentVideo == 0, "ms_pCurrentVideo is NOT set to NULL while creating a new Video.");
 
@@ -187,7 +187,7 @@ void CVideo::Start()
 	av_dump_format(m_pFormatContext, 0, aWholePath, 1);
 
 	/* open the output file, if needed */
-	if(!(m_pFormat->flags & AVFMT_NOFILE))
+	if((m_pFormat->flags & AVFMT_NOFILE) == 0)
 	{
 		int Ret = avio_open(&m_pFormatContext->pb, aWholePath, AVIO_FLAG_WRITE);
 		if(Ret < 0)
@@ -283,7 +283,7 @@ void CVideo::Stop()
 		CloseStream(&m_AudioStream);
 	//fclose(m_dbgfile);
 
-	if(!(m_pFormat->flags & AVFMT_NOFILE))
+	if((m_pFormat->flags & AVFMT_NOFILE) == 0)
 		avio_closep(&m_pFormatContext->pb);
 
 	if(m_pFormatContext)
@@ -622,7 +622,7 @@ AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t Channel
 	Frame->sample_rate = SampleRate;
 	Frame->nb_samples = NbSamples;
 
-	if(NbSamples)
+	if(NbSamples != 0)
 	{
 		Ret = av_frame_get_buffer(Frame, 0);
 		if(Ret < 0)
@@ -723,7 +723,7 @@ bool CVideo::OpenAudio()
 		return false;
 	}
 
-	if(c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
+	if((c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE) != 0)
 		NbSamples = 10000;
 	else
 		NbSamples = c->frame_size;
@@ -837,7 +837,7 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		if((*ppCodec)->supported_samplerates)
 		{
 			c->sample_rate = (*ppCodec)->supported_samplerates[0];
-			for(int i = 0; (*ppCodec)->supported_samplerates[i]; i++)
+			for(int i = 0; (*ppCodec)->supported_samplerates[i] != 0; i++)
 			{
 				if((*ppCodec)->supported_samplerates[i] == g_Config.m_SndRate)
 				{
@@ -895,7 +895,7 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 	}
 
 	/* Some formats want stream headers to be separate. */
-	if(pOC->oformat->flags & AVFMT_GLOBALHEADER)
+	if((pOC->oformat->flags & AVFMT_GLOBALHEADER) != 0)
 		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
 	return true;
@@ -919,7 +919,7 @@ void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 	do
 	{
 		RetRecv = avcodec_receive_packet(pStream->pEnc, pPacket);
-		if(!RetRecv)
+		if(RetRecv == 0)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
 			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
@@ -936,7 +936,7 @@ void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 			break;
 	} while(true);
 
-	if(RetRecv && RetRecv != AVERROR(EAGAIN))
+	if((RetRecv != 0) && RetRecv != AVERROR(EAGAIN))
 	{
 		dbg_msg("video_recorder", "Error encoding frame, error: %d", RetRecv);
 	}
@@ -963,7 +963,7 @@ void CVideo::FinishFrames(OutputStream *pStream)
 	do
 	{
 		RetRecv = avcodec_receive_packet(pStream->pEnc, pPacket);
-		if(!RetRecv)
+		if(RetRecv == 0)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
 			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
@@ -980,7 +980,7 @@ void CVideo::FinishFrames(OutputStream *pStream)
 			break;
 	} while(true);
 
-	if(RetRecv && RetRecv != AVERROR_EOF)
+	if((RetRecv != 0) && RetRecv != AVERROR_EOF)
 	{
 		dbg_msg("video_recorder", "failed to finish recoding, error: %d", RetRecv);
 	}

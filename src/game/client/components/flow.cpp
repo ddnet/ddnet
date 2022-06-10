@@ -35,7 +35,7 @@ void CFlow::DbgRender()
 			}
 		}
 
-	if(NumItems)
+	if(NumItems != 0)
 		Graphics()->LinesDraw(Array, NumItems);
 	Graphics()->LinesEnd();
 }
