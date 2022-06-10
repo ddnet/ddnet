@@ -26,7 +26,7 @@ void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCusto
 	pSkin->m_ColorFeet = ColorFeet;
 }
 
-void CGhost::GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar)
+void CGhost::GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar)
 {
 	pGhostChar->m_X = pChar->m_X;
 	pGhostChar->m_Y = pChar->m_Y;
@@ -34,7 +34,12 @@ void CGhost::GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Charac
 	pGhostChar->m_VelY = 0;
 	pGhostChar->m_Angle = pChar->m_Angle;
 	pGhostChar->m_Direction = pChar->m_Direction;
-	pGhostChar->m_Weapon = pChar->m_Weapon;
+	int Weapon = pChar->m_Weapon;
+	if(pDDnetChar != nullptr && pDDnetChar->m_FreezeEnd != 0)
+	{
+		Weapon = WEAPON_NINJA;
+	}
+	pGhostChar->m_Weapon = Weapon;
 	pGhostChar->m_HookState = pChar->m_HookState;
 	pGhostChar->m_HookX = pChar->m_HookX;
 	pGhostChar->m_HookY = pChar->m_HookY;
@@ -134,7 +139,7 @@ void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) co
 		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%s.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, aSha256);
 }
 
-void CGhost::AddInfos(const CNetObj_Character *pChar)
+void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar)
 {
 	int NumTicks = m_CurGhost.m_Path.Size();
 
@@ -151,7 +156,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar)
 	}
 
 	CGhostCharacter GhostChar;
-	GetGhostCharacter(&GhostChar, pChar);
+	GetGhostCharacter(&GhostChar, pChar, pDDnetChar);
 	m_CurGhost.m_Path.Add(GhostChar);
 	if(GhostRecorder()->IsRecording())
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, &GhostChar, sizeof(CGhostCharacter));
@@ -279,7 +284,7 @@ void CGhost::OnNewSnapshot()
 			CheckStart();
 
 		if(m_Recording)
-			AddInfos(m_pClient->m_Snap.m_pLocalCharacter);
+			AddInfos(m_pClient->m_Snap.m_pLocalCharacter, (m_pClient->m_Snap.m_LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData) ? &m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_ExtendedData : nullptr);
 	}
 
 	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnect/QuitTime anyway
