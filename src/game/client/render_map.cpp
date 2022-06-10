@@ -512,7 +512,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				Graphics()->SetColor(255.0f, 255.0f, 255.0f, Alpha);
 
 				SelectSprite(SPRITE_SPEEDUP_ARROW);
-				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (3.14159265f / 180.0f));
+				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
 				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
 
 				Graphics()->QuadsEnd();

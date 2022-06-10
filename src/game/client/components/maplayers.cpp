@@ -182,7 +182,7 @@ void FillTmpTileSpeedup(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTe
 	}
 
 	//same as in rotate from Graphics()
-	float Angle = (float)AngleRotate * (3.14159265f / 180.0f);
+	float Angle = (float)AngleRotate * (pi / 180.0f);
 	float c = cosf(Angle);
 	float s = sinf(Angle);
 	float xR, yR;
