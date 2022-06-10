@@ -23,6 +23,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Type = Type;
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
+	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : 0;
@@ -150,12 +151,19 @@ void CLaser::DoBounce()
 
 			const float Distance = distance(m_From, m_Pos);
 			// Prevent infinite bounces
-			if(Distance == 0.0f)
+			if(Distance == 0.0f && m_ZeroEnergyBounceInLastTick)
+			{
 				m_Energy = -1;
+			}
 			else if(!m_TuneZone)
+			{
 				m_Energy -= Distance + GameServer()->Tuning()->m_LaserBounceCost;
+			}
 			else
+			{
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
+			}
+			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
 			CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
 			if(Res == TILE_TELEINWEAPON && !pControllerDDRace->m_TeleOuts[z - 1].empty())
