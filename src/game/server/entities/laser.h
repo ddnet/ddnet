@@ -30,7 +30,7 @@ private:
 	int m_EvalTick;
 	int m_Owner;
 	int m_TeamMask;
-	int m_ZeroEnergyBounceInLastTick;
+	bool m_ZeroEnergyBounceInLastTick;
 
 	// DDRace
 
