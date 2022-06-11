@@ -545,7 +545,7 @@ endif()
 find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
-find_package(Pnglite)
+find_package(PNG)
 find_package(PythonInterp 3)
 find_package(SDL2)
 find_package(SQLite3)
@@ -631,7 +631,7 @@ show_dependency_status("Ogg" OGG)
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
-show_dependency_status("Pnglite" PNGLITE)
+show_dependency_status("PNG" PNG)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL2" SDL2)
 show_dependency_status("SQLite3" SQLite3)
@@ -679,6 +679,9 @@ if(DISCORD_DYNAMIC)
   if(NOT DISCORD)
     message(SEND_ERROR "You must enable the DISCORD flag if you want to link the Discord SDK")
   endif()
+endif()
+if(NOT(PNG_FOUND))
+  message(SEND_ERROR "You must install libpng to compile DDNet")
 endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
   message(SEND_ERROR "You must install Freetype to compile the ${CMAKE_PROJECT_NAME} client")
@@ -1562,6 +1565,7 @@ set(COPY_FILES
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
+  ${PNG_COPY_FILES}
   ${SDL2_COPY_FILES}
   ${SQLite3_COPY_FILES}
   ${FFMPEG_COPY_FILES}
@@ -1755,6 +1759,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   http.h
   huffman.cpp
   huffman.h
+  image_loader.cpp
+  image_loader.h
   image_manipulation.cpp
   image_manipulation.h
   jobs.cpp
@@ -1868,6 +1874,7 @@ set(LIBS
   ${CURL_LIBRARIES}
   ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
+  ${PNG_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
@@ -1877,6 +1884,7 @@ set(LIBS
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
+target_include_directories(engine-shared PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
 
@@ -2102,14 +2110,14 @@ if(CLIENT)
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
-  set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${PNGLITE_DEP} ${WAVPACK_DEP})
+  set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${WAVPACK_DEP})
 
   # Libraries
   set(LIBS_CLIENT
     ${LIBS}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
-    ${PNGLITE_LIBRARIES}
+    ${PNG_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${WAVPACK_LIBRARIES}
     ${FFMPEG_LIBRARIES}
@@ -2185,7 +2193,7 @@ if(CLIENT)
     ${OGG_INCLUDE_DIRS}
     ${OPUSFILE_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
-    ${PNGLITE_INCLUDE_DIRS}
+    ${PNG_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
@@ -2343,6 +2351,7 @@ if(SERVER)
   # Libraries
   set(LIBS_SERVER
     ${LIBS}
+    ${PNG_LIBRARIES}
     ${MYSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
     ${MINIUPNPC_LIBRARIES}
@@ -2361,6 +2370,7 @@ if(SERVER)
     $<TARGET_OBJECTS:game-shared>
   )
   target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+  target_include_directories(${TARGET_SERVER} PRIVATE ${PNG_INCLUDE_DIRS})
   list(APPEND TARGETS_OWN ${TARGET_SERVER})
   list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
@@ -2413,9 +2423,7 @@ if(TOOLS)
       set(TOOL_DEPS ${DEPS})
       set(TOOL_LIBS ${LIBS})
       if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
-        list(APPEND TOOL_DEPS ${PNGLITE_DEP})
-        list(APPEND TOOL_LIBS ${PNGLITE_LIBRARIES})
-        list(APPEND TOOL_INCLUDE_DIRS ${PNGLITE_INCLUDE_DIRS})
+        list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS})
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")

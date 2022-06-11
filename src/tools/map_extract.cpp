@@ -5,7 +5,7 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-#include <pnglite.h>
+#include <engine/shared/image_loader.h>
 
 bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 {
@@ -52,22 +52,15 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 		// copy image data
 		IOHANDLE File = io_open(aBuf, IOFLAG_WRITE);
-		if(!File)
+		if(File)
 		{
-			dbg_msg("map_extract", "failed to open file. filename='%s'", aBuf);
-			continue;
+			TImageByteBuffer ByteBuffer;
+			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+
+			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
+				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
+			io_close(File);
 		}
-		png_t Png;
-		int Error = png_open_write(&Png, 0, File);
-		if(Error != PNG_NO_ERROR)
-		{
-			dbg_msg("map_extract", "failed to write image file. filename='%s', pnglite: %s", aBuf, png_error_string(Error));
-		}
-		else
-		{
-			png_set_data(&Png, pItem->m_Width, pItem->m_Height, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)Reader.GetData(pItem->m_ImageData));
-		}
-		io_close(File);
 	}
 
 	// load sounds
@@ -122,8 +115,6 @@ int main(int argc, const char *argv[])
 		dbg_msg("usage", "directory '%s' does not exist", pDir);
 		return -1;
 	}
-
-	png_init(0, 0);
 
 	int Result = Process(pStorage, argv[1], pDir) ? 0 : 1;
 	return Result;
