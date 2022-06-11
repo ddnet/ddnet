@@ -7,14 +7,9 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <stddef.h>
-
 class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;
-
-	int m_LastX;
-	int m_LastY;
 
 	int m_InputGrabbed;
 	char *m_pClipboardText;
@@ -33,6 +28,8 @@ class CInput : public IEngineInput
 	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
 	int m_InputCounter;
 
+	void UpdateMouseState();
+
 	// IME support
 	int m_NumTextInputInstances;
 	char m_aEditingText[INPUT_TEXT_SIZE];
@@ -45,6 +42,7 @@ class CInput : public IEngineInput
 
 public:
 	CInput();
+	~CInput();
 
 	void Init() override;
 
@@ -52,14 +50,15 @@ public:
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
-	void MouseRelative(float *x, float *y) override;
+	bool MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
-	void NativeMousePos(int *x, int *y) const override;
-	bool NativeMousePressed(int index) override;
+	void NativeMousePos(int *pX, int *pY) const override;
+	bool NativeMousePressed(int Index) override;
 	bool MouseDoubleClick() override;
+
 	const char *GetClipboardText() override;
-	void SetClipboardText(const char *Text) override;
+	void SetClipboardText(const char *pText) override;
 
 	int Update() override;
 

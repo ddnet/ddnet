@@ -1,8 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 #include <game/version.h>
 
@@ -77,7 +75,7 @@ void CDoor::Snap(int SnappingClient)
 		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-		if(Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		if(Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && !Switchers().empty() && Switchers()[m_Number].m_Status[Char->Team()])
 		{
 			pObj->m_FromX = (int)m_To.x;
 			pObj->m_FromY = (int)m_To.y;

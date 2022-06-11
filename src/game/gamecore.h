@@ -3,7 +3,6 @@
 #ifndef GAME_GAMECORE_H
 #define GAME_GAMECORE_H
 
-#include <base/math.h>
 #include <base/system.h>
 
 #include <map>
@@ -13,9 +12,7 @@
 #include "collision.h"
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
-#include <math.h>
 
-#include "mapitems.h"
 #include "prng.h"
 #include "teamscore.h"
 
@@ -177,6 +174,15 @@ enum
 	SHOW_OTHERS_ONLY_TEAM = 2 // show players that are in solo and are in the same team
 };
 
+struct SSwitchers
+{
+	bool m_Status[MAX_CLIENTS];
+	bool m_Initial;
+	int m_EndTick[MAX_CLIENTS];
+	int m_Type[MAX_CLIENTS];
+	int m_LastUpdateTick[MAX_CLIENTS];
+};
+
 class CWorldCore
 {
 public:
@@ -201,6 +207,9 @@ public:
 	CTuningParams m_Tuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
+
+	void InitSwitchers(int HighestSwitchNumber);
+	std::vector<SSwitchers> m_aSwitchers;
 };
 
 class CCharacterCore
@@ -211,10 +220,10 @@ class CCharacterCore
 	std::map<int, std::vector<vec2>> *m_pTeleOuts;
 
 public:
+	static constexpr float PhysicalSize() { return 28.0f; };
+	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); };
 	vec2 m_Pos;
 	vec2 m_Vel;
-	bool m_Hook;
-	bool m_Collision;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;

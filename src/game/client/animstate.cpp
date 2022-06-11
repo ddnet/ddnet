@@ -3,7 +3,6 @@
 
 #include <base/math.h>
 #include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
 #include "animstate.h"
 

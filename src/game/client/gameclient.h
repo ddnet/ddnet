@@ -11,13 +11,9 @@
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
-#include <game/localization.h>
 
 #include <game/teamscore.h>
 
-#include <game/client/prediction/entities/character.h>
-#include <game/client/prediction/entities/laser.h>
-#include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/gameworld.h>
 
 // components
@@ -152,23 +148,8 @@ public:
 	CTooltips m_Tooltips;
 
 private:
-	class CStack
-	{
-	public:
-		enum
-		{
-			MAX_COMPONENTS = 64,
-		};
-
-		CStack();
-		void Add(class CComponent *pComponent);
-
-		class CComponent *m_paComponents[MAX_COMPONENTS];
-		int m_Num;
-	};
-
-	CStack m_All;
-	CStack m_Input;
+	std::vector<class CComponent *> m_vpAll;
+	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
 
 	class IEngine *m_pEngine;
@@ -530,6 +511,9 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
+	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_aSwitchers; }
+	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_aSwitchers; }
+
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientID);
@@ -710,7 +694,6 @@ private:
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
-	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 	int m_SwitchStateTeam[NUM_DUMMIES];
 
 	enum

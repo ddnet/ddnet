@@ -29,9 +29,6 @@ class CCharacter : public CEntity
 	friend class CSaveTee; // need to use core
 
 public:
-	//character's size
-	static const int ms_PhysSize = 28;
-
 	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
 
 	void Reset() override;

@@ -387,5 +387,5 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 
 std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup)
 {
-	return std::unique_ptr<IDbConnection>(new CSqliteConnection(pFilename, Setup));
+	return std::make_unique<CSqliteConnection>(pFilename, Setup);
 }

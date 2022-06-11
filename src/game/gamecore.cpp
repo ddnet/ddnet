@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "gamecore.h"
+#include "mapitems.h"
 
 #include <engine/shared/config.h>
 
@@ -85,8 +86,6 @@ void CCharacterCore::Reset()
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
 	m_TriggeredEvents = 0;
-	m_Hook = true;
-	m_Collision = true;
 
 	// DDNet Character
 	m_Solo = false;
@@ -116,15 +115,14 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput)
 {
-	float PhysSize = 28.0f;
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
 	m_TriggeredEvents = 0;
 
 	// get ground state
 	bool Grounded = false;
-	if(m_pCollision->CheckPoint(m_Pos.x + PhysSize / 2, m_Pos.y + PhysSize / 2 + 5))
+	if(m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
 		Grounded = true;
-	if(m_pCollision->CheckPoint(m_Pos.x - PhysSize / 2, m_Pos.y + PhysSize / 2 + 5))
+	if(m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
 		Grounded = true;
 
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
@@ -196,7 +194,7 @@ void CCharacterCore::Tick(bool UseInput)
 			if(m_HookState == HOOK_IDLE)
 			{
 				m_HookState = HOOK_FLYING;
-				m_HookPos = m_Pos + TargetDirection * PhysSize * 1.5f;
+				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
 				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
@@ -275,7 +273,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// Check against other players first
-		if(this->m_Hook && m_pWorld && m_Tuning.m_PlayerHooking)
+		if(!this->m_NoHookHit && m_pWorld && m_Tuning.m_PlayerHooking)
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -287,7 +285,7 @@ void CCharacterCore::Tick(bool UseInput)
 				vec2 ClosestPoint;
 				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
 				{
-					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize + 2.0f)
+					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysicalSize() + 2.0f)
 					{
 						if(m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
 						{
@@ -322,7 +320,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 				m_NewHook = true;
 				int RandomOut = m_pWorld->RandomOr0((*m_pTeleOuts)[teleNr - 1].size());
-				m_HookPos = (*m_pTeleOuts)[teleNr - 1][RandomOut] + TargetDirection * PhysSize * 1.5f;
+				m_HookPos = (*m_pTeleOuts)[teleNr - 1][RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
 			}
@@ -409,11 +407,11 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				bool CanCollide = (m_Super || pCharCore->m_Super) || (pCharCore->m_Collision && m_Collision && !m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
+				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
 
-				if(CanCollide && Distance < PhysSize * 1.25f && Distance > 0.0f)
+				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
 				{
-					float a = (PhysSize * 1.45f - Distance);
+					float a = (PhysicalSize() * 1.45f - Distance);
 					float Velocity = 0.5f;
 
 					// make sure that we don't add excess force by checking the
@@ -426,9 +424,9 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 
 				// handle hook influence
-				if(m_Hook && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
+				if(!m_NoHookHit && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
 				{
-					if(Distance > PhysSize * 1.50f) // TODO: fix tweakable variable
+					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
 					{
 						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
 						float DragSpeed = m_Tuning.m_HookDragSpeed;
@@ -467,7 +465,7 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(&NewPos, &m_Vel, vec2(28.0f, 28.0f), 0);
+	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(), 0);
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001f && m_Vel.x > -0.001f)
@@ -482,7 +480,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
-	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && m_Collision && !m_NoCollision && !m_Solo)))
+	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_NoCollision && !m_Solo)))
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
@@ -499,10 +497,10 @@ void CCharacterCore::Move()
 					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
 					if(!pCharCore || pCharCore == this)
 						continue;
-					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || !pCharCore->m_Collision || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
 					float D = distance(Pos, pCharCore->m_Pos);
-					if(D < 28.0f && D >= 0.0f)
+					if(D < PhysicalSize() && D >= 0.0f)
 					{
 						if(a > 0.0f)
 							m_Pos = LastPos;
@@ -573,9 +571,6 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
 	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
-
-	m_Hook = !m_NoHookHit;
-	m_Collision = !m_NoCollision;
 
 	// Endless
 	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
@@ -657,8 +652,28 @@ void CCharacterCore::SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts)
 bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
-	if(pThis->Collision()->m_pSwitchers)
+	if(pThis->m_pWorld && !pThis->m_pWorld->m_aSwitchers.empty())
 		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
-			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
+			return pThis->m_pWorld->m_aSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
+}
+
+void CWorldCore::InitSwitchers(int HighestSwitchNumber)
+{
+	if(HighestSwitchNumber > 0)
+		m_aSwitchers.resize(HighestSwitchNumber + 1);
+	else
+		m_aSwitchers.clear();
+
+	for(auto &Switcher : m_aSwitchers)
+	{
+		Switcher.m_Initial = true;
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			Switcher.m_Status[j] = true;
+			Switcher.m_EndTick[j] = 0;
+			Switcher.m_Type[j] = 0;
+			Switcher.m_LastUpdateTick[j] = 0;
+		}
+	}
 }

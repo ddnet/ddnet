@@ -1,15 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/tl/sorted_array.h>
-
 #include <base/math.h>
 
 #include <SDL.h>
 
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 
-#include <game/client/component.h>
 #include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/menus.h>

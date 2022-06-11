@@ -4,7 +4,6 @@
 #define ENGINE_SERVER_SERVER_H
 
 #include <base/hash.h>
-#include <base/math.h>
 
 #include <engine/engine.h>
 #include <engine/server.h>
@@ -20,8 +19,6 @@
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
-
-#include <base/tl/array.h>
 
 #include <list>
 #include <vector>
@@ -168,7 +165,7 @@ public:
 		int m_Latency;
 		int m_SnapRate;
 
-		float m_Traffic;
+		double m_Traffic;
 		int64_t m_TrafficSince;
 
 		int m_LastAckedSnapshot;
@@ -268,7 +265,7 @@ public:
 
 	char m_aErrorShutdownReason[128];
 
-	array<CNameBan> m_aNameBans;
+	std::vector<CNameBan> m_vNameBans;
 
 	CServer();
 	~CServer();

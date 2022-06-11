@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
-#include <base/system.h>
 #include <engine/textrender.h>
 
 #include <chrono>
@@ -192,11 +191,15 @@ struct SLabelProperties
 
 class CUI
 {
+	bool m_Enabled;
+
 	const void *m_pHotItem;
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
 	const void *m_pBecomingHotItem;
 	const void *m_pActiveTooltipItem;
+	bool m_ActiveItemValid = false;
+
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
@@ -208,6 +211,7 @@ class CUI
 	std::vector<CUIRect> m_Clips;
 	void UpdateClipping();
 
+	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
@@ -218,7 +222,8 @@ public:
 	static float ms_FontmodHeight;
 
 	// TODO: Refactor: Fill this in
-	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
+	void Init(class IInput *pInput, class IGraphics *pGraphics, class ITextRender *pTextRender);
+	class IInput *Input() const { return m_pInput; }
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 
@@ -249,7 +254,9 @@ public:
 		CORNER_ALL = CORNER_T | CORNER_B
 	};
 
-	int Update(float mx, float my, float Mwx, float Mwy, int m_Buttons);
+	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
+	bool Enabled() const { return m_Enabled; }
+	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
 	float MouseDeltaY() const { return m_MouseDeltaY; }
@@ -264,17 +271,38 @@ public:
 	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)
 	{
+		m_ActiveItemValid = true;
 		m_pActiveItem = pID;
 		if(pID)
 			m_pLastActiveItem = pID;
 	}
+	bool CheckActiveItem(const void *pID)
+	{
+		if(m_pActiveItem == pID)
+		{
+			m_ActiveItemValid = true;
+			return true;
+		}
+		return false;
+	}
 	void SetActiveTooltipItem(const void *pID) { m_pActiveTooltipItem = pID; }
-	void ClearLastActiveItem() { m_pLastActiveItem = 0; }
+	void ClearLastActiveItem() { m_pLastActiveItem = nullptr; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
 	const void *ActiveTooltipItem() const { return m_pActiveTooltipItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
+
+	void StartCheck() { m_ActiveItemValid = false; }
+	void FinishCheck()
+	{
+		if(!m_ActiveItemValid && m_pActiveItem != nullptr)
+		{
+			SetActiveItem(nullptr);
+			m_pHotItem = nullptr;
+			m_pBecomingHotItem = nullptr;
+		}
+	}
 
 	bool MouseInside(const CUIRect *pRect) const;
 	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }

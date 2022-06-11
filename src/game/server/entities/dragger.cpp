@@ -1,10 +1,8 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include <engine/config.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
 #include <game/version.h>
@@ -64,7 +62,7 @@ void CDragger::LookForPlayersToDrag()
 	mem_zero(pPlayersInRange, sizeof(pPlayersInRange));
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
-		g_Config.m_SvDraggerRange - CCharacter::ms_PhysSize,
+		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),
 		(CEntity **)pPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
@@ -92,7 +90,7 @@ void CDragger::LookForPlayersToDrag()
 		}
 		// If the dragger is disabled for the target's team, no dragger beam will be generated
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[TargetTeam])
+			!Switchers()[m_Number].m_Status[TargetTeam])
 		{
 			continue;
 		}
@@ -141,7 +139,11 @@ void CDragger::LookForPlayersToDrag()
 		// Create Dragger Beams which have not been created yet
 		if(IsTarget[i] && m_apDraggerBeam[i] == nullptr)
 		{
-			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i);
+			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i, m_Layer, m_Number);
+			// The generated dragger beam is placed in the first position in the tick sequence and would therefore
+			// no longer be executed automatically in this tick. To execute the dragger beam nevertheless already
+			// this tick we call it manually (we do this to keep the old game logic)
+			m_apDraggerBeam[i]->Tick();
 		}
 		// Remove dragger beams that have not yet been deleted
 		else if(!IsTarget[i] && m_apDraggerBeam[i] != nullptr)
@@ -209,7 +211,7 @@ void CDragger::Snap(int SnappingClient)
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChar->Team()] && (!Tick))
+			!Switchers()[m_Number].m_Status[pChar->Team()] && !Tick)
 			return;
 	}
 

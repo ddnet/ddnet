@@ -7,14 +7,10 @@
 #include "animstate.h"
 #include "render.h"
 #include <engine/graphics.h>
-#include <engine/map.h>
 #include <engine/shared/config.h>
-#include <game/client/components/skins.h>
-#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
-#include <game/layers.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
@@ -117,6 +113,18 @@ void CRenderTools::DrawSprite(float x, float y, float ScaledWidth, float ScaledH
 {
 	IGraphics::CQuadItem QuadItem(x, y, ScaledWidth, ScaledHeight);
 	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
+void CRenderTools::RenderCursor(vec2 Center, float Size)
+{
+	Graphics()->WrapClamp();
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, Size, Size);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)

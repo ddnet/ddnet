@@ -333,10 +333,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// do the logic
 		const bool Inside = UI()->MouseInside(&SeekBar);
 
-		if(UI()->ActiveItem() == id)
+		if(UI()->CheckActiveItem(id))
 		{
 			if(!UI()->MouseButton(0))
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			else
 			{
 				static float PrevAmount = 0.0f;
@@ -652,7 +652,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 			}
 			else if(KeyEvents)
 			{
@@ -767,7 +767,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_StorageType = StorageType;
-	pSelf->m_lDemos.add_unsorted(Item);
+	pSelf->m_lDemos.push_back(Item);
 
 	if(tw::time_get() - pSelf->m_DemoPopulateStartTime > 500ms)
 	{
@@ -788,7 +788,7 @@ void CMenus::DemolistPopulate()
 	if(g_Config.m_BrDemoFetchInfo)
 		FetchAllHeaders();
 
-	m_lDemos.sort_range();
+	std::stable_sort(m_lDemos.begin(), m_lDemos.end());
 }
 
 void CMenus::DemolistOnUpdate(bool Reset)
@@ -800,11 +800,11 @@ void CMenus::DemolistOnUpdate(bool Reset)
 		bool Found = false;
 		int SelectedIndex = -1;
 		// search for selected index
-		for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
+		for(auto &Item : m_lDemos)
 		{
 			SelectedIndex++;
 
-			if(str_comp(g_Config.m_UiDemoSelected, r.front().m_aName) == 0)
+			if(str_comp(g_Config.m_UiDemoSelected, Item.m_aName) == 0)
 			{
 				Found = true;
 				break;
@@ -815,8 +815,8 @@ void CMenus::DemolistOnUpdate(bool Reset)
 			m_DemolistSelectedIndex = SelectedIndex;
 	}
 
-	m_DemolistSelectedIndex = Reset ? m_lDemos.size() > 0 ? 0 : -1 :
-					  m_DemolistSelectedIndex >= m_lDemos.size() ? m_lDemos.size() - 1 : m_DemolistSelectedIndex;
+	m_DemolistSelectedIndex = Reset ? !m_lDemos.empty() ? 0 : -1 :
+					  m_DemolistSelectedIndex >= (int)m_lDemos.size() ? m_lDemos.size() - 1 : m_DemolistSelectedIndex;
 	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_lDemos[m_DemolistSelectedIndex].m_IsDir;
 }
 
@@ -834,11 +834,11 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 
 void CMenus::FetchAllHeaders()
 {
-	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
+	for(auto &Item : m_lDemos)
 	{
-		FetchHeader(r.front());
+		FetchHeader(Item);
 	}
-	m_lDemos.sort_range();
+	std::stable_sort(m_lDemos.begin(), m_lDemos.end());
 }
 
 void CMenus::RenderDemoList(CUIRect MainView)
@@ -1070,7 +1070,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 
 			// Don't rescan in order to keep fetched headers, just resort
-			m_lDemos.sort_range();
+			std::stable_sort(m_lDemos.begin(), m_lDemos.end());
 			DemolistOnUpdate(false);
 		}
 	}
@@ -1095,13 +1095,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	CUIRect OriginalView = ListBox;
 	int Num = (int)(ListBox.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = maximum(m_lDemos.size() - Num + 1, 0);
+	int ScrollNum = maximum<int>(m_lDemos.size() - Num + 1, 0);
 	ListBox.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int ItemIndex = -1;
 	bool DoubleClicked = false;
 
-	for(sorted_array<CDemoItem>::range r = m_lDemos.all(); !r.empty(); r.pop_front())
+	for(auto &Item : m_lDemos)
 	{
 		ItemIndex++;
 
@@ -1126,10 +1126,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			if(UI()->DoButtonLogic(r.front().m_aName, Selected, &Row))
+			if(UI()->DoButtonLogic(Item.m_aName, Selected, &Row))
 			{
 				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
-				str_copy(g_Config.m_UiDemoSelected, r.front().m_aName, sizeof(g_Config.m_UiDemoSelected));
+				str_copy(g_Config.m_UiDemoSelected, Item.m_aName, sizeof(g_Config.m_UiDemoSelected));
 				DemolistOnUpdate(false);
 				m_DoubleClickIndex = ItemIndex;
 			}
@@ -1152,7 +1152,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			if(ID == COL_ICON)
 			{
-				DoButton_Icon(IMAGE_FILEICONS, r.front().m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &Button);
+				DoButton_Icon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &Button);
 			}
 			else if(ID == COL_DEMONAME)
 			{
@@ -1160,27 +1160,27 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
-				TextRender()->TextEx(&Cursor, r.front().m_aName, -1);
+				TextRender()->TextEx(&Cursor, Item.m_aName, -1);
 			}
-			else if(ID == COL_MARKERS && !r.front().m_IsDir && r.front().m_InfosLoaded)
+			else if(ID == COL_MARKERS && !Item.m_IsDir && Item.m_InfosLoaded)
 			{
 				char aBuf[3];
-				str_format(aBuf, sizeof(aBuf), "%d", r.front().NumMarkers());
+				str_format(aBuf, sizeof(aBuf), "%d", Item.NumMarkers());
 				Button.VMargin(4.0f, &Button);
 				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
-			else if(ID == COL_LENGTH && !r.front().m_IsDir && r.front().m_InfosLoaded)
+			else if(ID == COL_LENGTH && !Item.m_IsDir && Item.m_InfosLoaded)
 			{
-				int Length = r.front().Length();
+				int Length = Item.Length();
 				char aBuf[32];
 				str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 				Button.VMargin(4.0f, &Button);
 				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
-			else if(ID == COL_DATE && !r.front().m_IsDir)
+			else if(ID == COL_DATE && !Item.m_IsDir)
 			{
 				char aBuf[64];
-				str_timestamp_ex(r.front().m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
+				str_timestamp_ex(Item.m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 				Button.VSplitRight(24.0f, &Button, 0);
 				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
@@ -1192,7 +1192,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	bool Activated = false;
 	if(m_EnterPressed || (DoubleClicked && Input()->MouseDoubleClick()))
 	{
-		UI()->SetActiveItem(0);
+		UI()->SetActiveItem(nullptr);
 		Activated = true;
 	}
 
@@ -1238,7 +1238,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 				else
 				{
-					UI()->SetActiveItem(0);
+					UI()->SetActiveItem(nullptr);
 					return;
 				}
 			}
@@ -1264,7 +1264,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_DELETE_DEMO;
 				return;
 			}
@@ -1275,7 +1275,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENAME_DEMO;
 				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;
@@ -1288,7 +1288,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(0);
+				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENDER_DEMO;
 				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;

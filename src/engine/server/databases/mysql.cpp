@@ -713,7 +713,7 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	int Port,
 	bool Setup)
 {
-	return std::unique_ptr<IDbConnection>(new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup));
+	return std::make_unique<CMysqlConnection>(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup);
 }
 #else
 int MysqlInit()

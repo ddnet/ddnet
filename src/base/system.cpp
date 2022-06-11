@@ -13,11 +13,9 @@
 
 #include "system.h"
 
+#include "lock_scope.h"
 #include "logger.h"
 
-#if !defined(CONF_PLATFORM_MACOS)
-#include <base/color.h>
-#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -627,11 +625,8 @@ void aio_write_newline(ASYNCIO *aio)
 
 int aio_error(ASYNCIO *aio)
 {
-	int result;
-	lock_wait(aio->lock);
-	result = aio->error;
-	lock_unlock(aio->lock);
-	return result;
+	CLockScope ls(aio->lock);
+	return aio->error;
 }
 
 void aio_free(ASYNCIO *aio)
@@ -647,23 +642,25 @@ void aio_free(ASYNCIO *aio)
 
 void aio_close(ASYNCIO *aio)
 {
-	lock_wait(aio->lock);
-	aio->finish = ASYNCIO_CLOSE;
-	lock_unlock(aio->lock);
+	{
+		CLockScope ls(aio->lock);
+		aio->finish = ASYNCIO_CLOSE;
+	}
 	sphore_signal(&aio->sphore);
 }
 
 void aio_wait(ASYNCIO *aio)
 {
 	void *thread;
-	lock_wait(aio->lock);
-	thread = aio->thread;
-	aio->thread = 0;
-	if(aio->finish == ASYNCIO_RUNNING)
 	{
-		aio->finish = ASYNCIO_EXIT;
+		CLockScope ls(aio->lock);
+		thread = aio->thread;
+		aio->thread = 0;
+		if(aio->finish == ASYNCIO_RUNNING)
+		{
+			aio->finish = ASYNCIO_EXIT;
+		}
 	}
-	lock_unlock(aio->lock);
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
 }
@@ -1450,11 +1447,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1478,11 +1475,9 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
-
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		int socket = -1;
 		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
@@ -1502,7 +1497,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1527,10 +1521,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	/* set non-blocking */
-	net_set_non_blocking(sock);
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
+	}
+	else
+	{
+		/* set non-blocking */
+		net_set_non_blocking(sock);
 
-	net_buffer_init(&sock->buffer);
+		net_buffer_init(&sock->buffer);
+	}
 
 	/* return */
 	return sock;
@@ -1737,11 +1739,11 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1757,7 +1759,6 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1768,6 +1769,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 		}
+	}
+
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
 	}
 
 	/* return */
@@ -3461,32 +3468,6 @@ int str_utf8_encode(char *ptr, int chr)
 		ptr[1] = 0x80 | ((chr >> 12) & 0x3F);
 		ptr[2] = 0x80 | ((chr >> 6) & 0x3F);
 		ptr[3] = 0x80 | (chr & 0x3F);
-		return 4;
-	}
-
-	return 0;
-}
-
-int str_utf16le_encode(char *ptr, int chr)
-{
-	if(chr < 0x10000)
-	{
-		ptr[0] = chr;
-		ptr[1] = chr >> 0x8;
-		return 2;
-	}
-	else if(chr <= 0x10FFFF)
-	{
-		int U = chr - 0x10000;
-		int W1 = 0xD800, W2 = 0xDC00;
-
-		W1 |= ((U >> 10) & 0x3FF);
-		W2 |= (U & 0x3FF);
-
-		ptr[0] = W1;
-		ptr[1] = W1 >> 0x8;
-		ptr[2] = W2;
-		ptr[3] = W2 >> 0x8;
 		return 4;
 	}
 

@@ -2,10 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/map.h>
-#include <engine/serverbrowser.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <game/client/component.h>
+#include <game/generated/client_data.h>
 #include <game/mapitems.h>
 
 #include <game/layers.h>
@@ -308,10 +307,6 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 							{
 								ValidTile = false;
 							}
-							/*else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE_BLOCKWORLD) && ...)
-							{
-								ValidTile = false;
-							}*/
 						}
 
 						if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)

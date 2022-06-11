@@ -1,11 +1,12 @@
 #include "updater.h"
+#include <base/lock_scope.h>
 #include <base/system.h>
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/storage.h>
-#include <game/version.h>
 
 #include <cstdlib> // system
 
@@ -52,10 +53,9 @@ CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, cons
 
 void CUpdaterFetchTask::OnProgress()
 {
-	lock_wait(m_pUpdater->m_Lock);
+	CLockScope ls(m_pUpdater->m_Lock);
 	str_copy(m_pUpdater->m_aStatus, Dest(), sizeof(m_pUpdater->m_aStatus));
 	m_pUpdater->m_Percent = Progress();
-	lock_unlock(m_pUpdater->m_Lock);
 }
 
 int CUpdaterFetchTask::OnCompletion(int State)
@@ -112,32 +112,26 @@ CUpdater::~CUpdater()
 
 void CUpdater::SetCurrentState(int NewState)
 {
-	lock_wait(m_Lock);
+	CLockScope ls(m_Lock);
 	m_State = NewState;
-	lock_unlock(m_Lock);
 }
 
 int CUpdater::GetCurrentState()
 {
-	lock_wait(m_Lock);
-	int Result = m_State;
-	lock_unlock(m_Lock);
-	return Result;
+	CLockScope ls(m_Lock);
+	return m_State;
 }
 
 void CUpdater::GetCurrentFile(char *pBuf, int BufSize)
 {
-	lock_wait(m_Lock);
+	CLockScope ls(m_Lock);
 	str_copy(pBuf, m_aStatus, BufSize);
-	lock_unlock(m_Lock);
 }
 
 int CUpdater::GetCurrentPercent()
 {
-	lock_wait(m_Lock);
-	int Result = m_Percent;
-	lock_unlock(m_Lock);
-	return Result;
+	CLockScope ls(m_Lock);
+	return m_Percent;
 }
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)

@@ -3,6 +3,7 @@
 #include <base/hash_ctxt.h>
 #include <engine/shared/packer.h>
 
+#include <algorithm>
 #include <cstdio>
 
 static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
@@ -100,44 +101,46 @@ static int GetID(int Index)
 
 void CUuidManager::RegisterName(int ID, const char *pName)
 {
-	int Index = GetIndex(ID);
-	dbg_assert(Index == m_aNames.size(), "names must be registered with increasing ID");
+	dbg_assert(GetIndex(ID) == (int)m_vNames.size(), "names must be registered with increasing ID");
 	CName Name;
 	Name.m_pName = pName;
 	Name.m_Uuid = CalculateUuid(pName);
 	dbg_assert(LookupUuid(Name.m_Uuid) == -1, "duplicate uuid");
 
-	m_aNames.add(Name);
+	m_vNames.push_back(Name);
 
 	CNameIndexed NameIndexed;
 	NameIndexed.m_Uuid = Name.m_Uuid;
 	NameIndexed.m_ID = GetIndex(ID);
-	m_aNamesSorted.add(NameIndexed);
+	m_vNamesSorted.insert(std::lower_bound(m_vNamesSorted.begin(), m_vNamesSorted.end(), NameIndexed), NameIndexed);
 }
 
 CUuid CUuidManager::GetUuid(int ID) const
 {
-	return m_aNames[GetIndex(ID)].m_Uuid;
+	return m_vNames[GetIndex(ID)].m_Uuid;
 }
 
 const char *CUuidManager::GetName(int ID) const
 {
-	return m_aNames[GetIndex(ID)].m_pName;
+	return m_vNames[GetIndex(ID)].m_pName;
 }
 
 int CUuidManager::LookupUuid(CUuid Uuid) const
 {
-	sorted_array<CNameIndexed>::range Pos = ::find_binary(m_aNamesSorted.all(), Uuid);
-	if(!Pos.empty())
+	CNameIndexed Needle;
+	Needle.m_Uuid = Uuid;
+	Needle.m_ID = 0;
+	auto Range = std::equal_range(m_vNamesSorted.begin(), m_vNamesSorted.end(), Needle);
+	if(std::distance(Range.first, Range.second) == 1)
 	{
-		return GetID(Pos.front().m_ID);
+		return GetID(Range.first->m_ID);
 	}
 	return UUID_UNKNOWN;
 }
 
 int CUuidManager::NumUuids() const
 {
-	return m_aNames.size();
+	return m_vNames.size();
 }
 
 int CUuidManager::UnpackUuid(CUnpacker *pUnpacker) const
@@ -165,10 +168,10 @@ void CUuidManager::PackUuid(int ID, CPacker *pPacker) const
 
 void CUuidManager::DebugDump() const
 {
-	for(int i = 0; i < m_aNames.size(); i++)
+	for(const auto &Name : m_vNames)
 	{
 		char aBuf[UUID_MAXSTRSIZE];
-		FormatUuid(m_aNames[i].m_Uuid, aBuf, sizeof(aBuf));
-		dbg_msg("uuid", "%s %s", aBuf, m_aNames[i].m_pName);
+		FormatUuid(Name.m_Uuid, aBuf, sizeof(aBuf));
+		dbg_msg("uuid", "%s %s", aBuf, Name.m_pName);
 	}
 }

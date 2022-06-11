@@ -8,7 +8,6 @@
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-#include <engine/textrender.h>
 
 #include "countryflags.h"
 
@@ -81,15 +80,15 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 		}
-		m_aCountryFlags.add_unsorted(CountryFlag);
+		m_aCountryFlags.push_back(CountryFlag);
 	}
 	io_close(File);
-	m_aCountryFlags.sort_range();
+	std::sort(m_aCountryFlags.begin(), m_aCountryFlags.end());
 
 	// find index of default item
-	int DefaultIndex = 0, Index = 0;
-	for(sorted_array<CCountryFlag>::range r = m_aCountryFlags.all(); !r.empty(); r.pop_front(), ++Index)
-		if(r.front().m_CountryCode == -1)
+	size_t DefaultIndex = 0;
+	for(size_t Index = 0; Index < m_aCountryFlags.size(); ++Index)
+		if(m_aCountryFlags[Index].m_CountryCode == -1)
 		{
 			DefaultIndex = Index;
 			break;
@@ -97,11 +96,11 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 	// init LUT
 	if(DefaultIndex != 0)
-		for(int &CodeIndexLUT : m_CodeIndexLUT)
+		for(size_t &CodeIndexLUT : m_CodeIndexLUT)
 			CodeIndexLUT = DefaultIndex;
 	else
 		mem_zero(m_CodeIndexLUT, sizeof(m_CodeIndexLUT));
-	for(int i = 0; i < m_aCountryFlags.size(); ++i)
+	for(size_t i = 0; i < m_aCountryFlags.size(); ++i)
 		m_CodeIndexLUT[maximum(0, (m_aCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
 }
 
@@ -110,13 +109,13 @@ void CCountryFlags::OnInit()
 	// load country flags
 	m_aCountryFlags.clear();
 	LoadCountryflagsIndexfile();
-	if(!m_aCountryFlags.size())
+	if(m_aCountryFlags.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
 		mem_zero(DummyEntry.m_aCountryCodeString, sizeof(DummyEntry.m_aCountryCodeString));
-		m_aCountryFlags.add(DummyEntry);
+		m_aCountryFlags.push_back(DummyEntry);
 	}
 
 	m_FlagsQuadContainerIndex = Graphics()->CreateQuadContainer(false);
@@ -126,7 +125,7 @@ void CCountryFlags::OnInit()
 	Graphics()->QuadContainerUpload(m_FlagsQuadContainerIndex);
 }
 
-int CCountryFlags::Num() const
+size_t CCountryFlags::Num() const
 {
 	return m_aCountryFlags.size();
 }
@@ -136,9 +135,9 @@ const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCo
 	return GetByIndex(m_CodeIndexLUT[maximum(0, (CountryCode - CODE_LB) % CODE_RANGE)]);
 }
 
-const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(int Index) const
+const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(size_t Index) const
 {
-	return &m_aCountryFlags[maximum(0, Index % m_aCountryFlags.size())];
+	return &m_aCountryFlags[Index % m_aCountryFlags.size()];
 }
 
 void CCountryFlags::Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h)

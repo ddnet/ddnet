@@ -3,7 +3,6 @@
 #ifndef GAME_SERVER_ENTITIES_GUN_H
 #define GAME_SERVER_ENTITIES_GUN_H
 
-#include <game/gamecore.h>
 #include <game/server/entity.h>
 
 /**

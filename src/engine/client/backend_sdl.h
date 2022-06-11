@@ -1,23 +1,17 @@
 #ifndef ENGINE_CLIENT_BACKEND_SDL_H
 #define ENGINE_CLIENT_BACKEND_SDL_H
 
-#include "SDL.h"
+#include <SDL_video.h>
 
 #include <base/detect.h>
 
 #include "engine/graphics.h"
 #include "graphics_defines.h"
-
-#include "blocklist_driver.h"
 #include "graphics_threaded.h"
-
-#include <base/tl/threading.h>
 
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <thread>
-#include <vector>
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <objc/objc-runtime.h>

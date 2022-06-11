@@ -2,6 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CHAT_H
 #define GAME_CLIENT_COMPONENTS_CHAT_H
+#include <vector>
+
+#include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 
@@ -91,15 +94,21 @@ class CChat : public CComponent
 
 	struct CCommand
 	{
-		const char *pName;
-		const char *pParams;
+		const char *m_pName;
+		const char *m_pParams;
 
-		bool operator<(const CCommand &Other) const { return str_comp(pName, Other.pName) < 0; }
-		bool operator<=(const CCommand &Other) const { return str_comp(pName, Other.pName) <= 0; }
-		bool operator==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
+		CCommand() {}
+		CCommand(const char *pName, const char *pParams) :
+			m_pName(pName), m_pParams(pParams)
+		{
+		}
+
+		bool operator<(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) < 0; }
+		bool operator<=(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) <= 0; }
+		bool operator==(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) == 0; }
 	};
 
-	sorted_array<CCommand> m_Commands;
+	std::vector<CCommand> m_Commands;
 	bool m_ReverseTAB;
 
 	struct CHistoryEntry

@@ -5,7 +5,7 @@
 
 #include <engine/storage.h>
 
-#include <stddef.h>
+#include <stdint.h>
 
 class CFileCollection
 {

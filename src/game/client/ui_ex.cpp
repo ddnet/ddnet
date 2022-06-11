@@ -5,7 +5,6 @@
 #include <base/math.h>
 #include <engine/textrender.h>
 
-#include <engine/client/input.h>
 #include <engine/keys.h>
 
 #include <game/client/lineinput.h>
@@ -61,7 +60,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(UI()->MouseButton(0))
 		{
@@ -71,7 +70,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		}
 		else
 		{
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
@@ -108,7 +107,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.w / 2.0f);
 
 	float ColorSlider;
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 		ColorSlider = 0.9f;
 	else if(UI()->HotItem() == pID)
 		ColorSlider = 1.0f;
@@ -141,7 +140,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(UI()->MouseButton(0))
 		{
@@ -151,7 +150,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 		}
 		else
 		{
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
@@ -199,7 +198,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.h / 2.0f);
 
 		float ColorSlider;
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 			ColorSlider = 0.9f;
 		else if(UI()->HotItem() == pID)
 			ColorSlider = 1.0f;
@@ -507,11 +506,11 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
 
 	bool JustGotActive = false;
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)

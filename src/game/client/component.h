@@ -7,14 +7,7 @@
 #include <engine/shared/video.h>
 #endif
 
-#include <base/color.h>
 #include <engine/input.h>
-
-#include <engine/client.h>
-#include <engine/console.h>
-#include <game/localization.h>
-
-#include <engine/config.h>
 
 class CGameClient;
 

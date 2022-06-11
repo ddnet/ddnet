@@ -5,19 +5,15 @@
 
 #include <climits>
 #include <new>
-
-#include <cstdarg>
 #include <tuple>
 
 #include <base/hash_ctxt.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
-#include <base/vmath.h>
 
 #include <game/client/components/menus.h>
-#include <game/client/gameclient.h>
-#include <game/editor/editor.h>
+#include <game/generated/protocol.h>
 
 #include <engine/client.h>
 #include <engine/config.h>
@@ -38,27 +34,24 @@
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/http.h>
-#include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocol_ex.h>
-#include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
 #include <base/system.h>
 
+#include <game/localization.h>
 #include <game/version.h>
 
 #include <engine/client/demoedit.h>
-#include <engine/client/serverbrowser.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
@@ -73,15 +66,11 @@
 #include "video.h"
 #endif
 
-#include <zlib.h>
-
 #include "SDL.h"
 #ifdef main
 #undef main
 #endif
 
-// for android
-#include "SDL_rwops.h"
 #include "base/hash.h"
 
 // for msvc
@@ -591,7 +580,7 @@ void CClient::SendInput()
 			// pack input
 			CMsgPacker Msg(NETMSG_INPUT, true);
 			Msg.AddInt(m_AckGameTick[i]);
-			Msg.AddInt(m_PredTick[i]);
+			Msg.AddInt(m_PredTick[g_Config.m_ClDummy]);
 			Msg.AddInt(Size);
 
 			m_aInputs[i][m_CurrentInput[i]].m_Tick = m_PredTick[g_Config.m_ClDummy];
@@ -633,16 +622,7 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 	}
 
 	if(Best != -1)
-		return (int *)m_aInputs[g_Config.m_ClDummy][Best].m_aData;
-	return 0;
-}
-
-int *CClient::GetDirectInput(int Tick, int IsDummy) const
-{
-	const int d = IsDummy ^ g_Config.m_ClDummy;
-	for(int i = 0; i < 200; i++)
-		if(m_aInputs[d][i].m_Tick == Tick)
-			return (int *)m_aInputs[d][i].m_aData;
+		return (int *)m_aInputs[d][Best].m_aData;
 	return 0;
 }
 
@@ -1744,7 +1724,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
 						m_pMapdownloadTask = HttpGetFile(aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
-						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
+						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -2987,7 +2967,12 @@ void CClient::Run()
 		}
 		for(unsigned int i = 0; i < std::size(m_NetClient); i++)
 		{
-			BindAddr.port = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+			if(PortRef < 1024) // Reject users setting ports that we don't want to use
+			{
+				PortRef = 0;
+			}
+			BindAddr.port = PortRef;
 			while(BindAddr.port == 0 || !m_NetClient[i].Open(BindAddr))
 			{
 				BindAddr.port = (secure_rand() % 64511) + 1024;
@@ -4256,7 +4241,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, 0, 0, "Kick player with specified id for any reason");
 	m_pConsole->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER, 0, 0, "Ban player with ip/id for x minutes for any reason");
 	m_pConsole->Register("unban", "r[ip]", CFGFLAG_SERVER, 0, 0, "Unban ip");
-	m_pConsole->Register("bans", "", CFGFLAG_SERVER, 0, 0, "Show banlist");
+	m_pConsole->Register("bans", "?i[page]", CFGFLAG_SERVER, 0, 0, "Show banlist (page 0 by default, 20 entries per page)");
 	m_pConsole->Register("status", "?r[name]", CFGFLAG_SERVER, 0, 0, "List players containing name or all players");
 	m_pConsole->Register("shutdown", "", CFGFLAG_SERVER, 0, 0, "Shut down");
 	m_pConsole->Register("record", "r[file]", CFGFLAG_SERVER, 0, 0, "Record to a file");
@@ -4372,7 +4357,7 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
 #endif
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -4576,7 +4561,6 @@ int main(int argc, const char **argv)
 
 	delete pKernel;
 
-	cmdline_free(argc, argv);
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
 	std::exit(0);
@@ -4644,7 +4628,7 @@ void CClient::RequestDDNetInfo()
 
 	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
 	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
-	m_pDDNetInfoTask->Timeout(CTimeout{10000, 500, 10});
+	m_pDDNetInfoTask->Timeout(CTimeout{10000, 0, 500, 10});
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
 	Engine()->AddJob(m_pDDNetInfoTask);
 }

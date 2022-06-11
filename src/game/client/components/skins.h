@@ -2,12 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
-#include <base/color.h>
-#include <base/tl/sorted_array.h>
-#include <base/vmath.h>
+
 #include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>
+#include <vector>
 
 class CSkins : public CComponent
 {
@@ -46,8 +45,8 @@ public:
 	int Find(const char *pName);
 
 private:
-	sorted_array<CSkin> m_aSkins;
-	sorted_array<CDownloadSkin> m_aDownloadSkins;
+	std::vector<CSkin> m_aSkins;
+	std::vector<CDownloadSkin> m_aDownloadSkins;
 	char m_EventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);

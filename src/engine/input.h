@@ -57,7 +57,6 @@ public:
 		}
 		return m_aInputEvents[Index];
 	}
-
 	CEvent *GetEventsRaw() { return m_aInputEvents; }
 	int *GetEventCountRaw() { return &m_NumEvents; }
 
@@ -68,17 +67,19 @@ public:
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
 	virtual void Clear() = 0;
 
-	//
-	virtual void NativeMousePos(int *mx, int *my) const = 0;
-	virtual bool NativeMousePressed(int index) = 0;
+	// mouse
+	virtual void NativeMousePos(int *pX, int *pY) const = 0;
+	virtual bool NativeMousePressed(int Index) = 0;
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual bool MouseDoubleClick() = 0;
+	virtual bool MouseRelative(float *pX, float *pY) = 0;
+
+	// clipboard
 	virtual const char *GetClipboardText() = 0;
-	virtual void SetClipboardText(const char *Text) = 0;
+	virtual void SetClipboardText(const char *pText) = 0;
 
-	virtual void MouseRelative(float *x, float *y) = 0;
-
+	// text editing
 	virtual bool GetIMEState() = 0;
 	virtual void SetIMEState(bool Activate) = 0;
 	virtual int GetIMEEditingTextLength() const = 0;

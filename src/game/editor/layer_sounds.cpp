@@ -23,44 +23,42 @@ void CLayerSounds::Render(bool Tileset)
 
 	// draw falloff distance
 	Graphics()->SetColor(0.6f, 0.8f, 1.0f, 0.4f);
-	for(int i = 0; i < m_lSources.size(); i++)
+	for(const auto &Source : m_lSources)
 	{
-		CSoundSource *pSource = &m_lSources[i];
-
 		float OffsetX = 0;
 		float OffsetY = 0;
 
-		if(pSource->m_PosEnv >= 0)
+		if(Source.m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset, pSource->m_PosEnv, aChannels, m_pEditor);
+			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, aChannels, m_pEditor);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 		}
 
-		switch(pSource->m_Shape.m_Type)
+		switch(Source.m_Shape.m_Type)
 		{
 		case CSoundShape::SHAPE_CIRCLE:
 		{
-			m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x) + OffsetX, fx2f(pSource->m_Position.y) + OffsetY,
-				pSource->m_Shape.m_Circle.m_Radius, 32);
+			m_pEditor->RenderTools()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
+				Source.m_Shape.m_Circle.m_Radius, 32);
 
-			float Falloff = ((float)pSource->m_Falloff / 255.0f);
+			float Falloff = ((float)Source.m_Falloff / 255.0f);
 			if(Falloff > 0.0f)
-				m_pEditor->RenderTools()->DrawCircle(fx2f(pSource->m_Position.x) + OffsetX, fx2f(pSource->m_Position.y) + OffsetY,
-					pSource->m_Shape.m_Circle.m_Radius * Falloff, 32);
+				m_pEditor->RenderTools()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
+					Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
 			break;
 		}
 		case CSoundShape::SHAPE_RECTANGLE:
 		{
-			float Width = fx2f(pSource->m_Shape.m_Rectangle.m_Width);
-			float Height = fx2f(pSource->m_Shape.m_Rectangle.m_Height);
-			m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x) + OffsetX - Width / 2, fx2f(pSource->m_Position.y) + OffsetY - Height / 2,
+			float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
+			float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
+			m_pEditor->RenderTools()->DrawRoundRect(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
 				Width, Height, 0.0f);
 
-			float Falloff = ((float)pSource->m_Falloff / 255.0f);
+			float Falloff = ((float)Source.m_Falloff / 255.0f);
 			if(Falloff > 0.0f)
-				m_pEditor->RenderTools()->DrawRoundRect(fx2f(pSource->m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(pSource->m_Position.y) + OffsetY - Falloff * Height / 2,
+				m_pEditor->RenderTools()->DrawRoundRect(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
 					Width * Falloff, Height * Falloff, 0.0f);
 			break;
 		}
@@ -75,22 +73,20 @@ void CLayerSounds::Render(bool Tileset)
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pEditor->RenderTools()->SelectSprite(SPRITE_AUDIO_SOURCE);
-	for(int i = 0; i < m_lSources.size(); i++)
+	for(const auto &Source : m_lSources)
 	{
-		CSoundSource *pSource = &m_lSources[i];
-
 		float OffsetX = 0;
 		float OffsetY = 0;
 
-		if(pSource->m_PosEnv >= 0)
+		if(Source.m_PosEnv >= 0)
 		{
 			float aChannels[4];
-			m_pEditor->EnvelopeEval(pSource->m_PosEnvOffset, pSource->m_PosEnv, aChannels, m_pEditor);
+			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, aChannels, m_pEditor);
 			OffsetX = aChannels[0];
 			OffsetY = aChannels[1];
 		}
 
-		m_pEditor->RenderTools()->DrawSprite(fx2f(pSource->m_Position.x) + OffsetX, fx2f(pSource->m_Position.y) + OffsetY, s_SourceVisualSize * m_pEditor->m_WorldZoom);
+		m_pEditor->RenderTools()->DrawSprite(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY, s_SourceVisualSize * m_pEditor->m_WorldZoom);
 	}
 
 	Graphics()->QuadsEnd();
@@ -100,7 +96,8 @@ CSoundSource *CLayerSounds::NewSource(int x, int y)
 {
 	m_pEditor->m_Map.m_Modified = true;
 
-	CSoundSource *pSource = &m_lSources[m_lSources.add(CSoundSource())];
+	m_lSources.emplace_back();
+	CSoundSource *pSource = &m_lSources[m_lSources.size() - 1];
 
 	pSource->m_Position.x = f2fx(x);
 	pSource->m_Position.y = f2fx(y);
@@ -118,12 +115,6 @@ CSoundSource *CLayerSounds::NewSource(int x, int y)
 
 	pSource->m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
 	pSource->m_Shape.m_Circle.m_Radius = 1500;
-
-	/*
-	pSource->m_Shape.m_Type = CSoundShape::SHAPE_RECTANGLE;
-	pSource->m_Shape.m_Rectangle.m_Width = f2fx(1500.0f);
-	pSource->m_Shape.m_Rectangle.m_Height = f2fx(1000.0f);
-	*/
 
 	return pSource;
 }
@@ -150,38 +141,36 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	pGrabbed->m_Sound = m_Sound;
 	pBrush->AddLayer(pGrabbed);
 
-	for(int i = 0; i < m_lSources.size(); i++)
+	for(const auto &Source : m_lSources)
 	{
-		CSoundSource *pSource = &m_lSources[i];
-		float px = fx2f(pSource->m_Position.x);
-		float py = fx2f(pSource->m_Position.y);
+		float px = fx2f(Source.m_Position.x);
+		float py = fx2f(Source.m_Position.y);
 
 		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
-			CSoundSource n;
-			n = *pSource;
+			CSoundSource n = Source;
 
 			n.m_Position.x -= f2fx(Rect.x);
 			n.m_Position.y -= f2fx(Rect.y);
 
-			pGrabbed->m_lSources.add(n);
+			pGrabbed->m_lSources.push_back(n);
 		}
 	}
 
-	return pGrabbed->m_lSources.size() ? 1 : 0;
+	return pGrabbed->m_lSources.empty() ? 0 : 1;
 }
 
 void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
 {
 	CLayerSounds *l = (CLayerSounds *)pBrush;
-	for(int i = 0; i < l->m_lSources.size(); i++)
+	for(const auto &Source : l->m_lSources)
 	{
-		CSoundSource n = l->m_lSources[i];
+		CSoundSource n = Source;
 
 		n.m_Position.x += f2fx(wx);
 		n.m_Position.y += f2fx(wy);
 
-		m_lSources.add(n);
+		m_lSources.push_back(n);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }
@@ -224,9 +213,9 @@ void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC Func)
 
 void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 {
-	for(int i = 0; i < m_lSources.size(); i++)
+	for(auto &Source : m_lSources)
 	{
-		Func(&m_lSources[i].m_SoundEnv);
-		Func(&m_lSources[i].m_PosEnv);
+		Func(&Source.m_SoundEnv);
+		Func(&Source.m_PosEnv);
 	}
 }

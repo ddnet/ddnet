@@ -4,17 +4,12 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include <game/layers.h>
-
-#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
+#include <game/client/prediction/entities/character.h>
+#include <game/localization.h>
 
-//#include "controls.h"
-//#include "camera.h"
 #include "debughud.h"
 
 void CDebugHud::RenderNetCorrections()
@@ -24,9 +19,6 @@ void CDebugHud::RenderNetCorrections()
 
 	float Width = 300 * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0, 0, Width, 300);
-
-	/*float speed = distance(vec2(netobjects.local_prev_character->x, netobjects.local_prev_character->y),
-		vec2(netobjects.local_character->x, netobjects.local_character->y));*/
 
 	const float TicksPerSecond = 50.0f;
 	float Velspeed = length(vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * TicksPerSecond;

@@ -2,6 +2,8 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#define TW_DILATE_ALPHA_THRESHOLD 10
+
 static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
 {
 	int ix, iy;

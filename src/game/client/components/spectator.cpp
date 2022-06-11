@@ -3,16 +3,15 @@
 
 #include <climits>
 
-#include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
 #include <game/client/render.h>
+#include <game/localization.h>
 
 #include "camera.h"
 #include "spectator.h"
@@ -435,15 +434,7 @@ void CSpectator::OnRender()
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// draw cursor
-	Graphics()->WrapClamp();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x + Width / 2.0f, m_SelectorMouse.y + Height / 2.0f, 48.0f, 48.0f);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-	Graphics()->WrapNormal();
+	RenderTools()->RenderCursor(m_SelectorMouse + vec2(Width, Height) / 2, 48.0f);
 }
 
 void CSpectator::OnReset()

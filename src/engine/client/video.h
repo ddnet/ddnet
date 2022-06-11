@@ -3,18 +3,13 @@
 
 #include <base/system.h>
 
-#include "graphics_defines.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/opt.h>
 #include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 };
 
-#include <engine/shared/demo.h>
 #include <engine/shared/video.h>
 
 #include <atomic>
@@ -50,7 +45,7 @@ public:
 	CVideo(class CGraphics_Threaded *pGraphics, class ISound *pSound, class IStorage *pStorage, class IConsole *pConsole, int width, int height, const char *name);
 	~CVideo();
 
-	void Start() override;
+	void Start() override REQUIRES(!g_WriteLock);
 	void Stop() override;
 	void Pause(bool Pause) override;
 	bool IsRecording() override { return m_Recording; }
@@ -66,11 +61,11 @@ public:
 	static void Init() { av_log_set_level(AV_LOG_DEBUG); }
 
 private:
-	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex);
-	void FillVideoFrame(size_t ThreadIndex);
+	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
+	void FillVideoFrame(size_t ThreadIndex) REQUIRES(!g_WriteLock);
 	void ReadRGBFromGL(size_t ThreadIndex);
 
-	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex);
+	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
 	void FillAudioFrame(size_t ThreadIndex);
 
 	bool OpenVideo();
@@ -143,8 +138,6 @@ private:
 
 	std::atomic<int32_t> m_ProcessingVideoFrame;
 	std::atomic<int32_t> m_ProcessingAudioFrame;
-
-	std::atomic<bool> m_NextFrame;
 
 	bool m_HasAudio;
 

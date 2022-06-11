@@ -2,9 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_LOCALIZATION_H
 #define GAME_LOCALIZATION_H
-#include <base/tl/sorted_array.h>
 
+#include <base/system.h> // GNUC_ATTRIBUTE
 #include <engine/shared/memheap.h>
+#include <vector>
 
 class CLocalizationDatabase
 {
@@ -15,12 +16,18 @@ class CLocalizationDatabase
 		unsigned m_ContextHash;
 		const char *m_pReplacement;
 
+		CString() {}
+		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
+			m_Hash(Hash), m_ContextHash(ContextHash), m_pReplacement(pReplacement)
+		{
+		}
+
 		bool operator<(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash < Other.m_ContextHash); }
 		bool operator<=(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash <= Other.m_ContextHash); }
 		bool operator==(const CString &Other) const { return m_Hash == Other.m_Hash && m_ContextHash == Other.m_ContextHash; }
 	};
 
-	sorted_array<CString> m_Strings;
+	std::vector<CString> m_Strings;
 	CHeap m_StringsHeap;
 	int m_VersionCounter;
 	int m_CurrentVersion;

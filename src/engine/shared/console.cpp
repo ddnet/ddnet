@@ -1,12 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <new>
 
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
-#include <base/vmath.h>
 
 #include <engine/client/checksum.h>
 #include <engine/shared/protocol.h>
@@ -17,6 +15,7 @@
 #include "linereader.h"
 
 #include <array> // std::size
+#include <new>
 
 // todo: rework this
 

@@ -102,6 +102,7 @@ tags
 
 *.a
 *.cmd
+*.csv
 *.dll
 *.dmg
 *.dtb
@@ -109,6 +110,7 @@ tags
 *.exe
 *.fifo
 *.filters
+*.json
 *.lnk
 *.log
 *.opensdf
