@@ -3752,8 +3752,8 @@ public:
 		VKQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		VKQueueCreateInfo.queueFamilyIndex = m_VKGraphicsQueueIndex;
 		VKQueueCreateInfo.queueCount = 1;
-		std::vector<float> vQueuePrio = {1.0f};
-		VKQueueCreateInfo.pQueuePriorities = vQueuePrio.data();
+		float QueuePrio = 1.0f;
+		VKQueueCreateInfo.pQueuePriorities = &QueuePrio;
 		VKQueueCreateInfo.pNext = NULL;
 		VKQueueCreateInfo.flags = 0;
 
