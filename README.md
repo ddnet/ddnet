@@ -34,7 +34,7 @@ Dependencies on Linux / macOS
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
-    sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev libvulkan-dev glslang-tools spirv-tools
+    sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpnglite-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev libvulkan-dev glslang-tools spirv-tools libpng-dev
 
 On older distributions like Ubuntu 18.04 don't install `google-mock`, but instead set `-DDOWNLOAD_GTEST=ON` when building to get a more recent gtest/gmock version.
 
@@ -44,9 +44,7 @@ Or on CentOS, RedHat and AlmaLinux like this:
 
 Or on Arch Linux like this:
 
-    sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools
-
-There is an [AUR package for pnglite](https://aur.archlinux.org/packages/pnglite/). For instructions on installing it, see [AUR packages installation instructions on ArchWiki](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
+    sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools libpng
 
 On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
 
