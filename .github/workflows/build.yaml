@@ -148,7 +148,7 @@ jobs:
         mv chillerbot-ux.exe DDNet.exe || true
     - name: Rename headless client nix
       env: ${{ matrix.env }}
-      if: contains(matrix.os, 'ubuntu')
+      if: contains(matrix.os, 'ubuntu') || contains(matrix.os, 'macOS')
       run: |
         cd headless
         cp chillerbot-ux DDNet
