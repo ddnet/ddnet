@@ -125,6 +125,8 @@ public:
 
 	// DDRace
 
+	void RenderGameTileOutlines(CTile *pTiles, int w, int h, float Scale, int TileType, float Alpha = 1.0f);
+	void RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha = 1.0f);
 	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha = 1.0f);

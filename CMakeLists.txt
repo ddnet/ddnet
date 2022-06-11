@@ -2034,6 +2034,8 @@ if(CLIENT)
     components/nameplates.h
     components/particles.cpp
     components/particles.h
+    components/outlines.cpp
+    components/outlines.h
     components/players.cpp
     components/players.h
     components/race_demo.cpp

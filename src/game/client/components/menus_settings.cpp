@@ -2304,11 +2304,12 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
 	static int s_CurTab = 0;
 
-	CUIRect TabLabel1, TabLabel2, Column,
+	CUIRect TabLabel1, TabLabel2, TabLabel3, Column,
 		Section, SectionTwo;
 
 	MainView.HSplitTop(20, &TabLabel1, &MainView);
 	TabLabel1.VSplitMid(&TabLabel1, &TabLabel2);
+	TabLabel3.VSplitMid(&TabLabel2, &TabLabel3);
 
 	static int s_aPageTabs[2] = {};
 
@@ -2316,6 +2317,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		s_CurTab = 0;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Chat"), s_CurTab == 1, &TabLabel2, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = 1;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Tiles"), s_CurTab == 2, &TabLabel3, 10, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = 2;
 
 	MainView.HSplitTop(10.0f, 0x0, &MainView);
 
@@ -2647,6 +2650,17 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TextRender()->SetCursorPosition(&Cursor, X, Y);
 
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+	else if(s_CurTab == 2) 
+	{
+		MainView.VSplitMid(&MainView, &Column);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, ("Show any enabled outlines"), &g_Config.m_ClOutline, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineEntities, ("Only show outlines in entities"), &g_Config.m_ClOutlineEntities, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, ("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, ("Outline walls"), &g_Config.m_ClOutlineSolid, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, ("Outline teleporter"), &g_Config.m_ClOutlineTele, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, ("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &MainView, LineMargin);
 	}
 }
 

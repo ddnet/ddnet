@@ -435,6 +435,336 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
+void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Scale, int TileType, float Alpha)
+{
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	int StartY = (int)(ScreenY0 / Scale) - 1;
+	int StartX = (int)(ScreenX0 / Scale) - 1;
+	int EndY = (int)(ScreenY1 / Scale) + 1;
+	int EndX = (int)(ScreenX1 / Scale) + 1;
+	int MaxScale = 12;
+	if(EndX - StartX > Graphics()->ScreenWidth() / MaxScale || EndY - StartY > Graphics()->ScreenHeight() / MaxScale)
+	{
+		int EdgeX = (EndX - StartX)-(Graphics()->ScreenWidth() / MaxScale);
+		StartX += EdgeX / 2;
+		EndX -= EdgeX / 2;
+		int EdgeY = (EndY - StartY) - (Graphics()->ScreenHeight() / MaxScale);
+		StartY += EdgeY / 2;
+		EndY -= EdgeY / 2;
+	}
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
+	if (TileType == TILE_FREEZE) {
+		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorFreeze));
+	}
+	else if(TileType == TILE_SOLID)
+	{
+		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorSolid));
+	}
+	else if(TileType == TILE_UNFREEZE)
+	{
+		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorUnfreeze));
+	}
+	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
+
+	for(int y = StartY; y < EndY; y++)
+		for(int x = StartX; x < EndX; x++)
+		{
+			int mx = x;
+			int my = y;
+
+			if(mx < 1)
+				continue; // mx = 0;
+			if(mx >= w - 1)
+				continue; // mx = w-1;
+			if(my < 1)
+				continue; // my = 0;
+			if(my >= h - 1)
+				continue; // my = h-1;
+
+			int c = mx + my * w;
+
+			unsigned char Index = pTiles[c].m_Index;
+			bool IsFreeze = Index == TILE_FREEZE || Index == TILE_DFREEZE;
+			bool IsUnFreeze = Index == TILE_UNFREEZE || Index == TILE_DUNFREEZE;
+			bool IsSolid = Index == TILE_SOLID || Index == TILE_NOHOOK;
+
+			if(!(IsSolid || IsFreeze || IsUnFreeze)) //Not an tile we care about
+				continue;
+			if(IsSolid && !(TileType == TILE_SOLID))
+				continue;
+			if(IsFreeze && !(TileType == TILE_FREEZE))
+				continue;
+			if(IsUnFreeze && !(TileType == TILE_UNFREEZE))
+				continue;
+
+			IGraphics::CQuadItem Array[8];
+			bool Neighbors[8];
+			if(IsFreeze && TileType == TILE_FREEZE)
+			{
+				int IndexN;
+				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
+				Neighbors[0] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
+				Neighbors[1] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
+				Neighbors[2] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
+				Neighbors[3] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
+				Neighbors[4] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
+				Neighbors[5] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
+				Neighbors[6] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
+				Neighbors[7] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
+			}
+			else if(IsSolid && TileType == TILE_SOLID)
+			{
+				int IndexN;
+				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
+				Neighbors[0] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
+				Neighbors[1] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
+				Neighbors[2] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
+				Neighbors[3] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
+				Neighbors[4] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
+				Neighbors[5] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
+				Neighbors[6] = IndexN != TILE_NOHOOK && IndexN != Index;
+				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
+				Neighbors[7] = IndexN != TILE_NOHOOK && IndexN != Index;
+			}
+			else
+			{
+				int IndexN;
+				IndexN = pTiles[(mx - 1) + (my - 1) * w].m_Index;
+				Neighbors[0] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my - 1) * w].m_Index;
+				Neighbors[1] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my - 1) * w].m_Index;
+				Neighbors[2] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 0) * w].m_Index;
+				Neighbors[3] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 0) * w].m_Index;
+				Neighbors[4] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx - 1) + (my + 1) * w].m_Index;
+				Neighbors[5] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 0) + (my + 1) * w].m_Index;
+				Neighbors[6] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+				IndexN = pTiles[(mx + 1) + (my + 1) * w].m_Index;
+				Neighbors[7] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
+			}
+
+
+			float Size = (float)g_Config.m_ClOutlineWidth;
+			int NumQuads = 0;
+
+			//Do lonely corners first
+			if(Neighbors[0] && !Neighbors[1] && !Neighbors[3])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[2] && !Neighbors[1] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[5] && !Neighbors[3] && !Neighbors[6])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[7] && !Neighbors[6] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			//Top
+			if(Neighbors[1])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Scale, Size);
+				NumQuads++;
+			}
+			//Bottom
+			if(Neighbors[6])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Scale, Size);
+				NumQuads++;
+			}
+			//Left
+			if(Neighbors[3])
+			{
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size * 2.0f);
+				NumQuads++;
+			}
+			//Right
+			if(Neighbors[4])
+			{
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size * 2.0f);
+				NumQuads++;
+			}
+
+
+			Graphics()->QuadsDrawTL(Array, NumQuads);
+		}
+	Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, int h, float Scale, float Alpha)
+{
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	int StartY = (int)(ScreenY0 / Scale) - 1;
+	int StartX = (int)(ScreenX0 / Scale) - 1;
+	int EndY = (int)(ScreenY1 / Scale) + 1;
+	int EndX = (int)(ScreenX1 / Scale) + 1;
+
+	int MaxScale = 12;
+	if(EndX - StartX > Graphics()->ScreenWidth() / MaxScale || EndY - StartY > Graphics()->ScreenHeight() / MaxScale)
+	{
+		int EdgeX = (EndX - StartX) - (Graphics()->ScreenWidth() / MaxScale);
+		StartX += EdgeX / 2;
+		EndX -= EdgeX / 2;
+		int EdgeY = (EndY - StartY) - (Graphics()->ScreenHeight() / MaxScale);
+		StartY += EdgeY / 2;
+		EndY -= EdgeY / 2;
+	}
+
+
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorTele));
+	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
+
+	for(int y = StartY; y < EndY; y++)
+		for(int x = StartX; x < EndX; x++)
+		{
+			int mx = x;
+			int my = y;
+
+			if(mx < 1)
+				continue; // mx = 0;
+			if(mx >= w - 1)
+				continue; // mx = w-1;
+			if(my < 1)
+				continue; // my = 0;
+			if(my >= h - 1)
+				continue; // my = h-1;
+
+			int c = mx + my * w;
+
+			unsigned char Index = pTele[c].m_Type;
+			if(!Index)
+				continue;
+			if(!(Index == TILE_TELECHECKINEVIL || Index == TILE_TELEIN || Index == TILE_TELEINEVIL))
+				continue;
+
+			IGraphics::CQuadItem Array[8];
+			bool Neighbors[8];
+			Neighbors[0] = pTiles[(mx - 1) + (my - 1) * w].m_Index == 0 && !pTele[(mx - 1) + (my - 1) * w].m_Number;
+			Neighbors[1] = pTiles[(mx + 0) + (my - 1) * w].m_Index == 0 && !pTele[(mx + 0) + (my - 1) * w].m_Number;
+			Neighbors[2] = pTiles[(mx + 1) + (my - 1) * w].m_Index == 0 && !pTele[(mx + 1) + (my - 1) * w].m_Number;
+			Neighbors[3] = pTiles[(mx - 1) + (my + 0) * w].m_Index == 0 && !pTele[(mx - 1) + (my + 0) * w].m_Number;
+			Neighbors[4] = pTiles[(mx + 1) + (my + 0) * w].m_Index == 0 && !pTele[(mx + 1) + (my + 0) * w].m_Number;
+			Neighbors[5] = pTiles[(mx - 1) + (my + 1) * w].m_Index == 0 && !pTele[(mx - 1) + (my + 1) * w].m_Number;
+			Neighbors[6] = pTiles[(mx + 0) + (my + 1) * w].m_Index == 0 && !pTele[(mx + 0) + (my + 1) * w].m_Number;
+			Neighbors[7] = pTiles[(mx + 1) + (my + 1) * w].m_Index == 0 && !pTele[(mx + 1) + (my + 1) * w].m_Number;
+
+			float Size = (float)g_Config.m_ClOutlineWidth;
+			int NumQuads = 0;
+
+			//Do lonely corners first
+			if(Neighbors[0] && !Neighbors[1] && !Neighbors[3])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[2] && !Neighbors[1] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[5] && !Neighbors[3] && !Neighbors[6])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			if(Neighbors[7] && !Neighbors[6] && !Neighbors[4])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Scale - Size, Size, Size);
+				NumQuads++;
+			}
+			//Top
+			if(Neighbors[1])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Scale, Size);
+				NumQuads++;
+			}
+			//Bottom
+			if(Neighbors[6])
+			{
+				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Scale, Size);
+				NumQuads++;
+			}
+			//Left
+			if(Neighbors[3])
+			{
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size * 2.0f);
+				NumQuads++;
+			}
+			//Right
+			if(Neighbors[4])
+			{
+				if(!Neighbors[1] && !Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale);
+				else if(!Neighbors[6])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size);
+				else if(!Neighbors[1])
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale, Size, Scale - Size);
+				else
+					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Size, Size, Scale - Size * 2.0f);
+				NumQuads++;
+			}
+
+			Graphics()->QuadsDrawTL(Array, NumQuads);
+		}
+	Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
 void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha)
 {
 	if(!g_Config.m_ClTextEntities)

@@ -58,6 +58,7 @@
 #include "components/motd.h"
 #include "components/nameplates.h"
 #include "components/particles.h"
+#include "components/outlines.h"
 #include "components/players.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
@@ -121,6 +122,7 @@ void CGameClient::OnConsoleInit()
 
 	m_All.Add(&m_BackGround); //render instead of m_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&m_MapLayersBackGround); // first to render
+	m_All.Add(&m_Outlines);
 	m_All.Add(&m_Particles.m_RenderTrail);
 	m_All.Add(&m_Items);
 	m_All.Add(&m_Players);
