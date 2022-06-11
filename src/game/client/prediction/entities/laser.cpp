@@ -20,6 +20,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_EvalTick = 0;
 	m_WasTele = false;
 	m_Type = Type;
+	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
@@ -137,10 +138,15 @@ void CLaser::DoBounce()
 
 			const float Distance = distance(m_From, m_Pos);
 			// Prevent infinite bounces
-			if(Distance == 0.0f)
+			if(Distance == 0.0f && m_ZeroEnergyBounceInLastTick)
+			{
 				m_Energy = -1;
+			}
 			else
+			{
 				m_Energy -= Distance + GetTuning(m_TuneZone)->m_LaserBounceCost;
+			}
+			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
 			m_Bounces++;
 			m_WasTele = false;
