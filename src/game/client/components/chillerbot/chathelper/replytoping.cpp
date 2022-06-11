@@ -120,8 +120,9 @@ bool CReplyToPing::WhyWar(const char *pVictim, bool IsCheck)
 			str_format(m_pResponse, m_SizeOfResponse, "%s: the name %s is on my warlist.", m_pMessageAuthor, aVictim);
 		return true;
 	}
-	for(auto &Client : ChatHelper()->GameClient()->m_aClients)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		auto &Client = ChatHelper()->GameClient()->m_aClients[i];
 		if(!Client.m_Active)
 			continue;
 		if(str_comp(Client.m_aName, aVictim))
@@ -130,6 +131,11 @@ bool CReplyToPing::WhyWar(const char *pVictim, bool IsCheck)
 		if(ChatHelper()->GameClient()->m_WarList.IsWarClanlist(Client.m_aClan))
 		{
 			str_format(m_pResponse, m_SizeOfResponse, "%s i war %s because his clan %s is on my warlist.", m_pMessageAuthor, aVictim, Client.m_aClan);
+			return true;
+		}
+		if(ChatHelper()->GameClient()->m_WarList.IsWarClanmate(i))
+		{
+			str_format(m_pResponse, m_SizeOfResponse, "%s i might kill %s because I war member from his clan %s", m_pMessageAuthor, aVictim, Client.m_aClan);
 			return true;
 		}
 	}
@@ -322,6 +328,20 @@ bool CReplyToPing::Reply()
 		{
 			str_format(m_pResponse, m_SizeOfResponse, "%s your clan is on my warlist.", m_pMessageAuthor);
 			return true;
+		}
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			auto &Client = ChatHelper()->GameClient()->m_aClients[i];
+			if(!Client.m_Active)
+				continue;
+			if(str_comp(Client.m_aName, m_pMessageAuthor))
+				continue;
+
+			if(ChatHelper()->GameClient()->m_WarList.IsWarClanmate(i))
+			{
+				str_format(m_pResponse, m_SizeOfResponse, "%s i might kill you because i war member of your clan", m_pMessageAuthor);
+				return true;
+			}
 		}
 	}
 
