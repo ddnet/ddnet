@@ -355,7 +355,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 {
 	int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
 
-	m_vSpriteHelper.resize(w * h * bpp);
+	m_vSpriteHelper.resize((size_t)w * h * bpp);
 
 	CopyTextureFromTextureBufferSub(&m_vSpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
 

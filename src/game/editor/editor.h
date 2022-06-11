@@ -1068,7 +1068,7 @@ public:
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	void DoQuadEnvelopes(const std::vector<CQuad> &m_vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
+	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
 

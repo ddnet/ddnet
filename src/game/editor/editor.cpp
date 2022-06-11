@@ -676,13 +676,13 @@ CLayer *CEditor::GetSelectedLayerType(int Index, int Type) const
 std::vector<CQuad *> CEditor::GetSelectedQuads()
 {
 	CLayerQuads *ql = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-	std::vector<CQuad *> lQuads;
+	std::vector<CQuad *> vpQuads;
 	if(!ql)
-		return lQuads;
-	lQuads.resize(m_vSelectedQuads.size());
+		return vpQuads;
+	vpQuads.resize(m_vSelectedQuads.size());
 	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
-		lQuads[i] = &ql->m_vQuads[m_vSelectedQuads[i]];
-	return lQuads;
+		vpQuads[i] = &ql->m_vQuads[m_vSelectedQuads[i]];
+	return vpQuads;
 }
 
 CSoundSource *CEditor::GetSelectedSource()
@@ -2045,16 +2045,16 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	Graphics()->QuadsEnd();
 }
 
-void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &lQuads, IGraphics::CTextureHandle Texture)
+void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture)
 {
-	size_t Num = lQuads.size();
+	size_t Num = vQuads.size();
 	CEnvelope **apEnvelope = new CEnvelope *[Num];
 	mem_zero(apEnvelope, sizeof(CEnvelope *) * Num); // NOLINT(bugprone-sizeof-expression)
 	for(size_t i = 0; i < Num; i++)
 	{
-		if((m_ShowEnvelopePreview == 1 && lQuads[i].m_PosEnv == m_SelectedEnvelope) || m_ShowEnvelopePreview == 2)
-			if(lQuads[i].m_PosEnv >= 0 && lQuads[i].m_PosEnv < (int)m_Map.m_vpEnvelopes.size())
-				apEnvelope[i] = m_Map.m_vpEnvelopes[lQuads[i].m_PosEnv];
+		if((m_ShowEnvelopePreview == 1 && vQuads[i].m_PosEnv == m_SelectedEnvelope) || m_ShowEnvelopePreview == 2)
+			if(vQuads[i].m_PosEnv >= 0 && vQuads[i].m_PosEnv < (int)m_Map.m_vpEnvelopes.size())
+				apEnvelope[i] = m_Map.m_vpEnvelopes[vQuads[i].m_PosEnv];
 	}
 
 	//Draw Lines
@@ -2067,7 +2067,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &lQuads, IGraphics::CText
 			continue;
 
 		//QuadParams
-		const CPoint *pPoints = lQuads[j].m_aPoints;
+		const CPoint *pPoints = vQuads[j].m_aPoints;
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size() - 1; i++)
 		{
 			float OffsetX = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[0]);
@@ -2095,7 +2095,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &lQuads, IGraphics::CText
 			continue;
 
 		//QuadParams
-		const CPoint *pPoints = lQuads[j].m_aPoints;
+		const CPoint *pPoints = vQuads[j].m_aPoints;
 
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size(); i++)
 		{
@@ -2105,36 +2105,36 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &lQuads, IGraphics::CText
 			float Rot = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[2]) / 360.0f * pi * 2;
 
 			//Set Colours
-			float Alpha = (m_SelectedQuadEnvelope == lQuads[j].m_PosEnv && m_SelectedEnvelopePoint == (int)i) ? 0.65f : 0.35f;
+			float Alpha = (m_SelectedQuadEnvelope == vQuads[j].m_PosEnv && m_SelectedEnvelopePoint == (int)i) ? 0.65f : 0.35f;
 			IGraphics::CColorVertex aArray[4] = {
-				IGraphics::CColorVertex(0, lQuads[j].m_aColors[0].r, lQuads[j].m_aColors[0].g, lQuads[j].m_aColors[0].b, Alpha),
-				IGraphics::CColorVertex(1, lQuads[j].m_aColors[1].r, lQuads[j].m_aColors[1].g, lQuads[j].m_aColors[1].b, Alpha),
-				IGraphics::CColorVertex(2, lQuads[j].m_aColors[2].r, lQuads[j].m_aColors[2].g, lQuads[j].m_aColors[2].b, Alpha),
-				IGraphics::CColorVertex(3, lQuads[j].m_aColors[3].r, lQuads[j].m_aColors[3].g, lQuads[j].m_aColors[3].b, Alpha)};
+				IGraphics::CColorVertex(0, vQuads[j].m_aColors[0].r, vQuads[j].m_aColors[0].g, vQuads[j].m_aColors[0].b, Alpha),
+				IGraphics::CColorVertex(1, vQuads[j].m_aColors[1].r, vQuads[j].m_aColors[1].g, vQuads[j].m_aColors[1].b, Alpha),
+				IGraphics::CColorVertex(2, vQuads[j].m_aColors[2].r, vQuads[j].m_aColors[2].g, vQuads[j].m_aColors[2].b, Alpha),
+				IGraphics::CColorVertex(3, vQuads[j].m_aColors[3].r, vQuads[j].m_aColors[3].g, vQuads[j].m_aColors[3].b, Alpha)};
 			Graphics()->SetColorVertex(aArray, 4);
 
 			//Rotation
 			if(Rot != 0)
 			{
 				static CPoint aRotated[4];
-				aRotated[0] = lQuads[j].m_aPoints[0];
-				aRotated[1] = lQuads[j].m_aPoints[1];
-				aRotated[2] = lQuads[j].m_aPoints[2];
-				aRotated[3] = lQuads[j].m_aPoints[3];
+				aRotated[0] = vQuads[j].m_aPoints[0];
+				aRotated[1] = vQuads[j].m_aPoints[1];
+				aRotated[2] = vQuads[j].m_aPoints[2];
+				aRotated[3] = vQuads[j].m_aPoints[3];
 				pPoints = aRotated;
 
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[0], Rot);
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[1], Rot);
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[2], Rot);
-				Rotate(&lQuads[j].m_aPoints[4], &aRotated[3], Rot);
+				Rotate(&vQuads[j].m_aPoints[4], &aRotated[0], Rot);
+				Rotate(&vQuads[j].m_aPoints[4], &aRotated[1], Rot);
+				Rotate(&vQuads[j].m_aPoints[4], &aRotated[2], Rot);
+				Rotate(&vQuads[j].m_aPoints[4], &aRotated[3], Rot);
 			}
 
 			//Set Texture Coords
 			Graphics()->QuadsSetSubsetFree(
-				fx2f(lQuads[j].m_aTexcoords[0].x), fx2f(lQuads[j].m_aTexcoords[0].y),
-				fx2f(lQuads[j].m_aTexcoords[1].x), fx2f(lQuads[j].m_aTexcoords[1].y),
-				fx2f(lQuads[j].m_aTexcoords[2].x), fx2f(lQuads[j].m_aTexcoords[2].y),
-				fx2f(lQuads[j].m_aTexcoords[3].x), fx2f(lQuads[j].m_aTexcoords[3].y));
+				fx2f(vQuads[j].m_aTexcoords[0].x), fx2f(vQuads[j].m_aTexcoords[0].y),
+				fx2f(vQuads[j].m_aTexcoords[1].x), fx2f(vQuads[j].m_aTexcoords[1].y),
+				fx2f(vQuads[j].m_aTexcoords[2].x), fx2f(vQuads[j].m_aTexcoords[2].y),
+				fx2f(vQuads[j].m_aTexcoords[3].x), fx2f(vQuads[j].m_aTexcoords[3].y));
 
 			//Set Quad Coords & Draw
 			IGraphics::CFreeformItem Freeform(
@@ -2157,7 +2157,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &lQuads, IGraphics::CText
 
 		//QuadParams
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size() - 1; i++)
-			DoQuadEnvPoint(&lQuads[j], j, i);
+			DoQuadEnvPoint(&vQuads[j], j, i);
 	}
 	Graphics()->QuadsEnd();
 	delete[] apEnvelope;
@@ -3954,15 +3954,15 @@ void CEditor::SortImages()
 {
 	if(!std::is_sorted(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), ImageNameLess))
 	{
-		std::vector<CEditorImage *> lTemp = m_Map.m_vpImages;
-		gs_pSortedIndex = new int[lTemp.size()];
+		std::vector<CEditorImage *> vpTemp = m_Map.m_vpImages;
+		gs_pSortedIndex = new int[vpTemp.size()];
 
 		std::sort(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), ImageNameLess);
-		for(size_t OldIndex = 0; OldIndex < lTemp.size(); OldIndex++)
+		for(size_t OldIndex = 0; OldIndex < vpTemp.size(); OldIndex++)
 		{
 			for(size_t NewIndex = 0; NewIndex < m_Map.m_vpImages.size(); NewIndex++)
 			{
-				if(lTemp[OldIndex] == m_Map.m_vpImages[NewIndex])
+				if(vpTemp[OldIndex] == m_Map.m_vpImages[NewIndex])
 				{
 					gs_pSortedIndex[OldIndex] = NewIndex;
 					break;

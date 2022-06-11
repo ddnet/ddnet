@@ -27,7 +27,7 @@ struct CDemoItem
 struct CDemoListParam
 {
 	const CRaceDemo *m_pThis;
-	std::vector<CDemoItem> *m_plDemos;
+	std::vector<CDemoItem> *m_pvDemos;
 	const char *pMap;
 };
 
@@ -219,7 +219,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);
 	if(Item.m_Time > 0)
-		pParam->m_plDemos->push_back(Item);
+		pParam->m_pvDemos->push_back(Item);
 
 	if(tw::time_get() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
 	{
