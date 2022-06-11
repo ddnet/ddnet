@@ -198,6 +198,17 @@ TEST_P(SingleScore, LoadPlayerData)
 	{
 		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], i);
 	}
+
+	str_copy(m_PlayerRequest.m_aRequestingPlayer, "finishless", sizeof(m_PlayerRequest.m_aRequestingPlayer));
+	str_copy(m_PlayerRequest.m_aName, "nameless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));
+	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
+	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
+	for(int i = 0; i < NUM_CHECKPOINTS; i++)
+	{
+		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], i);
+	}
 }
 
 TEST_P(SingleScore, TimesExists)
