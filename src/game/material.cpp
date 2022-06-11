@@ -74,7 +74,7 @@ float CMaterials::GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, in
 	return HandleMaterialInteraction(GroundedLeft, GroundedRight, ms_aMaterials[MaterialLeft].m_GroundJumpImpulse, ms_aMaterials[MaterialRight].m_GroundJumpImpulse, [](float a, float b) { return (a + b) / 2; });
 }
 
-float CMaterials::HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)>& function)
+float CMaterials::HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)> &function)
 {
 	if(GroundedLeft && !GroundedRight) //standing on the left edge
 		return ValueLeft;

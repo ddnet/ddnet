@@ -13,9 +13,9 @@
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
+#include "material.h"
 #include "prng.h"
 #include "teamscore.h"
-#include "material.h"
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
 {
