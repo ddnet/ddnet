@@ -132,11 +132,11 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	// get best race time
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT"
-		"  (SELECT Time FROM %s_race WHERE Map = ? AND Name = ? ORDER BY Time ASC LIMIT 1) AS Time, "
+		"  (SELECT Time FROM %s_race WHERE Map = ? AND Name = ? ORDER BY Time ASC LIMIT 1) AS minTime, "
 		"  cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, "
 		"  cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
 		"  (cp1 + cp2 + cp3 + cp4 + cp5 + cp6 + cp7 + cp8 + cp9 + cp10 + cp11 + cp12 + cp13 + cp14 + "
-		"  cp15 + cp16 + cp17 + cp18 + cp19 + cp20 + cp21 + cp22 + cp23 + cp24 + cp25 > 0) AS hasCP "
+		"  cp15 + cp16 + cp17 + cp18 + cp19 + cp20 + cp21 + cp22 + cp23 + cp24 + cp25 > 0) AS hasCP, Time "
 		"FROM %s_race "
 		"WHERE Map = ? AND Name = ? "
 		"ORDER BY hasCP DESC, Time ASC "
@@ -160,11 +160,14 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	}
 	if(!End)
 	{
-		// get the best time
-		float Time = pSqlServer->GetFloat(1);
-		pResult->m_Data.m_Info.m_Time = Time;
-		pResult->m_Data.m_Info.m_Score = -Time;
-		pResult->m_Data.m_Info.m_HasFinishScore = true;
+		if(!pSqlServer->IsNull(1))
+		{
+			// get the best time
+			float Time = pSqlServer->GetFloat(1);
+			pResult->m_Data.m_Info.m_Time = Time;
+			pResult->m_Data.m_Info.m_Score = -Time;
+			pResult->m_Data.m_Info.m_HasFinishScore = true;
+		}
 
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		{
