@@ -180,7 +180,7 @@ public:
 	bool m_Moderating;
 
 	void UpdatePlaytime();
-	void AfkVoteTimer(CNetObj_PlayerInput *pNewTarget);
+	void AfkTimer();
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;
 	int64_t m_LastBroadcast;

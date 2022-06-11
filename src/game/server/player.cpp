@@ -504,7 +504,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
 		return;
 
-	AfkVoteTimer(NewInput);
+	AfkTimer();
 
 	m_NumInputs++;
 
@@ -526,7 +526,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(NewInput->m_PlayerFlags)
 		Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
 
-	AfkVoteTimer(NewInput);
+	AfkTimer();
 
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
 		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
@@ -695,12 +695,12 @@ void CPlayer::UpdatePlaytime()
 	m_LastPlaytime = time_get();
 }
 
-void CPlayer::AfkVoteTimer(CNetObj_PlayerInput *NewTarget)
+void CPlayer::AfkTimer()
 {
-	if(g_Config.m_SvMaxAfkVoteTime == 0)
+	if(g_Config.m_SvMaxAfkTime == 0)
 		return;
 
-	if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
+	if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
 	{
 		m_Afk = true;
 		return;
