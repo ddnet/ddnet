@@ -278,7 +278,7 @@ class CServerLogger : public ILogger
 {
 	CServer *m_pServer;
 	std::mutex m_PendingLock;
-	std::vector<CLogMessage> m_aPending;
+	std::vector<CLogMessage> m_vPending;
 	std::thread::id m_MainThread;
 
 public:
@@ -298,23 +298,23 @@ void CServerLogger::Log(const CLogMessage *pMessage)
 	m_PendingLock.lock();
 	if(m_MainThread == std::this_thread::get_id())
 	{
-		if(!m_aPending.empty())
+		if(!m_vPending.empty())
 		{
 			if(m_pServer)
 			{
-				for(const auto &Message : m_aPending)
+				for(const auto &Message : m_vPending)
 				{
 					m_pServer->SendLogLine(&Message);
 				}
 			}
-			m_aPending.clear();
+			m_vPending.clear();
 		}
 		m_PendingLock.unlock();
 		m_pServer->SendLogLine(pMessage);
 	}
 	else
 	{
-		m_aPending.push_back(*pMessage);
+		m_vPending.push_back(*pMessage);
 		m_PendingLock.unlock();
 	}
 }

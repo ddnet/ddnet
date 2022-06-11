@@ -53,7 +53,7 @@ public:
 	int GameTickSpeed() { return m_GameTickSpeed; }
 	class CCollision *Collision() { return m_pCollision; }
 	CTeamsCore *Teams() { return &m_Teams; }
-	std::vector<SSwitchers> &Switchers() { return m_Core.m_aSwitchers; }
+	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
 	CTuningParams *Tuning();
 	CEntity *GetEntity(int ID, int EntityType);
 	class CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : 0; }

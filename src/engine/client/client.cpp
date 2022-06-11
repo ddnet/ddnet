@@ -3269,7 +3269,7 @@ void CClient::Run()
 			{
 				// write down the config and quit
 				if(!m_pConfigManager->Save())
-					m_Warnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
+					m_vWarnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
 				s_SavedConfig = true;
 			}
 
@@ -3280,7 +3280,7 @@ void CClient::Run()
 				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
-			if(m_Warnings.empty() && !GameClient()->IsDisplayingWarning())
+			if(m_vWarnings.empty() && !GameClient()->IsDisplayingWarning())
 				break;
 		}
 
@@ -4651,18 +4651,18 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 
 SWarning *CClient::GetCurWarning()
 {
-	if(m_Warnings.empty())
+	if(m_vWarnings.empty())
 	{
 		return NULL;
 	}
-	else if(m_Warnings[0].m_WasShown)
+	else if(m_vWarnings[0].m_WasShown)
 	{
-		m_Warnings.erase(m_Warnings.begin());
+		m_vWarnings.erase(m_vWarnings.begin());
 		return NULL;
 	}
 	else
 	{
-		return &m_Warnings[0];
+		return &m_vWarnings[0];
 	}
 }
 

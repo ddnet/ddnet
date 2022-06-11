@@ -103,7 +103,7 @@ class CMapLayers : public CComponent
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
-	std::vector<STileLayerVisuals *> m_TileLayerVisuals;
+	std::vector<STileLayerVisuals *> m_vpTileLayerVisuals;
 
 	struct SQuadLayerVisuals
 	{
@@ -124,7 +124,7 @@ class CMapLayers : public CComponent
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
-	std::vector<SQuadLayerVisuals *> m_QuadLayerVisuals;
+	std::vector<SQuadLayerVisuals *> m_vpQuadLayerVisuals;
 
 	virtual class CCamera *GetCurCamera();
 

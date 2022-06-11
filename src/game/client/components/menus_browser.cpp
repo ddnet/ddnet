@@ -214,7 +214,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	m_SelectedIndex = -1;
 
 	// reset friend counter
-	for(auto &Friend : m_lFriends)
+	for(auto &Friend : m_vFriends)
 		Friend.m_NumFound = 0;
 
 	auto RenderBrowserIcons = [this](CUIElement::SUIElementRect &UIRect, CUIRect *pRect, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, const char *pText, ETextAlignment TextAlign, bool SmallFont = false) {
@@ -262,7 +262,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					unsigned NameHash = str_quickhash(pItem->m_aClients[j].m_aName);
 					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
-					for(auto &Friend : m_lFriends)
+					for(auto &Friend : m_vFriends)
 					{
 						if(((g_Config.m_ClFriendsIgnoreClan && Friend.m_pFriendInfo->m_aName[0]) || (ClanHash == Friend.m_pFriendInfo->m_ClanHash && !str_comp(Friend.m_pFriendInfo->m_aClan, pItem->m_aClients[j].m_aClan))) &&
 							(!Friend.m_pFriendInfo->m_aName[0] || (NameHash == Friend.m_pFriendInfo->m_NameHash && !str_comp(Friend.m_pFriendInfo->m_aName, pItem->m_aClients[j].m_aName))))
@@ -1241,10 +1241,10 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 void CMenus::FriendlistOnUpdate()
 {
-	m_lFriends.clear();
+	m_vFriends.clear();
 	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
-		m_lFriends.emplace_back(m_pClient->Friends()->GetFriend(i));
-	std::sort(m_lFriends.begin(), m_lFriends.end());
+		m_vFriends.emplace_back(m_pClient->Friends()->GetFriend(i));
+	std::sort(m_vFriends.begin(), m_vFriends.end());
 }
 
 void CMenus::RenderServerbrowserFriends(CUIRect View)
@@ -1274,12 +1274,12 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// friends list(remove friend)
 	static float s_ScrollValue = 0;
-	if(m_FriendlistSelectedIndex >= (int)m_lFriends.size())
-		m_FriendlistSelectedIndex = m_lFriends.size() - 1;
-	UiDoListboxStart(&m_lFriends, &List, 30.0f, "", "", m_lFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
+	if(m_FriendlistSelectedIndex >= (int)m_vFriends.size())
+		m_FriendlistSelectedIndex = m_vFriends.size() - 1;
+	UiDoListboxStart(&m_vFriends, &List, 30.0f, "", "", m_vFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
 
-	std::sort(m_lFriends.begin(), m_lFriends.end());
-	for(auto &Friend : m_lFriends)
+	std::sort(m_vFriends.begin(), m_vFriends.end());
+	for(auto &Friend : m_vFriends)
 	{
 		CListboxItem Item = UiDoListboxNextItem(&Friend.m_NumFound, false, false);
 
@@ -1308,7 +1308,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_FriendlistSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
 
 	// activate found server with friend
-	if(Activated && !m_EnterPressed && m_lFriends[m_FriendlistSelectedIndex].m_NumFound)
+	if(Activated && !m_EnterPressed && m_vFriends[m_FriendlistSelectedIndex].m_NumFound)
 	{
 		bool Found = false;
 		int NumServers = ServerBrowser()->NumSortedServers();
@@ -1321,9 +1321,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				for(int j = 0; j < pItem->m_NumReceivedClients && !Found; ++j)
 				{
 					if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO &&
-						((g_Config.m_ClFriendsIgnoreClan && m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
-						(!m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
-							str_quickhash(pItem->m_aClients[j].m_aName) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
+						((g_Config.m_ClFriendsIgnoreClan && m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
+						(!m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
+							str_quickhash(pItem->m_aClients[j].m_aName) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
 						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 						m_ScrollOffset = ItemIndex;

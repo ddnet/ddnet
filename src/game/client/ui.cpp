@@ -14,13 +14,13 @@ void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
 	pUI->AddUIElement(this);
 	if(RequestedRectCount > 0)
-		m_UIRects.resize(RequestedRectCount);
+		m_vUIRects.resize(RequestedRectCount);
 }
 
 void CUIElement::InitRects(int RequestedRectCount)
 {
-	dbg_assert(m_UIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
-	m_UIRects.resize(RequestedRectCount);
+	dbg_assert(m_vUIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
+	m_vUIRects.resize(RequestedRectCount);
 }
 
 CUIElement::SUIElementRect::SUIElementRect() { Reset(); }
@@ -78,30 +78,30 @@ CUI::CUI()
 
 CUI::~CUI()
 {
-	for(CUIElement *&pEl : m_OwnUIElements)
+	for(CUIElement *&pEl : m_vpOwnUIElements)
 	{
 		delete pEl;
 	}
-	m_OwnUIElements.clear();
+	m_vpOwnUIElements.clear();
 }
 
 CUIElement *CUI::GetNewUIElement(int RequestedRectCount)
 {
 	CUIElement *pNewEl = new CUIElement(this, RequestedRectCount);
 
-	m_OwnUIElements.push_back(pNewEl);
+	m_vpOwnUIElements.push_back(pNewEl);
 
 	return pNewEl;
 }
 
 void CUI::AddUIElement(CUIElement *pElement)
 {
-	m_UIElements.push_back(pElement);
+	m_vpUIElements.push_back(pElement);
 }
 
 void CUI::ResetUIElement(CUIElement &UIElement)
 {
-	for(CUIElement::SUIElementRect &Rect : UIElement.m_UIRects)
+	for(CUIElement::SUIElementRect &Rect : UIElement.m_vUIRects)
 	{
 		if(Rect.m_UIRectQuadContainer != -1)
 			Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
@@ -116,7 +116,7 @@ void CUI::ResetUIElement(CUIElement &UIElement)
 
 void CUI::OnElementsReset()
 {
-	for(CUIElement *pEl : m_UIElements)
+	for(CUIElement *pEl : m_vpUIElements)
 	{
 		ResetUIElement(*pEl);
 	}
@@ -230,11 +230,11 @@ void CUI::ClipEnable(const CUIRect *pRect)
 		Intersection.y = std::max(pRect->y, pOldRect->y);
 		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - pRect->x;
 		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - pRect->y;
-		m_Clips.push_back(Intersection);
+		m_vClips.push_back(Intersection);
 	}
 	else
 	{
-		m_Clips.push_back(*pRect);
+		m_vClips.push_back(*pRect);
 	}
 	UpdateClipping();
 }
@@ -242,14 +242,14 @@ void CUI::ClipEnable(const CUIRect *pRect)
 void CUI::ClipDisable()
 {
 	dbg_assert(IsClipped(), "no clip region");
-	m_Clips.pop_back();
+	m_vClips.pop_back();
 	UpdateClipping();
 }
 
 const CUIRect *CUI::ClipArea() const
 {
 	dbg_assert(IsClipped(), "no clip region");
-	return &m_Clips.back();
+	return &m_vClips.back();
 }
 
 void CUI::UpdateClipping()

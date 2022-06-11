@@ -42,7 +42,7 @@ public:
 
 		char m_aName[256];
 		int m_FlagID;
-		NETADDR m_aServers[MAX_SERVERS];
+		NETADDR m_vServers[MAX_SERVERS];
 		char m_aTypes[MAX_SERVERS][32];
 		int m_NumServers;
 
@@ -55,7 +55,7 @@ public:
 		/*void Add(NETADDR Addr, char* pType) {
 			if (m_NumServers < MAX_SERVERS)
 			{
-				m_aServers[m_NumServers] = Addr;
+				m_vServers[m_NumServers] = Addr;
 				str_copy(m_aTypes[m_NumServers], pType, sizeof(m_aTypes[0]));
 				m_NumServers++;
 			}

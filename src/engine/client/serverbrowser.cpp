@@ -573,7 +573,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
-				if(net_addr_comp(&Addr, &pCntr->m_aServers[j]) == 0)
+				if(net_addr_comp(&Addr, &pCntr->m_vServers[j]) == 0)
 				{
 					pEntry->m_Info.m_Official = true;
 					break;
@@ -1016,7 +1016,7 @@ void CServerBrowser::UpdateFromHttp()
 
 					if(DDNetFiltered(pExcludeTypes, pCntr->m_aTypes[g]))
 						continue;
-					aWantedAddresses.push_back(CWantedAddr{pCntr->m_aServers[g], false, false});
+					aWantedAddresses.push_back(CWantedAddr{pCntr->m_vServers[g], false, false});
 				}
 			}
 		}
@@ -1415,7 +1415,7 @@ void CServerBrowser::LoadDDNetServers()
 						continue;
 					}
 					const char *pStr = json_string_get(pAddr);
-					net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
+					net_addr_from_str(&pCntr->m_vServers[pCntr->m_NumServers], pStr);
 					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
 				}
 			}
@@ -1434,7 +1434,7 @@ void CServerBrowser::RecheckOfficial()
 			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
-				CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+				CServerEntry *pEntry = Find(pCntr->m_vServers[j]);
 				if(pEntry)
 				{
 					pEntry->m_Info.m_Official = true;
@@ -1538,7 +1538,7 @@ const char *CServerBrowser::GetTutorialServer()
 		CNetworkCountry *pCntr = &pNetwork->m_aCountries[i];
 		for(int j = 0; j < pCntr->m_NumServers; j++)
 		{
-			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
+			CServerEntry *pEntry = Find(pCntr->m_vServers[j]);
 			if(!pEntry)
 				continue;
 			if(str_find(pEntry->m_Info.m_aName, "(Tutorial)") == 0)

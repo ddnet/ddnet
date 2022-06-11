@@ -27,7 +27,7 @@ class CLocalizationDatabase
 		bool operator==(const CString &Other) const { return m_Hash == Other.m_Hash && m_ContextHash == Other.m_ContextHash; }
 	};
 
-	std::vector<CString> m_Strings;
+	std::vector<CString> m_vStrings;
 	CHeap m_StringsHeap;
 	int m_VersionCounter;
 	int m_CurrentVersion;

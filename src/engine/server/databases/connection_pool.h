@@ -69,7 +69,7 @@ public:
 	void OnShutdown();
 
 private:
-	std::vector<std::unique_ptr<IDbConnection>> m_aapDbConnections[NUM_MODES];
+	std::vector<std::unique_ptr<IDbConnection>> m_vvpDbConnections[NUM_MODES];
 
 	static void Worker(void *pUser);
 	void Worker();

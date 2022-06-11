@@ -209,7 +209,7 @@ public:
 	CPrng *m_pPrng;
 
 	void InitSwitchers(int HighestSwitchNumber);
-	std::vector<SSwitchers> m_aSwitchers;
+	std::vector<SSwitchers> m_vSwitchers;
 };
 
 class CCharacterCore
