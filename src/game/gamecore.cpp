@@ -5,8 +5,6 @@
 
 #include <engine/shared/config.h>
 
-
-
 float HermiteBasis1(float v)
 {
 	return 2 * v * v * v - 3 * v * v + 1;

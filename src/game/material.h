@@ -6,8 +6,8 @@
 #define DDNET_MATERIAL_H
 
 #include <base/system.h>
-#include <vector>
 #include <functional>
+#include <vector>
 
 class CTuneParam
 {
@@ -74,17 +74,18 @@ class CMaterials
 {
 public:
 	CMaterials() = default;
-	CMatDefault& operator [](int Index) const;
-	CMatDefault* Tuning() { return const_cast<CMatDefault *>(&ms_aMaterials[0]); }
+	CMatDefault &operator[](int Index) const;
+	CMatDefault *Tuning() { return const_cast<CMatDefault *>(&ms_aMaterials[0]); }
 
 	//multi material interactions (ground)
 	float GetGroundControlSpeed(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 	float GetGroundControlAccel(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 	float GetGroundFriction(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 	float GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
+
 private:
-	float HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, std::function<float(float, float)> function);
-	static const inline std::vector<CMatDefault> ms_aMaterials {
+	float HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)>& function);
+	static const inline std::vector<CMatDefault> ms_aMaterials{
 		CMatDefault(),
 		CMatPlaceholder(),
 	};
