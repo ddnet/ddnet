@@ -84,7 +84,7 @@ public:
 	float GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 
 private:
-	float HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)>& function);
+	float HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)> &function);
 	static const inline std::vector<CMatDefault> ms_aMaterials{
 		CMatDefault(),
 		CMatPlaceholder(),
