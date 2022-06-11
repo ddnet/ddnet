@@ -999,12 +999,12 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 			{
 				View.HSplitTop(Spacing, 0, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
-				UIEx()->DoScrollbarOption(&g_Config.m_InpJoystickSens, &g_Config.m_InpJoystickSens, &Button, Localize("Ingame joystick sensitivity"), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale);
+				UIEx()->DoScrollbarOption(&g_Config.m_InpJoystickSens, &g_Config.m_InpJoystickSens, &Button, Localize("Ingame joystick sensitivity"), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 			}
 
 			View.HSplitTop(Spacing, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UIEx()->DoScrollbarOption(&g_Config.m_UiJoystickSens, &g_Config.m_UiJoystickSens, &Button, Localize("Menu/Editor joystick sensitivity"), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale);
+			UIEx()->DoScrollbarOption(&g_Config.m_UiJoystickSens, &g_Config.m_UiJoystickSens, &Button, Localize("Menu/Editor joystick sensitivity"), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
 			View.HSplitTop(Spacing, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);

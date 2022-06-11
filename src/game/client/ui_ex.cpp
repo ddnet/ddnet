@@ -214,8 +214,12 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	return ReturnValue;
 }
 
-void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, bool Infinite)
+void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags)
 {
+	const bool Infinite = Flags & CUIEx::SCROLLBAR_OPTION_INFINITE;
+	const bool NoClampValue = Flags & CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE;
+	dbg_assert(!(Infinite && NoClampValue), "cannot combine SCROLLBAR_OPTION_INFINITE and SCROLLBAR_OPTION_NOCLAMPVALUE");
+
 	int Value = *pOption;
 	if(Infinite)
 	{
@@ -233,6 +237,12 @@ void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRec
 	else
 		str_format(aBuf, sizeof(aBuf), "%s: ∞", pStr);
 
+	if(NoClampValue)
+	{
+		// clamp the value internally for the scrollbar
+		Value = clamp(Value, Min, Max);
+	}
+
 	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
 	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(0, FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(0, FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
 
@@ -241,8 +251,16 @@ void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRec
 	UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
 
 	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
-	if(Infinite && Value == Max)
-		Value = 0;
+	if(Infinite)
+	{
+		if(Value == Max)
+			Value = 0;
+	}
+	else if(NoClampValue)
+	{
+		if((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max))
+			Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
+	}
 
 	*pOption = Value;
 }
