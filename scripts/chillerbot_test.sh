@@ -44,7 +44,6 @@ trap cleanup EXIT
 
 {
 	echo $'add_path $CURRENTDIR'
-	echo $'add_path $USERDIR'
 	echo $'add_path $DATADIR'
 } > storage.cfg
 
@@ -81,6 +80,8 @@ done
 
 ins=()
 outs=()
+ins+=('client2: who do you war?');outs+=('client1 1 of my 1 enemies are online: client1')
+ins+=('client2: do you even have any friends?');outs+=('client1 currently 0 of my 0 friends are connected')
 ins+=('client2: why foo war?');outs+=('client1: foo has war because: bullied me in school')
 ins+=('client2: warum hat       foo war?');outs+=('client1: foo has war because: bullied me in school')
 ins+=('client2 hast du eig war mit samplename300 ?');outs+=("client1: 'samplename300' is not on my warlist.")

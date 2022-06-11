@@ -102,6 +102,9 @@ public:
 	bool IsWarClanmate(int ClientID);
 	void SetNameplateColor(int ClientID, STextRenderColor *pColor);
 	void ReloadList();
+
+	int NumEnemies() { return m_WarDirs + m_TraitorDirs; }
+	int NumTeam() { return m_TeamDirs; };
 };
 
 #endif
