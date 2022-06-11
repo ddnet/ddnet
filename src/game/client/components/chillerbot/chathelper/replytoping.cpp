@@ -359,20 +359,22 @@ bool CReplyToPing::Reply()
 		if((pWho = str_find_nocase(m_pMessage, "have any")))
 			pWho = pWho + str_length("have any");
 	if(!pWho)
-		if((pWho = str_find_nocase(m_pMessage, "u got")))
-			pWho = pWho + str_length("u got");
-	if(!pWho)
 		if((pWho = str_find_nocase(m_pMessage, "wer ")))
 			pWho = pWho + str_length("wer ");
 	if(!pWho)
 		if((pWho = str_find_nocase(m_pMessage, "wie viele")))
 			pWho = pWho + str_length("wie viele");
 	if(!pWho)
-		if((pWho = str_find_nocase(m_pMessage, "how ")))
-			pWho = pWho + str_length("how ");
+		if((pWho = str_find_nocase(m_pMessage, " how ")))
+			pWho = pWho + str_length(" how ");
+	if(!pWho)
+		pWho = str_startswith_nocase(m_pMessage, "how ");
 	if(!pWho)
 		if((pWho = str_find_nocase(m_pMessage, "howm"))) // howmani howmany howm any
 			pWho = pWho + str_length("howm");
+	if(!pWho)
+		if((pWho = str_find_nocase(m_pMessage, "u got")))
+			pWho = pWho + str_length("u got");
 	if(pWho)
 	{
 		const char *pEnemy = NULL;
@@ -475,6 +477,62 @@ bool CReplyToPing::Reply()
 				str_format(m_pResponse, m_SizeOfResponse, "%s %d of my %d friends are online: %s", m_pMessageAuthor, NumFriends, ChatHelper()->GameClient()->m_WarList.NumTeam(), aFriendList);
 			else
 				str_format(m_pResponse, m_SizeOfResponse, "%s currently 0 of my %d friends are connected", m_pMessageAuthor, ChatHelper()->GameClient()->m_WarList.NumTeam());
+			return true;
+		}
+	}
+
+	// intentionally check for being on warlist
+	// also expecting an no if not
+	if(str_find_nocase(m_pMessage, "?") ||
+		str_find_nocase(m_pMessage, "do you") ||
+		str_find_nocase(m_pMessage, "are we") ||
+		str_find_nocase(m_pMessage, "am i") ||
+		str_find_nocase(m_pMessage, "is i") ||
+		str_find_nocase(m_pMessage, "what") ||
+		str_find_nocase(m_pMessage, "show") ||
+		str_find_nocase(m_pMessage, "wat"))
+	{
+		if(str_find_nocase(m_pMessage, "me enem") || str_find_nocase(m_pMessage, "i enem") || str_find_nocase(m_pMessage, "me is enem") || str_find_nocase(m_pMessage, "i is enem") ||
+			str_find_nocase(m_pMessage, "me war") || str_find_nocase(m_pMessage, "i war") || str_find_nocase(m_pMessage, "me is war") || str_find_nocase(m_pMessage, "i is war") ||
+			str_find_nocase(m_pMessage, "peace") ||
+			str_find_nocase(m_pMessage, "me friend") || str_find_nocase(m_pMessage, "i friend") || str_find_nocase(m_pMessage, "me is friend") || str_find_nocase(m_pMessage, "i is friend") ||
+			str_find_nocase(m_pMessage, "me frint") || str_find_nocase(m_pMessage, "i frint") || str_find_nocase(m_pMessage, "me is frint") || str_find_nocase(m_pMessage, "i is frint") ||
+			str_find_nocase(m_pMessage, "are we in war") || str_find_nocase(m_pMessage, "we war") || str_find_nocase(m_pMessage, "we peace") || str_find_nocase(m_pMessage, "we good") ||
+			str_find_nocase(m_pMessage, "i enem") || str_find_nocase(m_pMessage, "i peace") || str_find_nocase(m_pMessage, "i frien") || str_find_nocase(m_pMessage, "i frin") ||
+			str_find_nocase(m_pMessage, "me enem") || str_find_nocase(m_pMessage, "me peace") || str_find_nocase(m_pMessage, "me frien") || str_find_nocase(m_pMessage, "me frin") ||
+			str_find_nocase(m_pMessage, "colo") || str_find_nocase(m_pMessage, "cole") || str_find_nocase(m_pMessage, "collo") || str_find_nocase(m_pMessage, "colla") || str_find_nocase(m_pMessage, "cola") ||
+			str_find_nocase(m_pMessage, "red") || str_find_nocase(m_pMessage, "green") || str_find_nocase(m_pMessage, "orange") || str_find_nocase(m_pMessage, "black") || str_find_nocase(m_pMessage, "reason"))
+		{
+			char aWarReason[128];
+			if(ChatHelper()->GameClient()->m_WarList.IsWarlist(m_pMessageAuthor) || ChatHelper()->GameClient()->m_WarList.IsTraitorlist(m_pMessageAuthor))
+			{
+				ChatHelper()->GameClient()->m_WarList.GetWarReason(m_pMessageAuthor, aWarReason, sizeof(aWarReason));
+				if(aWarReason[0])
+					str_format(m_pResponse, m_SizeOfResponse, "%s you have war because: %s", m_pMessageAuthor, aWarReason);
+				else
+					str_format(m_pResponse, m_SizeOfResponse, "%s you are on my warlist.", m_pMessageAuthor);
+				return true;
+			}
+			else if(ChatHelper()->GameClient()->m_WarList.IsWarClanlist(m_pMessageAuthorClan))
+			{
+				str_format(m_pResponse, m_SizeOfResponse, "%s your clan is on my warlist.", m_pMessageAuthor);
+				return true;
+			}
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				auto &Client = ChatHelper()->GameClient()->m_aClients[i];
+				if(!Client.m_Active)
+					continue;
+				if(str_comp(Client.m_aName, m_pMessageAuthor))
+					continue;
+
+				if(ChatHelper()->GameClient()->m_WarList.IsWarClanmate(i))
+				{
+					str_format(m_pResponse, m_SizeOfResponse, "%s i might kill you because i war member of your clan", m_pMessageAuthor);
+					return true;
+				}
+			}
+			str_format(m_pResponse, m_SizeOfResponse, "%s your name is neither on my friend nor enemy list.", m_pMessageAuthor);
 			return true;
 		}
 	}
@@ -620,7 +678,8 @@ bool CReplyToPing::Reply()
 			Weapon = WEAPON_GRENADE;
 		else if(str_find_nocase(m_pMessage, "rifle") || str_find_nocase(m_pMessage, "laser") || str_find_nocase(m_pMessage, "sniper"))
 			Weapon = WEAPON_LASER;
-		if(CCharacter *pChar = ChatHelper()->GameClient()->m_GameWorld.GetCharacterByID(ChatHelper()->GameClient()->m_LocalIDs[g_Config.m_ClDummy]))
+		CCharacter *pChar = ChatHelper()->GameClient()->m_GameWorld.GetCharacterByID(ChatHelper()->GameClient()->m_LocalIDs[g_Config.m_ClDummy]);
+		if(pChar && Weapon != -1)
 		{
 			char aWeapons[1024];
 			aWeapons[0] = '\0';
