@@ -69,6 +69,7 @@ public:
 	// DDRace
 	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType);
 	IGraphics::CTextureHandle GetSpeedupArrow();
+	IGraphics::CTextureHandle GetMaterialOverlay();
 
 	IGraphics::CTextureHandle GetOverlayBottom();
 	IGraphics::CTextureHandle GetOverlayTop();
@@ -82,12 +83,14 @@ public:
 private:
 	bool m_EntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];
 	bool m_SpeedupArrowIsLoaded;
+	bool m_MaterialIsLoaded;
 	IGraphics::CTextureHandle m_EntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
 	IGraphics::CTextureHandle m_TransparentTexture;
+	IGraphics::CTextureHandle m_MaterialTexture;
 	int m_TextureScale;
 
 	void InitOverlayTextures();

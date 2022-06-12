@@ -323,8 +323,6 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						{
 							if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
 								TileIndex = 8;
-							if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_MATERIAL)
-								TileIndex += TILE_MATERIAL_PLACEHOLDER1;
 						}
 
 						int X = TileIndex % 16;
@@ -373,6 +371,28 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 	}
 
 	return m_SpeedupArrowTexture;
+}
+
+IGraphics::CTextureHandle CMapImages::GetMaterialOverlay()
+{
+	if(!m_MaterialIsLoaded)
+	{
+		char aPath[64];
+		str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", "ddnet-material");
+
+		int TextureLoadFlag = 0;
+		if(Graphics()->IsTileBufferingEnabled())
+			TextureLoadFlag = (Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
+
+		CImageInfo ImgInfo;
+		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
+		{
+			m_MaterialTexture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, (uint8_t *)ImgInfo.m_pData, ImgInfo.m_Format, TextureLoadFlag, aPath);
+			m_MaterialIsLoaded = true;
+		}
+	}
+
+	return m_MaterialTexture;
 }
 
 IGraphics::CTextureHandle CMapImages::GetOverlayBottom()

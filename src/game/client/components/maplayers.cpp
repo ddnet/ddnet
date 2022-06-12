@@ -2035,6 +2035,7 @@ void CMapLayers::OnRender()
 					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f * EntityOverlayVal / 100.0f);
 					if(!Graphics()->IsTileBufferingEnabled())
 					{
+						Graphics()->TextureSet(m_pImages->GetMaterialOverlay());
 						Graphics()->BlendNone();
 						RenderTools()->RenderMaterialmap(pMaterialTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 						Graphics()->BlendNormal();
