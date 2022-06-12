@@ -455,7 +455,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	CUIRect Button, Label, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton, Eyes, EyesLabel, EyesTee, EyesRight;
 
 	static bool s_InitSkinlist = true;
-	MainView.HSplitTop(10.0f, 0, &MainView);
 	Eyes = MainView;
 
 	char *pSkinName = g_Config.m_ClPlayerSkin;
@@ -490,7 +489,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 	OwnSkinInfo.m_Size = 50.0f * UI()->Scale();
 
-	MainView.HSplitTop(20.0f, &Label, &MainView);
+	MainView.HSplitTop(10.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
 	Dummy.VSplitLeft(170.0f, &Dummy, &SkinPrefix);
@@ -512,6 +511,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadSkins, Localize("Download skins"), g_Config.m_ClDownloadSkins, &DummyLabel))
 	{
 		g_Config.m_ClDownloadSkins ^= 1;
+	}
+
+	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	if(DoButton_CheckBox(&g_Config.m_ClDownloadCommunitySkins, Localize("Download community skins"), g_Config.m_ClDownloadCommunitySkins, &DummyLabel))
+	{
+		g_Config.m_ClDownloadCommunitySkins ^= 1;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -571,7 +577,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(RenderEyesBelow)
 	{
 		Eyes.VSplitLeft(190.0f, 0, &Eyes);
-		Eyes.HSplitTop(85.0f, 0, &Eyes);
+		Eyes.HSplitTop(105.0f, 0, &Eyes);
 	}
 	else
 	{
