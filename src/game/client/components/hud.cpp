@@ -1477,7 +1477,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 	}
 }
 
-void CHud::RenderSpectatorHud()				
+void CHud::RenderSpectatorHud()
 {
 	// draw the box
 	Graphics()->TextureClear();
