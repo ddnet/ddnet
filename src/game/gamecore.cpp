@@ -443,7 +443,7 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(), 0);
+	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(), vec2(m_Tuning.m_GroundElasticityX, m_Tuning.m_GroundElasticityY));
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001f && m_Vel.x > -0.001f)
