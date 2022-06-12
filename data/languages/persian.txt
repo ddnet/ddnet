@@ -1,4 +1,4 @@
-﻿##### authors #####
+##### authors #####
 # Created By : Quick
 # Translated by: younesdevil
 ##### translated strings #####
