@@ -14,6 +14,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/localization.h>
+#include <string.h>
 
 #include "scoreboard.h"
 
@@ -56,6 +57,10 @@ void CScoreboard::OnConsoleInit()
 
 void CScoreboard::RenderGoals(float x, float y, float w)
 {
+	// fetch server info
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
+
 	float h = 50.0f;
 
 	Graphics()->BlendNormal();
@@ -90,10 +95,8 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	}
 }
 
-void CScoreboard::RenderSpectators(float x, float y, float w)
+void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 {
-	float h = 140.0f;
-
 	// background
 	Graphics()->BlendNormal();
 	Graphics()->TextureClear();
@@ -609,6 +612,12 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 void CScoreboard::OnRender()
 {
+	// fetch server info
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
+
+	//Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "huddebug", CurrentServerInfo.m_aGameType, ColorRGBA(1, 0, 1, 1));
+
 	if(!Active())
 		return;
 
@@ -687,8 +696,13 @@ void CScoreboard::OnRender()
 		}
 	}
 
-	RenderGoals(Width / 2 - w / 2, 150 + 760 + 10, w);
-	RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10 + 50 + 10, w);
+	if (strcmp(CurrentServerInfo.m_aGameType, "DDraceNetwork") != 0) { // we are not in ddrace mod
+		RenderGoals(Width / 2 - w / 2, 150 + 760 + 10, w);
+		RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10 + 50 + 10, w, 140.0f);
+	}
+	else {
+		RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10, w, 140.0f + 50.0f + 10.0f);
+	}
 	RenderRecordingNotification((Width / 7) * 4 + 20);
 }
 
