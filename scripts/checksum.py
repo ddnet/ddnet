@@ -6,7 +6,7 @@ import os
 os.chdir(os.path.dirname(__file__) + "/..")
 
 def hash_bytes(b):
-	return "0x{}".format(hashlib.sha256(b).hexdigest()[:8])
+	return f"0x{hashlib.sha256(b).hexdigest()[:8]}"
 
 def hash_file(filename):
 	with open(filename, "rb") as f:
@@ -18,7 +18,7 @@ def main():
 	p.add_argument("extra_file", metavar="EXTRA_FILE", help="File containing extra strings to be hashed")
 	args = p.parse_args()
 
-	with open(args.list_file) as f:
+	with open(args.list_file, encoding="utf-8") as f:
 		files = f.read().splitlines()
 	with open(args.extra_file, "rb") as f:
 		extra = f.read().splitlines()
@@ -31,10 +31,10 @@ def main():
 void CChecksumData::InitFiles()
 {
 """, end="")
-	print("\tm_NumFiles = {};".format(len(hashes_files)))
-	print("\tm_NumExtra = {};".format(len(hashes_extra)))
+	print(f"\tm_NumFiles = {len(hashes_files)};")
+	print(f"\tm_NumExtra = {len(hashes_extra)};")
 	for i, h in enumerate(hashes):
-		print("\tm_aFiles[0x{:03x}] = {};".format(i, h))
+		print(f"\tm_aFiles[0x{i:03x}] = {h};")
 	print("}")
 
 if __name__ == "__main__":

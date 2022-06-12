@@ -48,7 +48,7 @@ def gen_network_header():
 	print(network.RawHeader)
 
 	for e in network.Enums:
-		for line in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): # pylint: disable=E1101
+		for line in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): # pylint: disable=no-member
 			print(line)
 		print("")
 

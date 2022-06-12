@@ -15,7 +15,8 @@ def generate_decompositions():
 	ud = unicode.data()
 	con = unicode.confusables()
 
-	category = lambda x: {unicode.unhex(u["Value"]) for u in ud if u["General_Category"].startswith(x)}
+	def category(x):
+		return {unicode.unhex(u["Value"]) for u in ud if u["General_Category"].startswith(x)}
 
 	# TODO: Is this correct? They changed the decompositioning format
 	nfd = {unicode.unhex(u["Value"]): unicode.unhex_sequence(u["Decomposition_Type"]) for u in ud}
@@ -62,8 +63,8 @@ struct DECOMP_SLICE
 """)
 	print("enum")
 	print("{")
-	print("\tNUM_DECOMP_LENGTHS = {},".format(len(len_set)))
-	print("\tNUM_DECOMPS = {},".format(len(decompositions)))
+	print(f"\tNUM_DECOMP_LENGTHS = {len(len_set)},")
+	print(f"\tNUM_DECOMPS = {len(decompositions)},")
 	print("};")
 	print()
 
@@ -81,13 +82,13 @@ def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
 
 	print("const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {")
 	for l in len_set:
-		print("\t{},".format(l))
+		print(f"\t{l},")
 	print("};")
 	print()
 
 	print("const int32_t decomp_chars[NUM_DECOMPS] = {")
 	for k in sorted(decompositions):
-		print("\t0x{:x},".format(k))
+		print(f"\t0x{k:x},")
 	print("};")
 	print()
 
@@ -96,14 +97,14 @@ def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
 		d = decompositions[k]
 		i = decomposition_set.index(tuple(d))
 		l = len_set.index(len(d))
-		print("\t{{{}, {}}},".format(decomposition_offsets[i], l))
+		print(f"\t{{{decomposition_offsets[i]}, {l}}},")
 	print("};")
 	print()
 
 	print("const int32_t decomp_data[] = {")
 	for d in decomposition_set:
 		for c in d:
-			print("\t0x{:x},".format(c))
+			print(f"\t0x{c:x},")
 	print("};")
 
 def main():

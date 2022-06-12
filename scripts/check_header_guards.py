@@ -17,7 +17,7 @@ def check_file(filename):
 	if filename in EXCEPTIONS:
 		return False
 	error = False
-	with open(filename) as file:
+	with open(filename, encoding="utf-8") as file:
 		for line in file:
 			if line == "// This file can be included several times.\n":
 				break
@@ -27,10 +27,10 @@ def check_file(filename):
 			if line.startswith("#ifndef"):
 				if line[:-1] != header_guard:
 					error = True
-					print("Wrong header guard in {}, is: {}, should be: {}".format(filename, line[:-1], header_guard))
+					print(f"Wrong header guard in {filename}, is: {line[:-1]}, should be: {header_guard}")
 			else:
 				error = True
-				print("Missing header guard in {}, should be: {}".format(filename, header_guard))
+				print(f"Missing header guard in {filename}, should be: {header_guard}")
 			break
 	return error
 

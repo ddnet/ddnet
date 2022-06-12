@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 class LanguageDecodeError(Exception):
 	def __init__(self, message, filename, line):
-		error = "File \"{1}\", line {2}: {0}".format(message, filename, line+1)
+		error = f"File \"{filename}\", line {line+1}: {message}"
 		super().__init__(error)
 
 
@@ -45,7 +45,7 @@ def decode(fileobj, elements_per_key):
 			if len(data[current_key]) >= 1+elements_per_key:
 				raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
 			if current_key:
-				original = current_key[0] # pylint: disable=E1136
+				original = current_key[0] # pylint: disable=unsubscriptable-object
 				translation = line[3:]
 				if translation and [m.group(1) for m in re.finditer(cfmt, original, flags=re.X)] != [m.group(1) for m in re.finditer(cfmt, translation, flags=re.X)]:
 					raise LanguageDecodeError("Non-matching formatting string", fileobj.name, index)
@@ -68,7 +68,7 @@ def decode(fileobj, elements_per_key):
 
 
 def check_file(path):
-	with open(path) as fileobj:
+	with open(path, encoding="utf-8") as fileobj:
 		matches = re.findall(r"Localize\s*\(\s*\"([^\"]+)\"(?:\s*,\s*\"([^\"]+)\")?\s*\)", fileobj.read())
 	return matches
 
@@ -86,13 +86,15 @@ def check_folder(path):
 
 
 def languages():
-	index = decode(open("data/languages/index.txt"), 2)
+	with open("data/languages/index.txt", encoding="utf-8") as f:
+		index = decode(f, 2)
 	langs = {"data/languages/"+key[0]+".txt" : [key[0]]+elements for key, elements in index.items()}
 	return langs
 
 
 def translations(filename):
-	return decode(open(filename), 1)
+	with open(filename, encoding="utf-8") as f:
+		return decode(f, 1)
 
 
 def localizes():

@@ -48,4 +48,4 @@ jobs:
     - name: Pylint
       run: |
         pylint --version
-        find . -type f -name "*.py" -not -path './ddnet-libs/*' -print0 | xargs -0 pylint
+        find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint
