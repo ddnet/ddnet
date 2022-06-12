@@ -157,7 +157,7 @@ public:
 	};
 
 protected:
-	std::vector<SUIElementRect> m_UIRects;
+	std::vector<SUIElementRect> m_vUIRects;
 
 	// used for marquees or other user implemented things
 	int64_t m_ElementTime;
@@ -169,12 +169,12 @@ public:
 
 	SUIElementRect *Get(size_t Index)
 	{
-		return &m_UIRects[Index];
+		return &m_vUIRects[Index];
 	}
 
 	bool AreRectsInit()
 	{
-		return !m_UIRects.empty();
+		return !m_vUIRects.empty();
 	}
 
 	void InitRects(int RequestedRectCount);
@@ -208,15 +208,15 @@ class CUI
 
 	CUIRect m_Screen;
 
-	std::vector<CUIRect> m_Clips;
+	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
 	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
-	std::vector<CUIElement *> m_OwnUIElements; // ui elements maintained by CUI class
-	std::vector<CUIElement *> m_UIElements;
+	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUI class
+	std::vector<CUIElement *> m_vpUIElements;
 
 public:
 	static float ms_FontmodHeight;
@@ -321,7 +321,7 @@ public:
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
 	const CUIRect *ClipArea() const;
-	inline bool IsClipped() const { return !m_Clips.empty(); }
+	inline bool IsClipped() const { return !m_vClips.empty(); }
 
 	// TODO: Refactor: Redo UI scaling
 	void SetScale(float s);

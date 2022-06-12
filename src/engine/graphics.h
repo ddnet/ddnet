@@ -34,7 +34,7 @@ struct SBufferContainerInfo
 		//0: float, 1:integer
 		unsigned int m_FuncType;
 	};
-	std::vector<SAttribute> m_Attributes;
+	std::vector<SAttribute> m_vAttributes;
 };
 
 struct SQuadRenderInfo
@@ -195,7 +195,7 @@ struct STWGraphicGPU
 		char m_Name[256];
 		ETWGraphicsGPUType m_GPUType;
 	};
-	std::vector<STWGraphicGPUItem> m_GPUs;
+	std::vector<STWGraphicGPUItem> m_vGPUs;
 	STWGraphicGPUItem m_AutoGPU;
 };
 

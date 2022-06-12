@@ -258,25 +258,25 @@ public:
 
 	int NumServers() const override
 	{
-		return m_aServers.size();
+		return m_vServers.size();
 	}
 	const NETADDR &ServerAddress(int Index) const override
 	{
-		return m_aServers[Index].m_Addr;
+		return m_vServers[Index].m_Addr;
 	}
 	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const override
 	{
-		const CEntry &Entry = m_aServers[Index];
+		const CEntry &Entry = m_vServers[Index];
 		*pAddr = Entry.m_Addr;
 		*pInfo = Entry.m_Info;
 	}
 	int NumLegacyServers() const override
 	{
-		return m_aLegacyServers.size();
+		return m_vLegacyServers.size();
 	}
 	const NETADDR &LegacyServer(int Index) const override
 	{
-		return m_aLegacyServers[Index];
+		return m_vLegacyServers[Index];
 	}
 
 private:
@@ -305,8 +305,8 @@ private:
 	std::shared_ptr<CHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
-	std::vector<CEntry> m_aServers;
-	std::vector<NETADDR> m_aLegacyServers;
+	std::vector<CEntry> m_vServers;
+	std::vector<NETADDR> m_vLegacyServers;
 };
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
@@ -358,7 +358,7 @@ void CServerBrowserHttp::Update()
 		bool Success = true;
 		json_value *pJson = pGetServers->ResultJson();
 		Success = Success && pJson;
-		Success = Success && !Parse(pJson, &m_aServers, &m_aLegacyServers);
+		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
 		json_value_free(pJson);
 		if(!Success)
 		{

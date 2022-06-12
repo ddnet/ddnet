@@ -80,15 +80,15 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 		}
-		m_aCountryFlags.push_back(CountryFlag);
+		m_vCountryFlags.push_back(CountryFlag);
 	}
 	io_close(File);
-	std::sort(m_aCountryFlags.begin(), m_aCountryFlags.end());
+	std::sort(m_vCountryFlags.begin(), m_vCountryFlags.end());
 
 	// find index of default item
 	size_t DefaultIndex = 0;
-	for(size_t Index = 0; Index < m_aCountryFlags.size(); ++Index)
-		if(m_aCountryFlags[Index].m_CountryCode == -1)
+	for(size_t Index = 0; Index < m_vCountryFlags.size(); ++Index)
+		if(m_vCountryFlags[Index].m_CountryCode == -1)
 		{
 			DefaultIndex = Index;
 			break;
@@ -100,22 +100,22 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			CodeIndexLUT = DefaultIndex;
 	else
 		mem_zero(m_CodeIndexLUT, sizeof(m_CodeIndexLUT));
-	for(size_t i = 0; i < m_aCountryFlags.size(); ++i)
-		m_CodeIndexLUT[maximum(0, (m_aCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
+	for(size_t i = 0; i < m_vCountryFlags.size(); ++i)
+		m_CodeIndexLUT[maximum(0, (m_vCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
 }
 
 void CCountryFlags::OnInit()
 {
 	// load country flags
-	m_aCountryFlags.clear();
+	m_vCountryFlags.clear();
 	LoadCountryflagsIndexfile();
-	if(m_aCountryFlags.empty())
+	if(m_vCountryFlags.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
 		mem_zero(DummyEntry.m_aCountryCodeString, sizeof(DummyEntry.m_aCountryCodeString));
-		m_aCountryFlags.push_back(DummyEntry);
+		m_vCountryFlags.push_back(DummyEntry);
 	}
 
 	m_FlagsQuadContainerIndex = Graphics()->CreateQuadContainer(false);
@@ -127,7 +127,7 @@ void CCountryFlags::OnInit()
 
 size_t CCountryFlags::Num() const
 {
-	return m_aCountryFlags.size();
+	return m_vCountryFlags.size();
 }
 
 const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCode) const
@@ -137,7 +137,7 @@ const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCo
 
 const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(size_t Index) const
 {
-	return &m_aCountryFlags[Index % m_aCountryFlags.size()];
+	return &m_vCountryFlags[Index % m_vCountryFlags.size()];
 }
 
 void CCountryFlags::Render(int CountryCode, const ColorRGBA *pColor, float x, float y, float w, float h)

@@ -41,7 +41,7 @@ class CEnvelope
 {
 public:
 	int m_Channels;
-	std::vector<CEnvPoint> m_lPoints;
+	std::vector<CEnvPoint> m_vPoints;
 	char m_aName[32];
 	float m_Bottom, m_Top;
 	bool m_Synchronized;
@@ -57,7 +57,7 @@ public:
 
 	void Resort()
 	{
-		std::sort(m_lPoints.begin(), m_lPoints.end());
+		std::sort(m_vPoints.begin(), m_vPoints.end());
 		FindTopBottom(0xf);
 	}
 
@@ -65,7 +65,7 @@ public:
 	{
 		m_Top = -1000000000.0f;
 		m_Bottom = 1000000000.0f;
-		for(auto &Point : m_lPoints)
+		for(auto &Point : m_vPoints)
 		{
 			for(int c = 0; c < m_Channels; c++)
 			{
@@ -83,7 +83,7 @@ public:
 
 	int Eval(float Time, float *pResult)
 	{
-		CRenderTools::RenderEvalEnvelope(&m_lPoints[0], m_lPoints.size(), m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), pResult);
+		CRenderTools::RenderEvalEnvelope(&m_vPoints[0], m_vPoints.size(), m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), pResult);
 		return m_Channels;
 	}
 
@@ -96,14 +96,14 @@ public:
 		p.m_aValues[2] = v2;
 		p.m_aValues[3] = v3;
 		p.m_Curvetype = CURVETYPE_LINEAR;
-		m_lPoints.push_back(p);
+		m_vPoints.push_back(p);
 		Resort();
 	}
 
 	float EndTime() const
 	{
-		if(!m_lPoints.empty())
-			return m_lPoints[m_lPoints.size() - 1].m_Time * (1.0f / 1000.0f);
+		if(!m_vPoints.empty())
+			return m_vPoints[m_vPoints.size() - 1].m_Time * (1.0f / 1000.0f);
 		return 0;
 	}
 };
@@ -171,7 +171,7 @@ class CLayerGroup
 public:
 	class CEditorMap *m_pMap;
 
-	std::vector<CLayer *> m_lLayers;
+	std::vector<CLayer *> m_vpLayers;
 
 	int m_OffsetX;
 	int m_OffsetY;
@@ -205,7 +205,7 @@ public:
 
 	bool IsEmpty() const
 	{
-		return m_lLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
+		return m_vpLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
 	}
 
 	/*bool IsUsedInThisLayer(int Layer, int Index) // <--------- this is what i meant but cause i don't know which Indexes belongs to which layers i can't finish yet
@@ -245,26 +245,26 @@ public:
 
 	void Clear()
 	{
-		m_lLayers.clear();
+		m_vpLayers.clear();
 	}
 
 	void AddLayer(CLayer *l);
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 	{
-		for(auto &pLayer : m_lLayers)
+		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifyImageIndex(Func);
 	}
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 	{
-		for(auto &pLayer : m_lLayers)
+		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifyEnvelopeIndex(Func);
 	}
 
 	void ModifySoundIndex(INDEX_MODIFY_FUNC Func)
 	{
-		for(auto &pLayer : m_lLayers)
+		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifySoundIndex(Func);
 	}
 };
@@ -340,10 +340,10 @@ public:
 		Clean();
 	}
 
-	std::vector<CLayerGroup *> m_lGroups;
-	std::vector<CEditorImage *> m_lImages;
-	std::vector<CEnvelope *> m_lEnvelopes;
-	std::vector<CEditorSound *> m_lSounds;
+	std::vector<CLayerGroup *> m_vpGroups;
+	std::vector<CEditorImage *> m_vpImages;
+	std::vector<CEnvelope *> m_vpEnvelopes;
+	std::vector<CEditorSound *> m_vpSounds;
 
 	class CMapInfo
 	{
@@ -377,7 +377,7 @@ public:
 	{
 		char m_aCommand[256];
 	};
-	std::vector<CSetting> m_lSettings;
+	std::vector<CSetting> m_vSettings;
 
 	class CLayerGame *m_pGameLayer;
 	CLayerGroup *m_pGameGroup;
@@ -386,7 +386,7 @@ public:
 	{
 		m_Modified = true;
 		CEnvelope *e = new CEnvelope(Channels);
-		m_lEnvelopes.push_back(e);
+		m_vpEnvelopes.push_back(e);
 		return e;
 	}
 
@@ -397,50 +397,50 @@ public:
 		m_Modified = true;
 		CLayerGroup *g = new CLayerGroup;
 		g->m_pMap = this;
-		m_lGroups.push_back(g);
+		m_vpGroups.push_back(g);
 		return g;
 	}
 
 	int SwapGroups(int Index0, int Index1)
 	{
-		if(Index0 < 0 || Index0 >= (int)m_lGroups.size())
+		if(Index0 < 0 || Index0 >= (int)m_vpGroups.size())
 			return Index0;
-		if(Index1 < 0 || Index1 >= (int)m_lGroups.size())
+		if(Index1 < 0 || Index1 >= (int)m_vpGroups.size())
 			return Index0;
 		if(Index0 == Index1)
 			return Index0;
 		m_Modified = true;
-		std::swap(m_lGroups[Index0], m_lGroups[Index1]);
+		std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
 		return Index1;
 	}
 
 	void DeleteGroup(int Index)
 	{
-		if(Index < 0 || Index >= (int)m_lGroups.size())
+		if(Index < 0 || Index >= (int)m_vpGroups.size())
 			return;
 		m_Modified = true;
-		delete m_lGroups[Index];
-		m_lGroups.erase(m_lGroups.begin() + Index);
+		delete m_vpGroups[Index];
+		m_vpGroups.erase(m_vpGroups.begin() + Index);
 	}
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
 		m_Modified = true;
-		for(auto &pGroup : m_lGroups)
+		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyImageIndex(pfnFunc);
 	}
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
 		m_Modified = true;
-		for(auto &pGroup : m_lGroups)
+		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyEnvelopeIndex(pfnFunc);
 	}
 
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
 		m_Modified = true;
-		for(auto &pGroup : m_lGroups)
+		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifySoundIndex(pfnFunc);
 	}
 
@@ -593,7 +593,7 @@ public:
 		int Height = -1;
 		int Color = 0;
 	};
-	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &pLayers);
+	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
@@ -655,7 +655,7 @@ public:
 	void GetSize(float *w, float *h) override;
 
 	int m_Image;
-	std::vector<CQuad> m_lQuads;
+	std::vector<CQuad> m_vQuads;
 };
 
 class CLayerGame : public CLayerTiles
@@ -924,12 +924,12 @@ public:
 
 		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
 	};
-	std::vector<CFilelistItem> m_FileList;
+	std::vector<CFilelistItem> m_vFileList;
 	int m_FilesStartAt;
 	int m_FilesCur;
 	int m_FilesStopAt;
 
-	std::vector<std::string> m_SelectEntitiesFiles;
+	std::vector<std::string> m_vSelectEntitiesFiles;
 	std::string m_SelectEntitiesImage;
 
 	float m_WorldOffsetX;
@@ -959,8 +959,8 @@ public:
 	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
-	std::vector<int> m_lSelectedLayers;
-	std::vector<int> m_lSelectedQuads;
+	std::vector<int> m_vSelectedLayers;
+	std::vector<int> m_vSelectedQuads;
 	int m_SelectedQuadPoint;
 	int m_SelectedQuadIndex;
 	int m_SelectedGroup;
@@ -1031,7 +1031,7 @@ public:
 
 	struct CLayerPopupContext
 	{
-		std::vector<CLayerTiles *> m_aLayers;
+		std::vector<CLayerTiles *> m_vpLayers;
 		CLayerTiles::SCommonPropState m_CommonPropState;
 	};
 	static int PopupLayer(CEditor *pEditor, CUIRect View, void *pContext);
@@ -1068,7 +1068,7 @@ public:
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
 
-	void DoQuadEnvelopes(const std::vector<CQuad> &m_lQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
+	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
 
@@ -1328,7 +1328,7 @@ public:
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	int m_Sound;
-	std::vector<CSoundSource> m_lSources;
+	std::vector<CSoundSource> m_vSources;
 };
 
 #endif

@@ -867,7 +867,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	str_copy(Item.m_aPlayer, Info.m_aOwner, sizeof(Item.m_aPlayer));
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
-		pSelf->m_lGhosts.push_back(Item);
+		pSelf->m_vGhosts.push_back(Item);
 
 	if(tw::time_get() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
@@ -879,13 +879,13 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 
 void CMenus::GhostlistPopulate()
 {
-	m_lGhosts.clear();
+	m_vGhosts.clear();
 	m_GhostPopulateStartTime = tw::time_get();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
-	std::sort(m_lGhosts.begin(), m_lGhosts.end());
+	std::sort(m_vGhosts.begin(), m_vGhosts.end());
 
 	CGhostItem *pOwnGhost = 0;
-	for(auto &Ghost : m_lGhosts)
+	for(auto &Ghost : m_vGhosts)
 		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
 			pOwnGhost = &Ghost;
 
@@ -898,7 +898,7 @@ void CMenus::GhostlistPopulate()
 
 CMenus::CGhostItem *CMenus::GetOwnGhost()
 {
-	for(auto &Ghost : m_lGhosts)
+	for(auto &Ghost : m_vGhosts)
 		if(Ghost.m_Own)
 			return &Ghost;
 	return nullptr;
@@ -907,27 +907,27 @@ CMenus::CGhostItem *CMenus::GetOwnGhost()
 void CMenus::UpdateOwnGhost(CGhostItem Item)
 {
 	int Own = -1;
-	for(size_t i = 0; i < m_lGhosts.size(); i++)
-		if(m_lGhosts[i].m_Own)
+	for(size_t i = 0; i < m_vGhosts.size(); i++)
+		if(m_vGhosts[i].m_Own)
 			Own = i;
 
 	if(Own != -1)
 	{
-		m_lGhosts[Own].m_Slot = -1;
-		m_lGhosts[Own].m_Own = false;
-		if(Item.HasFile() || !m_lGhosts[Own].HasFile())
+		m_vGhosts[Own].m_Slot = -1;
+		m_vGhosts[Own].m_Own = false;
+		if(Item.HasFile() || !m_vGhosts[Own].HasFile())
 			DeleteGhostItem(Own);
 	}
 
 	Item.m_Own = true;
-	m_lGhosts.insert(std::lower_bound(m_lGhosts.begin(), m_lGhosts.end(), Item), Item);
+	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 }
 
 void CMenus::DeleteGhostItem(int Index)
 {
-	if(m_lGhosts[Index].HasFile())
-		Storage()->RemoveFile(m_lGhosts[Index].m_aFilename, IStorage::TYPE_SAVE);
-	m_lGhosts.erase(m_lGhosts.begin() + Index);
+	if(m_vGhosts[Index].HasFile())
+		Storage()->RemoveFile(m_vGhosts[Index].m_aFilename, IStorage::TYPE_SAVE);
+	m_vGhosts.erase(m_vGhosts.begin() + Index);
 }
 
 void CMenus::RenderGhost(CUIRect MainView)
@@ -996,7 +996,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static float s_ScrollValue = 0;
 	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
-	int NumGhosts = m_lGhosts.size();
+	int NumGhosts = m_vGhosts.size();
 	static int s_SelectedIndex = 0;
 	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);
 
@@ -1013,7 +1013,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	for(int i = 0; i < NumGhosts; i++)
 	{
-		const CGhostItem *pItem = &m_lGhosts[i];
+		const CGhostItem *pItem = &m_vGhosts[i];
 		CUIRect Row;
 		View.HSplitTop(17.0f, &Row, &View);
 
@@ -1106,10 +1106,10 @@ void CMenus::RenderGhost(CUIRect MainView)
 		GhostlistPopulate();
 	}
 
-	if(s_SelectedIndex == -1 || s_SelectedIndex >= (int)m_lGhosts.size())
+	if(s_SelectedIndex == -1 || s_SelectedIndex >= (int)m_vGhosts.size())
 		return;
 
-	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
+	CGhostItem *pGhost = &m_vGhosts[s_SelectedIndex];
 
 	CGhostItem *pOwnGhost = GetOwnGhost();
 	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());

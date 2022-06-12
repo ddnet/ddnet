@@ -79,17 +79,17 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			Item.m_License = -1;
 
 		Item.m_Settings = -1;
-		if(!m_lSettings.empty())
+		if(!m_vSettings.empty())
 		{
 			int Size = 0;
-			for(const auto &Setting : m_lSettings)
+			for(const auto &Setting : m_vSettings)
 			{
 				Size += str_length(Setting.m_aCommand) + 1;
 			}
 
 			char *pSettings = (char *)malloc(maximum(Size, 1));
 			char *pNext = pSettings;
-			for(const auto &Setting : m_lSettings)
+			for(const auto &Setting : m_vSettings)
 			{
 				int Length = str_length(Setting.m_aCommand) + 1;
 				mem_copy(pNext, Setting.m_aCommand, Length);
@@ -103,9 +103,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	}
 
 	// save images
-	for(size_t i = 0; i < m_lImages.size(); i++)
+	for(size_t i = 0; i < m_vpImages.size(); i++)
 	{
-		CEditorImage *pImg = m_lImages[i];
+		CEditorImage *pImg = m_vpImages[i];
 
 		// analyse the image for when saving (should be done when we load the image)
 		// TODO!
@@ -146,9 +146,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	}
 
 	// save sounds
-	for(size_t i = 0; i < m_lSounds.size(); i++)
+	for(size_t i = 0; i < m_vpSounds.size(); i++)
 	{
-		CEditorSound *pSound = m_lSounds[i];
+		CEditorSound *pSound = m_vpSounds[i];
 
 		CMapItemSound Item;
 		Item.m_Version = 1;
@@ -164,7 +164,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	// save layers
 	int LayerCount = 0, GroupCount = 0;
 	int AutomapperCount = 0;
-	for(const auto &pGroup : m_lGroups)
+	for(const auto &pGroup : m_vpGroups)
 	{
 		CMapItemGroup GItem;
 		GItem.m_Version = CMapItemGroup::CURRENT_VERSION;
@@ -184,7 +184,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		// save group name
 		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
 
-		for(const auto &pLayer : pGroup->m_lLayers)
+		for(const auto &pLayer : pGroup->m_vpLayers)
 		{
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
@@ -279,7 +279,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			{
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving quads layer");
 				CLayerQuads *pLayerQuads = (CLayerQuads *)pLayer;
-				if(!pLayerQuads->m_lQuads.empty())
+				if(!pLayerQuads->m_vQuads.empty())
 				{
 					CMapItemLayerQuads Item;
 					Item.m_Version = 2;
@@ -289,8 +289,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Image = pLayerQuads->m_Image;
 
 					// add the data
-					Item.m_NumQuads = pLayerQuads->m_lQuads.size();
-					Item.m_Data = df.AddDataSwapped(pLayerQuads->m_lQuads.size() * sizeof(CQuad), &pLayerQuads->m_lQuads[0]);
+					Item.m_NumQuads = pLayerQuads->m_vQuads.size();
+					Item.m_Data = df.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), &pLayerQuads->m_vQuads[0]);
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerQuads->m_aName);
@@ -308,7 +308,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			{
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
 				CLayerSounds *pLayerSounds = (CLayerSounds *)pLayer;
-				if(!pLayerSounds->m_lSources.empty())
+				if(!pLayerSounds->m_vSources.empty())
 				{
 					CMapItemLayerSounds Item;
 					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
@@ -318,8 +318,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Sound = pLayerSounds->m_Sound;
 
 					// add the data
-					Item.m_NumSources = pLayerSounds->m_lSources.size();
-					Item.m_Data = df.AddDataSwapped(pLayerSounds->m_lSources.size() * sizeof(CSoundSource), &pLayerSounds->m_lSources[0]);
+					Item.m_NumSources = pLayerSounds->m_vSources.size();
+					Item.m_Data = df.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), &pLayerSounds->m_vSources[0]);
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerSounds->m_aName);
@@ -336,15 +336,15 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 	// save envelopes
 	int PointCount = 0;
-	for(size_t e = 0; e < m_lEnvelopes.size(); e++)
+	for(size_t e = 0; e < m_vpEnvelopes.size(); e++)
 	{
 		CMapItemEnvelope Item;
 		Item.m_Version = CMapItemEnvelope::CURRENT_VERSION;
-		Item.m_Channels = m_lEnvelopes[e]->m_Channels;
+		Item.m_Channels = m_vpEnvelopes[e]->m_Channels;
 		Item.m_StartPoint = PointCount;
-		Item.m_NumPoints = m_lEnvelopes[e]->m_lPoints.size();
-		Item.m_Synchronized = m_lEnvelopes[e]->m_Synchronized;
-		StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_lEnvelopes[e]->m_aName);
+		Item.m_NumPoints = m_vpEnvelopes[e]->m_vPoints.size();
+		Item.m_Synchronized = m_vpEnvelopes[e]->m_Synchronized;
+		StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_vpEnvelopes[e]->m_aName);
 
 		df.AddItem(MAPITEMTYPE_ENVELOPE, e, sizeof(Item), &Item);
 		PointCount += Item.m_NumPoints;
@@ -355,10 +355,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	CEnvPoint *pPoints = (CEnvPoint *)calloc(maximum(PointCount, 1), sizeof(*pPoints));
 	PointCount = 0;
 
-	for(const auto &pEnvelope : m_lEnvelopes)
+	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
-		int Count = pEnvelope->m_lPoints.size();
-		mem_copy(&pPoints[PointCount], &pEnvelope->m_lPoints[0], sizeof(CEnvPoint) * Count);
+		int Count = pEnvelope->m_vPoints.size();
+		mem_copy(&pPoints[PointCount], &pEnvelope->m_vPoints[0], sizeof(CEnvPoint) * Count);
 		PointCount += Count;
 	}
 
@@ -459,7 +459,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					int StrSize = str_length(pNext) + 1;
 					CSetting Setting;
 					str_copy(Setting.m_aCommand, pNext, sizeof(Setting.m_aCommand));
-					m_lSettings.push_back(Setting);
+					m_vSettings.push_back(Setting);
 					pNext += StrSize;
 				}
 			}
@@ -519,7 +519,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				// load auto mapper file
 				pImg->m_AutoMapper.Load(pImg->m_aName);
 
-				m_lImages.push_back(pImg);
+				m_vpImages.push_back(pImg);
 
 				// unload image
 				DataFile.UnloadData(pItem->m_ImageData);
@@ -578,7 +578,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				if(pName)
 					str_copy(pSound->m_aName, pName, sizeof(pSound->m_aName));
 
-				m_lSounds.push_back(pSound);
+				m_vpSounds.push_back(pSound);
 
 				// unload image
 				DataFile.UnloadData(pItem->m_SoundData);
@@ -851,7 +851,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pQuads->m_pEditor = m_pEditor;
 						pLayer = pQuads;
 						pQuads->m_Image = pQuadsItem->m_Image;
-						if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_lImages.size())
+						if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_vpImages.size())
 							pQuads->m_Image = -1;
 
 						// load layer name
@@ -860,8 +860,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 						void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
 						pGroup->AddLayer(pQuads);
-						pQuads->m_lQuads.resize(pQuadsItem->m_NumQuads);
-						mem_copy(&pQuads->m_lQuads[0], pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
+						pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
+						mem_copy(&pQuads->m_vQuads[0], pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
 						DataFile.UnloadData(pQuadsItem->m_Data);
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
@@ -876,7 +876,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pSounds->m_Sound = pSoundsItem->m_Sound;
 
 						// validate m_Sound
-						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_lSounds.size())
+						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
 							pSounds->m_Sound = -1;
 
 						// load layer name
@@ -886,8 +886,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						// load data
 						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
 						pGroup->AddLayer(pSounds);
-						pSounds->m_lSources.resize(pSoundsItem->m_NumSources);
-						mem_copy(&pSounds->m_lSources[0], pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
+						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
+						mem_copy(&pSounds->m_vSources[0], pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
 						DataFile.UnloadData(pSoundsItem->m_Data);
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
@@ -903,7 +903,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pSounds->m_Sound = pSoundsItem->m_Sound;
 
 						// validate m_Sound
-						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_lSounds.size())
+						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
 							pSounds->m_Sound = -1;
 
 						// load layer name
@@ -913,13 +913,13 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						// load data
 						CSoundSource_DEPRECATED *pData = (CSoundSource_DEPRECATED *)DataFile.GetDataSwapped(pSoundsItem->m_Data);
 						pGroup->AddLayer(pSounds);
-						pSounds->m_lSources.resize(pSoundsItem->m_NumSources);
+						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
 
 						for(int i = 0; i < pSoundsItem->m_NumSources; i++)
 						{
 							CSoundSource_DEPRECATED *pOldSource = &pData[i];
 
-							CSoundSource &Source = pSounds->m_lSources[i];
+							CSoundSource &Source = pSounds->m_vSources[i];
 							Source.m_Position = pOldSource->m_Position;
 							Source.m_Loop = pOldSource->m_Loop;
 							Source.m_Pan = true;
@@ -961,11 +961,11 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			{
 				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e, 0, 0);
 				CEnvelope *pEnv = new CEnvelope(pItem->m_Channels);
-				pEnv->m_lPoints.resize(pItem->m_NumPoints);
-				mem_copy(&pEnv->m_lPoints[0], &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
+				pEnv->m_vPoints.resize(pItem->m_NumPoints);
+				mem_copy(&pEnv->m_vPoints[0], &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
 				if(pItem->m_aName[0] != -1) // compatibility with old maps
 					IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
-				m_lEnvelopes.push_back(pEnv);
+				m_vpEnvelopes.push_back(pEnv);
 				if(pItem->m_Version >= 2)
 					pEnv->m_Synchronized = pItem->m_Synchronized;
 			}
@@ -979,13 +979,13 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start + i, 0, 0);
 				if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
 				{
-					if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_lGroups.size() &&
-						pItem->m_LayerId >= 0 && (size_t)pItem->m_LayerId < m_lGroups[pItem->m_GroupId]->m_lLayers.size())
+					if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
+						pItem->m_LayerId >= 0 && (size_t)pItem->m_LayerId < m_vpGroups[pItem->m_GroupId]->m_vpLayers.size())
 					{
-						CLayer *pLayer = m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
+						CLayer *pLayer = m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId];
 						if(pLayer->m_Type == LAYERTYPE_TILES)
 						{
-							CLayerTiles *pTiles = (CLayerTiles *)m_lGroups[pItem->m_GroupId]->m_lLayers[pItem->m_LayerId];
+							CLayerTiles *pTiles = (CLayerTiles *)m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId];
 							// only load auto mappers for tile layers (not physics layers)
 							if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
 								   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
@@ -1025,35 +1025,35 @@ int CEditor::Append(const char *pFileName, int StorageType)
 		return Err;
 
 	// modify indecies
-	gs_ModifyAddAmount = m_Map.m_lImages.size();
+	gs_ModifyAddAmount = m_Map.m_vpImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
 
-	gs_ModifyAddAmount = m_Map.m_lEnvelopes.size();
+	gs_ModifyAddAmount = m_Map.m_vpEnvelopes.size();
 	NewMap.ModifyEnvelopeIndex(ModifyAdd);
 
 	// transfer images
-	for(const auto &pImage : NewMap.m_lImages)
-		m_Map.m_lImages.push_back(pImage);
-	NewMap.m_lImages.clear();
+	for(const auto &pImage : NewMap.m_vpImages)
+		m_Map.m_vpImages.push_back(pImage);
+	NewMap.m_vpImages.clear();
 
 	// transfer envelopes
-	for(const auto &pEnvelope : NewMap.m_lEnvelopes)
-		m_Map.m_lEnvelopes.push_back(pEnvelope);
-	NewMap.m_lEnvelopes.clear();
+	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
+		m_Map.m_vpEnvelopes.push_back(pEnvelope);
+	NewMap.m_vpEnvelopes.clear();
 
 	// transfer groups
 
-	for(const auto &pGroup : NewMap.m_lGroups)
+	for(const auto &pGroup : NewMap.m_vpGroups)
 	{
 		if(pGroup == NewMap.m_pGameGroup)
 			delete pGroup;
 		else
 		{
 			pGroup->m_pMap = &m_Map;
-			m_Map.m_lGroups.push_back(pGroup);
+			m_Map.m_vpGroups.push_back(pGroup);
 		}
 	}
-	NewMap.m_lGroups.clear();
+	NewMap.m_vpGroups.clear();
 
 	// all done \o/
 	return 0;

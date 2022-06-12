@@ -179,23 +179,23 @@ std::unique_ptr<ILogger> log_logger_android()
 
 class CLoggerCollection : public ILogger
 {
-	std::vector<std::shared_ptr<ILogger>> m_apLoggers;
+	std::vector<std::shared_ptr<ILogger>> m_vpLoggers;
 
 public:
-	CLoggerCollection(std::vector<std::shared_ptr<ILogger>> &&apLoggers) :
-		m_apLoggers(std::move(apLoggers))
+	CLoggerCollection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers) :
+		m_vpLoggers(std::move(vpLoggers))
 	{
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		for(auto &pLogger : m_apLoggers)
+		for(auto &pLogger : m_vpLoggers)
 		{
 			pLogger->Log(pMessage);
 		}
 	}
 	void GlobalFinish() override
 	{
-		for(auto &pLogger : m_apLoggers)
+		for(auto &pLogger : m_vpLoggers)
 		{
 			pLogger->GlobalFinish();
 		}
@@ -453,12 +453,12 @@ void CFutureLogger::Set(std::unique_ptr<ILogger> &&pLogger)
 	{
 		dbg_assert(false, "future logger has already been set and can only be set once");
 	}
-	for(const auto &Pending : m_aPending)
+	for(const auto &Pending : m_vPending)
 	{
 		pLoggerRaw->Log(&Pending);
 	}
-	m_aPending.clear();
-	m_aPending.shrink_to_fit();
+	m_vPending.clear();
+	m_vPending.shrink_to_fit();
 	m_PendingLock.unlock();
 }
 
@@ -471,7 +471,7 @@ void CFutureLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 	m_PendingLock.lock();
-	m_aPending.push_back(*pMessage);
+	m_vPending.push_back(*pMessage);
 	m_PendingLock.unlock();
 }
 

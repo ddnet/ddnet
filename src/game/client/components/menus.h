@@ -254,11 +254,11 @@ public:
 	};
 
 protected:
-	std::vector<SCustomEntities> m_EntitiesList;
-	std::vector<SCustomGame> m_GameList;
-	std::vector<SCustomEmoticon> m_EmoticonList;
-	std::vector<SCustomParticle> m_ParticlesList;
-	std::vector<SCustomHud> m_HudList;
+	std::vector<SCustomEntities> m_vEntitiesList;
+	std::vector<SCustomGame> m_vGameList;
+	std::vector<SCustomEmoticon> m_vEmoticonList;
+	std::vector<SCustomParticle> m_vParticlesList;
+	std::vector<SCustomHud> m_vHudList;
 
 	bool m_IsInit = false;
 
@@ -471,7 +471,7 @@ protected:
 		}
 	};
 
-	std::vector<CFriendItem> m_lFriends;
+	std::vector<CFriendItem> m_vFriends;
 	int m_FriendlistSelectedIndex;
 
 	void FriendlistOnUpdate();
@@ -620,7 +620,7 @@ public:
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	std::vector<CDemoItem> m_lDemos;
+	std::vector<CDemoItem> m_vDemos;
 	void DemolistPopulate();
 	bool m_Dummy;
 
@@ -645,7 +645,7 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
-	std::vector<CGhostItem> m_lGhosts;
+	std::vector<CGhostItem> m_vGhosts;
 
 	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 

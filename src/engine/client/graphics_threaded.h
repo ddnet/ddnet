@@ -818,13 +818,13 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CTextureHandle m_InvalidTexture;
 
-	std::vector<int> m_TextureIndices;
+	std::vector<int> m_vTextureIndices;
 	int m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
-	std::vector<uint8_t> m_SpriteHelper;
+	std::vector<uint8_t> m_vSpriteHelper;
 
-	std::vector<SWarning> m_Warnings;
+	std::vector<SWarning> m_vWarnings;
 
 	// is a non full windowed (in a sense that the viewport won't include the whole window),
 	// forced viewport, so that it justifies our UI ratio needs
@@ -842,14 +842,14 @@ class CGraphics_Threaded : public IEngineGraphics
 	std::vector<SVertexArrayInfo> m_VertexArrayInfo;
 	int m_FirstFreeVertexArrayInfo;
 
-	std::vector<int> m_BufferObjectIndices;
+	std::vector<int> m_vBufferObjectIndices;
 	int m_FirstFreeBufferObjectIndex;
 
 	struct SQuadContainer
 	{
 		SQuadContainer(bool AutomaticUpload = true)
 		{
-			m_Quads.clear();
+			m_vQuads.clear();
 			m_QuadBufferObjectIndex = m_QuadBufferContainerIndex = -1;
 			m_FreeIndex = -1;
 
@@ -861,7 +861,7 @@ class CGraphics_Threaded : public IEngineGraphics
 			CCommandBuffer::SVertex m_aVertices[4];
 		};
 
-		std::vector<SQuad> m_Quads;
+		std::vector<SQuad> m_vQuads;
 
 		int m_QuadBufferObjectIndex;
 		int m_QuadBufferContainerIndex;
@@ -870,7 +870,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 		bool m_AutomaticUpload;
 	};
-	std::vector<SQuadContainer> m_QuadContainers;
+	std::vector<SQuadContainer> m_vQuadContainers;
 	int m_FirstFreeQuadContainer;
 
 	struct SWindowResizeListener
@@ -880,7 +880,7 @@ class CGraphics_Threaded : public IEngineGraphics
 		WINDOW_RESIZE_FUNC m_pFunc;
 		void *m_pUser;
 	};
-	std::vector<SWindowResizeListener> m_ResizeListeners;
+	std::vector<SWindowResizeListener> m_vResizeListeners;
 
 	void *AllocCommandBufferData(unsigned AllocSize);
 

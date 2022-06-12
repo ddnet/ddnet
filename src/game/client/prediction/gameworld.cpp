@@ -551,7 +551,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	}
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
-	m_Core.m_aSwitchers = pFrom->m_Core.m_aSwitchers;
+	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	// delete the previous entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)

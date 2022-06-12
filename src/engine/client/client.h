@@ -274,7 +274,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
-	std::vector<SWarning> m_Warnings;
+	std::vector<SWarning> m_vWarnings;
 
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
