@@ -1800,7 +1800,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 	pEditor->Graphics()->QuadsEnd();
 
 	// marker
-	vec2 Marker = vec2(hsv.y * pEditor->UI()->Scale(), (1.0f - hsv.z) * pEditor->UI()->Scale()) * vec2(SVPicker.w, SVPicker.h);
+	vec2 Marker = vec2(hsv.y, (1.0f - hsv.z)) * vec2(SVPicker.w, SVPicker.h);
 	pEditor->Graphics()->QuadsBegin();
 	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
 	IGraphics::CQuadItem aMarker[2];
@@ -1847,7 +1847,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// marker
 	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - hsv.x) * HuePicker.h * pEditor->UI()->Scale(), HuePicker.w, pEditor->UI()->PixelSize());
+	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - hsv.x) * HuePicker.h, HuePicker.w, pEditor->UI()->PixelSize());
 	pEditor->Graphics()->QuadsDrawTL(&QuadItemMarker, 1);
 
 	pEditor->Graphics()->QuadsEnd();

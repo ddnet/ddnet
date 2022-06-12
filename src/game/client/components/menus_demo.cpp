@@ -83,19 +83,19 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		CUIRect Screen = *UI()->Screen();
 		CUIRect Box, Part, Part2;
 		Box = Screen;
-		Box.Margin(150.0f / UI()->Scale(), &Box);
+		Box.Margin(150.0f, &Box);
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, ColorRGBA(0, 0, 0, 0.5f), CUI::CORNER_ALL, 15.0f);
 
-		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
-		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
-		UI()->DoLabelScaled(&Part, Localize("Select a name"), 24.f, TEXTALIGN_CENTER);
-		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
-		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f / UI()->Scale(), &Part);
-		UI()->DoLabelScaled(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_CENTER);
-		Box.HSplitTop(20.f / UI()->Scale(), 0, &Box);
+		Box.HSplitTop(20.f, 0, &Box);
+		Box.HSplitTop(24.f, &Part, &Box);
+		UI()->DoLabel(&Part, Localize("Select a name"), 24.f, TEXTALIGN_CENTER);
+		Box.HSplitTop(20.f, 0, &Box);
+		Box.HSplitTop(20.f, &Part, &Box);
+		Part.VMargin(20.f, &Part);
+		UI()->DoLabel(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_CENTER);
+		Box.HSplitTop(20.f, 0, &Box);
 
 		CUIRect Label, TextBox, Ok, Abort;
 
@@ -158,7 +158,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Label.VSplitLeft(120.0f, 0, &TextBox);
 		TextBox.VSplitLeft(20.0f, 0, &TextBox);
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
-		UI()->DoLabelScaled(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
 		static float s_Offset = 0.0f;
 		if(UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
 		{
@@ -579,7 +579,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	if(gs_ListBoxItemIndex % gs_ListBoxItemsPerRow == 0)
 		gs_ListBoxView.HSplitTop(gs_ListBoxRowHeight /*-2.0f*/, &s_RowView, &gs_ListBoxView);
 
-	s_RowView.VSplitLeft(s_RowView.w / (gs_ListBoxItemsPerRow - gs_ListBoxItemIndex % gs_ListBoxItemsPerRow) / (UI()->Scale()), &Item.m_Rect, &s_RowView);
+	s_RowView.VSplitLeft(s_RowView.w / (gs_ListBoxItemsPerRow - gs_ListBoxItemIndex % gs_ListBoxItemsPerRow), &Item.m_Rect, &s_RowView);
 
 	Item.m_Visible = 1;
 	//item.rect = row;
@@ -911,76 +911,76 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		// left side
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Created:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Created:"), 14.0f, TEXTALIGN_LEFT);
 
 		char aTimestamp[256];
 		str_timestamp_ex(m_vDemos[m_DemolistSelectedIndex].m_Date, aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 
-		UI()->DoLabelScaled(&Right, aTimestamp, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, aTimestamp, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Type:"), 14.0f, TEXTALIGN_LEFT);
-		UI()->DoLabelScaled(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aType, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Type:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aType, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Length:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Length:"), 14.0f, TEXTALIGN_LEFT);
 		int Length = m_vDemos[m_DemolistSelectedIndex].Length();
 		char aBuf[64];
 		str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Version:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Version:"), 14.0f, TEXTALIGN_LEFT);
 		str_format(aBuf, sizeof(aBuf), "%d", m_vDemos[m_DemolistSelectedIndex].m_Info.m_Version);
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_LEFT);
 		str_format(aBuf, sizeof(aBuf), "%d", m_vDemos[m_DemolistSelectedIndex].NumMarkers());
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 
 		// right side
 		Labels = MainView;
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Map:"), 14.0f, TEXTALIGN_LEFT);
-		UI()->DoLabelScaled(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aMapName, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Map:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aMapName, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Size:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Size:"), 14.0f, TEXTALIGN_LEFT);
 		const float Size = m_vDemos[m_DemolistSelectedIndex].Size() / 1024.0f;
 		if(Size > 1024)
 			str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), Size);
-		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		if(m_vDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
 		{
-			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Left, "SHA256:", 14.0f, TEXTALIGN_LEFT);
 			char aSha[SHA256_MAXSTRSIZE];
 			sha256_str(m_vDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha) / 2);
-			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, TEXTALIGN_LEFT);
 		}
 		else
 		{
-			UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Left, Localize("Crc:"), 14.0f, TEXTALIGN_LEFT);
 			str_format(aBuf, sizeof(aBuf), "%08x", m_vDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
-			UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		}
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, TEXTALIGN_LEFT);
-		UI()->DoLabelScaled(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Left, Localize("Netversion:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, TEXTALIGN_LEFT);
 	}
 
 	// demo list
@@ -1157,7 +1157,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			else if(ID == COL_DEMONAME)
 			{
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f * UI()->Scale()) / 2.f, 12.0f * UI()->Scale(), TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f) / 2.f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
 				TextRender()->TextEx(&Cursor, Item.m_aName, -1);
@@ -1167,7 +1167,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				char aBuf[3];
 				str_format(aBuf, sizeof(aBuf), "%d", Item.NumMarkers());
 				Button.VMargin(4.0f, &Button);
-				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
+				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
 			else if(ID == COL_LENGTH && !Item.m_IsDir && Item.m_InfosLoaded)
 			{
@@ -1175,14 +1175,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				char aBuf[32];
 				str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 				Button.VMargin(4.0f, &Button);
-				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
+				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
 			else if(ID == COL_DATE && !Item.m_IsDir)
 			{
 				char aBuf[64];
 				str_timestamp_ex(Item.m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 				Button.VSplitRight(24.0f, &Button, 0);
-				UI()->DoLabelScaled(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
+				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_RIGHT);
 			}
 		}
 	}
@@ -1297,5 +1297,5 @@ void CMenus::RenderDemoList(CUIRect MainView)
 #endif
 	}
 
-	UI()->DoLabelScaled(&LabelRect, aFooterLabel, 14.0f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&LabelRect, aFooterLabel, 14.0f, TEXTALIGN_LEFT);
 }
