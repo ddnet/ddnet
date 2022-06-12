@@ -2,8 +2,8 @@
 // Created by Marvin on 05.06.2022.
 //
 
-#ifndef DDNET_MATERIAL_H
-#define DDNET_MATERIAL_H
+#ifndef GAME_MATERIAL_H
+#define GAME_MATERIAL_H
 
 #include <base/system.h>
 #include <functional>
@@ -91,4 +91,4 @@ private:
 	};
 };
 
-#endif //DDNET_MATERIAL_H
+#endif //GAME_MATERIAL_H
