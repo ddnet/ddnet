@@ -57,10 +57,6 @@ void CScoreboard::OnConsoleInit()
 
 void CScoreboard::RenderGoals(float x, float y, float w)
 {
-	// fetch server info
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
-
 	float h = 50.0f;
 
 	Graphics()->BlendNormal();
@@ -612,12 +608,6 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 void CScoreboard::OnRender()
 {
-	// fetch server info
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
-
-	//Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "huddebug", CurrentServerInfo.m_aGameType, ColorRGBA(1, 0, 1, 1));
-
 	if(!Active())
 		return;
 
@@ -695,6 +685,10 @@ void CScoreboard::OnRender()
 			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"), NumPlayers);
 		}
 	}
+
+	// fetch server info
+	CServerInfo CurrentServerInfo;
+	Client()->GetServerInfo(&CurrentServerInfo);
 
 	if (strcmp(CurrentServerInfo.m_aGameType, "DDraceNetwork") != 0) { // we are not in ddrace mod
 		RenderGoals(Width / 2 - w / 2, 150 + 760 + 10, w);
