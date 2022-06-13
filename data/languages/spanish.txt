@@ -790,9 +790,6 @@ Save
 Switch weapon when out of ammo
 == Cambiar de arma cuando se acabe la munición
 
-Reset wanted weapon on death
-== Restablecer el arma deseada al morir
-
 Show clan above name plates
 == Mostrar el clan por encima de los nombres
 
@@ -1356,7 +1353,7 @@ Graphics cards
 == Tarjetas de video
 
 auto
-== auto. 
+== auto.
 
 Tutorial
 == Tutorial

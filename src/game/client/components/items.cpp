@@ -4,16 +4,17 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/projectile_data.h>
 #include <game/client/render.h>
-#include <game/client/ui.h>
+
+#include <game/client/prediction/entities/laser.h>
+#include <game/client/prediction/entities/pickup.h>
+#include <game/client/prediction/entities/projectile.h>
 
 #include <game/client/components/effects.h>
-#include <game/client/components/flow.h>
 
 #include "items.h"
 
@@ -321,11 +322,12 @@ void CItems::OnRender()
 	int GunStartTick = (Client()->GameTick(g_Config.m_ClDummy) / 7) * 7;
 
 	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
+	auto &aSwitchers = GameClient()->Switchers();
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pProj->m_Number].m_Status[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_Status[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 
 			CProjectileData Data = pProj->GetData();
@@ -342,7 +344,7 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
-			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pPickup->m_Number].m_Status[SwitcherTeam] && BlinkingPickup)
+			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_Status[SwitcherTeam] && BlinkingPickup)
 				continue;
 
 			if(pPickup->InDDNetTile())
@@ -366,7 +368,7 @@ void CItems::OnRender()
 
 		bool Inactive = false;
 		if(pEntEx)
-			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < Collision()->m_NumSwitchers + 1 && !Collision()->m_pSwitchers[pEntEx->m_SwitchNumber].m_Status[SwitcherTeam];
+			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[pEntEx->m_SwitchNumber].m_Status[SwitcherTeam];
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{

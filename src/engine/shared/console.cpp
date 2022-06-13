@@ -1,12 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <new>
 
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
-#include <base/vmath.h>
 
 #include <engine/client/checksum.h>
 #include <engine/shared/protocol.h>
@@ -17,6 +15,7 @@
 #include "linereader.h"
 
 #include <array> // std::size
+#include <new>
 
 // todo: rework this
 
@@ -352,12 +351,7 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 		{
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 			void *pUserData = pCommand->m_pUserData;
-			while(pfnCallback == Con_Chain)
-			{
-				CChain *pChainInfo = static_cast<CChain *>(pUserData);
-				pfnCallback = pChainInfo->m_pfnCallback;
-				pUserData = pChainInfo->m_pCallbackUserData;
-			}
+			TraverseChain(&pfnCallback, &pUserData);
 			int CallbackBits = (uintptr_t)pfnCallback & 0xfff;
 			int *pTarget = &pData->m_aCommandsChecksum[pData->m_NumCommands];
 			*pTarget = ((uint8_t)pCommand->m_pName[0]) | ((uint8_t)pCommand->m_pName[1] << 8) | (CallbackBits << 16);
@@ -859,6 +853,16 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
+{
+	while(*ppfnCallback == Con_Chain)
+	{
+		CChain *pChainInfo = static_cast<CChain *>(*ppUserData);
+		*ppfnCallback = pChainInfo->m_pfnCallback;
+		*ppUserData = pChainInfo->m_pCallbackUserData;
+	}
+}
+
 void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
@@ -868,15 +872,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 	{
 		FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 		void *pUserData = pCommand->m_pUserData;
-
-		// check for chain
-		if(pCommand->m_pfnCallback == Con_Chain)
-		{
-			CChain *pChainInfo = static_cast<CChain *>(pCommand->m_pUserData);
-			pfnCallback = pChainInfo->m_pfnCallback;
-			pUserData = pChainInfo->m_pCallbackUserData;
-		}
-
+		TraverseChain(&pfnCallback, &pUserData);
 		if(pfnCallback == IntVariableCommand)
 		{
 			CIntVariableData *pData = static_cast<CIntVariableData *>(pUserData);
@@ -927,14 +923,8 @@ void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 	if(pCommand)
 	{
 		FCommandCallback pfnCallback = pCommand->m_pfnCallback;
-
-		// check for chain
-		if(pCommand->m_pfnCallback == Con_Chain)
-		{
-			CChain *pChainInfo = static_cast<CChain *>(pCommand->m_pUserData);
-			pfnCallback = pChainInfo->m_pfnCallback;
-		}
-
+		void *pUserData = pCommand->m_pUserData;
+		TraverseChain(&pfnCallback, &pUserData);
 		if(pfnCallback == IntVariableCommand)
 		{
 			int Val = pResult->GetInteger(0) == 0 ? pResult->GetInteger(3) : pResult->GetInteger(2);
@@ -991,8 +981,18 @@ CConsole::~CConsole()
 	while(pCommand)
 	{
 		CCommand *pNext = pCommand->m_pNext;
-		if(pCommand->m_pfnCallback == Con_Chain)
-			delete static_cast<CChain *>(pCommand->m_pUserData);
+		{
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
+			void *pUserData = pCommand->m_pUserData;
+			CChain *pChain = nullptr;
+			while(pfnCallback == Con_Chain)
+			{
+				pChain = static_cast<CChain *>(pUserData);
+				pfnCallback = pChain->m_pfnCallback;
+				pUserData = pChain->m_pCallbackUserData;
+				delete pChain;
+			}
+		}
 		// Temp commands are on m_TempCommands heap, so don't delete them
 		if(!pCommand->m_Temp)
 			delete pCommand;
@@ -1263,12 +1263,7 @@ void CConsole::ResetServerGameSettings()
 			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
 			void *pUserData = pCommand->m_pUserData; \
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
-			while(pfnCallback == Con_Chain) \
-			{ \
-				CChain *pChainInfo = (CChain *)pUserData; \
-				pUserData = pChainInfo->m_pCallbackUserData; \
-				pfnCallback = pChainInfo->m_pfnCallback; \
-			} \
+			TraverseChain(&pfnCallback, &pUserData); \
 			CIntVariableData *pData = (CIntVariableData *)pUserData; \
 			*pData->m_pVariable = pData->m_OldValue; \
 		} \
@@ -1283,12 +1278,7 @@ void CConsole::ResetServerGameSettings()
 			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
 			void *pUserData = pCommand->m_pUserData; \
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
-			while(pfnCallback == Con_Chain) \
-			{ \
-				CChain *pChainInfo = (CChain *)pUserData; \
-				pUserData = pChainInfo->m_pCallbackUserData; \
-				pfnCallback = pChainInfo->m_pfnCallback; \
-			} \
+			TraverseChain(&pfnCallback, &pUserData); \
 			CStrVariableData *pData = (CStrVariableData *)pUserData; \
 			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize); \
 		} \

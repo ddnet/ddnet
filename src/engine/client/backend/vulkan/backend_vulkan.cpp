@@ -35,8 +35,7 @@
 
 #include <unordered_map>
 
-#include <SDL.h>
-#include <SDL_error.h>
+#include <SDL_video.h>
 #include <SDL_vulkan.h>
 
 #include <vulkan/vulkan.h>
@@ -51,6 +50,8 @@
 #ifndef PRIu64
 #define PRIu64 "I64u"
 #endif
+
+using namespace std::chrono_literals;
 
 class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 {
@@ -148,7 +149,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SDeviceDescriptorPools
 	{
-		std::vector<SDeviceDescriptorPool> m_Pools;
+		std::vector<SDeviceDescriptorPool> m_vPools;
 		VkDeviceSize m_DefaultAllocSize = 0;
 		bool m_IsUniformPool = false;
 	};
@@ -344,28 +345,28 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				SDeviceMemoryBlock m_BufferMem;
 				void *m_pMappedBuffer;
 			};
-			std::vector<SMemoryCacheHeap *> m_MemoryHeaps;
+			std::vector<SMemoryCacheHeap *> m_vpMemoryHeaps;
 		};
 		SMemoryCacheType m_MemoryCaches;
-		std::vector<std::vector<SMemoryBlock<ID>>> m_FrameDelayedCachedBufferCleanup;
+		std::vector<std::vector<SMemoryBlock<ID>>> m_vvFrameDelayedCachedBufferCleanup;
 
 		bool m_CanShrink = false;
 
 		void Init(size_t SwapChainImageCount)
 		{
-			m_FrameDelayedCachedBufferCleanup.resize(SwapChainImageCount);
+			m_vvFrameDelayedCachedBufferCleanup.resize(SwapChainImageCount);
 		}
 
 		void DestroyFrameData(size_t ImageCount)
 		{
 			for(size_t i = 0; i < ImageCount; ++i)
 				Cleanup(i);
-			m_FrameDelayedCachedBufferCleanup.clear();
+			m_vvFrameDelayedCachedBufferCleanup.clear();
 		}
 
 		void Destroy(VkDevice &Device)
 		{
-			for(auto it = m_MemoryCaches.m_MemoryHeaps.begin(); it != m_MemoryCaches.m_MemoryHeaps.end();)
+			for(auto it = m_MemoryCaches.m_vpMemoryHeaps.begin(); it != m_MemoryCaches.m_vpMemoryHeaps.end();)
 			{
 				auto *pHeap = *it;
 				if(pHeap->m_pMappedBuffer != nullptr)
@@ -375,28 +376,28 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				vkFreeMemory(Device, pHeap->m_BufferMem.m_Mem, nullptr);
 
 				delete pHeap;
-				it = m_MemoryCaches.m_MemoryHeaps.erase(it);
+				it = m_MemoryCaches.m_vpMemoryHeaps.erase(it);
 			}
 
-			m_MemoryCaches.m_MemoryHeaps.clear();
-			m_FrameDelayedCachedBufferCleanup.clear();
+			m_MemoryCaches.m_vpMemoryHeaps.clear();
+			m_vvFrameDelayedCachedBufferCleanup.clear();
 		}
 
 		void Cleanup(size_t ImgIndex)
 		{
-			for(auto &MemBlock : m_FrameDelayedCachedBufferCleanup[ImgIndex])
+			for(auto &MemBlock : m_vvFrameDelayedCachedBufferCleanup[ImgIndex])
 			{
 				MemBlock.m_UsedSize = 0;
 				MemBlock.m_pHeap->Free(MemBlock.m_HeapData);
 
 				m_CanShrink = true;
 			}
-			m_FrameDelayedCachedBufferCleanup[ImgIndex].clear();
+			m_vvFrameDelayedCachedBufferCleanup[ImgIndex].clear();
 		}
 
 		void FreeMemBlock(SMemoryBlock<ID> &Block, size_t ImgIndex)
 		{
-			m_FrameDelayedCachedBufferCleanup[ImgIndex].push_back(Block);
+			m_vvFrameDelayedCachedBufferCleanup[ImgIndex].push_back(Block);
 		}
 
 		// returns the total free'd memory
@@ -406,9 +407,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			if(m_CanShrink)
 			{
 				m_CanShrink = false;
-				if(m_MemoryCaches.m_MemoryHeaps.size() > 1)
+				if(m_MemoryCaches.m_vpMemoryHeaps.size() > 1)
 				{
-					for(auto it = m_MemoryCaches.m_MemoryHeaps.begin(); it != m_MemoryCaches.m_MemoryHeaps.end();)
+					for(auto it = m_MemoryCaches.m_vpMemoryHeaps.begin(); it != m_MemoryCaches.m_vpMemoryHeaps.end();)
 					{
 						auto *pHeap = *it;
 						if(pHeap->m_Heap.IsUnused())
@@ -421,8 +422,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 							FreeedMemory += pHeap->m_BufferMem.m_Size;
 
 							delete pHeap;
-							it = m_MemoryCaches.m_MemoryHeaps.erase(it);
-							if(m_MemoryCaches.m_MemoryHeaps.size() == 1)
+							it = m_MemoryCaches.m_vpMemoryHeaps.erase(it);
+							if(m_MemoryCaches.m_vpMemoryHeaps.size() == 1)
 								break;
 						}
 						else
@@ -839,7 +840,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SShaderFileCache
 	{
-		std::vector<uint8_t> m_Binary;
+		std::vector<uint8_t> m_vBinary;
 	};
 
 	struct SSwapImgViewportExtent
@@ -883,9 +884,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	SMemoryBlockCache<s_VertexBufferCacheID> m_VertexBufferCache;
 	std::map<uint32_t, SMemoryBlockCache<s_ImageBufferCacheID>> m_ImageBufferCaches;
 
-	std::vector<VkMappedMemoryRange> m_NonFlushedStagingBufferRange;
+	std::vector<VkMappedMemoryRange> m_vNonFlushedStagingBufferRange;
 
-	std::vector<CTexture> m_Textures;
+	std::vector<CTexture> m_vTextures;
 
 	std::atomic<uint64_t> *m_pTextureMemoryUsage;
 	std::atomic<uint64_t> *m_pBufferMemoryUsage;
@@ -926,7 +927,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	uint32_t m_MinUniformAlign;
 
-	std::vector<uint8_t> m_ScreenshotHelper;
+	std::vector<uint8_t> m_vScreenshotHelper;
 
 	SDeviceMemoryBlock m_GetPresentedImgDataHelperMem;
 	VkImage m_GetPresentedImgDataHelperImage = VK_NULL_HANDLE;
@@ -948,9 +949,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		void *m_pMappedData = nullptr;
 	};
 
-	std::vector<std::vector<SDelayedBufferCleanupItem>> m_FrameDelayedBufferCleanup;
-	std::vector<std::vector<CTexture>> m_FrameDelayedTextureCleanup;
-	std::vector<std::vector<std::pair<CTexture, CTexture>>> m_FrameDelayedTextTexturesCleanup;
+	std::vector<std::vector<SDelayedBufferCleanupItem>> m_vvFrameDelayedBufferCleanup;
+	std::vector<std::vector<CTexture>> m_vvFrameDelayedTextureCleanup;
+	std::vector<std::vector<std::pair<CTexture, CTexture>>> m_vvFrameDelayedTextTexturesCleanup;
 
 	size_t m_ThreadCount = 1;
 	static constexpr size_t ms_MainThreadIndex = 0;
@@ -969,38 +970,38 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		bool m_Finished = false;
 		bool m_Started = false;
 	};
-	std::vector<std::unique_ptr<SRenderThread>> m_RenderThreads;
+	std::vector<std::unique_ptr<SRenderThread>> m_vpRenderThreads;
 
 private:
-	std::vector<VkImageView> m_SwapChainImageViewList;
-	std::vector<SSwapChainMultiSampleImage> m_SwapChainMultiSamplingImages;
-	std::vector<VkFramebuffer> m_FramebufferList;
-	std::vector<VkCommandBuffer> m_MainDrawCommandBuffers;
+	std::vector<VkImageView> m_vSwapChainImageViewList;
+	std::vector<SSwapChainMultiSampleImage> m_vSwapChainMultiSamplingImages;
+	std::vector<VkFramebuffer> m_vFramebufferList;
+	std::vector<VkCommandBuffer> m_vMainDrawCommandBuffers;
 
-	std::vector<std::vector<VkCommandBuffer>> m_ThreadDrawCommandBuffers;
-	std::vector<VkCommandBuffer> m_HelperThreadDrawCommandBuffers;
-	std::vector<std::vector<bool>> m_UsedThreadDrawCommandBuffer;
+	std::vector<std::vector<VkCommandBuffer>> m_vvThreadDrawCommandBuffers;
+	std::vector<VkCommandBuffer> m_vHelperThreadDrawCommandBuffers;
+	std::vector<std::vector<bool>> m_vvUsedThreadDrawCommandBuffer;
 
-	std::vector<VkCommandBuffer> m_MemoryCommandBuffers;
-	std::vector<bool> m_UsedMemoryCommandBuffer;
+	std::vector<VkCommandBuffer> m_vMemoryCommandBuffers;
+	std::vector<bool> m_vUsedMemoryCommandBuffer;
 
 	// swapped by use case
-	std::vector<VkSemaphore> m_WaitSemaphores;
-	std::vector<VkSemaphore> m_SigSemaphores;
+	std::vector<VkSemaphore> m_vWaitSemaphores;
+	std::vector<VkSemaphore> m_vSigSemaphores;
 
-	std::vector<VkSemaphore> m_MemorySemaphores;
+	std::vector<VkSemaphore> m_vMemorySemaphores;
 
-	std::vector<VkFence> m_FrameFences;
-	std::vector<VkFence> m_ImagesFences;
+	std::vector<VkFence> m_vFrameFences;
+	std::vector<VkFence> m_vImagesFences;
 
 	uint64_t m_CurFrame = 0;
-	std::vector<uint64_t> m_ImageLastFrameCheck;
+	std::vector<uint64_t> m_vImageLastFrameCheck;
 
 	uint32_t m_LastPresentedSwapChainImageIndex;
 
-	std::vector<SBufferObjectFrame> m_BufferObjects;
+	std::vector<SBufferObjectFrame> m_vBufferObjects;
 
-	std::vector<SBufferContainer> m_BufferContainers;
+	std::vector<SBufferContainer> m_vBufferContainers;
 
 	VkInstance m_VKInstance;
 	VkPhysicalDevice m_VKGPU;
@@ -1047,10 +1048,10 @@ private:
 	SDeviceDescriptorPools m_StandardTextureDescrPool;
 	SDeviceDescriptorPools m_TextTextureDescrPool;
 
-	std::vector<SDeviceDescriptorPools> m_UniformBufferDescrPools;
+	std::vector<SDeviceDescriptorPools> m_vUniformBufferDescrPools;
 
 	VkSwapchainKHR m_VKSwapChain = VK_NULL_HANDLE;
-	std::vector<VkImage> m_SwapChainImages;
+	std::vector<VkImage> m_vSwapChainImages;
 	uint32_t m_SwapChainImageCount = 0;
 
 	std::vector<SStreamMemory<SFrameBuffers>> m_vStreamedVertexBuffers;
@@ -1092,8 +1093,8 @@ private:
 	typedef std::vector<SRenderCommandExecuteBuffer> TCommandList;
 	typedef std::vector<TCommandList> TThreadCommandList;
 
-	TThreadCommandList m_ThreadCommandLists;
-	std::vector<bool> m_ThreadHelperHadCommands;
+	TThreadCommandList m_vvThreadCommandLists;
+	std::vector<bool> m_vThreadHelperHadCommands;
 
 	typedef std::function<bool(const CCommandBuffer::SCommand *, SRenderCommandExecuteBuffer &)> TCommandBufferCommandCallback;
 	typedef std::function<void(SRenderCommandExecuteBuffer &, const CCommandBuffer::SCommand *)> TCommandBufferFillExecuteBufferFunc;
@@ -1373,7 +1374,7 @@ protected:
 			Region.imageOffset = {0, 0, 0};
 			Region.imageExtent = {Viewport.width, Viewport.height, 1};
 
-			auto &SwapImg = m_SwapChainImages[m_LastPresentedSwapChainImageIndex];
+			auto &SwapImg = m_vSwapChainImages[m_LastPresentedSwapChainImageIndex];
 
 			ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 			ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -1423,7 +1424,7 @@ protected:
 			ImageBarrier(SwapImg, 0, 1, 0, 1, m_VKSurfFormat.format, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 			vkEndCommandBuffer(CommandBuffer);
-			m_UsedMemoryCommandBuffer[m_CurImageIndex] = false;
+			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
 
 			VkSubmitInfo SubmitInfo{};
 			SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1552,7 +1553,7 @@ protected:
 			SMemoryHeap::SMemoryHeapQueueElement AllocatedMem;
 			SDeviceMemoryBlock TmpBufferMemory;
 			typename SMemoryBlockCache<ID>::SMemoryCacheType::SMemoryCacheHeap *pCacheHeap = nullptr;
-			auto &Heaps = MemoryCache.m_MemoryCaches.m_MemoryHeaps;
+			auto &Heaps = MemoryCache.m_MemoryCaches.m_vpMemoryHeaps;
 			for(size_t i = 0; i < Heaps.size(); ++i)
 			{
 				auto *pHeap = Heaps[i];
@@ -1667,7 +1668,7 @@ protected:
 		if(UploadRange.offset + UploadRange.size > Block.m_BufferMem.m_Size)
 			UploadRange.size = VK_WHOLE_SIZE;
 
-		m_NonFlushedStagingBufferRange.push_back(UploadRange);
+		m_vNonFlushedStagingBufferRange.push_back(UploadRange);
 	}
 
 	void UploadAndFreeStagingMemBlock(SMemoryBlock<s_StagingBufferCacheID> &Block)
@@ -1675,7 +1676,7 @@ protected:
 		PrepareStagingMemRange(Block);
 		if(!Block.m_IsCached)
 		{
-			m_FrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, Block.m_pMappedBuffer});
+			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, Block.m_pMappedBuffer});
 		}
 		else
 		{
@@ -1688,7 +1689,7 @@ protected:
 		PrepareStagingMemRange(Block);
 		if(!Block.m_IsCached)
 		{
-			m_FrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, Block.m_pMappedBuffer});
+			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, Block.m_pMappedBuffer});
 		}
 		else
 		{
@@ -1705,7 +1706,7 @@ protected:
 	{
 		if(!Block.m_IsCached)
 		{
-			m_FrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, nullptr});
+			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, nullptr});
 		}
 		else
 		{
@@ -1763,9 +1764,9 @@ protected:
 			SMemoryHeap::SMemoryHeapQueueElement AllocatedMem;
 			SDeviceMemoryBlock TmpBufferMemory;
 			typename SMemoryBlockCache<ID>::SMemoryCacheType::SMemoryCacheHeap *pCacheHeap = nullptr;
-			for(size_t i = 0; i < MemoryCache.m_MemoryCaches.m_MemoryHeaps.size(); ++i)
+			for(size_t i = 0; i < MemoryCache.m_MemoryCaches.m_vpMemoryHeaps.size(); ++i)
 			{
-				auto *pHeap = MemoryCache.m_MemoryCaches.m_MemoryHeaps[i];
+				auto *pHeap = MemoryCache.m_MemoryCaches.m_vpMemoryHeaps[i];
 				if(pHeap->m_Heap.Allocate(RequiredSize, RequiredAlignment, AllocatedMem))
 				{
 					TmpBufferMemory = pHeap->m_BufferMem;
@@ -1785,7 +1786,7 @@ protected:
 				pNewHeap->m_BufferMem = TmpBufferMemory;
 				pNewHeap->m_pMappedBuffer = nullptr;
 
-				auto &Heaps = MemoryCache.m_MemoryCaches.m_MemoryHeaps;
+				auto &Heaps = MemoryCache.m_MemoryCaches.m_vpMemoryHeaps;
 				pCacheHeap = pNewHeap;
 				Heaps.emplace_back(pNewHeap);
 				Heaps.back()->m_Heap.Init(MemoryBlockSize * BlockCount, 0);
@@ -1844,7 +1845,7 @@ protected:
 	{
 		if(!Block.m_IsCached)
 		{
-			m_FrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, nullptr});
+			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({Block.m_Buffer, Block.m_BufferMem, nullptr});
 		}
 		else
 		{
@@ -1964,7 +1965,7 @@ protected:
 		UploadStagingBuffers();
 
 		// clear pending buffers, that require deletion
-		for(auto &BufferPair : m_FrameDelayedBufferCleanup[FrameImageIndex])
+		for(auto &BufferPair : m_vvFrameDelayedBufferCleanup[FrameImageIndex])
 		{
 			if(BufferPair.m_pMappedData != nullptr)
 			{
@@ -1972,20 +1973,20 @@ protected:
 			}
 			CleanBufferPair(FrameImageIndex, BufferPair.m_Buffer, BufferPair.m_Mem);
 		}
-		m_FrameDelayedBufferCleanup[FrameImageIndex].clear();
+		m_vvFrameDelayedBufferCleanup[FrameImageIndex].clear();
 
 		// clear pending textures, that require deletion
-		for(auto &Texture : m_FrameDelayedTextureCleanup[FrameImageIndex])
+		for(auto &Texture : m_vvFrameDelayedTextureCleanup[FrameImageIndex])
 		{
 			DestroyTexture(Texture);
 		}
-		m_FrameDelayedTextureCleanup[FrameImageIndex].clear();
+		m_vvFrameDelayedTextureCleanup[FrameImageIndex].clear();
 
-		for(auto &TexturePair : m_FrameDelayedTextTexturesCleanup[FrameImageIndex])
+		for(auto &TexturePair : m_vvFrameDelayedTextTexturesCleanup[FrameImageIndex])
 		{
 			DestroyTextTexture(TexturePair.first, TexturePair.second);
 		}
-		m_FrameDelayedTextTexturesCleanup[FrameImageIndex].clear();
+		m_vvFrameDelayedTextTexturesCleanup[FrameImageIndex].clear();
 
 		m_StagingBufferCache.Cleanup(FrameImageIndex);
 		m_StagingBufferCacheImage.Cleanup(FrameImageIndex);
@@ -2077,11 +2078,11 @@ protected:
 
 	void StartRenderThread(size_t ThreadIndex)
 	{
-		auto &List = m_ThreadCommandLists[ThreadIndex];
+		auto &List = m_vvThreadCommandLists[ThreadIndex];
 		if(!List.empty())
 		{
-			m_ThreadHelperHadCommands[ThreadIndex] = true;
-			auto *pThread = m_RenderThreads[ThreadIndex].get();
+			m_vThreadHelperHadCommands[ThreadIndex] = true;
+			auto *pThread = m_vpRenderThreads[ThreadIndex].get();
 			std::unique_lock<std::mutex> Lock(pThread->m_Mutex);
 			pThread->m_IsRendering = true;
 			pThread->m_Cond.notify_one();
@@ -2096,7 +2097,7 @@ protected:
 
 			for(size_t ThreadIndex = 0; ThreadIndex < m_ThreadCount - 1; ++ThreadIndex)
 			{
-				if(!m_ThreadHelperHadCommands[ThreadIndex])
+				if(!m_vThreadHelperHadCommands[ThreadIndex])
 				{
 					StartRenderThread(ThreadIndex);
 				}
@@ -2104,10 +2105,10 @@ protected:
 
 			for(size_t ThreadIndex = 0; ThreadIndex < m_ThreadCount - 1; ++ThreadIndex)
 			{
-				if(m_ThreadHelperHadCommands[ThreadIndex])
+				if(m_vThreadHelperHadCommands[ThreadIndex])
 				{
-					auto &pRenderThread = m_RenderThreads[ThreadIndex];
-					m_ThreadHelperHadCommands[ThreadIndex] = false;
+					auto &pRenderThread = m_vpRenderThreads[ThreadIndex];
+					m_vThreadHelperHadCommands[ThreadIndex] = false;
 					std::unique_lock<std::mutex> Lock(pRenderThread->m_Mutex);
 					pRenderThread->m_Cond.wait(Lock, [&pRenderThread] { return !pRenderThread->m_IsRendering; });
 					m_vLastPipeline[ThreadIndex + 1] = VK_NULL_HANDLE;
@@ -2118,9 +2119,9 @@ protected:
 
 	void ExecuteMemoryCommandBuffer()
 	{
-		if(m_UsedMemoryCommandBuffer[m_CurImageIndex])
+		if(m_vUsedMemoryCommandBuffer[m_CurImageIndex])
 		{
-			auto &MemoryCommandBuffer = m_MemoryCommandBuffers[m_CurImageIndex];
+			auto &MemoryCommandBuffer = m_vMemoryCommandBuffers[m_CurImageIndex];
 			vkEndCommandBuffer(MemoryCommandBuffer);
 
 			VkSubmitInfo SubmitInfo{};
@@ -2131,7 +2132,7 @@ protected:
 			vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, VK_NULL_HANDLE);
 			vkQueueWaitIdle(m_VKGraphicsQueue);
 
-			m_UsedMemoryCommandBuffer[m_CurImageIndex] = false;
+			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
 		}
 	}
 
@@ -2157,29 +2158,29 @@ protected:
 			size_t RenderThreadCount = m_ThreadCount - 1;
 			for(size_t i = 0; i < RenderThreadCount; ++i)
 			{
-				if(m_UsedThreadDrawCommandBuffer[i + 1][m_CurImageIndex])
+				if(m_vvUsedThreadDrawCommandBuffer[i + 1][m_CurImageIndex])
 				{
-					auto &GraphicThreadCommandBuffer = m_ThreadDrawCommandBuffers[i + 1][m_CurImageIndex];
-					m_HelperThreadDrawCommandBuffers[ThreadedCommandsUsedCount++] = GraphicThreadCommandBuffer;
+					auto &GraphicThreadCommandBuffer = m_vvThreadDrawCommandBuffers[i + 1][m_CurImageIndex];
+					m_vHelperThreadDrawCommandBuffers[ThreadedCommandsUsedCount++] = GraphicThreadCommandBuffer;
 
-					m_UsedThreadDrawCommandBuffer[i + 1][m_CurImageIndex] = false;
+					m_vvUsedThreadDrawCommandBuffer[i + 1][m_CurImageIndex] = false;
 				}
 			}
 			if(ThreadedCommandsUsedCount > 0)
 			{
-				vkCmdExecuteCommands(CommandBuffer, ThreadedCommandsUsedCount, m_HelperThreadDrawCommandBuffers.data());
+				vkCmdExecuteCommands(CommandBuffer, ThreadedCommandsUsedCount, m_vHelperThreadDrawCommandBuffers.data());
 			}
 
 			// special case if swap chain was not completed in one runbuffer call
 
-			if(m_UsedThreadDrawCommandBuffer[0][m_CurImageIndex])
+			if(m_vvUsedThreadDrawCommandBuffer[0][m_CurImageIndex])
 			{
-				auto &GraphicThreadCommandBuffer = m_ThreadDrawCommandBuffers[0][m_CurImageIndex];
+				auto &GraphicThreadCommandBuffer = m_vvThreadDrawCommandBuffers[0][m_CurImageIndex];
 				vkEndCommandBuffer(GraphicThreadCommandBuffer);
 
 				vkCmdExecuteCommands(CommandBuffer, 1, &GraphicThreadCommandBuffer);
 
-				m_UsedThreadDrawCommandBuffer[0][m_CurImageIndex] = false;
+				m_vvUsedThreadDrawCommandBuffer[0][m_CurImageIndex] = false;
 			}
 		}
 
@@ -2190,7 +2191,7 @@ protected:
 			SetError("Command buffer cannot be ended anymore.");
 		}
 
-		VkSemaphore WaitSemaphore = m_WaitSemaphores[m_CurFrames];
+		VkSemaphore WaitSemaphore = m_vWaitSemaphores[m_CurFrames];
 
 		VkSubmitInfo SubmitInfo{};
 		SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2200,9 +2201,9 @@ protected:
 
 		std::array<VkCommandBuffer, 2> aCommandBuffers = {};
 
-		if(m_UsedMemoryCommandBuffer[m_CurImageIndex])
+		if(m_vUsedMemoryCommandBuffer[m_CurImageIndex])
 		{
-			auto &MemoryCommandBuffer = m_MemoryCommandBuffers[m_CurImageIndex];
+			auto &MemoryCommandBuffer = m_vMemoryCommandBuffers[m_CurImageIndex];
 			vkEndCommandBuffer(MemoryCommandBuffer);
 
 			aCommandBuffers[0] = MemoryCommandBuffer;
@@ -2210,7 +2211,7 @@ protected:
 			SubmitInfo.commandBufferCount = 2;
 			SubmitInfo.pCommandBuffers = aCommandBuffers.data();
 
-			m_UsedMemoryCommandBuffer[m_CurImageIndex] = false;
+			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = false;
 		}
 
 		std::array<VkSemaphore, 1> aWaitSemaphores = {WaitSemaphore};
@@ -2219,13 +2220,13 @@ protected:
 		SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
 		SubmitInfo.pWaitDstStageMask = aWaitStages.data();
 
-		std::array<VkSemaphore, 1> aSignalSemaphores = {m_SigSemaphores[m_CurFrames]};
+		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vSigSemaphores[m_CurFrames]};
 		SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
 		SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
 
-		vkResetFences(m_VKDevice, 1, &m_FrameFences[m_CurFrames]);
+		vkResetFences(m_VKDevice, 1, &m_vFrameFences[m_CurFrames]);
 
-		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_FrameFences[m_CurFrames]);
+		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vFrameFences[m_CurFrames]);
 		if(QueueSubmitRes != VK_SUCCESS)
 		{
 			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
@@ -2233,7 +2234,7 @@ protected:
 				SetError("Submitting to graphics queue failed.", pCritErrorMsg);
 		}
 
-		std::swap(m_WaitSemaphores[m_CurFrames], m_SigSemaphores[m_CurFrames]);
+		std::swap(m_vWaitSemaphores[m_CurFrames], m_vSigSemaphores[m_CurFrames]);
 
 		VkPresentInfoKHR PresentInfo{};
 		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -2272,7 +2273,7 @@ protected:
 			RecreateSwapChain();
 		}
 
-		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_SigSemaphores[m_CurFrames], VK_NULL_HANDLE, &m_CurImageIndex);
+		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_vSigSemaphores[m_CurFrames], VK_NULL_HANDLE, &m_CurImageIndex);
 		if(AcqResult != VK_SUCCESS)
 		{
 			if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
@@ -2301,31 +2302,31 @@ protected:
 				}
 			}
 		}
-		std::swap(m_WaitSemaphores[m_CurFrames], m_SigSemaphores[m_CurFrames]);
+		std::swap(m_vWaitSemaphores[m_CurFrames], m_vSigSemaphores[m_CurFrames]);
 
-		if(m_ImagesFences[m_CurImageIndex] != VK_NULL_HANDLE)
+		if(m_vImagesFences[m_CurImageIndex] != VK_NULL_HANDLE)
 		{
-			vkWaitForFences(m_VKDevice, 1, &m_ImagesFences[m_CurImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
+			vkWaitForFences(m_VKDevice, 1, &m_vImagesFences[m_CurImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
 		}
-		m_ImagesFences[m_CurImageIndex] = m_FrameFences[m_CurFrames];
+		m_vImagesFences[m_CurImageIndex] = m_vFrameFences[m_CurFrames];
 
 		// next frame
 		m_CurFrame++;
-		m_ImageLastFrameCheck[m_CurImageIndex] = m_CurFrame;
+		m_vImageLastFrameCheck[m_CurImageIndex] = m_CurFrame;
 
 		// check if older frames weren't used in a long time
-		for(size_t FrameImageIndex = 0; FrameImageIndex < m_ImageLastFrameCheck.size(); ++FrameImageIndex)
+		for(size_t FrameImageIndex = 0; FrameImageIndex < m_vImageLastFrameCheck.size(); ++FrameImageIndex)
 		{
-			auto LastFrame = m_ImageLastFrameCheck[FrameImageIndex];
+			auto LastFrame = m_vImageLastFrameCheck[FrameImageIndex];
 			if(m_CurFrame - LastFrame > (uint64_t)m_SwapChainImageCount)
 			{
-				if(m_ImagesFences[FrameImageIndex] != VK_NULL_HANDLE)
+				if(m_vImagesFences[FrameImageIndex] != VK_NULL_HANDLE)
 				{
-					vkWaitForFences(m_VKDevice, 1, &m_ImagesFences[FrameImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
+					vkWaitForFences(m_VKDevice, 1, &m_vImagesFences[FrameImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
 					ClearFrameData(FrameImageIndex);
-					m_ImagesFences[FrameImageIndex] = VK_NULL_HANDLE;
+					m_vImagesFences[FrameImageIndex] = VK_NULL_HANDLE;
 				}
-				m_ImageLastFrameCheck[FrameImageIndex] = m_CurFrame;
+				m_vImageLastFrameCheck[FrameImageIndex] = m_CurFrame;
 			}
 		}
 
@@ -2348,7 +2349,7 @@ protected:
 		VkRenderPassBeginInfo RenderPassInfo{};
 		RenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		RenderPassInfo.renderPass = m_VKRenderPass;
-		RenderPassInfo.framebuffer = m_FramebufferList[m_CurImageIndex];
+		RenderPassInfo.framebuffer = m_vFramebufferList[m_CurImageIndex];
 		RenderPassInfo.renderArea.offset = {0, 0};
 		RenderPassInfo.renderArea.extent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 
@@ -2364,11 +2365,11 @@ protected:
 
 	void UploadStagingBuffers()
 	{
-		if(!m_NonFlushedStagingBufferRange.empty())
+		if(!m_vNonFlushedStagingBufferRange.empty())
 		{
-			vkFlushMappedMemoryRanges(m_VKDevice, m_NonFlushedStagingBufferRange.size(), m_NonFlushedStagingBufferRange.data());
+			vkFlushMappedMemoryRanges(m_VKDevice, m_vNonFlushedStagingBufferRange.size(), m_vNonFlushedStagingBufferRange.data());
 
-			m_NonFlushedStagingBufferRange.clear();
+			m_vNonFlushedStagingBufferRange.clear();
 		}
 	}
 
@@ -2429,7 +2430,7 @@ protected:
 		size_t ImageSize = Width * Height * ColorChannelCount;
 		auto StagingBuffer = GetStagingBufferImage(pData, ImageSize);
 
-		auto &Tex = m_Textures[TextureSlot];
+		auto &Tex = m_vTextures[TextureSlot];
 
 		if(Tex.m_RescaleCount > 0)
 		{
@@ -2471,9 +2472,9 @@ protected:
 		size_t ImageIndex = (size_t)Slot;
 		int ImageColorChannels = VulkanFormatToImageColorChannelCount(Format);
 
-		while(ImageIndex >= m_Textures.size())
+		while(ImageIndex >= m_vTextures.size())
 		{
-			m_Textures.resize((m_Textures.size() * 2) + 1);
+			m_vTextures.resize((m_vTextures.size() * 2) + 1);
 		}
 
 		// resample if needed
@@ -2505,7 +2506,7 @@ protected:
 				MipMapLevelCount = 1;
 		}
 
-		CTexture &Texture = m_Textures[ImageIndex];
+		CTexture &Texture = m_vTextures[ImageIndex];
 
 		Texture.m_Width = Width;
 		Texture.m_Height = Height;
@@ -2943,11 +2944,11 @@ protected:
 			pUploadData = pUploadDataTmp;
 		}
 
-		while(BufferIndex >= m_BufferObjects.size())
+		while(BufferIndex >= m_vBufferObjects.size())
 		{
-			m_BufferObjects.resize((m_BufferObjects.size() * 2) + 1);
+			m_vBufferObjects.resize((m_vBufferObjects.size() * 2) + 1);
 		}
-		auto &BufferObject = m_BufferObjects[BufferIndex];
+		auto &BufferObject = m_vBufferObjects[BufferIndex];
 
 		VkBuffer VertexBuffer;
 		size_t BufferOffset = 0;
@@ -2981,7 +2982,7 @@ protected:
 
 	void DeleteBufferObject(size_t BufferIndex)
 	{
-		auto &BufferObject = m_BufferObjects[BufferIndex];
+		auto &BufferObject = m_vBufferObjects[BufferIndex];
 		if(!BufferObject.m_IsStreamedBuffer)
 		{
 			FreeVertexMemBlock(BufferObject.m_BufferObject.m_Mem);
@@ -3201,8 +3202,8 @@ protected:
 
 	void RenderTileLayer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, size_t DrawCalls, const CCommandBuffer::SState &State, size_t BufferContainerIndex)
 	{
-		size_t BufferObjectIndex = (size_t)m_BufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_BufferObjects[BufferObjectIndex];
+		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
+		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
@@ -3210,7 +3211,7 @@ protected:
 		bool IsTextured = GetIsTextured(State);
 		if(IsTextured)
 		{
-			auto &DescrSet = m_Textures[State.m_Texture].m_VKStandard3DTexturedDescrSet;
+			auto &DescrSet = m_vTextures[State.m_Texture].m_VKStandard3DTexturedDescrSet;
 			ExecBuffer.m_aDescriptors[0] = DescrSet;
 		}
 
@@ -3342,14 +3343,14 @@ protected:
 public:
 	CCommandProcessorFragment_Vulkan()
 	{
-		m_Textures.reserve(CCommandBuffer::MAX_TEXTURES);
+		m_vTextures.reserve(CCommandBuffer::MAX_TEXTURES);
 	}
 
 	/************************
 	* VULKAN SETUP CODE
 	************************/
 
-	bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &VKExtensions)
+	bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
 	{
 		unsigned int ExtCount = 0;
 		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, nullptr))
@@ -3358,8 +3359,8 @@ public:
 			return false;
 		}
 
-		std::vector<const char *> ExtensionList(ExtCount);
-		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, ExtensionList.data()))
+		std::vector<const char *> vExtensionList(ExtCount);
+		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, vExtensionList.data()))
 		{
 			SetError("Could not get instance extensions from SDL.");
 			return false;
@@ -3367,7 +3368,7 @@ public:
 
 		for(uint32_t i = 0; i < ExtCount; i++)
 		{
-			VKExtensions.emplace_back(ExtensionList[i]);
+			vVKExtensions.emplace_back(vExtensionList[i]);
 		}
 
 		return true;
@@ -3396,15 +3397,15 @@ public:
 
 	std::vector<VkImageUsageFlags> OurImageUsages()
 	{
-		std::vector<VkImageUsageFlags> ImgUsages;
+		std::vector<VkImageUsageFlags> vImgUsages;
 
-		ImgUsages.emplace_back(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-		ImgUsages.emplace_back(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+		vImgUsages.emplace_back(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+		vImgUsages.emplace_back(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 
-		return ImgUsages;
+		return vImgUsages;
 	}
 
-	bool GetVulkanLayers(std::vector<std::string> &VKLayers)
+	bool GetVulkanLayers(std::vector<std::string> &vVKLayers)
 	{
 		uint32_t LayerCount = 0;
 		VkResult Res = vkEnumerateInstanceLayerProperties(&LayerCount, NULL);
@@ -3414,8 +3415,8 @@ public:
 			return false;
 		}
 
-		std::vector<VkLayerProperties> VKInstanceLayers(LayerCount);
-		Res = vkEnumerateInstanceLayerProperties(&LayerCount, VKInstanceLayers.data());
+		std::vector<VkLayerProperties> vVKInstanceLayers(LayerCount);
+		Res = vkEnumerateInstanceLayerProperties(&LayerCount, vVKInstanceLayers.data());
 		if(Res != VK_SUCCESS)
 		{
 			SetError("Could not get vulkan layers.");
@@ -3423,36 +3424,36 @@ public:
 		}
 
 		std::set<std::string> ReqLayerNames = OurVKLayers();
-		VKLayers.clear();
-		for(const auto &LayerName : VKInstanceLayers)
+		vVKLayers.clear();
+		for(const auto &LayerName : vVKInstanceLayers)
 		{
 			auto it = ReqLayerNames.find(std::string(LayerName.layerName));
 			if(it != ReqLayerNames.end())
 			{
-				VKLayers.emplace_back(LayerName.layerName);
+				vVKLayers.emplace_back(LayerName.layerName);
 			}
 		}
 
 		return true;
 	}
 
-	bool CreateVulkanInstance(const std::vector<std::string> &VKLayers, const std::vector<std::string> &VKExtensions, bool TryDebugExtensions)
+	bool CreateVulkanInstance(const std::vector<std::string> &vVKLayers, const std::vector<std::string> &vVKExtensions, bool TryDebugExtensions)
 	{
-		std::vector<const char *> LayersCStr;
-		LayersCStr.reserve(VKLayers.size());
-		for(const auto &Layer : VKLayers)
-			LayersCStr.emplace_back(Layer.c_str());
+		std::vector<const char *> vLayersCStr;
+		vLayersCStr.reserve(vVKLayers.size());
+		for(const auto &Layer : vVKLayers)
+			vLayersCStr.emplace_back(Layer.c_str());
 
-		std::vector<const char *> ExtCStr;
-		ExtCStr.reserve(VKExtensions.size() + 1);
-		for(const auto &Ext : VKExtensions)
-			ExtCStr.emplace_back(Ext.c_str());
+		std::vector<const char *> vExtCStr;
+		vExtCStr.reserve(vVKExtensions.size() + 1);
+		for(const auto &Ext : vVKExtensions)
+			vExtCStr.emplace_back(Ext.c_str());
 
 #ifdef VK_EXT_debug_utils
 		if(TryDebugExtensions && (g_Config.m_DbgGfx == DEBUG_GFX_MODE_MINIMUM || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL))
 		{
 			// debug message support
-			ExtCStr.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			vExtCStr.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 #endif
 
@@ -3484,10 +3485,10 @@ public:
 		VKInstanceInfo.pNext = pExt;
 		VKInstanceInfo.flags = 0;
 		VKInstanceInfo.pApplicationInfo = &VKAppInfo;
-		VKInstanceInfo.enabledExtensionCount = static_cast<uint32_t>(ExtCStr.size());
-		VKInstanceInfo.ppEnabledExtensionNames = ExtCStr.data();
-		VKInstanceInfo.enabledLayerCount = static_cast<uint32_t>(LayersCStr.size());
-		VKInstanceInfo.ppEnabledLayerNames = LayersCStr.data();
+		VKInstanceInfo.enabledExtensionCount = static_cast<uint32_t>(vExtCStr.size());
+		VKInstanceInfo.ppEnabledExtensionNames = vExtCStr.data();
+		VKInstanceInfo.enabledLayerCount = static_cast<uint32_t>(vLayersCStr.size());
+		VKInstanceInfo.ppEnabledLayerNames = vLayersCStr.data();
 
 		bool TryAgain = false;
 
@@ -3502,7 +3503,7 @@ public:
 			TryAgain = true;
 
 		if(TryAgain && TryDebugExtensions)
-			return CreateVulkanInstance(VKLayers, VKExtensions, false);
+			return CreateVulkanInstance(vVKLayers, vVKExtensions, false);
 
 		return true;
 	}
@@ -3566,12 +3567,12 @@ public:
 			return false;
 		}
 
-		std::vector<VkPhysicalDevice> DeviceList(DevicesCount);
-		vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, DeviceList.data());
+		std::vector<VkPhysicalDevice> vDeviceList(DevicesCount);
+		vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, vDeviceList.data());
 
 		size_t Index = 0;
-		std::vector<VkPhysicalDeviceProperties> DevicePropList(DeviceList.size());
-		m_pGPUList->m_GPUs.reserve(DeviceList.size());
+		std::vector<VkPhysicalDeviceProperties> vDevicePropList(vDeviceList.size());
+		m_pGPUList->m_vGPUs.reserve(vDeviceList.size());
 
 		size_t FoundDeviceIndex = 0;
 		size_t FoundGPUType = STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INVALID;
@@ -3580,18 +3581,18 @@ public:
 
 		bool IsAutoGPU = str_comp(g_Config.m_GfxGPUName, "auto") == 0;
 
-		for(auto &CurDevice : DeviceList)
+		for(auto &CurDevice : vDeviceList)
 		{
-			vkGetPhysicalDeviceProperties(CurDevice, &(DevicePropList[Index]));
+			vkGetPhysicalDeviceProperties(CurDevice, &(vDevicePropList[Index]));
 
-			auto &DeviceProp = DevicePropList[Index];
+			auto &DeviceProp = vDevicePropList[Index];
 
 			STWGraphicGPU::ETWGraphicsGPUType GPUType = VKGPUTypeToGraphicsGPUType(DeviceProp.deviceType);
 
 			STWGraphicGPU::STWGraphicGPUItem NewGPU;
 			str_copy(NewGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_Name)));
 			NewGPU.m_GPUType = GPUType;
-			m_pGPUList->m_GPUs.push_back(NewGPU);
+			m_pGPUList->m_vGPUs.push_back(NewGPU);
 
 			Index++;
 
@@ -3617,7 +3618,7 @@ public:
 			FoundDeviceIndex = 1;
 
 		{
-			auto &DeviceProp = DevicePropList[FoundDeviceIndex - 1];
+			auto &DeviceProp = vDevicePropList[FoundDeviceIndex - 1];
 
 			int DevAPIMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
 			int DevAPIMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
@@ -3677,7 +3678,7 @@ public:
 			}
 		}
 
-		VkPhysicalDevice CurDevice = DeviceList[FoundDeviceIndex - 1];
+		VkPhysicalDevice CurDevice = vDeviceList[FoundDeviceIndex - 1];
 
 		uint32_t FamQueueCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(CurDevice, &FamQueueCount, nullptr);
@@ -3687,17 +3688,17 @@ public:
 			return false;
 		}
 
-		std::vector<VkQueueFamilyProperties> QueuePropList(FamQueueCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(CurDevice, &FamQueueCount, QueuePropList.data());
+		std::vector<VkQueueFamilyProperties> vQueuePropList(FamQueueCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(CurDevice, &FamQueueCount, vQueuePropList.data());
 
 		uint32_t QueueNodeIndex = std::numeric_limits<uint32_t>::max();
 		for(uint32_t i = 0; i < FamQueueCount; i++)
 		{
-			if(QueuePropList[i].queueCount > 0 && (QueuePropList[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
+			if(vQueuePropList[i].queueCount > 0 && (vQueuePropList[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{
 				QueueNodeIndex = i;
 			}
-			/*if(QueuePropList[i].queueCount > 0 && (QueuePropList[i].queueFlags & VK_QUEUE_COMPUTE_BIT))
+			/*if(vQueuePropList[i].queueCount > 0 && (vQueuePropList[i].queueFlags & VK_QUEUE_COMPUTE_BIT))
 			{
 				QueueNodeIndex = i;
 			}*/
@@ -3714,12 +3715,12 @@ public:
 		return true;
 	}
 
-	bool CreateLogicalDevice(const std::vector<std::string> &VKLayers)
+	bool CreateLogicalDevice(const std::vector<std::string> &vVKLayers)
 	{
-		std::vector<const char *> LayerCNames;
-		LayerCNames.reserve(VKLayers.size());
-		for(const auto &Layer : VKLayers)
-			LayerCNames.emplace_back(Layer.c_str());
+		std::vector<const char *> vLayerCNames;
+		vLayerCNames.reserve(vVKLayers.size());
+		for(const auto &Layer : vVKLayers)
+			vLayerCNames.emplace_back(Layer.c_str());
 
 		uint32_t DevPropCount = 0;
 		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, NULL) != VK_SUCCESS)
@@ -3728,22 +3729,22 @@ public:
 			return false;
 		}
 
-		std::vector<VkExtensionProperties> DevPropList(DevPropCount);
-		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, DevPropList.data()) != VK_SUCCESS)
+		std::vector<VkExtensionProperties> vDevPropList(DevPropCount);
+		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, vDevPropList.data()) != VK_SUCCESS)
 		{
 			SetError("Querying logical device extension propterties failed.");
 			return false;
 		}
 
-		std::vector<const char *> DevPropCNames;
+		std::vector<const char *> vDevPropCNames;
 		std::set<std::string> OurDevExt = OurDeviceExtensions();
 
-		for(const auto &CurExtProp : DevPropList)
+		for(const auto &CurExtProp : vDevPropList)
 		{
 			auto it = OurDevExt.find(std::string(CurExtProp.extensionName));
 			if(it != OurDevExt.end())
 			{
-				DevPropCNames.emplace_back(CurExtProp.extensionName);
+				vDevPropCNames.emplace_back(CurExtProp.extensionName);
 			}
 		}
 
@@ -3751,8 +3752,8 @@ public:
 		VKQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		VKQueueCreateInfo.queueFamilyIndex = m_VKGraphicsQueueIndex;
 		VKQueueCreateInfo.queueCount = 1;
-		std::vector<float> queue_prio = {1.0f};
-		VKQueueCreateInfo.pQueuePriorities = queue_prio.data();
+		float QueuePrio = 1.0f;
+		VKQueueCreateInfo.pQueuePriorities = &QueuePrio;
 		VKQueueCreateInfo.pNext = NULL;
 		VKQueueCreateInfo.flags = 0;
 
@@ -3760,10 +3761,10 @@ public:
 		VKCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		VKCreateInfo.queueCreateInfoCount = 1;
 		VKCreateInfo.pQueueCreateInfos = &VKQueueCreateInfo;
-		VKCreateInfo.ppEnabledLayerNames = LayerCNames.data();
-		VKCreateInfo.enabledLayerCount = static_cast<uint32_t>(LayerCNames.size());
-		VKCreateInfo.ppEnabledExtensionNames = DevPropCNames.data();
-		VKCreateInfo.enabledExtensionCount = static_cast<uint32_t>(DevPropCNames.size());
+		VKCreateInfo.ppEnabledLayerNames = vLayerCNames.data();
+		VKCreateInfo.enabledLayerCount = static_cast<uint32_t>(vLayerCNames.size());
+		VKCreateInfo.ppEnabledExtensionNames = vDevPropCNames.data();
+		VKCreateInfo.enabledExtensionCount = static_cast<uint32_t>(vDevPropCNames.size());
 		VKCreateInfo.pNext = NULL;
 		VKCreateInfo.pEnabledFeatures = NULL;
 		VKCreateInfo.flags = 0;
@@ -3812,15 +3813,15 @@ public:
 			return false;
 		}
 
-		std::vector<VkPresentModeKHR> PresentModeList(PresentModeCount);
-		if(vkGetPhysicalDeviceSurfacePresentModesKHR(m_VKGPU, m_VKPresentSurface, &PresentModeCount, PresentModeList.data()) != VK_SUCCESS)
+		std::vector<VkPresentModeKHR> vPresentModeList(PresentModeCount);
+		if(vkGetPhysicalDeviceSurfacePresentModesKHR(m_VKGPU, m_VKPresentSurface, &PresentModeCount, vPresentModeList.data()) != VK_SUCCESS)
 		{
 			SetError("The device surface presentation modes could not be fetched.");
 			return false;
 		}
 
 		VKIOMode = g_Config.m_GfxVsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR;
-		for(auto &Mode : PresentModeList)
+		for(auto &Mode : vPresentModeList)
 		{
 			if(Mode == VKIOMode)
 				return true;
@@ -3828,7 +3829,7 @@ public:
 
 		dbg_msg("vulkan", "warning: requested presentation mode was not available. falling back to mailbox / fifo relaxed.");
 		VKIOMode = g_Config.m_GfxVsync ? VK_PRESENT_MODE_FIFO_RELAXED_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
-		for(auto &Mode : PresentModeList)
+		for(auto &Mode : vPresentModeList)
 		{
 			if(Mode == VKIOMode)
 				return true;
@@ -3836,7 +3837,7 @@ public:
 
 		dbg_msg("vulkan", "warning: requested presentation mode was not available. using first available.");
 		if(PresentModeCount > 0)
-			VKIOMode = PresentModeList[0];
+			VKIOMode = vPresentModeList[0];
 
 		return true;
 	}
@@ -3894,16 +3895,16 @@ public:
 
 	bool GetImageUsage(const VkSurfaceCapabilitiesKHR &VKCapabilities, VkImageUsageFlags &VKOutUsage)
 	{
-		std::vector<VkImageUsageFlags> OurImgUsages = OurImageUsages();
-		if(OurImgUsages.empty())
+		std::vector<VkImageUsageFlags> vOurImgUsages = OurImageUsages();
+		if(vOurImgUsages.empty())
 		{
 			SetError("Framebuffer image attachment types not supported.");
 			return false;
 		}
 
-		VKOutUsage = OurImgUsages[0];
+		VKOutUsage = vOurImgUsages[0];
 
-		for(const auto &ImgUsage : OurImgUsages)
+		for(const auto &ImgUsage : vOurImgUsages)
 		{
 			VkImageUsageFlags ImgUsageFlags = ImgUsage & VKCapabilities.supportedUsageFlags;
 			if(ImgUsageFlags != ImgUsage)
@@ -3935,8 +3936,8 @@ public:
 			return false;
 		}
 
-		std::vector<VkSurfaceFormatKHR> SurfFormatList(SurfFormats);
-		Res = vkGetPhysicalDeviceSurfaceFormatsKHR(m_VKGPU, m_VKPresentSurface, &SurfFormats, SurfFormatList.data());
+		std::vector<VkSurfaceFormatKHR> vSurfFormatList(SurfFormats);
+		Res = vkGetPhysicalDeviceSurfaceFormatsKHR(m_VKGPU, m_VKPresentSurface, &SurfFormats, vSurfFormatList.data());
 		if(Res != VK_SUCCESS && Res != VK_INCOMPLETE)
 		{
 			SetError("The device surface format fetching failed.");
@@ -3948,7 +3949,7 @@ public:
 			dbg_msg("vulkan", "warning: not all surface formats are requestable with your current settings.");
 		}
 
-		if(SurfFormatList.size() == 1 && SurfFormatList[0].format == VK_FORMAT_UNDEFINED)
+		if(vSurfFormatList.size() == 1 && vSurfFormatList[0].format == VK_FORMAT_UNDEFINED)
 		{
 			m_VKSurfFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
 			m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
@@ -3956,7 +3957,7 @@ public:
 			return true;
 		}
 
-		for(const auto &FindFormat : SurfFormatList)
+		for(const auto &FindFormat : vSurfFormatList)
 		{
 			if(FindFormat.format == VK_FORMAT_B8G8R8A8_UNORM && FindFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
 			{
@@ -3971,7 +3972,7 @@ public:
 		}
 
 		dbg_msg("vulkan", "warning: surface format was not RGBA(or variants of it). This can potentially cause weird looking images(too bright etc.).");
-		m_VKSurfFormat = SurfFormatList[0];
+		m_VKSurfFormat = vSurfFormatList[0];
 		return true;
 	}
 
@@ -4055,8 +4056,8 @@ public:
 
 		m_SwapChainImageCount = ImgCount;
 
-		m_SwapChainImages.resize(ImgCount);
-		if(vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, m_SwapChainImages.data()) != VK_SUCCESS)
+		m_vSwapChainImages.resize(ImgCount);
+		if(vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, m_vSwapChainImages.data()) != VK_SUCCESS)
 		{
 			SetError("Could not get swap chain images.");
 			return false;
@@ -4067,7 +4068,7 @@ public:
 
 	void ClearSwapChainImageHandles()
 	{
-		m_SwapChainImages.clear();
+		m_vSwapChainImages.clear();
 	}
 
 	void GetDeviceQueue()
@@ -4145,13 +4146,13 @@ public:
 
 	bool CreateImageViews()
 	{
-		m_SwapChainImageViewList.resize(m_SwapChainImageCount);
+		m_vSwapChainImageViewList.resize(m_SwapChainImageCount);
 
 		for(size_t i = 0; i < m_SwapChainImageCount; i++)
 		{
 			VkImageViewCreateInfo CreateInfo{};
 			CreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			CreateInfo.image = m_SwapChainImages[i];
+			CreateInfo.image = m_vSwapChainImages[i];
 			CreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			CreateInfo.format = m_VKSurfFormat.format;
 			CreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -4164,7 +4165,7 @@ public:
 			CreateInfo.subresourceRange.baseArrayLayer = 0;
 			CreateInfo.subresourceRange.layerCount = 1;
 
-			if(vkCreateImageView(m_VKDevice, &CreateInfo, nullptr, &m_SwapChainImageViewList[i]) != VK_SUCCESS)
+			if(vkCreateImageView(m_VKDevice, &CreateInfo, nullptr, &m_vSwapChainImageViewList[i]) != VK_SUCCESS)
 			{
 				SetError("Could not create image views for the swap chain framebuffers.");
 				return false;
@@ -4176,23 +4177,23 @@ public:
 
 	void DestroyImageViews()
 	{
-		for(auto &ImageView : m_SwapChainImageViewList)
+		for(auto &ImageView : m_vSwapChainImageViewList)
 		{
 			vkDestroyImageView(m_VKDevice, ImageView, nullptr);
 		}
 
-		m_SwapChainImageViewList.clear();
+		m_vSwapChainImageViewList.clear();
 	}
 
 	bool CreateMultiSamplerImageAttachments()
 	{
-		m_SwapChainMultiSamplingImages.resize(m_SwapChainImageCount);
+		m_vSwapChainMultiSamplingImages.resize(m_SwapChainImageCount);
 		if(HasMultiSampling())
 		{
 			for(size_t i = 0; i < m_SwapChainImageCount; ++i)
 			{
-				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_SwapChainMultiSamplingImages[i].m_Image, m_SwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-				m_SwapChainMultiSamplingImages[i].m_ImgView = CreateImageView(m_SwapChainMultiSamplingImages[i].m_Image, m_VKSurfFormat.format, VK_IMAGE_VIEW_TYPE_2D, 1, 1);
+				CreateImage(m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width, m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height, 1, 1, m_VKSurfFormat.format, VK_IMAGE_TILING_OPTIMAL, m_vSwapChainMultiSamplingImages[i].m_Image, m_vSwapChainMultiSamplingImages[i].m_ImgMem, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+				m_vSwapChainMultiSamplingImages[i].m_ImgView = CreateImageView(m_vSwapChainMultiSamplingImages[i].m_Image, m_VKSurfFormat.format, VK_IMAGE_VIEW_TYPE_2D, 1, 1);
 			}
 		}
 
@@ -4203,15 +4204,15 @@ public:
 	{
 		if(HasMultiSampling())
 		{
-			m_SwapChainMultiSamplingImages.resize(m_SwapChainImageCount);
+			m_vSwapChainMultiSamplingImages.resize(m_SwapChainImageCount);
 			for(size_t i = 0; i < m_SwapChainImageCount; ++i)
 			{
-				vkDestroyImage(m_VKDevice, m_SwapChainMultiSamplingImages[i].m_Image, nullptr);
-				vkDestroyImageView(m_VKDevice, m_SwapChainMultiSamplingImages[i].m_ImgView, nullptr);
-				FreeImageMemBlock(m_SwapChainMultiSamplingImages[i].m_ImgMem);
+				vkDestroyImage(m_VKDevice, m_vSwapChainMultiSamplingImages[i].m_Image, nullptr);
+				vkDestroyImageView(m_VKDevice, m_vSwapChainMultiSamplingImages[i].m_ImgView, nullptr);
+				FreeImageMemBlock(m_vSwapChainMultiSamplingImages[i].m_ImgMem);
 			}
 		}
-		m_SwapChainMultiSamplingImages.clear();
+		m_vSwapChainMultiSamplingImages.clear();
 	}
 
 	bool CreateRenderPass(bool ClearAttachs)
@@ -4288,13 +4289,13 @@ public:
 
 	bool CreateFramebuffers()
 	{
-		m_FramebufferList.resize(m_SwapChainImageCount);
+		m_vFramebufferList.resize(m_SwapChainImageCount);
 
 		for(size_t i = 0; i < m_SwapChainImageCount; i++)
 		{
 			std::array<VkImageView, 2> aAttachments = {
-				m_SwapChainMultiSamplingImages[i].m_ImgView,
-				m_SwapChainImageViewList[i]};
+				m_vSwapChainMultiSamplingImages[i].m_ImgView,
+				m_vSwapChainImageViewList[i]};
 
 			bool HasMultiSamplingTargets = HasMultiSampling();
 
@@ -4307,7 +4308,7 @@ public:
 			FramebufferInfo.height = m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
 			FramebufferInfo.layers = 1;
 
-			if(vkCreateFramebuffer(m_VKDevice, &FramebufferInfo, nullptr, &m_FramebufferList[i]) != VK_SUCCESS)
+			if(vkCreateFramebuffer(m_VKDevice, &FramebufferInfo, nullptr, &m_vFramebufferList[i]) != VK_SUCCESS)
 			{
 				SetError("Creating the framebuffers failed.");
 				return false;
@@ -4319,12 +4320,12 @@ public:
 
 	void DestroyFramebuffers()
 	{
-		for(auto &FrameBuffer : m_FramebufferList)
+		for(auto &FrameBuffer : m_vFramebufferList)
 		{
 			vkDestroyFramebuffer(m_VKDevice, FrameBuffer, nullptr);
 		}
 
-		m_FramebufferList.clear();
+		m_vFramebufferList.clear();
 	}
 
 	bool CreateShaderModule(const std::vector<uint8_t> &Code, VkShaderModule &ShaderModule)
@@ -4385,21 +4386,21 @@ public:
 		{
 			auto *pShaderCodeFile = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
 
-			std::vector<uint8_t> ShaderBuff;
+			std::vector<uint8_t> vShaderBuff;
 			if(pShaderCodeFile)
 			{
 				long FileSize = io_length(pShaderCodeFile);
-				ShaderBuff.resize(FileSize);
-				io_read(pShaderCodeFile, ShaderBuff.data(), FileSize);
+				vShaderBuff.resize(FileSize);
+				io_read(pShaderCodeFile, vShaderBuff.data(), FileSize);
 				io_close(pShaderCodeFile);
 			}
 			else
 				return false;
 
-			it = m_ShaderFiles.insert({pFileName, {std::move(ShaderBuff)}}).first;
+			it = m_ShaderFiles.insert({pFileName, {std::move(vShaderBuff)}}).first;
 		}
 
-		pShaderData = &it->second.m_Binary;
+		pShaderData = &it->second.m_vBinary;
 
 		return true;
 	}
@@ -4408,10 +4409,10 @@ public:
 	{
 		bool ShaderLoaded = true;
 
-		std::vector<uint8_t> *pVertBuff;
-		std::vector<uint8_t> *pFragBuff;
-		ShaderLoaded &= LoadShader(pVertName, pVertBuff);
-		ShaderLoaded &= LoadShader(pFragName, pFragBuff);
+		std::vector<uint8_t> *pvVertBuff;
+		std::vector<uint8_t> *pvFragBuff;
+		ShaderLoaded &= LoadShader(pVertName, pvVertBuff);
+		ShaderLoaded &= LoadShader(pFragName, pvFragBuff);
 
 		ShaderModule.m_VKDevice = m_VKDevice;
 
@@ -4421,10 +4422,10 @@ public:
 			return false;
 		}
 
-		if(!CreateShaderModule(*pVertBuff, ShaderModule.m_VertShaderModule))
+		if(!CreateShaderModule(*pvVertBuff, ShaderModule.m_VertShaderModule))
 			return false;
 
-		if(!CreateShaderModule(*pFragBuff, ShaderModule.m_FragShaderModule))
+		if(!CreateShaderModule(*pvFragBuff, ShaderModule.m_FragShaderModule))
 			return false;
 
 		VkPipelineShaderStageCreateInfo &VertShaderStageInfo = aShaderStages[0];
@@ -4855,14 +4856,14 @@ public:
 
 	bool CreateUniformDescriptorSets(size_t RenderThreadIndex, VkDescriptorSetLayout &SetLayout, SDeviceDescriptorSet *pSets, size_t SetCount, VkBuffer BindBuffer, size_t SingleBufferInstanceSize, VkDeviceSize MemoryOffset)
 	{
-		GetDescriptorPoolForAlloc(m_UniformBufferDescrPools[RenderThreadIndex], pSets, SetCount);
+		GetDescriptorPoolForAlloc(m_vUniformBufferDescrPools[RenderThreadIndex], pSets, SetCount);
 		VkDescriptorSetAllocateInfo DesAllocInfo{};
 		DesAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		DesAllocInfo.descriptorSetCount = 1;
 		DesAllocInfo.pSetLayouts = &SetLayout;
 		for(size_t i = 0; i < SetCount; ++i)
 		{
-			DesAllocInfo.descriptorPool = pSets[i].m_pPools->m_Pools[pSets[i].m_PoolIndex].m_Pool;
+			DesAllocInfo.descriptorPool = pSets[i].m_pPools->m_vPools[pSets[i].m_PoolIndex].m_Pool;
 			if(vkAllocateDescriptorSets(m_VKDevice, &DesAllocInfo, &pSets[i].m_Descriptor) != VK_SUCCESS)
 			{
 				return false;
@@ -4893,7 +4894,7 @@ public:
 	{
 		for(size_t i = 0; i < SetCount; ++i)
 		{
-			vkFreeDescriptorSets(m_VKDevice, pSets[i].m_pPools->m_Pools[pSets[i].m_PoolIndex].m_Pool, 1, &pSets[i].m_Descriptor);
+			vkFreeDescriptorSets(m_VKDevice, pSets[i].m_pPools->m_vPools[pSets[i].m_PoolIndex].m_Pool, 1, &pSets[i].m_Descriptor);
 			pSets[i].m_Descriptor = VK_NULL_HANDLE;
 		}
 	}
@@ -5086,39 +5087,39 @@ public:
 
 	bool CreateCommandBuffers()
 	{
-		m_MainDrawCommandBuffers.resize(m_SwapChainImageCount);
+		m_vMainDrawCommandBuffers.resize(m_SwapChainImageCount);
 		if(m_ThreadCount > 1)
 		{
-			m_ThreadDrawCommandBuffers.resize(m_ThreadCount);
-			m_UsedThreadDrawCommandBuffer.resize(m_ThreadCount);
-			m_HelperThreadDrawCommandBuffers.resize(m_ThreadCount);
-			for(auto &ThreadDrawCommandBuffers : m_ThreadDrawCommandBuffers)
+			m_vvThreadDrawCommandBuffers.resize(m_ThreadCount);
+			m_vvUsedThreadDrawCommandBuffer.resize(m_ThreadCount);
+			m_vHelperThreadDrawCommandBuffers.resize(m_ThreadCount);
+			for(auto &ThreadDrawCommandBuffers : m_vvThreadDrawCommandBuffers)
 			{
 				ThreadDrawCommandBuffers.resize(m_SwapChainImageCount);
 			}
-			for(auto &UsedThreadDrawCommandBuffer : m_UsedThreadDrawCommandBuffer)
+			for(auto &UsedThreadDrawCommandBuffer : m_vvUsedThreadDrawCommandBuffer)
 			{
 				UsedThreadDrawCommandBuffer.resize(m_SwapChainImageCount, false);
 			}
 		}
-		m_MemoryCommandBuffers.resize(m_SwapChainImageCount);
-		m_UsedMemoryCommandBuffer.resize(m_SwapChainImageCount, false);
+		m_vMemoryCommandBuffers.resize(m_SwapChainImageCount);
+		m_vUsedMemoryCommandBuffer.resize(m_SwapChainImageCount, false);
 
 		VkCommandBufferAllocateInfo AllocInfo{};
 		AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		AllocInfo.commandPool = m_vCommandPools[0];
 		AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		AllocInfo.commandBufferCount = (uint32_t)m_MainDrawCommandBuffers.size();
+		AllocInfo.commandBufferCount = (uint32_t)m_vMainDrawCommandBuffers.size();
 
-		if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, m_MainDrawCommandBuffers.data()) != VK_SUCCESS)
+		if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, m_vMainDrawCommandBuffers.data()) != VK_SUCCESS)
 		{
 			SetError("Allocating command buffers failed.");
 			return false;
 		}
 
-		AllocInfo.commandBufferCount = (uint32_t)m_MemoryCommandBuffers.size();
+		AllocInfo.commandBufferCount = (uint32_t)m_vMemoryCommandBuffers.size();
 
-		if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, m_MemoryCommandBuffers.data()) != VK_SUCCESS)
+		if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, m_vMemoryCommandBuffers.data()) != VK_SUCCESS)
 		{
 			SetError("Allocating memory command buffers failed.");
 			return false;
@@ -5127,7 +5128,7 @@ public:
 		if(m_ThreadCount > 1)
 		{
 			size_t Count = 0;
-			for(auto &ThreadDrawCommandBuffers : m_ThreadDrawCommandBuffers)
+			for(auto &ThreadDrawCommandBuffers : m_vvThreadDrawCommandBuffers)
 			{
 				AllocInfo.commandPool = m_vCommandPools[Count];
 				++Count;
@@ -5149,34 +5150,34 @@ public:
 		if(m_ThreadCount > 1)
 		{
 			size_t Count = 0;
-			for(auto &ThreadDrawCommandBuffers : m_ThreadDrawCommandBuffers)
+			for(auto &ThreadDrawCommandBuffers : m_vvThreadDrawCommandBuffers)
 			{
 				vkFreeCommandBuffers(m_VKDevice, m_vCommandPools[Count], static_cast<uint32_t>(ThreadDrawCommandBuffers.size()), ThreadDrawCommandBuffers.data());
 				++Count;
 			}
 		}
 
-		vkFreeCommandBuffers(m_VKDevice, m_vCommandPools[0], static_cast<uint32_t>(m_MemoryCommandBuffers.size()), m_MemoryCommandBuffers.data());
-		vkFreeCommandBuffers(m_VKDevice, m_vCommandPools[0], static_cast<uint32_t>(m_MainDrawCommandBuffers.size()), m_MainDrawCommandBuffers.data());
+		vkFreeCommandBuffers(m_VKDevice, m_vCommandPools[0], static_cast<uint32_t>(m_vMemoryCommandBuffers.size()), m_vMemoryCommandBuffers.data());
+		vkFreeCommandBuffers(m_VKDevice, m_vCommandPools[0], static_cast<uint32_t>(m_vMainDrawCommandBuffers.size()), m_vMainDrawCommandBuffers.data());
 
-		m_ThreadDrawCommandBuffers.clear();
-		m_UsedThreadDrawCommandBuffer.clear();
-		m_HelperThreadDrawCommandBuffers.clear();
+		m_vvThreadDrawCommandBuffers.clear();
+		m_vvUsedThreadDrawCommandBuffer.clear();
+		m_vHelperThreadDrawCommandBuffers.clear();
 
-		m_MainDrawCommandBuffers.clear();
-		m_MemoryCommandBuffers.clear();
-		m_UsedMemoryCommandBuffer.clear();
+		m_vMainDrawCommandBuffers.clear();
+		m_vMemoryCommandBuffers.clear();
+		m_vUsedMemoryCommandBuffer.clear();
 	}
 
 	bool CreateSyncObjects()
 	{
-		m_WaitSemaphores.resize(m_SwapChainImageCount);
-		m_SigSemaphores.resize(m_SwapChainImageCount);
+		m_vWaitSemaphores.resize(m_SwapChainImageCount);
+		m_vSigSemaphores.resize(m_SwapChainImageCount);
 
-		m_MemorySemaphores.resize(m_SwapChainImageCount);
+		m_vMemorySemaphores.resize(m_SwapChainImageCount);
 
-		m_FrameFences.resize(m_SwapChainImageCount);
-		m_ImagesFences.resize(m_SwapChainImageCount, VK_NULL_HANDLE);
+		m_vFrameFences.resize(m_SwapChainImageCount);
+		m_vImagesFences.resize(m_SwapChainImageCount, VK_NULL_HANDLE);
 
 		VkSemaphoreCreateInfo CreateSemaphoreInfo{};
 		CreateSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -5187,10 +5188,10 @@ public:
 
 		for(size_t i = 0; i < m_SwapChainImageCount; i++)
 		{
-			if(vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_WaitSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_SigSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_MemorySemaphores[i]) != VK_SUCCESS ||
-				vkCreateFence(m_VKDevice, &FenceInfo, nullptr, &m_FrameFences[i]) != VK_SUCCESS)
+			if(vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vWaitSemaphores[i]) != VK_SUCCESS ||
+				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vSigSemaphores[i]) != VK_SUCCESS ||
+				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vMemorySemaphores[i]) != VK_SUCCESS ||
+				vkCreateFence(m_VKDevice, &FenceInfo, nullptr, &m_vFrameFences[i]) != VK_SUCCESS)
 			{
 				SetError("Creating swap chain sync objects(fences, semaphores) failed.");
 				return false;
@@ -5204,19 +5205,19 @@ public:
 	{
 		for(size_t i = 0; i < m_SwapChainImageCount; i++)
 		{
-			vkDestroySemaphore(m_VKDevice, m_WaitSemaphores[i], nullptr);
-			vkDestroySemaphore(m_VKDevice, m_SigSemaphores[i], nullptr);
-			vkDestroySemaphore(m_VKDevice, m_MemorySemaphores[i], nullptr);
-			vkDestroyFence(m_VKDevice, m_FrameFences[i], nullptr);
+			vkDestroySemaphore(m_VKDevice, m_vWaitSemaphores[i], nullptr);
+			vkDestroySemaphore(m_VKDevice, m_vSigSemaphores[i], nullptr);
+			vkDestroySemaphore(m_VKDevice, m_vMemorySemaphores[i], nullptr);
+			vkDestroyFence(m_VKDevice, m_vFrameFences[i], nullptr);
 		}
 
-		m_WaitSemaphores.clear();
-		m_SigSemaphores.clear();
+		m_vWaitSemaphores.clear();
+		m_vSigSemaphores.clear();
 
-		m_MemorySemaphores.clear();
+		m_vMemorySemaphores.clear();
 
-		m_FrameFences.clear();
-		m_ImagesFences.clear();
+		m_vFrameFences.clear();
+		m_vImagesFences.clear();
 	}
 
 	void DestroyBufferOfFrame(size_t ImageIndex, SFrameBuffers &Buffer)
@@ -5279,7 +5280,7 @@ public:
 				CleanupVulkanSwapChain(true);
 
 			// clean all images, buffers, buffer containers
-			for(auto &Texture : m_Textures)
+			for(auto &Texture : m_vTextures)
 			{
 				if(Texture.m_VKTextDescrSet.m_Descriptor != VK_NULL_HANDLE && IsVerbose())
 				{
@@ -5288,16 +5289,16 @@ public:
 				DestroyTexture(Texture);
 			}
 
-			for(auto &BufferObject : m_BufferObjects)
+			for(auto &BufferObject : m_vBufferObjects)
 			{
 				if(!BufferObject.m_IsStreamedBuffer)
 					FreeVertexMemBlock(BufferObject.m_BufferObject.m_Mem);
 			}
 
-			m_BufferContainers.clear();
+			m_vBufferContainers.clear();
 		}
 
-		m_ImageLastFrameCheck.clear();
+		m_vImageLastFrameCheck.clear();
 
 		m_vLastPipeline.clear();
 
@@ -5314,9 +5315,9 @@ public:
 			ClearFrameData(i);
 		}
 
-		m_FrameDelayedBufferCleanup.clear();
-		m_FrameDelayedTextureCleanup.clear();
-		m_FrameDelayedTextTexturesCleanup.clear();
+		m_vvFrameDelayedBufferCleanup.clear();
+		m_vvFrameDelayedTextureCleanup.clear();
+		m_vvFrameDelayedTextTexturesCleanup.clear();
 
 		m_StagingBufferCache.DestroyFrameData(m_SwapChainImageCount);
 		m_StagingBufferCacheImage.DestroyFrameData(m_SwapChainImageCount);
@@ -5418,26 +5419,26 @@ public:
 
 	int InitVulkanSDL(SDL_Window *pWindow, uint32_t CanvasWidth, uint32_t CanvasHeight, char *pRendererString, char *pVendorString, char *pVersionString)
 	{
-		std::vector<std::string> VKExtensions;
-		std::vector<std::string> VKLayers;
+		std::vector<std::string> vVKExtensions;
+		std::vector<std::string> vVKLayers;
 
 		m_CanvasWidth = CanvasWidth;
 		m_CanvasHeight = CanvasHeight;
 
-		if(!GetVulkanExtensions(pWindow, VKExtensions))
+		if(!GetVulkanExtensions(pWindow, vVKExtensions))
 			return -1;
 
-		if(!GetVulkanLayers(VKLayers))
+		if(!GetVulkanLayers(vVKLayers))
 			return -1;
 
-		if(!CreateVulkanInstance(VKLayers, VKExtensions, true))
+		if(!CreateVulkanInstance(vVKLayers, vVKExtensions, true))
 			return -1;
 
 		if(g_Config.m_DbgGfx == DEBUG_GFX_MODE_MINIMUM || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL)
 		{
 			SetupDebugCallback();
 
-			for(auto &VKLayer : VKLayers)
+			for(auto &VKLayer : vVKLayers)
 			{
 				dbg_msg("vulkan", "Validation layer: %s", VKLayer.c_str());
 			}
@@ -5446,7 +5447,7 @@ public:
 		if(!SelectGPU(pRendererString, pVendorString, pVersionString))
 			return -1;
 
-		if(!CreateLogicalDevice(VKLayers))
+		if(!CreateLogicalDevice(vVKLayers))
 			return -1;
 
 		GetDeviceQueue();
@@ -5555,7 +5556,7 @@ public:
 			return false;
 		}
 
-		DescriptorPools.m_Pools.push_back(NewPool);
+		DescriptorPools.m_vPools.push_back(NewPool);
 
 		return true;
 	}
@@ -5567,8 +5568,8 @@ public:
 		m_TextTextureDescrPool.m_IsUniformPool = false;
 		m_TextTextureDescrPool.m_DefaultAllocSize = 8;
 
-		m_UniformBufferDescrPools.resize(m_ThreadCount);
-		for(auto &UniformBufferDescrPool : m_UniformBufferDescrPools)
+		m_vUniformBufferDescrPools.resize(m_ThreadCount);
+		for(auto &UniformBufferDescrPool : m_vUniformBufferDescrPools)
 		{
 			UniformBufferDescrPool.m_IsUniformPool = true;
 			UniformBufferDescrPool.m_DefaultAllocSize = 512;
@@ -5577,7 +5578,7 @@ public:
 		bool Ret = AllocateDescriptorPool(m_StandardTextureDescrPool, CCommandBuffer::MAX_TEXTURES);
 		Ret |= AllocateDescriptorPool(m_TextTextureDescrPool, 8);
 
-		for(auto &UniformBufferDescrPool : m_UniformBufferDescrPools)
+		for(auto &UniformBufferDescrPool : m_vUniformBufferDescrPools)
 		{
 			Ret |= AllocateDescriptorPool(UniformBufferDescrPool, 64);
 		}
@@ -5587,17 +5588,17 @@ public:
 
 	void DestroyDescriptorPools()
 	{
-		for(auto &DescrPool : m_StandardTextureDescrPool.m_Pools)
+		for(auto &DescrPool : m_StandardTextureDescrPool.m_vPools)
 			vkDestroyDescriptorPool(m_VKDevice, DescrPool.m_Pool, nullptr);
-		for(auto &DescrPool : m_TextTextureDescrPool.m_Pools)
+		for(auto &DescrPool : m_TextTextureDescrPool.m_vPools)
 			vkDestroyDescriptorPool(m_VKDevice, DescrPool.m_Pool, nullptr);
 
-		for(auto &UniformBufferDescrPool : m_UniformBufferDescrPools)
+		for(auto &UniformBufferDescrPool : m_vUniformBufferDescrPools)
 		{
-			for(auto &DescrPool : UniformBufferDescrPool.m_Pools)
+			for(auto &DescrPool : UniformBufferDescrPool.m_vPools)
 				vkDestroyDescriptorPool(m_VKDevice, DescrPool.m_Pool, nullptr);
 		}
-		m_UniformBufferDescrPools.clear();
+		m_vUniformBufferDescrPools.clear();
 	}
 
 	VkDescriptorPool GetDescriptorPoolForAlloc(SDeviceDescriptorPools &DescriptorPools, SDeviceDescriptorSet *pSets, size_t AllocNum)
@@ -5612,9 +5613,9 @@ public:
 
 			bool Found = false;
 			size_t DescriptorPoolIndex = std::numeric_limits<size_t>::max();
-			for(size_t i = 0; i < DescriptorPools.m_Pools.size(); ++i)
+			for(size_t i = 0; i < DescriptorPools.m_vPools.size(); ++i)
 			{
-				auto &Pool = DescriptorPools.m_Pools[i];
+				auto &Pool = DescriptorPools.m_vPools[i];
 				if(Pool.m_CurSize + CurAllocNum < Pool.m_Size)
 				{
 					AllocatedInThisRun = CurAllocNum;
@@ -5643,13 +5644,13 @@ public:
 
 			if(!Found)
 			{
-				DescriptorPoolIndex = DescriptorPools.m_Pools.size();
+				DescriptorPoolIndex = DescriptorPools.m_vPools.size();
 
 				AllocateDescriptorPool(DescriptorPools, DescriptorPools.m_DefaultAllocSize);
 
 				AllocatedInThisRun = minimum((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
 
-				auto &Pool = DescriptorPools.m_Pools.back();
+				auto &Pool = DescriptorPools.m_vPools.back();
 				Pool.m_CurSize += AllocatedInThisRun;
 				if(RetDescr == VK_NULL_HANDLE)
 					RetDescr = Pool.m_Pool;
@@ -5669,7 +5670,7 @@ public:
 
 	bool CreateNewTexturedStandardDescriptorSets(size_t TextureSlot, size_t DescrIndex)
 	{
-		auto &Texture = m_Textures[TextureSlot];
+		auto &Texture = m_vTextures[TextureSlot];
 
 		auto &DescrSet = Texture.m_aVKStandardTexturedDescrSets[DescrIndex];
 
@@ -5708,13 +5709,13 @@ public:
 	{
 		auto &DescrSet = Texture.m_aVKStandardTexturedDescrSets[DescrIndex];
 		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
-			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_Pools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
 		DescrSet = {};
 	}
 
 	bool CreateNew3DTexturedStandardDescriptorSets(size_t TextureSlot)
 	{
-		auto &Texture = m_Textures[TextureSlot];
+		auto &Texture = m_vTextures[TextureSlot];
 
 		auto &DescrSet = Texture.m_VKStandard3DTexturedDescrSet;
 
@@ -5753,13 +5754,13 @@ public:
 	{
 		auto &DescrSet = Texture.m_VKStandard3DTexturedDescrSet;
 		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
-			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_Pools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
 	}
 
 	bool CreateNewTextDescriptorSets(size_t Texture, size_t TextureOutline)
 	{
-		auto &TextureText = m_Textures[Texture];
-		auto &TextureTextOutline = m_Textures[TextureOutline];
+		auto &TextureText = m_vTextures[Texture];
+		auto &TextureTextOutline = m_vTextures[TextureOutline];
 		auto &DescrSetText = TextureText.m_VKTextDescrSet;
 		auto &DescrSetTextOutline = TextureText.m_VKTextDescrSet;
 
@@ -5806,7 +5807,7 @@ public:
 	{
 		auto &DescrSet = Texture.m_VKTextDescrSet;
 		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
-			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_Pools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
 	}
 
 	bool HasMultiSampling()
@@ -5999,16 +6000,16 @@ public:
 
 		m_vLastPipeline.resize(m_ThreadCount, VK_NULL_HANDLE);
 
-		m_FrameDelayedBufferCleanup.resize(m_SwapChainImageCount);
-		m_FrameDelayedTextureCleanup.resize(m_SwapChainImageCount);
-		m_FrameDelayedTextTexturesCleanup.resize(m_SwapChainImageCount);
+		m_vvFrameDelayedBufferCleanup.resize(m_SwapChainImageCount);
+		m_vvFrameDelayedTextureCleanup.resize(m_SwapChainImageCount);
+		m_vvFrameDelayedTextTexturesCleanup.resize(m_SwapChainImageCount);
 		m_StagingBufferCache.Init(m_SwapChainImageCount);
 		m_StagingBufferCacheImage.Init(m_SwapChainImageCount);
 		m_VertexBufferCache.Init(m_SwapChainImageCount);
 		for(auto &ImageBufferCache : m_ImageBufferCaches)
 			ImageBufferCache.second.Init(m_SwapChainImageCount);
 
-		m_ImageLastFrameCheck.resize(m_SwapChainImageCount, 0);
+		m_vImageLastFrameCheck.resize(m_SwapChainImageCount, 0);
 
 		if(IsFirstInitialization)
 		{
@@ -6041,10 +6042,10 @@ public:
 
 	VkCommandBuffer &GetMemoryCommandBuffer()
 	{
-		VkCommandBuffer &MemCommandBuffer = m_MemoryCommandBuffers[m_CurImageIndex];
-		if(!m_UsedMemoryCommandBuffer[m_CurImageIndex])
+		VkCommandBuffer &MemCommandBuffer = m_vMemoryCommandBuffers[m_CurImageIndex];
+		if(!m_vUsedMemoryCommandBuffer[m_CurImageIndex])
 		{
-			m_UsedMemoryCommandBuffer[m_CurImageIndex] = true;
+			m_vUsedMemoryCommandBuffer[m_CurImageIndex] = true;
 
 			vkResetCommandBuffer(MemCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 
@@ -6063,14 +6064,14 @@ public:
 	{
 		if(m_ThreadCount < 2)
 		{
-			return m_MainDrawCommandBuffers[m_CurImageIndex];
+			return m_vMainDrawCommandBuffers[m_CurImageIndex];
 		}
 		else
 		{
-			VkCommandBuffer &DrawCommandBuffer = m_ThreadDrawCommandBuffers[RenderThreadIndex][m_CurImageIndex];
-			if(!m_UsedThreadDrawCommandBuffer[RenderThreadIndex][m_CurImageIndex])
+			VkCommandBuffer &DrawCommandBuffer = m_vvThreadDrawCommandBuffers[RenderThreadIndex][m_CurImageIndex];
+			if(!m_vvUsedThreadDrawCommandBuffer[RenderThreadIndex][m_CurImageIndex])
 			{
-				m_UsedThreadDrawCommandBuffer[RenderThreadIndex][m_CurImageIndex] = true;
+				m_vvUsedThreadDrawCommandBuffer[RenderThreadIndex][m_CurImageIndex] = true;
 
 				vkResetCommandBuffer(DrawCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 
@@ -6080,7 +6081,7 @@ public:
 
 				VkCommandBufferInheritanceInfo InheretInfo{};
 				InheretInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-				InheretInfo.framebuffer = m_FramebufferList[m_CurImageIndex];
+				InheretInfo.framebuffer = m_vFramebufferList[m_CurImageIndex];
 				InheretInfo.occlusionQueryEnable = VK_FALSE;
 				InheretInfo.renderPass = m_VKRenderPass;
 				InheretInfo.subpass = 0;
@@ -6098,7 +6099,7 @@ public:
 
 	VkCommandBuffer &GetMainGraphicCommandBuffer()
 	{
-		return m_MainDrawCommandBuffers[m_CurImageIndex];
+		return m_vMainDrawCommandBuffers[m_CurImageIndex];
 	}
 
 	/************************
@@ -6284,7 +6285,7 @@ public:
 				{
 					StartRenderThread(m_LastCommandsInPipeThreadIndex - 1);
 				}
-				m_ThreadCommandLists[Buffer.m_ThreadIndex - 1].push_back(Buffer);
+				m_vvThreadCommandLists[Buffer.m_ThreadIndex - 1].push_back(Buffer);
 			}
 
 			++m_CurCommandInPipe;
@@ -6347,7 +6348,7 @@ public:
 		m_MultiSamplingCount = (g_Config.m_GfxFsaaSamples & 0xFFFFFFFE); // ignore the uneven bit, only even multi sampling works
 
 		TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
-		ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) { return GetPresentedImageData(Width, Height, Format, DstData); };
+		ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
 
 		m_pWindow = pCommand->m_pWindow;
 
@@ -6425,9 +6426,9 @@ public:
 	void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 	{
 		size_t ImageIndex = (size_t)pCommand->m_Slot;
-		auto &Texture = m_Textures[ImageIndex];
+		auto &Texture = m_vTextures[ImageIndex];
 
-		m_FrameDelayedTextureCleanup[m_CurImageIndex].push_back(Texture);
+		m_vvFrameDelayedTextureCleanup[m_CurImageIndex].push_back(Texture);
 
 		Texture = CTexture{};
 	}
@@ -6471,10 +6472,10 @@ public:
 	{
 		size_t ImageIndex = (size_t)pCommand->m_Slot;
 		size_t ImageIndexOutline = (size_t)pCommand->m_SlotOutline;
-		auto &Texture = m_Textures[ImageIndex];
-		auto &TextureOutline = m_Textures[ImageIndexOutline];
+		auto &Texture = m_vTextures[ImageIndex];
+		auto &TextureOutline = m_vTextures[ImageIndexOutline];
 
-		m_FrameDelayedTextTexturesCleanup[m_CurImageIndex].push_back({Texture, TextureOutline});
+		m_vvFrameDelayedTextTexturesCleanup[m_CurImageIndex].push_back({Texture, TextureOutline});
 
 		Texture = {};
 		TextureOutline = {};
@@ -6527,7 +6528,7 @@ public:
 		if(IsTextured)
 		{
 			size_t AddressModeIndex = GetAddressModeIndex(pCommand->m_State);
-			auto &DescrSet = m_Textures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
+			auto &DescrSet = m_vTextures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
 			ExecBuffer.m_aDescriptors[0] = DescrSet;
 		}
 
@@ -6551,11 +6552,11 @@ public:
 		uint32_t Width;
 		uint32_t Height;
 		uint32_t Format;
-		if(GetPresentedImageDataImpl(Width, Height, Format, m_ScreenshotHelper, false, true))
+		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, false, true))
 		{
 			size_t ImgSize = (size_t)Width * (size_t)Height * (size_t)4;
 			pCommand->m_pImage->m_pData = malloc(ImgSize);
-			mem_copy(pCommand->m_pImage->m_pData, m_ScreenshotHelper.data(), ImgSize);
+			mem_copy(pCommand->m_pImage->m_pData, m_vScreenshotHelper.data(), ImgSize);
 		}
 		else
 		{
@@ -6571,7 +6572,7 @@ public:
 		bool IsTextured = GetIsTextured(pCommand->m_State);
 		if(IsTextured)
 		{
-			auto &DescrSet = m_Textures[pCommand->m_State.m_Texture].m_VKStandard3DTexturedDescrSet;
+			auto &DescrSet = m_vTextures[pCommand->m_State.m_Texture].m_VKStandard3DTexturedDescrSet;
 			ExecBuffer.m_aDescriptors[0] = DescrSet;
 		}
 
@@ -6676,7 +6677,7 @@ public:
 
 		auto StagingBuffer = GetStagingBuffer(pUploadData, DataSize);
 
-		auto &MemBlock = m_BufferObjects[BufferIndex].m_BufferObject.m_Mem;
+		auto &MemBlock = m_vBufferObjects[BufferIndex].m_BufferObject.m_Mem;
 		VkBuffer VertexBuffer = MemBlock.m_Buffer;
 		MemoryBarrier(VertexBuffer, Offset + MemBlock.m_HeapData.m_OffsetToAlign, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true);
 		CopyBuffer(StagingBuffer.m_Buffer, VertexBuffer, StagingBuffer.m_HeapData.m_OffsetToAlign, Offset + MemBlock.m_HeapData.m_OffsetToAlign, DataSize);
@@ -6699,8 +6700,8 @@ public:
 	{
 		size_t ReadBufferIndex = (size_t)pCommand->m_ReadBufferIndex;
 		size_t WriteBufferIndex = (size_t)pCommand->m_WriteBufferIndex;
-		auto &ReadMemBlock = m_BufferObjects[ReadBufferIndex].m_BufferObject.m_Mem;
-		auto &WriteMemBlock = m_BufferObjects[WriteBufferIndex].m_BufferObject.m_Mem;
+		auto &ReadMemBlock = m_vBufferObjects[ReadBufferIndex].m_BufferObject.m_Mem;
+		auto &WriteMemBlock = m_vBufferObjects[WriteBufferIndex].m_BufferObject.m_Mem;
 		VkBuffer ReadBuffer = ReadMemBlock.m_Buffer;
 		VkBuffer WriteBuffer = WriteMemBlock.m_Buffer;
 
@@ -6724,16 +6725,16 @@ public:
 	void Cmd_CreateBufferContainer(const CCommandBuffer::SCommand_CreateBufferContainer *pCommand)
 	{
 		size_t ContainerIndex = (size_t)pCommand->m_BufferContainerIndex;
-		while(ContainerIndex >= m_BufferContainers.size())
-			m_BufferContainers.resize((m_BufferContainers.size() * 2) + 1);
+		while(ContainerIndex >= m_vBufferContainers.size())
+			m_vBufferContainers.resize((m_vBufferContainers.size() * 2) + 1);
 
-		m_BufferContainers[ContainerIndex].m_BufferObjectIndex = pCommand->m_VertBufferBindingIndex;
+		m_vBufferContainers[ContainerIndex].m_BufferObjectIndex = pCommand->m_VertBufferBindingIndex;
 	}
 
 	void Cmd_UpdateBufferContainer(const CCommandBuffer::SCommand_UpdateBufferContainer *pCommand)
 	{
 		size_t ContainerIndex = (size_t)pCommand->m_BufferContainerIndex;
-		m_BufferContainers[ContainerIndex].m_BufferObjectIndex = pCommand->m_VertBufferBindingIndex;
+		m_vBufferContainers[ContainerIndex].m_BufferObjectIndex = pCommand->m_VertBufferBindingIndex;
 	}
 
 	void Cmd_DeleteBufferContainer(const CCommandBuffer::SCommand_DeleteBufferContainer *pCommand)
@@ -6742,7 +6743,7 @@ public:
 		bool DeleteAllBO = pCommand->m_DestroyAllBO;
 		if(DeleteAllBO)
 		{
-			size_t BufferIndex = (size_t)m_BufferContainers[ContainerIndex].m_BufferObjectIndex;
+			size_t BufferIndex = (size_t)m_vBufferContainers[ContainerIndex].m_BufferObjectIndex;
 			DeleteBufferObject(BufferIndex);
 		}
 	}
@@ -6752,20 +6753,20 @@ public:
 		size_t IndicesCount = pCommand->m_RequiredIndicesNum;
 		if(m_CurRenderIndexPrimitiveCount < IndicesCount / 6)
 		{
-			m_FrameDelayedBufferCleanup[m_CurImageIndex].push_back({m_RenderIndexBuffer, m_RenderIndexBufferMemory});
-			std::vector<uint32_t> Indices(IndicesCount);
+			m_vvFrameDelayedBufferCleanup[m_CurImageIndex].push_back({m_RenderIndexBuffer, m_RenderIndexBufferMemory});
+			std::vector<uint32_t> vIndices(IndicesCount);
 			uint32_t Primq = 0;
 			for(size_t i = 0; i < IndicesCount; i += 6)
 			{
-				Indices[i] = Primq;
-				Indices[i + 1] = Primq + 1;
-				Indices[i + 2] = Primq + 2;
-				Indices[i + 3] = Primq;
-				Indices[i + 4] = Primq + 2;
-				Indices[i + 5] = Primq + 3;
+				vIndices[i] = Primq;
+				vIndices[i + 1] = Primq + 1;
+				vIndices[i + 2] = Primq + 2;
+				vIndices[i + 3] = Primq;
+				vIndices[i + 4] = Primq + 2;
+				vIndices[i + 5] = Primq + 3;
 				Primq += 4;
 			}
-			CreateIndexBuffer(Indices.data(), Indices.size() * sizeof(uint32_t), m_RenderIndexBuffer, m_RenderIndexBufferMemory);
+			CreateIndexBuffer(vIndices.data(), vIndices.size() * sizeof(uint32_t), m_RenderIndexBuffer, m_RenderIndexBufferMemory);
 			m_CurRenderIndexPrimitiveCount = IndicesCount / 6;
 		}
 	}
@@ -6814,8 +6815,8 @@ public:
 	void Cmd_RenderQuadLayer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderQuadLayer *pCommand)
 	{
 		size_t BufferContainerIndex = (size_t)pCommand->m_BufferContainerIndex;
-		size_t BufferObjectIndex = (size_t)m_BufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_BufferObjects[BufferObjectIndex];
+		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
+		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
@@ -6824,7 +6825,7 @@ public:
 		if(IsTextured)
 		{
 			size_t AddressModeIndex = GetAddressModeIndex(pCommand->m_State);
-			auto &DescrSet = m_Textures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
+			auto &DescrSet = m_vTextures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
 			ExecBuffer.m_aDescriptors[0] = DescrSet;
 		}
 
@@ -6917,13 +6918,13 @@ public:
 	void Cmd_RenderText_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderText *pCommand)
 	{
 		size_t BufferContainerIndex = (size_t)pCommand->m_BufferContainerIndex;
-		size_t BufferObjectIndex = (size_t)m_BufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_BufferObjects[BufferObjectIndex];
+		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
+		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
 
-		auto &TextTextureDescr = m_Textures[pCommand->m_TextTextureIndex].m_VKTextDescrSet;
+		auto &TextTextureDescr = m_vTextures[pCommand->m_TextTextureIndex].m_VKTextDescrSet;
 		ExecBuffer.m_aDescriptors[0] = TextTextureDescr;
 
 		ExecBuffer.m_IndexBuffer = m_RenderIndexBuffer;
@@ -6976,8 +6977,8 @@ public:
 
 	void BufferContainer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, size_t BufferContainerIndex, size_t DrawCalls)
 	{
-		size_t BufferObjectIndex = (size_t)m_BufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_BufferObjects[BufferObjectIndex];
+		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
+		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
@@ -6986,7 +6987,7 @@ public:
 		if(IsTextured)
 		{
 			size_t AddressModeIndex = GetAddressModeIndex(State);
-			auto &DescrSet = m_Textures[State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
+			auto &DescrSet = m_vTextures[State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
 			ExecBuffer.m_aDescriptors[0] = DescrSet;
 		}
 
@@ -7236,9 +7237,9 @@ public:
 		dbg_assert(m_ThreadCount != 2, "Either use 1 main thread or at least 2 extra rendering threads.");
 		if(m_ThreadCount > 1)
 		{
-			m_ThreadCommandLists.resize(m_ThreadCount - 1);
-			m_ThreadHelperHadCommands.resize(m_ThreadCount - 1, false);
-			for(auto &ThreadCommandList : m_ThreadCommandLists)
+			m_vvThreadCommandLists.resize(m_ThreadCount - 1);
+			m_vThreadHelperHadCommands.resize(m_ThreadCount - 1, false);
+			for(auto &ThreadCommandList : m_vvThreadCommandLists)
 			{
 				ThreadCommandList.reserve(256);
 			}
@@ -7247,7 +7248,7 @@ public:
 			{
 				auto *pRenderThread = new SRenderThread();
 				std::unique_lock<std::mutex> Lock(pRenderThread->m_Mutex);
-				m_RenderThreads.emplace_back(pRenderThread);
+				m_vpRenderThreads.emplace_back(pRenderThread);
 				pRenderThread->m_Thread = std::thread([this, i]() { RunThread(i); });
 				// wait until thread started
 				pRenderThread->m_Cond.wait(Lock, [pRenderThread]() -> bool { return pRenderThread->m_Started; });
@@ -7259,7 +7260,7 @@ public:
 	{
 		for(size_t i = 0; i < m_ThreadCount - 1; ++i)
 		{
-			auto *pThread = m_RenderThreads[i].get();
+			auto *pThread = m_vpRenderThreads[i].get();
 			{
 				std::unique_lock<std::mutex> Lock(pThread->m_Mutex);
 				pThread->m_Finished = true;
@@ -7267,9 +7268,9 @@ public:
 			}
 			pThread->m_Thread.join();
 		}
-		m_RenderThreads.clear();
-		m_ThreadCommandLists.clear();
-		m_ThreadHelperHadCommands.clear();
+		m_vpRenderThreads.clear();
+		m_vvThreadCommandLists.clear();
+		m_vThreadHelperHadCommands.clear();
 
 		m_ThreadCount = 1;
 
@@ -7297,7 +7298,7 @@ public:
 
 	void RunThread(size_t ThreadIndex)
 	{
-		auto *pThread = m_RenderThreads[ThreadIndex].get();
+		auto *pThread = m_vpRenderThreads[ThreadIndex].get();
 		std::unique_lock<std::mutex> Lock(pThread->m_Mutex);
 		pThread->m_Started = true;
 		pThread->m_Cond.notify_one();
@@ -7309,30 +7310,30 @@ public:
 
 			// set this to true, if you want to benchmark the render thread times
 			static constexpr bool s_BenchmarkRenderThreads = false;
-			int64_t ThreadRenderTime = 0;
+			std::chrono::nanoseconds ThreadRenderTime = 0ns;
 			if(IsVerbose() && s_BenchmarkRenderThreads)
 			{
-				ThreadRenderTime = time_get_microseconds();
+				ThreadRenderTime = tw::time_get();
 			}
 
 			if(!pThread->m_Finished)
 			{
-				for(auto &NextCmd : m_ThreadCommandLists[ThreadIndex])
+				for(auto &NextCmd : m_vvThreadCommandLists[ThreadIndex])
 				{
 					m_aCommandCallbacks[CommandBufferCMDOff(NextCmd.m_Command)].m_CommandCB(NextCmd.m_pRawCommand, NextCmd);
 				}
-				m_ThreadCommandLists[ThreadIndex].clear();
+				m_vvThreadCommandLists[ThreadIndex].clear();
 
-				if(m_UsedThreadDrawCommandBuffer[ThreadIndex + 1][m_CurImageIndex])
+				if(m_vvUsedThreadDrawCommandBuffer[ThreadIndex + 1][m_CurImageIndex])
 				{
-					auto &GraphicThreadCommandBuffer = m_ThreadDrawCommandBuffers[ThreadIndex + 1][m_CurImageIndex];
+					auto &GraphicThreadCommandBuffer = m_vvThreadDrawCommandBuffers[ThreadIndex + 1][m_CurImageIndex];
 					vkEndCommandBuffer(GraphicThreadCommandBuffer);
 				}
 			}
 
 			if(IsVerbose() && s_BenchmarkRenderThreads)
 			{
-				dbg_msg("vulkan", "render thread %" PRIu64 " took %d microseconds to finish", ThreadIndex, (int)(time_get_microseconds() - ThreadRenderTime));
+				dbg_msg("vulkan", "render thread %" PRIu64 " took %d ns to finish", ThreadIndex, (int)(tw::time_get() - ThreadRenderTime).count());
 			}
 
 			pThread->m_IsRendering = false;

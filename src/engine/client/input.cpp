@@ -1,6 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "SDL.h"
+#include <SDL_clipboard.h>
+#include <SDL_events.h>
+#include <SDL_keyboard.h>
+#include <SDL_mouse.h>
+#include <SDL_rect.h>
 
 #include <base/system.h>
 #include <engine/graphics.h>
@@ -51,9 +55,11 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
+}
 
-	m_LastX = 0;
-	m_LastY = 0;
+CInput::~CInput()
+{
+	SDL_free(m_pClipboardText);
 }
 
 void CInput::Init()
@@ -65,20 +71,22 @@ void CInput::Init()
 	MouseModeRelative();
 }
 
-void CInput::MouseRelative(float *x, float *y)
+bool CInput::MouseRelative(float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
-		return;
+		return false;
 
 	int nx = 0, ny = 0;
 	float Sens = g_Config.m_InpMousesens / 100.0f;
 
 #if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	static int s_LastX = 0;
+	static int s_LastY = 0;
 	SDL_GetMouseState(&nx, &ny);
-	int XTmp = nx - m_LastX;
-	int YTmp = ny - m_LastY;
-	m_LastX = nx;
-	m_LastY = ny;
+	int XTmp = nx - s_LastX;
+	int YTmp = ny - s_LastY;
+	s_LastX = nx;
+	s_LastY = ny;
 	nx = XTmp;
 	ny = YTmp;
 	Sens = 1;
@@ -86,8 +94,9 @@ void CInput::MouseRelative(float *x, float *y)
 	SDL_GetRelativeMouseState(&nx, &ny);
 #endif
 
-	*x = nx * Sens;
-	*y = ny * Sens;
+	*pX = nx * Sens;
+	*pY = ny * Sens;
+	return *pX != 0.0f || *pY != 0.0f;
 }
 
 void CInput::MouseModeAbsolute()
@@ -108,19 +117,15 @@ void CInput::MouseModeRelative()
 	SDL_GetRelativeMouseState(0x0, 0x0);
 }
 
-void CInput::NativeMousePos(int *x, int *y) const
+void CInput::NativeMousePos(int *pX, int *pY) const
 {
-	int nx = 0, ny = 0;
-	SDL_GetMouseState(&nx, &ny);
-
-	*x = nx;
-	*y = ny;
+	SDL_GetMouseState(pX, pY);
 }
 
-bool CInput::NativeMousePressed(int index)
+bool CInput::NativeMousePressed(int Index)
 {
 	int i = SDL_GetMouseState(NULL, NULL);
-	return (i & SDL_BUTTON(index)) != 0;
+	return (i & SDL_BUTTON(Index)) != 0;
 }
 
 bool CInput::MouseDoubleClick()
@@ -140,9 +145,9 @@ const char *CInput::GetClipboardText()
 	return m_pClipboardText;
 }
 
-void CInput::SetClipboardText(const char *Text)
+void CInput::SetClipboardText(const char *pText)
 {
-	SDL_SetClipboardText(Text);
+	SDL_SetClipboardText(pText);
 }
 
 void CInput::Clear()
@@ -157,6 +162,29 @@ bool CInput::KeyState(int Key) const
 	if(Key < 0 || Key >= KEY_LAST)
 		return false;
 	return m_aInputState[Key];
+}
+
+void CInput::UpdateMouseState()
+{
+	const int MouseState = SDL_GetMouseState(NULL, NULL);
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+		m_aInputState[KEY_MOUSE_1] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
+		m_aInputState[KEY_MOUSE_2] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+		m_aInputState[KEY_MOUSE_3] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
+		m_aInputState[KEY_MOUSE_4] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
+		m_aInputState[KEY_MOUSE_5] = 1;
+	if(MouseState & SDL_BUTTON(6))
+		m_aInputState[KEY_MOUSE_6] = 1;
+	if(MouseState & SDL_BUTTON(7))
+		m_aInputState[KEY_MOUSE_7] = 1;
+	if(MouseState & SDL_BUTTON(8))
+		m_aInputState[KEY_MOUSE_8] = 1;
+	if(MouseState & SDL_BUTTON(9))
+		m_aInputState[KEY_MOUSE_9] = 1;
 }
 
 bool CInput::GetIMEState()
@@ -227,26 +255,8 @@ int CInput::Update()
 	if(m_EditingTextLen == 0)
 		m_EditingTextLen = -1;
 
-	// these states must always be updated manually because they are not in the GetKeyState from SDL
-	const int MouseState = SDL_GetMouseState(NULL, NULL);
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
-		m_aInputState[KEY_MOUSE_1] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
-		m_aInputState[KEY_MOUSE_2] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
-		m_aInputState[KEY_MOUSE_3] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
-		m_aInputState[KEY_MOUSE_4] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
-		m_aInputState[KEY_MOUSE_5] = 1;
-	if(MouseState & SDL_BUTTON(6))
-		m_aInputState[KEY_MOUSE_6] = 1;
-	if(MouseState & SDL_BUTTON(7))
-		m_aInputState[KEY_MOUSE_7] = 1;
-	if(MouseState & SDL_BUTTON(8))
-		m_aInputState[KEY_MOUSE_8] = 1;
-	if(MouseState & SDL_BUTTON(9))
-		m_aInputState[KEY_MOUSE_9] = 1;
+	// these states must always be updated manually because they are not in the SDL_GetKeyboardState from SDL
+	UpdateMouseState();
 
 	SDL_Event Event;
 	bool IgnoreKeys = false;

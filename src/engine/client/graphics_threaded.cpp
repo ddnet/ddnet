@@ -15,7 +15,6 @@
 
 #include <engine/console.h>
 #include <engine/graphics.h>
-#include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <game/generated/client_data.h>
@@ -23,8 +22,6 @@
 #include <game/localization.h>
 
 #include <engine/shared/image_manipulation.h>
-
-#include <cmath> // cosf, sinf, log2f
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"
@@ -278,7 +275,7 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 	AddCmd(
 		Cmd, [] { return true; }, "failed to unload texture.");
 
-	m_TextureIndices[pIndex->Id()] = m_FirstFreeTexture;
+	m_vTextureIndices[pIndex->Id()] = m_FirstFreeTexture;
 	m_FirstFreeTexture = pIndex->Id();
 
 	pIndex->Invalidate();
@@ -358,11 +355,11 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 {
 	int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
 
-	m_SpriteHelper.resize(w * h * bpp);
+	m_vSpriteHelper.resize((size_t)w * h * bpp);
 
-	CopyTextureFromTextureBufferSub(&m_SpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
+	CopyTextureFromTextureBufferSub(&m_vSpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
 
-	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, &m_SpriteHelper[0], FromImageInfo.m_Format, 0);
+	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, &m_vSpriteHelper[0], FromImageInfo.m_Format, 0);
 
 	return RetHandle;
 }
@@ -443,7 +440,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 			}
 			str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), aText, 16, 16);
 
-			m_Warnings.emplace_back(NewWarning);
+			m_vWarnings.emplace_back(NewWarning);
 		}
 	}
 
@@ -454,18 +451,18 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	int Tex = m_FirstFreeTexture;
 	if(Tex == -1)
 	{
-		size_t CurSize = m_TextureIndices.size();
-		m_TextureIndices.resize(CurSize * 2);
+		size_t CurSize = m_vTextureIndices.size();
+		m_vTextureIndices.resize(CurSize * 2);
 		for(size_t i = 0; i < CurSize - 1; ++i)
 		{
-			m_TextureIndices[CurSize + i] = CurSize + i + 1;
+			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
 		}
-		m_TextureIndices.back() = -1;
+		m_vTextureIndices.back() = -1;
 
 		Tex = CurSize;
 	}
-	m_FirstFreeTexture = m_TextureIndices[Tex];
-	m_TextureIndices[Tex] = -1;
+	m_FirstFreeTexture = m_vTextureIndices[Tex];
+	m_vTextureIndices[Tex] = -1;
 
 	CCommandBuffer::SCommand_Texture_Create Cmd;
 	Cmd.m_Slot = Tex;
@@ -538,34 +535,34 @@ bool CGraphics_Threaded::LoadTextTextures(int Width, int Height, CTextureHandle 
 	int Tex = m_FirstFreeTexture;
 	if(Tex == -1)
 	{
-		size_t CurSize = m_TextureIndices.size();
-		m_TextureIndices.resize(CurSize * 2);
+		size_t CurSize = m_vTextureIndices.size();
+		m_vTextureIndices.resize(CurSize * 2);
 		for(size_t i = 0; i < CurSize - 1; ++i)
 		{
-			m_TextureIndices[CurSize + i] = CurSize + i + 1;
+			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
 		}
-		m_TextureIndices.back() = -1;
+		m_vTextureIndices.back() = -1;
 
 		Tex = CurSize;
 	}
-	m_FirstFreeTexture = m_TextureIndices[Tex];
-	m_TextureIndices[Tex] = -1;
+	m_FirstFreeTexture = m_vTextureIndices[Tex];
+	m_vTextureIndices[Tex] = -1;
 
 	int Tex2 = m_FirstFreeTexture;
 	if(Tex2 == -1)
 	{
-		size_t CurSize = m_TextureIndices.size();
-		m_TextureIndices.resize(CurSize * 2);
+		size_t CurSize = m_vTextureIndices.size();
+		m_vTextureIndices.resize(CurSize * 2);
 		for(size_t i = 0; i < CurSize - 1; ++i)
 		{
-			m_TextureIndices[CurSize + i] = CurSize + i + 1;
+			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
 		}
-		m_TextureIndices.back() = -1;
+		m_vTextureIndices.back() = -1;
 
 		Tex2 = CurSize;
 	}
-	m_FirstFreeTexture = m_TextureIndices[Tex2];
-	m_TextureIndices[Tex2] = -1;
+	m_FirstFreeTexture = m_vTextureIndices[Tex2];
+	m_vTextureIndices[Tex2] = -1;
 
 	CCommandBuffer::SCommand_TextTextures_Create Cmd;
 	Cmd.m_Slot = Tex;
@@ -593,10 +590,10 @@ bool CGraphics_Threaded::UnloadTextTextures(CTextureHandle &TextTexture, CTextur
 	AddCmd(
 		Cmd, [] { return true; }, "failed to unload text textures.");
 
-	m_TextureIndices[TextTexture.Id()] = m_FirstFreeTexture;
+	m_vTextureIndices[TextTexture.Id()] = m_FirstFreeTexture;
 	m_FirstFreeTexture = TextTexture.Id();
 
-	m_TextureIndices[TextOutlineTexture.Id()] = m_FirstFreeTexture;
+	m_vTextureIndices[TextOutlineTexture.Id()] = m_FirstFreeTexture;
 	m_FirstFreeTexture = TextOutlineTexture.Id();
 
 	TextTexture.Invalidate();
@@ -697,7 +694,7 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInf
 		SWarning NewWarning;
 		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
 
-		m_Warnings.emplace_back(NewWarning);
+		m_vWarnings.emplace_back(NewWarning);
 
 		ImageIsValid = false;
 	}
@@ -749,7 +746,7 @@ bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Im
 		}
 		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
 			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
-		m_Warnings.emplace_back(NewWarning);
+		m_vWarnings.emplace_back(NewWarning);
 		return false;
 	}
 	return true;
@@ -1399,14 +1396,14 @@ int CGraphics_Threaded::CreateQuadContainer(bool AutomaticUpload)
 	int Index = -1;
 	if(m_FirstFreeQuadContainer == -1)
 	{
-		Index = m_QuadContainers.size();
-		m_QuadContainers.emplace_back(AutomaticUpload);
+		Index = m_vQuadContainers.size();
+		m_vQuadContainers.emplace_back(AutomaticUpload);
 	}
 	else
 	{
 		Index = m_FirstFreeQuadContainer;
-		m_FirstFreeQuadContainer = m_QuadContainers[Index].m_FreeIndex;
-		m_QuadContainers[Index].m_FreeIndex = Index;
+		m_FirstFreeQuadContainer = m_vQuadContainers[Index].m_FreeIndex;
+		m_vQuadContainers[Index].m_FreeIndex = Index;
 	}
 
 	return Index;
@@ -1414,7 +1411,7 @@ int CGraphics_Threaded::CreateQuadContainer(bool AutomaticUpload)
 
 void CGraphics_Threaded::QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 	Container.m_AutomaticUpload = AutomaticUpload;
 }
 
@@ -1422,18 +1419,18 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 {
 	if(IsQuadContainerBufferingEnabled())
 	{
-		SQuadContainer &Container = m_QuadContainers[ContainerIndex];
-		if(!Container.m_Quads.empty())
+		SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
+		if(!Container.m_vQuads.empty())
 		{
 			if(Container.m_QuadBufferObjectIndex == -1)
 			{
-				size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
-				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_Quads[0], 0);
+				size_t UploadDataSize = Container.m_vQuads.size() * sizeof(SQuadContainer::SQuad);
+				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_vQuads[0], 0);
 			}
 			else
 			{
-				size_t UploadDataSize = Container.m_Quads.size() * sizeof(SQuadContainer::SQuad);
-				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_Quads[0], 0);
+				size_t UploadDataSize = Container.m_vQuads.size() * sizeof(SQuadContainer::SQuad);
+				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_vQuads[0], 0);
 			}
 
 			if(Container.m_QuadBufferContainerIndex == -1)
@@ -1442,22 +1439,22 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				Info.m_Stride = sizeof(CCommandBuffer::SVertex);
 				Info.m_VertBufferBindingIndex = Container.m_QuadBufferObjectIndex;
 
-				Info.m_Attributes.emplace_back();
-				SBufferContainerInfo::SAttribute *pAttr = &Info.m_Attributes.back();
+				Info.m_vAttributes.emplace_back();
+				SBufferContainerInfo::SAttribute *pAttr = &Info.m_vAttributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = false;
 				pAttr->m_pOffset = 0;
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-				Info.m_Attributes.emplace_back();
-				pAttr = &Info.m_Attributes.back();
+				Info.m_vAttributes.emplace_back();
+				pAttr = &Info.m_vAttributes.back();
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = false;
 				pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-				Info.m_Attributes.emplace_back();
-				pAttr = &Info.m_Attributes.back();
+				Info.m_vAttributes.emplace_back();
+				pAttr = &Info.m_vAttributes.back();
 				pAttr->m_DataTypeCount = 4;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = true;
@@ -1472,17 +1469,17 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 
 int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
+	if((int)Container.m_vQuads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
 		return -1;
 
-	int RetOff = (int)Container.m_Quads.size();
+	int RetOff = (int)Container.m_vQuads.size();
 
 	for(int i = 0; i < Num; ++i)
 	{
-		Container.m_Quads.emplace_back();
-		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
+		Container.m_vQuads.emplace_back();
+		SQuadContainer::SQuad &Quad = Container.m_vQuads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X;
 		Quad.m_aVertices[0].m_Pos.y = pArray[i].m_Y;
@@ -1522,17 +1519,17 @@ int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CQuadItem *pAr
 
 int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
+	if((int)Container.m_vQuads.size() > Num + CCommandBuffer::CCommandBuffer::MAX_VERTICES)
 		return -1;
 
-	int RetOff = (int)Container.m_Quads.size();
+	int RetOff = (int)Container.m_vQuads.size();
 
 	for(int i = 0; i < Num; ++i)
 	{
-		Container.m_Quads.emplace_back();
-		SQuadContainer::SQuad &Quad = Container.m_Quads.back();
+		Container.m_vQuads.emplace_back();
+		SQuadContainer::SQuad &Quad = Container.m_vQuads.back();
 
 		Quad.m_aVertices[0].m_Pos.x = pArray[i].m_X0;
 		Quad.m_aVertices[0].m_Pos.y = pArray[i].m_Y0;
@@ -1563,13 +1560,13 @@ int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem 
 
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex != -1)
 			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
 	}
-	Container.m_Quads.clear();
+	Container.m_vQuads.clear();
 	Container.m_QuadBufferContainerIndex = Container.m_QuadBufferObjectIndex = -1;
 }
 
@@ -1578,7 +1575,7 @@ void CGraphics_Threaded::DeleteQuadContainer(int ContainerIndex)
 	QuadContainerReset(ContainerIndex);
 
 	// also clear the container index
-	m_QuadContainers[ContainerIndex].m_FreeIndex = m_FirstFreeQuadContainer;
+	m_vQuadContainers[ContainerIndex].m_FreeIndex = m_FirstFreeQuadContainer;
 	m_FirstFreeQuadContainer = ContainerIndex;
 }
 
@@ -1589,12 +1586,12 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadDrawNum
 
 void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
 	if(QuadDrawNum == -1)
-		QuadDrawNum = (int)Container.m_Quads.size() - QuadOffset;
+		QuadDrawNum = (int)Container.m_vQuads.size() - QuadOffset;
 
-	if((int)Container.m_Quads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
+	if((int)Container.m_vQuads.size() < QuadOffset + QuadDrawNum || QuadDrawNum == 0)
 		return;
 
 	if(IsQuadContainerBufferingEnabled())
@@ -1625,7 +1622,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		{
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset + i];
+				SQuadContainer::SQuad &Quad = Container.m_vQuads[QuadOffset + i];
 				m_aVertices[i * 6] = Quad.m_aVertices[0];
 				m_aVertices[i * 6 + 1] = Quad.m_aVertices[1];
 				m_aVertices[i * 6 + 2] = Quad.m_aVertices[2];
@@ -1637,7 +1634,7 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		}
 		else
 		{
-			mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
+			mem_copy(m_aVertices, &Container.m_vQuads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
 			m_NumVertices += 4 * QuadDrawNum;
 		}
 		m_Drawing = DRAWING_QUADS;
@@ -1651,20 +1648,20 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 
 void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX, float ScaleY)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
-	if((int)Container.m_Quads.size() < QuadOffset + 1)
+	if((int)Container.m_vQuads.size() < QuadOffset + 1)
 		return;
 
 	if(QuadDrawNum == -1)
-		QuadDrawNum = (int)Container.m_Quads.size() - QuadOffset;
+		QuadDrawNum = (int)Container.m_vQuads.size() - QuadOffset;
 
 	if(IsQuadContainerBufferingEnabled())
 	{
 		if(Container.m_QuadBufferContainerIndex == -1)
 			return;
 
-		SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset];
+		SQuadContainer::SQuad &Quad = Container.m_vQuads[QuadOffset];
 		CCommandBuffer::SCommand_RenderQuadContainerEx Cmd;
 
 		WrapClamp();
@@ -1704,7 +1701,7 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 		{
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
-				SQuadContainer::SQuad &Quad = Container.m_Quads[QuadOffset + i];
+				SQuadContainer::SQuad &Quad = Container.m_vQuads[QuadOffset + i];
 				m_aVertices[i * 6 + 0] = Quad.m_aVertices[0];
 				m_aVertices[i * 6 + 1] = Quad.m_aVertices[1];
 				m_aVertices[i * 6 + 2] = Quad.m_aVertices[2];
@@ -1739,7 +1736,7 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 		}
 		else
 		{
-			mem_copy(m_aVertices, &Container.m_Quads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
+			mem_copy(m_aVertices, &Container.m_vQuads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
 			for(int i = 0; i < QuadDrawNum; ++i)
 			{
 				for(int n = 0; n < 4; ++n)
@@ -1781,7 +1778,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSprite(int ContainerIndex, int Qua
 
 void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo)
 {
-	SQuadContainer &Container = m_QuadContainers[ContainerIndex];
+	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 
 	if(DrawCount == 0)
 		return;
@@ -1792,7 +1789,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 			return;
 
 		WrapClamp();
-		SQuadContainer::SQuad &Quad = Container.m_Quads[0];
+		SQuadContainer::SQuad &Quad = Container.m_vQuads[0];
 		CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple Cmd;
 
 		Cmd.m_State = m_State;
@@ -1879,14 +1876,14 @@ int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadD
 	int Index = -1;
 	if(m_FirstFreeBufferObjectIndex == -1)
 	{
-		Index = m_BufferObjectIndices.size();
-		m_BufferObjectIndices.push_back(Index);
+		Index = m_vBufferObjectIndices.size();
+		m_vBufferObjectIndices.push_back(Index);
 	}
 	else
 	{
 		Index = m_FirstFreeBufferObjectIndex;
-		m_FirstFreeBufferObjectIndex = m_BufferObjectIndices[Index];
-		m_BufferObjectIndices[Index] = Index;
+		m_FirstFreeBufferObjectIndex = m_vBufferObjectIndices[Index];
+		m_vBufferObjectIndices[Index] = Index;
 	}
 
 	CCommandBuffer::SCommand_CreateBufferObject Cmd;
@@ -2099,7 +2096,7 @@ void CGraphics_Threaded::DeleteBufferObject(int BufferIndex)
 	}
 
 	// also clear the buffer object index
-	m_BufferObjectIndices[BufferIndex] = m_FirstFreeBufferObjectIndex;
+	m_vBufferObjectIndices[BufferIndex] = m_FirstFreeBufferObjectIndex;
 	m_FirstFreeBufferObjectIndex = BufferIndex;
 }
 
@@ -2120,7 +2117,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 
 	CCommandBuffer::SCommand_CreateBufferContainer Cmd;
 	Cmd.m_BufferContainerIndex = Index;
-	Cmd.m_AttrCount = (int)pContainerInfo->m_Attributes.size();
+	Cmd.m_AttrCount = (int)pContainerInfo->m_vAttributes.size();
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
 
@@ -2143,7 +2140,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 		return -1;
 	}
 
-	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_Attributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_vAttributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
 
@@ -2171,7 +2168,7 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 		if(BufferObjectIndex != -1)
 		{
 			// clear the buffer object index
-			m_BufferObjectIndices[BufferObjectIndex] = m_FirstFreeBufferObjectIndex;
+			m_vBufferObjectIndices[BufferObjectIndex] = m_FirstFreeBufferObjectIndex;
 			m_FirstFreeBufferObjectIndex = BufferObjectIndex;
 		}
 	}
@@ -2186,7 +2183,7 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 {
 	CCommandBuffer::SCommand_UpdateBufferContainer Cmd;
 	Cmd.m_BufferContainerIndex = ContainerIndex;
-	Cmd.m_AttrCount = (int)pContainerInfo->m_Attributes.size();
+	Cmd.m_AttrCount = (int)pContainerInfo->m_vAttributes.size();
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
 
@@ -2209,7 +2206,7 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 		return;
 	}
 
-	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_Attributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_vAttributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
 	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
 }
@@ -2251,7 +2248,7 @@ int CGraphics_Threaded::IssueInit()
 	if(g_Config.m_GfxHighdpi)
 		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
 
-	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
+	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
 	if(r == 0)
 	{
@@ -2310,7 +2307,7 @@ void CGraphics_Threaded::AddBackEndWarningIfExists()
 	{
 		SWarning NewWarning;
 		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "%s", Localize(pErrStr));
-		m_Warnings.emplace_back(NewWarning);
+		m_vWarnings.emplace_back(NewWarning);
 	}
 }
 
@@ -2323,7 +2320,11 @@ int CGraphics_Threaded::InitWindow()
 	// try disabling fsaa
 	while(g_Config.m_GfxFsaaSamples)
 	{
-		g_Config.m_GfxFsaaSamples--;
+		// 4 is the minimum required by OpenGL ES spec (GL_MAX_SAMPLES - https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glGet.xhtml), so can probably also be assumed for OpenGL
+		if(g_Config.m_GfxFsaaSamples > 4)
+			g_Config.m_GfxFsaaSamples = 4;
+		else
+			g_Config.m_GfxFsaaSamples = 0;
 
 		if(g_Config.m_GfxFsaaSamples)
 			dbg_msg("gfx", "lowering FSAA to %d and trying again", g_Config.m_GfxFsaaSamples);
@@ -2445,10 +2446,10 @@ int CGraphics_Threaded::Init()
 
 	// init textures
 	m_FirstFreeTexture = 0;
-	m_TextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
-	for(int i = 0; i < (int)m_TextureIndices.size() - 1; i++)
-		m_TextureIndices[i] = i + 1;
-	m_TextureIndices.back() = -1;
+	m_vTextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
+	for(int i = 0; i < (int)m_vTextureIndices.size() - 1; i++)
+		m_vTextureIndices[i] = i + 1;
+	m_vTextureIndices.back() = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;
@@ -2608,13 +2609,13 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	KickCommandBuffer();
 	WaitForIdle();
 
-	for(auto &ResizeListener : m_ResizeListeners)
+	for(auto &ResizeListener : m_vResizeListeners)
 		ResizeListener.m_pFunc(ResizeListener.m_pUser);
 }
 
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
 {
-	m_ResizeListeners.emplace_back(pFunc, pUser);
+	m_vResizeListeners.emplace_back(pFunc, pUser);
 }
 
 int CGraphics_Threaded::GetWindowScreen()
@@ -2695,12 +2696,12 @@ void CGraphics_Threaded::TakeCustomScreenshot(const char *pFilename)
 
 void CGraphics_Threaded::Swap()
 {
-	if(!m_Warnings.empty())
+	if(!m_vWarnings.empty())
 	{
 		SWarning *pCurWarning = GetCurWarning();
 		if(pCurWarning->m_WasShown)
 		{
-			m_Warnings.erase(m_Warnings.begin());
+			m_vWarnings.erase(m_vWarnings.begin());
 		}
 	}
 
@@ -2815,11 +2816,11 @@ void CGraphics_Threaded::WaitForIdle()
 
 SWarning *CGraphics_Threaded::GetCurWarning()
 {
-	if(m_Warnings.empty())
+	if(m_vWarnings.empty())
 		return NULL;
 	else
 	{
-		SWarning *pCurWarning = &m_Warnings[0];
+		SWarning *pCurWarning = &m_vWarnings[0];
 		return pCurWarning;
 	}
 }

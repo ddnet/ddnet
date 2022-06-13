@@ -1,7 +1,7 @@
 #if defined(CONF_WEBSOCKETS)
 
+#include <cstdlib>
 #include <map>
-#include <stdlib.h>
 #include <string>
 
 #include "base/system.h"

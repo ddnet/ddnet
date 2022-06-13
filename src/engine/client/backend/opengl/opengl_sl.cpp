@@ -10,9 +10,8 @@
 #include <string>
 #include <vector>
 
-#include <engine/client/backend_sdl.h>
-
 #include <engine/client/backend/glsl_shader_compiler.h>
+#include <engine/graphics.h>
 
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
@@ -72,7 +71,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 			}
 		}
 
-		for(CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_Defines)
+		for(CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_vDefines)
 		{
 			Lines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
 		}

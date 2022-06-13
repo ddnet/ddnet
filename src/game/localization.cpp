@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "localization.h"
-#include <base/tl/algorithm.h>
 
 #include <engine/console.h>
 #include <engine/shared/linereader.h>
@@ -38,11 +37,7 @@ CLocalizationDatabase::CLocalizationDatabase()
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
 {
-	CString s;
-	s.m_Hash = str_quickhash(pOrgStr);
-	s.m_ContextHash = str_quickhash(pContext);
-	s.m_pReplacement = m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr);
-	m_Strings.add(s);
+	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
@@ -50,7 +45,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	// empty string means unload
 	if(pFilename[0] == 0)
 	{
-		m_Strings.clear();
+		m_vStrings.clear();
 		m_StringsHeap.Reset();
 		m_CurrentVersion = 0;
 		return true;
@@ -63,7 +58,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded '%s'", pFilename);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
-	m_Strings.clear();
+	m_vStrings.clear();
 	m_StringsHeap.Reset();
 
 	char aContext[512];
@@ -118,6 +113,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		AddString(aOrigin, pReplacement, aContext);
 	}
 	io_close(IoHandle);
+	std::sort(m_vStrings.begin(), m_vStrings.end());
 
 	m_CurrentVersion = ++m_VersionCounter;
 	return true;
@@ -129,22 +125,21 @@ const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHas
 	String.m_Hash = Hash;
 	String.m_ContextHash = ContextHash;
 	String.m_pReplacement = 0x0;
-	sorted_array<CString>::range r = ::find_binary(m_Strings.all(), String);
-	if(r.empty())
-		return 0;
+	auto Range1 = std::equal_range(m_vStrings.begin(), m_vStrings.end(), String);
+	if(std::distance(Range1.first, Range1.second) == 1)
+		return Range1.first->m_pReplacement;
 
-	unsigned DefaultHash = str_quickhash("");
-	unsigned DefaultIndex = 0;
-	for(unsigned i = 0; i < r.size() && r.index(i).m_Hash == Hash; ++i)
+	const unsigned DefaultHash = str_quickhash("");
+	if(ContextHash != DefaultHash)
 	{
-		const CString &rStr = r.index(i);
-		if(rStr.m_ContextHash == ContextHash)
-			return rStr.m_pReplacement;
-		else if(rStr.m_ContextHash == DefaultHash)
-			DefaultIndex = i;
+		// Do another lookup with the default context hash
+		String.m_ContextHash = DefaultHash;
+		auto Range2 = std::equal_range(m_vStrings.begin(), m_vStrings.end(), String);
+		if(std::distance(Range2.first, Range2.second) == 1)
+			return Range2.first->m_pReplacement;
 	}
 
-	return r.index(DefaultIndex).m_pReplacement;
+	return nullptr;
 }
 
 CLocalizationDatabase g_Localization;

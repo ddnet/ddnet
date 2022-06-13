@@ -1,7 +1,7 @@
 #include "glsl_shader_compiler.h"
 
 #include <base/system.h>
-#include <engine/client/backend_sdl.h>
+#include <engine/graphics.h>
 
 CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias)
 {
@@ -19,7 +19,7 @@ CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int
 
 void CGLSLCompiler::AddDefine(const std::string &DefineName, const std::string &DefineValue)
 {
-	m_Defines.emplace_back(SGLSLCompilerDefine(DefineName, DefineValue));
+	m_vDefines.emplace_back(SGLSLCompilerDefine(DefineName, DefineValue));
 }
 
 void CGLSLCompiler::AddDefine(const char *pDefineName, const char *pDefineValue)
@@ -29,7 +29,7 @@ void CGLSLCompiler::AddDefine(const char *pDefineName, const char *pDefineValue)
 
 void CGLSLCompiler::ClearDefines()
 {
-	m_Defines.clear();
+	m_vDefines.clear();
 }
 
 void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLShaderCompilerType Type)

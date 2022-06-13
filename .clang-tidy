@@ -8,6 +8,8 @@
 #   Too annoying to always align for perfect padding
 # clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
 #   TODO: Requires C11 to fix
+# modernize-use-override,
+#   TODO: modernize-use-override.IgnoreDestructors not supported on ubuntu-latest yet for CI
 # misc-unused-parameters
 #   TODO: Many changes
 # readability-static-accessed-through-instance,
@@ -35,6 +37,10 @@ Checks: >
   -clang-analyzer-osx.cocoa.RetainCount,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   -clang-analyzer-security.insecureAPI.rand,
+  cppcoreguidelines-avoid-goto,
+  cppcoreguidelines-interfaces-global-init,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-virtual-class-destructor,
   misc-*,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
@@ -78,3 +84,4 @@ Checks: >
   -readability-uppercase-literal-suffix,
   performance-*,
   -performance-no-int-to-ptr,
+  portability-*,

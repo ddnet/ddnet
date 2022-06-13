@@ -63,6 +63,7 @@ map_resave
 map_version
 mastersrv
 packetgen
+stun
 testrunner
 twping
 unicode_confusables
@@ -77,6 +78,7 @@ generated
 target
 
 /build*
+/integration_test/*
 
 # IDE project files
 .cache
@@ -100,6 +102,7 @@ tags
 
 *.a
 *.cmd
+*.csv
 *.dll
 *.dmg
 *.dtb
@@ -107,6 +110,7 @@ tags
 *.exe
 *.fifo
 *.filters
+*.json
 *.lnk
 *.log
 *.opensdf

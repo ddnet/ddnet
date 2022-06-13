@@ -5,8 +5,6 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
-#include "entities/laser.h"
-#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -59,14 +57,11 @@ void CGameTeams::ResetRoundState(int Team)
 
 void CGameTeams::ResetSwitchers(int Team)
 {
-	if(GameServer()->Collision()->m_NumSwitchers > 0)
+	for(auto &Switcher : GameServer()->Switchers())
 	{
-		for(int i = 0; i < GameServer()->Collision()->m_NumSwitchers + 1; ++i)
-		{
-			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = GameServer()->Collision()->m_pSwitchers[i].m_Initial;
-			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
-			GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
-		}
+		Switcher.m_Status[Team] = Switcher.m_Initial;
+		Switcher.m_EndTick[Team] = 0;
+		Switcher.m_Type[Team] = TILE_SWITCHOPEN;
 	}
 }
 
@@ -907,6 +902,11 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	std::swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
 
 	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
+
+	if(GameServer()->TeeHistorianActive())
+	{
+		GameServer()->TeeHistorian()->RecordPlayerSwap(pPlayer->GetCID(), pTargetPlayer->GetCID());
+	}
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",

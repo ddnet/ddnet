@@ -1,5 +1,7 @@
 #include "prng.h"
 
+#include <base/system.h>
+
 // From https://en.wikipedia.org/w/index.php?title=Permuted_congruential_generator&oldid=901497400#Example_code.
 //
 // > The generator recommended for most users is PCG-XSH-RR with 64-bit state

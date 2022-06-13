@@ -3,6 +3,7 @@
 #include "pickup.h"
 #include "character.h"
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 void CPickup::Tick()
 {
@@ -13,11 +14,11 @@ void CPickup::Tick()
 	for(int i = 0; i < Num; ++i)
 	{
 		CCharacter *pChr = apEnts[i];
-		if(pChr && pChr->IsAlive())
+		if(pChr)
 		{
 			if(GameWorld()->m_WorldConfig.m_IsVanilla && distance(m_Pos, pChr->m_Pos) >= 20.0f * 2) // pickup distance is shorter on vanilla due to using ClosestEntity
 				continue;
-			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && !GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
+			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && !Switchers()[m_Number].m_Status[pChr->Team()])
 				continue;
 			bool sound = false;
 			// player picked us up, is someone was hooking us, let them go

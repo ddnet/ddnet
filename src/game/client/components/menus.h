@@ -3,9 +3,12 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
+#include <chrono>
+#include <vector>
+
+#include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -176,7 +179,7 @@ class CMenus : public CComponent
 		}
 		// render
 		size_t Index = 2;
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 			Index = 0;
 		else if(UI()->HotItem() == pID)
 			Index = 1;
@@ -251,11 +254,11 @@ public:
 	};
 
 protected:
-	sorted_array<SCustomEntities> m_EntitiesList;
-	sorted_array<SCustomGame> m_GameList;
-	sorted_array<SCustomEmoticon> m_EmoticonList;
-	sorted_array<SCustomParticle> m_ParticlesList;
-	sorted_array<SCustomHud> m_HudList;
+	std::vector<SCustomEntities> m_vEntitiesList;
+	std::vector<SCustomGame> m_vGameList;
+	std::vector<SCustomEmoticon> m_vEmoticonList;
+	std::vector<SCustomParticle> m_vParticlesList;
+	std::vector<SCustomHud> m_vHudList;
 
 	bool m_IsInit = false;
 
@@ -281,7 +284,6 @@ protected:
 	int m_ActivePage;
 	bool m_ShowStart;
 	bool m_MenuActive;
-	bool m_UseMouseButtons;
 	vec2 m_MousePos;
 	bool m_JoinTutorial;
 
@@ -294,7 +296,7 @@ protected:
 		IGraphics::CTextureHandle m_OrgTexture;
 		IGraphics::CTextureHandle m_GreyTexture;
 	};
-	array<CMenuImage> m_lMenuImages;
+	std::vector<CMenuImage> m_vMenuImages;
 
 	static int MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser);
 
@@ -427,7 +429,6 @@ protected:
 		}
 	};
 
-	//sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
 	char m_aCurrentDemoFile[64];
 	int m_DemolistSelectedIndex;
@@ -435,7 +436,7 @@ protected:
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 
-	int64_t m_DemoPopulateStartTime = 0;
+	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
 
 	void DemolistOnUpdate(bool Reset);
 	//void DemolistPopulate();
@@ -446,6 +447,12 @@ protected:
 	{
 		const CFriendInfo *m_pFriendInfo;
 		int m_NumFound;
+
+		CFriendItem() {}
+		CFriendItem(const CFriendInfo *pFriendInfo) :
+			m_pFriendInfo(pFriendInfo), m_NumFound(0)
+		{
+		}
 
 		bool operator<(const CFriendItem &Other) const
 		{
@@ -464,7 +471,7 @@ protected:
 		}
 	};
 
-	sorted_array<CFriendItem> m_lFriends;
+	std::vector<CFriendItem> m_vFriends;
 	int m_FriendlistSelectedIndex;
 
 	void FriendlistOnUpdate();
@@ -532,8 +539,6 @@ public:
 	void RenderBackground();
 
 	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
-
-	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }
 
 	static CMenusKeyBinder m_Binder;
 
@@ -616,7 +621,7 @@ public:
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	sorted_array<CDemoItem> m_lDemos;
+	std::vector<CDemoItem> m_vDemos;
 	void DemolistPopulate();
 	bool m_Dummy;
 
@@ -641,9 +646,9 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
-	sorted_array<CGhostItem> m_lGhosts;
+	std::vector<CGhostItem> m_vGhosts;
 
-	int64_t m_GhostPopulateStartTime = 0;
+	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 
 	void GhostlistPopulate();
 	CGhostItem *GetOwnGhost();
@@ -654,10 +659,10 @@ public:
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
-	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, int64_t Duration);
+	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration);
 
-	int64_t m_PopupWarningLastTime;
-	int64_t m_PopupWarningDuration;
+	std::chrono::nanoseconds m_PopupWarningLastTime;
+	std::chrono::nanoseconds m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
 	char m_aDemoPlayerPopupHint[256];

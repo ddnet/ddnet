@@ -1,8 +1,6 @@
 #include <cctype>
 #include <list>
 
-#include <base/math.h>
-#include <engine/serverbrowser.h>
 #include <game/client/gameclient.h>
 #include <game/mapitems.h>
 

@@ -1,8 +1,8 @@
 #include "http.h"
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
-#include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
@@ -14,11 +14,11 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <curl/curl.h>
-#include <curl/easy.h>
 
 // TODO: Non-global pls?
 static CURLSH *gs_Share;
 static LOCK gs_aLocks[CURL_LOCK_DATA_LAST + 1];
+static bool gs_Initialized = false;
 
 static int GetLockIndex(int Data)
 {
@@ -42,6 +42,33 @@ static void CurlUnlock(CURL *pHandle, curl_lock_data Data, void *pUser) RELEASE(
 	(void)pHandle;
 	(void)pUser;
 	lock_unlock(gs_aLocks[GetLockIndex(Data)]);
+}
+
+int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
+{
+	char TypeChar;
+	switch(Type)
+	{
+	case CURLINFO_TEXT:
+		TypeChar = '*';
+		break;
+	case CURLINFO_HEADER_OUT:
+		TypeChar = '<';
+		break;
+	case CURLINFO_HEADER_IN:
+		TypeChar = '>';
+		break;
+	default:
+		return 0;
+	}
+	while(const char *pLineEnd = (const char *)memchr(pData, '\n', DataSize))
+	{
+		int LineLength = pLineEnd - pData;
+		log_debug("curl", "%c %.*s", TypeChar, LineLength, pData);
+		pData += LineLength + 1;
+		DataSize -= LineLength + 1;
+	}
+	return 0;
 }
 
 bool HttpInit(IStorage *pStorage)
@@ -76,6 +103,8 @@ bool HttpInit(IStorage *pStorage)
 	// handlers and instead ignore SIGPIPE from OpenSSL ourselves.
 	signal(SIGPIPE, SIG_IGN);
 #endif
+
+	gs_Initialized = true;
 
 	return false;
 }
@@ -113,6 +142,7 @@ CHttpRequest::~CHttpRequest()
 
 void CHttpRequest::Run()
 {
+	dbg_assert(gs_Initialized, "must initialize HTTP before running HTTP requests");
 	int FinalState;
 	if(!BeforeInit())
 	{
@@ -159,11 +189,13 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	if(g_Config.m_DbgCurl)
 	{
 		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
+		curl_easy_setopt(pHandle, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(pHandle, CURLOPT_ERRORBUFFER, aErr);
 
 	curl_easy_setopt(pHandle, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.ConnectTimeoutMs);
+	curl_easy_setopt(pHandle, CURLOPT_TIMEOUT_MS, m_Timeout.TimeoutMs);
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
 
@@ -207,6 +239,10 @@ int CHttpRequest::RunImpl(CURL *pUser)
 		if(m_Type == REQUEST::POST_JSON)
 		{
 			Header("Content-Type: application/json");
+		}
+		else
+		{
+			Header("Content-Type:");
 		}
 		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, m_pBody);
 		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDSIZE, m_BodyLength);

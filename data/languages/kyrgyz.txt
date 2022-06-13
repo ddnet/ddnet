@@ -853,9 +853,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 
 
-Reset wanted weapon on death
-== 
-
 Show clan above name plates
 == 
 

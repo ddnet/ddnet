@@ -1,7 +1,6 @@
 #ifndef GAME_CLIENT_UI_EX_H
 #define GAME_CLIENT_UI_EX_H
 
-#include <base/system.h>
 #include <engine/input.h>
 #include <engine/kernel.h>
 #include <game/client/ui.h>

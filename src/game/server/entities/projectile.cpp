@@ -4,7 +4,6 @@
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
-#include <game/server/player.h>
 #include <game/version.h>
 
 #include <engine/shared/config.h>
@@ -143,7 +142,7 @@ void CProjectile::Tick()
 	}
 	if(pOwnerChar && pOwnerChar->IsAlive())
 	{
-		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+		TeamMask = pOwnerChar->TeamMask();
 	}
 	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath || m_BelongsToPracticeTeam))
 	{
@@ -173,7 +172,7 @@ void CProjectile::Tick()
 			CCharacter *apEnts[MAX_CLIENTS];
 			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_Status[apEnts[i]->Team()])))
 					apEnts[i]->Freeze();
 		}
 
@@ -257,7 +256,7 @@ void CProjectile::Tick()
 			TeamMask = -1LL;
 			if(pOwnerChar && pOwnerChar->IsAlive())
 			{
-				TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+				TeamMask = pOwnerChar->TeamMask();
 			}
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
@@ -322,7 +321,7 @@ void CProjectile::Snap(int SnappingClient)
 	{
 		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
-		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
+		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
 			return;
 	}
 
@@ -333,7 +332,7 @@ void CProjectile::Snap(int SnappingClient)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 	if(pOwnerChar && pOwnerChar->IsAlive())
-		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+		TeamMask = pOwnerChar->TeamMask();
 
 	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;

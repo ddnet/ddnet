@@ -22,7 +22,7 @@ class CPlayer
 	MACRO_ALLOC_POOL_ID()
 
 public:
-	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
+	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team);
 	~CPlayer();
 
 	void Reset();
@@ -33,6 +33,7 @@ public:
 	void SetTeam(int Team, bool DoChatMsg = true);
 	int GetTeam() const { return m_Team; }
 	int GetCID() const { return m_ClientID; }
+	uint32_t GetUniqueCID() const { return m_UniqueClientID; }
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
@@ -113,6 +114,7 @@ public:
 	} m_Latency;
 
 private:
+	const uint32_t m_UniqueClientID;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
 	CGameContext *m_pGameServer;
@@ -177,9 +179,8 @@ public:
 
 	bool m_Moderating;
 
-	bool AfkTimer(CNetObj_PlayerInput *pNewTarget); // returns true if kicked
 	void UpdatePlaytime();
-	void AfkVoteTimer(CNetObj_PlayerInput *pNewTarget);
+	void AfkTimer();
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;
 	int64_t m_LastBroadcast;
@@ -187,12 +188,6 @@ public:
 
 	CNetObj_PlayerInput *m_pLastTarget;
 	bool m_LastTargetInit;
-	/* 
-		afk timer's 1st warning after 50% of sv_max_afk_time
-		2nd warning after 90%
-		kick after reaching 100% of sv_max_afk_time
-	*/
-	bool m_SentAfkWarning[2];
 
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;

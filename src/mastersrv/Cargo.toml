@@ -1,0 +1,32 @@
+[package]
+name = "mastersrv"
+version = "0.0.1"
+authors = ["heinrich5991 <heinrich5991@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+arrayvec = { version = "0.5.2", features = ["serde"] }
+base64 = "0.13.0"
+bytes = "1.1.0"
+clap = { version = "2.34.0", default-features = false, features = [
+  "suggestions",
+  "wrap_help",
+] }
+csv = "1.1.6"
+env_logger = "0.8.3"
+headers = "0.3.7"
+hex = "0.4.3"
+ipnet = { version = "2.5.0", features = ["serde"] }
+log = "0.4.17"
+rand = "0.8.4"
+serde = { version = "1.0.126", features = ["derive"] }
+serde_json = { version = "1.0.64", features = [
+  "float_roundtrip",
+  "preserve_order",
+  "raw_value",
+] }
+sha2 = "0.10.0"
+tokio = { version = "1.6.0", features = ["macros", "rt", "rt-multi-thread"] }
+tokio-stream = { version = "0.1.8", features = ["net"] }
+url = { version = "2.2.2", features = ["serde"] }
+warp = { version = "0.3.1", default-features = false }

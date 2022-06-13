@@ -736,14 +736,11 @@ Save
 Switch weapon when out of ammo
 == Змінювати зброю коли закінчились боєприпаси
 
-Reset wanted weapon on death
-== Скидати вибір зброї при смерті
-
 Show only chat messages from friends
 == Показувати повідомлення тільки від друзів
 
 Name plates size
-== Розмір ніків 
+== Розмір ніків
 
 Use team colors for name plates
 == Розфарбовувати ім'я гравця кольором команди
@@ -929,7 +926,7 @@ Show votes window after voting
 == Показувати голосування після вашого голосу
 
 Messages
-== Повідомлення 
+== Повідомлення
 
 System message
 == Системне повідомлення
@@ -1085,7 +1082,7 @@ Replay
 == Повтор
 
 Saving ddnet-settings.cfg failed
-== Збереження налаштувань невдалося 
+== Збереження налаштувань невдалося
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина або висота текстури %s не поділяється на %d, що може викликати візуальні помилки
@@ -1208,7 +1205,7 @@ Chat sound volume
 == Гучність звуку чату
 
 Background music volume
-== Гучність музики заднього фону 
+== Гучність музики заднього фону
 
 Assets
 == Текстури

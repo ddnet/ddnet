@@ -10,8 +10,6 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_BACKEND_OPENGL3_H_AS_ES
 #endif
 
-#include <engine/client/backend_sdl.h>
-
 #include "backend_opengl.h"
 
 #define MAX_STREAM_BUFFER_COUNT 10
@@ -66,9 +64,9 @@ protected:
 		TWGLuint m_LastIndexBufferBound;
 		SBufferContainerInfo m_ContainerInfo;
 	};
-	std::vector<SBufferContainer> m_BufferContainers;
+	std::vector<SBufferContainer> m_vBufferContainers;
 
-	std::vector<TWGLuint> m_BufferObjectIndices;
+	std::vector<TWGLuint> m_vBufferObjectIndices;
 
 	CCommandBuffer::SColorf m_ClearColor;
 

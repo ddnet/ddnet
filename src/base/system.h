@@ -14,8 +14,6 @@
 #define __USE_GNU
 #endif
 
-#include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -28,9 +26,9 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(__cplusplus)
+#include <chrono>
+
 extern "C" {
-#endif
 
 /**
  * @defgroup Debug
@@ -101,7 +99,7 @@ dbg_break();
  * @remark Also works in release mode.
  *
  * @see dbg_assert
-*/
+ */
 void dbg_msg(const char *sys, const char *fmt, ...)
 	GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
@@ -196,7 +194,7 @@ typedef struct IOINTERNAL *IOHANDLE;
  * @ingroup File-IO
  *
  * @param File to open.
- * @param flags A set of IOFLAG flags. 
+ * @param flags A set of IOFLAG flags.
  *
  * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
  *
@@ -481,7 +479,7 @@ void aio_wait(ASYNCIO *aio);
  *
  * @param aio Handle to the file.
  *
-i */
+ */
 void aio_free(ASYNCIO *aio);
 
 /**
@@ -490,15 +488,6 @@ void aio_free(ASYNCIO *aio);
  *
  * @see Locks
  */
-
-/**
- * Suspends the current thread for a given period.
- *
- * @ingroup Threads
- *
- * @param microseconds Number of microseconds to sleep.
- */
-void thread_sleep(int microseconds);
 
 /**
  * Creates a new thread.
@@ -535,7 +524,7 @@ void thread_yield();
  * @ingroup Threads
  *
  * @param thread Thread to detach
-*/
+ */
 void thread_detach(void *thread);
 
 /**
@@ -768,13 +757,13 @@ enum
 int time_season();
 
 /**
- * Fetches a sample from a high resolution timer and converts it in microseconds.
+ * Fetches a sample from a high resolution timer and converts it in nanoseconds.
  *
  * @ingroup Time
  *
- * @return Current value of the timer in microseconds.
-*/
-int64_t time_get_microseconds();
+ * @return Current value of the timer in nanoseconds.
+ */
+int64_t time_get_nanoseconds();
 
 /**
  * @defgroup Network-General
@@ -806,7 +795,7 @@ enum
 /**
  * @ingroup Network-General
  */
-typedef struct
+typedef struct NETADDR
 {
 	unsigned int type;
 	unsigned char ip[16];
@@ -1186,7 +1175,7 @@ void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
  * @param str Pointer to the string.
  *
  * @return Length of string in bytes excluding the zero termination.
-*/
+ */
 int str_length(const char *str);
 
 /**
@@ -1242,7 +1231,7 @@ void str_sanitize_cc(char *str);
  * @param str String to sanitize.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 void str_sanitize(char *str);
 
 /**
@@ -1251,7 +1240,7 @@ void str_sanitize(char *str);
  * @param str String to sanitize.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 void str_sanitize_filename(char *str);
 
 /**
@@ -1296,7 +1285,7 @@ const char *str_skip_to_whitespace_const(const char *str);
  * within the string.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 char *str_skip_whitespaces(char *str);
 
 /**
@@ -1371,7 +1360,7 @@ int str_comp(const char *a, const char *b);
  * @return `> 0` - String a is greater than string b
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 int str_comp_num(const char *a, const char *b, int num);
 
 /**
@@ -1465,7 +1454,7 @@ const char *str_endswith(const char *str, const char *suffix);
  * @return The edit distance between the both strings.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 int str_utf8_dist(const char *a, const char *b);
 
 /**
@@ -1483,7 +1472,7 @@ int str_utf8_dist(const char *a, const char *b);
  * @return The edit distance between the both strings.
  *
  * @remark The strings are treated as zero-terminated strings.
-*/
+ */
 int str_utf8_dist_buffer(const char *a, const char *b, int *buf, int buf_len);
 
 /*
@@ -2168,21 +2157,6 @@ int str_utf8_decode(const char **ptr);
 int str_utf8_encode(char *ptr, int chr);
 
 /*
-	Function: str_utf16le_encode
-		Encode an utf8 character
-
-	Parameters:
-		ptr - Pointer to a buffer that should receive the data. Should be able to hold at least 4 bytes.
-
-	Returns:
-		Number of bytes put into the buffer.
-
-	Remarks:
-		- Does not do zero termination of the string.
-*/
-int str_utf16le_encode(char *ptr, int chr);
-
-/*
 	Function: str_utf8_check
 		Checks if a strings contains just valid utf8 characters.
 
@@ -2297,7 +2271,7 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 /*
 	Function: pid
 		Returns the pid of the current process.
-	
+
 	Returns:
 		pid of the current process
 */
@@ -2459,9 +2433,47 @@ int os_version_str(char *version, int length);
 void init_exception_handler();
 void set_exception_handler_log_file(const char *log_file_path);
 #endif
-
-#if defined(__cplusplus)
 }
-#endif
+
+/**
+	Type safe wrappers for the c system
+*/
+
+namespace tw {
+
+/**
+ * Fetches a sample from a high resolution timer and converts it in nanoseconds.
+ *
+ * @ingroup Time
+ *
+ * @return Current value of the timer in nanoseconds.
+ */
+std::chrono::nanoseconds time_get();
+
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
+
+/**
+ * Fixes the command line arguments to be encoded in UTF-8 on all systems.
+ * This is a RAII wrapper for cmdline_fix and cmdline_free.
+ */
+class CCmdlineFix
+{
+	int m_Argc;
+	const char **m_ppArgv;
+
+public:
+	CCmdlineFix(int *pArgc, const char ***pppArgv)
+	{
+		cmdline_fix(pArgc, pppArgv);
+		m_Argc = *pArgc;
+		m_ppArgv = *pppArgv;
+	}
+	~CCmdlineFix()
+	{
+		cmdline_free(m_Argc, m_ppArgv);
+	}
+};
+
+} // namespace tw
 
 #endif

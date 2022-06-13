@@ -1,10 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/sorted_array.h>
-
 #include <engine/demo.h>
-#include <engine/engine.h>
 
 #include <engine/shared/config.h>
 
@@ -13,7 +10,6 @@
 #include <game/client/components/damageind.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/particles.h>
-#include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 

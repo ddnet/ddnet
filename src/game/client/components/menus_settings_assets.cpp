@@ -1,11 +1,16 @@
-#include "binds.h"
-#include <engine/engine.h>
+#include <base/system.h>
+
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 #include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include "menus.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 typedef std::function<void()> TMenuAssetScanLoadedFunc;
 
@@ -94,7 +99,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 		SCustomEntities EntitiesItem;
 		str_copy(EntitiesItem.m_aName, pName, sizeof(EntitiesItem.m_aName));
 		CMenus::LoadEntities(&EntitiesItem, pUser);
-		pThis->m_EntitiesList.add(EntitiesItem);
+		pThis->m_vEntitiesList.push_back(EntitiesItem);
 	}
 	else
 	{
@@ -109,7 +114,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 			SCustomEntities EntitiesItem;
 			str_copy(EntitiesItem.m_aName, aName, sizeof(EntitiesItem.m_aName));
 			CMenus::LoadEntities(&EntitiesItem, pUser);
-			pThis->m_EntitiesList.add(EntitiesItem);
+			pThis->m_vEntitiesList.push_back(EntitiesItem);
 		}
 	}
 
@@ -155,7 +160,7 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 }
 
 template<typename TName>
-static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TName> &AssetList, const char *pAssetName, IGraphics *pGraphics, void *pUser)
+static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TName> &AssetList, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	if(IsDir)
@@ -170,7 +175,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 		TName AssetItem;
 		str_copy(AssetItem.m_aName, pName, sizeof(AssetItem.m_aName));
 		LoadAsset(&AssetItem, pAssetName, pGraphics, pUser);
-		AssetList.add(AssetItem);
+		AssetList.push_back(AssetItem);
 	}
 	else
 	{
@@ -185,7 +190,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, sorted_array<TNa
 			TName AssetItem;
 			str_copy(AssetItem.m_aName, aName, sizeof(AssetItem.m_aName));
 			LoadAsset(&AssetItem, pAssetName, pGraphics, pUser);
-			AssetList.add(AssetItem);
+			AssetList.push_back(AssetItem);
 		}
 	}
 
@@ -199,7 +204,7 @@ int CMenus::GameScan(const char *pName, int IsDir, int DirType, void *pUser)
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
-	return AssetScan(pName, IsDir, DirType, pThis->m_GameList, "game", pGraphics, pUser);
+	return AssetScan(pName, IsDir, DirType, pThis->m_vGameList, "game", pGraphics, pUser);
 }
 
 int CMenus::EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -207,7 +212,7 @@ int CMenus::EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
-	return AssetScan(pName, IsDir, DirType, pThis->m_EmoticonList, "emoticons", pGraphics, pUser);
+	return AssetScan(pName, IsDir, DirType, pThis->m_vEmoticonList, "emoticons", pGraphics, pUser);
 }
 
 int CMenus::ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -215,28 +220,29 @@ int CMenus::ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
-	return AssetScan(pName, IsDir, DirType, pThis->m_ParticlesList, "particles", pGraphics, pUser);
+	return AssetScan(pName, IsDir, DirType, pThis->m_vParticlesList, "particles", pGraphics, pUser);
 }
 
 int CMenus::HudScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pMenus = (CMenus *)pUser;
-	IGraphics *pGraphics = pMenus->Graphics();
-	return AssetScan(pName, IsDir, DirType, pMenus->m_HudList, "hud", pGraphics, pUser);
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
+	IGraphics *pGraphics = pThis->Graphics();
+	return AssetScan(pName, IsDir, DirType, pThis->m_vHudList, "hud", pGraphics, pUser);
 }
 
-static sorted_array<const CMenus::SCustomEntities *> s_SearchEntitiesList;
-static sorted_array<const CMenus::SCustomGame *> s_SearchGamesList;
-static sorted_array<const CMenus::SCustomEmoticon *> s_SearchEmoticonsList;
-static sorted_array<const CMenus::SCustomParticle *> s_SearchParticlesList;
-static sorted_array<const CMenus::SCustomHud *> s_SearchHudList;
+static std::vector<const CMenus::SCustomEntities *> s_SearchEntitiesList;
+static std::vector<const CMenus::SCustomGame *> s_SearchGamesList;
+static std::vector<const CMenus::SCustomEmoticon *> s_SearchEmoticonsList;
+static std::vector<const CMenus::SCustomParticle *> s_SearchParticlesList;
+static std::vector<const CMenus::SCustomHud *> s_SearchHudList;
 
 static const int NumberOfAssetsTabs = 5;
 static bool s_InitCustomList[NumberOfAssetsTabs] = {
 	true,
 };
 
-static int s_CustomListSize[NumberOfAssetsTabs] = {
+static size_t s_CustomListSize[NumberOfAssetsTabs] = {
 	0,
 };
 
@@ -244,7 +250,7 @@ static char s_aFilterString[NumberOfAssetsTabs][50];
 
 static int s_CurCustomTab = ASSETS_TAB_ENTITIES;
 
-static const CMenus::SCustomItem *GetCustomItem(int CurTab, int Index)
+static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 {
 	if(CurTab == ASSETS_TAB_ENTITIES)
 		return s_SearchEntitiesList[Index];
@@ -261,9 +267,9 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, int Index)
 }
 
 template<typename TName>
-void ClearAssetList(sorted_array<TName> &List, IGraphics *pGraphics)
+void ClearAssetList(std::vector<TName> &List, IGraphics *pGraphics)
 {
-	for(int i = 0; i < List.size(); ++i)
+	for(size_t i = 0; i < List.size(); ++i)
 	{
 		if(List[i].m_RenderTexture.IsValid())
 			pGraphics->UnloadTexture(&(List[i].m_RenderTexture));
@@ -276,44 +282,44 @@ void CMenus::ClearCustomItems(int CurTab)
 {
 	if(CurTab == ASSETS_TAB_ENTITIES)
 	{
-		for(int i = 0; i < m_EntitiesList.size(); ++i)
+		for(auto &Entity : m_vEntitiesList)
 		{
-			for(auto &Image : m_EntitiesList[i].m_aImages)
+			for(auto &Image : Entity.m_aImages)
 			{
 				if(Image.m_Texture.IsValid())
 					Graphics()->UnloadTexture(&Image.m_Texture);
 				Image.m_Texture = IGraphics::CTextureHandle();
 			}
 		}
-		m_EntitiesList.clear();
+		m_vEntitiesList.clear();
 
 		// reload current entities
 		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
 	}
 	else if(CurTab == ASSETS_TAB_GAME)
 	{
-		ClearAssetList(m_GameList, Graphics());
+		ClearAssetList(m_vGameList, Graphics());
 
 		// reload current game skin
 		GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
 	}
 	else if(CurTab == ASSETS_TAB_EMOTICONS)
 	{
-		ClearAssetList(m_EmoticonList, Graphics());
+		ClearAssetList(m_vEmoticonList, Graphics());
 
 		// reload current emoticons skin
 		GameClient()->LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 	}
 	else if(CurTab == ASSETS_TAB_PARTICLES)
 	{
-		ClearAssetList(m_ParticlesList, Graphics());
+		ClearAssetList(m_vParticlesList, Graphics());
 
 		// reload current particles skin
 		GameClient()->LoadParticlesSkin(g_Config.m_ClAssetParticles);
 	}
 	else if(CurTab == ASSETS_TAB_HUD)
 	{
-		ClearAssetList(m_HudList, Graphics());
+		ClearAssetList(m_vHudList, Graphics());
 
 		// reload current hud skin
 		GameClient()->LoadHudSkin(g_Config.m_ClAssetHud);
@@ -322,24 +328,25 @@ void CMenus::ClearCustomItems(int CurTab)
 }
 
 template<typename TName, typename TCaller>
-void InitAssetList(sorted_array<TName> &AssetList, const char *pAssetPath, const char *pAssetName, FS_LISTDIR_CALLBACK pfnCallback, IGraphics *pGraphics, IStorage *pStorage, TCaller Caller)
+void InitAssetList(std::vector<TName> &AssetList, const char *pAssetPath, const char *pAssetName, FS_LISTDIR_CALLBACK pfnCallback, IGraphics *pGraphics, IStorage *pStorage, TCaller Caller)
 {
-	if(AssetList.size() == 0)
+	if(AssetList.empty())
 	{
 		TName AssetItem;
 		str_copy(AssetItem.m_aName, "default", sizeof(AssetItem.m_aName));
 		LoadAsset(&AssetItem, pAssetName, pGraphics, Caller);
-		AssetList.add(AssetItem);
+		AssetList.push_back(AssetItem);
 
 		// load assets
 		pStorage->ListDirectory(IStorage::TYPE_ALL, pAssetPath, pfnCallback, Caller);
+		std::sort(AssetList.begin(), AssetList.end());
 	}
 	if(AssetList.size() != s_CustomListSize[s_CurCustomTab])
 		s_InitCustomList[s_CurCustomTab] = true;
 }
 
 template<typename TName>
-int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> &AssetList)
+int InitSearchList(std::vector<const TName *> &SearchList, std::vector<TName> &AssetList)
 {
 	SearchList.clear();
 	int ListSize = AssetList.size();
@@ -351,7 +358,7 @@ int InitSearchList(sorted_array<const TName *> &SearchList, sorted_array<TName> 
 		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 			continue;
 
-		SearchList.add_unsorted(s);
+		SearchList.push_back(s);
 	}
 	return AssetList.size();
 }
@@ -380,43 +387,44 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
 
-	int64_t LoadStartTime = time_get_microseconds();
+	auto LoadStartTime = tw::time_get();
 	SMenuAssetScanUser User;
 	User.m_pUser = this;
 	User.m_LoadedFunc = [&]() {
-		if(time_get_microseconds() - LoadStartTime > 500000)
+		if(tw::time_get() - LoadStartTime > 500ms)
 			RenderLoading(false, false);
 	};
 	if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 	{
-		if(m_EntitiesList.size() == 0)
+		if(m_vEntitiesList.empty())
 		{
 			SCustomEntities EntitiesItem;
 			str_copy(EntitiesItem.m_aName, "default", sizeof(EntitiesItem.m_aName));
 			LoadEntities(&EntitiesItem, &User);
-			m_EntitiesList.add(EntitiesItem);
+			m_vEntitiesList.push_back(EntitiesItem);
 
 			// load entities
 			Storage()->ListDirectory(IStorage::TYPE_ALL, "assets/entities", EntitiesScan, &User);
+			std::sort(m_vEntitiesList.begin(), m_vEntitiesList.end());
 		}
-		if(m_EntitiesList.size() != s_CustomListSize[s_CurCustomTab])
+		if(m_vEntitiesList.size() != s_CustomListSize[s_CurCustomTab])
 			s_InitCustomList[s_CurCustomTab] = true;
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_GAME)
 	{
-		InitAssetList(m_GameList, "assets/game", "game", GameScan, Graphics(), Storage(), &User);
+		InitAssetList(m_vGameList, "assets/game", "game", GameScan, Graphics(), Storage(), &User);
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
 	{
-		InitAssetList(m_EmoticonList, "assets/emoticons", "emoticons", EmoticonsScan, Graphics(), Storage(), &User);
+		InitAssetList(m_vEmoticonList, "assets/emoticons", "emoticons", EmoticonsScan, Graphics(), Storage(), &User);
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
 	{
-		InitAssetList(m_ParticlesList, "assets/particles", "particles", ParticlesScan, Graphics(), Storage(), &User);
+		InitAssetList(m_vParticlesList, "assets/particles", "particles", ParticlesScan, Graphics(), Storage(), &User);
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_HUD)
 	{
-		InitAssetList(m_HudList, "assets/hud", "hud", HudScan, Graphics(), Storage(), this);
+		InitAssetList(m_vHudList, "assets/hud", "hud", HudScan, Graphics(), Storage(), &User);
 	}
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
@@ -430,33 +438,33 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 		{
 			s_SearchEntitiesList.clear();
-			ListSize = m_EntitiesList.size();
+			ListSize = m_vEntitiesList.size();
 			for(int i = 0; i < ListSize; ++i)
 			{
-				const SCustomEntities *s = &m_EntitiesList[i];
+				const SCustomEntities *s = &m_vEntitiesList[i];
 
 				// filter quick search
 				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
 					continue;
 
-				s_SearchEntitiesList.add_unsorted(s);
+				s_SearchEntitiesList.push_back(s);
 			}
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_GAME)
 		{
-			ListSize = InitSearchList(s_SearchGamesList, m_GameList);
+			ListSize = InitSearchList(s_SearchGamesList, m_vGameList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
 		{
-			ListSize = InitSearchList(s_SearchEmoticonsList, m_EmoticonList);
+			ListSize = InitSearchList(s_SearchEmoticonsList, m_vEmoticonList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
 		{
-			ListSize = InitSearchList(s_SearchParticlesList, m_ParticlesList);
+			ListSize = InitSearchList(s_SearchParticlesList, m_vParticlesList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_HUD)
 		{
-			ListSize = InitSearchList(s_SearchHudList, m_HudList);
+			ListSize = InitSearchList(s_SearchHudList, m_vHudList);
 		}
 		s_InitCustomList[s_CurCustomTab] = false;
 		s_CustomListSize[s_CurCustomTab] = ListSize;
@@ -467,7 +475,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	float TextureWidth = 150;
 	float TextureHeight = 150;
 
-	int SearchListSize = 0;
+	size_t SearchListSize = 0;
 
 	if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 	{
@@ -493,7 +501,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	}
 
 	UiDoListboxStart(&s_InitCustomList[s_CurCustomTab], &CustomList, TextureHeight + 15.0f + 10.0f + Margin, "", "", SearchListSize, CustomList.w / (Margin + TextureWidth), OldSelected, s_ScrollValue, true);
-	for(int i = 0; i < SearchListSize; ++i)
+	for(size_t i = 0; i < SearchListSize; ++i)
 	{
 		const SCustomItem *s = GetCustomItem(s_CurCustomTab, i);
 		if(s == NULL)
@@ -525,7 +533,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				OldSelected = i;
 		}
 
-		CListboxItem Item = UiDoListboxNextItem(s, OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(s, OldSelected >= 0 && (size_t)OldSelected == i);
 		CUIRect ItemRect = Item.m_Rect;
 		ItemRect.Margin(Margin / 2, &ItemRect);
 		if(Item.m_Visible)

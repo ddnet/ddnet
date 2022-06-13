@@ -1,7 +1,6 @@
 #include "protocol_ex.h"
 
 #include "config.h"
-#include "protocol.h"
 #include "uuid_manager.h"
 
 #include <new>

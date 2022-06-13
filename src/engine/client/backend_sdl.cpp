@@ -12,17 +12,14 @@
 
 #include <engine/storage.h>
 
-#include "SDL.h"
+#include <SDL.h>
+#include <SDL_hints.h>
+#include <SDL_pixels.h>
+#include <SDL_video.h>
 
-#include "SDL_syswm.h"
 #include <base/detect.h>
 #include <base/math.h>
-#include <cmath>
 #include <cstdlib>
-
-#include "SDL_hints.h"
-#include "SDL_pixels.h"
-#include "SDL_video.h"
 
 #include <engine/shared/config.h>
 
@@ -45,14 +42,10 @@
 #endif
 
 #if defined(CONF_BACKEND_VULKAN)
-#include <SDL_vulkan.h>
-
 #include "backend/vulkan/backend_vulkan.h"
 #endif
 
 #include "graphics_threaded.h"
-
-#include <engine/shared/image_manipulation.h>
 
 #include <engine/graphics.h>
 
@@ -575,6 +568,7 @@ static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, in
 EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 {
 	EBackendType RetBackendType = BACKEND_TYPE_OPENGL;
+#if defined(CONF_BACKEND_VULKAN)
 	const char *pEnvDriver = SDL_getenv("DDNET_DRIVER");
 	if(pEnvDriver && str_comp_nocase(pEnvDriver, "GLES") == 0)
 		RetBackendType = BACKEND_TYPE_OPENGL_ES;
@@ -593,7 +587,7 @@ EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 		else if(str_comp_nocase(pConfBackend, "OpenGL") == 0)
 			RetBackendType = BACKEND_TYPE_OPENGL;
 	}
-#if !defined(CONF_BACKEND_VULKAN)
+#else
 	RetBackendType = BACKEND_TYPE_OPENGL;
 #endif
 #if !defined(CONF_BACKEND_OPENGL_ES) && !defined(CONF_BACKEND_OPENGL_ES3)
@@ -863,7 +857,7 @@ CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL()
 	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
 
-int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int FsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
+int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 #if defined(CONF_HEADLESS_CLIENT)
 	int InitError = 0;
@@ -943,6 +937,11 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	else if(m_BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	}
+
+	if(IsOpenGLFamilyBackend)
+	{
+		*pFsaaSamples = std::clamp(*pFsaaSamples, 0, 8);
 	}
 
 	// set screen
@@ -1032,10 +1031,10 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	if(IsOpenGLFamilyBackend)
 	{
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		if(FsaaSamples)
+		if(*pFsaaSamples)
 		{
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, FsaaSamples);
+			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, *pFsaaSamples);
 		}
 		else
 		{

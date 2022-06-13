@@ -7,14 +7,9 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <stddef.h>
-
 class CInput : public IEngineInput
 {
 	IEngineGraphics *m_pGraphics;
-
-	int m_LastX;
-	int m_LastY;
 
 	int m_InputGrabbed;
 	char *m_pClipboardText;
@@ -25,13 +20,15 @@ class CInput : public IEngineInput
 	int m_VideoRestartNeeded;
 
 	void AddEvent(char *pText, int Key, int Flags);
-	void Clear();
-	bool IsEventValid(CEvent *pEvent) const { return pEvent->m_InputCount == m_InputCounter; }
+	void Clear() override;
+	bool IsEventValid(CEvent *pEvent) const override { return pEvent->m_InputCount == m_InputCounter; }
 
 	// quick access to input
 	unsigned short m_aInputCount[g_MaxKeys]; // tw-KEY
 	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
 	int m_InputCounter;
+
+	void UpdateMouseState();
 
 	// IME support
 	int m_NumTextInputInstances;
@@ -45,32 +42,34 @@ class CInput : public IEngineInput
 
 public:
 	CInput();
+	~CInput();
 
-	virtual void Init();
+	void Init() override;
 
-	bool ModifierIsPressed() const { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
-	bool KeyIsPressed(int Key) const { return KeyState(Key); }
-	bool KeyPress(int Key, bool CheckCounter) const { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
+	bool ModifierIsPressed() const override { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
+	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
+	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
-	virtual void MouseRelative(float *x, float *y);
-	virtual void MouseModeAbsolute();
-	virtual void MouseModeRelative();
-	virtual void NativeMousePos(int *x, int *y) const;
-	virtual bool NativeMousePressed(int index);
-	virtual bool MouseDoubleClick();
-	virtual const char *GetClipboardText();
-	virtual void SetClipboardText(const char *Text);
+	bool MouseRelative(float *pX, float *pY) override;
+	void MouseModeAbsolute() override;
+	void MouseModeRelative() override;
+	void NativeMousePos(int *pX, int *pY) const override;
+	bool NativeMousePressed(int Index) override;
+	bool MouseDoubleClick() override;
 
-	virtual int Update();
+	const char *GetClipboardText() override;
+	void SetClipboardText(const char *pText) override;
 
-	virtual int VideoRestartNeeded();
+	int Update() override;
 
-	virtual bool GetIMEState();
-	virtual void SetIMEState(bool Activate);
-	int GetIMEEditingTextLength() const { return m_EditingTextLen; }
-	virtual const char *GetIMEEditingText();
-	virtual int GetEditingCursor();
-	virtual void SetEditingPosition(float X, float Y);
+	int VideoRestartNeeded() override;
+
+	bool GetIMEState() override;
+	void SetIMEState(bool Activate) override;
+	int GetIMEEditingTextLength() const override { return m_EditingTextLen; }
+	const char *GetIMEEditingText() override;
+	int GetEditingCursor() override;
+	void SetEditingPosition(float X, float Y) override;
 };
 
 #endif

@@ -1,7 +1,6 @@
 /* (c) Rajh, Redix and Sushi. */
 
 #include <engine/ghost.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
@@ -62,41 +61,41 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 }
 
 CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) noexcept :
-	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
+	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_vpChunks(std::move(Other.m_vpChunks))
 {
 	Other.m_NumItems = 0;
-	Other.m_lChunks.clear();
+	Other.m_vpChunks.clear();
 }
 
 CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other) noexcept
 {
 	Reset(Other.m_ChunkSize);
 	m_NumItems = Other.m_NumItems;
-	m_lChunks = std::move(Other.m_lChunks);
+	m_vpChunks = std::move(Other.m_vpChunks);
 	Other.m_NumItems = 0;
-	Other.m_lChunks.clear();
+	Other.m_vpChunks.clear();
 	return *this;
 }
 
 void CGhost::CGhostPath::Reset(int ChunkSize)
 {
-	for(auto &pChunk : m_lChunks)
+	for(auto &pChunk : m_vpChunks)
 		free(pChunk);
-	m_lChunks.clear();
+	m_vpChunks.clear();
 	m_ChunkSize = ChunkSize;
 	m_NumItems = 0;
 }
 
 void CGhost::CGhostPath::SetSize(int Items)
 {
-	int Chunks = m_lChunks.size();
+	int Chunks = m_vpChunks.size();
 	int NeededChunks = (Items + m_ChunkSize - 1) / m_ChunkSize;
 
 	if(NeededChunks > Chunks)
 	{
-		m_lChunks.resize(NeededChunks);
+		m_vpChunks.resize(NeededChunks);
 		for(int i = Chunks; i < NeededChunks; i++)
-			m_lChunks[i] = (CGhostCharacter *)calloc(m_ChunkSize, sizeof(CGhostCharacter));
+			m_vpChunks[i] = (CGhostCharacter *)calloc(m_ChunkSize, sizeof(CGhostCharacter));
 	}
 
 	m_NumItems = Items;
@@ -115,7 +114,7 @@ CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 
 	int Chunk = Index / m_ChunkSize;
 	int Pos = Index % m_ChunkSize;
-	return &m_lChunks[Chunk][Pos];
+	return &m_vpChunks[Chunk][Pos];
 }
 
 void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) const

@@ -8,6 +8,7 @@
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
+#include <game/localization.h>
 
 CStatboard::CStatboard()
 {

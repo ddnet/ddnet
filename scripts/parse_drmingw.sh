@@ -2,13 +2,13 @@
 
 if [ -z ${1+x} ]; then
     printf "\e[31m%s\e[30m\n" "Did not pass executable file (full path)"
-    printf "\e[31m%s\e[30m\n" "Usage: ./parse_drmingw.sh <executable> <crash_log>"
+    printf "\e[31m%s\e[30m\n" "Usage: $0 <executable> <crash_log>"
     exit 1
 fi
 
 if [ -z ${2+x} ]; then
     printf "\e[31m%s\e[30m\n" "Did not pass crash log file (full path)"
-    printf "\e[31m%s\e[30m\n" "Usage: ./parse_drmingw.sh <executable> <crash_log>"
+    printf "\e[31m%s\e[30m\n" "Usage: $0 <executable> <crash_log>"
     exit 1
 fi
 

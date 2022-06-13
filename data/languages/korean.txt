@@ -831,9 +831,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 탄약 고갈 시 무기 교체
 
-Reset wanted weapon on death
-== 사망 시 기본 무기로 전환
-
 Show clan above name plates
 == 이름 위에 클랜 표시
 
@@ -1319,13 +1316,13 @@ AUS
 == 호주
 
 EUR
-== 유럽 
+== 유럽
 
 NA
-== 북미 
+== 북미
 
 SA
-== 남미 
+== 남미
 
 CHN
 == 중국
@@ -1367,7 +1364,7 @@ Allows maps to render with more detail
 == 맵의 세부사항을 렌더링합니다.
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다. 
+== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다.
 
 Opacity
 == 불투명도

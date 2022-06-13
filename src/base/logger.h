@@ -196,7 +196,7 @@ class CFutureLogger : public ILogger
 {
 private:
 	std::atomic<ILogger *> m_pLogger;
-	std::vector<CLogMessage> m_aPending;
+	std::vector<CLogMessage> m_vPending;
 	std::mutex m_PendingLock;
 
 public:

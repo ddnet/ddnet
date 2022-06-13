@@ -1,5 +1,4 @@
 #include "score.h"
-#include "entities/character.h"
 #include "gamemodes/DDRace.h"
 #include "player.h"
 #include "save.h"
@@ -8,7 +7,6 @@
 #include <base/system.h>
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
-#include <engine/server/sql_string_helpers.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
 #include <engine/shared/linereader.h>
@@ -16,10 +14,7 @@
 #include <game/generated/wordlist.h>
 
 #include <algorithm>
-#include <cstring>
-#include <fstream>
 #include <memory>
-#include <random>
 
 std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 {
@@ -68,8 +63,8 @@ void CScore::GeneratePassphrase(char *pBuf, int BufSize)
 		if(i != 0)
 			str_append(pBuf, " ", BufSize);
 		// TODO: decide if the slight bias towards lower numbers is ok
-		int Rand = m_Prng.RandomBits() % m_aWordlist.size();
-		str_append(pBuf, m_aWordlist[Rand].c_str(), BufSize);
+		int Rand = m_Prng.RandomBits() % m_vWordlist.size();
+		str_append(pBuf, m_vWordlist[Rand].c_str(), BufSize);
 	}
 }
 
@@ -98,17 +93,17 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 			char aWord[32] = {0};
 			sscanf(pLine, "%*s %31s", aWord);
 			aWord[31] = 0;
-			m_aWordlist.emplace_back(aWord);
+			m_vWordlist.emplace_back(aWord);
 		}
 		io_close(File);
 	}
 	else
 	{
 		dbg_msg("sql", "failed to open wordlist, using fallback");
-		m_aWordlist.assign(std::begin(g_aFallbackWordlist), std::end(g_aFallbackWordlist));
+		m_vWordlist.assign(std::begin(g_aFallbackWordlist), std::end(g_aFallbackWordlist));
 	}
 
-	if(m_aWordlist.size() < 1000)
+	if(m_vWordlist.size() < 1000)
 	{
 		dbg_msg("sql", "too few words in wordlist");
 		Server()->SetErrorShutdown("sql too few words in wordlist");
@@ -118,9 +113,9 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pPool->Execute(CScoreWorker::Init, std::move(Tmp), "load best time");
 }
 
-void CScore::LoadPlayerData(int ClientID)
+void CScore::LoadPlayerData(int ClientID, const char *pName)
 {
-	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientID, "", 0);
+	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientID, pName, 0);
 }
 
 void CScore::MapVote(int ClientID, const char *MapName)

@@ -95,22 +95,22 @@ constexpr float pi = 3.1415926535897932384626433f;
 template<typename T>
 constexpr inline T minimum(T a, T b)
 {
-	return a < b ? a : b;
+	return std::min(a, b);
 }
 template<typename T>
 constexpr inline T minimum(T a, T b, T c)
 {
-	return minimum(minimum(a, b), c);
+	return std::min(std::min(a, b), c);
 }
 template<typename T>
 constexpr inline T maximum(T a, T b)
 {
-	return a > b ? a : b;
+	return std::max(a, b);
 }
 template<typename T>
 constexpr inline T maximum(T a, T b, T c)
 {
-	return maximum(maximum(a, b), c);
+	return std::max(std::max(a, b), c);
 }
 template<typename T>
 constexpr inline T absolute(T a)

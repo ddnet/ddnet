@@ -9,14 +9,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <thread>
 
 #include "system.h"
 
+#include "lock_scope.h"
 #include "logger.h"
 
-#if !defined(CONF_PLATFORM_MACOS)
-#include <base/color.h>
-#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -626,11 +625,8 @@ void aio_write_newline(ASYNCIO *aio)
 
 int aio_error(ASYNCIO *aio)
 {
-	int result;
-	lock_wait(aio->lock);
-	result = aio->error;
-	lock_unlock(aio->lock);
-	return result;
+	CLockScope ls(aio->lock);
+	return aio->error;
 }
 
 void aio_free(ASYNCIO *aio)
@@ -646,23 +642,25 @@ void aio_free(ASYNCIO *aio)
 
 void aio_close(ASYNCIO *aio)
 {
-	lock_wait(aio->lock);
-	aio->finish = ASYNCIO_CLOSE;
-	lock_unlock(aio->lock);
+	{
+		CLockScope ls(aio->lock);
+		aio->finish = ASYNCIO_CLOSE;
+	}
 	sphore_signal(&aio->sphore);
 }
 
 void aio_wait(ASYNCIO *aio)
 {
 	void *thread;
-	lock_wait(aio->lock);
-	thread = aio->thread;
-	aio->thread = 0;
-	if(aio->finish == ASYNCIO_RUNNING)
 	{
-		aio->finish = ASYNCIO_EXIT;
+		CLockScope ls(aio->lock);
+		thread = aio->thread;
+		aio->thread = 0;
+		if(aio->finish == ASYNCIO_RUNNING)
+		{
+			aio->finish = ASYNCIO_EXIT;
+		}
 	}
-	lock_unlock(aio->lock);
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
 }
@@ -739,20 +737,6 @@ void thread_yield()
 		dbg_msg("thread", "yield failed: %d", errno);
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(0);
-#else
-#error not implemented
-#endif
-}
-
-void thread_sleep(int microseconds)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = usleep(microseconds);
-	/* ignore signal interruption */
-	if(result == -1 && errno != EINTR)
-		dbg_msg("thread", "sleep failed: %d", errno);
-#elif defined(CONF_FAMILY_WINDOWS)
-	Sleep(microseconds / 1000);
 #else
 #error not implemented
 #endif
@@ -929,12 +913,12 @@ void set_new_tick()
 
 /* -----  time ----- */
 static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support steady clocks, it might be out of date.");
-static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000, "Compiler has a bad timer precision and might be out of date.");
+static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000000, "Compiler has a bad timer precision and might be out of date.");
 static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
 
 int64_t time_get_impl()
 {
-	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
 }
 
 int64_t time_get()
@@ -951,12 +935,13 @@ int64_t time_get()
 
 int64_t time_freq()
 {
-	return 1000000;
+	using namespace std::chrono_literals;
+	return std::chrono::nanoseconds(1s).count();
 }
 
-int64_t time_get_microseconds()
+int64_t time_get_nanoseconds()
 {
-	return time_get_impl() / (time_freq() / 1000 / 1000);
+	return time_get_impl();
 }
 
 /* -----  network ----- */
@@ -1462,11 +1447,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1490,11 +1475,9 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
-
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		int socket = -1;
 		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
@@ -1514,7 +1497,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1539,10 +1521,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	/* set non-blocking */
-	net_set_non_blocking(sock);
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
+	}
+	else
+	{
+		/* set non-blocking */
+		net_set_non_blocking(sock);
 
-	net_buffer_init(&sock->buffer);
+		net_buffer_init(&sock->buffer);
+	}
 
 	/* return */
 	return sock;
@@ -1749,11 +1739,11 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1769,7 +1759,6 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1780,6 +1769,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 		}
+	}
+
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
 	}
 
 	/* return */
@@ -3479,32 +3474,6 @@ int str_utf8_encode(char *ptr, int chr)
 	return 0;
 }
 
-int str_utf16le_encode(char *ptr, int chr)
-{
-	if(chr < 0x10000)
-	{
-		ptr[0] = chr;
-		ptr[1] = chr >> 0x8;
-		return 2;
-	}
-	else if(chr <= 0x10FFFF)
-	{
-		int U = chr - 0x10000;
-		int W1 = 0xD800, W2 = 0xDC00;
-
-		W1 |= ((U >> 10) & 0x3FF);
-		W2 |= (U & 0x3FF);
-
-		ptr[0] = W1;
-		ptr[1] = W1 >> 0x8;
-		ptr[2] = W2;
-		ptr[3] = W2 >> 0x8;
-		return 4;
-	}
-
-	return 0;
-}
-
 static unsigned char str_byte_next(const char **ptr)
 {
 	unsigned char byte = **ptr;
@@ -4130,4 +4099,17 @@ void set_exception_handler_log_file(const char *log_file_path)
 #endif
 }
 #endif
+}
+
+// pure cpp code for the cpp system wrapper
+
+std::chrono::nanoseconds tw::time_get()
+{
+	return std::chrono::nanoseconds(time_get_nanoseconds());
+}
+
+int tw::net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+{
+	using namespace std::chrono_literals;
+	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());
 }

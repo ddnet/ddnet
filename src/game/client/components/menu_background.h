@@ -4,6 +4,7 @@
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
 
 class CMenuBackground : public CBackground
 {
-	int64_t m_ThemeScanStartTime = 0;
+	std::chrono::nanoseconds m_ThemeScanStartTime{0};
 
 public:
 	enum
@@ -92,7 +93,7 @@ public:
 	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 
-	std::vector<CTheme> m_lThemes;
+	std::vector<CTheme> m_vThemes;
 
 	CMenuBackground();
 	~CMenuBackground() override {}

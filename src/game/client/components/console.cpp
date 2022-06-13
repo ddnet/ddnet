@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/logger.h>
-#include <base/tl/sorted_array.h>
 
 #include <climits>
 #include <cmath>
@@ -15,21 +14,16 @@
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <cstdio>
-#include <cstring>
-
 #include <game/client/ui.h>
 
+#include <game/localization.h>
 #include <game/version.h>
 
-#include <game/client/components/controls.h>
-#include <game/client/components/menus.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 
@@ -449,7 +443,8 @@ CGameConsole::CGameConsole() :
 
 CGameConsole::~CGameConsole()
 {
-	m_pConsoleLogger->OnConsoleDeletion();
+	if(m_pConsoleLogger)
+		m_pConsoleLogger->OnConsoleDeletion();
 }
 
 float CGameConsole::TimeNow()
@@ -770,6 +765,8 @@ void CGameConsole::OnRender()
 		}
 
 		static int s_LastActivePage = pConsole->m_BacklogCurPage;
+		if(pConsole->m_BacklogCurPage == INT_MAX)
+			s_LastActivePage = INT_MAX;
 		int TotalPages = 1;
 		for(int Page = 0; Page <= s_LastActivePage; ++Page, OffsetY = 0.0f)
 		{
@@ -909,18 +906,15 @@ void CGameConsole::Toggle(int Type)
 
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			/*Input()->MouseModeAbsolute();*/
-			m_pClient->m_Menus.UseMouseButtons(false);
+			UI()->SetEnabled(false);
 			m_ConsoleState = CONSOLE_OPENING;
-			/*// reset controls
-			m_pClient->m_Controls.OnReset();*/
 
 			Input()->SetIMEState(true);
 		}
 		else
 		{
 			Input()->MouseModeRelative();
-			m_pClient->m_Menus.UseMouseButtons(true);
+			UI()->SetEnabled(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 

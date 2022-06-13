@@ -631,7 +631,7 @@ Default zoom
 == Standard zoom
 
 Dummy copy
-== Dummy kopiering 
+== Dummy kopiering
 
 Show tiles layers from BG map
 == Visa tiles lager från BG bana
@@ -803,9 +803,6 @@ Update failed! Check log...
 
 Check now
 == Kolla nu
-
-Reset wanted weapon on death
-== Återställ önskade vapen vid död
 
 Search
 == Sök

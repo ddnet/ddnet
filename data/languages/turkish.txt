@@ -783,9 +783,6 @@ Save
 Switch weapon when out of ammo
 == Mermi kalmadığında silahı değiştir
 
-Reset wanted weapon on death
-== Ölünce varsayılan silahı kullan
-
 Show only chat messages from friends
 == Sadece arkadaşlardan gelen mesajları göster
 

@@ -1,15 +1,15 @@
 #include <base/math.h>
 #include <base/system.h>
 #include <cstdio>
+#include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
-#include <mastersrv/mastersrv.h>
 
 static CNetClient g_NetOp; // main
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
@@ -69,6 +69,5 @@ int main(int argc, const char **argv)
 			printf("%g ms\n", (double)(endTime - startTime) / time_freq() * 1000);
 		}
 	}
-	cmdline_free(argc, argv);
 	return 0;
 }

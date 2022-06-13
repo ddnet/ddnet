@@ -1,11 +1,10 @@
 #import <Cocoa/Cocoa.h>
-#include <base/system.h>
 
-extern int TWMain(int argc, const char **argv);
+extern "C" int TWMain(int argc, const char **argv);
 
 int main(int argc, const char **argv)
 {
-	BOOL FinderLaunch = argc >= 2 && !str_comp_num(argv[1], "-psn", 4);
+	BOOL FinderLaunch = argc >= 2 && !strncmp(argv[1], "-psn", 4);
 
 	NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
 	if(!resourcePath)

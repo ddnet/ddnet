@@ -6,49 +6,43 @@
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
-	int Index, ID = 0, Type = 0, Size;
-	void *pPtr;
-	char aFileName[IO_MAX_PATH_LENGTH];
-	CDataFileReader DataFile;
-	CDataFileWriter df;
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	if(!pStorage || argc != 3)
 		return -1;
 
-	str_format(aFileName, sizeof(aFileName), "%s", argv[2]);
-
-	if(!DataFile.Open(pStorage, argv[1], IStorage::TYPE_ABSOLUTE))
+	CDataFileReader Reader;
+	if(!Reader.Open(pStorage, argv[1], IStorage::TYPE_ABSOLUTE))
 		return -1;
-	if(!df.Open(pStorage, aFileName))
+
+	CDataFileWriter Writer;
+	if(!Writer.Open(pStorage, argv[2]))
 		return -1;
 
 	// add all items
-	for(Index = 0; Index < DataFile.NumItems(); Index++)
+	for(int Index = 0; Index < Reader.NumItems(); Index++)
 	{
-		pPtr = DataFile.GetItem(Index, &Type, &ID);
-		Size = DataFile.GetItemSize(Index);
+		int Type, ID;
+		void *pPtr = Reader.GetItem(Index, &Type, &ID);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
-		{
 			continue;
-		}
 
-		df.AddItem(Type, ID, Size, pPtr);
+		int Size = Reader.GetItemSize(Index);
+		Writer.AddItem(Type, ID, Size, pPtr);
 	}
 
 	// add all data
-	for(Index = 0; Index < DataFile.NumData(); Index++)
+	for(int Index = 0; Index < Reader.NumData(); Index++)
 	{
-		pPtr = DataFile.GetData(Index);
-		Size = DataFile.GetDataSize(Index);
-		df.AddData(Size, pPtr);
+		void *pPtr = Reader.GetData(Index);
+		int Size = Reader.GetDataSize(Index);
+		Writer.AddData(Size, pPtr);
 	}
 
-	DataFile.Close();
-	df.Finish();
-	cmdline_free(argc, argv);
+	Reader.Close();
+	Writer.Finish();
 	return 0;
 }

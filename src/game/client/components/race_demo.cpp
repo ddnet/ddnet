@@ -3,7 +3,6 @@
 #include <cctype>
 
 #include <base/system.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
@@ -12,6 +11,10 @@
 #include "race_demo.h"
 
 #include <game/client/gameclient.h>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 const char *CRaceDemo::ms_pRaceDemoDir = "demos/auto/race";
 
@@ -24,7 +27,7 @@ struct CDemoItem
 struct CDemoListParam
 {
 	const CRaceDemo *m_pThis;
-	std::vector<CDemoItem> *m_plDemos;
+	std::vector<CDemoItem> *m_pvDemos;
 	const char *pMap;
 };
 
@@ -216,9 +219,9 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);
 	if(Item.m_Time > 0)
-		pParam->m_plDemos->push_back(Item);
+		pParam->m_pvDemos->push_back(Item);
 
-	if(time_get_microseconds() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500000)
+	if(tw::time_get() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
 	{
 		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -230,7 +233,7 @@ bool CRaceDemo::CheckDemo(int Time)
 {
 	std::vector<CDemoItem> lDemos;
 	CDemoListParam Param = {this, &lDemos, Client()->GetCurrentMap()};
-	m_RaceDemosLoadStartTime = time_get_microseconds();
+	m_RaceDemosLoadStartTime = tw::time_get();
 	SRaceDemoFetchUser User;
 	User.m_pParam = &Param;
 	User.m_pThis = this;

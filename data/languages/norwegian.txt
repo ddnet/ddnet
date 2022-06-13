@@ -777,9 +777,6 @@ Save
 Switch weapon when out of ammo
 == Bytt våpen ved tom ammo
 
-Reset wanted weapon on death
-== Tilbakestill våpen ved død
-
 Show only chat messages from friends
 == Vis kun meldinger fra venner
 

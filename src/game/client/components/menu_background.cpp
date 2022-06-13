@@ -12,19 +12,15 @@
 
 #include <game/layers.h>
 
-#include <game/client/render.h>
-
 #include "menu_background.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 CMenuBackground::CMenuBackground() :
 	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
-	m_RotationCenter = vec2(0.0f, 0.0f);
-	m_AnimationStartPos = vec2(0.0f, 0.0f);
-	m_Camera.m_Center = vec2(0.0f, 0.0f);
-	m_Camera.m_PrevCenter = vec2(0.0f, 0.0f);
-	m_MenuCenter = vec2(0.0f, 0.0f);
-
 	m_ChangedPosition = false;
 
 	ResetPositions();
@@ -112,7 +108,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 		return 0;
 
 	// try to edit an existing theme
-	for(auto &Theme : pSelf->m_lThemes)
+	for(auto &Theme : pSelf->m_vThemes)
 	{
 		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0)
 		{
@@ -129,9 +125,9 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-	pSelf->m_lThemes.push_back(Theme);
-	int64_t TimeNow = time_get_microseconds();
-	if(TimeNow - pSelf->m_ThemeScanStartTime >= 1000000 / 60)
+	pSelf->m_vThemes.push_back(Theme);
+	auto TimeNow = tw::time_get();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
 	{
 		pSelf->Client()->UpdateAndSwap();
 		pSelf->m_ThemeScanStartTime = TimeNow;
@@ -146,8 +142,8 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	if(IsDir || !pSuffix)
 		return 0;
 
-	int64_t TimeNow = time_get_microseconds();
-	if(TimeNow - pSelf->m_ThemeScanStartTime >= 1000000 / 60)
+	auto TimeNow = tw::time_get();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
 	{
 		pSelf->Client()->UpdateAndSwap();
 		pSelf->m_ThemeScanStartTime = TimeNow;
@@ -157,7 +153,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - pName);
 
 	// save icon for an existing theme
-	for(CTheme &Theme : pSelf->m_lThemes) // bit slow but whatever
+	for(CTheme &Theme : pSelf->m_vThemes) // bit slow but whatever
 	{
 		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0 || (Theme.m_Name.empty() && str_comp(aThemeName, "none") == 0))
 		{
@@ -400,18 +396,18 @@ void CMenuBackground::ChangePosition(int PositionNumber)
 
 std::vector<CTheme> &CMenuBackground::GetThemes()
 {
-	if(m_lThemes.empty()) // not loaded yet
+	if(m_vThemes.empty()) // not loaded yet
 	{
 		// when adding more here, make sure to change the value of PREDEFINED_THEMES_COUNT too
-		m_lThemes.emplace_back("", true, true); // no theme
-		m_lThemes.emplace_back("auto", true, true); // auto theme
-		m_lThemes.emplace_back("rand", true, true); // random theme
+		m_vThemes.emplace_back("", true, true); // no theme
+		m_vThemes.emplace_back("auto", true, true); // auto theme
+		m_vThemes.emplace_back("rand", true, true); // random theme
 
-		m_ThemeScanStartTime = time_get_microseconds();
+		m_ThemeScanStartTime = tw::time_get();
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
 
-		std::sort(m_lThemes.begin() + PREDEFINED_THEMES_COUNT, m_lThemes.end());
+		std::sort(m_vThemes.begin() + PREDEFINED_THEMES_COUNT, m_vThemes.end());
 	}
-	return m_lThemes;
+	return m_vThemes;
 }

@@ -131,7 +131,7 @@ Disconnected
 == Прекинута веза
 
 Downloading map
-== Преузимам мапу 
+== Преузимам мапу
 
 Draw!
 == Нерешено!
@@ -808,9 +808,6 @@ Activate
 Switch weapon when out of ammo
 == Замени оружје кад нема муниције
 
-Reset wanted weapon on death
-== Ресетуј тражено оружје на смрт
-
 Show clan above name plates
 == Прикажи клан изнад плочице са именима
 
@@ -890,7 +887,7 @@ Dummy copy
 == Зајед. крет. копије
 
 Hammerfly dummy
-== Лет. чекићем коп. 
+== Лет. чекићем коп.
 
 Converse
 == Сви дописивање

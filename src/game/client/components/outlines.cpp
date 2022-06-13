@@ -16,7 +16,6 @@ void COutlines::OnRender()
 		return;
 	if(!g_Config.m_ClOverlayEntities && g_Config.m_ClOutlineEntities)
 		return;
-
 	for(int g = 0; g < GameClient()->Layers()->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = GameClient()->Layers()->GetGroup(g);

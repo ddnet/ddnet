@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/system.h>
 
-#include <engine/config.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/ghost.h>
@@ -28,6 +28,10 @@
 #include "ghost.h"
 #include <engine/keys.h>
 #include <engine/storage.h>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 void CMenus::RenderGame(CUIRect MainView)
 {
@@ -357,56 +361,6 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
-	/*
-	CUIRect bars;
-	votearea.HSplitTop(10.0f, 0, &votearea);
-	votearea.HSplitTop(25.0f + 10.0f*3 + 25.0f, &votearea, &bars);
-
-	RenderTools()->DrawUIRect(&votearea, color_tabbar_active, CUI::CORNER_ALL, 10.0f);
-
-	votearea.VMargin(20.0f, &votearea);
-	votearea.HMargin(10.0f, &votearea);
-
-	votearea.HSplitBottom(35.0f, &votearea, &bars);
-
-	if(gameclient.voting->is_voting())
-	{
-		// do yes button
-		votearea.VSplitLeft(50.0f, &button, &votearea);
-		static int yes_button = 0;
-		if(UI()->DoButton(&yes_button, "Yes", 0, &button, ui_draw_menu_button, 0))
-			gameclient.voting->vote(1);
-
-		// do no button
-		votearea.VSplitLeft(5.0f, 0, &votearea);
-		votearea.VSplitLeft(50.0f, &button, &votearea);
-		static int no_button = 0;
-		if(UI()->DoButton(&no_button, "No", 0, &button, ui_draw_menu_button, 0))
-			gameclient.voting->vote(-1);
-
-		// do time left
-		votearea.VSplitRight(50.0f, &votearea, &button);
-		char buf[256];
-		str_format(buf, sizeof(buf), "%d", gameclient.voting->seconds_left());
-		UI()->DoLabel(&button, buf, 24.0f, TEXTALIGN_CENTER);
-
-		// do description and command
-		votearea.VSplitLeft(5.0f, 0, &votearea);
-		UI()->DoLabel(&votearea, gameclient.voting->vote_description(), 14.0f, TEXTALIGN_LEFT);
-		votearea.HSplitTop(16.0f, 0, &votearea);
-		UI()->DoLabel(&votearea, gameclient.voting->vote_command(), 10.0f, TEXTALIGN_LEFT);
-
-		// do bars
-		bars.HSplitTop(10.0f, 0, &bars);
-		bars.HMargin(5.0f, &bars);
-
-		gameclient.voting->render_bars(bars, true);
-
-	}
-	else
-	{
-		UI()->DoLabel(&votearea, "No vote in progress", 18.0f, TEXTALIGN_LEFT);
-	}*/
 }
 
 void CMenus::RenderServerInfo(CUIRect MainView)
@@ -913,9 +867,9 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	str_copy(Item.m_aPlayer, Info.m_aOwner, sizeof(Item.m_aPlayer));
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
-		pSelf->m_lGhosts.add(Item);
+		pSelf->m_vGhosts.push_back(Item);
 
-	if(time_get_microseconds() - pSelf->m_GhostPopulateStartTime > 500000)
+	if(tw::time_get() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
 		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -925,16 +879,15 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 
 void CMenus::GhostlistPopulate()
 {
-	CGhostItem *pOwnGhost = 0;
-	m_lGhosts.clear();
-	m_GhostPopulateStartTime = time_get_microseconds();
+	m_vGhosts.clear();
+	m_GhostPopulateStartTime = tw::time_get();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
+	std::sort(m_vGhosts.begin(), m_vGhosts.end());
 
-	for(int i = 0; i < m_lGhosts.size(); i++)
-	{
-		if(str_comp(m_lGhosts[i].m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || m_lGhosts[i] < *pOwnGhost))
-			pOwnGhost = &m_lGhosts[i];
-	}
+	CGhostItem *pOwnGhost = 0;
+	for(auto &Ghost : m_vGhosts)
+		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
+			pOwnGhost = &Ghost;
 
 	if(pOwnGhost)
 	{
@@ -945,36 +898,36 @@ void CMenus::GhostlistPopulate()
 
 CMenus::CGhostItem *CMenus::GetOwnGhost()
 {
-	for(int i = 0; i < m_lGhosts.size(); i++)
-		if(m_lGhosts[i].m_Own)
-			return &m_lGhosts[i];
-	return 0;
+	for(auto &Ghost : m_vGhosts)
+		if(Ghost.m_Own)
+			return &Ghost;
+	return nullptr;
 }
 
 void CMenus::UpdateOwnGhost(CGhostItem Item)
 {
 	int Own = -1;
-	for(int i = 0; i < m_lGhosts.size(); i++)
-		if(m_lGhosts[i].m_Own)
+	for(size_t i = 0; i < m_vGhosts.size(); i++)
+		if(m_vGhosts[i].m_Own)
 			Own = i;
 
 	if(Own != -1)
 	{
-		m_lGhosts[Own].m_Slot = -1;
-		m_lGhosts[Own].m_Own = false;
-		if(Item.HasFile() || !m_lGhosts[Own].HasFile())
+		m_vGhosts[Own].m_Slot = -1;
+		m_vGhosts[Own].m_Own = false;
+		if(Item.HasFile() || !m_vGhosts[Own].HasFile())
 			DeleteGhostItem(Own);
 	}
 
 	Item.m_Own = true;
-	m_lGhosts.add(Item);
+	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 }
 
 void CMenus::DeleteGhostItem(int Index)
 {
-	if(m_lGhosts[Index].HasFile())
-		Storage()->RemoveFile(m_lGhosts[Index].m_aFilename, IStorage::TYPE_SAVE);
-	m_lGhosts.remove_index(Index);
+	if(m_vGhosts[Index].HasFile())
+		Storage()->RemoveFile(m_vGhosts[Index].m_aFilename, IStorage::TYPE_SAVE);
+	m_vGhosts.erase(m_vGhosts.begin() + Index);
 }
 
 void CMenus::RenderGhost(CUIRect MainView)
@@ -1043,7 +996,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static float s_ScrollValue = 0;
 	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
-	int NumGhosts = m_lGhosts.size();
+	int NumGhosts = m_vGhosts.size();
 	static int s_SelectedIndex = 0;
 	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);
 
@@ -1060,7 +1013,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	for(int i = 0; i < NumGhosts; i++)
 	{
-		const CGhostItem *pItem = &m_lGhosts[i];
+		const CGhostItem *pItem = &m_vGhosts[i];
 		CUIRect Row;
 		View.HSplitTop(17.0f, &Row, &View);
 
@@ -1153,10 +1106,10 @@ void CMenus::RenderGhost(CUIRect MainView)
 		GhostlistPopulate();
 	}
 
-	if(s_SelectedIndex == -1 || s_SelectedIndex >= m_lGhosts.size())
+	if(s_SelectedIndex == -1 || s_SelectedIndex >= (int)m_vGhosts.size())
 		return;
 
-	CGhostItem *pGhost = &m_lGhosts[s_SelectedIndex];
+	CGhostItem *pGhost = &m_vGhosts[s_SelectedIndex];
 
 	CGhostItem *pOwnGhost = GetOwnGhost();
 	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());

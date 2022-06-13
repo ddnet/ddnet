@@ -1097,9 +1097,6 @@ Pause
 Smooth Dynamic Camera
 == 
 
-Reset wanted weapon on death
-== 
-
 Skip the main menu
 == 
 

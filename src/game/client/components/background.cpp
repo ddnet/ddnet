@@ -1,10 +1,8 @@
 #include <base/system.h>
 
-#include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/shared/config.h>
 
-#include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
 
