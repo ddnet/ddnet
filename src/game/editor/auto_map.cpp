@@ -54,9 +54,9 @@ void CAutoMapper::Load(const char *pTileName)
 	CLineReader LineReader;
 	LineReader.Init(RulesFile);
 
-	CConfiguration *pCurrentConf = 0;
-	CRun *pCurrentRun = 0;
-	CIndexRule *pCurrentIndex = 0;
+	CConfiguration *pCurrentConf = nullptr;
+	CRun *pCurrentRun = nullptr;
+	CIndexRule *pCurrentIndex = nullptr;
 
 	char aBuf[256];
 

@@ -187,7 +187,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	m_pEditor->Graphics()->QuadsEnd();
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
-	TextRender()->Text(0, Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
+	TextRender()->Text(nullptr, Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
 }
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -759,13 +759,13 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{
 			static int s_AutoMapperButton = 0;
 			static int s_AutoMapperButtonAuto = 0;
-			pToolBox->HSplitBottom(2.0f, pToolBox, 0);
+			pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
 			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 			if(m_Seed != 0)
 			{
 				CUIRect ButtonAuto;
 				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
-				Button.VSplitRight(2.0f, &Button, 0);
+				Button.VSplitRight(2.0f, &Button, nullptr);
 				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, 0, "Automatically run automap after modifications."))
 				{
 					m_AutoAutoMap = !m_AutoAutoMap;
@@ -812,19 +812,19 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
 		{"Seed", m_Seed, PROPTYPE_INT_SCROLL, 0, 1000000000},
-		{0},
+		{nullptr},
 	};
 
 	if(IsGameLayer) // remove the image and color properties if this is a game layer
 	{
-		aProps[PROP_IMAGE].m_pName = 0;
-		aProps[PROP_COLOR].m_pName = 0;
-		aProps[PROP_AUTOMAPPER].m_pName = 0;
+		aProps[PROP_IMAGE].m_pName = nullptr;
+		aProps[PROP_COLOR].m_pName = nullptr;
+		aProps[PROP_AUTOMAPPER].m_pName = nullptr;
 	}
 	if(m_Image == -1)
 	{
-		aProps[PROP_AUTOMAPPER].m_pName = 0;
-		aProps[PROP_SEED].m_pName = 0;
+		aProps[PROP_AUTOMAPPER].m_pName = nullptr;
+		aProps[PROP_SEED].m_pName = nullptr;
 	}
 
 	static int s_aIds[NUM_PROPS] = {0};
@@ -963,7 +963,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		Props.m_MaxWidth = Warning.w;
 		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, TEXTALIGN_LEFT, Props);
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-		pToolbox->HSplitTop(2.0f, 0, pToolbox);
+		pToolbox->HSplitTop(2.0f, nullptr, pToolbox);
 	}
 
 	enum
@@ -982,7 +982,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
 		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Color", State.Color, PROPTYPE_COLOR, 0, 0},
-		{0},
+		{nullptr},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};

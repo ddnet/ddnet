@@ -342,7 +342,7 @@ public:
 	void OnEnterGame(bool Dummy);
 	void EnterGame(int Conn) override;
 
-	void Connect(const char *pAddress, const char *pPassword = NULL) override;
+	void Connect(const char *pAddress, const char *pPassword = nullptr) override;
 	void DisconnectWithReason(const char *pReason);
 	void Disconnect() override;
 
