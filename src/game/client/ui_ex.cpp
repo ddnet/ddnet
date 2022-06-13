@@ -217,8 +217,6 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	bool ReturnValue = false;
 	bool UpdateOffset = false;
 
-	FontSize *= UI()->Scale();
-
 	auto &&SetHasSelection = [&](bool HasSelection) {
 		m_HasSelection = HasSelection;
 		m_pSelItem = m_HasSelection ? pID : nullptr;

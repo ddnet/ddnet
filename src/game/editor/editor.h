@@ -126,7 +126,7 @@ public:
 		m_Visible = true;
 		m_Readonly = false;
 		m_Flags = 0;
-		m_pEditor = 0;
+		m_pEditor = nullptr;
 		m_BrushRefCount = 0;
 	}
 
@@ -282,7 +282,7 @@ public:
 		m_External = 0;
 		m_Width = 0;
 		m_Height = 0;
-		m_pData = 0;
+		m_pData = nullptr;
 		m_Format = 0;
 	}
 
@@ -308,7 +308,7 @@ public:
 		m_aName[0] = 0;
 		m_SoundID = 0;
 
-		m_pData = 0x0;
+		m_pData = nullptr;
 		m_DataSize = 0;
 	}
 
@@ -712,16 +712,16 @@ public:
 	CEditor() :
 		m_TilesetPicker(16, 16)
 	{
-		m_pInput = 0;
-		m_pClient = 0;
-		m_pGraphics = 0;
-		m_pTextRender = 0;
-		m_pSound = 0;
+		m_pInput = nullptr;
+		m_pClient = nullptr;
+		m_pGraphics = nullptr;
+		m_pTextRender = nullptr;
+		m_pSound = nullptr;
 
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
 		m_EditBoxActive = 0;
-		m_pTooltip = 0;
+		m_pTooltip = nullptr;
 
 		m_GridActive = false;
 		m_GridFactor = 1;
@@ -737,9 +737,9 @@ public:
 		m_MouseInsidePopup = false;
 
 		m_FileDialogStorageType = 0;
-		m_pFileDialogTitle = 0;
-		m_pFileDialogButtonText = 0;
-		m_pFileDialogUser = 0;
+		m_pFileDialogTitle = nullptr;
+		m_pFileDialogButtonText = nullptr;
+		m_pFileDialogUser = nullptr;
 		m_aFileDialogFileName[0] = 0;
 		m_aFileDialogCurrentFolder[0] = 0;
 		m_aFileDialogCurrentLink[0] = 0;
@@ -791,7 +791,7 @@ public:
 		m_CommandBox = 0.0f;
 		m_aSettingsCommand[0] = 0;
 
-		ms_pUiGotContext = 0;
+		ms_pUiGotContext = nullptr;
 
 		// DDRace
 
@@ -1009,9 +1009,9 @@ public:
 	int DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = 0);
+	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = nullptr);
 
-	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = 0);
+	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = nullptr);
 
 	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
 	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
@@ -1020,12 +1020,12 @@ public:
 
 	void RenderGrid(CLayerGroup *pGroup);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext = 0);
+	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext = nullptr);
 	void UiDoPopupMenu();
 	bool UiPopupExists(void *pID);
 	bool UiPopupOpen();
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = CUI::CORNER_ALL, ColorRGBA *Color = 0);
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = CUI::CORNER_ALL, ColorRGBA *Color = nullptr);
 
 	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
 

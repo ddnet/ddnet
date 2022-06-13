@@ -420,7 +420,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const 
 	float LabelWidth = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f);
 	Section.VSplitLeft(LabelWidth, &Label, &Section);
 
-	UI()->DoLabelScaled(&Label, pText, LabelSize, TEXTALIGN_LEFT);
+	UI()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_LEFT);
 
 	float Cut = WantedPickerPosition - (SectionWidth - Section.w);
 	if(Cut < 5)
@@ -997,12 +997,12 @@ void CMenus::RenderNews(CUIRect MainView)
 		{
 			MainView.HSplitTop(30.0f, &Label, &MainView);
 			aLine[Len - 1] = '\0';
-			UI()->DoLabelScaled(&Label, aLine + 1, 20.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aLine + 1, 20.0f, TEXTALIGN_LEFT);
 		}
 		else
 		{
 			MainView.HSplitTop(20.0f, &Label, &MainView);
-			UI()->DoLabelScaled(&Label, aLine, 15.f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aLine, 15.f, TEXTALIGN_LEFT);
 		}
 	}
 }
@@ -1620,35 +1620,35 @@ int CMenus::Render()
 		CUIRect Box, Part;
 		Box = Screen;
 		if(m_Popup != POPUP_FIRST_LAUNCH)
-			Box.Margin(150.0f / UI()->Scale(), &Box);
+			Box.Margin(150.0f, &Box);
 
 		// render the box
 		RenderTools()->DrawUIRect(&Box, BgColor, CUI::CORNER_ALL, 15.0f);
 
-		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f / UI()->Scale(), &Part);
+		Box.HSplitTop(20.f, &Part, &Box);
+		Box.HSplitTop(24.f, &Part, &Box);
+		Part.VMargin(20.f, &Part);
 		SLabelProperties Props;
 		Props.m_MaxWidth = (int)Part.w;
 		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
-			UI()->DoLabelScaled(&Part, pTitle, 24.f, TEXTALIGN_LEFT, Props);
+			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_LEFT, Props);
 		else
-			UI()->DoLabelScaled(&Part, pTitle, 24.f, TEXTALIGN_CENTER);
-		Box.HSplitTop(20.f / UI()->Scale(), &Part, &Box);
-		Box.HSplitTop(24.f / UI()->Scale(), &Part, &Box);
-		Part.VMargin(20.f / UI()->Scale(), &Part);
+			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_CENTER);
+		Box.HSplitTop(20.f, &Part, &Box);
+		Box.HSplitTop(24.f, &Part, &Box);
+		Part.VMargin(20.f, &Part);
 
 		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
 
 		Props.m_MaxWidth = (int)Part.w;
 		if(ExtraAlign == -1)
-			UI()->DoLabelScaled(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
+			UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
 		else
 		{
 			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
-				UI()->DoLabelScaled(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
+				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
 			else
-				UI()->DoLabelScaled(&Part, pExtraText, FontSize, TEXTALIGN_CENTER);
+				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_CENTER);
 		}
 
 		if(m_Popup == POPUP_QUIT)
@@ -1658,12 +1658,12 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 
 			// additional info
-			Box.VMargin(20.f / UI()->Scale(), &Box);
+			Box.VMargin(20.f, &Box);
 			if(m_pClient->Editor()->HasUnsavedData())
 			{
 				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
 				Props.m_MaxWidth = Part.w - 20.0f;
-				UI()->DoLabelScaled(&Box, aBuf, 20.f, TEXTALIGN_LEFT, Props);
+				UI()->DoLabel(&Box, aBuf, 20.f, TEXTALIGN_LEFT, Props);
 			}
 
 			// buttons

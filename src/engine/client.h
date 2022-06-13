@@ -123,7 +123,7 @@ public:
 	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
 
 	// actions
-	virtual void Connect(const char *pAddress, const char *pPassword = NULL) = 0;
+	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
 	virtual void Disconnect() = 0;
 
 	// dummy

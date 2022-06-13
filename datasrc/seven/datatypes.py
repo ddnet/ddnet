@@ -119,7 +119,7 @@ class Array(BaseType):
 				lines += ["\t" + " ".join(itemlines).replace("\t", " ") + ","]
 			lines += ["};"]
 		else:
-			lines += ["static %s *%s = 0;"%(self.TypeName(), self.Identifyer())]
+			lines += ["static %s *%s = nullptr;"%(self.TypeName(), self.Identifyer())]
 
 		return lines
 	def EmitDefinition(self, _name):
