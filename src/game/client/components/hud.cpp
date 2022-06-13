@@ -597,14 +597,15 @@ void CHud::RenderTextInfo()
 		char aBuf[64];
 		float yOff = 3;
 
-		if(g_Config.m_ClDDRaceHud && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		int PlayerId = m_pClient->m_Snap.m_LocalClientID;
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
+
+		if(g_Config.m_ClDDRaceHud && m_pClient->m_Snap.m_aCharacters[PlayerId].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 50;
 		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 27;
 
-		int PlayerId = m_pClient->m_Snap.m_LocalClientID;
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
 
 		vec2 Pos;
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
