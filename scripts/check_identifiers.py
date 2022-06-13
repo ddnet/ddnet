@@ -65,7 +65,7 @@ def main():
 		error = check_name(i["kind"], i["qualifiers"], i["type"], i["name"])
 		if error:
 			unclean = True
-			print(f"{['file']}:{i['line']}:{i['column']}: {i['name']}: {error}")
+			print(f"{i['file']}:{i['line']}:{i['column']}: {i['name']}: {error}")
 	return unclean
 
 if __name__ == "__main__":
