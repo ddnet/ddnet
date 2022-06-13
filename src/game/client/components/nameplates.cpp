@@ -337,7 +337,7 @@ void CNamePlates::OnRender()
 				RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
 			}
 		}
-		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
+		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
 		{
 			continue;
 		}
