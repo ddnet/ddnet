@@ -57,9 +57,9 @@
 #include "components/menus.h"
 #include "components/motd.h"
 #include "components/nameplates.h"
+#include "components/outlines.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
-#include "components/outlines.h"
 #include "components/players.h"
 #include "components/race_demo.h"
 #include "components/scoreboard.h"
@@ -225,7 +225,7 @@ void CGameClient::OnInit()
 
 	// propagate pointers
 	m_UI.Init(Input(), Graphics(), TextRender());
-	m_RenderTools.Init(Graphics(), TextRender());
+	m_RenderTools.Init(Graphics(), TextRender(), this);
 
 	int64_t Start = time_get();
 
