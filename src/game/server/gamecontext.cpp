@@ -54,6 +54,10 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 {
 	if(str_comp(pMessage->m_aSystem, "chatresp") == 0)
 	{
+		if(m_Filter.Filters(pMessage))
+		{
+			return;
+		}
 		m_pGameServer->SendChatTarget(m_ClientID, pMessage->Message());
 	}
 	else

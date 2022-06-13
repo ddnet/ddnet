@@ -42,8 +42,7 @@ public:
 
 void CConsoleLogger::Log(const CLogMessage *pMessage)
 {
-	// TODO: Fix thread-unsafety of accessing `g_Config.m_ConsoleOutputLevel`
-	if(pMessage->m_Level > IConsole::ToLogLevel(g_Config.m_ConsoleOutputLevel))
+	if(m_Filter.Filters(pMessage))
 	{
 		return;
 	}
@@ -384,6 +383,8 @@ CGameConsole::CGameConsole() :
 	m_ConsoleState = CONSOLE_CLOSED;
 	m_StateChangeEnd = 0.0f;
 	m_StateChangeDuration = 0.1f;
+
+	m_pConsoleLogger = new CConsoleLogger(this);
 }
 
 CGameConsole::~CGameConsole()
@@ -940,6 +941,16 @@ void CGameConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserDat
 		pConsole->m_BacklogCurPage = 0;
 }
 
+void CGameConsole::ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameConsole *pSelf = (CGameConsole *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		pSelf->m_pConsoleLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_ConsoleOutputLevel)});
+	}
+}
+
 void CGameConsole::RequireUsername(bool UsernameReq)
 {
 	if((m_RemoteConsole.m_UsernameReq = UsernameReq))
@@ -974,11 +985,11 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("console_page_up", "", CFGFLAG_CLIENT, ConConsolePageUp, this, "Previous page in console");
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
+	Console()->Chain("console_output_level", ConchainConsoleOutputLevel, this);
 }
 
 void CGameConsole::OnInit()
 {
-	m_pConsoleLogger = new CConsoleLogger(this);
 	Engine()->SetAdditionalLogger(std::unique_ptr<ILogger>(m_pConsoleLogger));
 	// add resize event
 	Graphics()->AddWindowResizeListener([this]() {
