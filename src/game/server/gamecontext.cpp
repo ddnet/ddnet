@@ -1599,7 +1599,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	SendRecord(ClientID);
 
 	// And report correct tunings.
-	if(ClientVersion >= VERSION_DDNET_EXTRATUNES)
+	if(ClientVersion < VERSION_DDNET_EARLY_VERSION)
 		SendTuningParams(ClientID, pPlayer->m_TuneZone);
 
 	// Tell old clients to update.
