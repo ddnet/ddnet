@@ -54,7 +54,7 @@ class CUpdater : public IUpdater
 	std::map<std::string, bool> m_FileJobs;
 
 	void AddFileJob(const char *pFile, bool Job);
-	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	void FetchFile(const char *pFile, const char *pDestPath = nullptr);
 	bool MoveFile(const char *pFile);
 
 	void ParseUpdate();

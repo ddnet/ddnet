@@ -80,7 +80,7 @@ public:
 	int Stop(int Ticks, int Time) override;
 
 	void WriteData(int Type, const void *pData, int Size) override;
-	bool IsRecording() const override { return m_File != 0; }
+	bool IsRecording() const override { return m_File != nullptr; }
 };
 
 class CGhostLoader : public IGhostLoader

@@ -189,7 +189,7 @@ public:
 	CWorldCore()
 	{
 		mem_zero(m_apCharacters, sizeof(m_apCharacters));
-		m_pPrng = 0;
+		m_pPrng = nullptr;
 	}
 
 	int RandomOr0(int BelowThis)

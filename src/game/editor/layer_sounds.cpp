@@ -186,7 +186,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 
 	CProperty aProps[] = {
 		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
-		{0},
+		{nullptr},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};

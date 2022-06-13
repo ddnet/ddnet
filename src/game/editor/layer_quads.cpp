@@ -222,7 +222,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 	CProperty aProps[] = {
 		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
-		{0},
+		{nullptr},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};

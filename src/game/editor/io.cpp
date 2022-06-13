@@ -432,7 +432,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			{
 				int ItemSize = DataFile.GetItemSize(Start);
 				int ItemID;
-				CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)DataFile.GetItem(i, 0, &ItemID);
+				CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)DataFile.GetItem(i, nullptr, &ItemID);
 				if(!pItem || ItemID != 0)
 					continue;
 
@@ -471,7 +471,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			DataFile.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemImage *pItem = (CMapItemImage *)DataFile.GetItem(Start + i, 0, 0);
+				CMapItemImage *pItem = (CMapItemImage *)DataFile.GetItem(Start + i, nullptr, nullptr);
 				char *pName = (char *)DataFile.GetData(pItem->m_ImageName);
 
 				// copy base info
@@ -492,7 +492,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 							TextureLoadFlag = 0;
 						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, aBuf);
-						ImgInfo.m_pData = 0;
+						ImgInfo.m_pData = nullptr;
 						pImg->m_External = 1;
 					}
 				}
@@ -533,7 +533,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			DataFile.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i, 0, 0);
+				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i, nullptr, nullptr);
 				char *pName = (char *)DataFile.GetData(pItem->m_SoundName);
 
 				// copy base info
@@ -595,7 +595,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			DataFile.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 			for(int g = 0; g < Num; g++)
 			{
-				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g, 0, 0);
+				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g, nullptr, nullptr);
 
 				if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
 					continue;
@@ -621,15 +621,15 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 				for(int l = 0; l < pGItem->m_NumLayers; l++)
 				{
-					CLayer *pLayer = 0;
-					CMapItemLayer *pLayerItem = (CMapItemLayer *)DataFile.GetItem(LayersStart + pGItem->m_StartLayer + l, 0, 0);
+					CLayer *pLayer = nullptr;
+					CMapItemLayer *pLayerItem = (CMapItemLayer *)DataFile.GetItem(LayersStart + pGItem->m_StartLayer + l, nullptr, nullptr);
 					if(!pLayerItem)
 						continue;
 
 					if(pLayerItem->m_Type == LAYERTYPE_TILES)
 					{
 						CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
-						CLayerTiles *pTiles = 0;
+						CLayerTiles *pTiles = nullptr;
 
 						if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
 						{
@@ -946,20 +946,20 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 		// load envelopes
 		{
-			CEnvPoint *pPoints = 0;
+			CEnvPoint *pPoints = nullptr;
 
 			{
 				int Start, Num;
 				DataFile.GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
 				if(Num)
-					pPoints = (CEnvPoint *)DataFile.GetItem(Start, 0, 0);
+					pPoints = (CEnvPoint *)DataFile.GetItem(Start, nullptr, nullptr);
 			}
 
 			int Start, Num;
 			DataFile.GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
 			for(int e = 0; e < Num; e++)
 			{
-				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e, 0, 0);
+				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e, nullptr, nullptr);
 				CEnvelope *pEnv = new CEnvelope(pItem->m_Channels);
 				pEnv->m_vPoints.resize(pItem->m_NumPoints);
 				mem_copy(&pEnv->m_vPoints[0], &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
@@ -976,7 +976,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 			DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start + i, 0, 0);
+				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start + i, nullptr, nullptr);
 				if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
 				{
 					if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
