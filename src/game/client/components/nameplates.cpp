@@ -196,40 +196,6 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
-
-		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
-		{
-			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
-			int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
-
-			if(Health > 0 || Armor > 0)
-			{
-				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				char aHealth[40] = "\0";
-				char aArmor[40] = "\0";
-				for(int i = 0; i < Health; i++)
-					str_append(aHealth, "♥", sizeof(aHealth));
-				for(int i = Health; i < 10; i++)
-					str_append(aHealth, "♡", sizeof(aHealth));
-				str_append(aHealth, "\0", sizeof(aHealth));
-				for(int i = 0; i < Armor; i++)
-					str_append(aArmor, "⚫", sizeof(aArmor));
-				for(int i = Armor; i < 10; i++)
-					str_append(aArmor, "⚪", sizeof(aArmor));
-				str_append(aArmor, "\0", sizeof(aArmor));
-
-				YOffset -= HFontSize + AFontSize;
-				float PosHealth = TextRender()->TextWidth(0, HFontSize, aHealth, -1, -1.0f);
-				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-				TextRender()->Text(0, Position.x - PosHealth / 2.0f, YOffset, HFontSize, aHealth, -1);
-
-				YOffset -= -AFontSize + 3.0f;
-				float PosArmor = TextRender()->TextWidth(0, AFontSize, aArmor, -1, -1.0f);
-				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
-				TextRender()->Text(0, Position.x - PosArmor / 2.0f, YOffset, AFontSize, aArmor, -1);
-			}
-		}
 	}
 
 	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
