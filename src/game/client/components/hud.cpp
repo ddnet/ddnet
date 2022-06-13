@@ -594,7 +594,9 @@ void CHud::RenderTextInfo()
 		char aBuf[64];
 		float yOff = 3;
 
-		if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(g_Config.m_ClDDRaceHud && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+			yOff += 50;
+		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 27;
 
 		int PlayerId = m_pClient->m_Snap.m_LocalClientID;
@@ -618,6 +620,11 @@ void CHud::RenderTextInfo()
 			yOff += TextHeight;
 			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
 			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+
+			yOff += TextHeight;
+			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
+			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+
 		}
 	}
 
