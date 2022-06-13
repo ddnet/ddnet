@@ -1242,6 +1242,7 @@ set(EXPECTED_DATA
   editor/entities/Vanilla.png
   editor/entities/blockworlds.png
   editor/entities_clear/blockworlds.png
+  editor/entities_clear/ddnet-material.png
   editor/entities_clear/ddnet.png
   editor/entities_clear/ddrace.png
   editor/entities_clear/f-ddrace.png
