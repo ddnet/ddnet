@@ -189,7 +189,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		auto StartTime = tw::time_get();
+		auto StartTime = time_get_nanoseconds();
 		CHttpRequest *pGet = HttpGet(pUrl).release();
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
@@ -198,7 +198,7 @@ void CChooseMaster::CJob::Run()
 			m_pGet = std::unique_ptr<CHttpRequest>(pGet);
 		}
 		IEngine::RunJobBlocking(pGet);
-		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
+		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");

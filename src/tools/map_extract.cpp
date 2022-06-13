@@ -95,7 +95,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 int main(int argc, const char *argv[])
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateLocalStorage();

@@ -626,7 +626,7 @@ public:
 		m_FTLibrary = 0;
 
 		m_RenderFlags = 0;
-		m_CursorRenderTime = tw::time_get();
+		m_CursorRenderTime = time_get_nanoseconds();
 	}
 
 	virtual ~CTextRender()
@@ -1648,7 +1648,7 @@ public:
 		{
 			if(TextContainer.m_HasCursor)
 			{
-				auto CurTime = tw::time_get();
+				auto CurTime = time_get_nanoseconds();
 
 				Graphics()->TextureClear();
 				if((CurTime - m_CursorRenderTime) > 500ms)
@@ -1659,7 +1659,7 @@ public:
 					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
 				}
 				if((CurTime - m_CursorRenderTime) > 1s)
-					m_CursorRenderTime = tw::time_get();
+					m_CursorRenderTime = time_get_nanoseconds();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}

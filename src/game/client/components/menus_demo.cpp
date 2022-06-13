@@ -769,7 +769,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	Item.m_StorageType = StorageType;
 	pSelf->m_vDemos.push_back(Item);
 
-	if(tw::time_get() - pSelf->m_DemoPopulateStartTime > 500ms)
+	if(time_get_nanoseconds() - pSelf->m_DemoPopulateStartTime > 500ms)
 	{
 		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -782,7 +782,7 @@ void CMenus::DemolistPopulate()
 	m_vDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
-	m_DemoPopulateStartTime = tw::time_get();
+	m_DemoPopulateStartTime = time_get_nanoseconds();
 	Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 
 	if(g_Config.m_BrDemoFetchInfo)

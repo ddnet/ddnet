@@ -80,7 +80,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 	const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
 
 	static std::chrono::nanoseconds s_Time{0};
-	static auto s_LastLocalTime = tw::time_get();
+	static auto s_LastLocalTime = time_get_nanoseconds();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -135,7 +135,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 		}
 		else
 		{
-			auto CurTime = tw::time_get();
+			auto CurTime = time_get_nanoseconds();
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}

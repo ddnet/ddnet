@@ -6,7 +6,7 @@
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	if(!pStorage || argc != 3)

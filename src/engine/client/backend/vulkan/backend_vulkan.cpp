@@ -7313,7 +7313,7 @@ public:
 			std::chrono::nanoseconds ThreadRenderTime = 0ns;
 			if(IsVerbose() && s_BenchmarkRenderThreads)
 			{
-				ThreadRenderTime = tw::time_get();
+				ThreadRenderTime = time_get_nanoseconds();
 			}
 
 			if(!pThread->m_Finished)
@@ -7333,7 +7333,7 @@ public:
 
 			if(IsVerbose() && s_BenchmarkRenderThreads)
 			{
-				dbg_msg("vulkan", "render thread %" PRIu64 " took %d ns to finish", ThreadIndex, (int)(tw::time_get() - ThreadRenderTime).count());
+				dbg_msg("vulkan", "render thread %" PRIu64 " took %d ns to finish", ThreadIndex, (int)(time_get_nanoseconds() - ThreadRenderTime).count());
 			}
 
 			pThread->m_IsRendering = false;

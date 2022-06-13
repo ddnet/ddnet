@@ -387,11 +387,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
 
-	auto LoadStartTime = tw::time_get();
+	auto LoadStartTime = time_get_nanoseconds();
 	SMenuAssetScanUser User;
 	User.m_pUser = this;
 	User.m_LoadedFunc = [&]() {
-		if(tw::time_get() - LoadStartTime > 500ms)
+		if(time_get_nanoseconds() - LoadStartTime > 500ms)
 			RenderLoading(false, false);
 	};
 	if(s_CurCustomTab == ASSETS_TAB_ENTITIES)

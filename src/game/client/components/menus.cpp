@@ -229,7 +229,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		auto Time = tw::time_get();
+		auto Time = time_get_nanoseconds();
 
 		if(pAnimator->m_Time + 100ms < Time)
 		{
@@ -927,10 +927,10 @@ void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(tw::time_get() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
+	if(time_get_nanoseconds() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	LastLoadRender = tw::time_get();
+	LastLoadRender = time_get_nanoseconds();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
@@ -1071,7 +1071,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	SetActive(true);
 
 	m_PopupWarningDuration = Duration;
-	m_PopupWarningLastTime = tw::time_get();
+	m_PopupWarningLastTime = time_get_nanoseconds();
 }
 
 bool CMenus::CanDisplayWarning()
@@ -2253,7 +2253,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (tw::time_get() - m_PopupWarningLastTime >= m_PopupWarningDuration))
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
 			{
 				m_Popup = POPUP_NONE;
 				SetActive(false);

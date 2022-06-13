@@ -3050,7 +3050,7 @@ void CClient::Run()
 	bool LastE = false;
 	bool LastG = false;
 
-	auto LastTime = tw::time_get();
+	auto LastTime = time_get_nanoseconds();
 	int64_t LastRenderTime = time_get();
 
 	while(true)
@@ -3289,7 +3289,7 @@ void CClient::Run()
 #endif
 
 		// beNice
-		auto Now = tw::time_get();
+		auto Now = time_get_nanoseconds();
 		decltype(Now) SleepTimeInNanoSeconds{0};
 		bool Slept = false;
 		if(
@@ -3306,7 +3306,7 @@ void CClient::Run()
 		{
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
 			if(SleepTimeInNanoSeconds > 0ns)
-				tw::net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
+				net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
 			Slept = true;
 		}
 		if(Slept)
@@ -4357,7 +4357,7 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
 #endif
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 	bool RandInitFailed = false;
 

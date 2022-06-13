@@ -114,7 +114,7 @@ CTestInfo::~CTestInfo()
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();

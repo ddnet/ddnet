@@ -47,7 +47,7 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 
 int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateLocalStorage();

@@ -109,7 +109,7 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc != 5)
