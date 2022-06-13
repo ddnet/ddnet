@@ -4643,8 +4643,7 @@ void CEditor::RenderFileDialog()
 					str_format(m_pFileDialogPath, IO_MAX_PATH_LENGTH, "%s/%s", aTemp, m_vFileList[m_FilesSelectedIndex].m_aFilename);
 				}
 			}
-			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType :
-															  m_vFileList[m_FilesSelectedIndex].m_StorageType);
+			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType : m_vFileList[m_FilesSelectedIndex].m_StorageType);
 			if(m_FilesSelectedIndex >= 0 && !m_vFileList[m_FilesSelectedIndex].m_IsDir)
 				str_copy(m_aFileDialogFileName, m_vFileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
 			else
@@ -4971,9 +4970,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ColorRGBA EnvColor = ColorRGBA(1, 1, 1, 0.5f);
 		if(!m_Map.m_vpEnvelopes.empty())
 		{
-			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ?
-					   ColorRGBA(1, 0.7f, 0.7f, 0.5f) :
-					   ColorRGBA(0.7f, 1, 0.7f, 0.5f);
+			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ? ColorRGBA(1, 0.7f, 0.7f, 0.5f) : ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
 		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
