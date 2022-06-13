@@ -17,11 +17,10 @@
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender, class CGameClient *pGameClient)
+void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 {
 	m_pGraphics = pGraphics;
 	m_pTextRender = pTextRender;
-	m_pGameClient = (CGameClient *)pGameClient;
 	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
