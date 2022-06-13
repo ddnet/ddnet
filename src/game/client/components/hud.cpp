@@ -132,7 +132,10 @@ void CHud::RenderGameTimer()
 		static float s_TextWidth0D = TextRender()->TextWidth(0, FontSize, "0d 00:00:00", -1, -1.0f);
 		static float s_TextWidth00D = TextRender()->TextWidth(0, FontSize, "00d 00:00:00", -1, -1.0f);
 		static float s_TextWidth000D = TextRender()->TextWidth(0, FontSize, "000d 00:00:00", -1, -1.0f);
-		float w = Time >= 3600 * 24 * 100 ? s_TextWidth000D : Time >= 3600 * 24 * 10 ? s_TextWidth00D : Time >= 3600 * 24 ? s_TextWidth0D : Time >= 3600 ? s_TextWidthH : s_TextWidthM;
+		float w = Time >= 3600 * 24 * 100 ? s_TextWidth000D : Time >= 3600 * 24 * 10 ? s_TextWidth00D :
+							      Time >= 3600 * 24              ? s_TextWidth0D :
+							      Time >= 3600                   ? s_TextWidthH :
+                                                                                               s_TextWidthM;
 		// last 60 sec red, last 10 sec blink
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit && Time <= 60 && (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0))
 		{
@@ -594,7 +597,7 @@ void CHud::RenderTextInfo()
 		char aBuf[64];
 		float yOff = 3;
 
-		if(g_Config.m_ClDDRaceHud && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(g_Config.m_ClDDRaceHud && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 50;
 		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 27;
@@ -622,9 +625,13 @@ void CHud::RenderTextInfo()
 			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 
 			yOff += TextHeight;
-			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
+			str_format(aBuf, sizeof(aBuf), "VelY: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelY / 256.0f * 50.0 / 32.0f);
 			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 
+			yOff += TextHeight;
+			
+			str_format(aBuf, sizeof(aBuf), "VelX: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelX / 256.0f * 50.0 / 32.0f);
+			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 		}
 	}
 
@@ -855,10 +862,11 @@ void CHud::RenderCursor()
 	RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 	// render cursor
-	int Wep = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponCursors[Wep]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CursorOffset[Wep], m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
+	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CursorOffset[CurWeapon], m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
