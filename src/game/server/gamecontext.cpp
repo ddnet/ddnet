@@ -445,7 +445,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, Team != CHAT_ALL ? "teamchat" : "chat", aBuf);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team != CHAT_ALL ? "teamchat" : "chat", aBuf);
 
 	if(Team == CHAT_ALL)
 	{
@@ -1077,24 +1077,21 @@ void CGameContext::OnTick()
 			SendChat(-1, CGameContext::CHAT_ALL, Line);
 	}
 
-	if(Collision()->m_NumSwitchers > 0)
+	for(auto &Switcher : Switchers())
 	{
-		for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
+		for(int j = 0; j < MAX_CLIENTS; ++j)
 		{
-			for(int j = 0; j < MAX_CLIENTS; ++j)
+			if(Switcher.m_EndTick[j] <= Server()->Tick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDOPEN)
 			{
-				if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
-				{
-					Collision()->m_pSwitchers[i].m_Status[j] = false;
-					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
-					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHCLOSE;
-				}
-				else if(Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
-				{
-					Collision()->m_pSwitchers[i].m_Status[j] = true;
-					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
-					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHOPEN;
-				}
+				Switcher.m_Status[j] = false;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHCLOSE;
+			}
+			else if(Switcher.m_EndTick[j] <= Server()->Tick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+			{
+				Switcher.m_Status[j] = true;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHOPEN;
 			}
 		}
 	}
@@ -1862,25 +1859,25 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if(pMsg->m_pMessage[0] == '/')
 			{
-				if(str_startswith(pMsg->m_pMessage + 1, "w "))
+				if(str_startswith_nocase(pMsg->m_pMessage + 1, "w "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
 					Whisper(pPlayer->GetCID(), aWhisperMsg);
 				}
-				else if(str_startswith(pMsg->m_pMessage + 1, "whisper "))
+				else if(str_startswith_nocase(pMsg->m_pMessage + 1, "whisper "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 9, 256);
 					Whisper(pPlayer->GetCID(), aWhisperMsg);
 				}
-				else if(str_startswith(pMsg->m_pMessage + 1, "c "))
+				else if(str_startswith_nocase(pMsg->m_pMessage + 1, "c "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
 					Converse(pPlayer->GetCID(), aWhisperMsg);
 				}
-				else if(str_startswith(pMsg->m_pMessage + 1, "converse "))
+				else if(str_startswith_nocase(pMsg->m_pMessage + 1, "converse "))
 				{
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
@@ -2584,10 +2581,6 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	/*CTuningParams TuningParams;
-	*pSelf->Tuning() = TuningParams;
-	pSelf->SendTuningParams(-1);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");*/
 	pSelf->ResetTuning();
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
 }
@@ -2731,9 +2724,9 @@ void CGameContext::ConSwitchOpen(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Switch = pResult->GetInteger(0);
 
-	if(pSelf->Collision()->m_NumSwitchers > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_NumSwitchers + 1)
+	if(in_range(Switch, (int)pSelf->Switchers().size() - 1))
 	{
-		pSelf->Collision()->m_pSwitchers[Switch].m_Initial = false;
+		pSelf->Switchers()[Switch].m_Initial = false;
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "switch %d opened by default", Switch);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -3207,6 +3200,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
@@ -3262,9 +3256,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		g_Config.m_SvTeam = SV_TEAM_ALLOWED;
 		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_OFF;
 
-		if(Collision()->m_NumSwitchers > 0)
-			for(int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
-				Collision()->m_pSwitchers[i].m_Initial = true;
+		for(auto &Switcher : Switchers())
+			Switcher.m_Initial = true;
 	}
 
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);

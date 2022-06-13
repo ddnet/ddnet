@@ -50,13 +50,6 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	const float EndProgressProportion = EndProgressWidth / ProgressBarWidth;
 	const float MiddleProgressProportion = MiddleBarWidth / ProgressBarWidth;
 
-	// we cut 2% of all sides of all sprites so we don't get edge bleeding
-	const float CutL = 0.02f;
-	const float CutR = 0.98f;
-	const float CutT = 0.02f;
-	const float CutB = 0.98f;
-	const float Slice = 0.02f;
-
 	// beginning piece
 	float BeginningPieceProgress = 1;
 	if(Progress <= EndProgressProportion)
@@ -65,11 +58,12 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	}
 
 	// full
+	Graphics()->WrapClamp();
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudFreezeBarFullLeft);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// Subset: top_l, top_m, btm_m, btm_l
-	Graphics()->QuadsSetSubsetFree(CutL, CutT, RestPct + (ProgPct - CutL) * BeginningPieceProgress, CutT, RestPct + (ProgPct - CutL) * BeginningPieceProgress, CutB, CutL, CutB);
+	Graphics()->QuadsSetSubsetFree(0, 0, RestPct + ProgPct * BeginningPieceProgress, 0, RestPct + ProgPct * BeginningPieceProgress, 1, 0, 1);
 	IGraphics::CQuadItem QuadFullBeginning(x, y, EndRestWidth + EndProgressWidth * BeginningPieceProgress, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
 	Graphics()->QuadsEnd();
@@ -81,7 +75,7 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		// Subset: top_m, top_l, btm_l, btm_m | it is mirrored on the horizontal axe and rotated 180 degrees
-		Graphics()->QuadsSetSubsetFree(ProgPct - (ProgPct - CutL) * BeginningPieceProgress, CutT, CutL, CutT, CutL, CutB, ProgPct - (ProgPct - CutL) * BeginningPieceProgress, CutB);
+		Graphics()->QuadsSetSubsetFree(ProgPct - ProgPct * BeginningPieceProgress, 0, 0, 0, 0, 1, ProgPct - ProgPct * BeginningPieceProgress, 1);
 		IGraphics::CQuadItem QuadEmptyBeginning(x + EndRestWidth + EndProgressWidth * BeginningPieceProgress, y, EndProgressWidth * (1.0f - BeginningPieceProgress), BarHeight);
 		Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
 		Graphics()->QuadsEnd();
@@ -115,12 +109,12 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	{
 		// prevent pixel puree, select only a small slice
 		// Subset: top_l, top_m, btm_m, btm_l
-		Graphics()->QuadsSetSubsetFree(CutL, CutT, CutL + Slice, CutT, CutL + Slice, CutB, CutL, CutB);
+		Graphics()->QuadsSetSubsetFree(0, 0, FullMiddleBarWidth / EndWidth, 0, FullMiddleBarWidth / EndWidth, 1, 0, 1);
 	}
 	else
 	{
 		// Subset: top_l, top_r, btm_r, btm_l
-		Graphics()->QuadsSetSubsetFree(CutL, CutT, CutR, CutT, CutR, CutB, CutL, CutB);
+		Graphics()->QuadsSetSubsetFree(0, 0, 1, 0, 1, 1, 0, 1);
 	}
 	IGraphics::CQuadItem QuadFull(x, y, FullMiddleBarWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadFull, 1);
@@ -135,12 +129,12 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	{
 		// prevent pixel puree, select only a small slice
 		// Subset: top_m, top_l, btm_l, btm_m | it is mirrored on the horizontal axe and rotated 180 degrees
-		Graphics()->QuadsSetSubsetFree(CutL + Slice, CutT, CutL, CutT, CutL, CutB, CutL + Slice, CutB);
+		Graphics()->QuadsSetSubsetFree(EmptyMiddleBarWidth / EndWidth, 0, 0, 0, 0, 1, EmptyMiddleBarWidth / EndWidth, 1);
 	}
 	else
 	{
 		// Subset: top_r, top_l, btm_l, btm_r | it is mirrored on the horizontal axe and rotated 180 degrees
-		Graphics()->QuadsSetSubsetFree(CutR, CutT, CutL, CutT, CutL, CutB, CutR, CutB);
+		Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
 	}
 
 	IGraphics::CQuadItem QuadEmpty(x + FullMiddleBarWidth, y, EmptyMiddleBarWidth, BarHeight);
@@ -168,7 +162,7 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		// Subset: top_r, top_m, btm_m, btm_r | it is mirrored on the horizontal axe and rotated 180 degrees
-		Graphics()->QuadsSetSubsetFree(CutR, CutT, CutR - (ProgPct - CutL) * EndingPieceProgress, CutT, CutR - (ProgPct - CutL) * EndingPieceProgress, CutB, CutR, CutB);
+		Graphics()->QuadsSetSubsetFree(1, 0, 1.0f - ProgPct * EndingPieceProgress, 0, 1.0f - ProgPct * EndingPieceProgress, 1, 1, 1);
 		IGraphics::CQuadItem QuadFullEnding(x, y, EndProgressWidth * EndingPieceProgress, BarHeight);
 		Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
 		Graphics()->QuadsEnd();
@@ -178,13 +172,14 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 	// Subset: top_m, top_r, btm_r, btm_m
-	Graphics()->QuadsSetSubsetFree(ProgPct - (ProgPct - CutL) * (1.0f - EndingPieceProgress), CutT, CutR, CutT, CutR, CutB, ProgPct - (ProgPct - CutL) * (1.0f - EndingPieceProgress), CutB);
+	Graphics()->QuadsSetSubsetFree(ProgPct - ProgPct * (1.0f - EndingPieceProgress), 0, 1, 0, 1, 1, ProgPct - ProgPct * (1.0f - EndingPieceProgress), 1);
 	IGraphics::CQuadItem QuadEmptyEnding(x + EndProgressWidth * EndingPieceProgress, y, EndProgressWidth * (1.0f - EndingPieceProgress) + EndRestWidth, BarHeight);
 	Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
 	Graphics()->QuadsEnd();
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->WrapNormal();
 }
 
 inline bool CFreezeBars::IsPlayerInfoAvailable(int ClientID) const

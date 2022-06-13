@@ -577,8 +577,6 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 			{
 				if(pSelf->m_apPlayers[i]->GetCharacter())
 					pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
-				/*if(pSelf->Server()->IsSixup(i))
-					pSelf->SendClientInfo(i, i);*/
 				return;
 			}
 		}
@@ -1470,6 +1468,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->Rescue();
+	pChr->UnFreeze();
 }
 
 void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
@@ -1517,6 +1516,8 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->Teleport(pChr, Pos);
+	pChr->UnFreeze();
+	pChr->Core()->m_Vel = vec2(0, 0);
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
@@ -1576,4 +1577,25 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pResult->GetInteger(0));
 	else
 		pSelf->Score()->ShowTopPoints(pResult->m_ClientID);
+}
+
+void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(g_Config.m_SvHideScore)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Showing the checkpoint times is not allowed on this server.");
+		return;
+	}
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	const char *pName = pResult->GetString(0);
+	pSelf->Score()->LoadPlayerData(pResult->m_ClientID, pName);
 }

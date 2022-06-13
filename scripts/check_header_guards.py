@@ -23,14 +23,14 @@ def check_file(filename):
 				break
 			if line[0] == "/" or line[0] == "*" or line[0] == "\r" or line[0] == "\n" or line[0] == "\t":
 				continue
+			header_guard = "#ifndef " + ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
 			if line.startswith("#ifndef"):
-				header_guard = "#ifndef " + ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
 				if line[:-1] != header_guard:
 					error = True
-					print("Wrong header guard in {}".format(filename))
+					print("Wrong header guard in {}, is: {}, should be: {}".format(filename, line[:-1], header_guard))
 			else:
 				error = True
-				print("Missing header guard in {}".format(filename))
+				print("Missing header guard in {}, should be: {}".format(filename, header_guard))
 			break
 	return error
 

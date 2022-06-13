@@ -275,7 +275,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
-	std::vector<SWarning> m_Warnings;
+	std::vector<SWarning> m_vWarnings;
 
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
@@ -333,7 +333,6 @@ public:
 
 	// TODO: OPT: do this a lot smarter!
 	int *GetInput(int Tick, int IsDummy) const override;
-	int *GetDirectInput(int Tick, int IsDummy) const override;
 
 	const char *LatestVersion() const override;
 

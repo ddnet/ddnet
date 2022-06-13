@@ -7,16 +7,15 @@
 
 int DilateFile(const char *pFilename)
 {
-	png_t Png;
-
-	png_init(0, 0);
-
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
 	{
 		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
+
+	png_init(0, 0);
+	png_t Png;
 	int Error = png_open_read(&Png, 0, File);
 	if(Error != PNG_NO_ERROR)
 	{
@@ -73,7 +72,7 @@ int DilateFile(const char *pFilename)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc == 1)
 	{
@@ -83,6 +82,6 @@ int main(int argc, const char **argv)
 
 	for(int i = 1; i < argc; i++)
 		DilateFile(argv[i]);
-	cmdline_free(argc, argv);
+
 	return 0;
 }

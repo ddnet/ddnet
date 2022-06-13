@@ -1500,7 +1500,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	// GPU list
 	const auto &GPUList = Graphics()->GetGPUs();
-	if(GPUList.m_GPUs.size() > 1)
+	if(GPUList.m_vGPUs.size() > 1)
 	{
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
@@ -1513,7 +1513,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		static std::vector<const void *> vGPUIDPtrs;
 		static std::vector<const char *> vGPUIDNames;
 
-		size_t GPUCount = GPUList.m_GPUs.size() + 1;
+		size_t GPUCount = GPUList.m_vGPUs.size() + 1;
 		vGPUIDs.resize(GPUCount);
 		vGPUIDPtrs.resize(GPUCount);
 		vGPUIDNames.resize(GPUCount);
@@ -1537,8 +1537,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			}
 			else
 			{
-				vGPUIDNames[i] = GPUList.m_GPUs[i - 1].m_Name;
-				if(str_comp(GPUList.m_GPUs[i - 1].m_Name, g_Config.m_GfxGPUName) == 0)
+				vGPUIDNames[i] = GPUList.m_vGPUs[i - 1].m_Name;
+				if(str_comp(GPUList.m_vGPUs[i - 1].m_Name, g_Config.m_GfxGPUName) == 0)
 				{
 					OldSelectedGPU = i;
 				}
@@ -1557,7 +1557,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			if(NewGPU == 0)
 				str_copy(g_Config.m_GfxGPUName, "auto", sizeof(g_Config.m_GfxGPUName));
 			else
-				str_copy(g_Config.m_GfxGPUName, GPUList.m_GPUs[NewGPU - 1].m_Name, sizeof(g_Config.m_GfxGPUName));
+				str_copy(g_Config.m_GfxGPUName, GPUList.m_vGPUs[NewGPU - 1].m_Name, sizeof(g_Config.m_GfxGPUName));
 			CheckSettings = true;
 			s_GfxGPUChanged = NewGPU != s_OldSelectedGPU;
 		}

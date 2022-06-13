@@ -11,13 +11,11 @@ public: \
 	void *operator new(size_t Size) \
 	{ \
 		void *p = malloc(Size); \
-		/*dbg_msg("", "++ %p %d", p, size);*/ \
 		mem_zero(p, Size); \
 		return p; \
 	} \
 	void operator delete(void *pPtr) \
 	{ \
-		/*dbg_msg("", "-- %p", p);*/ \
 		free(pPtr); \
 	} \
 \
@@ -40,6 +38,7 @@ public:
 	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 	virtual ~CEntity();
 
+	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->Switchers(); }
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
 	CTuningParams *Tuning() { return GameWorld()->Tuning(); }
 	CTuningParams *TuningList() { return GameWorld()->TuningList(); }

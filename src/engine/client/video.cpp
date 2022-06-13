@@ -4,6 +4,7 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <base/lock_scope.h>
 #include <engine/client/graphics_threaded.h>
 #include <engine/sound.h>
 
@@ -157,7 +158,7 @@ void CVideo::Start()
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
 		std::unique_lock<std::mutex> Lock(m_vVideoThreads[i]->m_Mutex);
-		m_vVideoThreads[i]->m_Thread = std::thread([this, i]() { RunVideoThread(i == 0 ? (m_VideoThreads - 1) : (i - 1), i); });
+		m_vVideoThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunVideoThread(i == 0 ? (m_VideoThreads - 1) : (i - 1), i); });
 		m_vVideoThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vVideoThreads[i]->m_Started; });
 	}
 
@@ -169,7 +170,7 @@ void CVideo::Start()
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		std::unique_lock<std::mutex> Lock(m_vAudioThreads[i]->m_Mutex);
-		m_vAudioThreads[i]->m_Thread = std::thread([this, i]() { RunAudioThread(i == 0 ? (m_AudioThreads - 1) : (i - 1), i); });
+		m_vAudioThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunAudioThread(i == 0 ? (m_AudioThreads - 1) : (i - 1), i); });
 		m_vAudioThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vAudioThreads[i]->m_Started; });
 	}
 
@@ -467,10 +468,11 @@ void CVideo::RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex)
 			{
 				std::unique_lock<std::mutex> LockAudio(pThreadData->m_AudioFillMutex);
 
-				lock_wait(g_WriteLock);
-				m_AudioStream.m_vpFrames[ThreadIndex]->pts = av_rescale_q(pThreadData->m_SampleCountStart, AVRational{1, m_AudioStream.pEnc->sample_rate}, m_AudioStream.pEnc->time_base);
-				WriteFrame(&m_AudioStream, ThreadIndex);
-				lock_unlock(g_WriteLock);
+				{
+					CLockScope ls(g_WriteLock);
+					m_AudioStream.m_vpFrames[ThreadIndex]->pts = av_rescale_q(pThreadData->m_SampleCountStart, AVRational{1, m_AudioStream.pEnc->sample_rate}, m_AudioStream.pEnc->time_base);
+					WriteFrame(&m_AudioStream, ThreadIndex);
+				}
 
 				pThreadData->m_AudioFrameToFill = 0;
 				pThreadData->m_AudioFillCond.notify_all();
@@ -547,10 +549,11 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 			}
 			{
 				std::unique_lock<std::mutex> LockVideo(pThreadData->m_VideoFillMutex);
-				lock_wait(g_WriteLock);
-				m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->frame_number;
-				WriteFrame(&m_VideoStream, ThreadIndex);
-				lock_unlock(g_WriteLock);
+				{
+					CLockScope ls(g_WriteLock);
+					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->frame_number;
+					WriteFrame(&m_VideoStream, ThreadIndex);
+				}
 
 				pThreadData->m_VideoFrameToFill = 0;
 				pThreadData->m_VideoFillCond.notify_all();

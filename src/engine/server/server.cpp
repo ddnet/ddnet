@@ -278,7 +278,7 @@ class CServerLogger : public ILogger
 {
 	CServer *m_pServer;
 	std::mutex m_PendingLock;
-	std::vector<CLogMessage> m_aPending;
+	std::vector<CLogMessage> m_vPending;
 	std::thread::id m_MainThread;
 
 public:
@@ -298,23 +298,23 @@ void CServerLogger::Log(const CLogMessage *pMessage)
 	m_PendingLock.lock();
 	if(m_MainThread == std::this_thread::get_id())
 	{
-		if(!m_aPending.empty())
+		if(!m_vPending.empty())
 		{
 			if(m_pServer)
 			{
-				for(const auto &Message : m_aPending)
+				for(const auto &Message : m_vPending)
 				{
 					m_pServer->SendLogLine(&Message);
 				}
 			}
-			m_aPending.clear();
+			m_vPending.clear();
 		}
 		m_PendingLock.unlock();
 		m_pServer->SendLogLine(pMessage);
 	}
 	else
 	{
-		m_aPending.push_back(*pMessage);
+		m_vPending.push_back(*pMessage);
 		m_PendingLock.unlock();
 	}
 }
@@ -571,20 +571,10 @@ void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason);
 }
 
-/*int CServer::Tick()
-{
-	return m_CurrentGameTick;
-}*/
-
 int64_t CServer::TickStartTime(int Tick)
 {
 	return m_GameStartTime + (time_freq() * Tick) / SERVER_TICK_SPEED;
 }
-
-/*int CServer::TickSpeed()
-{
-	return SERVER_TICK_SPEED;
-}*/
 
 int CServer::Init()
 {
@@ -1667,7 +1657,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
-					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientID = ClientID;
 					m_RconAuthLevel = m_aClients[ClientID].m_Authed;
 					Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientID].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : m_aClients[ClientID].m_Authed == AUTHED_HELPER ? IConsole::ACCESS_LEVEL_HELPER : IConsole::ACCESS_LEVEL_USER);
@@ -2678,7 +2668,7 @@ int CServer::Run()
 			int64_t t = time_get();
 			int NewTicks = 0;
 
-			// load new map TODO: don't poll this
+			// load new map
 			if(m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) // force reload to make sure the ticks stay within a valid range
 			{
 				// load map
@@ -2928,6 +2918,8 @@ int CServer::Run()
 	}
 
 	m_NetServer.Close();
+
+	m_pRegister->OnShutdown();
 
 	return ErrorShutdown();
 }
@@ -3773,7 +3765,7 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++)
@@ -3917,7 +3909,6 @@ int main(int argc, const char **argv)
 	// free
 	delete pKernel;
 
-	cmdline_free(argc, argv);
 	return Ret;
 }
 

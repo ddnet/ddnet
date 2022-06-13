@@ -3,7 +3,7 @@
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	tw::CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc < 1 + 2)
 	{
@@ -11,6 +11,5 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 	dbg_msg("conf", "not_confusable=%d", str_utf8_comp_confusable(argv[1], argv[2]));
-	cmdline_free(argc, argv);
 	return 0;
 }

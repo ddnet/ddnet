@@ -71,7 +71,7 @@ struct STextCharQuad
 struct STextureSkyline
 {
 	// the height of each column
-	std::vector<int> m_CurHeightOfPixelColumn;
+	std::vector<int> m_vCurHeightOfPixelColumn;
 };
 
 struct CFontSizeData
@@ -94,7 +94,7 @@ public:
 		free(m_pBuf);
 		delete[] m_TextureData[0];
 		delete[] m_TextureData[1];
-		for(auto &FtFallbackFont : m_FtFallbackFonts)
+		for(auto &FtFallbackFont : m_vFtFallbackFonts)
 		{
 			free(FtFallbackFont.m_pBuf);
 		}
@@ -128,7 +128,7 @@ public:
 		FT_Face m_FtFace;
 	};
 
-	std::vector<SFontFallBack> m_FtFallbackFonts;
+	std::vector<SFontFallBack> m_vFtFallbackFonts;
 
 	CFontSizeData m_aFontSizes[NUM_FONT_SIZES];
 
@@ -149,7 +149,7 @@ struct STextString
 	size_t m_QuadNum;
 	int m_SelectionQuadContainerIndex;
 
-	std::vector<STextCharQuad> m_CharacterQuads;
+	std::vector<STextCharQuad> m_vCharacterQuads;
 };
 
 struct STextContainer
@@ -191,7 +191,7 @@ struct STextContainer
 
 		m_StringInfo.m_QuadBufferObjectIndex = m_StringInfo.m_QuadBufferContainerIndex = m_StringInfo.m_SelectionQuadContainerIndex = -1;
 		m_StringInfo.m_QuadNum = 0;
-		m_StringInfo.m_CharacterQuads.clear();
+		m_StringInfo.m_vCharacterQuads.clear();
 
 		m_AlignedStartX = m_AlignedStartY = m_X = m_Y = 0.f;
 		m_Flags = m_LineCount = m_CharCount = m_GlyphCount = 0;
@@ -216,13 +216,13 @@ class CTextRender : public IEngineTextRender
 
 	unsigned int m_RenderFlags;
 
-	std::vector<STextContainer *> m_TextContainers;
-	std::vector<int> m_TextContainerIndices;
+	std::vector<STextContainer *> m_vpTextContainers;
+	std::vector<int> m_vTextContainerIndices;
 	int m_FirstFreeTextContainerIndex;
 
 	SBufferContainerInfo m_DefaultTextContainerInfo;
 
-	std::vector<CFont *> m_Fonts;
+	std::vector<CFont *> m_vpFonts;
 	CFont *m_pCurFont;
 
 	std::chrono::nanoseconds m_CursorRenderTime;
@@ -231,41 +231,41 @@ class CTextRender : public IEngineTextRender
 	{
 		if(m_FirstFreeTextContainerIndex == -1)
 		{
-			int Index = (int)m_TextContainerIndices.size();
-			m_TextContainerIndices.push_back(Index);
+			int Index = (int)m_vTextContainerIndices.size();
+			m_vTextContainerIndices.push_back(Index);
 			return Index;
 		}
 		else
 		{
 			int Index = m_FirstFreeTextContainerIndex;
-			m_FirstFreeTextContainerIndex = m_TextContainerIndices[Index];
-			m_TextContainerIndices[Index] = Index;
+			m_FirstFreeTextContainerIndex = m_vTextContainerIndices[Index];
+			m_vTextContainerIndices[Index] = Index;
 			return Index;
 		}
 	}
 
 	void FreeTextContainerIndex(int Index)
 	{
-		m_TextContainerIndices[Index] = m_FirstFreeTextContainerIndex;
+		m_vTextContainerIndices[Index] = m_FirstFreeTextContainerIndex;
 		m_FirstFreeTextContainerIndex = Index;
 	}
 
 	void FreeTextContainer(int Index)
 	{
-		m_TextContainers[Index]->Reset();
+		m_vpTextContainers[Index]->Reset();
 		FreeTextContainerIndex(Index);
 	}
 
 	STextContainer &GetTextContainer(int Index)
 	{
-		if(Index >= (int)m_TextContainers.size())
+		if(Index >= (int)m_vpTextContainers.size())
 		{
-			int Size = (int)m_TextContainers.size();
+			int Size = (int)m_vpTextContainers.size();
 			for(int i = 0; i < (Index + 1) - Size; ++i)
-				m_TextContainers.push_back(new STextContainer());
+				m_vpTextContainers.push_back(new STextContainer());
 		}
 
-		return *m_TextContainers[Index];
+		return *m_vpTextContainers[Index];
 	}
 
 	int WordLength(const char *pText)
@@ -353,7 +353,7 @@ class CTextRender : public IEngineTextRender
 		delete[] pFont->m_TextureData[TextureIndex];
 		pFont->m_TextureData[TextureIndex] = pTmpTexBuffer;
 		pFont->m_CurTextureDimensions[TextureIndex] = NewDimensions;
-		pFont->m_TextureSkyline[TextureIndex].m_CurHeightOfPixelColumn.resize(NewDimensions, 0);
+		pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn.resize(NewDimensions, 0);
 	}
 
 	void IncreaseFontTexture(CFont *pFont)
@@ -400,7 +400,7 @@ class CTextRender : public IEngineTextRender
 			return false;
 
 		// skyline bottom left algorithm
-		std::vector<int> &SkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_CurHeightOfPixelColumn;
+		std::vector<int> &SkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
 
 		// search a fitting area with less pixel loss
 		int SmallestPixelLossAreaX = 0;
@@ -486,7 +486,7 @@ class CTextRender : public IEngineTextRender
 
 		if(GlyphIndex == 0)
 		{
-			for(CFont::SFontFallBack &FallbackFont : pFont->m_FtFallbackFonts)
+			for(CFont::SFontFallBack &FallbackFont : pFont->m_vFtFallbackFonts)
 			{
 				FtFace = FallbackFont.m_FtFace;
 				FT_Set_Pixel_Sizes(FtFace, 0, pSizeData->m_FontSize);
@@ -631,18 +631,18 @@ public:
 
 	virtual ~CTextRender()
 	{
-		for(auto *pTextCont : m_TextContainers)
+		for(auto *pTextCont : m_vpTextContainers)
 		{
 			pTextCont->Reset();
 			delete pTextCont;
 		}
-		m_TextContainers.clear();
+		m_vpTextContainers.clear();
 
-		for(auto &pFont : m_Fonts)
+		for(auto &pFont : m_vpFonts)
 		{
 			FT_Done_Face(pFont->m_FtFace);
 
-			for(CFont::SFontFallBack &FallbackFont : pFont->m_FtFallbackFonts)
+			for(CFont::SFontFallBack &FallbackFont : pFont->m_vFtFallbackFonts)
 			{
 				FT_Done_Face(FallbackFont.m_FtFace);
 			}
@@ -671,22 +671,22 @@ public:
 		m_DefaultTextContainerInfo.m_Stride = sizeof(STextCharQuadVertex);
 		m_DefaultTextContainerInfo.m_VertBufferBindingIndex = -1;
 
-		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
-		SBufferContainerInfo::SAttribute *pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
+		m_DefaultTextContainerInfo.m_vAttributes.emplace_back();
+		SBufferContainerInfo::SAttribute *pAttr = &m_DefaultTextContainerInfo.m_vAttributes.back();
 		pAttr->m_DataTypeCount = 2;
 		pAttr->m_FuncType = 0;
 		pAttr->m_Normalized = false;
 		pAttr->m_pOffset = 0;
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
-		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
+		m_DefaultTextContainerInfo.m_vAttributes.emplace_back();
+		pAttr = &m_DefaultTextContainerInfo.m_vAttributes.back();
 		pAttr->m_DataTypeCount = 2;
 		pAttr->m_FuncType = 0;
 		pAttr->m_Normalized = false;
 		pAttr->m_pOffset = (void *)(sizeof(float) * 2);
 		pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
-		m_DefaultTextContainerInfo.m_Attributes.emplace_back();
-		pAttr = &m_DefaultTextContainerInfo.m_Attributes.back();
+		m_DefaultTextContainerInfo.m_vAttributes.emplace_back();
+		pAttr = &m_DefaultTextContainerInfo.m_vAttributes.back();
 		pAttr->m_DataTypeCount = 4;
 		pAttr->m_FuncType = 0;
 		pAttr->m_Normalized = true;
@@ -731,12 +731,12 @@ public:
 
 		InitTextures(pFont->m_CurTextureDimensions[0], pFont->m_CurTextureDimensions[0], pFont->m_aTextures, pFont->m_TextureData);
 
-		pFont->m_TextureSkyline[0].m_CurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[0], 0);
-		pFont->m_TextureSkyline[1].m_CurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[1], 0);
+		pFont->m_TextureSkyline[0].m_vCurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[0], 0);
+		pFont->m_TextureSkyline[1].m_vCurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[1], 0);
 
 		pFont->InitFontSizes();
 
-		m_Fonts.push_back(pFont);
+		m_vpFonts.push_back(pFont);
 
 		return pFont;
 	}
@@ -750,7 +750,7 @@ public:
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
 			dbg_msg("textrender", "loaded fallback font from '%s'", pFilename);
-			pFont->m_FtFallbackFonts.emplace_back(FallbackFont);
+			pFont->m_vFtFallbackFonts.emplace_back(FallbackFont);
 
 			return true;
 		}
@@ -760,15 +760,15 @@ public:
 
 	CFont *GetFont(int FontIndex) override
 	{
-		if(FontIndex >= 0 && FontIndex < (int)m_Fonts.size())
-			return m_Fonts[FontIndex];
+		if(FontIndex >= 0 && FontIndex < (int)m_vpFonts.size())
+			return m_vpFonts[FontIndex];
 
 		return NULL;
 	}
 
 	CFont *GetFont(const char *pFilename) override
 	{
-		for(auto &pFont : m_Fonts)
+		for(auto &pFont : m_vpFonts)
 		{
 			if(str_comp(pFilename, pFont->m_aFilename) == 0)
 				return pFont;
@@ -983,15 +983,15 @@ public:
 
 		AppendTextContainer(pCursor, ContainerIndex, pText, Length);
 
-		if(TextContainer.m_StringInfo.m_CharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
+		if(TextContainer.m_StringInfo.m_vCharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
 		{
 			FreeTextContainer(ContainerIndex);
 			return -1;
 		}
 		else
 		{
-			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
-			if(Graphics()->IsTextBufferingEnabled() && IsRendered && !TextContainer.m_StringInfo.m_CharacterQuads.empty())
+			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_vCharacterQuads.size();
+			if(Graphics()->IsTextBufferingEnabled() && IsRendered && !TextContainer.m_StringInfo.m_vCharacterQuads.empty())
 			{
 				if((TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
@@ -1057,6 +1057,21 @@ public:
 
 		const char *pCurrent = (char *)pText;
 		const char *pEnd = pCurrent + Length;
+		const char *pEllipsis = "…";
+		SFontSizeChar *pEllipsisChr = nullptr;
+		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
+		{
+			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(0, pCursor->m_FontSize, pText, -1, -1.0f))
+			{
+				pEllipsisChr = GetChar(TextContainer.m_pFont, pSizeData, 0x2026); // …
+				if(pEllipsisChr == nullptr)
+				{
+					// no ellipsis char in font, just stop at end instead
+					pCursor->m_Flags &= ~TEXTFLAG_ELLIPSIS_AT_END;
+					pCursor->m_Flags |= TEXTFLAG_STOP_AT_END;
+				}
+			}
+		}
 
 		int RenderFlags = TextContainer.m_RenderFlags;
 
@@ -1163,11 +1178,11 @@ public:
 				pCursor->m_CursorCharacter = -1;
 		}
 
-		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
+		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines) && pCurrent != pEllipsis)
 		{
 			int NewLine = 0;
 			const char *pBatchEnd = pEnd;
-			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END))
+			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
 			{
 				int Wlen = minimum(WordLength((char *)pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
@@ -1212,11 +1227,11 @@ public:
 			const char *pTmp = pCurrent;
 			int NextCharacter = str_utf8_decode(&pTmp);
 
-			while(pCurrent < pBatchEnd)
+			while(pCurrent < pBatchEnd && pCurrent != pEllipsis)
 			{
 				pCursor->m_CharCount += pTmp - pCurrent;
-				int Character = NextCharacter;
 				pCurrent = pTmp;
+				int Character = NextCharacter;
 				NextCharacter = str_utf8_decode(&pTmp);
 
 				if(Character == '\n')
@@ -1241,6 +1256,23 @@ public:
 					if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
 						CharKerning = Kerning(TextContainer.m_pFont, LastCharGlyphIndex, pChr->m_GlyphIndex) * Scale * Size;
 					LastCharGlyphIndex = pChr->m_GlyphIndex;
+
+					if(pEllipsisChr != nullptr && pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END && pCurrent < pBatchEnd && pCurrent != pEllipsis)
+					{
+						float AdvanceEllipsis = ((((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pEllipsisChr->m_Width) : (pEllipsisChr->m_AdvanceX + ((!ApplyBearingX) ? (-pEllipsisChr->m_OffsetX) : 0.f)))) * Scale * Size;
+						float CharKerningEllipsis = 0.f;
+						if((RenderFlags & TEXT_RENDER_FLAG_KERNING) != 0)
+						{
+							CharKerningEllipsis = Kerning(TextContainer.m_pFont, pChr->m_GlyphIndex, pEllipsisChr->m_GlyphIndex) * Scale * Size;
+						}
+						if(DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+						{
+							// we hit the end, only render ellipsis and finish
+							pTmp = pEllipsis;
+							NextCharacter = 0x2026;
+							continue;
+						}
+					}
 
 					if(pCursor->m_Flags & TEXTFLAG_STOP_AT_END && (DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
 					{
@@ -1273,8 +1305,8 @@ public:
 					// don't add text that isn't drawn, the color overwrite is used for that
 					if(m_Color.a != 0.f && IsRendered)
 					{
-						TextContainer.m_StringInfo.m_CharacterQuads.emplace_back();
-						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads.back();
+						TextContainer.m_StringInfo.m_vCharacterQuads.emplace_back();
+						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads.back();
 
 						TextCharQuad.m_Vertices[0].m_X = CharX;
 						TextCharQuad.m_Vertices[0].m_Y = CharY;
@@ -1400,14 +1432,14 @@ public:
 				GotNewLineLast = 0;
 		}
 
-		if(!TextContainer.m_StringInfo.m_CharacterQuads.empty() && IsRendered)
+		if(!TextContainer.m_StringInfo.m_vCharacterQuads.empty() && IsRendered)
 		{
-			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_CharacterQuads.size();
+			TextContainer.m_StringInfo.m_QuadNum = TextContainer.m_StringInfo.m_vCharacterQuads.size();
 			// setup the buffers
 			if(Graphics()->IsTextBufferingEnabled())
 			{
-				size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
-				void *pUploadData = &TextContainer.m_StringInfo.m_CharacterQuads[0];
+				size_t DataSize = TextContainer.m_StringInfo.m_vCharacterQuads.size() * sizeof(STextCharQuad);
+				void *pUploadData = &TextContainer.m_StringInfo.m_vCharacterQuads[0];
 
 				if(TextContainer.m_StringInfo.m_QuadBufferObjectIndex != -1 && (TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
@@ -1505,7 +1537,7 @@ public:
 	void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-		TextContainer.m_StringInfo.m_CharacterQuads.clear();
+		TextContainer.m_StringInfo.m_vCharacterQuads.clear();
 		TextContainer.m_StringInfo.m_QuadNum = 0;
 		// the text buffer gets then recreated by the appended quads
 		AppendTextContainer(pCursor, TextContainerIndex, pText, Length);
@@ -1529,8 +1561,8 @@ public:
 		if(Graphics()->IsTextBufferingEnabled())
 		{
 			STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-			size_t DataSize = TextContainer.m_StringInfo.m_CharacterQuads.size() * sizeof(STextCharQuad);
-			void *pUploadData = TextContainer.m_StringInfo.m_CharacterQuads.data();
+			size_t DataSize = TextContainer.m_StringInfo.m_vCharacterQuads.size() * sizeof(STextCharQuad);
+			void *pUploadData = TextContainer.m_StringInfo.m_vCharacterQuads.data();
 			TextContainer.m_StringInfo.m_QuadBufferObjectIndex = Graphics()->CreateBufferObject(DataSize, pUploadData, TextContainer.m_SingleTimeUse ? IGraphics::EBufferObjectCreateFlags::BUFFER_OBJECT_CREATE_FLAGS_ONE_TIME_USE_BIT : 0);
 
 			m_DefaultTextContainerInfo.m_VertBufferBindingIndex = TextContainer.m_StringInfo.m_QuadBufferObjectIndex;
@@ -1576,7 +1608,7 @@ public:
 
 				for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
 				{
-					STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
+					STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads[i];
 
 					Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.m_R / 255.f * pTextOutlineColor->m_R, TextCharQuad.m_Vertices[0].m_Color.m_G / 255.f * pTextOutlineColor->m_G, TextCharQuad.m_Vertices[0].m_Color.m_B / 255.f * pTextOutlineColor->m_B, TextCharQuad.m_Vertices[0].m_Color.m_A / 255.f * pTextOutlineColor->m_A);
 
@@ -1593,7 +1625,7 @@ public:
 
 					for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
 					{
-						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_CharacterQuads[i];
+						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads[i];
 						unsigned char CR = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_R) * pTextColor->m_R);
 						unsigned char CG = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_G) * pTextColor->m_G);
 						unsigned char CB = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.m_B) * pTextColor->m_B);
@@ -1908,7 +1940,7 @@ public:
 	void OnWindowResize() override
 	{
 		bool HasNonEmptyTextContainer = false;
-		for(auto *pTextContainer : m_TextContainers)
+		for(auto *pTextContainer : m_vpTextContainers)
 		{
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
@@ -1919,12 +1951,12 @@ public:
 
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");
 
-		for(auto &pFont : m_Fonts)
+		for(auto &pFont : m_vpFonts)
 		{
 			// reset the skylines
 			for(int j = 0; j < 2; ++j)
 			{
-				for(int &k : pFont->m_TextureSkyline[j].m_CurHeightOfPixelColumn)
+				for(int &k : pFont->m_TextureSkyline[j].m_vCurHeightOfPixelColumn)
 					k = 0;
 
 				mem_zero(pFont->m_TextureData[j], (size_t)pFont->m_CurTextureDimensions[j] * pFont->m_CurTextureDimensions[j] * sizeof(unsigned char));

@@ -117,7 +117,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static int s_ButtonOk = 0;
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 		{
-			if(str_comp(m_lDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
+			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
 			else
 			{
@@ -456,7 +456,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static int s_SliceSaveButton = 0;
 	if(DoButton_Sprite(&s_SliceSaveButton, IMAGE_FILEICONS, SPRITE_FILE_DEMO2, 0, &Button, CUI::CORNER_ALL))
 	{
-		str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
@@ -767,7 +767,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_StorageType = StorageType;
-	pSelf->m_lDemos.push_back(Item);
+	pSelf->m_vDemos.push_back(Item);
 
 	if(tw::time_get() - pSelf->m_DemoPopulateStartTime > 500ms)
 	{
@@ -779,7 +779,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 
 void CMenus::DemolistPopulate()
 {
-	m_lDemos.clear();
+	m_vDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
 	m_DemoPopulateStartTime = tw::time_get();
@@ -788,7 +788,7 @@ void CMenus::DemolistPopulate()
 	if(g_Config.m_BrDemoFetchInfo)
 		FetchAllHeaders();
 
-	std::stable_sort(m_lDemos.begin(), m_lDemos.end());
+	std::stable_sort(m_vDemos.begin(), m_vDemos.end());
 }
 
 void CMenus::DemolistOnUpdate(bool Reset)
@@ -800,7 +800,7 @@ void CMenus::DemolistOnUpdate(bool Reset)
 		bool Found = false;
 		int SelectedIndex = -1;
 		// search for selected index
-		for(auto &Item : m_lDemos)
+		for(auto &Item : m_vDemos)
 		{
 			SelectedIndex++;
 
@@ -815,9 +815,9 @@ void CMenus::DemolistOnUpdate(bool Reset)
 			m_DemolistSelectedIndex = SelectedIndex;
 	}
 
-	m_DemolistSelectedIndex = Reset ? !m_lDemos.empty() ? 0 : -1 :
-					  m_DemolistSelectedIndex >= (int)m_lDemos.size() ? m_lDemos.size() - 1 : m_DemolistSelectedIndex;
-	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_lDemos[m_DemolistSelectedIndex].m_IsDir;
+	m_DemolistSelectedIndex = Reset ? !m_vDemos.empty() ? 0 : -1 :
+					  m_DemolistSelectedIndex >= (int)m_vDemos.size() ? m_vDemos.size() - 1 : m_DemolistSelectedIndex;
+	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_vDemos[m_DemolistSelectedIndex].m_IsDir;
 }
 
 bool CMenus::FetchHeader(CDemoItem &Item)
@@ -834,11 +834,11 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 
 void CMenus::FetchAllHeaders()
 {
-	for(auto &Item : m_lDemos)
+	for(auto &Item : m_vDemos)
 	{
 		FetchHeader(Item);
 	}
-	std::stable_sort(m_lDemos.begin(), m_lDemos.end());
+	std::stable_sort(m_vDemos.begin(), m_vDemos.end());
 }
 
 void CMenus::RenderDemoList(CUIRect MainView)
@@ -854,7 +854,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	char aFooterLabel[128] = {0};
 	if(m_DemolistSelectedIndex >= 0)
 	{
-		CDemoItem &Item = m_lDemos[m_DemolistSelectedIndex];
+		CDemoItem &Item = m_vDemos[m_DemolistSelectedIndex];
 		if(str_comp(Item.m_aFilename, "..") == 0)
 			str_copy(aFooterLabel, Localize("Parent Folder"), sizeof(aFooterLabel));
 		else if(m_DemolistSelectedIsDir)
@@ -901,7 +901,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	MainView.VMargin(5.0f, &MainView);
 	MainView.HSplitBottom(5.0f, &MainView, 0);
 	RenderTools()->DrawUIRect(&MainView, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_B, 4.0f);
-	if(!m_DemolistSelectedIsDir && m_DemolistSelectedIndex >= 0 && m_lDemos[m_DemolistSelectedIndex].m_Valid)
+	if(!m_DemolistSelectedIsDir && m_DemolistSelectedIndex >= 0 && m_vDemos[m_DemolistSelectedIndex].m_Valid)
 	{
 		CUIRect Left, Right, Labels;
 		MainView.VMargin(20.0f, &MainView);
@@ -914,19 +914,19 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		UI()->DoLabelScaled(&Left, Localize("Created:"), 14.0f, TEXTALIGN_LEFT);
 
 		char aTimestamp[256];
-		str_timestamp_ex(m_lDemos[m_DemolistSelectedIndex].m_Date, aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+		str_timestamp_ex(m_vDemos[m_DemolistSelectedIndex].m_Date, aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 
 		UI()->DoLabelScaled(&Right, aTimestamp, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Type:"), 14.0f, TEXTALIGN_LEFT);
-		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aType, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aType, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Length:"), 14.0f, TEXTALIGN_LEFT);
-		int Length = m_lDemos[m_DemolistSelectedIndex].Length();
+		int Length = m_vDemos[m_DemolistSelectedIndex].Length();
 		char aBuf[64];
 		str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
@@ -934,13 +934,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Version:"), 14.0f, TEXTALIGN_LEFT);
-		str_format(aBuf, sizeof(aBuf), "%d", m_lDemos[m_DemolistSelectedIndex].m_Info.m_Version);
+		str_format(aBuf, sizeof(aBuf), "%d", m_vDemos[m_DemolistSelectedIndex].m_Info.m_Version);
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_LEFT);
-		str_format(aBuf, sizeof(aBuf), "%d", m_lDemos[m_DemolistSelectedIndex].NumMarkers());
+		str_format(aBuf, sizeof(aBuf), "%d", m_vDemos[m_DemolistSelectedIndex].NumMarkers());
 		UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 
 		// right side
@@ -948,12 +948,12 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Map:"), 14.0f, TEXTALIGN_LEFT);
-		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aMapName, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aMapName, 14.0f, TEXTALIGN_LEFT);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Size:"), 14.0f, TEXTALIGN_LEFT);
-		const float Size = m_lDemos[m_DemolistSelectedIndex].Size() / 1024.0f;
+		const float Size = m_vDemos[m_DemolistSelectedIndex].Size() / 1024.0f;
 		if(Size > 1024)
 			str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
 		else
@@ -962,17 +962,17 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
-		if(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
+		if(m_vDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256 != SHA256_ZEROED)
 		{
 			UI()->DoLabelScaled(&Left, "SHA256:", 14.0f, TEXTALIGN_LEFT);
 			char aSha[SHA256_MAXSTRSIZE];
-			sha256_str(m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha) / 2);
+			sha256_str(m_vDemos[m_DemolistSelectedIndex].m_MapInfo.m_Sha256, aSha, sizeof(aSha) / 2);
 			UI()->DoLabelScaled(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, TEXTALIGN_LEFT);
 		}
 		else
 		{
 			UI()->DoLabelScaled(&Left, Localize("Crc:"), 14.0f, TEXTALIGN_LEFT);
-			str_format(aBuf, sizeof(aBuf), "%08x", m_lDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
+			str_format(aBuf, sizeof(aBuf), "%08x", m_vDemos[m_DemolistSelectedIndex].m_MapInfo.m_Crc);
 			UI()->DoLabelScaled(&Right, aBuf, 14.0f, TEXTALIGN_LEFT);
 		}
 		Labels.HSplitTop(5.0f, 0, &Labels);
@@ -980,7 +980,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabelScaled(&Left, Localize("Netversion:"), 14.0f, TEXTALIGN_LEFT);
-		UI()->DoLabelScaled(&Right, m_lDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabelScaled(&Right, m_vDemos[m_DemolistSelectedIndex].m_Info.m_aNetversion, 14.0f, TEXTALIGN_LEFT);
 	}
 
 	// demo list
@@ -1070,7 +1070,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 
 			// Don't rescan in order to keep fetched headers, just resort
-			std::stable_sort(m_lDemos.begin(), m_lDemos.end());
+			std::stable_sort(m_vDemos.begin(), m_vDemos.end());
 			DemolistOnUpdate(false);
 		}
 	}
@@ -1083,10 +1083,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	int PreviousIndex = m_DemolistSelectedIndex;
-	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_lDemos.size());
+	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_vDemos.size());
 	if(PreviousIndex != m_DemolistSelectedIndex)
 	{
-		str_copy(g_Config.m_UiDemoSelected, m_lDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+		str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
 		DemolistOnUpdate(false);
 	}
 
@@ -1095,13 +1095,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	CUIRect OriginalView = ListBox;
 	int Num = (int)(ListBox.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = maximum<int>(m_lDemos.size() - Num + 1, 0);
+	int ScrollNum = maximum<int>(m_vDemos.size() - Num + 1, 0);
 	ListBox.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
 
 	int ItemIndex = -1;
 	bool DoubleClicked = false;
 
-	for(auto &Item : m_lDemos)
+	for(auto &Item : m_vDemos)
 	{
 		ItemIndex++;
 
@@ -1217,14 +1217,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIsDir) // folder
 			{
-				if(str_comp(m_lDemos[m_DemolistSelectedIndex].m_aFilename, "..") == 0) // parent folder
+				if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, "..") == 0) // parent folder
 					fs_parent_dir(m_aCurrentDemoFolder);
 				else // sub folder
 				{
 					char aTemp[256];
 					str_copy(aTemp, m_aCurrentDemoFolder, sizeof(aTemp));
-					str_format(m_aCurrentDemoFolder, sizeof(m_aCurrentDemoFolder), "%s/%s", aTemp, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-					m_DemolistStorageType = m_lDemos[m_DemolistSelectedIndex].m_StorageType;
+					str_format(m_aCurrentDemoFolder, sizeof(m_aCurrentDemoFolder), "%s/%s", aTemp, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+					m_DemolistStorageType = m_vDemos[m_DemolistSelectedIndex].m_StorageType;
 				}
 				DemolistPopulate();
 				DemolistOnUpdate(true);
@@ -1232,8 +1232,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			else // file
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-				const char *pError = Client()->DemoPlayer_Play(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType);
+				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				const char *pError = Client()->DemoPlayer_Play(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType);
 				if(pError)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 				else
@@ -1277,7 +1277,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENAME_DEMO;
-				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;
 			}
 		}
@@ -1290,7 +1290,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENDER_DEMO;
-				str_copy(m_aCurrentDemoFile, m_lDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
 				return;
 			}
 		}

@@ -255,34 +255,36 @@ if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_cxx_compiler_flag_if_supported(OUR_FLAGS -fcolor-diagnostics)
 endif()
 
-if(NOT MSVC AND NOT HAIKU AND NOT TARGET_OS STREQUAL "mac")
-  if(NOT FUSE_LD STREQUAL OFF)
-    add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=${FUSE_LD})
-    if(FLAG_SUPPORTED_fuse_ld_${FUSE_LD})
-      message(STATUS "Using ${FUSE_LD} linker")
-    endif()
-  else()
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR NOT ENABLE_IPO)
-      # GCC+LTO: pthread_create has failed: Resource temporarily unavailable
-      add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=mold)
-      if(FLAG_SUPPORTED_fuse_ld_mold)
-        message(STATUS "Using mold linker")
-      else()
-        # Does not support GCC+LTO
-        add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=lld)
-        if(FLAG_SUPPORTED_fuse_ld_lld)
-          message(STATUS "Using lld linker")
-        else()
-          add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=gold)
-          if(FLAG_SUPPORTED_fuse_ld_gold)
-            message(STATUS "Using gold linker")
-          endif()
-        endif()
+if(NOT MSVC AND NOT HAIKU)
+  IF(NOT TARGET_OS STREQUAL "mac")
+    if(NOT FUSE_LD STREQUAL OFF)
+      add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=${FUSE_LD})
+      if(FLAG_SUPPORTED_fuse_ld_${FUSE_LD})
+        message(STATUS "Using ${FUSE_LD} linker")
       endif()
     else()
-      add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=gold)
-      if(FLAG_SUPPORTED_fuse_ld_gold)
-        message(STATUS "Using gold linker")
+      if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR NOT ENABLE_IPO)
+        # GCC+LTO: pthread_create has failed: Resource temporarily unavailable
+        add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=mold)
+        if(FLAG_SUPPORTED_fuse_ld_mold)
+          message(STATUS "Using mold linker")
+        else()
+          # Does not support GCC+LTO
+          add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=lld)
+          if(FLAG_SUPPORTED_fuse_ld_lld)
+            message(STATUS "Using lld linker")
+          else()
+            add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=gold)
+            if(FLAG_SUPPORTED_fuse_ld_gold)
+              message(STATUS "Using gold linker")
+            endif()
+          endif()
+        endif()
+      else()
+        add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=gold)
+        if(FLAG_SUPPORTED_fuse_ld_gold)
+          message(STATUS "Using gold linker")
+        endif()
       endif()
     endif()
   endif()
@@ -342,6 +344,7 @@ if(NOT MSVC AND NOT HAIKU AND NOT TARGET_OS STREQUAL "mac")
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety-negative)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
   add_linker_flag_if_supported(OUR_FLAGS_LINK -Wno-alloc-size-larger-than) # save.cpp with LTO
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurences
@@ -1680,6 +1683,7 @@ set_src(BASE GLOB_RECURSE src/base
   hash_ctxt.h
   hash_libtomcrypt.cpp
   hash_openssl.cpp
+  lock_scope.h
   log.cpp
   log.h
   logger.h
@@ -3017,6 +3021,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
   endif()
   if(TARGET_OS STREQUAL "windows")
+    target_compile_definitions(${target} PRIVATE NOMINMAX) # windows.h shouldn't define min/max macros
     target_compile_definitions(${target} PRIVATE UNICODE) # Windows headers
     target_compile_definitions(${target} PRIVATE _UNICODE) # C-runtime
   endif()

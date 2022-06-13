@@ -1924,8 +1924,8 @@ int CMenus::Render()
 				// delete demo
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
-					str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-					if(Storage()->RemoveFile(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
+					str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+					if(Storage()->RemoveFile(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
 						DemolistPopulate();
 						DemolistOnUpdate(false);
@@ -1960,14 +1960,14 @@ int CMenus::Render()
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
 					char aBufOld[512];
-					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					int Length = str_length(m_aCurrentDemoFile);
 					char aBufNew[512];
 					if(Length <= 4 || m_aCurrentDemoFile[Length - 5] != '.' || str_comp_nocase(m_aCurrentDemoFile + Length - 4, "demo"))
 						str_format(aBufNew, sizeof(aBufNew), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 					else
 						str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-					if(Storage()->RenameFile(aBufOld, aBufNew, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
+					if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
 						DemolistPopulate();
 						DemolistOnUpdate(false);
@@ -2019,7 +2019,7 @@ int CMenus::Render()
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
 					char aBufOld[512];
-					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
+					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					int Length = str_length(m_aCurrentDemoFile);
 					char aBufNew[512];
 					if(Length <= 3 || m_aCurrentDemoFile[Length - 4] != '.' || str_comp_nocase(m_aCurrentDemoFile + Length - 3, "mp4"))
@@ -2036,7 +2036,7 @@ int CMenus::Render()
 					}
 					else
 					{
-						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
 						m_Speed = 4;
 						//Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render_path", aWholePath);
 						if(pError)
@@ -2136,8 +2136,8 @@ int CMenus::Render()
 			{
 				m_Popup = POPUP_NONE;
 				// render video
-				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-				const char *pError = Client()->DemoPlayer_Render(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
 				m_Speed = 4;
 				if(pError)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
@@ -2167,8 +2167,8 @@ int CMenus::Render()
 				// remove friend
 				if(m_FriendlistSelectedIndex >= 0)
 				{
-					m_pClient->Friends()->RemoveFriend(m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName,
-						m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aClan);
+					m_pClient->Friends()->RemoveFriend(m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName,
+						m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aClan);
 					FriendlistOnUpdate();
 					Client()->ServerBrowserUpdate();
 				}
@@ -2693,42 +2693,6 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		d[i * Step + 1] = v;
 		d[i * Step + 2] = v;
 	}
-
-	/* same grey like sinks
-	int Freq[256] = {0};
-	int OrgWeight = 0;
-	int NewWeight = 192;
-
-	// find most common frequence
-	for(int y = 0; y < Info.m_Height; y++)
-		for(int x = 0; x < Info.m_Width; x++)
-		{
-			if(d[y*Pitch+x*4+3] > 128)
-				Freq[d[y*Pitch+x*4]]++;
-		}
-
-	for(int i = 1; i < 256; i++)
-	{
-		if(Freq[OrgWeight] < Freq[i])
-			OrgWeight = i;
-	}
-
-	// reorder
-	int InvOrgWeight = 255-OrgWeight;
-	int InvNewWeight = 255-NewWeight;
-	for(int y = 0; y < Info.m_Height; y++)
-		for(int x = 0; x < Info.m_Width; x++)
-		{
-			int v = d[y*Pitch+x*4];
-			if(v <= OrgWeight)
-				v = (int)(((v/(float)OrgWeight) * NewWeight));
-			else
-				v = (int)(((v-OrgWeight)/(float)InvOrgWeight)*InvNewWeight + NewWeight);
-			d[y*Pitch+x*4] = v;
-			d[y*Pitch+x*4+1] = v;
-			d[y*Pitch+x*4+2] = v;
-		}
-	*/
 
 	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 	pSelf->Graphics()->FreePNG(&Info);

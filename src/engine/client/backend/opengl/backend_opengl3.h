@@ -64,9 +64,9 @@ protected:
 		TWGLuint m_LastIndexBufferBound;
 		SBufferContainerInfo m_ContainerInfo;
 	};
-	std::vector<SBufferContainer> m_BufferContainers;
+	std::vector<SBufferContainer> m_vBufferContainers;
 
-	std::vector<TWGLuint> m_BufferObjectIndices;
+	std::vector<TWGLuint> m_vBufferObjectIndices;
 
 	CCommandBuffer::SColorf m_ClearColor;
 

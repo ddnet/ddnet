@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <engine/shared/config.h>
 #include <game/client/projectile_data.h>
+#include <game/mapitems.h>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -198,6 +199,26 @@ void CGameWorld::Tick()
 		}
 
 	RemoveEntities();
+
+	// update switch state
+	for(auto &Switcher : Switchers())
+	{
+		for(int j = 0; j < MAX_CLIENTS; ++j)
+		{
+			if(Switcher.m_EndTick[j] <= GameTick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDOPEN)
+			{
+				Switcher.m_Status[j] = false;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHCLOSE;
+			}
+			else if(Switcher.m_EndTick[j] <= GameTick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+			{
+				Switcher.m_Status[j] = true;
+				Switcher.m_EndTick[j] = 0;
+				Switcher.m_Type[j] = TILE_SWITCHOPEN;
+			}
+		}
+	}
 
 	OnModified();
 }
@@ -530,6 +551,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	}
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
+	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	// delete the previous entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)

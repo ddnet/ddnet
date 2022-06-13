@@ -64,15 +64,15 @@ class CUpdater : public IUpdater
 	bool ReplaceClient();
 	bool ReplaceServer();
 
-	void SetCurrentState(int NewState);
+	void SetCurrentState(int NewState) REQUIRES(!m_Lock);
 
 public:
 	CUpdater();
 	~CUpdater();
 
-	int GetCurrentState() override;
-	void GetCurrentFile(char *pBuf, int BufSize) override;
-	int GetCurrentPercent() override;
+	int GetCurrentState() override REQUIRES(!m_Lock);
+	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);
+	int GetCurrentPercent() override REQUIRES(!m_Lock);
 
 	void InitiateUpdate() override;
 	void Init();

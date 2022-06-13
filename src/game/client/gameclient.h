@@ -150,23 +150,8 @@ public:
 	CTooltips m_Tooltips;
 
 private:
-	class CStack
-	{
-	public:
-		enum
-		{
-			MAX_COMPONENTS = 64,
-		};
-
-		CStack();
-		void Add(class CComponent *pComponent);
-
-		class CComponent *m_paComponents[MAX_COMPONENTS];
-		int m_Num;
-	};
-
-	CStack m_All;
-	CStack m_Input;
+	std::vector<class CComponent *> m_vpAll;
+	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
 
 	class IEngine *m_pEngine;
@@ -528,6 +513,9 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
+	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_vSwitchers; }
+	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_vSwitchers; }
+
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientID);
@@ -691,10 +679,10 @@ public:
 	SClientHudSkin m_HudSkin;
 	bool m_HudSkinLoaded;
 
-	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
+	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
 private:
-	std::vector<CSnapEntities> m_aSnapEntities;
+	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 
 	bool m_DDRaceMsgSent[NUM_DUMMIES];
