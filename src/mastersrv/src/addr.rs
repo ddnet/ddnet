@@ -101,16 +101,16 @@ impl Protocol {
     }
 }
 
+impl Addr {
+    pub fn to_socket_addr(self) -> SocketAddr {
+        SocketAddr::new(self.ip, self.port)
+    }
+}
+
 impl fmt::Display for Addr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
-        write!(
-            &mut buf,
-            "{}://{}",
-            self.protocol,
-            SocketAddr::new(self.ip, self.port)
-        )
-        .unwrap();
+        write!(&mut buf, "{}://{}", self.protocol, self.to_socket_addr()).unwrap();
         buf.fmt(f)
     }
 }
