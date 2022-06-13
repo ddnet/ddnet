@@ -1390,6 +1390,7 @@ set(EXPECTED_DATA
   maps7/Tsunami.map
   maps7/Tutorial.map
   maps7/readme.txt
+  material_particles.png
   menuimages/demos.png
   menuimages/editor.png
   menuimages/local_server.png

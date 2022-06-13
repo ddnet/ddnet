@@ -260,6 +260,7 @@ void CGameClient::OnInit()
 
 	m_GameSkinLoaded = false;
 	m_ParticlesSkinLoaded = false;
+	m_MaterialSkinLoaded = false;
 	m_EmoticonsSkinLoaded = false;
 	m_HudSkinLoaded = false;
 
@@ -272,6 +273,8 @@ void CGameClient::OnInit()
 			LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 		else if(i == IMAGE_PARTICLES)
 			LoadParticlesSkin(g_Config.m_ClAssetParticles);
+		else if(i == IMAGE_MATERIAL_PARTICLES)
+			LoadMaterialSkin(g_Config.m_ClAssetMaterialParticles);
 		else if(i == IMAGE_HUD)
 			LoadHudSkin(g_Config.m_ClAssetHud);
 		else
@@ -346,6 +349,8 @@ void CGameClient::OnInit()
 		int Size = m_vpAll[i]->Sizeof();
 		pChecksum->m_aComponentsChecksum[i] = Size;
 	}
+
+	m_pMaterial = CMaterials::GetInstance();
 }
 
 void CGameClient::OnUpdate()
@@ -3006,6 +3011,56 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		m_ParticlesSkin.m_SpriteParticles[9] = m_ParticlesSkin.m_SpriteParticleHit;
 
 		m_ParticlesSkinLoaded = true;
+		free(ImgInfo.m_pData);
+	}
+}
+
+void CGameClient::LoadMaterialSkin(const char *pPath, bool AsDir)
+{
+	if(m_MaterialSkinLoaded)
+	{
+		for(auto &SpriteParticleIce : m_MaterialSkin.m_SpriteMaterialParticleIce)
+			Graphics()->UnloadTexture(&SpriteParticleIce);
+
+		for(auto &SpriteParticle : m_MaterialSkin.m_SpriteMaterialParticles)
+			SpriteParticle = IGraphics::CTextureHandle();
+
+		m_MaterialSkinLoaded = false;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_MATERIAL_PARTICLES].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/material_particles/%s/%s", pPath, g_pData->m_aImages[IMAGE_MATERIAL_PARTICLES].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/material_particles/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadMaterialSkin("default");
+		else
+			LoadMaterialSkin(pPath, true);
+	}
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE01].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE01].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
+	{
+		for(int i = 0; i < 4; ++i)
+			m_MaterialSkin.m_SpriteMaterialParticleIce[i] = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE01 + i]);
+
+		for(int i = 0; i < 4; ++i)
+			m_MaterialSkin.m_SpriteMaterialParticles[i] = m_MaterialSkin.m_SpriteMaterialParticleIce[i];
+
+		m_MaterialSkinLoaded = true;
 		free(ImgInfo.m_pData);
 	}
 }

@@ -186,7 +186,7 @@ enum
 	//Start From Top Left
 	//Material Controllers
 	MAT_DEFAULT = 0, //Note: default is not air
-	MAT_PLACEHOLDER,
+	MAT_ICE,
 	NUM_MATERIALS,
 	//End of materials
 	//Layers

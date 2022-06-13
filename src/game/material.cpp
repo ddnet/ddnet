@@ -50,7 +50,7 @@ CMaterials::CMaterials()
 {
 	m_apMaterials = {
 		new CMatDefault(),
-		new CMatPlaceholder()};
+		new CMatIce()};
 }
 
 CMaterials::~CMaterials()
@@ -66,7 +66,7 @@ CMatDefault &CMaterials::operator[](int Index)
 {
 	switch(Index)
 	{
-	case MAT_PLACEHOLDER: return *m_apMaterials[1];
+	case MAT_ICE: return *m_apMaterials[1];
 	}
 	return *m_apMaterials[MAT_DEFAULT];
 }

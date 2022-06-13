@@ -1354,22 +1354,4 @@ public:
 	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 };
 
-class CLayerMaterial : public CLayerTiles
-{
-public:
-	CLayerMaterial(int w, int h);
-	~CLayerMaterial();
-
-	CMaterialTile *m_pMaterialTile;
-
-	void Resize(int NewW, int NewH) override;
-	void Shift(int Direction) override;
-	bool IsEmpty(CLayerTiles *pLayer) override;
-	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
-	void BrushFlipX() override;
-	void BrushFlipY() override;
-	void BrushRotate(float Amount) override;
-	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
-};
-
 #endif

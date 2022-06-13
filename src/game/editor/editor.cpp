@@ -3420,7 +3420,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSwitchLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTuneLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pMaterialLayer ||
-					m_Map.m_lGroups[g]->m_lLayers[i] == m_Map.m_pSpeedupLayer ||
+					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSpeedupLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTeleLayer ||
 					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pMaterialLayer)
 				{

@@ -18,6 +18,7 @@ class IDemoRecorder *CComponent::DemoRecorder(int Recorder) const { return m_pCl
 class IServerBrowser *CComponent::ServerBrowser() const { return m_pClient->ServerBrowser(); }
 class CLayers *CComponent::Layers() const { return m_pClient->Layers(); }
 class CCollision *CComponent::Collision() const { return m_pClient->Collision(); }
+class CMaterials *CComponent::Material() const { return m_pClient->Material(); }
 #if defined(CONF_AUTOUPDATE)
 class IUpdater *CComponent::Updater() const
 {

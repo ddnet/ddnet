@@ -11,6 +11,7 @@
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
+#include <game/material.h>
 
 #include <game/teamscore.h>
 
@@ -170,6 +171,7 @@ private:
 
 	CLayers m_Layers;
 	class CCollision m_Collision;
+	CMaterials *m_pMaterial;
 	CUI m_UI;
 
 	void ProcessEvents();
@@ -217,6 +219,7 @@ public:
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; }
 	class CCollision *Collision() { return &m_Collision; }
+	class CMaterials *Material() { return m_pMaterial; }
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
@@ -523,6 +526,7 @@ public:
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+	void LoadMaterialSkin(const char *pPath, bool AsDir = false);
 	void LoadHudSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
@@ -631,6 +635,15 @@ public:
 
 	SClientParticlesSkin m_ParticlesSkin;
 	bool m_ParticlesSkinLoaded;
+
+	struct SClientMaterialSkin
+	{
+		IGraphics::CTextureHandle m_SpriteMaterialParticleIce[4];
+		IGraphics::CTextureHandle m_SpriteMaterialParticles[4];
+	};
+
+	SClientMaterialSkin m_MaterialSkin;
+	bool m_MaterialSkinLoaded;
 
 	struct SClientEmoticonsSkin
 	{

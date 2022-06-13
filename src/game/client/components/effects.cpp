@@ -97,7 +97,19 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 	m_pClient->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
+void CEffects::SkidTrail(int Material, vec2 Pos, vec2 Vel)
+{
+	switch(Material)
+	{
+	case MAT_ICE:
+		IceTrail(Pos, Vel);
+		break;
+	default:
+		DefaultTrail(Pos, Vel);
+	}
+}
+
+void CEffects::DefaultTrail(vec2 Pos, vec2 Vel)
 {
 	if(!m_Add100hz)
 		return;
@@ -113,6 +125,28 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 	p.m_Friction = 0.7f;
 	p.m_Gravity = random_float() * -500.0f;
 	p.m_Color = ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f);
+	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+}
+
+void CEffects::IceTrail(vec2 Pos, vec2 Vel)
+{
+	if(!m_Add100hz)
+		return;
+
+	CParticle p;
+	p.SetDefault();
+	p.m_Spr = SPRITE_PART_SNOWFLAKE01 + (rand() % 4);
+	p.m_Pos = Pos;
+	p.m_Vel = Vel + RandomDir() * 50.0f;
+	p.m_LifeSpan = 0.5f + random_float() * 0.5f;
+	p.m_StartSize = 12.0f + random_float() * 6;
+	p.m_EndSize = 0;
+	p.m_Friction = 0.90f;
+	p.m_Rot = random_float() * pi * 2;
+	p.m_Rotspeed = pi * (4 * random_float() - 2);
+	p.m_Gravity = random_float() * 500.0f;
+	float Blueness = 0.25f * random_float();
+	p.m_Color = vec4(0.75f + Blueness, 0.75f + Blueness, 1.0f, 0.75f);
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 }
 

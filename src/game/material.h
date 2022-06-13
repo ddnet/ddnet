@@ -8,6 +8,7 @@
 #include "mapitems.h"
 #include <base/system.h>
 #include <functional>
+#include <game/generated/protocol.h>
 #include <vector>
 
 class CTuneParam
@@ -37,7 +38,7 @@ class CMatDefault //Note: this was CTuneParams before
 public:
 	CMatDefault()
 	{
-		const float TicksPerSecond = 50.0f;
+		const float TicksPerSecond = ms_TicksPerSecond;
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) m_##Name.Set((int)(Value * 100.0f));
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
@@ -49,6 +50,10 @@ public:
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
 
+	// client side material values
+	int m_SkidSound = SOUND_PLAYER_SKID;
+	int m_SkidThreshold = 500.0f;
+
 	static int Num()
 	{
 		return sizeof(CMatDefault) / sizeof(CTuneParam);
@@ -57,15 +62,21 @@ public:
 	bool Set(const char *pName, float Value);
 	bool Get(int Index, float *pValue) const;
 	bool Get(const char *pName, float *pValue) const;
+
+protected:
+	constexpr static const float ms_TicksPerSecond = 50.0f;
 };
 
-class CMatPlaceholder : public CMatDefault
+class CMatIce : public CMatDefault
 {
 public:
-	CMatPlaceholder()
+	CMatIce()
 	{
 		m_GroundFriction = 0.99f;
-		m_Gravity = 0.1f;
+		m_GroundControlSpeed = 150.0f;
+		m_GroundControlAccel = 20.0f / ms_TicksPerSecond;
+		m_SkidSound = -1;
+		m_SkidThreshold = 100.0f;
 	}
 };
 

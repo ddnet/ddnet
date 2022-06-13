@@ -252,8 +252,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			CLayer *l = new CLayerMaterial(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeMaterialLayer(l);
-			pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->AddLayer(l);
-			pEditor->SelectLayer(pEditor->m_Map.m_lGroups[pEditor->m_SelectedGroup]->m_lLayers.size() - 1);
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 			pEditor->m_Brush.Clear();
 			return 1;
 		}

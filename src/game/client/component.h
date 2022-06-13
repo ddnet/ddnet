@@ -92,6 +92,10 @@ protected:
 	 * Get the collision interface.
 	 */
 	class CCollision *Collision() const;
+	/**
+	 * Get the material interface.
+	 */
+	class CMaterials *Material() const;
 #if defined(CONF_AUTOUPDATE)
 	/**
 	 * Get the updater interface.
