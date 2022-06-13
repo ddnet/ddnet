@@ -2703,7 +2703,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, ("Frozen Tee Display"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, ("Frozen Tee Display"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
@@ -2718,7 +2718,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(140.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i", "Max Rows", g_Config.m_ClFrozenMaxRows);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClFrozenMaxRows = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenMaxRows, &Button, (g_Config.m_ClFrozenMaxRows - 1) / 5.0f) * 5.0f) + 1;
 		}
 		{
@@ -2727,7 +2727,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(140.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i", "Tee Size", g_Config.m_ClFrozenHudTeeSize);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClFrozenHudTeeSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenHudTeeSize, &Button, (g_Config.m_ClFrozenHudTeeSize - 8) / 19.0f) * 19.0f) + 8;
 		}
 
@@ -2754,7 +2754,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		// ***** MISCELLANEOUS ***** //
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, ("Miscellaneous"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, ("Miscellaneous"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
@@ -2766,7 +2766,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClRunOnJoinDelay * 20);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			int Delay = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 7) / 93.0f) * 93.0f) + 7;
 			if(Delay < 100 || g_Config.m_ClRunOnJoinDelay <= 100)
 			{
@@ -2791,7 +2791,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
 		}
 
@@ -2819,7 +2819,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView = Column;
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, Localize("Tile Outlines"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, Localize("Tile Outlines"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
@@ -2837,7 +2837,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Width", g_Config.m_ClOutlineWidth);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClOutlineWidth = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineWidth, &Button, (g_Config.m_ClOutlineWidth - 1) / 15.0f) * 15.0f) + 1;
 		}
 		{
@@ -2847,7 +2847,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha", g_Config.m_ClOutlineAlpha);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClOutlineAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlpha, &Button, (g_Config.m_ClOutlineAlpha) / 100.0f) * 100.0f);
 		}
 		{
@@ -2857,7 +2857,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(185.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha (walls)", g_Config.m_ClOutlineAlphaSolid);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
 		}
 		static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
@@ -2882,11 +2882,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		// MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(15.0f, 0, &MainView);
 
 		MainView.HSplitTop(20.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, ("Only use on gores maps! Can help mitigate latency."), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, ("Only use on gores maps! Can help mitigate latency."), 14.0f, TEXTALIGN_LEFT);
 
 		MainView.HSplitTop(5.0f, 0, &MainView);
 		{
@@ -2895,7 +2895,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(165.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Prediction Margin", g_Config.m_ClPredictionMargin);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			int PredictionMargin = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
 			if((PredictionMargin < 25 || g_Config.m_ClPredictionMargin <= 25) && g_Config.m_ClPredictionMargin >= 10)
 			{
@@ -2909,7 +2909,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(220.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Negative margin (may lag)", g_Config.m_ClUnfreezeHelperLimit);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClUnfreezeHelperLimit = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
 		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
@@ -2919,7 +2919,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(115.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
 		}
 		{
@@ -2928,7 +2928,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(200.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClUnfreezeLagTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
 		}
 	}
@@ -2938,7 +2938,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabelScaled(&Section, ("Player Indicator"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, ("Player Indicator"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
@@ -2966,7 +2966,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator size", g_Config.m_ClIndicatorRadius);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClIndicatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
 		}
 		{
@@ -2976,7 +2976,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator opacity", g_Config.m_ClIndicatorOpacity);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClIndicatorOpacity = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOpacity, &Button, (g_Config.m_ClIndicatorOpacity) / 100.0f) * 100.0f);
 		}
 		{
@@ -2988,7 +2988,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator offset", g_Config.m_ClIndicatorOffset);
 			if(g_Config.m_ClIndicatorVariableDistance)
 				str_format(aBuf, sizeof(aBuf), "%s: %i ", "Min offset", g_Config.m_ClIndicatorOffset);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClIndicatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 16) / 184.0f) * 184.0f) + 16;
 		}
 		if(g_Config.m_ClIndicatorVariableDistance)
@@ -2999,7 +2999,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max offset", g_Config.m_ClIndicatorOffsetMax);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClIndicatorOffsetMax = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffsetMax, &Button, (g_Config.m_ClIndicatorOffsetMax - 16) / 184.0f) * 184.0f) + 16;
 		}
 		if(g_Config.m_ClIndicatorVariableDistance)
@@ -3010,7 +3010,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Button.VSplitLeft(150.0f, &Label, &Button);
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max distance", g_Config.m_ClIndicatorMaxDistance);
-			UI()->DoLabelScaled(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			int NewValue = (g_Config.m_ClIndicatorMaxDistance) / 50.0f;
 			NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
 			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
