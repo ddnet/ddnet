@@ -3,8 +3,6 @@
 #include "color.h"
 #include "system.h"
 
-#include <engine/shared/config.h>
-
 #include <atomic>
 #include <cstdio>
 
@@ -19,9 +17,15 @@
 
 extern "C" {
 
+std::atomic<LEVEL> loglevel = LEVEL_INFO;
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
 thread_local bool in_logger = false;
+
+void log_set_loglevel(LEVEL level)
+{
+	loglevel.store(level, std::memory_order_release);
+}
 
 void log_set_global_logger(ILogger *logger)
 {
@@ -69,7 +73,7 @@ void log_set_scope_logger(ILogger *logger)
 
 void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
-	if(level > g_Config.m_Loglevel)
+	if(level > loglevel.load(std::memory_order_acquire))
 		return;
 
 	// Make sure we're not logging recursively.

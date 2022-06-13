@@ -84,6 +84,16 @@ public:
 /**
  * @ingroup Log
  *
+ * Sets the global loglevel to the given value. Log messages with a less severe
+ * loglevel will not be forwarded to loggers.
+ *
+ * @param level The loglevel.
+ */
+void log_set_loglevel(LEVEL level);
+
+/**
+ * @ingroup Log
+ *
  * Registers a logger instance as the default logger for all current and future
  * threads. It will only be used if no thread-local logger is set via
  * `log_set_scope_logger`.
