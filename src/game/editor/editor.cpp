@@ -6344,7 +6344,8 @@ void CEditor::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_UI.Init(m_pInput, m_pGraphics, m_pTextRender);
-	m_RenderTools.Init(m_pGraphics, m_pTextRender);
+	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	m_RenderTools.Init(m_pGraphics, m_pTextRender, pGameClient);
 	m_Map.m_pEditor = this;
 
 	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());

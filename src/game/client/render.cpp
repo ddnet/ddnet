@@ -7,18 +7,20 @@
 #include "animstate.h"
 #include "render.h"
 #include <engine/graphics.h>
+#include <engine/map.h>
 #include <engine/shared/config.h>
+#include <game/client/components/skins.h>
+#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
-#include <game/client/gameclient.h>
-
-
+#include <game/layers.h>
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
+void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender, CGameClient *pGameClient)
 {
+	m_pGameClient = (CGameClient *)pGameClient;
 	m_pGraphics = pGraphics;
 	m_pTextRender = pTextRender;
 	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
@@ -729,7 +731,6 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			if(g_Config.m_ClWhiteFeet && pInfo->m_CustomColoredSkin)
 			{
 				CTeeRenderInfo WhiteFeetInfo;
-
 				int Skin = GameClient()->m_Skins.Find("x_ninja");
 				if(Skin != -1)
 				{
