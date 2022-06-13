@@ -3,6 +3,7 @@
 //
 
 #include "material.h"
+#include "mapitems.h"
 #include <base/math.h>
 
 const char *CMatDefault::ms_apNames[] =
@@ -47,9 +48,11 @@ bool CMatDefault::Get(const char *pName, float *pValue) const
 
 CMatDefault &CMaterials::operator[](int Index) const
 {
-	if(Index >= (int)ms_aMaterials.size())
-		return const_cast<CMatDefault &>(ms_aMaterials[0]); //Unknown material, maybe the map is too new?
-	return const_cast<CMatDefault &>(ms_aMaterials[Index]);
+	switch(Index)
+	{
+	case MAT_PLACEHOLDER: return const_cast<CMatDefault &>(ms_aMaterials[1]);
+	}
+	return const_cast<CMatDefault &>(ms_aMaterials[0]);
 }
 
 float CMaterials::GetGroundControlSpeed(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight)
