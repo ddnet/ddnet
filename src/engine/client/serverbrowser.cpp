@@ -1480,26 +1480,14 @@ int CServerBrowser::HasRank(const char *pMap)
 
 void CServerBrowser::LoadDDNetInfoJson()
 {
-	IOHANDLE File = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-	if(!File)
+	void *pBuf;
+	unsigned Length;
+	if(!m_pStorage->ReadFile(DDNET_INFO, IStorage::TYPE_SAVE, &pBuf, &Length))
 		return;
-
-	const int Length = io_length(File);
-	if(Length <= 0)
-	{
-		io_close(File);
-		return;
-	}
-
-	char *pBuf = (char *)malloc(Length);
-	pBuf[0] = '\0';
-
-	io_read(File, pBuf, Length);
-	io_close(File);
 
 	json_value_free(m_pDDNetInfo);
 
-	m_pDDNetInfo = json_parse(pBuf, Length);
+	m_pDDNetInfo = json_parse((json_char *)pBuf, Length);
 
 	free(pBuf);
 
