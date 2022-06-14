@@ -232,6 +232,14 @@ int CMenus::HudScan(const char *pName, int IsDir, int DirType, void *pUser)
 	return AssetScan(pName, IsDir, DirType, pThis->m_vHudList, "hud", pGraphics, pUser);
 }
 
+int CMenus::ExtrasScan(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	auto *pRealUser = (SMenuAssetScanUser *)pUser;
+	auto *pThis = (CMenus *)pRealUser->m_pUser;
+	IGraphics *pGraphics = pThis->Graphics();
+	return AssetScan(pName, IsDir, DirType, pThis->m_vExtrasList, "extras", pGraphics, pUser);
+}
+
 static std::vector<const CMenus::SCustomEntities *> s_vpSearchEntitiesList;
 static std::vector<const CMenus::SCustomGame *> s_vpSearchGamesList;
 static std::vector<const CMenus::SCustomEmoticon *> s_vpSearchEmoticonsList;
@@ -442,7 +450,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 	{
-		InitAssetList(m_vExtrasList, "assets/extras", "extras", HudScan, Graphics(), Storage(), &User);
+		InitAssetList(m_vExtrasList, "assets/extras", "extras", ExtrasScan, Graphics(), Storage(), &User);
 	}
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
