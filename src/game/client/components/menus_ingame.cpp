@@ -869,7 +869,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	if(Item.m_Time > 0)
 		pSelf->m_vGhosts.push_back(Item);
 
-	if(tw::time_get() - pSelf->m_GhostPopulateStartTime > 500ms)
+	if(time_get_nanoseconds() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
 		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -880,7 +880,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 void CMenus::GhostlistPopulate()
 {
 	m_vGhosts.clear();
-	m_GhostPopulateStartTime = tw::time_get();
+	m_GhostPopulateStartTime = time_get_nanoseconds();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 	std::sort(m_vGhosts.begin(), m_vGhosts.end());
 

@@ -221,7 +221,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 	if(Item.m_Time > 0)
 		pParam->m_pvDemos->push_back(Item);
 
-	if(tw::time_get() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
+	if(time_get_nanoseconds() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
 	{
 		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -233,7 +233,7 @@ bool CRaceDemo::CheckDemo(int Time)
 {
 	std::vector<CDemoItem> lDemos;
 	CDemoListParam Param = {this, &lDemos, Client()->GetCurrentMap()};
-	m_RaceDemosLoadStartTime = tw::time_get();
+	m_RaceDemosLoadStartTime = time_get_nanoseconds();
 	SRaceDemoFetchUser User;
 	User.m_pParam = &Param;
 	User.m_pThis = this;

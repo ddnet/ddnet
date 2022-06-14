@@ -3772,7 +3772,7 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++)

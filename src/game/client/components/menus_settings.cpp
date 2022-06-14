@@ -818,10 +818,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
-		auto SkinStartLoadTime = tw::time_get();
+		auto SkinStartLoadTime = time_get_nanoseconds();
 		m_pClient->m_Skins.Refresh([&](int) {
 			// if skin refreshing takes to long, swap to a loading screen
-			if(tw::time_get() - SkinStartLoadTime > 500ms)
+			if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 			{
 				RenderLoading(false, false);
 			}
