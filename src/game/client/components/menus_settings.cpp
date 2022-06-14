@@ -999,12 +999,12 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 			{
 				View.HSplitTop(Spacing, 0, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
-				UIEx()->DoScrollbarOption(&g_Config.m_InpJoystickSens, &g_Config.m_InpJoystickSens, &Button, Localize("Ingame joystick sensitivity"), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+				UIEx()->DoScrollbarOption(&g_Config.m_InpJoystickSens, &g_Config.m_InpJoystickSens, &Button, Localize("Ingame joystick sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 			}
 
 			View.HSplitTop(Spacing, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UIEx()->DoScrollbarOption(&g_Config.m_UiJoystickSens, &g_Config.m_UiJoystickSens, &Button, Localize("Menu/Editor joystick sensitivity"), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			UIEx()->DoScrollbarOption(&g_Config.m_UiJoystickSens, &g_Config.m_UiJoystickSens, &Button, Localize("UI joystick sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
 			View.HSplitTop(Spacing, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
@@ -1118,8 +1118,6 @@ void CMenus::DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance,
 
 void CMenus::RenderSettingsControls(CUIRect MainView)
 {
-	char aBuf[128];
-
 	// this is kinda slow, but whatever
 	for(auto &Key : gs_aKeys)
 		Key.m_KeyId = Key.m_ModifierCombination = 0;
@@ -1173,29 +1171,14 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 		MouseSettings.HSplitTop(HeaderHeight, 0, &MouseSettings);
 
-		{
-			CUIRect Button, Label;
-			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
-			Button.VSplitLeft(160.0f, &Label, &Button);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
-			UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
-			int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_InpMousesens, &Button, (minimum(g_Config.m_InpMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
-			if(g_Config.m_InpMousesens < 500 || NewValue < 500)
-				g_Config.m_InpMousesens = minimum(NewValue, 500);
-		}
+		CUIRect Button;
+		MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
+		UIEx()->DoScrollbarOption(&g_Config.m_InpMousesens, &g_Config.m_InpMousesens, &Button, Localize("Ingame mouse sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
 		MouseSettings.HSplitTop(2.0f, 0, &MouseSettings);
 
-		{
-			CUIRect Button, Label;
-			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
-			Button.VSplitLeft(160.0f, &Label, &Button);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
-			UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
-			int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_UiMousesens, &Button, (minimum(g_Config.m_UiMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
-			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
-				g_Config.m_UiMousesens = minimum(NewValue, 500);
-		}
+		MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
+		UIEx()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 	}
 
 	// joystick settings
