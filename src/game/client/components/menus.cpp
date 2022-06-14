@@ -1029,6 +1029,7 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
 	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
 	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
+	Console()->Chain("cl_asset_extras", ConchainAssetExtras, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 

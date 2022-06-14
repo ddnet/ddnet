@@ -27,7 +27,8 @@ enum
 	ASSETS_TAB_GAME = 1,
 	ASSETS_TAB_EMOTICONS = 2,
 	ASSETS_TAB_PARTICLES = 3,
-	ASSETS_TAB_HUD = 4
+	ASSETS_TAB_HUD = 4,
+	ASSETS_TAB_EXTRAS = 5
 };
 
 void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
@@ -236,8 +237,9 @@ static std::vector<const CMenus::SCustomGame *> s_vpSearchGamesList;
 static std::vector<const CMenus::SCustomEmoticon *> s_vpSearchEmoticonsList;
 static std::vector<const CMenus::SCustomParticle *> s_vpSearchParticlesList;
 static std::vector<const CMenus::SCustomHud *> s_vpSearchHudList;
+static std::vector<const CMenus::SCustomExtras *> s_vpSearchExtrasList;
 
-static const int NumberOfAssetsTabs = 5;
+static const int NumberOfAssetsTabs = 6;
 static bool s_InitCustomList[NumberOfAssetsTabs] = {
 	true,
 };
@@ -262,6 +264,8 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 		return s_vpSearchParticlesList[Index];
 	else if(CurTab == ASSETS_TAB_HUD)
 		return s_vpSearchHudList[Index];
+	else if(CurTab == ASSETS_TAB_EXTRAS)
+		return s_vpSearchExtrasList[Index];
 
 	return NULL;
 }
@@ -324,6 +328,13 @@ void CMenus::ClearCustomItems(int CurTab)
 		// reload current hud skin
 		GameClient()->LoadHudSkin(g_Config.m_ClAssetHud);
 	}
+	else if(CurTab == ASSETS_TAB_EXTRAS)
+	{
+		ClearAssetList(m_vExtrasList, Graphics());
+
+		// reload current DDNet particles skin
+		GameClient()->LoadExtrasSkin(g_Config.m_ClAssetExtras);
+	}
 	s_InitCustomList[CurTab] = true;
 }
 
@@ -365,7 +376,7 @@ int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> 
 
 void CMenus::RenderSettingsCustom(CUIRect MainView)
 {
-	CUIRect Label, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, ReloadButton;
+	CUIRect Label, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, Page6Tab, ReloadButton;
 
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
@@ -373,6 +384,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	Page2Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page2Tab, &Page3Tab);
 	Page3Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page3Tab, &Page4Tab);
 	Page4Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page4Tab, &Page5Tab);
+	Page5Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page5Tab, &Page6Tab);
 
 	static int s_aPageTabs[NumberOfAssetsTabs] = {};
 
@@ -384,8 +396,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		s_CurCustomTab = ASSETS_TAB_EMOTICONS;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[3], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_PARTICLES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[5], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = ASSETS_TAB_EXTRAS;
 
 	auto LoadStartTime = time_get_nanoseconds();
 	SMenuAssetScanUser User;
@@ -425,6 +439,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	else if(s_CurCustomTab == ASSETS_TAB_HUD)
 	{
 		InitAssetList(m_vHudList, "assets/hud", "hud", HudScan, Graphics(), Storage(), &User);
+	}
+	else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
+	{
+		InitAssetList(m_vExtrasList, "assets/extras", "extras", HudScan, Graphics(), Storage(), &User);
 	}
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
@@ -466,6 +484,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		{
 			ListSize = InitSearchList(s_vpSearchHudList, m_vHudList);
 		}
+		else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
+		{
+			ListSize = InitSearchList(s_vpSearchExtrasList, m_vExtrasList);
+		}
 		s_InitCustomList[s_CurCustomTab] = false;
 		s_CustomListSize[s_CurCustomTab] = ListSize;
 	}
@@ -499,6 +521,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		SearchListSize = s_vpSearchHudList.size();
 		TextureHeight = 128;
 	}
+	else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
+	{
+		SearchListSize = s_vpSearchExtrasList.size();
+	}
 
 	UiDoListboxStart(&s_InitCustomList[s_CurCustomTab], &CustomList, TextureHeight + 15.0f + 10.0f + Margin, "", "", SearchListSize, CustomList.w / (Margin + TextureWidth), OldSelected, s_ScrollValue, true);
 	for(size_t i = 0; i < SearchListSize; ++i)
@@ -530,6 +556,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		else if(s_CurCustomTab == ASSETS_TAB_HUD)
 		{
 			if(str_comp(s->m_aName, g_Config.m_ClAssetHud) == 0)
+				OldSelected = i;
+		}
+		else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
+		{
+			if(str_comp(s->m_aName, g_Config.m_ClAssetExtras) == 0)
 				OldSelected = i;
 		}
 
@@ -586,6 +617,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				str_copy(g_Config.m_ClAssetHud, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetHud));
 				GameClient()->LoadHudSkin(g_Config.m_ClAssetHud);
 			}
+			else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
+			{
+				str_copy(g_Config.m_ClAssetExtras, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetExtras));
+				GameClient()->LoadExtrasSkin(g_Config.m_ClAssetExtras);
+			}
 		}
 	}
 
@@ -639,6 +675,8 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			str_copy(aBufFull, "assets/particles", sizeof(aBufFull));
 		else if(s_CurCustomTab == ASSETS_TAB_HUD)
 			str_copy(aBufFull, "assets/hud", sizeof(aBufFull));
+		else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
+			str_copy(aBufFull, "assets/extras", sizeof(aBufFull));
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, aBufFull, aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("assets", IStorage::TYPE_SAVE);
 		Storage()->CreateFolder(aBufFull, IStorage::TYPE_SAVE);
@@ -728,6 +766,21 @@ void CMenus::ConchainAssetHud(IConsole::IResult *pResult, void *pUserData, ICons
 		if(str_comp(pArg, g_Config.m_ClAssetHud) != 0)
 		{
 			pThis->GameClient()->LoadHudSkin(pArg);
+		}
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainAssetExtras(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	if(pResult->NumArguments() == 1)
+	{
+		const char *pArg = pResult->GetString(0);
+		if(str_comp(pArg, g_Config.m_ClAssetExtras) != 0)
+		{
+			pThis->GameClient()->LoadExtrasSkin(pArg);
 		}
 	}
 

@@ -123,6 +123,7 @@ void CGameClient::OnConsoleInit()
 					      &m_MapLayersForeGround,
 					      &m_Particles.m_RenderExplosions,
 					      &m_NamePlates,
+					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
 					      &m_FreezeBars,
 					      &m_DamageInd,
@@ -274,6 +275,8 @@ void CGameClient::OnInit()
 			LoadParticlesSkin(g_Config.m_ClAssetParticles);
 		else if(i == IMAGE_HUD)
 			LoadHudSkin(g_Config.m_ClAssetHud);
+		else if(i == IMAGE_EXTRAS)
+			LoadExtrasSkin(g_Config.m_ClAssetExtras);
 		else
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		m_Menus.RenderLoading(false);
@@ -3119,6 +3122,51 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudDummyCopy = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_COPY]);
 
 		m_HudSkinLoaded = true;
+		free(ImgInfo.m_pData);
+	}
+}
+
+void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
+{
+	if(m_ExtrasSkinLoaded)
+	{
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSnowflake);
+
+		for(auto &SpriteParticle : m_ExtrasSkin.m_SpriteParticles)
+			SpriteParticle = IGraphics::CTextureHandle();
+
+		m_ExtrasSkinLoaded = false;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_EXTRAS].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/extras/%s/%s", pPath, g_pData->m_aImages[IMAGE_EXTRAS].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/extras/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadExtrasSkin("default");
+		else
+			LoadExtrasSkin(pPath, true);
+	}
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
+	{
+		m_ExtrasSkin.m_SpriteParticleSnowflake = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE]);
+		m_ExtrasSkin.m_SpriteParticles[0] = m_ExtrasSkin.m_SpriteParticleSnowflake;
+		m_ExtrasSkinLoaded = true;
 		free(ImgInfo.m_pData);
 	}
 }
