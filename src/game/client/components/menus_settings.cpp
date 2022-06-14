@@ -2508,6 +2508,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
+	char aBuf[128];
 	static int s_CurTab = 0;
 
 	CUIRect TabLabel1, TabLabel2, Column,
@@ -2554,8 +2555,17 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &MainView, LineMargin);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(2.5f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Label, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClFreezeBarsAlphaInsideFreeze = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f) * 100.0f);
+		}
 
-		MainView.HSplitTop(60.0f, 0x0, &MainView);
+		MainView.HSplitTop(30.0f, 0x0, &MainView);
 
 		// ***** Kill Messages ***** //
 
@@ -2658,8 +2668,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		const float WantedPickerPosition = 210.0f;
 		const float LabelSize = 13.0f;
 		const float LineSpacing = 5.0f;
-
-		char aBuf[64];
 
 		int i = 0;
 		static int ResetIDs[24];
