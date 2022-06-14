@@ -159,8 +159,6 @@ MOTD
 == ﺕﺎﺤﯿﺿﻮﺗ
 Map
 == ﭗﻣ
-Mouse sens.
-== ﺱﻮﻣ ﺖﯿﺳﺎﺴﺣ
 Move left
 == ﭗﭼ ﻪﺑ ﺖﻛﺮﺣ
 Move player to spectators
@@ -571,9 +569,6 @@ Max Screenshots
 Refresh Rate
 == ﯼﺯﺎﺳ ﻩﺯﺎﺗ ﺥﺮﻧ
 
-Show console window
-== ﺯﺪﻨﯾﻭ ﻝﻮﺴﻨﮐ ﺶﯾﺎﻤﻧ
-
 Dummy settings
 == dummy ﺕﺎﻤﯿﻈﻨﺗ
 
@@ -821,7 +816,28 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
 Personal best:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
 == 
 
 The server is running a non-standard tuning on a pure game type.
@@ -926,6 +942,9 @@ Max CSVs
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Vanilla skins only
 == 
 
@@ -962,7 +981,60 @@ Remote console
 Statboard
 == 
 
-UI mouse s.
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1047,6 +1119,24 @@ Lht.
 == 
 
 Alpha
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Show names in chat in team colors
