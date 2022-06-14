@@ -100,8 +100,8 @@ void CCharacterCore::Tick(bool UseInput)
 
 	//material handling
 	int CenterMaterialID = m_pCollision->GetMaterial(m_Pos.x, m_Pos.y);
-	CMatDefault& AirMaterial = m_pMaterial->At(CenterMaterialID);
-	CMatDefault& DefaultMaterial = m_pMaterial->At(MAT_DEFAULT);
+	CMatDefault &AirMaterial = m_pMaterial->At(CenterMaterialID);
+	CMatDefault &DefaultMaterial = m_pMaterial->At(MAT_DEFAULT);
 
 	m_Vel.y += AirMaterial.m_Gravity;
 
@@ -435,7 +435,7 @@ void CCharacterCore::Tick(bool UseInput)
 void CCharacterCore::Move()
 {
 	//material handling
-	CMatDefault& DefaultMaterial = m_pMaterial->At(MAT_DEFAULT);
+	CMatDefault &DefaultMaterial = m_pMaterial->At(MAT_DEFAULT);
 	float RampValue = VelocityRamp(length(m_Vel) * 50, DefaultMaterial.m_VelrampStart, DefaultMaterial.m_VelrampRange, DefaultMaterial.m_VelrampCurvature);
 
 	m_Vel.x = m_Vel.x * RampValue;
@@ -443,7 +443,7 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(), vec2(m_Tuning.m_GroundElasticityX, m_Tuning.m_GroundElasticityY));
+	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2());
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001f && m_Vel.x > -0.001f)

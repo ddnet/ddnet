@@ -8,6 +8,7 @@
 #include "mapitems.h"
 #include <base/system.h>
 #include <functional>
+#include <game/generated/protocol.h>
 #include <vector>
 
 class CTuneParam
@@ -49,6 +50,10 @@ public:
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
 
+	// client side material values
+	int m_SkidSound = SOUND_PLAYER_SKID;
+	int m_SkidThreshold = 500.0f;
+
 	static int Num()
 	{
 		return sizeof(CMatDefault) / sizeof(CTuneParam);
@@ -59,13 +64,69 @@ public:
 	bool Get(const char *pName, float *pValue) const;
 };
 
-class CMatPlaceholder : public CMatDefault
+class CMatSlimeBase : public CMatDefault
 {
 public:
-	CMatPlaceholder()
+	CMatSlimeBase()
 	{
-		m_GroundFriction = 0.99f;
-		m_Gravity = 0.1f;
+		m_SkidThreshold = 99999;
+		m_SkidSound = -1;
+	}
+};
+
+class CMatSlime : public CMatSlimeBase
+{
+public:
+	CMatSlime()
+	{
+		m_GroundElasticityX = 1.0f;
+		m_GroundElasticityY = 1.0f;
+	}
+};
+
+class CMatSlimeV : public CMatSlimeBase
+{
+public:
+	CMatSlimeV()
+	{
+		m_GroundElasticityY = 1.0f;
+	}
+};
+
+class CMatSlimeH : public CMatSlimeBase
+{
+public:
+	CMatSlimeH()
+	{
+		m_GroundElasticityX = 1.0f;
+	}
+};
+
+class CMatSlimeWeak : public CMatSlimeBase
+{
+public:
+	CMatSlimeWeak()
+	{
+		m_GroundElasticityX = 0.5f;
+		m_GroundElasticityY = 0.5f;
+	}
+};
+
+class CMatSlimeWeakV : public CMatSlimeBase
+{
+public:
+	CMatSlimeWeakV()
+	{
+		m_GroundElasticityY = 0.5f;
+	}
+};
+
+class CMatSlimeWeakH : public CMatSlimeBase
+{
+public:
+	CMatSlimeWeakH()
+	{
+		m_GroundElasticityX = 0.5f;
 	}
 };
 
@@ -88,6 +149,8 @@ public:
 	float GetGroundControlAccel(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 	float GetGroundFriction(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 	float GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
+	float GetElasticityX(bool GroundedTop, bool GroundedBottom, int MaterialTop, int MaterialBottom, float Offset);
+	float GetElasticityY(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight, float Offset);
 
 	static CMaterials *GetInstance()
 	{

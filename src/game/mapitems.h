@@ -186,7 +186,12 @@ enum
 	//Start From Top Left
 	//Material Controllers
 	MAT_DEFAULT = 0, //Note: default is not air
-	MAT_PLACEHOLDER,
+	MAT_SLIME = 16,
+	MAT_SLIME_V,
+	MAT_SLIME_H,
+	MAT_SLIME_WEAK,
+	MAT_SLIME_WEAK_V,
+	MAT_SLIME_WEAK_H,
 	NUM_MATERIALS,
 	//End of materials
 	//Layers

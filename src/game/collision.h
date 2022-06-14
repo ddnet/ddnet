@@ -5,7 +5,7 @@
 
 #include <base/vmath.h>
 #include <engine/shared/protocol.h>
-
+#include "material.h"
 #include <list>
 
 enum
@@ -42,8 +42,9 @@ public:
 	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const;
 	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const;
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces) const;
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity) const;
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size) const;
 	bool TestBox(vec2 Pos, vec2 Size) const;
+	void TestElasticity(vec2 Pos, vec2 Size, vec2 *pElasticityX, vec2 *pElasticityY) const;
 
 	// DDRace
 
