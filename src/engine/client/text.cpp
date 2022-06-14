@@ -699,11 +699,11 @@ public:
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
-			size_t Size = io_length(File);
-			unsigned char *pBuf = (unsigned char *)malloc(Size);
-			io_read(File, pBuf, Size);
+			void *pBuf;
+			unsigned Size;
+			io_read_all(File, &pBuf, &Size);
 			io_close(File);
-			LoadFont(aFilename, pBuf, Size);
+			LoadFont(aFilename, (unsigned char *)pBuf, Size);
 		}
 	}
 
