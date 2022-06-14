@@ -48,12 +48,12 @@ void CEmoticon::OnRelease()
 	m_Active = false;
 }
 
-bool CEmoticon::OnMouseMove(float x, float y)
+bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_Active)
 		return false;
 
-	UI()->ConvertMouseMove(&x, &y);
+	UI()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
 	return true;
 }

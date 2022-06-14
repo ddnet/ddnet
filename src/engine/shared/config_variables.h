@@ -132,6 +132,14 @@ MACRO_CONFIG_INT(InpMouseOld, inp_mouseold, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIE
 MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
 MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
 
+MACRO_CONFIG_INT(InpJoystickEnable, inp_joystick_enable, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable joystick")
+MACRO_CONFIG_STR(InpJoystickGUID, inp_joystick_guid, 34, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Joystick GUID which uniquely identifies the active joystick")
+MACRO_CONFIG_INT(InpJoystickAbsolute, inp_joystick_absolute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable absolute joystick aiming ingame")
+MACRO_CONFIG_INT(InpJoystickSens, inp_joystick_sens, 100, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ingame joystick sensitivity")
+MACRO_CONFIG_INT(InpJoystickX, inp_joystick_x, 0, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Joystick axis that controls X axis of cursor")
+MACRO_CONFIG_INT(InpJoystickY, inp_joystick_y, 1, 0, 12, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Joystick axis that controls Y axis of cursor")
+MACRO_CONFIG_INT(InpJoystickTolerance, inp_joystick_tolerance, 5, 0, 50, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Joystick axis tolerance to account for jitter")
+
 MACRO_CONFIG_INT(ClPort, cl_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for client connections to server (0 to choose a random port, 1024 or higher to set a manual port, requires a restart)")
 MACRO_CONFIG_INT(ClDummyPort, cl_dummy_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for dummy connections to server (0 to choose a random port, 1024 or higher to set a manual port, requires a restart)")
 MACRO_CONFIG_INT(ClContactPort, cl_contact_port, 0, 0, 65535, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Port to use for serverinfo connections to server (0 to choose a random port, 1024 or higher to set a manual port, requires a restart)")
@@ -397,7 +405,6 @@ MACRO_CONFIG_STR(ClTimeoutCode, cl_timeout_code, 64, "", CFGFLAG_SAVE | CFGFLAG_
 MACRO_CONFIG_STR(ClDummyTimeoutCode, cl_dummy_timeout_code, 64, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Dummy Timeout code to use")
 MACRO_CONFIG_STR(ClTimeoutSeed, cl_timeout_seed, 64, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Timeout seed")
 MACRO_CONFIG_STR(ClInputFifo, cl_input_fifo, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Fifo file to use as input for client console")
-MACRO_CONFIG_INT(InpJoystick, inp_joystick, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Try to use a joystick as input")
 MACRO_CONFIG_INT(ClConfigVersion, cl_config_version, 0, 0, 0, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The config version. Helps newer clients fix bugs with older configs.")
 
 // demo editor

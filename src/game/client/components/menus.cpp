@@ -2417,12 +2417,12 @@ void CMenus::OnShutdown()
 	KillServer();
 }
 
-bool CMenus::OnMouseMove(float x, float y)
+bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_MenuActive)
 		return false;
 
-	UIEx()->ConvertMouseMove(&x, &y);
+	UIEx()->ConvertMouseMove(&x, &y, CursorType);
 
 	m_MousePos.x = clamp(m_MousePos.x + x, 0.f, (float)Graphics()->WindowWidth());
 	m_MousePos.y = clamp(m_MousePos.y + y, 0.f, (float)Graphics()->WindowHeight());

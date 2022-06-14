@@ -100,7 +100,11 @@ class CMenus : public CComponent
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination);
 
-	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
+	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View);
+
+	float RenderSettingsControlsJoystick(CUIRect View);
+	void DoJoystickAxisPicker(CUIRect View);
+	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
 	void RenderColorPicker();
 
@@ -558,7 +562,7 @@ public:
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual bool OnInput(IInput::CEvent Event) override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnShutdown() override;
 
 	enum

@@ -352,11 +352,12 @@ void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
-	if(Input()->MouseRelative(&x, &y))
+	IInput::ECursorType CursorType = Input()->CursorRelative(&x, &y);
+	if(CursorType != IInput::CURSOR_NONE)
 	{
 		for(auto &pComponent : m_vpInput)
 		{
-			if(pComponent->OnMouseMove(x, y))
+			if(pComponent->OnCursorMove(x, y, CursorType))
 				break;
 		}
 	}

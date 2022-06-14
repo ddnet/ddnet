@@ -6409,8 +6409,8 @@ void CEditor::UpdateAndRender()
 	float mx, my, Mwx, Mwy;
 	float rx = 0, ry = 0;
 	{
-		Input()->MouseRelative(&rx, &ry);
-		UIEx()->ConvertMouseMove(&rx, &ry);
+		IInput::ECursorType CursorType = Input()->CursorRelative(&rx, &ry);
+		UIEx()->ConvertMouseMove(&rx, &ry, CursorType);
 		UIEx()->ResetMouseSlow();
 
 		m_MouseDeltaX = rx;
