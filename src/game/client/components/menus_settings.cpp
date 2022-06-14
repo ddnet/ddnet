@@ -1250,6 +1250,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		{
 			m_pClient->m_Binds.SetDefaults();
 
+			g_Config.m_InpMousesens = 200;
+			g_Config.m_UiMousesens = 200;
+
 			g_Config.m_InpJoystickEnable = 0;
 			g_Config.m_InpJoystickGUID[0] = '\0';
 			g_Config.m_InpJoystickAbsolute = 0;
