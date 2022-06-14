@@ -19,6 +19,7 @@ inline vec2 RandomDir() { return normalize(vec2(random_float() - 0.5f, random_fl
 
 CEffects::CEffects()
 {
+	m_Add5hz = false;
 	m_Add50hz = false;
 	m_Add100hz = false;
 }
@@ -57,7 +58,7 @@ void CEffects::ResetDamageIndicator()
 	m_pClient->m_DamageInd.Reset();
 }
 
-void CEffects::PowerupShine(vec2 Pos, vec2 size)
+void CEffects::PowerupShine(vec2 Pos, vec2 Size)
 {
 	if(!m_Add50hz)
 		return;
@@ -65,7 +66,7 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 	CParticle p;
 	p.SetDefault();
 	p.m_Spr = SPRITE_PART_SLICE;
-	p.m_Pos = Pos + vec2((random_float() - 0.5f) * size.x, (random_float() - 0.5f) * size.y);
+	p.m_Pos = Pos + vec2((random_float() - 0.5f) * Size.x, (random_float() - 0.5f) * Size.y);
 	p.m_Vel = vec2(0, 0);
 	p.m_LifeSpan = 0.5f;
 	p.m_StartSize = 16.0f;
@@ -76,6 +77,31 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 	p.m_Friction = 0.9f;
 	p.m_FlowAffected = 0.0f;
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+}
+
+void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
+{
+	if(!m_Add5hz)
+		return;
+
+	CParticle p;
+	p.SetDefault();
+	p.m_Spr = SPRITE_PART_SNOWFLAKE;
+	p.m_Pos = Pos + vec2((random_float() - 0.5f) * Size.x, (random_float() - 0.5f) * Size.y);
+	p.m_Vel = vec2(0, 0);
+	p.m_LifeSpan = 1.5f;
+	p.m_StartSize = (random_float() + 0.5f) * 16.0f;
+	p.m_EndSize = p.m_StartSize * 0.5f;
+	p.m_UseAlphaFading = true;
+	p.m_StartAlpha = 1.0f;
+	p.m_EndAlpha = 0.0f;
+	p.m_Rot = random_float() * pi * 2;
+	p.m_Rotspeed = pi;
+	p.m_Gravity = random_float() * 250.0f;
+	p.m_Friction = 0.9f;
+	p.m_FlowAffected = 0.0f;
+	p.m_Collides = false;
+	m_pClient->m_Particles.Add(CParticles::GROUP_EXTRA, &p);
 }
 
 void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
@@ -255,50 +281,37 @@ void CEffects::HammerHit(vec2 Pos)
 
 void CEffects::OnRender()
 {
-	static int64_t LastUpdate100hz = 0;
-	static int64_t LastUpdate50hz = 0;
+	static int64_t s_LastUpdate100hz = 0;
+	static int64_t s_LastUpdate50hz = 0;
+	static int64_t s_LastUpdate5hz = 0;
 
+	float Speed = 1.0f;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+		Speed = DemoPlayer()->BaseInfo()->m_Speed;
 
-		if(time() - LastUpdate100hz > time_freq() / (100 * pInfo->m_Speed))
-		{
-			m_Add100hz = true;
-			LastUpdate100hz = time();
-		}
-		else
-			m_Add100hz = false;
-
-		if(time() - LastUpdate50hz > time_freq() / (100 * pInfo->m_Speed))
-		{
-			m_Add50hz = true;
-			LastUpdate50hz = time();
-		}
-		else
-			m_Add50hz = false;
-
-		if(m_Add50hz)
-			m_pClient->m_Flow.Update();
-
-		return;
-	}
-
-	if(time() - LastUpdate100hz > time_freq() / 100)
+	if(time() - s_LastUpdate100hz > time_freq() / (100 * Speed))
 	{
 		m_Add100hz = true;
-		LastUpdate100hz = time();
+		s_LastUpdate100hz = time();
 	}
 	else
 		m_Add100hz = false;
 
-	if(time() - LastUpdate50hz > time_freq() / 100)
+	if(time() - s_LastUpdate50hz > time_freq() / (50 * Speed))
 	{
 		m_Add50hz = true;
-		LastUpdate50hz = time();
+		s_LastUpdate50hz = time();
 	}
 	else
 		m_Add50hz = false;
+
+	if(time() - s_LastUpdate5hz > time_freq() / (5 * Speed))
+	{
+		m_Add5hz = true;
+		s_LastUpdate5hz = time();
+	}
+	else
+		m_Add5hz = false;
 
 	if(m_Add50hz)
 		m_pClient->m_Flow.Update();
