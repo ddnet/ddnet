@@ -524,6 +524,7 @@ public:
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
 	void LoadHudSkin(const char *pPath, bool AsDir = false);
+	void LoadExtrasSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
 
@@ -674,6 +675,15 @@ public:
 
 	SClientHudSkin m_HudSkin;
 	bool m_HudSkinLoaded;
+
+	struct SClientExtrasSkin
+	{
+		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
+		IGraphics::CTextureHandle m_SpriteParticles[1];
+	};
+
+	SClientExtrasSkin m_ExtrasSkin;
+	bool m_ExtrasSkinLoaded;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 

@@ -1266,6 +1266,7 @@ set(EXPECTED_DATA
   editor/water.rules
   editor/winter_main.rules
   emoticons.png
+  extras.png
   file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
