@@ -4139,14 +4139,16 @@ void CClient::LoadFont()
 	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
 	{
-		size_t Size = io_length(File);
-		unsigned char *pBuf = (unsigned char *)malloc(Size);
-		io_read(File, pBuf, Size);
-		io_close(File);
 		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
 		pDefaultFont = pTextRender->GetFont(aFilename);
 		if(pDefaultFont == NULL)
-			pDefaultFont = pTextRender->LoadFont(aFilename, pBuf, Size);
+		{
+			void *pBuf;
+			unsigned Size;
+			io_read_all(File, &pBuf, &Size);
+			pDefaultFont = pTextRender->LoadFont(aFilename, (unsigned char *)pBuf, Size);
+		}
+		io_close(File);
 
 		for(auto &pFallbackFontFile : apFallbackFontFiles)
 		{
@@ -4154,12 +4156,11 @@ void CClient::LoadFont()
 			File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 			if(File)
 			{
-				Size = io_length(File);
-				pBuf = (unsigned char *)malloc(Size);
-				io_read(File, pBuf, Size);
+				void *pBuf;
+				unsigned Size;
+				io_read_all(File, &pBuf, &Size);
 				io_close(File);
-				pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, pBuf, Size);
+				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, (unsigned char *)pBuf, Size);
 			}
 
 			if(!FontLoaded)
@@ -4169,7 +4170,7 @@ void CClient::LoadFont()
 			}
 		}
 
-		Kernel()->RequestInterface<IEngineTextRender>()->SetDefaultFont(pDefaultFont);
+		pTextRender->SetDefaultFont(pDefaultFont);
 	}
 
 	if(!pDefaultFont)
