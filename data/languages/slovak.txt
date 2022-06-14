@@ -238,9 +238,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Citlivosť myši
-
 Move left
 == Pohyb vľavo
 
@@ -631,6 +628,15 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 Game paused
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
 Server best:
 == 
 
@@ -647,6 +653,18 @@ Ghost
 == 
 
 Loading DDNet Client
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
 == 
 
 Reconnect in %d sec
@@ -874,9 +892,6 @@ Skip the main menu
 Refresh Rate
 == 
 
-Show console window
-== 
-
 Settings file
 == 
 
@@ -902,6 +917,9 @@ Toggle to edit your dummy settings
 == 
 
 Download skins
+== 
+
+Download community skins
 == 
 
 Vanilla skins only
@@ -973,7 +991,57 @@ Show HUD
 Chat command
 == 
 
-UI mouse s.
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
 == 
 
 Dummy
@@ -1066,10 +1134,28 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == 
 
+Use DDRace HUD
+== 
+
 Use DDRace Scoreboard
 == 
 
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Show score

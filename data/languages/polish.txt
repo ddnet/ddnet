@@ -241,9 +241,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Czułość myszy
-
 Move left
 == W lewo
 
@@ -901,9 +898,6 @@ Show entities
 Size
 == Rozmiar
 
-UI mouse s.
-== Czułość myszy w UI
-
 Fetch Info
 == Pobierz szczegóły
 
@@ -969,9 +963,6 @@ Downloading %s:
 
 Show tiles layers from BG map
 == Pokazuj warstwy płytek razem z tłem mapy
-
-Show console window
-== Pokazuj okno konsoli
 
 Max CSVs
 == Maksymalne CSV
@@ -1211,6 +1202,27 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1259,10 +1271,66 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
 == 
 
 Chat command
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
 == 
 
 Dummy
@@ -1298,7 +1366,25 @@ Graphics cards
 auto
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages

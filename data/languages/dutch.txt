@@ -251,9 +251,6 @@ MOTD
 Map
 == Kaart
 
-Mouse sens.
-== Muisgevoeligheid
-
 Move left
 == Naar links
 
@@ -799,9 +796,6 @@ Clan plates size
 Refresh Rate
 == Vernieuwingsfrequentie
 
-Show console window
-== Laat consolescherm zien
-
 Automatically take statboard screenshot
 == Automatisch statistiekbord screenshot nemen
 
@@ -876,9 +870,6 @@ Show entities
 
 Show HUD
 == Laat HUD zien
-
-UI mouse s.
-== UI muisgevoeligheid
 
 may cause delay
 == kan voor vertraging zorgen
@@ -1390,3 +1381,98 @@ Net
 
 FPM
 == FPM
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 

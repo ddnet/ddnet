@@ -238,9 +238,6 @@ MOTD
 Map
 == Мапа
 
-Mouse sens.
-== Осетљивост миша
-
 Move left
 == Помери се лево
 
@@ -820,9 +817,6 @@ Skip the main menu
 Refresh Rate
 == Освежавање
 
-Show console window
-== Прикажи конзолу
-
 Themes directory
 == Тема директоријума
 
@@ -903,9 +897,6 @@ Show entities
 
 Show HUD
 == Прикажи HUD
-
-UI mouse s.
-== UI осетљ. миша
 
 may cause delay
 == може проузроковати кашњење
@@ -1181,6 +1172,27 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Existing Player
 == 
 
@@ -1241,10 +1253,66 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
 == 
 
 Chat command
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
 == 
 
 Dummy
@@ -1289,7 +1357,25 @@ Chat sound volume
 Background music volume
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages

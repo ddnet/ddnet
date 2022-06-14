@@ -240,9 +240,6 @@ MOTD
 Map
 == 맵
 
-Mouse sens.
-== 마우스 감도
-
 Move left
 == 왼쪽으로 이동
 
@@ -843,9 +840,6 @@ Skip the main menu
 Refresh Rate
 == 화면 주사율
 
-Show console window
-== 콘솔 창 표시
-
 Settings file
 == 설정 파일
 
@@ -935,9 +929,6 @@ Show HUD
 
 Chat command
 == 채팅 명령어
-
-UI mouse s.
-== UI 마우스 감도
 
 Dummy
 == 더미
@@ -1383,3 +1374,98 @@ Super
 
 Team %d
 == 팀 %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 

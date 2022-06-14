@@ -237,9 +237,6 @@ MOTD
 Map
 == Pálya
 
-Mouse sens.
-== Egér érzékenység
-
 Move left
 == Balra lépés
 
@@ -664,9 +661,6 @@ DDNet Client needs to be restarted to complete update!
 Please use a different name
 == Kérlek, válassz másik nevet
 
-Show console window
-== Konzol ablak mutatása
-
 Show others
 == Játékosok mutatása
 
@@ -888,9 +882,6 @@ Threaded sound loading
 
 Activate
 == Aktiválás
-
-UI mouse s.
-== UI egér sebesség
 
 File already exists, do you want to overwrite it?
 == A fájl már létezik, szeretné felülírni?
@@ -1378,3 +1369,98 @@ Super
 
 Team %d
 == Csapat %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 

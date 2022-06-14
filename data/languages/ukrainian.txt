@@ -175,9 +175,6 @@ MOTD
 Map
 == Карта
 
-Mouse sens.
-== Чутлив. миші
-
 Move left
 == Вліво
 
@@ -769,9 +766,6 @@ Max Screenshots
 Refresh Rate
 == Частота оновлення
 
-Show console window
-== Показувати консоль
-
 Automatically take statboard screenshot
 == Автоматично робити знімок результатів
 
@@ -855,9 +849,6 @@ Show entities
 
 Show HUD
 == Показувати HUD
-
-UI mouse s.
-== Чутлившсть миші в меню
 
 may cause delay
 == може спричинити затримку
@@ -1307,6 +1298,27 @@ Play
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Join Tutorial Server
 == 
 
@@ -1322,7 +1334,63 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
 == 
 
 Windowed fullscreen
@@ -1344,6 +1412,24 @@ Graphics cards
 == 
 
 auto
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

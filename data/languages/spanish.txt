@@ -253,9 +253,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Sensib. del ratón
-
 Move left
 == Mover a la izquierda
 
@@ -799,9 +796,6 @@ Clan plates size
 Refresh Rate
 == Frecuencia de actualización
 
-Show console window
-== Mostrar ventana de consola
-
 Automatically take statboard screenshot
 == Tomar automáticamente la captura de pantalla del Statboard
 
@@ -876,9 +870,6 @@ Show entities
 
 Show HUD
 == Mostrar HUD
-
-UI mouse s.
-== Sens. del ratón en menú
 
 may cause delay
 == puede causar retraso
@@ -1376,9 +1367,6 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Opacidad
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
-
 Quads are used for background decoration
 == Las quads se usan para la decoración del fondo
 
@@ -1390,3 +1378,101 @@ Super
 
 Team %d
 == Equipo %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 

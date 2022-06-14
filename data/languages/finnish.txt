@@ -240,9 +240,6 @@ MOTD
 Map
 == Kenttä
 
-Mouse sens.
-== Hiiren herkkyys
-
 Move left
 == Liiku vasemmalle
 
@@ -856,9 +853,6 @@ Skip the main menu
 Refresh Rate
 == Virkistystaajuus
 
-Show console window
-== Näytä konsoli-ikkuna
-
 Themes directory
 == Teemahakemisto
 
@@ -915,9 +909,6 @@ Show HUD
 
 Chat command
 == Chattikomento
-
-UI mouse s.
-== Käyttöliittymän herkkyys
 
 Dummy
 == Dummy
@@ -1214,6 +1205,27 @@ Best
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1244,6 +1256,9 @@ Max CSVs
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Fat skins (DDFat)
 == 
 
@@ -1263,6 +1278,59 @@ Statboard
 == 
 
 Show entities
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
 == 
 
 Windowed fullscreen
@@ -1290,6 +1358,24 @@ Enable long pain sound (used when shooting in freeze)
 == 
 
 Assets
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages

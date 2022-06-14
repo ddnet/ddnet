@@ -255,9 +255,6 @@ MOTD
 Map
 == Karte
 
-Mouse sens.
-== Maus-Empfindl.
-
 Move left
 == Nach links
 
@@ -805,9 +802,6 @@ Automatically take game over screenshot
 Please use a different name
 == Bitte anderen Namen wählen
 
-Show console window
-== Konsolenfenster zeigen
-
 Gameplay
 == Gameplay
 
@@ -894,9 +888,6 @@ Welcome to DDNet
 
 may cause delay
 == kann verlangsamen
-
-UI mouse s.
-== UI-Maus-Empf.
 
 Indicate map finish
 == Kartensieg anzeigen
@@ -1393,3 +1384,98 @@ Team %d
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Deckkraft von Entities die zu einem anderen Team gehören, z.B. Tees und Namensschilder
+
+Position:
+== Position:
+
+Speed:
+== Geschwindigkeit:
+
+Angle:
+== Winkel:
+
+Trying to determine UDP connectivity...
+== Versuche UDP-Verbindungsfähigkeit festzustellen...
+
+UDP seems to be filtered.
+== UDP scheint gefiltert zu werden.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP- und TCP-IP-Adressen scheinen unterschiedlich zu sein. Versuch VPN, Proxy oder Netzwerkbeschleuniger abzuschalten.
+
+No answer from server yet.
+== Bisher keine Antwort vom Server.
+
+Download community skins
+== Community-Skins runterladen
+
+Enable joystick
+== Joystick aktivieren
+
+Click to cycle through all available joysticks.
+== Klicken um durch die verfügbaren Joysticks zu wechseln.
+
+[Ingame joystick mode]
+Relative
+== Relativ
+
+[Ingame joystick mode]
+Absolute
+== Absolut
+
+Ingame joystick mode
+== Spiel-Joystick-Modus
+
+Joystick jitter tolerance
+== Jitter-Toleranz des Joysticks
+
+No joysticks found. Plug in a joystick and restart the game.
+== Kein Joystick gefunden. Schließ einen Joystick an und starte das Spiel neu.
+
+Device
+== Gerät
+
+Status
+== Statu
+
+Aim bind
+== Ziel-Bind
+
+Joystick Axis #%d
+== Joystick-Axe #%d
+
+Mouse
+== Maus
+
+Joystick
+== Joystick
+
+Use DDRace HUD
+== DDRace-HUD nutzen
+
+Show dummy actions
+== Dummy-Aktionen zeigen
+
+Show freeze bars
+== Einfrier-Balken zeigen
+
+Show player position
+== Spielerposition zeigen
+
+Show player speed
+== Spielergeschwindigkeit zeigen
+
+Show player target angle
+== Zielwinkel des Spielers zeigen
+
+Ingame joystick sens.
+== Joystick-Sens. im Spiel
+
+UI joystick sens.
+== Joystick-Sens. im Menü
+
+Ingame mouse sens.
+== Maussens. im Spiel
+
+UI mouse sens.
+== Maussens. im Menü

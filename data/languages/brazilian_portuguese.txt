@@ -259,9 +259,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Sens. do mouse
-
 Move left
 == Esquerda
 
@@ -803,9 +800,6 @@ Show score
 UI Color
 == Cor da UI
 
-Show console window
-== Mostra janela de console
-
 Try fast HTTP map download first
 == Tentar baixar mapa por HTTP (rápido) primeiro
 
@@ -904,9 +898,6 @@ Welcome to DDNet
 
 Activate
 == Ativar
-
-UI mouse s.
-== Sens. mouse de UI
 
 File already exists, do you want to overwrite it?
 == O arquivo já existe, você deseja sobrescrevê-lo?
@@ -1365,13 +1356,108 @@ Tutorial
 Can't find a Tutorial server
 == Não foi possível encontrar o servidor de tutorial
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Toggle to edit your dummy settings
+== 
+
+Download community skins
 == 
 
 Choose default eyes when joining a server
 == 
 
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
+== 
+
 Allows maps to render with more detail
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

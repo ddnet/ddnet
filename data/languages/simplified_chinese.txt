@@ -264,9 +264,6 @@ MOTD
 Map
 == 地图
 
-Mouse sens.
-== 鼠标灵敏度
-
 Move left
 == 向左移动
 
@@ -664,9 +661,6 @@ Round
 Lht.
 == 亮度
 
-Show console window
-== 显示控制台窗口
-
 Automatically take statboard screenshot
 == 自动对统计板截图
 
@@ -801,9 +795,6 @@ Connecting dummy
 
 Search
 == 搜索
-
-UI mouse s.
-== 界面鼠标灵敏度
 
 Vanilla skins only
 == 只显示原生皮肤
@@ -1402,3 +1393,98 @@ Super
 
 Team %d
 == 队伍 %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 

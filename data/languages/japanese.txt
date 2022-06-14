@@ -235,9 +235,6 @@ MOTD
 Map
 == マップ
 
-Mouse sens.
-== マウス感度
-
 Move left
 == 左移動
 
@@ -832,9 +829,6 @@ Skip the main menu
 Refresh Rate
 == リフレッシュ・レート
 
-Show console window
-== コンソールを表示
-
 Themes directory
 == テーマ・ディレクトリー
 
@@ -918,9 +912,6 @@ Show HUD
 
 Chat command
 == チャットコマンド
-
-UI mouse s.
-== メイン画面マウス感度
 
 Dummy
 == ダミー
@@ -1268,6 +1259,27 @@ Grabs
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1310,7 +1322,63 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
+== 
+
+Enable joystick
+== 
+
+Click to cycle through all available joysticks.
+== 
+
+[Ingame joystick mode]
+Relative
+== 
+
+[Ingame joystick mode]
+Absolute
+== 
+
+Ingame joystick mode
+== 
+
+Ingame joystick sens.
+== 
+
+UI joystick sens.
+== 
+
+Joystick jitter tolerance
+== 
+
+No joysticks found. Plug in a joystick and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Joystick Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Joystick
 == 
 
 Windowed fullscreen
@@ -1332,6 +1400,24 @@ Graphics cards
 == 
 
 auto
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages
