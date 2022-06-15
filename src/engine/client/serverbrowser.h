@@ -42,7 +42,7 @@ public:
 
 		char m_aName[256];
 		int m_FlagID;
-		NETADDR m_vServers[MAX_SERVERS];
+		NETADDR m_aServers[MAX_SERVERS];
 		char m_aTypes[MAX_SERVERS][32];
 		int m_NumServers;
 
