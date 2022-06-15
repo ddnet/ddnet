@@ -60,6 +60,7 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 ./chillerbot-* \
 	"cl_input_fifo client1.fifo;
 	cl_shownotifications 0;
+	snd_volume 0;
 	cl_chat_spam_filter 0;
 	player_name client1;
 	cl_tabbed_out_msg 0;
@@ -68,6 +69,7 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 ./chillerbot-* \
 	'cl_input_fifo client2.fifo;
 	cl_shownotifications 0;
+	snd_volume 0;
 	cl_chat_spam_filter 0;
 	player_name client2;
 	cl_tabbed_out_msg 0;
@@ -169,6 +171,7 @@ ins+=('client2: client1 is ur war ?');outs+=('not_client1: client1 has war becau
 ins+=('client2: do you have war with clientP ?');outs+=("not_client1: 'clientP' is not on my warlist.")
 ins+=('client2: im your enemy?');outs+=('not_client1 your name is neither on my friend nor enemy list.')
 ins+=('client2: is clientX on your warlist?');outs+=("not_client1: 'is clientX' is not on my warlist.")
+ins+=('client2: client1 enemy?');outs+=('not_client1: client1 has war because: bullied me in school')
 
 run_tests
 

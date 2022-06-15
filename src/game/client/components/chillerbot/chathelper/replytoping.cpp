@@ -491,6 +491,27 @@ bool CReplyToPing::Reply()
 		ChopEnding = GetSuffixLen(aStrippedMsg, " u warlist");
 	if(!ChopEnding)
 		ChopEnding = GetSuffixLen(aStrippedMsg, " warlist");
+	bool Strict = false;
+	if(!ChopEnding)
+	{
+		ChopEnding = GetSuffixLen(aStrippedMsg, " bad");
+		Strict = true;
+	}
+	if(!ChopEnding)
+	{
+		ChopEnding = GetSuffixLen(aStrippedMsg, " good");
+		Strict = true;
+	}
+	if(!ChopEnding)
+	{
+		Strict = true;
+		ChopEnding = GetSuffixLen(aStrippedMsg, " friend");
+	}
+	if(!ChopEnding)
+	{
+		Strict = true;
+		ChopEnding = GetSuffixLen(aStrippedMsg, " enemy");
+	}
 
 	if(ChopEnding)
 	{
@@ -498,9 +519,28 @@ bool CReplyToPing::Reply()
 		if(Cut > 0 && Cut < sizeof(aStrippedMsg))
 		{
 			aStrippedMsg[str_length(aStrippedMsg) - ChopEnding] = '\0';
-			if(!WhyWar(aStrippedMsg))
+			if(WhyWar(aStrippedMsg))
+				return true;
+			bool FoundName = false;
+			if(Strict)
+			{
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					auto &Client = ChatHelper()->GameClient()->m_aClients[i];
+					if(!Client.m_Active)
+						continue;
+					if(!str_comp(Client.m_aName, aStrippedMsg))
+					{
+						FoundName = true;
+						break;
+					}
+				}
+			}
+			if(!Strict || FoundName)
+			{
 				str_format(m_pResponse, m_SizeOfResponse, "%s: '%s' is not on my warlist.", m_pMessageAuthor, aStrippedMsg);
-			return true;
+				return true;
+			}
 		}
 	}
 
