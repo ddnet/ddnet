@@ -170,6 +170,7 @@ void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 	switch(CursorType)
 	{
 	case IInput::CURSOR_MOUSE:
+	case IInput::CURSOR_NONE:
 		Factor = g_Config.m_UiMousesens / 100.0f;
 		break;
 	case IInput::CURSOR_JOYSTICK:
