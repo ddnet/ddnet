@@ -2541,10 +2541,9 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		// ***** HUD ***** //
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceHud, Localize("Use DDRace HUD"), &g_Config.m_ClDDRaceHud, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowJumpsIndicator, Localize("Show jump indicator"), &g_Config.m_ClShowJumpsIndicator, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs"), &g_Config.m_ClShowIDs, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &MainView, LineMargin);
@@ -2555,31 +2554,21 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &MainView, LineMargin);
 		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(2.5f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &Label, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
-			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClFreezeBarsAlphaInsideFreeze = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f) * 100.0f);
+			if(g_Config.m_ClShowFreezeBars)
+			{
+				CUIRect Button, Label;
+				MainView.HSplitTop(2.5f, 0, &MainView);
+				MainView.HSplitTop(20.0f, &Label, &MainView);
+				MainView.HSplitTop(20.0f, &Button, &MainView);
+				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
+				UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+				g_Config.m_ClFreezeBarsAlphaInsideFreeze = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f) * 100.0f);
+			}
 		}
 
 		MainView.HSplitTop(30.0f, 0x0, &MainView);
-
-		// ***** Kill Messages ***** //
-
-		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, Localize("Kill Messages"), 20.0f, TEXTALIGN_LEFT);
-		MainView.VSplitLeft(5.0f, 0x0, &MainView);
-
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
-
-		static int KillMessageNormalColorID;
-		DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
-
-		static int KillMessageHighlightColorID;
-		DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 
 		// ***** Laser ***** //
 
@@ -2606,6 +2595,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Section.VSplitLeft(30.0f, 0, &Section);
 
 		DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
+
+		// ***** Hookline ***** //
 
 		MainView.HSplitTop(25.0f, 0x0, &MainView);
 		MainView.HSplitTop(20.0f, &SectionTwo, &MainView);
@@ -2646,6 +2637,23 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
 		DoLine_ColorPicker(&HookCollTeeCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
+
+		// ***** Kill Messages ***** //
+
+		MainView.HSplitTop(25.0f, 0x0, &MainView);
+		MainView.HSplitTop(20.0f, &Section, &MainView);
+		UI()->DoLabel(&Section, Localize("Kill Messages"), 20.0f, TEXTALIGN_LEFT);
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
+
+		static int KillMessageNormalColorID, KillMessageHighlightColorID;
+		DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
+
+		DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 	}
 	else if(s_CurTab == 1)
 	{ // ***** CHAT TAB ***** //
