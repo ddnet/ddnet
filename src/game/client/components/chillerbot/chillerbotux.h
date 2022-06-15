@@ -106,7 +106,7 @@ class CChillerBotUX : public CComponent
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual void OnConsoleInit() override;
 	virtual void OnInit() override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual bool OnInput(IInput::CEvent e) override;
 
 	static void ConAfk(IConsole::IResult *pResult, void *pUserData);

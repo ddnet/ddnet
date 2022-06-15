@@ -392,7 +392,7 @@ void CChillerBotUX::CampHackTick()
 	}
 }
 
-bool CChillerBotUX::OnMouseMove(float x, float y)
+bool CChillerBotUX::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(time_get() % 10 == 0)
 		ReturnFromAfk();
