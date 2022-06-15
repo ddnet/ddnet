@@ -112,11 +112,11 @@ CLayerGroup::CLayerGroup()
 }
 
 template<typename T>
-static void DeleteAll(std::vector<T> &List)
+static void DeleteAll(std::vector<T> &vList)
 {
-	for(auto &Item : List)
+	for(auto &Item : vList)
 		delete Item;
-	List.clear();
+	vList.clear();
 }
 
 CLayerGroup::~CLayerGroup()
@@ -1348,7 +1348,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 	// some basic values
 	void *pID = &pQuad->m_aPoints[4]; // use pivot addr as id
-	static std::vector<std::vector<CPoint>> s_lRotatePoints;
+	static std::vector<std::vector<CPoint>> s_vvRotatePoints;
 	static int s_Operation = OP_NONE;
 	static float s_RotateAngle = 0;
 	float wx = UI()->MouseWorldX();
@@ -1461,7 +1461,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
 					for(int v = 0; v < 4; v++)
 					{
-						pCurrentQuad->m_aPoints[v] = s_lRotatePoints[i][v];
+						pCurrentQuad->m_aPoints[v] = s_vvRotatePoints[i][v];
 						Rotate(&pCurrentQuad->m_aPoints[4], &pCurrentQuad->m_aPoints[v], s_RotateAngle);
 					}
 				}
@@ -1537,17 +1537,17 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					SelectQuad(Index);
 
 				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-				s_lRotatePoints.clear();
-				s_lRotatePoints.resize(m_vSelectedQuads.size());
+				s_vvRotatePoints.clear();
+				s_vvRotatePoints.resize(m_vSelectedQuads.size());
 				for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
 
-					s_lRotatePoints[i].resize(4);
-					s_lRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
-					s_lRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
-					s_lRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
-					s_lRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
+					s_vvRotatePoints[i].resize(4);
+					s_vvRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
+					s_vvRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
+					s_vvRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
+					s_vvRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
 				}
 			}
 			else
@@ -5021,8 +5021,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	if(pEnvelope)
 	{
-		static std::vector<int> Selection;
-		static int sEnvelopeEditorID = 0;
+		static std::vector<int> s_vSelection;
+		static int s_EnvelopeEditorID = 0;
 		static int s_ActiveChannels = 0xf;
 
 		ColorRGBA aColors[] = {ColorRGBA(1, 0.2f, 0.2f), ColorRGBA(0.2f, 1, 0.2f), ColorRGBA(0.2f, 0.2f, 1), ColorRGBA(1, 1, 0.2f)};
@@ -5087,9 +5087,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		float ValueScale = (Top - Bottom) / View.h;
 
 		if(UI()->MouseInside(&View))
-			UI()->SetHotItem(&sEnvelopeEditorID);
+			UI()->SetHotItem(&s_EnvelopeEditorID);
 
-		if(UI()->HotItem() == &sEnvelopeEditorID)
+		if(UI()->HotItem() == &s_EnvelopeEditorID)
 		{
 			// do stuff
 			if(pEnvelope)
@@ -5304,8 +5304,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					{
 						if(UI()->MouseButton(0))
 						{
-							Selection.clear();
-							Selection.push_back(i);
+							s_vSelection.clear();
+							s_vSelection.push_back(i);
 							UI()->SetActiveItem(pID);
 							// track it
 							s_pID = pID;

@@ -400,7 +400,7 @@ class CTextRender : public IEngineTextRender
 			return false;
 
 		// skyline bottom left algorithm
-		std::vector<int> &SkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
+		std::vector<int> &vSkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
 
 		// search a fitting area with less pixel loss
 		int SmallestPixelLossAreaX = 0;
@@ -408,27 +408,27 @@ class CTextRender : public IEngineTextRender
 		int SmallestPixelLossCurPixelLoss = pFont->m_CurTextureDimensions[TextureIndex] * pFont->m_CurTextureDimensions[TextureIndex];
 
 		bool FoundAnyArea = false;
-		for(size_t i = 0; i < SkylineHeights.size(); i++)
+		for(size_t i = 0; i < vSkylineHeights.size(); i++)
 		{
-			int CurHeight = SkylineHeights[i];
+			int CurHeight = vSkylineHeights[i];
 			int CurPixelLoss = 0;
 			// find width pixels, and we are happy
 			int AreaWidth = 1;
-			for(size_t n = i + 1; n < i + Width && n < SkylineHeights.size(); ++n)
+			for(size_t n = i + 1; n < i + Width && n < vSkylineHeights.size(); ++n)
 			{
 				++AreaWidth;
-				if(SkylineHeights[n] <= CurHeight)
+				if(vSkylineHeights[n] <= CurHeight)
 				{
-					CurPixelLoss += CurHeight - SkylineHeights[n];
+					CurPixelLoss += CurHeight - vSkylineHeights[n];
 				}
 				// if the height changed, we will use that new height and adjust the pixel loss
 				else
 				{
 					CurPixelLoss = 0;
-					CurHeight = SkylineHeights[n];
+					CurHeight = vSkylineHeights[n];
 					for(size_t l = i; l <= n; ++l)
 					{
-						CurPixelLoss += CurHeight - SkylineHeights[l];
+						CurPixelLoss += CurHeight - vSkylineHeights[l];
 					}
 				}
 			}
@@ -460,7 +460,7 @@ class CTextRender : public IEngineTextRender
 			PosY = SmallestPixelLossAreaY;
 			for(int i = PosX; i < PosX + Width; ++i)
 			{
-				SkylineHeights[i] = PosY + Height;
+				vSkylineHeights[i] = PosY + Height;
 			}
 			return true;
 		}
@@ -1100,7 +1100,7 @@ public:
 		float CursorOuterWidth = CursorInnerWidth * 2;
 		float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
 
-		std::vector<IGraphics::CQuadItem> SelectionQuads;
+		std::vector<IGraphics::CQuadItem> vSelectionQuads;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
 		bool SelectionUsedRelease = false;
@@ -1409,7 +1409,7 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						SelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
+						vSelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
 					}
 
 					LastSelX = SelX;
@@ -1491,7 +1491,7 @@ public:
 			}
 		}
 
-		bool HasSelection = !SelectionQuads.empty() && SelectionUsedPress && SelectionUsedRelease;
+		bool HasSelection = !vSelectionQuads.empty() && SelectionUsedPress && SelectionUsedRelease;
 		if((HasSelection || HasCursor) && IsRendered)
 		{
 			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -1500,7 +1500,7 @@ public:
 			if(HasCursor)
 				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, CursorQuads, 2);
 			if(HasSelection)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &SelectionQuads[0], (int)SelectionQuads.size());
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &vSelectionQuads[0], (int)vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			TextContainer.m_HasCursor = HasCursor;

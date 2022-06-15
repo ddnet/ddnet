@@ -271,7 +271,7 @@ struct CTeamrank
 	// if another team can be extracted
 	bool NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize);
 
-	bool SamePlayers(const std::vector<std::string> *aSortedNames);
+	bool SamePlayers(const std::vector<std::string> *pvSortedNames);
 };
 
 struct CScoreWorker

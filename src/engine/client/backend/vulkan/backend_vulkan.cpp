@@ -508,28 +508,28 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		typedef std::vector<std::vector<TName>> TBufferObjectsOfFrame;
 		typedef std::vector<std::vector<VkMappedMemoryRange>> TMemoryMapRangesOfFrame;
 		typedef std::vector<size_t> TStreamUseCount;
-		TBufferObjectsOfFrame m_BufferObjectsOfFrame;
-		TMemoryMapRangesOfFrame m_BufferObjectsOfFrameRangeData;
-		TStreamUseCount m_CurrentUsedCount;
+		TBufferObjectsOfFrame m_vvBufferObjectsOfFrame;
+		TMemoryMapRangesOfFrame m_vvBufferObjectsOfFrameRangeData;
+		TStreamUseCount m_vCurrentUsedCount;
 
 		std::vector<TName> &GetBuffers(size_t FrameImageIndex)
 		{
-			return m_BufferObjectsOfFrame[FrameImageIndex];
+			return m_vvBufferObjectsOfFrame[FrameImageIndex];
 		}
 
 		std::vector<VkMappedMemoryRange> &GetRanges(size_t FrameImageIndex)
 		{
-			return m_BufferObjectsOfFrameRangeData[FrameImageIndex];
+			return m_vvBufferObjectsOfFrameRangeData[FrameImageIndex];
 		}
 
 		size_t GetUsedCount(size_t FrameImageIndex)
 		{
-			return m_CurrentUsedCount[FrameImageIndex];
+			return m_vCurrentUsedCount[FrameImageIndex];
 		}
 
 		void IncreaseUsedCount(size_t FrameImageIndex)
 		{
-			++m_CurrentUsedCount[FrameImageIndex];
+			++m_vCurrentUsedCount[FrameImageIndex];
 		}
 
 		bool IsUsed(size_t FrameImageIndex)
@@ -539,14 +539,14 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 		void ResetFrame(size_t FrameImageIndex)
 		{
-			m_CurrentUsedCount[FrameImageIndex] = 0;
+			m_vCurrentUsedCount[FrameImageIndex] = 0;
 		}
 
 		void Init(size_t FrameImageCount)
 		{
-			m_BufferObjectsOfFrame.resize(FrameImageCount);
-			m_BufferObjectsOfFrameRangeData.resize(FrameImageCount);
-			m_CurrentUsedCount.resize(FrameImageCount);
+			m_vvBufferObjectsOfFrame.resize(FrameImageCount);
+			m_vvBufferObjectsOfFrameRangeData.resize(FrameImageCount);
+			m_vCurrentUsedCount.resize(FrameImageCount);
 		}
 
 		typedef std::function<void(size_t, TName &)> TDestroyBufferFunc;
@@ -554,7 +554,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		void Destroy(TDestroyBufferFunc &&DestroyBuffer)
 		{
 			size_t ImageIndex = 0;
-			for(auto &vBuffersOfFrame : m_BufferObjectsOfFrame)
+			for(auto &vBuffersOfFrame : m_vvBufferObjectsOfFrame)
 			{
 				for(auto &BufferOfFrame : vBuffersOfFrame)
 				{
@@ -573,9 +573,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				}
 				++ImageIndex;
 			}
-			m_BufferObjectsOfFrame.clear();
-			m_BufferObjectsOfFrameRangeData.clear();
-			m_CurrentUsedCount.clear();
+			m_vvBufferObjectsOfFrame.clear();
+			m_vvBufferObjectsOfFrameRangeData.clear();
+			m_vCurrentUsedCount.clear();
 		}
 	};
 
@@ -1346,7 +1346,7 @@ protected:
 		}
 	}
 
-	bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData, bool FlipImgData, bool ResetAlpha)
+	bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData, bool FlipImgData, bool ResetAlpha)
 	{
 		bool IsB8G8R8A8 = m_VKSurfFormat.format == VK_FORMAT_B8G8R8A8_UNORM;
 		bool UsesRGBALikeFormat = m_VKSurfFormat.format == VK_FORMAT_R8G8B8A8_UNORM || IsB8G8R8A8;
@@ -1444,10 +1444,10 @@ protected:
 			vkInvalidateMappedMemoryRanges(m_VKDevice, 1, &MemRange);
 
 			size_t RealFullImageSize = maximum(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
-			if(DstData.size() < RealFullImageSize + (Width * 4))
-				DstData.resize(RealFullImageSize + (Width * 4)); // extra space for flipping
+			if(vDstData.size() < RealFullImageSize + (Width * 4))
+				vDstData.resize(RealFullImageSize + (Width * 4)); // extra space for flipping
 
-			mem_copy(DstData.data(), m_pGetPresentedImgDataHelperMappedMemory, RealFullImageSize);
+			mem_copy(vDstData.data(), m_pGetPresentedImgDataHelperMappedMemory, RealFullImageSize);
 
 			// pack image data together without any offset that the driver might require
 			if(Width * 4 < m_GetPresentedImgDataHelperMappedLayoutPitch)
@@ -1456,7 +1456,7 @@ protected:
 				{
 					size_t OffsetImagePacked = (Y * Width * 4);
 					size_t OffsetImageUnpacked = (Y * m_GetPresentedImgDataHelperMappedLayoutPitch);
-					mem_copy(DstData.data() + OffsetImagePacked, DstData.data() + OffsetImageUnpacked, Width * 4);
+					mem_copy(vDstData.data() + OffsetImagePacked, vDstData.data() + OffsetImageUnpacked, Width * 4);
 				}
 			}
 
@@ -1470,21 +1470,21 @@ protected:
 						size_t ImgOff = (Y * Width * 4) + (X * 4);
 						if(IsB8G8R8A8)
 						{
-							std::swap(DstData[ImgOff], DstData[ImgOff + 2]);
+							std::swap(vDstData[ImgOff], vDstData[ImgOff + 2]);
 						}
-						DstData[ImgOff + 3] = 255;
+						vDstData[ImgOff + 3] = 255;
 					}
 				}
 			}
 
 			if(FlipImgData)
 			{
-				uint8_t *pTempRow = DstData.data() + Width * Height * 4;
+				uint8_t *pTempRow = vDstData.data() + Width * Height * 4;
 				for(uint32_t Y = 0; Y < Height / 2; ++Y)
 				{
-					mem_copy(pTempRow, DstData.data() + Y * Width * 4, Width * 4);
-					mem_copy(DstData.data() + Y * Width * 4, DstData.data() + ((Height - Y) - 1) * Width * 4, Width * 4);
-					mem_copy(DstData.data() + ((Height - Y) - 1) * Width * 4, pTempRow, Width * 4);
+					mem_copy(pTempRow, vDstData.data() + Y * Width * 4, Width * 4);
+					mem_copy(vDstData.data() + Y * Width * 4, vDstData.data() + ((Height - Y) - 1) * Width * 4, Width * 4);
+					mem_copy(vDstData.data() + ((Height - Y) - 1) * Width * 4, pTempRow, Width * 4);
 				}
 			}
 
@@ -1504,9 +1504,9 @@ protected:
 		}
 	}
 
-	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) override
+	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) override
 	{
-		return GetPresentedImageDataImpl(Width, Height, Format, DstData, false, false);
+		return GetPresentedImageDataImpl(Width, Height, Format, vDstData, false, false);
 	}
 
 	/************************
@@ -4328,12 +4328,12 @@ public:
 		m_vFramebufferList.clear();
 	}
 
-	bool CreateShaderModule(const std::vector<uint8_t> &Code, VkShaderModule &ShaderModule)
+	bool CreateShaderModule(const std::vector<uint8_t> &vCode, VkShaderModule &ShaderModule)
 	{
 		VkShaderModuleCreateInfo CreateInfo{};
 		CreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		CreateInfo.codeSize = Code.size();
-		CreateInfo.pCode = (const uint32_t *)(Code.data());
+		CreateInfo.codeSize = vCode.size();
+		CreateInfo.pCode = (const uint32_t *)(vCode.data());
 
 		if(vkCreateShaderModule(m_VKDevice, &CreateInfo, nullptr, &ShaderModule) != VK_SUCCESS)
 		{
@@ -4379,7 +4379,7 @@ public:
 		vkDestroyDescriptorSetLayout(m_VKDevice, m_Standard3DTexturedDescriptorSetLayout, nullptr);
 	}
 
-	bool LoadShader(const char *pFileName, std::vector<uint8_t> *&pShaderData)
+	bool LoadShader(const char *pFileName, std::vector<uint8_t> *&pvShaderData)
 	{
 		auto it = m_ShaderFiles.find(pFileName);
 		if(it == m_ShaderFiles.end())
@@ -4400,7 +4400,7 @@ public:
 			it = m_ShaderFiles.insert({pFileName, {std::move(vShaderBuff)}}).first;
 		}
 
-		pShaderData = &it->second.m_vBinary;
+		pvShaderData = &it->second.m_vBinary;
 
 		return true;
 	}

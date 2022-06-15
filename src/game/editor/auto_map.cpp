@@ -155,7 +155,7 @@ void CAutoMapper::Load(const char *pTileName)
 				int x = 0, y = 0;
 				char aValue[128];
 				int Value = CPosRule::NORULE;
-				std::vector<CIndexInfo> NewIndexList;
+				std::vector<CIndexInfo> vNewIndexList;
 
 				sscanf(pLine, "Pos %d %d %127s", &x, &y, aValue);
 
@@ -163,15 +163,15 @@ void CAutoMapper::Load(const char *pTileName)
 				{
 					Value = CPosRule::INDEX;
 					CIndexInfo NewIndexInfo = {0, 0, false};
-					NewIndexList.push_back(NewIndexInfo);
+					vNewIndexList.push_back(NewIndexInfo);
 				}
 				else if(!str_comp(aValue, "FULL"))
 				{
 					Value = CPosRule::NOTINDEX;
 					CIndexInfo NewIndexInfo1 = {0, 0, false};
 					//CIndexInfo NewIndexInfo2 = {-1, 0};
-					NewIndexList.push_back(NewIndexInfo1);
-					//NewIndexList.push_back(NewIndexInfo2);
+					vNewIndexList.push_back(NewIndexInfo1);
+					//vNewIndexList.push_back(NewIndexInfo2);
 				}
 				else if(!str_comp(aValue, "INDEX") || !str_comp(aValue, "NOTINDEX"))
 				{
@@ -197,7 +197,7 @@ void CAutoMapper::Load(const char *pTileName)
 
 						if(!str_comp(aOrientation1, "OR"))
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							pWord += 2;
 							continue;
 						}
@@ -217,13 +217,13 @@ void CAutoMapper::Load(const char *pTileName)
 						}
 						else
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							break;
 						}
 
 						if(!str_comp(aOrientation2, "OR"))
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							pWord += 3;
 							continue;
 						}
@@ -238,13 +238,13 @@ void CAutoMapper::Load(const char *pTileName)
 						}
 						else
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							break;
 						}
 
 						if(!str_comp(aOrientation3, "OR"))
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							pWord += 4;
 							continue;
 						}
@@ -259,19 +259,19 @@ void CAutoMapper::Load(const char *pTileName)
 						}
 						else
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							break;
 						}
 
 						if(!str_comp(aOrientation4, "OR"))
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							pWord += 5;
 							continue;
 						}
 						else
 						{
-							NewIndexList.push_back(NewIndexInfo);
+							vNewIndexList.push_back(NewIndexInfo);
 							break;
 						}
 					}
@@ -279,7 +279,7 @@ void CAutoMapper::Load(const char *pTileName)
 
 				if(Value != CPosRule::NORULE)
 				{
-					CPosRule NewPosRule = {x, y, Value, NewIndexList};
+					CPosRule NewPosRule = {x, y, Value, vNewIndexList};
 					pCurrentIndex->m_vRules.push_back(NewPosRule);
 
 					pCurrentConf->m_StartX = minimum(pCurrentConf->m_StartX, NewPosRule.m_X);
@@ -289,7 +289,7 @@ void CAutoMapper::Load(const char *pTileName)
 
 					if(x == 0 && y == 0)
 					{
-						for(const auto &Index : NewIndexList)
+						for(const auto &Index : vNewIndexList)
 						{
 							if(Value == CPosRule::INDEX && Index.m_ID == 0)
 								pCurrentIndex->m_SkipFull = true;
@@ -342,10 +342,10 @@ void CAutoMapper::Load(const char *pTileName)
 				}
 				if(!Found && IndexRule.m_DefaultRule)
 				{
-					std::vector<CIndexInfo> NewIndexList;
+					std::vector<CIndexInfo> vNewIndexList;
 					CIndexInfo NewIndexInfo = {0, 0, false};
-					NewIndexList.push_back(NewIndexInfo);
-					CPosRule NewPosRule = {0, 0, CPosRule::NOTINDEX, NewIndexList};
+					vNewIndexList.push_back(NewIndexInfo);
+					CPosRule NewPosRule = {0, 0, CPosRule::NOTINDEX, vNewIndexList};
 					IndexRule.m_vRules.push_back(NewPosRule);
 
 					IndexRule.m_SkipEmpty = true;

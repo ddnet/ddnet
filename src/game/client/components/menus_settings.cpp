@@ -1910,7 +1910,7 @@ public:
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };
 
-void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &Languages)
+void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &vLanguages)
 {
 	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
@@ -1965,7 +1965,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<C
 
 		char aFileName[IO_MAX_PATH_LENGTH];
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
-		Languages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
+		vLanguages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
 	}
 	io_close(File);
 }
@@ -1974,16 +1974,16 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
 	static int s_LanguageList = 0;
 	static int s_SelectedLanguage = 0;
-	static std::vector<CLanguage> s_Languages;
+	static std::vector<CLanguage> s_vLanguages;
 	static float s_ScrollValue = 0;
 
-	if(s_Languages.empty())
+	if(s_vLanguages.empty())
 	{
-		s_Languages.emplace_back("English", "", 826);
-		LoadLanguageIndexfile(Storage(), Console(), s_Languages);
-		std::sort(s_Languages.begin(), s_Languages.end());
-		for(size_t i = 0; i < s_Languages.size(); i++)
-			if(str_comp(s_Languages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
+		s_vLanguages.emplace_back("English", "", 826);
+		LoadLanguageIndexfile(Storage(), Console(), s_vLanguages);
+		std::sort(s_vLanguages.begin(), s_vLanguages.end());
+		for(size_t i = 0; i < s_vLanguages.size(); i++)
+			if(str_comp(s_vLanguages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
 				break;
@@ -1992,9 +1992,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	int OldSelected = s_SelectedLanguage;
 
-	UiDoListboxStart(&s_LanguageList, &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+	UiDoListboxStart(&s_LanguageList, &MainView, 24.0f, Localize("Language"), "", s_vLanguages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 
-	for(auto &Language : s_Languages)
+	for(auto &Language : s_vLanguages)
 	{
 		CListboxItem Item = UiDoListboxNextItem(&Language.m_Name);
 		if(Item.m_Visible)
@@ -2014,8 +2014,8 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	if(OldSelected != s_SelectedLanguage)
 	{
-		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName.c_str(), sizeof(g_Config.m_ClLanguagefile));
-		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
+		str_copy(g_Config.m_ClLanguagefile, s_vLanguages[s_SelectedLanguage].m_FileName.c_str(), sizeof(g_Config.m_ClLanguagefile));
+		g_Localization.Load(s_vLanguages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
 		GameClient()->OnLanguageChange();
 	}
 }
