@@ -1414,16 +1414,20 @@ void CHud::RenderMovementInformation(const int ClientID)
 		DisplaySpeedX *= (m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_RampValue / 1000.0f);
 	}
 
-	float Angle = Character->m_Angle / 256.0f;
-	if(Angle > pi)
-	{
-		Angle -= 2.0f * pi;
-	}
+	float Angle = 0.0f;
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
 		CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
 		Angle = atan2f(CharacterDisplayInfo->m_TargetY, CharacterDisplayInfo->m_TargetX);
+	}
+	else
+	{
+		Angle = Character->m_Angle / 256.0f;
+	}
+	if(Angle < 0)
+	{
+		Angle += 2.0f * pi;
 	}
 	float DisplayAngle = Angle * 180.0f / pi;
 
