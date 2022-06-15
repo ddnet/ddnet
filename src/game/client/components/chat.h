@@ -108,7 +108,7 @@ class CChat : public CComponent
 		bool operator==(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) == 0; }
 	};
 
-	std::vector<CCommand> m_Commands;
+	std::vector<CCommand> m_vCommands;
 	bool m_ReverseTAB;
 
 	struct CHistoryEntry

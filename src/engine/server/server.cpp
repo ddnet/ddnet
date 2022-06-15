@@ -278,7 +278,7 @@ class CServerLogger : public ILogger
 {
 	CServer *m_pServer;
 	std::mutex m_PendingLock;
-	std::vector<CLogMessage> m_aPending;
+	std::vector<CLogMessage> m_vPending;
 	std::thread::id m_MainThread;
 
 public:
@@ -298,23 +298,23 @@ void CServerLogger::Log(const CLogMessage *pMessage)
 	m_PendingLock.lock();
 	if(m_MainThread == std::this_thread::get_id())
 	{
-		if(!m_aPending.empty())
+		if(!m_vPending.empty())
 		{
 			if(m_pServer)
 			{
-				for(const auto &Message : m_aPending)
+				for(const auto &Message : m_vPending)
 				{
 					m_pServer->SendLogLine(&Message);
 				}
 			}
-			m_aPending.clear();
+			m_vPending.clear();
 		}
 		m_PendingLock.unlock();
 		m_pServer->SendLogLine(pMessage);
 	}
 	else
 	{
-		m_aPending.push_back(*pMessage);
+		m_vPending.push_back(*pMessage);
 		m_PendingLock.unlock();
 	}
 }
@@ -3478,6 +3478,12 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CServer::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3707,6 +3713,7 @@ void CServer::RegisterCommands()
 	Console()->Register("name_bans", "", CFGFLAG_SERVER, ConNameBans, this, "List all name bans");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
+	Console()->Chain("loglevel", ConchainLoglevel, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
@@ -3765,7 +3772,7 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++)
@@ -3885,6 +3892,7 @@ int main(int argc, const char **argv)
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
 
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 	if(g_Config.m_Logfile[0])
 	{
 		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);

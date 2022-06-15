@@ -17,7 +17,7 @@ class CAutoMapper
 		int m_X;
 		int m_Y;
 		int m_Value;
-		std::vector<CIndexInfo> m_aIndexList;
+		std::vector<CIndexInfo> m_vIndexList;
 
 		enum
 		{
@@ -30,7 +30,7 @@ class CAutoMapper
 	struct CIndexRule
 	{
 		int m_ID;
-		std::vector<CPosRule> m_aRules;
+		std::vector<CPosRule> m_vRules;
 		int m_Flag;
 		float m_RandomProbability;
 		bool m_DefaultRule;
@@ -40,13 +40,13 @@ class CAutoMapper
 
 	struct CRun
 	{
-		std::vector<CIndexRule> m_aIndexRules;
+		std::vector<CIndexRule> m_vIndexRules;
 		bool m_AutomapCopy;
 	};
 
 	struct CConfiguration
 	{
-		std::vector<CRun> m_aRuns;
+		std::vector<CRun> m_vRuns;
 		char m_aName[128];
 		int m_StartX;
 		int m_StartY;
@@ -61,13 +61,13 @@ public:
 	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
 	void Proceed(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 
-	int ConfigNamesNum() const { return m_lConfigs.size(); }
+	int ConfigNamesNum() const { return m_vConfigs.size(); }
 	const char *GetConfigName(int Index);
 
 	bool IsLoaded() const { return m_FileLoaded; }
 
 private:
-	std::vector<CConfiguration> m_lConfigs;
+	std::vector<CConfiguration> m_vConfigs;
 	class CEditor *m_pEditor;
 	bool m_FileLoaded;
 };

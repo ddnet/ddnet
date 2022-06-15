@@ -36,7 +36,7 @@ public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnConsoleInit() override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
 	virtual void OnReset() override;

@@ -274,7 +274,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
 	void GraphicsThread();
 
-	std::vector<SWarning> m_Warnings;
+	std::vector<SWarning> m_vWarnings;
 
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
@@ -344,7 +344,7 @@ public:
 	void OnEnterGame(bool Dummy);
 	void EnterGame(int Conn) override;
 
-	void Connect(const char *pAddress, const char *pPassword = NULL) override;
+	void Connect(const char *pAddress, const char *pPassword = nullptr) override;
 	void DisconnectWithReason(const char *pReason);
 	void Disconnect() override;
 
@@ -455,6 +455,7 @@ public:
 	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 

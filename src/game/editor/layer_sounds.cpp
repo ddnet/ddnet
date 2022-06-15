@@ -23,7 +23,7 @@ void CLayerSounds::Render(bool Tileset)
 
 	// draw falloff distance
 	Graphics()->SetColor(0.6f, 0.8f, 1.0f, 0.4f);
-	for(const auto &Source : m_lSources)
+	for(const auto &Source : m_vSources)
 	{
 		float OffsetX = 0;
 		float OffsetY = 0;
@@ -73,7 +73,7 @@ void CLayerSounds::Render(bool Tileset)
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pEditor->RenderTools()->SelectSprite(SPRITE_AUDIO_SOURCE);
-	for(const auto &Source : m_lSources)
+	for(const auto &Source : m_vSources)
 	{
 		float OffsetX = 0;
 		float OffsetY = 0;
@@ -96,8 +96,8 @@ CSoundSource *CLayerSounds::NewSource(int x, int y)
 {
 	m_pEditor->m_Map.m_Modified = true;
 
-	m_lSources.emplace_back();
-	CSoundSource *pSource = &m_lSources[m_lSources.size() - 1];
+	m_vSources.emplace_back();
+	CSoundSource *pSource = &m_vSources[m_vSources.size() - 1];
 
 	pSource->m_Position.x = f2fx(x);
 	pSource->m_Position.y = f2fx(y);
@@ -141,7 +141,7 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	pGrabbed->m_Sound = m_Sound;
 	pBrush->AddLayer(pGrabbed);
 
-	for(const auto &Source : m_lSources)
+	for(const auto &Source : m_vSources)
 	{
 		float px = fx2f(Source.m_Position.x);
 		float py = fx2f(Source.m_Position.y);
@@ -153,24 +153,24 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			n.m_Position.x -= f2fx(Rect.x);
 			n.m_Position.y -= f2fx(Rect.y);
 
-			pGrabbed->m_lSources.push_back(n);
+			pGrabbed->m_vSources.push_back(n);
 		}
 	}
 
-	return pGrabbed->m_lSources.empty() ? 0 : 1;
+	return pGrabbed->m_vSources.empty() ? 0 : 1;
 }
 
 void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
 {
 	CLayerSounds *l = (CLayerSounds *)pBrush;
-	for(const auto &Source : l->m_lSources)
+	for(const auto &Source : l->m_vSources)
 	{
 		CSoundSource n = Source;
 
 		n.m_Position.x += f2fx(wx);
 		n.m_Position.y += f2fx(wy);
 
-		m_lSources.push_back(n);
+		m_vSources.push_back(n);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }
@@ -186,7 +186,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 
 	CProperty aProps[] = {
 		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
-		{0},
+		{nullptr},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};
@@ -198,7 +198,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	if(Prop == PROP_SOUND)
 	{
 		if(NewVal >= 0)
-			m_Sound = NewVal % m_pEditor->m_Map.m_lSounds.size();
+			m_Sound = NewVal % m_pEditor->m_Map.m_vpSounds.size();
 		else
 			m_Sound = -1;
 	}
@@ -213,7 +213,7 @@ void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC Func)
 
 void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 {
-	for(auto &Source : m_lSources)
+	for(auto &Source : m_vSources)
 	{
 		Func(&Source.m_SoundEnv);
 		Func(&Source.m_PosEnv);

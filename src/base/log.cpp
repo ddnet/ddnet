@@ -3,8 +3,6 @@
 #include "color.h"
 #include "system.h"
 
-#include <engine/shared/config.h>
-
 #include <atomic>
 #include <cstdio>
 
@@ -19,9 +17,15 @@
 
 extern "C" {
 
+std::atomic<LEVEL> loglevel = LEVEL_INFO;
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
 thread_local bool in_logger = false;
+
+void log_set_loglevel(LEVEL level)
+{
+	loglevel.store(level, std::memory_order_release);
+}
 
 void log_set_global_logger(ILogger *logger)
 {
@@ -69,7 +73,7 @@ void log_set_scope_logger(ILogger *logger)
 
 void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
-	if(level > g_Config.m_Loglevel)
+	if(level > loglevel.load(std::memory_order_acquire))
 		return;
 
 	// Make sure we're not logging recursively.
@@ -179,23 +183,23 @@ std::unique_ptr<ILogger> log_logger_android()
 
 class CLoggerCollection : public ILogger
 {
-	std::vector<std::shared_ptr<ILogger>> m_apLoggers;
+	std::vector<std::shared_ptr<ILogger>> m_vpLoggers;
 
 public:
-	CLoggerCollection(std::vector<std::shared_ptr<ILogger>> &&apLoggers) :
-		m_apLoggers(std::move(apLoggers))
+	CLoggerCollection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers) :
+		m_vpLoggers(std::move(vpLoggers))
 	{
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		for(auto &pLogger : m_apLoggers)
+		for(auto &pLogger : m_vpLoggers)
 		{
 			pLogger->Log(pMessage);
 		}
 	}
 	void GlobalFinish() override
 	{
-		for(auto &pLogger : m_apLoggers)
+		for(auto &pLogger : m_vpLoggers)
 		{
 			pLogger->GlobalFinish();
 		}
@@ -453,12 +457,12 @@ void CFutureLogger::Set(std::unique_ptr<ILogger> &&pLogger)
 	{
 		dbg_assert(false, "future logger has already been set and can only be set once");
 	}
-	for(const auto &Pending : m_aPending)
+	for(const auto &Pending : m_vPending)
 	{
 		pLoggerRaw->Log(&Pending);
 	}
-	m_aPending.clear();
-	m_aPending.shrink_to_fit();
+	m_vPending.clear();
+	m_vPending.shrink_to_fit();
 	m_PendingLock.unlock();
 }
 
@@ -471,7 +475,7 @@ void CFutureLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 	m_PendingLock.lock();
-	m_aPending.push_back(*pMessage);
+	m_vPending.push_back(*pMessage);
 	m_PendingLock.unlock();
 }
 

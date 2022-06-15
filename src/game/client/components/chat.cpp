@@ -35,7 +35,7 @@ CChat::CChat()
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include <game/ddracechat.h>
-	std::sort(m_Commands.begin(), m_Commands.end());
+	std::sort(m_vCommands.begin(), m_vCommands.end());
 
 	m_Mode = MODE_NONE;
 	Reset();
@@ -43,7 +43,7 @@ CChat::CChat()
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
 {
-	m_Commands.emplace_back(pName, pParams);
+	m_vCommands.emplace_back(pName, pParams);
 }
 
 void CChat::RebuildChat()
@@ -352,7 +352,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 		{
 			CCommand *pCompletionCommand = 0;
 
-			const size_t NumCommands = m_Commands.size();
+			const size_t NumCommands = m_vCommands.size();
 
 			if(m_ReverseTAB && m_CompletionUsed)
 				m_CompletionChosen--;
@@ -379,7 +379,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 					Index = (m_CompletionChosen + i) % NumCommands;
 				}
 
-				auto &Command = m_Commands[Index];
+				auto &Command = m_vCommands[Index];
 
 				if(str_startswith(Command.m_pName, pCommandStart))
 				{

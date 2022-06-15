@@ -763,7 +763,7 @@ fn handle_register(
         tokio::spawn(send_challenge(
             connless_request_token_7,
             shared.socket.clone(),
-            SocketAddr::new(addr.ip, addr.port),
+            addr.to_socket_addr(),
             register.challenge_secret,
             challenge.current,
         ));

@@ -38,7 +38,7 @@ class CMapLayers : public CComponent
 	struct STileLayerVisuals
 	{
 		STileLayerVisuals() :
-			m_pTilesOfLayer(NULL), m_pBorderTop(NULL), m_pBorderLeft(NULL), m_pBorderRight(NULL), m_pBorderBottom(NULL)
+			m_pTilesOfLayer(nullptr), m_pBorderTop(nullptr), m_pBorderLeft(nullptr), m_pBorderRight(nullptr), m_pBorderBottom(nullptr)
 		{
 			m_Width = 0;
 			m_Height = 0;
@@ -103,12 +103,12 @@ class CMapLayers : public CComponent
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
-	std::vector<STileLayerVisuals *> m_TileLayerVisuals;
+	std::vector<STileLayerVisuals *> m_vpTileLayerVisuals;
 
 	struct SQuadLayerVisuals
 	{
 		SQuadLayerVisuals() :
-			m_QuadNum(0), m_pQuadsOfLayer(NULL), m_BufferContainerIndex(-1), m_IsTextured(false) {}
+			m_QuadNum(0), m_pQuadsOfLayer(nullptr), m_BufferContainerIndex(-1), m_IsTextured(false) {}
 
 		struct SQuadVisual
 		{
@@ -124,7 +124,7 @@ class CMapLayers : public CComponent
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
-	std::vector<SQuadLayerVisuals *> m_QuadLayerVisuals;
+	std::vector<SQuadLayerVisuals *> m_vpQuadLayerVisuals;
 
 	virtual class CCamera *GetCurCamera();
 

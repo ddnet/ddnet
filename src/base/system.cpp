@@ -948,11 +948,6 @@ int64_t time_freq()
 	return std::chrono::nanoseconds(1s).count();
 }
 
-int64_t time_get_nanoseconds()
-{
-	return time_get_impl();
-}
-
 /* -----  network ----- */
 static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 {
@@ -4110,14 +4105,12 @@ void set_exception_handler_log_file(const char *log_file_path)
 #endif
 }
 
-// pure cpp code for the cpp system wrapper
-
-std::chrono::nanoseconds tw::time_get()
+std::chrono::nanoseconds time_get_nanoseconds()
 {
-	return std::chrono::nanoseconds(time_get_nanoseconds());
+	return std::chrono::nanoseconds(time_get_impl());
 }
 
-int tw::net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 {
 	using namespace std::chrono_literals;
 	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());

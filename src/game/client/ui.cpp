@@ -14,13 +14,13 @@ void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
 	pUI->AddUIElement(this);
 	if(RequestedRectCount > 0)
-		m_UIRects.resize(RequestedRectCount);
+		m_vUIRects.resize(RequestedRectCount);
 }
 
 void CUIElement::InitRects(int RequestedRectCount)
 {
-	dbg_assert(m_UIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
-	m_UIRects.resize(RequestedRectCount);
+	dbg_assert(m_vUIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
+	m_vUIRects.resize(RequestedRectCount);
 }
 
 CUIElement::SUIElementRect::SUIElementRect() { Reset(); }
@@ -78,30 +78,30 @@ CUI::CUI()
 
 CUI::~CUI()
 {
-	for(CUIElement *&pEl : m_OwnUIElements)
+	for(CUIElement *&pEl : m_vpOwnUIElements)
 	{
 		delete pEl;
 	}
-	m_OwnUIElements.clear();
+	m_vpOwnUIElements.clear();
 }
 
 CUIElement *CUI::GetNewUIElement(int RequestedRectCount)
 {
 	CUIElement *pNewEl = new CUIElement(this, RequestedRectCount);
 
-	m_OwnUIElements.push_back(pNewEl);
+	m_vpOwnUIElements.push_back(pNewEl);
 
 	return pNewEl;
 }
 
 void CUI::AddUIElement(CUIElement *pElement)
 {
-	m_UIElements.push_back(pElement);
+	m_vpUIElements.push_back(pElement);
 }
 
 void CUI::ResetUIElement(CUIElement &UIElement)
 {
-	for(CUIElement::SUIElementRect &Rect : UIElement.m_UIRects)
+	for(CUIElement::SUIElementRect &Rect : UIElement.m_vUIRects)
 	{
 		if(Rect.m_UIRectQuadContainer != -1)
 			Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
@@ -116,7 +116,7 @@ void CUI::ResetUIElement(CUIElement &UIElement)
 
 void CUI::OnElementsReset()
 {
-	for(CUIElement *pEl : m_UIElements)
+	for(CUIElement *pEl : m_vpUIElements)
 	{
 		ResetUIElement(*pEl);
 	}
@@ -164,11 +164,24 @@ bool CUI::MouseInside(const CUIRect *pRect) const
 	return pRect->Inside(m_MouseX, m_MouseY);
 }
 
-void CUI::ConvertMouseMove(float *x, float *y) const
+void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
 {
-	float Fac = (float)(g_Config.m_UiMousesens) / g_Config.m_InpMousesens;
-	*x = *x * Fac;
-	*y = *y * Fac;
+	float Factor = 1.0f;
+	switch(CursorType)
+	{
+	case IInput::CURSOR_MOUSE:
+		Factor = g_Config.m_UiMousesens / 100.0f;
+		break;
+	case IInput::CURSOR_JOYSTICK:
+		Factor = g_Config.m_UiJoystickSens / 100.0f;
+		break;
+	default:
+		dbg_msg("assert", "CUI::ConvertMouseMove CursorType %d", (int)CursorType);
+		dbg_break();
+		break;
+	}
+	*pX *= Factor;
+	*pY *= Factor;
 }
 
 float CUI::ButtonColorMul(const void *pID)
@@ -205,21 +218,6 @@ float CUI::PixelSize()
 	return Screen()->w / Graphics()->ScreenWidth();
 }
 
-void CUI::SetScale(float s)
-{
-	g_Config.m_UiScale = (int)(s * 100.0f);
-}
-
-float CUI::Scale() const
-{
-	return g_Config.m_UiScale / 100.0f;
-}
-
-float CUIRect::Scale() const
-{
-	return g_Config.m_UiScale / 100.0f;
-}
-
 void CUI::ClipEnable(const CUIRect *pRect)
 {
 	if(IsClipped())
@@ -230,11 +228,11 @@ void CUI::ClipEnable(const CUIRect *pRect)
 		Intersection.y = std::max(pRect->y, pOldRect->y);
 		Intersection.w = std::min(pRect->x + pRect->w, pOldRect->x + pOldRect->w) - pRect->x;
 		Intersection.h = std::min(pRect->y + pRect->h, pOldRect->y + pOldRect->h) - pRect->y;
-		m_Clips.push_back(Intersection);
+		m_vClips.push_back(Intersection);
 	}
 	else
 	{
-		m_Clips.push_back(*pRect);
+		m_vClips.push_back(*pRect);
 	}
 	UpdateClipping();
 }
@@ -242,14 +240,14 @@ void CUI::ClipEnable(const CUIRect *pRect)
 void CUI::ClipDisable()
 {
 	dbg_assert(IsClipped(), "no clip region");
-	m_Clips.pop_back();
+	m_vClips.pop_back();
 	UpdateClipping();
 }
 
 const CUIRect *CUI::ClipArea() const
 {
 	dbg_assert(IsClipped(), "no clip region");
-	return &m_Clips.back();
+	return &m_vClips.back();
 }
 
 void CUI::UpdateClipping()
@@ -293,7 +291,6 @@ void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const
 void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	if(pTop)
 	{
@@ -315,7 +312,6 @@ void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 void CUIRect::HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	if(pTop)
 	{
@@ -360,7 +356,6 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing) const
 void CUIRect::VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	if(pLeft)
 	{
@@ -382,7 +377,6 @@ void CUIRect::VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	if(pLeft)
 	{
@@ -404,7 +398,6 @@ void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 void CUIRect::Margin(float Cut, CUIRect *pOtherRect) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	pOtherRect->x = r.x + Cut;
 	pOtherRect->y = r.y + Cut;
@@ -415,7 +408,6 @@ void CUIRect::Margin(float Cut, CUIRect *pOtherRect) const
 void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	pOtherRect->x = r.x + Cut;
 	pOtherRect->y = r.y;
@@ -426,7 +418,6 @@ void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
 void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 {
 	CUIRect r = *this;
-	Cut *= Scale();
 
 	pOtherRect->x = r.x;
 	pOtherRect->y = r.y + Cut;
@@ -489,9 +480,9 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 		return 0;
 
 	if(pX)
-		*pX = clamp(m_MouseX - pRect->x, 0.0f, pRect->w) / Scale();
+		*pX = clamp(m_MouseX - pRect->x, 0.0f, pRect->w);
 	if(pY)
-		*pY = clamp(m_MouseY - pRect->y, 0.0f, pRect->h) / Scale();
+		*pY = clamp(m_MouseY - pRect->y, 0.0f, pRect->h);
 
 	return 1;
 }
@@ -567,11 +558,6 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
 	DoTextLabel(pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, LabelProps);
-}
-
-void CUI::DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
-{
-	DoLabel(pRect, pText, Size * Scale(), Align, LabelProps);
 }
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, CTextCursor *pReadCursor)

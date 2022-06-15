@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include <engine/input.h>
 #include <engine/textrender.h>
 
 #include <chrono>
@@ -12,9 +13,6 @@
 class CUIRect
 {
 public:
-	// TODO: Refactor: Redo UI scaling
-	float Scale() const;
-
 	float x, y, w, h;
 
 	/**
@@ -157,7 +155,7 @@ public:
 	};
 
 protected:
-	std::vector<SUIElementRect> m_UIRects;
+	std::vector<SUIElementRect> m_vUIRects;
 
 	// used for marquees or other user implemented things
 	int64_t m_ElementTime;
@@ -169,12 +167,12 @@ public:
 
 	SUIElementRect *Get(size_t Index)
 	{
-		return &m_UIRects[Index];
+		return &m_vUIRects[Index];
 	}
 
 	bool AreRectsInit()
 	{
-		return !m_UIRects.empty();
+		return !m_vUIRects.empty();
 	}
 
 	void InitRects(int RequestedRectCount);
@@ -208,15 +206,15 @@ class CUI
 
 	CUIRect m_Screen;
 
-	std::vector<CUIRect> m_Clips;
+	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
 	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
-	std::vector<CUIElement *> m_OwnUIElements; // ui elements maintained by CUI class
-	std::vector<CUIElement *> m_UIElements;
+	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUI class
+	std::vector<CUIElement *> m_vpUIElements;
 
 public:
 	static float ms_FontmodHeight;
@@ -307,7 +305,7 @@ public:
 	bool MouseInside(const CUIRect *pRect) const;
 	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
 	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
-	void ConvertMouseMove(float *x, float *y) const;
+	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
 
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }
@@ -321,22 +319,17 @@ public:
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
 	const CUIRect *ClipArea() const;
-	inline bool IsClipped() const { return !m_Clips.empty(); }
-
-	// TODO: Refactor: Redo UI scaling
-	void SetScale(float s);
-	float Scale() const;
+	inline bool IsClipped() const { return !m_vClips.empty(); }
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
 	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
-	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
-	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
 };
 
 #endif

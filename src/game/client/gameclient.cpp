@@ -387,11 +387,12 @@ void CGameClient::OnUpdate()
 {
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
-	if(Input()->MouseRelative(&x, &y))
+	IInput::ECursorType CursorType = Input()->CursorRelative(&x, &y);
+	if(CursorType != IInput::CURSOR_NONE)
 	{
 		for(auto &pComponent : m_vpInput)
 		{
-			if(pComponent->OnMouseMove(x, y))
+			if(pComponent->OnCursorMove(x, y, CursorType))
 				break;
 		}
 	}
@@ -3330,7 +3331,7 @@ void CGameClient::SnapCollectEntities()
 	std::sort(aItemEx.begin(), aItemEx.end(), CEntComparer());
 
 	// merge extended items with items they belong to
-	m_aSnapEntities.clear();
+	m_vSnapEntities.clear();
 
 	size_t IndexEx = 0;
 	for(const CSnapEntities &Ent : aItemData)
@@ -3341,6 +3342,6 @@ void CGameClient::SnapCollectEntities()
 		if(IndexEx < aItemEx.size() && aItemEx[IndexEx].m_Item.m_ID == Ent.m_Item.m_ID)
 			pDataEx = (const CNetObj_EntityEx *)aItemEx[IndexEx].m_pData;
 
-		m_aSnapEntities.push_back({Ent.m_Item, Ent.m_pData, pDataEx});
+		m_vSnapEntities.push_back({Ent.m_Item, Ent.m_pData, pDataEx});
 	}
 }

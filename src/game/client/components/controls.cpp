@@ -2,8 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
-#include <SDL.h>
-
 #include <engine/shared/config.h>
 
 #include <game/client/components/camera.h>
@@ -17,49 +15,11 @@
 
 #include "controls.h"
 
-enum
-{
-	LEFT_JOYSTICK_X = 0,
-	LEFT_JOYSTICK_Y = 1,
-	RIGHT_JOYSTICK_X = 2,
-	RIGHT_JOYSTICK_Y = 3,
-	SECOND_RIGHT_JOYSTICK_X = 20,
-	SECOND_RIGHT_JOYSTICK_Y = 21,
-	NUM_JOYSTICK_AXES = 22
-};
-
 CControls::CControls()
 {
 	mem_zero(&m_LastData, sizeof(m_LastData));
 	m_LastDummy = 0;
 	m_OtherFire = 0;
-
-	if(g_Config.m_InpJoystick)
-	{
-		SDL_Init(SDL_INIT_JOYSTICK);
-		m_pJoystick = SDL_JoystickOpen(0);
-		if(m_pJoystick && SDL_JoystickNumAxes(m_pJoystick) < NUM_JOYSTICK_AXES)
-		{
-			SDL_JoystickClose(m_pJoystick);
-			m_pJoystick = NULL;
-		}
-
-		m_pGamepad = SDL_JoystickOpen(2);
-
-		SDL_JoystickEventState(SDL_QUERY);
-
-		m_UsingGamepad = false;
-#if defined(CONF_FAMILY_UNIX)
-		if(getenv("OUYA"))
-			m_UsingGamepad = true;
-#endif
-	}
-	else
-	{
-		m_pJoystick = NULL;
-		m_pGamepad = NULL;
-		m_UsingGamepad = false;
-	}
 }
 
 void CControls::OnReset()
@@ -67,9 +27,6 @@ void CControls::OnReset()
 	ResetInput(0);
 	ResetInput(1);
 
-	m_JoystickFirePressed = false;
-	m_JoystickRunPressed = false;
-	m_JoystickTapTime = 0;
 	for(int &AmmoCount : m_AmmoCount)
 		AmmoCount = 0;
 	m_OldMouseX = m_OldMouseY = 0.0f;
@@ -99,7 +56,6 @@ void CControls::OnPlayerDeath()
 {
 	for(int &AmmoCount : m_AmmoCount)
 		AmmoCount = 0;
-	m_JoystickTapTime = 0; // Do not launch hook on first tap
 }
 
 struct CInputState
@@ -254,9 +210,6 @@ int CControls::SnapInput(int *pData)
 	if(m_pClient->m_Scoreboard.Active())
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
-	if(m_InputData[g_Config.m_ClDummy].m_PlayerFlags != PLAYERFLAG_PLAYING)
-		m_JoystickTapTime = 0; // Do not launch hook on first tap
-
 	if(m_pClient->m_Controls.m_ShowHookColl[g_Config.m_ClDummy])
 		m_InputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_AIM;
 
@@ -380,121 +333,12 @@ int CControls::SnapInput(int *pData)
 
 void CControls::OnRender()
 {
-	enum
-	{
-		JOYSTICK_RUN_DISTANCE = 65536 / 8,
-		GAMEPAD_DEAD_ZONE = 65536 / 8,
-	};
-
-	int64_t CurTime = time_get();
-	bool FireWasPressed = false;
-
-	if(m_pJoystick)
-	{
-		// Get input from left joystick
-		int RunX = SDL_JoystickGetAxis(m_pJoystick, LEFT_JOYSTICK_X);
-		int RunY = SDL_JoystickGetAxis(m_pJoystick, LEFT_JOYSTICK_Y);
-		bool RunPressed = (RunX != 0 || RunY != 0);
-		// Get input from right joystick
-		int AimX = SDL_JoystickGetAxis(m_pJoystick, SECOND_RIGHT_JOYSTICK_X);
-		int AimY = SDL_JoystickGetAxis(m_pJoystick, SECOND_RIGHT_JOYSTICK_Y);
-		bool AimPressed = (AimX != 0 || AimY != 0);
-		// Get input from another right joystick
-		int HookX = SDL_JoystickGetAxis(m_pJoystick, RIGHT_JOYSTICK_X);
-		int HookY = SDL_JoystickGetAxis(m_pJoystick, RIGHT_JOYSTICK_Y);
-		bool HookPressed = (HookX != 0 || HookY != 0);
-
-		if(m_JoystickRunPressed != RunPressed)
-		{
-			if(RunPressed)
-			{
-				if(m_JoystickTapTime + time_freq() > CurTime) // Tap in less than 1 second to jump
-					m_InputData[g_Config.m_ClDummy].m_Jump = 1;
-			}
-			else
-				m_InputData[g_Config.m_ClDummy].m_Jump = 0;
-			m_JoystickTapTime = CurTime;
-		}
-
-		m_JoystickRunPressed = RunPressed;
-
-		if(RunPressed)
-		{
-			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -JOYSTICK_RUN_DISTANCE);
-			m_InputDirectionRight[g_Config.m_ClDummy] = (RunX > JOYSTICK_RUN_DISTANCE);
-		}
-
-		// Move 500ms in the same direction, to prevent speed bump when tapping
-		if(!RunPressed && m_JoystickTapTime + time_freq() / 2 > CurTime)
-		{
-			m_InputDirectionLeft[g_Config.m_ClDummy] = 0;
-			m_InputDirectionRight[g_Config.m_ClDummy] = 0;
-		}
-
-		if(HookPressed)
-		{
-			m_MousePos[g_Config.m_ClDummy] = vec2(HookX / 30, HookY / 30);
-			ClampMousePos();
-			m_InputData[g_Config.m_ClDummy].m_Hook = 1;
-		}
-		else
-		{
-			m_InputData[g_Config.m_ClDummy].m_Hook = 0;
-		}
-
-		if(AimPressed)
-		{
-			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
-			ClampMousePos();
-		}
-
-		if(AimPressed != m_JoystickFirePressed)
-		{
-			// Fire when releasing joystick
-			if(!AimPressed)
-			{
-				m_InputData[g_Config.m_ClDummy].m_Fire++;
-				if((bool)(m_InputData[g_Config.m_ClDummy].m_Fire % 2) != AimPressed)
-					m_InputData[g_Config.m_ClDummy].m_Fire++;
-				FireWasPressed = true;
-			}
-		}
-
-		m_JoystickFirePressed = AimPressed;
-	}
-
-	if(m_pGamepad)
-	{
-		// Get input from left joystick
-		int RunX = SDL_JoystickGetAxis(m_pGamepad, LEFT_JOYSTICK_X);
-		int RunY = SDL_JoystickGetAxis(m_pGamepad, LEFT_JOYSTICK_Y);
-		if(m_UsingGamepad)
-		{
-			m_InputDirectionLeft[g_Config.m_ClDummy] = (RunX < -GAMEPAD_DEAD_ZONE);
-			m_InputDirectionRight[g_Config.m_ClDummy] = (RunX > GAMEPAD_DEAD_ZONE);
-		}
-
-		// Get input from right joystick
-		int AimX = SDL_JoystickGetAxis(m_pGamepad, RIGHT_JOYSTICK_X);
-		int AimY = SDL_JoystickGetAxis(m_pGamepad, RIGHT_JOYSTICK_Y);
-		if(abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE)
-		{
-			m_MousePos[g_Config.m_ClDummy] = vec2(AimX / 30, AimY / 30);
-			ClampMousePos();
-		}
-
-		if(!m_UsingGamepad && (abs(AimX) > GAMEPAD_DEAD_ZONE || abs(AimY) > GAMEPAD_DEAD_ZONE || abs(RunX) > GAMEPAD_DEAD_ZONE || abs(RunY) > GAMEPAD_DEAD_ZONE))
-		{
-			m_UsingGamepad = true;
-		}
-	}
-
 	if(g_Config.m_ClAutoswitchWeaponsOutOfAmmo && !GameClient()->m_GameInfo.m_UnlimitedAmmo && m_pClient->m_Snap.m_pLocalCharacter)
 	{
 		// Keep track of ammo count, we know weapon ammo only when we switch to that weapon, this is tracked on server and protocol does not track that
 		m_AmmoCount[m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
 		// Autoswitch weapon if we're out of ammo
-		if((m_InputData[g_Config.m_ClDummy].m_Fire % 2 != 0 || FireWasPressed) &&
+		if(m_InputData[g_Config.m_ClDummy].m_Fire % 2 != 0 &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount == 0 &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
@@ -521,26 +365,46 @@ void CControls::OnRender()
 		m_TargetPos[g_Config.m_ClDummy] = m_MousePos[g_Config.m_ClDummy];
 }
 
-bool CControls::OnMouseMove(float x, float y)
+bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
-	if((m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+	if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
 		return false;
 
+	if(CursorType == IInput::CURSOR_JOYSTICK && g_Config.m_InpJoystickAbsolute && m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		float AbsX = 0.0f, AbsY = 0.0f;
+		if(Input()->GetActiveJoystick()->Absolute(&AbsX, &AbsY))
+			m_MousePos[g_Config.m_ClDummy] = vec2(AbsX, AbsY) * GetMaxMouseDistance();
+		return true;
+	}
+
+	float Factor = 1.0f;
 	if(g_Config.m_ClDyncam && g_Config.m_ClDyncamMousesens)
 	{
-		x = x * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
-		y = y * g_Config.m_ClDyncamMousesens / g_Config.m_InpMousesens;
+		Factor = g_Config.m_ClDyncamMousesens / 100.0f;
+	}
+	else
+	{
+		switch(CursorType)
+		{
+		case IInput::CURSOR_MOUSE:
+			Factor = g_Config.m_InpMousesens / 100.0f;
+			break;
+		case IInput::CURSOR_JOYSTICK:
+			Factor = g_Config.m_InpJoystickSens / 100.0f;
+			break;
+		default:
+			dbg_msg("assert", "CControls::OnCursorMove CursorType %d", (int)CursorType);
+			dbg_break();
+			break;
+		}
 	}
 
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
-	{
-		x = x * m_pClient->m_Camera.m_Zoom;
-		y = y * m_pClient->m_Camera.m_Zoom;
-	}
+		Factor *= m_pClient->m_Camera.m_Zoom;
 
-	m_MousePos[g_Config.m_ClDummy] += vec2(x, y); // TODO: ugly
+	m_MousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
 	ClampMousePos();
-
 	return true;
 }
 
@@ -553,11 +417,7 @@ void CControls::ClampMousePos()
 	}
 	else
 	{
-		float CameraMaxDistance = 200.0f;
-		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-		float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		float MouseMax = minimum((FollowFactor != 0 ? CameraMaxDistance / FollowFactor + DeadZone : MaxDistance), MaxDistance);
+		float MouseMax = GetMaxMouseDistance();
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 		float MouseMin = MinDistance;
 
@@ -574,4 +434,13 @@ void CControls::ClampMousePos()
 		if(MDistance > MouseMax)
 			m_MousePos[g_Config.m_ClDummy] = normalize_pre_length(m_MousePos[g_Config.m_ClDummy], MDistance) * MouseMax;
 	}
+}
+
+float CControls::GetMaxMouseDistance() const
+{
+	float CameraMaxDistance = 200.0f;
+	float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+	float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+	float MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
+	return minimum((FollowFactor != 0 ? CameraMaxDistance / FollowFactor + DeadZone : MaxDistance), MaxDistance);
 }

@@ -538,8 +538,8 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
-	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_aSwitchers; }
-	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_aSwitchers; }
+	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_vSwitchers; }
+	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_vSwitchers; }
 
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
@@ -704,10 +704,10 @@ public:
 	SClientHudSkin m_HudSkin;
 	bool m_HudSkinLoaded;
 
-	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
+	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
 private:
-	std::vector<CSnapEntities> m_aSnapEntities;
+	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 
 	bool m_DDRaceMsgSent[NUM_DUMMIES];

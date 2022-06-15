@@ -3094,7 +3094,7 @@ void CClient::Run()
 	bool LastE = false;
 	bool LastG = false;
 
-	auto LastTime = tw::time_get();
+	auto LastTime = time_get_nanoseconds();
 	int64_t LastRenderTime = time_get();
 
 	while(true)
@@ -3314,7 +3314,7 @@ void CClient::Run()
 			{
 				// write down the config and quit
 				if(!m_pConfigManager->Save())
-					m_Warnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
+					m_vWarnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
 				s_SavedConfig = true;
 			}
 
@@ -3325,7 +3325,7 @@ void CClient::Run()
 				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
-			if(m_Warnings.empty() && !GameClient()->IsDisplayingWarning())
+			if(m_vWarnings.empty() && !GameClient()->IsDisplayingWarning())
 				break;
 		}
 
@@ -3334,7 +3334,7 @@ void CClient::Run()
 #endif
 
 		// beNice
-		auto Now = tw::time_get();
+		auto Now = time_get_nanoseconds();
 		decltype(Now) SleepTimeInNanoSeconds{0};
 		bool Slept = false;
 		if(
@@ -3351,7 +3351,7 @@ void CClient::Run()
 		{
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
 			if(SleepTimeInNanoSeconds > 0ns)
-				tw::net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
+				net_socket_read_wait(m_NetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
 			Slept = true;
 		}
 		if(Slept)
@@ -4251,6 +4251,12 @@ void CClient::ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, I
 		pSelf->m_GenerateTimeoutSeed = false;
 }
 
+void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+}
+
 void CClient::ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4331,6 +4337,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
 
+	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
 	m_pConsole->Chain("password", ConchainPassword, this);
 
 	// used for server browser update
@@ -4402,7 +4409,7 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
 #endif
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -4573,6 +4580,7 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 	if(g_Config.m_Logfile[0])
 	{
 		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
@@ -4696,18 +4704,18 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 
 SWarning *CClient::GetCurWarning()
 {
-	if(m_Warnings.empty())
+	if(m_vWarnings.empty())
 	{
 		return NULL;
 	}
-	else if(m_Warnings[0].m_WasShown)
+	else if(m_vWarnings[0].m_WasShown)
 	{
-		m_Warnings.erase(m_Warnings.begin());
+		m_vWarnings.erase(m_vWarnings.begin());
 		return NULL;
 	}
 	else
 	{
-		return &m_Warnings[0];
+		return &m_vWarnings[0];
 	}
 }
 

@@ -80,7 +80,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 	const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
 
 	static std::chrono::nanoseconds s_Time{0};
-	static auto s_LastLocalTime = tw::time_get();
+	static auto s_LastLocalTime = time_get_nanoseconds();
 	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
@@ -135,7 +135,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, v
 		}
 		else
 		{
-			auto CurTime = tw::time_get();
+			auto CurTime = time_get_nanoseconds();
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
@@ -390,20 +390,20 @@ void mem_copy_special(void *pDest, void *pSource, size_t Size, size_t Count, siz
 CMapLayers::~CMapLayers()
 {
 	//clear everything and destroy all buffers
-	if(!m_TileLayerVisuals.empty())
+	if(!m_vpTileLayerVisuals.empty())
 	{
-		int s = m_TileLayerVisuals.size();
+		int s = m_vpTileLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
 		{
-			delete m_TileLayerVisuals[i];
+			delete m_vpTileLayerVisuals[i];
 		}
 	}
-	if(!m_QuadLayerVisuals.empty())
+	if(!m_vpQuadLayerVisuals.empty())
 	{
-		int s = m_QuadLayerVisuals.size();
+		int s = m_vpQuadLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
 		{
-			delete m_QuadLayerVisuals[i];
+			delete m_vpQuadLayerVisuals[i];
 		}
 	}
 }
@@ -413,25 +413,25 @@ void CMapLayers::OnMapLoad()
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 		return;
 	//clear everything and destroy all buffers
-	if(!m_TileLayerVisuals.empty())
+	if(!m_vpTileLayerVisuals.empty())
 	{
-		int s = m_TileLayerVisuals.size();
+		int s = m_vpTileLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
 		{
-			Graphics()->DeleteBufferContainer(m_TileLayerVisuals[i]->m_BufferContainerIndex, true);
-			delete m_TileLayerVisuals[i];
+			Graphics()->DeleteBufferContainer(m_vpTileLayerVisuals[i]->m_BufferContainerIndex, true);
+			delete m_vpTileLayerVisuals[i];
 		}
-		m_TileLayerVisuals.clear();
+		m_vpTileLayerVisuals.clear();
 	}
-	if(!m_QuadLayerVisuals.empty())
+	if(!m_vpQuadLayerVisuals.empty())
 	{
-		int s = m_QuadLayerVisuals.size();
+		int s = m_vpQuadLayerVisuals.size();
 		for(int i = 0; i < s; ++i)
 		{
-			Graphics()->DeleteBufferContainer(m_QuadLayerVisuals[i]->m_BufferContainerIndex, true);
-			delete m_QuadLayerVisuals[i];
+			Graphics()->DeleteBufferContainer(m_vpQuadLayerVisuals[i]->m_BufferContainerIndex, true);
+			delete m_vpQuadLayerVisuals[i];
 		}
-		m_QuadLayerVisuals.clear();
+		m_vpQuadLayerVisuals.clear();
 	}
 
 	bool PassedGameLayer = false;
@@ -566,8 +566,8 @@ void CMapLayers::OnMapLoad()
 					while(CurOverlay < OverlayCount + 1)
 					{
 						// We can later just count the tile layers to get the idx in the vector
-						m_TileLayerVisuals.push_back(new STileLayerVisuals());
-						STileLayerVisuals &Visuals = *m_TileLayerVisuals.back();
+						m_vpTileLayerVisuals.push_back(new STileLayerVisuals());
+						STileLayerVisuals &Visuals = *m_vpTileLayerVisuals.back();
 						if(!Visuals.Init(pTMap->m_Width, pTMap->m_Height))
 						{
 							++CurOverlay;
@@ -841,8 +841,8 @@ void CMapLayers::OnMapLoad()
 							SBufferContainerInfo ContainerInfo;
 							ContainerInfo.m_Stride = (DoTextureCoords ? (sizeof(float) * 2 + sizeof(vec3)) : 0);
 							ContainerInfo.m_VertBufferBindingIndex = BufferObjectIndex;
-							ContainerInfo.m_Attributes.emplace_back();
-							SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_Attributes.back();
+							ContainerInfo.m_vAttributes.emplace_back();
+							SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_vAttributes.back();
 							pAttr->m_DataTypeCount = 2;
 							pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 							pAttr->m_Normalized = false;
@@ -850,8 +850,8 @@ void CMapLayers::OnMapLoad()
 							pAttr->m_FuncType = 0;
 							if(DoTextureCoords)
 							{
-								ContainerInfo.m_Attributes.emplace_back();
-								pAttr = &ContainerInfo.m_Attributes.back();
+								ContainerInfo.m_vAttributes.emplace_back();
+								pAttr = &ContainerInfo.m_vAttributes.back();
 								pAttr->m_DataTypeCount = 3;
 								pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 								pAttr->m_Normalized = false;
@@ -872,8 +872,8 @@ void CMapLayers::OnMapLoad()
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 
-				m_QuadLayerVisuals.push_back(new SQuadLayerVisuals());
-				SQuadLayerVisuals *pQLayerVisuals = m_QuadLayerVisuals.back();
+				m_vpQuadLayerVisuals.push_back(new SQuadLayerVisuals());
+				SQuadLayerVisuals *pQLayerVisuals = m_vpQuadLayerVisuals.back();
 
 				bool Textured = (pQLayer->m_Image != -1);
 
@@ -944,15 +944,15 @@ void CMapLayers::OnMapLoad()
 					SBufferContainerInfo ContainerInfo;
 					ContainerInfo.m_Stride = (Textured ? (sizeof(STmpQuadTextured) / 4) : (sizeof(STmpQuad) / 4));
 					ContainerInfo.m_VertBufferBindingIndex = BufferObjectIndex;
-					ContainerInfo.m_Attributes.emplace_back();
-					SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_Attributes.back();
+					ContainerInfo.m_vAttributes.emplace_back();
+					SBufferContainerInfo::SAttribute *pAttr = &ContainerInfo.m_vAttributes.back();
 					pAttr->m_DataTypeCount = 4;
 					pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 					pAttr->m_Normalized = false;
 					pAttr->m_pOffset = 0;
 					pAttr->m_FuncType = 0;
-					ContainerInfo.m_Attributes.emplace_back();
-					pAttr = &ContainerInfo.m_Attributes.back();
+					ContainerInfo.m_vAttributes.emplace_back();
+					pAttr = &ContainerInfo.m_vAttributes.back();
 					pAttr->m_DataTypeCount = 4;
 					pAttr->m_Type = GRAPHICS_TYPE_UNSIGNED_BYTE;
 					pAttr->m_Normalized = true;
@@ -960,8 +960,8 @@ void CMapLayers::OnMapLoad()
 					pAttr->m_FuncType = 0;
 					if(Textured)
 					{
-						ContainerInfo.m_Attributes.emplace_back();
-						pAttr = &ContainerInfo.m_Attributes.back();
+						ContainerInfo.m_vAttributes.emplace_back();
+						pAttr = &ContainerInfo.m_vAttributes.back();
 						pAttr->m_DataTypeCount = 2;
 						pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 						pAttr->m_Normalized = false;
@@ -980,7 +980,7 @@ void CMapLayers::OnMapLoad()
 
 void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA *pColor, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup)
 {
-	STileLayerVisuals &Visuals = *m_TileLayerVisuals[LayerIndex];
+	STileLayerVisuals &Visuals = *m_vpTileLayerVisuals[LayerIndex];
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 
@@ -1097,7 +1097,7 @@ void CMapLayers::RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int Height
 
 void CMapLayers::RenderTileBorder(int LayerIndex, ColorRGBA *pColor, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount)
 {
-	STileLayerVisuals &Visuals = *m_TileLayerVisuals[LayerIndex];
+	STileLayerVisuals &Visuals = *m_vpTileLayerVisuals[LayerIndex];
 
 	int Y0 = BorderY0;
 	int X0 = BorderX0;
@@ -1249,7 +1249,7 @@ void CMapLayers::RenderTileBorder(int LayerIndex, ColorRGBA *pColor, CMapItemLay
 
 void CMapLayers::RenderKillTileBorder(int LayerIndex, ColorRGBA *pColor, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup)
 {
-	STileLayerVisuals &Visuals = *m_TileLayerVisuals[LayerIndex];
+	STileLayerVisuals &Visuals = *m_vpTileLayerVisuals[LayerIndex];
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 
@@ -1361,7 +1361,7 @@ void CMapLayers::RenderKillTileBorder(int LayerIndex, ColorRGBA *pColor, CMapIte
 
 void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer, CMapItemGroup *pGroup, bool Force)
 {
-	SQuadLayerVisuals &Visuals = *m_QuadLayerVisuals[LayerIndex];
+	SQuadLayerVisuals &Visuals = *m_vpQuadLayerVisuals[LayerIndex];
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; //no visuals were created
 

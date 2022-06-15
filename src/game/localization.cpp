@@ -37,7 +37,7 @@ CLocalizationDatabase::CLocalizationDatabase()
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
 {
-	m_Strings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
+	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
@@ -45,7 +45,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	// empty string means unload
 	if(pFilename[0] == 0)
 	{
-		m_Strings.clear();
+		m_vStrings.clear();
 		m_StringsHeap.Reset();
 		m_CurrentVersion = 0;
 		return true;
@@ -58,7 +58,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded '%s'", pFilename);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
-	m_Strings.clear();
+	m_vStrings.clear();
 	m_StringsHeap.Reset();
 
 	char aContext[512];
@@ -113,7 +113,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		AddString(aOrigin, pReplacement, aContext);
 	}
 	io_close(IoHandle);
-	std::sort(m_Strings.begin(), m_Strings.end());
+	std::sort(m_vStrings.begin(), m_vStrings.end());
 
 	m_CurrentVersion = ++m_VersionCounter;
 	return true;
@@ -125,7 +125,7 @@ const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHas
 	String.m_Hash = Hash;
 	String.m_ContextHash = ContextHash;
 	String.m_pReplacement = 0x0;
-	auto Range1 = std::equal_range(m_Strings.begin(), m_Strings.end(), String);
+	auto Range1 = std::equal_range(m_vStrings.begin(), m_vStrings.end(), String);
 	if(std::distance(Range1.first, Range1.second) == 1)
 		return Range1.first->m_pReplacement;
 
@@ -134,7 +134,7 @@ const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHas
 	{
 		// Do another lookup with the default context hash
 		String.m_ContextHash = DefaultHash;
-		auto Range2 = std::equal_range(m_Strings.begin(), m_Strings.end(), String);
+		auto Range2 = std::equal_range(m_vStrings.begin(), m_vStrings.end(), String);
 		if(std::distance(Range2.first, Range2.second) == 1)
 			return Range2.first->m_pReplacement;
 	}
