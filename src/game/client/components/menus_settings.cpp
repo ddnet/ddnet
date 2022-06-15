@@ -3197,7 +3197,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		Button.VSplitLeft(200.0f, &Button, &Checkbox);
 		Button.VSplitLeft(150.0f, &Button, 0);
 		str_format(aBuf, sizeof(aBuf), "%s:", "Finish name");
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		UI()->DoLabel(&Label, aBuf, 14.0f, -1);
 		static float s_OffsetName = 0.0f;
 		UIEx()->DoEditBox(pName, &Button, pName, sizeof(g_Config.m_ClFinishName), 14.0f, &s_OffsetName);
 		if(DoButton_CheckBox(&g_Config.m_ClFinishRename, "Rename on finish", g_Config.m_ClFinishRename, &Checkbox))
@@ -3217,7 +3217,7 @@ void CMenus::RenderSettingsChillerbot(CUIRect MainView)
 		Button.VSplitLeft(200.0f, &Button, &Checkbox);
 		Button.VSplitLeft(150.0f, &Button, 0);
 		str_format(aBuf, sizeof(aBuf), "%s:", "auto reply msg");
-		UI()->DoLabelScaled(&Label, aBuf, 14.0f, -1);
+		UI()->DoLabel(&Label, aBuf, 14.0f, -1);
 		static float s_ReplyMsg = 0.0f;
 		UIEx()->DoEditBox(pReplyMsg, &Button, pReplyMsg, sizeof(g_Config.m_ClAutoReplyMsg), 14.0f, &s_ReplyMsg);
 		if(DoButton_CheckBox(&g_Config.m_ClAutoReply, "Auto reply", g_Config.m_ClAutoReply, &Checkbox))
