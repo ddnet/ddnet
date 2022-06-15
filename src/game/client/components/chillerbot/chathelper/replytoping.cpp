@@ -524,9 +524,8 @@ bool CReplyToPing::Reply()
 			bool FoundName = false;
 			if(Strict)
 			{
-				for(int i = 0; i < MAX_CLIENTS; i++)
+				for(const auto &Client : ChatHelper()->GameClient()->m_aClients)
 				{
-					auto &Client = ChatHelper()->GameClient()->m_aClients[i];
 					if(!Client.m_Active)
 						continue;
 					if(!str_comp(Client.m_aName, aStrippedMsg))
