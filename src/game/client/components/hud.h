@@ -81,6 +81,7 @@ public:
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	void RenderNinjaBarPos(float x, const float y, const float width, const float height, float Progress, float Alpha = 1.0f);
+	void OnHudChange();
 
 private:
 	void RenderRecord();
