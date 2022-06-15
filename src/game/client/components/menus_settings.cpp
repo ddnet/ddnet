@@ -939,7 +939,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 
 float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 {
-	bool JoystickEnabled = g_Config.m_InpJoystickEnable;
+	bool JoystickEnabled = g_Config.m_InpControllerEnable;
 	int NumJoysticks = Input()->NumJoysticks();
 	int NumOptions = 1; // expandable header
 	if(JoystickEnabled)
@@ -951,7 +951,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 			if(NumJoysticks > 1)
 				NumOptions++; // joystick selection
 			NumOptions += 3; // mode, ui sens, tolerance
-			if(!g_Config.m_InpJoystickAbsolute)
+			if(!g_Config.m_InpControllerAbsolute)
 				NumOptions++; // ingame sens
 			NumOptions += Input()->GetActiveJoystick()->GetNumAxes() + 1; // axis selection + header
 		}
@@ -967,9 +967,9 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 	CUIRect Button;
 	View.HSplitTop(Spacing, 0, &View);
 	View.HSplitTop(ButtonHeight, &Button, &View);
-	if(DoButton_CheckBox(&g_Config.m_InpJoystickEnable, Localize("Enable joystick"), g_Config.m_InpJoystickEnable, &Button))
+	if(DoButton_CheckBox(&g_Config.m_InpControllerEnable, Localize("Enable controller"), g_Config.m_InpControllerEnable, &Button))
 	{
-		g_Config.m_InpJoystickEnable ^= 1;
+		g_Config.m_InpControllerEnable ^= 1;
 	}
 	if(JoystickEnabled)
 	{
@@ -982,33 +982,33 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 				View.HSplitTop(ButtonHeight, &Button, &View);
 				static int s_ButtonJoystickId;
 				char aBuf[96];
-				str_format(aBuf, sizeof(aBuf), "Joystick %d: %s", Input()->GetActiveJoystick()->GetIndex(), Input()->GetActiveJoystick()->GetName());
+				str_format(aBuf, sizeof(aBuf), Localize("Controller %d: %s"), Input()->GetActiveJoystick()->GetIndex(), Input()->GetActiveJoystick()->GetName());
 				if(DoButton_Menu(&s_ButtonJoystickId, aBuf, 0, &Button))
 					Input()->SelectNextJoystick();
-				GameClient()->m_Tooltips.DoToolTip(&s_ButtonJoystickId, &Button, Localize("Click to cycle through all available joysticks."));
+				GameClient()->m_Tooltips.DoToolTip(&s_ButtonJoystickId, &Button, Localize("Click to cycle through all available controllers."));
 			}
 
 			{
 				View.HSplitTop(Spacing, 0, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
-				const char *apLabels[] = {Localize("Relative", "Ingame joystick mode"), Localize("Absolute", "Ingame joystick mode")};
-				UIEx()->DoScrollbarOptionLabeled(&g_Config.m_InpJoystickAbsolute, &g_Config.m_InpJoystickAbsolute, &Button, Localize("Ingame joystick mode"), apLabels, std::size(apLabels));
+				const char *apLabels[] = {Localize("Relative", "Ingame controller mode"), Localize("Absolute", "Ingame controller mode")};
+				UIEx()->DoScrollbarOptionLabeled(&g_Config.m_InpControllerAbsolute, &g_Config.m_InpControllerAbsolute, &Button, Localize("Ingame controller mode"), apLabels, std::size(apLabels));
 			}
 
-			if(!g_Config.m_InpJoystickAbsolute)
+			if(!g_Config.m_InpControllerAbsolute)
 			{
 				View.HSplitTop(Spacing, 0, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
-				UIEx()->DoScrollbarOption(&g_Config.m_InpJoystickSens, &g_Config.m_InpJoystickSens, &Button, Localize("Ingame joystick sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+				UIEx()->DoScrollbarOption(&g_Config.m_InpControllerSens, &g_Config.m_InpControllerSens, &Button, Localize("Ingame controller sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 			}
 
 			View.HSplitTop(Spacing, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UIEx()->DoScrollbarOption(&g_Config.m_UiJoystickSens, &g_Config.m_UiJoystickSens, &Button, Localize("UI joystick sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			UIEx()->DoScrollbarOption(&g_Config.m_UiControllerSens, &g_Config.m_UiControllerSens, &Button, Localize("UI controller sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
 			View.HSplitTop(Spacing, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UIEx()->DoScrollbarOption(&g_Config.m_InpJoystickTolerance, &g_Config.m_InpJoystickTolerance, &Button, Localize("Joystick jitter tolerance"), 0, 50);
+			UIEx()->DoScrollbarOption(&g_Config.m_InpControllerTolerance, &g_Config.m_InpControllerTolerance, &Button, Localize("Controller jitter tolerance"), 0, 50);
 
 			View.HSplitTop(Spacing, 0, &View);
 			RenderTools()->DrawUIRect(&View, ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), CUI::CORNER_ALL, 5.0f);
@@ -1018,7 +1018,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 		{
 			View.HSplitTop((View.h - ButtonHeight) / 2.0f, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UI()->DoLabel(&Button, Localize("No joysticks found. Plug in a joystick and restart the game."), 13.0f, TEXTALIGN_CENTER);
+			UI()->DoLabel(&Button, Localize("No controller found. Plug in a controller and restart the game."), 13.0f, TEXTALIGN_CENTER);
 		}
 	}
 
@@ -1050,7 +1050,7 @@ void CMenus::DoJoystickAxisPicker(CUIRect View)
 	static int s_aActive[NUM_JOYSTICK_AXES][2];
 	for(int i = 0; i < minimum<int>(pJoystick->GetNumAxes(), NUM_JOYSTICK_AXES); i++)
 	{
-		bool Active = g_Config.m_InpJoystickX == i || g_Config.m_InpJoystickY == i;
+		bool Active = g_Config.m_InpControllerX == i || g_Config.m_InpControllerY == i;
 
 		View.HSplitTop(Spacing, 0, &View);
 		View.HSplitTop(ButtonHeight, &Row, &View);
@@ -1059,7 +1059,7 @@ void CMenus::DoJoystickAxisPicker(CUIRect View)
 		// Device label
 		Row.VSplitLeft(DeviceLabelWidth, &Button, &Row);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), Localize("Joystick Axis #%d"), i + 1);
+		str_format(aBuf, sizeof(aBuf), Localize("Controller Axis #%d"), i + 1);
 		if(!Active)
 			TextRender()->TextColor(0.7f, 0.7f, 0.7f, 1.0f);
 		else
@@ -1070,23 +1070,23 @@ void CMenus::DoJoystickAxisPicker(CUIRect View)
 		Row.VSplitLeft(StatusMargin, 0, &Row);
 		Row.VSplitLeft(StatusWidth, &Button, &Row);
 		Button.HMargin((ButtonHeight - 14.0f) / 2.0f, &Button);
-		DoJoystickBar(&Button, (pJoystick->GetAxisValue(i) + 1.0f) / 2.0f, g_Config.m_InpJoystickTolerance / 50.0f, Active);
+		DoJoystickBar(&Button, (pJoystick->GetAxisValue(i) + 1.0f) / 2.0f, g_Config.m_InpControllerTolerance / 50.0f, Active);
 
 		// Bind to X,Y
 		Row.VSplitLeft(2 * StatusMargin, 0, &Row);
 		Row.VSplitLeft(BindWidth, &Button, &Row);
-		if(DoButton_CheckBox(&s_aActive[i][0], "X", g_Config.m_InpJoystickX == i, &Button))
+		if(DoButton_CheckBox(&s_aActive[i][0], "X", g_Config.m_InpControllerX == i, &Button))
 		{
-			if(g_Config.m_InpJoystickY == i)
-				g_Config.m_InpJoystickY = g_Config.m_InpJoystickX;
-			g_Config.m_InpJoystickX = i;
+			if(g_Config.m_InpControllerY == i)
+				g_Config.m_InpControllerY = g_Config.m_InpControllerX;
+			g_Config.m_InpControllerX = i;
 		}
 		Row.VSplitLeft(BindWidth, &Button, &Row);
-		if(DoButton_CheckBox(&s_aActive[i][1], "Y", g_Config.m_InpJoystickY == i, &Button))
+		if(DoButton_CheckBox(&s_aActive[i][1], "Y", g_Config.m_InpControllerY == i, &Button))
 		{
-			if(g_Config.m_InpJoystickX == i)
-				g_Config.m_InpJoystickX = g_Config.m_InpJoystickY;
-			g_Config.m_InpJoystickY = i;
+			if(g_Config.m_InpControllerX == i)
+				g_Config.m_InpControllerX = g_Config.m_InpControllerY;
+			g_Config.m_InpControllerY = i;
 		}
 		Row.VSplitLeft(StatusMargin, 0, &Row);
 	}
@@ -1188,7 +1188,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		RenderTools()->DrawUIRect(&JoystickSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
 		JoystickSettings.VMargin(Margin, &JoystickSettings);
 
-		TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Joystick"), -1.0f);
+		TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
 
 		JoystickSettings.HSplitTop(HeaderHeight, 0, &JoystickSettings);
 		s_JoystickSettingsHeight = RenderSettingsControlsJoystick(JoystickSettings) + HeaderHeight + Margin; // + Margin for another bottom margin
@@ -1236,14 +1236,14 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			g_Config.m_InpMousesens = 200;
 			g_Config.m_UiMousesens = 200;
 
-			g_Config.m_InpJoystickEnable = 0;
-			g_Config.m_InpJoystickGUID[0] = '\0';
-			g_Config.m_InpJoystickAbsolute = 0;
-			g_Config.m_InpJoystickSens = 100;
-			g_Config.m_InpJoystickX = 0;
-			g_Config.m_InpJoystickY = 1;
-			g_Config.m_InpJoystickTolerance = 5;
-			g_Config.m_UiJoystickSens = 100;
+			g_Config.m_InpControllerEnable = 0;
+			g_Config.m_InpControllerGUID[0] = '\0';
+			g_Config.m_InpControllerAbsolute = 0;
+			g_Config.m_InpControllerSens = 100;
+			g_Config.m_InpControllerX = 0;
+			g_Config.m_InpControllerY = 1;
+			g_Config.m_InpControllerTolerance = 5;
+			g_Config.m_UiControllerSens = 100;
 		}
 	}
 
