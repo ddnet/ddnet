@@ -139,7 +139,7 @@ bool CReplyToPing::WhyWar(const char *pVictim, bool IsCheck)
 			return true;
 		}
 	}
-	if(IsCheck)
+	if(IsCheck && str_comp_nocase(aVictim, "me"))
 	{
 		str_format(m_pResponse, m_SizeOfResponse, "%s: '%s' is not on my warlist.", m_pMessageAuthor, aVictim);
 		return true;
@@ -684,6 +684,8 @@ bool CReplyToPing::Reply()
 	if(str_find_nocase(m_pMessage, "?") ||
 		str_find_nocase(m_pMessage, "do you") ||
 		str_find_nocase(m_pMessage, "are we") ||
+		str_find_nocase(m_pMessage, "u war") ||
+		str_find_nocase(m_pMessage, "war me?") ||
 		str_find_nocase(m_pMessage, "am i") ||
 		str_find_nocase(m_pMessage, "is i") ||
 		str_find_nocase(m_pMessage, "im your") ||
@@ -697,6 +699,8 @@ bool CReplyToPing::Reply()
 			str_find_nocase(m_pMessage, "i am u enem") || str_find_nocase(m_pMessage, "i am ur enem") || str_find_nocase(m_pMessage, "i am your enem") ||
 			str_find_nocase(m_pMessage, "me war") || str_find_nocase(m_pMessage, "i war") || str_find_nocase(m_pMessage, "me is war") || str_find_nocase(m_pMessage, "i is war") ||
 			str_find_nocase(m_pMessage, "peace") ||
+			(str_find_nocase(m_pMessage, "war me?") && MsgLen < NameLen + 15) ||
+			str_find_nocase(m_pMessage, "u war me") ||
 			str_find_nocase(m_pMessage, "me friend") || str_find_nocase(m_pMessage, "i friend") || str_find_nocase(m_pMessage, "me is friend") || str_find_nocase(m_pMessage, "i is friend") ||
 			str_find_nocase(m_pMessage, "me frint") || str_find_nocase(m_pMessage, "i frint") || str_find_nocase(m_pMessage, "me is frint") || str_find_nocase(m_pMessage, "i is frint") ||
 			str_find_nocase(m_pMessage, "are we in war") || str_find_nocase(m_pMessage, "we war") || str_find_nocase(m_pMessage, "we peace") || str_find_nocase(m_pMessage, "we good") ||
