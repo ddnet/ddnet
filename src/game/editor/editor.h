@@ -811,7 +811,8 @@ public:
 	}
 
 	void Init() override;
-	void UpdateAndRender() override;
+	void OnUpdate() override;
+	void OnRender() override;
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
@@ -942,6 +943,10 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 	bool m_ProofBorders;
+	float m_MouseX = 0.0f;
+	float m_MouseY = 0.0f;
+	float m_MouseWorldX = 0.0f;
+	float m_MouseWorldY = 0.0f;
 	float m_MouseDeltaX;
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;

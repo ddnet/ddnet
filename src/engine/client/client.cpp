@@ -2816,8 +2816,10 @@ void CClient::Update()
 	m_ServerBrowser.Update(m_ResortServerBrowser);
 	m_ResortServerBrowser = false;
 
-	// update gameclient
-	if(!m_EditorActive)
+	// update editor/gameclient
+	if(m_EditorActive)
+		m_pEditor->OnUpdate();
+	else
 		GameClient()->OnUpdate();
 
 	Discord()->Update();
@@ -3224,7 +3226,7 @@ void CClient::Run()
 							Render();
 						else
 						{
-							m_pEditor->UpdateAndRender();
+							m_pEditor->OnRender();
 							DebugRender();
 						}
 						m_pGraphics->Swap();
@@ -3237,7 +3239,7 @@ void CClient::Run()
 						Render();
 					else
 					{
-						m_pEditor->UpdateAndRender();
+						m_pEditor->OnRender();
 						DebugRender();
 					}
 					m_pGraphics->Swap();
