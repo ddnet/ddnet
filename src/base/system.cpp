@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <array> // std::size
 #include <atomic>
 #include <cctype>
 #include <cmath>
@@ -9,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <iterator> // std::size
 #include <thread>
 
 #include "system.h"

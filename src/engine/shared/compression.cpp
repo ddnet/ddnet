@@ -4,7 +4,7 @@
 
 #include "compression.h"
 
-#include <array> // std::size
+#include <iterator> // std::size
 
 // Format: ESDDDDDD EDDDDDDD EDD... Extended, Data, Sign
 unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
