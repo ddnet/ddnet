@@ -173,7 +173,7 @@ void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 		Factor = g_Config.m_UiMousesens / 100.0f;
 		break;
 	case IInput::CURSOR_JOYSTICK:
-		Factor = g_Config.m_UiJoystickSens / 100.0f;
+		Factor = g_Config.m_UiControllerSens / 100.0f;
 		break;
 	default:
 		dbg_msg("assert", "CUI::ConvertMouseMove CursorType %d", (int)CursorType);

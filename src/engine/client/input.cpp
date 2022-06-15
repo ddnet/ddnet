@@ -129,7 +129,7 @@ void CInput::UpdateActiveJoystick()
 	m_pActiveJoystick = nullptr;
 	for(auto &Joystick : m_vJoysticks)
 	{
-		if(str_comp(Joystick.GetGUID(), g_Config.m_InpJoystickGUID) == 0)
+		if(str_comp(Joystick.GetGUID(), g_Config.m_InpControllerGUID) == 0)
 		{
 			m_pActiveJoystick = &Joystick;
 			return;
@@ -148,7 +148,7 @@ void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUser
 
 float CInput::GetJoystickDeadzone()
 {
-	return g_Config.m_InpJoystickTolerance / 50.0f;
+	return g_Config.m_InpControllerTolerance / 50.0f;
 }
 
 CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
@@ -185,7 +185,7 @@ void CInput::SelectNextJoystick()
 	if(Num > 1)
 	{
 		m_pActiveJoystick = &m_vJoysticks[(m_pActiveJoystick->GetIndex() + 1) % Num];
-		str_copy(g_Config.m_InpJoystickGUID, m_pActiveJoystick->GetGUID(), sizeof(g_Config.m_InpJoystickGUID));
+		str_copy(g_Config.m_InpControllerGUID, m_pActiveJoystick->GetGUID(), sizeof(g_Config.m_InpControllerGUID));
 	}
 }
 
@@ -217,10 +217,10 @@ int CInput::CJoystick::GetHatValue(int Hat)
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
 {
-	if(!g_Config.m_InpJoystickEnable)
+	if(!g_Config.m_InpControllerEnable)
 		return false;
 
-	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpJoystickX), GetAxisValue(g_Config.m_InpJoystickY));
+	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpControllerX), GetAxisValue(g_Config.m_InpControllerY));
 	const float Len = length(RawJoystickPos);
 	const float DeadZone = Input()->GetJoystickDeadzone();
 	if(Len > DeadZone)
@@ -235,10 +235,10 @@ bool CInput::CJoystick::Relative(float *pX, float *pY)
 
 bool CInput::CJoystick::Absolute(float *pX, float *pY)
 {
-	if(!Input()->m_MouseFocus || !Input()->m_InputGrabbed || !g_Config.m_InpJoystickEnable)
+	if(!Input()->m_MouseFocus || !Input()->m_InputGrabbed || !g_Config.m_InpControllerEnable)
 		return false;
 
-	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpJoystickX), GetAxisValue(g_Config.m_InpJoystickY));
+	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpControllerX), GetAxisValue(g_Config.m_InpControllerY));
 	const float DeadZone = Input()->GetJoystickDeadzone();
 	if(dot(RawJoystickPos, RawJoystickPos) > DeadZone * DeadZone)
 	{
@@ -364,7 +364,7 @@ void CInput::UpdateMouseState()
 
 void CInput::UpdateJoystickState()
 {
-	if(!g_Config.m_InpJoystickEnable)
+	if(!g_Config.m_InpControllerEnable)
 		return;
 	IJoystick *pJoystick = GetActiveJoystick();
 	if(!pJoystick)
@@ -390,7 +390,7 @@ void CInput::UpdateJoystickState()
 
 void CInput::HandleJoystickAxisMotionEvent(const SDL_Event &Event)
 {
-	if(!g_Config.m_InpJoystickEnable)
+	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
 	if(!pJoystick || pJoystick->GetInstanceID() != Event.jaxis.which)
@@ -429,7 +429,7 @@ void CInput::HandleJoystickAxisMotionEvent(const SDL_Event &Event)
 
 void CInput::HandleJoystickButtonEvent(const SDL_Event &Event)
 {
-	if(!g_Config.m_InpJoystickEnable)
+	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
 	if(!pJoystick || pJoystick->GetInstanceID() != Event.jbutton.which)
@@ -454,7 +454,7 @@ void CInput::HandleJoystickButtonEvent(const SDL_Event &Event)
 
 void CInput::HandleJoystickHatMotionEvent(const SDL_Event &Event)
 {
-	if(!g_Config.m_InpJoystickEnable)
+	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
 	if(!pJoystick || pJoystick->GetInstanceID() != Event.jhat.which)
