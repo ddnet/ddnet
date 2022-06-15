@@ -1266,8 +1266,8 @@ void CHud::RenderDummyActions()
 		return;
 	}
 	// render small dummy actions hud
-	const float BoxHeight = 27.0f;
-	const float BoxWidth = 14.0f;
+	const float BoxHeight = 29.0f;
+	const float BoxWidth = 16.0f;
 
 	float StartX = m_Width - BoxWidth;
 	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
@@ -1289,8 +1289,8 @@ void CHud::RenderDummyActions()
 	Graphics()->QuadsEnd();
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	float y = StartY + 1;
-	float x = StartX + 1;
+	float y = StartY + 2;
+	float x = StartX + 2;
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 	if(g_Config.m_ClDummyHammer)
 	{
