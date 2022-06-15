@@ -46,35 +46,51 @@ bool CMatDefault::Get(const char *pName, float *pValue) const
 	return false;
 }
 
-CMatDefault &CMaterials::operator[](int Index) const
+CMaterials::CMaterials()
+{
+	m_apMaterials = {
+		new CMatDefault(),
+		new CMatPlaceholder()};
+}
+
+CMaterials::~CMaterials()
+{
+	for(CMatDefault *Mat : m_apMaterials)
+	{
+		delete Mat;
+	}
+	m_apMaterials.clear();
+}
+
+CMatDefault &CMaterials::operator[](int Index)
 {
 	switch(Index)
 	{
-	case MAT_PLACEHOLDER: return const_cast<CMatDefault &>(ms_aMaterials[1]);
+	case MAT_PLACEHOLDER: return *m_apMaterials[1];
 	}
-	return const_cast<CMatDefault &>(ms_aMaterials[0]);
+	return *m_apMaterials[MAT_DEFAULT];
 }
 
 float CMaterials::GetGroundControlSpeed(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight)
 {
-	return HandleMaterialInteraction(GroundedLeft, GroundedRight, ms_aMaterials[MaterialLeft].m_GroundControlSpeed, ms_aMaterials[MaterialRight].m_GroundControlSpeed, [](float a, float b) { return minimum(a, b); });
+	return HandleMaterialInteraction(GroundedLeft, GroundedRight, At(MaterialLeft).m_GroundControlSpeed, At(MaterialRight).m_GroundControlSpeed, [](float a, float b) { return minimum(a, b); });
 }
 
 float CMaterials::GetGroundControlAccel(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight)
 {
-	return HandleMaterialInteraction(GroundedLeft, GroundedRight, ms_aMaterials[MaterialLeft].m_GroundControlAccel, ms_aMaterials[MaterialRight].m_GroundControlAccel, [](float a, float b) { return maximum(a, b); });
+	return HandleMaterialInteraction(GroundedLeft, GroundedRight, At(MaterialLeft).m_GroundControlAccel, At(MaterialRight).m_GroundControlAccel, [](float a, float b) { return maximum(a, b); });
 }
 
 float CMaterials::GetGroundFriction(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight)
 {
 	// Note: Higher friction VALUE means LOWER physical friction
-	return HandleMaterialInteraction(GroundedLeft, GroundedRight, ms_aMaterials[MaterialLeft].m_GroundFriction, ms_aMaterials[MaterialRight].m_GroundFriction, [](float a, float b) { return minimum(a, b); });
+	return HandleMaterialInteraction(GroundedLeft, GroundedRight, At(MaterialLeft).m_GroundFriction, At(MaterialRight).m_GroundFriction, [](float a, float b) { return minimum(a, b); });
 }
 
 float CMaterials::GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight)
 {
 	// you sticked to something with one leg, average it?
-	return HandleMaterialInteraction(GroundedLeft, GroundedRight, ms_aMaterials[MaterialLeft].m_GroundJumpImpulse, ms_aMaterials[MaterialRight].m_GroundJumpImpulse, [](float a, float b) { return (a + b) / 2; });
+	return HandleMaterialInteraction(GroundedLeft, GroundedRight, At(MaterialLeft).m_GroundJumpImpulse, At(MaterialRight).m_GroundJumpImpulse, [](float a, float b) { return (a + b) / 2; });
 }
 
 float CMaterials::HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)> &function)

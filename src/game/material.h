@@ -5,6 +5,7 @@
 #ifndef GAME_MATERIAL_H
 #define GAME_MATERIAL_H
 
+#include "mapitems.h"
 #include <base/system.h>
 #include <functional>
 #include <vector>
@@ -73,9 +74,14 @@ public:
 class CMaterials
 {
 public:
-	CMaterials() = default;
-	CMatDefault &operator[](int Index) const;
-	CMatDefault *Tuning() { return const_cast<CMatDefault *>(&ms_aMaterials[0]); }
+	~CMaterials();
+
+	CMaterials(CMaterials const &) = delete;
+	CMaterials &operator=(CMaterials const &) = delete;
+
+	//TODO split this into Get and Set
+	CMatDefault &At(int Index) { return (*this)[Index]; }
+	CMatDefault *Tuning() { return m_apMaterials[MAT_DEFAULT]; }
 
 	//multi material interactions (ground)
 	float GetGroundControlSpeed(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
@@ -83,12 +89,17 @@ public:
 	float GetGroundFriction(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 	float GetGroundJumpImpulse(bool GroundedLeft, bool GroundedRight, int MaterialLeft, int MaterialRight);
 
+	static CMaterials *GetInstance()
+	{
+		static CMaterials instance;
+		return &instance;
+	}
+
 private:
+	CMaterials();
+	CMatDefault &operator[](int Index);
 	float HandleMaterialInteraction(bool GroundedLeft, bool GroundedRight, float ValueLeft, float ValueRight, const std::function<float(float, float)> &function);
-	static const inline std::vector<CMatDefault> ms_aMaterials{
-		CMatDefault(),
-		CMatPlaceholder(),
-	};
+	std::vector<CMatDefault *> m_apMaterials;
 };
 
 #endif //GAME_MATERIAL_H

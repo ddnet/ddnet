@@ -263,7 +263,7 @@ public:
 	bool m_IsInFreeze;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
-	CMaterials m_Material;
+	CMaterials *m_pMaterial;
 
 private:
 	CTeamsCore *m_pTeams;
