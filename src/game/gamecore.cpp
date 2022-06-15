@@ -26,8 +26,9 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_pTeams = pTeams;
 	m_Id = -1;
 
+	m_pMaterial = CMaterials::GetInstance();
 	// fail safe, if core's tuning didn't get updated at all, just fallback to world tuning.
-	m_Material[0] = m_pWorld->m_Tuning[g_Config.m_ClDummy];
+	m_pMaterial->At(MAT_DEFAULT) = m_pWorld->m_Tuning[g_Config.m_ClDummy];
 	Reset();
 }
 
@@ -99,14 +100,14 @@ void CCharacterCore::Tick(bool UseInput)
 
 	//material handling
 	int CenterMaterialID = m_pCollision->GetMaterial(m_Pos.x, m_Pos.y);
-	CMatDefault AirMaterial = m_Material[CenterMaterialID];
-	CMatDefault DefaultMaterial = m_Material[MAT_DEFAULT];
+	CMatDefault& AirMaterial = m_pMaterial->At(CenterMaterialID);
+	CMatDefault& DefaultMaterial = m_pMaterial->At(MAT_DEFAULT);
 
 	m_Vel.y += AirMaterial.m_Gravity;
 
-	float MaxSpeed = Grounded ? m_Material.GetGroundControlSpeed(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID) : AirMaterial.m_AirControlSpeed;
-	float Accel = Grounded ? m_Material.GetGroundControlAccel(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID) : AirMaterial.m_AirControlAccel;
-	float Friction = Grounded ? m_Material.GetGroundFriction(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID) : AirMaterial.m_AirFriction;
+	float MaxSpeed = Grounded ? m_pMaterial->GetGroundControlSpeed(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID) : AirMaterial.m_AirControlSpeed;
+	float Accel = Grounded ? m_pMaterial->GetGroundControlAccel(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID) : AirMaterial.m_AirControlAccel;
+	float Friction = Grounded ? m_pMaterial->GetGroundFriction(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID) : AirMaterial.m_AirFriction;
 
 	// handle input
 	if(UseInput)
@@ -138,7 +139,7 @@ void CCharacterCore::Tick(bool UseInput)
 				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
-					m_Vel.y = -m_Material.GetGroundJumpImpulse(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID);
+					m_Vel.y = -m_pMaterial->GetGroundJumpImpulse(GroundedLeft, GroundedRight, GroundMaterialLeftID, GroundMaterialRightID);
 					if(m_Jumps > 1)
 					{
 						m_Jumped |= 1;
@@ -434,7 +435,7 @@ void CCharacterCore::Tick(bool UseInput)
 void CCharacterCore::Move()
 {
 	//material handling
-	CMatDefault DefaultMaterial = m_Material[MAT_DEFAULT];
+	CMatDefault& DefaultMaterial = m_pMaterial->At(MAT_DEFAULT);
 	float RampValue = VelocityRamp(length(m_Vel) * 50, DefaultMaterial.m_VelrampStart, DefaultMaterial.m_VelrampRange, DefaultMaterial.m_VelrampCurvature);
 
 	m_Vel.x = m_Vel.x * RampValue;

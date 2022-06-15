@@ -1170,7 +1170,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
 	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
-	CMatDefault DefaultMaterial = m_Core.m_Material[MAT_DEFAULT];
+	CMatDefault &DefaultMaterial = m_Core.m_pMaterial->At(MAT_DEFAULT);
 	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, DefaultMaterial.m_VelrampStart, DefaultMaterial.m_VelrampRange, DefaultMaterial.m_VelrampCurvature) * 1000.0f);
 }
 
@@ -1922,9 +1922,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Material[MAT_DEFAULT] = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_pMaterial->At(MAT_DEFAULT) = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Material[MAT_DEFAULT] = *GameServer()->Tuning();
+		m_Core.m_pMaterial->At(MAT_DEFAULT) = *GameServer()->Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
