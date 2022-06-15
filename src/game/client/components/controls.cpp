@@ -370,7 +370,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
 		return false;
 
-	if(CursorType == IInput::CURSOR_JOYSTICK && g_Config.m_InpJoystickAbsolute && m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(CursorType == IInput::CURSOR_JOYSTICK && g_Config.m_InpControllerAbsolute && m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
 		float AbsX = 0.0f, AbsY = 0.0f;
 		if(Input()->GetActiveJoystick()->Absolute(&AbsX, &AbsY))
@@ -391,7 +391,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 			Factor = g_Config.m_InpMousesens / 100.0f;
 			break;
 		case IInput::CURSOR_JOYSTICK:
-			Factor = g_Config.m_InpJoystickSens / 100.0f;
+			Factor = g_Config.m_InpControllerSens / 100.0f;
 			break;
 		default:
 			dbg_msg("assert", "CControls::OnCursorMove CursorType %d", (int)CursorType);
