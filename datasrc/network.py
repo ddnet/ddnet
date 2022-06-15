@@ -25,7 +25,8 @@ GameInfoFlags = [
 	# Full, use GameInfoFlags2 for more flags
 ]
 GameInfoFlags2 = [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
+	"HUD_DDRACE",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
@@ -63,7 +64,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=6,
+	GAMEINFO_CURVERSION=7,
 };
 '''
 
