@@ -843,73 +843,75 @@ void CHud::RenderPlayerState(const int ClientID)
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-
-	int TotalJumpsToDisplay, AvailableJumpsToDisplay;
-	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	int TotalJumpsToDisplay = 0, AvailableJumpsToDisplay = 0;
+	if(g_Config.m_ClShowJumpsIndicator)
 	{
-		bool Grounded = false;
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
-			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
-			Grounded = true;
+			bool Grounded = false;
+			if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
+				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			{
+				Grounded = true;
+			}
+			if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
+				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			{
+				Grounded = true;
+			}
+
+			int UsedJumps = pCharacter->m_JumpedTotal;
+			if(pCharacter->m_Jumps > 1)
+			{
+				UsedJumps += !Grounded;
+			}
+			else if(pCharacter->m_Jumps == 1)
+			{
+				// If the player has only one jump, each jump is the last one
+				UsedJumps = pCharacter->m_Jumped & 2;
+			}
+			else if(pCharacter->m_Jumps == -1)
+			{
+				// The player has only one ground jump
+				UsedJumps = !Grounded;
+			}
+
+			if(pCharacter->m_EndlessJump && UsedJumps >= abs(pCharacter->m_Jumps))
+			{
+				UsedJumps = abs(pCharacter->m_Jumps) - 1;
+			}
+
+			int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
+			if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
+			{
+				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
+				UnusedJumps = 1;
+			}
+			TotalJumpsToDisplay = maximum(minimum(abs(pCharacter->m_Jumps), 10), 0);
+			AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
-			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+		else
 		{
-			Grounded = true;
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = abs(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
 		}
 
-		int UsedJumps = pCharacter->m_JumpedTotal;
-		if(pCharacter->m_Jumps > 1)
+		// render available and used jumps
+		int JumpsOffsetY = ((GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
+				    (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
+		if(JumpsOffsetY > 0)
 		{
-			UsedJumps += !Grounded;
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay, 0, JumpsOffsetY);
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay, 0, JumpsOffsetY);
 		}
-		else if(pCharacter->m_Jumps == 1)
+		else
 		{
-			// If the player has only one jump, each jump is the last one
-			UsedJumps = pCharacter->m_Jumped & 2;
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
 		}
-		else if(pCharacter->m_Jumps == -1)
-		{
-			// The player has only one ground jump
-			UsedJumps = !Grounded;
-		}
-
-		if(pCharacter->m_EndlessJump && UsedJumps >= abs(pCharacter->m_Jumps))
-		{
-			UsedJumps = abs(pCharacter->m_Jumps) - 1;
-		}
-
-		int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
-		if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
-		{
-			// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
-			UnusedJumps = 1;
-		}
-		TotalJumpsToDisplay = maximum(minimum(abs(pCharacter->m_Jumps), 10), 0);
-		AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
-	}
-	else
-	{
-		TotalJumpsToDisplay = AvailableJumpsToDisplay = abs(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
-	}
-
-	// render available and used jumps
-	int JumpsOffsetY = ((GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
-			    (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
-	if(JumpsOffsetY > 0)
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
-		Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay, 0, JumpsOffsetY);
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
-		Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay, 0, JumpsOffsetY);
-	}
-	else
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
 	}
 
 	float x = 5 + 12;
