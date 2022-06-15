@@ -83,7 +83,7 @@ protected:
 	virtual bool IsNewApi() { return false; }
 	void DestroyTexture(int Slot);
 
-	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) override;
+	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) override;
 
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static size_t GLFormatToImageColorChannelCount(int GLFormat);

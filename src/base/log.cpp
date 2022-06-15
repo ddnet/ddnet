@@ -206,9 +206,9 @@ public:
 	}
 };
 
-std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers)
+std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers)
 {
-	return std::make_unique<CLoggerCollection>(std::move(loggers));
+	return std::make_unique<CLoggerCollection>(std::move(vpLoggers));
 }
 
 class CLoggerAsync : public ILogger

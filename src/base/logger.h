@@ -166,7 +166,7 @@ std::unique_ptr<ILogger> log_logger_android();
  *
  * Logger combining a vector of other loggers.
  */
-std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers);
+std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers);
 
 /**
  * @ingroup Log

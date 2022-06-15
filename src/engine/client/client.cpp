@@ -4386,22 +4386,22 @@ int main(int argc, const char **argv)
 	init_exception_handler();
 #endif
 
-	std::vector<std::shared_ptr<ILogger>> apLoggers;
+	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 #if defined(CONF_PLATFORM_ANDROID)
-	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
 #else
 	if(!Silent)
 	{
-		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
 	}
 #endif
 	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureFileLogger);
+	vpLoggers.push_back(pFutureFileLogger);
 	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureConsoleLogger);
+	vpLoggers.push_back(pFutureConsoleLogger);
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureAssertionLogger);
-	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+	vpLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
 	if(secure_random_init() != 0)
 	{

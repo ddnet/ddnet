@@ -5,7 +5,7 @@
 
 class CCommandProcessorFragment_Null : public CCommandProcessorFragment_GLBase
 {
-	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) override { return false; };
+	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) override { return false; };
 	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
 	bool Cmd_Init(const SCommand_Init *pCommand);
 	virtual void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand);

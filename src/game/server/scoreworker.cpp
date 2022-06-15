@@ -80,13 +80,13 @@ bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pErro
 	return false;
 }
 
-bool CTeamrank::SamePlayers(const std::vector<std::string> *aSortedNames)
+bool CTeamrank::SamePlayers(const std::vector<std::string> *pvSortedNames)
 {
-	if(aSortedNames->size() != m_NumNames)
+	if(pvSortedNames->size() != m_NumNames)
 		return false;
 	for(unsigned int i = 0; i < m_NumNames; i++)
 	{
-		if(str_comp(aSortedNames->at(i).c_str(), m_aaNames[i]) != 0)
+		if(str_comp(pvSortedNames->at(i).c_str(), m_aaNames[i]) != 0)
 			return false;
 	}
 	return true;
@@ -487,11 +487,11 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 	char aBuf[512];
 
 	// get the names sorted in a tab separated string
-	std::vector<std::string> aNames;
+	std::vector<std::string> vNames;
 	for(unsigned int i = 0; i < pData->m_Size; i++)
-		aNames.emplace_back(pData->m_aaNames[i]);
+		vNames.emplace_back(pData->m_aaNames[i]);
 
-	std::sort(aNames.begin(), aNames.end());
+	std::sort(vNames.begin(), vNames.end());
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT l.ID, Name, Time "
 		"FROM (" // preselect teams with first name in team
@@ -526,7 +526,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			{
 				return true;
 			}
-			if(Teamrank.SamePlayers(&aNames))
+			if(Teamrank.SamePlayers(&vNames))
 			{
 				FoundTeam = true;
 				break;

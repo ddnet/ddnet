@@ -2305,12 +2305,12 @@ int CMenus::Render()
 
 void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 {
-	std::vector<CTheme> &ThemesRef = m_pBackground->GetThemes();
+	std::vector<CTheme> &vThemesRef = m_pBackground->GetThemes();
 
 	int SelectedTheme = -1;
-	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	for(int i = 0; i < (int)vThemesRef.size(); i++)
 	{
-		if(str_comp(ThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
+		if(str_comp(vThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
 		{
 			SelectedTheme = i;
 			break;
@@ -2319,13 +2319,13 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	static int s_ListBox = 0;
 	static float s_ScrollValue = 0.0f;
-	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", ThemesRef.size(), 1, -1, s_ScrollValue);
+	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", vThemesRef.size(), 1, -1, s_ScrollValue);
 
-	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	for(int i = 0; i < (int)vThemesRef.size(); i++)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&ThemesRef[i].m_Name, i == SelectedTheme);
+		CListboxItem Item = UiDoListboxNextItem(&vThemesRef[i].m_Name, i == SelectedTheme);
 
-		CTheme &Theme = ThemesRef[i];
+		CTheme &Theme = vThemesRef[i];
 
 		if(!Item.m_Visible)
 			continue;
@@ -2370,8 +2370,8 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	if(ItemActive && NewSelected != SelectedTheme)
 	{
-		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.c_str());
-		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
+		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", vThemesRef[NewSelected].m_Name.c_str());
+		m_pBackground->LoadMenuBackground(vThemesRef[NewSelected].m_HasDay, vThemesRef[NewSelected].m_HasNight);
 	}
 }
 

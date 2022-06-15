@@ -3226,17 +3226,17 @@ void CGameClient::SnapCollectEntities()
 {
 	int NumSnapItems = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 
-	std::vector<CSnapEntities> aItemData;
-	std::vector<CSnapEntities> aItemEx;
+	std::vector<CSnapEntities> vItemData;
+	std::vector<CSnapEntities> vItemEx;
 
 	for(int Index = 0; Index < NumSnapItems; Index++)
 	{
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
 		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
-			aItemEx.push_back({Item, pData, 0});
+			vItemEx.push_back({Item, pData, 0});
 		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
-			aItemData.push_back({Item, pData, 0});
+			vItemData.push_back({Item, pData, 0});
 	}
 
 	// sort by id
@@ -3249,20 +3249,20 @@ void CGameClient::SnapCollectEntities()
 		}
 	};
 
-	std::sort(aItemData.begin(), aItemData.end(), CEntComparer());
-	std::sort(aItemEx.begin(), aItemEx.end(), CEntComparer());
+	std::sort(vItemData.begin(), vItemData.end(), CEntComparer());
+	std::sort(vItemEx.begin(), vItemEx.end(), CEntComparer());
 
 	// merge extended items with items they belong to
 	m_vSnapEntities.clear();
 
 	size_t IndexEx = 0;
-	for(const CSnapEntities &Ent : aItemData)
+	for(const CSnapEntities &Ent : vItemData)
 	{
 		const CNetObj_EntityEx *pDataEx = 0;
-		while(IndexEx < aItemEx.size() && aItemEx[IndexEx].m_Item.m_ID < Ent.m_Item.m_ID)
+		while(IndexEx < vItemEx.size() && vItemEx[IndexEx].m_Item.m_ID < Ent.m_Item.m_ID)
 			IndexEx++;
-		if(IndexEx < aItemEx.size() && aItemEx[IndexEx].m_Item.m_ID == Ent.m_Item.m_ID)
-			pDataEx = (const CNetObj_EntityEx *)aItemEx[IndexEx].m_pData;
+		if(IndexEx < vItemEx.size() && vItemEx[IndexEx].m_Item.m_ID == Ent.m_Item.m_ID)
+			pDataEx = (const CNetObj_EntityEx *)vItemEx[IndexEx].m_pData;
 
 		m_vSnapEntities.push_back({Ent.m_Item, Ent.m_pData, pDataEx});
 	}

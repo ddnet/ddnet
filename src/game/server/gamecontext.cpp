@@ -3060,11 +3060,11 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	std::vector<CMapNameItem> MapList;
-	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, "maps", MapScan, &MapList);
-	std::sort(MapList.begin(), MapList.end());
+	std::vector<CMapNameItem> vMapList;
+	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, "maps", MapScan, &vMapList);
+	std::sort(vMapList.begin(), vMapList.end());
 
-	for(auto &Item : MapList)
+	for(auto &Item : vMapList)
 	{
 		char aDescription[64];
 		str_format(aDescription, sizeof(aDescription), "Map: %s", Item.m_aName);
