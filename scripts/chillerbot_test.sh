@@ -59,6 +59,7 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 # shellcheck disable=SC2211
 ./chillerbot-* \
 	"cl_input_fifo client1.fifo;
+	cl_shownotifications 0;
 	cl_chat_spam_filter 0;
 	player_name client1;
 	cl_tabbed_out_msg 0;
@@ -66,6 +67,7 @@ echo "bullied me in school" > chillerbot/warlist/war/foo/reason.txt
 # shellcheck disable=SC2211
 ./chillerbot-* \
 	'cl_input_fifo client2.fifo;
+	cl_shownotifications 0;
 	cl_chat_spam_filter 0;
 	player_name client2;
 	cl_tabbed_out_msg 0;
@@ -88,6 +90,7 @@ ins+=('client2: warum hat       foo war?');outs+=('client1: foo has war because:
 ins+=('client2 hast du eig war mit samplename300 ?');outs+=("client1: 'samplename300' is not on my warlist.")
 ins+=('client2 do you war foo?');outs+=('client1: foo has war because: bullied me in school')
 ins+=('hi client2');outs+=('hi client1')
+ins+=('client2: are we peace');outs+=('client1 you have war because: bullied me in school')
 ins+=('client2 how are you?');outs+=('client1 good, and you? :)')
 ins+=('wats ur inp_mousesens? client2');outs+=('client1 my current inp_mousesens is 1000')
 ins+=('client2: why?');outs+=('client1 has war because: bullied me in school')
@@ -152,6 +155,20 @@ function run_tests() {
 		fi
 	done
 }
+
+run_tests
+
+echo "player_name not_client1" > client1.fifo
+
+ins=()
+outs=()
+ins+=('client2: are we peace');outs+=('not_client1 your name is neither on my friend nor enemy list.')
+ins+=('client2 do you have war with client9 ?');outs+=("not_client1: 'client9' is not on my warlist.")
+ins+=('client2: where are you?');outs+=('not_client1 no idea. Where are you?')
+ins+=('client2: client1 is ur war ?');outs+=('not_client1: client1 has war because: bullied me in school')
+ins+=('client2: do you have war with clientP ?');outs+=("not_client1: 'clientP' is not on my warlist.")
+ins+=('client2: im your enemy?');outs+=('not_client1 your name is neither on my friend nor enemy list.')
+ins+=('client2: is clientX on your warlist?');outs+=("not_client1: 'is clientX' is not on my warlist.")
 
 run_tests
 

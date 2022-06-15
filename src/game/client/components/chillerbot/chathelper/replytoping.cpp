@@ -147,6 +147,86 @@ bool CReplyToPing::WhyWar(const char *pVictim, bool IsCheck)
 	return false;
 }
 
+int CReplyToPing::GetSuffixLen(const char *pStr, const char *pSuffix)
+{
+	if(str_endswith(pStr, pSuffix))
+		return str_length(pSuffix);
+	return 0;
+}
+
+void CReplyToPing::StripSpacesAndPunctuationAndOwnName(const char *pStr, char *pStripped, int SizeOfStripped)
+{
+	dbg_assert(SizeOfStripped < 512, "too big to strip");
+	if(pStr == pStripped)
+	{
+		pStripped[0] = '\0';
+		return;
+	}
+	if(!pStr)
+	{
+		pStripped[0] = '\0';
+		return;
+	}
+	if(!pStripped)
+	{
+		pStripped[0] = '\0';
+		return;
+	}
+	if(SizeOfStripped < 1)
+	{
+		pStripped[0] = '\0';
+		return;
+	}
+	char aBuf[512];
+	str_copy(aBuf, pStr, sizeof(aBuf));
+	while(str_endswith(aBuf, "?")) // cut off the question marks
+		aBuf[str_length(aBuf) - 1] = '\0';
+	while(str_endswith(aBuf, " ")) // cut off spaces
+		aBuf[str_length(aBuf) - 1] = '\0';
+	int Offset = 0;
+	const char *pName = ChatHelper()->GameClient()->m_aClients[ChatHelper()->GameClient()->m_LocalIDs[0]].m_aName;
+	const char *pDummyName = ChatHelper()->GameClient()->m_aClients[ChatHelper()->GameClient()->m_LocalIDs[1]].m_aName;
+	char aName[128];
+	str_format(aName, sizeof(aName), "%s: ", pName);
+	if(!Offset && str_startswith(pStr, aName))
+		Offset = str_length(aName);
+	str_format(aName, sizeof(aName), "%s ", pName);
+	if(!Offset && str_startswith(pStr, aName))
+		Offset = str_length(aName);
+	str_format(aName, sizeof(aName), "%s", pName);
+	if(!Offset && str_startswith(pStr, aName))
+		Offset = str_length(aName);
+	if(ChatHelper()->GameClient()->Client()->DummyConnected())
+	{
+		str_format(aName, sizeof(aName), "%s: ", pDummyName);
+		if(!Offset && str_startswith(pStr, aName))
+			Offset = str_length(aName);
+		str_format(aName, sizeof(aName), "%s ", pDummyName);
+		if(!Offset && str_startswith(pStr, aName))
+			Offset = str_length(aName);
+		str_format(aName, sizeof(aName), "%s", pDummyName);
+		if(!Offset && str_startswith(pStr, aName))
+			Offset = str_length(aName);
+	}
+	if(Offset >= str_length(aBuf))
+		pStripped[0] = '\0';
+	else
+		str_copy(pStripped, aBuf + Offset, SizeOfStripped);
+}
+
+bool CReplyToPing::IsEmptyStr(const char *pStr)
+{
+	if(!pStr)
+		return true;
+	for(int i = 0; pStr[i] != '\0'; i++)
+		if(pStr[i] != ' ' && pStr[i] != 0x7)
+		{
+			dbg_msg("chiller", "'%c' != ' ' (%d)", pStr[i], pStr[i]);
+			return false;
+		}
+	return true;
+}
+
 bool CReplyToPing::Reply()
 {
 	if(!m_pResponse)
@@ -286,6 +366,12 @@ bool CReplyToPing::Reply()
 			pKill = pKill + str_length("bullied ");
 		else if((pKill = str_find_nocase(pWhy, "freeze "))) // why freeze foo?
 			pKill = pKill + str_length("freeze ");
+		else if((pKill = str_find_nocase(pWhy, "warlist "))) // is warlist foo?
+			pKill = pKill + str_length("warlist ");
+		else if((pKill = str_find_nocase(pWhy, "enemi "))) // is enemi foo?
+			pKill = pKill + str_length("enemi ");
+		else if((pKill = str_find_nocase(pWhy, "enemy "))) // is enemy foo?
+			pKill = pKill + str_length("enemy ");
 
 		if(WhyWar(pKill))
 			return true;
@@ -309,6 +395,14 @@ bool CReplyToPing::Reply()
 		if(CutOffWar != -1)
 			if(WhyWar(aWhy + trim))
 				return true;
+
+		char aStripped[128];
+		StripSpacesAndPunctuationAndOwnName(pKill, aStripped, sizeof(aStripped));
+		if(!IsEmptyStr(aStripped))
+		{
+			str_format(m_pResponse, m_SizeOfResponse, "%s: '%s' is not on my warlist. axaxaxax", m_pMessageAuthor, aStripped);
+			return true;
+		}
 	}
 	// why? (check war for self)
 	if(LangParser().IsQuestionWhy(m_pMessage) || (str_find(m_pMessage, "?") && MsgLen < NameLen + 4) ||
@@ -342,6 +436,71 @@ bool CReplyToPing::Reply()
 				str_format(m_pResponse, m_SizeOfResponse, "%s i might kill you because i war member of your clan", m_pMessageAuthor);
 				return true;
 			}
+		}
+	}
+	// still check war for others but now different order
+	// also cover "name is war?" in addition to "is war name?"
+	int ChopEnding = 0;
+	char aStrippedMsg[256];
+	StripSpacesAndPunctuationAndOwnName(m_pMessage, aStrippedMsg, sizeof(aStrippedMsg));
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " is ur war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " is u war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " is your war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " is you war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " ur war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " u war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " your war");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on your warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on you warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on ur warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on u warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on your war list");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on you war list");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on ur war list");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " on u war list");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " in your warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " in you warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " in ur warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " in u warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " your warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " you warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " ur warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " u warlist");
+	if(!ChopEnding)
+		ChopEnding = GetSuffixLen(aStrippedMsg, " warlist");
+
+	if(ChopEnding)
+	{
+		unsigned int Cut = str_length(aStrippedMsg) - ChopEnding;
+		if(Cut > 0 && Cut < sizeof(aStrippedMsg))
+		{
+			aStrippedMsg[str_length(aStrippedMsg) - ChopEnding] = '\0';
+			if(!WhyWar(aStrippedMsg))
+				str_format(m_pResponse, m_SizeOfResponse, "%s: '%s' is not on my warlist.", m_pMessageAuthor, aStrippedMsg);
+			return true;
 		}
 	}
 
@@ -488,11 +647,15 @@ bool CReplyToPing::Reply()
 		str_find_nocase(m_pMessage, "are we") ||
 		str_find_nocase(m_pMessage, "am i") ||
 		str_find_nocase(m_pMessage, "is i") ||
+		str_find_nocase(m_pMessage, "im your") ||
 		str_find_nocase(m_pMessage, "what") ||
 		str_find_nocase(m_pMessage, "show") ||
 		str_find_nocase(m_pMessage, "wat"))
 	{
 		if(str_find_nocase(m_pMessage, "me enem") || str_find_nocase(m_pMessage, "i enem") || str_find_nocase(m_pMessage, "me is enem") || str_find_nocase(m_pMessage, "i is enem") ||
+			str_find_nocase(m_pMessage, "i u enem") || str_find_nocase(m_pMessage, "i ur enem") || str_find_nocase(m_pMessage, "i your enem") ||
+			str_find_nocase(m_pMessage, "im u enem") || str_find_nocase(m_pMessage, "im ur enem") || str_find_nocase(m_pMessage, "im your enem") ||
+			str_find_nocase(m_pMessage, "i am u enem") || str_find_nocase(m_pMessage, "i am ur enem") || str_find_nocase(m_pMessage, "i am your enem") ||
 			str_find_nocase(m_pMessage, "me war") || str_find_nocase(m_pMessage, "i war") || str_find_nocase(m_pMessage, "me is war") || str_find_nocase(m_pMessage, "i is war") ||
 			str_find_nocase(m_pMessage, "peace") ||
 			str_find_nocase(m_pMessage, "me friend") || str_find_nocase(m_pMessage, "i friend") || str_find_nocase(m_pMessage, "me is friend") || str_find_nocase(m_pMessage, "i is friend") ||
@@ -549,6 +712,8 @@ bool CReplyToPing::Reply()
 
 			// TODO: dont get current dummy but the pinged dummy
 			CCharacter *pChar = ChatHelper()->GameClient()->m_GameWorld.GetCharacterByID(ChatHelper()->GameClient()->m_LocalIDs[g_Config.m_ClDummy]);
+			if(pChar)
+				continue;
 			vec2 Self = pChar->m_Pos;
 			vec2 Other = Client.m_RenderPos;
 			float distY = abs(Self.y - Other.y);
@@ -632,6 +797,8 @@ bool CReplyToPing::Reply()
 				}
 			}
 		}
+		str_format(m_pResponse, m_SizeOfResponse, "%s no idea. Where are you?", m_pMessageAuthor);
+		return true;
 	}
 
 	// spec me
