@@ -674,14 +674,12 @@ void CHud::PrepareAmmoHealthAndArmorQuads()
 	float y = 5;
 	IGraphics::CQuadItem Array[10];
 
-	int AmmoOffset = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
-
 	// ammo of the different weapons
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		// 0.6
 		for(int n = 0; n < 10; n++)
-			Array[n] = IGraphics::CQuadItem(x + n * 12, y + AmmoOffset, 10, 10);
+			Array[n] = IGraphics::CQuadItem(x + n * 12, y, 10, 10);
 
 		m_AmmoOffset[i] = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
@@ -690,12 +688,12 @@ void CHud::PrepareAmmoHealthAndArmorQuads()
 		{
 			// special case for 0.7 grenade
 			for(int n = 0; n < 10; n++)
-				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y + AmmoOffset, 10, 10);
+				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y, 10, 10);
 		}
 		else
 		{
 			for(int n = 0; n < 10; n++)
-				Array[n] = IGraphics::CQuadItem(x + n * 12, y + AmmoOffset, 12, 12);
+				Array[n] = IGraphics::CQuadItem(x + n * 12, y, 12, 12);
 		}
 
 		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
@@ -753,11 +751,19 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	if(GameClient()->m_GameInfo.m_HudAmmo)
 	{
 		// ammo display
+		float AmmoOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
 		int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
 		if(m_pClient->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
 		{
 			Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
-			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10));
+			if(AmmoOffsetY > 0)
+			{
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10), 0, AmmoOffsetY);
+			}
+			else
+			{
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10));
+			}
 		}
 	}
 
@@ -900,13 +906,26 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 
 	// render available and used jumps
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
+	int JumpsOffsetY = ((GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
+			    (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
+	if(JumpsOffsetY > 0)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+		Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay, 0, JumpsOffsetY);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+		Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay, 0, JumpsOffsetY);
+	}
+	else
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
+	}
 
 	float x = 5 + 12;
-	float y = 5 + 12;
+	float y = (5 + 12 + (GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
+		   (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
 
 	if(GameClient()->m_GameInfo.m_HudHealthArmor)
 		y += 24;
