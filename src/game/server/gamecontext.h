@@ -7,6 +7,7 @@
 #include <engine/console.h>
 #include <engine/server.h>
 
+#include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>

@@ -7,7 +7,9 @@
 #include "entities/character.h"
 #include "gamecontext.h"
 #include <engine/server.h>
+
 #include <game/gamecore.h>
+#include <game/teamscore.h>
 #include <game/version.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)

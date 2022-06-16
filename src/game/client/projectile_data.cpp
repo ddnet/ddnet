@@ -7,6 +7,8 @@
 #include <game/client/prediction/gameworld.h>
 #include <game/generated/protocol.h>
 
+#include <game/collision.h>
+
 bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
 {
 	return pProj->m_VelY >= 0 && (pProj->m_VelY & PROJECTILEFLAG_IS_DDNET) != 0;

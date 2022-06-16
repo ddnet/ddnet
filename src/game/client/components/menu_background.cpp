@@ -11,6 +11,7 @@
 #include <game/client/components/maplayers.h>
 
 #include <game/layers.h>
+#include <game/mapitems.h>
 
 #include "menu_background.h"
 

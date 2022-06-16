@@ -3,7 +3,12 @@
 #ifndef GAME_LAYERS_H
 #define GAME_LAYERS_H
 
-#include <game/mapitems.h>
+class IKernel;
+class IMap;
+
+struct CMapItemGroup;
+struct CMapItemLayer;
+struct CMapItemLayerTilemap;
 
 class CLayers
 {
@@ -13,17 +18,17 @@ class CLayers
 	int m_LayersStart;
 	CMapItemGroup *m_pGameGroup;
 	CMapItemLayerTilemap *m_pGameLayer;
-	class IMap *m_pMap;
+	IMap *m_pMap;
 
 	void InitTilemapSkip();
 
 public:
 	CLayers();
-	void Init(class IKernel *pKernel);
-	void InitBackground(class IMap *pMap);
+	void Init(IKernel *pKernel);
+	void InitBackground(IMap *pMap);
 	int NumGroups() const { return m_GroupsNum; }
 	int NumLayers() const { return m_LayersNum; }
-	class IMap *Map() const { return m_pMap; }
+	IMap *Map() const { return m_pMap; }
 	CMapItemGroup *GameGroup() const { return m_pGameGroup; }
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; }
 	CMapItemGroup *GetGroup(int Index) const;
