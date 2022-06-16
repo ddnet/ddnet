@@ -256,18 +256,33 @@ int CControls::SnapInput(int *pData)
 		if(g_Config.m_ClDummyCopyMoves)
 		{
 			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
-			pDummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction;
-			pDummyInput->m_Hook = m_InputData[g_Config.m_ClDummy].m_Hook;
-			pDummyInput->m_Jump = m_InputData[g_Config.m_ClDummy].m_Jump;
+			if(g_Config.m_ClDummyCopyDirection)
+				pDummyInput->m_Direction = m_InputData[g_Config.m_ClDummy].m_Direction;
+
+			if(g_Config.m_ClDummyCopyHook)
+				pDummyInput->m_Hook = m_InputData[g_Config.m_ClDummy].m_Hook;
+
+			if(g_Config.m_ClDummyCopyJump)
+				pDummyInput->m_Jump = m_InputData[g_Config.m_ClDummy].m_Jump;
+
+			if(g_Config.m_ClDummyCopyAim)
+			{
+				pDummyInput->m_TargetX = m_InputData[g_Config.m_ClDummy].m_TargetX;
+				pDummyInput->m_TargetY = m_InputData[g_Config.m_ClDummy].m_TargetY;
+				m_MousePos[!g_Config.m_ClDummy] = m_MousePos[g_Config.m_ClDummy];
+			}
+			
+			if(g_Config.m_ClDummyCopyFire)
+				pDummyInput->m_Fire += m_InputData[g_Config.m_ClDummy].m_Fire - m_LastData[g_Config.m_ClDummy].m_Fire;
+
+			if(g_Config.m_ClDummyCopyWeapon)
+			{
+				pDummyInput->m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
+				pDummyInput->m_NextWeapon += m_InputData[g_Config.m_ClDummy].m_NextWeapon - m_LastData[g_Config.m_ClDummy].m_NextWeapon;
+				pDummyInput->m_PrevWeapon += m_InputData[g_Config.m_ClDummy].m_PrevWeapon - m_LastData[g_Config.m_ClDummy].m_PrevWeapon;
+			}
+
 			pDummyInput->m_PlayerFlags = m_InputData[g_Config.m_ClDummy].m_PlayerFlags;
-			pDummyInput->m_TargetX = m_InputData[g_Config.m_ClDummy].m_TargetX;
-			pDummyInput->m_TargetY = m_InputData[g_Config.m_ClDummy].m_TargetY;
-			pDummyInput->m_WantedWeapon = m_InputData[g_Config.m_ClDummy].m_WantedWeapon;
-
-			pDummyInput->m_Fire += m_InputData[g_Config.m_ClDummy].m_Fire - m_LastData[g_Config.m_ClDummy].m_Fire;
-			pDummyInput->m_NextWeapon += m_InputData[g_Config.m_ClDummy].m_NextWeapon - m_LastData[g_Config.m_ClDummy].m_NextWeapon;
-			pDummyInput->m_PrevWeapon += m_InputData[g_Config.m_ClDummy].m_PrevWeapon - m_LastData[g_Config.m_ClDummy].m_PrevWeapon;
-
 			m_InputData[!g_Config.m_ClDummy] = *pDummyInput;
 		}
 

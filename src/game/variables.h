@@ -144,6 +144,12 @@ MACRO_CONFIG_INT(ClDummyHammer, cl_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT | CFGFL
 MACRO_CONFIG_INT(ClDummyResetOnSwitch, cl_dummy_resetonswitch, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Whether dummy or player should stop pressing keys when you switch. 0 = off, 1 = dummy, 2 = player")
 MACRO_CONFIG_INT(ClDummyRestoreWeapon, cl_dummy_restore_weapon, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Whether dummy should switch to last weapon after hammerfly")
 MACRO_CONFIG_INT(ClDummyCopyMoves, cl_dummy_copy_moves, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your moves")
+MACRO_CONFIG_INT(ClDummyCopyDirection, cl_dummy_copy_direction, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your direction (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyJump, cl_dummy_copy_jump, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your jump (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyFire, cl_dummy_copy_fire, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your fire (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyHook, cl_dummy_copy_hook, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your hook (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyAim, cl_dummy_copy_aim, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your aim (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyWeapon, cl_dummy_copy_weapon, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your selected weapon (requires cl_dummy_copy_moves 1)")
 
 // more controlable dummy command
 MACRO_CONFIG_INT(ClDummyControl, cl_dummy_control, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether can you control dummy at the same time (cl_dummy_jump, cl_dummy_fire, cl_dummy_hook)")
