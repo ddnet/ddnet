@@ -231,8 +231,8 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 bool CRaceDemo::CheckDemo(int Time)
 {
-	std::vector<CDemoItem> lDemos;
-	CDemoListParam Param = {this, &lDemos, Client()->GetCurrentMap()};
+	std::vector<CDemoItem> vDemos;
+	CDemoListParam Param = {this, &vDemos, Client()->GetCurrentMap()};
 	m_RaceDemosLoadStartTime = time_get_nanoseconds();
 	SRaceDemoFetchUser User;
 	User.m_pParam = &Param;
@@ -240,7 +240,7 @@ bool CRaceDemo::CheckDemo(int Time)
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &User);
 
 	// loop through demo files
-	for(auto &Demo : lDemos)
+	for(auto &Demo : vDemos)
 	{
 		if(Time >= Demo.m_Time) // found a better demo
 			return false;

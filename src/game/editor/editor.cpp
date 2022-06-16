@@ -112,11 +112,11 @@ CLayerGroup::CLayerGroup()
 }
 
 template<typename T>
-static void DeleteAll(std::vector<T> &List)
+static void DeleteAll(std::vector<T> &vList)
 {
-	for(auto &Item : List)
+	for(auto &Item : vList)
 		delete Item;
-	List.clear();
+	vList.clear();
 }
 
 CLayerGroup::~CLayerGroup()
@@ -1348,7 +1348,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 	// some basic values
 	void *pID = &pQuad->m_aPoints[4]; // use pivot addr as id
-	static std::vector<std::vector<CPoint>> s_lRotatePoints;
+	static std::vector<std::vector<CPoint>> s_vvRotatePoints;
 	static int s_Operation = OP_NONE;
 	static float s_RotateAngle = 0;
 	float wx = UI()->MouseWorldX();
@@ -1461,7 +1461,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
 					for(int v = 0; v < 4; v++)
 					{
-						pCurrentQuad->m_aPoints[v] = s_lRotatePoints[i][v];
+						pCurrentQuad->m_aPoints[v] = s_vvRotatePoints[i][v];
 						Rotate(&pCurrentQuad->m_aPoints[4], &pCurrentQuad->m_aPoints[v], s_RotateAngle);
 					}
 				}
@@ -1537,17 +1537,17 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					SelectQuad(Index);
 
 				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-				s_lRotatePoints.clear();
-				s_lRotatePoints.resize(m_vSelectedQuads.size());
+				s_vvRotatePoints.clear();
+				s_vvRotatePoints.resize(m_vSelectedQuads.size());
 				for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
 
-					s_lRotatePoints[i].resize(4);
-					s_lRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
-					s_lRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
-					s_lRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
-					s_lRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
+					s_vvRotatePoints[i].resize(4);
+					s_vvRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
+					s_vvRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
+					s_vvRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
+					s_vvRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
 				}
 			}
 			else
@@ -5022,8 +5022,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	if(pEnvelope)
 	{
-		static std::vector<int> Selection;
-		static int sEnvelopeEditorID = 0;
+		static std::vector<int> s_vSelection;
+		static int s_EnvelopeEditorID = 0;
 		static int s_ActiveChannels = 0xf;
 
 		ColorRGBA aColors[] = {ColorRGBA(1, 0.2f, 0.2f), ColorRGBA(0.2f, 1, 0.2f), ColorRGBA(0.2f, 0.2f, 1), ColorRGBA(1, 1, 0.2f)};
@@ -5088,9 +5088,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		float ValueScale = (Top - Bottom) / View.h;
 
 		if(UI()->MouseInside(&View))
-			UI()->SetHotItem(&sEnvelopeEditorID);
+			UI()->SetHotItem(&s_EnvelopeEditorID);
 
-		if(UI()->HotItem() == &sEnvelopeEditorID)
+		if(UI()->HotItem() == &s_EnvelopeEditorID)
 		{
 			// do stuff
 			if(pEnvelope)
@@ -5305,8 +5305,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					{
 						if(UI()->MouseButton(0))
 						{
-							Selection.clear();
-							Selection.push_back(i);
+							s_vSelection.clear();
+							s_vSelection.push_back(i);
 							UI()->SetActiveItem(pID);
 							// track it
 							s_pID = pID;
@@ -6390,67 +6390,53 @@ void CEditor::PlaceBorderTiles()
 		pT->m_pTiles[i].m_Index = 1;
 }
 
-void CEditor::UpdateAndRender()
+void CEditor::OnUpdate()
 {
-	static float s_MouseX = 0.0f;
-	static float s_MouseY = 0.0f;
-
 	if(!m_EditorWasUsedBefore)
 	{
 		m_EditorWasUsedBefore = true;
 		Reset();
 	}
 
-	if(m_Animate)
-		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
-	else
-		m_AnimateTime = 0;
-	ms_pUiGotContext = nullptr;
-
-	UI()->StartCheck();
-
 	// handle mouse movement
-	float mx, my, Mwx, Mwy;
-	float rx = 0, ry = 0;
 	{
-		IInput::ECursorType CursorType = Input()->CursorRelative(&rx, &ry);
-		if(CursorType != IInput::CURSOR_NONE)
-			UIEx()->ConvertMouseMove(&rx, &ry, CursorType);
-		UIEx()->ResetMouseSlow();
+		static double s_MouseX = 0.0f;
+		static double s_MouseY = 0.0f;
 
-		m_MouseDeltaX = rx;
-		m_MouseDeltaY = ry;
+		float MouseRelX = 0.0f, MouseRelY = 0.0f;
+		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
+		if(CursorType != IInput::CURSOR_NONE)
+			UIEx()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
+		UIEx()->ResetMouseSlow();
 
 		if(!m_LockMouse)
 		{
-			s_MouseX = clamp<float>(s_MouseX + rx, 0.0f, Graphics()->WindowWidth());
-			s_MouseY = clamp<float>(s_MouseY + ry, 0.0f, Graphics()->WindowHeight());
+			s_MouseX = clamp<float>(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth());
+			s_MouseY = clamp<float>(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight());
 		}
 
-		// update the ui
-		mx = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
-		my = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
-		Mwx = 0;
-		Mwy = 0;
+		// update positions for ui, but only update ui when rendering
+		m_MouseX = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
+		m_MouseY = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
 
 		// fix correct world x and y
-		CLayerGroup *g = GetSelectedGroup();
-		if(g)
+		CLayerGroup *pGroup = GetSelectedGroup();
+		if(pGroup)
 		{
 			float aPoints[4];
-			g->Mapping(aPoints);
+			pGroup->Mapping(aPoints);
 
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 
-			Mwx = aPoints[0] + WorldWidth * ((float)s_MouseX / Graphics()->WindowWidth());
-			Mwy = aPoints[1] + WorldHeight * ((float)s_MouseY / Graphics()->WindowHeight());
-
-			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->ScreenWidth());
-			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->ScreenHeight());
+			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
+			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
 		}
-
-		UI()->Update(mx, my, Mwx, Mwy);
+		else
+		{
+			m_MouseWorldX = 0.0f;
+			m_MouseWorldY = 0.0f;
+		}
 	}
 
 	// toggle gui
@@ -6459,6 +6445,23 @@ void CEditor::UpdateAndRender()
 
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
+}
+
+void CEditor::OnRender()
+{
+	if(m_Animate)
+		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
+	else
+		m_AnimateTime = 0;
+
+	ms_pUiGotContext = nullptr;
+	UI()->StartCheck();
+
+	m_MouseDeltaX = m_MouseX - UI()->MouseX();
+	m_MouseDeltaY = m_MouseY - UI()->MouseY();
+	m_MouseDeltaWx = m_MouseWorldX - UI()->MouseWorldX();
+	m_MouseDeltaWy = m_MouseWorldY - UI()->MouseWorldY();
+	UI()->Update(m_MouseX, m_MouseY, m_MouseWorldX, m_MouseWorldY);
 
 	Render();
 

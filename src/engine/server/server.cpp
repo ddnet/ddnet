@@ -3787,22 +3787,22 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	std::vector<std::shared_ptr<ILogger>> apLoggers;
+	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 #if defined(CONF_PLATFORM_ANDROID)
-	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
 #else
 	if(!Silent)
 	{
-		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
 	}
 #endif
 	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureFileLogger);
+	vpLoggers.push_back(pFutureFileLogger);
 	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureConsoleLogger);
+	vpLoggers.push_back(pFutureConsoleLogger);
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureAssertionLogger);
-	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+	vpLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
 	if(secure_random_init() != 0)
 	{
@@ -3936,34 +3936,34 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	if(!File)
 		return 0;
 
-	std::vector<char *> Lines;
+	std::vector<char *> vpLines;
 	char *pLine;
 	CLineReader Reader;
 	Reader.Init(File);
 	while((pLine = Reader.Get()))
 		if(str_length(pLine))
 			if(pLine[0] != '#')
-				Lines.push_back(pLine);
+				vpLines.push_back(pLine);
 
-	if(Lines.empty())
+	if(vpLines.empty())
 	{
 		return 0;
 	}
-	else if(Lines.size() == 1)
+	else if(vpLines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
 	else if(!Config()->m_SvAnnouncementRandom)
 	{
-		if(++m_AnnouncementLastLine >= Lines.size())
-			m_AnnouncementLastLine %= Lines.size();
+		if(++m_AnnouncementLastLine >= vpLines.size())
+			m_AnnouncementLastLine %= vpLines.size();
 	}
 	else
 	{
 		unsigned Rand;
 		do
 		{
-			Rand = rand() % Lines.size();
+			Rand = rand() % vpLines.size();
 		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
@@ -3971,7 +3971,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 
 	io_close(File);
 
-	return Lines[m_AnnouncementLastLine];
+	return vpLines[m_AnnouncementLastLine];
 }
 
 int *CServer::GetIdMap(int ClientID)
