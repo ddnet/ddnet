@@ -2490,20 +2490,18 @@ int CServer::LoadMap(const char *pMapName)
 
 	// load complete map into memory for download
 	{
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		m_aCurrentMapSize[MAP_TYPE_SIX] = (unsigned int)io_length(File);
 		free(m_apCurrentMapData[MAP_TYPE_SIX]);
-		m_apCurrentMapData[MAP_TYPE_SIX] = (unsigned char *)malloc(m_aCurrentMapSize[MAP_TYPE_SIX]);
-		io_read(File, m_apCurrentMapData[MAP_TYPE_SIX], m_aCurrentMapSize[MAP_TYPE_SIX]);
-		io_close(File);
+		void *pData;
+		Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIX]);
+		m_apCurrentMapData[MAP_TYPE_SIX] = (unsigned char *)pData;
 	}
 
 	// load sixup version of the map
 	if(Config()->m_SvSixup)
 	{
 		str_format(aBuf, sizeof(aBuf), "maps7/%s.map", pMapName);
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		if(!File)
+		void *pData;
+		if(!Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIXUP]))
 		{
 			Config()->m_SvSixup = 0;
 			if(m_pRegister)
@@ -2516,11 +2514,8 @@ int CServer::LoadMap(const char *pMapName)
 		}
 		else
 		{
-			m_aCurrentMapSize[MAP_TYPE_SIXUP] = (unsigned int)io_length(File);
 			free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
-			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)malloc(m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			io_read(File, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			io_close(File);
+			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)pData;
 
 			m_aCurrentMapSha256[MAP_TYPE_SIXUP] = sha256(m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
 			m_aCurrentMapCrc[MAP_TYPE_SIXUP] = crc32(0, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);

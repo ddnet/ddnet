@@ -4384,18 +4384,15 @@ public:
 		auto it = m_ShaderFiles.find(pFileName);
 		if(it == m_ShaderFiles.end())
 		{
-			auto *pShaderCodeFile = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
+			void *pShaderBuff;
+			unsigned FileSize;
+			if(!m_pStorage->ReadFile(pFileName, IStorage::TYPE_ALL, &pShaderBuff, &FileSize))
+				return false;
 
 			std::vector<uint8_t> vShaderBuff;
-			if(pShaderCodeFile)
-			{
-				long FileSize = io_length(pShaderCodeFile);
-				vShaderBuff.resize(FileSize);
-				io_read(pShaderCodeFile, vShaderBuff.data(), FileSize);
-				io_close(pShaderCodeFile);
-			}
-			else
-				return false;
+			vShaderBuff.reserve(FileSize);
+			mem_copy(vShaderBuff.data(), pShaderBuff, FileSize);
+			free(pShaderBuff);
 
 			it = m_ShaderFiles.insert({pFileName, {std::move(vShaderBuff)}}).first;
 		}

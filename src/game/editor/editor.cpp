@@ -3744,36 +3744,26 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	// load external
-	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
-	if(!SoundFile)
+	void *pData;
+	unsigned DataSize;
+	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
 		return;
 	}
-
-	// read the whole file into memory
-	int DataSize = io_length(SoundFile);
-
-	if(DataSize <= 0)
-	{
-		io_close(SoundFile);
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
-		return;
-	}
-
-	void *pData = malloc((unsigned)DataSize);
-	io_read(SoundFile, pData, (unsigned)DataSize);
-	io_close(SoundFile);
 
 	// load sound
 	int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned)DataSize, true);
 	if(SoundId == -1)
+	{
+		free(pData);
 		return;
+	}
 
 	// add sound
 	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
-	pSound->m_DataSize = (unsigned)DataSize;
+	pSound->m_DataSize = DataSize;
 	pSound->m_pData = pData;
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
@@ -3796,26 +3786,13 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	CEditor *pEditor = (CEditor *)pUser;
 
 	// load external
-	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
-	if(!SoundFile)
+	void *pData;
+	unsigned DataSize;
+	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
 		return;
 	}
-
-	// read the whole file into memory
-	int DataSize = io_length(SoundFile);
-
-	if(DataSize <= 0)
-	{
-		io_close(SoundFile);
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
-		return;
-	}
-
-	void *pData = malloc((unsigned)DataSize);
-	io_read(SoundFile, pData, (unsigned)DataSize);
-	io_close(SoundFile);
 
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
