@@ -1261,7 +1261,7 @@ Refreshing...
 == Odświeżanie
 
 Leak IP
-== Ujawnij swój adres IP temu serwerowi
+== Ujawnij IP
 
 Settings file
 == Plik ustawień
