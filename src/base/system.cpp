@@ -54,10 +54,6 @@
 #include <mach/mach_time.h>
 #endif
 
-#ifdef CONF_PLATFORM_ANDROID
-#include <android/log.h>
-#endif
-
 #elif defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
