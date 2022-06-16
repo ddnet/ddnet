@@ -3517,7 +3517,7 @@ void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Graphics()->WaitForIdle();
 		// pause the sound device while creating the video instance
 		pSelf->Sound()->PauseAudioDevice();
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
+		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
 		pSelf->Sound()->UnpauseAudioDevice();
 		IVideo::Current()->Start();
 		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
@@ -3542,7 +3542,7 @@ void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char
 		pSelf->Graphics()->WaitForIdle();
 		// pause the sound device while creating the video instance
 		pSelf->Sound()->PauseAudioDevice();
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->m_pConsole, pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
+		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
 		pSelf->Sound()->UnpauseAudioDevice();
 		IVideo::Current()->Start();
 	}
