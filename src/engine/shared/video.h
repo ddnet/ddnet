@@ -18,7 +18,7 @@ public:
 	virtual void NextVideoFrame() = 0;
 	virtual void NextVideoFrameThread() = 0;
 
-	virtual void NextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames)) = 0;
+	virtual void NextAudioFrame(ISoundMixFunc Mix) = 0;
 	virtual void NextAudioFrameTimeline(ISoundMixFunc Mix) = 0;
 
 	static IVideo *Current() { return ms_pCurrentVideo; }
