@@ -5,6 +5,7 @@
 #include "uuid_manager.h"
 
 #include <climits>
+#include <cstdlib>
 
 #include <base/system.h>
 #include <game/generated/protocolglue.h>

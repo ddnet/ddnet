@@ -5,18 +5,14 @@
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <iterator> // std::size
-#include <thread>
 
 #include "system.h"
 
 #include "lock_scope.h"
 #include "logger.h"
 
-#include <sys/stat.h>
 #include <sys/types.h>
 
 #include <chrono>
@@ -29,6 +25,7 @@
 
 #if defined(CONF_FAMILY_UNIX)
 #include <csignal>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
@@ -37,7 +34,6 @@
 /* unix net includes */
 #include <arpa/inet.h>
 #include <cerrno>
-#include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -70,9 +66,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include <direct.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <io.h>
 #include <process.h>
 #include <share.h>
