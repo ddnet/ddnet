@@ -2013,6 +2013,7 @@ if(CLIENT)
     components/chillerbot/chatcommands.h
     components/chillerbot/chathelper.cpp
     components/chillerbot/chathelper.h
+    components/chillerbot/chathelper/ichathelper.h
     components/chillerbot/chathelper/replytoping.cpp
     components/chillerbot/chathelper/replytoping.h
     components/chillerbot/chillconsole.cpp
