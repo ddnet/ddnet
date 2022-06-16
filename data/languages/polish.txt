@@ -6,6 +6,7 @@
 #	Tsin			2011-04-06 23:15:58
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
+#	CROACH			2022-05-15 21:41:32
 ##### /authors #####
 
 ##### translated strings #####
@@ -254,7 +255,7 @@ Movement
 == Ruch
 
 Mute when not active
-== Wycisz, kiedy gra nieaktywna
+== Wycisz, kiedy gra jest nieaktywna
 
 Name
 == Nazwa
@@ -1197,10 +1198,10 @@ Play
 == Graj
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Szerokość tekstury %s nie jest podzielna przez %d, lub wysokość nie jest podzielna przez %d, co może spowodować błędy wizualne.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formatem tekstury %s nie jest RGBA, co może spowodować błędy wizualne.
 
 Position:
 == 
@@ -1224,61 +1225,61 @@ No answer from server yet.
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Czy na pewno chcesz się rozłączyć i przełączyć na inny serwer?
 
 Join Tutorial Server
-== 
+== Dołącz do serwera samouczkowego
 
 Skip Tutorial
-== 
+== Pomiń samouczek
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Pobieranie listy serwerów z serwera głównego
 
 Refreshing...
-== 
+== Odświeżanie
 
 Leak IP
-== 
+== Ujawnij IP
 
 Settings file
-== 
+== Plik ustawień
 
 Config directory
-== 
+== Lokalizacja konfiguracji
 
 Toggle to edit your dummy settings
-== 
+== Przełącz aby edytować ustawienia kukły
 
 Download community skins
 == 
 
 Choose default eyes when joining a server
-== 
+== Wybierz domyślne oczy, podczas dołączenia do serwera
 
 Chat command
-== 
+== Komenda czatu
 
 Enable controller
 == 
@@ -1337,37 +1338,37 @@ Controller
 == 
 
 Dummy
-== 
+== Kukła
 
 Windowed
-== 
+== W oknie
 
 Windowed borderless
-== 
+== W oknie bez ramki
 
 Windowed fullscreen
-== 
+== W oknie pełnoekranowym
 
 Desktop fullscreen
-== 
+== Pełnoekranowy z przełączaniem innych okien
 
 Allows maps to render with more detail
-== 
+== Pozwala na renderowanie map z większą ilością detali
 
 Renderer
-== 
+== Technologia renderowania
 
 default
-== 
+== domyślny
 
 custom
-== 
+== niestandardowy
 
 Graphics cards
-== 
+== Karty graficzne
 
 auto
-== 
+== automatyczny
 
 Use DDRace HUD
 == 
@@ -1379,7 +1380,7 @@ Show freeze bars
 == 
 
 Show client IDs
-== 
+== Pokazuj ID klientów
 
 Show player position
 == 
@@ -1391,82 +1392,82 @@ Show player target angle
 == 
 
 Kill Messages
-== 
+== Wiadomości o zabiciu
 
 Kill Message Normal Color
-== 
+== Kolor normalnej wiadomości o zabiciu
 
 Kill Message Highlight Color
-== 
+== Kolor wyróżnionej wiadomości o zabiciu
 
 Laser Outline Color
-== 
+== Zewnętrzny kolor lasera
 
 Laser Inner Color
-== 
+== Wewnętrzny kolor lasera
 
 Hookline
-== 
+== Linia kolizyjna
 
 No hit
-== 
+== Brak kolizji
 
 Hookable
-== 
+== Blok kolizyjny
 
 Tee
-== 
+== Gracz
 
 Preview
-== 
+== Podgląd
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Podczas przekroczenia linii startu, pokaż duszka z Twoim najlepszym czasem
 
 Opacity
-== 
+== Przezroczystość
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Dopasuj przezroczystość obiektów należących do innych drużyn, takich jak duszki i nicki
 
 Quads are used for background decoration
-== 
+== Kwadry są używane do dekoracji tła
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Próbuje przewidzieć ruchy innych stworzeń, aby dostarczyć wrażenie niskiego opóźnienia
 
 Show local player's key presses
-== 
+== Pokazuj klawisze, które są wciśnięte
 
 Background
-== 
+== Tło
 
 Entities Background color
-== 
+== Kolor tła stworzeń
 
 Regular Background Color
-== 
+== Kolor tła normalnego
 
 Run on join
-== 
+== Uruchom po dołączeniu
 
 Chat command (e.g. showall 1)
-== 
+== Komenda czatu (np. showall 1)
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 Tutorial
-== 
+== Samouczek
 
 Can't find a Tutorial server
-== 
+== Nie można znaleźć serwera samouczkowego
 
 Super
-== 
+== Super
 
 Team %d
-== 
+== Drużyna %d
