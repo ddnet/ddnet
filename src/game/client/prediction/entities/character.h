@@ -177,7 +177,7 @@ private:
 	void DDRacePostCoreTick();
 	void HandleTuneLayer();
 
-	CTuningParams *CharacterTuning();
+	CMatDefault *CharacterTuning();
 
 	int m_StrongWeakID;
 

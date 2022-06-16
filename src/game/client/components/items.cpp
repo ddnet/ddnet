@@ -25,7 +25,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
+	CMatDefault Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
 	if(CurWeapon == WEAPON_GRENADE)
 	{
 		Curvature = Tuning.m_GrenadeCurvature;
@@ -550,7 +550,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
+	CMatDefault Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
 
 	if(pCurrent->m_Type == WEAPON_GRENADE)
 	{

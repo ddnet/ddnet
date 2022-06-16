@@ -86,6 +86,11 @@ bool IsValidTuneTile(int Index)
 	return Index == TILE_TUNE;
 }
 
+bool IsValidMaterialTile(int Index)
+{
+	return Index > MAT_DEFAULT && Index < NUM_MATERIALS;
+}
+
 bool IsValidEntity(int Index)
 {
 	Index -= ENTITY_OFFSET;

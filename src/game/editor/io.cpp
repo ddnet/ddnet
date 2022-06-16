@@ -217,6 +217,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 					Item.m_Flags = TILESLAYERFLAG_SWITCH;
 				else if(pLayerTiles->m_Tune)
 					Item.m_Flags = TILESLAYERFLAG_TUNE;
+				else if(pLayerTiles->m_Material)
+					Item.m_Flags = TILESLAYERFLAG_MATERIAL;
 				else
 					Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
 
@@ -228,6 +230,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 				Item.m_Front = -1;
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
+				Item.m_Material = -1;
 
 				if(Item.m_Flags && !(pLayerTiles->m_Game))
 				{
@@ -246,6 +249,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 						Item.m_Switch = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), ((CLayerSwitch *)pLayerTiles)->m_pSwitchTile);
 					else if(pLayerTiles->m_Tune)
 						Item.m_Tune = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), ((CLayerTune *)pLayerTiles)->m_pTuneTile);
+					else if(pLayerTiles->m_Material)
+						Item.m_Material = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CMaterialTile), ((CLayerMaterial *)pLayerTiles)->m_pMaterialTile);
 				}
 				else
 					Item.m_Data = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
@@ -677,6 +682,14 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pTiles = new CLayerTune(pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeTuneLayer(pTiles);
 						}
+						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_MATERIAL)
+						{
+							if(pTilemapItem->m_Version <= 2)
+								pTilemapItem->m_Material = *((int *)(pTilemapItem) + 20);
+
+							pTiles = new CLayerMaterial(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							MakeMaterialLayer(pTiles);
+						}
 						else
 						{
 							pTiles = new CLayerTiles(pTilemapItem->m_Width, pTilemapItem->m_Height);
@@ -823,6 +836,25 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tune);
+						}
+						else if(pTiles->m_Material)
+						{
+							void *pMaterialData = DataFile.GetData(pTilemapItem->m_Material);
+							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Material);
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CMaterialTile))
+							{
+								CMaterialTile *pLayerMaterialTiles = ((CLayerMaterial *)pTiles)->m_pMaterialTile;
+								mem_copy(((CLayerMaterial *)pTiles)->m_pMaterialTile, pMaterialData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CMaterialTile));
+
+								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+								{
+									if(pLayerMaterialTiles[i].m_Material > MAT_DEFAULT)
+										pTiles->m_pTiles[i].m_Index = pLayerMaterialTiles[i].m_Material;
+									else
+										pTiles->m_pTiles[i].m_Index = 0;
+								}
+							}
+							DataFile.UnloadData(pTilemapItem->m_Material);
 						}
 						else // regular tile layer or game layer
 						{
@@ -986,9 +1018,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						if(pLayer->m_Type == LAYERTYPE_TILES)
 						{
 							CLayerTiles *pTiles = (CLayerTiles *)m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId];
-							// only load auto mappers for tile layers (not physics layers)
+							// only load auto mappers for tile layers (not physics layers); WAIT that's a great idea!: TODO automapper for materials
 							if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
-								   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
+								   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune || pTiles->m_Material))
 							{
 								pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
 								pTiles->m_Seed = pItem->m_AutomapperSeed;

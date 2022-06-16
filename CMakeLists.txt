@@ -1242,6 +1242,7 @@ set(EXPECTED_DATA
   editor/entities/Vanilla.png
   editor/entities/blockworlds.png
   editor/entities_clear/blockworlds.png
+  editor/entities_clear/ddnet-material.png
   editor/entities_clear/ddnet.png
   editor/entities_clear/ddrace.png
   editor/entities_clear/f-ddrace.png
@@ -1257,6 +1258,7 @@ set(EXPECTED_DATA
   editor/grass_main_0.7.rules
   editor/jungle_main.rules
   editor/jungle_midground.rules
+  editor/material.png
   editor/round_tiles.rules
   editor/speed_arrow.png
   editor/speedup.png
@@ -1388,6 +1390,7 @@ set(EXPECTED_DATA
   maps7/Tsunami.map
   maps7/Tutorial.map
   maps7/readme.txt
+  material_particles.png
   menuimages/demos.png
   menuimages/editor.png
   menuimages/local_server.png
@@ -1826,6 +1829,8 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex.cpp
   mapitems_ex.h
   mapitems_ex_types.h
+  material.cpp
+  material.h
   prng.cpp
   prng.h
   teamscore.cpp

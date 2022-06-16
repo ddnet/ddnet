@@ -40,9 +40,9 @@ public:
 
 	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->Switchers(); }
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
-	CTuningParams *Tuning() { return GameWorld()->Tuning(); }
-	CTuningParams *TuningList() { return GameWorld()->TuningList(); }
-	CTuningParams *GetTuning(int i) { return GameWorld()->GetTuning(i); }
+	CMatDefault *Tuning() { return GameWorld()->Tuning(); }
+	CMatDefault *TuningList() { return GameWorld()->TuningList(); }
+	CMatDefault *GetTuning(int i) { return GameWorld()->GetTuning(i); }
 	class CCollision *Collision() { return GameWorld()->Collision(); }
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }

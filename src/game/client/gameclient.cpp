@@ -260,6 +260,7 @@ void CGameClient::OnInit()
 
 	m_GameSkinLoaded = false;
 	m_ParticlesSkinLoaded = false;
+	m_MaterialSkinLoaded = false;
 	m_EmoticonsSkinLoaded = false;
 	m_HudSkinLoaded = false;
 
@@ -272,6 +273,8 @@ void CGameClient::OnInit()
 			LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 		else if(i == IMAGE_PARTICLES)
 			LoadParticlesSkin(g_Config.m_ClAssetParticles);
+		else if(i == IMAGE_MATERIAL_PARTICLES)
+			LoadMaterialSkin(g_Config.m_ClAssetMaterialParticles);
 		else if(i == IMAGE_HUD)
 			LoadHudSkin(g_Config.m_ClAssetHud);
 		else
@@ -346,6 +349,8 @@ void CGameClient::OnInit()
 		int Size = m_vpAll[i]->Sizeof();
 		pChecksum->m_aComponentsChecksum[i] = Size;
 	}
+
+	m_pMaterial = CMaterials::GetInstance();
 }
 
 void CGameClient::OnUpdate()
@@ -515,7 +520,7 @@ void CGameClient::OnReset()
 	m_LastRoundStartTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
-	m_Tuning[g_Config.m_ClDummy] = CTuningParams();
+	m_Tuning[g_Config.m_ClDummy] = CMatDefault();
 
 	m_Teams.Reset();
 	m_DDRaceMsgSent[0] = false;
@@ -686,11 +691,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	if(MsgId == NETMSGTYPE_SV_TUNEPARAMS)
 	{
 		// unpack the new tuning
-		CTuningParams NewTuning;
+		CMatDefault NewTuning;
 		int *pParams = (int *)&NewTuning;
 		// No jetpack on DDNet incompatible servers:
 		NewTuning.m_JetpackStrength = 0;
-		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
+		for(unsigned i = 0; i < sizeof(CMatDefault) / sizeof(int); i++)
 		{
 			int value = pUnpacker->GetInt();
 
@@ -1595,7 +1600,7 @@ void CGameClient::OnNewSnapshot()
 
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
-	CTuningParams StandardTuning;
+	CMatDefault StandardTuning;
 	if(CurrentServerInfo.m_aGameType[0] != '0')
 	{
 		if(str_comp(CurrentServerInfo.m_aGameType, "DM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "TDM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "CTF") != 0)
@@ -1614,7 +1619,7 @@ void CGameClient::OnNewSnapshot()
 			AnyRecording = true;
 			break;
 		}
-	if(AnyRecording && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CTuningParams)) != 0)
+	if(AnyRecording && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CMatDefault)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning[g_Config.m_ClDummy];
@@ -3011,6 +3016,56 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	}
 }
 
+void CGameClient::LoadMaterialSkin(const char *pPath, bool AsDir)
+{
+	if(m_MaterialSkinLoaded)
+	{
+		for(auto &SpriteParticleIce : m_MaterialSkin.m_SpriteMaterialParticleIce)
+			Graphics()->UnloadTexture(&SpriteParticleIce);
+
+		for(auto &SpriteParticle : m_MaterialSkin.m_SpriteMaterialParticles)
+			SpriteParticle = IGraphics::CTextureHandle();
+
+		m_MaterialSkinLoaded = false;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_MATERIAL_PARTICLES].m_pFilename);
+		IsDefault = true;
+	}
+	else
+	{
+		if(AsDir)
+			str_format(aPath, sizeof(aPath), "assets/material_particles/%s/%s", pPath, g_pData->m_aImages[IMAGE_MATERIAL_PARTICLES].m_pFilename);
+		else
+			str_format(aPath, sizeof(aPath), "assets/material_particles/%s.png", pPath);
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadMaterialSkin("default");
+		else
+			LoadMaterialSkin(pPath, true);
+	}
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE01].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE01].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
+	{
+		for(int i = 0; i < 4; ++i)
+			m_MaterialSkin.m_SpriteMaterialParticleIce[i] = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE01 + i]);
+
+		for(int i = 0; i < 4; ++i)
+			m_MaterialSkin.m_SpriteMaterialParticles[i] = m_MaterialSkin.m_SpriteMaterialParticleIce[i];
+
+		m_MaterialSkinLoaded = true;
+		free(ImgInfo.m_pData);
+	}
+}
+
 void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 {
 	if(m_HudSkinLoaded)
@@ -3128,7 +3183,7 @@ void CGameClient::RefindSkins()
 void CGameClient::LoadMapSettings()
 {
 	// Reset Tunezones
-	CTuningParams TuningParams;
+	CMatDefault TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;

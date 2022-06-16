@@ -18,6 +18,7 @@ CLayers::CLayers()
 	m_pFrontLayer = 0;
 	m_pSwitchLayer = 0;
 	m_pTuneLayer = 0;
+	m_pMaterialLayer = 0;
 }
 
 void CLayers::Init(class IKernel *pKernel)
@@ -31,6 +32,7 @@ void CLayers::Init(class IKernel *pKernel)
 	m_pFrontLayer = 0;
 	m_pSwitchLayer = 0;
 	m_pTuneLayer = 0;
+	m_pMaterialLayer = 0;
 
 	for(int g = 0; g < NumGroups(); g++)
 	{
@@ -105,6 +107,14 @@ void CLayers::Init(class IKernel *pKernel)
 					}
 					m_pTuneLayer = pTilemap;
 				}
+				if(pTilemap->m_Flags & TILESLAYERFLAG_MATERIAL)
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Material = *((int *)(pTilemap) + 20);
+					}
+					m_pMaterialLayer = pTilemap;
+				}
 			}
 		}
 	}
@@ -124,6 +134,7 @@ void CLayers::InitBackground(class IMap *pMap)
 	m_pFrontLayer = 0;
 	m_pSwitchLayer = 0;
 	m_pTuneLayer = 0;
+	m_pMaterialLayer = 0;
 
 	for(int g = 0; g < NumGroups(); g++)
 	{
