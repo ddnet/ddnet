@@ -3,9 +3,11 @@
 #ifndef ENGINE_SHARED_FILECOLLECTION_H
 #define ENGINE_SHARED_FILECOLLECTION_H
 
-#include <engine/storage.h>
+#include <base/system.h>
 
 #include <stdint.h>
+
+class IStorage;
 
 class CFileCollection
 {

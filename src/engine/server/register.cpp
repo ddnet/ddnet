@@ -9,6 +9,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/uuid_manager.h>
 
 class CRegister : public IRegister
