@@ -4390,7 +4390,7 @@ public:
 				return false;
 
 			std::vector<uint8_t> vShaderBuff;
-			vShaderBuff.reserve(FileSize);
+			vShaderBuff.resize(FileSize);
 			mem_copy(vShaderBuff.data(), pShaderBuff, FileSize);
 			free(pShaderBuff);
 
