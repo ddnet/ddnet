@@ -255,9 +255,6 @@ MOTD
 Map
 == Karte
 
-Mouse sens.
-== Maus-Empfindl.
-
 Move left
 == Nach links
 
@@ -805,9 +802,6 @@ Automatically take game over screenshot
 Please use a different name
 == Bitte anderen Namen wählen
 
-Show console window
-== Konsolenfenster zeigen
-
 Gameplay
 == Gameplay
 
@@ -894,9 +888,6 @@ Welcome to DDNet
 
 may cause delay
 == kann verlangsamen
-
-UI mouse s.
-== UI-Maus-Empf.
 
 Indicate map finish
 == Kartensieg anzeigen
@@ -1393,3 +1384,101 @@ Team %d
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Deckkraft von Entities die zu einem anderen Team gehören, z.B. Tees und Namensschilder
+
+Position:
+== Position:
+
+Speed:
+== Geschwindigkeit:
+
+Angle:
+== Winkel:
+
+Trying to determine UDP connectivity...
+== Versuche UDP-Verbindungsfähigkeit festzustellen...
+
+UDP seems to be filtered.
+== UDP scheint gefiltert zu werden.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP- und TCP-IP-Adressen scheinen unterschiedlich zu sein. Versuch VPN, Proxy oder Netzwerkbeschleuniger abzuschalten.
+
+No answer from server yet.
+== Bisher keine Antwort vom Server.
+
+Download community skins
+== Community-Skins runterladen
+
+Device
+== Gerät
+
+Status
+== Status
+
+Aim bind
+== Ziel-Bind
+
+Mouse
+== Maus
+
+Use DDRace HUD
+== DDRace-HUD nutzen
+
+Show dummy actions
+== Dummy-Aktionen zeigen
+
+Show freeze bars
+== Einfrier-Balken zeigen
+
+Show player position
+== Spielerposition zeigen
+
+Show player speed
+== Spielergeschwindigkeit zeigen
+
+Show player target angle
+== Zielwinkel des Spielers zeigen
+
+Ingame mouse sens.
+== Mause-Empfind. im Spiel
+
+UI mouse sens.
+== Mause-Empfind. im Menü
+
+Enable controller
+== Controller aktivieren
+
+Controller %d: %s
+== Controller %d: %s
+
+Click to cycle through all available controllers.
+== Klicken um durch die verfügbaren Controller zu wechseln.
+
+[Ingame controller mode]
+Relative
+== Relativ
+
+[Ingame controller mode]
+Absolute
+== Absolut
+
+Ingame controller mode
+== Spiel-Controller-Modus
+
+Ingame controller sens.
+== Controller-Empfind. im Spiel
+
+UI controller sens.
+== Controller-Empfind. Im Menü
+
+Controller jitter tolerance
+== Jitter-Toleranz des Controllers
+
+No controller found. Plug in a controller and restart the game.
+== Kein Controller gefunden. Schließ einen Joystick an und starte das Spiel neu.
+
+Controller Axis #%d
+== Controller-Axe #%d
+
+Controller
+== Controller
