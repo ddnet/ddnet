@@ -6373,8 +6373,8 @@ void CEditor::OnUpdate()
 
 	// handle cursor movement
 	{
-		static double s_MouseX = 0.0f;
-		static double s_MouseY = 0.0f;
+		static float s_MouseX = 0.0f;
+		static float s_MouseY = 0.0f;
 
 		float MouseRelX = 0.0f, MouseRelY = 0.0f;
 		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
