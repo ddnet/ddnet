@@ -1,4 +1,4 @@
-##### authors #####
+﻿##### authors #####
 #originally created by:
 # slinack
 #modified by:
@@ -21,6 +21,7 @@
 # Rafael Fontenelle   2020-09-20 11:00:38
 # Rafael Fontenelle   2021-02-13 07:00:00
 # Rafael Fontenelle   2021-06-10 12:00:00
+# pv                  2022-06-01 20:44:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1366,31 +1367,31 @@ Can't find a Tutorial server
 == Não foi possível encontrar o servidor de tutorial
 
 Toggle to edit your dummy settings
-== 
+== Alterne para editar as configurações do seu dummy
 
 Choose default eyes when joining a server
-== 
+== Escolha os olhos padrões ao entrar em um servidor
 
 Allows maps to render with more detail
-== 
+== Permite que os mapas renderizem com mais detalhes
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Ao cruzar a linha de partida, mostra um tee fantasma replicando os movimentos do seu melhor tempo
 
 Opacity
-== 
+== Opacidade
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Ajustar a opacidade das entidades pertencentes a outros times, tais como tees e placas de identificação
 
 Quads are used for background decoration
-== 
+== Quads são utilizados para decoração de fundo
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Tenta prever outras entidades para dar uma sensação de baixa latência
 
 Super
-== 
+== Super
 
 Team %d
-== 
+== Time %d
