@@ -6371,7 +6371,7 @@ void CEditor::OnUpdate()
 		Reset();
 	}
 
-	// handle mouse movement
+	// handle cursor movement
 	{
 		static double s_MouseX = 0.0f;
 		static double s_MouseY = 0.0f;
