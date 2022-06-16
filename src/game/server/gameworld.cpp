@@ -210,7 +210,7 @@ void CGameWorld::UpdatePlayerMaps()
 			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
 		}
 
-		// always send the player himself
+		// always send the player themselves
 		Dist[i].first = 0;
 
 		// compute reverse map

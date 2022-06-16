@@ -166,7 +166,7 @@ void CCharacter::HandleNinja()
 				if(distance(aEnts[i]->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
 					continue;
 
-				// Hit a player, give him damage and stuffs...
+				// Hit a player, give them damage and stuffs...
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
 					m_aHitObjects[m_NumObjectsHit++] = aEnts[i]->GetCID();
