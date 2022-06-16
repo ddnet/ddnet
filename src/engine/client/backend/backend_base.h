@@ -1,10 +1,18 @@
 #ifndef ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 #define ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 
-#include "../backend_sdl.h"
-#include "engine/graphics.h"
+#include <engine/graphics.h>
 
+#include <engine/client/graphics_threaded.h>
+
+#include <SDL_video.h>
+
+#include <atomic>
+#include <stddef.h>
+#include <stdint.h>
 #include <vector>
+
+struct SBackendCapabilites;
 
 enum EDebugGFXModes
 {

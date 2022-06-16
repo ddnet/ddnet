@@ -3,14 +3,16 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
-#include <engine/config.h>
+#include <base/system.h>
+
 #include <engine/console.h>
-#include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
+class CNetClient;
+class IConfigManager;
 class IServerBrowserHttp;
 class IServerBrowserPingCache;
 

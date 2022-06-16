@@ -1,5 +1,8 @@
 #include "backend_opengl.h"
-#include "engine/graphics.h"
+
+#include <engine/graphics.h>
+
+#include <engine/client/backend_sdl.h>
 
 #include <base/detect.h>
 

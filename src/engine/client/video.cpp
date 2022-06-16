@@ -10,6 +10,8 @@
 extern "C" {
 #include <libavutil/avutil.h>
 #include <libavutil/opt.h>
+#include <libswresample/swresample.h>
+#include <libswscale/swscale.h>
 };
 
 #include <memory>

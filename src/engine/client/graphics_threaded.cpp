@@ -3,7 +3,6 @@
 
 #include <base/detect.h>
 #include <base/math.h>
-#include <base/tl/threading.h>
 
 #if defined(CONF_FAMILY_UNIX)
 #include <pthread.h>
@@ -24,10 +23,12 @@
 #include <engine/shared/image_manipulation.h>
 
 #if defined(CONF_VIDEORECORDER)
-#include "video.h"
+#include <engine/shared/video.h>
 #endif
 
 #include "graphics_threaded.h"
+
+class CSemaphore;
 
 static CVideoMode g_aFakeModes[] = {
 	{8192, 4320, 8192, 4320, 0, 8, 8, 8, 0}, {7680, 4320, 7680, 4320, 0, 8, 8, 8, 0}, {5120, 2880, 5120, 2880, 0, 8, 8, 8, 0},

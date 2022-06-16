@@ -6,12 +6,13 @@
 #include <base/detect.h>
 
 #include "engine/graphics.h"
-#include "graphics_defines.h"
 #include "graphics_threaded.h"
 
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <stddef.h>
+#include <stdint.h>
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <objc/objc-runtime.h>

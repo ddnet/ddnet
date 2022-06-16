@@ -10,8 +10,6 @@
 #include <GL/glew.h>
 #endif
 
-#include <engine/storage.h>
-
 #include <SDL.h>
 #include <SDL_hints.h>
 #include <SDL_pixels.h>
@@ -26,12 +24,14 @@
 #include <base/tl/threading.h>
 
 #if defined(CONF_VIDEORECORDER)
-#include "video.h"
+#include <engine/shared/video.h>
 #endif
 
 #include "backend_sdl.h"
 
+#if defined(CONF_HEADLESS_CLIENT)
 #include "backend/null/backend_null.h"
+#endif
 
 #if !defined(CONF_BACKEND_OPENGL_ES)
 #include "backend/opengl/backend_opengl3.h"
@@ -48,6 +48,8 @@
 #include "graphics_threaded.h"
 
 #include <engine/graphics.h>
+
+class IStorage;
 
 #ifdef __MINGW32__
 extern "C" {

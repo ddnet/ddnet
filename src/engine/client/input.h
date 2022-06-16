@@ -3,9 +3,10 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
-#include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
+
+class IEngineGraphics;
 
 class CInput : public IEngineInput
 {
