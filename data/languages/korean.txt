@@ -8,6 +8,7 @@
 # 2022-03-28 CHaBek
 # 2022-04-21 CHaBek
 # 2022-05-16 CHaBek
+# 2022-06-17 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -862,7 +863,7 @@ Dummy settings
 == 더미 설정
 
 Download skins
-== 스킨 다운로드하기
+== 스킨 다운로드
 
 Vanilla skins only
 == 원판 스킨만 표시
@@ -961,7 +962,7 @@ Enable gun sound
 == 총 소리 활성화
 
 Enable long pain sound (used when shooting in freeze)
-== 동결(프리즈) 상태 비명 활성화
+== 동결 상태 비명 활성화
 
 Enable server message sound
 == 서버 메시지 소리 활성화
@@ -1376,99 +1377,99 @@ Team %d
 == 팀 %d
 
 Position:
-== 
+== 위치
 
 Speed:
-== 
+== 속도
 
 Angle:
-== 
+== 각도
 
 Trying to determine UDP connectivity...
-== 
+== UDP 연결 확인 시도 중...
 
 UDP seems to be filtered.
-== 
+== UDP가 필터링된 것으로 보입니다.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UDP와 TCP의 IP 주소가 다른 것으로 보입니다. VPN, 프록시 또는 네트워크 가속기를 비활성화하십시오.
 
 No answer from server yet.
-== 
+== 서버로부터 응답이 아직 없습니다.
 
 Download community skins
-== 
+== 커뮤니티 스킨 다운로드
 
 Enable controller
-== 
+== 컨트롤러 활성화
 
 Controller %d: %s
-== 
+== 컨트롤러 %d: %s
 
 Click to cycle through all available controllers.
-== 
+== 사용가능한 컨트롤러로 전환하려면 클릭하십시오.
 
 [Ingame controller mode]
 Relative
-== 
+== 상대적
 
 [Ingame controller mode]
 Absolute
-== 
+== 절대적
 
 Ingame controller mode
-== 
+== 게임 내 컨트롤러 모드
 
 Ingame controller sens.
-== 
+== 게임 내 컨트롤러 감도
 
 UI controller sens.
-== 
+== UI 컨트롤러 감도
 
 Controller jitter tolerance
-== 
+== 컨트롤러 신호 오차 허용 범위
 
 No controller found. Plug in a controller and restart the game.
-== 
+== 컨트롤러가 발견되지 않았습니다. 컨트롤러 연결 후 게임을 재시작 하십시오.
 
 Device
-== 
+== 장치
 
 Status
-== 
+== 상태
 
 Aim bind
-== 
+== 조준 바인드
 
 Controller Axis #%d
-== 
+== 컨트롤러 축
 
 Mouse
-== 
+== 마우스
 
 Ingame mouse sens.
-== 
+== 게임 내 마우스 감도
 
 UI mouse sens.
-== 
+== UI 마우스 감도
 
 Controller
-== 
+== 컨트롤러
 
 Use DDRace HUD
-== 
+== DDRace HUD 사용
 
 Show dummy actions
-== 
+== 더미 동작 표시
 
 Show freeze bars
-== 
+== 동결 상태줄 표시
 
 Show player position
-== 
+== 플레이어 위치 표시
 
 Show player speed
-== 
+== 플레이어 속도 표시
 
 Show player target angle
-== 
+== 플레이어 조준 각도 표시
