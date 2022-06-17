@@ -19,7 +19,7 @@ protected:
 
 public:
 	IInterface() :
-		m_pKernel(0) {}
+		m_pKernel(nullptr) {}
 	virtual ~IInterface() {}
 };
 

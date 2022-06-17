@@ -93,7 +93,7 @@ public:
 	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 
-	std::vector<CTheme> m_lThemes;
+	std::vector<CTheme> m_vThemes;
 
 	CMenuBackground();
 	~CMenuBackground() override {}

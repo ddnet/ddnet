@@ -1,5 +1,6 @@
 #include "register.h"
 
+#include <base/lock_scope.h>
 #include <base/log.h>
 #include <engine/console.h>
 #include <engine/engine.h>
@@ -109,6 +110,7 @@ class CRegister : public IRegister
 		CProtocol(CRegister *pParent, int Protocol);
 		void OnToken(const char *pToken);
 		void SendRegister();
+		void SendDeleteIfRegistered(bool Shutdown);
 		void Update();
 	};
 
@@ -137,6 +139,7 @@ public:
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
 	void OnNewInfo(const char *pInfo) override;
+	void OnShutdown() override;
 };
 
 bool CRegister::StatusFromString(int *pResult, const char *pString)
@@ -263,11 +266,14 @@ void CRegister::CProtocol::SendRegister()
 	FormatUuid(m_pParent->m_ChallengeSecret, aChallengeUuid, sizeof(aChallengeUuid));
 	char aChallengeSecret[64];
 	str_format(aChallengeSecret, sizeof(aChallengeSecret), "%s:%s", aChallengeUuid, ProtocolToString(m_Protocol));
+	int InfoSerial;
+	bool SendInfo;
 
-	lock_wait(m_pShared->m_pGlobal->m_Lock);
-	int InfoSerial = m_pShared->m_pGlobal->m_InfoSerial;
-	bool SendInfo = InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial;
-	lock_unlock(m_pShared->m_pGlobal->m_Lock);
+	{
+		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
+		InfoSerial = m_pShared->m_pGlobal->m_InfoSerial;
+		SendInfo = InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial;
+	}
 
 	std::unique_ptr<CHttpRequest> pRegister;
 	if(SendInfo)
@@ -297,19 +303,57 @@ void CRegister::CProtocol::SendRegister()
 	pRegister->LogProgress(HTTPLOG::FAILURE);
 	pRegister->IpResolve(ProtocolToIpresolve(m_Protocol));
 
-	lock_wait(m_pShared->m_Lock);
-	if(m_pShared->m_LatestResponseStatus != STATUS_OK)
+	int RequestIndex;
 	{
-		log_info(ProtocolToSystem(m_Protocol), "registering...");
+		CLockScope ls(m_pShared->m_Lock);
+		if(m_pShared->m_LatestResponseStatus != STATUS_OK)
+		{
+			log_info(ProtocolToSystem(m_Protocol), "registering...");
+		}
+		RequestIndex = m_pShared->m_NumTotalRequests;
+		m_pShared->m_NumTotalRequests += 1;
 	}
-	int RequestIndex = m_pShared->m_NumTotalRequests;
-	m_pShared->m_NumTotalRequests += 1;
-	lock_unlock(m_pShared->m_Lock);
 	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister)));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
 	m_NextRegister = Now + 15 * Freq;
+}
+
+void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
+{
+	lock_wait(m_pShared->m_Lock);
+	bool ShouldSendDelete = m_pShared->m_LatestResponseStatus == STATUS_OK;
+	m_pShared->m_LatestResponseStatus = STATUS_NONE;
+	lock_unlock(m_pShared->m_Lock);
+	if(!ShouldSendDelete)
+	{
+		return;
+	}
+
+	char aAddress[64];
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+
+	char aSecret[UUID_MAXSTRSIZE];
+	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
+
+	std::unique_ptr<CHttpRequest> pDelete = HttpPost(m_pParent->m_pConfig->m_SvRegisterUrl, (const unsigned char *)"", 0);
+	pDelete->HeaderString("Action", "delete");
+	pDelete->HeaderString("Address", aAddress);
+	pDelete->HeaderString("Secret", aSecret);
+	for(int i = 0; i < m_pParent->m_NumExtraHeaders; i++)
+	{
+		pDelete->Header(m_pParent->m_aaExtraHeaders[i]);
+	}
+	pDelete->LogProgress(HTTPLOG::FAILURE);
+	pDelete->IpResolve(ProtocolToIpresolve(m_Protocol));
+	if(Shutdown)
+	{
+		// On shutdown, wait at most 1 second for the delete requests.
+		pDelete->Timeout(CTimeout{1000, 1000, 0, 0});
+	}
+	log_info(ProtocolToSystem(m_Protocol), "deleting...");
+	m_pParent->m_pEngine->AddJob(std::move(pDelete));
 }
 
 CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
@@ -321,7 +365,7 @@ CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
 
 void CRegister::CProtocol::CheckChallengeStatus()
 {
-	lock_wait(m_pShared->m_Lock);
+	CLockScope ls(m_pShared->m_Lock);
 	// No requests in flight?
 	if(m_pShared->m_LatestResponseIndex == m_pShared->m_NumTotalRequests - 1)
 	{
@@ -340,7 +384,6 @@ void CRegister::CProtocol::CheckChallengeStatus()
 			break;
 		}
 	}
-	lock_unlock(m_pShared->m_Lock);
 }
 
 void CRegister::CProtocol::Update()
@@ -396,41 +439,40 @@ void CRegister::CProtocol::CJob::Run()
 		json_value_free(pJson);
 		return;
 	}
-	lock_wait(m_pShared->m_Lock);
-	if(Status != STATUS_OK || Status != m_pShared->m_LatestResponseStatus)
 	{
-		log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
+		CLockScope ls(m_pShared->m_Lock);
+		if(Status != STATUS_OK || Status != m_pShared->m_LatestResponseStatus)
+		{
+			log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
+		}
+		if(Status == m_pShared->m_LatestResponseStatus && Status == STATUS_NEEDCHALLENGE)
+		{
+			log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
+			log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
+		}
+		json_value_free(pJson);
+		if(m_Index > m_pShared->m_LatestResponseIndex)
+		{
+			m_pShared->m_LatestResponseIndex = m_Index;
+			m_pShared->m_LatestResponseStatus = Status;
+		}
 	}
-	if(Status == m_pShared->m_LatestResponseStatus)
-	{
-		log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
-		log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
-	}
-	json_value_free(pJson);
-	if(m_Index > m_pShared->m_LatestResponseIndex)
-	{
-		m_pShared->m_LatestResponseIndex = m_Index;
-		m_pShared->m_LatestResponseStatus = Status;
-	}
-	lock_unlock(m_pShared->m_Lock);
 	if(Status == STATUS_OK)
 	{
-		lock_wait(m_pShared->m_pGlobal->m_Lock);
+		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
 		if(m_InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial)
 		{
 			m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial = m_InfoSerial;
 		}
-		lock_unlock(m_pShared->m_pGlobal->m_Lock);
 	}
 	else if(Status == STATUS_NEEDINFO)
 	{
-		lock_wait(m_pShared->m_pGlobal->m_Lock);
+		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
 		if(m_InfoSerial == m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial)
 		{
 			// Tell other requests that they need to send the info again.
 			m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial -= 1;
 		}
-		lock_unlock(m_pShared->m_pGlobal->m_Lock);
 	}
 }
 
@@ -478,6 +520,11 @@ void CRegister::Update()
 
 void CRegister::OnConfigChange()
 {
+	bool aOldProtocolEnabled[NUM_PROTOCOLS];
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		aOldProtocolEnabled[i] = m_aProtocolEnabled[i];
+	}
 	const char *pProtocols = m_pConfig->m_SvRegister;
 	if(str_comp(pProtocols, "1") == 0)
 	{
@@ -557,6 +604,21 @@ void CRegister::OnConfigChange()
 		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader, sizeof(m_aaExtraHeaders));
 		m_NumExtraHeaders += 1;
 	}
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(aOldProtocolEnabled[i] == m_aProtocolEnabled[i])
+		{
+			continue;
+		}
+		if(m_aProtocolEnabled[i])
+		{
+			m_aProtocols[i].SendRegister();
+		}
+		else
+		{
+			m_aProtocols[i].SendDeleteIfRegistered(false);
+		}
+	}
 }
 
 bool CRegister::OnPacket(const CNetChunk *pPacket)
@@ -602,9 +664,10 @@ void CRegister::OnNewInfo(const char *pInfo)
 
 	m_GotServerInfo = true;
 	str_copy(m_aServerInfo, pInfo, sizeof(m_aServerInfo));
-	lock_wait(m_pGlobal->m_Lock);
-	m_pGlobal->m_InfoSerial += 1;
-	lock_unlock(m_pGlobal->m_Lock);
+	{
+		CLockScope ls(m_pGlobal->m_Lock);
+		m_pGlobal->m_InfoSerial += 1;
+	}
 
 	// Immediately send new info if it changes, but at most once per second.
 	int64_t Now = time_get();
@@ -647,6 +710,18 @@ void CRegister::OnNewInfo(const char *pInfo)
 		{
 			m_aProtocols[i].SendRegister();
 		}
+	}
+}
+
+void CRegister::OnShutdown()
+{
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(!m_aProtocolEnabled[i])
+		{
+			continue;
+		}
+		m_aProtocols[i].SendDeleteIfRegistered(true);
 	}
 }
 

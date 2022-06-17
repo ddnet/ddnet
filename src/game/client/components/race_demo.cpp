@@ -3,7 +3,6 @@
 #include <cctype>
 
 #include <base/system.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
@@ -28,7 +27,7 @@ struct CDemoItem
 struct CDemoListParam
 {
 	const CRaceDemo *m_pThis;
-	std::vector<CDemoItem> *m_plDemos;
+	std::vector<CDemoItem> *m_pvDemos;
 	const char *pMap;
 };
 
@@ -220,9 +219,9 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);
 	if(Item.m_Time > 0)
-		pParam->m_plDemos->push_back(Item);
+		pParam->m_pvDemos->push_back(Item);
 
-	if(tw::time_get() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
+	if(time_get_nanoseconds() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
 	{
 		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -232,16 +231,16 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 bool CRaceDemo::CheckDemo(int Time)
 {
-	std::vector<CDemoItem> lDemos;
-	CDemoListParam Param = {this, &lDemos, Client()->GetCurrentMap()};
-	m_RaceDemosLoadStartTime = tw::time_get();
+	std::vector<CDemoItem> vDemos;
+	CDemoListParam Param = {this, &vDemos, Client()->GetCurrentMap()};
+	m_RaceDemosLoadStartTime = time_get_nanoseconds();
 	SRaceDemoFetchUser User;
 	User.m_pParam = &Param;
 	User.m_pThis = this;
 	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &User);
 
 	// loop through demo files
-	for(auto &Demo : lDemos)
+	for(auto &Demo : vDemos)
 	{
 		if(Time >= Demo.m_Time) // found a better demo
 			return false;

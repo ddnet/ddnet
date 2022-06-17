@@ -236,9 +236,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Sensibilitat del ratolí
-
 Move left
 == Moure's a l'esquerra
 
@@ -681,9 +678,6 @@ DDNet Client needs to be restarted to complete update!
 Please use a different name
 == Si us plau, fes servir un nom diferent
 
-Show console window
-== Mostra la finestra de la consola
-
 Show others
 == Mostrar altres
 
@@ -737,9 +731,6 @@ Threaded sound loading
 
 Check now
 == Comprova ara
-
-Reset wanted weapon on death
-== Reiniciar l'arma desitjada al morir
 
 Frags
 == Morts causades
@@ -884,9 +875,6 @@ Welcome to DDNet
 
 Activate
 == Activar
-
-UI mouse s.
-== UI mouse s.
 
 File already exists, do you want to overwrite it?
 == L'arxiu ja existeix, vols reescriure'l?
@@ -1084,7 +1072,7 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 == La mida de la textura %s no es divisible per %d, o l'altura no es divisible per %d, el qual pot resultar en errors visuals.
 
 Warning
-== Advertència 
+== Advertència
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Mode de depuració activat. Utilitza Ctrl+Shift+D per desactivar-lo.
@@ -1219,7 +1207,7 @@ Client message
 == Missatge del client
 
 Preview
-== Vista prèvia 
+== Vista prèvia
 
 Show local player's key presses
 == Mostrar les tecles premudes del jugador local
@@ -1277,7 +1265,7 @@ Editor
 
 [Start menu]
 Play
-== Jugar 
+== Jugar
 
 AFR
 == AFR
@@ -1345,13 +1333,111 @@ Tutorial
 Can't find a Tutorial server
 == No s'ha pogut trobar un servidor del tutorial
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Toggle to edit your dummy settings
+== 
+
+Download community skins
 == 
 
 Choose default eyes when joining a server
 == 
 
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
 Allows maps to render with more detail
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

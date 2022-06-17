@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
-#include <base/tl/algorithm.h>
 
 #include <engine/client.h>
 #include <engine/graphics.h>
@@ -9,9 +8,6 @@
 
 #include "editor.h"
 #include <game/client/render.h>
-#include <game/generated/client_data.h>
-
-#include <game/localization.h>
 
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -69,7 +65,7 @@ void CLayerTiles::PrepareForSave()
 	{
 		for(int y = 0; y < m_Height; y++)
 			for(int x = 0; x < m_Width; x++)
-				m_pTiles[y * m_Width + x].m_Flags |= m_pEditor->m_Map.m_lImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
+				m_pTiles[y * m_Width + x].m_Flags |= m_pEditor->m_Map.m_vpImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
 	}
 }
 
@@ -82,8 +78,8 @@ void CLayerTiles::MakePalette()
 
 void CLayerTiles::Render(bool Tileset)
 {
-	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		m_Texture = m_pEditor->m_Map.m_lImages[m_Image]->m_Texture;
+	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
+		m_Texture = m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture;
 	Graphics()->TextureSet(m_Texture);
 	ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f);
 	Graphics()->BlendNone();
@@ -191,7 +187,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	m_pEditor->Graphics()->QuadsEnd();
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
-	TextRender()->Text(0, Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
+	TextRender()->Text(nullptr, Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
 }
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -507,9 +503,7 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 void CLayerTiles::BrushFlipX()
 {
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width / 2; x++)
-			std::swap(m_pTiles[y * m_Width + x], m_pTiles[y * m_Width + m_Width - 1 - x]);
+	BrushFlipXImpl(m_pTiles);
 
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
@@ -525,9 +519,7 @@ void CLayerTiles::BrushFlipX()
 
 void CLayerTiles::BrushFlipY()
 {
-	for(int y = 0; y < m_Height / 2; y++)
-		for(int x = 0; x < m_Width; x++)
-			std::swap(m_pTiles[y * m_Width + x], m_pTiles[(m_Height - 1 - y) * m_Width + x]);
+	BrushFlipYImpl(m_pTiles);
 
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
@@ -617,38 +609,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 
 void CLayerTiles::Shift(int Direction)
 {
-	int o = m_pEditor->m_ShiftBy;
-
-	switch(Direction)
-	{
-	case DIRECTION_LEFT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pTiles[y * m_Width], &m_pTiles[y * m_Width + o], (m_Width - o) * sizeof(CTile));
-			mem_zero(&m_pTiles[y * m_Width + (m_Width - o)], o * sizeof(CTile));
-		}
-		break;
-	case DIRECTION_RIGHT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pTiles[y * m_Width + o], &m_pTiles[y * m_Width], (m_Width - o) * sizeof(CTile));
-			mem_zero(&m_pTiles[y * m_Width], o * sizeof(CTile));
-		}
-		break;
-	case DIRECTION_UP:
-		for(int y = 0; y < m_Height - o; ++y)
-		{
-			mem_copy(&m_pTiles[y * m_Width], &m_pTiles[(y + o) * m_Width], m_Width * sizeof(CTile));
-			mem_zero(&m_pTiles[(y + o) * m_Width], m_Width * sizeof(CTile));
-		}
-		break;
-	case DIRECTION_DOWN:
-		for(int y = m_Height - 1; y >= o; --y)
-		{
-			mem_copy(&m_pTiles[y * m_Width], &m_pTiles[(y - o) * m_Width], m_Width * sizeof(CTile));
-			mem_zero(&m_pTiles[(y - o) * m_Width], m_Width * sizeof(CTile));
-		}
-	}
+	ShiftImpl(m_pTiles, Direction, m_pEditor->m_ShiftBy);
 }
 
 void CLayerTiles::ShowInfo()
@@ -692,7 +653,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this);
 
-	CLayerGroup *pGroup = m_pEditor->m_Map.m_lGroups[m_pEditor->m_SelectedGroup];
+	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
 	if(!IsGameLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
@@ -793,18 +754,18 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	if(m_pEditor->m_Map.m_pGameLayer != this)
 	{
-		if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size() && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.IsLoaded() &&
+		if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size() && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.IsLoaded() &&
 			m_AutoMapperConfig != -1)
 		{
 			static int s_AutoMapperButton = 0;
 			static int s_AutoMapperButtonAuto = 0;
-			pToolBox->HSplitBottom(2.0f, pToolBox, 0);
+			pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
 			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 			if(m_Seed != 0)
 			{
 				CUIRect ButtonAuto;
 				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
-				Button.VSplitRight(2.0f, &Button, 0);
+				Button.VSplitRight(2.0f, &Button, nullptr);
 				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, 0, "Automatically run automap after modifications."))
 				{
 					m_AutoAutoMap = !m_AutoAutoMap;
@@ -813,7 +774,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			}
 			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, 0, "Run the automapper"))
 			{
-				m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
+				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
 				return 1;
 			}
 		}
@@ -851,19 +812,19 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
 		{"Seed", m_Seed, PROPTYPE_INT_SCROLL, 0, 1000000000},
-		{0},
+		{nullptr},
 	};
 
 	if(IsGameLayer) // remove the image and color properties if this is a game layer
 	{
-		aProps[PROP_IMAGE].m_pName = 0;
-		aProps[PROP_COLOR].m_pName = 0;
-		aProps[PROP_AUTOMAPPER].m_pName = 0;
+		aProps[PROP_IMAGE].m_pName = nullptr;
+		aProps[PROP_COLOR].m_pName = nullptr;
+		aProps[PROP_AUTOMAPPER].m_pName = nullptr;
 	}
 	if(m_Image == -1)
 	{
-		aProps[PROP_AUTOMAPPER].m_pName = 0;
-		aProps[PROP_SEED].m_pName = 0;
+		aProps[PROP_AUTOMAPPER].m_pName = nullptr;
+		aProps[PROP_SEED].m_pName = nullptr;
 	}
 
 	static int s_aIds[NUM_PROPS] = {0};
@@ -904,10 +865,10 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		}
 		else
 		{
-			m_Image = NewVal % m_pEditor->m_Map.m_lImages.size();
+			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
 			m_AutoMapperConfig = -1;
 
-			if(m_pEditor->m_Map.m_lImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_lImages[m_Image]->m_Height % 16 != 0)
+			if(m_pEditor->m_Map.m_vpImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_vpImages[m_Image]->m_Height % 16 != 0)
 			{
 				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
@@ -926,12 +887,12 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	if(Prop == PROP_COLOR_ENV)
 	{
-		int Index = clamp(NewVal - 1, -1, m_pEditor->m_Map.m_lEnvelopes.size() - 1);
+		int Index = clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
 		int Step = (Index - m_ColorEnv) % 2;
 		if(Step != 0)
 		{
-			for(; Index >= -1 && Index < m_pEditor->m_Map.m_lEnvelopes.size(); Index += Step)
-				if(Index == -1 || m_pEditor->m_Map.m_lEnvelopes[Index]->m_Channels == 4)
+			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
+				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
 				{
 					m_ColorEnv = Index;
 					break;
@@ -944,8 +905,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Seed = NewVal;
 	else if(Prop == PROP_AUTOMAPPER)
 	{
-		if(m_Image >= 0 && m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
-			m_AutoMapperConfig = NewVal % m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ConfigNamesNum();
+		if(m_Image >= 0 && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
+			m_AutoMapperConfig = NewVal % m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum();
 		else
 			m_AutoMapperConfig = -1;
 	}
@@ -957,7 +918,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	return 0;
 }
 
-int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, array<CLayerTiles *> &pLayers)
+int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers)
 {
 	if(State.Modified)
 	{
@@ -967,7 +928,8 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
 		{
 			dbg_msg("editor", "applying changes");
-			for_each(pLayers.all(), [&State](CLayerTiles *pLayer) {
+			for(auto &pLayer : vpLayers)
+			{
 				pLayer->Resize(State.Width, State.Height);
 
 				pLayer->m_Color.r = (State.Color >> 24) & 0xff;
@@ -976,18 +938,19 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 				pLayer->m_Color.a = State.Color & 0xff;
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
-			});
+			}
 			State.Modified = false;
 		}
 	}
 	else
 	{
-		for_each(pLayers.all(), [&State](CLayerTiles *pLayer) {
+		for(auto &pLayer : vpLayers)
+		{
 			if(pLayer->m_Width > State.Width)
 				State.Width = pLayer->m_Width;
 			if(pLayer->m_Height > State.Height)
 				State.Height = pLayer->m_Height;
-		});
+		}
 	}
 
 	{
@@ -1000,7 +963,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		Props.m_MaxWidth = Warning.w;
 		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, TEXTALIGN_LEFT, Props);
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-		pToolbox->HSplitTop(2.0f, 0, pToolbox);
+		pToolbox->HSplitTop(2.0f, nullptr, pToolbox);
 	}
 
 	enum
@@ -1019,7 +982,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
 		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Color", State.Color, PROPTYPE_COLOR, 0, 0},
-		{0},
+		{nullptr},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};
@@ -1048,9 +1011,8 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 	}
 	else if(Prop == PROP_SHIFT)
 	{
-		for_each(pLayers.all(), [NewVal](CLayerTiles *pLayer) {
+		for(auto &pLayer : vpLayers)
 			pLayer->Shift(NewVal);
-		});
 	}
 	else if(Prop == PROP_SHIFT_BY)
 		pEditor->m_ShiftBy = NewVal;
@@ -1072,7 +1034,7 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 	m_pEditor->m_Map.m_Modified = true;
 	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
 	{
-		m_pEditor->m_Map.m_lImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
+		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
 	}
 }
 
@@ -1127,38 +1089,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 void CLayerTele::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
-	int o = m_pEditor->m_ShiftBy;
-
-	switch(Direction)
-	{
-	case DIRECTION_LEFT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pTeleTile[y * m_Width], &m_pTeleTile[y * m_Width + o], (m_Width - o) * sizeof(CTeleTile));
-			mem_zero(&m_pTeleTile[y * m_Width + (m_Width - o)], o * sizeof(CTeleTile));
-		}
-		break;
-	case DIRECTION_RIGHT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pTeleTile[y * m_Width + o], &m_pTeleTile[y * m_Width], (m_Width - o) * sizeof(CTeleTile));
-			mem_zero(&m_pTeleTile[y * m_Width], o * sizeof(CTeleTile));
-		}
-		break;
-	case DIRECTION_UP:
-		for(int y = 0; y < m_Height - o; ++y)
-		{
-			mem_copy(&m_pTeleTile[y * m_Width], &m_pTeleTile[(y + o) * m_Width], m_Width * sizeof(CTeleTile));
-			mem_zero(&m_pTeleTile[(y + o) * m_Width], m_Width * sizeof(CTeleTile));
-		}
-		break;
-	case DIRECTION_DOWN:
-		for(int y = m_Height - 1; y >= o; --y)
-		{
-			mem_copy(&m_pTeleTile[y * m_Width], &m_pTeleTile[(y - o) * m_Width], m_Width * sizeof(CTeleTile));
-			mem_zero(&m_pTeleTile[(y - o) * m_Width], m_Width * sizeof(CTeleTile));
-		}
-	}
+	ShiftImpl(m_pTeleTile, Direction, m_pEditor->m_ShiftBy);
 }
 
 bool CLayerTele::IsEmpty(CLayerTiles *pLayer)
@@ -1233,19 +1164,13 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 void CLayerTele::BrushFlipX()
 {
 	CLayerTiles::BrushFlipX();
-
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width / 2; x++)
-			std::swap(m_pTeleTile[y * m_Width + x], m_pTeleTile[y * m_Width + m_Width - 1 - x]);
+	BrushFlipXImpl(m_pTeleTile);
 }
 
 void CLayerTele::BrushFlipY()
 {
 	CLayerTiles::BrushFlipY();
-
-	for(int y = 0; y < m_Height / 2; y++)
-		for(int x = 0; x < m_Width; x++)
-			std::swap(m_pTeleTile[y * m_Width + x], m_pTeleTile[(m_Height - 1 - y) * m_Width + x]);
+	BrushFlipYImpl(m_pTeleTile);
 }
 
 void CLayerTele::BrushRotate(float Amount)
@@ -1393,38 +1318,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 void CLayerSpeedup::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
-	int o = m_pEditor->m_ShiftBy;
-
-	switch(Direction)
-	{
-	case DIRECTION_LEFT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pSpeedupTile[y * m_Width], &m_pSpeedupTile[y * m_Width + o], (m_Width - o) * sizeof(CSpeedupTile));
-			mem_zero(&m_pSpeedupTile[y * m_Width + (m_Width - o)], o * sizeof(CSpeedupTile));
-		}
-		break;
-	case DIRECTION_RIGHT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pSpeedupTile[y * m_Width + o], &m_pSpeedupTile[y * m_Width], (m_Width - o) * sizeof(CSpeedupTile));
-			mem_zero(&m_pSpeedupTile[y * m_Width], o * sizeof(CSpeedupTile));
-		}
-		break;
-	case DIRECTION_UP:
-		for(int y = 0; y < m_Height - o; ++y)
-		{
-			mem_copy(&m_pSpeedupTile[y * m_Width], &m_pSpeedupTile[(y + o) * m_Width], m_Width * sizeof(CSpeedupTile));
-			mem_zero(&m_pSpeedupTile[(y + o) * m_Width], m_Width * sizeof(CSpeedupTile));
-		}
-		break;
-	case DIRECTION_DOWN:
-		for(int y = m_Height - 1; y >= o; --y)
-		{
-			mem_copy(&m_pSpeedupTile[y * m_Width], &m_pSpeedupTile[(y - o) * m_Width], m_Width * sizeof(CSpeedupTile));
-			mem_zero(&m_pSpeedupTile[(y - o) * m_Width], m_Width * sizeof(CSpeedupTile));
-		}
-	}
+	ShiftImpl(m_pSpeedupTile, Direction, m_pEditor->m_ShiftBy);
 }
 
 bool CLayerSpeedup::IsEmpty(CLayerTiles *pLayer)
@@ -1516,19 +1410,13 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 void CLayerSpeedup::BrushFlipX()
 {
 	CLayerTiles::BrushFlipX();
-
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width / 2; x++)
-			std::swap(m_pSpeedupTile[y * m_Width + x], m_pSpeedupTile[y * m_Width + m_Width - 1 - x]);
+	BrushFlipXImpl(m_pSpeedupTile);
 }
 
 void CLayerSpeedup::BrushFlipY()
 {
 	CLayerTiles::BrushFlipY();
-
-	for(int y = 0; y < m_Height / 2; y++)
-		for(int x = 0; x < m_Width; x++)
-			std::swap(m_pSpeedupTile[y * m_Width + x], m_pSpeedupTile[(m_Height - 1 - y) * m_Width + x]);
+	BrushFlipYImpl(m_pSpeedupTile);
 }
 
 void CLayerSpeedup::BrushRotate(float Amount)
@@ -1715,38 +1603,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 void CLayerSwitch::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
-	int o = m_pEditor->m_ShiftBy;
-
-	switch(Direction)
-	{
-	case DIRECTION_LEFT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pSwitchTile[y * m_Width], &m_pSwitchTile[y * m_Width + o], (m_Width - o) * sizeof(CSwitchTile));
-			mem_zero(&m_pSwitchTile[y * m_Width + (m_Width - o)], o * sizeof(CSwitchTile));
-		}
-		break;
-	case DIRECTION_RIGHT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pSwitchTile[y * m_Width + o], &m_pSwitchTile[y * m_Width], (m_Width - o) * sizeof(CSwitchTile));
-			mem_zero(&m_pSwitchTile[y * m_Width], o * sizeof(CSwitchTile));
-		}
-		break;
-	case DIRECTION_UP:
-		for(int y = 0; y < m_Height - o; ++y)
-		{
-			mem_copy(&m_pSwitchTile[y * m_Width], &m_pSwitchTile[(y + o) * m_Width], m_Width * sizeof(CSwitchTile));
-			mem_zero(&m_pSwitchTile[(y + o) * m_Width], m_Width * sizeof(CSwitchTile));
-		}
-		break;
-	case DIRECTION_DOWN:
-		for(int y = m_Height - 1; y >= o; --y)
-		{
-			mem_copy(&m_pSwitchTile[y * m_Width], &m_pSwitchTile[(y - o) * m_Width], m_Width * sizeof(CSwitchTile));
-			mem_zero(&m_pSwitchTile[(y - o) * m_Width], m_Width * sizeof(CSwitchTile));
-		}
-	}
+	ShiftImpl(m_pSwitchTile, Direction, m_pEditor->m_ShiftBy);
 }
 
 bool CLayerSwitch::IsEmpty(CLayerTiles *pLayer)
@@ -1835,19 +1692,13 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 void CLayerSwitch::BrushFlipX()
 {
 	CLayerTiles::BrushFlipX();
-
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width / 2; x++)
-			std::swap(m_pSwitchTile[y * m_Width + x], m_pSwitchTile[y * m_Width + m_Width - 1 - x]);
+	BrushFlipXImpl(m_pSwitchTile);
 }
 
 void CLayerSwitch::BrushFlipY()
 {
 	CLayerTiles::BrushFlipY();
-
-	for(int y = 0; y < m_Height / 2; y++)
-		for(int x = 0; x < m_Width; x++)
-			std::swap(m_pSwitchTile[y * m_Width + x], m_pSwitchTile[(m_Height - 1 - y) * m_Width + x]);
+	BrushFlipYImpl(m_pSwitchTile);
 }
 
 void CLayerSwitch::BrushRotate(float Amount)
@@ -2009,38 +1860,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 void CLayerTune::Shift(int Direction)
 {
 	CLayerTiles::Shift(Direction);
-	int o = m_pEditor->m_ShiftBy;
-
-	switch(Direction)
-	{
-	case DIRECTION_LEFT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pTuneTile[y * m_Width], &m_pTuneTile[y * m_Width + o], (m_Width - o) * sizeof(CTuneTile));
-			mem_zero(&m_pTuneTile[y * m_Width + (m_Width - o)], o * sizeof(CTuneTile));
-		}
-		break;
-	case DIRECTION_RIGHT:
-		for(int y = 0; y < m_Height; ++y)
-		{
-			mem_move(&m_pTuneTile[y * m_Width + o], &m_pTuneTile[y * m_Width], (m_Width - o) * sizeof(CTuneTile));
-			mem_zero(&m_pTuneTile[y * m_Width], o * sizeof(CTuneTile));
-		}
-		break;
-	case DIRECTION_UP:
-		for(int y = 0; y < m_Height - o; ++y)
-		{
-			mem_copy(&m_pTuneTile[y * m_Width], &m_pTuneTile[(y + o) * m_Width], m_Width * sizeof(CTuneTile));
-			mem_zero(&m_pTuneTile[(y + o) * m_Width], m_Width * sizeof(CTuneTile));
-		}
-		break;
-	case DIRECTION_DOWN:
-		for(int y = m_Height - 1; y >= o; --y)
-		{
-			mem_copy(&m_pTuneTile[y * m_Width], &m_pTuneTile[(y - o) * m_Width], m_Width * sizeof(CTuneTile));
-			mem_zero(&m_pTuneTile[(y - o) * m_Width], m_Width * sizeof(CTuneTile));
-		}
-	}
+	ShiftImpl(m_pTuneTile, Direction, m_pEditor->m_ShiftBy);
 }
 
 bool CLayerTune::IsEmpty(CLayerTiles *pLayer)
@@ -2117,19 +1937,13 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 void CLayerTune::BrushFlipX()
 {
 	CLayerTiles::BrushFlipX();
-
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width / 2; x++)
-			std::swap(m_pTuneTile[y * m_Width + x], m_pTuneTile[y * m_Width + m_Width - 1 - x]);
+	BrushFlipXImpl(m_pTuneTile);
 }
 
 void CLayerTune::BrushFlipY()
 {
 	CLayerTiles::BrushFlipY();
-
-	for(int y = 0; y < m_Height / 2; y++)
-		for(int x = 0; x < m_Width; x++)
-			std::swap(m_pTuneTile[y * m_Width + x], m_pTuneTile[(m_Height - 1 - y) * m_Width + x]);
+	BrushFlipYImpl(m_pTuneTile);
 }
 
 void CLayerTune::BrushRotate(float Amount)

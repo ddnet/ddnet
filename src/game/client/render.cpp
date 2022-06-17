@@ -7,14 +7,10 @@
 #include "animstate.h"
 #include "render.h"
 #include <engine/graphics.h>
-#include <engine/map.h>
 #include <engine/shared/config.h>
-#include <game/client/components/skins.h>
-#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
-#include <game/layers.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
@@ -117,6 +113,18 @@ void CRenderTools::DrawSprite(float x, float y, float ScaledWidth, float ScaledH
 {
 	IGraphics::CQuadItem QuadItem(x, y, ScaledWidth, ScaledHeight);
 	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
+void CRenderTools::RenderCursor(vec2 Center, float Size)
+{
+	Graphics()->WrapClamp();
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, Size, Size);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
@@ -473,7 +481,7 @@ void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners
 	// TODO: FIX US
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
-	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding * pRect->Scale(), Corners);
+	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
 	Graphics()->QuadsEnd();
 }
 
@@ -752,7 +760,7 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *w, float *h
 	*h *= Zoom;
 }
 
-void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 	float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
 {
 	float Width, Height;
@@ -763,4 +771,12 @@ void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[1] = OffsetY + CenterY - Height / 2;
 	pPoints[2] = pPoints[0] + Width;
 	pPoints[3] = pPoints[1] + Height;
+}
+
+void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
+{
+	float Points[4];
+	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
+	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
 }

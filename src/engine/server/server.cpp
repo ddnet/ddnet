@@ -19,11 +19,11 @@
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
-#include <engine/shared/datafile.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/netban.h>
@@ -64,7 +64,7 @@ void CSnapIDPool::Reset()
 	for(int i = 0; i < MAX_IDS; i++)
 	{
 		m_aIDs[i].m_Next = i + 1;
-		m_aIDs[i].m_State = 0;
+		m_aIDs[i].m_State = ID_FREE;
 	}
 
 	m_aIDs[MAX_IDS - 1].m_Next = -1;
@@ -81,7 +81,7 @@ void CSnapIDPool::RemoveFirstTimeout()
 
 	// add it to the free list
 	m_aIDs[m_FirstTimed].m_Next = m_FirstFree;
-	m_aIDs[m_FirstTimed].m_State = 0;
+	m_aIDs[m_FirstTimed].m_State = ID_FREE;
 	m_FirstFree = m_FirstTimed;
 
 	// remove it from the timed list
@@ -107,7 +107,7 @@ int CSnapIDPool::NewID()
 		return ID;
 	}
 	m_FirstFree = m_aIDs[m_FirstFree].m_Next;
-	m_aIDs[ID].m_State = 1;
+	m_aIDs[ID].m_State = ID_ALLOCATED;
 	m_Usage++;
 	m_InUsage++;
 	return ID;
@@ -124,10 +124,10 @@ void CSnapIDPool::FreeID(int ID)
 {
 	if(ID < 0)
 		return;
-	dbg_assert(m_aIDs[ID].m_State == 1, "id is not allocated");
+	dbg_assert(m_aIDs[ID].m_State == ID_ALLOCATED, "id is not allocated");
 
 	m_InUsage--;
-	m_aIDs[ID].m_State = 2;
+	m_aIDs[ID].m_State = ID_TIMED;
 	m_aIDs[ID].m_Timeout = time_get() + time_freq() * 5;
 	m_aIDs[ID].m_Next = -1;
 
@@ -278,7 +278,7 @@ class CServerLogger : public ILogger
 {
 	CServer *m_pServer;
 	std::mutex m_PendingLock;
-	std::vector<CLogMessage> m_aPending;
+	std::vector<CLogMessage> m_vPending;
 	std::thread::id m_MainThread;
 
 public:
@@ -298,23 +298,23 @@ void CServerLogger::Log(const CLogMessage *pMessage)
 	m_PendingLock.lock();
 	if(m_MainThread == std::this_thread::get_id())
 	{
-		if(!m_aPending.empty())
+		if(!m_vPending.empty())
 		{
 			if(m_pServer)
 			{
-				for(const auto &Message : m_aPending)
+				for(const auto &Message : m_vPending)
 				{
 					m_pServer->SendLogLine(&Message);
 				}
 			}
-			m_aPending.clear();
+			m_vPending.clear();
 		}
 		m_PendingLock.unlock();
 		m_pServer->SendLogLine(pMessage);
 	}
 	else
 	{
-		m_aPending.push_back(*pMessage);
+		m_vPending.push_back(*pMessage);
 		m_PendingLock.unlock();
 	}
 }
@@ -448,7 +448,7 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 	if(m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return false;
 
-	CNameBan *pBanned = IsNameBanned(pNameRequest, m_aNameBans.base_ptr(), m_aNameBans.size());
+	CNameBan *pBanned = IsNameBanned(pNameRequest, m_vNameBans);
 	if(pBanned)
 	{
 		if(m_aClients[ClientID].m_State == CClient::STATE_READY && Set)
@@ -571,20 +571,10 @@ void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason);
 }
 
-/*int CServer::Tick()
-{
-	return m_CurrentGameTick;
-}*/
-
 int64_t CServer::TickStartTime(int Tick)
 {
 	return m_GameStartTime + (time_freq() * Tick) / SERVER_TICK_SPEED;
 }
-
-/*int CServer::TickSpeed()
-{
-	return SERVER_TICK_SPEED;
-}*/
 
 int CServer::Init()
 {
@@ -1435,8 +1425,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	{
 		int64_t Now = time_get();
 		int64_t Diff = Now - m_aClients[ClientID].m_TrafficSince;
-		float Alpha = Config()->m_SvNetlimitAlpha / 100.0f;
-		float Limit = (float)Config()->m_SvNetlimit * 1024 / time_freq();
+		double Alpha = Config()->m_SvNetlimitAlpha / 100.0;
+		double Limit = (double)(Config()->m_SvNetlimit * 1024) / time_freq();
 
 		if(m_aClients[ClientID].m_Traffic > Limit)
 		{
@@ -1445,7 +1435,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		if(Diff > 100)
 		{
-			m_aClients[ClientID].m_Traffic = (Alpha * ((float)pPacket->m_DataSize / Diff)) + (1.0f - Alpha) * m_aClients[ClientID].m_Traffic;
+			m_aClients[ClientID].m_Traffic = (Alpha * ((double)pPacket->m_DataSize / Diff)) + (1.0 - Alpha) * m_aClients[ClientID].m_Traffic;
 			m_aClients[ClientID].m_TrafficSince = Now;
 		}
 	}
@@ -1667,7 +1657,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
-					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientID = ClientID;
 					m_RconAuthLevel = m_aClients[ClientID].m_Authed;
 					Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientID].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : m_aClients[ClientID].m_Authed == AUTHED_HELPER ? IConsole::ACCESS_LEVEL_HELPER : IConsole::ACCESS_LEVEL_USER);
@@ -2500,20 +2490,18 @@ int CServer::LoadMap(const char *pMapName)
 
 	// load complete map into memory for download
 	{
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		m_aCurrentMapSize[MAP_TYPE_SIX] = (unsigned int)io_length(File);
 		free(m_apCurrentMapData[MAP_TYPE_SIX]);
-		m_apCurrentMapData[MAP_TYPE_SIX] = (unsigned char *)malloc(m_aCurrentMapSize[MAP_TYPE_SIX]);
-		io_read(File, m_apCurrentMapData[MAP_TYPE_SIX], m_aCurrentMapSize[MAP_TYPE_SIX]);
-		io_close(File);
+		void *pData;
+		Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIX]);
+		m_apCurrentMapData[MAP_TYPE_SIX] = (unsigned char *)pData;
 	}
 
 	// load sixup version of the map
 	if(Config()->m_SvSixup)
 	{
 		str_format(aBuf, sizeof(aBuf), "maps7/%s.map", pMapName);
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		if(!File)
+		void *pData;
+		if(!Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIXUP]))
 		{
 			Config()->m_SvSixup = 0;
 			if(m_pRegister)
@@ -2526,11 +2514,8 @@ int CServer::LoadMap(const char *pMapName)
 		}
 		else
 		{
-			m_aCurrentMapSize[MAP_TYPE_SIXUP] = (unsigned int)io_length(File);
 			free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
-			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)malloc(m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			io_read(File, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			io_close(File);
+			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)pData;
 
 			m_aCurrentMapSha256[MAP_TYPE_SIXUP] = sha256(m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
 			m_aCurrentMapCrc[MAP_TYPE_SIXUP] = crc32(0, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
@@ -2678,8 +2663,8 @@ int CServer::Run()
 			int64_t t = time_get();
 			int NewTicks = 0;
 
-			// load new map TODO: don't poll this
-			if(m_MapReload)
+			// load new map
+			if(m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) // force reload to make sure the ticks stay within a valid range
 			{
 				// load map
 				if(LoadMap(Config()->m_SvMap))
@@ -2775,10 +2760,21 @@ int CServer::Run()
 				GameServer()->OnPreTickTeehistorian();
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
-					if(m_aClients[c].m_State == CClient::STATE_INGAME)
-						for(auto &Input : m_aClients[c].m_aInputs)
-							if(Input.m_GameTick == Tick() + 1)
-								GameServer()->OnClientPredictedEarlyInput(c, Input.m_aData);
+				{
+					if(m_aClients[c].m_State != CClient::STATE_INGAME)
+						continue;
+					bool ClientHadInput = false;
+					for(auto &Input : m_aClients[c].m_aInputs)
+					{
+						if(Input.m_GameTick == Tick() + 1)
+						{
+							GameServer()->OnClientPredictedEarlyInput(c, Input.m_aData);
+							ClientHadInput = true;
+						}
+					}
+					if(!ClientHadInput)
+						GameServer()->OnClientPredictedEarlyInput(c, nullptr);
+				}
 
 				m_CurrentGameTick++;
 				NewTicks++;
@@ -2788,14 +2784,18 @@ int CServer::Run()
 				{
 					if(m_aClients[c].m_State != CClient::STATE_INGAME)
 						continue;
+					bool ClientHadInput = false;
 					for(auto &Input : m_aClients[c].m_aInputs)
 					{
 						if(Input.m_GameTick == Tick())
 						{
 							GameServer()->OnClientPredictedInput(c, Input.m_aData);
+							ClientHadInput = true;
 							break;
 						}
 					}
+					if(!ClientHadInput)
+						GameServer()->OnClientPredictedInput(c, nullptr);
 				}
 
 				GameServer()->OnTick();
@@ -2832,8 +2832,13 @@ int CServer::Run()
 			NonActive = true;
 
 			for(auto &Client : m_aClients)
+			{
 				if(Client.m_State != CClient::STATE_EMPTY)
+				{
 					NonActive = false;
+					break;
+				}
+			}
 
 			// wait for incoming data
 			if(NonActive)
@@ -2908,6 +2913,8 @@ int CServer::Run()
 	}
 
 	m_NetServer.Close();
+
+	m_pRegister->OnShutdown();
 
 	return ErrorShutdown();
 }
@@ -3216,21 +3223,20 @@ void CServer::ConNameBan(IConsole::IResult *pResult, void *pUser)
 	int Distance = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : str_length(pName) / 3;
 	int IsSubstring = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
 
-	for(int i = 0; i < pThis->m_aNameBans.size(); i++)
+	for(auto &Ban : pThis->m_vNameBans)
 	{
-		CNameBan *pBan = &pThis->m_aNameBans[i];
-		if(str_comp(pBan->m_aName, pName) == 0)
+		if(str_comp(Ban.m_aName, pName) == 0)
 		{
-			str_format(aBuf, sizeof(aBuf), "changed name='%s' distance=%d old_distance=%d is_substring=%d old_is_substring=%d reason='%s' old_reason='%s'", pName, Distance, pBan->m_Distance, IsSubstring, pBan->m_IsSubstring, pReason, pBan->m_aReason);
+			str_format(aBuf, sizeof(aBuf), "changed name='%s' distance=%d old_distance=%d is_substring=%d old_is_substring=%d reason='%s' old_reason='%s'", pName, Distance, Ban.m_Distance, IsSubstring, Ban.m_IsSubstring, pReason, Ban.m_aReason);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
-			pBan->m_Distance = Distance;
-			pBan->m_IsSubstring = IsSubstring;
-			str_copy(pBan->m_aReason, pReason, sizeof(pBan->m_aReason));
+			Ban.m_Distance = Distance;
+			Ban.m_IsSubstring = IsSubstring;
+			str_copy(Ban.m_aReason, pReason, sizeof(Ban.m_aReason));
 			return;
 		}
 	}
 
-	pThis->m_aNameBans.add(CNameBan(pName, Distance, IsSubstring, pReason));
+	pThis->m_vNameBans.emplace_back(pName, Distance, IsSubstring, pReason);
 	str_format(aBuf, sizeof(aBuf), "added name='%s' distance=%d is_substring=%d reason='%s'", pName, Distance, IsSubstring, pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 }
@@ -3240,15 +3246,15 @@ void CServer::ConNameUnban(IConsole::IResult *pResult, void *pUser)
 	CServer *pThis = (CServer *)pUser;
 	const char *pName = pResult->GetString(0);
 
-	for(int i = 0; i < pThis->m_aNameBans.size(); i++)
+	for(size_t i = 0; i < pThis->m_vNameBans.size(); i++)
 	{
-		CNameBan *pBan = &pThis->m_aNameBans[i];
+		CNameBan *pBan = &pThis->m_vNameBans[i];
 		if(str_comp(pBan->m_aName, pName) == 0)
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "removed name='%s' distance=%d is_substring=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_IsSubstring, pBan->m_aReason);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
-			pThis->m_aNameBans.remove_index(i);
+			pThis->m_vNameBans.erase(pThis->m_vNameBans.begin() + i);
 		}
 	}
 }
@@ -3257,11 +3263,10 @@ void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
-	for(int i = 0; i < pThis->m_aNameBans.size(); i++)
+	for(auto &Ban : pThis->m_vNameBans)
 	{
-		CNameBan *pBan = &pThis->m_aNameBans[i];
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "name='%s' distance=%d is_substring=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_IsSubstring, pBan->m_aReason);
+		str_format(aBuf, sizeof(aBuf), "name='%s' distance=%d is_substring=%d reason='%s'", Ban.m_aName, Ban.m_Distance, Ban.m_IsSubstring, Ban.m_aReason);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
 	}
 }
@@ -3468,6 +3473,12 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CServer::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3668,6 +3679,8 @@ void CServer::RegisterCommands()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 
+	HttpInit(m_pStorage);
+
 	// register console commands
 	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
 	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
@@ -3695,6 +3708,7 @@ void CServer::RegisterCommands()
 	Console()->Register("name_bans", "", CFGFLAG_SERVER, ConNameBans, this, "List all name bans");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
+	Console()->Chain("loglevel", ConchainLoglevel, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
@@ -3753,7 +3767,7 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++)
@@ -3768,22 +3782,22 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	std::vector<std::shared_ptr<ILogger>> apLoggers;
+	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 #if defined(CONF_PLATFORM_ANDROID)
-	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
 #else
 	if(!Silent)
 	{
-		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
 	}
 #endif
 	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureFileLogger);
+	vpLoggers.push_back(pFutureFileLogger);
 	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureConsoleLogger);
+	vpLoggers.push_back(pFutureConsoleLogger);
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureAssertionLogger);
-	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+	vpLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
 	if(secure_random_init() != 0)
 	{
@@ -3873,6 +3887,7 @@ int main(int argc, const char **argv)
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
 
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 	if(g_Config.m_Logfile[0])
 	{
 		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
@@ -3885,7 +3900,7 @@ int main(int argc, const char **argv)
 			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
-	pEngine->SetAdditionalLogger(std::unique_ptr<ILogger>(new CServerLogger(pServer)));
+	pEngine->SetAdditionalLogger(std::make_unique<CServerLogger>(pServer));
 
 	// run the server
 	dbg_msg("server", "starting...");
@@ -3897,7 +3912,6 @@ int main(int argc, const char **argv)
 	// free
 	delete pKernel;
 
-	cmdline_free(argc, argv);
 	return Ret;
 }
 
@@ -3917,34 +3931,34 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	if(!File)
 		return 0;
 
-	std::vector<char *> Lines;
+	std::vector<char *> vpLines;
 	char *pLine;
 	CLineReader Reader;
 	Reader.Init(File);
 	while((pLine = Reader.Get()))
 		if(str_length(pLine))
 			if(pLine[0] != '#')
-				Lines.push_back(pLine);
+				vpLines.push_back(pLine);
 
-	if(Lines.empty())
+	if(vpLines.empty())
 	{
 		return 0;
 	}
-	else if(Lines.size() == 1)
+	else if(vpLines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
 	else if(!Config()->m_SvAnnouncementRandom)
 	{
-		if(++m_AnnouncementLastLine >= Lines.size())
-			m_AnnouncementLastLine %= Lines.size();
+		if(++m_AnnouncementLastLine >= vpLines.size())
+			m_AnnouncementLastLine %= vpLines.size();
 	}
 	else
 	{
 		unsigned Rand;
 		do
 		{
-			Rand = rand() % Lines.size();
+			Rand = rand() % vpLines.size();
 		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
@@ -3952,7 +3966,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 
 	io_close(File);
 
-	return Lines[m_AnnouncementLastLine];
+	return vpLines[m_AnnouncementLastLine];
 }
 
 int *CServer::GetIdMap(int ClientID)

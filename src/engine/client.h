@@ -123,7 +123,7 @@ public:
 	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
 
 	// actions
-	virtual void Connect(const char *pAddress, const char *pPassword = NULL) = 0;
+	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
 	virtual void Disconnect() = 0;
 
 	// dummy
@@ -169,7 +169,6 @@ public:
 
 	// input
 	virtual int *GetInput(int Tick, int IsDummy = 0) const = 0;
-	virtual int *GetDirectInput(int Tick, int IsDummy = 0) const = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;

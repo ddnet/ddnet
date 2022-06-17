@@ -2,12 +2,15 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SCOREBOARD_H
 #define GAME_CLIENT_COMPONENTS_SCOREBOARD_H
+
+#include <engine/console.h>
+
 #include <game/client/component.h>
 
 class CScoreboard : public CComponent
 {
 	void RenderGoals(float x, float y, float w);
-	void RenderSpectators(float x, float y, float w);
+	void RenderSpectators(float x, float y, float w, float h);
 	void RenderScoreboard(float x, float y, float w, int Team, const char *pTitle, int NumPlayers = -1);
 	void RenderRecordingNotification(float x);
 

@@ -5,21 +5,17 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/components/motd.h>
-#include <game/client/components/skins.h>
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/localization.h>
 
 #include "scoreboard.h"
-
-#include <engine/serverbrowser.h>
 
 CScoreboard::CScoreboard()
 {
@@ -94,10 +90,8 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	}
 }
 
-void CScoreboard::RenderSpectators(float x, float y, float w)
+void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 {
-	float h = 140.0f;
-
 	// background
 	Graphics()->BlendNormal();
 	Graphics()->TextureClear();
@@ -690,9 +684,16 @@ void CScoreboard::OnRender()
 			RenderScoreboard(Width / 2 + 5.0f, 150.0f, w, TEAM_BLUE, pBlueClanName ? pBlueClanName : Localize("Blue team"), NumPlayers);
 		}
 	}
+	if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit || m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit || (m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum && m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent)))
+	{
+		RenderGoals(Width / 2 - w / 2, 150 + 760 + 10, w);
+		RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10 + 50 + 10, w, 160.0f);
+	}
+	else
+	{
+		RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10, w, 200.0f);
+	}
 
-	RenderGoals(Width / 2 - w / 2, 150 + 760 + 10, w);
-	RenderSpectators(Width / 2 - w / 2, 150 + 760 + 10 + 50 + 10, w);
 	RenderRecordingNotification((Width / 7) * 4 + 20);
 }
 

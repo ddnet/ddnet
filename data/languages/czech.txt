@@ -241,9 +241,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Citlivost myši
-
 Move left
 == Pohyb doleva
 
@@ -691,7 +688,7 @@ Countries
 == Země
 
 Types
-== Typy 
+== Typy
 
 DDNet %s is out!
 == DDNet %s je venku!
@@ -765,9 +762,6 @@ Save
 Switch weapon when out of ammo
 == Změnit zbraň když vám dojdou náboje
 
-Reset wanted weapon on death
-== Resetujte hledanou zbraň po smrti
-
 Show only chat messages from friends
 == Zobrazit pouze zprávy od přátel
 
@@ -779,9 +773,6 @@ Clan plates size
 
 Refresh Rate
 == Obnovovací frekvence
-
-Show console window
-== Zobrazit konzolové okno
 
 Automatically take statboard screenshot
 == Automaticky pořídit snímek obrazovky statboardu
@@ -857,9 +848,6 @@ Show entities
 
 Show HUD
 == Zobrazit HUD
-
-UI mouse s.
-== UI mouse s.
 
 may cause delay
 == může způsobit zpoždění
@@ -1214,6 +1202,27 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1262,10 +1271,69 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
 == 
 
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1301,7 +1369,25 @@ Graphics cards
 auto
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages

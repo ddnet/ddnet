@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_HTTP_H
 #define ENGINE_SHARED_HTTP_H
 
+#include <algorithm>
 #include <atomic>
 #include <engine/shared/jobs.h>
 
@@ -33,6 +34,7 @@ enum class IPRESOLVE
 struct CTimeout
 {
 	long ConnectTimeoutMs;
+	long TimeoutMs;
 	long LowSpeedLimit;
 	long LowSpeedTime;
 };
@@ -52,7 +54,7 @@ class CHttpRequest : public IJob
 	unsigned char *m_pBody = nullptr;
 	size_t m_BodyLength = 0;
 
-	CTimeout m_Timeout = CTimeout{0, 0, 0};
+	CTimeout m_Timeout = CTimeout{0, 0, 0, 0};
 	REQUEST m_Type = REQUEST::GET;
 
 	bool m_WriteToFile = false;
@@ -105,7 +107,7 @@ public:
 	{
 		m_Type = REQUEST::POST;
 		m_BodyLength = DataLength;
-		m_pBody = (unsigned char *)malloc(DataLength);
+		m_pBody = (unsigned char *)malloc(std::max((size_t)1, DataLength));
 		mem_copy(m_pBody, pData, DataLength);
 	}
 	void PostJson(const char *pJson)
@@ -153,35 +155,37 @@ public:
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)
 {
-	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->Head();
 	return pResult;
 }
 
 inline std::unique_ptr<CHttpRequest> HttpGet(const char *pUrl)
 {
-	return std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	return std::make_unique<CHttpRequest>(pUrl);
 }
 
 inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pStorage, const char *pOutputFile, int StorageType)
 {
 	std::unique_ptr<CHttpRequest> pResult = HttpGet(pUrl);
 	pResult->WriteToFile(pStorage, pOutputFile, StorageType);
-	pResult->Timeout(CTimeout{4000, 500, 5});
+	pResult->Timeout(CTimeout{4000, 0, 500, 5});
 	return pResult;
 }
 
 inline std::unique_ptr<CHttpRequest> HttpPost(const char *pUrl, const unsigned char *pData, size_t DataLength)
 {
-	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->Post(pData, DataLength);
+	pResult->Timeout(CTimeout{4000, 15000, 500, 5});
 	return pResult;
 }
 
 inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *pJson)
 {
-	std::unique_ptr<CHttpRequest> pResult = std::unique_ptr<CHttpRequest>(new CHttpRequest(pUrl));
+	auto pResult = std::make_unique<CHttpRequest>(pUrl);
 	pResult->PostJson(pJson);
+	pResult->Timeout(CTimeout{4000, 15000, 500, 5});
 	return pResult;
 }
 

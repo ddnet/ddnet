@@ -3,11 +3,9 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 
-#include "projectile.h"
 #include <game/client/prediction/entity.h>
 
 #include <game/gamecore.h>
-#include <game/generated/client_data.h>
 
 enum
 {
@@ -33,6 +31,8 @@ class CCharacter : public CEntity
 	friend class CGameWorld;
 
 public:
+	~CCharacter();
+
 	//character's size
 	static const int ms_PhysSize = 28;
 
@@ -61,9 +61,6 @@ public:
 	void GiveNinja();
 	void RemoveNinja();
 
-	bool IsAlive() { return m_Alive; }
-
-	bool m_Alive;
 	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
@@ -144,7 +141,6 @@ public:
 
 	bool Match(CCharacter *pChar);
 	void ResetPrediction();
-	CCharacter() { m_Alive = false; }
 	void SetTuneZone(int Zone);
 
 private:

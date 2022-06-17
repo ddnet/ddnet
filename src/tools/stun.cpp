@@ -4,7 +4,7 @@
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	secure_random_init();
 	log_set_global_logger_default();
@@ -89,6 +89,4 @@ int main(int argc, const char **argv)
 			break;
 		}
 	}
-
-	cmdline_free(argc, argv);
 }

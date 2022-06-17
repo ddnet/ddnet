@@ -4,26 +4,29 @@
 
 TEST(NameBan, Empty)
 {
-	EXPECT_FALSE(IsNameBanned("", 0, 0));
-	EXPECT_FALSE(IsNameBanned("abc", 0, 0));
+	std::vector<CNameBan> vBans;
+	EXPECT_FALSE(IsNameBanned("", vBans));
+	EXPECT_FALSE(IsNameBanned("abc", vBans));
 }
 
 TEST(NameBan, Equality)
 {
-	CNameBan Abc0("abc", 0, 0);
-	EXPECT_TRUE(IsNameBanned("abc", &Abc0, 1));
-	EXPECT_TRUE(IsNameBanned("   abc", &Abc0, 1));
-	EXPECT_TRUE(IsNameBanned("abc   ", &Abc0, 1));
-	EXPECT_TRUE(IsNameBanned("abc                   foo", &Abc0, 1)); // Maximum name length.
-	EXPECT_TRUE(IsNameBanned("äbc", &Abc0, 1)); // Confusables
-	EXPECT_FALSE(IsNameBanned("def", &Abc0, 1));
-	EXPECT_FALSE(IsNameBanned("abcdef", &Abc0, 1));
+	std::vector<CNameBan> vBans;
+	vBans.emplace_back("abc", 0, 0);
+	EXPECT_TRUE(IsNameBanned("abc", vBans));
+	EXPECT_TRUE(IsNameBanned("   abc", vBans));
+	EXPECT_TRUE(IsNameBanned("abc   ", vBans));
+	EXPECT_TRUE(IsNameBanned("abc                   foo", vBans)); // Maximum name length.
+	EXPECT_TRUE(IsNameBanned("äbc", vBans)); // Confusables
+	EXPECT_FALSE(IsNameBanned("def", vBans));
+	EXPECT_FALSE(IsNameBanned("abcdef", vBans));
 }
 
 TEST(NameBan, Substring)
 {
-	CNameBan Xyz("xyz", 0, 1);
-	EXPECT_TRUE(IsNameBanned("abcxyz", &Xyz, 1));
-	EXPECT_TRUE(IsNameBanned("abcxyzdef", &Xyz, 1));
-	EXPECT_FALSE(IsNameBanned("abcdef", &Xyz, 1));
+	std::vector<CNameBan> vBans;
+	vBans.emplace_back("xyz", 0, 1);
+	EXPECT_TRUE(IsNameBanned("abcxyz", vBans));
+	EXPECT_TRUE(IsNameBanned("abcxyzdef", vBans));
+	EXPECT_FALSE(IsNameBanned("abcdef", vBans));
 }

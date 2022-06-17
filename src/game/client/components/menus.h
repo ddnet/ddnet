@@ -3,10 +3,12 @@
 #ifndef GAME_CLIENT_COMPONENTS_MENUS_H
 #define GAME_CLIENT_COMPONENTS_MENUS_H
 
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 
 #include <chrono>
+#include <vector>
+
+#include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
 #include <engine/shared/config.h>
@@ -82,14 +84,14 @@ class CMenus : public CComponent
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = 0, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1, bool CheckForActiveColorPicker = false);
-	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = NULL, const ColorRGBA *pDefaultColor = NULL, const ColorRGBA *pActiveColor = NULL, const ColorRGBA *pHoverColor = NULL, float EdgeRounding = 10, int AlignVertically = 1);
+	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = nullptr, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1, bool CheckForActiveColorPicker = false);
+	int DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10, int AlignVertically = 1);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);
 	int DoButton_CheckBox(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_CheckBoxAutoVMarginAndSet(const void *pID, const char *pText, int *pValue, CUIRect *pRect, float VMargin);
 	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	ColorHSLA DoLine_ColorPicker(int *pResetID, float LineSize, float WantedPickerPosition, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, bool UseCheckBox = false, int *pCheckBoxValue = NULL);
+	ColorHSLA DoLine_ColorPicker(int *pResetID, float LineSize, float WantedPickerPosition, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, bool UseCheckBox = false, int *pCheckBoxValue = nullptr);
 	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor);
 	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color);
 	int DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect);
@@ -98,7 +100,11 @@ class CMenus : public CComponent
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination);
 
-	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView);
+	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View);
+
+	float RenderSettingsControlsJoystick(CUIRect View);
+	void DoJoystickAxisPicker(CUIRect View);
+	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
 	void RenderColorPicker();
 
@@ -123,7 +129,7 @@ class CMenus : public CComponent
 					}
 				}
 			}
-			const char *pText = NULL;
+			const char *pText = nullptr;
 			if(HintRequiresStringCheck)
 			{
 				if(UIElement.AreRectsInit())
@@ -164,7 +170,7 @@ class CMenus : public CComponent
 					NewRect.m_Height = pRect->h;
 					if(i == 0)
 					{
-						if(pText == NULL)
+						if(pText == nullptr)
 							pText = GetTextLambda();
 						NewRect.m_Text = pText;
 						SLabelProperties Props;
@@ -177,7 +183,7 @@ class CMenus : public CComponent
 		}
 		// render
 		size_t Index = 2;
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 			Index = 0;
 		else if(UI()->HotItem() == pID)
 			Index = 1;
@@ -202,7 +208,7 @@ class CMenus : public CComponent
 		int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly = false);
 	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false, bool KeyEvents = true, bool NoHoverEffects = false);
 	CListboxItem UiDoListboxNextRow();
-	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = 0);
+	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = nullptr);
 
 	int UiLogicGetCurrentClickedItem();
 
@@ -252,11 +258,11 @@ public:
 	};
 
 protected:
-	sorted_array<SCustomEntities> m_EntitiesList;
-	sorted_array<SCustomGame> m_GameList;
-	sorted_array<SCustomEmoticon> m_EmoticonList;
-	sorted_array<SCustomParticle> m_ParticlesList;
-	sorted_array<SCustomHud> m_HudList;
+	std::vector<SCustomEntities> m_vEntitiesList;
+	std::vector<SCustomGame> m_vGameList;
+	std::vector<SCustomEmoticon> m_vEmoticonList;
+	std::vector<SCustomParticle> m_vParticlesList;
+	std::vector<SCustomHud> m_vHudList;
 
 	bool m_IsInit = false;
 
@@ -282,7 +288,6 @@ protected:
 	int m_ActivePage;
 	bool m_ShowStart;
 	bool m_MenuActive;
-	bool m_UseMouseButtons;
 	vec2 m_MousePos;
 	bool m_JoinTutorial;
 
@@ -295,7 +300,7 @@ protected:
 		IGraphics::CTextureHandle m_OrgTexture;
 		IGraphics::CTextureHandle m_GreyTexture;
 	};
-	array<CMenuImage> m_lMenuImages;
+	std::vector<CMenuImage> m_vMenuImages;
 
 	static int MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser);
 
@@ -428,7 +433,6 @@ protected:
 		}
 	};
 
-	//sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
 	char m_aCurrentDemoFile[64];
 	int m_DemolistSelectedIndex;
@@ -448,6 +452,12 @@ protected:
 		const CFriendInfo *m_pFriendInfo;
 		int m_NumFound;
 
+		CFriendItem() {}
+		CFriendItem(const CFriendInfo *pFriendInfo) :
+			m_pFriendInfo(pFriendInfo), m_NumFound(0)
+		{
+		}
+
 		bool operator<(const CFriendItem &Other) const
 		{
 			if(m_NumFound && !Other.m_NumFound)
@@ -465,7 +475,7 @@ protected:
 		}
 	};
 
-	sorted_array<CFriendItem> m_lFriends;
+	std::vector<CFriendItem> m_vFriends;
 	int m_FriendlistSelectedIndex;
 
 	void FriendlistOnUpdate();
@@ -534,8 +544,6 @@ public:
 
 	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
 
-	void UseMouseButtons(bool Use) { m_UseMouseButtons = Use; }
-
 	static CMenusKeyBinder m_Binder;
 
 	CMenus();
@@ -554,7 +562,7 @@ public:
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual bool OnInput(IInput::CEvent Event) override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnShutdown() override;
 
 	enum
@@ -616,7 +624,7 @@ public:
 
 	// DDRace
 	int DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	sorted_array<CDemoItem> m_lDemos;
+	std::vector<CDemoItem> m_vDemos;
 	void DemolistPopulate();
 	bool m_Dummy;
 
@@ -641,7 +649,7 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
-	sorted_array<CGhostItem> m_lGhosts;
+	std::vector<CGhostItem> m_vGhosts;
 
 	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
 

@@ -1,5 +1,4 @@
 #include <engine/demo.h>
-#include <engine/engine.h>
 #include <engine/sound.h>
 
 #include <game/client/components/camera.h>
@@ -49,7 +48,7 @@ void CMapSounds::OnMapLoad()
 	}
 
 	// enqueue sound sources
-	m_lSourceQueue.clear();
+	m_vSourceQueue.clear();
 	for(int g = 0; g < Layers()->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = Layers()->GetGroup(g);
@@ -89,7 +88,7 @@ void CMapSounds::OnMapLoad()
 					if(!source.m_pSource || source.m_Sound == -1)
 						continue;
 
-					m_lSourceQueue.add(source);
+					m_vSourceQueue.push_back(source);
 				}
 			}
 		}
@@ -104,10 +103,8 @@ void CMapSounds::OnRender()
 	bool DemoPlayerPaused = Client()->State() == IClient::STATE_DEMOPLAYBACK && DemoPlayer()->BaseInfo()->m_Paused;
 
 	// enqueue sounds
-	for(int i = 0; i < m_lSourceQueue.size(); i++)
+	for(auto &Source : m_vSourceQueue)
 	{
-		CSourceQueueEntry *pSource = &m_lSourceQueue[i];
-
 		static float s_Time = 0.0f;
 		if(m_pClient->m_Snap.m_pGameInfoObj) // && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		{
@@ -115,37 +112,37 @@ void CMapSounds::OnRender()
 				(Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
-		float Offset = s_Time - pSource->m_pSource->m_TimeDelay;
-		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !pSource->m_HighDetail))
+		float Offset = s_Time - Source.m_pSource->m_TimeDelay;
+		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !Source.m_HighDetail))
 		{
-			if(pSource->m_Voice.IsValid())
+			if(Source.m_Voice.IsValid())
 			{
 				// currently playing, set offset
-				Sound()->SetVoiceTimeOffset(pSource->m_Voice, Offset);
+				Sound()->SetVoiceTimeOffset(Source.m_Voice, Offset);
 			}
 			else
 			{
 				// need to enqueue
 				int Flags = 0;
-				if(pSource->m_pSource->m_Loop)
+				if(Source.m_pSource->m_Loop)
 					Flags |= ISound::FLAG_LOOP;
-				if(!pSource->m_pSource->m_Pan)
+				if(!Source.m_pSource->m_Pan)
 					Flags |= ISound::FLAG_NO_PANNING;
 
-				pSource->m_Voice = m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[pSource->m_Sound], 1.0f, vec2(fx2f(pSource->m_pSource->m_Position.x), fx2f(pSource->m_pSource->m_Position.y)), Flags);
-				Sound()->SetVoiceTimeOffset(pSource->m_Voice, Offset);
-				Sound()->SetVoiceFalloff(pSource->m_Voice, pSource->m_pSource->m_Falloff / 255.0f);
-				switch(pSource->m_pSource->m_Shape.m_Type)
+				Source.m_Voice = m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[Source.m_Sound], 1.0f, vec2(fx2f(Source.m_pSource->m_Position.x), fx2f(Source.m_pSource->m_Position.y)), Flags);
+				Sound()->SetVoiceTimeOffset(Source.m_Voice, Offset);
+				Sound()->SetVoiceFalloff(Source.m_Voice, Source.m_pSource->m_Falloff / 255.0f);
+				switch(Source.m_pSource->m_Shape.m_Type)
 				{
 				case CSoundShape::SHAPE_CIRCLE:
 				{
-					Sound()->SetVoiceCircle(pSource->m_Voice, pSource->m_pSource->m_Shape.m_Circle.m_Radius);
+					Sound()->SetVoiceCircle(Source.m_Voice, Source.m_pSource->m_Shape.m_Circle.m_Radius);
 					break;
 				}
 
 				case CSoundShape::SHAPE_RECTANGLE:
 				{
-					Sound()->SetVoiceRectangle(pSource->m_Voice, fx2f(pSource->m_pSource->m_Shape.m_Rectangle.m_Width), fx2f(pSource->m_pSource->m_Shape.m_Rectangle.m_Height));
+					Sound()->SetVoiceRectangle(Source.m_Voice, fx2f(Source.m_pSource->m_Shape.m_Rectangle.m_Width), fx2f(Source.m_pSource->m_Shape.m_Rectangle.m_Height));
 					break;
 				}
 				};
@@ -154,8 +151,8 @@ void CMapSounds::OnRender()
 		else
 		{
 			// stop voice
-			Sound()->StopVoice(pSource->m_Voice);
-			pSource->m_Voice = ISound::CVoiceHandle();
+			Sound()->StopVoice(Source.m_Voice);
+			Source.m_Voice = ISound::CVoiceHandle();
 		}
 	}
 
@@ -188,28 +185,26 @@ void CMapSounds::OnRender()
 
 				for(int s = 0; s < pSoundLayer->m_NumSources; s++)
 				{
-					for(int i = 0; i < m_lSourceQueue.size(); i++)
+					for(auto &Voice : m_vSourceQueue)
 					{
-						CSourceQueueEntry *pVoice = &m_lSourceQueue[i];
-
-						if(pVoice->m_pSource != &pSources[s])
+						if(Voice.m_pSource != &pSources[s])
 							continue;
 
-						if(!pVoice->m_Voice.IsValid())
+						if(!Voice.m_Voice.IsValid())
 							continue;
 
 						float OffsetX = 0, OffsetY = 0;
 
-						if(pVoice->m_pSource->m_PosEnv >= 0)
+						if(Voice.m_pSource->m_PosEnv >= 0)
 						{
 							float aChannels[4];
-							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_PosEnvOffset, pVoice->m_pSource->m_PosEnv, aChannels, &m_pClient->m_MapLayersBackGround);
+							CMapLayers::EnvelopeEval(Voice.m_pSource->m_PosEnvOffset, Voice.m_pSource->m_PosEnv, aChannels, &m_pClient->m_MapLayersBackGround);
 							OffsetX = aChannels[0];
 							OffsetY = aChannels[1];
 						}
 
-						float x = fx2f(pVoice->m_pSource->m_Position.x) + OffsetX;
-						float y = fx2f(pVoice->m_pSource->m_Position.y) + OffsetY;
+						float x = fx2f(Voice.m_pSource->m_Position.x) + OffsetX;
+						float y = fx2f(Voice.m_pSource->m_Position.y) + OffsetY;
 
 						x += Center.x * (1.0f - pGroup->m_ParallaxX / 100.0f);
 						y += Center.y * (1.0f - pGroup->m_ParallaxY / 100.0f);
@@ -217,15 +212,15 @@ void CMapSounds::OnRender()
 						x -= pGroup->m_OffsetX;
 						y -= pGroup->m_OffsetY;
 
-						Sound()->SetVoiceLocation(pVoice->m_Voice, x, y);
+						Sound()->SetVoiceLocation(Voice.m_Voice, x, y);
 
-						if(pVoice->m_pSource->m_SoundEnv >= 0)
+						if(Voice.m_pSource->m_SoundEnv >= 0)
 						{
 							float aChannels[4];
-							CMapLayers::EnvelopeEval(pVoice->m_pSource->m_SoundEnvOffset, pVoice->m_pSource->m_SoundEnv, aChannels, &m_pClient->m_MapLayersBackGround);
+							CMapLayers::EnvelopeEval(Voice.m_pSource->m_SoundEnvOffset, Voice.m_pSource->m_SoundEnv, aChannels, &m_pClient->m_MapLayersBackGround);
 							float Volume = clamp(aChannels[0], 0.0f, 1.0f);
 
-							Sound()->SetVoiceVolume(pVoice->m_Voice, Volume);
+							Sound()->SetVoiceVolume(Voice.m_Voice, Volume);
 						}
 					}
 				}

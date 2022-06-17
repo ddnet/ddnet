@@ -10,9 +10,8 @@
 #include <string>
 #include <vector>
 
-#include <engine/client/backend_sdl.h>
-
 #include <engine/client/backend/glsl_shader_compiler.h>
+#include <engine/graphics.h>
 
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
@@ -26,7 +25,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		return true;
 	IOHANDLE f = pStorage->OpenFile(pFile, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 
-	std::vector<std::string> Lines;
+	std::vector<std::string> vLines;
 	if(f)
 	{
 		EBackendType BackendType = pCompiler->m_IsOpenGLES ? BACKEND_TYPE_OPENGL_ES : BACKEND_TYPE_OPENGL;
@@ -36,24 +35,24 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 			GLShaderStringPostfix = std::string(" es\r\n");
 		//add compiler specific values
 		if(IsNewOpenGL)
-			Lines.push_back(std::string("#version ") + std::string(std::to_string(pCompiler->m_OpenGLVersionMajor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionMinor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionPatch)) + GLShaderStringPostfix);
+			vLines.push_back(std::string("#version ") + std::string(std::to_string(pCompiler->m_OpenGLVersionMajor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionMinor)) + std::string(std::to_string(pCompiler->m_OpenGLVersionPatch)) + GLShaderStringPostfix);
 		else
 		{
 			if(pCompiler->m_OpenGLVersionMajor == 3)
 			{
 				if(pCompiler->m_OpenGLVersionMinor == 0)
-					Lines.emplace_back("#version 130 \r\n");
+					vLines.emplace_back("#version 130 \r\n");
 				if(pCompiler->m_OpenGLVersionMinor == 1)
-					Lines.emplace_back("#version 140 \r\n");
+					vLines.emplace_back("#version 140 \r\n");
 				if(pCompiler->m_OpenGLVersionMinor == 2)
-					Lines.emplace_back("#version 150 \r\n");
+					vLines.emplace_back("#version 150 \r\n");
 			}
 			else if(pCompiler->m_OpenGLVersionMajor == 2)
 			{
 				if(pCompiler->m_OpenGLVersionMinor == 0)
-					Lines.emplace_back("#version 110 \r\n");
+					vLines.emplace_back("#version 110 \r\n");
 				if(pCompiler->m_OpenGLVersionMinor == 1)
-					Lines.emplace_back("#version 120 \r\n");
+					vLines.emplace_back("#version 120 \r\n");
 			}
 		}
 
@@ -61,25 +60,25 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		{
 			if(Type == GL_FRAGMENT_SHADER)
 			{
-				Lines.emplace_back("precision highp float; \r\n");
-				Lines.emplace_back("precision highp sampler2D; \r\n");
-				Lines.emplace_back("precision highp sampler3D; \r\n");
-				Lines.emplace_back("precision highp samplerCube; \r\n");
-				Lines.emplace_back("precision highp samplerCubeShadow; \r\n");
-				Lines.emplace_back("precision highp sampler2DShadow; \r\n");
-				Lines.emplace_back("precision highp sampler2DArray; \r\n");
-				Lines.emplace_back("precision highp sampler2DArrayShadow; \r\n");
+				vLines.emplace_back("precision highp float; \r\n");
+				vLines.emplace_back("precision highp sampler2D; \r\n");
+				vLines.emplace_back("precision highp sampler3D; \r\n");
+				vLines.emplace_back("precision highp samplerCube; \r\n");
+				vLines.emplace_back("precision highp samplerCubeShadow; \r\n");
+				vLines.emplace_back("precision highp sampler2DShadow; \r\n");
+				vLines.emplace_back("precision highp sampler2DArray; \r\n");
+				vLines.emplace_back("precision highp sampler2DArrayShadow; \r\n");
 			}
 		}
 
-		for(CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_Defines)
+		for(CGLSLCompiler::SGLSLCompilerDefine &Define : pCompiler->m_vDefines)
 		{
-			Lines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
+			vLines.push_back(std::string("#define ") + Define.m_DefineName + std::string(" ") + Define.m_DefineValue + std::string("\r\n"));
 		}
 
 		if(Type == GL_FRAGMENT_SHADER && !IsNewOpenGL && pCompiler->m_OpenGLVersionMajor <= 3 && pCompiler->m_HasTextureArray)
 		{
-			Lines.emplace_back("#extension GL_EXT_texture_array : enable\r\n");
+			vLines.emplace_back("#extension GL_EXT_texture_array : enable\r\n");
 		}
 
 		CLineReader LineReader;
@@ -90,20 +89,20 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 			std::string Line;
 			pCompiler->ParseLine(Line, ReadLine, Type == GL_FRAGMENT_SHADER ? GLSL_SHADER_COMPILER_TYPE_FRAGMENT : GLSL_SHADER_COMPILER_TYPE_VERTEX);
 			Line.append("\r\n");
-			Lines.push_back(Line);
+			vLines.push_back(Line);
 		}
 		io_close(f);
 
-		const char **ShaderCode = new const char *[Lines.size()];
+		const char **ShaderCode = new const char *[vLines.size()];
 
-		for(size_t i = 0; i < Lines.size(); ++i)
+		for(size_t i = 0; i < vLines.size(); ++i)
 		{
-			ShaderCode[i] = Lines[i].c_str();
+			ShaderCode[i] = vLines[i].c_str();
 		}
 
 		TWGLuint shader = glCreateShader(Type);
 
-		glShaderSource(shader, Lines.size(), ShaderCode, NULL);
+		glShaderSource(shader, vLines.size(), ShaderCode, NULL);
 		glCompileShader(shader);
 
 		delete[] ShaderCode;

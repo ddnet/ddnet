@@ -11,10 +11,8 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
-#include <base/tl/array.h>
-
 #include "eventhandler.h"
-//#include "gamecontroller.h"
+#include "game/generated/protocol.h"
 #include "gameworld.h"
 #include "teehistorian.h"
 
@@ -73,7 +71,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	array<std::string> m_aCensorlist;
+	std::vector<std::string> m_vCensorlist;
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
@@ -149,6 +147,13 @@ public:
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
+	// keep last input to always apply when none is sent
+	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
+	bool m_aPlayerHasInput[MAX_CLIENTS];
+
+	// returns last input if available otherwise nulled PlayerInput object
+	// ClientID has to be valid
+	CNetObj_PlayerInput GetLastPlayerInput(int ClientID) const;
 
 	IGameController *m_pController;
 	CGameWorld m_World;
@@ -156,6 +161,7 @@ public:
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
 	bool EmulateBug(int Bug);
+	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);
@@ -295,6 +301,8 @@ public:
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
+	// starting 1 to make 0 the special value "no client id"
+	uint32_t NextUniqueClientID = 1;
 	bool m_VoteWillPass;
 	class CScore *m_pScore;
 
@@ -354,6 +362,7 @@ private:
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData);
 	static void ConPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
+	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);

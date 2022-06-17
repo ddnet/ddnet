@@ -240,9 +240,6 @@ MOTD
 Map
 == 맵
 
-Mouse sens.
-== 마우스 감도
-
 Move left
 == 왼쪽으로 이동
 
@@ -831,9 +828,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 탄약 고갈 시 무기 교체
 
-Reset wanted weapon on death
-== 사망 시 기본 무기로 전환
-
 Show clan above name plates
 == 이름 위에 클랜 표시
 
@@ -845,9 +839,6 @@ Skip the main menu
 
 Refresh Rate
 == 화면 주사율
-
-Show console window
-== 콘솔 창 표시
 
 Settings file
 == 설정 파일
@@ -938,9 +929,6 @@ Show HUD
 
 Chat command
 == 채팅 명령어
-
-UI mouse s.
-== UI 마우스 감도
 
 Dummy
 == 더미
@@ -1319,13 +1307,13 @@ AUS
 == 호주
 
 EUR
-== 유럽 
+== 유럽
 
 NA
-== 북미 
+== 북미
 
 SA
-== 남미 
+== 남미
 
 CHN
 == 중국
@@ -1367,7 +1355,7 @@ Allows maps to render with more detail
 == 맵의 세부사항을 렌더링합니다.
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다. 
+== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다.
 
 Opacity
 == 불투명도
@@ -1386,3 +1374,101 @@ Super
 
 Team %d
 == 팀 %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 

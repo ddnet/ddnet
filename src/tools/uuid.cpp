@@ -2,7 +2,7 @@
 #include <engine/shared/uuid_manager.h>
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc != 2)
 	{
@@ -13,6 +13,5 @@ int main(int argc, const char **argv)
 	char aBuf[UUID_MAXSTRSIZE];
 	FormatUuid(Uuid, aBuf, sizeof(aBuf));
 	dbg_msg("uuid", "%s", aBuf);
-	cmdline_free(argc, argv);
 	return 0;
 }

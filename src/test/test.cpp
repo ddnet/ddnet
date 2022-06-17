@@ -47,7 +47,7 @@ class CTestCollectData
 {
 public:
 	char m_aCurrentDir[IO_MAX_PATH_LENGTH];
-	std::vector<CTestInfoPath> *m_paEntries;
+	std::vector<CTestInfoPath> *m_pvEntries;
 };
 
 int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
@@ -62,12 +62,12 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 	CTestInfoPath Path;
 	Path.m_IsDirectory = IsDir;
 	str_format(Path.m_aData, sizeof(Path.m_aData), "%s/%s", pData->m_aCurrentDir, pName);
-	pData->m_paEntries->push_back(Path);
+	pData->m_pvEntries->push_back(Path);
 	if(Path.m_IsDirectory)
 	{
 		CTestCollectData DataRecursive;
 		str_copy(DataRecursive.m_aCurrentDir, Path.m_aData, sizeof(DataRecursive.m_aCurrentDir));
-		DataRecursive.m_paEntries = pData->m_paEntries;
+		DataRecursive.m_pvEntries = pData->m_pvEntries;
 		fs_listdir(DataRecursive.m_aCurrentDir, TestCollect, 0, &DataRecursive);
 	}
 	return 0;
@@ -75,23 +75,23 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 
 void TestDeleteTestStorageFiles(const char *pPath)
 {
-	std::vector<CTestInfoPath> aEntries;
+	std::vector<CTestInfoPath> vEntries;
 	CTestCollectData Data;
 	str_copy(Data.m_aCurrentDir, pPath, sizeof(Data.m_aCurrentDir));
-	Data.m_paEntries = &aEntries;
+	Data.m_pvEntries = &vEntries;
 	fs_listdir(Data.m_aCurrentDir, TestCollect, 0, &Data);
 
 	CTestInfoPath Path;
 	Path.m_IsDirectory = true;
 	str_copy(Path.m_aData, Data.m_aCurrentDir, sizeof(Path.m_aData));
-	aEntries.push_back(Path);
+	vEntries.push_back(Path);
 
 	// Sorts directories after files.
-	std::sort(aEntries.begin(), aEntries.end());
+	std::sort(vEntries.begin(), vEntries.end());
 
 	// Don't delete too many files.
-	ASSERT_LE(aEntries.size(), 10);
-	for(auto &Entry : aEntries)
+	ASSERT_LE(vEntries.size(), 10);
+	for(auto &Entry : vEntries)
 	{
 		if(Entry.m_IsDirectory)
 		{
@@ -114,7 +114,7 @@ CTestInfo::~CTestInfo()
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
@@ -125,6 +125,5 @@ int main(int argc, const char **argv)
 	}
 	int Result = RUN_ALL_TESTS();
 	secure_random_uninit();
-	cmdline_free(argc, argv);
 	return Result;
 }

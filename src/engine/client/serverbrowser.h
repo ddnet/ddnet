@@ -55,7 +55,7 @@ public:
 		/*void Add(NETADDR Addr, char* pType) {
 			if (m_NumServers < MAX_SERVERS)
 			{
-				m_aServers[m_NumServers] = Addr;
+				m_vServers[m_NumServers] = Addr;
 				str_copy(m_aTypes[m_NumServers], pType, sizeof(m_aTypes[0]));
 				m_NumServers++;
 			}

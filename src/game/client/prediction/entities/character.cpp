@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/shared/config.h>
+#include <game/generated/client_data.h>
 #include <game/mapitems.h>
-#include <new>
 
 #include "character.h"
 #include "laser.h"
@@ -31,12 +31,12 @@ void CCharacter::SetSolo(bool Solo)
 
 bool CCharacter::IsGrounded()
 {
-	if(Collision()->CheckPoint(m_Pos.x + m_ProximityRadius / 2, m_Pos.y + m_ProximityRadius / 2 + 5))
+	if(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
 		return true;
-	if(Collision()->CheckPoint(m_Pos.x - m_ProximityRadius / 2, m_Pos.y + m_ProximityRadius / 2 + 5))
+	if(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
 		return true;
 
-	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, m_ProximityRadius / 2 + 4), 0.0f);
+	int MoveRestrictionsBelow = Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f);
 	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
 }
 
@@ -166,7 +166,7 @@ void CCharacter::HandleNinja()
 				if(distance(aEnts[i]->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
 					continue;
 
-				// Hit a player, give him damage and stuffs...
+				// Hit a player, give them damage and stuffs...
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
 					m_aHitObjects[m_NumObjectsHit++] = aEnts[i]->GetCID();
@@ -305,7 +305,7 @@ void CCharacter::FireWeapon()
 		{
 			CCharacter *pTarget = apEnts[i];
 
-			if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetCID()))))
+			if((pTarget == this || !CanCollide(pTarget->GetCID())))
 				continue;
 
 			// set his velocity to fast upward (for now)
@@ -494,7 +494,7 @@ void CCharacter::GiveNinja()
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// save reseted input
 		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
@@ -515,10 +515,12 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if(GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
+	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// reset input
 		ResetInput();
+		// mods that do not allow inputs to be held while chatting also do not allow to hold hook
+		m_Input.m_Hook = 0;
 		return;
 	}
 
@@ -530,7 +532,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	if(m_NumInputs > 2 && Team() != TEAM_SPECTATORS)
+	if(m_NumInputs > 1 && Team() != TEAM_SPECTATORS)
 	{
 		HandleWeaponSwitch();
 		FireWeapon();
@@ -542,7 +544,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
-	//m_Input.m_Hook = 0;
+	// m_Input.m_Hook = 0;
 	// simulate releasing the fire button
 	if((m_Input.m_Fire & 1) != 0)
 		m_Input.m_Fire++;
@@ -668,8 +670,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacter *pThis = (CCharacter *)pUser;
-	CCollision *pCollision = pThis->Collision();
-	return pCollision->m_pSwitchers && pThis->Team() != TEAM_SUPER && pCollision->m_pSwitchers[Number].m_Status[pThis->Team()];
+	auto &aSwitchers = pThis->Switchers();
+	return !aSwitchers.empty() && pThis->Team() != TEAM_SUPER && aSwitchers[Number].m_Status[pThis->Team()];
 }
 
 void CCharacter::HandleTiles(int Index)
@@ -697,21 +699,49 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// handle switch tiles
-	if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
+	if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
-		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHOPEN;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_LastUpdateTick[Team()] = GameWorld()->GameTick();
+	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	{
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = GameWorld()->GameTick() + 1 + Collision()->GetSwitchDelay(MapIndex) * GameWorld()->GameTickSpeed();
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDOPEN;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_LastUpdateTick[Team()] = GameWorld()->GameTick();
+	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	{
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = GameWorld()->GameTick() + 1 + Collision()->GetSwitchDelay(MapIndex) * GameWorld()->GameTickSpeed();
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHTIMEDCLOSE;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_LastUpdateTick[Team()] = GameWorld()->GameTick();
+	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	{
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = false;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_EndTick[Team()] = 0;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Type[Team()] = TILE_SWITCHCLOSE;
+		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_LastUpdateTick[Team()] = GameWorld()->GameTick();
+	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
+	{
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 		{
 			Freeze(Collision()->GetSwitchDelay(MapIndex));
 		}
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
 	{
-		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = true;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER)
 	{
-		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 			m_DeepFreeze = false;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Hit & DISABLE_HIT_HAMMER && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
@@ -767,7 +797,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
 	{
-		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 		{
 			m_LiveFreeze = true;
 			m_Core.m_LiveFrozen = true;
@@ -775,7 +805,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER)
 	{
-		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Collision()->m_pSwitchers[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
+		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
 		{
 			m_LiveFreeze = false;
 			m_Core.m_LiveFrozen = false;
@@ -827,23 +857,23 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// collide with others
-	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && m_Core.m_Collision)
+	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_NoCollision)
 	{
-		m_Core.m_Collision = false;
+		m_Core.m_NoCollision = true;
 	}
-	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && !m_Core.m_Collision)
+	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_NoCollision)
 	{
-		m_Core.m_Collision = true;
+		m_Core.m_NoCollision = false;
 	}
 
 	// hook others
-	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && m_Core.m_Hook)
+	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_NoHookHit)
 	{
-		m_Core.m_Hook = false;
+		m_Core.m_NoHookHit = true;
 	}
-	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && !m_Core.m_Hook)
+	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_NoHookHit)
 	{
-		m_Core.m_Hook = true;
+		m_Core.m_NoHookHit = false;
 	}
 
 	// unlimited air jumps
@@ -1085,7 +1115,7 @@ CTeamsCore *CCharacter::TeamsCore()
 }
 
 CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), CCharacterCore::PhysicalSize())
 {
 	m_ID = ID;
 	m_IsLocal = false;
@@ -1100,7 +1130,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
 	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
-	m_ProximityRadius = ms_PhysSize;
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
@@ -1108,11 +1137,10 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastJetpackStrength = 400.0f;
 	m_Super = false;
 	m_CanMoveInFreeze = false;
-	m_Alive = true;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
-	// never intilize both to zero
+	// never initialize both to zero
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
 
@@ -1120,8 +1148,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 
 	ResetPrediction();
 	Read(pChar, pExtended, pExtendedDisplayInfo, false);
-
-	GameWorld()->InsertEntity(this);
 }
 
 void CCharacter::ResetPrediction()
@@ -1133,8 +1159,8 @@ void CCharacter::ResetPrediction()
 	m_Jetpack = false;
 	m_NinjaJetpack = false;
 	m_Core.m_Jumps = 2;
-	m_Core.m_Hook = true;
-	m_Core.m_Collision = true;
+	m_Core.m_NoHookHit = false;
+	m_Core.m_NoCollision = false;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_Core.m_FreezeTick = 0;
@@ -1150,7 +1176,7 @@ void CCharacter::ResetPrediction()
 	}
 	if(m_Core.m_HookedPlayer >= 0)
 	{
-		m_Core.m_HookedPlayer = -1;
+		m_Core.SetHookedPlayer(-1);
 		m_Core.m_HookState = HOOK_IDLE;
 	}
 	m_LastWeaponSwitchTick = 0;
@@ -1270,8 +1296,8 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		// set player collision
 		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
-		m_Core.m_Collision = Tuning()->m_PlayerCollision;
-		m_Core.m_Hook = Tuning()->m_PlayerHooking;
+		m_Core.m_NoCollision = !Tuning()->m_PlayerCollision;
+		m_Core.m_NoHookHit = !Tuning()->m_PlayerHooking;
 
 		if(m_Core.m_HookTick != 0)
 			m_EndlessHook = false;
@@ -1299,7 +1325,6 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Core.m_JumpedTotal = m_Core.m_Jumps;
 	m_AttackTick = pChar->m_AttackTick;
 	m_LastSnapWeapon = pChar->m_Weapon;
-	m_Alive = true;
 
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 
@@ -1376,4 +1401,10 @@ void CCharacter::SetTuneZone(int Zone)
 		return;
 	m_TuneZone = Zone;
 	m_LastTuneZoneTick = GameWorld()->GameTick();
+}
+
+CCharacter::~CCharacter()
+{
+	if(GameWorld())
+		GameWorld()->RemoveCharacter(this);
 }

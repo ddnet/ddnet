@@ -253,9 +253,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Sensib. del ratón
-
 Move left
 == Mover a la izquierda
 
@@ -790,9 +787,6 @@ Save
 Switch weapon when out of ammo
 == Cambiar de arma cuando se acabe la munición
 
-Reset wanted weapon on death
-== Restablecer el arma deseada al morir
-
 Show clan above name plates
 == Mostrar el clan por encima de los nombres
 
@@ -801,9 +795,6 @@ Clan plates size
 
 Refresh Rate
 == Frecuencia de actualización
-
-Show console window
-== Mostrar ventana de consola
 
 Automatically take statboard screenshot
 == Tomar automáticamente la captura de pantalla del Statboard
@@ -879,9 +870,6 @@ Show entities
 
 Show HUD
 == Mostrar HUD
-
-UI mouse s.
-== Sens. del ratón en menú
 
 may cause delay
 == puede causar retraso
@@ -1356,7 +1344,7 @@ Graphics cards
 == Tarjetas de video
 
 auto
-== auto. 
+== auto.
 
 Tutorial
 == Tutorial
@@ -1379,9 +1367,6 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Opacidad
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
-
 Quads are used for background decoration
 == Las quads se usan para la decoración del fondo
 
@@ -1393,3 +1378,104 @@ Super
 
 Team %d
 == Equipo %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 

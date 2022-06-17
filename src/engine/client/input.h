@@ -7,14 +7,61 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <stddef.h>
-
 class CInput : public IEngineInput
 {
-	IEngineGraphics *m_pGraphics;
+public:
+	class CJoystick : public IJoystick
+	{
+		CInput *m_pInput;
+		int m_Index;
+		char m_aName[64];
+		char m_aGUID[34];
+		SDL_JoystickID m_InstanceID;
+		int m_NumAxes;
+		int m_NumButtons;
+		int m_NumBalls;
+		int m_NumHats;
+		SDL_Joystick *m_pDelegate;
 
-	int m_LastX;
-	int m_LastY;
+		CInput *Input() { return m_pInput; }
+
+	public:
+		CJoystick() {}
+		CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate);
+		virtual ~CJoystick() = default;
+
+		int GetIndex() const override { return m_Index; }
+		const char *GetName() const override { return m_aName; }
+		const char *GetGUID() const { return m_aGUID; }
+		SDL_JoystickID GetInstanceID() const { return m_InstanceID; }
+		int GetNumAxes() const override { return m_NumAxes; }
+		int GetNumButtons() const override { return m_NumButtons; }
+		int GetNumBalls() const override { return m_NumBalls; }
+		int GetNumHats() const override { return m_NumHats; }
+		float GetAxisValue(int Axis) override;
+		int GetHatValue(int Hat) override;
+		bool Relative(float *pX, float *pY) override;
+		bool Absolute(float *pX, float *pY) override;
+		void Close();
+
+		static int GetJoystickHatKey(int Hat, int HatValue);
+	};
+
+private:
+	IEngineGraphics *m_pGraphics;
+	IConsole *m_pConsole;
+
+	IEngineGraphics *Graphics() { return m_pGraphics; }
+	IConsole *Console() { return m_pConsole; }
+
+	// joystick
+	std::vector<CJoystick> m_vJoysticks;
+	CJoystick *m_pActiveJoystick = nullptr;
+	void InitJoysticks();
+	void CloseJoysticks();
+	void UpdateActiveJoystick();
+	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	float GetJoystickDeadzone();
 
 	int m_InputGrabbed;
 	char *m_pClipboardText;
@@ -33,6 +80,12 @@ class CInput : public IEngineInput
 	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
 	int m_InputCounter;
 
+	void UpdateMouseState();
+	void UpdateJoystickState();
+	void HandleJoystickAxisMotionEvent(const SDL_Event &Event);
+	void HandleJoystickButtonEvent(const SDL_Event &Event);
+	void HandleJoystickHatMotionEvent(const SDL_Event &Event);
+
 	// IME support
 	int m_NumTextInputInstances;
 	char m_aEditingText[INPUT_TEXT_SIZE];
@@ -41,10 +94,9 @@ class CInput : public IEngineInput
 
 	bool KeyState(int Key) const;
 
-	IEngineGraphics *Graphics() { return m_pGraphics; }
-
 public:
 	CInput();
+	~CInput();
 
 	void Init() override;
 
@@ -52,14 +104,19 @@ public:
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
-	void MouseRelative(float *x, float *y) override;
+	size_t NumJoysticks() const override { return m_vJoysticks.size(); }
+	CJoystick *GetActiveJoystick() override { return m_pActiveJoystick; }
+	void SelectNextJoystick() override;
+
+	bool MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
-	void NativeMousePos(int *x, int *y) const override;
-	bool NativeMousePressed(int index) override;
+	void NativeMousePos(int *pX, int *pY) const override;
+	bool NativeMousePressed(int Index) override;
 	bool MouseDoubleClick() override;
+
 	const char *GetClipboardText() override;
-	void SetClipboardText(const char *Text) override;
+	void SetClipboardText(const char *pText) override;
 
 	int Update() override;
 

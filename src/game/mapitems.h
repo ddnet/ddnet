@@ -3,8 +3,6 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
-#include <engine/shared/protocol.h>
-
 // layer types
 enum
 {

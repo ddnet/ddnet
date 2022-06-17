@@ -5,13 +5,15 @@
 #include <base/math.h>
 #include <engine/textrender.h>
 
-#include <engine/client/input.h>
 #include <engine/keys.h>
 
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 
 #include <limits>
+
+const CLinearScrollbarScale CUIEx::ms_LinearScrollbarScale;
+const CLogarithmicScrollbarScale CUIEx::ms_LogarithmicScrollbarScale(25);
 
 CUIEx::CUIEx()
 {
@@ -31,9 +33,9 @@ void CUIEx::Init(CUI *pUI, IKernel *pKernel, CRenderTools *pRenderTools, IInput:
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 }
 
-void CUIEx::ConvertMouseMove(float *pX, float *pY) const
+void CUIEx::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
 {
-	UI()->ConvertMouseMove(pX, pY);
+	UI()->ConvertMouseMove(pX, pY, CursorType);
 
 	if(m_MouseSlow)
 	{
@@ -61,7 +63,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(UI()->MouseButton(0))
 		{
@@ -71,7 +73,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		}
 		else
 		{
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
@@ -108,7 +110,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.w / 2.0f);
 
 	float ColorSlider;
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 		ColorSlider = 0.9f;
 	else if(UI()->HotItem() == pID)
 		ColorSlider = 1.0f;
@@ -141,7 +143,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	const bool InsideHandle = UI()->MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(UI()->MouseButton(0))
 		{
@@ -151,7 +153,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 		}
 		else
 		{
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)
@@ -199,7 +201,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.h / 2.0f);
 
 		float ColorSlider;
-		if(UI()->ActiveItem() == pID)
+		if(UI()->CheckActiveItem(pID))
 			ColorSlider = 0.9f;
 		else if(UI()->HotItem() == pID)
 			ColorSlider = 1.0f;
@@ -212,13 +214,85 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 	return ReturnValue;
 }
 
+void CUIEx::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags)
+{
+	const bool Infinite = Flags & CUIEx::SCROLLBAR_OPTION_INFINITE;
+	const bool NoClampValue = Flags & CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE;
+	dbg_assert(!(Infinite && NoClampValue), "cannot combine SCROLLBAR_OPTION_INFINITE and SCROLLBAR_OPTION_NOCLAMPVALUE");
+
+	int Value = *pOption;
+	if(Infinite)
+	{
+		Min += 1;
+		Max += 1;
+		if(Value == 0)
+			Value = Max;
+	}
+
+	char aBufMax[256];
+	str_format(aBufMax, sizeof(aBufMax), "%s: %i", pStr, Max);
+	char aBuf[256];
+	if(!Infinite || Value != Max)
+		str_format(aBuf, sizeof(aBuf), "%s: %i", pStr, Value);
+	else
+		str_format(aBuf, sizeof(aBuf), "%s: ∞", pStr);
+
+	if(NoClampValue)
+	{
+		// clamp the value internally for the scrollbar
+		Value = clamp(Value, Min, Max);
+	}
+
+	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
+	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(0, FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(0, FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
+
+	CUIRect Label, ScrollBar;
+	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);
+	UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
+
+	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
+	if(Infinite)
+	{
+		if(Value == Max)
+			Value = 0;
+	}
+	else if(NoClampValue)
+	{
+		if((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max))
+			Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
+	}
+
+	*pOption = Value;
+}
+
+void CUIEx::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale)
+{
+	const int Max = NumLabels - 1;
+	int Value = clamp(*pOption, 0, Max);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s: %s", pStr, ppLabels[Value]);
+
+	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
+
+	CUIRect Label, ScrollBar;
+	pRect->VSplitRight(60.0f, &Label, &ScrollBar);
+	Label.VSplitRight(10.0f, &Label, 0);
+	UI()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
+
+	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
+
+	if(UI()->HotItem() != pID && !UI()->CheckActiveItem(pID) && UI()->MouseHovered(pRect) && UI()->MouseButtonClicked(0))
+		Value = (Value + 1) % NumLabels;
+
+	*pOption = clamp(Value, 0, Max);
+}
+
 bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
 {
 	const bool Inside = UI()->MouseHovered(pRect);
 	bool ReturnValue = false;
 	bool UpdateOffset = false;
-
-	FontSize *= UI()->Scale();
 
 	auto &&SetHasSelection = [&](bool HasSelection) {
 		m_HasSelection = HasSelection;
@@ -507,11 +581,11 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	DispCursorPos = minimum(DispCursorPos, str_length(pDisplayStr));
 
 	bool JustGotActive = false;
-	if(UI()->ActiveItem() == pID)
+	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
-			UI()->SetActiveItem(0);
+			UI()->SetActiveItem(nullptr);
 		}
 	}
 	else if(UI()->HotItem() == pID)

@@ -80,13 +80,13 @@ bool CTeamrank::NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pErro
 	return false;
 }
 
-bool CTeamrank::SamePlayers(const std::vector<std::string> *aSortedNames)
+bool CTeamrank::SamePlayers(const std::vector<std::string> *pvSortedNames)
 {
-	if(aSortedNames->size() != m_NumNames)
+	if(pvSortedNames->size() != m_NumNames)
 		return false;
 	for(unsigned int i = 0; i < m_NumNames; i++)
 	{
-		if(str_comp(aSortedNames->at(i).c_str(), m_aaNames[i]) != 0)
+		if(str_comp(pvSortedNames->at(i).c_str(), m_aaNames[i]) != 0)
 			return false;
 	}
 	return true;
@@ -131,20 +131,27 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	char aBuf[512];
 	// get best race time
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, "
-		"  cp11, cp12, cp13, cp14, cp15, cp16, cp17, cp18, cp19, cp20, "
-		"  cp21, cp22, cp23, cp24, cp25 "
+		"SELECT"
+		"  (SELECT Time FROM %s_race WHERE Map = ? AND Name = ? ORDER BY Time ASC LIMIT 1) AS minTime, "
+		"  cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, cp14, "
+		"  cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
+		"  (cp1 + cp2 + cp3 + cp4 + cp5 + cp6 + cp7 + cp8 + cp9 + cp10 + cp11 + cp12 + cp13 + cp14 + "
+		"  cp15 + cp16 + cp17 + cp18 + cp19 + cp20 + cp21 + cp22 + cp23 + cp24 + cp25 > 0) AS hasCP, Time "
 		"FROM %s_race "
 		"WHERE Map = ? AND Name = ? "
-		"ORDER BY Time ASC "
+		"ORDER BY hasCP DESC, Time ASC "
 		"LIMIT 1",
-		pSqlServer->GetPrefix());
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
 	}
+
+	const char *pPlayer = pData->m_aName[0] != '\0' ? pData->m_aName : pData->m_aRequestingPlayer;
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, pData->m_aRequestingPlayer);
+	pSqlServer->BindString(3, pData->m_aMap);
+	pSqlServer->BindString(4, pPlayer);
 
 	bool End;
 	if(pSqlServer->Step(&End, pError, ErrorSize))
@@ -153,18 +160,18 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	}
 	if(!End)
 	{
-		// get the best time
-		float Time = pSqlServer->GetFloat(1);
-		pResult->m_Data.m_Info.m_Time = Time;
-		pResult->m_Data.m_Info.m_Score = -Time;
-		pResult->m_Data.m_Info.m_HasFinishScore = true;
-
-		if(g_Config.m_SvCheckpointSave)
+		if(!pSqlServer->IsNull(1))
 		{
-			for(int i = 0; i < NUM_CHECKPOINTS; i++)
-			{
-				pResult->m_Data.m_Info.m_CpTime[i] = pSqlServer->GetFloat(i + 2);
-			}
+			// get the best time
+			float Time = pSqlServer->GetFloat(1);
+			pResult->m_Data.m_Info.m_Time = Time;
+			pResult->m_Data.m_Info.m_Score = -Time;
+			pResult->m_Data.m_Info.m_HasFinishScore = true;
+		}
+
+		for(int i = 0; i < NUM_CHECKPOINTS; i++)
+		{
+			pResult->m_Data.m_Info.m_CpTime[i] = pSqlServer->GetFloat(i + 2);
 		}
 	}
 
@@ -480,11 +487,11 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 	char aBuf[512];
 
 	// get the names sorted in a tab separated string
-	std::vector<std::string> aNames;
+	std::vector<std::string> vNames;
 	for(unsigned int i = 0; i < pData->m_Size; i++)
-		aNames.emplace_back(pData->m_aaNames[i]);
+		vNames.emplace_back(pData->m_aaNames[i]);
 
-	std::sort(aNames.begin(), aNames.end());
+	std::sort(vNames.begin(), vNames.end());
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT l.ID, Name, Time "
 		"FROM (" // preselect teams with first name in team
@@ -519,7 +526,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			{
 				return true;
 			}
-			if(Teamrank.SamePlayers(&aNames))
+			if(Teamrank.SamePlayers(&vNames))
 			{
 				FoundTeam = true;
 				break;

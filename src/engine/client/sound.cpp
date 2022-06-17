@@ -609,32 +609,23 @@ int CSound::LoadOpus(const char *pFilename)
 	if(!m_pStorage)
 		return -1;
 
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(!File)
-	{
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
-		return -1;
-	}
-
 	int SampleID = AllocID();
-	int DataSize = io_length(File);
-	if(SampleID < 0 || DataSize <= 0)
+	if(SampleID < 0)
 	{
-		io_close(File);
-		File = NULL;
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
+		dbg_msg("sound/opus", "failed to allocate sample ID. filename='%s'", pFilename);
 		return -1;
 	}
 
-	// read the whole file into memory
-	char *pData = new char[DataSize];
-	io_read(File, pData, DataSize);
+	void *pData;
+	unsigned DataSize;
+	if(!m_pStorage->ReadFile(pFilename, IStorage::TYPE_ALL, &pData, &DataSize))
+	{
+		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
+		return -1;
+	}
 
 	SampleID = DecodeOpus(SampleID, pData, DataSize);
-
-	delete[] pData;
-	io_close(File);
-	File = NULL;
+	free(pData);
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
@@ -658,32 +649,23 @@ int CSound::LoadWV(const char *pFilename)
 	if(!m_pStorage)
 		return -1;
 
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(!File)
-	{
-		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
-		return -1;
-	}
-
 	int SampleID = AllocID();
-	int DataSize = io_length(File);
-	if(SampleID < 0 || DataSize <= 0)
+	if(SampleID < 0)
 	{
-		io_close(File);
-		File = NULL;
-		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
+		dbg_msg("sound/wv", "failed to allocate sample ID. filename='%s'", pFilename);
 		return -1;
 	}
 
-	// read the whole file into memory
-	char *pData = new char[DataSize];
-	io_read(File, pData, DataSize);
+	void *pData;
+	unsigned DataSize;
+	if(!m_pStorage->ReadFile(pFilename, IStorage::TYPE_ALL, &pData, &DataSize))
+	{
+		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
+		return -1;
+	}
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
-
-	delete[] pData;
-	io_close(File);
-	File = NULL;
+	free(pData);
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);

@@ -7,14 +7,7 @@
 #include <engine/shared/video.h>
 #endif
 
-#include <base/color.h>
 #include <engine/input.h>
-
-#include <engine/client.h>
-#include <engine/console.h>
-#include <game/localization.h>
-
-#include <engine/config.h>
 
 class CGameClient;
 
@@ -206,8 +199,9 @@ public:
 	 *
 	 * @param x The amount of change in the x coordinate since the last call.
 	 * @param y The amount of change in the y coordinate since the last call.
+	 * @param CursorType The type of cursor that caused the movement.
 	 */
-	virtual bool OnMouseMove(float x, float y) { return false; }
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) { return false; }
 	/**
 	 * Called on a input event.
 	 * @param e The input event.

@@ -247,9 +247,6 @@ MOTD
 Map
 == Hartă
 
-Mouse sens.
-== Sensib. maus
-
 Move left
 == Mută la stânga
 
@@ -640,6 +637,15 @@ Warning
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
 Server best:
 == 
 
@@ -656,6 +662,18 @@ Ghost
 == 
 
 Loading DDNet Client
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
 == 
 
 Reconnect in %d sec
@@ -868,9 +886,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 
 
-Reset wanted weapon on death
-== 
-
 Show clan above name plates
 == 
 
@@ -881,9 +896,6 @@ Skip the main menu
 == 
 
 Refresh Rate
-== 
-
-Show console window
 == 
 
 Settings file
@@ -911,6 +923,9 @@ Toggle to edit your dummy settings
 == 
 
 Download skins
+== 
+
+Download community skins
 == 
 
 Vanilla skins only
@@ -982,7 +997,60 @@ Show HUD
 Chat command
 == 
 
-UI mouse s.
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1075,10 +1143,28 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == 
 
+Use DDRace HUD
+== 
+
 Use DDRace Scoreboard
 == 
 
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Show score

@@ -1,23 +1,21 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/logger.h>
-#include <base/math.h>
 #include <base/system.h>
 #include <engine/shared/image_manipulation.h>
 #include <pnglite.h>
 
 int DilateFile(const char *pFilename)
 {
-	png_t Png;
-
-	png_init(0, 0);
-
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
 	{
 		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
+
+	png_init(0, 0);
+	png_t Png;
 	int Error = png_open_read(&Png, 0, File);
 	if(Error != PNG_NO_ERROR)
 	{
@@ -74,7 +72,7 @@ int DilateFile(const char *pFilename)
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	if(argc == 1)
 	{
@@ -84,6 +82,6 @@ int main(int argc, const char **argv)
 
 	for(int i = 1; i < argc; i++)
 		DilateFile(argv[i]);
-	cmdline_free(argc, argv);
+
 	return 0;
 }

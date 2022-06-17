@@ -65,7 +65,7 @@ public:
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1);
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
 	{
-		return GetMoveRestrictions(0, 0, Pos, Distance);
+		return GetMoveRestrictions(nullptr, nullptr, Pos, Distance);
 	}
 
 	int GetTile(int x, int y) const;
@@ -114,16 +114,7 @@ public:
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
-	int m_NumSwitchers;
-
-	struct SSwitchers
-	{
-		bool m_Status[MAX_CLIENTS];
-		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-	};
-	SSwitchers *m_pSwitchers;
+	int m_HighestSwitchNumber;
 
 private:
 	class CTeleTile *m_pTele;

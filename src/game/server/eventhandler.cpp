@@ -4,7 +4,9 @@
 
 #include "entity.h"
 #include "gamecontext.h"
-#include "player.h"
+
+#include <base/system.h>
+#include <base/vmath.h>
 
 //////////////////////////////////////////////////
 // Event handler

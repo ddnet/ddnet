@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "projectile.h"
+#include <engine/shared/config.h>
+
 #include <game/client/projectile_data.h>
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
-#include <engine/shared/config.h>
+#include "character.h"
+#include "projectile.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -90,8 +93,6 @@ void CProjectile::Tick()
 	if(
 		pOwnerChar &&
 		pTargetChr &&
-		pOwnerChar->IsAlive() &&
-		pTargetChr->IsAlive() &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
 		isWeaponCollide = true;
@@ -108,7 +109,7 @@ void CProjectile::Tick()
 			CCharacter *apEnts[MAX_CLIENTS];
 			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_Status[apEnts[i]->Team()])))
 					apEnts[i]->Freeze();
 		}
 		if(Collide && m_Bouncing != 0)

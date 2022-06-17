@@ -2,7 +2,6 @@
 #include <gtest/gtest.h>
 
 #include <base/color.h>
-#include <base/system.h>
 
 TEST(Color, HRHConv)
 {

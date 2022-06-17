@@ -1,10 +1,7 @@
 #ifndef ENGINE_SHARED_IMAGE_MANIPULATION_H
 #define ENGINE_SHARED_IMAGE_MANIPULATION_H
 
-#include <stddef.h>
 #include <stdint.h>
-
-#define TW_DILATE_ALPHA_THRESHOLD 10
 
 void DilateImage(unsigned char *pImageBuff, int w, int h, int BPP);
 void DilateImageSub(unsigned char *pImageBuff, int w, int h, int BPP, int x, int y, int sw, int sh);

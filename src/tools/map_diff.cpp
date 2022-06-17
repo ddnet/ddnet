@@ -5,92 +5,86 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 
-#include <pnglite.h>
-
 bool Process(IStorage *pStorage, const char **pMapNames)
 {
-	CDataFileReader Maps[2];
+	CDataFileReader aMaps[2];
 
 	for(int i = 0; i < 2; ++i)
 	{
-		if(!Maps[i].Open(pStorage, pMapNames[i], IStorage::TYPE_ABSOLUTE))
+		if(!aMaps[i].Open(pStorage, pMapNames[i], IStorage::TYPE_ABSOLUTE))
 		{
 			dbg_msg("map_compare", "error opening map '%s'", pMapNames[i]);
 			return false;
 		}
 
-		CDataFileReader *pMap = &Maps[i];
 		// check version
-		CMapItemVersion *pVersion = (CMapItemVersion *)pMap->FindItem(MAPITEMTYPE_VERSION, 0);
+		CMapItemVersion *pVersion = (CMapItemVersion *)aMaps[i].FindItem(MAPITEMTYPE_VERSION, 0);
 		if(pVersion && pVersion->m_Version != 1)
 			return false;
 	}
 
-	int Start[2], Num[2];
-
-	Maps[0].GetType(MAPITEMTYPE_LAYER, &Start[0], &Num[0]);
-	Maps[1].GetType(MAPITEMTYPE_LAYER, &Start[1], &Num[1]);
+	int aStart[2], aNum[2];
+	for(int i = 0; i < 2; ++i)
+		aMaps[i].GetType(MAPITEMTYPE_LAYER, &aStart[i], &aNum[i]);
 
 	// ensure basic layout
-	if(Num[0] != Num[1])
+	if(aNum[0] != aNum[1])
 	{
 		dbg_msg("map_compare", "different layer numbers:");
 		for(int i = 0; i < 2; ++i)
-			dbg_msg("map_compare", "  \"%s\": %d layers", pMapNames[i], Num[i]);
+			dbg_msg("map_compare", "  \"%s\": %d layers", pMapNames[i], aNum[i]);
 		return false;
 	}
 
 	// preload data
-	for(int j = 0; j < Num[0]; ++j)
+	for(int j = 0; j < aNum[0]; ++j)
 	{
-		CMapItemLayer *pItem[2];
-		CMapItemLayerTilemap *pTilemap[2];
 		for(int i = 0; i < 2; ++i)
 		{
-			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i] + j, 0, 0);
-			pTilemap[i] = (CMapItemLayerTilemap *)pItem[i];
-			(void)(CTile *) Maps[i].GetData(pTilemap[i]->m_Data);
+			CMapItemLayer *pItem = (CMapItemLayer *)aMaps[i].GetItem(aStart[i] + j, nullptr, nullptr);
+			if(pItem->m_Type == LAYERTYPE_TILES)
+				(void)aMaps[i].GetData(((CMapItemLayerTilemap *)pItem)->m_Data);
 		}
 	}
 
 	// compare
-	for(int j = 0; j < Num[0]; ++j)
+	for(int j = 0; j < aNum[0]; ++j)
 	{
-		CMapItemLayer *pItem[2];
+		CMapItemLayer *apItem[2];
 		for(int i = 0; i < 2; ++i)
-			pItem[i] = (CMapItemLayer *)Maps[i].GetItem(Start[i] + j, 0, 0);
+			apItem[i] = (CMapItemLayer *)aMaps[i].GetItem(aStart[i] + j, nullptr, nullptr);
 
-		if(pItem[0]->m_Type != LAYERTYPE_TILES)
+		if(apItem[0]->m_Type != LAYERTYPE_TILES || apItem[1]->m_Type != LAYERTYPE_TILES)
 			continue;
 
-		CMapItemLayerTilemap *pTilemap[2];
-		char aName[2][16];
+		CMapItemLayerTilemap *apTilemap[2];
+		char aaName[2][16];
 
 		for(int i = 0; i < 2; ++i)
 		{
-			pTilemap[i] = (CMapItemLayerTilemap *)pItem[i];
-			IntsToStr(pTilemap[i]->m_aName, sizeof(pTilemap[i]->m_aName) / sizeof(int), aName[i]);
+			apTilemap[i] = (CMapItemLayerTilemap *)apItem[i];
+			IntsToStr(apTilemap[i]->m_aName, sizeof(apTilemap[i]->m_aName) / sizeof(int), aaName[i]);
 		}
 
-		if(str_comp(aName[0], aName[1]) != 0 || pTilemap[0]->m_Width != pTilemap[1]->m_Width || pTilemap[0]->m_Height != pTilemap[1]->m_Height)
+		if(str_comp(aaName[0], aaName[1]) != 0 || apTilemap[0]->m_Width != apTilemap[1]->m_Width || apTilemap[0]->m_Height != apTilemap[1]->m_Height)
 		{
 			dbg_msg("map_compare", "different tile layers:");
 			for(int i = 0; i < 2; ++i)
-				dbg_msg("map_compare", "  \"%s\" (%dx%d)", aName[i], pTilemap[i]->m_Width, pTilemap[i]->m_Height);
+				dbg_msg("map_compare", "  \"%s\" (%dx%d)", aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height);
 			return false;
 		}
-		CTile *pTile[2];
+		CTile *apTile[2];
 		for(int i = 0; i < 2; ++i)
-			pTile[i] = (CTile *)Maps[i].GetData(pTilemap[i]->m_Data);
+			apTile[i] = (CTile *)aMaps[i].GetData(apTilemap[i]->m_Data);
 
-		for(int y = 0; y < pTilemap[0]->m_Height; y++)
+		for(int y = 0; y < apTilemap[0]->m_Height; y++)
 		{
-			for(int x = 0; x < pTilemap[0]->m_Width; x++)
+			for(int x = 0; x < apTilemap[0]->m_Width; x++)
 			{
-				int pos = y * pTilemap[0]->m_Width + x;
-				if(pTile[0][pos].m_Index != pTile[1][pos].m_Index || pTile[0][pos].m_Flags != pTile[1][pos].m_Flags)
+				int Pos = y * apTilemap[0]->m_Width + x;
+				if(apTile[0][Pos].m_Index != apTile[1][Pos].m_Index || apTile[0][Pos].m_Flags != apTile[1][Pos].m_Flags)
 				{
-					dbg_msg("map_compare", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", Num[0], aName[0], x, y, pTile[0][pos].m_Index, pTile[0][pos].m_Flags, pTile[1][pos].m_Index, pTile[0][pos].m_Flags);
+					dbg_msg("map_compare", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[0][Pos].m_Flags);
 				}
 			}
 		}
@@ -101,24 +95,25 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 
 int main(int argc, const char *argv[])
 {
-	cmdline_fix(&argc, &argv);
-	std::vector<std::shared_ptr<ILogger>> apLoggers;
-	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+	CCmdlineFix CmdlineFix(&argc, &argv);
+	std::vector<std::shared_ptr<ILogger>> vpLoggers;
+	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
 	IOHANDLE LogFile = io_open("map_diff.txt", IOFLAG_WRITE);
 	if(LogFile)
 	{
-		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_file(LogFile)));
+		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_file(LogFile)));
 	}
-	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
-
-	IStorage *pStorage = CreateLocalStorage();
+	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
 	if(argc != 3)
 	{
 		dbg_msg("usage", "%s map1 map2", argv[0]);
 		return -1;
 	}
-	int Result = Process(pStorage, &argv[1]) ? 0 : 1;
-	cmdline_free(argc, argv);
-	return Result;
+
+	IStorage *pStorage = CreateLocalStorage();
+	if(!pStorage)
+		return -1;
+
+	return Process(pStorage, &argv[1]) ? 0 : 1;
 }

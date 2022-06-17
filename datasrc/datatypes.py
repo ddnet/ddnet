@@ -359,3 +359,38 @@ class NetBool(NetIntRange):
 class NetTick(NetIntAny):
 	def __init__(self, name):
 		NetIntAny.__init__(self,name)
+
+class NetArray(NetVariable):
+	def __init__(self, var, size):
+		NetVariable.__init__(self,var.name)
+		self.base_name = var.name
+		self.var = var
+		self.size = size
+		self.name = self.base_name + "[%d]"%self.size
+	def emit_declaration(self):
+		self.var.name = self.name
+		return self.var.emit_declaration()
+	def emit_validate(self):
+		lines = []
+		for i in range(self.size):
+			self.var.name = self.base_name + "[%d]"%i
+			lines += self.var.emit_validate()
+		return lines
+	def emit_unpack(self):
+		lines = []
+		for i in range(self.size):
+			self.var.name = self.base_name + "[%d]"%i
+			lines += self.var.emit_unpack()
+		return lines
+	def emit_pack(self):
+		lines = []
+		for i in range(self.size):
+			self.var.name = self.base_name + "[%d]"%i
+			lines += self.var.emit_pack()
+		return lines
+	def emit_unpack_check(self):
+		lines = []
+		for i in range(self.size):
+			self.var.name = self.base_name + "[%d]"%i
+			lines += self.var.emit_unpack_check()
+		return lines

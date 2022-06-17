@@ -10,6 +10,7 @@
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
+#include <base/lock_scope.h>
 #include <base/system.h>
 
 #include <memory>
@@ -54,13 +55,13 @@ private:
 		std::shared_ptr<CData> m_pData;
 		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
 		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
-		void Run() override;
+		void Run() override REQUIRES(!m_Lock);
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
 			m_pData(std::move(pData)) { m_Lock = lock_create(); }
 		virtual ~CJob() { lock_destroy(m_Lock); }
-		void Abort();
+		void Abort() REQUIRES(!m_Lock);
 	};
 
 	IEngine *m_pEngine;
@@ -133,7 +134,7 @@ void CChooseMaster::Refresh()
 
 void CChooseMaster::CJob::Abort()
 {
-	lock_wait(m_Lock);
+	CLockScope ls(m_Lock);
 	if(m_pHead != nullptr)
 	{
 		m_pHead->Abort();
@@ -143,7 +144,6 @@ void CChooseMaster::CJob::Abort()
 	{
 		m_pGet->Abort();
 	}
-	lock_unlock(m_Lock);
 }
 
 void CChooseMaster::CJob::Run()
@@ -166,7 +166,7 @@ void CChooseMaster::CJob::Run()
 	//
 	// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to
 	// fail.
-	CTimeout Timeout{10000, 8000, 10};
+	CTimeout Timeout{10000, 0, 8000, 10};
 	int aTimeMs[MAX_URLS];
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
@@ -175,9 +175,10 @@ void CChooseMaster::CJob::Run()
 		CHttpRequest *pHead = HttpHead(pUrl).release();
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
-		lock_wait(m_Lock);
-		m_pHead = std::unique_ptr<CHttpRequest>(pHead);
-		lock_unlock(m_Lock);
+		{
+			CLockScope ls(m_Lock);
+			m_pHead = std::unique_ptr<CHttpRequest>(pHead);
+		}
 		IEngine::RunJobBlocking(pHead);
 		if(pHead->State() == HTTP_ABORTED)
 		{
@@ -188,15 +189,16 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		auto StartTime = tw::time_get();
+		auto StartTime = time_get_nanoseconds();
 		CHttpRequest *pGet = HttpGet(pUrl).release();
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
-		lock_wait(m_Lock);
-		m_pGet = std::unique_ptr<CHttpRequest>(pGet);
-		lock_unlock(m_Lock);
+		{
+			CLockScope ls(m_Lock);
+			m_pGet = std::unique_ptr<CHttpRequest>(pGet);
+		}
 		IEngine::RunJobBlocking(pGet);
-		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
+		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
@@ -256,25 +258,25 @@ public:
 
 	int NumServers() const override
 	{
-		return m_aServers.size();
+		return m_vServers.size();
 	}
 	const NETADDR &ServerAddress(int Index) const override
 	{
-		return m_aServers[Index].m_Addr;
+		return m_vServers[Index].m_Addr;
 	}
 	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const override
 	{
-		const CEntry &Entry = m_aServers[Index];
+		const CEntry &Entry = m_vServers[Index];
 		*pAddr = Entry.m_Addr;
 		*pInfo = Entry.m_Info;
 	}
 	int NumLegacyServers() const override
 	{
-		return m_aLegacyServers.size();
+		return m_vLegacyServers.size();
 	}
 	const NETADDR &LegacyServer(int Index) const override
 	{
-		return m_aLegacyServers[Index];
+		return m_vLegacyServers[Index];
 	}
 
 private:
@@ -294,7 +296,7 @@ private:
 	};
 
 	static bool Validate(json_value *pJson);
-	static bool Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers);
+	static bool Parse(json_value *pJson, std::vector<CEntry> *pvServers, std::vector<NETADDR> *pvLegacyServers);
 
 	IEngine *m_pEngine;
 	IConsole *m_pConsole;
@@ -303,8 +305,8 @@ private:
 	std::shared_ptr<CHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
-	std::vector<CEntry> m_aServers;
-	std::vector<NETADDR> m_aLegacyServers;
+	std::vector<CEntry> m_vServers;
+	std::vector<NETADDR> m_vLegacyServers;
 };
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
@@ -339,7 +341,7 @@ void CServerBrowserHttp::Update()
 		}
 		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
-		m_pGetServers->Timeout(CTimeout{10000, 8000, 10});
+		m_pGetServers->Timeout(CTimeout{10000, 0, 8000, 10});
 		m_pEngine->AddJob(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
@@ -356,7 +358,7 @@ void CServerBrowserHttp::Update()
 		bool Success = true;
 		json_value *pJson = pGetServers->ResultJson();
 		Success = Success && pJson;
-		Success = Success && !Parse(pJson, &m_aServers, &m_aLegacyServers);
+		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
 		json_value_free(pJson);
 		if(!Success)
 		{
@@ -411,14 +413,14 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
-	std::vector<CEntry> aServers;
-	std::vector<NETADDR> aLegacyServers;
-	return Parse(pJson, &aServers, &aLegacyServers);
+	std::vector<CEntry> vServers;
+	std::vector<NETADDR> vLegacyServers;
+	return Parse(pJson, &vServers, &vLegacyServers);
 }
-bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers)
+bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *pvServers, std::vector<NETADDR> *pvLegacyServers)
 {
-	std::vector<CEntry> aServers;
-	std::vector<NETADDR> aLegacyServers;
+	std::vector<CEntry> vServers;
+	std::vector<NETADDR> vLegacyServers;
 
 	const json_value &Json = *pJson;
 	const json_value &Servers = Json["servers"];
@@ -472,7 +474,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 				// Skip unknown addresses.
 				continue;
 			}
-			aServers.push_back({ParsedAddr, SetInfo});
+			vServers.push_back({ParsedAddr, SetInfo});
 		}
 	}
 	if(LegacyServers.type == json_array)
@@ -485,11 +487,11 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 			{
 				return true;
 			}
-			aLegacyServers.push_back(ParsedAddr);
+			vLegacyServers.push_back(ParsedAddr);
 		}
 	}
-	*paServers = aServers;
-	*paLegacyServers = aLegacyServers;
+	*pvServers = vServers;
+	*pvLegacyServers = vLegacyServers;
 	return false;
 }
 

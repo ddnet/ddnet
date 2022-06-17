@@ -30,13 +30,14 @@ static const char *IndexToSystem(int Index)
 
 static int RetryWaitSeconds(int NumUnsuccessfulTries)
 {
-	return (1 << clamp(0, NumUnsuccessfulTries, 9));
+	return (1 << clamp(NumUnsuccessfulTries, 0, 9));
 }
 
 CStun::CProtocol::CProtocol(int Index, NETSOCKET Socket) :
 	m_Index(Index),
 	m_Socket(Socket)
 {
+	mem_zero(&m_StunServer, sizeof(NETADDR));
 	// Initialize `m_Stun` with random data.
 	unsigned char aBuf[32];
 	StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);
@@ -72,7 +73,7 @@ void CStun::CProtocol::Update()
 	int Size = StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);
 	if(net_udp_send(m_Socket, &m_StunServer, aBuf, Size) == -1)
 	{
-		log_error(IndexToSystem(m_Index), "couldn't send stun request");
+		log_debug(IndexToSystem(m_Index), "couldn't send stun request");
 		return;
 	}
 }
@@ -89,16 +90,14 @@ bool CStun::CProtocol::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize
 	{
 		return false;
 	}
-	int64_t Now = time_get();
-	int64_t Freq = time_freq();
-	m_LastResponse = Now;
+	m_LastResponse = time_get();
 	if(!Success)
 	{
 		m_HaveAddr = false;
 		log_debug(IndexToSystem(m_Index), "got error response");
 		return true;
 	}
-	m_NextTry = Now + 600 * Freq;
+	m_NextTry = -1;
 	m_NumUnsuccessfulTries = -1;
 	m_HaveAddr = true;
 	m_Addr = StunAddr;

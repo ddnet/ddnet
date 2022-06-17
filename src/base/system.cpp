@@ -13,11 +13,9 @@
 
 #include "system.h"
 
+#include "lock_scope.h"
 #include "logger.h"
 
-#if !defined(CONF_PLATFORM_MACOS)
-#include <base/color.h>
-#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -266,6 +264,51 @@ IOHANDLE io_open(const char *filename, int flags)
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 {
 	return fread(buffer, 1, size, (FILE *)io);
+}
+
+void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
+{
+	long signed_len = io_length(io);
+	unsigned len = signed_len < 0 ? 1024 : (unsigned)signed_len; // use default initial size if we couldn't get the length
+	char *buffer = (char *)malloc(len + 1);
+	unsigned read = io_read(io, buffer, len + 1); // +1 to check if the file size is larger than expected
+	if(read < len)
+	{
+		buffer = (char *)realloc(buffer, read + 1);
+		len = read;
+	}
+	else if(read > len)
+	{
+		unsigned cap = 2 * read;
+		len = read;
+		buffer = (char *)realloc(buffer, cap);
+		while((read = io_read(io, buffer + len, cap - len)) != 0)
+		{
+			len += read;
+			if(len == cap)
+			{
+				cap *= 2;
+				buffer = (char *)realloc(buffer, cap);
+			}
+		}
+		buffer = (char *)realloc(buffer, len + 1);
+	}
+	buffer[len] = 0;
+	*result = buffer;
+	*result_len = len;
+}
+
+char *io_read_all_str(IOHANDLE io)
+{
+	void *buffer;
+	unsigned len;
+	io_read_all(io, &buffer, &len);
+	if(mem_has_null(buffer, len))
+	{
+		free(buffer);
+		return nullptr;
+	}
+	return (char *)buffer;
 }
 
 unsigned io_skip(IOHANDLE io, int size)
@@ -627,11 +670,8 @@ void aio_write_newline(ASYNCIO *aio)
 
 int aio_error(ASYNCIO *aio)
 {
-	int result;
-	lock_wait(aio->lock);
-	result = aio->error;
-	lock_unlock(aio->lock);
-	return result;
+	CLockScope ls(aio->lock);
+	return aio->error;
 }
 
 void aio_free(ASYNCIO *aio)
@@ -647,23 +687,25 @@ void aio_free(ASYNCIO *aio)
 
 void aio_close(ASYNCIO *aio)
 {
-	lock_wait(aio->lock);
-	aio->finish = ASYNCIO_CLOSE;
-	lock_unlock(aio->lock);
+	{
+		CLockScope ls(aio->lock);
+		aio->finish = ASYNCIO_CLOSE;
+	}
 	sphore_signal(&aio->sphore);
 }
 
 void aio_wait(ASYNCIO *aio)
 {
 	void *thread;
-	lock_wait(aio->lock);
-	thread = aio->thread;
-	aio->thread = 0;
-	if(aio->finish == ASYNCIO_RUNNING)
 	{
-		aio->finish = ASYNCIO_EXIT;
+		CLockScope ls(aio->lock);
+		thread = aio->thread;
+		aio->thread = 0;
+		if(aio->finish == ASYNCIO_RUNNING)
+		{
+			aio->finish = ASYNCIO_EXIT;
+		}
 	}
-	lock_unlock(aio->lock);
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
 }
@@ -940,11 +982,6 @@ int64_t time_freq()
 {
 	using namespace std::chrono_literals;
 	return std::chrono::nanoseconds(1s).count();
-}
-
-int64_t time_get_nanoseconds()
-{
-	return time_get_impl();
 }
 
 /* -----  network ----- */
@@ -1450,11 +1487,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1478,11 +1515,9 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
-
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		int socket = -1;
 		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
@@ -1502,7 +1537,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1527,10 +1561,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	/* set non-blocking */
-	net_set_non_blocking(sock);
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
+	}
+	else
+	{
+		/* set non-blocking */
+		net_set_non_blocking(sock);
 
-	net_buffer_init(&sock->buffer);
+		net_buffer_init(&sock->buffer);
+	}
 
 	/* return */
 	return sock;
@@ -1737,11 +1779,11 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1757,7 +1799,6 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1768,6 +1809,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 		}
+	}
+
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
 	}
 
 	/* return */
@@ -3242,6 +3289,20 @@ int mem_comp(const void *a, const void *b, int size)
 	return memcmp(a, b, size);
 }
 
+int mem_has_null(const void *block, unsigned size)
+{
+	const unsigned char *bytes = (const unsigned char *)block;
+	unsigned i;
+	for(i = 0; i < size; i++)
+	{
+		if(bytes[i] == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void net_stats(NETSTATS *stats_inout)
 {
 	*stats_inout = network_stats;
@@ -3461,32 +3522,6 @@ int str_utf8_encode(char *ptr, int chr)
 		ptr[1] = 0x80 | ((chr >> 12) & 0x3F);
 		ptr[2] = 0x80 | ((chr >> 6) & 0x3F);
 		ptr[3] = 0x80 | (chr & 0x3F);
-		return 4;
-	}
-
-	return 0;
-}
-
-int str_utf16le_encode(char *ptr, int chr)
-{
-	if(chr < 0x10000)
-	{
-		ptr[0] = chr;
-		ptr[1] = chr >> 0x8;
-		return 2;
-	}
-	else if(chr <= 0x10FFFF)
-	{
-		int U = chr - 0x10000;
-		int W1 = 0xD800, W2 = 0xDC00;
-
-		W1 |= ((U >> 10) & 0x3FF);
-		W2 |= (U & 0x3FF);
-
-		ptr[0] = W1;
-		ptr[1] = W1 >> 0x8;
-		ptr[2] = W2;
-		ptr[3] = W2 >> 0x8;
 		return 4;
 	}
 
@@ -4120,14 +4155,12 @@ void set_exception_handler_log_file(const char *log_file_path)
 #endif
 }
 
-// pure cpp code for the cpp system wrapper
-
-std::chrono::nanoseconds tw::time_get()
+std::chrono::nanoseconds time_get_nanoseconds()
 {
-	return std::chrono::nanoseconds(time_get_nanoseconds());
+	return std::chrono::nanoseconds(time_get_impl());
 }
 
-int tw::net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 {
 	using namespace std::chrono_literals;
 	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());

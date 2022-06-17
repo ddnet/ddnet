@@ -131,7 +131,7 @@ Disconnected
 == Прекинута веза
 
 Downloading map
-== Преузимам мапу 
+== Преузимам мапу
 
 Draw!
 == Нерешено!
@@ -237,9 +237,6 @@ MOTD
 
 Map
 == Мапа
-
-Mouse sens.
-== Осетљивост миша
 
 Move left
 == Помери се лево
@@ -808,9 +805,6 @@ Activate
 Switch weapon when out of ammo
 == Замени оружје кад нема муниције
 
-Reset wanted weapon on death
-== Ресетуј тражено оружје на смрт
-
 Show clan above name plates
 == Прикажи клан изнад плочице са именима
 
@@ -822,9 +816,6 @@ Skip the main menu
 
 Refresh Rate
 == Освежавање
-
-Show console window
-== Прикажи конзолу
 
 Themes directory
 == Тема директоријума
@@ -890,7 +881,7 @@ Dummy copy
 == Зајед. крет. копије
 
 Hammerfly dummy
-== Лет. чекићем коп. 
+== Лет. чекићем коп.
 
 Converse
 == Сви дописивање
@@ -906,9 +897,6 @@ Show entities
 
 Show HUD
 == Прикажи HUD
-
-UI mouse s.
-== UI осетљ. миша
 
 may cause delay
 == може проузроковати кашњење
@@ -1184,6 +1172,27 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Existing Player
 == 
 
@@ -1244,10 +1253,69 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
 == 
 
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1292,7 +1360,25 @@ Chat sound volume
 Background music volume
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages

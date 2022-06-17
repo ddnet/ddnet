@@ -64,7 +64,7 @@ private:
 		int m_ChunkSize;
 		int m_NumItems;
 
-		std::vector<CGhostCharacter *> m_lChunks;
+		std::vector<CGhostCharacter *> m_vpChunks;
 
 	public:
 		CGhostPath() { Reset(); }

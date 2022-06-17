@@ -175,9 +175,6 @@ MOTD
 Map
 == Карта
 
-Mouse sens.
-== Чутлив. миші
-
 Move left
 == Вліво
 
@@ -736,14 +733,11 @@ Save
 Switch weapon when out of ammo
 == Змінювати зброю коли закінчились боєприпаси
 
-Reset wanted weapon on death
-== Скидати вибір зброї при смерті
-
 Show only chat messages from friends
 == Показувати повідомлення тільки від друзів
 
 Name plates size
-== Розмір ніків 
+== Розмір ніків
 
 Use team colors for name plates
 == Розфарбовувати ім'я гравця кольором команди
@@ -771,9 +765,6 @@ Max Screenshots
 
 Refresh Rate
 == Частота оновлення
-
-Show console window
-== Показувати консоль
 
 Automatically take statboard screenshot
 == Автоматично робити знімок результатів
@@ -859,9 +850,6 @@ Show entities
 Show HUD
 == Показувати HUD
 
-UI mouse s.
-== Чутлившсть миші в меню
-
 may cause delay
 == може спричинити затримку
 
@@ -929,7 +917,7 @@ Show votes window after voting
 == Показувати голосування після вашого голосу
 
 Messages
-== Повідомлення 
+== Повідомлення
 
 System message
 == Системне повідомлення
@@ -1085,7 +1073,7 @@ Replay
 == Повтор
 
 Saving ddnet-settings.cfg failed
-== Збереження налаштувань невдалося 
+== Збереження налаштувань невдалося
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина або висота текстури %s не поділяється на %d, що може викликати візуальні помилки
@@ -1208,7 +1196,7 @@ Chat sound volume
 == Гучність звуку чату
 
 Background music volume
-== Гучність музики заднього фону 
+== Гучність музики заднього фону
 
 Assets
 == Текстури
@@ -1310,6 +1298,27 @@ Play
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Join Tutorial Server
 == 
 
@@ -1325,7 +1334,66 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Windowed fullscreen
@@ -1347,6 +1415,24 @@ Graphics cards
 == 
 
 auto
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

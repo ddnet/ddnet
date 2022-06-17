@@ -1,8 +1,9 @@
 #ifndef ENGINE_SERVER_AUTHMANAGER_H
 #define ENGINE_SERVER_AUTHMANAGER_H
 
+#include <vector>
+
 #include <base/hash.h>
-#include <base/tl/array.h>
 
 #define SALT_BYTES 8
 
@@ -16,7 +17,7 @@ private:
 		unsigned char m_aSalt[SALT_BYTES];
 		int m_Level;
 	};
-	array<CKey> m_aKeys;
+	std::vector<CKey> m_vKeys;
 
 	int m_aDefault[3];
 	bool m_Generated;
