@@ -1,9 +1,14 @@
 #include "antibot.h"
+
 #include <antibot/antibot_interface.h>
+
+#include <base/system.h>
 
 #include <engine/console.h>
 #include <engine/kernel.h>
 #include <engine/server.h>
+
+class IEngineAntibot;
 
 #ifdef CONF_ANTIBOT
 CAntibot::CAntibot() :
