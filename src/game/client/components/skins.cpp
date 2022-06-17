@@ -440,7 +440,6 @@ int CSkins::FindImpl(const char *pName)
 				char aUrlSkinsTw[IO_MAX_PATH_LENGTH];
 				EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
 				str_format(aUrlSkinsTw, sizeof(aUrlSkinsTw), "%s%s.png", g_Config.m_ClSkinSkinsTwDownloadUrl, aEscapedName);
-				
 				RangeBegin->m_pTask = std::make_shared<CGetPngFile>(this, aUrlSkinsTw, Storage(), RangeBegin->m_aPath);
 				m_pClient->Engine()->AddJob(RangeBegin->m_pTask);
 			}
