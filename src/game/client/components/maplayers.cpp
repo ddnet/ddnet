@@ -9,7 +9,9 @@
 
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
+
 #include <game/layers.h>
+#include <game/mapitems.h>
 
 #include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>

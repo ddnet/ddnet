@@ -6,11 +6,15 @@
 
 #include "animstate.h"
 #include "render.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
+
+#include <game/mapitems.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;

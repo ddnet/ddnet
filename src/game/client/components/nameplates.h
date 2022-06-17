@@ -2,9 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
+#include <base/vmath.h>
+
+#include <engine/shared/protocol.h>
+
 #include <game/client/component.h>
 
-#include <game/generated/protocol.h>
+struct CNetObj_Character;
+struct CNetObj_PlayerInfo;
 
 struct SPlayerNamePlate
 {

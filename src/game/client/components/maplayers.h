@@ -4,8 +4,6 @@
 #define GAME_CLIENT_COMPONENTS_MAPLAYERS_H
 #include <game/client/component.h>
 
-#include <base/color.h>
-
 #include <cstdint>
 #include <vector>
 
@@ -17,6 +15,10 @@ typedef char *offset_ptr_size;
 typedef uintptr_t offset_ptr;
 typedef unsigned int offset_ptr32;
 
+class CCamera;
+class CLayers;
+class CMapImages;
+class ColorRGBA;
 struct CMapItemGroup;
 struct CMapItemLayerTilemap;
 struct CMapItemLayerQuads;
@@ -27,7 +29,7 @@ class CMapLayers : public CComponent
 	friend class CMenuBackground;
 
 	CLayers *m_pLayers;
-	class CMapImages *m_pImages;
+	CMapImages *m_pImages;
 	int m_Type;
 	int m_CurrentLocalTick;
 	int m_LastLocalTick;
@@ -126,7 +128,7 @@ class CMapLayers : public CComponent
 	};
 	std::vector<SQuadLayerVisuals *> m_vpQuadLayerVisuals;
 
-	virtual class CCamera *GetCurCamera();
+	virtual CCamera *GetCurCamera();
 
 	void LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer);
 

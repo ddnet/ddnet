@@ -26,12 +26,13 @@
 #include <base/system.h>
 #include <base/vmath.h>
 
+#include "gameclient.h"
 #include "race.h"
 #include "render.h"
-#include <game/localization.h>
-#include <game/version.h>
 
-#include "gameclient.h"
+#include <game/localization.h>
+#include <game/mapitems.h>
+#include <game/version.h>
 
 #include "components/background.h"
 #include "components/binds.h"

@@ -108,9 +108,7 @@ public:
 	}
 };
 
-class CLayer;
 class CLayerGroup;
-class CEditorMap;
 
 class CLayer
 {

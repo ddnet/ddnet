@@ -4,11 +4,24 @@
 #define GAME_CLIENT_RENDER_H
 
 #include "ui.h"
+
 #include <base/color.h>
 #include <base/vmath.h>
-#include <engine/graphics.h>
+
 #include <game/client/skin.h>
-#include <game/mapitems.h>
+
+class CSpeedupTile;
+class CSwitchTile;
+class CTeleTile;
+class CTile;
+class CTuneTile;
+namespace client_data7 {
+struct CDataSprite;
+}
+struct CDataSprite;
+struct CEnvPoint;
+struct CMapItemGroup;
+struct CQuad;
 
 class CTeeRenderInfo
 {
@@ -68,11 +81,11 @@ public:
 
 	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
 
-	void SelectSprite(struct CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
+	void SelectSprite(CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
 	void SelectSprite(int Id, int Flags = 0, int sx = 0, int sy = 0);
 
 	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
-	void GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY);
+	void GetSpriteScale(CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(int Id, float &ScaleX, float &ScaleY);
 	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
 

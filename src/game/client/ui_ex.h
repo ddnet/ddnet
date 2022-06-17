@@ -2,15 +2,12 @@
 #define GAME_CLIENT_UI_EX_H
 
 #include <engine/input.h>
-#include <engine/kernel.h>
 #include <game/client/ui.h>
 
-class IInput;
-class ITextRender;
-class IKernel;
-class IGraphics;
-
 class CRenderTools;
+class IGraphics;
+class IKernel;
+class ITextRender;
 
 class IScrollbarScale
 {
