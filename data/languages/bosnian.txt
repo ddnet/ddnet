@@ -1180,6 +1180,9 @@ Download skins
 Download community skins
 == 
 
+Download skins.tw skins
+== 
+
 Choose default eyes when joining a server
 == 
 

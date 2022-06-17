@@ -28,6 +28,7 @@ public:
 		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
 		char m_aPath[IO_MAX_PATH_LENGTH];
 		char m_aName[24];
+		int m_attempts = 0;
 
 		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }

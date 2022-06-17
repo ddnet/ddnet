@@ -945,6 +945,9 @@ Toggle to edit your dummy settings
 Download community skins
 == 
 
+Download skins.tw skins
+== 
+
 Vanilla skins only
 == 
 

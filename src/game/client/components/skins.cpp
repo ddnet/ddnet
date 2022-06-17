@@ -401,6 +401,7 @@ int CSkins::Find(const char *pName)
 
 int CSkins::FindImpl(const char *pName)
 {
+	char aEscapedName[256];
 	CSkin Needle;
 	mem_zero(&Needle, sizeof(Needle));
 	str_copy(Needle.m_aName, pName, sizeof(Needle.m_aName));
@@ -433,7 +434,20 @@ int CSkins::FindImpl(const char *pName)
 		}
 		if(RangeBegin->m_pTask && (RangeBegin->m_pTask->State() == HTTP_ERROR || RangeBegin->m_pTask->State() == HTTP_ABORTED))
 		{
-			RangeBegin->m_pTask = nullptr;
+			if(g_Config.m_ClDownloadSkinsTwSkins != 0 && RangeBegin->m_attempts < 1)
+			{
+				RangeBegin->m_attempts++;
+				char aUrlSkinsTw[IO_MAX_PATH_LENGTH];
+				EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
+				str_format(aUrlSkinsTw, sizeof(aUrlSkinsTw), "%s%s.png", g_Config.m_ClSkinSkinsTwDownloadUrl, aEscapedName);
+				
+				RangeBegin->m_pTask = std::make_shared<CGetPngFile>(this, aUrlSkinsTw, Storage(), RangeBegin->m_aPath);
+				m_pClient->Engine()->AddJob(RangeBegin->m_pTask);
+			}
+			else
+			{
+				RangeBegin->m_pTask = nullptr;
+			}
 		}
 		return -1;
 	}
@@ -442,7 +456,6 @@ int CSkins::FindImpl(const char *pName)
 	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
 
 	char aUrl[IO_MAX_PATH_LENGTH];
-	char aEscapedName[256];
 	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClDownloadCommunitySkins != 0 ? g_Config.m_ClSkinCommunityDownloadUrl : g_Config.m_ClSkinDownloadUrl, aEscapedName);
 	char aBuf[IO_MAX_PATH_LENGTH];

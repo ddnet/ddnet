@@ -1419,6 +1419,9 @@ No answer from server yet.
 Download community skins
 == 下载社区皮肤
 
+Download skins.tw skins
+== 
+
 Enable controller
 == 启用控制器
 
