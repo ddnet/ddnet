@@ -6371,16 +6371,19 @@ void CEditor::OnUpdate()
 		Reset();
 	}
 
-	// handle mouse movement
+	// handle cursor movement
 	{
-		static double s_MouseX = 0.0f;
-		static double s_MouseY = 0.0f;
+		static float s_MouseX = 0.0f;
+		static float s_MouseY = 0.0f;
 
 		float MouseRelX = 0.0f, MouseRelY = 0.0f;
 		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
 		if(CursorType != IInput::CURSOR_NONE)
 			UIEx()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
 		UIEx()->ResetMouseSlow();
+
+		m_MouseDeltaX += MouseRelX;
+		m_MouseDeltaY += MouseRelY;
 
 		if(!m_LockMouse)
 		{
@@ -6404,6 +6407,8 @@ void CEditor::OnUpdate()
 
 			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
 			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
+			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->WindowWidth());
+			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->WindowHeight());
 		}
 		else
 		{
@@ -6430,13 +6435,14 @@ void CEditor::OnRender()
 	ms_pUiGotContext = nullptr;
 	UI()->StartCheck();
 
-	m_MouseDeltaX = m_MouseX - UI()->MouseX();
-	m_MouseDeltaY = m_MouseY - UI()->MouseY();
-	m_MouseDeltaWx = m_MouseWorldX - UI()->MouseWorldX();
-	m_MouseDeltaWy = m_MouseWorldY - UI()->MouseWorldY();
 	UI()->Update(m_MouseX, m_MouseY, m_MouseWorldX, m_MouseWorldY);
 
 	Render();
+
+	m_MouseDeltaX = 0.0f;
+	m_MouseDeltaY = 0.0f;
+	m_MouseDeltaWx = 0.0f;
+	m_MouseDeltaWy = 0.0f;
 
 	if(Input()->KeyPress(KEY_F10))
 	{
