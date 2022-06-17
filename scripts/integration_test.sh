@@ -1,37 +1,30 @@
 #!/bin/bash
 
-arg_end_args=0
 arg_verbose=0
 arg_valgrind_memcheck=0
 
 for arg in "$@"
 do
-	if [[ "${arg::1}" == "-" ]] && [[ "$arg_end_args" == "0" ]] 
+	if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]
 	then
-		if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]
-		then
-			echo "usage: $(basename "$0") [OPTION..] [build dir]"
-			echo "description:"
-			echo "  Runs a simple integration test of the client and server"
-			echo "  binaries from the given build dir"
-			echo "options:"
-			echo "  --help|-h           show this help"
-			echo "	--verbose|-v        verbose output"
-			echo "	--valgrind-memcheck use valgrind's memcheck to run server and client"
-		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
-		then
-			arg_verbose=1
-		elif [ "$arg" == "--valgrind-memcheck" ]
-		then
-			arg_valgrind_memcheck=1
-		elif [ "$arg" == "--" ]
-		then
-			arg_end_args=1
-		else
-			echo "Error: unknown arg '$arg'"
-		fi
+		echo "usage: $(basename "$0") [OPTION..] [build dir]"
+		echo "description:"
+		echo "  Runs a simple integration test of the client and server"
+		echo "  binaries from the given build dir"
+		echo "options:"
+		echo "  --help|-h           show this help"
+		echo "  --verbose|-v        verbose output"
+		echo "  --valgrind-memcheck use valgrind's memcheck to run server and client"
+		exit 0
+	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
+	then
+		arg_verbose=1
+	elif [ "$arg" == "--valgrind-memcheck" ]
+	then
+		arg_valgrind_memcheck=1
 	else
 		echo "Error: unknown arg '$arg'"
+		exit 1
 	fi
 done
 
