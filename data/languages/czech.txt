@@ -1274,8 +1274,8 @@ Toggle to edit your dummy settings
 Download community skins
 == 
 
-Download skins.tw skins
-== Skiny ze skins.tw
+Skins.tw skins (3rd party)
+== Skins.tw skiny (3rd party)
 
 Choose default eyes when joining a server
 == 

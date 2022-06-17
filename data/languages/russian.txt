@@ -1375,7 +1375,7 @@ Toggle to edit your dummy settings
 Download community skins
 == 
 
-Download skins.tw skins
+Skins.tw skins (3rd party)
 == 
 
 Choose default eyes when joining a server

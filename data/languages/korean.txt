@@ -1399,7 +1399,7 @@ No answer from server yet.
 Download community skins
 == 
 
-Download skins.tw skins
+Skins.tw skins (3rd party)
 == 
 
 Enable controller
