@@ -11,7 +11,6 @@
 class CConfig;
 class CTuningParams;
 class CUuidManager;
-class CPlayer;
 
 class CTeeHistorian
 {

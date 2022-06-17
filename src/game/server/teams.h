@@ -4,8 +4,11 @@
 
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
-#include <game/server/scoreworker.h>
 #include <game/teamscore.h>
+
+class CCharacter;
+class CPlayer;
+struct CScoreSaveResult;
 
 class CGameTeams
 {

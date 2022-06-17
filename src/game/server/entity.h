@@ -6,10 +6,10 @@
 #include <base/vmath.h>
 
 #include "alloc.h"
-#include "gamecontext.h"
 #include "gameworld.h"
 
 class CCollision;
+class CGameContext;
 
 /*
 	Class: Entity
@@ -20,12 +20,12 @@ class CEntity
 	MACRO_ALLOC_HEAP()
 
 private:
-	friend class CGameWorld; // entity list handling
+	friend CGameWorld; // entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 
 	/* Identity */
-	class CGameWorld *m_pGameWorld;
+	CGameWorld *m_pGameWorld;
 	CCollision *m_pCCollision;
 
 	int m_ID;
@@ -59,7 +59,7 @@ public: // TODO: Maybe make protected
 
 	/* Objects */
 	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->m_Core.m_vSwitchers; }
-	class CGameWorld *GameWorld() { return m_pGameWorld; }
+	CGameWorld *GameWorld() { return m_pGameWorld; }
 	class CConfig *Config() { return m_pGameWorld->Config(); }
 	class CGameContext *GameServer() { return m_pGameWorld->GameServer(); }
 	class IServer *Server() { return m_pGameWorld->Server(); }

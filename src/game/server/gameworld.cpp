@@ -5,9 +5,12 @@
 #include "entities/character.h"
 #include "entity.h"
 #include "gamecontext.h"
+#include "gamecontroller.h"
 #include "player.h"
-#include <algorithm>
+
 #include <engine/shared/config.h>
+
+#include <algorithm>
 #include <utility>
 
 //////////////////////////////////////////////////

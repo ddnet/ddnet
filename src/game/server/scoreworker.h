@@ -14,7 +14,7 @@
 #include <game/voting.h>
 
 class IDbConnection;
-class IServer;
+class IGameController;
 
 enum
 {

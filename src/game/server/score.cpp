@@ -5,7 +5,6 @@
 #include "scoreworker.h"
 
 #include <base/system.h>
-#include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -13,8 +12,9 @@
 #include <engine/storage.h>
 #include <game/generated/wordlist.h>
 
-#include <algorithm>
 #include <memory>
+
+class IDbConnection;
 
 std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 {
