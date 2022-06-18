@@ -3351,6 +3351,7 @@ void CClient::Run()
 		m_NetClient[i].Close();
 
 	delete m_pEditor;
+	m_pInput->Shutdown();
 	m_pGraphics->Shutdown();
 
 	// shutdown SDL
