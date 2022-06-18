@@ -340,7 +340,7 @@ public:
 		}
 	}
 
-	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
 	{
 		if(Type == TYPE_ABSOLUTE)
 		{
