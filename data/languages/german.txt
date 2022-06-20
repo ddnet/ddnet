@@ -626,7 +626,7 @@ Dummy settings
 == Dummy-Einstellungen
 
 AntiPing
-== AntiPing
+== Anti-Ping
 
 Show quads
 == Quads anzeigen
@@ -713,7 +713,7 @@ DDNet Client updated!
 == Der DDNet-Client wurde aktualisiert!
 
 AntiPing: predict other players
-== AntiPing: Andere Spieler vorberechnen
+== Anti-Ping: Andere Spieler vorberechnen
 
 Show other players' key presses
 == Tastendrücke von anderen Spielern anzeigen
@@ -1010,7 +1010,7 @@ Replace video
 == Video ersetzen
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork ist ein kooperatives Onlinespiel mit dem Ziel für dich und deine Gruppe von Tees das Ziel der Karte zu erreichen. Als Anfänger solltest du auf den Novice-Servern anfangen, auf denen die einfachsten Karten sind. Achte auf den Ping um einen Server in deiner Nähe zu finden.
+== DDraceNetwork ist ein kooperatives Onlinespiel mit dem Ziel für dich und deine Gruppe von Tees das Ziel der Karte zu erreichen. Als Anfänger solltest du auf den Novice-Servern anfangen, auf denen die einfachsten Karten sind. Achte auf den Ping, um einen Server in deiner Nähe zu finden.
 
 Default length: %d
 == Standardlänge: %d
@@ -1076,7 +1076,7 @@ Show others (own team only)
 == Andere Spieler zeigen (eigenes Team)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Benutze die Taste k um neuzustarten, q zum pausieren und andere Spieler zu beobachten. In den Einstellungen sieht man weitere Tasten.
+== Benutze die Taste k, um neuzustarten. Benutze q, um zu pausieren und andere Spieler zu beobachten. Weitere Tastenbelegungen findet man in den Einstellungen.
 
 Client message
 == Client-Nachricht
@@ -1173,7 +1173,7 @@ Use current map as background
 == Aktuelle Karte als Hintergrund benutzen
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Debug-Modus aktiviert. Drück Strg+Shift+D um den Debug-Modus zu deaktivieren.
+== Debug-Modus aktiviert. Drück Strg+Shift+D, um den Debug-Modus zu deaktivieren.
 
 Existing Player
 == Existierender Spieler
@@ -1353,10 +1353,10 @@ Tutorial
 == Tutorial
 
 Can't find a Tutorial server
-== Tutorial-Server kann nicht gefunden werden
+== Kein Tutorial-Server wurde gefunden
 
 Toggle to edit your dummy settings
-== Umschalten um Dummy-Einstellungen zu bearbeiten
+== Umschalten, um Dummy-Einstellungen zu bearbeiten
 
 Choose default eyes when joining a server
 == Standard-Augen beim Betreten eines Servers auswählen
@@ -1374,7 +1374,7 @@ Quads are used for background decoration
 == Quads werden als Hintergrund-Dekoration benutzt
 
 Tries to predict other entities to give a feel of low latency
-== Versucht das Verhalten andere Entitäten vorherzusagen um das Gefühl einer niederigeren Latenz zu geben
+== Versucht das Verhalten anderer Entitäten vorherzusagen, um das Gefühl einer niedrigeren Latenz zu geben
 
 Super
 == Super
@@ -1425,7 +1425,7 @@ Use DDRace HUD
 == DDRace-HUD nutzen
 
 Show dummy actions
-== Dummy-Aktionen zeigen
+== Dummy-Aktionen anzeigen
 
 Show freeze bars
 == Einfrier-Balken zeigen
@@ -1440,10 +1440,10 @@ Show player target angle
 == Zielwinkel des Spielers zeigen
 
 Ingame mouse sens.
-== Mause-Empfind. im Spiel
+== Maus-Empfind. im Spiel
 
 UI mouse sens.
-== Mause-Empfind. im Menü
+== Maus-Empfind. im Menü
 
 Enable controller
 == Controller aktivieren
@@ -1452,7 +1452,7 @@ Controller %d: %s
 == Controller %d: %s
 
 Click to cycle through all available controllers.
-== Klicken um durch die verfügbaren Controller zu wechseln.
+== Klicke, um durch die verfügbaren Controller zu wechseln.
 
 [Ingame controller mode]
 Relative
@@ -1469,13 +1469,13 @@ Ingame controller sens.
 == Controller-Empfind. im Spiel
 
 UI controller sens.
-== Controller-Empfind. Im Menü
+== Controller-Empfind. im Menü
 
 Controller jitter tolerance
 == Jitter-Toleranz des Controllers
 
 No controller found. Plug in a controller and restart the game.
-== Kein Controller gefunden. Schließ einen Joystick an und starte das Spiel neu.
+== Keine Controller gefunden. Schließ einen Controller an und starte das Spiel neu.
 
 Controller Axis #%d
 == Controller-Axe #%d
