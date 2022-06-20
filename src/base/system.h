@@ -14,7 +14,7 @@
 #define __USE_GNU
 #endif
 
-#include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 
 #ifdef CONF_FAMILY_UNIX

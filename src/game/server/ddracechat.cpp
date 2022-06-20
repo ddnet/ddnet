@@ -8,6 +8,7 @@
 
 #include "entities/character.h"
 #include "player.h"
+#include "score.h"
 
 bool CheckClientID(int ClientID);
 

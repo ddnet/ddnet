@@ -1,13 +1,15 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "pickup.h"
-#include <game/generated/protocol.h>
-#include <game/server/gamecontext.h>
-#include <game/server/player.h>
+#include "character.h"
 
+#include <game/generated/protocol.h>
+#include <game/mapitems.h>
+#include <game/teamscore.h>
 #include <game/version.h>
 
-#include "character.h"
+#include <game/server/gamecontext.h>
+#include <game/server/player.h>
 
 static constexpr int PickupPhysSize = 14;
 

@@ -2,8 +2,10 @@
 #ifndef GAME_SERVER_ENTITIES_DRAGGER_BEAM_H
 #define GAME_SERVER_ENTITIES_DRAGGER_BEAM_H
 
-#include "dragger.h"
 #include <game/server/entity.h>
+
+class CDragger;
+class CGameWorld;
 
 /**
  * Dragger beams pull a selected player towards their center

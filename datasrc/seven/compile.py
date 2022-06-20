@@ -96,7 +96,7 @@ def main():
 
 		print("#ifndef GAME_GENERATED_PROTOCOL7_H")
 		print("#define GAME_GENERATED_PROTOCOL7_H")
-		print("#include <engine/shared/protocol.h>")
+		print("class CUnpacker;")
 		print("#include <engine/message.h>")
 		print("namespace protocol7 {")
 		print(network.RawHeader)
@@ -181,8 +181,8 @@ def main():
 		lines = []
 
 		lines += ['#include "protocol7.h"']
+		lines += ['#include <engine/shared/packer.h>']
 		lines += ['#include <engine/shared/protocol.h>']
-		lines += ['#include <engine/message.h>']
 
 		lines += ['namespace protocol7 {']
 

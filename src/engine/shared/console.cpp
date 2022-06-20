@@ -14,7 +14,7 @@
 #include "console.h"
 #include "linereader.h"
 
-#include <array> // std::size
+#include <iterator> // std::size
 #include <new>
 
 // todo: rework this

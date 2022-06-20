@@ -9,9 +9,10 @@
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
+
+#include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
-
 #include <game/teamscore.h>
 
 #include <game/client/prediction/gameworld.h>
@@ -169,7 +170,7 @@ private:
 #endif
 
 	CLayers m_Layers;
-	class CCollision m_Collision;
+	CCollision m_Collision;
 	CUI m_UI;
 
 	void ProcessEvents();
@@ -216,7 +217,7 @@ public:
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; }
-	class CCollision *Collision() { return &m_Collision; }
+	CCollision *Collision() { return &m_Collision; }
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }

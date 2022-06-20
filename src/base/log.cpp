@@ -15,6 +15,10 @@
 #include <unistd.h>
 #endif
 
+#if defined(CONF_PLATFORM_ANDROID)
+#include <android/log.h>
+#endif
+
 extern "C" {
 
 std::atomic<LEVEL> loglevel = LEVEL_INFO;

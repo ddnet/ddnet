@@ -5,12 +5,9 @@
 
 #include <base/hash.h>
 
-#include <engine/engine.h>
+#include <engine/console.h>
 #include <engine/server.h>
 
-#include <engine/map.h>
-#include <engine/server/register.h>
-#include <engine/shared/console.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
@@ -21,6 +18,7 @@
 #include <engine/shared/uuid_manager.h>
 
 #include <list>
+#include <memory>
 #include <vector>
 
 #include "antibot.h"
@@ -31,7 +29,12 @@
 #include "upnp.h"
 #endif
 
+class CConfig;
+class CHostLookup;
 class CLogMessage;
+class CMsgPacker;
+class CPacker;
+class IEngineMap;
 
 class CSnapIDPool
 {

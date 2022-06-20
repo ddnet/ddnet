@@ -6,8 +6,6 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libswresample/swresample.h>
-#include <libswscale/swscale.h>
 };
 
 #include <engine/shared/video.h>
@@ -18,6 +16,10 @@ extern "C" {
 #include <thread>
 #include <vector>
 #define ALEN 2048
+
+class CGraphics_Threaded;
+class ISound;
+class IStorage;
 
 extern LOCK g_WriteLock;
 
@@ -42,7 +44,7 @@ typedef struct OutputStream
 class CVideo : public IVideo
 {
 public:
-	CVideo(class CGraphics_Threaded *pGraphics, class ISound *pSound, class IStorage *pStorage, class IConsole *pConsole, int width, int height, const char *name);
+	CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
 	~CVideo();
 
 	void Start() override REQUIRES(!g_WriteLock);
@@ -79,9 +81,9 @@ private:
 
 	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId);
 
-	class CGraphics_Threaded *m_pGraphics;
-	class IStorage *m_pStorage;
-	class ISound *m_pSound;
+	CGraphics_Threaded *m_pGraphics;
+	IStorage *m_pStorage;
+	ISound *m_pSound;
 
 	int m_Width;
 	int m_Height;

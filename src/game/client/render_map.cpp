@@ -1,16 +1,20 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
-#include <cmath>
+
 #include <engine/graphics.h>
+#include <engine/textrender.h>
+
+#include <engine/shared/config.h>
 
 #include "render.h"
 
-#include <engine/shared/config.h>
-#include <engine/textrender.h>
 #include <game/generated/client_data.h>
 
+#include <game/mapitems.h>
+
 #include <chrono>
+#include <cmath>
 
 using namespace std::chrono_literals;
 

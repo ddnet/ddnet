@@ -3,6 +3,8 @@
 #include "config.h"
 #include "uuid_manager.h"
 
+#include <engine/message.h>
+
 #include <new>
 
 void RegisterUuids(CUuidManager *pManager)
@@ -12,7 +14,7 @@ void RegisterUuids(CUuidManager *pManager)
 #undef UUID
 }
 
-int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
+int UnpackMessageID(int *pID, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
 {
 	*pID = 0;
 	*pSys = false;

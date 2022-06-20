@@ -1,8 +1,14 @@
 #ifndef GAME_CLIENT_COMPONENTS_BACKGROUND_H
 #define GAME_CLIENT_COMPONENTS_BACKGROUND_H
+
 #include <engine/shared/map.h>
-#include <game/client/component.h>
+
 #include <game/client/components/maplayers.h>
+
+#include <stdint.h>
+
+class CLayers;
+class CMapImages;
 
 // Special value to use background of current map
 #define CURRENT_MAP "%current%"

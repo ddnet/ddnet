@@ -18,8 +18,10 @@
 #include <engine/shared/linereader.h>
 #include <engine/shared/memheap.h>
 #include <engine/storage.h>
+
 #include <game/collision.h>
 #include <game/gamecore.h>
+#include <game/mapitems.h>
 #include <game/version.h>
 
 #include <game/generated/protocol7.h>

@@ -12,16 +12,13 @@
 
 #include <base/system.h>
 
+#include <engine/client/graphics_defines.h>
+
 #include <engine/client/backend/backend_base.h>
 
-class CGLSLProgram;
 class CGLSLTWProgram;
 class CGLSLPrimitiveProgram;
-class CGLSLQuadProgram;
 class CGLSLTileProgram;
-class CGLSLTextProgram;
-class CGLSLPrimitiveExProgram;
-class CGLSLSpriteMultipleProgram;
 
 #if defined(BACKEND_AS_OPENGL_ES) && defined(CONF_BACKEND_OPENGL_ES3)
 #define BACKEND_GL_MODERN_API 1

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "pickup.h"
 #include "character.h"
+#include <game/collision.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 
