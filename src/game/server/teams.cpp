@@ -897,6 +897,15 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
 	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
 
+	if(Team >= 1)
+	{
+		for(const auto &pListedPlayer : GameServer()->m_apPlayers)
+		{
+			CCharacter *pChar = pListedPlayer ? pListedPlayer->GetCharacter() : nullptr;
+			if(pChar && pChar->Team() == Team && pChar != pPlayer->GetCharacter() && pChar != pTargetPlayer->GetCharacter())
+				pChar->m_StartTime = pPlayer->GetCharacter()->m_StartTime;
+		}
+	}
 	std::swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
 	std::swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
 	std::swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
