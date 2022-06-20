@@ -62,12 +62,6 @@ CInput::CInput()
 	m_aEditingText[0] = 0;
 }
 
-CInput::~CInput()
-{
-	SDL_free(m_pClipboardText);
-	CloseJoysticks();
-}
-
 void CInput::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
@@ -78,6 +72,12 @@ void CInput::Init()
 	MouseModeRelative();
 
 	InitJoysticks();
+}
+
+void CInput::Shutdown()
+{
+	SDL_free(m_pClipboardText);
+	CloseJoysticks();
 }
 
 void CInput::InitJoysticks()
@@ -167,16 +167,11 @@ CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
 
 void CInput::CloseJoysticks()
 {
-	for(auto &Joystick : m_vJoysticks)
-		Joystick.Close();
+	if(SDL_WasInit(SDL_INIT_JOYSTICK))
+		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+
 	m_vJoysticks.clear();
 	m_pActiveJoystick = nullptr;
-}
-
-void CInput::CJoystick::Close()
-{
-	if(SDL_JoystickGetAttached(m_pDelegate))
-		SDL_JoystickClose(m_pDelegate);
 }
 
 void CInput::SelectNextJoystick()

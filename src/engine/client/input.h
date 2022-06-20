@@ -43,7 +43,6 @@ public:
 		int GetHatValue(int Hat) override;
 		bool Relative(float *pX, float *pY) override;
 		bool Absolute(float *pX, float *pY) override;
-		void Close();
 
 		static int GetJoystickHatKey(int Hat, int HatValue);
 	};
@@ -97,9 +96,9 @@ private:
 
 public:
 	CInput();
-	~CInput();
 
 	void Init() override;
+	void Shutdown() override;
 
 	bool ModifierIsPressed() const override { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
