@@ -118,7 +118,7 @@ public:
 	void KillSavedTeam(int ClientID, int Team);
 	void ResetSavedTeam(int ClientID, int Team);
 	void RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
-	void SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);
+	void SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPlayer, int Team);
 	void ProcessSaveTeam();
 
 	int GetFirstEmptyTeam() const;
