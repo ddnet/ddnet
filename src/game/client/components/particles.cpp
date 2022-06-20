@@ -6,7 +6,6 @@
 
 #include "particles.h"
 #include <game/client/render.h>
-#include <game/gamecore.h>
 #include <game/generated/client_data.h>
 
 #include <game/client/gameclient.h>
@@ -231,7 +230,7 @@ void CParticles::RenderGroup(int Group)
 			// the current position, respecting the size, is inside the viewport, render it, else ignore
 			if(ParticleIsVisibleOnScreen(p, Size))
 			{
-				if(LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
+				if((size_t)CurParticleRenderCount == gs_GraphicsMaxParticlesRenderCount || LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
 				{
 					Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
 					Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);

@@ -36,7 +36,7 @@ def transfer(file_from, file_to):
 	conn_from = sqlite3.connect(file_from, isolation_level='EXCLUSIVE')
 	for line in conn_from.iterdump():
 		cursor_to.execute(line)
-		print(line)
+		print(line.encode('utf-8'))
 	cursor_to.close()
 	conn_to.commit()
 	conn_to.close()

@@ -56,15 +56,15 @@ public:
 		m_pActivityManager = m_pCore->get_activity_manager(m_pCore);
 		return false;
 	}
-	void Update()
+	void Update() override
 	{
 		m_pCore->run_callbacks(m_pCore);
 	}
-	void ClearGameInfo()
+	void ClearGameInfo() override
 	{
 		m_pActivityManager->clear_activity(m_pActivityManager, 0, 0);
 	}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName)
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override
 	{
 		DiscordActivity Activity;
 		mem_zero(&Activity, sizeof(DiscordActivity));
@@ -100,9 +100,9 @@ IDiscord *CreateDiscordImpl()
 
 class CDiscordStub : public IDiscord
 {
-	void Update() {}
-	void ClearGameInfo() {}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) {}
+	void Update() override {}
+	void ClearGameInfo() override {}
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override {}
 };
 
 IDiscord *CreateDiscord()

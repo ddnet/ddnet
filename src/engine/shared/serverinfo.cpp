@@ -1,8 +1,11 @@
 #include "serverinfo.h"
 
 #include "json.h"
+#include <base/math.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+
+#include <cstdio>
 
 static bool IsAllowedHex(char c)
 {
@@ -93,13 +96,13 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	for(unsigned i = 0; i < Clients.u.array.length; i++)
 	{
 		const json_value &Client = Clients[i];
-		const json_value &Name = Client["name"];
+		const json_value &ClientName = Client["name"];
 		const json_value &Clan = Client["clan"];
 		const json_value &Country = Client["country"];
 		const json_value &Score = Client["score"];
 		const json_value &IsPlayer = Client["is_player"];
 		Error = false;
-		Error = Error || Name.type != json_string;
+		Error = Error || ClientName.type != json_string;
 		Error = Error || Clan.type != json_string;
 		Error = Error || Country.type != json_integer;
 		Error = Error || Score.type != json_integer;
@@ -111,7 +114,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		if(i < SERVERINFO_MAX_CLIENTS)
 		{
 			CClient *pClient = &pOut->m_aClients[i];
-			str_copy(pClient->m_aName, Name, sizeof(pClient->m_aName));
+			str_copy(pClient->m_aName, ClientName, sizeof(pClient->m_aName));
 			str_copy(pClient->m_aClan, Clan, sizeof(pClient->m_aClan));
 			pClient->m_Country = json_int_get(&Country);
 			pClient->m_Score = json_int_get(&Score);

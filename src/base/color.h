@@ -177,29 +177,35 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 	vec3 rgb = vec3(0, 0, 0);
 
 	float h1 = hsl.h * 6;
-	float c = (1 - absolute(2 * hsl.l - 1)) * hsl.s;
-	float x = c * (1 - absolute(fmod(h1, 2) - 1));
+	float c = (1.f - absolute(2 * hsl.l - 1)) * hsl.s;
+	float x = c * (1.f - absolute(fmodf(h1, 2) - 1.f));
 
 	switch(round_truncate(h1))
 	{
 	case 0:
-		rgb.r = c, rgb.g = x;
+		rgb.r = c;
+		rgb.g = x;
 		break;
 	case 1:
-		rgb.r = x, rgb.g = c;
+		rgb.r = x;
+		rgb.g = c;
 		break;
 	case 2:
-		rgb.g = c, rgb.b = x;
+		rgb.g = c;
+		rgb.b = x;
 		break;
 	case 3:
-		rgb.g = x, rgb.b = c;
+		rgb.g = x;
+		rgb.b = c;
 		break;
 	case 4:
-		rgb.r = x, rgb.b = c;
+		rgb.r = x;
+		rgb.b = c;
 		break;
 	case 5:
 	case 6:
-		rgb.r = c, rgb.b = x;
+		rgb.r = c;
+		rgb.b = x;
 		break;
 	}
 

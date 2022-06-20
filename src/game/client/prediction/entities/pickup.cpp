@@ -3,6 +3,7 @@
 #include "pickup.h"
 #include "character.h"
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 void CPickup::Tick()
 {
@@ -13,11 +14,11 @@ void CPickup::Tick()
 	for(int i = 0; i < Num; ++i)
 	{
 		CCharacter *pChr = apEnts[i];
-		if(pChr && pChr->IsAlive())
+		if(pChr)
 		{
 			if(GameWorld()->m_WorldConfig.m_IsVanilla && distance(m_Pos, pChr->m_Pos) >= 20.0f * 2) // pickup distance is shorter on vanilla due to using ClosestEntity
 				continue;
-			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && !GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
+			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && !Switchers()[m_Number].m_Status[pChr->Team()])
 				continue;
 			bool sound = false;
 			// player picked us up, is someone was hooking us, let them go
@@ -32,12 +33,12 @@ void CPickup::Tick()
 					continue;
 				if(pChr->m_Super)
 					continue;
-				for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
+				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
 				{
-					if(pChr->GetWeaponGot(i))
+					if(pChr->GetWeaponGot(j))
 					{
-						pChr->SetWeaponGot(i, false);
-						pChr->SetWeaponAmmo(i, 0);
+						pChr->SetWeaponGot(j, false);
+						pChr->SetWeaponAmmo(j, 0);
 						sound = true;
 					}
 				}
@@ -47,6 +48,61 @@ void CPickup::Tick()
 				if(sound)
 					pChr->SetLastWeapon(WEAPON_GUN);
 				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_SHOTGUN:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_SHOTGUN))
+				{
+					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
+					pChr->SetWeaponAmmo(WEAPON_SHOTGUN, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_SHOTGUN)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_GRENADE:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_GRENADE))
+				{
+					pChr->SetWeaponGot(WEAPON_GRENADE, false);
+					pChr->SetWeaponAmmo(WEAPON_GRENADE, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_GRENADE)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				break;
+
+			case POWERUP_ARMOR_NINJA:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				pChr->SetNinjaActivationDir(vec2(0, 0));
+				pChr->SetNinjaActivationTick(-500);
+				pChr->SetNinjaCurrentMoveTime(0);
+				break;
+
+			case POWERUP_ARMOR_LASER:
+				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				if(pChr->GetWeaponGot(WEAPON_LASER))
+				{
+					pChr->SetWeaponGot(WEAPON_LASER, false);
+					pChr->SetWeaponAmmo(WEAPON_LASER, 0);
+					pChr->SetLastWeapon(WEAPON_GUN);
+				}
+				if(pChr->GetActiveWeapon() == WEAPON_LASER)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
 				break;
 

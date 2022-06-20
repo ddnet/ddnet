@@ -160,9 +160,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Entrar
-
 Error
 == Erro
 
@@ -261,9 +258,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Sens. do mouse
 
 Move left
 == Esquerda
@@ -806,9 +800,6 @@ Show score
 UI Color
 == Cor da UI
 
-Show console window
-== Mostra janela de console
-
 Try fast HTTP map download first
 == Tentar baixar mapa por HTTP (rápido) primeiro
 
@@ -863,9 +854,6 @@ Highlighted message
 Alpha
 == Alfa
 
-Reset wanted weapon on death
-== Redefinir arma desejada ao morrer
-
 Length:
 == Duração:
 
@@ -908,17 +896,8 @@ Deactivate
 Welcome to DDNet
 == Bem-vindo ao DDNet
 
-Preinit VBO (iGPUs only)
-== Pré-iniciar VNO (iGPU somente) 
-
 Activate
 == Ativar
-
-Multiple texture units (disable for macOS)
-== Várias unidades de textura (desabilite para macOS)
-
-UI mouse s.
-== Sens. mouse de UI
 
 File already exists, do you want to overwrite it?
 == O arquivo já existe, você deseja sobrescrevê-lo?
@@ -1072,18 +1051,6 @@ Replace video
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork é um jogo online cooperativo cujo objetivo é você e seu grupo de tees chegarem à linha de chegada do mapa. Como um novato, você deve começar nos servidores Novice, que hospedam os mapas mais fáceis. Considere o ping para escolher um servidor próximo a você.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Os mapas contêm congelamento, o que temporariamente torna um tee incapaz de se mover. Você tem que trabalhar junto para passar por essas partes.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== A roda do mouse muda de arma. O martelo (botão esquerdo do mouse) pode ser usado para acertar outros tees e acordá-los do congelamento.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== O gancho (botão direito do mouse) pode ser usado para balançar pelo mapa e agarrar outros tees em você.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Mais importante ainda, a comunicação é a chave: não há um tutorial, então você terá que conversar (tecla t) com outros jogadores para aprender o básico e os truques do jogo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Use a tecla k para se matar (reiniciar), q para pausar e assistir outros jogadores. Veja as configurações para outras combinações de teclas.
@@ -1308,9 +1275,6 @@ Windowed borderless
 Desktop fullscreen
 == Tela cheia de desktop
 
-Use modern OpenGL
-== Usar OpenGL moderno
-
 Hookline
 == Linha do gancho
 
@@ -1348,19 +1312,174 @@ Show local player's key presses
 == Mostrar pressionamento de teclas de jogadores locais
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== O formato da textura %s não é RGBA, o que vai causar falhas visuais.
+
+Join Tutorial Server
+== Entrar no servidor de tutorial
+
+Skip Tutorial
+== Pular tutorial
 
 Settings file
-== 
+== Arquivo de configurações
 
 Config directory
-== 
+== Diretório de configurações
 
 Windowed fullscreen
-== 
+== Tela cheia em janela
+
+Renderer
+== Renderizador
+
+default
+== padrão
+
+custom
+== personalizado
+
+Graphics cards
+== Placas de vídeo
+
+auto
+== auto
 
 Run on join
-== 
+== Executar ao entrar
 
 Chat command (e.g. showall 1)
+== Comando de chat (p. ex., showall 1)
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== Não foi possível encontrar o servidor de tutorial
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Allows maps to render with more detail
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Super
+== 
+
+Team %d
 == 

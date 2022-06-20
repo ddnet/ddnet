@@ -1,17 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
-
 #include <engine/editor.h>
-#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/shared/csv.h>
 #include <engine/textrender.h>
 
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
@@ -36,7 +32,7 @@ CChat::CChat()
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
 #include <game/ddracechat.h>
-	m_Commands.sort_range();
+	std::sort(m_vCommands.begin(), m_vCommands.end());
 
 	m_Mode = MODE_NONE;
 	Reset();
@@ -44,7 +40,7 @@ CChat::CChat()
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
 {
-	m_Commands.add_unsorted(CCommand{pName, pParams});
+	m_vCommands.emplace_back(pName, pParams);
 }
 
 void CChat::RebuildChat()
@@ -323,11 +319,37 @@ bool CChat::OnInput(IInput::CEvent Event)
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
+		if(!m_CompletionUsed && m_aCompletionBuffer[0] != '/')
+		{
+			// Create the completion list of player names through which the player can iterate
+			const char *PlayerName, *FoundInput;
+			m_PlayerCompletionListLength = 0;
+			for(auto &PlayerInfo : m_pClient->m_Snap.m_paInfoByName)
+			{
+				if(PlayerInfo)
+				{
+					PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
+					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
+					if(FoundInput != 0)
+					{
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientID = PlayerInfo->m_ClientID;
+						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = (int)(FoundInput - PlayerName);
+						m_PlayerCompletionListLength++;
+					}
+				}
+			}
+			std::stable_sort(m_aPlayerCompletionList, m_aPlayerCompletionList + m_PlayerCompletionListLength,
+				[](const CRateablePlayer &p1, const CRateablePlayer &p2) -> bool {
+					return p1.Score < p2.Score;
+				});
+		}
+
 		if(m_aCompletionBuffer[0] == '/')
 		{
 			CCommand *pCompletionCommand = 0;
 
-			const size_t NumCommands = m_Commands.size();
+			const size_t NumCommands = m_vCommands.size();
 
 			if(m_ReverseTAB && m_CompletionUsed)
 				m_CompletionChosen--;
@@ -354,9 +376,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 					Index = (m_CompletionChosen + i) % NumCommands;
 				}
 
-				auto &Command = m_Commands[Index];
+				auto &Command = m_vCommands[Index];
 
-				if(str_comp_nocase_num(Command.pName, pCommandStart, str_length(pCommandStart)) == 0)
+				if(str_startswith(Command.m_pName, pCommandStart))
 				{
 					pCompletionCommand = &Command;
 					m_CompletionChosen = Index + SearchType * NumCommands;
@@ -373,10 +395,10 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 				// add the command
 				str_append(aBuf, "/", sizeof(aBuf));
-				str_append(aBuf, pCompletionCommand->pName, sizeof(aBuf));
+				str_append(aBuf, pCompletionCommand->m_pName, sizeof(aBuf));
 
 				// add separator
-				const char *pSeparator = pCompletionCommand->pParams[0] == '\0' ? "" : " ";
+				const char *pSeparator = pCompletionCommand->m_pParams[0] == '\0' ? "" : " ";
 				str_append(aBuf, pSeparator, sizeof(aBuf));
 				if(*pSeparator)
 					str_append(aBuf, pSeparator, sizeof(aBuf));
@@ -384,7 +406,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				// add part after the name
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength, sizeof(aBuf));
 
-				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->pName) + 1;
+				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->m_pName) + 1;
 				m_OldChatStringLength = m_Input.GetLength();
 				m_Input.Set(aBuf); // TODO: Use Add instead
 				m_Input.SetCursorOffset(m_PlaceholderOffset + m_PlaceholderLength);
@@ -395,50 +417,34 @@ bool CChat::OnInput(IInput::CEvent Event)
 		{
 			// find next possible name
 			const char *pCompletionString = 0;
-
-			if(m_ReverseTAB && m_CompletionUsed)
-				m_CompletionChosen--;
-			else if(!m_ReverseTAB)
-				m_CompletionChosen++;
-			m_CompletionChosen = (m_CompletionChosen + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS);
-
-			m_CompletionUsed = true;
-
-			for(int i = 0; i < 2 * MAX_CLIENTS; ++i)
+			if(m_PlayerCompletionListLength > 0)
 			{
-				int SearchType;
-				int Index;
-
-				if(m_ReverseTAB)
+				// We do this in a loop, if a player left the game during the repeated pressing of Tab, they are skipped
+				CGameClient::CClientData *CompletionClientData;
+				for(int i = 0; i < m_PlayerCompletionListLength; ++i)
 				{
-					SearchType = ((m_CompletionChosen - i + 2 * MAX_CLIENTS) % (2 * MAX_CLIENTS)) / MAX_CLIENTS;
-					Index = (m_CompletionChosen - i + MAX_CLIENTS) % MAX_CLIENTS;
-				}
-				else
-				{
-					SearchType = ((m_CompletionChosen + i) % (2 * MAX_CLIENTS)) / MAX_CLIENTS;
-					Index = (m_CompletionChosen + i) % MAX_CLIENTS;
-				}
+					if(m_ReverseTAB && m_CompletionUsed)
+					{
+						m_CompletionChosen--;
+					}
+					else if(!m_ReverseTAB)
+					{
+						m_CompletionChosen++;
+					}
+					if(m_CompletionChosen < 0)
+					{
+						m_CompletionChosen += m_PlayerCompletionListLength;
+					}
+					m_CompletionChosen %= m_PlayerCompletionListLength;
+					m_CompletionUsed = true;
 
-				if(!m_pClient->m_Snap.m_paInfoByName[Index])
-					continue;
+					CompletionClientData = &m_pClient->m_aClients[m_aPlayerCompletionList[m_CompletionChosen].ClientID];
+					if(!CompletionClientData->m_Active)
+					{
+						continue;
+					}
 
-				int Index2 = m_pClient->m_Snap.m_paInfoByName[Index]->m_ClientID;
-
-				bool Found = false;
-				if(SearchType == 1)
-				{
-					if(str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)) &&
-						str_utf8_find_nocase(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer))
-						Found = true;
-				}
-				else if(!str_utf8_comp_nocase_num(m_pClient->m_aClients[Index2].m_aName, m_aCompletionBuffer, str_length(m_aCompletionBuffer)))
-					Found = true;
-
-				if(Found)
-				{
-					pCompletionString = m_pClient->m_aClients[Index2].m_aName;
-					m_CompletionChosen = Index + SearchType * MAX_CLIENTS;
+					pCompletionString = CompletionClientData->m_aName;
 					break;
 				}
 			}
@@ -676,43 +682,40 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	bool Highlighted = false;
 	char *p = const_cast<char *>(pLine);
 
-	bool IsTeamLine = Team == 1;
-	bool IsWhisperLine = Team >= 2;
-
 	// Only empty string left
 	if(*p == 0)
 		return;
 
-	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine) {
-		if(pLine->m_ClientID < 0) // server or client message
+	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine_) {
+		if(pLine_->m_ClientID < 0) // server or client message
 		{
 			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(pLine->m_aText);
+				StoreSave(pLine_->m_aText);
 		}
 
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine->m_aName, pLine->m_ClientID >= 0 ? ": " : "", pLine->m_aText);
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine_->m_aName, pLine_->m_ClientID >= 0 ? ": " : "", pLine_->m_aText);
 
 		ColorRGBA ChatLogColor{1, 1, 1, 1};
-		if(pLine->m_Highlighted)
+		if(pLine_->m_Highlighted)
 		{
 			ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
 		}
 		else
 		{
-			if(pLine->m_Friend && g_Config.m_ClMessageFriend)
+			if(pLine_->m_Friend && g_Config.m_ClMessageFriend)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			else if(pLine->m_Team)
+			else if(pLine_->m_Team)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-			else if(pLine->m_ClientID == -1) // system
+			else if(pLine_->m_ClientID == -1) // system
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-			else if(pLine->m_ClientID == -2) // client
+			else if(pLine_->m_ClientID == -2) // client
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 			else // regular message
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
 		}
 
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine->m_Whisper ? "whisper" : (pLine->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine_->m_Whisper ? "whisper" : (pLine_->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
 	};
 
 	while(*p)
@@ -731,8 +734,11 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		CLine *pCurrentLine = &m_aLines[m_CurrentLine];
 
+		// Team Number:
+		// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
+
 		// If it's a client message, m_aText will have ": " prepended so we have to work around it.
-		if(pCurrentLine->m_Team == IsTeamLine && pCurrentLine->m_Whisper == IsWhisperLine && pCurrentLine->m_ClientID == ClientID && str_comp(pCurrentLine->m_aText, pLine) == 0)
+		if(pCurrentLine->m_TeamNumber == Team && pCurrentLine->m_ClientID == ClientID && str_comp(pCurrentLine->m_aText, pLine) == 0)
 		{
 			pCurrentLine->m_TimesRepeated++;
 			if(pCurrentLine->m_TextContainerIndex != -1)
@@ -758,8 +764,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		pCurrentLine->m_YOffset[0] = -1.0f;
 		pCurrentLine->m_YOffset[1] = -1.0f;
 		pCurrentLine->m_ClientID = ClientID;
-		pCurrentLine->m_Team = IsTeamLine;
-		pCurrentLine->m_Whisper = IsWhisperLine;
+		pCurrentLine->m_TeamNumber = Team;
+		pCurrentLine->m_Team = Team == 1;
+		pCurrentLine->m_Whisper = Team >= 2;
 		pCurrentLine->m_NameColor = -2;
 
 		if(pCurrentLine->m_TextContainerIndex != -1)

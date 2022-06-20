@@ -16,6 +16,7 @@ bool CNetClient::Open(NETADDR BindAddr)
 
 	// init
 	m_Socket = Socket;
+	m_pStun = new CStun(m_Socket);
 	m_Connection.Init(m_Socket, false);
 
 	return true;
@@ -23,8 +24,14 @@ bool CNetClient::Open(NETADDR BindAddr)
 
 int CNetClient::Close()
 {
-	// TODO: implement me
-	return 0;
+	if(!m_Socket)
+		return 0;
+	if(m_pStun)
+	{
+		delete m_pStun;
+		m_pStun = nullptr;
+	}
+	return net_udp_close(m_Socket);
 }
 
 int CNetClient::Disconnect(const char *pReason)
@@ -39,6 +46,7 @@ int CNetClient::Update()
 	m_Connection.Update();
 	if(m_Connection.State() == NET_CONNSTATE_ERROR)
 		Disconnect(m_Connection.ErrorString());
+	m_pStun->Update();
 	return 0;
 }
 
@@ -70,6 +78,11 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		// no more packets for now
 		if(Bytes <= 0)
 			break;
+
+		if(m_pStun->OnPacket(Addr, pData, Bytes))
+		{
+			continue;
+		}
 
 		bool Sixup = false;
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup) == 0)
@@ -152,4 +165,19 @@ int CNetClient::GotProblems(int64_t MaxLatency) const
 const char *CNetClient::ErrorString() const
 {
 	return m_Connection.ErrorString();
+}
+
+void CNetClient::FeedStunServer(NETADDR StunServer)
+{
+	m_pStun->FeedStunServer(StunServer);
+}
+
+void CNetClient::RefreshStun()
+{
+	m_pStun->Refresh();
+}
+
+CONNECTIVITY CNetClient::GetConnectivity(int NetType, NETADDR *pGlobalAddr)
+{
+	return m_pStun->GetConnectivity(NetType, pGlobalAddr);
 }

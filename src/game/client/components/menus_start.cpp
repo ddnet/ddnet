@@ -2,22 +2,23 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/keys.h>
+#include <engine/serverbrowser.h>
 #include <engine/textrender.h>
 
 #include <engine/client/updater.h>
 #include <engine/shared/config.h>
 
-#include <game/client/components/console.h>
-#include <game/client/render.h>
+#include <game/client/gameclient.h>
 #include <game/client/ui.h>
-#include <game/editor/editor.h>
-#include <game/version.h>
 
 #include <game/generated/client_data.h>
-
-#include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include "menus.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 void CMenus::RenderStartMenu(CUIRect MainView)
 {
@@ -58,6 +59,32 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		if(!open_link(Localize("https://wiki.ddnet.tw/")))
 		{
 			dbg_msg("menus", "couldn't open link");
+		}
+		m_DoubleClickIndex = -1;
+	}
+
+	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
+	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
+	static int s_TutorialButton;
+	static float s_JoinTutorialTime = 0.0f;
+	if(DoButton_Menu(&s_TutorialButton, Localize("Tutorial"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) ||
+		(s_JoinTutorialTime != 0.0f && Client()->LocalTime() >= s_JoinTutorialTime))
+	{
+		const char *pAddr = ServerBrowser()->GetTutorialServer();
+		if(pAddr)
+		{
+			Client()->Connect(pAddr);
+			s_JoinTutorialTime = 0.0f;
+		}
+		else if(s_JoinTutorialTime == 0.0f)
+		{
+			dbg_msg("menus", "couldn't find tutorial server, retrying in 5 seconds");
+			s_JoinTutorialTime = Client()->LocalTime() + 5.0f;
+		}
+		else
+		{
+			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
+			s_JoinTutorialTime = 0.0f;
 		}
 		m_DoubleClickIndex = -1;
 	}
@@ -125,13 +152,13 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			}
 			else
 			{
-				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10000000);
+				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10s);
 			}
 		}
 	}
 
 	static bool EditorHotkeyWasPressed = true;
-	static float EditorHotKeyChecktime = 0;
+	static float EditorHotKeyChecktime = 0.0f;
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static int s_MapEditorButton;

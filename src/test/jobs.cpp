@@ -32,7 +32,7 @@ protected:
 class CJob : public IJob
 {
 	std::function<void()> m_JobFunction;
-	void Run() { m_JobFunction(); }
+	void Run() override { m_JobFunction(); }
 
 public:
 	CJob(std::function<void()> &&JobFunction) :
@@ -91,7 +91,7 @@ TEST_F(Jobs, LookupHost)
 TEST_F(Jobs, Many)
 {
 	std::atomic<int> ThreadsRunning(0);
-	std::vector<std::shared_ptr<IJob>> apJobs;
+	std::vector<std::shared_ptr<IJob>> vpJobs;
 	SEMAPHORE sphore;
 	sphore_init(&sphore);
 	for(int i = 0; i < TEST_NUM_THREADS; i++)
@@ -104,16 +104,16 @@ TEST_F(Jobs, Many)
 			}
 		});
 		EXPECT_EQ(pJob->Status(), IJob::STATE_PENDING);
-		apJobs.push_back(pJob);
+		vpJobs.push_back(pJob);
 	}
-	for(auto &pJob : apJobs)
+	for(auto &pJob : vpJobs)
 	{
 		Add(pJob);
 	}
 	sphore_wait(&sphore);
 	sphore_destroy(&sphore);
 	m_Pool.~CJobPool();
-	for(auto &pJob : apJobs)
+	for(auto &pJob : vpJobs)
 	{
 		EXPECT_EQ(pJob->Status(), IJob::STATE_DONE);
 	}

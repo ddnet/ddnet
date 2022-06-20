@@ -3,7 +3,7 @@
 #include <engine/shared/compression.h>
 
 static const int DATA[] = {0, 1, -1, 32, 64, 256, -512, 12345, -123456, 1234567, 12345678, 123456789, 2147483647, (-2147483647 - 1)};
-static const int NUM = sizeof(DATA) / sizeof(int);
+static const int NUM = std::size(DATA);
 static const int SIZES[NUM] = {1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5};
 
 TEST(CVariableInt, RoundtripPackUnpack)

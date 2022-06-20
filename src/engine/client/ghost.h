@@ -76,11 +76,11 @@ public:
 
 	void Init();
 
-	int Start(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, const char *pName);
-	int Stop(int Ticks, int Time);
+	int Start(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, const char *pName) override;
+	int Stop(int Ticks, int Time) override;
 
-	void WriteData(int Type, const void *pData, int Size);
-	bool IsRecording() const { return m_File != 0; }
+	void WriteData(int Type, const void *pData, int Size) override;
+	bool IsRecording() const override { return m_File != nullptr; }
 };
 
 class CGhostLoader : public IGhostLoader
@@ -108,13 +108,13 @@ public:
 
 	void Init();
 
-	int Load(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc);
-	void Close();
-	const CGhostInfo *GetInfo() const { return &m_Info; }
+	int Load(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc) override;
+	void Close() override;
+	const CGhostInfo *GetInfo() const override { return &m_Info; }
 
-	bool ReadNextType(int *pType);
-	bool ReadData(int Type, void *pData, int Size);
+	bool ReadNextType(int *pType) override;
+	bool ReadData(int Type, void *pData, int Size) override;
 
-	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc);
+	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc) override;
 };
 #endif

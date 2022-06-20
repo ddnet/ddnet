@@ -1,7 +1,7 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
-#include <base/math.h>
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/graphics.h>
 #include <engine/shared/datafile.h>
@@ -16,14 +16,13 @@
 */
 
 CDataFileReader g_DataReader;
-CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
 int g_NewNameID = -1;
 char g_aNewName[128];
 int g_NewDataID = -1;
 int g_NewDataSize = 0;
-void *g_pNewData = 0;
+void *g_pNewData = nullptr;
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
@@ -32,7 +31,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
 	{
-		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		dbg_msg("map_replace_image", "failed to open file. filename='%s'", pFilename);
 		return 0;
 	}
 	int Error = png_open_read(&Png, 0, File);
@@ -54,7 +53,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	Error = png_get_data(&Png, pBuffer);
 	if(Error != PNG_NO_ERROR)
 	{
-		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		dbg_msg("map_replace_image", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
 		free(pBuffer);
 		io_close(File);
 		return 0;
@@ -110,10 +109,8 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 
 int main(int argc, const char **argv)
 {
-	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
-
-	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
+	log_set_global_logger_default();
 
 	if(argc != 5)
 	{
@@ -124,6 +121,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 	if(!pStorage)
 	{
 		dbg_msg("map_replace_image", "error loading storage");
@@ -135,19 +133,14 @@ int main(int argc, const char **argv)
 	const char *pImageName = argv[3];
 	const char *pImageFile = argv[4];
 
-	int ID = 0;
-	int Type = 0;
-	int Size = 0;
-	void *pItem = 0;
-	void *pData = 0;
-
 	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ALL))
 	{
 		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFileName);
 		return -1;
 	}
 
-	if(!g_DataWriter.Open(pStorage, pDestFileName))
+	CDataFileWriter Writer;
+	if(!Writer.Open(pStorage, pDestFileName))
 	{
 		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
@@ -158,20 +151,20 @@ int main(int argc, const char **argv)
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		CMapItemImage NewImageItem;
-		pItem = g_DataReader.GetItem(Index, &Type, &ID);
-		Size = g_DataReader.GetItemSize(Index);
+		int Type, ID;
+		void *pItem = g_DataReader.GetItem(Index, &Type, &ID);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
-		{
 			continue;
-		}
 
+		CMapItemImage NewImageItem;
 		pItem = ReplaceImageItem(pItem, Type, pImageName, pImageFile, &NewImageItem);
 		if(!pItem)
 			return -1;
-		g_DataWriter.AddItem(Type, ID, Size, pItem);
+
+		int Size = g_DataReader.GetItemSize(Index);
+		Writer.AddItem(Type, ID, Size, pItem);
 	}
 
 	if(g_NewDataID == -1)
@@ -181,8 +174,10 @@ int main(int argc, const char **argv)
 	}
 
 	// add all data
-	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
+	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
 	{
+		void *pData;
+		int Size;
 		if(Index == g_NewDataID)
 		{
 			pData = g_pNewData;
@@ -199,13 +194,12 @@ int main(int argc, const char **argv)
 			Size = g_DataReader.GetDataSize(Index);
 		}
 
-		g_DataWriter.AddData(Size, pData);
+		Writer.AddData(Size, pData);
 	}
 
 	g_DataReader.Close();
-	g_DataWriter.Finish();
+	Writer.Finish();
 
 	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
-	cmdline_free(argc, argv);
 	return 0;
 }

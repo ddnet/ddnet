@@ -1,4 +1,4 @@
-#include "confusables_data.h"
+#include "confusables.h"
 
 #include "../system.h"
 
@@ -100,3 +100,7 @@ int str_utf8_comp_confusable(const char *str1, const char *str2)
 			return 1;
 	}
 }
+
+#define CONFUSABLES_DATA
+#include "confusables_data.h"
+#undef CONFUSABLES_DATA

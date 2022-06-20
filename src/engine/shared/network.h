@@ -5,6 +5,7 @@
 
 #include "huffman.h"
 #include "ringbuffer.h"
+#include "stun.h"
 
 #include <base/math.h>
 
@@ -96,7 +97,7 @@ typedef int SECURITY_TOKEN;
 
 SECURITY_TOKEN ToSecurityToken(unsigned char *pData);
 
-static const unsigned char SECURITY_TOKEN_MAGIC[] = {'T', 'K', 'E', 'N'};
+extern const unsigned char SECURITY_TOKEN_MAGIC[4];
 
 enum
 {
@@ -155,6 +156,49 @@ public:
 	int m_DataSize;
 	unsigned char m_aChunkData[NET_MAX_PAYLOAD];
 	unsigned char m_aExtraData[4];
+};
+
+enum class CONNECTIVITY
+{
+	UNKNOWN,
+	CHECKING,
+	UNREACHABLE,
+	REACHABLE,
+	ADDRESS_KNOWN,
+};
+
+class CStun
+{
+	class CProtocol
+	{
+		int m_Index;
+		NETSOCKET m_Socket;
+		CStunData m_Stun;
+		bool m_HaveStunServer = false;
+		NETADDR m_StunServer;
+		bool m_HaveAddr = false;
+		NETADDR m_Addr;
+		int64_t m_LastResponse = -1;
+		int64_t m_NextTry = -1;
+		int m_NumUnsuccessfulTries = -1;
+
+	public:
+		CProtocol(int Index, NETSOCKET Socket);
+		void FeedStunServer(NETADDR StunServer);
+		void Refresh();
+		void Update();
+		bool OnPacket(NETADDR Addr, unsigned char *pData, int DataSize);
+		CONNECTIVITY GetConnectivity(NETADDR *pGlobalAddr);
+	};
+	CProtocol m_aProtocols[2];
+
+public:
+	CStun(NETSOCKET Socket);
+	void FeedStunServer(NETADDR StunServer);
+	void Refresh();
+	void Update();
+	bool OnPacket(NETADDR Addr, unsigned char *pData, int DataSize);
+	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
 };
 
 class CNetConnection
@@ -381,6 +425,7 @@ public:
 	const char *ErrorString(int ClientID);
 
 	// anti spoof
+	SECURITY_TOKEN GetGlobalToken();
 	SECURITY_TOKEN GetToken(const NETADDR &Addr);
 	// vanilla token/gametick shouldn't be negative
 	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) { return absolute(GetToken(Addr)); }
@@ -411,7 +456,7 @@ public:
 	int Close();
 
 	//
-	int Recv(char *pLine, int MaxLength, int *pClientID = 0);
+	int Recv(char *pLine, int MaxLength, int *pClientID = nullptr);
 	int Send(int ClientID, const char *pLine);
 	int Update();
 
@@ -429,6 +474,8 @@ class CNetClient
 {
 	CNetConnection m_Connection;
 	CNetRecvUnpacker m_RecvUnpacker;
+
+	CStun *m_pStun = nullptr;
 
 public:
 	NETSOCKET m_Socket;
@@ -457,6 +504,11 @@ public:
 	const char *ErrorString() const;
 
 	bool SecurityTokenUnknown() { return m_Connection.SecurityToken() == NET_SECURITY_TOKEN_UNKNOWN; }
+
+	// stun
+	void FeedStunServer(NETADDR StunServer);
+	void RefreshStun();
+	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
 };
 
 // TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywere
@@ -477,7 +529,7 @@ public:
 	static void SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4]);
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false, bool NoCompress = false);
 
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = 0, SECURITY_TOKEN *pResponseToken = 0);
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static int IsSeqInBackroom(int Seq, int Ack);

@@ -10,8 +10,6 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_BACKEND_OPENGL3_H_AS_ES
 #endif
 
-#include <engine/client/backend_sdl.h>
-
 #include "backend_opengl.h"
 
 #define MAX_STREAM_BUFFER_COUNT 10
@@ -66,9 +64,9 @@ protected:
 		TWGLuint m_LastIndexBufferBound;
 		SBufferContainerInfo m_ContainerInfo;
 	};
-	std::vector<SBufferContainer> m_BufferContainers;
+	std::vector<SBufferContainer> m_vBufferContainers;
 
-	std::vector<TWGLuint> m_BufferObjectIndices;
+	std::vector<TWGLuint> m_vBufferObjectIndices;
 
 	CCommandBuffer::SColorf m_ClearColor;
 
@@ -81,11 +79,17 @@ protected:
 	void UploadStreamBufferData(unsigned int PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D = false);
 	void RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const float *pTextColor, const float *pTextOutlineColor);
 
+	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData);
+	void TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData);
+
 	bool Cmd_Init(const SCommand_Init *pCommand) override;
 	void Cmd_Shutdown(const SCommand_Shutdown *pCommand) override;
 	void Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand) override;
 	void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand) override;
 	void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand) override;
+	void Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand) override;
+	void Cmd_TextTextures_Destroy(const CCommandBuffer::SCommand_TextTextures_Destroy *pCommand) override;
+	void Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand) override;
 	void Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand) override;
 	void Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand) override;
 	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
@@ -106,7 +110,6 @@ protected:
 	void Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand) override;
 	void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand) override;
 	void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand) override;
-	void Cmd_RenderTextStream(const CCommandBuffer::SCommand_RenderTextStream *pCommand) override;
 	void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) override;
 	void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) override;
 	void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand) override;

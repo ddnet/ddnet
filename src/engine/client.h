@@ -31,6 +31,7 @@ class IClient : public IInterface
 protected:
 	// quick access to state of the client
 	int m_State;
+	int64_t m_StateStartTime;
 
 	// quick access to time variables
 	int m_PrevGameTick[NUM_DUMMIES];
@@ -91,8 +92,20 @@ public:
 		STATE_RESTARTING,
 	};
 
+	enum
+	{
+		CONNECTIVITY_UNKNOWN,
+		CONNECTIVITY_CHECKING,
+		CONNECTIVITY_UNREACHABLE,
+		CONNECTIVITY_REACHABLE,
+		// Different global IP address has been detected for UDP and
+		// TCP connections.
+		CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES,
+	};
+
 	//
 	inline int State() const { return m_State; }
+	inline int64_t StateStartTime() const { return m_StateStartTime; }
 
 	// tick time access
 	inline int PrevGameTick(int Conn) const { return m_PrevGameTick[Conn]; }
@@ -110,7 +123,7 @@ public:
 	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
 
 	// actions
-	virtual void Connect(const char *pAddress, const char *pPassword = NULL) = 0;
+	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
 	virtual void Disconnect() = 0;
 
 	// dummy
@@ -142,18 +155,20 @@ public:
 	virtual void LoadFont() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 
+	virtual void UpdateAndSwap() = 0;
+
 	// networking
 	virtual void EnterGame(int Conn) = 0;
 
 	//
-	virtual const char *ServerAddress() const = 0;
+	virtual NETADDR ServerAddress() const = 0;
+	virtual const char *ConnectAddressString() const = 0;
 	virtual const char *MapDownloadName() const = 0;
 	virtual int MapDownloadAmount() const = 0;
 	virtual int MapDownloadTotalsize() const = 0;
 
 	// input
 	virtual int *GetInput(int Tick, int IsDummy = 0) const = 0;
-	virtual int *GetDirectInput(int Tick, int IsDummy = 0) const = 0;
 
 	// remote console
 	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
@@ -234,6 +249,8 @@ public:
 
 	virtual SWarning *GetCurWarning() = 0;
 	virtual CChecksumData *ChecksumData() = 0;
+	virtual bool InfoTaskRunning() = 0;
+	virtual int UdpConnectivity(int NetType) = 0;
 };
 
 class IGameClient : public IInterface

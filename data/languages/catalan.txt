@@ -138,9 +138,6 @@ Dynamic Camera
 Emoticon
 == Emoticó
 
-Enter
-== Entrar
-
 Error
 == Error
 
@@ -238,9 +235,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Sensibilitat del ratolí
 
 Move left
 == Moure's a l'esquerra
@@ -684,9 +678,6 @@ DDNet Client needs to be restarted to complete update!
 Please use a different name
 == Si us plau, fes servir un nom diferent
 
-Show console window
-== Mostra la finestra de la consola
-
 Show others
 == Mostrar altres
 
@@ -740,9 +731,6 @@ Threaded sound loading
 
 Check now
 == Comprova ara
-
-Reset wanted weapon on death
-== Reiniciar l'arma desitjada al morir
 
 Frags
 == Morts causades
@@ -885,17 +873,8 @@ Deactivate
 Welcome to DDNet
 == Benvingut a DDNet
 
-Preinit VBO (iGPUs only)
-== Preinicialitzar VBO (iGPUs només)
-
 Activate
 == Activar
-
-Multiple texture units (disable for macOS)
-== Multiple texture units (disable for macOS)
-
-UI mouse s.
-== UI mouse s.
 
 File already exists, do you want to overwrite it?
 == L'arxiu ja existeix, vols reescriure'l?
@@ -950,18 +929,6 @@ Are you sure that you want to disconnect your dummy?
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork és un videojoc cooperatiu en línia on l'objectiu és que tu i el teu grup de tees arribin a la meta final del mapa. Com a nouvingut hauries de començar en els servidors Novice, que contenen els mapes més fàcils. Considera el teu ping per escollir un servidor a prop teu.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Els mapes contenen "freeze", que fan que el tee no es pugui moure temporalment. Hauràs de treballar en equip per passar aquestes parts.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Pots canviar d'arma amb la roda del ratolí. El martell (ratolí esquerre) pot ser utilitzat per descongelar altres tees.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== El ganxo (ratolí dret) pot ser utilitzat per gronxar-se pel mapa i enganxar altres tees cap a tu.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== El més important és la comunicació: No hi ha tutorial, per això hauràs de parlar pel xat (tecla t) amb altres jugadors per aprendre les tècniques del joc.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == És recomanat que miris la configuració i ho canviïs al teu gust abans d'entrar a un servidor.
@@ -1105,7 +1072,7 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 == La mida de la textura %s no es divisible per %d, o l'altura no es divisible per %d, el qual pot resultar en errors visuals.
 
 Warning
-== Advertència 
+== Advertència
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Mode de depuració activat. Utilitza Ctrl+Shift+D per desactivar-lo.
@@ -1191,9 +1158,6 @@ Windowed borderless
 Desktop fullscreen
 == Pantalla completa d'escriptori
 
-Use modern OpenGL
-== Utilitzar OpenGL modern
-
 Game sound volume
 == Volum del so del joc
 
@@ -1243,7 +1207,7 @@ Client message
 == Missatge del client
 
 Preview
-== Vista prèvia 
+== Vista prèvia
 
 Show local player's key presses
 == Mostrar les tecles premudes del jugador local
@@ -1301,7 +1265,7 @@ Editor
 
 [Start menu]
 Play
-== Jugar 
+== Jugar
 
 AFR
 == AFR
@@ -1325,19 +1289,174 @@ CHN
 == CHN
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== El format de la textura %s no és RGBA i pot causar errors visuals.
+
+Join Tutorial Server
+== Entrar al tutorial
+
+Skip Tutorial
+== Saltar el Tutorial
 
 Settings file
-== 
+== Arxiu de configuració
 
 Config directory
-== 
+== Directori amb la configuració
 
 Windowed fullscreen
-== 
+== Windowed fullscreen
+
+Renderer
+== Renderitzador
+
+default
+== predeterminat
+
+custom
+== personalitzat
+
+Graphics cards
+== Tarjetes gràfiques
+
+auto
+== auto
 
 Run on join
-== 
+== Córrer en unir-se
 
 Chat command (e.g. showall 1)
+== Commanda del xat (e.g showall 1)
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== No s'ha pogut trobar un servidor del tutorial
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Allows maps to render with more detail
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Super
+== 
+
+Team %d
 == 

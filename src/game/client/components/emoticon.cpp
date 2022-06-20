@@ -1,9 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
-#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
 #include "chat.h"
@@ -11,7 +9,6 @@
 #include <game/client/animstate.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/gamecore.h> // get_angle
 
 #include <game/client/gameclient.h>
 
@@ -51,12 +48,12 @@ void CEmoticon::OnRelease()
 	m_Active = false;
 }
 
-bool CEmoticon::OnMouseMove(float x, float y)
+bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_Active)
 		return false;
 
-	UI()->ConvertMouseMove(&x, &y);
+	UI()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
 	return true;
 }
@@ -171,14 +168,7 @@ void CEmoticon::OnRender()
 	else
 		m_SelectedEyeEmote = -1;
 
-	Graphics()->WrapClamp();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1, 1, 1, 1);
-	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x + Screen.w / 2, m_SelectorMouse.y + Screen.h / 2, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-	Graphics()->WrapNormal();
+	RenderTools()->RenderCursor(m_SelectorMouse + vec2(Screen.w, Screen.h) / 2, 24.0f);
 }
 
 void CEmoticon::Emote(int Emoticon)
@@ -189,9 +179,9 @@ void CEmoticon::Emote(int Emoticon)
 
 	if(g_Config.m_ClDummyCopyMoves)
 	{
-		CMsgPacker Msg(NETMSGTYPE_CL_EMOTICON, false);
-		Msg.AddInt(Emoticon);
-		Client()->SendMsg(!g_Config.m_ClDummy, &Msg, MSGFLAG_VITAL);
+		CMsgPacker MsgDummy(NETMSGTYPE_CL_EMOTICON, false);
+		MsgDummy.AddInt(Emoticon);
+		Client()->SendMsg(!g_Config.m_ClDummy, &MsgDummy, MSGFLAG_VITAL);
 	}
 }
 

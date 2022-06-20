@@ -11,13 +11,9 @@
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
-#include <game/localization.h>
 
 #include <game/teamscore.h>
 
-#include <game/client/prediction/entities/character.h>
-#include <game/client/prediction/entities/laser.h>
-#include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/gameworld.h>
 
 // components
@@ -34,6 +30,7 @@
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
+#include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
@@ -53,6 +50,7 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+#include "components/tooltips.h"
 #include "components/voting.h"
 
 class CGameInfo
@@ -131,6 +129,7 @@ public:
 
 	CPlayers m_Players;
 	CNamePlates m_NamePlates;
+	CFreezeBars m_FreezeBars;
 	CItems m_Items;
 	CMapImages m_MapImages;
 
@@ -144,24 +143,11 @@ public:
 	CRaceDemo m_RaceDemo;
 	CGhost m_Ghost;
 
+	CTooltips m_Tooltips;
+
 private:
-	class CStack
-	{
-	public:
-		enum
-		{
-			MAX_COMPONENTS = 64,
-		};
-
-		CStack();
-		void Add(class CComponent *pComponent);
-
-		class CComponent *m_paComponents[MAX_COMPONENTS];
-		int m_Num;
-	};
-
-	CStack m_All;
-	CStack m_Input;
+	std::vector<class CComponent *> m_vpAll;
+	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
 
 	class IEngine *m_pEngine;
@@ -316,6 +302,10 @@ public:
 			CNetObj_DDNetCharacter m_ExtendedData;
 			bool m_HasExtendedData;
 
+			const CNetObj_DDNetCharacterDisplayInfo *m_PrevExtendedDisplayInfo;
+			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
+			bool m_HasExtendedDisplayInfo;
+
 			// interpolated position
 			vec2 m_Position;
 		};
@@ -450,25 +440,25 @@ public:
 	void OnReset();
 
 	// hooks
-	virtual void OnConnected();
-	virtual void OnRender();
-	virtual void OnUpdate();
-	virtual void OnDummyDisconnect();
+	void OnConnected() override;
+	void OnRender() override;
+	void OnUpdate() override;
+	void OnDummyDisconnect() override;
 	virtual void OnRelease();
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnStateChange(int NewState, int OldState);
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy);
-	virtual void InvalidateSnapshot();
-	virtual void OnNewSnapshot();
-	virtual void OnPredict();
-	virtual void OnActivateEditor();
-	virtual void OnDummySwap();
-	virtual int OnSnapInput(int *pData, bool Dummy, bool Force);
-	virtual void OnShutdown();
-	virtual void OnEnterGame();
-	virtual void OnRconType(bool UsernameReq);
-	virtual void OnRconLine(const char *pLine);
+	void OnInit() override;
+	void OnConsoleInit() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy) override;
+	void InvalidateSnapshot() override;
+	void OnNewSnapshot() override;
+	void OnPredict() override;
+	void OnActivateEditor() override;
+	void OnDummySwap() override;
+	int OnSnapInput(int *pData, bool Dummy, bool Force) override;
+	void OnShutdown() override;
+	void OnEnterGame() override;
+	void OnRconType(bool UsernameReq) override;
+	void OnRconLine(const char *pLine) override;
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnFlagGrab(int TeamID);
@@ -478,17 +468,17 @@ public:
 
 	void OnLanguageChange();
 
-	virtual const char *GetItemName(int Type) const;
-	virtual const char *Version() const;
-	virtual const char *NetVersion() const;
-	virtual int DDNetVersion() const;
-	virtual const char *DDNetVersionStr() const;
+	const char *GetItemName(int Type) const override;
+	const char *Version() const override;
+	const char *NetVersion() const override;
+	int DDNetVersion() const override;
+	const char *DDNetVersionStr() const override;
 
 	// actions
 	// TODO: move these
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
-	virtual void SendDummyInfo(bool Start);
+	void SendDummyInfo(bool Start) override;
 	void SendKill(int ClientID);
 
 	// DDRace
@@ -496,14 +486,14 @@ public:
 	int m_LocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
-	int m_DummyFire;
+	unsigned int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 
 	class CTeamsCore m_Teams;
 
 	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID);
 
-	virtual int GetLastRaceTick();
+	int GetLastRaceTick() override;
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
@@ -519,17 +509,21 @@ public:
 	CGameWorld m_PredictedWorld;
 	CGameWorld m_PrevPredictedWorld;
 
-	void DummyResetInput();
-	void Echo(const char *pString);
+	std::vector<SSwitchers> &Switchers() { return m_GameWorld.m_Core.m_vSwitchers; }
+	std::vector<SSwitchers> &PredSwitchers() { return m_PredictedWorld.m_Core.m_vSwitchers; }
+
+	void DummyResetInput() override;
+	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientID);
 	int SwitchStateTeam();
 	bool IsLocalCharSuper();
-	bool CanDisplayWarning();
-	bool IsDisplayingWarning();
+	bool CanDisplayWarning() override;
+	bool IsDisplayingWarning() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
+	void LoadHudSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
 
@@ -589,6 +583,10 @@ public:
 		// pickups
 		IGraphics::CTextureHandle m_SpritePickupHealth;
 		IGraphics::CTextureHandle m_SpritePickupArmor;
+		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
+		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
+		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;
@@ -597,6 +595,7 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupHammer;
 
 		IGraphics::CTextureHandle m_SpritePickupWeapons[6];
+		IGraphics::CTextureHandle m_SpritePickupWeaponArmor[4];
 
 		// flags
 		IGraphics::CTextureHandle m_SpriteFlagBlue;
@@ -641,10 +640,45 @@ public:
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
 
-	const std::vector<CSnapEntities> &SnapEntities() { return m_aSnapEntities; }
+	struct SClientHudSkin
+	{
+		IGraphics::CTextureHandle m_SpriteHudAirjump;
+		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
+		IGraphics::CTextureHandle m_SpriteHudSolo;
+		IGraphics::CTextureHandle m_SpriteHudNoCollision;
+		IGraphics::CTextureHandle m_SpriteHudEndlessJump;
+		IGraphics::CTextureHandle m_SpriteHudEndlessHook;
+		IGraphics::CTextureHandle m_SpriteHudJetpack;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarFull;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarFullLeft;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarFull;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
+		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
+		IGraphics::CTextureHandle m_SpriteHudNoHookHit;
+		IGraphics::CTextureHandle m_SpriteHudNoHammerHit;
+		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;
+		IGraphics::CTextureHandle m_SpriteHudNoGrenadeHit;
+		IGraphics::CTextureHandle m_SpriteHudNoLaserHit;
+		IGraphics::CTextureHandle m_SpriteHudDeepFrozen;
+		IGraphics::CTextureHandle m_SpriteHudLiveFrozen;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;
+		IGraphics::CTextureHandle m_SpriteHudTeleportGun;
+		IGraphics::CTextureHandle m_SpriteHudTeleportLaser;
+		IGraphics::CTextureHandle m_SpriteHudPracticeMode;
+		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
+		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
+	};
+
+	SClientHudSkin m_HudSkin;
+	bool m_HudSkinLoaded;
+
+	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
 private:
-	std::vector<CSnapEntities> m_aSnapEntities;
+	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 
 	bool m_DDRaceMsgSent[NUM_DUMMIES];
@@ -658,7 +692,6 @@ private:
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
-	class CCharacter m_aLastWorldCharacters[MAX_CLIENTS];
 	int m_SwitchStateTeam[NUM_DUMMIES];
 
 	enum

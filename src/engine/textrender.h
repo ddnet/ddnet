@@ -12,7 +12,8 @@ enum
 {
 	TEXTFLAG_RENDER = 1,
 	TEXTFLAG_ALLOW_NEWLINE = 2,
-	TEXTFLAG_STOP_AT_END = 4
+	TEXTFLAG_STOP_AT_END = 4,
+	TEXTFLAG_ELLIPSIS_AT_END = 8,
 };
 
 enum ETextAlignment
@@ -33,6 +34,8 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
 	TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE = 1 << 7,
 	TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD = 1 << 8,
+	// text is only rendered once and then discarded (a hint for buffer creation)
+	TEXT_RENDER_FLAG_ONE_TIME_USE = 1 << 9,
 };
 
 enum
@@ -188,7 +191,7 @@ public:
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
 	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
 	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) = 0;
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
 	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
 
 	virtual ColorRGBA GetTextColor() = 0;

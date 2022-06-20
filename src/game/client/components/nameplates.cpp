@@ -9,17 +9,10 @@
 #include "camera.h"
 #include "controls.h"
 #include "nameplates.h"
-#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
+#include <game/client/prediction/entities/character.h>
 
 #include "players.h"
-
-void CNamePlates::MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup)
-{
-	float Points[4];
-	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY, pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), 1.0f, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
-}
 
 void CNamePlates::RenderNameplate(
 	const CNetObj_Character *pPrevChar,
@@ -109,7 +102,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			// create nameplates at standard zoom
 			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-			MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+			RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 			m_aNamePlates[ClientID].m_NameTextWidth = TextRender()->TextWidth(0, FontSize, pName, -1, -1.0f);
 
@@ -135,7 +128,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				// create nameplates at standard zoom
 				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-				MapscreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
+				RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 				m_aNamePlates[ClientID].m_ClanNameTextWidth = TextRender()->TextWidth(0, FontSizeClan, pClan, -1, -1.0f);
 
@@ -202,40 +195,6 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
-		}
-
-		if(g_Config.m_ClNameplatesHA) // render health and armor in nameplate
-		{
-			int Health = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Health;
-			int Armor = m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur.m_Armor;
-
-			if(Health > 0 || Armor > 0)
-			{
-				float HFontSize = 5.0f + 20.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				float AFontSize = 6.0f + 24.0f * g_Config.m_ClNameplatesHASize / 100.0f;
-				char aHealth[40] = "\0";
-				char aArmor[40] = "\0";
-				for(int i = 0; i < Health; i++)
-					str_append(aHealth, "♥", sizeof(aHealth));
-				for(int i = Health; i < 10; i++)
-					str_append(aHealth, "♡", sizeof(aHealth));
-				str_append(aHealth, "\0", sizeof(aHealth));
-				for(int i = 0; i < Armor; i++)
-					str_append(aArmor, "⚫", sizeof(aArmor));
-				for(int i = Armor; i < 10; i++)
-					str_append(aArmor, "⚪", sizeof(aArmor));
-				str_append(aArmor, "\0", sizeof(aArmor));
-
-				YOffset -= HFontSize + AFontSize;
-				float PosHealth = TextRender()->TextWidth(0, HFontSize, aHealth, -1, -1.0f);
-				TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
-				TextRender()->Text(0, Position.x - PosHealth / 2.0f, YOffset, HFontSize, aHealth, -1);
-
-				YOffset -= -AFontSize + 3.0f;
-				float PosArmor = TextRender()->TextWidth(0, AFontSize, aArmor, -1, -1.0f);
-				TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 0.0f));
-				TextRender()->Text(0, Position.x - PosArmor / 2.0f, YOffset, AFontSize, aArmor, -1);
-			}
 		}
 	}
 
@@ -305,6 +264,18 @@ void CNamePlates::OnRender()
 	if(!g_Config.m_ClNameplates && ShowDirection == 0)
 		return;
 
+	// get screen edges to avoid rendering offscreen
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	// expand the edges to prevent popping in/out onscreen
+	//
+	// it is assumed that the nameplate and all its components fit into a 800x800 box placed directly above the tee
+	// this may need to be changed or calculated differently in the future
+	ScreenX0 -= 400;
+	ScreenX1 += 400;
+	//ScreenY0 -= 0;
+	ScreenY1 += 800;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paPlayerInfos[i];
@@ -313,18 +284,29 @@ void CNamePlates::OnRender()
 			continue;
 		}
 
+		vec2 *pRenderPos;
 		if(m_pClient->m_aClients[i].m_SpecCharPresent)
 		{
-			RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+			// Each player can also have a spec char whose nameplate is displayed independently
+			pRenderPos = &m_pClient->m_aClients[i].m_SpecChar;
+			// don't render offscreen
+			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
+			{
+				RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+			}
 		}
-
-		// only render active characters
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
 		{
-			RenderNameplate(
-				&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
-				&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
-				pInfo);
+			// Only render nameplates for active characters
+			pRenderPos = &m_pClient->m_aClients[i].m_RenderPos;
+			// don't render offscreen
+			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
+			{
+				RenderNameplate(
+					&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
+					&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
+					pInfo);
+			}
 		}
 	}
 }
@@ -356,10 +338,8 @@ void CNamePlates::OnInit()
 {
 	ResetNamePlates();
 
-	// the direction
+	// Quad for the direction arrows above the player
 	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
-
-	IGraphics::CQuadItem QuadItem(0.f, 0.f, 22.f, 22.f);
-	Graphics()->QuadContainerAddQuads(m_DirectionQuadContainerIndex, &QuadItem, 1);
+	RenderTools()->QuadContainerAddSprite(m_DirectionQuadContainerIndex, 0.f, 0.f, 22.f);
 	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
 }

@@ -5,8 +5,6 @@
 #include <engine/shared/config.h>
 
 #include "entities/character.h"
-#include "entities/laser.h"
-#include "entities/projectile.h"
 #include "player.h"
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
@@ -59,14 +57,11 @@ void CGameTeams::ResetRoundState(int Team)
 
 void CGameTeams::ResetSwitchers(int Team)
 {
-	if(GameServer()->Collision()->m_NumSwitchers > 0)
+	for(auto &Switcher : GameServer()->Switchers())
 	{
-		for(int i = 0; i < GameServer()->Collision()->m_NumSwitchers + 1; ++i)
-		{
-			GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = GameServer()->Collision()->m_pSwitchers[i].m_Initial;
-			GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;
-			GameServer()->Collision()->m_pSwitchers[i].m_Type[Team] = TILE_SWITCHOPEN;
-		}
+		Switcher.m_Status[Team] = Switcher.m_Initial;
+		Switcher.m_EndTick[Team] = 0;
+		Switcher.m_Type[Team] = TILE_SWITCHOPEN;
 	}
 }
 
@@ -277,7 +272,6 @@ void CGameTeams::Tick()
 				}
 				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
 				NumPlayersNotStarted += 1;
-				break;
 			}
 		}
 		if(!aPlayerNames[0])
@@ -484,7 +478,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 	int64_t Mask = 0;
 
 	if(Team == TEAM_SUPER)
-		return 0xffffffffffffffff;
+		return 0xffffffffffffffff & ~(1 << ExceptID);
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -779,8 +773,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 		if(pData->m_BestTime)
 		{
-			float Diff = (Time - pData->m_BestTime) * 100;
-			MsgLegacy.m_Check = Msg.m_Check = (int)Diff;
+			float Diff100 = (Time - pData->m_BestTime) * 100;
+			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
 		}
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
@@ -817,18 +811,39 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 	if(pPlayer->m_SwapTargetsClientID == pTargetPlayer->GetCID())
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"%s has already requested to swap with %s.",
-			Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
+			"You have already requested to swap with %s.", Server()->ClientName(pTargetPlayer->GetCID()));
 
-		GameServer()->SendChatTeam(Team, aBuf);
+		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 		return;
 	}
 
+	// Notification for the swap initiator
 	str_format(aBuf, sizeof(aBuf),
-		"%s has requested to swap with %s. Please wait %d seconds then type /swap %s.",
-		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
+		"You have requested to swap with %s.",
+		Server()->ClientName(pTargetPlayer->GetCID()));
+	GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 
-	GameServer()->SendChatTeam(Team, aBuf);
+	// Notification to the target swap player
+	str_format(aBuf, sizeof(aBuf),
+		"%s has requested to swap with you. To complete the swap process please wait %d seconds and then type /swap %s.",
+		Server()->ClientName(pPlayer->GetCID()), g_Config.m_SvSaveSwapGamesDelay, Server()->ClientName(pPlayer->GetCID()));
+	GameServer()->SendChatTarget(pTargetPlayer->GetCID(), aBuf);
+
+	// Notification for the remaining team
+	str_format(aBuf, sizeof(aBuf),
+		"%s has requested to swap with %s.",
+		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
+	// Do not send the team notification for team 0
+	if(Team != 0)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Core.Team(i) == Team && i != pTargetPlayer->GetCID() && i != pPlayer->GetCID())
+			{
+				GameServer()->SendChatTarget(i, aBuf);
+			}
+		}
+	}
 
 	pPlayer->m_SwapTargetsClientID = pTargetPlayer->GetCID();
 	m_LastSwap[Team] = Server()->Tick();
@@ -848,7 +863,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 			"You have to wait %d seconds until you can swap.",
 			g_Config.m_SvSaveSwapGamesDelay - Since);
 
-		GameServer()->SendChatTeam(Team, aBuf);
+		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 
 		return;
 	}
@@ -868,18 +883,9 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 			"Your swap request timed out %d seconds ago. Use /swap again to re-initiate it.",
 			Since - g_Config.m_SvSwapTimeout);
 
-		GameServer()->SendChatTeam(Team, aBuf);
+		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 
 		return;
-	}
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-		{
-			GameServer()->m_apPlayers[i]->GetCharacter()->ResetHook();
-			GameServer()->m_World.ReleaseHooked(i);
-		}
 	}
 
 	CSaveTee PrimarySavedTee;
@@ -891,11 +897,16 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
 	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
 
-	swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
-	swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
-	swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+	std::swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
+	std::swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+	std::swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
 
 	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
+
+	if(GameServer()->TeeHistorianActive())
+	{
+		GameServer()->TeeHistorian()->RecordPlayerSwap(pPlayer->GetCID(), pTargetPlayer->GetCID());
+	}
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",

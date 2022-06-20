@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <array> // std::size
+#include <atomic>
 #include <cctype>
 #include <cmath>
 #include <cstdarg>
@@ -7,11 +9,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <thread>
 
 #include "system.h"
-#if !defined(CONF_PLATFORM_MACOS)
-#include <base/color.h>
-#endif
+
+#include "lock_scope.h"
+#include "logger.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -97,7 +101,7 @@ IOHANDLE io_current_exe()
 #if defined(CONF_FAMILY_WINDOWS)
 	wchar_t wpath[IO_MAX_PATH_LENGTH];
 	char path[IO_MAX_PATH_LENGTH];
-	if(!GetModuleFileNameW(NULL, wpath, sizeof(wpath) / sizeof(wpath[0])))
+	if(!GetModuleFileNameW(NULL, wpath, std::size(wpath)))
 	{
 		return 0;
 	}
@@ -131,22 +135,6 @@ IOHANDLE io_current_exe()
 	return 0;
 #endif
 }
-
-struct DBG_LOGGER_DATA
-{
-	DBG_LOGGER logger;
-	DBG_LOGGER_FINISH finish;
-	DBG_LOGGER_ASSERTION on_assert = nullptr;
-	void *user;
-};
-
-static DBG_LOGGER_DATA loggers[16];
-static int has_stdout_logger = 0;
-static int num_loggers = 0;
-
-#ifndef CONF_FAMILY_WINDOWS
-static DBG_LOGGER_DATA stdout_nonewline_logger;
-#endif
 
 static NETSTATS network_stats = {0};
 
@@ -182,21 +170,20 @@ static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
 #define AF_WEBSOCKET_INET (0xee)
 
-static void dbg_assert_notify_loggers()
+std::atomic_bool dbg_assert_failing = false;
+
+bool dbg_assert_has_failed()
 {
-	for(int i = 0; i < num_loggers; i++)
-	{
-		if(loggers[i].on_assert)
-			loggers[i].on_assert(loggers[i].user);
-	}
+	return dbg_assert_failing.load(std::memory_order_acquire);
 }
 
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
 	{
+		dbg_assert_failing.store(true, std::memory_order_release);
 		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
-		dbg_assert_notify_loggers();
+		log_global_logger_finish();
 		dbg_break();
 	}
 }
@@ -213,177 +200,11 @@ void dbg_break()
 void dbg_msg(const char *sys, const char *fmt, ...)
 {
 	va_list args;
-	char *msg;
-	int len;
-
-	char str[1024 * 4];
-	int i;
-
-	char timestr[80];
-	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
-
-	str_format(str, sizeof(str), "[%s][%s]: ", timestr, sys);
-
-	len = str_length(str);
-	msg = (char *)str + len;
-
 	va_start(args, fmt);
-#if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(msg, sizeof(str) - len, fmt, args);
-#elif defined(CONF_PLATFORM_ANDROID)
-	__android_log_vprint(ANDROID_LOG_DEBUG, sys, fmt, args);
-#else
-	vsnprintf(msg, sizeof(str) - len, fmt, args);
-#endif
-
+	log_log_v(LEVEL_INFO, sys, fmt, args);
 	va_end(args);
-
-	for(i = 0; i < num_loggers; i++)
-		loggers[i].logger(str, loggers[i].user);
 }
 
-#if defined(CONF_FAMILY_WINDOWS)
-static void logger_win_debugger(const char *line, void *user)
-{
-	(void)user;
-	WCHAR wBuffer[512];
-	MultiByteToWideChar(CP_UTF8, 0, line, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
-	OutputDebugStringW(wBuffer);
-	OutputDebugStringW(L"\n");
-}
-#endif
-
-static void logger_file(const char *line, void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_lock(logfile);
-	aio_write_unlocked(logfile, line, str_length(line));
-	aio_write_newline_unlocked(logfile);
-	aio_unlock(logfile);
-}
-
-#if !defined(CONF_FAMILY_WINDOWS)
-static void logger_file_no_newline(const char *line, void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_lock(logfile);
-	aio_write_unlocked(logfile, line, str_length(line));
-	aio_unlock(logfile);
-}
-#else
-static void logger_stdout_sync(const char *line, void *user)
-{
-	size_t length = str_length(line);
-	wchar_t *wide = (wchar_t *)malloc(length * sizeof(*wide));
-	const char *p = line;
-	int wlen = 0;
-	HANDLE console;
-
-	(void)user;
-	mem_zero(wide, length * sizeof *wide);
-
-	for(int codepoint = 0; (codepoint = str_utf8_decode(&p)); wlen++)
-	{
-		char u16[4] = {0};
-
-		if(codepoint < 0)
-		{
-			free(wide);
-			return;
-		}
-
-		if(str_utf16le_encode(u16, codepoint) != 2)
-		{
-			free(wide);
-			return;
-		}
-
-		mem_copy(&wide[wlen], u16, 2);
-	}
-
-	console = GetStdHandle(STD_OUTPUT_HANDLE);
-	WriteConsoleW(console, wide, wlen, NULL, NULL);
-	WriteConsoleA(console, "\n", 1, NULL, NULL);
-	free(wide);
-}
-#endif
-
-static void logger_stdout_finish(void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_wait(logfile);
-	aio_free(logfile);
-}
-
-static void logger_file_finish(void *user)
-{
-	ASYNCIO *logfile = (ASYNCIO *)user;
-	aio_close(logfile);
-	logger_stdout_finish(user);
-}
-
-static void dbg_logger_finish()
-{
-	int i;
-	for(i = 0; i < num_loggers; i++)
-	{
-		if(loggers[i].finish)
-		{
-			loggers[i].finish(loggers[i].user);
-		}
-	}
-}
-
-void dbg_logger(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, void *user)
-{
-	DBG_LOGGER_DATA data;
-	if(num_loggers == 0)
-	{
-		atexit(dbg_logger_finish);
-	}
-	data.logger = logger;
-	data.finish = finish;
-	data.user = user;
-	loggers[num_loggers] = data;
-	num_loggers++;
-}
-
-void dbg_logger_assertion(DBG_LOGGER logger, DBG_LOGGER_FINISH finish, DBG_LOGGER_ASSERTION on_assert, void *user)
-{
-	dbg_logger(logger, finish, user);
-
-	loggers[num_loggers - 1].on_assert = on_assert;
-}
-
-void dbg_logger_stdout()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	dbg_logger(logger_stdout_sync, 0, 0);
-#else
-	ASYNCIO *logger_obj = aio_new(io_stdout());
-	dbg_logger(logger_file, logger_stdout_finish, logger_obj);
-	dbg_logger(logger_file_no_newline, 0, logger_obj);
-	stdout_nonewline_logger = loggers[num_loggers - 1];
-	--num_loggers;
-#endif
-	has_stdout_logger = 1;
-}
-
-void dbg_logger_debugger()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	dbg_logger(logger_win_debugger, 0, 0);
-#endif
-}
-
-void dbg_logger_file(const char *filename)
-{
-	IOHANDLE logfile = io_open(filename, IOFLAG_WRITE);
-	if(logfile)
-		dbg_logger(logger_file, logger_file_finish, aio_new(logfile));
-	else
-		dbg_msg("dbg/logger", "failed to open '%s' for logging", filename);
-}
 /* */
 
 void mem_copy(void *dest, const void *source, unsigned size)
@@ -406,7 +227,7 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wBuffer, std::size(wBuffer));
 	if((flags & IOFLAG_READ) != 0)
 		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
 	if(flags == IOFLAG_WRITE)
@@ -443,6 +264,51 @@ IOHANDLE io_open(const char *filename, int flags)
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 {
 	return fread(buffer, 1, size, (FILE *)io);
+}
+
+void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
+{
+	long signed_len = io_length(io);
+	unsigned len = signed_len < 0 ? 1024 : (unsigned)signed_len; // use default initial size if we couldn't get the length
+	char *buffer = (char *)malloc(len + 1);
+	unsigned read = io_read(io, buffer, len + 1); // +1 to check if the file size is larger than expected
+	if(read < len)
+	{
+		buffer = (char *)realloc(buffer, read + 1);
+		len = read;
+	}
+	else if(read > len)
+	{
+		unsigned cap = 2 * read;
+		len = read;
+		buffer = (char *)realloc(buffer, cap);
+		while((read = io_read(io, buffer + len, cap - len)) != 0)
+		{
+			len += read;
+			if(len == cap)
+			{
+				cap *= 2;
+				buffer = (char *)realloc(buffer, cap);
+			}
+		}
+		buffer = (char *)realloc(buffer, len + 1);
+	}
+	buffer[len] = 0;
+	*result = buffer;
+	*result_len = len;
+}
+
+char *io_read_all_str(IOHANDLE io)
+{
+	void *buffer;
+	unsigned len;
+	io_read_all(io, &buffer, &len);
+	if(mem_has_null(buffer, len))
+	{
+		free(buffer);
+		return nullptr;
+	}
+	return (char *)buffer;
 }
 
 unsigned io_skip(IOHANDLE io, int size)
@@ -804,11 +670,8 @@ void aio_write_newline(ASYNCIO *aio)
 
 int aio_error(ASYNCIO *aio)
 {
-	int result;
-	lock_wait(aio->lock);
-	result = aio->error;
-	lock_unlock(aio->lock);
-	return result;
+	CLockScope ls(aio->lock);
+	return aio->error;
 }
 
 void aio_free(ASYNCIO *aio)
@@ -824,23 +687,25 @@ void aio_free(ASYNCIO *aio)
 
 void aio_close(ASYNCIO *aio)
 {
-	lock_wait(aio->lock);
-	aio->finish = ASYNCIO_CLOSE;
-	lock_unlock(aio->lock);
+	{
+		CLockScope ls(aio->lock);
+		aio->finish = ASYNCIO_CLOSE;
+	}
 	sphore_signal(&aio->sphore);
 }
 
 void aio_wait(ASYNCIO *aio)
 {
 	void *thread;
-	lock_wait(aio->lock);
-	thread = aio->thread;
-	aio->thread = 0;
-	if(aio->finish == ASYNCIO_RUNNING)
 	{
-		aio->finish = ASYNCIO_EXIT;
+		CLockScope ls(aio->lock);
+		thread = aio->thread;
+		aio->thread = 0;
+		if(aio->finish == ASYNCIO_RUNNING)
+		{
+			aio->finish = ASYNCIO_EXIT;
+		}
 	}
-	lock_unlock(aio->lock);
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
 }
@@ -917,20 +782,6 @@ void thread_yield()
 		dbg_msg("thread", "yield failed: %d", errno);
 #elif defined(CONF_FAMILY_WINDOWS)
 	Sleep(0);
-#else
-#error not implemented
-#endif
-}
-
-void thread_sleep(int microseconds)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = usleep(microseconds);
-	/* ignore signal interruption */
-	if(result == -1 && errno != EINTR)
-		dbg_msg("thread", "sleep failed: %d", errno);
-#elif defined(CONF_FAMILY_WINDOWS)
-	Sleep(microseconds / 1000);
 #else
 #error not implemented
 #endif
@@ -1107,12 +958,12 @@ void set_new_tick()
 
 /* -----  time ----- */
 static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support steady clocks, it might be out of date.");
-static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000, "Compiler has a bad timer precision and might be out of date.");
+static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000000, "Compiler has a bad timer precision and might be out of date.");
 static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
 
 int64_t time_get_impl()
 {
-	return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
 }
 
 int64_t time_get()
@@ -1129,12 +980,8 @@ int64_t time_get()
 
 int64_t time_freq()
 {
-	return 1000000;
-}
-
-int64_t time_get_microseconds()
-{
-	return time_get_impl() / (time_freq() / 1000 / 1000);
+	using namespace std::chrono_literals;
+	return std::chrono::nanoseconds(1s).count();
 }
 
 /* -----  network ----- */
@@ -1575,7 +1422,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 		char buf[128];
 		WCHAR wBuffer[128];
 		int error = WSAGetLastError();
-		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, sizeof(wBuffer) / sizeof(WCHAR), 0) == 0)
+		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, std::size(wBuffer), 0) == 0)
 			wBuffer[0] = 0;
 		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
@@ -1614,7 +1461,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 		char buf[128];
 		WCHAR wBuffer[128];
 		int error = WSAGetLastError();
-		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, sizeof(wBuffer) / sizeof(WCHAR), 0) == 0)
+		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, std::size(wBuffer), 0) == 0)
 			wBuffer[0] = 0;
 		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
@@ -1640,11 +1487,11 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1668,11 +1515,9 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
-
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		int socket = -1;
 		char addr_str[NETADDR_MAXSTRSIZE];
 
 		/* bind, we should check for error */
@@ -1692,7 +1537,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1717,10 +1561,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	/* set non-blocking */
-	net_set_non_blocking(sock);
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
+	}
+	else
+	{
+		/* set non-blocking */
+		net_set_non_blocking(sock);
 
-	net_buffer_init(&sock->buffer);
+		net_buffer_init(&sock->buffer);
+	}
 
 	/* return */
 	return sock;
@@ -1927,11 +1779,11 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
+	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1947,7 +1799,6 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1958,6 +1809,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 		}
+	}
+
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
 	}
 
 	/* return */
@@ -2213,7 +2070,7 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	int length;
 
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
-	MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, std::size(wBuffer));
 
 	handle = FindFirstFileW(wBuffer, &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
@@ -2267,7 +2124,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 	int length;
 
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
-	MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, std::size(wBuffer));
 
 	handle = FindFirstFileW(wBuffer, &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
@@ -2345,14 +2202,23 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 #if defined(CONF_PLATFORM_HAIKU)
 	str_format(path, max, "%s/config/settings/%s", home, appname);
-	return 0;
-#endif
-
-#if defined(CONF_PLATFORM_MACOS)
+#elif defined(CONF_PLATFORM_MACOS)
 	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 #else
-	str_format(path, max, "%s/.%s", home, appname);
-	for(int i = str_length(home) + 2; path[i]; i++)
+	if(str_comp(appname, "Teeworlds") == 0)
+	{
+		// fallback for old directory for Teeworlds compatibility
+		str_format(path, max, "%s/.%s", home, appname);
+	}
+	else
+	{
+		char *data_home = getenv("XDG_DATA_HOME");
+		if(data_home)
+			str_format(path, max, "%s/%s", data_home, appname);
+		else
+			str_format(path, max, "%s/.local/share/%s", home, appname);
+	}
+	for(int i = str_length(path) - str_length(appname); path[i]; i++)
 		path[i] = tolower((unsigned char)path[i]);
 #endif
 
@@ -2382,7 +2248,7 @@ int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer));
 	if(_wmkdir(wBuffer) == 0)
 		return 0;
 	if(errno == EEXIST)
@@ -2406,7 +2272,7 @@ int fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, sizeof(wPath) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath));
 	if(RemoveDirectoryW(wPath) != 0)
 		return 0;
 	return -1;
@@ -2421,7 +2287,7 @@ int fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, sizeof(wPath) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath));
 	DWORD attributes = GetFileAttributesW(wPath);
 	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
@@ -2438,7 +2304,7 @@ int fs_chdir(const char *path)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-		MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+		MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer));
 		if(_wchdir(wBuffer))
 			return 1;
 		else
@@ -2490,7 +2356,7 @@ int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wFilename[IO_MAX_PATH_LENGTH];
-	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wFilename, sizeof(wFilename) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, filename, -1, wFilename, std::size(wFilename));
 	return DeleteFileW(wFilename) == 0;
 #else
 	return unlink(filename) != 0;
@@ -2502,8 +2368,8 @@ int fs_rename(const char *oldname, const char *newname)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wOldname[IO_MAX_PATH_LENGTH];
 	WCHAR wNewname[IO_MAX_PATH_LENGTH];
-	MultiByteToWideChar(CP_UTF8, 0, oldname, -1, wOldname, sizeof(wOldname) / sizeof(WCHAR));
-	MultiByteToWideChar(CP_UTF8, 0, newname, -1, wNewname, sizeof(wNewname) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, oldname, -1, wOldname, std::size(wOldname));
+	MultiByteToWideChar(CP_UTF8, 0, newname, -1, wNewname, std::size(wNewname));
 	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
@@ -2520,7 +2386,7 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 	HANDLE handle;
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 
-	MultiByteToWideChar(CP_UTF8, 0, name, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, name, -1, wBuffer, std::size(wBuffer));
 	handle = FindFirstFileW(wBuffer, &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return 1;
@@ -2912,12 +2778,45 @@ int str_comp_filenames(const char *a, const char *b)
 	return *a - *b;
 }
 
+const char *str_startswith_nocase(const char *str, const char *prefix)
+{
+	int prefixl = str_length(prefix);
+	if(str_comp_nocase_num(str, prefix, prefixl) == 0)
+	{
+		return str + prefixl;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 const char *str_startswith(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
 	if(str_comp_num(str, prefix, prefixl) == 0)
 	{
 		return str + prefixl;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+const char *str_endswith_nocase(const char *str, const char *suffix)
+{
+	int strl = str_length(str);
+	int suffixl = str_length(suffix);
+	const char *strsuffix;
+	if(strl < suffixl)
+	{
+		return 0;
+	}
+	strsuffix = str + strl - suffixl;
+	if(str_comp_nocase(strsuffix, suffix) == 0)
+	{
+		return strsuffix;
 	}
 	else
 	{
@@ -3148,6 +3047,152 @@ int str_hex_decode(void *dst, int dst_size, const char *src)
 	return 0;
 }
 
+void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
+{
+	static const char DIGITS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+	const unsigned char *data = (const unsigned char *)data_raw;
+	unsigned value = 0;
+	int num_bits = 0;
+	int i = 0;
+	int o = 0;
+
+	dst_size -= 1;
+	dst[dst_size] = 0;
+	while(true)
+	{
+		if(num_bits < 6 && i < data_size)
+		{
+			value = (value << 8) | data[i];
+			num_bits += 8;
+			i += 1;
+		}
+		if(o == dst_size)
+		{
+			return;
+		}
+		if(num_bits > 0)
+		{
+			unsigned padded;
+			if(num_bits >= 6)
+			{
+				padded = (value >> (num_bits - 6)) & 0x3f;
+			}
+			else
+			{
+				padded = (value << (6 - num_bits)) & 0x3f;
+			}
+			dst[o] = DIGITS[padded];
+			num_bits -= 6;
+			o += 1;
+		}
+		else if(o % 4 != 0)
+		{
+			dst[o] = '=';
+			o += 1;
+		}
+		else
+		{
+			dst[o] = 0;
+			return;
+		}
+	}
+}
+
+static int base64_digit_value(char digit)
+{
+	if('A' <= digit && digit <= 'Z')
+	{
+		return digit - 'A';
+	}
+	else if('a' <= digit && digit <= 'z')
+	{
+		return digit - 'a' + 26;
+	}
+	else if('0' <= digit && digit <= '9')
+	{
+		return digit - '0' + 52;
+	}
+	else if(digit == '+')
+	{
+		return 62;
+	}
+	else if(digit == '/')
+	{
+		return 63;
+	}
+	return -1;
+}
+
+int str_base64_decode(void *dst_raw, int dst_size, const char *data)
+{
+	unsigned char *dst = (unsigned char *)dst_raw;
+	int data_len = str_length(data);
+
+	int i;
+	int o = 0;
+
+	if(data_len % 4 != 0)
+	{
+		return -3;
+	}
+	if(data_len / 4 * 3 > dst_size)
+	{
+		// Output buffer too small.
+		return -2;
+	}
+	for(i = 0; i < data_len; i += 4)
+	{
+		int num_output_bytes = 3;
+		char copy[4];
+		int d[4];
+		int value;
+		int b;
+		mem_copy(copy, data + i, sizeof(copy));
+		if(i == data_len - 4)
+		{
+			if(copy[3] == '=')
+			{
+				copy[3] = 'A';
+				num_output_bytes = 2;
+				if(copy[2] == '=')
+				{
+					copy[2] = 'A';
+					num_output_bytes = 1;
+				}
+			}
+		}
+		d[0] = base64_digit_value(copy[0]);
+		d[1] = base64_digit_value(copy[1]);
+		d[2] = base64_digit_value(copy[2]);
+		d[3] = base64_digit_value(copy[3]);
+		if(d[0] == -1 || d[1] == -1 || d[2] == -1 || d[3] == -1)
+		{
+			// Invalid digit.
+			return -1;
+		}
+		value = (d[0] << 18) | (d[1] << 12) | (d[2] << 6) | d[3];
+		for(b = 0; b < 3; b++)
+		{
+			unsigned char byte_value = (value >> (16 - 8 * b)) & 0xff;
+			if(b < num_output_bytes)
+			{
+				dst[o] = byte_value;
+				o += 1;
+			}
+			else
+			{
+				if(byte_value != 0)
+				{
+					// Padding not zeroed.
+					return -2;
+				}
+			}
+		}
+	}
+	return o;
+}
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
@@ -3220,7 +3265,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 
 int str_time_float(float secs, int format, char *buffer, int buffer_size)
 {
-	return str_time(llroundf(secs * 100.0), format, buffer, buffer_size);
+	return str_time(llroundf(secs * 100), format, buffer, buffer_size);
 }
 
 void str_escape(char **dst, const char *src, const char *end)
@@ -3242,6 +3287,20 @@ void str_escape(char **dst, const char *src, const char *end)
 int mem_comp(const void *a, const void *b, int size)
 {
 	return memcmp(a, b, size);
+}
+
+int mem_has_null(const void *block, unsigned size)
+{
+	const unsigned char *bytes = (const unsigned char *)block;
+	unsigned i;
+	for(i = 0; i < size; i++)
+	{
+		if(bytes[i] == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void net_stats(NETSTATS *stats_inout)
@@ -3463,32 +3522,6 @@ int str_utf8_encode(char *ptr, int chr)
 		ptr[1] = 0x80 | ((chr >> 12) & 0x3F);
 		ptr[2] = 0x80 | ((chr >> 6) & 0x3F);
 		ptr[3] = 0x80 | (chr & 0x3F);
-		return 4;
-	}
-
-	return 0;
-}
-
-int str_utf16le_encode(char *ptr, int chr)
-{
-	if(chr < 0x10000)
-	{
-		ptr[0] = chr;
-		ptr[1] = chr >> 0x8;
-		return 2;
-	}
-	else if(chr <= 0x10FFFF)
-	{
-		int U = chr - 0x10000;
-		int W1 = 0xD800, W2 = 0xDC00;
-
-		W1 |= ((U >> 10) & 0x3FF);
-		W2 |= (U & 0x3FF);
-
-		ptr[0] = W1;
-		ptr[1] = W1 >> 0x8;
-		ptr[2] = W2;
-		ptr[3] = W2 >> 0x8;
 		return 4;
 	}
 
@@ -3758,7 +3791,7 @@ PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[512];
-	MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, std::size(wBuffer));
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
@@ -3802,7 +3835,7 @@ int open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[512];
-	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, sizeof(wBuffer) / sizeof(WCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, std::size(wBuffer));
 	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
 #elif defined(CONF_PLATFORM_LINUX)
 	const int pid = fork();
@@ -3992,76 +4025,6 @@ int secure_rand_below(int below)
 	}
 }
 
-#if defined(CONF_FAMILY_WINDOWS)
-static int color_hsv_to_windows_console_color(const ColorHSVA *hsv)
-{
-	int h = hsv->h * 255.0f;
-	int s = hsv->s * 255.0f;
-	int v = hsv->v * 255.0f;
-	if(s >= 0 && s <= 10)
-	{
-		if(v <= 150)
-			return 8;
-		return 15;
-	}
-	else if(h >= 0 && h < 15)
-		return 12;
-	else if(h >= 15 && h < 30)
-		return 6;
-	else if(h >= 30 && h < 60)
-		return 14;
-	else if(h >= 60 && h < 110)
-		return 10;
-	else if(h >= 110 && h < 140)
-		return 11;
-	else if(h >= 140 && h < 170)
-		return 9;
-	else if(h >= 170 && h < 195)
-		return 5;
-	else if(h >= 195 && h < 240)
-		return 13;
-	else if(h >= 240)
-		return 12;
-	else
-		return 15;
-}
-#endif
-
-void set_console_msg_color(const void *rgbvoid)
-{
-	static const char *pNoColor = getenv("NO_COLOR");
-	if(pNoColor)
-		return;
-
-#if defined(CONF_FAMILY_WINDOWS)
-	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
-	int color = 15;
-	if(rgb)
-	{
-		ColorHSVA hsv = color_cast<ColorHSVA>(*rgb);
-		color = color_hsv_to_windows_console_color(&hsv);
-	}
-	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(console, color);
-#elif CONF_PLATFORM_LINUX
-	const ColorRGBA *rgb = (const ColorRGBA *)rgbvoid;
-	// set true color terminal escape codes refering
-	// https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
-	int esc_seq = 0x1B;
-	char buff[32];
-	if(rgb == NULL)
-		// reset foreground color
-		str_format(buff, sizeof(buff), "%c[39m", esc_seq);
-	else
-		// set rgb foreground color
-		// if not used by a true color terminal it is still converted refering
-		// https://wiki.archlinux.org/title/Color_output_in_console#True_color_support
-		str_format(buff, sizeof(buff), "%c[38;2;%d;%d;%dm", esc_seq, (int)uint8_t(rgb->r * 255.0f), (int)uint8_t(rgb->g * 255.0f), (int)uint8_t(rgb->b * 255.0f));
-	if(has_stdout_logger)
-		stdout_nonewline_logger.logger(buff, stdout_nonewline_logger.user);
-#endif
-}
-
 int os_version_str(char *version, int length)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -4154,12 +4117,12 @@ void init_exception_handler()
 	{
 		// Intentional
 #ifdef __MINGW32__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 		auto exc_hndl_init = (void APIENTRY (*)(void *))GetProcAddress(exception_handling_module, "ExcHndlInit");
 #ifdef __MINGW32__
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 		void *exception_handling_offset = (void *)GetModuleHandle(NULL);
 		exc_hndl_init(exception_handling_offset);
@@ -4176,12 +4139,12 @@ void set_exception_handler_log_file(const char *log_file_path)
 	{
 		// Intentional
 #ifdef __MINGW32__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 		auto exception_log_file_path_func = (BOOL APIENTRY(*)(const char *))(GetProcAddress(exception_handling_module, "ExcHndlSetLogFileNameA"));
 #ifdef __MINGW32__
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 		exception_log_file_path_func(log_file_path);
 	}
@@ -4190,4 +4153,15 @@ void set_exception_handler_log_file(const char *log_file_path)
 #endif
 }
 #endif
+}
+
+std::chrono::nanoseconds time_get_nanoseconds()
+{
+	return std::chrono::nanoseconds(time_get_impl());
+}
+
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+{
+	using namespace std::chrono_literals;
+	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());
 }

@@ -131,7 +131,7 @@ Disconnected
 == Прекинута веза
 
 Downloading map
-== Преузимам мапу 
+== Преузимам мапу
 
 Draw!
 == Нерешено!
@@ -141,9 +141,6 @@ Dynamic Camera
 
 Emoticon
 == Осећања
-
-Enter
-== Започни
 
 Error
 == Грешка
@@ -240,9 +237,6 @@ MOTD
 
 Map
 == Мапа
-
-Mouse sens.
-== Осетљивост миша
 
 Move left
 == Помери се лево
@@ -687,18 +681,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork је кооперативна онлајн игра у којој је циљ да ви и ваша група teeova дођете до циља на мапи. Као новајлија требали бисте започети на Novice серверима, на којима се налазе најједноставније мапе. Размислите о пингу да бисте изабрали сервер који вам је близу.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Мапе садрже замрзавање, што привремено teeu онемогућава кретање. Морате радити заједно да бисте прошли кроз ове делове.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Точак миша мења оружје. Чекићем (леви миш) може се користити за ударање других teeova и њихово буђење из смрзавања.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Кука (десни миш) се може користити за пролазак кроз мапу и за причвршћивање других teeova уз вас.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Најважније је да је комуникација кључна: не постоји водич, па ћете морати да се дописујете (тастер т) са другим играчима да бисте научили основе и трикове игре.
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Користите тастер к за убијање (поновно покретање), q за паузирање и гледање других играча. Погледајте подешавања за остале пречице тастера.
 
@@ -823,9 +805,6 @@ Activate
 Switch weapon when out of ammo
 == Замени оружје кад нема муниције
 
-Reset wanted weapon on death
-== Ресетуј тражено оружје на смрт
-
 Show clan above name plates
 == Прикажи клан изнад плочице са именима
 
@@ -837,9 +816,6 @@ Skip the main menu
 
 Refresh Rate
 == Освежавање
-
-Show console window
-== Прикажи конзолу
 
 Themes directory
 == Тема директоријума
@@ -905,7 +881,7 @@ Dummy copy
 == Зајед. крет. копије
 
 Hammerfly dummy
-== Лет. чекићем коп. 
+== Лет. чекићем коп.
 
 Converse
 == Сви дописивање
@@ -922,17 +898,8 @@ Show entities
 Show HUD
 == Прикажи HUD
 
-UI mouse s.
-== UI осетљ. миша
-
 may cause delay
 == може проузроковати кашњење
-
-Preinit VBO (iGPUs only)
-== Preinit VBO (само у iGPUs)
-
-Multiple texture units (disable for macOS)
-== Вишеструке текстурне јединице (угашено за macOS)
 
 Use high DPI
 == Користи високи DPI
@@ -1205,6 +1172,27 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Existing Player
 == 
 
@@ -1215,6 +1203,12 @@ Checking for existing player with your name
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR
@@ -1256,7 +1250,72 @@ Settings file
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1274,7 +1333,22 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1286,7 +1360,25 @@ Chat sound volume
 Background music volume
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages
@@ -1322,6 +1414,21 @@ Use old chat style
 Preview
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Show local player's key presses
 == 
 
@@ -1347,4 +1454,16 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

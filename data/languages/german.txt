@@ -156,9 +156,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Starten
-
 Error
 == Fehlgeschlagen
 
@@ -257,9 +254,6 @@ MOTD
 
 Map
 == Karte
-
-Mouse sens.
-== Maus-Empfindl.
 
 Move left
 == Nach links
@@ -416,7 +410,7 @@ Show friends only
 == Nur Freunde zeigen
 
 Show ingame HUD
-== Spielanzeigen
+== Spiel-HUD anzeigen
 
 Show name plates
 == Zeige Namen
@@ -793,9 +787,6 @@ AntiPing: predict weapons
 Highlighted message
 == Hervorgehobene Nachricht
 
-Reset wanted weapon on death
-== Waffe beim Tod zurücksetzen
-
 Switch weapon when out of ammo
 == Waffe wechseln wenn Munition leer ist
 
@@ -810,9 +801,6 @@ Automatically take game over screenshot
 
 Please use a different name
 == Bitte anderen Namen wählen
-
-Show console window
-== Konsolenfenster zeigen
 
 Gameplay
 == Gameplay
@@ -900,15 +888,6 @@ Welcome to DDNet
 
 may cause delay
 == kann verlangsamen
-
-Preinit VBO (iGPUs only)
-== Preinit-VBO (nur für iGPUs)
-
-Multiple texture units (disable for macOS)
-== Mehrere Textureinheiten (nicht für Mac OS)
-
-UI mouse s.
-== UI-Maus-Empf.
 
 Indicate map finish
 == Kartensieg anzeigen
@@ -1042,9 +1021,6 @@ Pause
 transmits your player name to info2.ddnet.tw
 == überträgt deinen Spielernamen an info2.ddnet.tw
 
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Das Mausrad wechselt Waffen. Hammer (linke Maustaste) kann benutzt werden um andere Tees zu schlagen und vom Freeze aufzuwecken.
-
 Server best:
 == Serverbeste:
 
@@ -1078,23 +1054,14 @@ Kill
 Please enter your nickname below.
 == Bitte gib deinen Spitznamen unten ein.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Die Map enthält Freeze, dass deinen Tee kurzzeitig unbeweglich macht. Ihr müsst zusammenarbeiten um durch diese Parts zu kommen.
-
 Render
 == Rendern
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hook (rechte Maustaste) kann benutzt werden um durch die Map zu schwingen und andere Tees zu dir zu ziehen.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Es wird empfohlen die Einstellungen nach deinem Geschmack anzupassen bevor du einem Server beitrittst.
 
 Use high DPI
 == Hohe DPI nutzen
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Am wichtigsten ist Kommunikation: Es gibt kein Tutorial, das heißt du musst mit den anderen Spielern schreiben (t-Taste) um die Grundlagen und Tricks des Spiels zu lernen.
 
 Learn
 == Lernen
@@ -1313,9 +1280,6 @@ Windowed borderless
 Desktop fullscreen
 == Desktop-Vollbild
 
-Use modern OpenGL
-== Modernes OpenGL benutzen
-
 Hookline
 == Hooklinie
 
@@ -1363,3 +1327,158 @@ Windowed fullscreen
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == Das Format der Textur %s ist nicht RGBA was graphische Fehler verursachen wird.
+
+Join Tutorial Server
+== Tutorial-Server betreten
+
+Skip Tutorial
+== Tutorial überspringen
+
+Renderer
+== Renderer
+
+default
+== Standard
+
+custom
+== eigene
+
+Graphics cards
+== Grafikkarte
+
+auto
+== Auto
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== Tutorial-Server kann nicht gefunden werden
+
+Toggle to edit your dummy settings
+== Umschalten um Dummy-Einstellungen zu bearbeiten
+
+Choose default eyes when joining a server
+== Standard-Augen beim Betreten eines Servers auswählen
+
+Allows maps to render with more detail
+== Erlaubt es Karten mit mehr Detail zu rendern
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Wenn du die Startlinie überschreitest, wird ein Geist-Tee mit den Bewegungen deiner besten Zeit gezeigt
+
+Opacity
+== Deckkraft
+
+Quads are used for background decoration
+== Quads werden als Hintergrund-Dekoration benutzt
+
+Tries to predict other entities to give a feel of low latency
+== Versucht das Verhalten andere Entitäten vorherzusagen um das Gefühl einer niederigeren Latenz zu geben
+
+Super
+== Super
+
+Team %d
+== Team %d
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Deckkraft von Entities die zu einem anderen Team gehören, z.B. Tees und Namensschilder
+
+Position:
+== Position:
+
+Speed:
+== Geschwindigkeit:
+
+Angle:
+== Winkel:
+
+Trying to determine UDP connectivity...
+== Versuche UDP-Verbindungsfähigkeit festzustellen...
+
+UDP seems to be filtered.
+== UDP scheint gefiltert zu werden.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP- und TCP-IP-Adressen scheinen unterschiedlich zu sein. Versuch VPN, Proxy oder Netzwerkbeschleuniger abzuschalten.
+
+No answer from server yet.
+== Bisher keine Antwort vom Server.
+
+Download community skins
+== Community-Skins runterladen
+
+Device
+== Gerät
+
+Status
+== Status
+
+Aim bind
+== Ziel-Bind
+
+Mouse
+== Maus
+
+Use DDRace HUD
+== DDRace-HUD nutzen
+
+Show dummy actions
+== Dummy-Aktionen zeigen
+
+Show freeze bars
+== Einfrier-Balken zeigen
+
+Show player position
+== Spielerposition zeigen
+
+Show player speed
+== Spielergeschwindigkeit zeigen
+
+Show player target angle
+== Zielwinkel des Spielers zeigen
+
+Ingame mouse sens.
+== Mause-Empfind. im Spiel
+
+UI mouse sens.
+== Mause-Empfind. im Menü
+
+Enable controller
+== Controller aktivieren
+
+Controller %d: %s
+== Controller %d: %s
+
+Click to cycle through all available controllers.
+== Klicken um durch die verfügbaren Controller zu wechseln.
+
+[Ingame controller mode]
+Relative
+== Relativ
+
+[Ingame controller mode]
+Absolute
+== Absolut
+
+Ingame controller mode
+== Spiel-Controller-Modus
+
+Ingame controller sens.
+== Controller-Empfind. im Spiel
+
+UI controller sens.
+== Controller-Empfind. Im Menü
+
+Controller jitter tolerance
+== Jitter-Toleranz des Controllers
+
+No controller found. Plug in a controller and restart the game.
+== Kein Controller gefunden. Schließ einen Joystick an und starte das Spiel neu.
+
+Controller Axis #%d
+== Controller-Axe #%d
+
+Controller
+== Controller

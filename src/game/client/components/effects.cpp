@@ -1,10 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/sorted_array.h>
-
 #include <engine/demo.h>
-#include <engine/engine.h>
 
 #include <engine/shared/config.h>
 
@@ -13,7 +10,6 @@
 #include <game/client/components/damageind.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/particles.h>
-#include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 
@@ -166,7 +162,13 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 
 	if(ClientID >= 0)
 	{
-		if(m_pClient->m_aClients[ClientID].m_UseCustomColor)
+		// Use m_RenderInfo.m_CustomColoredSkin instead of m_UseCustomColor
+		// m_UseCustomColor says if the player's skin has a custom color (value sent from the client side)
+
+		// m_RenderInfo.m_CustomColoredSkin Defines if in the context of the game the color is being customized,
+		// Using this value if the game is teams (red and blue), this value will be true even if the skin is with the normal color.
+		// And will use the team body color to create player death effect instead of tee color
+		if(m_pClient->m_aClients[ClientID].m_RenderInfo.m_CustomColoredSkin)
 			BloodColor = m_pClient->m_aClients[ClientID].m_RenderInfo.m_ColorBody;
 		else
 		{
@@ -221,7 +223,6 @@ void CEffects::Explosion(vec2 Pos)
 	// add the smoke
 	for(int i = 0; i < 24; i++)
 	{
-		CParticle p;
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SMOKE;
 		p.m_Pos = Pos;

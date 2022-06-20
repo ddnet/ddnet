@@ -2,27 +2,23 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CONTROLS_H
 #define GAME_CLIENT_COMPONENTS_CONTROLS_H
-#include <SDL_joystick.h>
-#include <base/system.h>
-#include <base/vmath.h>
-#include <game/client/component.h>
 
+#include <base/vmath.h>
+
+#include <engine/client.h>
+
+#include <game/client/component.h>
 #include <game/generated/protocol.h>
 
 class CControls : public CComponent
 {
+	float GetMaxMouseDistance() const;
+
 public:
 	vec2 m_MousePos[NUM_DUMMIES];
 	vec2 m_TargetPos[NUM_DUMMIES];
 	float m_OldMouseX;
 	float m_OldMouseY;
-	SDL_Joystick *m_Joystick;
-	bool m_JoystickFirePressed;
-	bool m_JoystickRunPressed;
-	int64_t m_JoystickTapTime;
-
-	SDL_Joystick *m_Gamepad;
-	bool m_UsingGamepad;
 
 	int m_AmmoCount[NUM_WEAPONS];
 
@@ -41,7 +37,7 @@ public:
 	virtual void OnRelease() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 

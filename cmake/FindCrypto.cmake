@@ -8,7 +8,7 @@ if(NOT PREFER_BUNDLED_LIBS)
   endif()
 endif()
 
-if(PREFER_BUNDLED_LIBS AND TARGET_OS STREQUAL "android")
+if(PREFER_BUNDLED_LIBS AND (TARGET_OS STREQUAL "android" OR CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
   set_extra_dirs_lib(CRYPTO openssl)
   find_library(CRYPTO_LIBRARY1
     NAMES crypto

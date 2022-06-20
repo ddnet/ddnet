@@ -147,9 +147,6 @@ Dynamic Camera
 Emoticon
 == Yüz ifadesi
 
-Enter
-== Gir
-
 Error
 == Hata
 
@@ -245,9 +242,6 @@ MOTD
 
 Map
 == Harita
-
-Mouse sens.
-== Mouse duyarlılığı
 
 Move left
 == Sola git
@@ -666,18 +660,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Haritalar, içindeyken haraket edemediğin freeze denilen yapılar içerir. Bu aşamaları geçmen için takım çalışması lazım.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Mouse tekeri silahını değiştirir. Çekiç (sol tık) kullanarak diğer oyunculara vurabilir, onları uyandırıp haraket etmelerini sağlayabilirsin.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Kanca (sağ tık) ile sallanma haraketi yaparak haritada aşamaları geçebilir, diğer oyunculara tutunmak için kullanabilirsin.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Herhangi bir öğretici mekanizma olmadığı için diğer oyuncularla yazışarak (t tuşu) yardım isteyebilir, oyunun genel mantığını ipuçlarıyla öğrenebilirsin.
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
 
@@ -798,9 +780,6 @@ Save
 Switch weapon when out of ammo
 == Mermi kalmadığında silahı değiştir
 
-Reset wanted weapon on death
-== Ölünce varsayılan silahı kullan
-
 Show only chat messages from friends
 == Sadece arkadaşlardan gelen mesajları göster
 
@@ -812,9 +791,6 @@ Clan plates size
 
 Refresh Rate
 == Yenileme Hızı
-
-Show console window
-== Konsol penceresini göster
 
 Automatically take statboard screenshot
 == Otomatik olarak stat tahtası ekran görüntüsü al
@@ -891,20 +867,11 @@ Show entities
 Show HUD
 == Arayüzü göster
 
-UI mouse s.
-== Arayüzde mouse duy.
-
 may cause delay
 == gecikmelere sebep olabilir
 
 Screen
 == Ekran
-
-Preinit VBO (iGPUs only)
-== Preinit VBO (sadece iGPUs)
-
-Multiple texture units (disable for macOS)
-== Çoklu doku birimleri (macOS'da kullanılmaz)
 
 Use high DPI
 == Yüksek DPI kullan
@@ -1131,6 +1098,27 @@ Warning
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Existing Player
 == 
 
@@ -1147,6 +1135,12 @@ Country / Region
 == 
 
 Speed
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Theme
@@ -1212,7 +1206,16 @@ Config directory
 Themes directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1222,6 +1225,62 @@ Skins directory
 == 
 
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1239,7 +1298,22 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Game sound volume
@@ -1254,7 +1328,25 @@ Background music volume
 Assets
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages
@@ -1288,6 +1380,21 @@ Use old chat style
 == 
 
 Preview
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show local player's key presses
@@ -1332,6 +1439,12 @@ https://ddnet.tw/discord
 https://wiki.ddnet.tw/
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Website
 == 
 
@@ -1352,4 +1465,10 @@ Editor
 
 [Start menu]
 Play
+== 
+
+Super
+== 
+
+Team %d
 == 

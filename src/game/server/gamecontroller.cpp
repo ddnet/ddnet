@@ -15,9 +15,7 @@
 #include "entities/dragger.h"
 #include "entities/gun.h"
 #include "entities/light.h"
-#include "entities/plasma.h"
 #include "entities/projectile.h"
-#include <game/layers.h>
 
 IGameController::IGameController(class CGameContext *pGameServer)
 {
@@ -182,9 +180,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	if(Index < 0)
 		return false;
 
-	int Type = -1;
-	int SubType = 0;
-
 	int x, y;
 	x = (Pos.x - 16.0f) / 32.0f;
 	y = (Pos.y - 16.0f) / 32.0f;
@@ -202,7 +197,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		int Type = Index - ENTITY_SPAWN;
 		m_aaSpawnPoints[Type][m_aNumSpawnPoints[Type]] = Pos;
-		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)(sizeof(m_aaSpawnPoints[0]) / sizeof(m_aaSpawnPoints[0][0])));
+		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)std::size(m_aaSpawnPoints[0]));
 	}
 
 	else if(Index == ENTITY_DOOR)
@@ -276,8 +271,19 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		bullet->SetBouncing(2 - (Dir % 2));
 	}
 
+	int Type = -1;
+	int SubType = 0;
+
 	if(Index == ENTITY_ARMOR_1)
 		Type = POWERUP_ARMOR;
+	else if(Index == ENTITY_ARMOR_SHOTGUN)
+		Type = POWERUP_ARMOR_SHOTGUN;
+	else if(Index == ENTITY_ARMOR_GRENADE)
+		Type = POWERUP_ARMOR_GRENADE;
+	else if(Index == ENTITY_ARMOR_NINJA)
+		Type = POWERUP_ARMOR_NINJA;
+	else if(Index == ENTITY_ARMOR_LASER)
+		Type = POWERUP_ARMOR_LASER;
 	else if(Index == ENTITY_HEALTH_1)
 		Type = POWERUP_HEALTH;
 	else if(Index == ENTITY_WEAPON_SHOTGUN)
@@ -358,11 +364,11 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	}
 	else if(Index >= ENTITY_DRAGGER_WEAK && Index <= ENTITY_DRAGGER_STRONG)
 	{
-		CDraggerTeam(&GameServer()->m_World, Pos, Index - ENTITY_DRAGGER_WEAK + 1, false, Layer, Number);
+		new CDragger(&GameServer()->m_World, Pos, Index - ENTITY_DRAGGER_WEAK + 1, false, Layer, Number);
 	}
 	else if(Index >= ENTITY_DRAGGER_WEAK_NW && Index <= ENTITY_DRAGGER_STRONG_NW)
 	{
-		CDraggerTeam(&GameServer()->m_World, Pos, Index - ENTITY_DRAGGER_WEAK_NW + 1, true, Layer, Number);
+		new CDragger(&GameServer()->m_World, Pos, Index - ENTITY_DRAGGER_WEAK_NW + 1, true, Layer, Number);
 	}
 	else if(Index == ENTITY_PLASMAE)
 	{
@@ -626,7 +632,7 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 
-	if(GameServer()->Collision()->m_pSwitchers)
+	if(!GameServer()->Switchers().empty())
 	{
 		int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
 
@@ -640,36 +646,35 @@ void IGameController::Snap(int SnappingClient)
 		if(!pSwitchState)
 			return;
 
-		pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->m_NumSwitchers, 0, 255);
-		pSwitchState->m_Status1 = 0;
-		pSwitchState->m_Status2 = 0;
-		pSwitchState->m_Status3 = 0;
-		pSwitchState->m_Status4 = 0;
-		pSwitchState->m_Status5 = 0;
-		pSwitchState->m_Status6 = 0;
-		pSwitchState->m_Status7 = 0;
-		pSwitchState->m_Status8 = 0;
+		pSwitchState->m_HighestSwitchNumber = clamp((int)GameServer()->Switchers().size() - 1, 0, 255);
+		mem_zero(pSwitchState->m_aStatus, sizeof(pSwitchState->m_aStatus));
 
-		for(int i = 0; i < pSwitchState->m_NumSwitchers + 1; i++)
+		std::vector<std::pair<int, int>> vEndTicks; // <EndTick, SwitchNumber>
+
+		for(int i = 0; i <= pSwitchState->m_HighestSwitchNumber; i++)
 		{
-			int Status = (int)GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
+			int Status = (int)GameServer()->Switchers()[i].m_Status[Team];
+			pSwitchState->m_aStatus[i / 32] |= (Status << (i % 32));
 
-			if(i < 32)
-				pSwitchState->m_Status1 |= Status << i;
-			else if(i < 64)
-				pSwitchState->m_Status2 |= Status << (i - 32);
-			else if(i < 96)
-				pSwitchState->m_Status3 |= Status << (i - 64);
-			else if(i < 128)
-				pSwitchState->m_Status4 |= Status << (i - 96);
-			else if(i < 160)
-				pSwitchState->m_Status5 |= Status << (i - 128);
-			else if(i < 192)
-				pSwitchState->m_Status6 |= Status << (i - 160);
-			else if(i < 224)
-				pSwitchState->m_Status7 |= Status << (i - 192);
-			else if(i < 256)
-				pSwitchState->m_Status8 |= Status << (i - 224);
+			int EndTick = GameServer()->Switchers()[i].m_EndTick[Team];
+			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_LastUpdateTick[Team] < Server()->Tick())
+			{
+				// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
+				vEndTicks.emplace_back(std::pair<int, int>(GameServer()->Switchers()[i].m_EndTick[Team], i));
+			}
+		}
+
+		// send the endtick of switchers that are about to toggle back (up to four, prioritizing those with the earliest endticks)
+		mem_zero(pSwitchState->m_aSwitchNumbers, sizeof(pSwitchState->m_aSwitchNumbers));
+		mem_zero(pSwitchState->m_aEndTicks, sizeof(pSwitchState->m_aEndTicks));
+
+		std::sort(vEndTicks.begin(), vEndTicks.end());
+		const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+
+		for(int i = 0; i < NumTimedSwitchers; i++)
+		{
+			pSwitchState->m_aSwitchNumbers[i] = vEndTicks[i].second;
+			pSwitchState->m_aEndTicks[i] = vEndTicks[i].first;
 		}
 	}
 }

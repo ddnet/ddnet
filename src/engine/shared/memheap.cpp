@@ -97,3 +97,11 @@ void *CHeap::Allocate(unsigned Size, unsigned Alignment)
 
 	return pMem;
 }
+
+const char *CHeap::StoreString(const char *pSrc)
+{
+	const int Size = str_length(pSrc) + 1;
+	char *pMem = static_cast<char *>(Allocate(Size));
+	str_copy(pMem, pSrc, Size);
+	return pMem;
+}

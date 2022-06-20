@@ -8,13 +8,13 @@
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
+#include <game/localization.h>
 
 CStatboard::CStatboard()
 {
 	m_Active = false;
 	m_ScreenshotTaken = false;
 	m_ScreenshotTime = -1;
-	m_pCSVstr = 0;
 }
 
 void CStatboard::OnReset()
@@ -404,11 +404,11 @@ void CStatboard::AutoStatCSV()
 		str_format(aFilename, sizeof(aFilename), "screenshots/auto/stats_%s.csv", aDate);
 		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_ALL);
 
-		FormatStats();
-
 		if(File)
 		{
-			io_write(File, m_pCSVstr, str_length(m_pCSVstr));
+			char aStats[1024 * (VANILLA_MAX_CLIENTS + 1)];
+			FormatStats(aStats, sizeof(aStats));
+			io_write(File, aStats, str_length(aStats));
 			io_close(File);
 		}
 
@@ -416,42 +416,36 @@ void CStatboard::AutoStatCSV()
 	}
 }
 
-char *CStatboard::ReplaceCommata(char *pStr)
+std::string CStatboard::ReplaceCommata(char *pStr)
 {
 	if(!str_find(pStr, ","))
 		return pStr;
-
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "%s", pStr);
 
 	char aOutbuf[256];
 	mem_zero(aOutbuf, sizeof(aOutbuf));
 
 	for(int i = 0, skip = 0; i < 64; i++)
 	{
-		if(aBuf[i] == ',')
+		if(pStr[i] == ',')
 		{
 			aOutbuf[i + skip++] = '%';
 			aOutbuf[i + skip++] = '2';
 			aOutbuf[i + skip] = 'C';
 		}
 		else
-			aOutbuf[i + skip] = aBuf[i];
+			aOutbuf[i + skip] = pStr[i];
 	}
 
-	unsigned int len = str_length(aOutbuf);
-	char *buf = new char[len];
-	mem_copy(buf, aOutbuf, len);
-	return buf;
+	return aOutbuf;
 }
 
-void CStatboard::FormatStats()
+void CStatboard::FormatStats(char *pDest, size_t DestSize)
 {
 	// server stats
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 	char aServerStats[1024];
-	str_format(aServerStats, sizeof(aServerStats), "Servername,Game-type,Map\n%s,%s,%s", ReplaceCommata(CurrentServerInfo.m_aName), CurrentServerInfo.m_aGameType, CurrentServerInfo.m_aMap);
+	str_format(aServerStats, sizeof(aServerStats), "Servername,Game-type,Map\n%s,%s,%s", ReplaceCommata(CurrentServerInfo.m_aName).c_str(), ReplaceCommata(CurrentServerInfo.m_aGameType).c_str(), ReplaceCommata(CurrentServerInfo.m_aMap).c_str());
 
 	// player stats
 
@@ -514,8 +508,8 @@ void CStatboard::FormatStats()
 		str_format(aBuf, sizeof(aBuf), "%d,%d,%s,%s,%d,%d,%d,%d,%.2f,%i,%.1f,%d,%d,%s,%d,%d,%d\n",
 			localPlayer ? 1 : 0, // Local player
 			m_pClient->m_aClients[pInfo->m_ClientID].m_Team, // Team
-			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aName), // Name
-			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan), // Clan
+			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aName).c_str(), // Name
+			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan).c_str(), // Clan
 			clamp(pInfo->m_Score, -999, 999), // Score
 			pStats->m_Frags, // Frags
 			pStats->m_Deaths, // Deaths
@@ -533,10 +527,5 @@ void CStatboard::FormatStats()
 		str_append(aPlayerStats, aBuf, sizeof(aPlayerStats));
 	}
 
-	char aStats[1024 * (VANILLA_MAX_CLIENTS + 1)];
-	str_format(aStats, sizeof(aStats), "%s\n\n%s", aServerStats, aPlayerStats);
-
-	unsigned int Len = str_length(aStats);
-	m_pCSVstr = (char *)malloc(Len);
-	str_copy(m_pCSVstr, aStats, Len);
+	str_format(pDest, DestSize, "%s\n\n%s", aServerStats, aPlayerStats);
 }

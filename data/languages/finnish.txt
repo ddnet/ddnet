@@ -144,9 +144,6 @@ Dynamic Camera
 Emoticon
 == Hymiö
 
-Enter
-== Jatka
-
 Error
 == Virhe
 
@@ -242,9 +239,6 @@ MOTD
 
 Map
 == Kenttä
-
-Mouse sens.
-== Hiiren herkkyys
 
 Move left
 == Liiku vasemmalle
@@ -676,18 +670,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork on yhteistoiminnallinen verkkopeli, jossa tavoitteena on, että sinä ja teeryhmäsi saavuttavat kentän maaliviivan. Alokkaana sinun kannattaisi aloittaa Novice-palvelimilla, jotka isännöivät helpoimiä kenttiä. Huomioi viive valitaksesi lähellä olevan palvelimen.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Kentät sisältävät jäätä, joka tekee teen väliaikaisesti liikkumiskyvyttömäksi. Sinun täytyy toimia yhteistyössä päästäkesi näiden kohtien läpi.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Hiirenrulla vaihtaa aseita. Nuijaa (hiiren vasen painike) voidaan käyttää muiden tee-hahmojen lyömiseen ja herättämiseen jäästä.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Koukkua (hiiren oikea painike) voidaan käyttää kentässä etenemiseen ja muiden tee-hahmojen koukuttamiseen.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Kaikkein tärkeintä on viestintä: Ei ole tutoriaalia, joten sinun täytyy chatata (t-näppäin) muiden pelaajien kanssa oppiaksesi pelin perusteet ja temput.
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Käytä näppäintä k tappaaksesi (uudelleenaloitus) ja näppäintä q pysäyttääksesi sekä katsoaksesi muita pelaajia. Asetuksista löydät muiden näppäinten asettelut.
 
@@ -856,9 +838,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == Vaihda asetta ammusten loppuessa
 
-Reset wanted weapon on death
-== Palauta haluttu ase kuollessa
-
 Show only chat messages from friends
 == Näytä chattiviestit vain ystäviltä
 
@@ -873,9 +852,6 @@ Skip the main menu
 
 Refresh Rate
 == Virkistystaajuus
-
-Show console window
-== Näytä konsoli-ikkuna
 
 Themes directory
 == Teemahakemisto
@@ -934,9 +910,6 @@ Show HUD
 Chat command
 == Chattikomento
 
-UI mouse s.
-== Käyttöliittymän herkkyys
-
 Dummy
 == Dummy
 
@@ -954,15 +927,6 @@ may cause delay
 
 Screen
 == Näyttö
-
-Use modern OpenGL
-== Käytä nykyaikaista OpenGL:ää
-
-Preinit VBO (iGPUs only)
-== Esialusta VBO (vain iGPUt)
-
-Multiple texture units (disable for macOS)
-== Monta tekstuuriyksikköä (älä käytä macOS:ällä)
 
 Use high DPI
 == Käytä korkeaa DPI:tä
@@ -1241,7 +1205,34 @@ Best
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Refreshing...
@@ -1262,7 +1253,16 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
 Fat skins (DDFat)
+== 
+
+Choose default eyes when joining a server
 == 
 
 Dummy copy
@@ -1280,13 +1280,105 @@ Statboard
 Show entities
 == 
 
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
 Windowed fullscreen
+== 
+
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
 == 
 
 Assets
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages
@@ -1298,13 +1390,28 @@ Kill Message Normal Color
 Kill Message Highlight Color
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Overlay entities
 == 
 
 Show text entities
 == 
 
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
 Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show local player's key presses
@@ -1337,7 +1444,19 @@ Particles
 Assets directory
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Server executable not found, can't run server
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Auto

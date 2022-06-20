@@ -1,7 +1,7 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
@@ -34,13 +34,11 @@ ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
-Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
+Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA", "ARMOR_SHOTGUN", "ARMOR_GRENADE", "ARMOR_NINJA", "ARMOR_LASER"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 
 RawHeader = '''
-
-#include <engine/message.h>
 #include <engine/shared/teehistorian_ex.h>
 
 enum
@@ -69,7 +67,6 @@ enum
 '''
 
 RawSource = '''
-#include <engine/message.h>
 #include "protocol.h"
 '''
 
@@ -243,6 +240,17 @@ Objects = [
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
 	]),
 
+	NetObjectEx("DDNetCharacterDisplayInfo", "character-display-info@netobj.ddnet.tw", [
+		NetIntRange("m_JumpedTotal", 0, 255),
+		NetTick("m_NinjaActivationTick"),
+		NetTick("m_FreezeTick"),
+		NetBool("m_IsInFreeze"),
+		NetBool("m_IsInPracticeMode"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+		NetIntAny("m_RampValue"),
+	]),
+
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
@@ -304,17 +312,13 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntRange("m_NumSwitchers", 0, 256),
+		NetIntAny("m_HighestSwitchNumber"),
 		# 256 switches / 32 bits = 8 int32
-		NetIntAny("m_Status1"),
-		NetIntAny("m_Status2"),
-		NetIntAny("m_Status3"),
-		NetIntAny("m_Status4"),
-		NetIntAny("m_Status5"),
-		NetIntAny("m_Status6"),
-		NetIntAny("m_Status7"),
-		NetIntAny("m_Status8"),
-	]),
+		NetArray(NetIntAny("m_aStatus"), 8),
+		# send the endtick of up to 4 timed switchers
+		NetArray(NetIntAny("m_aSwitchNumbers"), 4),
+		NetArray(NetIntAny("m_aEndTicks"), 4),
+	], validate_size=False),
 
 	# Switch info for map items
 	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [

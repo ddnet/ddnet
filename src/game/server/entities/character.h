@@ -29,17 +29,15 @@ class CCharacter : public CEntity
 	friend class CSaveTee; // need to use core
 
 public:
-	//character's size
-	static const int ms_PhysSize = 28;
+	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
 
-	CCharacter(CGameWorld *pWorld);
-
-	virtual void Reset();
-	virtual void Destroy();
-	virtual void Tick();
-	virtual void TickDefered();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
+	void Reset() override;
+	void Destroy() override;
+	void Tick() override;
+	void TickDefered() override;
+	void TickPaused() override;
+	void Snap(int SnappingClient) override;
+	void SwapClients(int Client1, int Client2) override;
 
 	bool CanSnapCharacter(int SnappingClient);
 
@@ -47,6 +45,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
+	void SetLiveFrozen(bool Active);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
@@ -96,15 +95,6 @@ private:
 	CEntity *m_apHitObjects[10];
 	int m_NumObjectsHit;
 
-	struct WeaponStat
-	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		int m_Ammocost;
-		bool m_Got;
-
-	} m_aWeapons[NUM_WEAPONS];
-
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
@@ -136,15 +126,6 @@ private:
 
 	int m_Health;
 	int m_Armor;
-
-	// ninja
-	struct
-	{
-		vec2 m_ActivationDir;
-		int m_ActivationTick;
-		int m_CurrentMoveTime;
-		int m_OldVelAmount;
-	} m_Ninja;
 
 	// the player core for the physics
 	CCharacterCore m_Core;
@@ -201,7 +182,6 @@ public:
 	bool m_NinjaJetpack;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
-	int m_FreezeTick;
 	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
 	bool m_LiveFreeze;
@@ -257,14 +237,14 @@ public:
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
 	CCharacterCore *Core() { return &m_Core; }
-	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; }
-	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; }
-	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; }
-	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; }
+	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
+	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
+	int GetWeaponAmmo(int Type) { return m_Core.m_aWeapons[Type].m_Ammo; }
+	void SetWeaponAmmo(int Type, int Value) { m_Core.m_aWeapons[Type].m_Ammo = Value; }
 	bool IsAlive() { return m_Alive; }
-	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; }
-	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; }
-	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
+	void SetNinjaActivationDir(vec2 ActivationDir) { m_Core.m_Ninja.m_ActivationDir = ActivationDir; }
+	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
+	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
 
 	int GetLastAction() const { return m_LastAction; }
 

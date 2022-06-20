@@ -152,9 +152,6 @@ Dynamic Camera
 Emoticon
 == Эмоции
 
-Enter
-== Вход
-
 Error
 == Ошибка
 
@@ -189,7 +186,7 @@ Friends
 == Друзья
 
 Fullscreen
-== Полноэкранный режим
+== Полноэкранный（настр.)
 
 Game
 == Игра
@@ -250,9 +247,6 @@ MOTD
 
 Map
 == Карта
-
-Mouse sens.
-== Чувств. мыши
 
 Move left
 == Шаг влево
@@ -453,9 +447,6 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == Переключать оружие без патронов
 
-Reset wanted weapon on death
-== Сбрасывать выбор оружия при смерти
-
 Show only chat messages from friends
 == Показывать сообщения только от друзей
 
@@ -464,9 +455,6 @@ Show clan above name plates
 
 Automatically take statboard screenshot
 == Делать снимок результатов
-
-Show console window
-== Показывать консоль
 
 Team
 == Команда
@@ -619,7 +607,7 @@ Join game
 == Играть
 
 FSAA samples
-== FSAA сэмплов 
+== FSAA сэмплов
 
 Sound volume
 == Громкость звука
@@ -807,18 +795,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork - кооперативная онлайн-игра, где Вашей главной целью и целью вашей команды является достижение конца карты. Как новенький, Вы должны начать свой путь на Novice, на которых есть лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Карта содержит фриз, который временно лишает вас возможности двигаться. Вы должны работать сообща, чтобы пройти такие места.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Колесо мыши меняет оружие. Молотком (ЛКМ) можно ударить по другим и расфризить их.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Крюк (ПКМ) используется для перемещения по карте, а также для притягивания игроков к себе.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Самое главное, общение - ключ к успеху: здесь нет туториалов, поэтому тебе придется общаться (кнопка Т) с остальными игроками, чтобы обучиться базовым вещам и трюкам в игре.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Перед посещением сервера рекомендуем изменить настройки на Ваш вкус.
 
@@ -966,20 +942,11 @@ Show entities
 Show HUD
 == Показывать HUD
 
-UI mouse s.
-== Чувств. мыши в меню
-
 may cause delay
 == создает задержку
 
 Screen
 == Экран
-
-Preinit VBO (iGPUs only)
-== Преинициал-ть VBO (только iGPU)
-
-Multiple texture units (disable for macOS)
-== Улучш. блоки текстур (откл. для macOS)
 
 Use high DPI
 == Использовать высокую чувств.
@@ -1306,9 +1273,6 @@ Windowed borderless
 Desktop fullscreen
 == Полноэкранный
 
-Use modern OpenGL
-== Использовать новый OpenGL
-
 Tee
 == Tee
 
@@ -1340,19 +1304,174 @@ Show local player's key presses
 == Показывать нажатия клавиш игрока
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Формат текстуры %s не соотвествует RGBA, что может повлечь артефакты.
+
+Join Tutorial Server
+== Начать туториал
+
+Skip Tutorial
+== Пропустить туториал
 
 Settings file
-== 
+== Файл настроек
 
 Config directory
-== 
+== Путь к настройкам
 
 Windowed fullscreen
-== 
+== Оконный на весь экран
+
+Renderer
+== Рендерер
+
+default
+== станд.
+
+custom
+== перс.
+
+Graphics cards
+== Видеокарты
+
+auto
+== авто
 
 Run on join
-== 
+== Запускать при входе
 
 Chat command (e.g. showall 1)
+== Чат-команда (напр. showall 1)
+
+Tutorial
+== Туториал
+
+Can't find a Tutorial server
+== Обучающий сервер не найден
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Allows maps to render with more detail
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Super
+== 
+
+Team %d
 == 

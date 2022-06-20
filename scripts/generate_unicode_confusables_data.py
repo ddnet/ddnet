@@ -4,9 +4,11 @@
 # - http://www.unicode.org/Public/security/<VERSION>/confusables.txt
 # - http://www.unicode.org/Public/<VERSION>/ucd/UnicodeData.txt
 #
-# If executed as a script, it will generate the contents of the file
-# `src/base/unicode/confusables_data.h`.
+# If executed as a script, it will generate the contents of the files
+# python3 scripts/generate_unicode_confusables_data.py header > `src/base/unicode/confusables.h`,
+# python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.h`.
 
+import sys
 import unicode
 
 def generate_decompositions():
@@ -48,22 +50,7 @@ def generate_decompositions():
 
 	return {c: gen(c) for c in interesting}
 
-def main():
-	decompositions = generate_decompositions()
-
-	# Deduplicate
-	decomposition_set = sorted(set(tuple(x) for x in decompositions.values()))
-	len_set = sorted(set(len(x) for x in decomposition_set))
-
-	if len(len_set) > 8:
-		raise ValueError("Can't pack offset (13 bit) together with len (>3bit)")
-
-	cur_offset = 0
-	decomposition_offsets = []
-	for d in decomposition_set:
-		decomposition_offsets.append(cur_offset)
-		cur_offset += len(d)
-
+def gen_header(decompositions, len_set):
 	print("""\
 #include <stdint.h>
 
@@ -80,19 +67,31 @@ struct DECOMP_SLICE
 	print("};")
 	print()
 
-	print("static const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {")
+	print("extern const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS];")
+	print("extern const int32_t decomp_chars[NUM_DECOMPS];")
+	print("extern const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS];")
+	print("extern const int32_t decomp_data[];")
+
+def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
+	print("""\
+#ifndef CONFUSABLES_DATA
+#error "This file should only be included in `confusables.cpp`"
+#endif
+""")
+
+	print("const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {")
 	for l in len_set:
 		print("\t{},".format(l))
 	print("};")
 	print()
 
-	print("static const int32_t decomp_chars[NUM_DECOMPS] = {")
+	print("const int32_t decomp_chars[NUM_DECOMPS] = {")
 	for k in sorted(decompositions):
 		print("\t0x{:x},".format(k))
 	print("};")
 	print()
 
-	print("static const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS] = {")
+	print("const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS] = {")
 	for k in sorted(decompositions):
 		d = decompositions[k]
 		i = decomposition_set.index(tuple(d))
@@ -101,11 +100,35 @@ struct DECOMP_SLICE
 	print("};")
 	print()
 
-	print("static const int32_t decomp_data[] = {")
+	print("const int32_t decomp_data[] = {")
 	for d in decomposition_set:
 		for c in d:
 			print("\t0x{:x},".format(c))
 	print("};")
+
+def main():
+	decompositions = generate_decompositions()
+
+	# Deduplicate
+	decomposition_set = sorted(set(tuple(x) for x in decompositions.values()))
+	len_set = sorted(set(len(x) for x in decomposition_set))
+
+	if len(len_set) > 8:
+		raise ValueError("Can't pack offset (13 bit) together with len (>3bit)")
+
+	cur_offset = 0
+	decomposition_offsets = []
+	for d in decomposition_set:
+		decomposition_offsets.append(cur_offset)
+		cur_offset += len(d)
+
+	header = "header" in sys.argv
+	data = "data" in sys.argv
+
+	if header:
+		gen_header(decompositions, len_set)
+	elif data:
+		gen_data(decompositions, decomposition_set, decomposition_offsets, len_set)
 
 if __name__ == '__main__':
 	main()

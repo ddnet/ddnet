@@ -149,9 +149,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Entrar
-
 Error
 == Erro
 
@@ -253,9 +250,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Sens. do rato
 
 Move left
 == Mover para a esquerda
@@ -681,9 +675,6 @@ DDNet Client needs to be restarted to complete update!
 Please use a different name
 == Por favor usa um nome diferente
 
-Show console window
-== Mostrar a janela da consola
-
 Show others
 == Mostrar os outros
 
@@ -843,9 +834,6 @@ Are you sure that you want to disconnect your dummy?
 Welcome to DDNet
 == Bem-vindo à DDNet
 
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== O mais importante é a comunicação: Não existe um tutorial pelo que terás de utilizar o chat (tecla t) para conversar com outros jogadores para que aprendas os básicos e os truques do jogo.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == É recomendado que verifiques as definições para ajustá-las a teu gosto antes de te juntares a um servidor.
 
@@ -991,14 +979,6 @@ Editor
 == Editor
 
 [Start menu]
-1 new mention
-== 1 nova menção
-
-%d new mentions
-== %d novas menções
-
-9+ new mentions
-== 9+ novas menções
 
 Successfully saved the replay!
 == 
@@ -1015,10 +995,31 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
 Server best:
 == 
 
 Personal best:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
 == 
 
 Render demo
@@ -1030,16 +1031,13 @@ Replace video
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Show DDNet map finishes in server browser
@@ -1114,16 +1112,19 @@ Pause
 Smooth Dynamic Camera
 == 
 
-Reset wanted weapon on death
-== 
-
 Skip the main menu
 == 
 
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
+== 
+
+Download community skins
 == 
 
 Vanilla skins only
@@ -1133,6 +1134,9 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1183,7 +1187,60 @@ Show HUD
 Chat command
 == 
 
-UI mouse s.
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Windowed fullscreen
@@ -1192,16 +1249,25 @@ Windowed fullscreen
 may cause delay
 == 
 
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
+Allows maps to render with more detail
 == 
 
 Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1213,7 +1279,25 @@ Threaded sound loading
 Assets
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages
@@ -1246,10 +1330,13 @@ Client message
 Preview
 == 
 
+Enable replays
+== 
+
 Default length: %d
 == 
 
-Enable replays
+When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Overlay entities
@@ -1258,10 +1345,22 @@ Overlay entities
 Show text entities
 == 
 
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
 Show others (own team only)
 == 
 
 Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Show other players' hook collision lines
@@ -1303,6 +1402,12 @@ Emoticons
 Assets directory
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Run server
 == 
 
@@ -1320,6 +1425,12 @@ Downloading %s:
 == 
 
 Update failed! Check log...
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual
@@ -1350,4 +1461,13 @@ Spree
 == 
 
 Grabs
+== 
+
+1 new mention
+== 
+
+%d new mentions
+== 
+
+9+ new mentions
 == 

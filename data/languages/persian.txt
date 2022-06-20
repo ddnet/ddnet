@@ -93,8 +93,6 @@ Dynamic Camera
 == کﺮﺤﺘﻣ ﻦﯿﺑﺭﻭﺩ
 Emoticon
 == ﺎﻫ ﻚﻠﻜﺷ
-Enter
-== ﻥﺪﺷ ﺩﺭﺍﻭ
 Error
 == ﺎﻄﺧ
 Error loading demo
@@ -161,8 +159,6 @@ MOTD
 == ﺕﺎﺤﯿﺿﻮﺗ
 Map
 == ﭗﻣ
-Mouse sens.
-== ﺱﻮﻣ ﺖﯿﺳﺎﺴﺣ
 Move left
 == ﭗﭼ ﻪﺑ ﺖﻛﺮﺣ
 Move player to spectators
@@ -308,9 +304,6 @@ Welcome to DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == ﺪﯿﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺪﻫﺪﯿﻣ ﺍﺭ ﮓﻨﯿﭘ ﻦﯾﺮﺗ ﻦﯿﯾﺎﭘ ﻪﮐ ﯼﺭﻭﺮﺳ ﺎﻤﺘﺣ ﻭ ﺪﯿﻨﮑﺑ ﻥﺩﺮﮐ ﯼﺯﺎﺑ ﻪﺑ ﻉﻭﺮﺷ Novice ﯼﺎﻫ ﺭﻭﺮﺳ ﺯﺍ ﺪﯾﺎﺑ ﺪﯿﺘﺴﻫ ﺩﺭﺍﻭ ﻩﺯﺎﺗ ﻪﮐ ﺎﻤﺷ.ﺖﺳﺍ ﻥﺎﯾﺎﭘ ﻂﺧ ﻪﺑ ﻉﻭﺮﺷ ﻂﺧ ﺯﺍ ﻥﺎﺘﻤﯿﺗ ﻭ ﺎﻤﺷ ﻥﺪﯿﺳﺭ ﻥﺁ ﻑﺪﻫ ﻪﮐ ﺖﺳﺍ ﯽﻤﯿﺗ ﻦﯾﻼﻧﺁ ﯼﺯﺎﺑ ﮏﯾ DDraceNetwork
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== .ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﻥﺎﺘﻧﺎﺘﺳﻭﺩ ﮏﻤﮐ ﻪﺑ ﺪﯾﺎﺑ ﻭ ﻩﺩﺯ ﺦﯾ ﺪﯾﻮﺸﺑ ﺎﻬﻧﺁ ﺩﺭﺍﻭ ﺮﮔﺍ ﻪﮐ ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺰﯾﺮﻓ ﻥﺍﻮﻨﻋ ﺎﺑ ﯽﯾﺎﻫ ﺖﻤﺴﻗ ﯼﺎﻫ ﭗﻣ ﺭﺩ
 
 Existing Player
 == ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻦﮑﯾﺯﺎﺑ
@@ -561,9 +554,6 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == ﺕﺎﻤﻬﻣ ﻥﺪﺷ ﻡﺎﻤﺗ ﻡﺎﮕﻨﻫ ﻪﺤﻠﺳﺍ ﺮﯿﯿﻐﺗ
 
-Reset wanted weapon on death
-== گﺮﻣ ﺯﺍ ﺪﻌﺑ ﻪﺤﻠﺳﺍ ﯽﻧﺎﺸﻧﺯﺎﺑ
-
 Show only chat messages from friends
 == ﻩﺪﺑ ﻥﺎﺸﻧ ﺍﺭ ﻥﺎﺘﺳﻭﺩ ﺖﭼ ﻂﻘﻓ
 
@@ -578,9 +568,6 @@ Max Screenshots
 
 Refresh Rate
 == ﯼﺯﺎﺳ ﻩﺯﺎﺗ ﺥﺮﻧ
-
-Show console window
-== ﺯﺪﻨﯾﻭ ﻝﻮﺴﻨﮐ ﺶﯾﺎﻤﻧ
 
 Dummy settings
 == dummy ﺕﺎﻤﯿﻈﻨﺗ
@@ -829,22 +816,34 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
 Personal best:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
 == 
 
 The server is running a non-standard tuning on a pure game type.
 == 
 
 The audio device couldn't be initialised.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
@@ -854,6 +853,12 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nickname below.
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 transmits your player name to info2.ddnet.tw
@@ -934,7 +939,16 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
 Vanilla skins only
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skins
@@ -967,7 +981,60 @@ Remote console
 Statboard
 == 
 
-UI mouse s.
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -991,16 +1058,25 @@ may cause delay
 FSAA samples
 == 
 
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
+Allows maps to render with more detail
 == 
 
 Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1043,6 +1119,24 @@ Lht.
 == 
 
 Alpha
+== 
+
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Show names in chat in team colors
@@ -1099,6 +1193,9 @@ Save the best demo of each race
 Default length: %d
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
 Show ghost
 == 
 
@@ -1111,10 +1208,22 @@ Overlay entities
 Show text entities
 == 
 
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
 Show others (own team only)
 == 
 
 Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 AntiPing: predict other players
@@ -1186,6 +1295,12 @@ https://ddnet.tw/discord
 https://wiki.ddnet.tw/
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Server executable not found, can't run server
 == 
 
@@ -1196,6 +1311,12 @@ Time limit: %d min
 == 
 
 Round
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

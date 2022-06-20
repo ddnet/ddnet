@@ -2,17 +2,16 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
-#include <base/color.h>
-#include <base/tl/sorted_array.h>
-#include <base/vmath.h>
-#include <engine/client/http.h>
+
+#include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>
+#include <vector>
 
 class CSkins : public CComponent
 {
 public:
-	class CGetPngFile : public CGetFile
+	class CGetPngFile : public CHttpRequest
 	{
 		CSkins *m_pSkins;
 
@@ -20,7 +19,7 @@ public:
 		virtual int OnCompletion(int State) override;
 
 	public:
-		CGetPngFile(CSkins *pSkins, IStorage *pStorage, const char *pUrl, const char *pDest, int StorageType = -2, CTimeout Timeout = CTimeout{4000, 500, 5}, HTTPLOG LogProgress = HTTPLOG::ALL);
+		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
 		CImageInfo m_Info;
 	};
 
@@ -35,17 +34,19 @@ public:
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 	};
 
+	typedef std::function<void(int)> TSkinLoadedCBFunc;
+
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 
-	void Refresh();
+	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
 	int Num();
 	const CSkin *Get(int Index);
 	int Find(const char *pName);
 
 private:
-	sorted_array<CSkin> m_aSkins;
-	sorted_array<CDownloadSkin> m_aDownloadSkins;
+	std::vector<CSkin> m_vSkins;
+	std::vector<CDownloadSkin> m_vDownloadSkins;
 	char m_EventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);

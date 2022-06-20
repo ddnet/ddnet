@@ -12,13 +12,16 @@
 #include <engine/shared/video.h>
 #endif
 
-#include <game/generated/protocol.h>
-
 #include "compression.h"
 #include "demo.h"
 #include "memheap.h"
 #include "network.h"
 #include "snapshot.h"
+
+const double g_aSpeeds[g_DemoSpeeds] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 40.0, 48.0, 56.0, 64.0};
+const CUuid SHA256_EXTENSION =
+	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
+		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
 static const unsigned char s_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
 static const unsigned char s_CurVersion = 6;
@@ -155,6 +158,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		while(true)
 		{
 			unsigned char aChunk[1024 * 64];
+			mem_zero(aChunk, sizeof(aChunk));
 			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
 			if(Bytes <= 0)
 				break;
@@ -400,9 +404,6 @@ void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta)
 	m_File = 0;
 	m_pKeyFrames = 0;
 	m_SpeedIndex = 4;
-
-	m_TickTime = 0;
-	m_Time = 0;
 
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
@@ -681,12 +682,7 @@ void CDemoPlayer::Pause()
 
 void CDemoPlayer::Unpause()
 {
-	if(m_Info.m_Info.m_Paused)
-	{
-		/*m_Info.start_tick = m_Info.current_tick;
-		m_Info.start_time = time_get();*/
-		m_Info.m_Info.m_Paused = false;
-	}
+	m_Info.m_Info.m_Paused = false;
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
 		IVideo::Current()->Pause(false);
@@ -908,8 +904,6 @@ int CDemoPlayer::Play()
 		DoTick();
 
 	// set start info
-	/*m_Info.start_tick = m_Info.previous_tick;
-	m_Info.start_time = time_get();*/
 	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
 	m_Info.m_LastUpdate = time();
 	return 0;
@@ -969,7 +963,7 @@ void CDemoPlayer::SetSpeed(float Speed)
 
 void CDemoPlayer::SetSpeedIndex(int Offset)
 {
-	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(sizeof(g_aSpeeds) / sizeof(g_aSpeeds[0]) - 1));
+	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(std::size(g_aSpeeds) - 1));
 	SetSpeed(g_aSpeeds[m_SpeedIndex]);
 }
 
@@ -1027,7 +1021,6 @@ int CDemoPlayer::Update(bool RealTime)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 			}
 		}
-		m_Time += m_TickTime;
 	}
 	return 0;
 }

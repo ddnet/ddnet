@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/sorted_array.h>
+#include <base/logger.h>
 
 #include <climits>
 #include <cmath>
@@ -14,21 +14,16 @@
 #include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <cstdio>
-#include <cstring>
-
 #include <game/client/ui.h>
 
+#include <game/localization.h>
 #include <game/version.h>
 
-#include <game/client/components/controls.h>
-#include <game/client/components/menus.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 
@@ -37,6 +32,49 @@
 #include <base/math.h>
 
 #include "console.h"
+
+class CConsoleLogger : public ILogger
+{
+	CGameConsole *m_pConsole;
+	std::mutex m_ConsoleMutex;
+
+public:
+	CConsoleLogger(CGameConsole *pConsole) :
+		m_pConsole(pConsole)
+	{
+		dbg_assert(pConsole != nullptr, "console pointer must not be null");
+	}
+
+	void Log(const CLogMessage *pMessage) override;
+	void OnConsoleDeletion();
+};
+
+void CConsoleLogger::Log(const CLogMessage *pMessage)
+{
+	// TODO: Fix thread-unsafety of accessing `g_Config.m_ConsoleOutputLevel`
+	if(pMessage->m_Level > IConsole::ToLogLevel(g_Config.m_ConsoleOutputLevel))
+	{
+		return;
+	}
+	ColorRGBA Color = gs_ConsoleDefaultColor;
+	if(pMessage->m_HaveColor)
+	{
+		Color.r = pMessage->m_Color.r / 255.0;
+		Color.g = pMessage->m_Color.g / 255.0;
+		Color.b = pMessage->m_Color.b / 255.0;
+	}
+	std::unique_lock<std::mutex> Guard(m_ConsoleMutex);
+	if(m_pConsole)
+	{
+		m_pConsole->m_LocalConsole.PrintLine(pMessage->m_aLine, pMessage->m_LineLength, Color);
+	}
+}
+
+void CConsoleLogger::OnConsoleDeletion()
+{
+	std::unique_lock<std::mutex> Guard(m_ConsoleMutex);
+	m_pConsole = nullptr;
+}
 
 CGameConsole::CInstance::CInstance(int Type)
 {
@@ -69,18 +107,22 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 void CGameConsole::CInstance::ClearBacklog()
 {
+	m_BacklogLock.lock();
 	m_Backlog.Init();
-	m_BacklogActPage = 0;
+	m_BacklogCurPage = 0;
+	m_BacklogLock.unlock();
 }
 
 void CGameConsole::CInstance::ClearBacklogYOffsets()
 {
+	m_BacklogLock.lock();
 	auto *pEntry = m_Backlog.First();
 	while(pEntry)
 	{
 		pEntry->m_YOffset = -1.0f;
 		pEntry = m_Backlog.Next(pEntry);
 	}
+	m_BacklogLock.unlock();
 }
 
 void CGameConsole::CInstance::ClearHistory()
@@ -303,26 +345,26 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
-			++m_BacklogActPage;
+			++m_BacklogCurPage;
 			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
 			m_pGameConsole->m_HasSelection = false;
-			--m_BacklogActPage;
-			if(m_BacklogActPage < 0)
-				m_BacklogActPage = 0;
+			--m_BacklogCurPage;
+			if(m_BacklogCurPage < 0)
+				m_BacklogCurPage = 0;
 		}
 		// in order not to conflict with CLineInput's handling of Home/End only
 		// react to it when the input is empty
 		else if(Event.m_Key == KEY_HOME && m_Input.GetString()[0] == '\0')
 		{
-			m_BacklogActPage = INT_MAX;
+			m_BacklogCurPage = INT_MAX;
 			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.GetString()[0] == '\0')
 		{
-			m_BacklogActPage = 0;
+			m_BacklogCurPage = 0;
 			m_pGameConsole->m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_LSHIFT)
@@ -374,13 +416,12 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 }
 
-void CGameConsole::CInstance::PrintLine(const char *pLine, ColorRGBA PrintColor)
+void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA PrintColor)
 {
-	int Len = str_length(pLine);
-
 	if(Len > 255)
 		Len = 255;
 
+	m_BacklogLock.lock();
 	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry) + Len);
 	pEntry->m_YOffset = -1.0f;
 	pEntry->m_PrintColor = PrintColor;
@@ -388,6 +429,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, ColorRGBA PrintColor)
 	pEntry->m_aText[Len] = 0;
 	if(m_pGameConsole->m_ConsoleType == m_Type)
 		m_pGameConsole->m_NewLineCounter++;
+	m_BacklogLock.unlock();
 }
 
 CGameConsole::CGameConsole() :
@@ -397,6 +439,12 @@ CGameConsole::CGameConsole() :
 	m_ConsoleState = CONSOLE_CLOSED;
 	m_StateChangeEnd = 0.0f;
 	m_StateChangeDuration = 0.1f;
+}
+
+CGameConsole::~CGameConsole()
+{
+	if(m_pConsoleLogger)
+		m_pConsoleLogger->OnConsoleDeletion();
 }
 
 float CGameConsole::TimeNow()
@@ -685,7 +733,9 @@ void CGameConsole::OnRender()
 			}
 		}
 
-		//	render log (actual page, wrap lines)
+		pConsole->m_BacklogLock.lock();
+
+		// render log (current page, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 		float OffsetY = 0.0f;
 		float LineOffset = 1.0f;
@@ -714,7 +764,11 @@ void CGameConsole::OnRender()
 			m_MouseIsPress = false;
 		}
 
-		for(int Page = 0; Page <= pConsole->m_BacklogActPage; ++Page, OffsetY = 0.0f)
+		static int s_LastActivePage = pConsole->m_BacklogCurPage;
+		if(pConsole->m_BacklogCurPage == INT_MAX)
+			s_LastActivePage = INT_MAX;
+		int TotalPages = 1;
+		for(int Page = 0; Page <= s_LastActivePage; ++Page, OffsetY = 0.0f)
 		{
 			while(pEntry)
 			{
@@ -742,8 +796,8 @@ void CGameConsole::OnRender()
 				if(y - OffsetY <= RowHeight)
 					break;
 
-				// just render output from actual backlog page (render bottom up)
-				if(Page == pConsole->m_BacklogActPage)
+				// just render output from current backlog page (render bottom up)
+				if(Page == s_LastActivePage)
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
@@ -788,27 +842,19 @@ void CGameConsole::OnRender()
 				Input()->SetClipboardText(SelectionString.c_str());
 			}
 
-			//	actual backlog page number is too high, render last available page (current checked one, render top down)
-			if(!pEntry && Page < pConsole->m_BacklogActPage)
-			{
-				pConsole->m_BacklogActPage = Page;
-				pEntry = pConsole->m_Backlog.First();
-				while(OffsetY > 0.0f && pEntry)
-				{
-					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
-					Cursor.m_LineWidth = Screen.w - 10.0f;
-					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					OffsetY -= pEntry->m_YOffset;
-					pEntry = pConsole->m_Backlog.Next(pEntry);
-				}
+			if(!pEntry)
 				break;
-			}
+			TotalPages++;
 		}
+		pConsole->m_BacklogCurPage = clamp(pConsole->m_BacklogCurPage, 0, TotalPages - 1);
+		s_LastActivePage = pConsole->m_BacklogCurPage;
+
+		pConsole->m_BacklogLock.unlock();
 
 		// render page
 		char aBuf[128];
 		TextRender()->TextColor(1, 1, 1, 1);
-		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogActPage + 1);
+		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogCurPage + 1);
 		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 
 		// render version
@@ -860,18 +906,15 @@ void CGameConsole::Toggle(int Type)
 
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			/*Input()->MouseModeAbsolute();*/
-			m_pClient->m_Menus.UseMouseButtons(false);
+			UI()->SetEnabled(false);
 			m_ConsoleState = CONSOLE_OPENING;
-			/*// reset controls
-			m_pClient->m_Controls.OnReset();*/
 
 			Input()->SetIMEState(true);
 		}
 		else
 		{
 			Input()->MouseModeRelative();
-			m_pClient->m_Menus.UseMouseButtons(true);
+			UI()->SetEnabled(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 
@@ -894,11 +937,13 @@ void CGameConsole::Dump(int Type)
 	IOHANDLE io = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(io)
 	{
+		pConsole->m_BacklogLock.lock();
 		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry; pEntry = pConsole->m_Backlog.Next(pEntry))
 		{
 			io_write(io, pEntry->m_aText, str_length(pEntry->m_aText));
 			io_write_newline(io);
 		}
+		pConsole->m_BacklogLock.unlock();
 		io_close(io);
 	}
 }
@@ -933,33 +978,18 @@ void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserD
 	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
 }
 
-void CGameConsole::ClientConsolePrintCallback(const char *pStr, void *pUserData, ColorRGBA PrintColor)
-{
-	((CGameConsole *)pUserData)->m_LocalConsole.PrintLine(pStr, PrintColor);
-}
-
 void CGameConsole::ConConsolePageUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
-	pConsole->m_BacklogActPage++;
+	pConsole->m_BacklogCurPage++;
 }
 
 void CGameConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserData)
 {
 	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
-	--pConsole->m_BacklogActPage;
-	if(pConsole->m_BacklogActPage < 0)
-		pConsole->m_BacklogActPage = 0;
-}
-
-void CGameConsole::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 1)
-	{
-		CGameConsole *pThis = static_cast<CGameConsole *>(pUserData);
-		pThis->Console()->SetPrintOutputLevel(pThis->m_PrintCBIndex, pResult->GetInteger(0));
-	}
+	--pConsole->m_BacklogCurPage;
+	if(pConsole->m_BacklogCurPage < 0)
+		pConsole->m_BacklogCurPage = 0;
 }
 
 void CGameConsole::RequireUsername(bool UsernameReq)
@@ -974,9 +1004,9 @@ void CGameConsole::RequireUsername(bool UsernameReq)
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_LOCAL)
-		m_LocalConsole.PrintLine(pLine);
+		m_LocalConsole.PrintLine(pLine, str_length(pLine), ColorRGBA{1, 1, 1, 1});
 	else if(Type == CONSOLETYPE_REMOTE)
-		m_RemoteConsole.PrintLine(pLine);
+		m_RemoteConsole.PrintLine(pLine, str_length(pLine), ColorRGBA{1, 1, 1, 1});
 }
 
 void CGameConsole::OnConsoleInit()
@@ -987,9 +1017,6 @@ void CGameConsole::OnConsoleInit()
 
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	//
-	m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_ConsoleOutputLevel, ClientConsolePrintCallback, this);
-
 	Console()->Register("toggle_local_console", "", CFGFLAG_CLIENT, ConToggleLocalConsole, this, "Toggle local console");
 	Console()->Register("toggle_remote_console", "", CFGFLAG_CLIENT, ConToggleRemoteConsole, this, "Toggle remote console");
 	Console()->Register("clear_local_console", "", CFGFLAG_CLIENT, ConClearLocalConsole, this, "Clear local console");
@@ -999,12 +1026,12 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("console_page_up", "", CFGFLAG_CLIENT, ConConsolePageUp, this, "Previous page in console");
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
-
-	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 }
 
 void CGameConsole::OnInit()
 {
+	m_pConsoleLogger = new CConsoleLogger(this);
+	Engine()->SetAdditionalLogger(std::unique_ptr<ILogger>(m_pConsoleLogger));
 	// add resize event
 	Graphics()->AddWindowResizeListener([this](void *) {
 		m_LocalConsole.ClearBacklogYOffsets();

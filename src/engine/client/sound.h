@@ -7,7 +7,7 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
-#include "SDL.h"
+#include <SDL_audio.h>
 
 class CSound : public IEngineSound
 {
@@ -18,10 +18,10 @@ public:
 	IEngineGraphics *m_pGraphics;
 	IStorage *m_pStorage;
 
-	virtual int Init();
+	int Init() override;
 
-	int Update();
-	int Shutdown();
+	int Update() override;
+	int Shutdown() override;
 	int AllocID();
 
 	static void RateConvert(int SampleID);
@@ -30,33 +30,37 @@ public:
 	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
 
-	virtual bool IsSoundEnabled() { return m_SoundEnabled != 0; }
+	bool IsSoundEnabled() override { return m_SoundEnabled != 0; }
 
-	virtual int LoadWV(const char *pFilename);
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor);
-	virtual int LoadOpus(const char *pFilename);
-	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor);
-	virtual void UnloadSample(int SampleID);
+	int LoadWV(const char *pFilename) override;
+	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
+	int LoadOpus(const char *pFilename) override;
+	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
+	void UnloadSample(int SampleID) override;
 
-	virtual float GetSampleDuration(int SampleID); // in s
+	float GetSampleDuration(int SampleID) override; // in s
 
-	virtual void SetListenerPos(float x, float y);
-	virtual void SetChannel(int ChannelID, float Vol, float Pan);
+	void SetListenerPos(float x, float y) override;
+	void SetChannel(int ChannelID, float Vol, float Pan) override;
 
-	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume);
-	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff);
-	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y);
-	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset); // in s
+	void SetVoiceVolume(CVoiceHandle Voice, float Volume) override;
+	void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) override;
+	void SetVoiceLocation(CVoiceHandle Voice, float x, float y) override;
+	void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) override; // in s
 
-	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius);
-	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height);
+	void SetVoiceCircle(CVoiceHandle Voice, float Radius) override;
+	void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) override;
 
 	CVoiceHandle Play(int ChannelID, int SampleID, int Flags, float x, float y);
-	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y);
-	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags);
-	virtual void Stop(int SampleID);
-	virtual void StopAll();
-	virtual void StopVoice(CVoiceHandle Voice);
+	CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) override;
+	CVoiceHandle Play(int ChannelID, int SampleID, int Flags) override;
+	void Stop(int SampleID) override;
+	void StopAll() override;
+	void StopVoice(CVoiceHandle Voice) override;
+
+	ISoundMixFunc GetSoundMixFunc() override;
+	void PauseAudioDevice() override;
+	void UnpauseAudioDevice() override;
 };
 
 #endif

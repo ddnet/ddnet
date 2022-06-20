@@ -1,6 +1,5 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
-#include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/server/gamemodes/DDRace.h>
@@ -16,54 +15,56 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDNet is run by the DDNet staff (DDNet.tw/staff)");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Great maps and many ideas from the great community");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Help and code by eeeee, HMH, east, CookieMichal, Learath2,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Savander, laxa, Tobii, BeaR, Wohoo, nuborn, timakro, Shiki,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"trml, Soreu, hi_leute_gll, Lady Saavik, Chairn, heinrich5991,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"swick, oy, necropotame, Ryozuki, Redix, d3fault, marcelherd,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"BannZay, ACTom, SiuFuWong, PathosEthosLogos, TsFreddie,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Jupeyy, noby, ChillerDragon, ZombieToad, weez15, z6zzz,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Fireball, Banana090, axblk, yangfl, Kaffeine,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Zodiac & others.");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"Zodiac, c0d3d3v, GiuCcc, Ravie, Robyt3, simpygirl,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"sjrc6, Cellegen, srdante, Nouaa & others.");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Based on DDRace by the DDRace developers,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"which is a mod of Teeworlds by the Teeworlds developers.");
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDraceNetwork Mod. Version: " GAME_VERSION);
 	if(GIT_SHORTREV_HASH)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Git revision hash: %s", GIT_SHORTREV_HASH);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 	}
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Official site: DDNet.tw");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"For more info: /cmdlist");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Or visit DDNet.tw");
 }
 
@@ -87,11 +88,11 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() == 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"/cmdlist will show a list of all chat commands");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"/help + any command will show you the help for this command");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Example /help settings will display the help about /settings");
 	}
 	else
@@ -105,16 +106,16 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pCmdInfo->m_pName, pCmdInfo->m_pParams);
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help", aBuf);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 			}
 
 			if(pCmdInfo->m_pHelp)
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help", pCmdInfo->m_pHelp);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pCmdInfo->m_pHelp);
 		}
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"help",
+				"chatresp",
 				"Command is either unknown or you have given a blank command without any parameters.");
 	}
 }
@@ -125,11 +126,11 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() == 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"to check a server setting say /settings and setting's name, setting names are:");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"teams, cheats, collision, hooking, endlesshooking, me, ");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"hitting, oldlaser, timeout, votes, pause and scores");
 	}
 	else
@@ -149,53 +150,53 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 					"Teams are not available on this server" :
 					"You have to be in a team to play on this server", /*g_Config.m_SvTeamStrict ? "and if you die in a team all of you die" : */
 				"and all of your team will die if the team is locked");
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
 		else if(str_comp(pArg, "cheats") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvTestingCommands ?
 					"Cheats are enabled on this server" :
 					"Cheats are disabled on this server");
 		}
 		else if(str_comp(pArg, "collision") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				ColTemp ?
 					"Players can collide on this server" :
 					"Players can't collide on this server");
 		}
 		else if(str_comp(pArg, "hooking") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				HookTemp ?
 					"Players can hook each other on this server" :
 					"Players can't hook each other on this server");
 		}
 		else if(str_comp(pArg, "endlesshooking") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvEndlessDrag ?
 					"Players hook time is unlimited" :
 					"Players hook time is limited");
 		}
 		else if(str_comp(pArg, "hitting") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvHit ?
 					"Players weapons affect others" :
 					"Players weapons has no affect on others");
 		}
 		else if(str_comp(pArg, "oldlaser") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvOldLaser ?
 					"Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
 					"Lasers can't hit you if you shot them, and they pull others towards the shooter");
 		}
 		else if(str_comp(pArg, "me") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvSlashMe ?
 					"Players can use /me commands the famous IRC Command" :
 					"Players can't use the /me command");
@@ -203,11 +204,11 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		else if(str_comp(pArg, "timeout") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "The Server Timeout is currently set to %d seconds", g_Config.m_ConnTimeout);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
 		else if(str_comp(pArg, "votes") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvVoteKick ?
 					"Players can use Callvote menu tab to kick offenders" :
 					"Players can't use the Callvote menu tab to kick offenders");
@@ -216,7 +217,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 				str_format(aBuf, sizeof(aBuf),
 					"Players are banned for %d minute(s) if they get voted off", g_Config.m_SvVoteKickBantime);
 
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 					g_Config.m_SvVoteKickBantime ?
 						aBuf :
 						"Players are just kicked and not banned if they get voted off");
@@ -224,21 +225,21 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		}
 		else if(str_comp(pArg, "pause") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvPauseable ?
 					"/spec will pause you and your tee will vanish" :
 					"/spec will pause you but your tee will not vanish");
 		}
 		else if(str_comp(pArg, "scores") == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvHideScore ?
 					"Scores are private on this server" :
 					"Scores are public on this server");
 		}
 		else
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "settings",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				"no matching settings found, type /settings to view them");
 		}
 	}
@@ -250,7 +251,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 	bool Printed = false;
 	if(g_Config.m_SvDDRaceRules)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Be nice.");
 		Printed = true;
 	}
@@ -272,13 +273,13 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 		if(pRuleLine[0])
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-				"rules", pRuleLine);
+				"chatresp", pRuleLine);
 			Printed = true;
 		}
 	}
 	if(!Printed)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "rules",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"No Rules Defined, Kill em all!!");
 	}
 }
@@ -299,7 +300,7 @@ void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "You are force-paused for %d seconds.", (PauseState - pServ->Tick()) / pServ->TickSpeed());
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 	}
 	else if(pResult->NumArguments() > 0)
 	{
@@ -339,7 +340,7 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 		IServer *pServ = pSelf->Server();
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "You are force-paused for %d seconds.", (PauseState - pServ->Tick()) / pServ->TickSpeed());
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "spec", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		return;
 	}
 
@@ -387,7 +388,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvHideScore)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Showing the team top 5 is not allowed on this server.");
 		return;
 	}
@@ -407,7 +408,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
 							     pSelf->Server()->ClientName(pResult->m_ClientID) :
 							     pResult->GetString(0);
-			pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pRequestedName, 0);
+			pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, 0);
 		}
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
@@ -415,13 +416,13 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 		const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
 						     pSelf->Server()->ClientName(pResult->m_ClientID) :
 						     pResult->GetString(0);
-		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
+		pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
 	}
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5", "/top5team needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5", "Example: /top5team, /top5team me, /top5team Hans, /top5team \"Papa Smurf\" 5");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "teamtop5", "Bad: /top5team Papa Smurf 5 # Good: /top5team \"Papa Smurf\" 5 ");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "/top5team needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Example: /top5team, /top5team me, /top5team Hans, /top5team \"Papa Smurf\" 5");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Bad: /top5team Papa Smurf 5 # Good: /top5team \"Papa Smurf\" 5 ");
 	}
 }
 
@@ -433,7 +434,7 @@ void CGameContext::ConTop(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvHideScore)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "top",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Showing the top is not allowed on this server.");
 		return;
 	}
@@ -477,9 +478,9 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "times", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
 	}
 }
 
@@ -496,12 +497,12 @@ void CGameContext::ConDND(IConsole::IResult *pResult, void *pUserData)
 	if(pPlayer->m_DND)
 	{
 		pPlayer->m_DND = false;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnd", "You will receive global chat and server messages");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You will receive global chat and server messages");
 	}
 	else
 	{
 		pPlayer->m_DND = true;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnd", "You will not receive any further global chat and server messages");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You will not receive any further global chat and server messages");
 	}
 }
 
@@ -513,14 +514,14 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvMapVote == 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "map",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"/map is disabled");
 		return;
 	}
 
 	if(pResult->NumArguments() <= 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "map", "Example: /map adr3 to call vote for Adrenaline 3. This means that the map name must start with 'a' and contain the characters 'd', 'r' and '3' in that order");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Example: /map adr3 to call vote for Adrenaline 3. This means that the map name must start with 'a' and contain the characters 'd', 'r' and '3' in that order");
 		return;
 	}
 
@@ -576,15 +577,13 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 			{
 				if(pSelf->m_apPlayers[i]->GetCharacter())
 					pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
-				/*if(pSelf->Server()->IsSixup(i))
-					pSelf->SendClientInfo(i, i);*/
 				return;
 			}
 		}
 	}
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "print",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Your timeout code has been set. 0.7 clients can not reclaim their tees on timeout; however, a 0.6 client can claim your tee ");
 	}
 
@@ -609,7 +608,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Practice mode is disabled");
 		return;
 	}
@@ -622,7 +621,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Join a team to enable practice mode, which means you can use /r, but can't earn a rank.");
 		return;
 	}
@@ -631,7 +630,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Team is already in practice mode");
 		return;
 	}
@@ -665,7 +664,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	if(NumCurrentVotes >= NumRequiredVotes)
 	{
-		Teams.EnablePractice(Team);
+		Teams.SetPractice(Team, true);
 		pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
 	}
 }
@@ -686,7 +685,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Swap is disabled on this server.");
 		return;
 	}
@@ -695,11 +694,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
-	if(Team < TEAM_FLOCK || (Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || Team >= TEAM_SUPER)
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"Join a team to use swap feature, which means you can swap positions with each other.");
 		return;
 	}
@@ -716,30 +715,39 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	if(TargetClientId < 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player not found");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Player not found");
 		return;
 	}
 
 	if(TargetClientId == pResult->m_ClientID)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can't swap with yourself");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't swap with yourself");
 		return;
 	}
 
 	int TargetTeam = Teams.m_Core.Team(TargetClientId);
 	if(TargetTeam != Team)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Player is on a different team");
-		return;
-	}
-
-	if(!Teams.IsStarted(Team))
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Need to have started the map to swap with a player.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Player is on a different team");
 		return;
 	}
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+	if(Team == TEAM_FLOCK && g_Config.m_SvTeam != 3)
+	{
+		CCharacter *pChr = pPlayer->GetCharacter();
+		CCharacter *pSwapChr = pSwapPlayer->GetCharacter();
+		if(!pChr || !pSwapChr || pChr->m_DDRaceState != DDRACE_STARTED || pSwapChr->m_DDRaceState != DDRACE_STARTED)
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You and other player need to have started the map");
+			return;
+		}
+	}
+	else if(!Teams.IsStarted(Team))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Need to have started the map to swap with a player.");
+		return;
+	}
 
 	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)
@@ -804,7 +812,7 @@ void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"teamrank",
+				"chatresp",
 				"Showing the team rank of other players is not allowed on this server.");
 	}
 	else
@@ -825,7 +833,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"rank",
+				"chatresp",
 				"Showing the rank of other players is not allowed on this server.");
 	}
 	else
@@ -841,7 +849,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "lock",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Teams are disabled");
 		return;
 	}
@@ -857,7 +865,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"print",
+			"chatresp",
 			"This team can't be locked");
 		return;
 	}
@@ -887,7 +895,7 @@ void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "unlock",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Teams are disabled");
 		return;
 	}
@@ -920,14 +928,14 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Teams are disabled");
 		return;
 	}
 
 	if(!g_Config.m_SvInvite)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Invites are disabled");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Invites are disabled");
 		return;
 	}
 
@@ -946,19 +954,19 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 
 		if(Target < 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player not found");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Player not found");
 			return;
 		}
 
 		if(pController->m_Teams.IsInvited(Team, Target))
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Player already invited");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Player already invited");
 			return;
 		}
 
 		if(pSelf->m_apPlayers[pResult->m_ClientID] && pSelf->m_apPlayers[pResult->m_ClientID]->m_LastInvited + g_Config.m_SvInviteFrequency * pSelf->Server()->TickSpeed() > pSelf->Server()->Tick())
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't invite this quickly");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't invite this quickly");
 			return;
 		}
 
@@ -973,7 +981,7 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTeam(Team, aBuf);
 	}
 	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "invite", "Can't invite players to this team");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't invite players to this team");
 }
 
 void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
@@ -991,13 +999,13 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"join",
+			"chatresp",
 			"You are running a vote please try again after the vote is done!");
 		return;
 	}
 	else if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Teams are disabled");
 		return;
 	}
@@ -1005,7 +1013,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"join",
+			"chatresp",
 			"You must join a team and play with somebody or else you can\'t play");
 		pPlayer->GetCharacter()->m_LastStartWarning = pSelf->Server()->Tick();
 	}
@@ -1014,7 +1022,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(pPlayer->GetCharacter() == 0)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				"You can't change teams while you are dead/a spectator.");
 		}
 		else
@@ -1026,12 +1034,12 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 
 			if(pPlayer->m_Last_Team + (int64_t)pSelf->Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > pSelf->Server()->Tick())
 			{
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 					"You can\'t change teams that fast!");
 			}
 			else if(Team > 0 && Team < MAX_CLIENTS && pController->m_Teams.TeamLocked(Team) && !pController->m_Teams.IsInvited(Team, pResult->m_ClientID))
 			{
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 					g_Config.m_SvInvite ?
 						"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 						"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
@@ -1040,11 +1048,11 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", aBuf);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 			}
 			else if(const char *pError = pController->m_Teams.SetCharacterTeam(pPlayer->GetCID(), Team))
 			{
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join", pError);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pError);
 			}
 			else
 			{
@@ -1067,7 +1075,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		{
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"join",
+				"chatresp",
 				"You can't check your team while you are dead/a spectator.");
 		}
 		else
@@ -1077,7 +1085,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				sizeof(aBuf),
 				"You are in team %d",
 				((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID));
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "join",
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				aBuf);
 		}
 	}
@@ -1099,7 +1107,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"me",
+			"chatresp",
 			"/me is disabled on this server");
 }
 
@@ -1127,7 +1135,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
+			"chatresp",
 			(pPlayer->m_EyeEmoteEnabled) ?
 				"You can now use the preset eye emotes." :
 				"You don't have any eye emotes, remember to bind some. (until you die)");
@@ -1141,7 +1149,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 		pPlayer->m_EyeEmoteEnabled = !pPlayer->m_EyeEmoteEnabled;
 	pSelf->Console()->Print(
 		IConsole::OUTPUT_LEVEL_STANDARD,
-		"emote",
+		"chatresp",
 		(pPlayer->m_EyeEmoteEnabled) ?
 			"You can now use the preset eye emotes." :
 			"You don't have any eye emotes, remember to bind some. (until you die)");
@@ -1152,7 +1160,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(g_Config.m_SvEmotionalTees == -1)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "emote",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Emotes are disabled.");
 		return;
 	}
@@ -1168,11 +1176,11 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
+			"chatresp",
 			"Emote commands are: /emote surprise /emote blink /emote close /emote angry /emote happy /emote pain /emote normal");
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
+			"chatresp",
 			"Example: /emote surprise 10 for 10 seconds or /emote surprise (default 1 second)");
 	}
 	else
@@ -1198,7 +1206,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
-				"emote", "Unknown emote... Say /emote");
+				"chatresp", "Unknown emote... Say /emote");
 			return;
 		}
 
@@ -1244,7 +1252,7 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
 	else
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
-			"showotherschat",
+			"chatresp",
 			"Showing players from other teams is disabled");
 }
 
@@ -1337,7 +1345,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "%s current race time is %s", aBufName, aBufTime);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "time", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
 void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
@@ -1417,13 +1425,13 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_NONE);
 		else
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "Unknown parameter. Accepted values: default, gametimer, broadcast, both, none");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Unknown parameter. Accepted values: default, gametimer, broadcast, both, none");
 			return;
 		}
 
 		if(!Result)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", "Selected timertype is not supported by your client");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Selected timertype is not supported by your client");
 			return;
 		}
 
@@ -1436,7 +1444,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
 		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
 
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "timer", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
 void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
@@ -1460,6 +1468,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->Rescue();
+	pChr->UnFreeze();
 }
 
 void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
@@ -1507,6 +1516,8 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->Teleport(pChr, Pos);
+	pChr->UnFreeze();
+	pChr->Core()->m_Vel = vec2(0, 0);
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
@@ -1541,7 +1552,7 @@ void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 		else
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
-				"points",
+				"chatresp",
 				"Showing the global points of other players is not allowed on this server.");
 	}
 	else
@@ -1557,7 +1568,7 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvHideScore)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "toppoints",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Showing the global top points is not allowed on this server.");
 		return;
 	}
@@ -1566,4 +1577,25 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Score()->ShowTopPoints(pResult->m_ClientID, pResult->GetInteger(0));
 	else
 		pSelf->Score()->ShowTopPoints(pResult->m_ClientID);
+}
+
+void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(g_Config.m_SvHideScore)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Showing the checkpoint times is not allowed on this server.");
+		return;
+	}
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	const char *pName = pResult->GetString(0);
+	pSelf->Score()->LoadPlayerData(pResult->m_ClientID, pName);
 }

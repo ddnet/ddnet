@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "projectile.h"
+#include <engine/shared/config.h>
+
 #include <game/client/projectile_data.h>
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
-#include <engine/shared/config.h>
+#include "character.h"
+#include "projectile.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -86,13 +89,10 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
 	bool isWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
-		pOwnerChar->IsAlive() &&
-		pTargetChr->IsAlive() &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
 		isWeaponCollide = true;
@@ -102,15 +102,14 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
-			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-				(m_Owner != -1) ? TeamMask : -1LL);
+			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), -1LL);
 		}
 		else if(m_Freeze)
 		{
 			CCharacter *apEnts[MAX_CLIENTS];
 			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_Status[apEnts[i]->Team()])))
 					apEnts[i]->Freeze();
 		}
 		if(Collide && m_Bouncing != 0)
@@ -121,9 +120,9 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if(fabs(m_Direction.x) < 1e-6)
+			if(fabs(m_Direction.x) < 1e-6f)
 				m_Direction.x = 0;
-			if(fabs(m_Direction.y) < 1e-6)
+			if(fabs(m_Direction.y) < 1e-6f)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
@@ -141,10 +140,7 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
 
-			int64_t TeamMask = -1LL;
-
-			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-				(m_Owner != -1) ? TeamMask : -1LL);
+			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), -1LL);
 		}
 		m_MarkedForDestroy = true;
 	}

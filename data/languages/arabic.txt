@@ -21,7 +21,7 @@
 == ﺖﻀﻣ ﻦﻧﺍﻮﺛ %i
 
 %s wins!
-== !ﺯﺎﻓ %s 
+== !ﺯﺎﻓ %s
 
 -Page %d-
 == -ﺔﺤﻔﺻ &d-
@@ -137,9 +137,6 @@ Dynamic Camera
 Emoticon
 == ﺕﻮﻤﻳﺍ
 
-Enter
-== ﺀﺍﺪﺑﺍ
-
 Error
 == ﺀﺎﻄﺧ
 
@@ -238,9 +235,6 @@ MOTD
 
 Map
 == ﺏﺎﻤﻟﺍ
-
-Mouse sens.
-== ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
 
 Move left
 == ﺭﺎﺴﻳ ﻙﺮﺤﺘﻟﺍ
@@ -768,9 +762,6 @@ AntiPing: predict weapons
 Highlighted message
 == ﻪﻴﺒﻨﺘﻟﺍ ﻞﺋﺎﺳﺭ
 
-Reset wanted weapon on death
-== ﺕﻮﻤﻟﺍ ﺪﻨﻋ ﺏﻮﻠﻄﻣ ﺡﻼﺳ ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
-
 Switch weapon when out of ammo
 == ﺓﺮﻴﺧﺬﻟﺍ ﺫﺎﻔﻧ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﺮﻴﻴﻐﺗ
 
@@ -785,9 +776,6 @@ Automatically take game over screenshot
 
 Please use a different name
 == ﺮﺧﺃ ﻢﺳﺍ ﺭﺎﻴﺘﺧﺎﺑ ﻢﻗ ﺀﺎﺟﺭ
-
-Show console window
-== ﻢﻜﺤﺘﻟﺍ ﺓﺪﺣﻭ ﺓﺬﻓﺎﻧ ﺽﺮﻋ
 
 Gameplay
 == ﺐﻌﻠﻟﺍ
@@ -805,7 +793,7 @@ Reset
 == ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
 
 Automatically create statboard csv
-== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ 
+== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ
 
 Show tiles layers from BG map
 == ﺔﻴﻔﻠﺨﻟﺍ ﺏﺎﻤﻠﻟ ﺐﻧﺎﺠﺘﻟﺍ ﺕﺎﻘﺒﻃ ﺭﺎﻬﻇﺇ
@@ -875,15 +863,6 @@ Welcome to DDNet
 
 may cause delay
 == ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
-
-Preinit VBO (iGPUs only)
-== Preinit-VBO (iGPUs ﻂﻘﻓ)
-
-Multiple texture units (disable for macOS)
-== ﺮﺘﺴﻜﺗ ﻦﻣ ﺮﺜﻛﺍ ( ﺖﻨﻛ ﺍﺫﺍ ﺔﺋﺎﻔﻃﺍ macOS )
-
-UI mouse s.
-== ﻮﻴﻨﻣ ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
 
 Indicate map finish
 == ﺔﻗﺎﻄﺒﻟﺍ ﺭﺎﺼﺘﻧﺍ ﺭﺎﻬﻇﺇ
@@ -1017,9 +996,6 @@ Pause
 transmits your player name to info2.ddnet.tw
 == ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info2.ddnet.tw
 
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== .ﺰﻳﺮﻔﻟﺍ ﻦﻣ ﺎﻬﻇﺎﻘﻳﺇﻭ ﻯﺮﺧﻷﺍ ﺕﻼﻤﺤﻤﻟﺍ ﺏﺮﻀﻟ (ﺮﺴﻳﻷﺍ ﺱﻭﺎﻤﻟﺍ) ﺔﻗﺮﻄﻤﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ ﻦﻜﻤﻳ .ﺔﺤﻠﺳﻷﺍ ﺮﻴﻐﺗ ﺱﻭﺎﻤﻟﺍ ﺔﻠﺠﻋ
-
 Server best:
 == :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
 
@@ -1053,23 +1029,14 @@ Kill
 Please enter your nickname below.
 == ﻚﺑ ﺹﺎﺨﻟﺍ ﻢﺳﺍ ﻝﺎﺧﺩﺇ ﺀﺎﺟﺮﻟﺍ
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== .ﺀﺍﺰﺟﻷﺍ ﻩﺬﻫ ﺯﻭﺎﺠﺘﻟ ﺍًﻌﻣ ﻞﻤﻌﻟﺍ ﻚﻴﻠﻋ .ﺍًﺘﻗﺆﻣ ﻙﺮﺤﺘﻟﺍ ﻰﻠﻋ ﺓﺭﺩﺎﻗ ﺮﻴﻏ ﻕﻼﻄﻧﻹﺍ ﺔﻄﻘﻧ ﻞﻌﺠﻳ ﺎﻤﻣ ، ﻩﺰﻳﺮﻓ ﻰﻠﻋ ﺕﺎﺑﺎﻣ ﻱﻮﺘﺤﺗ
-
 Render
 == ﻞﻌﺟ
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== ﻚﻴﻟﺍ ﺹﺎﺨﺷﻻﺍ ﺐﺤﺳﻭ ﺏﺎﻤﻟﺎﺑ ﻙﺮﺤﺘﻠﻟ ﻡﺪﺨﺘﺴﻳ )ﻦﻴﻤﻳ ﻚﻠﻛ( ﺐﺤﺴﻠﻟ
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == .ﺮﻓﺮﻴﺴﻟﺍ ﻰﻟﺇ ﻡﺎﻤﻀﻧﻻﺍ ﻞﺒﻗ ﻚﺘﺒﻏﺭ ﺐﺴﺣ ﺎﻬﻄﺒﻀﻟ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻦﻣ ﻖﻘﺤﺘﻟﺎﺑ ﻰﺻﻮﻳ
 
 Use high DPI
 == ﻲﻟﺎﻋ IPD ﻡﺍﺪﺨﺘﺳﺍ
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== .ﺔﺒﻌﻠﻟﺍ ﻞﻴﺣﻭ ﺕﺎﻴﺳﺎﺳﺃ ﻢﻠﻌﺘﻟ ﻦﻳﺮﺧﺁ ﻦﻴﺒﻋﻻ ﻊﻣ  (ﺭﺯ t) ﺔﺷﺩﺭﺪﻟﺍ ﻚﻴﻠﻋ ﻦﻴﻌﺘﻴﺳ ﺍﺬﻟ ، ﻲﻤﻴﻠﻌﺗ ﺞﻣﺎﻧﺮﺑ ﺪﺟﻮﻳ ﻻ :ﺭﺯ ﻮﻫ ﻞﺻﺍﻮﺘﻟﺍ ، ﻚﻟﺫ ﻦﻣ ﻢﻫﻷﺍ
 
 Learn
 == ﻢﻠﻌﺗ
@@ -1222,7 +1189,34 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 AFR
@@ -1261,7 +1255,72 @@ Settings file
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1279,13 +1338,46 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Sample rate
 == 
 
+Use DDRace HUD
+== 
+
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Kill Messages
@@ -1318,6 +1410,21 @@ Tee
 Preview
 == 
 
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
 Show local player's key presses
 == 
 
@@ -1343,4 +1450,16 @@ Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Super
+== 
+
+Team %d
 == 

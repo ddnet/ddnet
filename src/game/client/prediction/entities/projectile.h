@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_PROJECTILE_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_PROJECTILE_H
 
-#include "character.h"
 #include <game/client/prediction/entity.h>
 
 class CProjectileData;
@@ -31,7 +30,7 @@ public:
 	vec2 GetPos(float Time);
 	CProjectileData GetData() const;
 
-	virtual void Tick();
+	void Tick() override;
 
 	bool Match(CProjectile *pProj);
 	void SetBouncing(int Value);

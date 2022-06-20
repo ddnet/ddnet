@@ -27,10 +27,10 @@ class CDataFileReader
 
 public:
 	CDataFileReader() :
-		m_pDataFile(0) {}
+		m_pDataFile(nullptr) {}
 	~CDataFileReader() { Close(); }
 
-	bool IsOpen() const { return m_pDataFile != 0; }
+	bool IsOpen() const { return m_pDataFile != nullptr; }
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	bool Close();

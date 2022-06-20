@@ -9,6 +9,11 @@
 # 2021-11-19 cheeser0613
 # 2021-12-21 cheeser0613
 # 2022-02-07 cheeser0613
+# 2022-03-19 cheeser0613
+# 2022-03-22 cheeser0613
+# 2022-03-24 cheeser0613
+# 2022-05-14 cheeser0613
+# 2022-06-16 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -148,14 +153,11 @@ Dynamic Camera
 Emoticon
 == 表情
 
-Enter
-== 確定
-
 Error
 == 錯誤
 
 Error loading demo
-== 回放讀取錯誤
+== 回放載入錯誤
 
 Favorite
 == 收藏
@@ -253,9 +255,6 @@ MOTD
 Map
 == 地圖
 
-Mouse sens.
-== 滑鼠靈敏度
-
 Move left
 == 向左移動
 
@@ -308,7 +307,7 @@ No password
 == 沒有密碼
 
 No servers found
-== 找不到任何伺服器
+== 未檢測到任何伺服器
 
 No servers match your filter criteria
 == 沒有伺服器滿足設定的過濾條件
@@ -488,9 +487,6 @@ Show clan above name plates
 Clan plates size
 == 戰隊名稱大小
 
-Reset wanted weapon on death
-== 死亡後自動切換回預設武器
-
 Team
 == 隊伍
 
@@ -656,9 +652,6 @@ Round
 Lht.
 == 亮度
 
-Show console window
-== 顯示控制檯視窗
-
 Automatically take statboard screenshot
 == 自動對統計板截圖
 
@@ -762,7 +755,7 @@ Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
 
 Try fast HTTP map download first
-== 優先嚐試用HTTP高速下載地圖
+== 優先嘗試用HTTP高速下載地圖
 
 DDNet %s is available:
 == DDNet %s 現已可用：
@@ -793,9 +786,6 @@ Connecting dummy
 
 Search
 == 搜尋
-
-UI mouse s.
-== 主頁面靈敏度
 
 Vanilla skins only
 == 只顯示原生外觀
@@ -908,14 +898,8 @@ Deactivate
 Welcome to DDNet
 == 歡迎來到 DDNet
 
-Preinit VBO (iGPUs only)
-== 預初始化頂點緩衝物件 (僅限整合顯示卡)
-
 Activate
 == 啟用
-
-Multiple texture units (disable for macOS)
-== 多重紋理單元 (macOS不可用)
 
 File already exists, do you want to overwrite it?
 == 檔案已存在，是否覆蓋？
@@ -1052,20 +1036,8 @@ Toggle dyncam
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork 是以到達地圖終點為目標，單人或組隊的線上合作遊戲。如果你是新手，你可以從有入門級地圖的 Novice 伺服器開 始。記得選擇 Ping 值低的伺服器。
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 地圖中的冰凍可以使 tee 暫時無法移動。你需要合作來透過這些關卡。
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 滑鼠滾輪可以切換武器。錘子 (滑鼠左鍵) 擊中其他 tee 時，可以讓他們從冰凍中甦醒。
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 鉤索 (滑鼠右鍵) 可以用來悠盪您的角色來透過地圖關卡，也可以用來將其他 tee 拉向自己。
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 遊戲內沒有教程，溝通則至關重要。你需要透過聊天 (t鍵) 向其他玩家學習基本技巧。
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 推薦在進入伺服器前，先將設定調整到符合你的習慣。
+== 推薦在加入伺服器前，先將設定調整到符合你的習慣。
 
 Please enter your nickname below.
 == 請輸入你的暱稱。
@@ -1077,7 +1049,7 @@ Server best:
 == 伺服器最佳
 
 Learn
-== 教程
+== 教程Wiki
 
 Use high DPI
 == 使用高 DPI
@@ -1141,7 +1113,7 @@ Run server
 == 開啟伺服器
 
 Server executable not found, can't run server
-== 找不到伺服器的可執行檔案，無法開啟
+== 未檢測到伺服器的可執行檔案，無法開啟
 
 Editor
 == 編輯器
@@ -1198,7 +1170,7 @@ Themes directory
 == 主題目錄
 
 Download skins
-== 在線獲取外觀
+== 下載官方外觀
 
 Skin Database
 == 外觀數據庫
@@ -1281,9 +1253,6 @@ Windowed borderless
 Desktop fullscreen
 == 無邊框全螢幕
 
-Use modern OpenGL
-== 使用現代OpenGL
-
 Show client IDs
 == 顯示客戶端ID
 
@@ -1357,4 +1326,159 @@ Windowed fullscreen
 == 視窗化全螢幕
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== 紋理文件 %s 并非 RGBA 格式，這可能會導致顯示錯誤
+
+Join Tutorial Server
+== 加入教學伺服器
+
+Skip Tutorial
+== 跳過教學
+
+Renderer
+== 渲染設定
+
+default
+== 預設
+
+custom
+== 自定義
+
+Graphics cards
+== 顯示卡
+
+auto
+== 自動
+
+Tutorial
+== 教學
+
+Toggle to edit your dummy settings
+== 編輯分身設定
+
+Choose default eyes when joining a server
+== 加入伺服器時的預設表情
+
+Allows maps to render with more detail
+== 允許地圖渲染更多細節
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 當越過起跑綫時，游戲裏將有影子回放你的最佳成績
+
+Opacity
+== 不透明度
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 調整單人區域或其他隊伍中玩家的不透明度
+
+Quads are used for background decoration
+== 顯示用於背景裝飾的貼圖
+
+Tries to predict other entities to give a feel of low latency
+== 嘗試預測其他實體物以帶來低延遲的游玩體驗
+
+Can't find a Tutorial server
+== 無法找到教學伺服器
+
+Super
+== 無敵
+
+Team %d
+== 隊伍 %d
+
+Position:
+== 坐標	
+
+Speed:
+== 速度
+
+Angle:
+== 角度
+
+Trying to determine UDP connectivity...
+== 正在嘗試檢測 UDP 連接...
+
+UDP seems to be filtered.
+== UDP 疑似被過濾
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP 與 TCP 的 IP 地址并不相同。請嘗試屏蔽 VPN 、代理網路以及網路加速器。
+
+No answer from server yet.
+== 伺服器無響應
+
+Download community skins
+== 下載社區外觀
+
+Enable controller
+== 啓用控制器
+
+Controller %d: %s
+== 控制器 %d: %s
+
+Click to cycle through all available controllers.
+== 點擊以切換其他控制器
+
+[Ingame controller mode]
+Relative
+== 相對
+
+[Ingame controller mode]
+Absolute
+== 絕對
+
+Ingame controller mode
+== 游戲内控制器瞄準模式
+
+Ingame controller sens.
+== 類比搖桿靈敏度（游戲）
+
+UI controller sens.
+== 類比遙感靈敏度（界面）
+
+Controller jitter tolerance
+== 類比搖桿錯位容錯
+
+No controller found. Plug in a controller and restart the game.
+== 未檢測到任何控制器。請重試重新連接控制器並重啓游戲。
+
+Device
+== 輸入設備
+
+Status
+== 狀態
+
+Aim bind
+== 操作軸綁定
+
+Controller Axis #%d
+== 類比搖桿 #%d
+
+Mouse
+== 滑鼠
+
+Ingame mouse sens.
+== 滑鼠靈敏度（游戲）
+
+UI mouse sens.
+== 滑鼠靈敏度（界面）
+
+Controller
+== 控制器
+
+Use DDRace HUD
+== 使用 DDRace HUD
+
+Show dummy actions
+== 顯示分身狀態
+
+Show freeze bars
+== 顯示解凍進度條
+
+Show player position
+== 顯示玩家坐標
+
+Show player speed
+== 顯示玩家速度
+
+Show player target angle
+== 顯示玩家瞄準角度

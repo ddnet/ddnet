@@ -2,6 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_MAPIMAGES_H
 #define GAME_CLIENT_COMPONENTS_MAPIMAGES_H
+
+#include <engine/graphics.h>
+
 #include <game/client/component.h>
 
 enum EMapImageEntityLayerType
@@ -29,14 +32,7 @@ enum EMapImageModType
 	MAP_IMAGE_MOD_TYPE_COUNT,
 };
 
-static const char *const gs_aModEntitiesNames[] = {
-	"ddnet",
-	"ddrace",
-	"race",
-	"blockworlds",
-	"fng",
-	"vanilla",
-	"f-ddrace"};
+extern const char *const gs_aModEntitiesNames[];
 
 class CMapImages : public CComponent
 {

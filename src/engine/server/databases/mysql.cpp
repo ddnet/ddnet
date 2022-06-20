@@ -10,6 +10,10 @@
 #include <memory>
 #include <vector>
 
+#ifndef LIBMARIADB
+typedef bool my_bool;
+#endif
+
 enum
 {
 	MYSQLSTATE_UNINITIALIZED,
@@ -61,44 +65,44 @@ public:
 		const char *pIp,
 		int Port,
 		bool Setup);
-	virtual ~CMysqlConnection();
-	virtual void Print(IConsole *pConsole, const char *Mode);
+	~CMysqlConnection();
+	void Print(IConsole *pConsole, const char *Mode) override;
 
-	virtual CMysqlConnection *Copy();
+	CMysqlConnection *Copy() override;
 
-	virtual const char *BinaryCollate() const { return "utf8mb4_bin"; }
-	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize);
-	virtual const char *InsertTimestampAsUtc() const { return "?"; }
-	virtual const char *CollateNocase() const { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
-	virtual const char *InsertIgnore() const { return "INSERT IGNORE"; }
-	virtual const char *Random() const { return "RAND()"; }
-	virtual const char *MedianMapTime(char *pBuffer, int BufferSize) const;
-	virtual const char *False() const { return "FALSE"; }
-	virtual const char *True() const { return "TRUE"; }
+	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
+	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
+	const char *InsertTimestampAsUtc() const override { return "?"; }
+	const char *CollateNocase() const override { return "CONVERT(? USING utf8mb4) COLLATE utf8mb4_general_ci"; }
+	const char *InsertIgnore() const override { return "INSERT IGNORE"; }
+	const char *Random() const override { return "RAND()"; }
+	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;
+	const char *False() const override { return "FALSE"; }
+	const char *True() const override { return "TRUE"; }
 
-	virtual bool Connect(char *pError, int ErrorSize);
-	virtual void Disconnect();
+	bool Connect(char *pError, int ErrorSize) override;
+	void Disconnect() override;
 
-	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize);
+	bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) override;
 
-	virtual void BindString(int Idx, const char *pString);
-	virtual void BindBlob(int Idx, unsigned char *pBlob, int Size);
-	virtual void BindInt(int Idx, int Value);
-	virtual void BindInt64(int Idx, int64_t Value);
-	virtual void BindFloat(int Idx, float Value);
+	void BindString(int Idx, const char *pString) override;
+	void BindBlob(int Idx, unsigned char *pBlob, int Size) override;
+	void BindInt(int Idx, int Value) override;
+	void BindInt64(int Idx, int64_t Value) override;
+	void BindFloat(int Idx, float Value) override;
 
-	virtual void Print() {}
-	virtual bool Step(bool *pEnd, char *pError, int ErrorSize);
-	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize);
+	void Print() override {}
+	bool Step(bool *pEnd, char *pError, int ErrorSize) override;
+	bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) override;
 
-	virtual bool IsNull(int Col);
-	virtual float GetFloat(int Col);
-	virtual int GetInt(int Col);
-	virtual int64_t GetInt64(int Col);
-	virtual void GetString(int Col, char *pBuffer, int BufferSize);
-	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize);
+	bool IsNull(int Col) override;
+	float GetFloat(int Col) override;
+	int GetInt(int Col) override;
+	int64_t GetInt64(int Col) override;
+	void GetString(int Col, char *pBuffer, int BufferSize) override;
+	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
-	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize);
+	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 private:
 	class CStmtDeleter
@@ -125,8 +129,8 @@ private:
 	bool m_HaveConnection = false;
 	MYSQL m_Mysql;
 	std::unique_ptr<MYSQL_STMT, CStmtDeleter> m_pStmt = nullptr;
-	std::vector<MYSQL_BIND> m_aStmtParameters;
-	std::vector<UParameterExtra> m_aStmtParameterExtras;
+	std::vector<MYSQL_BIND> m_vStmtParameters;
+	std::vector<UParameterExtra> m_vStmtParameterExtras;
 
 	// copy of config vars
 	char m_aDatabase[64];
@@ -344,10 +348,10 @@ bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int Err
 	}
 	m_NewQuery = true;
 	unsigned NumParameters = mysql_stmt_param_count(m_pStmt.get());
-	m_aStmtParameters.resize(NumParameters);
-	m_aStmtParameterExtras.resize(NumParameters);
-	mem_zero(&m_aStmtParameters[0], sizeof(m_aStmtParameters[0]) * m_aStmtParameters.size());
-	mem_zero(&m_aStmtParameterExtras[0], sizeof(m_aStmtParameterExtras[0]) * m_aStmtParameterExtras.size());
+	m_vStmtParameters.resize(NumParameters);
+	m_vStmtParameterExtras.resize(NumParameters);
+	mem_zero(&m_vStmtParameters[0], sizeof(m_vStmtParameters[0]) * m_vStmtParameters.size());
+	mem_zero(&m_vStmtParameterExtras[0], sizeof(m_vStmtParameterExtras[0]) * m_vStmtParameterExtras.size());
 	return false;
 }
 
@@ -355,15 +359,15 @@ void CMysqlConnection::BindString(int Idx, const char *pString)
 {
 	m_NewQuery = true;
 	Idx -= 1;
-	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
 
 	int Length = str_length(pString);
-	m_aStmtParameterExtras[Idx].ul = Length;
-	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	m_vStmtParameterExtras[Idx].ul = Length;
+	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_STRING;
 	pParam->buffer = (void *)pString;
 	pParam->buffer_length = Length + 1;
-	pParam->length = &m_aStmtParameterExtras[Idx].ul;
+	pParam->length = &m_vStmtParameterExtras[Idx].ul;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
 	pParam->error = nullptr;
@@ -373,14 +377,14 @@ void CMysqlConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 {
 	m_NewQuery = true;
 	Idx -= 1;
-	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
 
-	m_aStmtParameterExtras[Idx].ul = Size;
-	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	m_vStmtParameterExtras[Idx].ul = Size;
+	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_BLOB;
 	pParam->buffer = pBlob;
 	pParam->buffer_length = Size;
-	pParam->length = &m_aStmtParameterExtras[Idx].ul;
+	pParam->length = &m_vStmtParameterExtras[Idx].ul;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
 	pParam->error = nullptr;
@@ -390,13 +394,13 @@ void CMysqlConnection::BindInt(int Idx, int Value)
 {
 	m_NewQuery = true;
 	Idx -= 1;
-	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
 
-	m_aStmtParameterExtras[Idx].i = Value;
-	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	m_vStmtParameterExtras[Idx].i = Value;
+	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_LONG;
-	pParam->buffer = &m_aStmtParameterExtras[Idx].i;
-	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
+	pParam->buffer = &m_vStmtParameterExtras[Idx].i;
+	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i);
 	pParam->length = nullptr;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
@@ -407,13 +411,13 @@ void CMysqlConnection::BindInt64(int Idx, int64_t Value)
 {
 	m_NewQuery = true;
 	Idx -= 1;
-	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
 
-	m_aStmtParameterExtras[Idx].i = Value;
-	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	m_vStmtParameterExtras[Idx].i = Value;
+	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_LONGLONG;
-	pParam->buffer = &m_aStmtParameterExtras[Idx].i;
-	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
+	pParam->buffer = &m_vStmtParameterExtras[Idx].i;
+	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i);
 	pParam->length = nullptr;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
@@ -424,13 +428,13 @@ void CMysqlConnection::BindFloat(int Idx, float Value)
 {
 	m_NewQuery = true;
 	Idx -= 1;
-	dbg_assert(0 <= Idx && Idx < (int)m_aStmtParameters.size(), "index out of bounds");
+	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
 
-	m_aStmtParameterExtras[Idx].f = Value;
-	MYSQL_BIND *pParam = &m_aStmtParameters[Idx];
+	m_vStmtParameterExtras[Idx].f = Value;
+	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_FLOAT;
-	pParam->buffer = &m_aStmtParameterExtras[Idx].f;
-	pParam->buffer_length = sizeof(m_aStmtParameterExtras[Idx].i);
+	pParam->buffer = &m_vStmtParameterExtras[Idx].f;
+	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i);
 	pParam->length = nullptr;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
@@ -442,7 +446,7 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 	if(m_NewQuery)
 	{
 		m_NewQuery = false;
-		if(mysql_stmt_bind_param(m_pStmt.get(), &m_aStmtParameters[0]))
+		if(mysql_stmt_bind_param(m_pStmt.get(), &m_vStmtParameters[0]))
 		{
 			StoreErrorStmt("bind_param");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -473,7 +477,7 @@ bool CMysqlConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSi
 	if(m_NewQuery)
 	{
 		m_NewQuery = false;
-		if(mysql_stmt_bind_param(m_pStmt.get(), &m_aStmtParameters[0]))
+		if(mysql_stmt_bind_param(m_pStmt.get(), &m_vStmtParameters[0]))
 		{
 			StoreErrorStmt("bind_param");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -697,11 +701,7 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	BindInt(2, Points);
 	BindInt(3, Points);
 	int NumUpdated;
-	if(ExecuteUpdate(&NumUpdated, pError, ErrorSize))
-	{
-		return true;
-	}
-	return false;
+	return ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 }
 
 std::unique_ptr<IDbConnection> CreateMysqlConnection(
@@ -713,7 +713,7 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	int Port,
 	bool Setup)
 {
-	return std::unique_ptr<IDbConnection>(new CMysqlConnection(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup));
+	return std::make_unique<CMysqlConnection>(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup);
 }
 #else
 int MysqlInit()

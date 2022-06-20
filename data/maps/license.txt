@@ -13,3 +13,7 @@ CC-BY-SA license, grass_main is redrawn from original Teeworlds grass_main mapre
 Tsunami:
 Copyright louis
 CC-BY-SA license
+
+Tutorial:
+Copyright unique2 & Alisa
+CC-BY-SA license

@@ -35,7 +35,9 @@ install_manifest*.txt
 ninja_package
 pack_*/
 rules.ninja
+SAN.*
 testrunner\[1\]_include.cmake
+vulkan_shaders_sha256.txt
 
 /SDL2.framework
 
@@ -61,6 +63,7 @@ map_resave
 map_version
 mastersrv
 packetgen
+stun
 testrunner
 twping
 unicode_confusables
@@ -72,8 +75,13 @@ versionsrv
 !src/twping
 
 generated
+target
+
+/build*
+/integration_test/*
 
 # IDE project files
+.cache
 .cproject
 .cmake
 .idea
@@ -94,12 +102,15 @@ tags
 
 *.a
 *.cmd
+*.csv
 *.dll
 *.dmg
 *.dtb
 *.dylib
 *.exe
+*.fifo
 *.filters
+*.json
 *.lnk
 *.log
 *.opensdf

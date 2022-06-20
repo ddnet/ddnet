@@ -1,19 +1,15 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/string.h>
-
 #include <engine/shared/config.h>
 
 #include <base/math.h>
-#include <game/client/component.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 
 #include "camera.h"
 #include "controls.h"
 
-#include <engine/serverbrowser.h>
 #include <limits>
 
 const float ZoomStep = 0.866025f;

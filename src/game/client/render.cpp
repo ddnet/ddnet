@@ -7,23 +7,18 @@
 #include "animstate.h"
 #include "render.h"
 #include <engine/graphics.h>
-#include <engine/map.h>
 #include <engine/shared/config.h>
-#include <game/client/components/skins.h>
-#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
-#include <game/layers.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
-void CRenderTools::Init(IGraphics *pGraphics, CUI *pUI, CGameClient *pGameClient)
+void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 {
 	m_pGraphics = pGraphics;
-	m_pUI = pUI;
-	m_pGameClient = (CGameClient *)pGameClient;
+	m_pTextRender = pTextRender;
 	m_TeeQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
@@ -65,21 +60,12 @@ void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy)
 	float x2 = (x + w) / (float)cx - 0.5f / (float)(cx * 32);
 	float y1 = y / (float)cy + 0.5f / (float)(cy * 32);
 	float y2 = (y + h) / (float)cy - 0.5f / (float)(cy * 32);
-	float Temp = 0;
 
 	if(Flags & SPRITE_FLAG_FLIP_Y)
-	{
-		Temp = y1;
-		y1 = y2;
-		y2 = Temp;
-	}
+		std::swap(y1, y2);
 
 	if(Flags & SPRITE_FLAG_FLIP_X)
-	{
-		Temp = x1;
-		x1 = x2;
-		x2 = Temp;
-	}
+		std::swap(x1, x2);
 
 	Graphics()->QuadsSetSubset(x1, y1, x2, y2);
 }
@@ -105,9 +91,9 @@ void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, fl
 	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
 }
 
-void CRenderTools::GetSpriteScale(int id, float &ScaleX, float &ScaleY)
+void CRenderTools::GetSpriteScale(int Id, float &ScaleX, float &ScaleY)
 {
-	GetSpriteScale(&g_pData->m_aSprites[id], ScaleX, ScaleY);
+	GetSpriteScale(&g_pData->m_aSprites[Id], ScaleX, ScaleY);
 }
 
 void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
@@ -129,28 +115,40 @@ void CRenderTools::DrawSprite(float x, float y, float ScaledWidth, float ScaledH
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
+void CRenderTools::RenderCursor(vec2 Center, float Size)
+{
+	Graphics()->WrapClamp();
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, Size, Size);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
+}
+
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
 {
 	IGraphics::CQuadItem QuadItem(x, y, Size, Size);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Size)
 {
 	IGraphics::CQuadItem QuadItem(-(Size) / 2.f, -(Size) / 2.f, (Size), (Size));
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(-(Width) / 2.f, -(Height) / 2.f, (Width), (Height));
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
+int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height)
 {
 	IGraphics::CQuadItem QuadItem(X, Y, Width, Height);
-	Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
+	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
@@ -345,25 +343,25 @@ void CRenderTools::DrawRoundRectExt4(float x, float y, float w, float h, vec4 Co
 	if(!(Corners & 1))
 	{
 		Graphics()->SetColor(ColorTopLeft.r, ColorTopLeft.g, ColorTopLeft.b, ColorTopLeft.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y, r, r); // TL
+		ItemQ = IGraphics::CQuadItem(x, y, r, r); // TL
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 2))
 	{
 		Graphics()->SetColor(ColorTopRight.r, ColorTopRight.g, ColorTopRight.b, ColorTopRight.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x + w, y, -r, r); // TR
+		ItemQ = IGraphics::CQuadItem(x + w, y, -r, r); // TR
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 4))
 	{
 		Graphics()->SetColor(ColorBottomLeft.r, ColorBottomLeft.g, ColorBottomLeft.b, ColorBottomLeft.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y + h, r, -r); // BL
+		ItemQ = IGraphics::CQuadItem(x, y + h, r, -r); // BL
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 	if(!(Corners & 8))
 	{
 		Graphics()->SetColor(ColorBottomRight.r, ColorBottomRight.g, ColorBottomRight.b, ColorBottomRight.a);
-		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
+		ItemQ = IGraphics::CQuadItem(x + w, y + h, -r, -r); // BR
 		Graphics()->QuadsDrawTL(&ItemQ, 1);
 	}
 }
@@ -483,7 +481,7 @@ void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners
 	// TODO: FIX US
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
-	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding * UI()->Scale(), Corners);
+	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
 	Graphics()->QuadsEnd();
 }
 
@@ -715,16 +713,16 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
 
 			bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
-			float cs = 1.0f; // color scale
+			float ColorScale = 1.0f;
 
 			if(!OutLine)
 			{
 				++QuadOffset;
 				if(Indicate)
-					cs = 0.5f;
+					ColorScale = 0.5f;
 			}
 
-			Graphics()->SetColor(pInfo->m_ColorFeet.r * cs, pInfo->m_ColorFeet.g * cs, pInfo->m_ColorFeet.b * cs, Alpha);
+			Graphics()->SetColor(pInfo->m_ColorFeet.r * ColorScale, pInfo->m_ColorFeet.g * ColorScale, pInfo->m_ColorFeet.b * ColorScale, Alpha);
 
 			Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
 			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
@@ -762,7 +760,7 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *w, float *h
 	*h *= Zoom;
 }
 
-void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 	float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
 {
 	float Width, Height;
@@ -773,4 +771,12 @@ void CRenderTools::MapscreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[1] = OffsetY + CenterY - Height / 2;
 	pPoints[2] = pPoints[0] + Width;
 	pPoints[3] = pPoints[1] + Height;
+}
+
+void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
+{
+	float Points[4];
+	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
+	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
 }

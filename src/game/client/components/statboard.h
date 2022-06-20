@@ -1,7 +1,10 @@
 #ifndef GAME_CLIENT_COMPONENTS_STATBOARD_H
 #define GAME_CLIENT_COMPONENTS_STATBOARD_H
 
+#include <engine/console.h>
+
 #include <game/client/component.h>
+#include <string>
 
 class CStatboard : public CComponent
 {
@@ -14,9 +17,8 @@ private:
 	void AutoStatScreenshot();
 	void AutoStatCSV();
 
-	char *m_pCSVstr;
-	char *ReplaceCommata(char *pStr);
-	void FormatStats();
+	std::string ReplaceCommata(char *pStr);
+	void FormatStats(char *pDest, size_t DestSize);
 
 public:
 	CStatboard();

@@ -8,7 +8,7 @@
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
-static const char TEEHISTORIAN_VERSION_MINOR[] = "3";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "4";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
@@ -53,7 +53,8 @@ void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCal
 	for(auto &PrevPlayer : m_aPrevPlayers)
 	{
 		PrevPlayer.m_Alive = false;
-		PrevPlayer.m_InputExists = false;
+		// zero means no id
+		PrevPlayer.m_UniqueClientID = 0;
 		PrevPlayer.m_Team = 0;
 	}
 	for(auto &PrevTeam : m_aPrevTeams)
@@ -256,7 +257,7 @@ void CTeeHistorian::RecordPlayer(int ClientID, const CNetObj_CharacterCore *pCha
 {
 	dbg_assert(m_State == STATE_PLAYERS, "invalid teehistorian state");
 
-	CPlayer *pPrev = &m_aPrevPlayers[ClientID];
+	CTeehistorianPlayer *pPrev = &m_aPrevPlayers[ClientID];
 	if(!pPrev->m_Alive || pPrev->m_X != pChar->m_X || pPrev->m_Y != pChar->m_Y)
 	{
 		EnsureTickWrittenPlayerData(ClientID);
@@ -299,7 +300,7 @@ void CTeeHistorian::RecordDeadPlayer(int ClientID)
 {
 	dbg_assert(m_State == STATE_PLAYERS, "invalid teehistorian state");
 
-	CPlayer *pPrev = &m_aPrevPlayers[ClientID];
+	CTeehistorianPlayer *pPrev = &m_aPrevPlayers[ClientID];
 	if(pPrev->m_Alive)
 	{
 		EnsureTickWrittenPlayerData(ClientID);
@@ -406,13 +407,13 @@ void CTeeHistorian::BeginInputs()
 	m_State = STATE_INPUTS;
 }
 
-void CTeeHistorian::RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *pInput)
+void CTeeHistorian::RecordPlayerInput(int ClientID, uint32_t UniqueClientID, const CNetObj_PlayerInput *pInput)
 {
 	CPacker Buffer;
 
-	CPlayer *pPrev = &m_aPrevPlayers[ClientID];
+	CTeehistorianPlayer *pPrev = &m_aPrevPlayers[ClientID];
 	CNetObj_PlayerInput DiffInput;
-	if(pPrev->m_InputExists)
+	if(pPrev->m_UniqueClientID == UniqueClientID)
 	{
 		if(mem_comp(&pPrev->m_Input, pInput, sizeof(pPrev->m_Input)) == 0)
 		{
@@ -447,7 +448,7 @@ void CTeeHistorian::RecordPlayerInput(int ClientID, const CNetObj_PlayerInput *p
 	{
 		Buffer.AddInt(((int *)&DiffInput)[i]);
 	}
-	pPrev->m_InputExists = true;
+	pPrev->m_UniqueClientID = UniqueClientID;
 	pPrev->m_Input = *pInput;
 
 	Write(Buffer.Data(), Buffer.Size());
@@ -573,6 +574,18 @@ void CTeeHistorian::RecordTestExtra()
 	}
 
 	WriteExtra(UUID_TEEHISTORIAN_TEST, "", 0);
+}
+
+void CTeeHistorian::RecordPlayerSwap(int ClientID1, int ClientID2)
+{
+	EnsureTickWritten();
+
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID1);
+	Buffer.AddInt(ClientID2);
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_SWITCH, Buffer.Data(), Buffer.Size());
 }
 
 void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveID, const char *pTeamSave)

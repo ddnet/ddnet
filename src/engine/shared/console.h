@@ -19,7 +19,7 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 
-		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const;
+		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
 
 		void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
 	};
@@ -53,6 +53,8 @@ class CConsole : public IConsole
 	CCommand *m_pRecycleList;
 	CHeap m_TempCommands;
 
+	static void TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData);
+
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);
 	static void Con_Exec(IResult *pResult, void *pUserData);
@@ -61,15 +63,7 @@ class CConsole : public IConsole
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
-	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true);
-
-	struct
-	{
-		int m_OutputLevel;
-		FPrintCallback m_pfnPrintCallback;
-		void *m_pPrintCallbackUserdata;
-	} m_aPrintCB[MAX_PRINT_CB];
-	int m_NumPrintCB;
+	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) override;
 
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
@@ -117,12 +111,12 @@ class CConsole : public IConsole
 			m_apArgs[m_NumArgs++] = pArg;
 		}
 
-		virtual const char *GetString(unsigned Index);
-		virtual int GetInteger(unsigned Index);
-		virtual float GetFloat(unsigned Index);
-		virtual ColorHSLA GetColor(unsigned Index, bool Light);
+		const char *GetString(unsigned Index) override;
+		int GetInteger(unsigned Index) override;
+		float GetFloat(unsigned Index) override;
+		ColorHSLA GetColor(unsigned Index, bool Light) override;
 
-		virtual void RemoveArgument(unsigned Index)
+		void RemoveArgument(unsigned Index) override
 		{
 			dbg_assert(Index < m_NumArgs, "invalid argument index");
 			for(unsigned i = Index; i < m_NumArgs - 1; i++)
@@ -145,7 +139,7 @@ class CConsole : public IConsole
 		bool HasVictim();
 		void SetVictim(int Victim);
 		void SetVictim(const char *pVictim);
-		virtual int GetVictim();
+		int GetVictim() override;
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);
@@ -199,37 +193,35 @@ public:
 	CConsole(int FlagMask);
 	~CConsole();
 
-	virtual void Init();
-	virtual const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const;
-	virtual const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp);
-	virtual void PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser);
+	void Init() override;
+	const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;
+	const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
+	void PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
-	virtual void ParseArguments(int NumArgs, const char **ppArguments);
-	virtual void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp);
-	virtual void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp);
-	virtual void DeregisterTemp(const char *pName);
-	virtual void DeregisterTempAll();
-	virtual void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser);
-	virtual void StoreCommands(bool Store);
+	void ParseArguments(int NumArgs, const char **ppArguments) override;
+	void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) override;
+	void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) override;
+	void DeregisterTemp(const char *pName) override;
+	void DeregisterTempAll() override;
+	void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) override;
+	void StoreCommands(bool Store) override;
 
-	virtual bool LineIsValid(const char *pStr);
-	virtual void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true);
-	virtual void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true);
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
+	bool LineIsValid(const char *pStr) override;
+	void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) override;
+	void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true) override;
+	void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
-	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
-	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
-	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
-	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor);
-	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
-	virtual void InitChecksum(CChecksumData *pData) const;
+	char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) override;
+	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) override;
+	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
+	void InitChecksum(CChecksumData *pData) const override;
 
-	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
-	void ResetServerGameSettings();
+	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
+	void ResetServerGameSettings() override;
 	// DDRace
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
-	void SetFlagMask(int FlagMask) { m_FlagMask = FlagMask; }
+	void SetFlagMask(int FlagMask) override { m_FlagMask = FlagMask; }
 };
 
 #endif

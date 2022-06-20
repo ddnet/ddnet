@@ -3,16 +3,15 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
-#include <base/system.h>
+#include <engine/input.h>
 #include <engine/textrender.h>
+
+#include <chrono>
 #include <string>
 #include <vector>
 
 class CUIRect
 {
-	// TODO: Refactor: Redo UI scaling
-	float Scale() const;
-
 public:
 	float x, y, w, h;
 
@@ -103,7 +102,7 @@ public:
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 
-	bool Inside(float x, float y) const;
+	bool Inside(float x_, float y_) const;
 };
 
 struct SUIAnimator
@@ -112,7 +111,7 @@ struct SUIAnimator
 	bool m_ScaleLabel;
 	bool m_RepositionLabel;
 
-	int64_t m_Time;
+	std::chrono::nanoseconds m_Time;
 	float m_Value;
 
 	float m_XOffset;
@@ -156,7 +155,7 @@ public:
 	};
 
 protected:
-	std::vector<SUIElementRect> m_UIRects;
+	std::vector<SUIElementRect> m_vUIRects;
 
 	// used for marquees or other user implemented things
 	int64_t m_ElementTime;
@@ -168,12 +167,12 @@ public:
 
 	SUIElementRect *Get(size_t Index)
 	{
-		return &m_UIRects[Index];
+		return &m_vUIRects[Index];
 	}
 
 	bool AreRectsInit()
 	{
-		return !m_UIRects.empty();
+		return !m_vUIRects.empty();
 	}
 
 	void InitRects(int RequestedRectCount);
@@ -190,10 +189,15 @@ struct SLabelProperties
 
 class CUI
 {
+	bool m_Enabled;
+
 	const void *m_pHotItem;
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
 	const void *m_pBecomingHotItem;
+	const void *m_pActiveTooltipItem;
+	bool m_ActiveItemValid = false;
+
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
@@ -201,17 +205,23 @@ class CUI
 	unsigned m_LastMouseButtons;
 
 	CUIRect m_Screen;
+
+	std::vector<CUIRect> m_vClips;
+	void UpdateClipping();
+
+	class IInput *m_pInput;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 
-	std::vector<CUIElement *> m_OwnUIElements; // ui elements maintained by CUI class
-	std::vector<CUIElement *> m_UIElements;
+	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUI class
+	std::vector<CUIElement *> m_vpUIElements;
 
 public:
 	static float ms_FontmodHeight;
 
 	// TODO: Refactor: Fill this in
-	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
+	void Init(class IInput *pInput, class IGraphics *pGraphics, class ITextRender *pTextRender);
+	class IInput *Input() const { return m_pInput; }
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 
@@ -242,7 +252,9 @@ public:
 		CORNER_ALL = CORNER_T | CORNER_B
 	};
 
-	int Update(float mx, float my, float Mwx, float Mwy, int m_Buttons);
+	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
+	bool Enabled() const { return m_Enabled; }
+	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
 	float MouseDeltaY() const { return m_MouseDeltaY; }
@@ -257,18 +269,43 @@ public:
 	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)
 	{
+		m_ActiveItemValid = true;
 		m_pActiveItem = pID;
 		if(pID)
 			m_pLastActiveItem = pID;
 	}
-	void ClearLastActiveItem() { m_pLastActiveItem = 0; }
+	bool CheckActiveItem(const void *pID)
+	{
+		if(m_pActiveItem == pID)
+		{
+			m_ActiveItemValid = true;
+			return true;
+		}
+		return false;
+	}
+	void SetActiveTooltipItem(const void *pID) { m_pActiveTooltipItem = pID; }
+	void ClearLastActiveItem() { m_pLastActiveItem = nullptr; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
+	const void *ActiveTooltipItem() const { return m_pActiveTooltipItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
+	void StartCheck() { m_ActiveItemValid = false; }
+	void FinishCheck()
+	{
+		if(!m_ActiveItemValid && m_pActiveItem != nullptr)
+		{
+			SetActiveItem(nullptr);
+			m_pHotItem = nullptr;
+			m_pBecomingHotItem = nullptr;
+		}
+	}
+
 	bool MouseInside(const CUIRect *pRect) const;
-	void ConvertMouseMove(float *x, float *y) const;
+	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
+	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
+	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
 
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }
@@ -278,24 +315,21 @@ public:
 	CUIRect *Screen();
 	void MapScreen();
 	float PixelSize();
+
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
-
-	// TODO: Refactor: Redo UI scaling
-	void SetScale(float s);
-	float Scale() const;
+	const CUIRect *ClipArea() const;
+	inline bool IsClipped() const { return !m_vClips.empty(); }
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
-	int DoButtonLogic(const void *pID, const char *pText /* TODO: Refactor: Remove */, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 
 	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
-	void DoLabelScaled(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
-	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = NULL);
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
 };
 
 #endif

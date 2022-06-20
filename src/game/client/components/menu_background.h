@@ -4,6 +4,8 @@
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
+#include <chrono>
+#include <string>
 #include <vector>
 
 class CMenuMap : public CBackgroundEngineMap
@@ -19,7 +21,7 @@ public:
 	CTheme(const char *n, bool HasDay, bool HasNight) :
 		m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
-	string m_Name;
+	std::string m_Name;
 	bool m_HasDay;
 	bool m_HasNight;
 	IGraphics::CTextureHandle m_IconTexture;
@@ -28,6 +30,8 @@ public:
 
 class CMenuBackground : public CBackground
 {
+	std::chrono::nanoseconds m_ThemeScanStartTime{0};
+
 public:
 	enum
 	{
@@ -89,7 +93,7 @@ public:
 	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 
-	std::vector<CTheme> m_lThemes;
+	std::vector<CTheme> m_vThemes;
 
 	CMenuBackground();
 	~CMenuBackground() override {}

@@ -31,8 +31,7 @@ void md5_str(MD5_DIGEST digest, char *str, size_t max_len);
 int md5_from_str(MD5_DIGEST *out, const char *str);
 int md5_comp(MD5_DIGEST digest1, MD5_DIGEST digest2);
 
-static const SHA256_DIGEST SHA256_ZEROED = {{0}};
-static const MD5_DIGEST MD5_ZEROED = {{0}};
+extern const SHA256_DIGEST SHA256_ZEROED;
 
 inline bool operator==(const SHA256_DIGEST &that, const SHA256_DIGEST &other)
 {

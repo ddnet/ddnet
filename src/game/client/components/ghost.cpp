@@ -1,7 +1,6 @@
 /* (c) Rajh, Redix and Sushi. */
 
 #include <engine/ghost.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
@@ -62,41 +61,41 @@ void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter 
 }
 
 CGhost::CGhostPath::CGhostPath(CGhostPath &&Other) noexcept :
-	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_lChunks(std::move(Other.m_lChunks))
+	m_ChunkSize(Other.m_ChunkSize), m_NumItems(Other.m_NumItems), m_vpChunks(std::move(Other.m_vpChunks))
 {
 	Other.m_NumItems = 0;
-	Other.m_lChunks.clear();
+	Other.m_vpChunks.clear();
 }
 
 CGhost::CGhostPath &CGhost::CGhostPath::operator=(CGhostPath &&Other) noexcept
 {
 	Reset(Other.m_ChunkSize);
 	m_NumItems = Other.m_NumItems;
-	m_lChunks = std::move(Other.m_lChunks);
+	m_vpChunks = std::move(Other.m_vpChunks);
 	Other.m_NumItems = 0;
-	Other.m_lChunks.clear();
+	Other.m_vpChunks.clear();
 	return *this;
 }
 
 void CGhost::CGhostPath::Reset(int ChunkSize)
 {
-	for(auto &pChunk : m_lChunks)
+	for(auto &pChunk : m_vpChunks)
 		free(pChunk);
-	m_lChunks.clear();
+	m_vpChunks.clear();
 	m_ChunkSize = ChunkSize;
 	m_NumItems = 0;
 }
 
 void CGhost::CGhostPath::SetSize(int Items)
 {
-	int Chunks = m_lChunks.size();
+	int Chunks = m_vpChunks.size();
 	int NeededChunks = (Items + m_ChunkSize - 1) / m_ChunkSize;
 
 	if(NeededChunks > Chunks)
 	{
-		m_lChunks.resize(NeededChunks);
+		m_vpChunks.resize(NeededChunks);
 		for(int i = Chunks; i < NeededChunks; i++)
-			m_lChunks[i] = (CGhostCharacter *)calloc(m_ChunkSize, sizeof(CGhostCharacter));
+			m_vpChunks[i] = (CGhostCharacter *)calloc(m_ChunkSize, sizeof(CGhostCharacter));
 	}
 
 	m_NumItems = Items;
@@ -115,7 +114,7 @@ CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 
 	int Chunk = Index / m_ChunkSize;
 	int Pos = Index % m_ChunkSize;
-	return &m_lChunks[Chunk][Pos];
+	return &m_vpChunks[Chunk][Pos];
 }
 
 void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) const
@@ -343,8 +342,37 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		m_pClient->m_Players.RenderHook(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
-		m_pClient->m_Players.RenderPlayer(&Prev, &Player, &Ghost.m_RenderInfo, -2, IntraTick);
+		CTeeRenderInfo *RenderInfo = &Ghost.m_RenderInfo;
+		CTeeRenderInfo GhostNinjaRenderInfo;
+		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
+		{
+			// change the skin for the ghost to the ninja
+			int Skin = m_pClient->m_Skins.Find("x_ninja");
+			if(Skin != -1)
+			{
+				bool IsTeamplay = false;
+				if(m_pClient->m_Snap.m_pGameInfoObj)
+					IsTeamplay = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
+
+				GhostNinjaRenderInfo = Ghost.m_RenderInfo;
+				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+				GhostNinjaRenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				GhostNinjaRenderInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				GhostNinjaRenderInfo.m_BloodColor = pSkin->m_BloodColor;
+				GhostNinjaRenderInfo.m_SkinMetrics = pSkin->m_Metrics;
+				GhostNinjaRenderInfo.m_CustomColoredSkin = IsTeamplay;
+				if(!IsTeamplay)
+				{
+					GhostNinjaRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
+					GhostNinjaRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+				}
+				RenderInfo = &GhostNinjaRenderInfo;
+			}
+		}
+
+		m_pClient->m_Players.RenderHook(&Prev, &Player, RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderHookCollLine(&Prev, &Player, -2, IntraTick);
+		m_pClient->m_Players.RenderPlayer(&Prev, &Player, RenderInfo, -2, IntraTick);
 	}
 }
 
@@ -363,8 +391,8 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
-		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody));
-		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet));
+		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody).UnclampLighting());
+		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet).UnclampLighting());
 	}
 	else
 	{

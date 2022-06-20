@@ -210,7 +210,7 @@ void CGameWorld::UpdatePlayerMaps()
 			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
 		}
 
-		// always send the player himself
+		// always send the player themselves
 		Dist[i].first = 0;
 
 		// compute reverse map
@@ -223,7 +223,7 @@ void CGameWorld::UpdatePlayerMaps()
 		{
 			if(pMap[j] == -1)
 				continue;
-			if(Dist[pMap[j]].first > 5e9)
+			if(Dist[pMap[j]].first > 5e9f)
 				pMap[j] = -1;
 			else
 				rMap[pMap[j]] = j;
@@ -236,7 +236,7 @@ void CGameWorld::UpdatePlayerMaps()
 		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
 			int k = Dist[j].second;
-			if(rMap[k] != -1 || Dist[j].first > 5e9)
+			if(rMap[k] != -1 || Dist[j].first > 5e9f)
 				continue;
 			while(Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1)
 				Mapc++;
@@ -416,8 +416,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 		CCharacterCore *Core = pChr->Core();
 		if(Core->m_HookedPlayer == ClientID && !pChr->m_Super)
 		{
-			Core->m_HookedPlayer = -1;
-			Core->m_HookState = HOOK_RETRACTED;
+			Core->SetHookedPlayer(-1);
 			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			Core->m_HookState = HOOK_RETRACTED;
 		}

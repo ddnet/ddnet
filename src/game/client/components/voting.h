@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_VOTING_H
 #define GAME_CLIENT_COMPONENTS_VOTING_H
 
+#include <engine/console.h>
 #include <engine/shared/memheap.h>
 
 #include <game/client/component.h>

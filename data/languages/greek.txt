@@ -142,9 +142,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Είσοδος
-
 Error
 == Σφάλμα
 
@@ -243,9 +240,6 @@ MOTD
 
 Map
 == Χάρτης
-
-Mouse sens.
-== Ταχύτητα δείκτη
 
 Move left
 == Κίνηση αριστερά
@@ -637,6 +631,15 @@ Warning
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
 Server best:
 == 
 
@@ -653,6 +656,18 @@ Ghost
 == 
 
 Loading DDNet Client
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
 == 
 
 Reconnect in %d sec
@@ -680,18 +695,6 @@ Welcome to DDNet
 == 
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== 
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== 
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== 
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
@@ -725,6 +728,12 @@ Speed
 == 
 
 Video name:
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
 == 
 
 Show DDNet map finishes in server browser
@@ -871,9 +880,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 
 
-Reset wanted weapon on death
-== 
-
 Show clan above name plates
 == 
 
@@ -884,9 +890,6 @@ Skip the main menu
 == 
 
 Refresh Rate
-== 
-
-Show console window
 == 
 
 Settings file
@@ -910,7 +913,13 @@ Max CSVs
 Dummy settings
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Download skins
+== 
+
+Download community skins
 == 
 
 Vanilla skins only
@@ -920,6 +929,9 @@ Fat skins (DDFat)
 == 
 
 Skin prefix
+== 
+
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -979,7 +991,60 @@ Show HUD
 Chat command
 == 
 
-UI mouse s.
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1003,16 +1068,25 @@ may cause delay
 Screen
 == 
 
-Use modern OpenGL
-== 
-
-Preinit VBO (iGPUs only)
-== 
-
-Multiple texture units (disable for macOS)
+Allows maps to render with more detail
 == 
 
 Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Enable game sounds
@@ -1063,10 +1137,28 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == 
 
+Use DDRace HUD
+== 
+
 Use DDRace Scoreboard
 == 
 
+Show dummy actions
+== 
+
+Show freeze bars
+== 
+
 Show client IDs
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
 == 
 
 Show score
@@ -1100,6 +1192,9 @@ Laser Inner Color
 == 
 
 Hookline
+== 
+
+Size
 == 
 
 No hit
@@ -1141,10 +1236,13 @@ Preview
 Save the best demo of each race
 == 
 
+Enable replays
+== 
+
 Default length: %d
 == 
 
-Enable replays
+When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Show ghost
@@ -1159,10 +1257,13 @@ Gameplay
 Overlay entities
 == 
 
-Size
+Show text entities
 == 
 
-Show text entities
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 
 
 Show others (own team only)
@@ -1171,7 +1272,13 @@ Show others (own team only)
 Show quads
 == 
 
+Quads are used for background decoration
+== 
+
 AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 AntiPing: predict other players
@@ -1264,6 +1371,12 @@ Learn
 https://wiki.ddnet.tw/
 == 
 
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
 Website
 == 
 
@@ -1296,6 +1409,12 @@ Update failed! Check log...
 == 
 
 Restart
+== 
+
+Super
+== 
+
+Team %d
 == 
 
 Manual

@@ -6,7 +6,6 @@
 #include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
-#include <game/version.h>
 
 bool CheckClientID(int ClientID);
 
@@ -170,6 +169,26 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
 		pChr->m_DeepFreeze = false;
+}
+
+void CGameContext::ConLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetLiveFrozen(true);
+}
+
+void CGameContext::ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetLiveFrozen(false);
 }
 
 void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData)

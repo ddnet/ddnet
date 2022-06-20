@@ -53,6 +53,9 @@ typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, float *pChannels, v
 
 class CRenderTools
 {
+	class IGraphics *m_pGraphics;
+	class ITextRender *m_pTextRender;
+
 	int m_TeeQuadContainerIndex;
 
 	void GetRenderTeeAnimScaleAndBaseSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize);
@@ -60,32 +63,26 @@ class CRenderTools
 	void GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, float &FeetScaleHeight);
 
 public:
-	class IGraphics *m_pGraphics;
-	class CUI *m_pUI;
-	class CGameClient *m_pGameClient;
-
 	class IGraphics *Graphics() const { return m_pGraphics; }
-	class CUI *UI() const { return m_pUI; }
-	class CGameClient *GameClient() const { return m_pGameClient; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
 
-	void Init(class IGraphics *pGraphics, class CUI *pUI, class CGameClient *pGameClient);
-
-	//typedef struct SPRITE;
+	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
 
 	void SelectSprite(struct CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
-	void SelectSprite(int id, int Flags = 0, int sx = 0, int sy = 0);
+	void SelectSprite(int Id, int Flags = 0, int sx = 0, int sy = 0);
 
 	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY);
-	void GetSpriteScale(int id, float &ScaleX, float &ScaleY);
+	void GetSpriteScale(int Id, float &ScaleX, float &ScaleY);
 	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
 
 	void DrawSprite(float x, float y, float size);
 	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);
-	void QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
-	void QuadContainerAddSprite(int QuadContainerIndex, float size);
-	void QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
-	void QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
+	void RenderCursor(vec2 Center, float Size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
+	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
 	// rects
 	void DrawRoundRect(float x, float y, float w, float h, float r);
@@ -108,11 +105,11 @@ public:
 
 	// returns the offset to use, to render the tee with @see RenderTee exactly in the mid
 	void GetRenderTeeOffsetToRenderedTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid);
-	// object render methods (gc_render_obj.cpp)
+	// object render methods
 	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f);
 
-	// map render methods (gc_render_map.cpp)
-	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64_t TimeMicros, float *pResult);
+	// map render methods (render_map.cpp)
+	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, std::chrono::nanoseconds TimeNanos, float *pResult);
 	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser);
 	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha = 1.0f);
 	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
@@ -123,8 +120,9 @@ public:
 
 	// helpers
 	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
-	void MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
 
 	// DDRace
 

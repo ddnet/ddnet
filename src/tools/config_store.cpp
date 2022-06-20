@@ -1,15 +1,14 @@
+#include <base/math.h>
 #include <base/system.h>
-#include <base/tl/array.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
+#include <vector>
 
 void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
 	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
-	array<char *> aLines;
-	char *pSettings = NULL;
 	if(!File)
 	{
 		dbg_msg("config_store", "config '%s' not found", pConfigName);
@@ -21,24 +20,25 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 
 	char *pLine;
 	int TotalLength = 0;
+	std::vector<char *> vLines;
 	while((pLine = LineReader.Get()))
 	{
 		int Length = str_length(pLine) + 1;
 		char *pCopy = (char *)malloc(Length);
 		mem_copy(pCopy, pLine, Length);
-		aLines.add(pCopy);
+		vLines.push_back(pCopy);
 		TotalLength += Length;
 	}
 	io_close(File);
 
-	pSettings = (char *)malloc(maximum(1, TotalLength));
+	char *pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
-	for(int i = 0; i < aLines.size(); i++)
+	for(auto &Line : vLines)
 	{
-		int Length = str_length(aLines[i]) + 1;
-		mem_copy(pSettings + Offset, aLines[i], Length);
+		int Length = str_length(Line) + 1;
+		mem_copy(pSettings + Offset, Line, Length);
 		Offset += Length;
-		free(aLines[i]);
+		free(Line);
 	}
 
 	CDataFileReader Reader;
@@ -51,19 +51,18 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	bool FoundInfo = false;
 	for(int i = 0; i < Reader.NumItems(); i++)
 	{
-		int TypeID;
-		int ItemID;
-		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
+		int Type, ID;
+		int *pItem = (int *)Reader.GetItem(i, &Type, &ID);
 		int Size = Reader.GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
-		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
+		if(Type == MAPITEMTYPE_INFO && ID == 0)
 		{
 			FoundInfo = true;
-			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
+			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pItem;
 			if(Size >= (int)sizeof(CMapItemInfoSettings))
 			{
 				MapInfo = *pInfo;
-				pData = (int *)&MapInfo;
+				pItem = (int *)&MapInfo;
 				Size = sizeof(MapInfo);
 				if(pInfo->m_Settings > -1)
 				{
@@ -82,7 +81,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 				{
 					MapInfo = *pInfo;
 					MapInfo.m_Settings = SettingsIndex;
-					pData = (int *)&MapInfo;
+					pItem = (int *)&MapInfo;
 					Size = sizeof(MapInfo);
 				}
 			}
@@ -90,11 +89,11 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 			{
 				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pInfo;
 				MapInfo.m_Settings = SettingsIndex;
-				pData = (int *)&MapInfo;
+				pItem = (int *)&MapInfo;
 				Size = sizeof(MapInfo);
 			}
 		}
-		Writer.AddItem(TypeID, ItemID, Size, pData);
+		Writer.AddItem(Type, ID, Size, pItem);
 	}
 
 	if(!FoundInfo)

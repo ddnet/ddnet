@@ -3,11 +3,9 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 
-#include "projectile.h"
 #include <game/client/prediction/entity.h>
 
 #include <game/gamecore.h>
-#include <game/generated/client_data.h>
 
 enum
 {
@@ -33,11 +31,13 @@ class CCharacter : public CEntity
 	friend class CGameWorld;
 
 public:
+	~CCharacter();
+
 	//character's size
 	static const int ms_PhysSize = 28;
 
-	virtual void Tick();
-	virtual void TickDefered();
+	void Tick() override;
+	void TickDefered() override;
 
 	bool IsGrounded();
 
@@ -61,9 +61,6 @@ public:
 	void GiveNinja();
 	void RemoveNinja();
 
-	bool IsAlive() { return m_Alive; }
-
-	bool m_Alive;
 	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
@@ -79,7 +76,6 @@ public:
 	bool m_Jetpack;
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
-	int m_FreezeTick;
 	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
 	bool m_LiveFreeze;
@@ -112,13 +108,13 @@ public:
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
 	CCharacterCore *Core() { return &m_Core; }
-	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; }
-	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; }
-	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; }
-	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; }
-	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; }
-	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; }
-	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
+	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
+	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
+	int GetWeaponAmmo(int Type) { return m_Core.m_aWeapons[Type].m_Ammo; }
+	void SetWeaponAmmo(int Type, int Value) { m_Core.m_aWeapons[Type].m_Ammo = Value; }
+	void SetNinjaActivationDir(vec2 ActivationDir) { m_Core.m_Ninja.m_ActivationDir = ActivationDir; }
+	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
+	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
 	int GetCID() { return m_ID; }
 	void SetInput(CNetObj_PlayerInput *pNewInput)
 	{
@@ -133,8 +129,8 @@ public:
 	int GetAttackTick() { return m_AttackTick; }
 	int GetStrongWeakID() { return m_StrongWeakID; }
 
-	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
-	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
+	CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo = 0);
+	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, CNetObj_DDNetCharacterDisplayInfo *pExtendedDisplayInfo, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
@@ -145,21 +141,12 @@ public:
 
 	bool Match(CCharacter *pChar);
 	void ResetPrediction();
-	CCharacter() { m_Alive = false; }
 	void SetTuneZone(int Zone);
 
 private:
 	// weapon info
 	int m_aHitObjects[10];
 	int m_NumObjectsHit;
-
-	struct WeaponStat
-	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		int m_Ammocost;
-		bool m_Got;
-	} m_aWeapons[NUM_WEAPONS];
 
 	int m_LastWeapon;
 	int m_QueuedWeapon;
@@ -177,15 +164,6 @@ private:
 	CNetObj_PlayerInput m_SavedInput;
 
 	int m_NumInputs;
-
-	// ninja
-	struct NinjaStat
-	{
-		vec2 m_ActivationDir;
-		int m_ActivationTick;
-		int m_CurrentMoveTime;
-		int m_OldVelAmount;
-	} m_Ninja;
 
 	// the player core for the physics
 	CCharacterCore m_Core;

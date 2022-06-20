@@ -4,10 +4,8 @@
 
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
-#include <game/server/score.h>
+#include <game/server/scoreworker.h>
 #include <game/teamscore.h>
-
-#include <utility>
 
 class CGameTeams
 {
@@ -183,14 +181,14 @@ public:
 		return m_pSaveTeamResult[TeamID] != nullptr;
 	}
 
-	void EnablePractice(int Team)
+	void SetPractice(int Team, bool Enabled)
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return;
 		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return;
 
-		m_Practice[Team] = true;
+		m_Practice[Team] = Enabled;
 	}
 
 	bool IsPractice(int Team)

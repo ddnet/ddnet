@@ -1,23 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/config.h>
 #include <engine/friends.h>
-#include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
-#include <engine/updater.h>
-
-#include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
 #include <game/client/components/console.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/localization.h>
-#include <game/version.h>
 
 #include <game/client/gameclient.h>
 
@@ -109,7 +102,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	// This is just for scripts/update_localization.py to work correctly (all other strings are already Localize()'d somewhere else). Don't remove!
 	// Localize("Type");
 
-	int NumCols = sizeof(s_aCols) / sizeof(CColumn);
+	int NumCols = std::size(s_aCols);
 
 	// do layout
 	for(int i = 0; i < NumCols; i++)
@@ -181,11 +174,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CUIRect MsgBox = View;
 
 		if(!ServerBrowser()->NumServers() && ServerBrowser()->IsGettingServerlist())
-			UI()->DoLabelScaled(&MsgBox, Localize("Getting server list from master server"), 16.0f, TEXTALIGN_CENTER);
+			UI()->DoLabel(&MsgBox, Localize("Getting server list from master server"), 16.0f, TEXTALIGN_CENTER);
 		else if(!ServerBrowser()->NumServers())
-			UI()->DoLabelScaled(&MsgBox, Localize("No servers found"), 16.0f, TEXTALIGN_CENTER);
+			UI()->DoLabel(&MsgBox, Localize("No servers found"), 16.0f, TEXTALIGN_CENTER);
 		else if(ServerBrowser()->NumServers() && !NumServers)
-			UI()->DoLabelScaled(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, TEXTALIGN_CENTER);
+			UI()->DoLabel(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, TEXTALIGN_CENTER);
 	}
 
 	static float s_ScrollValue = 0;
@@ -221,8 +214,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	m_SelectedIndex = -1;
 
 	// reset friend counter
-	for(int i = 0; i < m_lFriends.size(); m_lFriends[i++].m_NumFound = 0)
-		;
+	for(auto &Friend : m_vFriends)
+		Friend.m_NumFound = 0;
+
+	auto RenderBrowserIcons = [this](CUIElement::SUIElementRect &UIRect, CUIRect *pRect, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, const char *pText, ETextAlignment TextAlign, bool SmallFont = false) {
+		float FontSize = 14.0f;
+		if(SmallFont)
+			FontSize = 6.0f;
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->TextColor(TextColor);
+		TextRender()->TextOutlineColor(TextOutlineColor);
+		UI()->DoLabelStreamed(UIRect, pRect, pText, FontSize, TextAlign, -1, 0);
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(nullptr);
+	};
 
 	for(int i = 0; i < NumServers; i++)
 	{
@@ -230,7 +238,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
 		NumPlayers += pItem->m_NumFilteredPlayers;
 		CUIRect Row;
-		CUIRect SelectHitBox;
 
 		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 		//initialize
@@ -242,7 +249,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
 
 		View.HSplitTop(ms_ListheaderHeight, &Row, &View);
-		SelectHitBox = Row;
 
 		if(Selected)
 			m_SelectedIndex = i;
@@ -256,13 +262,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					unsigned NameHash = str_quickhash(pItem->m_aClients[j].m_aName);
 					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
-					for(int f = 0; f < m_lFriends.size(); ++f)
+					for(auto &Friend : m_vFriends)
 					{
-						if(((g_Config.m_ClFriendsIgnoreClan && m_lFriends[f].m_pFriendInfo->m_aName[0]) || (ClanHash == m_lFriends[f].m_pFriendInfo->m_ClanHash && !str_comp(m_lFriends[f].m_pFriendInfo->m_aClan, pItem->m_aClients[j].m_aClan))) &&
-							(!m_lFriends[f].m_pFriendInfo->m_aName[0] || (NameHash == m_lFriends[f].m_pFriendInfo->m_NameHash && !str_comp(m_lFriends[f].m_pFriendInfo->m_aName, pItem->m_aClients[j].m_aName))))
+						if(((g_Config.m_ClFriendsIgnoreClan && Friend.m_pFriendInfo->m_aName[0]) || (ClanHash == Friend.m_pFriendInfo->m_ClanHash && !str_comp(Friend.m_pFriendInfo->m_aClan, pItem->m_aClients[j].m_aClan))) &&
+							(!Friend.m_pFriendInfo->m_aName[0] || (NameHash == Friend.m_pFriendInfo->m_NameHash && !str_comp(Friend.m_pFriendInfo->m_aName, pItem->m_aClients[j].m_aName))))
 						{
-							m_lFriends[f].m_NumFound++;
-							if(m_lFriends[f].m_pFriendInfo->m_aName[0])
+							Friend.m_NumFound++;
+							if(Friend.m_pFriendInfo->m_aName[0])
 								break;
 						}
 					}
@@ -280,23 +286,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(0), &r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			// clip the selection
-			if(SelectHitBox.y < OriginalView.y) // top
-			{
-				SelectHitBox.h -= OriginalView.y - SelectHitBox.y;
-				SelectHitBox.y = OriginalView.y;
-			}
-			else if(SelectHitBox.y + SelectHitBox.h > OriginalView.y + OriginalView.h) // bottom
-				SelectHitBox.h = OriginalView.y + OriginalView.h - SelectHitBox.y;
-
-			if(!Selected && UI()->MouseInside(&SelectHitBox))
+			if(!Selected && UI()->MouseHovered(&Row))
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(1), &r, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
 			}
 
-			if(UI()->DoButtonLogic(pItem, "", Selected, &SelectHitBox))
+			if(UI()->DoButtonLogic(pItem, Selected, &Row))
 			{
 				NewSelected = ItemIndex;
 				if(NewSelected == m_DoubleClickIndex)
@@ -307,8 +304,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		else
 		{
 			// reset active item, if not visible
-			if(UI()->ActiveItem() == pItem)
-				UI()->SetActiveItem(0);
+			if(UI()->CheckActiveItem(pItem))
+				UI()->SetActiveItem(nullptr);
 
 			// don't render invisible items
 			continue;
@@ -328,21 +325,28 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(ID == COL_FLAG_LOCK)
 			{
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_LOCK, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\xA3", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
+				}
 			}
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_DDNET, &Button);
+				{
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, "\xEF\x82\xA3", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 1), &Button, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, "\xEF\x80\x8C", TEXTALIGN_CENTER, true);
+				}
 			}
 			else if(ID == COL_NAME)
 			{
-				float FontSize = 12.0f * UI()->Scale();
+				float FontSize = 12.0f;
 
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
 				{
@@ -372,10 +376,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					Icon.Margin(2.0f, &Icon);
 
 					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
-						DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_RANK, &Icon);
+					{
+						RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), "\xEF\x84\x9E", TEXTALIGN_CENTER);
+					}
 				}
 
-				float FontSize = 12.0f * UI()->Scale();
+				float FontSize = 12.0f;
 
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
 				{
@@ -403,13 +409,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					DoButton_Icon(IMAGE_BROWSEICONS, SPRITE_BROWSE_HEART, &Icon);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
 				}
 
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-				float FontSize = 12.0f * UI()->Scale();
+				float FontSize = 12.0f;
 				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 				TextRender()->TextColor(1, 1, 1, 1);
 			}
@@ -423,19 +429,19 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					TextRender()->TextColor(rgb);
 				}
 
-				float FontSize = 12.0f * UI()->Scale();
+				float FontSize = 12.0f;
 				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPing), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else if(ID == COL_VERSION)
 			{
 				const char *pVersion = pItem->m_aVersion;
-				float FontSize = 12.0f * UI()->Scale();
+				float FontSize = 12.0f;
 				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColVersion), &Button, pVersion, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 			}
 			else if(ID == COL_GAMETYPE)
 			{
-				float FontSize = 12.0f * UI()->Scale();
+				float FontSize = 12.0f;
 
 				if(g_Config.m_UiColorizeGametype)
 				{
@@ -507,8 +513,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	float SearchIconWidth = 0;
 	float ExcludeIconWidth = 0;
 	float ExcludeSearchIconMax = 0;
-	const char *pSearchLabel = "\xEE\xA2\xB6"; // U+0e8b6
-	const char *pExcludeLabel = "\xEE\x85\x8B"; // U+0e14b
+	const char *pSearchLabel = "\xEF\x80\x82";
+	const char *pExcludeLabel = "\xEF\x81\x9E";
 
 	// render quick search
 	{
@@ -517,7 +523,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabelScaled(&QuickSearch, pSearchLabel, 16.0f, TEXTALIGN_LEFT, Props);
+		UI()->DoLabel(&QuickSearch, pSearchLabel, 16.0f, TEXTALIGN_LEFT, Props);
 		SearchIconWidth = TextRender()->TextWidth(0, 16.0f, pSearchLabel, -1, -1.0f);
 		ExcludeIconWidth = TextRender()->TextWidth(0, 16.0f, pExcludeLabel, -1, -1.0f);
 		ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
@@ -528,7 +534,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		char aBufSearch[64];
 		str_format(aBufSearch, sizeof(aBufSearch), "%s:", Localize("Search"));
-		UI()->DoLabelScaled(&QuickSearch, aBufSearch, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&QuickSearch, aBufSearch, 14.0f, TEXTALIGN_LEFT);
 		QuickSearch.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
@@ -552,7 +558,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabelScaled(&QuickExclude, pExcludeLabel, 16.0f, TEXTALIGN_LEFT, Props);
+		UI()->DoLabel(&QuickExclude, pExcludeLabel, 16.0f, TEXTALIGN_LEFT, Props);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickExclude.VSplitLeft(ExcludeSearchIconMax, 0, &QuickExclude);
@@ -560,7 +566,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		char aBufExclude[64];
 		str_format(aBufExclude, sizeof(aBufExclude), "%s:", Localize("Exclude"));
-		UI()->DoLabelScaled(&QuickExclude, aBufExclude, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&QuickExclude, aBufExclude, 14.0f, TEXTALIGN_LEFT);
 		QuickExclude.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
@@ -587,9 +593,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	CUIRect SvrsOnline, PlysOnline;
 	Status3.HSplitTop(20.f, &PlysOnline, &SvrsOnline);
 	PlysOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufPyr, -1, -1.0f), 0, &PlysOnline);
-	UI()->DoLabelScaled(&PlysOnline, aBufPyr, 12.0f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&PlysOnline, aBufPyr, 12.0f, TEXTALIGN_LEFT);
 	SvrsOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufSvr, -1, -1.0f), 0, &SvrsOnline);
-	UI()->DoLabelScaled(&SvrsOnline, aBufSvr, 12.0f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&SvrsOnline, aBufSvr, 12.0f, TEXTALIGN_LEFT);
 
 	// status box
 	{
@@ -598,7 +604,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		ServerAddr.Margin(2.0f, &ServerAddr);
 
 		// address info
-		UI()->DoLabelScaled(&ServerAddr, Localize("Server address:"), 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&ServerAddr, Localize("Server address:"), 14.0f, TEXTALIGN_LEFT);
 		ServerAddr.VSplitLeft(SearchExcludeAddrStrMax + 5.0f + ExcludeSearchIconMax + 5.0f, NULL, &ServerAddr);
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
@@ -675,7 +681,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 4.0f);
 
 	RenderTools()->DrawUIRect(&ServerFilter, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_B, 4.0f);
-	UI()->DoLabelScaled(&FilterHeader, Localize("Server filter"), FontSize + 2.0f, TEXTALIGN_CENTER);
+	UI()->DoLabel(&FilterHeader, Localize("Server filter"), FontSize + 2.0f, TEXTALIGN_CENTER);
 	CUIRect Button, Button2;
 
 	ServerFilter.VSplitLeft(5.0f, 0, &ServerFilter);
@@ -709,7 +715,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	ServerFilter.HSplitTop(5.0f, 0, &ServerFilter);
 
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
-	UI()->DoLabelScaled(&Button, Localize("Game types:"), FontSize, TEXTALIGN_LEFT);
+	UI()->DoLabel(&Button, Localize("Game types:"), FontSize, TEXTALIGN_LEFT);
 	Button.VSplitRight(60.0f, 0, &Button);
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	static float s_OffsetGametype = 0.0f;
@@ -719,7 +725,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	// server address
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
-	UI()->DoLabelScaled(&Button, Localize("Server address:"), FontSize, TEXTALIGN_LEFT);
+	UI()->DoLabel(&Button, Localize("Server address:"), FontSize, TEXTALIGN_LEFT);
 	Button.VSplitRight(60.0f, 0, &Button);
 	static float s_OffsetAddr = 0.0f;
 	if(UIEx()->DoEditBox(&g_Config.m_BrFilterServerAddress, &Button, g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress), FontSize, &s_OffsetAddr))
@@ -741,7 +747,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry ? 1.0f : 0.5f);
 		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
-		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, "", 0, &Rect))
+		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Rect))
 			m_Popup = POPUP_COUNTRY;
 	}
 
@@ -848,8 +854,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = TypesWidth;
 					Rect.h = TypesHeight;
 
-					int Button = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], "", 0, &Rect);
-					if(Button == 1 || Button == 2)
+					int Click = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], 0, &Rect);
+					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
 						if(pFilterExcludeTypes[0] == '\0')
@@ -889,7 +895,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
-					else if(Button == 3)
+					else if(Click == 3)
 					{
 						// middle click to reset (re-enable all)
 						pFilterExcludeTypes[0] = '\0';
@@ -897,7 +903,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					}
 
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
-					UI()->DoLabelScaled(&Rect, pName, FontSize, TEXTALIGN_CENTER);
+					UI()->DoLabel(&Rect, pName, FontSize, TEXTALIGN_CENTER);
 					TextRender()->TextColor(1.0, 1.0, 1.0, 1.0f);
 				}
 			}
@@ -943,8 +949,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = FlagWidth;
 					Rect.h = FlagHeight;
 
-					int Button = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], "", 0, &Rect);
-					if(Button == 1 || Button == 2)
+					int Click = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], 0, &Rect);
+					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
 						if(pFilterExcludeCountries[0] == '\0')
@@ -984,7 +990,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
-					else if(Button == 3)
+					else if(Click == 3)
 					{
 						// middle click to reset (re-enable all)
 						pFilterExcludeCountries[0] = '\0';
@@ -1041,7 +1047,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	ServerDetails.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerDetails);
 	RenderTools()->DrawUIRect(&ServerHeader, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 4.0f);
 	RenderTools()->DrawUIRect(&ServerDetails, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_B, 4.0f);
-	UI()->DoLabelScaled(&ServerHeader, Localize("Server details"), FontSize + 2.0f, TEXTALIGN_CENTER);
+	UI()->DoLabel(&ServerHeader, Localize("Server details"), FontSize + 2.0f, TEXTALIGN_CENTER);
 
 	if(pSelectedServer)
 	{
@@ -1098,7 +1104,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		for(auto &Label : s_aLabels)
 		{
 			LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
-			UI()->DoLabelScaled(&Row, Localize(Label), FontSize, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Row, Localize(Label), FontSize, TEXTALIGN_LEFT);
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
@@ -1235,15 +1241,10 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 void CMenus::FriendlistOnUpdate()
 {
-	m_lFriends.clear();
+	m_vFriends.clear();
 	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
-	{
-		CFriendItem Item;
-		Item.m_pFriendInfo = m_pClient->Friends()->GetFriend(i);
-		Item.m_NumFound = 0;
-		m_lFriends.add_unsorted(Item);
-	}
-	m_lFriends.sort_range();
+		m_vFriends.emplace_back(m_pClient->Friends()->GetFriend(i));
+	std::sort(m_vFriends.begin(), m_vFriends.end());
 }
 
 void CMenus::RenderServerbrowserFriends(CUIRect View)
@@ -1264,7 +1265,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	ServerFriends.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFriends);
 	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 4.0f);
 	RenderTools()->DrawUIRect(&ServerFriends, ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
-	UI()->DoLabelScaled(&FilterHeader, Localize("Friends"), FontSize + 4.0f, TEXTALIGN_CENTER);
+	UI()->DoLabel(&FilterHeader, Localize("Friends"), FontSize + 4.0f, TEXTALIGN_CENTER);
 	CUIRect Button, List;
 
 	ServerFriends.Margin(3.0f, &ServerFriends);
@@ -1273,14 +1274,14 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// friends list(remove friend)
 	static float s_ScrollValue = 0;
-	if(m_FriendlistSelectedIndex >= m_lFriends.size())
-		m_FriendlistSelectedIndex = m_lFriends.size() - 1;
-	UiDoListboxStart(&m_lFriends, &List, 30.0f, "", "", m_lFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
+	if(m_FriendlistSelectedIndex >= (int)m_vFriends.size())
+		m_FriendlistSelectedIndex = m_vFriends.size() - 1;
+	UiDoListboxStart(&m_vFriends, &List, 30.0f, "", "", m_vFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
 
-	m_lFriends.sort_range();
-	for(int i = 0; i < m_lFriends.size(); ++i)
+	std::sort(m_vFriends.begin(), m_vFriends.end());
+	for(auto &Friend : m_vFriends)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&m_lFriends[i], false, false);
+		CListboxItem Item = UiDoListboxNextItem(&Friend.m_NumFound, false, false);
 
 		if(Item.m_Visible)
 		{
@@ -1291,15 +1292,15 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 			Item.m_Rect.VMargin(2.5f, &Item.m_Rect);
 			Item.m_Rect.HSplitTop(12.0f, &Item.m_Rect, &Button);
-			UI()->DoLabelScaled(&Item.m_Rect, m_lFriends[i].m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
-			UI()->DoLabelScaled(&Button, m_lFriends[i].m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Item.m_Rect, Friend.m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Button, Friend.m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
 
-			RenderTools()->DrawUIRect(&OnState, m_lFriends[i].m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_R, 4.0f);
+			RenderTools()->DrawUIRect(&OnState, Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_R, 4.0f);
 			OnState.HMargin((OnState.h - FontSize) / 3, &OnState);
 			OnState.VMargin(5.0f, &OnState);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%i", m_lFriends[i].m_NumFound);
-			UI()->DoLabelScaled(&OnState, aBuf, FontSize + 2, TEXTALIGN_RIGHT);
+			str_format(aBuf, sizeof(aBuf), "%i", Friend.m_NumFound);
+			UI()->DoLabel(&OnState, aBuf, FontSize + 2, TEXTALIGN_RIGHT);
 		}
 	}
 
@@ -1307,7 +1308,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_FriendlistSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
 
 	// activate found server with friend
-	if(Activated && !m_EnterPressed && m_lFriends[m_FriendlistSelectedIndex].m_NumFound)
+	if(Activated && !m_EnterPressed && m_vFriends[m_FriendlistSelectedIndex].m_NumFound)
 	{
 		bool Found = false;
 		int NumServers = ServerBrowser()->NumSortedServers();
@@ -1320,9 +1321,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				for(int j = 0; j < pItem->m_NumReceivedClients && !Found; ++j)
 				{
 					if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO &&
-						((g_Config.m_ClFriendsIgnoreClan && m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
-						(!m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
-							str_quickhash(pItem->m_aClients[j].m_aName) == m_lFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
+						((g_Config.m_ClFriendsIgnoreClan && m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
+						(!m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
+							str_quickhash(pItem->m_aClients[j].m_aName) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
 						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
 						m_ScrollOffset = ItemIndex;
@@ -1350,7 +1351,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
-		UI()->DoLabelScaled(&Button, aBuf, FontSize + 2, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Button, aBuf, FontSize + 2, TEXTALIGN_LEFT);
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aName[MAX_NAME_LENGTH] = {0};
 		static float s_OffsetName = 0.0f;
@@ -1359,7 +1360,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
-		UI()->DoLabelScaled(&Button, aBuf, FontSize + 2, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Button, aBuf, FontSize + 2, TEXTALIGN_LEFT);
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aClan[MAX_CLAN_LENGTH] = {0};
 		static float s_OffsetClan = 0.0f;

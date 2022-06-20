@@ -3,8 +3,6 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
-#include <engine/shared/protocol.h>
-
 // layer types
 enum
 {
@@ -80,6 +78,11 @@ enum
 	//DDRace - Shotgun
 	ENTITY_CRAZY_SHOTGUN_EX,
 	ENTITY_CRAZY_SHOTGUN,
+	//DDNet - Removing specific weapon
+	ENTITY_ARMOR_SHOTGUN,
+	ENTITY_ARMOR_GRENADE,
+	ENTITY_ARMOR_NINJA,
+	ENTITY_ARMOR_LASER,
 	//DDRace - Draggers
 	ENTITY_DRAGGER_WEAK = 42,
 	ENTITY_DRAGGER_NORMAL,
