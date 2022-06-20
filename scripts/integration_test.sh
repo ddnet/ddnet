@@ -156,7 +156,7 @@ fails=0
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	tries=120
 else
-	tries=2
+	tries=50
 fi
 # give the client time to launch and create the fifo file
 # but assume after X secs that the client crashed before
