@@ -603,7 +603,7 @@ void GetGameAreaDistance(const float pGameAreas[2][2][2], const MapObject Obs[2]
 
 void GetGameAreaDistance(const float pGameAreas[2][2][2], const MapObject Obs[2], const float pVisibleArea[2][2], float pDistance[2])
 {
-	float pVisibleAreas[2][2][2] = {0,0,0,0,0,0,0,0};
+	float pVisibleAreas[2][2][2];
 	memcpy(pVisibleAreas[0], pVisibleArea[0], sizeof(float[2][2]));
 	memcpy(pVisibleAreas[1], pVisibleArea[0], sizeof(float[2][2]));
 	GetGameAreaDistance(pGameAreas, Obs, pVisibleAreas, pDistance);
