@@ -1,11 +1,11 @@
 #include <algorithm>
+#include <limits>
 #include <base/logger.h>
 #include <base/system.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
-#define INEXISTENT INT_MAX
 
 // global new layers data (set by ReplaceAreaTiles and ReplaceAreaQuads)
 void *g_pNewData[1024];
@@ -430,10 +430,10 @@ bool InsertDestinationQuads(const float pGameAreas[2][2][2], const CQuad *pQuads
 				continue;
 
 			pDestQuads[QuadsCounter] = pQuads[i];
-			for(auto &m_aPoint : pDestQuads[QuadsCounter].m_aPoints)
+			for(auto &Point : pDestQuads[QuadsCounter].m_aPoints)
 			{
-				m_aPoint.x += f2fx(pQuadPos[0]) - pDestQuads[QuadsCounter].m_aPoints[4].x;
-				m_aPoint.y += f2fx(pQuadPos[1]) - pDestQuads[QuadsCounter].m_aPoints[4].y;
+				Point.x += f2fx(pQuadPos[0]) - pDestQuads[QuadsCounter].m_aPoints[4].x;
+				Point.y += f2fx(pQuadPos[1]) - pDestQuads[QuadsCounter].m_aPoints[4].y;
 			}
 
 			QuadsCounter++;
@@ -651,18 +651,18 @@ bool GetLineIntersection(const float pLine[2], const float Point)
 void SetInexistent(float *pArray, const int Count)
 {
 	for(int i = 0; i < Count; i++)
-		pArray[i] = (float)INEXISTENT;
+		pArray[i] = std::numeric_limits<float>::max();
 }
 
 bool IsInexistent(const float *pArray, const int Count)
 {
 	for(int i = 0; i < Count; i++)
-		if((float)pArray[i] == (float)INEXISTENT)
+		if(pArray[i] == std::numeric_limits<float>::max())
 			return true;
 	return false;
 }
 
 bool IsInexistent(const float Value)
 {
-	return Value == INEXISTENT;
+	return Value == std::numeric_limits<float>::max();
 }
