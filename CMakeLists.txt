@@ -1759,10 +1759,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   http.h
   huffman.cpp
   huffman.h
-  image_loader.cpp
-  image_loader.h
-  image_manipulation.cpp
-  image_manipulation.h
   jobs.cpp
   jobs.h
   json.cpp
@@ -1810,6 +1806,12 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   video.h
   websockets.cpp
   websockets.h
+)
+set_src(ENGINE_GFX GLOB src/engine/gfx
+  image_loader.cpp
+  image_loader.h
+  image_manipulation.cpp
+  image_manipulation.h
 )
 set_src(GAME_SHARED GLOB src/game
   bezier.cpp
@@ -1874,7 +1876,6 @@ set(LIBS
   ${CURL_LIBRARIES}
   ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
-  ${PNG_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
@@ -1883,10 +1884,11 @@ set(LIBS
 )
 
 # Targets
+add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
+target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
-target_include_directories(engine-shared PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
-list(APPEND TARGETS_OWN engine-shared game-shared)
+list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
   add_library(discord-shared SHARED IMPORTED)
@@ -2168,6 +2170,7 @@ if(CLIENT)
       ${CLIENT_ICON}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
+      $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
     )
@@ -2177,6 +2180,7 @@ if(CLIENT)
       ${CLIENT_ICON}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
+      $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
     )
@@ -2351,7 +2355,6 @@ if(SERVER)
   # Libraries
   set(LIBS_SERVER
     ${LIBS}
-    ${PNG_LIBRARIES}
     ${MYSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
     ${MINIUPNPC_LIBRARIES}
@@ -2424,6 +2427,8 @@ if(TOOLS)
       set(TOOL_LIBS ${LIBS})
       if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
         list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS})
+	list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx>)
+        list(APPEND TOOL_LIBS ${PNG_LIBRARIES})
       endif()
       if(TOOL MATCHES "^config_")
         list(APPEND EXTRA_TOOL_SRC "src/tools/config_common.h")
@@ -2548,11 +2553,12 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
     ${TESTS}
     ${TESTS_EXTRA}
+    $<TARGET_OBJECTS:engine-gfx>
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
     ${DEPS}
   )
-  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${MYSQL_LIBRARIES} ${GTEST_LIBRARIES})
+  target_link_libraries(${TARGET_TESTRUNNER} ${LIBS} ${MYSQL_LIBRARIES} ${PNG_LIBRARIES} ${GTEST_LIBRARIES})
   target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 
   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})

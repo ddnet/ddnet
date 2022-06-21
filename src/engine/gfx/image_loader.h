@@ -1,5 +1,5 @@
-#ifndef ENGINE_SHARED_IMAGE_LOADER_H
-#define ENGINE_SHARED_IMAGE_LOADER_H
+#ifndef ENGINE_GFX_IMAGE_LOADER_H
+#define ENGINE_GFX_IMAGE_LOADER_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -25,4 +25,4 @@ struct SImageByteBuffer
 bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
 bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height);
 
-#endif
+#endif // ENGINE_GFX_IMAGE_LOADER_H

@@ -10,17 +10,15 @@
 
 #include <base/system.h>
 
-#include <engine/shared/image_loader.h>
-
 #include <engine/console.h>
+#include <engine/gfx/image_loader.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/localization.h>
-
-#include <engine/shared/image_manipulation.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>

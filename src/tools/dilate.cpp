@@ -2,9 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/gfx/image_loader.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
-#include <engine/shared/image_loader.h>
-#include <engine/shared/image_manipulation.h>
 
 int DilateFile(const char *pFilename)
 {

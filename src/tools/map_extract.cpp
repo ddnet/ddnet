@@ -1,11 +1,10 @@
 // Adapted from TWMapImagesRecovery by Tardo: https://github.com/Tardo/TWMapImagesRecovery
 #include <base/logger.h>
 #include <base/system.h>
+#include <engine/gfx/image_loader.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
-
-#include <engine/shared/image_loader.h>
 
 bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 {

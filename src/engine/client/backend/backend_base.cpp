@@ -1,5 +1,5 @@
 #include "backend_base.h"
-#include "engine/shared/image_manipulation.h"
+#include <engine/gfx/image_manipulation.h>
 
 size_t CCommandProcessorFragment_GLBase::TexFormatToImageColorChannelCount(int TexFormat)
 {
