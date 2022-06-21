@@ -136,7 +136,7 @@ def main():
 	{
 		const char *m_pMsgFailedOn;
 		const char *m_pObjCorrectedOn;
-		char m_aMsgData[1024];
+		char m_aMsgData[1024 * 2];
 		int m_NumObjCorrections;
 		int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
 
