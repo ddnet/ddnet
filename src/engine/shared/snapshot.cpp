@@ -26,6 +26,11 @@ int CSnapshot::GetItemSize(int Index) const
 int CSnapshot::GetItemType(int Index) const
 {
 	int InternalType = GetItem(Index)->Type();
+	return GetExternalItemType(InternalType);
+}
+
+int CSnapshot::GetExternalItemType(int InternalType) const
+{
 	if(InternalType < OFFSET_UUID_TYPE)
 	{
 		return InternalType;
@@ -36,7 +41,6 @@ int CSnapshot::GetItemType(int Index) const
 	{
 		return InternalType;
 	}
-
 	CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
@@ -470,7 +474,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 	m_pLast = 0;
 }
 
-void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, bool CreateAlt)
 {
 	// allocate memory for holder + snapshot_data
 	int TotalSize = sizeof(CHolder) + DataSize;
