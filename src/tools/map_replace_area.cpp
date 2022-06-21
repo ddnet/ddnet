@@ -50,7 +50,7 @@ bool GetReplaceableArea(const float[][2], MapObject, float[][2]);
 
 void GetGameAreaDistance(const float[][2][2], const MapObject[], const float[][2][2], float[]);
 void GetGameAreaDistance(const float[][2][2], const MapObject[], const float[][2], float[]);
-void GetSignificantScreenPos(const MapObject, const float[][2], const float[][2], float[]);
+void GetSignificantScreenPos(MapObject, const float[][2], const float[][2], float[]);
 void ConvertToTiles(const float[][2], int[][2]);
 
 bool GetLineIntersection(const float[], const float[], float[] = 0x0);
@@ -430,7 +430,7 @@ bool InsertDestinationQuads(const float pGameAreas[2][2][2], const CQuad *pQuads
 				continue;
 
 			pDestQuads[QuadsCounter] = pQuads[i];
-			for(auto & m_aPoint : pDestQuads[QuadsCounter].m_aPoints)
+			for(auto &m_aPoint : pDestQuads[QuadsCounter].m_aPoints)
 			{
 				m_aPoint.x += f2fx(pQuadPos[0]) - pDestQuads[QuadsCounter].m_aPoints[4].x;
 				m_aPoint.y += f2fx(pQuadPos[1]) - pDestQuads[QuadsCounter].m_aPoints[4].y;
