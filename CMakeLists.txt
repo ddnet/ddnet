@@ -2399,8 +2399,8 @@ if(TOOLS)
     map_diff.cpp
     map_extract.cpp
     map_optimize.cpp
-    map_replace_image.cpp
     map_replace_area.cpp
+    map_replace_image.cpp
     map_resave.cpp
     packetgen.cpp
     stun.cpp
