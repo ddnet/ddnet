@@ -48,6 +48,7 @@ public:
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
 	int GetItemType(int Index) const;
+	int GetExternalItemType(int InternalType) const;
 	void *FindItem(int Type, int ID) const;
 
 	unsigned Crc();
@@ -119,7 +120,7 @@ public:
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
-	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt);
+	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, bool CreateAlt);
 	int Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 

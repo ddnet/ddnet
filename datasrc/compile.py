@@ -141,8 +141,10 @@ def main():
 		int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
 
 		static const char *ms_apObjNames[];
+		static const char *ms_apExObjNames[];
 		static int ms_aObjSizes[];
 		static const char *ms_apMsgNames[];
+		static const char *ms_apExMsgNames[];
 
 	public:
 		CNetObjHandler();
@@ -201,8 +203,13 @@ def main():
 		lines += ['}']
 
 		lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
-		lines += ['\t"invalid",']
+		lines += ['\t"EX/UUID",']
 		lines += ['\t"%s",' % o.name for o in network.Objects if o.ex is None]
+		lines += ['\t""', "};", ""]
+
+		lines += ["const char *CNetObjHandler::ms_apExObjNames[] = {"]
+		lines += ['\t"invalid",']
+		lines += ['\t"%s",' % o.name for o in network.Objects if o.ex is not None]
 		lines += ['\t""', "};", ""]
 
 		lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
@@ -213,17 +220,25 @@ def main():
 
 		lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
 		lines += ['\t"invalid",']
-		for msg in network.Messages:
-			if msg.ex is None:
-				lines += ['\t"%s",' % msg.name]
-		lines += ['\t""']
-		lines += ['};']
-		lines += ['']
+		lines += ['\t"%s",' % msg.name for msg in network.Messages if msg.ex is None]
+		lines += ['\t""', "};", ""]
+
+		lines += ['const char *CNetObjHandler::ms_apExMsgNames[] = {']
+		lines += ['\t"invalid",']
+		lines += ['\t"%s",' % msg.name for msg in network.Messages if msg.ex is not None]
+		lines += ['\t""', "};", ""]
 
 		lines += ['const char *CNetObjHandler::GetObjName(int Type) const']
 		lines += ['{']
-		lines += ['\tif(Type < 0 || Type >= NUM_NETOBJTYPES) return "(out of range)";']
-		lines += ['\treturn ms_apObjNames[Type];']
+		lines += ['\tif(Type >= 0 && Type < NUM_NETOBJTYPES)']
+		lines += ['\t{']
+		lines += ['\t\treturn ms_apObjNames[Type];']
+		lines += ['\t}']
+		lines += ['\telse if(Type > __NETOBJTYPE_UUID_HELPER && Type < OFFSET_NETMSGTYPE_UUID)']
+		lines += ['\t{']
+		lines += ['\t\treturn ms_apExObjNames[Type - __NETOBJTYPE_UUID_HELPER];']
+		lines += ['\t}']
+		lines += ['\treturn "(out of range)";']
 		lines += ['}']
 		lines += ['']
 
@@ -234,14 +249,19 @@ def main():
 		lines += ['}']
 		lines += ['']
 
-
 		lines += ['const char *CNetObjHandler::GetMsgName(int Type) const']
 		lines += ['{']
-		lines += ['\tif(Type < 0 || Type >= NUM_NETMSGTYPES) return "(out of range)";']
-		lines += ['\treturn ms_apMsgNames[Type];']
+		lines += ['\tif(Type >= 0 && Type < NUM_NETMSGTYPES)']
+		lines += ['\t{']
+		lines += ['\t\treturn ms_apMsgNames[Type];']
+		lines += ['\t}']
+		lines += ['\telse if(Type > __NETMSGTYPE_UUID_HELPER && Type < OFFSET_MAPITEMTYPE_UUID)']
+		lines += ['\t{']
+		lines += ['\t\treturn ms_apExMsgNames[Type - __NETMSGTYPE_UUID_HELPER];']
+		lines += ['\t}']
+		lines += ['\treturn "(out of range)";']
 		lines += ['}']
 		lines += ['']
-
 
 		for l in lines:
 			print(l)
