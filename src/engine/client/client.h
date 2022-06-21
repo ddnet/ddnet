@@ -120,11 +120,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IDiscord *m_pDiscord;
 	ISteam *m_pSteam;
 
-	enum
-	{
-		NUM_SNAPSHOT_TYPES = 2,
-	};
-
 	CNetClient m_NetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
 	CDemoRecorder m_DemoRecorder[RECORDER_MAX];
@@ -143,7 +138,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr;
 
-	unsigned m_SnapshotParts[NUM_DUMMIES];
+	uint64_t m_SnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
@@ -239,7 +234,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CSnapshotStorage::CHolder *m_aSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES];
 
 	int m_ReceivedSnapshots[NUM_DUMMIES];
-	char m_aSnapshotIncomingData[CSnapshot::MAX_SIZE];
+	char m_aSnapshotIncomingData[NUM_DUMMIES][CSnapshot::MAX_SIZE];
+	int m_SnapshotIncomingDataSize[NUM_DUMMIES];
 
 	CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
 	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
