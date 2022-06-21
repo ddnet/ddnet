@@ -1,4 +1,5 @@
 #include "image_loader.h"
+#include <base/log.h>
 #include <base/system.h>
 #include <cstdlib>
 
@@ -78,6 +79,56 @@ static void LibPNGDeleteReadStruct(png_structp pPNGStruct, png_infop pPNGInfo)
 	png_destroy_read_struct(&pPNGStruct, NULL, NULL);
 }
 
+static bool IsUnsupportedByPnglite(png_structp pPNGStruct, png_infop pPNGInfo)
+{
+	int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
+	int BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
+	int InterlaceType = png_get_interlace_type(pPNGStruct, pPNGInfo);
+	bool Unsupported = false;
+	switch(ColorType)
+	{
+	case PNG_COLOR_TYPE_GRAY:
+	case PNG_COLOR_TYPE_RGB:
+	case PNG_COLOR_TYPE_RGB_ALPHA:
+	case PNG_COLOR_TYPE_GRAY_ALPHA:
+		break;
+	default:
+		log_error("png", "color type %d unsupported by pnglite", ColorType);
+		Unsupported = true;
+	}
+
+	switch(BitDepth)
+	{
+	case 8:
+	case 16:
+		break;
+	default:
+		log_error("png", "bit depth %d unsupported by pnglite", BitDepth);
+		Unsupported = true;
+	}
+
+	switch(InterlaceType)
+	{
+	case PNG_INTERLACE_NONE:
+		break;
+	default:
+		log_error("png", "interlace type %d unsupported by pnglite", InterlaceType);
+		Unsupported = true;
+	}
+
+	if(png_get_compression_type(pPNGStruct, pPNGInfo) != PNG_COMPRESSION_TYPE_BASE || png_get_filter_type(pPNGStruct, pPNGInfo) != PNG_FILTER_TYPE_BASE)
+	{
+		log_error("png", "non-default compression type or non-default filter type unsupported by pnglite");
+		Unsupported = true;
+	}
+
+	if(Unsupported)
+	{
+		log_error("png", "refusing to load PNG because it would be unsupported by pnglite");
+	}
+	return Unsupported;
+}
+
 bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
 {
 	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -125,10 +176,12 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, in
 	int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
 	png_byte BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
 
-	bool PNGErr = false;
+	bool PNGErr = IsUnsupportedByPnglite(pPNGStruct, pPNGInfo);
 
 	if(BitDepth == 16)
+	{
 		png_set_strip_16(pPNGStruct);
+	}
 	else if(BitDepth > 8)
 	{
 		dbg_msg("png", "non supported bit depth.");
@@ -137,7 +190,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, in
 
 	if(Width == 0 || Height == 0 || BitDepth == 0)
 	{
-		dbg_msg("png", "image had width or height of 0.");
+		dbg_msg("png", "image had width, height or bit depth of 0.");
 		PNGErr = true;
 	}
 
