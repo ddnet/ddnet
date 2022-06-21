@@ -316,10 +316,11 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 
 		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
 
+		const bool Enabled = UI()->Enabled();
 		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
 		bool IsModPressed = Input()->ModifierIsPressed();
 
-		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_V))
+		if(Enabled && !IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_V))
 		{
 			const char *pText = Input()->GetClipboardText();
 			if(pText)
@@ -376,7 +377,7 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 			}
 		}
 
-		if(!IsShiftPressed && IsModPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
+		if(Enabled && !IsShiftPressed && IsModPressed && (Input()->KeyPress(KEY_C) || Input()->KeyPress(KEY_X)))
 		{
 			if(m_HasSelection)
 			{
@@ -404,12 +405,12 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 				Input()->SetClipboardText(pStr);
 		}
 
-		if(Properties.m_SelectText || (!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_A)))
+		if(Properties.m_SelectText || (Enabled && !IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_A)))
 		{
 			SelectAllText();
 		}
 
-		if(!IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_U))
+		if(Enabled && !IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_U))
 		{
 			pStr[0] = '\0';
 			m_CurCursor = 0;
