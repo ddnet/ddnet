@@ -186,7 +186,8 @@ public:
 	enum
 	{
 		SNAP_CURRENT = 0,
-		SNAP_PREV = 1
+		SNAP_PREV = 1,
+		NUM_SNAPSHOT_TYPES = 2,
 	};
 
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls

@@ -15,7 +15,6 @@
 #include <game/client/components/menus.h>
 #include <game/generated/protocol.h>
 
-#include <engine/client.h>
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/editor.h>
@@ -1938,19 +1937,25 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					m_SnapshotParts[Conn] = 0;
 					m_CurrentRecvTick[Conn] = GameTick;
+					m_SnapshotIncomingDataSize[Conn] = 0;
 				}
 
-				mem_copy((char *)m_aSnapshotIncomingData + Part * MAX_SNAPSHOT_PACKSIZE, pData, clamp(PartSize, 0, (int)sizeof(m_aSnapshotIncomingData) - Part * MAX_SNAPSHOT_PACKSIZE));
-				m_SnapshotParts[Conn] |= 1 << Part;
+				mem_copy((char *)m_aSnapshotIncomingData[Conn] + Part * MAX_SNAPSHOT_PACKSIZE, pData, clamp(PartSize, 0, (int)sizeof(m_aSnapshotIncomingData[Conn]) - Part * MAX_SNAPSHOT_PACKSIZE));
+				m_SnapshotParts[Conn] |= (uint64_t)(1) << Part;
 
-				if(m_SnapshotParts[Conn] == (unsigned)((1 << NumParts) - 1))
+				if(Part == NumParts - 1)
+				{
+					m_SnapshotIncomingDataSize[Conn] = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
+				}
+
+				if((NumParts < CSnapshot::MAX_PARTS && m_SnapshotParts[Conn] == (((uint64_t)(1) << NumParts) - 1)) ||
+					(NumParts == CSnapshot::MAX_PARTS && m_SnapshotParts[Conn] == std::numeric_limits<uint64_t>::max()))
 				{
 					static CSnapshot Emptysnap;
 					CSnapshot *pDeltaShot = &Emptysnap;
 					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
 					unsigned char aTmpBuffer3[CSnapshot::MAX_SIZE];
 					CSnapshot *pTmpBuffer3 = (CSnapshot *)aTmpBuffer3; // Fix compiler warning for strict-aliasing
-					const int CompleteSize = (NumParts - 1) * MAX_SNAPSHOT_PACKSIZE + PartSize;
 
 					// reset snapshoting
 					m_SnapshotParts[Conn] = 0;
@@ -1975,8 +1980,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							}
 
 							// ack snapshot
-							// TODO: combine this with the input message
 							m_AckGameTick[Conn] = -1;
+							SendInput();
 							return;
 						}
 					}
@@ -1985,11 +1990,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					const void *pDeltaData = m_SnapshotDelta.EmptyDelta();
 					int DeltaSize = sizeof(int) * 3;
 
-					if(CompleteSize)
+					if(m_SnapshotIncomingDataSize[Conn])
 					{
-						int IntSize = CVariableInt::Decompress(m_aSnapshotIncomingData, CompleteSize, aTmpBuffer2, sizeof(aTmpBuffer2));
+						int IntSize = CVariableInt::Decompress(m_aSnapshotIncomingData[Conn], m_SnapshotIncomingDataSize[Conn], aTmpBuffer2, sizeof(aTmpBuffer2));
 
-						if(IntSize < 0) // failure during decompression, bail
+						if(IntSize < 0) // failure during decompression
 							return;
 
 						pDeltaData = aTmpBuffer2;
@@ -2010,7 +2015,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						{
 							char aBuf[256];
 							str_format(aBuf, sizeof(aBuf), "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
-								m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), CompleteSize, DeltaTick);
+								m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_SnapshotIncomingDataSize[Conn], DeltaTick);
 							m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
 						}
 
