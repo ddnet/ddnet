@@ -12,6 +12,7 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -25,8 +26,6 @@
 #include <game/client/ui.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
-
-#include <engine/shared/image_manipulation.h>
 
 #include "auto_map.h"
 #include "editor.h"

@@ -1,5 +1,5 @@
-#ifndef ENGINE_SHARED_IMAGE_MANIPULATION_H
-#define ENGINE_SHARED_IMAGE_MANIPULATION_H
+#ifndef ENGINE_GFX_IMAGE_MANIPULATION_H
+#define ENGINE_GFX_IMAGE_MANIPULATION_H
 
 #include <stdint.h>
 
@@ -11,4 +11,4 @@ uint8_t *ResizeImage(const uint8_t *pImageData, int Width, int Height, int NewWi
 
 int HighestBit(int OfVar);
 
-#endif
+#endif // ENGINE_GFX_IMAGE_MANIPULATION_H

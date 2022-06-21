@@ -2,8 +2,8 @@
 #include <base/logger.h>
 #include <base/system.h>
 #include <cstdint>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/shared/datafile.h>
-#include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
 #include <vector>

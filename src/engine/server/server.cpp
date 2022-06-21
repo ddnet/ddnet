@@ -415,6 +415,14 @@ CServer::~CServer()
 		free(pCurrentMapData);
 	}
 
+	if(m_RunServer != UNINITIALIZED)
+	{
+		for(auto &Client : m_aClients)
+		{
+			free(Client.m_pPersistentData);
+		}
+	}
+
 	delete m_pRegister;
 	delete m_pConnectionPool;
 }
@@ -724,7 +732,7 @@ int CServer::Port() const
 
 int CServer::MaxClients() const
 {
-	return m_NetServer.MaxClients();
+	return m_RunServer == UNINITIALIZED ? 0 : m_NetServer.MaxClients();
 }
 
 int CServer::ClientCount() const
@@ -2907,11 +2915,6 @@ int CServer::Run()
 #if defined(CONF_UPNP)
 	m_UPnP.Shutdown();
 #endif
-
-	for(auto &Client : m_aClients)
-	{
-		free(Client.m_pPersistentData);
-	}
 
 	m_NetServer.Close();
 

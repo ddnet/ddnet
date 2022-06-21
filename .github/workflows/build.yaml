@@ -58,7 +58,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get upgrade -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev valgrind -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind -y
 
     - name: Prepare Linux (non-fancy)
       if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
@@ -176,7 +176,8 @@ jobs:
     - name: Run integration tests with Valgrind's Memcheck
       if: contains(matrix.os, 'ubuntu')
       run: |
-        scripts/integration_test.sh --valgrind-memcheck headless
+        cd headless
+        ./integration_test.sh --valgrind-memcheck
 
     - name: Package
       run: |

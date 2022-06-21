@@ -61,9 +61,10 @@ void CFifo::Update()
 		return;
 
 	char aBuf[8192];
-	int Length = read(m_File, aBuf, sizeof(aBuf));
+	int Length = read(m_File, aBuf, sizeof(aBuf) - 1);
 	if(Length <= 0)
 		return;
+	aBuf[Length] = '\0';
 
 	char *pCur = aBuf;
 	for(int i = 0; i < Length; ++i)

@@ -1,66 +1,43 @@
 #!/bin/bash
 
-if [ ! -f scripts/integration_test.sh ] || [ ! -f CMakeLists.txt ]
-then
-	echo "Error: make sure your are in the root of the repo"
-	exit 1
-fi
-
-arg_build_dir="build"
-arg_end_args=0
 arg_verbose=0
 arg_valgrind_memcheck=0
 
 for arg in "$@"
 do
-	if [[ "${arg::1}" == "-" ]] && [[ "$arg_end_args" == "0" ]] 
+	if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]
 	then
-		if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]
-		then
-			echo "usage: $(basename "$0") [OPTION..] [build dir]"
-			echo "description:"
-			echo "  Runs a simple integration test of the client and server"
-			echo "  binaries from the given build dir"
-			echo "options:"
-			echo "  --help|-h     show this help"
-			echo "	--verbose|-v  verbose output"
-		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
-		then
-			arg_verbose=1
-		elif [ "$arg" == "--valgrind-memcheck" ]
-		then
-			arg_valgrind_memcheck=1
-		elif [ "$arg" == "--" ]
-		then
-			arg_end_args=1
-		else
-			echo "Error: unknown arg '$arg'"
-		fi
+		echo "usage: $(basename "$0") [OPTION..] [build dir]"
+		echo "description:"
+		echo "  Runs a simple integration test of the client and server"
+		echo "  binaries from the given build dir"
+		echo "options:"
+		echo "  --help|-h           show this help"
+		echo "  --verbose|-v        verbose output"
+		echo "  --valgrind-memcheck use valgrind's memcheck to run server and client"
+		exit 0
+	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
+	then
+		arg_verbose=1
+	elif [ "$arg" == "--valgrind-memcheck" ]
+	then
+		arg_valgrind_memcheck=1
 	else
-		arg_build_dir="$arg"
+		echo "Error: unknown arg '$arg'"
+		exit 1
 	fi
 done
 
-if [ ! -d "$arg_build_dir" ]
+if [ ! -f DDNet ]
 then
-	echo "Error: build directory '$arg_build_dir' not found"
+	echo "Error: client binary not found DDNet' not found"
 	exit 1
 fi
-if [ ! -f "$arg_build_dir"/DDNet ]
+if [ ! -f DDNet-Server ]
 then
-	echo "Error: client binary not found '$arg_build_dir/DDNet' not found"
+	echo "Error: server binary not found DDNet-Server' not found"
 	exit 1
 fi
-if [ ! -f "$arg_build_dir"/DDNet-Server ]
-then
-	echo "Error: server binary not found '$arg_build_dir/DDNet-Server' not found"
-	exit 1
-fi
-
-mkdir -p integration_test
-cp "$arg_build_dir"/DDNet* integration_test
-
-cd integration_test || exit 1
 
 got_killed=0
 
@@ -89,13 +66,6 @@ function cleanup() {
 
 trap cleanup EXIT
 
-{
-	echo $'add_path $CURRENTDIR'
-	echo $'add_path $USERDIR'
-	echo $'add_path $DATADIR'
-	echo $'add_path ../data'
-} > storage.cfg
-
 function fail()
 {
 	sleep 1
@@ -104,28 +74,8 @@ function fail()
 	echo "[-] $1 exited with code $2"
 }
 
-if test -n "$(find . -maxdepth 1 -name '*.fifo' -print -quit)"
-then
-	rm ./*.fifo
-fi
-if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
-then
-	rm SAN.*
-fi
-if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"
-then
-	rm fail_*
-fi
-if [ -f ddnet-server.sqlite ]
-then
-	rm ddnet-server.sqlite
-fi
-
 # TODO: check for open ports instead
 port=17822
-
-cp ../ubsan.supp .
-cp ../memcheck.supp .
 
 if [[ $OSTYPE == 'darwin'* ]]; then
 	DETECT_LEAKS=0
@@ -133,8 +83,9 @@ else
 	DETECT_LEAKS=1
 fi
 
-export UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
+export UBSAN_OPTIONS=suppressions=../ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
 export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=$DETECT_LEAKS:halt_on_errors=0
+export LSAN_OPTIONS=suppressions=../lsan.supp:print_suppressions=0
 
 function print_results() {
 	if [ "$arg_valgrind_memcheck" == "1" ]; then
@@ -152,21 +103,34 @@ function print_results() {
 	return 0
 }
 
+rm -rf integration_test
+mkdir -p integration_test/data/maps
+cp data/maps/coverage.map integration_test/data/maps
+cd integration_test || exit 1
+
+{
+	echo $'add_path $CURRENTDIR'
+	echo $'add_path $USERDIR'
+	echo $'add_path $DATADIR'
+	echo $'add_path ../data'
+} > storage.cfg
+
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=memcheck.supp"
+	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=../memcheck.supp --track-origins=yes"
 	client_args="cl_menu_map \"\";"
 else
 	tool=""
 	client_args=""
 fi
 
-$tool ./DDNet-Server \
+$tool ../DDNet-Server \
 	"sv_input_fifo server.fifo;
+	sv_rcon_password rcon;
 	sv_map coverage;
 	sv_sqlite_file ddnet-server.sqlite;
 	sv_port $port" &> server.log || fail server "$?" &
 
-$tool ./DDNet \
+$tool ../DDNet \
 	"cl_input_fifo client1.fifo;
 	player_name client1;
 	cl_download_skins 0;
@@ -175,12 +139,12 @@ $tool ./DDNet \
 	connect localhost:$port" &> client1.log || fail client1 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-  sleep 10
+	sleep 10
 else
-  sleep 1
+	sleep 1
 fi
 
-$tool ./DDNet \
+$tool ../DDNet \
 	"cl_input_fifo client2.fifo;
 	player_name client2;
 	cl_download_skins 0;
@@ -192,7 +156,7 @@ fails=0
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	tries=120
 else
-	tries=2
+	tries=50
 fi
 # give the client time to launch and create the fifo file
 # but assume after X secs that the client crashed before
@@ -214,9 +178,66 @@ do
 done
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-  sleep 20
+	sleep 20
 else
-  sleep 2
+	sleep 2
+fi
+
+echo "[*] test chat and chat commands"
+echo "say hello world" > client1.fifo
+echo "rcon_auth rcon" > client1.fifo
+sleep 1
+tr -d '\n' > client1.fifo << EOF
+say "/mc
+;top5
+;rank
+;team 512
+;emote happy -999
+;pause
+;points
+;mapinfo
+;list
+;whisper client2 hi
+;kill
+;settings cheats
+;timeout 123
+;timer broadcast
+;cmdlist
+;saytime"
+EOF
+sleep 1
+echo "[*] test rcon commands"
+tr -d '\n' > client1.fifo << EOF
+rcon say hello from admin;
+rcon broadcast test;
+rcon status;
+rcon echo test;
+muteid 1 900 spam;
+unban_all;
+EOF
+sleep 1
+
+
+# TODO: remove the first grep after https://github.com/ddnet/ddnet/pull/5036 is merged
+if ! grep -qE '^\[[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2}\]\[chat\]: 0:-2:client1: hello world$' server.log && \
+	! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} D chat: 0:-2:client1: hello world$' server.log
+then
+	touch fail_chat.txt
+	echo "[-] Error: chat message not found in server log"
+fi
+if ! grep -q 'cmdlist' client1.log || \
+	! grep -q 'pause' client1.log || \
+	! grep -q 'rank' client1.log || \
+	! grep -q 'points' client1.log
+then
+	touch fail_chatcommand.txt
+	echo "[-] Error: did not find output of /cmdlist command"
+fi
+
+if ! grep -q "hello from admin" server.log
+then
+	touch fail_rcon.txt
+	echo "[-] Error: admin message not found in server log"
 fi
 
 kill_all
