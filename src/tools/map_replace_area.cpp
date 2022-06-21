@@ -30,7 +30,7 @@ bool OpenMaps(IStorage *, const char[][64], CDataFileReader[], CDataFileWriter &
 void SaveOutputMap(CDataFileReader &, CDataFileWriter &);
 bool CompareLayers(const char[][64], CDataFileReader[]);
 void CompareGroups(const char[][64], CDataFileReader[]);
-const CMapItemGroup *GetLayerGroup(CDataFileReader &, const int);
+const CMapItemGroup *GetLayerGroup(CDataFileReader &, int);
 
 void ReplaceAreaTiles(CDataFileReader[], const float[][2][2], const CMapItemGroup *[], CMapItemLayer *[]);
 void RemoveDestinationTiles(CMapItemLayerTilemap *, CTile *, float[][2]);
@@ -38,15 +38,15 @@ void ReplaceDestinationTiles(CMapItemLayerTilemap *[], CTile *[], float[][2][2])
 bool AdaptVisibleAreas(const float[][2][2], const MapObject[], float[][2][2]);
 bool AdaptReplaceableAreas(const float[][2][2], const float[][2][2], const MapObject[], float[][2][2]);
 
-void ReplaceAreaQuads(CDataFileReader[], const float[][2][2], const CMapItemGroup *[], CMapItemLayer *[], const int);
-bool RemoveDestinationQuads(const float[][2], const CQuad *, const int, const CMapItemGroup *, CQuad *, int &);
-bool InsertDestinationQuads(const float[][2][2], const CQuad *, const int, const CMapItemGroup *[], CQuad *, int &);
+void ReplaceAreaQuads(CDataFileReader[], const float[][2][2], const CMapItemGroup *[], CMapItemLayer *[], int);
+bool RemoveDestinationQuads(const float[][2], const CQuad *, int, const CMapItemGroup *, CQuad *, int &);
+bool InsertDestinationQuads(const float[][2][2], const CQuad *, int, const CMapItemGroup *[], CQuad *, int &);
 bool AdaptVisiblePoint(const float[][2][2], const float[][2], const MapObject[], float[]);
 
-MapObject CreateMapObject(const CMapItemGroup *, const int, const int, const int, const int);
+MapObject CreateMapObject(const CMapItemGroup *, int, int, int, int);
 void SetExtendedArea(MapObject &);
-bool GetVisibleArea(const float[][2], const MapObject, float[][2] = 0x0);
-bool GetReplaceableArea(const float[][2], const MapObject, float[][2]);
+bool GetVisibleArea(const float[][2], MapObject, float[][2] = 0x0);
+bool GetReplaceableArea(const float[][2], MapObject, float[][2]);
 
 void GetGameAreaDistance(const float[][2][2], const MapObject[], const float[][2][2], float[]);
 void GetGameAreaDistance(const float[][2][2], const MapObject[], const float[][2], float[]);
@@ -54,10 +54,10 @@ void GetSignificantScreenPos(const MapObject, const float[][2], const float[][2]
 void ConvertToTiles(const float[][2], int[][2]);
 
 bool GetLineIntersection(const float[], const float[], float[] = 0x0);
-bool GetLineIntersection(const float[], const float);
-void SetInexistent(float *, const int);
-bool IsInexistent(const float *, const int);
-bool IsInexistent(const float);
+bool GetLineIntersection(const float[], float);
+void SetInexistent(float *, int);
+bool IsInexistent(const float *, int);
+bool IsInexistent(float);
 
 int main(int argc, const char *argv[])
 {
@@ -74,9 +74,9 @@ int main(int argc, const char *argv[])
 	}
 
 	char pMapNames[3][64];
-	strcpy(pMapNames[0], argv[1]); //from_map
-	strcpy(pMapNames[1], argv[4]); //to_map
-	strcpy(pMapNames[2], argv[9]); //output_map
+	snprintf(pMapNames[0], 64, "%s", argv[1]); //from_map
+	snprintf(pMapNames[1], 64, "%s", argv[4]); //to_map
+	snprintf(pMapNames[2], 64, "%s", argv[9]); //output_map
 
 	float pGameAreas[2][2][2];
 
@@ -129,6 +129,9 @@ bool ReplaceArea(IStorage *pStorage, const char pMapNames[3][64], const float pG
 			pItem[j] = (CMapItemLayer *)InputMaps[j].GetItem(LayersStart[j] + i, 0, 0);
 		}
 
+		if(!pLayerGroups[0] || !pLayerGroups[1])
+			continue;
+
 		if(pItem[0]->m_Type == LAYERTYPE_TILES)
 			ReplaceAreaTiles(InputMaps, pGameAreas, pLayerGroups, pItem);
 		else if(pItem[0]->m_Type == LAYERTYPE_QUADS)
@@ -146,14 +149,14 @@ bool OpenMaps(IStorage *pStorage, const char pMapNames[3][64], CDataFileReader I
 	{
 		if(!InputMaps[i].Open(pStorage, pMapNames[i], IStorage::TYPE_ABSOLUTE))
 		{
-			dbg_msg("map_replace_area", "Error: unable to open map '%s'", pMapNames[i]);
+			dbg_msg("map_replace_area", "ERROR: unable to open map '%s'", pMapNames[i]);
 			return false;
 		}
 	}
 
 	if(!OutputMap.Open(pStorage, pMapNames[2], IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_replace_area", "Error: unable to open map '%s'", pMapNames[2]);
+		dbg_msg("map_replace_area", "ERROR: unable to open map '%s'", pMapNames[2]);
 		return false;
 	}
 
@@ -194,7 +197,7 @@ bool CompareLayers(const char pMapNames[3][64], CDataFileReader InputMaps[2])
 
 	if(Num[0] != Num[1])
 	{
-		dbg_msg("map_replace_area", "Error: different layers quantity");
+		dbg_msg("map_replace_area", "ERROR: different layers quantity");
 		for(int i = 0; i < 2; i++)
 			dbg_msg("map_replace_area", " \"%s\": %d layers", pMapNames[i], Num[i]);
 		return false;
@@ -208,13 +211,9 @@ bool CompareLayers(const char pMapNames[3][64], CDataFileReader InputMaps[2])
 
 		if(pItem[0]->m_Type != pItem[1]->m_Type)
 		{
-			dbg_msg("map_replace_area", "Error: different types on layer #%d", i);
+			dbg_msg("map_replace_area", "ERROR: different types on layer #%d", i);
 			for(int j = 0; j < 2; j++)
-			{
-				char aLayerType[16];
-				strcpy(aLayerType, pItem[j]->m_Type == LAYERTYPE_TILES ? "tiles layer" : "quad layer");
-				dbg_msg("map_replace_area", " \"%s\": %s", pMapNames[j], aLayerType);
-			}
+				dbg_msg("map_replace_area", " \"%s\": %s", pMapNames[j], pItem[j]->m_Type == LAYERTYPE_TILES ? "tiles layer" : "quad layer");
 			return false;
 		}
 	}
@@ -237,7 +236,7 @@ void CompareGroups(const char pMapNames[3][64], CDataFileReader InputMaps[2])
 		bool bSameConfig = pItem[0]->m_ParallaxX == pItem[1]->m_ParallaxX && pItem[0]->m_ParallaxY == pItem[1]->m_ParallaxY && pItem[0]->m_OffsetX == pItem[1]->m_OffsetX && pItem[0]->m_OffsetY == pItem[1]->m_OffsetY && pItem[0]->m_UseClipping == pItem[1]->m_UseClipping && pItem[0]->m_ClipX == pItem[1]->m_ClipX && pItem[0]->m_ClipY == pItem[1]->m_ClipY && pItem[0]->m_ClipW == pItem[1]->m_ClipW && pItem[0]->m_ClipH == pItem[1]->m_ClipH;
 
 		if(!bSameConfig)
-			dbg_msg("map_replace_area", "Warning: different configuration on layergroup #%d, this might lead to unexpected results", i);
+			dbg_msg("map_replace_area", "WARNING: different configuration on layergroup #%d, this might lead to unexpected results", i);
 	}
 }
 
@@ -388,7 +387,7 @@ void ReplaceAreaQuads(CDataFileReader InputMaps[2], const float pGameAreas[][2][
 		g_pNewItem[ItemNumber] = pItem[1];
 	}
 	else
-		delete pQuads[2];
+		delete[] pQuads[2];
 }
 
 bool RemoveDestinationQuads(const float pGameArea[2][2], const CQuad *pQuads, const int NumQuads, const CMapItemGroup *pLayerGroup, CQuad *pDestQuads, int &QuadsCounter)
@@ -431,10 +430,10 @@ bool InsertDestinationQuads(const float pGameAreas[2][2][2], const CQuad *pQuads
 				continue;
 
 			pDestQuads[QuadsCounter] = pQuads[i];
-			for(int j = 0; j < 5; j++)
+			for(auto & m_aPoint : pDestQuads[QuadsCounter].m_aPoints)
 			{
-				pDestQuads[QuadsCounter].m_aPoints[j].x += f2fx(pQuadPos[0]) - pDestQuads[QuadsCounter].m_aPoints[4].x;
-				pDestQuads[QuadsCounter].m_aPoints[j].y += f2fx(pQuadPos[1]) - pDestQuads[QuadsCounter].m_aPoints[4].y;
+				m_aPoint.x += f2fx(pQuadPos[0]) - pDestQuads[QuadsCounter].m_aPoints[4].x;
+				m_aPoint.y += f2fx(pQuadPos[1]) - pDestQuads[QuadsCounter].m_aPoints[4].y;
 			}
 
 			QuadsCounter++;
