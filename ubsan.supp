@@ -1,3 +1,2 @@
-shift-base:pnglite.c
 null:json.c
 pointer-overflow:json.c
