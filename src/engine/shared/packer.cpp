@@ -123,6 +123,35 @@ int CUnpacker::GetIntOrDefault(int Default)
 	return GetInt();
 }
 
+int CUnpacker::GetUncompressedInt()
+{
+	if(m_Error)
+		return 0;
+
+	if(m_pCurrent + 4 > m_pEnd)
+	{
+		m_Error = 1;
+		return 0;
+	}
+
+	int i = *(int *)m_pCurrent;
+	m_pCurrent += 4;
+	return i;
+}
+
+int CUnpacker::GetUncompressedIntOrDefault(int Default)
+{
+	if(m_Error)
+	{
+		return 0;
+	}
+	if(m_pCurrent == m_pEnd)
+	{
+		return Default;
+	}
+	return GetUncompressedInt();
+}
+
 const char *CUnpacker::GetString(int SanitizeType)
 {
 	if(m_Error)

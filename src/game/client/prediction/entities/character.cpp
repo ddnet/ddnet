@@ -1345,7 +1345,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_Input.m_Direction = m_SavedInput.m_Direction = m_Core.m_Direction;
 		m_Input.m_Hook = m_SavedInput.m_Hook = (m_Core.m_HookState != HOOK_IDLE);
 
-		if(pExtended)
+		if(pExtended && pExtended->m_TargetX != 0 && pExtended->m_TargetY != 0)
 		{
 			m_Input.m_TargetX = m_SavedInput.m_TargetX = pExtended->m_TargetX;
 			m_Input.m_TargetY = m_SavedInput.m_TargetY = pExtended->m_TargetY;

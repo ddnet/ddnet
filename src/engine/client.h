@@ -7,6 +7,9 @@
 #include "graphics.h"
 #include "message.h"
 #include <base/hash.h>
+
+#include <game/generated/protocol.h>
+
 #include <engine/friends.h>
 
 struct SWarning;
@@ -292,6 +295,8 @@ public:
 	virtual void Echo(const char *pString) = 0;
 	virtual bool CanDisplayWarning() = 0;
 	virtual bool IsDisplayingWarning() = 0;
+
+	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };
 
 void SnapshotRemoveExtraProjectileInfo(unsigned char *pData);

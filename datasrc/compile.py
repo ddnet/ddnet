@@ -135,25 +135,30 @@ def main():
 	class CNetObjHandler
 	{
 		const char *m_pMsgFailedOn;
+		const char *m_pObjFailedOn;
 		const char *m_pObjCorrectedOn;
-		char m_aMsgData[1024 * 2];
+		char m_aUnpackedData[1024 * 2];
 		int m_NumObjCorrections;
 		int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
 
 		static const char *ms_apObjNames[];
 		static const char *ms_apExObjNames[];
 		static int ms_aObjSizes[];
+		static int ms_aUnpackedObjSizes[];
+		static int ms_aUnpackedExObjSizes[];
 		static const char *ms_apMsgNames[];
 		static const char *ms_apExMsgNames[];
 
 	public:
 		CNetObjHandler();
 
-		int ValidateObj(int Type, void *pData, int Size);
+		void *SecureUnpackObj(int Type, CUnpacker *pUnpacker);
 		const char *GetObjName(int Type) const;
 		int GetObjSize(int Type) const;
+		int GetUnpackedObjSize(int Type) const;
 		int NumObjCorrections() const;
 		const char *CorrectedObjOn() const;
+		const char *FailedObjOn() const;
 
 		const char *GetMsgName(int Type) const;
 		void *SecureUnpackMsg(int Type, CUnpacker *pUnpacker);
@@ -179,12 +184,14 @@ def main():
 		lines += ['CNetObjHandler::CNetObjHandler()']
 		lines += ['{']
 		lines += ['\tm_pMsgFailedOn = "";']
+		lines += ['\tm_pObjFailedOn = "";']
 		lines += ['\tm_pObjCorrectedOn = "";']
 		lines += ['\tm_NumObjCorrections = 0;']
 		lines += ['}']
 		lines += ['']
 		lines += ['int CNetObjHandler::NumObjCorrections() const { return m_NumObjCorrections; }']
 		lines += ['const char *CNetObjHandler::CorrectedObjOn() const { return m_pObjCorrectedOn; }']
+		lines += ['const char *CNetObjHandler::FailedObjOn() const { return m_pObjFailedOn; }']
 		lines += ['const char *CNetObjHandler::FailedMsgOn() const { return m_pMsgFailedOn; }']
 		lines += ['']
 		lines += ['']
@@ -217,6 +224,15 @@ def main():
 		lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is None]
 		lines += ['\t0', "};", ""]
 
+		lines += ["int CNetObjHandler::ms_aUnpackedObjSizes[] = {"]
+		lines += ['\t16,']
+		lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is None]
+		lines += ["};", ""]
+
+		lines += ["int CNetObjHandler::ms_aUnpackedExObjSizes[] = {"]
+		lines += ['\t0,']
+		lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is not None]
+		lines += ["};", ""]
 
 		lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
 		lines += ['\t"invalid",']
@@ -248,6 +264,21 @@ def main():
 		lines += ['\treturn ms_aObjSizes[Type];']
 		lines += ['}']
 		lines += ['']
+
+		lines += ['int CNetObjHandler::GetUnpackedObjSize(int Type) const']
+		lines += ['{']
+		lines += ['\tif(Type >= 0 && Type < NUM_NETOBJTYPES)']
+		lines += ['\t{']
+		lines += ['\t\treturn ms_aUnpackedObjSizes[Type];']
+		lines += ['\t}']
+		lines += ['\telse if(Type > __NETOBJTYPE_UUID_HELPER && Type < OFFSET_NETMSGTYPE_UUID)']
+		lines += ['\t{']
+		lines += ['\t\treturn ms_aUnpackedExObjSizes[Type - __NETOBJTYPE_UUID_HELPER];']
+		lines += ['\t}']
+		lines += ['\treturn 0;']
+		lines += ['}']
+		lines += ['']
+
 
 		lines += ['const char *CNetObjHandler::GetMsgName(int Type) const']
 		lines += ['{']
@@ -282,26 +313,44 @@ def main():
 			lines += ["};", ""]
 
 		lines = []
-		lines += ['int CNetObjHandler::ValidateObj(int Type, void *pData, int Size)']
+		lines += ['void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)']
 		lines += ['{']
+		lines += ['\tm_pObjFailedOn = 0;']
 		lines += ['\tswitch(Type)']
 		lines += ['\t{']
 		lines += ['\tcase NETOBJTYPE_EX:']
 		lines += ['\t{']
-		lines += ['\t\treturn 0;']
+		lines += ['\t\tconst unsigned char *pPtr = pUnpacker->GetRaw(sizeof(CUuid));']
+		lines += ['\t\tif(pPtr != 0)']
+		lines += ['\t\t{']
+		lines += ['\t\t\tmem_copy(m_aUnpackedData, pPtr, sizeof(CUuid));']
+		lines += ['\t\t}']
+		lines += ['\t\tbreak;']
 		lines += ['\t}']
 
 		for item in network.Objects:
 			base_item = None
 			if item.base:
 				base_item = next(i for i in network.Objects if i.name == item.base)
-			for line in item.emit_validate(base_item):
+			for line in item.emit_uncompressed_unpack_and_validate(base_item):
 				lines += ["\t" + line]
 			lines += ['\t']
+
+		lines += ['\tdefault:']
+		lines += ['\t\tm_pObjFailedOn = "(type out of range)";']
+		lines += ['\t\tbreak;']
 		lines += ['\t}']
-		lines += ['\treturn -1;']
+		lines += ['\t']
+		lines += ['\tif(pUnpacker->Error())']
+		lines += ['\t\tm_pObjFailedOn = "(unpack error)";']
+		lines += ['\t']
+		lines += ['\tif(m_pObjFailedOn)']
+		lines += ['\t\treturn 0;']
+		lines += ['\tm_pObjFailedOn = "";']
+		lines += ['\treturn m_aUnpackedData;']
 		lines += ['}']
 		lines += ['']
+
 
 		lines += ['void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)']
 		lines += ['{']
@@ -309,9 +358,8 @@ def main():
 		lines += ['\tswitch(Type)']
 		lines += ['\t{']
 
-
 		for item in network.Messages:
-			for line in item.emit_unpack():
+			for line in item.emit_unpack_msg():
 				lines += ["\t" + line]
 			lines += ['\t']
 
@@ -326,9 +374,10 @@ def main():
 		lines += ['\tif(m_pMsgFailedOn)']
 		lines += ['\t\treturn 0;']
 		lines += ['\tm_pMsgFailedOn = "";']
-		lines += ['\treturn m_aMsgData;']
+		lines += ['\treturn m_aUnpackedData;']
 		lines += ['}']
 		lines += ['']
+
 
 		lines += ['bool CNetObjHandler::TeeHistorianRecordMsg(int Type)']
 		lines += ['{']

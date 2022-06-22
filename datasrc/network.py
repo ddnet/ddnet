@@ -235,10 +235,10 @@ Objects = [
 	]),
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
-		NetIntAny("m_Flags"),
-		NetTick("m_FreezeEnd"),
+		NetIntAny("m_Flags", 0),
+		NetTick("m_FreezeEnd", 0),
 		NetIntRange("m_Jumps", -1, 255, 2),
-		NetIntAny("m_TeleCheckpoint"),
+		NetIntAny("m_TeleCheckpoint", -1),
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1', 0),
 
 		# New data fields for jump display, freeze bar and ninja bar
@@ -257,9 +257,9 @@ Objects = [
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
-		NetIntAny("m_Flags"),
-		NetIntAny("m_Version"),
-		NetIntAny("m_Flags2"),
+		NetIntAny("m_Flags", 0),
+		NetIntAny("m_Version", 0),
+		NetIntAny("m_Flags2", 0),
 	], validate_size=False),
 
 	# The code assumes that this has the same in-memory representation as
@@ -312,12 +312,12 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntAny("m_HighestSwitchNumber"),
+		NetIntAny("m_HighestSwitchNumber", 0),
 		# 256 switches / 32 bits = 8 int32
-		NetArray(NetIntAny("m_aStatus"), 8),
+		NetArray(NetIntAny("m_aStatus", 0), 8),
 		# send the endtick of up to 4 timed switchers
-		NetArray(NetIntAny("m_aSwitchNumbers"), 4),
-		NetArray(NetIntAny("m_aEndTicks"), 4),
+		NetArray(NetIntAny("m_aSwitchNumbers", 0), 4),
+		NetArray(NetIntAny("m_aEndTicks", 0), 4),
 	], validate_size=False),
 
 	# Switch info for map items

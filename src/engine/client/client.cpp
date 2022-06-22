@@ -991,7 +991,7 @@ void CClient::SnapInvalidateItem(int SnapID, int Index)
 	CSnapshotItem *i = m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
 	if(i)
 	{
-		if((char *)i < (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap || (char *)i > (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap + m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_SnapSize)
+		if((char *)i < (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap || (char *)i > (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap + m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_AltSnapSize)
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "snap invalidate problem");
 		if((char *)i >= (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap && (char *)i < (char *)m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap + m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_SnapSize)
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "snap invalidate problem");
@@ -1012,7 +1012,7 @@ int CClient::SnapNumItems(int SnapID) const
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
 	if(!m_aSnapshots[g_Config.m_ClDummy][SnapID])
 		return 0;
-	return m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap->NumItems();
+	return m_aSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->NumItems();
 }
 
 void CClient::SnapSetStaticsize(int ItemType, int Size)
@@ -1097,7 +1097,7 @@ void CClient::DebugRender()
 			if(m_SnapshotDelta.GetDataRate(i) && m_aSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
 				int Type = m_aSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
-				if(Type == -1)
+				if(Type == UUID_INVALID)
 				{
 					str_format(aBuffer, sizeof(aBuffer), "%5d %20s: %8d %8d %8d", i, "Unknown UUID", m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
@@ -2070,8 +2070,18 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						PurgeTick = m_aSnapshots[Conn][SNAP_CURRENT]->m_Tick;
 					m_SnapshotStorage[Conn].PurgeUntil(PurgeTick);
 
+					// create a verified and unpacked snapshot
+					unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
+					CSnapshot *pAltSnapBuffer = (CSnapshot *)aAltSnapBuffer;
+					const int AltSnapSize = UnpackAndValidateSnapshot(pTmpBuffer3, pAltSnapBuffer);
+					if(AltSnapSize < 0)
+					{
+						dbg_msg("client", "unpack snapshot and validate failed!=%d", AltSnapSize);
+						return;
+					}
+
 					// add new
-					m_SnapshotStorage[Conn].Add(GameTick, time_get(), SnapSize, pTmpBuffer3, true);
+					m_SnapshotStorage[Conn].Add(GameTick, time_get(), SnapSize, pTmpBuffer3, AltSnapSize, pAltSnapBuffer);
 
 					if(!Dummy)
 					{
@@ -2216,6 +2226,45 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			GameClient()->OnMessage(Msg, &Unpacker, Conn, Dummy);
 		}
 	}
+}
+
+int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
+{
+	CUnpacker Unpacker;
+	CSnapshotBuilder Builder;
+	Builder.Init();
+	CNetObjHandler *pNetObjHandler = GameClient()->GetNetObjHandler();
+
+	int Num = pFrom->NumItems();
+	for(int Index = 0; Index < Num; Index++)
+	{
+		CSnapshotItem *pFromItem = pFrom->GetItem(Index);
+		const int FromItemSize = pFrom->GetItemSize(Index);
+		const int ItemType = pFrom->GetItemType(Index);
+		void *pData = pFromItem->Data();
+		Unpacker.Reset(pData, FromItemSize);
+
+		void *pRawObj = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
+		if(!pRawObj)
+		{
+			if(g_Config.m_Debug && ItemType != UUID_UNKNOWN)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "dropped weird object '%s' (%d), failed on '%s'", pNetObjHandler->GetObjName(ItemType), ItemType, pNetObjHandler->FailedObjOn());
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
+			}
+			continue;
+		}
+		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
+
+		void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
+		if(!pObj)
+			return -4;
+
+		mem_copy(pObj, pRawObj, ItemSize);
+	}
+
+	return Builder.Finish(pTo);
 }
 
 void CClient::ResetMapDownload()
@@ -2505,7 +2554,17 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = pTemp;
 
 	mem_copy(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
-	mem_copy(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap, pData, Size);
+
+	// create a verified and unpacked snapshot
+	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
+	CSnapshot *pAltSnapBuffer = (CSnapshot *)aAltSnapBuffer;
+	const int AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
+	if(AltSnapSize < 0)
+	{
+		dbg_msg("client", "unpack snapshot and validate failed!=%d", AltSnapSize);
+		return;
+	}
+	mem_copy(m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
 
 	GameClient()->OnNewSnapshot();
 }
@@ -3779,11 +3838,13 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_CURRENT][0];
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_CURRENT][1];
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_SnapSize = 0;
+	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_AltSnapSize = 0;
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick = -1;
 
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_pSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_PREV][0];
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_pAltSnap = (CSnapshot *)m_aDemorecSnapshotData[SNAP_PREV][1];
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_SnapSize = 0;
+	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_AltSnapSize = 0;
 	m_aSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick = -1;
 
 	// enter demo playback state

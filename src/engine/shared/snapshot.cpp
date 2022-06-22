@@ -475,13 +475,15 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 	m_pLast = 0;
 }
 
-void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, bool CreateAlt)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int AltDataSize, void *pAltData)
 {
 	// allocate memory for holder + snapshot_data
 	int TotalSize = sizeof(CHolder) + DataSize;
 
-	if(CreateAlt)
-		TotalSize += DataSize;
+	if(AltDataSize > 0)
+	{
+		TotalSize += AltDataSize;
+	}
 
 	CHolder *pHolder = (CHolder *)malloc(TotalSize);
 
@@ -492,13 +494,17 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData,
 	pHolder->m_pSnap = (CSnapshot *)(pHolder + 1);
 	mem_copy(pHolder->m_pSnap, pData, DataSize);
 
-	if(CreateAlt) // create alternative if wanted
+	if(AltDataSize > 0) // create alternative if wanted
 	{
 		pHolder->m_pAltSnap = (CSnapshot *)(((char *)pHolder->m_pSnap) + DataSize);
-		mem_copy(pHolder->m_pAltSnap, pData, DataSize);
+		mem_copy(pHolder->m_pAltSnap, pAltData, AltDataSize);
+		pHolder->m_AltSnapSize = AltDataSize;
 	}
 	else
+	{
 		pHolder->m_pAltSnap = 0;
+		pHolder->m_AltSnapSize = 0;
+	}
 
 	// link
 	pHolder->m_pNext = 0;

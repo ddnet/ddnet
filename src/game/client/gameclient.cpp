@@ -1123,26 +1123,6 @@ void CGameClient::OnNewSnapshot()
 
 	m_NewTick = true;
 
-	// secure snapshot
-	{
-		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
-		for(int Index = 0; Index < Num; Index++)
-		{
-			IClient::CSnapItem Item;
-			void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index, &Item);
-			if(m_NetObjHandler.ValidateObj(Item.m_Type, pData, Item.m_DataSize) != 0)
-			{
-				if(g_Config.m_Debug && Item.m_Type != UUID_UNKNOWN)
-				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "invalidated index=%d type=%d (%s) size=%d id=%d", Index, Item.m_Type, m_NetObjHandler.GetObjName(Item.m_Type), Item.m_DataSize, Item.m_ID);
-					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-				}
-				Client()->SnapInvalidateItem(IClient::SNAP_CURRENT, Index);
-			}
-		}
-	}
-
 	ProcessEvents();
 
 #ifdef CONF_DEBUG
@@ -1324,7 +1304,7 @@ void CGameClient::OnNewSnapshot()
 					m_Snap.m_aCharacters[Item.m_ID].m_PrevExtendedData = (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_ID);
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedData = true;
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = false;
-					if(Item.m_DataSize >= 40)
+					if(pCharacterData->m_JumpedTotal != -1)
 					{
 						m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = true;
 					}
@@ -3270,6 +3250,11 @@ bool CGameClient::CanDisplayWarning()
 bool CGameClient::IsDisplayingWarning()
 {
 	return m_Menus.GetCurPopup() == CMenus::POPUP_WARNING;
+}
+
+CNetObjHandler *CGameClient::GetNetObjHandler()
+{
+	return &m_NetObjHandler;
 }
 
 void CGameClient::SnapCollectEntities()

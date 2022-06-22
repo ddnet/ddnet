@@ -522,6 +522,7 @@ public:
 	bool IsLocalCharSuper();
 	bool CanDisplayWarning() override;
 	bool IsDisplayingWarning() override;
+	CNetObjHandler *GetNetObjHandler() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
