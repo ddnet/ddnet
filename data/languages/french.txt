@@ -21,6 +21,7 @@
 #	T tee			2021-06-01 00:39:00
 #	T tee & NRK & Chairn	2022-03-23 20:52:52
 #	Nouaa			2022-05-14 23:00:00
+#	Chairn			2022-06-16 19:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1389,99 +1390,99 @@ Team %d
 == Équipe %d
 
 Position:
-== 
+== Position:
 
 Speed:
-== 
+== Vitesse:
 
 Angle:
-== 
+== Angle:
 
 Trying to determine UDP connectivity...
-== 
+== Tentative de connection UDP...
 
 UDP seems to be filtered.
-== 
+== UDP semble filtré.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Les adresses IP UDP et TCP semblent différentes. Essayez de désactiver les VPN, proxy ou accélérateurs réseaux.
 
 No answer from server yet.
-== 
+== Aucune réponse du serveur.
 
 Download community skins
-== 
+== Télécharger les skins de la communauté
 
 Enable controller
-== 
+== Activer la manette
 
 Controller %d: %s
-== 
+== Manette %d: %s
 
 Click to cycle through all available controllers.
-== 
+== Cliquez pour essayer toutes les manettes disponibles.
 
 [Ingame controller mode]
 Relative
-== 
+== Relatif
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolu
 
 Ingame controller mode
-== 
+== Mode manette
 
 Ingame controller sens.
-== 
+== Sensibilité manette (jeu)
 
 UI controller sens.
-== 
+== Sensibilité manette (menus)
 
 Controller jitter tolerance
-== 
+== Tolérance gigue de la manette
 
 No controller found. Plug in a controller and restart the game.
-== 
+== Aucune manette détectée. Branchez une manette et redémarrez le jeu.
 
 Device
-== 
+== Manette
 
 Status
-== 
+== Statut
 
 Aim bind
-== 
+== Touche visée
 
 Controller Axis #%d
-== 
+== Axe manette #%d
 
 Mouse
-== 
+== Souris
 
 Ingame mouse sens.
-== 
+== Sensibilité souris (jeu)
 
 UI mouse sens.
-== 
+== Sensibilité souris (menus)
 
 Controller
-== 
+== Manette 
 
 Use DDRace HUD
-== 
+== Utiliser l'interface DDRace
 
 Show dummy actions
-== 
+== Afficher les actions du dummy
 
 Show freeze bars
-== 
+== Afficher la barre de gel 
 
 Show player position
-== 
+== Afficher la position
 
 Show player speed
-== 
+== Afficher la vitesse
 
 Show player target angle
-== 
+== Afficher l'angle de visée
