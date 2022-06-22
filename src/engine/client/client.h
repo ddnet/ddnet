@@ -382,6 +382,8 @@ public:
 	void ProcessServerInfo(int Type, NETADDR *pFrom, const void *pData, int DataSize);
 	void ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy);
 
+	int UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo);
+
 	void ResetMapDownload();
 	void FinishMapDownload();
 

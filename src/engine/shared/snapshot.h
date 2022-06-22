@@ -108,6 +108,8 @@ public:
 		int m_Tick;
 
 		int m_SnapSize;
+		int m_AltSnapSize;
+
 		CSnapshot *m_pSnap;
 		CSnapshot *m_pAltSnap;
 	};
@@ -120,7 +122,7 @@ public:
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
-	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, bool CreateAlt);
+	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int AltDataSize, void *pAltData);
 	int Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 
