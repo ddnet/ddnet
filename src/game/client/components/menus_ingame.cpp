@@ -871,7 +871,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 
 	if(time_get_nanoseconds() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
-		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
+		pSelf->GameClient()->m_Menus.RenderLoading(Localize("Loading ghost files"), "", 0, false);
 	}
 
 	return 0;

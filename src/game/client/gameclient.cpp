@@ -216,6 +216,10 @@ void CGameClient::OnConsoleInit()
 
 void CGameClient::OnInit()
 {
+	Client()->SetMapLoadingCBFunc([this]() {
+		m_Menus.RenderLoading(DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected"), Localize("Loading map file from storage"), 0, false);
+	});
+
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 
 	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
@@ -248,13 +252,27 @@ void CGameClient::OnInit()
 	// update and swap after font loading, they are quite huge
 	Client()->UpdateAndSwap();
 
+	const char *pLoadingDDNetCaption = Localize("Loading DDNet Client");
+
 	// init all components
+	int SkippedComps = 0;
+	int CompCounter = 0;
 	for(int i = m_vpAll.size() - 1; i >= 0; --i)
 	{
 		m_vpAll[i]->OnInit();
 		// try to render a frame after each component, also flushes GPU uploads
 		if(m_Menus.IsInit())
-			m_Menus.RenderLoading(false);
+		{
+			char aBuff[256];
+			str_format(aBuff, std::size(aBuff), "%s [%d/%d]", Localize("Initializing components"), (CompCounter + 1), (int)ComponentCount());
+			m_Menus.RenderLoading(pLoadingDDNetCaption, aBuff, 1 + SkippedComps);
+			SkippedComps = 0;
+		}
+		else
+		{
+			++SkippedComps;
+		}
+		++CompCounter;
 	}
 
 	char aBuf[256];
@@ -264,7 +282,7 @@ void CGameClient::OnInit()
 	m_EmoticonsSkinLoaded = false;
 	m_HudSkinLoaded = false;
 
-	// setup load amount// load textures
+	// setup load amount, load textures
 	for(int i = 0; i < g_pData->m_NumImages; i++)
 	{
 		if(i == IMAGE_GAME)
@@ -277,7 +295,7 @@ void CGameClient::OnInit()
 			LoadHudSkin(g_Config.m_ClAssetHud);
 		else
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-		m_Menus.RenderLoading(false);
+		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
 	}
 
 	for(auto &pComponent : m_vpAll)
@@ -444,6 +462,10 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 
 void CGameClient::OnConnected()
 {
+	const char *pConnectCaption = DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
+	const char *pLoadMapContent = Localize("Initializing map logic");
+	// render loading before skip is calculated
+	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
@@ -463,11 +485,16 @@ void CGameClient::OnConnected()
 		i += pGameTiles[i].m_Skip;
 	}
 
+	// render loading before going through all components
+	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
 	for(auto &pComponent : m_vpAll)
 	{
 		pComponent->OnMapLoad();
 		pComponent->OnReset();
 	}
+
+	Client()->SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_GETTING_READY);
+	m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0, false);
 
 	m_ServerMode = SERVERMODE_PURE;
 

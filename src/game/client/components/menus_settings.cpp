@@ -823,7 +823,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			// if skin refreshing takes to long, swap to a loading screen
 			if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 			{
-				RenderLoading(false, false);
+				RenderLoading(Localize("Loading skin files"), "", 0, false);
 			}
 		});
 		s_InitSkinlist = true;

@@ -549,7 +549,7 @@ public:
 	CMenus();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void RenderLoading(bool IncreaseCounter, bool RenderLoadingBar = true);
+	void RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter, bool RenderLoadingBar = true, bool RenderMenuBackgroundMap = true);
 
 	bool IsInit() { return m_IsInit; }
 

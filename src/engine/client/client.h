@@ -344,7 +344,7 @@ public:
 	const char *LatestVersion() const override;
 
 	// ------ state handling -----
-	void SetState(int s);
+	void SetState(EClientState s);
 
 	// called when the map is loaded and we should init for a new round
 	void OnEnterGame(bool Dummy);

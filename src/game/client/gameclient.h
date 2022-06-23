@@ -440,6 +440,8 @@ public:
 
 	void OnReset();
 
+	size_t ComponentCount() { return m_vpAll.size(); }
+
 	// hooks
 	void OnConnected() override;
 	void OnRender() override;
