@@ -106,6 +106,7 @@ function print_results() {
 rm -rf integration_test
 mkdir -p integration_test/data/maps
 cp data/maps/coverage.map integration_test/data/maps
+cp data/maps/Tutorial.map integration_test/data/maps
 cd integration_test || exit 1
 
 {
@@ -123,24 +124,52 @@ else
 	client_args=""
 fi
 
+function wait_for_fifo() {
+	local fifo="$1"
+	local tries="$2"
+	local fails=0
+	# give the client time to launch and create the fifo file
+	# but assume after X secs that the client crashed before
+	# being able to create the file
+	while [[ ! -p "$fifo" ]]
+	do
+		fails="$((fails+1))"
+		if [ "$arg_verbose" == "1" ]
+		then
+			echo "[!] client fifos not found (attempts $fails/$tries)"
+		fi
+		if [ "$fails" -gt "$tries" ]
+		then
+			print_results
+			echo "[-] Error: client possibly crashed on launch"
+			exit 1
+		fi
+		sleep 1
+	done
+}
+
 $tool ../DDNet-Server \
 	"sv_input_fifo server.fifo;
 	sv_rcon_password rcon;
 	sv_map coverage;
 	sv_sqlite_file ddnet-server.sqlite;
-	sv_port $port" &> server.log || fail server "$?" &
+	logfile server.log;
+	sv_port $port" > stdout_server.txt 2> stderr_server.txt || fail server "$?" &
 
 $tool ../DDNet \
 	"cl_input_fifo client1.fifo;
 	player_name client1;
 	cl_download_skins 0;
 	gfx_fullscreen 0;
+	logfile client1.log;
 	$client_args
-	connect localhost:$port" &> client1.log || fail client1 "$?" &
+	connect localhost:$port" > stdout_client1.txt 2> stderr_client1.txt || fail client1 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	sleep 10
+	wait_for_fifo client1.fifo 120
+	sleep 1
 else
+	wait_for_fifo client1.fifo 50
 	sleep 1
 fi
 
@@ -149,37 +178,15 @@ $tool ../DDNet \
 	player_name client2;
 	cl_download_skins 0;
 	gfx_fullscreen 0;
+	logfile client2.log;
 	$client_args
-	connect localhost:$port" &> client2.log || fail client2 "$?" &
-
-fails=0
-if [ "$arg_valgrind_memcheck" == "1" ]; then
-	tries=120
-else
-	tries=50
-fi
-# give the client time to launch and create the fifo file
-# but assume after X secs that the client crashed before
-# being able to create the file
-while [[ ! -p client1.fifo || ! -p client2.fifo ]]
-do
-	fails="$((fails+1))"
-	if [ "$arg_verbose" == "1" ]
-	then
-		echo "[!] client fifos not found (attempts $fails/$tries)"
-	fi
-	if [ "$fails" -gt "$tries" ]
-	then
-		print_results
-		echo "[-] Error: client possibly crashed on launch"
-		exit 1
-	fi
-	sleep 1
-done
+	connect localhost:$port" > stdout_client2.txt 2> stderr_client2.txt || fail client2 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
+	wait_for_fifo client2.fifo 120
 	sleep 20
 else
+	wait_for_fifo client2.fifo 50
 	sleep 2
 fi
 
@@ -215,6 +222,9 @@ rcon echo test;
 muteid 1 900 spam;
 unban_all;
 EOF
+sleep 1
+echo "[*] test map change"
+echo "rcon sv_map Tutorial" > client1.fifo
 sleep 1
 
 
@@ -261,6 +271,45 @@ then
 	echo "[-] Error: expected a rank from client1 instead got:"
 	echo "  $ranks"
 fi
+
+for logfile in client1.log client2.log server.log
+do
+	if [ "$arg_valgrind_memcheck" == "1" ]
+	then
+		break
+	fi
+	if [ ! -f "$logfile" ]
+	then
+		echo "[-] Error: logfile '$logfile' not found."
+		touch fail_logs.txt
+		continue
+	fi
+	logdiff="$(diff "$logfile" "stdout_$(basename "$logfile" .log).txt")"
+	if [ "$logdiff" != "" ]
+	then
+		echo "[-] Error: logfile '$logfile' differs from stdout"
+		echo "[-] Error: logfile '$logfile' differs from stdout" >> fail_logs.txt
+		echo "$logdiff" >> fail_logs.txt
+	fi
+done
+
+for stderr in ./stderr_*.txt
+do
+	if [ ! -f "$stderr" ]
+	then
+		continue
+	fi
+	if [ "$(cat "$stderr")" == "" ]
+	then
+		continue
+	fi
+	if [ "$arg_verbose" != "1" ]
+	then
+		continue
+	fi
+	echo "[!] Warning: $stderr"
+	cat "$stderr"
+done
 
 if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"
 then
