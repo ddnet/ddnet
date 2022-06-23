@@ -297,21 +297,6 @@ def main():
 		for l in lines:
 			print(l)
 
-		# create validate tables
-			lines = []
-			lines += ['static int validate_invalid(void *data, int size) { return -1; }']
-			lines += ["typedef int(*VALIDATEFUNC)(void *data, int size);"]
-			lines += ["static VALIDATEFUNC validate_funcs[] = {"]
-			lines += ['\tvalidate_invalid,']
-			lines += ['\tvalidate_%s,' % o.name for o in network.Objects]
-			lines += ["\t0x0", "};", ""]
-
-			lines += ["int netobj_validate(int type, void *data, int size)"]
-			lines += ["{"]
-			lines += ["\tif(type < 0 || type >= NUM_NETOBJTYPES) return -1;"]
-			lines += ["\treturn validate_funcs[type](data, size);"]
-			lines += ["};", ""]
-
 		lines = []
 		lines += ['void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)']
 		lines += ['{']
