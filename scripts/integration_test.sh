@@ -288,6 +288,7 @@ do
 	if [ "$logdiff" != "" ]
 	then
 		echo "[-] Error: logfile '$logfile' differs from stdout"
+		echo "$logdiff"
 		echo "[-] Error: logfile '$logfile' differs from stdout" >> fail_logs.txt
 		echo "$logdiff" >> fail_logs.txt
 	fi
