@@ -415,6 +415,30 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
 
+	// copy clipboard button
+	{
+		CUIRect Button;
+		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
+		Button.VSplitRight(200.0f, &ServerInfo, &Button);
+		static int s_CopyClipboardButton = 0;
+		if(DoButton_Menu(&s_CopyClipboardButton, Localize("Copy server info"), 0, &Button))
+		{	
+			mem_zero(aBuf, sizeof(aBuf));
+			str_format(
+				aBuf,
+				sizeof(aBuf),
+				"@Moderator\r\n"
+				"%s\r\n"
+				"Address: %s\r\n"
+				"My IGN: %s\r\n",
+				CurrentServerInfo.m_aName,
+				CurrentServerInfo.m_aAddress,
+				g_Config.m_PlayerName);
+			Input()->SetClipboardText(aBuf);
+		}
+	}
+
+	// add fav checkbox
 	{
 		CUIRect Button;
 		int IsFavorite = ServerBrowser()->IsFavorite(CurrentServerInfo.m_NetAddr);

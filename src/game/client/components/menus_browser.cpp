@@ -1038,7 +1038,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	const CServerInfo *pSelectedServer = ServerBrowser()->SortedGet(m_SelectedIndex);
 
 	// split off a piece to use for scoreboard
-	ServerDetails.HSplitTop(90.0f, &ServerDetails, &ServerScoreBoard);
+	ServerDetails.HSplitTop(110.0f, &ServerDetails, &ServerScoreBoard);
 	ServerDetails.HSplitBottom(2.5f, &ServerDetails, 0x0);
 
 	// server details
@@ -1048,6 +1048,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	RenderTools()->DrawUIRect(&ServerHeader, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 4.0f);
 	RenderTools()->DrawUIRect(&ServerDetails, ColorRGBA(0, 0, 0, 0.15f), CUI::CORNER_B, 4.0f);
 	UI()->DoLabel(&ServerHeader, Localize("Server details"), FontSize + 2.0f, TEXTALIGN_CENTER);
+
+	char aBuf[1024];
 
 	if(pSelectedServer)
 	{
@@ -1063,7 +1065,29 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		CUIRect LeftColumn;
 		CUIRect RightColumn;
 
-		//
+		// copy clipboard button
+		{
+			CUIRect Button;
+			ServerDetails.HSplitBottom(15.0f, &ServerDetails, &Button);
+			static int s_CopyClipboardButton = 0;
+			if(DoButton_Menu(&s_CopyClipboardButton, Localize("Copy server info"), 0, &Button))
+			{	
+				mem_zero(aBuf, sizeof(aBuf));
+				str_format(
+					aBuf,
+					sizeof(aBuf),
+					"@Moderator\r\n"
+					"%s\r\n"
+					"Address: %s\r\n"
+					"My IGN: %s\r\n",
+					pSelectedServer->m_aName,
+					pSelectedServer->m_aAddress,
+					g_Config.m_PlayerName);
+				Input()->SetClipboardText(aBuf);
+			}
+		}
+
+		// add fav checkbox
 		{
 			CUIRect Button;
 			ServerDetails.HSplitBottom(20.0f, &ServerDetails, &Button);
