@@ -8,6 +8,8 @@
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>
 
+#include <cstdlib>
+
 void CUPnP::Open(NETADDR Address)
 {
 	if(g_Config.m_SvUseUPnP)
