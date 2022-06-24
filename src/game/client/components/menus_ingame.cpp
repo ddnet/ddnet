@@ -421,7 +421,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
 		Button.VSplitRight(200.0f, &ServerInfo, &Button);
 		static int s_CopyClipboardButton = 0;
-		if(DoButton_Menu(&s_CopyClipboardButton, Localize("Copy server info"), 0, &Button))
+		if(DoButton_Menu(&s_CopyClipboardButton, Localize("Copy report template"), 0, &Button))
 		{	
 			mem_zero(aBuf, sizeof(aBuf));
 			str_format(
