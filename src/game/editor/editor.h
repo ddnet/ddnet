@@ -495,11 +495,11 @@ enum
 	DIRECTION_DOWN = 8,
 };
 
-typedef struct
+struct RECTi
 {
 	int x, y;
 	int w, h;
-} RECTi;
+};
 
 class CLayerTiles : public CLayer
 {

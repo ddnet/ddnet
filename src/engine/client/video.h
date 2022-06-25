@@ -24,7 +24,7 @@ class IStorage;
 extern LOCK g_WriteLock;
 
 // a wrapper around a single output AVStream
-typedef struct OutputStream
+struct OutputStream
 {
 	AVStream *pSt = nullptr;
 	AVCodecContext *pEnc = nullptr;
@@ -39,7 +39,7 @@ typedef struct OutputStream
 
 	std::vector<struct SwsContext *> m_vpSwsCtxs;
 	std::vector<struct SwrContext *> m_vpSwrCtxs;
-} OutputStream;
+};
 
 class CVideo : public IVideo
 {
