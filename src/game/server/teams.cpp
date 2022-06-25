@@ -473,7 +473,7 @@ bool CGameTeams::TeamFinished(int Team)
 	return true;
 }
 
-int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker, int ExcludeClientVersionAndHigher)
+int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
 	int64_t Mask = 0;
 
@@ -486,8 +486,6 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker, int ExcludeClien
 			continue; // Explicitly excluded
 		if(!GetPlayer(i))
 			continue; // Player doesn't exist
-		if(ExcludeClientVersionAndHigher != -1 && GetPlayer(i)->GetClientVersion() >= ExcludeClientVersionAndHigher)
-			continue; // The player is excluded from this team mask because of his client version
 
 		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
 		{ // Not spectator
