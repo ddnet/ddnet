@@ -422,7 +422,7 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	switch(GetFileType(pOutput))
 	{
 	case FILE_TYPE_CHAR: return std::make_unique<CWindowsConsoleLogger>(pOutput);
-	case FILE_TYPE_PIPE: // fall through, writing to pipe works the same as writing to a file
+	case FILE_TYPE_PIPE: [[fallthrough]]; // writing to pipe works the same as writing to a file
 	case FILE_TYPE_DISK: return std::make_unique<CWindowsFileLogger>(pOutput);
 	default: return std::make_unique<CLoggerAsync>(io_stdout(), false, false);
 	}

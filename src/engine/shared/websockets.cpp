@@ -78,7 +78,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 		{
 			return 0;
 		}
-		/* FALLTHRU */
+		[[fallthrough]];
 	case LWS_CALLBACK_ESTABLISHED:
 	{
 		pss->wsi = wsi;
@@ -116,7 +116,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 	break;
 
 	case LWS_CALLBACK_CLIENT_WRITEABLE:
-		/* FALLTHRU */
+		[[fallthrough]];
 	case LWS_CALLBACK_SERVER_WRITEABLE:
 	{
 		websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.First();
@@ -140,7 +140,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 	break;
 
 	case LWS_CALLBACK_CLIENT_RECEIVE:
-		/* FALLTHRU */
+		[[fallthrough]];
 	case LWS_CALLBACK_RECEIVE:
 		if(pss->addr_str.empty())
 			return -1;
