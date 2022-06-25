@@ -108,7 +108,7 @@ CMenus::CMenus()
 	}
 }
 
-void CMenus::DoIcon(int ImageId, int SpriteId, const CUIRect *pRect)
+void CMenus::DoIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor)
 {
 	int x = pRect->x;
 	int y = pRect->y;
@@ -131,6 +131,8 @@ void CMenus::DoIcon(int ImageId, int SpriteId, const CUIRect *pRect)
 
 	Graphics()->QuadsBegin();
 	RenderTools()->SelectSprite(SpriteId);
+	if(pColor)
+		Graphics()->SetColor(pColor->r * pColor->a, pColor->g * pColor->a, pColor->b * pColor->a, pColor->a);
 	IGraphics::CQuadItem QuadItem(x, y, w, h);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
