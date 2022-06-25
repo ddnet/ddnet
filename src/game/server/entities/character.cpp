@@ -203,7 +203,7 @@ void CCharacter::HandleNinja()
 
 	if(NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
 	{
-		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask(VERSION_DDNET_NEW_HUD));
+		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
 	}
 
 	m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
@@ -2002,7 +2002,7 @@ void CCharacter::DDRaceTick()
 	{
 		if(m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1 || m_FreezeTime == -1)
 		{
-			GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), TeamMask(VERSION_DDNET_NEW_HUD));
+			GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
 		}
 		if(m_FreezeTime > 0)
 			m_FreezeTime--;
@@ -2304,9 +2304,9 @@ void CCharacter::Rescue()
 	}
 }
 
-int64_t CCharacter::TeamMask(int ExcludeClientVersionAndHigher)
+int64_t CCharacter::TeamMask()
 {
-	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID(), ExcludeClientVersionAndHigher);
+	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID());
 }
 
 void CCharacter::SwapClients(int Client1, int Client2)
