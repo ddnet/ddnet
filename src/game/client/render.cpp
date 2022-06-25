@@ -131,6 +131,18 @@ void CRenderTools::RenderCursor(vec2 Center, float Size)
 	Graphics()->WrapNormal();
 }
 
+void CRenderTools::RenderIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor)
+{
+	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
+	Graphics()->QuadsBegin();
+	SelectSprite(SpriteId);
+	if(pColor)
+		Graphics()->SetColor(pColor->r * pColor->a, pColor->g * pColor->a, pColor->b * pColor->a, pColor->a);
+	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+}
+
 int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)
 {
 	IGraphics::CQuadItem QuadItem(x, y, Size, Size);

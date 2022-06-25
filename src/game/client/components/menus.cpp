@@ -108,36 +108,6 @@ CMenus::CMenus()
 	}
 }
 
-int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
-{
-	int x = pRect->x;
-	int y = pRect->y;
-	int w = pRect->w;
-	int h = pRect->h;
-
-	// Square and center
-	if(w > h)
-	{
-		x += (w - h) / 2;
-		w = h;
-	}
-	else if(h > w)
-	{
-		y += (h - w) / 2;
-		h = w;
-	}
-
-	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
-
-	Graphics()->QuadsBegin();
-	RenderTools()->SelectSprite(SpriteId);
-	IGraphics::CQuadItem QuadItem(x, y, w, h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-
-	return 0;
-}
-
 int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
