@@ -620,7 +620,7 @@ int CInput::Update()
 		case SDL_MOUSEBUTTONUP:
 			Action = IInput::FLAG_RELEASE;
 
-			// fall through
+		[[fallthrough]];
 		case SDL_MOUSEBUTTONDOWN:
 			if(Event.button.button == SDL_BUTTON_LEFT)
 				Scancode = KEY_MOUSE_1;
@@ -704,7 +704,7 @@ int CInput::Update()
 				MouseModeAbsolute();
 				MouseModeRelative();
 #endif
-				// fallthrough
+			[[fallthrough]];
 			case SDL_WINDOWEVENT_RESTORED:
 				Graphics()->WindowCreateNtf(Event.window.windowID);
 				break;
