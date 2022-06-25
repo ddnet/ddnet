@@ -1003,15 +1003,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	enum
 	{
-		COL_ICON = 0,
-		COL_DEMONAME,
+		COL_DEMONAME = 0,
 		COL_MARKERS,
 		COL_LENGTH,
 		COL_DATE,
 	};
 
 	static CColumn s_aCols[] = {
-		{COL_ICON, -1, " ", -1, 14.0f, 0, {0}, {0}},
 		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, 0, {0}, {0}},
 		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, 0, {0}, {0}},
 		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, 0, {0}, {0}},
@@ -1140,6 +1138,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			continue;
 		}
 
+		CUIRect FileIcon;
+		Row.VSplitLeft(Row.h, &FileIcon, &Row);
+		Row.VSplitLeft(5.0f, 0, &Row);
+		FileIcon.Margin(2.0f, &FileIcon);
+		FileIcon.x += 2.0f;
+
+		DoIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &FileIcon);
+
 		for(int c = 0; c < NumCols; c++)
 		{
 			CUIRect Button;
@@ -1150,12 +1156,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			int ID = s_aCols[c].m_ID;
 
-			if(ID == COL_ICON)
+			if(ID == COL_DEMONAME)
 			{
-				DoIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &Button);
-			}
-			else if(ID == COL_DEMONAME)
-			{
+				Button.x += FileIcon.w + 6.0f;
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f) / 2.f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;

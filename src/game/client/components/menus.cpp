@@ -110,30 +110,13 @@ CMenus::CMenus()
 
 void CMenus::DoIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor)
 {
-	int x = pRect->x;
-	int y = pRect->y;
-	int w = pRect->w;
-	int h = pRect->h;
-
-	// Square and center
-	if(w > h)
-	{
-		x += (w - h) / 2;
-		w = h;
-	}
-	else if(h > w)
-	{
-		y += (h - w) / 2;
-		h = w;
-	}
-
 	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
 
 	Graphics()->QuadsBegin();
 	RenderTools()->SelectSprite(SpriteId);
 	if(pColor)
 		Graphics()->SetColor(pColor->r * pColor->a, pColor->g * pColor->a, pColor->b * pColor->a, pColor->a);
-	IGraphics::CQuadItem QuadItem(x, y, w, h);
+	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 }
