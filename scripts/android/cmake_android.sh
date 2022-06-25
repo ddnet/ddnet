@@ -104,8 +104,8 @@ function build_for_type() {
 		-DTOOLS=OFF \
 		-DDEV=TRUE \
 		-DCMAKE_CROSSCOMPILING=ON \
-		-DPREFER_BUNDLED_LIBS=ON \
-		-DVULKAN=ON
+		-DVULKAN=ON \
+		-DVIDEORECORDER=OFF
 	(
 		cd "build_android/$_ANDROID_SUB_BUILD_DIR/$1" || exit 1
 		cmake --build . --target DDNet
