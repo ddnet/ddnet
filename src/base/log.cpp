@@ -162,7 +162,7 @@ public:
 	void Log(const CLogMessage *pMessage) override
 	{
 		int AndroidLevel;
-		switch(Level)
+		switch(pMessage->m_Level)
 		{
 		case LEVEL_TRACE: AndroidLevel = ANDROID_LOG_VERBOSE; break;
 		case LEVEL_DEBUG: AndroidLevel = ANDROID_LOG_DEBUG; break;
