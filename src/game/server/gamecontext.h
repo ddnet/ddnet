@@ -222,7 +222,7 @@ public:
 
 	// network
 	void CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = 0);
-	void SendChatTarget(int To, const char *pText, int ExcludeClientVersionAndHigher = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
+	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendChatTeam(int Team, const char *pText);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendStartWarning(int ClientID, const char *pMessage);
