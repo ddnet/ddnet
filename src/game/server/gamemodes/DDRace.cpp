@@ -105,12 +105,18 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// solo part
 	if(((m_TileIndex == TILE_SOLO_ENABLE) || (m_TileFIndex == TILE_SOLO_ENABLE)) && !m_Teams.m_Core.GetSolo(ClientID))
 	{
-		GameServer()->SendChatTarget(ClientID, "You are now in a solo part", VERSION_DDNET_NEW_HUD);
+		if(GameServer()->GetClientVersion(ClientID) < VERSION_DDNET_NEW_HUD)
+		{
+			GameServer()->SendChatTarget(ClientID, "You are now in a solo part");
+		}
 		pChr->SetSolo(true);
 	}
 	else if(((m_TileIndex == TILE_SOLO_DISABLE) || (m_TileFIndex == TILE_SOLO_DISABLE)) && m_Teams.m_Core.GetSolo(ClientID))
 	{
-		GameServer()->SendChatTarget(ClientID, "You are now out of the solo part", VERSION_DDNET_NEW_HUD);
+		if(GameServer()->GetClientVersion(ClientID) < VERSION_DDNET_NEW_HUD)
+		{
+			GameServer()->SendChatTarget(ClientID, "You are now out of the solo part");
+		}
 		pChr->SetSolo(false);
 	}
 }

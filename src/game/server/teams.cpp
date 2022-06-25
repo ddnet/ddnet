@@ -671,7 +671,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		Server()->ClientName(ClientID), (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
 	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
-		GameServer()->SendChatTarget(ClientID, aBuf, -1, CGameContext::CHAT_SIX);
+		GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
 	else
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1., CGameContext::CHAT_SIX);
 
@@ -689,7 +689,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 				Diff);
 		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
-			GameServer()->SendChatTarget(ClientID, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
 		else
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 	}
@@ -711,7 +711,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 				str_format(aBuf, sizeof(aBuf),
 					"%5.2f second(s) worse, better luck next time.",
 					Diff);
-			GameServer()->SendChatTarget(ClientID, aBuf, -1, CGameContext::CHAT_SIX); // this is private, sent only to the tee
+			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX); // this is private, sent only to the tee
 		}
 	}
 	else
