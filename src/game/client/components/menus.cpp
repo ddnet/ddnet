@@ -376,7 +376,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 
 	Graphics()->BlendNormal();
 	int SpriteIndex = time_get() % 3;
-	Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[SpriteIndex]);
+	Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[SpriteIndex]);
 	Graphics()->QuadsBegin();
 	Graphics()->QuadsSetRotation(time_get());
 	Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);

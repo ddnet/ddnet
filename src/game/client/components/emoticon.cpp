@@ -121,7 +121,7 @@ void CEmoticon::OnRender()
 
 		float Size = Selected ? 80.0f : 50.0f;
 
-		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[i]);
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[i]);
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 
 		Graphics()->QuadsBegin();
