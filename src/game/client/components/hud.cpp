@@ -658,7 +658,7 @@ void CHud::RenderCursor()
 	// render cursor
 	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
+	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CursorOffset[CurWeapon], m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
 }
 
@@ -747,9 +747,9 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 		// ammo display
 		float AmmoOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
 		int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
-		if(m_pClient->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
+		if(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
 		{
-			Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
+			Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 			if(AmmoOffsetY > 0)
 			{
 				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10), 0, AmmoOffsetY);

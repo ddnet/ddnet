@@ -206,12 +206,12 @@ bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
 
 void CParticles::RenderGroup(int Group)
 {
-	IGraphics::CTextureHandle *aParticles = GameClient()->m_ParticlesSkin.m_SpriteParticles;
+	IGraphics::CTextureHandle *aParticles = GameClient()->m_ParticlesSkin.m_aSpriteParticles;
 	int FirstParticleOffset = SPRITE_PART_SLICE;
 	int ParticleQuadContainerIndex = m_ParticleQuadContainerIndex;
 	if(Group == GROUP_EXTRA)
 	{
-		aParticles = GameClient()->m_ExtrasSkin.m_SpriteParticles;
+		aParticles = GameClient()->m_ExtrasSkin.m_aSpriteParticles;
 		FirstParticleOffset = SPRITE_PART_SNOWFLAKE;
 		ParticleQuadContainerIndex = m_ExtraParticleQuadContainerIndex;
 	}
