@@ -667,6 +667,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;
 		IGraphics::CTextureHandle m_SpriteHudNoGrenadeHit;
 		IGraphics::CTextureHandle m_SpriteHudNoLaserHit;
+		IGraphics::CTextureHandle m_SpriteHudNoGunHit;
 		IGraphics::CTextureHandle m_SpriteHudDeepFrozen;
 		IGraphics::CTextureHandle m_SpriteHudLiveFrozen;
 		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;

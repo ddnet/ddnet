@@ -3047,6 +3047,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoShotgunHit);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoGrenadeHit);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoLaserHit);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoGunHit);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDeepFrozen);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudLiveFrozen);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudTeleportGrenade);
@@ -3104,6 +3105,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudNoShotgunHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_SHOTGUN_HIT]);
 		m_HudSkin.m_SpriteHudNoGrenadeHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_GRENADE_HIT]);
 		m_HudSkin.m_SpriteHudNoLaserHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_LASER_HIT]);
+		m_HudSkin.m_SpriteHudNoGunHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_GUN_HIT]);
 		m_HudSkin.m_SpriteHudDeepFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DEEP_FROZEN]);
 		m_HudSkin.m_SpriteHudLiveFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LIVE_FROZEN]);
 		m_HudSkin.m_SpriteHudTeleportGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_GRENADE]);

@@ -527,7 +527,6 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	else if(s_CurCustomTab == ASSETS_TAB_HUD)
 	{
 		SearchListSize = s_vpSearchHudList.size();
-		TextureHeight = 128;
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 	{
