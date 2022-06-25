@@ -369,13 +369,13 @@ int CSaveTee::FromString(const char *String)
 	{
 	case 96:
 		m_NotEligibleForFinish = false;
-	[[fallthrough]];
+		[[fallthrough]];
 	case 97:
 		m_HasTelegunGrenade = 0;
 		m_HasTelegunLaser = 0;
 		m_HasTelegunGun = 0;
 		FormatUuid(CalculateUuid("game-uuid-nonexistent@ddnet.tw"), m_aGameUuid, sizeof(m_aGameUuid));
-	[[fallthrough]];
+		[[fallthrough]];
 	case 101:
 		m_HookedPlayer = -1;
 		m_NewHook = false;
@@ -386,13 +386,13 @@ int CSaveTee::FromString(const char *String)
 		m_InputFire = 0;
 		m_InputHook = 0;
 		m_ReloadTimer = 0;
-	[[fallthrough]];
+		[[fallthrough]];
 	case 108:
 		m_TeeStarted = true;
-	[[fallthrough]];
+		[[fallthrough]];
 	case 109:
 		m_LiveFreeze = 0;
-	[[fallthrough]];
+		[[fallthrough]];
 	case 110:
 		return 0;
 	default:
@@ -613,7 +613,7 @@ int CSaveTeam::FromString(const char *String)
 		{
 		case 4:
 			m_Practice = false;
-		[[fallthrough]];
+			[[fallthrough]];
 		case 5:
 			break;
 		default:

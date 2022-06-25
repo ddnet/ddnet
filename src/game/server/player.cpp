@@ -778,7 +778,7 @@ int CPlayer::Pause(int State, bool Force)
 				m_ViewPos = m_pCharacter->m_Pos;
 				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 			}
-		[[fallthrough]];
+			[[fallthrough]];
 		case PAUSE_SPEC:
 			if(g_Config.m_SvPauseMessages)
 			{
