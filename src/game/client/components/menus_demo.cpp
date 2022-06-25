@@ -1148,7 +1148,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		if(!Item.m_IsDir && (!Item.m_InfosLoaded || !Item.m_Valid))
 			IconColor = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f); // not loaded
 
-		DoIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &FileIcon, &IconColor);
+		RenderTools()->RenderIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &FileIcon, &IconColor);
 
 		for(int c = 0; c < NumCols; c++)
 		{
