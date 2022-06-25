@@ -108,7 +108,7 @@ CMenus::CMenus()
 	}
 }
 
-int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
+void CMenus::DoIcon(int ImageId, int SpriteId, const CUIRect *pRect)
 {
 	int x = pRect->x;
 	int y = pRect->y;
@@ -134,8 +134,6 @@ int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 	IGraphics::CQuadItem QuadItem(x, y, w, h);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
-
-	return 0;
 }
 
 int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active)

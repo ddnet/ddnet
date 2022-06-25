@@ -1152,7 +1152,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			if(ID == COL_ICON)
 			{
-				DoButton_Icon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &Button);
+				DoIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &Button);
 			}
 			else if(ID == COL_DEMONAME)
 			{
