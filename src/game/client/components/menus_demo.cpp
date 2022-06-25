@@ -1144,7 +1144,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		FileIcon.Margin(2.0f, &FileIcon);
 		FileIcon.x += 2.0f;
 
-		DoIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &FileIcon);
+		ColorRGBA IconColor(1.0f, 1.0f, 1.0f, 1.0f);
+		if(!Item.m_IsDir && (!Item.m_InfosLoaded || !Item.m_Valid))
+			IconColor = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f); // not loaded
+
+		DoIcon(IMAGE_FILEICONS, Item.m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_DEMO1, &FileIcon, &IconColor);
 
 		for(int c = 0; c < NumCols; c++)
 		{
