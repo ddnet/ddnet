@@ -89,16 +89,6 @@ static int s_WVBufferSize = 0;
 const int DefaultDistance = 1500;
 int m_LastBreak = 0;
 
-// TODO: there should be a faster way todo this
-static short Int2Short(int i)
-{
-	if(i > 0x7fff)
-		return 0x7fff;
-	else if(i < -0x7fff)
-		return -0x7fff;
-	return i;
-}
-
 static int IntAbs(int i)
 {
 	if(i < 0)
@@ -259,21 +249,9 @@ static void Mix(short *pFinalOut, unsigned Frames)
 	// release the lock
 	m_SoundLock.unlock();
 
-	{
-		// clamp accumulated values
-		// TODO: this seams slow
-		for(unsigned i = 0; i < Frames; i++)
-		{
-			int j = i << 1;
-			int vl = ((m_pMixBuffer[j] * MasterVol) / 101) >> 8;
-			int vr = ((m_pMixBuffer[j + 1] * MasterVol) / 101) >> 8;
-
-			pFinalOut[j] = Int2Short(vl);
-			pFinalOut[j + 1] = Int2Short(vr);
-
-			// dbg_msg("sound", "the real shit: %d %d", pFinalOut[j], pFinalOut[j+1]);
-		}
-	}
+	// clamp accumulated values
+	for(unsigned i = 0; i < Frames * 2; i++)
+		pFinalOut[i] = clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
