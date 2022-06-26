@@ -533,7 +533,12 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 		}
 
 		int *pBuffer = (int *)calloc((size_t)NumSamples * NumChannels, sizeof(int));
-		WavpackUnpackSamples(pContext, pBuffer, NumSamples); // TODO: check return value
+		if(!WavpackUnpackSamples(pContext, pBuffer, NumSamples))
+		{
+			free(pBuffer);
+			dbg_msg("sound/wv", "WavpackUnpackSamples failed. NumSamples=%d, NumChannels=%d", NumSamples, NumChannels);
+			return -1;
+		}
 		int *pSrc = pBuffer;
 
 		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
