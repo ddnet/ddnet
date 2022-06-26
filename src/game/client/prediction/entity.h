@@ -62,6 +62,7 @@ public:
 	int m_DestroyTick;
 	int m_LastRenderTick;
 	CEntity *m_pParent;
+	CEntity *m_pChild;
 	CEntity *NextEntity() { return m_pNextTypeEntity; }
 	int ID() { return m_ID; }
 	void Keep()
