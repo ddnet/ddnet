@@ -1,7 +1,7 @@
 #ifndef BASE_HASH_H
 #define BASE_HASH_H
 
-#include <stddef.h>
+#include <cstddef> // size_t
 
 enum
 {
@@ -11,15 +11,15 @@ enum
 	MD5_MAXSTRSIZE = 2 * MD5_DIGEST_LENGTH + 1,
 };
 
-typedef struct
+struct SHA256_DIGEST
 {
 	unsigned char data[SHA256_DIGEST_LENGTH];
-} SHA256_DIGEST;
+};
 
-typedef struct
+struct MD5_DIGEST
 {
 	unsigned char data[MD5_DIGEST_LENGTH];
-} MD5_DIGEST;
+};
 
 SHA256_DIGEST sha256(const void *message, size_t message_len);
 void sha256_str(SHA256_DIGEST digest, char *str, size_t max_len);

@@ -28,13 +28,13 @@ typedef CStaticRingBuffer<unsigned char, 4 * 1024,
 	CRingBufferBase::FLAG_RECYCLE>
 	TSendBuffer;
 
-typedef struct
+struct websocket_chunk
 {
 	size_t size;
 	size_t read;
 	sockaddr_in addr;
 	unsigned char data[0];
-} websocket_chunk;
+};
 
 struct per_session_data
 {
