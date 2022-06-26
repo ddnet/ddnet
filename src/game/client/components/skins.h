@@ -29,6 +29,11 @@ public:
 		char m_aPath[IO_MAX_PATH_LENGTH];
 		char m_aName[24];
 
+		~CDownloadSkin()
+		{
+			if(m_pTask)
+				m_pTask->Abort();
+		}
 		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
