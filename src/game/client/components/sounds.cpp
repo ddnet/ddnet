@@ -234,6 +234,18 @@ void CSounds::Stop(int SetId)
 		Sound()->Stop(pSet->m_aSounds[i].m_Id);
 }
 
+bool CSounds::IsPlaying(int SetId)
+{
+	if(m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
+		return false;
+
+	const CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
+	for(int i = 0; i < pSet->m_NumSounds; i++)
+		if(pSet->m_aSounds[i].m_Id != -1 && Sound()->IsPlaying(pSet->m_aSounds[i].m_Id))
+			return true;
+	return false;
+}
+
 ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, int Flags)
 {
 	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
