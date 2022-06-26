@@ -973,6 +973,7 @@ set(EXPECTED_DATA
   audio/wp_switch-01.wv
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
+  autoexec_server.cfg
   blob.png
   censorlist.txt
   console.png
@@ -1551,7 +1552,7 @@ set(EXPECTED_DATA
   wordlist.txt
 )
 
-set_glob(DATA GLOB_RECURSE "frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
+set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
 
 ########################################################################
 # COPY DATA AND SHARED LIBS

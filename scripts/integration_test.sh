@@ -154,6 +154,7 @@ $tool ../DDNet-Server \
 	sv_map coverage;
 	sv_sqlite_file ddnet-server.sqlite;
 	logfile server.log;
+	sv_register 0;
 	sv_port $port" > stdout_server.txt 2> stderr_server.txt || fail server "$?" &
 
 $tool ../DDNet \
@@ -284,7 +285,7 @@ do
 		touch fail_logs.txt
 		continue
 	fi
-	logdiff="$(diff "$logfile" "stdout_$(basename "$logfile" .log).txt")"
+	logdiff="$(diff -u "$logfile" "stdout_$(basename "$logfile" .log).txt")"
 	if [ "$logdiff" != "" ]
 	then
 		echo "[-] Error: logfile '$logfile' differs from stdout"
