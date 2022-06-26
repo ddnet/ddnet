@@ -972,6 +972,13 @@ void CSound::StopVoice(CVoiceHandle Voice)
 	}
 }
 
+bool CSound::IsPlaying(int SampleID)
+{
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CSample *pSample = &m_aSamples[SampleID];
+	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
+}
+
 ISoundMixFunc CSound::GetSoundMixFunc()
 {
 	return Mix;

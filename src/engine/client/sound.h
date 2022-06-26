@@ -59,6 +59,7 @@ public:
 	void Stop(int SampleID) override;
 	void StopAll() override;
 	void StopVoice(CVoiceHandle Voice) override;
+	bool IsPlaying(int SampleID) override;
 
 	ISoundMixFunc GetSoundMixFunc() override;
 	void PauseAudioDevice() override;
