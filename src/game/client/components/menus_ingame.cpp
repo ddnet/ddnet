@@ -1041,7 +1041,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				if(pItem->Active())
 				{
 					Graphics()->WrapClamp();
-					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
+					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
 					Graphics()->QuadsBegin();
 					IGraphics::CQuadItem QuadItem(Button.x + Button.w / 2, Button.y + Button.h / 2, 20.0f, 20.0f);
 					Graphics()->QuadsDraw(&QuadItem, 1);

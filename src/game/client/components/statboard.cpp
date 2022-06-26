@@ -222,7 +222,7 @@ void CStatboard::RenderGlobalStats()
 			continue;
 		float ScaleX, ScaleY;
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeapons[i]);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[i]);
 		Graphics()->QuadsBegin();
 		if(i == 0)
 			RenderTools()->DrawSprite(x + px, y + 10, g_pData->m_Weapons.m_aId[i].m_VisualSize * 0.8f * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * 0.8f * ScaleY);

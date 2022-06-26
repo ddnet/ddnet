@@ -80,6 +80,7 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "assets/game", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/particles", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/hud", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "assets/extras", aPath, sizeof(aPath)));
 #if defined(CONF_VIDEORECORDER)
 				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
 #endif

@@ -4105,6 +4105,18 @@ int CGameContext::GetClientVersion(int ClientID) const
 	return Info.m_DDNetVersion;
 }
 
+int64_t CGameContext::ClientsMaskExcludeClientVersionAndHigher(int Version)
+{
+	int64_t Mask = 0;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(GetClientVersion(i) >= Version)
+			continue;
+		Mask |= 1LL << i;
+	}
+	return Mask;
+}
+
 bool CGameContext::PlayerModerating() const
 {
 	return std::any_of(std::begin(m_apPlayers), std::end(m_apPlayers), [](const CPlayer *pPlayer) { return pPlayer && pPlayer->m_Moderating; });

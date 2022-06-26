@@ -123,6 +123,7 @@ private:
 	int m_NoCollisionOffset;
 	int m_NoHookHitOffset;
 	int m_NoHammerHitOffset;
+	int m_NoGunHitOffset;
 	int m_NoShotgunHitOffset;
 	int m_NoGrenadeHitOffset;
 	int m_NoLaserHitOffset;
