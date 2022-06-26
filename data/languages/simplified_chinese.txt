@@ -24,6 +24,7 @@
 # 2022-05-14 Dan_cao
 # 2022-05-14 cheeser0613
 # 2022-06-16 cheeser0613
+# 2022-06-27 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1311,12 +1312,6 @@ Refreshing...
 Kill Messages
 == 击杀消息
 
-Kill Message Normal Color
-== 击杀消息普通颜色
-
-Kill Message Highlight Color
-== 击杀消息强调颜色
-
 Show local player's key presses
 == 显示自己的按键
 
@@ -1475,9 +1470,6 @@ UI mouse sens.
 Controller
 == 控制器
 
-Use DDRace HUD
-== 使用 DDRace HUD
-
 Show dummy actions
 == 显示分身状态
 
@@ -1492,3 +1484,18 @@ Show player speed
 
 Show player target angle
 == 显示玩家瞄准角度
+
+Show jump indicator
+== 显示跳越次数
+
+Opacity of freeze bars inside freeze
+== 解冻进度条不透明度
+
+Normal Color
+== 非相关信息颜色
+
+Highlight Color
+== 相关信息颜色
+
+Extras
+== 其他
