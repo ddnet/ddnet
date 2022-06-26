@@ -1034,9 +1034,6 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_DontMaskEntities = !DDNet;
 	Info.m_AllowXSkins = false;
 	Info.m_EntitiesFDDrace = FDDrace;
-	Info.m_HudHealthArmor = !DDNet;
-	Info.m_HudAmmo = !DDNet;
-	Info.m_HudDDRace = DDNet;
 
 	if(Version >= 0)
 	{
@@ -1081,12 +1078,6 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 6)
 	{
 		Info.m_EntitiesFDDrace = Flags2 & GAMEINFOFLAG2_ENTITIES_FDDRACE;
-	}
-	if(Version >= 7)
-	{
-		Info.m_HudHealthArmor = Flags2 & GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
-		Info.m_HudAmmo = Flags2 & GAMEINFOFLAG2_HUD_AMMO;
-		Info.m_HudDDRace = Flags2 & GAMEINFOFLAG2_HUD_DDRACE;
 	}
 	return Info;
 }
@@ -1413,17 +1404,9 @@ void CGameClient::OnNewSnapshot()
 					continue;
 				}
 				FoundGameInfoEx = true;
-
-				bool HudHealthArmor = m_GameInfo.m_HudHealthArmor;
-				bool HudAmmo = m_GameInfo.m_HudAmmo;
-				bool HudDDRace = m_GameInfo.m_HudDDRace;
-
 				CServerInfo ServerInfo;
 				Client()->GetServerInfo(&ServerInfo);
 				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)pData, Client()->SnapItemSize(IClient::SNAP_CURRENT, i), &ServerInfo);
-
-				if(m_GameInfo.m_HudHealthArmor != HudHealthArmor || m_GameInfo.m_HudAmmo != HudAmmo || m_GameInfo.m_HudDDRace != HudDDRace)
-					m_Hud.OnHudChange();
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{

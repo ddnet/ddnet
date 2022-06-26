@@ -89,10 +89,6 @@ public:
 
 	bool m_DontMaskEntities;
 	bool m_AllowXSkins;
-
-	bool m_HudHealthArmor;
-	bool m_HudAmmo;
-	bool m_HudDDRace;
 };
 
 class CSnapEntities
