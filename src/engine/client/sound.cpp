@@ -864,11 +864,11 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 	int VoiceID = -1;
 	for(int i = 0; i < NUM_VOICES; i++)
 	{
-		int id = (m_NextVoice + i) % NUM_VOICES;
-		if(!m_aVoices[id].m_pSample)
+		int NextID = (m_NextVoice + i) % NUM_VOICES;
+		if(!m_aVoices[NextID].m_pSample)
 		{
-			VoiceID = id;
-			m_NextVoice = id + 1;
+			VoiceID = NextID;
+			m_NextVoice = NextID + 1;
 			break;
 		}
 	}
