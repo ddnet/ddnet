@@ -595,7 +595,7 @@ public:
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
 		SETTINGS_TEE,
-		SETTINGS_HUD,
+		SETTINGS_APPEARANCE,
 		SETTINGS_CONTROLS,
 		SETTINGS_GRAPHICS,
 		SETTINGS_SOUND,
@@ -716,7 +716,7 @@ private:
 
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
-	void RenderSettingsHUD(CUIRect MainView);
+	void RenderSettingsAppearance(CUIRect MainView);
 	ColorHSLA RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha);
 	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);
 

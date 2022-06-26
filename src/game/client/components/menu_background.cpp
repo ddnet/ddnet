@@ -66,7 +66,7 @@ void CMenuBackground::ResetPositions()
 	m_Positions[POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_TEE] = vec2(700.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_HUD] = vec2(200.0f, 1000.0f);
+	m_Positions[POS_SETTINGS_APPEARANCE] = vec2(200.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_CONTROLS] = vec2(800.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
 	m_Positions[POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
