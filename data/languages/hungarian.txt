@@ -1277,12 +1277,6 @@ Refreshing...
 Kill Messages
 == Halálüzenetek
 
-Kill Message Normal Color
-== Halálüzenetek alap színe
-
-Kill Message Highlight Color
-== Halálüzenetek kiemelt színe
-
 Show local player's key presses
 == Saját mozgásod nyilakkal mutatása
 
@@ -1450,13 +1444,10 @@ UI mouse sens.
 Controller
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1466,4 +1457,19 @@ Show player speed
 == 
 
 Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
 == 

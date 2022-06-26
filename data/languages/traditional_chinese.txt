@@ -1301,12 +1301,6 @@ Refreshing...
 Kill Messages
 == 擊殺訊息
 
-Kill Message Normal Color
-== 其他玩家擊殺訊息顔色
-
-Kill Message Highlight Color
-== 玩家擊殺信息顔色
-
 Show local player's key presses
 == 顯示周圍玩家的按鍵輸入
 
@@ -1465,9 +1459,6 @@ UI mouse sens.
 Controller
 == 控制器
 
-Use DDRace HUD
-== 使用 DDRace HUD
-
 Show dummy actions
 == 顯示分身狀態
 
@@ -1482,3 +1473,18 @@ Show player speed
 
 Show player target angle
 == 顯示玩家瞄準角度
+
+Show jump indicator
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 

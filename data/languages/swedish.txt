@@ -1243,12 +1243,6 @@ Show client IDs
 Kill Messages
 == Döds meddelanden
 
-Kill Message Normal Color
-== Döds Meddelanden Normal Färg
-
-Kill Message Highlight Color
-== Döds Meddelanden Betonad Färg
-
 Laser Outline Color
 == Laser Yttre Färg
 
@@ -1425,13 +1419,10 @@ Graphics cards
 auto
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1441,6 +1432,18 @@ Show player speed
 == 
 
 Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1456,6 +1459,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+Extras
 == 
 
 Tutorial

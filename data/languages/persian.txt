@@ -1121,13 +1121,10 @@ Lht.
 Alpha
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1148,13 +1145,10 @@ Show votes window after voting
 Show kill messages
 == 
 
-Kill Messages
+Show freeze bars
 == 
 
-Kill Message Normal Color
-== 
-
-Kill Message Highlight Color
+Opacity of freeze bars inside freeze
 == 
 
 Laser Outline Color
@@ -1170,6 +1164,15 @@ No hit
 == 
 
 Tee
+== 
+
+Kill Messages
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Highlighted message
@@ -1284,6 +1287,9 @@ Emoticons
 == 
 
 Particles
+== 
+
+Extras
 == 
 
 Assets directory

@@ -1207,12 +1207,6 @@ Show client IDs
 Kill Messages
 == Повідомлення вбивств
 
-Kill Message Normal Color
-== Колір повідомлення вбивств
-
-Kill Message Highlight Color
-== Підсвічення повідомлення вбивств
-
 Laser Outline Color
 == Колір обводки лазеру
 
@@ -1417,13 +1411,10 @@ Graphics cards
 auto
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1433,6 +1424,18 @@ Show player speed
 == 
 
 Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1454,6 +1457,9 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Extras
 == 
 
 Tutorial
