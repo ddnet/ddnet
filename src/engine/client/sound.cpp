@@ -108,14 +108,13 @@ static int IntAbs(int i)
 
 static void Mix(short *pFinalOut, unsigned Frames)
 {
-	int MasterVol;
 	Frames = minimum(Frames, m_MaxFrames);
 	mem_zero(m_pMixBuffer, Frames * 2 * sizeof(int));
 
 	// acquire lock while we are mixing
 	m_SoundLock.lock();
 
-	MasterVol = m_SoundVolume;
+	int MasterVol = m_SoundVolume;
 
 	for(auto &Voice : m_aVoices)
 	{
@@ -394,16 +393,14 @@ int CSound::AllocID()
 void CSound::RateConvert(int SampleID)
 {
 	CSample *pSample = &m_aSamples[SampleID];
-	int NumFrames = 0;
-	short *pNewData = 0;
 
 	// make sure that we need to convert this sound
 	if(!pSample->m_pData || pSample->m_Rate == m_MixingRate)
 		return;
 
 	// allocate new data
-	NumFrames = (int)((pSample->m_NumFrames / (float)pSample->m_Rate) * m_MixingRate);
-	pNewData = (short *)calloc((size_t)NumFrames * pSample->m_Channels, sizeof(short));
+	int NumFrames = (int)((pSample->m_NumFrames / (float)pSample->m_Rate) * m_MixingRate);
+	short *pNewData = (short *)calloc((size_t)NumFrames * pSample->m_Channels, sizeof(short));
 
 	for(int i = 0; i < NumFrames; i++)
 	{
@@ -453,13 +450,9 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 
 		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
 
-		int Read;
 		int Pos = 0;
 		while(Pos < NumSamples)
-		{
-			Read = op_read(OpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
-			Pos += Read;
-		}
+			Pos += op_read(OpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
 
 		pSample->m_NumFrames = NumSamples; // ?
 		pSample->m_Rate = 48000;
@@ -523,7 +516,6 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 
 	CSample *pSample = &m_aSamples[SampleID];
 	char aError[100];
-	WavpackContext *pContext;
 
 	s_pWVBuffer = pData;
 	s_WVBufferSize = DataSize;
@@ -536,9 +528,9 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	Callback.get_pos = GetPos;
 	Callback.push_back_byte = PushBackByte;
 	Callback.read_bytes = ReadData;
-	pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
+	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
 #else
-	pContext = WavpackOpenFileInput(ReadDataOld, aError);
+	WavpackContext *pContext = WavpackOpenFileInput(ReadDataOld, aError);
 #endif
 	if(pContext)
 	{
@@ -546,9 +538,6 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 		int BitsPerSample = WavpackGetBitsPerSample(pContext);
 		unsigned int SampleRate = WavpackGetSampleRate(pContext);
 		int NumChannels = WavpackGetNumChannels(pContext);
-		int *pSrc;
-		short *pDst;
-		int i;
 
 		pSample->m_Channels = NumChannels;
 		pSample->m_Rate = SampleRate;
@@ -567,12 +556,12 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 
 		int *pBuffer = (int *)calloc((size_t)NumSamples * NumChannels, sizeof(int));
 		WavpackUnpackSamples(pContext, pBuffer, NumSamples); // TODO: check return value
-		pSrc = pBuffer;
+		int *pSrc = pBuffer;
 
 		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
-		pDst = pSample->m_pData;
+		short *pDst = pSample->m_pData;
 
-		for(i = 0; i < NumSamples * NumChannels; i++)
+		for(int i = 0; i < NumSamples * NumChannels; i++)
 			*pDst++ = (short)*pSrc++;
 
 		free(pBuffer);
@@ -869,14 +858,11 @@ void CSound::SetChannel(int ChannelID, float Vol, float Pan)
 
 ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 {
-	int VoiceID = -1;
-	int Age = -1;
-	int i;
-
 	m_SoundLock.lock();
 
 	// search for voice
-	for(i = 0; i < NUM_VOICES; i++)
+	int VoiceID = -1;
+	for(int i = 0; i < NUM_VOICES; i++)
 	{
 		int id = (m_NextVoice + i) % NUM_VOICES;
 		if(!m_aVoices[id].m_pSample)
@@ -888,6 +874,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 	}
 
 	// voice found, use it
+	int Age = -1;
 	if(VoiceID != -1)
 	{
 		m_aVoices[VoiceID].m_pSample = &m_aSamples[SampleID];
