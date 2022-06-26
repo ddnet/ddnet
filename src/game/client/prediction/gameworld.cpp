@@ -559,9 +559,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	// delete the previous entities
-	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		while(pFirstEntityType)
-			delete pFirstEntityType;
+	Clear();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_apCharacters[i] = 0;
