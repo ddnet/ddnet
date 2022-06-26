@@ -16,14 +16,9 @@ class CSound : public IEngineSound
 	bool m_SoundEnabled;
 	SDL_AudioDeviceID m_Device;
 
-public:
 	IEngineGraphics *m_pGraphics;
 	IStorage *m_pStorage;
 
-	int Init() override;
-
-	int Update() override;
-	int Shutdown() override;
 	int AllocID();
 
 	static void RateConvert(int SampleID);
@@ -31,6 +26,11 @@ public:
 	// TODO: Refactor: clean this mess up
 	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
+
+public:
+	int Init() override;
+	int Update() override;
+	int Shutdown() override;
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
