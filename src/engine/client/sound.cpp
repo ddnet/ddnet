@@ -277,7 +277,7 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 
 int CSound::Init()
 {
-	m_SoundEnabled = 0;
+	m_SoundEnabled = false;
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
@@ -321,7 +321,7 @@ int CSound::Init()
 
 	SDL_PauseAudioDevice(m_Device, 0);
 
-	m_SoundEnabled = 1;
+	m_SoundEnabled = true;
 	Update(); // update the volume
 	return 0;
 }

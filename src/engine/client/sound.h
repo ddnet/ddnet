@@ -13,7 +13,7 @@ class IStorage;
 
 class CSound : public IEngineSound
 {
-	int m_SoundEnabled;
+	bool m_SoundEnabled;
 	SDL_AudioDeviceID m_Device;
 
 public:
@@ -32,7 +32,7 @@ public:
 	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
 
-	bool IsSoundEnabled() override { return m_SoundEnabled != 0; }
+	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
 	int LoadWV(const char *pFilename) override;
 	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
