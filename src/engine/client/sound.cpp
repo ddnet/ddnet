@@ -966,10 +966,8 @@ void CSound::StopVoice(CVoiceHandle Voice)
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
-	{
-		m_aVoices[VoiceID].m_pSample = 0;
-		m_aVoices[VoiceID].m_Age++;
-	}
+	m_aVoices[VoiceID].m_pSample = 0;
+	m_aVoices[VoiceID].m_Age++;
 }
 
 bool CSound::IsPlaying(int SampleID)
