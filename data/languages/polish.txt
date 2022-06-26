@@ -1203,27 +1203,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == Formatem tekstury %s nie jest RGBA, co może spowodować błędy wizualne.
 
-Position:
-== 
-
-Speed:
-== 
-
-Angle:
-== 
-
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == Czy na pewno chcesz się rozłączyć i przełączyć na inny serwer?
 
@@ -1272,70 +1251,11 @@ Config directory
 Toggle to edit your dummy settings
 == Przełącz aby edytować ustawienia kukły
 
-Download community skins
-== 
-
 Choose default eyes when joining a server
 == Wybierz domyślne oczy, podczas dołączenia do serwera
 
 Chat command
 == Komenda czatu
-
-Enable controller
-== 
-
-Controller %d: %s
-== 
-
-Click to cycle through all available controllers.
-== 
-
-[Ingame controller mode]
-Relative
-== 
-
-[Ingame controller mode]
-Absolute
-== 
-
-Ingame controller mode
-== 
-
-Ingame controller sens.
-== 
-
-UI controller sens.
-== 
-
-Controller jitter tolerance
-== 
-
-No controller found. Plug in a controller and restart the game.
-== 
-
-Device
-== 
-
-Status
-== 
-
-Aim bind
-== 
-
-Controller Axis #%d
-== 
-
-Mouse
-== 
-
-Ingame mouse sens.
-== 
-
-UI mouse sens.
-== 
-
-Controller
-== 
 
 Dummy
 == Kukła
@@ -1370,35 +1290,11 @@ Graphics cards
 auto
 == automatyczny
 
-Use DDRace HUD
-== 
-
-Show dummy actions
-== 
-
-Show freeze bars
-== 
-
 Show client IDs
 == Pokazuj ID klientów
 
-Show player position
-== 
-
-Show player speed
-== 
-
-Show player target angle
-== 
-
 Kill Messages
 == Wiadomości o zabiciu
-
-Kill Message Normal Color
-== Kolor normalnej wiadomości o zabiciu
-
-Kill Message Highlight Color
-== Kolor wyróżnionej wiadomości o zabiciu
 
 Laser Outline Color
 == Zewnętrzny kolor lasera
@@ -1471,3 +1367,113 @@ Super
 
 Team %d
 == Drużyna %d
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Download community skins
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Show dummy actions
+== 
+
+Show jump indicator
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 

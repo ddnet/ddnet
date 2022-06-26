@@ -1141,16 +1141,13 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == 
 
-Use DDRace HUD
-== 
-
 Use DDRace Scoreboard
 == 
 
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show client IDs
@@ -1180,13 +1177,10 @@ Show votes window after voting
 Show kill messages
 == 
 
-Kill Messages
+Show freeze bars
 == 
 
-Kill Message Normal Color
-== 
-
-Kill Message Highlight Color
+Opacity of freeze bars inside freeze
 == 
 
 Laser Outline Color
@@ -1208,6 +1202,15 @@ Hookable
 == 
 
 Tee
+== 
+
+Kill Messages
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Use old chat style
@@ -1358,6 +1361,9 @@ Emoticons
 == 
 
 Particles
+== 
+
+Extras
 == 
 
 Assets directory

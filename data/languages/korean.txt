@@ -1027,12 +1027,6 @@ Show kill messages
 Kill Messages
 == 킬 메시지
 
-Kill Message Normal Color
-== 다른 플레이어 킬 메시지 색상
-
-Kill Message Highlight Color
-== 플레이어 킬 메시지 색상
-
 Laser Outline Color
 == 레이저 테두리 색상
 
@@ -1456,9 +1450,6 @@ UI mouse sens.
 Controller
 == 컨트롤러
 
-Use DDRace HUD
-== DDRace HUD 사용
-
 Show dummy actions
 == 더미 동작 표시
 
@@ -1473,3 +1464,18 @@ Show player speed
 
 Show player target angle
 == 플레이어 조준 각도 표시
+
+Show jump indicator
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 

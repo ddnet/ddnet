@@ -1363,13 +1363,10 @@ Enable long pain sound (used when shooting in freeze)
 Assets
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1381,13 +1378,19 @@ Show player speed
 Show player target angle
 == 
 
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
 Kill Messages
 == 
 
-Kill Message Normal Color
+Normal Color
 == 
 
-Kill Message Highlight Color
+Highlight Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1439,6 +1442,9 @@ Entities
 == 
 
 Particles
+== 
+
+Extras
 == 
 
 Assets directory

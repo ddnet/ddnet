@@ -1279,13 +1279,10 @@ Threaded sound loading
 Assets
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show client IDs
@@ -1300,13 +1297,10 @@ Show player speed
 Show player target angle
 == 
 
-Kill Messages
+Show freeze bars
 == 
 
-Kill Message Normal Color
-== 
-
-Kill Message Highlight Color
+Opacity of freeze bars inside freeze
 == 
 
 Laser Outline Color
@@ -1322,6 +1316,15 @@ No hit
 == 
 
 Hookable
+== 
+
+Kill Messages
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Client message
@@ -1397,6 +1400,9 @@ Entities
 == 
 
 Emoticons
+== 
+
+Extras
 == 
 
 Assets directory

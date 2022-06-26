@@ -1299,12 +1299,6 @@ Refreshing...
 Kill Messages
 == Mensajes de Muerte
 
-Kill Message Normal Color
-== Color Normal de Mensajes de Muerte
-
-Kill Message Highlight Color
-== Color Destac. de Mensajes de Muerte
-
 Show local player's key presses
 == Mostrar las teclas presionadas por el jugador local
 
@@ -1460,9 +1454,6 @@ UI mouse sens.
 Controller
 == Mando
 
-Use DDRace HUD
-== Usar el HUD DDRace
-
 Show dummy actions
 == Mostrar acciones del dummy
 
@@ -1480,3 +1471,18 @@ Show player target angle
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
+
+Show jump indicator
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 
