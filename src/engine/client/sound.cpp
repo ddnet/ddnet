@@ -288,7 +288,7 @@ int CSound::Init()
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
 	{
-		dbg_msg("gfx", "unable to init SDL audio: %s", SDL_GetError());
+		dbg_msg("client/sound", "unable to init SDL audio: %s", SDL_GetError());
 		return -1;
 	}
 
