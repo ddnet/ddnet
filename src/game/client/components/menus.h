@@ -492,6 +492,8 @@ protected:
 	//void render_loading(float percent);
 	int RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
+	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	void UpdateMusicState();
 
 	// found in menus_demo.cpp
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);

@@ -1775,13 +1775,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndEnable, Localize("Use sounds"), g_Config.m_SndEnable, &Button))
 	{
 		g_Config.m_SndEnable ^= 1;
-		if(g_Config.m_SndEnable)
-		{
-			if(g_Config.m_SndMusic && Client()->State() == IClient::STATE_OFFLINE)
-				m_pClient->m_Sounds.Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
-		}
-		else
-			m_pClient->m_Sounds.Stop(SOUND_MENU);
+		UpdateMusicState();
 		m_NeedRestartSound = g_Config.m_SndEnable && (!s_SndEnable || s_SndRate != g_Config.m_SndRate);
 	}
 
@@ -1792,13 +1786,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndMusic, Localize("Play background music"), g_Config.m_SndMusic, &Button))
 	{
 		g_Config.m_SndMusic ^= 1;
-		if(Client()->State() == IClient::STATE_OFFLINE)
-		{
-			if(g_Config.m_SndMusic)
-				m_pClient->m_Sounds.Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
-			else
-				m_pClient->m_Sounds.Stop(SOUND_MENU);
-		}
+		UpdateMusicState();
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
