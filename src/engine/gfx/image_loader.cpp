@@ -26,8 +26,8 @@ static void LibPNGWarning(png_structp png_ptr, png_const_charp warning_msg)
 
 static bool FileMatchesImageType(SImageByteBuffer &ByteLoader)
 {
-	if(ByteLoader.m_pLoadedImageBytes->size() >= 8)
-		return png_sig_cmp((png_bytep)ByteLoader.m_pLoadedImageBytes->data(), 0, 8) == 0;
+	if(ByteLoader.m_pvLoadedImageBytes->size() >= 8)
+		return png_sig_cmp((png_bytep)ByteLoader.m_pvLoadedImageBytes->data(), 0, 8) == 0;
 	return false;
 }
 
@@ -37,9 +37,9 @@ static void ReadDataFromLoadedBytes(png_structp pPNGStruct, png_bytep pOutBytes,
 
 	SImageByteBuffer *pByteLoader = (SImageByteBuffer *)pIO_Ptr;
 
-	if(pByteLoader->m_pLoadedImageBytes->size() >= pByteLoader->m_LoadOffset + (size_t)ByteCountToRead)
+	if(pByteLoader->m_pvLoadedImageBytes->size() >= pByteLoader->m_LoadOffset + (size_t)ByteCountToRead)
 	{
-		mem_copy(pOutBytes, &(*pByteLoader->m_pLoadedImageBytes)[pByteLoader->m_LoadOffset], (size_t)ByteCountToRead);
+		mem_copy(pOutBytes, &(*pByteLoader->m_pvLoadedImageBytes)[pByteLoader->m_LoadOffset], (size_t)ByteCountToRead);
 
 		pByteLoader->m_LoadOffset += (size_t)ByteCountToRead;
 	}
@@ -254,9 +254,9 @@ static void WriteDataFromLoadedBytes(png_structp pPNGStruct, png_bytep pOutBytes
 		SImageByteBuffer *pByteLoader = (SImageByteBuffer *)pIO_Ptr;
 
 		size_t NewSize = pByteLoader->m_LoadOffset + (size_t)ByteCountToWrite;
-		pByteLoader->m_pLoadedImageBytes->resize(NewSize);
+		pByteLoader->m_pvLoadedImageBytes->resize(NewSize);
 
-		mem_copy(&(*pByteLoader->m_pLoadedImageBytes)[pByteLoader->m_LoadOffset], pOutBytes, (size_t)ByteCountToWrite);
+		mem_copy(&(*pByteLoader->m_pvLoadedImageBytes)[pByteLoader->m_LoadOffset], pOutBytes, (size_t)ByteCountToWrite);
 		pByteLoader->m_LoadOffset = NewSize;
 	}
 }
@@ -295,7 +295,7 @@ bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuff
 	}
 
 	WrittenBytes.m_LoadOffset = 0;
-	WrittenBytes.m_pLoadedImageBytes->clear();
+	WrittenBytes.m_pvLoadedImageBytes->clear();
 
 	png_set_write_fn(pPNGStruct, (png_bytep)&WrittenBytes, WriteDataFromLoadedBytes, FlushPNGWrite);
 

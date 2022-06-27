@@ -15,10 +15,10 @@ enum EImageFormat
 typedef std::vector<uint8_t> TImageByteBuffer;
 struct SImageByteBuffer
 {
-	SImageByteBuffer(TImageByteBuffer *pBuff) :
-		m_LoadOffset(0), m_pLoadedImageBytes(pBuff), m_Err(0) {}
+	SImageByteBuffer(std::vector<uint8_t> *pvBuff) :
+		m_LoadOffset(0), m_pvLoadedImageBytes(pvBuff), m_Err(0) {}
 	size_t m_LoadOffset;
-	TImageByteBuffer *m_pLoadedImageBytes;
+	std::vector<uint8_t> *m_pvLoadedImageBytes;
 	int m_Err;
 };
 
