@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <vector>
 
-#define CMD_BUFFER_DATA_BUFFER_SIZE 1024 * 1024 * 2
-#define CMD_BUFFER_CMD_BUFFER_SIZE 1024 * 256
+constexpr int CMD_BUFFER_DATA_BUFFER_SIZE = 1024 * 1024 * 2;
+constexpr int CMD_BUFFER_CMD_BUFFER_SIZE = 1024 * 256;
 
 class CCommandBuffer
 {
