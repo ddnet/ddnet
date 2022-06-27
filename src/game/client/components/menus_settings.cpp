@@ -2839,6 +2839,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		{
 			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection != 2 ? 2 : 1;
 		}
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesStrong, Localize("Show hook strength indicator"), &g_Config.m_ClNameplatesStrong, &MainView, LineMargin);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{
