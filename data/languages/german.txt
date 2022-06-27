@@ -1301,12 +1301,6 @@ Refreshing...
 Kill Messages
 == Kill-Nachrichten
 
-Kill Message Normal Color
-== Kill-Nachrichten Normale Farbe
-
-Kill Message Highlight Color
-== Kill-Nachrichten Hervorgehobene Farbe
-
 Show local player's key presses
 == Tastendrücke des eigenen Spielers anzeigen
 
@@ -1421,9 +1415,6 @@ Aim bind
 Mouse
 == Maus
 
-Use DDRace HUD
-== DDRace-HUD nutzen
-
 Show dummy actions
 == Dummy-Aktionen anzeigen
 
@@ -1482,3 +1473,18 @@ Controller Axis #%d
 
 Controller
 == Controller
+
+Show jump indicator
+== Sprung-Hinweis anzeigen
+
+Opacity of freeze bars inside freeze
+== Deckkraft der Einfrier-Balken beim Einfrieren
+
+Normal Color
+== Normale Farbe
+
+Highlight Color
+== Hervorgehobene Farbe
+
+Extras
+== Extras

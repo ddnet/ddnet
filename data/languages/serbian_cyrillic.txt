@@ -1360,13 +1360,10 @@ Chat sound volume
 Background music volume
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show client IDs
@@ -1381,13 +1378,10 @@ Show player speed
 Show player target angle
 == 
 
-Kill Messages
+Show freeze bars
 == 
 
-Kill Message Normal Color
-== 
-
-Kill Message Highlight Color
+Opacity of freeze bars inside freeze
 == 
 
 Laser Outline Color
@@ -1406,6 +1400,15 @@ Hookable
 == 
 
 Tee
+== 
+
+Kill Messages
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Use old chat style
@@ -1448,6 +1451,9 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Extras
 == 
 
 Discord

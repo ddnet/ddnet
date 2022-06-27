@@ -1176,12 +1176,6 @@ Show client IDs
 Kill Messages
 == Missatges al matar
 
-Kill Message Normal Color
-== Color del missatge normal al matar
-
-Kill Message Highlight Color
-== Color del missatge ressaltat al matar
-
 Laser Outline Color
 == Color exterior del làser
 
@@ -1422,13 +1416,10 @@ Controller
 Allows maps to render with more detail
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1438,6 +1429,18 @@ Show player speed
 == 
 
 Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1453,6 +1456,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+Extras
 == 
 
 Super

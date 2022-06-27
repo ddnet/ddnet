@@ -1252,12 +1252,6 @@ Show client IDs
 Kill Messages
 == Kill Berichten
 
-Kill Message Normal Color
-== Kill Berichten Normale Kleur
-
-Kill Message Highlight Color
-== Kill Berichten Uitgelichte Kleur
-
 Laser Outline Color
 == Laser Kleur Buitenzijde
 
@@ -1462,13 +1456,10 @@ UI mouse sens.
 Controller
 == 
 
-Use DDRace HUD
-== 
-
 Show dummy actions
 == 
 
-Show freeze bars
+Show jump indicator
 == 
 
 Show player position
@@ -1478,4 +1469,19 @@ Show player speed
 == 
 
 Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
 == 

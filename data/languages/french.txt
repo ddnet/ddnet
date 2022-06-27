@@ -1263,12 +1263,6 @@ Show client IDs
 Kill Messages
 == Messages d'élimination
 
-Kill Message Normal Color
-== Couleur normale des messages d'élimination
-
-Kill Message Highlight Color
-== Couleur de surbrillance des messages d'élimination
-
 Laser Outline Color
 == Couleur de la bordure du laser
 
@@ -1469,9 +1463,6 @@ UI mouse sens.
 Controller
 == Manette 
 
-Use DDRace HUD
-== Utiliser l'interface DDRace
-
 Show dummy actions
 == Afficher les actions du dummy
 
@@ -1486,3 +1477,18 @@ Show player speed
 
 Show player target angle
 == Afficher l'angle de visée
+
+Show jump indicator
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 
