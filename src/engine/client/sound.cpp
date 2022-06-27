@@ -264,14 +264,14 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 #if defined(CONF_VIDEORECORDER)
 	if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
 	{
-		Mix((short *)pStream, Len / sizeof(int16_t) / 2);
+		Mix((short *)pStream, Len / sizeof(short) / 2);
 	}
 	else
 	{
 		mem_zero(pStream, Len);
 	}
 #else
-	Mix((short *)pStream, Len / 2 / 2);
+	Mix((short *)pStream, Len / sizeof(short) / 2);
 #endif
 }
 
