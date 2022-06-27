@@ -930,16 +930,20 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 			dbg_msg("editor", "applying changes");
 			for(auto &pLayer : vpLayers)
 			{
-				pLayer->Resize(State.m_Width, State.m_Height);
+				if((State.m_Modified & SCommonPropState::MODIFIED_SIZE) != 0)
+					pLayer->Resize(State.m_Width, State.m_Height);
 
-				pLayer->m_Color.r = (State.m_Color >> 24) & 0xff;
-				pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
-				pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
-				pLayer->m_Color.a = State.m_Color & 0xff;
+				if((State.m_Modified & SCommonPropState::MODIFIED_COLOR) != 0)
+				{
+					pLayer->m_Color.r = (State.m_Color >> 24) & 0xff;
+					pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
+					pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
+					pLayer->m_Color.a = State.m_Color & 0xff;
+				}
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
 			}
-			State.m_Modified = false;
+			State.m_Modified = 0;
 		}
 	}
 	else
@@ -1021,10 +1025,10 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		State.m_Color = NewVal;
 	}
 
-	if(Prop != -1 && Prop != PROP_SHIFT)
-	{
-		State.m_Modified = true;
-	}
+	if(Prop == PROP_WIDTH || Prop == PROP_HEIGHT)
+		State.m_Modified |= SCommonPropState::MODIFIED_SIZE;
+	else if(Prop == PROP_COLOR)
+		State.m_Modified |= SCommonPropState::MODIFIED_COLOR;
 
 	return 0;
 }
