@@ -79,12 +79,12 @@ static void LibPNGDeleteReadStruct(png_structp pPNGStruct, png_infop pPNGInfo)
 	png_destroy_read_struct(&pPNGStruct, NULL, NULL);
 }
 
-static bool IsUnsupportedByPnglite(png_structp pPNGStruct, png_infop pPNGInfo)
+static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
 {
 	int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
 	int BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
 	int InterlaceType = png_get_interlace_type(pPNGStruct, pPNGInfo);
-	bool Unsupported = false;
+	int Result = 0;
 	switch(ColorType)
 	{
 	case PNG_COLOR_TYPE_GRAY:
@@ -93,8 +93,8 @@ static bool IsUnsupportedByPnglite(png_structp pPNGStruct, png_infop pPNGInfo)
 	case PNG_COLOR_TYPE_GRAY_ALPHA:
 		break;
 	default:
-		log_error("png", "color type %d unsupported by pnglite", ColorType);
-		Unsupported = true;
+		log_debug("png", "color type %d unsupported by pnglite", ColorType);
+		Result |= PNGLITE_COLOR_TYPE;
 	}
 
 	switch(BitDepth)
@@ -103,33 +103,29 @@ static bool IsUnsupportedByPnglite(png_structp pPNGStruct, png_infop pPNGInfo)
 	case 16:
 		break;
 	default:
-		log_error("png", "bit depth %d unsupported by pnglite", BitDepth);
-		Unsupported = true;
+		log_debug("png", "bit depth %d unsupported by pnglite", BitDepth);
+		Result |= PNGLITE_BIT_DEPTH;
 	}
 
-	switch(InterlaceType)
+	if(InterlaceType != PNG_INTERLACE_NONE)
 	{
-	case PNG_INTERLACE_NONE:
-		break;
-	default:
-		log_error("png", "interlace type %d unsupported by pnglite", InterlaceType);
-		Unsupported = true;
+		log_debug("png", "interlace type %d unsupported by pnglite", InterlaceType);
+		Result |= PNGLITE_INTERLACE_TYPE;
 	}
-
-	if(png_get_compression_type(pPNGStruct, pPNGInfo) != PNG_COMPRESSION_TYPE_BASE || png_get_filter_type(pPNGStruct, pPNGInfo) != PNG_FILTER_TYPE_BASE)
+	if(png_get_compression_type(pPNGStruct, pPNGInfo) != PNG_COMPRESSION_TYPE_BASE)
 	{
-		log_error("png", "non-default compression type or non-default filter type unsupported by pnglite");
-		Unsupported = true;
+		log_debug("png", "non-default compression type unsupported by pnglite");
+		Result |= PNGLITE_COMPRESSION_TYPE;
 	}
-
-	if(Unsupported)
+	if(png_get_filter_type(pPNGStruct, pPNGInfo) != PNG_FILTER_TYPE_BASE)
 	{
-		log_error("png", "refusing to load PNG because it would be unsupported by pnglite");
+		log_debug("png", "non-default filter type unsupported by pnglite");
+		Result |= PNGLITE_FILTER_TYPE;
 	}
-	return Unsupported;
+	return Result;
 }
 
-bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
+bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
 {
 	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
@@ -175,8 +171,9 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, in
 	Height = png_get_image_height(pPNGStruct, pPNGInfo);
 	int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
 	png_byte BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
+	PngliteIncompatible = PngliteIncompatibility(pPNGStruct, pPNGInfo);
 
-	bool PNGErr = IsUnsupportedByPnglite(pPNGStruct, pPNGInfo);
+	bool PNGErr = false;
 
 	if(BitDepth == 16)
 	{

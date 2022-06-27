@@ -251,6 +251,7 @@ public:
 	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
 	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
+	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;

@@ -22,7 +22,16 @@ struct SImageByteBuffer
 	int m_Err;
 };
 
-bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
+enum
+{
+	PNGLITE_COLOR_TYPE = 1 << 0,
+	PNGLITE_BIT_DEPTH = 1 << 1,
+	PNGLITE_INTERLACE_TYPE = 1 << 2,
+	PNGLITE_COMPRESSION_TYPE = 1 << 3,
+	PNGLITE_FILTER_TYPE = 1 << 4,
+};
+
+bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
 bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height);
 
 #endif // ENGINE_GFX_IMAGE_LOADER_H

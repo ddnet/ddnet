@@ -26,7 +26,8 @@ int DilateFile(const char *pFilename)
 
 		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
-		if(LoadPNG(ImageByteBuffer, pFilename, Img.m_Width, Img.m_Height, pImgBuffer, ImageFormat))
+		int PngliteIncompatible;
+		if(LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, Img.m_Width, Img.m_Height, pImgBuffer, ImageFormat))
 		{
 			if(ImageFormat != IMAGE_FORMAT_RGBA)
 			{
