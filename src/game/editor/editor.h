@@ -586,10 +586,10 @@ public:
 
 	struct SCommonPropState
 	{
-		bool Modified = false;
-		int Width = -1;
-		int Height = -1;
-		int Color = 0;
+		bool m_Modified = false;
+		int m_Width = -1;
+		int m_Height = -1;
+		int m_Color = 0;
 	};
 	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
 

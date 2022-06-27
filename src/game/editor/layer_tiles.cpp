@@ -920,7 +920,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers)
 {
-	if(State.Modified)
+	if(State.m_Modified)
 	{
 		CUIRect Commit;
 		pToolbox->HSplitBottom(20.0f, pToolbox, &Commit);
@@ -930,26 +930,26 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 			dbg_msg("editor", "applying changes");
 			for(auto &pLayer : vpLayers)
 			{
-				pLayer->Resize(State.Width, State.Height);
+				pLayer->Resize(State.m_Width, State.m_Height);
 
-				pLayer->m_Color.r = (State.Color >> 24) & 0xff;
-				pLayer->m_Color.g = (State.Color >> 16) & 0xff;
-				pLayer->m_Color.b = (State.Color >> 8) & 0xff;
-				pLayer->m_Color.a = State.Color & 0xff;
+				pLayer->m_Color.r = (State.m_Color >> 24) & 0xff;
+				pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
+				pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
+				pLayer->m_Color.a = State.m_Color & 0xff;
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
 			}
-			State.Modified = false;
+			State.m_Modified = false;
 		}
 	}
 	else
 	{
 		for(auto &pLayer : vpLayers)
 		{
-			if(pLayer->m_Width > State.Width)
-				State.Width = pLayer->m_Width;
-			if(pLayer->m_Height > State.Height)
-				State.Height = pLayer->m_Height;
+			if(pLayer->m_Width > State.m_Width)
+				State.m_Width = pLayer->m_Width;
+			if(pLayer->m_Height > State.m_Height)
+				State.m_Height = pLayer->m_Height;
 		}
 	}
 
@@ -977,11 +977,11 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 	};
 
 	CProperty aProps[] = {
-		{"Width", State.Width, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Height", State.Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Width", State.m_Width, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Height", State.m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
 		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Color", State.Color, PROPTYPE_COLOR, 0, 0},
+		{"Color", State.m_Color, PROPTYPE_COLOR, 0, 0},
 		{nullptr},
 	};
 
@@ -997,7 +997,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 			pEditor->m_PopupEventActivated = true;
 			pEditor->m_LargeLayerWasWarned = true;
 		}
-		State.Width = NewVal;
+		State.m_Width = NewVal;
 	}
 	else if(Prop == PROP_HEIGHT && NewVal > 1)
 	{
@@ -1007,7 +1007,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 			pEditor->m_PopupEventActivated = true;
 			pEditor->m_LargeLayerWasWarned = true;
 		}
-		State.Height = NewVal;
+		State.m_Height = NewVal;
 	}
 	else if(Prop == PROP_SHIFT)
 	{
@@ -1018,12 +1018,12 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		pEditor->m_ShiftBy = NewVal;
 	else if(Prop == PROP_COLOR)
 	{
-		State.Color = NewVal;
+		State.m_Color = NewVal;
 	}
 
 	if(Prop != -1 && Prop != PROP_SHIFT)
 	{
-		State.Modified = true;
+		State.m_Modified = true;
 	}
 
 	return 0;
