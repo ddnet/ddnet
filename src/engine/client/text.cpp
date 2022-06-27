@@ -84,7 +84,7 @@ struct CFontSizeData
 
 #define MIN_FONT_SIZE 6
 #define MAX_FONT_SIZE 128
-#define NUM_FONT_SIZES MAX_FONT_SIZE - MIN_FONT_SIZE + 1
+#define NUM_FONT_SIZES (MAX_FONT_SIZE - MIN_FONT_SIZE + 1)
 
 class CFont
 {

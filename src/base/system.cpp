@@ -385,8 +385,8 @@ int io_sync(IOHANDLE io)
 #endif
 }
 
-#define ASYNC_BUFSIZE 8 * 1024
-#define ASYNC_LOCAL_BUFSIZE 64 * 1024
+#define ASYNC_BUFSIZE (8 * 1024)
+#define ASYNC_LOCAL_BUFSIZE (64 * 1024)
 
 // TODO: Use Thread Safety Analysis when this file is converted to C++
 struct ASYNCIO
