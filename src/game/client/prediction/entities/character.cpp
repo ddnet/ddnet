@@ -123,7 +123,7 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius), 0.f);
+		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius));
 
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);
@@ -942,7 +942,7 @@ void CCharacter::HandleTuneLayer()
 
 	if(m_IsLocal)
 		m_Core.m_pWorld->m_Tuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
-	m_Core.m_Tuning = *GetTuning(m_TuneZone);
+	m_Core.m_pMaterial->At(MAT_DEFAULT) = *GetTuning(m_TuneZone);
 }
 
 void CCharacter::DDRaceTick()

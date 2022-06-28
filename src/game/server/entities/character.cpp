@@ -228,7 +228,9 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f);
+		vec2 GroundElasticity;
+
+		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()));
 
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);
@@ -1176,7 +1178,8 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
 	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
-	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, m_Core.m_Tuning.m_VelrampStart, m_Core.m_Tuning.m_VelrampRange, m_Core.m_Tuning.m_VelrampCurvature) * 1000.0f);
+	CMatDefault &DefaultMaterial = m_Core.m_pMaterial->At(MAT_DEFAULT);
+	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, DefaultMaterial.m_VelrampStart, DefaultMaterial.m_VelrampRange, DefaultMaterial.m_VelrampCurvature) * 1000.0f);
 }
 
 // DDRace
@@ -2001,9 +2004,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Tuning = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_pMaterial->At(MAT_DEFAULT) = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Tuning = *GameServer()->Tuning();
+		m_Core.m_pMaterial->At(MAT_DEFAULT) = *GameServer()->Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{

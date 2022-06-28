@@ -475,6 +475,7 @@ void CMapLayers::OnMapLoad()
 			bool IsTeleLayer = false;
 			bool IsSpeedupLayer = false;
 			bool IsTuneLayer = false;
+			bool IsMaterialLayer = false;
 			bool IsGameLayer = false;
 			bool IsEntityLayer = false;
 
@@ -499,6 +500,9 @@ void CMapLayers::OnMapLoad()
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
+
+			if(pLayer == (CMapItemLayer *)m_pLayers->MaterialLayer())
+				IsEntityLayer = IsMaterialLayer = true;
 
 			if(m_Type <= TYPE_BACKGROUND_FORCE)
 			{
@@ -553,6 +557,11 @@ void CMapLayers::OnMapLoad()
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
+				}
+				else if(IsMaterialLayer)
+				{
+					DataIndex = pTMap->m_Material;
+					TileSize = sizeof(CMaterialTile);
 				}
 				else
 				{
@@ -673,6 +682,11 @@ void CMapLayers::OnMapLoad()
 									if(IsTuneLayer)
 									{
 										Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+										Flags = 0;
+									}
+									if(IsMaterialLayer)
+									{
+										Index = ((CMaterialTile *)pTiles)[y * pTMap->m_Width + x].m_Material;
 										Flags = 0;
 									}
 								}
@@ -1440,6 +1454,7 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 		bool IsTeleLayer = false;
 		bool IsSpeedupLayer = false;
 		bool IsTuneLayer = false;
+		bool IsMaterialLayer = false;
 
 		if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
 		{
@@ -1460,6 +1475,9 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 
 		if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 			IsTuneLayer = true;
+
+		if(pLayer == (CMapItemLayer *)m_pLayers->MaterialLayer())
+			IsMaterialLayer = true;
 
 		if(m_Type <= TYPE_BACKGROUND_FORCE)
 		{
@@ -1506,6 +1524,12 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 			{
 				DataIndex = pTMap->m_Tune;
 				TileSize = sizeof(CTuneTile);
+				TileLayerAndOverlayCount = 1;
+			}
+			else if(IsMaterialLayer)
+			{
+				DataIndex = pTMap->m_Material;
+				TileSize = sizeof(CMaterialTile);
 				TileLayerAndOverlayCount = 1;
 			}
 			else
@@ -1596,6 +1620,7 @@ void CMapLayers::OnRender()
 			bool IsTeleLayer = false;
 			bool IsSpeedupLayer = false;
 			bool IsTuneLayer = false;
+			bool IsMaterialLayer = false;
 			bool IsEntityLayer = false;
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
@@ -1618,6 +1643,9 @@ void CMapLayers::OnRender()
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
+
+			if(pLayer == (CMapItemLayer *)m_pLayers->MaterialLayer())
+				IsEntityLayer = IsMaterialLayer = true;
 
 			if(m_Type == -1)
 				Render = true;
@@ -1701,6 +1729,12 @@ void CMapLayers::OnRender()
 					TileSize = sizeof(CTuneTile);
 					TileLayerAndOverlayCount = 1;
 				}
+				else if(IsMaterialLayer)
+				{
+					DataIndex = pTMap->m_Material;
+					TileSize = sizeof(CMaterialTile);
+					TileLayerAndOverlayCount = 1;
+				}
 				else
 				{
 					DataIndex = pTMap->m_Data;
@@ -1727,7 +1761,7 @@ void CMapLayers::OnRender()
 			if(m_Type == TYPE_FULL_DESIGN)
 				EntityOverlayVal = 0;
 
-			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
+			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer && !IsMaterialLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
 			{
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
@@ -1982,6 +2016,32 @@ void CMapLayers::OnRender()
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
 						//RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, EntityOverlayVal/100.0f);
+					}
+					else
+					{
+						Graphics()->BlendNormal();
+						RenderTileLayer(TileLayerCounter - 1, &Color, pTMap, pGroup);
+					}
+				}
+			}
+			else if(Render && EntityOverlayVal && IsMaterialLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_MATERIAL));
+
+				CMaterialTile *pMaterialTiles = (CMaterialTile *)m_pLayers->Map()->GetData(pTMap->m_Material);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Material);
+
+				if(Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CMaterialTile))
+				{
+					ColorRGBA Color = ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f * EntityOverlayVal / 100.0f);
+					if(!Graphics()->IsTileBufferingEnabled())
+					{
+						Graphics()->TextureSet(m_pImages->GetMaterialOverlay());
+						Graphics()->BlendNone();
+						RenderTools()->RenderMaterialmap(pMaterialTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
+						Graphics()->BlendNormal();
+						RenderTools()->RenderMaterialmap(pMaterialTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
 					}
 					else
 					{

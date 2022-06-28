@@ -49,6 +49,7 @@ CCollision::CCollision()
 	m_pSwitch = 0;
 	m_pDoor = 0;
 	m_pTune = 0;
+	m_pMaterial = 0;
 }
 
 CCollision::~CCollision()
@@ -98,6 +99,13 @@ void CCollision::Init(class CLayers *pLayers)
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->TuneLayer()->m_Tune);
 		if(Size >= (size_t)m_Width * m_Height * sizeof(CTuneTile))
 			m_pTune = static_cast<CTuneTile *>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
+	}
+
+	if(m_pLayers->MaterialLayer())
+	{
+		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->MaterialLayer()->m_Material);
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CMaterialTile))
+			m_pMaterial = static_cast<CMaterialTile *>(m_pLayers->Map()->GetData(m_pLayers->MaterialLayer()->m_Material));
 	}
 
 	if(m_pLayers->FrontLayer())
@@ -475,7 +483,37 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size) const
 	return false;
 }
 
-void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity) const
+void CCollision::TestElasticity(vec2 Pos, vec2 Size, vec2 *pElasticityX, vec2 *pElasticityY) const
+{
+	Size *= 0.5f; // same as TestBox
+	int MaterialTL = GetMaterial(round_to_int(Pos.x - Size.x), round_to_int(Pos.y - Size.y));
+	int MaterialTR = GetMaterial(round_to_int(Pos.x + Size.x), round_to_int(Pos.y - Size.y));
+	int MaterialBL = GetMaterial(round_to_int(Pos.x - Size.x), round_to_int(Pos.y + Size.y));
+	int MaterialBR = GetMaterial(round_to_int(Pos.x + Size.x), round_to_int(Pos.y + Size.y));
+	bool IsGroundTL = CheckPoint(Pos.x - Size.x, Pos.y - Size.y);
+	bool IsGroundTR = CheckPoint(Pos.x + Size.x, Pos.y - Size.y);
+	bool IsGroundBL = CheckPoint(Pos.x - Size.x, Pos.y + Size.y);
+	bool IsGroundBR = CheckPoint(Pos.x + Size.x, Pos.y + Size.y);
+
+	if(pElasticityY)
+	{
+		float OffsetX = fmodf(Pos.x, 32.0f) / 32.0f;
+		// top
+		(*pElasticityY).x = CMaterials::GetInstance()->GetElasticityY(IsGroundTL, IsGroundTR, MaterialTL, MaterialTR, OffsetX);
+		// bottom
+		(*pElasticityY).y = CMaterials::GetInstance()->GetElasticityY(IsGroundBL, IsGroundBR, MaterialBL, MaterialBR, OffsetX);
+	}
+	if(pElasticityX)
+	{
+		float OffsetY = fmodf(Pos.y, 32.0f) / 32.0f;
+		// right
+		(*pElasticityX).x = CMaterials::GetInstance()->GetElasticityX(IsGroundTR, IsGroundBR, MaterialTR, MaterialBR, OffsetY);
+		// left
+		(*pElasticityX).y = CMaterials::GetInstance()->GetElasticityX(IsGroundTL, IsGroundBL, MaterialTL, MaterialBL, OffsetY);
+	}
+}
+
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size) const
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -487,6 +525,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 	if(Distance > 0.00001f)
 	{
 		float Fraction = 1.0f / (float)(Max + 1);
+
 		for(int i = 0; i <= Max; i++)
 		{
 			// Early break as optimization to stop checking for collisions for
@@ -509,18 +548,20 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
 			{
 				int Hits = 0;
+				vec2 ElasticityY, ElasticityX;
+				TestElasticity(NewPos, Size, &ElasticityX, &ElasticityY);
 
 				if(TestBox(vec2(Pos.x, NewPos.y), Size))
 				{
 					NewPos.y = Pos.y;
-					Vel.y *= -Elasticity;
+					Vel.y *= Vel.y > 0 ? -ElasticityY.y : -ElasticityY.x;
 					Hits++;
 				}
 
 				if(TestBox(vec2(NewPos.x, Pos.y), Size))
 				{
 					NewPos.x = Pos.x;
-					Vel.x *= -Elasticity;
+					Vel.x *= Vel.x > 0 ? -ElasticityX.x : -ElasticityX.y;
 					Hits++;
 				}
 
@@ -529,9 +570,9 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 				if(Hits == 0)
 				{
 					NewPos.y = Pos.y;
-					Vel.y *= -Elasticity;
+					Vel.y *= Vel.y > 0 ? -ElasticityY.x : -ElasticityY.y;
 					NewPos.x = Pos.x;
-					Vel.x *= -Elasticity;
+					Vel.x *= Vel.x > 0 ? -ElasticityX.x : -ElasticityX.y;
 				}
 			}
 
@@ -557,6 +598,7 @@ void CCollision::Dest()
 	m_pFront = 0;
 	m_pSwitch = 0;
 	m_pTune = 0;
+	m_pMaterial = 0;
 	m_pDoor = 0;
 }
 
@@ -776,6 +818,18 @@ int CCollision::IsMover(int x, int y, int *pFlags) const
 		return 0;
 }
 
+int CCollision::GetMaterial(int x, int y) const
+{
+	if(!m_pMaterial)
+		return 0;
+	int Nx = clamp(x / 32, 0, m_Width - 1);
+	int Ny = clamp(y / 32, 0, m_Height - 1);
+	int Material = m_pMaterial[Ny * m_Width + Nx].m_Material;
+	if(Material <= 0)
+		return 0;
+	return Material;
+}
+
 vec2 CCollision::CpSpeed(int Index, int Flags) const
 {
 	if(Index < 0)
@@ -834,6 +888,8 @@ bool CCollision::TileExists(int Index) const
 	if(m_pSwitch && m_pSwitch[Index].m_Type)
 		return true;
 	if(m_pTune && m_pTune[Index].m_Type)
+		return true;
+	if(m_pMaterial && m_pMaterial[Index].m_Material)
 		return true;
 	return TileExistsNext(Index);
 }
@@ -1062,6 +1118,9 @@ int CCollision::Entity(int x, int y, int Layer) const
 		case LAYER_TUNE:
 			str_format(aBuf, sizeof(aBuf), "Tune");
 			break;
+		case LAYER_MATERIAL:
+			str_format(aBuf, sizeof(aBuf), "Material");
+			break;
 		default:
 			str_format(aBuf, sizeof(aBuf), "Unknown");
 		}
@@ -1082,6 +1141,8 @@ int CCollision::Entity(int x, int y, int Layer) const
 		return m_pSpeedup[y * m_Width + x].m_Type - ENTITY_OFFSET;
 	case LAYER_TUNE:
 		return m_pTune[y * m_Width + x].m_Type - ENTITY_OFFSET;
+	case LAYER_MATERIAL:
+		return m_pMaterial[y * m_Width + x].m_Material - ENTITY_OFFSET;
 	default:
 		return 0;
 		break;

@@ -519,7 +519,7 @@ void CGameClient::OnReset()
 	m_LastRoundStartTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
-	m_Tuning[g_Config.m_ClDummy] = CTuningParams();
+	m_Tuning[g_Config.m_ClDummy] = CMatDefault();
 
 	m_Teams.Reset();
 	m_DDRaceMsgSent[0] = false;
@@ -690,11 +690,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	if(MsgId == NETMSGTYPE_SV_TUNEPARAMS)
 	{
 		// unpack the new tuning
-		CTuningParams NewTuning;
+		CMatDefault NewTuning;
 		int *pParams = (int *)&NewTuning;
 		// No jetpack on DDNet incompatible servers:
 		NewTuning.m_JetpackStrength = 0;
-		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
+		for(unsigned i = 0; i < sizeof(CMatDefault) / sizeof(int); i++)
 		{
 			int value = pUnpacker->GetInt();
 
@@ -1608,7 +1608,7 @@ void CGameClient::OnNewSnapshot()
 
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
-	CTuningParams StandardTuning;
+	CMatDefault StandardTuning;
 	if(CurrentServerInfo.m_aGameType[0] != '0')
 	{
 		if(str_comp(CurrentServerInfo.m_aGameType, "DM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "TDM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "CTF") != 0)
@@ -1627,7 +1627,7 @@ void CGameClient::OnNewSnapshot()
 			AnyRecording = true;
 			break;
 		}
-	if(AnyRecording && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CTuningParams)) != 0)
+	if(AnyRecording && mem_comp(&StandardTuning, &m_Tuning[g_Config.m_ClDummy], sizeof(CMatDefault)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning[g_Config.m_ClDummy];
@@ -3188,7 +3188,7 @@ void CGameClient::RefindSkins()
 void CGameClient::LoadMapSettings()
 {
 	// Reset Tunezones
-	CTuningParams TuningParams;
+	CMatDefault TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;

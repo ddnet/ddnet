@@ -178,9 +178,22 @@ enum
 	TILE_CREDITS_6 = 157,
 	TILE_CREDITS_7 = 158,
 	TILE_CREDITS_8 = 159,
+	TILE_MATERIAL_PLACEHOLDER1 = 160, //all in between are reserved, too!
+	TILE_MATERIAL_PLACEHOLDER16 = 175,
 	TILE_ENTITIES_OFF_1 = 190,
 	TILE_ENTITIES_OFF_2,
 	//End of higher tiles
+	//Start From Top Left
+	//Material Controllers
+	MAT_DEFAULT = 0, //Note: default is not air
+	MAT_SLIME = 16,
+	MAT_SLIME_V,
+	MAT_SLIME_H,
+	MAT_SLIME_WEAK,
+	MAT_SLIME_WEAK_V,
+	MAT_SLIME_WEAK_H,
+	NUM_MATERIALS,
+	//End of materials
 	//Layers
 	LAYER_GAME = 0,
 	LAYER_FRONT,
@@ -188,6 +201,7 @@ enum
 	LAYER_SPEEDUP,
 	LAYER_SWITCH,
 	LAYER_TUNE,
+	LAYER_MATERIAL,
 	NUM_LAYERS,
 	//Flags
 	TILEFLAG_VFLIP = 1,
@@ -207,6 +221,7 @@ enum
 	TILESLAYERFLAG_FRONT = 8,
 	TILESLAYERFLAG_SWITCH = 16,
 	TILESLAYERFLAG_TUNE = 32,
+	TILESLAYERFLAG_MATERIAL = 64,
 
 	ENTITY_OFFSET = 255 - 16 * 4,
 };
@@ -327,6 +342,7 @@ struct CMapItemLayerTilemap
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
+	int m_Material;
 };
 
 struct CMapItemLayerQuads
@@ -487,12 +503,19 @@ public:
 	unsigned char m_Type;
 };
 
+class CMaterialTile
+{
+public:
+	unsigned char m_Material;
+};
+
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
 bool IsValidTuneTile(int Index);
+bool IsValidMaterialTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);
