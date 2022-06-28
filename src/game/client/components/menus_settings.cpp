@@ -646,7 +646,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static int s_RandomizeColors = 0;
 	if(*UseCustomColor)
 	{
-		RandomColorsButton.VSplitLeft(150.0f, &RandomColorsButton, 0);
+		RandomColorsButton.VSplitLeft(120.0f, &RandomColorsButton, 0);
 		if(DoButton_Menu(&s_RandomizeColors, "Randomize Colors", 0, &RandomColorsButton, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0, 0, 0, 0.5f), vec4(0, 0, 0, 0.25f)))
 		{
 			if(m_Dummy)
