@@ -430,9 +430,20 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 
 		int Pos = 0;
 		while(Pos < NumSamples)
-			Pos += op_read(OpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
+		{
+			const int Read = op_read(OpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
+			if(Read < 0)
+			{
+				free(pSample->m_pData);
+				dbg_msg("sound/opus", "op_read error %d at %d", Read, Pos);
+				return -1;
+			}
+			else if(Read == 0) // EOF
+				break;
+			Pos += Read;
+		}
 
-		pSample->m_NumFrames = NumSamples; // ?
+		pSample->m_NumFrames = Pos;
 		pSample->m_Rate = 48000;
 		pSample->m_LoopStart = -1;
 		pSample->m_LoopEnd = -1;
