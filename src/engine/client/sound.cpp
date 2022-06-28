@@ -412,11 +412,11 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 
 	CSample *pSample = &m_aSamples[SampleID];
 
-	OggOpusFile *OpusFile = op_open_memory((const unsigned char *)pData, DataSize, NULL);
-	if(OpusFile)
+	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, NULL);
+	if(pOpusFile)
 	{
-		int NumChannels = op_channel_count(OpusFile, -1);
-		int NumSamples = op_pcm_total(OpusFile, -1); // per channel!
+		int NumChannels = op_channel_count(pOpusFile, -1);
+		int NumSamples = op_pcm_total(pOpusFile, -1); // per channel!
 
 		pSample->m_Channels = NumChannels;
 
@@ -431,7 +431,7 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 		int Pos = 0;
 		while(Pos < NumSamples)
 		{
-			const int Read = op_read(OpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
+			const int Read = op_read(pOpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
 			if(Read < 0)
 			{
 				free(pSample->m_pData);
