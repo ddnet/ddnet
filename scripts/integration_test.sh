@@ -285,7 +285,7 @@ do
 		touch fail_logs.txt
 		continue
 	fi
-	logdiff="$(diff -u "$logfile" "stdout_$(basename "$logfile" .log).txt")"
+	logdiff="$(diff -u <(sort "$logfile") <(sort "stdout_$(basename "$logfile" .log).txt"))"
 	if [ "$logdiff" != "" ]
 	then
 		echo "[-] Error: logfile '$logfile' differs from stdout"
