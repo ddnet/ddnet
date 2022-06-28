@@ -1362,8 +1362,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
-	bool IgnoreGrid;
-	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	// draw selection background
 	if(IsQuadSelected(Index))
@@ -1623,8 +1622,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	static bool s_Moved;
 	static int s_Operation = OP_NONE;
 
-	bool IgnoreGrid;
-	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	if(UI()->CheckActiveItem(pID))
 	{
@@ -2190,8 +2188,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		s_CurQIndex = QIndex;
 	}
 
-	bool IgnoreGrid;
-	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	if(UI()->CheckActiveItem(pID) && s_CurQIndex == QIndex)
 	{
