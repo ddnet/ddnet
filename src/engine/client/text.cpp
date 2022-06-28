@@ -719,7 +719,7 @@ public:
 			return NULL;
 		}
 
-		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
+		dbg_msg("textrender", "loaded font from '%s'", pFilename);
 
 		pFont->m_pBuf = (void *)pBuf;
 		pFont->m_CurTextureDimensions[0] = 1024;
@@ -779,7 +779,7 @@ public:
 
 	void SetDefaultFont(CFont *pFont) override
 	{
-		dbg_msg("textrender", "default pFont set %p", pFont);
+		dbg_msg("textrender", "default font set to '%s'", pFont->m_aFilename);
 		m_pDefaultFont = pFont;
 		m_pCurFont = m_pDefaultFont;
 	}
