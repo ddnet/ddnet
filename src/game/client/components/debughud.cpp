@@ -87,13 +87,13 @@ void CDebugHud::RenderTuning()
 	if(!g_Config.m_DbgTuning)
 		return;
 
-	CTuningParams StandardTuning;
+	CMatDefault StandardTuning;
 
 	Graphics()->MapScreen(0, 0, 300 * Graphics()->ScreenAspect(), 300);
 
 	float y = 27.0f;
 	int Count = 0;
-	for(int i = 0; i < CTuningParams::Num(); i++)
+	for(int i = 0; i < CMatDefault::Num(); i++)
 	{
 		char aBuf[128];
 		float Current, Standard;
@@ -119,7 +119,7 @@ void CDebugHud::RenderTuning()
 		TextRender()->Text(0x0, x - w, y + Count * 6, 5, aBuf, -1.0f);
 
 		x += 5.0f;
-		TextRender()->Text(0x0, x, y + Count * 6, 5, CTuningParams::ms_apNames[i], -1.0f);
+		TextRender()->Text(0x0, x, y + Count * 6, 5, CMatDefault::ms_apNames[i], -1.0f);
 
 		Count++;
 	}
@@ -132,7 +132,7 @@ void CDebugHud::RenderTuning()
 	float GraphX = GraphW;
 	float GraphY = Graphics()->ScreenHeight() - GraphH - sp;
 
-	CTuningParams *ClinetTuning = &m_pClient->m_Tuning[g_Config.m_ClDummy];
+	CMatDefault *ClinetTuning = &m_pClient->m_Tuning[g_Config.m_ClDummy];
 	const int StepSizeRampGraph = 270;
 	const int StepSizeZoomedInGraph = 14;
 	if(m_OldVelrampStart != ClinetTuning->m_VelrampStart || m_OldVelrampRange != ClinetTuning->m_VelrampRange || m_OldVelrampCurvature != ClinetTuning->m_VelrampCurvature)

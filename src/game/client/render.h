@@ -155,6 +155,7 @@ public:
 	void RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderMaterialmap(CMaterialTile *pMaterial, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 };
 
 #endif
