@@ -10,10 +10,12 @@
 #include <GLES3/gl3.h>
 #endif
 
+#include <engine/client/backend_sdl.h>
+
 #include <engine/client/backend/opengl/opengl_sl.h>
 #include <engine/client/backend/opengl/opengl_sl_program.h>
 
-#include <engine/shared/image_manipulation.h>
+#include <engine/gfx/image_manipulation.h>
 
 #include <engine/client/backend/glsl_shader_compiler.h>
 

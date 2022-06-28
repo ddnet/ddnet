@@ -12,7 +12,7 @@ class CJobPool;
 
 class IJob
 {
-	friend class CJobPool;
+	friend CJobPool;
 
 private:
 	std::shared_ptr<IJob> m_pNext;

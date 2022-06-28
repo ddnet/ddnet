@@ -207,7 +207,7 @@ namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
 }
 
-typedef std::function<bool(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData)> TGLBackendReadPresentedImageData;
+typedef std::function<bool(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData)> TGLBackendReadPresentedImageData;
 
 class IGraphics : public IInterface
 {

@@ -1,10 +1,13 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "plasma.h"
-#include <engine/server.h>
-#include <game/generated/protocol.h>
-#include <game/server/gamecontext.h>
-
 #include "character.h"
+
+#include <engine/server.h>
+
+#include <game/generated/protocol.h>
+#include <game/teamscore.h>
+
+#include <game/server/gamecontext.h>
 
 const float PLASMA_ACCEL = 1.1f;
 

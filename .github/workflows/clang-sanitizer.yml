@@ -36,6 +36,7 @@ jobs:
         cd san
         export UBSAN_OPTIONS=suppressions=../ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
         export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0
+        export LSAN_OPTIONS=suppressions=../lsan.supp
         ./DDNet "cl_download_skins 0;quit" || true
         ./DDNet-Server shutdown || true
         if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
@@ -45,4 +46,5 @@ jobs:
         fi
     - name: Run integration tests with ASan and UBSan
       run: |
-        scripts/integration_test.sh san
+        cd san
+        make run_integration_tests

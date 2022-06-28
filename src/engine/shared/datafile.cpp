@@ -9,6 +9,8 @@
 
 #include "uuid_manager.h"
 
+#include <cstdlib>
+
 static const int DEBUG = 0;
 
 enum

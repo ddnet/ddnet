@@ -3,10 +3,10 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
-#include <engine/antibot.h>
 #include <engine/console.h>
 #include <engine/server.h>
 
+#include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>
@@ -46,15 +46,17 @@ enum
 	NUM_TUNEZONES = 256
 };
 
+class CCharacter;
 class CConfig;
 class CHeap;
 class CPlayer;
 class CScore;
-class IConsole;
+class CUnpacker;
+class IAntibot;
 class IGameController;
 class IEngine;
 class IStorage;
-struct CAntibotData;
+struct CAntibotRoundData;
 struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
@@ -289,6 +291,7 @@ public:
 	int64_t m_NonEmptySince;
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
+	int64_t ClientsMaskExcludeClientVersionAndHigher(int Version);
 	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
@@ -304,7 +307,7 @@ private:
 	// starting 1 to make 0 the special value "no client id"
 	uint32_t NextUniqueClientID = 1;
 	bool m_VoteWillPass;
-	class CScore *m_pScore;
+	CScore *m_pScore;
 
 	//DDRace Console Commands
 
@@ -445,7 +448,7 @@ private:
 
 public:
 	CLayers *Layers() { return &m_Layers; }
-	class CScore *Score() { return m_pScore; }
+	CScore *Score() { return m_pScore; }
 
 	enum
 	{

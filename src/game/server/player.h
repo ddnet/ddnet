@@ -3,11 +3,20 @@
 #ifndef GAME_SERVER_PLAYER_H
 #define GAME_SERVER_PLAYER_H
 
-#include "alloc.h"
+#include <base/vmath.h>
 
-// this include should perhaps be removed
-#include "score.h"
+#include <engine/shared/protocol.h>
+
+#include "alloc.h"
 #include "teeinfo.h"
+
+#include <memory>
+
+class CCharacter;
+class CGameContext;
+class IServer;
+struct CNetObj_PlayerInput;
+struct CScorePlayerResult;
 
 enum
 {

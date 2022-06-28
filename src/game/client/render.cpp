@@ -6,15 +6,20 @@
 
 #include "animstate.h"
 #include "render.h"
+
 #include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/shared/config.h>
-#include <game/client/components/skins.h>
-#include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
+
+#include <game/mapitems.h>
+
+#include <game/client/components/skins.h>
+#include <game/client/gameclient.h>
 #include <game/layers.h>
+
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
 
@@ -129,6 +134,18 @@ void CRenderTools::RenderCursor(vec2 Center, float Size)
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 	Graphics()->WrapNormal();
+}
+
+void CRenderTools::RenderIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor)
+{
+	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
+	Graphics()->QuadsBegin();
+	SelectSprite(SpriteId);
+	if(pColor)
+		Graphics()->SetColor(pColor->r * pColor->a, pColor->g * pColor->a, pColor->b * pColor->a, pColor->a);
+	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
 }
 
 int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size)

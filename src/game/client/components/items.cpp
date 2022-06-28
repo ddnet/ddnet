@@ -3,8 +3,11 @@
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
+
+#include <game/mapitems.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/projectile_data.h>
@@ -125,9 +128,9 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 			Graphics()->QuadsSetRotation(0);
 	}
 
-	if(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
+	if(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
 	{
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ProjectileOffset[CurWeapon], Pos.x, Pos.y);
 	}
@@ -153,7 +156,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	else if(pCurrent->m_Type == POWERUP_WEAPON)
 	{
 		QuadOffset = m_PickupWeaponOffset[CurWeapon];
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupWeapons[CurWeapon]);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpritePickupWeapons[CurWeapon]);
 	}
 	else if(pCurrent->m_Type == POWERUP_NINJA)
 	{
@@ -165,7 +168,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	else if(pCurrent->m_Type >= POWERUP_ARMOR_SHOTGUN && pCurrent->m_Type <= POWERUP_ARMOR_LASER)
 	{
 		QuadOffset = m_PickupWeaponArmorOffset[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN];
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupWeaponArmor[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN]);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpritePickupWeaponArmor[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN]);
 	}
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -295,7 +298,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 	// render head
 	{
 		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
-		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[CurParticle]);
+		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
 		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
 		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ParticleSplatOffset[CurParticle], Pos.x, Pos.y);

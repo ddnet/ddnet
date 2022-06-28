@@ -6,6 +6,7 @@
 
 #include <engine/console.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
 
 #include <game/client/component.h>

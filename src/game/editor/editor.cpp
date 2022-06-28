@@ -12,6 +12,7 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -25,8 +26,6 @@
 #include <game/client/ui.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
-
-#include <engine/shared/image_manipulation.h>
 
 #include "auto_map.h"
 #include "editor.h"
@@ -112,11 +111,11 @@ CLayerGroup::CLayerGroup()
 }
 
 template<typename T>
-static void DeleteAll(std::vector<T> &List)
+static void DeleteAll(std::vector<T> &vList)
 {
-	for(auto &Item : List)
+	for(auto &Item : vList)
 		delete Item;
-	List.clear();
+	vList.clear();
 }
 
 CLayerGroup::~CLayerGroup()
@@ -1348,7 +1347,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 	// some basic values
 	void *pID = &pQuad->m_aPoints[4]; // use pivot addr as id
-	static std::vector<std::vector<CPoint>> s_lRotatePoints;
+	static std::vector<std::vector<CPoint>> s_vvRotatePoints;
 	static int s_Operation = OP_NONE;
 	static float s_RotateAngle = 0;
 	float wx = UI()->MouseWorldX();
@@ -1461,7 +1460,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
 					for(int v = 0; v < 4; v++)
 					{
-						pCurrentQuad->m_aPoints[v] = s_lRotatePoints[i][v];
+						pCurrentQuad->m_aPoints[v] = s_vvRotatePoints[i][v];
 						Rotate(&pCurrentQuad->m_aPoints[4], &pCurrentQuad->m_aPoints[v], s_RotateAngle);
 					}
 				}
@@ -1537,17 +1536,17 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 					SelectQuad(Index);
 
 				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
-				s_lRotatePoints.clear();
-				s_lRotatePoints.resize(m_vSelectedQuads.size());
+				s_vvRotatePoints.clear();
+				s_vvRotatePoints.resize(m_vSelectedQuads.size());
 				for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
 
-					s_lRotatePoints[i].resize(4);
-					s_lRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
-					s_lRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
-					s_lRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
-					s_lRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
+					s_vvRotatePoints[i].resize(4);
+					s_vvRotatePoints[i][0] = pCurrentQuad->m_aPoints[0];
+					s_vvRotatePoints[i][1] = pCurrentQuad->m_aPoints[1];
+					s_vvRotatePoints[i][2] = pCurrentQuad->m_aPoints[2];
+					s_vvRotatePoints[i][3] = pCurrentQuad->m_aPoints[3];
 				}
 			}
 			else
@@ -3744,36 +3743,26 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	// load external
-	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
-	if(!SoundFile)
+	void *pData;
+	unsigned DataSize;
+	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
 		return;
 	}
-
-	// read the whole file into memory
-	int DataSize = io_length(SoundFile);
-
-	if(DataSize <= 0)
-	{
-		io_close(SoundFile);
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
-		return;
-	}
-
-	void *pData = malloc((unsigned)DataSize);
-	io_read(SoundFile, pData, (unsigned)DataSize);
-	io_close(SoundFile);
 
 	// load sound
 	int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned)DataSize, true);
 	if(SoundId == -1)
+	{
+		free(pData);
 		return;
+	}
 
 	// add sound
 	CEditorSound *pSound = new CEditorSound(pEditor);
 	pSound->m_SoundID = SoundId;
-	pSound->m_DataSize = (unsigned)DataSize;
+	pSound->m_DataSize = DataSize;
 	pSound->m_pData = pData;
 	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
@@ -3796,26 +3785,13 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	CEditor *pEditor = (CEditor *)pUser;
 
 	// load external
-	IOHANDLE SoundFile = pEditor->Storage()->OpenFile(pFileName, IOFLAG_READ, StorageType);
-	if(!SoundFile)
+	void *pData;
+	unsigned DataSize;
+	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
 		return;
 	}
-
-	// read the whole file into memory
-	int DataSize = io_length(SoundFile);
-
-	if(DataSize <= 0)
-	{
-		io_close(SoundFile);
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
-		return;
-	}
-
-	void *pData = malloc((unsigned)DataSize);
-	io_read(SoundFile, pData, (unsigned)DataSize);
-	io_close(SoundFile);
 
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
@@ -4349,12 +4325,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 	Button.VSplitLeft(Button.h, &FileIcon, &Button);
 	Button.VSplitLeft(5.0f, nullptr, &Button);
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_FILEICONS].m_Id);
-	Graphics()->QuadsBegin();
-	RenderTools()->SelectSprite(m_vFileList[Index].m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_MAP2);
-	IGraphics::CQuadItem QuadItem(FileIcon.x, FileIcon.y, FileIcon.w, FileIcon.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	RenderTools()->RenderIcon(IMAGE_FILEICONS, m_vFileList[Index].m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_MAP2, &FileIcon);
 
 	if(DoButton_File(&m_vFileList[Index], m_vFileList[Index].m_aName, m_FilesSelectedIndex == Index, &Button, 0, nullptr))
 	{
@@ -5021,8 +4992,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	if(pEnvelope)
 	{
-		static std::vector<int> Selection;
-		static int sEnvelopeEditorID = 0;
+		static std::vector<int> s_vSelection;
+		static int s_EnvelopeEditorID = 0;
 		static int s_ActiveChannels = 0xf;
 
 		ColorRGBA aColors[] = {ColorRGBA(1, 0.2f, 0.2f), ColorRGBA(0.2f, 1, 0.2f), ColorRGBA(0.2f, 0.2f, 1), ColorRGBA(1, 1, 0.2f)};
@@ -5087,9 +5058,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		float ValueScale = (Top - Bottom) / View.h;
 
 		if(UI()->MouseInside(&View))
-			UI()->SetHotItem(&sEnvelopeEditorID);
+			UI()->SetHotItem(&s_EnvelopeEditorID);
 
-		if(UI()->HotItem() == &sEnvelopeEditorID)
+		if(UI()->HotItem() == &s_EnvelopeEditorID)
 		{
 			// do stuff
 			if(pEnvelope)
@@ -5304,8 +5275,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					{
 						if(UI()->MouseButton(0))
 						{
-							Selection.clear();
-							Selection.push_back(i);
+							s_vSelection.clear();
+							s_vSelection.push_back(i);
 							UI()->SetActiveItem(pID);
 							// track it
 							s_pID = pID;
@@ -6387,66 +6358,58 @@ void CEditor::PlaceBorderTiles()
 		pT->m_pTiles[i].m_Index = 1;
 }
 
-void CEditor::UpdateAndRender()
+void CEditor::OnUpdate()
 {
-	static float s_MouseX = 0.0f;
-	static float s_MouseY = 0.0f;
-
 	if(!m_EditorWasUsedBefore)
 	{
 		m_EditorWasUsedBefore = true;
 		Reset();
 	}
 
-	if(m_Animate)
-		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
-	else
-		m_AnimateTime = 0;
-	ms_pUiGotContext = nullptr;
-
-	UI()->StartCheck();
-
-	// handle mouse movement
-	float mx, my, Mwx, Mwy;
-	float rx = 0, ry = 0;
+	// handle cursor movement
 	{
-		Input()->MouseRelative(&rx, &ry);
-		UIEx()->ConvertMouseMove(&rx, &ry);
+		static float s_MouseX = 0.0f;
+		static float s_MouseY = 0.0f;
+
+		float MouseRelX = 0.0f, MouseRelY = 0.0f;
+		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
+		if(CursorType != IInput::CURSOR_NONE)
+			UIEx()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
 		UIEx()->ResetMouseSlow();
 
-		m_MouseDeltaX = rx;
-		m_MouseDeltaY = ry;
+		m_MouseDeltaX += MouseRelX;
+		m_MouseDeltaY += MouseRelY;
 
 		if(!m_LockMouse)
 		{
-			s_MouseX = clamp<float>(s_MouseX + rx, 0.0f, Graphics()->WindowWidth());
-			s_MouseY = clamp<float>(s_MouseY + ry, 0.0f, Graphics()->WindowHeight());
+			s_MouseX = clamp<float>(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth());
+			s_MouseY = clamp<float>(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight());
 		}
 
-		// update the ui
-		mx = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
-		my = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
-		Mwx = 0;
-		Mwy = 0;
+		// update positions for ui, but only update ui when rendering
+		m_MouseX = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
+		m_MouseY = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
 
 		// fix correct world x and y
-		CLayerGroup *g = GetSelectedGroup();
-		if(g)
+		CLayerGroup *pGroup = GetSelectedGroup();
+		if(pGroup)
 		{
 			float aPoints[4];
-			g->Mapping(aPoints);
+			pGroup->Mapping(aPoints);
 
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 
-			Mwx = aPoints[0] + WorldWidth * ((float)s_MouseX / Graphics()->WindowWidth());
-			Mwy = aPoints[1] + WorldHeight * ((float)s_MouseY / Graphics()->WindowHeight());
-
-			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->ScreenWidth());
-			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->ScreenHeight());
+			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
+			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
+			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->WindowWidth());
+			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->WindowHeight());
 		}
-
-		UI()->Update(mx, my, Mwx, Mwy);
+		else
+		{
+			m_MouseWorldX = 0.0f;
+			m_MouseWorldY = 0.0f;
+		}
 	}
 
 	// toggle gui
@@ -6455,8 +6418,26 @@ void CEditor::UpdateAndRender()
 
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
+}
+
+void CEditor::OnRender()
+{
+	if(m_Animate)
+		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
+	else
+		m_AnimateTime = 0;
+
+	ms_pUiGotContext = nullptr;
+	UI()->StartCheck();
+
+	UI()->Update(m_MouseX, m_MouseY, m_MouseWorldX, m_MouseWorldY);
 
 	Render();
+
+	m_MouseDeltaX = 0.0f;
+	m_MouseDeltaY = 0.0f;
+	m_MouseDeltaWx = 0.0f;
+	m_MouseDeltaWy = 0.0f;
 
 	if(Input()->KeyPress(KEY_F10))
 	{

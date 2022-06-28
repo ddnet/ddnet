@@ -242,9 +242,6 @@ MOTD
 Map
 == Bana
 
-Mouse sens.
-== Muskänslighet
-
 Move left
 == Gå vänster
 
@@ -609,17 +606,11 @@ Name plates size
 Type:
 == Typ:
 
-Show console window
-== Visa konsol fönster
-
 Vanilla skins only
 == Bara vanilla skins
 
 New random timeout code
 == Ny slumpad timeout kod
-
-UI mouse s.
-== UI mus s.
 
 Select a name
 == Välj ett namn
@@ -1252,12 +1243,6 @@ Show client IDs
 Kill Messages
 == Döds meddelanden
 
-Kill Message Normal Color
-== Döds Meddelanden Normal Färg
-
-Kill Message Highlight Color
-== Döds Meddelanden Betonad Färg
-
 Laser Outline Color
 == Laser Yttre Färg
 
@@ -1324,6 +1309,27 @@ https://ddnet.tw/discord
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Join Tutorial Server
 == 
 
@@ -1333,7 +1339,66 @@ Skip Tutorial
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Allows maps to render with more detail
@@ -1354,6 +1419,33 @@ Graphics cards
 auto
 == 
 
+Show dummy actions
+== 
+
+Show jump indicator
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
@@ -1367,6 +1459,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+Extras
 == 
 
 Tutorial

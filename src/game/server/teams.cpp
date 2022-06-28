@@ -1,11 +1,14 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "teams.h"
+#include "entities/character.h"
+#include "gamecontroller.h"
+#include "player.h"
 #include "score.h"
 #include "teehistorian.h"
+
 #include <engine/shared/config.h>
 
-#include "entities/character.h"
-#include "player.h"
+#include <game/mapitems.h>
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 	m_pGameContext(pGameContext)
@@ -691,7 +694,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 			GameServer()->SendChatTarget(ClientID, aBuf, CGameContext::CHAT_SIX);
 		else
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 	}
 	else if(pData->m_BestTime != 0) // tee has already finished?
 	{
@@ -849,9 +852,9 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 	m_LastSwap[Team] = Server()->Tick();
 }
 
-void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team)
+void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPlayer, int Team)
 {
-	if(!pPlayer || !pTargetPlayer)
+	if(!pPrimaryPlayer || !pTargetPlayer)
 		return;
 
 	char aBuf[128];
@@ -863,7 +866,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 			"You have to wait %d seconds until you can swap.",
 			g_Config.m_SvSaveSwapGamesDelay - Since);
 
-		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget(pPrimaryPlayer->GetCID(), aBuf);
 
 		return;
 	}
@@ -883,34 +886,43 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPlayer, CPlayer *pTargetPlayer, in
 			"Your swap request timed out %d seconds ago. Use /swap again to re-initiate it.",
 			Since - g_Config.m_SvSwapTimeout);
 
-		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget(pPrimaryPlayer->GetCID(), aBuf);
 
 		return;
 	}
 
 	CSaveTee PrimarySavedTee;
-	PrimarySavedTee.Save(pPlayer->GetCharacter());
+	PrimarySavedTee.Save(pPrimaryPlayer->GetCharacter());
 
 	CSaveTee SecondarySavedTee;
 	SecondarySavedTee.Save(pTargetPlayer->GetCharacter());
 
 	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
-	SecondarySavedTee.Load(pPlayer->GetCharacter(), Team, true);
+	SecondarySavedTee.Load(pPrimaryPlayer->GetCharacter(), Team, true);
 
-	std::swap(m_TeeStarted[pPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
-	std::swap(m_TeeFinished[pPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
-	std::swap(pPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+	if(Team >= 1)
+	{
+		for(const auto &pPlayer : GameServer()->m_apPlayers)
+		{
+			CCharacter *pChar = pPlayer ? pPlayer->GetCharacter() : nullptr;
+			if(pChar && pChar->Team() == Team && pChar != pPrimaryPlayer->GetCharacter() && pChar != pTargetPlayer->GetCharacter())
+				pChar->m_StartTime = pPrimaryPlayer->GetCharacter()->m_StartTime;
+		}
+	}
+	std::swap(m_TeeStarted[pPrimaryPlayer->GetCID()], m_TeeStarted[pTargetPlayer->GetCID()]);
+	std::swap(m_TeeFinished[pPrimaryPlayer->GetCID()], m_TeeFinished[pTargetPlayer->GetCID()]);
+	std::swap(pPrimaryPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
 
-	GameServer()->m_World.SwapClients(pPlayer->GetCID(), pTargetPlayer->GetCID());
+	GameServer()->m_World.SwapClients(pPrimaryPlayer->GetCID(), pTargetPlayer->GetCID());
 
 	if(GameServer()->TeeHistorianActive())
 	{
-		GameServer()->TeeHistorian()->RecordPlayerSwap(pPlayer->GetCID(), pTargetPlayer->GetCID());
+		GameServer()->TeeHistorian()->RecordPlayerSwap(pPrimaryPlayer->GetCID(), pTargetPlayer->GetCID());
 	}
 
 	str_format(aBuf, sizeof(aBuf),
 		"%s has swapped with %s.",
-		Server()->ClientName(pPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
+		Server()->ClientName(pPrimaryPlayer->GetCID()), Server()->ClientName(pTargetPlayer->GetCID()));
 
 	GameServer()->SendChatTeam(Team, aBuf);
 }

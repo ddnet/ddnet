@@ -3,11 +3,17 @@
 #include "player.h"
 #include <engine/shared/config.h>
 
+#include <engine/antibot.h>
+#include <engine/server.h>
+
 #include "base/system.h"
 #include "entities/character.h"
 #include "gamecontext.h"
-#include <engine/server.h>
+#include "gamecontroller.h"
+#include "score.h"
+
 #include <game/gamecore.h>
+#include <game/teamscore.h>
 #include <game/version.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
@@ -772,7 +778,7 @@ int CPlayer::Pause(int State, bool Force)
 				m_ViewPos = m_pCharacter->m_Pos;
 				GameServer()->CreatePlayerSpawn(m_pCharacter->m_Pos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
 			}
-			// fall-thru
+			[[fallthrough]];
 		case PAUSE_SPEC:
 			if(g_Config.m_SvPauseMessages)
 			{

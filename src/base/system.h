@@ -14,7 +14,7 @@
 #define __USE_GNU
 #endif
 
-#include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 
 #ifdef CONF_FAMILY_UNIX
@@ -164,6 +164,19 @@ void mem_zero(void *block, unsigned size);
 int mem_comp(const void *a, const void *b, int size);
 
 /**
+ * Checks whether a block of memory contains null bytes.
+ *
+ * @ingroup Memory
+ *
+ * @param block Pointer to the block to check for nulls.
+ * @param size Size of the block.
+ *
+ * @return 1 - The block has a null byte.
+ * @return 0 - The block does not have a null byte.
+ */
+int mem_has_null(const void *block, unsigned size);
+
+/**
  * @defgroup File-IO
  *
  * I/O related operations.
@@ -216,6 +229,36 @@ IOHANDLE io_open(const char *filename, int flags);
  *
  */
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size);
+
+/**
+ * Reads the rest of the file into a buffer.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file to read data from.
+ * @param result Receives the file's remaining contents.
+ * @param result_len Receives the file's remaining length.
+ *
+ * @remark Does NOT guarantee that there are no internal null bytes.
+ * @remark The result must be freed after it has been used.
+ */
+void io_read_all(IOHANDLE io, void **result, unsigned *result_len);
+
+/**
+ * Reads the rest of the file into a zero-terminated buffer with
+ * no internal null bytes.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file to read data from.
+ *
+ * @return The file's remaining contents or null on failure.
+ *
+ * @remark Guarantees that there are no internal null bytes.
+ * @remark Guarantees that result will contain zero-termination.
+ * @remark The result must be freed after it has been used.
+ */
+char *io_read_all_str(IOHANDLE io);
 
 /**
  * Skips data in a file.
@@ -755,15 +798,6 @@ enum
  * @see SEASON_SPRING
  */
 int time_season();
-
-/**
- * Fetches a sample from a high resolution timer and converts it in nanoseconds.
- *
- * @ingroup Time
- *
- * @return Current value of the timer in nanoseconds.
- */
-int64_t time_get_nanoseconds();
 
 /**
  * @defgroup Network-General
@@ -2436,19 +2470,13 @@ void set_exception_handler_log_file(const char *log_file_path);
 }
 
 /**
-	Type safe wrappers for the c system
-*/
-
-namespace tw {
-
-/**
  * Fetches a sample from a high resolution timer and converts it in nanoseconds.
  *
  * @ingroup Time
  *
  * @return Current value of the timer in nanoseconds.
  */
-std::chrono::nanoseconds time_get();
+std::chrono::nanoseconds time_get_nanoseconds();
 
 int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
@@ -2473,7 +2501,5 @@ public:
 		cmdline_free(m_Argc, m_ppArgv);
 	}
 };
-
-} // namespace tw
 
 #endif

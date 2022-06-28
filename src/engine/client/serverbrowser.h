@@ -3,14 +3,16 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
-#include <engine/config.h>
+#include <base/system.h>
+
 #include <engine/console.h>
-#include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
+class CNetClient;
+class IConfigManager;
 class IServerBrowserHttp;
 class IServerBrowserPingCache;
 
@@ -42,7 +44,7 @@ public:
 
 		char m_aName[256];
 		int m_FlagID;
-		NETADDR m_vServers[MAX_SERVERS];
+		NETADDR m_aServers[MAX_SERVERS];
 		char m_aTypes[MAX_SERVERS][32];
 		int m_NumServers;
 

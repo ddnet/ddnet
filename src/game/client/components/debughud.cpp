@@ -37,15 +37,15 @@ void CDebugHud::RenderNetCorrections()
 
 	x = Width - 10.0f;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%.2f Bps", Velspeed / 32);
+	str_format(aBuf, sizeof(aBuf), "%.0f Bps", Velspeed / 32);
 	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%.2f Bps", VelspeedX / 32 * Ramp);
+	str_format(aBuf, sizeof(aBuf), "%.0f Bps", VelspeedX / 32 * Ramp);
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
-	str_format(aBuf, sizeof(aBuf), "%.2f Bps", VelspeedY / 32);
+	str_format(aBuf, sizeof(aBuf), "%.0f Bps", VelspeedY / 32);
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;

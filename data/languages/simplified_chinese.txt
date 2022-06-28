@@ -23,6 +23,8 @@
 # 2022-04-01 Dan_cao
 # 2022-05-14 Dan_cao
 # 2022-05-14 cheeser0613
+# 2022-06-16 cheeser0613
+# 2022-06-27 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -264,9 +266,6 @@ MOTD
 Map
 == 地图
 
-Mouse sens.
-== 鼠标灵敏度
-
 Move left
 == 向左移动
 
@@ -319,7 +318,7 @@ No password
 == 没有密码
 
 No servers found
-== 找不到任何服务器
+== 未检测到任何服务器
 
 No servers match your filter criteria
 == 没有服务器满足设置的筛选条件
@@ -664,9 +663,6 @@ Round
 Lht.
 == 亮度
 
-Show console window
-== 显示控制台窗口
-
 Automatically take statboard screenshot
 == 自动对统计板截图
 
@@ -801,9 +797,6 @@ Connecting dummy
 
 Search
 == 搜索
-
-UI mouse s.
-== 界面鼠标灵敏度
 
 Vanilla skins only
 == 只显示原生皮肤
@@ -1131,7 +1124,7 @@ Run server
 == 运行服务器
 
 Server executable not found, can't run server
-== 找不到服务器的可执行文件，无法运行服务器
+== 未检测到服务器的可执行文件，无法运行服务器
 
 Editor
 == 编辑器
@@ -1319,12 +1312,6 @@ Refreshing...
 Kill Messages
 == 击杀消息
 
-Kill Message Normal Color
-== 击杀消息普通颜色
-
-Kill Message Highlight Color
-== 击杀消息强调颜色
-
 Show local player's key presses
 == 显示自己的按键
 
@@ -1402,3 +1389,113 @@ Super
 
 Team %d
 == 队伍 %d
+
+Position:
+== 坐标
+
+Speed:
+== 速度
+
+Angle:
+== 角度
+
+Trying to determine UDP connectivity...
+== 正在尝试检测 UDP 连接...
+
+UDP seems to be filtered.
+== UDP 疑似被过滤
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP 与 TCP 的 IP 地址并不相同。请尝试屏蔽 VPN 、代理网络以及网络加速器。
+
+No answer from server yet.
+== 服务器无响应
+
+Download community skins
+== 下载社区皮肤
+
+Enable controller
+== 启用控制器
+
+Controller %d: %s
+== 控制器 %d: %s
+
+Click to cycle through all available controllers.
+== 点击以切换其他控制器
+
+[Ingame controller mode]
+Relative
+== 相对
+
+[Ingame controller mode]
+Absolute
+== 绝对
+
+Ingame controller mode
+== 游戏内控制器瞄准模式
+
+Ingame controller sens.
+== 类比摇杆灵敏度（游戏）
+
+UI controller sens.
+== 类比摇杆灵敏度（界面）
+
+Controller jitter tolerance
+== 类比摇杆错位容错
+
+No controller found. Plug in a controller and restart the game.
+== 未检测到任何控制器。请尝试重新连接控制器并重启游戏。
+
+Device
+== 输入设备
+
+Status
+== 状态
+
+Aim bind
+== 操作轴绑定
+
+Controller Axis #%d
+== 类比摇杆 #%d
+
+Mouse
+== 滑鼠
+
+Ingame mouse sens.
+== 滑鼠灵敏度（游戏）
+
+UI mouse sens.
+== 滑鼠灵敏度（界面）
+
+Controller
+== 控制器
+
+Show dummy actions
+== 显示分身状态
+
+Show freeze bars
+== 显示解冻进度条
+
+Show player position
+== 显示玩家坐标
+
+Show player speed
+== 显示玩家速度
+
+Show player target angle
+== 显示玩家瞄准角度
+
+Show jump indicator
+== 显示跳越次数
+
+Opacity of freeze bars inside freeze
+== 解冻进度条不透明度
+
+Normal Color
+== 非相关信息颜色
+
+Highlight Color
+== 相关信息颜色
+
+Extras
+== 其他

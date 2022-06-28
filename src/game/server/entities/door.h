@@ -4,7 +4,7 @@
 
 #include <game/server/entity.h>
 
-class CTrigger;
+class CGameWorld;
 
 class CDoor : public CEntity
 {

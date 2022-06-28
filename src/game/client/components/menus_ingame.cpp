@@ -225,30 +225,15 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	ButtonBar.HMargin(1.0f, &ButtonBar);
 	float Width = ButtonBar.h * 2.0f;
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
-	Graphics()->QuadsBegin();
-	RenderTools()->SelectSprite(SPRITE_GUIICON_MUTE);
-	IGraphics::CQuadItem QuadItem(Button.x, Button.y, Button.w, Button.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_MUTE, &Button);
 
 	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
-	Graphics()->QuadsBegin();
-	RenderTools()->SelectSprite(SPRITE_GUIICON_EMOTICON_MUTE);
-	QuadItem = IGraphics::CQuadItem(Button.x, Button.y, Button.w, Button.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_EMOTICON_MUTE, &Button);
 
 	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
-	Graphics()->QuadsBegin();
-	RenderTools()->SelectSprite(SPRITE_GUIICON_FRIEND);
-	QuadItem = IGraphics::CQuadItem(Button.x, Button.y, Button.w, Button.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_FRIEND, &Button);
 
 	int TotalPlayers = 0;
 
@@ -869,7 +854,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	if(Item.m_Time > 0)
 		pSelf->m_vGhosts.push_back(Item);
 
-	if(tw::time_get() - pSelf->m_GhostPopulateStartTime > 500ms)
+	if(time_get_nanoseconds() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
 		pSelf->GameClient()->m_Menus.RenderLoading(false, false);
 	}
@@ -880,7 +865,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 void CMenus::GhostlistPopulate()
 {
 	m_vGhosts.clear();
-	m_GhostPopulateStartTime = tw::time_get();
+	m_GhostPopulateStartTime = time_get_nanoseconds();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 	std::sort(m_vGhosts.begin(), m_vGhosts.end());
 
@@ -1056,7 +1041,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				if(pItem->Active())
 				{
 					Graphics()->WrapClamp();
-					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_SpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
+					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
 					Graphics()->QuadsBegin();
 					IGraphics::CQuadItem QuadItem(Button.x + Button.w / 2, Button.y + Button.h / 2, 20.0f, 20.0f);
 					Graphics()->QuadsDraw(&QuadItem, 1);

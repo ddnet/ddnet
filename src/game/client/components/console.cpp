@@ -285,7 +285,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 				if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
 					char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
-					mem_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
+					str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
 				}
 				ExecuteLine(m_Input.GetString());
 				m_Input.Clear();
@@ -425,8 +425,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA Pr
 	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry) + Len);
 	pEntry->m_YOffset = -1.0f;
 	pEntry->m_PrintColor = PrintColor;
-	mem_copy(pEntry->m_aText, pLine, Len);
-	pEntry->m_aText[Len] = 0;
+	str_copy(pEntry->m_aText, pLine, Len + 1);
 	if(m_pGameConsole->m_ConsoleType == m_Type)
 		m_pGameConsole->m_NewLineCounter++;
 	m_BacklogLock.unlock();

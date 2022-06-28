@@ -1,13 +1,15 @@
 #ifndef GAME_SERVER_SCORE_H
 #define GAME_SERVER_SCORE_H
 
-#include <engine/server/databases/connection_pool.h>
 #include <game/prng.h>
 
-#include "save.h"
 #include "scoreworker.h"
 
+class CDbConnectionPool;
 class CGameContext;
+class IDbConnection;
+class IServer;
+struct ISqlData;
 
 class CScore
 {

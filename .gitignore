@@ -58,6 +58,7 @@ map_convert_07
 map_diff
 map_extract
 map_optimize
+map_replace_area
 map_replace_image
 map_resave
 map_version

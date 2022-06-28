@@ -1,10 +1,18 @@
 #ifndef ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 #define ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 
-#include "../backend_sdl.h"
-#include "engine/graphics.h"
+#include <engine/graphics.h>
 
+#include <engine/client/graphics_threaded.h>
+
+#include <SDL_video.h>
+
+#include <atomic>
+#include <stddef.h>
+#include <stdint.h>
 #include <vector>
+
+struct SBackendCapabilites;
 
 enum EDebugGFXModes
 {
@@ -23,7 +31,7 @@ protected:
 
 	static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
 
-	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) = 0;
+	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) = 0;
 
 public:
 	virtual ~CCommandProcessorFragment_GLBase() = default;

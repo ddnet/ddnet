@@ -838,10 +838,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
-		auto SkinStartLoadTime = tw::time_get();
+		auto SkinStartLoadTime = time_get_nanoseconds();
 		m_pClient->m_Skins.Refresh([&](int) {
 			// if skin refreshing takes to long, swap to a loading screen
-			if(tw::time_get() - SkinStartLoadTime > 500ms)
+			if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 			{
 				RenderLoading(false, false);
 			}
@@ -930,7 +930,7 @@ static CKeyInfo gs_aKeys[] =
 	Localize("Lock team");Localize("Show entities");Localize("Show HUD");Localize("Chat command");
 */
 
-void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRect ScopeView)
+void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
@@ -957,10 +957,187 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View, CUIRec
 	}
 }
 
+float CMenus::RenderSettingsControlsJoystick(CUIRect View)
+{
+	bool JoystickEnabled = g_Config.m_InpControllerEnable;
+	int NumJoysticks = Input()->NumJoysticks();
+	int NumOptions = 1; // expandable header
+	if(JoystickEnabled)
+	{
+		if(NumJoysticks == 0)
+			NumOptions++; // message
+		else
+		{
+			if(NumJoysticks > 1)
+				NumOptions++; // joystick selection
+			NumOptions += 3; // mode, ui sens, tolerance
+			if(!g_Config.m_InpControllerAbsolute)
+				NumOptions++; // ingame sens
+			NumOptions += Input()->GetActiveJoystick()->GetNumAxes() + 1; // axis selection + header
+		}
+	}
+	const float ButtonHeight = 20.0f;
+	const float Spacing = 2.0f;
+	const float BackgroundHeight = NumOptions * (ButtonHeight + Spacing) + (NumOptions == 1 ? 0 : Spacing);
+	if(View.h < BackgroundHeight)
+		return BackgroundHeight; // TODO: make this less hacky by porting CScrollRegion from vanilla
+
+	View.HSplitTop(BackgroundHeight, &View, 0);
+
+	CUIRect Button;
+	View.HSplitTop(Spacing, 0, &View);
+	View.HSplitTop(ButtonHeight, &Button, &View);
+	if(DoButton_CheckBox(&g_Config.m_InpControllerEnable, Localize("Enable controller"), g_Config.m_InpControllerEnable, &Button))
+	{
+		g_Config.m_InpControllerEnable ^= 1;
+	}
+	if(JoystickEnabled)
+	{
+		if(NumJoysticks > 0)
+		{
+			// show joystick device selection if more than one available
+			if(NumJoysticks > 1)
+			{
+				View.HSplitTop(Spacing, 0, &View);
+				View.HSplitTop(ButtonHeight, &Button, &View);
+				static int s_ButtonJoystickId;
+				char aBuf[96];
+				str_format(aBuf, sizeof(aBuf), Localize("Controller %d: %s"), Input()->GetActiveJoystick()->GetIndex(), Input()->GetActiveJoystick()->GetName());
+				if(DoButton_Menu(&s_ButtonJoystickId, aBuf, 0, &Button))
+					Input()->SelectNextJoystick();
+				GameClient()->m_Tooltips.DoToolTip(&s_ButtonJoystickId, &Button, Localize("Click to cycle through all available controllers."));
+			}
+
+			{
+				View.HSplitTop(Spacing, 0, &View);
+				View.HSplitTop(ButtonHeight, &Button, &View);
+				const char *apLabels[] = {Localize("Relative", "Ingame controller mode"), Localize("Absolute", "Ingame controller mode")};
+				UIEx()->DoScrollbarOptionLabeled(&g_Config.m_InpControllerAbsolute, &g_Config.m_InpControllerAbsolute, &Button, Localize("Ingame controller mode"), apLabels, std::size(apLabels));
+			}
+
+			if(!g_Config.m_InpControllerAbsolute)
+			{
+				View.HSplitTop(Spacing, 0, &View);
+				View.HSplitTop(ButtonHeight, &Button, &View);
+				UIEx()->DoScrollbarOption(&g_Config.m_InpControllerSens, &g_Config.m_InpControllerSens, &Button, Localize("Ingame controller sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			}
+
+			View.HSplitTop(Spacing, 0, &View);
+			View.HSplitTop(ButtonHeight, &Button, &View);
+			UIEx()->DoScrollbarOption(&g_Config.m_UiControllerSens, &g_Config.m_UiControllerSens, &Button, Localize("UI controller sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+
+			View.HSplitTop(Spacing, 0, &View);
+			View.HSplitTop(ButtonHeight, &Button, &View);
+			UIEx()->DoScrollbarOption(&g_Config.m_InpControllerTolerance, &g_Config.m_InpControllerTolerance, &Button, Localize("Controller jitter tolerance"), 0, 50);
+
+			View.HSplitTop(Spacing, 0, &View);
+			RenderTools()->DrawUIRect(&View, ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), CUI::CORNER_ALL, 5.0f);
+			DoJoystickAxisPicker(View);
+		}
+		else
+		{
+			View.HSplitTop((View.h - ButtonHeight) / 2.0f, 0, &View);
+			View.HSplitTop(ButtonHeight, &Button, &View);
+			UI()->DoLabel(&Button, Localize("No controller found. Plug in a controller and restart the game."), 13.0f, TEXTALIGN_CENTER);
+		}
+	}
+
+	return BackgroundHeight;
+}
+
+void CMenus::DoJoystickAxisPicker(CUIRect View)
+{
+	float ButtonHeight = 20.0f;
+	float Spacing = 2.0f;
+	float DeviceLabelWidth = View.w * 0.30f;
+	float StatusWidth = View.w * 0.30f;
+	float BindWidth = View.w * 0.1f;
+	float StatusMargin = View.w * 0.05f;
+
+	CUIRect Row, Button;
+	View.HSplitTop(Spacing, 0, &View);
+	View.HSplitTop(ButtonHeight, &Row, &View);
+	Row.VSplitLeft(StatusWidth, &Button, &Row);
+	UI()->DoLabel(&Button, Localize("Device"), 13.0f, TEXTALIGN_CENTER);
+	Row.VSplitLeft(StatusMargin, 0, &Row);
+	Row.VSplitLeft(StatusWidth, &Button, &Row);
+	UI()->DoLabel(&Button, Localize("Status"), 13.0f, TEXTALIGN_CENTER);
+	Row.VSplitLeft(2 * StatusMargin, 0, &Row);
+	Row.VSplitLeft(2 * BindWidth, &Button, &Row);
+	UI()->DoLabel(&Button, Localize("Aim bind"), 13.0f, TEXTALIGN_CENTER);
+
+	IInput::IJoystick *pJoystick = Input()->GetActiveJoystick();
+	static int s_aActive[NUM_JOYSTICK_AXES][2];
+	for(int i = 0; i < minimum<int>(pJoystick->GetNumAxes(), NUM_JOYSTICK_AXES); i++)
+	{
+		bool Active = g_Config.m_InpControllerX == i || g_Config.m_InpControllerY == i;
+
+		View.HSplitTop(Spacing, 0, &View);
+		View.HSplitTop(ButtonHeight, &Row, &View);
+		RenderTools()->DrawUIRect(&Row, ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), CUI::CORNER_ALL, 5.0f);
+
+		// Device label
+		Row.VSplitLeft(DeviceLabelWidth, &Button, &Row);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), Localize("Controller Axis #%d"), i + 1);
+		if(!Active)
+			TextRender()->TextColor(0.7f, 0.7f, 0.7f, 1.0f);
+		else
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+		UI()->DoLabel(&Button, aBuf, 13.0f, TEXTALIGN_CENTER);
+
+		// Device status
+		Row.VSplitLeft(StatusMargin, 0, &Row);
+		Row.VSplitLeft(StatusWidth, &Button, &Row);
+		Button.HMargin((ButtonHeight - 14.0f) / 2.0f, &Button);
+		DoJoystickBar(&Button, (pJoystick->GetAxisValue(i) + 1.0f) / 2.0f, g_Config.m_InpControllerTolerance / 50.0f, Active);
+
+		// Bind to X,Y
+		Row.VSplitLeft(2 * StatusMargin, 0, &Row);
+		Row.VSplitLeft(BindWidth, &Button, &Row);
+		if(DoButton_CheckBox(&s_aActive[i][0], "X", g_Config.m_InpControllerX == i, &Button))
+		{
+			if(g_Config.m_InpControllerY == i)
+				g_Config.m_InpControllerY = g_Config.m_InpControllerX;
+			g_Config.m_InpControllerX = i;
+		}
+		Row.VSplitLeft(BindWidth, &Button, &Row);
+		if(DoButton_CheckBox(&s_aActive[i][1], "Y", g_Config.m_InpControllerY == i, &Button))
+		{
+			if(g_Config.m_InpControllerX == i)
+				g_Config.m_InpControllerX = g_Config.m_InpControllerY;
+			g_Config.m_InpControllerY = i;
+		}
+		Row.VSplitLeft(StatusMargin, 0, &Row);
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+}
+
+void CMenus::DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active)
+{
+	CUIRect Handle;
+	pRect->VSplitLeft(7.0f, &Handle, 0); // Slider size
+
+	Handle.x += (pRect->w - Handle.w) * Current;
+
+	CUIRect Rail;
+	pRect->HMargin(4.0f, &Rail);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 0.25f : 0.125f), CUI::CORNER_ALL, Rail.h / 2.0f);
+
+	CUIRect ToleranceArea = Rail;
+	ToleranceArea.w *= Tolerance;
+	ToleranceArea.x += (Rail.w - ToleranceArea.w) / 2.0f;
+	ColorRGBA ToleranceColor = Active ? ColorRGBA(0.8f, 0.35f, 0.35f, 1.0f) : ColorRGBA(0.7f, 0.5f, 0.5f, 1.0f);
+	RenderTools()->DrawUIRect(&ToleranceArea, ToleranceColor, CUI::CORNER_ALL, ToleranceArea.h / 2.0f);
+
+	CUIRect Slider = Handle;
+	Slider.HMargin(4.0f, &Slider);
+	ColorRGBA SliderColor = Active ? ColorRGBA(0.95f, 0.95f, 0.95f, 1.0f) : ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
+	RenderTools()->DrawUIRect(&Slider, SliderColor, CUI::CORNER_ALL, Slider.h / 2.0f);
+}
+
 void CMenus::RenderSettingsControls(CUIRect MainView)
 {
-	char aBuf[128];
-
 	// this is kinda slow, but whatever
 	for(auto &Key : gs_aKeys)
 		Key.m_KeyId = Key.m_ModifierCombination = 0;
@@ -988,69 +1165,84 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	static int s_SelectedControl = -1;
 	static float s_ScrollValue = 0;
 	static int s_OldSelected = 0;
+	static float s_JoystickSettingsHeight = 0.0f; // we calculate this later and don't render until enough space is available
 	// Hacky values: Size of 10.0f per item for smoother scrolling, 72 elements
 	// fits the current size of controls settings
-	UiDoListboxStart(&s_ControlsList, &MainView, 10.0f, Localize("Controls"), "", 72, 1, s_SelectedControl, s_ScrollValue);
+	const float PseudoItemSize = 10.0f;
+	UiDoListboxStart(&s_ControlsList, &MainView, PseudoItemSize, Localize("Controls"), "", 72 + (int)ceilf(s_JoystickSettingsHeight / PseudoItemSize + 0.5f), 1, s_SelectedControl, s_ScrollValue);
 
-	CUIRect MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, ResetButton;
+	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton;
 	CListboxItem Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
 	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
-	Item.m_Rect.VSplitMid(&MovementSettings, &VotingSettings);
+	Item.m_Rect.VSplitMid(&MouseSettings, &VotingSettings);
+
+	const float FontSize = 14.0f;
+	const float Margin = 10.0f;
+	const float HeaderHeight = FontSize + 5.0f + Margin;
+
+	// mouse settings
+	{
+		MouseSettings.VMargin(5.0f, &MouseSettings);
+		MouseSettings.HSplitTop(80.0f, &MouseSettings, &JoystickSettings);
+		RenderTools()->DrawUIRect(&MouseSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
+		MouseSettings.VMargin(10.0f, &MouseSettings);
+
+		TextRender()->Text(0, MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
+
+		MouseSettings.HSplitTop(HeaderHeight, 0, &MouseSettings);
+
+		CUIRect Button;
+		MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
+		UIEx()->DoScrollbarOption(&g_Config.m_InpMousesens, &g_Config.m_InpMousesens, &Button, Localize("Ingame mouse sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+
+		MouseSettings.HSplitTop(2.0f, 0, &MouseSettings);
+
+		MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
+		UIEx()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUIEx::ms_LogarithmicScrollbarScale, CUIEx::SCROLLBAR_OPTION_NOCLAMPVALUE);
+	}
+
+	// joystick settings
+	{
+		JoystickSettings.HSplitTop(Margin, 0, &JoystickSettings);
+		JoystickSettings.HSplitTop(s_JoystickSettingsHeight, &JoystickSettings, &MovementSettings);
+		RenderTools()->DrawUIRect(&JoystickSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
+		JoystickSettings.VMargin(Margin, &JoystickSettings);
+
+		TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
+
+		JoystickSettings.HSplitTop(HeaderHeight, 0, &JoystickSettings);
+		s_JoystickSettingsHeight = RenderSettingsControlsJoystick(JoystickSettings) + HeaderHeight + Margin; // + Margin for another bottom margin
+	}
 
 	// movement settings
 	{
-		MovementSettings.VMargin(5.0f, &MovementSettings);
-		MovementSettings.HSplitTop(445.0f, &MovementSettings, &WeaponSettings);
+		MovementSettings.HSplitTop(Margin, 0, &MovementSettings);
+		MovementSettings.HSplitTop(365.0f, &MovementSettings, &WeaponSettings);
 		RenderTools()->DrawUIRect(&MovementSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
-		MovementSettings.VMargin(10.0f, &MovementSettings);
+		MovementSettings.VMargin(Margin, &MovementSettings);
 
-		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Movement"), -1.0f);
+		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
 
-		MovementSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &MovementSettings);
-
-		{
-			CUIRect Button, Label;
-			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
-			Button.VSplitLeft(160.0f, &Label, &Button);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Mouse sens."), g_Config.m_InpMousesens);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_InpMousesens, &Button, (minimum(g_Config.m_InpMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
-			if(g_Config.m_InpMousesens < 500 || NewValue < 500)
-				g_Config.m_InpMousesens = minimum(NewValue, 500);
-			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
-		}
-
-		{
-			CUIRect Button, Label;
-			MovementSettings.HSplitTop(20.0f, &Button, &MovementSettings);
-			Button.VSplitLeft(160.0f, &Label, &Button);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("UI mouse s."), g_Config.m_UiMousesens);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			int NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_UiMousesens, &Button, (minimum(g_Config.m_UiMousesens, 500) - 1) / 500.0f) * 500.0f) + 1;
-			if(g_Config.m_UiMousesens < 500 || NewValue < 500)
-				g_Config.m_UiMousesens = minimum(NewValue, 500);
-			MovementSettings.HSplitTop(20.0f, 0, &MovementSettings);
-		}
-
-		DoSettingsControlsButtons(0, 15, MovementSettings, MainView);
+		MovementSettings.HSplitTop(HeaderHeight, 0, &MovementSettings);
+		DoSettingsControlsButtons(0, 15, MovementSettings);
 	}
 
 	// weapon settings
 	{
-		WeaponSettings.HSplitTop(10.0f, 0, &WeaponSettings);
+		WeaponSettings.HSplitTop(Margin, 0, &WeaponSettings);
 		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
 		RenderTools()->DrawUIRect(&WeaponSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
-		WeaponSettings.VMargin(10.0f, &WeaponSettings);
+		WeaponSettings.VMargin(Margin, &WeaponSettings);
 
-		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Weapon"), -1.0f);
+		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
 
-		WeaponSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &WeaponSettings);
-		DoSettingsControlsButtons(15, 22, WeaponSettings, MainView);
+		WeaponSettings.HSplitTop(HeaderHeight, 0, &WeaponSettings);
+		DoSettingsControlsButtons(15, 22, WeaponSettings);
 	}
 
 	// defaults
 	{
-		ResetButton.HSplitTop(10.0f, 0, &ResetButton);
+		ResetButton.HSplitTop(Margin, 0, &ResetButton);
 		ResetButton.HSplitTop(40.0f, &ResetButton, 0);
 		RenderTools()->DrawUIRect(&ResetButton, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
 		ResetButton.HMargin(10.0f, &ResetButton);
@@ -1058,7 +1250,21 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		ResetButton.HSplitTop(20.0f, &ResetButton, 0);
 		static int s_DefaultButton = 0;
 		if(DoButton_Menu((void *)&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
+		{
 			m_pClient->m_Binds.SetDefaults();
+
+			g_Config.m_InpMousesens = 200;
+			g_Config.m_UiMousesens = 200;
+
+			g_Config.m_InpControllerEnable = 0;
+			g_Config.m_InpControllerGUID[0] = '\0';
+			g_Config.m_InpControllerAbsolute = 0;
+			g_Config.m_InpControllerSens = 100;
+			g_Config.m_InpControllerX = 0;
+			g_Config.m_InpControllerY = 1;
+			g_Config.m_InpControllerTolerance = 5;
+			g_Config.m_UiControllerSens = 100;
+		}
 	}
 
 	// voting settings
@@ -1066,51 +1272,51 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		VotingSettings.VMargin(5.0f, &VotingSettings);
 		VotingSettings.HSplitTop(80.0f, &VotingSettings, &ChatSettings);
 		RenderTools()->DrawUIRect(&VotingSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
-		VotingSettings.VMargin(10.0f, &VotingSettings);
+		VotingSettings.VMargin(Margin, &VotingSettings);
 
-		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Voting"), -1.0f);
+		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
 
-		VotingSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &VotingSettings);
-		DoSettingsControlsButtons(22, 24, VotingSettings, MainView);
+		VotingSettings.HSplitTop(HeaderHeight, 0, &VotingSettings);
+		DoSettingsControlsButtons(22, 24, VotingSettings);
 	}
 
 	// chat settings
 	{
-		ChatSettings.HSplitTop(10.0f, 0, &ChatSettings);
+		ChatSettings.HSplitTop(Margin, 0, &ChatSettings);
 		ChatSettings.HSplitTop(145.0f, &ChatSettings, &DummySettings);
 		RenderTools()->DrawUIRect(&ChatSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
-		ChatSettings.VMargin(10.0f, &ChatSettings);
+		ChatSettings.VMargin(Margin, &ChatSettings);
 
-		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Chat"), -1.0f);
+		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
 
-		ChatSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &ChatSettings);
-		DoSettingsControlsButtons(24, 29, ChatSettings, MainView);
+		ChatSettings.HSplitTop(HeaderHeight, 0, &ChatSettings);
+		DoSettingsControlsButtons(24, 29, ChatSettings);
 	}
 
 	// dummy settings
 	{
-		DummySettings.HSplitTop(10.0f, 0, &DummySettings);
+		DummySettings.HSplitTop(Margin, 0, &DummySettings);
 		DummySettings.HSplitTop(100.0f, &DummySettings, &MiscSettings);
 		RenderTools()->DrawUIRect(&DummySettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
-		DummySettings.VMargin(10.0f, &DummySettings);
+		DummySettings.VMargin(Margin, &DummySettings);
 
-		TextRender()->Text(0, DummySettings.x, DummySettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Dummy"), -1.0f);
+		TextRender()->Text(0, DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
 
-		DummySettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &DummySettings);
-		DoSettingsControlsButtons(29, 32, DummySettings, MainView);
+		DummySettings.HSplitTop(HeaderHeight, 0, &DummySettings);
+		DoSettingsControlsButtons(29, 32, DummySettings);
 	}
 
 	// misc settings
 	{
-		MiscSettings.HSplitTop(10.0f, 0, &MiscSettings);
+		MiscSettings.HSplitTop(Margin, 0, &MiscSettings);
 		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
 		RenderTools()->DrawUIRect(&MiscSettings, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
-		MiscSettings.VMargin(10.0f, &MiscSettings);
+		MiscSettings.VMargin(Margin, &MiscSettings);
 
-		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (14.0f + 5.0f + 10.0f - 14.0f) / 2.f, 14.0f, Localize("Miscellaneous"), -1.0f);
+		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
 
-		MiscSettings.HSplitTop(14.0f + 5.0f + 10.0f, 0, &MiscSettings);
-		DoSettingsControlsButtons(32, 44, MiscSettings, MainView);
+		MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
+		DoSettingsControlsButtons(32, 44, MiscSettings);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
@@ -1724,7 +1930,7 @@ public:
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };
 
-void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &Languages)
+void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &vLanguages)
 {
 	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
@@ -1779,7 +1985,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<C
 
 		char aFileName[IO_MAX_PATH_LENGTH];
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
-		Languages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
+		vLanguages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
 	}
 	io_close(File);
 }
@@ -1788,16 +1994,16 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 {
 	static int s_LanguageList = 0;
 	static int s_SelectedLanguage = 0;
-	static std::vector<CLanguage> s_Languages;
+	static std::vector<CLanguage> s_vLanguages;
 	static float s_ScrollValue = 0;
 
-	if(s_Languages.empty())
+	if(s_vLanguages.empty())
 	{
-		s_Languages.emplace_back("English", "", 826);
-		LoadLanguageIndexfile(Storage(), Console(), s_Languages);
-		std::sort(s_Languages.begin(), s_Languages.end());
-		for(size_t i = 0; i < s_Languages.size(); i++)
-			if(str_comp(s_Languages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
+		s_vLanguages.emplace_back("English", "", 826);
+		LoadLanguageIndexfile(Storage(), Console(), s_vLanguages);
+		std::sort(s_vLanguages.begin(), s_vLanguages.end());
+		for(size_t i = 0; i < s_vLanguages.size(); i++)
+			if(str_comp(s_vLanguages[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
 				break;
@@ -1806,9 +2012,9 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	int OldSelected = s_SelectedLanguage;
 
-	UiDoListboxStart(&s_LanguageList, &MainView, 24.0f, Localize("Language"), "", s_Languages.size(), 1, s_SelectedLanguage, s_ScrollValue);
+	UiDoListboxStart(&s_LanguageList, &MainView, 24.0f, Localize("Language"), "", s_vLanguages.size(), 1, s_SelectedLanguage, s_ScrollValue);
 
-	for(auto &Language : s_Languages)
+	for(auto &Language : s_vLanguages)
 	{
 		CListboxItem Item = UiDoListboxNextItem(&Language.m_Name);
 		if(Item.m_Visible)
@@ -1828,8 +2034,8 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	if(OldSelected != s_SelectedLanguage)
 	{
-		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName.c_str(), sizeof(g_Config.m_ClLanguagefile));
-		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
+		str_copy(g_Config.m_ClLanguagefile, s_vLanguages[s_SelectedLanguage].m_FileName.c_str(), sizeof(g_Config.m_ClLanguagefile));
+		g_Localization.Load(s_vLanguages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
 		GameClient()->OnLanguageChange();
 	}
 }
@@ -2328,6 +2534,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 
 void CMenus::RenderSettingsHUD(CUIRect MainView)
 {
+	char aBuf[128];
 	static int s_CurTab = 0;
 
 	CUIRect TabLabel1, TabLabel2, Column,
@@ -2360,10 +2567,9 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		// ***** HUD ***** //
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceHud, Localize("Use DDRace HUD"), &g_Config.m_ClDDRaceHud, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowJumpsIndicator, Localize("Show jump indicator"), &g_Config.m_ClShowJumpsIndicator, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs"), &g_Config.m_ClShowIDs, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &MainView, LineMargin);
@@ -2374,22 +2580,21 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &MainView, LineMargin);
+		{
+			if(g_Config.m_ClShowFreezeBars)
+			{
+				CUIRect Button, Label;
+				MainView.HSplitTop(2.5f, 0, &MainView);
+				MainView.HSplitTop(20.0f, &Label, &MainView);
+				MainView.HSplitTop(20.0f, &Button, &MainView);
+				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
+				UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+				g_Config.m_ClFreezeBarsAlphaInsideFreeze = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f) * 100.0f);
+			}
+		}
 
-		MainView.HSplitTop(60.0f, 0x0, &MainView);
-
-		// ***** Kill Messages ***** //
-
-		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, Localize("Kill Messages"), 20.0f, TEXTALIGN_LEFT);
-		MainView.VSplitLeft(5.0f, 0x0, &MainView);
-
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
-
-		static int KillMessageNormalColorID;
-		DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
-
-		static int KillMessageHighlightColorID;
-		DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 250.0f, 13.0f, 5.0f, &MainView, Localize("Kill Message Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+		MainView.HSplitTop(30.0f, 0x0, &MainView);
 
 		// ***** Laser ***** //
 
@@ -2416,6 +2621,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		Section.VSplitLeft(30.0f, 0, &Section);
 
 		DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
+
+		// ***** Hookline ***** //
 
 		MainView.HSplitTop(25.0f, 0x0, &MainView);
 		MainView.HSplitTop(20.0f, &SectionTwo, &MainView);
@@ -2456,6 +2663,23 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
 
 		DoLine_ColorPicker(&HookCollTeeCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
+
+		// ***** Kill Messages ***** //
+
+		MainView.HSplitTop(25.0f, 0x0, &MainView);
+		MainView.HSplitTop(20.0f, &Section, &MainView);
+		UI()->DoLabel(&Section, Localize("Kill Messages"), 20.0f, TEXTALIGN_LEFT);
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
+
+		static int KillMessageNormalColorID, KillMessageHighlightColorID;
+		DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
+
+		DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 	}
 	else if(s_CurTab == 1)
 	{ // ***** CHAT TAB ***** //
@@ -2478,8 +2702,6 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		const float WantedPickerPosition = 210.0f;
 		const float LabelSize = 13.0f;
 		const float LineSpacing = 5.0f;
-
-		char aBuf[64];
 
 		int i = 0;
 		static int ResetIDs[24];

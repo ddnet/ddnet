@@ -5,9 +5,12 @@
 #include "entities/character.h"
 #include "entity.h"
 #include "gamecontext.h"
+#include "gamecontroller.h"
 #include "player.h"
-#include <algorithm>
+
 #include <engine/shared/config.h>
+
+#include <algorithm>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -210,7 +213,7 @@ void CGameWorld::UpdatePlayerMaps()
 			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
 		}
 
-		// always send the player himself
+		// always send the player themselves
 		Dist[i].first = 0;
 
 		// compute reverse map

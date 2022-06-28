@@ -108,36 +108,6 @@ CMenus::CMenus()
 	}
 }
 
-int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
-{
-	int x = pRect->x;
-	int y = pRect->y;
-	int w = pRect->w;
-	int h = pRect->h;
-
-	// Square and center
-	if(w > h)
-	{
-		x += (w - h) / 2;
-		w = h;
-	}
-	else if(h > w)
-	{
-		y += (h - w) / 2;
-		h = w;
-	}
-
-	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
-
-	Graphics()->QuadsBegin();
-	RenderTools()->SelectSprite(SpriteId);
-	IGraphics::CQuadItem QuadItem(x, y, w, h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
-
-	return 0;
-}
-
 int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
@@ -229,7 +199,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 
 	if(pAnimator != NULL)
 	{
-		auto Time = tw::time_get();
+		auto Time = time_get_nanoseconds();
 
 		if(pAnimator->m_Time + 100ms < Time)
 		{
@@ -376,7 +346,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 
 	Graphics()->BlendNormal();
 	int SpriteIndex = time_get() % 3;
-	Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticleSplat[SpriteIndex]);
+	Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[SpriteIndex]);
 	Graphics()->QuadsBegin();
 	Graphics()->QuadsSetRotation(time_get());
 	Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
@@ -927,10 +897,10 @@ void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(tw::time_get() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
+	if(time_get_nanoseconds() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	LastLoadRender = tw::time_get();
+	LastLoadRender = time_get_nanoseconds();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
@@ -1029,6 +999,7 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
 	Console()->Chain("cl_asset_particles", ConchainAssetParticles, this);
 	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
+	Console()->Chain("cl_asset_extras", ConchainAssetExtras, this);
 
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
@@ -1071,7 +1042,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	SetActive(true);
 
 	m_PopupWarningDuration = Duration;
-	m_PopupWarningLastTime = tw::time_get();
+	m_PopupWarningLastTime = time_get_nanoseconds();
 }
 
 bool CMenus::CanDisplayWarning()
@@ -2253,7 +2224,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static int s_Button = 0;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (tw::time_get() - m_PopupWarningLastTime >= m_PopupWarningDuration))
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
 			{
 				m_Popup = POPUP_NONE;
 				SetActive(false);
@@ -2305,12 +2276,12 @@ int CMenus::Render()
 
 void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 {
-	std::vector<CTheme> &ThemesRef = m_pBackground->GetThemes();
+	std::vector<CTheme> &vThemesRef = m_pBackground->GetThemes();
 
 	int SelectedTheme = -1;
-	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	for(int i = 0; i < (int)vThemesRef.size(); i++)
 	{
-		if(str_comp(ThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
+		if(str_comp(vThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
 		{
 			SelectedTheme = i;
 			break;
@@ -2319,13 +2290,13 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	static int s_ListBox = 0;
 	static float s_ScrollValue = 0.0f;
-	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", ThemesRef.size(), 1, -1, s_ScrollValue);
+	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", vThemesRef.size(), 1, -1, s_ScrollValue);
 
-	for(int i = 0; i < (int)ThemesRef.size(); i++)
+	for(int i = 0; i < (int)vThemesRef.size(); i++)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&ThemesRef[i].m_Name, i == SelectedTheme);
+		CListboxItem Item = UiDoListboxNextItem(&vThemesRef[i].m_Name, i == SelectedTheme);
 
-		CTheme &Theme = ThemesRef[i];
+		CTheme &Theme = vThemesRef[i];
 
 		if(!Item.m_Visible)
 			continue;
@@ -2370,8 +2341,8 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	if(ItemActive && NewSelected != SelectedTheme)
 	{
-		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", ThemesRef[NewSelected].m_Name.c_str());
-		m_pBackground->LoadMenuBackground(ThemesRef[NewSelected].m_HasDay, ThemesRef[NewSelected].m_HasNight);
+		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", vThemesRef[NewSelected].m_Name.c_str());
+		m_pBackground->LoadMenuBackground(vThemesRef[NewSelected].m_HasDay, vThemesRef[NewSelected].m_HasNight);
 	}
 }
 
@@ -2417,12 +2388,12 @@ void CMenus::OnShutdown()
 	KillServer();
 }
 
-bool CMenus::OnMouseMove(float x, float y)
+bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_MenuActive)
 		return false;
 
-	UIEx()->ConvertMouseMove(&x, &y);
+	UIEx()->ConvertMouseMove(&x, &y, CursorType);
 
 	m_MousePos.x = clamp(m_MousePos.x + x, 0.f, (float)Graphics()->WindowWidth());
 	m_MousePos.y = clamp(m_MousePos.y + y, 0.f, (float)Graphics()->WindowHeight());

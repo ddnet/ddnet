@@ -240,9 +240,6 @@ MOTD
 Map
 == Bane
 
-Mouse sens.
-== Mushastighet
-
 Move left
 == Gå til venstre
 
@@ -789,9 +786,6 @@ Clan plates size
 Refresh Rate
 == Oppdateringsrate
 
-Show console window
-== Vis konsoll-vindu
-
 Automatically take statboard screenshot
 == Automatisk ta skjermbilde av spillerstatistikk
 
@@ -866,9 +860,6 @@ Show entities
 
 Show HUD
 == Vis HUD
-
-UI mouse s.
-== UI museh.
 
 may cause delay
 == kan gi forsinkelse
@@ -1210,6 +1201,27 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1258,10 +1270,69 @@ Config directory
 Toggle to edit your dummy settings
 == 
 
+Download community skins
+== 
+
 Choose default eyes when joining a server
 == 
 
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1297,16 +1368,28 @@ Graphics cards
 auto
 == 
 
+Show dummy actions
+== 
+
+Show jump indicator
+== 
+
 Show client IDs
 == 
 
-Kill Messages
+Show player position
 == 
 
-Kill Message Normal Color
+Show player speed
 == 
 
-Kill Message Highlight Color
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
 == 
 
 Laser Outline Color
@@ -1325,6 +1408,15 @@ Hookable
 == 
 
 Tee
+== 
+
+Kill Messages
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Preview
@@ -1361,6 +1453,9 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Extras
 == 
 
 Discord

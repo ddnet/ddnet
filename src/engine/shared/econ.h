@@ -3,8 +3,11 @@
 
 #include "network.h"
 
-#include <engine/config.h>
 #include <engine/console.h>
+
+class CConfig;
+class CNetBan;
+class ColorRGBA;
 
 class CEcon
 {
@@ -47,7 +50,7 @@ public:
 	CEcon();
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(CConfig *pConfig, IConsole *pConsole, class CNetBan *pNetBan);
+	void Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan);
 	void Update();
 	void Send(int ClientID, const char *pLine);
 	void Shutdown();

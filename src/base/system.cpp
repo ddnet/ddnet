@@ -1,22 +1,18 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <array> // std::size
 #include <atomic>
 #include <cctype>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <ctime>
-#include <thread>
+#include <iterator> // std::size
 
 #include "system.h"
 
 #include "lock_scope.h"
 #include "logger.h"
 
-#include <sys/stat.h>
 #include <sys/types.h>
 
 #include <chrono>
@@ -29,6 +25,7 @@
 
 #if defined(CONF_FAMILY_UNIX)
 #include <csignal>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
@@ -37,7 +34,6 @@
 /* unix net includes */
 #include <arpa/inet.h>
 #include <cerrno>
-#include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -58,10 +54,6 @@
 #include <mach/mach_time.h>
 #endif
 
-#ifdef CONF_PLATFORM_ANDROID
-#include <android/log.h>
-#endif
-
 #elif defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
@@ -70,9 +62,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include <direct.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <io.h>
 #include <process.h>
 #include <share.h>
@@ -266,6 +256,51 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 	return fread(buffer, 1, size, (FILE *)io);
 }
 
+void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
+{
+	long signed_len = io_length(io);
+	unsigned len = signed_len < 0 ? 1024 : (unsigned)signed_len; // use default initial size if we couldn't get the length
+	char *buffer = (char *)malloc(len + 1);
+	unsigned read = io_read(io, buffer, len + 1); // +1 to check if the file size is larger than expected
+	if(read < len)
+	{
+		buffer = (char *)realloc(buffer, read + 1);
+		len = read;
+	}
+	else if(read > len)
+	{
+		unsigned cap = 2 * read;
+		len = read;
+		buffer = (char *)realloc(buffer, cap);
+		while((read = io_read(io, buffer + len, cap - len)) != 0)
+		{
+			len += read;
+			if(len == cap)
+			{
+				cap *= 2;
+				buffer = (char *)realloc(buffer, cap);
+			}
+		}
+		buffer = (char *)realloc(buffer, len + 1);
+	}
+	buffer[len] = 0;
+	*result = buffer;
+	*result_len = len;
+}
+
+char *io_read_all_str(IOHANDLE io)
+{
+	void *buffer;
+	unsigned len;
+	io_read_all(io, &buffer, &len);
+	if(mem_has_null(buffer, len))
+	{
+		free(buffer);
+		return nullptr;
+	}
+	return (char *)buffer;
+}
+
 unsigned io_skip(IOHANDLE io, int size)
 {
 	fseek((FILE *)io, size, SEEK_CUR);
@@ -350,8 +385,8 @@ int io_sync(IOHANDLE io)
 #endif
 }
 
-#define ASYNC_BUFSIZE 8 * 1024
-#define ASYNC_LOCAL_BUFSIZE 64 * 1024
+#define ASYNC_BUFSIZE (8 * 1024)
+#define ASYNC_LOCAL_BUFSIZE (64 * 1024)
 
 // TODO: Use Thread Safety Analysis when this file is converted to C++
 struct ASYNCIO
@@ -937,11 +972,6 @@ int64_t time_freq()
 {
 	using namespace std::chrono_literals;
 	return std::chrono::nanoseconds(1s).count();
-}
-
-int64_t time_get_nanoseconds()
-{
-	return time_get_impl();
 }
 
 /* -----  network ----- */
@@ -3201,12 +3231,12 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 		if(centisecs >= day)
 			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / day,
 				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
-		// fall through
+		[[fallthrough]];
 	case TIME_HOURS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec);
-		// fall through
+		[[fallthrough]];
 	case TIME_MINS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
@@ -3214,7 +3244,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
-		// fall through
+		[[fallthrough]];
 	case TIME_MINS_CENTISECS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / min,
 			(centisecs % min) / sec, centisecs % sec);
@@ -3247,6 +3277,20 @@ void str_escape(char **dst, const char *src, const char *end)
 int mem_comp(const void *a, const void *b, int size)
 {
 	return memcmp(a, b, size);
+}
+
+int mem_has_null(const void *block, unsigned size)
+{
+	const unsigned char *bytes = (const unsigned char *)block;
+	unsigned i;
+	for(i = 0; i < size; i++)
+	{
+		if(bytes[i] == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void net_stats(NETSTATS *stats_inout)
@@ -4101,14 +4145,12 @@ void set_exception_handler_log_file(const char *log_file_path)
 #endif
 }
 
-// pure cpp code for the cpp system wrapper
-
-std::chrono::nanoseconds tw::time_get()
+std::chrono::nanoseconds time_get_nanoseconds()
 {
-	return std::chrono::nanoseconds(time_get_nanoseconds());
+	return std::chrono::nanoseconds(time_get_impl());
 }
 
-int tw::net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 {
 	using namespace std::chrono_literals;
 	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());

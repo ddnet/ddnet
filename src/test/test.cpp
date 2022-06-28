@@ -75,23 +75,23 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 
 void TestDeleteTestStorageFiles(const char *pPath)
 {
-	std::vector<CTestInfoPath> aEntries;
+	std::vector<CTestInfoPath> vEntries;
 	CTestCollectData Data;
 	str_copy(Data.m_aCurrentDir, pPath, sizeof(Data.m_aCurrentDir));
-	Data.m_pvEntries = &aEntries;
+	Data.m_pvEntries = &vEntries;
 	fs_listdir(Data.m_aCurrentDir, TestCollect, 0, &Data);
 
 	CTestInfoPath Path;
 	Path.m_IsDirectory = true;
 	str_copy(Path.m_aData, Data.m_aCurrentDir, sizeof(Path.m_aData));
-	aEntries.push_back(Path);
+	vEntries.push_back(Path);
 
 	// Sorts directories after files.
-	std::sort(aEntries.begin(), aEntries.end());
+	std::sort(vEntries.begin(), vEntries.end());
 
 	// Don't delete too many files.
-	ASSERT_LE(aEntries.size(), 10);
-	for(auto &Entry : aEntries)
+	ASSERT_LE(vEntries.size(), 10);
+	for(auto &Entry : vEntries)
 	{
 		if(Entry.m_IsDirectory)
 		{
@@ -114,7 +114,7 @@ CTestInfo::~CTestInfo()
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();

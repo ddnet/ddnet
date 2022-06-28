@@ -19,6 +19,7 @@
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
+#include <engine/shared/console.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
@@ -414,6 +415,14 @@ CServer::~CServer()
 		free(pCurrentMapData);
 	}
 
+	if(m_RunServer != UNINITIALIZED)
+	{
+		for(auto &Client : m_aClients)
+		{
+			free(Client.m_pPersistentData);
+		}
+	}
+
 	delete m_pRegister;
 	delete m_pConnectionPool;
 }
@@ -723,7 +732,7 @@ int CServer::Port() const
 
 int CServer::MaxClients() const
 {
-	return m_NetServer.MaxClients();
+	return m_RunServer == UNINITIALIZED ? 0 : m_NetServer.MaxClients();
 }
 
 int CServer::ClientCount() const
@@ -2490,20 +2499,18 @@ int CServer::LoadMap(const char *pMapName)
 
 	// load complete map into memory for download
 	{
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		m_aCurrentMapSize[MAP_TYPE_SIX] = (unsigned int)io_length(File);
 		free(m_apCurrentMapData[MAP_TYPE_SIX]);
-		m_apCurrentMapData[MAP_TYPE_SIX] = (unsigned char *)malloc(m_aCurrentMapSize[MAP_TYPE_SIX]);
-		io_read(File, m_apCurrentMapData[MAP_TYPE_SIX], m_aCurrentMapSize[MAP_TYPE_SIX]);
-		io_close(File);
+		void *pData;
+		Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIX]);
+		m_apCurrentMapData[MAP_TYPE_SIX] = (unsigned char *)pData;
 	}
 
 	// load sixup version of the map
 	if(Config()->m_SvSixup)
 	{
 		str_format(aBuf, sizeof(aBuf), "maps7/%s.map", pMapName);
-		IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
-		if(!File)
+		void *pData;
+		if(!Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIXUP]))
 		{
 			Config()->m_SvSixup = 0;
 			if(m_pRegister)
@@ -2516,11 +2523,8 @@ int CServer::LoadMap(const char *pMapName)
 		}
 		else
 		{
-			m_aCurrentMapSize[MAP_TYPE_SIXUP] = (unsigned int)io_length(File);
 			free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
-			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)malloc(m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			io_read(File, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			io_close(File);
+			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)pData;
 
 			m_aCurrentMapSha256[MAP_TYPE_SIXUP] = sha256(m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
 			m_aCurrentMapCrc[MAP_TYPE_SIXUP] = crc32(0, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
@@ -2911,11 +2915,6 @@ int CServer::Run()
 #if defined(CONF_UPNP)
 	m_UPnP.Shutdown();
 #endif
-
-	for(auto &Client : m_aClients)
-	{
-		free(Client.m_pPersistentData);
-	}
 
 	m_NetServer.Close();
 
@@ -3478,6 +3477,12 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CServer::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3707,6 +3712,7 @@ void CServer::RegisterCommands()
 	Console()->Register("name_bans", "", CFGFLAG_SERVER, ConNameBans, this, "List all name bans");
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
+	Console()->Chain("loglevel", ConchainLoglevel, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
@@ -3765,7 +3771,7 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 
 	for(int i = 1; i < argc; i++)
@@ -3780,22 +3786,22 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	std::vector<std::shared_ptr<ILogger>> apLoggers;
+	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 #if defined(CONF_PLATFORM_ANDROID)
-	apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
 #else
 	if(!Silent)
 	{
-		apLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
 	}
 #endif
 	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureFileLogger);
+	vpLoggers.push_back(pFutureFileLogger);
 	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureConsoleLogger);
+	vpLoggers.push_back(pFutureConsoleLogger);
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
-	apLoggers.push_back(pFutureAssertionLogger);
-	log_set_global_logger(log_logger_collection(std::move(apLoggers)).release());
+	vpLoggers.push_back(pFutureAssertionLogger);
+	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
 	if(secure_random_init() != 0)
 	{
@@ -3885,6 +3891,7 @@ int main(int argc, const char **argv)
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
 
+	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 	if(g_Config.m_Logfile[0])
 	{
 		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
@@ -3928,34 +3935,34 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 	if(!File)
 		return 0;
 
-	std::vector<char *> Lines;
+	std::vector<char *> vpLines;
 	char *pLine;
 	CLineReader Reader;
 	Reader.Init(File);
 	while((pLine = Reader.Get()))
 		if(str_length(pLine))
 			if(pLine[0] != '#')
-				Lines.push_back(pLine);
+				vpLines.push_back(pLine);
 
-	if(Lines.empty())
+	if(vpLines.empty())
 	{
 		return 0;
 	}
-	else if(Lines.size() == 1)
+	else if(vpLines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
 	else if(!Config()->m_SvAnnouncementRandom)
 	{
-		if(++m_AnnouncementLastLine >= Lines.size())
-			m_AnnouncementLastLine %= Lines.size();
+		if(++m_AnnouncementLastLine >= vpLines.size())
+			m_AnnouncementLastLine %= vpLines.size();
 	}
 	else
 	{
 		unsigned Rand;
 		do
 		{
-			Rand = rand() % Lines.size();
+			Rand = rand() % vpLines.size();
 		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
@@ -3963,7 +3970,7 @@ const char *CServer::GetAnnouncementLine(char const *pFileName)
 
 	io_close(File);
 
-	return Lines[m_AnnouncementLastLine];
+	return vpLines[m_AnnouncementLastLine];
 }
 
 int *CServer::GetIdMap(int ClientID)

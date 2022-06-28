@@ -1,9 +1,10 @@
 #ifndef GAME_SERVER_SAVE_H
 #define GAME_SERVER_SAVE_H
 
+#include <base/vmath.h>
+
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
-#include <game/server/gamecontroller.h>
 
 class IGameController;
 class CGameContext;

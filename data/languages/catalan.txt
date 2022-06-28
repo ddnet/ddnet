@@ -236,9 +236,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Sensibilitat del ratolí
-
 Move left
 == Moure's a l'esquerra
 
@@ -681,9 +678,6 @@ DDNet Client needs to be restarted to complete update!
 Please use a different name
 == Si us plau, fes servir un nom diferent
 
-Show console window
-== Mostra la finestra de la consola
-
 Show others
 == Mostrar altres
 
@@ -881,9 +875,6 @@ Welcome to DDNet
 
 Activate
 == Activar
-
-UI mouse s.
-== UI mouse s.
 
 File already exists, do you want to overwrite it?
 == L'arxiu ja existeix, vols reescriure'l?
@@ -1185,12 +1176,6 @@ Show client IDs
 Kill Messages
 == Missatges al matar
 
-Kill Message Normal Color
-== Color del missatge normal al matar
-
-Kill Message Highlight Color
-== Color del missatge ressaltat al matar
-
 Laser Outline Color
 == Color exterior del làser
 
@@ -1342,13 +1327,120 @@ Tutorial
 Can't find a Tutorial server
 == No s'ha pogut trobar un servidor del tutorial
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Toggle to edit your dummy settings
+== 
+
+Download community skins
 == 
 
 Choose default eyes when joining a server
 == 
 
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
 Allows maps to render with more detail
+== 
+
+Show dummy actions
+== 
+
+Show jump indicator
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1364,6 +1456,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+Extras
 == 
 
 Super

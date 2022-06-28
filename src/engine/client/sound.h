@@ -3,11 +3,13 @@
 #ifndef ENGINE_CLIENT_SOUND_H
 #define ENGINE_CLIENT_SOUND_H
 
-#include <engine/graphics.h>
+#include <engine/shared/video.h>
 #include <engine/sound.h>
-#include <engine/storage.h>
 
 #include <SDL_audio.h>
+
+class IEngineGraphics;
+class IStorage;
 
 class CSound : public IEngineSound
 {

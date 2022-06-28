@@ -3,6 +3,8 @@
 
 #include "entity.h"
 
+#include <game/collision.h>
+
 //////////////////////////////////////////////////
 // Entity
 //////////////////////////////////////////////////
@@ -22,7 +24,8 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	m_SnapTicks = -1;
 
 	// DDRace
-	m_pParent = 0;
+	m_pParent = nullptr;
+	m_pChild = nullptr;
 	m_DestroyTick = -1;
 	m_LastRenderTick = -1;
 }

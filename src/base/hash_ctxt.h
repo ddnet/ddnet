@@ -3,7 +3,7 @@
 
 #include "hash.h"
 #include "system.h"
-#include <stdint.h>
+#include <cstdint>
 
 #if defined(CONF_OPENSSL)
 #include <openssl/md5.h>
@@ -15,13 +15,13 @@
 #if defined(CONF_OPENSSL)
 // SHA256_CTX is defined in <openssl/sha.h>
 #else
-typedef struct
+struct SHA256_CTX
 {
 	uint64_t length;
 	uint32_t state[8];
 	uint32_t curlen;
 	unsigned char buf[64];
-} SHA256_CTX;
+};
 typedef md5_state_t MD5_CTX;
 #endif
 

@@ -13,6 +13,8 @@
 # 2022-03-22 cheeser0613
 # 2022-03-24 cheeser0613
 # 2022-05-14 cheeser0613
+# 2022-06-16 cheeser0613
+# 2022-06-27 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -156,7 +158,7 @@ Error
 == 錯誤
 
 Error loading demo
-== 回放讀取錯誤
+== 回放載入錯誤
 
 Favorite
 == 收藏
@@ -254,9 +256,6 @@ MOTD
 Map
 == 地圖
 
-Mouse sens.
-== 滑鼠靈敏度
-
 Move left
 == 向左移動
 
@@ -309,7 +308,7 @@ No password
 == 沒有密碼
 
 No servers found
-== 找不到任何伺服器
+== 未檢測到任何伺服器
 
 No servers match your filter criteria
 == 沒有伺服器滿足設定的過濾條件
@@ -654,9 +653,6 @@ Round
 Lht.
 == 亮度
 
-Show console window
-== 顯示控制檯視窗
-
 Automatically take statboard screenshot
 == 自動對統計板截圖
 
@@ -760,7 +756,7 @@ Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
 
 Try fast HTTP map download first
-== 優先嚐試用HTTP高速下載地圖
+== 優先嘗試用HTTP高速下載地圖
 
 DDNet %s is available:
 == DDNet %s 現已可用：
@@ -791,9 +787,6 @@ Connecting dummy
 
 Search
 == 搜尋
-
-UI mouse s.
-== 主頁面靈敏度
 
 Vanilla skins only
 == 只顯示原生外觀
@@ -1121,7 +1114,7 @@ Run server
 == 開啟伺服器
 
 Server executable not found, can't run server
-== 找不到伺服器的可執行檔案，無法開啟
+== 未檢測到伺服器的可執行檔案，無法開啟
 
 Editor
 == 編輯器
@@ -1178,7 +1171,7 @@ Themes directory
 == 主題目錄
 
 Download skins
-== 在線獲取外觀
+== 下載官方外觀
 
 Skin Database
 == 外觀數據庫
@@ -1309,12 +1302,6 @@ Refreshing...
 Kill Messages
 == 擊殺訊息
 
-Kill Message Normal Color
-== 其他玩家擊殺訊息顔色
-
-Kill Message Highlight Color
-== 玩家擊殺信息顔色
-
 Show local player's key presses
 == 顯示周圍玩家的按鍵輸入
 
@@ -1392,3 +1379,113 @@ Super
 
 Team %d
 == 隊伍 %d
+
+Position:
+== 坐標	
+
+Speed:
+== 速度
+
+Angle:
+== 角度
+
+Trying to determine UDP connectivity...
+== 正在嘗試檢測 UDP 連接...
+
+UDP seems to be filtered.
+== UDP 疑似被過濾
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP 與 TCP 的 IP 地址并不相同。請嘗試屏蔽 VPN 、代理網路以及網路加速器。
+
+No answer from server yet.
+== 伺服器無響應
+
+Download community skins
+== 下載社區外觀
+
+Enable controller
+== 啓用控制器
+
+Controller %d: %s
+== 控制器 %d: %s
+
+Click to cycle through all available controllers.
+== 點擊以切換其他控制器
+
+[Ingame controller mode]
+Relative
+== 相對
+
+[Ingame controller mode]
+Absolute
+== 絕對
+
+Ingame controller mode
+== 游戲内控制器瞄準模式
+
+Ingame controller sens.
+== 類比搖桿靈敏度（游戲）
+
+UI controller sens.
+== 類比遙感靈敏度（界面）
+
+Controller jitter tolerance
+== 類比搖桿錯位容錯
+
+No controller found. Plug in a controller and restart the game.
+== 未檢測到任何控制器。請重試重新連接控制器並重啓游戲。
+
+Device
+== 輸入設備
+
+Status
+== 狀態
+
+Aim bind
+== 操作軸綁定
+
+Controller Axis #%d
+== 類比搖桿 #%d
+
+Mouse
+== 滑鼠
+
+Ingame mouse sens.
+== 滑鼠靈敏度（游戲）
+
+UI mouse sens.
+== 滑鼠靈敏度（界面）
+
+Controller
+== 控制器
+
+Show dummy actions
+== 顯示分身狀態
+
+Show freeze bars
+== 顯示解凍進度條
+
+Show player position
+== 顯示玩家坐標
+
+Show player speed
+== 顯示玩家速度
+
+Show player target angle
+== 顯示玩家瞄準角度
+
+Show jump indicator
+== 顯示跳躍次數
+
+Opacity of freeze bars inside freeze
+== 解凍進度條不透明度
+
+Normal Color
+== 非相關訊息顔色
+
+Highlight Color
+== 相關訊息顔色
+
+Extras
+== 其他

@@ -254,7 +254,7 @@ void CKillMessages::OnRender()
 		x -= 44.0f;
 		if(m_aKillmsgs[r].m_Weapon >= 0)
 		{
-			Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeapons[m_aKillmsgs[r].m_Weapon]);
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[m_aKillmsgs[r].m_Weapon]);
 			Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, 4 + m_aKillmsgs[r].m_Weapon, x, y + 28);
 		}
 		x -= 52.0f;

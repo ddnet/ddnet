@@ -545,22 +545,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 
 					// load external
-					IOHANDLE SoundFile = pStorage->OpenFile(pName, IOFLAG_READ, IStorage::TYPE_ALL);
-					if(SoundFile)
+					if(pStorage->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 					{
-						// read the whole file into memory
-						pSound->m_DataSize = io_length(SoundFile);
-
-						if(pSound->m_DataSize > 0)
-						{
-							pSound->m_pData = malloc(pSound->m_DataSize);
-							io_read(SoundFile, pSound->m_pData, pSound->m_DataSize);
-						}
-						io_close(SoundFile);
-						if(pSound->m_DataSize > 0)
-						{
-							pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
-						}
+						pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 					}
 				}
 				else

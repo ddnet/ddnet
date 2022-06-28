@@ -136,8 +136,8 @@ void CServerBrowserPingCache::GetPingCache(const CEntry **ppEntries, int *pNumEn
 				return net_addr_comp(&a.m_Addr, &b.m_Addr) < 0;
 			}
 		};
-		std::vector<CEntry> aOldEntries;
-		std::swap(m_vEntries, aOldEntries);
+		std::vector<CEntry> vOldEntries;
+		std::swap(m_vEntries, vOldEntries);
 
 		// Remove duplicates, keeping newer ones.
 		std::stable_sort(m_vNewEntries.begin(), m_vNewEntries.end(), CAddrComparer());
@@ -158,18 +158,18 @@ void CServerBrowserPingCache::GetPingCache(const CEntry **ppEntries, int *pNumEn
 			m_vNewEntries.resize(To);
 		}
 		// Only keep the new entries where there are duplicates.
-		m_vEntries.reserve(m_vNewEntries.size() + aOldEntries.size());
+		m_vEntries.reserve(m_vNewEntries.size() + vOldEntries.size());
 		{
 			unsigned i = 0;
 			unsigned j = 0;
-			while(i < aOldEntries.size() && j < m_vNewEntries.size())
+			while(i < vOldEntries.size() && j < m_vNewEntries.size())
 			{
-				int Cmp = net_addr_comp(&aOldEntries[i].m_Addr, &m_vNewEntries[j].m_Addr);
+				int Cmp = net_addr_comp(&vOldEntries[i].m_Addr, &m_vNewEntries[j].m_Addr);
 				if(Cmp != 0)
 				{
 					if(Cmp < 0)
 					{
-						m_vEntries.push_back(aOldEntries[i]);
+						m_vEntries.push_back(vOldEntries[i]);
 						i++;
 					}
 					else
@@ -185,9 +185,9 @@ void CServerBrowserPingCache::GetPingCache(const CEntry **ppEntries, int *pNumEn
 				}
 			}
 			// Add the remaining elements.
-			for(; i < aOldEntries.size(); i++)
+			for(; i < vOldEntries.size(); i++)
 			{
-				m_vEntries.push_back(aOldEntries[i]);
+				m_vEntries.push_back(vOldEntries[i]);
 			}
 			for(; j < m_vNewEntries.size(); j++)
 			{

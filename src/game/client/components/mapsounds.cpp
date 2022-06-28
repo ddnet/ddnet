@@ -8,6 +8,7 @@
 #include <game/client/gameclient.h>
 
 #include <game/layers.h>
+#include <game/mapitems.h>
 
 #include "mapsounds.h"
 

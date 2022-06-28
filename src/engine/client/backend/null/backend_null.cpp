@@ -1,5 +1,7 @@
 #include "backend_null.h"
 
+#include <engine/client/backend_sdl.h>
+
 bool CCommandProcessorFragment_Null::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)

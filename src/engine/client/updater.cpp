@@ -242,17 +242,12 @@ bool CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
-	if(!File)
+	void *pBuf;
+	unsigned Length;
+	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 
-	long int Length = io_length(File);
-	char *pBuf = (char *)malloc(Length);
-	mem_zero(pBuf, Length);
-	io_read(File, pBuf, Length);
-	io_close(File);
-
-	json_value *pVersions = json_parse(pBuf, Length);
+	json_value *pVersions = json_parse((json_char *)pBuf, Length);
 	free(pBuf);
 
 	if(pVersions && pVersions->type == json_array)

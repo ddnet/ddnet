@@ -3,6 +3,7 @@
 #include "memheap.h"
 #include <base/system.h>
 #include <cstdint>
+#include <cstdlib>
 
 // allocates a new chunk to be used
 void CHeap::NewChunk()

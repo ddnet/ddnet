@@ -5,6 +5,7 @@
 
 #include <game/client/component.h>
 #include <game/client/components/menus.h>
+#include <game/generated/protocol.h>
 
 #include <game/client/render.h>
 
@@ -124,12 +125,12 @@ private:
 	bool m_RenderingStartedByServer;
 
 	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
-	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar);
+	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar);
 	static void GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter *pGhostChar);
 
 	void GetPath(char *pBuf, int Size, const char *pPlayerName, int Time = -1) const;
 
-	void AddInfos(const CNetObj_Character *pChar);
+	void AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar);
 	int GetSlot() const;
 
 	void CheckStart();

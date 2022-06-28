@@ -15,6 +15,7 @@
 # Deëivid!        2022-02-05 21:53:00
 # Deëivid!        2022-03-27 18:40:00
 # Deëivid!        2022-05-13 18:44:00
+# Deëivid!        2022-06-22 19:26:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -252,9 +253,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Sensib. del ratón
 
 Move left
 == Mover a la izquierda
@@ -799,9 +797,6 @@ Clan plates size
 Refresh Rate
 == Frecuencia de actualización
 
-Show console window
-== Mostrar ventana de consola
-
 Automatically take statboard screenshot
 == Tomar automáticamente la captura de pantalla del Statboard
 
@@ -876,9 +871,6 @@ Show entities
 
 Show HUD
 == Mostrar HUD
-
-UI mouse s.
-== Sens. del ratón en menú
 
 may cause delay
 == puede causar retraso
@@ -1307,12 +1299,6 @@ Refreshing...
 Kill Messages
 == Mensajes de Muerte
 
-Kill Message Normal Color
-== Color Normal de Mensajes de Muerte
-
-Kill Message Highlight Color
-== Color Destac. de Mensajes de Muerte
-
 Show local player's key presses
 == Mostrar las teclas presionadas por el jugador local
 
@@ -1376,9 +1362,6 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Opacidad
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
-
 Quads are used for background decoration
 == Las quads se usan para la decoración del fondo
 
@@ -1390,3 +1373,116 @@ Super
 
 Team %d
 == Equipo %d
+
+Position:
+== Posición:
+
+Speed:
+== Velocidad:
+
+Angle:
+== Ángulo:
+
+Trying to determine UDP connectivity...
+== Tratando de determinar la conexión UDP...
+
+UDP seems to be filtered.
+== UDP parece estar filtrado.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== Las direcciones IP TCP y UDP parecen ser diferentes. Intenta desactivar cualquier VPN, proxy o acelerador de red.
+
+No answer from server yet.
+== Aún no hay respuesta del servidor.
+
+Download community skins
+== Descargar skins de la comunidad
+
+Enable controller
+== Habilitar mando
+
+Controller %d: %s
+== Mando %d: %s
+
+Click to cycle through all available controllers.
+== Click acá para recorrer todos los mandos disponibles.
+
+[Ingame controller mode]
+Relative
+== Relativo
+
+[Ingame controller mode]
+Absolute
+== Absoluto
+
+Ingame controller mode
+== Modo del mando
+
+Ingame controller sens.
+== Sens. del mando en el juego
+
+UI controller sens.
+== Sens. del mando en el menú
+
+Controller jitter tolerance
+== Tolerancia a fluctuación del mando
+
+No controller found. Plug in a controller and restart the game.
+== No se encontró un mando. Conecta uno y reinicia el juego.
+
+Device
+== Dispositivo
+
+Status
+== Estado
+
+Aim bind
+== Apuntar
+
+Controller Axis #%d
+== Eje #%d del mando
+
+Mouse
+== Ratón
+
+Ingame mouse sens.
+== Sens. del ratón en el juego
+
+UI mouse sens.
+== Sens. del ratón en el menú
+
+Controller
+== Mando
+
+Show dummy actions
+== Mostrar acciones del dummy
+
+Show freeze bars
+== Mostrar barras de freeze
+
+Show player position
+== Mostrar la posición del jugador
+
+Show player speed
+== Mostrar la velocidad del jugador
+
+Show player target angle
+== Mostrar el ángulo del objetivo del jugador
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
+
+Show jump indicator
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 

@@ -3,8 +3,8 @@
 #include <base/logger.h>
 #include <base/system.h>
 
-#include <array> // std::size
 #include <cstdlib>
+#include <iterator> // std::size
 
 #include <thread>
 
@@ -200,7 +200,7 @@ void Run(unsigned short Port, NETADDR Dest)
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(8302, Addr);

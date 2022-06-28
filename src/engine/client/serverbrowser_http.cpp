@@ -189,7 +189,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		auto StartTime = tw::time_get();
+		auto StartTime = time_get_nanoseconds();
 		CHttpRequest *pGet = HttpGet(pUrl).release();
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
@@ -198,7 +198,7 @@ void CChooseMaster::CJob::Run()
 			m_pGet = std::unique_ptr<CHttpRequest>(pGet);
 		}
 		IEngine::RunJobBlocking(pGet);
-		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(tw::time_get() - StartTime);
+		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
@@ -296,7 +296,7 @@ private:
 	};
 
 	static bool Validate(json_value *pJson);
-	static bool Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers);
+	static bool Parse(json_value *pJson, std::vector<CEntry> *pvServers, std::vector<NETADDR> *pvLegacyServers);
 
 	IEngine *m_pEngine;
 	IConsole *m_pConsole;
@@ -413,14 +413,14 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
-	std::vector<CEntry> aServers;
-	std::vector<NETADDR> aLegacyServers;
-	return Parse(pJson, &aServers, &aLegacyServers);
+	std::vector<CEntry> vServers;
+	std::vector<NETADDR> vLegacyServers;
+	return Parse(pJson, &vServers, &vLegacyServers);
 }
-bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers, std::vector<NETADDR> *paLegacyServers)
+bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *pvServers, std::vector<NETADDR> *pvLegacyServers)
 {
-	std::vector<CEntry> aServers;
-	std::vector<NETADDR> aLegacyServers;
+	std::vector<CEntry> vServers;
+	std::vector<NETADDR> vLegacyServers;
 
 	const json_value &Json = *pJson;
 	const json_value &Servers = Json["servers"];
@@ -474,7 +474,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 				// Skip unknown addresses.
 				continue;
 			}
-			aServers.push_back({ParsedAddr, SetInfo});
+			vServers.push_back({ParsedAddr, SetInfo});
 		}
 	}
 	if(LegacyServers.type == json_array)
@@ -487,11 +487,11 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *paServers
 			{
 				return true;
 			}
-			aLegacyServers.push_back(ParsedAddr);
+			vLegacyServers.push_back(ParsedAddr);
 		}
 	}
-	*paServers = aServers;
-	*paLegacyServers = aLegacyServers;
+	*pvServers = vServers;
+	*pvLegacyServers = vLegacyServers;
 	return false;
 }
 

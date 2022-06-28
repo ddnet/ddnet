@@ -91,7 +91,7 @@ def main():
 
 		print("#ifndef GAME_GENERATED_PROTOCOL_H")
 		print("#define GAME_GENERATED_PROTOCOL_H")
-		print("#include <engine/shared/protocol.h>")
+		print("class CUnpacker;")
 		print("#include <engine/message.h>")
 		print(network.RawHeader)
 
@@ -169,8 +169,9 @@ def main():
 		lines = []
 
 		lines += ['#include "protocol.h"']
+		lines += ['#include <engine/shared/packer.h>']
 		lines += ['#include <engine/shared/protocol.h>']
-		lines += ['#include <engine/message.h>']
+		lines += ['#include <engine/shared/uuid_manager.h>']
 		lines += ['#include <game/mapitems_ex.h>']
 
 		lines += ['CNetObjHandler::CNetObjHandler()']

@@ -11,6 +11,7 @@
 #include <game/client/components/maplayers.h>
 
 #include <game/layers.h>
+#include <game/mapitems.h>
 
 #include "menu_background.h"
 
@@ -126,7 +127,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	pSelf->m_vThemes.push_back(Theme);
-	auto TimeNow = tw::time_get();
+	auto TimeNow = time_get_nanoseconds();
 	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
 	{
 		pSelf->Client()->UpdateAndSwap();
@@ -142,7 +143,7 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	if(IsDir || !pSuffix)
 		return 0;
 
-	auto TimeNow = tw::time_get();
+	auto TimeNow = time_get_nanoseconds();
 	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
 	{
 		pSelf->Client()->UpdateAndSwap();
@@ -223,10 +224,10 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		else if(str_comp(pMenuMap, "rand") == 0)
 		{
 			//make sure to load themes
-			std::vector<CTheme> &ThemesRef = GetThemes();
-			int RandomThemeIndex = rand() % (ThemesRef.size() - PREDEFINED_THEMES_COUNT);
-			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)ThemesRef.size())
-				pMenuMap = ThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.c_str();
+			std::vector<CTheme> &vThemesRef = GetThemes();
+			int RandomThemeIndex = rand() % (vThemesRef.size() - PREDEFINED_THEMES_COUNT);
+			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)vThemesRef.size())
+				pMenuMap = vThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.c_str();
 		}
 
 		char aBuf[128];
@@ -403,7 +404,7 @@ std::vector<CTheme> &CMenuBackground::GetThemes()
 		m_vThemes.emplace_back("auto", true, true); // auto theme
 		m_vThemes.emplace_back("rand", true, true); // random theme
 
-		m_ThemeScanStartTime = tw::time_get();
+		m_ThemeScanStartTime = time_get_nanoseconds();
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
 

@@ -117,7 +117,7 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 {
 	CServerBrowser *pThis = (CServerBrowser *)pUserData;
 
-	std::vector<int> aSortedServers;
+	std::vector<int> vSortedServers;
 	// Sort servers by IP address, ignoring port.
 	class CAddrComparer
 	{
@@ -132,37 +132,37 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 			return net_addr_comp(&Addr1, &Addr2) < 0;
 		}
 	};
-	aSortedServers.reserve(pThis->m_NumServers);
+	vSortedServers.reserve(pThis->m_NumServers);
 	for(int i = 0; i < pThis->m_NumServers; i++)
 	{
-		aSortedServers.push_back(i);
+		vSortedServers.push_back(i);
 	}
-	std::sort(aSortedServers.begin(), aSortedServers.end(), CAddrComparer{pThis});
+	std::sort(vSortedServers.begin(), vSortedServers.end(), CAddrComparer{pThis});
 
 	// Group the servers into those with same IP address (but differing
 	// port).
 	NETADDR Addr;
 	int Start = -1;
-	for(int i = 0; i <= (int)aSortedServers.size(); i++)
+	for(int i = 0; i <= (int)vSortedServers.size(); i++)
 	{
 		NETADDR NextAddr;
-		if(i < (int)aSortedServers.size())
+		if(i < (int)vSortedServers.size())
 		{
-			NextAddr = pThis->m_ppServerlist[aSortedServers[i]]->m_Addr;
+			NextAddr = pThis->m_ppServerlist[vSortedServers[i]]->m_Addr;
 			NextAddr.port = 0;
 		}
-		bool New = Start == -1 || i == (int)aSortedServers.size() || net_addr_comp(&Addr, &NextAddr) != 0;
+		bool New = Start == -1 || i == (int)vSortedServers.size() || net_addr_comp(&Addr, &NextAddr) != 0;
 		if(Start != -1 && New)
 		{
 			int Chosen = Start + secure_rand_below(i - Start);
-			CServerEntry *pChosen = pThis->m_ppServerlist[aSortedServers[Chosen]];
+			CServerEntry *pChosen = pThis->m_ppServerlist[vSortedServers[Chosen]];
 			pChosen->m_RequestIgnoreInfo = true;
 			pThis->QueueRequest(pChosen);
 			char aAddr[NETADDR_MAXSTRSIZE];
 			net_addr_str(&pChosen->m_Addr, aAddr, sizeof(aAddr), true);
 			dbg_msg("serverbrowse/dbg", "queuing ping request for %s", aAddr);
 		}
-		if(i < (int)aSortedServers.size() && New)
+		if(i < (int)vSortedServers.size() && New)
 		{
 			Start = i;
 			Addr = NextAddr;
@@ -573,7 +573,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
-				if(net_addr_comp(&Addr, &pCntr->m_vServers[j]) == 0)
+				if(net_addr_comp(&Addr, &pCntr->m_aServers[j]) == 0)
 				{
 					pEntry->m_Info.m_Official = true;
 					break;
@@ -957,13 +957,13 @@ void CServerBrowser::UpdateFromHttp()
 			bool m_FallbackToPing;
 			bool m_Got;
 		};
-		std::vector<CWantedAddr> aWantedAddresses;
+		std::vector<CWantedAddr> vWantedAddresses;
 		int LegacySetType;
 		if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 		{
 			for(int i = 0; i < m_NumFavoriteServers; i++)
 			{
-				aWantedAddresses.push_back(CWantedAddr{m_aFavoriteServers[i], m_aFavoriteServersAllowPing[i], false});
+				vWantedAddresses.push_back(CWantedAddr{m_aFavoriteServers[i], m_aFavoriteServersAllowPing[i], false});
 			}
 			LegacySetType = IServerBrowser::SET_FAV_ADD;
 		}
@@ -1016,21 +1016,21 @@ void CServerBrowser::UpdateFromHttp()
 
 					if(DDNetFiltered(pExcludeTypes, pCntr->m_aTypes[g]))
 						continue;
-					aWantedAddresses.push_back(CWantedAddr{pCntr->m_vServers[g], false, false});
+					vWantedAddresses.push_back(CWantedAddr{pCntr->m_aServers[g], false, false});
 				}
 			}
 		}
-		std::vector<int> aSortedServers;
-		std::vector<int> aSortedLegacyServers;
-		aSortedServers.reserve(NumServers);
+		std::vector<int> vSortedServers;
+		std::vector<int> vSortedLegacyServers;
+		vSortedServers.reserve(NumServers);
 		for(int i = 0; i < NumServers; i++)
 		{
-			aSortedServers.push_back(i);
+			vSortedServers.push_back(i);
 		}
-		aSortedLegacyServers.reserve(NumLegacyServers);
+		vSortedLegacyServers.reserve(NumLegacyServers);
 		for(int i = 0; i < NumLegacyServers; i++)
 		{
-			aSortedLegacyServers.push_back(i);
+			vSortedLegacyServers.push_back(i);
 		}
 
 		class CWantedAddrComparer
@@ -1060,16 +1060,16 @@ void CServerBrowser::UpdateFromHttp()
 			}
 		};
 
-		std::sort(aWantedAddresses.begin(), aWantedAddresses.end(), CWantedAddrComparer());
-		std::sort(aSortedServers.begin(), aSortedServers.end(), CAddrComparer{m_pHttp});
-		std::sort(aSortedLegacyServers.begin(), aSortedLegacyServers.end(), CLegacyAddrComparer{m_pHttp});
+		std::sort(vWantedAddresses.begin(), vWantedAddresses.end(), CWantedAddrComparer());
+		std::sort(vSortedServers.begin(), vSortedServers.end(), CAddrComparer{m_pHttp});
+		std::sort(vSortedLegacyServers.begin(), vSortedLegacyServers.end(), CLegacyAddrComparer{m_pHttp});
 
 		unsigned i = 0;
 		unsigned j = 0;
 		int p = 0;
-		while(i < aWantedAddresses.size() && j < aSortedServers.size())
+		while(i < vWantedAddresses.size() && j < vSortedServers.size())
 		{
-			int Cmp = net_addr_comp(&aWantedAddresses[i].m_Addr, &m_pHttp->ServerAddress(aSortedServers[j]));
+			int Cmp = net_addr_comp(&vWantedAddresses[i].m_Addr, &m_pHttp->ServerAddress(vSortedServers[j]));
 			if(Cmp != 0)
 			{
 				if(Cmp < 0)
@@ -1082,10 +1082,10 @@ void CServerBrowser::UpdateFromHttp()
 				}
 				continue;
 			}
-			aWantedAddresses[i].m_Got = true;
+			vWantedAddresses[i].m_Got = true;
 			NETADDR Addr;
 			CServerInfo Info;
-			m_pHttp->Server(aSortedServers[j], &Addr, &Info);
+			m_pHttp->Server(vSortedServers[j], &Addr, &Info);
 			ServerBrowserFillEstimatedLatency(OwnLocation, pPingEntries, NumPingEntries, &p, Addr, &Info);
 			Info.m_HasRank = HasRank(Info.m_aMap);
 			Set(Addr, IServerBrowser::SET_HTTPINFO, -1, &Info);
@@ -1094,9 +1094,9 @@ void CServerBrowser::UpdateFromHttp()
 		}
 		i = 0;
 		j = 0;
-		while(i < aWantedAddresses.size() && j < aSortedLegacyServers.size())
+		while(i < vWantedAddresses.size() && j < vSortedLegacyServers.size())
 		{
-			int Cmp = net_addr_comp(&aWantedAddresses[i].m_Addr, &m_pHttp->LegacyServer(aSortedLegacyServers[j]));
+			int Cmp = net_addr_comp(&vWantedAddresses[i].m_Addr, &m_pHttp->LegacyServer(vSortedLegacyServers[j]));
 			if(Cmp != 0)
 			{
 				if(Cmp < 0)
@@ -1109,12 +1109,12 @@ void CServerBrowser::UpdateFromHttp()
 				}
 				continue;
 			}
-			aWantedAddresses[i].m_Got = true;
-			Set(m_pHttp->LegacyServer(aSortedLegacyServers[j]), LegacySetType, -1, nullptr);
+			vWantedAddresses[i].m_Got = true;
+			Set(m_pHttp->LegacyServer(vSortedLegacyServers[j]), LegacySetType, -1, nullptr);
 			i++;
 			j++;
 		}
-		for(const CWantedAddr &Wanted : aWantedAddresses)
+		for(const CWantedAddr &Wanted : vWantedAddresses)
 		{
 			if(!Wanted.m_Got)
 			{
@@ -1415,7 +1415,7 @@ void CServerBrowser::LoadDDNetServers()
 						continue;
 					}
 					const char *pStr = json_string_get(pAddr);
-					net_addr_from_str(&pCntr->m_vServers[pCntr->m_NumServers], pStr);
+					net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
 					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
 				}
 			}
@@ -1434,7 +1434,7 @@ void CServerBrowser::RecheckOfficial()
 			CNetworkCountry *pCntr = &Network.m_aCountries[i];
 			for(int j = 0; j < pCntr->m_NumServers; j++)
 			{
-				CServerEntry *pEntry = Find(pCntr->m_vServers[j]);
+				CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
 				if(pEntry)
 				{
 					pEntry->m_Info.m_Official = true;
@@ -1480,26 +1480,14 @@ int CServerBrowser::HasRank(const char *pMap)
 
 void CServerBrowser::LoadDDNetInfoJson()
 {
-	IOHANDLE File = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-	if(!File)
+	void *pBuf;
+	unsigned Length;
+	if(!m_pStorage->ReadFile(DDNET_INFO, IStorage::TYPE_SAVE, &pBuf, &Length))
 		return;
-
-	const int Length = io_length(File);
-	if(Length <= 0)
-	{
-		io_close(File);
-		return;
-	}
-
-	char *pBuf = (char *)malloc(Length);
-	pBuf[0] = '\0';
-
-	io_read(File, pBuf, Length);
-	io_close(File);
 
 	json_value_free(m_pDDNetInfo);
 
-	m_pDDNetInfo = json_parse(pBuf, Length);
+	m_pDDNetInfo = json_parse((json_char *)pBuf, Length);
 
 	free(pBuf);
 
@@ -1538,7 +1526,7 @@ const char *CServerBrowser::GetTutorialServer()
 		CNetworkCountry *pCntr = &pNetwork->m_aCountries[i];
 		for(int j = 0; j < pCntr->m_NumServers; j++)
 		{
-			CServerEntry *pEntry = Find(pCntr->m_vServers[j]);
+			CServerEntry *pEntry = Find(pCntr->m_aServers[j]);
 			if(!pEntry)
 				continue;
 			if(str_find(pEntry->m_Info.m_aName, "(Tutorial)") == 0)

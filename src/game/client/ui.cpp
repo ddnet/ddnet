@@ -164,11 +164,24 @@ bool CUI::MouseInside(const CUIRect *pRect) const
 	return pRect->Inside(m_MouseX, m_MouseY);
 }
 
-void CUI::ConvertMouseMove(float *x, float *y) const
+void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
 {
-	float Fac = (float)(g_Config.m_UiMousesens) / g_Config.m_InpMousesens;
-	*x = *x * Fac;
-	*y = *y * Fac;
+	float Factor = 1.0f;
+	switch(CursorType)
+	{
+	case IInput::CURSOR_MOUSE:
+		Factor = g_Config.m_UiMousesens / 100.0f;
+		break;
+	case IInput::CURSOR_JOYSTICK:
+		Factor = g_Config.m_UiControllerSens / 100.0f;
+		break;
+	default:
+		dbg_msg("assert", "CUI::ConvertMouseMove CursorType %d", (int)CursorType);
+		dbg_break();
+		break;
+	}
+	*pX *= Factor;
+	*pY *= Factor;
 }
 
 float CUI::ButtonColorMul(const void *pID)

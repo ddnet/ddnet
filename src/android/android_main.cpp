@@ -65,18 +65,18 @@ void InitAndroid()
 	CLineReader LineReader;
 	LineReader.Init(pIO);
 	const char *pReadLine = NULL;
-	std::vector<std::string> Lines;
+	std::vector<std::string> vLines;
 	while((pReadLine = LineReader.Get()))
 	{
-		Lines.push_back(pReadLine);
+		vLines.push_back(pReadLine);
 	}
 	io_close(pIO);
 
 	// first line is the whole hash
 	std::string AllAsOne;
-	for(size_t i = 1; i < Lines.size(); ++i)
+	for(size_t i = 1; i < vLines.size(); ++i)
 	{
-		AllAsOne.append(Lines[i]);
+		AllAsOne.append(vLines[i]);
 		AllAsOne.append("\n");
 	}
 	SHA256_DIGEST ShaAll;
@@ -97,21 +97,21 @@ void InitAndroid()
 	}
 
 	SHA256_DIGEST ShaAllFile;
-	sha256_from_str(&ShaAllFile, Lines[0].c_str());
+	sha256_from_str(&ShaAllFile, vLines[0].c_str());
 
 	// TODO: check files individually
 	if(!GotSHA || sha256_comp(ShaAllFile, ShaAll) != 0)
 	{
 		// then the files
-		for(size_t i = 1; i < Lines.size(); ++i)
+		for(size_t i = 1; i < vLines.size(); ++i)
 		{
 			std::string FileName, Hash;
 			std::string::size_type n = 0;
 			std::string::size_type c = 0;
-			while((c = Lines[i].find(' ', n)) != std::string::npos)
+			while((c = vLines[i].find(' ', n)) != std::string::npos)
 				n = c + 1;
-			FileName = Lines[i].substr(0, n - 1);
-			Hash = Lines[i].substr(n + 1);
+			FileName = vLines[i].substr(0, n - 1);
+			Hash = vLines[i].substr(n + 1);
 
 			std::string AssetFileName = std::string("asset_integrity_files/") + FileName;
 			SDL_RWops *pF = SDL_RWFromFile(AssetFileName.c_str(), "rb");

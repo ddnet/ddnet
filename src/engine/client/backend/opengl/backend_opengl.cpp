@@ -1,5 +1,8 @@
 #include "backend_opengl.h"
-#include "engine/graphics.h"
+
+#include <engine/graphics.h>
+
+#include <engine/client/backend_sdl.h>
 
 #include <base/detect.h>
 
@@ -11,7 +14,7 @@
 
 #include <engine/client/backend/glsl_shader_compiler.h>
 
-#include <engine/shared/image_manipulation.h>
+#include <engine/gfx/image_manipulation.h>
 
 #ifndef BACKEND_AS_OPENGL_ES
 #include <GL/glew.h>
@@ -282,7 +285,7 @@ GfxOpenGLMessageCallback(GLenum source,
 }
 #endif
 
-bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData)
+bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData)
 {
 	if(m_CanvasWidth == 0 || m_CanvasHeight == 0)
 	{
@@ -293,20 +296,20 @@ bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, ui
 		Width = m_CanvasWidth;
 		Height = m_CanvasHeight;
 		Format = CImageInfo::FORMAT_RGBA;
-		DstData.resize((size_t)Width * (Height + 1) * 4); // +1 for flipping image
+		vDstData.resize((size_t)Width * (Height + 1) * 4); // +1 for flipping image
 		glReadBuffer(GL_FRONT);
 		GLint Alignment;
 		glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, m_CanvasWidth, m_CanvasHeight, GL_RGBA, GL_UNSIGNED_BYTE, DstData.data());
+		glReadPixels(0, 0, m_CanvasWidth, m_CanvasHeight, GL_RGBA, GL_UNSIGNED_BYTE, vDstData.data());
 		glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
 
-		uint8_t *pTempRow = DstData.data() + Width * Height * 4;
+		uint8_t *pTempRow = vDstData.data() + Width * Height * 4;
 		for(uint32_t Y = 0; Y < Height / 2; ++Y)
 		{
-			mem_copy(pTempRow, DstData.data() + Y * Width * 4, Width * 4);
-			mem_copy(DstData.data() + Y * Width * 4, DstData.data() + ((Height - Y) - 1) * Width * 4, Width * 4);
-			mem_copy(DstData.data() + ((Height - Y) - 1) * Width * 4, pTempRow, Width * 4);
+			mem_copy(pTempRow, vDstData.data() + Y * Width * 4, Width * 4);
+			mem_copy(vDstData.data() + Y * Width * 4, vDstData.data() + ((Height - Y) - 1) * Width * 4, Width * 4);
+			mem_copy(vDstData.data() + ((Height - Y) - 1) * Width * 4, pTempRow, Width * 4);
 		}
 
 		return true;
@@ -318,7 +321,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	m_IsOpenGLES = pCommand->m_RequestedBackend == BACKEND_TYPE_OPENGL_ES;
 
 	TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
-	ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) { return GetPresentedImageData(Width, Height, Format, DstData); };
+	ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
 	dbg_msg("opengl", "Vendor string: %s", pVendorString);
@@ -535,6 +538,8 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_3DTextures = false;
 			pCommand->m_pCapabilities->m_2DArrayTextures = false;
 			pCommand->m_pCapabilities->m_NPOTTextures = false;
+
+			pCommand->m_pCapabilities->m_TrianglesAsQuads = false;
 		}
 		else
 		{
@@ -548,6 +553,8 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 			pCommand->m_pCapabilities->m_3DTextures = true;
 			pCommand->m_pCapabilities->m_2DArrayTextures = true;
 			pCommand->m_pCapabilities->m_NPOTTextures = true;
+
+			pCommand->m_pCapabilities->m_TrianglesAsQuads = true;
 		}
 	}
 
@@ -1816,6 +1823,8 @@ void CCommandProcessorFragment_OpenGL2::Cmd_Shutdown(const SCommand_Shutdown *pC
 	delete m_pTileProgramTextured;
 	delete m_pPrimitive3DProgram;
 	delete m_pPrimitive3DProgramTextured;
+	for(auto &BufferObject : m_vBufferObjectIndices)
+		free(BufferObject.m_pData);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand)

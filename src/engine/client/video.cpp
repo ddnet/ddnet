@@ -1,6 +1,5 @@
 #if defined(CONF_VIDEORECORDER)
 
-#include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
@@ -11,6 +10,8 @@
 extern "C" {
 #include <libavutil/avutil.h>
 #include <libavutil/opt.h>
+#include <libswresample/swresample.h>
+#include <libswscale/swscale.h>
 };
 
 #include <memory>
@@ -30,7 +31,7 @@ using namespace std::chrono_literals;
 const size_t FORMAT_GL_NCHANNELS = 4;
 LOCK g_WriteLock = 0;
 
-CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, IConsole *pConsole, int Width, int Height, const char *pName) :
+CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName) :
 	m_pGraphics(pGraphics),
 	m_pStorage(pStorage),
 	m_pSound(pSound)

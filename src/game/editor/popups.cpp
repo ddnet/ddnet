@@ -138,11 +138,11 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		if(pEditor->DoButton_Editor(&s_DeleteButton, "Clean up game tiles", 0, &Button, 0, "Removes game tiles that aren't based on a layer"))
 		{
 			// gather all tile layers
-			std::vector<CLayerTiles *> Layers;
+			std::vector<CLayerTiles *> vpLayers;
 			for(auto &pLayer : pEditor->m_Map.m_pGameGroup->m_vpLayers)
 			{
 				if(pLayer != pEditor->m_Map.m_pGameLayer && pLayer->m_Type == LAYERTYPE_TILES)
-					Layers.push_back(static_cast<CLayerTiles *>(pLayer));
+					vpLayers.push_back(static_cast<CLayerTiles *>(pLayer));
 			}
 
 			// search for unneeded game tiles
@@ -154,7 +154,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 						continue;
 
 					bool Found = false;
-					for(const auto &pLayer : Layers)
+					for(const auto &pLayer : vpLayers)
 					{
 						if(x < pLayer->m_Width && y < pLayer->m_Height && pLayer->m_pTiles[y * pLayer->m_Width + x].m_Index)
 						{
@@ -489,8 +489,8 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	std::vector<CQuad *> lQuads = pEditor->GetSelectedQuads();
-	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
+	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
+	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
 
 	CUIRect Button;
 
@@ -517,7 +517,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_AspectRatioButton = 0;
 		if(pEditor->DoButton_Editor(&s_AspectRatioButton, "Aspect ratio", 0, &Button, 0, "Resizes the current Quad based on the aspect ratio of the image"))
 		{
-			for(auto &pQuad : lQuads)
+			for(auto &pQuad : vpQuads)
 			{
 				int Top = pQuad->m_aPoints[0].y;
 				int Left = pQuad->m_aPoints[0].x;
@@ -555,7 +555,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_AlignButton = 0;
 	if(pEditor->DoButton_Editor(&s_AlignButton, "Align", 0, &Button, 0, "Aligns coordinates of the quad points"))
 	{
-		for(auto &pQuad : lQuads)
+		for(auto &pQuad : vpQuads)
 		{
 			for(int k = 1; k < 4; k++)
 			{
@@ -573,7 +573,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_Button = 0;
 	if(pEditor->DoButton_Editor(&s_Button, "Square", 0, &Button, 0, "Squares the current quad"))
 	{
-		for(auto &pQuad : lQuads)
+		for(auto &pQuad : vpQuads)
 		{
 			int Top = pQuad->m_aPoints[0].y;
 			int Left = pQuad->m_aPoints[0].x;
@@ -647,7 +647,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
 	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
 
-	for(auto &pQuad : lQuads)
+	for(auto &pQuad : vpQuads)
 	{
 		if(Prop == PROP_POS_X)
 		{
@@ -898,8 +898,8 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	std::vector<CQuad *> lQuads = pEditor->GetSelectedQuads();
-	CQuad *pCurrentQuad = lQuads[pEditor->m_SelectedQuadIndex];
+	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
+	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
 
 	enum
 	{
@@ -937,7 +937,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
-	for(auto &pQuad : lQuads)
+	for(auto &pQuad : vpQuads)
 	{
 		if(Prop == PROP_POS_X)
 		{

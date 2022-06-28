@@ -84,7 +84,7 @@ struct CFontSizeData
 
 #define MIN_FONT_SIZE 6
 #define MAX_FONT_SIZE 128
-#define NUM_FONT_SIZES MAX_FONT_SIZE - MIN_FONT_SIZE + 1
+#define NUM_FONT_SIZES (MAX_FONT_SIZE - MIN_FONT_SIZE + 1)
 
 class CFont
 {
@@ -400,7 +400,7 @@ class CTextRender : public IEngineTextRender
 			return false;
 
 		// skyline bottom left algorithm
-		std::vector<int> &SkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
+		std::vector<int> &vSkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
 
 		// search a fitting area with less pixel loss
 		int SmallestPixelLossAreaX = 0;
@@ -408,27 +408,27 @@ class CTextRender : public IEngineTextRender
 		int SmallestPixelLossCurPixelLoss = pFont->m_CurTextureDimensions[TextureIndex] * pFont->m_CurTextureDimensions[TextureIndex];
 
 		bool FoundAnyArea = false;
-		for(size_t i = 0; i < SkylineHeights.size(); i++)
+		for(size_t i = 0; i < vSkylineHeights.size(); i++)
 		{
-			int CurHeight = SkylineHeights[i];
+			int CurHeight = vSkylineHeights[i];
 			int CurPixelLoss = 0;
 			// find width pixels, and we are happy
 			int AreaWidth = 1;
-			for(size_t n = i + 1; n < i + Width && n < SkylineHeights.size(); ++n)
+			for(size_t n = i + 1; n < i + Width && n < vSkylineHeights.size(); ++n)
 			{
 				++AreaWidth;
-				if(SkylineHeights[n] <= CurHeight)
+				if(vSkylineHeights[n] <= CurHeight)
 				{
-					CurPixelLoss += CurHeight - SkylineHeights[n];
+					CurPixelLoss += CurHeight - vSkylineHeights[n];
 				}
 				// if the height changed, we will use that new height and adjust the pixel loss
 				else
 				{
 					CurPixelLoss = 0;
-					CurHeight = SkylineHeights[n];
+					CurHeight = vSkylineHeights[n];
 					for(size_t l = i; l <= n; ++l)
 					{
-						CurPixelLoss += CurHeight - SkylineHeights[l];
+						CurPixelLoss += CurHeight - vSkylineHeights[l];
 					}
 				}
 			}
@@ -460,7 +460,7 @@ class CTextRender : public IEngineTextRender
 			PosY = SmallestPixelLossAreaY;
 			for(int i = PosX; i < PosX + Width; ++i)
 			{
-				SkylineHeights[i] = PosY + Height;
+				vSkylineHeights[i] = PosY + Height;
 			}
 			return true;
 		}
@@ -626,7 +626,7 @@ public:
 		m_FTLibrary = 0;
 
 		m_RenderFlags = 0;
-		m_CursorRenderTime = tw::time_get();
+		m_CursorRenderTime = time_get_nanoseconds();
 	}
 
 	virtual ~CTextRender()
@@ -699,11 +699,11 @@ public:
 		IOHANDLE File = pStorage->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 		if(File)
 		{
-			size_t Size = io_length(File);
-			unsigned char *pBuf = (unsigned char *)malloc(Size);
-			io_read(File, pBuf, Size);
+			void *pBuf;
+			unsigned Size;
+			io_read_all(File, &pBuf, &Size);
 			io_close(File);
-			LoadFont(aFilename, pBuf, Size);
+			LoadFont(aFilename, (unsigned char *)pBuf, Size);
 		}
 	}
 
@@ -719,7 +719,7 @@ public:
 			return NULL;
 		}
 
-		dbg_msg("textrender", "loaded pFont from '%s'", pFilename);
+		dbg_msg("textrender", "loaded font from '%s'", pFilename);
 
 		pFont->m_pBuf = (void *)pBuf;
 		pFont->m_CurTextureDimensions[0] = 1024;
@@ -779,7 +779,7 @@ public:
 
 	void SetDefaultFont(CFont *pFont) override
 	{
-		dbg_msg("textrender", "default pFont set %p", pFont);
+		dbg_msg("textrender", "default font set to '%s'", pFont->m_aFilename);
 		m_pDefaultFont = pFont;
 		m_pCurFont = m_pDefaultFont;
 	}
@@ -1100,7 +1100,7 @@ public:
 		float CursorOuterWidth = CursorInnerWidth * 2;
 		float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
 
-		std::vector<IGraphics::CQuadItem> SelectionQuads;
+		std::vector<IGraphics::CQuadItem> vSelectionQuads;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
 		bool SelectionUsedRelease = false;
@@ -1409,7 +1409,7 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						SelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
+						vSelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
 					}
 
 					LastSelX = SelX;
@@ -1491,7 +1491,7 @@ public:
 			}
 		}
 
-		bool HasSelection = !SelectionQuads.empty() && SelectionUsedPress && SelectionUsedRelease;
+		bool HasSelection = !vSelectionQuads.empty() && SelectionUsedPress && SelectionUsedRelease;
 		if((HasSelection || HasCursor) && IsRendered)
 		{
 			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -1500,7 +1500,7 @@ public:
 			if(HasCursor)
 				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, CursorQuads, 2);
 			if(HasSelection)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &SelectionQuads[0], (int)SelectionQuads.size());
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &vSelectionQuads[0], (int)vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			TextContainer.m_HasCursor = HasCursor;
@@ -1648,7 +1648,7 @@ public:
 		{
 			if(TextContainer.m_HasCursor)
 			{
-				auto CurTime = tw::time_get();
+				auto CurTime = time_get_nanoseconds();
 
 				Graphics()->TextureClear();
 				if((CurTime - m_CursorRenderTime) > 500ms)
@@ -1659,7 +1659,7 @@ public:
 					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
 				}
 				if((CurTime - m_CursorRenderTime) > 1s)
-					m_CursorRenderTime = tw::time_get();
+					m_CursorRenderTime = time_get_nanoseconds();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}

@@ -866,7 +866,7 @@ void CHud::RenderCursor()
 	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponCursors[CurWeapon]);
+	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CursorOffset[CurWeapon], m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
 }
 
@@ -881,7 +881,7 @@ void CHud::PrepareAmmoHealthAndArmorQuads()
 	{
 		// 0.6
 		for(int n = 0; n < 10; n++)
-			Array[n] = IGraphics::CQuadItem(x + n * 12, y + 24, 10, 10);
+			Array[n] = IGraphics::CQuadItem(x + n * 12, y, 10, 10);
 
 		m_AmmoOffset[i] = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
@@ -890,12 +890,12 @@ void CHud::PrepareAmmoHealthAndArmorQuads()
 		{
 			// special case for 0.7 grenade
 			for(int n = 0; n < 10; n++)
-				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y + 24, 10, 10);
+				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y, 10, 10);
 		}
 		else
 		{
 			for(int n = 0; n < 10; n++)
-				Array[n] = IGraphics::CQuadItem(x + n * 12, y + 24, 12, 12);
+				Array[n] = IGraphics::CQuadItem(x + n * 12, y, 12, 12);
 		}
 
 		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
@@ -950,25 +950,39 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	bool IsSixupGameSkin = m_pClient->m_GameSkin.IsSixup();
 	int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
 
-	// ammo display
-	int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
-	if(m_pClient->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon].IsValid())
+	if(GameClient()->m_GameInfo.m_HudAmmo)
 	{
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteWeaponProjectiles[CurWeapon]);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10));
+		// ammo display
+		float AmmoOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
+		int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
+		if(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
+		{
+			Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
+			if(AmmoOffsetY > 0)
+			{
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10), 0, AmmoOffsetY);
+			}
+			else
+			{
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AmmoOffset[CurWeapon] + QuadOffsetSixup, minimum(pCharacter->m_AmmoCount, 10));
+			}
+		}
 	}
 
-	// health display
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthFull);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, minimum(pCharacter->m_Health, 10));
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthEmpty);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
+	if(GameClient()->m_GameInfo.m_HudHealthArmor)
+	{
+		// health display
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthFull);
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, minimum(pCharacter->m_Health, 10));
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthEmpty);
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
 
-	// armor display
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorFull);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, minimum(pCharacter->m_Armor, 10));
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorEmpty);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
+		// armor display
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorFull);
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, minimum(pCharacter->m_Armor, 10));
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorEmpty);
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
+	}
 }
 
 void CHud::PreparePlayerStateQuads()
@@ -1015,6 +1029,7 @@ void CHud::PreparePlayerStateQuads()
 	m_NoCollisionOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoHookHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoHammerHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_NoGunHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoShotgunHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoGrenadeHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_NoLaserHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -1037,65 +1052,80 @@ void CHud::RenderPlayerState(const int ClientID)
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-
-	int TotalJumpsToDisplay, AvailableJumpsToDisplay;
-	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	int TotalJumpsToDisplay = 0, AvailableJumpsToDisplay = 0;
+	if(g_Config.m_ClShowJumpsIndicator)
 	{
-		bool Grounded = false;
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
-			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
-			Grounded = true;
+			bool Grounded = false;
+			if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
+				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			{
+				Grounded = true;
+			}
+			if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
+				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			{
+				Grounded = true;
+			}
+
+			int UsedJumps = pCharacter->m_JumpedTotal;
+			if(pCharacter->m_Jumps > 1)
+			{
+				UsedJumps += !Grounded;
+			}
+			else if(pCharacter->m_Jumps == 1)
+			{
+				// If the player has only one jump, each jump is the last one
+				UsedJumps = pCharacter->m_Jumped & 2;
+			}
+			else if(pCharacter->m_Jumps == -1)
+			{
+				// The player has only one ground jump
+				UsedJumps = !Grounded;
+			}
+
+			if(pCharacter->m_EndlessJump && UsedJumps >= abs(pCharacter->m_Jumps))
+			{
+				UsedJumps = abs(pCharacter->m_Jumps) - 1;
+			}
+
+			int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
+			if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
+			{
+				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
+				UnusedJumps = 1;
+			}
+			TotalJumpsToDisplay = maximum(minimum(abs(pCharacter->m_Jumps), 10), 0);
+			AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
-		if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
-			   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+		else
 		{
-			Grounded = true;
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = abs(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
 		}
 
-		int UsedJumps = pCharacter->m_JumpedTotal;
-		if(pCharacter->m_Jumps > 1)
+		// render available and used jumps
+		int JumpsOffsetY = ((GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
+				    (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
+		if(JumpsOffsetY > 0)
 		{
-			UsedJumps += !Grounded;
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay, 0, JumpsOffsetY);
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay, 0, JumpsOffsetY);
 		}
-		else if(pCharacter->m_Jumps == 1)
+		else
 		{
-			// If the player has only one jump, each jump is the last one
-			UsedJumps = pCharacter->m_Jumped & 2;
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
 		}
-		else if(pCharacter->m_Jumps == -1)
-		{
-			// The player has only one ground jump
-			UsedJumps = !Grounded;
-		}
-
-		if(pCharacter->m_EndlessJump && UsedJumps >= abs(pCharacter->m_Jumps))
-		{
-			UsedJumps = abs(pCharacter->m_Jumps) - 1;
-		}
-
-		int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
-		if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
-		{
-			// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
-			UnusedJumps = 1;
-		}
-		TotalJumpsToDisplay = maximum(minimum(abs(pCharacter->m_Jumps), 10), 0);
-		AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 	}
-	else
-	{
-		TotalJumpsToDisplay = AvailableJumpsToDisplay = abs(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
-	}
-
-	// render available and used jumps
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
-	Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
 
 	float x = 5 + 12;
-	float y = 5 + 12;
+	float y = (5 + 12 + (GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
+		   (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
 
 	// render weapons
 	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
@@ -1268,6 +1298,13 @@ void CHud::RenderPlayerState(const int ClientID)
 		HasProhibitedCapabilities = true;
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHammerHit);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHammerHitOffset, x, y);
+		x += 12;
+	}
+	if((pCharacter->m_NoGrenadeHit && pCharacter->m_HasTelegunGun && pCharacter->m_aWeapons[WEAPON_GUN].m_Got))
+	{
+		HasProhibitedCapabilities = true;
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoGunHit);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
 		x += 12;
 	}
 	if((pCharacter->m_NoShotgunHit && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
@@ -1474,8 +1511,8 @@ void CHud::RenderDummyActions()
 		return;
 	}
 	// render small dummy actions hud
-	const float BoxHeight = 27.0f;
-	const float BoxWidth = 14.0f;
+	const float BoxHeight = 29.0f;
+	const float BoxWidth = 16.0f;
 
 	float StartX = m_Width - BoxWidth;
 	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
@@ -1497,8 +1534,8 @@ void CHud::RenderDummyActions()
 	Graphics()->QuadsEnd();
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	float y = StartY + 1;
-	float x = StartX + 1;
+	float y = StartY + 2;
+	float x = StartX + 2;
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 	if(g_Config.m_ClDummyHammer)
 	{
@@ -1598,16 +1635,20 @@ void CHud::RenderMovementInformation(const int ClientID)
 		DisplaySpeedX *= (m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_RampValue / 1000.0f);
 	}
 
-	float Angle = Character->m_Angle / 256.0f;
-	if(Angle > pi)
-	{
-		Angle -= 2.0f * pi;
-	}
+	float Angle = 0.0f;
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
 		CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
 		Angle = atan2f(CharacterDisplayInfo->m_TargetY, CharacterDisplayInfo->m_TargetX);
+	}
+	else
+	{
+		Angle = Character->m_Angle / 256.0f;
+	}
+	if(Angle < 0)
+	{
+		Angle += 2.0f * pi;
 	}
 	float DisplayAngle = Angle * 180.0f / pi;
 
@@ -1736,11 +1777,11 @@ void CHud::OnRender()
 	{
 		if(m_pClient->m_Snap.m_pLocalCharacter && !m_pClient->m_Snap.m_SpecInfo.m_Active && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
 		{
-			if(g_Config.m_ClShowhudHealthAmmo && (!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData || !g_Config.m_ClDDRaceHud))
+			if(g_Config.m_ClShowhudHealthAmmo)
 			{
 				RenderAmmoHealthAndArmor(m_pClient->m_Snap.m_pLocalCharacter);
 			}
-			if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData && g_Config.m_ClDDRaceHud)
+			if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData && g_Config.m_ClDDRaceHud && GameClient()->m_GameInfo.m_HudDDRace)
 			{
 				RenderPlayerState(m_pClient->m_Snap.m_LocalClientID);
 			}
@@ -1750,11 +1791,11 @@ void CHud::OnRender()
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 		{
 			int SpectatorID = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
-			if(SpectatorID != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo && (!m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData || !g_Config.m_ClDDRaceHud))
+			if(SpectatorID != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo)
 			{
 				RenderAmmoHealthAndArmor(&m_pClient->m_Snap.m_aCharacters[SpectatorID].m_Cur);
 			}
-			if(SpectatorID != SPEC_FREEVIEW && m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData && g_Config.m_ClDDRaceHud)
+			if(SpectatorID != SPEC_FREEVIEW && m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData && g_Config.m_ClDDRaceHud && GameClient()->m_GameInfo.m_HudDDRace)
 			{
 				RenderPlayerState(SpectatorID);
 			}

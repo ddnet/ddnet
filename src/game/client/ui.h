@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include <engine/input.h>
 #include <engine/textrender.h>
 
 #include <chrono>
@@ -304,7 +305,7 @@ public:
 	bool MouseInside(const CUIRect *pRect) const;
 	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
 	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
-	void ConvertMouseMove(float *x, float *y) const;
+	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
 
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }

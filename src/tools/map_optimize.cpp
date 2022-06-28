@@ -2,8 +2,8 @@
 #include <base/logger.h>
 #include <base/system.h>
 #include <cstdint>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/shared/datafile.h>
-#include <engine/shared/image_manipulation.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
 #include <vector>
@@ -75,7 +75,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 
 int main(int argc, const char **argv)
 {
-	tw::CCmdlineFix CmdlineFix(&argc, &argv);
+	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);

@@ -3,8 +3,6 @@
 #include "color.h"
 #include "system.h"
 
-#include <engine/shared/config.h>
-
 #include <atomic>
 #include <cstdio>
 
@@ -17,11 +15,21 @@
 #include <unistd.h>
 #endif
 
+#if defined(CONF_PLATFORM_ANDROID)
+#include <android/log.h>
+#endif
+
 extern "C" {
 
+std::atomic<LEVEL> loglevel = LEVEL_INFO;
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
 thread_local bool in_logger = false;
+
+void log_set_loglevel(LEVEL level)
+{
+	loglevel.store(level, std::memory_order_release);
+}
 
 void log_set_global_logger(ILogger *logger)
 {
@@ -69,7 +77,7 @@ void log_set_scope_logger(ILogger *logger)
 
 void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
-	if(level > g_Config.m_Loglevel)
+	if(level > loglevel.load(std::memory_order_acquire))
 		return;
 
 	// Make sure we're not logging recursively.
@@ -154,7 +162,7 @@ public:
 	void Log(const CLogMessage *pMessage) override
 	{
 		int AndroidLevel;
-		switch(Level)
+		switch(pMessage->m_Level)
 		{
 		case LEVEL_TRACE: AndroidLevel = ANDROID_LOG_VERBOSE; break;
 		case LEVEL_DEBUG: AndroidLevel = ANDROID_LOG_DEBUG; break;
@@ -202,9 +210,9 @@ public:
 	}
 };
 
-std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers)
+std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers)
 {
-	return std::make_unique<CLoggerCollection>(std::move(loggers));
+	return std::make_unique<CLoggerCollection>(std::move(vpLoggers));
 }
 
 class CLoggerAsync : public ILogger
@@ -414,7 +422,7 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	switch(GetFileType(pOutput))
 	{
 	case FILE_TYPE_CHAR: return std::make_unique<CWindowsConsoleLogger>(pOutput);
-	case FILE_TYPE_PIPE: // fall through, writing to pipe works the same as writing to a file
+	case FILE_TYPE_PIPE: [[fallthrough]]; // writing to pipe works the same as writing to a file
 	case FILE_TYPE_DISK: return std::make_unique<CWindowsFileLogger>(pOutput);
 	default: return std::make_unique<CLoggerAsync>(io_stdout(), false, false);
 	}

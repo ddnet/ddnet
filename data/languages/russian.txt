@@ -248,9 +248,6 @@ MOTD
 Map
 == Карта
 
-Mouse sens.
-== Чувств. мыши
-
 Move left
 == Шаг влево
 
@@ -458,9 +455,6 @@ Show clan above name plates
 
 Automatically take statboard screenshot
 == Делать снимок результатов
-
-Show console window
-== Показывать консоль
 
 Team
 == Команда
@@ -948,9 +942,6 @@ Show entities
 Show HUD
 == Показывать HUD
 
-UI mouse s.
-== Чувств. мыши в меню
-
 may cause delay
 == создает задержку
 
@@ -1294,12 +1285,6 @@ Refreshing...
 Kill Messages
 == Сообщения об убийстве
 
-Kill Message Normal Color
-== Цвет сообщения об убийстве
-
-Kill Message Highlight Color
-== Цвет подсветки сообщения об убийстве
-
 Hookline
 == Линия крюка
 
@@ -1357,13 +1342,120 @@ Tutorial
 Can't find a Tutorial server
 == Обучающий сервер не найден
 
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
 Toggle to edit your dummy settings
+== 
+
+Download community skins
 == 
 
 Choose default eyes when joining a server
 == 
 
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
 Allows maps to render with more detail
+== 
+
+Show dummy actions
+== 
+
+Show jump indicator
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1379,6 +1471,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+Extras
 == 
 
 Super

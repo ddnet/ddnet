@@ -44,6 +44,12 @@ public:
 		FLAG_REPEAT = 4,
 		FLAG_TEXT = 8,
 	};
+	enum ECursorType
+	{
+		CURSOR_NONE,
+		CURSOR_MOUSE,
+		CURSOR_JOYSTICK,
+	};
 
 	// events
 	int NumEvents() const { return m_NumEvents; }
@@ -67,6 +73,25 @@ public:
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
 	virtual void Clear() = 0;
 
+	// joystick
+	class IJoystick
+	{
+	public:
+		virtual int GetIndex() const = 0;
+		virtual const char *GetName() const = 0;
+		virtual int GetNumAxes() const = 0;
+		virtual int GetNumButtons() const = 0;
+		virtual int GetNumBalls() const = 0;
+		virtual int GetNumHats() const = 0;
+		virtual float GetAxisValue(int Axis) = 0;
+		virtual int GetHatValue(int Hat) = 0;
+		virtual bool Relative(float *pX, float *pY) = 0;
+		virtual bool Absolute(float *pX, float *pY) = 0;
+	};
+	virtual size_t NumJoysticks() const = 0;
+	virtual IJoystick *GetActiveJoystick() = 0;
+	virtual void SelectNextJoystick() = 0;
+
 	// mouse
 	virtual void NativeMousePos(int *pX, int *pY) const = 0;
 	virtual bool NativeMousePressed(int Index) = 0;
@@ -86,6 +111,16 @@ public:
 	virtual const char *GetIMEEditingText() = 0;
 	virtual int GetEditingCursor() = 0;
 	virtual void SetEditingPosition(float X, float Y) = 0;
+
+	ECursorType CursorRelative(float *pX, float *pY)
+	{
+		if(MouseRelative(pX, pY))
+			return CURSOR_MOUSE;
+		IJoystick *pJoystick = GetActiveJoystick();
+		if(pJoystick && pJoystick->Relative(pX, pY))
+			return CURSOR_JOYSTICK;
+		return CURSOR_NONE;
+	}
 };
 
 class IEngineInput : public IInput
@@ -93,6 +128,7 @@ class IEngineInput : public IInput
 	MACRO_INTERFACE("engineinput", 0)
 public:
 	virtual void Init() = 0;
+	virtual void Shutdown() = 0;
 	virtual int Update() = 0;
 	virtual int VideoRestartNeeded() = 0;
 };

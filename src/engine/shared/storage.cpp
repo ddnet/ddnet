@@ -80,6 +80,7 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "assets/game", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/particles", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/hud", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "assets/extras", aPath, sizeof(aPath)));
 #if defined(CONF_VIDEORECORDER)
 				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
 #endif
@@ -407,6 +408,30 @@ public:
 
 		pBuffer[0] = 0;
 		return 0;
+	}
+
+	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) override
+	{
+		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, Type);
+		if(!File)
+		{
+			*ppResult = nullptr;
+			*pResultLen = 0;
+			return false;
+		}
+		io_read_all(File, ppResult, pResultLen);
+		io_close(File);
+		return true;
+	}
+
+	char *ReadFileStr(const char *pFilename, int Type) override
+	{
+		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, Type);
+		if(!File)
+			return nullptr;
+		char *pResult = io_read_all_str(File);
+		io_close(File);
+		return pResult;
 	}
 
 	struct CFindCBData
