@@ -2169,6 +2169,8 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	};
 
 	// some basic values
+	static float s_LastWx = 0;
+	static float s_LastWy = 0;
 	static int s_Operation = OP_NONE;
 	float wx = UI()->MouseWorldX();
 	float wy = UI()->MouseWorldY();
@@ -2214,12 +2216,15 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 			}
 			else
 			{
-				pEnvelope->m_vPoints[PIndex].m_aValues[0] = f2fx(wx);
-				pEnvelope->m_vPoints[PIndex].m_aValues[1] = f2fx(wy);
+				pEnvelope->m_vPoints[PIndex].m_aValues[0] += f2fx(wx - s_LastWx);
+				pEnvelope->m_vPoints[PIndex].m_aValues[1] += f2fx(wy - s_LastWy);
 			}
 		}
 		else if(s_Operation == OP_ROTATE)
 			pEnvelope->m_vPoints[PIndex].m_aValues[2] += 10 * m_MouseDeltaX;
+
+		s_LastWx = wx;
+		s_LastWy = wy;
 
 		if(!UI()->MouseButton(0))
 		{
@@ -2257,6 +2262,9 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 			m_SelectedQuadEnvelope = pQuad->m_PosEnv;
 
 			UI()->SetActiveItem(pID);
+
+			s_LastWx = wx;
+			s_LastWy = wy;
 		}
 		else
 		{
