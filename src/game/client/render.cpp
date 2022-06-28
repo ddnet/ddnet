@@ -748,7 +748,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			if(g_Config.m_ClWhiteFeet && pInfo->m_CustomColoredSkin)
 			{
 				CTeeRenderInfo WhiteFeetInfo;
-				int Skin = GameClient()->m_Skins.Find("x_ninja");
+				int Skin = GameClient()->m_Skins.Find(g_Config.m_ClWhiteFeetSkin);
 				if(Skin != -1)
 				{
 					const CSkin *pSkin = GameClient()->m_Skins.Get(Skin);
