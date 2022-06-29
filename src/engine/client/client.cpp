@@ -4406,6 +4406,7 @@ void CClient::RegisterCommands()
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, 0, 0, help);
 #include <game/ddracecommands.h>
+#undef CONSOLE_COMMAND
 }
 
 static CClient *CreateClient()

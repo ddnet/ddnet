@@ -63,7 +63,7 @@ static u32 Gamma1(u32 x) { return Rot(x, 17) ^ Rot(x, 19) ^ Sh(x, 10); }
 
 static void sha_compress(sha256_state *md, const unsigned char *buf)
 {
-	u32 S[8], W[64], t0, t1, t;
+	u32 S[8], W[64], t;
 	int i;
 
 	// Copy state into S
@@ -80,12 +80,13 @@ static void sha_compress(sha256_state *md, const unsigned char *buf)
 
 // Compress
 #define RND(a, b, c, d, e, f, g, h, i) \
+	do \
 	{ \
-		t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
-		t1 = Sigma0(a) + Maj(a, b, c); \
-		d += t0; \
-		h = t0 + t1; \
-	}
+		u32 t0 = (h) + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
+		u32 t1 = Sigma0(a) + Maj(a, b, c); \
+		(d) += t0; \
+		(h) = t0 + t1; \
+	} while(0)
 
 	for(i = 0; i < 64; ++i)
 	{

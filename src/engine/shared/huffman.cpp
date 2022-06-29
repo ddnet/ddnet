@@ -132,19 +132,25 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 {
 	// this macro loads a symbol for a byte into bits and bitcount
 #define HUFFMAN_MACRO_LOADSYMBOL(Sym) \
-	Bits |= m_aNodes[Sym].m_Bits << Bitcount; \
-	Bitcount += m_aNodes[Sym].m_NumBits;
+	do \
+	{ \
+		Bits |= m_aNodes[Sym].m_Bits << Bitcount; \
+		Bitcount += m_aNodes[Sym].m_NumBits; \
+	} while(0)
 
 	// this macro writes the symbol stored in bits and bitcount to the dst pointer
 #define HUFFMAN_MACRO_WRITE() \
-	while(Bitcount >= 8) \
+	do \
 	{ \
-		*pDst++ = (unsigned char)(Bits & 0xff); \
-		if(pDst == pDstEnd) \
-			return -1; \
-		Bits >>= 8; \
-		Bitcount -= 8; \
-	}
+		while(Bitcount >= 8) \
+		{ \
+			*pDst++ = (unsigned char)(Bits & 0xff); \
+			if(pDst == pDstEnd) \
+				return -1; \
+			Bits >>= 8; \
+			Bitcount -= 8; \
+		} \
+	} while(0)
 
 	// setup buffer pointers
 	const unsigned char *pSrc = (const unsigned char *)pInput;
@@ -165,23 +171,23 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 		while(pSrc != pSrcEnd)
 		{
 			// {B} load the symbol
-			HUFFMAN_MACRO_LOADSYMBOL(Symbol)
+			HUFFMAN_MACRO_LOADSYMBOL(Symbol);
 
 			// {C} fetch next symbol, this is done here because it will reduce dependency in the code
 			Symbol = *pSrc++;
 
 			// {B} write the symbol loaded at
-			HUFFMAN_MACRO_WRITE()
+			HUFFMAN_MACRO_WRITE();
 		}
 
 		// write the last symbol loaded from {C} or {A} in the case of only 1 byte input buffer
-		HUFFMAN_MACRO_LOADSYMBOL(Symbol)
-		HUFFMAN_MACRO_WRITE()
+		HUFFMAN_MACRO_LOADSYMBOL(Symbol);
+		HUFFMAN_MACRO_WRITE();
 	}
 
 	// write EOF symbol
-	HUFFMAN_MACRO_LOADSYMBOL(HUFFMAN_EOF_SYMBOL)
-	HUFFMAN_MACRO_WRITE()
+	HUFFMAN_MACRO_LOADSYMBOL(HUFFMAN_EOF_SYMBOL);
+	HUFFMAN_MACRO_WRITE();
 
 	// write out the last bits
 	*pDst++ = Bits;
