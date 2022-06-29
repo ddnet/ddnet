@@ -1038,7 +1038,7 @@ AntiPing
 == AntiPing
 
 Enable long pain sound (used when shooting in freeze)
-== Activer les sons de douleur du Tee (utilisé lorsqu'un Tee tire depuis le freeze (gèle))
+== Activer les sons de douleur du Tee (utilisé lorsqu'un Tee tire depuis le freeze (gel))
 
 9+ new mentions
 == 9+ nouveaux messages
@@ -1461,13 +1461,13 @@ UI mouse sens.
 == Sensibilité souris (menus)
 
 Controller
-== Manette 
+== Manette
 
 Show dummy actions
 == Afficher les actions du dummy
 
 Show freeze bars
-== Afficher la barre de gel 
+== Afficher la barre de gel
 
 Show player position
 == Afficher la position
@@ -1479,16 +1479,16 @@ Show player target angle
 == Afficher l'angle de visée
 
 Show jump indicator
-== 
+== Indicateur de sauts
 
 Opacity of freeze bars inside freeze
-== 
+== Opacité de la barre de gel dans le gel
 
 Normal Color
-== 
+== Couleur normal
 
 Highlight Color
-== 
+== Couleur surbrillante
 
 Extras
-== 
+== Extras
