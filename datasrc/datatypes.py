@@ -213,31 +213,41 @@ class NetObject:
 		self.variables = variables
 		self.ex = ex
 		self.validate_size = validate_size
+
 	def emit_declaration(self):
+		lines = []
 		if self.base:
-			lines = ["struct %s : public %s"%(self.struct_name,self.base_struct_name), "{"]
+			lines += ["struct %s : public %s"%(self.struct_name,self.base_struct_name), "{"]
 		else:
-			lines = ["struct %s"%self.struct_name, "{"]
+			lines += ["struct %s"%self.struct_name, "{"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def emit_validate(self, base_item):
-		lines = ["case %s:" % self.enum_name]
+
+	def emit_uncompressed_unpack_and_validate(self, base_item):
+		lines = []
+		lines += ["case %s:" % self.enum_name]
 		lines += ["{"]
-		if self.validate_size:
-			lines += ["\t%s *pObj = (%s *)pData;"%(self.struct_name, self.struct_name)]
-			lines += ["\tif((int)sizeof(*pObj) > Size) return -1;"]
-		prev_len = len(lines)
-		variables = self.variables
+		lines += ["\t%s *pData = (%s *)m_aUnpackedData;" % (self.struct_name, self.struct_name)]
+		unpack_lines = []
+
+		variables = []
 		if base_item:
 			variables += base_item.variables
+		variables += self.variables
 		for v in variables:
-			lines += ["\t"+line for line in v.emit_validate()]
-		if not self.validate_size and prev_len != len(lines):
-			raise ValueError("Can't use members that need validation in a struct whose size isn't validated")
-		lines += ["\treturn 0;"]
-		lines += ["}"]
+			if not self.validate_size and v.default is None:
+				raise ValueError(f"{v.name} in {self.name} has no default value. Member variables that do not have a default value cannot be used in a structure whose size is not validated.")
+			unpack_lines += ["\t"+line for line in v.emit_uncompressed_unpack_obj()]
+		for v in variables:
+			unpack_lines += ["\t"+line for line in v.emit_validate_obj()]
+
+		if len(unpack_lines) > 0:
+			lines += unpack_lines
+		else:
+			lines += ["\t(void)pData;"]
+		lines += ["} break;"]
 		return lines
 
 class NetEvent(NetObject):
@@ -254,18 +264,26 @@ class NetMessage(NetObject):
 		self.struct_name = "CNetMsg_%s" % self.name
 		self.enum_name = "NETMSGTYPE_%s" % self.name.upper()
 		self.teehistorian = teehistorian
-	def emit_unpack(self):
+
+	def emit_unpack_msg(self):
 		lines = []
 		lines += ["case %s:" % self.enum_name]
 		lines += ["{"]
-		lines += ["\t%s *pMsg = (%s *)m_aMsgData;" % (self.struct_name, self.struct_name)]
-		lines += ["\t(void)pMsg;"]
+		lines += ["\t%s *pData = (%s *)m_aUnpackedData;" % (self.struct_name, self.struct_name)]
+
+		unpack_lines = []
 		for v in self.variables:
-			lines += ["\t"+line for line in v.emit_unpack()]
+			unpack_lines += ["\t"+line for line in v.emit_unpack_msg()]
 		for v in self.variables:
-			lines += ["\t"+line for line in v.emit_unpack_check()]
+			unpack_lines += ["\t"+line for line in v.emit_unpack_msg_check()]
+
+		if len(unpack_lines) > 0:
+			lines += unpack_lines
+		else:
+			lines += ["\t(void)pData;"]
 		lines += ["} break;"]
 		return lines
+
 	def emit_declaration(self):
 		extra = []
 		extra += ["\tint MsgID() const { return %s; }" % self.enum_name]
@@ -277,7 +295,6 @@ class NetMessage(NetObject):
 			extra += ["\t\t"+line for line in v.emit_pack()]
 		extra += ["\t\treturn pPacker->Error() != 0;"]
 		extra += ["\t}"]
-
 
 		lines = NetObject.emit_declaration(self)
 		lines = lines[:-1] + extra + lines[-1:]
@@ -297,72 +314,88 @@ class NetMessageEx(NetMessage):
 
 
 class NetVariable:
-	def __init__(self, name):
+	def __init__(self, name, default=None):
 		self.name = name
+		self.default = None if default is None else str(default)
 	def emit_declaration(self):
 		return []
-	def emit_validate(self):
+	def emit_validate_obj(self):
+		return []
+	def emit_uncompressed_unpack_obj(self):
 		return []
 	def emit_pack(self):
 		return []
-	def emit_unpack(self):
+	def emit_unpack_msg(self):
 		return []
-	def emit_unpack_check(self):
+	def emit_unpack_msg_check(self):
 		return []
 
 class NetString(NetVariable):
 	def emit_declaration(self):
 		return ["const char *%s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetString();" % self.name]
+	def emit_uncompressed_unpack_obj(self):
+		return self.emit_unpack_msg()
+	def emit_unpack_msg(self):
+		return ["pData->%s = pUnpacker->GetString();" % self.name]
 	def emit_pack(self):
 		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetStringHalfStrict(NetVariable):
 	def emit_declaration(self):
 		return ["const char *%s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC);" % self.name]
+	def emit_uncompressed_unpack_obj(self):
+		return self.emit_unpack_msg()
+	def emit_unpack_msg(self):
+		return ["pData->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC);" % self.name]
 	def emit_pack(self):
 		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetStringStrict(NetVariable):
 	def emit_declaration(self):
 		return ["const char *%s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);" % self.name]
+	def emit_uncompressed_unpack_obj(self):
+		return self.emit_unpack_msg()
+	def emit_unpack_msg(self):
+		return ["pData->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);" % self.name]
 	def emit_pack(self):
 		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetIntAny(NetVariable):
 	def emit_declaration(self):
 		return ["int %s;"%self.name]
-	def emit_unpack(self):
-		return ["pMsg->%s = pUnpacker->GetInt();" % self.name]
+	def emit_uncompressed_unpack_obj(self):
+		if self.default is None:
+			return ["pData->%s = pUnpacker->GetUncompressedInt();" % self.name]
+		return ["pData->%s = pUnpacker->GetUncompressedIntOrDefault(%s);" % (self.name, self.default)]
+	def emit_unpack_msg(self):
+		if self.default is None:
+			return ["pData->%s = pUnpacker->GetInt();" % self.name]
+		return ["pData->%s = pUnpacker->GetIntOrDefault(%s);" % (self.name, self.default)]
 	def emit_pack(self):
 		return ["pPacker->AddInt(%s);" % self.name]
 
 class NetIntRange(NetIntAny):
-	def __init__(self, name, min_val, max_val):
-		NetIntAny.__init__(self,name)
+	def __init__(self, name, min_val, max_val, default=None):
+		NetIntAny.__init__(self,name,default=default)
 		self.min = str(min_val)
 		self.max = str(max_val)
-	def emit_validate(self):
-		return ["pObj->%s = ClampInt(\"%s\", pObj->%s, %s, %s);"%(self.name, self.name, self.name, self.min, self.max)]
-	def emit_unpack_check(self):
-		return ["if(pMsg->%s < %s || pMsg->%s > %s) { m_pMsgFailedOn = \"%s\"; break; }" % (self.name, self.min, self.name, self.max, self.name)]
+	def emit_validate_obj(self):
+		return ["pData->%s = ClampInt(\"%s\", pData->%s, %s, %s);"%(self.name, self.name, self.name, self.min, self.max)]
+	def emit_unpack_msg_check(self):
+		return ["if(pData->%s < %s || pData->%s > %s) { m_pMsgFailedOn = \"%s\"; break; }" % (self.name, self.min, self.name, self.max, self.name)]
 
 class NetBool(NetIntRange):
-	def __init__(self, name):
-		NetIntRange.__init__(self,name,0,1)
+	def __init__(self, name, default=None):
+		default = None if default is None else int(default)
+		NetIntRange.__init__(self,name,0,1,default=default)
 
 class NetTick(NetIntAny):
-	def __init__(self, name):
-		NetIntAny.__init__(self,name)
+	def __init__(self, name, default=None):
+		NetIntAny.__init__(self,name,default=default)
 
 class NetArray(NetVariable):
 	def __init__(self, var, size):
-		NetVariable.__init__(self,var.name)
+		NetVariable.__init__(self,var.name,var.default)
 		self.base_name = var.name
 		self.var = var
 		self.size = size
@@ -370,17 +403,23 @@ class NetArray(NetVariable):
 	def emit_declaration(self):
 		self.var.name = self.name
 		return self.var.emit_declaration()
-	def emit_validate(self):
+	def emit_uncompressed_unpack_obj(self):
 		lines = []
 		for i in range(self.size):
 			self.var.name = self.base_name + "[%d]"%i
-			lines += self.var.emit_validate()
+			lines += self.var.emit_uncompressed_unpack_obj()
 		return lines
-	def emit_unpack(self):
+	def emit_validate_obj(self):
 		lines = []
 		for i in range(self.size):
 			self.var.name = self.base_name + "[%d]"%i
-			lines += self.var.emit_unpack()
+			lines += self.var.emit_validate_obj()
+		return lines
+	def emit_unpack_msg(self):
+		lines = []
+		for i in range(self.size):
+			self.var.name = self.base_name + "[%d]"%i
+			lines += self.var.emit_unpack_msg()
 		return lines
 	def emit_pack(self):
 		lines = []
@@ -388,9 +427,9 @@ class NetArray(NetVariable):
 			self.var.name = self.base_name + "[%d]"%i
 			lines += self.var.emit_pack()
 		return lines
-	def emit_unpack_check(self):
+	def emit_unpack_msg_check(self):
 		lines = []
 		for i in range(self.size):
 			self.var.name = self.base_name + "[%d]"%i
-			lines += self.var.emit_unpack_check()
+			lines += self.var.emit_unpack_msg_check()
 		return lines

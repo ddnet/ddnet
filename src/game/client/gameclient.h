@@ -305,10 +305,8 @@ public:
 			CNetObj_Character m_Cur;
 
 			CNetObj_DDNetCharacter m_ExtendedData;
+			const CNetObj_DDNetCharacter *m_PrevExtendedData;
 			bool m_HasExtendedData;
-
-			const CNetObj_DDNetCharacterDisplayInfo *m_PrevExtendedDisplayInfo;
-			CNetObj_DDNetCharacterDisplayInfo m_ExtendedDisplayInfo;
 			bool m_HasExtendedDisplayInfo;
 
 			// interpolated position
@@ -524,6 +522,7 @@ public:
 	bool IsLocalCharSuper();
 	bool CanDisplayWarning() override;
 	bool IsDisplayingWarning() override;
+	CNetObjHandler *GetNetObjHandler() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);

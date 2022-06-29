@@ -1126,7 +1126,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	{
 		y += 12;
 	}
-	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_IsInPracticeMode)
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudPracticeMode);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_PracticeModeOffset, x, y);
@@ -1420,19 +1420,19 @@ void CHud::RenderMovementInformation(const int ClientID)
 	}
 	// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
 	float DisplaySpeedX = VelspeedX / 32;
+	float VelspeedLength = length(vec2(Character->m_VelX / 256.0f, Character->m_VelY / 256.0f)) * TicksPerSecond;
+	// Todo: Use Velramp tuning of each individual player
+	// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
+	float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
+	DisplaySpeedX *= Ramp;
 	float DisplaySpeedY = VelspeedY / 32;
-	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
-	{
-		// On DDNet servers the actual speed on X axis is displayed, i.e. VelspeedX * Ramp
-		DisplaySpeedX *= (m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo.m_RampValue / 1000.0f);
-	}
 
 	float Angle = 0.0f;
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
-		CNetObj_DDNetCharacterDisplayInfo *CharacterDisplayInfo = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedDisplayInfo;
-		Angle = atan2f(CharacterDisplayInfo->m_TargetY, CharacterDisplayInfo->m_TargetX);
+		CNetObj_DDNetCharacter *ExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
+		Angle = atan2f(ExtendedData->m_TargetY, ExtendedData->m_TargetX);
 	}
 	else
 	{

@@ -7,6 +7,9 @@
 #include "graphics.h"
 #include "message.h"
 #include <base/hash.h>
+
+#include <game/generated/protocol.h>
+
 #include <engine/friends.h>
 
 struct SWarning;
@@ -186,7 +189,8 @@ public:
 	enum
 	{
 		SNAP_CURRENT = 0,
-		SNAP_PREV = 1
+		SNAP_PREV = 1,
+		NUM_SNAPSHOT_TYPES = 2,
 	};
 
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
@@ -291,6 +295,8 @@ public:
 	virtual void Echo(const char *pString) = 0;
 	virtual bool CanDisplayWarning() = 0;
 	virtual bool IsDisplayingWarning() = 0;
+
+	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };
 
 void SnapshotRemoveExtraProjectileInfo(unsigned char *pData);

@@ -10,13 +10,14 @@ void CFreezeBars::RenderFreezeBar(const int ClientID)
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	if(pCharacter->m_FreezeEnd <= 0.0f || pCharacter->m_FreezeTick == 0 || !m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo || (pCharacter->m_IsInFreeze && g_Config.m_ClFreezeBarsAlphaInsideFreeze == 0))
+
+	if(pCharacter->m_FreezeEnd <= 0.0f || pCharacter->m_FreezeStart == 0 || !m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo || (pCharacter->m_IsInFreeze && g_Config.m_ClFreezeBarsAlphaInsideFreeze == 0))
 	{
 		return;
 	}
 
-	const int Max = pCharacter->m_FreezeEnd - pCharacter->m_FreezeTick;
-	float FreezeProgress = clamp(Max - (Client()->GameTick(g_Config.m_ClDummy) - pCharacter->m_FreezeTick), 0, Max) / (float)Max;
+	const int Max = pCharacter->m_FreezeEnd - pCharacter->m_FreezeStart;
+	float FreezeProgress = clamp(Max - (Client()->GameTick(g_Config.m_ClDummy) - pCharacter->m_FreezeStart), 0, Max) / (float)Max;
 	if(FreezeProgress <= 0.0f)
 	{
 		return;
