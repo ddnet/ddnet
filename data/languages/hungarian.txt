@@ -1365,99 +1365,99 @@ Team %d
 == Csapat %d
 
 Position:
-== 
+== Pozíció:
 
 Speed:
-== 
+== Sebesség:
 
 Angle:
-== 
+== Szög:
 
 Trying to determine UDP connectivity...
-== 
+== Próbáljuk meghatározni az UDP kapcsoltatot...
 
 UDP seems to be filtered.
-== 
+== Az UDP szűrve van.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Az UDP és a TCP IP címek külömböznek. Próbáld meg kikapcsolni a VPN-ed, proxy-dat, vagy hálózati gyorsítódat.
 
 No answer from server yet.
-== 
+== Még nincs válasz a szervertől.
 
 Download community skins
-== 
+== Közösségi karakterek letöltése
 
 Enable controller
-== 
+== Kontroller használata
 
 Controller %d: %s
-== 
+== Kontroller %d: %s
 
 Click to cycle through all available controllers.
-== 
+== Kattints, hogy az elérhető kontrollerek között váltogass.
 
 [Ingame controller mode]
 Relative
-== 
+== Relatív
 
 [Ingame controller mode]
 Absolute
-== 
+== Abszolút
 
 Ingame controller mode
-== 
+== Játékbeli kontroller mód
 
 Ingame controller sens.
-== 
+== Játékbeli kontroller érzékenység
 
 UI controller sens.
-== 
+== UI kontroller érzékenység
 
 Controller jitter tolerance
-== 
+== Kontroller jitter tolerancia
 
 No controller found. Plug in a controller and restart the game.
-== 
+== Nem találtunk kontrollert. Dugj be egy kontrollert, majd indítsd újra a játékot.
 
 Device
-== 
+== Eszköz
 
 Status
-== 
+== Állapot
 
 Aim bind
 == 
 
 Controller Axis #%d
-== 
+== Kontroller Tengely #%d
 
 Mouse
-== 
+== Egér
 
 Ingame mouse sens.
-== 
+== Játékbeli egér érzékenység
 
 UI mouse sens.
-== 
+== UI egér érzékenység
 
 Controller
-== 
+== Kontroller
 
 Show dummy actions
-== 
+== Másolat mozgásának mutatása
 
 Show jump indicator
-== 
+== Ugrásjelző mutatása
 
 Show player position
-== 
+== Játékos pozíciójának mutatása
 
 Show player speed
-== 
+== Játékos sebességének mutatása
 
 Show player target angle
-== 
+== Játékos célszög mutatása
 
 Show freeze bars
 == 
@@ -1466,10 +1466,10 @@ Opacity of freeze bars inside freeze
 == 
 
 Normal Color
-== 
+== Normális szín
 
 Highlight Color
-== 
+== Kiemelt szín
 
 Extras
-== 
+== Extrák
