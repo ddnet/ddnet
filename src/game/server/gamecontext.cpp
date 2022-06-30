@@ -1134,7 +1134,26 @@ void CGameContext::OnTick()
 	// Warning: do not put code in this function directly above or below this comment
 }
 
+static int PlayerFlags_SevenToSix(int Flags)
+{
+	int Six = 0;
+	if(Flags & protocol7::PLAYERFLAG_CHATTING)
+		Six |= PLAYERFLAG_CHATTING;
+	if(Flags & protocol7::PLAYERFLAG_SCOREBOARD)
+		Six |= PLAYERFLAG_SCOREBOARD;
+	if(Flags & protocol7::PLAYERFLAG_AIM)
+		Six |= PLAYERFLAG_AIM;
+	return Six;
+}
+
 // Server hooks
+void CGameContext::OnClientPrepareInput(int ClientID, void *pInput)
+{
+	auto *pPlayerInput = (CNetObj_PlayerInput *)pInput;
+	if(Server()->IsSixup(ClientID))
+		pPlayerInput->m_PlayerFlags = PlayerFlags_SevenToSix(pPlayerInput->m_PlayerFlags);
+}
+
 void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 {
 	if(!m_World.m_Paused)

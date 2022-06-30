@@ -147,19 +147,6 @@ void CPlayer::Reset()
 	m_SwapTargetsClientID = -1;
 }
 
-static int PlayerFlags_SevenToSix(int Flags)
-{
-	int Six = 0;
-	if(Flags & protocol7::PLAYERFLAG_CHATTING)
-		Six |= PLAYERFLAG_CHATTING;
-	if(Flags & protocol7::PLAYERFLAG_SCOREBOARD)
-		Six |= PLAYERFLAG_SCOREBOARD;
-	if(Flags & protocol7::PLAYERFLAG_AIM)
-		Six |= PLAYERFLAG_AIM;
-
-	return Six;
-}
-
 static int PlayerFlags_SixToSeven(int Flags)
 {
 	int Seven = 0;
@@ -526,9 +513,6 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
-	if(Server()->IsSixup(m_ClientID))
-		NewInput->m_PlayerFlags = PlayerFlags_SevenToSix(NewInput->m_PlayerFlags);
-
 	Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
 
 	AfkTimer();

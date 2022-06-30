@@ -1635,6 +1635,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			for(int i = 0; i < Size / 4; i++)
 				pInput->m_aData[i] = Unpacker.GetInt();
 
+			GameServer()->OnClientPrepareInput(ClientID, pInput->m_aData);
 			mem_copy(m_aClients[ClientID].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
 
 			m_aClients[ClientID].m_CurrentInput++;
