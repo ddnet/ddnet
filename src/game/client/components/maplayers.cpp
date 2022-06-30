@@ -15,6 +15,7 @@
 
 #include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>
+#include <game/localization.h>
 
 #include "maplayers.h"
 
@@ -414,6 +415,18 @@ void CMapLayers::OnMapLoad()
 {
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 		return;
+
+	const char *pConnectCaption = GameClient()->DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
+	const char *pLoadMapContent = Localize("Uploading map data to GPU");
+
+	auto CurTime = time_get_nanoseconds();
+	auto &&RenderLoading = [&]() {
+		if(CanRenderMenuBackground())
+			GameClient()->m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
+		else if(time_get_nanoseconds() - CurTime > 500ms)
+			GameClient()->m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false, false);
+	};
+
 	//clear everything and destroy all buffers
 	if(!m_vpTileLayerVisuals.empty())
 	{
@@ -434,6 +447,8 @@ void CMapLayers::OnMapLoad()
 			delete m_vpQuadLayerVisuals[i];
 		}
 		m_vpQuadLayerVisuals.clear();
+
+		RenderLoading();
 	}
 
 	bool PassedGameLayer = false;
@@ -864,6 +879,8 @@ void CMapLayers::OnMapLoad()
 							Visuals.m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
 							// and finally inform the backend how many indices are required
 							Graphics()->IndicesNumRequiredNotify(vtmpTiles.size() * 6);
+
+							RenderLoading();
 						}
 
 						++CurOverlay;
@@ -974,6 +991,8 @@ void CMapLayers::OnMapLoad()
 					pQLayerVisuals->m_BufferContainerIndex = Graphics()->CreateBufferContainer(&ContainerInfo);
 					// and finally inform the backend how many indices are required
 					Graphics()->IndicesNumRequiredNotify(pQLayer->m_NumQuads * 6);
+
+					RenderLoading();
 				}
 			}
 		}

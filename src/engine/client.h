@@ -11,6 +11,7 @@
 #include <game/generated/protocol.h>
 
 #include <engine/friends.h>
+#include <functional>
 
 struct SWarning;
 
@@ -31,9 +32,45 @@ struct CChecksumData;
 class IClient : public IInterface
 {
 	MACRO_INTERFACE("client", 0)
+public:
+	/* Constants: Client States
+		STATE_OFFLINE - The client is offline.
+		STATE_CONNECTING - The client is trying to connect to a server.
+		STATE_LOADING - The client has connected to a server and is loading resources.
+		STATE_ONLINE - The client is connected to a server and running the game.
+		STATE_DEMOPLAYBACK - The client is playing a demo
+		STATE_QUITTING - The client is quitting.
+	*/
+
+	enum EClientState
+	{
+		STATE_OFFLINE = 0,
+		STATE_CONNECTING,
+		STATE_LOADING,
+		STATE_ONLINE,
+		STATE_DEMOPLAYBACK,
+		STATE_QUITTING,
+		STATE_RESTARTING,
+	};
+
+	/**
+	* More precise state for @see STATE_LOADING
+	* Sets what is actually happening in the client right now
+	*/
+	enum ELoadingStateDetail
+	{
+		LOADING_STATE_DETAIL_INITIAL,
+		LOADING_STATE_DETAIL_LOADING_MAP,
+		LOADING_STATE_DETAIL_SENDING_READY,
+		LOADING_STATE_DETAIL_GETTING_READY,
+	};
+
+	typedef std::function<void()> TMapLoadingCallbackFunc;
+
 protected:
 	// quick access to state of the client
-	int m_State;
+	EClientState m_State;
+	ELoadingStateDetail m_LoadingStateDetail;
 	int64_t m_StateStartTime;
 
 	// quick access to time variables
@@ -52,6 +89,8 @@ protected:
 	int m_GameTickSpeed;
 
 	float m_FrameTimeAvg;
+
+	TMapLoadingCallbackFunc m_MapLoadingCBFunc;
 
 public:
 	char m_aNews[3000];
@@ -75,26 +114,6 @@ public:
 		NUM_CONNS,
 	};
 
-	/* Constants: Client States
-		STATE_OFFLINE - The client is offline.
-		STATE_CONNECTING - The client is trying to connect to a server.
-		STATE_LOADING - The client has connected to a server and is loading resources.
-		STATE_ONLINE - The client is connected to a server and running the game.
-		STATE_DEMOPLAYBACK - The client is playing a demo
-		STATE_QUITTING - The client is quitting.
-	*/
-
-	enum
-	{
-		STATE_OFFLINE = 0,
-		STATE_CONNECTING,
-		STATE_LOADING,
-		STATE_ONLINE,
-		STATE_DEMOPLAYBACK,
-		STATE_QUITTING,
-		STATE_RESTARTING,
-	};
-
 	enum
 	{
 		CONNECTIVITY_UNKNOWN,
@@ -107,8 +126,12 @@ public:
 	};
 
 	//
-	inline int State() const { return m_State; }
+	inline EClientState State() const { return m_State; }
+	inline ELoadingStateDetail LoadingStateDetail() const { return m_LoadingStateDetail; }
 	inline int64_t StateStartTime() const { return m_StateStartTime; }
+	void SetLoadingStateDetail(ELoadingStateDetail LoadingStateDetail) { m_LoadingStateDetail = LoadingStateDetail; }
+
+	void SetMapLoadingCBFunc(TMapLoadingCallbackFunc &&Func) { m_MapLoadingCBFunc = std::move(Func); }
 
 	// tick time access
 	inline int PrevGameTick(int Conn) const { return m_PrevGameTick[Conn]; }

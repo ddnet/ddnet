@@ -32,6 +32,9 @@ class CMenuBackground : public CBackground
 {
 	std::chrono::nanoseconds m_ThemeScanStartTime{0};
 
+protected:
+	bool CanRenderMenuBackground() override { return false; }
+
 public:
 	enum
 	{

@@ -13,6 +13,7 @@
 #include <game/generated/client_data.h>
 
 #include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #include "skins.h"
 
@@ -317,7 +318,7 @@ void CSkins::OnInit()
 
 	// load skins;
 	Refresh([this](int SkinID) {
-		GameClient()->m_Menus.RenderLoading(false);
+		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
 	});
 }
 

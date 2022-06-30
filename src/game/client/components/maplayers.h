@@ -134,6 +134,9 @@ class CMapLayers : public CComponent
 
 	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float *pColor, offset_ptr_size IndexBufferOffset, float *pOffset, float *pDir);
 
+protected:
+	virtual bool CanRenderMenuBackground() { return true; }
+
 public:
 	enum
 	{
