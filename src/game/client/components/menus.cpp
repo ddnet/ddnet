@@ -320,7 +320,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 {
 	ColorRGBA LaserRGB;
 	CUIRect Section = *pRect;
-	vec2 From = vec2(Section.x, Section.y + Section.h / 2.0f);
+	vec2 From = vec2(Section.x + 50.0f, Section.y + Section.h / 2.0f);
 	vec2 Pos = vec2(Section.x + Section.w - 10.0f, Section.y + Section.h / 2.0f);
 
 	Graphics()->BlendNormal();
@@ -361,7 +361,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	Graphics()->QuadsBegin();
 	RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->DrawSprite(Section.x, Section.y + Section.h / 2.0f, 60.0f);
+	RenderTools()->DrawSprite(Section.x + 30.0f, Section.y + Section.h / 2.0f, 60.0f);
 	Graphics()->QuadsEnd();
 }
 
