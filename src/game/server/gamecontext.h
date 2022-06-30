@@ -265,6 +265,7 @@ public:
 	void OnClientConnected(int ClientID, void *pData) override;
 	void OnClientEnter(int ClientID) override;
 	void OnClientDrop(int ClientID, const char *pReason) override;
+	void OnClientPrepareInput(int ClientID, void *pInput) override;
 	void OnClientDirectInput(int ClientID, void *pInput) override;
 	void OnClientPredictedInput(int ClientID, void *pInput) override;
 	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
