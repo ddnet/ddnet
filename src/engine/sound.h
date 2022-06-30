@@ -87,6 +87,7 @@ public:
 	virtual void Stop(int SampleID) = 0;
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
+	virtual bool IsPlaying(int SampleID) = 0;
 
 	virtual ISoundMixFunc GetSoundMixFunc() = 0;
 	// useful for thread synchronization

@@ -64,6 +64,7 @@ public:
 	void PlayAt(int Channel, int SetId, float Vol, vec2 Pos);
 	void PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos);
 	void Stop(int SetId);
+	bool IsPlaying(int SetId);
 
 	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
 	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);
