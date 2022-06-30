@@ -129,47 +129,6 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeaponsOutOfAmmo, Localize("Switch weapon when out of ammo"), g_Config.m_ClAutoswitchWeaponsOutOfAmmo, &Button))
 			g_Config.m_ClAutoswitchWeaponsOutOfAmmo ^= 1;
-
-		// chat messages
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClShowChatFriends, Localize("Show only chat messages from friends"), g_Config.m_ClShowChatFriends, &Button))
-			g_Config.m_ClShowChatFriends ^= 1;
-
-		// name plates
-		Right.HSplitTop(5.0f, 0, &Right);
-		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClNameplates, Localize("Show name plates"), g_Config.m_ClNameplates, &Button))
-			g_Config.m_ClNameplates ^= 1;
-
-		if(g_Config.m_ClNameplates)
-		{
-			Right.HSplitTop(2.5f, 0, &Right);
-			Right.HSplitTop(20.0f, &Label, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Name plates size"), g_Config.m_ClNameplatesSize);
-			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClNameplatesSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize / 100.0f) * 100.0f + 0.1f);
-
-			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), g_Config.m_ClNameplatesTeamcolors, &Button))
-				g_Config.m_ClNameplatesTeamcolors ^= 1;
-
-			Right.HSplitTop(5.0f, 0, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClNameplatesClan, Localize("Show clan above name plates"), g_Config.m_ClNameplatesClan, &Button))
-				g_Config.m_ClNameplatesClan ^= 1;
-
-			if(g_Config.m_ClNameplatesClan)
-			{
-				Right.HSplitTop(2.5f, 0, &Right);
-				Right.HSplitTop(20.0f, &Label, &Right);
-				Right.HSplitTop(20.0f, &Button, &Right);
-				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Clan plates size"), g_Config.m_ClNameplatesClanSize);
-				UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
-				g_Config.m_ClNameplatesClanSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize / 100.0f) * 100.0f + 0.1f);
-			}
-		}
 	}
 
 	// client
@@ -2028,7 +1987,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("General"),
 		Localize("Player"),
 		("Tee"),
-		Localize("HUD"),
+		Localize("Appearance"),
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
@@ -2071,10 +2030,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_TEE);
 		RenderSettingsTee(MainView);
 	}
-	else if(g_Config.m_UiSettingsPage == SETTINGS_HUD)
+	else if(g_Config.m_UiSettingsPage == SETTINGS_APPEARANCE)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_HUD);
-		RenderSettingsHUD(MainView);
+		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_APPEARANCE);
+		RenderSettingsAppearance(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_CONTROLS)
 	{
@@ -2494,201 +2453,195 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 	return Color;
 }
 
-void CMenus::RenderSettingsHUD(CUIRect MainView)
+enum
+{
+	APPEARANCE_TAB_HUD = 0,
+	APPEARANCE_TAB_CHAT = 1,
+	APPEARANCE_TAB_NAME_PLATE = 2,
+	APPEARANCE_TAB_HOOK_COLLISION = 3,
+	APPEARANCE_TAB_KILL_MESSAGES = 4,
+	APPEARANCE_TAB_LASER = 5,
+	NUMBER_OF_APPEARANCE_TABS = 6,
+};
+
+void CMenus::RenderSettingsAppearance(CUIRect MainView)
 {
 	char aBuf[128];
 	static int s_CurTab = 0;
 
-	CUIRect TabLabel1, TabLabel2, Column,
-		Section, SectionTwo;
+	CUIRect TabBar, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, Page6Tab, LeftView, RightView, Section, Button, Label;
 
-	MainView.HSplitTop(20, &TabLabel1, &MainView);
-	TabLabel1.VSplitMid(&TabLabel1, &TabLabel2);
+	MainView.HSplitTop(20, &TabBar, &MainView);
+	float TabsW = TabBar.w;
+	TabBar.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page1Tab, &Page2Tab);
+	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page2Tab, &Page3Tab);
+	Page3Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page3Tab, &Page4Tab);
+	Page4Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page4Tab, &Page5Tab);
+	Page5Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page5Tab, &Page6Tab);
 
-	static int s_aPageTabs[2] = {};
+	static int s_aPageTabs[NUMBER_OF_APPEARANCE_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("General"), s_CurTab == 0, &TabLabel1, 5, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = 0;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Chat"), s_CurTab == 1, &TabLabel2, 10, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = 1;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_HUD], Localize("HUD"), s_CurTab == APPEARANCE_TAB_HUD, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_HUD;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_CHAT], Localize("Chat"), s_CurTab == APPEARANCE_TAB_CHAT, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_CHAT;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_NAME_PLATE], Localize("Name Plate"), s_CurTab == APPEARANCE_TAB_NAME_PLATE, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_NAME_PLATE;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_HOOK_COLLISION], Localize("Hook Collisions"), s_CurTab == APPEARANCE_TAB_HOOK_COLLISION, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_HOOK_COLLISION;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_KILL_MESSAGES], Localize("Kill Messages"), s_CurTab == APPEARANCE_TAB_KILL_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_KILL_MESSAGES;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_LASER;
 
-	MainView.HSplitTop(10.0f, 0x0, &MainView);
+	MainView.HSplitTop(10.0f, 0x0, &MainView); // Margin
 
-	const float LineMargin = 20.0f;
+	const float LineSize = 20.0f;
+	const float ColorPickerLineSize = 25.0f;
+	const float SectionMargin = 5.0f;
+	const float SectionTotalMargin = 10.0f; // SectionMargin * 2;
+	const float HeadlineFontSize = 20.0f;
+	const float HeadlineAndVMargin = 30.0f; // HeadlineFontSize + SectionTotalMargin;
+	const float MarginToNextSection = 5.0f;
 
-	if(s_CurTab == 0)
-	{ // ***** GENERAL TAB ***** //
+	const float ColorPickerLabelSize = 13.0f;
+	const float ColorPickerLineSpacing = 5.0f;
+	const float LeftViewColorPickerPosition = 210.0f;
 
-		MainView.VSplitLeft(MainView.w * 0.55f, &MainView, &Column);
-
-		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, Localize("HUD"), 20.0f, TEXTALIGN_LEFT);
-		MainView.VSplitLeft(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
+	if(s_CurTab == APPEARANCE_TAB_HUD)
+	{
+		MainView.VSplitMid(&LeftView, &RightView);
 
 		// ***** HUD ***** //
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("HUD"), HeadlineFontSize, TEXTALIGN_LEFT);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowJumpsIndicator, Localize("Show jump indicator"), &g_Config.m_ClShowJumpsIndicator, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs"), &g_Config.m_ClShowIDs, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudScore, Localize("Show score"), &g_Config.m_ClShowhudScore, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health + ammo"), &g_Config.m_ClShowhudHealthAmmo, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChat, Localize("Show chat"), &g_Config.m_ClShowChat, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &MainView, LineMargin);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &MainView, LineMargin);
+		// Switch of the entire HUD
+		LeftView.HSplitTop(SectionTotalMargin + LineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &Section, LineSize);
+
+		// Switches of the various normal HUD elements
+		LeftView.HSplitTop(SectionTotalMargin + 5 * LineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health, shields and ammo"), &g_Config.m_ClShowhudHealthAmmo, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChat, Localize("Show chat"), &g_Config.m_ClShowChat, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplates, Localize("Show name plates"), &g_Config.m_ClNameplates, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudScore, Localize("Show score"), &g_Config.m_ClShowhudScore, &Section, LineSize);
+
+		// Settings of the HUD element for votes
+		LeftView.HSplitTop(SectionTotalMargin + LineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &Section, LineSize);
+
+		// ***** DDRace HUD ***** //
+		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
+		UI()->DoLabel(&Label, Localize("DDRace HUD"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// Switches of various DDRace HUD elements
+		RightView.HSplitTop(SectionTotalMargin + 4 * LineSize, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs in scoreboard"), &g_Config.m_ClShowIDs, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDDRace, Localize("Show DDRace HUD"), &g_Config.m_ClShowhudDDRace, &Section, LineSize);
+		if(g_Config.m_ClShowhudDDRace)
+		{
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudJumpsIndicator, Localize("Show jumps indicator"), &g_Config.m_ClShowhudJumpsIndicator, &Section, LineSize);
+		}
+		else
+		{
+			Section.HSplitTop(LineSize, 0x0, &Section); // Create empty space for hidden option
+		}
+
+		// Switch for dummy actions display
+		RightView.HSplitTop(SectionTotalMargin + LineSize, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &Section, LineSize);
+
+		// Player movement information display settings
+		RightView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &Section, LineSize);
+
+		// Freeze bar settings
+		RightView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &Section, LineSize);
 		{
 			if(g_Config.m_ClShowFreezeBars)
 			{
-				CUIRect Button, Label;
-				MainView.HSplitTop(2.5f, 0, &MainView);
-				MainView.HSplitTop(20.0f, &Label, &MainView);
-				MainView.HSplitTop(20.0f, &Button, &MainView);
-				str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
+				Section.HSplitTop(LineSize, &Label, &Section);
+				Section.HSplitTop(LineSize, &Button, &Section);
+				str_format(aBuf, sizeof(aBuf), "%s: %i%%", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
 				UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 				g_Config.m_ClFreezeBarsAlphaInsideFreeze = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f) * 100.0f);
 			}
+			else
+			{
+				Section.HSplitTop(2 * LineSize, 0x0, &Section); // Create empty space for hidden option
+			}
 		}
-
-		MainView.HSplitTop(30.0f, 0x0, &MainView);
-
-		// ***** Laser ***** //
-
-		MainView = Column;
-
-		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, Localize("Laser"), 20.0f, TEXTALIGN_LEFT);
-		MainView.VSplitLeft(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-
-		MainView.HSplitTop(50.0f, &Section, &MainView);
-		Section.VSplitLeft(260.0f, &Section, 0x0);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		static int LasterOutResetID, LaserInResetID;
-
-		ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&LasterOutResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
-
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		ColorHSLA LaserInnerColor = DoLine_ColorPicker(&LaserInResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
-
-		Section.VSplitLeft(30.0f, 0, &Section);
-
-		DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
-
-		// ***** Hookline ***** //
-
-		MainView.HSplitTop(25.0f, 0x0, &MainView);
-		MainView.HSplitTop(20.0f, &SectionTwo, &MainView);
-
-		UI()->DoLabel(&SectionTwo, Localize("Hookline"), 20.0f, TEXTALIGN_LEFT);
-
-		MainView.Margin(5.0f, &MainView);
-
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(5.0f, &Button, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(45.0f, &Label, &Button);
-			UI()->DoLabel(&Label, Localize("Size"), 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
-		}
-
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(5.0f, &Button, &MainView);
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(45.0f, &Label, &Button);
-			UI()->DoLabel(&Label, Localize("Alpha"), 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClHookCollAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollAlpha, &Button, g_Config.m_ClHookCollAlpha / 100.0f) * 100.0f);
-		}
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		static int HookCollNoCollResetID, HookCollHookableCollResetID, HookCollTeeCollResetID;
-		DoLine_ColorPicker(&HookCollNoCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("No hit"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
-
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		DoLine_ColorPicker(&HookCollHookableCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
-
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		DoLine_ColorPicker(&HookCollTeeCollResetID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
-
-		// ***** Kill Messages ***** //
-
-		MainView.HSplitTop(25.0f, 0x0, &MainView);
-		MainView.HSplitTop(20.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, Localize("Kill Messages"), 20.0f, TEXTALIGN_LEFT);
-
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		static int KillMessageNormalColorID, KillMessageHighlightColorID;
-		DoLine_ColorPicker(&KillMessageNormalColorID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
-
-		MainView.HSplitTop(5.0f, 0x0, &MainView);
-		MainView.HSplitTop(25.0f, &SectionTwo, &MainView);
-
-		DoLine_ColorPicker(&KillMessageHighlightColorID, 25.0f, 180.0f, 13.0f, 5.0f, &SectionTwo, Localize("Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 	}
-	else if(s_CurTab == 1)
-	{ // ***** CHAT TAB ***** //
+	else if(s_CurTab == APPEARANCE_TAB_CHAT)
+	{
+		MainView.VSplitMid(&LeftView, &RightView);
 
-		MainView.VSplitMid(&MainView, &Column);
+		// ***** Chat ***** //
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Chat"), HeadlineFontSize, TEXTALIGN_LEFT);
 
-		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &MainView, LineMargin))
+		// General chat settings
+		LeftView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChatFriends, Localize("Show only chat messages from friends"), &g_Config.m_ClShowChatFriends, &Section, LineSize);
+
+		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &Section, LineSize))
 			GameClient()->m_Chat.RebuildChat();
 
-		MainView.HSplitTop(30.0f, 0x0, &MainView);
+		// ***** Messages ***** //
+		LeftView.HSplitTop(MarginToNextSection, 0x0, &LeftView);
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Messages"), HeadlineFontSize, TEXTALIGN_LEFT);
 
-		// Message Colors and extra
-
-		MainView.HSplitTop(20.0f, &Section, &MainView);
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
-
-		UI()->DoLabel(&Section, Localize("Messages"), 20.0f, TEXTALIGN_LEFT);
-
-		const float LineSize = 25.0f;
-		const float WantedPickerPosition = 210.0f;
-		const float LabelSize = 13.0f;
-		const float LineSpacing = 5.0f;
+		// Message Colors and extra settings
+		LeftView.HSplitTop(SectionTotalMargin + 6 * ColorPickerLineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
 
 		int i = 0;
 		static int ResetIDs[24];
 
-		DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &MainView, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
-		DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &MainView, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
-		DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &MainView, Localize("Team message"), &g_Config.m_ClMessageTeamColor, ColorRGBA(0.65f, 1.0f, 0.65f));
-		DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &MainView, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, &g_Config.m_ClMessageFriend);
-		DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &MainView, Localize("Normal message"), &g_Config.m_ClMessageColor, ColorRGBA(1.0f, 1.0f, 1.0f));
+		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
+		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
+		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Team message"), &g_Config.m_ClMessageTeamColor, ColorRGBA(0.65f, 1.0f, 0.65f));
+		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, &g_Config.m_ClMessageFriend);
+		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Normal message"), &g_Config.m_ClMessageColor, ColorRGBA(1.0f, 1.0f, 1.0f));
 
 		str_format(aBuf, sizeof(aBuf), "%s (echo)", Localize("Client message"));
-		DoLine_ColorPicker(&ResetIDs[i++], LineSize, WantedPickerPosition, LabelSize, LineSpacing, &MainView, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
+		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
 
 		// ***** Chat Preview ***** //
+		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
+		UI()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_LEFT);
 
-		MainView = Column;
+		// Use the rest of the view for preview
+		Section = RightView;
+		Section.Margin(SectionMargin, &Section);
 
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
-		MainView.HSplitTop(20.0f, &Section, &MainView);
+		RenderTools()->DrawUIRect(&Section, ColorRGBA(1, 1, 1, 0.1f), CUI::CORNER_ALL, 8.0f);
 
-		UI()->DoLabel(&Section, Localize("Preview"), 20.0f, TEXTALIGN_LEFT);
-
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
-		RenderTools()->DrawUIRect(&MainView, ColorRGBA(1, 1, 1, 0.1f), CUI::CORNER_ALL, 8.0f);
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
+		Section.HSplitTop(10.0f, 0x0, &Section); // Margin
 
 		ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
 		ColorRGBA HighlightedColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
@@ -2704,8 +2657,8 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		const float RealMsgPaddingTee = (!g_Config.m_ClChatOld ? CChat::MESSAGE_TEE_SIZE + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
 		const float RealOffsetY = RealFontSize + RealMsgPaddingY;
 
-		const float X = 5.0f + RealMsgPaddingX / 2.0f + MainView.x;
-		float Y = MainView.y;
+		const float X = 5.0f + RealMsgPaddingX / 2.0f + Section.x;
+		float Y = Section.y;
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
@@ -2857,6 +2810,143 @@ void CMenus::RenderSettingsHUD(CUIRect MainView)
 		TextRender()->SetCursorPosition(&Cursor, X, Y);
 
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+	else if(s_CurTab == APPEARANCE_TAB_NAME_PLATE)
+	{
+		MainView.VSplitMid(&LeftView, &RightView);
+
+		// ***** Name Plate ***** //
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Name Plate"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General chat settings
+		LeftView.HSplitTop(SectionTotalMargin + 9 * LineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		{
+			Section.HSplitTop(LineSize, &Label, &Section);
+			Section.HSplitTop(LineSize, &Button, &Section);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Name plates size"), g_Config.m_ClNameplatesSize);
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClNameplatesSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClNameplatesSize, &Button, g_Config.m_ClNameplatesSize / 100.0f) * 100.0f + 0.1f);
+		}
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesClan, Localize("Show clan above name plates"), &g_Config.m_ClNameplatesClan, &Section, LineSize);
+		if(g_Config.m_ClNameplatesClan)
+		{
+			Section.HSplitTop(LineSize, &Label, &Section);
+			Section.HSplitTop(LineSize, &Button, &Section);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Clan plates size"), g_Config.m_ClNameplatesClanSize);
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClNameplatesClanSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClNameplatesClanSize, &Button, g_Config.m_ClNameplatesClanSize / 100.0f) * 100.0f + 0.1f);
+		}
+		else
+		{
+			Section.HSplitTop(2 * LineSize, 0x0, &Section); // Create empty space for hidden option
+		}
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), &g_Config.m_ClNameplatesTeamcolors, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesStrong, Localize("Show hook strength indicator"), &g_Config.m_ClNameplatesStrong, &Section, LineSize);
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1, &Button))
+		{
+			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection >= 1 ? 0 : 1;
+		}
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		static int s_ShowLocalPlayer = 0;
+		if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection == 2, &Button))
+		{
+			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection != 2 ? 2 : 1;
+		}
+	}
+	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
+	{
+		MainView.VSplitMid(&LeftView, &RightView);
+
+		// ***** Hookline ***** //
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Hook collision line"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General hookline settings
+		LeftView.HSplitTop(SectionTotalMargin + 6 * LineSize + 3 * ColorPickerLineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowHookCollOther, Localize("Show other players' hook collision lines"), g_Config.m_ClShowHookCollOther, &Button))
+		{
+			g_Config.m_ClShowHookCollOther = g_Config.m_ClShowHookCollOther >= 1 ? 0 : 1;
+		}
+
+		{
+			Section.HSplitTop(LineSize, &Label, &Section);
+			Section.HSplitTop(LineSize, &Button, &Section);
+			str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Hook collision line width"), g_Config.m_ClHookCollSize);
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
+		}
+
+		{
+			Section.HSplitTop(LineSize, &Label, &Section);
+			Section.HSplitTop(LineSize, &Button, &Section);
+			str_format(aBuf, sizeof(aBuf), "%s: %i%%", Localize("Hook collision line opacity"), g_Config.m_ClHookCollAlpha);
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClHookCollAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollAlpha, &Button, g_Config.m_ClHookCollAlpha / 100.0f) * 100.0f);
+		}
+
+		static int HookCollNoCollResetID, HookCollHookableCollResetID, HookCollTeeCollResetID, HookCollToolTop;
+
+		Section.HSplitTop(LineSize, &Label, &Section);
+		UI()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_LEFT);
+		GameClient()->m_Tooltips.DoToolTip(&HookCollToolTop, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
+		DoLine_ColorPicker(&HookCollNoCollResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&HookCollHookableCollResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
+		DoLine_ColorPicker(&HookCollTeeCollResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("A Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
+	}
+	else if(s_CurTab == APPEARANCE_TAB_KILL_MESSAGES)
+	{
+		MainView.VSplitMid(&LeftView, &RightView);
+
+		// ***** Kill Messages ***** //
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Kill Messages"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General kill messages settings
+		LeftView.HSplitTop(SectionTotalMargin + 2 * ColorPickerLineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		static int KillMessageNormalColorID, KillMessageHighlightColorID;
+
+		DoLine_ColorPicker(&KillMessageNormalColorID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+		DoLine_ColorPicker(&KillMessageHighlightColorID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	}
+	else if(s_CurTab == APPEARANCE_TAB_LASER)
+	{
+		MainView.VSplitMid(&LeftView, &RightView);
+
+		// ***** Laser ***** //
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Laser"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General laser settings
+		LeftView.HSplitTop(SectionTotalMargin + 2 * ColorPickerLineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		static int LasterOutResetID, LaserInResetID;
+
+		ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&LasterOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
+		ColorHSLA LaserInnerColor = DoLine_ColorPicker(&LaserInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+
+		// ***** Laser Preview ***** //
+		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
+		UI()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General laser settings
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+
+		DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
 	}
 }
 
@@ -3035,25 +3125,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.HSplitTop(40.0f, 0, &Right);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowHookCollOther, Localize("Show other players' hook collision lines"), g_Config.m_ClShowHookCollOther, &Button))
-	{
-		g_Config.m_ClShowHookCollOther = g_Config.m_ClShowHookCollOther >= 1 ? 0 : 1;
-	}
-
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1, &Button))
-	{
-		g_Config.m_ClShowDirection = g_Config.m_ClShowDirection >= 1 ? 0 : 1;
-	}
-
-	Left.HSplitTop(20.0f, &Button, &Left);
-	static int s_ShowLocalPlayer = 0;
-	if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection == 2, &Button))
-	{
-		g_Config.m_ClShowDirection = g_Config.m_ClShowDirection != 2 ? 2 : 1;
-	}
-
-	Left.HSplitTop(20.0f, &Button, &Left);
 	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
 	{
 		g_Config.m_InpMouseOld ^= 1;
@@ -3064,7 +3135,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		m_NeedRestartDDNet = s_InpMouseOld != g_Config.m_InpMouseOld;
 
 	Left.HSplitTop(5.0f, &Button, &Left);
-	Right.HSplitTop(25.0f, &Button, &Right);
 	Left.VSplitRight(10.0f, &Left, 0x0);
 	Right.VSplitLeft(10.0f, 0x0, &Right);
 	Left.HSplitTop(25.0f, 0x0, &Left);
@@ -3074,7 +3144,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	UI()->DoLabel(&TempLabel, Localize("Background"), 20.0f, TEXTALIGN_LEFT);
 
-	Right.HSplitTop(45.0f, 0x0, &Right);
 	Right.HSplitTop(25.0f, &TempLabel, &Right);
 	Right.HSplitTop(5.0f, 0x0, &Miscellaneous);
 

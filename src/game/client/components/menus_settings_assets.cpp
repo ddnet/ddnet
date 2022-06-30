@@ -28,7 +28,8 @@ enum
 	ASSETS_TAB_EMOTICONS = 2,
 	ASSETS_TAB_PARTICLES = 3,
 	ASSETS_TAB_HUD = 4,
-	ASSETS_TAB_EXTRAS = 5
+	ASSETS_TAB_EXTRAS = 5,
+	NUMBER_OF_ASSETS_TABS = 6,
 };
 
 void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
@@ -247,16 +248,15 @@ static std::vector<const CMenus::SCustomParticle *> s_vpSearchParticlesList;
 static std::vector<const CMenus::SCustomHud *> s_vpSearchHudList;
 static std::vector<const CMenus::SCustomExtras *> s_vpSearchExtrasList;
 
-static const int NumberOfAssetsTabs = 6;
-static bool s_InitCustomList[NumberOfAssetsTabs] = {
+static bool s_InitCustomList[NUMBER_OF_ASSETS_TABS] = {
 	true,
 };
 
-static size_t s_CustomListSize[NumberOfAssetsTabs] = {
+static size_t s_CustomListSize[NUMBER_OF_ASSETS_TABS] = {
 	0,
 };
 
-static char s_aFilterString[NumberOfAssetsTabs][50];
+static char s_aFilterString[NUMBER_OF_ASSETS_TABS][50];
 
 static int s_CurCustomTab = ASSETS_TAB_ENTITIES;
 
@@ -384,29 +384,29 @@ int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> 
 
 void CMenus::RenderSettingsCustom(CUIRect MainView)
 {
-	CUIRect Label, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, Page6Tab, ReloadButton;
+	CUIRect TabBar, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, Page6Tab, ReloadButton;
 
-	MainView.HSplitTop(20, &Label, &MainView);
-	float TabsW = Label.w;
-	Label.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page1Tab, &Page2Tab);
-	Page2Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page2Tab, &Page3Tab);
-	Page3Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page3Tab, &Page4Tab);
-	Page4Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page4Tab, &Page5Tab);
-	Page5Tab.VSplitLeft(TabsW / NumberOfAssetsTabs, &Page5Tab, &Page6Tab);
+	MainView.HSplitTop(20, &TabBar, &MainView);
+	float TabsW = TabBar.w;
+	TabBar.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page1Tab, &Page2Tab);
+	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page2Tab, &Page3Tab);
+	Page3Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page3Tab, &Page4Tab);
+	Page4Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page4Tab, &Page5Tab);
+	Page5Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page5Tab, &Page6Tab);
 
-	static int s_aPageTabs[NumberOfAssetsTabs] = {};
+	static int s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_ENTITIES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_GAME], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_GAME;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[2], Localize("Emoticons"), s_CurCustomTab == ASSETS_TAB_EMOTICONS, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_EMOTICONS], Localize("Emoticons"), s_CurCustomTab == ASSETS_TAB_EMOTICONS, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_EMOTICONS;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[3], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_PARTICLES], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_PARTICLES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[4], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_HUD], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[5], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_EXTRAS;
 
 	auto LoadStartTime = time_get_nanoseconds();
