@@ -1260,8 +1260,8 @@ int CCollision::IsCheckpoint(int Index) const
 		return -1;
 
 	int z = m_pTiles[Index].m_Index;
-	if(z >= TILE_CHECKPOINT_FIRST && z <= TILE_CHECKPOINT_LAST)
-		return z - TILE_CHECKPOINT_FIRST;
+	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
+		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
 }
 
@@ -1271,7 +1271,7 @@ int CCollision::IsFCheckpoint(int Index) const
 		return -1;
 
 	int z = m_pFront[Index].m_Index;
-	if(z >= 35 && z <= 59)
-		return z - 35;
+	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
+		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
 }
