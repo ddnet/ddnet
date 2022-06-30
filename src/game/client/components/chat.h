@@ -29,7 +29,7 @@ class CChat : public CComponent
 	struct CLine
 	{
 		int64_t m_Time;
-		float m_YOffset[2];
+		float m_aYOffset[2];
 		int m_ClientID;
 		int m_TeamNumber;
 		bool m_Team;

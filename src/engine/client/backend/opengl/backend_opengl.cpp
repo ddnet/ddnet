@@ -273,15 +273,15 @@ static const char *GetGLSeverity(GLenum Type)
 }
 
 static void GLAPIENTRY
-GfxOpenGLMessageCallback(GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar *message,
-	const void *userParam)
+GfxOpenGLMessageCallback(GLenum Source,
+	GLenum Type,
+	GLuint Id,
+	GLenum Severity,
+	GLsizei Length,
+	const GLchar *pMsg,
+	const void *pUserParam)
 {
-	dbg_msg("gfx", "[%s] (importance: %s) %s", GetGLErrorName(type), GetGLSeverity(severity), message);
+	dbg_msg("gfx", "[%s] (importance: %s) %s", GetGLErrorName(Type), GetGLSeverity(Severity), pMsg);
 }
 #endif
 
@@ -1925,12 +1925,12 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CopyBufferObject(const CCommandBuffe
 	SBufferObject &ReadBufferObject = m_vBufferObjectIndices[ReadIndex];
 	SBufferObject &WriteBufferObject = m_vBufferObjectIndices[WriteIndex];
 
-	mem_copy(((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pWriteOffset, ((uint8_t *)ReadBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pReadOffset, pCommand->m_CopySize);
+	mem_copy(((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_WriteOffset, ((uint8_t *)ReadBufferObject.m_pData) + (ptrdiff_t)pCommand->m_ReadOffset, pCommand->m_CopySize);
 
 	if(m_HasShaders)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, WriteBufferObject.m_BufferObjectID);
-		glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_pWriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pWriteOffset);
+		glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_WriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_WriteOffset);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }

@@ -8,15 +8,15 @@
 
 struct SVersion
 {
-	int m_Parts[VERSION_PARTS];
+	int m_aParts[VERSION_PARTS];
 
 	bool operator<=(const SVersion &Other) const
 	{
 		for(int i = 0; i < VERSION_PARTS; i++)
 		{
-			if(m_Parts[i] < Other.m_Parts[i])
+			if(m_aParts[i] < Other.m_aParts[i])
 				return true;
-			if(m_Parts[i] > Other.m_Parts[i])
+			if(m_aParts[i] > Other.m_aParts[i])
 				return false;
 		}
 		return true;
@@ -68,7 +68,7 @@ const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVe
 	char aVersionStrHelper[512]; // the size is random, but shouldn't be too small probably
 
 	SVersion Version;
-	for(int &VersionPart : Version.m_Parts)
+	for(int &VersionPart : Version.m_aParts)
 	{
 		pVersionStrStart = str_next_token(pVersionStrStart, ".", aVersionStrHelper, sizeof(aVersionStrHelper));
 		if(pVersionStrStart == NULL)

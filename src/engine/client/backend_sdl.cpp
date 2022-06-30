@@ -762,7 +762,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 	}
 
-	static constexpr int ModeCount = 256;
+	constexpr int ModeCount = 256;
 	SDL_DisplayMode aModes[ModeCount];
 	int NumModes = 0;
 	for(int i = 0; i < maxModes && NumModes < ModeCount; i++)

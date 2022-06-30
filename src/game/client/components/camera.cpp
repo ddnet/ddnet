@@ -103,28 +103,28 @@ void CCamera::OnRender()
 	{
 		if(m_CamType != CAMTYPE_SPEC)
 		{
-			m_LastPos[g_Config.m_ClDummy] = m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy];
-			m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy] = m_PrevCenter;
+			m_aLastPos[g_Config.m_ClDummy] = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+			m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_PrevCenter;
 			m_pClient->m_Controls.ClampMousePos();
 			m_CamType = CAMTYPE_SPEC;
 		}
-		m_Center = m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy];
+		m_Center = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 	}
 	else
 	{
 		if(m_CamType != CAMTYPE_PLAYER)
 		{
-			if((m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClMouseMinDistance) || (m_LastPos[g_Config.m_ClDummy].x < g_Config.m_ClDyncamMinDistance))
-				m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x = m_LastPos[g_Config.m_ClDummy].x + g_Config.m_ClMouseMinDistance + g_Config.m_ClDyncamMinDistance;
+			if((m_aLastPos[g_Config.m_ClDummy].x < g_Config.m_ClMouseMinDistance) || (m_aLastPos[g_Config.m_ClDummy].x < g_Config.m_ClDyncamMinDistance))
+				m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x = m_aLastPos[g_Config.m_ClDummy].x + g_Config.m_ClMouseMinDistance + g_Config.m_ClDyncamMinDistance;
 			else
-				m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy] = m_LastPos[g_Config.m_ClDummy];
+				m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_aLastPos[g_Config.m_ClDummy];
 			m_pClient->m_Controls.ClampMousePos();
 			m_CamType = CAMTYPE_PLAYER;
 		}
 
 		float DeltaTime = Client()->RenderFrameTime();
 		static vec2 s_LastMousePos(0, 0);
-		static vec2 s_CurrentCameraOffset[2] = {vec2(0, 0), vec2(0, 0)};
+		static vec2 s_aCurrentCameraOffset[NUM_DUMMIES] = {vec2(0, 0), vec2(0, 0)};
 		static float s_SpeedBias = 0.5f;
 
 		if(g_Config.m_ClDyncamSmoothness > 0)
@@ -135,7 +135,7 @@ void CCamera::OnRender()
 			s_SpeedBias += CameraSpeed * DeltaTime;
 			if(g_Config.m_ClDyncam)
 			{
-				s_SpeedBias -= length(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy] - s_LastMousePos) * log10f(CameraStabilizingFactor) * 0.02f;
+				s_SpeedBias -= length(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] - s_LastMousePos) * log10f(CameraStabilizingFactor) * 0.02f;
 				s_SpeedBias = clamp(s_SpeedBias, 0.5f, CameraSpeed);
 			}
 			else
@@ -145,7 +145,7 @@ void CCamera::OnRender()
 		}
 
 		vec2 TargetCameraOffset(0, 0);
-		s_LastMousePos = m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy];
+		s_LastMousePos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 		float l = length(s_LastMousePos);
 		if(l > 0.0001f) // make sure that this isn't 0
 		{
@@ -153,23 +153,23 @@ void CCamera::OnRender()
 			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
 			float OffsetAmount = maximum(l - DeadZone, 0.0f) * FollowFactor;
 
-			TargetCameraOffset = normalize(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]) * OffsetAmount;
+			TargetCameraOffset = normalize(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]) * OffsetAmount;
 		}
 
 		if(g_Config.m_ClDyncamSmoothness > 0)
-			s_CurrentCameraOffset[g_Config.m_ClDummy] += (TargetCameraOffset - s_CurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * s_SpeedBias, 1.0f);
+			s_aCurrentCameraOffset[g_Config.m_ClDummy] += (TargetCameraOffset - s_aCurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * s_SpeedBias, 1.0f);
 		else
-			s_CurrentCameraOffset[g_Config.m_ClDummy] = TargetCameraOffset;
+			s_aCurrentCameraOffset[g_Config.m_ClDummy] = TargetCameraOffset;
 
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + s_CurrentCameraOffset[g_Config.m_ClDummy];
+			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + s_aCurrentCameraOffset[g_Config.m_ClDummy];
 		else
-			m_Center = m_pClient->m_LocalCharacterPos + s_CurrentCameraOffset[g_Config.m_ClDummy];
+			m_Center = m_pClient->m_LocalCharacterPos + s_aCurrentCameraOffset[g_Config.m_ClDummy];
 	}
 
 	if(m_ForceFreeviewPos != vec2(-1, -1) && m_CamType == CAMTYPE_SPEC)
 	{
-		m_Center = m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy] = m_ForceFreeviewPos;
+		m_Center = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_ForceFreeviewPos;
 		m_ForceFreeviewPos = vec2(-1, -1);
 	}
 	m_PrevCenter = m_Center;

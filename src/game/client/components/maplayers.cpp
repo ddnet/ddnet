@@ -904,7 +904,7 @@ void CMapLayers::OnMapLoad()
 				CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
 				for(int i = 0; i < pQLayer->m_NumQuads; ++i)
 				{
-					CQuad *q = &pQuads[i];
+					CQuad *pQuad = &pQuads[i];
 					for(int j = 0; j < 4; ++j)
 					{
 						int QuadIDX = j;
@@ -915,28 +915,28 @@ void CMapLayers::OnMapLoad()
 						if(!Textured)
 						{
 							// ignore the conversion for the position coordinates
-							vtmpQuads[i].m_aVertices[j].m_X = (q->m_aPoints[QuadIDX].x);
-							vtmpQuads[i].m_aVertices[j].m_Y = (q->m_aPoints[QuadIDX].y);
-							vtmpQuads[i].m_aVertices[j].m_CenterX = (q->m_aPoints[4].x);
-							vtmpQuads[i].m_aVertices[j].m_CenterY = (q->m_aPoints[4].y);
-							vtmpQuads[i].m_aVertices[j].m_R = (unsigned char)q->m_aColors[QuadIDX].r;
-							vtmpQuads[i].m_aVertices[j].m_G = (unsigned char)q->m_aColors[QuadIDX].g;
-							vtmpQuads[i].m_aVertices[j].m_B = (unsigned char)q->m_aColors[QuadIDX].b;
-							vtmpQuads[i].m_aVertices[j].m_A = (unsigned char)q->m_aColors[QuadIDX].a;
+							vtmpQuads[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIDX].x);
+							vtmpQuads[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIDX].y);
+							vtmpQuads[i].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
+							vtmpQuads[i].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
+							vtmpQuads[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIDX].r;
+							vtmpQuads[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIDX].g;
+							vtmpQuads[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIDX].b;
+							vtmpQuads[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIDX].a;
 						}
 						else
 						{
 							// ignore the conversion for the position coordinates
-							vtmpQuadsTextured[i].m_aVertices[j].m_X = (q->m_aPoints[QuadIDX].x);
-							vtmpQuadsTextured[i].m_aVertices[j].m_Y = (q->m_aPoints[QuadIDX].y);
-							vtmpQuadsTextured[i].m_aVertices[j].m_CenterX = (q->m_aPoints[4].x);
-							vtmpQuadsTextured[i].m_aVertices[j].m_CenterY = (q->m_aPoints[4].y);
-							vtmpQuadsTextured[i].m_aVertices[j].m_U = fx2f(q->m_aTexcoords[QuadIDX].x);
-							vtmpQuadsTextured[i].m_aVertices[j].m_V = fx2f(q->m_aTexcoords[QuadIDX].y);
-							vtmpQuadsTextured[i].m_aVertices[j].m_R = (unsigned char)q->m_aColors[QuadIDX].r;
-							vtmpQuadsTextured[i].m_aVertices[j].m_G = (unsigned char)q->m_aColors[QuadIDX].g;
-							vtmpQuadsTextured[i].m_aVertices[j].m_B = (unsigned char)q->m_aColors[QuadIDX].b;
-							vtmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)q->m_aColors[QuadIDX].a;
+							vtmpQuadsTextured[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIDX].x);
+							vtmpQuadsTextured[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIDX].y);
+							vtmpQuadsTextured[i].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
+							vtmpQuadsTextured[i].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
+							vtmpQuadsTextured[i].m_aVertices[j].m_U = fx2f(pQuad->m_aTexcoords[QuadIDX].x);
+							vtmpQuadsTextured[i].m_aVertices[j].m_V = fx2f(pQuad->m_aTexcoords[QuadIDX].y);
+							vtmpQuadsTextured[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIDX].r;
+							vtmpQuadsTextured[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIDX].g;
+							vtmpQuadsTextured[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIDX].b;
+							vtmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIDX].a;
 						}
 					}
 				}
@@ -1390,22 +1390,22 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	size_t CurQuadOffset = 0;
 	for(int i = 0; i < pQuadLayer->m_NumQuads; ++i)
 	{
-		CQuad *q = &pQuads[i];
+		CQuad *pQuad = &pQuads[i];
 
 		ColorRGBA Color(1.f, 1.f, 1.f, 1.f);
-		if(q->m_ColorEnv >= 0)
+		if(pQuad->m_ColorEnv >= 0)
 		{
-			EnvelopeEval(q->m_ColorEnvOffset, q->m_ColorEnv, Color, this);
+			EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, this);
 		}
 
 		float OffsetX = 0;
 		float OffsetY = 0;
 		float Rot = 0;
 
-		if(q->m_PosEnv >= 0)
+		if(pQuad->m_PosEnv >= 0)
 		{
 			ColorRGBA Channels;
-			EnvelopeEval(q->m_PosEnvOffset, q->m_PosEnv, Channels, this);
+			EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Channels, this);
 			OffsetX = Channels.r;
 			OffsetY = Channels.g;
 			Rot = Channels.b / 180.0f * pi;
@@ -1570,13 +1570,13 @@ void CMapLayers::OnRender()
 		if((!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN) && pGroup->m_Version >= 2 && pGroup->m_UseClipping)
 		{
 			// set clipping
-			float Points[4];
+			float aPoints[4];
 			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
-			Graphics()->GetScreen(&Points[0], &Points[1], &Points[2], &Points[3]);
-			float x0 = (pGroup->m_ClipX - Points[0]) / (Points[2] - Points[0]);
-			float y0 = (pGroup->m_ClipY - Points[1]) / (Points[3] - Points[1]);
-			float x1 = ((pGroup->m_ClipX + pGroup->m_ClipW) - Points[0]) / (Points[2] - Points[0]);
-			float y1 = ((pGroup->m_ClipY + pGroup->m_ClipH) - Points[1]) / (Points[3] - Points[1]);
+			Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
+			float x0 = (pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
+			float y0 = (pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
+			float x1 = ((pGroup->m_ClipX + pGroup->m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
+			float y1 = ((pGroup->m_ClipY + pGroup->m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
 
 			if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
 			{

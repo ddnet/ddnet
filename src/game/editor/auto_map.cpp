@@ -405,10 +405,10 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 	{
 		for(int x = UpdateFromX; x < UpdateToX; x++)
 		{
-			CTile *in = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-			CTile *out = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
-			out->m_Index = in->m_Index;
-			out->m_Flags = in->m_Flags;
+			CTile *pIn = &pLayer->m_pTiles[y * pLayer->m_Width + x];
+			CTile *pOut = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
+			pOut->m_Index = pIn->m_Index;
+			pOut->m_Flags = pIn->m_Flags;
 		}
 	}
 
@@ -418,10 +418,10 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 	{
 		for(int x = CommitFromX; x < CommitToX; x++)
 		{
-			CTile *in = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
-			CTile *out = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-			out->m_Index = in->m_Index;
-			out->m_Flags = in->m_Flags;
+			CTile *pIn = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
+			CTile *pOut = &pLayer->m_pTiles[y * pLayer->m_Width + x];
+			pOut->m_Index = pIn->m_Index;
+			pOut->m_Flags = pIn->m_Flags;
 		}
 	}
 
@@ -453,10 +453,10 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 			{
 				for(int x = 0; x < pLayer->m_Width; x++)
 				{
-					CTile *in = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-					CTile *out = &pReadLayer->m_pTiles[y * pLayer->m_Width + x];
-					out->m_Index = in->m_Index;
-					out->m_Flags = in->m_Flags;
+					CTile *pIn = &pLayer->m_pTiles[y * pLayer->m_Width + x];
+					CTile *pOut = &pReadLayer->m_pTiles[y * pLayer->m_Width + x];
+					pOut->m_Index = pIn->m_Index;
+					pOut->m_Flags = pIn->m_Flags;
 				}
 			}
 		}

@@ -163,7 +163,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	Skin.m_OriginalSkin.m_HandsOutline = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_HAND_OUTLINE]);
 
 	for(int i = 0; i < 6; ++i)
-		Skin.m_OriginalSkin.m_Eyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
+		Skin.m_OriginalSkin.m_aEyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
 
 	int FeetGridPixelsWidth = (Info.m_Width / g_pData->m_aSprites[SPRITE_TEE_FOOT].m_pSet->m_Gridx);
 	int FeetGridPixelsHeight = (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_FOOT].m_pSet->m_Gridy);
@@ -193,7 +193,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	int BodyHeight = g_pData->m_aSprites[SPRITE_TEE_BODY].m_H * (Info.m_Height / g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy); // body height
 	if(BodyWidth > Info.m_Width || BodyHeight > Info.m_Height)
 		return 0;
-	unsigned char *d = (unsigned char *)Info.m_pData;
+	unsigned char *pData = (unsigned char *)Info.m_pData;
 	const int PixelStep = 4;
 	int Pitch = Info.m_Width * PixelStep;
 
@@ -203,12 +203,12 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 		for(int y = 0; y < BodyHeight; y++)
 			for(int x = 0; x < BodyWidth; x++)
 			{
-				uint8_t AlphaValue = d[y * Pitch + x * PixelStep + 3];
+				uint8_t AlphaValue = pData[y * Pitch + x * PixelStep + 3];
 				if(AlphaValue > 128)
 				{
-					aColors[0] += d[y * Pitch + x * PixelStep + 0];
-					aColors[1] += d[y * Pitch + x * PixelStep + 1];
-					aColors[2] += d[y * Pitch + x * PixelStep + 2];
+					aColors[0] += pData[y * Pitch + x * PixelStep + 0];
+					aColors[1] += pData[y * Pitch + x * PixelStep + 1];
+					aColors[2] += pData[y * Pitch + x * PixelStep + 2];
 				}
 			}
 		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
@@ -217,27 +217,27 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
 	}
 
-	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, 0, 0, BodyWidth, BodyHeight);
+	CheckMetrics(Skin.m_Metrics.m_Body, pData, Pitch, 0, 0, BodyWidth, BodyHeight);
 
 	// body outline metrics
-	CheckMetrics(Skin.m_Metrics.m_Body, d, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineWidth, BodyOutlineHeight);
+	CheckMetrics(Skin.m_Metrics.m_Body, pData, Pitch, BodyOutlineOffsetX, BodyOutlineOffsetY, BodyOutlineWidth, BodyOutlineHeight);
 
 	// get feet size
-	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOffsetX, FeetOffsetY, FeetWidth, FeetHeight);
+	CheckMetrics(Skin.m_Metrics.m_Feet, pData, Pitch, FeetOffsetX, FeetOffsetY, FeetWidth, FeetHeight);
 
 	// get feet outline size
-	CheckMetrics(Skin.m_Metrics.m_Feet, d, Pitch, FeetOutlineOffsetX, FeetOutlineOffsetY, FeetOutlineWidth, FeetOutlineHeight);
+	CheckMetrics(Skin.m_Metrics.m_Feet, pData, Pitch, FeetOutlineOffsetX, FeetOutlineOffsetY, FeetOutlineWidth, FeetOutlineHeight);
 
 	// make the texture gray scale
 	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
 	{
-		int v = (d[i * PixelStep] + d[i * PixelStep + 1] + d[i * PixelStep + 2]) / 3;
-		d[i * PixelStep] = v;
-		d[i * PixelStep + 1] = v;
-		d[i * PixelStep + 2] = v;
+		int v = (pData[i * PixelStep] + pData[i * PixelStep + 1] + pData[i * PixelStep + 2]) / 3;
+		pData[i * PixelStep] = v;
+		pData[i * PixelStep + 1] = v;
+		pData[i * PixelStep + 2] = v;
 	}
 
-	int Freq[256] = {0};
+	int aFreq[256] = {0};
 	int OrgWeight = 0;
 	int NewWeight = 192;
 
@@ -245,13 +245,13 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	for(int y = 0; y < BodyHeight; y++)
 		for(int x = 0; x < BodyWidth; x++)
 		{
-			if(d[y * Pitch + x * PixelStep + 3] > 128)
-				Freq[d[y * Pitch + x * PixelStep]]++;
+			if(pData[y * Pitch + x * PixelStep + 3] > 128)
+				aFreq[pData[y * Pitch + x * PixelStep]]++;
 		}
 
 	for(int i = 1; i < 256; i++)
 	{
-		if(Freq[OrgWeight] < Freq[i])
+		if(aFreq[OrgWeight] < aFreq[i])
 			OrgWeight = i;
 	}
 
@@ -261,7 +261,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	for(int y = 0; y < BodyHeight; y++)
 		for(int x = 0; x < BodyWidth; x++)
 		{
-			int v = d[y * Pitch + x * PixelStep];
+			int v = pData[y * Pitch + x * PixelStep];
 			if(v <= OrgWeight && OrgWeight == 0)
 				v = 0;
 			else if(v <= OrgWeight)
@@ -270,9 +270,9 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 				v = NewWeight;
 			else
 				v = (int)(((v - OrgWeight) / (float)InvOrgWeight) * InvNewWeight + NewWeight);
-			d[y * Pitch + x * PixelStep] = v;
-			d[y * Pitch + x * PixelStep + 1] = v;
-			d[y * Pitch + x * PixelStep + 2] = v;
+			pData[y * Pitch + x * PixelStep] = v;
+			pData[y * Pitch + x * PixelStep + 1] = v;
+			pData[y * Pitch + x * PixelStep + 2] = v;
 		}
 
 	Skin.m_ColorableSkin.m_Body = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_BODY]);
@@ -283,7 +283,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	Skin.m_ColorableSkin.m_HandsOutline = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_HAND_OUTLINE]);
 
 	for(int i = 0; i < 6; ++i)
-		Skin.m_ColorableSkin.m_Eyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
+		Skin.m_ColorableSkin.m_aEyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
 
 	Graphics()->FreePNG(&Info);
 
@@ -302,17 +302,17 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 void CSkins::OnInit()
 {
-	m_EventSkinPrefix[0] = '\0';
+	m_aEventSkinPrefix[0] = '\0';
 
 	if(g_Config.m_Events)
 	{
-		time_t rawtime;
-		struct tm *timeinfo;
-		std::time(&rawtime);
-		timeinfo = localtime(&rawtime);
-		if(timeinfo->tm_mon == 11 && timeinfo->tm_mday >= 24 && timeinfo->tm_mday <= 26)
+		time_t RawTime;
+		struct tm *pTimeInfo;
+		std::time(&RawTime);
+		pTimeInfo = localtime(&RawTime);
+		if(pTimeInfo->tm_mon == 11 && pTimeInfo->tm_mday >= 24 && pTimeInfo->tm_mday <= 26)
 		{ // Christmas
-			str_copy(m_EventSkinPrefix, "santa", sizeof(m_EventSkinPrefix));
+			str_copy(m_aEventSkinPrefix, "santa", sizeof(m_aEventSkinPrefix));
 		}
 	}
 
@@ -332,7 +332,7 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_FeetOutline);
 		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_Hands);
 		Graphics()->UnloadTexture(&Skin.m_OriginalSkin.m_HandsOutline);
-		for(auto &Eye : Skin.m_OriginalSkin.m_Eyes)
+		for(auto &Eye : Skin.m_OriginalSkin.m_aEyes)
 			Graphics()->UnloadTexture(&Eye);
 
 		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_Body);
@@ -341,7 +341,7 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_FeetOutline);
 		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_Hands);
 		Graphics()->UnloadTexture(&Skin.m_ColorableSkin.m_HandsOutline);
-		for(auto &Eye : Skin.m_ColorableSkin.m_Eyes)
+		for(auto &Eye : Skin.m_ColorableSkin.m_aEyes)
 			Graphics()->UnloadTexture(&Eye);
 	}
 
@@ -381,7 +381,7 @@ const CSkin *CSkins::Get(int Index)
 
 int CSkins::Find(const char *pName)
 {
-	const char *pSkinPrefix = m_EventSkinPrefix[0] ? m_EventSkinPrefix : g_Config.m_ClSkinPrefix;
+	const char *pSkinPrefix = m_aEventSkinPrefix[0] ? m_aEventSkinPrefix : g_Config.m_ClSkinPrefix;
 	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
 	{
 		return -1;

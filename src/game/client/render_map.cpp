@@ -104,12 +104,12 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	float Conv = 1 / 255.0f;
 	for(int i = 0; i < NumQuads; i++)
 	{
-		CQuad *q = &pQuads[i];
+		CQuad *pQuad = &pQuads[i];
 
 		ColorRGBA Color(1.f, 1.f, 1.f, 1.f);
-		if(q->m_ColorEnv >= 0)
+		if(pQuad->m_ColorEnv >= 0)
 		{
-			pfnEval(q->m_ColorEnvOffset, q->m_ColorEnv, Color, pUser);
+			pfnEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, pUser);
 		}
 
 		if(Color.a <= 0)
@@ -126,47 +126,47 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			continue;
 
 		Graphics()->QuadsSetSubsetFree(
-			fx2f(q->m_aTexcoords[0].x), fx2f(q->m_aTexcoords[0].y),
-			fx2f(q->m_aTexcoords[1].x), fx2f(q->m_aTexcoords[1].y),
-			fx2f(q->m_aTexcoords[2].x), fx2f(q->m_aTexcoords[2].y),
-			fx2f(q->m_aTexcoords[3].x), fx2f(q->m_aTexcoords[3].y));
+			fx2f(pQuad->m_aTexcoords[0].x), fx2f(pQuad->m_aTexcoords[0].y),
+			fx2f(pQuad->m_aTexcoords[1].x), fx2f(pQuad->m_aTexcoords[1].y),
+			fx2f(pQuad->m_aTexcoords[2].x), fx2f(pQuad->m_aTexcoords[2].y),
+			fx2f(pQuad->m_aTexcoords[3].x), fx2f(pQuad->m_aTexcoords[3].y));
 
 		float OffsetX = 0;
 		float OffsetY = 0;
 		float Rot = 0;
 
 		// TODO: fix this
-		if(q->m_PosEnv >= 0)
+		if(pQuad->m_PosEnv >= 0)
 		{
 			ColorRGBA Channels;
-			pfnEval(q->m_PosEnvOffset, q->m_PosEnv, Channels, pUser);
+			pfnEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Channels, pUser);
 			OffsetX = Channels.r;
 			OffsetY = Channels.g;
 			Rot = Channels.b / 360.0f * pi * 2;
 		}
 
 		IGraphics::CColorVertex Array[4] = {
-			IGraphics::CColorVertex(0, q->m_aColors[0].r * Conv * Color.r, q->m_aColors[0].g * Conv * Color.g, q->m_aColors[0].b * Conv * Color.b, q->m_aColors[0].a * Conv * Color.a * Alpha),
-			IGraphics::CColorVertex(1, q->m_aColors[1].r * Conv * Color.r, q->m_aColors[1].g * Conv * Color.g, q->m_aColors[1].b * Conv * Color.b, q->m_aColors[1].a * Conv * Color.a * Alpha),
-			IGraphics::CColorVertex(2, q->m_aColors[2].r * Conv * Color.r, q->m_aColors[2].g * Conv * Color.g, q->m_aColors[2].b * Conv * Color.b, q->m_aColors[2].a * Conv * Color.a * Alpha),
-			IGraphics::CColorVertex(3, q->m_aColors[3].r * Conv * Color.r, q->m_aColors[3].g * Conv * Color.g, q->m_aColors[3].b * Conv * Color.b, q->m_aColors[3].a * Conv * Color.a * Alpha)};
+			IGraphics::CColorVertex(0, pQuad->m_aColors[0].r * Conv * Color.r, pQuad->m_aColors[0].g * Conv * Color.g, pQuad->m_aColors[0].b * Conv * Color.b, pQuad->m_aColors[0].a * Conv * Color.a * Alpha),
+			IGraphics::CColorVertex(1, pQuad->m_aColors[1].r * Conv * Color.r, pQuad->m_aColors[1].g * Conv * Color.g, pQuad->m_aColors[1].b * Conv * Color.b, pQuad->m_aColors[1].a * Conv * Color.a * Alpha),
+			IGraphics::CColorVertex(2, pQuad->m_aColors[2].r * Conv * Color.r, pQuad->m_aColors[2].g * Conv * Color.g, pQuad->m_aColors[2].b * Conv * Color.b, pQuad->m_aColors[2].a * Conv * Color.a * Alpha),
+			IGraphics::CColorVertex(3, pQuad->m_aColors[3].r * Conv * Color.r, pQuad->m_aColors[3].g * Conv * Color.g, pQuad->m_aColors[3].b * Conv * Color.b, pQuad->m_aColors[3].a * Conv * Color.a * Alpha)};
 		Graphics()->SetColorVertex(Array, 4);
 
-		CPoint *pPoints = q->m_aPoints;
+		CPoint *pPoints = pQuad->m_aPoints;
 
 		if(Rot != 0)
 		{
 			static CPoint aRotated[4];
-			aRotated[0] = q->m_aPoints[0];
-			aRotated[1] = q->m_aPoints[1];
-			aRotated[2] = q->m_aPoints[2];
-			aRotated[3] = q->m_aPoints[3];
+			aRotated[0] = pQuad->m_aPoints[0];
+			aRotated[1] = pQuad->m_aPoints[1];
+			aRotated[2] = pQuad->m_aPoints[2];
+			aRotated[3] = pQuad->m_aPoints[3];
 			pPoints = aRotated;
 
-			Rotate(&q->m_aPoints[4], &aRotated[0], Rot);
-			Rotate(&q->m_aPoints[4], &aRotated[1], Rot);
-			Rotate(&q->m_aPoints[4], &aRotated[2], Rot);
-			Rotate(&q->m_aPoints[4], &aRotated[3], Rot);
+			Rotate(&pQuad->m_aPoints[4], &aRotated[0], Rot);
+			Rotate(&pQuad->m_aPoints[4], &aRotated[1], Rot);
+			Rotate(&pQuad->m_aPoints[4], &aRotated[2], Rot);
+			Rotate(&pQuad->m_aPoints[4], &aRotated[3], Rot);
 		}
 
 		IGraphics::CFreeformItem Freeform(

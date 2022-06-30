@@ -74,14 +74,14 @@ protected:
 	int64_t m_StateStartTime;
 
 	// quick access to time variables
-	int m_PrevGameTick[NUM_DUMMIES];
-	int m_CurGameTick[NUM_DUMMIES];
-	float m_GameIntraTick[NUM_DUMMIES];
-	float m_GameTickTime[NUM_DUMMIES];
-	float m_GameIntraTickSincePrev[NUM_DUMMIES];
+	int m_aPrevGameTick[NUM_DUMMIES];
+	int m_aCurGameTick[NUM_DUMMIES];
+	float m_aGameIntraTick[NUM_DUMMIES];
+	float m_aGameTickTime[NUM_DUMMIES];
+	float m_aGameIntraTickSincePrev[NUM_DUMMIES];
 
-	int m_PredTick[NUM_DUMMIES];
-	float m_PredIntraTick[NUM_DUMMIES];
+	int m_aPredTick[NUM_DUMMIES];
+	float m_aPredIntraTick[NUM_DUMMIES];
 
 	float m_LocalTime;
 	float m_RenderFrameTime;
@@ -134,13 +134,13 @@ public:
 	void SetMapLoadingCBFunc(TMapLoadingCallbackFunc &&Func) { m_MapLoadingCBFunc = std::move(Func); }
 
 	// tick time access
-	inline int PrevGameTick(int Conn) const { return m_PrevGameTick[Conn]; }
-	inline int GameTick(int Conn) const { return m_CurGameTick[Conn]; }
-	inline int PredGameTick(int Conn) const { return m_PredTick[Conn]; }
-	inline float IntraGameTick(int Conn) const { return m_GameIntraTick[Conn]; }
-	inline float PredIntraGameTick(int Conn) const { return m_PredIntraTick[Conn]; }
-	inline float IntraGameTickSincePrev(int Conn) const { return m_GameIntraTickSincePrev[Conn]; }
-	inline float GameTickTime(int Conn) const { return m_GameTickTime[Conn]; }
+	inline int PrevGameTick(int Conn) const { return m_aPrevGameTick[Conn]; }
+	inline int GameTick(int Conn) const { return m_aCurGameTick[Conn]; }
+	inline int PredGameTick(int Conn) const { return m_aPredTick[Conn]; }
+	inline float IntraGameTick(int Conn) const { return m_aGameIntraTick[Conn]; }
+	inline float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
+	inline float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
+	inline float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
 	inline int GameTickSpeed() const { return m_GameTickSpeed; }
 
 	// other time access

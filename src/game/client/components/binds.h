@@ -54,7 +54,7 @@ public:
 	const char *Get(int KeyID, int ModifierCombination);
 	void GetKey(const char *pBindStr, char *aBuf, unsigned BufSize);
 	int GetBindSlot(const char *pBindString, int *pModifierCombination);
-	static int GetModifierMask(IInput *i);
+	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);
 	static const char *GetKeyBindModifiersName(int ModifierCombination);

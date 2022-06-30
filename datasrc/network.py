@@ -447,9 +447,9 @@ Messages = [
 	], teehistorian=False),
 
 	NetMessage("Cl_CallVote", [
-		NetStringStrict("m_Type"),
-		NetStringStrict("m_Value"),
-		NetStringStrict("m_Reason"),
+		NetStringStrict("m_pType"),
+		NetStringStrict("m_pValue"),
+		NetStringStrict("m_pReason"),
 	], teehistorian=False),
 
 	NetMessage("Cl_IsDDNetLegacy", []),

@@ -148,10 +148,10 @@ public:
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 
-	virtual void GetSize(float *w, float *h)
+	virtual void GetSize(float *pWidth, float *pHeight)
 	{
-		*w = 0;
-		*h = 0;
+		*pWidth = 0;
+		*pHeight = 0;
 	}
 
 	char m_aName[12];
@@ -196,7 +196,7 @@ public:
 	void MapScreen();
 	void Mapping(float *pPoints);
 
-	void GetSize(float *w, float *h) const;
+	void GetSize(float *pWidth, float *pHeight) const;
 
 	void DeleteLayer(int Index);
 	int SwapLayers(int Index0, int Index1);
@@ -246,7 +246,7 @@ public:
 		m_vpLayers.clear();
 	}
 
-	void AddLayer(CLayer *l);
+	void AddLayer(CLayer *pLayer);
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 	{
@@ -383,9 +383,9 @@ public:
 	CEnvelope *NewEnvelope(int Channels)
 	{
 		m_Modified = true;
-		CEnvelope *e = new CEnvelope(Channels);
-		m_vpEnvelopes.push_back(e);
-		return e;
+		CEnvelope *pEnv = new CEnvelope(Channels);
+		m_vpEnvelopes.push_back(pEnv);
+		return pEnv;
 	}
 
 	void DeleteEnvelope(int Index);
@@ -393,10 +393,10 @@ public:
 	CLayerGroup *NewGroup()
 	{
 		m_Modified = true;
-		CLayerGroup *g = new CLayerGroup;
-		g->m_pMap = this;
-		m_vpGroups.push_back(g);
-		return g;
+		CLayerGroup *pGroup = new CLayerGroup;
+		pGroup->m_pMap = this;
+		m_vpGroups.push_back(pGroup);
+		return pGroup;
 	}
 
 	int SwapGroups(int Index0, int Index1)
@@ -603,10 +603,10 @@ public:
 
 	void PrepareForSave();
 
-	void GetSize(float *w, float *h) override
+	void GetSize(float *pWidth, float *pHeight) override
 	{
-		*w = m_Width * 32.0f;
-		*h = m_Height * 32.0f;
+		*pWidth = m_Width * 32.0f;
+		*pHeight = m_Height * 32.0f;
 	}
 
 	void FlagModified(int x, int y, int w, int h);
@@ -655,7 +655,7 @@ public:
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
-	void GetSize(float *w, float *h) override;
+	void GetSize(float *pWidth, float *pHeight) override;
 
 	int m_Image;
 	std::vector<CQuad> m_vQuads;
@@ -911,7 +911,7 @@ public:
 	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
 	char m_aFileDialogNewFolderName[64];
-	char m_FileDialogErrString[64];
+	char m_aFileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
 	CImageInfo m_FilePreviewImageInfo;
@@ -1033,7 +1033,7 @@ public:
 	bool UiPopupExists(void *pID);
 	bool UiPopupOpen();
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = CUI::CORNER_ALL, ColorRGBA *Color = nullptr);
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = CUI::CORNER_ALL, ColorRGBA *pColor = nullptr);
 
 	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
 

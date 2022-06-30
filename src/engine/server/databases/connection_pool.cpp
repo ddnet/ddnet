@@ -72,10 +72,10 @@ CDbConnectionPool::~CDbConnectionPool() = default;
 
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {
-	const char *ModeDesc[] = {"Read", "Write", "WriteBackup"};
+	static const char *s_apModeDesc[] = {"Read", "Write", "WriteBackup"};
 	for(unsigned int i = 0; i < m_vvpDbConnections[DatabaseMode].size(); i++)
 	{
-		m_vvpDbConnections[DatabaseMode][i]->Print(pConsole, ModeDesc[DatabaseMode]);
+		m_vvpDbConnections[DatabaseMode][i]->Print(pConsole, s_apModeDesc[DatabaseMode]);
 	}
 }
 

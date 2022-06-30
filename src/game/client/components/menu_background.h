@@ -18,8 +18,8 @@ class CTheme
 {
 public:
 	CTheme() {}
-	CTheme(const char *n, bool HasDay, bool HasNight) :
-		m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
+	CTheme(const char *pName, bool HasDay, bool HasNight) :
+		m_Name(pName), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
 	std::string m_Name;
 	bool m_HasDay;
@@ -83,7 +83,7 @@ public:
 
 	vec2 m_MenuCenter;
 	vec2 m_RotationCenter;
-	vec2 m_Positions[NUM_POS];
+	vec2 m_aPositions[NUM_POS];
 	int m_CurrentPosition;
 	vec2 m_AnimationStartPos;
 	bool m_ChangedPosition;

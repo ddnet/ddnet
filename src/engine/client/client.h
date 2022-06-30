@@ -120,9 +120,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IDiscord *m_pDiscord;
 	ISteam *m_pSteam;
 
-	CNetClient m_NetClient[NUM_CONNS];
+	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
-	CDemoRecorder m_DemoRecorder[RECORDER_MAX];
+	CDemoRecorder m_aDemoRecorder[RECORDER_MAX];
 	CDemoEditor m_DemoEditor;
 	CGhostRecorder m_GhostRecorder;
 	CGhostLoader m_GhostLoader;
@@ -138,7 +138,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr;
 
-	uint64_t m_SnapshotParts[NUM_DUMMIES];
+	uint64_t m_aSnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
@@ -158,12 +158,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_SoundInitFailed;
 	bool m_ResortServerBrowser;
 
-	int m_AckGameTick[NUM_DUMMIES];
-	int m_CurrentRecvTick[NUM_DUMMIES];
-	int m_RconAuthed[NUM_DUMMIES];
-	char m_RconPassword[32];
+	int m_aAckGameTick[NUM_DUMMIES];
+	int m_aCurrentRecvTick[NUM_DUMMIES];
+	int m_aRconAuthed[NUM_DUMMIES];
+	char m_aRconPassword[32];
 	int m_UseTempRconCommands;
-	char m_Password[32];
+	char m_aPassword[32];
 	bool m_SendPassword;
 	bool m_ButtonRender = false;
 
@@ -177,7 +177,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH];
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32];
-	bool m_CodeRunAfterJoin[NUM_DUMMIES];
+	bool m_aCodeRunAfterJoin[NUM_DUMMIES];
 	bool m_GenerateTimeoutSeed;
 
 	//
@@ -207,7 +207,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask;
 
 	// time
-	CSmoothTime m_GameTime[NUM_DUMMIES];
+	CSmoothTime m_aGameTime[NUM_DUMMIES];
 	CSmoothTime m_PredictedTime;
 
 	// input
@@ -220,7 +220,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int64_t m_Time;
 	} m_aInputs[NUM_DUMMIES][200];
 
-	int m_CurrentInput[NUM_DUMMIES];
+	int m_aCurrentInput[NUM_DUMMIES];
 	bool m_LastDummy;
 	bool m_DummySendConnInfo;
 
@@ -230,19 +230,19 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_FpsGraph;
 
 	// the game snapshots are modifiable by the game
-	CSnapshotStorage m_SnapshotStorage[NUM_DUMMIES];
-	CSnapshotStorage::CHolder *m_aSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES];
+	CSnapshotStorage m_aSnapshotStorage[NUM_DUMMIES];
+	CSnapshotStorage::CHolder *m_aapSnapshots[NUM_DUMMIES][NUM_SNAPSHOT_TYPES];
 
-	int m_ReceivedSnapshots[NUM_DUMMIES];
-	char m_aSnapshotIncomingData[NUM_DUMMIES][CSnapshot::MAX_SIZE];
-	int m_SnapshotIncomingDataSize[NUM_DUMMIES];
+	int m_aReceivedSnapshots[NUM_DUMMIES];
+	char m_aaSnapshotIncomingData[NUM_DUMMIES][CSnapshot::MAX_SIZE];
+	int m_aSnapshotIncomingDataSize[NUM_DUMMIES];
 
 	CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char *m_aaapDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	CSnapshotDelta m_SnapshotDelta;
 
-	std::list<std::shared_ptr<CDemoEdit>> m_EditJobs;
+	std::list<std::shared_ptr<CDemoEdit>> m_lpEditJobs;
 
 	//
 	bool m_CanReceiveServerCapabilities;
@@ -320,7 +320,7 @@ public:
 	void SendReady();
 	void SendMapRequest();
 
-	bool RconAuthed() const override { return m_RconAuthed[g_Config.m_ClDummy] != 0; }
+	bool RconAuthed() const override { return m_aRconAuthed[g_Config.m_ClDummy] != 0; }
 	bool UseTempRconCommands() const override { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword) override;
 	void Rcon(const char *pCmd) override;

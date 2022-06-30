@@ -152,11 +152,11 @@ void CAuthManager::AddDefaultKey(int Level, const char *pPw)
 	if(Level < AUTHED_HELPER || Level > AUTHED_ADMIN)
 		return;
 
-	static const char IDENTS[3][sizeof(HELPER_IDENT)] = {ADMIN_IDENT, MOD_IDENT, HELPER_IDENT};
+	static const char s_aaIdents[3][sizeof(HELPER_IDENT)] = {ADMIN_IDENT, MOD_IDENT, HELPER_IDENT};
 	int Index = AUTHED_ADMIN - Level;
 	if(m_aDefault[Index] >= 0)
 		return; // already exists
-	m_aDefault[Index] = AddKey(IDENTS[Index], pPw, Level);
+	m_aDefault[Index] = AddKey(s_aaIdents[Index], pPw, Level);
 }
 
 bool CAuthManager::IsGenerated() const

@@ -302,12 +302,12 @@ TEST(Str, Base64DecodeError)
 TEST(Str, Tokenize)
 {
 	char aTest[] = "GER,RUS,ZAF,BRA,CAN";
-	const char *aOut[] = {"GER", "RUS", "ZAF", "BRA", "CAN"};
+	const char *apOut[] = {"GER", "RUS", "ZAF", "BRA", "CAN"};
 	char aBuf[4];
 
 	int n = 0;
-	for(const char *tok = aTest; (tok = str_next_token(tok, ",", aBuf, sizeof(aBuf)));)
-		EXPECT_STREQ(aOut[n++], aBuf);
+	for(const char *pTok = aTest; (pTok = str_next_token(pTok, ",", aBuf, sizeof(aBuf)));)
+		EXPECT_STREQ(apOut[n++], aBuf);
 
 	char aTest2[] = "";
 	EXPECT_EQ(str_next_token(aTest2, ",", aBuf, sizeof(aBuf)), nullptr);
@@ -376,26 +376,26 @@ TEST(Str, StrFormatTruncate)
 
 TEST(Str, StrCopyNum)
 {
-	const char *foo = "Foobaré";
+	const char *pFoo = "Foobaré";
 	char aBuf[64];
-	str_utf8_truncate(aBuf, 3, foo, 1);
+	str_utf8_truncate(aBuf, 3, pFoo, 1);
 	EXPECT_STREQ(aBuf, "F");
-	str_utf8_truncate(aBuf, 3, foo, 2);
+	str_utf8_truncate(aBuf, 3, pFoo, 2);
 	EXPECT_STREQ(aBuf, "Fo");
-	str_utf8_truncate(aBuf, 3, foo, 3);
+	str_utf8_truncate(aBuf, 3, pFoo, 3);
 	EXPECT_STREQ(aBuf, "Fo");
-	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 6);
+	str_utf8_truncate(aBuf, sizeof(aBuf), pFoo, 6);
 	EXPECT_STREQ(aBuf, "Foobar");
-	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 7);
+	str_utf8_truncate(aBuf, sizeof(aBuf), pFoo, 7);
 	EXPECT_STREQ(aBuf, "Foobaré");
-	str_utf8_truncate(aBuf, sizeof(aBuf), foo, 0);
+	str_utf8_truncate(aBuf, sizeof(aBuf), pFoo, 0);
 	EXPECT_STREQ(aBuf, "");
 
 	char aBuf2[8];
-	str_utf8_truncate(aBuf2, sizeof(aBuf2), foo, 7);
+	str_utf8_truncate(aBuf2, sizeof(aBuf2), pFoo, 7);
 	EXPECT_STREQ(aBuf2, "Foobar");
 	char aBuf3[9];
-	str_utf8_truncate(aBuf3, sizeof(aBuf3), foo, 7);
+	str_utf8_truncate(aBuf3, sizeof(aBuf3), pFoo, 7);
 	EXPECT_STREQ(aBuf3, "Foobaré");
 }
 

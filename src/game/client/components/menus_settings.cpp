@@ -417,16 +417,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Eyes = MainView;
 
 	char *pSkinName = g_Config.m_ClPlayerSkin;
-	int *UseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
-	unsigned *ColorBody = &g_Config.m_ClPlayerColorBody;
-	unsigned *ColorFeet = &g_Config.m_ClPlayerColorFeet;
+	int *pUseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
+	unsigned *pColorBody = &g_Config.m_ClPlayerColorBody;
+	unsigned *pColorFeet = &g_Config.m_ClPlayerColorFeet;
 
 	if(m_Dummy)
 	{
 		pSkinName = g_Config.m_ClDummySkin;
-		UseCustomColor = &g_Config.m_ClDummyUseCustomColor;
-		ColorBody = &g_Config.m_ClDummyColorBody;
-		ColorFeet = &g_Config.m_ClDummyColorFeet;
+		pUseCustomColor = &g_Config.m_ClDummyUseCustomColor;
+		pColorBody = &g_Config.m_ClDummyColorBody;
+		pColorFeet = &g_Config.m_ClDummyColorFeet;
 	}
 
 	// skin info
@@ -435,11 +435,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-	OwnSkinInfo.m_CustomColoredSkin = *UseCustomColor;
-	if(*UseCustomColor)
+	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
+	if(*pUseCustomColor)
 	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*ColorBody).UnclampLighting());
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*ColorFeet).UnclampLighting());
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
 	}
 	else
 	{
@@ -506,8 +506,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
-		static const char *s_aSkinPrefixes[] = {"kitty", "santa"};
-		for(auto &pPrefix : s_aSkinPrefixes)
+		static const char *s_apSkinPrefixes[] = {"kitty", "santa"};
+		for(auto &pPrefix : s_apSkinPrefixes)
 		{
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
@@ -596,33 +596,33 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	static int s_CustomColorID = 0;
-	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *UseCustomColor, &Button))
+	if(DoButton_CheckBox(&s_CustomColorID, Localize("Custom colors"), *pUseCustomColor, &Button))
 	{
-		*UseCustomColor = *UseCustomColor ? 0 : 1;
+		*pUseCustomColor = *pUseCustomColor ? 0 : 1;
 		SetNeedSendInfo();
 	}
 
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(82.5f, &Label, &MainView);
-	if(*UseCustomColor)
+	if(*pUseCustomColor)
 	{
 		CUIRect aRects[2];
 		Label.VSplitMid(&aRects[0], &aRects[1], 20.0f);
 
-		unsigned *paColors[2] = {ColorBody, ColorFeet};
-		const char *paParts[] = {Localize("Body"), Localize("Feet")};
+		unsigned *apColors[2] = {pColorBody, pColorFeet};
+		const char *apParts[] = {Localize("Body"), Localize("Feet")};
 
 		for(int i = 0; i < 2; i++)
 		{
 			aRects[i].HSplitTop(20.0f, &Label, &aRects[i]);
-			UI()->DoLabel(&Label, paParts[i], 14.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&Label, apParts[i], 14.0f, TEXTALIGN_LEFT);
 			aRects[i].VSplitLeft(10.0f, 0, &aRects[i]);
 			aRects[i].HSplitTop(2.5f, 0, &aRects[i]);
 
-			unsigned PrevColor = *paColors[i];
-			RenderHSLScrollbars(&aRects[i], paColors[i], false, true);
+			unsigned PrevColor = *apColors[i];
+			RenderHSLScrollbars(&aRects[i], apColors[i], false, true);
 
-			if(PrevColor != *paColors[i])
+			if(PrevColor != *apColors[i])
 			{
 				SetNeedSendInfo();
 			}
@@ -640,24 +640,24 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		s_vSkinList.clear();
 		for(int i = 0; i < m_pClient->m_Skins.Num(); ++i)
 		{
-			const CSkin *s = m_pClient->m_Skins.Get(i);
+			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.Get(i);
 
 			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkinToBeSelected->m_aName, g_Config.m_ClSkinFilterString))
 				continue;
 
 			// no special skins
-			if((s->m_aName[0] == 'x' && s->m_aName[1] == '_'))
+			if((pSkinToBeSelected->m_aName[0] == 'x' && pSkinToBeSelected->m_aName[1] == '_'))
 				continue;
 
 			// vanilla skins only
-			if(g_Config.m_ClVanillaSkinsOnly && !s->m_IsVanilla)
+			if(g_Config.m_ClVanillaSkinsOnly && !pSkinToBeSelected->m_IsVanilla)
 				continue;
 
-			if(s == 0)
+			if(pSkinToBeSelected == 0)
 				continue;
 
-			s_vSkinList.emplace_back(s);
+			s_vSkinList.emplace_back(pSkinToBeSelected);
 		}
 		std::sort(s_vSkinList.begin(), s_vSkinList.end());
 		s_InitSkinlist = false;
@@ -668,20 +668,20 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_vSkinList.size(), 4, OldSelected, s_ScrollValue);
 	for(size_t i = 0; i < s_vSkinList.size(); ++i)
 	{
-		const CSkin *s = s_vSkinList[i].m_pSkin;
+		const CSkin *pSkinToBeDraw = s_vSkinList[i].m_pSkin;
 
-		if(str_comp(s->m_aName, pSkinName) == 0)
+		if(str_comp(pSkinToBeDraw->m_aName, pSkinName) == 0)
 			OldSelected = i;
 
-		CListboxItem Item = UiDoListboxNextItem(s, OldSelected >= 0 && (size_t)OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(pSkinToBeDraw, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info = OwnSkinInfo;
-			Info.m_CustomColoredSkin = *UseCustomColor;
+			Info.m_CustomColoredSkin = *pUseCustomColor;
 
-			Info.m_OriginalRenderSkin = s->m_OriginalSkin;
-			Info.m_ColorableRenderSkin = s->m_ColorableSkin;
-			Info.m_SkinMetrics = s->m_Metrics;
+			Info.m_OriginalRenderSkin = pSkinToBeDraw->m_OriginalSkin;
+			Info.m_ColorableRenderSkin = pSkinToBeDraw->m_ColorableSkin;
+			Info.m_SkinMetrics = pSkinToBeDraw->m_Metrics;
 
 			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &Info, OffsetToMid);
 			TeeRenderPos = vec2(Item.m_Rect.x + 30, Item.m_Rect.y + Item.m_Rect.h / 2 + OffsetToMid.y);
@@ -690,10 +690,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			SLabelProperties Props;
 			Props.m_MaxWidth = Item.m_Rect.w;
-			UI()->DoLabel(&Item.m_Rect, s->m_aName, 12.0f, TEXTALIGN_LEFT, Props);
+			UI()->DoLabel(&Item.m_Rect, pSkinToBeDraw->m_aName, 12.0f, TEXTALIGN_LEFT, Props);
 			if(g_Config.m_Debug)
 			{
-				ColorRGBA BloodColor = *UseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*ColorBody)) : s->m_BloodColor;
+				ColorRGBA BloodColor = *pUseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*pColorBody)) : pSkinToBeDraw->m_BloodColor;
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -1394,12 +1394,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	// switches
 	static float s_ScrollValueDrop = 0;
-	const char *pWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
-	static const int s_NumWindowMode = std::size(pWindowModes);
+	const char *apWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
+	static const int s_NumWindowMode = std::size(apWindowModes);
 	static int s_aWindowModeIDs[s_NumWindowMode];
-	const void *aWindowModeIDs[s_NumWindowMode];
+	const void *apWindowModeIDs[s_NumWindowMode];
 	for(int i = 0; i < s_NumWindowMode; ++i)
-		aWindowModeIDs[i] = &s_aWindowModeIDs[i];
+		apWindowModeIDs[i] = &s_aWindowModeIDs[i];
 	static int s_WindowModeDropDownState = 0;
 
 	static int s_OldSelectedBackend = -1;
@@ -1407,7 +1407,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
 
-	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, aWindowModeIDs, pWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
+	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, apWindowModeIDs, apWindowModes, s_NumWindowMode, &s_NumWindowMode, s_ScrollValueDrop);
 	if(OldSelected != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
@@ -1679,7 +1679,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			vGPUIDPtrs[i] = vGPUIDs[i].get();
 			if(i == 0)
 			{
-				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s(%s)", Localize("auto"), GPUList.m_AutoGPU.m_Name);
+				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s(%s)", Localize("auto"), GPUList.m_AutoGPU.m_aName);
 				vGPUIDNames[i] = aCurDeviceName;
 				if(str_comp("auto", g_Config.m_GfxGPUName) == 0)
 				{
@@ -1688,8 +1688,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			}
 			else
 			{
-				vGPUIDNames[i] = GPUList.m_vGPUs[i - 1].m_Name;
-				if(str_comp(GPUList.m_vGPUs[i - 1].m_Name, g_Config.m_GfxGPUName) == 0)
+				vGPUIDNames[i] = GPUList.m_vGPUs[i - 1].m_aName;
+				if(str_comp(GPUList.m_vGPUs[i - 1].m_aName, g_Config.m_GfxGPUName) == 0)
 				{
 					OldSelectedGPU = i;
 				}
@@ -1708,7 +1708,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			if(NewGPU == 0)
 				str_copy(g_Config.m_GfxGPUName, "auto", sizeof(g_Config.m_GfxGPUName));
 			else
-				str_copy(g_Config.m_GfxGPUName, GPUList.m_vGPUs[NewGPU - 1].m_Name, sizeof(g_Config.m_GfxGPUName));
+				str_copy(g_Config.m_GfxGPUName, GPUList.m_vGPUs[NewGPU - 1].m_aName, sizeof(g_Config.m_GfxGPUName));
 			CheckSettings = true;
 			s_GfxGPUChanged = NewGPU != s_OldSelectedGPU;
 		}
@@ -1847,8 +1847,8 @@ class CLanguage
 {
 public:
 	CLanguage() = default;
-	CLanguage(const char *n, const char *f, int Code) :
-		m_Name(n), m_FileName(f), m_CountryCode(Code) {}
+	CLanguage(const char *pName, const char *pFileName, int Code) :
+		m_Name(pName), m_FileName(pFileName), m_CountryCode(Code) {}
 
 	std::string m_Name;
 	std::string m_FileName;
@@ -1982,7 +1982,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	CUIRect Button;
 
-	const char *aTabs[] = {
+	const char *apTabs[] = {
 		Localize("Language"),
 		Localize("General"),
 		Localize("Player"),
@@ -1994,14 +1994,14 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("DDNet"),
 		Localize("Assets")};
 
-	int NumTabs = (int)std::size(aTabs);
+	int NumTabs = (int)std::size(apTabs);
 	int PreviousPage = g_Config.m_UiSettingsPage;
 
 	for(int i = 0; i < NumTabs; i++)
 	{
 		TabBar.HSplitTop(10, &Button, &TabBar);
 		TabBar.HSplitTop(26, &Button, &TabBar);
-		if(DoButton_MenuTab(aTabs[i], aTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R, &m_aAnimatorsSettingsTab[i]))
+		if(DoButton_MenuTab(apTabs[i], apTabs[i], g_Config.m_UiSettingsPage == i, &Button, CUI::CORNER_R, &m_aAnimatorsSettingsTab[i]))
 			g_Config.m_UiSettingsPage = i;
 	}
 
@@ -2119,8 +2119,8 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 	ColorHSLA Color(*pColor, Alpha);
 	CUIRect Preview, Button, Label;
 	char aBuf[32];
-	float *paComponent[] = {&Color.h, &Color.s, &Color.l, &Color.a};
-	const char *aLabels[] = {Localize("Hue"), Localize("Sat."), Localize("Lht."), Localize("Alpha")};
+	float *apComponent[] = {&Color.h, &Color.s, &Color.l, &Color.a};
+	const char *apLabels[] = {Localize("Hue"), Localize("Sat."), Localize("Lht."), Localize("Alpha")};
 
 	float SizePerEntry = 20.0f;
 	float MarginPerEntry = 5.0f;
@@ -2410,7 +2410,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		CUIRect Rail;
 		Button.Margin(2.0f, &Rail);
 
-		str_format(aBuf, sizeof(aBuf), "%s: %03d", aLabels[i], (int)(*paComponent[i] * 255));
+		str_format(aBuf, sizeof(aBuf), "%s: %03d", apLabels[i], (int)(*apComponent[i] * 255));
 		UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 
 		ColorHSLA CurColorPureHSLA(RenderColorHSLA.r, 1, 0.5f, 1);
@@ -2425,28 +2425,28 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		else if(i == 1)
 		{
 			RenderHSLSatRect(&Rail, CurColorPure);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], CurColorPureHSLA.b, 1));
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *apComponent[1], CurColorPureHSLA.b, 1));
 		}
 		else if(i == 2)
 		{
-			ColorRGBA CurColorSat = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], 0.5f, 1));
+			ColorRGBA CurColorSat = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *apComponent[1], 0.5f, 1));
 			RenderHSLLightRect(&Rail, CurColorSat);
-			float LightVal = *paComponent[2];
+			float LightVal = *apComponent[2];
 			if(ClampedLight)
 				LightVal = ColorHSLA::DARKEST_LGT + LightVal * (1.0f - ColorHSLA::DARKEST_LGT);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], LightVal, 1));
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *apComponent[1], LightVal, 1));
 		}
 		else if(i == 3)
 		{
-			ColorRGBA CurColorFull = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], *paComponent[2], 1));
+			ColorRGBA CurColorFull = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *apComponent[1], *apComponent[2], 1));
 			RenderHSLAlphaRect(&Rail, CurColorFull);
-			float LightVal = *paComponent[2];
+			float LightVal = *apComponent[2];
 			if(ClampedLight)
 				LightVal = ColorHSLA::DARKEST_LGT + LightVal * (1.0f - ColorHSLA::DARKEST_LGT);
-			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *paComponent[1], LightVal, *paComponent[3]));
+			ColorInner = color_cast<ColorRGBA>(ColorHSLA(CurColorPureHSLA.r, *apComponent[1], LightVal, *apComponent[3]));
 		}
 
-		*paComponent[i] = UIEx()->DoScrollbarH(&((char *)pColor)[i], &Button, *paComponent[i], &ColorInner);
+		*apComponent[i] = UIEx()->DoScrollbarH(&((char *)pColor)[i], &Button, *apComponent[i], &ColorInner);
 	}
 
 	*pColor = Color.Pack(Alpha);
@@ -2620,16 +2620,16 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Section.Margin(SectionMargin, &Section);
 
 		int i = 0;
-		static int ResetIDs[24];
+		static int s_aResetIDs[24];
 
-		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
-		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
-		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Team message"), &g_Config.m_ClMessageTeamColor, ColorRGBA(0.65f, 1.0f, 0.65f));
-		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, &g_Config.m_ClMessageFriend);
-		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Normal message"), &g_Config.m_ClMessageColor, ColorRGBA(1.0f, 1.0f, 1.0f));
+		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("System message"), &g_Config.m_ClMessageSystemColor, ColorRGBA(1.0f, 1.0f, 0.5f), true, true, &g_Config.m_ClShowChatSystem);
+		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Highlighted message"), &g_Config.m_ClMessageHighlightColor, ColorRGBA(1.0f, 0.5f, 0.5f));
+		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Team message"), &g_Config.m_ClMessageTeamColor, ColorRGBA(0.65f, 1.0f, 0.65f));
+		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Friend message"), &g_Config.m_ClMessageFriendColor, ColorRGBA(1.0f, 0.137f, 0.137f), true, true, &g_Config.m_ClMessageFriend);
+		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Normal message"), &g_Config.m_ClMessageColor, ColorRGBA(1.0f, 1.0f, 1.0f));
 
 		str_format(aBuf, sizeof(aBuf), "%s (echo)", Localize("Client message"));
-		DoLine_ColorPicker(&ResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
+		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
 
 		// ***** Chat Preview ***** //
 		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
@@ -2673,7 +2673,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		constexpr float OffsetTeeY = RealTeeSizeHalved;
 		const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
 
-		CTeeRenderInfo RenderInfo[PreviewTeeCount];
+		CTeeRenderInfo aRenderInfo[PreviewTeeCount];
 
 		// Backgrounds first
 		if(!g_Config.m_ClChatOld)
@@ -2682,36 +2682,36 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 0, 0.12f);
 
-			char LineBuilder[128];
+			char aLineBuilder[128];
 			float Width;
 			float TempY = Y;
 			constexpr float RealBackgroundRounding = CChat::MESSAGE_ROUNDING * 2.0f;
 
 			if(g_Config.m_ClShowChatSystem)
 			{
-				str_format(LineBuilder, sizeof(LineBuilder), "*** '%s' entered and joined the game", aBuf);
-				Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+				str_format(aLineBuilder, sizeof(aLineBuilder), "*** '%s' entered and joined the game", aBuf);
+				Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
 				RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 				TempY += RealOffsetY;
 			}
 
-			str_format(LineBuilder, sizeof(LineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
-			Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+			str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
+			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
 			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			str_format(LineBuilder, sizeof(LineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
-			Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+			str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
+			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
 			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			str_format(LineBuilder, sizeof(LineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
-			Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+			str_format(aLineBuilder, sizeof(aLineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
+			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
 			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			str_format(LineBuilder, sizeof(LineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
-			Width = TextRender()->TextWidth(0, RealFontSize, LineBuilder, -1, -1);
+			str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
+			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
 			RenderTools()->DrawRoundRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, CUI::CORNER_ALL);
 			TempY += RealOffsetY;
 
@@ -2724,7 +2724,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 			int DefaultInd = GameClient()->m_Skins.Find("default");
 
-			for(auto &Info : RenderInfo)
+			for(auto &Info : aRenderInfo)
 			{
 				Info.m_Size = RealTeeSize;
 				Info.m_CustomColoredSkin = false;
@@ -2733,10 +2733,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			int ind = -1;
 			int pos = 0;
 
-			RenderInfo[pos++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
-			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
-			RenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : RenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
 		}
 
 		// System
@@ -2760,7 +2760,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 		TextRender()->TextEx(&Cursor, "?", -1);
 		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &RenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			RenderTools()->RenderTee(pIdleState, &aRenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 		// Team
@@ -2770,7 +2770,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			TextRender()->TextEx(&Cursor, "11: ", -1);
 		TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
 		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &RenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			RenderTools()->RenderTee(pIdleState, &aRenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 		// Friend
@@ -2787,7 +2787,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		TextRender()->TextColor(NormalColor);
 		TextRender()->TextEx(&Cursor, "Hello there", -1);
 		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &RenderInfo[2], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			RenderTools()->RenderTee(pIdleState, &aRenderInfo[2], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 		// Normal
@@ -2801,7 +2801,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		TextRender()->TextColor(NormalColor);
 		TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
 		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &RenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			RenderTools()->RenderTee(pIdleState, &aRenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 		// Client

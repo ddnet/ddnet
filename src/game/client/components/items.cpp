@@ -132,7 +132,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ProjectileOffset[CurWeapon], Pos.x, Pos.y);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aProjectileOffset[CurWeapon], Pos.x, Pos.y);
 	}
 }
 
@@ -155,7 +155,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	}
 	else if(pCurrent->m_Type == POWERUP_WEAPON)
 	{
-		QuadOffset = m_PickupWeaponOffset[CurWeapon];
+		QuadOffset = m_aPickupWeaponOffset[CurWeapon];
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpritePickupWeapons[CurWeapon]);
 	}
 	else if(pCurrent->m_Type == POWERUP_NINJA)
@@ -167,7 +167,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	}
 	else if(pCurrent->m_Type >= POWERUP_ARMOR_SHOTGUN && pCurrent->m_Type <= POWERUP_ARMOR_LASER)
 	{
-		QuadOffset = m_PickupWeaponArmorOffset[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN];
+		QuadOffset = m_aPickupWeaponArmorOffset[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN];
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpritePickupWeaponArmor[pCurrent->m_Type - POWERUP_ARMOR_SHOTGUN]);
 	}
 	Graphics()->QuadsSetRotation(0);
@@ -301,9 +301,9 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
 		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
 		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ParticleSplatOffset[CurParticle], Pos.x, Pos.y);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y);
 		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_ParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
 	}
 }
 
@@ -330,7 +330,7 @@ void CItems::OnRender()
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_Status[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 
 			CProjectileData Data = pProj->GetData();
@@ -347,7 +347,7 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
-			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_Status[SwitcherTeam] && BlinkingPickup)
+			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_aStatus[SwitcherTeam] && BlinkingPickup)
 				continue;
 
 			if(pPickup->InDDNetTile())
@@ -371,7 +371,7 @@ void CItems::OnRender()
 
 		bool Inactive = false;
 		if(pEntEx)
-			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[pEntEx->m_SwitchNumber].m_Status[SwitcherTeam];
+			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[pEntEx->m_SwitchNumber].m_aStatus[SwitcherTeam];
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
@@ -511,7 +511,7 @@ void CItems::OnInit()
 	{
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		m_PickupWeaponOffset[i] = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+		m_aPickupWeaponOffset[i] = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 	}
 	RenderTools()->GetSpriteScale(SPRITE_PICKUP_NINJA, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
@@ -521,16 +521,16 @@ void CItems::OnInit()
 	{
 		RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN + i, ScaleX, ScaleY);
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		m_PickupWeaponArmorOffset[i] = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+		m_aPickupWeaponArmorOffset[i] = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 	}
 
-	for(int &ProjectileOffset : m_ProjectileOffset)
+	for(int &ProjectileOffset : m_aProjectileOffset)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		ProjectileOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 32.f);
 	}
 
-	for(int &ParticleSplatOffset : m_ParticleSplatOffset)
+	for(int &ParticleSplatOffset : m_aParticleSplatOffset)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		ParticleSplatOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);

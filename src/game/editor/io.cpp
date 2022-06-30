@@ -374,11 +374,11 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		CServerInfo CurrentServerInfo;
 		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
-		const unsigned char ipv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		const unsigned char ipv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+		const unsigned char aIPv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		const unsigned char aIPv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 		// and if we're on localhost
-		if(!mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv4Localhost, sizeof(ipv4Localhost)) || !mem_comp(CurrentServerInfo.m_NetAddr.ip, ipv6Localhost, sizeof(ipv6Localhost)))
+		if(!mem_comp(CurrentServerInfo.m_NetAddr.ip, aIPv4Localhost, sizeof(aIPv4Localhost)) || !mem_comp(CurrentServerInfo.m_NetAddr.ip, aIPv6Localhost, sizeof(aIPv6Localhost)))
 		{
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));

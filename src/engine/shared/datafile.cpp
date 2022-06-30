@@ -403,17 +403,17 @@ void *CDataFileReader::GetItem(int Index, int *pType, int *pID)
 		return 0;
 	}
 
-	CDatafileItem *i = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart + m_pDataFile->m_Info.m_pItemOffsets[Index]);
+	CDatafileItem *pItem = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart + m_pDataFile->m_Info.m_pItemOffsets[Index]);
 	if(pType)
 	{
 		// remove sign extension
-		*pType = GetExternalItemType((i->m_TypeAndID >> 16) & 0xffff);
+		*pType = GetExternalItemType((pItem->m_TypeAndID >> 16) & 0xffff);
 	}
 	if(pID)
 	{
-		*pID = i->m_TypeAndID & 0xffff;
+		*pID = pItem->m_TypeAndID & 0xffff;
 	}
-	return (void *)(i + 1);
+	return (void *)(pItem + 1);
 }
 
 void CDataFileReader::GetType(int Type, int *pStart, int *pNum)

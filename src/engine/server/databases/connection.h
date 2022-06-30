@@ -17,7 +17,7 @@ public:
 	}
 	virtual ~IDbConnection() {}
 	IDbConnection &operator=(const IDbConnection &) = delete;
-	virtual void Print(IConsole *pConsole, const char *Mode) = 0;
+	virtual void Print(IConsole *pConsole, const char *pMode) = 0;
 
 	// copies the credentials, not the active connection
 	virtual IDbConnection *Copy() = 0;

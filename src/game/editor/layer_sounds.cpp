@@ -162,8 +162,8 @@ int CLayerSounds::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
 {
-	CLayerSounds *l = (CLayerSounds *)pBrush;
-	for(const auto &Source : l->m_vSources)
+	CLayerSounds *pSoundLayer = (CLayerSounds *)pBrush;
+	for(const auto &Source : pSoundLayer->m_vSources)
 	{
 		CSoundSource n = Source;
 

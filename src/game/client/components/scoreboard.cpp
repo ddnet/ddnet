@@ -112,7 +112,7 @@ void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 	Cursor.m_LineWidth = w - 20.0f;
 	Cursor.m_MaxLines = 4;
 
-	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByName)
+	for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfo || pInfo->m_Team != TEAM_SPECTATORS)
 			continue;
@@ -219,9 +219,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	else
 	{
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW &&
-			m_pClient->m_Snap.m_paPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID])
+			m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID])
 		{
-			int Score = m_pClient->m_Snap.m_paPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID]->m_Score;
+			int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID]->m_Score;
 			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
 		else if(m_pClient->m_Snap.m_pLocalInfo)
@@ -329,7 +329,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// make sure that we render the correct team
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_paInfoByDDTeamScore[i];
+		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_apInfoByDDTeamScore[i];
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;
 
@@ -341,7 +341,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
-			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
+			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_apInfoByDDTeamScore[j];
 
 			if(!pInfo2 || pInfo2->m_Team != Team)
 				continue;
@@ -354,7 +354,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		{
 			for(int j = i - 1; j >= 0; j--)
 			{
-				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_paInfoByDDTeamScore[j];
+				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_apInfoByDDTeamScore[j];
 
 				if(!pInfo2 || pInfo2->m_Team != Team)
 					continue;
@@ -492,7 +492,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// clan
 		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
-			   m_pClient->m_aClients[GameClient()->m_LocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
+			   m_pClient->m_aClients[GameClient()->m_aLocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor));
 			TextRender()->TextColor(Color);
@@ -723,7 +723,7 @@ const char *CScoreboard::GetClanName(int Team)
 {
 	int ClanPlayers = 0;
 	const char *pClanName = 0;
-	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
+	for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 	{
 		if(!pInfo || pInfo->m_Team != Team)
 			continue;

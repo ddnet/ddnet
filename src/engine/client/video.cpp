@@ -45,7 +45,7 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 
 	m_Width = Width;
 	m_Height = Height;
-	str_copy(m_Name, pName, sizeof(m_Name));
+	str_copy(m_aName, pName, sizeof(m_aName));
 
 	m_FPS = g_Config.m_ClVideoRecorderFPS;
 
@@ -80,8 +80,8 @@ void CVideo::Start()
 	char aDate[20];
 	str_timestamp(aDate, sizeof(aDate));
 	char aBuf[256];
-	if(str_length(m_Name) != 0)
-		str_format(aBuf, sizeof(aBuf), "videos/%s", m_Name);
+	if(str_length(m_aName) != 0)
+		str_format(aBuf, sizeof(aBuf), "videos/%s", m_aName);
 	else
 		str_format(aBuf, sizeof(aBuf), "videos/%s.mp4", aDate);
 
@@ -569,9 +569,9 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 
 void CVideo::FillVideoFrame(size_t ThreadIndex)
 {
-	const int InLinesize[1] = {4 * m_VideoStream.pEnc->width};
+	const int InLineSize = 4 * m_VideoStream.pEnc->width;
 	auto *pRGBAData = m_vPixelHelper[ThreadIndex].data();
-	sws_scale(m_VideoStream.m_vpSwsCtxs[ThreadIndex], (const uint8_t *const *)&pRGBAData, InLinesize, 0,
+	sws_scale(m_VideoStream.m_vpSwsCtxs[ThreadIndex], (const uint8_t *const *)&pRGBAData, &InLineSize, 0,
 		m_VideoStream.pEnc->height, m_VideoStream.m_vpFrames[ThreadIndex]->data, m_VideoStream.m_vpFrames[ThreadIndex]->linesize);
 }
 
@@ -609,23 +609,23 @@ AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
 
 AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples)
 {
-	AVFrame *Frame = av_frame_alloc();
+	AVFrame *pFrame = av_frame_alloc();
 	int Ret;
 
-	if(!Frame)
+	if(!pFrame)
 	{
 		dbg_msg("video_recorder", "Error allocating an audio frame");
 		return nullptr;
 	}
 
-	Frame->format = SampleFmt;
-	Frame->channel_layout = ChannelLayout;
-	Frame->sample_rate = SampleRate;
-	Frame->nb_samples = NbSamples;
+	pFrame->format = SampleFmt;
+	pFrame->channel_layout = ChannelLayout;
+	pFrame->sample_rate = SampleRate;
+	pFrame->nb_samples = NbSamples;
 
 	if(NbSamples)
 	{
-		Ret = av_frame_get_buffer(Frame, 0);
+		Ret = av_frame_get_buffer(pFrame, 0);
 		if(Ret < 0)
 		{
 			dbg_msg("video_recorder", "Error allocating an audio buffer");
@@ -633,20 +633,20 @@ AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t Channel
 		}
 	}
 
-	return Frame;
+	return pFrame;
 }
 
 bool CVideo::OpenVideo()
 {
 	int Ret;
-	AVCodecContext *c = m_VideoStream.pEnc;
-	AVDictionary *opt = 0;
+	AVCodecContext *pContext = m_VideoStream.pEnc;
+	AVDictionary *pOptions = 0;
 
-	av_dict_copy(&opt, m_pOptDict, 0);
+	av_dict_copy(&pOptions, m_pOptDict, 0);
 
 	/* open the codec */
-	Ret = avcodec_open2(c, m_pVideoCodec, &opt);
-	av_dict_free(&opt);
+	Ret = avcodec_open2(pContext, m_pVideoCodec, &pOptions);
+	av_dict_free(&pOptions);
 	if(Ret < 0)
 	{
 		char aBuf[AV_ERROR_MAX_STRING_SIZE];
@@ -662,7 +662,7 @@ bool CVideo::OpenVideo()
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
 		m_VideoStream.m_vpFrames.emplace_back(nullptr);
-		m_VideoStream.m_vpFrames[i] = AllocPicture(c->pix_fmt, c->width, c->height);
+		m_VideoStream.m_vpFrames[i] = AllocPicture(pContext->pix_fmt, pContext->width, pContext->height);
 		if(!m_VideoStream.m_vpFrames[i])
 		{
 			dbg_msg("video_recorder", "Could not allocate video frame");
@@ -676,13 +676,13 @@ bool CVideo::OpenVideo()
 	m_VideoStream.m_vpTmpFrames.clear();
 	m_VideoStream.m_vpTmpFrames.reserve(m_VideoThreads);
 
-	if(c->pix_fmt != AV_PIX_FMT_YUV420P)
+	if(pContext->pix_fmt != AV_PIX_FMT_YUV420P)
 	{
 		/* allocate and init a re-usable frame */
 		for(size_t i = 0; i < m_VideoThreads; ++i)
 		{
 			m_VideoStream.m_vpTmpFrames.emplace_back(nullptr);
-			m_VideoStream.m_vpTmpFrames[i] = AllocPicture(AV_PIX_FMT_YUV420P, c->width, c->height);
+			m_VideoStream.m_vpTmpFrames[i] = AllocPicture(AV_PIX_FMT_YUV420P, pContext->width, pContext->height);
 			if(!m_VideoStream.m_vpTmpFrames[i])
 			{
 				dbg_msg("video_recorder", "Could not allocate temporary video frame");
@@ -692,7 +692,7 @@ bool CVideo::OpenVideo()
 	}
 
 	/* copy the stream parameters to the muxer */
-	Ret = avcodec_parameters_from_context(m_VideoStream.pSt->codecpar, c);
+	Ret = avcodec_parameters_from_context(m_VideoStream.pSt->codecpar, pContext);
 	if(Ret < 0)
 	{
 		dbg_msg("video_recorder", "Could not copy the stream parameters");
@@ -704,18 +704,18 @@ bool CVideo::OpenVideo()
 
 bool CVideo::OpenAudio()
 {
-	AVCodecContext *c;
+	AVCodecContext *pContext;
 	int NbSamples;
 	int Ret;
-	AVDictionary *opt = NULL;
+	AVDictionary *pOptions = NULL;
 
-	c = m_AudioStream.pEnc;
+	pContext = m_AudioStream.pEnc;
 
 	/* open it */
 	//m_dbgfile = fopen("/tmp/pcm_dbg", "wb");
-	av_dict_copy(&opt, m_pOptDict, 0);
-	Ret = avcodec_open2(c, m_pAudioCodec, &opt);
-	av_dict_free(&opt);
+	av_dict_copy(&pOptions, m_pOptDict, 0);
+	Ret = avcodec_open2(pContext, m_pAudioCodec, &pOptions);
+	av_dict_free(&pOptions);
 	if(Ret < 0)
 	{
 		char aBuf[AV_ERROR_MAX_STRING_SIZE];
@@ -724,10 +724,10 @@ bool CVideo::OpenAudio()
 		return false;
 	}
 
-	if(c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
+	if(pContext->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
 		NbSamples = 10000;
 	else
-		NbSamples = c->frame_size;
+		NbSamples = pContext->frame_size;
 
 	m_AudioStream.m_vpFrames.clear();
 	m_AudioStream.m_vpFrames.reserve(m_AudioThreads);
@@ -739,7 +739,7 @@ bool CVideo::OpenAudio()
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		m_AudioStream.m_vpFrames.emplace_back(nullptr);
-		m_AudioStream.m_vpFrames[i] = AllocAudioFrame(c->sample_fmt, c->channel_layout, c->sample_rate, NbSamples);
+		m_AudioStream.m_vpFrames[i] = AllocAudioFrame(pContext->sample_fmt, pContext->channel_layout, pContext->sample_rate, NbSamples);
 		if(!m_AudioStream.m_vpFrames[i])
 		{
 			dbg_msg("video_recorder", "Could not allocate audio frame");
@@ -756,7 +756,7 @@ bool CVideo::OpenAudio()
 	}
 
 	/* copy the stream parameters to the muxer */
-	Ret = avcodec_parameters_from_context(m_AudioStream.pSt->codecpar, c);
+	Ret = avcodec_parameters_from_context(m_AudioStream.pSt->codecpar, pContext);
 	if(Ret < 0)
 	{
 		dbg_msg("video_recorder", "Could not copy the stream parameters");
@@ -779,9 +779,9 @@ bool CVideo::OpenAudio()
 		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_channel_count", 2, 0);
 		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", g_Config.m_SndRate, 0);
 		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0);
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", c->channels, 0);
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_sample_rate", c->sample_rate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "out_sample_fmt", c->sample_fmt, 0);
+		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->channels, 0);
+		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_sample_rate", pContext->sample_rate, 0);
+		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "out_sample_fmt", pContext->sample_fmt, 0);
 
 		/* initialize the resampling context */
 		if(swr_init(m_AudioStream.m_vpSwrCtxs[i]) < 0)
@@ -798,7 +798,7 @@ bool CVideo::OpenAudio()
 /* Add an output stream. */
 bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId)
 {
-	AVCodecContext *c;
+	AVCodecContext *pContext;
 
 	/* find the encoder */
 	*ppCodec = avcodec_find_encoder(CodecId);
@@ -816,13 +816,13 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		return false;
 	}
 	pStream->pSt->id = pOC->nb_streams - 1;
-	c = avcodec_alloc_context3(*ppCodec);
-	if(!c)
+	pContext = avcodec_alloc_context3(*ppCodec);
+	if(!pContext)
 	{
 		dbg_msg("video_recorder", "Could not alloc an encoding context");
 		return false;
 	}
-	pStream->pEnc = c;
+	pStream->pEnc = pContext;
 
 #if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
 	// use only 1 ffmpeg thread on 32-bit to save memory
@@ -832,62 +832,62 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 	switch((*ppCodec)->type)
 	{
 	case AVMEDIA_TYPE_AUDIO:
-		c->sample_fmt = (*ppCodec)->sample_fmts ? (*ppCodec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
-		c->bit_rate = g_Config.m_SndRate * 2 * 16;
-		c->sample_rate = g_Config.m_SndRate;
+		pContext->sample_fmt = (*ppCodec)->sample_fmts ? (*ppCodec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
+		pContext->bit_rate = g_Config.m_SndRate * 2 * 16;
+		pContext->sample_rate = g_Config.m_SndRate;
 		if((*ppCodec)->supported_samplerates)
 		{
-			c->sample_rate = (*ppCodec)->supported_samplerates[0];
+			pContext->sample_rate = (*ppCodec)->supported_samplerates[0];
 			for(int i = 0; (*ppCodec)->supported_samplerates[i]; i++)
 			{
 				if((*ppCodec)->supported_samplerates[i] == g_Config.m_SndRate)
 				{
-					c->sample_rate = g_Config.m_SndRate;
+					pContext->sample_rate = g_Config.m_SndRate;
 					break;
 				}
 			}
 		}
-		c->channels = 2;
-		c->channel_layout = AV_CH_LAYOUT_STEREO;
+		pContext->channels = 2;
+		pContext->channel_layout = AV_CH_LAYOUT_STEREO;
 
 		pStream->pSt->time_base.num = 1;
-		pStream->pSt->time_base.den = c->sample_rate;
+		pStream->pSt->time_base.den = pContext->sample_rate;
 		break;
 
 	case AVMEDIA_TYPE_VIDEO:
-		c->codec_id = CodecId;
+		pContext->codec_id = CodecId;
 
-		c->bit_rate = 400000;
+		pContext->bit_rate = 400000;
 		/* Resolution must be a multiple of two. */
-		c->width = m_Width;
-		c->height = m_Height % 2 == 0 ? m_Height : m_Height - 1;
+		pContext->width = m_Width;
+		pContext->height = m_Height % 2 == 0 ? m_Height : m_Height - 1;
 		/* timebase: This is the fundamental unit of time (in seconds) in terms
 			 * of which frame timestamps are represented. For fixed-fps content,
 			 * timebase should be 1/framerate and timestamp increments should be
 			 * identical to 1. */
 		pStream->pSt->time_base.num = 1;
 		pStream->pSt->time_base.den = m_FPS;
-		c->time_base = pStream->pSt->time_base;
+		pContext->time_base = pStream->pSt->time_base;
 
-		c->gop_size = 12; /* emit one intra frame every twelve frames at most */
-		c->pix_fmt = STREAM_PIX_FMT;
-		if(c->codec_id == AV_CODEC_ID_MPEG2VIDEO)
+		pContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
+		pContext->pix_fmt = STREAM_PIX_FMT;
+		if(pContext->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 		{
 			/* just for testing, we also add B-frames */
-			c->max_b_frames = 2;
+			pContext->max_b_frames = 2;
 		}
-		if(c->codec_id == AV_CODEC_ID_MPEG1VIDEO)
+		if(pContext->codec_id == AV_CODEC_ID_MPEG1VIDEO)
 		{
 			/* Needed to avoid using macroblocks in which some coeffs overflow.
 				 * This does not happen with normal video, it just happens here as
 				 * the motion of the chroma plane does not match the luma plane. */
-			c->mb_decision = 2;
+			pContext->mb_decision = 2;
 		}
 		if(CodecId == AV_CODEC_ID_H264)
 		{
-			const char *presets[10] = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo"};
-			av_opt_set(c->priv_data, "preset", presets[g_Config.m_ClVideoX264Preset], 0);
-			av_opt_set_int(c->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0);
+			static const char *s_apPresets[10] = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo"};
+			av_opt_set(pContext->priv_data, "preset", s_apPresets[g_Config.m_ClVideoX264Preset], 0);
+			av_opt_set_int(pContext->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0);
 		}
 		break;
 
@@ -897,7 +897,7 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 
 	/* Some formats want stream headers to be separate. */
 	if(pOC->oformat->flags & AVFMT_GLOBALHEADER)
-		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+		pContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
 	return true;
 }

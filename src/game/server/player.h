@@ -54,9 +54,9 @@ public:
 	void Snap(int SnappingClient);
 	void FakeSnap();
 
-	void OnDirectInput(CNetObj_PlayerInput *NewInput);
-	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
-	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
+	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
+	void OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput);
 	void OnDisconnect();
 
 	void KillCharacter(int Weapon = WEAPON_GAME);
@@ -93,7 +93,7 @@ public:
 	int m_LastChangeInfo;
 	int m_LastEmote;
 	int m_LastKill;
-	int m_LastCommands[4];
+	int m_aLastCommands[4];
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 	int m_LastInvited;

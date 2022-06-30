@@ -24,7 +24,7 @@ class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_Ope
 {
 protected:
 	int m_MaxQuadsAtOnce;
-	static const int m_MaxQuadsPossible = 256;
+	static const int ms_MaxQuadsPossible = 256;
 
 	CGLSLPrimitiveProgram *m_pPrimitiveProgram;
 	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured;
@@ -43,12 +43,12 @@ protected:
 
 	TWGLuint m_LastProgramID;
 
-	TWGLuint m_PrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aPrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
 	TWGLuint m_PrimitiveDrawVertexIDTex3D;
-	TWGLuint m_PrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aPrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
 	TWGLuint m_PrimitiveDrawBufferIDTex3D;
 
-	TWGLuint m_LastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aLastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
 
 	int m_LastStreamBuffer;
 

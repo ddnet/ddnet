@@ -126,18 +126,18 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 			if(j == 0)
 			{
 				// check if the position is occupado
-				CCharacter *aEnts[MAX_CLIENTS];
-				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-				vec2 Positions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
+				CCharacter *apEnts[MAX_CLIENTS];
+				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+				vec2 aPositions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
 				int Result = -1;
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
 				{
 					Result = Index;
-					if(!GameServer()->m_World.m_Core.m_Tuning[0].m_PlayerCollision)
+					if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
 						break;
 					for(int c = 0; c < Num; ++c)
-						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + Positions[Index]) ||
-							distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + Positions[Index]) <= aEnts[c]->GetProximityRadius())
+						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + aPositions[Index]) ||
+							distance(apEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + aPositions[Index]) <= apEnts[c]->GetProximityRadius())
 						{
 							Result = -1;
 							break;
@@ -146,7 +146,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 				if(Result == -1)
 					continue; // try next spawn point
 
-				P += Positions[Result];
+				P += aPositions[Result];
 			}
 
 			float S = EvaluateSpawnPos(pEval, P, DDTeam);
@@ -184,15 +184,15 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	int x, y;
 	x = (Pos.x - 16.0f) / 32.0f;
 	y = (Pos.y - 16.0f) / 32.0f;
-	int sides[8];
-	sides[0] = GameServer()->Collision()->Entity(x, y + 1, Layer);
-	sides[1] = GameServer()->Collision()->Entity(x + 1, y + 1, Layer);
-	sides[2] = GameServer()->Collision()->Entity(x + 1, y, Layer);
-	sides[3] = GameServer()->Collision()->Entity(x + 1, y - 1, Layer);
-	sides[4] = GameServer()->Collision()->Entity(x, y - 1, Layer);
-	sides[5] = GameServer()->Collision()->Entity(x - 1, y - 1, Layer);
-	sides[6] = GameServer()->Collision()->Entity(x - 1, y, Layer);
-	sides[7] = GameServer()->Collision()->Entity(x - 1, y + 1, Layer);
+	int aSides[8];
+	aSides[0] = GameServer()->Collision()->Entity(x, y + 1, Layer);
+	aSides[1] = GameServer()->Collision()->Entity(x + 1, y + 1, Layer);
+	aSides[2] = GameServer()->Collision()->Entity(x + 1, y, Layer);
+	aSides[3] = GameServer()->Collision()->Entity(x + 1, y - 1, Layer);
+	aSides[4] = GameServer()->Collision()->Entity(x, y - 1, Layer);
+	aSides[5] = GameServer()->Collision()->Entity(x - 1, y - 1, Layer);
+	aSides[6] = GameServer()->Collision()->Entity(x - 1, y, Layer);
+	aSides[7] = GameServer()->Collision()->Entity(x - 1, y + 1, Layer);
 
 	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE)
 	{
@@ -205,13 +205,13 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		for(int i = 0; i < 8; i++)
 		{
-			if(sides[i] >= ENTITY_LASER_SHORT && sides[i] <= ENTITY_LASER_LONG)
+			if(aSides[i] >= ENTITY_LASER_SHORT && aSides[i] <= ENTITY_LASER_LONG)
 			{
 				new CDoor(
 					&GameServer()->m_World, //GameWorld
 					Pos, //Pos
 					pi / 4 * i, //Rotation
-					32 * 3 + 32 * (sides[i] - ENTITY_LASER_SHORT) * 3, //Length
+					32 * 3 + 32 * (aSides[i] - ENTITY_LASER_SHORT) * 3, //Length
 					Number //Number
 				);
 			}
@@ -229,7 +229,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		else
 			Dir = 3;
 		float Deg = Dir * (pi / 2);
-		CProjectile *bullet = new CProjectile(
+		CProjectile *pBullet = new CProjectile(
 			&GameServer()->m_World,
 			WEAPON_SHOTGUN, //Type
 			-1, //Owner
@@ -242,7 +242,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
 			Layer,
 			Number);
-		bullet->SetBouncing(2 - (Dir % 2));
+		pBullet->SetBouncing(2 - (Dir % 2));
 	}
 	else if(Index == ENTITY_CRAZY_SHOTGUN)
 	{
@@ -256,7 +256,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		else
 			Dir = 3;
 		float Deg = Dir * (pi / 2);
-		CProjectile *bullet = new CProjectile(
+		CProjectile *pBullet = new CProjectile(
 			&GameServer()->m_World,
 			WEAPON_SHOTGUN, //Type
 			-1, //Owner
@@ -269,7 +269,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			SOUND_GRENADE_EXPLODE,
 			Layer,
 			Number);
-		bullet->SetBouncing(2 - (Dir % 2));
+		pBullet->SetBouncing(2 - (Dir % 2));
 	}
 
 	int Type = -1;
@@ -309,15 +309,15 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	}
 	else if(Index >= ENTITY_LASER_FAST_CCW && Index <= ENTITY_LASER_FAST_CW)
 	{
-		int sides2[8];
-		sides2[0] = GameServer()->Collision()->Entity(x, y + 2, Layer);
-		sides2[1] = GameServer()->Collision()->Entity(x + 2, y + 2, Layer);
-		sides2[2] = GameServer()->Collision()->Entity(x + 2, y, Layer);
-		sides2[3] = GameServer()->Collision()->Entity(x + 2, y - 2, Layer);
-		sides2[4] = GameServer()->Collision()->Entity(x, y - 2, Layer);
-		sides2[5] = GameServer()->Collision()->Entity(x - 2, y - 2, Layer);
-		sides2[6] = GameServer()->Collision()->Entity(x - 2, y, Layer);
-		sides2[7] = GameServer()->Collision()->Entity(x - 2, y + 2, Layer);
+		int aSides2[8];
+		aSides2[0] = GameServer()->Collision()->Entity(x, y + 2, Layer);
+		aSides2[1] = GameServer()->Collision()->Entity(x + 2, y + 2, Layer);
+		aSides2[2] = GameServer()->Collision()->Entity(x + 2, y, Layer);
+		aSides2[3] = GameServer()->Collision()->Entity(x + 2, y - 2, Layer);
+		aSides2[4] = GameServer()->Collision()->Entity(x, y - 2, Layer);
+		aSides2[5] = GameServer()->Collision()->Entity(x - 2, y - 2, Layer);
+		aSides2[6] = GameServer()->Collision()->Entity(x - 2, y, Layer);
+		aSides2[7] = GameServer()->Collision()->Entity(x - 2, y + 2, Layer);
 
 		float AngularSpeed = 0.0f;
 		int Ind = Index - ENTITY_LASER_STOP;
@@ -344,22 +344,22 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 		for(int i = 0; i < 8; i++)
 		{
-			if(sides[i] >= ENTITY_LASER_SHORT && sides[i] <= ENTITY_LASER_LONG)
+			if(aSides2[i] >= ENTITY_LASER_SHORT && aSides2[i] <= ENTITY_LASER_LONG)
 			{
-				CLight *Lgt = new CLight(&GameServer()->m_World, Pos, pi / 4 * i, 32 * 3 + 32 * (sides[i] - ENTITY_LASER_SHORT) * 3, Layer, Number);
-				Lgt->m_AngularSpeed = AngularSpeed;
-				if(sides2[i] >= ENTITY_LASER_C_SLOW && sides2[i] <= ENTITY_LASER_C_FAST)
+				CLight *pLight = new CLight(&GameServer()->m_World, Pos, pi / 4 * i, 32 * 3 + 32 * (aSides2[i] - ENTITY_LASER_SHORT) * 3, Layer, Number);
+				pLight->m_AngularSpeed = AngularSpeed;
+				if(aSides2[i] >= ENTITY_LASER_C_SLOW && aSides2[i] <= ENTITY_LASER_C_FAST)
 				{
-					Lgt->m_Speed = 1 + (sides2[i] - ENTITY_LASER_C_SLOW) * 2;
-					Lgt->m_CurveLength = Lgt->m_Length;
+					pLight->m_Speed = 1 + (aSides2[i] - ENTITY_LASER_C_SLOW) * 2;
+					pLight->m_CurveLength = pLight->m_Length;
 				}
-				else if(sides2[i] >= ENTITY_LASER_O_SLOW && sides2[i] <= ENTITY_LASER_O_FAST)
+				else if(aSides2[i] >= ENTITY_LASER_O_SLOW && aSides2[i] <= ENTITY_LASER_O_FAST)
 				{
-					Lgt->m_Speed = 1 + (sides2[i] - ENTITY_LASER_O_SLOW) * 2;
-					Lgt->m_CurveLength = 0;
+					pLight->m_Speed = 1 + (aSides2[i] - ENTITY_LASER_O_SLOW) * 2;
+					pLight->m_CurveLength = 0;
 				}
 				else
-					Lgt->m_CurveLength = Lgt->m_Length;
+					pLight->m_CurveLength = pLight->m_Length;
 			}
 		}
 	}
@@ -654,14 +654,14 @@ void IGameController::Snap(int SnappingClient)
 
 		for(int i = 0; i <= pSwitchState->m_HighestSwitchNumber; i++)
 		{
-			int Status = (int)GameServer()->Switchers()[i].m_Status[Team];
+			int Status = (int)GameServer()->Switchers()[i].m_aStatus[Team];
 			pSwitchState->m_aStatus[i / 32] |= (Status << (i % 32));
 
-			int EndTick = GameServer()->Switchers()[i].m_EndTick[Team];
-			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_LastUpdateTick[Team] < Server()->Tick())
+			int EndTick = GameServer()->Switchers()[i].m_aEndTick[Team];
+			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_aLastUpdateTick[Team] < Server()->Tick())
 			{
 				// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
-				vEndTicks.emplace_back(std::pair<int, int>(GameServer()->Switchers()[i].m_EndTick[Team], i));
+				vEndTicks.emplace_back(std::pair<int, int>(GameServer()->Switchers()[i].m_aEndTick[Team], i));
 			}
 		}
 

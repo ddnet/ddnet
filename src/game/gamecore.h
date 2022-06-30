@@ -178,11 +178,11 @@ enum
 
 struct SSwitchers
 {
-	bool m_Status[MAX_CLIENTS];
+	bool m_aStatus[MAX_CLIENTS];
 	bool m_Initial;
-	int m_EndTick[MAX_CLIENTS];
-	int m_Type[MAX_CLIENTS];
-	int m_LastUpdateTick[MAX_CLIENTS];
+	int m_aEndTick[MAX_CLIENTS];
+	int m_aType[MAX_CLIENTS];
+	int m_aLastUpdateTick[MAX_CLIENTS];
 };
 
 class CWorldCore
@@ -206,7 +206,7 @@ public:
 		return m_pPrng->RandomBits() % BelowThis;
 	}
 
-	CTuningParams m_Tuning[2];
+	CTuningParams m_aTuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
 
@@ -280,7 +280,7 @@ public:
 	// DDRace
 
 	int m_Id;
-	bool m_pReset;
+	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
 
 	vec2 m_LastVel;

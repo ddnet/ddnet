@@ -712,7 +712,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					float EyeSeparation = (0.075f - 0.010f * absolute(Direction.x)) * BaseSize;
 					vec2 Offset = vec2(Direction.x * 0.125f, -0.05f + Direction.y * 0.10f) * BaseSize;
 
-					Graphics()->TextureSet(pSkinTextures->m_Eyes[TeeEye]);
+					Graphics()->TextureSet(pSkinTextures->m_aEyes[TeeEye]);
 					Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset + EyeQuadOffset, BodyPos.x - EyeSeparation + Offset.x, BodyPos.y + Offset.y, EyeScale / (64.f * 0.4f), h / (64.f * 0.4f));
 					Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset + EyeQuadOffset, BodyPos.x + EyeSeparation + Offset.x, BodyPos.y + Offset.y, -EyeScale / (64.f * 0.4f), h / (64.f * 0.4f));
 				}
@@ -749,31 +749,31 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 	Graphics()->QuadsSetRotation(0);
 }
 
-void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *w, float *h)
+void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight)
 {
 	const float Amount = 1150 * 1000;
 	const float WMax = 1500;
 	const float HMax = 1050;
 
 	float f = sqrtf(Amount) / sqrtf(Aspect);
-	*w = f * Aspect;
-	*h = f;
+	*pWidth = f * Aspect;
+	*pHeight = f;
 
 	// limit the view
-	if(*w > WMax)
+	if(*pWidth > WMax)
 	{
-		*w = WMax;
-		*h = *w / Aspect;
+		*pWidth = WMax;
+		*pHeight = *pWidth / Aspect;
 	}
 
-	if(*h > HMax)
+	if(*pHeight > HMax)
 	{
-		*h = HMax;
-		*w = *h * Aspect;
+		*pHeight = HMax;
+		*pWidth = *pHeight * Aspect;
 	}
 
-	*w *= Zoom;
-	*h *= Zoom;
+	*pWidth *= Zoom;
+	*pHeight *= Zoom;
 }
 
 void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
@@ -791,8 +791,8 @@ void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float Parallax
 
 void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
 {
-	float Points[4];
+	float aPoints[4];
 	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, aPoints);
+	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }

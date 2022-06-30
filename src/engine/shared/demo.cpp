@@ -23,13 +23,13 @@ const CUuid SHA256_EXTENSION =
 	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
 		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
-static const unsigned char s_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-static const unsigned char s_CurVersion = 6;
-static const unsigned char s_OldVersion = 3;
-static const unsigned char s_Sha256Version = 6;
-static const unsigned char s_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
-static const int s_LengthOffset = 152;
-static const int s_NumMarkersOffset = 176;
+static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
+static const unsigned char gs_CurVersion = 6;
+static const unsigned char gs_OldVersion = 3;
+static const unsigned char gs_Sha256Version = 6;
+static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
+static const int gs_LengthOffset = 152;
+static const int gs_NumMarkersOffset = 176;
 
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
@@ -129,8 +129,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	// write header
 	mem_zero(&Header, sizeof(Header));
-	mem_copy(Header.m_aMarker, s_aHeaderMarker, sizeof(Header.m_aMarker));
-	Header.m_Version = s_CurVersion;
+	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
+	Header.m_Version = gs_CurVersion;
 	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
 	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
 	uint_to_bytes_be(Header.m_aMapSize, MapSize);
@@ -343,13 +343,13 @@ int CDemoRecorder::Stop()
 		return -1;
 
 	// add the demo length to the header
-	io_seek(m_File, s_LengthOffset, IOSEEK_START);
+	io_seek(m_File, gs_LengthOffset, IOSEEK_START);
 	unsigned char aLength[4];
 	int_to_bytes_be(aLength, Length());
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
-	io_seek(m_File, s_NumMarkersOffset, IOSEEK_START);
+	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
 	unsigned char aNumMarkers[4];
 	int_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
@@ -433,7 +433,7 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		int Tickdelta_legacy = Chunk & (CHUNKMASK_TICK_LEGACY); // compatibility
 		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
-		if(m_Info.m_Header.m_Version < s_VersionTickCompression && Tickdelta_legacy != 0)
+		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
 		{
 			*pTick += Tickdelta_legacy;
 		}
@@ -721,7 +721,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 
 	// read the header
 	io_read(m_File, &m_Info.m_Header, sizeof(m_Info.m_Header));
-	if(mem_comp(m_Info.m_Header.m_aMarker, s_aHeaderMarker, sizeof(s_aHeaderMarker)) != 0)
+	if(mem_comp(m_Info.m_Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0)
 	{
 		if(m_pConsole)
 		{
@@ -734,7 +734,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		return -1;
 	}
 
-	if(m_Info.m_Header.m_Version < s_OldVersion)
+	if(m_Info.m_Header.m_Version < gs_OldVersion)
 	{
 		if(m_pConsole)
 		{
@@ -746,11 +746,11 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		m_File = 0;
 		return -1;
 	}
-	else if(m_Info.m_Header.m_Version > s_OldVersion)
+	else if(m_Info.m_Header.m_Version > gs_OldVersion)
 		io_read(m_File, &m_Info.m_TimelineMarkers, sizeof(m_Info.m_TimelineMarkers));
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(m_Info.m_Header.m_Version >= s_Sha256Version)
+	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
 		io_read(m_File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
@@ -792,7 +792,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
 
-	if(m_Info.m_Header.m_Version > s_OldVersion)
+	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
 		// get timeline markers
 		int Num = bytes_be_to_int(m_Info.m_TimelineMarkers.m_aNumTimelineMarkers);
@@ -837,7 +837,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 
 	// handle sha256
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(m_Info.m_Header.m_Version >= s_Sha256Version)
+	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
 		Sha256 = m_MapInfo.m_Sha256;
 	else
 	{
@@ -1081,7 +1081,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Crc = bytes_be_to_int(pDemoHeader->m_aMapCrc);
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(pDemoHeader->m_Version >= s_Sha256Version)
+	if(pDemoHeader->m_Version >= gs_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
 		io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
@@ -1102,7 +1102,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Size = bytes_be_to_int(pDemoHeader->m_aMapSize);
 
 	io_close(File);
-	return !(mem_comp(pDemoHeader->m_aMarker, s_aHeaderMarker, sizeof(s_aHeaderMarker)) || pDemoHeader->m_Version < s_OldVersion);
+	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
 }
 
 int CDemoPlayer::GetDemoType() const
@@ -1141,7 +1141,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
 
 	SHA256_DIGEST Sha256 = pMapInfo->m_Sha256;
-	if(pInfo->m_Header.m_Version < s_Sha256Version)
+	if(pInfo->m_Header.m_Version < gs_Sha256Version)
 	{
 		if(m_pDemoPlayer->ExtractMap(m_pStorage))
 			Sha256 = pMapInfo->m_Sha256;

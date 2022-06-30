@@ -33,11 +33,11 @@ bool CLight::HitCharacter()
 		GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
 	if(HitCharacters.empty())
 		return false;
-	for(auto *Char : HitCharacters)
+	for(auto *pChar : HitCharacters)
 	{
-		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[Char->Team()])
+		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()])
 			continue;
-		Char->Freeze();
+		pChar->Freeze();
 	}
 	return true;
 }
@@ -126,7 +126,7 @@ void CLight::Snap(int SnappingClient)
 	else
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
-		if(pChr && pChr->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pChr->Team()] && Tick)
+		if(pChr && pChr->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()] && Tick)
 			return;
 	}
 
@@ -144,7 +144,7 @@ void CLight::Snap(int SnappingClient)
 		pObj->m_FromX = (int)m_Pos.x;
 		pObj->m_FromY = (int)m_Pos.y;
 	}
-	else if(pChr && m_Layer == LAYER_SWITCH && Switchers()[m_Number].m_Status[pChr->Team()])
+	else if(pChr && m_Layer == LAYER_SWITCH && Switchers()[m_Number].m_aStatus[pChr->Team()])
 	{
 		pObj->m_FromX = (int)m_To.x;
 		pObj->m_FromY = (int)m_To.y;

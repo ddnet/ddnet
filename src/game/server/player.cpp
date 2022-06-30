@@ -88,15 +88,15 @@ void CPlayer::Reset()
 
 	if(g_Config.m_Events)
 	{
-		time_t rawtime;
-		struct tm *timeinfo;
-		time(&rawtime);
-		timeinfo = localtime(&rawtime);
-		if((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 0 && timeinfo->tm_mday == 1))
+		time_t RawTime;
+		struct tm *pTimeInfo;
+		time(&RawTime);
+		pTimeInfo = localtime(&RawTime);
+		if((pTimeInfo->tm_mon == 11 && pTimeInfo->tm_mday == 31) || (pTimeInfo->tm_mon == 0 && pTimeInfo->tm_mday == 1))
 		{ // New Year
 			m_DefEmote = EMOTE_HAPPY;
 		}
-		else if((timeinfo->tm_mon == 9 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 10 && timeinfo->tm_mday == 1))
+		else if((pTimeInfo->tm_mon == 9 && pTimeInfo->tm_mday == 31) || (pTimeInfo->tm_mon == 10 && pTimeInfo->tm_mday == 1))
 		{ // Halloween
 			m_DefEmote = EMOTE_ANGRY;
 			m_Halloween = true;
@@ -331,7 +331,7 @@ void CPlayer::Snap(int SnappingClient)
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_aSkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
@@ -492,10 +492,10 @@ void CPlayer::OnDisconnect()
 	m_Moderating = false;
 }
 
-void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
+void CPlayer::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	// skip the input if chat is active
-	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
+	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
 		return;
 
 	AfkTimer();
@@ -503,7 +503,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	m_NumInputs++;
 
 	if(m_pCharacter && !m_Paused)
-		m_pCharacter->OnPredictedInput(NewInput);
+		m_pCharacter->OnPredictedInput(pNewInput);
 
 	// Magic number when we can hope that client has successfully identified itself
 	if(m_NumInputs == 20 && g_Config.m_SvClientSuggestion[0] != '\0' && GetClientVersion() <= VERSION_DDNET_OLD)
@@ -512,19 +512,19 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 		GameServer()->SendBroadcast("This server uses an experimental translation from Teeworlds 0.7 to 0.6. Please report bugs on ddnet.tw/discord", m_ClientID);
 }
 
-void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
+void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
-	Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
+	Server()->SetClientFlags(m_ClientID, pNewInput->m_PlayerFlags);
 
 	AfkTimer();
 
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorID == SPEC_FREEVIEW)
-		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
+		m_ViewPos = vec2(pNewInput->m_TargetX, pNewInput->m_TargetY);
 
 	// check for activity
-	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
+	if(mem_comp(pNewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
-		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
+		mem_copy(m_pLastTarget, pNewInput, sizeof(CNetObj_PlayerInput));
 		// Ignore the first direct input and keep the player afk as it is sent automatically
 		if(m_LastTargetInit)
 			UpdatePlaytime();
@@ -533,11 +533,11 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	}
 }
 
-void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
+void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput)
 {
-	m_PlayerFlags = NewInput->m_PlayerFlags;
+	m_PlayerFlags = pNewInput->m_PlayerFlags;
 
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire & 1))
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (pNewInput->m_Fire & 1))
 		m_Spawning = true;
 
 	// skip the input if chat is active
@@ -545,7 +545,7 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput)
 		return;
 
 	if(m_pCharacter && !m_Paused)
-		m_pCharacter->OnDirectInput(NewInput);
+		m_pCharacter->OnDirectInput(pNewInput);
 }
 
 int CPlayer::GetClientVersion() const

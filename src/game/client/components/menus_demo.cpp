@@ -216,10 +216,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// seek to 0-90%
-		const int SeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
-		for(unsigned i = 0; i < std::size(SeekPercentKeys); i++)
+		const int aSeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
+		for(unsigned i = 0; i < std::size(aSeekPercentKeys); i++)
 		{
-			if(Input()->KeyPress(SeekPercentKeys[i]))
+			if(Input()->KeyPress(aSeekPercentKeys[i]))
 			{
 				DemoPlayer()->SeekPercent(i * 0.1f);
 				break;
@@ -273,7 +273,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// do seekbar
 	{
 		static int s_SeekBarID = 0;
-		void *id = &s_SeekBarID;
+		void *pId = &s_SeekBarID;
 		char aBuffer[128];
 
 		// draw seek bar
@@ -333,7 +333,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// do the logic
 		const bool Inside = UI()->MouseInside(&SeekBar);
 
-		if(UI()->CheckActiveItem(id))
+		if(UI()->CheckActiveItem(pId))
 		{
 			if(!UI()->MouseButton(0))
 				UI()->SetActiveItem(nullptr);
@@ -369,14 +369,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				}
 			}
 		}
-		else if(UI()->HotItem() == id)
+		else if(UI()->HotItem() == pId)
 		{
 			if(UI()->MouseButton(0))
-				UI()->SetActiveItem(id);
+				UI()->SetActiveItem(pId);
 		}
 
 		if(Inside)
-			UI()->SetHotItem(id);
+			UI()->SetHotItem(pId);
 	}
 
 	if(CurrentTick == TotalTicks)

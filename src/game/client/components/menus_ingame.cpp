@@ -237,7 +237,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	int TotalPlayers = 0;
 
-	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
+	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -261,10 +261,10 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_paInfoByName[i])
+		if(!m_pClient->m_Snap.m_apInfoByName[i])
 			continue;
 
-		int Index = m_pClient->m_Snap.m_paInfoByName[i]->m_ClientID;
+		int Index = m_pClient->m_Snap.m_apInfoByName[i]->m_ClientID;
 
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
@@ -507,7 +507,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	int NumOptions = 0;
 	int Selected = 0;
 	static int aPlayerIDs[MAX_CLIENTS];
-	for(auto &pInfoByName : m_pClient->m_Snap.m_paInfoByName)
+	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -648,7 +648,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			else if(s_ControlPage == 1)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
+					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
 					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason);
 					SetActive(false);
@@ -657,7 +657,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			else if(s_ControlPage == 2)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-					m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
+					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
 					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason);
 					SetActive(false);
@@ -700,7 +700,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				else if(s_ControlPage == 1)
 				{
 					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-						m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
+						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 					{
 						m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason, true);
 						SetActive(false);
@@ -709,7 +709,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				else if(s_ControlPage == 2)
 				{
 					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-						m_pClient->m_Snap.m_paPlayerInfos[m_CallvoteSelectedPlayer])
+						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 					{
 						m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason, true);
 						SetActive(false);
