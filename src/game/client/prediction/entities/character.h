@@ -43,6 +43,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
+	void SetSuper(bool Super);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
@@ -71,24 +72,9 @@ public:
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
-	bool m_Super;
-	bool m_SuperJump;
-	bool m_Jetpack;
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
 	bool m_FrozenLastTick;
-	bool m_DeepFreeze;
-	bool m_LiveFreeze;
-	bool m_EndlessHook;
-	enum
-	{
-		HIT_ALL = 0,
-		DISABLE_HIT_HAMMER = 1,
-		DISABLE_HIT_SHOTGUN = 2,
-		DISABLE_HIT_GRENADE = 4,
-		DISABLE_HIT_LASER = 8
-	};
-	int m_Hit;
 	int m_TuneZone;
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
@@ -142,6 +128,13 @@ public:
 	bool Match(CCharacter *pChar);
 	void ResetPrediction();
 	void SetTuneZone(int Zone);
+
+	bool CanNotHammerHit() { return m_Core.m_NoHammerHit; }
+	bool CanNotShotgunHit() { return m_Core.m_NoShotgunHit; }
+	bool CanNotLaserHit() { return m_Core.m_NoLaserHit; }
+	bool CanNotGrenadeHit() { return m_Core.m_NoGrenadeHit; }
+
+	bool IsSuper() { return m_Core.m_Super; }
 
 private:
 	// weapon info

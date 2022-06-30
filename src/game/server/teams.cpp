@@ -363,7 +363,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientID, int Team)
 		return "You are in this team already";
 	if(!Character(ClientID))
 		return "Your character is not valid";
-	if(Team == TEAM_SUPER && !Character(ClientID)->m_Super)
+	if(Team == TEAM_SUPER && !Character(ClientID)->IsSuper())
 		return "You can't join super team if you don't have super rights";
 	if(Team != TEAM_SUPER && Character(ClientID)->m_DDRaceState != DDRACE_NONE)
 		return "You have started racing already";

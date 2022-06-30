@@ -32,7 +32,7 @@ void CPickup::Tick()
 			case POWERUP_ARMOR:
 				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
 					continue;
-				if(pChr->m_Super)
+				if(pChr->IsSuper())
 					continue;
 				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
 				{

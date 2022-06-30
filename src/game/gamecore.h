@@ -277,7 +277,6 @@ public:
 	void Quantize();
 
 	// DDRace
-
 	int m_Id;
 	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
