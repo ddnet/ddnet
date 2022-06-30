@@ -548,8 +548,7 @@ void CServer::SetClientFlags(int ClientID, int Flags)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
 
-	if(Flags > m_aClients[ClientID].m_Flags)
-		m_aClients[ClientID].m_Flags = Flags;
+	m_aClients[ClientID].m_Flags = Flags;
 }
 
 void CServer::Kick(int ClientID, const char *pReason)

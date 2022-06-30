@@ -529,8 +529,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	if(Server()->IsSixup(m_ClientID))
 		NewInput->m_PlayerFlags = PlayerFlags_SevenToSix(NewInput->m_PlayerFlags);
 
-	if(NewInput->m_PlayerFlags)
-		Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
+	Server()->SetClientFlags(m_ClientID, NewInput->m_PlayerFlags);
 
 	AfkTimer();
 
