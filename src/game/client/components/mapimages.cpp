@@ -187,16 +187,16 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		m_EntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitesAreMasked] = true;
 
 		// any mod that does not mask, will get all layers unmasked
-		bool WasUnknwon = !EntitesAreMasked;
+		bool WasUnknown = !EntitesAreMasked;
 
 		char aPath[64];
 		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_aModEntitiesNames[EntitiesModType]);
 
-		bool GameTypeHasFrontLayer = HasFrontLayer(EntitiesModType) || WasUnknwon;
-		bool GameTypeHasSpeedupLayer = HasSpeedupLayer(EntitiesModType) || WasUnknwon;
-		bool GameTypeHasSwitchLayer = HasSwitchLayer(EntitiesModType) || WasUnknwon;
-		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknwon;
-		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknwon;
+		bool GameTypeHasFrontLayer = HasFrontLayer(EntitiesModType) || WasUnknown;
+		bool GameTypeHasSpeedupLayer = HasSpeedupLayer(EntitiesModType) || WasUnknown;
+		bool GameTypeHasSwitchLayer = HasSwitchLayer(EntitiesModType) || WasUnknown;
+		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknown;
+		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknown;
 
 		int TextureLoadFlag = 0;
 		if(Graphics()->IsTileBufferingEnabled())
