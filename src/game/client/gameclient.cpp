@@ -1062,9 +1062,9 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_DontMaskEntities = !DDNet;
 	Info.m_AllowXSkins = false;
 	Info.m_EntitiesFDDrace = FDDrace;
-	Info.m_HudHealthArmor = !DDNet;
-	Info.m_HudAmmo = !DDNet;
-	Info.m_HudDDRace = DDNet;
+	Info.m_HudHealthArmor = true;
+	Info.m_HudAmmo = true;
+	Info.m_HudDDRace = false;
 
 	if(Version >= 0)
 	{
