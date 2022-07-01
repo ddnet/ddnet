@@ -10,6 +10,7 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES
 #endif
 
+#include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client/graphics_defines.h>
 
@@ -85,8 +86,8 @@ public:
 	int m_LocTextOutlineSampler;
 	int m_LocTextureSize;
 
-	float m_LastColor[4];
-	float m_LastOutlineColor[4];
+	ColorRGBA m_LastColor;
+	ColorRGBA m_LastOutlineColor;
 	int m_LastTextSampler;
 	int m_LastTextOutlineSampler;
 	int m_LastTextureSize;
@@ -105,7 +106,7 @@ public:
 	{
 		m_LastRotation = 0.f;
 		m_LastCenter = vec2(0, 0);
-		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
+		m_LastVerticesColor = ColorRGBA(-1, -1, -1, -1);
 	}
 
 	int m_LocRotation;
@@ -114,7 +115,7 @@ public:
 
 	float m_LastRotation;
 	vec2 m_LastCenter;
-	float m_LastVertciesColor[4];
+	ColorRGBA m_LastVerticesColor;
 };
 
 class CGLSLSpriteMultipleProgram : public CGLSLTWProgram
@@ -124,7 +125,7 @@ public:
 
 	{
 		m_LastCenter = vec2(0, 0);
-		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
+		m_LastVerticesColor = ColorRGBA(-1, -1, -1, -1);
 	}
 
 	int m_LocRSP;
@@ -132,7 +133,7 @@ public:
 	int m_LocVertciesColor;
 
 	vec2 m_LastCenter;
-	float m_LastVertciesColor[4];
+	ColorRGBA m_LastVerticesColor;
 };
 
 class CGLSLQuadProgram : public CGLSLTWProgram

@@ -144,8 +144,8 @@ public:
 
 		CTextCursor m_Cursor;
 
-		STextRenderColor m_TextColor;
-		STextRenderColor m_TextOutlineColor;
+		ColorRGBA m_TextColor;
+		ColorRGBA m_TextOutlineColor;
 
 		SUIElementRect();
 

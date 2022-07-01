@@ -18,23 +18,20 @@
 
 using namespace std::chrono_literals;
 
-void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, std::chrono::nanoseconds TimeNanos, float *pResult)
+void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result)
 {
 	if(NumPoints == 0)
 	{
-		pResult[0] = 0;
-		pResult[1] = 0;
-		pResult[2] = 0;
-		pResult[3] = 0;
+		Result = ColorRGBA();
 		return;
 	}
 
 	if(NumPoints == 1)
 	{
-		pResult[0] = fx2f(pPoints[0].m_aValues[0]);
-		pResult[1] = fx2f(pPoints[0].m_aValues[1]);
-		pResult[2] = fx2f(pPoints[0].m_aValues[2]);
-		pResult[3] = fx2f(pPoints[0].m_aValues[3]);
+		Result.r = fx2f(pPoints[0].m_aValues[0]);
+		Result.g = fx2f(pPoints[0].m_aValues[1]);
+		Result.b = fx2f(pPoints[0].m_aValues[2]);
+		Result.a = fx2f(pPoints[0].m_aValues[3]);
 		return;
 	}
 
@@ -72,17 +69,17 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 			{
 				float v0 = fx2f(pPoints[i].m_aValues[c]);
 				float v1 = fx2f(pPoints[i + 1].m_aValues[c]);
-				pResult[c] = v0 + (v1 - v0) * a;
+				Result[c] = v0 + (v1 - v0) * a;
 			}
 
 			return;
 		}
 	}
 
-	pResult[0] = fx2f(pPoints[NumPoints - 1].m_aValues[0]);
-	pResult[1] = fx2f(pPoints[NumPoints - 1].m_aValues[1]);
-	pResult[2] = fx2f(pPoints[NumPoints - 1].m_aValues[2]);
-	pResult[3] = fx2f(pPoints[NumPoints - 1].m_aValues[3]);
+	Result.r = fx2f(pPoints[NumPoints - 1].m_aValues[0]);
+	Result.g = fx2f(pPoints[NumPoints - 1].m_aValues[1]);
+	Result.b = fx2f(pPoints[NumPoints - 1].m_aValues[2]);
+	Result.a = fx2f(pPoints[NumPoints - 1].m_aValues[3]);
 }
 
 static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
@@ -109,19 +106,13 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	{
 		CQuad *q = &pQuads[i];
 
-		float r = 1, g = 1, b = 1, a = 1;
-
+		ColorRGBA Color(1.f, 1.f, 1.f, 1.f);
 		if(q->m_ColorEnv >= 0)
 		{
-			float aChannels[4];
-			pfnEval(q->m_ColorEnvOffset, q->m_ColorEnv, aChannels, pUser);
-			r = aChannels[0];
-			g = aChannels[1];
-			b = aChannels[2];
-			a = aChannels[3];
+			pfnEval(q->m_ColorEnvOffset, q->m_ColorEnv, Color, pUser);
 		}
 
-		if(a <= 0)
+		if(Color.a <= 0)
 			continue;
 
 		bool Opaque = false;
@@ -147,18 +138,18 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 		// TODO: fix this
 		if(q->m_PosEnv >= 0)
 		{
-			float aChannels[4];
-			pfnEval(q->m_PosEnvOffset, q->m_PosEnv, aChannels, pUser);
-			OffsetX = aChannels[0];
-			OffsetY = aChannels[1];
-			Rot = aChannels[2] / 360.0f * pi * 2;
+			ColorRGBA Channels;
+			pfnEval(q->m_PosEnvOffset, q->m_PosEnv, Channels, pUser);
+			OffsetX = Channels.r;
+			OffsetY = Channels.g;
+			Rot = Channels.b / 360.0f * pi * 2;
 		}
 
 		IGraphics::CColorVertex Array[4] = {
-			IGraphics::CColorVertex(0, q->m_aColors[0].r * Conv * r, q->m_aColors[0].g * Conv * g, q->m_aColors[0].b * Conv * b, q->m_aColors[0].a * Conv * a * Alpha),
-			IGraphics::CColorVertex(1, q->m_aColors[1].r * Conv * r, q->m_aColors[1].g * Conv * g, q->m_aColors[1].b * Conv * b, q->m_aColors[1].a * Conv * a * Alpha),
-			IGraphics::CColorVertex(2, q->m_aColors[2].r * Conv * r, q->m_aColors[2].g * Conv * g, q->m_aColors[2].b * Conv * b, q->m_aColors[2].a * Conv * a * Alpha),
-			IGraphics::CColorVertex(3, q->m_aColors[3].r * Conv * r, q->m_aColors[3].g * Conv * g, q->m_aColors[3].b * Conv * b, q->m_aColors[3].a * Conv * a * Alpha)};
+			IGraphics::CColorVertex(0, q->m_aColors[0].r * Conv * Color.r, q->m_aColors[0].g * Conv * Color.g, q->m_aColors[0].b * Conv * Color.b, q->m_aColors[0].a * Conv * Color.a * Alpha),
+			IGraphics::CColorVertex(1, q->m_aColors[1].r * Conv * Color.r, q->m_aColors[1].g * Conv * Color.g, q->m_aColors[1].b * Conv * Color.b, q->m_aColors[1].a * Conv * Color.a * Alpha),
+			IGraphics::CColorVertex(2, q->m_aColors[2].r * Conv * Color.r, q->m_aColors[2].g * Conv * Color.g, q->m_aColors[2].b * Conv * Color.b, q->m_aColors[2].a * Conv * Color.a * Alpha),
+			IGraphics::CColorVertex(3, q->m_aColors[3].r * Conv * Color.r, q->m_aColors[3].g * Conv * Color.g, q->m_aColors[3].b * Conv * Color.b, q->m_aColors[3].a * Conv * Color.a * Alpha)};
 		Graphics()->SetColorVertex(Array, 4);
 
 		CPoint *pPoints = q->m_aPoints;
@@ -201,19 +192,14 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
 	float FinalTilesetScale = FinalTileSize / TilePixelSize;
 
-	float r = 1, g = 1, b = 1, a = 1;
+	ColorRGBA Channels(1.f, 1.f, 1.f, 1.f);
 	if(ColorEnv >= 0)
 	{
-		float aChannels[4];
-		pfnEval(ColorEnvOffset, ColorEnv, aChannels, pUser);
-		r = aChannels[0];
-		g = aChannels[1];
-		b = aChannels[2];
-		a = aChannels[3];
+		pfnEval(ColorEnvOffset, ColorEnv, Channels, pUser);
 	}
 
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r * r, Color.g * g, Color.b * b, Color.a * a);
+	Graphics()->SetColor(Color.r * Channels.r, Color.g * Channels.g, Color.b * Channels.b, Color.a * Channels.a);
 
 	int StartY = (int)(ScreenY0 / Scale) - 1;
 	int StartX = (int)(ScreenX0 / Scale) - 1;
@@ -277,22 +263,17 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
 	float FinalTilesetScale = FinalTileSize / TilePixelSize;
 
-	float r = 1, g = 1, b = 1, a = 1;
+	ColorRGBA Channels(1.f, 1.f, 1.f, 1.f);
 	if(ColorEnv >= 0)
 	{
-		float aChannels[4];
-		pfnEval(ColorEnvOffset, ColorEnv, aChannels, pUser);
-		r = aChannels[0];
-		g = aChannels[1];
-		b = aChannels[2];
-		a = aChannels[3];
+		pfnEval(ColorEnvOffset, ColorEnv, Channels, pUser);
 	}
 
 	if(Graphics()->IsTileBufferingEnabled())
 		Graphics()->QuadsTex3DBegin();
 	else
 		Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r * r, Color.g * g, Color.b * b, Color.a * a);
+	Graphics()->SetColor(Color.r * Channels.r, Color.g * Channels.g, Color.b * Channels.b, Color.a * Channels.a);
 
 	int StartY = (int)(ScreenY0 / Scale) - 1;
 	int StartX = (int)(ScreenX0 / Scale) - 1;
@@ -342,7 +323,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 				unsigned char Flags = pTiles[c].m_Flags;
 
 				bool Render = false;
-				if(Flags & TILEFLAG_OPAQUE && Color.a * a > 254.0f / 255.0f)
+				if(Flags & TILEFLAG_OPAQUE && Color.a * Channels.a > 254.0f / 255.0f)
 				{
 					if(RenderFlags & LAYERRENDERFLAG_OPAQUE)
 						Render = true;

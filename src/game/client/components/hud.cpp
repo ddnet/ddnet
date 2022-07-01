@@ -240,9 +240,9 @@ void CHud::RenderScoreHud()
 				}
 				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 				{
-					STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-					STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
-					TextRender()->RenderTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &TColor, &TOutlineColor);
+					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+					TextRender()->RenderTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, TColor, TOutlineColor);
 				}
 
 				if(GameFlags & GAMEFLAG_FLAGS)
@@ -280,9 +280,9 @@ void CHud::RenderScoreHud()
 
 						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
 						{
-							STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-							STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
-							TextRender()->RenderTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &TColor, &TOutlineColor);
+							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+							TextRender()->RenderTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, TColor, TOutlineColor);
 						}
 
 						// draw tee of the flag holder
@@ -422,9 +422,9 @@ void CHud::RenderScoreHud()
 				// draw score
 				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 				{
-					STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-					STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
-					TextRender()->RenderTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &TColor, &TOutlineColor);
+					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+					TextRender()->RenderTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, TColor, TOutlineColor);
 				}
 
 				if(apPlayerInfo[t])
@@ -450,9 +450,9 @@ void CHud::RenderScoreHud()
 
 						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
 						{
-							STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-							STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
-							TextRender()->RenderTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &TColor, &TOutlineColor);
+							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+							TextRender()->RenderTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, TColor, TOutlineColor);
 						}
 
 						// draw tee
@@ -489,9 +489,9 @@ void CHud::RenderScoreHud()
 				}
 				if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
 				{
-					STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-					STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
-					TextRender()->RenderTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, &TColor, &TOutlineColor);
+					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+					TextRender()->RenderTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, TColor, TOutlineColor);
 				}
 
 				StartY += 8.0f;
@@ -550,17 +550,9 @@ void CHud::RenderTextInfo()
 		else
 			TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
 		TextRender()->SetRenderFlags(OldFlags);
-		STextRenderColor TColor;
-		TColor.m_R = 1.f;
-		TColor.m_G = 1.f;
-		TColor.m_B = 1.f;
-		TColor.m_A = 1.f;
-		STextRenderColor TOutColor;
-		TOutColor.m_R = 0.f;
-		TOutColor.m_G = 0.f;
-		TOutColor.m_B = 0.f;
-		TOutColor.m_A = 0.3f;
-		TextRender()->RenderTextContainer(m_FPSTextContainerIndex, &TColor, &TOutColor);
+		ColorRGBA TColor(1, 1, 1, 1);
+		ColorRGBA TOutColor(0, 0, 0, 0.3f);
+		TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TColor, TOutColor);
 	}
 	if(g_Config.m_ClShowpred)
 	{

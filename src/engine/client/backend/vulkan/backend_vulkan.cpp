@@ -711,8 +711,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformTextGFragmentConstants
 	{
-		float m_aTextColor[4];
-		float m_aTextOutlineColor[4];
+		ColorRGBA m_TextColor;
+		ColorRGBA m_TextOutlineColor;
 	};
 
 	struct SUniformTextFragment
@@ -736,10 +736,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		int32_t m_JumpIndex;
 	};
 
-	struct SUniformTileGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformTileGVertColor;
 
 	struct SUniformTileGVertColorAlign
 	{
@@ -757,10 +754,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		float m_Rotation;
 	};
 
-	struct SUniformPrimExGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformPrimExGVertColor;
 
 	struct SUniformPrimExGVertColorAlign
 	{
@@ -773,10 +767,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec2 m_Center;
 	};
 
-	struct SUniformSpriteMultiGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformSpriteMultiGVertColor;
 
 	struct SUniformSpriteMultiGVertColorAlign
 	{
@@ -795,10 +786,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec4 m_aPSR[1];
 	};
 
-	struct SUniformSpriteMultiPushGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformSpriteMultiPushGVertColor;
 
 	struct SUniformQuadGPosBase
 	{
@@ -3252,7 +3240,7 @@ protected:
 		size_t FragPushConstantSize = sizeof(SUniformTileGVertColor);
 
 		mem_copy(VertexPushConstants.m_aPos, m.data(), m.size() * sizeof(float));
-		mem_copy(FragPushConstants.m_aColor, &Color, sizeof(FragPushConstants.m_aColor));
+		FragPushConstants = Color;
 
 		if(Type == 1)
 		{
@@ -6963,8 +6951,8 @@ public:
 
 		SUniformTextFragment FragmentConstants;
 
-		mem_copy(FragmentConstants.m_Constants.m_aTextColor, pCommand->m_aTextColor, sizeof(FragmentConstants.m_Constants.m_aTextColor));
-		mem_copy(FragmentConstants.m_Constants.m_aTextOutlineColor, pCommand->m_aTextOutlineColor, sizeof(FragmentConstants.m_Constants.m_aTextOutlineColor));
+		FragmentConstants.m_Constants.m_TextColor = pCommand->m_TextColor;
+		FragmentConstants.m_Constants.m_TextOutlineColor = pCommand->m_TextOutlineColor;
 		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformGTextPos) + sizeof(SUniformTextGFragmentOffset), sizeof(SUniformTextFragment), &FragmentConstants);
 
 		vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(pCommand->m_DrawNum), 1, 0, 0, 0);
@@ -7073,8 +7061,7 @@ public:
 		SUniformPrimExGPos PushConstantVertex;
 		size_t VertexPushConstantSize = sizeof(PushConstantVertex);
 
-		mem_copy(PushConstantColor.m_aColor, &pCommand->m_VertexColor, sizeof(PushConstantColor.m_aColor));
-
+		PushConstantColor = pCommand->m_VertexColor;
 		mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
 
 		if(!IsRotationless)
@@ -7131,7 +7118,7 @@ public:
 			SUniformSpriteMultiPushGVertColor PushConstantColor;
 			SUniformSpriteMultiPushGPos PushConstantVertex;
 
-			mem_copy(PushConstantColor.m_aColor, &pCommand->m_VertexColor, sizeof(PushConstantColor.m_aColor));
+			PushConstantColor = pCommand->m_VertexColor;
 
 			mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
 			PushConstantVertex.m_Center = pCommand->m_Center;
@@ -7147,7 +7134,7 @@ public:
 			SUniformSpriteMultiGVertColor PushConstantColor;
 			SUniformSpriteMultiGPos PushConstantVertex;
 
-			mem_copy(PushConstantColor.m_aColor, &pCommand->m_VertexColor, sizeof(PushConstantColor.m_aColor));
+			PushConstantColor = pCommand->m_VertexColor;
 
 			mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
 			PushConstantVertex.m_Center = pCommand->m_Center;

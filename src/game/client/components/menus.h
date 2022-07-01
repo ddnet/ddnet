@@ -188,10 +188,10 @@ class CMenus : public CComponent
 			Index = 1;
 		Graphics()->TextureClear();
 		Graphics()->RenderQuadContainer(UIElement.Get(Index)->m_UIRectQuadContainer, -1);
-		STextRenderColor ColorText(TextRender()->DefaultTextColor());
-		STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
+		ColorRGBA ColorText(TextRender()->DefaultTextColor());
+		ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
 		if(UIElement.Get(0)->m_UITextContainer != -1)
-			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, &ColorText, &ColorTextOutline);
+			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, ColorText, ColorTextOutline);
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 

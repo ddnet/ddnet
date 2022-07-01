@@ -1230,7 +1230,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 
 		for(size_t i = 0; i < (size_t)ActualQuadCount; ++i)
 		{
-			mem_copy(&aColors[i], pCommand->m_pQuadInfo[i + QuadOffset].m_aColor, sizeof(vec4));
+			aColors[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Color;
 			aOffsets[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Offsets;
 			aRotations[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Rotation;
 		}
@@ -1246,7 +1246,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	}
 }
 
-void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const float *pTextColor, const float *pTextOutlineColor)
+void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor)
 {
 	if(DrawNum == 0)
 	{
@@ -1284,22 +1284,16 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 		m_pTextProgram->m_LastTextureSize = TextureSize;
 	}
 
-	if(m_pTextProgram->m_LastOutlineColor[0] != pTextOutlineColor[0] || m_pTextProgram->m_LastOutlineColor[1] != pTextOutlineColor[1] || m_pTextProgram->m_LastOutlineColor[2] != pTextOutlineColor[2] || m_pTextProgram->m_LastOutlineColor[3] != pTextOutlineColor[3])
+	if(m_pTextProgram->m_LastOutlineColor != TextOutlineColor)
 	{
-		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocOutlineColor, 1, (float *)pTextOutlineColor);
-		m_pTextProgram->m_LastOutlineColor[0] = pTextOutlineColor[0];
-		m_pTextProgram->m_LastOutlineColor[1] = pTextOutlineColor[1];
-		m_pTextProgram->m_LastOutlineColor[2] = pTextOutlineColor[2];
-		m_pTextProgram->m_LastOutlineColor[3] = pTextOutlineColor[3];
+		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocOutlineColor, 1, (float *)&TextOutlineColor);
+		m_pTextProgram->m_LastOutlineColor = TextOutlineColor;
 	}
 
-	if(m_pTextProgram->m_LastColor[0] != pTextColor[0] || m_pTextProgram->m_LastColor[1] != pTextColor[1] || m_pTextProgram->m_LastColor[2] != pTextColor[2] || m_pTextProgram->m_LastColor[3] != pTextColor[3])
+	if(m_pTextProgram->m_LastColor != TextColor)
 	{
-		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocColor, 1, (float *)pTextColor);
-		m_pTextProgram->m_LastColor[0] = pTextColor[0];
-		m_pTextProgram->m_LastColor[1] = pTextColor[1];
-		m_pTextProgram->m_LastColor[2] = pTextColor[2];
-		m_pTextProgram->m_LastColor[3] = pTextColor[3];
+		m_pTextProgram->SetUniformVec4(m_pTextProgram->m_LocColor, 1, (float *)&TextColor);
+		m_pTextProgram->m_LastColor = TextColor;
 	}
 
 	glDrawElements(GL_TRIANGLES, DrawNum, GL_UNSIGNED_INT, (void *)(0));
@@ -1323,7 +1317,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderText(const CCommandBuffer::S
 		BufferContainer.m_LastIndexBufferBound = m_QuadDrawIndexBufferID;
 	}
 
-	RenderText(pCommand->m_State, pCommand->m_DrawNum, pCommand->m_TextTextureIndex, pCommand->m_TextOutlineTextureIndex, pCommand->m_TextureSize, pCommand->m_aTextColor, pCommand->m_aTextOutlineColor);
+	RenderText(pCommand->m_State, pCommand->m_DrawNum, pCommand->m_TextTextureIndex, pCommand->m_TextOutlineTextureIndex, pCommand->m_TextureSize, pCommand->m_TextColor, pCommand->m_TextOutlineColor);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand)
@@ -1410,13 +1404,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerEx(const CComma
 		pProgram->m_LastRotation = pCommand->m_Rotation;
 	}
 
-	if(pProgram->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || pProgram->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || pProgram->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || pProgram->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)
+	if(pProgram->m_LastVerticesColor != pCommand->m_VertexColor)
 	{
 		pProgram->SetUniformVec4(pProgram->m_LocVertciesColor, 1, (float *)&pCommand->m_VertexColor);
-		pProgram->m_LastVertciesColor[0] = pCommand->m_VertexColor.r;
-		pProgram->m_LastVertciesColor[1] = pCommand->m_VertexColor.g;
-		pProgram->m_LastVertciesColor[2] = pCommand->m_VertexColor.b;
-		pProgram->m_LastVertciesColor[3] = pCommand->m_VertexColor.a;
+		pProgram->m_LastVerticesColor = pCommand->m_VertexColor;
 	}
 
 	glDrawElements(GL_TRIANGLES, pCommand->m_DrawNum, GL_UNSIGNED_INT, pCommand->m_pOffset);
@@ -1454,13 +1445,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 		m_pSpriteProgramMultiple->m_LastCenter = pCommand->m_Center;
 	}
 
-	if(m_pSpriteProgramMultiple->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || m_pSpriteProgramMultiple->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || m_pSpriteProgramMultiple->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || m_pSpriteProgramMultiple->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)
+	if(m_pSpriteProgramMultiple->m_LastVerticesColor != pCommand->m_VertexColor)
 	{
 		m_pSpriteProgramMultiple->SetUniformVec4(m_pSpriteProgramMultiple->m_LocVertciesColor, 1, (float *)&pCommand->m_VertexColor);
-		m_pSpriteProgramMultiple->m_LastVertciesColor[0] = pCommand->m_VertexColor.r;
-		m_pSpriteProgramMultiple->m_LastVertciesColor[1] = pCommand->m_VertexColor.g;
-		m_pSpriteProgramMultiple->m_LastVertciesColor[2] = pCommand->m_VertexColor.b;
-		m_pSpriteProgramMultiple->m_LastVertciesColor[3] = pCommand->m_VertexColor.a;
+		m_pSpriteProgramMultiple->m_LastVerticesColor = pCommand->m_VertexColor;
 	}
 
 	int DrawCount = pCommand->m_DrawCount;

@@ -270,15 +270,12 @@ void CEditorImage::AnalyseTileFlags()
 	}
 }
 
-void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser)
+void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser)
 {
 	CEditor *pThis = (CEditor *)pUser;
 	if(Env < 0 || Env >= (int)pThis->m_Map.m_vpEnvelopes.size())
 	{
-		pChannels[0] = 0;
-		pChannels[1] = 0;
-		pChannels[2] = 0;
-		pChannels[3] = 0;
+		Channels = ColorRGBA();
 		return;
 	}
 
@@ -286,7 +283,7 @@ void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void
 	float t = pThis->m_AnimateTime;
 	t *= pThis->m_AnimateSpeed;
 	t += (TimeOffsetMillis / 1000.0f);
-	e->Eval(t, pChannels);
+	e->Eval(t, Channels);
 }
 
 /********************************************************
@@ -5074,11 +5071,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					// add point
 					int Time = (int)(((UI()->MouseX() - View.x) * TimeScale) * 1000.0f);
 					//float env_y = (UI()->MouseY()-view.y)/TimeScale;
-					float aChannels[4];
-					pEnvelope->Eval(Time / 1000.0f, aChannels);
+					ColorRGBA Channels;
+					pEnvelope->Eval(Time / 1000.0f, Channels);
 					pEnvelope->AddPoint(Time,
-						f2fx(aChannels[0]), f2fx(aChannels[1]),
-						f2fx(aChannels[2]), f2fx(aChannels[3]));
+						f2fx(Channels.r), f2fx(Channels.g),
+						f2fx(Channels.b), f2fx(Channels.a));
 					m_Map.m_Modified = true;
 				}
 
@@ -5100,16 +5097,16 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					Graphics()->SetColor(aColors[c].r * 0.5f, aColors[c].g * 0.5f, aColors[c].b * 0.5f, 1);
 
 				float PrevX = 0;
-				float aResults[4];
-				pEnvelope->Eval(0.000001f, aResults);
-				float PrevValue = aResults[c];
+				ColorRGBA Channels;
+				pEnvelope->Eval(0.000001f, Channels);
+				float PrevValue = Channels[c];
 
 				int Steps = (int)((View.w / UI()->Screen()->w) * Graphics()->ScreenWidth());
 				for(int i = 1; i <= Steps; i++)
 				{
 					float a = i / (float)Steps;
-					pEnvelope->Eval(a * EndTime, aResults);
-					float v = aResults[c];
+					pEnvelope->Eval(a * EndTime, Channels);
+					float v = Channels[c];
 					v = (v - Bottom) / (Top - Bottom);
 
 					IGraphics::CLineItem LineItem(View.x + PrevX * View.w, View.y + View.h - PrevValue * View.h, View.x + a * View.w, View.y + View.h - v * View.h);

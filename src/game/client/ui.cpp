@@ -35,8 +35,8 @@ void CUIElement::SUIElementRect::Reset()
 	m_Height = -1;
 	m_Text.clear();
 	mem_zero(&m_Cursor, sizeof(m_Cursor));
-	m_TextColor.Set(-1, -1, -1, -1);
-	m_TextOutlineColor.Set(-1, -1, -1, -1);
+	m_TextColor = ColorRGBA(-1, -1, -1, -1);
+	m_TextOutlineColor = ColorRGBA(-1, -1, -1, -1);
 	m_QuadColor = ColorRGBA(-1, -1, -1, -1);
 }
 
@@ -675,10 +675,10 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 		DoLabel(RectEl, &TmpRect, pText, Size, Align, Props, StrLen, pReadCursor);
 	}
 
-	STextRenderColor ColorText(RectEl.m_TextColor);
-	STextRenderColor ColorTextOutline(RectEl.m_TextOutlineColor);
+	ColorRGBA ColorText(RectEl.m_TextColor);
+	ColorRGBA ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer != -1)
-		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, &ColorText, &ColorTextOutline);
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline);
 }
 
 void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, CTextCursor *pReadCursor)

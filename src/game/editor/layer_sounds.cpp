@@ -30,10 +30,10 @@ void CLayerSounds::Render(bool Tileset)
 
 		if(Source.m_PosEnv >= 0)
 		{
-			float aChannels[4];
-			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, aChannels, m_pEditor);
-			OffsetX = aChannels[0];
-			OffsetY = aChannels[1];
+			ColorRGBA Channels;
+			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
+			OffsetX = Channels.r;
+			OffsetY = Channels.g;
 		}
 
 		switch(Source.m_Shape.m_Type)
@@ -80,10 +80,10 @@ void CLayerSounds::Render(bool Tileset)
 
 		if(Source.m_PosEnv >= 0)
 		{
-			float aChannels[4];
-			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, aChannels, m_pEditor);
-			OffsetX = aChannels[0];
-			OffsetY = aChannels[1];
+			ColorRGBA Channels;
+			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
+			OffsetX = Channels.r;
+			OffsetY = Channels.g;
 		}
 
 		m_pEditor->RenderTools()->DrawSprite(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY, s_SourceVisualSize * m_pEditor->m_WorldZoom);

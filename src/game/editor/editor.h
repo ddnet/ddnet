@@ -81,9 +81,9 @@ public:
 		}
 	}
 
-	int Eval(float Time, float *pResult)
+	int Eval(float Time, ColorRGBA &Color)
 	{
-		CRenderTools::RenderEvalEnvelope(&m_vPoints[0], m_vPoints.size(), m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), pResult);
+		CRenderTools::RenderEvalEnvelope(&m_vPoints[0], m_vPoints.size(), m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Color);
 		return m_Channels;
 	}
 
@@ -999,7 +999,7 @@ public:
 	CEditorMap m_Map;
 	int m_ShiftBy;
 
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
 	float m_CommandBox;
 	char m_aSettingsCommand[256];
