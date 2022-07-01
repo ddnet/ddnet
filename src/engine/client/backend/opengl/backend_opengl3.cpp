@@ -1231,8 +1231,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 		for(size_t i = 0; i < (size_t)ActualQuadCount; ++i)
 		{
 			mem_copy(&aColors[i], pCommand->m_pQuadInfo[i + QuadOffset].m_aColor, sizeof(vec4));
-			mem_copy(&aOffsets[i], pCommand->m_pQuadInfo[i + QuadOffset].m_aOffsets, sizeof(vec2));
-			mem_copy(&aRotations[i], &pCommand->m_pQuadInfo[i + QuadOffset].m_Rotation, sizeof(float));
+			aOffsets[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Offsets;
+			aRotations[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Rotation;
 		}
 
 		pProgram->SetUniformVec4(pProgram->m_LocColors, ActualQuadCount, (float *)aColors);
@@ -1398,11 +1398,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerEx(const CComma
 	UseProgram(pProgram);
 	SetState(pCommand->m_State, pProgram);
 
-	if(pCommand->m_Rotation != 0.0f && (pProgram->m_LastCenter[0] != pCommand->m_Center.x || pProgram->m_LastCenter[1] != pCommand->m_Center.y))
+	if(pCommand->m_Rotation != 0.0f && pProgram->m_LastCenter != pCommand->m_Center)
 	{
 		pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, (float *)&pCommand->m_Center);
-		pProgram->m_LastCenter[0] = pCommand->m_Center.x;
-		pProgram->m_LastCenter[1] = pCommand->m_Center.y;
+		pProgram->m_LastCenter = pCommand->m_Center;
 	}
 
 	if(pProgram->m_LastRotation != pCommand->m_Rotation)
@@ -1449,11 +1448,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 	UseProgram(m_pSpriteProgramMultiple);
 	SetState(pCommand->m_State, m_pSpriteProgramMultiple);
 
-	if((m_pSpriteProgramMultiple->m_LastCenter[0] != pCommand->m_Center.x || m_pSpriteProgramMultiple->m_LastCenter[1] != pCommand->m_Center.y))
+	if(m_pSpriteProgramMultiple->m_LastCenter != pCommand->m_Center)
 	{
 		m_pSpriteProgramMultiple->SetUniformVec2(m_pSpriteProgramMultiple->m_LocCenter, 1, (float *)&pCommand->m_Center);
-		m_pSpriteProgramMultiple->m_LastCenter[0] = pCommand->m_Center.x;
-		m_pSpriteProgramMultiple->m_LastCenter[1] = pCommand->m_Center.y;
+		m_pSpriteProgramMultiple->m_LastCenter = pCommand->m_Center;
 	}
 
 	if(m_pSpriteProgramMultiple->m_LastVertciesColor[0] != pCommand->m_VertexColor.r || m_pSpriteProgramMultiple->m_LastVertciesColor[1] != pCommand->m_VertexColor.g || m_pSpriteProgramMultiple->m_LastVertciesColor[2] != pCommand->m_VertexColor.b || m_pSpriteProgramMultiple->m_LastVertciesColor[3] != pCommand->m_VertexColor.a)

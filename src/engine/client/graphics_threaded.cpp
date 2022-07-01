@@ -1264,7 +1264,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, float *pColor
 	// todo max indices group check!!
 }
 
-void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum)
+void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum)
 {
 	if(DrawNum == 0)
 		return;
@@ -1278,10 +1278,8 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 	Cmd.m_JumpIndex = JumpIndex;
 
-	Cmd.m_Offset[0] = pOffset[0];
-	Cmd.m_Offset[1] = pOffset[1];
-	Cmd.m_Dir[0] = pDir[0];
-	Cmd.m_Dir[1] = pDir[1];
+	Cmd.m_Offset = Offset;
+	Cmd.m_Dir = Dir;
 
 	// check if we have enough free memory in the commandbuffer
 	if(!AddCmd(
@@ -1293,7 +1291,7 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, float *pCol
 	m_pCommandBuffer->AddRenderCalls(1);
 }
 
-void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum)
+void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
 {
 	if(IndexDrawNum == 0 || RedrawNum == 0)
 		return;
@@ -1307,10 +1305,8 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, float *
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
 
-	Cmd.m_Offset[0] = pOffset[0];
-	Cmd.m_Offset[1] = pOffset[1];
-	Cmd.m_Dir[0] = pDir[0];
-	Cmd.m_Dir[1] = pDir[1];
+	Cmd.m_Offset = Offset;
+	Cmd.m_Dir = Dir;
 
 	// check if we have enough free memory in the commandbuffer
 	if(!AddCmd(
@@ -1840,7 +1836,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		for(int i = 0; i < DrawCount; ++i)
 		{
 			QuadsSetRotation(pRenderInfo[i].m_Rotation);
-			RenderQuadContainerAsSprite(ContainerIndex, QuadOffset, pRenderInfo[i].m_Pos[0], pRenderInfo[i].m_Pos[1], pRenderInfo[i].m_Scale, pRenderInfo[i].m_Scale);
+			RenderQuadContainerAsSprite(ContainerIndex, QuadOffset, pRenderInfo[i].m_Pos.x, pRenderInfo[i].m_Pos.y, pRenderInfo[i].m_Scale, pRenderInfo[i].m_Scale);
 		}
 	}
 }

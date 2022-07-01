@@ -175,8 +175,8 @@ public:
 		WRAP_CLAMP,
 	};
 
-	typedef GL_SPoint SPoint;
-	typedef GL_STexCoord STexCoord;
+	typedef vec2 SPoint;
+	typedef vec2 STexCoord;
 	typedef GL_SColorf SColorf;
 	typedef GL_SColor SColor;
 	typedef GL_SVertex SVertex;
@@ -384,8 +384,8 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 
-		float m_Offset[2];
-		float m_Dir[2];
+		vec2 m_Offset;
+		vec2 m_Dir;
 		int m_JumpIndex;
 	};
 
@@ -400,8 +400,8 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 
-		float m_Offset[2];
-		float m_Dir[2];
+		vec2 m_Offset;
+		vec2 m_Dir;
 	};
 
 	struct SCommand_RenderQuadLayer : public SCommand
@@ -1231,8 +1231,8 @@ public:
 	void FlushVerticesTex3D() override;
 
 	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) override;
-	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;
-	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
+	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) override;
+	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
 

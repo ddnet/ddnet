@@ -40,7 +40,7 @@ struct SBufferContainerInfo
 struct SQuadRenderInfo
 {
 	float m_aColor[4];
-	float m_aOffsets[2];
+	vec2 m_Offsets;
 	float m_Rotation;
 	// allows easier upload for uniform buffers because of the alignment requirements
 	float m_Padding;
@@ -103,14 +103,9 @@ public:
 	uint32_t m_Format;
 };
 
-struct GL_SPoint
-{
-	float x, y;
-};
-struct GL_STexCoord
-{
-	float u, v;
-};
+typedef vec2 GL_SPoint;
+typedef vec2 GL_STexCoord;
+
 struct GL_STexCoord3D
 {
 	GL_STexCoord3D &operator=(const GL_STexCoord &TexCoord)
@@ -119,18 +114,21 @@ struct GL_STexCoord3D
 		v = TexCoord.v;
 		return *this;
 	}
+
+	GL_STexCoord3D &operator=(const vec3 &TexCoord)
+	{
+		u = TexCoord.u;
+		v = TexCoord.v;
+		w = TexCoord.w;
+		return *this;
+	}
+
 	float u, v, w;
 };
-struct GL_SColorf
-{
-	float r, g, b, a;
-};
 
+typedef ColorRGBA GL_SColorf;
 //use normalized color values
-struct GL_SColor
-{
-	unsigned char r, g, b, a;
-};
+typedef vector4_base<unsigned char> GL_SColor;
 
 struct GL_SVertex
 {
@@ -325,8 +323,8 @@ public:
 
 	// specific render functions
 	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
-	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) = 0;
-	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
+	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) = 0;
+	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) = 0;
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
 
@@ -433,7 +431,7 @@ public:
 
 	struct SRenderSpriteInfo
 	{
-		float m_Pos[2];
+		vec2 m_Pos;
 		float m_Scale;
 		float m_Rotation;
 	};

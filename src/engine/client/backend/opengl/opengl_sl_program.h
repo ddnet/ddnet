@@ -10,6 +10,7 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES
 #endif
 
+#include <base/vmath.h>
 #include <engine/client/graphics_defines.h>
 
 class CGLSL;
@@ -55,7 +56,7 @@ public:
 	CGLSLTWProgram() :
 		m_LocPos(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
 	{
-		m_LastScreen[0] = m_LastScreen[1] = m_LastScreen[2] = m_LastScreen[3] = -1.f;
+		m_aLastScreen[0] = m_aLastScreen[1] = vec2(-1, -1);
 	}
 
 	int m_LocPos;
@@ -63,7 +64,7 @@ public:
 
 	int m_LastTextureSampler;
 	int m_LastIsTextured;
-	float m_LastScreen[4];
+	vec2 m_aLastScreen[2];
 };
 
 class CGLSLTextProgram : public CGLSLTWProgram
@@ -103,7 +104,7 @@ public:
 
 	{
 		m_LastRotation = 0.f;
-		m_LastCenter[0] = m_LastCenter[1] = 0.f;
+		m_LastCenter = vec2(0, 0);
 		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
 	}
 
@@ -112,7 +113,7 @@ public:
 	int m_LocVertciesColor;
 
 	float m_LastRotation;
-	float m_LastCenter[2];
+	vec2 m_LastCenter;
 	float m_LastVertciesColor[4];
 };
 
@@ -122,7 +123,7 @@ public:
 	CGLSLSpriteMultipleProgram()
 
 	{
-		m_LastCenter[0] = m_LastCenter[1] = 0.f;
+		m_LastCenter = vec2(0, 0);
 		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
 	}
 
@@ -130,7 +131,7 @@ public:
 	int m_LocCenter;
 	int m_LocVertciesColor;
 
-	float m_LastCenter[2];
+	vec2 m_LastCenter;
 	float m_LastVertciesColor[4];
 };
 

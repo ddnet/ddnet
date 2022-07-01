@@ -171,15 +171,15 @@ class vector3_base
 public:
 	union
 	{
-		T x, r, h;
+		T x, r, h, u;
 	};
 	union
 	{
-		T y, g, s;
+		T y, g, s, v;
 	};
 	union
 	{
-		T z, b, v, l;
+		T z, b, l, w;
 	};
 
 	vector3_base() :

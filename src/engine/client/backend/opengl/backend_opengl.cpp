@@ -1263,12 +1263,11 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		}
 	}
 
-	if(pProgram->m_LastScreen[0] != State.m_ScreenTL.x || pProgram->m_LastScreen[1] != State.m_ScreenTL.y || pProgram->m_LastScreen[2] != State.m_ScreenBR.x || pProgram->m_LastScreen[3] != State.m_ScreenBR.y)
+	if(pProgram->m_aLastScreen[0] != State.m_ScreenTL || pProgram->m_aLastScreen[1] != State.m_ScreenBR)
 	{
-		pProgram->m_LastScreen[0] = State.m_ScreenTL.x;
-		pProgram->m_LastScreen[1] = State.m_ScreenTL.y;
-		pProgram->m_LastScreen[2] = State.m_ScreenBR.x;
-		pProgram->m_LastScreen[3] = State.m_ScreenBR.y;
+		pProgram->m_aLastScreen[0] = State.m_ScreenTL;
+		pProgram->m_aLastScreen[1] = State.m_ScreenBR;
+
 		// screen mapping
 		// orthographic projection matrix
 		// the z coordinate is the same for every vertex, so just ignore the z coordinate and set it in the shaders
@@ -2019,7 +2018,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_IndicesRequiredNumNotify(const CComm
 {
 }
 
-void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int DrawNum, const float *pOffset, const float *pDir, int JumpIndex)
+void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int DrawNum, const vec2 &Offset, const vec2 &Dir, int JumpIndex)
 {
 	if(m_HasShaders)
 	{
@@ -2071,7 +2070,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 			vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 
 			GL_SVertexTex3D &Vertex = m_aStreamVertices[VertexCount++];
-			mem_copy(&Vertex.m_Pos, pPos, sizeof(vec2));
+			Vertex.m_Pos = *pPos;
 			mem_copy(&Vertex.m_Color, pColor, sizeof(vec4));
 			if(IsTextured)
 			{
@@ -2079,8 +2078,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 				mem_copy(&Vertex.m_Tex, pTex, sizeof(vec3));
 			}
 
-			Vertex.m_Pos.x += pOffset[0] + pDir[0] * XCount;
-			Vertex.m_Pos.y += pOffset[1] + pDir[1] * YCount;
+			Vertex.m_Pos += Offset + Dir * vec2(XCount, YCount);
 
 			if(VertexCount >= std::size(m_aStreamVertices))
 			{
@@ -2104,7 +2102,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 	}
 }
 
-void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int IndexDrawNum, unsigned int DrawNum, const float *pOffset, const float *pDir)
+void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int IndexDrawNum, unsigned int DrawNum, const vec2 &Offset, const vec2 &Dir)
 {
 	if(m_HasShaders)
 	{
@@ -2154,7 +2152,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferCon
 			vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 
 			GL_SVertexTex3D &Vertex = m_aStreamVertices[VertexCount++];
-			mem_copy(&Vertex.m_Pos, pPos, sizeof(vec2));
+			Vertex.m_Pos = *pPos;
 			mem_copy(&Vertex.m_Color, pColor, sizeof(vec4));
 			if(IsTextured)
 			{
@@ -2162,8 +2160,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferCon
 				mem_copy(&Vertex.m_Tex, pTex, sizeof(vec3));
 			}
 
-			Vertex.m_Pos.x += pOffset[0] + pDir[0] * i;
-			Vertex.m_Pos.y += pOffset[1] + pDir[1] * i;
+			Vertex.m_Pos += Offset + Dir * i;
 
 			if(VertexCount >= std::size(m_aStreamVertices))
 			{
@@ -2297,7 +2294,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 				ptrdiff_t VertOffset = (ptrdiff_t)(CurBufferOffset + (n * SingleVertSize));
 				vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 				GL_SVertexTex3D &Vertex = m_aStreamVertices[VertexCount++];
-				mem_copy(&Vertex.m_Pos, pPos, sizeof(vec2));
+				Vertex.m_Pos = *pPos;
 				mem_copy(&Vertex.m_Color, &pCommand->m_Color, sizeof(vec4));
 				if(IsTextured)
 				{
