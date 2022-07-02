@@ -39,11 +39,6 @@ struct CItemEx
 	}
 };
 
-static int GetTypeFromIndex(int Index)
-{
-	return ITEMTYPE_EX - Index - 1;
-}
-
 struct CDatafileItemType
 {
 	int m_Type;
@@ -580,6 +575,11 @@ bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename, int 
 {
 	Init();
 	return OpenFile(pStorage, pFilename, StorageType);
+}
+
+int CDataFileWriter::GetTypeFromIndex(int Index)
+{
+	return ITEMTYPE_EX - Index - 1;
 }
 
 int CDataFileWriter::GetExtendedItemTypeIndex(int Type)

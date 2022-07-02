@@ -584,7 +584,7 @@ int CSnapshotBuilder::Finish(void *pSnapData)
 	return sizeof(CSnapshot) + OffsetSize + m_DataSize;
 }
 
-static int GetTypeFromIndex(int Index)
+int CSnapshotBuilder::GetTypeFromIndex(int Index)
 {
 	return CSnapshot::MAX_TYPE - Index;
 }

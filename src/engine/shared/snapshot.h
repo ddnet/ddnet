@@ -144,6 +144,7 @@ class CSnapshotBuilder
 
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
+	int GetTypeFromIndex(int Index);
 
 	bool m_Sixup;
 
