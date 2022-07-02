@@ -2381,10 +2381,10 @@ void CClient::FinishDDNetInfo()
 	}
 }
 
-typedef std::tuple<int, int, int> Version;
-static const Version InvalidVersion = std::make_tuple(-1, -1, -1);
+typedef std::tuple<int, int, int> TVersion;
+static const TVersion InvalidVersion = std::make_tuple(-1, -1, -1);
 
-Version ToVersion(char *pStr)
+TVersion ToVersion(char *pStr)
 {
 	int version[3] = {0, 0, 0};
 	const char *p = strtok(pStr, ".");

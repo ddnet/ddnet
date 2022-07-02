@@ -100,6 +100,7 @@ class CDataFileWriter
 	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
 
 	int GetExtendedItemTypeIndex(int Type);
+	int GetTypeFromIndex(int Index);
 
 public:
 	CDataFileWriter();
