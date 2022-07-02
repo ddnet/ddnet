@@ -77,7 +77,7 @@ private:
 	int m_TimeCpBroadcastEndTime;
 	int m_LastTimeCp;
 	int m_LastTimeCpBroadcasted;
-	float m_aCurrentTimeCp[25];
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
 
 	int m_NotEligibleForFinish;
 

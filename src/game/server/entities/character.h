@@ -208,7 +208,7 @@ public:
 	int m_TimeCpBroadcastEndTick;
 	int m_LastTimeCp;
 	int m_LastTimeCpBroadcasted;
-	float m_aCurrentTimeCp[25];
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
 
 	int m_TileIndex;
 	int m_TileFIndex;

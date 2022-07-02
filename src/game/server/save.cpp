@@ -65,7 +65,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_LastTimeCp = pChr->m_LastTimeCp;
 	m_LastTimeCpBroadcasted = pChr->m_LastTimeCpBroadcasted;
 
-	for(int i = 0; i < 25; i++)
+	for(int i = 0; i < MAX_CHECKPOINTS; i++)
 		m_aCurrentTimeCp[i] = pChr->m_aCurrentTimeCp[i];
 
 	m_NotEligibleForFinish = pChr->m_pPlayer->m_NotEligibleForFinish;
@@ -158,7 +158,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_LastTimeCp = m_LastTimeCp;
 	pChr->m_LastTimeCpBroadcasted = m_LastTimeCpBroadcasted;
 
-	for(int i = 0; i < 25; i++)
+	for(int i = 0; i < MAX_CHECKPOINTS; i++)
 		pChr->m_aCurrentTimeCp[i] = m_aCurrentTimeCp[i];
 
 	pChr->m_pPlayer->m_NotEligibleForFinish = pChr->m_pPlayer->m_NotEligibleForFinish || m_NotEligibleForFinish;
