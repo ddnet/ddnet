@@ -25,12 +25,11 @@ CUuid RandomUuid()
 
 CUuid CalculateUuid(const char *pName)
 {
-	MD5_CTX Md5;
-	md5_init(&Md5);
-	md5_update(&Md5, TEEWORLDS_NAMESPACE.m_aData, sizeof(TEEWORLDS_NAMESPACE.m_aData));
+	MD5_CTX *pMd5 = md5_create_init();
+	md5_update(pMd5, TEEWORLDS_NAMESPACE.m_aData, sizeof(TEEWORLDS_NAMESPACE.m_aData));
 	// Without terminating NUL.
-	md5_update(&Md5, (const unsigned char *)pName, str_length(pName));
-	MD5_DIGEST Digest = md5_finish(&Md5);
+	md5_update(pMd5, (const unsigned char *)pName, str_length(pName));
+	MD5_DIGEST Digest = md5_finish_destroy(pMd5);
 
 	CUuid Result;
 	for(unsigned i = 0; i < sizeof(Result.m_aData); i++)

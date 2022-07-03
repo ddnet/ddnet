@@ -118,8 +118,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 			BUFFER_SIZE = 64 * 1024
 		};
 
-		SHA256_CTX Sha256Ctxt;
-		sha256_init(&Sha256Ctxt);
+		SHA256_CTX *pSha256Ctxt = sha256_create_init();
 		unsigned char aBuffer[BUFFER_SIZE];
 
 		while(true)
@@ -128,9 +127,9 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 			if(Bytes <= 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes);
-			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
+			sha256_update(pSha256Ctxt, aBuffer, Bytes);
 		}
-		Sha256 = sha256_finish(&Sha256Ctxt);
+		Sha256 = sha256_finish_destroy(pSha256Ctxt);
 
 		io_seek(File, 0, IOSEEK_START);
 	}

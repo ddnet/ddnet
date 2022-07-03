@@ -1,37 +1,45 @@
 #if defined(CONF_OPENSSL)
 #include "hash_ctxt.h"
 
-void sha256_init(SHA256_CTX *ctxt)
+EVP_MD_CTX *sha256_create_init()
 {
-	SHA256_Init(ctxt);
+	EVP_MD_CTX *pCtxt = EVP_MD_CTX_create();
+	EVP_DigestInit_ex(pCtxt, EVP_sha256(), NULL);
+	return pCtxt;
 }
 
-void sha256_update(SHA256_CTX *ctxt, const void *data, size_t data_len)
+void sha256_update(EVP_MD_CTX *pCtxt, const void *data, size_t data_len)
 {
-	SHA256_Update(ctxt, data, data_len);
+	EVP_DigestUpdate(pCtxt, data, data_len);
 }
 
-SHA256_DIGEST sha256_finish(SHA256_CTX *ctxt)
+SHA256_DIGEST sha256_finish_destroy(EVP_MD_CTX *pCtxt)
 {
 	SHA256_DIGEST result;
-	SHA256_Final(result.data, ctxt);
+	unsigned int sha256_len = sizeof(result);
+	EVP_DigestFinal_ex(pCtxt, result.data, &sha256_len);
+	EVP_MD_CTX_destroy(pCtxt);
 	return result;
 }
 
-void md5_init(MD5_CTX *ctxt)
+EVP_MD_CTX *md5_create_init()
 {
-	MD5_Init(ctxt);
+	EVP_MD_CTX *pCtxt = EVP_MD_CTX_create();
+	EVP_DigestInit_ex(pCtxt, EVP_md5(), NULL);
+	return pCtxt;
 }
 
-void md5_update(MD5_CTX *ctxt, const void *data, size_t data_len)
+void md5_update(EVP_MD_CTX *pCtxt, const void *data, size_t data_len)
 {
-	MD5_Update(ctxt, data, data_len);
+	EVP_DigestUpdate(pCtxt, data, data_len);
 }
 
-MD5_DIGEST md5_finish(MD5_CTX *ctxt)
+MD5_DIGEST md5_finish_destroy(EVP_MD_CTX *pCtxt)
 {
 	MD5_DIGEST result;
-	MD5_Final(result.data, ctxt);
+	unsigned int md5_len = sizeof(result);
+	EVP_DigestFinal_ex(pCtxt, result.data, &md5_len);
+	EVP_MD_CTX_destroy(pCtxt);
 	return result;
 }
 #endif

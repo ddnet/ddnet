@@ -10,11 +10,10 @@
 static MD5_DIGEST HashPassword(const char *pPassword, const unsigned char aSalt[SALT_BYTES])
 {
 	// Hash the password and the salt
-	MD5_CTX Md5;
-	md5_init(&Md5);
-	md5_update(&Md5, (unsigned char *)pPassword, str_length(pPassword));
-	md5_update(&Md5, aSalt, SALT_BYTES);
-	return md5_finish(&Md5);
+	MD5_CTX *pMd5 = md5_create_init();
+	md5_update(pMd5, (unsigned char *)pPassword, str_length(pPassword));
+	md5_update(pMd5, aSalt, SALT_BYTES);
+	return md5_finish_destroy(pMd5);
 }
 
 CAuthManager::CAuthManager()

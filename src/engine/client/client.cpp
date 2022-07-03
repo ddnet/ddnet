@@ -710,13 +710,12 @@ void CClient::EnterGame(int Conn)
 
 void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
 {
-	MD5_CTX Md5;
-	md5_init(&Md5);
+	MD5_CTX *pMd5 = md5_create_init();
 	const char *pDummy = Dummy ? "dummy" : "normal";
-	md5_update(&Md5, (unsigned char *)pDummy, str_length(pDummy) + 1);
-	md5_update(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
-	md5_update(&Md5, (unsigned char *)&Addr, sizeof(Addr));
-	MD5_DIGEST Digest = md5_finish(&Md5);
+	md5_update(pMd5, (unsigned char *)pDummy, str_length(pDummy) + 1);
+	md5_update(pMd5, (unsigned char *)pSeed, str_length(pSeed) + 1);
+	md5_update(pMd5, (unsigned char *)&Addr, sizeof(Addr));
+	MD5_DIGEST Digest = md5_finish_destroy(pMd5);
 
 	unsigned short Random[8];
 	mem_copy(Random, Digest.data, sizeof(Random));
@@ -4124,14 +4123,13 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		}
 	}
 
-	SHA256_CTX Sha256Ctxt;
-	sha256_init(&Sha256Ctxt);
+	SHA256_CTX *pSha256Ctxt = sha256_create_init();
 	CUuid Salt = DDNET_CHECKSUM_SALT;
-	sha256_update(&Sha256Ctxt, &Salt, sizeof(Salt));
-	sha256_update(&Sha256Ctxt, &Uuid, sizeof(Uuid));
-	sha256_update(&Sha256Ctxt, aStartBytes, sizeof(aStartBytes));
-	sha256_update(&Sha256Ctxt, aEndBytes, sizeof(aEndBytes));
-	sha256_update(&Sha256Ctxt, m_Checksum.m_aBytes + Start, ChecksumBytesEnd - Start);
+	sha256_update(pSha256Ctxt, &Salt, sizeof(Salt));
+	sha256_update(pSha256Ctxt, &Uuid, sizeof(Uuid));
+	sha256_update(pSha256Ctxt, aStartBytes, sizeof(aStartBytes));
+	sha256_update(pSha256Ctxt, aEndBytes, sizeof(aEndBytes));
+	sha256_update(pSha256Ctxt, m_Checksum.m_aBytes + Start, ChecksumBytesEnd - Start);
 	if(End > (int)sizeof(m_Checksum.m_aBytes))
 	{
 		unsigned char aBuf[2048];
@@ -4142,10 +4140,10 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		for(int i = FileStart; i < End; i += sizeof(aBuf))
 		{
 			int Read = io_read(m_OwnExecutable, aBuf, minimum((int)sizeof(aBuf), End - i));
-			sha256_update(&Sha256Ctxt, aBuf, Read);
+			sha256_update(pSha256Ctxt, aBuf, Read);
 		}
 	}
-	SHA256_DIGEST Sha256 = sha256_finish(&Sha256Ctxt);
+	SHA256_DIGEST Sha256 = sha256_finish_destroy(pSha256Ctxt);
 
 	CMsgPacker Msg(NETMSG_CHECKSUM_RESPONSE, true);
 	Msg.AddRaw(&Uuid, sizeof(Uuid));

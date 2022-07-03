@@ -133,12 +133,11 @@ SECURITY_TOKEN CNetServer::GetGlobalToken()
 }
 SECURITY_TOKEN CNetServer::GetToken(const NETADDR &Addr)
 {
-	SHA256_CTX Sha256;
-	sha256_init(&Sha256);
-	sha256_update(&Sha256, (unsigned char *)m_aSecurityTokenSeed, sizeof(m_aSecurityTokenSeed));
-	sha256_update(&Sha256, (unsigned char *)&Addr, 20); // omit port, bad idea!
+	SHA256_CTX *pSha256 = sha256_create_init();
+	sha256_update(pSha256, (unsigned char *)m_aSecurityTokenSeed, sizeof(m_aSecurityTokenSeed));
+	sha256_update(pSha256, (unsigned char *)&Addr, 20); // omit port, bad idea!
 
-	SECURITY_TOKEN SecurityToken = ToSecurityToken(sha256_finish(&Sha256).data);
+	SECURITY_TOKEN SecurityToken = ToSecurityToken(sha256_finish_destroy(pSha256).data);
 
 	if(SecurityToken == NET_SECURITY_TOKEN_UNKNOWN ||
 		SecurityToken == NET_SECURITY_TOKEN_UNSUPPORTED)
