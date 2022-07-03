@@ -1632,7 +1632,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 
 		m_FinishTime = pMsg->m_Finish != 0;
 
-		if(pMsg->m_Check)
+		if(!m_FinishTime)
 		{
 			m_CheckpointDiff = (float)pMsg->m_Check / 100;
 			m_CheckpointTick = Client()->GameTick(g_Config.m_ClDummy);

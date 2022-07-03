@@ -143,7 +143,7 @@ private:
 
 	void SnapCharacter(int SnappingClient, int ID);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
-	void SetTimeCheckpoint(int TimeCpNumber);
+	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
