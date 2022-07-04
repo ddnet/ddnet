@@ -25,6 +25,7 @@
 # 2022-05-14 cheeser0613
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
+# 2022-07-04 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1181,7 +1182,7 @@ Themes directory
 == 主题目录
 
 Download skins
-== 在线获取皮肤
+== 下载官方皮肤
 
 Skin Database
 == 皮肤数据库
