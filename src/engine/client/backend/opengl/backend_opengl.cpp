@@ -1140,19 +1140,6 @@ void CCommandProcessorFragment_OpenGL2::UseProgram(CGLSLTWProgram *pProgram)
 	pProgram->UseProgram();
 }
 
-bool CCommandProcessorFragment_OpenGL2::IsAndUpdateTextureSlotBound(int IDX, int Slot, bool Is2DArray)
-{
-	if(m_vTextureSlotBoundToUnit[IDX].m_TextureSlot == Slot && m_vTextureSlotBoundToUnit[IDX].m_Is2DArray == Is2DArray)
-		return true;
-	else
-	{
-		// the texture slot uses this index now
-		m_vTextureSlotBoundToUnit[IDX].m_TextureSlot = Slot;
-		m_vTextureSlotBoundToUnit[IDX].m_Is2DArray = Is2DArray;
-		return false;
-	}
-}
-
 void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures)
 {
 	if(m_LastBlendMode == CCommandBuffer::BLEND_NONE)
@@ -1217,55 +1204,31 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	if(IsTexturedState(State))
 	{
 		int Slot = 0;
-		if(m_UseMultipleTextureUnits)
+		if(!Use2DArrayTextures)
 		{
-			Slot = State.m_Texture % m_MaxTextureUnits;
-			if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture, Use2DArrayTextures))
-			{
-				glActiveTexture(GL_TEXTURE0 + Slot);
-				if(!Use2DArrayTextures)
-				{
-					glBindTexture(GL_TEXTURE_2D, m_vTextures[State.m_Texture].m_Tex);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler);
-				}
-				else
-				{
-					glBindTexture(GL_TEXTURE_2D_ARRAY, m_vTextures[State.m_Texture].m_Tex2DArray);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
-				}
-			}
+			if(!IsNewApi() && !m_HasShaders)
+				glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, m_vTextures[State.m_Texture].m_Tex);
+			if(IsNewApi())
+				glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler);
 		}
 		else
 		{
-			Slot = 0;
-			if(!Use2DArrayTextures)
+			if(!m_Has2DArrayTextures)
 			{
 				if(!IsNewApi() && !m_HasShaders)
-					glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, m_vTextures[State.m_Texture].m_Tex);
+					glEnable(GL_TEXTURE_3D);
+				glBindTexture(GL_TEXTURE_3D, m_vTextures[State.m_Texture].m_Tex2DArray);
 				if(IsNewApi())
-					glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler);
+					glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
 			}
 			else
 			{
-				if(!m_Has2DArrayTextures)
-				{
-					if(!IsNewApi() && !m_HasShaders)
-						glEnable(GL_TEXTURE_3D);
-					glBindTexture(GL_TEXTURE_3D, m_vTextures[State.m_Texture].m_Tex2DArray);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
-				}
-				else
-				{
-					if(!IsNewApi() && !m_HasShaders)
-						glEnable(m_2DArrayTarget);
-					glBindTexture(m_2DArrayTarget, m_vTextures[State.m_Texture].m_Tex2DArray);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
-				}
+				if(!IsNewApi() && !m_HasShaders)
+					glEnable(m_2DArrayTarget);
+				glBindTexture(m_2DArrayTarget, m_vTextures[State.m_Texture].m_Tex2DArray);
+				if(IsNewApi())
+					glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
 			}
 		}
 
