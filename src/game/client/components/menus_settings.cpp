@@ -2581,16 +2581,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "%s: %i%%", Localize("Opacity of freeze bars"), g_Config.m_ClFreezeBarAlpha);
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 		g_Config.m_ClFreezeBarAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarAlpha, &Button, g_Config.m_ClFreezeBarAlpha / 100.0f) * 100.0f);
-		{
-			if(g_Config.m_ClFreezeBarAlpha > 0)
-			{
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeBarsInsideFreeze, Localize("Show freeze bars inside freeze"), &g_Config.m_ClFreezeBarsInsideFreeze, &Section, LineSize);
-			}
-			else
-			{
-				Section.HSplitTop(1 * LineSize, 0x0, &Section); // Create empty space for hidden option
-			}
-		}
+
+		Section.HSplitTop(LineSize, &Label, &Section);
+		Section.HSplitTop(LineSize, &Button, &Section);
+		str_format(aBuf, sizeof(aBuf), "%s: %i%%", Localize("Opacity of freeze bars in freeze"), g_Config.m_ClFreezeBarInFreezeAlpha);
+		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClFreezeBarInFreezeAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarInFreezeAlpha, &Button, g_Config.m_ClFreezeBarInFreezeAlpha / 100.0f) * 100.0f);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_CHAT)
 	{

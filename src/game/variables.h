@@ -48,7 +48,7 @@ MACRO_CONFIG_INT(ClShowhudPlayerAngle, cl_showhud_player_angle, 0, 0, 1, CFGFLAG
 MACRO_CONFIG_INT(ClShowhudDDRace, cl_showhud_ddrace, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show ingame HUD (DDRace HUD)")
 MACRO_CONFIG_INT(ClShowhudJumpsIndicator, cl_showhud_jumps_indicator, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show ingame HUD (Jumps you have and have used)")
 MACRO_CONFIG_INT(ClFreezeBarAlpha, cl_freezebar_alpha, 100, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Opacity of freeze bar (0 = disable)")
-MACRO_CONFIG_INT(ClFreezeBarsInsideFreeze, cl_freezebar_inside_freeze, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show freeze bar inside freeze")
+MACRO_CONFIG_INT(ClFreezeBarInFreezeAlpha, cl_freezebar_in_freeze_alpha, 0, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Opacity of freeze bar inside freeze (0 = disable)")
 MACRO_CONFIG_INT(ClShowRecord, cl_showrecord, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show old style DDRace client records")
 MACRO_CONFIG_INT(ClShowNotifications, cl_shownotifications, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Make the client notify when someone highlights you")
 MACRO_CONFIG_INT(ClShowEmotes, cl_showemotes, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show tee emotes")
