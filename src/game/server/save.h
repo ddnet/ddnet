@@ -74,10 +74,10 @@ private:
 	int m_TeleCheckpoint;
 	int m_LastPenalty;
 
-	int m_CpTime;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_aCpCurrent[25];
+	int m_TimeCpBroadcastEndTime;
+	int m_LastTimeCp;
+	int m_LastTimeCpBroadcasted;
+	float m_aCurrentTimeCp[25];
 
 	int m_NotEligibleForFinish;
 

@@ -114,10 +114,10 @@ public:
 
 	int GetDDRaceState(CPlayer *Player);
 	int GetStartTime(CPlayer *Player);
-	float *GetCpCurrent(CPlayer *Player);
+	float *GetCurrentTimeCp(CPlayer *Player);
 	void SetDDRaceState(CPlayer *Player, int DDRaceState);
 	void SetStartTime(CPlayer *Player, int StartTime);
-	void SetCpActive(CPlayer *Player, int CpActive);
+	void SetLastTimeCp(CPlayer *Player, int LastTimeCp);
 	void KillSavedTeam(int ClientID, int Team);
 	void ResetSavedTeam(int ClientID, int Team);
 	void RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team);

@@ -204,10 +204,12 @@ public:
 	int m_StartTime;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
-	int m_CpTick;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_CpCurrent[25];
+
+	int m_TimeCpBroadcastEndTick;
+	int m_LastTimeCp;
+	int m_LastTimeCpBroadcasted;
+	float m_aCurrentTimeCp[25];
+
 	int m_TileIndex;
 	int m_TileFIndex;
 

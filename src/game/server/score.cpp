@@ -132,7 +132,7 @@ void CScore::MapInfo(int ClientID, const char *MapName)
 	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientID, MapName, 0);
 }
 
-void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float CpTime[NUM_CHECKPOINTS], bool NotEligible)
+void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->m_Cheated || NotEligible)
@@ -150,7 +150,7 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float C
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
-		Tmp->m_aCpCurrent[i] = CpTime[i];
+		Tmp->m_aCurrentTimeCp[i] = aTimeCp[i];
 
 	m_pPool->ExecuteWrite(CScoreWorker::SaveScore, std::move(Tmp), "save score");
 }

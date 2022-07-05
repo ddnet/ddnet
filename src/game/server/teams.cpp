@@ -615,24 +615,24 @@ void CGameTeams::SetStartTime(CPlayer *Player, int StartTime)
 		pChar->m_StartTime = StartTime;
 }
 
-void CGameTeams::SetCpActive(CPlayer *Player, int CpActive)
+void CGameTeams::SetLastTimeCp(CPlayer *Player, int LastTimeCp)
 {
 	if(!Player)
 		return;
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
-		pChar->m_CpActive = CpActive;
+		pChar->m_LastTimeCp = LastTimeCp;
 }
 
-float *CGameTeams::GetCpCurrent(CPlayer *Player)
+float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 {
 	if(!Player)
 		return NULL;
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
-		return pChar->m_CpCurrent;
+		return pChar->m_aCurrentTimeCp;
 	return NULL;
 }
 
@@ -667,7 +667,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientID);
 
 	char aBuf[128];
-	SetCpActive(Player, -2);
+	SetLastTimeCp(Player, -1);
 	// Note that the "finished in" message is parsed by the client
 	str_format(aBuf, sizeof(aBuf),
 		"%s finished in: %d minute(s) %5.2f second(s)",
@@ -727,14 +727,14 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	if(!pData->m_BestTime || Time < pData->m_BestTime)
 	{
 		// update the score
-		pData->Set(Time, GetCpCurrent(Player));
+		pData->Set(Time, GetCurrentTimeCp(Player));
 		CallSaveScore = true;
 	}
 
 	if(CallSaveScore)
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
 			GameServer()->Score()->SaveScore(ClientID, Time, pTimestamp,
-				GetCpCurrent(Player), Player->m_NotEligibleForFinish);
+				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
 
 	bool NeedToSendNewRecord = false;
 	// update server best time
