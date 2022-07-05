@@ -20,6 +20,7 @@
 #	andi103			2012-07-14 11:31:11
 #	timakro			2014-06-30 18:26:59
 #	deen			2020-06-26 18:32:00
+#	bluesky			2022-07-05 21:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -98,6 +99,9 @@ Client
 
 Close
 == Schließ.
+
+Colors of the hook collision line, in case of a possible collision with:
+== Die Farbe der Hakenkollisionlinie bei einer möglichen Kollision mit:
 
 Connect
 == Verbinden
@@ -406,8 +410,20 @@ Shotgun
 Show chat
 == Chat anzeigen
 
+Show client IDs in scoreboard
+== Client-IDs in der Punktetafel anzeigen
+
+Show DDRace HUD
+== DDRace-HUD anzeigen
+
 Show friends only
 == Nur Freunde zeigen
+
+Show health, shields and ammo
+== Leben, Schilde und Munition anzeigen
+
+Show hook strength indicator
+== Indikator für Hakenstärke anzeigen
 
 Show ingame HUD
 == Spiel-HUD anzeigen
@@ -416,7 +432,7 @@ Show name plates
 == Zeige Namen
 
 Show only chat messages from friends
-== Nur Nachrichten von Freunden zeigen
+== Nur Nachrichten von Freunden anzeigen
 
 Skins
 == Skins
@@ -525,6 +541,9 @@ Yes
 
 You must restart the game for all settings to take effect.
 == Du musst das Spiel neustarten, um die Änderungen zu übernehmen.
+
+Name Plate
+== Namensschilder
 
 New name:
 == Neuer Name:
@@ -659,6 +678,9 @@ Show votes window after voting
 == Abstimmungsfenster nach Abstimmung zeigen
 
 HUD
+== Aussehen
+
+Appearance
 == Aussehen
 
 Show names in chat in team colors
@@ -942,6 +964,18 @@ Show text entities
 
 Hook collisions
 == Hakenkollisionen
+
+Hook Collisions
+== Hakenkollisionen
+
+Hook collision line
+== Hakenkollisionslinie
+
+Hook collision line opacity
+== Deckkraft der Hakenkollisionslinie
+
+Hook collision line width
+== Breite der Hakenkollisionslinie
 
 Fetch Info
 == Neu laden
@@ -1289,8 +1323,17 @@ No hit
 Hookable
 == Hookbar
 
+Nothing hookable
+== nichts hookbarem
+
+Something hookable
+== etwas hookbarem
+
 Tee
 == Tee
+
+A Tee
+== einem Tee
 
 Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
@@ -1474,8 +1517,8 @@ Controller Axis #%d
 Controller
 == Controller
 
-Show jump indicator
-== Sprung-Hinweis anzeigen
+Show jumps indicator
+== Sprung-Indikator anzeigen
 
 Opacity of freeze bars inside freeze
 == Deckkraft der Einfrier-Balken beim Einfrieren
