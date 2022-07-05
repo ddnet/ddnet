@@ -4131,7 +4131,10 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	sha256_update(&Sha256Ctxt, &Uuid, sizeof(Uuid));
 	sha256_update(&Sha256Ctxt, aStartBytes, sizeof(aStartBytes));
 	sha256_update(&Sha256Ctxt, aEndBytes, sizeof(aEndBytes));
-	sha256_update(&Sha256Ctxt, m_Checksum.m_aBytes + Start, ChecksumBytesEnd - Start);
+	if(Start < (int)sizeof(m_Checksum.m_aBytes))
+	{
+		sha256_update(&Sha256Ctxt, m_Checksum.m_aBytes + Start, ChecksumBytesEnd - Start);
+	}
 	if(End > (int)sizeof(m_Checksum.m_aBytes))
 	{
 		unsigned char aBuf[2048];
