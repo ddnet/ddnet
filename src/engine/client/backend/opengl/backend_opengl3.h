@@ -23,8 +23,6 @@ class CGLSLTextProgram;
 class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_OpenGL3
 {
 protected:
-	bool m_UsePreinitializedVertexBuffer;
-
 	int m_MaxQuadsAtOnce;
 	static const int m_MaxQuadsPossible = 256;
 
