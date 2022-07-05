@@ -2576,19 +2576,19 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		RightView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &Section, LineSize);
+		Section.HSplitTop(LineSize, &Label, &Section);
+		Section.HSplitTop(LineSize, &Button, &Section);
+		str_format(aBuf, sizeof(aBuf), "%s: %i%%", Localize("Opacity of freeze bars"), g_Config.m_ClFreezeBarAlpha);
+		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+		g_Config.m_ClFreezeBarAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarAlpha, &Button, g_Config.m_ClFreezeBarAlpha / 100.0f) * 100.0f);
 		{
-			if(g_Config.m_ClShowFreezeBars)
+			if(g_Config.m_ClFreezeBarAlpha > 0)
 			{
-				Section.HSplitTop(LineSize, &Label, &Section);
-				Section.HSplitTop(LineSize, &Button, &Section);
-				str_format(aBuf, sizeof(aBuf), "%s: %i%%", Localize("Opacity of freeze bars inside freeze"), g_Config.m_ClFreezeBarsAlphaInsideFreeze);
-				UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
-				g_Config.m_ClFreezeBarsAlphaInsideFreeze = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f) * 100.0f);
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeBarsInsideFreeze, Localize("Show freeze bars inside freeze"), &g_Config.m_ClFreezeBarsInsideFreeze, &Section, LineSize);
 			}
 			else
 			{
-				Section.HSplitTop(2 * LineSize, 0x0, &Section); // Create empty space for hidden option
+				Section.HSplitTop(1 * LineSize, 0x0, &Section); // Create empty space for hidden option
 			}
 		}
 	}
