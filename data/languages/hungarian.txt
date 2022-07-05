@@ -691,9 +691,6 @@ Reset
 Enable gun sound
 == Fegyverhang lejátszása
 
-Show health + ammo
-== Élet + lőszer mutatása
-
 Team message
 == Csapat üzenet
 
@@ -1214,26 +1211,11 @@ Windowed borderless
 Desktop fullscreen
 == Asztalos Teljesképernyő
 
-Show client IDs
-== Kliens ID-k Mutatása
-
 Laser Outline Color
 == Lézer Körvonal Szín
 
 Laser Inner Color
 == Lézer Belső Szín
-
-Hookline
-== Horogvonal
-
-No hit
-== Nincs Találat
-
-Hookable
-== Horgolható
-
-Tee
-== Játékos Találat
 
 Preview
 == Előnézet
@@ -1426,9 +1408,6 @@ Device
 Status
 == Állapot
 
-Aim bind
-== 
-
 Controller Axis #%d
 == Kontroller Tengely #%d
 
@@ -1447,9 +1426,6 @@ Controller
 Show dummy actions
 == Másolat mozgásának mutatása
 
-Show jump indicator
-== Ugrásjelző mutatása
-
 Show player position
 == Játékos pozíciójának mutatása
 
@@ -1459,12 +1435,6 @@ Show player speed
 Show player target angle
 == Játékos célszög mutatása
 
-Show freeze bars
-== 
-
-Opacity of freeze bars inside freeze
-== 
-
 Normal Color
 == Normális szín
 
@@ -1473,3 +1443,117 @@ Highlight Color
 
 Extras
 == Extrák
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Aim bind
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
+== 

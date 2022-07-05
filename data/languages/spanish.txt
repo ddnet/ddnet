@@ -924,9 +924,6 @@ Use DDRace Scoreboard
 Show score
 == Mostrar puntaje
 
-Show health + ammo
-== Mostrar salud + munición
-
 Show names in chat in team colors
 == Mostrar nombres con colores de equipo en el chat
 
@@ -1252,26 +1249,11 @@ Windowed borderless
 Desktop fullscreen
 == Pantalla completa de escritorio
 
-Show client IDs
-== Mostrar IDs de clientes
-
 Laser Outline Color
 == Color de contorno del láser
 
 Laser Inner Color
 == Color interior del láser
-
-Hookline
-== Línea del gancho
-
-No hit
-== Sin golpes
-
-Hookable
-== Enganchable
-
-Tee
-== Tee
 
 Preview
 == Vista previa
@@ -1473,9 +1455,6 @@ Show player target angle
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
 
-Show jump indicator
-== Mostrar indicador de salto
-
 Opacity of freeze bars inside freeze
 == Opacidad de las barras de freeze dentro del freeze
 
@@ -1487,3 +1466,108 @@ Highlight Color
 
 Extras
 == Extras
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
+== 

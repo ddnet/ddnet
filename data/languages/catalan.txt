@@ -699,9 +699,6 @@ Follow
 Enable gun sound
 == Activar el so de la pistola
 
-Show health + ammo
-== Mostrar la vida + munició
-
 Team message
 == Missatge d'equip
 
@@ -1170,9 +1167,6 @@ Background music volume
 Assets
 == Arxius
 
-Show client IDs
-== Veure les IDs del clients
-
 Kill Messages
 == Missatges al matar
 
@@ -1181,18 +1175,6 @@ Laser Outline Color
 
 Laser Inner Color
 == Color de l'interior del làser
-
-Hookline
-== Línia del ganxo
-
-No hit
-== Cap cop
-
-Hookable
-== Enganxable
-
-Tee
-== Tee
 
 Use old chat style
 == Utilitzar l'estil antic del xat
@@ -1327,6 +1309,27 @@ Tutorial
 Can't find a Tutorial server
 == No s'ha pogut trobar un servidor del tutorial
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Position:
 == 
 
@@ -1334,6 +1337,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Uploading map data to GPU
 == 
 
 Trying to determine UDP connectivity...
@@ -1348,6 +1354,24 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 No answer from server yet.
 == 
 
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Toggle to edit your dummy settings
 == 
 
@@ -1355,6 +1379,9 @@ Download community skins
 == 
 
 Choose default eyes when joining a server
+== 
+
+Loading skin files
 == 
 
 Enable controller
@@ -1416,10 +1443,31 @@ Controller
 Allows maps to render with more detail
 == 
 
-Show dummy actions
+Appearance
 == 
 
-Show jump indicator
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
 == 
 
 Show player position
@@ -1435,6 +1483,33 @@ Show freeze bars
 == 
 
 Opacity of freeze bars inside freeze
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
 == 
 
 Normal Color
@@ -1461,8 +1536,17 @@ Tries to predict other entities to give a feel of low latency
 Extras
 == 
 
+Loading assets
+== 
+
+Loading race demo files
+== 
+
 Super
 == 
 
 Team %d
+== 
+
+Loading sound files
 == 

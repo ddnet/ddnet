@@ -988,14 +988,8 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == DDRace スゴアボードを使用
 
-Show client IDs
-== クライアント ID を表示
-
 Show score
 == スコアを表示
-
-Show health + ammo
-== HP と弾薬を表示
 
 Show names in chat in team colors
 == チームの色でハンドルネームを表示
@@ -1011,18 +1005,6 @@ Laser Outline Color
 
 Laser Inner Color
 == レーザーの色
-
-Hookline
-== フックライン
-
-No hit
-== ヒットなし
-
-Hookable
-== フック可能
-
-Tee
-== Tee
 
 Use old chat style
 == 古いチャットボックスを使用
@@ -1259,6 +1241,27 @@ Grabs
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Position:
 == 
 
@@ -1266,6 +1269,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Uploading map data to GPU
 == 
 
 Trying to determine UDP connectivity...
@@ -1280,6 +1286,15 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 No answer from server yet.
 == 
 
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1287,6 +1302,9 @@ Join Tutorial Server
 == 
 
 Skip Tutorial
+== 
+
+Loading menu images
 == 
 
 AFR
@@ -1313,6 +1331,12 @@ CHN
 Refreshing...
 == 
 
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Settings file
 == 
 
@@ -1326,6 +1350,9 @@ Download community skins
 == 
 
 Choose default eyes when joining a server
+== 
+
+Loading skin files
 == 
 
 Enable controller
@@ -1405,10 +1432,34 @@ Graphics cards
 auto
 == 
 
-Show dummy actions
+Appearance
 == 
 
-Show jump indicator
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
 == 
 
 Show player position
@@ -1426,7 +1477,34 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
-Kill Messages
+Show hook strength indicator
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
 == 
 
 Normal Color
@@ -1450,9 +1528,6 @@ Quads are used for background decoration
 Tries to predict other entities to give a feel of low latency
 == 
 
-Show local player's key presses
-== 
-
 Run on join
 == 
 
@@ -1462,14 +1537,23 @@ Chat command (e.g. showall 1)
 Extras
 == 
 
+Loading assets
+== 
+
 Tutorial
 == 
 
 Can't find a Tutorial server
 == 
 
+Loading race demo files
+== 
+
 Super
 == 
 
 Team %d
+== 
+
+Loading sound files
 == 

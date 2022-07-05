@@ -701,17 +701,8 @@ Sound
 Use DDRace Scoreboard
 == DDRace ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
 
-Show client IDs
-== ﺖﻨﯾﻼﮐ ﯼﺪﯾﺁ ﺶﯾﺎﻤﻧ
-
 Show score
 == ﺯﺎﯿﺘﻣﺍ ﺶﯾﺎﻤﻧ
-
-Show health + ammo
-== ﺕﺎﻤﻬﻣ+ﯽﺘﻣﻼﺳ ﺶﯾﺎﻤﻧ
-
-Hookable
-== کﻮﻫ ﻞﺑﺎﻗ
 
 Use old chat style
 == ﺖﭼ ﯽﻤﯾﺪﻗ ﻞﯾﺎﺘﺳﺍ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
@@ -813,6 +804,27 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -828,6 +840,9 @@ Angle:
 Personal best:
 == 
 
+Uploading map data to GPU
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -838,6 +853,15 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
 == 
 
 The server is running a non-standard tuning on a pure game type.
@@ -864,6 +888,9 @@ Skip Tutorial
 transmits your player name to info2.ddnet.tw
 == 
 
+Loading menu images
+== 
+
 AFR
 == 
 
@@ -888,6 +915,9 @@ CHN
 Leak IP
 == 
 
+Loading demo files
+== 
+
 %.2f MiB
 == 
 
@@ -906,19 +936,7 @@ Fetch Info
 Render
 == 
 
-Show name plates
-== 
-
-Name plates size
-== 
-
-Use team colors for name plates
-== 
-
-Show clan above name plates
-== 
-
-Clan plates size
+Loading ghost files
 == 
 
 Settings file
@@ -955,6 +973,9 @@ Skins
 == 
 
 Skins directory
+== 
+
+Loading skin files
 == 
 
 Hook collisions
@@ -1094,7 +1115,7 @@ Threaded sound loading
 Sample rate
 == 
 
-HUD
+Appearance
 == 
 
 DDNet
@@ -1121,10 +1142,43 @@ Lht.
 Alpha
 == 
 
-Show dummy actions
+HUD
 == 
 
-Show jump indicator
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+Show name plates
+== 
+
+Show kill messages
+== 
+
+Show votes window after voting
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
 == 
 
 Show player position
@@ -1136,43 +1190,13 @@ Show player speed
 Show player target angle
 == 
 
-Show names in chat in team colors
-== 
-
-Show votes window after voting
-== 
-
-Show kill messages
-== 
-
 Show freeze bars
 == 
 
 Opacity of freeze bars inside freeze
 == 
 
-Laser Outline Color
-== 
-
-Laser Inner Color
-== 
-
-Hookline
-== 
-
-No hit
-== 
-
-Tee
-== 
-
-Kill Messages
-== 
-
-Normal Color
-== 
-
-Highlight Color
+Show names in chat in team colors
 == 
 
 Highlighted message
@@ -1188,6 +1212,66 @@ Normal message
 == 
 
 Client message
+== 
+
+Name plates size
+== 
+
+Show clan above name plates
+== 
+
+Clan plates size
+== 
+
+Use team colors for name plates
+== 
+
+Show hook strength indicator
+== 
+
+Show other players' key presses
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Show other players' hook collision lines
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
 == 
 
 Save the best demo of each race
@@ -1238,15 +1322,6 @@ AntiPing: predict weapons
 AntiPing: predict grenade paths
 == 
 
-Show other players' hook collision lines
-== 
-
-Show other players' key presses
-== 
-
-Show local player's key presses
-== 
-
 Old mouse mode
 == 
 
@@ -1292,6 +1367,9 @@ Particles
 Extras
 == 
 
+Loading assets
+== 
+
 Assets directory
 == 
 
@@ -1313,6 +1391,9 @@ Server executable not found, can't run server
 DDNet %s is out!
 == 
 
+Loading race demo files
+== 
+
 Time limit: %d min
 == 
 
@@ -1332,6 +1413,9 @@ Race
 == 
 
 Auto
+== 
+
+Loading sound files
 == 
 
 Frags

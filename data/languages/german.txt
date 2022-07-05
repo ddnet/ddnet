@@ -713,9 +713,6 @@ Browser
 Enable gun sound
 == Pistolen-Ton aktivieren
 
-Show health + ammo
-== Gesundheit und Munition anzeigen
-
 Team message
 == Team-Nachricht
 
@@ -1248,9 +1245,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Show client IDs
-== Zeige Client-IDs
-
 Laser Outline Color
 == Laser-Konturfarbe
 
@@ -1314,23 +1308,11 @@ Windowed borderless
 Desktop fullscreen
 == Desktop-Vollbild
 
-Hookline
-== Hooklinie
-
-No hit
-== Kein Treffer
-
-Hookable
-== Hookbar
-
 Nothing hookable
 == nichts hookbarem
 
 Something hookable
 == etwas hookbarem
-
-Tee
-== Tee
 
 A Tee
 == einem Tee
@@ -1531,3 +1513,63 @@ Highlight Color
 
 Extras
 == Extras
+
+Preparing demo playback
+== Bereite Demo-Wiedergabe vor
+
+Connected
+== Verbunden
+
+Loading map file from storage
+== Lade Kartendatei von Platte
+
+Initializing components
+== Initialisiere Komponenten
+
+Initializing assets
+== Initialisiere Assets
+
+Initializing map logic
+== Initialisiere Kartenlogik
+
+Sending initial client info
+== Sende initiale Client-Info
+
+Uploading map data to GPU
+== Lade Kartendaten zur GPU hoch
+
+Getting game info
+== Hole Spiel-Info
+
+Requesting to join the game
+== Frage an dem Spiel beizutreten
+
+Sending intial client info
+== Sende initiale Client-Info
+
+Loading menu images
+== Lade Menü-Bilder
+
+Loading demo files
+== Lade Demo-Dateien
+
+Loading ghost files
+== Lade Geist-Dateien
+
+Loading skin files
+== Lade Skin-Dateien
+
+DDRace HUD
+== DDRace-HUD
+
+Your movements are not taken into account when calculating the line colors
+== Deine Bewegungen werden bei der Berechnung von Linienfarben nicht berücksichtigt
+
+Loading assets
+== Lade Assets
+
+Loading race demo files
+== Lade Rennen-Demo-Dateien
+
+Loading sound files
+== Lade Sound-Dateien

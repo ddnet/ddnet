@@ -616,6 +616,30 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Loading DDNet Client
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Warning
 == 
 
@@ -637,6 +661,9 @@ Server best:
 Personal best:
 == 
 
+Uploading map data to GPU
+== 
+
 Reset
 == 
 
@@ -644,9 +671,6 @@ Browser
 == 
 
 Ghost
-== 
-
-Loading DDNet Client
 == 
 
 Trying to determine UDP connectivity...
@@ -659,6 +683,15 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
 == 
 
 Reconnect in %d sec
@@ -736,6 +769,9 @@ transmits your player name to info2.ddnet.tw
 Theme
 == 
 
+Loading menu images
+== 
+
 AFR
 == 
 
@@ -808,6 +844,9 @@ Please use a different name
 Remove chat
 == 
 
+Loading demo files
+== 
+
 Markers:
 == 
 
@@ -850,6 +889,9 @@ Kill
 Pause
 == 
 
+Loading ghost files
+== 
+
 Time
 == 
 
@@ -869,12 +911,6 @@ Smooth Dynamic Camera
 == 
 
 Switch weapon when out of ammo
-== 
-
-Show clan above name plates
-== 
-
-Clan plates size
 == 
 
 Skip the main menu
@@ -929,6 +965,9 @@ Skin Database
 == 
 
 Skins directory
+== 
+
+Loading skin files
 == 
 
 Hook collisions
@@ -1116,7 +1155,7 @@ Map sound volume
 Background music volume
 == 
 
-HUD
+Appearance
 == 
 
 DDNet
@@ -1128,16 +1167,46 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == 
 
+HUD
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+Show kill messages
+== 
+
+Show score
+== 
+
+Show votes window after voting
+== 
+
+DDRace HUD
+== 
+
 Use DDRace Scoreboard
 == 
 
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
 Show dummy actions
-== 
-
-Show jump indicator
-== 
-
-Show client IDs
 == 
 
 Show player position
@@ -1149,55 +1218,13 @@ Show player speed
 Show player target angle
 == 
 
-Show score
-== 
-
-Show health + ammo
-== 
-
-Show names in chat in team colors
-== 
-
-Show votes window after voting
-== 
-
-Show kill messages
-== 
-
 Show freeze bars
 == 
 
 Opacity of freeze bars inside freeze
 == 
 
-Laser Outline Color
-== 
-
-Laser Inner Color
-== 
-
-Hookline
-== 
-
-Size
-== 
-
-No hit
-== 
-
-Hookable
-== 
-
-Tee
-== 
-
-Kill Messages
-== 
-
-Normal Color
-== 
-
-Highlight Color
+Show names in chat in team colors
 == 
 
 Use old chat style
@@ -1227,6 +1254,60 @@ Client message
 Preview
 == 
 
+Show clan above name plates
+== 
+
+Clan plates size
+== 
+
+Show hook strength indicator
+== 
+
+Show other players' key presses
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Show other players' hook collision lines
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
 Save the best demo of each race
 == 
 
@@ -1249,6 +1330,9 @@ Gameplay
 == 
 
 Overlay entities
+== 
+
+Size
 == 
 
 Show text entities
@@ -1282,15 +1366,6 @@ AntiPing: predict weapons
 == 
 
 AntiPing: predict grenade paths
-== 
-
-Show other players' hook collision lines
-== 
-
-Show other players' key presses
-== 
-
-Show local player's key presses
 == 
 
 Old mouse mode
@@ -1353,6 +1428,9 @@ Particles
 Extras
 == 
 
+Loading assets
+== 
+
 Assets directory
 == 
 
@@ -1408,6 +1486,9 @@ Update failed! Check log...
 Restart
 == 
 
+Loading race demo files
+== 
+
 Super
 == 
 
@@ -1424,6 +1505,9 @@ Auto
 == 
 
 Replay
+== 
+
+Loading sound files
 == 
 
 Follow

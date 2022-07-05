@@ -561,9 +561,6 @@ Show kill messages
 Show score
 == Показывать табло счета
 
-Show health + ammo
-== Показывать здоровье и патроны
-
 Show names in chat in team colors
 == Выделять сообщения в командном чате
 
@@ -1207,9 +1204,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Дамми
 
-Show client IDs
-== Показывать ID
-
 Laser Outline Color
 == Цвет обводки лазера
 
@@ -1273,9 +1267,6 @@ Windowed borderless
 Desktop fullscreen
 == Полноэкранный
 
-Tee
-== Tee
-
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
@@ -1284,15 +1275,6 @@ Refreshing...
 
 Kill Messages
 == Сообщения об убийстве
-
-Hookline
-== Линия крюка
-
-No hit
-== Нельзя зацепиться
-
-Hookable
-== Можно зацепиться
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
@@ -1434,9 +1416,6 @@ Allows maps to render with more detail
 Show dummy actions
 == Показать действия дамми
 
-Show jump indicator
-== Показать индикатор прыжка
-
 Show player position
 == Показать позицию игрока
 
@@ -1481,3 +1460,108 @@ Super
 
 Team %d
 == Команда %d
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
+== 
