@@ -9,6 +9,7 @@
 # 2022-04-21 CHaBek
 # 2022-05-16 CHaBek
 # 2022-06-17 CHaBek
+# 2022-07-05 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -1466,16 +1467,16 @@ Show player target angle
 == 플레이어 조준 각도 표시
 
 Show jump indicator
-== 
+== 점프 상태 표시
 
 Opacity of freeze bars inside freeze
-== 
+== 동결 타일 내에서의 동결 상태줄 불투명도
 
 Normal Color
-== 
+== 일반 메시지 색상
 
 Highlight Color
-== 
+== 강조 메시지 색상
 
 Extras
-== 
+== 기타
