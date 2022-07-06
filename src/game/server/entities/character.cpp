@@ -1350,15 +1350,15 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 
 void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 {
-	if(TimeCheckpoint != -1 && m_DDRaceState == DDRACE_STARTED && TimeCheckpoint > m_LastTimeCp)
+	if(TimeCheckpoint > -1 && m_DDRaceState == DDRACE_STARTED && m_aCurrentTimeCp[TimeCheckpoint] == 0.0f && m_Time != 0.0f)
 	{
 		m_LastTimeCp = TimeCheckpoint;
-		m_aCurrentTimeCp[TimeCheckpoint] = m_Time;
+		m_aCurrentTimeCp[m_LastTimeCp] = m_Time;
 		m_TimeCpBroadcastEndTick = Server()->Tick() + Server()->TickSpeed() * 2;
 		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
 		{
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-			if(pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0 && m_LastTimeCp != -1)
+			if(pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0.0f)
 			{
 				CNetMsg_Sv_DDRaceTime Msg;
 				Msg.m_Time = (int)(m_Time * 100.0f);

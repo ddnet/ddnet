@@ -67,15 +67,16 @@ void CHud::OnWindowResize()
 
 void CHud::OnReset()
 {
-	m_CheckpointDiff = 0.0f;
+	m_TimeCpDiff = 0.0f;
 	m_DDRaceTime = 0;
-	m_LastReceivedTimeTick = 0;
-	m_CheckpointTick = 0;
-	m_FinishTime = false;
-	m_DDRaceTimeReceived = false;
+	m_FinishTimeLastReceivedTick = 0;
+	m_TimeCpLastReceivedTick = 0;
+	m_ShowFinishTime = false;
 	m_ServerRecord = -1.0f;
 	m_PlayerRecord[0] = -1.0f;
 	m_PlayerRecord[1] = -1.0f;
+	m_LastPlayerRecord[0] = -1.0f;
+	m_LastPlayerRecord[1] = -1.0f;
 
 	ResetHudContainers();
 }
@@ -1622,20 +1623,20 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 {
 	if(MsgType == NETMSGTYPE_SV_DDRACETIME || MsgType == NETMSGTYPE_SV_DDRACETIMELEGACY)
 	{
-		m_DDRaceTimeReceived = true;
-
 		CNetMsg_Sv_DDRaceTime *pMsg = (CNetMsg_Sv_DDRaceTime *)pRawMsg;
 
 		m_DDRaceTime = pMsg->m_Time;
 
-		m_LastReceivedTimeTick = Client()->GameTick(g_Config.m_ClDummy);
+		m_ShowFinishTime = pMsg->m_Finish != 0;
 
-		m_FinishTime = pMsg->m_Finish != 0;
-
-		if(!m_FinishTime)
+		if(!m_ShowFinishTime)
 		{
-			m_CheckpointDiff = (float)pMsg->m_Check / 100;
-			m_CheckpointTick = Client()->GameTick(g_Config.m_ClDummy);
+			m_TimeCpDiff = (float)pMsg->m_Check / 100;
+			m_TimeCpLastReceivedTick = Client()->GameTick(g_Config.m_ClDummy);
+		}
+		else
+		{
+			m_FinishTimeLastReceivedTick = Client()->GameTick(g_Config.m_ClDummy);
 		}
 	}
 	else if(MsgType == NETMSGTYPE_SV_RECORD || MsgType == NETMSGTYPE_SV_RECORDLEGACY)
@@ -1645,64 +1646,101 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 		// NETMSGTYPE_SV_RACETIME on old race servers
 		if(MsgType == NETMSGTYPE_SV_RECORDLEGACY && m_pClient->m_GameInfo.m_DDRaceRecordMessage)
 		{
-			m_DDRaceTimeReceived = true;
-
 			m_DDRaceTime = pMsg->m_ServerTimeBest; // First value: m_Time
 
-			m_LastReceivedTimeTick = Client()->GameTick(g_Config.m_ClDummy);
+			m_FinishTimeLastReceivedTick = Client()->GameTick(g_Config.m_ClDummy);
 
 			if(pMsg->m_PlayerTimeBest) // Second value: m_Check
 			{
-				m_CheckpointDiff = (float)pMsg->m_PlayerTimeBest / 100;
-				m_CheckpointTick = Client()->GameTick(g_Config.m_ClDummy);
+				m_TimeCpDiff = (float)pMsg->m_PlayerTimeBest / 100;
+				m_TimeCpLastReceivedTick = Client()->GameTick(g_Config.m_ClDummy);
 			}
 		}
 		else if(MsgType == NETMSGTYPE_SV_RECORD || m_pClient->m_GameInfo.m_RaceRecordMessage)
 		{
 			m_ServerRecord = (float)pMsg->m_ServerTimeBest / 100;
+			m_LastPlayerRecord[g_Config.m_ClDummy] = m_PlayerRecord[g_Config.m_ClDummy];
 			m_PlayerRecord[g_Config.m_ClDummy] = (float)pMsg->m_PlayerTimeBest / 100;
+			if(m_LastPlayerRecord[g_Config.m_ClDummy] == -1.0f)
+			{
+				m_LastPlayerRecord[g_Config.m_ClDummy] = m_PlayerRecord[g_Config.m_ClDummy];
+			}
 		}
 	}
 }
 
 void CHud::RenderDDRaceEffects()
 {
-	// check racestate
-	if(m_FinishTime && m_LastReceivedTimeTick + Client()->GameTickSpeed() * 2 < Client()->GameTick(g_Config.m_ClDummy))
-	{
-		m_FinishTime = false;
-		m_DDRaceTimeReceived = false;
-		return;
-	}
-
 	if(m_DDRaceTime)
 	{
 		char aBuf[64];
 		char aTime[32];
-		if(m_FinishTime)
+		if(m_ShowFinishTime && m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
 			str_time(m_DDRaceTime, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 			str_format(aBuf, sizeof(aBuf), "Finish time: %s", aTime);
-			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
-		}
-		else if(m_CheckpointTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
-		{
-			str_format(aBuf, sizeof(aBuf), "%+5.2f", m_CheckpointDiff);
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float a = 1.0f;
-			if(m_CheckpointTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_CheckpointTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
+			float alpha = 1.0f;
+			if(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				a = ((float)(m_CheckpointTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
-			if(m_CheckpointDiff > 0)
-				TextRender()->TextColor(1.0f, 0.5f, 0.5f, a); // red
-			else if(m_CheckpointDiff < 0)
-				TextRender()->TextColor(0.5f, 1.0f, 0.5f, a); // green
-			else if(!m_CheckpointDiff)
-				TextRender()->TextColor(1, 1, 1, a); // white
+			TextRender()->TextColor(1, 1, 1, alpha);
+			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
+
+			if(m_LastPlayerRecord[g_Config.m_ClDummy] > 0.0f)
+			{
+				const float FinishTimeDiff = m_DDRaceTime / 100.0f - m_LastPlayerRecord[g_Config.m_ClDummy];
+				if(FinishTimeDiff < 0)
+				{
+					str_time_float(-FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+					str_format(aBuf, sizeof(aBuf), "-%s", aTime);
+				}
+				else
+				{
+					str_time_float(FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+					str_format(aBuf, sizeof(aBuf), "+%s", aTime);
+				}
+				if(FinishTimeDiff > 0)
+					TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+				else if(FinishTimeDiff < 0)
+					TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+				else if(!FinishTimeDiff)
+					TextRender()->TextColor(1, 1, 1, alpha); // white
+				TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 34, 10, aBuf, -1.0f);
+			}
+			TextRender()->TextColor(1, 1, 1, 1);
+		}
+		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
+		{
+			if(m_TimeCpDiff < 0)
+			{
+				str_time_float(-m_TimeCpDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+				str_format(aBuf, sizeof(aBuf), "-%s", aTime);
+			}
+			else
+			{
+				str_time_float(m_TimeCpDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+				str_format(aBuf, sizeof(aBuf), "+%s", aTime);
+			}
+
+			// calculate alpha (4 sec 1 than get lower the next 2 sec)
+			float alpha = 1.0f;
+			if(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
+			{
+				// lower the alpha slowly to blend text out
+				alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+			}
+
+			if(m_TimeCpDiff > 0)
+				TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+			else if(m_TimeCpDiff < 0)
+				TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+			else if(!m_TimeCpDiff)
+				TextRender()->TextColor(1, 1, 1, alpha); // white
 			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
 
 			TextRender()->TextColor(1, 1, 1, 1);
@@ -1712,26 +1750,26 @@ void CHud::RenderDDRaceEffects()
 
 void CHud::RenderRecord()
 {
-	if(m_ServerRecord > 0)
+	if(m_ServerRecord > 0.0f)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
-		TextRender()->Text(0, 5, 40, 6, aBuf, -1.0f);
+		TextRender()->Text(0, 5, 75, 6, aBuf, -1.0f);
 		char aTime[32];
 		str_time_float(m_ServerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_ServerRecord > 3600 ? "" : "   ", aTime);
-		TextRender()->Text(0, 53, 40, 6, aBuf, -1.0f);
+		TextRender()->Text(0, 53, 75, 6, aBuf, -1.0f);
 	}
 
 	const float PlayerRecord = m_PlayerRecord[g_Config.m_ClDummy];
-	if(PlayerRecord > 0)
+	if(PlayerRecord > 0.0f)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
-		TextRender()->Text(0, 5, 47, 6, aBuf, -1.0f);
+		TextRender()->Text(0, 5, 82, 6, aBuf, -1.0f);
 		char aTime[32];
 		str_time_float(PlayerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 		str_format(aBuf, sizeof(aBuf), "%s%s", PlayerRecord > 3600 ? "" : "   ", aTime);
-		TextRender()->Text(0, 53, 47, 6, aBuf, -1.0f);
+		TextRender()->Text(0, 53, 82, 6, aBuf, -1.0f);
 	}
 }

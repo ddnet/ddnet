@@ -85,14 +85,14 @@ public:
 private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
-	float m_CheckpointDiff;
+	float m_TimeCpDiff;
 	float m_ServerRecord;
 	float m_PlayerRecord[NUM_DUMMIES];
+	float m_LastPlayerRecord[NUM_DUMMIES];
 	int m_DDRaceTime;
-	int m_LastReceivedTimeTick;
-	int m_CheckpointTick;
-	bool m_FinishTime;
-	bool m_DDRaceTimeReceived;
+	int m_FinishTimeLastReceivedTick;
+	int m_TimeCpLastReceivedTick;
+	bool m_ShowFinishTime;
 
 	inline float GetMovementInformationBoxHeight();
 	inline int GetDigitsIndex(int Value, int Max);
