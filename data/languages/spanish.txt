@@ -16,6 +16,7 @@
 # Deëivid!        2022-03-27 18:40:00
 # Deëivid!        2022-05-13 18:44:00
 # Deëivid!        2022-06-22 19:26:00
+# Deëivid!        2022-07-05 22:30:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1149,7 +1150,7 @@ Assets
 == Recursos
 
 Use old chat style
-== Usar estilo viejo de chat
+== Usar estilo antiguo del chat
 
 Client message
 == Mensaje de cliente
@@ -1425,7 +1426,7 @@ UI controller sens.
 == Sens. del mando en el menú
 
 Controller jitter tolerance
-== Tolerancia a fluctuación del mando
+== Tolerancia a la fluctuación del mando
 
 No controller found. Plug in a controller and restart the game.
 == No se encontró un mando. Conecta uno y reinicia el juego.
@@ -1473,16 +1474,16 @@ Adjust the opacity of entities belonging to other teams, such as tees and namepl
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
 
 Show jump indicator
-== 
+== Mostrar indicador de salto
 
 Opacity of freeze bars inside freeze
-== 
+== Opacidad de las barras de freeze dentro del freeze
 
 Normal Color
-== 
+== Color normal
 
 Highlight Color
-== 
+== Color resaltado
 
 Extras
-== 
+== Extras
