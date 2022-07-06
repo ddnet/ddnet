@@ -41,8 +41,8 @@ void CScorePlayerResult::SetVariant(Variant v)
 		m_Data.m_Info.m_Birthday = 0;
 		m_Data.m_Info.m_HasFinishScore = false;
 		m_Data.m_Info.m_Time = 0;
-		for(float &CpTime : m_Data.m_Info.m_CpTime)
-			CpTime = 0;
+		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
+			TimeCp = 0;
 	}
 }
 
@@ -171,7 +171,7 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		{
-			pResult->m_Data.m_Info.m_CpTime[i] = pSqlServer->GetFloat(i + 2);
+			pResult->m_Data.m_Info.m_aTimeCp[i] = pSqlServer->GetFloat(i + 2);
 		}
 	}
 
@@ -457,15 +457,15 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		"	?, %s)",
 		pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
-		pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
-		pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
-		pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
-		pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11],
-		pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14],
-		pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
-		pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
-		pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
-		pData->m_aCpCurrent[24], pSqlServer->False());
+		pData->m_aCurrentTimeCp[0], pData->m_aCurrentTimeCp[1], pData->m_aCurrentTimeCp[2],
+		pData->m_aCurrentTimeCp[3], pData->m_aCurrentTimeCp[4], pData->m_aCurrentTimeCp[5],
+		pData->m_aCurrentTimeCp[6], pData->m_aCurrentTimeCp[7], pData->m_aCurrentTimeCp[8],
+		pData->m_aCurrentTimeCp[9], pData->m_aCurrentTimeCp[10], pData->m_aCurrentTimeCp[11],
+		pData->m_aCurrentTimeCp[12], pData->m_aCurrentTimeCp[13], pData->m_aCurrentTimeCp[14],
+		pData->m_aCurrentTimeCp[15], pData->m_aCurrentTimeCp[16], pData->m_aCurrentTimeCp[17],
+		pData->m_aCurrentTimeCp[18], pData->m_aCurrentTimeCp[19], pData->m_aCurrentTimeCp[20],
+		pData->m_aCurrentTimeCp[21], pData->m_aCurrentTimeCp[22], pData->m_aCurrentTimeCp[23],
+		pData->m_aCurrentTimeCp[24], pSqlServer->False());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;

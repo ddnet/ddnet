@@ -59,14 +59,14 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_TeleCheckpoint = pChr->m_TeleCheckpoint;
 	m_LastPenalty = pChr->m_LastPenalty;
 
-	if(pChr->m_CpTick)
-		m_CpTime = pChr->Server()->Tick() - pChr->m_CpTick;
+	if(pChr->m_TimeCpBroadcastEndTick)
+		m_TimeCpBroadcastEndTime = pChr->Server()->Tick() - pChr->m_TimeCpBroadcastEndTick;
 
-	m_CpActive = pChr->m_CpActive;
-	m_CpLastBroadcast = pChr->m_CpLastBroadcast;
+	m_LastTimeCp = pChr->m_LastTimeCp;
+	m_LastTimeCpBroadcasted = pChr->m_LastTimeCpBroadcasted;
 
 	for(int i = 0; i < 25; i++)
-		m_aCpCurrent[i] = pChr->m_CpCurrent[i];
+		m_aCurrentTimeCp[i] = pChr->m_aCurrentTimeCp[i];
 
 	m_NotEligibleForFinish = pChr->m_pPlayer->m_NotEligibleForFinish;
 
@@ -152,14 +152,14 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_TeleCheckpoint = m_TeleCheckpoint;
 	pChr->m_LastPenalty = m_LastPenalty;
 
-	if(m_CpTime)
-		pChr->m_CpTick = pChr->Server()->Tick() - m_CpTime;
+	if(m_TimeCpBroadcastEndTime)
+		pChr->m_TimeCpBroadcastEndTick = pChr->Server()->Tick() - m_TimeCpBroadcastEndTime;
 
-	pChr->m_CpActive = m_CpActive;
-	pChr->m_CpLastBroadcast = m_CpLastBroadcast;
+	pChr->m_LastTimeCp = m_LastTimeCp;
+	pChr->m_LastTimeCpBroadcasted = m_LastTimeCpBroadcasted;
 
 	for(int i = 0; i < 25; i++)
-		pChr->m_CpCurrent[i] = m_aCpCurrent[i];
+		pChr->m_aCurrentTimeCp[i] = m_aCurrentTimeCp[i];
 
 	pChr->m_pPlayer->m_NotEligibleForFinish = pChr->m_pPlayer->m_NotEligibleForFinish || m_NotEligibleForFinish;
 
@@ -278,12 +278,12 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		(int)m_HookPos.x, (int)m_HookPos.y, m_HookDir.x, m_HookDir.y,
 		(int)m_HookTeleBase.x, (int)m_HookTeleBase.y, m_HookTick, m_HookState,
 		// time checkpoints
-		m_CpTime, m_CpActive, m_CpLastBroadcast,
-		m_aCpCurrent[0], m_aCpCurrent[1], m_aCpCurrent[2], m_aCpCurrent[3], m_aCpCurrent[4],
-		m_aCpCurrent[5], m_aCpCurrent[6], m_aCpCurrent[7], m_aCpCurrent[8], m_aCpCurrent[9],
-		m_aCpCurrent[10], m_aCpCurrent[11], m_aCpCurrent[12], m_aCpCurrent[13], m_aCpCurrent[14],
-		m_aCpCurrent[15], m_aCpCurrent[16], m_aCpCurrent[17], m_aCpCurrent[18], m_aCpCurrent[19],
-		m_aCpCurrent[20], m_aCpCurrent[21], m_aCpCurrent[22], m_aCpCurrent[23], m_aCpCurrent[24],
+		m_TimeCpBroadcastEndTime, m_LastTimeCp, m_LastTimeCpBroadcasted,
+		m_aCurrentTimeCp[0], m_aCurrentTimeCp[1], m_aCurrentTimeCp[2], m_aCurrentTimeCp[3], m_aCurrentTimeCp[4],
+		m_aCurrentTimeCp[5], m_aCurrentTimeCp[6], m_aCurrentTimeCp[7], m_aCurrentTimeCp[8], m_aCurrentTimeCp[9],
+		m_aCurrentTimeCp[10], m_aCurrentTimeCp[11], m_aCurrentTimeCp[12], m_aCurrentTimeCp[13], m_aCurrentTimeCp[14],
+		m_aCurrentTimeCp[15], m_aCurrentTimeCp[16], m_aCurrentTimeCp[17], m_aCurrentTimeCp[18], m_aCurrentTimeCp[19],
+		m_aCurrentTimeCp[20], m_aCurrentTimeCp[21], m_aCurrentTimeCp[22], m_aCurrentTimeCp[23], m_aCurrentTimeCp[24],
 		m_NotEligibleForFinish,
 		m_HasTelegunGun, m_HasTelegunLaser, m_HasTelegunGrenade,
 		m_aGameUuid,
@@ -351,12 +351,12 @@ int CSaveTee::FromString(const char *String)
 		&m_HookPos.x, &m_HookPos.y, &m_HookDir.x, &m_HookDir.y,
 		&m_HookTeleBase.x, &m_HookTeleBase.y, &m_HookTick, &m_HookState,
 		// time checkpoints
-		&m_CpTime, &m_CpActive, &m_CpLastBroadcast,
-		&m_aCpCurrent[0], &m_aCpCurrent[1], &m_aCpCurrent[2], &m_aCpCurrent[3], &m_aCpCurrent[4],
-		&m_aCpCurrent[5], &m_aCpCurrent[6], &m_aCpCurrent[7], &m_aCpCurrent[8], &m_aCpCurrent[9],
-		&m_aCpCurrent[10], &m_aCpCurrent[11], &m_aCpCurrent[12], &m_aCpCurrent[13], &m_aCpCurrent[14],
-		&m_aCpCurrent[15], &m_aCpCurrent[16], &m_aCpCurrent[17], &m_aCpCurrent[18], &m_aCpCurrent[19],
-		&m_aCpCurrent[20], &m_aCpCurrent[21], &m_aCpCurrent[22], &m_aCpCurrent[23], &m_aCpCurrent[24],
+		&m_TimeCpBroadcastEndTime, &m_LastTimeCp, &m_LastTimeCpBroadcasted,
+		&m_aCurrentTimeCp[0], &m_aCurrentTimeCp[1], &m_aCurrentTimeCp[2], &m_aCurrentTimeCp[3], &m_aCurrentTimeCp[4],
+		&m_aCurrentTimeCp[5], &m_aCurrentTimeCp[6], &m_aCurrentTimeCp[7], &m_aCurrentTimeCp[8], &m_aCurrentTimeCp[9],
+		&m_aCurrentTimeCp[10], &m_aCurrentTimeCp[11], &m_aCurrentTimeCp[12], &m_aCurrentTimeCp[13], &m_aCurrentTimeCp[14],
+		&m_aCurrentTimeCp[15], &m_aCurrentTimeCp[16], &m_aCurrentTimeCp[17], &m_aCurrentTimeCp[18], &m_aCurrentTimeCp[19],
+		&m_aCurrentTimeCp[20], &m_aCurrentTimeCp[21], &m_aCurrentTimeCp[22], &m_aCurrentTimeCp[23], &m_aCurrentTimeCp[24],
 		&m_NotEligibleForFinish,
 		&m_HasTelegunGun, &m_HasTelegunLaser, &m_HasTelegunGrenade,
 		m_aGameUuid,

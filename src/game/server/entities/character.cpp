@@ -35,6 +35,13 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_Input.m_TargetY = -1;
 
 	m_LatestPrevPrevInput = m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
+
+	m_LastTimeCp = -1;
+	m_LastTimeCpBroadcasted = -1;
+	for(float &CurrentTimeCp : m_aCurrentTimeCp)
+	{
+		CurrentTimeCp = 0.0f;
+	}
 }
 
 void CCharacter::Reset()
@@ -1226,15 +1233,15 @@ void CCharacter::HandleBroadcast()
 {
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
 
-	if(m_DDRaceState == DDRACE_STARTED && m_CpLastBroadcast != m_CpActive &&
-		m_CpActive > -1 && m_CpTick > Server()->Tick() && m_pPlayer->GetClientVersion() == VERSION_VANILLA &&
-		pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
+	if(m_DDRaceState == DDRACE_STARTED && m_pPlayer->GetClientVersion() == VERSION_VANILLA &&
+		m_LastTimeCpBroadcasted != m_LastTimeCp && m_LastTimeCp > -1 &&
+		m_TimeCpBroadcastEndTick > Server()->Tick() && pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0)
 	{
 		char aBroadcast[128];
-		float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
+		float Diff = m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp];
 		str_format(aBroadcast, sizeof(aBroadcast), "Checkpoint | Diff : %+5.2f", Diff);
 		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
-		m_CpLastBroadcast = m_CpActive;
+		m_LastTimeCpBroadcasted = m_LastTimeCp;
 		m_LastBroadcast = Server()->Tick();
 	}
 	else if((m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_BROADCAST || m_pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && m_DDRaceState == DDRACE_STARTED && m_LastBroadcast + Server()->TickSpeed() * g_Config.m_SvTimeInBroadcastInterval <= Server()->Tick())
@@ -1243,7 +1250,7 @@ void CCharacter::HandleBroadcast()
 		int Time = (int64_t)100 * ((float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed()));
 		str_time(Time, TIME_HOURS, aBuf, sizeof(aBuf));
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
-		m_CpLastBroadcast = m_CpActive;
+		m_LastTimeCpBroadcasted = m_LastTimeCp;
 		m_LastBroadcast = Server()->Tick();
 	}
 }
@@ -1341,6 +1348,29 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 	return !aSwitchers.empty() && pThis->Team() != TEAM_SUPER && aSwitchers[Number].m_Status[pThis->Team()];
 }
 
+void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
+{
+	if(TimeCheckpoint > -1 && m_DDRaceState == DDRACE_STARTED && m_aCurrentTimeCp[TimeCheckpoint] == 0.0f && m_Time != 0.0f)
+	{
+		m_LastTimeCp = TimeCheckpoint;
+		m_aCurrentTimeCp[m_LastTimeCp] = m_Time;
+		m_TimeCpBroadcastEndTick = Server()->Tick() + Server()->TickSpeed() * 2;
+		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
+		{
+			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
+			if(pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0.0f)
+			{
+				CNetMsg_Sv_DDRaceTime Msg;
+				Msg.m_Time = (int)(m_Time * 100.0f);
+				Msg.m_Finish = 0;
+				float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 100;
+				Msg.m_Check = (int)Diff;
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCID());
+			}
+		}
+	}
+}
+
 void CCharacter::HandleTiles(int Index)
 {
 	int MapIndex = Index;
@@ -1355,61 +1385,11 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 		return;
 	}
-	int cp = Collision()->IsCheckpoint(MapIndex);
-	if(cp != -1 && m_DDRaceState == DDRACE_STARTED && cp > m_CpActive)
-	{
-		m_CpActive = cp;
-		m_CpCurrent[cp] = m_Time;
-		m_CpTick = Server()->Tick() + Server()->TickSpeed() * 2;
-		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
-		{
-			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-			CNetMsg_Sv_DDRaceTime Msg;
-			Msg.m_Time = (int)m_Time;
-			Msg.m_Check = 0;
-			Msg.m_Finish = 0;
-
-			if(m_CpActive != -1 && m_CpTick > Server()->Tick())
-			{
-				if(pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
-				{
-					float Diff = (m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive]) * 100;
-					Msg.m_Check = (int)Diff;
-				}
-			}
-
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCID());
-		}
-	}
-	int cpf = Collision()->IsFCheckpoint(MapIndex);
-	if(cpf != -1 && m_DDRaceState == DDRACE_STARTED && cpf > m_CpActive)
-	{
-		m_CpActive = cpf;
-		m_CpCurrent[cpf] = m_Time;
-		m_CpTick = Server()->Tick() + Server()->TickSpeed() * 2;
-		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
-		{
-			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
-			CNetMsg_Sv_DDRaceTime Msg;
-			Msg.m_Time = (int)m_Time;
-			Msg.m_Check = 0;
-			Msg.m_Finish = 0;
-
-			if(m_CpActive != -1 && m_CpTick > Server()->Tick())
-			{
-				if(pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
-				{
-					float Diff = (m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive]) * 100;
-					Msg.m_Check = (int)Diff;
-				}
-			}
-
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCID());
-		}
-	}
-	int tcp = Collision()->IsTCheckpoint(MapIndex);
-	if(tcp)
-		m_TeleCheckpoint = tcp;
+	SetTimeCheckpoint(Collision()->IsTimeCheckpoint(MapIndex));
+	SetTimeCheckpoint(Collision()->IsFTimeCheckpoint(MapIndex));
+	int TeleCheckpoint = Collision()->IsTeleCheckpoint(MapIndex);
+	if(TeleCheckpoint)
+		m_TeleCheckpoint = TeleCheckpoint;
 
 	GameServer()->m_pController->HandleCharacterTiles(this, Index);
 

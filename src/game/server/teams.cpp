@@ -615,24 +615,24 @@ void CGameTeams::SetStartTime(CPlayer *Player, int StartTime)
 		pChar->m_StartTime = StartTime;
 }
 
-void CGameTeams::SetCpActive(CPlayer *Player, int CpActive)
+void CGameTeams::SetLastTimeCp(CPlayer *Player, int LastTimeCp)
 {
 	if(!Player)
 		return;
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
-		pChar->m_CpActive = CpActive;
+		pChar->m_LastTimeCp = LastTimeCp;
 }
 
-float *CGameTeams::GetCpCurrent(CPlayer *Player)
+float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 {
 	if(!Player)
 		return NULL;
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
-		return pChar->m_CpCurrent;
+		return pChar->m_aCurrentTimeCp;
 	return NULL;
 }
 
@@ -667,7 +667,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientID);
 
 	char aBuf[128];
-	SetCpActive(Player, -2);
+	SetLastTimeCp(Player, -1);
 	// Note that the "finished in" message is parsed by the client
 	str_format(aBuf, sizeof(aBuf),
 		"%s finished in: %d minute(s) %5.2f second(s)",
@@ -722,51 +722,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		Server()->SaveDemo(ClientID, Time);
 	}
 
-	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
-
-	if(!pData->m_BestTime || Time < pData->m_BestTime)
-	{
-		// update the score
-		pData->Set(Time, GetCpCurrent(Player));
-		CallSaveScore = true;
-	}
-
-	if(CallSaveScore)
-		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
-			GameServer()->Score()->SaveScore(ClientID, Time, pTimestamp,
-				GetCpCurrent(Player), Player->m_NotEligibleForFinish);
-
-	bool NeedToSendNewRecord = false;
-	// update server best time
-	if(GameServer()->m_pController->m_CurrentRecord == 0 || Time < GameServer()->m_pController->m_CurrentRecord)
-	{
-		// check for nameless
-		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
-		{
-			GameServer()->m_pController->m_CurrentRecord = Time;
-			NeedToSendNewRecord = true;
-		}
-	}
-
-	SetDDRaceState(Player, DDRACE_FINISHED);
-	// set player score
-	if(!pData->m_CurrentTime || pData->m_CurrentTime > Time)
-	{
-		pData->m_CurrentTime = Time;
-		NeedToSendNewRecord = true;
-	}
-
-	if(NeedToSendNewRecord && Player->GetClientVersion() >= VERSION_DDRACE)
-	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
-			{
-				GameServer()->SendRecord(i);
-			}
-		}
-	}
-
+	if(!Server()->IsSixup(ClientID))
 	{
 		CNetMsg_Sv_DDRaceTime Msg;
 		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy;
@@ -779,22 +735,74 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 			float Diff100 = (Time - pData->m_BestTime) * 100;
 			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
 		}
-
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
-		if(!Server()->IsSixup(ClientID) && VERSION_DDRACE <= Player->GetClientVersion() && Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
+		if(VERSION_DDRACE <= Player->GetClientVersion())
 		{
-			Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
+			if(Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
+			{
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+			}
+			else
+			{
+				Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
+			}
 		}
 	}
-
+	else
 	{
 		protocol7::CNetMsg_Sv_RaceFinish Msg;
 		Msg.m_ClientID = ClientID;
 		Msg.m_Time = Time * 1000;
-		Msg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
+		Msg.m_Diff = 0;
+		if(pData->m_BestTime)
+		{
+			Msg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
+		}
 		Msg.m_RecordPersonal = Time < pData->m_BestTime;
 		Msg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+	}
+
+	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
+	bool NeedToSendNewPersonalRecord = false;
+	if(!pData->m_BestTime || Time < pData->m_BestTime)
+	{
+		// update the score
+		pData->Set(Time, GetCurrentTimeCp(Player));
+		CallSaveScore = true;
+		NeedToSendNewPersonalRecord = true;
+	}
+
+	if(CallSaveScore)
+		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
+			GameServer()->Score()->SaveScore(ClientID, Time, pTimestamp,
+				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
+
+	bool NeedToSendNewServerRecord = false;
+	// update server best time
+	if(GameServer()->m_pController->m_CurrentRecord == 0 || Time < GameServer()->m_pController->m_CurrentRecord)
+	{
+		// check for nameless
+		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))
+		{
+			GameServer()->m_pController->m_CurrentRecord = Time;
+			NeedToSendNewServerRecord = true;
+		}
+	}
+
+	SetDDRaceState(Player, DDRACE_FINISHED);
+	if(NeedToSendNewServerRecord)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+			{
+				GameServer()->SendRecord(i);
+			}
+		}
+	}
+	if(!NeedToSendNewServerRecord && NeedToSendNewPersonalRecord && Player->GetClientVersion() >= VERSION_DDRACE)
+	{
+		GameServer()->SendRecord(ClientID);
 	}
 
 	int TTime = 0 - (int)Time;

@@ -877,7 +877,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
-			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_CpTime);
+			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
 			m_Score = Result.m_Data.m_Info.m_Score;
 			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
 			// -9999 stands for no time and isn't displayed in scoreboard, so
@@ -899,6 +899,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 					Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
 				GameServer()->SendBroadcast(aBuf, m_ClientID);
 			}
+			GameServer()->SendRecord(m_ClientID);
 			break;
 		}
 	}

@@ -45,7 +45,6 @@ void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Record *pMsg = (CNetMsg_Sv_Record *)pRawMsg;
 		m_ServerRecord = (float)pMsg->m_ServerTimeBest / 100;
-		//m_PlayerRecord = (float)pMsg->m_PlayerTimeBest/100;
 	}
 }
 

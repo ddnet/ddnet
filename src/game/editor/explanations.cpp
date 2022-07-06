@@ -483,7 +483,7 @@ const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add
 				return "TELELASER OFF: Turn laser off as telegun weapon.";
 			break;
 		}
-		if(Tile >= TILE_CHECKPOINT_FIRST && Tile <= TILE_CHECKPOINT_LAST && (Layer == LAYER_GAME || Layer == LAYER_FRONT))
+		if(Tile >= TILE_TIME_CHECKPOINT_FIRST && Tile <= TILE_TIME_CHECKPOINT_LAST && (Layer == LAYER_GAME || Layer == LAYER_FRONT))
 			return "TIME CHECKPOINT: Compares your current race time with your record to show you whether you are running faster or slower.";
 	}
 	else if(ExplanationID == EXPLANATION_FNG)

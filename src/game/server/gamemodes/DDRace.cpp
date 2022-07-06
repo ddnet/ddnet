@@ -89,7 +89,12 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 		}
 
 		m_Teams.OnCharacterStart(ClientID);
-		pChr->m_CpActive = -2;
+		pChr->m_LastTimeCp = -1;
+		pChr->m_LastTimeCpBroadcasted = -1;
+		for(float &CurrentTimeCp : pChr->m_aCurrentTimeCp)
+		{
+			CurrentTimeCp = 0.0f;
+		}
 	}
 
 	// finish
