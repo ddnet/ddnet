@@ -88,7 +88,7 @@ private:
 	float m_TimeCpDiff;
 	float m_ServerRecord;
 	float m_PlayerRecord[NUM_DUMMIES];
-	float m_LastPlayerRecord[NUM_DUMMIES];
+	float m_FinishTimeDiff;
 	int m_DDRaceTime;
 	int m_FinishTimeLastReceivedTick;
 	int m_TimeCpLastReceivedTick;

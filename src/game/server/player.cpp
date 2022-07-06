@@ -916,6 +916,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 					Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
 				GameServer()->SendBroadcast(aBuf, m_ClientID);
 			}
+			GameServer()->SendRecord(m_ClientID);
 			break;
 		}
 	}

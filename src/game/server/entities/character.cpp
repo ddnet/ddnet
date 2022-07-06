@@ -1362,7 +1362,6 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 			{
 				CNetMsg_Sv_DDRaceTime Msg;
 				Msg.m_Time = (int)(m_Time * 100.0f);
-				Msg.m_Check = 0;
 				Msg.m_Finish = 0;
 				float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 100;
 				Msg.m_Check = (int)Diff;

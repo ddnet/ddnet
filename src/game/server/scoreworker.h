@@ -232,7 +232,6 @@ public:
 	void Reset()
 	{
 		m_BestTime = 0;
-		m_CurrentTime = 0;
 		for(float &BestTimeCp : m_aBestTimeCp)
 			BestTimeCp = 0;
 	}
@@ -240,13 +239,11 @@ public:
 	void Set(float Time, float aTimeCp[NUM_CHECKPOINTS])
 	{
 		m_BestTime = Time;
-		m_CurrentTime = Time;
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 			m_aBestTimeCp[i] = aTimeCp[i];
 	}
 
 	float m_BestTime;
-	float m_CurrentTime;
 	float m_aBestTimeCp[NUM_CHECKPOINTS];
 };
 

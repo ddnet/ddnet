@@ -75,9 +75,6 @@ void CHud::OnReset()
 	m_ServerRecord = -1.0f;
 	m_PlayerRecord[0] = -1.0f;
 	m_PlayerRecord[1] = -1.0f;
-	m_LastPlayerRecord[0] = -1.0f;
-	m_LastPlayerRecord[1] = -1.0f;
-
 	ResetHudContainers();
 }
 
@@ -1636,6 +1633,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 		}
 		else
 		{
+			m_FinishTimeDiff = (float)pMsg->m_Check / 100;
 			m_FinishTimeLastReceivedTick = Client()->GameTick(g_Config.m_ClDummy);
 		}
 	}
@@ -1659,12 +1657,7 @@ void CHud::OnMessage(int MsgType, void *pRawMsg)
 		else if(MsgType == NETMSGTYPE_SV_RECORD || m_pClient->m_GameInfo.m_RaceRecordMessage)
 		{
 			m_ServerRecord = (float)pMsg->m_ServerTimeBest / 100;
-			m_LastPlayerRecord[g_Config.m_ClDummy] = m_PlayerRecord[g_Config.m_ClDummy];
 			m_PlayerRecord[g_Config.m_ClDummy] = (float)pMsg->m_PlayerTimeBest / 100;
-			if(m_LastPlayerRecord[g_Config.m_ClDummy] == -1.0f)
-			{
-				m_LastPlayerRecord[g_Config.m_ClDummy] = m_PlayerRecord[g_Config.m_ClDummy];
-			}
 		}
 	}
 }
@@ -1690,26 +1683,20 @@ void CHud::RenderDDRaceEffects()
 
 			TextRender()->TextColor(1, 1, 1, alpha);
 			TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
-
-			if(m_LastPlayerRecord[g_Config.m_ClDummy] > 0.0f)
+			if(m_FinishTimeDiff != 0.0f)
 			{
-				const float FinishTimeDiff = m_DDRaceTime / 100.0f - m_LastPlayerRecord[g_Config.m_ClDummy];
-				if(FinishTimeDiff < 0)
+				if(m_FinishTimeDiff < 0)
 				{
-					str_time_float(-FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+					str_time_float(-m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "-%s", aTime);
+					TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
 				}
 				else
 				{
-					str_time_float(FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+					str_time_float(m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "+%s", aTime);
-				}
-				if(FinishTimeDiff > 0)
 					TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
-				else if(FinishTimeDiff < 0)
-					TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
-				else if(!FinishTimeDiff)
-					TextRender()->TextColor(1, 1, 1, alpha); // white
+				}
 				TextRender()->Text(0, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 34, 10, aBuf, -1.0f);
 			}
 			TextRender()->TextColor(1, 1, 1, 1);
