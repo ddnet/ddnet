@@ -2,7 +2,6 @@
 # pylint: disable=undefined-variable
 from __future__ import unicode_literals
 import os.path
-import sys
 
 import plistlib
 def read_plist(path):

@@ -3,9 +3,9 @@ import csv
 import os
 import sys
 
-import clang.cindex
+import clang.cindex # pylint: disable=import-error
 
-from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
+from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind # pylint: disable=import-error
 
 try:
 	from tqdm import tqdm

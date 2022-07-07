@@ -1,7 +1,7 @@
 import sys
 from .datatypes import EmitDefinition, EmitTypeDeclaration
-from . import content
-from . import network
+from . import content # pylint: disable=no-name-in-module
+from . import network # pylint: disable=no-name-in-module
 
 def create_enum_table(names, num):
 	lines = []
@@ -64,7 +64,8 @@ def main():
 		print("namespace client_data7 {")
 
 		# emit the type declarations
-		contentlines = open("datasrc/content.py", "rb").readlines()
+		with open("datasrc/content.py", "rb") as f:
+			contentlines = f.readlines()
 		order = []
 		for line in contentlines:
 			line = line.strip()

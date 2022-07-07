@@ -33,7 +33,7 @@ class BaseType:
 		self._target_name = "INVALID"
 		self._id = GetID() # this is used to remember what order the members have in structures etc
 
-	def Identifyer(self):
+	def Identifier(self):
 		return "x"+str(self._id)
 	def TargetName(self):
 		return self._target_name
@@ -62,10 +62,10 @@ class Struct(BaseType):
 		def sorter(a):
 			return a.var.ID()
 		m = []
-		for name in self.__dict__:
+		for name, value in self.__dict__.items():
 			if name[0] == "_":
 				continue
-			m += [MemberType(name, self.__dict__[name])]
+			m += [MemberType(name, value)]
 		m.sort(key = sorter)
 		return m
 
@@ -85,7 +85,7 @@ class Struct(BaseType):
 			lines += member.var.EmitPreDefinition(target_name+"."+member.name)
 		return lines
 	def EmitDefinition(self, _name):
-		lines = ["/* %s */ {" % self.TargetName()]
+		lines = [f"/* {self.TargetName()} */ {{"]
 		for member in self.Members():
 			lines += ["\t" + " ".join(member.var.EmitDefinition("")) + ","]
 		lines += ["}"]
@@ -98,7 +98,7 @@ class Array(BaseType):
 		self.items = []
 	def Add(self, instance):
 		if instance.TypeName() != self.type.TypeName():
-			raise "bah"
+			raise ValueError("bah")
 		self.items += [instance]
 	def EmitDeclaration(self, name):
 		return [f"int m_Num{FixCasing(name)};",
@@ -109,21 +109,21 @@ class Array(BaseType):
 		lines = []
 		i = 0
 		for item in self.items:
-			lines += item.EmitPreDefinition(f"{self.Identifyer()}[{int(i)}]")
+			lines += item.EmitPreDefinition(f"{self.Identifier()}[{int(i)}]")
 			i += 1
 
 		if self.items:
-			lines += ["static %s %s[] = {"%(self.TypeName(), self.Identifyer())]
+			lines += [f"static {self.TypeName()} {self.Identifier()}[] = {{"]
 			for item in self.items:
 				itemlines = item.EmitDefinition("")
 				lines += ["\t" + " ".join(itemlines).replace("\t", " ") + ","]
 			lines += ["};"]
 		else:
-			lines += [f"static {self.TypeName()} *{self.Identifyer()} = 0;"]
+			lines += [f"static {self.TypeName()} *{self.Identifier()} = 0;"]
 
 		return lines
 	def EmitDefinition(self, _name):
-		return [str(len(self.items))+","+self.Identifyer()]
+		return [str(len(self.items))+","+self.Identifier()]
 
 # Basic Types
 
@@ -286,7 +286,7 @@ class NetMessage(NetObject):
 
 	def emit_declaration(self):
 		extra = []
-		extra += ["\tint MsgID() const { return %s; }" % self.enum_name]
+		extra += [f"\tint MsgID() const {{ return {self.enum_name}; }}"]
 		extra += ["\t"]
 		extra += ["\tbool Pack(CMsgPacker *pPacker) const"]
 		extra += ["\t{"]
@@ -382,7 +382,7 @@ class NetIntRange(NetIntAny):
 	def emit_validate_obj(self):
 		return [f"pData->{self.name} = ClampInt(\"{self.name}\", pData->{self.name}, {self.min}, {self.max});"]
 	def emit_unpack_msg_check(self):
-		return ["if(pData->%s < %s || pData->%s > %s) { m_pMsgFailedOn = \"%s\"; break; }" % (self.name, self.min, self.name, self.max, self.name)]
+		return [f"if(pData->{self.name} < {self.min} || pData->{self.name} > {self.max}) {{ m_pMsgFailedOn = \"{self.name}\"; break; }}"]
 
 class NetBool(NetIntRange):
 	def __init__(self, name, default=None):
