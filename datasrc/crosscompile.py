@@ -25,11 +25,11 @@ def generate_map(a, b):
 	return result
 
 def output_map_header(name, m):
-	print("extern const int gs_{}[{}];".format(name, len(m)))
-	print("inline int {0}(int a) {{ if(a < 0 || a >= {1}) return -1; return gs_{0}[a]; }}".format(name, len(m)))
+	print(f"extern const int gs_{name}[{len(m)}];")
+	print(f"inline int {name}(int a) {{ if(a < 0 || a >= {len(m)}) return -1; return gs_{name}[a]; }}")
 
 def output_map_source(name, m):
-	print("const int gs_{}[{}] = {{".format(name, len(m)))
+	print(f"const int gs_{name}[{len(m)}] = {{")
 	print(*m, sep=',')
 	print("};")
 

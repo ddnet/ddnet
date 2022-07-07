@@ -29,7 +29,7 @@ GameInfoFlags2 = [
 	"HUD_DDRACE",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
-ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
+ProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
 	"EXPLOSIVE", "FREEZE",
 ]
