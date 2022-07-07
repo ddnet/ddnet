@@ -696,9 +696,6 @@ Follow
 Enable gun sound
 == Ativar o som da arma
 
-Show health + ammo
-== Mostrar saúde + munição
-
 Team message
 == Mensagem de equipa
 
@@ -936,9 +933,6 @@ Chat sound volume
 Background music volume
 == Volume da música de fundo
 
-Tee
-== Tee
-
 Use old chat style
 == Usar o modo antigo de chat
 
@@ -992,6 +986,27 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1010,6 +1025,9 @@ Server best:
 Personal best:
 == 
 
+Uploading map data to GPU
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -1020,6 +1038,15 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
 == 
 
 Render demo
@@ -1041,6 +1068,9 @@ Skip Tutorial
 == 
 
 Show DDNet map finishes in server browser
+== 
+
+Loading menu images
 == 
 
 AFR
@@ -1079,6 +1109,9 @@ Unfinished map
 Leak IP
 == 
 
+Loading demo files
+== 
+
 Markers:
 == 
 
@@ -1107,6 +1140,9 @@ Kill
 == 
 
 Pause
+== 
+
+Loading ghost files
 == 
 
 Smooth Dynamic Camera
@@ -1140,6 +1176,9 @@ Choose default eyes when joining a server
 == 
 
 Skin Database
+== 
+
+Loading skin files
 == 
 
 Hook collisions
@@ -1276,16 +1315,37 @@ Enable long pain sound (used when shooting in freeze)
 Threaded sound loading
 == 
 
+Appearance
+== 
+
 Assets
 == 
 
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
 Show dummy actions
-== 
-
-Show jump indicator
-== 
-
-Show client IDs
 == 
 
 Show player position
@@ -1303,22 +1363,46 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
-Laser Outline Color
+Client message
 == 
 
-Laser Inner Color
+Preview
 == 
 
-Hookline
+Show hook strength indicator
 == 
 
-No hit
+Show other players' key presses
 == 
 
-Hookable
+Show local player's key presses
 == 
 
-Kill Messages
+Hook collision line
+== 
+
+Show other players' hook collision lines
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
 == 
 
 Normal Color
@@ -1327,10 +1411,10 @@ Normal Color
 Highlight Color
 == 
 
-Client message
+Laser Outline Color
 == 
 
-Preview
+Laser Inner Color
 == 
 
 Enable replays
@@ -1366,15 +1450,6 @@ Quads are used for background decoration
 Tries to predict other entities to give a feel of low latency
 == 
 
-Show other players' hook collision lines
-== 
-
-Show other players' key presses
-== 
-
-Show local player's key presses
-== 
-
 Entities Background color
 == 
 
@@ -1405,6 +1480,9 @@ Emoticons
 Extras
 == 
 
+Loading assets
+== 
+
 Assets directory
 == 
 
@@ -1433,6 +1511,9 @@ Downloading %s:
 Update failed! Check log...
 == 
 
+Loading race demo files
+== 
+
 Super
 == 
 
@@ -1449,6 +1530,9 @@ Auto
 == 
 
 Replay
+== 
+
+Loading sound files
 == 
 
 Frags

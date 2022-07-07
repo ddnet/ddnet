@@ -683,9 +683,6 @@ Dummy settings
 Show score
 == Pokazuj wyniki
 
-Show health + ammo
-== Pokazuj życie i amunicję
-
 Show names in chat in team colors
 == Pokazuj nicki na czacie w kolorach teamu
 
@@ -1290,9 +1287,6 @@ Graphics cards
 auto
 == automatyczny
 
-Show client IDs
-== Pokazuj ID klientów
-
 Kill Messages
 == Wiadomości o zabiciu
 
@@ -1301,18 +1295,6 @@ Laser Outline Color
 
 Laser Inner Color
 == Wewnętrzny kolor lasera
-
-Hookline
-== Linia kolizyjna
-
-No hit
-== Brak kolizji
-
-Hookable
-== Blok kolizyjny
-
-Tee
-== Gracz
 
 Preview
 == Podgląd
@@ -1368,6 +1350,27 @@ Super
 Team %d
 == Drużyna %d
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Position:
 == 
 
@@ -1375,6 +1378,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Uploading map data to GPU
 == 
 
 Trying to determine UDP connectivity...
@@ -1389,7 +1395,28 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 No answer from server yet.
 == 
 
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Download community skins
+== 
+
+Loading skin files
 == 
 
 Enable controller
@@ -1448,10 +1475,31 @@ UI mouse sens.
 Controller
 == 
 
-Show dummy actions
+Appearance
 == 
 
-Show jump indicator
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
 == 
 
 Show player position
@@ -1469,6 +1517,33 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
 Normal Color
 == 
 
@@ -1476,4 +1551,13 @@ Highlight Color
 == 
 
 Extras
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 
