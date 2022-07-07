@@ -1124,6 +1124,7 @@ void CGameClient::InvalidateSnapshot()
 	// clear all pointers
 	mem_zero(&m_Snap, sizeof(m_Snap));
 	m_Snap.m_LocalClientID = -1;
+	SnapCollectEntities();
 }
 
 void CGameClient::OnNewSnapshot()

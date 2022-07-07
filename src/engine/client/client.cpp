@@ -677,6 +677,8 @@ void CClient::OnEnterGame(bool Dummy)
 	m_aSnapshots[Dummy][SNAP_CURRENT] = 0;
 	m_aSnapshots[Dummy][SNAP_PREV] = 0;
 	m_SnapshotStorage[Dummy].PurgeAll();
+	// Also make gameclient aware that snapshots have been purged
+	GameClient()->InvalidateSnapshot();
 	m_ReceivedSnapshots[Dummy] = 0;
 	m_SnapshotParts[Dummy] = 0;
 	m_PredTick[Dummy] = 0;
