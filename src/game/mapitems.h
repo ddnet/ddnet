@@ -3,6 +3,8 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
+#include <base/vmath.h>
+
 // layer types
 enum
 {
@@ -211,15 +213,8 @@ enum
 	ENTITY_OFFSET = 255 - 16 * 4,
 };
 
-struct CPoint
-{
-	int x, y; // 22.10 fixed point
-};
-
-struct CColor
-{
-	int r, g, b, a;
-};
+typedef ivec2 CPoint; // 22.10 fixed point
+typedef ivec4 CColor;
 
 struct CQuad
 {

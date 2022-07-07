@@ -1350,9 +1350,9 @@ void CChat::OnRender()
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
-			STextRenderColor TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);
-			STextRenderColor Text(1.f, 1.f, 1.f, Blend);
-			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, &Text, &TextOutline, 0, (y + RealMsgPaddingY / 2.0f) - m_aLines[r].m_TextYOffset);
+			ColorRGBA TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);
+			ColorRGBA Text(1.f, 1.f, 1.f, Blend);
+			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, Text, TextOutline, 0, (y + RealMsgPaddingY / 2.0f) - m_aLines[r].m_TextYOffset);
 		}
 	}
 }

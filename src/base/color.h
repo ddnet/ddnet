@@ -54,7 +54,10 @@ public:
 		float w, a;
 	};
 
-	color4_base() {}
+	color4_base() :
+		x(), y(), z(), a()
+	{
+	}
 
 	color4_base(const vec4 &v4)
 	{
@@ -97,6 +100,14 @@ public:
 	}
 
 	vec4 v4() const { return vec4(x, y, z, a); }
+	operator vec4() const { return vec4(x, y, z, a); }
+	float &operator[](int index)
+	{
+		return ((float *)this)[index];
+	}
+
+	bool operator==(const color4_base &col) const { return x == col.x && y == col.y && z == col.z && a == col.a; }
+	bool operator!=(const color4_base &col) const { return x != col.x || y != col.y || z != col.z || a != col.a; }
 
 	unsigned Pack(bool Alpha = true)
 	{

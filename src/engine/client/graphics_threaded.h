@@ -175,8 +175,8 @@ public:
 		WRAP_CLAMP,
 	};
 
-	typedef GL_SPoint SPoint;
-	typedef GL_STexCoord STexCoord;
+	typedef vec2 SPoint;
+	typedef vec2 STexCoord;
 	typedef GL_SColorf SColorf;
 	typedef GL_SColor SColor;
 	typedef GL_SVertex SVertex;
@@ -384,8 +384,8 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 
-		float m_Offset[2];
-		float m_Dir[2];
+		vec2 m_Offset;
+		vec2 m_Dir;
 		int m_JumpIndex;
 	};
 
@@ -400,8 +400,8 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 
-		float m_Offset[2];
-		float m_Dir[2];
+		vec2 m_Offset;
+		vec2 m_Dir;
 	};
 
 	struct SCommand_RenderQuadLayer : public SCommand
@@ -429,8 +429,8 @@ public:
 		int m_TextOutlineTextureIndex;
 
 		int m_DrawNum;
-		float m_aTextColor[4];
-		float m_aTextOutlineColor[4];
+		ColorRGBA m_TextColor;
+		ColorRGBA m_TextOutlineColor;
 	};
 
 	struct SCommand_RenderQuadContainer : public SCommand
@@ -1230,11 +1230,11 @@ public:
 	void FlushVertices(bool KeepVertices = false) override;
 	void FlushVerticesTex3D() override;
 
-	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) override;
-	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;
-	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
+	void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) override;
+	void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) override;
+	void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
-	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
+	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override;
 
 	// modern GL functions
 	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override;
