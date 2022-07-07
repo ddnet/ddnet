@@ -145,6 +145,7 @@ void CPlayer::Reset()
 	m_EligibleForFinishCheck = 0;
 	m_VotedForPractice = false;
 	m_SwapTargetsClientID = -1;
+	m_BirthdayAnnounced = false;
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
@@ -887,7 +888,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				m_Score = -10000;
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
-			if(Birthday != 0)
+			if(Birthday != 0 && !m_BirthdayAnnounced)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf),
@@ -898,6 +899,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 					"Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!",
 					Server()->ClientName(m_ClientID), Birthday, Birthday > 1 ? "s" : "");
 				GameServer()->SendBroadcast(aBuf, m_ClientID);
+				m_BirthdayAnnounced = true;
 			}
 			GameServer()->SendRecord(m_ClientID);
 			break;
