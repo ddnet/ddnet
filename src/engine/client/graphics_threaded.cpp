@@ -1355,7 +1355,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 	m_pCommandBuffer->AddRenderCalls(((QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1);
 }
 
-void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextoutlineColor)
+void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor)
 {
 	if(BufferContainerIndex == -1)
 		return;
@@ -1368,7 +1368,7 @@ void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, i
 	Cmd.m_TextTextureIndex = TextureTextIndex;
 	Cmd.m_TextOutlineTextureIndex = TextureTextOutlineIndex;
 	Cmd.m_TextColor = TextColor;
-	Cmd.m_TextOutlineColor = TextoutlineColor;
+	Cmd.m_TextOutlineColor = TextOutlineColor;
 
 	if(!AddCmd(
 		   Cmd, [] { return true; }, "failed to allocate memory for render text command"))

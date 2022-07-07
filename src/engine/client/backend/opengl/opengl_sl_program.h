@@ -57,7 +57,7 @@ public:
 	CGLSLTWProgram() :
 		m_LocPos(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
 	{
-		m_aLastScreen[0] = m_aLastScreen[1] = vec2(-1, -1);
+		m_LastScreenTL = m_LastScreenBR = vec2(-1, -1);
 	}
 
 	int m_LocPos;
@@ -65,7 +65,8 @@ public:
 
 	int m_LastTextureSampler;
 	int m_LastIsTextured;
-	vec2 m_aLastScreen[2];
+	vec2 m_LastScreenTL;
+	vec2 m_LastScreenBR;
 };
 
 class CGLSLTextProgram : public CGLSLTWProgram

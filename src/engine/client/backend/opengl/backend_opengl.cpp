@@ -1263,10 +1263,10 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		}
 	}
 
-	if(pProgram->m_aLastScreen[0] != State.m_ScreenTL || pProgram->m_aLastScreen[1] != State.m_ScreenBR)
+	if(pProgram->m_LastScreenTL != State.m_ScreenTL || pProgram->m_LastScreenBR != State.m_ScreenBR)
 	{
-		pProgram->m_aLastScreen[0] = State.m_ScreenTL;
-		pProgram->m_aLastScreen[1] = State.m_ScreenBR;
+		pProgram->m_LastScreenTL = State.m_ScreenTL;
+		pProgram->m_LastScreenBR = State.m_ScreenBR;
 
 		// screen mapping
 		// orthographic projection matrix
