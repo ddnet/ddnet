@@ -91,7 +91,7 @@ public:
 	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
-	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const;
+	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const;
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
@@ -125,5 +125,5 @@ private:
 	class CDoorTile *m_pDoor;
 };
 
-void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy);
+void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);
 #endif

@@ -30,7 +30,7 @@ struct GameRichPresenceJoinRequested_t
 		k_iCallback = 337
 	};
 	CSteamID m_steamIDFriend;
-	char m_rgchConnect[256];
+	char m_aRGCHConnect[256];
 };
 
 struct NewUrlLaunchParameters_t

@@ -246,12 +246,12 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	if(!End)
 	{
 		pResult->SetVariant(CScorePlayerResult::MAP_VOTE);
-		auto *MapVote = &pResult->m_Data.m_MapVote;
-		pSqlServer->GetString(1, MapVote->m_aMap, sizeof(MapVote->m_aMap));
-		pSqlServer->GetString(2, MapVote->m_aServer, sizeof(MapVote->m_aServer));
-		str_copy(MapVote->m_aReason, "/map", sizeof(MapVote->m_aReason));
+		auto *pMapVote = &pResult->m_Data.m_MapVote;
+		pSqlServer->GetString(1, pMapVote->m_aMap, sizeof(pMapVote->m_aMap));
+		pSqlServer->GetString(2, pMapVote->m_aServer, sizeof(pMapVote->m_aServer));
+		str_copy(pMapVote->m_aReason, "/map", sizeof(pMapVote->m_aReason));
 
-		for(char *p = MapVote->m_aServer; *p; p++) // lower case server
+		for(char *p = pMapVote->m_aServer; *p; p++) // lower case server
 			*p = tolower(*p);
 	}
 	else

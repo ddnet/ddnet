@@ -172,7 +172,7 @@ private:
 
 	json_value *m_pDDNetInfo;
 
-	CServerEntry *m_aServerlistIp[256]; // ip hash list
+	CServerEntry *m_apServerlistIp[256]; // ip hash list
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;

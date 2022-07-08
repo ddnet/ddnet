@@ -257,7 +257,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 		Printed = true;
 	}
 #define GET_SERVER_RULE_LINE(n) g_Config.m_SvRulesLine##n
-	char *pRuleLines[] = {
+	char *apRuleLines[] = {
 		GET_SERVER_RULE_LINE(1),
 		GET_SERVER_RULE_LINE(2),
 		GET_SERVER_RULE_LINE(3),
@@ -269,7 +269,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 		GET_SERVER_RULE_LINE(9),
 		GET_SERVER_RULE_LINE(10),
 	};
-	for(auto &pRuleLine : pRuleLines)
+	for(auto &pRuleLine : apRuleLines)
 	{
 		if(pRuleLine[0])
 		{

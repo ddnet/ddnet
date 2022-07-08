@@ -57,7 +57,7 @@ public:
 private:
 	std::vector<CSkin> m_vSkins;
 	std::vector<CDownloadSkin> m_vDownloadSkins;
-	char m_EventSkinPrefix[24];
+	char m_aEventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	int LoadSkin(const char *pName, const char *pPath, int DirType);

@@ -41,7 +41,7 @@ public:
 	void SetUniform(int Loc, int Count, const float *pValues);
 
 	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
-	int GetUniformLoc(const char *Name);
+	int GetUniformLoc(const char *pName);
 
 	CGLSLProgram();
 	virtual ~CGLSLProgram();

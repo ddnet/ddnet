@@ -84,19 +84,19 @@ float CPlayers::GetPlayerTargetAngle(
 		AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 	if(ClientID >= 0 && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
-		CNetObj_DDNetCharacter *ExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
+		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
 		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedData)
 		{
 			const CNetObj_DDNetCharacter *PrevExtendedData = m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedData;
 
-			float MixX = mix((float)PrevExtendedData->m_TargetX, (float)ExtendedData->m_TargetX, AngleIntraTick);
-			float MixY = mix((float)PrevExtendedData->m_TargetY, (float)ExtendedData->m_TargetY, AngleIntraTick);
+			float MixX = mix((float)PrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, AngleIntraTick);
+			float MixY = mix((float)PrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, AngleIntraTick);
 
 			return angle(vec2(MixX, MixY));
 		}
 		else
 		{
-			return angle(vec2(ExtendedData->m_TargetX, ExtendedData->m_TargetY));
+			return angle(vec2(pExtendedData->m_TargetX, pExtendedData->m_TargetY));
 		}
 	}
 	else
@@ -143,7 +143,7 @@ void CPlayers::RenderHookCollLine(
 	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]);
+		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
@@ -170,15 +170,15 @@ void CPlayers::RenderHookCollLine(
 
 			if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			{
-				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
+				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
 
 				// fix direction if mouse is exactly in the center
-				if(!(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y)
+				if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
 					ExDirection = vec2(1, 0);
 			}
 			Graphics()->TextureClear();
 			vec2 InitPos = Position;
-			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
+			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
 
 			if(g_Config.m_ClHookCollSize > 0)
 				Graphics()->QuadsBegin();
@@ -196,11 +196,11 @@ void CPlayers::RenderHookCollLine(
 			do
 			{
 				OldPos = NewPos;
-				NewPos = OldPos + ExDirection * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookFireSpeed;
+				NewPos = OldPos + ExDirection * m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookFireSpeed;
 
-				if(distance(InitPos, NewPos) > m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength)
+				if(distance(InitPos, NewPos) > m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookLength)
 				{
-					NewPos = InitPos + normalize(NewPos - InitPos) * m_pClient->m_Tuning[g_Config.m_ClDummy].m_HookLength;
+					NewPos = InitPos + normalize(NewPos - InitPos) * m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookLength;
 					DoBreak = true;
 				}
 
@@ -321,19 +321,18 @@ void CPlayers::RenderHook(
 
 		// render chain
 		++QuadOffset;
-		static IGraphics::SRenderSpriteInfo s_HookChainRenderInfo[1024];
+		static IGraphics::SRenderSpriteInfo s_aHookChainRenderInfo[1024];
 		int HookChainCount = 0;
 		for(float f = 24; f < d && HookChainCount < 1024; f += 24, ++HookChainCount)
 		{
 			vec2 p = HookPos + Dir * f;
-			s_HookChainRenderInfo[HookChainCount].m_Pos[0] = p.x;
-			s_HookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
-
-			s_HookChainRenderInfo[HookChainCount].m_Scale = 1;
-			s_HookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
+			s_aHookChainRenderInfo[HookChainCount].m_Pos[0] = p.x;
+			s_aHookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
+			s_aHookChainRenderInfo[HookChainCount].m_Scale = 1;
+			s_aHookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
 		}
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
-		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_HookChainRenderInfo);
+		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_aHookChainRenderInfo);
 
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -390,7 +389,7 @@ void CPlayers::RenderPlayer(
 	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]);
+		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
@@ -548,8 +547,8 @@ void CPlayers::RenderPlayer(
 						WeaponPosition = Position;
 						float OffsetX = g_pData->m_Weapons.m_aId[CurrentWeapon].m_Muzzleoffsetx;
 						WeaponPosition -= Dir * OffsetX;
-						Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponsMuzzles[CurrentWeapon][IteX]);
-						Graphics()->RenderQuadContainerAsSprite(m_WeaponSpriteMuzzleQuadContainerIndex[CurrentWeapon], QuadOffset, WeaponPosition.x, WeaponPosition.y);
+						Graphics()->TextureSet(GameClient()->m_GameSkin.m_aaSpriteWeaponsMuzzles[CurrentWeapon][IteX]);
+						Graphics()->RenderQuadContainerAsSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[CurrentWeapon], QuadOffset, WeaponPosition.x, WeaponPosition.y);
 					}
 				}
 			}
@@ -605,8 +604,8 @@ void CPlayers::RenderPlayer(
 
 						vec2 DirY(-Dir.y, Dir.x);
 						vec2 MuzzlePos = WeaponPosition + Dir * g_pData->m_Weapons.m_aId[CurrentWeapon].m_Muzzleoffsetx + DirY * OffsetY;
-						Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeaponsMuzzles[CurrentWeapon][IteX]);
-						Graphics()->RenderQuadContainerAsSprite(m_WeaponSpriteMuzzleQuadContainerIndex[CurrentWeapon], QuadOffset, MuzzlePos.x, MuzzlePos.y);
+						Graphics()->TextureSet(GameClient()->m_GameSkin.m_aaSpriteWeaponsMuzzles[CurrentWeapon][IteX]);
+						Graphics()->RenderQuadContainerAsSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[CurrentWeapon], QuadOffset, MuzzlePos.x, MuzzlePos.y);
 					}
 				}
 			}
@@ -662,7 +661,7 @@ void CPlayers::RenderPlayer(
 	if(ClientID < 0)
 		return;
 
-	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Client()->DummyConnected() && ClientID == m_pClient->m_LocalIDs[!g_Config.m_ClDummy]))
+	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientID].m_Afk && !(Client()->DummyConnected() && ClientID == m_pClient->m_aLocalIDs[!g_Config.m_ClDummy]))
 	{
 		int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
 		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[CurEmoticon]);
@@ -864,7 +863,7 @@ void CPlayers::OnInit()
 
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
-		m_WeaponSpriteMuzzleQuadContainerIndex[i] = Graphics()->CreateQuadContainer(false);
+		m_aWeaponSpriteMuzzleQuadContainerIndex[i] = Graphics()->CreateQuadContainer(false);
 		for(int n = 0; n < g_pData->m_Weapons.m_aId[i].m_NumSpriteMuzzles; ++n)
 		{
 			if(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n])
@@ -883,17 +882,17 @@ void CPlayers::OnInit()
 
 			Graphics()->QuadsSetSubset(0, 0, 1, 1);
 			if(WEAPON_NINJA == i)
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
+				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
+				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
 
 			Graphics()->QuadsSetSubset(0, 1, 1, 0);
 			if(WEAPON_NINJA == i)
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
+				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_WeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
+				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
 		}
-		Graphics()->QuadContainerUpload(m_WeaponSpriteMuzzleQuadContainerIndex[i]);
+		Graphics()->QuadContainerUpload(m_aWeaponSpriteMuzzleQuadContainerIndex[i]);
 	}
 
 	Graphics()->QuadsSetSubset(0.f, 0.f, 1.f, 1.f);

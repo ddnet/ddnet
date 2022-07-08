@@ -1021,8 +1021,8 @@ void CConsole::Init()
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	{ \
-		static char OldValue[Len] = Def; \
-		static CStrVariableData Data = {this, g_Config.m_##Name, Len, OldValue}; \
+		static char s_aOldValue[Len] = Def; \
+		static CStrVariableData Data = {this, g_Config.m_##Name, Len, s_aOldValue}; \
 		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc " (default: " #Def ", max length: " #Len ")"); \
 	}
 

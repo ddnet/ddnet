@@ -61,7 +61,7 @@ public:
 
 	void OnGameRichPresenceJoinRequested(GameRichPresenceJoinRequested_t *pEvent)
 	{
-		ParseConnectString(pEvent->m_rgchConnect);
+		ParseConnectString(pEvent->m_aRGCHConnect);
 	}
 
 	const char *GetPlayerName() override

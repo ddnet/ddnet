@@ -190,17 +190,17 @@ void CGameWorld::UpdatePlayerMaps()
 				Dist[j].first = 1e10;
 				continue;
 			}
-			CCharacter *ch = GameServer()->m_apPlayers[j]->GetCharacter();
-			if(!ch)
+			CCharacter *pChr = GameServer()->m_apPlayers[j]->GetCharacter();
+			if(!pChr)
 			{
 				Dist[j].first = 1e9;
 				continue;
 			}
 			// copypasted chunk from character.cpp Snap() follows
-			CCharacter *SnapChar = GameServer()->GetPlayerChar(i);
-			if(SnapChar && !SnapChar->m_Super &&
+			CCharacter *pSnapChar = GameServer()->GetPlayerChar(i);
+			if(pSnapChar && !pSnapChar->m_Super &&
 				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
-				!ch->CanCollide(i) &&
+				!pChr->CanCollide(i) &&
 				(!GameServer()->m_apPlayers[i] ||
 					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
 					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
@@ -217,8 +217,8 @@ void CGameWorld::UpdatePlayerMaps()
 		Dist[i].first = 0;
 
 		// compute reverse map
-		int rMap[MAX_CLIENTS];
-		for(int &j : rMap)
+		int aReverseMap[MAX_CLIENTS];
+		for(int &j : aReverseMap)
 		{
 			j = -1;
 		}
@@ -229,7 +229,7 @@ void CGameWorld::UpdatePlayerMaps()
 			if(Dist[pMap[j]].first > 5e9f)
 				pMap[j] = -1;
 			else
-				rMap[pMap[j]] = j;
+				aReverseMap[pMap[j]] = j;
 		}
 
 		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
@@ -239,7 +239,7 @@ void CGameWorld::UpdatePlayerMaps()
 		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
 			int k = Dist[j].second;
-			if(rMap[k] != -1 || Dist[j].first > 5e9f)
+			if(aReverseMap[k] != -1 || Dist[j].first > 5e9f)
 				continue;
 			while(Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1)
 				Mapc++;
@@ -251,8 +251,8 @@ void CGameWorld::UpdatePlayerMaps()
 		for(int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
 		{
 			int k = Dist[j].second;
-			if(rMap[k] != -1 && Demand-- > 0)
-				pMap[rMap[k]] = -1;
+			if(aReverseMap[k] != -1 && Demand-- > 0)
+				pMap[aReverseMap[k]] = -1;
 		}
 		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 	}
@@ -416,12 +416,12 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		CCharacterCore *Core = pChr->Core();
-		if(Core->m_HookedPlayer == ClientID && !pChr->m_Super)
+		CCharacterCore *pCore = pChr->Core();
+		if(pCore->m_HookedPlayer == ClientID && !pChr->m_Super)
 		{
-			Core->SetHookedPlayer(-1);
-			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
-			Core->m_HookState = HOOK_RETRACTED;
+			pCore->SetHookedPlayer(-1);
+			pCore->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			pCore->m_HookState = HOOK_RETRACTED;
 		}
 	}
 }

@@ -234,7 +234,7 @@ public:
 	void SendSettings(int ClientID);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
 
-	void List(int ClientID, const char *filter);
+	void List(int ClientID, const char *pFilter);
 
 	//
 	void CheckPureTuning();
@@ -257,7 +257,7 @@ public:
 	void OnSnap(int ClientID) override;
 	void OnPostSnap() override;
 
-	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
+	void *PreProcessMsg(int *pMsgID, CUnpacker *pUnpacker, int ClientID);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
 	void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) override;
 

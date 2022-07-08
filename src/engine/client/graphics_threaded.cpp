@@ -1212,7 +1212,7 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset)
+void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset)
 {
 	if(NumIndicesOffset == 0)
 		return;
@@ -1224,32 +1224,32 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRG
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
 	Cmd.m_Color = Color;
 
-	void *Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
-	if(Data == 0x0)
+	void *pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
+	if(pData == 0x0)
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
-		if(Data == 0x0)
+		pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
+		if(pData == 0x0)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
 			return;
 		}
 	}
-	Cmd.m_pIndicesOffsets = (char **)Data;
-	Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffset));
+	Cmd.m_pIndicesOffsets = (char **)pData;
+	Cmd.m_pDrawCount = (unsigned int *)(((char *)pData) + (sizeof(char *) * NumIndicesOffset));
 
 	if(!AddCmd(
 		   Cmd, [&] {
-			   Data = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
-			   if(Data == 0x0)
+			   pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
+			   if(pData == 0x0)
 			   {
 				   dbg_msg("graphics", "failed to allocate data for vertices");
 				   return false;
 			   }
-			   Cmd.m_pIndicesOffsets = (char **)Data;
-			   Cmd.m_pDrawCount = (unsigned int *)(((char *)Data) + (sizeof(char *) * NumIndicesOffset));
+			   Cmd.m_pIndicesOffsets = (char **)pData;
+			   Cmd.m_pDrawCount = (unsigned int *)(((char *)pData) + (sizeof(char *) * NumIndicesOffset));
 			   return true;
 		   },
 		   "failed to allocate memory for render command"))
@@ -1258,7 +1258,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRG
 	}
 
 	mem_copy(Cmd.m_pIndicesOffsets, pOffsets, sizeof(char *) * NumIndicesOffset);
-	mem_copy(Cmd.m_pDrawCount, IndicedVertexDrawNum, sizeof(unsigned int) * NumIndicesOffset);
+	mem_copy(Cmd.m_pDrawCount, pIndicedVertexDrawNum, sizeof(unsigned int) * NumIndicesOffset);
 
 	m_pCommandBuffer->AddRenderCalls(NumIndicesOffset);
 	// todo max indices group check!!
@@ -2058,8 +2058,8 @@ void CGraphics_Threaded::CopyBufferObjectInternal(int WriteBufferIndex, int Read
 	CCommandBuffer::SCommand_CopyBufferObject Cmd;
 	Cmd.m_WriteBufferIndex = WriteBufferIndex;
 	Cmd.m_ReadBufferIndex = ReadBufferIndex;
-	Cmd.m_pWriteOffset = WriteOffset;
-	Cmd.m_pReadOffset = ReadOffset;
+	Cmd.m_WriteOffset = WriteOffset;
+	Cmd.m_ReadOffset = ReadOffset;
 	Cmd.m_CopySize = CopyDataSize;
 
 	if(!AddCmd(
@@ -2093,14 +2093,14 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	int Index = -1;
 	if(m_FirstFreeVertexArrayInfo == -1)
 	{
-		Index = m_VertexArrayInfo.size();
-		m_VertexArrayInfo.emplace_back();
+		Index = m_vVertexArrayInfo.size();
+		m_vVertexArrayInfo.emplace_back();
 	}
 	else
 	{
 		Index = m_FirstFreeVertexArrayInfo;
-		m_FirstFreeVertexArrayInfo = m_VertexArrayInfo[Index].m_FreeIndex;
-		m_VertexArrayInfo[Index].m_FreeIndex = Index;
+		m_FirstFreeVertexArrayInfo = m_vVertexArrayInfo[Index].m_FreeIndex;
+		m_vVertexArrayInfo[Index].m_FreeIndex = Index;
 	}
 
 	CCommandBuffer::SCommand_CreateBufferContainer Cmd;
@@ -2130,7 +2130,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 
 	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_vAttributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
-	m_VertexArrayInfo[Index].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
+	m_vVertexArrayInfo[Index].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
 
 	return Index;
 }
@@ -2152,7 +2152,7 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 	if(DestroyAllBO)
 	{
 		// delete all associated references
-		int BufferObjectIndex = m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex;
+		int BufferObjectIndex = m_vVertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex;
 		if(BufferObjectIndex != -1)
 		{
 			// clear the buffer object index
@@ -2160,10 +2160,10 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 			m_FirstFreeBufferObjectIndex = BufferObjectIndex;
 		}
 	}
-	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = -1;
+	m_vVertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = -1;
 
 	// also clear the buffer object index
-	m_VertexArrayInfo[ContainerIndex].m_FreeIndex = m_FirstFreeVertexArrayInfo;
+	m_vVertexArrayInfo[ContainerIndex].m_FreeIndex = m_FirstFreeVertexArrayInfo;
 	m_FirstFreeVertexArrayInfo = ContainerIndex;
 }
 
@@ -2196,7 +2196,7 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 
 	mem_copy(Cmd.m_pAttributes, pContainerInfo->m_vAttributes.data(), Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
 
-	m_VertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
+	m_vVertexArrayInfo[ContainerIndex].m_AssociatedBufferObjectIndex = pContainerInfo->m_VertBufferBindingIndex;
 }
 
 void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCount)

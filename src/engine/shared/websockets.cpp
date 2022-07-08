@@ -251,9 +251,9 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 		return -1;
 	}
 	context_data *ctx_data = (context_data *)lws_context_user(context);
-	char buf[100];
-	snprintf(buf, sizeof(buf), "%s:%d", addr_str, port);
-	std::string addr_str_with_port = std::string(buf);
+	char aBuf[100];
+	snprintf(aBuf, sizeof(aBuf), "%s:%d", addr_str, port);
+	std::string addr_str_with_port = std::string(aBuf);
 	struct per_session_data *pss = ctx_data->port_map[addr_str_with_port];
 	if(pss == NULL)
 	{

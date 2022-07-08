@@ -24,16 +24,16 @@ void CDebugHud::RenderNetCorrections()
 	float Velspeed = length(vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * TicksPerSecond;
 	float VelspeedX = m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f * TicksPerSecond;
 	float VelspeedY = m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f * TicksPerSecond;
-	float Ramp = VelocityRamp(Velspeed, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
+	float Ramp = VelocityRamp(Velspeed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
 
-	const char *apStrings[] = {"velspeed:", "velspeed.x*ramp:", "velspeed.y:", "ramp:", "checkpoint:", "Pos", " x:", " y:", "angle:", "netobj corrections", " num:", " on:"};
-	const int Num = std::size(apStrings);
+	static const char *s_apStrings[] = {"velspeed:", "velspeed.x*ramp:", "velspeed.y:", "ramp:", "checkpoint:", "Pos", " x:", " y:", "angle:", "netobj corrections", " num:", " on:"};
+	const int Num = std::size(s_apStrings);
 	const float LineHeight = 6.0f;
 	const float Fontsize = 5.0f;
 
 	float x = Width - 100.0f, y = 50.0f;
 	for(int i = 0; i < Num; ++i)
-		TextRender()->Text(0, x, y + i * LineHeight, Fontsize, apStrings[i], -1.0f);
+		TextRender()->Text(0, x, y + i * LineHeight, Fontsize, s_apStrings[i], -1.0f);
 
 	x = Width - 10.0f;
 	char aBuf[128];
@@ -97,7 +97,7 @@ void CDebugHud::RenderTuning()
 	{
 		char aBuf[128];
 		float Current, Standard;
-		m_pClient->m_Tuning[g_Config.m_ClDummy].Get(i, &Current);
+		m_pClient->m_aTuning[g_Config.m_ClDummy].Get(i, &Current);
 		StandardTuning.Get(i, &Standard);
 
 		if(Standard == Current)
@@ -132,14 +132,14 @@ void CDebugHud::RenderTuning()
 	float GraphX = GraphW;
 	float GraphY = Graphics()->ScreenHeight() - GraphH - sp;
 
-	CTuningParams *ClinetTuning = &m_pClient->m_Tuning[g_Config.m_ClDummy];
+	CTuningParams *pClientTuning = &m_pClient->m_aTuning[g_Config.m_ClDummy];
 	const int StepSizeRampGraph = 270;
 	const int StepSizeZoomedInGraph = 14;
-	if(m_OldVelrampStart != ClinetTuning->m_VelrampStart || m_OldVelrampRange != ClinetTuning->m_VelrampRange || m_OldVelrampCurvature != ClinetTuning->m_VelrampCurvature)
+	if(m_OldVelrampStart != pClientTuning->m_VelrampStart || m_OldVelrampRange != pClientTuning->m_VelrampRange || m_OldVelrampCurvature != pClientTuning->m_VelrampCurvature)
 	{
-		m_OldVelrampStart = ClinetTuning->m_VelrampStart;
-		m_OldVelrampRange = ClinetTuning->m_VelrampRange;
-		m_OldVelrampCurvature = ClinetTuning->m_VelrampCurvature;
+		m_OldVelrampStart = pClientTuning->m_VelrampStart;
+		m_OldVelrampRange = pClientTuning->m_VelrampRange;
+		m_OldVelrampCurvature = pClientTuning->m_VelrampCurvature;
 
 		m_RampGraph.Init(0.0f, 0.0f);
 		m_SpeedTurningPoint = 0;
@@ -149,7 +149,7 @@ void CDebugHud::RenderTuning()
 		{
 			// This is a calculation of the speed values per second on the X axis, from 270 to 34560 in steps of 270
 			float Speed = (i + 1) * StepSizeRampGraph;
-			float Ramp = VelocityRamp(Speed, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
+			float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
 			float RampedSpeed = Speed * Ramp;
 			if(RampedSpeed >= pv)
 			{
@@ -172,7 +172,7 @@ void CDebugHud::RenderTuning()
 		{
 			// This is a calculation of the speed values per second on the X axis, from (MiddleOfZoomedInGraph - 64 * StepSize) to (MiddleOfZoomedInGraph + 64 * StepSize)
 			float Speed = MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
-			float Ramp = VelocityRamp(Speed, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_Tuning[g_Config.m_ClDummy].m_VelrampCurvature);
+			float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
 			float RampedSpeed = Speed * Ramp;
 			if(RampedSpeed >= pv)
 			{

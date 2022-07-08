@@ -28,11 +28,11 @@ private:
 	int m_RedFlagOffset;
 	int m_PickupHealthOffset;
 	int m_PickupArmorOffset;
-	int m_PickupWeaponOffset[NUM_WEAPONS];
+	int m_aPickupWeaponOffset[NUM_WEAPONS];
 	int m_PickupNinjaOffset;
-	int m_PickupWeaponArmorOffset[4];
-	int m_ProjectileOffset[NUM_WEAPONS];
-	int m_ParticleSplatOffset[3];
+	int m_aPickupWeaponArmorOffset[4];
+	int m_aProjectileOffset[NUM_WEAPONS];
+	int m_aParticleSplatOffset[3];
 };
 
 #endif

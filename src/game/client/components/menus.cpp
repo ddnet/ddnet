@@ -442,12 +442,12 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
-int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color)
+int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *pColor)
 {
 	// logic
 	static float s_Value;
-	static char s_NumStr[64];
-	static void *s_LastTextpID = pID;
+	static char s_aNumStr[64];
+	static void *s_pLastTextpID = pID;
 	const bool Inside = UI()->MouseInside(pRect);
 
 	if(Inside)
@@ -455,12 +455,12 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 
 	if(UI()->MouseButtonReleased(1) && UI()->HotItem() == pID)
 	{
-		s_LastTextpID = pID;
+		s_pLastTextpID = pID;
 		ms_ValueSelectorTextMode = true;
 		if(IsHex)
-			str_format(s_NumStr, sizeof(s_NumStr), "%06X", Current);
+			str_format(s_aNumStr, sizeof(s_aNumStr), "%06X", Current);
 		else
-			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
+			str_format(s_aNumStr, sizeof(s_aNumStr), "%d", Current);
 	}
 
 	if(UI()->CheckActiveItem(pID))
@@ -473,10 +473,10 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 		}
 	}
 
-	if(ms_ValueSelectorTextMode && s_LastTextpID == pID)
+	if(ms_ValueSelectorTextMode && s_pLastTextpID == pID)
 	{
 		static float s_NumberBoxID = 0;
-		UIEx()->DoEditBox(&s_NumberBoxID, pRect, s_NumStr, sizeof(s_NumStr), 10.0f, &s_NumberBoxID, false, CUI::CORNER_ALL);
+		UIEx()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, CUI::CORNER_ALL);
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
@@ -484,9 +484,9 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			((UI()->MouseButtonClicked(1) || UI()->MouseButtonClicked(0)) && !Inside))
 		{
 			if(IsHex)
-				Current = clamp(str_toint_base(s_NumStr, 16), Min, Max);
+				Current = clamp(str_toint_base(s_aNumStr, 16), Min, Max);
 			else
-				Current = clamp(str_toint(s_NumStr), Min, Max);
+				Current = clamp(str_toint(s_aNumStr), Min, Max);
 			//m_LockMouse = false;
 			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
@@ -556,14 +556,14 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			else
 				str_format(aBuf, sizeof(aBuf), "%d", Current);
 		}
-		RenderTools()->DrawUIRect(pRect, *Color, CUI::CORNER_ALL, Round);
+		RenderTools()->DrawUIRect(pRect, *pColor, CUI::CORNER_ALL, Round);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_CENTER);
 	}
 
 	return Current;
 }
 
-int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination)
+int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
 {
 	// process
 	static void *pGrabbedID = 0;
@@ -571,7 +571,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	static int s_ButtonUsed = 0;
 	const bool Inside = UI()->MouseHovered(pRect);
 	int NewKey = Key;
-	*NewModifierCombination = ModifierCombination;
+	*pNewModifierCombination = ModifierCombination;
 
 	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
 		MouseReleased = true;
@@ -584,7 +584,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
 			{
 				NewKey = m_Binder.m_Key.m_Key;
-				*NewModifierCombination = m_Binder.m_ModifierCombination;
+				*pNewModifierCombination = m_Binder.m_ModifierCombination;
 			}
 			m_Binder.m_GotKey = false;
 			UI()->SetActiveItem(nullptr);
@@ -630,8 +630,8 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		if(Key)
 		{
 			char aBuf[64];
-			if(*NewModifierCombination)
-				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*NewModifierCombination), Input()->KeyName(Key));
+			if(*pNewModifierCombination)
+				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(Key));
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", Input()->KeyName(Key));
 
@@ -2710,7 +2710,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		CMenuImage MenuImage;
 		MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
-		unsigned char *d = (unsigned char *)Info.m_pData;
+		unsigned char *pData = (unsigned char *)Info.m_pData;
 		//int Pitch = Info.m_Width*4;
 
 		// create colorless version
@@ -2719,10 +2719,10 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		// make the texture gray scale
 		for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
 		{
-			int v = (d[i * Step] + d[i * Step + 1] + d[i * Step + 2]) / 3;
-			d[i * Step] = v;
-			d[i * Step + 1] = v;
-			d[i * Step + 2] = v;
+			int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
+			pData[i * Step] = v;
+			pData[i * Step + 1] = v;
+			pData[i * Step + 2] = v;
 		}
 
 		MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);

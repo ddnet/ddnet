@@ -21,7 +21,7 @@ struct CSkin
 		IGraphics::CTextureHandle m_Hands;
 		IGraphics::CTextureHandle m_HandsOutline;
 
-		IGraphics::CTextureHandle m_Eyes[6];
+		IGraphics::CTextureHandle m_aEyes[6];
 
 		void Reset()
 		{
@@ -31,7 +31,7 @@ struct CSkin
 			m_FeetOutline = IGraphics::CTextureHandle();
 			m_Hands = IGraphics::CTextureHandle();
 			m_HandsOutline = IGraphics::CTextureHandle();
-			for(auto &Eye : m_Eyes)
+			for(auto &Eye : m_aEyes)
 				Eye = IGraphics::CTextureHandle();
 		}
 	};

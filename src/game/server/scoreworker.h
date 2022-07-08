@@ -18,7 +18,7 @@ class IGameController;
 
 enum
 {
-	NUM_CHECKPOINTS = 25,
+	NUM_CHECKPOINTS = MAX_CHECKPOINTS,
 	TIMESTAMP_STR_LENGTH = 20, // 2019-04-02 19:38:36
 };
 
@@ -149,9 +149,9 @@ struct CSqlScoreData : ISqlData
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerID, IGameController *Controller) :
+	CScoreSaveResult(int PlayerID, IGameController *pController) :
 		m_Status(SAVE_FAILED),
-		m_SavedTeam(CSaveTeam(Controller)),
+		m_SavedTeam(CSaveTeam(pController)),
 		m_RequestingPlayer(PlayerID)
 	{
 		m_aMessage[0] = '\0';

@@ -47,8 +47,8 @@ unsigned int CPrng::RandomBits()
 	uint64_t x = m_State;
 	unsigned int Count = x >> 59;
 
-	static const uint64_t MULTIPLIER = 6364136223846793005u;
-	m_State = x * MULTIPLIER + m_Increment;
+	static const uint64_t s_Multiplier = 6364136223846793005u;
+	m_State = x * s_Multiplier + m_Increment;
 	x ^= x >> 18;
 	return RotateRight32(x >> 27, Count);
 }

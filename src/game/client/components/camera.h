@@ -22,7 +22,7 @@ class CCamera : public CComponent
 	};
 
 	int m_CamType;
-	vec2 m_LastPos[NUM_DUMMIES];
+	vec2 m_aLastPos[NUM_DUMMIES];
 	vec2 m_PrevCenter;
 
 	CCubicBezier m_ZoomSmoothing;

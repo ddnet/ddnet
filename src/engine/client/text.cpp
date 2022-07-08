@@ -62,7 +62,7 @@ struct STextCharQuadVertex
 
 struct STextCharQuad
 {
-	STextCharQuadVertex m_Vertices[4];
+	STextCharQuadVertex m_aVertices[4];
 };
 
 struct STextureSkyline
@@ -89,8 +89,8 @@ public:
 	~CFont()
 	{
 		free(m_pBuf);
-		delete[] m_TextureData[0];
-		delete[] m_TextureData[1];
+		delete[] m_apTextureData[0];
+		delete[] m_apTextureData[1];
 		for(auto &FtFallbackFont : m_vFtFallbackFonts)
 		{
 			free(FtFallbackFont.m_pBuf);
@@ -131,12 +131,12 @@ public:
 
 	IGraphics::CTextureHandle m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
-	uint8_t *m_TextureData[2];
+	uint8_t *m_apTextureData[2];
 
 	// width and height are the same
-	int m_CurTextureDimensions[2];
+	int m_aCurTextureDimensions[2];
 
-	STextureSkyline m_TextureSkyline[2];
+	STextureSkyline m_aTextureSkyline[2];
 };
 
 struct STextString
@@ -339,29 +339,29 @@ class CTextRender : public IEngineTextRender
 		unsigned char *pTmpTexBuffer = new unsigned char[NewDimensions * NewDimensions];
 		mem_zero(pTmpTexBuffer, (size_t)NewDimensions * NewDimensions * sizeof(unsigned char));
 
-		for(int y = 0; y < pFont->m_CurTextureDimensions[TextureIndex]; ++y)
+		for(int y = 0; y < pFont->m_aCurTextureDimensions[TextureIndex]; ++y)
 		{
-			for(int x = 0; x < pFont->m_CurTextureDimensions[TextureIndex]; ++x)
+			for(int x = 0; x < pFont->m_aCurTextureDimensions[TextureIndex]; ++x)
 			{
-				pTmpTexBuffer[x + y * NewDimensions] = pFont->m_TextureData[TextureIndex][x + y * pFont->m_CurTextureDimensions[TextureIndex]];
+				pTmpTexBuffer[x + y * NewDimensions] = pFont->m_apTextureData[TextureIndex][x + y * pFont->m_aCurTextureDimensions[TextureIndex]];
 			}
 		}
 
-		delete[] pFont->m_TextureData[TextureIndex];
-		pFont->m_TextureData[TextureIndex] = pTmpTexBuffer;
-		pFont->m_CurTextureDimensions[TextureIndex] = NewDimensions;
-		pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn.resize(NewDimensions, 0);
+		delete[] pFont->m_apTextureData[TextureIndex];
+		pFont->m_apTextureData[TextureIndex] = pTmpTexBuffer;
+		pFont->m_aCurTextureDimensions[TextureIndex] = NewDimensions;
+		pFont->m_aTextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn.resize(NewDimensions, 0);
 	}
 
 	void IncreaseFontTexture(CFont *pFont)
 	{
-		int NewDimensions = pFont->m_CurTextureDimensions[0] * 2;
+		int NewDimensions = pFont->m_aCurTextureDimensions[0] * 2;
 		UnloadTextures(pFont->m_aTextures);
 
 		IncreaseFontTextureImpl(pFont, 0, NewDimensions);
 		IncreaseFontTextureImpl(pFont, 1, NewDimensions);
 
-		InitTextures(NewDimensions, NewDimensions, pFont->m_aTextures, pFont->m_TextureData);
+		InitTextures(NewDimensions, NewDimensions, pFont->m_aTextures, pFont->m_apTextureData);
 	}
 
 	int AdjustOutlineThicknessToFontSize(int OutlineThickness, int FontSize)
@@ -379,7 +379,7 @@ class CTextRender : public IEngineTextRender
 		{
 			for(int x = 0; x < Width; ++x)
 			{
-				pFont->m_TextureData[TextureIndex][x + PosX + ((y + PosY) * pFont->m_CurTextureDimensions[TextureIndex])] = pData[x + y * Width];
+				pFont->m_apTextureData[TextureIndex][x + PosX + ((y + PosY) * pFont->m_aCurTextureDimensions[TextureIndex])] = pData[x + y * Width];
 			}
 		}
 		Graphics()->UpdateTextTexture(pFont->m_aTextures[TextureIndex], PosX, PosY, Width, Height, pData);
@@ -391,18 +391,18 @@ class CTextRender : public IEngineTextRender
 
 	bool GetCharacterSpace(CFont *pFont, int TextureIndex, int Width, int Height, int &PosX, int &PosY)
 	{
-		if(pFont->m_CurTextureDimensions[TextureIndex] < Width)
+		if(pFont->m_aCurTextureDimensions[TextureIndex] < Width)
 			return false;
-		if(pFont->m_CurTextureDimensions[TextureIndex] < Height)
+		if(pFont->m_aCurTextureDimensions[TextureIndex] < Height)
 			return false;
 
 		// skyline bottom left algorithm
-		std::vector<int> &vSkylineHeights = pFont->m_TextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
+		std::vector<int> &vSkylineHeights = pFont->m_aTextureSkyline[TextureIndex].m_vCurHeightOfPixelColumn;
 
 		// search a fitting area with less pixel loss
 		int SmallestPixelLossAreaX = 0;
-		int SmallestPixelLossAreaY = pFont->m_CurTextureDimensions[TextureIndex] + 1;
-		int SmallestPixelLossCurPixelLoss = pFont->m_CurTextureDimensions[TextureIndex] * pFont->m_CurTextureDimensions[TextureIndex];
+		int SmallestPixelLossAreaY = pFont->m_aCurTextureDimensions[TextureIndex] + 1;
+		int SmallestPixelLossCurPixelLoss = pFont->m_aCurTextureDimensions[TextureIndex] * pFont->m_aCurTextureDimensions[TextureIndex];
 
 		bool FoundAnyArea = false;
 		for(size_t i = 0; i < vSkylineHeights.size(); i++)
@@ -431,7 +431,7 @@ class CTextRender : public IEngineTextRender
 			}
 
 			// if the area is too high, continue
-			if(CurHeight + Height > pFont->m_CurTextureDimensions[TextureIndex])
+			if(CurHeight + Height > pFont->m_aCurTextureDimensions[TextureIndex])
 				continue;
 			// if the found area fits our needs, check if we can use it
 			if(AreaWidth == Width)
@@ -719,17 +719,17 @@ public:
 		dbg_msg("textrender", "loaded font from '%s'", pFilename);
 
 		pFont->m_pBuf = (void *)pBuf;
-		pFont->m_CurTextureDimensions[0] = 1024;
-		pFont->m_TextureData[0] = new unsigned char[pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0]];
-		mem_zero(pFont->m_TextureData[0], (size_t)pFont->m_CurTextureDimensions[0] * pFont->m_CurTextureDimensions[0] * sizeof(unsigned char));
-		pFont->m_CurTextureDimensions[1] = 1024;
-		pFont->m_TextureData[1] = new unsigned char[pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1]];
-		mem_zero(pFont->m_TextureData[1], (size_t)pFont->m_CurTextureDimensions[1] * pFont->m_CurTextureDimensions[1] * sizeof(unsigned char));
+		pFont->m_aCurTextureDimensions[0] = 1024;
+		pFont->m_apTextureData[0] = new unsigned char[pFont->m_aCurTextureDimensions[0] * pFont->m_aCurTextureDimensions[0]];
+		mem_zero(pFont->m_apTextureData[0], (size_t)pFont->m_aCurTextureDimensions[0] * pFont->m_aCurTextureDimensions[0] * sizeof(unsigned char));
+		pFont->m_aCurTextureDimensions[1] = 1024;
+		pFont->m_apTextureData[1] = new unsigned char[pFont->m_aCurTextureDimensions[1] * pFont->m_aCurTextureDimensions[1]];
+		mem_zero(pFont->m_apTextureData[1], (size_t)pFont->m_aCurTextureDimensions[1] * pFont->m_aCurTextureDimensions[1] * sizeof(unsigned char));
 
-		InitTextures(pFont->m_CurTextureDimensions[0], pFont->m_CurTextureDimensions[0], pFont->m_aTextures, pFont->m_TextureData);
+		InitTextures(pFont->m_aCurTextureDimensions[0], pFont->m_aCurTextureDimensions[0], pFont->m_aTextures, pFont->m_apTextureData);
 
-		pFont->m_TextureSkyline[0].m_vCurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[0], 0);
-		pFont->m_TextureSkyline[1].m_vCurHeightOfPixelColumn.resize(pFont->m_CurTextureDimensions[1], 0);
+		pFont->m_aTextureSkyline[0].m_vCurHeightOfPixelColumn.resize(pFont->m_aCurTextureDimensions[0], 0);
+		pFont->m_aTextureSkyline[1].m_vCurHeightOfPixelColumn.resize(pFont->m_aCurTextureDimensions[1], 0);
 
 		pFont->InitFontSizes();
 
@@ -1090,7 +1090,7 @@ public:
 
 		bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
-		IGraphics::CQuadItem CursorQuads[2];
+		IGraphics::CQuadItem aCursorQuads[2];
 		bool HasCursor = false;
 
 		float CursorInnerWidth = (((ScreenX1 - ScreenX0) / Graphics()->ScreenWidth())) * 2;
@@ -1305,41 +1305,41 @@ public:
 						TextContainer.m_StringInfo.m_vCharacterQuads.emplace_back();
 						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads.back();
 
-						TextCharQuad.m_Vertices[0].m_X = CharX;
-						TextCharQuad.m_Vertices[0].m_Y = CharY;
-						TextCharQuad.m_Vertices[0].m_U = pChr->m_aUVs[0];
-						TextCharQuad.m_Vertices[0].m_V = pChr->m_aUVs[3];
-						TextCharQuad.m_Vertices[0].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_Vertices[0].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_Vertices[0].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_Vertices[0].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[0].m_X = CharX;
+						TextCharQuad.m_aVertices[0].m_Y = CharY;
+						TextCharQuad.m_aVertices[0].m_U = pChr->m_aUVs[0];
+						TextCharQuad.m_aVertices[0].m_V = pChr->m_aUVs[3];
+						TextCharQuad.m_aVertices[0].m_Color.r = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.g = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.b = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.a = (unsigned char)(m_Color.a * 255.f);
 
-						TextCharQuad.m_Vertices[1].m_X = CharX + CharWidth;
-						TextCharQuad.m_Vertices[1].m_Y = CharY;
-						TextCharQuad.m_Vertices[1].m_U = pChr->m_aUVs[2];
-						TextCharQuad.m_Vertices[1].m_V = pChr->m_aUVs[3];
-						TextCharQuad.m_Vertices[1].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_Vertices[1].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_Vertices[1].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_Vertices[1].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[1].m_X = CharX + CharWidth;
+						TextCharQuad.m_aVertices[1].m_Y = CharY;
+						TextCharQuad.m_aVertices[1].m_U = pChr->m_aUVs[2];
+						TextCharQuad.m_aVertices[1].m_V = pChr->m_aUVs[3];
+						TextCharQuad.m_aVertices[1].m_Color.r = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.g = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.b = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.a = (unsigned char)(m_Color.a * 255.f);
 
-						TextCharQuad.m_Vertices[2].m_X = CharX + CharWidth;
-						TextCharQuad.m_Vertices[2].m_Y = CharY - CharHeight;
-						TextCharQuad.m_Vertices[2].m_U = pChr->m_aUVs[2];
-						TextCharQuad.m_Vertices[2].m_V = pChr->m_aUVs[1];
-						TextCharQuad.m_Vertices[2].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_Vertices[2].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_Vertices[2].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_Vertices[2].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[2].m_X = CharX + CharWidth;
+						TextCharQuad.m_aVertices[2].m_Y = CharY - CharHeight;
+						TextCharQuad.m_aVertices[2].m_U = pChr->m_aUVs[2];
+						TextCharQuad.m_aVertices[2].m_V = pChr->m_aUVs[1];
+						TextCharQuad.m_aVertices[2].m_Color.r = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.g = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.b = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.a = (unsigned char)(m_Color.a * 255.f);
 
-						TextCharQuad.m_Vertices[3].m_X = CharX;
-						TextCharQuad.m_Vertices[3].m_Y = CharY - CharHeight;
-						TextCharQuad.m_Vertices[3].m_U = pChr->m_aUVs[0];
-						TextCharQuad.m_Vertices[3].m_V = pChr->m_aUVs[1];
-						TextCharQuad.m_Vertices[3].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_Vertices[3].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_Vertices[3].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_Vertices[3].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[3].m_X = CharX;
+						TextCharQuad.m_aVertices[3].m_Y = CharY - CharHeight;
+						TextCharQuad.m_aVertices[3].m_U = pChr->m_aUVs[0];
+						TextCharQuad.m_aVertices[3].m_V = pChr->m_aUVs[1];
+						TextCharQuad.m_aVertices[3].m_Color.r = (unsigned char)(m_Color.r * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.g = (unsigned char)(m_Color.g * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.b = (unsigned char)(m_Color.b * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.a = (unsigned char)(m_Color.a * 255.f);
 					}
 
 					// calculate the full width from the last selection point to the end of this selection draw on screen
@@ -1389,8 +1389,8 @@ public:
 						if((int)CharacterCounter == pCursor->m_CursorCharacter)
 						{
 							HasCursor = true;
-							CursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
-							CursorQuads[1] = IGraphics::CQuadItem(SelX, DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+							aCursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
+							aCursorQuads[1] = IGraphics::CQuadItem(SelX, DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
 						}
 					}
 
@@ -1483,8 +1483,8 @@ public:
 			if((int)CharacterCounter == pCursor->m_CursorCharacter)
 			{
 				HasCursor = true;
-				CursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
-				CursorQuads[1] = IGraphics::CQuadItem((LastSelX + LastSelWidth), DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+				aCursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
+				aCursorQuads[1] = IGraphics::CQuadItem((LastSelX + LastSelWidth), DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
 			}
 		}
 
@@ -1495,7 +1495,7 @@ public:
 			if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
 				TextContainer.m_StringInfo.m_SelectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 			if(HasCursor)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, CursorQuads, 2);
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, 2);
 			if(HasSelection)
 				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &vSelectionQuads[0], (int)vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
@@ -1591,12 +1591,12 @@ public:
 			{
 				Graphics()->TextureClear();
 				// render buffered text
-				Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_CurTextureDimensions[0], pFont->m_aTextures[0].Id(), pFont->m_aTextures[1].Id(), TextColor, TextOutlineColor);
+				Graphics()->RenderText(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, TextContainer.m_StringInfo.m_QuadNum, pFont->m_aCurTextureDimensions[0], pFont->m_aTextures[0].Id(), pFont->m_aTextures[1].Id(), TextColor, TextOutlineColor);
 			}
 			else
 			{
 				// render tiles
-				float UVScale = 1.0f / pFont->m_CurTextureDimensions[0];
+				float UVScale = 1.0f / pFont->m_aCurTextureDimensions[0];
 
 				Graphics()->FlushVertices();
 				Graphics()->TextureSet(pFont->m_aTextures[1]);
@@ -1607,10 +1607,10 @@ public:
 				{
 					STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads[i];
 
-					Graphics()->SetColor(TextCharQuad.m_Vertices[0].m_Color.r / 255.f * TextOutlineColor.r, TextCharQuad.m_Vertices[0].m_Color.g / 255.f * TextOutlineColor.g, TextCharQuad.m_Vertices[0].m_Color.b / 255.f * TextOutlineColor.b, TextCharQuad.m_Vertices[0].m_Color.a / 255.f * TextOutlineColor.a);
+					Graphics()->SetColor(TextCharQuad.m_aVertices[0].m_Color.r / 255.f * TextOutlineColor.r, TextCharQuad.m_aVertices[0].m_Color.g / 255.f * TextOutlineColor.g, TextCharQuad.m_aVertices[0].m_Color.b / 255.f * TextOutlineColor.b, TextCharQuad.m_aVertices[0].m_Color.a / 255.f * TextOutlineColor.a);
 
-					Graphics()->QuadsSetSubset(TextCharQuad.m_Vertices[0].m_U * UVScale, TextCharQuad.m_Vertices[0].m_V * UVScale, TextCharQuad.m_Vertices[2].m_U * UVScale, TextCharQuad.m_Vertices[2].m_V * UVScale);
-					IGraphics::CQuadItem QuadItem(TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[0].m_Y, TextCharQuad.m_Vertices[1].m_X - TextCharQuad.m_Vertices[0].m_X, TextCharQuad.m_Vertices[2].m_Y - TextCharQuad.m_Vertices[0].m_Y);
+					Graphics()->QuadsSetSubset(TextCharQuad.m_aVertices[0].m_U * UVScale, TextCharQuad.m_aVertices[0].m_V * UVScale, TextCharQuad.m_aVertices[2].m_U * UVScale, TextCharQuad.m_aVertices[2].m_V * UVScale);
+					IGraphics::CQuadItem QuadItem(TextCharQuad.m_aVertices[0].m_X, TextCharQuad.m_aVertices[0].m_Y, TextCharQuad.m_aVertices[1].m_X - TextCharQuad.m_aVertices[0].m_X, TextCharQuad.m_aVertices[2].m_Y - TextCharQuad.m_aVertices[0].m_Y);
 					Graphics()->QuadsDrawTL(&QuadItem, 1);
 				}
 
@@ -1623,10 +1623,10 @@ public:
 					for(size_t i = 0; i < TextContainer.m_StringInfo.m_QuadNum; ++i)
 					{
 						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads[i];
-						unsigned char CR = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.r) * TextColor.r);
-						unsigned char CG = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.g) * TextColor.g);
-						unsigned char CB = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.b) * TextColor.b);
-						unsigned char CA = (unsigned char)((float)(TextCharQuad.m_Vertices[0].m_Color.a) * TextColor.a);
+						unsigned char CR = (unsigned char)((float)(TextCharQuad.m_aVertices[0].m_Color.r) * TextColor.r);
+						unsigned char CG = (unsigned char)((float)(TextCharQuad.m_aVertices[0].m_Color.g) * TextColor.g);
+						unsigned char CB = (unsigned char)((float)(TextCharQuad.m_aVertices[0].m_Color.b) * TextColor.b);
+						unsigned char CA = (unsigned char)((float)(TextCharQuad.m_aVertices[0].m_Color.a) * TextColor.a);
 						Graphics()->ChangeColorOfQuadVertices((int)i, CR, CG, CB, CA);
 					}
 
@@ -1953,11 +1953,11 @@ public:
 			// reset the skylines
 			for(int j = 0; j < 2; ++j)
 			{
-				for(int &k : pFont->m_TextureSkyline[j].m_vCurHeightOfPixelColumn)
+				for(int &k : pFont->m_aTextureSkyline[j].m_vCurHeightOfPixelColumn)
 					k = 0;
 
-				mem_zero(pFont->m_TextureData[j], (size_t)pFont->m_CurTextureDimensions[j] * pFont->m_CurTextureDimensions[j] * sizeof(unsigned char));
-				Graphics()->UpdateTextTexture(pFont->m_aTextures[j], 0, 0, pFont->m_CurTextureDimensions[j], pFont->m_CurTextureDimensions[j], pFont->m_TextureData[j]);
+				mem_zero(pFont->m_apTextureData[j], (size_t)pFont->m_aCurTextureDimensions[j] * pFont->m_aCurTextureDimensions[j] * sizeof(unsigned char));
+				Graphics()->UpdateTextTexture(pFont->m_aTextures[j], 0, 0, pFont->m_aCurTextureDimensions[j], pFont->m_aCurTextureDimensions[j], pFont->m_apTextureData[j]);
 			}
 
 			pFont->InitFontSizes();

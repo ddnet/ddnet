@@ -50,7 +50,7 @@ void CDraggerBeam::Tick()
 	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_Status[pTarget->Team()])
+			!Switchers()[m_Number].m_aStatus[pTarget->Team()])
 		{
 			Reset();
 			return;
@@ -108,16 +108,16 @@ void CDraggerBeam::Snap(int SnappingClient)
 	{
 		return;
 	}
-	CNetObj_Laser *obj = static_cast<CNetObj_Laser *>(
+	CNetObj_Laser *pObjLaser = static_cast<CNetObj_Laser *>(
 		Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if(!obj)
+	if(!pObjLaser)
 	{
 		return;
 	}
-	obj->m_X = (int)m_Pos.x;
-	obj->m_Y = (int)m_Pos.y;
-	obj->m_FromX = (int)TargetPos.x;
-	obj->m_FromY = (int)TargetPos.y;
+	pObjLaser->m_X = (int)m_Pos.x;
+	pObjLaser->m_Y = (int)m_Pos.y;
+	pObjLaser->m_FromX = (int)TargetPos.x;
+	pObjLaser->m_FromY = (int)TargetPos.y;
 
 	int StartTick = m_EvalTick;
 	if(StartTick < Server()->Tick() - 4)
@@ -128,5 +128,5 @@ void CDraggerBeam::Snap(int SnappingClient)
 	{
 		StartTick = Server()->Tick();
 	}
-	obj->m_StartTick = StartTick;
+	pObjLaser->m_StartTick = StartTick;
 }

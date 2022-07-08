@@ -181,14 +181,14 @@ private:
 	void UpdatePositions();
 
 	int m_PredictedTick;
-	int m_LastNewPredictedTick[NUM_DUMMIES];
+	int m_aLastNewPredictedTick[NUM_DUMMIES];
 
 	int m_LastRoundStartTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
 
-	int m_CheckInfo[NUM_DUMMIES];
+	int m_aCheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
 
@@ -241,10 +241,10 @@ public:
 	bool m_SuppressEvents;
 	bool m_NewTick;
 	bool m_NewPredictedTick;
-	int m_FlagDropTick[2];
+	int m_aFlagDropTick[2];
 
 	// TODO: move this
-	CTuningParams m_Tuning[NUM_DUMMIES];
+	CTuningParams m_aTuning[NUM_DUMMIES];
 
 	enum
 	{
@@ -271,16 +271,16 @@ public:
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
-		const CNetObj_Flag *m_paFlags[2];
+		const CNetObj_Flag *m_apFlags[2];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
 		int m_GameDataSnapID;
 
-		const CNetObj_PlayerInfo *m_paPlayerInfos[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_paInfoByScore[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_paInfoByName[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_paInfoByDDTeamScore[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_paInfoByDDTeamName[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apPlayerInfos[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apInfoByScore[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apInfoByName[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apInfoByDDTeamScore[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apInfoByDDTeamName[MAX_CLIENTS];
 
 		int m_LocalClientID;
 		int m_NumPlayers;
@@ -317,10 +317,10 @@ public:
 	};
 
 	CSnapState m_Snap;
-	int m_LocalTuneZone[2];
-	bool m_ReceivedTuning[2];
-	int m_ExpectingTuningForZone[2];
-	int m_ExpectingTuningSince[2];
+	int m_aLocalTuneZone[NUM_DUMMIES];
+	bool m_aReceivedTuning[NUM_DUMMIES];
+	int m_aExpectingTuningForZone[NUM_DUMMIES];
+	int m_aExpectingTuningSince[NUM_DUMMIES];
 
 	// client data
 	struct CClientData
@@ -375,7 +375,7 @@ public:
 		bool m_Spec;
 
 		// Editor allows 256 switches for now.
-		bool m_SwitchStates[256];
+		bool m_aSwitchStates[256];
 
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
@@ -389,10 +389,10 @@ public:
 		vec2 m_RenderPos;
 		bool m_IsPredicted;
 		bool m_IsPredictedLocal;
-		int64_t m_SmoothStart[2];
-		int64_t m_SmoothLen[2];
-		vec2 m_PredPos[200];
-		int m_PredTick[200];
+		int64_t m_aSmoothStart[2];
+		int64_t m_aSmoothLen[2];
+		vec2 m_aPredPos[200];
+		int m_aPredTick[200];
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 	};
@@ -488,7 +488,7 @@ public:
 
 	// DDRace
 
-	int m_LocalIDs[NUM_DUMMIES];
+	int m_aLocalIDs[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
 	unsigned int m_DummyFire;
@@ -502,7 +502,7 @@ public:
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
-	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_Tuning[g_Config.m_ClDummy].m_PlayerCollision || m_Tuning[g_Config.m_ClDummy].m_PlayerHooking); }
+	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_aTuning[g_Config.m_ClDummy].m_PlayerCollision || m_aTuning[g_Config.m_ClDummy].m_PlayerHooking); }
 	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
@@ -581,11 +581,11 @@ public:
 		IGraphics::CTextureHandle m_aSpriteWeaponProjectiles[6];
 
 		// muzzles
-		IGraphics::CTextureHandle m_SpriteWeaponGunMuzzles[3];
-		IGraphics::CTextureHandle m_SpriteWeaponShotgunMuzzles[3];
-		IGraphics::CTextureHandle m_SpriteWeaponNinjaMuzzles[3];
+		IGraphics::CTextureHandle m_aSpriteWeaponGunMuzzles[3];
+		IGraphics::CTextureHandle m_aSpriteWeaponShotgunMuzzles[3];
+		IGraphics::CTextureHandle m_aaSpriteWeaponNinjaMuzzles[3];
 
-		IGraphics::CTextureHandle m_SpriteWeaponsMuzzles[6][3];
+		IGraphics::CTextureHandle m_aaSpriteWeaponsMuzzles[6][3];
 
 		// pickups
 		IGraphics::CTextureHandle m_SpritePickupHealth;
@@ -698,8 +698,8 @@ private:
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 
-	bool m_DDRaceMsgSent[NUM_DUMMIES];
-	int m_ShowOthers[NUM_DUMMIES];
+	bool m_aDDRaceMsgSent[NUM_DUMMIES];
+	int m_aShowOthers[NUM_DUMMIES];
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
@@ -709,7 +709,7 @@ private:
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
-	int m_SwitchStateTeam[NUM_DUMMIES];
+	int m_aSwitchStateTeam[NUM_DUMMIES];
 
 	enum
 	{

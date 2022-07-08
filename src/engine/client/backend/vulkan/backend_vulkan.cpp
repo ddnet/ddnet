@@ -3576,7 +3576,7 @@ public:
 			STWGraphicGPU::ETWGraphicsGPUType GPUType = VKGPUTypeToGraphicsGPUType(DeviceProp.deviceType);
 
 			STWGraphicGPU::STWGraphicGPUItem NewGPU;
-			str_copy(NewGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_Name)));
+			str_copy(NewGPU.m_aName, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_aName)));
 			NewGPU.m_GPUType = GPUType;
 			m_pGPUList->m_vGPUs.push_back(NewGPU);
 
@@ -3587,7 +3587,7 @@ public:
 
 			if(GPUType < AutoGPUType && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
-				str_copy(m_pGPUList->m_AutoGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_Name)));
+				str_copy(m_pGPUList->m_AutoGPU.m_aName, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_aName)));
 				m_pGPUList->m_AutoGPU.m_GPUType = GPUType;
 
 				AutoGPUType = GPUType;
@@ -6689,8 +6689,8 @@ public:
 		VkBuffer WriteBuffer = WriteMemBlock.m_Buffer;
 
 		VkDeviceSize DataSize = (VkDeviceSize)pCommand->m_CopySize;
-		VkDeviceSize ReadOffset = (VkDeviceSize)pCommand->m_pReadOffset + ReadMemBlock.m_HeapData.m_OffsetToAlign;
-		VkDeviceSize WriteOffset = (VkDeviceSize)pCommand->m_pWriteOffset + WriteMemBlock.m_HeapData.m_OffsetToAlign;
+		VkDeviceSize ReadOffset = (VkDeviceSize)pCommand->m_ReadOffset + ReadMemBlock.m_HeapData.m_OffsetToAlign;
+		VkDeviceSize WriteOffset = (VkDeviceSize)pCommand->m_WriteOffset + WriteMemBlock.m_HeapData.m_OffsetToAlign;
 
 		MemoryBarrier(ReadBuffer, ReadOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true);
 		MemoryBarrier(WriteBuffer, WriteOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true);

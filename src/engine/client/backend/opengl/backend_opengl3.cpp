@@ -73,8 +73,8 @@ void CCommandProcessorFragment_OpenGL3_3::InitPrimExProgram(CGLSLPrimitiveExProg
 	pProgram->m_LocVertciesColor = pProgram->GetUniformLoc("gVerticesColor");
 
 	pProgram->SetUniform(pProgram->m_LocRotation, 0.0f);
-	float Center[2] = {0.f, 0.f};
-	pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, Center);
+	float aCenter[2] = {0.f, 0.f};
+	pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, aCenter);
 }
 
 bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
@@ -123,7 +123,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	GLint CapVal;
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &CapVal);
 
-	m_MaxQuadsAtOnce = minimum<int>(((CapVal - 20) / (3 * 4)), m_MaxQuadsPossible);
+	m_MaxQuadsAtOnce = minimum<int>(((CapVal - 20) / (3 * 4)), ms_MaxQuadsPossible);
 
 	{
 		CGLSL PrimitiveVertexShader;
@@ -408,21 +408,21 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pSpriteProgramMultiple->m_LocCenter = m_pSpriteProgramMultiple->GetUniformLoc("gCenter");
 		m_pSpriteProgramMultiple->m_LocVertciesColor = m_pSpriteProgramMultiple->GetUniformLoc("gVerticesColor");
 
-		float Center[2] = {0.f, 0.f};
-		m_pSpriteProgramMultiple->SetUniformVec2(m_pSpriteProgramMultiple->m_LocCenter, 1, Center);
+		float aCenter[2] = {0.f, 0.f};
+		m_pSpriteProgramMultiple->SetUniformVec2(m_pSpriteProgramMultiple->m_LocCenter, 1, aCenter);
 	}
 
 	m_LastStreamBuffer = 0;
 
-	glGenBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID);
-	glGenVertexArrays(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawVertexID);
+	glGenBuffers(MAX_STREAM_BUFFER_COUNT, m_aPrimitiveDrawBufferID);
+	glGenVertexArrays(MAX_STREAM_BUFFER_COUNT, m_aPrimitiveDrawVertexID);
 	glGenBuffers(1, &m_PrimitiveDrawBufferIDTex3D);
 	glGenVertexArrays(1, &m_PrimitiveDrawVertexIDTex3D);
 
 	for(int i = 0; i < MAX_STREAM_BUFFER_COUNT; ++i)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[i]);
-		glBindVertexArray(m_PrimitiveDrawVertexID[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, m_aPrimitiveDrawBufferID[i]);
+		glBindVertexArray(m_aPrimitiveDrawVertexID[i]);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
@@ -431,7 +431,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void *)(sizeof(float) * 2));
 		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(CCommandBuffer::SVertex), (void *)(sizeof(float) * 4));
 
-		m_LastIndexBufferBound[i] = 0;
+		m_aLastIndexBufferBound[i] = 0;
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferIDTex3D);
@@ -451,19 +451,19 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	glGenBuffers(1, &m_QuadDrawIndexBufferID);
 	glBindBuffer(BUFFER_INIT_INDEX_TARGET, m_QuadDrawIndexBufferID);
 
-	unsigned int Indices[CCommandBuffer::MAX_VERTICES / 4 * 6];
+	unsigned int aIndices[CCommandBuffer::MAX_VERTICES / 4 * 6];
 	int Primq = 0;
 	for(int i = 0; i < CCommandBuffer::MAX_VERTICES / 4 * 6; i += 6)
 	{
-		Indices[i] = Primq;
-		Indices[i + 1] = Primq + 1;
-		Indices[i + 2] = Primq + 2;
-		Indices[i + 3] = Primq;
-		Indices[i + 4] = Primq + 2;
-		Indices[i + 5] = Primq + 3;
+		aIndices[i] = Primq;
+		aIndices[i + 1] = Primq + 1;
+		aIndices[i + 2] = Primq + 2;
+		aIndices[i + 3] = Primq;
+		aIndices[i + 4] = Primq + 2;
+		aIndices[i + 5] = Primq + 3;
 		Primq += 4;
 	}
-	glBufferData(BUFFER_INIT_INDEX_TARGET, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES / 4 * 6, Indices, GL_STATIC_DRAW);
+	glBufferData(BUFFER_INIT_INDEX_TARGET, sizeof(unsigned int) * CCommandBuffer::MAX_VERTICES / 4 * 6, aIndices, GL_STATIC_DRAW);
 
 	m_CurrentIndicesInBuffer = CCommandBuffer::MAX_VERTICES / 4 * 6;
 
@@ -521,9 +521,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	delete m_pSpriteProgramMultiple;
 
 	glBindVertexArray(0);
-	glDeleteBuffers(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawBufferID);
+	glDeleteBuffers(MAX_STREAM_BUFFER_COUNT, m_aPrimitiveDrawBufferID);
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
-	glDeleteVertexArrays(MAX_STREAM_BUFFER_COUNT, m_PrimitiveDrawVertexID);
+	glDeleteVertexArrays(MAX_STREAM_BUFFER_COUNT, m_aPrimitiveDrawVertexID);
 	glDeleteBuffers(1, &m_PrimitiveDrawBufferIDTex3D);
 	glDeleteVertexArrays(1, &m_PrimitiveDrawVertexIDTex3D);
 
@@ -790,7 +790,7 @@ void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int Pr
 	if(AsTex3D)
 		glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferIDTex3D);
 	else
-		glBindBuffer(GL_ARRAY_BUFFER, m_PrimitiveDrawBufferID[m_LastStreamBuffer]);
+		glBindBuffer(GL_ARRAY_BUFFER, m_aPrimitiveDrawBufferID[m_LastStreamBuffer]);
 
 	glBufferData(GL_ARRAY_BUFFER, VertSize * Count, pVertices, GL_STREAM_DRAW);
 }
@@ -805,7 +805,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 
 	UploadStreamBufferData(pCommand->m_PrimType, pCommand->m_pVertices, sizeof(CCommandBuffer::SVertex), pCommand->m_PrimCount);
 
-	glBindVertexArray(m_PrimitiveDrawVertexID[m_LastStreamBuffer]);
+	glBindVertexArray(m_aPrimitiveDrawVertexID[m_LastStreamBuffer]);
 
 	switch(pCommand->m_PrimType)
 	{
@@ -817,10 +817,10 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	case CCommandBuffer::PRIMTYPE_QUADS:
-		if(m_LastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferID)
+		if(m_aLastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferID)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferID);
-			m_LastIndexBufferBound[m_LastStreamBuffer] = m_QuadDrawIndexBufferID;
+			m_aLastIndexBufferBound[m_LastStreamBuffer] = m_QuadDrawIndexBufferID;
 		}
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
@@ -883,16 +883,16 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	if(NewIndicesCount <= m_CurrentIndicesInBuffer)
 		return;
 	unsigned int AddCount = NewIndicesCount - m_CurrentIndicesInBuffer;
-	unsigned int *Indices = new unsigned int[AddCount];
+	unsigned int *pIndices = new unsigned int[AddCount];
 	int Primq = (m_CurrentIndicesInBuffer / 6) * 4;
 	for(unsigned int i = 0; i < AddCount; i += 6)
 	{
-		Indices[i] = Primq;
-		Indices[i + 1] = Primq + 1;
-		Indices[i + 2] = Primq + 2;
-		Indices[i + 3] = Primq;
-		Indices[i + 4] = Primq + 2;
-		Indices[i + 5] = Primq + 3;
+		pIndices[i] = Primq;
+		pIndices[i + 1] = Primq + 1;
+		pIndices[i + 2] = Primq + 2;
+		pIndices[i + 3] = Primq;
+		pIndices[i + 4] = Primq + 2;
+		pIndices[i + 5] = Primq + 3;
 		Primq += 4;
 	}
 
@@ -903,14 +903,14 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	GLsizeiptr size = sizeof(unsigned int);
 	glBufferData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)NewIndicesCount * size, NULL, GL_STATIC_DRAW);
 	glCopyBufferSubData(GL_COPY_READ_BUFFER, BUFFER_INIT_INDEX_TARGET, 0, 0, (GLsizeiptr)m_CurrentIndicesInBuffer * size);
-	glBufferSubData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)m_CurrentIndicesInBuffer * size, (GLsizeiptr)AddCount * size, Indices);
+	glBufferSubData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)m_CurrentIndicesInBuffer * size, (GLsizeiptr)AddCount * size, pIndices);
 	glBindBuffer(BUFFER_INIT_INDEX_TARGET, 0);
 	glBindBuffer(GL_COPY_READ_BUFFER, 0);
 
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferID);
 	m_QuadDrawIndexBufferID = NewIndexBufferID;
 
-	for(unsigned int &i : m_LastIndexBufferBound)
+	for(unsigned int &i : m_aLastIndexBufferBound)
 		i = 0;
 	for(auto &BufferContainer : m_vBufferContainers)
 	{
@@ -918,7 +918,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	}
 
 	m_CurrentIndicesInBuffer = NewIndicesCount;
-	delete[] Indices;
+	delete[] pIndices;
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand)
@@ -977,7 +977,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CopyBufferObject(const CCommandBuf
 
 	glBindBuffer(GL_COPY_WRITE_BUFFER, m_vBufferObjectIndices[WriteIndex]);
 	glBindBuffer(GL_COPY_READ_BUFFER, m_vBufferObjectIndices[ReadIndex]);
-	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_pReadOffset), (GLsizeiptr)(pCommand->m_pWriteOffset), (GLsizeiptr)pCommand->m_CopySize);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, (GLsizeiptr)(pCommand->m_ReadOffset), (GLsizeiptr)(pCommand->m_WriteOffset), (GLsizeiptr)pCommand->m_CopySize);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_DeleteBufferObject(const CCommandBuffer::SCommand_DeleteBufferObject *pCommand)
@@ -1220,9 +1220,9 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	// the extra offset is not related to the information from the command, but an actual offset in the buffer
 	size_t QuadOffsetExtra = pCommand->m_QuadOffset;
 
-	vec4 aColors[m_MaxQuadsPossible];
-	vec2 aOffsets[m_MaxQuadsPossible];
-	float aRotations[m_MaxQuadsPossible];
+	vec4 aColors[ms_MaxQuadsPossible];
+	vec2 aOffsets[ms_MaxQuadsPossible];
+	float aRotations[ms_MaxQuadsPossible];
 
 	while(QuadsLeft > 0)
 	{

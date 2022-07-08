@@ -7,8 +7,11 @@
 
 class CEventHandler
 {
-	static const int MAX_EVENTS = 128;
-	static const int MAX_DATASIZE = 128 * 64;
+	enum
+	{
+		MAX_EVENTS = 128,
+		MAX_DATASIZE = 128 * 64,
+	};
 
 	int m_aTypes[MAX_EVENTS]; // TODO: remove some of these arrays
 	int m_aOffsets[MAX_EVENTS];
@@ -30,7 +33,7 @@ public:
 	void Clear();
 	void Snap(int SnappingClient);
 
-	void EventToSixup(int *Type, int *Size, const char **Data);
+	void EventToSixup(int *pType, int *pSize, const char **ppData);
 };
 
 #endif

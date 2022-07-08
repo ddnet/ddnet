@@ -78,10 +78,10 @@ void CBinds::Bind(int KeyID, const char *pStr, bool FreeOnly, int ModifierCombin
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "binds", aBuf, gs_BindPrintColor);
 }
 
-int CBinds::GetModifierMask(IInput *i)
+int CBinds::GetModifierMask(IInput *pInput)
 {
 	int Mask = 0;
-	static const auto ModifierKeys = {
+	static const auto s_aModifierKeys = {
 		KEY_LSHIFT,
 		KEY_RSHIFT,
 		KEY_LCTRL,
@@ -91,9 +91,9 @@ int CBinds::GetModifierMask(IInput *i)
 		KEY_LGUI,
 		KEY_RGUI,
 	};
-	for(const auto Key : ModifierKeys)
+	for(const auto Key : s_aModifierKeys)
 	{
-		if(i->KeyIsPressed(Key))
+		if(pInput->KeyIsPressed(Key))
 		{
 			Mask |= GetModifierMaskOfKey(Key);
 		}

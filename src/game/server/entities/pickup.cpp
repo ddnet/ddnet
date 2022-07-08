@@ -11,10 +11,10 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 
-static constexpr int PickupPhysSize = 14;
+static constexpr int gs_PickupPhysSize = 14;
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), PickupPhysSize)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
 {
 	m_Type = Type;
 	m_Subtype = SubType;
@@ -44,7 +44,7 @@ void CPickup::Tick()
 
 		if(pChr && pChr->IsAlive())
 		{
-			if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pChr->Team()])
+			if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
 				continue;
 			bool Sound = false;
 			// player picked us up, is someone was hooking us, let them go
@@ -189,7 +189,7 @@ void CPickup::Snap(int SnappingClient)
 	else
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_Status[pChar->Team()] && !Tick)
+		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
 			return;
 	}
 

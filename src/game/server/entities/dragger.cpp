@@ -24,7 +24,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool Ignore
 	m_Number = Number;
 	m_EvalTick = Server()->Tick();
 
-	for(auto &TargetId : m_TargetIdInTeam)
+	for(auto &TargetId : m_aTargetIdInTeam)
 	{
 		TargetId = -1;
 	}
@@ -61,29 +61,29 @@ void CDragger::Tick()
 void CDragger::LookForPlayersToDrag()
 {
 	// Create a list of players who are in the range of the dragger
-	CCharacter *pPlayersInRange[MAX_CLIENTS];
-	mem_zero(pPlayersInRange, sizeof(pPlayersInRange));
+	CCharacter *apPlayersInRange[MAX_CLIENTS];
+	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
 		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),
-		(CEntity **)pPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
-	int ClosestTargetIdInTeam[MAX_CLIENTS];
-	bool CanStillBeTeamTarget[MAX_CLIENTS];
-	bool IsTarget[MAX_CLIENTS];
-	int MinDistInTeam[MAX_CLIENTS];
-	mem_zero(CanStillBeTeamTarget, sizeof(CanStillBeTeamTarget));
-	mem_zero(MinDistInTeam, sizeof(MinDistInTeam));
-	mem_zero(IsTarget, sizeof(IsTarget));
-	for(int &TargetId : ClosestTargetIdInTeam)
+	int aClosestTargetIdInTeam[MAX_CLIENTS];
+	bool aCanStillBeTeamTarget[MAX_CLIENTS];
+	bool aIsTarget[MAX_CLIENTS];
+	int aMinDistInTeam[MAX_CLIENTS];
+	mem_zero(aCanStillBeTeamTarget, sizeof(aCanStillBeTeamTarget));
+	mem_zero(aMinDistInTeam, sizeof(aMinDistInTeam));
+	mem_zero(aIsTarget, sizeof(aIsTarget));
+	for(int &TargetId : aClosestTargetIdInTeam)
 	{
 		TargetId = -1;
 	}
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
-		CCharacter *pTarget = pPlayersInRange[i];
+		CCharacter *pTarget = apPlayersInRange[i];
 		const int &TargetTeam = pTarget->Team();
 
 		// Do not create a dragger beam for super player
@@ -93,7 +93,7 @@ void CDragger::LookForPlayersToDrag()
 		}
 		// If the dragger is disabled for the target's team, no dragger beam will be generated
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_Status[TargetTeam])
+			!Switchers()[m_Number].m_aStatus[TargetTeam])
 		{
 			continue;
 		}
@@ -109,17 +109,17 @@ void CDragger::LookForPlayersToDrag()
 			// Solo players are dragged independently from the rest of the team
 			if(pTarget->Teams()->m_Core.GetSolo(TargetClientId))
 			{
-				IsTarget[TargetClientId] = true;
+				aIsTarget[TargetClientId] = true;
 			}
 			else
 			{
 				int Distance = distance(pTarget->m_Pos, m_Pos);
-				if(MinDistInTeam[TargetTeam] == 0 || MinDistInTeam[TargetTeam] > Distance)
+				if(aMinDistInTeam[TargetTeam] == 0 || aMinDistInTeam[TargetTeam] > Distance)
 				{
-					MinDistInTeam[TargetTeam] = Distance;
-					ClosestTargetIdInTeam[TargetTeam] = TargetClientId;
+					aMinDistInTeam[TargetTeam] = Distance;
+					aClosestTargetIdInTeam[TargetTeam] = TargetClientId;
 				}
-				CanStillBeTeamTarget[TargetClientId] = true;
+				aCanStillBeTeamTarget[TargetClientId] = true;
 			}
 		}
 	}
@@ -127,20 +127,20 @@ void CDragger::LookForPlayersToDrag()
 	// Set the closest player for each team as a target if the team does not have a target player yet
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if((m_TargetIdInTeam[i] != -1 && !CanStillBeTeamTarget[m_TargetIdInTeam[i]]) || m_TargetIdInTeam[i] == -1)
+		if((m_aTargetIdInTeam[i] != -1 && !aCanStillBeTeamTarget[m_aTargetIdInTeam[i]]) || m_aTargetIdInTeam[i] == -1)
 		{
-			m_TargetIdInTeam[i] = ClosestTargetIdInTeam[i];
+			m_aTargetIdInTeam[i] = aClosestTargetIdInTeam[i];
 		}
-		if(m_TargetIdInTeam[i] != -1)
+		if(m_aTargetIdInTeam[i] != -1)
 		{
-			IsTarget[m_TargetIdInTeam[i]] = true;
+			aIsTarget[m_aTargetIdInTeam[i]] = true;
 		}
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// Create Dragger Beams which have not been created yet
-		if(IsTarget[i] && m_apDraggerBeam[i] == nullptr)
+		if(aIsTarget[i] && m_apDraggerBeam[i] == nullptr)
 		{
 			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i, m_Layer, m_Number);
 			// The generated dragger beam is placed in the first position in the tick sequence and would therefore
@@ -149,7 +149,7 @@ void CDragger::LookForPlayersToDrag()
 			m_apDraggerBeam[i]->Tick();
 		}
 		// Remove dragger beams that have not yet been deleted
-		else if(!IsTarget[i] && m_apDraggerBeam[i] != nullptr)
+		else if(!aIsTarget[i] && m_apDraggerBeam[i] != nullptr)
 		{
 			m_apDraggerBeam[i]->Reset();
 		}
@@ -214,24 +214,24 @@ void CDragger::Snap(int SnappingClient)
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_Status[pChar->Team()] && !Tick)
+			!Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
 			return;
 	}
 
-	CNetObj_Laser *obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
+	CNetObj_Laser *pObjLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 
-	if(!obj)
+	if(!pObjLaser)
 		return;
 
-	obj->m_X = (int)m_Pos.x;
-	obj->m_Y = (int)m_Pos.y;
-	obj->m_FromX = (int)m_Pos.x;
-	obj->m_FromY = (int)m_Pos.y;
+	pObjLaser->m_X = (int)m_Pos.x;
+	pObjLaser->m_Y = (int)m_Pos.y;
+	pObjLaser->m_FromX = (int)m_Pos.x;
+	pObjLaser->m_FromY = (int)m_Pos.y;
 
 	if(pEntData)
 	{
-		obj->m_StartTick = 0;
+		pObjLaser->m_StartTick = 0;
 	}
 	else
 	{
@@ -240,6 +240,6 @@ void CDragger::Snap(int SnappingClient)
 			StartTick = Server()->Tick() - 4;
 		else if(StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
-		obj->m_StartTick = StartTick;
+		pObjLaser->m_StartTick = StartTick;
 	}
 }

@@ -31,19 +31,19 @@ int main(int argc, const char **argv)
 	if(Addr.port == 0)
 		Addr.port = 8303;
 
-	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
+	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
 	CNetChunk Packet;
 
-	mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+	mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
 
 	int CurToken = rand() % 256;
-	Buffer[sizeof(SERVERBROWSE_GETINFO)] = CurToken;
+	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = CurToken;
 
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	Packet.m_DataSize = sizeof(Buffer);
-	Packet.m_pData = Buffer;
+	Packet.m_DataSize = sizeof(aBuffer);
+	Packet.m_pData = aBuffer;
 
 	g_NetOp.Send(&Packet);
 

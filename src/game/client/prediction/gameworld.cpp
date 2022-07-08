@@ -211,17 +211,17 @@ void CGameWorld::Tick()
 	{
 		for(int j = 0; j < MAX_CLIENTS; ++j)
 		{
-			if(Switcher.m_EndTick[j] <= GameTick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDOPEN)
+			if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
 			{
-				Switcher.m_Status[j] = false;
-				Switcher.m_EndTick[j] = 0;
-				Switcher.m_Type[j] = TILE_SWITCHCLOSE;
+				Switcher.m_aStatus[j] = false;
+				Switcher.m_aEndTick[j] = 0;
+				Switcher.m_aType[j] = TILE_SWITCHCLOSE;
 			}
-			else if(Switcher.m_EndTick[j] <= GameTick() && Switcher.m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+			else if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDCLOSE)
 			{
-				Switcher.m_Status[j] = true;
-				Switcher.m_EndTick[j] = 0;
-				Switcher.m_Type[j] = TILE_SWITCHOPEN;
+				Switcher.m_aStatus[j] = true;
+				Switcher.m_aEndTick[j] = 0;
+				Switcher.m_aType[j] = TILE_SWITCHOPEN;
 			}
 		}
 	}
@@ -296,19 +296,19 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		CCharacterCore *Core = pChr->Core();
-		if(Core->m_HookedPlayer == ClientID)
+		CCharacterCore *pCore = pChr->Core();
+		if(pCore->m_HookedPlayer == ClientID)
 		{
-			Core->SetHookedPlayer(-1);
-			Core->m_HookState = HOOK_RETRACTED;
-			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			pCore->SetHookedPlayer(-1);
+			pCore->m_HookState = HOOK_RETRACTED;
+			pCore->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 		}
 	}
 }
 
 CTuningParams *CGameWorld::Tuning()
 {
-	return &m_Core.m_Tuning[g_Config.m_ClDummy];
+	return &m_Core.m_aTuning[g_Config.m_ClDummy];
 }
 
 CEntity *CGameWorld::GetEntity(int ID, int EntityType)
@@ -553,7 +553,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_WorldConfig = pFrom->m_WorldConfig;
 	for(int i = 0; i < 2; i++)
 	{
-		m_Core.m_Tuning[i] = pFrom->m_Core.m_Tuning[i];
+		m_Core.m_aTuning[i] = pFrom->m_Core.m_aTuning[i];
 	}
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;

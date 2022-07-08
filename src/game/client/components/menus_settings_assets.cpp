@@ -43,7 +43,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 	{
 		for(int i = 0; i < MAP_IMAGE_MOD_TYPE_COUNT; ++i)
 		{
-			str_format(aBuff, sizeof(aBuff), "editor/entities_clear/%s.png", gs_aModEntitiesNames[i]);
+			str_format(aBuff, sizeof(aBuff), "editor/entities_clear/%s.png", gs_apModEntitiesNames[i]);
 			CImageInfo ImgInfo;
 			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
@@ -59,7 +59,7 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 	{
 		for(int i = 0; i < MAP_IMAGE_MOD_TYPE_COUNT; ++i)
 		{
-			str_format(aBuff, sizeof(aBuff), "assets/entities/%s/%s.png", pEntitiesItem->m_aName, gs_aModEntitiesNames[i]);
+			str_format(aBuff, sizeof(aBuff), "assets/entities/%s/%s.png", pEntitiesItem->m_aName, gs_apModEntitiesNames[i]);
 			CImageInfo ImgInfo;
 			if(pThis->Graphics()->LoadPNG(&ImgInfo, aBuff, IStorage::TYPE_ALL))
 			{
@@ -241,18 +241,18 @@ int CMenus::ExtrasScan(const char *pName, int IsDir, int DirType, void *pUser)
 	return AssetScan(pName, IsDir, DirType, pThis->m_vExtrasList, "extras", pGraphics, pUser);
 }
 
-static std::vector<const CMenus::SCustomEntities *> s_vpSearchEntitiesList;
-static std::vector<const CMenus::SCustomGame *> s_vpSearchGamesList;
-static std::vector<const CMenus::SCustomEmoticon *> s_vpSearchEmoticonsList;
-static std::vector<const CMenus::SCustomParticle *> s_vpSearchParticlesList;
-static std::vector<const CMenus::SCustomHud *> s_vpSearchHudList;
-static std::vector<const CMenus::SCustomExtras *> s_vpSearchExtrasList;
+static std::vector<const CMenus::SCustomEntities *> gs_vpSearchEntitiesList;
+static std::vector<const CMenus::SCustomGame *> gs_vpSearchGamesList;
+static std::vector<const CMenus::SCustomEmoticon *> gs_vpSearchEmoticonsList;
+static std::vector<const CMenus::SCustomParticle *> gs_vpSearchParticlesList;
+static std::vector<const CMenus::SCustomHud *> gs_vpSearchHudList;
+static std::vector<const CMenus::SCustomExtras *> gs_vpSearchExtrasList;
 
-static bool s_InitCustomList[NUMBER_OF_ASSETS_TABS] = {
+static bool gs_aInitCustomList[NUMBER_OF_ASSETS_TABS] = {
 	true,
 };
 
-static size_t s_CustomListSize[NUMBER_OF_ASSETS_TABS] = {
+static size_t gs_aCustomListSize[NUMBER_OF_ASSETS_TABS] = {
 	0,
 };
 
@@ -263,17 +263,17 @@ static int s_CurCustomTab = ASSETS_TAB_ENTITIES;
 static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 {
 	if(CurTab == ASSETS_TAB_ENTITIES)
-		return s_vpSearchEntitiesList[Index];
+		return gs_vpSearchEntitiesList[Index];
 	else if(CurTab == ASSETS_TAB_GAME)
-		return s_vpSearchGamesList[Index];
+		return gs_vpSearchGamesList[Index];
 	else if(CurTab == ASSETS_TAB_EMOTICONS)
-		return s_vpSearchEmoticonsList[Index];
+		return gs_vpSearchEmoticonsList[Index];
 	else if(CurTab == ASSETS_TAB_PARTICLES)
-		return s_vpSearchParticlesList[Index];
+		return gs_vpSearchParticlesList[Index];
 	else if(CurTab == ASSETS_TAB_HUD)
-		return s_vpSearchHudList[Index];
+		return gs_vpSearchHudList[Index];
 	else if(CurTab == ASSETS_TAB_EXTRAS)
-		return s_vpSearchExtrasList[Index];
+		return gs_vpSearchExtrasList[Index];
 
 	return NULL;
 }
@@ -343,7 +343,7 @@ void CMenus::ClearCustomItems(int CurTab)
 		// reload current DDNet particles skin
 		GameClient()->LoadExtrasSkin(g_Config.m_ClAssetExtras);
 	}
-	s_InitCustomList[CurTab] = true;
+	gs_aInitCustomList[CurTab] = true;
 }
 
 template<typename TName, typename TCaller>
@@ -360,8 +360,8 @@ void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const
 		pStorage->ListDirectory(IStorage::TYPE_ALL, pAssetPath, pfnCallback, Caller);
 		std::sort(vAssetList.begin(), vAssetList.end());
 	}
-	if(vAssetList.size() != s_CustomListSize[s_CurCustomTab])
-		s_InitCustomList[s_CurCustomTab] = true;
+	if(vAssetList.size() != gs_aCustomListSize[s_CurCustomTab])
+		gs_aInitCustomList[s_CurCustomTab] = true;
 }
 
 template<typename TName>
@@ -371,13 +371,13 @@ int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> 
 	int ListSize = vAssetList.size();
 	for(int i = 0; i < ListSize; ++i)
 	{
-		const TName *s = &vAssetList[i];
+		const TName *pAsset = &vAssetList[i];
 
 		// filter quick search
-		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(pAsset->m_aName, s_aFilterString[s_CurCustomTab]))
 			continue;
 
-		vpSearchList.push_back(s);
+		vpSearchList.push_back(pAsset);
 	}
 	return vAssetList.size();
 }
@@ -429,8 +429,8 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			Storage()->ListDirectory(IStorage::TYPE_ALL, "assets/entities", EntitiesScan, &User);
 			std::sort(m_vEntitiesList.begin(), m_vEntitiesList.end());
 		}
-		if(m_vEntitiesList.size() != s_CustomListSize[s_CurCustomTab])
-			s_InitCustomList[s_CurCustomTab] = true;
+		if(m_vEntitiesList.size() != gs_aCustomListSize[s_CurCustomTab])
+			gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_GAME)
 	{
@@ -458,46 +458,46 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	// skin selector
 	MainView.HSplitTop(MainView.h - 10.0f - ms_ButtonHeight, &CustomList, &MainView);
 	static float s_ScrollValue = 0.0f;
-	if(s_InitCustomList[s_CurCustomTab])
+	if(gs_aInitCustomList[s_CurCustomTab])
 	{
 		int ListSize = 0;
 		if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 		{
-			s_vpSearchEntitiesList.clear();
+			gs_vpSearchEntitiesList.clear();
 			ListSize = m_vEntitiesList.size();
 			for(int i = 0; i < ListSize; ++i)
 			{
-				const SCustomEntities *s = &m_vEntitiesList[i];
+				const SCustomEntities *pEntity = &m_vEntitiesList[i];
 
 				// filter quick search
-				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(s->m_aName, s_aFilterString[s_CurCustomTab]))
+				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(pEntity->m_aName, s_aFilterString[s_CurCustomTab]))
 					continue;
 
-				s_vpSearchEntitiesList.push_back(s);
+				gs_vpSearchEntitiesList.push_back(pEntity);
 			}
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_GAME)
 		{
-			ListSize = InitSearchList(s_vpSearchGamesList, m_vGameList);
+			ListSize = InitSearchList(gs_vpSearchGamesList, m_vGameList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
 		{
-			ListSize = InitSearchList(s_vpSearchEmoticonsList, m_vEmoticonList);
+			ListSize = InitSearchList(gs_vpSearchEmoticonsList, m_vEmoticonList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
 		{
-			ListSize = InitSearchList(s_vpSearchParticlesList, m_vParticlesList);
+			ListSize = InitSearchList(gs_vpSearchParticlesList, m_vParticlesList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_HUD)
 		{
-			ListSize = InitSearchList(s_vpSearchHudList, m_vHudList);
+			ListSize = InitSearchList(gs_vpSearchHudList, m_vHudList);
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 		{
-			ListSize = InitSearchList(s_vpSearchExtrasList, m_vExtrasList);
+			ListSize = InitSearchList(gs_vpSearchExtrasList, m_vExtrasList);
 		}
-		s_InitCustomList[s_CurCustomTab] = false;
-		s_CustomListSize[s_CurCustomTab] = ListSize;
+		gs_aInitCustomList[s_CurCustomTab] = false;
+		gs_aCustomListSize[s_CurCustomTab] = ListSize;
 	}
 
 	int OldSelected = -1;
@@ -509,69 +509,69 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 	{
-		SearchListSize = s_vpSearchEntitiesList.size();
+		SearchListSize = gs_vpSearchEntitiesList.size();
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_GAME)
 	{
-		SearchListSize = s_vpSearchGamesList.size();
+		SearchListSize = gs_vpSearchGamesList.size();
 		TextureHeight = 75;
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
 	{
-		SearchListSize = s_vpSearchEmoticonsList.size();
+		SearchListSize = gs_vpSearchEmoticonsList.size();
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
 	{
-		SearchListSize = s_vpSearchParticlesList.size();
+		SearchListSize = gs_vpSearchParticlesList.size();
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_HUD)
 	{
-		SearchListSize = s_vpSearchHudList.size();
+		SearchListSize = gs_vpSearchHudList.size();
 	}
 	else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 	{
-		SearchListSize = s_vpSearchExtrasList.size();
+		SearchListSize = gs_vpSearchExtrasList.size();
 	}
 
-	UiDoListboxStart(&s_InitCustomList[s_CurCustomTab], &CustomList, TextureHeight + 15.0f + 10.0f + Margin, "", "", SearchListSize, CustomList.w / (Margin + TextureWidth), OldSelected, s_ScrollValue, true);
+	UiDoListboxStart(&gs_aInitCustomList[s_CurCustomTab], &CustomList, TextureHeight + 15.0f + 10.0f + Margin, "", "", SearchListSize, CustomList.w / (Margin + TextureWidth), OldSelected, s_ScrollValue, true);
 	for(size_t i = 0; i < SearchListSize; ++i)
 	{
-		const SCustomItem *s = GetCustomItem(s_CurCustomTab, i);
-		if(s == NULL)
+		const SCustomItem *pItem = GetCustomItem(s_CurCustomTab, i);
+		if(pItem == NULL)
 			continue;
 
 		if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetsEntites) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetsEntites) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_GAME)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetGame) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetGame) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetEmoticons) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetEmoticons) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetParticles) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetParticles) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_HUD)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetHud) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetHud) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 		{
-			if(str_comp(s->m_aName, g_Config.m_ClAssetExtras) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetExtras) == 0)
 				OldSelected = i;
 		}
 
-		CListboxItem Item = UiDoListboxNextItem(s, OldSelected >= 0 && (size_t)OldSelected == i);
+		CListboxItem Item = UiDoListboxNextItem(pItem, OldSelected >= 0 && (size_t)OldSelected == i);
 		CUIRect ItemRect = Item.m_Rect;
 		ItemRect.Margin(Margin / 2, &ItemRect);
 		if(Item.m_Visible)
@@ -579,11 +579,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			CUIRect TextureRect;
 			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
 			TextureRect.HSplitTop(10, NULL, &TextureRect);
-			UI()->DoLabel(&ItemRect, s->m_aName, ItemRect.h - 2, TEXTALIGN_CENTER);
-			if(s->m_RenderTexture.IsValid())
+			UI()->DoLabel(&ItemRect, pItem->m_aName, ItemRect.h - 2, TEXTALIGN_CENTER);
+			if(pItem->m_RenderTexture.IsValid())
 			{
 				Graphics()->WrapClamp();
-				Graphics()->TextureSet(s->m_RenderTexture);
+				Graphics()->TextureSet(pItem->m_RenderTexture);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(1, 1, 1, 1);
 				IGraphics::CQuadItem QuadItem(TextureRect.x + (TextureRect.w - TextureWidth) / 2, TextureRect.y + (TextureRect.h - TextureHeight) / 2, TextureWidth, TextureHeight);
@@ -660,7 +660,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		}
 		EditProps.m_pEmptyText = Localize("Search");
 		if(UIEx()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps))
-			s_InitCustomList[s_CurCustomTab] = true;
+			gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 
 	DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);

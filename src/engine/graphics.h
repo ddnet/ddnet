@@ -190,7 +190,7 @@ struct STWGraphicGPU
 
 	struct STWGraphicGPUItem
 	{
-		char m_Name[256];
+		char m_aName[256];
 		ETWGraphicsGPUType m_GPUType;
 	};
 	std::vector<STWGraphicGPUItem> m_vGPUs;
@@ -322,7 +322,7 @@ public:
 	virtual void FlushVerticesTex3D() = 0;
 
 	// specific render functions
-	virtual void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
+	virtual void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
 	virtual void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) = 0;
 	virtual void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) = 0;

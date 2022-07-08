@@ -287,7 +287,6 @@ void CParticles::RenderGroup(int Group)
 
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[1] = p.y;
-
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Scale = Size;
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Rotation = m_aParticles[i].m_Rot;
 

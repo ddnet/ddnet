@@ -301,8 +301,8 @@ public:
 		int m_WriteBufferIndex;
 		int m_ReadBufferIndex;
 
-		size_t m_pReadOffset;
-		size_t m_pWriteOffset;
+		size_t m_ReadOffset;
+		size_t m_WriteOffset;
 		size_t m_CopySize;
 	};
 
@@ -716,7 +716,7 @@ public:
 
 	virtual ~IGraphicsBackend() {}
 
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
+	virtual int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
 
 	virtual uint64_t TextureMemoryUsage() const = 0;
@@ -839,7 +839,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 		int m_FreeIndex;
 	};
-	std::vector<SVertexArrayInfo> m_VertexArrayInfo;
+	std::vector<SVertexArrayInfo> m_vVertexArrayInfo;
 	int m_FirstFreeVertexArrayInfo;
 
 	std::vector<int> m_vBufferObjectIndices;
@@ -1008,10 +1008,7 @@ public:
 	void SetColor(TName *pVertex, int ColorIndex)
 	{
 		TName *pVert = pVertex;
-		pVert->m_Color.r = m_aColor[ColorIndex].r;
-		pVert->m_Color.g = m_aColor[ColorIndex].g;
-		pVert->m_Color.b = m_aColor[ColorIndex].b;
-		pVert->m_Color.a = m_aColor[ColorIndex].a;
+		pVert->m_Color = m_aColor[ColorIndex];
 	}
 
 	void SetColorVertex(const CColorVertex *pArray, int Num) override;
@@ -1230,7 +1227,7 @@ public:
 	void FlushVertices(bool KeepVertices = false) override;
 	void FlushVerticesTex3D() override;
 
-	void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) override;
+	void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) override;
 	void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) override;
 	void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
