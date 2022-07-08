@@ -45,15 +45,15 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_EndlessHook = pChr->m_Core.m_EndlessHook;
 	m_DDRaceState = pChr->m_DDRaceState;
 
-	m_NoHitFlags = 0;
-	if(pChr->m_Core.m_NoHammerHit)
-		m_NoHitFlags |= CSaveTee::DISABLE_HIT_HAMMER;
-	if(pChr->m_Core.m_NoShotgunHit)
-		m_NoHitFlags |= CSaveTee::DISABLE_HIT_SHOTGUN;
-	if(pChr->m_Core.m_NoGrenadeHit)
-		m_NoHitFlags |= CSaveTee::DISABLE_HIT_GRENADE;
-	if(pChr->m_Core.m_NoLaserHit)
-		m_NoHitFlags |= CSaveTee::DISABLE_HIT_LASER;
+	m_HitDisabledFlags = 0;
+	if(pChr->m_Core.m_HammerHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::HAMMER_HIT_DISABLED;
+	if(pChr->m_Core.m_ShotgunHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::SHOTGUN_HIT_DISABLED;
+	if(pChr->m_Core.m_GrenadeHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::GRENADE_HIT_DISABLED;
+	if(pChr->m_Core.m_LaserHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::LASER_HIT_DISABLED;
 
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
@@ -86,8 +86,8 @@ void CSaveTee::Save(CCharacter *pChr)
 	// Core
 	m_CorePos = pChr->m_Core.m_Pos;
 	m_Vel = pChr->m_Core.m_Vel;
-	m_Hook = !pChr->m_Core.m_NoHookHit;
-	m_Collision = !pChr->m_Core.m_NoCollision;
+	m_HookHitEnabled = !pChr->m_Core.m_HookHitDisabled;
+	m_CollisionEnabled = !pChr->m_Core.m_CollisionDisabled;
 	m_ActiveWeapon = pChr->m_Core.m_ActiveWeapon;
 	m_Jumped = pChr->m_Core.m_Jumped;
 	m_JumpedTotal = pChr->m_Core.m_JumpedTotal;
@@ -149,10 +149,10 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Core.m_EndlessHook = m_EndlessHook;
 	pChr->m_DDRaceState = m_DDRaceState;
 
-	pChr->m_Core.m_NoHammerHit = m_NoHitFlags & CSaveTee::DISABLE_HIT_HAMMER;
-	pChr->m_Core.m_NoShotgunHit = m_NoHitFlags & CSaveTee::DISABLE_HIT_SHOTGUN;
-	pChr->m_Core.m_NoGrenadeHit = m_NoHitFlags & CSaveTee::DISABLE_HIT_GRENADE;
-	pChr->m_Core.m_NoLaserHit = m_NoHitFlags & CSaveTee::DISABLE_HIT_LASER;
+	pChr->m_Core.m_HammerHitDisabled = m_HitDisabledFlags & CSaveTee::HAMMER_HIT_DISABLED;
+	pChr->m_Core.m_ShotgunHitDisabled = m_HitDisabledFlags & CSaveTee::SHOTGUN_HIT_DISABLED;
+	pChr->m_Core.m_GrenadeHitDisabled = m_HitDisabledFlags & CSaveTee::GRENADE_HIT_DISABLED;
+	pChr->m_Core.m_LaserHitDisabled = m_HitDisabledFlags & CSaveTee::LASER_HIT_DISABLED;
 
 	pChr->m_TuneZone = m_TuneZone;
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
@@ -183,8 +183,8 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	// Core
 	pChr->m_Core.m_Pos = m_CorePos;
 	pChr->m_Core.m_Vel = m_Vel;
-	pChr->m_Core.m_NoHookHit = !m_Hook;
-	pChr->m_Core.m_NoCollision = !m_Collision;
+	pChr->m_Core.m_HookHitDisabled = !m_HookHitEnabled;
+	pChr->m_Core.m_CollisionDisabled = !m_CollisionEnabled;
 	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
 	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
@@ -283,7 +283,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_LastWeapon, m_QueuedWeapon,
 		// tee states
 		m_EndlessJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeStart, m_DeepFrozen, m_EndlessHook,
-		m_DDRaceState, m_NoHitFlags, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
+		m_DDRaceState, m_HitDisabledFlags, m_CollisionEnabled, m_TuneZone, m_TuneZoneOld, m_HookHitEnabled, m_Time,
 		(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 		m_TeleCheckpoint, m_LastPenalty,
 		(int)m_CorePos.x, (int)m_CorePos.y, m_Vel.x, m_Vel.y,
@@ -356,7 +356,7 @@ int CSaveTee::FromString(const char *pString)
 		&m_LastWeapon, &m_QueuedWeapon,
 		// tee states
 		&m_EndlessJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeStart, &m_DeepFrozen, &m_EndlessHook,
-		&m_DDRaceState, &m_NoHitFlags, &m_Collision, &m_TuneZone, &m_TuneZoneOld, &m_Hook, &m_Time,
+		&m_DDRaceState, &m_HitDisabledFlags, &m_CollisionEnabled, &m_TuneZone, &m_TuneZoneOld, &m_HookHitEnabled, &m_Time,
 		&m_Pos.x, &m_Pos.y, &m_PrevPos.x, &m_PrevPos.y,
 		&m_TeleCheckpoint, &m_LastPenalty,
 		&m_CorePos.x, &m_CorePos.y, &m_Vel.x, &m_Vel.y,

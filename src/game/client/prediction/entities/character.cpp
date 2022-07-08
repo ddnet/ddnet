@@ -301,7 +301,7 @@ void CCharacter::FireWeapon()
 		// reset objects Hit
 		m_NumObjectsHit = 0;
 
-		if(m_Core.m_NoHammerHit)
+		if(m_Core.m_HammerHitDisabled)
 			break;
 
 		CCharacter *apEnts[MAX_CLIENTS];
@@ -752,37 +752,37 @@ void CCharacter::HandleTiles(int Index)
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_NoHammerHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_HammerHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
-		m_Core.m_NoHammerHit = false;
+		m_Core.m_HammerHitDisabled = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_NoHammerHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_HammerHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
-		m_Core.m_NoHammerHit = true;
+		m_Core.m_HammerHitDisabled = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_NoShotgunHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_ShotgunHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
-		m_Core.m_NoShotgunHit = false;
+		m_Core.m_ShotgunHitDisabled = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_NoShotgunHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_ShotgunHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
-		m_Core.m_NoShotgunHit = true;
+		m_Core.m_ShotgunHitDisabled = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_NoGrenadeHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_GrenadeHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
-		m_Core.m_NoGrenadeHit = false;
+		m_Core.m_GrenadeHitDisabled = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_NoGrenadeHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_GrenadeHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_GRENADE)
 	{
-		m_Core.m_NoGrenadeHit = true;
+		m_Core.m_GrenadeHitDisabled = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_NoLaserHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_LaserHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
-		m_Core.m_NoLaserHit = false;
+		m_Core.m_LaserHitDisabled = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_NoLaserHit && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !m_Core.m_LaserHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_LASER)
 	{
-		m_Core.m_NoLaserHit = true;
+		m_Core.m_LaserHitDisabled = true;
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_JUMP)
 	{
@@ -851,23 +851,23 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// collide with others
-	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_NoCollision)
+	if(((m_TileIndex == TILE_NPC_DISABLE) || (m_TileFIndex == TILE_NPC_DISABLE)) && !m_Core.m_CollisionDisabled)
 	{
-		m_Core.m_NoCollision = true;
+		m_Core.m_CollisionDisabled = true;
 	}
-	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_NoCollision)
+	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_CollisionDisabled)
 	{
-		m_Core.m_NoCollision = false;
+		m_Core.m_CollisionDisabled = false;
 	}
 
 	// hook others
-	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_NoHookHit)
+	if(((m_TileIndex == TILE_NPH_DISABLE) || (m_TileFIndex == TILE_NPH_DISABLE)) && !m_Core.m_HookHitDisabled)
 	{
-		m_Core.m_NoHookHit = true;
+		m_Core.m_HookHitDisabled = true;
 	}
-	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_NoHookHit)
+	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_HookHitDisabled)
 	{
-		m_Core.m_NoHookHit = false;
+		m_Core.m_HookHitDisabled = false;
 	}
 
 	// unlimited air jumps
@@ -1144,16 +1144,16 @@ void CCharacter::ResetPrediction()
 	SetSolo(false);
 	SetSuper(false);
 	m_Core.m_EndlessHook = false;
-	m_Core.m_NoHammerHit = false;
-	m_Core.m_NoShotgunHit = false;
-	m_Core.m_NoGrenadeHit = false;
-	m_Core.m_NoLaserHit = false;
+	m_Core.m_HammerHitDisabled = false;
+	m_Core.m_ShotgunHitDisabled = false;
+	m_Core.m_GrenadeHitDisabled = false;
+	m_Core.m_LaserHitDisabled = false;
 	m_Core.m_EndlessJump = false;
 	m_Core.m_Jetpack = false;
 	m_NinjaJetpack = false;
 	m_Core.m_Jumps = 2;
-	m_Core.m_NoHookHit = false;
-	m_Core.m_NoCollision = false;
+	m_Core.m_HookHitDisabled = false;
+	m_Core.m_CollisionDisabled = false;
 	m_NumInputs = 0;
 	m_FreezeTime = 0;
 	m_Core.m_FreezeStart = 0;
@@ -1274,8 +1274,8 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 		// set player collision
 		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
-		m_Core.m_NoCollision = !Tuning()->m_PlayerCollision;
-		m_Core.m_NoHookHit = !Tuning()->m_PlayerHooking;
+		m_Core.m_CollisionDisabled = !Tuning()->m_PlayerCollision;
+		m_Core.m_HookHitDisabled = !Tuning()->m_PlayerHooking;
 
 		if(m_Core.m_HookTick != 0)
 			m_Core.m_EndlessHook = false;

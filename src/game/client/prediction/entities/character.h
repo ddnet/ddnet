@@ -129,10 +129,10 @@ public:
 	void ResetPrediction();
 	void SetTuneZone(int Zone);
 
-	bool CanNotHammerHit() { return m_Core.m_NoHammerHit; }
-	bool CanNotShotgunHit() { return m_Core.m_NoShotgunHit; }
-	bool CanNotLaserHit() { return m_Core.m_NoLaserHit; }
-	bool CanNotGrenadeHit() { return m_Core.m_NoGrenadeHit; }
+	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
+	bool ShotgunHitDisabled() { return m_Core.m_ShotgunHitDisabled; }
+	bool LaserHitDisabled() { return m_Core.m_LaserHitDisabled; }
+	bool GrenadeHitDisabled() { return m_Core.m_GrenadeHitDisabled; }
 
 	bool IsSuper() { return m_Core.m_Super; }
 

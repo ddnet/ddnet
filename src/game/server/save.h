@@ -30,10 +30,10 @@ public:
 	enum
 	{
 		HIT_ALL = 0,
-		DISABLE_HIT_HAMMER = 1,
-		DISABLE_HIT_SHOTGUN = 2,
-		DISABLE_HIT_GRENADE = 4,
-		DISABLE_HIT_LASER = 8
+		HAMMER_HIT_DISABLED = 1,
+		SHOTGUN_HIT_DISABLED = 2,
+		GRENADE_HIT_DISABLED = 4,
+		LASER_HIT_DISABLED = 8
 	};
 
 private:
@@ -72,11 +72,11 @@ private:
 	int m_EndlessHook;
 	int m_DDRaceState;
 
-	int m_NoHitFlags;
-	int m_Collision;
+	int m_HitDisabledFlags;
+	int m_CollisionEnabled;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	int m_Hook;
+	int m_HookHitEnabled;
 	int m_Time;
 	vec2 m_Pos;
 	vec2 m_PrevPos;

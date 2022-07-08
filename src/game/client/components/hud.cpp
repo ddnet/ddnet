@@ -786,13 +786,13 @@ void CHud::PreparePlayerStateQuads()
 
 	// Quads for displaying prohibited capabilities
 	m_SoloOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoCollisionOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoHookHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoHammerHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoGunHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoShotgunHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoGrenadeHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoLaserHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_CollisionDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_HookHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_HammerHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_GunHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_ShotgunHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_GrenadeHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_LaserHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
 	// Quads for displaying freeze status
 	m_DeepFrozenOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -1040,53 +1040,53 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_SoloOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoCollision)
+	if(pCharacter->m_CollisionDisabled)
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoCollision);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoCollisionOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudCollisionDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CollisionDisabledOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoHookHit)
+	if(pCharacter->m_HookHitDisabled)
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHookHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHookHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudHookHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_HookHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoHammerHit)
+	if(pCharacter->m_HammerHitDisabled)
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHammerHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHammerHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudHammerHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_HammerHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoGrenadeHit && pCharacter->m_HasTelegunGun && pCharacter->m_aWeapons[WEAPON_GUN].m_Got))
+	if((pCharacter->m_GrenadeHitDisabled && pCharacter->m_HasTelegunGun && pCharacter->m_aWeapons[WEAPON_GUN].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoGunHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudGunHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LaserHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoShotgunHit && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
+	if((pCharacter->m_ShotgunHitDisabled && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoShotgunHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoShotgunHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudShotgunHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_ShotgunHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoGrenadeHit && pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got))
+	if((pCharacter->m_GrenadeHitDisabled && pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoGrenadeHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoGrenadeHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudGrenadeHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_GrenadeHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoLaserHit && pCharacter->m_aWeapons[WEAPON_LASER].m_Got))
+	if((pCharacter->m_LaserHitDisabled && pCharacter->m_aWeapons[WEAPON_LASER].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoLaserHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLaserHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LaserHitDisabledOffset, x, y);
 	}
 
 	// render dummy actions and freeze state
