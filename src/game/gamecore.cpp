@@ -536,7 +536,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 {
 	m_Pos.x = pObjCore->m_X;
 	m_Pos.y = pObjCore->m_Y;
@@ -554,11 +554,6 @@ void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
-void CCharacterCore::ReadCharacter(const CNetObj_Character *pObjChar)
-{
-	m_ActiveWeapon = pObjChar->m_Weapon;
-	ReadCharacterCore((const CNetObj_CharacterCore *)pObjChar);
-}
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
@@ -618,7 +613,7 @@ void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
 	Write(&Core);
-	ReadCharacterCore(&Core);
+	Read(&Core);
 }
 
 void CCharacterCore::SetHookedPlayer(int HookedPlayer)
