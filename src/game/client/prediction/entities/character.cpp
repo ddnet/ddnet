@@ -1186,7 +1186,7 @@ void CCharacter::ResetPrediction()
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
-	m_Core.ReadCharacterCore((const CNetObj_CharacterCore *)pChar);
+	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
 
 	if(pExtended)
