@@ -27,28 +27,22 @@ CHud::CHud()
 	// won't work if zero
 	m_FrameTimeAvg = 0.0f;
 	m_FPSTextContainerIndex = -1;
-	OnReset();
 }
 
 void CHud::ResetHudContainers()
 {
 	for(auto &ScoreInfo : m_aScoreInfo)
 	{
-		if(ScoreInfo.m_OptionalNameTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(ScoreInfo.m_OptionalNameTextContainerIndex);
-		if(ScoreInfo.m_TextRankContainerIndex != -1)
-			TextRender()->DeleteTextContainer(ScoreInfo.m_TextRankContainerIndex);
-		if(ScoreInfo.m_TextScoreContainerIndex != -1)
-			TextRender()->DeleteTextContainer(ScoreInfo.m_TextScoreContainerIndex);
+		TextRender()->DeleteTextContainer(ScoreInfo.m_OptionalNameTextContainerIndex);
+		TextRender()->DeleteTextContainer(ScoreInfo.m_TextRankContainerIndex);
+		TextRender()->DeleteTextContainer(ScoreInfo.m_TextScoreContainerIndex);
 		if(ScoreInfo.m_RoundRectQuadContainerIndex != -1)
 			Graphics()->DeleteQuadContainer(ScoreInfo.m_RoundRectQuadContainerIndex);
 
 		ScoreInfo.Reset();
 	}
 
-	if(m_FPSTextContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
-	m_FPSTextContainerIndex = -1;
+	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
 }
 
 void CHud::OnWindowResize()
@@ -71,6 +65,8 @@ void CHud::OnReset()
 
 void CHud::OnInit()
 {
+	OnReset();
+
 	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	PrepareAmmoHealthAndArmorQuads();
@@ -219,13 +215,12 @@ void CHud::RenderScoreHud()
 				// draw score
 				if(RecreateTeamScore[t])
 				{
-					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
-						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
+					TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
-					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScoreTeam[t]);
+					TextRender()->CreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScoreTeam[t]);
 				}
 				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 				{
@@ -256,15 +251,14 @@ void CHud::RenderScoreHud()
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
 
-							if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
-								TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
+							TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
 
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 
 							CTextCursor Cursor;
 							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
-							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
+							TextRender()->CreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
 						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
@@ -400,13 +394,12 @@ void CHud::RenderScoreHud()
 
 				if(RecreateScores)
 				{
-					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
-						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
+					TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
-					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScore[t]);
+					TextRender()->CreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScore[t]);
 				}
 				// draw score
 				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
@@ -427,14 +420,13 @@ void CHud::RenderScoreHud()
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
 
-							if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
-								TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
+							TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
 
 							CTextCursor Cursor;
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
-							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
+							TextRender()->CreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
 						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
@@ -468,13 +460,12 @@ void CHud::RenderScoreHud()
 				{
 					mem_copy(m_aScoreInfo[t].m_aRankText, aBuf, sizeof(m_aScoreInfo[t].m_aRankText));
 
-					if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
-						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex);
+					TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax - ImageSize - Split - PosSize, StartY + t * 20 + (18.f - 10.f) / 2.f, 10.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
-					m_aScoreInfo[t].m_TextRankContainerIndex = TextRender()->CreateTextContainer(&Cursor, aBuf);
+					TextRender()->CreateTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, &Cursor, aBuf);
 				}
 				if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
 				{
@@ -535,7 +526,7 @@ void CHud::RenderTextInfo()
 		auto OldFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
 		if(m_FPSTextContainerIndex == -1)
-			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
+			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
 		else
 			TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
 		TextRender()->SetRenderFlags(OldFlags);
