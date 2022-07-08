@@ -3,12 +3,11 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
-#include "ui.h"
-
 #include <base/color.h>
 #include <base/vmath.h>
 
 #include <game/client/skin.h>
+#include <game/client/ui_rect.h>
 
 class CSpeedupTile;
 class CSwitchTile;

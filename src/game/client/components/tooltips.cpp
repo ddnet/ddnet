@@ -1,6 +1,7 @@
 #include "tooltips.h"
 
 #include <game/client/render.h>
+#include <game/client/ui.h>
 
 CTooltips::CTooltips()
 {
