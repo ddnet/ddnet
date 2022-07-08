@@ -3,107 +3,14 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include "ui_rect.h"
+
 #include <engine/input.h>
 #include <engine/textrender.h>
 
 #include <chrono>
 #include <string>
 #include <vector>
-
-class CUIRect
-{
-public:
-	float x, y, w, h;
-
-	/**
-	 * Splits 2 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
-	 *
-	 * @param pTop This rect will end up taking the top half of this CUIRect.
-	 * @param pBottom This rect will end up taking the bottom half of this CUIRect.
-	 * @param Spacing Total size of margin between split rects.
-	 */
-	void HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing = 0.0f) const;
-	/**
-	 * Splits 2 CUIRect inside *this* CUIRect.
-	 *
-	 * The cut parameter determines the height of the top rect, so it allows more customization than HSplitMid.
-	 *
-	 * This method doesn't check if Cut is bigger than *this* rect height.
-	 *
-	 * @param Cut The height of the pTop rect.
-	 * @param pTop The rect that ends up at the top with a height equal to Cut.
-	 * @param pBottom The rect that ends up at the bottom with a height equal to *this* rect minus the Cut.
-	 */
-	void HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
-	/**
-	 * Splits 2 CUIRect inside *this* CUIRect.
-	 *
-	 * The cut parameter determines the height of the bottom rect, so it allows more customization than HSplitMid.
-	 *
-	 * This method doesn't check if Cut is bigger than *this* rect height.
-	 *
-	 * @param Cut The height of the pBottom rect.
-	 * @param pTop The rect that ends up at the top with a height equal to *this* CUIRect height minus Cut.
-	 * @param pBottom The rect that ends up at the bottom with a height equal to Cut.
-	 */
-	void HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
-	/**
-	 * Splits 2 CUIRect inside *this* CUIRect vertically. You can pass null pointers.
-	 *
-	 * @param pLeft This rect will take up the left half of *this* CUIRect.
-	 * @param pRight This rect will take up the right half of *this* CUIRect.
-	 * @param Spacing Total size of margin between split rects.
-	 */
-	void VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing = 0.0f) const;
-	/**
-	 * Splits 2 CUIRect inside *this* CUIRect.
-	 *
-	 * The cut parameter determines the width of the left rect, so it allows more customization than VSplitMid.
-	 *
-	 * This method doesn't check if Cut is bigger than *this* rect width.
-	 *
-	 * @param Cut The width of the pLeft rect.
-	 * @param pLeft The rect that ends up at the left with a width equal to Cut.
-	 * @param pRight The rect that ends up at the right with a width equal to *this* rect minus the Cut.
-	 */
-	void VSplitLeft(float Cut, CUIRect *pLeft, CUIRect *pRight) const;
-	/**
-	 * Splits 2 CUIRect inside *this* CUIRect.
-	 *
-	 * The cut parameter determines the width of the right rect, so it allows more customization than VSplitMid.
-	 *
-	 * This method doesn't check if Cut is bigger than *this* rect width.
-	 *
-	 * @param Cut The width of the pRight rect.
-	 * @param pLeft The rect that ends up at the left with a width equal to *this* CUIRect width minus Cut.
-	 * @param pRight The rect that ends up at the right with a width equal to Cut.
-	 */
-	void VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const;
-
-	/**
-	 * Places pOtherRect inside *this* CUIRect with Cut as the margin.
-	 *
-	 * @param Cut The margin.
-	 * @param pOtherRect The CUIRect to place inside *this* CUIRect.
-	 */
-	void Margin(float Cut, CUIRect *pOtherRect) const;
-	/**
-	 * Places pOtherRect inside *this* CUIRect applying Cut as the margin only on the vertical axis.
-	 *
-	 * @param Cut The margin.
-	 * @param pOtherRect The CUIRect to place inside *this* CUIRect
-	 */
-	void VMargin(float Cut, CUIRect *pOtherRect) const;
-	/**
-	 * Places pOtherRect inside *this* CUIRect applying Cut as the margin only on the horizontal axis.
-	 *
-	 * @param Cut The margin.
-	 * @param pOtherRect The CUIRect to place inside *this* CUIRect
-	 */
-	void HMargin(float Cut, CUIRect *pOtherRect) const;
-
-	bool Inside(float x_, float y_) const;
-};
 
 struct SUIAnimator
 {
