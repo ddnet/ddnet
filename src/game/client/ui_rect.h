@@ -95,7 +95,7 @@ public:
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
 
-	bool Inside(float x_, float y_) const;
+	bool Inside(float PointX, float PointY) const;
 };
 
 #endif

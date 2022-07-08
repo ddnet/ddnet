@@ -162,7 +162,7 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 	pOtherRect->h = r.h - 2 * Cut;
 }
 
-bool CUIRect::Inside(float x_, float y_) const
+bool CUIRect::Inside(float PointX, float PointY) const
 {
-	return x_ >= this->x && x_ < this->x + this->w && y_ >= this->y && y_ < this->y + this->h;
+	return PointX >= x && PointX < x + w && PointY >= y && PointY < y + h;
 }
