@@ -285,8 +285,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				r.Margin(0.5f, &r);
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(0), &r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
-
-			if(!Selected && UI()->MouseHovered(&Row))
+			else if(UI()->MouseHovered(&Row))
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
