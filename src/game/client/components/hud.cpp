@@ -32,28 +32,19 @@ CHud::CHud()
 
 void CHud::ResetHudContainers()
 {
-	if(m_aScoreInfo[0].m_OptionalNameTextContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_OptionalNameTextContainerIndex);
-	if(m_aScoreInfo[1].m_OptionalNameTextContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_OptionalNameTextContainerIndex);
+	for(auto &ScoreInfo : m_aScoreInfo)
+	{
+		if(ScoreInfo.m_OptionalNameTextContainerIndex != -1)
+			TextRender()->DeleteTextContainer(ScoreInfo.m_OptionalNameTextContainerIndex);
+		if(ScoreInfo.m_TextRankContainerIndex != -1)
+			TextRender()->DeleteTextContainer(ScoreInfo.m_TextRankContainerIndex);
+		if(ScoreInfo.m_TextScoreContainerIndex != -1)
+			TextRender()->DeleteTextContainer(ScoreInfo.m_TextScoreContainerIndex);
+		if(ScoreInfo.m_RoundRectQuadContainerIndex != -1)
+			Graphics()->DeleteQuadContainer(ScoreInfo.m_RoundRectQuadContainerIndex);
 
-	if(m_aScoreInfo[0].m_TextRankContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextRankContainerIndex);
-	if(m_aScoreInfo[1].m_TextRankContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextRankContainerIndex);
-
-	if(m_aScoreInfo[0].m_TextScoreContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[0].m_TextScoreContainerIndex);
-	if(m_aScoreInfo[1].m_TextScoreContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_aScoreInfo[1].m_TextScoreContainerIndex);
-
-	if(m_aScoreInfo[0].m_RoundRectQuadContainerIndex != -1)
-		Graphics()->DeleteQuadContainer(m_aScoreInfo[0].m_RoundRectQuadContainerIndex);
-	if(m_aScoreInfo[1].m_RoundRectQuadContainerIndex != -1)
-		Graphics()->DeleteQuadContainer(m_aScoreInfo[1].m_RoundRectQuadContainerIndex);
-
-	m_aScoreInfo[0].Reset();
-	m_aScoreInfo[1].Reset();
+		ScoreInfo.Reset();
+	}
 
 	if(m_FPSTextContainerIndex != -1)
 		TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
