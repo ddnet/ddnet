@@ -94,7 +94,13 @@ public:
 	 * @param pOtherRect The CUIRect to place inside *this* CUIRect
 	 */
 	void HMargin(float Cut, CUIRect *pOtherRect) const;
-
+	/**
+	 * Checks whether a point is inside *this* CUIRect.
+	 *
+	 * @param PointX The point's X position.
+	 * @param PointY The point's Y position.
+	 * @return true iff the given point is inside *this* CUIRect.
+	 */
 	bool Inside(float PointX, float PointY) const;
 };
 
