@@ -39,7 +39,7 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_BROADCAST)
 	{
 		CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
-		str_copy(m_aBroadcastText, pMsg->m_pMessage, sizeof(m_aBroadcastText));
+		str_copy(m_aBroadcastText, pMsg->m_pMessage);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, 12.0f, TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();

@@ -883,7 +883,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_BackendType == BACKEND_TYPE_VULKAN)
 		{
 			// try default opengl settings
-			str_copy(g_Config.m_GfxBackend, "OpenGL", std::size(g_Config.m_GfxBackend));
+			str_copy(g_Config.m_GfxBackend, "OpenGL");
 			g_Config.m_GfxGLMajor = 3;
 			g_Config.m_GfxGLMinor = 0;
 			g_Config.m_GfxGLPatch = 0;
@@ -1209,7 +1209,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		if(pErrorStr != NULL)
 		{
-			str_copy(m_aErrorString, pErrorStr, std::size(m_aErrorString));
+			str_copy(m_aErrorString, pErrorStr);
 		}
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;

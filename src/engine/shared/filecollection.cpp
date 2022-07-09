@@ -129,11 +129,11 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	// MAX_ENTRIES - 1 to make sure that we can insert one entry into the sorted
 	// list and then remove the oldest one
 	m_MaxEntries = clamp(MaxEntries, 1, static_cast<int>(MAX_ENTRIES) - 1);
-	str_copy(m_aFileDesc, pFileDesc, sizeof(m_aFileDesc));
+	str_copy(m_aFileDesc, pFileDesc);
 	m_FileDescLength = str_length(m_aFileDesc);
-	str_copy(m_aFileExt, pFileExt, sizeof(m_aFileExt));
+	str_copy(m_aFileExt, pFileExt);
 	m_FileExtLength = str_length(m_aFileExt);
-	str_copy(m_aPath, pPath, sizeof(m_aPath));
+	str_copy(m_aPath, pPath);
 	m_pStorage = pStorage;
 
 	m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, FilelistCallback, this);

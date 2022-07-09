@@ -19,9 +19,9 @@ public:
 	CNameBan(const char *pName, int Distance, int IsSubstring, const char *pReason = "") :
 		m_Distance(Distance), m_IsSubstring(IsSubstring)
 	{
-		str_copy(m_aName, pName, sizeof(m_aName));
+		str_copy(m_aName, pName);
 		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, std::size(m_aSkeleton));
-		str_copy(m_aReason, pReason, sizeof(m_aReason));
+		str_copy(m_aReason, pReason);
 	}
 	char m_aName[MAX_NAME_LENGTH];
 	char m_aReason[MAX_NAMEBAN_REASON_LENGTH];

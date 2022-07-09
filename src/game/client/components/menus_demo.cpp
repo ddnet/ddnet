@@ -118,7 +118,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 		{
 			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
-				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
+				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
 			else
 			{
 				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
@@ -132,7 +132,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(DemoFile && str_comp(m_aDemoPlayerPopupHint, pStr) != 0)
 				{
 					io_close(DemoFile);
-					str_copy(m_aDemoPlayerPopupHint, pStr, sizeof(m_aDemoPlayerPopupHint));
+					str_copy(m_aDemoPlayerPopupHint, pStr);
 				}
 				else
 				{
@@ -456,7 +456,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static int s_SliceSaveButton = 0;
 	if(DoButton_Sprite(&s_SliceSaveButton, IMAGE_FILEICONS, SPRITE_FILE_DEMO2, 0, &Button, CUI::CORNER_ALL))
 	{
-		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
@@ -751,7 +751,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	}
 
 	CDemoItem Item;
-	str_copy(Item.m_aFilename, pInfo->m_pName, sizeof(Item.m_aFilename));
+	str_copy(Item.m_aFilename, pInfo->m_pName);
 	if(IsDir)
 	{
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pInfo->m_pName);
@@ -856,13 +856,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	{
 		CDemoItem &Item = m_vDemos[m_DemolistSelectedIndex];
 		if(str_comp(Item.m_aFilename, "..") == 0)
-			str_copy(aFooterLabel, Localize("Parent Folder"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Parent Folder"));
 		else if(m_DemolistSelectedIsDir)
-			str_copy(aFooterLabel, Localize("Folder"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Folder"));
 		else if(!FetchHeader(Item))
-			str_copy(aFooterLabel, Localize("Invalid Demo"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Invalid Demo"));
 		else
-			str_copy(aFooterLabel, Localize("Demo details"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Demo details"));
 	}
 
 	// render background
@@ -1084,7 +1084,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_vDemos.size());
 	if(PreviousIndex != m_DemolistSelectedIndex)
 	{
-		str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+		str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName);
 		DemolistOnUpdate(false);
 	}
 
@@ -1127,7 +1127,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			if(UI()->DoButtonLogic(Item.m_aName, Selected, &Row))
 			{
 				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
-				str_copy(g_Config.m_UiDemoSelected, Item.m_aName, sizeof(g_Config.m_UiDemoSelected));
+				str_copy(g_Config.m_UiDemoSelected, Item.m_aName);
 				DemolistOnUpdate(false);
 				m_DoubleClickIndex = ItemIndex;
 			}
@@ -1229,7 +1229,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				else // sub folder
 				{
 					char aTemp[256];
-					str_copy(aTemp, m_aCurrentDemoFolder, sizeof(aTemp));
+					str_copy(aTemp, m_aCurrentDemoFolder);
 					str_format(m_aCurrentDemoFolder, sizeof(m_aCurrentDemoFolder), "%s/%s", aTemp, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					m_DemolistStorageType = m_vDemos[m_DemolistSelectedIndex].m_StorageType;
 				}
@@ -1284,7 +1284,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENAME_DEMO;
-				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 				return;
 			}
 		}
@@ -1297,7 +1297,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENDER_DEMO;
-				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 				return;
 			}
 		}

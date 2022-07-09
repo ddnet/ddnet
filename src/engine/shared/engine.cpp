@@ -14,7 +14,7 @@ CHostLookup::CHostLookup() = default;
 
 CHostLookup::CHostLookup(const char *pHostname, int Nettype)
 {
-	str_copy(m_aHostname, pHostname, sizeof(m_aHostname));
+	str_copy(m_aHostname, pHostname);
 	m_Nettype = Nettype;
 }
 
@@ -59,7 +59,7 @@ public:
 	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) :
 		m_pFutureLogger(std::move(pFutureLogger))
 	{
-		str_copy(m_aAppName, pAppname, std::size(m_aAppName));
+		str_copy(m_aAppName, pAppname);
 		if(!Test)
 		{
 			//

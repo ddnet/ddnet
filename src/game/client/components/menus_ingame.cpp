@@ -848,8 +848,8 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 		return 0;
 
 	CGhostItem Item;
-	str_copy(Item.m_aFilename, aFilename, sizeof(Item.m_aFilename));
-	str_copy(Item.m_aPlayer, Info.m_aOwner, sizeof(Item.m_aPlayer));
+	str_copy(Item.m_aFilename, aFilename);
+	str_copy(Item.m_aPlayer, Info.m_aOwner);
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_vGhosts.push_back(Item);

@@ -83,7 +83,7 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const cha
 	m_pData->m_NumUrls = NumUrls;
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
-		str_copy(m_pData->m_aaUrls[i], ppUrls[i], sizeof(m_pData->m_aaUrls[i]));
+		str_copy(m_pData->m_aaUrls[i], ppUrls[i]);
 	}
 }
 
@@ -520,7 +520,7 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 			{
 				break;
 			}
-			str_copy(aaUrls[NumUrls], pLine, sizeof(aaUrls[NumUrls]));
+			str_copy(aaUrls[NumUrls], pLine);
 			apUrls[NumUrls] = aaUrls[NumUrls];
 			NumUrls += 1;
 		}

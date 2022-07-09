@@ -42,8 +42,8 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, SHA256_DIGEST
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
-	str_copy(Header.m_aOwner, pName, sizeof(Header.m_aOwner));
-	str_copy(Header.m_aMap, pMap, sizeof(Header.m_aMap));
+	str_copy(Header.m_aOwner, pName);
+	str_copy(Header.m_aMap, pMap);
 	Header.m_MapSha256 = MapSha256;
 	io_write(m_File, &Header, sizeof(Header));
 

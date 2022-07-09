@@ -53,7 +53,7 @@ const char *CNetConnection::ErrorString()
 
 void CNetConnection::SetError(const char *pString)
 {
-	str_copy(m_aErrorString, pString, sizeof(m_aErrorString));
+	str_copy(m_aErrorString, pString);
 }
 
 void CNetConnection::Init(NETSOCKET Socket, bool BlockCloseMsg)
@@ -214,7 +214,7 @@ void CNetConnection::Disconnect(const char *pReason)
 		{
 			m_aErrorString[0] = 0;
 			if(pReason)
-				str_copy(m_aErrorString, pReason, sizeof(m_aErrorString));
+				str_copy(m_aErrorString, pReason);
 		}
 	}
 

@@ -3,7 +3,7 @@
 CNameBan *IsNameBanned(const char *pName, std::vector<CNameBan> &vNameBans)
 {
 	char aTrimmed[MAX_NAME_LENGTH];
-	str_copy(aTrimmed, str_utf8_skip_whitespaces(pName), sizeof(aTrimmed));
+	str_copy(aTrimmed, str_utf8_skip_whitespaces(pName));
 	str_utf8_trim_right(aTrimmed);
 
 	int aSkeleton[MAX_NAME_SKELETON_LENGTH];

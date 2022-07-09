@@ -61,7 +61,7 @@ int ParseUuid(CUuid *pUuid, const char *pBuffer)
 		return 2;
 	}
 	char aCopy[UUID_MAXSTRSIZE];
-	str_copy(aCopy, pBuffer, sizeof(aCopy));
+	str_copy(aCopy, pBuffer);
 	// 01234567-9012-4567-9012-456789012345
 	if(aCopy[8] != '-' || aCopy[13] != '-' || aCopy[18] != '-' || aCopy[23] != '-')
 	{

@@ -18,7 +18,7 @@ void CLineInput::Clear()
 
 void CLineInput::Set(const char *pString)
 {
-	str_copy(m_aStr, pString, sizeof(m_aStr));
+	str_copy(m_aStr, pString);
 	str_utf8_stats(m_aStr, MAX_SIZE, MAX_CHARS, &m_Len, &m_NumChars);
 	m_CursorPos = m_Len;
 }
@@ -59,7 +59,7 @@ void CLineInput::SetRange(const char *pString, int Begin, int End)
 
 void CLineInput::Editing(const char *pString, int Cursor)
 {
-	str_copy(m_aDisplayStr, m_aStr, sizeof(m_aDisplayStr));
+	str_copy(m_aDisplayStr, m_aStr);
 	char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
 	str_format(aEditingText, sizeof(aEditingText), "[%s]", pString);
 	int NewTextLen = str_length(aEditingText);

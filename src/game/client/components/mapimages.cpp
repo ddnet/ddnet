@@ -37,7 +37,7 @@ CMapImages::CMapImages(int TextureSize)
 
 	mem_zero(m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_aTextureUsedByTileOrQuadLayerFlag));
 
-	str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
+	str_copy(m_aEntitiesPath, "editor/entities_clear");
 
 	static_assert(std::size(gs_apModEntitiesNames) == MAP_IMAGE_MOD_TYPE_COUNT, "Mod name string count is not equal to mod type count");
 }
@@ -47,7 +47,7 @@ void CMapImages::OnInit()
 	InitOverlayTextures();
 
 	if(str_comp(g_Config.m_ClAssetsEntites, "default") == 0)
-		str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
+		str_copy(m_aEntitiesPath, "editor/entities_clear");
 	else
 	{
 		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", g_Config.m_ClAssetsEntites);
@@ -381,7 +381,7 @@ IGraphics::CTextureHandle CMapImages::GetOverlayCenter()
 void CMapImages::ChangeEntitiesPath(const char *pPath)
 {
 	if(str_comp(pPath, "default") == 0)
-		str_copy(m_aEntitiesPath, "editor/entities_clear", sizeof(m_aEntitiesPath));
+		str_copy(m_aEntitiesPath, "editor/entities_clear");
 	else
 	{
 		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", pPath);

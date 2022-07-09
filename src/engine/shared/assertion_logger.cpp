@@ -32,7 +32,7 @@ void CAssertionLogger::Log(const CLogMessage *pMessage)
 {
 	std::unique_lock<std::mutex> Lock(m_DbgMessageMutex);
 	SDebugMessageItem *pMsgItem = (SDebugMessageItem *)m_DbgMessages.Allocate(sizeof(SDebugMessageItem));
-	str_copy(pMsgItem->m_aMessage, pMessage->m_aLine, std::size(pMsgItem->m_aMessage));
+	str_copy(pMsgItem->m_aMessage, pMessage->m_aLine);
 }
 
 void CAssertionLogger::GlobalFinish()
@@ -69,8 +69,8 @@ void CAssertionLogger::Dump()
 
 CAssertionLogger::CAssertionLogger(const char *pAssertLogPath, const char *pGameName)
 {
-	str_copy(m_aAssertLogPath, pAssertLogPath, std::size(m_aAssertLogPath));
-	str_copy(m_aGameName, pGameName, std::size(m_aGameName));
+	str_copy(m_aAssertLogPath, pAssertLogPath);
+	str_copy(m_aGameName, pGameName);
 }
 
 std::unique_ptr<ILogger> CreateAssertionLogger(IStorage *pStorage, const char *pGameName)

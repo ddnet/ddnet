@@ -520,7 +520,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 		return;
 
 	if(pPassword != m_aRconPassword)
-		str_copy(m_aRconPassword, pPassword, sizeof(m_aRconPassword));
+		str_copy(m_aRconPassword, pPassword);
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
 	Msg.AddString(pName, 32);
@@ -745,8 +745,8 @@ void CClient::GenerateTimeoutCodes()
 	}
 	else
 	{
-		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode, sizeof(m_aTimeoutCodes[0]));
-		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode, sizeof(m_aTimeoutCodes[1]));
+		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode);
+		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode);
 	}
 }
 
@@ -759,7 +759,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	m_ConnectionID = RandomUuid();
 	if(pAddress != m_aConnectAddressStr)
-		str_copy(m_aConnectAddressStr, pAddress, sizeof(m_aConnectAddressStr));
+		str_copy(m_aConnectAddressStr, pAddress);
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aConnectAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
@@ -767,7 +767,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	if(strncmp(m_aConnectAddressStr, "ws://", 5) == 0)
 	{
 		is_websocket = true;
-		str_copy(m_aConnectAddressStr, pAddress + 5, sizeof(m_aConnectAddressStr));
+		str_copy(m_aConnectAddressStr, pAddress + 5);
 	}
 
 	ServerInfoRequest();
@@ -781,13 +781,13 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	if(m_SendPassword)
 	{
-		str_copy(m_aPassword, g_Config.m_Password, sizeof(m_aPassword));
+		str_copy(m_aPassword, g_Config.m_Password);
 		m_SendPassword = false;
 	}
 	else if(!pPassword)
 		m_aPassword[0] = 0;
 	else
-		str_copy(m_aPassword, pPassword, sizeof(m_aPassword));
+		str_copy(m_aPassword, pPassword);
 
 	m_CanReceiveServerCapabilities = true;
 	// Deregister Rcon commands from last connected server, might not have called
@@ -949,7 +949,7 @@ void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
 	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
-		str_copy(pServerInfo->m_aGameType, "DDraceNetwork", sizeof(pServerInfo->m_aGameType));
+		str_copy(pServerInfo->m_aGameType, "DDraceNetwork");
 }
 
 void CClient::ServerInfoRequest()
@@ -1258,8 +1258,8 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 	m_aReceivedSnapshots[g_Config.m_ClDummy] = 0;
 
-	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
-	str_copy(m_aCurrentMapPath, pFilename, sizeof(m_aCurrentMapPath));
+	str_copy(m_aCurrentMap, pName);
+	str_copy(m_aCurrentMapPath, pFilename);
 
 	return 0;
 }
@@ -1273,7 +1273,7 @@ static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pS
 	}
 	else
 	{
-		str_copy(aSuffix, ".map", sizeof(aSuffix));
+		str_copy(aSuffix, ".map");
 	}
 
 	if(pSha256)
@@ -1650,7 +1650,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 
 			m_MapDetailsPresent = true;
-			str_copy(m_aMapDetailsName, pMap, sizeof(m_aMapDetailsName));
+			str_copy(m_aMapDetailsName, pMap);
 			m_MapDetailsSha256 = *pMapSha256;
 			m_MapDetailsCrc = MapCrc;
 		}
@@ -1734,7 +1734,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", aBuf);
 
 					m_MapdownloadChunk = 0;
-					str_copy(m_aMapdownloadName, pMap, sizeof(m_aMapdownloadName));
+					str_copy(m_aMapdownloadName, pMap);
 
 					m_MapdownloadSha256Present = (bool)pMapSha256;
 					m_MapdownloadSha256 = pMapSha256 ? *pMapSha256 : SHA256_ZEROED;
@@ -2418,12 +2418,12 @@ void CClient::LoadDDNetInfo()
 	if(CurrentVersion.type == json_string)
 	{
 		char aNewVersionStr[64];
-		str_copy(aNewVersionStr, CurrentVersion, sizeof(aNewVersionStr));
+		str_copy(aNewVersionStr, CurrentVersion);
 		char aCurVersionStr[64];
-		str_copy(aCurVersionStr, GAME_RELEASE_VERSION, sizeof(aCurVersionStr));
+		str_copy(aCurVersionStr, GAME_RELEASE_VERSION);
 		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
 		{
-			str_copy(m_aVersionStr, CurrentVersion, sizeof(m_aVersionStr));
+			str_copy(m_aVersionStr, CurrentVersion);
 		}
 		else
 		{
@@ -2439,13 +2439,13 @@ void CClient::LoadDDNetInfo()
 		if(m_aNews[0] && str_find(m_aNews, News) == nullptr)
 			g_Config.m_UiUnreadNews = true;
 
-		str_copy(m_aNews, News, sizeof(m_aNews));
+		str_copy(m_aNews, News);
 	}
 
 	const json_value &MapDownloadUrl = DDNetInfo["map-download-url"];
 	if(MapDownloadUrl.type == json_string)
 	{
-		str_copy(m_aMapDownloadUrl, MapDownloadUrl, sizeof(m_aMapDownloadUrl));
+		str_copy(m_aMapDownloadUrl, MapDownloadUrl);
 	}
 
 	const json_value &Points = DDNetInfo["points"];
@@ -3098,7 +3098,7 @@ void CClient::Run()
 
 	if(Steam()->GetPlayerName())
 	{
-		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName(), sizeof(g_Config.m_SteamName));
+		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName());
 	}
 
 	GameClient()->OnInit();
@@ -3157,7 +3157,7 @@ void CClient::Run()
 		// handle pending connects
 		if(m_aCmdConnect[0])
 		{
-			str_copy(g_Config.m_UiServerAddress, m_aCmdConnect, sizeof(g_Config.m_UiServerAddress));
+			str_copy(g_Config.m_UiServerAddress, m_aCmdConnect);
 			Connect(m_aCmdConnect);
 			m_aCmdConnect[0] = 0;
 		}
@@ -3469,7 +3469,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0), sizeof(pSelf->m_aCmdConnect));
+	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0));
 }
 
 void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
@@ -4042,7 +4042,7 @@ void CClient::InitChecksum()
 {
 	CChecksumData *pData = &m_Checksum.m_Data;
 	pData->m_SizeofData = sizeof(*pData);
-	str_copy(pData->m_aVersionStr, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")", sizeof(pData->m_aVersionStr));
+	str_copy(pData->m_aVersionStr, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
 	pData->m_Start = time_get();
 	os_version_str(pData->m_aOsVersion, sizeof(pData->m_aOsVersion));
 	secure_random_fill(&pData->m_Random, sizeof(pData->m_Random));
@@ -4430,17 +4430,17 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
-	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
+	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
 }
 
 void CClient::HandleDemoPath(const char *pPath)
 {
-	str_copy(m_aCmdPlayDemo, pPath, sizeof(m_aCmdPlayDemo));
+	str_copy(m_aCmdPlayDemo, pPath);
 }
 
 void CClient::HandleMapPath(const char *pPath)
 {
-	str_copy(m_aCmdEditMap, pPath, sizeof(m_aCmdEditMap));
+	str_copy(m_aCmdEditMap, pPath);
 }
 
 /*
@@ -4729,7 +4729,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
+	str_copy(aUrl, "https://info2.ddnet.tw/info");
 
 	if(g_Config.m_BrIndicateFinished)
 	{

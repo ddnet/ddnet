@@ -118,7 +118,7 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 
 CHttpRequest::CHttpRequest(const char *pUrl)
 {
-	str_copy(m_aUrl, pUrl, sizeof(m_aUrl));
+	str_copy(m_aUrl, pUrl);
 }
 
 CHttpRequest::~CHttpRequest()
@@ -333,7 +333,7 @@ int CHttpRequest::OnCompletion(int State)
 void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)
 {
 	m_WriteToFile = true;
-	str_copy(m_aDest, pDest, sizeof(m_aDest));
+	str_copy(m_aDest, pDest);
 	if(StorageType == -2)
 	{
 		pStorage->GetBinaryPath(m_aDest, m_aDestAbsolute, sizeof(m_aDestAbsolute));

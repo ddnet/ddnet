@@ -198,7 +198,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			pTitle = Localize("Game over");
 		else
 		{
-			str_copy(aBuf, Client()->GetCurrentMap(), sizeof(aBuf));
+			str_copy(aBuf, Client()->GetCurrentMap());
 			while(TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
 				aBuf[str_length(aBuf) - 1] = '\0';
 			if(str_comp(aBuf, Client()->GetCurrentMap()))
@@ -387,7 +387,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 				{
 					if(DDTeam == TEAM_SUPER)
-						str_copy(aBuf, Localize("Super"), sizeof(aBuf));
+						str_copy(aBuf, Localize("Super"));
 					else
 						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize / 1.5f), FontSize / 1.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
@@ -396,7 +396,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				else
 				{
 					if(DDTeam == TEAM_SUPER)
-						str_copy(aBuf, Localize("Super"), sizeof(aBuf));
+						str_copy(aBuf, Localize("Super"));
 					else
 						str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
 					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
@@ -654,21 +654,21 @@ void CScoreboard::OnRender()
 			if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER && m_pClient->m_Snap.m_pGameDataObj)
 			{
 				char aText[256];
-				str_copy(aText, Localize("Draw!"), sizeof(aText));
+				str_copy(aText, Localize("Draw!"));
 
 				if(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed > m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue)
 				{
 					if(pRedClanName)
 						str_format(aText, sizeof(aText), Localize("%s wins!"), pRedClanName);
 					else
-						str_copy(aText, Localize("Red team wins!"), sizeof(aText));
+						str_copy(aText, Localize("Red team wins!"));
 				}
 				else if(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue > m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed)
 				{
 					if(pBlueClanName)
 						str_format(aText, sizeof(aText), Localize("%s wins!"), pBlueClanName);
 					else
-						str_copy(aText, Localize("Blue team wins!"), sizeof(aText));
+						str_copy(aText, Localize("Blue team wins!"));
 				}
 
 				float TextWidth = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);
