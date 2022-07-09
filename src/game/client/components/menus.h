@@ -162,7 +162,7 @@ class CMenus : public CComponent
 					Graphics()->SetColor(Color);
 
 					CUIElement::SUIElementRect &NewRect = *UIElement.Get(i);
-					NewRect.m_UIRectQuadContainer = RenderTools()->CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
+					NewRect.m_UIRectQuadContainer = Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
 
 					NewRect.m_X = pRect->x;
 					NewRect.m_Y = pRect->y;

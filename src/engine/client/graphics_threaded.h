@@ -1127,6 +1127,11 @@ public:
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
 
+	void DrawRectExt(float x, float y, float w, float h, float r, int Corners) override;
+	void DrawRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners) override;
+	int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) override;
+	void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) override;
+	void DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding) override;
 	void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) override;
 
 	const GL_STexCoord *GetCurTextureCoordinates() override

@@ -457,6 +457,11 @@ public:
 
 		CORNER_ALL = CORNER_T | CORNER_B
 	};
+	virtual void DrawRectExt(float x, float y, float w, float h, float r, int Corners) = 0;
+	virtual void DrawRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners) = 0;
+	virtual int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) = 0;
+	virtual void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) = 0;
+	virtual void DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding) = 0;
 	virtual void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) = 0;
 
 	struct CColorVertex

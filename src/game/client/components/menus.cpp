@@ -940,7 +940,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_CENTER);
 
 	if(RenderLoadingBar)
-		RenderTools()->DrawRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f), IGraphics::CORNER_ALL, 5.0f);
+		Graphics()->DrawRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f), IGraphics::CORNER_ALL, 5.0f);
 
 	Client()->UpdateAndSwap();
 }

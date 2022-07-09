@@ -545,7 +545,7 @@ void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, v
 	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
 	{
 		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1, -1.0f);
-		pInfo->m_pSelf->RenderTools()->DrawRect(pInfo->m_Cursor.m_X - 2.5f, pInfo->m_Cursor.m_Y - 4.f / 2.f, tw + 5.f, pInfo->m_Cursor.m_FontSize + 4.f, ColorRGBA(229.0f / 255.0f, 185.0f / 255.0f, 4.0f / 255.0f, 0.85f), IGraphics::CORNER_ALL, pInfo->m_Cursor.m_FontSize / 3.f);
+		pInfo->m_pSelf->Graphics()->DrawRect(pInfo->m_Cursor.m_X - 2.5f, pInfo->m_Cursor.m_Y - 4.f / 2.f, tw + 5.f, pInfo->m_Cursor.m_FontSize + 4.f, ColorRGBA(229.0f / 255.0f, 185.0f / 255.0f, 4.0f / 255.0f, 0.85f), IGraphics::CORNER_ALL, pInfo->m_Cursor.m_FontSize / 3.f);
 
 		// scroll when out of sight
 		if(pInfo->m_Cursor.m_X < 3.0f)
