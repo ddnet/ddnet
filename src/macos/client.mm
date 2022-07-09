@@ -6,16 +6,16 @@ int main(int argc, const char **argv)
 {
 	BOOL FinderLaunch = argc >= 2 && !strncmp(argv[1], "-psn", 4);
 
-	NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
-	if(!resourcePath)
+	NSString *pResourcePath = [[NSBundle mainBundle] resourcePath];
+	if(!pResourcePath)
 		return -1;
 
-	[[NSFileManager defaultManager] changeCurrentDirectoryPath:resourcePath];
+	[[NSFileManager defaultManager] changeCurrentDirectoryPath:pResourcePath];
 
 	if(FinderLaunch)
 	{
-		const char *paArgv[2] = { argv[0], NULL };
-		return TWMain(1, paArgv);
+		const char *apArgv[2] = { argv[0], NULL };
+		return TWMain(1, apArgv);
 	}
 	else
 		return TWMain(argc, argv);

@@ -230,14 +230,14 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 	}
 	if(m_pGameConsole->Input()->ModifierIsPressed() && m_pGameConsole->Input()->KeyPress(KEY_V))
 	{
-		const char *Text = m_pGameConsole->Input()->GetClipboardText();
-		if(Text)
+		const char *pText = m_pGameConsole->Input()->GetClipboardText();
+		if(pText)
 		{
 			char aLine[256];
 			int i, Begin = 0;
-			for(i = 0; i < str_length(Text); i++)
+			for(i = 0; i < str_length(pText); i++)
 			{
-				if(Text[i] == '\n')
+				if(pText[i] == '\n')
 				{
 					if(i == Begin)
 					{
@@ -245,13 +245,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 						continue;
 					}
 					int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-					str_copy(aLine, Text + Begin, max);
+					str_copy(aLine, pText + Begin, max);
 					Begin = i + 1;
 					ExecuteLine(aLine);
 				}
 			}
 			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-			str_copy(aLine, Text + Begin, max);
+			str_copy(aLine, pText + Begin, max);
 			m_Input.Append(aLine);
 		}
 	}

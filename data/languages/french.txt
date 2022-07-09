@@ -974,9 +974,6 @@ Markers
 HUD
 == Interface
 
-Show health + ammo
-== Afficher la vie et les munitions
-
 Refresh Rate
 == Taux de rafraîchissement
 
@@ -1038,7 +1035,7 @@ AntiPing
 == AntiPing
 
 Enable long pain sound (used when shooting in freeze)
-== Activer les sons de douleur du Tee (utilisé lorsqu'un Tee tire depuis le freeze (gèle))
+== Activer les sons de douleur du Tee (utilisé lorsqu'un Tee tire depuis le freeze (gel))
 
 9+ new mentions
 == 9+ nouveaux messages
@@ -1257,9 +1254,6 @@ Windowed borderless
 Desktop fullscreen
 == Bureau plein écran
 
-Show client IDs
-== Montrer les IDs
-
 Kill Messages
 == Messages d'élimination
 
@@ -1268,18 +1262,6 @@ Laser Outline Color
 
 Laser Inner Color
 == Couleur du laser
-
-Hookline
-== Ligne de visée
-
-No hit
-== Pas de frappe
-
-Hookable
-== Accrochable
-
-Tee
-== Tee
 
 Preview
 == Prévisualisation
@@ -1461,13 +1443,13 @@ UI mouse sens.
 == Sensibilité souris (menus)
 
 Controller
-== Manette 
+== Manette
 
 Show dummy actions
 == Afficher les actions du dummy
 
 Show freeze bars
-== Afficher la barre de gel 
+== Afficher la barre de gel
 
 Show player position
 == Afficher la position
@@ -1478,17 +1460,119 @@ Show player speed
 Show player target angle
 == Afficher l'angle de visée
 
-Show jump indicator
-== 
-
 Opacity of freeze bars inside freeze
-== 
+== Opacité de la barre de gel dans le gel
 
 Normal Color
-== 
+== Couleur normal
 
 Highlight Color
-== 
+== Couleur surbrillante
 
 Extras
+== Extras
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

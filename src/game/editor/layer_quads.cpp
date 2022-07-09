@@ -33,57 +33,57 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 	m_pEditor->m_Map.m_Modified = true;
 
 	m_vQuads.emplace_back();
-	CQuad *q = &m_vQuads[m_vQuads.size() - 1];
+	CQuad *pQuad = &m_vQuads[m_vQuads.size() - 1];
 
-	q->m_PosEnv = -1;
-	q->m_ColorEnv = -1;
-	q->m_PosEnvOffset = 0;
-	q->m_ColorEnvOffset = 0;
+	pQuad->m_PosEnv = -1;
+	pQuad->m_ColorEnv = -1;
+	pQuad->m_PosEnvOffset = 0;
+	pQuad->m_ColorEnvOffset = 0;
 
 	Width /= 2;
 	Height /= 2;
-	q->m_aPoints[0].x = i2fx(x - Width);
-	q->m_aPoints[0].y = i2fx(y - Height);
-	q->m_aPoints[1].x = i2fx(x + Width);
-	q->m_aPoints[1].y = i2fx(y - Height);
-	q->m_aPoints[2].x = i2fx(x - Width);
-	q->m_aPoints[2].y = i2fx(y + Height);
-	q->m_aPoints[3].x = i2fx(x + Width);
-	q->m_aPoints[3].y = i2fx(y + Height);
+	pQuad->m_aPoints[0].x = i2fx(x - Width);
+	pQuad->m_aPoints[0].y = i2fx(y - Height);
+	pQuad->m_aPoints[1].x = i2fx(x + Width);
+	pQuad->m_aPoints[1].y = i2fx(y - Height);
+	pQuad->m_aPoints[2].x = i2fx(x - Width);
+	pQuad->m_aPoints[2].y = i2fx(y + Height);
+	pQuad->m_aPoints[3].x = i2fx(x + Width);
+	pQuad->m_aPoints[3].y = i2fx(y + Height);
 
-	q->m_aPoints[4].x = i2fx(x); // pivot
-	q->m_aPoints[4].y = i2fx(y);
+	pQuad->m_aPoints[4].x = i2fx(x); // pivot
+	pQuad->m_aPoints[4].y = i2fx(y);
 
-	q->m_aTexcoords[0].x = i2fx(0);
-	q->m_aTexcoords[0].y = i2fx(0);
+	pQuad->m_aTexcoords[0].x = i2fx(0);
+	pQuad->m_aTexcoords[0].y = i2fx(0);
 
-	q->m_aTexcoords[1].x = i2fx(1);
-	q->m_aTexcoords[1].y = i2fx(0);
+	pQuad->m_aTexcoords[1].x = i2fx(1);
+	pQuad->m_aTexcoords[1].y = i2fx(0);
 
-	q->m_aTexcoords[2].x = i2fx(0);
-	q->m_aTexcoords[2].y = i2fx(1);
+	pQuad->m_aTexcoords[2].x = i2fx(0);
+	pQuad->m_aTexcoords[2].y = i2fx(1);
 
-	q->m_aTexcoords[3].x = i2fx(1);
-	q->m_aTexcoords[3].y = i2fx(1);
+	pQuad->m_aTexcoords[3].x = i2fx(1);
+	pQuad->m_aTexcoords[3].y = i2fx(1);
 
-	q->m_aColors[0].r = 255;
-	q->m_aColors[0].g = 255;
-	q->m_aColors[0].b = 255;
-	q->m_aColors[0].a = 255;
-	q->m_aColors[1].r = 255;
-	q->m_aColors[1].g = 255;
-	q->m_aColors[1].b = 255;
-	q->m_aColors[1].a = 255;
-	q->m_aColors[2].r = 255;
-	q->m_aColors[2].g = 255;
-	q->m_aColors[2].b = 255;
-	q->m_aColors[2].a = 255;
-	q->m_aColors[3].r = 255;
-	q->m_aColors[3].g = 255;
-	q->m_aColors[3].b = 255;
-	q->m_aColors[3].a = 255;
+	pQuad->m_aColors[0].r = 255;
+	pQuad->m_aColors[0].g = 255;
+	pQuad->m_aColors[0].b = 255;
+	pQuad->m_aColors[0].a = 255;
+	pQuad->m_aColors[1].r = 255;
+	pQuad->m_aColors[1].g = 255;
+	pQuad->m_aColors[1].b = 255;
+	pQuad->m_aColors[1].a = 255;
+	pQuad->m_aColors[2].r = 255;
+	pQuad->m_aColors[2].g = 255;
+	pQuad->m_aColors[2].b = 255;
+	pQuad->m_aColors[2].a = 255;
+	pQuad->m_aColors[3].r = 255;
+	pQuad->m_aColors[3].g = 255;
+	pQuad->m_aColors[3].b = 255;
+	pQuad->m_aColors[3].a = 255;
 
-	return q;
+	return pQuad;
 }
 
 void CLayerQuads::BrushSelecting(CUIRect Rect)
@@ -133,8 +133,8 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 {
-	CLayerQuads *l = (CLayerQuads *)pBrush;
-	for(const auto &Quad : l->m_vQuads)
+	CLayerQuads *pQuadLayer = (CLayerQuads *)pBrush;
+	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{
 		CQuad n = Quad;
 
@@ -196,17 +196,17 @@ void CLayerQuads::BrushRotate(float Amount)
 	}
 }
 
-void CLayerQuads::GetSize(float *w, float *h)
+void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 {
-	*w = 0;
-	*h = 0;
+	*pWidth = 0;
+	*pHeight = 0;
 
 	for(const auto &Quad : m_vQuads)
 	{
 		for(const auto &Point : Quad.m_aPoints)
 		{
-			*w = maximum(*w, fx2f(Point.x));
-			*h = maximum(*h, fx2f(Point.y));
+			*pWidth = maximum(*pWidth, fx2f(Point.x));
+			*pHeight = maximum(*pHeight, fx2f(Point.y));
 		}
 	}
 }

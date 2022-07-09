@@ -1,19 +1,10 @@
 #include <base/detect.h>
 
-#if defined(CONF_FAMILY_WINDOWS)
-// For FlashWindowEx, FLASHWINFO, FLASHW_TRAY
-#define _WIN32_WINNT 0x0501
-#define WINVER 0x0501
-#endif
-
 #ifndef CONF_BACKEND_OPENGL_ES
 #include <GL/glew.h>
 #endif
 
 #include <SDL.h>
-#include <SDL_hints.h>
-#include <SDL_pixels.h>
-#include <SDL_video.h>
 
 #include <base/detect.h>
 #include <base/math.h>
@@ -50,12 +41,6 @@
 #include <engine/graphics.h>
 
 class IStorage;
-
-#ifdef __MINGW32__
-extern "C" {
-int putenv(const char *);
-}
-#endif
 
 // ------------ CGraphicsBackend_Threaded
 
@@ -777,7 +762,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 	}
 
-	static constexpr int ModeCount = 256;
+	constexpr int ModeCount = 256;
 	SDL_DisplayMode aModes[ModeCount];
 	int NumModes = 0;
 	for(int i = 0; i < maxModes && NumModes < ModeCount; i++)

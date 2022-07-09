@@ -82,13 +82,13 @@ bool CConfigManager::Save()
 	char aEscapeBuf[1024 * 2];
 
 #define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
-	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != (def)) \
 	{ \
 		str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); \
 		WriteLine(aLineBuf); \
 	}
 #define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) \
-	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != (def)) \
 	{ \
 		str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); \
 		WriteLine(aLineBuf); \

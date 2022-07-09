@@ -16,7 +16,7 @@
 #include <curl/curl.h>
 
 // TODO: Non-global pls?
-static CURLSH *gs_Share;
+static CURLSH *gs_pShare;
 static LOCK gs_aLocks[CURL_LOCK_DATA_LAST + 1];
 static bool gs_Initialized = false;
 
@@ -77,8 +77,8 @@ bool HttpInit(IStorage *pStorage)
 	{
 		return true;
 	}
-	gs_Share = curl_share_init();
-	if(!gs_Share)
+	gs_pShare = curl_share_init();
+	if(!gs_pShare)
 	{
 		return true;
 	}
@@ -92,11 +92,11 @@ bool HttpInit(IStorage *pStorage)
 	{
 		Lock = lock_create();
 	}
-	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-	curl_share_setopt(gs_Share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-	curl_share_setopt(gs_Share, CURLSHOPT_LOCKFUNC, CurlLock);
-	curl_share_setopt(gs_Share, CURLSHOPT_UNLOCKFUNC, CurlUnlock);
+	curl_share_setopt(gs_pShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+	curl_share_setopt(gs_pShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+	curl_share_setopt(gs_pShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+	curl_share_setopt(gs_pShare, CURLSHOPT_LOCKFUNC, CurlLock);
+	curl_share_setopt(gs_pShare, CURLSHOPT_UNLOCKFUNC, CurlUnlock);
 
 #if !defined(CONF_FAMILY_WINDOWS)
 	// As a multithreaded application we have to tell curl to not install signal
@@ -199,7 +199,7 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
 
-	curl_easy_setopt(pHandle, CURLOPT_SHARE, gs_Share);
+	curl_easy_setopt(pHandle, CURLOPT_SHARE, gs_pShare);
 	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 	curl_easy_setopt(pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_MAXREDIRS, 4L);

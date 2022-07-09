@@ -747,9 +747,6 @@ News
 Updating...
 == Atualizando...
 
-Show health + ammo
-== Mostrar vida + munição
-
 Overlay entities
 == Sobrepor entidades
 
@@ -1216,9 +1213,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Show client IDs
-== Mostrar IDs de cliente
-
 Laser Outline Color
 == Cor de contorno do laser
 
@@ -1275,18 +1269,6 @@ Windowed borderless
 
 Desktop fullscreen
 == Tela cheia de desktop
-
-Hookline
-== Linha do gancho
-
-No hit
-== Sem acerto
-
-Hookable
-== Enganchável
-
-Tee
-== Tee
 
 Discord
 == Discord
@@ -1382,111 +1364,213 @@ Team %d
 == Time %d
 
 Position:
-== 
+== Posição:
 
 Speed:
-== 
+== Velocidade:
 
 Angle:
-== 
+== Ângulo:
 
 Trying to determine UDP connectivity...
-== 
+== Tentando determinar conectividade UDP...
 
 UDP seems to be filtered.
-== 
+== UDP parece estar filtrado.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Os endereços IP em UDP e TCP parecem estar diferentes. Tente desabilitar VPN, proxy e aceleradores de rede.
 
 No answer from server yet.
-== 
+== Nenhuma resposta dos servidores ainda.
 
 Download community skins
-== 
+== Baixar skins da comunidade
 
 Enable controller
-== 
+== Habilitar controle
 
 Controller %d: %s
-== 
+== Controle %d: %s
 
 Click to cycle through all available controllers.
-== 
+== Clique para trocar entre todos os controles disponíveis.
 
 [Ingame controller mode]
 Relative
-== 
+== Relativo
 
 [Ingame controller mode]
 Absolute
-== 
+== Absoluto
 
 Ingame controller mode
-== 
+== Modo do controle no jogo
 
 Ingame controller sens.
-== 
+== Sens. do controle no jogo
 
 UI controller sens.
-== 
+== Sens do controle na UI
 
 Controller jitter tolerance
-== 
+== Tolerância jitter do controle
 
 No controller found. Plug in a controller and restart the game.
-== 
+== Nenhum controle encontrado. Conecte um controle e reinicie o jogo.
 
 Device
-== 
+== Dispositivo
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Associação de mira
 
 Controller Axis #%d
-== 
+== Eixo #%d do controle
 
 Mouse
-== 
+== Mouse
 
 Ingame mouse sens.
-== 
+== Sens. do mouse no jogo
 
 UI mouse sens.
-== 
+== Sens. do mouse na UI
 
 Controller
-== 
+== Controle
 
 Show dummy actions
-== 
-
-Show jump indicator
-== 
+== Mostrar ações do dummy
 
 Show player position
-== 
+== Mostrar posição do jogador
 
 Show player speed
-== 
+== Mostrar velocidade do jogador
 
 Show player target angle
-== 
+== Mostrar ângulo de alvo do jogador
 
 Show freeze bars
-== 
+== Mostrar barra de congelamento
 
 Opacity of freeze bars inside freeze
-== 
+== Opacidade das barras de congelamento durante o congelamento
 
 Normal Color
-== 
+== Cor normal
 
 Highlight Color
-== 
+== Cor realçada
 
 Extras
+== Extras
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

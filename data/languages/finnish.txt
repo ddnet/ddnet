@@ -976,14 +976,8 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == Käytä DDRacen tuloslistaa
 
-Show client IDs
-== Näytä asiakkaiden ID:t
-
 Show score
 == Näytä pistemäärä
-
-Show health + ammo
-== Näytä terveyspisteet + ammusmäärä
 
 Show names in chat in team colors
 == Näytä nimet chatissa joukkueiden väreissä
@@ -999,18 +993,6 @@ Laser Outline Color
 
 Laser Inner Color
 == Laserin sisäväri
-
-Hookline
-== Koukkuviiva
-
-No hit
-== Ei osumaa
-
-Hookable
-== Koukutettava
-
-Tee
-== Tee
 
 Use old chat style
 == Käytä vanhaa chatin tyyliä
@@ -1205,6 +1187,27 @@ Best
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Position:
 == 
 
@@ -1212,6 +1215,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Uploading map data to GPU
 == 
 
 Trying to determine UDP connectivity...
@@ -1226,6 +1232,15 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 No answer from server yet.
 == 
 
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1235,7 +1250,16 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
+Loading menu images
+== 
+
 Refreshing...
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
 == 
 
 Settings file
@@ -1263,6 +1287,9 @@ Fat skins (DDFat)
 == 
 
 Choose default eyes when joining a server
+== 
+
+Loading skin files
 == 
 
 Dummy copy
@@ -1360,13 +1387,37 @@ auto
 Enable long pain sound (used when shooting in freeze)
 == 
 
+Appearance
+== 
+
 Assets
 == 
 
-Show dummy actions
+Name Plate
 == 
 
-Show jump indicator
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
 == 
 
 Show player position
@@ -1384,7 +1435,34 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
-Kill Messages
+Show hook strength indicator
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
 == 
 
 Normal Color
@@ -1417,9 +1495,6 @@ Quads are used for background decoration
 Tries to predict other entities to give a feel of low latency
 == 
 
-Show local player's key presses
-== 
-
 Entities Background color
 == 
 
@@ -1447,6 +1522,9 @@ Particles
 Extras
 == 
 
+Loading assets
+== 
+
 Assets directory
 == 
 
@@ -1459,6 +1537,9 @@ Can't find a Tutorial server
 Server executable not found, can't run server
 == 
 
+Loading race demo files
+== 
+
 Super
 == 
 
@@ -1466,6 +1547,9 @@ Team %d
 == 
 
 Auto
+== 
+
+Loading sound files
 == 
 
 Spree

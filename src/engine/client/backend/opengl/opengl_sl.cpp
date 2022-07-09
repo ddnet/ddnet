@@ -83,11 +83,11 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 		CLineReader LineReader;
 		LineReader.Init(f);
-		char *ReadLine = NULL;
-		while((ReadLine = LineReader.Get()))
+		char *pReadLine = NULL;
+		while((pReadLine = LineReader.Get()))
 		{
 			std::string Line;
-			pCompiler->ParseLine(Line, ReadLine, Type == GL_FRAGMENT_SHADER ? GLSL_SHADER_COMPILER_TYPE_FRAGMENT : GLSL_SHADER_COMPILER_TYPE_VERTEX);
+			pCompiler->ParseLine(Line, pReadLine, Type == GL_FRAGMENT_SHADER ? GLSL_SHADER_COMPILER_TYPE_FRAGMENT : GLSL_SHADER_COMPILER_TYPE_VERTEX);
 			Line.append("\r\n");
 			vLines.push_back(Line);
 		}
@@ -112,14 +112,14 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 		if(CompilationStatus == GL_FALSE)
 		{
-			char buff[3000];
+			char aBuf[3000];
 
 			TWGLint maxLength = 0;
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-			glGetShaderInfoLog(shader, maxLength, &maxLength, buff);
+			glGetShaderInfoLog(shader, maxLength, &maxLength, aBuf);
 
-			dbg_msg("glsl", "%s: %s", pFile, buff);
+			dbg_msg("glsl", "%s: %s", pFile, aBuf);
 			glDeleteShader(shader);
 			return false;
 		}

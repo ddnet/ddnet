@@ -495,9 +495,9 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int
 	m_aVerifyPacketPrefix[HEADER_LEN + UUID_MAXSTRSIZE - 1] = ':';
 
 	// The DDNet code uses the `unsigned` security token in memory byte order.
-	unsigned char TokenBytes[4];
-	mem_copy(TokenBytes, &SixupSecurityToken, sizeof(TokenBytes));
-	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", bytes_be_to_uint(TokenBytes));
+	unsigned char aTokenBytes[4];
+	mem_copy(aTokenBytes, &SixupSecurityToken, sizeof(aTokenBytes));
+	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", bytes_be_to_uint(aTokenBytes));
 
 	m_pConsole->Chain("sv_register", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_sixup", ConchainOnConfigChange, this);

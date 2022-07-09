@@ -9,6 +9,7 @@
 # 2022-04-21 CHaBek
 # 2022-05-16 CHaBek
 # 2022-06-17 CHaBek
+# 2022-07-05 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -1006,14 +1007,8 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == DDRace 점수판 사용
 
-Show client IDs
-== 클라이언트 ID 표시
-
 Show score
 == 점수 표시
-
-Show health + ammo
-== 체력과 탄약 표시
 
 Show names in chat in team colors
 == 이름을 팀 색상으로 표시
@@ -1032,18 +1027,6 @@ Laser Outline Color
 
 Laser Inner Color
 == 레이저 색상
-
-Hookline
-== 갈고리 보조선
-
-No hit
-== 갈고리 불가
-
-Hookable
-== 갈고리 가능
-
-Tee
-== Tee
 
 Use old chat style
 == 구식 채팅 방식 사용
@@ -1465,17 +1448,119 @@ Show player speed
 Show player target angle
 == 플레이어 조준 각도 표시
 
-Show jump indicator
-== 
-
 Opacity of freeze bars inside freeze
-== 
+== 동결 타일 내에서의 동결 상태줄 불투명도
 
 Normal Color
-== 
+== 일반 메시지 색상
 
 Highlight Color
-== 
+== 강조 메시지 색상
 
 Extras
+== 기타
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

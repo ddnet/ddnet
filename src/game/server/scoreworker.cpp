@@ -41,8 +41,8 @@ void CScorePlayerResult::SetVariant(Variant v)
 		m_Data.m_Info.m_Birthday = 0;
 		m_Data.m_Info.m_HasFinishScore = false;
 		m_Data.m_Info.m_Time = 0;
-		for(float &CpTime : m_Data.m_Info.m_CpTime)
-			CpTime = 0;
+		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
+			TimeCp = 0;
 	}
 }
 
@@ -171,7 +171,7 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		{
-			pResult->m_Data.m_Info.m_CpTime[i] = pSqlServer->GetFloat(i + 2);
+			pResult->m_Data.m_Info.m_aTimeCp[i] = pSqlServer->GetFloat(i + 2);
 		}
 	}
 
@@ -246,12 +246,12 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	if(!End)
 	{
 		pResult->SetVariant(CScorePlayerResult::MAP_VOTE);
-		auto *MapVote = &pResult->m_Data.m_MapVote;
-		pSqlServer->GetString(1, MapVote->m_aMap, sizeof(MapVote->m_aMap));
-		pSqlServer->GetString(2, MapVote->m_aServer, sizeof(MapVote->m_aServer));
-		str_copy(MapVote->m_aReason, "/map", sizeof(MapVote->m_aReason));
+		auto *pMapVote = &pResult->m_Data.m_MapVote;
+		pSqlServer->GetString(1, pMapVote->m_aMap, sizeof(pMapVote->m_aMap));
+		pSqlServer->GetString(2, pMapVote->m_aServer, sizeof(pMapVote->m_aServer));
+		str_copy(pMapVote->m_aReason, "/map", sizeof(pMapVote->m_aReason));
 
-		for(char *p = MapVote->m_aServer; *p; p++) // lower case server
+		for(char *p = pMapVote->m_aServer; *p; p++) // lower case server
 			*p = tolower(*p);
 	}
 	else
@@ -457,15 +457,15 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		"	?, %s)",
 		pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
 		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
-		pData->m_aCpCurrent[0], pData->m_aCpCurrent[1], pData->m_aCpCurrent[2],
-		pData->m_aCpCurrent[3], pData->m_aCpCurrent[4], pData->m_aCpCurrent[5],
-		pData->m_aCpCurrent[6], pData->m_aCpCurrent[7], pData->m_aCpCurrent[8],
-		pData->m_aCpCurrent[9], pData->m_aCpCurrent[10], pData->m_aCpCurrent[11],
-		pData->m_aCpCurrent[12], pData->m_aCpCurrent[13], pData->m_aCpCurrent[14],
-		pData->m_aCpCurrent[15], pData->m_aCpCurrent[16], pData->m_aCpCurrent[17],
-		pData->m_aCpCurrent[18], pData->m_aCpCurrent[19], pData->m_aCpCurrent[20],
-		pData->m_aCpCurrent[21], pData->m_aCpCurrent[22], pData->m_aCpCurrent[23],
-		pData->m_aCpCurrent[24], pSqlServer->False());
+		pData->m_aCurrentTimeCp[0], pData->m_aCurrentTimeCp[1], pData->m_aCurrentTimeCp[2],
+		pData->m_aCurrentTimeCp[3], pData->m_aCurrentTimeCp[4], pData->m_aCurrentTimeCp[5],
+		pData->m_aCurrentTimeCp[6], pData->m_aCurrentTimeCp[7], pData->m_aCurrentTimeCp[8],
+		pData->m_aCurrentTimeCp[9], pData->m_aCurrentTimeCp[10], pData->m_aCurrentTimeCp[11],
+		pData->m_aCurrentTimeCp[12], pData->m_aCurrentTimeCp[13], pData->m_aCurrentTimeCp[14],
+		pData->m_aCurrentTimeCp[15], pData->m_aCurrentTimeCp[16], pData->m_aCurrentTimeCp[17],
+		pData->m_aCurrentTimeCp[18], pData->m_aCurrentTimeCp[19], pData->m_aCurrentTimeCp[20],
+		pData->m_aCurrentTimeCp[21], pData->m_aCurrentTimeCp[22], pData->m_aCurrentTimeCp[23],
+		pData->m_aCurrentTimeCp[24], pSqlServer->False());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;

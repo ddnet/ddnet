@@ -132,7 +132,10 @@ class CMapLayers : public CComponent
 
 	void LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer);
 
-	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, float *pColor, offset_ptr_size IndexBufferOffset, float *pOffset, float *pDir);
+	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, const ColorRGBA &Color, offset_ptr_size IndexBufferOffset, const vec2 &Offset, const vec2 &Dir);
+
+protected:
+	virtual bool CanRenderMenuBackground() { return true; }
 
 public:
 	bool m_OnlineOnly;
@@ -154,14 +157,14 @@ public:
 	virtual void OnRender() override;
 	virtual void OnMapLoad() override;
 
-	void RenderTileLayer(int LayerIndex, ColorRGBA *pColor, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
-	void RenderTileBorder(int LayerIndex, ColorRGBA *pColor, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount);
-	void RenderKillTileBorder(int LayerIndex, ColorRGBA *pColor, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
+	void RenderTileLayer(int LayerIndex, ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
+	void RenderTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount);
+	void RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
 	void RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer, CMapItemGroup *pGroup, bool ForceRender = false);
 
 	void EnvelopeUpdate();
 
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, float *pChannels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 };
 
 #endif

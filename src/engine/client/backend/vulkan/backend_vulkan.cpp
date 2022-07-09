@@ -707,15 +707,12 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		float m_TextureSize;
 	};
 
-	struct SUniformTextGFragmentOffset
-	{
-		float m_Padding[3];
-	};
+	typedef vec3 SUniformTextGFragmentOffset;
 
 	struct SUniformTextGFragmentConstants
 	{
-		float m_aTextColor[4];
-		float m_aTextOutlineColor[4];
+		ColorRGBA m_TextColor;
+		ColorRGBA m_TextOutlineColor;
 	};
 
 	struct SUniformTextFragment
@@ -739,10 +736,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		int32_t m_JumpIndex;
 	};
 
-	struct SUniformTileGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformTileGVertColor;
 
 	struct SUniformTileGVertColorAlign
 	{
@@ -760,10 +754,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		float m_Rotation;
 	};
 
-	struct SUniformPrimExGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformPrimExGVertColor;
 
 	struct SUniformPrimExGVertColorAlign
 	{
@@ -776,10 +767,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec2 m_Center;
 	};
 
-	struct SUniformSpriteMultiGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformSpriteMultiGVertColor;
 
 	struct SUniformSpriteMultiGVertColorAlign
 	{
@@ -798,10 +786,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec4 m_aPSR[1];
 	};
 
-	struct SUniformSpriteMultiPushGVertColor
-	{
-		float m_aColor[4];
-	};
+	typedef ColorRGBA SUniformSpriteMultiPushGVertColor;
 
 	struct SUniformQuadGPosBase
 	{
@@ -3255,19 +3240,19 @@ protected:
 		size_t FragPushConstantSize = sizeof(SUniformTileGVertColor);
 
 		mem_copy(VertexPushConstants.m_aPos, m.data(), m.size() * sizeof(float));
-		mem_copy(FragPushConstants.m_aColor, &Color, sizeof(FragPushConstants.m_aColor));
+		FragPushConstants = Color;
 
 		if(Type == 1)
 		{
-			mem_copy(&VertexPushConstants.m_Dir, &Dir, sizeof(Dir));
-			mem_copy(&VertexPushConstants.m_Offset, &Off, sizeof(Off));
+			VertexPushConstants.m_Dir = Dir;
+			VertexPushConstants.m_Offset = Off;
 			VertexPushConstants.m_JumpIndex = JumpIndex;
 			VertexPushConstantSize = sizeof(SUniformTileGPosBorder);
 		}
 		else if(Type == 2)
 		{
-			mem_copy(&VertexPushConstants.m_Dir, &Dir, sizeof(Dir));
-			mem_copy(&VertexPushConstants.m_Offset, &Off, sizeof(Off));
+			VertexPushConstants.m_Dir = Dir;
+			VertexPushConstants.m_Offset = Off;
 			VertexPushConstantSize = sizeof(SUniformTileGPosBorderLine);
 		}
 
@@ -3591,7 +3576,7 @@ public:
 			STWGraphicGPU::ETWGraphicsGPUType GPUType = VKGPUTypeToGraphicsGPUType(DeviceProp.deviceType);
 
 			STWGraphicGPU::STWGraphicGPUItem NewGPU;
-			str_copy(NewGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_Name)));
+			str_copy(NewGPU.m_aName, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_aName)));
 			NewGPU.m_GPUType = GPUType;
 			m_pGPUList->m_vGPUs.push_back(NewGPU);
 
@@ -3602,7 +3587,7 @@ public:
 
 			if(GPUType < AutoGPUType && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
-				str_copy(m_pGPUList->m_AutoGPU.m_Name, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_Name)));
+				str_copy(m_pGPUList->m_AutoGPU.m_aName, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_aName)));
 				m_pGPUList->m_AutoGPU.m_GPUType = GPUType;
 
 				AutoGPUType = GPUType;
@@ -6704,8 +6689,8 @@ public:
 		VkBuffer WriteBuffer = WriteMemBlock.m_Buffer;
 
 		VkDeviceSize DataSize = (VkDeviceSize)pCommand->m_CopySize;
-		VkDeviceSize ReadOffset = (VkDeviceSize)pCommand->m_pReadOffset + ReadMemBlock.m_HeapData.m_OffsetToAlign;
-		VkDeviceSize WriteOffset = (VkDeviceSize)pCommand->m_pWriteOffset + WriteMemBlock.m_HeapData.m_OffsetToAlign;
+		VkDeviceSize ReadOffset = (VkDeviceSize)pCommand->m_ReadOffset + ReadMemBlock.m_HeapData.m_OffsetToAlign;
+		VkDeviceSize WriteOffset = (VkDeviceSize)pCommand->m_WriteOffset + WriteMemBlock.m_HeapData.m_OffsetToAlign;
 
 		MemoryBarrier(ReadBuffer, ReadOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true);
 		MemoryBarrier(WriteBuffer, WriteOffset, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true);
@@ -6791,8 +6776,8 @@ public:
 	void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
 		int Type = 1;
-		vec2 Dir = {pCommand->m_Dir[0], pCommand->m_Dir[1]};
-		vec2 Off = {pCommand->m_Offset[0], pCommand->m_Offset[1]};
+		vec2 Dir = pCommand->m_Dir;
+		vec2 Off = pCommand->m_Offset;
 		unsigned int DrawNum = 6;
 		RenderTileLayer(ExecBuffer, pCommand->m_State, Type, pCommand->m_Color, Dir, Off, pCommand->m_JumpIndex, (size_t)1, &pCommand->m_pIndicesOffset, &DrawNum, pCommand->m_DrawNum);
 	}
@@ -6805,8 +6790,8 @@ public:
 	void Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
 		int Type = 2;
-		vec2 Dir = {pCommand->m_Dir[0], pCommand->m_Dir[1]};
-		vec2 Off = {pCommand->m_Offset[0], pCommand->m_Offset[1]};
+		vec2 Dir = pCommand->m_Dir;
+		vec2 Off = pCommand->m_Offset;
 		RenderTileLayer(ExecBuffer, pCommand->m_State, Type, pCommand->m_Color, Dir, Off, 0, (size_t)1, &pCommand->m_pIndicesOffset, &pCommand->m_IndexDrawNum, pCommand->m_DrawNum);
 	}
 
@@ -6966,8 +6951,8 @@ public:
 
 		SUniformTextFragment FragmentConstants;
 
-		mem_copy(FragmentConstants.m_Constants.m_aTextColor, pCommand->m_aTextColor, sizeof(FragmentConstants.m_Constants.m_aTextColor));
-		mem_copy(FragmentConstants.m_Constants.m_aTextOutlineColor, pCommand->m_aTextOutlineColor, sizeof(FragmentConstants.m_Constants.m_aTextOutlineColor));
+		FragmentConstants.m_Constants.m_TextColor = pCommand->m_TextColor;
+		FragmentConstants.m_Constants.m_TextOutlineColor = pCommand->m_TextOutlineColor;
 		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformGTextPos) + sizeof(SUniformTextGFragmentOffset), sizeof(SUniformTextFragment), &FragmentConstants);
 
 		vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(pCommand->m_DrawNum), 1, 0, 0, 0);
@@ -7076,8 +7061,7 @@ public:
 		SUniformPrimExGPos PushConstantVertex;
 		size_t VertexPushConstantSize = sizeof(PushConstantVertex);
 
-		mem_copy(PushConstantColor.m_aColor, &pCommand->m_VertexColor, sizeof(PushConstantColor.m_aColor));
-
+		PushConstantColor = pCommand->m_VertexColor;
 		mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
 
 		if(!IsRotationless)
@@ -7134,13 +7118,13 @@ public:
 			SUniformSpriteMultiPushGVertColor PushConstantColor;
 			SUniformSpriteMultiPushGPos PushConstantVertex;
 
-			mem_copy(PushConstantColor.m_aColor, &pCommand->m_VertexColor, sizeof(PushConstantColor.m_aColor));
+			PushConstantColor = pCommand->m_VertexColor;
 
 			mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
-			mem_copy(&PushConstantVertex.m_Center, &pCommand->m_Center, sizeof(PushConstantVertex.m_Center));
+			PushConstantVertex.m_Center = pCommand->m_Center;
 
 			for(size_t i = 0; i < pCommand->m_DrawCount; ++i)
-				PushConstantVertex.m_aPSR[i] = vec4(pCommand->m_pRenderInfo[i].m_Pos[0], pCommand->m_pRenderInfo[i].m_Pos[1], pCommand->m_pRenderInfo[i].m_Scale, pCommand->m_pRenderInfo[i].m_Rotation);
+				PushConstantVertex.m_aPSR[i] = vec4(pCommand->m_pRenderInfo[i].m_Pos.x, pCommand->m_pRenderInfo[i].m_Pos.y, pCommand->m_pRenderInfo[i].m_Scale, pCommand->m_pRenderInfo[i].m_Rotation);
 
 			vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SUniformSpriteMultiPushGPosBase) + sizeof(vec4) * pCommand->m_DrawCount, &PushConstantVertex);
 			vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformSpriteMultiPushGPos), sizeof(PushConstantColor), &PushConstantColor);
@@ -7150,10 +7134,10 @@ public:
 			SUniformSpriteMultiGVertColor PushConstantColor;
 			SUniformSpriteMultiGPos PushConstantVertex;
 
-			mem_copy(PushConstantColor.m_aColor, &pCommand->m_VertexColor, sizeof(PushConstantColor.m_aColor));
+			PushConstantColor = pCommand->m_VertexColor;
 
 			mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
-			mem_copy(&PushConstantVertex.m_Center, &pCommand->m_Center, sizeof(PushConstantVertex.m_Center));
+			PushConstantVertex.m_Center = pCommand->m_Center;
 
 			vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantVertex), &PushConstantVertex);
 			vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformSpriteMultiGPos) + sizeof(SUniformSpriteMultiGVertColorAlign), sizeof(PushConstantColor), &PushConstantColor);

@@ -34,7 +34,7 @@ private:
 		CODE_RANGE = CODE_UB - CODE_LB + 1,
 	};
 	std::vector<CCountryFlag> m_vCountryFlags;
-	size_t m_CodeIndexLUT[CODE_RANGE];
+	size_t m_aCodeIndexLUT[CODE_RANGE];
 
 	int m_FlagsQuadContainerIndex;
 

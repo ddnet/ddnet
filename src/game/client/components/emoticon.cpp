@@ -141,7 +141,7 @@ void CEmoticon::OnRender()
 		DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_LocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
+		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
 
 		for(int i = 0; i < NUM_EMOTES; i++)
 		{

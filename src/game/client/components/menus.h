@@ -93,11 +93,11 @@ class CMenus : public CComponent
 	int DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	ColorHSLA DoLine_ColorPicker(int *pResetID, float LineSize, float WantedPickerPosition, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, bool UseCheckBox = false, int *pCheckBoxValue = nullptr);
 	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor);
-	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color);
+	int DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *pColor);
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
 	void DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination);
+	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination);
 
 	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View);
 
@@ -188,10 +188,10 @@ class CMenus : public CComponent
 			Index = 1;
 		Graphics()->TextureClear();
 		Graphics()->RenderQuadContainer(UIElement.Get(Index)->m_UIRectQuadContainer, -1);
-		STextRenderColor ColorText(TextRender()->DefaultTextColor());
-		STextRenderColor ColorTextOutline(TextRender()->DefaultTextOutlineColor());
+		ColorRGBA ColorText(TextRender()->DefaultTextColor());
+		ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
 		if(UIElement.Get(0)->m_UITextContainer != -1)
-			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, &ColorText, &ColorTextOutline);
+			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, ColorText, ColorTextOutline);
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 
@@ -492,6 +492,8 @@ protected:
 	//void render_loading(float percent);
 	int RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
+	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	void UpdateMusicState();
 
 	// found in menus_demo.cpp
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);
@@ -555,7 +557,7 @@ public:
 	CMenus();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void RenderLoading(bool IncreaseCounter, bool RenderLoadingBar = true);
+	void RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter, bool RenderLoadingBar = true, bool RenderMenuBackgroundMap = true);
 
 	bool IsInit() { return m_IsInit; }
 
@@ -595,7 +597,7 @@ public:
 		SETTINGS_GENERAL,
 		SETTINGS_PLAYER,
 		SETTINGS_TEE,
-		SETTINGS_HUD,
+		SETTINGS_APPEARANCE,
 		SETTINGS_CONTROLS,
 		SETTINGS_GRAPHICS,
 		SETTINGS_SOUND,
@@ -717,7 +719,7 @@ private:
 
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
-	void RenderSettingsHUD(CUIRect MainView);
+	void RenderSettingsAppearance(CUIRect MainView);
 	void RenderSettingsTClient(CUIRect MainView);
 	ColorHSLA RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha);
 	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);

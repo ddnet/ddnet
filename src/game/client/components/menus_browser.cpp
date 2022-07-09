@@ -16,15 +16,15 @@
 
 #include "menus.h"
 
-static const int g_OffsetColFlagLock = 2;
-static const int g_OffsetColFav = g_OffsetColFlagLock + 3;
-static const int g_OffsetColOff = g_OffsetColFav + 3;
-static const int g_OffsetColName = g_OffsetColOff + 3;
-static const int g_OffsetColGameType = g_OffsetColName + 3;
-static const int g_OffsetColMap = g_OffsetColGameType + 3;
-static const int g_OffsetColPlayers = g_OffsetColMap + 3;
-static const int g_OffsetColPing = g_OffsetColPlayers + 3;
-static const int g_OffsetColVersion = g_OffsetColPing + 3;
+static const int gs_OffsetColFlagLock = 2;
+static const int gs_OffsetColFav = gs_OffsetColFlagLock + 3;
+static const int gs_OffsetColOff = gs_OffsetColFav + 3;
+static const int gs_OffsetColName = gs_OffsetColOff + 3;
+static const int gs_OffsetColGameType = gs_OffsetColName + 3;
+static const int gs_OffsetColMap = gs_OffsetColGameType + 3;
+static const int gs_OffsetColPlayers = gs_OffsetColMap + 3;
+static const int gs_OffsetColPing = gs_OffsetColPlayers + 3;
+static const int gs_OffsetColVersion = gs_OffsetColPing + 3;
 
 void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo *pInfo)
 {
@@ -326,22 +326,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\xA3", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\xA3", TEXTALIGN_CENTER);
 				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
 				}
 			}
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, "\xEF\x82\xA3", TEXTALIGN_CENTER);
-					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColOff + 1), &Button, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, "\xEF\x80\x8C", TEXTALIGN_CENTER, true);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, "\xEF\x82\xA3", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColOff + 1), &Button, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, "\xEF\x80\x8C", TEXTALIGN_CENTER, true);
 				}
 			}
 			else if(ID == COL_NAME)
@@ -354,17 +354,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					const char *pStr = str_utf8_find_nocase(pItem->m_aName, g_Config.m_BrFilterString);
 					if(pStr)
 					{
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 0), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pStr - pItem->m_aName));
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColName + 0), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pStr - pItem->m_aName));
 						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 1), &Button, pStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)str_length(g_Config.m_BrFilterString), &pItem->m_pUIElement->Get(g_OffsetColName + 0)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColName + 1), &Button, pStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)str_length(g_Config.m_BrFilterString), &pItem->m_pUIElement->Get(gs_OffsetColName + 0)->m_Cursor);
 						TextRender()->TextColor(1, 1, 1, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName + 2), &Button, pStr + str_length(g_Config.m_BrFilterString), FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Get(g_OffsetColName + 1)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColName + 2), &Button, pStr + str_length(g_Config.m_BrFilterString), FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Get(gs_OffsetColName + 1)->m_Cursor);
 					}
 					else
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 				}
 				else
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 			}
 			else if(ID == COL_MAP)
 			{
@@ -377,7 +377,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
 					{
-						RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), "\xEF\x84\x9E", TEXTALIGN_CENTER);
+						RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), "\xEF\x84\x9E", TEXTALIGN_CENTER);
 					}
 				}
 
@@ -389,17 +389,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					const char *pStr = str_utf8_find_nocase(pItem->m_aMap, g_Config.m_BrFilterString);
 					if(pStr)
 					{
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pStr - pItem->m_aMap));
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pStr - pItem->m_aMap));
 						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 1), &Button, pStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)str_length(g_Config.m_BrFilterString), &pItem->m_pUIElement->Get(g_OffsetColMap + 0)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColMap + 1), &Button, pStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)str_length(g_Config.m_BrFilterString), &pItem->m_pUIElement->Get(gs_OffsetColMap + 0)->m_Cursor);
 						TextRender()->TextColor(1, 1, 1, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap + 2), &Button, pStr + str_length(g_Config.m_BrFilterString), FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Get(g_OffsetColMap + 1)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColMap + 2), &Button, pStr + str_length(g_Config.m_BrFilterString), FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Get(gs_OffsetColMap + 1)->m_Cursor);
 					}
 					else
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 				}
 				else
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 			}
 			else if(ID == COL_PLAYERS)
 			{
@@ -409,14 +409,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					Button.VSplitLeft(Button.h, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					RenderBrowserIcons(*pItem->m_pUIElement->Get(g_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
+					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
 				}
 
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 				TextRender()->TextColor(1, 1, 1, 1);
 			}
 			else if(ID == COL_PING)
@@ -430,14 +430,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				}
 
 				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColPing), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColPing), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else if(ID == COL_VERSION)
 			{
 				const char *pVersion = pItem->m_aVersion;
 				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColVersion), &Button, pVersion, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColVersion), &Button, pVersion, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 			}
 			else if(ID == COL_GAMETYPE)
 			{
@@ -464,11 +464,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
 					TextRender()->TextColor(rgb);
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 				else
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(g_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Get(gs_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 			}
 		}
 	}
@@ -1193,14 +1193,14 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(g_Config.m_BrFilterString[0])
 			{
 				// highlight the parts that matches
-				const char *s = str_utf8_find_nocase(pName, g_Config.m_BrFilterString);
-				if(s)
+				const char *pFilteredStr = str_utf8_find_nocase(pName, g_Config.m_BrFilterString);
+				if(pFilteredStr)
 				{
-					TextRender()->TextEx(&Cursor, pName, (int)(s - pName));
+					TextRender()->TextEx(&Cursor, pName, (int)(pFilteredStr - pName));
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s, str_length(g_Config.m_BrFilterString));
+					TextRender()->TextEx(&Cursor, pFilteredStr, str_length(g_Config.m_BrFilterString));
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s + str_length(g_Config.m_BrFilterString), -1);
+					TextRender()->TextEx(&Cursor, pFilteredStr + str_length(g_Config.m_BrFilterString), -1);
 				}
 				else
 					TextRender()->TextEx(&Cursor, pName, -1);
@@ -1215,14 +1215,14 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(g_Config.m_BrFilterString[0])
 			{
 				// highlight the parts that matches
-				const char *s = str_utf8_find_nocase(pClan, g_Config.m_BrFilterString);
-				if(s)
+				const char *pFilteredString = str_utf8_find_nocase(pClan, g_Config.m_BrFilterString);
+				if(pFilteredString)
 				{
-					TextRender()->TextEx(&Cursor, pClan, (int)(s - pClan));
+					TextRender()->TextEx(&Cursor, pClan, (int)(pFilteredString - pClan));
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s, str_length(g_Config.m_BrFilterString));
+					TextRender()->TextEx(&Cursor, pFilteredString, str_length(g_Config.m_BrFilterString));
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-					TextRender()->TextEx(&Cursor, s + str_length(g_Config.m_BrFilterString), -1);
+					TextRender()->TextEx(&Cursor, pFilteredString + str_length(g_Config.m_BrFilterString), -1);
 				}
 				else
 					TextRender()->TextEx(&Cursor, pClan, -1);

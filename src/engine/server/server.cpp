@@ -548,8 +548,7 @@ void CServer::SetClientFlags(int ClientID, int Flags)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
 
-	if(Flags > m_aClients[ClientID].m_Flags)
-		m_aClients[ClientID].m_Flags = Flags;
+	m_aClients[ClientID].m_Flags = Flags;
 }
 
 void CServer::Kick(int ClientID, const char *pReason)
@@ -974,12 +973,12 @@ void CServer::DoSnapshot()
 
 			int Crc = pData->Crc();
 
-			// remove old snapshos
+			// remove old snapshots
 			// keep 3 seconds worth of snapshots
 			m_aClients[i].m_Snapshots.PurgeUntil(m_CurrentGameTick - SERVER_TICK_SPEED * 3);
 
-			// save it the snapshot
-			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0);
+			// save the snapshot
+			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0, nullptr);
 
 			// find snapshot that we can perform delta against
 			static CSnapshot s_EmptySnap;
@@ -1636,6 +1635,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			for(int i = 0; i < Size / 4; i++)
 				pInput->m_aData[i] = Unpacker.GetInt();
 
+			GameServer()->OnClientPrepareInput(ClientID, pInput->m_aData);
 			mem_copy(m_aClients[ClientID].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
 
 			m_aClients[ClientID].m_CurrentInput++;
@@ -3745,10 +3745,6 @@ void CServer::SnapFreeID(int ID)
 
 void *CServer::SnapNewItem(int Type, int ID, int Size)
 {
-	if(Type > 0xffff)
-	{
-		g_UuidManager.GetUuid(Type);
-	}
 	dbg_assert(ID >= -1 && ID <= 0xffff, "incorrect id");
 	return ID < 0 ? 0 : m_SnapshotBuilder.NewItem(Type, ID, Size);
 }

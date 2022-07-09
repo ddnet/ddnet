@@ -10,7 +10,8 @@
 #include <memory>
 #include <vector>
 
-#ifndef LIBMARIADB
+// MySQL >= 8.0.1 removed my_bool, 8.0.2 accidentally reintroduced it: https://bugs.mysql.com/bug.php?id=87337
+#if !defined(LIBMARIADB) && MYSQL_VERSION_ID >= 80001 && MYSQL_VERSION_ID != 80002
 typedef bool my_bool;
 #endif
 
@@ -66,7 +67,7 @@ public:
 		int Port,
 		bool Setup);
 	~CMysqlConnection();
-	void Print(IConsole *pConsole, const char *Mode) override;
+	void Print(IConsole *pConsole, const char *pMode) override;
 
 	CMysqlConnection *Copy() override;
 
@@ -205,12 +206,12 @@ bool CMysqlConnection::PrepareAndExecuteStatement(const char *pStmt)
 	return false;
 }
 
-void CMysqlConnection::Print(IConsole *pConsole, const char *Mode)
+void CMysqlConnection::Print(IConsole *pConsole, const char *pMode)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
 		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-		Mode, m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
+		pMode, m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 

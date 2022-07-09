@@ -19,7 +19,7 @@ public:
 	void Save(CCharacter *pchr);
 	void Load(CCharacter *pchr, int Team, bool IsSwap = false);
 	char *GetString(const CSaveTeam *pTeam);
-	int FromString(const char *String);
+	int FromString(const char *pString);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
 	bool IsHooking() const;
 	vec2 GetPos() const { return m_Pos; }
@@ -57,7 +57,7 @@ private:
 	int m_Jetpack;
 	int m_NinjaJetpack;
 	int m_FreezeTime;
-	int m_FreezeTick;
+	int m_FreezeStart;
 	int m_DeepFreeze;
 	int m_LiveFreeze;
 	int m_EndlessHook;
@@ -74,10 +74,10 @@ private:
 	int m_TeleCheckpoint;
 	int m_LastPenalty;
 
-	int m_CpTime;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_aCpCurrent[25];
+	int m_TimeCpBroadcastEndTime;
+	int m_LastTimeCp;
+	int m_LastTimeCpBroadcasted;
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
 
 	int m_NotEligibleForFinish;
 
@@ -114,12 +114,12 @@ private:
 class CSaveTeam
 {
 public:
-	CSaveTeam(IGameController *Controller);
+	CSaveTeam(IGameController *pController);
 	~CSaveTeam();
 	char *GetString();
 	int GetMembersCount() const { return m_MembersCount; }
 	// MatchPlayers has to be called afterwards
-	int FromString(const char *String);
+	int FromString(const char *pString);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int Save(int Team);

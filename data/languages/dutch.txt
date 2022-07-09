@@ -922,9 +922,6 @@ Use DDRace Scoreboard
 Show score
 == Laat score zien
 
-Show health + ammo
-== Laat levens + ammo zien
-
 Show names in chat in team colors
 == Laat namen in chat in de kleuren van het team zien
 
@@ -1246,9 +1243,6 @@ Background music volume
 Assets
 == Assets
 
-Show client IDs
-== Laat client ID's zien
-
 Kill Messages
 == Kill Berichten
 
@@ -1257,18 +1251,6 @@ Laser Outline Color
 
 Laser Inner Color
 == Laser Kleur Binnenzijde
-
-Hookline
-== Hookline
-
-No hit
-== Niet raak
-
-Hookable
-== Haakbaar
-
-Tee
-== Tee
 
 Use old chat style
 == Oude chatstijl gebruiken
@@ -1376,6 +1358,27 @@ Net
 FPM
 == FPM
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Position:
 == 
 
@@ -1383,6 +1386,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Uploading map data to GPU
 == 
 
 Trying to determine UDP connectivity...
@@ -1397,7 +1403,28 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 No answer from server yet.
 == 
 
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Download community skins
+== 
+
+Loading skin files
 == 
 
 Enable controller
@@ -1456,10 +1483,31 @@ UI mouse sens.
 Controller
 == 
 
-Show dummy actions
+Appearance
 == 
 
-Show jump indicator
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
 == 
 
 Show player position
@@ -1477,6 +1525,33 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
 Normal Color
 == 
 
@@ -1484,4 +1559,13 @@ Highlight Color
 == 
 
 Extras
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

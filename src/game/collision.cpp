@@ -660,7 +660,7 @@ int CCollision::IsCheckEvilTeleport(int Index) const
 	return 0;
 }
 
-int CCollision::IsTCheckpoint(int Index) const
+int CCollision::IsTeleCheckpoint(int Index) const
 {
 	if(Index < 0)
 		return 0;
@@ -718,15 +718,15 @@ int CCollision::IsTune(int Index) const
 	return 0;
 }
 
-void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const
+void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const
 {
 	if(Index < 0 || !m_pSpeedup)
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
-	*Force = m_pSpeedup[Index].m_Force;
-	*Dir = vec2(cos(Angle), sin(Angle));
-	if(MaxSpeed)
-		*MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
+	*pForce = m_pSpeedup[Index].m_Force;
+	*pDir = vec2(cos(Angle), sin(Angle));
+	if(pMaxSpeed)
+		*pMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
 
 int CCollision::GetSwitchType(int Index) const
@@ -1131,7 +1131,7 @@ int CCollision::GetDTileFlags(int Index) const
 	return m_pDoor[Index].m_Flags;
 }
 
-void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy)
+void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY)
 {
 	float x = Pos0.x - Pos1.x;
 	float y = Pos0.y - Pos1.y;
@@ -1139,26 +1139,26 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy)
 	{
 		if(x < 0)
 		{
-			*Ox = -32;
-			*Oy = 0;
+			*pOffsetX = -32;
+			*pOffsetY = 0;
 		}
 		else
 		{
-			*Ox = 32;
-			*Oy = 0;
+			*pOffsetX = 32;
+			*pOffsetY = 0;
 		}
 	}
 	else
 	{
 		if(y < 0)
 		{
-			*Ox = 0;
-			*Oy = -32;
+			*pOffsetX = 0;
+			*pOffsetY = -32;
 		}
 		else
 		{
-			*Ox = 0;
-			*Oy = 32;
+			*pOffsetX = 0;
+			*pOffsetY = 32;
 		}
 	}
 }
@@ -1254,24 +1254,24 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	return 0;
 }
 
-int CCollision::IsCheckpoint(int Index) const
+int CCollision::IsTimeCheckpoint(int Index) const
 {
 	if(Index < 0)
 		return -1;
 
 	int z = m_pTiles[Index].m_Index;
-	if(z >= TILE_CHECKPOINT_FIRST && z <= TILE_CHECKPOINT_LAST)
-		return z - TILE_CHECKPOINT_FIRST;
+	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
+		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
 }
 
-int CCollision::IsFCheckpoint(int Index) const
+int CCollision::IsFTimeCheckpoint(int Index) const
 {
 	if(Index < 0 || !m_pFront)
 		return -1;
 
 	int z = m_pFront[Index].m_Index;
-	if(z >= 35 && z <= 59)
-		return z - 35;
+	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
+		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
 }

@@ -101,7 +101,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		ScoreData.m_Time = Time;
 		str_copy(ScoreData.m_aTimestamp, "2021-11-24 19:24:08", sizeof(ScoreData.m_aTimestamp));
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
-			ScoreData.m_aCpCurrent[i] = WithTimeCheckPoints ? i : 0;
+			ScoreData.m_aCurrentTimeCp[i] = WithTimeCheckPoints ? i : 0;
 		str_copy(ScoreData.m_aRequestingPlayer, "deen", sizeof(ScoreData.m_aRequestingPlayer));
 		ASSERT_FALSE(CScoreWorker::SaveScore(m_pConn, &ScoreData, false, m_aError, sizeof(m_aError))) << m_aError;
 	}
@@ -185,7 +185,7 @@ TEST_P(SingleScore, LoadPlayerData)
 	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 	{
-		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], 0);
+		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_aTimeCp[i], 0);
 	}
 
 	str_copy(m_PlayerRequest.m_aRequestingPlayer, "nameless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));
@@ -196,7 +196,7 @@ TEST_P(SingleScore, LoadPlayerData)
 	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 100.0);
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 	{
-		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], i);
+		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_aTimeCp[i], i);
 	}
 
 	str_copy(m_PlayerRequest.m_aRequestingPlayer, "finishless", sizeof(m_PlayerRequest.m_aRequestingPlayer));
@@ -207,7 +207,7 @@ TEST_P(SingleScore, LoadPlayerData)
 	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 	{
-		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_CpTime[i], i);
+		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_aTimeCp[i], i);
 	}
 }
 

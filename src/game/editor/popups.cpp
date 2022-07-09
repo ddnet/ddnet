@@ -146,11 +146,11 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			}
 
 			// search for unneeded game tiles
-			CLayerTiles *gl = pEditor->m_Map.m_pGameLayer;
-			for(int y = 0; y < gl->m_Height; ++y)
-				for(int x = 0; x < gl->m_Width; ++x)
+			CLayerTiles *pGameLayer = pEditor->m_Map.m_pGameLayer;
+			for(int y = 0; y < pGameLayer->m_Height; ++y)
+				for(int x = 0; x < pGameLayer->m_Width; ++x)
 				{
-					if(gl->m_pTiles[y * gl->m_Width + x].m_Index > static_cast<unsigned char>(TILE_NOHOOK))
+					if(pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index > static_cast<unsigned char>(TILE_NOHOOK))
 						continue;
 
 					bool Found = false;
@@ -165,7 +165,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 
 					if(!Found)
 					{
-						gl->m_pTiles[y * gl->m_Width + x].m_Index = TILE_AIR;
+						pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index = TILE_AIR;
 						pEditor->m_Map.m_Modified = true;
 					}
 				}
@@ -182,9 +182,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewTeleLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
 		{
-			CLayer *l = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeTeleLayer(l);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+			CLayer *pTeleLayer = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			pEditor->m_Map.MakeTeleLayer(pTeleLayer);
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTeleLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 			pEditor->m_Brush.Clear();
 			return 1;
@@ -199,9 +199,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewSpeedupLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
 		{
-			CLayer *l = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeSpeedupLayer(l);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+			CLayer *pSpeedupLayer = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSpeedupLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 			pEditor->m_Brush.Clear();
 			return 1;
@@ -216,9 +216,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewTuneLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
 		{
-			CLayer *l = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeTuneLayer(l);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+			CLayer *pTuneLayer = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			pEditor->m_Map.MakeTuneLayer(pTuneLayer);
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTuneLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 			pEditor->m_Brush.Clear();
 			return 1;
@@ -233,9 +233,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewFrontLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
 		{
-			CLayer *l = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeFrontLayer(l);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+			CLayer *pFrontLayer = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			pEditor->m_Map.MakeFrontLayer(pFrontLayer);
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pFrontLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 			pEditor->m_Brush.Clear();
 			return 1;
@@ -250,9 +250,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewSwitchLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
 		{
-			CLayer *l = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeSwitchLayer(l);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+			CLayer *pSwitchLayer = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSwitchLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 			pEditor->m_Brush.Clear();
 			return 1;
@@ -265,9 +265,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewQuadLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
 	{
-		CLayer *l = new CLayerQuads;
-		l->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+		CLayer *pQuadLayer = new CLayerQuads;
+		pQuadLayer->m_pEditor = pEditor;
+		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pQuadLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
 		return 1;
@@ -279,9 +279,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewTileLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
 	{
-		CLayer *l = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-		l->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+		CLayer *pTileLayer = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+		pTileLayer->m_pEditor = pEditor;
+		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTileLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
 		return 1;
@@ -293,9 +293,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewSoundLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
 	{
-		CLayer *l = new CLayerSounds;
-		l->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(l);
+		CLayer *pSoundLayer = new CLayerSounds;
+		pSoundLayer->m_pEditor = pEditor;
+		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSoundLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
 		return 1;
@@ -723,13 +723,13 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(12.0f, &View, &ShapeButton);
 	static int s_ShapeTypeButton = 0;
 
-	static const char *s_aShapeNames[] = {
+	static const char *s_apShapeNames[] = {
 		"Rectangle",
 		"Circle"};
 
 	pSource->m_Shape.m_Type = pSource->m_Shape.m_Type % CSoundShape::NUM_SHAPES; // prevent out of array errors
 
-	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_aShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, 0, "Change shape"))
+	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_apShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, 0, "Change shape"))
 	{
 		pSource->m_Shape.m_Type = (pSource->m_Shape.m_Type + 1) % CSoundShape::NUM_SHAPES;
 
@@ -993,7 +993,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(10.0f, &View, nullptr);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
-	if(pEditor->m_FileDialogErrString[0] == 0)
+	if(pEditor->m_aFileDialogErrString[0] == 0)
 	{
 		// interaction box
 		View.HSplitBottom(40.0f, &View, nullptr);
@@ -1021,7 +1021,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 					return 1;
 				}
 				else
-					str_copy(pEditor->m_FileDialogErrString, "Unable to create the folder", sizeof(pEditor->m_FileDialogErrString));
+					str_copy(pEditor->m_aFileDialogErrString, "Unable to create the folder", sizeof(pEditor->m_aFileDialogErrString));
 			}
 		}
 		ButtonBar.VSplitRight(30.0f, &ButtonBar, nullptr);
@@ -1414,7 +1414,7 @@ static int s_GametileOpSelected = -1;
 
 int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static const char *s_pButtonNames[] = {
+	static const char *s_apButtonNames[] = {
 		"Air",
 		"Hookable",
 		"Death",
@@ -1429,14 +1429,14 @@ int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContex
 		"Live Freeze",
 		"Live Unfreeze",
 	};
-	static unsigned s_NumButtons = std::size(s_pButtonNames);
+	static unsigned s_NumButtons = std::size(s_apButtonNames);
 	CUIRect Button;
 
 	for(unsigned i = 0; i < s_NumButtons; ++i)
 	{
 		View.HSplitTop(2.0f, nullptr, &View);
 		View.HSplitTop(12.0f, &Button, &View);
-		if(pEditor->DoButton_Editor(&s_pButtonNames[i], s_pButtonNames[i], 0, &Button, 0, nullptr))
+		if(pEditor->DoButton_Editor(&s_apButtonNames[i], s_apButtonNames[i], 0, &Button, 0, nullptr))
 			s_GametileOpSelected = i;
 	}
 
@@ -1467,7 +1467,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
 	CUIRect Button;
-	static int s_AutoMapperConfigButtons[256];
+	static int s_aAutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
@@ -1521,7 +1521,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		{
 			View.HSplitTop(ButtonMargin, nullptr, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			if(pEditor->DoButton_MenuItem(&s_AutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
+			if(pEditor->DoButton_MenuItem(&s_aAutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
 			{
 				s_AutoMapConfigSelected = i;
 			}
@@ -1771,29 +1771,29 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// base: white - hue
 	ColorHSVA hsv = CEditor::ms_PickerColor;
-	IGraphics::CColorVertex ColorArray[4];
+	IGraphics::CColorVertex aColors[4];
 
 	ColorRGBA c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
-	ColorArray[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
+	aColors[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
 	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
-	ColorArray[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
+	aColors[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
 	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
-	ColorArray[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
+	aColors[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
 	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
-	ColorArray[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
+	aColors[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
 
-	pEditor->Graphics()->SetColorVertex(ColorArray, 4);
+	pEditor->Graphics()->SetColorVertex(aColors, 4);
 
 	IGraphics::CQuadItem QuadItem(SVPicker.x, SVPicker.y, SVPicker.w, SVPicker.h);
 	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 
 	// base: transparent - black
-	ColorArray[0] = IGraphics::CColorVertex(0, 0.0f, 0.0f, 0.0f, 0.0f);
-	ColorArray[1] = IGraphics::CColorVertex(1, 0.0f, 0.0f, 0.0f, 0.0f);
-	ColorArray[2] = IGraphics::CColorVertex(2, 0.0f, 0.0f, 0.0f, 1.0f);
-	ColorArray[3] = IGraphics::CColorVertex(3, 0.0f, 0.0f, 0.0f, 1.0f);
+	aColors[0] = IGraphics::CColorVertex(0, 0.0f, 0.0f, 0.0f, 0.0f);
+	aColors[1] = IGraphics::CColorVertex(1, 0.0f, 0.0f, 0.0f, 0.0f);
+	aColors[2] = IGraphics::CColorVertex(2, 0.0f, 0.0f, 0.0f, 1.0f);
+	aColors[3] = IGraphics::CColorVertex(3, 0.0f, 0.0f, 0.0f, 1.0f);
 
-	pEditor->Graphics()->SetColorVertex(ColorArray, 4);
+	pEditor->Graphics()->SetColorVertex(aColors, 4);
 
 	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 
@@ -1836,11 +1836,11 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 		ColorTop = ColorRGBA(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
 		ColorBottom = ColorRGBA(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
 
-		ColorArray[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
-		ColorArray[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
-		ColorArray[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
-		ColorArray[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
-		pEditor->Graphics()->SetColorVertex(ColorArray, 4);
+		aColors[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
+		aColors[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
+		aColors[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
+		aColors[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
+		pEditor->Graphics()->SetColorVertex(aColors, 4);
 		QuadItem = IGraphics::CQuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
 		pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 	}
@@ -1869,9 +1869,9 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 		CUIRect Button;
 		View.HSplitTop(14.0f, &Button, &View);
 
-		const char *Name = pEditor->m_vSelectEntitiesFiles[i].c_str();
+		const char *pName = pEditor->m_vSelectEntitiesFiles[i].c_str();
 
-		if(pEditor->DoButton_MenuItem(Name, Name, pEditor->m_vSelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button))
+		if(pEditor->DoButton_MenuItem(pName, pName, pEditor->m_vSelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button))
 		{
 			if(pEditor->m_vSelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage)
 			{
@@ -1880,7 +1880,7 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				pEditor->m_PreventUnusedTilesWasWarned = false;
 
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", Name);
+				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);
 
 				if(pEditor->m_EntitiesTexture.IsValid())
 					pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);

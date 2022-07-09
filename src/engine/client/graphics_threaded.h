@@ -175,8 +175,8 @@ public:
 		WRAP_CLAMP,
 	};
 
-	typedef GL_SPoint SPoint;
-	typedef GL_STexCoord STexCoord;
+	typedef vec2 SPoint;
+	typedef vec2 STexCoord;
 	typedef GL_SColorf SColorf;
 	typedef GL_SColor SColor;
 	typedef GL_SVertex SVertex;
@@ -301,8 +301,8 @@ public:
 		int m_WriteBufferIndex;
 		int m_ReadBufferIndex;
 
-		size_t m_pReadOffset;
-		size_t m_pWriteOffset;
+		size_t m_ReadOffset;
+		size_t m_WriteOffset;
 		size_t m_CopySize;
 	};
 
@@ -384,8 +384,8 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 
-		float m_Offset[2];
-		float m_Dir[2];
+		vec2 m_Offset;
+		vec2 m_Dir;
 		int m_JumpIndex;
 	};
 
@@ -400,8 +400,8 @@ public:
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
 
-		float m_Offset[2];
-		float m_Dir[2];
+		vec2 m_Offset;
+		vec2 m_Dir;
 	};
 
 	struct SCommand_RenderQuadLayer : public SCommand
@@ -429,8 +429,8 @@ public:
 		int m_TextOutlineTextureIndex;
 
 		int m_DrawNum;
-		float m_aTextColor[4];
-		float m_aTextOutlineColor[4];
+		ColorRGBA m_TextColor;
+		ColorRGBA m_TextOutlineColor;
 	};
 
 	struct SCommand_RenderQuadContainer : public SCommand
@@ -716,7 +716,7 @@ public:
 
 	virtual ~IGraphicsBackend() {}
 
-	virtual int Init(const char *pName, int *Screen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
+	virtual int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
 
 	virtual uint64_t TextureMemoryUsage() const = 0;
@@ -839,7 +839,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 		int m_FreeIndex;
 	};
-	std::vector<SVertexArrayInfo> m_VertexArrayInfo;
+	std::vector<SVertexArrayInfo> m_vVertexArrayInfo;
 	int m_FirstFreeVertexArrayInfo;
 
 	std::vector<int> m_vBufferObjectIndices;
@@ -1008,10 +1008,7 @@ public:
 	void SetColor(TName *pVertex, int ColorIndex)
 	{
 		TName *pVert = pVertex;
-		pVert->m_Color.r = m_aColor[ColorIndex].r;
-		pVert->m_Color.g = m_aColor[ColorIndex].g;
-		pVert->m_Color.b = m_aColor[ColorIndex].b;
-		pVert->m_Color.a = m_aColor[ColorIndex].a;
+		pVert->m_Color = m_aColor[ColorIndex];
 	}
 
 	void SetColorVertex(const CColorVertex *pArray, int Num) override;
@@ -1230,11 +1227,11 @@ public:
 	void FlushVertices(bool KeepVertices = false) override;
 	void FlushVerticesTex3D() override;
 
-	void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffset) override;
-	void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) override;
-	void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
+	void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) override;
+	void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) override;
+	void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
 	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
-	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) override;
+	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override;
 
 	// modern GL functions
 	int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) override;

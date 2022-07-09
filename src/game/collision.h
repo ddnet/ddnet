@@ -88,10 +88,10 @@ public:
 	int IsCheckEvilTeleport(int Index) const;
 	int IsTeleportWeapon(int Index) const;
 	int IsTeleportHook(int Index) const;
-	int IsTCheckpoint(int Index) const;
+	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
-	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const;
+	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const;
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
@@ -103,8 +103,8 @@ public:
 	int IsNoLaser(int x, int y) const;
 	int IsFNoLaser(int x, int y) const;
 
-	int IsCheckpoint(int Index) const;
-	int IsFCheckpoint(int Index) const;
+	int IsTimeCheckpoint(int Index) const;
+	int IsFTimeCheckpoint(int Index) const;
 
 	int IsMover(int x, int y, int *pFlags) const;
 
@@ -125,5 +125,5 @@ private:
 	class CDoorTile *m_pDoor;
 };
 
-void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy);
+void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);
 #endif

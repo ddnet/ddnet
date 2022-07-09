@@ -25,6 +25,7 @@
 # 2022-05-14 cheeser0613
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
+# 2022-07-04 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -690,9 +691,6 @@ Use DDRace Scoreboard
 Show score
 == 显示分数
 
-Show health + ammo
-== 显示生命与弹药
-
 Show names in chat in team colors
 == 以队伍颜色显示玩家昵称
 
@@ -1181,7 +1179,7 @@ Themes directory
 == 主题目录
 
 Download skins
-== 在线获取皮肤
+== 下载官方皮肤
 
 Skin Database
 == 皮肤数据库
@@ -1233,9 +1231,6 @@ Chat command
 
 Dummy
 == 分身
-
-Show client IDs
-== 显示客户端 ID
 
 Laser Outline Color
 == 激光边框颜色
@@ -1290,18 +1285,6 @@ Windowed borderless
 
 Desktop fullscreen
 == 无边框全屏
-
-Hookline
-== 钩索辅助线
-
-No hit
-== 未命中
-
-Hookable
-== 可钩砖块
-
-Tee
-== 其他玩家
 
 Are you sure that you want to disconnect and switch to a different server?
 == 你确定要断开此服务器连接并进入其他服务器吗？
@@ -1485,9 +1468,6 @@ Show player speed
 Show player target angle
 == 显示玩家瞄准角度
 
-Show jump indicator
-== 显示跳越次数
-
 Opacity of freeze bars inside freeze
 == 解冻进度条不透明度
 
@@ -1499,3 +1479,108 @@ Highlight Color
 
 Extras
 == 其他
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
+== 

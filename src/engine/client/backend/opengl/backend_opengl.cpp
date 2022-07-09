@@ -273,15 +273,15 @@ static const char *GetGLSeverity(GLenum Type)
 }
 
 static void GLAPIENTRY
-GfxOpenGLMessageCallback(GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar *message,
-	const void *userParam)
+GfxOpenGLMessageCallback(GLenum Source,
+	GLenum Type,
+	GLuint Id,
+	GLenum Severity,
+	GLsizei Length,
+	const GLchar *pMsg,
+	const void *pUserParam)
 {
-	dbg_msg("gfx", "[%s] (importance: %s) %s", GetGLErrorName(type), GetGLSeverity(severity), message);
+	dbg_msg("gfx", "[%s] (importance: %s) %s", GetGLErrorName(Type), GetGLSeverity(Severity), pMsg);
 }
 #endif
 
@@ -1140,19 +1140,6 @@ void CCommandProcessorFragment_OpenGL2::UseProgram(CGLSLTWProgram *pProgram)
 	pProgram->UseProgram();
 }
 
-bool CCommandProcessorFragment_OpenGL2::IsAndUpdateTextureSlotBound(int IDX, int Slot, bool Is2DArray)
-{
-	if(m_vTextureSlotBoundToUnit[IDX].m_TextureSlot == Slot && m_vTextureSlotBoundToUnit[IDX].m_Is2DArray == Is2DArray)
-		return true;
-	else
-	{
-		// the texture slot uses this index now
-		m_vTextureSlotBoundToUnit[IDX].m_TextureSlot = Slot;
-		m_vTextureSlotBoundToUnit[IDX].m_Is2DArray = Is2DArray;
-		return false;
-	}
-}
-
 void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures)
 {
 	if(m_LastBlendMode == CCommandBuffer::BLEND_NONE)
@@ -1217,55 +1204,31 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 	if(IsTexturedState(State))
 	{
 		int Slot = 0;
-		if(m_UseMultipleTextureUnits)
+		if(!Use2DArrayTextures)
 		{
-			Slot = State.m_Texture % m_MaxTextureUnits;
-			if(!IsAndUpdateTextureSlotBound(Slot, State.m_Texture, Use2DArrayTextures))
-			{
-				glActiveTexture(GL_TEXTURE0 + Slot);
-				if(!Use2DArrayTextures)
-				{
-					glBindTexture(GL_TEXTURE_2D, m_vTextures[State.m_Texture].m_Tex);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler);
-				}
-				else
-				{
-					glBindTexture(GL_TEXTURE_2D_ARRAY, m_vTextures[State.m_Texture].m_Tex2DArray);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
-				}
-			}
+			if(!IsNewApi() && !m_HasShaders)
+				glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, m_vTextures[State.m_Texture].m_Tex);
+			if(IsNewApi())
+				glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler);
 		}
 		else
 		{
-			Slot = 0;
-			if(!Use2DArrayTextures)
+			if(!m_Has2DArrayTextures)
 			{
 				if(!IsNewApi() && !m_HasShaders)
-					glEnable(GL_TEXTURE_2D);
-				glBindTexture(GL_TEXTURE_2D, m_vTextures[State.m_Texture].m_Tex);
+					glEnable(GL_TEXTURE_3D);
+				glBindTexture(GL_TEXTURE_3D, m_vTextures[State.m_Texture].m_Tex2DArray);
 				if(IsNewApi())
-					glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler);
+					glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
 			}
 			else
 			{
-				if(!m_Has2DArrayTextures)
-				{
-					if(!IsNewApi() && !m_HasShaders)
-						glEnable(GL_TEXTURE_3D);
-					glBindTexture(GL_TEXTURE_3D, m_vTextures[State.m_Texture].m_Tex2DArray);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
-				}
-				else
-				{
-					if(!IsNewApi() && !m_HasShaders)
-						glEnable(m_2DArrayTarget);
-					glBindTexture(m_2DArrayTarget, m_vTextures[State.m_Texture].m_Tex2DArray);
-					if(IsNewApi())
-						glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
-				}
+				if(!IsNewApi() && !m_HasShaders)
+					glEnable(m_2DArrayTarget);
+				glBindTexture(m_2DArrayTarget, m_vTextures[State.m_Texture].m_Tex2DArray);
+				if(IsNewApi())
+					glBindSampler(Slot, m_vTextures[State.m_Texture].m_Sampler2DArray);
 			}
 		}
 
@@ -1300,12 +1263,11 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		}
 	}
 
-	if(pProgram->m_LastScreen[0] != State.m_ScreenTL.x || pProgram->m_LastScreen[1] != State.m_ScreenTL.y || pProgram->m_LastScreen[2] != State.m_ScreenBR.x || pProgram->m_LastScreen[3] != State.m_ScreenBR.y)
+	if(pProgram->m_LastScreenTL != State.m_ScreenTL || pProgram->m_LastScreenBR != State.m_ScreenBR)
 	{
-		pProgram->m_LastScreen[0] = State.m_ScreenTL.x;
-		pProgram->m_LastScreen[1] = State.m_ScreenTL.y;
-		pProgram->m_LastScreen[2] = State.m_ScreenBR.x;
-		pProgram->m_LastScreen[3] = State.m_ScreenBR.y;
+		pProgram->m_LastScreenTL = State.m_ScreenTL;
+		pProgram->m_LastScreenBR = State.m_ScreenBR;
+
 		// screen mapping
 		// orthographic projection matrix
 		// the z coordinate is the same for every vertex, so just ignore the z coordinate and set it in the shaders
@@ -1963,12 +1925,12 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CopyBufferObject(const CCommandBuffe
 	SBufferObject &ReadBufferObject = m_vBufferObjectIndices[ReadIndex];
 	SBufferObject &WriteBufferObject = m_vBufferObjectIndices[WriteIndex];
 
-	mem_copy(((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pWriteOffset, ((uint8_t *)ReadBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pReadOffset, pCommand->m_CopySize);
+	mem_copy(((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_WriteOffset, ((uint8_t *)ReadBufferObject.m_pData) + (ptrdiff_t)pCommand->m_ReadOffset, pCommand->m_CopySize);
 
 	if(m_HasShaders)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, WriteBufferObject.m_BufferObjectID);
-		glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_pWriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_pWriteOffset);
+		glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_WriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_WriteOffset);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
@@ -2056,7 +2018,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_IndicesRequiredNumNotify(const CComm
 {
 }
 
-void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int DrawNum, const float *pOffset, const float *pDir, int JumpIndex)
+void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const ColorRGBA &Color, const char *pBuffOffset, unsigned int DrawNum, const vec2 &Offset, const vec2 &Dir, int JumpIndex)
 {
 	if(m_HasShaders)
 	{
@@ -2108,16 +2070,15 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 			vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 
 			GL_SVertexTex3D &Vertex = m_aStreamVertices[VertexCount++];
-			mem_copy(&Vertex.m_Pos, pPos, sizeof(vec2));
-			mem_copy(&Vertex.m_Color, pColor, sizeof(vec4));
+			Vertex.m_Pos = *pPos;
+			Vertex.m_Color = Color;
 			if(IsTextured)
 			{
 				vec3 *pTex = (vec3 *)((uint8_t *)BufferObject.m_pData + VertOffset + (ptrdiff_t)sizeof(vec2));
-				mem_copy(&Vertex.m_Tex, pTex, sizeof(vec3));
+				Vertex.m_Tex = *pTex;
 			}
 
-			Vertex.m_Pos.x += pOffset[0] + pDir[0] * XCount;
-			Vertex.m_Pos.y += pOffset[1] + pDir[1] * YCount;
+			Vertex.m_Pos += Offset + Dir * vec2(XCount, YCount);
 
 			if(VertexCount >= std::size(m_aStreamVertices))
 			{
@@ -2141,7 +2102,7 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 	}
 }
 
-void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const float *pColor, const char *pBuffOffset, unsigned int IndexDrawNum, unsigned int DrawNum, const float *pOffset, const float *pDir)
+void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferContainer &BufferContainer, const CCommandBuffer::SState &State, const ColorRGBA &Color, const char *pBuffOffset, unsigned int IndexDrawNum, unsigned int DrawNum, const vec2 &Offset, const vec2 &Dir)
 {
 	if(m_HasShaders)
 	{
@@ -2191,16 +2152,15 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileLineEmulation(SBufferCon
 			vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 
 			GL_SVertexTex3D &Vertex = m_aStreamVertices[VertexCount++];
-			mem_copy(&Vertex.m_Pos, pPos, sizeof(vec2));
-			mem_copy(&Vertex.m_Color, pColor, sizeof(vec4));
+			Vertex.m_Pos = *pPos;
+			Vertex.m_Color = Color;
 			if(IsTextured)
 			{
 				vec3 *pTex = (vec3 *)((uint8_t *)BufferObject.m_pData + VertOffset + (ptrdiff_t)sizeof(vec2));
-				mem_copy(&Vertex.m_Tex, pTex, sizeof(vec3));
+				Vertex.m_Tex = *pTex;
 			}
 
-			Vertex.m_Pos.x += pOffset[0] + pDir[0] * i;
-			Vertex.m_Pos.y += pOffset[1] + pDir[1] * i;
+			Vertex.m_Pos += Offset + Dir * i;
 
 			if(VertexCount >= std::size(m_aStreamVertices))
 			{
@@ -2233,7 +2193,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTile(const CCommandBuffe
 
 	SBufferContainer &BufferContainer = m_vBufferContainers[Index];
 
-	RenderBorderTileEmulation(BufferContainer, pCommand->m_State, (float *)&pCommand->m_Color, pCommand->m_pIndicesOffset, pCommand->m_DrawNum, pCommand->m_Offset, pCommand->m_Dir, pCommand->m_JumpIndex);
+	RenderBorderTileEmulation(BufferContainer, pCommand->m_State, pCommand->m_Color, pCommand->m_pIndicesOffset, pCommand->m_DrawNum, pCommand->m_Offset, pCommand->m_Dir, pCommand->m_JumpIndex);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand)
@@ -2245,7 +2205,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderBorderTileLine(const CCommandB
 
 	SBufferContainer &BufferContainer = m_vBufferContainers[Index];
 
-	RenderBorderTileLineEmulation(BufferContainer, pCommand->m_State, (float *)&pCommand->m_Color, pCommand->m_pIndicesOffset, pCommand->m_IndexDrawNum, pCommand->m_DrawNum, pCommand->m_Offset, pCommand->m_Dir);
+	RenderBorderTileLineEmulation(BufferContainer, pCommand->m_State, pCommand->m_Color, pCommand->m_pIndicesOffset, pCommand->m_IndexDrawNum, pCommand->m_DrawNum, pCommand->m_Offset, pCommand->m_Dir);
 }
 
 void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand)
@@ -2334,12 +2294,12 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 				ptrdiff_t VertOffset = (ptrdiff_t)(CurBufferOffset + (n * SingleVertSize));
 				vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 				GL_SVertexTex3D &Vertex = m_aStreamVertices[VertexCount++];
-				mem_copy(&Vertex.m_Pos, pPos, sizeof(vec2));
-				mem_copy(&Vertex.m_Color, &pCommand->m_Color, sizeof(vec4));
+				Vertex.m_Pos = *pPos;
+				Vertex.m_Color = pCommand->m_Color;
 				if(IsTextured)
 				{
 					vec3 *pTex = (vec3 *)((uint8_t *)BufferObject.m_pData + VertOffset + (ptrdiff_t)sizeof(vec2));
-					mem_copy(&Vertex.m_Tex, pTex, sizeof(vec3));
+					Vertex.m_Tex = *pTex;
 				}
 
 				if(VertexCount >= std::size(m_aStreamVertices))

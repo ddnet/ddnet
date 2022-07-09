@@ -2,8 +2,8 @@
 
 @interface ServerView : NSTextView
 {
-	NSTask *task;
-	NSFileHandle *file;
+	NSTask *pTask;
+	NSFileHandle *pFile;
 }
 - (void)listenTo: (NSTask *)t;
 @end
@@ -11,57 +11,57 @@
 @implementation ServerView
 - (void)listenTo: (NSTask *)t
 {
-	NSPipe *pipe;
-	task = t;
-	pipe = [NSPipe pipe];
-	[task setStandardOutput: pipe];
-	file = [pipe fileHandleForReading];
+	NSPipe *pPipe;
+	pTask = t;
+	pPipe = [NSPipe pipe];
+	[pTask setStandardOutput: pPipe];
+	pFile = [pPipe fileHandleForReading];
 
-	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(outputNotification:) name: NSFileHandleReadCompletionNotification object: file];
+	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(outputNotification:) name: NSFileHandleReadCompletionNotification object: pFile];
 
-	[file readInBackgroundAndNotify];
+	[pFile readInBackgroundAndNotify];
 }
 
 - (void) outputNotification: (NSNotification *) notification
 {
-	NSData *data = [[[notification userInfo] objectForKey: NSFileHandleNotificationDataItem] retain];
-	NSString *string = [[NSString alloc] initWithData: data encoding: NSASCIIStringEncoding];
-	NSAttributedString *attrstr = [[NSAttributedString alloc] initWithString: string];
+	NSData *pData = [[[notification userInfo] objectForKey: NSFileHandleNotificationDataItem] retain];
+	NSString *pString = [[NSString alloc] initWithData: pData encoding: NSASCIIStringEncoding];
+	NSAttributedString *pAttrStr = [[NSAttributedString alloc] initWithString: pString];
 
-	[[self textStorage] appendAttributedString: attrstr];
+	[[self textStorage] appendAttributedString: pAttrStr];
 	int length = [[self textStorage] length];
 	NSRange range = NSMakeRange(length, 0);
 	[self scrollRangeToVisible: range];
 
-	[attrstr release];
-	[string release];
-	[file readInBackgroundAndNotify];
+	[pAttrStr release];
+	[pString release];
+	[pFile readInBackgroundAndNotify];
 }
 
 -(void)windowWillClose:(NSNotification *)notification
 {
-	[task terminate];
+	[pTask terminate];
 	[NSApp terminate:self];
 }
 @end
 
 void runServer()
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool *pPool = [[NSAutoreleasePool alloc] init];
 	NSApp = [NSApplication sharedApplication];
-	NSBundle *mainBundle = [NSBundle mainBundle];
-	NSTask *task;
-	task = [[NSTask alloc] init];
-	[task setCurrentDirectoryPath: [mainBundle resourcePath]]; // NOLINT(clang-analyzer-nullability.NullablePassedToNonnull)
+	NSBundle *pMainBundle = [NSBundle mainBundle];
+	NSTask *pTask;
+	pTask = [[NSTask alloc] init];
+	[pTask setCurrentDirectoryPath: [pMainBundle resourcePath]]; // NOLINT(clang-analyzer-nullability.NullablePassedToNonnull)
 
-	NSArray *arguments = [NSArray new];
+	NSArray *pArguments = [NSArray new];
 
-	NSAlert *alert = [[[NSAlert alloc] init] autorelease];
-	[alert setMessageText: @"Run DDNet Server"];
-	[alert addButtonWithTitle: @"Use default config"];
-	[alert addButtonWithTitle: @"Select config"];
-	[alert addButtonWithTitle: @"Cancel"];
-	switch([alert runModal])
+	NSAlert *pAlert = [[[NSAlert alloc] init] autorelease];
+	[pAlert setMessageText: @"Run DDNet Server"];
+	[pAlert addButtonWithTitle: @"Use default config"];
+	[pAlert addButtonWithTitle: @"Select config"];
+	[pAlert addButtonWithTitle: @"Cancel"];
+	switch([pAlert runModal])
 	{
 		case NSAlertFirstButtonReturn:
 			break;
@@ -69,49 +69,49 @@ void runServer()
 			return;
 		case NSAlertSecondButtonReturn:
 			// get a server config
-			NSOpenPanel *openDlg = [NSOpenPanel openPanel];
-			[openDlg setCanChooseFiles:YES];
-			if([openDlg runModal] != NSModalResponseOK)
+			NSOpenPanel *pOpenDlg = [NSOpenPanel openPanel];
+			[pOpenDlg setCanChooseFiles:YES];
+			if([pOpenDlg runModal] != NSModalResponseOK)
 				return;
-			NSString *filename = [[openDlg URL] path];
-			arguments = [NSArray arrayWithObjects: @"-f", filename, nil];
+			NSString *pFileName = [[pOpenDlg URL] path];
+			pArguments = [NSArray arrayWithObjects: @"-f", pFileName, nil];
 			break;
 	}
 
 	// run server
-	NSWindow *window;
-	ServerView *view;
-	NSRect graphicsRect;
+	NSWindow *pWindow;
+	ServerView *pView;
+	NSRect GraphicsRect;
 
-	graphicsRect = NSMakeRect(100.0, 1000.0, 600.0, 400.0);
+	GraphicsRect = NSMakeRect(100.0, 1000.0, 600.0, 400.0);
 
-	window = [[NSWindow alloc]
-		initWithContentRect: graphicsRect
+	pWindow = [[NSWindow alloc]
+		initWithContentRect: GraphicsRect
 		styleMask: NSWindowStyleMaskTitled
 		| NSWindowStyleMaskClosable
 		| NSWindowStyleMaskMiniaturizable
 		backing: NSBackingStoreBuffered
 		defer: NO];
 
-	[window setTitle: @"DDNet Server"];
+	[pWindow setTitle: @"DDNet Server"];
 
-	view = [[[ServerView alloc] initWithFrame: graphicsRect] autorelease];
-	[view setEditable: NO];
-	[view setRulerVisible: YES];
+	pView = [[[ServerView alloc] initWithFrame: GraphicsRect] autorelease];
+	[pView setEditable: NO];
+	[pView setRulerVisible: YES];
 
-	[window setContentView: view];
-	[window setDelegate: (id<NSWindowDelegate>)view];
-	[window makeKeyAndOrderFront: nil];
+	[pWindow setContentView: pView];
+	[pWindow setDelegate: (id<NSWindowDelegate>)pView];
+	[pWindow makeKeyAndOrderFront: nil];
 
-	[view listenTo: task];
-	[task setLaunchPath: [mainBundle pathForAuxiliaryExecutable: @"DDNet-Server"]];
-	[task setArguments: arguments];
-	[task launch];
+	[pView listenTo: pTask];
+	[pTask setLaunchPath: [pMainBundle pathForAuxiliaryExecutable: @"DDNet-Server"]];
+	[pTask setArguments: pArguments];
+	[pTask launch];
 	[NSApp run];
-	[task terminate];
+	[pTask terminate];
 
 	[NSApp release];
-	[pool release];
+	[pPool release];
 }
 
 int main(int argc, char **argv)

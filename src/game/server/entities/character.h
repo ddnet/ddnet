@@ -143,6 +143,7 @@ private:
 
 	void SnapCharacter(int SnappingClient, int ID);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
+	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
 	float m_Time;
 	int m_LastBroadcast;
@@ -203,10 +204,12 @@ public:
 	int m_StartTime;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
-	int m_CpTick;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_CpCurrent[25];
+
+	int m_TimeCpBroadcastEndTick;
+	int m_LastTimeCp;
+	int m_LastTimeCpBroadcasted;
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
+
 	int m_TileIndex;
 	int m_TileFIndex;
 

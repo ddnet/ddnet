@@ -57,20 +57,20 @@ void CPlasma::Move()
 bool CPlasma::HitCharacter(CCharacter *pTarget)
 {
 	vec2 IntersectPos;
-	CCharacter *HitPlayer = GameServer()->m_World.IntersectCharacter(
+	CCharacter *pHitPlayer = GameServer()->m_World.IntersectCharacter(
 		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, 0, m_ForClientID);
-	if(!HitPlayer)
+	if(!pHitPlayer)
 	{
 		return false;
 	}
 
 	// Super player should not be able to stop the plasma bullets
-	if(HitPlayer->Team() == TEAM_SUPER)
+	if(pHitPlayer->Team() == TEAM_SUPER)
 	{
 		return false;
 	}
 
-	m_Freeze ? HitPlayer->Freeze() : HitPlayer->UnFreeze();
+	m_Freeze ? pHitPlayer->Freeze() : pHitPlayer->UnFreeze();
 	if(m_Explosive)
 	{
 		// Plasma Turrets are very precise weapons only one tee gets speed from it,

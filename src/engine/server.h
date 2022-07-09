@@ -112,14 +112,13 @@ public:
 		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
-	char msgbuf[1000];
-
 	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
+		char aBuf[1000];
 		if(pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
 		{
-			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
-			pMsg->m_pMessage = msgbuf;
+			str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
+			pMsg->m_pMessage = aBuf;
 			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
 		}
 
@@ -243,7 +242,7 @@ public:
 	virtual bool DnsblWhite(int ClientID) = 0;
 	virtual bool DnsblPending(int ClientID) = 0;
 	virtual bool DnsblBlack(int ClientID) = 0;
-	virtual const char *GetAnnouncementLine(char const *FileName) = 0;
+	virtual const char *GetAnnouncementLine(char const *pFileName) = 0;
 	virtual bool ClientPrevIngame(int ClientID) = 0;
 	virtual const char *GetNetErrorString(int ClientID) = 0;
 	virtual void ResetNetErrorString(int ClientID) = 0;
@@ -297,6 +296,7 @@ public:
 
 	virtual void OnClientEnter(int ClientID) = 0;
 	virtual void OnClientDrop(int ClientID, const char *pReason) = 0;
+	virtual void OnClientPrepareInput(int ClientID, void *pInput) = 0;
 	virtual void OnClientDirectInput(int ClientID, void *pInput) = 0;
 	virtual void OnClientPredictedInput(int ClientID, void *pInput) = 0;
 	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput) = 0;

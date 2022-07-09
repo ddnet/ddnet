@@ -347,7 +347,7 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		CTeeRenderInfo *RenderInfo = &Ghost.m_RenderInfo;
+		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 		CTeeRenderInfo GhostNinjaRenderInfo;
 		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 		{
@@ -371,13 +371,13 @@ void CGhost::OnRender()
 					GhostNinjaRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
 					GhostNinjaRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 				}
-				RenderInfo = &GhostNinjaRenderInfo;
+				pRenderInfo = &GhostNinjaRenderInfo;
 			}
 		}
 
-		m_pClient->m_Players.RenderHook(&Prev, &Player, RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderHook(&Prev, &Player, pRenderInfo, -2, IntraTick);
 		m_pClient->m_Players.RenderHookCollLine(&Prev, &Player, -2, IntraTick);
-		m_pClient->m_Players.RenderPlayer(&Prev, &Player, RenderInfo, -2, IntraTick);
+		m_pClient->m_Players.RenderPlayer(&Prev, &Player, pRenderInfo, -2, IntraTick);
 	}
 }
 

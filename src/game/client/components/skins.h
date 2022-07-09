@@ -29,6 +29,9 @@ public:
 		char m_aPath[IO_MAX_PATH_LENGTH];
 		char m_aName[24];
 
+		CDownloadSkin(CDownloadSkin &&Other) = default;
+		CDownloadSkin() = default;
+
 		~CDownloadSkin()
 		{
 			if(m_pTask)
@@ -37,6 +40,8 @@ public:
 		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
+
+		CDownloadSkin &operator=(CDownloadSkin &&Other) = default;
 	};
 
 	typedef std::function<void(int)> TSkinLoadedCBFunc;
@@ -52,7 +57,7 @@ public:
 private:
 	std::vector<CSkin> m_vSkins;
 	std::vector<CDownloadSkin> m_vDownloadSkins;
-	char m_EventSkinPrefix[24];
+	char m_aEventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	int LoadSkin(const char *pName, const char *pPath, int DirType);

@@ -15,18 +15,18 @@ class CControls : public CComponent
 	float GetMaxMouseDistance() const;
 
 public:
-	vec2 m_MousePos[NUM_DUMMIES];
-	vec2 m_TargetPos[NUM_DUMMIES];
+	vec2 m_aMousePos[NUM_DUMMIES];
+	vec2 m_aTargetPos[NUM_DUMMIES];
 	float m_OldMouseX;
 	float m_OldMouseY;
 
-	int m_AmmoCount[NUM_WEAPONS];
+	int m_aAmmoCount[NUM_WEAPONS];
 
-	CNetObj_PlayerInput m_InputData[NUM_DUMMIES];
-	CNetObj_PlayerInput m_LastData[NUM_DUMMIES];
-	int m_InputDirectionLeft[NUM_DUMMIES];
-	int m_InputDirectionRight[NUM_DUMMIES];
-	int m_ShowHookColl[NUM_DUMMIES];
+	CNetObj_PlayerInput m_aInputData[NUM_DUMMIES];
+	CNetObj_PlayerInput m_aLastData[NUM_DUMMIES];
+	int m_aInputDirectionLeft[NUM_DUMMIES];
+	int m_aInputDirectionRight[NUM_DUMMIES];
+	int m_aShowHookColl[NUM_DUMMIES];
 	int m_LastDummy;
 	int m_OtherFire;
 

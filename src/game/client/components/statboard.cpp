@@ -136,7 +136,7 @@ void CStatboard::RenderGlobalStats()
 	int NumPlayers = 0;
 
 	// sort red or dm players by score
-	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
+	for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 	{
 		if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
 			continue;
@@ -147,7 +147,7 @@ void CStatboard::RenderGlobalStats()
 	// sort blue players by score after
 	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 	{
-		for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
+		for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 		{
 			if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
 				continue;
@@ -454,7 +454,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	int NumPlayers = 0;
 
 	// sort red or dm players by score
-	for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
+	for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 	{
 		if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_RED)
 			continue;
@@ -465,7 +465,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	// sort blue players by score after
 	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 	{
-		for(const auto *pInfo : m_pClient->m_Snap.m_paInfoByScore)
+		for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 		{
 			if(!pInfo || !m_pClient->m_aStats[pInfo->m_ClientID].IsActive() || m_pClient->m_aClients[pInfo->m_ClientID].m_Team != TEAM_BLUE)
 				continue;

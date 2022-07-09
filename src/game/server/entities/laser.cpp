@@ -296,13 +296,13 @@ void CLaser::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient) && NetworkClipped(SnappingClient, m_From))
 		return;
-	CCharacter *OwnerChar = 0;
+	CCharacter *pOwnerChar = 0;
 	if(m_Owner >= 0)
-		OwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(!OwnerChar)
+		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwnerChar)
 		return;
 
-	CCharacter *pOwnerChar = 0;
+	pOwnerChar = nullptr;
 	int64_t TeamMask = -1LL;
 
 	if(m_Owner >= 0)

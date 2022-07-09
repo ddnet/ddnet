@@ -86,25 +86,25 @@ public:
 private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
-	float m_CheckpointDiff;
+	float m_TimeCpDiff;
 	float m_ServerRecord;
-	float m_PlayerRecord[NUM_DUMMIES];
+	float m_aPlayerRecord[NUM_DUMMIES];
+	float m_FinishTimeDiff;
 	int m_DDRaceTime;
-	int m_LastReceivedTimeTick;
-	int m_CheckpointTick;
-	bool m_FinishTime;
-	bool m_DDRaceTimeReceived;
+	int m_FinishTimeLastReceivedTick;
+	int m_TimeCpLastReceivedTick;
+	bool m_ShowFinishTime;
 
 	inline float GetMovementInformationBoxHeight();
 	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets
-	int m_AmmoOffset[NUM_WEAPONS];
+	int m_aAmmoOffset[NUM_WEAPONS];
 	int m_HealthOffset;
 	int m_EmptyHealthOffset;
 	int m_ArmorOffset;
 	int m_EmptyArmorOffset;
-	int m_CursorOffset[NUM_WEAPONS];
+	int m_aCursorOffset[NUM_WEAPONS];
 	int m_FlagOffset;
 	int m_AirjumpOffset;
 	int m_AirjumpEmptyOffset;

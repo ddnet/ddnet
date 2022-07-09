@@ -23,10 +23,8 @@ class CGLSLTextProgram;
 class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_OpenGL3
 {
 protected:
-	bool m_UsePreinitializedVertexBuffer;
-
 	int m_MaxQuadsAtOnce;
-	static const int m_MaxQuadsPossible = 256;
+	static const int ms_MaxQuadsPossible = 256;
 
 	CGLSLPrimitiveProgram *m_pPrimitiveProgram;
 	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured;
@@ -45,12 +43,12 @@ protected:
 
 	TWGLuint m_LastProgramID;
 
-	TWGLuint m_PrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aPrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
 	TWGLuint m_PrimitiveDrawVertexIDTex3D;
-	TWGLuint m_PrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aPrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
 	TWGLuint m_PrimitiveDrawBufferIDTex3D;
 
-	TWGLuint m_LastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aLastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
 
 	int m_LastStreamBuffer;
 
@@ -82,7 +80,7 @@ protected:
 
 	void UseProgram(CGLSLTWProgram *pProgram);
 	void UploadStreamBufferData(unsigned int PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D = false);
-	void RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const float *pTextColor, const float *pTextOutlineColor);
+	void RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor);
 
 	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData);
 	void TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData);

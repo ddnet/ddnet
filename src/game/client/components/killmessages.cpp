@@ -200,21 +200,21 @@ void CKillMessages::OnRender()
 
 		float x = StartX;
 
-		STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-		STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+		ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+		ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
 
 		// render victim name
 		x -= m_aKillmsgs[r].m_VitctimTextWidth;
 		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
 		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
-			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0f);
+			TColor = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
+			TColor.a = 1.f;
 		}
 
 		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
-			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
+			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 
 		// render victim tee
 		x -= 24.0f;
@@ -299,7 +299,7 @@ void CKillMessages::OnRender()
 			x -= m_aKillmsgs[r].m_KillerTextWidth;
 
 			if(m_aKillmsgs[r].m_KillerTextContainerIndex != -1)
-				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
+				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 		}
 
 		y += 46.0f;

@@ -48,6 +48,7 @@ public:
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
 	int GetItemType(int Index) const;
+	int GetExternalItemType(int InternalType) const;
 	void *FindItem(int Type, int ID) const;
 
 	unsigned Crc();
@@ -107,6 +108,8 @@ public:
 		int m_Tick;
 
 		int m_SnapSize;
+		int m_AltSnapSize;
+
 		CSnapshot *m_pSnap;
 		CSnapshot *m_pAltSnap;
 	};
@@ -119,7 +122,7 @@ public:
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
-	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt);
+	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int AltDataSize, void *pAltData);
 	int Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 
@@ -141,6 +144,7 @@ class CSnapshotBuilder
 
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
+	int GetTypeFromIndex(int Index);
 
 	bool m_Sixup;
 

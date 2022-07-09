@@ -166,7 +166,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 
 	First = true;
 
-	static const float TicksPerSecond = 50.0f;
+	const float TicksPerSecond = 50.0f;
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) \
 	if(pGameInfo->m_pTuning->m_##Name.Get() != (int)((Value)*100)) \
 	{ \

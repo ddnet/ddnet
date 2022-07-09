@@ -561,9 +561,6 @@ Show kill messages
 Show score
 == Показывать табло счета
 
-Show health + ammo
-== Показывать здоровье и патроны
-
 Show names in chat in team colors
 == Выделять сообщения в командном чате
 
@@ -1207,9 +1204,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Дамми
 
-Show client IDs
-== Показывать ID
-
 Laser Outline Color
 == Цвет обводки лазера
 
@@ -1273,9 +1267,6 @@ Windowed borderless
 Desktop fullscreen
 == Полноэкранный
 
-Tee
-== Tee
-
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
@@ -1284,15 +1275,6 @@ Refreshing...
 
 Kill Messages
 == Сообщения об убийстве
-
-Hookline
-== Линия крюка
-
-No hit
-== Нельзя зацепиться
-
-Hookable
-== Можно зацепиться
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
@@ -1343,141 +1325,243 @@ Can't find a Tutorial server
 == Обучающий сервер не найден
 
 Position:
-== 
+== Позиция
 
 Speed:
-== 
+== Скорость
 
 Angle:
-== 
+== Угол
 
 Trying to determine UDP connectivity...
-== 
+== Попытка определить UDP соединение...
 
 UDP seems to be filtered.
-== 
+== Похоже, что UDP фильтруется.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Похоже, что UDP и TCP IP отличаются. Попробуйте отключить VPN, прокси и ускорители сети.
 
 No answer from server yet.
-== 
+== Сервер еще не ответил.
 
 Toggle to edit your dummy settings
-== 
+== Переключите, чтобы изменить настройки дамми
 
 Download community skins
-== 
+== Скачивать скины сообщества
 
 Choose default eyes when joining a server
-== 
+== Выберите стандартные глаза при подключении к серверу
 
 Enable controller
-== 
+== Включить контроллер
 
 Controller %d: %s
-== 
+== Контроллер %d: %s
 
 Click to cycle through all available controllers.
-== 
+== Нажмите для переключения между всеми доступными контроллерами.
 
 [Ingame controller mode]
 Relative
-== 
+== Относительный
 
 [Ingame controller mode]
 Absolute
-== 
+== Абсолютный
 
 Ingame controller mode
-== 
+== Режим контроллера в игре
 
 Ingame controller sens.
-== 
+== Чувств. контроллера в игре
 
 UI controller sens.
-== 
+== Чувств. контроллера в меню
 
 Controller jitter tolerance
-== 
+== Устойчивость к движению контроллера
 
 No controller found. Plug in a controller and restart the game.
-== 
+== Контроллер не найден. Подключите контроллер и перезапустите игру.
 
 Device
-== 
+== Устройство
 
 Status
-== 
+== Состояние
 
 Aim bind
-== 
+== Привязка оси
 
 Controller Axis #%d
-== 
+== Ось контроллера #%d
 
 Mouse
-== 
+== Мышь
 
 Ingame mouse sens.
-== 
+== Чувств. мыши в игре
 
 UI mouse sens.
-== 
+== Чувств. мыши в меню
 
 Controller
-== 
+== Контроллер
 
 Allows maps to render with more detail
-== 
+== Позволяет более детализированную прорисовку карты
 
 Show dummy actions
-== 
-
-Show jump indicator
-== 
+== Показать действия дамми
 
 Show player position
-== 
+== Показать позицию игрока
 
 Show player speed
-== 
+== Показать скорость игрока
 
 Show player target angle
-== 
+== Показать угол прицела игрока
 
 Show freeze bars
-== 
+== Показать полоску фриза
 
 Opacity of freeze bars inside freeze
-== 
+== Прозрачность полоски фриза внутри фриза
 
 Normal Color
-== 
+== Обычный цвет
 
 Highlight Color
-== 
+== Цвет выделения
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== При пересечении стартовой линии, показать призрак Tee, повторяющий прохождение лучшего времени
 
 Opacity
-== 
+== Прозрачность
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Регулирует прозрачность объектов другой команды, такие как Tee и имена.
 
 Quads are used for background decoration
-== 
+== Квады используются для фонового украшения
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
 
 Extras
-== 
+== Дополнительно
 
 Super
-== 
+== Супер
 
 Team %d
+== Команда %d
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

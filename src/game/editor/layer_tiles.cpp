@@ -464,14 +464,14 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 		return;
 
 	//
-	CLayerTiles *l = (CLayerTiles *)pBrush;
+	CLayerTiles *pTileLayer = (CLayerTiles *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTileLayer);
 
-	for(int y = 0; y < l->m_Height; y++)
-		for(int x = 0; x < l->m_Width; x++)
+	for(int y = 0; y < pTileLayer->m_Height; y++)
+		for(int x = 0; x < pTileLayer->m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
@@ -480,7 +480,7 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 				continue;
 
 			bool HasTile = GetTile(fx, fy).m_Index;
-			if(l->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+			if(pTileLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 			{
 				if(m_Game && m_pEditor->m_Map.m_pFrontLayer)
 				{
@@ -495,10 +495,10 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && HasTile)
 				continue;
 
-			SetTile(fx, fy, l->GetTile(x, y));
+			SetTile(fx, fy, pTileLayer->GetTile(x, y));
 		}
 
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
+	FlagModified(sx, sy, pTileLayer->m_Width, pTileLayer->m_Height);
 }
 
 void CLayerTiles::BrushFlipX()
@@ -1111,16 +1111,16 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 	if(m_Readonly)
 		return;
 
-	CLayerTele *l = (CLayerTele *)pBrush;
+	CLayerTele *pTeleLayer = (CLayerTele *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
-	if(str_comp(l->m_aFileName, m_pEditor->m_aFileName))
-		m_pEditor->m_TeleNumber = l->m_TeleNum;
+	if(str_comp(pTeleLayer->m_aFileName, m_pEditor->m_aFileName))
+		m_pEditor->m_TeleNumber = pTeleLayer->m_TeleNum;
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTeleLayer);
 
-	for(int y = 0; y < l->m_Height; y++)
-		for(int x = 0; x < l->m_Width; x++)
+	for(int y = 0; y < pTeleLayer->m_Height; y++)
+		for(int x = 0; x < pTeleLayer->m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
@@ -1131,14 +1131,14 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index)) && pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TeleNumber != l->m_TeleNum)
+				if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
 				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
 				}
-				else if(l->m_pTeleTile[y * l->m_Width + x].m_Number)
-					m_pTeleTile[fy * m_Width + fx].m_Number = l->m_pTeleTile[y * l->m_Width + x].m_Number;
+				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
+					m_pTeleTile[fy * m_Width + fx].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
 				else
 				{
 					if(!m_pEditor->m_TeleNumber)
@@ -1152,8 +1152,8 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 						m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
 				}
 
-				m_pTeleTile[fy * m_Width + fx].m_Type = l->m_pTiles[y * l->m_Width + x].m_Index;
-				m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
+				m_pTeleTile[fy * m_Width + fx].m_Type = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
+				m_pTiles[fy * m_Width + fx].m_Index = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
 			}
 			else
 			{
@@ -1162,7 +1162,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 		}
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
+	FlagModified(sx, sy, pTeleLayer->m_Width, pTeleLayer->m_Height);
 }
 
 void CLayerTele::BrushFlipX()
@@ -1340,20 +1340,20 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 	if(m_Readonly)
 		return;
 
-	CLayerSpeedup *l = (CLayerSpeedup *)pBrush;
+	CLayerSpeedup *pSpeedupLayer = (CLayerSpeedup *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
-	if(str_comp(l->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pSpeedupLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
-		m_pEditor->m_SpeedupAngle = l->m_SpeedupAngle;
-		m_pEditor->m_SpeedupForce = l->m_SpeedupForce;
-		m_pEditor->m_SpeedupMaxSpeed = l->m_SpeedupMaxSpeed;
+		m_pEditor->m_SpeedupAngle = pSpeedupLayer->m_SpeedupAngle;
+		m_pEditor->m_SpeedupForce = pSpeedupLayer->m_SpeedupForce;
+		m_pEditor->m_SpeedupMaxSpeed = pSpeedupLayer->m_SpeedupMaxSpeed;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pSpeedupLayer);
 
-	for(int y = 0; y < l->m_Height; y++)
-		for(int x = 0; x < l->m_Width; x++)
+	for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+		for(int x = 0; x < pSpeedupLayer->m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
@@ -1364,31 +1364,31 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSpeedupTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index)) && pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_SpeedupAngle != l->m_SpeedupAngle || m_pEditor->m_SpeedupForce != l->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != l->m_SpeedupMaxSpeed)
+				if(m_pEditor->m_SpeedupAngle != pSpeedupLayer->m_SpeedupAngle || m_pEditor->m_SpeedupForce != pSpeedupLayer->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != pSpeedupLayer->m_SpeedupMaxSpeed)
 				{
 					m_pSpeedupTile[fy * m_Width + fx].m_Force = m_pEditor->m_SpeedupForce;
 					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 					m_pSpeedupTile[fy * m_Width + fx].m_Angle = m_pEditor->m_SpeedupAngle;
-					m_pSpeedupTile[fy * m_Width + fx].m_Type = l->m_pTiles[y * l->m_Width + x].m_Index;
-					m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
+					m_pSpeedupTile[fy * m_Width + fx].m_Type = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pTiles[fy * m_Width + fx].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
 				}
-				else if(l->m_pSpeedupTile[y * l->m_Width + x].m_Force)
+				else if(pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_Force)
 				{
-					m_pSpeedupTile[fy * m_Width + fx].m_Force = l->m_pSpeedupTile[y * l->m_Width + x].m_Force;
-					m_pSpeedupTile[fy * m_Width + fx].m_Angle = l->m_pSpeedupTile[y * l->m_Width + x].m_Angle;
-					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = l->m_pSpeedupTile[y * l->m_Width + x].m_MaxSpeed;
-					m_pSpeedupTile[fy * m_Width + fx].m_Type = l->m_pTiles[y * l->m_Width + x].m_Index;
-					m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
+					m_pSpeedupTile[fy * m_Width + fx].m_Force = pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_Force;
+					m_pSpeedupTile[fy * m_Width + fx].m_Angle = pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_Angle;
+					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_MaxSpeed;
+					m_pSpeedupTile[fy * m_Width + fx].m_Type = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pTiles[fy * m_Width + fx].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
 				}
 				else if(m_pEditor->m_SpeedupForce)
 				{
 					m_pSpeedupTile[fy * m_Width + fx].m_Force = m_pEditor->m_SpeedupForce;
 					m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 					m_pSpeedupTile[fy * m_Width + fx].m_Angle = m_pEditor->m_SpeedupAngle;
-					m_pSpeedupTile[fy * m_Width + fx].m_Type = l->m_pTiles[y * l->m_Width + x].m_Index;
-					m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
+					m_pSpeedupTile[fy * m_Width + fx].m_Type = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pTiles[fy * m_Width + fx].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
 				}
 				else
 				{
@@ -1408,7 +1408,7 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 		}
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
+	FlagModified(sx, sy, pSpeedupLayer->m_Width, pSpeedupLayer->m_Height);
 }
 
 void CLayerSpeedup::BrushFlipX()
@@ -1625,19 +1625,19 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 	if(m_Readonly)
 		return;
 
-	CLayerSwitch *l = (CLayerSwitch *)pBrush;
+	CLayerSwitch *pSwitchLayer = (CLayerSwitch *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
-	if(str_comp(l->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pSwitchLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
-		m_pEditor->m_SwitchNum = l->m_SwitchNumber;
-		m_pEditor->m_SwitchDelay = l->m_SwitchDelay;
+		m_pEditor->m_SwitchNum = pSwitchLayer->m_SwitchNumber;
+		m_pEditor->m_SwitchDelay = pSwitchLayer->m_SwitchDelay;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pSwitchLayer);
 
-	for(int y = 0; y < l->m_Height; y++)
-		for(int x = 0; x < l->m_Width; x++)
+	for(int y = 0; y < pSwitchLayer->m_Height; y++)
+		for(int x = 0; x < pSwitchLayer->m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
@@ -1648,17 +1648,17 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index)) && pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_SwitchNum != l->m_SwitchNumber || m_pEditor->m_SwitchDelay != l->m_SwitchDelay)
+				if(m_pEditor->m_SwitchNum != pSwitchLayer->m_SwitchNumber || m_pEditor->m_SwitchDelay != pSwitchLayer->m_SwitchDelay)
 				{
 					m_pSwitchTile[fy * m_Width + fx].m_Number = m_pEditor->m_SwitchNum;
 					m_pSwitchTile[fy * m_Width + fx].m_Delay = m_pEditor->m_SwitchDelay;
 				}
-				else if(l->m_pSwitchTile[y * l->m_Width + x].m_Number)
+				else if(pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number)
 				{
-					m_pSwitchTile[fy * m_Width + fx].m_Number = l->m_pSwitchTile[y * l->m_Width + x].m_Number;
-					m_pSwitchTile[fy * m_Width + fx].m_Delay = l->m_pSwitchTile[y * l->m_Width + x].m_Delay;
+					m_pSwitchTile[fy * m_Width + fx].m_Number = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number;
+					m_pSwitchTile[fy * m_Width + fx].m_Delay = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Delay;
 				}
 				else
 				{
@@ -1666,10 +1666,10 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 					m_pSwitchTile[fy * m_Width + fx].m_Delay = m_pEditor->m_SwitchDelay;
 				}
 
-				m_pSwitchTile[fy * m_Width + fx].m_Type = l->m_pTiles[y * l->m_Width + x].m_Index;
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = l->m_pTiles[y * l->m_Width + x].m_Flags;
-				m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
-				m_pTiles[fy * m_Width + fx].m_Flags = l->m_pTiles[y * l->m_Width + x].m_Flags;
+				m_pSwitchTile[fy * m_Width + fx].m_Type = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
+				m_pSwitchTile[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
+				m_pTiles[fy * m_Width + fx].m_Index = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
+				m_pTiles[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
 			}
 			else
 			{
@@ -1680,17 +1680,17 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 
-			if(l->m_pTiles[y * l->m_Width + x].m_Index == TILE_FREEZE)
+			if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_FREEZE)
 			{
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
 			}
-			else if(l->m_pTiles[y * l->m_Width + x].m_Index == TILE_DFREEZE || l->m_pTiles[y * l->m_Width + x].m_Index == TILE_DUNFREEZE)
+			else if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DFREEZE || pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DUNFREEZE)
 			{
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
 				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 			}
 		}
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
+	FlagModified(sx, sy, pSwitchLayer->m_Width, pSwitchLayer->m_Height);
 }
 
 void CLayerSwitch::BrushFlipX()
@@ -1882,18 +1882,18 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 	if(m_Readonly)
 		return;
 
-	CLayerTune *l = (CLayerTune *)pBrush;
+	CLayerTune *pTuneLayer = (CLayerTune *)pBrush;
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
-	if(str_comp(l->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
-		m_pEditor->m_TuningNum = l->m_TuningNumber;
+		m_pEditor->m_TuningNum = pTuneLayer->m_TuningNumber;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(l);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTuneLayer);
 
-	for(int y = 0; y < l->m_Height; y++)
-		for(int x = 0; x < l->m_Width; x++)
+	for(int y = 0; y < pTuneLayer->m_Height; y++)
+		for(int x = 0; x < pTuneLayer->m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
@@ -1904,14 +1904,14 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTuneTile(l->m_pTiles[y * l->m_Width + x].m_Index)) && l->m_pTiles[y * l->m_Width + x].m_Index != TILE_AIR)
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTuneTile(pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index)) && pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TuningNum != l->m_TuningNumber)
+				if(m_pEditor->m_TuningNum != pTuneLayer->m_TuningNumber)
 				{
 					m_pTuneTile[fy * m_Width + fx].m_Number = m_pEditor->m_TuningNum;
 				}
-				else if(l->m_pTuneTile[y * l->m_Width + x].m_Number)
-					m_pTuneTile[fy * m_Width + fx].m_Number = l->m_pTuneTile[y * l->m_Width + x].m_Number;
+				else if(pTuneLayer->m_pTuneTile[y * pTuneLayer->m_Width + x].m_Number)
+					m_pTuneTile[fy * m_Width + fx].m_Number = pTuneLayer->m_pTuneTile[y * pTuneLayer->m_Width + x].m_Number;
 				else
 				{
 					if(!m_pEditor->m_TuningNum)
@@ -1925,8 +1925,8 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 						m_pTuneTile[fy * m_Width + fx].m_Number = m_pEditor->m_TuningNum;
 				}
 
-				m_pTuneTile[fy * m_Width + fx].m_Type = l->m_pTiles[y * l->m_Width + x].m_Index;
-				m_pTiles[fy * m_Width + fx].m_Index = l->m_pTiles[y * l->m_Width + x].m_Index;
+				m_pTuneTile[fy * m_Width + fx].m_Type = pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index;
+				m_pTiles[fy * m_Width + fx].m_Index = pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index;
 			}
 			else
 			{
@@ -1935,7 +1935,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
 			}
 		}
-	FlagModified(sx, sy, l->m_Width, l->m_Height);
+	FlagModified(sx, sy, pTuneLayer->m_Width, pTuneLayer->m_Height);
 }
 
 void CLayerTune::BrushFlipX()

@@ -27,21 +27,21 @@ CDamageInd::CItem *CDamageInd::CreateI()
 	return 0;
 }
 
-void CDamageInd::DestroyI(CDamageInd::CItem *i)
+void CDamageInd::DestroyI(CDamageInd::CItem *pItem)
 {
 	m_NumItems--;
-	*i = m_aItems[m_NumItems];
+	*pItem = m_aItems[m_NumItems];
 }
 
 void CDamageInd::Create(vec2 Pos, vec2 Dir)
 {
-	CItem *i = CreateI();
-	if(i)
+	CItem *pItem = CreateI();
+	if(pItem)
 	{
-		i->m_Pos = Pos;
-		i->m_StartTime = LocalTime();
-		i->m_Dir = Dir * -1;
-		i->m_StartAngle = (random_float() - 1.0f) * 2.0f * pi;
+		pItem->m_Pos = Pos;
+		pItem->m_StartTime = LocalTime();
+		pItem->m_Dir = Dir * -1;
+		pItem->m_StartAngle = (random_float() - 1.0f) * 2.0f * pi;
 	}
 }
 

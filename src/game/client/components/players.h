@@ -39,7 +39,7 @@ class CPlayers : public CComponent
 	bool IsPlayerInfoAvailable(int ClientID) const;
 
 	int m_WeaponEmoteQuadContainerIndex;
-	int m_WeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
+	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

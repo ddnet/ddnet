@@ -56,12 +56,12 @@ void CGLSLProgram::LinkProgram()
 	m_IsLinked = LinkStatus == GL_TRUE;
 	if(!m_IsLinked)
 	{
-		char sInfoLog[1024];
-		char sFinalMessage[1536];
+		char aInfoLog[1024];
+		char aFinalMessage[1536];
 		int iLogLength;
-		glGetProgramInfoLog(m_ProgramID, 1024, &iLogLength, sInfoLog);
-		str_format(sFinalMessage, 1536, "Error! Shader program wasn't linked! The linker returned:\n\n%s", sInfoLog);
-		dbg_msg("glslprogram", "%s", sFinalMessage);
+		glGetProgramInfoLog(m_ProgramID, 1024, &iLogLength, aInfoLog);
+		str_format(aFinalMessage, sizeof(aFinalMessage), "Error! Shader program wasn't linked! The linker returned:\n\n%s", aInfoLog);
+		dbg_msg("glslprogram", "%s", aFinalMessage);
 	}
 
 	//detach all shaders attached to this program
@@ -119,9 +119,9 @@ void CGLSLProgram::SetUniform(int Loc, const bool Value)
 	glUniform1i(Loc, (int)Value);
 }
 
-int CGLSLProgram::GetUniformLoc(const char *Name)
+int CGLSLProgram::GetUniformLoc(const char *pName)
 {
-	return glGetUniformLocation(m_ProgramID, Name);
+	return glGetUniformLocation(m_ProgramID, pName);
 }
 
 void CGLSLProgram::UseProgram()

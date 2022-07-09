@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <vector>
@@ -9,6 +10,7 @@
 #include <base/system.h>
 #include <base/vmath.h>
 
+#include <engine/client.h>
 #include <engine/editor.h>
 #include <engine/friends.h>
 #include <engine/graphics.h>
@@ -320,7 +322,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 {
 	ColorRGBA LaserRGB;
 	CUIRect Section = *pRect;
-	vec2 From = vec2(Section.x, Section.y + Section.h / 2.0f);
+	vec2 From = vec2(Section.x + 50.0f, Section.y + Section.h / 2.0f);
 	vec2 Pos = vec2(Section.x + Section.w - 10.0f, Section.y + Section.h / 2.0f);
 
 	Graphics()->BlendNormal();
@@ -361,7 +363,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	Graphics()->QuadsBegin();
 	RenderTools()->SelectSprite(SPRITE_WEAPON_LASER_BODY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->DrawSprite(Section.x, Section.y + Section.h / 2.0f, 60.0f);
+	RenderTools()->DrawSprite(Section.x + 30.0f, Section.y + Section.h / 2.0f, 60.0f);
 	Graphics()->QuadsEnd();
 }
 
@@ -440,12 +442,12 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
-int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *Color)
+int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *pColor)
 {
 	// logic
 	static float s_Value;
-	static char s_NumStr[64];
-	static void *s_LastTextpID = pID;
+	static char s_aNumStr[64];
+	static void *s_pLastTextpID = pID;
 	const bool Inside = UI()->MouseInside(pRect);
 
 	if(Inside)
@@ -453,12 +455,12 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 
 	if(UI()->MouseButtonReleased(1) && UI()->HotItem() == pID)
 	{
-		s_LastTextpID = pID;
+		s_pLastTextpID = pID;
 		ms_ValueSelectorTextMode = true;
 		if(IsHex)
-			str_format(s_NumStr, sizeof(s_NumStr), "%06X", Current);
+			str_format(s_aNumStr, sizeof(s_aNumStr), "%06X", Current);
 		else
-			str_format(s_NumStr, sizeof(s_NumStr), "%d", Current);
+			str_format(s_aNumStr, sizeof(s_aNumStr), "%d", Current);
 	}
 
 	if(UI()->CheckActiveItem(pID))
@@ -471,10 +473,10 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 		}
 	}
 
-	if(ms_ValueSelectorTextMode && s_LastTextpID == pID)
+	if(ms_ValueSelectorTextMode && s_pLastTextpID == pID)
 	{
 		static float s_NumberBoxID = 0;
-		UIEx()->DoEditBox(&s_NumberBoxID, pRect, s_NumStr, sizeof(s_NumStr), 10.0f, &s_NumberBoxID, false, CUI::CORNER_ALL);
+		UIEx()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, CUI::CORNER_ALL);
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
@@ -482,9 +484,9 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			((UI()->MouseButtonClicked(1) || UI()->MouseButtonClicked(0)) && !Inside))
 		{
 			if(IsHex)
-				Current = clamp(str_toint_base(s_NumStr, 16), Min, Max);
+				Current = clamp(str_toint_base(s_aNumStr, 16), Min, Max);
 			else
-				Current = clamp(str_toint(s_NumStr), Min, Max);
+				Current = clamp(str_toint(s_aNumStr), Min, Max);
 			//m_LockMouse = false;
 			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
@@ -554,14 +556,14 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			else
 				str_format(aBuf, sizeof(aBuf), "%d", Current);
 		}
-		RenderTools()->DrawUIRect(pRect, *Color, CUI::CORNER_ALL, Round);
+		RenderTools()->DrawUIRect(pRect, *pColor, CUI::CORNER_ALL, Round);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_CENTER);
 	}
 
 	return Current;
 }
 
-int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *NewModifierCombination)
+int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
 {
 	// process
 	static void *pGrabbedID = 0;
@@ -569,7 +571,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 	static int s_ButtonUsed = 0;
 	const bool Inside = UI()->MouseHovered(pRect);
 	int NewKey = Key;
-	*NewModifierCombination = ModifierCombination;
+	*pNewModifierCombination = ModifierCombination;
 
 	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
 		MouseReleased = true;
@@ -582,7 +584,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
 			{
 				NewKey = m_Binder.m_Key.m_Key;
-				*NewModifierCombination = m_Binder.m_ModifierCombination;
+				*pNewModifierCombination = m_Binder.m_ModifierCombination;
 			}
 			m_Binder.m_GotKey = false;
 			UI()->SetActiveItem(nullptr);
@@ -628,8 +630,8 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 		if(Key)
 		{
 			char aBuf[64];
-			if(*NewModifierCombination)
-				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*NewModifierCombination), Input()->KeyName(Key));
+			if(*pNewModifierCombination)
+				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(Key));
 			else
 				str_format(aBuf, sizeof(aBuf), "%s", Input()->KeyName(Key));
 
@@ -885,14 +887,13 @@ int CMenus::RenderMenubar(CUIRect r)
 	return 0;
 }
 
-void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
+void CMenus::RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter, bool RenderLoadingBar, bool RenderMenuBackgroundMap)
 {
 	// TODO: not supported right now due to separate render thread
 
 	static std::chrono::nanoseconds LastLoadRender{0};
 	auto CurLoadRenderCount = m_LoadCurrent;
-	if(IncreaseCounter)
-		++m_LoadCurrent;
+	m_LoadCurrent += IncreaseCounter;
 	float Percent = CurLoadRenderCount / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
@@ -906,41 +907,44 @@ void CMenus::RenderLoading(bool IncreaseCounter, bool RenderLoadingBar)
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
 	CUIRect Screen = *UI()->Screen();
+	// some margin around the screen
+	Screen.Margin(10.0f, &Screen);
 	UI()->MapScreen();
 
-	if(!m_pBackground->Render())
+	if(!RenderMenuBackgroundMap || !m_pBackground->Render())
 	{
 		RenderBackground();
 	}
 
-	float w = 700;
-	float h = 200;
-	float x = Screen.w / 2 - w / 2;
-	float y = Screen.h / 2 - h / 2;
+	CUIRect Box = Screen;
+	Box.Margin(150.0f, &Box);
 
 	Graphics()->BlendNormal();
 
 	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.50f);
-	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawUIRect(&Box, ColorRGBA{0, 0, 0, 0.50f}, CUI::CORNER_ALL, 15.0f);
 
-	const char *pCaption = Localize("Loading DDNet Client");
+	CUIRect Part;
 
-	CUIRect r;
-	r.x = x;
-	r.y = y + 20;
-	r.w = w;
-	r.h = h - 130;
-	UI()->DoLabel(&r, pCaption, 48.0f, TEXTALIGN_CENTER);
+	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(24.f, &Part, &Box);
+	Part.VMargin(20.f, &Part);
+	SLabelProperties Props;
+	Props.m_MaxWidth = (int)Part.w;
+	UI()->DoLabel(&Part, pCaption, 24.f, TEXTALIGN_CENTER);
+	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(24.f, &Part, &Box);
+	Part.VMargin(20.f, &Part);
+
+	Props.m_MaxWidth = (int)Part.w;
+	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_CENTER);
 
 	if(RenderLoadingBar)
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1, 1, 1, 0.75f);
-		RenderTools()->DrawRoundRect(x + 40, y + h - 75, (w - 80) * Percent, 25, 5.0f);
+		RenderTools()->DrawRoundRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, 5.0f);
 		Graphics()->QuadsEnd();
 	}
 
@@ -994,6 +998,9 @@ void CMenus::OnInit()
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
 
+	Console()->Chain("snd_enable", ConchainUpdateMusicState, this);
+	Console()->Chain("snd_enable_music", ConchainUpdateMusicState, this);
+
 	Console()->Chain("cl_assets_entities", ConchainAssetsEntities, this);
 	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
 	Console()->Chain("cl_asset_emoticons", ConchainAssetEmoticons, this);
@@ -1006,7 +1013,7 @@ void CMenus::OnInit()
 	// setup load amount
 	const int NumMenuImages = 5;
 	m_LoadCurrent = 0;
-	m_LoadTotal = g_pData->m_NumImages + NumMenuImages;
+	m_LoadTotal = g_pData->m_NumImages + NumMenuImages + GameClient()->ComponentCount();
 	if(!g_Config.m_ClThreadsoundloading)
 		m_LoadTotal += g_pData->m_NumSounds;
 
@@ -1015,6 +1022,23 @@ void CMenus::OnInit()
 	// load menu images
 	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
+}
+
+void CMenus::ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	auto *pSelf = (CMenus *)pUserData;
+	if(pResult->NumArguments())
+		pSelf->UpdateMusicState();
+}
+
+void CMenus::UpdateMusicState()
+{
+	const bool ShouldPlay = Client()->State() == IClient::STATE_OFFLINE && g_Config.m_SndEnable && g_Config.m_SndMusic;
+	if(ShouldPlay && !m_pClient->m_Sounds.IsPlaying(SOUND_MENU))
+		m_pClient->m_Sounds.Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
+	else if(!ShouldPlay && m_pClient->m_Sounds.IsPlaying(SOUND_MENU))
+		m_pClient->m_Sounds.Stop(SOUND_MENU);
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton)
@@ -1264,7 +1288,7 @@ int CMenus::Render()
 	}
 	else if(s_Frame == 1)
 	{
-		m_pClient->m_Sounds.Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
+		UpdateMusicState();
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
@@ -1457,6 +1481,29 @@ int CMenus::Render()
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
 				pTitle = aBuf;
 				pExtraText = "";
+			}
+			else if(Client()->State() == IClient::STATE_LOADING)
+			{
+				if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_INITIAL)
+				{
+					pTitle = Localize("Connected");
+					pExtraText = Localize("Getting game info");
+				}
+				else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_LOADING_MAP)
+				{
+					pTitle = Localize("Connected");
+					pExtraText = Localize("Loading map file from storage");
+				}
+				else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_SENDING_READY)
+				{
+					pTitle = Localize("Connected");
+					pExtraText = Localize("Requesting to join the game");
+				}
+				else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_GETTING_READY)
+				{
+					pTitle = Localize("Connected");
+					pExtraText = Localize("Sending intial client info");
+				}
 			}
 		}
 		else if(m_Popup == POPUP_DISCONNECTED)
@@ -2441,7 +2488,7 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	if(NewState == IClient::STATE_OFFLINE)
 	{
 		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
-			m_pClient->m_Sounds.Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f);
+			UpdateMusicState();
 		m_Popup = POPUP_NONE;
 		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
 		{
@@ -2638,41 +2685,54 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		return 0;
 
 	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
-	CImageInfo Info;
-	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+	bool ImgExists = false;
+	for(const auto &Img : pSelf->m_vMenuImages)
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to load menu image from %s", pName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-		return 0;
+		str_format(aBuf, std::size(aBuf), "%s.png", Img.m_aName);
+		if(str_comp(aBuf, pName) == 0)
+		{
+			ImgExists = true;
+			break;
+		}
 	}
 
-	CMenuImage MenuImage;
-	MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-
-	unsigned char *d = (unsigned char *)Info.m_pData;
-	//int Pitch = Info.m_Width*4;
-
-	// create colorless version
-	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
-
-	// make the texture gray scale
-	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
+	if(!ImgExists)
 	{
-		int v = (d[i * Step] + d[i * Step + 1] + d[i * Step + 2]) / 3;
-		d[i * Step] = v;
-		d[i * Step + 1] = v;
-		d[i * Step + 2] = v;
+		str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
+		CImageInfo Info;
+		if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+		{
+			str_format(aBuf, sizeof(aBuf), "failed to load menu image from %s", pName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+			return 0;
+		}
+
+		CMenuImage MenuImage;
+		MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+
+		unsigned char *pData = (unsigned char *)Info.m_pData;
+		//int Pitch = Info.m_Width*4;
+
+		// create colorless version
+		int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
+
+		// make the texture gray scale
+		for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
+		{
+			int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
+			pData[i * Step] = v;
+			pData[i * Step + 1] = v;
+			pData[i * Step + 2] = v;
+		}
+
+		MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+		pSelf->Graphics()->FreePNG(&Info);
+
+		// set menu image data
+		str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
+		pSelf->m_vMenuImages.push_back(MenuImage);
+		pSelf->RenderLoading(Localize("Loading DDNet Client"), Localize("Loading menu images"), 1);
 	}
-
-	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-	pSelf->Graphics()->FreePNG(&Info);
-
-	// set menu image data
-	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
-	pSelf->m_vMenuImages.push_back(MenuImage);
-	pSelf->RenderLoading(true);
-
 	return 0;
 }
 

@@ -226,7 +226,7 @@ void CParticles::RenderGroup(int Group)
 		int CurParticleRenderCount = 0;
 
 		// batching makes sense for stuff like ninja particles
-		float LastColor[4];
+		ColorRGBA LastColor;
 		int LastQuadOffset = 0;
 
 		if(i != -1)
@@ -237,10 +237,10 @@ void CParticles::RenderGroup(int Group)
 				float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
 				Alpha = mix(m_aParticles[i].m_StartAlpha, m_aParticles[i].m_EndAlpha, a);
 			}
-			LastColor[0] = m_aParticles[i].m_Color.r;
-			LastColor[1] = m_aParticles[i].m_Color.g;
-			LastColor[2] = m_aParticles[i].m_Color.b;
-			LastColor[3] = Alpha;
+			LastColor.r = m_aParticles[i].m_Color.r;
+			LastColor.g = m_aParticles[i].m_Color.g;
+			LastColor.b = m_aParticles[i].m_Color.b;
+			LastColor.a = Alpha;
 
 			Graphics()->SetColor(
 				m_aParticles[i].m_Color.r,
@@ -266,7 +266,7 @@ void CParticles::RenderGroup(int Group)
 			// the current position, respecting the size, is inside the viewport, render it, else ignore
 			if(ParticleIsVisibleOnScreen(p, Size))
 			{
-				if((size_t)CurParticleRenderCount == gs_GraphicsMaxParticlesRenderCount || LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != Alpha || LastQuadOffset != QuadOffset)
+				if((size_t)CurParticleRenderCount == gs_GraphicsMaxParticlesRenderCount || LastColor.r != m_aParticles[i].m_Color.r || LastColor.g != m_aParticles[i].m_Color.g || LastColor.b != m_aParticles[i].m_Color.b || LastColor.a != Alpha || LastQuadOffset != QuadOffset)
 				{
 					Graphics()->TextureSet(aParticles[LastQuadOffset - FirstParticleOffset]);
 					Graphics()->RenderQuadContainerAsSpriteMultiple(ParticleQuadContainerIndex, LastQuadOffset - FirstParticleOffset, CurParticleRenderCount, s_aParticleRenderInfo);
@@ -279,15 +279,14 @@ void CParticles::RenderGroup(int Group)
 						m_aParticles[i].m_Color.b,
 						Alpha);
 
-					LastColor[0] = m_aParticles[i].m_Color.r;
-					LastColor[1] = m_aParticles[i].m_Color.g;
-					LastColor[2] = m_aParticles[i].m_Color.b;
-					LastColor[3] = Alpha;
+					LastColor.r = m_aParticles[i].m_Color.r;
+					LastColor.g = m_aParticles[i].m_Color.g;
+					LastColor.b = m_aParticles[i].m_Color.b;
+					LastColor.a = Alpha;
 				}
 
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[1] = p.y;
-
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Scale = Size;
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Rotation = m_aParticles[i].m_Rot;
 

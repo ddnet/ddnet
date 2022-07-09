@@ -918,9 +918,6 @@ Use DDRace Scoreboard
 Show score
 == Skoru göster
 
-Show health + ammo
-== Can + mermi göster
-
 Show names in chat in team colors
 == Sohbetde isimleri takım rengiyle göster
 
@@ -1092,6 +1089,27 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
 Warning
 == 
 
@@ -1107,6 +1125,9 @@ Speed:
 Angle:
 == 
 
+Uploading map data to GPU
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -1117,6 +1138,15 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
 == 
 
 Existing Player
@@ -1144,6 +1174,9 @@ Skip Tutorial
 == 
 
 Theme
+== 
+
+Loading menu images
 == 
 
 AFR
@@ -1188,7 +1221,13 @@ Refreshing...
 Leak IP
 == 
 
+Loading demo files
+== 
+
 Demos directory
+== 
+
+Loading ghost files
 == 
 
 Smooth Dynamic Camera
@@ -1222,6 +1261,9 @@ Skin Database
 == 
 
 Skins directory
+== 
+
+Loading skin files
 == 
 
 Chat command
@@ -1325,16 +1367,37 @@ Chat sound volume
 Background music volume
 == 
 
+Appearance
+== 
+
 Assets
 == 
 
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
 Show dummy actions
-== 
-
-Show jump indicator
-== 
-
-Show client IDs
 == 
 
 Show player position
@@ -1352,25 +1415,40 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
-Laser Outline Color
+Use old chat style
 == 
 
-Laser Inner Color
+Preview
 == 
 
-Hookline
+Show hook strength indicator
 == 
 
-No hit
+Show local player's key presses
 == 
 
-Hookable
+Hook collision line
 == 
 
-Tee
+Hook collision line width
 == 
 
-Kill Messages
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
 == 
 
 Normal Color
@@ -1379,10 +1457,10 @@ Normal Color
 Highlight Color
 == 
 
-Use old chat style
+Laser Outline Color
 == 
 
-Preview
+Laser Inner Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1398,9 +1476,6 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
-== 
-
-Show local player's key presses
 == 
 
 Background
@@ -1431,6 +1506,9 @@ Particles
 == 
 
 Extras
+== 
+
+Loading assets
 == 
 
 Assets directory
@@ -1473,8 +1551,14 @@ Editor
 Play
 == 
 
+Loading race demo files
+== 
+
 Super
 == 
 
 Team %d
+== 
+
+Loading sound files
 == 

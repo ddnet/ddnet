@@ -13,17 +13,12 @@ class IStorage;
 
 class CSound : public IEngineSound
 {
-	int m_SoundEnabled;
+	bool m_SoundEnabled;
 	SDL_AudioDeviceID m_Device;
 
-public:
 	IEngineGraphics *m_pGraphics;
 	IStorage *m_pStorage;
 
-	int Init() override;
-
-	int Update() override;
-	int Shutdown() override;
 	int AllocID();
 
 	static void RateConvert(int SampleID);
@@ -32,7 +27,12 @@ public:
 	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
 
-	bool IsSoundEnabled() override { return m_SoundEnabled != 0; }
+public:
+	int Init() override;
+	int Update() override;
+	int Shutdown() override;
+
+	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
 	int LoadWV(const char *pFilename) override;
 	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
@@ -59,6 +59,7 @@ public:
 	void Stop(int SampleID) override;
 	void StopAll() override;
 	void StopVoice(CVoiceHandle Voice) override;
+	bool IsPlaying(int SampleID) override;
 
 	ISoundMixFunc GetSoundMixFunc() override;
 	void PauseAudioDevice() override;

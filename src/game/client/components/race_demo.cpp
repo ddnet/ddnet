@@ -7,6 +7,7 @@
 #include <engine/storage.h>
 
 #include <game/client/race.h>
+#include <game/localization.h>
 
 #include "race_demo.h"
 
@@ -223,7 +224,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	if(time_get_nanoseconds() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
 	{
-		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(false, false);
+		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(Localize("Loading race demo files"), "", 0, false);
 	}
 
 	return 0;

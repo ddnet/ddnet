@@ -149,52 +149,52 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 	int yInt = (int)Y;
 	float yFract = Y - floorf(Y);
 
-	uint8_t PX00[4];
-	uint8_t PX10[4];
-	uint8_t PX20[4];
-	uint8_t PX30[4];
+	uint8_t aPX00[4];
+	uint8_t aPX10[4];
+	uint8_t aPX20[4];
+	uint8_t aPX30[4];
 
-	uint8_t PX01[4];
-	uint8_t PX11[4];
-	uint8_t PX21[4];
-	uint8_t PX31[4];
+	uint8_t aPX01[4];
+	uint8_t aPX11[4];
+	uint8_t aPX21[4];
+	uint8_t aPX31[4];
 
-	uint8_t PX02[4];
-	uint8_t PX12[4];
-	uint8_t PX22[4];
-	uint8_t PX32[4];
+	uint8_t aPX02[4];
+	uint8_t aPX12[4];
+	uint8_t aPX22[4];
+	uint8_t aPX32[4];
 
-	uint8_t PX03[4];
-	uint8_t PX13[4];
-	uint8_t PX23[4];
-	uint8_t PX33[4];
+	uint8_t aPX03[4];
+	uint8_t aPX13[4];
+	uint8_t aPX23[4];
+	uint8_t aPX33[4];
 
-	GetPixelClamped(pSourceImage, xInt - 1, yInt - 1, W, H, BPP, PX00);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt - 1, W, H, BPP, PX10);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt - 1, W, H, BPP, PX20);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt - 1, W, H, BPP, PX30);
+	GetPixelClamped(pSourceImage, xInt - 1, yInt - 1, W, H, BPP, aPX00);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt - 1, W, H, BPP, aPX10);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt - 1, W, H, BPP, aPX20);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt - 1, W, H, BPP, aPX30);
 
-	GetPixelClamped(pSourceImage, xInt - 1, yInt + 0, W, H, BPP, PX01);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt + 0, W, H, BPP, PX11);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt + 0, W, H, BPP, PX21);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt + 0, W, H, BPP, PX31);
+	GetPixelClamped(pSourceImage, xInt - 1, yInt + 0, W, H, BPP, aPX01);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt + 0, W, H, BPP, aPX11);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt + 0, W, H, BPP, aPX21);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt + 0, W, H, BPP, aPX31);
 
-	GetPixelClamped(pSourceImage, xInt - 1, yInt + 1, W, H, BPP, PX02);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt + 1, W, H, BPP, PX12);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt + 1, W, H, BPP, PX22);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt + 1, W, H, BPP, PX32);
+	GetPixelClamped(pSourceImage, xInt - 1, yInt + 1, W, H, BPP, aPX02);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt + 1, W, H, BPP, aPX12);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt + 1, W, H, BPP, aPX22);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt + 1, W, H, BPP, aPX32);
 
-	GetPixelClamped(pSourceImage, xInt - 1, yInt + 2, W, H, BPP, PX03);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt + 2, W, H, BPP, PX13);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt + 2, W, H, BPP, PX23);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt + 2, W, H, BPP, PX33);
+	GetPixelClamped(pSourceImage, xInt - 1, yInt + 2, W, H, BPP, aPX03);
+	GetPixelClamped(pSourceImage, xInt + 0, yInt + 2, W, H, BPP, aPX13);
+	GetPixelClamped(pSourceImage, xInt + 1, yInt + 2, W, H, BPP, aPX23);
+	GetPixelClamped(pSourceImage, xInt + 2, yInt + 2, W, H, BPP, aPX33);
 
 	for(size_t i = 0; i < BPP; i++)
 	{
-		float Clmn0 = CubicHermite(PX00[i], PX10[i], PX20[i], PX30[i], xFract);
-		float Clmn1 = CubicHermite(PX01[i], PX11[i], PX21[i], PX31[i], xFract);
-		float Clmn2 = CubicHermite(PX02[i], PX12[i], PX22[i], PX32[i], xFract);
-		float Clmn3 = CubicHermite(PX03[i], PX13[i], PX23[i], PX33[i], xFract);
+		float Clmn0 = CubicHermite(aPX00[i], aPX10[i], aPX20[i], aPX30[i], xFract);
+		float Clmn1 = CubicHermite(aPX01[i], aPX11[i], aPX21[i], aPX31[i], xFract);
+		float Clmn2 = CubicHermite(aPX02[i], aPX12[i], aPX22[i], aPX32[i], xFract);
+		float Clmn3 = CubicHermite(aPX03[i], aPX13[i], aPX23[i], aPX33[i], xFract);
 
 		float Valuef = CubicHermite(Clmn0, Clmn1, Clmn2, Clmn3, yFract);
 

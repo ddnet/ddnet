@@ -23,8 +23,8 @@ enum
 
 class CTeamsCore
 {
-	int m_Team[MAX_CLIENTS];
-	bool m_IsSolo[MAX_CLIENTS];
+	int m_aTeam[MAX_CLIENTS];
+	bool m_aIsSolo[MAX_CLIENTS];
 
 public:
 	bool m_IsDDRace16;
@@ -43,14 +43,14 @@ public:
 	void SetSolo(int ClientID, bool Value)
 	{
 		dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "Invalid client id");
-		m_IsSolo[ClientID] = Value;
+		m_aIsSolo[ClientID] = Value;
 	}
 
 	bool GetSolo(int ClientID) const
 	{
 		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
 			return false;
-		return m_IsSolo[ClientID];
+		return m_aIsSolo[ClientID];
 	}
 };
 

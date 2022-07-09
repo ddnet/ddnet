@@ -70,7 +70,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Id = -1;
 
 	// fail safe, if core's tuning didn't get updated at all, just fallback to world tuning.
-	m_Tuning = m_pWorld->m_Tuning[g_Config.m_ClDummy];
+	m_Tuning = m_pWorld->m_aTuning[g_Config.m_ClDummy];
 	Reset();
 }
 
@@ -105,7 +105,7 @@ void CCharacterCore::Reset()
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
-	m_FreezeTick = 0;
+	m_FreezeStart = 0;
 	m_FreezeEnd = 0;
 	m_IsInFreeze = false;
 	m_DeepFrozen = false;
@@ -252,7 +252,7 @@ void CCharacterCore::Tick(bool UseInput)
 		{
 			m_HookState = HOOK_RETRACT_START;
 			NewPos = m_Pos + normalize(NewPos - m_Pos) * m_Tuning.m_HookLength;
-			m_pReset = true;
+			m_Reset = true;
 		}
 
 		// make sure that the hook doesn't go though the ground
@@ -272,7 +272,7 @@ void CCharacterCore::Tick(bool UseInput)
 				GoingThroughTele = true;
 			else
 				GoingToHitGround = true;
-			m_pReset = true;
+			m_Reset = true;
 		}
 
 		// Check against other players first
@@ -539,7 +539,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 {
 	m_Pos.x = pObjCore->m_X;
 	m_Pos.y = pObjCore->m_Y;
@@ -557,11 +557,6 @@ void CCharacterCore::ReadCharacterCore(const CNetObj_CharacterCore *pObjCore)
 	m_Angle = pObjCore->m_Angle;
 }
 
-void CCharacterCore::ReadCharacter(const CNetObj_Character *pObjChar)
-{
-	m_ActiveWeapon = pObjChar->m_Weapon;
-	ReadCharacterCore((const CNetObj_CharacterCore *)pObjChar);
-}
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 {
 	// Collision
@@ -599,21 +594,29 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 
 	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
-}
 
-void CCharacterCore::ReadDDNetDisplayInfo(const CNetObj_DDNetCharacterDisplayInfo *pObjDDNet)
-{
-	m_JumpedTotal = pObjDDNet->m_JumpedTotal;
-	m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
-	m_FreezeTick = pObjDDNet->m_FreezeTick;
-	m_IsInFreeze = pObjDDNet->m_IsInFreeze;
+	// Display Information
+	// We only accept the display information when it is received, which means it is not -1 in each case.
+	if(pObjDDNet->m_JumpedTotal != -1)
+	{
+		m_JumpedTotal = pObjDDNet->m_JumpedTotal;
+	}
+	if(pObjDDNet->m_NinjaActivationTick != -1)
+	{
+		m_Ninja.m_ActivationTick = pObjDDNet->m_NinjaActivationTick;
+	}
+	if(pObjDDNet->m_FreezeStart != -1)
+	{
+		m_FreezeStart = pObjDDNet->m_FreezeStart;
+		m_IsInFreeze = pObjDDNet->m_Flags & CHARACTERFLAG_IN_FREEZE;
+	}
 }
 
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
 	Write(&Core);
-	ReadCharacterCore(&Core);
+	Read(&Core);
 }
 
 void CCharacterCore::SetHookedPlayer(int HookedPlayer)
@@ -657,7 +660,7 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
 	if(pThis->m_pWorld && !pThis->m_pWorld->m_vSwitchers.empty())
 		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
-			return pThis->m_pWorld->m_vSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
+			return pThis->m_pWorld->m_vSwitchers[Number].m_aStatus[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
 }
 
@@ -673,10 +676,10 @@ void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 		Switcher.m_Initial = true;
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
-			Switcher.m_Status[j] = true;
-			Switcher.m_EndTick[j] = 0;
-			Switcher.m_Type[j] = 0;
-			Switcher.m_LastUpdateTick[j] = 0;
+			Switcher.m_aStatus[j] = true;
+			Switcher.m_aEndTick[j] = 0;
+			Switcher.m_aType[j] = 0;
+			Switcher.m_aLastUpdateTick[j] = 0;
 		}
 	}
 }

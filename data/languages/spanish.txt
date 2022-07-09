@@ -16,6 +16,7 @@
 # Deëivid!        2022-03-27 18:40:00
 # Deëivid!        2022-05-13 18:44:00
 # Deëivid!        2022-06-22 19:26:00
+# Deëivid!        2022-07-05 22:30:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -923,9 +924,6 @@ Use DDRace Scoreboard
 Show score
 == Mostrar puntaje
 
-Show health + ammo
-== Mostrar salud + munición
-
 Show names in chat in team colors
 == Mostrar nombres con colores de equipo en el chat
 
@@ -1149,7 +1147,7 @@ Assets
 == Recursos
 
 Use old chat style
-== Usar estilo viejo de chat
+== Usar estilo antiguo del chat
 
 Client message
 == Mensaje de cliente
@@ -1251,26 +1249,11 @@ Windowed borderless
 Desktop fullscreen
 == Pantalla completa de escritorio
 
-Show client IDs
-== Mostrar IDs de clientes
-
 Laser Outline Color
 == Color de contorno del láser
 
 Laser Inner Color
 == Color interior del láser
-
-Hookline
-== Línea del gancho
-
-No hit
-== Sin golpes
-
-Hookable
-== Enganchable
-
-Tee
-== Tee
 
 Preview
 == Vista previa
@@ -1425,7 +1408,7 @@ UI controller sens.
 == Sens. del mando en el menú
 
 Controller jitter tolerance
-== Tolerancia a fluctuación del mando
+== Tolerancia a la fluctuación del mando
 
 No controller found. Plug in a controller and restart the game.
 == No se encontró un mando. Conecta uno y reinicia el juego.
@@ -1472,17 +1455,119 @@ Show player target angle
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
 
-Show jump indicator
-== 
-
 Opacity of freeze bars inside freeze
-== 
+== Opacidad de las barras de freeze dentro del freeze
 
 Normal Color
-== 
+== Color normal
 
 Highlight Color
-== 
+== Color resaltado
 
 Extras
+== Extras
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Sending intial client info
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

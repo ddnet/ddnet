@@ -24,8 +24,8 @@ CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int La
 	m_Number = Number;
 	m_EvalTick = Server()->Tick();
 
-	mem_zero(m_LastFireTeam, sizeof(m_LastFireTeam));
-	mem_zero(m_LastFireSolo, sizeof(m_LastFireSolo));
+	mem_zero(m_aLastFireTeam, sizeof(m_aLastFireTeam));
+	mem_zero(m_aLastFireSolo, sizeof(m_aLastFireSolo));
 	GameWorld()->InsertEntity(this);
 }
 
@@ -51,26 +51,26 @@ void CGun::Tick()
 void CGun::Fire()
 {
 	// Create a list of players who are in the range of the turret
-	CCharacter *pPlayersInRange[MAX_CLIENTS];
-	mem_zero(pPlayersInRange, sizeof(pPlayersInRange));
+	CCharacter *apPlayersInRange[MAX_CLIENTS];
+	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange,
-		(CEntity **)pPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
-	int TargetIdInTeam[MAX_CLIENTS];
-	bool IsTarget[MAX_CLIENTS];
-	int MinDistInTeam[MAX_CLIENTS];
-	mem_zero(MinDistInTeam, sizeof(MinDistInTeam));
-	mem_zero(IsTarget, sizeof(IsTarget));
-	for(int &TargetId : TargetIdInTeam)
+	int aTargetIdInTeam[MAX_CLIENTS];
+	bool aIsTarget[MAX_CLIENTS];
+	int aMinDistInTeam[MAX_CLIENTS];
+	mem_zero(aMinDistInTeam, sizeof(aMinDistInTeam));
+	mem_zero(aIsTarget, sizeof(aIsTarget));
+	for(int &TargetId : aTargetIdInTeam)
 	{
 		TargetId = -1;
 	}
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
-		CCharacter *pTarget = pPlayersInRange[i];
+		CCharacter *pTarget = apPlayersInRange[i];
 		const int &TargetTeam = pTarget->Team();
 		// Do not fire at super players
 		if(TargetTeam == TEAM_SUPER)
@@ -79,7 +79,7 @@ void CGun::Fire()
 		}
 		// If the turret is disabled for the target's team, the turret will not fire
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_Status[TargetTeam])
+			!Switchers()[m_Number].m_aStatus[TargetTeam])
 		{
 			continue;
 		}
@@ -88,9 +88,9 @@ void CGun::Fire()
 		const int &TargetClientId = pTarget->GetPlayer()->GetCID();
 		const bool &TargetIsSolo = pTarget->Teams()->m_Core.GetSolo(TargetClientId);
 		if((TargetIsSolo &&
-			   m_LastFireSolo[TargetClientId] + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec > Server()->Tick()) ||
+			   m_aLastFireSolo[TargetClientId] + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec > Server()->Tick()) ||
 			(!TargetIsSolo &&
-				m_LastFireTeam[TargetTeam] + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec > Server()->Tick()))
+				m_aLastFireTeam[TargetTeam] + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec > Server()->Tick()))
 		{
 			continue;
 		}
@@ -102,16 +102,16 @@ void CGun::Fire()
 			// Turrets fire on solo players regardless of the rest of the team
 			if(TargetIsSolo)
 			{
-				IsTarget[TargetClientId] = true;
-				m_LastFireSolo[TargetClientId] = Server()->Tick();
+				aIsTarget[TargetClientId] = true;
+				m_aLastFireSolo[TargetClientId] = Server()->Tick();
 			}
 			else
 			{
 				int Distance = distance(pTarget->m_Pos, m_Pos);
-				if(MinDistInTeam[TargetTeam] == 0 || MinDistInTeam[TargetTeam] > Distance)
+				if(aMinDistInTeam[TargetTeam] == 0 || aMinDistInTeam[TargetTeam] > Distance)
 				{
-					MinDistInTeam[TargetTeam] = Distance;
-					TargetIdInTeam[TargetTeam] = TargetClientId;
+					aMinDistInTeam[TargetTeam] = Distance;
+					aTargetIdInTeam[TargetTeam] = TargetClientId;
 				}
 			}
 		}
@@ -120,17 +120,17 @@ void CGun::Fire()
 	// Set the closest player for each team as a target
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(TargetIdInTeam[i] != -1)
+		if(aTargetIdInTeam[i] != -1)
 		{
-			IsTarget[TargetIdInTeam[i]] = true;
-			m_LastFireTeam[i] = Server()->Tick();
+			aIsTarget[aTargetIdInTeam[i]] = true;
+			m_aLastFireTeam[i] = Server()->Tick();
 		}
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// Fire at each target
-		if(IsTarget[i])
+		if(aIsTarget[i])
 		{
 			CCharacter *pTarget = GameServer()->GetPlayerChar(i);
 			new CPlasma(&GameServer()->m_World, m_Pos, normalize(pTarget->m_Pos - m_Pos), m_Freeze, m_Explosive, i);
@@ -185,7 +185,7 @@ void CGun::Snap(int SnappingClient)
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_Status[pChar->Team()] && (!Tick))
+			!Switchers()[m_Number].m_aStatus[pChar->Team()] && (!Tick))
 			return;
 	}
 
