@@ -394,6 +394,15 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 {
 	int ContainerIndex = Graphics()->CreateQuadContainer(false);
 
+	if(Corners == 0 || r == 0.0f)
+	{
+		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y, w, h);
+		Graphics()->QuadContainerAddQuads(ContainerIndex, &ItemQ, 1);
+		Graphics()->QuadContainerUpload(ContainerIndex);
+		Graphics()->QuadContainerChangeAutomaticUpload(ContainerIndex, true);
+		return ContainerIndex;
+	}
+
 	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
 	int Num = 8;
