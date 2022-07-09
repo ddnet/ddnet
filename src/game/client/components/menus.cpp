@@ -1164,14 +1164,14 @@ void CMenus::RenderColorPicker()
 	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
 	vec4 BR(rgb.r, rgb.g, rgb.b, 1.0f);
 
-	RenderTools()->DrawUIRect4NoRounding(&ColorsArea, TL, TR, BL, BR);
+	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, CUI::CORNER_NONE, 0.0f);
 
 	TL = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	TR = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	BL = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	BR = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	RenderTools()->DrawUIRect4NoRounding(&ColorsArea, TL, TR, BL, BR);
+	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, CUI::CORNER_NONE, 0.0f);
 
 	// Hue Area
 	static const float s_aColorIndices[7][3] = {
@@ -1194,7 +1194,7 @@ void CMenus::RenderColorPicker()
 		BL = vec4(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
 
 		HuePartialArea.y = HueArea.y + HuePickerOffset * j;
-		RenderTools()->DrawUIRect4NoRounding(&HuePartialArea, TL, TL, BL, BL);
+		RenderTools()->DrawUIRect4(&HuePartialArea, TL, TL, BL, BL, CUI::CORNER_NONE, 0.0f);
 	}
 
 	//Editboxes Area
