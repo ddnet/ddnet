@@ -66,7 +66,8 @@ TEST_F(Jobs, Wait)
 	sphore_destroy(&sphore);
 }
 
-TEST_F(Jobs, LookupHost)
+// Requires internet access and busy-loops otherwise
+TEST_F(Jobs, DISABLED_LookupHost)
 {
 	static const char *HOST = "example.com";
 	static const int NETTYPE = NETTYPE_ALL;
