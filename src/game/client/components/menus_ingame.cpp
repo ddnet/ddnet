@@ -937,8 +937,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	struct CColumn
 	{
-		int m_Id;
 		CLocConstString m_Caption;
+		int m_Id;
 		float m_Width;
 		CUIRect m_Rect;
 		CUIRect m_Spacer;
@@ -952,10 +952,10 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{-1, " ", 2.0f, {0}, {0}},
-		{COL_ACTIVE, " ", 30.0f, {0}, {0}},
-		{COL_NAME, "Name", 300.0f, {0}, {0}}, // Localize("Name")
-		{COL_TIME, "Time", 200.0f, {0}, {0}}, // Localize("Time")
+		{" ", -1, 2.0f, {0}, {0}},
+		{" ", COL_ACTIVE, 30.0f, {0}, {0}},
+		{"Name", COL_NAME, 300.0f, {0}, {0}}, // Localize("Name")
+		{"Time", COL_TIME, 200.0f, {0}, {0}}, // Localize("Time")
 	};
 
 	int NumCols = std::size(s_aCols);
