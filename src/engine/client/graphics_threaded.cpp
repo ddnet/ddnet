@@ -975,12 +975,12 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	}
 }
 
-void CGraphics_Threaded::SetColor(ColorRGBA rgb)
+void CGraphics_Threaded::SetColor(ColorRGBA Color)
 {
-	SetColor(rgb.r, rgb.g, rgb.b, rgb.a);
+	SetColor(Color.r, Color.g, Color.b, Color.a);
 }
 
-void CGraphics_Threaded::SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight)
+void CGraphics_Threaded::SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight)
 {
 	dbg_assert(m_Drawing != 0, "called Graphics()->SetColor without begin");
 	CColorVertex Array[4] = {
@@ -1239,16 +1239,16 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 
 void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r, int Corners)
 {
-	int NumItems = 0;
-	const int Num = 8;
+	const int NumSegments = 8;
+	const float SegmentsAngle = pi / 2 / NumSegments;
+	IGraphics::CFreeformItem aFreeform[NumSegments * 4];
+	size_t NumItems = 0;
 
-	IGraphics::CFreeformItem ArrayF[Num * 4];
-
-	for(int i = 0; i < Num; i += 2)
+	for(int i = 0; i < NumSegments; i += 2)
 	{
-		float a1 = i / (float)Num * pi / 2;
-		float a2 = (i + 1) / (float)Num * pi / 2;
-		float a3 = (i + 2) / (float)Num * pi / 2;
+		float a1 = i * SegmentsAngle;
+		float a2 = (i + 1) * SegmentsAngle;
+		float a3 = (i + 2) * SegmentsAngle;
 		float Ca1 = cosf(a1);
 		float Ca2 = cosf(a2);
 		float Ca3 = cosf(a3);
@@ -1256,57 +1256,57 @@ void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r
 		float Sa2 = sinf(a2);
 		float Sa3 = sinf(a3);
 
-		if(Corners & 1) // TL
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_TL)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + r, y + r,
 				x + (1 - Ca1) * r, y + (1 - Sa1) * r,
 				x + (1 - Ca3) * r, y + (1 - Sa3) * r,
 				x + (1 - Ca2) * r, y + (1 - Sa2) * r);
 
-		if(Corners & 2) // TR
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_TR)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + w - r, y + r,
 				x + w - r + Ca1 * r, y + (1 - Sa1) * r,
 				x + w - r + Ca3 * r, y + (1 - Sa3) * r,
 				x + w - r + Ca2 * r, y + (1 - Sa2) * r);
 
-		if(Corners & 4) // BL
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_BL)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + r, y + h - r,
 				x + (1 - Ca1) * r, y + h - r + Sa1 * r,
 				x + (1 - Ca3) * r, y + h - r + Sa3 * r,
 				x + (1 - Ca2) * r, y + h - r + Sa2 * r);
 
-		if(Corners & 8) // BR
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_BR)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + w - r, y + h - r,
 				x + w - r + Ca1 * r, y + h - r + Sa1 * r,
 				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
 				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
 	}
-	QuadsDrawFreeform(ArrayF, NumItems);
+	QuadsDrawFreeform(aFreeform, NumItems);
 
-	CQuadItem ArrayQ[9];
+	CQuadItem aQuads[9];
 	NumItems = 0;
-	ArrayQ[NumItems++] = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
-	ArrayQ[NumItems++] = CQuadItem(x + r, y, w - r * 2, r); // top
-	ArrayQ[NumItems++] = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
-	ArrayQ[NumItems++] = CQuadItem(x, y + r, r, h - r * 2); // left
-	ArrayQ[NumItems++] = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
+	aQuads[NumItems++] = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
+	aQuads[NumItems++] = CQuadItem(x + r, y, w - r * 2, r); // top
+	aQuads[NumItems++] = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
+	aQuads[NumItems++] = CQuadItem(x, y + r, r, h - r * 2); // left
+	aQuads[NumItems++] = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
 
-	if(!(Corners & 1))
-		ArrayQ[NumItems++] = CQuadItem(x, y, r, r); // TL
-	if(!(Corners & 2))
-		ArrayQ[NumItems++] = CQuadItem(x + w, y, -r, r); // TR
-	if(!(Corners & 4))
-		ArrayQ[NumItems++] = CQuadItem(x, y + h, r, -r); // BL
-	if(!(Corners & 8))
-		ArrayQ[NumItems++] = CQuadItem(x + w, y + h, -r, -r); // BR
+	if(!(Corners & CORNER_TL))
+		aQuads[NumItems++] = CQuadItem(x, y, r, r);
+	if(!(Corners & CORNER_TR))
+		aQuads[NumItems++] = CQuadItem(x + w, y, -r, r);
+	if(!(Corners & CORNER_BL))
+		aQuads[NumItems++] = CQuadItem(x, y + h, r, -r);
+	if(!(Corners & CORNER_BR))
+		aQuads[NumItems++] = CQuadItem(x + w, y + h, -r, -r);
 
-	QuadsDrawTL(ArrayQ, NumItems);
+	QuadsDrawTL(aQuads, NumItems);
 }
 
-void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners)
+void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners)
 {
 	if(Corners == 0 || r == 0.0f)
 	{
@@ -1316,12 +1316,13 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 		return;
 	}
 
-	int Num = 8;
-	for(int i = 0; i < Num; i += 2)
+	const int NumSegments = 8;
+	const float SegmentsAngle = pi / 2 / NumSegments;
+	for(int i = 0; i < NumSegments; i += 2)
 	{
-		float a1 = i / (float)Num * pi / 2;
-		float a2 = (i + 1) / (float)Num * pi / 2;
-		float a3 = (i + 2) / (float)Num * pi / 2;
+		float a1 = i * SegmentsAngle;
+		float a2 = (i + 1) * SegmentsAngle;
+		float a3 = (i + 2) * SegmentsAngle;
 		float Ca1 = cosf(a1);
 		float Ca2 = cosf(a2);
 		float Ca3 = cosf(a3);
@@ -1329,9 +1330,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 		float Sa2 = sinf(a2);
 		float Sa3 = sinf(a3);
 
-		if(Corners & 1) // TL
+		if(Corners & CORNER_TL)
 		{
-			SetColor(ColorTopLeft.r, ColorTopLeft.g, ColorTopLeft.b, ColorTopLeft.a);
+			SetColor(ColorTopLeft);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x + r, y + r,
 				x + (1 - Ca1) * r, y + (1 - Sa1) * r,
@@ -1340,9 +1341,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 2) // TR
+		if(Corners & CORNER_TR)
 		{
-			SetColor(ColorTopRight.r, ColorTopRight.g, ColorTopRight.b, ColorTopRight.a);
+			SetColor(ColorTopRight);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x + w - r, y + r,
 				x + w - r + Ca1 * r, y + (1 - Sa1) * r,
@@ -1351,9 +1352,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 4) // BL
+		if(Corners & CORNER_BL)
 		{
-			SetColor(ColorBottomLeft.r, ColorBottomLeft.g, ColorBottomLeft.b, ColorBottomLeft.a);
+			SetColor(ColorBottomLeft);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x + r, y + h - r,
 				x + (1 - Ca1) * r, y + h - r + Sa1 * r,
@@ -1362,9 +1363,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 8) // BR
+		if(Corners & CORNER_BR)
 		{
-			SetColor(ColorBottomRight.r, ColorBottomRight.g, ColorBottomRight.b, ColorBottomRight.a);
+			SetColor(ColorBottomRight);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x + w - r, y + h - r,
 				x + w - r + Ca1 * r, y + h - r + Sa1 * r,
@@ -1373,9 +1374,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 16) // ITL
+		if(Corners & CORNER_ITL)
 		{
-			SetColor(ColorTopLeft.r, ColorTopLeft.g, ColorTopLeft.b, ColorTopLeft.a);
+			SetColor(ColorTopLeft);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x, y,
 				x + (1 - Ca1) * r, y - r + Sa1 * r,
@@ -1384,9 +1385,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 32) // ITR
+		if(Corners & CORNER_ITR)
 		{
-			SetColor(ColorTopRight.r, ColorTopRight.g, ColorTopRight.b, ColorTopRight.a);
+			SetColor(ColorTopRight);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x + w, y,
 				x + w - r + Ca1 * r, y - r + Sa1 * r,
@@ -1395,9 +1396,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 64) // IBL
+		if(Corners & CORNER_IBL)
 		{
-			SetColor(ColorBottomLeft.r, ColorBottomLeft.g, ColorBottomLeft.b, ColorBottomLeft.a);
+			SetColor(ColorBottomLeft);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x, y + h,
 				x + (1 - Ca1) * r, y + h + (1 - Sa1) * r,
@@ -1406,9 +1407,9 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 			QuadsDrawFreeform(&ItemF, 1);
 		}
 
-		if(Corners & 128) // IBR
+		if(Corners & CORNER_IBR)
 		{
-			SetColor(ColorBottomRight.r, ColorBottomRight.g, ColorBottomRight.b, ColorBottomRight.a);
+			SetColor(ColorBottomRight);
 			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
 				x + w, y + h,
 				x + w - r + Ca1 * r, y + h + (1 - Sa1) * r,
@@ -1421,41 +1422,48 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, vec4 C
 	SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
 	CQuadItem ItemQ = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
 	QuadsDrawTL(&ItemQ, 1);
+
 	SetColor4(ColorTopLeft, ColorTopRight, ColorTopLeft, ColorTopRight);
 	ItemQ = CQuadItem(x + r, y, w - r * 2, r); // top
 	QuadsDrawTL(&ItemQ, 1);
+
 	SetColor4(ColorBottomLeft, ColorBottomRight, ColorBottomLeft, ColorBottomRight);
 	ItemQ = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
 	QuadsDrawTL(&ItemQ, 1);
+
 	SetColor4(ColorTopLeft, ColorTopLeft, ColorBottomLeft, ColorBottomLeft);
 	ItemQ = CQuadItem(x, y + r, r, h - r * 2); // left
 	QuadsDrawTL(&ItemQ, 1);
+
 	SetColor4(ColorTopRight, ColorTopRight, ColorBottomRight, ColorBottomRight);
 	ItemQ = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
 	QuadsDrawTL(&ItemQ, 1);
 
-	if(!(Corners & 1))
+	if(!(Corners & CORNER_TL))
 	{
-		SetColor(ColorTopLeft.r, ColorTopLeft.g, ColorTopLeft.b, ColorTopLeft.a);
-		ItemQ = CQuadItem(x, y, r, r); // TL
+		SetColor(ColorTopLeft);
+		ItemQ = CQuadItem(x, y, r, r);
 		QuadsDrawTL(&ItemQ, 1);
 	}
-	if(!(Corners & 2))
+
+	if(!(Corners & CORNER_TR))
 	{
-		SetColor(ColorTopRight.r, ColorTopRight.g, ColorTopRight.b, ColorTopRight.a);
-		ItemQ = CQuadItem(x + w, y, -r, r); // TR
+		SetColor(ColorTopRight);
+		ItemQ = CQuadItem(x + w, y, -r, r);
 		QuadsDrawTL(&ItemQ, 1);
 	}
-	if(!(Corners & 4))
+
+	if(!(Corners & CORNER_BL))
 	{
-		SetColor(ColorBottomLeft.r, ColorBottomLeft.g, ColorBottomLeft.b, ColorBottomLeft.a);
-		ItemQ = CQuadItem(x, y + h, r, -r); // BL
+		SetColor(ColorBottomLeft);
+		ItemQ = CQuadItem(x, y + h, r, -r);
 		QuadsDrawTL(&ItemQ, 1);
 	}
-	if(!(Corners & 8))
+
+	if(!(Corners & CORNER_BR))
 	{
-		SetColor(ColorBottomRight.r, ColorBottomRight.g, ColorBottomRight.b, ColorBottomRight.a);
-		ItemQ = CQuadItem(x + w, y + h, -r, -r); // BR
+		SetColor(ColorBottomRight);
+		ItemQ = CQuadItem(x + w, y + h, -r, -r);
 		QuadsDrawTL(&ItemQ, 1);
 	}
 }
@@ -1473,14 +1481,16 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 		return ContainerIndex;
 	}
 
-	IGraphics::CFreeformItem ArrayF[32];
-	int NumItems = 0;
-	int Num = 8;
-	for(int i = 0; i < Num; i += 2)
+	const int NumSegments = 8;
+	const float SegmentsAngle = pi / 2 / NumSegments;
+	IGraphics::CFreeformItem aFreeform[NumSegments * 4];
+	size_t NumItems = 0;
+
+	for(int i = 0; i < NumSegments; i += 2)
 	{
-		float a1 = i / (float)Num * pi / 2;
-		float a2 = (i + 1) / (float)Num * pi / 2;
-		float a3 = (i + 2) / (float)Num * pi / 2;
+		float a1 = i * SegmentsAngle;
+		float a2 = (i + 1) * SegmentsAngle;
+		float a3 = (i + 2) * SegmentsAngle;
 		float Ca1 = cosf(a1);
 		float Ca2 = cosf(a2);
 		float Ca3 = cosf(a3);
@@ -1488,29 +1498,29 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 		float Sa2 = sinf(a2);
 		float Sa3 = sinf(a3);
 
-		if(Corners & 1) // TL
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_TL)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + r, y + r,
 				x + (1 - Ca1) * r, y + (1 - Sa1) * r,
 				x + (1 - Ca3) * r, y + (1 - Sa3) * r,
 				x + (1 - Ca2) * r, y + (1 - Sa2) * r);
 
-		if(Corners & 2) // TR
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_TR)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + w - r, y + r,
 				x + w - r + Ca1 * r, y + (1 - Sa1) * r,
 				x + w - r + Ca3 * r, y + (1 - Sa3) * r,
 				x + w - r + Ca2 * r, y + (1 - Sa2) * r);
 
-		if(Corners & 4) // BL
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_BL)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + r, y + h - r,
 				x + (1 - Ca1) * r, y + h - r + Sa1 * r,
 				x + (1 - Ca3) * r, y + h - r + Sa3 * r,
 				x + (1 - Ca2) * r, y + h - r + Sa2 * r);
 
-		if(Corners & 8) // BR
-			ArrayF[NumItems++] = IGraphics::CFreeformItem(
+		if(Corners & CORNER_BR)
+			aFreeform[NumItems++] = IGraphics::CFreeformItem(
 				x + w - r, y + h - r,
 				x + w - r + Ca1 * r, y + h - r + Sa1 * r,
 				x + w - r + Ca3 * r, y + h - r + Sa3 * r,
@@ -1518,27 +1528,27 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 	}
 
 	if(NumItems > 0)
-		QuadContainerAddQuads(ContainerIndex, ArrayF, NumItems);
+		QuadContainerAddQuads(ContainerIndex, aFreeform, NumItems);
 
-	CQuadItem ArrayQ[9];
+	CQuadItem aQuads[9];
 	NumItems = 0;
-	ArrayQ[NumItems++] = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
-	ArrayQ[NumItems++] = CQuadItem(x + r, y, w - r * 2, r); // top
-	ArrayQ[NumItems++] = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
-	ArrayQ[NumItems++] = CQuadItem(x, y + r, r, h - r * 2); // left
-	ArrayQ[NumItems++] = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
+	aQuads[NumItems++] = CQuadItem(x + r, y + r, w - r * 2, h - r * 2); // center
+	aQuads[NumItems++] = CQuadItem(x + r, y, w - r * 2, r); // top
+	aQuads[NumItems++] = CQuadItem(x + r, y + h - r, w - r * 2, r); // bottom
+	aQuads[NumItems++] = CQuadItem(x, y + r, r, h - r * 2); // left
+	aQuads[NumItems++] = CQuadItem(x + w - r, y + r, r, h - r * 2); // right
 
-	if(!(Corners & 1))
-		ArrayQ[NumItems++] = CQuadItem(x, y, r, r); // TL
-	if(!(Corners & 2))
-		ArrayQ[NumItems++] = CQuadItem(x + w, y, -r, r); // TR
-	if(!(Corners & 4))
-		ArrayQ[NumItems++] = CQuadItem(x, y + h, r, -r); // BL
-	if(!(Corners & 8))
-		ArrayQ[NumItems++] = CQuadItem(x + w, y + h, -r, -r); // BR
+	if(!(Corners & CORNER_TL))
+		aQuads[NumItems++] = CQuadItem(x, y, r, r);
+	if(!(Corners & CORNER_TR))
+		aQuads[NumItems++] = CQuadItem(x + w, y, -r, r);
+	if(!(Corners & CORNER_BL))
+		aQuads[NumItems++] = CQuadItem(x, y + h, r, -r);
+	if(!(Corners & CORNER_BR))
+		aQuads[NumItems++] = CQuadItem(x + w, y + h, -r, -r);
 
 	if(NumItems > 0)
-		QuadContainerAddQuads(ContainerIndex, ArrayQ, NumItems);
+		QuadContainerAddQuads(ContainerIndex, aQuads, NumItems);
 
 	QuadContainerUpload(ContainerIndex);
 	QuadContainerChangeAutomaticUpload(ContainerIndex, true);
@@ -1555,7 +1565,7 @@ void CGraphics_Threaded::DrawRect(float x, float y, float w, float h, ColorRGBA 
 	QuadsEnd();
 }
 
-void CGraphics_Threaded::DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
+void CGraphics_Threaded::DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding)
 {
 	TextureClear();
 	QuadsBegin();
