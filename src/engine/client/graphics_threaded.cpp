@@ -1237,36 +1237,29 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 	}
 }
 
-void CGraphics_Threaded::DrawCircle(float x, float y, float r, int Segments)
+void CGraphics_Threaded::DrawCircle(float CenterX, float CenterY, float Radius, int Segments)
 {
-	IGraphics::CFreeformItem Array[32];
-	int NumItems = 0;
-	float FSegments = (float)Segments;
+	IGraphics::CFreeformItem aItems[32];
+	size_t NumItems = 0;
+	const float SegmentsAngle = 2 * pi / Segments;
 	for(int i = 0; i < Segments; i += 2)
 	{
-		float a1 = i / FSegments * 2 * pi;
-		float a2 = (i + 1) / FSegments * 2 * pi;
-		float a3 = (i + 2) / FSegments * 2 * pi;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
-
-		Array[NumItems++] = IGraphics::CFreeformItem(
-			x, y,
-			x + Ca1 * r, y + Sa1 * r,
-			x + Ca3 * r, y + Sa3 * r,
-			x + Ca2 * r, y + Sa2 * r);
-		if(NumItems == 32)
+		const float a1 = i * SegmentsAngle;
+		const float a2 = (i + 1) * SegmentsAngle;
+		const float a3 = (i + 2) * SegmentsAngle;
+		aItems[NumItems++] = IGraphics::CFreeformItem(
+			CenterX, CenterY,
+			CenterX + cosf(a1) * Radius, CenterY + sinf(a1) * Radius,
+			CenterX + cosf(a3) * Radius, CenterY + sinf(a3) * Radius,
+			CenterX + cosf(a2) * Radius, CenterY + sinf(a2) * Radius);
+		if(NumItems == std::size(aItems))
 		{
-			QuadsDrawFreeform(Array, 32);
+			QuadsDrawFreeform(aItems, std::size(aItems));
 			NumItems = 0;
 		}
 	}
 	if(NumItems)
-		QuadsDrawFreeform(Array, NumItems);
+		QuadsDrawFreeform(aItems, NumItems);
 }
 
 void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset)
