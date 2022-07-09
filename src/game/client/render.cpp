@@ -507,24 +507,31 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 	DrawRoundRectExt(x, y, w, h, r, 0xf);
 }
 
-void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
+void CRenderTools::DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding)
 {
 	Graphics()->TextureClear();
-
-	// TODO: FIX US
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
-	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
+	DrawRoundRectExt(x, y, w, h, Rounding, Corners);
+	Graphics()->QuadsEnd();
+}
+
+void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
+{
+	DrawRect(pRect->x, pRect->y, pRect->w, pRect->h, Color, Corners, Rounding);
+}
+
+void CRenderTools::DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
+{
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	DrawRoundRectExt4(x, y, w, h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Rounding, Corners);
 	Graphics()->QuadsEnd();
 }
 
 void CRenderTools::DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
 {
-	Graphics()->TextureClear();
-
-	Graphics()->QuadsBegin();
-	DrawRoundRectExt4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Rounding, Corners);
-	Graphics()->QuadsEnd();
+	DrawRect4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
 }
 
 void CRenderTools::DrawCircle(float x, float y, float r, int Segments)

@@ -113,7 +113,9 @@ public:
 
 	void DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 
+	void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding);
 	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
+	void DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
 	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
 
 	void DrawCircle(float x, float y, float r, int Segments);
