@@ -578,12 +578,7 @@ void CHud::RenderVoting()
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.40f);
-
-	RenderTools()->DrawRoundRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, 5.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_ALL, 5.0f);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -1293,12 +1288,7 @@ void CHud::RenderDummyActions()
 		StartY -= 56;
 	}
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
-	Graphics()->QuadsEnd();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	RenderTools()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_L, 5.0f);
 
 	float y = StartY + 2;
 	float x = StartX + 2;
@@ -1368,12 +1358,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 		StartY -= 56;
 	}
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
-	Graphics()->QuadsEnd();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	RenderTools()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_L, 5.0f);
 
 	CNetObj_Character *pCharacter = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
 	const float TicksPerSecond = 50.0f;
@@ -1495,11 +1480,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 void CHud::RenderSpectatorHud()
 {
 	// draw the box
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(m_Width - 180.0f, m_Height - 15.0f, 180.0f, 15.0f, 5.0f, CUI::CORNER_TL);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(m_Width - 180.0f, m_Height - 15.0f, 180.0f, 15.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_TL, 5.0f);
 
 	// draw the text
 	char aBuf[128];
@@ -1512,15 +1493,10 @@ void CHud::RenderLocalTime(float x)
 	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_Scoreboard.Active())
 		return;
 
-	//draw the box
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(x - 30.0f, 0.0f, 25.0f, 12.5f, 3.75f, CUI::CORNER_B);
-	Graphics()->QuadsEnd();
+	// draw the box
+	RenderTools()->DrawRect(x - 30.0f, 0.0f, 25.0f, 12.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_B, 3.75f);
 
-	//draw the text
+	// draw the text
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 	TextRender()->Text(0, x - 25.0f, (12.5f - 5.f) / 2.f, 5.0f, aTimeStr, -1.0f);
