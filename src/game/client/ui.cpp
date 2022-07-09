@@ -106,9 +106,7 @@ void CUI::ResetUIElement(CUIElement &UIElement)
 		if(Rect.m_UIRectQuadContainer != -1)
 			Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
 		Rect.m_UIRectQuadContainer = -1;
-		if(Rect.m_UITextContainer != -1)
-			TextRender()->DeleteTextContainer(Rect.m_UITextContainer);
-		Rect.m_UITextContainer = -1;
+		TextRender()->DeleteTextContainer(Rect.m_UITextContainer);
 
 		Rect.Reset();
 	}
@@ -617,7 +615,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	RectEl.m_TextOutlineColor = TextRender()->GetTextOutlineColor();
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
-	RectEl.m_UITextContainer = TextRender()->CreateTextContainer(&Cursor, pText, StrLen);
+	TextRender()->CreateTextContainer(RectEl.m_UITextContainer, &Cursor, pText, StrLen);
 	TextRender()->TextColor(RectEl.m_TextColor);
 	TextRender()->TextOutlineColor(RectEl.m_TextOutlineColor);
 	RectEl.m_Cursor = Cursor;
@@ -646,9 +644,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 	}
 	if(NeedsRecreate)
 	{
-		if(RectEl.m_UITextContainer != -1)
-			TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
-		RectEl.m_UITextContainer = -1;
+		TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
 
 		RectEl.m_X = x;
 		RectEl.m_Y = y;

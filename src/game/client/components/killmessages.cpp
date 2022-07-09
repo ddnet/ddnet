@@ -15,11 +15,8 @@ void CKillMessages::OnWindowResize()
 {
 	for(auto &Killmsg : m_aKillmsgs)
 	{
-		if(Killmsg.m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
-		if(Killmsg.m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
-		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
+		TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
+		TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
 	}
 }
 
@@ -30,13 +27,8 @@ void CKillMessages::OnReset()
 	{
 		Killmsg.m_Tick = -100000;
 
-		if(Killmsg.m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
-
-		if(Killmsg.m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
-
-		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
+		TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
+		TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
 	}
 }
 
@@ -83,7 +75,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		}
 		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
 
-		Kill.m_VictimTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aVictimName);
+		TextRender()->CreateTextContainer(Kill.m_VictimTextContainerIndex, &Cursor, Kill.m_aVictimName);
 	}
 
 	if(Kill.m_KillerTextContainerIndex == -1 && Kill.m_aKillerName[0] != 0)
@@ -101,7 +93,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		}
 		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
 
-		Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
+		TextRender()->CreateTextContainer(Kill.m_KillerTextContainerIndex, &Cursor, Kill.m_aKillerName);
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
@@ -159,17 +151,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 			// add the message
 			m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
 
-			if(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex != -1)
-			{
-				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
-				m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex = -1;
-			}
-
-			if(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex != -1)
-			{
-				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
-				m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex = -1;
-			}
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}

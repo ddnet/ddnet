@@ -130,12 +130,14 @@ public:
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
-	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual bool CreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void AppendTextContainer(int TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	// either creates a new text container or appends to a existing one
+	virtual bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
-	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
-	virtual void DeleteTextContainer(int TextContainerIndex) = 0;
+	virtual void RecreateTextContainer(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void DeleteTextContainer(int &TextContainerIndex) = 0;
 
 	virtual void UploadTextContainer(int TextContainerIndex) = 0;
 

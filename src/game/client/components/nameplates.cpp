@@ -92,8 +92,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			mem_copy(m_aNamePlates[ClientID].m_aName, pName, sizeof(m_aNamePlates[ClientID].m_aName));
 			m_aNamePlates[ClientID].m_NameTextFontSize = FontSize;
 
-			if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
-				TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex);
+			TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex);
 
 			CTextCursor Cursor;
 			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -106,7 +105,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 			m_aNamePlates[ClientID].m_NameTextWidth = TextRender()->TextWidth(0, FontSize, pName, -1, -1.0f);
 
-			m_aNamePlates[ClientID].m_NameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
+			TextRender()->CreateTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, &Cursor, pName);
 			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
 
@@ -118,8 +117,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				mem_copy(m_aNamePlates[ClientID].m_aClanName, pClan, sizeof(m_aNamePlates[ClientID].m_aClanName));
 				m_aNamePlates[ClientID].m_ClanNameTextFontSize = FontSizeClan;
 
-				if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
-					TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex);
+				TextRender()->DeleteTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex);
 
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
@@ -132,7 +130,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 				m_aNamePlates[ClientID].m_ClanNameTextWidth = TextRender()->TextWidth(0, FontSizeClan, pClan, -1, -1.0f);
 
-				m_aNamePlates[ClientID].m_ClanNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pClan);
+				TextRender()->CreateTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, &Cursor, pClan);
 				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 			}
 		}
@@ -320,10 +318,8 @@ void CNamePlates::ResetNamePlates()
 {
 	for(auto &NamePlate : m_aNamePlates)
 	{
-		if(NamePlate.m_NameTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(NamePlate.m_NameTextContainerIndex);
-		if(NamePlate.m_ClanNameTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(NamePlate.m_ClanNameTextContainerIndex);
+		TextRender()->DeleteTextContainer(NamePlate.m_NameTextContainerIndex);
+		TextRender()->DeleteTextContainer(NamePlate.m_ClanNameTextContainerIndex);
 
 		NamePlate.Reset();
 	}
