@@ -844,19 +844,20 @@ void CHud::RenderPlayerState(const int ClientID)
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
+	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
 	int TotalJumpsToDisplay = 0, AvailableJumpsToDisplay = 0;
 	if(g_Config.m_ClShowJumpsIndicator)
 	{
 		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
 			bool Grounded = false;
-			if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
-				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			if(Collision()->CheckPoint(pPlayer->m_X + CCharacterCore::PhysicalSize() / 2,
+				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
 			{
 				Grounded = true;
 			}
-			if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
-				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			if(Collision()->CheckPoint(pPlayer->m_X - CCharacterCore::PhysicalSize() / 2,
+				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
 			{
 				Grounded = true;
 			}
@@ -869,7 +870,7 @@ void CHud::RenderPlayerState(const int ClientID)
 			else if(pCharacter->m_Jumps == 1)
 			{
 				// If the player has only one jump, each jump is the last one
-				UsedJumps = pCharacter->m_Jumped & 2;
+				UsedJumps = pPlayer->m_Jumped & 2;
 			}
 			else if(pCharacter->m_Jumps == -1)
 			{
@@ -883,7 +884,7 @@ void CHud::RenderPlayerState(const int ClientID)
 			}
 
 			int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
-			if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
+			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
@@ -922,7 +923,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	// render weapons
 	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_HAMMER)
+		if(pPlayer->m_Weapon != WEAPON_HAMMER)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -936,7 +937,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_GUN].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_GUN)
+		if(pPlayer->m_Weapon != WEAPON_GUN)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -949,7 +950,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_SHOTGUN)
+		if(pPlayer->m_Weapon != WEAPON_SHOTGUN)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -962,7 +963,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_GRENADE)
+		if(pPlayer->m_Weapon != WEAPON_GRENADE)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -975,7 +976,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_LASER].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_LASER)
+		if(pPlayer->m_Weapon != WEAPON_LASER)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -988,7 +989,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_NINJA)
+		if(pPlayer->m_Weapon != WEAPON_NINJA)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
