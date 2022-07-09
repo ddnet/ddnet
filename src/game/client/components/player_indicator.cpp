@@ -41,7 +41,7 @@ void CPlayerIndicator::OnRender()
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(!m_pClient->m_Snap.m_paPlayerInfos[i] || i == m_pClient->m_Snap.m_LocalClientID)
+				if(!m_pClient->m_Snap.m_apPlayerInfos[i] || i == m_pClient->m_Snap.m_LocalClientID)
 					continue;
 
 				CGameClient::CClientData OtherTee = m_pClient->m_aClients[i];

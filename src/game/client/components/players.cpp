@@ -169,7 +169,7 @@ void CPlayers::RenderHookCollLine(
 		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			// just use the direct input if it's the local player we are rendering
-			Angle = angle(m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy]);
+			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 		}
 		else
 		{
@@ -199,9 +199,9 @@ void CPlayers::RenderHookCollLine(
 
 		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y));
+			ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
 
-			if(!(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_MousePos[g_Config.m_ClDummy].y)
+			if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
 			{
 				ExDirection = vec2(1, 0);
 			}
@@ -887,7 +887,7 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo)
-			g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_paPlayerInfos[LocalClientID]->m_Latency;
+			g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_apPlayerInfos[LocalClientID]->m_Latency;
 		RenderHookCollLine(&m_pClient->m_aClients[LocalClientID].m_RenderPrev, &m_pClient->m_aClients[LocalClientID].m_RenderCur, LocalClientID);
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
 		CNetObj_Character CurChar = pLocalClientData->m_RenderCur;

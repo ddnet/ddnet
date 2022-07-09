@@ -2644,8 +2644,8 @@ vec2 CGameClient::GetFreezePos(int ClientID)
 			MixAmount = 1.0f;
 		}
 		Client()->GetSmoothFreezeTick(&SmoothTick, &SmoothIntra, MixAmount);
-		if(SmoothTick > 0 && m_aClients[ClientID].m_PredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && m_aClients[ClientID].m_PredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy))
-			Pos[i] = mix(m_aClients[ClientID].m_PredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientID].m_PredPos[SmoothTick % 200][i], SmoothIntra);
+		if(SmoothTick > 0 && m_aClients[ClientID].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && m_aClients[ClientID].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy))
+			Pos[i] = mix(m_aClients[ClientID].m_aPredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientID].m_aPredPos[SmoothTick % 200][i], SmoothIntra);
 	}
 	return Pos;
 }

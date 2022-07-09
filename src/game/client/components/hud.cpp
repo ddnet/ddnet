@@ -583,7 +583,7 @@ void CHud::RenderTextInfo()
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
 
-		if(g_Config.m_ClDDRaceHud && m_pClient->m_Snap.m_aCharacters[PlayerId].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(g_Config.m_ClShowhudDDRace && m_pClient->m_Snap.m_aCharacters[PlayerId].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 50;
 		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 27;
@@ -591,7 +591,7 @@ void CHud::RenderTextInfo()
 
 		vec2 Pos;
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
-			Pos = vec2(GameClient()->m_Controls.m_MousePos[g_Config.m_ClDummy].x, GameClient()->m_Controls.m_MousePos[g_Config.m_ClDummy].y);
+			Pos = vec2(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y);
 		else
 			Pos = m_pClient->m_aClients[PlayerId].m_RenderPos;
 
@@ -626,7 +626,7 @@ void CHud::RenderTextInfo()
 		int LocalTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!m_pClient->m_Snap.m_paPlayerInfos[i])
+			if(!m_pClient->m_Snap.m_apPlayerInfos[i])
 				continue;
 
 			if(m_pClient->m_Teams.Team(i) == LocalTeamID)
@@ -701,7 +701,7 @@ void CHud::RenderTextInfo()
 			{
 				for(int i = 0; i < MAX_CLIENTS && NumDisplayed < MaxTees * MaxRows; i++)
 				{
-					if(!m_pClient->m_Snap.m_paPlayerInfos[i])
+					if(!m_pClient->m_Snap.m_apPlayerInfos[i])
 						continue;
 					if(m_pClient->m_Teams.Team(i) == LocalTeamID)
 					{
@@ -841,7 +841,7 @@ void CHud::RenderCursor()
 		return;
 
 	int CurWeapon = 1;
-	vec2 Pos = vec2(m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_TargetPos[g_Config.m_ClDummy].y);
+	vec2 Pos = vec2(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
 	RenderTools()->MapScreenToGroup(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y, Layers()->GameGroup());
 
 	// render cursor

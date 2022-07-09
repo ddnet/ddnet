@@ -2145,13 +2145,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_aGameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
 					}
-					if(g_Config.m_ClRunOnJoinConsole && m_ReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay && !m_CodeRunAfterJoinConsole[Conn])
+					if(g_Config.m_ClRunOnJoinConsole && m_aReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay && !m_CodeRunAfterJoinConsole[Conn])
 					{
 						m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
 						m_CodeRunAfterJoinConsole[Conn] = true;
 					}
 
-					if(m_aReceivedSnapshots[Conn] > 50 && !m_aCodeRunAfterJoin[Conn])
+					if(m_aReceivedSnapshots[Conn] > 50 && !m_CodeRunAfterJoin[Conn])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
@@ -2205,7 +2205,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							MsgP.Pack(&PackerTimeout);
 							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
-						m_aCodeRunAfterJoin[Conn] = true;
+						m_CodeRunAfterJoin[Conn] = true;
 					}
 
 					// ack snapshot
@@ -4768,7 +4768,7 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 }
 void CClient::GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount)
 {
-	int64_t GameTime = m_GameTime[g_Config.m_ClDummy].Get(time_get());
+	int64_t GameTime = m_aGameTime[g_Config.m_ClDummy].Get(time_get());
 	int64_t PredTime = m_PredictedTime.Get(time_get());
 	int64_t UpperPredTime = clamp(PredTime - (time_freq() / 50) * g_Config.m_ClUnfreezeLagTicks, GameTime, PredTime);
 	int64_t LowestPredTime = clamp(PredTime, GameTime, UpperPredTime);
@@ -4801,7 +4801,7 @@ int CClient::MaxLatencyTicks() const
 
 int CClient::PredictionMargin() const
 {
-	if(g_Config.m_ClAmIFrozen && g_Config.m_ClUnfreezeDelayHelper && m_CurGameTick[g_Config.m_ClDummy] - g_Config.m_ClFreezeTick > 17)
+	if(g_Config.m_ClAmIFrozen && g_Config.m_ClUnfreezeDelayHelper && m_aCurGameTick[g_Config.m_ClDummy] - g_Config.m_ClFreezeTick > 17)
 	{
 		//min macro is broken on linux, manually typing it instead.
 		if(g_Config.m_ClWhatsMyPing  < g_Config.m_ClUnfreezeHelperLimit)
