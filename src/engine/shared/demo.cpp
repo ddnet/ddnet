@@ -131,11 +131,11 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
-	str_copy(Header.m_aNetversion, pNetVersion, sizeof(Header.m_aNetversion));
-	str_copy(Header.m_aMapName, pMap, sizeof(Header.m_aMapName));
+	str_copy(Header.m_aNetversion, pNetVersion);
+	str_copy(Header.m_aMapName, pMap);
 	uint_to_bytes_be(Header.m_aMapSize, MapSize);
 	uint_to_bytes_be(Header.m_aMapCrc, Crc);
-	str_copy(Header.m_aType, pType, sizeof(Header.m_aType));
+	str_copy(Header.m_aType, pType);
 	// Header.m_Length - add this on stop
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
@@ -182,7 +182,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
 	}
 	m_File = DemoFile;
-	str_copy(m_aCurrentFilename, pFilename, sizeof(m_aCurrentFilename));
+	str_copy(m_aCurrentFilename, pFilename);
 
 	return 0;
 }
@@ -705,7 +705,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	}
 
 	// store the filename
-	str_copy(m_aFilename, pFilename, sizeof(m_aFilename));
+	str_copy(m_aFilename, pFilename);
 
 	// clear the playback info
 	mem_zero(&m_Info, sizeof(m_Info));
@@ -790,7 +790,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_MapInfo.m_Crc = Crc;
 	m_MapInfo.m_Sha256 = Sha256;
 	m_MapInfo.m_Size = MapSize;
-	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName, sizeof(m_MapInfo.m_aName));
+	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName);
 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
@@ -1041,7 +1041,7 @@ int CDemoPlayer::Stop()
 	m_File = 0;
 	free(m_pKeyFrames);
 	m_pKeyFrames = 0;
-	str_copy(m_aFilename, "", sizeof(m_aFilename));
+	str_copy(m_aFilename, "");
 	return 0;
 }
 
@@ -1077,7 +1077,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	io_read(File, pDemoHeader, sizeof(CDemoHeader));
 	io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
 
-	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName, sizeof(pMapInfo->m_aName));
+	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName);
 	pMapInfo->m_Crc = bytes_be_to_int(pDemoHeader->m_aMapCrc);
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;

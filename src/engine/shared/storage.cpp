@@ -37,7 +37,7 @@ public:
 
 		if(!fs_is_dir(m_aUserdir) && fs_is_dir(aFallbackUserdir))
 		{
-			str_copy(m_aUserdir, aFallbackUserdir, sizeof(m_aUserdir));
+			str_copy(m_aUserdir, aFallbackUserdir);
 		}
 
 		// get datadir
@@ -159,7 +159,7 @@ public:
 		{
 			if(m_aUserdir[0])
 			{
-				str_copy(m_aaStoragePaths[m_NumPaths++], m_aUserdir, IO_MAX_PATH_LENGTH);
+				str_copy(m_aaStoragePaths[m_NumPaths++], m_aUserdir);
 				dbg_msg("storage", "added path '$USERDIR' ('%s')", m_aUserdir);
 			}
 		}
@@ -167,7 +167,7 @@ public:
 		{
 			if(m_aDatadir[0])
 			{
-				str_copy(m_aaStoragePaths[m_NumPaths++], m_aDatadir, IO_MAX_PATH_LENGTH);
+				str_copy(m_aaStoragePaths[m_NumPaths++], m_aDatadir);
 				dbg_msg("storage", "added path '$DATADIR' ('%s')", m_aDatadir);
 			}
 		}
@@ -180,7 +180,7 @@ public:
 		{
 			if(fs_is_dir(pPath))
 			{
-				str_copy(m_aaStoragePaths[m_NumPaths++], pPath, IO_MAX_PATH_LENGTH);
+				str_copy(m_aaStoragePaths[m_NumPaths++], pPath);
 				dbg_msg("storage", "added path '%s'", pPath);
 			}
 		}
@@ -191,7 +191,7 @@ public:
 		// 1) use data-dir in PWD if present
 		if(fs_is_dir("data/mapres"))
 		{
-			str_copy(m_aDatadir, "data", sizeof(m_aDatadir));
+			str_copy(m_aDatadir, "data");
 			return;
 		}
 

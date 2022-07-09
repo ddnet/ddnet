@@ -35,8 +35,8 @@ struct CGhostHeader
 	{
 		CGhostInfo Result;
 		mem_zero(&Result, sizeof(Result));
-		str_copy(Result.m_aOwner, m_aOwner, sizeof(Result.m_aOwner));
-		str_copy(Result.m_aMap, m_aMap, sizeof(Result.m_aMap));
+		str_copy(Result.m_aOwner, m_aOwner);
+		str_copy(Result.m_aMap, m_aMap);
 		Result.m_NumTicks = GetTicks();
 		Result.m_Time = GetTime();
 		return Result;

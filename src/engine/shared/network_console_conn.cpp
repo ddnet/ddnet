@@ -56,7 +56,7 @@ int CConsoleNetConnection::Update()
 		if((int)(sizeof(m_aBuffer)) <= m_BufferOffset)
 		{
 			m_State = NET_CONNSTATE_ERROR;
-			str_copy(m_aErrorString, "too weak connection (out of buffer)", sizeof(m_aErrorString));
+			str_copy(m_aErrorString, "too weak connection (out of buffer)");
 			return -1;
 		}
 
@@ -72,13 +72,13 @@ int CConsoleNetConnection::Update()
 				return 0;
 
 			m_State = NET_CONNSTATE_ERROR; // error
-			str_copy(m_aErrorString, "connection failure", sizeof(m_aErrorString));
+			str_copy(m_aErrorString, "connection failure");
 			return -1;
 		}
 		else
 		{
 			m_State = NET_CONNSTATE_ERROR;
-			str_copy(m_aErrorString, "remote end closed the connection", sizeof(m_aErrorString));
+			str_copy(m_aErrorString, "remote end closed the connection");
 			return -1;
 		}
 	}
@@ -169,7 +169,7 @@ int CConsoleNetConnection::Send(const char *pLine)
 		if(Send < 0)
 		{
 			m_State = NET_CONNSTATE_ERROR;
-			str_copy(m_aErrorString, "failed to send packet", sizeof(m_aErrorString));
+			str_copy(m_aErrorString, "failed to send packet");
 			return -1;
 		}
 

@@ -90,7 +90,7 @@ CServerBrowser::~CServerBrowser()
 void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVersion)
 {
 	m_pNetClient = pClient;
-	str_copy(m_aNetVersion, pNetVersion, sizeof(m_aNetVersion));
+	str_copy(m_aNetVersion, pNetVersion);
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
@@ -438,8 +438,8 @@ void CServerBrowser::Sort()
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_GAMETYPE)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, SortWrap(this, &CServerBrowser::SortCompareGametype));
 
-	str_copy(m_aFilterGametypeString, g_Config.m_BrFilterGametype, sizeof(m_aFilterGametypeString));
-	str_copy(m_aFilterString, g_Config.m_BrFilterString, sizeof(m_aFilterString));
+	str_copy(m_aFilterGametypeString, g_Config.m_BrFilterGametype);
+	str_copy(m_aFilterString, g_Config.m_BrFilterString);
 	m_Sorthash = SortHash();
 }
 
@@ -560,7 +560,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR &Addr)
 	pEntry->m_Info.m_Latency = 999;
 	pEntry->m_Info.m_HasRank = -1;
 	net_addr_str(&Addr, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), true);
-	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
+	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress);
 
 	// check if it's a favorite
 	pEntry->m_Info.m_Favorite = IsFavorite(Addr);
@@ -1172,7 +1172,7 @@ void CServerBrowser::Update(bool ForceResort)
 	const char *pHttpBestUrl;
 	if(!m_pHttp->GetBestUrl(&pHttpBestUrl) && pHttpBestUrl != m_pHttpPrevBestUrl)
 	{
-		str_copy(g_Config.m_BrCachedBestServerinfoUrl, pHttpBestUrl, sizeof(g_Config.m_BrCachedBestServerinfoUrl));
+		str_copy(g_Config.m_BrCachedBestServerinfoUrl, pHttpBestUrl);
 		m_pHttpPrevBestUrl = pHttpBestUrl;
 	}
 
@@ -1374,7 +1374,7 @@ void CServerBrowser::LoadDDNetServers()
 
 			pCntr->Reset();
 
-			str_copy(pCntr->m_aName, json_string_get(pName), sizeof(pCntr->m_aName));
+			str_copy(pCntr->m_aName, json_string_get(pName));
 			pCntr->m_FlagID = json_int_get(pFlagID);
 
 			// add country
@@ -1400,7 +1400,7 @@ void CServerBrowser::LoadDDNetServers()
 					}
 					if(Pos == pNet->m_NumTypes)
 					{
-						str_copy(pNet->m_aTypes[pNet->m_NumTypes], pType, sizeof(pNet->m_aTypes[pNet->m_NumTypes]));
+						str_copy(pNet->m_aTypes[pNet->m_NumTypes], pType);
 						pNet->m_NumTypes++;
 					}
 				}
@@ -1416,7 +1416,7 @@ void CServerBrowser::LoadDDNetServers()
 					}
 					const char *pStr = json_string_get(pAddr);
 					net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
-					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType, sizeof(pCntr->m_aTypes[pCntr->m_NumServers]));
+					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType);
 				}
 			}
 
@@ -1615,7 +1615,7 @@ void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 	// rewrite exclude/filter list
 	char aBuf[128];
 
-	str_copy(aBuf, pFilter, sizeof(aBuf));
+	str_copy(aBuf, pFilter);
 	pFilter[0] = '\0';
 
 	char aToken[128];

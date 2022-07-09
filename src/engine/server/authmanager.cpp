@@ -48,7 +48,7 @@ int CAuthManager::AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned
 		return -1;
 
 	CKey Key;
-	str_copy(Key.m_aIdent, pIdent, sizeof(Key.m_aIdent));
+	str_copy(Key.m_aIdent, pIdent);
 	Key.m_Pw = Hash;
 	mem_copy(Key.m_aSalt, pSalt, SALT_BYTES);
 	Key.m_Level = AuthLevel;

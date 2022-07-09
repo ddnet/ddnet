@@ -1758,8 +1758,8 @@ bool CCommandProcessorFragment_OpenGL2::Cmd_Init(const SCommand_Init *pCommand)
 			if(AnalysisCorrect)
 			{
 				g_Config.m_Gfx3DTextureAnalysisRan = 1;
-				str_copy(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString, std::size(g_Config.m_Gfx3DTextureAnalysisRenderer));
-				str_copy(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString, std::size(g_Config.m_Gfx3DTextureAnalysisVersion));
+				str_copy(g_Config.m_Gfx3DTextureAnalysisRenderer, pCommand->m_pRendererString);
+				str_copy(g_Config.m_Gfx3DTextureAnalysisVersion, pCommand->m_pVersionString);
 			}
 		}
 	}

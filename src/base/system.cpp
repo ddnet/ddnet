@@ -2024,7 +2024,7 @@ void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path)
 {
 	mem_zero(addr, sizeof(*addr));
 	addr->sun_family = AF_UNIX;
-	str_copy(addr->sun_path, path, sizeof(addr->sun_path));
+	str_copy(addr->sun_path, path);
 }
 
 void net_unix_close(UNIXSOCKET sock)
@@ -2220,7 +2220,7 @@ int fs_makedir_rec_for(const char *path)
 {
 	char buffer[1024 * 2];
 	char *p;
-	str_copy(buffer, path, sizeof(buffer));
+	str_copy(buffer, path);
 	for(p = buffer + 1; *p != '\0'; p++)
 	{
 		if(*p == '/' && *(p + 1) != '\0')

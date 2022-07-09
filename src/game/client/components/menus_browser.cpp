@@ -196,7 +196,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	if(HandleListInputs(View, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_SelectedIndex, NumServers))
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
-		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 	}
 
 	// set clipping
@@ -479,13 +479,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		// select the new server
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
-		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 		if(DoubleClicked && Input()->MouseDoubleClick())
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
 				m_Popup = POPUP_SWITCH_SERVER;
-				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress);
 			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
@@ -622,9 +622,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(ServerBrowser()->IsRefreshing())
 				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
 			else if(ServerBrowser()->IsGettingServerlist())
-				str_copy(m_aLocalStringHelper, Localize("Refreshing..."), sizeof(m_aLocalStringHelper));
+				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
 			else
-				str_copy(m_aLocalStringHelper, Localize("Refresh"), sizeof(m_aLocalStringHelper));
+				str_copy(m_aLocalStringHelper, Localize("Refresh"));
 
 			return m_aLocalStringHelper;
 		};
@@ -661,7 +661,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
 				m_Popup = POPUP_SWITCH_SERVER;
-				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress);
 			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
@@ -1167,7 +1167,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			char aTemp[16];
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
-				str_copy(aTemp, "SPEC", sizeof(aTemp));
+				str_copy(aTemp, "SPEC");
 			else if(IsRace(pSelectedServer) && g_Config.m_ClDDRaceScoreBoard)
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
@@ -1325,7 +1325,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 						(!m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
 							str_quickhash(pItem->m_aClients[j].m_aName) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
-						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 						m_ScrollOffset = ItemIndex;
 						m_SelectedIndex = ItemIndex;
 						Found = true;

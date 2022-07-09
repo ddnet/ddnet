@@ -62,7 +62,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 		return 0;
 
 	char aNameWithoutPng[128];
-	str_copy(aNameWithoutPng, pName, sizeof(aNameWithoutPng));
+	str_copy(aNameWithoutPng, pName);
 	aNameWithoutPng[str_length(aNameWithoutPng) - 4] = 0;
 
 	// Don't add duplicate skins (one from user's config directory, other from
@@ -288,7 +288,7 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	Graphics()->FreePNG(&Info);
 
 	// set skin data
-	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
+	str_copy(Skin.m_aName, pName);
 	if(g_Config.m_Debug)
 	{
 		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
@@ -312,7 +312,7 @@ void CSkins::OnInit()
 		pTimeInfo = localtime(&RawTime);
 		if(pTimeInfo->tm_mon == 11 && pTimeInfo->tm_mday >= 24 && pTimeInfo->tm_mday <= 26)
 		{ // Christmas
-			str_copy(m_aEventSkinPrefix, "santa", sizeof(m_aEventSkinPrefix));
+			str_copy(m_aEventSkinPrefix, "santa");
 		}
 	}
 
@@ -356,7 +356,7 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
 		DummySkin.m_IsVanilla = true;
-		str_copy(DummySkin.m_aName, "dummy", sizeof(DummySkin.m_aName));
+		str_copy(DummySkin.m_aName, "dummy");
 		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 		m_vSkins.push_back(DummySkin);
 	}
@@ -404,7 +404,7 @@ int CSkins::FindImpl(const char *pName)
 {
 	CSkin Needle;
 	mem_zero(&Needle, sizeof(Needle));
-	str_copy(Needle.m_aName, pName, sizeof(Needle.m_aName));
+	str_copy(Needle.m_aName, pName);
 	auto Range = std::equal_range(m_vSkins.begin(), m_vSkins.end(), Needle);
 	if(std::distance(Range.first, Range.second) == 1)
 		return Range.first - m_vSkins.begin();
@@ -420,7 +420,7 @@ int CSkins::FindImpl(const char *pName)
 
 	CDownloadSkin DownloadNeedle;
 	mem_zero(&DownloadNeedle, sizeof(DownloadNeedle));
-	str_copy(DownloadNeedle.m_aName, pName, sizeof(DownloadNeedle.m_aName));
+	str_copy(DownloadNeedle.m_aName, pName);
 	const auto &[RangeBegin, RangeEnd] = std::equal_range(m_vDownloadSkins.begin(), m_vDownloadSkins.end(), DownloadNeedle);
 	if(std::distance(RangeBegin, RangeEnd) == 1)
 	{
@@ -440,7 +440,7 @@ int CSkins::FindImpl(const char *pName)
 	}
 
 	CDownloadSkin Skin;
-	str_copy(Skin.m_aName, pName, sizeof(Skin.m_aName));
+	str_copy(Skin.m_aName, pName);
 
 	char aUrl[IO_MAX_PATH_LENGTH];
 	char aEscapedName[256];

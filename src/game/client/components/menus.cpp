@@ -77,7 +77,7 @@ CMenus::CMenus()
 	m_DeletePressed = false;
 	m_NumInputEvents = 0;
 
-	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
+	str_copy(m_aCurrentDemoFolder, "demos");
 	m_aCallvoteReason[0] = 0;
 
 	m_FriendlistSelectedIndex = -1;
@@ -1046,9 +1046,9 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	// reset active item
 	UI()->SetActiveItem(nullptr);
 
-	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
-	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
-	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
+	str_copy(m_aMessageTopic, pTopic);
+	str_copy(m_aMessageBody, pBody);
+	str_copy(m_aMessageButton, pButton);
 	m_Popup = POPUP_MESSAGE;
 }
 
@@ -1059,9 +1059,9 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	// reset active item
 	UI()->SetActiveItem(nullptr);
 
-	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
-	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
-	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
+	str_copy(m_aMessageTopic, pTopic);
+	str_copy(m_aMessageBody, pBody);
+	str_copy(m_aMessageButton, pButton);
 	m_Popup = POPUP_WARNING;
 	SetActive(true);
 
@@ -2046,7 +2046,7 @@ int CMenus::Render()
 						str_format(aBufNew, sizeof(aBufNew), "%s", m_aCurrentDemoFile);
 					char aWholePath[1024];
 					// store new video filename to origin buffer
-					str_copy(m_aCurrentDemoFile, aBufNew, sizeof(m_aCurrentDemoFile));
+					str_copy(m_aCurrentDemoFile, aBufNew);
 					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
 					{
 						PopupMessage(Localize("Error"), Localize("Destination file already exist"), Localize("Ok"));
@@ -2366,11 +2366,11 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 		char aName[128];
 		if(Theme.m_Name.empty())
-			str_copy(aName, "(none)", sizeof(aName));
+			str_copy(aName, "(none)");
 		else if(str_comp(Theme.m_Name.c_str(), "auto") == 0)
-			str_copy(aName, "(seasons)", sizeof(aName));
+			str_copy(aName, "(seasons)");
 		else if(str_comp(Theme.m_Name.c_str(), "rand") == 0)
-			str_copy(aName, "(random)", sizeof(aName));
+			str_copy(aName, "(random)");
 		else if(Theme.m_HasDay && Theme.m_HasNight)
 			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
 		else if(Theme.m_HasDay && !Theme.m_HasNight)

@@ -709,7 +709,7 @@ public:
 	{
 		CFont *pFont = new CFont();
 
-		str_copy(pFont->m_aFilename, pFilename, sizeof(pFont->m_aFilename));
+		str_copy(pFont->m_aFilename, pFilename);
 
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &pFont->m_FtFace))
 		{
@@ -743,7 +743,7 @@ public:
 	{
 		CFont::SFontFallBack FallbackFont;
 		FallbackFont.m_pBuf = (void *)pBuf;
-		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
+		str_copy(FallbackFont.m_aFilename, pFilename);
 
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{

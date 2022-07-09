@@ -99,7 +99,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 			return 0;
 
 		SCustomEntities EntitiesItem;
-		str_copy(EntitiesItem.m_aName, pName, sizeof(EntitiesItem.m_aName));
+		str_copy(EntitiesItem.m_aName, pName);
 		CMenus::LoadEntities(&EntitiesItem, pUser);
 		pThis->m_vEntitiesList.push_back(EntitiesItem);
 	}
@@ -114,7 +114,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 				return 0;
 
 			SCustomEntities EntitiesItem;
-			str_copy(EntitiesItem.m_aName, aName, sizeof(EntitiesItem.m_aName));
+			str_copy(EntitiesItem.m_aName, aName);
 			CMenus::LoadEntities(&EntitiesItem, pUser);
 			pThis->m_vEntitiesList.push_back(EntitiesItem);
 		}
@@ -175,7 +175,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TNam
 			return 0;
 
 		TName AssetItem;
-		str_copy(AssetItem.m_aName, pName, sizeof(AssetItem.m_aName));
+		str_copy(AssetItem.m_aName, pName);
 		LoadAsset(&AssetItem, pAssetName, pGraphics, pUser);
 		vAssetList.push_back(AssetItem);
 	}
@@ -190,7 +190,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TNam
 				return 0;
 
 			TName AssetItem;
-			str_copy(AssetItem.m_aName, aName, sizeof(AssetItem.m_aName));
+			str_copy(AssetItem.m_aName, aName);
 			LoadAsset(&AssetItem, pAssetName, pGraphics, pUser);
 			vAssetList.push_back(AssetItem);
 		}
@@ -352,7 +352,7 @@ void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const
 	if(vAssetList.empty())
 	{
 		TName AssetItem;
-		str_copy(AssetItem.m_aName, "default", sizeof(AssetItem.m_aName));
+		str_copy(AssetItem.m_aName, "default");
 		LoadAsset(&AssetItem, pAssetName, pGraphics, Caller);
 		vAssetList.push_back(AssetItem);
 
@@ -396,7 +396,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	static int s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, CUI::CORNER_L, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_ENTITIES;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_GAME], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_GAME;
@@ -406,7 +406,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		s_CurCustomTab = ASSETS_TAB_PARTICLES;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_HUD], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, CUI::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_EXTRAS;
 
 	auto LoadStartTime = time_get_nanoseconds();
@@ -421,7 +421,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		if(m_vEntitiesList.empty())
 		{
 			SCustomEntities EntitiesItem;
-			str_copy(EntitiesItem.m_aName, "default", sizeof(EntitiesItem.m_aName));
+			str_copy(EntitiesItem.m_aName, "default");
 			LoadEntities(&EntitiesItem, &User);
 			m_vEntitiesList.push_back(EntitiesItem);
 
@@ -601,32 +601,32 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		{
 			if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 			{
-				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetsEntites));
+				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_GAME)
 			{
-				str_copy(g_Config.m_ClAssetGame, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetGame));
+				str_copy(g_Config.m_ClAssetGame, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
 			{
-				str_copy(g_Config.m_ClAssetEmoticons, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetEmoticons));
+				str_copy(g_Config.m_ClAssetEmoticons, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				GameClient()->LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
 			{
-				str_copy(g_Config.m_ClAssetParticles, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetParticles));
+				str_copy(g_Config.m_ClAssetParticles, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				GameClient()->LoadParticlesSkin(g_Config.m_ClAssetParticles);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_HUD)
 			{
-				str_copy(g_Config.m_ClAssetHud, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetHud));
+				str_copy(g_Config.m_ClAssetHud, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				GameClient()->LoadHudSkin(g_Config.m_ClAssetHud);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 			{
-				str_copy(g_Config.m_ClAssetExtras, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName, sizeof(g_Config.m_ClAssetExtras));
+				str_copy(g_Config.m_ClAssetExtras, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				GameClient()->LoadExtrasSkin(g_Config.m_ClAssetExtras);
 			}
 		}
@@ -673,17 +673,17 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		char aBuf[IO_MAX_PATH_LENGTH];
 		char aBufFull[IO_MAX_PATH_LENGTH + 7];
 		if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
-			str_copy(aBufFull, "assets/entities", sizeof(aBufFull));
+			str_copy(aBufFull, "assets/entities");
 		else if(s_CurCustomTab == ASSETS_TAB_GAME)
-			str_copy(aBufFull, "assets/game", sizeof(aBufFull));
+			str_copy(aBufFull, "assets/game");
 		else if(s_CurCustomTab == ASSETS_TAB_EMOTICONS)
-			str_copy(aBufFull, "assets/emoticons", sizeof(aBufFull));
+			str_copy(aBufFull, "assets/emoticons");
 		else if(s_CurCustomTab == ASSETS_TAB_PARTICLES)
-			str_copy(aBufFull, "assets/particles", sizeof(aBufFull));
+			str_copy(aBufFull, "assets/particles");
 		else if(s_CurCustomTab == ASSETS_TAB_HUD)
-			str_copy(aBufFull, "assets/hud", sizeof(aBufFull));
+			str_copy(aBufFull, "assets/hud");
 		else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
-			str_copy(aBufFull, "assets/extras", sizeof(aBufFull));
+			str_copy(aBufFull, "assets/extras");
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, aBufFull, aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("assets", IStorage::TYPE_SAVE);
 		Storage()->CreateFolder(aBufFull, IStorage::TYPE_SAVE);
@@ -696,7 +696,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static int s_AssetsReloadBtnID = 0;
-	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, nullptr, CUI::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		ClearCustomItems(s_CurCustomTab);
 	}

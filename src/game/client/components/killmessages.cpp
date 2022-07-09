@@ -114,7 +114,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		{
 			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
 			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
-			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
+			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName);
 			Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
 		}
 
@@ -122,7 +122,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
 		{
 			Kill.m_KillerTeam = m_pClient->m_aClients[Kill.m_KillerID].m_Team;
-			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName, sizeof(Kill.m_aKillerName));
+			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName);
 			Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
 		}
 

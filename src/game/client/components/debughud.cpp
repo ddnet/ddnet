@@ -57,7 +57,7 @@ void CDebugHud::RenderNetCorrections()
 	if(pCharacter)
 		str_format(aBuf, sizeof(aBuf), "%d", pCharacter->m_TeleCheckpoint);
 	else
-		str_copy(aBuf, "-1", sizeof(aBuf));
+		str_copy(aBuf, "-1");
 	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
 	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
 	y += 2 * LineHeight;

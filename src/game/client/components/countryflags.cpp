@@ -31,7 +31,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
 			continue;
 
-		str_copy(aOrigin, pLine, sizeof(aOrigin));
+		str_copy(aOrigin, pLine);
 		char *pReplacement = LineReader.Get();
 		if(!pReplacement)
 		{
@@ -71,7 +71,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		// add entry
 		CCountryFlag CountryFlag;
 		CountryFlag.m_CountryCode = CountryCode;
-		str_copy(CountryFlag.m_aCountryCodeString, aOrigin, sizeof(CountryFlag.m_aCountryCodeString));
+		str_copy(CountryFlag.m_aCountryCodeString, aOrigin);
 		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0, aOrigin);
 		Graphics()->FreePNG(&Info);
 

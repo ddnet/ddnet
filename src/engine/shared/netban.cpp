@@ -247,7 +247,7 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 	// set up info
 	CBanInfo Info = {0};
 	Info.m_Expires = Stamp;
-	str_copy(Info.m_aReason, pReason, sizeof(Info.m_aReason));
+	str_copy(Info.m_aReason, pReason);
 
 	// check if it already exists
 	CNetHash NetHash(pData);

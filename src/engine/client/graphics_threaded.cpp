@@ -2678,7 +2678,7 @@ void CGraphics_Threaded::TakeScreenshot(const char *pFilename)
 
 void CGraphics_Threaded::TakeCustomScreenshot(const char *pFilename)
 {
-	str_copy(m_aScreenshotName, pFilename, sizeof(m_aScreenshotName));
+	str_copy(m_aScreenshotName, pFilename);
 	m_DoScreenshot = true;
 }
 

@@ -75,7 +75,7 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 			if(ForceVote)
 			{
 				char aBuf[128];
-				str_copy(aBuf, "force_vote option \"", sizeof(aBuf));
+				str_copy(aBuf, "force_vote option \"");
 				char *pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
 				str_append(aBuf, "\" \"", sizeof(aBuf));
@@ -102,7 +102,7 @@ void CVoting::RemovevoteOption(int OptionID)
 		if(OptionID == 0)
 		{
 			char aBuf[128];
-			str_copy(aBuf, "remove_vote \"", sizeof(aBuf));
+			str_copy(aBuf, "remove_vote \"");
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
 			str_append(aBuf, "\"", sizeof(aBuf));
@@ -118,7 +118,7 @@ void CVoting::RemovevoteOption(int OptionID)
 void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
 	char aBuf[128];
-	str_copy(aBuf, "add_vote \"", sizeof(aBuf));
+	str_copy(aBuf, "add_vote \"");
 	char *pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
 	str_append(aBuf, "\" \"", sizeof(aBuf));
@@ -169,7 +169,7 @@ void CVoting::AddOption(const char *pDescription)
 	if(!m_pFirst)
 		m_pFirst = pOption;
 
-	str_copy(pOption->m_aDescription, pDescription, sizeof(pOption->m_aDescription));
+	str_copy(pOption->m_aDescription, pDescription);
 	++m_NumVoteOptions;
 }
 
@@ -208,8 +208,8 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 		OnReset();
 		if(pMsg->m_Timeout)
 		{
-			str_copy(m_aDescription, pMsg->m_pDescription, sizeof(m_aDescription));
-			str_copy(m_aReason, pMsg->m_pReason, sizeof(m_aReason));
+			str_copy(m_aDescription, pMsg->m_pDescription);
+			str_copy(m_aReason, pMsg->m_pReason);
 			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
 
 			if(Client()->RconAuthed())

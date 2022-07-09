@@ -130,7 +130,7 @@ void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) co
 	sha256_str(Sha256, aSha256, sizeof(aSha256));
 
 	char aPlayerName[MAX_NAME_LENGTH];
-	str_copy(aPlayerName, pPlayerName, sizeof(aPlayerName));
+	str_copy(aPlayerName, pPlayerName);
 	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
@@ -415,7 +415,7 @@ void CGhost::StartRecord(int Tick)
 	m_CurGhost.m_StartTick = Tick;
 
 	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
-	str_copy(m_CurGhost.m_aPlayer, Client()->PlayerName(), sizeof(m_CurGhost.m_aPlayer));
+	str_copy(m_CurGhost.m_aPlayer, Client()->PlayerName());
 	GetGhostSkin(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
 	InitRenderInfos(&m_CurGhost);
 }
@@ -443,7 +443,7 @@ void CGhost::StopRecord(int Time)
 		CMenus::CGhostItem Item;
 		if(RecordingToFile)
 			GetPath(Item.m_aFilename, sizeof(Item.m_aFilename), m_CurGhost.m_aPlayer, Time);
-		str_copy(Item.m_aPlayer, m_CurGhost.m_aPlayer, sizeof(Item.m_aPlayer));
+		str_copy(Item.m_aPlayer, m_CurGhost.m_aPlayer);
 		Item.m_Time = Time;
 		Item.m_Slot = Slot;
 
@@ -499,7 +499,7 @@ int CGhost::Load(const char *pFilename)
 	pGhost->Reset();
 	pGhost->m_Path.SetSize(pInfo->m_NumTicks);
 
-	str_copy(pGhost->m_aPlayer, pInfo->m_aOwner, sizeof(pGhost->m_aPlayer));
+	str_copy(pGhost->m_aPlayer, pInfo->m_aOwner);
 
 	int Index = 0;
 	bool FoundSkin = false;

@@ -513,7 +513,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			Button.HMargin(2.0f, &Button);
 			if(DoButton_Menu(&pPrefix, pPrefix, 0, &Button))
 			{
-				str_copy(g_Config.m_ClSkinPrefix, pPrefix, sizeof(g_Config.m_ClSkinPrefix));
+				str_copy(g_Config.m_ClSkinPrefix, pPrefix);
 			}
 		}
 	}
@@ -772,7 +772,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static int s_SkinRefreshButtonID = 0;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, nullptr, CUI::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
@@ -1639,7 +1639,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		const int NewBackend = RenderDropDown(s_BackendDropDownState, &MainView, OldSelectedBackend, vBackendIDPtrs.data(), vBackendIDNamesCStr.data(), s_BackendCount, &s_BackendCount, s_ScrollValueDropBackend);
 		if(OldSelectedBackend != NewBackend)
 		{
-			str_copy(g_Config.m_GfxBackend, vBackendInfos[NewBackend].m_pBackendName, sizeof(g_Config.m_GfxBackend));
+			str_copy(g_Config.m_GfxBackend, vBackendInfos[NewBackend].m_pBackendName);
 			g_Config.m_GfxGLMajor = vBackendInfos[NewBackend].m_Major;
 			g_Config.m_GfxGLMinor = vBackendInfos[NewBackend].m_Minor;
 			g_Config.m_GfxGLPatch = vBackendInfos[NewBackend].m_Patch;
@@ -1706,9 +1706,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		if(OldSelectedGPU != NewGPU)
 		{
 			if(NewGPU == 0)
-				str_copy(g_Config.m_GfxGPUName, "auto", sizeof(g_Config.m_GfxGPUName));
+				str_copy(g_Config.m_GfxGPUName, "auto");
 			else
-				str_copy(g_Config.m_GfxGPUName, GPUList.m_vGPUs[NewGPU - 1].m_aName, sizeof(g_Config.m_GfxGPUName));
+				str_copy(g_Config.m_GfxGPUName, GPUList.m_vGPUs[NewGPU - 1].m_aName);
 			CheckSettings = true;
 			s_GfxGPUChanged = NewGPU != s_OldSelectedGPU;
 		}
@@ -1876,7 +1876,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<C
 		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
 			continue;
 
-		str_copy(aOrigin, pLine, sizeof(aOrigin));
+		str_copy(aOrigin, pLine);
 
 		pLine = LineReader.Get();
 		if(!pLine)
@@ -1893,7 +1893,7 @@ void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<C
 			(void)LineReader.Get();
 			continue;
 		}
-		str_copy(aReplacement, pLine + 3, sizeof(aReplacement));
+		str_copy(aReplacement, pLine + 3);
 
 		pLine = LineReader.Get();
 		if(!pLine)
@@ -1961,7 +1961,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	if(OldSelected != s_SelectedLanguage)
 	{
-		str_copy(g_Config.m_ClLanguagefile, s_vLanguages[s_SelectedLanguage].m_FileName.c_str(), sizeof(g_Config.m_ClLanguagefile));
+		str_copy(g_Config.m_ClLanguagefile, s_vLanguages[s_SelectedLanguage].m_FileName.c_str());
 		g_Localization.Load(s_vLanguages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
 		GameClient()->OnLanguageChange();
 	}
@@ -2481,7 +2481,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 	static int s_aPageTabs[NUMBER_OF_APPEARANCE_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_HUD], Localize("HUD"), s_CurTab == APPEARANCE_TAB_HUD, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_HUD], Localize("HUD"), s_CurTab == APPEARANCE_TAB_HUD, &Page1Tab, CUI::CORNER_L, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_HUD;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_CHAT], Localize("Chat"), s_CurTab == APPEARANCE_TAB_CHAT, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_CHAT;
@@ -2491,7 +2491,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		s_CurTab = APPEARANCE_TAB_HOOK_COLLISION;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_KILL_MESSAGES], Localize("Kill Messages"), s_CurTab == APPEARANCE_TAB_KILL_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_KILL_MESSAGES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, CUI::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_LASER;
 
 	MainView.HSplitTop(10.0f, 0x0, &MainView); // Margin
@@ -2663,7 +2663,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
 
-		str_copy(aBuf, Client()->PlayerName(), sizeof(aBuf));
+		str_copy(aBuf, Client()->PlayerName());
 
 		CAnimState *pIdleState = CAnimState::GetIdle();
 		constexpr int PreviewTeeCount = 4;
@@ -3169,7 +3169,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		if(UseCurrentMap)
 			g_Config.m_ClBackgroundEntities[0] = '\0';
 		else
-			str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP, sizeof(g_Config.m_ClBackgroundEntities));
+			str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP);
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);

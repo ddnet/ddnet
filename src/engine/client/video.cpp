@@ -45,7 +45,7 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 
 	m_Width = Width;
 	m_Height = Height;
-	str_copy(m_aName, pName, sizeof(m_aName));
+	str_copy(m_aName, pName);
 
 	m_FPS = g_Config.m_ClVideoRecorderFPS;
 
