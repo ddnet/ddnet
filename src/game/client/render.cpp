@@ -167,32 +167,6 @@ int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float 
 	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
-{
-	bool NeedsRecreate = false;
-	if(ElUIRect.m_UIRectQuadContainer == -1 || ElUIRect.m_X != pRect->x || ElUIRect.m_Y != pRect->y || ElUIRect.m_Width != pRect->w || ElUIRect.m_Height != pRect->h || mem_comp(&ElUIRect.m_QuadColor, &Color, sizeof(Color)) != 0)
-	{
-		if(ElUIRect.m_UIRectQuadContainer != -1)
-			Graphics()->DeleteQuadContainer(ElUIRect.m_UIRectQuadContainer);
-		NeedsRecreate = true;
-	}
-	if(NeedsRecreate)
-	{
-		ElUIRect.m_X = pRect->x;
-		ElUIRect.m_Y = pRect->y;
-		ElUIRect.m_Width = pRect->w;
-		ElUIRect.m_Height = pRect->h;
-		ElUIRect.m_QuadColor = Color;
-
-		Graphics()->SetColor(Color);
-		ElUIRect.m_UIRectQuadContainer = Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
-		Graphics()->SetColor(1, 1, 1, 1);
-	}
-
-	Graphics()->TextureClear();
-	Graphics()->RenderQuadContainer(ElUIRect.m_UIRectQuadContainer, -1);
-}
-
 void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	Graphics()->DrawRect(pRect->x, pRect->y, pRect->w, pRect->h, Color, Corners, Rounding);

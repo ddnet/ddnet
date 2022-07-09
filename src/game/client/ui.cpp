@@ -12,15 +12,18 @@
 
 void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
+	m_pUI = pUI;
 	pUI->AddUIElement(this);
 	if(RequestedRectCount > 0)
-		m_vUIRects.resize(RequestedRectCount);
+		InitRects(RequestedRectCount);
 }
 
 void CUIElement::InitRects(int RequestedRectCount)
 {
 	dbg_assert(m_vUIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
 	m_vUIRects.resize(RequestedRectCount);
+	for(auto &Rect : m_vUIRects)
+		Rect.m_pParent = this;
 }
 
 CUIElement::SUIElementRect::SUIElementRect() { Reset(); }
@@ -38,6 +41,32 @@ void CUIElement::SUIElementRect::Reset()
 	m_TextColor = ColorRGBA(-1, -1, -1, -1);
 	m_TextOutlineColor = ColorRGBA(-1, -1, -1, -1);
 	m_QuadColor = ColorRGBA(-1, -1, -1, -1);
+}
+
+void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
+{
+	bool NeedsRecreate = false;
+	if(m_UIRectQuadContainer == -1 || m_X != pRect->x || m_Y != pRect->y || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
+	{
+		if(m_UIRectQuadContainer != -1)
+			m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
+		NeedsRecreate = true;
+	}
+	if(NeedsRecreate)
+	{
+		m_X = pRect->x;
+		m_Y = pRect->y;
+		m_Width = pRect->w;
+		m_Height = pRect->h;
+		m_QuadColor = Color;
+
+		m_pParent->UI()->Graphics()->SetColor(Color);
+		m_UIRectQuadContainer = m_pParent->UI()->Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
+		m_pParent->UI()->Graphics()->SetColor(1, 1, 1, 1);
+	}
+
+	m_pParent->UI()->Graphics()->TextureClear();
+	m_pParent->UI()->Graphics()->RenderQuadContainer(m_UIRectQuadContainer, -1);
 }
 
 /********************************************************

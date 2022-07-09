@@ -286,13 +286,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(0), &r, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
+				pItem->m_pUIElement->Get(0)->Draw(&r, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
 			}
 			else if(UI()->MouseHovered(&Row))
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
-				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(1), &r, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
+				pItem->m_pUIElement->Get(0)->Draw(&r, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 			}
 
 			if(UI()->DoButtonLogic(pItem, Selected, &Row))

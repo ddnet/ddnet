@@ -126,11 +126,15 @@ class CUIElement
 {
 	friend class CUI;
 
+	CUI *m_pUI;
+
 	CUIElement(CUI *pUI, int RequestedRectCount) { Init(pUI, RequestedRectCount); }
 
 public:
 	struct SUIElementRect
 	{
+		CUIElement *m_pParent;
+
 	public:
 		int m_UIRectQuadContainer;
 		int m_UITextContainer;
@@ -152,9 +156,11 @@ public:
 		ColorRGBA m_QuadColor;
 
 		void Reset();
+		void Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 	};
 
 protected:
+	CUI *UI() const { return m_pUI; }
 	std::vector<SUIElementRect> m_vUIRects;
 
 	// used for marquees or other user implemented things
