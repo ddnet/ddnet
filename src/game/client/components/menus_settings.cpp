@@ -772,7 +772,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static int s_SkinRefreshButtonID = 0;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, NULL, 15, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, nullptr, CUI::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
@@ -2481,7 +2481,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 	static int s_aPageTabs[NUMBER_OF_APPEARANCE_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_HUD], Localize("HUD"), s_CurTab == APPEARANCE_TAB_HUD, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_HUD], Localize("HUD"), s_CurTab == APPEARANCE_TAB_HUD, &Page1Tab, CUI::CORNER_L, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_HUD;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_CHAT], Localize("Chat"), s_CurTab == APPEARANCE_TAB_CHAT, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_CHAT;
@@ -2491,7 +2491,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		s_CurTab = APPEARANCE_TAB_HOOK_COLLISION;
 	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_KILL_MESSAGES], Localize("Kill Messages"), s_CurTab == APPEARANCE_TAB_KILL_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_KILL_MESSAGES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((void *)&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, CUI::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_LASER;
 
 	MainView.HSplitTop(10.0f, 0x0, &MainView); // Margin
