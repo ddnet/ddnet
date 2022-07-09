@@ -53,13 +53,13 @@ void CLayerSounds::Render(bool Tileset)
 		{
 			float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
 			float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
-			m_pEditor->RenderTools()->DrawRoundRect(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
-				Width, Height, 0.0f);
+			m_pEditor->RenderTools()->DrawRoundRectExt(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
+				Width, Height, 0.0f, CUI::CORNER_NONE);
 
 			float Falloff = ((float)Source.m_Falloff / 255.0f);
 			if(Falloff > 0.0f)
-				m_pEditor->RenderTools()->DrawRoundRect(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
-					Width * Falloff, Height * Falloff, 0.0f);
+				m_pEditor->RenderTools()->DrawRoundRectExt(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
+					Width * Falloff, Height * Falloff, 0.0f, CUI::CORNER_NONE);
 			break;
 		}
 		}

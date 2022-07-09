@@ -502,11 +502,6 @@ void CRenderTools::DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIR
 	Graphics()->RenderQuadContainer(ElUIRect.m_UIRectQuadContainer, -1);
 }
 
-void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
-{
-	DrawRoundRectExt(x, y, w, h, r, 0xf);
-}
-
 void CRenderTools::DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding)
 {
 	Graphics()->TextureClear();
