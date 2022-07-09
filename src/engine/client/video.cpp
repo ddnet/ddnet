@@ -826,7 +826,7 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 
 #if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
 	// use only 1 ffmpeg thread on 32-bit to save memory
-	c->thread_count = 1;
+	pContext->thread_count = 1;
 #endif
 
 	switch((*ppCodec)->type)
