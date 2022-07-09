@@ -40,12 +40,12 @@ void CLayerSounds::Render(bool Tileset)
 		{
 		case CSoundShape::SHAPE_CIRCLE:
 		{
-			m_pEditor->RenderTools()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
+			m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
 				Source.m_Shape.m_Circle.m_Radius, 32);
 
 			float Falloff = ((float)Source.m_Falloff / 255.0f);
 			if(Falloff > 0.0f)
-				m_pEditor->RenderTools()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
+				m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
 					Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
 			break;
 		}

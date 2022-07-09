@@ -58,11 +58,6 @@ bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	return true;
 }
 
-void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
-{
-	RenderTools()->DrawCircle(x, y, r, Segments);
-}
-
 void CEmoticon::OnRender()
 {
 	if(!m_Active)
@@ -107,7 +102,7 @@ void CEmoticon::OnRender()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0, 0, 0, 0.3f);
-	DrawCircle(Screen.w / 2, Screen.h / 2, 190.0f, 64);
+	Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 190.0f, 64);
 	Graphics()->QuadsEnd();
 
 	Graphics()->WrapClamp();
@@ -138,7 +133,7 @@ void CEmoticon::OnRender()
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0, 1.0, 1.0, 0.3f);
-		DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
+		Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
 		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
@@ -162,7 +157,7 @@ void CEmoticon::OnRender()
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0, 0, 0, 0.3f);
-		DrawCircle(Screen.w / 2, Screen.h / 2, 30.0f, 64);
+		Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 30.0f, 64);
 		Graphics()->QuadsEnd();
 	}
 	else

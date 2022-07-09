@@ -1242,9 +1242,9 @@ void CMenus::RenderColorPicker()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(MarkerOutline);
-	RenderTools()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
+	Graphics()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
 	Graphics()->SetColor(color_cast<ColorRGBA, ColorHSVA>(PickerColorHSV));
-	RenderTools()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
+	Graphics()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
 	Graphics()->QuadsEnd();
 
 	// Marker Hue Area

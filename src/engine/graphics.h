@@ -442,6 +442,8 @@ public:
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadsText(float x, float y, float Size, const char *pText) = 0;
 
+	virtual void DrawCircle(float x, float y, float r, int Segments) = 0;
+
 	struct CColorVertex
 	{
 		int m_Index;

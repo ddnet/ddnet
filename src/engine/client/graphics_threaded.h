@@ -1127,6 +1127,8 @@ public:
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
 
+	void DrawCircle(float x, float y, float r, int Segments) override;
+
 	const GL_STexCoord *GetCurTextureCoordinates() override
 	{
 		return m_aTexture;

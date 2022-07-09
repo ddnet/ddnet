@@ -529,38 +529,6 @@ void CRenderTools::DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 Col
 	DrawRect4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
 }
 
-void CRenderTools::DrawCircle(float x, float y, float r, int Segments)
-{
-	IGraphics::CFreeformItem Array[32];
-	int NumItems = 0;
-	float FSegments = (float)Segments;
-	for(int i = 0; i < Segments; i += 2)
-	{
-		float a1 = i / FSegments * 2 * pi;
-		float a2 = (i + 1) / FSegments * 2 * pi;
-		float a3 = (i + 2) / FSegments * 2 * pi;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
-
-		Array[NumItems++] = IGraphics::CFreeformItem(
-			x, y,
-			x + Ca1 * r, y + Sa1 * r,
-			x + Ca3 * r, y + Sa3 * r,
-			x + Ca2 * r, y + Sa2 * r);
-		if(NumItems == 32)
-		{
-			Graphics()->QuadsDrawFreeform(Array, 32);
-			NumItems = 0;
-		}
-	}
-	if(NumItems)
-		Graphics()->QuadsDrawFreeform(Array, NumItems);
-}
-
 void CRenderTools::GetRenderTeeAnimScaleAndBaseSize(CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize)
 {
 	AnimScale = pInfo->m_Size * 1.0f / 64.0f;
