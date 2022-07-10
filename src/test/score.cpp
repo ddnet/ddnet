@@ -106,7 +106,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		ASSERT_FALSE(CScoreWorker::SaveScore(m_pConn, &ScoreData, false, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
-	void ExpectLines(std::shared_ptr<CScorePlayerResult> pPlayerResult, std::initializer_list<const char *> Lines, bool All = false)
+	void ExpectLines(const std::shared_ptr<CScorePlayerResult> &pPlayerResult, std::initializer_list<const char *> Lines, bool All = false)
 	{
 		EXPECT_EQ(pPlayerResult->m_MessageKind, All ? CScorePlayerResult::ALL : CScorePlayerResult::DIRECT);
 
