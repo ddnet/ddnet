@@ -4775,7 +4775,7 @@ SWarning *CClient::GetCurWarning()
 	}
 	else
 	{
-		return &m_vWarnings[0];
+		return m_vWarnings.data();
 	}
 }
 

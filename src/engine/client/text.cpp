@@ -1442,7 +1442,7 @@ public:
 			if(Graphics()->IsTextBufferingEnabled())
 			{
 				size_t DataSize = TextContainer.m_StringInfo.m_vCharacterQuads.size() * sizeof(STextCharQuad);
-				void *pUploadData = &TextContainer.m_StringInfo.m_vCharacterQuads[0];
+				void *pUploadData = TextContainer.m_StringInfo.m_vCharacterQuads.data();
 
 				if(TextContainer.m_StringInfo.m_QuadBufferObjectIndex != -1 && (TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
@@ -1503,7 +1503,7 @@ public:
 			if(HasCursor)
 				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, 2);
 			if(HasSelection)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &vSelectionQuads[0], (int)vSelectionQuads.size());
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, vSelectionQuads.data(), (int)vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			TextContainer.m_HasCursor = HasCursor;

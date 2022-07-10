@@ -137,7 +137,7 @@ void CInput::UpdateActiveJoystick()
 	}
 	// Fall back to first joystick if no match was found
 	if(!m_pActiveJoystick)
-		m_pActiveJoystick = &m_vJoysticks[0];
+		m_pActiveJoystick = &m_vJoysticks[0]; // NOLINT(readability-container-data-pointer)
 }
 
 void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

@@ -833,8 +833,8 @@ void CMapLayers::OnMapLoad()
 						vtmpTileTexCoords.insert(vtmpTileTexCoords.end(), vtmpBorderRightTilesTexCoords.begin(), vtmpBorderRightTilesTexCoords.end());
 
 						//setup params
-						float *pTmpTiles = (vtmpTiles.empty()) ? NULL : (float *)&vtmpTiles[0];
-						unsigned char *pTmpTileTexCoords = (vtmpTileTexCoords.empty()) ? NULL : (unsigned char *)&vtmpTileTexCoords[0];
+						float *pTmpTiles = vtmpTiles.empty() ? NULL : (float *)vtmpTiles.data();
+						unsigned char *pTmpTileTexCoords = vtmpTileTexCoords.empty() ? NULL : (unsigned char *)vtmpTileTexCoords.data();
 
 						Visuals.m_BufferContainerIndex = -1;
 						size_t UploadDataSize = vtmpTileTexCoords.size() * sizeof(SGraphicTileTexureCoords) + vtmpTiles.size() * sizeof(SGraphicTile);
@@ -951,9 +951,9 @@ void CMapLayers::OnMapLoad()
 				{
 					void *pUploadData = NULL;
 					if(Textured)
-						pUploadData = &vtmpQuadsTextured[0];
+						pUploadData = vtmpQuadsTextured.data();
 					else
-						pUploadData = &vtmpQuads[0];
+						pUploadData = vtmpQuads.data();
 					// create the buffer object
 					int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData, 0);
 					// then create the buffer container
@@ -1087,7 +1087,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA &Color, CMapItemLayer
 		int DrawCount = s_vpIndexOffsets.size();
 		if(DrawCount != 0)
 		{
-			Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, &s_vpIndexOffsets[0], &s_vDrawCounts[0], DrawCount);
+			Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, s_vpIndexOffsets.data(), s_vDrawCounts.data(), DrawCount);
 		}
 	}
 
@@ -1416,7 +1416,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 		if(NeedsFlush)
 		{
 			// render quads of the current offset directly(cancel batching)
-			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_vQuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 			QuadsRenderCount = 0;
 			CurQuadOffset = i;
 			if(Color.a == 0)
@@ -1435,7 +1435,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			QInfo.m_Rotation = Rot;
 		}
 	}
-	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_vQuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 }
 
 void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer)

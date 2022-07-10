@@ -27,7 +27,7 @@ static void LibPNGWarning(png_structp png_ptr, png_const_charp warning_msg)
 static bool FileMatchesImageType(SImageByteBuffer &ByteLoader)
 {
 	if(ByteLoader.m_pLoadedImageBytes->size() >= 8)
-		return png_sig_cmp((png_bytep) & (*ByteLoader.m_pLoadedImageBytes)[0], 0, 8) == 0;
+		return png_sig_cmp((png_bytep)ByteLoader.m_pLoadedImageBytes->data(), 0, 8) == 0;
 	return false;
 }
 
