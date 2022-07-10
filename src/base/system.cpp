@@ -3803,7 +3803,7 @@ PROCESS shell_execute(const char *file)
 	}
 	if(pid == 0)
 	{
-		execv(file, argv);
+		execvp(file, argv);
 		_exit(1);
 	}
 	return pid;

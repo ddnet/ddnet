@@ -144,8 +144,12 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
-			IOHANDLE File = io_open(aBuf, IOFLAG_READ);
-			if(File)
+			// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
+			if(str_find(aBuf, "/") == 0)
+			{
+				m_ServerProcess.Process = shell_execute(aBuf);
+			}
+			else if(IOHANDLE File = io_open(aBuf, IOFLAG_READ))
 			{
 				io_close(File);
 				m_ServerProcess.Process = shell_execute(aBuf);
