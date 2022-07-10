@@ -48,8 +48,6 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
-#include <base/system.h>
-
 #include <game/localization.h>
 #include <game/version.h>
 

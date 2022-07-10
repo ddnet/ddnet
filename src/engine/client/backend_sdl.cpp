@@ -6,7 +6,6 @@
 
 #include <SDL.h>
 
-#include <base/detect.h>
 #include <base/math.h>
 #include <cstdlib>
 
