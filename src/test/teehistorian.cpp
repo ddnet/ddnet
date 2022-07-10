@@ -690,13 +690,13 @@ TEST_F(TeeHistorian, TeamPractice)
 		0x40};
 
 	Tick(1);
-	m_TH.RecordTeamPractice(1, 0);
-	m_TH.RecordTeamPractice(16, 0);
-	m_TH.RecordTeamPractice(23, 1);
+	m_TH.RecordTeamPractice(1, false);
+	m_TH.RecordTeamPractice(16, false);
+	m_TH.RecordTeamPractice(23, true);
 	Tick(2);
-	m_TH.RecordTeamPractice(1, 1);
-	m_TH.RecordTeamPractice(16, 0);
-	m_TH.RecordTeamPractice(23, 0);
+	m_TH.RecordTeamPractice(1, true);
+	m_TH.RecordTeamPractice(16, false);
+	m_TH.RecordTeamPractice(23, false);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
