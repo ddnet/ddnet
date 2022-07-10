@@ -183,9 +183,9 @@ TEST_P(SingleScore, LoadPlayerData)
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
 	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
-	for(int i = 0; i < NUM_CHECKPOINTS; i++)
+	for(auto &Time : m_pPlayerResult->m_Data.m_Info.m_aTimeCp)
 	{
-		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_aTimeCp[i], 0);
+		ASSERT_EQ(Time, 0);
 	}
 
 	str_copy(m_PlayerRequest.m_aRequestingPlayer, "nameless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));
