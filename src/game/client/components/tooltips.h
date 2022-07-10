@@ -25,7 +25,7 @@ class CTooltips : public CComponent
 {
 	std::unordered_map<uintptr_t, CTooltip> m_Tooltips;
 	std::optional<std::reference_wrapper<CTooltip>> m_ActiveTooltip;
-	int64_t HoverTime;
+	int64_t m_HoverTime;
 
 	/**
 	 * The passed tooltip is only actually set if there is no currently active tooltip.
