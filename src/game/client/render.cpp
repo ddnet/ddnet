@@ -238,6 +238,14 @@ void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r,
 
 void CRenderTools::DrawRoundRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners)
 {
+	if(Corners == 0 || r == 0.0f)
+	{
+		Graphics()->SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
+		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y, w, h);
+		Graphics()->QuadsDrawTL(&ItemQ, 1);
+		return;
+	}
+
 	int Num = 8;
 	for(int i = 0; i < Num; i += 2)
 	{
@@ -386,6 +394,15 @@ int CRenderTools::CreateRoundRectQuadContainer(float x, float y, float w, float 
 {
 	int ContainerIndex = Graphics()->CreateQuadContainer(false);
 
+	if(Corners == 0 || r == 0.0f)
+	{
+		IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(x, y, w, h);
+		Graphics()->QuadContainerAddQuads(ContainerIndex, &ItemQ, 1);
+		Graphics()->QuadContainerUpload(ContainerIndex);
+		Graphics()->QuadContainerChangeAutomaticUpload(ContainerIndex, true);
+		return ContainerIndex;
+	}
+
 	IGraphics::CFreeformItem ArrayF[32];
 	int NumItems = 0;
 	int Num = 8;
@@ -485,42 +502,31 @@ void CRenderTools::DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIR
 	Graphics()->RenderQuadContainer(ElUIRect.m_UIRectQuadContainer, -1);
 }
 
-void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
+void CRenderTools::DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding)
 {
-	DrawRoundRectExt(x, y, w, h, r, 0xf);
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(Color);
+	DrawRoundRectExt(x, y, w, h, Rounding, Corners);
+	Graphics()->QuadsEnd();
 }
 
 void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
-	Graphics()->TextureClear();
+	DrawRect(pRect->x, pRect->y, pRect->w, pRect->h, Color, Corners, Rounding);
+}
 
-	// TODO: FIX US
+void CRenderTools::DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
+{
+	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color);
-	DrawRoundRectExt(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
+	DrawRoundRectExt4(x, y, w, h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Rounding, Corners);
 	Graphics()->QuadsEnd();
 }
 
 void CRenderTools::DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
 {
-	Graphics()->TextureClear();
-
-	Graphics()->QuadsBegin();
-	DrawRoundRectExt4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Rounding, Corners);
-	Graphics()->QuadsEnd();
-}
-
-void CRenderTools::DrawUIRect4NoRounding(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight)
-{
-	Graphics()->TextureClear();
-
-	Graphics()->QuadsBegin();
-
-	Graphics()->SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
-	IGraphics::CQuadItem ItemQ = IGraphics::CQuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
-	Graphics()->QuadsDrawTL(&ItemQ, 1);
-
-	Graphics()->QuadsEnd();
+	DrawRect4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
 }
 
 void CRenderTools::DrawCircle(float x, float y, float r, int Segments)

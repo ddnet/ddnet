@@ -189,12 +189,7 @@ void CStatboard::RenderGlobalStats()
 
 	Graphics()->MapScreen(0, 0, StatboardWidth, StatboardHeight);
 
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.5f);
-	RenderTools()->DrawRoundRect(x - 10.f, y - 10.f, StatboardContentWidth, StatboardContentHeight, 17.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(x - 10.f, y - 10.f, StatboardContentWidth, StatboardContentHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 17.0f);
 
 	float tw;
 	int px = 325;
@@ -272,11 +267,7 @@ void CStatboard::RenderGlobalStats()
 		if(m_pClient->m_Snap.m_LocalClientID == pInfo->m_ClientID || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
 			// background so it's easy to find the local player
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1, 1, 1, 0.25f);
-			RenderTools()->DrawRoundRect(x - 10, y + ContentLineOffset / 2, StatboardContentWidth, LineHeight - ContentLineOffset, 0);
-			Graphics()->QuadsEnd();
+			RenderTools()->DrawRect(x - 10, y + ContentLineOffset / 2, StatboardContentWidth, LineHeight - ContentLineOffset, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_NONE, 0.0f);
 		}
 
 		CTeeRenderInfo Teeinfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;

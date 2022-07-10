@@ -243,12 +243,7 @@ void CSpectator::OnRender()
 
 	Graphics()->MapScreen(0, 0, Width, Height);
 
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.3f);
-	RenderTools()->DrawRoundRect(Width / 2.0f - ObjWidth, Height / 2.0f - 300.0f, ObjWidth * 2, 600.0f, 20.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(Width / 2.0f - ObjWidth, Height / 2.0f - 300.0f, ObjWidth * 2, 600.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), CUI::CORNER_ALL, 20.0f);
 
 	// clamp mouse position to selector area
 	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -(ObjWidth - 20.0f), ObjWidth - 20.0f);
@@ -258,20 +253,12 @@ void CSpectator::OnRender()
 	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FREEVIEW) ||
 		m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
-		Graphics()->QuadsEnd();
+		RenderTools()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 20.0f);
 	}
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
 	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-		RenderTools()->DrawRoundRect(Width / 2.0f - (ObjWidth - 310.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, 20.0f);
-		Graphics()->QuadsEnd();
+		RenderTools()->DrawRect(Width / 2.0f - (ObjWidth - 310.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 20.0f);
 	}
 
 	if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) && m_SelectorMouse.x <= -(ObjWidth - 290 + 10.0f) &&
@@ -344,32 +331,20 @@ void CSpectator::OnRender()
 
 		if(DDTeam != TEAM_FLOCK)
 		{
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
-			Graphics()->SetColor(rgb);
-
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
 			int Corners = 0;
-
 			if(OldDDTeam != DDTeam)
 				Corners |= CUI::CORNER_TL | CUI::CORNER_TR;
 			if(NextDDTeam != DDTeam)
 				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
-
-			RenderTools()->DrawRoundRectExt(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius, Corners);
-
-			Graphics()->QuadsEnd();
+			RenderTools()->DrawRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, Color, Corners, RoundRadius);
 		}
 
 		OldDDTeam = DDTeam;
 
 		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientID) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientID))
 		{
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			RenderTools()->DrawRoundRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, RoundRadius);
-			Graphics()->QuadsEnd();
+			RenderTools()->DrawRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, RoundRadius);
 		}
 
 		Selected = false;
