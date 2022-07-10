@@ -129,7 +129,7 @@ public:
 			Msg7.m_pMessage = MsgCopy.m_pMessage;
 			Msg7.m_Mode = MsgCopy.m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
 			Msg7.m_TargetID = -1;
-			return SendPackMsgOne(&Msg7, Flags, ClientID); // NOLINT(clang-analyzer-core.StackAddressEscape)
+			return SendPackMsgOne(&Msg7, Flags, ClientID);
 		}
 
 		return SendPackMsgOne(&MsgCopy, Flags, ClientID);

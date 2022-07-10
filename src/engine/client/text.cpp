@@ -1965,7 +1965,7 @@ public:
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
 				dbg_msg("textrender", "Found non empty text container with index %d with %d quads", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum);
-				HasNonEmptyTextContainer = true;
+				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
 		}
 
