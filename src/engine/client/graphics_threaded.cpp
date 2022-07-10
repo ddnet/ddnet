@@ -354,9 +354,9 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 
 	m_vSpriteHelper.resize((size_t)w * h * bpp);
 
-	CopyTextureFromTextureBufferSub(&m_vSpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
+	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
 
-	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, &m_vSpriteHelper[0], FromImageInfo.m_Format, 0);
+	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
 
 	return RetHandle;
 }
@@ -1413,12 +1413,12 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 			if(Container.m_QuadBufferObjectIndex == -1)
 			{
 				size_t UploadDataSize = Container.m_vQuads.size() * sizeof(SQuadContainer::SQuad);
-				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_vQuads[0], 0);
+				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, Container.m_vQuads.data(), 0);
 			}
 			else
 			{
 				size_t UploadDataSize = Container.m_vQuads.size() * sizeof(SQuadContainer::SQuad);
-				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_vQuads[0], 0);
+				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, Container.m_vQuads.data(), 0);
 			}
 
 			if(Container.m_QuadBufferContainerIndex == -1)
@@ -2808,7 +2808,7 @@ SWarning *CGraphics_Threaded::GetCurWarning()
 		return NULL;
 	else
 	{
-		SWarning *pCurWarning = &m_vWarnings[0];
+		SWarning *pCurWarning = m_vWarnings.data();
 		return pCurWarning;
 	}
 }

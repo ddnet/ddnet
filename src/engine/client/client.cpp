@@ -48,8 +48,6 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
-#include <base/system.h>
-
 #include <game/localization.h>
 #include <game/version.h>
 
@@ -4775,7 +4773,7 @@ SWarning *CClient::GetCurWarning()
 	}
 	else
 	{
-		return &m_vWarnings[0];
+		return m_vWarnings.data();
 	}
 }
 
