@@ -4,6 +4,7 @@
 #include <base/system.h>
 
 #include <engine/demo.h>
+#include <engine/favorites.h>
 #include <engine/friends.h>
 #include <engine/ghost.h>
 #include <engine/graphics.h>
@@ -402,15 +403,16 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	{
 		CUIRect Button;
-		int IsFavorite = ServerBrowser()->IsFavorite(CurrentServerInfo.m_NetAddr);
+		NETADDR ServerAddr = Client()->ServerAddress();
+		TRISTATE IsFavorite = Favorites()->IsFavorite(&ServerAddr, 1);
 		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
 		static int s_AddFavButton = 0;
-		if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), IsFavorite, &Button))
+		if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), IsFavorite != TRISTATE::NONE, &Button))
 		{
-			if(IsFavorite)
-				ServerBrowser()->RemoveFavorite(CurrentServerInfo.m_NetAddr);
+			if(IsFavorite != TRISTATE::NONE)
+				Favorites()->Remove(&ServerAddr, 1);
 			else
-				ServerBrowser()->AddFavorite(CurrentServerInfo.m_NetAddr);
+				Favorites()->Add(&ServerAddr, 1);
 		}
 	}
 

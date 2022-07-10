@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVERBROWSER_H
 #define ENGINE_SERVERBROWSER_H
 
+#include <base/types.h>
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
 
@@ -50,7 +51,8 @@ public:
 	uint64_t m_ReceivedPackets;
 	int m_NumReceivedClients;
 
-	NETADDR m_NetAddr;
+	int m_NumAddresses;
+	NETADDR m_aAddresses[MAX_SERVER_ADDRESSES];
 
 	int m_QuickSearchHit;
 	int m_FriendState;
@@ -60,7 +62,8 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
-	bool m_Favorite;
+	TRISTATE m_Favorite;
+	TRISTATE m_FavoriteAllowPing;
 	bool m_Official;
 	int m_Location;
 	bool m_LatencyIsEstimated;
@@ -72,7 +75,7 @@ public:
 	int m_MapCrc;
 	int m_MapSize;
 	char m_aVersion[32];
-	char m_aAddress[NETADDR_MAXSTRSIZE];
+	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	mutable int m_NumFilteredPlayers;
 
@@ -150,13 +153,6 @@ public:
 
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
-
-	virtual bool GotInfo(const NETADDR &Addr) const = 0;
-	virtual bool IsFavorite(const NETADDR &Addr) const = 0;
-	virtual bool IsFavoritePingAllowed(const NETADDR &Addr) const = 0;
-	virtual void AddFavorite(const NETADDR &Addr) = 0;
-	virtual void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing) = 0;
-	virtual void RemoveFavorite(const NETADDR &Addr) = 0;
 
 	virtual int NumCountries(int Network) = 0;
 	virtual int GetCountryFlag(int Network, int Index) = 0;

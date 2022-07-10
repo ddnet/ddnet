@@ -260,15 +260,9 @@ public:
 	{
 		return m_vServers.size();
 	}
-	const NETADDR &ServerAddress(int Index) const override
+	const CServerInfo &Server(int Index) const override
 	{
-		return m_vServers[Index].m_Addr;
-	}
-	void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const override
-	{
-		const CEntry &Entry = m_vServers[Index];
-		*pAddr = Entry.m_Addr;
-		*pInfo = Entry.m_Info;
+		return m_vServers[Index];
 	}
 	int NumLegacyServers() const override
 	{
@@ -288,15 +282,8 @@ private:
 		STATE_NO_MASTER,
 	};
 
-	class CEntry
-	{
-	public:
-		NETADDR m_Addr;
-		CServerInfo m_Info;
-	};
-
 	static bool Validate(json_value *pJson);
-	static bool Parse(json_value *pJson, std::vector<CEntry> *pvServers, std::vector<NETADDR> *pvLegacyServers);
+	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers);
 
 	IEngine *m_pEngine;
 	IConsole *m_pConsole;
@@ -305,7 +292,7 @@ private:
 	std::shared_ptr<CHttpRequest> m_pGetServers;
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
-	std::vector<CEntry> m_vServers;
+	std::vector<CServerInfo> m_vServers;
 	std::vector<NETADDR> m_vLegacyServers;
 };
 
@@ -413,13 +400,13 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
-	std::vector<CEntry> vServers;
+	std::vector<CServerInfo> vServers;
 	std::vector<NETADDR> vLegacyServers;
 	return Parse(pJson, &vServers, &vLegacyServers);
 }
-bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *pvServers, std::vector<NETADDR> *pvLegacyServers)
+bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers)
 {
-	std::vector<CEntry> vServers;
+	std::vector<CServerInfo> vServers;
 	std::vector<NETADDR> vLegacyServers;
 
 	const json_value &Json = *pJson;
@@ -459,6 +446,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *pvServers
 		}
 		CServerInfo SetInfo = ParsedInfo;
 		SetInfo.m_Location = ParsedLocation;
+		SetInfo.m_NumAddresses = 0;
 		for(unsigned int a = 0; a < Addresses.u.array.length; a++)
 		{
 			const json_value &Address = Addresses[a];
@@ -466,7 +454,6 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *pvServers
 			{
 				return true;
 			}
-			// TODO: Address address handling :P
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
 			{
@@ -474,7 +461,15 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CEntry> *pvServers
 				// Skip unknown addresses.
 				continue;
 			}
-			vServers.push_back({ParsedAddr, SetInfo});
+			if(SetInfo.m_NumAddresses < (int)std::size(SetInfo.m_aAddresses))
+			{
+				SetInfo.m_aAddresses[SetInfo.m_NumAddresses] = ParsedAddr;
+				SetInfo.m_NumAddresses += 1;
+			}
+		}
+		if(SetInfo.m_NumAddresses > 0)
+		{
+			vServers.push_back(SetInfo);
 		}
 	}
 	if(LegacyServers.type == json_array)

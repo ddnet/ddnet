@@ -80,6 +80,7 @@ protected:
 	 * @see RECORDER_REPLAYS
 	 */
 	class IDemoRecorder *DemoRecorder(int Recorder) const;
+	class IFavorites *Favorites() const;
 	/**
 	 * Get the server browser interface.
 	 */

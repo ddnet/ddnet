@@ -17,87 +17,83 @@ TEST(ServerBrowser, PingCache)
 	auto pStorage = std::unique_ptr<IStorage>(Info.CreateTestStorage());
 	auto pPingCache = std::unique_ptr<IServerBrowserPingCache>(CreateServerBrowserPingCache(pConsole.get(), pStorage.get()));
 
-	const IServerBrowserPingCache::CEntry *pEntries;
-	int NumEntries;
+	NETADDR Localhost4, Localhost6, OtherLocalhost4, OtherLocalhost6;
+	ASSERT_FALSE(net_addr_from_str(&Localhost4, "127.0.0.1:8303"));
+	ASSERT_FALSE(net_addr_from_str(&Localhost6, "[::1]:8304"));
+	ASSERT_FALSE(net_addr_from_str(&OtherLocalhost4, "127.0.0.1:8305"));
+	ASSERT_FALSE(net_addr_from_str(&OtherLocalhost6, "[::1]:8306"));
+	EXPECT_LT(net_addr_comp(&Localhost4, &Localhost6), 0);
+	NETADDR aLocalhostBoth[2] = {Localhost4, Localhost6};
 
-	pPingCache->GetPingCache(&pEntries, &NumEntries);
-	EXPECT_EQ(NumEntries, 0);
+	EXPECT_EQ(pPingCache->NumEntries(), 0);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost4, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost6, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(aLocalhostBoth, 2), -1);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost4, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost6, 1), -1);
 
 	pPingCache->Load();
 
-	pPingCache->GetPingCache(&pEntries, &NumEntries);
-	EXPECT_EQ(NumEntries, 0);
-
-	NETADDR Localhost4, Localhost4Tw, Localhost6, Localhost6Tw;
-	ASSERT_FALSE(net_addr_from_str(&Localhost4, "127.0.0.1"));
-	ASSERT_FALSE(net_addr_from_str(&Localhost4Tw, "127.0.0.1:8303"));
-	ASSERT_FALSE(net_addr_from_str(&Localhost6, "[::1]"));
-	ASSERT_FALSE(net_addr_from_str(&Localhost6Tw, "[::1]:8304"));
-	EXPECT_LT(net_addr_comp(&Localhost4, &Localhost6), 0);
+	EXPECT_EQ(pPingCache->NumEntries(), 0);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost4, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost6, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(aLocalhostBoth, 2), -1);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost4, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost6, 1), -1);
 
 	// Newer pings overwrite older.
-	pPingCache->CachePing(Localhost4Tw, 123);
-	pPingCache->CachePing(Localhost4Tw, 234);
-	pPingCache->CachePing(Localhost4Tw, 345);
-	pPingCache->CachePing(Localhost4Tw, 456);
-	pPingCache->CachePing(Localhost4Tw, 567);
-	pPingCache->CachePing(Localhost4Tw, 678);
-	pPingCache->CachePing(Localhost4Tw, 789);
-	pPingCache->CachePing(Localhost4Tw, 890);
-	pPingCache->CachePing(Localhost4Tw, 901);
-	pPingCache->CachePing(Localhost4Tw, 135);
-	pPingCache->CachePing(Localhost4Tw, 246);
-	pPingCache->CachePing(Localhost4Tw, 357);
-	pPingCache->CachePing(Localhost4Tw, 468);
-	pPingCache->CachePing(Localhost4Tw, 579);
-	pPingCache->CachePing(Localhost4Tw, 680);
-	pPingCache->CachePing(Localhost4Tw, 791);
-	pPingCache->CachePing(Localhost4Tw, 802);
-	pPingCache->CachePing(Localhost4Tw, 913);
+	pPingCache->CachePing(Localhost4, 123);
+	pPingCache->CachePing(Localhost4, 234);
+	pPingCache->CachePing(Localhost4, 345);
+	pPingCache->CachePing(Localhost4, 456);
+	pPingCache->CachePing(Localhost4, 567);
+	pPingCache->CachePing(Localhost4, 678);
+	pPingCache->CachePing(Localhost4, 789);
+	pPingCache->CachePing(Localhost4, 890);
+	pPingCache->CachePing(Localhost4, 901);
+	pPingCache->CachePing(Localhost4, 135);
+	pPingCache->CachePing(Localhost4, 246);
+	pPingCache->CachePing(Localhost4, 357);
+	pPingCache->CachePing(Localhost4, 468);
+	pPingCache->CachePing(Localhost4, 579);
+	pPingCache->CachePing(Localhost4, 680);
+	pPingCache->CachePing(Localhost4, 791);
+	pPingCache->CachePing(Localhost4, 802);
+	pPingCache->CachePing(Localhost4, 913);
 
-	pPingCache->GetPingCache(&pEntries, &NumEntries);
-	EXPECT_EQ(NumEntries, 1);
-	if(NumEntries >= 1)
-	{
-		EXPECT_TRUE(net_addr_comp(&pEntries[0].m_Addr, &Localhost4) == 0);
-		EXPECT_EQ(pEntries[0].m_Ping, 913);
-	}
+	EXPECT_EQ(pPingCache->NumEntries(), 1);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost4, 1), 913);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost6, 1), -1);
+	EXPECT_EQ(pPingCache->GetPing(aLocalhostBoth, 2), 913);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost4, 1), 913);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost6, 1), -1);
 
-	pPingCache->CachePing(Localhost4Tw, 234);
-	pPingCache->CachePing(Localhost6Tw, 345);
-	pPingCache->GetPingCache(&pEntries, &NumEntries);
-	EXPECT_EQ(NumEntries, 2);
-	if(NumEntries >= 2)
-	{
-		EXPECT_TRUE(net_addr_comp(&pEntries[0].m_Addr, &Localhost4) == 0);
-		EXPECT_TRUE(net_addr_comp(&pEntries[1].m_Addr, &Localhost6) == 0);
-		EXPECT_EQ(pEntries[0].m_Ping, 234);
-		EXPECT_EQ(pEntries[1].m_Ping, 345);
-	}
+	pPingCache->CachePing(Localhost4, 234);
+	pPingCache->CachePing(Localhost6, 345);
+	EXPECT_EQ(pPingCache->NumEntries(), 2);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost4, 1), 234);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost6, 1), 345);
+	EXPECT_EQ(pPingCache->GetPing(aLocalhostBoth, 2), 234);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost4, 1), 234);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost6, 1), 345);
 
 	// Port doesn't matter for overwriting.
 	pPingCache->CachePing(Localhost4, 1337);
-	pPingCache->GetPingCache(&pEntries, &NumEntries);
-	EXPECT_EQ(NumEntries, 2);
-	if(NumEntries >= 2)
-	{
-		EXPECT_TRUE(net_addr_comp(&pEntries[0].m_Addr, &Localhost4) == 0);
-		EXPECT_TRUE(net_addr_comp(&pEntries[1].m_Addr, &Localhost6) == 0);
-		EXPECT_EQ(pEntries[0].m_Ping, 1337);
-		EXPECT_EQ(pEntries[1].m_Ping, 345);
-	}
+	EXPECT_EQ(pPingCache->NumEntries(), 2);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost4, 1), 1337);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost6, 1), 345);
+	EXPECT_EQ(pPingCache->GetPing(aLocalhostBoth, 2), 345);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost4, 1), 1337);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost6, 1), 345);
 
 	pPingCache.reset(CreateServerBrowserPingCache(pConsole.get(), pStorage.get()));
 
 	// Persistence.
 	pPingCache->Load();
-	pPingCache->GetPingCache(&pEntries, &NumEntries);
-	EXPECT_EQ(NumEntries, 2);
-	if(NumEntries >= 2)
-	{
-		EXPECT_TRUE(net_addr_comp(&pEntries[0].m_Addr, &Localhost4) == 0);
-		EXPECT_TRUE(net_addr_comp(&pEntries[1].m_Addr, &Localhost6) == 0);
-		EXPECT_EQ(pEntries[0].m_Ping, 1337);
-		EXPECT_EQ(pEntries[1].m_Ping, 345);
-	}
+	EXPECT_EQ(pPingCache->NumEntries(), 2);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost4, 1), 1337);
+	EXPECT_EQ(pPingCache->GetPing(&Localhost6, 1), 345);
+	EXPECT_EQ(pPingCache->GetPing(aLocalhostBoth, 2), 345);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost4, 1), 1337);
+	EXPECT_EQ(pPingCache->GetPing(&OtherLocalhost6, 1), 345);
 }

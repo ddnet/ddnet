@@ -1445,7 +1445,7 @@ int CMenus::Render()
 			pButtonText = Localize("Abort");
 			if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
 			{
-				int Connectivity = Client()->UdpConnectivity(Client()->ServerAddress().type);
+				int Connectivity = Client()->UdpConnectivity(Client()->ConnectNetTypes());
 				const char *pMessage = nullptr;
 				switch(Connectivity)
 				{
@@ -2657,19 +2657,20 @@ bool CMenus::CheckHotKey(int Key) const
 	       Input()->KeyIsPressed(Key) && m_pClient->m_GameConsole.IsClosed();
 }
 
-int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect)
 {
 	switch(Checked)
 	{
-	case 0:
+	case TRISTATE::NONE:
 		return DoButton_CheckBox_Common(pID, pText, "", pRect);
-	case 1:
-		return DoButton_CheckBox_Common(pID, pText, "X", pRect);
-	case 2:
+	case TRISTATE::SOME:
 		return DoButton_CheckBox_Common(pID, pText, "O", pRect);
+	case TRISTATE::ALL:
+		return DoButton_CheckBox_Common(pID, pText, "X", pRect);
 	default:
-		return DoButton_CheckBox_Common(pID, pText, "", pRect);
+		dbg_assert(false, "invalid tristate");
 	}
+	dbg_break();
 }
 
 int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)

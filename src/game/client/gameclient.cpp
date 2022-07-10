@@ -8,6 +8,7 @@
 #include <engine/demo.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
+#include <engine/favorites.h>
 #include <engine/friends.h>
 #include <engine/graphics.h>
 #include <engine/map.h>
@@ -91,6 +92,7 @@ void CGameClient::OnConsoleInit()
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
+	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
 #if defined(CONF_AUTOUPDATE)
