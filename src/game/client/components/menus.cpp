@@ -2393,6 +2393,8 @@ void CMenus::SetActive(bool Active)
 	{
 		ms_ColorPicker.m_Active = false;
 		Input()->SetIMEState(Active);
+		UI()->SetHotItem(nullptr);
+		UI()->SetActiveItem(nullptr);
 	}
 	m_MenuActive = Active;
 	if(!m_MenuActive)
