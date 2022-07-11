@@ -291,7 +291,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		if(!(int)Dmg)
 			continue;
 
-		if((GetPlayerChar(Owner) ? !(GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit) || NoDamage || Owner == apEnts[i]->GetPlayer()->GetCID())
+		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == apEnts[i]->GetPlayer()->GetCID())
 		{
 			if(Owner != -1 && apEnts[i]->IsAlive() && !apEnts[i]->CanCollide(Owner))
 				continue;
@@ -300,7 +300,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 
 			// Explode at most once per team
 			int PlayerTeam = apEnts[i]->Team();
-			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit) || NoDamage)
+			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
 				if(!CmaskIsSet(TeamMask, PlayerTeam))
 					continue;

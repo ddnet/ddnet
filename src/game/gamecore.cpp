@@ -93,14 +93,14 @@ void CCharacterCore::Reset()
 	// DDNet Character
 	m_Solo = false;
 	m_Jetpack = false;
-	m_NoCollision = false;
+	m_CollisionDisabled = false;
 	m_EndlessHook = false;
 	m_EndlessJump = false;
-	m_NoHammerHit = false;
-	m_NoGrenadeHit = false;
-	m_NoLaserHit = false;
-	m_NoShotgunHit = false;
-	m_NoHookHit = false;
+	m_HammerHitDisabled = false;
+	m_GrenadeHitDisabled = false;
+	m_LaserHitDisabled = false;
+	m_ShotgunHitDisabled = false;
+	m_HookHitDisabled = false;
 	m_Super = false;
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
@@ -276,7 +276,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// Check against other players first
-		if(!this->m_NoHookHit && m_pWorld && m_Tuning.m_PlayerHooking)
+		if(!this->m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking)
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -410,7 +410,7 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_NoCollision && !pCharCore->m_NoCollision && m_Tuning.m_PlayerCollision);
+				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
 
 				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
 				{
@@ -427,7 +427,7 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 
 				// handle hook influence
-				if(!m_NoHookHit && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
+				if(!m_HookHitDisabled && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
 				{
 					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
 					{
@@ -483,7 +483,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
-	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_NoCollision && !m_Solo)))
+	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
@@ -500,7 +500,7 @@ void CCharacterCore::Move()
 					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
 					if(!pCharCore || pCharCore == this)
 						continue;
-					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_NoCollision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
 					float D = distance(Pos, pCharCore->m_Pos);
 					if(D < PhysicalSize() && D >= 0.0f)
@@ -562,12 +562,12 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	// Collision
 	m_Solo = pObjDDNet->m_Flags & CHARACTERFLAG_SOLO;
 	m_Jetpack = pObjDDNet->m_Flags & CHARACTERFLAG_JETPACK;
-	m_NoCollision = pObjDDNet->m_Flags & CHARACTERFLAG_NO_COLLISION;
-	m_NoHammerHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
-	m_NoGrenadeHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
-	m_NoLaserHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_LASER_HIT;
-	m_NoShotgunHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
-	m_NoHookHit = pObjDDNet->m_Flags & CHARACTERFLAG_NO_HOOK;
+	m_CollisionDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_COLLISION_DISABLED;
+	m_HammerHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_HAMMER_HIT_DISABLED;
+	m_ShotgunHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
+	m_GrenadeHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_GRENADE_HIT_DISABLED;
+	m_LaserHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
+	m_HookHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
 
 	// Endless
@@ -577,7 +577,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	// Freeze
 	m_FreezeEnd = pObjDDNet->m_FreezeEnd;
 	m_DeepFrozen = pObjDDNet->m_FreezeEnd == -1;
-	m_LiveFrozen = (pObjDDNet->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
+	m_LiveFrozen = (pObjDDNet->m_Flags & CHARACTERFLAG_MOVEMENTS_DISABLED) != 0;
 
 	// Telegun
 	m_HasTelegunGrenade = pObjDDNet->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;

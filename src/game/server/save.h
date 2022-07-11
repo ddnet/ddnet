@@ -27,6 +27,15 @@ public:
 	int GetClientID() const { return m_ClientID; }
 	void SetClientID(int ClientID) { m_ClientID = ClientID; }
 
+	enum
+	{
+		HIT_ALL = 0,
+		HAMMER_HIT_DISABLED = 1,
+		SHOTGUN_HIT_DISABLED = 2,
+		GRENADE_HIT_DISABLED = 4,
+		LASER_HIT_DISABLED = 8
+	};
+
 private:
 	int m_ClientID;
 
@@ -53,21 +62,21 @@ private:
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
-	int m_SuperJump;
+	int m_EndlessJump;
 	int m_Jetpack;
 	int m_NinjaJetpack;
 	int m_FreezeTime;
 	int m_FreezeStart;
-	int m_DeepFreeze;
-	int m_LiveFreeze;
+	int m_DeepFrozen;
+	int m_LiveFrozen;
 	int m_EndlessHook;
 	int m_DDRaceState;
 
-	int m_Hit;
-	int m_Collision;
+	int m_HitDisabledFlags;
+	int m_CollisionEnabled;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	int m_Hook;
+	int m_HookHitEnabled;
 	int m_Time;
 	vec2 m_Pos;
 	vec2 m_PrevPos;

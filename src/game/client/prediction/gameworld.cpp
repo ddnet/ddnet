@@ -346,14 +346,14 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 
 		float Dmg = Strength * l;
 		if((int)Dmg)
-			if((GetCharacterByID(Owner) ? !(GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
+			if((GetCharacterByID(Owner) ? !GetCharacterByID(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
 			{
 				if(Owner != -1 && !pChar->CanCollide(Owner))
 					continue;
 				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
 					continue;
 				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
-				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
+				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
 	}

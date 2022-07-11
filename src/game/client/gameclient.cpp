@@ -1342,12 +1342,12 @@ void CGameClient::OnNewSnapshot()
 					// Collision
 					pClient->m_Solo = pCharacterData->m_Flags & CHARACTERFLAG_SOLO;
 					pClient->m_Jetpack = pCharacterData->m_Flags & CHARACTERFLAG_JETPACK;
-					pClient->m_NoCollision = pCharacterData->m_Flags & CHARACTERFLAG_NO_COLLISION;
-					pClient->m_NoHammerHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_HAMMER_HIT;
-					pClient->m_NoGrenadeHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_GRENADE_HIT;
-					pClient->m_NoLaserHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_LASER_HIT;
-					pClient->m_NoShotgunHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_SHOTGUN_HIT;
-					pClient->m_NoHookHit = pCharacterData->m_Flags & CHARACTERFLAG_NO_HOOK;
+					pClient->m_CollisionDisabled = pCharacterData->m_Flags & CHARACTERFLAG_COLLISION_DISABLED;
+					pClient->m_HammerHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_HAMMER_HIT_DISABLED;
+					pClient->m_GrenadeHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_GRENADE_HIT_DISABLED;
+					pClient->m_LaserHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
+					pClient->m_ShotgunHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
+					pClient->m_HookHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
 					pClient->m_Super = pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
 
 					// Endless
@@ -1357,7 +1357,7 @@ void CGameClient::OnNewSnapshot()
 					// Freeze
 					pClient->m_FreezeEnd = pCharacterData->m_FreezeEnd;
 					pClient->m_DeepFrozen = pCharacterData->m_FreezeEnd == -1;
-					pClient->m_LiveFrozen = (pCharacterData->m_Flags & CHARACTERFLAG_NO_MOVEMENTS) != 0;
+					pClient->m_LiveFrozen = (pCharacterData->m_Flags & CHARACTERFLAG_MOVEMENTS_DISABLED) != 0;
 
 					// Telegun
 					pClient->m_HasTelegunGrenade = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_GRENADE;
@@ -2039,14 +2039,14 @@ void CGameClient::CClientData::Reset()
 
 	m_Solo = false;
 	m_Jetpack = false;
-	m_NoCollision = false;
+	m_CollisionDisabled = false;
 	m_EndlessHook = false;
 	m_EndlessJump = false;
-	m_NoHammerHit = false;
-	m_NoGrenadeHit = false;
-	m_NoLaserHit = false;
-	m_NoShotgunHit = false;
-	m_NoHookHit = false;
+	m_HammerHitDisabled = false;
+	m_GrenadeHitDisabled = false;
+	m_LaserHitDisabled = false;
+	m_ShotgunHitDisabled = false;
+	m_HookHitDisabled = false;
 	m_Super = false;
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
@@ -2228,7 +2228,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		bool IsOneSuper = cData.m_Super || OwnClientData.m_Super;
 		bool IsOneSolo = cData.m_Solo || OwnClientData.m_Solo;
 
-		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwnClientData.m_NoHookHit))
+		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownID) || IsOneSolo || OwnClientData.m_HookHitDisabled))
 			continue;
 
 		vec2 ClosestPoint;
@@ -3033,7 +3033,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjump);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjumpEmpty);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudSolo);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoCollision);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudCollisionDisabled);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudEndlessJump);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudEndlessHook);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudJetpack);
@@ -3045,12 +3045,12 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarFull);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarEmpty);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarEmptyRight);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoHookHit);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoHammerHit);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoShotgunHit);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoGrenadeHit);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoLaserHit);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNoGunHit);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudHookHitDisabled);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudHammerHitDisabled);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudShotgunHitDisabled);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudGrenadeHitDisabled);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudLaserHitDisabled);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudGunHitDisabled);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDeepFrozen);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudLiveFrozen);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudTeleportGrenade);
@@ -3091,7 +3091,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudAirjump = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP]);
 		m_HudSkin.m_SpriteHudAirjumpEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP_EMPTY]);
 		m_HudSkin.m_SpriteHudSolo = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SOLO]);
-		m_HudSkin.m_SpriteHudNoCollision = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_COLLISION]);
+		m_HudSkin.m_SpriteHudCollisionDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_COLLISION_DISABLED]);
 		m_HudSkin.m_SpriteHudEndlessJump = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_ENDLESS_JUMP]);
 		m_HudSkin.m_SpriteHudEndlessHook = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_ENDLESS_HOOK]);
 		m_HudSkin.m_SpriteHudJetpack = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_JETPACK]);
@@ -3103,12 +3103,12 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudNinjaBarFull = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_FULL]);
 		m_HudSkin.m_SpriteHudNinjaBarEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_EMPTY]);
 		m_HudSkin.m_SpriteHudNinjaBarEmptyRight = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_EMPTY_RIGHT]);
-		m_HudSkin.m_SpriteHudNoHookHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_HOOK_HIT]);
-		m_HudSkin.m_SpriteHudNoHammerHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_HAMMER_HIT]);
-		m_HudSkin.m_SpriteHudNoShotgunHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_SHOTGUN_HIT]);
-		m_HudSkin.m_SpriteHudNoGrenadeHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_GRENADE_HIT]);
-		m_HudSkin.m_SpriteHudNoLaserHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_LASER_HIT]);
-		m_HudSkin.m_SpriteHudNoGunHit = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NO_GUN_HIT]);
+		m_HudSkin.m_SpriteHudHookHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HOOK_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudHammerHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HAMMER_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudShotgunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SHOTGUN_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudGrenadeHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GRENADE_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudLaserHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LASER_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudGunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GUN_HIT_DISABLED]);
 		m_HudSkin.m_SpriteHudDeepFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DEEP_FROZEN]);
 		m_HudSkin.m_SpriteHudLiveFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LIVE_FROZEN]);
 		m_HudSkin.m_SpriteHudTeleportGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_GRENADE]);

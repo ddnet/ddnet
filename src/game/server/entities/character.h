@@ -44,8 +44,11 @@ public:
 	bool IsGrounded();
 
 	void SetWeapon(int W);
+	void SetJetpack(bool Active);
 	void SetSolo(bool Solo);
+	void SetSuper(bool Super);
 	void SetLiveFrozen(bool Active);
+	void SetDeepFrozen(bool Active);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
@@ -120,7 +123,6 @@ private:
 	CNetObj_PlayerInput m_Input;
 	CNetObj_PlayerInput m_SavedInput;
 	int m_NumInputs;
-	int m_Jumped;
 
 	int m_DamageTakenTick;
 
@@ -159,7 +161,6 @@ private:
 
 	bool m_SetSavePos;
 	CSaveTee m_RescueTee;
-	bool m_Solo;
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }
@@ -177,26 +178,11 @@ public:
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
-	bool m_Super;
-	bool m_SuperJump;
-	bool m_Jetpack;
 	bool m_NinjaJetpack;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
 	bool m_FrozenLastTick;
-	bool m_DeepFreeze;
-	bool m_LiveFreeze;
-	bool m_EndlessHook;
 	bool m_FreezeHammer;
-	enum
-	{
-		HIT_ALL = 0,
-		DISABLE_HIT_HAMMER = 1,
-		DISABLE_HIT_SHOTGUN = 2,
-		DISABLE_HIT_GRENADE = 4,
-		DISABLE_HIT_LASER = 8
-	};
-	int m_Hit;
 	int m_TuneZone;
 	int m_TuneZoneOld;
 	int m_PainSoundTimer;
@@ -254,6 +240,13 @@ public:
 	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; }
 	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; }
 	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; }
+
+	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
+	bool ShotgunHitDisabled() { return m_Core.m_ShotgunHitDisabled; }
+	bool LaserHitDisabled() { return m_Core.m_LaserHitDisabled; }
+	bool GrenadeHitDisabled() { return m_Core.m_GrenadeHitDisabled; }
+
+	bool IsSuper() { return m_Core.m_Super; }
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
 };
