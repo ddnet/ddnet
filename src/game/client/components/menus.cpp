@@ -1430,6 +1430,7 @@ int CMenus::Render()
 		const char *pExtraText = "";
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
+		bool UseIpLabel = false;
 
 		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 		if(m_Popup == POPUP_MESSAGE)
@@ -1441,43 +1442,38 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = Client()->ConnectAddressString();
+			UseIpLabel = true;
 			pButtonText = Localize("Abort");
 			if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
 			{
 				int Connectivity = Client()->UdpConnectivity(Client()->ConnectNetTypes());
-				const char *pMessage = nullptr;
 				switch(Connectivity)
 				{
 				case IClient::CONNECTIVITY_UNKNOWN:
 					break;
 				case IClient::CONNECTIVITY_CHECKING:
-					pMessage = Localize("Trying to determine UDP connectivity...");
+					pExtraText = Localize("Trying to determine UDP connectivity...");
 					break;
 				case IClient::CONNECTIVITY_UNREACHABLE:
-					pMessage = Localize("UDP seems to be filtered.");
+					pExtraText = Localize("UDP seems to be filtered.");
 					break;
 				case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
-					pMessage = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
+					pExtraText = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
 					break;
 				case IClient::CONNECTIVITY_REACHABLE:
-					pMessage = Localize("No answer from server yet.");
+					pExtraText = Localize("No answer from server yet.");
 					break;
-				}
-				if(pMessage)
-				{
-					str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Client()->ConnectAddressString(), pMessage);
-					pExtraText = aBuf;
 				}
 			}
 			else if(Client()->MapDownloadTotalsize() > 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
 				pTitle = aBuf;
-				pExtraText = "";
+				UseIpLabel = false;
 			}
 			else if(Client()->State() == IClient::STATE_LOADING)
 			{
+				UseIpLabel = false;
 				if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_INITIAL)
 				{
 					pTitle = Localize("Connected");
@@ -1525,64 +1521,52 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Delete demo");
 			pExtraText = Localize("Are you sure that you want to delete the demo?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{
 			pTitle = Localize("Rename demo");
-			pExtraText = "";
-			ExtraAlign = -1;
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
 			pTitle = Localize("Render demo");
-			pExtraText = "";
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_REPLACE_VIDEO)
 		{
 			pTitle = Localize("Replace video");
 			pExtraText = Localize("File already exists, do you want to overwrite it?");
-			ExtraAlign = -1;
 		}
 #endif
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
 			pTitle = Localize("Remove friend");
 			pExtraText = Localize("Are you sure that you want to remove the player from your friends list?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_SOUNDERROR)
 		{
 			pTitle = Localize("Sound error");
 			pExtraText = Localize("The audio device couldn't be initialised.");
 			pButtonText = Localize("Ok");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_PASSWORD)
 		{
 			pTitle = Localize("Password incorrect");
-			pExtraText = "";
 			pButtonText = Localize("Try again");
 		}
 		else if(m_Popup == POPUP_QUIT)
 		{
 			pTitle = Localize("Quit");
 			pExtraText = Localize("Are you sure that you want to quit?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{
 			pTitle = Localize("Disconnect");
 			pExtraText = Localize("Are you sure that you want to disconnect?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_DISCONNECT_DUMMY)
 		{
 			pTitle = Localize("Disconnect Dummy");
 			pExtraText = Localize("Are you sure that you want to disconnect your dummy?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
@@ -1603,6 +1587,7 @@ int CMenus::Render()
 			{
 				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
 				pExtraText = aBuf;
+				ExtraAlign = -1;
 			}
 			else if(Client()->m_Points >= 0)
 			{
@@ -1612,7 +1597,6 @@ int CMenus::Render()
 			{
 				pExtraText = Localize("Checking for existing player with your name");
 			}
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
@@ -1626,7 +1610,6 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Disconnect");
 			pExtraText = Localize("Are you sure that you want to disconnect and switch to a different server?");
-			ExtraAlign = -1;
 		}
 
 		CUIRect Box, Part;
@@ -1642,15 +1625,24 @@ int CMenus::Render()
 		Part.VMargin(20.f, &Part);
 		SLabelProperties Props;
 		Props.m_MaxWidth = (int)Part.w;
+
 		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_LEFT, Props);
 		else
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_CENTER);
+
 		Box.HSplitTop(20.f, &Part, &Box);
 		Box.HSplitTop(24.f, &Part, &Box);
 		Part.VMargin(20.f, &Part);
 
 		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
+
+		if(UseIpLabel)
+		{
+			UI()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_CENTER);
+			Box.HSplitTop(20.f, &Part, &Box);
+			Box.HSplitTop(24.f, &Part, &Box);
+		}
 
 		Props.m_MaxWidth = (int)Part.w;
 		if(ExtraAlign == -1)
