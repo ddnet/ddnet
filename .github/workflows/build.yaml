@@ -21,7 +21,6 @@ jobs:
           package-file: "*-linux_x86_64.tar.xz"
           fancy: true
           env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: ubuntu-20.04
           cmake-path: /usr/bin/
@@ -29,7 +28,6 @@ jobs:
           package-file: "*-linux_x86_64.tar.xz"
           fancy: false
           env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
             GTEST_FILTER: -*SQLite*
         - os: macOS-latest
@@ -37,14 +35,12 @@ jobs:
           package-file: "*-macos.dmg"
           fancy: false
           env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
           cmake-args: -A x64
           package-file: "*-win64.zip"
           fancy: false
           env:
-            CFLAGS: /WX
             CXXFLAGS: /WX
             LDFLAGS: /WX
 
