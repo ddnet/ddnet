@@ -151,7 +151,7 @@ public:
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
-	const CMapInfo *GetMapInfo() { return &m_MapInfo; }
+	const CMapInfo *GetMapInfo() const { return &m_MapInfo; }
 };
 
 class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener
