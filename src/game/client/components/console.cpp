@@ -35,7 +35,7 @@
 
 class CConsoleLogger : public ILogger
 {
-	CGameConsole *m_pConsole;
+	CGameConsole *m_pConsole = nullptr;
 	std::mutex m_ConsoleMutex;
 
 public:
@@ -472,13 +472,13 @@ static float ConsoleScaleFunc(float t)
 
 struct CRenderInfo
 {
-	CGameConsole *m_pSelf;
+	CGameConsole *m_pSelf = nullptr;
 	CTextCursor m_Cursor;
-	const char *m_pCurrentCmd;
-	int m_WantedCompletion;
-	int m_EnumCount;
-	float m_Offset;
-	float m_Width;
+	const char *m_pCurrentCmd = nullptr;
+	int m_WantedCompletion = 0;
+	int m_EnumCount = 0;
+	float m_Offset = 0;
+	float m_Width = 0;
 };
 
 void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)

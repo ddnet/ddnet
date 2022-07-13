@@ -21,17 +21,17 @@ class CBackgroundEngineMap : public CMap
 class CBackground : public CMapLayers
 {
 protected:
-	IEngineMap *m_pMap;
-	bool m_Loaded;
-	char m_aMapName[MAX_MAP_LENGTH];
+	IEngineMap *m_pMap = nullptr;
+	bool m_Loaded = false;
+	char m_aMapName[MAX_MAP_LENGTH] = {0};
 
 	//to avoid spam when in menu
-	int64_t m_LastLoad;
+	int64_t m_LastLoad = 0;
 
 	//to avoid memory leak when switching to %current%
-	CBackgroundEngineMap *m_pBackgroundMap;
-	CLayers *m_pBackgroundLayers;
-	CMapImages *m_pBackgroundImages;
+	CBackgroundEngineMap *m_pBackgroundMap = nullptr;
+	CLayers *m_pBackgroundLayers = nullptr;
+	CMapImages *m_pBackgroundImages = nullptr;
 
 	virtual CBackgroundEngineMap *CreateBGMap();
 

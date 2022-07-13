@@ -85,9 +85,9 @@ float CPlayers::GetPlayerTargetAngle(
 	if(ClientID >= 0 && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
-		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedData)
+		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_pPrevExtendedData)
 		{
-			const CNetObj_DDNetCharacter *PrevExtendedData = m_pClient->m_Snap.m_aCharacters[ClientID].m_PrevExtendedData;
+			const CNetObj_DDNetCharacter *PrevExtendedData = m_pClient->m_Snap.m_aCharacters[ClientID].m_pPrevExtendedData;
 
 			float MixX = mix((float)PrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, AngleIntraTick);
 			float MixY = mix((float)PrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, AngleIntraTick);

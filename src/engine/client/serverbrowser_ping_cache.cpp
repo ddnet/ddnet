@@ -15,7 +15,7 @@ public:
 	{
 	public:
 		NETADDR m_Addr;
-		int m_Ping;
+		int m_Ping = 0;
 	};
 
 	CServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage);
@@ -28,7 +28,7 @@ public:
 	int GetPing(const NETADDR *pAddrs, int NumAddrs) const override;
 
 private:
-	IConsole *m_pConsole;
+	IConsole *m_pConsole = nullptr;
 
 	CSqlite m_pDisk;
 	CSqliteStmt m_pLoadStmt;

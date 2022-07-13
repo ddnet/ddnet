@@ -6,9 +6,9 @@
 
 class CAntibot : public IEngineAntibot
 {
-	class IServer *m_pServer;
-	class IConsole *m_pConsole;
-	class IGameServer *m_pGameServer;
+	class IServer *m_pServer = nullptr;
+	class IConsole *m_pConsole = nullptr;
+	class IGameServer *m_pGameServer = nullptr;
 
 	class IServer *Server() const { return m_pServer; }
 	class IConsole *Console() const { return m_pConsole; }
@@ -16,7 +16,7 @@ class CAntibot : public IEngineAntibot
 
 	CAntibotData m_Data;
 	CAntibotRoundData m_RoundData;
-	bool m_Initialized;
+	bool m_Initialized = false;
 
 	void Update();
 	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);

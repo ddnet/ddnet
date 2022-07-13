@@ -21,35 +21,35 @@ enum
 
 struct CGhostSkin
 {
-	int m_Skin0;
-	int m_Skin1;
-	int m_Skin2;
-	int m_Skin3;
-	int m_Skin4;
-	int m_Skin5;
-	int m_UseCustomColor;
-	int m_ColorBody;
-	int m_ColorFeet;
+	int m_Skin0 = 0;
+	int m_Skin1 = 0;
+	int m_Skin2 = 0;
+	int m_Skin3 = 0;
+	int m_Skin4 = 0;
+	int m_Skin5 = 0;
+	int m_UseCustomColor = 0;
+	int m_ColorBody = 0;
+	int m_ColorFeet = 0;
 };
 
 struct CGhostCharacter_NoTick
 {
-	int m_X;
-	int m_Y;
-	int m_VelX;
-	int m_VelY;
-	int m_Angle;
-	int m_Direction;
-	int m_Weapon;
-	int m_HookState;
-	int m_HookX;
-	int m_HookY;
-	int m_AttackTick;
+	int m_X = 0;
+	int m_Y = 0;
+	int m_VelX = 0;
+	int m_VelY = 0;
+	int m_Angle = 0;
+	int m_Direction = 0;
+	int m_Weapon = 0;
+	int m_HookState = 0;
+	int m_HookX = 0;
+	int m_HookY = 0;
+	int m_AttackTick = 0;
 };
 
 struct CGhostCharacter : public CGhostCharacter_NoTick
 {
-	int m_Tick;
+	int m_Tick = 0;
 };
 
 class CGhost : public CComponent
@@ -62,8 +62,8 @@ private:
 
 	class CGhostPath
 	{
-		int m_ChunkSize;
-		int m_NumItems;
+		int m_ChunkSize = 0;
+		int m_NumItems = 0;
 
 		std::vector<CGhostCharacter *> m_vpChunks;
 
@@ -90,9 +90,9 @@ private:
 		CTeeRenderInfo m_RenderInfo;
 		CGhostSkin m_Skin;
 		CGhostPath m_Path;
-		int m_StartTick;
-		char m_aPlayer[MAX_NAME_LENGTH];
-		int m_PlaybackPos;
+		int m_StartTick = 0;
+		char m_aPlayer[MAX_NAME_LENGTH] = {0};
+		int m_PlaybackPos = 0;
 
 		CGhostItem() { Reset(); }
 
@@ -107,22 +107,22 @@ private:
 
 	static const char *ms_pGhostDir;
 
-	class IGhostLoader *m_pGhostLoader;
-	class IGhostRecorder *m_pGhostRecorder;
+	class IGhostLoader *m_pGhostLoader = nullptr;
+	class IGhostRecorder *m_pGhostRecorder = nullptr;
 
 	CGhostItem m_aActiveGhosts[MAX_ACTIVE_GHOSTS];
 	CGhostItem m_CurGhost;
 
-	char m_aTmpFilename[128];
+	char m_aTmpFilename[128] = {0};
 
-	int m_NewRenderTick;
-	int m_StartRenderTick;
-	int m_LastDeathTick;
-	int m_LastRaceTick;
-	bool m_Recording;
-	bool m_Rendering;
+	int m_NewRenderTick = 0;
+	int m_StartRenderTick = 0;
+	int m_LastDeathTick = 0;
+	int m_LastRaceTick = 0;
+	bool m_Recording = false;
+	bool m_Rendering = false;
 
-	bool m_RenderingStartedByServer;
+	bool m_RenderingStartedByServer = false;
 
 	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar);
@@ -147,7 +147,7 @@ private:
 	static void ConGPlay(IConsole::IResult *pResult, void *pUserData);
 
 public:
-	bool m_AllowRestart;
+	bool m_AllowRestart = false;
 
 	CGhost();
 	virtual int Sizeof() const override { return sizeof(*this); }

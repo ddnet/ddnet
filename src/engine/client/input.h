@@ -13,16 +13,16 @@ class CInput : public IEngineInput
 public:
 	class CJoystick : public IJoystick
 	{
-		CInput *m_pInput;
-		int m_Index;
-		char m_aName[64];
-		char m_aGUID[34];
+		CInput *m_pInput = nullptr;
+		int m_Index = 0;
+		char m_aName[64] = {0};
+		char m_aGUID[34] = {0};
 		SDL_JoystickID m_InstanceID;
-		int m_NumAxes;
-		int m_NumButtons;
-		int m_NumBalls;
-		int m_NumHats;
-		SDL_Joystick *m_pDelegate;
+		int m_NumAxes = 0;
+		int m_NumButtons = 0;
+		int m_NumBalls = 0;
+		int m_NumHats = 0;
+		SDL_Joystick *m_pDelegate = nullptr;
 
 		CInput *Input() { return m_pInput; }
 
@@ -48,8 +48,8 @@ public:
 	};
 
 private:
-	IEngineGraphics *m_pGraphics;
-	IConsole *m_pConsole;
+	IEngineGraphics *m_pGraphics = nullptr;
+	IConsole *m_pConsole = nullptr;
 
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IConsole *Console() { return m_pConsole; }
@@ -63,22 +63,22 @@ private:
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	float GetJoystickDeadzone();
 
-	int m_InputGrabbed;
-	char *m_pClipboardText;
+	int m_InputGrabbed = 0;
+	char *m_pClipboardText = nullptr;
 
-	bool m_MouseFocus;
-	bool m_MouseDoubleClick;
+	bool m_MouseFocus = false;
+	bool m_MouseDoubleClick = false;
 
-	int m_VideoRestartNeeded;
+	int m_VideoRestartNeeded = 0;
 
 	void AddEvent(char *pText, int Key, int Flags);
 	void Clear() override;
 	bool IsEventValid(CEvent *pEvent) const override { return pEvent->m_InputCount == m_InputCounter; }
 
 	// quick access to input
-	unsigned short m_aInputCount[g_MaxKeys]; // tw-KEY
-	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
-	int m_InputCounter;
+	unsigned short m_aInputCount[g_MaxKeys] = {0}; // tw-KEY
+	unsigned char m_aInputState[g_MaxKeys] = {0}; // SDL_SCANCODE
+	int m_InputCounter = 0;
 
 	void UpdateMouseState();
 	void UpdateJoystickState();
@@ -87,10 +87,10 @@ private:
 	void HandleJoystickHatMotionEvent(const SDL_Event &Event);
 
 	// IME support
-	int m_NumTextInputInstances;
-	char m_aEditingText[INPUT_TEXT_SIZE];
-	int m_EditingTextLen;
-	int m_EditingCursor;
+	int m_NumTextInputInstances = 0;
+	char m_aEditingText[INPUT_TEXT_SIZE] = {0};
+	int m_EditingTextLen = 0;
+	int m_EditingCursor = 0;
 
 	bool KeyState(int Key) const;
 

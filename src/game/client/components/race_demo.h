@@ -19,12 +19,12 @@ class CRaceDemo : public CComponent
 
 	static const char *ms_pRaceDemoDir;
 
-	char m_aTmpFilename[128];
+	char m_aTmpFilename[128] = {0};
 
-	int m_RaceState;
-	int m_RaceStartTick;
-	int m_RecordStopTick;
-	int m_Time;
+	int m_RaceState = 0;
+	int m_RaceStartTick = 0;
+	int m_RecordStopTick = 0;
+	int m_Time = 0;
 
 	std::chrono::nanoseconds m_RaceDemosLoadStartTime{0};
 
@@ -36,7 +36,7 @@ class CRaceDemo : public CComponent
 	bool CheckDemo(int Time);
 
 public:
-	bool m_AllowRestart;
+	bool m_AllowRestart = false;
 
 	CRaceDemo();
 	virtual int Sizeof() const override { return sizeof(*this); }

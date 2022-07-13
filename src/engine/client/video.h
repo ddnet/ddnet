@@ -81,22 +81,22 @@ private:
 
 	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId);
 
-	CGraphics_Threaded *m_pGraphics;
-	IStorage *m_pStorage;
-	ISound *m_pSound;
+	CGraphics_Threaded *m_pGraphics = nullptr;
+	IStorage *m_pStorage = nullptr;
+	ISound *m_pSound = nullptr;
 
-	int m_Width;
-	int m_Height;
-	char m_aName[256];
-	//FILE *m_dbgfile;
+	int m_Width = 0;
+	int m_Height = 0;
+	char m_aName[256] = {0};
+	//FILE *m_dbgfile = nullptr;
 	uint64_t m_VSeq = 0;
 	uint64_t m_ASeq = 0;
-	uint64_t m_Vframe;
+	uint64_t m_Vframe = 0;
 
-	int m_FPS;
+	int m_FPS = 0;
 
-	bool m_Started;
-	bool m_Recording;
+	bool m_Started = false;
+	bool m_Recording = false;
 
 	size_t m_VideoThreads = 2;
 	size_t m_CurVideoThreadIndex = 0;
@@ -138,14 +138,14 @@ private:
 
 	std::vector<std::unique_ptr<SAudioRecorderThread>> m_vAudioThreads;
 
-	std::atomic<int32_t> m_ProcessingVideoFrame;
-	std::atomic<int32_t> m_ProcessingAudioFrame;
+	std::atomic<int32_t> m_ProcessingVideoFrame = 0;
+	std::atomic<int32_t> m_ProcessingAudioFrame = 0;
 
-	bool m_HasAudio;
+	bool m_HasAudio = false;
 
 	struct SVideoSoundBuffer
 	{
-		int16_t m_aBuffer[ALEN * 2];
+		int16_t m_aBuffer[ALEN * 2] = {0};
 	};
 	std::vector<SVideoSoundBuffer> m_vBuffer;
 	std::vector<std::vector<uint8_t>> m_vPixelHelper;
@@ -153,13 +153,13 @@ private:
 	OutputStream m_VideoStream;
 	OutputStream m_AudioStream;
 
-	const AVCodec *m_pVideoCodec;
-	const AVCodec *m_pAudioCodec;
+	const AVCodec *m_pVideoCodec = nullptr;
+	const AVCodec *m_pAudioCodec = nullptr;
 
-	AVDictionary *m_pOptDict;
+	AVDictionary *m_pOptDict = nullptr;
 
-	AVFormatContext *m_pFormatContext;
-	const AVOutputFormat *m_pFormat;
+	AVFormatContext *m_pFormatContext = nullptr;
+	const AVOutputFormat *m_pFormat = nullptr;
 };
 
 #endif

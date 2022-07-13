@@ -2490,8 +2490,8 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
  */
 class CCmdlineFix
 {
-	int m_Argc;
-	const char **m_ppArgv;
+	int m_Argc = 0;
+	const char **m_ppArgv = nullptr;
 
 public:
 	CCmdlineFix(int *pArgc, const char ***pppArgv)

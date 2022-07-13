@@ -15,9 +15,9 @@ class IJob
 	friend CJobPool;
 
 private:
-	std::shared_ptr<IJob> m_pNext;
+	std::shared_ptr<IJob> m_pNext = nullptr;
 
-	std::atomic<int> m_Status;
+	std::atomic<int> m_Status = 0;
 	virtual void Run() = 0;
 
 public:
@@ -41,14 +41,14 @@ class CJobPool
 	{
 		MAX_THREADS = 32
 	};
-	int m_NumThreads;
-	void *m_apThreads[MAX_THREADS];
-	std::atomic<bool> m_Shutdown;
+	int m_NumThreads = 0;
+	void *m_apThreads[MAX_THREADS] = {nullptr};
+	std::atomic<bool> m_Shutdown = false;
 
 	LOCK m_Lock;
 	SEMAPHORE m_Semaphore;
-	std::shared_ptr<IJob> m_pFirstJob GUARDED_BY(m_Lock);
-	std::shared_ptr<IJob> m_pLastJob GUARDED_BY(m_Lock);
+	std::shared_ptr<IJob> m_pFirstJob GUARDED_BY(m_Lock) = nullptr;
+	std::shared_ptr<IJob> m_pLastJob GUARDED_BY(m_Lock) = nullptr;
 
 	static void WorkerThread(void *pUser) NO_THREAD_SAFETY_ANALYSIS;
 

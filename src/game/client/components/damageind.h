@@ -7,13 +7,13 @@
 
 class CDamageInd : public CComponent
 {
-	int64_t m_Lastupdate;
+	int64_t m_Lastupdate = 0;
 	struct CItem
 	{
 		vec2 m_Pos;
 		vec2 m_Dir;
-		float m_StartTime;
-		float m_StartAngle;
+		float m_StartTime = 0;
+		float m_StartAngle = 0;
 	};
 
 	enum
@@ -22,12 +22,12 @@ class CDamageInd : public CComponent
 	};
 
 	CItem m_aItems[MAX_ITEMS];
-	int m_NumItems;
+	int m_NumItems = 0;
 
 	CItem *CreateI();
 	void DestroyI(CItem *pItem);
 
-	int m_DmgIndQuadContainerIndex;
+	int m_DmgIndQuadContainerIndex = 0;
 
 public:
 	CDamageInd();

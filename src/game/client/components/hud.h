@@ -21,26 +21,26 @@ struct SScoreInfo
 		m_Initialized = false;
 	}
 
-	int m_TextRankContainerIndex;
-	int m_TextScoreContainerIndex;
-	float m_ScoreTextWidth;
-	char m_aScoreText[16];
-	char m_aRankText[16];
-	char m_aPlayerNameText[MAX_NAME_LENGTH];
-	int m_RoundRectQuadContainerIndex;
-	int m_OptionalNameTextContainerIndex;
+	int m_TextRankContainerIndex = 0;
+	int m_TextScoreContainerIndex = 0;
+	float m_ScoreTextWidth = 0;
+	char m_aScoreText[16] = {0};
+	char m_aRankText[16] = {0};
+	char m_aPlayerNameText[MAX_NAME_LENGTH] = {0};
+	int m_RoundRectQuadContainerIndex = 0;
+	int m_OptionalNameTextContainerIndex = 0;
 
-	bool m_Initialized;
+	bool m_Initialized = false;
 };
 
 class CHud : public CComponent
 {
-	float m_Width, m_Height;
-	float m_FrameTimeAvg;
+	float m_Width = 0, m_Height = 0;
+	float m_FrameTimeAvg = 0;
 
-	int m_HudQuadContainerIndex;
+	int m_HudQuadContainerIndex = 0;
 	SScoreInfo m_aScoreInfo[2];
-	int m_FPSTextContainerIndex;
+	int m_FPSTextContainerIndex = 0;
 
 	void RenderCursor();
 
@@ -85,53 +85,53 @@ public:
 private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
-	float m_TimeCpDiff;
-	float m_ServerRecord;
-	float m_aPlayerRecord[NUM_DUMMIES];
-	float m_FinishTimeDiff;
-	int m_DDRaceTime;
-	int m_FinishTimeLastReceivedTick;
-	int m_TimeCpLastReceivedTick;
-	bool m_ShowFinishTime;
+	float m_TimeCpDiff = 0;
+	float m_ServerRecord = 0;
+	float m_aPlayerRecord[NUM_DUMMIES] = {0};
+	float m_FinishTimeDiff = 0;
+	int m_DDRaceTime = 0;
+	int m_FinishTimeLastReceivedTick = 0;
+	int m_TimeCpLastReceivedTick = 0;
+	bool m_ShowFinishTime = false;
 
 	inline float GetMovementInformationBoxHeight();
 	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets
-	int m_aAmmoOffset[NUM_WEAPONS];
-	int m_HealthOffset;
-	int m_EmptyHealthOffset;
-	int m_ArmorOffset;
-	int m_EmptyArmorOffset;
-	int m_aCursorOffset[NUM_WEAPONS];
-	int m_FlagOffset;
-	int m_AirjumpOffset;
-	int m_AirjumpEmptyOffset;
-	int m_WeaponHammerOffset;
-	int m_WeaponGunOffset;
-	int m_WeaponShotgunOffset;
-	int m_WeaponGrenadeOffset;
-	int m_WeaponLaserOffset;
-	int m_WeaponNinjaOffset;
-	int m_EndlessJumpOffset;
-	int m_EndlessHookOffset;
-	int m_JetpackOffset;
-	int m_TeleportGrenadeOffset;
-	int m_TeleportGunOffset;
-	int m_TeleportLaserOffset;
-	int m_SoloOffset;
-	int m_CollisionDisabledOffset;
-	int m_HookHitDisabledOffset;
-	int m_HammerHitDisabledOffset;
-	int m_GunHitDisabledOffset;
-	int m_ShotgunHitDisabledOffset;
-	int m_GrenadeHitDisabledOffset;
-	int m_LaserHitDisabledOffset;
-	int m_DeepFrozenOffset;
-	int m_LiveFrozenOffset;
-	int m_DummyHammerOffset;
-	int m_DummyCopyOffset;
-	int m_PracticeModeOffset;
+	int m_aAmmoOffset[NUM_WEAPONS] = {0};
+	int m_HealthOffset = 0;
+	int m_EmptyHealthOffset = 0;
+	int m_ArmorOffset = 0;
+	int m_EmptyArmorOffset = 0;
+	int m_aCursorOffset[NUM_WEAPONS] = {0};
+	int m_FlagOffset = 0;
+	int m_AirjumpOffset = 0;
+	int m_AirjumpEmptyOffset = 0;
+	int m_WeaponHammerOffset = 0;
+	int m_WeaponGunOffset = 0;
+	int m_WeaponShotgunOffset = 0;
+	int m_WeaponGrenadeOffset = 0;
+	int m_WeaponLaserOffset = 0;
+	int m_WeaponNinjaOffset = 0;
+	int m_EndlessJumpOffset = 0;
+	int m_EndlessHookOffset = 0;
+	int m_JetpackOffset = 0;
+	int m_TeleportGrenadeOffset = 0;
+	int m_TeleportGunOffset = 0;
+	int m_TeleportLaserOffset = 0;
+	int m_SoloOffset = 0;
+	int m_CollisionDisabledOffset = 0;
+	int m_HookHitDisabledOffset = 0;
+	int m_HammerHitDisabledOffset = 0;
+	int m_GunHitDisabledOffset = 0;
+	int m_ShotgunHitDisabledOffset = 0;
+	int m_GrenadeHitDisabledOffset = 0;
+	int m_LaserHitDisabledOffset = 0;
+	int m_DeepFrozenOffset = 0;
+	int m_LiveFrozenOffset = 0;
+	int m_DummyHammerOffset = 0;
+	int m_DummyCopyOffset = 0;
+	int m_PracticeModeOffset = 0;
 };
 
 #endif

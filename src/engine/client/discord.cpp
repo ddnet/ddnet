@@ -28,9 +28,9 @@ FDiscordCreate GetDiscordCreate()
 
 class CDiscord : public IDiscord
 {
-	IDiscordCore *m_pCore;
+	IDiscordCore *m_pCore = nullptr;
 	IDiscordActivityEvents m_ActivityEvents;
-	IDiscordActivityManager *m_pActivityManager;
+	IDiscordActivityManager *m_pActivityManager = nullptr;
 
 public:
 	bool Init(FDiscordCreate pfnDiscordCreate)

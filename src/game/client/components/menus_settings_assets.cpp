@@ -16,7 +16,7 @@ typedef std::function<void()> TMenuAssetScanLoadedFunc;
 
 struct SMenuAssetScanUser
 {
-	void *m_pUser;
+	void *m_pUser = nullptr;
 	TMenuAssetScanLoadedFunc m_LoadedFunc;
 };
 

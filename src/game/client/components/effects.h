@@ -6,9 +6,9 @@
 
 class CEffects : public CComponent
 {
-	bool m_Add5hz;
-	bool m_Add50hz;
-	bool m_Add100hz;
+	bool m_Add5hz = false;
+	bool m_Add50hz = false;
+	bool m_Add100hz = false;
 
 public:
 	CEffects();

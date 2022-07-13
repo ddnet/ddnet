@@ -9,12 +9,12 @@ class CEmoticon : public CComponent
 {
 	void DrawCircle(float x, float y, float r, int Segments);
 
-	bool m_WasActive;
-	bool m_Active;
+	bool m_WasActive = false;
+	bool m_Active = false;
 
 	vec2 m_SelectorMouse;
-	int m_SelectedEmote;
-	int m_SelectedEyeEmote;
+	int m_SelectedEmote = 0;
+	int m_SelectedEyeEmote = 0;
 
 	static void ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData);
 	static void ConEmote(IConsole::IResult *pResult, void *pUserData);

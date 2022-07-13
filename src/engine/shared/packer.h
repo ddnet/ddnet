@@ -12,10 +12,10 @@ public:
 	};
 
 private:
-	unsigned char m_aBuffer[PACKER_BUFFER_SIZE];
-	unsigned char *m_pCurrent;
-	unsigned char *m_pEnd;
-	int m_Error;
+	unsigned char m_aBuffer[PACKER_BUFFER_SIZE] = {0};
+	unsigned char *m_pCurrent = nullptr;
+	unsigned char *m_pEnd = nullptr;
+	int m_Error = 0;
 
 public:
 	void Reset();
@@ -30,10 +30,10 @@ public:
 
 class CUnpacker
 {
-	const unsigned char *m_pStart;
-	const unsigned char *m_pCurrent;
-	const unsigned char *m_pEnd;
-	int m_Error;
+	const unsigned char *m_pStart = nullptr;
+	const unsigned char *m_pCurrent = nullptr;
+	const unsigned char *m_pEnd = nullptr;
+	int m_Error = 0;
 
 public:
 	enum

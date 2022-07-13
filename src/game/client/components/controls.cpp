@@ -60,9 +60,9 @@ void CControls::OnPlayerDeath()
 
 struct CInputState
 {
-	CControls *m_pControls;
-	int *m_pVariable1;
-	int *m_pVariable2;
+	CControls *m_pControls = nullptr;
+	int *m_pVariable1 = nullptr;
+	int *m_pVariable2 = nullptr;
 };
 
 static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
@@ -98,10 +98,10 @@ static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 
 struct CInputSet
 {
-	CControls *m_pControls;
-	int *m_pVariable1;
-	int *m_pVariable2;
-	int m_Value;
+	CControls *m_pControls = nullptr;
+	int *m_pVariable1 = nullptr;
+	int *m_pVariable2 = nullptr;
+	int m_Value = 0;
 };
 
 static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData)

@@ -12,7 +12,7 @@ class IInterface
 {
 	// friend with the kernel implementation
 	friend class CKernel;
-	IKernel *m_pKernel;
+	IKernel *m_pKernel = nullptr;
 
 protected:
 	IKernel *Kernel() { return m_pKernel; }

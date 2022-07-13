@@ -17,7 +17,7 @@ enum
 
 struct CUuid
 {
-	unsigned char m_aData[16];
+	unsigned char m_aData[16] = {0};
 
 	bool operator==(const CUuid &Other) const;
 	bool operator!=(const CUuid &Other) const;
@@ -34,13 +34,13 @@ int ParseUuid(CUuid *pUuid, const char *pBuffer);
 struct CName
 {
 	CUuid m_Uuid;
-	const char *m_pName;
+	const char *m_pName = nullptr;
 };
 
 struct CNameIndexed
 {
 	CUuid m_Uuid;
-	int m_ID;
+	int m_ID = 0;
 
 	bool operator<(const CNameIndexed &Other) const { return m_Uuid < Other.m_Uuid; }
 	bool operator==(const CNameIndexed &Other) const { return m_Uuid == Other.m_Uuid; }

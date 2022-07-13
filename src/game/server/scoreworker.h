@@ -39,24 +39,28 @@ struct CScorePlayerResult : ISqlResult
 		MAP_VOTE,
 		PLAYER_INFO,
 	} m_MessageKind;
-	union
+	union UPlayerInfo
 	{
-		char m_aaMessages[MAX_MESSAGES][512];
-		char m_aBroadcast[1024];
+		char m_aaMessages[MAX_MESSAGES][512] = {{0}};
+		char m_aBroadcast[1024] /* = {0} */;
 		struct
 		{
-			float m_Time;
-			float m_aTimeCp[NUM_CHECKPOINTS];
-			int m_Score;
-			int m_HasFinishScore;
-			int m_Birthday; // 0 indicates no birthday
+			float m_Time = 0;
+			float m_aTimeCp[NUM_CHECKPOINTS] = {0};
+			int m_Score = 0;
+			int m_HasFinishScore = 0;
+			int m_Birthday = 0; // 0 indicates no birthday
 		} m_Info;
 		struct
 		{
-			char m_aReason[VOTE_REASON_LENGTH];
-			char m_aServer[32 + 1];
-			char m_aMap[MAX_MAP_LENGTH + 1];
+			char m_aReason[VOTE_REASON_LENGTH] = {0};
+			char m_aServer[32 + 1] = {0};
+			char m_aMap[MAX_MAP_LENGTH + 1] = {0};
 		} m_MapVote;
+		UPlayerInfo()
+		{
+			mem_zero(this, sizeof(*this));
+		}
 	} m_Data; // PLAYER_INFO
 
 	void SetVariant(Variant v);
@@ -68,7 +72,7 @@ struct CScoreInitResult : ISqlResult
 		m_CurrentRecord(0)
 	{
 	}
-	float m_CurrentRecord;
+	float m_CurrentRecord = 0;
 };
 
 struct CSqlInitData : ISqlData
@@ -79,7 +83,7 @@ struct CSqlInitData : ISqlData
 	}
 
 	// current map
-	char m_aMap[MAX_MAP_LENGTH];
+	char m_aMap[MAX_MAP_LENGTH] = {0};
 };
 
 struct CSqlPlayerRequest : ISqlData
@@ -90,13 +94,13 @@ struct CSqlPlayerRequest : ISqlData
 	}
 
 	// object being requested, either map (128 bytes) or player (16 bytes)
-	char m_aName[MAX_MAP_LENGTH];
+	char m_aName[MAX_MAP_LENGTH] = {0};
 	// current map
-	char m_aMap[MAX_MAP_LENGTH];
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	char m_aRequestingPlayer[MAX_NAME_LENGTH] = {0};
 	// relevant for /top5 kind of requests
-	int m_Offset;
-	char m_aServer[5];
+	int m_Offset = 0;
+	char m_aServer[5] = {0};
 };
 
 struct CScoreRandomMapResult : ISqlResult
@@ -107,9 +111,9 @@ struct CScoreRandomMapResult : ISqlResult
 		m_aMap[0] = '\0';
 		m_aMessage[0] = '\0';
 	}
-	int m_ClientID;
-	char m_aMap[MAX_MAP_LENGTH];
-	char m_aMessage[512];
+	int m_ClientID = 0;
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	char m_aMessage[512] = {0};
 };
 
 struct CSqlRandomMapRequest : ISqlData
@@ -119,10 +123,10 @@ struct CSqlRandomMapRequest : ISqlData
 	{
 	}
 
-	char m_aServerType[32];
-	char m_aCurrentMap[MAX_MAP_LENGTH];
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
-	int m_Stars;
+	char m_aServerType[32] = {0};
+	char m_aCurrentMap[MAX_MAP_LENGTH] = {0};
+	char m_aRequestingPlayer[MAX_NAME_LENGTH] = {0};
+	int m_Stars = 0;
 };
 
 struct CSqlScoreData : ISqlData
@@ -134,17 +138,17 @@ struct CSqlScoreData : ISqlData
 
 	virtual ~CSqlScoreData(){};
 
-	char m_aMap[MAX_MAP_LENGTH];
-	char m_aGameUuid[UUID_MAXSTRSIZE];
-	char m_aName[MAX_MAP_LENGTH];
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	char m_aGameUuid[UUID_MAXSTRSIZE] = {0};
+	char m_aName[MAX_MAP_LENGTH] = {0};
 
-	int m_ClientID;
-	float m_Time;
-	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
-	float m_aCurrentTimeCp[NUM_CHECKPOINTS];
-	int m_Num;
-	bool m_Search;
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	int m_ClientID = 0;
+	float m_Time = 0;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH] = {0};
+	float m_aCurrentTimeCp[NUM_CHECKPOINTS] = {0};
+	int m_Num = 0;
+	bool m_Search = false;
+	char m_aRequestingPlayer[MAX_NAME_LENGTH] = {0};
 };
 
 struct CScoreSaveResult : ISqlResult
@@ -165,10 +169,10 @@ struct CScoreSaveResult : ISqlResult
 		LOAD_SUCCESS,
 		LOAD_FAILED,
 	} m_Status;
-	char m_aMessage[512];
-	char m_aBroadcast[512];
+	char m_aMessage[512] = {0};
+	char m_aBroadcast[512] = {0};
 	CSaveTeam m_SavedTeam;
-	int m_RequestingPlayer;
+	int m_RequestingPlayer = 0;
 	CUuid m_SaveID;
 };
 
@@ -179,12 +183,12 @@ struct CSqlTeamScoreData : ISqlData
 	{
 	}
 
-	char m_aGameUuid[UUID_MAXSTRSIZE];
-	char m_aMap[MAX_MAP_LENGTH];
-	float m_Time;
-	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
-	unsigned int m_Size;
-	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	char m_aGameUuid[UUID_MAXSTRSIZE] = {0};
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	float m_Time = 0;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH] = {0};
+	unsigned int m_Size = 0;
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH] = {{0}};
 };
 
 struct CSqlTeamSave : ISqlData
@@ -195,11 +199,11 @@ struct CSqlTeamSave : ISqlData
 	}
 	virtual ~CSqlTeamSave(){};
 
-	char m_aClientName[MAX_NAME_LENGTH];
-	char m_aMap[MAX_MAP_LENGTH];
-	char m_aCode[128];
-	char m_aGeneratedCode[128];
-	char m_aServer[5];
+	char m_aClientName[MAX_NAME_LENGTH] = {0};
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	char m_aCode[128] = {0};
+	char m_aGeneratedCode[128] = {0};
+	char m_aServer[5] = {0};
 };
 
 struct CSqlTeamLoad : ISqlData
@@ -210,14 +214,14 @@ struct CSqlTeamLoad : ISqlData
 	}
 	virtual ~CSqlTeamLoad(){};
 
-	char m_aCode[128];
-	char m_aMap[MAX_MAP_LENGTH];
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
-	int m_ClientID;
+	char m_aCode[128] = {0};
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	char m_aRequestingPlayer[MAX_NAME_LENGTH] = {0};
+	int m_ClientID = 0;
 	// struct holding all player names in the team or an empty string
-	char m_aClientNames[MAX_CLIENTS][MAX_NAME_LENGTH];
-	int m_aClientID[MAX_CLIENTS];
-	int m_NumPlayer;
+	char m_aaClientNames[MAX_CLIENTS][MAX_NAME_LENGTH] = {{0}};
+	int m_aClientID[MAX_CLIENTS] = {0};
+	int m_NumPlayer = 0;
 };
 
 class CPlayerData
@@ -243,15 +247,15 @@ public:
 			m_aBestTimeCp[i] = aTimeCp[i];
 	}
 
-	float m_BestTime;
-	float m_aBestTimeCp[NUM_CHECKPOINTS];
+	float m_BestTime = 0;
+	float m_aBestTimeCp[NUM_CHECKPOINTS] = {0};
 };
 
 struct CTeamrank
 {
 	CUuid m_TeamID;
-	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
-	unsigned int m_NumNames;
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH] = {{0}};
+	unsigned int m_NumNames = 0;
 	CTeamrank();
 
 	// Assumes that a database query equivalent to

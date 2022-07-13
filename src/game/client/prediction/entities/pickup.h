@@ -16,14 +16,14 @@ public:
 	bool InDDNetTile() { return m_IsCoreActive; }
 
 private:
-	int m_Type;
-	int m_Subtype;
+	int m_Type = 0;
+	int m_Subtype = 0;
 
 	// DDRace
 
 	void Move();
 	vec2 m_Core;
-	bool m_IsCoreActive;
+	bool m_IsCoreActive = false;
 };
 
 #endif

@@ -17,10 +17,10 @@
 #else
 struct SHA256_CTX
 {
-	uint64_t length;
-	uint32_t state[8];
-	uint32_t curlen;
-	unsigned char buf[64];
+	uint64_t length = 0;
+	uint32_t state[8] = {0};
+	uint32_t curlen = 0;
+	unsigned char buf[64] = {0};
 };
 typedef md5_state_t MD5_CTX;
 #endif

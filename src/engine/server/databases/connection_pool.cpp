@@ -34,8 +34,8 @@ struct CSqlExecData
 		CDbConnectionPool::FWrite m_pWriteFunc;
 	} m_Ptr;
 
-	std::unique_ptr<const ISqlData> m_pThreadData;
-	const char *m_pName;
+	std::unique_ptr<const ISqlData> m_pThreadData = nullptr;
+	const char *m_pName = nullptr;
 };
 
 CSqlExecData::CSqlExecData(
@@ -91,8 +91,8 @@ void CDbConnectionPool::Execute(
 	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
-	m_FirstElem %= std::size(m_aTasks);
+	m_apTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
+	m_FirstElem %= std::size(m_apTasks);
 	m_NumElem.Signal();
 }
 
@@ -101,8 +101,8 @@ void CDbConnectionPool::ExecuteWrite(
 	std::unique_ptr<const ISqlData> pSqlRequestData,
 	const char *pName)
 {
-	m_aTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
-	m_FirstElem %= std::size(m_aTasks);
+	m_apTasks[m_FirstElem++] = std::make_unique<CSqlExecData>(pFunc, std::move(pSqlRequestData), pName);
+	m_FirstElem %= std::size(m_apTasks);
 	m_NumElem.Signal();
 }
 
@@ -144,14 +144,14 @@ void CDbConnectionPool::Worker()
 			FailMode = false;
 		}
 		m_NumElem.Wait();
-		auto pThreadData = std::move(m_aTasks[m_LastElem++]);
+		auto pThreadData = std::move(m_apTasks[m_LastElem++]);
 		// work through all database jobs after OnShutdown is called before exiting the thread
 		if(pThreadData == nullptr)
 		{
 			m_Shutdown.store(false);
 			return;
 		}
-		m_LastElem %= std::size(m_aTasks);
+		m_LastElem %= std::size(m_apTasks);
 		bool Success = false;
 		switch(pThreadData->m_Mode)
 		{

@@ -69,41 +69,41 @@ public:
 
 protected:
 	// quick access to state of the client
-	EClientState m_State;
-	ELoadingStateDetail m_LoadingStateDetail;
-	int64_t m_StateStartTime;
+	EClientState m_State = STATE_OFFLINE;
+	ELoadingStateDetail m_LoadingStateDetail = LOADING_STATE_DETAIL_INITIAL;
+	int64_t m_StateStartTime = 0;
 
 	// quick access to time variables
-	int m_aPrevGameTick[NUM_DUMMIES];
-	int m_aCurGameTick[NUM_DUMMIES];
-	float m_aGameIntraTick[NUM_DUMMIES];
-	float m_aGameTickTime[NUM_DUMMIES];
-	float m_aGameIntraTickSincePrev[NUM_DUMMIES];
+	int m_aPrevGameTick[NUM_DUMMIES] = {0};
+	int m_aCurGameTick[NUM_DUMMIES] = {0};
+	float m_aGameIntraTick[NUM_DUMMIES] = {0};
+	float m_aGameTickTime[NUM_DUMMIES] = {0};
+	float m_aGameIntraTickSincePrev[NUM_DUMMIES] = {0};
 
-	int m_aPredTick[NUM_DUMMIES];
-	float m_aPredIntraTick[NUM_DUMMIES];
+	int m_aPredTick[NUM_DUMMIES] = {0};
+	float m_aPredIntraTick[NUM_DUMMIES] = {0};
 
-	float m_LocalTime;
-	float m_RenderFrameTime;
+	float m_LocalTime = 0;
+	float m_RenderFrameTime = 0;
 
-	int m_GameTickSpeed;
+	int m_GameTickSpeed = 0;
 
-	float m_FrameTimeAvg;
+	float m_FrameTimeAvg = 0;
 
 	TMapLoadingCallbackFunc m_MapLoadingCBFunc;
 
 public:
-	char m_aNews[3000];
-	char m_aMapDownloadUrl[256];
-	int m_Points;
-	int64_t m_ReconnectTime;
+	char m_aNews[3000] = {0};
+	char m_aMapDownloadUrl[256] = {0};
+	int m_Points = 0;
+	int64_t m_ReconnectTime = 0;
 
 	class CSnapItem
 	{
 	public:
-		int m_Type;
-		int m_ID;
-		int m_DataSize;
+		int m_Type = 0;
+		int m_ID = 0;
+		int m_DataSize = 0;
 	};
 
 	enum

@@ -46,9 +46,9 @@ public:
 	void ReleaseHooked(int ClientID);
 	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, CEntity *pNotThis = nullptr);
 
-	int m_GameTick;
-	int m_GameTickSpeed;
-	CCollision *m_pCollision;
+	int m_GameTick = 0;
+	int m_GameTickSpeed = 0;
+	CCollision *m_pCollision = nullptr;
 
 	// getter for server variables
 	int GameTick() { return m_GameTick; }
@@ -66,22 +66,22 @@ public:
 	// for client side prediction
 	struct
 	{
-		bool m_IsDDRace;
-		bool m_IsVanilla;
-		bool m_IsFNG;
-		bool m_InfiniteAmmo;
-		bool m_PredictTiles;
-		int m_PredictFreeze;
-		bool m_PredictWeapons;
-		bool m_PredictDDRace;
-		bool m_IsSolo;
-		bool m_UseTuneZones;
-		bool m_BugDDRaceInput;
+		bool m_IsDDRace = false;
+		bool m_IsVanilla = false;
+		bool m_IsFNG = false;
+		bool m_InfiniteAmmo = false;
+		bool m_PredictTiles = false;
+		int m_PredictFreeze = 0;
+		bool m_PredictWeapons = false;
+		bool m_PredictDDRace = false;
+		bool m_IsSolo = false;
+		bool m_UseTuneZones = false;
+		bool m_BugDDRaceInput = false;
 	} m_WorldConfig;
 
-	bool m_IsValidCopy;
-	CGameWorld *m_pParent;
-	CGameWorld *m_pChild;
+	bool m_IsValidCopy = false;
+	CGameWorld *m_pParent = nullptr;
+	CGameWorld *m_pChild = nullptr;
 
 	void OnModified();
 	void NetObjBegin();
@@ -92,7 +92,7 @@ public:
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
 	void Clear();
 
-	CTuningParams *m_pTuningList;
+	CTuningParams *m_pTuningList = nullptr;
 	CTuningParams *TuningList() { return m_pTuningList; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 
@@ -100,9 +100,9 @@ private:
 	void RemoveEntities();
 
 	CEntity *m_pNextTraverseEntity = nullptr;
-	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
+	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES] = {nullptr};
 
-	CCharacter *m_apCharacters[MAX_CLIENTS];
+	CCharacter *m_apCharacters[MAX_CLIENTS] = {nullptr};
 };
 
 class CCharOrder

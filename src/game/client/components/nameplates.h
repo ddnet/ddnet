@@ -27,15 +27,15 @@ struct SPlayerNamePlate
 		m_NameTextFontSize = m_ClanNameTextFontSize = 0;
 	}
 
-	char m_aName[MAX_NAME_LENGTH];
-	float m_NameTextWidth;
-	int m_NameTextContainerIndex;
-	float m_NameTextFontSize;
+	char m_aName[MAX_NAME_LENGTH] = {0};
+	float m_NameTextWidth = 0;
+	int m_NameTextContainerIndex = 0;
+	float m_NameTextFontSize = 0;
 
-	char m_aClanName[MAX_CLAN_LENGTH];
-	float m_ClanNameTextWidth;
-	int m_ClanNameTextContainerIndex;
-	float m_ClanNameTextFontSize;
+	char m_aClanName[MAX_CLAN_LENGTH] = {0};
+	float m_ClanNameTextWidth = 0;
+	int m_ClanNameTextContainerIndex = 0;
+	float m_ClanNameTextFontSize = 0;
 };
 
 class CNamePlates : public CComponent
@@ -47,11 +47,11 @@ class CNamePlates : public CComponent
 	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha = false);
 
 	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
-	class CPlayers *m_pPlayers;
+	class CPlayers *m_pPlayers = nullptr;
 
 	void ResetNamePlates();
 
-	int m_DirectionQuadContainerIndex;
+	int m_DirectionQuadContainerIndex = 0;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

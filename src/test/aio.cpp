@@ -8,9 +8,9 @@ static const int BUF_SIZE = 64 * 1024;
 class Async : public ::testing::Test
 {
 protected:
-	ASYNCIO *m_pAio;
+	ASYNCIO *m_pAio = nullptr;
 	CTestInfo m_Info;
-	bool Delete;
+	bool Delete = false;
 
 	void SetUp() override
 	{

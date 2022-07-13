@@ -11,15 +11,15 @@ struct CSoundSource;
 
 class CMapSounds : public CComponent
 {
-	int m_aSounds[64];
-	int m_Count;
+	int m_aSounds[64] = {0};
+	int m_Count = 0;
 
 	struct CSourceQueueEntry
 	{
-		int m_Sound;
-		bool m_HighDetail;
+		int m_Sound = 0;
+		bool m_HighDetail = false;
 		ISound::CVoiceHandle m_Voice;
-		CSoundSource *m_pSource;
+		CSoundSource *m_pSource = nullptr;
 
 		bool operator==(const CSourceQueueEntry &Other) const { return (m_Sound == Other.m_Sound) && (m_Voice == Other.m_Voice) && (m_pSource == Other.m_pSource); }
 	};

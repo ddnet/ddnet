@@ -28,37 +28,37 @@ class CGameConsole : public CComponent
 	public:
 		struct CBacklogEntry
 		{
-			float m_YOffset;
+			float m_YOffset = 0;
 			ColorRGBA m_PrintColor;
-			char m_aText[1];
+			char m_aText[1] = {0};
 		};
 		std::mutex m_BacklogLock;
 		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
-		char *m_pHistoryEntry;
+		char *m_pHistoryEntry = nullptr;
 
 		CLineInput m_Input;
-		int m_Type;
-		int m_CompletionEnumerationCount;
-		int m_BacklogCurPage;
+		int m_Type = 0;
+		int m_CompletionEnumerationCount = 0;
+		int m_BacklogCurPage = 0;
 
-		CGameConsole *m_pGameConsole;
+		CGameConsole *m_pGameConsole = nullptr;
 
-		char m_aCompletionBuffer[128];
-		bool m_CompletionUsed;
-		int m_CompletionChosen;
-		int m_CompletionFlagmask;
-		float m_CompletionRenderOffset;
-		bool m_ReverseTAB;
+		char m_aCompletionBuffer[128] = {0};
+		bool m_CompletionUsed = false;
+		int m_CompletionChosen = 0;
+		int m_CompletionFlagmask = 0;
+		float m_CompletionRenderOffset = 0;
+		bool m_ReverseTAB = false;
 
-		char m_aUser[32];
-		bool m_UserGot;
-		bool m_UsernameReq;
+		char m_aUser[32] = {0};
+		bool m_UserGot = false;
+		bool m_UsernameReq = false;
 
-		bool m_IsCommand;
-		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
-		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
-		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		bool m_IsCommand = false;
+		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH] = {0};
+		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH] = {0};
+		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH] = {0};
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
@@ -76,7 +76,7 @@ class CGameConsole : public CComponent
 		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
 	};
 
-	class IConsole *m_pConsole;
+	class IConsole *m_pConsole = nullptr;
 	CConsoleLogger *m_pConsoleLogger = nullptr;
 
 	CInstance m_LocalConsole;
@@ -85,10 +85,10 @@ class CGameConsole : public CComponent
 	CInstance *CurrentConsole();
 	float TimeNow();
 
-	int m_ConsoleType;
-	int m_ConsoleState;
-	float m_StateChangeEnd;
-	float m_StateChangeDuration;
+	int m_ConsoleType = 0;
+	int m_ConsoleState = 0;
+	float m_StateChangeEnd = 0;
+	float m_StateChangeDuration = 0;
 
 	bool m_MouseIsPress = false;
 	int m_MousePressX = 0;

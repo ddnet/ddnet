@@ -11,8 +11,8 @@ class CCountryFlags : public CComponent
 public:
 	struct CCountryFlag
 	{
-		int m_CountryCode;
-		char m_aCountryCodeString[8];
+		int m_CountryCode = 0;
+		char m_aCountryCodeString[8] = {0};
 		IGraphics::CTextureHandle m_Texture;
 
 		bool operator<(const CCountryFlag &Other) const { return str_comp(m_aCountryCodeString, Other.m_aCountryCodeString) < 0; }
@@ -34,9 +34,9 @@ private:
 		CODE_RANGE = CODE_UB - CODE_LB + 1,
 	};
 	std::vector<CCountryFlag> m_vCountryFlags;
-	size_t m_aCodeIndexLUT[CODE_RANGE];
+	size_t m_aCodeIndexLUT[CODE_RANGE] = {0};
 
-	int m_FlagsQuadContainerIndex;
+	int m_FlagsQuadContainerIndex = 0;
 
 	void LoadCountryflagsIndexfile();
 };

@@ -13,11 +13,11 @@ class IStorage;
 
 class CSound : public IEngineSound
 {
-	bool m_SoundEnabled;
+	bool m_SoundEnabled = false;
 	SDL_AudioDeviceID m_Device;
 
-	IEngineGraphics *m_pGraphics;
-	IStorage *m_pStorage;
+	IEngineGraphics *m_pGraphics = nullptr;
+	IStorage *m_pStorage = nullptr;
 
 	int AllocID();
 

@@ -21,9 +21,9 @@ public:
 	class CEntry
 	{
 	public:
-		int m_NumAddrs;
+		int m_NumAddrs = 0;
 		NETADDR m_aAddrs[MAX_SERVER_ADDRESSES];
-		bool m_AllowPing;
+		bool m_AllowPing = false;
 	};
 
 	virtual ~IFavorites() {}

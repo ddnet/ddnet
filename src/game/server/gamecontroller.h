@@ -16,11 +16,11 @@ class IGameController
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
 	vec2 m_aaSpawnPoints[3][64];
-	int m_aNumSpawnPoints[3];
+	int m_aNumSpawnPoints[3] = {0};
 
-	class CGameContext *m_pGameServer;
-	class CConfig *m_pConfig;
-	class IServer *m_pServer;
+	class CGameContext *m_pGameServer = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IServer *m_pServer = nullptr;
 
 protected:
 	CGameContext *GameServer() const { return m_pGameServer; }
@@ -39,9 +39,9 @@ protected:
 		}
 
 		vec2 m_Pos;
-		bool m_Got;
-		int m_FriendlyTeam;
-		float m_Score;
+		bool m_Got = false;
+		int m_FriendlyTeam = 0;
+		float m_Score = 0;
 	};
 
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam);
@@ -49,21 +49,21 @@ protected:
 
 	void ResetGame();
 
-	char m_aMapWish[MAX_MAP_LENGTH];
+	char m_aMapWish[MAX_MAP_LENGTH] = {0};
 
-	int m_RoundStartTick;
-	int m_GameOverTick;
-	int m_SuddenDeath;
+	int m_RoundStartTick = 0;
+	int m_GameOverTick = 0;
+	int m_SuddenDeath = 0;
 
-	int m_Warmup;
-	int m_RoundCount;
+	int m_Warmup = 0;
+	int m_RoundCount = 0;
 
-	int m_GameFlags;
-	int m_UnbalancedTick;
-	bool m_ForceBalanced;
+	int m_GameFlags = 0;
+	int m_UnbalancedTick = 0;
+	bool m_ForceBalanced = false;
 
 public:
-	const char *m_pGameType;
+	const char *m_pGameType = nullptr;
 
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
@@ -146,7 +146,7 @@ public:
 
 	// DDRace
 
-	float m_CurrentRecord;
+	float m_CurrentRecord = 0;
 };
 
 #endif

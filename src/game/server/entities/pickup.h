@@ -16,9 +16,9 @@ public:
 	void Snap(int SnappingClient) override;
 
 private:
-	int m_Type;
-	int m_Subtype;
-	//int m_SpawnTick;
+	int m_Type = 0;
+	int m_Subtype = 0;
+	//int m_SpawnTick = 0;
 
 	// DDRace
 

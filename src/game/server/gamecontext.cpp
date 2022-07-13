@@ -35,9 +35,9 @@
 // Not thread-safe!
 class CClientChatLogger : public ILogger
 {
-	CGameContext *m_pGameServer;
-	int m_ClientID;
-	ILogger *m_pOuterLogger;
+	CGameContext *m_pGameServer = nullptr;
+	int m_ClientID = 0;
+	ILogger *m_pOuterLogger = nullptr;
 
 public:
 	CClientChatLogger(CGameContext *pGameServer, int ClientID, ILogger *pOuterLogger) :
@@ -87,7 +87,7 @@ void CGameContext::Construct(int Resetting)
 	m_NumVoteOptions = 0;
 	m_LastMapVote = 0;
 
-	m_SqlRandomMapResult = nullptr;
+	m_pSqlRandomMapResult = nullptr;
 
 	m_pScore = nullptr;
 	m_NumMutes = 0;
@@ -1086,18 +1086,18 @@ void CGameContext::OnTick()
 		}
 	}
 
-	if(m_SqlRandomMapResult != nullptr && m_SqlRandomMapResult->m_Completed)
+	if(m_pSqlRandomMapResult != nullptr && m_pSqlRandomMapResult->m_Completed)
 	{
-		if(m_SqlRandomMapResult->m_Success)
+		if(m_pSqlRandomMapResult->m_Success)
 		{
-			if(PlayerExists(m_SqlRandomMapResult->m_ClientID) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
-				SendChatTarget(m_SqlRandomMapResult->m_ClientID, m_SqlRandomMapResult->m_aMessage);
-			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
-				Server()->ChangeMap(m_SqlRandomMapResult->m_aMap);
+			if(PlayerExists(m_pSqlRandomMapResult->m_ClientID) && m_pSqlRandomMapResult->m_aMessage[0] != '\0')
+				SendChatTarget(m_pSqlRandomMapResult->m_ClientID, m_pSqlRandomMapResult->m_aMessage);
+			if(m_pSqlRandomMapResult->m_aMap[0] != '\0')
+				Server()->ChangeMap(m_pSqlRandomMapResult->m_aMap);
 			else
 				m_LastMapVote = 0;
 		}
-		m_SqlRandomMapResult = nullptr;
+		m_pSqlRandomMapResult = nullptr;
 	}
 
 #ifdef CONF_DEBUG
@@ -1409,7 +1409,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	for(int p = 0; p < 6; p++)
 	{
-		NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		NewClientInfoMsg.m_apSkinPartNames[p] = &pNewPlayer->m_TeeInfos.m_aaSkinPartNames[p][0];
 		NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
 		NewClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
 	}
@@ -1439,7 +1439,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 			for(int p = 0; p < 6; p++)
 			{
-				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				ClientInfoMsg.m_apSkinPartNames[p] = &pPlayer->m_TeeInfos.m_aaSkinPartNames[p][0];
 				ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 				ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 			}
@@ -2380,7 +2380,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				for(int p = 0; p < 6; p++)
 				{
-					Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+					Info.m_apSkinPartNames[p] = &pPlayer->m_TeeInfos.m_aaSkinPartNames[p][0];
 					Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 					Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 				}
@@ -2400,7 +2400,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Msg.m_ClientID = ClientID;
 				for(int p = 0; p < 6; p++)
 				{
-					Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+					Msg.m_apSkinPartNames[p] = &pPlayer->m_TeeInfos.m_aaSkinPartNames[p][0];
 					Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 					Msg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 				}
@@ -3072,7 +3072,7 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 
 struct CMapNameItem
 {
-	char m_aName[IO_MAX_PATH_LENGTH - 4];
+	char m_aName[IO_MAX_PATH_LENGTH - 4] = {0};
 
 	bool operator<(const CMapNameItem &Other) const { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
 };

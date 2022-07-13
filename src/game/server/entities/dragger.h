@@ -23,12 +23,12 @@ class CDragger : public CEntity
 {
 	// m_Core is the direction vector by which a dragger is shifted at each movement tick (every 150ms)
 	vec2 m_Core;
-	float m_Strength;
-	bool m_IgnoreWalls;
-	int m_EvalTick;
+	float m_Strength = 0;
+	bool m_IgnoreWalls = false;
+	int m_EvalTick = 0;
 
-	int m_aTargetIdInTeam[MAX_CLIENTS];
-	CDraggerBeam *m_apDraggerBeam[MAX_CLIENTS];
+	int m_aTargetIdInTeam[MAX_CLIENTS] = {0};
+	CDraggerBeam *m_apDraggerBeam[MAX_CLIENTS] = {nullptr};
 
 	void LookForPlayersToDrag();
 

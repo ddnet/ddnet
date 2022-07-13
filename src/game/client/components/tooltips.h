@@ -11,9 +11,9 @@
 struct CTooltip
 {
 	CUIRect m_Rect;
-	const char *m_pText;
-	float m_WidthHint;
-	bool m_OnScreen; // used to know if the tooltip should be rendered.
+	const char *m_pText = nullptr;
+	float m_WidthHint = 0;
+	bool m_OnScreen = false; // used to know if the tooltip should be rendered.
 };
 
 /**
@@ -25,7 +25,7 @@ class CTooltips : public CComponent
 {
 	std::unordered_map<uintptr_t, CTooltip> m_Tooltips;
 	std::optional<std::reference_wrapper<CTooltip>> m_ActiveTooltip;
-	int64_t m_HoverTime;
+	int64_t m_HoverTime = 0;
 
 	/**
 	 * The passed tooltip is only actually set if there is no currently active tooltip.

@@ -356,15 +356,15 @@ bool AddTile(std::vector<SGraphicTile> &vTmpTiles, std::vector<SGraphicTileTexur
 
 struct STmpQuadVertexTextured
 {
-	float m_X, m_Y, m_CenterX, m_CenterY;
-	unsigned char m_R, m_G, m_B, m_A;
-	float m_U, m_V;
+	float m_X = 0, m_Y = 0, m_CenterX = 0, m_CenterY = 0;
+	unsigned char m_R = 0, m_G = 0, m_B = 0, m_A = 0;
+	float m_U = 0, m_V = 0;
 };
 
 struct STmpQuadVertex
 {
-	float m_X, m_Y, m_CenterX, m_CenterY;
-	unsigned char m_R, m_G, m_B, m_A;
+	float m_X = 0, m_Y = 0, m_CenterX = 0, m_CenterY = 0;
+	unsigned char m_R = 0, m_G = 0, m_B = 0, m_A = 0;
 };
 
 struct STmpQuad

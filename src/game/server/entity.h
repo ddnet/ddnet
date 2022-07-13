@@ -21,25 +21,25 @@ class CEntity
 
 private:
 	friend CGameWorld; // entity list handling
-	CEntity *m_pPrevTypeEntity;
-	CEntity *m_pNextTypeEntity;
+	CEntity *m_pPrevTypeEntity = nullptr;
+	CEntity *m_pNextTypeEntity = nullptr;
 
 	/* Identity */
-	CGameWorld *m_pGameWorld;
-	CCollision *m_pCCollision;
+	CGameWorld *m_pGameWorld = nullptr;
+	CCollision *m_pCCollision = nullptr;
 
-	int m_ID;
-	int m_ObjType;
+	int m_ID = 0;
+	int m_ObjType = 0;
 
 	/*
 		Variable: m_ProximityRadius
 			Contains the physical size of the entity.
 	*/
-	float m_ProximityRadius;
+	float m_ProximityRadius = 0;
 
 protected:
 	/* State */
-	bool m_MarkedForDestroy;
+	bool m_MarkedForDestroy = false;
 
 public: // TODO: Maybe make protected
 	/*
@@ -153,8 +153,8 @@ public: // TODO: Maybe make protected
 	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
 	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *pOutPos);
 
-	int m_Number;
-	int m_Layer;
+	int m_Number = 0;
+	int m_Layer = 0;
 };
 
 bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);

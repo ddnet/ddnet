@@ -1,5 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
+/* If you are missing that file, acquire a complete release at teeworlds.com.				*/
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
@@ -222,56 +222,56 @@ struct CQuad
 	CColor m_aColors[4];
 	CPoint m_aTexcoords[4];
 
-	int m_PosEnv;
-	int m_PosEnvOffset;
+	int m_PosEnv = 0;
+	int m_PosEnvOffset = 0;
 
-	int m_ColorEnv;
-	int m_ColorEnvOffset;
+	int m_ColorEnv = 0;
+	int m_ColorEnvOffset = 0;
 };
 
 class CTile
 {
 public:
-	unsigned char m_Index;
-	unsigned char m_Flags;
-	unsigned char m_Skip;
-	unsigned char m_Reserved;
+	unsigned char m_Index = 0;
+	unsigned char m_Flags = 0;
+	unsigned char m_Skip = 0;
+	unsigned char m_Reserved = 0;
 };
 
 struct CMapItemInfo
 {
-	int m_Version;
-	int m_Author;
-	int m_MapVersion;
-	int m_Credits;
-	int m_License;
+	int m_Version = 0;
+	int m_Author = 0;
+	int m_MapVersion = 0;
+	int m_Credits = 0;
+	int m_License = 0;
 };
 
 struct CMapItemInfoSettings : CMapItemInfo
 {
-	int m_Settings;
+	int m_Settings = 0;
 };
 
 struct CMapItemImage
 {
-	int m_Version;
-	int m_Width;
-	int m_Height;
-	int m_External;
-	int m_ImageName;
-	int m_ImageData;
+	int m_Version = 0;
+	int m_Width = 0;
+	int m_Height = 0;
+	int m_External = 0;
+	int m_ImageName = 0;
+	int m_ImageData = 0;
 };
 
 struct CMapItemGroup_v1
 {
-	int m_Version;
-	int m_OffsetX;
-	int m_OffsetY;
-	int m_ParallaxX;
-	int m_ParallaxY;
+	int m_Version = 0;
+	int m_OffsetX = 0;
+	int m_OffsetY = 0;
+	int m_ParallaxX = 0;
+	int m_ParallaxY = 0;
 
-	int m_StartLayer;
-	int m_NumLayers;
+	int m_StartLayer = 0;
+	int m_NumLayers = 0;
 };
 
 struct CMapItemGroup : public CMapItemGroup_v1
@@ -281,82 +281,82 @@ struct CMapItemGroup : public CMapItemGroup_v1
 		CURRENT_VERSION = 3
 	};
 
-	int m_UseClipping;
-	int m_ClipX;
-	int m_ClipY;
-	int m_ClipW;
-	int m_ClipH;
+	int m_UseClipping = 0;
+	int m_ClipX = 0;
+	int m_ClipY = 0;
+	int m_ClipW = 0;
+	int m_ClipH = 0;
 
-	int m_aName[3];
+	int m_aName[3] = {0};
 };
 
 struct CMapItemLayer
 {
-	int m_Version;
-	int m_Type;
-	int m_Flags;
+	int m_Version = 0;
+	int m_Type = 0;
+	int m_Flags = 0;
 };
 
 struct CMapItemLayerTilemap
 {
 	CMapItemLayer m_Layer;
-	int m_Version;
+	int m_Version = 0;
 
-	int m_Width;
-	int m_Height;
-	int m_Flags;
+	int m_Width = 0;
+	int m_Height = 0;
+	int m_Flags = 0;
 
 	CColor m_Color;
-	int m_ColorEnv;
-	int m_ColorEnvOffset;
+	int m_ColorEnv = 0;
+	int m_ColorEnvOffset = 0;
 
-	int m_Image;
-	int m_Data;
+	int m_Image = 0;
+	int m_Data = 0;
 
-	int m_aName[3];
+	int m_aName[3] = {0};
 
 	// DDRace
 
-	int m_Tele;
-	int m_Speedup;
-	int m_Front;
-	int m_Switch;
-	int m_Tune;
+	int m_Tele = 0;
+	int m_Speedup = 0;
+	int m_Front = 0;
+	int m_Switch = 0;
+	int m_Tune = 0;
 };
 
 struct CMapItemLayerQuads
 {
 	CMapItemLayer m_Layer;
-	int m_Version;
+	int m_Version = 0;
 
-	int m_NumQuads;
-	int m_Data;
-	int m_Image;
+	int m_NumQuads = 0;
+	int m_Data = 0;
+	int m_Image = 0;
 
-	int m_aName[3];
+	int m_aName[3] = {0};
 };
 
 struct CMapItemVersion
 {
-	int m_Version;
+	int m_Version = 0;
 };
 
 struct CEnvPoint
 {
-	int m_Time; // in ms
-	int m_Curvetype;
-	int m_aValues[4]; // 1-4 depending on envelope (22.10 fixed point)
+	int m_Time = 0; // in ms
+	int m_Curvetype = 0;
+	int m_aValues[4] = {0}; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
 };
 
 struct CMapItemEnvelope_v1
 {
-	int m_Version;
-	int m_Channels;
-	int m_StartPoint;
-	int m_NumPoints;
-	int m_aName[8];
+	int m_Version = 0;
+	int m_Channels = 0;
+	int m_StartPoint = 0;
+	int m_NumPoints = 0;
+	int m_aName[8] = {0};
 };
 
 struct CMapItemEnvelope : public CMapItemEnvelope_v1
@@ -365,7 +365,7 @@ struct CMapItemEnvelope : public CMapItemEnvelope_v1
 	{
 		CURRENT_VERSION = 2
 	};
-	int m_Synchronized;
+	int m_Synchronized = 0;
 };
 
 struct CSoundShape
@@ -379,35 +379,37 @@ struct CSoundShape
 
 	struct CRectangle
 	{
-		int m_Width, m_Height; // fxp 22.10
+		int m_Width = 0, m_Height = 0; // fxp 22.10
 	};
 
 	struct CCircle
 	{
-		int m_Radius;
+		int m_Radius = 0;
 	};
 
-	int m_Type;
+	int m_Type = 0;
 
 	union
 	{
 		CRectangle m_Rectangle;
 		CCircle m_Circle;
 	};
+
+	CSoundShape() {} // required due to union
 };
 
 struct CSoundSource
 {
-	CPoint m_Position;
-	int m_Loop;
-	int m_Pan; // 0 - no panning, 1 - panning
-	int m_TimeDelay; // in s
-	int m_Falloff; // [0,255] // 0 - No falloff, 255 - full
+	CPoint m_Position = {0, 0};
+	int m_Loop = 0;
+	int m_Pan = 0; // 0 - no panning, 1 - panning
+	int m_TimeDelay = 0; // in s
+	int m_Falloff = 0; // [0,255] // 0 - No falloff, 255 - full
 
-	int m_PosEnv;
-	int m_PosEnvOffset;
-	int m_SoundEnv;
-	int m_SoundEnvOffset;
+	int m_PosEnv = 0;
+	int m_PosEnvOffset = 0;
+	int m_SoundEnv = 0;
+	int m_SoundEnvOffset = 0;
 
 	CSoundShape m_Shape;
 };
@@ -420,24 +422,24 @@ struct CMapItemLayerSounds
 	};
 
 	CMapItemLayer m_Layer;
-	int m_Version;
+	int m_Version = 0;
 
-	int m_NumSources;
-	int m_Data;
-	int m_Sound;
+	int m_NumSources = 0;
+	int m_Data = 0;
+	int m_Sound = 0;
 
-	int m_aName[3];
+	int m_aName[3] = {0};
 };
 
 struct CMapItemSound
 {
-	int m_Version;
+	int m_Version = 0;
 
-	int m_External;
+	int m_External = 0;
 
-	int m_SoundName;
-	int m_SoundData;
-	int m_SoundDataSize;
+	int m_SoundName = 0;
+	int m_SoundData = 0;
+	int m_SoundDataSize = 0;
 };
 
 // DDRace
@@ -445,41 +447,41 @@ struct CMapItemSound
 class CTeleTile
 {
 public:
-	unsigned char m_Number;
-	unsigned char m_Type;
+	unsigned char m_Number = 0;
+	unsigned char m_Type = 0;
 };
 
 class CSpeedupTile
 {
 public:
-	unsigned char m_Force;
-	unsigned char m_MaxSpeed;
-	unsigned char m_Type;
-	short m_Angle;
+	unsigned char m_Force = 0;
+	unsigned char m_MaxSpeed = 0;
+	unsigned char m_Type = 0;
+	short m_Angle = 0;
 };
 
 class CSwitchTile
 {
 public:
-	unsigned char m_Number;
-	unsigned char m_Type;
-	unsigned char m_Flags;
-	unsigned char m_Delay;
+	unsigned char m_Number = 0;
+	unsigned char m_Type = 0;
+	unsigned char m_Flags = 0;
+	unsigned char m_Delay = 0;
 };
 
 class CDoorTile
 {
 public:
-	unsigned char m_Index;
-	unsigned char m_Flags;
-	int m_Number;
+	unsigned char m_Index = 0;
+	unsigned char m_Flags = 0;
+	int m_Number = 0;
 };
 
 class CTuneTile
 {
 public:
-	unsigned char m_Number;
-	unsigned char m_Type;
+	unsigned char m_Number = 0;
+	unsigned char m_Type = 0;
 };
 
 bool IsValidGameTile(int Index);

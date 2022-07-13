@@ -25,29 +25,29 @@ extern const CUuid SHA256_EXTENSION;
 
 struct CDemoHeader
 {
-	unsigned char m_aMarker[7];
-	unsigned char m_Version;
-	char m_aNetversion[64];
-	char m_aMapName[64];
-	unsigned char m_aMapSize[4];
-	unsigned char m_aMapCrc[4];
-	char m_aType[8];
-	unsigned char m_aLength[4];
-	char m_aTimestamp[20];
+	unsigned char m_aMarker[7] = {0};
+	unsigned char m_Version = 0;
+	char m_aNetversion[64] = {0};
+	char m_aMapName[64] = {0};
+	unsigned char m_aMapSize[4] = {0};
+	unsigned char m_aMapCrc[4] = {0};
+	char m_aType[8] = {0};
+	unsigned char m_aLength[4] = {0};
+	char m_aTimestamp[20] = {0};
 };
 
 struct CTimelineMarkers
 {
-	unsigned char m_aNumTimelineMarkers[4];
-	unsigned char m_aTimelineMarkers[MAX_TIMELINE_MARKERS][4];
+	unsigned char m_aNumTimelineMarkers[4] = {0};
+	unsigned char m_aaTimelineMarkers[MAX_TIMELINE_MARKERS][4] = {{0}};
 };
 
 struct CMapInfo
 {
-	char m_aName[MAX_MAP_LENGTH];
+	char m_aName[MAX_MAP_LENGTH] = {0};
 	SHA256_DIGEST m_Sha256;
-	int m_Crc;
-	int m_Size;
+	int m_Crc = 0;
+	int m_Size = 0;
 };
 
 class IDemoPlayer : public IInterface
@@ -57,15 +57,15 @@ public:
 	class CInfo
 	{
 	public:
-		bool m_Paused;
-		float m_Speed;
+		bool m_Paused = false;
+		float m_Speed = 0;
 
-		int m_FirstTick;
-		int m_CurrentTick;
-		int m_LastTick;
+		int m_FirstTick = 0;
+		int m_CurrentTick = 0;
+		int m_LastTick = 0;
 
-		int m_NumTimelineMarkers;
-		int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
+		int m_NumTimelineMarkers = 0;
+		int m_aTimelineMarkers[MAX_TIMELINE_MARKERS] = {0};
 	};
 
 	enum

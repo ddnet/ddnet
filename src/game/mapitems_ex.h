@@ -18,10 +18,10 @@ struct CMapItemTest
 		CURRENT_VERSION = 1
 	};
 
-	int m_Version;
-	int m_aFields[2];
-	int m_Field3;
-	int m_Field4;
+	int m_Version = 0;
+	int m_aFields[2] = {0};
+	int m_Field3 = 0;
+	int m_Field4 = 0;
 };
 
 struct CMapItemAutoMapperConfig
@@ -35,12 +35,12 @@ struct CMapItemAutoMapperConfig
 		FLAG_AUTOMATIC = 1
 	};
 
-	int m_Version;
-	int m_GroupId;
-	int m_LayerId;
-	int m_AutomapperConfig;
-	int m_AutomapperSeed;
-	int m_Flags;
+	int m_Version = 0;
+	int m_GroupId = 0;
+	int m_LayerId = 0;
+	int m_AutomapperConfig = 0;
+	int m_AutomapperSeed = 0;
+	int m_Flags = 0;
 };
 
 void RegisterMapItemTypeUuids(class CUuidManager *pManager);

@@ -67,84 +67,84 @@ public:
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
 	vec2 m_ViewPos;
-	int m_TuneZone;
-	int m_TuneZoneOld;
+	int m_TuneZone = 0;
+	int m_TuneZoneOld = 0;
 
 	// states if the client is chatting, accessing a menu etc.
-	int m_PlayerFlags;
+	int m_PlayerFlags = 0;
 
 	// used for snapping to just update latency if the scoreboard is active
-	int m_aCurLatency[MAX_CLIENTS];
+	int m_aCurLatency[MAX_CLIENTS] = {0};
 
 	// used for spectator mode
-	int m_SpectatorID;
+	int m_SpectatorID = 0;
 
-	bool m_IsReady;
+	bool m_IsReady = false;
 
 	//
-	int m_Vote;
-	int m_VotePos;
+	int m_Vote = 0;
+	int m_VotePos = 0;
 	//
-	int m_LastVoteCall;
-	int m_LastVoteTry;
-	int m_LastChat;
-	int m_LastSetTeam;
-	int m_LastSetSpectatorMode;
-	int m_LastChangeInfo;
-	int m_LastEmote;
-	int m_LastKill;
-	int m_aLastCommands[4];
-	int m_LastCommandPos;
-	int m_LastWhisperTo;
-	int m_LastInvited;
+	int m_LastVoteCall = 0;
+	int m_LastVoteTry = 0;
+	int m_LastChat = 0;
+	int m_LastSetTeam = 0;
+	int m_LastSetSpectatorMode = 0;
+	int m_LastChangeInfo = 0;
+	int m_LastEmote = 0;
+	int m_LastKill = 0;
+	int m_aLastCommands[4] = {0};
+	int m_LastCommandPos = 0;
+	int m_LastWhisperTo = 0;
+	int m_LastInvited = 0;
 
-	int m_SendVoteIndex;
+	int m_SendVoteIndex = 0;
 
 	CTeeInfo m_TeeInfos;
 
-	int m_DieTick;
-	int m_PreviousDieTick;
-	int m_Score;
-	int m_JoinTick;
-	bool m_ForceBalanced;
-	int m_LastActionTick;
-	int m_TeamChangeTick;
-	bool m_SentSemicolonTip;
+	int m_DieTick = 0;
+	int m_PreviousDieTick = 0;
+	int m_Score = 0;
+	int m_JoinTick = 0;
+	bool m_ForceBalanced = false;
+	int m_LastActionTick = 0;
+	int m_TeamChangeTick = 0;
+	bool m_SentSemicolonTip = false;
 
 	// network latency calculations
 	struct
 	{
-		int m_Accum;
-		int m_AccumMin;
-		int m_AccumMax;
-		int m_Avg;
-		int m_Min;
-		int m_Max;
+		int m_Accum = 0;
+		int m_AccumMin = 0;
+		int m_AccumMax = 0;
+		int m_Avg = 0;
+		int m_Min = 0;
+		int m_Max = 0;
 	} m_Latency;
 
 private:
-	const uint32_t m_UniqueClientID;
-	CCharacter *m_pCharacter;
-	int m_NumInputs;
-	CGameContext *m_pGameServer;
+	const uint32_t m_UniqueClientID = 0;
+	CCharacter *m_pCharacter = nullptr;
+	int m_NumInputs = 0;
+	CGameContext *m_pGameServer = nullptr;
 
 	CGameContext *GameServer() const { return m_pGameServer; }
 	IServer *Server() const;
 
 	//
-	bool m_Spawning;
-	bool m_WeakHookSpawn;
-	int m_ClientID;
-	int m_Team;
+	bool m_Spawning = false;
+	bool m_WeakHookSpawn = false;
+	int m_ClientID = 0;
+	int m_Team = 0;
 
-	int m_Paused;
-	int64_t m_ForcePauseTime;
-	int64_t m_LastPause;
+	int m_Paused = 0;
+	int64_t m_ForcePauseTime = 0;
+	int64_t m_LastPause = 0;
 
-	int m_DefEmote;
-	int m_OverrideEmote;
-	int m_OverrideEmoteReset;
-	bool m_Halloween;
+	int m_DefEmote = 0;
+	int m_OverrideEmote = 0;
+	int m_OverrideEmoteReset = 0;
+	bool m_Halloween = false;
 
 public:
 	enum
@@ -164,9 +164,9 @@ public:
 		TIMERTYPE_NONE,
 	};
 
-	bool m_DND;
-	int64_t m_FirstVoteTick;
-	char m_aTimeoutCode[64];
+	bool m_DND = false;
+	int64_t m_FirstVoteTick = 0;
+	char m_aTimeoutCode[64] = {0};
 
 	void ProcessPause();
 	int Pause(int State, bool Force);
@@ -174,47 +174,47 @@ public:
 	int IsPaused();
 
 	bool IsPlaying();
-	int64_t m_Last_KickVote;
-	int64_t m_Last_Team;
-	int m_ShowOthers;
-	bool m_ShowAll;
+	int64_t m_Last_KickVote = 0;
+	int64_t m_Last_Team = 0;
+	int m_ShowOthers = 0;
+	bool m_ShowAll = false;
 	vec2 m_ShowDistance;
-	bool m_SpecTeam;
-	bool m_NinjaJetpack;
-	bool m_Afk;
-	bool m_HasFinishScore;
+	bool m_SpecTeam = false;
+	bool m_NinjaJetpack = false;
+	bool m_Afk = false;
+	bool m_HasFinishScore = false;
 
-	int m_ChatScore;
+	int m_ChatScore = 0;
 
-	bool m_Moderating;
+	bool m_Moderating = false;
 
 	void UpdatePlaytime();
 	void AfkTimer();
-	int64_t m_LastPlaytime;
-	int64_t m_LastEyeEmote;
-	int64_t m_LastBroadcast;
-	bool m_LastBroadcastImportance;
+	int64_t m_LastPlaytime = 0;
+	int64_t m_LastEyeEmote = 0;
+	int64_t m_LastBroadcast = 0;
+	bool m_LastBroadcastImportance = false;
 
-	CNetObj_PlayerInput *m_pLastTarget;
-	bool m_LastTargetInit;
+	CNetObj_PlayerInput *m_pLastTarget = nullptr;
+	bool m_LastTargetInit = false;
 
-	bool m_EyeEmoteEnabled;
-	int m_TimerType;
+	bool m_EyeEmoteEnabled = false;
+	int m_TimerType = 0;
 
 	int GetDefaultEmote() const;
 	void OverrideDefaultEmote(int Emote, int Tick);
 	bool CanOverrideDefaultEmote() const;
 
-	bool m_FirstPacket;
-	int64_t m_LastSQLQuery;
+	bool m_FirstPacket = false;
+	int64_t m_LastSQLQuery = 0;
 	void ProcessScoreResult(CScorePlayerResult &Result);
-	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
-	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;
-	bool m_NotEligibleForFinish;
-	int64_t m_EligibleForFinishCheck;
-	bool m_VotedForPractice;
-	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
-	bool m_BirthdayAnnounced;
+	std::shared_ptr<CScorePlayerResult> m_pScoreQueryResult = nullptr;
+	std::shared_ptr<CScorePlayerResult> m_pScoreFinishResult = nullptr;
+	bool m_NotEligibleForFinish = false;
+	int64_t m_EligibleForFinishCheck = 0;
+	bool m_VotedForPractice = false;
+	int m_SwapTargetsClientID = 0; //Client ID of the swap target for the given player
+	bool m_BirthdayAnnounced = false;
 };
 
 #endif

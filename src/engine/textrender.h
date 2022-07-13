@@ -68,41 +68,41 @@ enum ETextCursorCursorMode
 class CTextCursor
 {
 public:
-	int m_Flags;
-	int m_LineCount;
-	int m_GlyphCount;
-	int m_CharCount;
-	int m_MaxLines;
+	int m_Flags = 0;
+	int m_LineCount = 0;
+	int m_GlyphCount = 0;
+	int m_CharCount = 0;
+	int m_MaxLines = 0;
 
-	float m_StartX;
-	float m_StartY;
-	float m_LineWidth;
-	float m_X, m_Y;
-	float m_MaxCharacterHeight;
+	float m_StartX = 0;
+	float m_StartY = 0;
+	float m_LineWidth = 0;
+	float m_X = 0, m_Y = 0;
+	float m_MaxCharacterHeight = 0;
 
-	float m_LongestLineWidth;
+	float m_LongestLineWidth = 0;
 
-	CFont *m_pFont;
-	float m_FontSize;
-	float m_AlignedFontSize;
+	CFont *m_pFont = nullptr;
+	float m_FontSize = 0;
+	float m_AlignedFontSize = 0;
 
-	ETextCursorSelectionMode m_CalculateSelectionMode;
+	ETextCursorSelectionMode m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
 
 	// these coordinates are repsected if selection mode is set to calculate @see ETextCursorSelectionMode
-	int m_PressMouseX;
-	int m_PressMouseY;
+	int m_PressMouseX = 0;
+	int m_PressMouseY = 0;
 	// these coordinates are repsected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
-	int m_ReleaseMouseX;
-	int m_ReleaseMouseY;
+	int m_ReleaseMouseX = 0;
+	int m_ReleaseMouseY = 0;
 
 	// note m_SelectionStart can be bigger than m_SelectionEnd, depending on how the mouse cursor was dragged
 	// also note, that these are the character offsets decoded
-	int m_SelectionStart;
-	int m_SelectionEnd;
+	int m_SelectionStart = 0;
+	int m_SelectionEnd = 0;
 
-	ETextCursorCursorMode m_CursorMode;
+	ETextCursorCursorMode m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
 	// note this is the decoded character offset
-	int m_CursorCharacter;
+	int m_CursorCharacter = 0;
 };
 
 class ITextRender : public IInterface

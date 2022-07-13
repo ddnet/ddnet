@@ -23,25 +23,25 @@ public:
 	 * Severity
 	 */
 	LEVEL m_Level;
-	bool m_HaveColor;
+	bool m_HaveColor = false;
 	/**
 	 * The requested color of the log message. Only useful if `m_HaveColor`
 	 * is set.
 	 */
 	LOG_COLOR m_Color;
-	char m_aTimestamp[80];
-	char m_aSystem[32];
+	char m_aTimestamp[80] = {0};
+	char m_aSystem[32] = {0};
 	/**
 	 * The actual log message including the timestamp and the system.
 	 */
-	char m_aLine[4096];
-	int m_TimestampLength;
-	int m_SystemLength;
+	char m_aLine[4096] = {0};
+	int m_TimestampLength = 0;
+	int m_SystemLength = 0;
 	/**
 	 * Length of the log message including timestamp and the system.
 	 */
-	int m_LineLength;
-	int m_LineMessageOffset;
+	int m_LineLength = 0;
+	int m_LineMessageOffset = 0;
 
 	/**
 	 * The actual log message excluding timestamp and the system.
@@ -205,7 +205,7 @@ std::unique_ptr<ILogger> log_logger_windows_debugger();
 class CFutureLogger : public ILogger
 {
 private:
-	std::atomic<ILogger *> m_pLogger;
+	std::atomic<ILogger *> m_pLogger = nullptr;
 	std::vector<CLogMessage> m_vPending;
 	std::mutex m_PendingLock;
 
@@ -228,8 +228,8 @@ public:
  */
 class CLogScope
 {
-	ILogger *old_scope_logger;
-	ILogger *new_scope_logger;
+	ILogger *old_scope_logger = nullptr;
+	ILogger *new_scope_logger = nullptr;
 
 public:
 	CLogScope(ILogger *logger) :

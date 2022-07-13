@@ -37,8 +37,8 @@
 class SortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
-	SortFunc m_pfnSort;
-	CServerBrowser *m_pThis;
+	SortFunc m_pfnSort = nullptr;
+	CServerBrowser *m_pThis = nullptr;
 
 public:
 	SortWrap(CServerBrowser *pServer, SortFunc Func) :
@@ -120,7 +120,7 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 	class CAddrComparer
 	{
 	public:
-		CServerBrowser *m_pThis;
+		CServerBrowser *m_pThis = nullptr;
 		bool operator()(int i, int j)
 		{
 			NETADDR Addr1 = m_pThis->m_ppServerlist[i]->m_Info.m_aAddresses[0];
@@ -975,7 +975,7 @@ void CServerBrowser::UpdateFromHttp()
 					if(g >= pCntr->m_NumServers)
 						continue;
 
-					if(DDNetFiltered(pExcludeTypes, pCntr->m_aTypes[g]))
+					if(DDNetFiltered(pExcludeTypes, pCntr->m_aaTypes[g]))
 						continue;
 					WantedAddrs.insert(pCntr->m_aServers[g]);
 				}
@@ -1223,12 +1223,12 @@ void CServerBrowser::LoadDDNetServers()
 					int Pos;
 					for(Pos = 0; Pos < pNet->m_NumTypes; Pos++)
 					{
-						if(!str_comp(pNet->m_aTypes[Pos], pType))
+						if(!str_comp(pNet->m_aaTypes[Pos], pType))
 							break;
 					}
 					if(Pos == pNet->m_NumTypes)
 					{
-						str_copy(pNet->m_aTypes[pNet->m_NumTypes], pType);
+						str_copy(pNet->m_aaTypes[pNet->m_NumTypes], pType);
 						pNet->m_NumTypes++;
 					}
 				}
@@ -1244,7 +1244,7 @@ void CServerBrowser::LoadDDNetServers()
 					}
 					const char *pStr = json_string_get(pAddr);
 					net_addr_from_str(&pCntr->m_aServers[pCntr->m_NumServers], pStr);
-					str_copy(pCntr->m_aTypes[pCntr->m_NumServers], pType);
+					str_copy(pCntr->m_aaTypes[pCntr->m_NumServers], pType);
 				}
 			}
 
@@ -1470,7 +1470,7 @@ void CServerBrowser::TypeFilterClean(int Network)
 
 	for(int i = 0; i < m_aNetworks[Network].m_NumTypes; i++)
 	{
-		const char *pName = m_aNetworks[Network].m_aTypes[i];
+		const char *pName = m_aNetworks[Network].m_aaTypes[i];
 		if(DDNetFiltered(pExcludeTypes, pName))
 		{
 			char aBuf[128];

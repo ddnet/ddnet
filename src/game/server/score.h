@@ -14,12 +14,12 @@ struct ISqlData;
 class CScore
 {
 	CPlayerData m_aPlayerData[MAX_CLIENTS];
-	CDbConnectionPool *m_pPool;
+	CDbConnectionPool *m_pPool = nullptr;
 
 	CGameContext *GameServer() const { return m_pGameServer; }
 	IServer *Server() const { return m_pServer; }
-	CGameContext *m_pGameServer;
-	IServer *m_pServer;
+	CGameContext *m_pGameServer = nullptr;
+	IServer *m_pServer = nullptr;
 
 	std::vector<std::string> m_vWordlist;
 	CPrng m_Prng;

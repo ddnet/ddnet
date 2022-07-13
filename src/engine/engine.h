@@ -18,9 +18,9 @@ public:
 	CHostLookup();
 	CHostLookup(const char *pHostname, int Nettype);
 
-	int m_Result;
-	char m_aHostname[128];
-	int m_Nettype;
+	int m_Result = 0;
+	char m_aHostname[128] = {0};
+	int m_Nettype = 0;
 	NETADDR m_Addr;
 };
 

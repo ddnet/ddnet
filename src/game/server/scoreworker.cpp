@@ -1544,7 +1544,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 
 	bool CanLoad = pResult->m_SavedTeam.MatchPlayers(
-		pData->m_aClientNames, pData->m_aClientID, pData->m_NumPlayer,
+		pData->m_aaClientNames, pData->m_aClientID, pData->m_NumPlayer,
 		pResult->m_aMessage, sizeof(pResult->m_aMessage));
 
 	if(!CanLoad)

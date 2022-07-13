@@ -5,10 +5,10 @@
 class CUPnP
 {
 	NETADDR m_Addr;
-	struct UPNPUrls *m_pUPnPUrls;
-	struct IGDdatas *m_pUPnPData;
-	struct UPNPDev *m_pUPnPDevice;
-	bool m_Enabled;
+	struct UPNPUrls *m_pUPnPUrls = nullptr;
+	struct IGDdatas *m_pUPnPData = nullptr;
+	struct UPNPDev *m_pUPnPDevice = nullptr;
+	bool m_Enabled = false;
 
 public:
 	void Open(NETADDR Address);

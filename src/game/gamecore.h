@@ -20,7 +20,7 @@ class CTeamsCore;
 
 class CTuneParam
 {
-	int m_Value;
+	int m_Value = 0;
 
 public:
 	void Set(int v) { m_Value = v; }
@@ -178,11 +178,11 @@ enum
 
 struct SSwitchers
 {
-	bool m_aStatus[MAX_CLIENTS];
-	bool m_Initial;
-	int m_aEndTick[MAX_CLIENTS];
-	int m_aType[MAX_CLIENTS];
-	int m_aLastUpdateTick[MAX_CLIENTS];
+	bool m_aStatus[MAX_CLIENTS] = {false};
+	bool m_Initial = false;
+	int m_aEndTick[MAX_CLIENTS] = {0};
+	int m_aType[MAX_CLIENTS] = {0};
+	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
 };
 
 class CWorldCore
@@ -207,8 +207,8 @@ public:
 	}
 
 	CTuningParams m_aTuning[2];
-	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
-	CPrng *m_pPrng;
+	class CCharacterCore *m_apCharacters[MAX_CLIENTS] = {nullptr};
+	CPrng *m_pPrng = nullptr;
 
 	void InitSwitchers(int HighestSwitchNumber);
 	std::vector<SSwitchers> m_vSwitchers;
@@ -218,8 +218,8 @@ class CCharacterCore
 {
 	friend class CCharacter;
 	CWorldCore *m_pWorld = nullptr;
-	CCollision *m_pCollision;
-	std::map<int, std::vector<vec2>> *m_pTeleOuts;
+	CCollision *m_pCollision = nullptr;
+	std::map<int, std::vector<vec2>> *m_pTeleOuts = nullptr;
 
 public:
 	static constexpr float PhysicalSize() { return 28.0f; };
@@ -230,42 +230,42 @@ public:
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
-	int m_HookTick;
-	int m_HookState;
-	int m_HookedPlayer;
+	int m_HookTick = 0;
+	int m_HookState = 0;
+	int m_HookedPlayer = 0;
 	std::set<int> m_AttachedPlayers;
 	void SetHookedPlayer(int HookedPlayer);
 
-	int m_ActiveWeapon;
+	int m_ActiveWeapon = 0;
 	struct WeaponStat
 	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		int m_Ammocost;
-		bool m_Got;
+		int m_AmmoRegenStart = 0;
+		int m_Ammo = 0;
+		int m_Ammocost = 0;
+		bool m_Got = false;
 	} m_aWeapons[NUM_WEAPONS];
 
 	// ninja
 	struct
 	{
 		vec2 m_ActivationDir;
-		int m_ActivationTick;
-		int m_CurrentMoveTime;
-		int m_OldVelAmount;
+		int m_ActivationTick = 0;
+		int m_CurrentMoveTime = 0;
+		int m_OldVelAmount = 0;
 	} m_Ninja;
 
-	bool m_NewHook;
+	bool m_NewHook = false;
 
-	int m_Jumped;
+	int m_Jumped = 0;
 	// m_JumpedTotal counts the jumps performed in the air
-	int m_JumpedTotal;
-	int m_Jumps;
+	int m_JumpedTotal = 0;
+	int m_Jumps = 0;
 
-	int m_Direction;
-	int m_Angle;
+	int m_Direction = 0;
+	int m_Angle = 0;
 	CNetObj_PlayerInput m_Input;
 
-	int m_TriggeredEvents;
+	int m_TriggeredEvents = 0;
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
 	void Reset();
@@ -277,50 +277,50 @@ public:
 	void Quantize();
 
 	// DDRace
-	int m_Id;
-	bool m_Reset;
+	int m_Id = 0;
+	bool m_Reset = false;
 	CCollision *Collision() { return m_pCollision; }
 
 	vec2 m_LastVel;
-	int m_Colliding;
-	bool m_LeftWall;
+	int m_Colliding = 0;
+	bool m_LeftWall = false;
 
 	// DDNet Character
 	void SetTeamsCore(CTeamsCore *pTeams);
 	void SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts);
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
-	bool m_Solo;
-	bool m_Jetpack;
-	bool m_CollisionDisabled;
-	bool m_EndlessHook;
-	bool m_EndlessJump;
-	bool m_HammerHitDisabled;
-	bool m_GrenadeHitDisabled;
-	bool m_LaserHitDisabled;
-	bool m_ShotgunHitDisabled;
-	bool m_HookHitDisabled;
-	bool m_Super;
-	bool m_HasTelegunGun;
-	bool m_HasTelegunGrenade;
-	bool m_HasTelegunLaser;
-	int m_FreezeStart;
-	int m_FreezeEnd;
-	bool m_IsInFreeze;
-	bool m_DeepFrozen;
-	bool m_LiveFrozen;
+	bool m_Solo = false;
+	bool m_Jetpack = false;
+	bool m_CollisionDisabled = false;
+	bool m_EndlessHook = false;
+	bool m_EndlessJump = false;
+	bool m_HammerHitDisabled = false;
+	bool m_GrenadeHitDisabled = false;
+	bool m_LaserHitDisabled = false;
+	bool m_ShotgunHitDisabled = false;
+	bool m_HookHitDisabled = false;
+	bool m_Super = false;
+	bool m_HasTelegunGun = false;
+	bool m_HasTelegunGrenade = false;
+	bool m_HasTelegunLaser = false;
+	int m_FreezeStart = 0;
+	int m_FreezeEnd = 0;
+	bool m_IsInFreeze = false;
+	bool m_DeepFrozen = false;
+	bool m_LiveFrozen = false;
 	CTuningParams m_Tuning;
 
 private:
-	CTeamsCore *m_pTeams;
-	int m_MoveRestrictions;
+	CTeamsCore *m_pTeams = nullptr;
+	int m_MoveRestrictions = 0;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
 
 //input count
 struct CInputCount
 {
-	int m_Presses;
-	int m_Releases;
+	int m_Presses = 0;
+	int m_Releases = 0;
 };
 
 inline CInputCount CountInput(int Prev, int Cur)

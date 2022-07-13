@@ -940,8 +940,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	struct CColumn
 	{
 		CLocConstString m_Caption;
-		int m_Id;
-		float m_Width;
+		int m_Id = 0;
+		float m_Width = 0;
 		CUIRect m_Rect;
 		CUIRect m_Spacer;
 	};

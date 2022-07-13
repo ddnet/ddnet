@@ -21,8 +21,8 @@ enum
 class CMapBugs
 {
 	friend CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256);
-	void *m_pData;
-	unsigned int m_Extra;
+	void *m_pData = nullptr;
+	unsigned int m_Extra = 0;
 
 public:
 	bool Contains(int Bug) const;

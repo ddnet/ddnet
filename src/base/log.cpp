@@ -217,9 +217,9 @@ std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogg
 
 class CLoggerAsync : public ILogger
 {
-	ASYNCIO *m_pAio;
-	bool m_AnsiTruecolor;
-	bool m_Close;
+	ASYNCIO *m_pAio = nullptr;
+	bool m_AnsiTruecolor = false;
+	bool m_Close = false;
 
 public:
 	CLoggerAsync(IOHANDLE File, bool AnsiTruecolor, bool Close) :
@@ -314,9 +314,9 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 
 class CWindowsConsoleLogger : public ILogger
 {
-	HANDLE m_pConsole;
-	int m_BackgroundColor;
-	int m_ForegroundColor;
+	HANDLE m_pConsole = nullptr;
+	int m_BackgroundColor = 0;
+	int m_ForegroundColor = 0;
 	std::mutex m_OutputLock;
 	bool m_Finished = false;
 
@@ -389,7 +389,7 @@ public:
 };
 class CWindowsFileLogger : public ILogger
 {
-	HANDLE m_pFile;
+	HANDLE m_pFile = nullptr;
 	std::mutex m_OutputLock;
 
 public:

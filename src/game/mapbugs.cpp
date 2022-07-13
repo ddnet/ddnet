@@ -4,8 +4,8 @@
 
 struct CMapDescription
 {
-	const char *m_pName;
-	int m_Size;
+	const char *m_pName = nullptr;
+	int m_Size = 0;
 	SHA256_DIGEST m_Sha256;
 
 	bool operator==(const CMapDescription &Other) const
@@ -18,7 +18,7 @@ struct CMapDescription
 struct CMapBugsInternal
 {
 	CMapDescription m_Map;
-	unsigned int m_BugFlags;
+	unsigned int m_BugFlags = 0;
 };
 
 static unsigned int BugToFlag(int Bug)

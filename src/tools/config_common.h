@@ -4,13 +4,13 @@
 
 struct SListDirectoryContext
 {
-	const char *m_pPath;
-	IStorage *m_pStorage;
+	const char *m_pPath = nullptr;
+	IStorage *m_pStorage = nullptr;
 };
 
 inline void ProcessItem(const char *pItemName, IStorage *pStorage)
 {
-	char aConfig[2048];
+	char aConfig[2048] = {0};
 
 	size_t Len = (size_t)str_length(pItemName) + 1; // including '\0'
 	if(Len > sizeof(aConfig))

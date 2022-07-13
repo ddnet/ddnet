@@ -9,10 +9,10 @@
 class CGhostInfo
 {
 public:
-	char m_aOwner[MAX_NAME_LENGTH];
-	char m_aMap[64];
-	int m_NumTicks;
-	int m_Time;
+	char m_aOwner[MAX_NAME_LENGTH] = {0};
+	char m_aMap[64] = {0};
+	int m_NumTicks = 0;
+	int m_Time = 0;
 };
 
 class IGhostRecorder : public IInterface

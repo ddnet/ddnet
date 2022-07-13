@@ -13,23 +13,23 @@ public:
 	class CClient
 	{
 	public:
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
-		int m_Country;
-		int m_Score;
-		bool m_IsPlayer;
+		char m_aName[MAX_NAME_LENGTH] = {0};
+		char m_aClan[MAX_CLAN_LENGTH] = {0};
+		int m_Country = 0;
+		int m_Score = 0;
+		bool m_IsPlayer = false;
 	};
 
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
-	int m_MaxClients;
-	int m_NumClients; // Indirectly serialized.
-	int m_MaxPlayers;
-	int m_NumPlayers; // Not serialized.
-	bool m_Passworded;
-	char m_aGameType[16];
-	char m_aName[64];
-	char m_aMapName[MAX_MAP_LENGTH];
-	char m_aVersion[32];
+	int m_MaxClients = 0;
+	int m_NumClients = 0; // Indirectly serialized.
+	int m_MaxPlayers = 0;
+	int m_NumPlayers = 0; // Not serialized.
+	bool m_Passworded = false;
+	char m_aGameType[16] = {0};
+	char m_aName[64] = {0};
+	char m_aMapName[MAX_MAP_LENGTH] = {0};
+	char m_aVersion[32] = {0};
 
 	bool operator==(const CServerInfo2 &Other) const;
 	bool operator!=(const CServerInfo2 &Other) const { return !(*this == Other); }

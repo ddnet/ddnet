@@ -10,14 +10,14 @@ class CFlag : public CEntity
 {
 public:
 	static const int ms_PhysSize = 14;
-	CCharacter *m_pCarryingCharacter;
+	CCharacter *m_pCarryingCharacter = nullptr;
 	vec2 m_Vel;
 	vec2 m_StandPos;
 
-	int m_Team;
-	int m_AtStand;
-	int m_DropTick;
-	int m_GrabTick;
+	int m_Team = 0;
+	int m_AtStand = 0;
+	int m_DropTick = 0;
+	int m_GrabTick = 0;
 
 	CFlag(CGameWorld *pGameWorld, int Team);
 

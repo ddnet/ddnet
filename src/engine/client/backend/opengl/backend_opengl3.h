@@ -23,37 +23,37 @@ class CGLSLTextProgram;
 class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_OpenGL3
 {
 protected:
-	int m_MaxQuadsAtOnce;
+	int m_MaxQuadsAtOnce = 0;
 	static const int ms_MaxQuadsPossible = 256;
 
-	CGLSLPrimitiveProgram *m_pPrimitiveProgram;
-	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured;
-	CGLSLTileProgram *m_pBorderTileProgram;
-	CGLSLTileProgram *m_pBorderTileProgramTextured;
-	CGLSLTileProgram *m_pBorderTileLineProgram;
-	CGLSLTileProgram *m_pBorderTileLineProgramTextured;
-	CGLSLQuadProgram *m_pQuadProgram;
-	CGLSLQuadProgram *m_pQuadProgramTextured;
-	CGLSLTextProgram *m_pTextProgram;
-	CGLSLPrimitiveExProgram *m_pPrimitiveExProgram;
-	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTextured;
-	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramRotationless;
-	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTexturedRotationless;
-	CGLSLSpriteMultipleProgram *m_pSpriteProgramMultiple;
+	CGLSLPrimitiveProgram *m_pPrimitiveProgram = nullptr;
+	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured = nullptr;
+	CGLSLTileProgram *m_pBorderTileProgram = nullptr;
+	CGLSLTileProgram *m_pBorderTileProgramTextured = nullptr;
+	CGLSLTileProgram *m_pBorderTileLineProgram = nullptr;
+	CGLSLTileProgram *m_pBorderTileLineProgramTextured = nullptr;
+	CGLSLQuadProgram *m_pQuadProgram = nullptr;
+	CGLSLQuadProgram *m_pQuadProgramTextured = nullptr;
+	CGLSLTextProgram *m_pTextProgram = nullptr;
+	CGLSLPrimitiveExProgram *m_pPrimitiveExProgram = nullptr;
+	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTextured = nullptr;
+	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramRotationless = nullptr;
+	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTexturedRotationless = nullptr;
+	CGLSLSpriteMultipleProgram *m_pSpriteProgramMultiple = nullptr;
 
-	TWGLuint m_LastProgramID;
+	TWGLuint m_LastProgramID = 0;
 
-	TWGLuint m_aPrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
-	TWGLuint m_PrimitiveDrawVertexIDTex3D;
-	TWGLuint m_aPrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
-	TWGLuint m_PrimitiveDrawBufferIDTex3D;
+	TWGLuint m_aPrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT] = {0};
+	TWGLuint m_PrimitiveDrawVertexIDTex3D = 0;
+	TWGLuint m_aPrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT] = {0};
+	TWGLuint m_PrimitiveDrawBufferIDTex3D = 0;
 
-	TWGLuint m_aLastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_aLastIndexBufferBound[MAX_STREAM_BUFFER_COUNT] = {0};
 
-	int m_LastStreamBuffer;
+	int m_LastStreamBuffer = 0;
 
-	TWGLuint m_QuadDrawIndexBufferID;
-	unsigned int m_CurrentIndicesInBuffer;
+	TWGLuint m_QuadDrawIndexBufferID = 0;
+	unsigned int m_CurrentIndicesInBuffer = 0;
 
 	void DestroyBufferContainer(int Index, bool DeleteBOs = true);
 
@@ -63,8 +63,8 @@ protected:
 	{
 		SBufferContainer() :
 			m_VertArrayID(0), m_LastIndexBufferBound(0) {}
-		TWGLuint m_VertArrayID;
-		TWGLuint m_LastIndexBufferBound;
+		TWGLuint m_VertArrayID = 0;
+		TWGLuint m_LastIndexBufferBound = 0;
 		SBufferContainerInfo m_ContainerInfo;
 	};
 	std::vector<SBufferContainer> m_vBufferContainers;

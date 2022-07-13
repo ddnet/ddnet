@@ -12,13 +12,13 @@ struct CMapItemLayerTilemap;
 
 class CLayers
 {
-	int m_GroupsNum;
-	int m_GroupsStart;
-	int m_LayersNum;
-	int m_LayersStart;
-	CMapItemGroup *m_pGameGroup;
-	CMapItemLayerTilemap *m_pGameLayer;
-	IMap *m_pMap;
+	int m_GroupsNum = 0;
+	int m_GroupsStart = 0;
+	int m_LayersNum = 0;
+	int m_LayersStart = 0;
+	CMapItemGroup *m_pGameGroup = nullptr;
+	CMapItemLayerTilemap *m_pGameLayer = nullptr;
+	IMap *m_pMap = nullptr;
 
 	void InitTilemapSkip();
 
@@ -43,11 +43,11 @@ public:
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; }
 
 private:
-	CMapItemLayerTilemap *m_pTeleLayer;
-	CMapItemLayerTilemap *m_pSpeedupLayer;
-	CMapItemLayerTilemap *m_pFrontLayer;
-	CMapItemLayerTilemap *m_pSwitchLayer;
-	CMapItemLayerTilemap *m_pTuneLayer;
+	CMapItemLayerTilemap *m_pTeleLayer = nullptr;
+	CMapItemLayerTilemap *m_pSpeedupLayer = nullptr;
+	CMapItemLayerTilemap *m_pFrontLayer = nullptr;
+	CMapItemLayerTilemap *m_pSwitchLayer = nullptr;
+	CMapItemLayerTilemap *m_pTuneLayer = nullptr;
 };
 
 #endif

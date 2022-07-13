@@ -40,10 +40,10 @@ class CMapImages : public CComponent
 	friend class CMenuBackground;
 
 	IGraphics::CTextureHandle m_aTextures[64];
-	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
-	int m_Count;
+	int m_aTextureUsedByTileOrQuadLayerFlag[64] = {0}; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
+	int m_Count = 0;
 
-	char m_aEntitiesPath[IO_MAX_PATH_LENGTH];
+	char m_aEntitiesPath[IO_MAX_PATH_LENGTH] = {0};
 
 	bool HasFrontLayer(EMapImageModType ModType);
 	bool HasSpeedupLayer(EMapImageModType ModType);
@@ -78,15 +78,15 @@ public:
 	void ChangeEntitiesPath(const char *pPath);
 
 private:
-	bool m_aEntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2];
-	bool m_SpeedupArrowIsLoaded;
+	bool m_aEntitiesIsLoaded[MAP_IMAGE_MOD_TYPE_COUNT * 2] = {false};
+	bool m_SpeedupArrowIsLoaded = false;
 	IGraphics::CTextureHandle m_aaEntitiesTextures[MAP_IMAGE_MOD_TYPE_COUNT * 2][MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT];
 	IGraphics::CTextureHandle m_SpeedupArrowTexture;
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
 	IGraphics::CTextureHandle m_TransparentTexture;
-	int m_TextureScale;
+	int m_TextureScale = 0;
 
 	void InitOverlayTextures();
 	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset);

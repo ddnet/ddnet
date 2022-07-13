@@ -64,7 +64,7 @@ class CRegister : public IRegister
 				lock_destroy(m_Lock);
 			}
 
-			std::shared_ptr<CGlobal> m_pGlobal;
+			std::shared_ptr<CGlobal> m_pGlobal = nullptr;
 			LOCK m_Lock = lock_create();
 			int m_NumTotalRequests GUARDED_BY(m_Lock) = 0;
 			int m_LatestResponseStatus GUARDED_BY(m_Lock) = STATUS_NONE;
@@ -73,12 +73,12 @@ class CRegister : public IRegister
 
 		class CJob : public IJob
 		{
-			int m_Protocol;
-			int m_ServerPort;
-			int m_Index;
-			int m_InfoSerial;
-			std::shared_ptr<CShared> m_pShared;
-			std::unique_ptr<CHttpRequest> m_pRegister;
+			int m_Protocol = 0;
+			int m_ServerPort = 0;
+			int m_Index = 0;
+			int m_InfoSerial = 0;
+			std::shared_ptr<CShared> m_pShared = nullptr;
+			std::unique_ptr<CHttpRequest> m_pRegister = nullptr;
 			void Run() override;
 
 		public:
@@ -94,10 +94,10 @@ class CRegister : public IRegister
 			virtual ~CJob() = default;
 		};
 
-		CRegister *m_pParent;
-		int m_Protocol;
+		CRegister *m_pParent = nullptr;
+		int m_Protocol = 0;
 
-		std::shared_ptr<CShared> m_pShared;
+		std::shared_ptr<CShared> m_pShared = nullptr;
 		bool m_NewChallengeToken = false;
 		bool m_HaveChallengeToken = false;
 		char m_aChallengeToken[128] = {0};
@@ -115,24 +115,24 @@ class CRegister : public IRegister
 		void Update();
 	};
 
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
-	IEngine *m_pEngine;
-	int m_ServerPort;
-	char m_aConnlessTokenHex[16];
+	CConfig *m_pConfig = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IEngine *m_pEngine = nullptr;
+	int m_ServerPort = 0;
+	char m_aConnlessTokenHex[16] = {0};
 
 	std::shared_ptr<CGlobal> m_pGlobal = std::make_shared<CGlobal>();
 	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
 	CProtocol m_aProtocols[NUM_PROTOCOLS];
 
 	int m_NumExtraHeaders = 0;
-	char m_aaExtraHeaders[8][128];
+	char m_aaExtraHeaders[8][128] = {{0}};
 
-	char m_aVerifyPacketPrefix[sizeof(SERVERBROWSE_CHALLENGE) + UUID_MAXSTRSIZE];
+	char m_aVerifyPacketPrefix[sizeof(SERVERBROWSE_CHALLENGE) + UUID_MAXSTRSIZE] = {0};
 	CUuid m_Secret = RandomUuid();
 	CUuid m_ChallengeSecret = RandomUuid();
 	bool m_GotServerInfo = false;
-	char m_aServerInfo[16384];
+	char m_aServerInfo[16384] = {0};
 
 public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int ServerPort, unsigned SixupSecurityToken);

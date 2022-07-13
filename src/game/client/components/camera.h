@@ -21,13 +21,13 @@ class CCamera : public CComponent
 		CAMTYPE_PLAYER,
 	};
 
-	int m_CamType;
+	int m_CamType = 0;
 	vec2 m_aLastPos[NUM_DUMMIES];
 	vec2 m_PrevCenter;
 
 	CCubicBezier m_ZoomSmoothing;
-	float m_ZoomSmoothingStart;
-	float m_ZoomSmoothingEnd;
+	float m_ZoomSmoothingStart = 0;
+	float m_ZoomSmoothingEnd = 0;
 
 	void ScaleZoom(float Factor);
 	void ChangeZoom(float Target);
@@ -38,10 +38,10 @@ class CCamera : public CComponent
 
 public:
 	vec2 m_Center;
-	bool m_ZoomSet;
-	bool m_Zooming;
-	float m_Zoom;
-	float m_ZoomSmoothingTarget;
+	bool m_ZoomSet = false;
+	bool m_Zooming = false;
+	float m_Zoom = 0;
+	float m_ZoomSmoothingTarget = 0;
 
 	CCamera();
 	virtual int Sizeof() const override { return sizeof(*this); }

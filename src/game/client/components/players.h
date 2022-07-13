@@ -38,8 +38,8 @@ class CPlayers : public CComponent
 		float Intra = 0.f);
 	bool IsPlayerInfoAvailable(int ClientID) const;
 
-	int m_WeaponEmoteQuadContainerIndex;
-	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
+	int m_WeaponEmoteQuadContainerIndex = 0;
+	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS] = {0};
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

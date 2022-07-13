@@ -54,18 +54,18 @@ class CSnapIDPool
 	class CID
 	{
 	public:
-		short m_Next;
-		short m_State; // 0 = free, 1 = allocated, 2 = timed
-		int m_Timeout;
+		short m_Next = 0;
+		short m_State = 0; // 0 = free, 1 = allocated, 2 = timed
+		int m_Timeout = 0;
 	};
 
 	CID m_aIDs[MAX_IDS];
 
-	int m_FirstFree;
-	int m_FirstTimed;
-	int m_LastTimed;
-	int m_Usage;
-	int m_InUsage;
+	int m_FirstFree = 0;
+	int m_FirstTimed = 0;
+	int m_LastTimed = 0;
+	int m_Usage = 0;
+	int m_InUsage = 0;
 
 public:
 	CSnapIDPool();
@@ -79,7 +79,7 @@ public:
 
 class CServerBan : public CNetBan
 {
-	class CServer *m_pServer;
+	class CServer *m_pServer = nullptr;
 
 	template<class T>
 	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
@@ -101,12 +101,12 @@ class CServer : public IServer
 {
 	friend class CServerLogger;
 
-	class IGameServer *m_pGameServer;
-	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
-	class IEngineAntibot *m_pAntibot;
-	class IRegister *m_pRegister;
+	class IGameServer *m_pGameServer = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IConsole *m_pConsole = nullptr;
+	class IStorage *m_pStorage = nullptr;
+	class IEngineAntibot *m_pAntibot = nullptr;
+	class IRegister *m_pRegister = nullptr;
 
 #if defined(CONF_UPNP)
 	CUPnP m_UPnP;
@@ -114,11 +114,11 @@ class CServer : public IServer
 
 #if defined(CONF_FAMILY_UNIX)
 	UNIXSOCKETADDR m_ConnLoggingDestAddr;
-	bool m_ConnLoggingSocketCreated;
+	bool m_ConnLoggingSocketCreated = false;
 	UNIXSOCKET m_ConnLoggingSocket;
 #endif
 
-	class CDbConnectionPool *m_pConnectionPool;
+	class CDbConnectionPool *m_pConnectionPool = nullptr;
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
@@ -159,62 +159,62 @@ public:
 		class CInput
 		{
 		public:
-			int m_aData[MAX_INPUT_SIZE];
-			int m_GameTick; // the tick that was chosen for the input
+			int m_aData[MAX_INPUT_SIZE] = {0};
+			int m_GameTick = 0; // the tick that was chosen for the input
 		};
 
 		// connection state info
-		int m_State;
-		int m_Latency;
-		int m_SnapRate;
+		int m_State = 0;
+		int m_Latency = 0;
+		int m_SnapRate = 0;
 
-		double m_Traffic;
-		int64_t m_TrafficSince;
+		double m_Traffic = 0;
+		int64_t m_TrafficSince = 0;
 
-		int m_LastAckedSnapshot;
-		int m_LastInputTick;
+		int m_LastAckedSnapshot = 0;
+		int m_LastInputTick = 0;
 		CSnapshotStorage m_Snapshots;
 
 		CInput m_LatestInput;
 		CInput m_aInputs[200]; // TODO: handle input better
-		int m_CurrentInput;
+		int m_CurrentInput = 0;
 
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
-		int m_Country;
-		int m_Score;
-		int m_Authed;
-		int m_AuthKey;
-		int m_AuthTries;
-		int m_NextMapChunk;
-		int m_Flags;
-		bool m_ShowIps;
+		char m_aName[MAX_NAME_LENGTH] = {0};
+		char m_aClan[MAX_CLAN_LENGTH] = {0};
+		int m_Country = 0;
+		int m_Score = 0;
+		int m_Authed = 0;
+		int m_AuthKey = 0;
+		int m_AuthTries = 0;
+		int m_NextMapChunk = 0;
+		int m_Flags = 0;
+		bool m_ShowIps = false;
 
-		const IConsole::CCommandInfo *m_pRconCmdToSend;
+		const IConsole::CCommandInfo *m_pRconCmdToSend = nullptr;
 
-		bool m_HasPersistentData;
-		void *m_pPersistentData;
+		bool m_HasPersistentData = false;
+		void *m_pPersistentData = nullptr;
 
 		void Reset();
 
 		// DDRace
 
 		NETADDR m_Addr;
-		bool m_GotDDNetVersionPacket;
-		bool m_DDNetVersionSettled;
-		int m_DDNetVersion;
-		char m_aDDNetVersionStr[64];
+		bool m_GotDDNetVersionPacket = false;
+		bool m_DDNetVersionSettled = false;
+		int m_DDNetVersion = 0;
+		char m_aDDNetVersionStr[64] = {0};
 		CUuid m_ConnectionID;
 
 		// DNSBL
-		int m_DnsblState;
-		std::shared_ptr<CHostLookup> m_pDnsblLookup;
+		int m_DnsblState = 0;
+		std::shared_ptr<CHostLookup> m_pDnsblLookup = nullptr;
 
-		bool m_Sixup;
+		bool m_Sixup = false;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
-	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
+	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS] = {0};
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -226,10 +226,10 @@ public:
 #endif
 	CServerBan m_ServerBan;
 
-	IEngineMap *m_pMap;
+	IEngineMap *m_pMap = nullptr;
 
-	int64_t m_GameStartTime;
-	//int m_CurrentGameTick;
+	int64_t m_GameStartTime = 0;
+	//int m_CurrentGameTick = 0;
 
 	enum
 	{
@@ -238,14 +238,14 @@ public:
 		STOPPING = 2
 	};
 
-	int m_RunServer;
+	int m_RunServer = 0;
 
-	bool m_MapReload;
-	bool m_ReloadedWhenEmpty;
-	int m_RconClientID;
-	int m_RconAuthLevel;
-	int m_PrintCBIndex;
-	char m_aShutdownReason[128];
+	bool m_MapReload = false;
+	bool m_ReloadedWhenEmpty = false;
+	int m_RconClientID = 0;
+	int m_RconAuthLevel = 0;
+	int m_PrintCBIndex = 0;
+	char m_aShutdownReason[128] = {0};
 
 	enum
 	{
@@ -254,19 +254,19 @@ public:
 		NUM_MAP_TYPES
 	};
 
-	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
+	char m_aCurrentMap[IO_MAX_PATH_LENGTH] = {0};
 	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
-	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
-	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
-	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES];
+	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES] = {0};
+	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES] = {nullptr};
+	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES] = {0};
 
 	CDemoRecorder m_aDemoRecorder[MAX_CLIENTS + 1];
 	CAuthManager m_AuthManager;
 
-	int64_t m_ServerInfoFirstRequest;
-	int m_ServerInfoNumRequests;
+	int64_t m_ServerInfoFirstRequest = 0;
+	int m_ServerInfoNumRequests = 0;
 
-	char m_aErrorShutdownReason[128];
+	char m_aErrorShutdownReason[128] = {0};
 
 	std::vector<CNameBan> m_vNameBans;
 
@@ -360,7 +360,7 @@ public:
 	};
 	CCache m_aServerInfoCache[3 * 2];
 	CCache m_aSixupServerInfoCache[2];
-	bool m_ServerInfoNeedsUpdate;
+	bool m_ServerInfoNeedsUpdate = false;
 
 	void ExpireServerInfo() override;
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
@@ -440,9 +440,9 @@ public:
 	// DDRace
 
 	void GetClientAddr(int ClientID, NETADDR *pAddr) const override;
-	int m_aPrevStates[MAX_CLIENTS];
+	int m_aPrevStates[MAX_CLIENTS] = {0};
 	const char *GetAnnouncementLine(char const *pFileName) override;
-	unsigned m_AnnouncementLastLine;
+	unsigned m_AnnouncementLastLine = 0;
 
 	int *GetIdMap(int ClientID) override;
 

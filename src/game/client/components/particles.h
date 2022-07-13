@@ -29,33 +29,33 @@ struct CParticle
 	vec2 m_Pos;
 	vec2 m_Vel;
 
-	int m_Spr;
+	int m_Spr = 0;
 
-	float m_FlowAffected;
+	float m_FlowAffected = 0;
 
-	float m_LifeSpan;
+	float m_LifeSpan = 0;
 
-	float m_StartSize;
-	float m_EndSize;
+	float m_StartSize = 0;
+	float m_EndSize = 0;
 
-	bool m_UseAlphaFading;
-	float m_StartAlpha;
-	float m_EndAlpha;
+	bool m_UseAlphaFading = false;
+	float m_StartAlpha = 0;
+	float m_EndAlpha = 0;
 
-	float m_Rot;
-	float m_Rotspeed;
+	float m_Rot = 0;
+	float m_Rotspeed = 0;
 
-	float m_Gravity;
-	float m_Friction;
+	float m_Gravity = 0;
+	float m_Friction = 0;
 
 	ColorRGBA m_Color;
 
-	bool m_Collides;
+	bool m_Collides = false;
 
 	// set by the particle system
-	float m_Life;
-	int m_PrevPart;
-	int m_NextPart;
+	float m_Life = 0;
+	int m_PrevPart = 0;
+	int m_NextPart = 0;
 };
 
 class CParticles : public CComponent
@@ -82,8 +82,8 @@ public:
 	virtual void OnInit() override;
 
 private:
-	int m_ParticleQuadContainerIndex;
-	int m_ExtraParticleQuadContainerIndex;
+	int m_ParticleQuadContainerIndex = 0;
+	int m_ExtraParticleQuadContainerIndex = 0;
 
 	enum
 	{
@@ -91,8 +91,8 @@ private:
 	};
 
 	CParticle m_aParticles[MAX_PARTICLES];
-	int m_FirstFree;
-	int m_aFirstPart[NUM_GROUPS];
+	int m_FirstFree = 0;
+	int m_aFirstPart[NUM_GROUPS] = {0};
 
 	void RenderGroup(int Group);
 	void Update(float TimePassed);
@@ -101,7 +101,7 @@ private:
 	class CRenderGroup : public CComponent
 	{
 	public:
-		CParticles *m_pParts;
+		CParticles *m_pParts = nullptr;
 		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual void OnRender() override { m_pParts->RenderGroup(TGROUP); }
 	};

@@ -14,7 +14,7 @@ class CItems : public CComponent
 	void RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData);
 	void RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted = false);
 
-	int m_ItemsQuadContainerIndex;
+	int m_ItemsQuadContainerIndex = 0;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -24,15 +24,15 @@ public:
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
 
 private:
-	int m_BlueFlagOffset;
-	int m_RedFlagOffset;
-	int m_PickupHealthOffset;
-	int m_PickupArmorOffset;
-	int m_aPickupWeaponOffset[NUM_WEAPONS];
-	int m_PickupNinjaOffset;
-	int m_aPickupWeaponArmorOffset[4];
-	int m_aProjectileOffset[NUM_WEAPONS];
-	int m_aParticleSplatOffset[3];
+	int m_BlueFlagOffset = 0;
+	int m_RedFlagOffset = 0;
+	int m_PickupHealthOffset = 0;
+	int m_PickupArmorOffset = 0;
+	int m_aPickupWeaponOffset[NUM_WEAPONS] = {0};
+	int m_PickupNinjaOffset = 0;
+	int m_aPickupWeaponArmorOffset[4] = {0};
+	int m_aProjectileOffset[NUM_WEAPONS] = {0};
+	int m_aParticleSplatOffset[3] = {0};
 };
 
 #endif

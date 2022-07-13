@@ -7,21 +7,21 @@
 
 struct SLibPNGWarningItem
 {
-	SImageByteBuffer *m_pByteLoader;
-	const char *pFileName;
+	SImageByteBuffer *m_pByteLoader = nullptr;
+	const char *m_pFileName = nullptr;
 };
 
 static void LibPNGError(png_structp png_ptr, png_const_charp error_msg)
 {
 	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
 	pUserStruct->m_pByteLoader->m_Err = -1;
-	dbg_msg("libpng", "error for file \"%s\": %s", pUserStruct->pFileName, error_msg);
+	dbg_msg("libpng", "error for file \"%s\": %s", pUserStruct->m_pFileName, error_msg);
 }
 
 static void LibPNGWarning(png_structp png_ptr, png_const_charp warning_msg)
 {
 	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
-	dbg_msg("libpng", "warning for file \"%s\": %s", pUserStruct->pFileName, warning_msg);
+	dbg_msg("libpng", "warning for file \"%s\": %s", pUserStruct->m_pFileName, warning_msg);
 }
 
 static bool FileMatchesImageType(SImageByteBuffer &ByteLoader)

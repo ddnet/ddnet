@@ -7,10 +7,10 @@
 
 class CFifo
 {
-	IConsole *m_pConsole;
-	char m_aFilename[IO_MAX_PATH_LENGTH];
-	int m_Flag;
-	int m_File;
+	IConsole *m_pConsole = nullptr;
+	char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
+	int m_Flag = 0;
+	int m_File = 0;
 
 public:
 	void Init(IConsole *pConsole, char *pFifoFile, int Flag);

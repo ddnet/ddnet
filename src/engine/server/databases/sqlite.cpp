@@ -56,12 +56,12 @@ public:
 
 private:
 	// copy of config vars
-	char m_aFilename[IO_MAX_PATH_LENGTH];
-	bool m_Setup;
+	char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
+	bool m_Setup = false;
 
-	sqlite3 *m_pDb;
-	sqlite3_stmt *m_pStmt;
-	bool m_Done; // no more rows available for Step
+	sqlite3 *m_pDb = nullptr;
+	sqlite3_stmt *m_pStmt = nullptr;
+	bool m_Done = false; // no more rows available for Step
 	// returns false, if the query succeeded
 	bool Execute(const char *pQuery, char *pError, int ErrorSize);
 
@@ -69,7 +69,7 @@ private:
 	bool FormatError(int Result, char *pError, int ErrorSize);
 	void AssertNoError(int Result);
 
-	std::atomic_bool m_InUse;
+	std::atomic_bool m_InUse = false;
 };
 
 CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :

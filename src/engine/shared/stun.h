@@ -7,7 +7,7 @@ struct NETADDR;
 class CStunData
 {
 public:
-	unsigned char m_aSecret[12];
+	unsigned char m_aSecret[12] = {0};
 };
 
 size_t StunMessagePrepare(unsigned char *pBuffer, size_t BufferSize, CStunData *pData);

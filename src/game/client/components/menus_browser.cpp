@@ -64,12 +64,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	struct CColumn
 	{
-		int m_ID;
-		int m_Sort;
+		int m_ID = 0;
+		int m_Sort = 0;
 		CLocConstString m_Caption;
-		int m_Direction;
-		float m_Width;
-		int m_Flags;
+		int m_Direction = 0;
+		float m_Width = 0;
+		int m_Flags = 0;
 		CUIRect m_Rect;
 		CUIRect m_Spacer;
 	};

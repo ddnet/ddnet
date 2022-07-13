@@ -30,7 +30,7 @@ public:
 	class CBindsSpecial : public CComponent
 	{
 	public:
-		CBinds *m_pBinds;
+		CBinds *m_pBinds = nullptr;
 		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual bool OnInput(IInput::CEvent Event) override;
 	};
@@ -67,6 +67,6 @@ public:
 	void SetDDRaceBinds(bool FreeOnly);
 
 private:
-	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
+	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST] = {{nullptr}};
 };
 #endif

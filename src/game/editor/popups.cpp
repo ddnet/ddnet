@@ -16,10 +16,10 @@
 static struct
 {
 	CUIRect m_Rect;
-	void *m_pId;
+	void *m_pId = nullptr;
 	int (*m_pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext);
-	int m_IsMenu;
-	void *m_pContext;
+	int m_IsMenu = 0;
+	void *m_pContext = nullptr;
 } s_UiPopups[8];
 
 static int g_UiNumPopups = 0;

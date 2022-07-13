@@ -7,9 +7,9 @@
 class CBroadcast : public CComponent
 {
 	// broadcasts
-	char m_aBroadcastText[1024];
-	int m_BroadcastTick;
-	float m_BroadcastRenderOffset;
+	char m_aBroadcastText[1024] = {0};
+	int m_BroadcastTick = 0;
+	float m_BroadcastRenderOffset = 0;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

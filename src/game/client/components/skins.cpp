@@ -49,7 +49,7 @@ CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pSt
 
 struct SSkinScanUser
 {
-	CSkins *m_pThis;
+	CSkins *m_pThis = nullptr;
 	CSkins::TSkinLoadedCBFunc m_SkinLoadedFunc;
 };
 

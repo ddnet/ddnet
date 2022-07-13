@@ -37,87 +37,87 @@ public:
 	};
 
 private:
-	int m_ClientID;
+	int m_ClientID = 0;
 
-	char m_aString[2048];
-	char m_aName[16];
+	char m_aString[2048] = {0};
+	char m_aName[16] = {0};
 
-	int m_Alive;
-	int m_Paused;
-	int m_NeededFaketuning;
+	int m_Alive = 0;
+	int m_Paused = 0;
+	int m_NeededFaketuning = 0;
 
 	// Teamstuff
-	int m_TeeStarted;
-	int m_TeeFinished;
-	int m_IsSolo;
+	int m_TeeStarted = 0;
+	int m_TeeFinished = 0;
+	int m_IsSolo = 0;
 
 	struct WeaponStat
 	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		int m_Ammocost;
-		int m_Got;
+		int m_AmmoRegenStart = 0;
+		int m_Ammo = 0;
+		int m_Ammocost = 0;
+		int m_Got = 0;
 	} m_aWeapons[NUM_WEAPONS];
 
-	int m_LastWeapon;
-	int m_QueuedWeapon;
+	int m_LastWeapon = 0;
+	int m_QueuedWeapon = 0;
 
-	int m_EndlessJump;
-	int m_Jetpack;
-	int m_NinjaJetpack;
-	int m_FreezeTime;
-	int m_FreezeStart;
-	int m_DeepFrozen;
-	int m_LiveFrozen;
-	int m_EndlessHook;
-	int m_DDRaceState;
+	int m_EndlessJump = 0;
+	int m_Jetpack = 0;
+	int m_NinjaJetpack = 0;
+	int m_FreezeTime = 0;
+	int m_FreezeStart = 0;
+	int m_DeepFrozen = 0;
+	int m_LiveFrozen = 0;
+	int m_EndlessHook = 0;
+	int m_DDRaceState = 0;
 
-	int m_HitDisabledFlags;
-	int m_CollisionEnabled;
-	int m_TuneZone;
-	int m_TuneZoneOld;
-	int m_HookHitEnabled;
-	int m_Time;
+	int m_HitDisabledFlags = 0;
+	int m_CollisionEnabled = 0;
+	int m_TuneZone = 0;
+	int m_TuneZoneOld = 0;
+	int m_HookHitEnabled = 0;
+	int m_Time = 0;
 	vec2 m_Pos;
 	vec2 m_PrevPos;
-	int m_TeleCheckpoint;
-	int m_LastPenalty;
+	int m_TeleCheckpoint = 0;
+	int m_LastPenalty = 0;
 
-	int m_TimeCpBroadcastEndTime;
-	int m_LastTimeCp;
-	int m_LastTimeCpBroadcasted;
-	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
+	int m_TimeCpBroadcastEndTime = 0;
+	int m_LastTimeCp = 0;
+	int m_LastTimeCpBroadcasted = 0;
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS] = {0};
 
-	int m_NotEligibleForFinish;
+	int m_NotEligibleForFinish = 0;
 
-	int m_HasTelegunGun;
-	int m_HasTelegunGrenade;
-	int m_HasTelegunLaser;
+	int m_HasTelegunGun = 0;
+	int m_HasTelegunGrenade = 0;
+	int m_HasTelegunLaser = 0;
 
 	// Core
 	vec2 m_CorePos;
 	vec2 m_Vel;
-	int m_ActiveWeapon;
-	int m_Jumped;
-	int m_JumpedTotal;
-	int m_Jumps;
+	int m_ActiveWeapon = 0;
+	int m_Jumped = 0;
+	int m_JumpedTotal = 0;
+	int m_Jumps = 0;
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
-	int m_HookTick;
-	int m_HookState;
-	int m_HookedPlayer;
-	int m_NewHook;
+	int m_HookTick = 0;
+	int m_HookState = 0;
+	int m_HookedPlayer = 0;
+	int m_NewHook = 0;
 
 	// player input
-	int m_InputDirection;
-	int m_InputJump;
-	int m_InputFire;
-	int m_InputHook;
+	int m_InputDirection = 0;
+	int m_InputJump = 0;
+	int m_InputFire = 0;
+	int m_InputHook = 0;
 
-	int m_ReloadTimer;
+	int m_ReloadTimer = 0;
 
-	char m_aGameUuid[UUID_MAXSTRSIZE];
+	char m_aGameUuid[UUID_MAXSTRSIZE] = {0};
 };
 
 class CSaveTeam
@@ -133,7 +133,7 @@ public:
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int Save(int Team);
 	void Load(int Team, bool KeepCurrentWeakStrong);
-	CSaveTee *m_pSavedTees;
+	CSaveTee *m_pSavedTees = nullptr;
 
 	// returns true if an error occured
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
@@ -141,23 +141,23 @@ public:
 private:
 	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentCharacter);
 
-	IGameController *m_pController;
+	IGameController *m_pController = nullptr;
 
-	char m_aString[65536];
+	char m_aString[65536] = {0};
 
 	struct SSimpleSwitchers
 	{
-		int m_Status;
-		int m_EndTime;
-		int m_Type;
+		int m_Status = 0;
+		int m_EndTime = 0;
+		int m_Type = 0;
 	};
-	SSimpleSwitchers *m_pSwitchers;
+	SSimpleSwitchers *m_pSwitchers = nullptr;
 
-	int m_TeamState;
-	int m_MembersCount;
-	int m_HighestSwitchNumber;
-	int m_TeamLocked;
-	int m_Practice;
+	int m_TeamState = 0;
+	int m_MembersCount = 0;
+	int m_HighestSwitchNumber = 0;
+	int m_TeamLocked = 0;
+	int m_Practice = 0;
 };
 
 #endif // GAME_SERVER_SAVE_H

@@ -26,7 +26,7 @@ protected:
 		STATE_INPUTS,
 	};
 
-	int m_State;
+	int m_State = 0;
 
 	TeeHistorian()
 	{

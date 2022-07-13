@@ -33,10 +33,10 @@ enum class IPRESOLVE
 
 struct CTimeout
 {
-	long ConnectTimeoutMs;
-	long TimeoutMs;
-	long LowSpeedLimit;
-	long LowSpeedTime;
+	long ConnectTimeoutMs = 0;
+	long TimeoutMs = 0;
+	long LowSpeedLimit = 0;
+	long LowSpeedTime = 0;
 };
 
 class CHttpRequest : public IJob
@@ -120,13 +120,13 @@ public:
 	void Header(const char *pNameColonValue);
 	void HeaderString(const char *pName, const char *pValue)
 	{
-		char aHeader[256];
+		char aHeader[256] = {0};
 		str_format(aHeader, sizeof(aHeader), "%s: %s", pName, pValue);
 		Header(aHeader);
 	}
 	void HeaderInt(const char *pName, int Value)
 	{
-		char aHeader[256];
+		char aHeader[256] = {0};
 		str_format(aHeader, sizeof(aHeader), "%s: %d", pName, Value);
 		Header(aHeader);
 	}

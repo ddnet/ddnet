@@ -14,13 +14,13 @@ struct MapObject // quad pivot or tile layer
 {
 	static constexpr float ms_aStandardScreen[2] = {1430 / 2.f, 1050 / 2.f};
 
-	float m_aLayerOffset[2];
-	bool m_UseClipping;
-	float m_aaClipArea[2][2];
-	float m_aSpeed[2];
-	float m_aaScreenOffset[2][2];
-	float m_aaBaseArea[2][2]; // adapted to offset
-	float m_aaExtendedArea[2][2]; // extended with parallax
+	float m_aLayerOffset[2] = {0};
+	bool m_UseClipping = false;
+	float m_aaClipArea[2][2] = {{0}};
+	float m_aSpeed[2] = {0};
+	float m_aaScreenOffset[2][2] = {{0}};
+	float m_aaBaseArea[2][2] = {{0}}; // adapted to offset
+	float m_aaExtendedArea[2][2] = {{0}}; // extended with parallax
 };
 
 bool ReplaceArea(IStorage *, const char[][64], const float[][2][2]);

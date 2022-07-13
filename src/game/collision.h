@@ -23,10 +23,10 @@ struct CAntibotMapData;
 
 class CCollision
 {
-	class CTile *m_pTiles;
-	int m_Width;
-	int m_Height;
-	class CLayers *m_pLayers;
+	class CTile *m_pTiles = nullptr;
+	int m_Width = 0;
+	int m_Height = 0;
+	class CLayers *m_pLayers = nullptr;
 
 public:
 	CCollision();
@@ -114,15 +114,15 @@ public:
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
-	int m_HighestSwitchNumber;
+	int m_HighestSwitchNumber = 0;
 
 private:
-	class CTeleTile *m_pTele;
-	class CSpeedupTile *m_pSpeedup;
-	class CTile *m_pFront;
-	class CSwitchTile *m_pSwitch;
-	class CTuneTile *m_pTune;
-	class CDoorTile *m_pDoor;
+	class CTeleTile *m_pTele = nullptr;
+	class CSpeedupTile *m_pSpeedup = nullptr;
+	class CTile *m_pFront = nullptr;
+	class CSwitchTile *m_pSwitch = nullptr;
+	class CTuneTile *m_pTune = nullptr;
+	class CDoorTile *m_pDoor = nullptr;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);

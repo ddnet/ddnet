@@ -20,22 +20,22 @@ public:
 	struct CGameInfo
 	{
 		CUuid m_GameUuid;
-		const char *m_pServerVersion;
-		time_t m_StartTime;
-		const char *m_pPrngDescription;
+		const char *m_pServerVersion = nullptr;
+		time_t m_StartTime = 0;
+		const char *m_pPrngDescription = nullptr;
 
-		const char *m_pServerName;
-		int m_ServerPort;
-		const char *m_pGameType;
+		const char *m_pServerName = nullptr;
+		int m_ServerPort = 0;
+		const char *m_pGameType = nullptr;
 
-		const char *m_pMapName;
-		int m_MapSize;
+		const char *m_pMapName = nullptr;
+		int m_MapSize = 0;
 		SHA256_DIGEST m_MapSha256;
-		int m_MapCrc;
+		int m_MapCrc = 0;
 
-		CConfig *m_pConfig;
-		CTuningParams *m_pTuning;
-		CUuidManager *m_pUuids;
+		CConfig *m_pConfig = nullptr;
+		CTuningParams *m_pTuning = nullptr;
+		CUuidManager *m_pUuids = nullptr;
 	};
 
 	enum
@@ -84,7 +84,7 @@ public:
 	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogout(int ClientID);
 
-	int m_Debug; // Possible values: 0, 1, 2.
+	int m_Debug = 0; // Possible values: 0, 1, 2.
 
 private:
 	void WriteHeader(const CGameInfo *pGameInfo);
@@ -108,32 +108,32 @@ private:
 
 	struct CTeehistorianPlayer
 	{
-		bool m_Alive;
-		int m_X;
-		int m_Y;
+		bool m_Alive = false;
+		int m_X = 0;
+		int m_Y = 0;
 
 		CNetObj_PlayerInput m_Input;
-		uint32_t m_UniqueClientID;
+		uint32_t m_UniqueClientID = 0;
 
 		// DDNet team
-		int m_Team;
+		int m_Team = 0;
 	};
 
 	struct CTeam
 	{
-		bool m_Practice;
+		bool m_Practice = false;
 	};
 
-	WRITE_CALLBACK m_pfnWriteCallback;
-	void *m_pWriteCallbackUserdata;
+	WRITE_CALLBACK m_pfnWriteCallback = nullptr;
+	void *m_pWriteCallbackUserdata = nullptr;
 
-	int m_State;
+	int m_State = 0;
 
-	int m_LastWrittenTick;
-	bool m_TickWritten;
-	int m_Tick;
-	int m_PrevMaxClientID;
-	int m_MaxClientID;
+	int m_LastWrittenTick = 0;
+	bool m_TickWritten = false;
+	int m_Tick = 0;
+	int m_PrevMaxClientID = 0;
+	int m_MaxClientID = 0;
 	CTeehistorianPlayer m_aPrevPlayers[MAX_CLIENTS];
 	CTeam m_aPrevTeams[MAX_CLIENTS];
 };

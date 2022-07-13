@@ -8,10 +8,10 @@ class CHeap
 {
 	struct CChunk
 	{
-		char *m_pMemory;
-		char *m_pCurrent;
-		char *m_pEnd;
-		CChunk *m_pNext;
+		char *m_pMemory = nullptr;
+		char *m_pCurrent = nullptr;
+		char *m_pEnd = nullptr;
+		CChunk *m_pNext = nullptr;
 	};
 
 	enum
@@ -20,7 +20,7 @@ class CHeap
 		CHUNK_SIZE = 1025 * 64,
 	};
 
-	CChunk *m_pCurrent;
+	CChunk *m_pCurrent = nullptr;
 
 	void Clear();
 	void NewChunk();

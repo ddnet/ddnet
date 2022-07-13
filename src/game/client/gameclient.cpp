@@ -1331,7 +1331,7 @@ void CGameClient::OnNewSnapshot()
 				if(Item.m_ID < MAX_CLIENTS)
 				{
 					m_Snap.m_aCharacters[Item.m_ID].m_ExtendedData = *pCharacterData;
-					m_Snap.m_aCharacters[Item.m_ID].m_PrevExtendedData = (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_ID);
+					m_Snap.m_aCharacters[Item.m_ID].m_pPrevExtendedData = (const CNetObj_DDNetCharacter *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_DDNETCHARACTER, Item.m_ID);
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedData = true;
 					m_Snap.m_aCharacters[Item.m_ID].m_HasExtendedDisplayInfo = false;
 					if(pCharacterData->m_JumpedTotal != -1)

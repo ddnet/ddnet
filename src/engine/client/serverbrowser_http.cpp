@@ -46,15 +46,15 @@ private:
 		std::atomic_int m_BestIndex{-1};
 		// Constant after construction.
 		VALIDATOR m_pfnValidator;
-		int m_NumUrls;
-		char m_aaUrls[MAX_URLS][256];
+		int m_NumUrls = 0;
+		char m_aaUrls[MAX_URLS][256] = {{0}};
 	};
 	class CJob : public IJob
 	{
 		LOCK m_Lock;
-		std::shared_ptr<CData> m_pData;
-		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
-		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
+		std::shared_ptr<CData> m_pData = nullptr;
+		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock) = nullptr;
+		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock) = nullptr;
 		void Run() override REQUIRES(!m_Lock);
 
 	public:
@@ -64,10 +64,10 @@ private:
 		void Abort() REQUIRES(!m_Lock);
 	};
 
-	IEngine *m_pEngine;
-	int m_PreviousBestIndex;
-	std::shared_ptr<CData> m_pData;
-	std::shared_ptr<CJob> m_pJob;
+	IEngine *m_pEngine = nullptr;
+	int m_PreviousBestIndex = 0;
+	std::shared_ptr<CData> m_pData = nullptr;
+	std::shared_ptr<CJob> m_pJob = nullptr;
 };
 
 CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
@@ -285,12 +285,12 @@ private:
 	static bool Validate(json_value *pJson);
 	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers);
 
-	IEngine *m_pEngine;
-	IConsole *m_pConsole;
+	IEngine *m_pEngine = nullptr;
+	IConsole *m_pConsole = nullptr;
 
 	int m_State = STATE_DONE;
-	std::shared_ptr<CHttpRequest> m_pGetServers;
-	std::unique_ptr<CChooseMaster> m_pChooseMaster;
+	std::shared_ptr<CHttpRequest> m_pGetServers = nullptr;
+	std::unique_ptr<CChooseMaster> m_pChooseMaster = nullptr;
 
 	std::vector<CServerInfo> m_vServers;
 	std::vector<NETADDR> m_vLegacyServers;

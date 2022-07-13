@@ -8,10 +8,10 @@
 // f(t) = (1-t)³ a + 3(1-t)²t b + 3(1-t)t² c + t³ d
 class CCubicBezier
 {
-	float a;
-	float b;
-	float c;
-	float d;
+	float a = 0;
+	float b = 0;
+	float c = 0;
+	float d = 0;
 	CCubicBezier(float a_, float b_, float c_, float d_) :
 		a(a_), b(b_), c(c_), d(d_)
 	{

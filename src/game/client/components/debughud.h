@@ -14,11 +14,11 @@ class CDebugHud : public CComponent
 
 	CGraph m_RampGraph;
 	CGraph m_ZoomedInGraph;
-	float m_SpeedTurningPoint;
-	float MiddleOfZoomedInGraph;
-	float m_OldVelrampStart;
-	float m_OldVelrampRange;
-	float m_OldVelrampCurvature;
+	float m_SpeedTurningPoint = 0;
+	float MiddleOfZoomedInGraph = 0;
+	float m_OldVelrampStart = 0;
+	float m_OldVelrampRange = 0;
+	float m_OldVelrampCurvature = 0;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

@@ -22,13 +22,13 @@ static int MakeVersion(int i, const T &v)
 struct CSoundSource_DEPRECATED
 {
 	CPoint m_Position;
-	int m_Loop;
-	int m_TimeDelay; // in s
-	int m_FalloffDistance;
-	int m_PosEnv;
-	int m_PosEnvOffset;
-	int m_SoundEnv;
-	int m_SoundEnvOffset;
+	int m_Loop = 0;
+	int m_TimeDelay = 0; // in s
+	int m_FalloffDistance = 0;
+	int m_PosEnv = 0;
+	int m_PosEnvOffset = 0;
+	int m_SoundEnv = 0;
+	int m_SoundEnvOffset = 0;
 };
 
 int CEditor::Save(const char *pFilename)

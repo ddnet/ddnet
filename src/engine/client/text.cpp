@@ -29,20 +29,20 @@ using namespace std::chrono_literals;
 
 struct SFontSizeChar
 {
-	int m_ID;
+	int m_ID = 0;
 
 	// these values are scaled to the pFont size
 	// width * font_size == real_size
-	float m_Width;
-	float m_Height;
-	float m_CharWidth;
-	float m_CharHeight;
-	float m_OffsetX;
-	float m_OffsetY;
-	float m_AdvanceX;
+	float m_Width = 0;
+	float m_Height = 0;
+	float m_CharWidth = 0;
+	float m_CharHeight = 0;
+	float m_OffsetX = 0;
+	float m_OffsetY = 0;
+	float m_AdvanceX = 0;
 
-	float m_aUVs[4];
-	int64_t m_TouchTime;
+	float m_aUVs[4] = {0};
+	int64_t m_TouchTime = 0;
 	FT_UInt m_GlyphIndex;
 };
 
@@ -54,9 +54,9 @@ struct STextCharQuadVertex
 	{
 		m_Color.r = m_Color.g = m_Color.b = m_Color.a = 255;
 	}
-	float m_X, m_Y;
+	float m_X = 0, m_Y = 0;
 	// do not use normalized floats as coordinates, since the texture might grow
-	float m_U, m_V;
+	float m_U = 0, m_V = 0;
 	STextCharQuadVertexColor m_Color;
 };
 
@@ -73,8 +73,8 @@ struct STextureSkyline
 
 struct CFontSizeData
 {
-	int m_FontSize;
-	FT_Face *m_pFace;
+	int m_FontSize = 0;
+	FT_Face *m_pFace = nullptr;
 
 	std::map<int, SFontSizeChar> m_Chars;
 };
@@ -114,14 +114,14 @@ public:
 		return &m_aFontSizes[FontSize - MIN_FONT_SIZE];
 	}
 
-	void *m_pBuf;
-	char m_aFilename[IO_MAX_PATH_LENGTH];
+	void *m_pBuf = nullptr;
+	char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
 	FT_Face m_FtFace;
 
 	struct SFontFallBack
 	{
-		void *m_pBuf;
-		char m_aFilename[IO_MAX_PATH_LENGTH];
+		void *m_pBuf = nullptr;
+		char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
 		FT_Face m_FtFace;
 	};
 
@@ -131,20 +131,20 @@ public:
 
 	IGraphics::CTextureHandle m_aTextures[2];
 	// keep the full texture, because opengl doesn't provide texture copying
-	uint8_t *m_apTextureData[2];
+	uint8_t *m_apTextureData[2] = {nullptr};
 
 	// width and height are the same
-	int m_aCurTextureDimensions[2];
+	int m_aCurTextureDimensions[2] = {0};
 
 	STextureSkyline m_aTextureSkyline[2];
 };
 
 struct STextString
 {
-	int m_QuadBufferObjectIndex;
-	int m_QuadBufferContainerIndex;
-	size_t m_QuadNum;
-	int m_SelectionQuadContainerIndex;
+	int m_QuadBufferObjectIndex = 0;
+	int m_QuadBufferContainerIndex = 0;
+	size_t m_QuadNum = 0;
+	int m_SelectionQuadContainerIndex = 0;
 
 	std::vector<STextCharQuad> m_vCharacterQuads;
 };
@@ -153,33 +153,33 @@ struct STextContainer
 {
 	STextContainer() { Reset(); }
 
-	CFont *m_pFont;
-	int m_FontSize;
+	CFont *m_pFont = nullptr;
+	int m_FontSize = 0;
 	STextString m_StringInfo;
 
 	// keep these values to calculate offsets
-	float m_AlignedStartX;
-	float m_AlignedStartY;
-	float m_X;
-	float m_Y;
+	float m_AlignedStartX = 0;
+	float m_AlignedStartY = 0;
+	float m_X = 0;
+	float m_Y = 0;
 
-	int m_Flags;
-	int m_LineCount;
-	int m_GlyphCount;
-	int m_CharCount;
-	int m_MaxLines;
+	int m_Flags = 0;
+	int m_LineCount = 0;
+	int m_GlyphCount = 0;
+	int m_CharCount = 0;
+	int m_MaxLines = 0;
 
-	float m_StartX;
-	float m_StartY;
-	float m_LineWidth;
-	float m_UnscaledFontSize;
+	float m_StartX = 0;
+	float m_StartY = 0;
+	float m_LineWidth = 0;
+	float m_UnscaledFontSize = 0;
 
-	int m_RenderFlags;
+	int m_RenderFlags = 0;
 
-	bool m_HasCursor;
-	bool m_HasSelection;
+	bool m_HasCursor = false;
+	bool m_HasSelection = false;
 
-	bool m_SingleTimeUse;
+	bool m_SingleTimeUse = false;
 
 	void Reset()
 	{
@@ -208,21 +208,21 @@ struct STextContainer
 
 class CTextRender : public IEngineTextRender
 {
-	IGraphics *m_pGraphics;
+	IGraphics *m_pGraphics = nullptr;
 	IGraphics *Graphics() { return m_pGraphics; }
 
-	unsigned int m_RenderFlags;
+	unsigned int m_RenderFlags = 0;
 
 	std::vector<STextContainer *> m_vpTextContainers;
 	std::vector<int> m_vTextContainerIndices;
-	int m_FirstFreeTextContainerIndex;
+	int m_FirstFreeTextContainerIndex = 0;
 
 	SBufferContainerInfo m_DefaultTextContainerInfo;
 
 	std::vector<CFont *> m_vpFonts;
-	CFont *m_pCurFont;
+	CFont *m_pCurFont = nullptr;
 
-	std::chrono::nanoseconds m_CursorRenderTime;
+	std::chrono::nanoseconds m_CursorRenderTime = std::chrono::nanoseconds::zero();
 
 	int GetFreeTextContainerIndex()
 	{
@@ -282,7 +282,7 @@ class CTextRender : public IEngineTextRender
 	ColorRGBA m_Color;
 	ColorRGBA m_OutlineColor;
 	ColorRGBA m_SelectionColor;
-	CFont *m_pDefaultFont;
+	CFont *m_pDefaultFont = nullptr;
 
 	FT_Library m_FTLibrary;
 

@@ -45,7 +45,7 @@ protected:
 
 	const char *NetToString(const NETADDR *pData, char *pBuffer, unsigned BufferSize) const
 	{
-		char aAddrStr[NETADDR_MAXSTRSIZE];
+		char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
 		net_addr_str(pData, aAddrStr, sizeof(aAddrStr), false);
 		str_format(pBuffer, BufferSize, "'%s'", aAddrStr);
 		return pBuffer;
@@ -63,8 +63,8 @@ protected:
 	class CNetHash
 	{
 	public:
-		int m_Hash;
-		int m_HashIndex; // matching parts for ranges, 0 for addr
+		int m_Hash = 0;
+		int m_HashIndex = 0; // matching parts for ranges, 0 for addr
 
 		CNetHash() {}
 		CNetHash(const NETADDR *pAddr);
@@ -80,8 +80,8 @@ protected:
 			EXPIRES_NEVER = -1,
 			REASON_LENGTH = 64,
 		};
-		int m_Expires;
-		char m_aReason[REASON_LENGTH];
+		int m_Expires = 0;
+		char m_aReason[REASON_LENGTH] = {0};
 	};
 
 	template<class T>
@@ -92,12 +92,12 @@ protected:
 		CNetHash m_NetHash;
 
 		// hash list
-		CBan *m_pHashNext;
-		CBan *m_pHashPrev;
+		CBan *m_pHashNext = nullptr;
+		CBan *m_pHashPrev = nullptr;
 
 		// used or free list
-		CBan *m_pNext;
-		CBan *m_pPrev;
+		CBan *m_pNext = nullptr;
+		CBan *m_pPrev = nullptr;
 	};
 
 	template<class T, int HashCount>
@@ -134,11 +134,11 @@ protected:
 			MAX_BANS = 1024,
 		};
 
-		CBan<CDataType> *m_aapHashList[HashCount][256];
+		CBan<CDataType> *m_aapHashList[HashCount][256] = {{nullptr}};
 		CBan<CDataType> m_aBans[MAX_BANS];
-		CBan<CDataType> *m_pFirstFree;
-		CBan<CDataType> *m_pFirstUsed;
-		int m_CountUsed;
+		CBan<CDataType> *m_pFirstFree = nullptr;
+		CBan<CDataType> *m_pFirstUsed = nullptr;
+		int m_CountUsed = 0;
 	};
 
 	typedef CBanPool<NETADDR, 1> CBanAddrPool;
@@ -153,8 +153,8 @@ protected:
 	template<class T>
 	int Unban(T *pBanPool, const typename T::CDataType *pData);
 
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
+	class IConsole *m_pConsole = nullptr;
+	class IStorage *m_pStorage = nullptr;
 	CBanAddrPool m_BanAddrPool;
 	CBanRangePool m_BanRangePool;
 	NETADDR m_LocalhostIPV4, m_LocalhostIPV6;
@@ -203,12 +203,12 @@ void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, in
 	}
 
 	// build type based part
-	char aBuf[256];
+	char aBuf[256] = {0};
 	if(Type == MSGTYPE_PLAYER)
 		str_copy(aBuf, "You have been banned");
 	else
 	{
-		char aTemp[256];
+		char aTemp[256] = {0};
 		switch(Type)
 		{
 		case MSGTYPE_LIST:

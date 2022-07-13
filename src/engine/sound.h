@@ -28,25 +28,25 @@ public:
 	// unused
 	struct CSampleHandle
 	{
-		int m_SampleID;
+		int m_SampleID = 0;
 	};
 
 	struct CVoiceShapeCircle
 	{
-		float m_Radius;
+		float m_Radius = 0;
 	};
 
 	struct CVoiceShapeRectangle
 	{
-		float m_Width;
-		float m_Height;
+		float m_Width = 0;
+		float m_Height = 0;
 	};
 
 	class CVoiceHandle
 	{
 		friend class ISound;
-		int m_Id;
-		int m_Age;
+		int m_Id = 0;
+		int m_Age = 0;
 
 	public:
 		CVoiceHandle() :

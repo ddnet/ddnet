@@ -725,28 +725,28 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 
 struct CIntVariableData
 {
-	IConsole *m_pConsole;
-	int *m_pVariable;
-	int m_Min;
-	int m_Max;
-	int m_OldValue;
+	IConsole *m_pConsole = nullptr;
+	int *m_pVariable = nullptr;
+	int m_Min = 0;
+	int m_Max = 0;
+	int m_OldValue = 0;
 };
 
 struct CColVariableData
 {
-	IConsole *m_pConsole;
-	unsigned *m_pVariable;
-	bool m_Light;
-	bool m_Alpha;
-	unsigned m_OldValue;
+	IConsole *m_pConsole = nullptr;
+	unsigned *m_pVariable = nullptr;
+	bool m_Light = false;
+	bool m_Alpha = false;
+	unsigned m_OldValue = 0;
 };
 
 struct CStrVariableData
 {
-	IConsole *m_pConsole;
-	char *m_pStr;
-	int m_MaxSize;
-	char *m_pOldValue;
+	IConsole *m_pConsole = nullptr;
+	char *m_pStr = nullptr;
+	int m_MaxSize = 0;
+	char *m_pOldValue = nullptr;
 };
 
 static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)

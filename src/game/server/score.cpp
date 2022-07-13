@@ -19,10 +19,10 @@ class IDbConnection;
 std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 {
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
-	if(pCurPlayer->m_ScoreQueryResult != nullptr) // TODO: send player a message: "too many requests"
+	if(pCurPlayer->m_pScoreQueryResult != nullptr) // TODO: send player a message: "too many requests"
 		return nullptr;
-	pCurPlayer->m_ScoreQueryResult = std::make_shared<CScorePlayerResult>();
-	return pCurPlayer->m_ScoreQueryResult;
+	pCurPlayer->m_pScoreQueryResult = std::make_shared<CScorePlayerResult>();
+	return pCurPlayer->m_pScoreQueryResult;
 }
 
 void CScore::ExecPlayerThread(
@@ -139,10 +139,10 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float a
 		return;
 
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
-	if(pCurPlayer->m_ScoreFinishResult != nullptr)
+	if(pCurPlayer->m_pScoreFinishResult != nullptr)
 		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
-	pCurPlayer->m_ScoreFinishResult = std::make_shared<CScorePlayerResult>();
-	auto Tmp = std::make_unique<CSqlScoreData>(pCurPlayer->m_ScoreFinishResult);
+	pCurPlayer->m_pScoreFinishResult = std::make_shared<CScorePlayerResult>();
+	auto Tmp = std::make_unique<CSqlScoreData>(pCurPlayer->m_pScoreFinishResult);
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	Tmp->m_ClientID = ClientID;
@@ -243,7 +243,7 @@ void CScore::ShowTopPoints(int ClientID, int Offset)
 void CScore::RandomMap(int ClientID, int Stars)
 {
 	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientID);
-	GameServer()->m_SqlRandomMapResult = pResult;
+	GameServer()->m_pSqlRandomMapResult = pResult;
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
 	Tmp->m_Stars = Stars;
@@ -257,7 +257,7 @@ void CScore::RandomMap(int ClientID, int Stars)
 void CScore::RandomUnfinishedMap(int ClientID, int Stars)
 {
 	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientID);
-	GameServer()->m_SqlRandomMapResult = pResult;
+	GameServer()->m_pSqlRandomMapResult = pResult;
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
 	Tmp->m_Stars = Stars;
@@ -328,7 +328,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 		if(pController->m_Teams.m_Core.Team(i) == Team)
 		{
 			// put all names at the beginning of the array
-			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[Tmp->m_NumPlayer]));
+			str_copy(Tmp->m_aaClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aaClientNames[Tmp->m_NumPlayer]));
 			Tmp->m_aClientID[Tmp->m_NumPlayer] = i;
 			Tmp->m_NumPlayer++;
 		}

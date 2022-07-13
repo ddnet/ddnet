@@ -8,20 +8,20 @@ class CRingBufferBase
 	class CItem
 	{
 	public:
-		CItem *m_pPrev;
-		CItem *m_pNext;
-		int m_Free;
-		int m_Size;
+		CItem *m_pPrev = nullptr;
+		CItem *m_pNext = nullptr;
+		int m_Free = 0;
+		int m_Size = 0;
 	};
 
-	CItem *m_pProduce;
-	CItem *m_pConsume;
+	CItem *m_pProduce = nullptr;
+	CItem *m_pConsume = nullptr;
 
-	CItem *m_pFirst;
-	CItem *m_pLast;
+	CItem *m_pFirst = nullptr;
+	CItem *m_pLast = nullptr;
 
-	int m_Size;
-	int m_Flags;
+	int m_Size = 0;
+	int m_Flags = 0;
 
 	CItem *NextBlock(CItem *pItem);
 	CItem *PrevBlock(CItem *pItem);
@@ -49,7 +49,7 @@ public:
 template<typename T, int TSIZE, int TFLAGS = 0>
 class CStaticRingBuffer : public CRingBufferBase
 {
-	unsigned char m_aBuffer[TSIZE];
+	unsigned char m_aBuffer[TSIZE] = {0};
 
 public:
 	CStaticRingBuffer() { Init(); }

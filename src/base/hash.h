@@ -13,12 +13,12 @@ enum
 
 struct SHA256_DIGEST
 {
-	unsigned char data[SHA256_DIGEST_LENGTH];
+	unsigned char data[SHA256_DIGEST_LENGTH] = {0};
 };
 
 struct MD5_DIGEST
 {
-	unsigned char data[MD5_DIGEST_LENGTH];
+	unsigned char data[MD5_DIGEST_LENGTH] = {0};
 };
 
 SHA256_DIGEST sha256(const void *message, size_t message_len);

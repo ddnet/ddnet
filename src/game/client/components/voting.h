@@ -20,23 +20,23 @@ class CVoting : public CComponent
 	static void ConCallvote(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
 
-	int64_t m_Closetime;
-	char m_aDescription[VOTE_DESC_LENGTH];
-	char m_aReason[VOTE_REASON_LENGTH];
-	int m_Voted;
-	int m_Yes, m_No, m_Pass, m_Total;
+	int64_t m_Closetime = 0;
+	char m_aDescription[VOTE_DESC_LENGTH] = {0};
+	char m_aReason[VOTE_REASON_LENGTH] = {0};
+	int m_Voted = 0;
+	int m_Yes = 0, m_No = 0, m_Pass = 0, m_Total = 0;
 
 	void AddOption(const char *pDescription);
 	void ClearOptions();
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
 
 public:
-	int m_NumVoteOptions;
-	CVoteOptionClient *m_pFirst;
-	CVoteOptionClient *m_pLast;
+	int m_NumVoteOptions = 0;
+	CVoteOptionClient *m_pFirst = nullptr;
+	CVoteOptionClient *m_pLast = nullptr;
 
-	CVoteOptionClient *m_pRecycleFirst;
-	CVoteOptionClient *m_pRecycleLast;
+	CVoteOptionClient *m_pRecycleFirst = nullptr;
+	CVoteOptionClient *m_pRecycleLast = nullptr;
 
 	CVoting();
 	virtual int Sizeof() const override { return sizeof(*this); }

@@ -38,6 +38,6 @@ public:
 	std::map<int, std::vector<vec2>> m_TeleOuts;
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 
-	std::shared_ptr<CScoreInitResult> m_pInitResult;
+	std::shared_ptr<CScoreInitResult> m_pInitResult = nullptr;
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

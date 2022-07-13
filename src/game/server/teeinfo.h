@@ -12,7 +12,7 @@ public:
 	int m_ColorFeet = 0;
 
 	// 0.7
-	char m_apSkinPartNames[6][24] = {"", "", "", "", "", ""};
+	char m_aaSkinPartNames[6][24] = {"", "", "", "", "", ""};
 	bool m_aUseCustomColors[6] = {false, false, false, false, false, false};
 	int m_aSkinPartColors[6] = {0, 0, 0, 0, 0, 0};
 

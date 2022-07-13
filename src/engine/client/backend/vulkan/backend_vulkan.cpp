@@ -129,7 +129,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	{
 		VkDeviceMemory m_Mem = VK_NULL_HANDLE;
 		VkDeviceSize m_Size = 0;
-		EMemoryBlockUsage m_UsageType;
+		EMemoryBlockUsage m_UsageType = MEMORY_BLOCK_USAGE_TEXTURE;
 	};
 
 	struct SDeviceDescriptorPools;
@@ -161,12 +161,12 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		struct SMemoryHeapElement;
 		struct SMemoryHeapQueueElement
 		{
-			size_t m_AllocationSize;
+			size_t m_AllocationSize = 0;
 			// only useful information for the heap
-			size_t m_OffsetInHeap;
+			size_t m_OffsetInHeap = 0;
 			// useful for the user of this element
-			size_t m_OffsetToAlign;
-			SMemoryHeapElement *m_pElementInHeap;
+			size_t m_OffsetToAlign = 0;
+			SMemoryHeapElement *m_pElementInHeap = nullptr;
 			bool operator>(const SMemoryHeapQueueElement &Other) const { return m_AllocationSize > Other.m_AllocationSize; }
 		};
 
@@ -174,13 +174,13 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 		struct SMemoryHeapElement
 		{
-			size_t m_AllocationSize;
-			size_t m_Offset;
-			SMemoryHeapElement *m_pParent;
-			std::unique_ptr<SMemoryHeapElement> m_pLeft;
-			std::unique_ptr<SMemoryHeapElement> m_pRight;
+			size_t m_AllocationSize = 0;
+			size_t m_Offset = 0;
+			SMemoryHeapElement *m_pParent = nullptr;
+			std::unique_ptr<SMemoryHeapElement> m_pLeft = nullptr;
+			std::unique_ptr<SMemoryHeapElement> m_pRight = nullptr;
 
-			bool m_InUse;
+			bool m_InUse = false;
 			TMemoryHeapQueue::iterator m_InQueue;
 		};
 
@@ -315,22 +315,22 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	{
 		SMemoryHeap::SMemoryHeapQueueElement m_HeapData;
 
-		VkDeviceSize m_UsedSize;
+		VkDeviceSize m_UsedSize = 0;
 
 		// optional
 		VkBuffer m_Buffer;
 
 		SDeviceMemoryBlock m_BufferMem;
-		void *m_pMappedBuffer;
+		void *m_pMappedBuffer = nullptr;
 
-		bool m_IsCached;
-		SMemoryHeap *m_pHeap;
+		bool m_IsCached = false;
+		SMemoryHeap *m_pHeap = nullptr;
 	};
 
 	template<size_t ID>
 	struct SMemoryImageBlock : public SMemoryBlock<ID>
 	{
-		uint32_t m_ImageMemoryBits;
+		uint32_t m_ImageMemoryBits = 0;
 	};
 
 	template<size_t ID>
@@ -344,7 +344,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				VkBuffer m_Buffer;
 
 				SDeviceMemoryBlock m_BufferMem;
-				void *m_pMappedBuffer;
+				void *m_pMappedBuffer = nullptr;
 			};
 			std::vector<SMemoryCacheHeap *> m_vpMemoryHeaps;
 		};
@@ -477,7 +477,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SBufferContainer
 	{
-		int m_BufferObjectIndex;
+		int m_BufferObjectIndex = 0;
 	};
 
 	struct SFrameBuffers
@@ -485,9 +485,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		VkBuffer m_Buffer;
 		SDeviceMemoryBlock m_BufferMem;
 		size_t m_OffsetInBuffer = 0;
-		size_t m_Size;
-		size_t m_UsedSize;
-		void *m_pMappedBufferData;
+		size_t m_Size = 0;
+		size_t m_UsedSize = 0;
+		void *m_pMappedBufferData = nullptr;
 
 		SFrameBuffers(VkBuffer Buffer, SDeviceMemoryBlock BufferMem, size_t OffsetInBuffer, size_t Size, size_t UsedSize, void *pMappedBufferData) :
 			m_Buffer(Buffer), m_BufferMem(BufferMem), m_OffsetInBuffer(OffsetInBuffer), m_Size(Size), m_UsedSize(UsedSize), m_pMappedBufferData(pMappedBufferData)
@@ -698,13 +698,13 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformGPos
 	{
-		float m_aPos[4 * 2];
+		float m_aPos[4 * 2] = {0};
 	};
 
 	struct SUniformGTextPos
 	{
-		float m_aPos[4 * 2];
-		float m_TextureSize;
+		float m_aPos[4 * 2] = {0};
+		float m_TextureSize = 0;
 	};
 
 	typedef vec3 SUniformTextGFragmentOffset;
@@ -722,7 +722,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformTileGPos
 	{
-		float m_aPos[4 * 2];
+		float m_aPos[4 * 2] = {0};
 	};
 
 	struct SUniformTileGPosBorderLine : public SUniformTileGPos
@@ -733,37 +733,37 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformTileGPosBorder : public SUniformTileGPosBorderLine
 	{
-		int32_t m_JumpIndex;
+		int32_t m_JumpIndex = 0;
 	};
 
 	typedef ColorRGBA SUniformTileGVertColor;
 
 	struct SUniformTileGVertColorAlign
 	{
-		float m_aPad[(64 - 52) / 4];
+		float m_aPad[(64 - 52) / 4] = {0};
 	};
 
 	struct SUniformPrimExGPosRotationless
 	{
-		float m_aPos[4 * 2];
+		float m_aPos[4 * 2] = {0};
 	};
 
 	struct SUniformPrimExGPos : public SUniformPrimExGPosRotationless
 	{
 		vec2 m_Center;
-		float m_Rotation;
+		float m_Rotation = 0;
 	};
 
 	typedef ColorRGBA SUniformPrimExGVertColor;
 
 	struct SUniformPrimExGVertColorAlign
 	{
-		float m_aPad[(48 - 44) / 4];
+		float m_aPad[(48 - 44) / 4] = {0};
 	};
 
 	struct SUniformSpriteMultiGPos
 	{
-		float m_aPos[4 * 2];
+		float m_aPos[4 * 2] = {0};
 		vec2 m_Center;
 	};
 
@@ -771,12 +771,12 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformSpriteMultiGVertColorAlign
 	{
-		float m_aPad[(48 - 40) / 4];
+		float m_aPad[(48 - 40) / 4] = {0};
 	};
 
 	struct SUniformSpriteMultiPushGPosBase
 	{
-		float m_aPos[4 * 2];
+		float m_aPos[4 * 2] = {0};
 		vec2 m_Center;
 		vec2 m_Padding;
 	};
@@ -790,29 +790,29 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformQuadGPosBase
 	{
-		float m_aPos[4 * 2];
-		int32_t m_QuadOffset;
+		float m_aPos[4 * 2] = {0};
+		int32_t m_QuadOffset = 0;
 	};
 
 	struct SUniformQuadPushGBufferObject
 	{
 		vec4 m_VertColor;
 		vec2 m_Offset;
-		float m_Rotation;
-		float m_Padding;
+		float m_Rotation = 0;
+		float m_Padding = 0;
 	};
 
 	struct SUniformQuadPushGPos
 	{
-		float m_aPos[4 * 2];
+		float m_aPos[4 * 2] = {0};
 		SUniformQuadPushGBufferObject m_BOPush;
-		int32_t m_QuadOffset;
+		int32_t m_QuadOffset = 0;
 	};
 
 	struct SUniformQuadGPos
 	{
-		float m_aPos[4 * 2];
-		int32_t m_QuadOffset;
+		float m_aPos[4 * 2] = {0};
+		int32_t m_QuadOffset = 0;
 	};
 
 	enum ESupportedSamplerTypes
@@ -874,14 +874,14 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	std::vector<CTexture> m_vTextures;
 
-	std::atomic<uint64_t> *m_pTextureMemoryUsage;
-	std::atomic<uint64_t> *m_pBufferMemoryUsage;
-	std::atomic<uint64_t> *m_pStreamMemoryUsage;
-	std::atomic<uint64_t> *m_pStagingMemoryUsage;
+	std::atomic<uint64_t> *m_pTextureMemoryUsage = nullptr;
+	std::atomic<uint64_t> *m_pBufferMemoryUsage = nullptr;
+	std::atomic<uint64_t> *m_pStreamMemoryUsage = nullptr;
+	std::atomic<uint64_t> *m_pStagingMemoryUsage = nullptr;
 
-	TTWGraphicsGPUList *m_pGPUList;
+	TTWGraphicsGPUList *m_pGPUList = nullptr;
 
-	int m_GlobalTextureLodBIAS;
+	int m_GlobalTextureLodBIAS = 0;
 	uint32_t m_MultiSamplingCount = 1;
 
 	uint32_t m_NextMultiSamplingCount = std::numeric_limits<uint32_t>::max();
@@ -903,15 +903,15 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	VkBuffer m_RenderIndexBuffer;
 	SDeviceMemoryBlock m_RenderIndexBufferMemory;
-	size_t m_CurRenderIndexPrimitiveCount;
+	size_t m_CurRenderIndexPrimitiveCount = 0;
 
-	VkDeviceSize m_NonCoherentMemAlignment;
-	VkDeviceSize m_OptimalImageCopyMemAlignment;
-	uint32_t m_MaxTextureSize;
-	uint32_t m_MaxSamplerAnisotropy;
+	VkDeviceSize m_NonCoherentMemAlignment = 0;
+	VkDeviceSize m_OptimalImageCopyMemAlignment = 0;
+	uint32_t m_MaxTextureSize = 0;
+	uint32_t m_MaxSamplerAnisotropy = 0;
 	VkSampleCountFlags m_MaxMultiSample;
 
-	uint32_t m_MinUniformAlign;
+	uint32_t m_MinUniformAlign = 0;
 
 	std::vector<uint8_t> m_vScreenshotHelper;
 
@@ -926,7 +926,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	std::array<VkSampler, SUPPORTED_SAMPLER_TYPE_COUNT> m_aSamplers;
 
-	class IStorage *m_pStorage;
+	class IStorage *m_pStorage = nullptr;
 
 	struct SDelayedBufferCleanupItem
 	{
@@ -983,7 +983,7 @@ private:
 	uint64_t m_CurFrame = 0;
 	std::vector<uint64_t> m_vImageLastFrameCheck;
 
-	uint32_t m_LastPresentedSwapChainImageIndex;
+	uint32_t m_LastPresentedSwapChainImageIndex = 0;
 
 	std::vector<SBufferObjectFrame> m_vBufferObjects;
 
@@ -1046,25 +1046,25 @@ private:
 	uint32_t m_CurFrames = 0;
 	uint32_t m_CurImageIndex = 0;
 
-	uint32_t m_CanvasWidth;
-	uint32_t m_CanvasHeight;
+	uint32_t m_CanvasWidth = 0;
+	uint32_t m_CanvasHeight = 0;
 
-	SDL_Window *m_pWindow;
+	SDL_Window *m_pWindow = nullptr;
 
 	std::array<float, 4> m_aClearColor = {0, 0, 0, 0};
 
 	struct SRenderCommandExecuteBuffer
 	{
-		CCommandBuffer::ECommandBufferCMD m_Command;
-		const CCommandBuffer::SCommand *m_pRawCommand;
-		uint32_t m_ThreadIndex;
+		CCommandBuffer::ECommandBufferCMD m_Command = CCommandBuffer::ECommandBufferCMD::CMDGROUP_CORE;
+		const CCommandBuffer::SCommand *m_pRawCommand = nullptr;
+		uint32_t m_ThreadIndex = 0;
 
 		// must be calculated when the buffer gets filled
 		size_t m_EstimatedRenderCallCount = 0;
 
 		// usefull data
 		VkBuffer m_Buffer;
-		size_t m_BufferOff;
+		size_t m_BufferOff = 0;
 		std::array<SDeviceDescriptorSet, 2> m_aDescriptors;
 
 		VkBuffer m_IndexBuffer;
@@ -1087,7 +1087,7 @@ private:
 
 	struct SCommandCallback
 	{
-		bool m_IsRenderCommand;
+		bool m_IsRenderCommand = false;
 		TCommandBufferFillExecuteBufferFunc m_FillExecuteBuffer;
 		TCommandBufferCommandCallback m_CommandCB;
 	};
@@ -1098,7 +1098,7 @@ protected:
 	* ERROR MANAGMENT
 	************************/
 
-	char m_aError[1024];
+	char m_aError[1024] = {0};
 	bool m_HasError = false;
 	bool m_CanAssert = false;
 

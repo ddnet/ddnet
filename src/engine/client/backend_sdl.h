@@ -63,14 +63,14 @@ protected:
 	void StopProcessor();
 
 private:
-	ICommandProcessor *m_pProcessor;
+	ICommandProcessor *m_pProcessor = nullptr;
 	std::mutex m_BufferSwapMutex;
 	std::condition_variable m_BufferSwapCond;
-	CCommandBuffer *m_pBuffer;
-	std::atomic_bool m_Shutdown;
+	CCommandBuffer *m_pBuffer = nullptr;
+	std::atomic_bool m_Shutdown = false;
 	bool m_Started = false;
-	std::atomic_bool m_BufferInProcess;
-	void *m_pThread;
+	std::atomic_bool m_BufferInProcess = false;
+	void *m_pThread = nullptr;
 
 	static void ThreadFunc(void *pUser);
 };
@@ -87,31 +87,31 @@ public:
 
 struct SBackendCapabilites
 {
-	bool m_TileBuffering;
-	bool m_QuadBuffering;
-	bool m_TextBuffering;
-	bool m_QuadContainerBuffering;
+	bool m_TileBuffering = false;
+	bool m_QuadBuffering = false;
+	bool m_TextBuffering = false;
+	bool m_QuadContainerBuffering = false;
 
-	bool m_MipMapping;
-	bool m_NPOTTextures;
-	bool m_3DTextures;
-	bool m_2DArrayTextures;
-	bool m_2DArrayTexturesAsExtension;
-	bool m_ShaderSupport;
+	bool m_MipMapping = false;
+	bool m_NPOTTextures = false;
+	bool m_3DTextures = false;
+	bool m_2DArrayTextures = false;
+	bool m_2DArrayTexturesAsExtension = false;
+	bool m_ShaderSupport = false;
 
 	// use quads as much as possible, even if the user config says otherwise
-	bool m_TrianglesAsQuads;
+	bool m_TrianglesAsQuads = false;
 
-	int m_ContextMajor;
-	int m_ContextMinor;
-	int m_ContextPatch;
+	int m_ContextMajor = 0;
+	int m_ContextMinor = 0;
+	int m_ContextPatch = 0;
 };
 
 // takes care of sdl related commands
 class CCommandProcessorFragment_SDL
 {
 	// SDL stuff
-	SDL_Window *m_pWindow;
+	SDL_Window *m_pWindow = nullptr;
 	SDL_GLContext m_GLContext;
 
 public:
@@ -125,7 +125,7 @@ public:
 	{
 		SCommand_Init() :
 			SCommand(CMD_INIT) {}
-		SDL_Window *m_pWindow;
+		SDL_Window *m_pWindow = nullptr;
 		SDL_GLContext m_GLContext;
 	};
 
@@ -152,11 +152,11 @@ public:
 // command processor impelementation, uses the fragments to combine into one processor
 class CCommandProcessor_SDL_GL : public CGraphicsBackend_Threaded::ICommandProcessor
 {
-	class CCommandProcessorFragment_GLBase *m_pGLBackend;
+	class CCommandProcessorFragment_GLBase *m_pGLBackend = nullptr;
 	CCommandProcessorFragment_SDL m_SDL;
 	CCommandProcessorFragment_General m_General;
 
-	EBackendType m_BackendType;
+	EBackendType m_BackendType = BACKEND_TYPE_OPENGL;
 
 public:
 	CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch);
@@ -181,7 +181,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
-	int m_NumScreens;
+	int m_NumScreens = 0;
 
 	SBackendCapabilites m_Capabilites;
 
@@ -191,7 +191,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	EBackendType m_BackendType = BACKEND_TYPE_AUTO;
 
-	char m_aErrorString[256];
+	char m_aErrorString[256] = {0};
 
 	static EBackendType DetectBackend();
 	static void ClampDriverVersion(EBackendType BackendType);

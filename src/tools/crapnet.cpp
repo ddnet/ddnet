@@ -10,14 +10,14 @@
 
 struct SPacket
 {
-	SPacket *m_pPrev;
-	SPacket *m_pNext;
+	SPacket *m_pPrev = nullptr;
+	SPacket *m_pNext = nullptr;
 
 	NETADDR m_SendTo;
-	int64_t m_Timestamp;
-	int m_ID;
-	int m_DataSize;
-	char m_aData[1];
+	int64_t m_Timestamp = 0;
+	int m_ID = 0;
+	int m_DataSize = 0;
+	char m_aData[1] = {0};
 };
 
 static SPacket *g_pFirst = (SPacket *)0;
@@ -26,12 +26,12 @@ static int g_CurrentLatency = 0;
 
 struct SPingConfig
 {
-	int m_Base;
-	int m_Flux;
-	int m_Spike;
-	int m_Loss;
-	int m_Delay;
-	int m_DelayFreq;
+	int m_Base = 0;
+	int m_Flux = 0;
+	int m_Spike = 0;
+	int m_Loss = 0;
+	int m_Delay = 0;
+	int m_DelayFreq = 0;
 };
 
 static SPingConfig g_aConfigPings[] = {

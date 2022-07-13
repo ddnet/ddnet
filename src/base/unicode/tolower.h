@@ -2,8 +2,8 @@
 
 struct UPPER_LOWER
 {
-	int32_t upper;
-	int32_t lower;
+	int32_t upper = 0;
+	int32_t lower = 0;
 };
 
 enum

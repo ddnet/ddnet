@@ -23,11 +23,11 @@ enum
 
 class CTeamsCore
 {
-	int m_aTeam[MAX_CLIENTS];
-	bool m_aIsSolo[MAX_CLIENTS];
+	int m_aTeam[MAX_CLIENTS] = {0};
+	bool m_aIsSolo[MAX_CLIENTS] = {false};
 
 public:
-	bool m_IsDDRace16;
+	bool m_IsDDRace16 = false;
 
 	CTeamsCore();
 

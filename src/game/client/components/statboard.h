@@ -9,9 +9,9 @@
 class CStatboard : public CComponent
 {
 private:
-	bool m_Active;
-	bool m_ScreenshotTaken;
-	int64_t m_ScreenshotTime;
+	bool m_Active = false;
+	bool m_ScreenshotTaken = false;
+	int64_t m_ScreenshotTime = 0;
 	static void ConKeyStats(IConsole::IResult *pResult, void *pUserData);
 	void RenderGlobalStats();
 	void AutoStatScreenshot();

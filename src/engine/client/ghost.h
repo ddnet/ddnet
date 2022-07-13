@@ -12,13 +12,13 @@ enum
 // version 4-6
 struct CGhostHeader
 {
-	unsigned char m_aMarker[8];
-	unsigned char m_Version;
-	char m_aOwner[MAX_NAME_LENGTH];
-	char m_aMap[64];
-	unsigned char m_aZeroes[4]; // Crc before version 6
-	unsigned char m_aNumTicks[4];
-	unsigned char m_aTime[4];
+	unsigned char m_aMarker[8] = {0};
+	unsigned char m_Version = 0;
+	char m_aOwner[MAX_NAME_LENGTH] = {0};
+	char m_aMap[64] = {0};
+	unsigned char m_aZeroes[4] = {0}; // Crc before version 6
+	unsigned char m_aNumTicks[4] = {0};
+	unsigned char m_aTime[4] = {0};
 	SHA256_DIGEST m_MapSha256;
 
 	int GetTicks() const
@@ -46,8 +46,8 @@ struct CGhostHeader
 class CGhostItem
 {
 public:
-	unsigned char m_aData[MAX_ITEM_SIZE];
-	int m_Type;
+	unsigned char m_aData[MAX_ITEM_SIZE] = {0};
+	int m_Type = 0;
 
 	CGhostItem() :
 		m_Type(-1) {}
@@ -59,14 +59,14 @@ public:
 class CGhostRecorder : public IGhostRecorder
 {
 	IOHANDLE m_File;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
+	class IConsole *m_pConsole = nullptr;
+	class IStorage *m_pStorage = nullptr;
 
 	CGhostItem m_LastItem;
 
-	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK];
-	char *m_pBufferPos;
-	int m_BufferNumItems;
+	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK] = {0};
+	char *m_pBufferPos = nullptr;
+	int m_BufferNumItems = 0;
 
 	void ResetBuffer();
 	void FlushChunk();
@@ -86,19 +86,19 @@ public:
 class CGhostLoader : public IGhostLoader
 {
 	IOHANDLE m_File;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
+	class IConsole *m_pConsole = nullptr;
+	class IStorage *m_pStorage = nullptr;
 
 	CGhostHeader m_Header;
 	CGhostInfo m_Info;
 
 	CGhostItem m_LastItem;
 
-	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK];
-	char *m_pBufferPos;
-	int m_BufferNumItems;
-	int m_BufferCurItem;
-	int m_BufferPrevItem;
+	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK] = {0};
+	char *m_pBufferPos = nullptr;
+	int m_BufferNumItems = 0;
+	int m_BufferCurItem = 0;
+	int m_BufferPrevItem = 0;
 
 	void ResetBuffer();
 	int ReadChunk(int *pType);

@@ -10,7 +10,7 @@ class CDoor : public CEntity
 {
 	vec2 m_To;
 	void ResetCollision();
-	int m_Length;
+	int m_Length = 0;
 	vec2 m_Direction;
 
 public:

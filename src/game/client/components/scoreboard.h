@@ -18,7 +18,7 @@ class CScoreboard : public CComponent
 
 	const char *GetClanName(int Team);
 
-	bool m_Active;
+	bool m_Active = false;
 
 public:
 	CScoreboard();
@@ -35,7 +35,7 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 
 private:
-	float m_ServerRecord;
+	float m_ServerRecord = 0;
 };
 
 #endif

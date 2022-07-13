@@ -126,9 +126,9 @@ void CSnapshot::DebugDump()
 
 struct CItemList
 {
-	int m_Num;
-	int m_aKeys[64];
-	int m_aIndex[64];
+	int m_Num = 0;
+	int m_aKeys[64] = {0};
+	int m_aIndex[64] = {0};
 };
 
 enum

@@ -13,14 +13,14 @@ class CAssertionLogger : public ILogger
 
 	struct SDebugMessageItem
 	{
-		char m_aMessage[1024];
+		char m_aMessage[1024] = {0};
 	};
 
 	std::mutex m_DbgMessageMutex;
 	CStaticRingBuffer<SDebugMessageItem, sizeof(SDebugMessageItem) * 64, CRingBufferBase::FLAG_RECYCLE> m_DbgMessages;
 
-	char m_aAssertLogPath[IO_MAX_PATH_LENGTH];
-	char m_aGameName[256];
+	char m_aAssertLogPath[IO_MAX_PATH_LENGTH] = {0};
+	char m_aGameName[256] = {0};
 
 public:
 	CAssertionLogger(const char *pAssertLogPath, const char *pGameName);

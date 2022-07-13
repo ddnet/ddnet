@@ -42,7 +42,7 @@ public:
 	class IResult
 	{
 	protected:
-		unsigned m_NumArgs;
+		unsigned m_NumArgs = 0;
 
 	public:
 		IResult() { m_NumArgs = 0; }
@@ -56,7 +56,7 @@ public:
 		virtual void RemoveArgument(unsigned Index) = 0;
 
 		int NumArguments() const { return m_NumArgs; }
-		int m_ClientID;
+		int m_ClientID = 0;
 
 		// DDRace
 
@@ -66,14 +66,14 @@ public:
 	class CCommandInfo
 	{
 	protected:
-		int m_AccessLevel;
+		int m_AccessLevel = 0;
 
 	public:
 		CCommandInfo() { m_AccessLevel = ACCESS_LEVEL_ADMIN; }
 		virtual ~CCommandInfo() {}
-		const char *m_pName;
-		const char *m_pHelp;
-		const char *m_pParams;
+		const char *m_pName = nullptr;
+		const char *m_pHelp = nullptr;
+		const char *m_pParams = nullptr;
 
 		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const = 0;
 
@@ -118,7 +118,7 @@ public:
 
 	// DDRace
 
-	bool m_Cheated;
+	bool m_Cheated = false;
 	virtual void SetFlagMask(int FlagMask) = 0;
 };
 

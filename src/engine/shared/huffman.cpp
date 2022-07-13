@@ -21,8 +21,8 @@ const unsigned CHuffman::ms_aFreqTable[HUFFMAN_MAX_SYMBOLS] = {
 
 struct CHuffmanConstructNode
 {
-	unsigned short m_NodeId;
-	int m_Frequency;
+	unsigned short m_NodeId = 0;
+	int m_Frequency = 0;
 };
 
 bool CompareNodesByFrequencyDesc(const CHuffmanConstructNode *pNode1, const CHuffmanConstructNode *pNode2)

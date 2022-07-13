@@ -28,8 +28,8 @@ class IServer : public IInterface
 {
 	MACRO_INTERFACE("server", 0)
 protected:
-	int m_CurrentGameTick;
-	int m_TickSpeed;
+	int m_CurrentGameTick = 0;
+	int m_TickSpeed = 0;
 
 public:
 	/*
@@ -37,12 +37,12 @@ public:
 	*/
 	struct CClientInfo
 	{
-		const char *m_pName;
-		int m_Latency;
-		bool m_GotDDNetVersion;
-		int m_DDNetVersion;
-		const char *m_pDDNetVersionStr;
-		const CUuid *m_pConnectionID;
+		const char *m_pName = nullptr;
+		int m_Latency = 0;
+		bool m_GotDDNetVersion = false;
+		int m_DDNetVersion = 0;
+		const char *m_pDDNetVersionStr = nullptr;
+		const CUuid *m_pConnectionID = nullptr;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }

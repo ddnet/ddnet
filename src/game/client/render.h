@@ -40,14 +40,14 @@ public:
 
 	CSkin::SSkinMetrics m_SkinMetrics;
 
-	bool m_CustomColoredSkin;
+	bool m_CustomColoredSkin = false;
 	ColorRGBA m_BloodColor;
 
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
-	float m_Size;
-	int m_GotAirJump;
-	int m_TeeRenderFlags;
+	float m_Size = 0;
+	int m_GotAirJump = 0;
+	int m_TeeRenderFlags = 0;
 };
 
 // Tee Render Flags
@@ -73,10 +73,10 @@ typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 
 class CRenderTools
 {
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
+	class IGraphics *m_pGraphics = nullptr;
+	class ITextRender *m_pTextRender = nullptr;
 
-	int m_TeeQuadContainerIndex;
+	int m_TeeQuadContainerIndex = 0;
 
 	void GetRenderTeeBodyScale(float BaseSize, float &BodyScale);
 	void GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, float &FeetScaleHeight);

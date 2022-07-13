@@ -12,9 +12,9 @@ class CLocalizationDatabase
 	class CString
 	{
 	public:
-		unsigned m_Hash;
-		unsigned m_ContextHash;
-		const char *m_pReplacement;
+		unsigned m_Hash = 0;
+		unsigned m_ContextHash = 0;
+		const char *m_pReplacement = nullptr;
 
 		CString() {}
 		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
@@ -29,8 +29,8 @@ class CLocalizationDatabase
 
 	std::vector<CString> m_vStrings;
 	CHeap m_StringsHeap;
-	int m_VersionCounter;
-	int m_CurrentVersion;
+	int m_VersionCounter = 0;
+	int m_CurrentVersion = 0;
 
 public:
 	CLocalizationDatabase();
@@ -47,11 +47,11 @@ extern CLocalizationDatabase g_Localization;
 
 class CLocConstString
 {
-	const char *m_pDefaultStr;
-	const char *m_pCurrentStr;
-	unsigned m_Hash;
-	unsigned m_ContextHash;
-	int m_Version;
+	const char *m_pDefaultStr = nullptr;
+	const char *m_pCurrentStr = nullptr;
+	unsigned m_Hash = 0;
+	unsigned m_ContextHash = 0;
+	int m_Version = 0;
 
 public:
 	CLocConstString(const char *pStr, const char *pContext = "");

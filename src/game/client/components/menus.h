@@ -27,7 +27,7 @@
 struct CServerProcess
 {
 	PROCESS Process;
-	bool Initialized;
+	bool Initialized = false;
 	CLineReader LineReader;
 };
 
@@ -37,24 +37,24 @@ public:
 	const float ms_Width = 160.0f;
 	const float ms_Height = 186.0f;
 
-	float m_X;
-	float m_Y;
+	float m_X = 0;
+	float m_Y = 0;
 
-	bool m_Active;
+	bool m_Active = false;
 
 	CUIRect m_AttachedRect;
-	unsigned int *m_pColor;
-	unsigned int m_HSVColor;
+	unsigned int *m_pColor = nullptr;
+	unsigned int m_HSVColor = 0;
 };
 
 // compnent to fetch keypresses, override all other input
 class CMenusKeyBinder : public CComponent
 {
 public:
-	bool m_TakeKey;
-	bool m_GotKey;
+	bool m_TakeKey = false;
+	bool m_GotKey = false;
 	IInput::CEvent m_Key;
-	int m_ModifierCombination;
+	int m_ModifierCombination = 0;
 	CMenusKeyBinder();
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual bool OnInput(IInput::CEvent Event) override;
@@ -76,7 +76,7 @@ class CMenus : public CComponent
 	static SColorPicker ms_ColorPicker;
 	static bool ms_ValueSelectorTextMode;
 
-	char m_aLocalStringHelper[1024];
+	char m_aLocalStringHelper[1024] = {0};
 
 	CUIEx m_UIEx;
 
@@ -198,8 +198,8 @@ class CMenus : public CComponent
 
 	struct CListboxItem
 	{
-		int m_Visible;
-		int m_Selected;
+		int m_Visible = 0;
+		int m_Selected = 0;
 		CUIRect m_Rect;
 		CUIRect m_HitRect;
 	};
@@ -227,7 +227,7 @@ public:
 	{
 		IGraphics::CTextureHandle m_RenderTexture;
 
-		char m_aName[50];
+		char m_aName[50] = {0};
 
 		bool operator<(const SCustomItem &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 	};
@@ -289,21 +289,21 @@ protected:
 
 	void ClearCustomItems(int CurTab);
 
-	int m_MenuPage;
-	int m_GamePage;
-	int m_Popup;
-	int m_ActivePage;
-	bool m_ShowStart;
-	bool m_MenuActive;
+	int m_MenuPage = 0;
+	int m_GamePage = 0;
+	int m_Popup = 0;
+	int m_ActivePage = 0;
+	bool m_ShowStart = false;
+	bool m_MenuActive = false;
 	vec2 m_MousePos;
-	bool m_JoinTutorial;
+	bool m_JoinTutorial = false;
 
-	char m_aNextServer[256];
+	char m_aNextServer[256] = {0};
 
 	// images
 	struct CMenuImage
 	{
-		char m_aName[64];
+		char m_aName[64] = {0};
 		IGraphics::CTextureHandle m_OrgTexture;
 		IGraphics::CTextureHandle m_GreyTexture;
 	};
@@ -314,13 +314,13 @@ protected:
 	const CMenuImage *FindMenuImage(const char *pName);
 
 	// loading
-	int m_LoadCurrent;
-	int m_LoadTotal;
+	int m_LoadCurrent = 0;
+	int m_LoadTotal = 0;
 
 	//
-	char m_aMessageTopic[512];
-	char m_aMessageBody[512];
-	char m_aMessageButton[512];
+	char m_aMessageTopic[512] = {0};
+	char m_aMessageBody[512] = {0};
+	char m_aMessageButton[512] = {0};
 
 	CUIElement m_RefreshButton;
 	CUIElement m_ConnectButton;
@@ -341,32 +341,32 @@ protected:
 	static float ms_ListitemAdditionalHeight;
 
 	// for settings
-	bool m_NeedRestartGeneral;
-	bool m_NeedRestartSkins;
-	bool m_NeedRestartGraphics;
-	bool m_NeedRestartSound;
-	bool m_NeedRestartUpdate;
-	bool m_NeedRestartDDNet;
-	bool m_NeedSendinfo;
-	bool m_NeedSendDummyinfo;
-	int m_SettingPlayerPage;
+	bool m_NeedRestartGeneral = false;
+	bool m_NeedRestartSkins = false;
+	bool m_NeedRestartGraphics = false;
+	bool m_NeedRestartSound = false;
+	bool m_NeedRestartUpdate = false;
+	bool m_NeedRestartDDNet = false;
+	bool m_NeedSendinfo = false;
+	bool m_NeedSendDummyinfo = false;
+	int m_SettingPlayerPage = 0;
 
 	//
-	bool m_EscapePressed;
-	bool m_EnterPressed;
-	bool m_DeletePressed;
+	bool m_EscapePressed = false;
+	bool m_EnterPressed = false;
+	bool m_DeletePressed = false;
 
 	// for map download popup
-	int64_t m_DownloadLastCheckTime;
-	int m_DownloadLastCheckSize;
-	float m_DownloadSpeed;
+	int64_t m_DownloadLastCheckTime = 0;
+	int m_DownloadLastCheckSize = 0;
+	float m_DownloadSpeed = 0;
 
 	// for call vote
-	int m_CallvoteSelectedOption;
-	int m_CallvoteSelectedPlayer;
-	char m_aCallvoteReason[VOTE_REASON_LENGTH];
-	char m_aFilterString[25];
-	bool m_ControlPageOpening;
+	int m_CallvoteSelectedOption = 0;
+	int m_CallvoteSelectedPlayer = 0;
+	char m_aCallvoteReason[VOTE_REASON_LENGTH] = {0};
+	char m_aFilterString[25] = {0};
+	bool m_ControlPageOpening = false;
 
 	// demo
 	enum
@@ -379,14 +379,14 @@ protected:
 
 	struct CDemoItem
 	{
-		char m_aFilename[IO_MAX_PATH_LENGTH];
-		char m_aName[128];
-		bool m_IsDir;
-		int m_StorageType;
-		time_t m_Date;
+		char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
+		char m_aName[128] = {0};
+		bool m_IsDir = false;
+		int m_StorageType = 0;
+		time_t m_Date = 0;
 
-		bool m_InfosLoaded;
-		bool m_Valid;
+		bool m_InfosLoaded = false;
+		bool m_Valid = false;
 		CDemoHeader m_Info;
 		CTimelineMarkers m_TimelineMarkers;
 		CMapInfo m_MapInfo;
@@ -440,11 +440,11 @@ protected:
 		}
 	};
 
-	char m_aCurrentDemoFolder[256];
-	char m_aCurrentDemoFile[64];
-	int m_DemolistSelectedIndex;
-	bool m_DemolistSelectedIsDir;
-	int m_DemolistStorageType;
+	char m_aCurrentDemoFolder[256] = {0};
+	char m_aCurrentDemoFile[64] = {0};
+	int m_DemolistSelectedIndex = 0;
+	bool m_DemolistSelectedIsDir = false;
+	int m_DemolistStorageType = 0;
 	int m_Speed = 4;
 
 	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
@@ -456,8 +456,8 @@ protected:
 	// friends
 	struct CFriendItem
 	{
-		const CFriendInfo *m_pFriendInfo;
-		int m_NumFound;
+		const CFriendInfo *m_pFriendInfo = nullptr;
+		int m_NumFound = 0;
 
 		CFriendItem() {}
 		CFriendItem(const CFriendInfo *pFriendInfo) :
@@ -483,7 +483,7 @@ protected:
 	};
 
 	std::vector<CFriendItem> m_vFriends;
-	int m_FriendlistSelectedIndex;
+	int m_FriendlistSelectedIndex = 0;
 
 	void FriendlistOnUpdate();
 
@@ -515,9 +515,9 @@ protected:
 	bool RenderServerControlServer(CUIRect MainView);
 
 	// found in menus_browser.cpp
-	int m_SelectedIndex;
-	int m_DoubleClickIndex;
-	int m_ScrollOffset;
+	int m_SelectedIndex = 0;
+	int m_DoubleClickIndex = 0;
+	int m_ScrollOffset = 0;
 	void RenderServerbrowserServerList(CUIRect View);
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
@@ -546,7 +546,7 @@ protected:
 
 	bool CheckHotKey(int Key) const;
 
-	class CMenuBackground *m_pBackground;
+	class CMenuBackground *m_pBackground = nullptr;
 
 public:
 	void RenderBackground();
@@ -635,19 +635,19 @@ public:
 	int DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect);
 	std::vector<CDemoItem> m_vDemos;
 	void DemolistPopulate();
-	bool m_Dummy;
+	bool m_Dummy = false;
 
 	const char *GetCurrentDemoFolder() const { return m_aCurrentDemoFolder; }
 
 	// Ghost
 	struct CGhostItem
 	{
-		char m_aFilename[IO_MAX_PATH_LENGTH];
-		char m_aPlayer[MAX_NAME_LENGTH];
+		char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
+		char m_aPlayer[MAX_NAME_LENGTH] = {0};
 
-		int m_Time;
-		int m_Slot;
-		bool m_Own;
+		int m_Time = 0;
+		int m_Slot = 0;
+		bool m_Own = false;
 
 		CGhostItem() :
 			m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
@@ -673,11 +673,11 @@ public:
 
 	void PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration);
 
-	std::chrono::nanoseconds m_PopupWarningLastTime;
-	std::chrono::nanoseconds m_PopupWarningDuration;
+	std::chrono::nanoseconds m_PopupWarningLastTime = std::chrono::nanoseconds::zero();
+	std::chrono::nanoseconds m_PopupWarningDuration = std::chrono::nanoseconds::zero();
 
-	int m_DemoPlayerState;
-	char m_aDemoPlayerPopupHint[256];
+	int m_DemoPlayerState = 0;
+	char m_aDemoPlayerPopupHint[256] = {0};
 
 	enum
 	{

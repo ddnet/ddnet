@@ -126,8 +126,8 @@ void CPlayer::Reset()
 	// Variable initialized:
 	m_Last_Team = 0;
 	m_LastSQLQuery = 0;
-	m_ScoreQueryResult = nullptr;
-	m_ScoreFinishResult = nullptr;
+	m_pScoreQueryResult = nullptr;
+	m_pScoreFinishResult = nullptr;
 
 	int64_t Now = Server()->Tick();
 	int64_t TickSpeed = Server()->TickSpeed();
@@ -161,15 +161,15 @@ static int PlayerFlags_SixToSeven(int Flags)
 
 void CPlayer::Tick()
 {
-	if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed)
+	if(m_pScoreQueryResult != nullptr && m_pScoreQueryResult->m_Completed)
 	{
-		ProcessScoreResult(*m_ScoreQueryResult);
-		m_ScoreQueryResult = nullptr;
+		ProcessScoreResult(*m_pScoreQueryResult);
+		m_pScoreQueryResult = nullptr;
 	}
-	if(m_ScoreFinishResult != nullptr && m_ScoreFinishResult->m_Completed)
+	if(m_pScoreFinishResult != nullptr && m_pScoreFinishResult->m_Completed)
 	{
-		ProcessScoreResult(*m_ScoreFinishResult);
-		m_ScoreFinishResult = nullptr;
+		ProcessScoreResult(*m_pScoreFinishResult);
+		m_pScoreFinishResult = nullptr;
 	}
 
 	bool ClientIngame = Server()->ClientIngame(m_ClientID);

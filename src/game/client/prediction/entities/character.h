@@ -62,7 +62,7 @@ public:
 	void GiveNinja();
 	void RemoveNinja();
 
-	bool m_IsLocal;
+	bool m_IsLocal = false;
 
 	CTeamsCore *TeamsCore();
 	bool Freeze(int Seconds);
@@ -72,19 +72,19 @@ public:
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
-	bool m_NinjaJetpack;
-	int m_FreezeTime;
-	bool m_FrozenLastTick;
-	int m_TuneZone;
+	bool m_NinjaJetpack = false;
+	int m_FreezeTime = 0;
+	bool m_FrozenLastTick = false;
+	int m_TuneZone = 0;
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
-	int m_TeleCheckpoint;
+	int m_TeleCheckpoint = 0;
 
-	int m_TileIndex;
-	int m_TileFIndex;
+	int m_TileIndex = 0;
+	int m_TileFIndex = 0;
 
-	int m_MoveRestrictions;
-	bool m_LastRefillJumps;
+	int m_MoveRestrictions = 0;
+	bool m_LastRefillJumps = false;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; }
@@ -119,11 +119,11 @@ public:
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
-	int m_LastSnapWeapon;
-	int m_LastJetpackStrength;
-	bool m_KeepHooked;
-	int m_GameTeam;
-	bool m_CanMoveInFreeze;
+	int m_LastSnapWeapon = 0;
+	int m_LastJetpackStrength = 0;
+	bool m_KeepHooked = false;
+	int m_GameTeam = 0;
+	bool m_CanMoveInFreeze = false;
 
 	bool Match(CCharacter *pChar);
 	void ResetPrediction();
@@ -138,14 +138,14 @@ public:
 
 private:
 	// weapon info
-	int m_aHitObjects[10];
-	int m_NumObjectsHit;
+	int m_aHitObjects[10] = {0};
+	int m_NumObjectsHit = 0;
 
-	int m_LastWeapon;
-	int m_QueuedWeapon;
+	int m_LastWeapon = 0;
+	int m_QueuedWeapon = 0;
 
-	int m_ReloadTimer;
-	int m_AttackTick;
+	int m_ReloadTimer = 0;
+	int m_AttackTick = 0;
 
 	// these are non-heldback inputs
 	CNetObj_PlayerInput m_LatestPrevInput;
@@ -156,7 +156,7 @@ private:
 	CNetObj_PlayerInput m_Input;
 	CNetObj_PlayerInput m_SavedInput;
 
-	int m_NumInputs;
+	int m_NumInputs = 0;
 
 	// the player core for the physics
 	CCharacterCore m_Core;
@@ -172,10 +172,10 @@ private:
 
 	CTuningParams *CharacterTuning();
 
-	int m_StrongWeakID;
+	int m_StrongWeakID = 0;
 
-	int m_LastWeaponSwitchTick;
-	int m_LastTuneZoneTick;
+	int m_LastWeaponSwitchTick = 0;
+	int m_LastTuneZoneTick = 0;
 };
 
 enum

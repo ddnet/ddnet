@@ -28,16 +28,16 @@ private:
 
 	std::vector<SGLSLCompilerDefine> m_vDefines;
 
-	int m_OpenGLVersionMajor;
-	int m_OpenGLVersionMinor;
-	int m_OpenGLVersionPatch;
+	int m_OpenGLVersionMajor = 0;
+	int m_OpenGLVersionMinor = 0;
+	int m_OpenGLVersionPatch = 0;
 
-	bool m_IsOpenGLES;
+	bool m_IsOpenGLES = false;
 
-	float m_TextureLODBias;
+	float m_TextureLODBias = 0;
 
-	bool m_HasTextureArray;
-	int m_TextureReplaceType; // @see EGLSLCompilerTextureReplaceType
+	bool m_HasTextureArray = false;
+	int m_TextureReplaceType = 0; // @see EGLSLCompilerTextureReplaceType
 public:
 	CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias);
 	void SetHasTextureArray(bool TextureArray) { m_HasTextureArray = TextureArray; }

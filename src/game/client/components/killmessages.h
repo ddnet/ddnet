@@ -8,7 +8,7 @@
 
 class CKillMessages : public CComponent
 {
-	int m_SpriteQuadContainerIndex;
+	int m_SpriteQuadContainerIndex = 0;
 
 public:
 	// kill messages
@@ -19,26 +19,26 @@ public:
 			m_KillerTextContainerIndex = m_VictimTextContainerIndex = -1;
 		}
 
-		int m_Weapon;
+		int m_Weapon = 0;
 
-		int m_VictimID;
-		int m_VictimTeam;
-		int m_VictimDDTeam;
-		char m_aVictimName[64];
-		int m_VictimTextContainerIndex;
-		float m_VitctimTextWidth;
+		int m_VictimID = 0;
+		int m_VictimTeam = 0;
+		int m_VictimDDTeam = 0;
+		char m_aVictimName[64] = {0};
+		int m_VictimTextContainerIndex = 0;
+		float m_VitctimTextWidth = 0;
 		CTeeRenderInfo m_VictimRenderInfo;
 
-		int m_KillerID;
-		int m_KillerTeam;
-		char m_aKillerName[64];
-		int m_KillerTextContainerIndex;
-		float m_KillerTextWidth;
+		int m_KillerID = 0;
+		int m_KillerTeam = 0;
+		char m_aKillerName[64] = {0};
+		int m_KillerTextContainerIndex = 0;
+		float m_KillerTextWidth = 0;
 		CTeeRenderInfo m_KillerRenderInfo;
 
-		int m_ModeSpecial; // for CTF, if the guy is carrying a flag for example
-		int m_Tick;
-		int m_FlagCarrierBlue;
+		int m_ModeSpecial = 0; // for CTF, if the guy is carrying a flag for example
+		int m_Tick = 0;
+		int m_FlagCarrierBlue = 0;
 	};
 
 	enum
@@ -51,7 +51,7 @@ private:
 
 public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
-	int m_KillmsgCurrent;
+	int m_KillmsgCurrent = 0;
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;

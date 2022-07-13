@@ -20,10 +20,10 @@ public:
 	class CEvent
 	{
 	public:
-		int m_Flags;
-		int m_Key;
-		char m_aText[INPUT_TEXT_SIZE];
-		int m_InputCount;
+		int m_Flags = 0;
+		int m_Key = 0;
+		char m_aText[INPUT_TEXT_SIZE] = {0};
+		int m_InputCount = 0;
 	};
 
 protected:
@@ -33,7 +33,7 @@ protected:
 	};
 
 	// quick access to events
-	int m_NumEvents;
+	int m_NumEvents = 0;
 	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
 
 public:

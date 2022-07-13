@@ -25,14 +25,14 @@ class CEntity
 {
 	MACRO_ALLOC_HEAP()
 	friend class CGameWorld; // entity list handling
-	CEntity *m_pPrevTypeEntity;
-	CEntity *m_pNextTypeEntity;
+	CEntity *m_pPrevTypeEntity = nullptr;
+	CEntity *m_pNextTypeEntity = nullptr;
 
 protected:
-	class CGameWorld *m_pGameWorld;
-	bool m_MarkedForDestroy;
-	int m_ID;
-	int m_ObjType;
+	class CGameWorld *m_pGameWorld = nullptr;
+	bool m_MarkedForDestroy = false;
+	int m_ID = 0;
+	int m_ObjType = 0;
 
 public:
 	int GetID() const { return m_ID; }
@@ -56,16 +56,16 @@ public:
 	virtual void TickDefered() {}
 
 	bool GameLayerClipped(vec2 CheckPos);
-	float m_ProximityRadius;
+	float m_ProximityRadius = 0;
 	vec2 m_Pos;
-	int m_Number;
-	int m_Layer;
+	int m_Number = 0;
+	int m_Layer = 0;
 
-	int m_SnapTicks;
-	int m_DestroyTick;
-	int m_LastRenderTick;
-	CEntity *m_pParent;
-	CEntity *m_pChild;
+	int m_SnapTicks = 0;
+	int m_DestroyTick = 0;
+	int m_LastRenderTick = 0;
+	CEntity *m_pParent = nullptr;
+	CEntity *m_pChild = nullptr;
 	CEntity *NextEntity() { return m_pNextTypeEntity; }
 	void Keep()
 	{

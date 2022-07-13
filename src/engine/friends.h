@@ -9,10 +9,10 @@
 
 struct CFriendInfo
 {
-	char m_aName[MAX_NAME_LENGTH];
-	char m_aClan[MAX_CLAN_LENGTH];
-	unsigned m_NameHash;
-	unsigned m_ClanHash;
+	char m_aName[MAX_NAME_LENGTH] = {0};
+	char m_aClan[MAX_CLAN_LENGTH] = {0};
+	unsigned m_NameHash = 0;
+	unsigned m_ClanHash = 0;
 };
 
 class IFriends : public IInterface

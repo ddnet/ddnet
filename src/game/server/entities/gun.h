@@ -22,11 +22,11 @@
 class CGun : public CEntity
 {
 	vec2 m_Core;
-	bool m_Freeze;
-	bool m_Explosive;
-	int m_EvalTick;
-	int m_aLastFireTeam[MAX_CLIENTS];
-	int m_aLastFireSolo[MAX_CLIENTS];
+	bool m_Freeze = false;
+	bool m_Explosive = false;
+	int m_EvalTick = 0;
+	int m_aLastFireTeam[MAX_CLIENTS] = {0};
+	int m_aLastFireSolo[MAX_CLIENTS] = {0};
 
 	void Fire();
 

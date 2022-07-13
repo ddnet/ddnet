@@ -396,7 +396,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 struct CUISkin
 {
-	const CSkin *m_pSkin;
+	const CSkin *m_pSkin = nullptr;
 
 	CUISkin() :
 		m_pSkin(nullptr) {}
@@ -796,13 +796,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(NULL);
 }
 
-typedef struct
+struct CKeyInfo
 {
 	CLocConstString m_Name;
-	const char *m_pCommand;
-	int m_KeyId;
-	int m_ModifierCombination;
-} CKeyInfo;
+	const char *m_pCommand = nullptr;
+	int m_KeyId = 0;
+	int m_ModifierCombination = 0;
+};
 
 static CKeyInfo gs_aKeys[] =
 	{
@@ -1856,7 +1856,7 @@ public:
 
 	std::string m_Name;
 	std::string m_FileName;
-	int m_CountryCode;
+	int m_CountryCode = 0;
 
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };

@@ -115,9 +115,9 @@ void CGraph::Add(float v, float r, float g, float b)
 {
 	m_Index = (m_Index + 1) & (MAX_VALUES - 1);
 	m_aValues[m_Index] = v;
-	m_aColors[m_Index][0] = r;
-	m_aColors[m_Index][1] = g;
-	m_aColors[m_Index][2] = b;
+	m_aaColors[m_Index][0] = r;
+	m_aaColors[m_Index][1] = g;
+	m_aaColors[m_Index][2] = b;
 }
 
 bool CGraph::InsertAt(int i, float v, float r, float g, float b)
@@ -127,9 +127,9 @@ bool CGraph::InsertAt(int i, float v, float r, float g, float b)
 		return false;
 	}
 	m_aValues[i] = v;
-	m_aColors[i][0] = r;
-	m_aColors[i][1] = g;
-	m_aColors[i][2] = b;
+	m_aaColors[i][0] = r;
+	m_aaColors[i][1] = g;
+	m_aaColors[i][2] = b;
 	return true;
 }
 
@@ -165,8 +165,8 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
 
 		IGraphics::CColorVertex ArrayV[2] = {
-			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
-			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
+			IGraphics::CColorVertex(0, m_aaColors[i0][0], m_aaColors[i0][1], m_aaColors[i0][2], 0.75f),
+			IGraphics::CColorVertex(1, m_aaColors[i1][0], m_aaColors[i1][1], m_aaColors[i1][2], 0.75f)};
 		pGraphics->SetColorVertex(ArrayV, 2);
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
@@ -738,17 +738,17 @@ void CClient::GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs)
 	{
 		for(int i = 0; i < 2; i++)
 		{
-			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, i);
+			GenerateTimeoutCode(m_aaTimeoutCodes[i], sizeof(m_aaTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, i);
 
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "timeout code '%s' (%s)", m_aTimeoutCodes[i], i == 0 ? "normal" : "dummy");
+			str_format(aBuf, sizeof(aBuf), "timeout code '%s' (%s)", m_aaTimeoutCodes[i], i == 0 ? "normal" : "dummy");
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 		}
 	}
 	else
 	{
-		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode);
-		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode);
+		str_copy(m_aaTimeoutCodes[0], g_Config.m_ClTimeoutCode);
+		str_copy(m_aaTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode);
 	}
 }
 
@@ -2173,9 +2173,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							char aBuf[128];
 							char aBufMsg[256];
 							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
-								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
+								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aaTimeoutCodes[Conn]);
 							else
-								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aaTimeoutCodes[Conn]);
 
 							if(g_Config.m_ClRunOnJoin[0])
 							{

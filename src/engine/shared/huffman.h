@@ -20,22 +20,22 @@ class CHuffman
 	struct CNode
 	{
 		// symbol
-		unsigned m_Bits;
-		unsigned m_NumBits;
+		unsigned m_Bits = 0;
+		unsigned m_NumBits = 0;
 
 		// don't use pointers for this. shorts are smaller so we can fit more data into the cache
-		unsigned short m_aLeafs[2];
+		unsigned short m_aLeafs[2] = {0};
 
 		// what the symbol represents
-		unsigned char m_Symbol;
+		unsigned char m_Symbol = 0;
 	};
 
 	static const unsigned ms_aFreqTable[HUFFMAN_MAX_SYMBOLS];
 
 	CNode m_aNodes[HUFFMAN_MAX_NODES];
-	CNode *m_apDecodeLut[HUFFMAN_LUTSIZE];
-	CNode *m_pStartNode;
-	int m_NumNodes;
+	CNode *m_apDecodeLut[HUFFMAN_LUTSIZE] = {nullptr};
+	CNode *m_pStartNode = nullptr;
+	int m_NumNodes = 0;
 
 	void Setbits_r(CNode *pNode, int Bits, unsigned Depth);
 	void ConstructTree(const unsigned *pFrequencies);

@@ -26,13 +26,13 @@ void CHostLookup::Run()
 class CEngine : public IEngine
 {
 public:
-	IConsole *m_pConsole;
-	IStorage *m_pStorage;
-	bool m_Logging;
+	IConsole *m_pConsole = nullptr;
+	IStorage *m_pStorage = nullptr;
+	bool m_Logging = false;
 
-	std::shared_ptr<CFutureLogger> m_pFutureLogger;
+	std::shared_ptr<CFutureLogger> m_pFutureLogger = nullptr;
 
-	char m_aAppName[256];
+	char m_aAppName[256] = {0};
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	{

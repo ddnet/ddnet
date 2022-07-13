@@ -11,8 +11,8 @@ class IConfigManager;
 class CFriends : public IFriends
 {
 	CFriendInfo m_aFriends[MAX_FRIENDS];
-	int m_Foes;
-	int m_NumFriends;
+	int m_Foes = 0;
+	int m_NumFriends = 0;
 
 	static void ConAddFriend(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveFriend(IConsole::IResult *pResult, void *pUserData);

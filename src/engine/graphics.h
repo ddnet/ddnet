@@ -20,19 +20,19 @@
 #define GRAPHICS_TYPE_FLOAT 0x1406
 struct SBufferContainerInfo
 {
-	int m_Stride;
-	int m_VertBufferBindingIndex;
+	int m_Stride = 0;
+	int m_VertBufferBindingIndex = 0;
 
 	// the attributes of the container
 	struct SAttribute
 	{
-		int m_DataTypeCount;
-		unsigned int m_Type;
-		bool m_Normalized;
-		void *m_pOffset;
+		int m_DataTypeCount = 0;
+		unsigned int m_Type = 0;
+		bool m_Normalized = false;
+		void *m_pOffset = nullptr;
 
 		//0: float, 1:integer
-		unsigned int m_FuncType;
+		unsigned int m_FuncType = 0;
 	};
 	std::vector<SAttribute> m_vAttributes;
 };
@@ -41,9 +41,9 @@ struct SQuadRenderInfo
 {
 	ColorRGBA m_Color;
 	vec2 m_Offsets;
-	float m_Rotation;
+	float m_Rotation = 0;
 	// allows easier upload for uniform buffers because of the alignment requirements
-	float m_Padding;
+	float m_Padding = 0;
 };
 
 struct SGraphicTile
@@ -75,19 +75,19 @@ public:
 
 	/* Variable: width
 		Contains the width of the image */
-	int m_Width;
+	int m_Width = 0;
 
 	/* Variable: height
 		Contains the height of the image */
-	int m_Height;
+	int m_Height = 0;
 
 	/* Variable: format
 		Contains the format of the image. See <Image Formats> for more information. */
-	int m_Format;
+	int m_Format = 0;
 
 	/* Variable: data
 		Pointer to the image data. */
-	void *m_pData;
+	void *m_pData = nullptr;
 };
 
 /*
@@ -96,11 +96,11 @@ public:
 class CVideoMode
 {
 public:
-	int m_CanvasWidth, m_CanvasHeight;
-	int m_WindowWidth, m_WindowHeight;
-	int m_RefreshRate;
-	int m_Red, m_Green, m_Blue;
-	uint32_t m_Format;
+	int m_CanvasWidth = 0, m_CanvasHeight = 0;
+	int m_WindowWidth = 0, m_WindowHeight = 0;
+	int m_RefreshRate = 0;
+	int m_Red = 0, m_Green = 0, m_Blue = 0;
+	uint32_t m_Format = 0;
 };
 
 typedef vec2 GL_SPoint;
@@ -123,7 +123,7 @@ struct GL_STexCoord3D
 		return *this;
 	}
 
-	float u, v, w;
+	float u = 0, v = 0, w = 0;
 };
 
 typedef ColorRGBA GL_SColorf;
@@ -190,8 +190,8 @@ struct STWGraphicGPU
 
 	struct STWGraphicGPUItem
 	{
-		char m_aName[256];
-		ETWGraphicsGPUType m_GPUType;
+		char m_aName[256] = {0};
+		ETWGraphicsGPUType m_GPUType = GRAPHICS_GPU_TYPE_DISCRETE;
 	};
 	std::vector<STWGraphicGPUItem> m_vGPUs;
 	STWGraphicGPUItem m_AutoGPU;
@@ -211,10 +211,10 @@ class IGraphics : public IInterface
 {
 	MACRO_INTERFACE("graphics", 0)
 protected:
-	int m_ScreenWidth;
-	int m_ScreenHeight;
-	int m_ScreenRefreshRate;
-	float m_ScreenHiDPIScale;
+	int m_ScreenWidth = 0;
+	int m_ScreenHeight = 0;
+	int m_ScreenRefreshRate = 0;
+	float m_ScreenHiDPIScale = 0;
 
 public:
 	enum
@@ -362,7 +362,7 @@ public:
 
 	struct CLineItem
 	{
-		float m_X0, m_Y0, m_X1, m_Y1;
+		float m_X0 = 0, m_Y0 = 0, m_X1 = 0, m_Y1 = 0;
 		CLineItem() {}
 		CLineItem(float x0, float y0, float x1, float y1) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
@@ -385,7 +385,7 @@ public:
 
 	struct CFreeformItem
 	{
-		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
+		float m_X0 = 0, m_Y0 = 0, m_X1 = 0, m_Y1 = 0, m_X2 = 0, m_Y2 = 0, m_X3 = 0, m_Y3 = 0;
 		CFreeformItem() {}
 		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
@@ -393,7 +393,7 @@ public:
 
 	struct CQuadItem
 	{
-		float m_X, m_Y, m_Width, m_Height;
+		float m_X = 0, m_Y = 0, m_Width = 0, m_Height = 0;
 		CQuadItem() {}
 		CQuadItem(float x, float y, float w, float h) :
 			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
@@ -433,8 +433,8 @@ public:
 	struct SRenderSpriteInfo
 	{
 		vec2 m_Pos;
-		float m_Scale;
-		float m_Rotation;
+		float m_Scale = 0;
+		float m_Rotation = 0;
 	};
 
 	virtual void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) = 0;
@@ -444,8 +444,8 @@ public:
 
 	struct CColorVertex
 	{
-		int m_Index;
-		float m_R, m_G, m_B, m_A;
+		int m_Index = 0;
+		float m_R = 0, m_G = 0, m_B = 0, m_A = 0;
 		CColorVertex() {}
 		CColorVertex(int i, float r, float g, float b, float a) :
 			m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}

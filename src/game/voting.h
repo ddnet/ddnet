@@ -14,17 +14,17 @@ enum
 
 struct CVoteOptionClient
 {
-	CVoteOptionClient *m_pNext;
-	CVoteOptionClient *m_pPrev;
-	char m_aDescription[VOTE_DESC_LENGTH];
+	CVoteOptionClient *m_pNext = nullptr;
+	CVoteOptionClient *m_pPrev = nullptr;
+	char m_aDescription[VOTE_DESC_LENGTH] = {0};
 };
 
 struct CVoteOptionServer
 {
-	CVoteOptionServer *m_pNext;
-	CVoteOptionServer *m_pPrev;
-	char m_aDescription[VOTE_DESC_LENGTH];
-	char m_aCommand[1];
+	CVoteOptionServer *m_pNext = nullptr;
+	CVoteOptionServer *m_pPrev = nullptr;
+	char m_aDescription[VOTE_DESC_LENGTH] = {0};
+	char m_aCommand[1] = {0};
 };
 
 #endif

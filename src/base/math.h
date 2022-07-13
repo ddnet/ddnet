@@ -59,7 +59,7 @@ constexpr inline int fx2i(int v)
 
 class fxp
 {
-	int value;
+	int value = 0;
 
 public:
 	void set(int v)

@@ -26,19 +26,19 @@ class CEcon
 			STATE_AUTHED,
 		};
 
-		int m_State;
-		int64_t m_TimeConnected;
-		int m_AuthTries;
+		int m_State = 0;
+		int64_t m_TimeConnected = 0;
+		int m_AuthTries = 0;
 	};
 	CClient m_aClients[NET_MAX_CONSOLE_CLIENTS];
 
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
+	CConfig *m_pConfig = nullptr;
+	IConsole *m_pConsole = nullptr;
 	CNetConsole m_NetConsole;
 
-	bool m_Ready;
-	int m_PrintCBIndex;
-	int m_UserClientID;
+	bool m_Ready = false;
+	int m_PrintCBIndex = 0;
+	int m_UserClientID = 0;
 
 	static void SendLineCB(const char *pLine, void *pUserData, ColorRGBA PrintColor = {1, 1, 1, 1});
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);

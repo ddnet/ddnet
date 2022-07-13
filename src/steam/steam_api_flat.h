@@ -18,9 +18,9 @@ typedef int32_t HSteamUser;
 struct CallbackMsg_t
 {
 	HSteamUser m_hSteamUser;
-	int m_iCallback;
-	unsigned char *m_pubParam;
-	int m_cubParam;
+	int m_iCallback = 0;
+	unsigned char *m_pubParam = nullptr;
+	int m_cubParam = 0;
 };
 
 struct GameRichPresenceJoinRequested_t
@@ -29,8 +29,8 @@ struct GameRichPresenceJoinRequested_t
 	{
 		k_iCallback = 337
 	};
-	CSteamID m_steamIDFriend;
-	char m_aRGCHConnect[256];
+	CSteamID m_steamIDFriend = 0;
+	char m_aRGCHConnect[256] = {0};
 };
 
 struct NewUrlLaunchParameters_t
@@ -39,7 +39,7 @@ struct NewUrlLaunchParameters_t
 	{
 		k_iCallback = 1014
 	};
-	unsigned char m_EmptyStructDontUse;
+	unsigned char m_EmptyStructDontUse = 0;
 };
 
 struct ISteamApps;

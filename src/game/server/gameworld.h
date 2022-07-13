@@ -33,11 +33,11 @@ private:
 	void RemoveEntities();
 
 	CEntity *m_pNextTraverseEntity = nullptr;
-	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
+	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES] = {nullptr};
 
-	class CGameContext *m_pGameServer;
-	class CConfig *m_pConfig;
-	class IServer *m_pServer;
+	class CGameContext *m_pGameServer = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IServer *m_pServer = nullptr;
 
 	void UpdatePlayerMaps();
 
@@ -46,8 +46,8 @@ public:
 	class CConfig *Config() { return m_pConfig; }
 	class IServer *Server() { return m_pServer; }
 
-	bool m_ResetRequested;
-	bool m_Paused;
+	bool m_ResetRequested = false;
+	bool m_Paused = false;
 	CWorldCore m_Core;
 
 	CGameWorld();

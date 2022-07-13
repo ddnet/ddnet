@@ -13,16 +13,16 @@ class CEventHandler
 		MAX_DATASIZE = 128 * 64,
 	};
 
-	int m_aTypes[MAX_EVENTS]; // TODO: remove some of these arrays
-	int m_aOffsets[MAX_EVENTS];
-	int m_aSizes[MAX_EVENTS];
-	int64_t m_aClientMasks[MAX_EVENTS];
-	char m_aData[MAX_DATASIZE];
+	int m_aTypes[MAX_EVENTS] = {0}; // TODO: remove some of these arrays
+	int m_aOffsets[MAX_EVENTS] = {0};
+	int m_aSizes[MAX_EVENTS] = {0};
+	int64_t m_aClientMasks[MAX_EVENTS] = {0};
+	char m_aData[MAX_DATASIZE] = {0};
 
-	class CGameContext *m_pGameServer;
+	class CGameContext *m_pGameServer = nullptr;
 
-	int m_CurrentOffset;
-	int m_NumEvents;
+	int m_CurrentOffset = 0;
+	int m_NumEvents = 0;
 
 public:
 	CGameContext *GameServer() const { return m_pGameServer; }

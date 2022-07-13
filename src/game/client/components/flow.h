@@ -12,10 +12,10 @@ class CFlow : public CComponent
 		vec2 m_Vel;
 	};
 
-	CCell *m_pCells;
-	int m_Height;
-	int m_Width;
-	int m_Spacing;
+	CCell *m_pCells = nullptr;
+	int m_Height = 0;
+	int m_Width = 0;
+	int m_Spacing = 0;
 
 	void DbgRender();
 	void Init();

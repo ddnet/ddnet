@@ -21,7 +21,7 @@ class CComponent
 protected:
 	friend class CGameClient;
 
-	CGameClient *m_pClient;
+	CGameClient *m_pClient = nullptr;
 
 	// perhaps propagate pointers for these as well
 

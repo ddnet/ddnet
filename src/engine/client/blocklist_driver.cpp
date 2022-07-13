@@ -8,7 +8,7 @@
 
 struct SVersion
 {
-	int m_aParts[VERSION_PARTS];
+	int m_aParts[VERSION_PARTS] = {0};
 
 	bool operator<=(const SVersion &Other) const
 	{
@@ -32,22 +32,22 @@ enum EBackendDriverBlockListType
 /* TODO: generalize it more for other drivers / vendors */
 struct SBackEndDriverBlockList
 {
-	EBackendDriverBlockListType m_BlockListType;
+	EBackendDriverBlockListType m_BlockListType = BACKEND_DRIVER_BLOCKLIST_TYPE_VERSION;
 
 	SVersion m_VersionMin;
 	SVersion m_VersionMax;
 
-	const char *m_pVendorName;
+	const char *m_pVendorName = nullptr;
 
 	// the OpenGL version, that is supported
-	int m_AllowedMajor;
-	int m_AllowedMinor;
-	int m_AllowedPatch;
+	int m_AllowedMajor = 0;
+	int m_AllowedMinor = 0;
+	int m_AllowedPatch = 0;
 
-	const char *m_pReason;
+	const char *m_pReason = nullptr;
 
-	bool m_DisplayReason;
-	const char *m_pOSName;
+	bool m_DisplayReason = false;
+	const char *m_pOSName = nullptr;
 };
 
 static SBackEndDriverBlockList gs_aBlockList[] = {

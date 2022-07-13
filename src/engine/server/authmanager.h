@@ -12,15 +12,15 @@ class CAuthManager
 private:
 	struct CKey
 	{
-		char m_aIdent[64];
+		char m_aIdent[64] = {0};
 		MD5_DIGEST m_Pw;
-		unsigned char m_aSalt[SALT_BYTES];
-		int m_Level;
+		unsigned char m_aSalt[SALT_BYTES] = {0};
+		int m_Level = 0;
 	};
 	std::vector<CKey> m_vKeys;
 
-	int m_aDefault[3];
-	bool m_Generated;
+	int m_aDefault[3] = {0};
+	bool m_Generated = false;
 
 public:
 	typedef void (*FListCallback)(const char *pIdent, int Level, void *pUser);

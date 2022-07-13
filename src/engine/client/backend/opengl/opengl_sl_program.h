@@ -47,8 +47,8 @@ public:
 	virtual ~CGLSLProgram();
 
 protected:
-	TWGLuint m_ProgramID;
-	bool m_IsLinked;
+	TWGLuint m_ProgramID = 0;
+	bool m_IsLinked = false;
 };
 
 class CGLSLTWProgram : public CGLSLProgram
@@ -60,11 +60,11 @@ public:
 		m_LastScreenTL = m_LastScreenBR = vec2(-1, -1);
 	}
 
-	int m_LocPos;
-	int m_LocTextureSampler;
+	int m_LocPos = 0;
+	int m_LocTextureSampler = 0;
 
-	int m_LastTextureSampler;
-	int m_LastIsTextured;
+	int m_LastTextureSampler = 0;
+	int m_LastIsTextured = 0;
 	vec2 m_LastScreenTL;
 	vec2 m_LastScreenBR;
 };
@@ -81,17 +81,17 @@ public:
 		m_LastTextureSize = -1;
 	}
 
-	int m_LocColor;
-	int m_LocOutlineColor;
-	int m_LocTextSampler;
-	int m_LocTextOutlineSampler;
-	int m_LocTextureSize;
+	int m_LocColor = 0;
+	int m_LocOutlineColor = 0;
+	int m_LocTextSampler = 0;
+	int m_LocTextOutlineSampler = 0;
+	int m_LocTextureSize = 0;
 
 	ColorRGBA m_LastColor;
 	ColorRGBA m_LastOutlineColor;
-	int m_LastTextSampler;
-	int m_LastTextOutlineSampler;
-	int m_LastTextureSize;
+	int m_LastTextSampler = 0;
+	int m_LastTextOutlineSampler = 0;
+	int m_LastTextureSize = 0;
 };
 
 class CGLSLPrimitiveProgram : public CGLSLTWProgram
@@ -110,11 +110,11 @@ public:
 		m_LastVerticesColor = ColorRGBA(-1, -1, -1, -1);
 	}
 
-	int m_LocRotation;
-	int m_LocCenter;
-	int m_LocVertciesColor;
+	int m_LocRotation = 0;
+	int m_LocCenter = 0;
+	int m_LocVertciesColor = 0;
 
-	float m_LastRotation;
+	float m_LastRotation = 0;
 	vec2 m_LastCenter;
 	ColorRGBA m_LastVerticesColor;
 };
@@ -129,9 +129,9 @@ public:
 		m_LastVerticesColor = ColorRGBA(-1, -1, -1, -1);
 	}
 
-	int m_LocRSP;
-	int m_LocCenter;
-	int m_LocVertciesColor;
+	int m_LocRSP = 0;
+	int m_LocCenter = 0;
+	int m_LocVertciesColor = 0;
 
 	vec2 m_LastCenter;
 	ColorRGBA m_LastVerticesColor;
@@ -140,10 +140,10 @@ public:
 class CGLSLQuadProgram : public CGLSLTWProgram
 {
 public:
-	int m_LocColors;
-	int m_LocOffsets;
-	int m_LocRotations;
-	int m_LocQuadOffset;
+	int m_LocColors = 0;
+	int m_LocOffsets = 0;
+	int m_LocRotations = 0;
+	int m_LocQuadOffset = 0;
 };
 
 class CGLSLTileProgram : public CGLSLTWProgram
@@ -152,11 +152,11 @@ public:
 	CGLSLTileProgram() :
 		m_LocColor(-1), m_LocOffset(-1), m_LocDir(-1), m_LocNum(-1), m_LocJumpIndex(-1) {}
 
-	int m_LocColor;
-	int m_LocOffset;
-	int m_LocDir;
-	int m_LocNum;
-	int m_LocJumpIndex;
+	int m_LocColor = 0;
+	int m_LocOffset = 0;
+	int m_LocDir = 0;
+	int m_LocNum = 0;
+	int m_LocJumpIndex = 0;
 };
 
 #endif

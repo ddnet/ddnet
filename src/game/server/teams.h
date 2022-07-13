@@ -19,24 +19,24 @@ class CGameTeams
 	// could go around the startline on a map, leave one tee behind at
 	// start, go to the finish line, let the tee start and kill, allowing
 	// the team to finish instantly.
-	bool m_aTeeStarted[MAX_CLIENTS];
-	bool m_aTeeFinished[MAX_CLIENTS];
-	int m_aLastChat[MAX_CLIENTS];
+	bool m_aTeeStarted[MAX_CLIENTS] = {false};
+	bool m_aTeeFinished[MAX_CLIENTS] = {false};
+	int m_aLastChat[MAX_CLIENTS] = {0};
 
-	int m_aTeamState[NUM_TEAMS];
-	bool m_aTeamLocked[NUM_TEAMS];
-	uint64_t m_aInvited[NUM_TEAMS];
-	bool m_aPractice[NUM_TEAMS];
-	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_TEAMS];
-	uint64_t m_aLastSwap[NUM_TEAMS];
-	bool m_aTeamSentStartWarning[NUM_TEAMS];
+	int m_aTeamState[NUM_TEAMS] = {0};
+	bool m_aTeamLocked[NUM_TEAMS] = {false};
+	uint64_t m_aInvited[NUM_TEAMS] = {0};
+	bool m_aPractice[NUM_TEAMS] = {false};
+	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_TEAMS] = {nullptr};
+	uint64_t m_aLastSwap[NUM_TEAMS] = {0};
+	bool m_aTeamSentStartWarning[NUM_TEAMS] = {false};
 	// `m_aTeamUnfinishableKillTick` is -1 by default and gets set when a
 	// team becomes unfinishable. If the team hasn't entered practice mode
 	// by that time, it'll get killed to prevent people not understanding
 	// the message from playing for a long time in an unfinishable team.
-	int m_aTeamUnfinishableKillTick[NUM_TEAMS];
+	int m_aTeamUnfinishableKillTick[NUM_TEAMS] = {0};
 
-	class CGameContext *m_pGameContext;
+	class CGameContext *m_pGameContext = nullptr;
 
 	/**
 	* Kill the whole team.

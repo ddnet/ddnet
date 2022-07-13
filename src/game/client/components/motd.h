@@ -7,10 +7,10 @@
 class CMotd : public CComponent
 {
 	// motd
-	int64_t m_ServerMotdTime;
+	int64_t m_ServerMotdTime = 0;
 
 public:
-	char m_aServerMotd[900];
+	char m_aServerMotd[900] = {0};
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void Clear();

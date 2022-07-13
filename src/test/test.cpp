@@ -30,8 +30,8 @@ IStorage *CTestInfo::CreateTestStorage()
 class CTestInfoPath
 {
 public:
-	bool m_IsDirectory;
-	char m_aData[IO_MAX_PATH_LENGTH];
+	bool m_IsDirectory = false;
+	char m_aData[IO_MAX_PATH_LENGTH] = {0};
 
 	bool operator<(const CTestInfoPath &Other) const
 	{
@@ -46,8 +46,8 @@ public:
 class CTestCollectData
 {
 public:
-	char m_aCurrentDir[IO_MAX_PATH_LENGTH];
-	std::vector<CTestInfoPath> *m_pvEntries;
+	char m_aCurrentDir[IO_MAX_PATH_LENGTH] = {0};
+	std::vector<CTestInfoPath> *m_pvEntries = nullptr;
 };
 
 int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)

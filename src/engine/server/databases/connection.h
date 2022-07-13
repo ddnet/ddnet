@@ -87,7 +87,7 @@ public:
 	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
 
 private:
-	char m_aPrefix[64];
+	char m_aPrefix[64] = {0};
 
 protected:
 	void FormatCreateRace(char *aBuf, unsigned int BufferSize);

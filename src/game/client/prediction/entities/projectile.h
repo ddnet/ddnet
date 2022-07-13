@@ -42,19 +42,19 @@ public:
 
 private:
 	vec2 m_Direction;
-	int m_LifeSpan;
-	int m_Owner;
-	int m_Type;
-	int m_SoundImpact;
-	float m_Force;
-	int m_StartTick;
-	bool m_Explosive;
+	int m_LifeSpan = 0;
+	int m_Owner = 0;
+	int m_Type = 0;
+	int m_SoundImpact = 0;
+	float m_Force = 0;
+	int m_StartTick = 0;
+	bool m_Explosive = false;
 
 	// DDRace
 
-	int m_Bouncing;
-	bool m_Freeze;
-	int m_TuneZone;
+	int m_Bouncing = 0;
+	bool m_Freeze = false;
+	int m_TuneZone = 0;
 };
 
 #endif

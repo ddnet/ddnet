@@ -13,14 +13,14 @@ class CSpectator : public CComponent
 		NO_SELECTION = -3,
 	};
 
-	bool m_Active;
-	bool m_WasActive;
+	bool m_Active = false;
+	bool m_WasActive = false;
 
-	int m_SelectedSpectatorID;
+	int m_SelectedSpectatorID = 0;
 	vec2 m_SelectorMouse;
 
-	float m_OldMouseX;
-	float m_OldMouseY;
+	float m_OldMouseX = 0;
+	float m_OldMouseY = 0;
 
 	bool CanChangeSpectator();
 	void SpectateNext(bool Reverse);

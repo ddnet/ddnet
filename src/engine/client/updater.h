@@ -35,21 +35,21 @@ class CUpdater : public IUpdater
 {
 	friend class CUpdaterFetchTask;
 
-	class IClient *m_pClient;
-	class IStorage *m_pStorage;
-	class IEngine *m_pEngine;
+	class IClient *m_pClient = nullptr;
+	class IStorage *m_pStorage = nullptr;
+	class IEngine *m_pEngine = nullptr;
 
 	LOCK m_Lock;
 
-	int m_State;
+	int m_State = 0;
 	char m_aStatus[256] GUARDED_BY(m_Lock);
 	int m_Percent GUARDED_BY(m_Lock);
-	char m_aLastFile[256];
-	char m_aClientExecTmp[64];
-	char m_aServerExecTmp[64];
+	char m_aLastFile[256] = {0};
+	char m_aClientExecTmp[64] = {0};
+	char m_aServerExecTmp[64] = {0};
 
-	bool m_ClientUpdate;
-	bool m_ServerUpdate;
+	bool m_ClientUpdate = false;
+	bool m_ServerUpdate = false;
 
 	std::map<std::string, bool> m_FileJobs;
 

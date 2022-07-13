@@ -13,12 +13,12 @@
 class CStorage : public IStorage
 {
 public:
-	char m_aaStoragePaths[MAX_PATHS][IO_MAX_PATH_LENGTH];
-	int m_NumPaths;
-	char m_aDatadir[IO_MAX_PATH_LENGTH];
-	char m_aUserdir[IO_MAX_PATH_LENGTH];
-	char m_aCurrentdir[IO_MAX_PATH_LENGTH];
-	char m_aBinarydir[IO_MAX_PATH_LENGTH];
+	char m_aaStoragePaths[MAX_PATHS][IO_MAX_PATH_LENGTH] = {{0}};
+	int m_NumPaths = 0;
+	char m_aDatadir[IO_MAX_PATH_LENGTH] = {0};
+	char m_aUserdir[IO_MAX_PATH_LENGTH] = {0};
+	char m_aCurrentdir[IO_MAX_PATH_LENGTH] = {0};
+	char m_aBinarydir[IO_MAX_PATH_LENGTH] = {0};
 
 	CStorage()
 	{
@@ -430,11 +430,11 @@ public:
 
 	struct CFindCBData
 	{
-		CStorage *m_pStorage;
-		const char *m_pFilename;
-		const char *m_pPath;
-		char *m_pBuffer;
-		int m_BufferSize;
+		CStorage *m_pStorage = nullptr;
+		const char *m_pFilename = nullptr;
+		const char *m_pPath = nullptr;
+		char *m_pBuffer = nullptr;
+		int m_BufferSize = 0;
 	};
 
 	static int FindFileCallback(const char *pName, int IsDir, int Type, void *pUser)

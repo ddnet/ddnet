@@ -277,7 +277,7 @@ void CServerBan::ConBanRegionRange(IConsole::IResult *pResult, void *pUser)
 
 class CServerLogger : public ILogger
 {
-	CServer *m_pServer;
+	CServer *m_pServer = nullptr;
 	std::mutex m_PendingLock;
 	std::vector<CLogMessage> m_vPending;
 	std::thread::id m_MainThread;
@@ -329,8 +329,8 @@ void CServerLogger::OnServerDeletion()
 // Not thread-safe!
 class CRconClientLogger : public ILogger
 {
-	CServer *m_pServer;
-	int m_ClientID;
+	CServer *m_pServer = nullptr;
+	int m_ClientID = 0;
 
 public:
 	CRconClientLogger(CServer *pServer, int ClientID) :

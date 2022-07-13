@@ -28,14 +28,14 @@ class CMapLayers : public CComponent
 	friend class CBackground;
 	friend class CMenuBackground;
 
-	CLayers *m_pLayers;
-	CMapImages *m_pImages;
-	int m_Type;
-	int m_CurrentLocalTick;
-	int m_LastLocalTick;
-	bool m_EnvelopeUpdate;
+	CLayers *m_pLayers = nullptr;
+	CMapImages *m_pImages = nullptr;
+	int m_Type = 0;
+	int m_CurrentLocalTick = 0;
+	int m_LastLocalTick = 0;
+	bool m_EnvelopeUpdate = false;
 
-	bool m_OnlineOnly;
+	bool m_OnlineOnly = false;
 
 	struct STileLayerVisuals
 	{
@@ -58,7 +58,7 @@ class CMapLayers : public CComponent
 				m_IndexBufferByteOffset(0) {}
 
 		private:
-			offset_ptr32 m_IndexBufferByteOffset;
+			offset_ptr32 m_IndexBufferByteOffset = 0;
 
 		public:
 			bool DoDraw()
@@ -86,7 +86,7 @@ class CMapLayers : public CComponent
 				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xFFFFFFFE) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x00000001);
 			}
 		};
-		STileVisual *m_pTilesOfLayer;
+		STileVisual *m_pTilesOfLayer = nullptr;
 
 		STileVisual m_BorderTopLeft;
 		STileVisual m_BorderTopRight;
@@ -95,15 +95,15 @@ class CMapLayers : public CComponent
 
 		STileVisual m_BorderKillTile; //end of map kill tile -- game layer only
 
-		STileVisual *m_pBorderTop;
-		STileVisual *m_pBorderLeft;
-		STileVisual *m_pBorderRight;
-		STileVisual *m_pBorderBottom;
+		STileVisual *m_pBorderTop = nullptr;
+		STileVisual *m_pBorderLeft = nullptr;
+		STileVisual *m_pBorderRight = nullptr;
+		STileVisual *m_pBorderBottom = nullptr;
 
-		unsigned int m_Width;
-		unsigned int m_Height;
-		int m_BufferContainerIndex;
-		bool m_IsTextured;
+		unsigned int m_Width = 0;
+		unsigned int m_Height = 0;
+		int m_BufferContainerIndex = 0;
+		bool m_IsTextured = false;
 	};
 	std::vector<STileLayerVisuals *> m_vpTileLayerVisuals;
 
@@ -117,14 +117,14 @@ class CMapLayers : public CComponent
 			SQuadVisual() :
 				m_IndexBufferByteOffset(0) {}
 
-			offset_ptr m_IndexBufferByteOffset;
+			offset_ptr m_IndexBufferByteOffset = 0;
 		};
 
-		int m_QuadNum;
-		SQuadVisual *m_pQuadsOfLayer;
+		int m_QuadNum = 0;
+		SQuadVisual *m_pQuadsOfLayer = nullptr;
 
-		int m_BufferContainerIndex;
-		bool m_IsTextured;
+		int m_BufferContainerIndex = 0;
+		bool m_IsTextured = false;
 	};
 	std::vector<SQuadLayerVisuals *> m_vpQuadLayerVisuals;
 

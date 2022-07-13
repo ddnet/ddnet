@@ -22,8 +22,8 @@ public:
 		m_Name(pName), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
 	std::string m_Name;
-	bool m_HasDay;
-	bool m_HasNight;
+	bool m_HasDay = false;
+	bool m_HasNight = false;
 	IGraphics::CTextureHandle m_IconTexture;
 	bool operator<(const CTheme &Other) const { return m_Name < Other.m_Name; }
 };
@@ -84,12 +84,12 @@ public:
 	vec2 m_MenuCenter;
 	vec2 m_RotationCenter;
 	vec2 m_aPositions[NUM_POS];
-	int m_CurrentPosition;
+	int m_CurrentPosition = 0;
 	vec2 m_AnimationStartPos;
-	bool m_ChangedPosition;
-	float m_MoveTime;
+	bool m_ChangedPosition = false;
+	float m_MoveTime = 0;
 
-	bool m_IsInit;
+	bool m_IsInit = false;
 
 	void ResetPositions();
 

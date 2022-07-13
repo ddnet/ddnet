@@ -13,7 +13,7 @@
 class CUIRect
 {
 public:
-	float x, y, w, h;
+	float x = 0, y = 0, w = 0, h = 0;
 
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
@@ -107,17 +107,17 @@ public:
 
 struct SUIAnimator
 {
-	bool m_Active;
-	bool m_ScaleLabel;
-	bool m_RepositionLabel;
+	bool m_Active = false;
+	bool m_ScaleLabel = false;
+	bool m_RepositionLabel = false;
 
-	std::chrono::nanoseconds m_Time;
-	float m_Value;
+	std::chrono::nanoseconds m_Time = std::chrono::nanoseconds::zero();
+	float m_Value = 0;
 
-	float m_XOffset;
-	float m_YOffset;
-	float m_WOffset;
-	float m_HOffset;
+	float m_XOffset = 0;
+	float m_YOffset = 0;
+	float m_WOffset = 0;
+	float m_HOffset = 0;
 };
 
 class CUI;
@@ -132,13 +132,13 @@ public:
 	struct SUIElementRect
 	{
 	public:
-		int m_UIRectQuadContainer;
-		int m_UITextContainer;
+		int m_UIRectQuadContainer = 0;
+		int m_UITextContainer = 0;
 
-		float m_X;
-		float m_Y;
-		float m_Width;
-		float m_Height;
+		float m_X = 0;
+		float m_Y = 0;
+		float m_Width = 0;
+		float m_Height = 0;
 
 		std::string m_Text;
 
@@ -158,7 +158,7 @@ protected:
 	std::vector<SUIElementRect> m_vUIRects;
 
 	// used for marquees or other user implemented things
-	int64_t m_ElementTime;
+	int64_t m_ElementTime = 0;
 
 public:
 	CUIElement() = default;
@@ -193,29 +193,29 @@ class CButtonContainer
 
 class CUI
 {
-	bool m_Enabled;
+	bool m_Enabled = false;
 
-	const void *m_pHotItem;
-	const void *m_pActiveItem;
-	const void *m_pLastActiveItem;
-	const void *m_pBecomingHotItem;
-	const void *m_pActiveTooltipItem;
+	const void *m_pHotItem = nullptr;
+	const void *m_pActiveItem = nullptr;
+	const void *m_pLastActiveItem = nullptr;
+	const void *m_pBecomingHotItem = nullptr;
+	const void *m_pActiveTooltipItem = nullptr;
 	bool m_ActiveItemValid = false;
 
-	float m_MouseX, m_MouseY; // in gui space
-	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
-	float m_MouseWorldX, m_MouseWorldY; // in world space
-	unsigned m_MouseButtons;
-	unsigned m_LastMouseButtons;
+	float m_MouseX = 0, m_MouseY = 0; // in gui space
+	float m_MouseDeltaX = 0, m_MouseDeltaY = 0; // in gui space
+	float m_MouseWorldX = 0, m_MouseWorldY = 0; // in world space
+	unsigned m_MouseButtons = 0;
+	unsigned m_LastMouseButtons = 0;
 
 	CUIRect m_Screen;
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
-	class IInput *m_pInput;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
+	class IInput *m_pInput = nullptr;
+	class IGraphics *m_pGraphics = nullptr;
+	class ITextRender *m_pTextRender = nullptr;
 
 	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUI class
 	std::vector<CUIElement *> m_vpUIElements;

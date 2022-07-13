@@ -5,10 +5,10 @@
 
 struct StdSkin
 {
-	char m_aSkinName[64];
-	char m_apSkinPartNames[6][24];
-	bool m_aUseCustomColors[6];
-	int m_aSkinPartColors[6];
+	char m_aSkinName[64] = {0};
+	char m_aaSkinPartNames[6][24] = {{0}};
+	bool m_aUseCustomColors[6] = {false};
+	int m_aSkinPartColors[6] = {0};
 };
 
 static StdSkin g_aStdSkins[] = {
@@ -41,7 +41,7 @@ CTeeInfo::CTeeInfo(const char *apSkinPartNames[6], int *pUseCustomColors, int *p
 {
 	for(int i = 0; i < 6; i++)
 	{
-		str_copy(m_apSkinPartNames[i], apSkinPartNames[i], sizeof(m_apSkinPartNames[i]));
+		str_copy(m_aaSkinPartNames[i], apSkinPartNames[i], sizeof(m_aaSkinPartNames[i]));
 		m_aUseCustomColors[i] = pUseCustomColors[i];
 		m_aSkinPartColors[i] = pSkinPartColors[i];
 	}
@@ -52,7 +52,7 @@ void CTeeInfo::ToSixup()
 	// reset to default skin
 	for(int p = 0; p < 6; p++)
 	{
-		str_copy(m_apSkinPartNames[p], g_aStdSkins[0].m_apSkinPartNames[p], 24);
+		str_copy(m_aaSkinPartNames[p], g_aStdSkins[0].m_aaSkinPartNames[p], 24);
 		m_aUseCustomColors[p] = g_aStdSkins[0].m_aUseCustomColors[p];
 		m_aSkinPartColors[p] = g_aStdSkins[0].m_aSkinPartColors[p];
 	}
@@ -64,7 +64,7 @@ void CTeeInfo::ToSixup()
 		{
 			for(int p = 0; p < 6; p++)
 			{
-				str_copy(m_apSkinPartNames[p], StdSkin.m_apSkinPartNames[p], 24);
+				str_copy(m_aaSkinPartNames[p], StdSkin.m_aaSkinPartNames[p], 24);
 				m_aUseCustomColors[p] = StdSkin.m_aUseCustomColors[p];
 				m_aSkinPartColors[p] = StdSkin.m_aSkinPartColors[p];
 			}
@@ -103,7 +103,7 @@ void CTeeInfo::FromSixup()
 		bool match = true;
 		for(int p = 0; p < 6; p++)
 		{
-			if(str_comp(m_apSkinPartNames[p], StdSkin.m_apSkinPartNames[p]) || m_aUseCustomColors[p] != StdSkin.m_aUseCustomColors[p] || (m_aUseCustomColors[p] && m_aSkinPartColors[p] != StdSkin.m_aSkinPartColors[p]))
+			if(str_comp(m_aaSkinPartNames[p], StdSkin.m_aaSkinPartNames[p]) || m_aUseCustomColors[p] != StdSkin.m_aUseCustomColors[p] || (m_aUseCustomColors[p] && m_aSkinPartColors[p] != StdSkin.m_aSkinPartColors[p]))
 			{
 				match = false;
 				break;
@@ -123,7 +123,7 @@ void CTeeInfo::FromSixup()
 	{
 		int matches = 0;
 		for(int p = 0; p < 3; p++)
-			if(str_comp(m_apSkinPartNames[p], g_aStdSkins[s].m_apSkinPartNames[p]) == 0)
+			if(str_comp(m_aaSkinPartNames[p], g_aStdSkins[s].m_aaSkinPartNames[p]) == 0)
 				matches++;
 
 		if(matches > best_matches)

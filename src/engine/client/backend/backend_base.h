@@ -53,15 +53,15 @@ public:
 		SCommand_PreInit() :
 			SCommand(CMD_PRE_INIT) {}
 
-		SDL_Window *m_pWindow;
-		uint32_t m_Width;
-		uint32_t m_Height;
+		SDL_Window *m_pWindow = nullptr;
+		uint32_t m_Width = 0;
+		uint32_t m_Height = 0;
 
-		char *m_pVendorString;
-		char *m_pVersionString;
-		char *m_pRendererString;
+		char *m_pVendorString = nullptr;
+		char *m_pVersionString = nullptr;
+		char *m_pRendererString = nullptr;
 
-		TTWGraphicsGPUList *m_pGPUList;
+		TTWGraphicsGPUList *m_pGPUList = nullptr;
 	};
 
 	struct SCommand_Init : public CCommandBuffer::SCommand
@@ -69,38 +69,38 @@ public:
 		SCommand_Init() :
 			SCommand(CMD_INIT) {}
 
-		SDL_Window *m_pWindow;
-		uint32_t m_Width;
-		uint32_t m_Height;
+		SDL_Window *m_pWindow = nullptr;
+		uint32_t m_Width = 0;
+		uint32_t m_Height = 0;
 
-		class IStorage *m_pStorage;
-		std::atomic<uint64_t> *m_pTextureMemoryUsage;
-		std::atomic<uint64_t> *m_pBufferMemoryUsage;
-		std::atomic<uint64_t> *m_pStreamMemoryUsage;
-		std::atomic<uint64_t> *m_pStagingMemoryUsage;
+		class IStorage *m_pStorage = nullptr;
+		std::atomic<uint64_t> *m_pTextureMemoryUsage = nullptr;
+		std::atomic<uint64_t> *m_pBufferMemoryUsage = nullptr;
+		std::atomic<uint64_t> *m_pStreamMemoryUsage = nullptr;
+		std::atomic<uint64_t> *m_pStagingMemoryUsage = nullptr;
 
-		TTWGraphicsGPUList *m_pGPUList;
+		TTWGraphicsGPUList *m_pGPUList = nullptr;
 
-		TGLBackendReadPresentedImageData *m_pReadPresentedImageDataFunc;
+		TGLBackendReadPresentedImageData *m_pReadPresentedImageDataFunc = nullptr;
 
-		SBackendCapabilites *m_pCapabilities;
-		int *m_pInitError;
+		SBackendCapabilites *m_pCapabilities = nullptr;
+		int *m_pInitError = nullptr;
 
-		const char **m_pErrStringPtr;
+		const char **m_pErrStringPtr = nullptr;
 
-		char *m_pVendorString;
-		char *m_pVersionString;
-		char *m_pRendererString;
+		char *m_pVendorString = nullptr;
+		char *m_pVersionString = nullptr;
+		char *m_pRendererString = nullptr;
 
-		int m_RequestedMajor;
-		int m_RequestedMinor;
-		int m_RequestedPatch;
+		int m_RequestedMajor = 0;
+		int m_RequestedMinor = 0;
+		int m_RequestedPatch = 0;
 
-		EBackendType m_RequestedBackend;
+		EBackendType m_RequestedBackend = BACKEND_TYPE_OPENGL;
 
-		int m_GlewMajor;
-		int m_GlewMinor;
-		int m_GlewPatch;
+		int m_GlewMajor = 0;
+		int m_GlewMinor = 0;
+		int m_GlewPatch = 0;
 	};
 
 	struct SCommand_Shutdown : public CCommandBuffer::SCommand

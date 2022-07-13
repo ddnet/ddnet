@@ -9,9 +9,9 @@
 class CMsgPacker : public CPacker
 {
 public:
-	int m_MsgID;
-	bool m_System;
-	bool m_NoTranslate;
+	int m_MsgID = 0;
+	bool m_System = false;
+	bool m_NoTranslate = false;
 	CMsgPacker(int Type, bool System = false, bool NoTranslate = false) :
 		m_MsgID(Type), m_System(System), m_NoTranslate(NoTranslate)
 	{

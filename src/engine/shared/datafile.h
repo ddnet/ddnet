@@ -18,7 +18,7 @@ enum
 // raw datafile access
 class CDataFileReader
 {
-	struct CDatafile *m_pDataFile;
+	struct CDatafile *m_pDataFile = nullptr;
 	void *GetDataImpl(int Index, int Swap);
 	int GetFileDataSize(int Index);
 
@@ -59,26 +59,26 @@ class CDataFileWriter
 {
 	struct CDataInfo
 	{
-		int m_UncompressedSize;
-		int m_CompressedSize;
-		void *m_pCompressedData;
+		int m_UncompressedSize = 0;
+		int m_CompressedSize = 0;
+		void *m_pCompressedData = nullptr;
 	};
 
 	struct CItemInfo
 	{
-		int m_Type;
-		int m_ID;
-		int m_Size;
-		int m_Next;
-		int m_Prev;
-		void *m_pData;
+		int m_Type = 0;
+		int m_ID = 0;
+		int m_Size = 0;
+		int m_Next = 0;
+		int m_Prev = 0;
+		void *m_pData = nullptr;
 	};
 
 	struct CItemTypeInfo
 	{
-		int m_Num;
-		int m_First;
-		int m_Last;
+		int m_Num = 0;
+		int m_First = 0;
+		int m_Last = 0;
 	};
 
 	enum
@@ -90,14 +90,14 @@ class CDataFileWriter
 	};
 
 	IOHANDLE m_File;
-	int m_NumItems;
-	int m_NumDatas;
-	int m_NumItemTypes;
-	int m_NumExtendedItemTypes;
-	CItemTypeInfo *m_pItemTypes;
-	CItemInfo *m_pItems;
-	CDataInfo *m_pDatas;
-	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
+	int m_NumItems = 0;
+	int m_NumDatas = 0;
+	int m_NumItemTypes = 0;
+	int m_NumExtendedItemTypes = 0;
+	CItemTypeInfo *m_pItemTypes = nullptr;
+	CItemInfo *m_pItems = nullptr;
+	CDataInfo *m_pDatas = nullptr;
+	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES] = {0};
 
 	int GetExtendedItemTypeIndex(int Type);
 	int GetTypeFromIndex(int Index);

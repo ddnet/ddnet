@@ -10,8 +10,8 @@
 
 class CSoundLoading : public IJob
 {
-	CGameClient *m_pGameClient;
-	bool m_Render;
+	CGameClient *m_pGameClient = nullptr;
+	bool m_Render = false;
 
 public:
 	CSoundLoading(CGameClient *pGameClient, bool Render);
@@ -26,20 +26,20 @@ class CSounds : public CComponent
 	};
 	struct QueueEntry
 	{
-		int m_Channel;
-		int m_SetId;
+		int m_Channel = 0;
+		int m_SetId = 0;
 	} m_aQueue[QUEUE_SIZE];
-	int m_QueuePos;
-	int64_t m_QueueWaitTime;
-	std::shared_ptr<CSoundLoading> m_pSoundJob;
-	bool m_WaitForSoundJob;
+	int m_QueuePos = 0;
+	int64_t m_QueueWaitTime = 0;
+	std::shared_ptr<CSoundLoading> m_pSoundJob = nullptr;
+	bool m_WaitForSoundJob = false;
 
 	int GetSampleId(int SetId);
 
-	float m_GuiSoundVolume;
-	float m_GameSoundVolume;
-	float m_MapSoundVolume;
-	float m_BackgroundMusicVolume;
+	float m_GuiSoundVolume = 0;
+	float m_GameSoundVolume = 0;
+	float m_MapSoundVolume = 0;
+	float m_BackgroundMusicVolume = 0;
 
 public:
 	// sound channels

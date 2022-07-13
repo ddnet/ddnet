@@ -10,6 +10,6 @@ public:
 	~CTestInfo();
 	IStorage *CreateTestStorage();
 	bool m_DeleteTestStorageFilesOnSuccess = false;
-	char m_aFilename[64];
+	char m_aFilename[64] = {0};
 };
 #endif // TEST_TEST_H

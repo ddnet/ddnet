@@ -20,13 +20,13 @@ class CKernel : public IKernel
 			m_AutoDestroy = false;
 		}
 
-		char m_aName[64];
-		IInterface *m_pInterface;
-		bool m_AutoDestroy;
+		char m_aName[64] = {0};
+		IInterface *m_pInterface = nullptr;
+		bool m_AutoDestroy = false;
 	};
 
 	CInterfaceInfo m_aInterfaces[MAX_INTERFACES];
-	int m_NumInterfaces;
+	int m_NumInterfaces = 0;
 
 	CInterfaceInfo *FindInterfaceInfo(const char *pName)
 	{

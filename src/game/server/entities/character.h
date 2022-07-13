@@ -88,30 +88,30 @@ public:
 
 private:
 	// player controlling this character
-	class CPlayer *m_pPlayer;
+	class CPlayer *m_pPlayer = nullptr;
 
-	bool m_Alive;
-	bool m_Paused;
-	int m_NeededFaketuning;
+	bool m_Alive = false;
+	bool m_Paused = false;
+	int m_NeededFaketuning = 0;
 
 	// weapon info
-	CEntity *m_apHitObjects[10];
-	int m_NumObjectsHit;
+	CEntity *m_apHitObjects[10] = {nullptr};
+	int m_NumObjectsHit = 0;
 
-	int m_LastWeapon;
-	int m_QueuedWeapon;
+	int m_LastWeapon = 0;
+	int m_QueuedWeapon = 0;
 
-	int m_ReloadTimer;
-	int m_AttackTick;
+	int m_ReloadTimer = 0;
+	int m_AttackTick = 0;
 
-	int m_DamageTaken;
+	int m_DamageTaken = 0;
 
-	int m_EmoteType;
-	int m_EmoteStop;
+	int m_EmoteType = 0;
+	int m_EmoteStop = 0;
 
 	// last tick that the player took any action ie some input
-	int m_LastAction;
-	int m_LastNoAmmoSound;
+	int m_LastAction = 0;
+	int m_LastNoAmmoSound = 0;
 
 	// these are non-heldback inputs
 	CNetObj_PlayerInput m_LatestPrevPrevInput;
@@ -122,12 +122,12 @@ private:
 	CNetObj_PlayerInput m_PrevInput;
 	CNetObj_PlayerInput m_Input;
 	CNetObj_PlayerInput m_SavedInput;
-	int m_NumInputs;
+	int m_NumInputs = 0;
 
-	int m_DamageTakenTick;
+	int m_DamageTakenTick = 0;
 
-	int m_Health;
-	int m_Armor;
+	int m_Health = 0;
+	int m_Armor = 0;
 
 	// the player core for the physics
 	CCharacterCore m_Core;
@@ -137,7 +137,7 @@ private:
 	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
 
 	// info for dead reckoning
-	int m_ReckoningTick; // tick that we are performing dead reckoning From
+	int m_ReckoningTick = 0; // tick that we are performing dead reckoning From
 	CCharacterCore m_SendCore; // core that we should send
 	CCharacterCore m_ReckoningCore; // the dead reckoning core
 
@@ -147,8 +147,8 @@ private:
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
-	float m_Time;
-	int m_LastBroadcast;
+	float m_Time = 0;
+	int m_LastBroadcast = 0;
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
 	void SetRescue();
@@ -159,7 +159,7 @@ private:
 	void SendZoneMsgs();
 	IAntibot *Antibot();
 
-	bool m_SetSavePos;
+	bool m_SetSavePos = false;
 	CSaveTee m_RescueTee;
 
 public:
@@ -174,46 +174,46 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	void ResetPickups();
-	int m_DDRaceState;
+	int m_DDRaceState = 0;
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
-	bool m_NinjaJetpack;
-	int m_TeamBeforeSuper;
-	int m_FreezeTime;
-	bool m_FrozenLastTick;
-	bool m_FreezeHammer;
-	int m_TuneZone;
-	int m_TuneZoneOld;
-	int m_PainSoundTimer;
-	int m_LastMove;
-	int m_StartTime;
+	bool m_NinjaJetpack = false;
+	int m_TeamBeforeSuper = 0;
+	int m_FreezeTime = 0;
+	bool m_FrozenLastTick = false;
+	bool m_FreezeHammer = false;
+	int m_TuneZone = 0;
+	int m_TuneZoneOld = 0;
+	int m_PainSoundTimer = 0;
+	int m_LastMove = 0;
+	int m_StartTime = 0;
 	vec2 m_PrevPos;
-	int m_TeleCheckpoint;
+	int m_TeleCheckpoint = 0;
 
-	int m_TimeCpBroadcastEndTick;
-	int m_LastTimeCp;
-	int m_LastTimeCpBroadcasted;
-	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
+	int m_TimeCpBroadcastEndTick = 0;
+	int m_LastTimeCp = 0;
+	int m_LastTimeCpBroadcasted = 0;
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS] = {0};
 
-	int m_TileIndex;
-	int m_TileFIndex;
+	int m_TileIndex = 0;
+	int m_TileFIndex = 0;
 
-	int m_MoveRestrictions;
+	int m_MoveRestrictions = 0;
 
 	vec2 m_Intersection;
-	int64_t m_LastStartWarning;
-	int64_t m_LastRescue;
-	bool m_LastRefillJumps;
-	bool m_LastPenalty;
-	bool m_LastBonus;
+	int64_t m_LastStartWarning = 0;
+	int64_t m_LastRescue = 0;
+	bool m_LastRefillJumps = false;
+	bool m_LastPenalty = false;
+	bool m_LastBonus = false;
 	vec2 m_TeleGunPos;
-	bool m_TeleGunTeleport;
-	bool m_IsBlueTeleGunTeleport;
-	int m_StrongWeakID;
+	bool m_TeleGunTeleport = false;
+	bool m_IsBlueTeleGunTeleport = false;
+	int m_StrongWeakID = 0;
 
-	int m_SpawnTick;
-	int m_WeaponChangeTick;
+	int m_SpawnTick = 0;
+	int m_WeaponChangeTick = 0;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; }

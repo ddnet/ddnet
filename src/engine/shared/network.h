@@ -117,21 +117,21 @@ struct CNetChunk
 {
 	// -1 means that it's a stateless packet
 	// 0 on the client means the server
-	int m_ClientID;
+	int m_ClientID = 0;
 	NETADDR m_Address; // only used when client_id == -1
-	int m_Flags;
-	int m_DataSize;
-	const void *m_pData;
+	int m_Flags = 0;
+	int m_DataSize = 0;
+	const void *m_pData = nullptr;
 	// only used if the flags contain NETSENDFLAG_EXTENDED and NETSENDFLAG_CONNLESS
-	unsigned char m_aExtraData[4];
+	unsigned char m_aExtraData[4] = {0};
 };
 
 class CNetChunkHeader
 {
 public:
-	int m_Flags;
-	int m_Size;
-	int m_Sequence;
+	int m_Flags = 0;
+	int m_Size = 0;
+	int m_Sequence = 0;
 
 	unsigned char *Pack(unsigned char *pData, int Split = 4);
 	unsigned char *Unpack(unsigned char *pData, int Split = 4);
@@ -140,24 +140,24 @@ public:
 class CNetChunkResend
 {
 public:
-	int m_Flags;
-	int m_DataSize;
-	unsigned char *m_pData;
+	int m_Flags = 0;
+	int m_DataSize = 0;
+	unsigned char *m_pData = nullptr;
 
-	int m_Sequence;
-	int64_t m_LastSendTime;
-	int64_t m_FirstSendTime;
+	int m_Sequence = 0;
+	int64_t m_LastSendTime = 0;
+	int64_t m_FirstSendTime = 0;
 };
 
 class CNetPacketConstruct
 {
 public:
-	int m_Flags;
-	int m_Ack;
-	int m_NumChunks;
-	int m_DataSize;
-	unsigned char m_aChunkData[NET_MAX_PAYLOAD];
-	unsigned char m_aExtraData[4];
+	int m_Flags = 0;
+	int m_Ack = 0;
+	int m_NumChunks = 0;
+	int m_DataSize = 0;
+	unsigned char m_aChunkData[NET_MAX_PAYLOAD] = {0};
+	unsigned char m_aExtraData[4] = {0};
 };
 
 enum class CONNECTIVITY
@@ -173,7 +173,7 @@ class CStun
 {
 	class CProtocol
 	{
-		int m_Index;
+		int m_Index = 0;
 		NETSOCKET m_Socket;
 		CStunData m_Stun;
 		bool m_HaveStunServer = false;
@@ -211,28 +211,28 @@ class CNetConnection
 	friend class CNetRecvUnpacker;
 
 private:
-	unsigned short m_Sequence;
-	unsigned short m_Ack;
-	unsigned short m_PeerAck;
-	unsigned m_State;
+	unsigned short m_Sequence = 0;
+	unsigned short m_Ack = 0;
+	unsigned short m_PeerAck = 0;
+	unsigned m_State = 0;
 
 	SECURITY_TOKEN m_SecurityToken;
-	int m_RemoteClosed;
-	bool m_BlockCloseMsg;
-	bool m_UnknownSeq;
+	int m_RemoteClosed = 0;
+	bool m_BlockCloseMsg = false;
+	bool m_UnknownSeq = false;
 
 	CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> m_Buffer;
 
-	int64_t m_LastUpdateTime;
-	int64_t m_LastRecvTime;
-	int64_t m_LastSendTime;
+	int64_t m_LastUpdateTime = 0;
+	int64_t m_LastRecvTime = 0;
+	int64_t m_LastSendTime = 0;
 
-	char m_aErrorString[256];
+	char m_aErrorString[256] = {0};
 
 	CNetPacketConstruct m_Construct;
 
 	NETADDR m_aConnectAddrs[16];
-	int m_NumConnectAddrs;
+	int m_NumConnectAddrs = 0;
 	NETADDR m_PeerAddr;
 	NETSOCKET m_Socket;
 	NETSTATS m_Stats;
@@ -249,8 +249,8 @@ private:
 	void Resend();
 
 public:
-	bool m_TimeoutProtected;
-	bool m_TimeoutSituation;
+	bool m_TimeoutProtected = false;
+	bool m_TimeoutSituation = false;
 
 	void Reset(bool Rejoin = false);
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
@@ -292,25 +292,25 @@ public:
 	void SetUnknownSeq() { m_UnknownSeq = true; }
 	void SetSequence(int Sequence) { m_Sequence = Sequence; }
 
-	bool m_Sixup;
+	bool m_Sixup = false;
 	SECURITY_TOKEN m_Token;
 };
 
 class CConsoleNetConnection
 {
 private:
-	int m_State;
+	int m_State = 0;
 
 	NETADDR m_PeerAddr;
 	NETSOCKET m_Socket;
 
-	char m_aBuffer[NET_MAX_PACKETSIZE];
-	int m_BufferOffset;
+	char m_aBuffer[NET_MAX_PACKETSIZE] = {0};
+	int m_BufferOffset = 0;
 
-	char m_aErrorString[256];
+	char m_aErrorString[256] = {0};
 
-	bool m_LineEndingDetected;
-	char m_aLineEnding[3];
+	bool m_LineEndingDetected = false;
+	char m_aLineEnding[3] = {0};
 
 public:
 	void Init(NETSOCKET Socket, const NETADDR *pAddr);
@@ -329,14 +329,14 @@ public:
 class CNetRecvUnpacker
 {
 public:
-	bool m_Valid;
+	bool m_Valid = false;
 
 	NETADDR m_Addr;
-	CNetConnection *m_pConnection;
-	int m_CurrentChunk;
-	int m_ClientID;
+	CNetConnection *m_pConnection = nullptr;
+	int m_CurrentChunk = 0;
+	int m_ClientID = 0;
 	CNetPacketConstruct m_Data;
-	unsigned char m_aBuffer[NET_MAX_PACKETSIZE];
+	unsigned char m_aBuffer[NET_MAX_PACKETSIZE] = {0};
 
 	CNetRecvUnpacker() { Clear(); }
 	void Clear();
@@ -356,30 +356,30 @@ class CNetServer
 	struct CSpamConn
 	{
 		NETADDR m_Addr;
-		int64_t m_Time;
-		int m_Conns;
+		int64_t m_Time = 0;
+		int m_Conns = 0;
 	};
 
 	NETADDR m_Address;
 	NETSOCKET m_Socket;
-	CNetBan *m_pNetBan;
+	CNetBan *m_pNetBan = nullptr;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
-	int m_MaxClients;
-	int m_MaxClientsPerIP;
+	int m_MaxClients = 0;
+	int m_MaxClientsPerIP = 0;
 
-	NETFUNC_NEWCLIENT m_pfnNewClient;
-	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth;
-	NETFUNC_DELCLIENT m_pfnDelClient;
-	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
-	void *m_pUser;
+	NETFUNC_NEWCLIENT m_pfnNewClient = nullptr;
+	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth = nullptr;
+	NETFUNC_DELCLIENT m_pfnDelClient = nullptr;
+	NETFUNC_CLIENTREJOIN m_pfnClientRejoin = nullptr;
+	void *m_pUser = nullptr;
 
-	int m_NumConAttempts; // log flooding attacks
-	int64_t m_TimeNumConAttempts;
-	unsigned char m_aSecurityTokenSeed[16];
+	int m_NumConAttempts = 0; // log flooding attacks
+	int64_t m_TimeNumConAttempts = 0;
+	unsigned char m_aSecurityTokenSeed[16] = {0};
 
 	// vanilla connect flood detection
-	int64_t m_VConnFirst;
-	int m_VConnNum;
+	int64_t m_VConnFirst = 0;
+	int m_VConnNum = 0;
 
 	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
 
@@ -449,12 +449,12 @@ class CNetConsole
 	};
 
 	NETSOCKET m_Socket;
-	CNetBan *m_pNetBan;
+	CNetBan *m_pNetBan = nullptr;
 	CSlot m_aSlots[NET_MAX_CONSOLE_CLIENTS];
 
-	NETFUNC_NEWCLIENT_CON m_pfnNewClient;
-	NETFUNC_DELCLIENT m_pfnDelClient;
-	void *m_pUser;
+	NETFUNC_NEWCLIENT_CON m_pfnNewClient = nullptr;
+	NETFUNC_DELCLIENT m_pfnDelClient = nullptr;
+	void *m_pUser = nullptr;
 
 	CNetRecvUnpacker m_RecvUnpacker;
 

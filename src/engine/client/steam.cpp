@@ -7,10 +7,10 @@
 class CSteam : public ISteam
 {
 	HSteamPipe m_SteamPipe;
-	ISteamApps *m_pSteamApps;
-	ISteamFriends *m_pSteamFriends;
-	char m_aPlayerName[16];
-	bool m_GotConnectAddr;
+	ISteamApps *m_pSteamApps = nullptr;
+	ISteamFriends *m_pSteamFriends = nullptr;
+	char m_aPlayerName[16] = {0};
+	bool m_GotConnectAddr = false;
 	NETADDR m_ConnectAddr;
 
 public:

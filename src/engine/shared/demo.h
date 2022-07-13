@@ -15,21 +15,21 @@ typedef std::function<void()> TUpdateIntraTimesFunc;
 
 class CDemoRecorder : public IDemoRecorder
 {
-	class IConsole *m_pConsole;
+	class IConsole *m_pConsole = nullptr;
 	IOHANDLE m_File;
-	char m_aCurrentFilename[256];
-	int m_LastTickMarker;
-	int m_LastKeyFrame;
-	int m_FirstTick;
-	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
-	class CSnapshotDelta *m_pSnapshotDelta;
-	int m_NumTimelineMarkers;
-	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
-	bool m_NoMapData;
-	unsigned char *m_pMapData;
+	char m_aCurrentFilename[256] = {0};
+	int m_LastTickMarker = 0;
+	int m_LastKeyFrame = 0;
+	int m_FirstTick = 0;
+	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE] = {0};
+	class CSnapshotDelta *m_pSnapshotDelta = nullptr;
+	int m_NumTimelineMarkers = 0;
+	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS] = {0};
+	bool m_NoMapData = false;
+	unsigned char *m_pMapData = nullptr;
 
-	DEMOFUNC_FILTER m_pfnFilter;
-	void *m_pUser;
+	DEMOFUNC_FILTER m_pfnFilter = nullptr;
+	void *m_pUser = nullptr;
 
 	void WriteTickMarker(int Tick, int Keyframe);
 	void Write(int Type, const void *pData, int Size);
@@ -69,50 +69,50 @@ public:
 
 		IDemoPlayer::CInfo m_Info;
 
-		int64_t m_LastUpdate;
-		int64_t m_CurrentTime;
+		int64_t m_LastUpdate = 0;
+		int64_t m_CurrentTime = 0;
 
-		int m_SeekablePoints;
+		int m_SeekablePoints = 0;
 
-		int m_NextTick;
-		int m_PreviousTick;
+		int m_NextTick = 0;
+		int m_PreviousTick = 0;
 
-		float m_IntraTick;
-		float m_IntraTickSincePrev;
-		float m_TickTime;
+		float m_IntraTick = 0;
+		float m_IntraTickSincePrev = 0;
+		float m_TickTime = 0;
 	};
 
 private:
-	IListener *m_pListener;
+	IListener *m_pListener = nullptr;
 
 	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
 	struct CKeyFrame
 	{
-		long m_Filepos;
-		int m_Tick;
+		long m_Filepos = 0;
+		int m_Tick = 0;
 	};
 
 	struct CKeyFrameSearch
 	{
 		CKeyFrame m_Frame;
-		CKeyFrameSearch *m_pNext;
+		CKeyFrameSearch *m_pNext = nullptr;
 	};
 
-	class IConsole *m_pConsole;
+	class IConsole *m_pConsole = nullptr;
 	IOHANDLE m_File;
-	long m_MapOffset;
-	char m_aFilename[IO_MAX_PATH_LENGTH];
-	CKeyFrame *m_pKeyFrames;
+	long m_MapOffset = 0;
+	char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
+	CKeyFrame *m_pKeyFrames = nullptr;
 	CMapInfo m_MapInfo;
-	int m_SpeedIndex;
+	int m_SpeedIndex = 0;
 
 	CPlaybackInfo m_Info;
-	int m_DemoType;
-	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
-	int m_LastSnapshotDataSize;
-	class CSnapshotDelta *m_pSnapshotDelta;
+	int m_DemoType = 0;
+	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE] = {0};
+	int m_LastSnapshotDataSize = 0;
+	class CSnapshotDelta *m_pSnapshotDelta = nullptr;
 
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
@@ -156,16 +156,16 @@ public:
 
 class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener
 {
-	CDemoPlayer *m_pDemoPlayer;
-	CDemoRecorder *m_pDemoRecorder;
-	IConsole *m_pConsole;
-	IStorage *m_pStorage;
-	class CSnapshotDelta *m_pSnapshotDelta;
-	const char *m_pNetVersion;
+	CDemoPlayer *m_pDemoPlayer = nullptr;
+	CDemoRecorder *m_pDemoRecorder = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IStorage *m_pStorage = nullptr;
+	class CSnapshotDelta *m_pSnapshotDelta = nullptr;
+	const char *m_pNetVersion = nullptr;
 
-	bool m_Stop;
-	int m_SliceFrom;
-	int m_SliceTo;
+	bool m_Stop = false;
+	int m_SliceFrom = 0;
+	int m_SliceTo = 0;
 
 public:
 	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);

@@ -24,22 +24,22 @@ private:
 	vec2 m_From;
 	vec2 m_Dir;
 	vec2 m_TelePos;
-	bool m_WasTele;
-	float m_Energy;
-	int m_Bounces;
-	int m_EvalTick;
-	int m_Owner;
-	int m_TeamMask;
-	bool m_ZeroEnergyBounceInLastTick;
+	bool m_WasTele = false;
+	float m_Energy = 0;
+	int m_Bounces = 0;
+	int m_EvalTick = 0;
+	int m_Owner = 0;
+	int m_TeamMask = 0;
+	bool m_ZeroEnergyBounceInLastTick = false;
 
 	// DDRace
 
 	vec2 m_PrevPos;
-	int m_Type;
-	int m_TuneZone;
-	bool m_TeleportCancelled;
-	bool m_IsBlueTeleport;
-	bool m_BelongsToPracticeTeam;
+	int m_Type = 0;
+	int m_TuneZone = 0;
+	bool m_TeleportCancelled = false;
+	bool m_IsBlueTeleport = false;
+	bool m_BelongsToPracticeTeam = false;
 };
 
 #endif

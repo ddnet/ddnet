@@ -57,51 +57,51 @@
 class CGameInfo
 {
 public:
-	bool m_FlagStartsRace;
-	bool m_TimeScore;
-	bool m_UnlimitedAmmo;
-	bool m_DDRaceRecordMessage;
-	bool m_RaceRecordMessage;
-	bool m_RaceSounds;
+	bool m_FlagStartsRace = false;
+	bool m_TimeScore = false;
+	bool m_UnlimitedAmmo = false;
+	bool m_DDRaceRecordMessage = false;
+	bool m_RaceRecordMessage = false;
+	bool m_RaceSounds = false;
 
-	bool m_AllowEyeWheel;
-	bool m_AllowHookColl;
-	bool m_AllowZoom;
+	bool m_AllowEyeWheel = false;
+	bool m_AllowHookColl = false;
+	bool m_AllowZoom = false;
 
-	bool m_BugDDRaceGhost;
-	bool m_BugDDRaceInput;
-	bool m_BugFNGLaserRange;
-	bool m_BugVanillaBounce;
+	bool m_BugDDRaceGhost = false;
+	bool m_BugDDRaceInput = false;
+	bool m_BugFNGLaserRange = false;
+	bool m_BugVanillaBounce = false;
 
-	bool m_PredictFNG;
-	bool m_PredictDDRace;
-	bool m_PredictDDRaceTiles;
-	bool m_PredictVanilla;
+	bool m_PredictFNG = false;
+	bool m_PredictDDRace = false;
+	bool m_PredictDDRaceTiles = false;
+	bool m_PredictVanilla = false;
 
-	bool m_EntitiesDDNet;
-	bool m_EntitiesDDRace;
-	bool m_EntitiesRace;
-	bool m_EntitiesFNG;
-	bool m_EntitiesVanilla;
-	bool m_EntitiesBW;
-	bool m_EntitiesFDDrace;
+	bool m_EntitiesDDNet = false;
+	bool m_EntitiesDDRace = false;
+	bool m_EntitiesRace = false;
+	bool m_EntitiesFNG = false;
+	bool m_EntitiesVanilla = false;
+	bool m_EntitiesBW = false;
+	bool m_EntitiesFDDrace = false;
 
-	bool m_Race;
+	bool m_Race = false;
 
-	bool m_DontMaskEntities;
-	bool m_AllowXSkins;
+	bool m_DontMaskEntities = false;
+	bool m_AllowXSkins = false;
 
-	bool m_HudHealthArmor;
-	bool m_HudAmmo;
-	bool m_HudDDRace;
+	bool m_HudHealthArmor = false;
+	bool m_HudAmmo = false;
+	bool m_HudDDRace = false;
 };
 
 class CSnapEntities
 {
 public:
 	IClient::CSnapItem m_Item;
-	const void *m_pData;
-	const CNetObj_EntityEx *m_pDataEx;
+	const void *m_pData = nullptr;
+	const CNetObj_EntityEx *m_pDataEx = nullptr;
 };
 
 class CGameClient : public IGameClient
@@ -155,23 +155,23 @@ private:
 	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
 
-	class IEngine *m_pEngine;
-	class IInput *m_pInput;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-	class IClient *m_pClient;
-	class ISound *m_pSound;
-	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
-	class IDemoPlayer *m_pDemoPlayer;
-	class IFavorites *m_pFavorites;
-	class IServerBrowser *m_pServerBrowser;
-	class IEditor *m_pEditor;
-	class IFriends *m_pFriends;
-	class IFriends *m_pFoes;
+	class IEngine *m_pEngine = nullptr;
+	class IInput *m_pInput = nullptr;
+	class IGraphics *m_pGraphics = nullptr;
+	class ITextRender *m_pTextRender = nullptr;
+	class IClient *m_pClient = nullptr;
+	class ISound *m_pSound = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IConsole *m_pConsole = nullptr;
+	class IStorage *m_pStorage = nullptr;
+	class IDemoPlayer *m_pDemoPlayer = nullptr;
+	class IFavorites *m_pFavorites = nullptr;
+	class IServerBrowser *m_pServerBrowser = nullptr;
+	class IEditor *m_pEditor = nullptr;
+	class IFriends *m_pFriends = nullptr;
+	class IFriends *m_pFoes = nullptr;
 #if defined(CONF_AUTOUPDATE)
-	class IUpdater *m_pUpdater;
+	class IUpdater *m_pUpdater = nullptr;
 #endif
 
 	CLayers m_Layers;
@@ -181,17 +181,17 @@ private:
 	void ProcessEvents();
 	void UpdatePositions();
 
-	int m_PredictedTick;
-	int m_aLastNewPredictedTick[NUM_DUMMIES];
+	int m_PredictedTick = 0;
+	int m_aLastNewPredictedTick[NUM_DUMMIES] = {0};
 
-	int m_LastRoundStartTick;
+	int m_LastRoundStartTick = 0;
 
-	int m_LastFlagCarrierRed;
-	int m_LastFlagCarrierBlue;
+	int m_LastFlagCarrierRed = 0;
+	int m_LastFlagCarrierBlue = 0;
 
-	int m_aCheckInfo[NUM_DUMMIES];
+	int m_aCheckInfo[NUM_DUMMIES] = {0};
 
-	char m_aDDNetVersionStr[64];
+	char m_aDDNetVersionStr[64] = {0};
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
@@ -240,10 +240,10 @@ public:
 	}
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
 
-	bool m_SuppressEvents;
-	bool m_NewTick;
-	bool m_NewPredictedTick;
-	int m_aFlagDropTick[2];
+	bool m_SuppressEvents = false;
+	bool m_NewTick = false;
+	bool m_NewPredictedTick = false;
+	int m_aFlagDropTick[2] = {0};
 
 	// TODO: move this
 	CTuningParams m_aTuning[NUM_DUMMIES];
@@ -254,10 +254,10 @@ public:
 		SERVERMODE_MOD,
 		SERVERMODE_PUREMOD,
 	};
-	int m_ServerMode;
+	int m_ServerMode = 0;
 	CGameInfo m_GameInfo;
 
-	int m_DemoSpecID;
+	int m_DemoSpecID = 0;
 
 	vec2 m_LocalCharacterPos;
 
@@ -268,48 +268,48 @@ public:
 	// snap pointers
 	struct CSnapState
 	{
-		const CNetObj_Character *m_pLocalCharacter;
-		const CNetObj_Character *m_pLocalPrevCharacter;
-		const CNetObj_PlayerInfo *m_pLocalInfo;
-		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
-		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
-		const CNetObj_Flag *m_apFlags[2];
-		const CNetObj_GameInfo *m_pGameInfoObj;
-		const CNetObj_GameData *m_pGameDataObj;
-		int m_GameDataSnapID;
+		const CNetObj_Character *m_pLocalCharacter = nullptr;
+		const CNetObj_Character *m_pLocalPrevCharacter = nullptr;
+		const CNetObj_PlayerInfo *m_pLocalInfo = nullptr;
+		const CNetObj_SpectatorInfo *m_pSpectatorInfo = nullptr;
+		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo = nullptr;
+		const CNetObj_Flag *m_apFlags[2] = {nullptr};
+		const CNetObj_GameInfo *m_pGameInfoObj = nullptr;
+		const CNetObj_GameData *m_pGameDataObj = nullptr;
+		int m_GameDataSnapID = 0;
 
-		const CNetObj_PlayerInfo *m_apPlayerInfos[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_apInfoByScore[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_apInfoByName[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_apInfoByDDTeamScore[MAX_CLIENTS];
-		const CNetObj_PlayerInfo *m_apInfoByDDTeamName[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apPlayerInfos[MAX_CLIENTS] = {nullptr};
+		const CNetObj_PlayerInfo *m_apInfoByScore[MAX_CLIENTS] = {nullptr};
+		const CNetObj_PlayerInfo *m_apInfoByName[MAX_CLIENTS] = {nullptr};
+		const CNetObj_PlayerInfo *m_apInfoByDDTeamScore[MAX_CLIENTS] = {nullptr};
+		const CNetObj_PlayerInfo *m_apInfoByDDTeamName[MAX_CLIENTS] = {nullptr};
 
-		int m_LocalClientID;
-		int m_NumPlayers;
-		int m_aTeamSize[2];
+		int m_LocalClientID = 0;
+		int m_NumPlayers = 0;
+		int m_aTeamSize[2] = {0};
 
 		// spectate data
 		struct CSpectateInfo
 		{
-			bool m_Active;
-			int m_SpectatorID;
-			bool m_UsePosition;
+			bool m_Active = false;
+			int m_SpectatorID = 0;
+			bool m_UsePosition = false;
 			vec2 m_Position;
 		} m_SpecInfo;
 
 		//
 		struct CCharacterInfo
 		{
-			bool m_Active;
+			bool m_Active = false;
 
 			// snapshots
 			CNetObj_Character m_Prev;
 			CNetObj_Character m_Cur;
 
 			CNetObj_DDNetCharacter m_ExtendedData;
-			const CNetObj_DDNetCharacter *m_PrevExtendedData;
-			bool m_HasExtendedData;
-			bool m_HasExtendedDisplayInfo;
+			const CNetObj_DDNetCharacter *m_pPrevExtendedData = nullptr;
+			bool m_HasExtendedData = false;
+			bool m_HasExtendedDisplayInfo = false;
 
 			// interpolated position
 			vec2 m_Position;
@@ -319,44 +319,44 @@ public:
 	};
 
 	CSnapState m_Snap;
-	int m_aLocalTuneZone[NUM_DUMMIES];
-	bool m_aReceivedTuning[NUM_DUMMIES];
-	int m_aExpectingTuningForZone[NUM_DUMMIES];
-	int m_aExpectingTuningSince[NUM_DUMMIES];
+	int m_aLocalTuneZone[NUM_DUMMIES] = {0};
+	bool m_aReceivedTuning[NUM_DUMMIES] = {false};
+	int m_aExpectingTuningForZone[NUM_DUMMIES] = {0};
+	int m_aExpectingTuningSince[NUM_DUMMIES] = {0};
 
 	// client data
 	struct CClientData
 	{
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
+		int m_UseCustomColor = 0;
+		int m_ColorBody = 0;
+		int m_ColorFeet = 0;
 
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
-		int m_Country;
-		char m_aSkinName[64];
-		int m_SkinColor;
-		int m_Team;
-		int m_Emoticon;
-		float m_EmoticonStartFraction;
-		int m_EmoticonStartTick;
-		bool m_Solo;
-		bool m_Jetpack;
-		bool m_CollisionDisabled;
-		bool m_EndlessHook;
-		bool m_EndlessJump;
-		bool m_HammerHitDisabled;
-		bool m_GrenadeHitDisabled;
-		bool m_LaserHitDisabled;
-		bool m_ShotgunHitDisabled;
-		bool m_HookHitDisabled;
-		bool m_Super;
-		bool m_HasTelegunGun;
-		bool m_HasTelegunGrenade;
-		bool m_HasTelegunLaser;
-		int m_FreezeEnd;
-		bool m_DeepFrozen;
-		bool m_LiveFrozen;
+		char m_aName[MAX_NAME_LENGTH] = {0};
+		char m_aClan[MAX_CLAN_LENGTH] = {0};
+		int m_Country = 0;
+		char m_aSkinName[64] = {0};
+		int m_SkinColor = 0;
+		int m_Team = 0;
+		int m_Emoticon = 0;
+		float m_EmoticonStartFraction = 0;
+		int m_EmoticonStartTick = 0;
+		bool m_Solo = false;
+		bool m_Jetpack = false;
+		bool m_CollisionDisabled = false;
+		bool m_EndlessHook = false;
+		bool m_EndlessJump = false;
+		bool m_HammerHitDisabled = false;
+		bool m_GrenadeHitDisabled = false;
+		bool m_LaserHitDisabled = false;
+		bool m_ShotgunHitDisabled = false;
+		bool m_HookHitDisabled = false;
+		bool m_Super = false;
+		bool m_HasTelegunGun = false;
+		bool m_HasTelegunGrenade = false;
+		bool m_HasTelegunLaser = false;
+		int m_FreezeEnd = 0;
+		bool m_DeepFrozen = false;
+		bool m_LiveFrozen = false;
 
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
@@ -364,20 +364,20 @@ public:
 		CTeeRenderInfo m_SkinInfo; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
 
-		float m_Angle;
-		bool m_Active;
-		bool m_ChatIgnore;
-		bool m_EmoticonIgnore;
-		bool m_Friend;
-		bool m_Foe;
+		float m_Angle = 0;
+		bool m_Active = false;
+		bool m_ChatIgnore = false;
+		bool m_EmoticonIgnore = false;
+		bool m_Friend = false;
+		bool m_Foe = false;
 
-		int m_AuthLevel;
-		bool m_Afk;
-		bool m_Paused;
-		bool m_Spec;
+		int m_AuthLevel = 0;
+		bool m_Afk = false;
+		bool m_Paused = false;
+		bool m_Spec = false;
 
 		// Editor allows 256 switches for now.
-		bool m_aSwitchStates[256];
+		bool m_aSwitchStates[256] = {false};
 
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
@@ -389,13 +389,13 @@ public:
 		CNetObj_Character m_RenderCur;
 		CNetObj_Character m_RenderPrev;
 		vec2 m_RenderPos;
-		bool m_IsPredicted;
-		bool m_IsPredictedLocal;
-		int64_t m_aSmoothStart[2];
-		int64_t m_aSmoothLen[2];
+		bool m_IsPredicted = false;
+		bool m_IsPredictedLocal = false;
+		int64_t m_aSmoothStart[2] = {0};
+		int64_t m_aSmoothLen[2] = {0};
 		vec2 m_aPredPos[200];
-		int m_aPredTick[200];
-		bool m_SpecCharPresent;
+		int m_aPredTick[200] = {0};
+		bool m_SpecCharPresent = false;
 		vec2 m_SpecChar;
 	};
 
@@ -403,23 +403,23 @@ public:
 
 	class CClientStats
 	{
-		int m_IngameTicks;
-		int m_JoinTick;
-		bool m_Active;
+		int m_IngameTicks = 0;
+		int m_JoinTick = 0;
+		bool m_Active = false;
 
 	public:
 		CClientStats();
 
-		int m_aFragsWith[NUM_WEAPONS];
-		int m_aDeathsFrom[NUM_WEAPONS];
-		int m_Frags;
-		int m_Deaths;
-		int m_Suicides;
-		int m_BestSpree;
-		int m_CurrentSpree;
+		int m_aFragsWith[NUM_WEAPONS] = {0};
+		int m_aDeathsFrom[NUM_WEAPONS] = {0};
+		int m_Frags = 0;
+		int m_Deaths = 0;
+		int m_Suicides = 0;
+		int m_BestSpree = 0;
+		int m_CurrentSpree = 0;
 
-		int m_FlagGrabs;
-		int m_FlagCaptures;
+		int m_FlagGrabs = 0;
+		int m_FlagCaptures = 0;
 
 		void Reset();
 
@@ -490,11 +490,11 @@ public:
 
 	// DDRace
 
-	int m_aLocalIDs[NUM_DUMMIES];
+	int m_aLocalIDs[NUM_DUMMIES] = {0};
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
-	unsigned int m_DummyFire;
-	bool m_ReceivedDDNetPlayer;
+	unsigned int m_DummyFire = 0;
+	bool m_ReceivedDDNetPlayer = false;
 
 	class CTeamsCore m_Teams;
 
@@ -623,7 +623,7 @@ public:
 	};
 
 	SClientGameSkin m_GameSkin;
-	bool m_GameSkinLoaded;
+	bool m_GameSkinLoaded = false;
 
 	struct SClientParticlesSkin
 	{
@@ -639,7 +639,7 @@ public:
 	};
 
 	SClientParticlesSkin m_ParticlesSkin;
-	bool m_ParticlesSkinLoaded;
+	bool m_ParticlesSkinLoaded = false;
 
 	struct SClientEmoticonsSkin
 	{
@@ -647,7 +647,7 @@ public:
 	};
 
 	SClientEmoticonsSkin m_EmoticonsSkin;
-	bool m_EmoticonsSkinLoaded;
+	bool m_EmoticonsSkinLoaded = false;
 
 	struct SClientHudSkin
 	{
@@ -683,7 +683,7 @@ public:
 	};
 
 	SClientHudSkin m_HudSkin;
-	bool m_HudSkinLoaded;
+	bool m_HudSkinLoaded = false;
 
 	struct SClientExtrasSkin
 	{
@@ -692,7 +692,7 @@ public:
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;
-	bool m_ExtrasSkinLoaded;
+	bool m_ExtrasSkinLoaded = false;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
@@ -700,18 +700,18 @@ private:
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 
-	bool m_aDDRaceMsgSent[NUM_DUMMIES];
-	int m_aShowOthers[NUM_DUMMIES];
+	bool m_aDDRaceMsgSent[NUM_DUMMIES] = {false};
+	int m_aShowOthers[NUM_DUMMIES] = {0};
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
 	vec2 GetSmoothPos(int ClientID);
 
-	int m_PredictedDummyID;
-	int m_IsDummySwapping;
+	int m_PredictedDummyID = 0;
+	int m_IsDummySwapping = 0;
 	CCharOrder m_CharOrder;
-	int m_aSwitchStateTeam[NUM_DUMMIES];
+	int m_aSwitchStateTeam[NUM_DUMMIES] = {0};
 
 	enum
 	{
@@ -721,9 +721,9 @@ private:
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
 
-	float m_LastZoom;
-	float m_LastScreenAspect;
-	float m_LastDummyConnected;
+	float m_LastZoom = 0;
+	float m_LastScreenAspect = 0;
+	float m_LastDummyConnected = 0;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);

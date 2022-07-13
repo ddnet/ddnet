@@ -13,11 +13,11 @@ class CConsole : public IConsole
 	class CCommand : public CCommandInfo
 	{
 	public:
-		CCommand *m_pNext;
-		int m_Flags;
-		bool m_Temp;
-		FCommandCallback m_pfnCallback;
-		void *m_pUserData;
+		CCommand *m_pNext = nullptr;
+		int m_Flags = 0;
+		bool m_Temp = false;
+		FCommandCallback m_pfnCallback = nullptr;
+		void *m_pUserData = nullptr;
 
 		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
 
@@ -27,30 +27,30 @@ class CConsole : public IConsole
 	class CChain
 	{
 	public:
-		FChainCommandCallback m_pfnChainCallback;
-		FCommandCallback m_pfnCallback;
-		void *m_pCallbackUserData;
-		void *m_pUserData;
+		FChainCommandCallback m_pfnChainCallback = nullptr;
+		FCommandCallback m_pfnCallback = nullptr;
+		void *m_pCallbackUserData = nullptr;
+		void *m_pUserData = nullptr;
 	};
 
-	int m_FlagMask;
-	bool m_StoreCommands;
-	const char *m_apStrokeStr[2];
-	CCommand *m_pFirstCommand;
+	int m_FlagMask = 0;
+	bool m_StoreCommands = false;
+	const char *m_apStrokeStr[2] = {nullptr};
+	CCommand *m_pFirstCommand = nullptr;
 
 	class CExecFile
 	{
 	public:
-		const char *m_pFilename;
-		CExecFile *m_pPrev;
+		const char *m_pFilename = nullptr;
+		CExecFile *m_pPrev = nullptr;
 	};
 
-	CExecFile *m_pFirstExec;
-	class CConfig *m_pConfig;
-	class IStorage *m_pStorage;
-	int m_AccessLevel;
+	CExecFile *m_pFirstExec = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IStorage *m_pStorage = nullptr;
+	int m_AccessLevel = 0;
 
-	CCommand *m_pRecycleList;
+	CCommand *m_pRecycleList = nullptr;
 	CHeap m_TempCommands;
 
 	static void TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData);
@@ -65,8 +65,8 @@ class CConsole : public IConsole
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) override;
 
-	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
-	void *m_pTeeHistorianCommandUserdata;
+	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback = nullptr;
+	void *m_pTeeHistorianCommandUserdata = nullptr;
 
 	enum
 	{
@@ -77,11 +77,11 @@ class CConsole : public IConsole
 	class CResult : public IResult
 	{
 	public:
-		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH + 1];
-		char *m_pArgsStart;
+		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH + 1] = {0};
+		char *m_pArgsStart = nullptr;
 
-		const char *m_pCommand;
-		const char *m_apArgs[MAX_PARTS];
+		const char *m_pCommand = nullptr;
+		const char *m_apArgs[MAX_PARTS] = {nullptr};
 
 		CResult()
 
@@ -134,7 +134,7 @@ class CConsole : public IConsole
 			VICTIM_ALL = -1,
 		};
 
-		int m_Victim;
+		int m_Victim = 0;
 		void ResetVictim();
 		bool HasVictim();
 		void SetVictim(int Victim);
@@ -160,11 +160,11 @@ class CConsole : public IConsole
 	public:
 		struct CQueueEntry
 		{
-			CQueueEntry *m_pNext;
-			FCommandCallback m_pfnCommandCallback;
-			void *m_pCommandUserData;
+			CQueueEntry *m_pNext = nullptr;
+			FCommandCallback m_pfnCommandCallback = nullptr;
+			void *m_pCommandUserData = nullptr;
 			CResult m_Result;
-		} * m_pFirst, *m_pLast;
+		} *m_pFirst = nullptr, *m_pLast = nullptr;
 
 		void AddEntry()
 		{

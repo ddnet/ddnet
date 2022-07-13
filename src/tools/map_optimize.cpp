@@ -127,10 +127,10 @@ int main(int argc, const char **argv)
 
 	struct SMapOptimizeItem
 	{
-		CMapItemImage *m_pImage;
-		int m_Index;
-		int m_Data;
-		int m_Text;
+		CMapItemImage *m_pImage = nullptr;
+		int m_Index = 0;
+		int m_Data = 0;
+		int m_Text = 0;
 	};
 
 	std::vector<SMapOptimizeItem> vDataFindHelper;

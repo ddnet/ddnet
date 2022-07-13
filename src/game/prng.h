@@ -22,11 +22,11 @@ public:
 	unsigned int RandomBits();
 
 private:
-	char m_aDescription[64];
+	char m_aDescription[64] = {0};
 
-	bool m_Seeded;
-	uint64_t m_State;
-	uint64_t m_Increment;
+	bool m_Seeded = false;
+	uint64_t m_State = 0;
+	uint64_t m_Increment = 0;
 };
 
 #endif // GAME_PRNG_H

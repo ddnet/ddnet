@@ -40,11 +40,11 @@ enum
 class CEnvelope
 {
 public:
-	int m_Channels;
+	int m_Channels = 0;
 	std::vector<CEnvPoint> m_vPoints;
-	char m_aName[32];
-	float m_Bottom, m_Top;
-	bool m_Synchronized;
+	char m_aName[32] = {0};
+	float m_Bottom = 0, m_Top = 0;
+	bool m_Synchronized = false;
 
 	CEnvelope(int Chan)
 	{
@@ -113,7 +113,7 @@ class CLayerGroup;
 class CLayer
 {
 public:
-	class CEditor *m_pEditor;
+	class CEditor *m_pEditor = nullptr;
 	class IGraphics *Graphics();
 	class ITextRender *TextRender();
 
@@ -154,39 +154,39 @@ public:
 		*pHeight = 0;
 	}
 
-	char m_aName[12];
-	int m_Type;
-	int m_Flags;
+	char m_aName[12] = {0};
+	int m_Type = 0;
+	int m_Flags = 0;
 
-	bool m_Readonly;
-	bool m_Visible;
+	bool m_Readonly = false;
+	bool m_Visible = false;
 
-	int m_BrushRefCount;
+	int m_BrushRefCount = 0;
 };
 
 class CLayerGroup
 {
 public:
-	class CEditorMap *m_pMap;
+	class CEditorMap *m_pMap = nullptr;
 
 	std::vector<CLayer *> m_vpLayers;
 
-	int m_OffsetX;
-	int m_OffsetY;
+	int m_OffsetX = 0;
+	int m_OffsetY = 0;
 
-	int m_ParallaxX;
-	int m_ParallaxY;
+	int m_ParallaxX = 0;
+	int m_ParallaxY = 0;
 
-	int m_UseClipping;
-	int m_ClipX;
-	int m_ClipY;
-	int m_ClipW;
-	int m_ClipH;
+	int m_UseClipping = 0;
+	int m_ClipX = 0;
+	int m_ClipY = 0;
+	int m_ClipW = 0;
+	int m_ClipH = 0;
 
-	char m_aName[12];
-	bool m_GameGroup;
-	bool m_Visible;
-	bool m_Collapse;
+	char m_aName[12] = {0};
+	bool m_GameGroup = false;
+	bool m_Visible = false;
+	bool m_Collapse = false;
 
 	CLayerGroup();
 	~CLayerGroup();
@@ -270,7 +270,7 @@ public:
 class CEditorImage : public CImageInfo
 {
 public:
-	CEditor *m_pEditor;
+	CEditor *m_pEditor = nullptr;
 
 	CEditorImage(CEditor *pEditor) :
 		m_AutoMapper(pEditor)
@@ -289,16 +289,16 @@ public:
 	void AnalyseTileFlags();
 
 	IGraphics::CTextureHandle m_Texture;
-	int m_External;
-	char m_aName[128];
-	unsigned char m_aTileFlags[256];
+	int m_External = 0;
+	char m_aName[128] = {0};
+	unsigned char m_aTileFlags[256] = {0};
 	class CAutoMapper m_AutoMapper;
 };
 
 class CEditorSound
 {
 public:
-	CEditor *m_pEditor;
+	CEditor *m_pEditor = nullptr;
 
 	CEditorSound(CEditor *pEditor)
 	{
@@ -312,11 +312,11 @@ public:
 
 	~CEditorSound();
 
-	int m_SoundID;
-	char m_aName[128];
+	int m_SoundID = 0;
+	char m_aName[128] = {0};
 
-	void *m_pData;
-	unsigned m_DataSize;
+	void *m_pData = nullptr;
+	unsigned m_DataSize = 0;
 };
 
 class CEditorMap
@@ -325,8 +325,8 @@ class CEditorMap
 	void MakeGameLayer(CLayer *pLayer);
 
 public:
-	CEditor *m_pEditor;
-	bool m_Modified;
+	CEditor *m_pEditor = nullptr;
+	bool m_Modified = false;
 
 	CEditorMap()
 	{
@@ -346,15 +346,15 @@ public:
 	class CMapInfo
 	{
 	public:
-		char m_aAuthorTmp[32];
-		char m_aVersionTmp[16];
-		char m_aCreditsTmp[128];
-		char m_aLicenseTmp[32];
+		char m_aAuthorTmp[32] = {0};
+		char m_aVersionTmp[16] = {0};
+		char m_aCreditsTmp[128] = {0};
+		char m_aLicenseTmp[32] = {0};
 
-		char m_aAuthor[32];
-		char m_aVersion[16];
-		char m_aCredits[128];
-		char m_aLicense[32];
+		char m_aAuthor[32] = {0};
+		char m_aVersion[16] = {0};
+		char m_aCredits[128] = {0};
+		char m_aLicense[32] = {0};
 
 		void Reset()
 		{
@@ -373,12 +373,12 @@ public:
 
 	struct CSetting
 	{
-		char m_aCommand[256];
+		char m_aCommand[256] = {0};
 	};
 	std::vector<CSetting> m_vSettings;
 
-	class CLayerGame *m_pGameLayer;
-	CLayerGroup *m_pGameGroup;
+	class CLayerGame *m_pGameLayer = nullptr;
+	CLayerGroup *m_pGameGroup = nullptr;
 
 	CEnvelope *NewEnvelope(int Channels)
 	{
@@ -451,11 +451,11 @@ public:
 
 	// DDRace
 
-	class CLayerTele *m_pTeleLayer;
-	class CLayerSpeedup *m_pSpeedupLayer;
-	class CLayerFront *m_pFrontLayer;
-	class CLayerSwitch *m_pSwitchLayer;
-	class CLayerTune *m_pTuneLayer;
+	class CLayerTele *m_pTeleLayer = nullptr;
+	class CLayerSpeedup *m_pSpeedupLayer = nullptr;
+	class CLayerFront *m_pFrontLayer = nullptr;
+	class CLayerSwitch *m_pSwitchLayer = nullptr;
+	class CLayerTune *m_pTuneLayer = nullptr;
 	void MakeTeleLayer(CLayer *pLayer);
 	void MakeSpeedupLayer(CLayer *pLayer);
 	void MakeFrontLayer(CLayer *pLayer);
@@ -465,11 +465,11 @@ public:
 
 struct CProperty
 {
-	const char *m_pName;
-	int m_Value;
-	int m_Type;
-	int m_Min;
-	int m_Max;
+	const char *m_pName = nullptr;
+	int m_Value = 0;
+	int m_Type = 0;
+	int m_Min = 0;
+	int m_Max = 0;
 };
 
 enum
@@ -612,26 +612,26 @@ public:
 	void FlagModified(int x, int y, int w, int h);
 
 	IGraphics::CTextureHandle m_Texture;
-	int m_Game;
-	int m_Image;
-	int m_Width;
-	int m_Height;
+	int m_Game = 0;
+	int m_Image = 0;
+	int m_Width = 0;
+	int m_Height = 0;
 	CColor m_Color;
-	int m_ColorEnv;
-	int m_ColorEnvOffset;
-	CTile *m_pTiles;
+	int m_ColorEnv = 0;
+	int m_ColorEnvOffset = 0;
+	CTile *m_pTiles = nullptr;
 
 	// DDRace
 
-	int m_AutoMapperConfig;
-	int m_Seed;
-	bool m_AutoAutoMap;
-	int m_Tele;
-	int m_Speedup;
-	int m_Front;
-	int m_Switch;
-	int m_Tune;
-	char m_aFileName[IO_MAX_PATH_LENGTH];
+	int m_AutoMapperConfig = 0;
+	int m_Seed = 0;
+	bool m_AutoAutoMap = false;
+	int m_Tele = 0;
+	int m_Speedup = 0;
+	int m_Front = 0;
+	int m_Switch = 0;
+	int m_Tune = 0;
+	char m_aFileName[IO_MAX_PATH_LENGTH] = {0};
 };
 
 class CLayerQuads : public CLayer
@@ -657,7 +657,7 @@ public:
 
 	void GetSize(float *pWidth, float *pHeight) override;
 
-	int m_Image;
+	int m_Image = 0;
 	std::vector<CQuad> m_vQuads;
 };
 
@@ -675,14 +675,14 @@ public:
 
 class CEditor : public IEditor
 {
-	class IInput *m_pInput;
-	class IClient *m_pClient;
-	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-	class ISound *m_pSound;
-	class IStorage *m_pStorage;
+	class IInput *m_pInput = nullptr;
+	class IClient *m_pClient = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IConsole *m_pConsole = nullptr;
+	class IGraphics *m_pGraphics = nullptr;
+	class ITextRender *m_pTextRender = nullptr;
+	class ISound *m_pSound = nullptr;
+	class IStorage *m_pStorage = nullptr;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 	CUIEx m_UIEx;
@@ -820,7 +820,7 @@ public:
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
 
-	CLayerGroup *m_apSavedBrushes[10];
+	CLayerGroup *m_apSavedBrushes[10] = {nullptr};
 
 	void FilelistPopulate(int StorageType);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
@@ -849,19 +849,19 @@ public:
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
-	int m_Mode;
-	int m_Dialog;
-	int m_EditBoxActive;
-	const char *m_pTooltip;
+	int m_Mode = 0;
+	int m_Dialog = 0;
+	int m_EditBoxActive = 0;
+	const char *m_pTooltip = nullptr;
 
-	bool m_GridActive;
-	int m_GridFactor;
+	bool m_GridActive = false;
+	int m_GridFactor = 0;
 
-	bool m_BrushColorEnabled;
+	bool m_BrushColorEnabled = false;
 
-	char m_aFileName[IO_MAX_PATH_LENGTH];
-	char m_aFileSaveName[IO_MAX_PATH_LENGTH];
-	bool m_ValidSaveFilename;
+	char m_aFileName[IO_MAX_PATH_LENGTH] = {0};
+	char m_aFileSaveName[IO_MAX_PATH_LENGTH] = {0};
+	bool m_ValidSaveFilename = false;
 
 	enum
 	{
@@ -877,16 +877,16 @@ public:
 		POPEVENT_PLACE_BORDER_TILES
 	};
 
-	int m_PopupEventType;
-	int m_PopupEventActivated;
-	int m_PopupEventWasActivated;
-	bool m_MouseInsidePopup;
-	bool m_LargeLayerWasWarned;
-	bool m_PreventUnusedTilesWasWarned;
-	int m_AllowPlaceUnusedTiles;
-	bool m_BrushDrawDestructive;
+	int m_PopupEventType = 0;
+	int m_PopupEventActivated = 0;
+	int m_PopupEventWasActivated = 0;
+	bool m_MouseInsidePopup = false;
+	bool m_LargeLayerWasWarned = false;
+	bool m_PreventUnusedTilesWasWarned = false;
+	int m_AllowPlaceUnusedTiles = 0;
+	bool m_BrushDrawDestructive = false;
 
-	int m_Mentions;
+	int m_Mentions = 0;
 
 	enum
 	{
@@ -895,93 +895,93 @@ public:
 		FILETYPE_SOUND,
 	};
 
-	int m_FileDialogStorageType;
-	const char *m_pFileDialogTitle;
-	const char *m_pFileDialogButtonText;
+	int m_FileDialogStorageType = 0;
+	const char *m_pFileDialogTitle = nullptr;
+	const char *m_pFileDialogButtonText = nullptr;
 	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
-	void *m_pFileDialogUser;
-	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogSearchText[64];
-	char m_aFileDialogPrevSearchText[64];
-	char *m_pFileDialogPath;
-	bool m_FileDialogActivate;
-	int m_FileDialogFileType;
-	float m_FileDialogScrollValue;
-	int m_FilesSelectedIndex;
-	char m_aFileDialogNewFolderName[64];
-	char m_aFileDialogErrString[64];
+	void *m_pFileDialogUser = nullptr;
+	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH] = {0};
+	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH] = {0};
+	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH] = {0};
+	char m_aFileDialogSearchText[64] = {0};
+	char m_aFileDialogPrevSearchText[64] = {0};
+	char *m_pFileDialogPath = nullptr;
+	bool m_FileDialogActivate = false;
+	int m_FileDialogFileType = 0;
+	float m_FileDialogScrollValue = 0;
+	int m_FilesSelectedIndex = 0;
+	char m_aFileDialogNewFolderName[64] = {0};
+	char m_aFileDialogErrString[64] = {0};
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	bool m_PreviewImageIsLoaded;
+	bool m_PreviewImageIsLoaded = false;
 	CImageInfo m_FilePreviewImageInfo;
-	bool m_FileDialogOpening;
+	bool m_FileDialogOpening = false;
 
 	struct CFilelistItem
 	{
-		char m_aFilename[IO_MAX_PATH_LENGTH];
-		char m_aName[128];
-		bool m_IsDir;
-		bool m_IsLink;
-		int m_StorageType;
-		bool m_IsVisible;
+		char m_aFilename[IO_MAX_PATH_LENGTH] = {0};
+		char m_aName[128] = {0};
+		bool m_IsDir = false;
+		bool m_IsLink = false;
+		int m_StorageType = 0;
+		bool m_IsVisible = false;
 
 		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_nocase(m_aFilename, Other.m_aFilename) < 0; }
 	};
 	std::vector<CFilelistItem> m_vFileList;
-	int m_FilesStartAt;
-	int m_FilesCur;
-	int m_FilesStopAt;
+	int m_FilesStartAt = 0;
+	int m_FilesCur = 0;
+	int m_FilesStopAt = 0;
 
 	std::vector<std::string> m_vSelectEntitiesFiles;
 	std::string m_SelectEntitiesImage;
 
-	float m_WorldOffsetX;
-	float m_WorldOffsetY;
-	float m_EditorOffsetX;
-	float m_EditorOffsetY;
-	float m_WorldZoom;
-	int m_ZoomLevel;
-	bool m_LockMouse;
-	bool m_ShowMousePointer;
-	bool m_GuiActive;
-	bool m_ProofBorders;
+	float m_WorldOffsetX = 0;
+	float m_WorldOffsetY = 0;
+	float m_EditorOffsetX = 0;
+	float m_EditorOffsetY = 0;
+	float m_WorldZoom = 0;
+	int m_ZoomLevel = 0;
+	bool m_LockMouse = false;
+	bool m_ShowMousePointer = false;
+	bool m_GuiActive = false;
+	bool m_ProofBorders = false;
 	float m_MouseX = 0.0f;
 	float m_MouseY = 0.0f;
 	float m_MouseWorldX = 0.0f;
 	float m_MouseWorldY = 0.0f;
-	float m_MouseDeltaX;
-	float m_MouseDeltaY;
-	float m_MouseDeltaWx;
-	float m_MouseDeltaWy;
+	float m_MouseDeltaX = 0;
+	float m_MouseDeltaY = 0;
+	float m_MouseDeltaWx = 0;
+	float m_MouseDeltaWy = 0;
 
-	bool m_ShowTileInfo;
-	bool m_ShowDetail;
-	bool m_Animate;
-	int64_t m_AnimateStart;
-	float m_AnimateTime;
-	float m_AnimateSpeed;
+	bool m_ShowTileInfo = false;
+	bool m_ShowDetail = false;
+	bool m_Animate = false;
+	int64_t m_AnimateStart = 0;
+	float m_AnimateTime = 0;
+	float m_AnimateSpeed = 0;
 
-	int m_ShowEnvelopeEditor;
-	int m_ShowEnvelopePreview; //Values: 0-Off|1-Selected Envelope|2-All
-	bool m_ShowServerSettingsEditor;
-	bool m_ShowPicker;
+	int m_ShowEnvelopeEditor = 0;
+	int m_ShowEnvelopePreview = 0; //Values: 0-Off|1-Selected Envelope|2-All
+	bool m_ShowServerSettingsEditor = false;
+	bool m_ShowPicker = false;
 
 	std::vector<int> m_vSelectedLayers;
 	std::vector<int> m_vSelectedQuads;
-	int m_SelectedQuadPoint;
-	int m_SelectedQuadIndex;
-	int m_SelectedGroup;
-	int m_SelectedPoints;
-	int m_SelectedEnvelope;
-	int m_SelectedEnvelopePoint;
-	int m_SelectedQuadEnvelope;
-	int m_SelectedImage;
-	int m_SelectedSound;
-	int m_SelectedSource;
+	int m_SelectedQuadPoint = 0;
+	int m_SelectedQuadIndex = 0;
+	int m_SelectedGroup = 0;
+	int m_SelectedPoints = 0;
+	int m_SelectedEnvelope = 0;
+	int m_SelectedEnvelopePoint = 0;
+	int m_SelectedQuadEnvelope = 0;
+	int m_SelectedImage = 0;
+	int m_SelectedSound = 0;
+	int m_SelectedSource = 0;
 
-	bool m_QuadKnifeActive;
-	int m_QuadKnifeCount;
+	bool m_QuadKnifeActive = false;
+	int m_QuadKnifeCount = 0;
 	vec2 m_aQuadKnifePoints[4];
 
 	IGraphics::CTextureHandle m_CheckerTexture;
@@ -997,12 +997,12 @@ public:
 	static const void *ms_pUiGotContext;
 
 	CEditorMap m_Map;
-	int m_ShiftBy;
+	int m_ShiftBy = 0;
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
-	float m_CommandBox;
-	char m_aSettingsCommand[256];
+	float m_CommandBox = 0;
+	char m_aSettingsCommand[256] = {0};
 
 	void PlaceBorderTiles();
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
@@ -1209,16 +1209,16 @@ public:
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
-	unsigned char m_TeleNumber;
+	unsigned char m_TeleNumber = 0;
 
-	unsigned char m_TuningNum;
+	unsigned char m_TuningNum = 0;
 
-	unsigned char m_SpeedupForce;
-	unsigned char m_SpeedupMaxSpeed;
-	short m_SpeedupAngle;
+	unsigned char m_SpeedupForce = 0;
+	unsigned char m_SpeedupMaxSpeed = 0;
+	short m_SpeedupAngle = 0;
 
-	unsigned char m_SwitchNum;
-	unsigned char m_SwitchDelay;
+	unsigned char m_SwitchNum = 0;
+	unsigned char m_SwitchDelay = 0;
 };
 
 // make sure to inline this function
@@ -1233,8 +1233,8 @@ public:
 	CLayerTele(int w, int h);
 	~CLayerTele();
 
-	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
+	CTeleTile *m_pTeleTile = nullptr;
+	unsigned char m_TeleNum = 0;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1253,10 +1253,10 @@ public:
 	CLayerSpeedup(int w, int h);
 	~CLayerSpeedup();
 
-	CSpeedupTile *m_pSpeedupTile;
-	int m_SpeedupForce;
-	int m_SpeedupMaxSpeed;
-	int m_SpeedupAngle;
+	CSpeedupTile *m_pSpeedupTile = nullptr;
+	int m_SpeedupForce = 0;
+	int m_SpeedupMaxSpeed = 0;
+	int m_SpeedupAngle = 0;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1283,9 +1283,9 @@ public:
 	CLayerSwitch(int w, int h);
 	~CLayerSwitch();
 
-	CSwitchTile *m_pSwitchTile;
-	unsigned char m_SwitchNumber;
-	unsigned char m_SwitchDelay;
+	CSwitchTile *m_pSwitchTile = nullptr;
+	unsigned char m_SwitchNumber = 0;
+	unsigned char m_SwitchDelay = 0;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1304,8 +1304,8 @@ public:
 	CLayerTune(int w, int h);
 	~CLayerTune();
 
-	CTuneTile *m_pTuneTile;
-	unsigned char m_TuningNumber;
+	CTuneTile *m_pTuneTile = nullptr;
+	unsigned char m_TuningNumber = 0;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1335,7 +1335,7 @@ public:
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
-	int m_Sound;
+	int m_Sound = 0;
 	std::vector<CSoundSource> m_vSources;
 };
 

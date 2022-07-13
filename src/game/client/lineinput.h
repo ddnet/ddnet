@@ -13,14 +13,14 @@ class CLineInput
 		MAX_SIZE = 512,
 		MAX_CHARS = MAX_SIZE / 2,
 	};
-	char m_aStr[MAX_SIZE];
-	int m_Len;
-	int m_CursorPos;
-	int m_NumChars;
+	char m_aStr[MAX_SIZE] = {0};
+	int m_Len = 0;
+	int m_CursorPos = 0;
+	int m_NumChars = 0;
 
-	char m_aDisplayStr[MAX_SIZE + IInput::INPUT_TEXT_SIZE + 2];
-	int m_FakeLen;
-	int m_FakeCursorPos;
+	char m_aDisplayStr[MAX_SIZE + IInput::INPUT_TEXT_SIZE + 2] = {0};
+	int m_FakeLen = 0;
+	int m_FakeCursorPos = 0;
 
 public:
 	enum ELineInputChanges

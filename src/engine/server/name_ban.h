@@ -23,12 +23,12 @@ public:
 		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, std::size(m_aSkeleton));
 		str_copy(m_aReason, pReason);
 	}
-	char m_aName[MAX_NAME_LENGTH];
-	char m_aReason[MAX_NAMEBAN_REASON_LENGTH];
-	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
-	int m_SkeletonLength;
-	int m_Distance;
-	int m_IsSubstring;
+	char m_aName[MAX_NAME_LENGTH] = {0};
+	char m_aReason[MAX_NAMEBAN_REASON_LENGTH] = {0};
+	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH] = {0};
+	int m_SkeletonLength = 0;
+	int m_Distance = 0;
+	int m_IsSubstring = 0;
 };
 
 CNameBan *IsNameBanned(const char *pName, std::vector<CNameBan> &vNameBans);

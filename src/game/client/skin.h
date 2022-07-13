@@ -8,7 +8,7 @@
 // do this better and nicer
 struct CSkin
 {
-	bool m_IsVanilla;
+	bool m_IsVanilla = false;
 
 	struct SSkinTextures
 	{
@@ -38,13 +38,13 @@ struct CSkin
 
 	SSkinTextures m_OriginalSkin;
 	SSkinTextures m_ColorableSkin;
-	char m_aName[24];
+	char m_aName[24] = {0};
 	ColorRGBA m_BloodColor;
 
 	template<bool IsSizeType>
 	struct SSkinMetricVariableInt
 	{
-		int m_Value;
+		int m_Value = 0;
 		operator int() { return m_Value; }
 		SSkinMetricVariableInt &operator=(int NewVal)
 		{

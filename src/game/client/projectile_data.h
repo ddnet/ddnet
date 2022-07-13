@@ -13,16 +13,16 @@ class CProjectileData
 public:
 	vec2 m_StartPos;
 	vec2 m_StartVel;
-	int m_Type;
-	int m_StartTick;
-	bool m_ExtraInfo;
+	int m_Type = 0;
+	int m_StartTick = 0;
+	bool m_ExtraInfo = false;
 	// The rest is only set if m_ExtraInfo is true.
-	int m_Owner;
-	bool m_Explosive;
-	int m_Bouncing;
-	bool m_Freeze;
+	int m_Owner = 0;
+	bool m_Explosive = false;
+	int m_Bouncing = 0;
+	bool m_Freeze = false;
 	// TuneZone is introduced locally
-	int m_TuneZone;
+	int m_TuneZone = 0;
 };
 
 CProjectileData ExtractProjectileInfo(const CNetObj_Projectile *pProj, class CGameWorld *pGameWorld);

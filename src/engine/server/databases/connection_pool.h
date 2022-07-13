@@ -28,7 +28,7 @@ struct ISqlData
 	}
 	virtual ~ISqlData(){};
 
-	mutable std::shared_ptr<ISqlResult> m_pResult;
+	mutable std::shared_ptr<ISqlResult> m_pResult = nullptr;
 };
 
 class IConsole;
@@ -77,9 +77,9 @@ private:
 
 	std::atomic_bool m_Shutdown{false};
 	CSemaphore m_NumElem;
-	int m_FirstElem;
-	int m_LastElem;
-	std::unique_ptr<struct CSqlExecData> m_aTasks[512];
+	int m_FirstElem = 0;
+	int m_LastElem = 0;
+	std::unique_ptr<struct CSqlExecData> m_apTasks[512]; // cannot be initialized due to incomplete type
 };
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_POOL_H

@@ -14,15 +14,15 @@ class CCommandBuffer
 {
 	class CBuffer
 	{
-		unsigned char *m_pData;
-		unsigned m_Size;
-		unsigned m_Used;
+		unsigned char *m_pData = nullptr;
+		unsigned m_Size = 0;
+		unsigned m_Used = 0;
 
 	public:
 		CBuffer(unsigned BufferSize)
 		{
 			m_Size = BufferSize;
-			m_pData = new unsigned char[m_Size];
+			m_pData = new unsigned char[m_Size]{0};
 			m_Used = 0;
 		}
 
@@ -188,26 +188,26 @@ public:
 	public:
 		SCommand(unsigned Cmd) :
 			m_Cmd(Cmd), m_pNext(nullptr) {}
-		unsigned m_Cmd;
-		SCommand *m_pNext;
+		unsigned m_Cmd = 0;
+		SCommand *m_pNext = nullptr;
 	};
-	SCommand *m_pCmdBufferHead;
-	SCommand *m_pCmdBufferTail;
+	SCommand *m_pCmdBufferHead = nullptr;
+	SCommand *m_pCmdBufferTail = nullptr;
 
 	struct SState
 	{
-		int m_BlendMode;
-		int m_WrapMode;
-		int m_Texture;
+		int m_BlendMode = 0;
+		int m_WrapMode = 0;
+		int m_Texture = 0;
 		SPoint m_ScreenTL;
 		SPoint m_ScreenBR;
 
 		// clip
-		bool m_ClipEnable;
-		int m_ClipX;
-		int m_ClipY;
-		int m_ClipW;
-		int m_ClipH;
+		bool m_ClipEnable = false;
+		int m_ClipX = 0;
+		int m_ClipY = 0;
+		int m_ClipW = 0;
+		int m_ClipH = 0;
 	};
 
 	struct SCommand_Clear : public SCommand
@@ -215,21 +215,21 @@ public:
 		SCommand_Clear() :
 			SCommand(CMD_CLEAR) {}
 		SColorf m_Color;
-		bool m_ForceClear;
+		bool m_ForceClear = false;
 	};
 
 	struct SCommand_Signal : public SCommand
 	{
 		SCommand_Signal() :
 			SCommand(CMD_SIGNAL) {}
-		CSemaphore *m_pSemaphore;
+		CSemaphore *m_pSemaphore = nullptr;
 	};
 
 	struct SCommand_RunBuffer : public SCommand
 	{
 		SCommand_RunBuffer() :
 			SCommand(CMD_RUNBUFFER) {}
-		CCommandBuffer *m_pOtherBuffer;
+		CCommandBuffer *m_pOtherBuffer = nullptr;
 	};
 
 	struct SCommand_Render : public SCommand
@@ -237,9 +237,9 @@ public:
 		SCommand_Render() :
 			SCommand(CMD_RENDER) {}
 		SState m_State;
-		unsigned m_PrimType;
-		unsigned m_PrimCount;
-		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+		unsigned m_PrimType = 0;
+		unsigned m_PrimCount = 0;
+		SVertex *m_pVertices = nullptr; // you should use the command buffer data to allocate vertices for this command
 	};
 
 	struct SCommand_RenderTex3D : public SCommand
@@ -247,9 +247,9 @@ public:
 		SCommand_RenderTex3D() :
 			SCommand(CMD_RENDER_TEX3D) {}
 		SState m_State;
-		unsigned m_PrimType;
-		unsigned m_PrimCount;
-		SVertexTex3DStream *m_pVertices; // you should use the command buffer data to allocate vertices for this command
+		unsigned m_PrimType = 0;
+		unsigned m_PrimCount = 0;
+		SVertexTex3DStream *m_pVertices = nullptr; // you should use the command buffer data to allocate vertices for this command
 	};
 
 	struct SCommand_CreateBufferObject : public SCommand
@@ -257,13 +257,13 @@ public:
 		SCommand_CreateBufferObject() :
 			SCommand(CMD_CREATE_BUFFER_OBJECT) {}
 
-		int m_BufferIndex;
+		int m_BufferIndex = 0;
 
-		bool m_DeletePointer;
-		void *m_pUploadData;
-		size_t m_DataSize;
+		bool m_DeletePointer = false;
+		void *m_pUploadData = nullptr;
+		size_t m_DataSize = 0;
 
-		int m_Flags; // @see EBufferObjectCreateFlags
+		int m_Flags = 0; // @see EBufferObjectCreateFlags
 	};
 
 	struct SCommand_RecreateBufferObject : public SCommand
@@ -271,13 +271,13 @@ public:
 		SCommand_RecreateBufferObject() :
 			SCommand(CMD_RECREATE_BUFFER_OBJECT) {}
 
-		int m_BufferIndex;
+		int m_BufferIndex = 0;
 
-		bool m_DeletePointer;
-		void *m_pUploadData;
-		size_t m_DataSize;
+		bool m_DeletePointer = false;
+		void *m_pUploadData = nullptr;
+		size_t m_DataSize = 0;
 
-		int m_Flags; // @see EBufferObjectCreateFlags
+		int m_Flags = 0; // @see EBufferObjectCreateFlags
 	};
 
 	struct SCommand_UpdateBufferObject : public SCommand
@@ -285,12 +285,12 @@ public:
 		SCommand_UpdateBufferObject() :
 			SCommand(CMD_UPDATE_BUFFER_OBJECT) {}
 
-		int m_BufferIndex;
+		int m_BufferIndex = 0;
 
-		bool m_DeletePointer;
-		void *m_pOffset;
-		void *m_pUploadData;
-		size_t m_DataSize;
+		bool m_DeletePointer = false;
+		void *m_pOffset = nullptr;
+		void *m_pUploadData = nullptr;
+		size_t m_DataSize = 0;
 	};
 
 	struct SCommand_CopyBufferObject : public SCommand
@@ -298,12 +298,12 @@ public:
 		SCommand_CopyBufferObject() :
 			SCommand(CMD_COPY_BUFFER_OBJECT) {}
 
-		int m_WriteBufferIndex;
-		int m_ReadBufferIndex;
+		int m_WriteBufferIndex = 0;
+		int m_ReadBufferIndex = 0;
 
-		size_t m_ReadOffset;
-		size_t m_WriteOffset;
-		size_t m_CopySize;
+		size_t m_ReadOffset = 0;
+		size_t m_WriteOffset = 0;
+		size_t m_CopySize = 0;
 	};
 
 	struct SCommand_DeleteBufferObject : public SCommand
@@ -311,7 +311,7 @@ public:
 		SCommand_DeleteBufferObject() :
 			SCommand(CMD_DELETE_BUFFER_OBJECT) {}
 
-		int m_BufferIndex;
+		int m_BufferIndex = 0;
 	};
 
 	struct SCommand_CreateBufferContainer : public SCommand
@@ -319,13 +319,13 @@ public:
 		SCommand_CreateBufferContainer() :
 			SCommand(CMD_CREATE_BUFFER_CONTAINER) {}
 
-		int m_BufferContainerIndex;
+		int m_BufferContainerIndex = 0;
 
-		int m_Stride;
-		int m_VertBufferBindingIndex;
+		int m_Stride = 0;
+		int m_VertBufferBindingIndex = 0;
 
-		int m_AttrCount;
-		SBufferContainerInfo::SAttribute *m_pAttributes;
+		int m_AttrCount = 0;
+		SBufferContainerInfo::SAttribute *m_pAttributes = nullptr;
 	};
 
 	struct SCommand_UpdateBufferContainer : public SCommand
@@ -333,13 +333,13 @@ public:
 		SCommand_UpdateBufferContainer() :
 			SCommand(CMD_UPDATE_BUFFER_CONTAINER) {}
 
-		int m_BufferContainerIndex;
+		int m_BufferContainerIndex = 0;
 
-		int m_Stride;
-		int m_VertBufferBindingIndex;
+		int m_Stride = 0;
+		int m_VertBufferBindingIndex = 0;
 
-		int m_AttrCount;
-		SBufferContainerInfo::SAttribute *m_pAttributes;
+		int m_AttrCount = 0;
+		SBufferContainerInfo::SAttribute *m_pAttributes = nullptr;
 	};
 
 	struct SCommand_DeleteBufferContainer : public SCommand
@@ -347,8 +347,8 @@ public:
 		SCommand_DeleteBufferContainer() :
 			SCommand(CMD_DELETE_BUFFER_CONTAINER) {}
 
-		int m_BufferContainerIndex;
-		bool m_DestroyAllBO;
+		int m_BufferContainerIndex = 0;
+		bool m_DestroyAllBO = false;
 	};
 
 	struct SCommand_IndicesRequiredNumNotify : public SCommand
@@ -356,7 +356,7 @@ public:
 		SCommand_IndicesRequiredNumNotify() :
 			SCommand(CMD_INDICES_REQUIRED_NUM_NOTIFY) {}
 
-		unsigned int m_RequiredIndicesNum;
+		unsigned int m_RequiredIndicesNum = 0;
 	};
 
 	struct SCommand_RenderTileLayer : public SCommand
@@ -367,11 +367,11 @@ public:
 		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
 
 		// the char offset of all indices that should be rendered, and the amount of renders
-		char **m_pIndicesOffsets;
-		unsigned int *m_pDrawCount;
+		char **m_pIndicesOffsets = nullptr;
+		unsigned int *m_pDrawCount = nullptr;
 
-		int m_IndicesDrawNum;
-		int m_BufferContainerIndex;
+		int m_IndicesDrawNum = 0;
+		int m_BufferContainerIndex = 0;
 	};
 
 	struct SCommand_RenderBorderTile : public SCommand
@@ -380,13 +380,13 @@ public:
 			SCommand(CMD_RENDER_BORDER_TILE) {}
 		SState m_State;
 		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
-		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
-		unsigned int m_DrawNum;
-		int m_BufferContainerIndex;
+		char *m_pIndicesOffset = nullptr; // you should use the command buffer data to allocate vertices for this command
+		unsigned int m_DrawNum = 0;
+		int m_BufferContainerIndex = 0;
 
 		vec2 m_Offset;
 		vec2 m_Dir;
-		int m_JumpIndex;
+		int m_JumpIndex = 0;
 	};
 
 	struct SCommand_RenderBorderTileLine : public SCommand
@@ -395,10 +395,10 @@ public:
 			SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
 		SState m_State;
 		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
-		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
-		unsigned int m_IndexDrawNum;
-		unsigned int m_DrawNum;
-		int m_BufferContainerIndex;
+		char *m_pIndicesOffset = nullptr; // you should use the command buffer data to allocate vertices for this command
+		unsigned int m_IndexDrawNum = 0;
+		unsigned int m_DrawNum = 0;
+		int m_BufferContainerIndex = 0;
 
 		vec2 m_Offset;
 		vec2 m_Dir;
@@ -410,10 +410,10 @@ public:
 			SCommand(CMD_RENDER_QUAD_LAYER) {}
 		SState m_State;
 
-		int m_BufferContainerIndex;
-		SQuadRenderInfo *m_pQuadInfo;
-		int m_QuadNum;
-		int m_QuadOffset;
+		int m_BufferContainerIndex = 0;
+		SQuadRenderInfo *m_pQuadInfo = nullptr;
+		int m_QuadNum = 0;
+		int m_QuadOffset = 0;
 	};
 
 	struct SCommand_RenderText : public SCommand
@@ -422,13 +422,13 @@ public:
 			SCommand(CMD_RENDER_TEXT) {}
 		SState m_State;
 
-		int m_BufferContainerIndex;
-		int m_TextureSize;
+		int m_BufferContainerIndex = 0;
+		int m_TextureSize = 0;
 
-		int m_TextTextureIndex;
-		int m_TextOutlineTextureIndex;
+		int m_TextTextureIndex = 0;
+		int m_TextOutlineTextureIndex = 0;
 
-		int m_DrawNum;
+		int m_DrawNum = 0;
 		ColorRGBA m_TextColor;
 		ColorRGBA m_TextOutlineColor;
 	};
@@ -439,10 +439,10 @@ public:
 			SCommand(CMD_RENDER_QUAD_CONTAINER) {}
 		SState m_State;
 
-		int m_BufferContainerIndex;
+		int m_BufferContainerIndex = 0;
 
-		unsigned int m_DrawNum;
-		void *m_pOffset;
+		unsigned int m_DrawNum = 0;
+		void *m_pOffset = nullptr;
 	};
 
 	struct SCommand_RenderQuadContainerEx : public SCommand
@@ -451,15 +451,15 @@ public:
 			SCommand(CMD_RENDER_QUAD_CONTAINER_EX) {}
 		SState m_State;
 
-		int m_BufferContainerIndex;
+		int m_BufferContainerIndex = 0;
 
-		float m_Rotation;
+		float m_Rotation = 0;
 		SPoint m_Center;
 
 		SColorf m_VertexColor;
 
-		unsigned int m_DrawNum;
-		void *m_pOffset;
+		unsigned int m_DrawNum = 0;
+		void *m_pOffset = nullptr;
 	};
 
 	struct SCommand_RenderQuadContainerAsSpriteMultiple : public SCommand
@@ -468,24 +468,24 @@ public:
 			SCommand(CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE) {}
 		SState m_State;
 
-		int m_BufferContainerIndex;
+		int m_BufferContainerIndex = 0;
 
-		IGraphics::SRenderSpriteInfo *m_pRenderInfo;
+		IGraphics::SRenderSpriteInfo *m_pRenderInfo = nullptr;
 
 		SPoint m_Center;
 		SColorf m_VertexColor;
 
-		unsigned int m_DrawNum;
-		unsigned int m_DrawCount;
-		void *m_pOffset;
+		unsigned int m_DrawNum = 0;
+		unsigned int m_DrawCount = 0;
+		void *m_pOffset = nullptr;
 	};
 
 	struct SCommand_TrySwapAndScreenshot : public SCommand
 	{
 		SCommand_TrySwapAndScreenshot() :
 			SCommand(CMD_TRY_SWAP_AND_SCREENSHOT) {}
-		CImageInfo *m_pImage; // processor will fill this out, the one who adds this command must free the data as well
-		bool *m_pSwapped;
+		CImageInfo *m_pImage = nullptr; // processor will fill this out, the one who adds this command must free the data as well
+		bool *m_pSwapped = nullptr;
 	};
 
 	struct SCommand_Swap : public SCommand
@@ -505,8 +505,8 @@ public:
 		SCommand_VSync() :
 			SCommand(CMD_VSYNC) {}
 
-		int m_VSync;
-		bool *m_pRetOk;
+		int m_VSync = 0;
+		bool *m_pRetOk = nullptr;
 	};
 
 	struct SCommand_MultiSampling : public SCommand
@@ -514,9 +514,9 @@ public:
 		SCommand_MultiSampling() :
 			SCommand(CMD_MULTISAMPLING) {}
 
-		uint32_t m_RequestedMultiSamplingCount;
-		uint32_t *m_pRetMultiSamplingCount;
-		bool *m_pRetOk;
+		uint32_t m_RequestedMultiSamplingCount = 0;
+		uint32_t *m_pRetMultiSamplingCount = nullptr;
+		bool *m_pRetOk = nullptr;
 	};
 
 	struct SCommand_Update_Viewport : public SCommand
@@ -524,11 +524,11 @@ public:
 		SCommand_Update_Viewport() :
 			SCommand(CMD_UPDATE_VIEWPORT) {}
 
-		int m_X;
-		int m_Y;
-		int m_Width;
-		int m_Height;
-		bool m_ByResize; // resized by an resize event.. a hint to make clear that the viewport update can be deferred if wanted
+		int m_X = 0;
+		int m_Y = 0;
+		int m_Width = 0;
+		int m_Height = 0;
+		bool m_ByResize = false; // resized by an resize event.. a hint to make clear that the viewport update can be deferred if wanted
 	};
 
 	struct SCommand_Texture_Create : public SCommand
@@ -537,15 +537,15 @@ public:
 			SCommand(CMD_TEXTURE_CREATE) {}
 
 		// texture information
-		int m_Slot;
+		int m_Slot = 0;
 
-		int m_Width;
-		int m_Height;
-		int m_PixelSize;
-		int m_Format;
-		int m_StoreFormat;
-		int m_Flags;
-		void *m_pData; // will be freed by the command processor
+		int m_Width = 0;
+		int m_Height = 0;
+		int m_PixelSize = 0;
+		int m_Format = 0;
+		int m_StoreFormat = 0;
+		int m_Flags = 0;
+		void *m_pData = nullptr; // will be freed by the command processor
 	};
 
 	struct SCommand_Texture_Update : public SCommand
@@ -554,14 +554,14 @@ public:
 			SCommand(CMD_TEXTURE_UPDATE) {}
 
 		// texture information
-		int m_Slot;
+		int m_Slot = 0;
 
-		int m_X;
-		int m_Y;
-		int m_Width;
-		int m_Height;
-		int m_Format;
-		void *m_pData; // will be freed by the command processor
+		int m_X = 0;
+		int m_Y = 0;
+		int m_Width = 0;
+		int m_Height = 0;
+		int m_Format = 0;
+		void *m_pData = nullptr; // will be freed by the command processor
 	};
 
 	struct SCommand_Texture_Destroy : public SCommand
@@ -570,7 +570,7 @@ public:
 			SCommand(CMD_TEXTURE_DESTROY) {}
 
 		// texture information
-		int m_Slot;
+		int m_Slot = 0;
 	};
 
 	struct SCommand_TextTextures_Create : public SCommand
@@ -579,14 +579,14 @@ public:
 			SCommand(CMD_TEXT_TEXTURES_CREATE) {}
 
 		// texture information
-		int m_Slot;
-		int m_SlotOutline;
+		int m_Slot = 0;
+		int m_SlotOutline = 0;
 
-		int m_Width;
-		int m_Height;
+		int m_Width = 0;
+		int m_Height = 0;
 
-		void *m_pTextData;
-		void *m_pTextOutlineData;
+		void *m_pTextData = nullptr;
+		void *m_pTextOutlineData = nullptr;
 	};
 
 	struct SCommand_TextTextures_Destroy : public SCommand
@@ -595,8 +595,8 @@ public:
 			SCommand(CMD_TEXT_TEXTURES_DESTROY) {}
 
 		// texture information
-		int m_Slot;
-		int m_SlotOutline;
+		int m_Slot = 0;
+		int m_SlotOutline = 0;
 	};
 
 	struct SCommand_TextTexture_Update : public SCommand
@@ -605,13 +605,13 @@ public:
 			SCommand(CMD_TEXT_TEXTURE_UPDATE) {}
 
 		// texture information
-		int m_Slot;
+		int m_Slot = 0;
 
-		int m_X;
-		int m_Y;
-		int m_Width;
-		int m_Height;
-		void *m_pData; // will be freed by the command processor
+		int m_X = 0;
+		int m_Y = 0;
+		int m_Width = 0;
+		int m_Height = 0;
+		void *m_pData = nullptr; // will be freed by the command processor
 	};
 
 	struct SCommand_WindowCreateNtf : public CCommandBuffer::SCommand
@@ -619,7 +619,7 @@ public:
 		SCommand_WindowCreateNtf() :
 			SCommand(CMD_WINDOW_CREATE_NTF) {}
 
-		uint32_t m_WindowID;
+		uint32_t m_WindowID = 0;
 	};
 
 	struct SCommand_WindowDestroyNtf : public CCommandBuffer::SCommand
@@ -627,7 +627,7 @@ public:
 		SCommand_WindowDestroyNtf() :
 			SCommand(CMD_WINDOW_DESTROY_NTF) {}
 
-		uint32_t m_WindowID;
+		uint32_t m_WindowID = 0;
 	};
 
 	//
@@ -784,43 +784,43 @@ class CGraphics_Threaded : public IEngineGraphics
 	};
 
 	CCommandBuffer::SState m_State;
-	IGraphicsBackend *m_pBackend;
-	bool m_GLTileBufferingEnabled;
-	bool m_GLQuadBufferingEnabled;
-	bool m_GLTextBufferingEnabled;
-	bool m_GLQuadContainerBufferingEnabled;
-	bool m_GLHasTextureArrays;
-	bool m_GLUseTrianglesAsQuad;
+	IGraphicsBackend *m_pBackend = nullptr;
+	bool m_GLTileBufferingEnabled = false;
+	bool m_GLQuadBufferingEnabled = false;
+	bool m_GLTextBufferingEnabled = false;
+	bool m_GLQuadContainerBufferingEnabled = false;
+	bool m_GLHasTextureArrays = false;
+	bool m_GLUseTrianglesAsQuad = false;
 
-	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
-	CCommandBuffer *m_pCommandBuffer;
-	unsigned m_CurrentCommandBuffer;
+	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS] = {nullptr};
+	CCommandBuffer *m_pCommandBuffer = nullptr;
+	unsigned m_CurrentCommandBuffer = 0;
 
 	//
-	class IStorage *m_pStorage;
-	class IConsole *m_pConsole;
+	class IStorage *m_pStorage = nullptr;
+	class IConsole *m_pConsole = nullptr;
 
-	int m_CurIndex;
+	int m_CurIndex = 0;
 
 	CCommandBuffer::SVertex m_aVertices[CCommandBuffer::MAX_VERTICES];
 	CCommandBuffer::SVertexTex3DStream m_aVerticesTex3D[CCommandBuffer::MAX_VERTICES];
-	int m_NumVertices;
+	int m_NumVertices = 0;
 
 	CCommandBuffer::SColor m_aColor[4];
 	CCommandBuffer::STexCoord m_aTexture[4];
 
-	bool m_RenderEnable;
+	bool m_RenderEnable = false;
 
-	float m_Rotation;
-	int m_Drawing;
-	bool m_DoScreenshot;
-	char m_aScreenshotName[128];
+	float m_Rotation = 0;
+	int m_Drawing = 0;
+	bool m_DoScreenshot = false;
+	char m_aScreenshotName[128] = {0};
 
 	CTextureHandle m_InvalidTexture;
 
 	std::vector<int> m_vTextureIndices;
-	int m_FirstFreeTexture;
-	int m_TextureMemoryUsage;
+	int m_FirstFreeTexture = 0;
+	int m_TextureMemoryUsage = 0;
 
 	std::vector<uint8_t> m_vSpriteHelper;
 
@@ -837,15 +837,15 @@ class CGraphics_Threaded : public IEngineGraphics
 		SVertexArrayInfo() :
 			m_FreeIndex(-1) {}
 		// keep a reference to it, so we can free the ID
-		int m_AssociatedBufferObjectIndex;
+		int m_AssociatedBufferObjectIndex = 0;
 
-		int m_FreeIndex;
+		int m_FreeIndex = 0;
 	};
 	std::vector<SVertexArrayInfo> m_vVertexArrayInfo;
-	int m_FirstFreeVertexArrayInfo;
+	int m_FirstFreeVertexArrayInfo = 0;
 
 	std::vector<int> m_vBufferObjectIndices;
-	int m_FirstFreeBufferObjectIndex;
+	int m_FirstFreeBufferObjectIndex = 0;
 
 	struct SQuadContainer
 	{
@@ -865,22 +865,22 @@ class CGraphics_Threaded : public IEngineGraphics
 
 		std::vector<SQuad> m_vQuads;
 
-		int m_QuadBufferObjectIndex;
-		int m_QuadBufferContainerIndex;
+		int m_QuadBufferObjectIndex = 0;
+		int m_QuadBufferContainerIndex = 0;
 
-		int m_FreeIndex;
+		int m_FreeIndex = 0;
 
-		bool m_AutomaticUpload;
+		bool m_AutomaticUpload = false;
 	};
 	std::vector<SQuadContainer> m_vQuadContainers;
-	int m_FirstFreeQuadContainer;
+	int m_FirstFreeQuadContainer = 0;
 
 	struct SWindowResizeListener
 	{
 		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
 			m_pFunc(std::move(pFunc)), m_pUser(pUser) {}
-		WINDOW_RESIZE_FUNC m_pFunc;
-		void *m_pUser;
+		WINDOW_RESIZE_FUNC m_pFunc = nullptr;
+		void *m_pUser = nullptr;
 	};
 	std::vector<SWindowResizeListener> m_vResizeListeners;
 
@@ -896,7 +896,7 @@ class CGraphics_Threaded : public IEngineGraphics
 		float c = cosf(m_Rotation);
 		float s = sinf(m_Rotation);
 		float x, y;
-		int i;
+		int i = 0;
 
 		TName *pVertices = pPoints;
 		for(i = 0; i < NumPoints; i++)

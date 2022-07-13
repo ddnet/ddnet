@@ -21,15 +21,15 @@ const char *CRaceDemo::ms_pRaceDemoDir = "demos/auto/race";
 
 struct CDemoItem
 {
-	char m_aName[128];
-	int m_Time;
+	char m_aName[128] = {0};
+	int m_Time = 0;
 };
 
 struct CDemoListParam
 {
-	const CRaceDemo *m_pThis;
-	std::vector<CDemoItem> *m_pvDemos;
-	const char *pMap;
+	const CRaceDemo *m_pThis = nullptr;
+	std::vector<CDemoItem> *m_pvDemos = nullptr;
+	const char *pMap = nullptr;
 };
 
 CRaceDemo::CRaceDemo() :
@@ -186,8 +186,8 @@ void CRaceDemo::StopRecord(int Time)
 
 struct SRaceDemoFetchUser
 {
-	CRaceDemo *m_pThis;
-	CDemoListParam *m_pParam;
+	CRaceDemo *m_pThis = nullptr;
+	CDemoListParam *m_pParam = nullptr;
 };
 
 int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)

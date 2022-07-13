@@ -36,50 +36,50 @@ public:
 	class CClient
 	{
 	public:
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
-		int m_Country;
-		int m_Score;
-		bool m_Player;
+		char m_aName[MAX_NAME_LENGTH] = {0};
+		char m_aClan[MAX_CLAN_LENGTH] = {0};
+		int m_Country = 0;
+		int m_Score = 0;
+		bool m_Player = false;
 
-		int m_FriendState;
+		int m_FriendState = 0;
 	};
 
-	int m_ServerIndex;
+	int m_ServerIndex = 0;
 
-	int m_Type;
-	uint64_t m_ReceivedPackets;
-	int m_NumReceivedClients;
+	int m_Type = 0;
+	uint64_t m_ReceivedPackets = 0;
+	int m_NumReceivedClients = 0;
 
-	int m_NumAddresses;
+	int m_NumAddresses = 0;
 	NETADDR m_aAddresses[MAX_SERVER_ADDRESSES];
 
-	int m_QuickSearchHit;
-	int m_FriendState;
+	int m_QuickSearchHit = 0;
+	int m_FriendState = 0;
 
-	int m_MaxClients;
-	int m_NumClients;
-	int m_MaxPlayers;
-	int m_NumPlayers;
-	int m_Flags;
-	TRISTATE m_Favorite;
-	TRISTATE m_FavoriteAllowPing;
-	bool m_Official;
-	int m_Location;
-	bool m_LatencyIsEstimated;
-	int m_Latency; // in ms
-	int m_HasRank;
-	char m_aGameType[16];
-	char m_aName[64];
-	char m_aMap[MAX_MAP_LENGTH];
-	int m_MapCrc;
-	int m_MapSize;
-	char m_aVersion[32];
-	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
+	int m_MaxClients = 0;
+	int m_NumClients = 0;
+	int m_MaxPlayers = 0;
+	int m_NumPlayers = 0;
+	int m_Flags = 0;
+	TRISTATE m_Favorite = TRISTATE::NONE;
+	TRISTATE m_FavoriteAllowPing = TRISTATE::NONE;
+	bool m_Official = false;
+	int m_Location = 0;
+	bool m_LatencyIsEstimated = false;
+	int m_Latency = 0; // in ms
+	int m_HasRank = 0;
+	char m_aGameType[16] = {0};
+	char m_aName[64] = {0};
+	char m_aMap[MAX_MAP_LENGTH] = {0};
+	int m_MapCrc = 0;
+	int m_MapSize = 0;
+	char m_aVersion[32] = {0};
+	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = {0};
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
-	mutable int m_NumFilteredPlayers;
+	mutable int m_NumFilteredPlayers = 0;
 
-	mutable CUIElement *m_pUIElement;
+	mutable CUIElement *m_pUIElement = nullptr;
 
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);

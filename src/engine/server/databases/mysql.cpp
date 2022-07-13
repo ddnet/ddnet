@@ -112,7 +112,7 @@ private:
 		void operator()(MYSQL_STMT *pStmt) const;
 	};
 
-	char m_aErrorDetail[128];
+	char m_aErrorDetail[128] = {0};
 	void StoreErrorMysql(const char *pContext);
 	void StoreErrorStmt(const char *pContext);
 	bool ConnectImpl();
@@ -134,14 +134,14 @@ private:
 	std::vector<UParameterExtra> m_vStmtParameterExtras;
 
 	// copy of config vars
-	char m_aDatabase[64];
-	char m_aUser[64];
-	char m_aPass[64];
-	char m_aIp[64];
-	int m_Port;
-	bool m_Setup;
+	char m_aDatabase[64] = {0};
+	char m_aUser[64] = {0};
+	char m_aPass[64] = {0};
+	char m_aIp[64] = {0};
+	int m_Port = 0;
+	bool m_Setup = false;
 
-	std::atomic_bool m_InUse;
+	std::atomic_bool m_InUse = false;
 };
 
 void CMysqlConnection::CStmtDeleter::operator()(MYSQL_STMT *pStmt) const

@@ -17,18 +17,18 @@ class CControls : public CComponent
 public:
 	vec2 m_aMousePos[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
-	float m_OldMouseX;
-	float m_OldMouseY;
+	float m_OldMouseX = 0;
+	float m_OldMouseY = 0;
 
-	int m_aAmmoCount[NUM_WEAPONS];
+	int m_aAmmoCount[NUM_WEAPONS] = {0};
 
 	CNetObj_PlayerInput m_aInputData[NUM_DUMMIES];
 	CNetObj_PlayerInput m_aLastData[NUM_DUMMIES];
-	int m_aInputDirectionLeft[NUM_DUMMIES];
-	int m_aInputDirectionRight[NUM_DUMMIES];
-	int m_aShowHookColl[NUM_DUMMIES];
-	int m_LastDummy;
-	int m_OtherFire;
+	int m_aInputDirectionLeft[NUM_DUMMIES] = {0};
+	int m_aInputDirectionRight[NUM_DUMMIES] = {0};
+	int m_aShowHookColl[NUM_DUMMIES] = {0};
+	int m_LastDummy = 0;
+	int m_OtherFire = 0;
 
 	CControls();
 	virtual int Sizeof() const override { return sizeof(*this); }

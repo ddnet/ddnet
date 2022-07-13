@@ -17,9 +17,9 @@ struct SImageByteBuffer
 {
 	SImageByteBuffer(std::vector<uint8_t> *pvBuff) :
 		m_LoadOffset(0), m_pvLoadedImageBytes(pvBuff), m_Err(0) {}
-	size_t m_LoadOffset;
-	std::vector<uint8_t> *m_pvLoadedImageBytes;
-	int m_Err;
+	size_t m_LoadOffset = 0;
+	std::vector<uint8_t> *m_pvLoadedImageBytes = nullptr;
+	int m_Err = 0;
 };
 
 enum

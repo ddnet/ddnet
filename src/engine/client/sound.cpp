@@ -32,33 +32,34 @@ enum
 
 struct CSample
 {
-	short *m_pData;
-	int m_NumFrames;
-	int m_Rate;
-	int m_Channels;
-	int m_LoopStart;
-	int m_LoopEnd;
-	int m_PausedAt;
+	short *m_pData = nullptr;
+	int m_NumFrames = 0;
+	int m_Rate = 0;
+	int m_Channels = 0;
+	int m_LoopStart = 0;
+	int m_LoopEnd = 0;
+	int m_PausedAt = 0;
 };
 
 struct CChannel
 {
-	int m_Vol;
-	int m_Pan;
+	int m_Vol = 0;
+	int m_Pan = 0;
 };
 
 struct CVoice
 {
-	CSample *m_pSample;
-	CChannel *m_pChannel;
-	int m_Age; // increases when reused
-	int m_Tick;
-	int m_Vol; // 0 - 255
-	int m_Flags;
-	int m_X, m_Y;
-	float m_Falloff; // [0.0, 1.0]
+	CSample *m_pSample = nullptr;
+	CChannel *m_pChannel = nullptr;
+	int m_Age = 0; // increases when reused
+	int m_Tick = 0;
+	int m_Vol = 0; // 0 - 255
+	int m_Flags = 0;
+	int m_X = 0;
+	int m_Y = 0;
+	float m_Falloff = 0; // [0.0, 1.0]
 
-	int m_Shape;
+	int m_Shape = 0;
 	union
 	{
 		ISound::CVoiceShapeCircle m_Circle;

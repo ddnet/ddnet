@@ -5,6 +5,7 @@
 
 #include <base/detect.h>
 #include <engine/config.h>
+#include <engine/shared/protocol.h>
 
 #define CONFIG_FILE "settings_ddnet.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
@@ -14,9 +15,9 @@
 class CConfig
 {
 public:
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) int m_##Name;
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) unsigned m_##Name;
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) char m_##Name[Len]; // Flawfinder: ignore
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) int m_##Name = Def;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) unsigned m_##Name = Def;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) char m_##Name[Len] = Def; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
@@ -53,15 +54,15 @@ class CConfigManager : public IConfigManager
 
 	struct CCallback
 	{
-		SAVECALLBACKFUNC m_pfnFunc;
-		void *m_pUserData;
+		SAVECALLBACKFUNC m_pfnFunc = nullptr;
+		void *m_pUserData = nullptr;
 	};
 
-	class IStorage *m_pStorage;
+	class IStorage *m_pStorage = nullptr;
 	IOHANDLE m_ConfigFile;
-	bool m_Failed;
+	bool m_Failed = false;
 	CCallback m_aCallbacks[MAX_CALLBACKS];
-	int m_NumCallbacks;
+	int m_NumCallbacks = 0;
 
 public:
 	CConfigManager();

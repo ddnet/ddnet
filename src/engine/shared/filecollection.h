@@ -17,16 +17,16 @@ class CFileCollection
 		TIMESTAMP_LENGTH = 20, // _YYYY-MM-DD_HH-MM-SS
 	};
 
-	int64_t m_aTimestamps[MAX_ENTRIES];
-	int m_NumTimestamps;
-	int m_MaxEntries;
-	char m_aFileDesc[128];
-	int m_FileDescLength;
-	char m_aFileExt[32];
-	int m_FileExtLength;
-	char m_aPath[IO_MAX_PATH_LENGTH];
-	IStorage *m_pStorage;
-	int64_t m_Remove; // Timestamp we want to remove
+	int64_t m_aTimestamps[MAX_ENTRIES] = {0};
+	int m_NumTimestamps = 0;
+	int m_MaxEntries = 0;
+	char m_aFileDesc[128] = {0};
+	int m_FileDescLength = 0;
+	char m_aFileExt[32] = {0};
+	int m_FileExtLength = 0;
+	char m_aPath[IO_MAX_PATH_LENGTH] = {0};
+	IStorage *m_pStorage = nullptr;
+	int64_t m_Remove = 0; // Timestamp we want to remove
 
 	bool IsFilenameValid(const char *pFilename);
 	int64_t ExtractTimestamp(const char *pTimestring);

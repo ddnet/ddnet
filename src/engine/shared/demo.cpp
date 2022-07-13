@@ -799,7 +799,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		m_Info.m_Info.m_NumTimelineMarkers = clamp<int>(Num, 0, MAX_TIMELINE_MARKERS);
 		for(int i = 0; i < m_Info.m_Info.m_NumTimelineMarkers; i++)
 		{
-			m_Info.m_Info.m_aTimelineMarkers[i] = bytes_be_to_int(m_Info.m_TimelineMarkers.m_aTimelineMarkers[i]);
+			m_Info.m_Info.m_aTimelineMarkers[i] = bytes_be_to_int(m_Info.m_TimelineMarkers.m_aaTimelineMarkers[i]);
 		}
 	}
 

@@ -29,14 +29,14 @@ public:
 	class CServerEntry
 	{
 	public:
-		int64_t m_RequestTime;
-		bool m_RequestIgnoreInfo;
-		int m_GotInfo;
-		bool m_Request64Legacy;
+		int64_t m_RequestTime = 0;
+		bool m_RequestIgnoreInfo = false;
+		int m_GotInfo = 0;
+		bool m_Request64Legacy = false;
 		CServerInfo m_Info;
 
-		CServerEntry *m_pPrevReq; // request list
-		CServerEntry *m_pNextReq;
+		CServerEntry *m_pPrevReq = nullptr; // request list
+		CServerEntry *m_pNextReq = nullptr;
 	};
 
 	struct CNetworkCountry
@@ -46,11 +46,11 @@ public:
 			MAX_SERVERS = 1024
 		};
 
-		char m_aName[256];
-		int m_FlagID;
+		char m_aName[256] = {0};
+		int m_FlagID = 0;
 		NETADDR m_aServers[MAX_SERVERS];
-		char m_aTypes[MAX_SERVERS][32];
-		int m_NumServers;
+		char m_aaTypes[MAX_SERVERS][32] = {{0}};
+		int m_NumServers = 0;
 
 		void Reset()
 		{
@@ -70,10 +70,10 @@ public:
 	struct CNetwork
 	{
 		CNetworkCountry m_aCountries[MAX_COUNTRIES];
-		int m_NumCountries;
+		int m_NumCountries = 0;
 
-		char m_aTypes[MAX_TYPES][32];
-		int m_NumTypes;
+		char m_aaTypes[MAX_TYPES][32] = {{0}};
+		int m_NumTypes = 0;
 	};
 
 	CServerBrowser();
@@ -112,7 +112,7 @@ public:
 	const char *GetCountryName(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
 
 	int NumTypes(int Network) override { return m_aNetworks[Network].m_NumTypes; }
-	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aTypes[Index]; }
+	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aaTypes[Index]; }
 
 	void DDNetFilterAdd(char *pFilter, const char *pName) override;
 	void DDNetFilterRem(char *pFilter, const char *pName) override;
@@ -143,7 +143,7 @@ private:
 	IFriends *m_pFriends = nullptr;
 	IFavorites *m_pFavorites = nullptr;
 	IStorage *m_pStorage = nullptr;
-	char m_aNetVersion[128];
+	char m_aNetVersion[128] = {0};
 
 	bool m_RefreshingHttp = false;
 	IServerBrowserHttp *m_pHttp = nullptr;
@@ -151,38 +151,38 @@ private:
 	const char *m_pHttpPrevBestUrl = nullptr;
 
 	CHeap m_ServerlistHeap;
-	CServerEntry **m_ppServerlist;
-	int *m_pSortedServerlist;
+	CServerEntry **m_ppServerlist = nullptr;
+	int *m_pSortedServerlist = nullptr;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
 	CNetwork m_aNetworks[NUM_NETWORKS];
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
-	json_value *m_pDDNetInfo;
+	json_value *m_pDDNetInfo = nullptr;
 
-	CServerEntry *m_pFirstReqServer; // request list
-	CServerEntry *m_pLastReqServer;
-	int m_NumRequests;
+	CServerEntry *m_pFirstReqServer = nullptr; // request list
+	CServerEntry *m_pLastReqServer = nullptr;
+	int m_NumRequests = 0;
 
 	// used instead of g_Config.br_max_requests to get more servers
-	int m_CurrentMaxRequests;
+	int m_CurrentMaxRequests = 0;
 
-	int m_NeedRefresh;
+	int m_NeedRefresh = 0;
 
-	int m_NumSortedServers;
-	int m_NumSortedServersCapacity;
-	int m_NumServers;
-	int m_NumServerCapacity;
+	int m_NumSortedServers = 0;
+	int m_NumSortedServersCapacity = 0;
+	int m_NumServers = 0;
+	int m_NumServerCapacity = 0;
 
-	int m_Sorthash;
-	char m_aFilterString[64];
-	char m_aFilterGametypeString[128];
+	int m_Sorthash = 0;
+	char m_aFilterString[64] = {0};
+	char m_aFilterGametypeString[128] = {0};
 
-	int m_ServerlistType;
-	int64_t m_BroadcastTime;
-	unsigned char m_aTokenSeed[16];
+	int m_ServerlistType = 0;
+	int64_t m_BroadcastTime = 0;
+	unsigned char m_aTokenSeed[16] = {0};
 
-	bool m_SortOnNextUpdate;
+	bool m_SortOnNextUpdate = false;
 
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);

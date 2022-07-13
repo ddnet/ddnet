@@ -30,7 +30,7 @@ public:
 class CLogarithmicScrollbarScale : public IScrollbarScale
 {
 private:
-	int m_MinAdjustment;
+	int m_MinAdjustment = 0;
 
 public:
 	CLogarithmicScrollbarScale(int MinAdjustment)
@@ -68,15 +68,15 @@ struct SUIExEditBoxProperties
 
 class CUIEx
 {
-	CUI *m_pUI;
-	IInput *m_pInput;
-	ITextRender *m_pTextRender;
-	IKernel *m_pKernel;
-	IGraphics *m_pGraphics;
-	CRenderTools *m_pRenderTools;
+	CUI *m_pUI = nullptr;
+	IInput *m_pInput = nullptr;
+	ITextRender *m_pTextRender = nullptr;
+	IKernel *m_pKernel = nullptr;
+	IGraphics *m_pGraphics = nullptr;
+	CRenderTools *m_pRenderTools = nullptr;
 
-	IInput::CEvent *m_pInputEventsArray;
-	int *m_pInputEventCount;
+	IInput::CEvent *m_pInputEventsArray = nullptr;
+	int *m_pInputEventCount = nullptr;
 
 	bool m_MouseIsPress = false;
 	bool m_HasSelection = false;
@@ -85,7 +85,7 @@ class CUIEx
 	int m_MousePressY = 0;
 	int m_MouseCurX = 0;
 	int m_MouseCurY = 0;
-	bool m_MouseSlow;
+	bool m_MouseSlow = false;
 	int m_CurSelStart = 0;
 	int m_CurSelEnd = 0;
 	const void *m_pSelItem = nullptr;

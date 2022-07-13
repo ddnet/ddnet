@@ -35,42 +35,42 @@ protected:
 		{
 		}
 
-		TWGLuint m_Tex;
-		TWGLuint m_Tex2DArray; // or 3D texture as fallback
-		TWGLuint m_Sampler;
-		TWGLuint m_Sampler2DArray; // or 3D texture as fallback
-		int m_LastWrapMode;
+		TWGLuint m_Tex = 0;
+		TWGLuint m_Tex2DArray = 0; // or 3D texture as fallback
+		TWGLuint m_Sampler = 0;
+		TWGLuint m_Sampler2DArray = 0; // or 3D texture as fallback
+		int m_LastWrapMode = 0;
 
-		int m_MemSize;
+		int m_MemSize = 0;
 
-		int m_Width;
-		int m_Height;
-		int m_RescaleCount;
-		float m_ResizeWidth;
-		float m_ResizeHeight;
+		int m_Width = 0;
+		int m_Height = 0;
+		int m_RescaleCount = 0;
+		float m_ResizeWidth = 0;
+		float m_ResizeHeight = 0;
 	};
 	std::vector<CTexture> m_vTextures;
-	std::atomic<uint64_t> *m_pTextureMemoryUsage;
+	std::atomic<uint64_t> *m_pTextureMemoryUsage = nullptr;
 
 	uint32_t m_CanvasWidth = 0;
 	uint32_t m_CanvasHeight = 0;
 
-	TWGLint m_MaxTexSize;
+	TWGLint m_MaxTexSize = 0;
 
-	bool m_Has2DArrayTextures;
-	bool m_Has2DArrayTexturesAsExtension;
-	TWGLenum m_2DArrayTarget;
-	bool m_Has3DTextures;
-	bool m_HasMipMaps;
-	bool m_HasNPOTTextures;
+	bool m_Has2DArrayTextures = false;
+	bool m_Has2DArrayTexturesAsExtension = false;
+	TWGLenum m_2DArrayTarget = 0;
+	bool m_Has3DTextures = false;
+	bool m_HasMipMaps = false;
+	bool m_HasNPOTTextures = false;
 
-	bool m_HasShaders;
-	int m_LastBlendMode; // avoid all possible opengl state changes
-	bool m_LastClipEnable;
+	bool m_HasShaders = false;
+	int m_LastBlendMode = 0; // avoid all possible opengl state changes
+	bool m_LastClipEnable = false;
 
-	int m_OpenGLTextureLodBIAS;
+	int m_OpenGLTextureLodBIAS = 0;
 
-	bool m_IsOpenGLES;
+	bool m_IsOpenGLES = false;
 
 	bool IsTexturedState(const CCommandBuffer::SState &State);
 
@@ -151,9 +151,9 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 			m_pData = NULL;
 			m_DataSize = 0;
 		}
-		TWGLuint m_BufferObjectID;
-		void *m_pData;
-		size_t m_DataSize;
+		TWGLuint m_BufferObjectID = 0;
+		void *m_pData = nullptr;
+		size_t m_DataSize = 0;
 	};
 
 	std::vector<SBufferObject> m_vBufferObjectIndices;
@@ -193,10 +193,10 @@ protected:
 	void Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand) override;
 #endif
 
-	CGLSLTileProgram *m_pTileProgram;
-	CGLSLTileProgram *m_pTileProgramTextured;
-	CGLSLPrimitiveProgram *m_pPrimitive3DProgram;
-	CGLSLPrimitiveProgram *m_pPrimitive3DProgramTextured;
+	CGLSLTileProgram *m_pTileProgram = nullptr;
+	CGLSLTileProgram *m_pTileProgramTextured = nullptr;
+	CGLSLPrimitiveProgram *m_pPrimitive3DProgram = nullptr;
+	CGLSLPrimitiveProgram *m_pPrimitive3DProgramTextured = nullptr;
 };
 
 class CCommandProcessorFragment_OpenGL3 : public CCommandProcessorFragment_OpenGL2

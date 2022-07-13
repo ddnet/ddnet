@@ -6,7 +6,7 @@
 
 /**
  * Plasma Bullets are projectiles fired from turrets at a specific target
- * 
+ *
  * When hitting a tee, plasma bullets can either freeze or unfreeze the player
  * Also, plasma projectiles can explode on impact. However, the player affected by the explosion is not necessarily the
  * one the plasma collided with, but if the affected player is not a solo player, then the team-mate with the lowest
@@ -23,11 +23,11 @@
 class CPlasma : public CEntity
 {
 	vec2 m_Core;
-	int m_Freeze;
-	bool m_Explosive;
-	int m_ForClientID;
-	int m_EvalTick;
-	int m_LifeTime;
+	int m_Freeze = 0;
+	bool m_Explosive = false;
+	int m_ForClientID = 0;
+	int m_EvalTick = 0;
+	int m_LifeTime = 0;
 
 	void Move();
 	bool HitCharacter(CCharacter *pTarget);

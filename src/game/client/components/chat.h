@@ -28,39 +28,39 @@ class CChat : public CComponent
 
 	struct CLine
 	{
-		int64_t m_Time;
-		float m_aYOffset[2];
-		int m_ClientID;
-		int m_TeamNumber;
-		bool m_Team;
-		bool m_Whisper;
-		int m_NameColor;
-		char m_aName[64];
-		char m_aText[512];
-		bool m_Friend;
-		bool m_Highlighted;
+		int64_t m_Time = 0;
+		float m_aYOffset[2] = {0};
+		int m_ClientID = 0;
+		int m_TeamNumber = 0;
+		bool m_Team = false;
+		bool m_Whisper = false;
+		int m_NameColor = 0;
+		char m_aName[64] = {0};
+		char m_aText[512] = {0};
+		bool m_Friend = false;
+		bool m_Highlighted = false;
 
-		int m_TextContainerIndex;
-		int m_QuadContainerIndex;
+		int m_TextContainerIndex = 0;
+		int m_QuadContainerIndex = 0;
 
-		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
+		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)] = {0};
 		CSkin::SSkinTextures m_RenderSkin;
 		CSkin::SSkinMetrics m_RenderSkinMetrics;
-		bool m_CustomColoredSkin;
+		bool m_CustomColoredSkin = false;
 		ColorRGBA m_ColorBody;
 		ColorRGBA m_ColorFeet;
 
-		bool m_HasRenderTee;
-		float m_TextYOffset;
+		bool m_HasRenderTee = false;
+		float m_TextYOffset = 0;
 
-		int m_TimesRepeated;
+		int m_TimesRepeated = 0;
 	};
 
-	bool m_PrevScoreBoardShowed;
-	bool m_PrevShowChat;
+	bool m_PrevScoreBoardShowed = false;
+	bool m_PrevShowChat = false;
 
 	CLine m_aLines[MAX_LINES];
-	int m_CurrentLine;
+	int m_CurrentLine = 0;
 
 	// chat
 	enum
@@ -75,28 +75,28 @@ class CChat : public CComponent
 		CHAT_NUM,
 	};
 
-	int m_Mode;
-	bool m_Show;
-	bool m_InputUpdate;
-	int m_ChatStringOffset;
-	int m_OldChatStringLength;
-	bool m_CompletionUsed;
-	int m_CompletionChosen;
-	char m_aCompletionBuffer[256];
-	int m_PlaceholderOffset;
-	int m_PlaceholderLength;
+	int m_Mode = 0;
+	bool m_Show = false;
+	bool m_InputUpdate = false;
+	int m_ChatStringOffset = 0;
+	int m_OldChatStringLength = 0;
+	bool m_CompletionUsed = false;
+	int m_CompletionChosen = 0;
+	char m_aCompletionBuffer[256] = {0};
+	int m_PlaceholderOffset = 0;
+	int m_PlaceholderLength = 0;
 	struct CRateablePlayer
 	{
-		int ClientID;
-		int Score;
+		int ClientID = 0;
+		int Score = 0;
 	};
 	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
-	int m_PlayerCompletionListLength;
+	int m_PlayerCompletionListLength = 0;
 
 	struct CCommand
 	{
-		const char *m_pName;
-		const char *m_pParams;
+		const char *m_pName = nullptr;
+		const char *m_pParams = nullptr;
 
 		CCommand() = default;
 		CCommand(const char *pName, const char *pParams) :
@@ -110,18 +110,18 @@ class CChat : public CComponent
 	};
 
 	std::vector<CCommand> m_vCommands;
-	bool m_ReverseTAB;
+	bool m_ReverseTAB = false;
 
 	struct CHistoryEntry
 	{
-		int m_Team;
-		char m_aText[1];
+		int m_Team = 0;
+		char m_aText[1] = {0};
 	};
-	CHistoryEntry *m_pHistoryEntry;
+	CHistoryEntry *m_pHistoryEntry = nullptr;
 	CStaticRingBuffer<CHistoryEntry, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
-	int m_PendingChatCounter;
-	int64_t m_LastChatSend;
-	int64_t m_aLastSoundPlayed[CHAT_NUM];
+	int m_PendingChatCounter = 0;
+	int64_t m_LastChatSend = 0;
+	int64_t m_aLastSoundPlayed[CHAT_NUM] = {0};
 
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);

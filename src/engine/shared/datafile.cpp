@@ -20,7 +20,7 @@ enum
 
 struct CItemEx
 {
-	int m_aUuid[sizeof(CUuid) / 4];
+	int m_aUuid[sizeof(CUuid) / 4] = {0};
 
 	static CItemEx FromUuid(CUuid Uuid)
 	{
@@ -41,61 +41,61 @@ struct CItemEx
 
 struct CDatafileItemType
 {
-	int m_Type;
-	int m_Start;
-	int m_Num;
+	int m_Type = 0;
+	int m_Start = 0;
+	int m_Num = 0;
 };
 
 struct CDatafileItem
 {
-	int m_TypeAndID;
-	int m_Size;
+	int m_TypeAndID = 0;
+	int m_Size = 0;
 };
 
 struct CDatafileHeader
 {
-	char m_aID[4];
-	int m_Version;
-	int m_Size;
-	int m_Swaplen;
-	int m_NumItemTypes;
-	int m_NumItems;
-	int m_NumRawData;
-	int m_ItemSize;
-	int m_DataSize;
+	char m_aID[4] = {0};
+	int m_Version = 0;
+	int m_Size = 0;
+	int m_Swaplen = 0;
+	int m_NumItemTypes = 0;
+	int m_NumItems = 0;
+	int m_NumRawData = 0;
+	int m_ItemSize = 0;
+	int m_DataSize = 0;
 };
 
 struct CDatafileData
 {
-	int m_NumItemTypes;
-	int m_NumItems;
-	int m_NumRawData;
-	int m_ItemSize;
-	int m_DataSize;
-	char m_aStart[4];
+	int m_NumItemTypes = 0;
+	int m_NumItems = 0;
+	int m_NumRawData = 0;
+	int m_ItemSize = 0;
+	int m_DataSize = 0;
+	char m_aStart[4] = {0};
 };
 
 struct CDatafileInfo
 {
-	CDatafileItemType *m_pItemTypes;
-	int *m_pItemOffsets;
-	int *m_pDataOffsets;
-	int *m_pDataSizes;
+	CDatafileItemType *m_pItemTypes = nullptr;
+	int *m_pItemOffsets = nullptr;
+	int *m_pDataOffsets = nullptr;
+	int *m_pDataSizes = nullptr;
 
-	char *m_pItemStart;
-	char *m_pDataStart;
+	char *m_pItemStart = nullptr;
+	char *m_pDataStart = nullptr;
 };
 
 struct CDatafile
 {
 	IOHANDLE m_File;
 	SHA256_DIGEST m_Sha256;
-	unsigned m_Crc;
+	unsigned m_Crc = 0;
 	CDatafileInfo m_Info;
 	CDatafileHeader m_Header;
-	int m_DataStartOffset;
-	char **m_ppDataPtrs;
-	char *m_pData;
+	int m_DataStartOffset = 0;
+	char **m_ppDataPtrs = nullptr;
+	char *m_pData = nullptr;
 };
 
 bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int StorageType)

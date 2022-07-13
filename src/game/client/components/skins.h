@@ -13,7 +13,7 @@ class CSkins : public CComponent
 public:
 	class CGetPngFile : public CHttpRequest
 	{
-		CSkins *m_pSkins;
+		CSkins *m_pSkins = nullptr;
 
 	protected:
 		virtual int OnCompletion(int State) override;
@@ -25,9 +25,9 @@ public:
 
 	struct CDownloadSkin
 	{
-		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
-		char m_aPath[IO_MAX_PATH_LENGTH];
-		char m_aName[24];
+		std::shared_ptr<CSkins::CGetPngFile> m_pTask = nullptr;
+		char m_aPath[IO_MAX_PATH_LENGTH] = {0};
+		char m_aName[24] = {0};
 
 		CDownloadSkin(CDownloadSkin &&Other) = default;
 		CDownloadSkin() = default;
@@ -57,7 +57,7 @@ public:
 private:
 	std::vector<CSkin> m_vSkins;
 	std::vector<CDownloadSkin> m_vDownloadSkins;
-	char m_aEventSkinPrefix[24];
+	char m_aEventSkinPrefix[24] = {0};
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	int LoadSkin(const char *pName, const char *pPath, int DirType);
