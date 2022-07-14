@@ -155,6 +155,11 @@ void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorld
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
 	m_pBecomingHotItem = 0;
+	if(!Enabled())
+	{
+		m_pHotItem = nullptr;
+		m_pActiveItem = nullptr;
+	}
 }
 
 bool CUI::MouseInside(const CUIRect *pRect) const
