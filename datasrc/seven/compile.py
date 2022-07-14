@@ -145,10 +145,10 @@ def main():
 
 	class CNetObjHandler
 	{
-		const char *m_pMsgFailedOn;
-		char m_aMsgData[1024];
-		const char *m_pObjFailedOn;
-		int m_NumObjFailures;
+		const char *m_pMsgFailedOn = nullptr;
+		char m_aMsgData[1024] = {0};
+		const char *m_pObjFailedOn = nullptr;
+		int m_NumObjFailures = 0;
 		bool CheckInt(const char *pErrorMsg, int Value, int Min, int Max);
 		bool CheckFlag(const char *pErrorMsg, int Value, int Mask);
 

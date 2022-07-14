@@ -85,11 +85,11 @@ def gen_network_header():
 	print("""
 class CNetObjHandler
 {
-	const char *m_pMsgFailedOn;
-	const char *m_pObjFailedOn;
-	const char *m_pObjCorrectedOn;
-	char m_aUnpackedData[1024 * 2];
-	int m_NumObjCorrections;
+	const char *m_pMsgFailedOn = nullptr;
+	const char *m_pObjFailedOn = nullptr;
+	const char *m_pObjCorrectedOn = nullptr;
+	char m_aUnpackedData[1024 * 2] = {0};
+	int m_NumObjCorrections = 0;
 	int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
 
 	static const char *ms_apObjNames[];
@@ -274,10 +274,10 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 		m_pObjFailedOn = "(type out of range)";
 		break;
 	}
-	
+
 	if(pUnpacker->Error())
 		m_pObjFailedOn = "(unpack error)";
-	
+
 	if(m_pObjFailedOn)
 		return 0;
 	m_pObjFailedOn = "";
@@ -307,10 +307,10 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		m_pMsgFailedOn = "(type out of range)";
 		break;
 	}
-	
+
 	if(pUnpacker->Error())
 		m_pMsgFailedOn = "(unpack error)";
-	
+
 	if(m_pMsgFailedOn)
 		return 0;
 	m_pMsgFailedOn = "";

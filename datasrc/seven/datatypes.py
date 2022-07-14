@@ -101,8 +101,8 @@ class Array(BaseType):
 			raise "bah"
 		self.items += [instance]
 	def EmitDeclaration(self, name):
-		return ["int m_Num%s;"%(FixCasing(name)),
-			"%s *%s;"%(self.TypeName(), FormatName("[]", name))]
+		return ["int m_Num%s = 0;"%(FixCasing(name)),
+			"%s *%s = nullptr;"%(self.TypeName(), FormatName("[]", name))]
 	def EmitPreDefinition(self, target_name):
 		BaseType.EmitPreDefinition(self, target_name)
 
@@ -133,6 +133,8 @@ class Int(BaseType):
 		self.value = value
 	def Set(self, value):
 		self.value = value
+	def EmitDeclaration(self, name):
+		return ["%s %s = 0;"%(self.TypeName(), FormatName(self.TypeName(), name))]
 	def EmitDefinition(self, _name):
 		return ["%d"%self.value]
 		#return ["%d /* %s */"%(self.value, self._target_name)]
@@ -143,6 +145,8 @@ class Float(BaseType):
 		self.value = value
 	def Set(self, value):
 		self.value = value
+	def EmitDeclaration(self, name):
+		return ["%s %s = 0;"%(self.TypeName(), FormatName(self.TypeName(), name))]
 	def EmitDefinition(self, _name):
 		return ["%ff"%self.value]
 		#return ["%d /* %s */"%(self.value, self._target_name)]
@@ -153,6 +157,8 @@ class String(BaseType):
 		self.value = value
 	def Set(self, value):
 		self.value = value
+	def EmitDeclaration(self, name):
+		return ["%s %s = nullptr;"%(self.TypeName(), FormatName(self.TypeName(), name))]
 	def EmitDefinition(self, _name):
 		return ['"'+self.value+'"']
 
@@ -162,6 +168,8 @@ class Pointer(BaseType):
 		self.target = target
 	def Set(self, target):
 		self.target = target
+	def EmitDeclaration(self, name):
+		return ["%s %s = nullptr;"%(self.TypeName(), FormatName(self.TypeName(), name))]
 	def EmitDefinition(self, _name):
 		return ["&"+self.target.TargetName()]
 
@@ -286,7 +294,7 @@ class NetVariable:
 	def __init__(self, name, default=None):
 		self.name = name
 		self.default = None if default is None else str(default)
-	def emit_declaration(self):
+	def emit_declaration(self, _array=0):
 		return []
 	def emit_validate(self):
 		return []
@@ -298,24 +306,24 @@ class NetVariable:
 		return []
 
 class NetString(NetVariable):
-	def emit_declaration(self):
-		return ["const char *%s;"%self.name]
+	def emit_declaration(self, array=0):
+		return ["const char *%s = "%self.name + "{"*array + "nullptr" + "}"*array + ";"]
 	def emit_unpack(self):
 		return ["pMsg->%s = pUnpacker->GetString();" % self.name]
 	def emit_pack(self):
 		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetStringStrict(NetVariable):
-	def emit_declaration(self):
-		return ["const char *%s;"%self.name]
+	def emit_declaration(self, array=0):
+		return ["const char *%s = "%self.name + "{"*array + "nullptr" + "}"*array + ";"]
 	def emit_unpack(self):
 		return ["pMsg->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);" % self.name]
 	def emit_pack(self):
 		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetIntAny(NetVariable):
-	def emit_declaration(self):
-		return ["int %s;"%self.name]
+	def emit_declaration(self, array=0):
+		return ["int %s = "%self.name + "{"*array + "0" + "}"*array + ";"]
 	def emit_unpack(self):
 		if self.default is None:
 			return ["pMsg->%s = pUnpacker->GetInt();" % self.name]
@@ -367,9 +375,9 @@ class NetArray(NetVariable):
 		self.var = var
 		self.size = size
 		self.name = self.base_name + "[%d]"%self.size
-	def emit_declaration(self):
+	def emit_declaration(self, array=0):
 		self.var.name = self.name
-		return self.var.emit_declaration()
+		return self.var.emit_declaration(array+1)
 	def emit_validate(self):
 		lines = []
 		for i in range(self.size):
