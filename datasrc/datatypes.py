@@ -288,7 +288,7 @@ class NetMessage(NetObject):
 		extra = []
 		extra += ["\tint MsgID() const { return %s; }" % self.enum_name]
 		extra += ["\t"]
-		extra += ["\tbool Pack(CMsgPacker *pPacker)"]
+		extra += ["\tbool Pack(CMsgPacker *pPacker) const"]
 		extra += ["\t{"]
 		#extra += ["\t\tmsg_pack_start(%s, flags);"%self.enum_name]
 		for v in self.variables:

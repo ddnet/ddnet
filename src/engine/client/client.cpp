@@ -2501,6 +2501,8 @@ void CClient::LoadDDNetInfo()
 			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
 		}
 	}
+	const json_value &WarnPngliteIncompatibleImages = DDNetInfo["warn-pnglite-incompatible-images"];
+	Graphics()->WarnPngliteIncompatibleImages(WarnPngliteIncompatibleImages.type == json_boolean && (bool)WarnPngliteIncompatibleImages);
 }
 
 int CClient::ConnectNetTypes() const
@@ -3125,6 +3127,10 @@ void CClient::Run()
 		m_pEditor->Save(arg);
 	return;*/
 
+	m_ServerBrowser.OnInit();
+	// loads the existing ddnet info file if it exists
+	LoadDDNetInfo();
+
 	// load data
 	if(!LoadData())
 		return;
@@ -3135,7 +3141,6 @@ void CClient::Run()
 	}
 
 	GameClient()->OnInit();
-	m_ServerBrowser.OnInit();
 
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1, 1.0f));
 	if(GIT_SHORTREV_HASH)
@@ -3168,9 +3173,7 @@ void CClient::Run()
 	InitChecksum();
 	m_pConsole->InitChecksum(ChecksumData());
 
-	// loads the existing ddnet info file if it exists
-	LoadDDNetInfo();
-	// but still request the new one from server
+	// request the new ddnet info from server if already past the welcome dialog
 	if(g_Config.m_ClShowWelcome)
 		g_Config.m_ClShowWelcome = 0;
 	else
