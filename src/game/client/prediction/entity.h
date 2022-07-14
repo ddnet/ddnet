@@ -35,6 +35,8 @@ protected:
 	int m_ObjType;
 
 public:
+	int GetID() const { return m_ID; }
+
 	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 	virtual ~CEntity();
 
@@ -64,7 +66,6 @@ public:
 	CEntity *m_pParent;
 	CEntity *m_pChild;
 	CEntity *NextEntity() { return m_pNextTypeEntity; }
-	int ID() { return m_ID; }
 	void Keep()
 	{
 		m_SnapTicks = 0;
