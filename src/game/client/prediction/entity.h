@@ -48,6 +48,7 @@ public:
 	class CCollision *Collision() { return GameWorld()->Collision(); }
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
+	const vec2 &GetPos() const { return m_Pos; }
 	float GetProximityRadius() const { return m_ProximityRadius; }
 
 	void Destroy() { delete this; }
