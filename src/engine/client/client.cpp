@@ -3904,22 +3904,28 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return "error loading demo";
 
 	// load map
-	int Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
-	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-	const char *pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
+	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
+	int Crc = pMapInfo->m_Crc;
+	SHA256_DIGEST Sha = pMapInfo->m_Sha256;
+	const char *pError = LoadMapSearch(pMapInfo->m_aName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)
 	{
 		if(!m_DemoPlayer.ExtractMap(Storage()))
 			return pError;
 
 		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-		pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
+		pError = LoadMapSearch(pMapInfo->m_aName, &Sha, Crc);
 		if(pError)
 		{
 			DisconnectWithReason(pError);
 			return pError;
 		}
 	}
+
+	// setup current info
+	str_copy(m_CurrentServerInfo.m_aMap, pMapInfo->m_aName);
+	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
+	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
 
 	GameClient()->OnConnected();
 

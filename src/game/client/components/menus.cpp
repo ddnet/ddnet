@@ -1492,7 +1492,7 @@ int CMenus::Render()
 				else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_GETTING_READY)
 				{
 					pTitle = Localize("Connected");
-					pExtraText = Localize("Sending intial client info");
+					pExtraText = Localize("Sending initial client info");
 				}
 			}
 		}
