@@ -226,7 +226,7 @@ const CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr) const
 void CFavorites::RemoveEntry(CEntry *pEntry)
 {
 	// Replace the entry
-	int Index = pEntry - &m_aEntries[0];
+	int Index = pEntry - m_aEntries.data();
 	*pEntry = m_aEntries[m_aEntries.size() - 1];
 	m_aEntries.pop_back();
 	if(Index != (int)m_aEntries.size())
