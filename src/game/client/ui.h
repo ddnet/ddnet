@@ -187,6 +187,10 @@ struct SLabelProperties
 	bool m_EnableWidthCheck = true;
 };
 
+class CButtonContainer
+{
+};
+
 class CUI
 {
 	bool m_Enabled;

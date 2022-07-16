@@ -803,13 +803,13 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		static int s_ActivePage = 0;
 
-		static int s_CountriesButton = 0;
+		static CButtonContainer s_CountriesButton;
 		if(DoButton_MenuTab(&s_CountriesButton, Localize("Countries"), s_ActivePage == 0, &Button, CUI::CORNER_TL))
 		{
 			s_ActivePage = 0;
 		}
 
-		static int s_TypesButton = 0;
+		static CButtonContainer s_TypesButton;
 		if(DoButton_MenuTab(&s_TypesButton, Localize("Types"), s_ActivePage == 1, &Button2, CUI::CORNER_TR))
 		{
 			s_ActivePage = 1;
@@ -1006,7 +1006,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		}
 	}
 
-	static int s_ClearButton = 0;
+	static CButtonContainer s_ClearButton;
 	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &ResetButton))
 	{
 		g_Config.m_BrFilterString[0] = 0;
@@ -1342,7 +1342,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
 	if(m_FriendlistSelectedIndex != -1)
 	{
-		static int s_RemoveButton = 0;
+		static CButtonContainer s_RemoveButton;
 		if(DoButton_Menu(&s_RemoveButton, Localize("Remove"), 0, &Button))
 			m_Popup = POPUP_REMOVE_FRIEND;
 	}
@@ -1371,7 +1371,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
-		static int s_AddButton = 0;
+		static CButtonContainer s_AddButton;
 		if(DoButton_Menu(&s_AddButton, Localize("Add Friend"), 0, &Button))
 		{
 			m_pClient->Friends()->AddFriend(s_aName, s_aClan);
@@ -1437,15 +1437,15 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ms_ColorTabbarActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		ms_ColorTabbarInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
 
-		static int s_FiltersTab = 0;
+		static CButtonContainer s_FiltersTab;
 		if(DoButton_MenuTab(&s_FiltersTab, Localize("Filter"), ToolboxPage == 0, &TabButton0, CUI::CORNER_BL, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 0;
 
-		static int s_InfoTab = 0;
+		static CButtonContainer s_InfoTab;
 		if(DoButton_MenuTab(&s_InfoTab, Localize("Info"), ToolboxPage == 1, &TabButton1, 0, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 1;
 
-		static int s_FriendsTab = 0;
+		static CButtonContainer s_FriendsTab;
 		if(DoButton_MenuTab(&s_FriendsTab, Localize("Friends"), ToolboxPage == 2, &TabButton2, CUI::CORNER_BR, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 2;
 

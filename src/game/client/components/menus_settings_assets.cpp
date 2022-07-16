@@ -394,19 +394,19 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	Page4Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page4Tab, &Page5Tab);
 	Page5Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page5Tab, &Page6Tab);
 
-	static int s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
+	static CButtonContainer s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, CUI::CORNER_L, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, CUI::CORNER_L, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_ENTITIES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_GAME], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_GAME], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_GAME;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_EMOTICONS], Localize("Emoticons"), s_CurCustomTab == ASSETS_TAB_EMOTICONS, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_EMOTICONS], Localize("Emoticons"), s_CurCustomTab == ASSETS_TAB_EMOTICONS, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_EMOTICONS;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_PARTICLES], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_PARTICLES], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_PARTICLES;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_HUD], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_HUD], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, CUI::CORNER_R, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, CUI::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_EXTRAS;
 
 	auto LoadStartTime = time_get_nanoseconds();
@@ -667,7 +667,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &ReloadButton);
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
-	static int s_AssetsDirID = 0;
+	static CButtonContainer s_AssetsDirID;
 	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
@@ -695,7 +695,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	static int s_AssetsReloadBtnID = 0;
+	static CButtonContainer s_AssetsReloadBtnID;
 	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, nullptr, CUI::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		ClearCustomItems(s_CurCustomTab);
