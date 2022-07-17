@@ -130,8 +130,8 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	int HeaderSize = NET_PACKETHEADERSIZE;
 	if(Sixup)
 	{
-		HeaderSize += 4;
-		mem_copy(&aBuffer[3], &SecurityToken, 4);
+		HeaderSize += sizeof(SecurityToken);
+		mem_copy(&aBuffer[3], &SecurityToken, sizeof(SecurityToken));
 	}
 	else if(SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
@@ -221,8 +221,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if(Sixup)
 		{
-			mem_copy(pSecurityToken, &pBuffer[1], 4);
-			mem_copy(pResponseToken, &pBuffer[5], 4);
+			mem_copy(pSecurityToken, &pBuffer[1], sizeof(*pSecurityToken));
+			mem_copy(pResponseToken, &pBuffer[5], sizeof(*pResponseToken));
 		}
 
 		pPacket->m_Flags = NET_PACKETFLAG_CONNLESS;
@@ -260,7 +260,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 				Flags |= NET_PACKETFLAG_COMPRESSION;
 			pPacket->m_Flags = Flags;
 
-			mem_copy(pSecurityToken, &pBuffer[3], 4);
+			mem_copy(pSecurityToken, &pBuffer[3], sizeof(*pSecurityToken));
 		}
 
 		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
