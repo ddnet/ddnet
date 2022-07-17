@@ -197,10 +197,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 {
 	// check the size
 	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
-	{
-		//dbg_msg("", "packet too small, %d", Size);
 		return -1;
-	}
 
 	// log the data
 	if(ms_DataLogRecv)
@@ -217,9 +214,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
-		if(Size < 1)
-			return -1;
-
 		Sixup = (pBuffer[0] & 0x3) == 1;
 		int Offset = Sixup ? 9 : 6;
 		if(Size < Offset)
