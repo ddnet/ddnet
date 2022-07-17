@@ -544,7 +544,7 @@ public:
 	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
-	static int IsSeqInBackroom(int Seq, int Ack);
+	static bool IsSeqInBackroom(int Seq, int Ack);
 };
 
 #endif

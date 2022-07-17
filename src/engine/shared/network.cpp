@@ -339,23 +339,23 @@ unsigned char *CNetChunkHeader::Unpack(unsigned char *pData, int Split)
 	return pData + 2;
 }
 
-int CNetBase::IsSeqInBackroom(int Seq, int Ack)
+bool CNetBase::IsSeqInBackroom(int Seq, int Ack)
 {
 	int Bottom = (Ack - NET_MAX_SEQUENCE / 2);
 	if(Bottom < 0)
 	{
 		if(Seq <= Ack)
-			return 1;
+			return true;
 		if(Seq >= (Bottom + NET_MAX_SEQUENCE))
-			return 1;
+			return true;
 	}
 	else
 	{
 		if(Seq <= Ack && Seq >= Bottom)
-			return 1;
+			return true;
 	}
 
-	return 0;
+	return false;
 }
 
 IOHANDLE CNetBase::ms_DataLogSent = 0;
