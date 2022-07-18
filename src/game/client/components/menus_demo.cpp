@@ -34,9 +34,9 @@ int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
-int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_Sprite(CButtonContainer *pButtonContainer, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), Corners, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
 	Graphics()->QuadsBegin();
 	if(!Checked)
@@ -46,7 +46,7 @@ int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Chec
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
-	return UI()->DoButtonLogic(pID, Checked, pRect);
+	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
 bool CMenus::DemoFilterChat(const void *pData, int Size, void *pUser)
@@ -110,11 +110,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		static int s_RemoveChat = 0;
 
-		static int s_ButtonAbort = 0;
+		static CButtonContainer s_ButtonAbort;
 		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 			m_DemoPlayerState = DEMOPLAYER_NONE;
 
-		static int s_ButtonOk = 0;
+		static CButtonContainer s_ButtonOk;
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 		{
 			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
@@ -392,7 +392,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	// combined play and pause button
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_PlayPauseButton = 0;
+	static CButtonContainer s_PlayPauseButton;
 	if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, pInfo->m_Paused ? SPRITE_DEMOBUTTON_PLAY : SPRITE_DEMOBUTTON_PAUSE, false, &Button, CUI::CORNER_ALL))
 	{
 		if(pInfo->m_Paused)
@@ -409,7 +409,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_ResetButton = 0;
+	static CButtonContainer s_ResetButton;
 	if(DoButton_Sprite(&s_ResetButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP, false, &Button, CUI::CORNER_ALL))
 	{
 		DemoPlayer()->Pause();
@@ -419,14 +419,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// slowdown
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SlowDownButton = 0;
+	static CButtonContainer s_SlowDownButton;
 	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 		DecreaseDemoSpeed = true;
 
 	// fastforward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_FastForwardButton = 0;
+	static CButtonContainer s_FastForwardButton;
 	if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
 		IncreaseDemoSpeed = true;
 
@@ -439,21 +439,21 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// slice begin button
 	ButtonBar.VSplitLeft(Margins * 10, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SliceBeginButton = 0;
+	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_Sprite(&s_SliceBeginButton, IMAGE_DEMOBUTTONS2, SPRITE_DEMOBUTTON_SLICE_BEGIN, 0, &Button, CUI::CORNER_ALL))
 		Client()->DemoSliceBegin();
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SliceEndButton = 0;
+	static CButtonContainer s_SliceEndButton;
 	if(DoButton_Sprite(&s_SliceEndButton, IMAGE_DEMOBUTTONS2, SPRITE_DEMOBUTTON_SLICE_END, 0, &Button, CUI::CORNER_ALL))
 		Client()->DemoSliceEnd();
 
 	// slice save button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SliceSaveButton = 0;
+	static CButtonContainer s_SliceSaveButton;
 	if(DoButton_Sprite(&s_SliceSaveButton, IMAGE_FILEICONS, SPRITE_FILE_DEMO2, 0, &Button, CUI::CORNER_ALL))
 	{
 		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
@@ -473,7 +473,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// toggle keyboard shortcuts button
 	ButtonBar.VSplitRight(Margins * 3, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
-	static int s_KeyboardShortcutsButton = 0;
+	static CButtonContainer s_KeyboardShortcutsButton;
 	int Sprite = g_Config.m_ClDemoKeyboardShortcuts ? SPRITE_DEMOBUTTON_SHORTCUTS_ENABLED : SPRITE_DEMOBUTTON_SHORTCUTS_DISABLED;
 	if(DoButton_Sprite(&s_KeyboardShortcutsButton, IMAGE_DEMOBUTTONS2, Sprite, 0, &Button, CUI::CORNER_ALL))
 	{
@@ -1203,7 +1203,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Activated = true;
 	}
 
-	static int s_RefreshButton = 0;
+	static CButtonContainer s_RefreshButton;
 	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		DemolistPopulate();
@@ -1217,7 +1217,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			FetchAllHeaders();
 	}
 
-	static int s_PlayButton = 0;
+	static CButtonContainer s_PlayButton;
 	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		if(m_DemolistSelectedIndex >= 0)
@@ -1252,7 +1252,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 	}
 
-	static int s_DirectoryButtonID = 0;
+	static CButtonContainer s_DirectoryButtonID;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
@@ -1266,7 +1266,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	if(!m_DemolistSelectedIsDir)
 	{
-		static int s_DeleteButton = 0;
+		static CButtonContainer s_DeleteButton;
 		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
@@ -1277,7 +1277,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 		}
 
-		static int s_RenameButton = 0;
+		static CButtonContainer s_RenameButton;
 		if(DoButton_Menu(&s_RenameButton, Localize("Rename"), 0, &RenameRect))
 		{
 			if(m_DemolistSelectedIndex >= 0)
@@ -1290,7 +1290,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 
 #if defined(CONF_VIDEORECORDER)
-		static int s_RenderButton = 0;
+		static CButtonContainer s_RenderButton;
 		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
