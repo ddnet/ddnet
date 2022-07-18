@@ -19,18 +19,18 @@ public:
 	void AllEntries(const CEntry **ppEntries, int *pNumEntries) override;
 
 private:
-	std::vector<CEntry> m_aEntries;
+	std::vector<CEntry> m_vEntries;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
 	CEntry *Entry(const NETADDR &Addr);
 	const CEntry *Entry(const NETADDR &Addr) const;
-	// `pEntry` must come from the `m_aEntries` vector.
+	// `pEntry` must come from the `m_vEntries` vector.
 	void RemoveEntry(CEntry *pEntry);
 };
 
 void CFavorites::OnConfigSave(IConfigManager *pConfigManager)
 {
-	for(const auto &Entry : m_aEntries)
+	for(const auto &Entry : m_vEntries)
 	{
 		if(Entry.m_NumAddrs > 1)
 		{
@@ -161,10 +161,10 @@ void CFavorites::Add(const NETADDR *pAddrs, int NumAddrs)
 	for(int i = 0; i < NewEntry.m_NumAddrs; i++)
 	{
 		NewEntry.m_aAddrs[i] = pAddrs[i];
-		m_ByAddr[pAddrs[i]] = m_aEntries.size();
+		m_ByAddr[pAddrs[i]] = m_vEntries.size();
 	}
 	NewEntry.m_AllowPing = false;
-	m_aEntries.push_back(NewEntry);
+	m_vEntries.push_back(NewEntry);
 }
 
 void CFavorites::AllowPing(const NETADDR *pAddrs, int NumAddrs, bool AllowPing)
@@ -199,8 +199,8 @@ void CFavorites::Remove(const NETADDR *pAddrs, int NumAddrs)
 
 void CFavorites::AllEntries(const CEntry **ppEntries, int *pNumEntries)
 {
-	*ppEntries = m_aEntries.data();
-	*pNumEntries = m_aEntries.size();
+	*ppEntries = m_vEntries.data();
+	*pNumEntries = m_vEntries.size();
 }
 
 CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr)
@@ -210,7 +210,7 @@ CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr)
 	{
 		return nullptr;
 	}
-	return &m_aEntries[Entry->second];
+	return &m_vEntries[Entry->second];
 }
 
 const CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr) const
@@ -220,16 +220,16 @@ const CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr) const
 	{
 		return nullptr;
 	}
-	return &m_aEntries[Entry->second];
+	return &m_vEntries[Entry->second];
 }
 
 void CFavorites::RemoveEntry(CEntry *pEntry)
 {
 	// Replace the entry
-	int Index = pEntry - m_aEntries.data();
-	*pEntry = m_aEntries[m_aEntries.size() - 1];
-	m_aEntries.pop_back();
-	if(Index != (int)m_aEntries.size())
+	int Index = pEntry - m_vEntries.data();
+	*pEntry = m_vEntries[m_vEntries.size() - 1];
+	m_vEntries.pop_back();
+	if(Index != (int)m_vEntries.size())
 	{
 		for(int i = 0; i < pEntry->m_NumAddrs; i++)
 		{
