@@ -22,7 +22,7 @@
 #	T tee & NRK & Chairn	2022-03-23 20:52:52
 #	Nouaa			2022-05-14 23:00:00
 #	Chairn			2022-06-16 19:00:00
-# Sucre       2022-07-19 20:36:00
+#	Sucre			2022-07-19 20:36:00
 
 ##### /authors #####
 
@@ -1502,7 +1502,7 @@ Getting game info
 == Obtention des informations de la partie
 
 Requesting to join the game
-== 
+== Demande de rejoindre la partie
 
 Sending intial client info
 == 
@@ -1517,10 +1517,10 @@ Loading ghost files
 == 
 
 Loading skin files
-== Chargement des fichiers de skins
+== Chargement des fichiers de skin
 
 Appearance
-== Appparance
+== Apparence
 
 Name Plate
 == 
@@ -1529,25 +1529,25 @@ Hook Collisions
 == 
 
 Show health, shields and ammo
-== 
+== Monter la vie, bouclier et munitions
 
 DDRace HUD
-== 
+== HUD DDrace
 
 Show client IDs in scoreboard
 == 
 
 Show DDRace HUD
-== Montrer l'UI DDrace
+== Montrer l'HUD DDrace
 
 Show jumps indicator
-== Montrer l'indicateur de saut
+== Montrer l'indicateur de sauts
 
 Show hook strength indicator
 == 
 
 Hook collision line
-== Montrer la collision du grapin
+== Ligne de collision du grapin
 
 Hook collision line width
 == 
@@ -1577,4 +1577,4 @@ Loading race demo files
 == 
 
 Loading sound files
-== Chargements des fichiers sonores
+== Chargement des fichiers sonores
