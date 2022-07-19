@@ -580,7 +580,7 @@ void CCharacter::Tick()
 	m_PrevPos = m_Core.m_Pos;
 }
 
-void CCharacter::TickDefered()
+void CCharacter::TickDeferred()
 {
 	m_Core.Move();
 	m_Core.Quantize();

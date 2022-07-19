@@ -94,10 +94,10 @@ public: // TODO: Maybe make protected
 	virtual void Tick() {}
 
 	/*
-		Function: TickDefered
+		Function: TickDeferred
 			Called after all entities Tick() function has been called.
 	*/
-	virtual void TickDefered() {}
+	virtual void TickDeferred() {}
 
 	/*
 		Function: TickPaused

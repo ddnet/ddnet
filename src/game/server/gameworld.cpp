@@ -280,7 +280,7 @@ void CGameWorld::Tick()
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				pEnt->TickDefered();
+				pEnt->TickDeferred();
 				pEnt = m_pNextTraverseEntity;
 			}
 	}

@@ -764,7 +764,7 @@ void CCharacter::Tick()
 	m_PrevPos = m_Core.m_Pos;
 }
 
-void CCharacter::TickDefered()
+void CCharacter::TickDeferred()
 {
 	// advance the dummy
 	{

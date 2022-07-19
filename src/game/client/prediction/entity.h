@@ -53,7 +53,7 @@ public:
 
 	void Destroy() { delete this; }
 	virtual void Tick() {}
-	virtual void TickDefered() {}
+	virtual void TickDeferred() {}
 
 	bool GameLayerClipped(vec2 CheckPos);
 	float m_ProximityRadius;

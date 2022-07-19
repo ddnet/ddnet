@@ -37,7 +37,7 @@ public:
 	static const int ms_PhysSize = 28;
 
 	void Tick() override;
-	void TickDefered() override;
+	void TickDeferred() override;
 
 	bool IsGrounded();
 
