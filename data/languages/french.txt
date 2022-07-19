@@ -1529,10 +1529,10 @@ Hook Collisions
 == 
 
 Show health, shields and ammo
-== Monter la vie, bouclier et munitions
+== Monter la vie, bouclier et les munitions
 
 DDRace HUD
-== HUD DDrace
+== HUD DDRace
 
 Show client IDs in scoreboard
 == 
