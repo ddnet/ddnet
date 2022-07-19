@@ -40,6 +40,10 @@ dutch
 == Nederlands
 == 528
 
+esperanto
+== Esperanto
+== -1
+
 finnish
 == Suomi
 == 246

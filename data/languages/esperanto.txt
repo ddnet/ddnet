@@ -1,0 +1,1550 @@
+##### translated strings #####
+
+Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
+Replay feature is disabled!
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+ unsupported
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Connected
+== Konektita
+
+Loading map file from storage
+== Ŝargas mapdosieron el la diskaparato
+
+Loading DDNet Client
+== Ŝargas DDNet
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Warning
+== Averto
+
+All
+== Ĉio
+
+Team
+== Teamo
+
+Chat
+== Diskutejo
+
+-Page %d-
+== -Paĝo %d-
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Game paused
+== Paŭzata ludo
+
+Sudden Death
+== 
+
+Warmup
+== Trejnado
+
+Connection Problems...
+== Konekta problemoj...
+
+Please balance teams!
+== Bonvolu ekvilibrigi teamojn!
+
+%ds left
+== Restas %ds
+
+Reason:
+== Kialo:
+
+Vote yes
+== Voĉi jes
+
+Vote no
+== Voĉi ne
+
+Position:
+== 
+
+Speed:
+== Rapideco:
+
+Angle:
+== 
+
+Spectate
+== Rigardi
+
+Free-View
+== Libera vidado
+
+Server best:
+== 
+
+Personal best:
+== 
+
+Uploading map data to GPU
+== 
+
+Reset
+== 
+
+News
+== Novaĵoj
+
+Demos
+== 
+
+Internet
+== Internet
+
+LAN
+== LAN
+
+Favorites
+== Favoratoj
+
+Game
+== Ludo
+
+Players
+== Ludantoj
+
+Server info
+== Servila informoj
+
+Browser
+== Retumilo
+
+Ghost
+== Fantomo
+
+Call vote
+== Voĉi
+
+Connecting to
+== Konektas al
+
+Abort
+== Nuligi
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Downloading map
+== Elŝutas mapon
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Disconnected
+== Malkonektita
+
+Ok
+== Okej
+
+Reconnect in %d sec
+== Rekonektiĝos post %d sek
+
+The server is running a non-standard tuning on a pure game type.
+== 
+
+Delete demo
+== 
+
+Are you sure that you want to delete the demo?
+== 
+
+Rename demo
+== 
+
+Render demo
+== 
+
+Replace video
+== 
+
+File already exists, do you want to overwrite it?
+== 
+
+Remove friend
+== 
+
+Are you sure that you want to remove the player from your friends list?
+== 
+
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
+Password incorrect
+== 
+
+Try again
+== Reprovi
+
+Quit
+== Eliri
+
+Are you sure that you want to quit?
+== Ĉu vi certas eliri?
+
+Disconnect
+== Malkonektiĝi
+
+Are you sure that you want to disconnect?
+== Ĉu vi certas malkonektiĝi?
+
+Disconnect Dummy
+== Malkonektigi pupon
+
+Are you sure that you want to disconnect your dummy?
+== Ĉu vi certas malkonektiĝi vian pupon?
+
+Welcome to DDNet
+== Bonvenon en DDNet
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nickname below.
+== Bonvolu tajpi vian kromnomon.
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
+== 
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 
+
+Quit anyway?
+== Eliri tamen
+
+No
+== Ne
+
+Yes
+== Jes
+
+Password
+== Pasvorto
+
+%i minute left
+== Restas %i minuto
+
+%i minutes left
+== Restas %i minutoj
+
+%i second left
+== Restas %i sekundo
+
+%i seconds left
+== Restas %i sekundoj
+
+Country / Region
+== Lando / Regiono
+
+Error
+== Eraro
+
+Unable to delete the demo
+== 
+
+Unable to rename the demo
+== 
+
+New name:
+== Nova nomo:
+
+Destination file already exist
+== 
+
+Error loading demo
+== 
+
+Show chat
+== Montri la diskutejon
+
+Use sounds
+== Uzi sonojn
+
+Speed
+== Rapideco
+
+Show ingame HUD
+== 
+
+Video name:
+== 
+
+Join Tutorial Server
+== Aliĝi al la lernila servilo
+
+Skip Tutorial
+== Pasi la lernilo
+
+Show DDNet map finishes in server browser
+== 
+
+transmits your player name to info2.ddnet.tw
+== sendas vian ludantnomon al info2.ddnet.tw
+
+Nickname
+== Kromnomo
+
+Theme
+== Temo
+
+Loading menu images
+== 
+
+AFR
+== AFR
+
+ASI
+== AZI
+
+AUS
+== AŬS
+
+EUR
+== EŬR
+
+NA
+== NA
+
+SA
+== SA
+
+CHN
+== ĈIN
+
+Type
+== Tipo
+
+Getting server list from master server
+== Elŝutas servilaro de ĉefa servilo
+
+No servers found
+== Neniuj serviloj trovitaj
+
+No servers match your filter criteria
+== 
+
+Search
+== Serĉi
+
+Exclude
+== Ekskludi
+
+%d of %d servers
+== %d de %d serviloj
+
+%d of %d server
+== %d de %d servilo
+
+%d players
+== %d ludantoj
+
+%d player
+== %d ludanto
+
+Server address:
+== Retadreso de servilo:
+
+Refresh
+== Aktualigi
+
+Refreshing...
+== Aktualas...
+
+Connect
+== Konektiĝi
+
+Server filter
+== 
+
+Has people playing
+== 
+
+Count players only
+== Nur nombri ludantojn
+
+Server not full
+== 
+
+Show friends only
+== Nur montri amikojn
+
+No password
+== Neniu pasvorto
+
+Strict gametype filter
+== 
+
+Game types:
+== Ludtipoj:
+
+Player country:
+== 
+
+Filter connecting players
+== 
+
+Indicate map finish
+== 
+
+Unfinished map
+== 
+
+Countries
+== Landoj
+
+Types
+== 
+
+Reset filter
+== 
+
+Server details
+== 
+
+Favorite
+== Favorati
+
+Leak IP
+== 
+
+Scoreboard
+== 
+
+Friends
+== Amikoj
+
+Remove
+== 
+
+Name
+== Nomo
+
+Clan
+== Klano
+
+Add Friend
+== Aldoni amikon
+
+Filter
+== Filtri
+
+Info
+== 
+
+Select a name
+== Elekti nomon
+
+Please use a different name
+== Bonvolu uzi malsaman nomon
+
+Remove chat
+== Malmontri la diskutejon
+
+Close
+== Fermi
+
+Demofile: %s
+== 
+
+Loading demo files
+== 
+
+Parent Folder
+== 
+
+Folder
+== Dosierujo
+
+Invalid Demo
+== 
+
+Demo details
+== 
+
+Created:
+== 
+
+Type:
+== 
+
+Length:
+== 
+
+Version:
+== 
+
+Markers:
+== 
+
+Map:
+== Mapo:
+
+Size:
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Crc:
+== 
+
+Netversion:
+== 
+
+Demo
+== 
+
+Markers
+== 
+
+Length
+== 
+
+Date
+== 
+
+Fetch Info
+== 
+
+Open
+== Malfermi
+
+[Demo browser]
+Play
+== Legi
+
+Demos directory
+== 
+
+Delete
+== Forigi
+
+Rename
+== Renomigi
+
+Render
+== 
+
+Connect Dummy
+== Konektigi pupon
+
+Connecting dummy
+== Pupo konektas
+
+Stop record
+== 
+
+Record demo
+== 
+
+Join red
+== 
+
+Join blue
+== 
+
+Join game
+== Aliĝi al la ludo
+
+Kill
+== Mortiĝi
+
+Pause
+== Paŭzi
+
+Player options
+== Ludantaj agordoj
+
+Player
+== Ludanto
+
+Address
+== Retadreso
+
+Ping
+== Latenco
+
+Version
+== Versio
+
+Game info
+== Ludaj informoj
+
+Game type
+== Ludtipo
+
+Map
+== Mapo
+
+Score limit
+== 
+
+Time limit
+== 
+
+MOTD
+== MDLT
+
+Change settings
+== Ŝanĝi agordojn
+
+Kick player
+== Elirigi ludanton
+
+Move player to spectators
+== Rigardantigi ludanton
+
+Force vote
+== Forci voĉon
+
+Vote description:
+== 
+
+Vote command:
+== 
+
+Add
+== Aldoni
+
+Loading ghost files
+== 
+
+Time
+== Tempo
+
+Reload
+== 
+
+Deactivate
+== 
+
+Activate
+== 
+
+Save
+== 
+
+Dynamic Camera
+== 
+
+Smooth Dynamic Camera
+== 
+
+Switch weapon on pickup
+== 
+
+Switch weapon when out of ammo
+== 
+
+Client
+== 
+
+Skip the main menu
+== 
+
+Automatically record demos
+== 
+
+Max demos
+== 
+
+Automatically take game over screenshot
+== 
+
+Max Screenshots
+== 
+
+Refresh Rate
+== 
+
+Settings file
+== 
+
+Config directory
+== 
+
+Themes directory
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+Max CSVs
+== 
+
+Dummy settings
+== Agordoj de la pupo
+
+Your skin
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download skins
+== 
+
+Download community skins
+== 
+
+Vanilla skins only
+== 
+
+Fat skins (DDFat)
+== 
+
+Skin prefix
+== 
+
+Choose default eyes when joining a server
+== 
+
+Custom colors
+== 
+
+Body
+== 
+
+Feet
+== 
+
+Skins
+== 
+
+Skin Database
+== 
+
+Skins directory
+== Dosierujo de haŭtoj
+
+Loading skin files
+== 
+
+Move left
+== 
+
+Move right
+== 
+
+Jump
+== Salti
+
+Fire
+== 
+
+Hook
+== 
+
+Hook collisions
+== 
+
+Zoom in
+== 
+
+Zoom out
+== 
+
+Default zoom
+== 
+
+Show others
+== 
+
+Show all
+== 
+
+Toggle dyncam
+== 
+
+Toggle dummy
+== 
+
+Toggle ghost
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Hammer
+== Martelo
+
+Pistol
+== Pistolo
+
+Shotgun
+== 
+
+Grenade
+== 
+
+Laser
+== 
+
+Next weapon
+== 
+
+Prev. weapon
+== 
+
+Team chat
+== 
+
+Converse
+== 
+
+Emoticon
+== 
+
+Spectator mode
+== 
+
+Spectate next
+== 
+
+Spectate previous
+== 
+
+Console
+== 
+
+Remote console
+== 
+
+Screenshot
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
+== 
+
+Show HUD
+== 
+
+Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Controls
+== 
+
+Mouse
+== Muso
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Movement
+== 
+
+Weapon
+== Batalilo
+
+Reset to defaults
+== 
+
+Voting
+== 
+
+Dummy
+== Pupo
+
+Miscellaneous
+== 
+
+Current
+== 
+
+Display Modes
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Windowed fullscreen
+== 
+
+Desktop fullscreen
+== 
+
+Fullscreen
+== 
+
+V-Sync
+== 
+
+may cause delay
+== 
+
+Screen
+== Ekrano
+
+FSAA samples
+== 
+
+High Detail
+== 
+
+Allows maps to render with more detail
+== 
+
+Use high DPI
+== 
+
+UI Color
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Play background music
+== 
+
+Mute when not active
+== 
+
+Enable game sounds
+== 
+
+Enable gun sound
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable server message sound
+== 
+
+Enable regular chat sound
+== 
+
+Enable team chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Threaded sound loading
+== 
+
+Sample rate
+== 
+
+Sound volume
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Map sound volume
+== 
+
+Background music volume
+== 
+
+Language
+== Lingvo
+
+General
+== Ĝenerala
+
+Appearance
+== Aspekto
+
+Graphics
+== Grafikoj
+
+Sound
+== Sono
+
+DDNet
+== DDNet
+
+Assets
+== Bildoj
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+You must restart the game for all settings to take effect.
+== 
+
+Hue
+== 
+
+Sat.
+== 
+
+Lht.
+== 
+
+Alpha
+== 
+
+HUD
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+Show name plates
+== 
+
+Show kill messages
+== 
+
+Show score
+== 
+
+Show votes window after voting
+== 
+
+DDRace HUD
+== 
+
+Use DDRace Scoreboard
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show names in chat in team colors
+== 
+
+Show only chat messages from friends
+== 
+
+Use old chat style
+== 
+
+Messages
+== 
+
+System message
+== 
+
+Highlighted message
+== 
+
+Team message
+== 
+
+Friend message
+== 
+
+Normal message
+== 
+
+Client message
+== 
+
+Preview
+== 
+
+Name plates size
+== 
+
+Show clan above name plates
+== 
+
+Clan plates size
+== 
+
+Use team colors for name plates
+== 
+
+Show hook strength indicator
+== 
+
+Show other players' key presses
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Show other players' hook collision lines
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Save the best demo of each race
+== 
+
+Enable replays
+== 
+
+Default length: %d
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Show ghost
+== 
+
+Save ghost
+== 
+
+Gameplay
+== 
+
+Overlay entities
+== 
+
+Size
+== 
+
+Show text entities
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Show others (own team only)
+== 
+
+Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: predict other players
+== 
+
+AntiPing: predict weapons
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Old mouse mode
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Use current map as background
+== 
+
+Show tiles layers from BG map
+== 
+
+Regular Background Color
+== 
+
+Try fast HTTP map download first
+== 
+
+New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 
+
+DDNet %s is available:
+== 
+
+Update now
+== 
+
+Updating...
+== 
+
+DDNet Client updated!
+== 
+
+No updates available
+== 
+
+Check now
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Extras
+== 
+
+Loading assets
+== 
+
+Assets directory
+== 
+
+Discord
+== Diskordo
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Learn
+== Lerni
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Website
+== Retejo
+
+Settings
+== Agordoj
+
+Stop server
+== 
+
+Run server
+== 
+
+Server executable not found, can't run server
+== 
+
+Editor
+== Redaktilo
+
+[Start menu]
+Play
+== Ludi
+
+DDNet %s is out!
+== DDNet %s estas disponebla!
+
+Downloading %s:
+== Elŝutas %s:
+
+Update failed! Check log...
+== 
+
+Restart
+== 
+
+Loading race demo files
+== 
+
+Time limit: %d min
+== 
+
+Round
+== 
+
+Spectators
+== Rigardantoj
+
+Game over
+== 
+
+Score
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Manual
+== 
+
+Race
+== 
+
+Auto
+== 
+
+Replay
+== 
+
+Draw!
+== 
+
+%s wins!
+== 
+
+Red team wins!
+== 
+
+Blue team wins!
+== 
+
+Red team
+== Ruĝa teamo
+
+Blue team
+== Blua teamo
+
+Loading sound files
+== 
+
+Follow
+== 
+
+Frags
+== 
+
+Deaths
+== Mortoj
+
+Suicides
+== 
+
+Ratio
+== 
+
+Net
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Best
+== 
+
+Grabs
+== 
+
+1 new mention
+== 
+
+%d new mentions
+== 
+
+9+ new mentions
+== 
