@@ -52,6 +52,7 @@ public:
 	float GetProximityRadius() const { return m_ProximityRadius; }
 
 	void Destroy() { delete this; }
+	virtual void PreTick() {}
 	virtual void Tick() {}
 	virtual void TickDeferred() {}
 
