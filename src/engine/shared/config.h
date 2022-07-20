@@ -6,6 +6,7 @@
 #include <base/detect.h>
 #include <engine/config.h>
 
+#define TCONFIG_FILE "settings_tclient.cfg"
 #define CONFIG_FILE "settings_ddnet.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
@@ -70,6 +71,8 @@ public:
 	void Reset() override;
 	void Reset(const char *pScriptName) override;
 	bool Save() override;
+	bool TSave() override;
+
 	CConfig *Values() override { return &g_Config; }
 
 	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;

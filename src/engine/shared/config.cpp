@@ -131,6 +131,76 @@ bool CConfigManager::Save()
 		dbg_msg("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
 		return false;
 	}
+	TSave();
+	return true;
+}
+
+bool CConfigManager::TSave()
+{
+	if(!m_pStorage || !g_Config.m_ClSaveSettings)
+		return true;
+
+	char aConfigFileTmp[IO_MAX_PATH_LENGTH];
+	m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), TCONFIG_FILE), IOFLAG_WRITE, IStorage::TYPE_SAVE);
+
+	if(!m_ConfigFile)
+	{
+		dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
+		return false;
+	}
+
+	m_Failed = false;
+
+	char aLineBuf[1024 * 2];
+	char aEscapeBuf[1024 * 2];
+
+#define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
+	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+	{ \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); \
+		WriteLine(aLineBuf); \
+	}
+#define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) \
+	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+	{ \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); \
+		WriteLine(aLineBuf); \
+	}
+#define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) \
+	if((flags)&CFGFLAG_SAVE && str_comp(g_Config.m_##Name, def) != 0) \
+	{ \
+		EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); \
+		WriteLine(aLineBuf); \
+	}
+
+#include "././game/tater_variables.h"
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+
+	if(io_sync(m_ConfigFile) != 0)
+	{
+		m_Failed = true;
+	}
+
+	if(io_close(m_ConfigFile) != 0)
+		m_Failed = true;
+
+	m_ConfigFile = 0;
+
+	if(m_Failed)
+	{
+		dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
+		return false;
+	}
+
+	if(!m_pStorage->RenameFile(aConfigFileTmp, TCONFIG_FILE, IStorage::TYPE_SAVE))
+	{
+		dbg_msg("config", "ERROR: renaming %s to " TCONFIG_FILE " failed", aConfigFileTmp);
+		return false;
+	}
 
 	return true;
 }

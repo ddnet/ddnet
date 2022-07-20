@@ -1851,6 +1851,7 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.h
   tuning.h
   variables.h
+  tater_variables.h
   version.h
   voting.h
 )

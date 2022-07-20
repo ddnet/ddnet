@@ -4606,6 +4606,14 @@ int main(int argc, const char **argv)
 		pConsole->ExecuteFile(CONFIG_FILE);
 	}
 
+	// execute tclient config file
+	File = pStorage->OpenFile(TCONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
+	{
+		io_close(File);
+		pConsole->ExecuteFile(TCONFIG_FILE);
+	}
+
 	// execute autoexec file
 	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
