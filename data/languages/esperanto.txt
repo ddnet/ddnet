@@ -82,10 +82,10 @@ Reason:
 == Kialo:
 
 Vote yes
-== Voĉi jes
+== Voĉdoni jes
 
 Vote no
-== Voĉi ne
+== Voĉdoni ne
 
 Position:
 == 
@@ -97,7 +97,7 @@ Angle:
 == 
 
 Spectate
-== Rigardi
+== Spekti
 
 Free-View
 == Libera vidado
@@ -145,7 +145,7 @@ Ghost
 == Fantomo
 
 Call vote
-== Voĉi
+== Voĉdoni
 
 Connecting to
 == Konektas al
@@ -256,19 +256,19 @@ Please enter your nickname below.
 == Bonvolu tajpi vian kromnomon.
 
 Existing Player
-== 
+== Ekzista ludanto
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Vian kromnomon '%s' estas jam uzata (%d poentoj). Ĉu vi tamen volas uzi ĝin?
 
 Checking for existing player with your name
-== 
+== Kontrolas ekzistan ludanton kun via nomo
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Ĉu vi certas malkonektiĝi kaj movi al alia servilo?
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 
+== Estas nesavata mapo en la redaktilo, vi eble volas savi ĝin antaŭ eliri la ludon.
 
 Quit anyway?
 == Eliri tamen
@@ -382,7 +382,7 @@ No servers found
 == Neniuj serviloj trovitaj
 
 No servers match your filter criteria
-== 
+== Neniuj serviloj kun via filtro
 
 Search
 == Serĉi
@@ -532,7 +532,7 @@ Length:
 == 
 
 Version:
-== 
+== Versio:
 
 Markers:
 == 
@@ -602,10 +602,10 @@ Record demo
 == 
 
 Join red
-== 
+== Aliĝi al ruĝa taemo
 
 Join blue
-== 
+== Aliĝi al blua teamo
 
 Join game
 == Aliĝi al la ludo
@@ -656,16 +656,16 @@ Kick player
 == Elirigi ludanton
 
 Move player to spectators
-== Rigardantigi ludanton
+== Movi ludanton al spektantoj
 
 Force vote
-== Forci voĉon
+== Forci voĉdonon
 
 Vote description:
-== 
+== Voĉdona priskribo:
 
 Vote command:
-== 
+== Voĉdona komando:
 
 Add
 == Aldoni
@@ -776,10 +776,10 @@ Feet
 == 
 
 Skins
-== 
+== Haŭtoj
 
 Skin Database
-== 
+== Datumbazo de haŭtoj
 
 Skins directory
 == Dosierujo de haŭtoj
@@ -788,19 +788,19 @@ Loading skin files
 == 
 
 Move left
-== 
+== Movi maldekstren
 
 Move right
-== 
+== Movi dekstren
 
 Jump
 == Salti
 
 Fire
-== 
+== Pafi
 
 Hook
-== 
+== Hoki
 
 Hook collisions
 == 
@@ -815,10 +815,10 @@ Default zoom
 == 
 
 Show others
-== 
+== Montri aliaj
 
 Show all
-== 
+== Montri ĉiuj
 
 Toggle dyncam
 == 
@@ -848,7 +848,7 @@ Grenade
 == 
 
 Laser
-== 
+== Lasero
 
 Next weapon
 == 
@@ -1024,7 +1024,7 @@ Renderer
 == 
 
 default
-== 
+== defaŭlta
 
 custom
 == 
@@ -1033,7 +1033,7 @@ Graphics cards
 == 
 
 auto
-== 
+== aŭtomata
 
 Play background music
 == 
@@ -1105,10 +1105,10 @@ Assets
 == Bildoj
 
 DDNet Client needs to be restarted to complete update!
-== 
+== Vi devas relanci DDNet por kompletigi la ĝisdatigon.
 
 You must restart the game for all settings to take effect.
-== 
+== Vi devas relanci la ludon por aktivigi ĉiujn agordojn.
 
 Hue
 == 
@@ -1165,7 +1165,7 @@ Show jumps indicator
 == 
 
 Show dummy actions
-== 
+== Montri la agojn de la pupo
 
 Show player position
 == 
@@ -1201,19 +1201,19 @@ Highlighted message
 == 
 
 Team message
-== 
+== Mesaĝo de teamo
 
 Friend message
-== 
+== Mesaĝo de amiko
 
 Normal message
-== 
+== Normala mesaĝo
 
 Client message
 == 
 
 Preview
-== 
+== Antaŭrigardilo
 
 Name plates size
 == 
@@ -1261,7 +1261,7 @@ Something hookable
 == 
 
 A Tee
-== 
+== Tejo
 
 Normal Color
 == 
@@ -1366,13 +1366,13 @@ Chat command (e.g. showall 1)
 == 
 
 DDNet %s is available:
-== 
+== DDNet %s estas disponebla:
 
 Update now
-== 
+== Ĝisdatigi nun
 
 Updating...
-== 
+== Ĝisdatiĝas...
 
 DDNet Client updated!
 == 
@@ -1381,7 +1381,7 @@ No updates available
 == 
 
 Check now
-== 
+== Kontroli nun
 
 Entities
 == 
@@ -1414,7 +1414,7 @@ https://wiki.ddnet.tw/
 == https://wiki.ddnet.tw/
 
 Tutorial
-== 
+== Lernilo
 
 Can't find a Tutorial server
 == 
@@ -1426,10 +1426,10 @@ Settings
 == Agordoj
 
 Stop server
-== 
+== Halti servilon
 
 Run server
-== 
+== Lanci servilon
 
 Server executable not found, can't run server
 == 
@@ -1451,7 +1451,7 @@ Update failed! Check log...
 == 
 
 Restart
-== 
+== Relanci
 
 Loading race demo files
 == 
@@ -1463,7 +1463,7 @@ Round
 == 
 
 Spectators
-== Rigardantoj
+== Spektantoj
 
 Game over
 == 
@@ -1511,7 +1511,7 @@ Loading sound files
 == 
 
 Follow
-== 
+== Sekvi
 
 Frags
 == 
@@ -1541,10 +1541,10 @@ Grabs
 == 
 
 1 new mention
-== 
+== 1 nova mencio
 
 %d new mentions
-== 
+== %d novaj mencioj
 
 9+ new mentions
-== 
+== 9+ novaj mencioj
