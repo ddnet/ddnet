@@ -1847,11 +1847,11 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex_types.h
   prng.cpp
   prng.h
+  tater_variables.h
   teamscore.cpp
   teamscore.h
   tuning.h
   variables.h
-  tater_variables.h
   version.h
   voting.h
 )
@@ -2053,12 +2053,12 @@ if(CLIENT)
     components/motd.h
     components/nameplates.cpp
     components/nameplates.h
+    components/outlines.cpp
+    components/outlines.h
     components/particles.cpp
     components/particles.h
     components/player_indicator.cpp
     components/player_indicator.h
-    components/outlines.cpp
-    components/outlines.h
     components/players.cpp
     components/players.h
     components/race_demo.cpp
