@@ -30,6 +30,10 @@ MACRO_CONFIG_INT(ClDelayHammer, tc_kog_hammer_delay, 0, 0, 1, CFGFLAG_CLIENT | C
 
 MACRO_CONFIG_INT(ClShowCenterLines, tc_show_center, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Draws lines to show the center of your screen/hitbox")
 
+MACRO_CONFIG_INT(ClShowSkinName, tc_skin_name, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows skin names in nameplates, good for finding missing skins")
+
+
+
 //MACRO_CONFIG_INT(ClFreeGhost, tc_freeghost, 0, 0, 1, CFGFLAG_CLIENT , "")
 
 //Outline Variables

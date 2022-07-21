@@ -3076,14 +3076,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		if(g_Config.m_ClFixKoGSpec)
 			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpecNames, ("Show names of spectating players on KoG"), &g_Config.m_ClFixKoGSpecNames, &MainView, LineMargin);
 
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
-    
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, ("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &MainView, LineMargin);
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -3202,6 +3202,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			}
 		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnfreezeDelayHelper, ("Remove prediction margin in freeze"), &g_Config.m_ClUnfreezeDelayHelper, &MainView, LineMargin);
+		if(g_Config.m_ClUnfreezeDelayHelper)
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -3212,6 +3213,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			g_Config.m_ClUnfreezeHelperLimit = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
 		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
+		if(g_Config.m_ClRemoveAnti)
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -3221,6 +3223,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
 		}
+		if(g_Config.m_ClRemoveAnti)
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(20.0f, &Button, &MainView);
