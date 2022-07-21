@@ -94,15 +94,18 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 			}
 			if(pItem->m_Version < 2 || pItem->m_Synchronized)
 			{
-				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
-										    0,
-										    (CurTick - MinTick),
-										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-									    TickToNanoSeconds.count())) +
-					 MinTick * TickToNanoSeconds;
+				if(pThis->m_pClient->m_Snap.m_pGameInfoObj)
+				{
+					// get the lerp of the current tick and prev
+					int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+					int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+					s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
+											    0,
+											    (CurTick - MinTick),
+											    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+										    TickToNanoSeconds.count())) +
+						 MinTick * TickToNanoSeconds;
+				}
 			}
 			else
 			{
