@@ -792,7 +792,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		{
 			// on demo playback use local id from snap directly,
 			// since m_aLocalIDs isn't valid there
-			if(LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName))
+			if(m_pClient->m_Snap.m_LocalClientID >= 0 && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName))
 				Highlighted = true;
 		}
 
