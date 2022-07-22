@@ -3,6 +3,7 @@
 #ifndef ENGINE_SHARED_SNAPSHOT_H
 #define ENGINE_SHARED_SNAPSHOT_H
 
+#include <cstddef>
 #include <stdint.h>
 
 // CSnapshot
@@ -26,6 +27,9 @@ class CSnapshot
 
 	int *Offsets() const { return (int *)(this + 1); }
 	char *DataStart() const { return (char *)(Offsets() + m_NumItems); }
+
+	size_t OffsetSize() const { return sizeof(int) * m_NumItems; }
+	size_t TotalSize() const { return sizeof(CSnapshot) + OffsetSize() + m_DataSize; }
 
 public:
 	enum
@@ -53,6 +57,7 @@ public:
 
 	unsigned Crc();
 	void DebugDump();
+	bool IsValid(size_t ActualSize) const;
 };
 
 // CSnapshotDelta

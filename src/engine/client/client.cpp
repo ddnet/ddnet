@@ -2053,7 +2053,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					const int SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
-						dbg_msg("client", "delta unpack failed!=%d", SnapSize);
+						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
+						return;
+					}
+					if(!pTmpBuffer3->IsValid(SnapSize))
+					{
+						dbg_msg("client", "snapshot invalid. SnapSize=%d, DeltaSize=%d", SnapSize, DeltaSize);
 						return;
 					}
 
@@ -2097,7 +2102,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					const int AltSnapSize = UnpackAndValidateSnapshot(pTmpBuffer3, pAltSnapBuffer);
 					if(AltSnapSize < 0)
 					{
-						dbg_msg("client", "unpack snapshot and validate failed!=%d", AltSnapSize);
+						dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
 						return;
 					}
 
@@ -2581,16 +2586,8 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 {
 	// update ticks, they could have changed
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-	CSnapshotStorage::CHolder *pTemp;
 	m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
 	m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
-
-	// handle snapshots
-	pTemp = m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = pTemp;
-
-	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
 
 	// create a verified and unpacked snapshot
 	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
@@ -2598,9 +2595,13 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	const int AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
 	if(AltSnapSize < 0)
 	{
-		dbg_msg("client", "unpack snapshot and validate failed!=%d", AltSnapSize);
+		dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
 		return;
 	}
+
+	// handle snapshots after validation
+	std::swap(m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV], m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]);
+	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
 	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
 
 	GameClient()->OnNewSnapshot();

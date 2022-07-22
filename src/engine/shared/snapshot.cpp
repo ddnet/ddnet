@@ -122,6 +122,26 @@ void CSnapshot::DebugDump()
 	}
 }
 
+bool CSnapshot::IsValid(size_t ActualSize) const
+{
+	// validate total size
+	if(ActualSize < sizeof(CSnapshot) || m_NumItems < 0 || m_DataSize < 0 || ActualSize != TotalSize())
+		return false;
+
+	// validate item offsets
+	const int *pOffsets = Offsets();
+	for(int Index = 0; Index < m_NumItems; Index++)
+		if(pOffsets[Index] < 0 || pOffsets[Index] > m_DataSize)
+			return false;
+
+	// validate item sizes
+	for(int Index = 0; Index < m_NumItems; Index++)
+		if(GetItemSize(Index) < 0) // the offsets must be validated before using this
+			return false;
+
+	return true;
+}
+
 // CSnapshotDelta
 
 struct CItemList

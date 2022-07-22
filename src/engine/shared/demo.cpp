@@ -614,20 +614,10 @@ void CDemoPlayer::DoTick()
 		{
 			// process delta snapshot
 			static char s_aNewsnap[CSnapshot::MAX_SIZE];
+			CSnapshot *pNewsnap = (CSnapshot *)s_aNewsnap;
+			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, s_aData, DataSize);
 
-			GotSnapshot = 1;
-
-			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)s_aNewsnap, s_aData, DataSize);
-
-			if(DataSize >= 0)
-			{
-				if(m_pListener)
-					m_pListener->OnDemoPlayerSnapshot(s_aNewsnap, DataSize);
-
-				m_LastSnapshotDataSize = DataSize;
-				mem_copy(m_aLastSnapshotData, s_aNewsnap, DataSize);
-			}
-			else
+			if(DataSize < 0)
 			{
 				if(m_pConsole)
 				{
@@ -636,16 +626,47 @@ void CDemoPlayer::DoTick()
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
+			else if(!pNewsnap->IsValid(DataSize))
+			{
+				if(m_pConsole)
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "snapshot delta invalid. DataSize=%d", DataSize);
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+				}
+			}
+			else
+			{
+				if(m_pListener)
+					m_pListener->OnDemoPlayerSnapshot(s_aNewsnap, DataSize);
+
+				m_LastSnapshotDataSize = DataSize;
+				mem_copy(m_aLastSnapshotData, s_aNewsnap, DataSize);
+				GotSnapshot = 1;
+			}
 		}
 		else if(ChunkType == CHUNKTYPE_SNAPSHOT)
 		{
 			// process full snapshot
-			GotSnapshot = 1;
+			CSnapshot *pSnap = (CSnapshot *)s_aData;
+			if(!pSnap->IsValid(DataSize))
+			{
+				if(m_pConsole)
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "snapshot invalid. DataSize=%d", DataSize);
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+				}
+			}
+			else
+			{
+				GotSnapshot = 1;
 
-			m_LastSnapshotDataSize = DataSize;
-			mem_copy(m_aLastSnapshotData, s_aData, DataSize);
-			if(m_pListener)
-				m_pListener->OnDemoPlayerSnapshot(s_aData, DataSize);
+				m_LastSnapshotDataSize = DataSize;
+				mem_copy(m_aLastSnapshotData, s_aData, DataSize);
+				if(m_pListener)
+					m_pListener->OnDemoPlayerSnapshot(s_aData, DataSize);
+			}
 		}
 		else
 		{
