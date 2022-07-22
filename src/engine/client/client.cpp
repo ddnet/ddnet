@@ -2155,14 +2155,24 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
 						{
+							CNetMsg_Cl_Say TOMsgp;
+							TOMsgp.m_Team = 0;
+							char aBufTO[256];
+						    str_format(aBufTO, sizeof(aBufTO), "/timeout %s", m_aTimeoutCodes[Conn]);
+							TOMsgp.m_pMessage = aBufTO;
+							CMsgPacker PackerTO(TOMsgp.MsgID(), false);
+							TOMsgp.Pack(&PackerTO);
+							SendMsg(Conn, &PackerTO, MSGFLAG_VITAL);
+
 							CNetMsg_Cl_Say MsgP;
 							MsgP.m_Team = 0;
 							char aBuf[128];
 							char aBufMsg[256];
-							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
-								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
-							else
-								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+							//if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
+							//	str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
+							//else
+							//	str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+							str_format(aBufMsg, sizeof(aBufMsg), "/mc");
 
 							if(g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClRunOnJoinConsole)
 							{
