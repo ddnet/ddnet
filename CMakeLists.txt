@@ -2065,6 +2065,8 @@ if(CLIENT)
     components/race_demo.h
     components/scoreboard.cpp
     components/scoreboard.h
+    components/skinprofiles.cpp
+    components/skinprofiles.h
     components/skins.cpp
     components/skins.h
     components/sounds.cpp

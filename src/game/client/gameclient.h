@@ -55,6 +55,8 @@
 #include "components/statboard.h"
 #include "components/tooltips.h"
 #include "components/voting.h"
+#include "components/skinprofiles.h"
+
 
 class CGameInfo
 {
@@ -117,6 +119,7 @@ public:
 	CBroadcast m_Broadcast;
 	CGameConsole m_GameConsole;
 	CBinds m_Binds;
+	CSkinProfiles m_SkinProfiles;
 	CParticles m_Particles;
 	CMenus m_Menus;
 	CSkins m_Skins;

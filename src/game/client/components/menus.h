@@ -604,6 +604,7 @@ public:
 		SETTINGS_DDNET,
 		SETTINGS_ASSETS,
 		SETTINGS_TCLIENT,
+		SETTINGS_PROFILES,
 
 		SETTINGS_LENGTH,
 
@@ -721,6 +722,8 @@ private:
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsAppearance(CUIRect MainView);
 	void RenderSettingsTClient(CUIRect MainView);
+	void RenderSettingsProfiles(CUIRect MainView);
+
 	ColorHSLA RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha);
 	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);
 
