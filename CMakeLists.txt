@@ -2001,6 +2001,8 @@ if(CLIENT)
     components/background.h
     components/binds.cpp
     components/binds.h
+    components/bindwheel.cpp
+    components/bindwheel.h
     components/broadcast.cpp
     components/broadcast.h
     components/camera.cpp

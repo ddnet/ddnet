@@ -2981,29 +2981,40 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	}
 }
 
+enum
+{
+	TCLIENT_TAB_PAGE1 = 0,
+	TCLIENT_TAB_PAGE2 = 1,
+	TCLIENT_TAB_BINDWHEEL = 2,
+	NUMBER_OF_TCLIENT_TABS = 3,
+};
+
 void CMenus::RenderSettingsTClient(CUIRect MainView)
 {
 	static int s_CurCustomTab = 0;
 
-	CUIRect Column, Section, Page1Tab, Page2Tab, Label;
+	CUIRect Column, Section, TabBar, Page1Tab, Page2Tab, Page3Tab, Label;
 
 	MainView.HMargin(-15.0f, &MainView);
 
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
-	Label.VSplitLeft(TabsW / 2, &Page1Tab, &Page2Tab);
+	Label.VSplitLeft(TabsW / NUMBER_OF_TCLIENT_TABS, &Page1Tab, &Page2Tab);
+	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_TCLIENT_TABS, &Page2Tab, &Page3Tab);
 
-	static int s_aPageTabs[2] = {};
+	static int s_aPageTabs[NUMBER_OF_TCLIENT_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Page 1"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = 0;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Page 2"), s_CurCustomTab == 1, &Page2Tab, 5, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = 1;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_PAGE1], Localize("Page 1"), s_CurCustomTab == TCLIENT_TAB_PAGE1, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = TCLIENT_TAB_PAGE1;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_PAGE2], Localize("Page 2"), s_CurCustomTab == TCLIENT_TAB_PAGE2, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = TCLIENT_TAB_PAGE2;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_BINDWHEEL], Localize("BindWheel"), s_CurCustomTab == TCLIENT_TAB_BINDWHEEL, &Page3Tab, 10, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = TCLIENT_TAB_BINDWHEEL;
 
 	const float LineMargin = 20.0f;
 
-	//MainView.HSplitTop(10.0f, 0x0, &MainView);
-	if(s_CurCustomTab == 0)
+	// MainView.HSplitTop(10.0f, 0x0, &MainView);
+	if(s_CurCustomTab == TCLIENT_TAB_PAGE1)
 	{
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
@@ -3183,7 +3194,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		// ***** ANTI LATENCY ***** //
-		//MainView.HSplitTop(5.0f, 0, &MainView);
+		// MainView.HSplitTop(5.0f, 0, &MainView);
 
 		// MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 		MainView.HSplitTop(30.0f, &Section, &MainView);
@@ -3241,7 +3252,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		}
 	}
 
-	if(s_CurCustomTab == 1)
+	if(s_CurCustomTab == TCLIENT_TAB_PAGE2)
 	{
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
@@ -3324,8 +3335,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
 		}
 	}
-}
 
+	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
+	{
+	}
+}
 void CMenus::RenderSettingsProfiles(CUIRect MainView)
 {
 	CUIRect Label, LabelMid, Section, LabelRight;

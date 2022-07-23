@@ -45,6 +45,7 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
+#include "components/bindwheel.h"
 #include "components/outlines.h"
 #include "components/players.h"
 #include "components/race_demo.h"
@@ -139,6 +140,7 @@ public:
 
 	CPlayers m_Players;
 	CPlayerIndicator m_PlayerIndicator;
+    CBindWheel m_bindwheel;
 	COutlines m_Outlines;
 	CNamePlates m_NamePlates;
 	CFreezeBars m_FreezeBars;
