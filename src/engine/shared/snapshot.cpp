@@ -594,14 +594,13 @@ int *CSnapshotBuilder::GetItemData(int Key)
 
 int CSnapshotBuilder::Finish(void *pSnapData)
 {
-	// flattern and make the snapshot
+	// flatten and make the snapshot
 	CSnapshot *pSnap = (CSnapshot *)pSnapData;
-	int OffsetSize = sizeof(int) * m_NumItems;
 	pSnap->m_DataSize = m_DataSize;
 	pSnap->m_NumItems = m_NumItems;
-	mem_copy(pSnap->Offsets(), m_aOffsets, OffsetSize);
+	mem_copy(pSnap->Offsets(), m_aOffsets, pSnap->OffsetSize());
 	mem_copy(pSnap->DataStart(), m_aData, m_DataSize);
-	return sizeof(CSnapshot) + OffsetSize + m_DataSize;
+	return pSnap->TotalSize();
 }
 
 int CSnapshotBuilder::GetTypeFromIndex(int Index)
