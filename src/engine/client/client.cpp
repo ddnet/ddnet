@@ -681,6 +681,7 @@ void CClient::OnEnterGame(bool Dummy)
 	m_aReceivedSnapshots[Dummy] = 0;
 	m_aSnapshotParts[Dummy] = 0;
 	m_aPredTick[Dummy] = 0;
+	m_aAckGameTick[Dummy] = -1;
 	m_aCurrentRecvTick[Dummy] = 0;
 	m_aCurGameTick[Dummy] = 0;
 	m_aPrevGameTick[Dummy] = 0;
@@ -1979,7 +1980,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(Unpacker.Error() || NumParts < 1 || NumParts > CSnapshot::MAX_PARTS || Part < 0 || Part >= NumParts || PartSize < 0 || PartSize > MAX_SNAPSHOT_PACKSIZE)
 				return;
 
-			if(GameTick >= m_aCurrentRecvTick[Conn])
+			// Check m_aAckGameTick to see if we already got a snapshot for that tick
+			if(GameTick >= m_aCurrentRecvTick[Conn] && GameTick > m_aAckGameTick[Conn])
 			{
 				if(GameTick != m_aCurrentRecvTick[Conn])
 				{
@@ -2124,8 +2126,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					// apply snapshot, cycle pointers
 					m_aReceivedSnapshots[Conn]++;
-
-					m_aCurrentRecvTick[Conn] = GameTick;
 
 					// we got two snapshots until we see us self as connected
 					if(m_aReceivedSnapshots[Conn] == 2)
