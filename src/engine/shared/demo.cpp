@@ -534,17 +534,10 @@ void CDemoPlayer::ScanFile()
 
 void CDemoPlayer::DoTick()
 {
-	static char s_aCompresseddata[CSnapshot::MAX_SIZE];
-	static char s_aDecompressed[CSnapshot::MAX_SIZE];
-	static char s_aData[CSnapshot::MAX_SIZE];
-	int ChunkType, ChunkTick, ChunkSize;
-	int DataSize = 0;
-	int GotSnapshot = 0;
-
 	// update ticks
 	m_Info.m_PreviousTick = m_Info.m_Info.m_CurrentTick;
 	m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
-	ChunkTick = m_Info.m_Info.m_CurrentTick;
+	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
 	int64_t Freq = time_freq();
 	int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
@@ -555,8 +548,10 @@ void CDemoPlayer::DoTick()
 	if(m_UpdateIntraTimesFunc)
 		m_UpdateIntraTimesFunc();
 
+	bool GotSnapshot = false;
 	while(true)
 	{
+		int ChunkType, ChunkSize;
 		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
 		{
 			// stop on error or eof
@@ -578,8 +573,11 @@ void CDemoPlayer::DoTick()
 		}
 
 		// read the chunk
+		int DataSize = 0;
+		static char s_aData[CSnapshot::MAX_SIZE];
 		if(ChunkSize)
 		{
+			static char s_aCompresseddata[CSnapshot::MAX_SIZE];
 			if(io_read(m_File, s_aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
 			{
 				// stop on error or eof
@@ -589,6 +587,7 @@ void CDemoPlayer::DoTick()
 				break;
 			}
 
+			static char s_aDecompressed[CSnapshot::MAX_SIZE];
 			DataSize = CNetBase::Decompress(s_aCompresseddata, ChunkSize, s_aDecompressed, sizeof(s_aDecompressed));
 			if(DataSize < 0)
 			{
@@ -642,7 +641,7 @@ void CDemoPlayer::DoTick()
 
 				m_LastSnapshotDataSize = DataSize;
 				mem_copy(m_aLastSnapshotData, s_aNewsnap, DataSize);
-				GotSnapshot = 1;
+				GotSnapshot = true;
 			}
 		}
 		else if(ChunkType == CHUNKTYPE_SNAPSHOT)
@@ -660,7 +659,7 @@ void CDemoPlayer::DoTick()
 			}
 			else
 			{
-				GotSnapshot = 1;
+				GotSnapshot = true;
 
 				m_LastSnapshotDataSize = DataSize;
 				mem_copy(m_aLastSnapshotData, s_aData, DataSize);
@@ -673,7 +672,7 @@ void CDemoPlayer::DoTick()
 			// if there were no snapshots in this tick, replay the last one
 			if(!GotSnapshot && m_pListener && m_LastSnapshotDataSize != -1)
 			{
-				GotSnapshot = 1;
+				GotSnapshot = true;
 				m_pListener->OnDemoPlayerSnapshot(m_aLastSnapshotData, m_LastSnapshotDataSize);
 			}
 
