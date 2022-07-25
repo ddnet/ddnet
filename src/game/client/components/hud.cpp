@@ -789,6 +789,16 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderVoting()
 {
+	
+    bool kickvote = str_startswith(m_pClient->m_Voting.VoteDescription(),"Kick ")   != 0 ? true: false;
+    bool specvote = str_startswith(m_pClient->m_Voting.VoteDescription(),"Pause ")  != 0 ? true : false;
+
+    if(g_Config.m_ClVoteDontShow &&  (kickvote || specvote)) 
+	{ // only show votes
+	  // check if the is a playervote and if he is in your team.
+	}
+
+
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
