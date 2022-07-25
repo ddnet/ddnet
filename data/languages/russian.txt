@@ -1438,7 +1438,7 @@ Highlight Color
 == Цвет выделения
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== При пересечении стартовой линии, показать тень Tee, повторяющий прохождение лучшего времени
+== При пересечении стартовой линии, показать тень Tee, повторяющую прохождение лучшего времени
 
 Opacity
 == Прозрачность
