@@ -1546,7 +1546,7 @@ Colors of the hook collision line, in case of a possible collision with:
 == Цвет линии, в случае если:
 
 Your movements are not taken into account when calculating the line colors
-== Ваши движения не учитываются, когда рассчитывается цвет линии.
+== Ваши движения не учитываются, когда рассчитывается цвет линии
 
 Nothing hookable
 == Невозможно зацепиться
