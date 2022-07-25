@@ -397,7 +397,7 @@ Shotgun
 == Дробовик
 
 Show chat
-== Показать чат
+== Показывать чат
 
 Show friends only
 == Только с друзьями
@@ -553,7 +553,7 @@ Threaded sound loading
 == Фоновая загрузка музыки
 
 Use DDRace Scoreboard
-== Использовать DDRace табло
+== Использовать DDRace таблицу счета
 
 Show kill messages
 == Показывать сообщения о смерти
@@ -934,7 +934,7 @@ Lock team
 == Закрыть команду
 
 Show entities
-== Показать тайлы
+== Показывать тайлы
 
 Show HUD
 == Показывать HUD
@@ -1274,7 +1274,7 @@ Refreshing...
 == Обновление...
 
 Kill Messages
-== Сообщения об убийстве
+== Сообщения о смерти
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
@@ -1414,19 +1414,19 @@ Allows maps to render with more detail
 == Позволяет более детализированную прорисовку карты
 
 Show dummy actions
-== Показать действия дамми
+== Показывать действия дамми
 
 Show player position
-== Показать позицию игрока
+== Показывать позицию игрока
 
 Show player speed
-== Показать скорость игрока
+== Показывать скорость игрока
 
 Show player target angle
-== Показать угол прицела игрока
+== Показывать угол прицела игрока
 
 Show freeze bars
-== Показать полоску фриза
+== Показывать полоску фриза
 
 Opacity of freeze bars inside freeze
 == Прозрачность полоски фриза внутри фриза
@@ -1438,7 +1438,7 @@ Highlight Color
 == Цвет выделения
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== При пересечении стартовой линии, показать призрак Tee, повторяющий прохождение лучшего времени
+== При пересечении стартовой линии, показать тень Tee, повторяющий прохождение лучшего времени
 
 Opacity
 == Прозрачность
@@ -1462,106 +1462,106 @@ Team %d
 == Команда %d
 
 Preparing demo playback
-== 
+== Подготовка воспроизведения демо
 
 Connected
-== 
+== Подключено
 
 Loading map file from storage
-== 
+== Загрузка файлов карты из памяти
 
 Initializing components
-== 
+== Подготовка компонентов
 
 Initializing assets
-== 
+== Подготовка ресурсов
 
 Initializing map logic
-== 
+== Подготовка алгоритмов карты
 
 Sending initial client info
-== 
+== Отправка начальных данных о клиенте
 
 Uploading map data to GPU
-== 
+== Загрузка данных о карте в GPU
 
 Getting game info
-== 
+== Получение игровых данных
 
 Requesting to join the game
-== 
+== Запрашивается подключение к игре
 
 Sending intial client info
-== 
+== Отправка начальных данных о клиенте
 
 Loading menu images
-== 
+== Загрузка изображений меню
 
 Loading demo files
-== 
+== Загрузка файлов демо
 
 Loading ghost files
-== 
+== Загрузка файлов тени
 
 Loading skin files
-== 
+== Загрузка файлов скинов
 
 Appearance
-== 
+== Внешний вид
 
 Name Plate
-== 
+== Табличка имени
 
 Hook Collisions
-== 
+== Коллизии крюка
 
 Show health, shields and ammo
-== 
+== Показывать здоровье, щиты и патроны
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== Показывать ID клиентов в таблице счета
 
 Show DDRace HUD
-== 
+== Показывать DDRace HUD
 
 Show jumps indicator
-== 
+== Показывать индикатор прыжка
 
 Show hook strength indicator
-== 
+== Показывать индикатор силы крюка
 
 Hook collision line
-== 
+== Линия коллизии крюка
 
 Hook collision line width
-== 
+== Ширина линии
 
 Hook collision line opacity
-== 
+== Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Цвет линии, в случае если:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Ваши движения не учитываются, когда рассчитывается цвет линии.
 
 Nothing hookable
-== 
+== Невозможно зацепиться
 
 Something hookable
-== 
+== Возможно зацепиться
 
 A Tee
-== 
+== Столкновение с Tee
 
 Loading assets
-== 
+== Загрузка ресурсов
 
 Loading race demo files
-== 
+== Загрузка файлов демо
 
 Loading sound files
-== 
+== Загрузка звуковых файлов
