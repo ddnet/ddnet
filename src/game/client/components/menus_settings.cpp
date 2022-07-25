@@ -863,6 +863,7 @@ static CKeyInfo gs_aKeys[] =
 		{"Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0},
 
 		{"Emoticon", "+emote", 0, 0},
+        {"Bindwheel", "+bindwheel", 0, 0},
 		{"Spectator mode", "+spectate", 0, 0},
 		{"Spectate next", "spectate_next", 0, 0},
 		{"Spectate previous", "spectate_previous", 0, 0},
@@ -1275,7 +1276,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
-		DoSettingsControlsButtons(32, 44, MiscSettings);
+		DoSettingsControlsButtons(32, 45, MiscSettings);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
@@ -3338,8 +3339,336 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
 	{
+		CUIRect Screen = *UI()->Screen();
+		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+
+		const float FontSize = 14.0f;
+		const float Margin = 10.0f;
+		const float HeaderHeight = FontSize + 5.0f + Margin;
+
+		//create the buttons
+		CUIRect b1, b2, b3, b4, b5, b6, b7, b8;
+		const char *pDescriptionFallback = "EMPTY";
+		//fill the chars with description
+		char pD1[8], pD2[8], pD3[8], pD4[8], pD5[8], pD6[8], pD7[8], pD8[8];
+		str_format(pD1, sizeof(pD1), GameClient()->m_bindwheellist[0].description);
+		str_format(pD2, sizeof(pD2), GameClient()->m_bindwheellist[1].description);
+		str_format(pD3, sizeof(pD3), GameClient()->m_bindwheellist[2].description);
+		str_format(pD4, sizeof(pD4), GameClient()->m_bindwheellist[3].description);
+		str_format(pD5, sizeof(pD5), GameClient()->m_bindwheellist[4].description);
+		str_format(pD6, sizeof(pD6), GameClient()->m_bindwheellist[5].description);
+		str_format(pD7, sizeof(pD7), GameClient()->m_bindwheellist[6].description);
+		str_format(pD8, sizeof(pD8), GameClient()->m_bindwheellist[7].description);
+
+		// fill the chars with command
+		char pC1[128], pC2[128], pC3[128], pC4[128], pC5[128], pC6[128], pC7[128], pC8[128];
+		str_format(pC1, sizeof(pC1), GameClient()->m_bindwheellist[0].command);
+		str_format(pC2, sizeof(pC2), GameClient()->m_bindwheellist[1].command);
+		str_format(pC3, sizeof(pC3), GameClient()->m_bindwheellist[2].command);
+		str_format(pC4, sizeof(pC4), GameClient()->m_bindwheellist[3].command);
+		str_format(pC5, sizeof(pC5), GameClient()->m_bindwheellist[4].command);
+		str_format(pC6, sizeof(pC6), GameClient()->m_bindwheellist[5].command);
+		str_format(pC7, sizeof(pC7), GameClient()->m_bindwheellist[6].command);
+		str_format(pC8, sizeof(pC8), GameClient()->m_bindwheellist[7].command);
+
+		// bindwheel 1
+		{
+			// Description 1
+			MainView.HSplitTop(15.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b1, &MainView);
+			b1.VSplitLeft(80.0f, &Label, &b1);
+			b1.VSplitLeft(150.0f, &b1, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 1"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD1, &b1, pD1, sizeof(GameClient()->m_bindwheellist[0].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[0].description, sizeof(GameClient()->m_bindwheellist[0].description), pD1);
+			}
+
+			// Command 1
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b1, &MainView);
+			b1.VSplitLeft(80.0f, &Label, &b1);
+			b1.VSplitLeft(150.0f, &b1, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 1"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC1, &b1, pC1, sizeof(GameClient()->m_bindwheellist[0].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[0].command, sizeof(GameClient()->m_bindwheellist[0].command), pC1);
+			}
+		}
+
+        // bindwheel 2
+		{
+			// Description 2
+			MainView.HSplitTop(50.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b2, &MainView);
+			b2.VSplitLeft(80.0f, &Label, &b2);
+			b2.VSplitLeft(150.0f, &b2, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 2"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD2, &b2, pD2, sizeof(GameClient()->m_bindwheellist[1].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[1].description, sizeof(GameClient()->m_bindwheellist[1].description), pD2);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b2, &MainView);
+			b2.VSplitLeft(80.0f, &Label, &b2);
+			b2.VSplitLeft(150.0f, &b2, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 2"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC2, &b2, pC2, sizeof(GameClient()->m_bindwheellist[1].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[1].command, sizeof(GameClient()->m_bindwheellist[1].command), pC2);
+			}
+		}
+
+       // bindwheel 3
+		{
+			// Description 2
+			MainView.HSplitTop(50.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b3, &MainView);
+			b3.VSplitLeft(80.0f, &Label, &b3);
+			b3.VSplitLeft(150.0f, &b3, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 3"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD3, &b3, pD3, sizeof(GameClient()->m_bindwheellist[2].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[2].description, sizeof(GameClient()->m_bindwheellist[2].description), pD3);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b3, &MainView);
+			b3.VSplitLeft(80.0f, &Label, &b3);
+			b3.VSplitLeft(150.0f, &b3, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 3"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC3, &b3, pC3, sizeof(GameClient()->m_bindwheellist[2].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[2].command, sizeof(GameClient()->m_bindwheellist[2].command), pC3);
+			}
+		}
+
+       // bindwheel 4
+		{
+			// Description 2
+			MainView.HSplitTop(50.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b4, &MainView);
+			b4.VSplitLeft(80.0f, &Label, &b4);
+			b4.VSplitLeft(150.0f, &b4, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 4"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD4, &b4, pD4, sizeof(GameClient()->m_bindwheellist[3].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[3].description, sizeof(GameClient()->m_bindwheellist[3].description), pD4);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b4, &MainView);
+			b4.VSplitLeft(80.0f, &Label, &b4);
+			b4.VSplitLeft(150.0f, &b4, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 4"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC4, &b4, pC4, sizeof(GameClient()->m_bindwheellist[3].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[3].command, sizeof(GameClient()->m_bindwheellist[3].command), pC4);
+			}
+		}
+	
+        MainView = Column;
+
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		MainView.VSplitLeft(MainView.w * 0.5, 0, &MainView);
+       // bindwheel 5
+		{
+			// Description 2
+			MainView.HSplitTop(15.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b5, &MainView);
+			b5.VSplitLeft(80.0f, &Label, &b5);
+			b5.VSplitLeft(150.0f, &b5, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 5"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD5, &b5, pD5, sizeof(GameClient()->m_bindwheellist[4].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[4].description, sizeof(GameClient()->m_bindwheellist[4].description), pD5);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b5, &MainView);
+			b5.VSplitLeft(80.0f, &Label, &b5);
+			b5.VSplitLeft(150.0f, &b5, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 5"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC5, &b5, pC5, sizeof(GameClient()->m_bindwheellist[4].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[4].command, sizeof(GameClient()->m_bindwheellist[4].command), pC5);
+			}
+		}
+
+       // bindwheel 6
+		{
+			// Description 2
+			MainView.HSplitTop(50.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b6, &MainView);
+			b6.VSplitLeft(80.0f, &Label, &b6);
+			b6.VSplitLeft(150.0f, &b6, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 6"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD6, &b6, pD6, sizeof(GameClient()->m_bindwheellist[5].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[5].description, sizeof(GameClient()->m_bindwheellist[5].description), pD6);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b6, &MainView);
+			b6.VSplitLeft(80.0f, &Label, &b6);
+			b6.VSplitLeft(150.0f, &b6, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 6"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC6, &b6, pC6, sizeof(GameClient()->m_bindwheellist[5].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[5].command, sizeof(GameClient()->m_bindwheellist[5].command), pC6);
+			}
+		}
+
+       // bindwheel 7
+		{
+			// Description 2
+			MainView.HSplitTop(50.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b7, &MainView);
+			b7.VSplitLeft(80.0f, &Label, &b7);
+			b7.VSplitLeft(150.0f, &b7, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 7"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD7, &b7, pD7, sizeof(GameClient()->m_bindwheellist[6].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[6].description, sizeof(GameClient()->m_bindwheellist[6].description), pD7);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b7, &MainView);
+			b7.VSplitLeft(80.0f, &Label, &b7);
+			b7.VSplitLeft(150.0f, &b7, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 7"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC7, &b7, pC7, sizeof(GameClient()->m_bindwheellist[6].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[6].command, sizeof(GameClient()->m_bindwheellist[6].command), pC7);
+			}
+		}
+
+       //bindwheel 8
+		{
+			// Description 2
+			MainView.HSplitTop(50.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b8, &MainView);
+			b8.VSplitLeft(80.0f, &Label, &b8);
+			b8.VSplitLeft(150.0f, &b8, 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Description 8"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD8, &b8, pD8, sizeof(GameClient()->m_bindwheellist[7].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[7].description, sizeof(GameClient()->m_bindwheellist[7].description), pD8);
+			}
+
+			// Command 2
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &b8, &MainView);
+			b8.VSplitLeft(80.0f, &Label, &b8);
+			b8.VSplitLeft(150.0f, &b8, 0);
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command 8"));
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC8, &b8, pC8, sizeof(GameClient()->m_bindwheellist[7].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[7].command, sizeof(GameClient()->m_bindwheellist[7].command), pC8);
+			}
+		}
+
+
+        // Draw Circle
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.3f);
+		RenderTools()->DrawCircle(Screen.w / 2 - 55.0f, Screen.h / 2, 190.0f, 64);
+		Graphics()->QuadsEnd();
+
+		Graphics()->WrapClamp();
+		for(int i = 0; i < NUM_BINDWHEEL; i++)
+		{
+			float Angle = 2 * pi * i / NUM_BINDWHEEL;
+
+			float margin = 170.0f;
+			if(!(Angle >= 0 && Angle <= 90 || Angle >= 270 && Angle <= 359))
+			{
+				margin = 120.0;
+			}
+			if(Angle > pi)
+			{
+				Angle -= 2 * pi;
+			}
+
+
+			float Size = 12.0f;
+
+			float NudgeX = margin * cosf(Angle);
+			float NudgeY = 150.0f * sinf(Angle);
+
+			char aBuf[8];
+			str_format(aBuf, sizeof(aBuf), GameClient()->m_bindwheellist[i].description);
+			TextRender()->Text(0, Screen.w / 2 - 55.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
+		}
+		Graphics()->WrapNormal();
 	}
 }
+
 void CMenus::RenderSettingsProfiles(CUIRect MainView)
 {
 	CUIRect Label, LabelMid, Section, LabelRight;

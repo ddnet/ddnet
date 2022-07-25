@@ -134,13 +134,13 @@ public:
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
+    CBindWheel m_bindwheel;
 	CDamageInd m_DamageInd;
 	CVoting m_Voting;
 	CSpectator m_Spectator;
 
 	CPlayers m_Players;
 	CPlayerIndicator m_PlayerIndicator;
-    CBindWheel m_bindwheel;
 	COutlines m_Outlines;
 	CNamePlates m_NamePlates;
 	CFreezeBars m_FreezeBars;
@@ -200,7 +200,6 @@ private:
 	int m_aCheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
-
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 
@@ -345,6 +344,7 @@ public:
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
+        int m_bindwheel;
 		float m_EmoticonStartFraction;
 		int m_EmoticonStartTick;
 		bool m_Solo;
@@ -656,6 +656,13 @@ public:
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
 
+	struct SClientBindWheel
+	{
+		char description[8];
+		char command[128];
+	};
+	SClientBindWheel m_bindwheellist[NUM_BINDWHEEL];
+	
 	struct SClientHudSkin
 	{
 		IGraphics::CTextureHandle m_SpriteHudAirjump;

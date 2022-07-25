@@ -158,6 +158,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Menus,
 						  &m_Spectator,
+                          &m_bindwheel,
 						  &m_Emoticon,
 						  &m_Controls,
 						  &m_Binds});
@@ -281,6 +282,9 @@ void CGameClient::OnInit()
 		}
 		++CompCounter;
 	}
+
+
+
 
 	char aBuf[256];
 
@@ -2022,6 +2026,7 @@ void CGameClient::CClientData::Reset()
 	m_Country = -1;
 	m_Team = 0;
 	m_Angle = 0;
+    m_bindwheel = 0;
 	m_Emoticon = 0;
 	m_EmoticonStartTick = -1;
 	m_EmoticonStartFraction = 0;
