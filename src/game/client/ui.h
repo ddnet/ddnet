@@ -241,22 +241,6 @@ public:
 	void OnWindowResize();
 	void OnLanguageChange();
 
-	enum
-	{
-		CORNER_NONE = 0,
-		CORNER_TL = 1,
-		CORNER_TR = 2,
-		CORNER_BL = 4,
-		CORNER_BR = 8,
-
-		CORNER_T = CORNER_TL | CORNER_TR,
-		CORNER_B = CORNER_BL | CORNER_BR,
-		CORNER_R = CORNER_TR | CORNER_BR,
-		CORNER_L = CORNER_TL | CORNER_BL,
-
-		CORNER_ALL = CORNER_T | CORNER_B
-	};
-
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
 	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);

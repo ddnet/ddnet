@@ -107,7 +107,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	}
 
 	// render
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.w / 2.0f);
+	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.w / 2.0f);
 
 	float ColorSlider;
 	if(UI()->CheckActiveItem(pID))
@@ -117,7 +117,7 @@ float CUIEx::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	else
 		ColorSlider = 0.8f;
 
-	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 1.0f), CUI::CORNER_ALL, Handle.w / 2.0f);
+	RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 1.0f), IGraphics::CORNER_ALL, Handle.w / 2.0f);
 
 	return ReturnValue;
 }
@@ -192,13 +192,13 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 		CUIRect Slider;
 		Handle.VMargin(-2.0f, &Slider);
 		Slider.HMargin(-3.0f, &Slider);
-		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), CUI::CORNER_ALL, 5.0f);
+		RenderTools()->DrawUIRect(&Slider, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), IGraphics::CORNER_ALL, 5.0f);
 		Slider.Margin(2.0f, &Slider);
-		RenderTools()->DrawUIRect(&Slider, *pColorInner, CUI::CORNER_ALL, 3.0f);
+		RenderTools()->DrawUIRect(&Slider, *pColorInner, IGraphics::CORNER_ALL, 3.0f);
 	}
 	else
 	{
-		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, Rail.h / 2.0f);
+		RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
 
 		float ColorSlider;
 		if(UI()->CheckActiveItem(pID))
@@ -208,7 +208,7 @@ float CUIEx::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, 
 		else
 			ColorSlider = 0.8f;
 
-		RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 1.0f), CUI::CORNER_ALL, Handle.h / 2.0f);
+		RenderTools()->DrawUIRect(&Handle, ColorRGBA(ColorSlider, ColorSlider, ColorSlider, 1.0f), IGraphics::CORNER_ALL, Handle.h / 2.0f);
 	}
 
 	return ReturnValue;
@@ -705,10 +705,10 @@ bool CUIEx::DoClearableEditBox(const void *pID, const void *pClearID, const CUIR
 	CUIRect EditBox;
 	CUIRect ClearButton;
 	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
-	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~CUI::CORNER_R, Properties);
+	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~IGraphics::CORNER_R, Properties);
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
-	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~CUI::CORNER_L, 3.0f);
+	RenderTools()->DrawUIRect(&ClearButton, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(pClearID)), Corners & ~IGraphics::CORNER_L, 3.0f);
 
 	SLabelProperties Props;
 	Props.m_AlignVertically = 0;

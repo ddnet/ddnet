@@ -442,6 +442,21 @@ public:
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadsText(float x, float y, float Size, const char *pText) = 0;
 
+	enum
+	{
+		CORNER_NONE = 0,
+		CORNER_TL = 1,
+		CORNER_TR = 2,
+		CORNER_BL = 4,
+		CORNER_BR = 8,
+
+		CORNER_T = CORNER_TL | CORNER_TR,
+		CORNER_B = CORNER_BL | CORNER_BR,
+		CORNER_R = CORNER_TR | CORNER_BR,
+		CORNER_L = CORNER_TL | CORNER_BL,
+
+		CORNER_ALL = CORNER_T | CORNER_B
+	};
 	virtual void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) = 0;
 
 	struct CColorVertex
