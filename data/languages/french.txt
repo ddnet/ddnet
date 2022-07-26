@@ -22,6 +22,8 @@
 #	T tee & NRK & Chairn	2022-03-23 20:52:52
 #	Nouaa			2022-05-14 23:00:00
 #	Chairn			2022-06-16 19:00:00
+#	Sucre			2022-07-19 20:36:00
+
 ##### /authors #####
 
 ##### translated strings #####
@@ -1056,7 +1058,7 @@ Connect Dummy
 == Connecter le dummy
 
 Reconnect in %d sec
-== Reconnecte dans %d sec
+== Reconnexion dans %d sec
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDRaceNetwork est un jeu coopératif en ligne dont l'objectif est, pour vous ainsi que votre groupe de tees, d'atteindre la ligne d'arrivée d'une carte. En tant que nouveau joueur, il est préférable que vous commenciez sur les serveurs Novice, qui sont constitués des cartes les plus simples. Prenez en compte le ping afin de choisir un serveur proche de chez vous.
@@ -1476,7 +1478,7 @@ Preparing demo playback
 == 
 
 Connected
-== 
+==  Connecté
 
 Loading map file from storage
 == 
@@ -1485,7 +1487,7 @@ Initializing components
 == 
 
 Initializing assets
-== 
+== Initialisation des assets
 
 Initializing map logic
 == 
@@ -1497,10 +1499,10 @@ Uploading map data to GPU
 == 
 
 Getting game info
-== 
+== Obtention des informations de la partie
 
 Requesting to join the game
-== 
+== Demande de rejoindre la partie
 
 Sending intial client info
 == 
@@ -1515,10 +1517,10 @@ Loading ghost files
 == 
 
 Loading skin files
-== 
+== Chargement des fichiers de skin
 
 Appearance
-== 
+== Apparence
 
 Name Plate
 == 
@@ -1527,25 +1529,25 @@ Hook Collisions
 == 
 
 Show health, shields and ammo
-== 
+== Monter la vie, bouclier et les munitions
 
 DDRace HUD
-== 
+== HUD DDRace
 
 Show client IDs in scoreboard
 == 
 
 Show DDRace HUD
-== 
+== Montrer l'HUD DDrace
 
 Show jumps indicator
-== 
+== Montrer l'indicateur de sauts
 
 Show hook strength indicator
 == 
 
 Hook collision line
-== 
+== Ligne de collision du grapin
 
 Hook collision line width
 == 
@@ -1566,13 +1568,13 @@ Something hookable
 == 
 
 A Tee
-== 
+== Un Tee
 
 Loading assets
-== 
+== Chargement des assets
 
 Loading race demo files
 == 
 
 Loading sound files
-== 
+== Chargement des fichiers sonores
