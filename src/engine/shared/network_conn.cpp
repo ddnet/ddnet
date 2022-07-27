@@ -448,7 +448,7 @@ int CNetConnection::Update()
 		{
 			m_State = NET_CONNSTATE_ERROR;
 			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Too weak connection (not acked for %d seconds)", g_Config.m_ConnTimeout);
+			str_format(aBuf, sizeof(aBuf), "Too weak connection (not acted for %d seconds)", g_Config.m_ConnTimeout);
 			SetError(aBuf);
 			m_TimeoutSituation = true;
 		}
