@@ -63,7 +63,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include <errno.h>
+#include <cerrno>
 #include <io.h>
 #include <process.h>
 #include <share.h>
