@@ -18,14 +18,14 @@ from time import strftime
 import os
 
 def sqlite_table_exists(cursor, table):
-	cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='{}'".format(table))
+	cursor.execute(f"SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='{table}'")
 	return cursor.fetchone()[0] != 0
 
 def sqlite_num_transfer(conn, table):
 	c = conn.cursor()
 	if not sqlite_table_exists(c, table):
 		return 0
-	c.execute('SELECT COUNT(*) FROM {}'.format(table))
+	c.execute(f'SELECT COUNT(*) FROM {table}')
 	num = c.fetchone()[0]
 	return num
 
@@ -66,7 +66,7 @@ def main():
 	args = parser.parse_args()
 
 	if not os.path.exists(args.f):
-		print("Warning: '{}' does not exist (yet). Is the path specified correctly?".format(args.f))
+		print(f"Warning: '{args.f}' does not exist (yet). Is the path specified correctly?")
 		return
 
 	conn = sqlite3.connect(args.f)
@@ -78,22 +78,18 @@ def main():
 	if num == 0:
 		return
 
-	print('{} new entries in backup database found ({} ranks, {} teamranks, {} saves'.format(num, num_ranks, num_teamranks, num_saves))
-	print('Moving entries from {} to {}'.format(
-			os.path.abspath(args.f),
-			os.path.abspath(args.to)))
+	print(f'{num} new entries in backup database found ({num_ranks} ranks, {num_teamranks} teamranks, {num_saves} saves')
+	print('Moving entries from {os.path.abspath(args.f)} to {os.path.abspath(args.to)}')
 	sql_file = 'ddnet-server-' + strftime('%Y-%m-%d') + '.sql'
 	print("You can use the following commands to import the entries to MySQL (use sed 's/record_/prefix_/' for other database prefixes):")
 	print()
-	print(("    echo '.dump --preserve-rowids' | sqlite3 {} | " + # including rowids, this forces sqlite to name all columns in each INSERT statement
+	print((f"    echo '.dump --preserve-rowids' | sqlite3 {os.path.abspath(args.to)} | " + # including rowids, this forces sqlite to name all columns in each INSERT statement
 			"grep -E '^INSERT INTO record_(race|teamrace|saves)' | " + # filter out inserts
 			"sed -e 's/INSERT INTO/INSERT IGNORE INTO/' | " + # ignore duplicate rows
-			"sed -e 's/rowid,//' -e 's/VALUES([0-9]*,/VALUES(/' > {}") # filter out rowids again
-			.format(os.path.abspath(args.to), sql_file))
-	print("    mysql -u teeworlds -p'PW2' teeworlds < {}".format(sql_file))
+			f"sed -e 's/rowid,//' -e 's/VALUES([0-9]*,/VALUES(/' > {sql_file}")) # filter out rowids again
+	print(f"    mysql -u teeworlds -p'PW2' teeworlds < {sql_file}")
 	print()
-	print("When the ranks are transfered successfully to mysql, {} can be removed".format(
-			os.path.abspath(args.to)))
+	print(f"When the ranks are transfered successfully to mysql, {os.path.abspath(args.to)} can be removed")
 	print()
 	print("Log of the transfer:")
 	print()

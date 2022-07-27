@@ -44,13 +44,13 @@ def check_variable_name(qualifiers, typ, name):
 		return None
 	prefix = "".join([qualifiers, "_" if qualifiers else "", typ])
 	if not name.startswith(prefix):
-		return "should start with {!r}".format(prefix)
+		return f"should start with {prefix!r}"
 	if name in ALLOW:
 		return None
 	name = name[len(prefix):]
 	if not name[0].isupper():
 		if prefix:
-			return "should start with an uppercase letter after the prefix {!r}".format(prefix)
+			return f"should start with an uppercase letter after the prefix {prefix!r}"
 		return "should start with an uppercase letter"
 	return None
 
@@ -65,7 +65,7 @@ def main():
 		error = check_name(i["kind"], i["qualifiers"], i["type"], i["name"])
 		if error:
 			unclean = True
-			print("{}:{}:{}: {}: {}".format(i["file"], i["line"], i["column"], i["name"], error))
+			print(f"{i['file']}:{i['line']}:{i['column']}: {i['name']}: {error}")
 	return unclean
 
 if __name__ == "__main__":

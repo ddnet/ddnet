@@ -8,8 +8,8 @@ def create_enum_table(names, num):
 	lines = []
 	lines += ["enum", "{"]
 	for name in names:
-		lines += ["\t%s," % name]
-	lines += ["\t%s" % num, "};"]
+		lines += [f"\t{name},"]
+	lines += [f"\t{num}", "};"]
 	return lines
 
 
@@ -17,7 +17,7 @@ def create_flags_table(names):
 	lines = []
 	lines += ["enum", "{"]
 	for i, name in enumerate(names):
-		lines += ["\t%s = 1<<%d," % (name, i)]
+		lines += [f"\t{name} = 1<<{int(i)},"]
 	lines += ["};"]
 	return lines
 
@@ -25,10 +25,10 @@ def create_flags_table(names):
 def EmitEnum(names, num):
 	print("enum")
 	print("{")
-	print("\t%s=0," % names[0])
+	print(f"\t{names[0]}=0,")
 	for name in names[1:]:
-		print("\t%s," % name)
-	print("\t%s" % num)
+		print(f"\t{name},")
+	print(f"\t{num}")
 	print("};")
 
 
@@ -36,7 +36,7 @@ def EmitFlags(names):
 	print("enum")
 	print("{")
 	for i, name in enumerate(names):
-		print("\t%s = 1<<%d," % (name, i))
+		print(f"\t{name} = 1<<{int(i)},")
 	print("};")
 
 
@@ -48,12 +48,12 @@ def gen_network_header():
 	print(network.RawHeader)
 
 	for e in network.Enums:
-		for line in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): # pylint: disable=E1101
+		for line in create_enum_table([f"{e.name}_{v}" for v in e.values], f'NUM_{e.name}S'): # pylint: disable=no-member
 			print(line)
 		print("")
 
 	for e in network.Flags:
-		for line in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]):
+		for line in create_flags_table([f"{e.name}_{v}" for v in e.values]):
 			print(line)
 		print("")
 
@@ -79,8 +79,8 @@ def gen_network_header():
 			print(line)
 		print("")
 
-	EmitEnum(["SOUND_%s"%i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
-	EmitEnum(["WEAPON_%s"%i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
+	EmitEnum([f"SOUND_{i.name.value.upper()}" for i in content.container.sounds.items], "NUM_SOUNDS")
+	EmitEnum([f"WEAPON_{i.name.value.upper()}" for i in content.container.weapons.id.items], "NUM_WEAPONS")
 
 	print("""
 class CNetObjHandler
@@ -160,37 +160,37 @@ int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)
 	lines = []
 	lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
 	lines += ['\t"EX/UUID",']
-	lines += ['\t"%s",' % o.name for o in network.Objects if o.ex is None]
+	lines += [f'\t"{o.name}",' for o in network.Objects if o.ex is None]
 	lines += ['\t""', "};", ""]
 
 	lines += ["const char *CNetObjHandler::ms_apExObjNames[] = {"]
 	lines += ['\t"invalid",']
-	lines += ['\t"%s",' % o.name for o in network.Objects if o.ex is not None]
+	lines += [f'\t"{o.name}",' for o in network.Objects if o.ex is not None]
 	lines += ['\t""', "};", ""]
 
 	lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
 	lines += ['\t0,']
-	lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is None]
+	lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects if o.ex is None]
 	lines += ['\t0', "};", ""]
 
 	lines += ["int CNetObjHandler::ms_aUnpackedObjSizes[] = {"]
 	lines += ['\t16,']
-	lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is None]
+	lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects if o.ex is None]
 	lines += ["};", ""]
 
 	lines += ["int CNetObjHandler::ms_aUnpackedExObjSizes[] = {"]
 	lines += ['\t0,']
-	lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is not None]
+	lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects if o.ex is not None]
 	lines += ["};", ""]
 
 	lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
 	lines += ['\t"invalid",']
-	lines += ['\t"%s",' % msg.name for msg in network.Messages if msg.ex is None]
+	lines += [f'\t"{msg.name}",' for msg in network.Messages if msg.ex is None]
 	lines += ['\t""', "};", ""]
 
 	lines += ['const char *CNetObjHandler::ms_apExMsgNames[] = {']
 	lines += ['\t"invalid",']
-	lines += ['\t"%s",' % msg.name for msg in network.Messages if msg.ex is not None]
+	lines += [f'\t"{msg.name}",' for msg in network.Messages if msg.ex is not None]
 	lines += ['\t""', "};", ""]
 
 	for line in lines:
@@ -332,7 +332,7 @@ bool CNetObjHandler::TeeHistorianRecordMsg(int Type)
 	empty = True
 	for msg in network.Messages:
 		if not msg.teehistorian:
-			lines += ['\tcase %s:' % msg.enum_name]
+			lines += [f'\tcase {msg.enum_name}:']
 			empty = False
 	if not empty:
 		lines += ['\t\treturn false;']
@@ -355,7 +355,7 @@ void RegisterGameUuids(CUuidManager *pManager)
 
 	for item in network.Objects + network.Messages:
 		if item.ex is not None:
-			lines += ['\tpManager->RegisterName(%s, "%s");' % (item.enum_name, item.ex)]
+			lines += [f'\tpManager->RegisterName({item.enum_name}, "{item.ex}");']
 
 	lines += ["""
 	RegisterMapItemTypeUuids(pManager);
@@ -384,9 +384,9 @@ def gen_common_content_header():
 	print('extern CDataContainer *g_pData;')
 
 	# enums
-	EmitEnum(["IMAGE_%s"%i.name.value.upper() for i in content.container.images.items], "NUM_IMAGES")
-	EmitEnum(["ANIM_%s"%i.name.value.upper() for i in content.container.animations.items], "NUM_ANIMS")
-	EmitEnum(["SPRITE_%s"%i.name.value.upper() for i in content.container.sprites.items], "NUM_SPRITES")
+	EmitEnum([f"IMAGE_{i.name.value.upper()}" for i in content.container.images.items], "NUM_IMAGES")
+	EmitEnum([f"ANIM_{i.name.value.upper()}" for i in content.container.animations.items], "NUM_ANIMS")
+	EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
 
 def gen_common_content_source():
 	EmitDefinition(content.container, "datacontainer")

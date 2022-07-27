@@ -30,6 +30,6 @@ table.sort(key=lambda l: l[3])
 table = [["filename", "total", "empty", "missing", "unused"]] + table
 s = [[str(e) for e in row] for row in table]
 lens = [max(map(len, col)) for col in zip(*s)]
-fmt = "    ".join("{{:{}}}".format(x) for x in lens)
+fmt = "    ".join(f"{{:{x}}}" for x in lens)
 t = [fmt.format(*row) for row in s]
 print("\n".join(t))

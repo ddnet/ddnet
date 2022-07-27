@@ -15,7 +15,7 @@ def generate_cases():
 	return [(unicode.unhex(u["Value"]), unicode.unhex(u["Simple_Lowercase_Mapping"])) for u in ud if u["Simple_Lowercase_Mapping"]]
 
 def gen_header(cases):
-	print("""\
+	print(f"""\
 #include <stdint.h>
 
 struct UPPER_LOWER
@@ -26,10 +26,10 @@ struct UPPER_LOWER
 
 enum
 {{
-\tNUM_TOLOWER = {},
+\tNUM_TOLOWER = {len(cases)},
 }};
 
-extern const struct UPPER_LOWER tolowermap[];""".format(len(cases)))
+extern const struct UPPER_LOWER tolowermap[];""")
 
 def gen_data(cases):
 	print("""\
@@ -39,7 +39,7 @@ def gen_data(cases):
 
 const struct UPPER_LOWER tolowermap[] = {""")
 	for upper_code, lower_code in cases:
-		print("\t{{{}, {}}},".format(upper_code, lower_code))
+		print(f"\t{{{upper_code}, {lower_code}}},")
 	print("};")
 
 def main():

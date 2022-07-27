@@ -18,7 +18,7 @@ def get_curl_calls(path):
 			if (filename.endswith(".cpp") or
 					filename.endswith(".c") or
 					filename.endswith(".h")):
-				with open(os.path.join(directory, filename)) as f:
+				with open(os.path.join(directory, filename), encoding="utf-8") as f:
 					contents = f.read()
 				names = names.union(CURL_RE.findall(contents))
 	return names
@@ -27,11 +27,11 @@ def assembly_source(names):
 	names = sorted(names)
 	result = []
 	for name in names:
-		result.append(".type {},@function".format(name))
+		result.append(f".type {name},@function")
 	for name in names:
-		result.append(".global {}".format(name))
+		result.append(f".global {name}")
 	for name in names:
-		result.append("{}:".format(name))
+		result.append(f"{name}:")
 	return "\n".join(result + [""])
 
 DEFAULT_OUTPUT="libcurl.so"
@@ -40,8 +40,8 @@ DEFAULT_SONAME="libcurl.so.4"
 def main():
 	p = argparse.ArgumentParser(description="Create a stub shared object for linking")
 	p.add_argument("-k", "--keep", action="store_true", help="Keep the intermediary assembly file")
-	p.add_argument("--output", help="Output filename (default: {})".format(DEFAULT_OUTPUT), default=DEFAULT_OUTPUT)
-	p.add_argument("--soname", help="soname of the produced shared object (default: {})".format(DEFAULT_SONAME), default=DEFAULT_SONAME)
+	p.add_argument("--output", help=f"Output filename (default: {DEFAULT_OUTPUT})", default=DEFAULT_OUTPUT)
+	p.add_argument("--soname", help=f"soname of the produced shared object (default: {DEFAULT_SONAME})", default=DEFAULT_SONAME)
 	p.add_argument("--functions", metavar="FUNCTION", nargs="+", help="Function symbols that should be put into the shared object (default: look for curl_* names in the source code)")
 	p.add_argument("--link-args", help="Colon-separated list of additional linking arguments")
 	args = p.parse_args()
@@ -56,7 +56,7 @@ def main():
 
 	with tempfile.NamedTemporaryFile("w", suffix=".s", delete=not args.keep) as f:
 		if args.keep:
-			print("using {} as temporary file".format(f.name))
+			print(f"using {f.name} as temporary file")
 		f.write(assembly_source(functions))
 		f.flush()
 		subprocess.check_call([
@@ -64,7 +64,7 @@ def main():
 		] + extra_link_args + [
 			"-shared",
 			"-nostdlib", # don't need to link to libc
-			"-Wl,-soname,{}".format(args.soname),
+			f"-Wl,-soname,{args.soname}",
 			"-o", args.output,
 			f.name,
 		])
