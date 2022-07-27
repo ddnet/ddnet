@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 
-indent-string='	'
+indent-string='    '
 
 disable=
   C0103, # invalid-name
