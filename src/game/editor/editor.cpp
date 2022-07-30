@@ -6412,17 +6412,17 @@ void CEditor::OnUpdate()
 			m_MouseWorldY = 0.0f;
 		}
 	}
+}
 
+void CEditor::OnRender()
+{
 	// toggle gui
 	if(Input()->KeyPress(KEY_TAB))
 		m_GuiActive = !m_GuiActive;
 
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
-}
 
-void CEditor::OnRender()
-{
 	if(m_Animate)
 		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
 	else
