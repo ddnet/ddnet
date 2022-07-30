@@ -7,7 +7,6 @@
 
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
-#include <game/version.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
@@ -317,7 +316,7 @@ void CProjectile::Snap(int SnappingClient)
 		pEntData->m_EntityClass = ENTITYCLASS_PROJECTILE;
 	}
 
-	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
 	{
 		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);

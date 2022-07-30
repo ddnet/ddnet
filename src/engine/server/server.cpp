@@ -779,6 +779,17 @@ int CServer::DistinctClientCount() const
 	return ClientCount;
 }
 
+int CServer::GetClientVersion(int ClientID) const
+{
+	// Assume latest client version for server demos
+	if(ClientID == SERVER_DEMO_CLIENT)
+		return CLIENT_VERSIONNR;
+
+	CClientInfo Info;
+	GetClientInfo(ClientID, &Info);
+	return Info.m_DDNetVersion;
+}
+
 static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
 {
 	int MsgId = pMsg->m_MsgID;

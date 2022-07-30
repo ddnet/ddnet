@@ -14,7 +14,6 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
-#include <game/version.h>
 
 struct CAntibotRoundData;
 
@@ -61,6 +60,7 @@ public:
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 
+	virtual int GetClientVersion(int ClientID) const = 0;
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
 	template<class T, typename std::enable_if<!protocol7::is_sixup<T>::value, int>::type = 0>
@@ -157,19 +157,11 @@ public:
 		return SendMsg(&Packer, Flags, ClientID);
 	}
 
-	int GetClientVersion(int ClientID) const
-	{
-		CClientInfo Info;
-		GetClientInfo(ClientID, &Info);
-		return Info.m_DDNetVersion;
-	}
-
 	bool Translate(int &Target, int Client)
 	{
 		if(IsSixup(Client))
 			return true;
-		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
-		if(ClientVersion >= VERSION_DDNET_OLD)
+		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
 		int *pMap = GetIdMap(Client);
 		bool Found = false;
@@ -189,8 +181,7 @@ public:
 	{
 		if(IsSixup(Client))
 			return true;
-		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
-		if(ClientVersion >= VERSION_DDNET_OLD)
+		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
 		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
 		int *pMap = GetIdMap(Client);
