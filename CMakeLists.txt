@@ -2307,8 +2307,6 @@ if(SERVER)
     entities/dragger.h
     entities/dragger_beam.cpp
     entities/dragger_beam.h
-    entities/flag.cpp
-    entities/flag.h
     entities/gun.cpp
     entities/gun.h
     entities/laser.cpp
