@@ -697,6 +697,7 @@ void CEditor::SelectLayer(int LayerIndex, int GroupIndex)
 		m_SelectedGroup = GroupIndex;
 
 	m_vSelectedLayers.clear();
+	m_vSelectedQuads.clear();
 	AddSelectedLayer(LayerIndex);
 }
 
