@@ -643,8 +643,8 @@ const char *CServer::GetAuthName(int ClientID) const
 
 bool CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 {
-	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
-	dbg_assert(pInfo != 0, "info can not be null");
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "ClientID is not valid");
+	dbg_assert(pInfo != nullptr, "pInfo cannot be null");
 
 	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 	{
@@ -659,8 +659,8 @@ bool CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 		}
 		else
 		{
-			pInfo->m_pConnectionID = 0;
-			pInfo->m_pDDNetVersionStr = 0;
+			pInfo->m_pConnectionID = nullptr;
+			pInfo->m_pDDNetVersionStr = nullptr;
 		}
 		return true;
 	}
@@ -669,7 +669,7 @@ bool CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 
 void CServer::SetClientDDNetVersion(int ClientID, int DDNetVersion)
 {
-	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "ClientID is not valid");
 
 	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 	{
