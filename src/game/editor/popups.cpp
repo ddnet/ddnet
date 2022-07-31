@@ -1272,7 +1272,8 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 		if(i == -1)
 		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpImages[i], "None", i == g_SelectImageCurrent, &Button))
+			static int s_NoneButton = 0;
+			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectImageCurrent, &Button))
 				g_SelectImageSelected = -1;
 		}
 		else
@@ -1374,12 +1375,10 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 		CUIRect Button;
 		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
 
-		//if(pEditor->UI()->MouseInside(&Button))
-		//	ShowSound = i;
-
 		if(i == -1)
 		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpSounds[i], "None", i == g_SelectSoundCurrent, &Button))
+			static int s_NoneButton = 0;
+			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectSoundCurrent, &Button))
 				g_SelectSoundSelected = -1;
 		}
 		else
