@@ -1374,9 +1374,6 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 		CUIRect Button;
 		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
 
-		//if(pEditor->UI()->MouseInside(&Button))
-		//	ShowSound = i;
-
 		if(i == -1)
 		{
 			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpSounds[i], "None", i == g_SelectSoundCurrent, &Button))
