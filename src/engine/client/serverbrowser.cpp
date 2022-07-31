@@ -512,18 +512,13 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 
 void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 {
-	TRISTATE Fav = pEntry->m_Info.m_Favorite;
-	TRISTATE FavAllowPing = pEntry->m_Info.m_FavoriteAllowPing;
-	bool Off = pEntry->m_Info.m_Official;
-	NETADDR aAddresses[MAX_SERVER_ADDRESSES];
-	mem_copy(aAddresses, pEntry->m_Info.m_aAddresses, sizeof(aAddresses));
-	int NumAddresses = pEntry->m_Info.m_NumAddresses;
+	CServerInfo TmpInfo = pEntry->m_Info;
 	pEntry->m_Info = Info;
-	pEntry->m_Info.m_Favorite = Fav;
-	pEntry->m_Info.m_FavoriteAllowPing = FavAllowPing;
-	pEntry->m_Info.m_Official = Off;
-	mem_copy(pEntry->m_Info.m_aAddresses, aAddresses, sizeof(pEntry->m_Info.m_aAddresses));
-	pEntry->m_Info.m_NumAddresses = NumAddresses;
+	pEntry->m_Info.m_Favorite = TmpInfo.m_Favorite;
+	pEntry->m_Info.m_FavoriteAllowPing = TmpInfo.m_FavoriteAllowPing;
+	pEntry->m_Info.m_Official = TmpInfo.m_Official;
+	mem_copy(pEntry->m_Info.m_aAddresses, TmpInfo.m_aAddresses, sizeof(pEntry->m_Info.m_aAddresses));
+	pEntry->m_Info.m_NumAddresses = TmpInfo.m_NumAddresses;
 	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 
 	class CPlayerScoreNameLess
