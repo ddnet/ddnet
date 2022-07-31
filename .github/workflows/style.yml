@@ -50,3 +50,6 @@ jobs:
       run: |
         pylint --version
         find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint
+    - name: Unused headers
+      run: |
+        find src -name '*.h' | while read i; do grep -r -q $(basename $i) || (echo "Header file $i is unused" && exit 1); done

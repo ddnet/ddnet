@@ -1948,7 +1948,6 @@ if(CLIENT)
     backend/opengl/opengl_sl_program.cpp
     backend/opengl/opengl_sl_program.h
     backend/opengles/backend_opengles.cpp
-    backend/opengles/backend_opengles.h
     backend/opengles/backend_opengles3.cpp
     backend/opengles/backend_opengles3.h
     backend/opengles/gles_class_defines.h
@@ -2307,8 +2306,6 @@ if(SERVER)
     entities/dragger.h
     entities/dragger_beam.cpp
     entities/dragger_beam.h
-    entities/flag.cpp
-    entities/flag.h
     entities/gun.cpp
     entities/gun.h
     entities/laser.cpp
