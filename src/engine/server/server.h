@@ -300,7 +300,7 @@ public:
 	int GetAuthedState(int ClientID) const override;
 	const char *GetAuthName(int ClientID) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
-	int GetClientInfo(int ClientID, CClientInfo *pInfo) const override;
+	bool GetClientInfo(int ClientID, CClientInfo *pInfo) const override;
 	void SetClientDDNetVersion(int ClientID, int DDNetVersion) override;
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size) const override;
 	const char *ClientName(int ClientID) const override;

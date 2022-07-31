@@ -1365,8 +1365,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	IServer::CClientInfo Info;
-	Server()->GetClientInfo(ClientID, &Info);
-	if(Info.m_GotDDNetVersion)
+	if(Server()->GetClientInfo(ClientID, &Info) && Info.m_GotDDNetVersion)
 	{
 		if(OnClientDDNetVersionKnown(ClientID))
 			return; // kicked
@@ -1574,7 +1573,7 @@ void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
 bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 {
 	IServer::CClientInfo Info;
-	Server()->GetClientInfo(ClientID, &Info);
+	dbg_assert(Server()->GetClientInfo(ClientID, &Info), "failed to get client info");
 	int ClientVersion = Info.m_DDNetVersion;
 	dbg_msg("ddnet", "cid=%d version=%d", ClientID, ClientVersion);
 
@@ -2258,8 +2257,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
 		{
 			IServer::CClientInfo Info;
-			Server()->GetClientInfo(ClientID, &Info);
-			if(Info.m_GotDDNetVersion)
+			if(Server()->GetClientInfo(ClientID, &Info) && Info.m_GotDDNetVersion)
 			{
 				return;
 			}

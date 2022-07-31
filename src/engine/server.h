@@ -56,7 +56,7 @@ public:
 	virtual int ClientCountry(int ClientID) const = 0;
 	virtual bool ClientIngame(int ClientID) const = 0;
 	virtual bool ClientAuthed(int ClientID) const = 0;
-	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
+	virtual bool GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 

@@ -641,7 +641,7 @@ const char *CServer::GetAuthName(int ClientID) const
 	return m_AuthManager.KeyIdent(Key);
 }
 
-int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
+bool CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 {
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
 	dbg_assert(pInfo != 0, "info can not be null");
@@ -662,9 +662,9 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 			pInfo->m_pConnectionID = 0;
 			pInfo->m_pDDNetVersionStr = 0;
 		}
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 void CServer::SetClientDDNetVersion(int ClientID, int DDNetVersion)
@@ -786,8 +786,9 @@ int CServer::GetClientVersion(int ClientID) const
 		return CLIENT_VERSIONNR;
 
 	CClientInfo Info;
-	GetClientInfo(ClientID, &Info);
-	return Info.m_DDNetVersion;
+	if(GetClientInfo(ClientID, &Info))
+		return Info.m_DDNetVersion;
+	return VERSION_NONE;
 }
 
 static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
