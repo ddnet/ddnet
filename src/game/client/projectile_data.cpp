@@ -18,8 +18,10 @@ CProjectileData ExtractProjectileInfo(const CNetObj_Projectile *pProj, CGameWorl
 {
 	if(UseProjectileExtraInfo(pProj))
 	{
+		static_assert(sizeof(CNetObj_DDNetProjectile) == sizeof(CNetObj_Projectile),
+			"CNetObj_DDNetProjectile must have same layout as CNetObj_Projectile");
 		CNetObj_DDNetProjectile Proj;
-		mem_copy(&Proj, pProj, sizeof(Proj));
+		Proj = *pProj;
 		return ExtractProjectileInfoDDNet(&Proj, pGameWorld);
 	}
 

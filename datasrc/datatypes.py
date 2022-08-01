@@ -187,9 +187,6 @@ def EmitDefinition(root, name):
 
 # Network stuff after this
 
-class Object:
-	pass
-
 class Enum:
 	def __init__(self, name, values):
 		self.name = name
@@ -211,8 +208,14 @@ class NetObject:
 		self.struct_name = f"CNetObj_{self.name}"
 		self.enum_name = f"NETOBJTYPE_{self.name.upper()}"
 		self.variables = variables
+		for var in variables:
+			var.parent = self
 		self.ex = ex
 		self.validate_size = validate_size
+	def __str__(self):
+		return self.struct_name
+	def __repr__(self):
+		return self.struct_name
 
 	def emit_declaration(self):
 		lines = []
@@ -317,6 +320,9 @@ class NetVariable:
 	def __init__(self, name, default=None):
 		self.name = name
 		self.default = None if default is None else str(default)
+		self.parent = None
+	def __str__(self):
+		return self.name
 	def emit_declaration(self):
 		return []
 	def emit_validate_obj(self):
@@ -432,4 +438,97 @@ class NetArray(NetVariable):
 		for i in range(self.size):
 			self.var.name = self.base_name + f"[{int(i)}]"
 			lines += self.var.emit_unpack_msg_check()
+		return lines
+
+class NetFunction:
+	def __init__(self, rhs=None):
+		self.rhs = rhs
+		self.parent = None
+	def emit_declaration(self):
+		return []
+	def emit_validate_obj(self):
+		return []
+	def emit_uncompressed_unpack_obj(self):
+		return []
+	def emit_pack(self):
+		return []
+	def emit_unpack_msg(self):
+		return []
+	def emit_unpack_msg_check(self):
+		return []
+
+class NetOperatorAssignment(NetFunction):
+	def __init__(self, rhs=None, static_assert=False):
+		NetFunction.__init__(self, rhs)
+		self.static_assert = static_assert
+	def emit_declaration(self):
+		if self.rhs:
+			lines = [f"{self.parent}& operator=(const {self.rhs} &rhs)"]
+		else:
+			lines = [f"{self.parent}& operator=(const {self.parent} &rhs)"]
+		lines += ["{"]
+		if self.static_assert and self.rhs:
+			lines += [f"\tstatic_assert(sizeof({self.parent}) == sizeof({self.rhs}));"]
+		if self.rhs:
+			for varlhs, varrhs in zip(self.parent.variables, self.rhs.variables):
+				if isinstance(varlhs, NetVariable) and isinstance(varrhs, NetVariable):
+					lines += [f"\t{varlhs} = rhs.{varrhs};"]
+		else:
+			for var in self.parent.variables:
+				if isinstance(var, NetVariable):
+					lines += [f"\t{var} = rhs.{var};"]
+		lines += ["\treturn *this;"]
+		lines += ["}"]
+		return lines
+
+class NetOperatorEquality(NetFunction):
+	def __init__(self, rhs=None, static_assert=False):
+		NetFunction.__init__(self, rhs)
+		self.static_assert = static_assert
+	def emit_declaration(self):
+		lines = [f"bool operator==(const {self.parent} &rhs)"]
+		lines += ["{"]
+		if self.static_assert and self.rhs:
+			lines += [f"\tstatic_assert(sizeof({self.parent}) == sizeof({self.rhs}));"]
+		if self.parent.base:
+			## need import here due to circular import
+			from network import Objects # pylint: disable=import-outside-toplevel
+			base = next((base for base in Objects if base.name == self.parent.base))
+			lines += [f"\treturn {base.variables[0]} == rhs.{base.variables[0]}"]
+			for var in base.variables[1:]:
+				lines += [f"\t\t&& {var} == rhs.{var}"]
+			lines += [f"\t\t&& {self.parent.variables[0]} == rhs.{self.parent.variables[0]}"]
+		else:
+			lines += [f"\treturn {self.parent.variables[0]} == rhs.{self.parent.variables[0]}"]
+		for var in self.parent.variables[1:]:
+			if isinstance(var, NetVariable):
+				lines += [f"\t\t&& {var} == rhs.{var}"]
+		lines += ["\t\t;"]
+		lines += ["}"]
+		return lines
+
+class NetOperatorInequality(NetFunction):
+	def __init__(self, rhs=None, static_assert=False):
+		NetFunction.__init__(self, rhs)
+		self.static_assert = static_assert
+	def emit_declaration(self):
+		lines = [f"bool operator!=(const {self.parent} &rhs)"]
+		lines += ["{"]
+		if self.static_assert and self.rhs:
+			lines += [f"\tstatic_assert(sizeof({self.parent}) == sizeof({self.rhs}));"]
+		if self.parent.base:
+			## need import here due to circular import
+			from network import Objects # pylint: disable=import-outside-toplevel
+			base = next((base for base in Objects if base.name == self.parent.base))
+			lines += [f"\treturn {base.variables[0]} != rhs.{base.variables[0]}"]
+			for var in base.variables[1:]:
+				lines += [f"\t\t|| {var} != rhs.{var}"]
+			lines += [f"\t\t|| {self.parent.variables[0]} != rhs.{self.parent.variables[0]}"]
+		else:
+			lines += [f"\treturn {self.parent.variables[0]} != rhs.{self.parent.variables[0]}"]
+		for var in self.parent.variables[1:]:
+			if isinstance(var, NetVariable):
+				lines += [f"\t\t|| {var} != rhs.{var}"]
+		lines += ["\t\t;"]
+		lines += ["}"]
 		return lines

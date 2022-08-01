@@ -1304,9 +1304,9 @@ void CGameClient::OnNewSnapshot()
 						// reuse the result from the previous evolve if the snapped character didn't change since the previous snapshot
 						if(EvolveCur && m_aClients[Item.m_ID].m_Evolved.m_Tick == Client()->PrevGameTick(g_Config.m_ClDummy))
 						{
-							if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Prev, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
+							if(m_Snap.m_aCharacters[Item.m_ID].m_Prev == m_aClients[Item.m_ID].m_Snapped)
 								m_Snap.m_aCharacters[Item.m_ID].m_Prev = m_aClients[Item.m_ID].m_Evolved;
-							if(mem_comp(&m_Snap.m_aCharacters[Item.m_ID].m_Cur, &m_aClients[Item.m_ID].m_Snapped, sizeof(CNetObj_Character)) == 0)
+							if(m_Snap.m_aCharacters[Item.m_ID].m_Cur == m_aClients[Item.m_ID].m_Snapped)
 								m_Snap.m_aCharacters[Item.m_ID].m_Cur = m_aClients[Item.m_ID].m_Evolved;
 						}
 
