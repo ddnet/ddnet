@@ -104,15 +104,13 @@ public:
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientID)
 	{
-		CNetMsg_Sv_Emoticon MsgCopy;
-		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+		CNetMsg_Sv_Emoticon MsgCopy(*pMsg);
 		return Translate(MsgCopy.m_ClientID, ClientID) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
-		CNetMsg_Sv_Chat MsgCopy;
-		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+		CNetMsg_Sv_Chat MsgCopy(*pMsg);
 
 		char aBuf[1000];
 		if(MsgCopy.m_ClientID >= 0 && !Translate(MsgCopy.m_ClientID, ClientID))
@@ -137,8 +135,7 @@ public:
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_KillMsg *pMsg, int Flags, int ClientID)
 	{
-		CNetMsg_Sv_KillMsg MsgCopy;
-		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+		CNetMsg_Sv_KillMsg MsgCopy(*pMsg);
 		if(!Translate(MsgCopy.m_Victim, ClientID))
 			return 0;
 		if(!Translate(MsgCopy.m_Killer, ClientID))

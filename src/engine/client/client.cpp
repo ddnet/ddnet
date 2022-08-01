@@ -964,7 +964,7 @@ int CClient::GetCurrentRaceTime()
 
 void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
-	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
+	*pServerInfo = m_CurrentServerInfo;
 
 	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
 		str_copy(pServerInfo->m_aGameType, "DDraceNetwork");
@@ -1552,7 +1552,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			// us.
 			if(SavedType >= m_CurrentServerInfo.m_Type)
 			{
-				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
+				m_CurrentServerInfo = Info;
 				m_CurrentServerInfo.m_NumAddresses = 1;
 				m_CurrentServerInfo.m_aAddresses[0] = ServerAddress();
 				m_CurrentServerInfoRequestTime = -1;

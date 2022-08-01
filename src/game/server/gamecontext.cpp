@@ -1201,7 +1201,7 @@ void CGameContext::OnClientPredictedEarlyInput(int ClientID, void *pInput)
 		// because this function is called on all inputs, while
 		// `OnClientPredictedInput` is only called on the first input of each
 		// tick.
-		mem_copy(&m_aLastPlayerInput[ClientID], pApplyInput, sizeof(m_aLastPlayerInput[ClientID]));
+		m_aLastPlayerInput[ClientID] = *pApplyInput;
 		m_aPlayerHasInput[ClientID] = true;
 	}
 

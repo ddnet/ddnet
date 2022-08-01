@@ -505,19 +505,19 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
 		// save reseted input
-		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
+		m_SavedInput = m_Input;
 		return;
 	}
 
 	// copy new input
-	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
+	m_Input = *pNewInput;
 	//m_NumInputs++;
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
 		m_Input.m_TargetY = -1;
 
-	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
+	m_SavedInput = m_Input;
 }
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
@@ -533,8 +533,8 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	}
 
 	m_NumInputs++;
-	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
-	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
+	m_LatestPrevInput = m_LatestInput;
+	m_LatestInput = *pNewInput;
 
 	// it is not allowed to aim in the center
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
@@ -546,7 +546,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		FireWeapon();
 	}
 
-	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
+	m_LatestPrevInput = m_LatestInput;
 }
 
 void CCharacter::ResetInput()
@@ -936,7 +936,7 @@ void CCharacter::HandleTuneLayer()
 
 void CCharacter::DDRaceTick()
 {
-	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
+	m_Input = m_SavedInput;
 	if(m_Core.m_LiveFrozen && !m_CanMoveInFreeze && !m_Core.m_Super)
 	{
 		m_Input.m_Direction = 0;

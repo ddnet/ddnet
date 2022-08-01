@@ -526,14 +526,14 @@ protected:
 		case DIRECTION_UP:
 			for(int y = 0; y < m_Height - ShiftBy; ++y)
 			{
-				mem_copy(&pTiles[y * m_Width], &pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
+				std::copy_n(&pTiles[(y + ShiftBy) * m_Width], m_Width, &pTiles[y * m_Width]);
 				mem_zero(&pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
 			}
 			break;
 		case DIRECTION_DOWN:
 			for(int y = m_Height - 1; y >= ShiftBy; --y)
 			{
-				mem_copy(&pTiles[y * m_Width], &pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
+				std::copy_n(&pTiles[(y - ShiftBy) * m_Width], m_Width, &pTiles[y * m_Width]);
 				mem_zero(&pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
 			}
 		}

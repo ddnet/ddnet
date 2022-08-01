@@ -800,6 +800,17 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec2 m_Offset;
 		float m_Rotation;
 		float m_Padding;
+
+		SUniformQuadPushGBufferObject &operator=(const SQuadRenderInfo &QuadInfo)
+		{
+			static_assert(sizeof(SUniformQuadPushGBufferObject) == sizeof(SQuadRenderInfo));
+			m_VertColor = QuadInfo.m_Color;
+			m_Offset = QuadInfo.m_Offsets;
+			m_Rotation = QuadInfo.m_Rotation;
+			m_Padding = QuadInfo.m_Padding;
+
+			return *this;
+		}
 	};
 
 	struct SUniformQuadPushGPos
@@ -6853,7 +6864,7 @@ public:
 		{
 			SUniformQuadPushGPos PushConstantVertex;
 
-			mem_copy(&PushConstantVertex.m_BOPush, &pCommand->m_pQuadInfo[0], sizeof(PushConstantVertex.m_BOPush));
+			PushConstantVertex.m_BOPush = pCommand->m_pQuadInfo[0];
 
 			mem_copy(PushConstantVertex.m_aPos, m.data(), sizeof(PushConstantVertex.m_aPos));
 			PushConstantVertex.m_QuadOffset = pCommand->m_QuadOffset;

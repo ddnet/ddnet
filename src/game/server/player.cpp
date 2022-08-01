@@ -524,7 +524,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	// check for activity
 	if(mem_comp(pNewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
-		mem_copy(m_pLastTarget, pNewInput, sizeof(CNetObj_PlayerInput));
+		*m_pLastTarget = *pNewInput;
 		// Ignore the first direct input and keep the player afk as it is sent automatically
 		if(m_LastTargetInit)
 			UpdatePlaytime();

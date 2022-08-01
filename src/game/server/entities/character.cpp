@@ -662,19 +662,19 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		m_LastAction = Server()->Tick();
 
 	// copy new input
-	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
+	m_Input = *pNewInput;
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
 		m_Input.m_TargetY = -1;
 
-	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
+	m_SavedInput = m_Input;
 }
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
-	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
-	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
+	m_LatestPrevInput = m_LatestInput;
+	m_LatestInput = *pNewInput;
 	m_NumInputs++;
 
 	// it is not allowed to aim in the center
@@ -689,8 +689,8 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		FireWeapon();
 	}
 
-	mem_copy(&m_LatestPrevPrevInput, &m_LatestPrevInput, sizeof(m_LatestInput));
-	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
+	m_LatestPrevPrevInput = m_LatestPrevInput;
+	m_LatestPrevInput = m_LatestInput;
 }
 
 void CCharacter::ResetHook()
@@ -1988,7 +1988,7 @@ void CCharacter::SetRescue()
 
 void CCharacter::DDRaceTick()
 {
-	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
+	m_Input = m_SavedInput;
 	m_Armor = (m_FreezeTime >= 0) ? clamp(10 - (m_FreezeTime / 15), 0, 10) : 0;
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();

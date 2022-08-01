@@ -543,7 +543,7 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 	if(m_RecvUnpacker.m_Data.m_DataSize < 5 || ClientExists(Addr))
 		return 0; // silently ignore
 
-	mem_copy(&ResponseToken, Packet.m_aChunkData + 1, 4);
+	mem_copy(&ResponseToken, Packet.m_aChunkData + 1, sizeof(ResponseToken));
 
 	if(ControlMsg == 5)
 	{
@@ -564,7 +564,7 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 	{
 		SECURITY_TOKEN MyToken = GetToken(Addr);
 		unsigned char aToken[4];
-		mem_copy(aToken, &MyToken, 4);
+		mem_copy(aToken, &MyToken, sizeof(MyToken));
 
 		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CONNECTACCEPT, aToken, sizeof(aToken), ResponseToken, true);
 		if(Token == MyToken)
@@ -757,7 +757,7 @@ void CNetServer::SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token)
 {
 	SECURITY_TOKEN MyToken = GetToken(Addr);
 	unsigned char aBuf[512] = {};
-	mem_copy(aBuf, &MyToken, 4);
+	mem_copy(aBuf, &MyToken, sizeof(MyToken));
 	int Size = (Token == NET_SECURITY_TOKEN_UNKNOWN) ? 512 : 4;
 	CNetBase::SendControlMsg(m_Socket, &Addr, 0, 5, aBuf, Size, Token, true);
 }
@@ -770,8 +770,8 @@ int CNetServer::SendConnlessSixup(CNetChunk *pChunk, SECURITY_TOKEN ResponseToke
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
 	aBuffer[0] = NET_PACKETFLAG_CONNLESS << 2 | 1;
 	SECURITY_TOKEN Token = GetToken(pChunk->m_Address);
-	mem_copy(aBuffer + 1, &ResponseToken, 4);
-	mem_copy(aBuffer + 5, &Token, 4);
+	mem_copy(aBuffer + 1, &ResponseToken, sizeof(ResponseToken));
+	mem_copy(aBuffer + 5, &Token, sizeof(Token));
 	mem_copy(aBuffer + 9, pChunk->m_pData, pChunk->m_DataSize);
 	net_udp_send(m_Socket, &pChunk->m_Address, aBuffer, pChunk->m_DataSize + 9);
 

@@ -511,7 +511,7 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SE
 		CNetChunkResend *pFirst = pResendBuffer->First();
 
 		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend) + pFirst->m_DataSize);
-		mem_copy(pResend, pFirst, sizeof(CNetChunkResend) + pFirst->m_DataSize);
+		mem_copy((void*)pResend, (void*)pFirst, sizeof(CNetChunkResend) + pFirst->m_DataSize);
 
 		pResendBuffer->PopFirst();
 	}
