@@ -6,7 +6,6 @@
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/teamscore.h>
-#include <game/version.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -174,7 +173,7 @@ void CPickup::Snap(int SnappingClient)
 	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))

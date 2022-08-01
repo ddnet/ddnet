@@ -641,10 +641,10 @@ const char *CServer::GetAuthName(int ClientID) const
 	return m_AuthManager.KeyIdent(Key);
 }
 
-int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
+bool CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 {
-	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
-	dbg_assert(pInfo != 0, "info can not be null");
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "ClientID is not valid");
+	dbg_assert(pInfo != nullptr, "pInfo cannot be null");
 
 	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 	{
@@ -659,17 +659,17 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 		}
 		else
 		{
-			pInfo->m_pConnectionID = 0;
-			pInfo->m_pDDNetVersionStr = 0;
+			pInfo->m_pConnectionID = nullptr;
+			pInfo->m_pDDNetVersionStr = nullptr;
 		}
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 void CServer::SetClientDDNetVersion(int ClientID, int DDNetVersion)
 {
-	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "ClientID is not valid");
 
 	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 	{
@@ -777,6 +777,18 @@ int CServer::DistinctClientCount() const
 	}
 
 	return ClientCount;
+}
+
+int CServer::GetClientVersion(int ClientID) const
+{
+	// Assume latest client version for server demos
+	if(ClientID == SERVER_DEMO_CLIENT)
+		return CLIENT_VERSIONNR;
+
+	CClientInfo Info;
+	if(GetClientInfo(ClientID, &Info))
+		return Info.m_DDNetVersion;
+	return VERSION_NONE;
 }
 
 static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)

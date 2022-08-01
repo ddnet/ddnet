@@ -1,21 +1,21 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <antibot/antibot_data.h>
-
-#include <engine/antibot.h>
-
-#include <engine/shared/config.h>
-#include <game/generated/server_data.h>
-#include <game/mapitems.h>
-#include <game/server/gamecontext.h>
-#include <game/server/gamecontroller.h>
-#include <game/server/player.h>
-
 #include "character.h"
-#include "game/generated/protocol.h"
 #include "laser.h"
 #include "projectile.h"
 
+#include <antibot/antibot_data.h>
+
+#include <engine/antibot.h>
+#include <engine/shared/config.h>
+
+#include <game/generated/protocol.h>
+#include <game/generated/server_data.h>
+#include <game/mapitems.h>
+
+#include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
+#include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
 
@@ -948,9 +948,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 //TODO: Move the emote stuff to a function
 void CCharacter::SnapCharacter(int SnappingClient, int ID)
 {
-	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ?
-					    GameServer()->GetClientVersion(SnappingClient) :
-					    CLIENT_VERSIONNR;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	CCharacterCore *pCore;
 	int Tick, Emote = m_EmoteType, Weapon = m_Core.m_ActiveWeapon, AmmoCount = 0,
 		  Health = 0, Armor = 0;

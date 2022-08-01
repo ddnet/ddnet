@@ -7,7 +7,6 @@
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/teamscore.h>
-#include <game/version.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -106,7 +105,7 @@ void CLight::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
-	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
