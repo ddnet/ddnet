@@ -2548,12 +2548,13 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		UI()->DoLabel(&Label, Localize("DDRace HUD"), HeadlineFontSize, TEXTALIGN_LEFT);
 
 		// Switches of various DDRace HUD elements
-		RightView.HSplitTop(SectionTotalMargin + 4 * LineSize, &Section, &RightView);
+		RightView.HSplitTop(SectionTotalMargin + 5 * LineSize, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDDRaceScoreBoard, Localize("Use DDRace Scoreboard"), &g_Config.m_ClDDRaceScoreBoard, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIDs, Localize("Show client IDs in scoreboard"), &g_Config.m_ClShowIDs, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDDRace, Localize("Show DDRace HUD"), &g_Config.m_ClShowhudDDRace, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowRecord, Localize("Show records"), &g_Config.m_ClShowRecord, &Section, LineSize);
 		if(g_Config.m_ClShowhudDDRace)
 		{
 			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudJumpsIndicator, Localize("Show jumps indicator"), &g_Config.m_ClShowhudJumpsIndicator, &Section, LineSize);
