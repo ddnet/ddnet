@@ -66,7 +66,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
-	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
+	m_LatestPrevPrevInput = CNetObj_PlayerInput();
 	m_LatestPrevPrevInput.m_TargetY = -1;
 	m_NumInputs = 0;
 	m_SpawnTick = Server()->Tick();
@@ -846,10 +846,8 @@ void CCharacter::TickDefered()
 
 	// update the m_SendCore if needed
 	{
-		CNetObj_Character Predicted;
-		CNetObj_Character Current;
-		mem_zero(&Predicted, sizeof(Predicted));
-		mem_zero(&Current, sizeof(Current));
+		CNetObj_Character Predicted{};
+		CNetObj_Character Current{};
 		m_ReckoningCore.Write(&Predicted);
 		m_Core.Write(&Current);
 

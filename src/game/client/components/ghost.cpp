@@ -49,7 +49,7 @@ void CGhost::GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Charac
 
 void CGhost::GetNetObjCharacter(CNetObj_Character *pChar, const CGhostCharacter *pGhostChar)
 {
-	mem_zero(pChar, sizeof(CNetObj_Character));
+	*pChar = CNetObj_Character();
 	pChar->m_X = pGhostChar->m_X;
 	pChar->m_Y = pGhostChar->m_Y;
 	pChar->m_VelX = pGhostChar->m_VelX;

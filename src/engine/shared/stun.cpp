@@ -35,7 +35,7 @@ size_t StunMessagePrepare(unsigned char *pBuffer, size_t BufferSize, CStunData *
 bool StunMessageParse(const unsigned char *pMessage, size_t MessageSize, const CStunData *pData, bool *pSuccess, NETADDR *pAddr)
 {
 	*pSuccess = false;
-	mem_zero(pAddr, sizeof(*pAddr));
+	*pAddr = NETADDR();
 	if(MessageSize < 20)
 	{
 		return true;

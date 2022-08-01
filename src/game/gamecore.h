@@ -246,7 +246,7 @@ public:
 	} m_aWeapons[NUM_WEAPONS];
 
 	// ninja
-	struct
+	struct SNinja
 	{
 		vec2 m_ActivationDir;
 		int m_ActivationTick;

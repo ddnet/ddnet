@@ -36,7 +36,7 @@ public:
 	bool Init(FDiscordCreate pfnDiscordCreate)
 	{
 		m_pCore = 0;
-		mem_zero(&m_ActivityEvents, sizeof(m_ActivityEvents));
+		m_ActivityEvents = IDiscordActivityEvents();
 		m_pActivityManager = 0;
 
 		DiscordCreateParams Params;
@@ -66,8 +66,7 @@ public:
 	}
 	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override
 	{
-		DiscordActivity Activity;
-		mem_zero(&Activity, sizeof(DiscordActivity));
+		DiscordActivity Activity{};
 		str_copy(Activity.assets.large_image, "ddnet_logo", sizeof(Activity.assets.large_image));
 		str_copy(Activity.assets.large_text, "DDNet logo", sizeof(Activity.assets.large_text));
 		Activity.timestamps.start = time_timestamp();

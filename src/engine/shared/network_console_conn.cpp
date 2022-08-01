@@ -6,7 +6,7 @@
 void CConsoleNetConnection::Reset()
 {
 	m_State = NET_CONNSTATE_OFFLINE;
-	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_PeerAddr = NETADDR();
 	m_aErrorString[0] = 0;
 
 	m_Socket = nullptr;

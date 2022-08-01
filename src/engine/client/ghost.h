@@ -33,8 +33,7 @@ struct CGhostHeader
 
 	CGhostInfo ToGhostInfo() const
 	{
-		CGhostInfo Result;
-		mem_zero(&Result, sizeof(Result));
+		CGhostInfo Result{};
 		str_copy(Result.m_aOwner, m_aOwner);
 		str_copy(Result.m_aMap, m_aMap);
 		Result.m_NumTicks = GetTicks();

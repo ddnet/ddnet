@@ -72,7 +72,7 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 	}
 	else
 	{
-		mem_zero(&BindAddr, sizeof(BindAddr));
+		BindAddr = NETADDR();
 		BindAddr.type = NETTYPE_ALL;
 		BindAddr.port = g_Config.m_EcPort;
 	}

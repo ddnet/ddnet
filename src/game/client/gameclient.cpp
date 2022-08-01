@@ -512,7 +512,7 @@ void CGameClient::OnConnected()
 
 	m_GameWorld.Clear();
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
-	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
+	m_GameInfo = CGameInfo();
 	m_PredictedDummyID = -1;
 	LoadMapSettings();
 
@@ -1124,7 +1124,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 void CGameClient::InvalidateSnapshot()
 {
 	// clear all pointers
-	mem_zero(&m_Snap, sizeof(m_Snap));
+	m_Snap = CGameClient::CSnapState();
 	m_Snap.m_LocalClientID = -1;
 	SnapCollectEntities();
 }

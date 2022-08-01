@@ -11,8 +11,8 @@ SECURITY_TOKEN ToSecurityToken(unsigned char *pData)
 
 void CNetConnection::ResetStats()
 {
-	mem_zero(&m_Stats, sizeof(m_Stats));
-	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_Stats = NETSTATS();
+	m_PeerAddr = NETADDR();
 	m_LastUpdateTime = 0;
 }
 
@@ -45,7 +45,7 @@ void CNetConnection::Reset(bool Rejoin)
 
 	m_Buffer.Init();
 
-	mem_zero(&m_Construct, sizeof(m_Construct));
+	m_Construct = CNetPacketConstruct();
 }
 
 const char *CNetConnection::ErrorString()
@@ -102,7 +102,7 @@ int CNetConnection::Flush()
 	m_LastSendTime = time_get();
 
 	// clear construct so we can start building a new package
-	mem_zero(&m_Construct, sizeof(m_Construct));
+	m_Construct = CNetPacketConstruct();
 	return NumChunks;
 }
 
@@ -200,7 +200,7 @@ int CNetConnection::Connect(const NETADDR *pAddr, int NumAddrs)
 
 	// init connection
 	Reset();
-	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_PeerAddr = NETADDR();
 	for(int i = 0; i < NumAddrs; i++)
 	{
 		m_aConnectAddrs[i] = pAddr[i];

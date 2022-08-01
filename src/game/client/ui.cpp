@@ -34,7 +34,7 @@ void CUIElement::SUIElementRect::Reset()
 	m_Width = -1;
 	m_Height = -1;
 	m_Text.clear();
-	mem_zero(&m_Cursor, sizeof(m_Cursor));
+	m_Cursor = CTextCursor();
 	m_TextColor = ColorRGBA(-1, -1, -1, -1);
 	m_TextOutlineColor = ColorRGBA(-1, -1, -1, -1);
 	m_QuadColor = ColorRGBA(-1, -1, -1, -1);

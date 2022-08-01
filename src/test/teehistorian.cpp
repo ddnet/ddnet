@@ -30,7 +30,7 @@ protected:
 
 	TeeHistorian()
 	{
-		mem_zero(&m_Config, sizeof(m_Config));
+		m_Config = CConfig();
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) \
 	m_Config.m_##Name = (Def);
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Save, Desc)
@@ -50,7 +50,7 @@ protected:
 			0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45, 0x67, 0x89,
 			0x01, 0x23}};
 
-		mem_zero(&m_GameInfo, sizeof(m_GameInfo));
+		m_GameInfo = CTeeHistorian::CGameInfo();
 
 		m_GameInfo.m_GameUuid = CalculateUuid("test@ddnet.tw");
 		m_GameInfo.m_pServerVersion = "DDNet test";
@@ -206,8 +206,7 @@ protected:
 	}
 	void Player(int ClientID, int x, int y)
 	{
-		CNetObj_CharacterCore Char;
-		mem_zero(&Char, sizeof(Char));
+		CNetObj_CharacterCore Char{};
 		Char.m_X = x;
 		Char.m_Y = y;
 		m_TH.RecordPlayer(ClientID, &Char);

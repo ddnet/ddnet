@@ -10,8 +10,7 @@ static CNetClient g_NetOp; // main
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
-	NETADDR BindAddr;
-	mem_zero(&BindAddr, sizeof(BindAddr));
+	NETADDR BindAddr{};
 	BindAddr.type = NETTYPE_ALL;
 	g_NetOp.Open(BindAddr);
 
