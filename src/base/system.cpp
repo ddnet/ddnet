@@ -198,21 +198,6 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 
 /* */
 
-void mem_copy(void *dest, const void *source, unsigned size)
-{
-	memcpy(dest, source, size);
-}
-
-void mem_move(void *dest, const void *source, unsigned size)
-{
-	memmove(dest, source, size);
-}
-
-void mem_zero(void *block, unsigned size)
-{
-	memset(block, 0, size);
-}
-
 IOHANDLE io_open_impl(const char *filename, int flags)
 {
 	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");
@@ -3295,25 +3280,6 @@ void str_escape(char **dst, const char *src, const char *end)
 	**dst = 0;
 }
 
-int mem_comp(const void *a, const void *b, int size)
-{
-	return memcmp(a, b, size);
-}
-
-int mem_has_null(const void *block, unsigned size)
-{
-	const unsigned char *bytes = (const unsigned char *)block;
-	unsigned i;
-	for(i = 0; i < size; i++)
-	{
-		if(bytes[i] == 0)
-		{
-			return 1;
-		}
-	}
-	return 0;
-}
-
 void net_stats(NETSTATS *stats_inout)
 {
 	*stats_inout = network_stats;
@@ -4164,6 +4130,20 @@ void set_exception_handler_log_file(const char *log_file_path)
 #endif
 }
 #endif
+}
+
+int mem_has_null(const void *block, unsigned size)
+{
+	const unsigned char *bytes = (const unsigned char *)block;
+	unsigned i;
+	for(i = 0; i < size; i++)
+	{
+		if(bytes[i] == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
 
 std::chrono::nanoseconds time_get_nanoseconds()
