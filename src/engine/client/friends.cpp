@@ -139,7 +139,7 @@ void CFriends::RemoveFriend(int Index)
 {
 	if(Index >= 0 && Index < m_NumFriends)
 	{
-		mem_move(&m_aFriends[Index], &m_aFriends[Index + 1], sizeof(CFriendInfo) * (m_NumFriends - (Index + 1)));
+		std::copy(&m_aFriends[Index + 1], &m_aFriends[m_NumFriends], &m_aFriends[Index]);
 		--m_NumFriends;
 	}
 }
