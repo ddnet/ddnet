@@ -3348,8 +3348,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		const float HeaderHeight = FontSize + 5.0f + Margin;
 
 		CUIRect buttons[NUM_BINDWHEEL];
-		char pD[NUM_BINDWHEEL][8];
-		char pC[NUM_BINDWHEEL][128];
+		char pD[NUM_BINDWHEEL][MAX_BINDWHEEL_DESC];
+		char pC[NUM_BINDWHEEL][MAX_BINDWHEEL_CMD];
 
 		const char *pDescriptionFallback = "EMPTY";
 
@@ -3401,7 +3401,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
 			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
 			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
-			char aBuf[128];
+			char aBuf[MAX_BINDWHEEL_CMD];
 			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Description"), i + 1);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			static float s_OffsetName = 0.0f;

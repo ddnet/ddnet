@@ -27,8 +27,8 @@ void CBindWheel::ConBindwheel(IConsole::IResult *pResult, void *pUserData)
 void CBindWheel::ConBind(IConsole::IResult *pResult, void *pUserData)
 {
 	int bindpos = pResult->GetInteger(0);
-	char command[128];
-	char description[8];
+	char command[MAX_BINDWHEEL_CMD];
+	char description[MAX_BINDWHEEL_DESC];
 	str_format(description, sizeof(description), pResult->GetString(1));
 	str_format(command, sizeof(command), pResult->GetString(2));
 
@@ -43,8 +43,8 @@ void CBindWheel::ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, 
 	if(pResult->NumArguments() == 3)
 	{
 		int bindpos = pResult->GetInteger(0);
-		char command[128];
-		char description[8];
+		char command[MAX_BINDWHEEL_CMD];
+		char description[MAX_BINDWHEEL_DESC];
 		str_format(description, sizeof(description), pResult->GetString(1));
 		str_format(command, sizeof(command), pResult->GetString(2));
 
@@ -61,7 +61,7 @@ void CBindWheel::OnConsoleInit()
 		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
 	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConBindwheel, this, "Open bindwheel selector");
-	Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:8]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
+	Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:10]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
 	Console()->Chain("bindwheel", ConchainBindwheel, this);
 
 
@@ -173,7 +173,7 @@ void CBindWheel::OnRender()
 		float NudgeX = margin * cosf(Angle);
 		float NudgeY = 150.0f * sinf(Angle);
 
-		char aBuf[8];
+		char aBuf[MAX_BINDWHEEL_DESC];
 		str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_bindwheellist[i].description);
 		//str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
 		TextRender()->Text(0, Screen.w / 2 + NudgeX , Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);

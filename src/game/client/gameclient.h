@@ -658,8 +658,8 @@ public:
 
 	struct SClientBindWheel
 	{
-		char description[8];
-		char command[128];
+		char description[MAX_BINDWHEEL_DESC];
+		char command[MAX_BINDWHEEL_CMD];
 	};
 	SClientBindWheel m_bindwheellist[NUM_BINDWHEEL];
 	
