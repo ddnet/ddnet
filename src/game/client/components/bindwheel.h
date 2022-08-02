@@ -3,7 +3,7 @@
 #define GAME_CLIENT_COMPONENTS_BIND_WHEEL_H
 #include <game/client/component.h>
 class IConfigManager;
-
+#define NUM_BINDWHEEL 8
 class CBindWheel : public CComponent
 {
     void DrawCircle(float x, float y, float r, int Segments);

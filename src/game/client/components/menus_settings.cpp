@@ -863,7 +863,6 @@ static CKeyInfo gs_aKeys[] =
 		{"Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0},
 
 		{"Emoticon", "+emote", 0, 0},
-        {"Bindwheel", "+bindwheel", 0, 0},
 		{"Spectator mode", "+spectate", 0, 0},
 		{"Spectate next", "spectate_next", 0, 0},
 		{"Spectate previous", "spectate_previous", 0, 0},
@@ -1276,7 +1275,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
 
 		MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
-		DoSettingsControlsButtons(32, 45, MiscSettings);
+		DoSettingsControlsButtons(32, 44, MiscSettings);
 	}
 
 	UiDoListboxEnd(&s_ScrollValue, 0);
@@ -3341,6 +3340,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	{
 		CUIRect Screen = *UI()->Screen();
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
+		CUIRect LeftColumn = MainView;
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 
 		const float FontSize = 14.0f;
@@ -3353,59 +3353,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		const char *pDescriptionFallback = "EMPTY";
 
-		for(int i = 0; i < NUM_BINDWHEEL; i++)
-		{
-			str_format(pD[i], sizeof(pD[i]), GameClient()->m_bindwheellist[i].description);
-
-			str_format(pC[i], sizeof(pC[i]), GameClient()->m_bindwheellist[i].command);
-		
-			// Description
-			MainView.HSplitTop(15.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
-			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
-			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Description"), i + 1);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			static float s_OffsetName = 0.0f;
-			SUIExEditBoxProperties EditProps;
-			EditProps.m_pEmptyText = pDescriptionFallback;
-			if(UIEx()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_bindwheellist[i].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
-			{
-				str_format(GameClient()->m_bindwheellist[i].description, sizeof(GameClient()->m_bindwheellist[i].description), pD[i]);
-			}
-
-			//Command
-			//  Command 1
-			MainView.HSplitTop(5.0f, 0, &MainView);
-			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
-			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
-			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
-			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i+1);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			static float s_OffsetClan = 0.0f;
-			if(UIEx()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_bindwheellist[i].command), 14.0f, &s_OffsetClan))
-			{
-				str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), pC[i]);
-			}
-
-			if(NUM_BINDWHEEL / 2 == i + 1)
-			{
-				MainView = Column;
-
-				MainView.HSplitTop(30.0f, &Section, &MainView);
-				MainView.VSplitLeft(MainView.w * 0.5, 0, &MainView);
-			}
-		}
-
-        // Draw Circle
+		// Draw Circle
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0, 0, 0, 0.3f);
 		RenderTools()->DrawCircle(Screen.w / 2 - 55.0f, Screen.h / 2, 190.0f, 64);
 		Graphics()->QuadsEnd();
 
-			Graphics()->WrapClamp();
+		Graphics()->WrapClamp();
 		for(int i = 0; i < NUM_BINDWHEEL; i++)
 		{
 			float Angle = 2 * pi * i / NUM_BINDWHEEL;
@@ -3422,7 +3377,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 				margin = 170.0f;
 			}
 
-			float Size =  12.0f;
+			float Size = 12.0f;
 
 			float NudgeX = margin * cosf(Angle);
 			float NudgeY = 150.0f * sinf(Angle);
@@ -3432,6 +3387,94 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			TextRender()->Text(0, Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
 		}
 		Graphics()->WrapNormal();
+
+
+
+		for(int i = 0; i < NUM_BINDWHEEL; i++)
+		{
+			str_format(pD[i], sizeof(pD[i]), GameClient()->m_bindwheellist[i].description);
+
+			str_format(pC[i], sizeof(pC[i]), GameClient()->m_bindwheellist[i].command);
+
+			// Description
+			MainView.HSplitTop(15.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
+			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
+			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Description"), i + 1);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_bindwheellist[i].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[i].description, sizeof(GameClient()->m_bindwheellist[i].description), pD[i]);
+			}
+
+			// Command
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
+			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
+			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
+			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i + 1);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_bindwheellist[i].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), pC[i]);
+			}
+
+			if(NUM_BINDWHEEL / 2 == i + 1)
+			{
+				MainView = Column;
+				MainView.VSplitRight(500, 0, &MainView);
+
+				MainView.HSplitTop(30.0f, &Section, &MainView);
+				MainView.VSplitLeft(MainView.w * 0.5, 0, &MainView);
+			}
+		}
+
+
+		// Do Settings Key
+		{
+			CKeyInfo &Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
+			for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+			{
+				for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+				{
+					const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
+					if(!pBind[0])
+						continue;
+
+					if(str_comp(pBind, Key.m_pCommand) == 0)
+					{
+						Key.m_KeyId = KeyId;
+						Key.m_ModifierCombination = Mod;
+						break;
+					}
+				}
+			}
+
+			CUIRect Button, Label;
+			LeftColumn.HSplitBottom(20.0f, &LeftColumn, 0);
+			LeftColumn.HSplitBottom(20.0f, &LeftColumn, &Button);
+			Button.VSplitLeft(120.0f, &Label, &Button);
+			Button.VSplitLeft(100, &Button, 0);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+			int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+			if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+			{
+				if(OldId != 0 || NewId == 0)
+					m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+				if(NewId != 0)
+					m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
+			}
+		}
 	}
 }
 
@@ -3584,7 +3627,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 		str_format(aName, sizeof(aName), ("%s"), m_Dummy ? g_Config.m_ClDummyName : g_Config.m_PlayerName);
 		str_format(aClan, sizeof(aClan), ("%s"), m_Dummy ? g_Config.m_ClDummyClan : g_Config.m_PlayerClan);
-
 	}
 	else
 	{
@@ -3781,7 +3823,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 			Item.m_Rect.VSplitRight(60.0, &BodyColorSquare, &FlagRect);
 			BodyColorSquare.x -= 11.0;
-			BodyColorSquare.VSplitLeft(10, &BodyColorSquare,0 );
+			BodyColorSquare.VSplitLeft(10, &BodyColorSquare, 0);
 			BodyColorSquare.HSplitMid(&BodyColorSquare, &FeetColorSquare);
 			BodyColorSquare.HSplitMid(0, &BodyColorSquare);
 			FeetColorSquare.HSplitMid(&FeetColorSquare, 0);
@@ -3797,7 +3839,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 			if(CurrentProfile.BodyColor != -1 && CurrentProfile.FeetColor != -1)
 			{
-
 				ColorRGBA BodyColor = color_cast<ColorRGBA>(ColorHSLA(CurrentProfile.BodyColor).UnclampLighting());
 				ColorRGBA FeetColor = color_cast<ColorRGBA>(ColorHSLA(CurrentProfile.FeetColor).UnclampLighting());
 
