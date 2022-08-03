@@ -60,6 +60,16 @@ public:
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 
+	/**
+	 * Returns the version of the client with the given client ID.
+	 *
+	 * @param ClientID the client ID, which must be between 0 and
+	 * MAX_CLIENTS - 1, or equal to SERVER_DEMO_CLIENT for server demos.
+	 *
+	 * @return The version of the client with the given client ID.
+	 * For server demos this is always the latest client version.
+	 * On errors, VERSION_NONE is returned.
+	 */
 	virtual int GetClientVersion(int ClientID) const = 0;
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
