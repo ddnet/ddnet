@@ -17,6 +17,7 @@ CConfigManager::CConfigManager()
 	m_pStorage = 0;
 	m_ConfigFile = 0;
 	m_NumCallbacks = 0;
+	m_NumTCallbacks = 0;
 	m_Failed = false;
 }
 

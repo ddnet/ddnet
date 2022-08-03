@@ -153,19 +153,12 @@ void CBindWheel::OnRender()
 	for(int i = 0; i < NUM_BINDWHEEL; i++)
 	{
 		float Angle = 2 * pi * i / NUM_BINDWHEEL;
-		float margin = 170.0f;
+		float margin = 140.0f;
 
 		if(Angle > pi)
         {
             Angle -= 2 * pi;
         }
-		
-		int orgAngle = 2 * pi * i / NUM_BINDWHEEL;
-		if(orgAngle >= 0 && orgAngle < 2 || orgAngle>=4 && orgAngle<6)
-		{
-			margin = 120.0f;
-		}
-
 		bool Selected = m_SelectedBind == i;
 
 		float Size = Selected ? 14.0 : 12.0f;
@@ -176,7 +169,7 @@ void CBindWheel::OnRender()
 		char aBuf[MAX_BINDWHEEL_DESC];
 		str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_bindwheellist[i].description);
 		//str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
-		TextRender()->Text(0, Screen.w / 2 + NudgeX , Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
+		TextRender()->Text(0, Screen.w / 2 + NudgeX - TextRender()->TextWidth(0, Size, aBuf, -1, -1.0f)*0.5, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
 	}
 	Graphics()->WrapNormal();
 

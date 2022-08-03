@@ -3382,7 +3382,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			float NudgeX = margin * cosf(Angle);
 			float NudgeY = 150.0f * sinf(Angle);
 
-			char aBuf[8];
+			char aBuf[MAX_BINDWHEEL_DESC];
 			str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_bindwheellist[i].description);
 			TextRender()->Text(0, Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
 		}
@@ -3584,12 +3584,13 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 			OwnSkinInfo.m_OriginalRenderSkin = pLoadSkin->m_OriginalSkin;
 			OwnSkinInfo.m_ColorableRenderSkin = pLoadSkin->m_ColorableSkin;
 			OwnSkinInfo.m_SkinMetrics = pLoadSkin->m_Metrics;
-			if(*pUseCustomColor && doColors && LoadProfile.BodyColor != -1 && LoadProfile.FeetColor != -1)
-			{
-				OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.BodyColor).UnclampLighting());
-				OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.FeetColor).UnclampLighting());
-			}
 		}
+		if(*pUseCustomColor && doColors && LoadProfile.BodyColor != -1 && LoadProfile.FeetColor != -1)
+		{
+			OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.BodyColor).UnclampLighting());
+			OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.FeetColor).UnclampLighting());
+		}
+
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
 		TeeRenderPos = vec2(Label.x + 20.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
 		int LoadEmote = Emote;
@@ -3710,6 +3711,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 					g_Config.m_ClDummyCountry = LoadProfile.CountryFlag;
 			}
 		}
+		SetNeedSendInfo();
 		m_DoubleClickIndex = -1;
 	}
 	LabelRight.HSplitTop(5.0f, 0, &LabelRight);
