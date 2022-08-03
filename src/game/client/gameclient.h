@@ -45,6 +45,7 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
+#include "components/bindwheel.h"
 #include "components/outlines.h"
 #include "components/players.h"
 #include "components/race_demo.h"
@@ -133,6 +134,7 @@ public:
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
+    CBindWheel m_bindwheel;
 	CDamageInd m_DamageInd;
 	CVoting m_Voting;
 	CSpectator m_Spectator;
@@ -198,7 +200,6 @@ private:
 	int m_aCheckInfo[NUM_DUMMIES];
 
 	char m_aDDNetVersionStr[64];
-
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 
@@ -343,6 +344,7 @@ public:
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
+        int m_bindwheel;
 		float m_EmoticonStartFraction;
 		int m_EmoticonStartTick;
 		bool m_Solo;
@@ -654,6 +656,13 @@ public:
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
 
+	struct SClientBindWheel
+	{
+		char description[MAX_BINDWHEEL_DESC];
+		char command[MAX_BINDWHEEL_CMD];
+	};
+	SClientBindWheel m_bindwheellist[NUM_BINDWHEEL];
+	
 	struct SClientHudSkin
 	{
 		IGraphics::CTextureHandle m_SpriteHudAirjump;

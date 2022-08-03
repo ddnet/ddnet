@@ -215,6 +215,7 @@ void CBinds::SetDefaults()
 	Bind(KEY_MOUSE_1, "+fire");
 	Bind(KEY_MOUSE_2, "+hook");
 	Bind(KEY_LSHIFT, "+emote");
+    Bind(KEY_Q, "+bindwheel");
 	Bind(KEY_RETURN, "+show_chat; chat all");
 	Bind(KEY_RIGHT, "spectate_next");
 	Bind(KEY_LEFT, "spectate_previous");

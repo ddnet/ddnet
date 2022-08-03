@@ -62,7 +62,11 @@ class CConfigManager : public IConfigManager
 	IOHANDLE m_ConfigFile;
 	bool m_Failed;
 	CCallback m_aCallbacks[MAX_CALLBACKS];
+
 	int m_NumCallbacks;
+
+	CCallback m_aTCallbacks[MAX_CALLBACKS];
+	int m_NumTCallbacks;
 
 public:
 	CConfigManager();
@@ -76,6 +80,7 @@ public:
 	CConfig *Values() override { return &g_Config; }
 
 	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
+	void RegisterTCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
 
 	void WriteLine(const char *pLine) override;
 };

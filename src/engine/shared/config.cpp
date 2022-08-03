@@ -17,6 +17,7 @@ CConfigManager::CConfigManager()
 	m_pStorage = 0;
 	m_ConfigFile = 0;
 	m_NumCallbacks = 0;
+	m_NumTCallbacks = 0;
 	m_Failed = false;
 }
 
@@ -180,6 +181,10 @@ bool CConfigManager::TSave()
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
+	for(int i = 0; i < m_NumTCallbacks; i++)
+		m_aTCallbacks[i].m_pfnFunc(this, m_aTCallbacks[i].m_pUserData);
+
+
 	if(io_sync(m_ConfigFile) != 0)
 	{
 		m_Failed = true;
@@ -212,6 +217,15 @@ void CConfigManager::RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
 	m_aCallbacks[m_NumCallbacks].m_pUserData = pUserData;
 	m_NumCallbacks++;
 }
+
+void CConfigManager::RegisterTCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
+{
+	dbg_assert(m_NumTCallbacks < MAX_CALLBACKS, "too many tater config callbacks");
+	m_aTCallbacks[m_NumTCallbacks].m_pfnFunc = pfnFunc;
+	m_aTCallbacks[m_NumTCallbacks].m_pUserData = pUserData;
+	m_NumTCallbacks++;
+}
+
 
 void CConfigManager::WriteLine(const char *pLine)
 {

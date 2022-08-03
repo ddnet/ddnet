@@ -2981,29 +2981,40 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	}
 }
 
+enum
+{
+	TCLIENT_TAB_PAGE1 = 0,
+	TCLIENT_TAB_PAGE2 = 1,
+	TCLIENT_TAB_BINDWHEEL = 2,
+	NUMBER_OF_TCLIENT_TABS = 3,
+};
+
 void CMenus::RenderSettingsTClient(CUIRect MainView)
 {
 	static int s_CurCustomTab = 0;
 
-	CUIRect Column, Section, Page1Tab, Page2Tab, Label;
+	CUIRect Column, Section, TabBar, Page1Tab, Page2Tab, Page3Tab, Label;
 
 	MainView.HMargin(-15.0f, &MainView);
 
 	MainView.HSplitTop(20, &Label, &MainView);
 	float TabsW = Label.w;
-	Label.VSplitLeft(TabsW / 2, &Page1Tab, &Page2Tab);
+	Label.VSplitLeft(TabsW / NUMBER_OF_TCLIENT_TABS, &Page1Tab, &Page2Tab);
+	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_TCLIENT_TABS, &Page2Tab, &Page3Tab);
 
-	static int s_aPageTabs[2] = {};
+	static int s_aPageTabs[NUMBER_OF_TCLIENT_TABS] = {};
 
-	if(DoButton_MenuTab((void *)&s_aPageTabs[0], Localize("Page 1"), s_CurCustomTab == 0, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = 0;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[1], Localize("Page 2"), s_CurCustomTab == 1, &Page2Tab, 5, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = 1;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_PAGE1], Localize("Page 1"), s_CurCustomTab == TCLIENT_TAB_PAGE1, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = TCLIENT_TAB_PAGE1;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_PAGE2], Localize("Page 2"), s_CurCustomTab == TCLIENT_TAB_PAGE2, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = TCLIENT_TAB_PAGE2;
+	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_BINDWHEEL], Localize("BindWheel"), s_CurCustomTab == TCLIENT_TAB_BINDWHEEL, &Page3Tab, 10, NULL, NULL, NULL, NULL, 4))
+		s_CurCustomTab = TCLIENT_TAB_BINDWHEEL;
 
 	const float LineMargin = 20.0f;
 
-	//MainView.HSplitTop(10.0f, 0x0, &MainView);
-	if(s_CurCustomTab == 0)
+	// MainView.HSplitTop(10.0f, 0x0, &MainView);
+	if(s_CurCustomTab == TCLIENT_TAB_PAGE1)
 	{
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
@@ -3183,7 +3194,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		// ***** ANTI LATENCY ***** //
-		//MainView.HSplitTop(5.0f, 0, &MainView);
+		// MainView.HSplitTop(5.0f, 0, &MainView);
 
 		// MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 		MainView.HSplitTop(30.0f, &Section, &MainView);
@@ -3241,7 +3252,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		}
 	}
 
-	if(s_CurCustomTab == 1)
+	if(s_CurCustomTab == TCLIENT_TAB_PAGE2)
 	{
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 
@@ -3322,6 +3333,147 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			int NewValue = (g_Config.m_ClIndicatorMaxDistance) / 50.0f;
 			NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
 			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
+		}
+	}
+
+	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
+	{
+		CUIRect Screen = *UI()->Screen();
+		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
+		CUIRect LeftColumn = MainView;
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+
+		const float FontSize = 14.0f;
+		const float Margin = 10.0f;
+		const float HeaderHeight = FontSize + 5.0f + Margin;
+
+		CUIRect buttons[NUM_BINDWHEEL];
+		char pD[NUM_BINDWHEEL][MAX_BINDWHEEL_DESC];
+		char pC[NUM_BINDWHEEL][MAX_BINDWHEEL_CMD];
+
+		const char *pDescriptionFallback = "EMPTY";
+
+		// Draw Circle
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0, 0, 0, 0.3f);
+		RenderTools()->DrawCircle(Screen.w / 2 - 55.0f, Screen.h / 2, 190.0f, 64);
+		Graphics()->QuadsEnd();
+
+		Graphics()->WrapClamp();
+		for(int i = 0; i < NUM_BINDWHEEL; i++)
+		{
+			float Angle = 2 * pi * i / NUM_BINDWHEEL;
+			float margin = 120.0f;
+
+			if(Angle > pi)
+			{
+				Angle -= 2 * pi;
+			}
+
+			int orgAngle = 2 * pi * i / NUM_BINDWHEEL;
+			if(orgAngle >= 0 && orgAngle < 2 || orgAngle >= 4 && orgAngle < 6)
+			{
+				margin = 170.0f;
+			}
+
+			float Size = 12.0f;
+
+			float NudgeX = margin * cosf(Angle);
+			float NudgeY = 150.0f * sinf(Angle);
+
+			char aBuf[MAX_BINDWHEEL_DESC];
+			str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_bindwheellist[i].description);
+			TextRender()->Text(0, Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
+		}
+		Graphics()->WrapNormal();
+
+
+
+		for(int i = 0; i < NUM_BINDWHEEL; i++)
+		{
+			str_format(pD[i], sizeof(pD[i]), GameClient()->m_bindwheellist[i].description);
+
+			str_format(pC[i], sizeof(pC[i]), GameClient()->m_bindwheellist[i].command);
+
+			// Description
+			MainView.HSplitTop(15.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
+			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
+			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
+			char aBuf[MAX_BINDWHEEL_CMD];
+			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Description"), i + 1);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetName = 0.0f;
+			SUIExEditBoxProperties EditProps;
+			EditProps.m_pEmptyText = pDescriptionFallback;
+			if(UIEx()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_bindwheellist[i].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			{
+				str_format(GameClient()->m_bindwheellist[i].description, sizeof(GameClient()->m_bindwheellist[i].description), pD[i]);
+			}
+
+			// Command
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &buttons[i], &MainView);
+			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
+			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
+			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i + 1);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			static float s_OffsetClan = 0.0f;
+			if(UIEx()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_bindwheellist[i].command), 14.0f, &s_OffsetClan))
+			{
+				str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), pC[i]);
+			}
+
+			if(NUM_BINDWHEEL / 2 == i + 1)
+			{
+				MainView = Column;
+				MainView.VSplitRight(500, 0, &MainView);
+
+				MainView.HSplitTop(30.0f, &Section, &MainView);
+				MainView.VSplitLeft(MainView.w * 0.5, 0, &MainView);
+			}
+		}
+
+
+		// Do Settings Key
+		{
+			CKeyInfo &Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
+			for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+			{
+				for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+				{
+					const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
+					if(!pBind[0])
+						continue;
+
+					if(str_comp(pBind, Key.m_pCommand) == 0)
+					{
+						Key.m_KeyId = KeyId;
+						Key.m_ModifierCombination = Mod;
+						break;
+					}
+				}
+			}
+
+			CUIRect Button, Label;
+			LeftColumn.HSplitBottom(20.0f, &LeftColumn, 0);
+			LeftColumn.HSplitBottom(20.0f, &LeftColumn, &Button);
+			Button.VSplitLeft(120.0f, &Label, &Button);
+			Button.VSplitLeft(100, &Button, 0);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+
+			UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
+			int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+			int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+			if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+			{
+				if(OldId != 0 || NewId == 0)
+					m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+				if(NewId != 0)
+					m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
+			}
 		}
 	}
 }
@@ -3432,12 +3584,13 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 			OwnSkinInfo.m_OriginalRenderSkin = pLoadSkin->m_OriginalSkin;
 			OwnSkinInfo.m_ColorableRenderSkin = pLoadSkin->m_ColorableSkin;
 			OwnSkinInfo.m_SkinMetrics = pLoadSkin->m_Metrics;
-			if(*pUseCustomColor && doColors && LoadProfile.BodyColor != -1 && LoadProfile.FeetColor != -1)
-			{
-				OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.BodyColor).UnclampLighting());
-				OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.FeetColor).UnclampLighting());
-			}
 		}
+		if(*pUseCustomColor && doColors && LoadProfile.BodyColor != -1 && LoadProfile.FeetColor != -1)
+		{
+			OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.BodyColor).UnclampLighting());
+			OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(LoadProfile.FeetColor).UnclampLighting());
+		}
+
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
 		TeeRenderPos = vec2(Label.x + 20.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
 		int LoadEmote = Emote;
@@ -3475,7 +3628,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 		str_format(aName, sizeof(aName), ("%s"), m_Dummy ? g_Config.m_ClDummyName : g_Config.m_PlayerName);
 		str_format(aClan, sizeof(aClan), ("%s"), m_Dummy ? g_Config.m_ClDummyClan : g_Config.m_PlayerClan);
-
 	}
 	else
 	{
@@ -3559,6 +3711,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 					g_Config.m_ClDummyCountry = LoadProfile.CountryFlag;
 			}
 		}
+		SetNeedSendInfo();
 		m_DoubleClickIndex = -1;
 	}
 	LabelRight.HSplitTop(5.0f, 0, &LabelRight);
@@ -3672,7 +3825,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 			Item.m_Rect.VSplitRight(60.0, &BodyColorSquare, &FlagRect);
 			BodyColorSquare.x -= 11.0;
-			BodyColorSquare.VSplitLeft(10, &BodyColorSquare,0 );
+			BodyColorSquare.VSplitLeft(10, &BodyColorSquare, 0);
 			BodyColorSquare.HSplitMid(&BodyColorSquare, &FeetColorSquare);
 			BodyColorSquare.HSplitMid(0, &BodyColorSquare);
 			FeetColorSquare.HSplitMid(&FeetColorSquare, 0);
@@ -3688,7 +3841,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 			if(CurrentProfile.BodyColor != -1 && CurrentProfile.FeetColor != -1)
 			{
-
 				ColorRGBA BodyColor = color_cast<ColorRGBA>(ColorHSLA(CurrentProfile.BodyColor).UnclampLighting());
 				ColorRGBA FeetColor = color_cast<ColorRGBA>(ColorHSLA(CurrentProfile.FeetColor).UnclampLighting());
 
