@@ -10,159 +10,67 @@ If ddnet devs are reading this and want to steal my changes please feel free.
 Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
-![image](https://user-images.githubusercontent.com/22122579/163861467-672f522d-7782-4d5b-97e4-b931122167e7.png)
+![image](https://user-images.githubusercontent.com/22122579/182528606-cfb47e19-fb99-47c8-887f-43115ecf1f3e.png)
+![image](https://user-images.githubusercontent.com/22122579/182528639-e69d7e35-286d-4d14-9171-4274ef39b2e7.png)
+![image](https://user-images.githubusercontent.com/22122579/182528667-cf5bfbbf-ec10-4491-8c1b-21ff3b949715.png)
+![image](https://user-images.githubusercontent.com/22122579/182528700-4c8238c3-836e-49c3-9996-68025e7f5d58.png)
 
 
 # Features:
-### **Display frozen tees in your team on your HUD** 
-
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_hud**
 ```
-0 - off
-1 - on
-2 - on + show skin of frozen tees
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_hud_skins**
-```
-0 - Use ninja for frozen tees
-1 - Show darker+transparent version of tee skin when frozen
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_max_rows**
-```
-(1 - 10) adjust the maximum number of tees displayed
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_only_inteam**
-```
-0 - always display (team 0) 
-1 - only display frozen hud after you join a team
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_frozen_tees_text**
-```
-0 - off
-1 - on minimal text version of frozen tee HUD
-```
-
-### **Show outlines around tiles** 
-
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline**
-```
-0 - off (all outline rendering is off)
-1 - on (render any enabled outlines)
-```
-
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_freeze**
-```
-Outlines freeze tiles
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_solid**
-```
-Outlines hook and unhook tiles
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_tele**
-```
-Outlines tele tiles
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_unfreeze**
-```
-Outlines unfreeze and undeep tiles
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_width**
-```
-(1-16) Outline width
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_alpha**
-```
-(0-100) Outline alpha
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_alpha_solid**
-```
-(0-100) Outline alpha for hook and unhook
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_freeze**
-```
-Freeze outline color. 
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_solid**
-```
-Hook/Unhook outline color. 
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_tele**
-```
-Tele outline color. 
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_outline_color_unfreeze**
-```
-Unfreeze/Undeep outline color. 
-```
-
-### **KoG cl_prediction_margin PATCH**
-```
-default: 10
-cl_prediction_margin will work on KoG, however your hammer will be delayed more as you increase the margin
-set this between 15 and 25 if you are having lag, you can put it on a bind if it messes too much with your hammer
-```
-
-### **cl_run_on_join works with console**
-
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_run_on_join_console**
-```
-0 - output command to chat (normal)
-1 - output command to console
-```
-
-### **Display screen center for lineups**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_show_center**
-```
-0 - off
-1 - on
-```
-
-### **Ping Circles Next to nameplates**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_nameplate_ping_circle**
-```
-0 - off
-1 - on
-```
-
-### **KoG Spectator skin fix**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_kog_spec_skin**
-```
-0 - off
-1 - on
-```
-
-### **Enter freeze delay fix (WIP)**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_freeze_update_fix**
-```
-0 - normal
-1 - on, you will change to ninja skin as soon as you enter freeze
-```
-### **Render colored all feet with maximum brightness**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_white_feet**
-```
-0 - off
-1 - on
-```
-### **Anti Latency Tools for gores**
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_pred_remove**
-```
-0 - off
-1 - on, removes prediction margin while in freeze. 
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_pred_negative**
-```
-(0-40) Negative prediction margin while in freeze, can improve jitter but may cause buggy inputs after being saved. 
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_remove_anti**
-```
-0 - off
-1 - on, enable removing prediction and antiping while in freeze. 
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_remove_anti_ticks**
-```
-(0-10) how many ticks of prediction/antiping are removed while in freeze
-```
-&nbsp;&nbsp;&nbsp;&nbsp;**-tc_remove_anti_delay_ticks**
-```
-(0-200) how many ticks it takes for all of your configured preidction/antiping to be removed
+tc_run_on_join_console
+tc_run_on_join_delay
+tc_frozen_tees_text
+tc_frozen_tees_hud
+tc_frozen_tees_hud_skins
+tc_frozen_tees_size
+tc_frozen_tees_max_rows
+tc_frozen_tees_only_inteam
+tc_kog_spec_skin
+tc_kog_spec_names
+tc_show_center
+tc_white_feet
+tc_white_feet_skin
+tc_nameplate_ping_circle
+tc_freeze_update_fix
+tc_mini_debug
+tc_last_notify
+tc_cursor_in_spec
+tc_skin_name 
+tc_pred_remove
+tc_pred_negative
+tc_remove_anti
+tc_remove_anti_ticks
+tc_remove_anti_delay_ticks
+tc_outline
+tc_outline_in_entities 
+tc_outline_width
+tc_outline_freeze
+tc_outline_unfreeze
+tc_outline_tele
+tc_outline_solid
+tc_outline_alpha_solid
+tc_outline_color_solid
+tc_outline_color_freeze
+tc_outline_color_tele
+tc_outline_color_unfreeze
+tc_indicator_alive
+tc_indicator_freeze
+tc_indicator_offset
+tc_indicator_offset_max
+tc_indicator_variable_distance
+tc_indicator_variable_max_distance
+tc_indicator_radius
+tc_indicator_opacity
+tc_player_indicator
+tc_player_indicator_freeze
+tc_indicator_inteam
+tc_indicator_tees
+tc_profile_skin
+tc_profile_name
+tc_profile_clan
+tc_profile_flag
+tc_profile_colors
+tc_profile_emote
+add_profile
 ```
