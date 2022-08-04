@@ -66,6 +66,8 @@ void CLayers::Init(class IKernel *pKernel)
 						m_pGameGroup->m_ClipH = 0;
 					}
 
+					if(m_pGameGroup->m_Version >= 4)
+						m_pGameGroup->m_ParallaxZoom = 100;
 					//break;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
@@ -158,6 +160,9 @@ void CLayers::InitBackground(class IMap *pMap)
 						m_pGameGroup->m_ClipW = 0;
 						m_pGameGroup->m_ClipH = 0;
 					}
+
+					if(m_pGameGroup->m_Version >= 4)
+						m_pGameGroup->m_ParallaxZoom = 100;
 					//We don't care about tile layers.
 				}
 			}

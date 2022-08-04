@@ -176,6 +176,7 @@ public:
 
 	int m_ParallaxX;
 	int m_ParallaxY;
+	int m_ParallaxZoom;
 
 	int m_UseClipping;
 	int m_ClipX;

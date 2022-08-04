@@ -184,6 +184,8 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		// save group name
 		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
 
+		GItem.m_ParallaxZoom = pGroup->m_ParallaxZoom;
+
 		for(const auto &pLayer : pGroup->m_vpLayers)
 		{
 			if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -606,6 +608,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				// load group name
 				if(pGItem->m_Version >= 3)
 					IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
+
+				pGroup->m_ParallaxZoom = pGItem->GetParallaxZoom();
 
 				for(int l = 0; l < pGItem->m_NumLayers; l++)
 				{

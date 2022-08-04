@@ -278,7 +278,7 @@ struct CMapItemGroup : public CMapItemGroup_v1
 {
 	enum
 	{
-		CURRENT_VERSION = 3
+		CURRENT_VERSION = 4
 	};
 
 	int m_UseClipping;
@@ -288,6 +288,18 @@ struct CMapItemGroup : public CMapItemGroup_v1
 	int m_ClipH;
 
 	int m_aName[3];
+
+	// ItemGroup's perceived distance from camera when zooming. Similar to how
+	// Parallax{X,Y} works when camera is moving along the X and Y axes,
+	// this setting applies to camera moving closer or away (zooming in or out).
+	int m_ParallaxZoom;
+	int GetParallaxZoom() const
+	{
+		if(m_Version >= 4)
+			return m_ParallaxZoom;
+		else
+			return maximum(m_ParallaxX, m_ParallaxY);
+	}
 };
 
 struct CMapItemLayer
