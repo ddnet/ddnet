@@ -434,7 +434,7 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				continue;
 
 			bool HasTile = GetTile(fx, fy).m_Index;
-			if(!Empty && pLt->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+			if(!Empty && pLt->GetTile(x % pLt->m_Width, y % pLt->m_Height).m_Index == TILE_THROUGH_CUT)
 			{
 				if(m_Game && m_pEditor->m_Map.m_pFrontLayer)
 				{
