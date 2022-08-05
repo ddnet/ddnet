@@ -457,8 +457,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	static int s_MotdContainer = 0;
 	static float s_ScrollValue = 0;
 	static int s_OldSelected = 0;
-	int NumItems = GetMotdLength(m_pClient->m_Motd.m_aServerMotd);
-	UiDoListboxStart(&s_MotdContainer, &Motd, 18.0f, Localize("MOTD"), "", NumItems, 1, -1, s_ScrollValue);
+	UiDoListboxStart(&s_MotdContainer, &Motd, 18.0f, Localize("MOTD"), "", m_pClient->m_Motd.m_aMotdLinesNumber, 1, -1, s_ScrollValue);
 
 	CListboxItem Motd_Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
 	Motd_Item.m_Rect.HSplitTop(0, 0, &Motd);
@@ -470,21 +469,6 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	TextRender()->Text(0, Motd.x + x, Motd.y + y, 16, m_pClient->m_Motd.m_aServerMotd, Motd.w);
 	
 	UiDoListboxEnd(&s_ScrollValue, 0);
-}
-
-int CMenus::GetMotdLength(char* Motd) {
-	if(strlen(Motd) < 1)
-		return 0;
-
-	int length = 1;
-
-	for(int c = 0; c < strlen(Motd); c++)
-	{
-		if (Motd[c] == *"\n") {
-			length++;
-		}
-	}
-	return length;
 }
 
 bool CMenus::RenderServerControlServer(CUIRect MainView)

@@ -20,6 +20,23 @@ bool CMotd::IsActive()
 	return time() < m_ServerMotdTime;
 }
 
+int CMotd::Getlinescount(char *pMotd)
+{
+	if(str_length(pMotd) < 1)
+		return 0;
+
+	int Lines = 1;
+
+	for(int c = 0; c < str_length(pMotd); c++)
+	{
+		if(pMotd[c] == '\n')
+		{
+			Lines++;
+		}
+	}
+	return Lines;
+}
+
 void CMotd::OnStateChange(int NewState, int OldState)
 {
 	if(OldState == IClient::STATE_ONLINE || OldState == IClient::STATE_OFFLINE)
@@ -87,6 +104,8 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			m_ServerMotdTime = time() + time_freq() * g_Config.m_ClMotdTime;
 		else
 			m_ServerMotdTime = 0;
+
+		m_aMotdLinesNumber = Getlinescount(m_aServerMotd);
 	}
 }
 
