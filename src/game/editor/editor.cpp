@@ -132,9 +132,11 @@ void CLayerGroup::Convert(CUIRect *pRect)
 
 void CLayerGroup::Mapping(float *pPoints)
 {
+	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? m_ParallaxZoom : 100.0f;
+
 	m_pMap->m_pEditor->RenderTools()->MapScreenToWorld(
 		m_pMap->m_pEditor->m_WorldOffsetX, m_pMap->m_pEditor->m_WorldOffsetY,
-		m_ParallaxX, m_ParallaxY, 100.0f, m_OffsetX, m_OffsetY,
+		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
 		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->m_WorldZoom, pPoints);
 
 	pPoints[0] += m_pMap->m_pEditor->m_EditorOffsetX;
@@ -861,6 +863,17 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			(Input()->KeyPress(KEY_P) && ModPressed))
 		{
 			m_ProofBorders = !m_ProofBorders;
+		}
+
+		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+
+		// zoom button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_ZoomButton = 0;
+		// TODO: do we need a keyboard shortcut?
+		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, 0, "Toggles preview of how layers will be zoomed in-game"))
+		{
+			m_PreviewZoom = !m_PreviewZoom;
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -2708,6 +2721,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						m_Brush.m_OffsetY += pGroup->m_OffsetY;
 						m_Brush.m_ParallaxX = pGroup->m_ParallaxX;
 						m_Brush.m_ParallaxY = pGroup->m_ParallaxY;
+						m_Brush.m_ParallaxZoom = pGroup->m_ParallaxZoom;
 						m_Brush.Render();
 						float w, h;
 						m_Brush.GetSize(&w, &h);

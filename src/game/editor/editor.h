@@ -781,6 +781,7 @@ public:
 
 		m_GuiActive = true;
 		m_ProofBorders = false;
+		m_PreviewZoom = false;
 
 		m_ShowTileInfo = false;
 		m_ShowDetail = true;
@@ -954,6 +955,7 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 	bool m_ProofBorders;
+	bool m_PreviewZoom;
 	float m_MouseX = 0.0f;
 	float m_MouseY = 0.0f;
 	float m_MouseWorldX = 0.0f;
