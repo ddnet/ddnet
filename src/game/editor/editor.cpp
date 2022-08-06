@@ -870,7 +870,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// zoom button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ZoomButton = 0;
-		// TODO: do we need a keyboard shortcut?
 		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, 0, "Toggles preview of how layers will be zoomed in-game"))
 		{
 			m_PreviewZoom = !m_PreviewZoom;
@@ -1248,8 +1247,8 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	float CenterX = fx2f(pSource->m_Position.x);
 	float CenterY = fx2f(pSource->m_Position.y);
 
-	float dx = (CenterX - wx) / m_WorldZoom;
-	float dy = (CenterY - wy) / m_WorldZoom;
+	float dx = (CenterX - wx) / m_MouseWScale;
+	float dy = (CenterY - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
@@ -1341,7 +1340,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		Graphics()->SetColor(0, 1, 0, 1);
 	}
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1369,8 +1368,8 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	float CenterX = fx2f(pQuad->m_aPoints[4].x);
 	float CenterY = fx2f(pQuad->m_aPoints[4].y);
 
-	float dx = (CenterX - wx) / m_WorldZoom;
-	float dy = (CenterY - wy) / m_WorldZoom;
+	float dx = (CenterX - wx) / m_MouseWScale;
+	float dy = (CenterY - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
@@ -1380,7 +1379,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	if(IsQuadSelected(Index))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_WorldZoom, 7.0f * m_WorldZoom);
+		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -1596,7 +1595,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	else
 		Graphics()->SetColor(0, 1, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1610,8 +1609,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	float px = fx2f(pQuad->m_aPoints[V].x);
 	float py = fx2f(pQuad->m_aPoints[V].y);
 
-	float dx = (px - wx) / m_WorldZoom;
-	float dy = (py - wy) / m_WorldZoom;
+	float dx = (px - wx) / m_MouseWScale;
+	float dy = (py - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
@@ -1619,7 +1618,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	if(IsQuadSelected(QuadIndex) && m_SelectedPoints & (1 << V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_WorldZoom, 7.0f * m_WorldZoom);
+		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -1803,7 +1802,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	else
 		Graphics()->SetColor(1, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1839,7 +1838,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
 
 	bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
-	float SnapRadius = 4.f * m_WorldZoom;
+	float SnapRadius = 4.f * m_MouseWScale;
 
 	vec2 Mouse = vec2(UI()->MouseWorldX(), UI()->MouseWorldY());
 	vec2 Point = Mouse;
@@ -2040,14 +2039,14 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	IGraphics::CQuadItem aMarkers[4];
 
 	for(int i = 0; i < m_QuadKnifeCount; i++)
-		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_MouseWScale, 5.f * m_MouseWScale);
 
 	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsDraw(aMarkers, m_QuadKnifeCount);
 
 	if(ValidPosition)
 	{
-		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_MouseWScale, 5.f * m_MouseWScale);
 		Graphics()->QuadsDraw(&MarkerCurrent, 1);
 	}
 
@@ -2194,8 +2193,8 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	float CenterX = fx2f(pQuad->m_aPoints[4].x) + fx2f(pEnvelope->m_vPoints[PIndex].m_aValues[0]);
 	float CenterY = fx2f(pQuad->m_aPoints[4].y) + fx2f(pEnvelope->m_vPoints[PIndex].m_aValues[1]);
 
-	float dx = (CenterX - wx) / m_WorldZoom;
-	float dy = (CenterY - wy) / m_WorldZoom;
+	float dx = (CenterX - wx) / m_MouseWScale;
+	float dy = (CenterY - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50.0f && UI()->CheckActiveItem(nullptr))
 	{
 		UI()->SetHotItem(pID);
@@ -2287,7 +2286,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	else
 		Graphics()->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2798,13 +2797,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		{
 			if(s_Operation == OP_PAN_WORLD)
 			{
-				m_WorldOffsetX -= m_MouseDeltaX * m_WorldZoom;
-				m_WorldOffsetY -= m_MouseDeltaY * m_WorldZoom;
+				m_WorldOffsetX -= m_MouseDeltaX * m_MouseWScale;
+				m_WorldOffsetY -= m_MouseDeltaY * m_MouseWScale;
 			}
 			else if(s_Operation == OP_PAN_EDITOR)
 			{
-				m_EditorOffsetX -= m_MouseDeltaX * m_WorldZoom;
-				m_EditorOffsetY -= m_MouseDeltaY * m_WorldZoom;
+				m_EditorOffsetX -= m_MouseDeltaX * m_MouseWScale;
+				m_EditorOffsetY -= m_MouseDeltaY * m_MouseWScale;
 			}
 
 			// release mouse
@@ -2820,13 +2819,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		{
 			float PanSpeed = 64.0f;
 			if(Input()->KeyPress(KEY_A))
-				m_WorldOffsetX -= PanSpeed * m_WorldZoom;
+				m_WorldOffsetX -= PanSpeed * m_MouseWScale;
 			else if(Input()->KeyPress(KEY_D))
-				m_WorldOffsetX += PanSpeed * m_WorldZoom;
+				m_WorldOffsetX += PanSpeed * m_MouseWScale;
 			if(Input()->KeyPress(KEY_W))
-				m_WorldOffsetY -= PanSpeed * m_WorldZoom;
+				m_WorldOffsetY -= PanSpeed * m_MouseWScale;
 			else if(Input()->KeyPress(KEY_S))
-				m_WorldOffsetY += PanSpeed * m_WorldZoom;
+				m_WorldOffsetY += PanSpeed * m_MouseWScale;
 		}
 	}
 	else if(UI()->CheckActiveItem(s_pEditorID))
@@ -6417,6 +6416,11 @@ void CEditor::OnUpdate()
 
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
+
+			m_MouseWScale = WorldWidth / Graphics()->WindowWidth();
+			// The correct thing would be to skip all UI elements for group scaled to 0, but that's a rare and not particularly important situation so we can just have this hack to avoid crashes
+			if(abs(m_MouseWScale) < 0.000001f)
+				m_MouseWScale = 1.0f;
 
 			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
 			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());

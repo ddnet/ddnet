@@ -956,6 +956,7 @@ public:
 	bool m_GuiActive;
 	bool m_ProofBorders;
 	bool m_PreviewZoom;
+	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	float m_MouseX = 0.0f;
 	float m_MouseY = 0.0f;
 	float m_MouseWorldX = 0.0f;
