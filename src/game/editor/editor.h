@@ -176,6 +176,7 @@ public:
 
 	int m_ParallaxX;
 	int m_ParallaxY;
+	int m_CustomParallaxZoom;
 	int m_ParallaxZoom;
 
 	int m_UseClipping;
@@ -241,6 +242,12 @@ public:
 				return false;
 		}
 	}*/
+
+	void OnEdited()
+	{
+		if(!m_CustomParallaxZoom)
+			m_ParallaxZoom = maximum(m_ParallaxX, m_ParallaxY);
+	}
 
 	void Clear()
 	{

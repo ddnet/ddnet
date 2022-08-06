@@ -610,6 +610,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 					IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
 
 				pGroup->m_ParallaxZoom = pGItem->GetParallaxZoom();
+				pGroup->m_CustomParallaxZoom = pGroup->m_ParallaxZoom != maximum(pGroup->m_ParallaxX, pGroup->m_ParallaxY);
 
 				for(int l = 0; l < pGItem->m_NumLayers; l++)
 				{
