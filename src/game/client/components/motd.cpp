@@ -20,14 +20,14 @@ bool CMotd::IsActive()
 	return time() < m_ServerMotdTime;
 }
 
-int CMotd::Getlinescount(char *pMotd)
+int CMotd::GetlinesCount(char *pMotd)
 {
-	if(str_length(pMotd) < 1)
+	if(pMotd[0] == '\0')
 		return 0;
 
 	int Lines = 1;
 
-	for(int c = 0; c < str_length(pMotd); c++)
+	for(int c = 0; pMotd[c] != '\0'; c++)
 	{
 		if(pMotd[c] == '\n')
 		{
@@ -105,7 +105,7 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 		else
 			m_ServerMotdTime = 0;
 
-		m_aMotdLinesNumber = Getlinescount(m_aServerMotd);
+		m_aMotdNumLines = GetlinesCount(m_aServerMotd);
 	}
 }
 

@@ -11,12 +11,12 @@ class CMotd : public CComponent
 
 public:
 	char m_aServerMotd[900];
-	int m_aMotdLinesNumber;
+	int m_aMotdNumLines;
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void Clear();
 	bool IsActive();
-	int Getlinescount(char *pMotd);
+	int GetlinesCount(char *pMotd);
 
 	virtual void OnRender() override;
 	virtual void OnStateChange(int NewState, int OldState) override;

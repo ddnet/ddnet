@@ -457,7 +457,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	static int s_MotdContainer = 0;
 	static float s_ScrollValue = 0;
 	static int s_OldSelected = 0;
-	UiDoListboxStart(&s_MotdContainer, &Motd, 18.0f, Localize("MOTD"), "", m_pClient->m_Motd.m_aMotdLinesNumber, 1, -1, s_ScrollValue);
+	UiDoListboxStart(&s_MotdContainer, &Motd, 18.0f, Localize("MOTD"), "", m_pClient->m_Motd.m_aMotdNumLines, 1, -1, s_ScrollValue);
 
 	CListboxItem Motd_Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
 	Motd_Item.m_Rect.HSplitTop(0, 0, &Motd);
