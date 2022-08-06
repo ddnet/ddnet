@@ -2637,8 +2637,8 @@ void CEditor::DoMapEditor(CUIRect View)
 							size_t BrushIndex = k;
 							if(m_Brush.m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
-							if(BrushIndex < m_Brush.m_vpLayers.size())
-								apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), m_Brush.m_vpLayers[BrushIndex], r);
+							CLayer *pBrush = m_Brush.IsEmpty() ? nullptr : m_Brush.m_vpLayers[BrushIndex];
+							apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), pBrush, r);
 						}
 					}
 					else
