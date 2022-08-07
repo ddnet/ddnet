@@ -659,7 +659,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			EditProps.m_SelectText = true;
 		}
 		EditProps.m_pEmptyText = Localize("Search");
-		if(UIEx()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
+		if(UI()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
 			gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 

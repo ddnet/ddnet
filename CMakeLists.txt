@@ -2101,8 +2101,6 @@ if(CLIENT)
     skin.h
     ui.cpp
     ui.h
-    ui_ex.cpp
-    ui_ex.h
     ui_rect.cpp
     ui_rect.h
   )

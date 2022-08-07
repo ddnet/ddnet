@@ -633,7 +633,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				EditProps.m_SelectText = true;
 			}
 			EditProps.m_pEmptyText = Localize("Search");
-			UIEx()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
+			UI()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
 		}
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
@@ -680,7 +680,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&m_aCallvoteReason);
-		UIEx()->DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL);
+		UI()->DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL);
 
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
@@ -751,11 +751,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 				static float s_OffsetDesc = 0.0f;
-				UIEx()->DoEditBox(&s_aVoteDescription, &Button, s_aVoteDescription, sizeof(s_aVoteDescription), 14.0f, &s_OffsetDesc, false, IGraphics::CORNER_ALL);
+				UI()->DoEditBox(&s_aVoteDescription, &Button, s_aVoteDescription, sizeof(s_aVoteDescription), 14.0f, &s_OffsetDesc, false, IGraphics::CORNER_ALL);
 
 				Bottom.VMargin(20.0f, &Button);
 				static float s_OffsetCmd = 0.0f;
-				UIEx()->DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, IGraphics::CORNER_ALL);
+				UI()->DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, IGraphics::CORNER_ALL);
 			}
 		}
 	}
@@ -981,7 +981,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.VSplitRight(20.0f, &View, &Scroll);
 
 	static float s_ScrollValue = 0;
-	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	int NumGhosts = m_vGhosts.size();
 	static int s_SelectedIndex = 0;

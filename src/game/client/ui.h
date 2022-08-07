@@ -12,6 +12,9 @@
 #include <string>
 #include <vector>
 
+class IGraphics;
+class IKernel;
+
 struct SUIAnimator
 {
 	bool m_Active;
@@ -25,6 +28,63 @@ struct SUIAnimator
 	float m_YOffset;
 	float m_WOffset;
 	float m_HOffset;
+};
+
+class IScrollbarScale
+{
+public:
+	virtual float ToRelative(int AbsoluteValue, int Min, int Max) const = 0;
+	virtual int ToAbsolute(float RelativeValue, int Min, int Max) const = 0;
+};
+class CLinearScrollbarScale : public IScrollbarScale
+{
+public:
+	float ToRelative(int AbsoluteValue, int Min, int Max) const override
+	{
+		return (AbsoluteValue - Min) / (float)(Max - Min);
+	}
+	int ToAbsolute(float RelativeValue, int Min, int Max) const override
+	{
+		return round_to_int(RelativeValue * (Max - Min) + Min + 0.1f);
+	}
+};
+class CLogarithmicScrollbarScale : public IScrollbarScale
+{
+private:
+	int m_MinAdjustment;
+
+public:
+	CLogarithmicScrollbarScale(int MinAdjustment)
+	{
+		m_MinAdjustment = maximum(MinAdjustment, 1); // must be at least 1 to support Min == 0 with logarithm
+	}
+	float ToRelative(int AbsoluteValue, int Min, int Max) const override
+	{
+		if(Min < m_MinAdjustment)
+		{
+			AbsoluteValue += m_MinAdjustment;
+			Min += m_MinAdjustment;
+			Max += m_MinAdjustment;
+		}
+		return (log(AbsoluteValue) - log(Min)) / (float)(log(Max) - log(Min));
+	}
+	int ToAbsolute(float RelativeValue, int Min, int Max) const override
+	{
+		int ResultAdjustment = 0;
+		if(Min < m_MinAdjustment)
+		{
+			Min += m_MinAdjustment;
+			Max += m_MinAdjustment;
+			ResultAdjustment = -m_MinAdjustment;
+		}
+		return round_to_int(exp(RelativeValue * (log(Max) - log(Min)) + log(Min))) + ResultAdjustment;
+	}
+};
+
+struct SUIExEditBoxProperties
+{
+	bool m_SelectText = false;
+	const char *m_pEmptyText = "";
 };
 
 class CUI;
@@ -120,27 +180,47 @@ class CUI
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
+	bool m_MouseSlow = false;
+
+	IInput::CEvent *m_pInputEventsArray;
+	int *m_pInputEventCount;
+
+	bool m_MouseIsPress = false;
+	bool m_HasSelection = false;
+
+	int m_MousePressX = 0;
+	int m_MousePressY = 0;
+	int m_MouseCurX = 0;
+	int m_MouseCurY = 0;
+	int m_CurSelStart = 0;
+	int m_CurSelEnd = 0;
+	const void *m_pSelItem = nullptr;
+
+	int m_CurCursor = 0;
 
 	CUIRect m_Screen;
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
-	class IInput *m_pInput;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
+	IGraphics *m_pGraphics;
+	IInput *m_pInput;
+	ITextRender *m_pTextRender;
 
 	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUI class
 	std::vector<CUIElement *> m_vpUIElements;
 
 public:
+	static const CLinearScrollbarScale ms_LinearScrollbarScale;
+	static const CLogarithmicScrollbarScale ms_LogarithmicScrollbarScale;
+
 	static float ms_FontmodHeight;
 
-	// TODO: Refactor: Fill this in
-	void Init(class IInput *pInput, class IGraphics *pGraphics, class ITextRender *pTextRender);
-	class IInput *Input() const { return m_pInput; }
-	class IGraphics *Graphics() const { return m_pGraphics; }
-	class ITextRender *TextRender() const { return m_pTextRender; }
+	void Init(IKernel *pKernel);
+	void InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount);
+	IGraphics *Graphics() const { return m_pGraphics; }
+	IInput *Input() const { return m_pInput; }
+	ITextRender *TextRender() const { return m_pTextRender; }
 
 	CUI();
 	~CUI();
@@ -208,6 +288,7 @@ public:
 	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
 	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
+	void ResetMouseSlow() { m_MouseSlow = false; }
 
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }
@@ -232,6 +313,19 @@ public:
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+
+	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
+	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
+
+	enum
+	{
+		SCROLLBAR_OPTION_INFINITE = 1,
+		SCROLLBAR_OPTION_NOCLAMPVALUE = 2,
+	};
+	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
+	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
+	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u);
+	void DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale = &ms_LinearScrollbarScale);
 };
 
 #endif

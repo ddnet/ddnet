@@ -160,7 +160,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
 		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
 		static float s_Offset = 0.0f;
-		if(UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
+		if(UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
 		{
 			m_aDemoPlayerPopupHint[0] = '\0';
 		}
@@ -563,7 +563,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	if(Num == 0)
 		gs_ListBoxScrollValue = 0;
 	else
-		gs_ListBoxScrollValue = UIEx()->DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
+		gs_ListBoxScrollValue = UI()->DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
 
 	// the list
 	gs_ListBoxView = gs_ListBoxOriginalView;
@@ -1078,7 +1078,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
 
 	static float s_ScrollValue = 0;
-	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	int PreviousIndex = m_DemolistSelectedIndex;
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_vDemos.size());

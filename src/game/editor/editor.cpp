@@ -294,14 +294,14 @@ bool CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned St
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
-	return UIEx()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
+	return UI()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
 bool CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
-	return UIEx()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
+	return UI()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
 ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
@@ -3281,7 +3281,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 	{
 		CUIRect Scroll;
 		LayersBox.VSplitRight(20.0f, &LayersBox, &Scroll);
-		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&LayersBox))
 		{
@@ -3968,7 +3968,7 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 	{
 		CUIRect Scroll;
 		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
-		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ToolBox))
 		{
@@ -4182,7 +4182,7 @@ void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 	{
 		CUIRect Scroll;
 		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
-		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ToolBox))
 		{
@@ -4434,7 +4434,7 @@ void CEditor::RenderFileDialog()
 	m_FileDialogOpening = false;
 
 	int Num = (int)(View.h / 17.0f) + 1;
-	m_FileDialogScrollValue = UIEx()->DoScrollbarV(&m_FileDialogScrollValue, &Scroll, m_FileDialogScrollValue);
+	m_FileDialogScrollValue = UI()->DoScrollbarV(&m_FileDialogScrollValue, &Scroll, m_FileDialogScrollValue);
 
 	int ScrollNum = 0;
 	for(size_t i = 0; i < m_vFileList.size(); i++)
@@ -5501,7 +5501,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	{
 		CUIRect Scroll;
 		ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
-		s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ListBox))
 		{
@@ -6317,11 +6317,9 @@ void CEditor::Init()
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
-	m_UI.Init(m_pInput, m_pGraphics, m_pTextRender);
+	m_UI.Init(Kernel());
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_Map.m_pEditor = this;
-
-	UIEx()->Init(UI(), Kernel(), RenderTools(), Input()->GetEventsRaw(), Input()->GetEventCountRaw());
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
@@ -6376,8 +6374,8 @@ void CEditor::OnUpdate()
 		float MouseRelX = 0.0f, MouseRelY = 0.0f;
 		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
 		if(CursorType != IInput::CURSOR_NONE)
-			UIEx()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
-		UIEx()->ResetMouseSlow();
+			UI()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
+		UI()->ResetMouseSlow();
 
 		m_MouseDeltaX += MouseRelX;
 		m_MouseDeltaY += MouseRelY;

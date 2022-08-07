@@ -186,7 +186,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	static float s_ScrollValue = 0;
 
-	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
@@ -549,7 +549,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(UIEx()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
+		if(UI()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -576,7 +576,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
-		if(UIEx()->DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL))
+		if(UI()->DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -610,7 +610,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		ServerAddr.VSplitLeft(SearchExcludeAddrStrMax + 5.0f + ExcludeSearchIconMax + 5.0f, NULL, &ServerAddr);
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		UIEx()->DoClearableEditBox(&g_Config.m_UiServerAddress, &s_ClearButton, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &s_Offset);
+		UI()->DoClearableEditBox(&g_Config.m_UiServerAddress, &s_ClearButton, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &s_Offset);
 
 		// button area
 		ButtonArea = ConnectButtons;
@@ -721,7 +721,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	Button.VSplitRight(60.0f, 0, &Button);
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	static float s_OffsetGametype = 0.0f;
-	if(UIEx()->DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &s_OffsetGametype))
+	if(UI()->DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &s_OffsetGametype))
 		Client()->ServerBrowserUpdate();
 
 	// server address
@@ -730,7 +730,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	UI()->DoLabel(&Button, Localize("Server address:"), FontSize, TEXTALIGN_LEFT);
 	Button.VSplitRight(60.0f, 0, &Button);
 	static float s_OffsetAddr = 0.0f;
-	if(UIEx()->DoEditBox(&g_Config.m_BrFilterServerAddress, &Button, g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress), FontSize, &s_OffsetAddr))
+	if(UI()->DoEditBox(&g_Config.m_BrFilterServerAddress, &Button, g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress), FontSize, &s_OffsetAddr))
 		Client()->ServerBrowserUpdate();
 
 	// player country
@@ -1358,7 +1358,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aName[MAX_NAME_LENGTH] = {0};
 		static float s_OffsetName = 0.0f;
-		UIEx()->DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize + 2, &s_OffsetName);
+		UI()->DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize + 2, &s_OffsetName);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
@@ -1367,7 +1367,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aClan[MAX_CLAN_LENGTH] = {0};
 		static float s_OffsetClan = 0.0f;
-		UIEx()->DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize + 2, &s_OffsetClan);
+		UI()->DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize + 2, &s_OffsetClan);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);

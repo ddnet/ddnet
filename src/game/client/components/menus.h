@@ -19,7 +19,6 @@
 
 #include <game/client/component.h>
 #include <game/client/ui.h>
-#include <game/client/ui_ex.h>
 #include <game/voting.h>
 
 #include <game/client/render.h>
@@ -77,10 +76,6 @@ class CMenus : public CComponent
 	static bool ms_ValueSelectorTextMode;
 
 	char m_aLocalStringHelper[1024];
-
-	CUIEx m_UIEx;
-
-	CUIEx *UIEx() { return &m_UIEx; }
 
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(CButtonContainer *pButtonContainer, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);

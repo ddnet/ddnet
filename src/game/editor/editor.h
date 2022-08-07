@@ -10,7 +10,6 @@
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/client/ui_ex.h>
 #include <game/mapitems.h>
 
 #include <engine/editor.h>
@@ -685,7 +684,6 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
-	CUIEx m_UIEx;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -709,7 +707,6 @@ public:
 	class ITextRender *TextRender() { return m_pTextRender; }
 	class IStorage *Storage() { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
-	CUIEx *UIEx() { return &m_UIEx; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() :
