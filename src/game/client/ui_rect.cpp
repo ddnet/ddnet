@@ -2,6 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "ui_rect.h"
 
+#include <engine/graphics.h>
+
+IGraphics *CUIRect::s_pGraphics = nullptr;
+
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const
 {
 	CUIRect r = *this;
@@ -165,4 +169,14 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 bool CUIRect::Inside(float PointX, float PointY) const
 {
 	return PointX >= x && PointX < x + w && PointY >= y && PointY < y + h;
+}
+
+void CUIRect::Draw(ColorRGBA Color, int Corners, float Rounding) const
+{
+	s_pGraphics->DrawRect(x, y, w, h, Color, Corners, Rounding);
+}
+
+void CUIRect::Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const
+{
+	s_pGraphics->DrawRect4(x, y, w, h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
 }

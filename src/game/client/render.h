@@ -103,10 +103,6 @@ public:
 	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
 	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
-	// rects
-	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
-
 	// larger rendering methods
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
 	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);

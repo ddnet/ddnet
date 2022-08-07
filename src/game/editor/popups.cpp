@@ -77,9 +77,9 @@ void CEditor::UiDoPopupMenu()
 			Corners = IGraphics::CORNER_R | IGraphics::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
-		RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);
+		r.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);
 		r.Margin(1.0f, &r);
-		RenderTools()->DrawUIRect(&r, ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
+		r.Draw(ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
 		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))

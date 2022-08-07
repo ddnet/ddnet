@@ -3,9 +3,17 @@
 #ifndef GAME_CLIENT_UI_RECT_H
 #define GAME_CLIENT_UI_RECT_H
 
+#include <base/color.h>
+
+class IGraphics;
+
 class CUIRect
 {
+	static IGraphics *s_pGraphics;
+
 public:
+	static void Init(IGraphics *pGraphics) { s_pGraphics = pGraphics; }
+
 	float x, y, w, h;
 
 	/**
@@ -102,6 +110,9 @@ public:
 	 * @return true iff the given point is inside *this* CUIRect.
 	 */
 	bool Inside(float PointX, float PointY) const;
+
+	void Draw(ColorRGBA Color, int Corners, float Rounding) const;
+	void Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const;
 };
 
 #endif

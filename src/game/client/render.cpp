@@ -167,16 +167,6 @@ int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float 
 	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
-{
-	Graphics()->DrawRect(pRect->x, pRect->y, pRect->w, pRect->h, Color, Corners, Rounding);
-}
-
-void CRenderTools::DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
-{
-	Graphics()->DrawRect4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
-}
-
 void CRenderTools::GetRenderTeeAnimScaleAndBaseSize(CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize)
 {
 	AnimScale = pInfo->m_Size * 1.0f / 64.0f;

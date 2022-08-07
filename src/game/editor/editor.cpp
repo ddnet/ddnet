@@ -374,7 +374,7 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 
 int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
+	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
 	CUIRect NewRect = *pRect;
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVert;
@@ -389,7 +389,7 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 	float Alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
 	ColorRGBA Color = ColorRGBA(BaseColor.r * Bright, BaseColor.g * Bright, BaseColor.b * Bright, Alpha);
 
-	RenderTools()->DrawUIRect(pRect, Color, IGraphics::CORNER_ALL, 3.0f);
+	pRect->Draw(Color, IGraphics::CORNER_ALL, 3.0f);
 	UI()->DoLabel(pRect, pText, 10.f, TEXTALIGN_CENTER);
 	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
@@ -398,7 +398,7 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
+		pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
@@ -409,7 +409,7 @@ int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, cons
 int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	CUIRect r = *pRect;
-	RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), IGraphics::CORNER_T, 3.0f);
+	r.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), IGraphics::CORNER_T, 3.0f);
 
 	r = *pRect;
 	r.VMargin(5.0f, &r);
@@ -420,7 +420,7 @@ int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, cons
 int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(UI()->HotItem() == pID || Checked)
-		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
+		pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
@@ -430,7 +430,7 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 
 int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_T, 5.0f);
+	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_T, 5.0f);
 	CUIRect NewRect = *pRect;
 	UI()->DoLabel(&NewRect, pText, 10, TEXTALIGN_CENTER);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
@@ -438,7 +438,7 @@ int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const
 
 int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize, int AlignVert)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), Corners, 3.0f);
+	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
 	CUIRect NewRect = *pRect;
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVert;
@@ -448,21 +448,21 @@ int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const 
 
 int CEditor::DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_R, 3.0f);
+	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_R, 3.0f);
 	UI()->DoLabel(pRect, pText ? pText : "+", 10, TEXTALIGN_CENTER);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_L, 3.0f);
+	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_L, 3.0f);
 	UI()->DoLabel(pRect, pText ? pText : "-", 10, TEXTALIGN_CENTER);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, *pColor, 0, 0.0f);
+	pRect->Draw(*pColor, 0, 0.0f);
 	return DoButton_Editor_Common(pID, nullptr, 0, pRect, 0, pToolTip);
 }
 
@@ -631,7 +631,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			str_format(aBuf, sizeof(aBuf), "#%06X", Current);
 		else
 			str_format(aBuf, sizeof(aBuf), "%d", Current);
-		RenderTools()->DrawUIRect(pRect, pColor ? *pColor : GetButtonColor(pID, 0), Corners, 5.0f);
+		pRect->Draw(pColor ? *pColor : GetButtonColor(pID, 0), Corners, 5.0f);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_CENTER);
 	}
 
@@ -3153,11 +3153,11 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitMid(&Left, &Up, 2.0f);
 			Left.VSplitLeft(10.0f, &Left, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Right);
-			RenderTools()->DrawUIRect(&Shifter, ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
+			Shifter.Draw(ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
 			UI()->DoLabel(&Shifter, "X", 10.0f, TEXTALIGN_CENTER);
 			Up.VSplitLeft(10.0f, &Up, &Shifter);
 			Shifter.VSplitRight(10.0f, &Shifter, &Down);
-			RenderTools()->DrawUIRect(&Shifter, ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
+			Shifter.Draw(ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
 			UI()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_CENTER);
 			if(DoButton_ButtonDec(&pIDs[i], "-", 0, &Left, 0, "Left"))
 			{
@@ -3235,7 +3235,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				str_format(aBuf, sizeof(aBuf), "%d", CurValue);
 
 			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			RenderTools()->DrawUIRect(&Shifter, Color, 0, 5.0f);
+			Shifter.Draw(Color, 0, 5.0f);
 			UI()->DoLabel(&Shifter, aBuf, FontSize, TEXTALIGN_CENTER);
 
 			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Previous Envelope"))
@@ -4350,10 +4350,10 @@ void CEditor::RenderFileDialog()
 	CUIRect Preview;
 	float Width = View.w, Height = View.h;
 
-	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.25f), 0, 0);
+	View.Draw(ColorRGBA(0, 0, 0, 0.25f), 0, 0);
 	View.VMargin(150.0f, &View);
 	View.HMargin(50.0f, &View);
-	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.75f), IGraphics::CORNER_ALL, 5.0f);
+	View.Draw(ColorRGBA(0, 0, 0, 0.75f), IGraphics::CORNER_ALL, 5.0f);
 	View.Margin(10.0f, &View);
 
 	CUIRect Title, FileBox, FileBoxLabel, ButtonBar, Scroll, PathBox;
@@ -4371,7 +4371,7 @@ void CEditor::RenderFileDialog()
 	View.VSplitRight(20.0f, &View, &Scroll);
 
 	// title
-	RenderTools()->DrawUIRect(&Title, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
+	Title.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 	Title.VMargin(10.0f, &Title);
 	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, TEXTALIGN_LEFT);
 
@@ -4418,7 +4418,7 @@ void CEditor::RenderFileDialog()
 		// clearSearchbox button
 		{
 			static int s_ClearButton = 0;
-			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), IGraphics::CORNER_R, 3.0f);
+			ClearBox.Draw(ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), IGraphics::CORNER_R, 3.0f);
 			UI()->DoLabel(&ClearBox, "×", 10.0f, TEXTALIGN_CENTER);
 			if(UI()->DoButtonLogic(&s_ClearButton, 0, &ClearBox))
 			{
@@ -4945,7 +4945,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					   ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
-		RenderTools()->DrawUIRect(&Shifter, EnvColor, 0, 0.0f);
+		Shifter.Draw(EnvColor, 0, 0.0f);
 		UI()->DoLabel(&Shifter, aBuf, 10.0f, TEXTALIGN_CENTER);
 
 		static int s_PrevButton = 0;

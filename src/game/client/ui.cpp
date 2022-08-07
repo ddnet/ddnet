@@ -80,6 +80,7 @@ void CUI::Init(IInput *pInput, IGraphics *pGraphics, ITextRender *pTextRender)
 	m_pInput = pInput;
 	m_pGraphics = pGraphics;
 	m_pTextRender = pTextRender;
+	CUIRect::Init(m_pGraphics);
 }
 
 CUI::CUI()

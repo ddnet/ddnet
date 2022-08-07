@@ -265,9 +265,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
 		ProgressBar.y += 2.0f;
 		ProgressBar.HMargin(1.0f, &ProgressBar);
-		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+		ProgressBar.Draw(vec4(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 		ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
-		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		ProgressBar.Draw(vec4(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 	}
 #elif defined(CONF_INFORM_UPDATE)
 	if(str_comp(Client()->LatestVersion(), "0") != 0)

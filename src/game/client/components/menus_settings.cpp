@@ -971,7 +971,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 			UIEx()->DoScrollbarOption(&g_Config.m_InpControllerTolerance, &g_Config.m_InpControllerTolerance, &Button, Localize("Controller jitter tolerance"), 0, 50);
 
 			View.HSplitTop(Spacing, 0, &View);
-			RenderTools()->DrawUIRect(&View, ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), IGraphics::CORNER_ALL, 5.0f);
+			View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), IGraphics::CORNER_ALL, 5.0f);
 			DoJoystickAxisPicker(View);
 		}
 		else
@@ -1014,7 +1014,7 @@ void CMenus::DoJoystickAxisPicker(CUIRect View)
 
 		View.HSplitTop(Spacing, 0, &View);
 		View.HSplitTop(ButtonHeight, &Row, &View);
-		RenderTools()->DrawUIRect(&Row, ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), IGraphics::CORNER_ALL, 5.0f);
+		Row.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), IGraphics::CORNER_ALL, 5.0f);
 
 		// Device label
 		Row.VSplitLeft(DeviceLabelWidth, &Button, &Row);
@@ -1062,18 +1062,18 @@ void CMenus::DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance,
 
 	CUIRect Rail;
 	pRect->HMargin(4.0f, &Rail);
-	RenderTools()->DrawUIRect(&Rail, ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 0.25f : 0.125f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
+	Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 0.25f : 0.125f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
 
 	CUIRect ToleranceArea = Rail;
 	ToleranceArea.w *= Tolerance;
 	ToleranceArea.x += (Rail.w - ToleranceArea.w) / 2.0f;
 	ColorRGBA ToleranceColor = Active ? ColorRGBA(0.8f, 0.35f, 0.35f, 1.0f) : ColorRGBA(0.7f, 0.5f, 0.5f, 1.0f);
-	RenderTools()->DrawUIRect(&ToleranceArea, ToleranceColor, IGraphics::CORNER_ALL, ToleranceArea.h / 2.0f);
+	ToleranceArea.Draw(ToleranceColor, IGraphics::CORNER_ALL, ToleranceArea.h / 2.0f);
 
 	CUIRect Slider = Handle;
 	Slider.HMargin(4.0f, &Slider);
 	ColorRGBA SliderColor = Active ? ColorRGBA(0.95f, 0.95f, 0.95f, 1.0f) : ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
-	RenderTools()->DrawUIRect(&Slider, SliderColor, IGraphics::CORNER_ALL, Slider.h / 2.0f);
+	Slider.Draw(SliderColor, IGraphics::CORNER_ALL, Slider.h / 2.0f);
 }
 
 void CMenus::RenderSettingsControls(CUIRect MainView)
@@ -1124,7 +1124,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MouseSettings.VMargin(5.0f, &MouseSettings);
 		MouseSettings.HSplitTop(80.0f, &MouseSettings, &JoystickSettings);
-		RenderTools()->DrawUIRect(&MouseSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		MouseSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		MouseSettings.VMargin(10.0f, &MouseSettings);
 
 		TextRender()->Text(0, MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
@@ -1145,7 +1145,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		JoystickSettings.HSplitTop(Margin, 0, &JoystickSettings);
 		JoystickSettings.HSplitTop(s_JoystickSettingsHeight, &JoystickSettings, &MovementSettings);
-		RenderTools()->DrawUIRect(&JoystickSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		JoystickSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		JoystickSettings.VMargin(Margin, &JoystickSettings);
 
 		TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
@@ -1158,7 +1158,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MovementSettings.HSplitTop(Margin, 0, &MovementSettings);
 		MovementSettings.HSplitTop(365.0f, &MovementSettings, &WeaponSettings);
-		RenderTools()->DrawUIRect(&MovementSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		MovementSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		MovementSettings.VMargin(Margin, &MovementSettings);
 
 		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
@@ -1171,7 +1171,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		WeaponSettings.HSplitTop(Margin, 0, &WeaponSettings);
 		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
-		RenderTools()->DrawUIRect(&WeaponSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		WeaponSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		WeaponSettings.VMargin(Margin, &WeaponSettings);
 
 		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
@@ -1184,7 +1184,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		ResetButton.HSplitTop(Margin, 0, &ResetButton);
 		ResetButton.HSplitTop(40.0f, &ResetButton, 0);
-		RenderTools()->DrawUIRect(&ResetButton, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		ResetButton.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		ResetButton.HMargin(10.0f, &ResetButton);
 		ResetButton.VMargin(30.0f, &ResetButton);
 		ResetButton.HSplitTop(20.0f, &ResetButton, 0);
@@ -1211,7 +1211,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		VotingSettings.VMargin(5.0f, &VotingSettings);
 		VotingSettings.HSplitTop(80.0f, &VotingSettings, &ChatSettings);
-		RenderTools()->DrawUIRect(&VotingSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		VotingSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		VotingSettings.VMargin(Margin, &VotingSettings);
 
 		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
@@ -1224,7 +1224,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		ChatSettings.HSplitTop(Margin, 0, &ChatSettings);
 		ChatSettings.HSplitTop(145.0f, &ChatSettings, &DummySettings);
-		RenderTools()->DrawUIRect(&ChatSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		ChatSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		ChatSettings.VMargin(Margin, &ChatSettings);
 
 		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
@@ -1237,7 +1237,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		DummySettings.HSplitTop(Margin, 0, &DummySettings);
 		DummySettings.HSplitTop(100.0f, &DummySettings, &MiscSettings);
-		RenderTools()->DrawUIRect(&DummySettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		DummySettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		DummySettings.VMargin(Margin, &DummySettings);
 
 		TextRender()->Text(0, DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
@@ -1250,7 +1250,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		MiscSettings.HSplitTop(Margin, 0, &MiscSettings);
 		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
-		RenderTools()->DrawUIRect(&MiscSettings, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+		MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		MiscSettings.VMargin(Margin, &MiscSettings);
 
 		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
@@ -1976,11 +1976,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 	// render background
 	CUIRect Temp, TabBar, RestartWarning;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 	MainView.HSplitBottom(15.0f, &MainView, &RestartWarning);
 	TabBar.HSplitTop(50.0f, &Temp, &TabBar);
-	RenderTools()->DrawUIRect(&Temp, ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
+	Temp.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
 
@@ -2090,8 +2090,8 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 	CUIRect Rect;
 	pRect->Margin(OutlineSize, &Rect);
 
-	RenderTools()->DrawUIRect(pRect, Outline, IGraphics::CORNER_ALL, 4.0f);
-	RenderTools()->DrawUIRect(&Rect, RGBColor, IGraphics::CORNER_ALL, 4.0f);
+	pRect->Draw(Outline, IGraphics::CORNER_ALL, 4.0f);
+	Rect.Draw(RGBColor, IGraphics::CORNER_ALL, 4.0f);
 
 	if(UI()->DoButtonLogic(pColor, 0, pRect))
 	{
@@ -2410,7 +2410,7 @@ ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool
 		Button.VSplitLeft(10.0f, 0, &Button);
 		Button.VSplitLeft(100.0f, &Label, &Button);
 
-		RenderTools()->DrawUIRect(&Button, ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), IGraphics::CORNER_ALL, 1.0f);
+		Button.Draw(ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), IGraphics::CORNER_ALL, 1.0f);
 
 		CUIRect Rail;
 		Button.Margin(2.0f, &Rail);
@@ -2644,7 +2644,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Section = RightView;
 		Section.Margin(SectionMargin, &Section);
 
-		RenderTools()->DrawUIRect(&Section, ColorRGBA(1, 1, 1, 0.1f), IGraphics::CORNER_ALL, 8.0f);
+		Section.Draw(ColorRGBA(1, 1, 1, 0.1f), IGraphics::CORNER_ALL, 8.0f);
 
 		Section.HSplitTop(10.0f, 0x0, &Section); // Margin
 

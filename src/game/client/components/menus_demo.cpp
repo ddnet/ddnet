@@ -29,14 +29,14 @@ using namespace std::chrono_literals;
 
 int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
+	pRect->Draw(ColorRGBA(1, 1, 1, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
 	UI()->DoLabel(pRect, pText, 14.0f, TEXTALIGN_CENTER);
 	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
 int CMenus::DoButton_Sprite(CButtonContainer *pButtonContainer, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
 	Graphics()->QuadsBegin();
 	if(!Checked)
@@ -86,7 +86,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		Box.Margin(150.0f, &Box);
 
 		// render the box
-		RenderTools()->DrawUIRect(&Box, ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+		Box.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 15.0f);
 
 		Box.HSplitTop(20.f, 0, &Box);
 		Box.HSplitTop(24.f, &Part, &Box);
@@ -256,7 +256,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	MainView.VSplitLeft(50.0f, 0, &MainView);
 	MainView.VSplitLeft(450.0f, &MainView, 0);
 
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
 
 	MainView.Margin(5.0f, &MainView);
 
@@ -277,13 +277,13 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		char aBuffer[128];
 
 		// draw seek bar
-		RenderTools()->DrawUIRect(&SeekBar, ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		SeekBar.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 
 		// draw filled bar
 		float Amount = CurrentTick / (float)TotalTicks;
 		CUIRect FilledBar = SeekBar;
 		FilledBar.w = 10.0f + (FilledBar.w - 10.0f) * Amount;
-		RenderTools()->DrawUIRect(&FilledBar, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		FilledBar.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 
 		// draw markers
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
@@ -524,7 +524,7 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 	if(!LogicOnly)
 	{
 		// background
-		RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_ALL, 5.0f);
+		View.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_ALL, 5.0f);
 	}
 
 	View.VSplitRight(20.0f, &View, &Scroll);
@@ -710,13 +710,13 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		//selected_index = i;
 		CUIRect r = Item.m_Rect;
 		r.Margin(1.5f, &r);
-		RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
+		r.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
 	}
 	else if(UI()->MouseInside(&HitRect) && !NoHoverEffects)
 	{
 		CUIRect r = Item.m_Rect;
 		r.Margin(1.5f, &r);
-		RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
+		r.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 	}
 
 	return Item;
@@ -866,7 +866,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	// render background
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
 #if defined(CONF_VIDEORECORDER)
@@ -900,7 +900,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// render demo info
 	MainView.VMargin(5.0f, &MainView);
 	MainView.HSplitBottom(5.0f, &MainView, 0);
-	RenderTools()->DrawUIRect(&MainView, ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
+	MainView.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
 	if(!m_DemolistSelectedIsDir && m_DemolistSelectedIndex >= 0 && m_vDemos[m_DemolistSelectedIndex].m_Valid)
 	{
 		CUIRect Left, Right, Labels;
@@ -1019,7 +1019,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Localize("Demo");Localize("Markers");Localize("Length");Localize("Date");
 	*/
 
-	RenderTools()->DrawUIRect(&Headers, ColorRGBA(0.0f, 0, 0, 0.15f), 0, 0);
+	Headers.Draw(ColorRGBA(0.0f, 0, 0, 0.15f), 0, 0);
 
 	int NumCols = std::size(s_aCols);
 
@@ -1115,13 +1115,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				CUIRect Rect = Row;
 				Rect.Margin(0.5f, &Rect);
-				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
+				Rect.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
 			}
 			else if(UI()->MouseHovered(&Row))
 			{
 				CUIRect Rect = Row;
 				Rect.Margin(0.5f, &Rect);
-				RenderTools()->DrawUIRect(&Rect, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
+				Rect.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 			}
 
 			if(UI()->DoButtonLogic(Item.m_aName, Selected, &Row))
