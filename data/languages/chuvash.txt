@@ -631,6 +631,9 @@ Loading map file from storage
 Loading DDNet Client
 == 
 
+Why are you slowmo replaying to read this?
+== 
+
 Initializing components
 == 
 

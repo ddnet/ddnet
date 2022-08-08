@@ -608,6 +608,9 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Preparing demo playback
 == 
 
+Why are you slowmo replaying to read this?
+== 
+
 Initializing components
 == 
 
