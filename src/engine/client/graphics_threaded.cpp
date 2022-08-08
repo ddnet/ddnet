@@ -675,7 +675,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 						First = false;
 					}
 				}
-				str_append(Warning.m_aWarningMsg, Localize(" unsupported"), sizeof(Warning.m_aWarningMsg));
+				str_append(Warning.m_aWarningMsg, " unsupported", sizeof(Warning.m_aWarningMsg));
 				m_vWarnings.emplace_back(Warning);
 			}
 		}

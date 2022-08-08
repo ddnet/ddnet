@@ -1491,9 +1491,6 @@ Getting game info
 Requesting to join the game
 == Запрашивается подключение к игре
 
-Sending intial client info
-== Отправка начальных данных о клиенте
-
 Loading menu images
 == Загрузка изображений меню
 
@@ -1565,3 +1562,4 @@ Loading race demo files
 
 Loading sound files
 == Загрузка звуковых файлов
+

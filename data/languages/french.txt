@@ -1474,20 +1474,56 @@ Highlight Color
 Extras
 == Extras
 
-Preparing demo playback
-== 
-
 Connected
 ==  Connecté
+
+Initializing assets
+== Initialisation des assets
+
+Getting game info
+== Obtention des informations de la partie
+
+Requesting to join the game
+== Demande de rejoindre la partie
+
+Loading skin files
+== Chargement des fichiers de skin
+
+Appearance
+== Apparence
+
+Show health, shields and ammo
+== Monter la vie, bouclier et les munitions
+
+DDRace HUD
+== HUD DDRace
+
+Show DDRace HUD
+== Montrer l'HUD DDrace
+
+Show jumps indicator
+== Montrer l'indicateur de sauts
+
+Hook collision line
+== Ligne de collision du grapin
+
+A Tee
+== Un Tee
+
+Loading assets
+== Chargement des assets
+
+Loading sound files
+== Chargement des fichiers sonores
+
+Preparing demo playback
+== 
 
 Loading map file from storage
 == 
 
 Initializing components
 == 
-
-Initializing assets
-== Initialisation des assets
 
 Initializing map logic
 == 
@@ -1496,15 +1532,6 @@ Sending initial client info
 == 
 
 Uploading map data to GPU
-== 
-
-Getting game info
-== Obtention des informations de la partie
-
-Requesting to join the game
-== Demande de rejoindre la partie
-
-Sending intial client info
 == 
 
 Loading menu images
@@ -1516,38 +1543,17 @@ Loading demo files
 Loading ghost files
 == 
 
-Loading skin files
-== Chargement des fichiers de skin
-
-Appearance
-== Apparence
-
 Name Plate
 == 
 
 Hook Collisions
 == 
 
-Show health, shields and ammo
-== Monter la vie, bouclier et les munitions
-
-DDRace HUD
-== HUD DDRace
-
 Show client IDs in scoreboard
 == 
 
-Show DDRace HUD
-== Montrer l'HUD DDrace
-
-Show jumps indicator
-== Montrer l'indicateur de sauts
-
 Show hook strength indicator
 == 
-
-Hook collision line
-== Ligne de collision du grapin
 
 Hook collision line width
 == 
@@ -1567,14 +1573,5 @@ Nothing hookable
 Something hookable
 == 
 
-A Tee
-== Un Tee
-
-Loading assets
-== Chargement des assets
-
 Loading race demo files
 == 
-
-Loading sound files
-== Chargement des fichiers sonores

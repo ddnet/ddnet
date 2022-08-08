@@ -1401,9 +1401,6 @@ Getting game info
 Requesting to join the game
 == 
 
-Sending intial client info
-== 
-
 Loading menu images
 == 
 

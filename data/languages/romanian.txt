@@ -706,9 +706,6 @@ Getting game info
 Requesting to join the game
 == 
 
-Sending intial client info
-== 
-
 Reconnect in %d sec
 == 
 

@@ -861,9 +861,6 @@ Getting game info
 Requesting to join the game
 == 
 
-Sending intial client info
-== 
-
 The server is running a non-standard tuning on a pure game type.
 == 
 
