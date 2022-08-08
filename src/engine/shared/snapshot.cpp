@@ -159,7 +159,11 @@ struct CItemList
 
 inline size_t CalcHashID(int Key)
 {
-	return ((Key >> 12) & 0xf0) | (Key & 0xf);
+	// djb2 (http://www.cse.yorku.ca/~oz/hash.html)
+	unsigned Hash = 5381;
+	for(unsigned Shift = 0; Shift < sizeof(int); Shift++)
+		Hash = ((Hash << 5) + Hash) + ((Key >> (Shift * 8)) & 0xFF);
+	return Hash % HASHLIST_SIZE;
 }
 
 static void GenerateHash(CItemList *pHashlist, CSnapshot *pSnapshot)
