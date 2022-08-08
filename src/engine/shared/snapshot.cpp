@@ -156,6 +156,11 @@ enum
 	HASHLIST_SIZE = 256,
 };
 
+inline size_t CalcHashID(int Key)
+{
+	return ((Key >> 12) & 0xf0) | (Key & 0xf);
+}
+
 static void GenerateHash(CItemList *pHashlist, CSnapshot *pSnapshot)
 {
 	for(int i = 0; i < HASHLIST_SIZE; i++)
@@ -164,7 +169,7 @@ static void GenerateHash(CItemList *pHashlist, CSnapshot *pSnapshot)
 	for(int i = 0; i < pSnapshot->NumItems(); i++)
 	{
 		int Key = pSnapshot->GetItem(i)->Key();
-		int HashID = ((Key >> 12) & 0xf0) | (Key & 0xf);
+		size_t HashID = CalcHashID(Key);
 		if(pHashlist[HashID].m_Num != 64)
 		{
 			pHashlist[HashID].m_aIndex[pHashlist[HashID].m_Num] = i;
@@ -176,7 +181,7 @@ static void GenerateHash(CItemList *pHashlist, CSnapshot *pSnapshot)
 
 static int GetItemIndexHashed(int Key, const CItemList *pHashlist)
 {
-	int HashID = ((Key >> 12) & 0xf0) | (Key & 0xf);
+	size_t HashID = CalcHashID(Key);
 	for(int i = 0; i < pHashlist[HashID].m_Num; i++)
 	{
 		if(pHashlist[HashID].m_aKeys[i] == Key)
