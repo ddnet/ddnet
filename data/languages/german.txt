@@ -1544,9 +1544,6 @@ Getting game info
 Requesting to join the game
 == Frage an dem Spiel beizutreten
 
-Sending intial client info
-== Sende initiale Client-Info
-
 Loading menu images
 == Lade Menü-Bilder
 
@@ -1573,3 +1570,6 @@ Loading race demo files
 
 Loading sound files
 == Lade Sound-Dateien
+
+Why are you slowmo replaying to read this?
+== Warum spielst du das Replay in Slow-Motion um das zu lesen?

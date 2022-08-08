@@ -267,7 +267,7 @@ void CGameClient::OnInit()
 		if(m_Menus.IsInit())
 		{
 			char aBuff[256];
-			str_format(aBuff, std::size(aBuff), "%s [%d/%d]", Localize("Initializing components"), (CompCounter + 1), (int)ComponentCount());
+			str_format(aBuff, std::size(aBuff), "%s [%d/%d]", CompCounter == 40 ? Localize("Why are you slowmo replaying to read this?") : Localize("Initializing components"), (CompCounter + 1), (int)ComponentCount());
 			m_Menus.RenderLoading(pLoadingDDNetCaption, aBuff, 1 + SkippedComps);
 			SkippedComps = 0;
 		}

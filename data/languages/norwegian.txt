@@ -1207,6 +1207,9 @@ Connected
 Loading map file from storage
 == 
 
+Why are you slowmo replaying to read this?
+== 
+
 Initializing components
 == 
 
@@ -1247,9 +1250,6 @@ Getting game info
 == 
 
 Requesting to join the game
-== 
-
-Sending intial client info
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
