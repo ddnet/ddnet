@@ -10,6 +10,7 @@
 #include <set>
 #include <vector>
 
+#include <engine/console.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
@@ -64,6 +65,7 @@ public:
 	bool Get(int Index, float *pValue) const;
 	bool Get(const char *pName, float *pValue) const;
 	static const char *Name(int Index) { return ms_apNames[Index]; }
+	int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
 };
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
