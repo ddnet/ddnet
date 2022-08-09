@@ -94,10 +94,8 @@ CGameConsole::CInstance::CInstance(int Type)
 	}
 
 	m_aCompletionBuffer[0] = 0;
-	m_CompletionUsed = false;
 	m_CompletionChosen = -1;
-	m_CompletionRenderOffset = 0.0f;
-	m_ReverseTAB = false;
+	Reset();
 
 	m_aUser[0] = '\0';
 	m_UserGot = false;
@@ -135,6 +133,11 @@ void CGameConsole::CInstance::ClearHistory()
 {
 	m_History.Init();
 	m_pHistoryEntry = 0;
+}
+
+void CGameConsole::CInstance::Reset()
+{
+	m_CompletionRenderOffset = 0.0f;
 }
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
@@ -330,18 +333,20 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		{
 			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
-				if(m_ReverseTAB && m_CompletionUsed)
-					m_CompletionChosen--;
-				else if(!m_ReverseTAB)
-					m_CompletionChosen++;
-				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
-				m_CompletionUsed = true;
-
-				// handle wrapping
-				if(CompletionEnumerationCount && (m_CompletionChosen >= CompletionEnumerationCount || m_CompletionChosen < 0))
+				const int Direction = m_pGameConsole->m_pClient->Input()->KeyIsPressed(KEY_LSHIFT) || m_pGameConsole->m_pClient->Input()->KeyIsPressed(KEY_RSHIFT) ? -1 : 1;
+				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
+				const int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands);
+				if(CompletionEnumerationCount)
 				{
-					m_CompletionChosen = (m_CompletionChosen + CompletionEnumerationCount) % CompletionEnumerationCount;
-					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
+					if(m_CompletionChosen == -1 && Direction < 0)
+						m_CompletionChosen = 0;
+					m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
+				}
+				else if(m_CompletionChosen != -1)
+				{
+					m_CompletionChosen = -1;
+					Reset();
 				}
 			}
 		}
@@ -369,16 +374,6 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			m_BacklogCurPage = 0;
 			m_pGameConsole->m_HasSelection = false;
 		}
-		else if(Event.m_Key == KEY_LSHIFT)
-		{
-			m_ReverseTAB = true;
-			Handled = true;
-		}
-	}
-	if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
-	{
-		m_ReverseTAB = false;
-		Handled = true;
 	}
 
 	if(!Handled)
@@ -386,17 +381,17 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 	if(Event.m_Flags & (IInput::FLAG_PRESS | IInput::FLAG_TEXT))
 	{
-		if((Event.m_Key != KEY_TAB) && (Event.m_Key != KEY_LSHIFT))
+		if(Event.m_Key != KEY_TAB && Event.m_Key != KEY_LSHIFT && Event.m_Key != KEY_RSHIFT)
 		{
-			m_CompletionUsed = false;
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString());
-			m_CompletionRenderOffset = 0.0f;
+
+			Reset();
 		}
 
 		// find the current command
 		{
-			char aBuf[64] = {0};
+			char aBuf[sizeof(m_aCommandName)] = {0};
 			const char *pSrc = GetString();
 			int i = 0;
 			for(; i < (int)sizeof(aBuf) - 1 && *pSrc && *pSrc != ' '; i++, pSrc++)
@@ -463,6 +458,7 @@ CGameConsole::CInstance *CGameConsole::CurrentConsole()
 
 void CGameConsole::OnReset()
 {
+	m_RemoteConsole.Reset();
 }
 
 // only defined for 0<=t<=1
@@ -622,7 +618,7 @@ void CGameConsole::OnRender()
 
 		CRenderInfo Info;
 		Info.m_pSelf = this;
-		Info.m_WantedCompletion = pConsole->m_CompletionUsed ? pConsole->m_CompletionChosen : -1;
+		Info.m_WantedCompletion = pConsole->m_CompletionChosen;
 		Info.m_EnumCount = 0;
 		Info.m_Offset = pConsole->m_CompletionRenderOffset;
 		Info.m_Width = Screen.w;

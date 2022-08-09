@@ -45,11 +45,9 @@ class CGameConsole : public CComponent
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
-		bool m_CompletionUsed;
 		int m_CompletionChosen;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
-		bool m_ReverseTAB;
 
 		char m_aUser[32];
 		bool m_UserGot;
@@ -66,6 +64,7 @@ class CGameConsole : public CComponent
 		void ClearBacklog();
 		void ClearBacklogYOffsets();
 		void ClearHistory();
+		void Reset();
 
 		void ExecuteLine(const char *pLine);
 
