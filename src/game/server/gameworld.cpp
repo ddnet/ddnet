@@ -268,6 +268,17 @@ void CGameWorld::Tick()
 		if(GameServer()->m_pController->IsForceBalanced())
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Teams have been balanced");
 		// update all objects
+		if(g_Config.m_SvNoWeakHookAndBounce)
+		{
+			for(auto *pEnt : m_apFirstEntityTypes)
+				for(; pEnt;)
+				{
+					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+					pEnt->PreTick();
+					pEnt = m_pNextTraverseEntity;
+				}
+		}
+
 		for(auto *pEnt : m_apFirstEntityTypes)
 			for(; pEnt;)
 			{
@@ -280,7 +291,7 @@ void CGameWorld::Tick()
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				pEnt->TickDefered();
+				pEnt->TickDeferred();
 				pEnt = m_pNextTraverseEntity;
 			}
 	}

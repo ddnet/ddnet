@@ -116,7 +116,7 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
-void CCharacterCore::Tick(bool UseInput)
+void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
 	m_TriggeredEvents = 0;
@@ -387,6 +387,12 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
+	if(DoDeferredTick)
+		TickDeferred();
+}
+
+void CCharacterCore::TickDeferred()
+{
 	if(m_pWorld)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)

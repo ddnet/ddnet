@@ -33,8 +33,9 @@ public:
 
 	void Reset() override;
 	void Destroy() override;
+	void PreTick() override;
 	void Tick() override;
-	void TickDefered() override;
+	void TickDeferred() override;
 	void TickPaused() override;
 	void Snap(int SnappingClient) override;
 	void SwapClients(int Client1, int Client2) override;

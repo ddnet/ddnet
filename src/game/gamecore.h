@@ -269,7 +269,8 @@ public:
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
 	void Reset();
-	void Tick(bool UseInput);
+	void TickDeferred();
+	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();
 
 	void Read(const CNetObj_CharacterCore *pObjCore);
