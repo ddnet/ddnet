@@ -38,6 +38,7 @@ class CGameConsole : public CComponent
 		char *m_pHistoryEntry;
 
 		CLineInput m_Input;
+		const char *m_pName;
 		int m_Type;
 		int m_CompletionEnumerationCount;
 		int m_BacklogCurPage;
