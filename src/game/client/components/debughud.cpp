@@ -119,7 +119,7 @@ void CDebugHud::RenderTuning()
 		TextRender()->Text(0x0, x - w, y + Count * 6, 5, aBuf, -1.0f);
 
 		x += 5.0f;
-		TextRender()->Text(0x0, x, y + Count * 6, 5, CTuningParams::ms_apNames[i], -1.0f);
+		TextRender()->Text(0x0, x, y + Count * 6, 5, CTuningParams::Name(i), -1.0f);
 
 		Count++;
 	}

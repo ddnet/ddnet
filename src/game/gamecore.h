@@ -40,6 +40,8 @@ public:
 
 class CTuningParams
 {
+	static const char *ms_apNames[];
+
 public:
 	CTuningParams()
 	{
@@ -48,8 +50,6 @@ public:
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
 	}
-
-	static const char *ms_apNames[];
 
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) CTuneParam m_##Name;
 #include "tuning.h"
@@ -63,6 +63,7 @@ public:
 	bool Set(const char *pName, float Value);
 	bool Get(int Index, float *pValue) const;
 	bool Get(const char *pName, float *pValue) const;
+	static const char *Name(int Index) { return ms_apNames[Index]; }
 };
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
