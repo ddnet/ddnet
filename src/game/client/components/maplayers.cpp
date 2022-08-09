@@ -1414,7 +1414,8 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Rot = Channels.b / 180.0f * pi;
 		}
 
-		bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || !(Color.a > 0);
+		const bool IsFullyTransparent = Color.a <= 0;
+		bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || IsFullyTransparent;
 
 		if(NeedsFlush)
 		{
@@ -1422,14 +1423,14 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 			QuadsRenderCount = 0;
 			CurQuadOffset = i;
-			if(Color.a == 0)
+			if(IsFullyTransparent)
 			{
 				// since this quad is ignored, the offset is the next quad
 				++CurQuadOffset;
 			}
 		}
 
-		if(Color.a > 0)
+		if(!IsFullyTransparent)
 		{
 			SQuadRenderInfo &QInfo = s_vQuadRenderInfo[QuadsRenderCount++];
 			QInfo.m_Color = Color;
