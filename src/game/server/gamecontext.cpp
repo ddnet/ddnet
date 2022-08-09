@@ -2553,7 +2553,7 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 	float NewValue = pResult->GetFloat(1);
 
 	char aBuf[256];
-	if(pSelf->Tuning()->Set(pParamName, NewValue))
+	if(pSelf->Tuning()->Set(pParamName, NewValue) && pSelf->Tuning()->Get(pParamName, &NewValue))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -2583,6 +2583,7 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 	float NewValue = fabs(OldValue - pResult->GetFloat(1)) < 0.0001f ? pResult->GetFloat(2) : pResult->GetFloat(1);
 
 	pSelf->Tuning()->Set(pParamName, NewValue);
+	pSelf->Tuning()->Get(pParamName, &NewValue);
 
 	str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -2598,7 +2599,7 @@ void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
 		float DefaultValue = 0.0f;
 		char aBuf[256];
 		CTuningParams TuningParams;
-		if(TuningParams.Get(pParamName, &DefaultValue) && pSelf->Tuning()->Set(pParamName, DefaultValue))
+		if(TuningParams.Get(pParamName, &DefaultValue) && pSelf->Tuning()->Set(pParamName, DefaultValue) && pSelf->Tuning()->Get(pParamName, &DefaultValue))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s reset to %.2f", pParamName, DefaultValue);
 			pSelf->SendTuningParams(-1);
@@ -2639,7 +2640,7 @@ void CGameContext::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 	if(List >= 0 && List < NUM_TUNEZONES)
 	{
 		char aBuf[256];
-		if(pSelf->TuningList()[List].Set(pParamName, NewValue))
+		if(pSelf->TuningList()[List].Set(pParamName, NewValue) && pSelf->TuningList()[List].Get(pParamName, &NewValue))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
 			pSelf->SendTuningParams(-1, List);
