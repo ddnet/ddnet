@@ -40,7 +40,6 @@ class CGameConsole : public CComponent
 		CLineInput m_Input;
 		const char *m_pName;
 		int m_Type;
-		int m_CompletionEnumerationCount;
 		int m_BacklogCurPage;
 
 		CGameConsole *m_pGameConsole;
@@ -74,7 +73,7 @@ class CGameConsole : public CComponent
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
 
 		const char *GetString() const { return m_Input.GetString(); }
-		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
+		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 	};
 
 	class IConsole *m_pConsole;
@@ -106,7 +105,7 @@ class CGameConsole : public CComponent
 	void Toggle(int Type);
 	void Dump(int Type);
 
-	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
+	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);

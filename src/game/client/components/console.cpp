@@ -161,12 +161,11 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	}
 }
 
-void CGameConsole::CInstance::PossibleCommandsCompleteCallback(const char *pStr, void *pUser)
+void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser)
 {
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
-	if(pInstance->m_CompletionChosen == pInstance->m_CompletionEnumerationCount)
+	if(pInstance->m_CompletionChosen == Index)
 		pInstance->m_Input.Set(pStr);
-	pInstance->m_CompletionEnumerationCount++;
 }
 
 void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
@@ -335,16 +334,13 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 					m_CompletionChosen--;
 				else if(!m_ReverseTAB)
 					m_CompletionChosen++;
-				m_CompletionEnumerationCount = 0;
-				m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
-
+				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
 				m_CompletionUsed = true;
 
 				// handle wrapping
-				if(m_CompletionEnumerationCount && (m_CompletionChosen >= m_CompletionEnumerationCount || m_CompletionChosen < 0))
+				if(CompletionEnumerationCount && (m_CompletionChosen >= CompletionEnumerationCount || m_CompletionChosen < 0))
 				{
-					m_CompletionChosen = (m_CompletionChosen + m_CompletionEnumerationCount) % m_CompletionEnumerationCount;
-					m_CompletionEnumerationCount = 0;
+					m_CompletionChosen = (m_CompletionChosen + CompletionEnumerationCount) % CompletionEnumerationCount;
 					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands(), PossibleCommandsCompleteCallback, this);
 				}
 			}
@@ -487,7 +483,7 @@ struct CRenderInfo
 	float m_Width;
 };
 
-void CGameConsole::PossibleCommandsRenderCallback(const char *pStr, void *pUser)
+void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser)
 {
 	CRenderInfo *pInfo = static_cast<CRenderInfo *>(pUser);
 
