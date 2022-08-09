@@ -2598,9 +2598,9 @@ void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[256];
 	for(int i = 0; i < pSelf->Tuning()->Num(); i++)
 	{
-		float v;
-		pSelf->Tuning()->Get(i, &v);
-		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], v);
+		float Value;
+		pSelf->Tuning()->Get(i, &Value);
+		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], Value);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
@@ -2635,9 +2635,9 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 	{
 		for(int i = 0; i < pSelf->TuningList()[List].Num(); i++)
 		{
-			float v;
-			pSelf->TuningList()[List].Get(i, &v);
-			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], v);
+			float Value;
+			pSelf->TuningList()[List].Get(i, &Value);
+			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], Value);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		}
 	}

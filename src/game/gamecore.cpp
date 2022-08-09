@@ -48,11 +48,6 @@ bool CTuningParams::Get(const char *pName, float *pValue) const
 	return false;
 }
 
-float HermiteBasis1(float v)
-{
-	return 2 * v * v * v - 3 * v * v + 1;
-}
-
 float VelocityRamp(float Value, float Start, float Range, float Curvature)
 {
 	if(Value < Start)
@@ -122,12 +117,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	m_TriggeredEvents = 0;
 
 	// get ground state
-	bool Grounded = false;
-	if(m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
-		Grounded = true;
-	if(m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
-		Grounded = true;
-
+	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
 	m_Vel.y += m_Tuning.m_Gravity;
