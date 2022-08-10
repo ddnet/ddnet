@@ -184,7 +184,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		// save group name
 		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
 
-		GItem.m_ParallaxZoom = pGroup->m_ParallaxZoom;
+		CMapItemGroupEx GItemEx;
+		GItemEx.m_Version = CMapItemGroupEx::CURRENT_VERSION;
+		GItemEx.m_ParallaxZoom = pGroup->m_ParallaxZoom;
 
 		for(const auto &pLayer : pGroup->m_vpLayers)
 		{
@@ -333,7 +335,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			}
 		}
 
-		df.AddItem(MAPITEMTYPE_GROUP, GroupCount++, sizeof(GItem), &GItem);
+		df.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
+		df.AddItem(MAPITEMTYPE_GROUP_EX, GroupCount, sizeof(GItemEx), &GItemEx);
+		GroupCount++;
 	}
 
 	// save envelopes
@@ -583,9 +587,15 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 			int Start, Num;
 			DataFile.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
+
+			int StartEx, NumEx;
+			DataFile.GetType(MAPITEMTYPE_GROUP_EX, &StartEx, &NumEx);
 			for(int g = 0; g < Num; g++)
 			{
 				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g, nullptr, nullptr);
+				CMapItemGroupEx *pGItemEx = nullptr;
+				if(NumEx)
+					pGItemEx = (CMapItemGroupEx *)DataFile.GetItem(StartEx + g, nullptr, nullptr);
 
 				if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
 					continue;
@@ -609,8 +619,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				if(pGItem->m_Version >= 3)
 					IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
 
-				pGroup->m_ParallaxZoom = pGItem->GetParallaxZoom();
-				pGroup->m_CustomParallaxZoom = pGroup->m_ParallaxZoom != maximum(pGroup->m_ParallaxX, pGroup->m_ParallaxY);
+				pGroup->m_ParallaxZoom = GetParallaxZoom(pGItem, pGItemEx);
+				pGroup->m_CustomParallaxZoom = pGroup->m_ParallaxZoom != GetParallaxZoomDefault(pGroup->m_ParallaxX, pGroup->m_ParallaxY);
 
 				for(int l = 0; l < pGItem->m_NumLayers; l++)
 				{

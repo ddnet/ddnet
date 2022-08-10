@@ -6244,6 +6244,7 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	CLayerGroup *pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
+	pGroup->m_CustomParallaxZoom = 0;
 	pGroup->m_ParallaxZoom = 0;
 	CLayerQuads *pLayer = new CLayerQuads;
 	pLayer->m_pEditor = m_pEditor;
@@ -6418,9 +6419,6 @@ void CEditor::OnUpdate()
 			float WorldHeight = aPoints[3] - aPoints[1];
 
 			m_MouseWScale = WorldWidth / Graphics()->WindowWidth();
-			// The correct thing would be to skip all UI elements for group scaled to 0, but that's a rare and not particularly important situation so we can just have this hack to avoid crashes
-			if(abs(m_MouseWScale) < 0.000001f)
-				m_MouseWScale = 1.0f;
 
 			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
 			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());

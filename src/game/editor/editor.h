@@ -12,6 +12,7 @@
 #include <game/client/ui.h>
 #include <game/client/ui_ex.h>
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 #include <engine/editor.h>
 #include <engine/graphics.h>
@@ -246,7 +247,7 @@ public:
 	void OnEdited()
 	{
 		if(!m_CustomParallaxZoom)
-			m_ParallaxZoom = maximum(m_ParallaxX, m_ParallaxY);
+			m_ParallaxZoom = GetParallaxZoomDefault(m_ParallaxX, m_ParallaxY);
 	}
 
 	void Clear()
