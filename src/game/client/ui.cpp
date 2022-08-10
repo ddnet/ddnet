@@ -5,6 +5,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/client.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -83,6 +84,7 @@ float CUI::ms_FontmodHeight = 0.8f;
 
 void CUI::Init(IKernel *pKernel)
 {
+	m_pClient = pKernel->RequestInterface<IClient>();
 	m_pGraphics = pKernel->RequestInterface<IGraphics>();
 	m_pInput = pKernel->RequestInterface<IInput>();
 	m_pTextRender = pKernel->RequestInterface<ITextRender>();
@@ -370,6 +372,35 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 		*pY = clamp(m_MouseY - pRect->y, 0.0f, pRect->h);
 
 	return 1;
+}
+
+void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed)
+{
+	// instant scrolling if distance too long
+	if(absolute(*pScrollOffsetChange) > ViewPortSize)
+	{
+		*pScrollOffset += *pScrollOffsetChange;
+		*pScrollOffsetChange = 0.0f;
+	}
+	// smooth scrolling
+	if(*pScrollOffsetChange)
+	{
+		const float Delta = *pScrollOffsetChange * clamp(Client()->RenderFrameTime() * ScrollSpeed, 0.0f, 1.0f);
+		*pScrollOffset += Delta;
+		*pScrollOffsetChange -= Delta;
+	}
+	// clamp to first item
+	if(*pScrollOffset < 0.0f)
+	{
+		*pScrollOffset = 0.0f;
+		*pScrollOffsetChange = 0.0f;
+	}
+	// clamp to last item
+	if(TotalSize > ViewPortSize && *pScrollOffset > TotalSize - ViewPortSize)
+	{
+		*pScrollOffset = TotalSize - ViewPortSize;
+		*pScrollOffsetChange = 0.0f;
+	}
 }
 
 float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
