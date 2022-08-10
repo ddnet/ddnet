@@ -2755,7 +2755,7 @@ void CGraphics_Threaded::Swap()
 
 	// kick the command buffer
 	KickCommandBuffer();
-	// TODO: Remove when https://github.com/libsdl-org/SDL/issues/5203 is fixed
+	// TODO: Since https://github.com/libsdl-org/SDL/issues/5203 is fixed, remove when we upgrade to SDL2 >= 2.0.23
 #ifdef CONF_PLATFORM_MACOS
 	if(str_find(GetVersionString(), "Metal"))
 		WaitForIdle();
