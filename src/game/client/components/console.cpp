@@ -180,6 +180,12 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 		pInstance->m_Input.Set(pStr);
 }
 
+static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
+{
+	const char *pSpace = str_find(pSrc, " ");
+	str_copy(pDest, pSrc, minimum<size_t>(pSpace ? pSpace - pSrc + 1 : 1, DestSize));
+}
+
 void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser)
 {
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
@@ -187,12 +193,8 @@ void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const
 	{
 		// get command
 		char aBuf[512];
-		const char *pSrc = pInstance->GetString();
-		size_t i = 0;
-		for(; i < sizeof(aBuf) - 2 && pSrc[i] && pSrc[i] != ' '; i++)
-			aBuf[i] = pSrc[i];
-		aBuf[i++] = ' ';
-		aBuf[i] = '\0';
+		StrCopyUntilSpace(aBuf, sizeof(aBuf), pInstance->GetString());
+		str_append(aBuf, " ", sizeof(aBuf));
 
 		// append argument
 		str_append(aBuf, pStr, sizeof(aBuf));
@@ -453,13 +455,8 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 
 		// find the current command
 		{
-			char aBuf[sizeof(m_aCommandName)] = {0};
-			const char *pSrc = GetString();
-			size_t i = 0;
-			for(; i < sizeof(aBuf) - 1 && pSrc[i] && pSrc[i] != ' '; i++)
-				aBuf[i] = pSrc[i];
-			aBuf[i] = '\0';
-
+			char aBuf[sizeof(m_aCommandName)];
+			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
