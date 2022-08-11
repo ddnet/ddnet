@@ -551,16 +551,21 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 	}
 }
 
-void CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
+int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
 {
+	int Index = 0;
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
 			if(str_find_nocase(pCommand->m_pName, pStr))
-				pfnCallback(pCommand->m_pName, pUser);
+			{
+				pfnCallback(Index, pCommand->m_pName, pUser);
+				Index++;
+			}
 		}
 	}
+	return Index;
 }
 
 CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)

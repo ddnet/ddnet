@@ -196,7 +196,7 @@ public:
 	void Init() override;
 	const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;
 	const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
-	void PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
+	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
 	void ParseArguments(int NumArgs, const char **ppArguments) override;
 	void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) override;

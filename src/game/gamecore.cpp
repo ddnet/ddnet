@@ -34,7 +34,7 @@ bool CTuningParams::Get(int Index, float *pValue) const
 bool CTuningParams::Set(const char *pName, float Value)
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, ms_apNames[i]) == 0)
+		if(str_comp_nocase(pName, Name(i)) == 0)
 			return Set(i, Value);
 	return false;
 }
@@ -42,10 +42,24 @@ bool CTuningParams::Set(const char *pName, float Value)
 bool CTuningParams::Get(const char *pName, float *pValue) const
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, ms_apNames[i]) == 0)
+		if(str_comp_nocase(pName, Name(i)) == 0)
 			return Get(i, pValue);
 
 	return false;
+}
+
+int CTuningParams::PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCallback, void *pUser)
+{
+	int Index = 0;
+	for(int i = 0; i < Num(); i++)
+	{
+		if(str_find_nocase(Name(i), pStr))
+		{
+			pfnCallback(Index, Name(i), pUser);
+			Index++;
+		}
+	}
+	return Index;
 }
 
 float VelocityRamp(float Value, float Start, float Range, float Curvature)

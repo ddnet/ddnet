@@ -163,9 +163,9 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 
 	// register server dummy commands for tab completion
-	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, 0, 0, "Reset tuning");
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, 0, 0, "Dump tuning");
+	Console()->Register("tune", "s[tuning] ?i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value or show current value");
+	Console()->Register("tune_reset", "?s[tuning]", CFGFLAG_SERVER, 0, 0, "Reset all or one tuning variable to default");
+	Console()->Register("tunes", "", CFGFLAG_SERVER, 0, 0, "List all tuning variables and their values");
 	Console()->Register("change_map", "?r[map]", CFGFLAG_SERVER, 0, 0, "Change map");
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER, 0, 0, "Restart in x seconds");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, 0, 0, "Broadcast message");
