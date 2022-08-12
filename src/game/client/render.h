@@ -105,19 +105,8 @@ public:
 	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
 	// rects
-	void DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners);
-	void DrawRoundRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners);
-
-	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
-
-	void DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-
-	void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding);
 	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-	void DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
 	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
-
-	void DrawCircle(float x, float y, float r, int Segments);
 
 	// larger rendering methods
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);

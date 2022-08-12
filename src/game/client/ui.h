@@ -126,11 +126,15 @@ class CUIElement
 {
 	friend class CUI;
 
+	CUI *m_pUI;
+
 	CUIElement(CUI *pUI, int RequestedRectCount) { Init(pUI, RequestedRectCount); }
 
 public:
 	struct SUIElementRect
 	{
+		CUIElement *m_pParent;
+
 	public:
 		int m_UIRectQuadContainer;
 		int m_UITextContainer;
@@ -152,9 +156,11 @@ public:
 		ColorRGBA m_QuadColor;
 
 		void Reset();
+		void Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
 	};
 
 protected:
+	CUI *UI() const { return m_pUI; }
 	std::vector<SUIElementRect> m_vUIRects;
 
 	// used for marquees or other user implemented things
@@ -240,22 +246,6 @@ public:
 	void OnElementsReset();
 	void OnWindowResize();
 	void OnLanguageChange();
-
-	enum
-	{
-		CORNER_NONE = 0,
-		CORNER_TL = 1,
-		CORNER_TR = 2,
-		CORNER_BL = 4,
-		CORNER_BR = 8,
-
-		CORNER_T = CORNER_TL | CORNER_TR,
-		CORNER_B = CORNER_BL | CORNER_BR,
-		CORNER_R = CORNER_TR | CORNER_BR,
-		CORNER_L = CORNER_TL | CORNER_BL,
-
-		CORNER_ALL = CORNER_T | CORNER_B
-	};
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }

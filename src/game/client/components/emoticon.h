@@ -7,8 +7,6 @@
 
 class CEmoticon : public CComponent
 {
-	void DrawCircle(float x, float y, float r, int Segments);
-
 	bool m_WasActive;
 	bool m_Active;
 

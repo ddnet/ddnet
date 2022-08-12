@@ -72,9 +72,9 @@ void CEditor::UiDoPopupMenu()
 				UI()->SetActiveItem(&s_UiPopups[i].m_pId);
 		}
 
-		int Corners = CUI::CORNER_ALL;
+		int Corners = IGraphics::CORNER_ALL;
 		if(s_UiPopups[i].m_IsMenu)
-			Corners = CUI::CORNER_R | CUI::CORNER_B;
+			Corners = IGraphics::CORNER_R | IGraphics::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
 		RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);

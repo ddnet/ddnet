@@ -374,7 +374,7 @@ int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Chec
 
 int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_ALL, 3.0f);
+	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
 	CUIRect NewRect = *pRect;
 	SLabelProperties Props;
 	Props.m_AlignVertically = AlignVert;
@@ -389,7 +389,7 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 	float Alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
 	ColorRGBA Color = ColorRGBA(BaseColor.r * Bright, BaseColor.g * Bright, BaseColor.b * Bright, Alpha);
 
-	RenderTools()->DrawUIRect(pRect, Color, CUI::CORNER_ALL, 3.0f);
+	RenderTools()->DrawUIRect(pRect, Color, IGraphics::CORNER_ALL, 3.0f);
 	UI()->DoLabel(pRect, pText, 10.f, TEXTALIGN_CENTER);
 	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
@@ -398,7 +398,7 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(Checked)
-		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_ALL, 3.0f);
+		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
@@ -409,7 +409,7 @@ int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, cons
 int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	CUIRect r = *pRect;
-	RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), CUI::CORNER_T, 3.0f);
+	RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), IGraphics::CORNER_T, 3.0f);
 
 	r = *pRect;
 	r.VMargin(5.0f, &r);
@@ -420,7 +420,7 @@ int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, cons
 int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(UI()->HotItem() == pID || Checked)
-		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_ALL, 3.0f);
+		RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
@@ -430,7 +430,7 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 
 int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_T, 5.0f);
+	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_T, 5.0f);
 	CUIRect NewRect = *pRect;
 	UI()->DoLabel(&NewRect, pText, 10, TEXTALIGN_CENTER);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
@@ -448,14 +448,14 @@ int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const 
 
 int CEditor::DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_R, 3.0f);
+	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_R, 3.0f);
 	UI()->DoLabel(pRect, pText ? pText : "+", 10, TEXTALIGN_CENTER);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_L, 3.0f);
+	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), IGraphics::CORNER_L, 3.0f);
 	UI()->DoLabel(pRect, pText ? pText : "-", 10, TEXTALIGN_CENTER);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
@@ -925,7 +925,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// zoom group
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_ZoomOutButton = 0;
-		if(DoButton_Ex(&s_ZoomOutButton, "ZO", 0, &Button, 0, "[NumPad-] Zoom out", CUI::CORNER_L))
+		if(DoButton_Ex(&s_ZoomOutButton, "ZO", 0, &Button, 0, "[NumPad-] Zoom out", IGraphics::CORNER_L))
 			m_ZoomLevel += 50;
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
@@ -939,7 +939,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_ZoomInButton = 0;
-		if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", CUI::CORNER_R))
+		if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", IGraphics::CORNER_R))
 			m_ZoomLevel -= 50;
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -951,7 +951,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			// flip buttons
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_FlipXButton = 0;
-			if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				for(auto &pLayer : m_Brush.m_vpLayers)
 					pLayer->BrushFlipX();
@@ -959,7 +959,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_FlipyButton = 0;
-			if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				for(auto &pLayer : m_Brush.m_vpLayers)
 					pLayer->BrushFlipY();
@@ -981,7 +981,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_CcwButton = 0;
-			if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				for(auto &pLayer : m_Brush.m_vpLayers)
 					pLayer->BrushRotate(-s_RotationAmount / 360.0f * pi * 2);
@@ -989,7 +989,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_CwButton = 0;
-			if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				for(auto &pLayer : m_Brush.m_vpLayers)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
@@ -1003,7 +1003,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_AnimFasterButton = 0;
-			if(DoButton_Ex(&s_AnimFasterButton, "A+", 0, &Button, 0, "Increase animation speed", CUI::CORNER_L))
+			if(DoButton_Ex(&s_AnimFasterButton, "A+", 0, &Button, 0, "Increase animation speed", IGraphics::CORNER_L))
 				m_AnimateSpeed += 0.5f;
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
@@ -1013,7 +1013,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_AnimSlowerButton = 0;
-			if(DoButton_Ex(&s_AnimSlowerButton, "A-", 0, &Button, 0, "Decrease animation speed", CUI::CORNER_R))
+			if(DoButton_Ex(&s_AnimSlowerButton, "A-", 0, &Button, 0, "Decrease animation speed", IGraphics::CORNER_R))
 			{
 				if(m_AnimateSpeed > 0.5f)
 					m_AnimateSpeed -= 0.5f;
@@ -1027,7 +1027,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_GridIncreaseButton = 0;
-			if(DoButton_Ex(&s_GridIncreaseButton, "G-", 0, &Button, 0, "Decrease grid", CUI::CORNER_L))
+			if(DoButton_Ex(&s_GridIncreaseButton, "G-", 0, &Button, 0, "Decrease grid", IGraphics::CORNER_L))
 			{
 				if(m_GridFactor > 1)
 					m_GridFactor--;
@@ -1041,7 +1041,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 
 			static int s_GridDecreaseButton = 0;
-			if(DoButton_Ex(&s_GridDecreaseButton, "G+", 0, &Button, 0, "Increase grid", CUI::CORNER_R))
+			if(DoButton_Ex(&s_GridDecreaseButton, "G+", 0, &Button, 0, "Increase grid", IGraphics::CORNER_R))
 			{
 				if(m_GridFactor < 15)
 					m_GridFactor++;
@@ -1076,7 +1076,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			if(pT)
 			{
 				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", CUI::CORNER_ALL))
+				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", IGraphics::CORNER_ALL))
 				{
 					m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
 					m_PopupEventActivated = true;
@@ -1124,7 +1124,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 						static int s_ModifierButton = 0;
-						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, 0, aBuf, CUI::CORNER_ALL) || (ModPressed && Input()->KeyPress(KEY_A)))
+						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, 0, aBuf, IGraphics::CORNER_ALL) || (ModPressed && Input()->KeyPress(KEY_A)))
 						{
 							static int s_ModifierPopupID = 0;
 							if(!UiPopupExists(&s_ModifierPopupID))
@@ -2936,7 +2936,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 1, 0.3f);
-			RenderTools()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
+			Graphics()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
 			Graphics()->QuadsEnd();
 		}
 	}
@@ -3137,7 +3137,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_vpImages[pProps[i].m_Value]->m_aName);
 
 			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, CUI::CORNER_ALL, FontSize))
+			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL, FontSize))
 				PopupSelectImageInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectImageResult();
@@ -3189,7 +3189,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_vpSounds[pProps[i].m_Value]->m_aName);
 
 			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, CUI::CORNER_ALL, FontSize))
+			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL, FontSize))
 				PopupSelectSoundInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectSoundResult();
@@ -3208,7 +3208,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				str_format(aBuf, sizeof(aBuf), "%s", m_Map.m_vpImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value));
 
 			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, CUI::CORNER_ALL, FontSize))
+			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL, FontSize))
 				PopupSelectConfigAutoMapInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectConfigAutoMapResult();
@@ -3320,7 +3320,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			{
 				LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
 				Slot.VSplitLeft(12, &VisibleToggle, &Slot);
-				if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? "V" : "H", m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", CUI::CORNER_L, 10.0f, 0))
+				if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? "V" : "H", m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", IGraphics::CORNER_L, 10.0f, 0))
 					m_Map.m_vpGroups[g]->m_Visible = !m_Map.m_vpGroups[g]->m_Visible;
 
 				str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
@@ -3328,7 +3328,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Slot.w)
 					FontSize--;
 				if(int Result = DoButton_Ex(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot,
-					   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", CUI::CORNER_R, FontSize))
+					   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R, FontSize))
 				{
 					if(g != m_SelectedGroup)
 						SelectLayer(0, g);
@@ -3371,7 +3371,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				Slot.VSplitLeft(12.0f, nullptr, &Button);
 				Button.VSplitLeft(15, &VisibleToggle, &Button);
 
-				if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", CUI::CORNER_L, 10.0f, 0))
+				if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", IGraphics::CORNER_L, 10.0f, 0))
 					m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible = !m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible;
 
 				if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
@@ -3423,7 +3423,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					Checked += 6;
 				}
 				if(int Result = DoButton_Ex(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button,
-					   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", CUI::CORNER_R, FontSize))
+					   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R, FontSize))
 				{
 					static CLayerPopupContext s_LayerPopupContext = {};
 					if(Result == 1)
@@ -3561,7 +3561,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
 
 		static int s_NewGroupButton = 0;
-		if(DoButton_Editor(&s_NewGroupButton, "Add group", 0, &Slot, CUI::CORNER_R, "Adds a new group"))
+		if(DoButton_Editor(&s_NewGroupButton, "Add group", 0, &Slot, IGraphics::CORNER_R, "Adds a new group"))
 		{
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
@@ -4353,7 +4353,7 @@ void CEditor::RenderFileDialog()
 	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.25f), 0, 0);
 	View.VMargin(150.0f, &View);
 	View.HMargin(50.0f, &View);
-	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.75f), CUI::CORNER_ALL, 5.0f);
+	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.75f), IGraphics::CORNER_ALL, 5.0f);
 	View.Margin(10.0f, &View);
 
 	CUIRect Title, FileBox, FileBoxLabel, ButtonBar, Scroll, PathBox;
@@ -4371,7 +4371,7 @@ void CEditor::RenderFileDialog()
 	View.VSplitRight(20.0f, &View, &Scroll);
 
 	// title
-	RenderTools()->DrawUIRect(&Title, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 4.0f);
+	RenderTools()->DrawUIRect(&Title, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 	Title.VMargin(10.0f, &Title);
 	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, TEXTALIGN_LEFT);
 
@@ -4411,14 +4411,14 @@ void CEditor::RenderFileDialog()
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, TEXTALIGN_LEFT);
 		str_copy(m_aFileDialogPrevSearchText, m_aFileDialogSearchText, sizeof(m_aFileDialogPrevSearchText));
 		static float s_SearchBoxID = 0;
-		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID, false, CUI::CORNER_L);
+		DoEditBox(&s_SearchBoxID, &FileBox, m_aFileDialogSearchText, sizeof(m_aFileDialogSearchText), 10.0f, &s_SearchBoxID, false, IGraphics::CORNER_L);
 		if(m_FileDialogOpening)
 			UI()->SetActiveItem(&s_SearchBoxID);
 
 		// clearSearchbox button
 		{
 			static int s_ClearButton = 0;
-			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), CUI::CORNER_R, 3.0f);
+			RenderTools()->DrawUIRect(&ClearBox, ColorRGBA(1, 1, 1, 0.33f * UI()->ButtonColorMul(&s_ClearButton)), IGraphics::CORNER_R, 3.0f);
 			UI()->DoLabel(&ClearBox, "×", 10.0f, TEXTALIGN_CENTER);
 			if(UI()->DoButtonLogic(&s_ClearButton, 0, &ClearBox))
 			{
@@ -5392,7 +5392,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 		Button.VSplitLeft(70.0f, nullptr, &Button);
 		Button.VSplitLeft(180.0f, &Button, nullptr);
 		static int s_ClearButton = 0;
-		DoClearableEditBox(&m_CommandBox, &s_ClearButton, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox, false, CUI::CORNER_ALL);
+		DoClearableEditBox(&m_CommandBox, &s_ClearButton, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox, false, IGraphics::CORNER_ALL);
 
 		if(!ShowServerSettingsEditorLast) // Just activated
 			UI()->SetActiveItem(&m_CommandBox);

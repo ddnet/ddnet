@@ -442,6 +442,38 @@ public:
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadsText(float x, float y, float Size, const char *pText) = 0;
 
+	enum
+	{
+		CORNER_NONE = 0,
+		CORNER_TL = 1,
+		CORNER_TR = 2,
+		CORNER_BL = 4,
+		CORNER_BR = 8,
+		CORNER_ITL = 16,
+		CORNER_ITR = 32,
+		CORNER_IBL = 64,
+		CORNER_IBR = 128,
+
+		CORNER_T = CORNER_TL | CORNER_TR,
+		CORNER_B = CORNER_BL | CORNER_BR,
+		CORNER_R = CORNER_TR | CORNER_BR,
+		CORNER_L = CORNER_TL | CORNER_BL,
+
+		CORNER_IT = CORNER_ITL | CORNER_ITR,
+		CORNER_IB = CORNER_IBL | CORNER_IBR,
+		CORNER_IR = CORNER_ITR | CORNER_IBR,
+		CORNER_IL = CORNER_ITL | CORNER_IBL,
+
+		CORNER_ALL = CORNER_T | CORNER_B,
+		CORNER_INV_ALL = CORNER_IT | CORNER_IB
+	};
+	virtual void DrawRectExt(float x, float y, float w, float h, float r, int Corners) = 0;
+	virtual void DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners) = 0;
+	virtual int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) = 0;
+	virtual void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) = 0;
+	virtual void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) = 0;
+	virtual void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) = 0;
+
 	struct CColorVertex
 	{
 		int m_Index;
@@ -452,8 +484,8 @@ public:
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
-	virtual void SetColor(ColorRGBA rgb) = 0;
-	virtual void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) = 0;
+	virtual void SetColor(ColorRGBA Color) = 0;
+	virtual void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) = 0;
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
