@@ -144,8 +144,7 @@ void CDebugHud::RenderTuning()
 		m_RampGraph.Init(0.0f, 0.0f);
 		m_SpeedTurningPoint = 0;
 		float pv = 1;
-		// CGraph must be fed with exactly 128 values.
-		for(int i = 0; i < 128; i++)
+		for(size_t i = 0; i < CGraph::MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from 270 to 34560 in steps of 270
 			float Speed = (i + 1) * StepSizeRampGraph;
@@ -162,13 +161,12 @@ void CDebugHud::RenderTuning()
 			}
 			pv = RampedSpeed;
 		}
-		m_RampGraph.ScaleMin();
-		m_RampGraph.ScaleMax();
+		m_RampGraph.Scale();
 
 		m_ZoomedInGraph.Init(0.0f, 0.0f);
 		pv = 1;
 		MiddleOfZoomedInGraph = m_SpeedTurningPoint;
-		for(int i = 0; i < 128; i++)
+		for(size_t i = 0; i < CGraph::MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from (MiddleOfZoomedInGraph - 64 * StepSize) to (MiddleOfZoomedInGraph + 64 * StepSize)
 			float Speed = MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
@@ -185,12 +183,11 @@ void CDebugHud::RenderTuning()
 			}
 			if(i == 0)
 			{
-				m_ZoomedInGraph.m_Min = m_ZoomedInGraph.m_MinRange = RampedSpeed;
+				m_ZoomedInGraph.SetMin(RampedSpeed);
 			}
 			pv = RampedSpeed;
 		}
-		m_ZoomedInGraph.ScaleMin();
-		m_ZoomedInGraph.ScaleMax();
+		m_ZoomedInGraph.Scale();
 	}
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Velspeed.X*Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
