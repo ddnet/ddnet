@@ -162,8 +162,7 @@ void CDebugHud::RenderTuning()
 			}
 			pv = RampedSpeed;
 		}
-		m_RampGraph.ScaleMin();
-		m_RampGraph.ScaleMax();
+		m_RampGraph.Scale();
 
 		m_ZoomedInGraph.Init(0.0f, 0.0f);
 		pv = 1;
@@ -189,8 +188,7 @@ void CDebugHud::RenderTuning()
 			}
 			pv = RampedSpeed;
 		}
-		m_ZoomedInGraph.ScaleMin();
-		m_ZoomedInGraph.ScaleMax();
+		m_ZoomedInGraph.Scale();
 	}
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Velspeed.X*Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);

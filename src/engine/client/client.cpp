@@ -89,25 +89,16 @@ void CGraph::Init(float Min, float Max)
 	m_Index = 0;
 }
 
-void CGraph::ScaleMax()
+void CGraph::Scale()
 {
-	int i = 0;
-	m_Max = m_MaxRange;
-	for(i = 0; i < MAX_VALUES; i++)
-	{
-		if(m_aValues[i] > m_Max)
-			m_Max = m_aValues[i];
-	}
-}
-
-void CGraph::ScaleMin()
-{
-	int i = 0;
 	m_Min = m_MinRange;
-	for(i = 0; i < MAX_VALUES; i++)
+	m_Max = m_MaxRange;
+	for(auto Value : m_aValues)
 	{
-		if(m_aValues[i] < m_Min)
-			m_Min = m_aValues[i];
+		if(Value > m_Max)
+			m_Max = Value;
+		else if(Value < m_Min)
+			m_Min = Value;
 	}
 }
 
@@ -1143,14 +1134,11 @@ void CClient::DebugRender()
 		float sp = Graphics()->ScreenWidth() / 100.0f;
 		float x = Graphics()->ScreenWidth() - w - sp;
 
-		m_FpsGraph.ScaleMax();
-		m_FpsGraph.ScaleMin();
+		m_FpsGraph.Scale();
 		m_FpsGraph.Render(Graphics(), m_DebugFont, x, sp * 5, w, h, "FPS");
-		m_InputtimeMarginGraph.ScaleMin();
-		m_InputtimeMarginGraph.ScaleMax();
+		m_InputtimeMarginGraph.Scale();
 		m_InputtimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp, w, h, "Prediction Margin");
-		m_GametimeMarginGraph.ScaleMin();
-		m_GametimeMarginGraph.ScaleMax();
+		m_GametimeMarginGraph.Scale();
 		m_GametimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp + h + sp, w, h, "Gametime Margin");
 	}
 }
