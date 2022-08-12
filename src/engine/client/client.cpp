@@ -104,7 +104,7 @@ void CGraph::Scale()
 
 void CGraph::Add(float v, float r, float g, float b)
 {
-	m_Index = (m_Index + 1) & (MAX_VALUES - 1);
+	m_Index = (m_Index + 1) % MAX_VALUES;
 	m_aValues[m_Index] = v;
 	m_aColors[m_Index][0] = r;
 	m_aColors[m_Index][1] = g;
@@ -149,8 +149,8 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 	{
 		float a0 = (i - 1) / (float)MAX_VALUES;
 		float a1 = i / (float)MAX_VALUES;
-		int i0 = (m_Index + i - 1) & (MAX_VALUES - 1);
-		int i1 = (m_Index + i) & (MAX_VALUES - 1);
+		int i0 = (m_Index + i - 1) % MAX_VALUES;
+		int i1 = (m_Index + i) % MAX_VALUES;
 
 		float v0 = (m_aValues[i0] - m_Min) / (m_Max - m_Min);
 		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
