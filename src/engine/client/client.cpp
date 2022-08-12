@@ -134,10 +134,10 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 	IGraphics::CLineItem LineItem(x, y + h / 2, x + w, y + h / 2);
 	pGraphics->LinesDraw(&LineItem, 1);
 	pGraphics->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
-	IGraphics::CLineItem Array[2] = {
+	IGraphics::CLineItem aLineItems[2] = {
 		IGraphics::CLineItem(x, y + (h * 3) / 4, x + w, y + (h * 3) / 4),
 		IGraphics::CLineItem(x, y + h / 4, x + w, y + h / 4)};
-	pGraphics->LinesDraw(Array, 2);
+	pGraphics->LinesDraw(aLineItems, 2);
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
 		float a0 = (i - 1) / (float)MAX_VALUES;
@@ -148,10 +148,10 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		float v0 = (m_aValues[i0] - m_Min) / (m_Max - m_Min);
 		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
 
-		IGraphics::CColorVertex ArrayV[2] = {
+		IGraphics::CColorVertex aColorVertices[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(ArrayV, 2);
+		pGraphics->SetColorVertex(aColorVertices, 2);
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
 	}
