@@ -51,13 +51,13 @@ public:
 	float m_MinRange, m_MaxRange;
 	float m_aValues[MAX_VALUES];
 	float m_aColors[MAX_VALUES][3];
-	int m_Index;
+	size_t m_Index;
 
 	void Init(float Min, float Max);
 
 	void Scale();
 	void Add(float v, float r, float g, float b);
-	bool InsertAt(int i, float v, float r, float g, float b);
+	void InsertAt(size_t Index, float v, float r, float g, float b);
 	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
 };
 
