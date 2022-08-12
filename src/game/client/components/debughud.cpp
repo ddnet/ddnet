@@ -183,7 +183,7 @@ void CDebugHud::RenderTuning()
 			}
 			if(i == 0)
 			{
-				m_ZoomedInGraph.m_Min = m_ZoomedInGraph.m_MinRange = RampedSpeed;
+				m_ZoomedInGraph.SetMin(RampedSpeed);
 			}
 			pv = RampedSpeed;
 		}

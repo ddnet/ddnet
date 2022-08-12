@@ -47,13 +47,17 @@ public:
 		MAX_VALUES = 128,
 	};
 
+private:
 	float m_Min, m_Max;
 	float m_MinRange, m_MaxRange;
 	float m_aValues[MAX_VALUES];
 	float m_aColors[MAX_VALUES][3];
 	size_t m_Index;
 
+public:
 	void Init(float Min, float Max);
+	void SetMin(float Min);
+	void SetMax(float Max);
 
 	void Scale();
 	void Add(float v, float r, float g, float b);

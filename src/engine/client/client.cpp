@@ -84,9 +84,19 @@ static const ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
 void CGraph::Init(float Min, float Max)
 {
-	m_MinRange = m_Min = Min;
-	m_MaxRange = m_Max = Max;
+	SetMin(Min);
+	SetMax(Max);
 	m_Index = 0;
+}
+
+void CGraph::SetMin(float Min)
+{
+	m_MinRange = m_Min = Min;
+}
+
+void CGraph::SetMax(float Max)
+{
+	m_MaxRange = m_Max = Max;
 }
 
 void CGraph::Scale()
