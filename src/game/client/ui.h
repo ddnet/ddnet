@@ -136,7 +136,7 @@ public:
 
 	void Init(CUI *pUI, int RequestedRectCount);
 
-	SUIElementRect *Get(size_t Index)
+	SUIElementRect *Rect(size_t Index)
 	{
 		return &m_vUIRects[Index];
 	}

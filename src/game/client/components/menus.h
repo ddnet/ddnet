@@ -113,14 +113,14 @@ class CMenus : public CComponent
 		Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 		Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 
-		if(!UIElement.AreRectsInit() || HintRequiresStringCheck || HintCanChangePositionOrSize || UIElement.Get(0)->m_UITextContainer == -1)
+		if(!UIElement.AreRectsInit() || HintRequiresStringCheck || HintCanChangePositionOrSize || UIElement.Rect(0)->m_UITextContainer == -1)
 		{
-			bool NeedsRecalc = !UIElement.AreRectsInit() || UIElement.Get(0)->m_UITextContainer == -1;
+			bool NeedsRecalc = !UIElement.AreRectsInit() || UIElement.Rect(0)->m_UITextContainer == -1;
 			if(HintCanChangePositionOrSize)
 			{
 				if(UIElement.AreRectsInit())
 				{
-					if(UIElement.Get(0)->m_X != pRect->x || UIElement.Get(0)->m_Y != pRect->y || UIElement.Get(0)->m_Width != pRect->w || UIElement.Get(0)->m_Y != pRect->h)
+					if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Y != pRect->h)
 					{
 						NeedsRecalc = true;
 					}
@@ -132,7 +132,7 @@ class CMenus : public CComponent
 				if(UIElement.AreRectsInit())
 				{
 					pText = GetTextLambda();
-					if(str_comp(UIElement.Get(0)->m_Text.c_str(), pText) != 0)
+					if(str_comp(UIElement.Rect(0)->m_Text.c_str(), pText) != 0)
 					{
 						NeedsRecalc = true;
 					}
@@ -158,7 +158,7 @@ class CMenus : public CComponent
 						Color.a *= UI()->ButtonColorMulDefault();
 					Graphics()->SetColor(Color);
 
-					CUIElement::SUIElementRect &NewRect = *UIElement.Get(i);
+					CUIElement::SUIElementRect &NewRect = *UIElement.Rect(i);
 					NewRect.m_UIRectQuadContainer = Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
 
 					NewRect.m_X = pRect->x;
@@ -185,11 +185,11 @@ class CMenus : public CComponent
 		else if(UI()->HotItem() == pID)
 			Index = 1;
 		Graphics()->TextureClear();
-		Graphics()->RenderQuadContainer(UIElement.Get(Index)->m_UIRectQuadContainer, -1);
+		Graphics()->RenderQuadContainer(UIElement.Rect(Index)->m_UIRectQuadContainer, -1);
 		ColorRGBA ColorText(TextRender()->DefaultTextColor());
 		ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
-		if(UIElement.Get(0)->m_UITextContainer != -1)
-			TextRender()->RenderTextContainer(UIElement.Get(0)->m_UITextContainer, ColorText, ColorTextOutline);
+		if(UIElement.Rect(0)->m_UITextContainer != -1)
+			TextRender()->RenderTextContainer(UIElement.Rect(0)->m_UITextContainer, ColorText, ColorTextOutline);
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 
