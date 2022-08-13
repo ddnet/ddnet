@@ -3331,193 +3331,191 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 	float LayerCur = 0;
 
 	// render layers
+	for(int g = 0; g < (int)m_Map.m_vpGroups.size(); g++)
 	{
-		for(int g = 0; g < (int)m_Map.m_vpGroups.size(); g++)
+		if(LayerCur > LayerStopAt)
+			break;
+		else if(LayerCur + m_Map.m_vpGroups[g]->m_vpLayers.size() * 14.0f + 19.0f < LayerStartAt)
+		{
+			LayerCur += m_Map.m_vpGroups[g]->m_vpLayers.size() * 14.0f + 19.0f;
+			continue;
+		}
+
+		CUIRect VisibleToggle;
+		if(LayerCur >= LayerStartAt)
+		{
+			LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
+			Slot.VSplitLeft(12, &VisibleToggle, &Slot);
+			if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? "V" : "H", m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", IGraphics::CORNER_L, 10.0f, 0))
+				m_Map.m_vpGroups[g]->m_Visible = !m_Map.m_vpGroups[g]->m_Visible;
+
+			str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
+			float FontSize = 10.0f;
+			while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Slot.w)
+				FontSize--;
+			if(int Result = DoButton_Ex(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot,
+				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R, FontSize))
+			{
+				if(g != m_SelectedGroup)
+					SelectLayer(0, g);
+
+				if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+				{
+					m_vSelectedLayers.clear();
+					for(size_t i = 0; i < m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
+					{
+						AddSelectedLayer(i);
+					}
+				}
+
+				static int s_GroupPopupId = 0;
+				if(Result == 2)
+					UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+
+				if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
+					m_Map.m_vpGroups[g]->m_Collapse ^= 1;
+			}
+			LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
+		}
+		LayerCur += 14.0f;
+
+		for(int i = 0; i < (int)m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
 		{
 			if(LayerCur > LayerStopAt)
 				break;
-			else if(LayerCur + m_Map.m_vpGroups[g]->m_vpLayers.size() * 14.0f + 19.0f < LayerStartAt)
+			else if(LayerCur < LayerStartAt)
 			{
-				LayerCur += m_Map.m_vpGroups[g]->m_vpLayers.size() * 14.0f + 19.0f;
+				LayerCur += 14.0f;
 				continue;
 			}
 
-			CUIRect VisibleToggle;
-			if(LayerCur >= LayerStartAt)
+			if(m_Map.m_vpGroups[g]->m_Collapse)
+				continue;
+
+			//visible
+			LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
+			Slot.VSplitLeft(12.0f, nullptr, &Button);
+			Button.VSplitLeft(15, &VisibleToggle, &Button);
+
+			if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", IGraphics::CORNER_L, 10.0f, 0))
+				m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible = !m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible;
+
+			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
+				str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName, sizeof(aBuf));
+			else
 			{
-				LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
-				Slot.VSplitLeft(12, &VisibleToggle, &Slot);
-				if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? "V" : "H", m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", IGraphics::CORNER_L, 10.0f, 0))
-					m_Map.m_vpGroups[g]->m_Visible = !m_Map.m_vpGroups[g]->m_Visible;
-
-				str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
-				float FontSize = 10.0f;
-				while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Slot.w)
-					FontSize--;
-				if(int Result = DoButton_Ex(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot,
-					   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R, FontSize))
+				if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
 				{
-					if(g != m_SelectedGroup)
-						SelectLayer(0, g);
+					CLayerTiles *pTiles = (CLayerTiles *)m_Map.m_vpGroups[g]->m_vpLayers[i];
+					str_copy(aBuf, pTiles->m_Image >= 0 ? m_Map.m_vpImages[pTiles->m_Image]->m_aName : "Tiles", sizeof(aBuf));
+				}
+				else if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
+				{
+					CLayerQuads *pQuads = (CLayerQuads *)m_Map.m_vpGroups[g]->m_vpLayers[i];
+					str_copy(aBuf, pQuads->m_Image >= 0 ? m_Map.m_vpImages[pQuads->m_Image]->m_aName : "Quads", sizeof(aBuf));
+				}
+				else if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
+				{
+					CLayerSounds *pSounds = (CLayerSounds *)m_Map.m_vpGroups[g]->m_vpLayers[i];
+					str_copy(aBuf, pSounds->m_Sound >= 0 ? m_Map.m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds", sizeof(aBuf));
+				}
+				if(str_length(aBuf) > 11)
+					str_format(aBuf, sizeof(aBuf), "%.8s...", aBuf);
+			}
 
+			float FontSize = 10.0f;
+			while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Button.w)
+				FontSize--;
+			int Checked = 0;
+			if(g == m_SelectedGroup)
+			{
+				for(const auto &Selected : m_vSelectedLayers)
+				{
+					if(Selected == i)
+					{
+						Checked = 1;
+						break;
+					}
+				}
+			}
+
+			if(m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pGameLayer ||
+				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pFrontLayer ||
+				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSwitchLayer ||
+				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTuneLayer ||
+				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSpeedupLayer ||
+				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTeleLayer)
+			{
+				Checked += 6;
+			}
+			if(int Result = DoButton_Ex(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button,
+				   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R, FontSize))
+			{
+				static CLayerPopupContext s_LayerPopupContext = {};
+				if(Result == 1)
+				{
 					if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
 					{
-						m_vSelectedLayers.clear();
-						for(size_t i = 0; i < m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
-						{
-							AddSelectedLayer(i);
-						}
-					}
-
-					static int s_GroupPopupId = 0;
-					if(Result == 2)
-						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
-
-					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
-						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
-				}
-				LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
-			}
-			LayerCur += 14.0f;
-
-			for(int i = 0; i < (int)m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
-			{
-				if(LayerCur > LayerStopAt)
-					break;
-				else if(LayerCur < LayerStartAt)
-				{
-					LayerCur += 14.0f;
-					continue;
-				}
-
-				if(m_Map.m_vpGroups[g]->m_Collapse)
-					continue;
-
-				//visible
-				LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
-				Slot.VSplitLeft(12.0f, nullptr, &Button);
-				Button.VSplitLeft(15, &VisibleToggle, &Button);
-
-				if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", IGraphics::CORNER_L, 10.0f, 0))
-					m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible = !m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible;
-
-				if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
-					str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName, sizeof(aBuf));
-				else
-				{
-					if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
-					{
-						CLayerTiles *pTiles = (CLayerTiles *)m_Map.m_vpGroups[g]->m_vpLayers[i];
-						str_copy(aBuf, pTiles->m_Image >= 0 ? m_Map.m_vpImages[pTiles->m_Image]->m_aName : "Tiles", sizeof(aBuf));
-					}
-					else if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
-					{
-						CLayerQuads *pQuads = (CLayerQuads *)m_Map.m_vpGroups[g]->m_vpLayers[i];
-						str_copy(aBuf, pQuads->m_Image >= 0 ? m_Map.m_vpImages[pQuads->m_Image]->m_aName : "Quads", sizeof(aBuf));
-					}
-					else if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
-					{
-						CLayerSounds *pSounds = (CLayerSounds *)m_Map.m_vpGroups[g]->m_vpLayers[i];
-						str_copy(aBuf, pSounds->m_Sound >= 0 ? m_Map.m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds", sizeof(aBuf));
-					}
-					if(str_length(aBuf) > 11)
-						str_format(aBuf, sizeof(aBuf), "%.8s...", aBuf);
-				}
-
-				float FontSize = 10.0f;
-				while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Button.w)
-					FontSize--;
-				int Checked = 0;
-				if(g == m_SelectedGroup)
-				{
-					for(const auto &Selected : m_vSelectedLayers)
-					{
-						if(Selected == i)
-						{
-							Checked = 1;
-							break;
-						}
-					}
-				}
-
-				if(m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pGameLayer ||
-					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pFrontLayer ||
-					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSwitchLayer ||
-					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTuneLayer ||
-					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSpeedupLayer ||
-					m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTeleLayer)
-				{
-					Checked += 6;
-				}
-				if(int Result = DoButton_Ex(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button,
-					   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R, FontSize))
-				{
-					static CLayerPopupContext s_LayerPopupContext = {};
-					if(Result == 1)
-					{
-						if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
-						{
-							auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
-							if(Position != m_vSelectedLayers.end())
-								m_vSelectedLayers.erase(Position);
-							else
-								AddSelectedLayer(i);
-						}
-						else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
-						{
-							SelectLayer(i, g);
-						}
-					}
-					else if(Result == 2)
-					{
-						bool IsLayerSelected = false;
-
-						if(m_SelectedGroup == g)
-						{
-							for(const auto &Selected : m_vSelectedLayers)
-							{
-								if(Selected == i)
-								{
-									IsLayerSelected = true;
-									break;
-								}
-							}
-						}
-
-						if(!IsLayerSelected)
-						{
-							SelectLayer(i, g);
-						}
-
-						if(m_vSelectedLayers.size() > 1)
-						{
-							bool AllTile = true;
-							for(size_t j = 0; AllTile && j < m_vSelectedLayers.size(); j++)
-							{
-								if(m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]->m_Type == LAYERTYPE_TILES)
-									s_LayerPopupContext.m_vpLayers.push_back((CLayerTiles *)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]);
-								else
-									AllTile = false;
-							}
-
-							// Don't allow editing if all selected layers are tile layers
-							if(!AllTile)
-								s_LayerPopupContext.m_vpLayers.clear();
-						}
+						auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
+						if(Position != m_vSelectedLayers.end())
+							m_vSelectedLayers.erase(Position);
 						else
-							s_LayerPopupContext.m_vpLayers.clear();
-
-						UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 320, PopupLayer, &s_LayerPopupContext);
+							AddSelectedLayer(i);
+					}
+					else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
+					{
+						SelectLayer(i, g);
 					}
 				}
+				else if(Result == 2)
+				{
+					bool IsLayerSelected = false;
 
-				LayerCur += 14.0f;
-				LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
+					if(m_SelectedGroup == g)
+					{
+						for(const auto &Selected : m_vSelectedLayers)
+						{
+							if(Selected == i)
+							{
+								IsLayerSelected = true;
+								break;
+							}
+						}
+					}
+
+					if(!IsLayerSelected)
+					{
+						SelectLayer(i, g);
+					}
+
+					if(m_vSelectedLayers.size() > 1)
+					{
+						bool AllTile = true;
+						for(size_t j = 0; AllTile && j < m_vSelectedLayers.size(); j++)
+						{
+							if(m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]->m_Type == LAYERTYPE_TILES)
+								s_LayerPopupContext.m_vpLayers.push_back((CLayerTiles *)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]);
+							else
+								AllTile = false;
+						}
+
+						// Don't allow editing if all selected layers are tile layers
+						if(!AllTile)
+							s_LayerPopupContext.m_vpLayers.clear();
+					}
+					else
+						s_LayerPopupContext.m_vpLayers.clear();
+
+					UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 320, PopupLayer, &s_LayerPopupContext);
+				}
 			}
-			if(LayerCur > LayerStartAt && LayerCur < LayerStopAt)
-				LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
-			LayerCur += 5.0f;
+
+			LayerCur += 14.0f;
+			LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
 		}
+		if(LayerCur > LayerStartAt && LayerCur < LayerStopAt)
+			LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
+		LayerCur += 5.0f;
 	}
 
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
