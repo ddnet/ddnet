@@ -131,9 +131,6 @@ protected:
 	CUI *UI() const { return m_pUI; }
 	std::vector<SUIElementRect> m_vUIRects;
 
-	// used for marquees or other user implemented things
-	int64_t m_ElementTime;
-
 public:
 	CUIElement() = default;
 
