@@ -6392,6 +6392,8 @@ void CEditor::PlaceBorderTiles()
 
 void CEditor::OnUpdate()
 {
+	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
+
 	if(!m_EditorWasUsedBefore)
 	{
 		m_EditorWasUsedBefore = true;

@@ -158,6 +158,21 @@ struct SLabelProperties
 	bool m_EnableWidthCheck = true;
 };
 
+class CUIElementBase
+{
+private:
+	static CUI *s_pUI;
+
+public:
+	static void Init(CUI *pUI) { s_pUI = pUI; }
+
+	IClient *Client() const;
+	IGraphics *Graphics() const;
+	IInput *Input() const;
+	ITextRender *TextRender() const;
+	CUI *UI() const { return s_pUI; }
+};
+
 class CButtonContainer
 {
 };

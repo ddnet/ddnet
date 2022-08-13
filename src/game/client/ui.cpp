@@ -82,6 +82,13 @@ const CLinearScrollbarScale CUI::ms_LinearScrollbarScale;
 const CLogarithmicScrollbarScale CUI::ms_LogarithmicScrollbarScale(25);
 float CUI::ms_FontmodHeight = 0.8f;
 
+CUI *CUIElementBase::s_pUI = nullptr;
+
+IClient *CUIElementBase::Client() const { return s_pUI->Client(); }
+IGraphics *CUIElementBase::Graphics() const { return s_pUI->Graphics(); }
+IInput *CUIElementBase::Input() const { return s_pUI->Input(); }
+ITextRender *CUIElementBase::TextRender() const { return s_pUI->TextRender(); }
+
 void CUI::Init(IKernel *pKernel)
 {
 	m_pClient = pKernel->RequestInterface<IClient>();
@@ -90,6 +97,7 @@ void CUI::Init(IKernel *pKernel)
 	m_pTextRender = pKernel->RequestInterface<ITextRender>();
 	InitInputs(m_pInput->GetEventsRaw(), m_pInput->GetEventCountRaw());
 	CUIRect::Init(m_pGraphics);
+	CUIElementBase::Init(this);
 }
 
 void CUI::InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount)
