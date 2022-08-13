@@ -3286,9 +3286,6 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 {
-	if(!m_GuiActive)
-		return;
-
 	CUIRect LayersBox = ToolBox;
 	CUIRect Slot, Button;
 	char aBuf[64];
@@ -3987,9 +3984,6 @@ void CEditor::SortImages()
 
 void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 {
-	if(!m_GuiActive)
-		return;
-
 	static float s_ScrollValue = 0;
 	float ImagesHeight = 30.0f + 14.0f * m_Map.m_vpImages.size() + 27.0f;
 	float ScrollDifference = ImagesHeight - ToolBox.h;
@@ -4201,9 +4195,6 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect View)
 
 void CEditor::RenderSounds(CUIRect ToolBox, CUIRect View)
 {
-	if(!m_GuiActive)
-		return;
-
 	static float s_ScrollValue = 0;
 	float SoundsHeight = 30.0f + 14.0f * m_Map.m_vpSounds.size() + 27.0f;
 	float ScrollDifference = SoundsHeight - ToolBox.h;
