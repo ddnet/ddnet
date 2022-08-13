@@ -2415,6 +2415,7 @@ if(TOOLS)
     map_convert_07.cpp
     map_diff.cpp
     map_extract.cpp
+    map_find_env.cpp
     map_optimize.cpp
     map_replace_area.cpp
     map_replace_image.cpp
