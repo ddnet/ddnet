@@ -4103,58 +4103,42 @@ void CEditor::RenderSelectedImage(CUIRect View)
 
 void CEditor::RenderSounds(CUIRect ToolBox)
 {
-	static float s_ScrollValue = 0;
-	float SoundsHeight = 30.0f + 14.0f * m_Map.m_vpSounds.size() + 27.0f;
-	float ScrollDifference = SoundsHeight - ToolBox.h;
+	const float RowHeight = 12.0f;
 
-	if(SoundsHeight > ToolBox.h) // Do we even need a scrollbar?
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = RowHeight * 5;
+	s_ScrollRegion.Begin(&ToolBox, &ScrollOffset, &ScrollParams);
+	ToolBox.y += ScrollOffset.y;
+
+	bool ScrollToSelection = false;
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
 	{
-		CUIRect Scroll;
-		ToolBox.VSplitRight(20.0f, &ToolBox, &Scroll);
-		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ToolBox))
-		{
-			int ScrollNum = (int)((SoundsHeight - ToolBox.h) / 14.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
+		m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
+		ScrollToSelection = true;
+	}
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
+	{
+		m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
+		ScrollToSelection = true;
 	}
 
-	float SoundStartAt = ScrollDifference * s_ScrollValue;
-	if(SoundStartAt < 0.0f)
-		SoundStartAt = 0.0f;
-
-	float SoundStopAt = SoundsHeight - ScrollDifference * (1 - s_ScrollValue);
-	float SoundCur = 0.0f;
-
 	CUIRect Slot;
-
-	ToolBox.HSplitTop(15.0f, &Slot, &ToolBox);
-	UI()->DoLabel(&Slot, "Embedded", 12.0f, TEXTALIGN_CENTER);
-	SoundCur += 15.0f;
+	ToolBox.HSplitTop(RowHeight + 3.0f, &Slot, &ToolBox);
+	if(s_ScrollRegion.AddRect(Slot))
+		UI()->DoLabel(&Slot, "Embedded", 12.0f, TEXTALIGN_CENTER);
 
 	for(int i = 0; i < (int)m_Map.m_vpSounds.size(); i++)
 	{
-		if(SoundCur > SoundStopAt)
-			break;
-		else if(SoundCur < SoundStartAt)
-		{
-			SoundCur += 14.0f;
-			continue;
-		}
-		SoundCur += 14.0f;
-
-		char aBuf[128];
-		str_copy(aBuf, m_Map.m_vpSounds[i]->m_aName, sizeof(aBuf));
-		ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
-
+		ToolBox.HSplitTop(RowHeight + 2.0f, &Slot, &ToolBox);
 		int Selected = m_SelectedSound == i;
+		if(!s_ScrollRegion.AddRect(Slot, Selected && ScrollToSelection))
+			continue;
+		Slot.HSplitTop(RowHeight, &Slot, nullptr);
+
 		const bool SoundUsed = std::any_of(m_Map.m_vpGroups.cbegin(), m_Map.m_vpGroups.cend(), [i](const auto &pGroup) {
 			return std::any_of(pGroup->m_vpLayers.cbegin(), pGroup->m_vpLayers.cend(), [i](const auto &pLayer) {
 				if(pLayer->m_Type == LAYERTYPE_SOUNDS)
@@ -4167,11 +4151,11 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			Selected += 2; // Sound is unused
 
 		float FontSize = 10.0f;
-		while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Slot.w)
+		while(TextRender()->TextWidth(nullptr, FontSize, m_Map.m_vpSounds[i]->m_aName, -1, -1.0f) > Slot.w)
 			FontSize--;
 
-		if(int Result = DoButton_Ex(&m_Map.m_vpSounds[i], aBuf, Selected, &Slot,
-			   BUTTON_CONTEXT, "Select sound.", 0, FontSize))
+		if(int Result = DoButton_Ex(&m_Map.m_vpSounds[i], m_Map.m_vpSounds[i]->m_aName, Selected, &Slot,
+			   BUTTON_CONTEXT, "Select sound.", IGraphics::CORNER_ALL, FontSize))
 		{
 			m_SelectedSound = i;
 
@@ -4179,43 +4163,31 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			if(Result == 2)
 				UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 43, PopupSound);
 		}
-
-		ToolBox.HSplitTop(2.0f, nullptr, &ToolBox);
 	}
 
 	// separator
 	ToolBox.HSplitTop(5.0f, &Slot, &ToolBox);
-	IGraphics::CLineItem LineItem(Slot.x, Slot.y + Slot.h / 2, Slot.x + Slot.w, Slot.y + Slot.h / 2);
-	Graphics()->TextureClear();
-	Graphics()->LinesBegin();
-	Graphics()->LinesDraw(&LineItem, 1);
-	Graphics()->LinesEnd();
-
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	if(s_ScrollRegion.AddRect(Slot))
 	{
-		m_SelectedSound = clamp(m_SelectedSound, 0, (int)m_Map.m_vpSounds.size() - 1);
-		if(m_SelectedSound == (int)m_Map.m_vpSounds.size() - 1)
-			m_SelectedSound = 0;
-		else
-			m_SelectedSound += 1;
-	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
-	{
-		m_SelectedSound = clamp(m_SelectedSound, 0, (int)m_Map.m_vpSounds.size() - 1);
-		if(m_SelectedSound == 0 && !m_Map.m_vpSounds.empty())
-			m_SelectedSound = m_Map.m_vpSounds.size() - 1;
-		else
-			m_SelectedSound -= 1;
+		IGraphics::CLineItem LineItem(Slot.x, Slot.y + Slot.h / 2, Slot.x + Slot.w, Slot.y + Slot.h / 2);
+		Graphics()->TextureClear();
+		Graphics()->LinesBegin();
+		Graphics()->LinesDraw(&LineItem, 1);
+		Graphics()->LinesEnd();
 	}
 
-	//CUIRect Slot;
-	ToolBox.HSplitTop(5.0f, &Slot, &ToolBox);
-
-	// new Sound
-	static int s_NewSoundButton = 0;
-	ToolBox.HSplitTop(12.0f, &Slot, &ToolBox);
-	if(DoButton_Editor(&s_NewSoundButton, "Add", 0, &Slot, 0, "Load a new sound to use in the map"))
-		InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Add Sound", "Add", "mapres", "", AddSound, this);
+	// new sound
+	static int s_AddSoundButton = 0;
+	CUIRect AddSoundButton;
+	ToolBox.HSplitTop(5.0f + RowHeight + 1.0f, &AddSoundButton, &ToolBox);
+	if(s_ScrollRegion.AddRect(AddSoundButton))
+	{
+		AddSoundButton.HSplitTop(5.0f, nullptr, &AddSoundButton);
+		AddSoundButton.HSplitTop(RowHeight, &AddSoundButton, nullptr);
+		if(DoButton_Editor(&s_AddSoundButton, "Add", 0, &AddSoundButton, 0, "Load a new sound to use in the map"))
+			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Add Sound", "Add", "mapres", "", AddSound, this);
+	}
+	s_ScrollRegion.End();
 }
 
 static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
@@ -5875,7 +5847,7 @@ void CEditor::Render()
 			RenderSelectedImage(View);
 		}
 		else if(m_Mode == MODE_SOUNDS)
-			RenderSounds(ToolBox, View);
+			RenderSounds(ToolBox);
 	}
 
 	UI()->MapScreen();
