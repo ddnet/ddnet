@@ -79,7 +79,7 @@ void PrintEnvelopedQuads(const EnvelopedQuad pEnvQuads[1024], const int EnvID, c
 
 	dbg_msg("map_find_env", "Found %d quads with env number #%d:", QuadsCounter, EnvID + 1);
 	for(int i = 0; i < QuadsCounter; i++)
-		dbg_msg("map_find_env", "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(log10(abs(QuadsCounter)))+1, i+1, pEnvQuads[i].m_GroupID, pEnvQuads[i].m_LayerID, pEnvQuads[i].m_TilePosX, pEnvQuads[i].m_TilePosY);
+		dbg_msg("map_find_env", "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(log10(abs(QuadsCounter))) + 1, i + 1, pEnvQuads[i].m_GroupID, pEnvQuads[i].m_LayerID, pEnvQuads[i].m_TilePosX, pEnvQuads[i].m_TilePosY);
 }
 
 bool FindEnv(const char aFilename[64], const int EnvID)
