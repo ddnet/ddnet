@@ -36,7 +36,7 @@ bool GetLayerGroupIDs(CDataFileReader &InputMap, const int LayerNumber, int &Gro
 		if(LayerNumber >= pItem->m_StartLayer && LayerNumber <= pItem->m_StartLayer + pItem->m_NumLayers)
 		{
 			GroupID = i;
-			LayerRelativeID = LayerNumber - pItem->m_StartLayer;
+			LayerRelativeID = LayerNumber - pItem->m_StartLayer - 1;
 			return true;
 		}
 	}
