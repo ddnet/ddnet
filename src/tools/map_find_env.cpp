@@ -104,7 +104,7 @@ bool FindEnv(const char aFilename[64], const int EnvID)
 		CQuad *pQuads = (CQuad *)InputMap.GetDataSwapped(pQuadLayer->m_Data);
 
 		int GroupID = 0, LayerRelativeID = 0;
-		if(!GetLayerGroupIDs(InputMap, i, GroupID, LayerRelativeID))
+		if(!GetLayerGroupIDs(InputMap, i + 1, GroupID, LayerRelativeID))
 			return false;
 
 		GetEnvelopedQuads(pQuads, pQuadLayer->m_NumQuads, EnvID, GroupID, LayerRelativeID, QuadsCounter, pEnvQuads);
