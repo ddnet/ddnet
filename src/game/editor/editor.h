@@ -1127,7 +1127,8 @@ public:
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 
 	void RenderLayers(CUIRect LayersBox);
-	void RenderImages(CUIRect Toolbox, CUIRect View);
+	void RenderImagesList(CUIRect Toolbox);
+	void RenderSelectedImage(CUIRect View);
 	void RenderSounds(CUIRect Toolbox, CUIRect View);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
