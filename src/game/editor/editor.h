@@ -1126,8 +1126,8 @@ public:
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 
+	void RenderLayers(CUIRect LayersBox);
 	void RenderImages(CUIRect Toolbox, CUIRect View);
-	void RenderLayers(CUIRect Toolbox, CUIRect View);
 	void RenderSounds(CUIRect Toolbox, CUIRect View);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
@@ -1140,7 +1140,7 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
-	void SelectLayerByTile(float &Scroll);
+	bool SelectLayerByTile();
 
 	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum

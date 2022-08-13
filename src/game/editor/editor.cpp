@@ -24,6 +24,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_scrollregion.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
@@ -3284,74 +3285,36 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 	return Change;
 }
 
-void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
+void CEditor::RenderLayers(CUIRect LayersBox)
 {
-	CUIRect LayersBox = ToolBox;
-	CUIRect Slot, Button;
+	const float RowHeight = 12.0f;
 	char aBuf[64];
 
-	float LayersHeight = 12.0f; // Height of AddGroup button
-	static float s_ScrollValue = 0;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = RowHeight * 5.0f;
+	s_ScrollRegion.Begin(&LayersBox, &ScrollOffset, &ScrollParams);
+	LayersBox.y += ScrollOffset.y;
 
-	for(auto &pGroup : m_Map.m_vpGroups)
-	{
-		// Each group is 19.0f
-		// Each layer is 14.0f
-		LayersHeight += 19.0f;
-		if(!pGroup->m_Collapse)
-			LayersHeight += pGroup->m_vpLayers.size() * 14.0f;
-	}
-
-	float ScrollDifference = LayersHeight - LayersBox.h;
-
-	if(LayersHeight > LayersBox.h) // Do we even need a scrollbar?
-	{
-		CUIRect Scroll;
-		LayersBox.VSplitRight(20.0f, &LayersBox, &Scroll);
-		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&LayersBox))
-		{
-			int ScrollNum = (int)((LayersHeight - LayersBox.h) / 15.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float LayerStartAt = ScrollDifference * s_ScrollValue;
-	if(LayerStartAt < 0.0f)
-		LayerStartAt = 0.0f;
-
-	float LayerStopAt = LayersHeight - ScrollDifference * (1 - s_ScrollValue);
-	float LayerCur = 0;
+	const bool ScrollToSelection = SelectLayerByTile();
 
 	// render layers
 	for(int g = 0; g < (int)m_Map.m_vpGroups.size(); g++)
 	{
-		if(LayerCur > LayerStopAt)
-			break;
-		else if(LayerCur + m_Map.m_vpGroups[g]->m_vpLayers.size() * 14.0f + 19.0f < LayerStartAt)
+		CUIRect Slot, VisibleToggle;
+		LayersBox.HSplitTop(RowHeight, &Slot, &LayersBox);
+		if(s_ScrollRegion.AddRect(Slot))
 		{
-			LayerCur += m_Map.m_vpGroups[g]->m_vpLayers.size() * 14.0f + 19.0f;
-			continue;
-		}
-
-		CUIRect VisibleToggle;
-		if(LayerCur >= LayerStartAt)
-		{
-			LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
-			Slot.VSplitLeft(12, &VisibleToggle, &Slot);
+			Slot.VSplitLeft(12.0f, &VisibleToggle, &Slot);
 			if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? "V" : "H", m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", IGraphics::CORNER_L, 10.0f, 0))
 				m_Map.m_vpGroups[g]->m_Visible = !m_Map.m_vpGroups[g]->m_Visible;
 
 			str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
 			float FontSize = 10.0f;
-			while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Slot.w)
+			while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Slot.w && FontSize >= 7.0f)
 				FontSize--;
 			if(int Result = DoButton_Ex(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot,
 				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R, FontSize))
@@ -3375,27 +3338,37 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
 					m_Map.m_vpGroups[g]->m_Collapse ^= 1;
 			}
-			LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
 		}
-		LayerCur += 14.0f;
+
+		LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
+		s_ScrollRegion.AddRect(Slot);
 
 		for(int i = 0; i < (int)m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
 		{
-			if(LayerCur > LayerStopAt)
-				break;
-			else if(LayerCur < LayerStartAt)
-			{
-				LayerCur += 14.0f;
-				continue;
-			}
-
 			if(m_Map.m_vpGroups[g]->m_Collapse)
 				continue;
 
-			//visible
-			LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
-			Slot.VSplitLeft(12.0f, nullptr, &Button);
-			Button.VSplitLeft(15, &VisibleToggle, &Button);
+			bool IsLayerSelected = false;
+			if(m_SelectedGroup == g)
+			{
+				for(const auto &Selected : m_vSelectedLayers)
+				{
+					if(Selected == i)
+					{
+						IsLayerSelected = true;
+						break;
+					}
+				}
+			}
+
+			LayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &LayersBox);
+			if(!s_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
+				continue;
+			Slot.HSplitTop(RowHeight, &Slot, nullptr);
+
+			CUIRect Button;
+			Slot.VSplitLeft(12.0f, nullptr, &Slot);
+			Slot.VSplitLeft(15.0f, &VisibleToggle, &Button);
 
 			if(DoButton_Ex(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? "V" : "H", 0, &VisibleToggle, 0, "Toggle layer visibility", IGraphics::CORNER_L, 10.0f, 0))
 				m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible = !m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible;
@@ -3424,21 +3397,10 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 			}
 
 			float FontSize = 10.0f;
-			while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Button.w)
+			while(TextRender()->TextWidth(nullptr, FontSize, aBuf, -1, -1.0f) > Button.w && FontSize >= 7.0f)
 				FontSize--;
-			int Checked = 0;
-			if(g == m_SelectedGroup)
-			{
-				for(const auto &Selected : m_vSelectedLayers)
-				{
-					if(Selected == i)
-					{
-						Checked = 1;
-						break;
-					}
-				}
-			}
 
+			int Checked = IsLayerSelected ? 1 : 0;
 			if(m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pGameLayer ||
 				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pFrontLayer ||
 				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSwitchLayer ||
@@ -3469,20 +3431,6 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 				}
 				else if(Result == 2)
 				{
-					bool IsLayerSelected = false;
-
-					if(m_SelectedGroup == g)
-					{
-						for(const auto &Selected : m_vSelectedLayers)
-						{
-							if(Selected == i)
-							{
-								IsLayerSelected = true;
-								break;
-							}
-						}
-					}
-
 					if(!IsLayerSelected)
 					{
 						SelectLayer(i, g);
@@ -3509,13 +3457,10 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 					UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 320, PopupLayer, &s_LayerPopupContext);
 				}
 			}
-
-			LayerCur += 14.0f;
-			LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
 		}
-		if(LayerCur > LayerStartAt && LayerCur < LayerStopAt)
-			LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
-		LayerCur += 5.0f;
+
+		LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
+		s_ScrollRegion.AddRect(Slot);
 	}
 
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
@@ -3581,22 +3526,23 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 		}
 	}
 
-	if(LayerCur <= LayerStopAt)
+	CUIRect AddGroupButton;
+	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
+	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
-		LayersBox.HSplitTop(12.0f, &Slot, &LayersBox);
-
-		static int s_NewGroupButton = 0;
-		if(DoButton_Editor(&s_NewGroupButton, "Add group", 0, &Slot, IGraphics::CORNER_R, "Adds a new group"))
+		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
+		static int s_AddGroupButton = 0;
+		if(DoButton_Editor(&s_AddGroupButton, "Add group", 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
 		{
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
 		}
 	}
 
-	SelectLayerByTile(s_ScrollValue);
+	s_ScrollRegion.End();
 }
 
-void CEditor::SelectLayerByTile(float &Scroll)
+bool CEditor::SelectLayerByTile()
 {
 	// ctrl+rightclick a map index to select the layer that has a tile there
 	static bool s_CtrlClick = false;
@@ -3605,18 +3551,15 @@ void CEditor::SelectLayerByTile(float &Scroll)
 	int MatchedLayer = -1;
 	int Matches = 0;
 	bool IsFound = false;
-	int TotalLayers = 0;
-	int SelectedLayer = 0;
 	if(UI()->MouseButton(1) && Input()->ModifierIsPressed())
 	{
 		if(s_CtrlClick)
-			return;
+			return false;
 		s_CtrlClick = true;
 		for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
 		{
 			for(size_t l = 0; l < m_Map.m_vpGroups[g]->m_vpLayers.size(); l++)
 			{
-				TotalLayers++;
 				if(IsFound)
 					continue;
 				if(m_Map.m_vpGroups[g]->m_vpLayers[l]->m_Type != LAYERTYPE_TILES)
@@ -3636,7 +3579,6 @@ void CEditor::SelectLayerByTile(float &Scroll)
 					{
 						MatchedGroup = g;
 						MatchedLayer = l;
-						SelectedLayer = TotalLayers;
 					}
 					if(++Matches > s_Selected)
 					{
@@ -3644,7 +3586,6 @@ void CEditor::SelectLayerByTile(float &Scroll)
 						MatchedGroup = g;
 						MatchedLayer = l;
 						IsFound = true;
-						SelectedLayer = TotalLayers;
 					}
 				}
 			}
@@ -3653,12 +3594,13 @@ void CEditor::SelectLayerByTile(float &Scroll)
 		{
 			if(!IsFound)
 				s_Selected = 1;
-			Scroll = (float)SelectedLayer / (float)TotalLayers;
 			SelectLayer(MatchedLayer, MatchedGroup);
+			return true;
 		}
 	}
 	else
 		s_CtrlClick = false;
+	return false;
 }
 
 void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
@@ -5958,7 +5900,7 @@ void CEditor::Render()
 		}
 
 		if(m_Mode == MODE_LAYERS)
-			RenderLayers(ToolBox, View);
+			RenderLayers(ToolBox);
 		else if(m_Mode == MODE_IMAGES)
 			RenderImages(ToolBox, View);
 		else if(m_Mode == MODE_SOUNDS)
