@@ -38,7 +38,7 @@ public:
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
 	int GetDataSize(int Index) const;
-	void ReplaceData(int Index, char *pData);
+	void ReplaceData(int Index, char *pData, size_t Size);
 	void UnloadData(int Index);
 	int NumData() const;
 

@@ -85,9 +85,10 @@ bool CMap::Load(const char *pMapName)
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 				if(pTilemap->m_Version >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
 				{
-					CTile *pTiles = static_cast<CTile *>(malloc((size_t)pTilemap->m_Width * pTilemap->m_Height * sizeof(CTile)));
+					const size_t TilemapSize = (size_t)pTilemap->m_Width * pTilemap->m_Height * sizeof(CTile);
+					CTile *pTiles = static_cast<CTile *>(malloc(TilemapSize));
 					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(m_DataFile.GetData(pTilemap->m_Data)), m_DataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
-					m_DataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles));
+					m_DataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles), TilemapSize);
 				}
 			}
 		}
