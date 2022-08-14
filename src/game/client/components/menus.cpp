@@ -152,7 +152,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 
 	if(!MouseInsideColorPicker)
 		Color.a *= UI()->ButtonColorMul(pButtonContainer);
-	RenderTools()->DrawUIRect(pRect, Color, Corners, r);
+	pRect->Draw(Color, Corners, r);
 
 	if(pImageName)
 	{
@@ -188,7 +188,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
+	pRect->Draw(ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER);
@@ -230,7 +230,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 		if(pActiveColor)
 			ColorMenuTab = *pActiveColor;
 
-		RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
+		Rect.Draw(ColorMenuTab, Corners, EdgeRounding);
 	}
 	else
 	{
@@ -240,7 +240,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 			if(pHoverColor)
 				HoverColorMenuTab = *pHoverColor;
 
-			RenderTools()->DrawUIRect(&Rect, HoverColorMenuTab, Corners, EdgeRounding);
+			Rect.Draw(HoverColorMenuTab, Corners, EdgeRounding);
 		}
 		else
 		{
@@ -248,7 +248,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 			if(pDefaultColor)
 				ColorMenuTab = *pDefaultColor;
 
-			RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
+			Rect.Draw(ColorMenuTab, Corners, EdgeRounding);
 		}
 	}
 
@@ -279,9 +279,9 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	if(Checked == 2)
-		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 0.98f, 0.5f, 0.55f), IGraphics::CORNER_T, 5.0f);
+		pRect->Draw(ColorRGBA(1, 0.98f, 0.5f, 0.55f), IGraphics::CORNER_T, 5.0f);
 	else if(Checked)
-		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_T, 5.0f);
+		pRect->Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 	UI()->DoLabel(&t, pText, pRect->h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
@@ -298,7 +298,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	t.VSplitLeft(5.0f, 0, &t);
 
 	c.Margin(2.0f, &c);
-	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 3.0f);
+	c.Draw(ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 3.0f);
 
 	const bool Checkable = *pBoxText == 'X';
 	SLabelProperties Props;
@@ -476,7 +476,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	if(ms_ValueSelectorTextMode && s_pLastTextpID == pID)
 	{
 		static float s_NumberBoxID = 0;
-		UIEx()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, IGraphics::CORNER_ALL);
+		UI()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, IGraphics::CORNER_ALL);
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
@@ -556,7 +556,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			else
 				str_format(aBuf, sizeof(aBuf), "%d", Current);
 		}
-		RenderTools()->DrawUIRect(pRect, *pColor, IGraphics::CORNER_ALL, Round);
+		pRect->Draw(*pColor, IGraphics::CORNER_ALL, Round);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_CENTER);
 	}
 
@@ -922,7 +922,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	Graphics()->BlendNormal();
 
 	Graphics()->TextureClear();
-	RenderTools()->DrawUIRect(&Box, ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
+	Box.Draw(ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
 
 	CUIRect Part;
 
@@ -949,7 +949,7 @@ void CMenus::RenderNews(CUIRect MainView)
 {
 	g_Config.m_UiUnreadNews = false;
 
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
@@ -982,7 +982,7 @@ void CMenus::OnInit()
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
-	UIEx()->Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
+	UI()->InitInputs(m_aInputEvents, &m_NumInputEvents);
 
 	m_RefreshButton.Init(UI(), -1);
 	m_ConnectButton.Init(UI(), -1);
@@ -1097,7 +1097,7 @@ void CMenus::RenderColorPicker()
 
 	// Render
 	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
-	RenderTools()->DrawUIRect(&PickerRect, BackgroundColor, 0, 0);
+	PickerRect.Draw(BackgroundColor, 0, 0);
 
 	CUIRect ColorsArea, HueArea, ValuesHitbox, BottomArea, HSVHRect, HSVSRect, HSVVRect, HEXRect, ALPHARect;
 	PickerRect.Margin(3, &ColorsArea);
@@ -1135,10 +1135,10 @@ void CMenus::RenderColorPicker()
 
 	ColorRGBA BlackColor(0, 0, 0, 0.5f);
 
-	RenderTools()->DrawUIRect(&HueArea, BlackColor, 0, 0);
+	HueArea.Draw(BlackColor, 0, 0);
 	HueArea.Margin(1, &HueArea);
 
-	RenderTools()->DrawUIRect(&ColorsArea, BlackColor, 0, 0);
+	ColorsArea.Draw(BlackColor, 0, 0);
 	ColorsArea.Margin(1, &ColorsArea);
 
 	unsigned int H = ms_ColorPicker.m_HSVColor / (1 << 16);
@@ -1158,14 +1158,14 @@ void CMenus::RenderColorPicker()
 	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
 	vec4 BR(rgb.r, rgb.g, rgb.b, 1.0f);
 
-	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
+	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
 
 	TL = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	TR = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	BL = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	BR = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
+	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
 
 	// Hue Area
 	static const float s_aColorIndices[7][3] = {
@@ -1188,7 +1188,7 @@ void CMenus::RenderColorPicker()
 		BL = vec4(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
 
 		HuePartialArea.y = HueArea.y + HuePickerOffset * j;
-		RenderTools()->DrawUIRect4(&HuePartialArea, TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
+		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
 	}
 
 	//Editboxes Area
@@ -1215,7 +1215,7 @@ void CMenus::RenderColorPicker()
 	// TODO : ALPHA SUPPORT
 	//static int ALPHAID = 0;
 	UI()->DoLabel(&ALPHARect, "A: 255", 10, TEXTALIGN_CENTER);
-	RenderTools()->DrawUIRect(&ALPHARect, ColorRGBA(0, 0, 0, 0.65f), IGraphics::CORNER_ALL, 5.0f);
+	ALPHARect.Draw(ColorRGBA(0, 0, 0, 0.65f), IGraphics::CORNER_ALL, 5.0f);
 
 	// Logic
 	float PickerX, PickerY;
@@ -1257,9 +1257,9 @@ void CMenus::RenderColorPicker()
 	const float HMOColor = PickerColorHSV.x > 0.75f ? 1.0f : 0.0f;
 	ColorRGBA HueMarkerOutline(HMOColor, HMOColor, HMOColor, 1);
 
-	RenderTools()->DrawUIRect(&HueMarker, HueMarkerOutline, IGraphics::CORNER_ALL, 1.2f);
+	HueMarker.Draw(HueMarkerOutline, IGraphics::CORNER_ALL, 1.2f);
 	HueMarker.Margin(1.2f, &HueMarker);
-	RenderTools()->DrawUIRect(&HueMarker, HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
+	HueMarker.Draw(HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
 
 	ms_ColorPicker.m_HSVColor = PickerColorHSV.Pack(false);
 	*ms_ColorPicker.m_pColor = color_cast<ColorHSLA, ColorHSVA>(PickerColorHSV).Pack(false);
@@ -1272,7 +1272,7 @@ int CMenus::Render()
 
 	CUIRect Screen = *UI()->Screen();
 	UI()->MapScreen();
-	UIEx()->ResetMouseSlow();
+	UI()->ResetMouseSlow();
 
 	static int s_Frame = 0;
 	if(s_Frame == 0)
@@ -1618,7 +1618,7 @@ int CMenus::Render()
 			Box.Margin(150.0f, &Box);
 
 		// render the box
-		RenderTools()->DrawUIRect(&Box, BgColor, IGraphics::CORNER_ALL, 15.0f);
+		Box.Draw(BgColor, IGraphics::CORNER_ALL, 15.0f);
 
 		Box.HSplitTop(20.f, &Part, &Box);
 		Box.HSplitTop(24.f, &Part, &Box);
@@ -1763,7 +1763,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
-			UIEx()->DoEditBox(&g_Config.m_Password, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &s_Offset, true);
+			UI()->DoEditBox(&g_Config.m_Password, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &s_Offset, true);
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
@@ -1826,9 +1826,9 @@ int CMenus::Render()
 				Box.HSplitTop(20.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
-				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+				Part.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 				Part.w = maximum(10.0f, (Part.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
-				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+				Part.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 			}
 		}
 		else if(m_Popup == POPUP_LANGUAGE)
@@ -1990,7 +1990,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
-			UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
+			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
@@ -2113,7 +2113,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
-			UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
+			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
 		}
 		else if(m_Popup == POPUP_REPLACE_VIDEO)
 		{
@@ -2227,7 +2227,7 @@ int CMenus::Render()
 			static float s_Offset = 0.0f;
 			SUIExEditBoxProperties EditProps;
 			EditProps.m_pEmptyText = Client()->PlayerName();
-			UIEx()->DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
+			UI()->DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -2428,7 +2428,7 @@ bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	if(!m_MenuActive)
 		return false;
 
-	UIEx()->ConvertMouseMove(&x, &y, CursorType);
+	UI()->ConvertMouseMove(&x, &y, CursorType);
 
 	m_MousePos.x = clamp(m_MousePos.x + x, 0.f, (float)Graphics()->WindowWidth());
 	m_MousePos.y = clamp(m_MousePos.y + y, 0.f, (float)Graphics()->WindowHeight());

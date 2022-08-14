@@ -228,7 +228,7 @@ void CGameClient::OnInit()
 	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
 
 	// propagate pointers
-	m_UI.Init(Input(), Graphics(), TextRender());
+	m_UI.Init(Kernel());
 	m_RenderTools.Init(Graphics(), TextRender());
 
 	int64_t Start = time_get();

@@ -3,12 +3,11 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
-#include "ui.h"
-
 #include <base/color.h>
 #include <base/vmath.h>
 
 #include <game/client/skin.h>
+#include <game/client/ui_rect.h>
 
 class CSpeedupTile;
 class CSwitchTile;
@@ -103,10 +102,6 @@ public:
 	int QuadContainerAddSprite(int QuadContainerIndex, float size);
 	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
 	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
-
-	// rects
-	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
 
 	// larger rendering methods
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);

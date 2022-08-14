@@ -59,7 +59,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	View.HSplitBottom(70.0f, &View, &Status);
 
 	// split of the scrollbar
-	RenderTools()->DrawUIRect(&Headers, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
+	Headers.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
 	Headers.VSplitRight(20.0f, &Headers, 0);
 
 	struct CColumn
@@ -164,7 +164,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 	}
 
-	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
+	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
 	View.VSplitRight(20.0f, &View, &Scroll);
@@ -186,7 +186,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	static float s_ScrollValue = 0;
 
-	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	if(Input()->KeyPress(KEY_TAB) && m_pClient->m_GameConsole.IsClosed())
 	{
@@ -494,7 +494,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 	}
 
-	//RenderTools()->DrawUIRect(&Status, ms_ColorTabbarActive, IGraphics::CORNER_B, 5.0f);
+	//Status.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, Status3;
@@ -549,7 +549,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(UIEx()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
+		if(UI()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -576,7 +576,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
-		if(UIEx()->DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL))
+		if(UI()->DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -610,7 +610,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		ServerAddr.VSplitLeft(SearchExcludeAddrStrMax + 5.0f + ExcludeSearchIconMax + 5.0f, NULL, &ServerAddr);
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		UIEx()->DoClearableEditBox(&g_Config.m_UiServerAddress, &s_ClearButton, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &s_Offset);
+		UI()->DoClearableEditBox(&g_Config.m_UiServerAddress, &s_ClearButton, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &s_Offset);
 
 		// button area
 		ButtonArea = ConnectButtons;
@@ -680,9 +680,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	// server filter
 	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
-	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
+	FilterHeader.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
 
-	RenderTools()->DrawUIRect(&ServerFilter, ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
+	ServerFilter.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
 	UI()->DoLabel(&FilterHeader, Localize("Server filter"), FontSize + 2.0f, TEXTALIGN_CENTER);
 	CUIRect Button, Button2;
 
@@ -721,7 +721,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	Button.VSplitRight(60.0f, 0, &Button);
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
 	static float s_OffsetGametype = 0.0f;
-	if(UIEx()->DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &s_OffsetGametype))
+	if(UI()->DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &s_OffsetGametype))
 		Client()->ServerBrowserUpdate();
 
 	// server address
@@ -730,7 +730,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	UI()->DoLabel(&Button, Localize("Server address:"), FontSize, TEXTALIGN_LEFT);
 	Button.VSplitRight(60.0f, 0, &Button);
 	static float s_OffsetAddr = 0.0f;
-	if(UIEx()->DoEditBox(&g_Config.m_BrFilterServerAddress, &Button, g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress), FontSize, &s_OffsetAddr))
+	if(UI()->DoEditBox(&g_Config.m_BrFilterServerAddress, &Button, g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress), FontSize, &s_OffsetAddr))
 		Client()->ServerBrowserUpdate();
 
 	// player country
@@ -797,7 +797,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 		ServerFilter.HSplitTop(120.0f, &ServerFilter, 0);
 
-		RenderTools()->DrawUIRect(&ServerFilter, ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+		ServerFilter.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 		Button.VSplitMid(&Button, &Button2);
 
@@ -1047,8 +1047,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	CTextCursor Cursor;
 	const float FontSize = 12.0f;
 	ServerDetails.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerDetails);
-	RenderTools()->DrawUIRect(&ServerHeader, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerDetails, ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
+	ServerHeader.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
+	ServerDetails.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
 	UI()->DoLabel(&ServerHeader, Localize("Server details"), FontSize + 2.0f, TEXTALIGN_CENTER);
 
 	if(pSelectedServer)
@@ -1159,7 +1159,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			ColorRGBA Color = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ?
 						  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
 						  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
-			RenderTools()->DrawUIRect(&Name, Color, IGraphics::CORNER_ALL, 4.0f);
+			Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
 			Name.VSplitLeft(5.0f, 0, &Name);
 			Name.VSplitLeft(34.0f, &Score, &Name);
 			Name.VSplitRight(34.0f, &Name, &Flag);
@@ -1266,8 +1266,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// header
 	ServerFriends.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFriends);
-	RenderTools()->DrawUIRect(&FilterHeader, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
-	RenderTools()->DrawUIRect(&ServerFriends, ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
+	FilterHeader.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
+	ServerFriends.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
 	UI()->DoLabel(&FilterHeader, Localize("Friends"), FontSize + 4.0f, TEXTALIGN_CENTER);
 	CUIRect Button, List;
 
@@ -1291,14 +1291,14 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			Item.m_Rect.Margin(1.5f, &Item.m_Rect);
 			CUIRect OnState;
 			Item.m_Rect.VSplitRight(30.0f, &Item.m_Rect, &OnState);
-			RenderTools()->DrawUIRect(&Item.m_Rect, ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_L, 4.0f);
+			Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_L, 4.0f);
 
 			Item.m_Rect.VMargin(2.5f, &Item.m_Rect);
 			Item.m_Rect.HSplitTop(12.0f, &Item.m_Rect, &Button);
 			UI()->DoLabel(&Item.m_Rect, Friend.m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
 			UI()->DoLabel(&Button, Friend.m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
 
-			RenderTools()->DrawUIRect(&OnState, Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_R, 4.0f);
+			OnState.Draw(Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_R, 4.0f);
 			OnState.HMargin((OnState.h - FontSize) / 3, &OnState);
 			OnState.VMargin(5.0f, &OnState);
 			char aBuf[64];
@@ -1358,7 +1358,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aName[MAX_NAME_LENGTH] = {0};
 		static float s_OffsetName = 0.0f;
-		UIEx()->DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize + 2, &s_OffsetName);
+		UI()->DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize + 2, &s_OffsetName);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
@@ -1367,7 +1367,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		Button.VSplitLeft(80.0f, 0, &Button);
 		static char s_aClan[MAX_CLAN_LENGTH] = {0};
 		static float s_OffsetClan = 0.0f;
-		UIEx()->DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize + 2, &s_OffsetClan);
+		UI()->DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize + 2, &s_OffsetClan);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
@@ -1397,7 +1397,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	CUIRect ServerList, ToolBox;
 
 	// background
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
 	// create server list, status box, tab bar and tool box area
@@ -1413,7 +1413,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	// tool box
 	{
-		RenderTools()->DrawUIRect(&ToolBox, ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 4.0f);
+		ToolBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 4.0f);
 
 		if(ToolboxPage == 0)
 			RenderServerbrowserFilters(ToolBox);

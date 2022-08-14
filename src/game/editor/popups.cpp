@@ -77,9 +77,9 @@ void CEditor::UiDoPopupMenu()
 			Corners = IGraphics::CORNER_R | IGraphics::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
-		RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);
+		r.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);
 		r.Margin(1.0f, &r);
-		RenderTools()->DrawUIRect(&r, ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
+		r.Draw(ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
 		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))
@@ -1232,7 +1232,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		CUIRect Scroll;
 		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
 		{
@@ -1340,7 +1340,7 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		CUIRect Scroll;
 		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
 		{
@@ -1483,7 +1483,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	{
 		CUIRect Scroll;
 		View.VSplitRight(20.0f, &View, &Scroll);
-		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
 		{
