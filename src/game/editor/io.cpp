@@ -736,8 +736,10 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						{
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
-								mem_copy(((CLayerFront *)pTiles)->m_pTiles, pFrontData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
+							if(pTilemapItem->m_Version > 3)
+								pTiles->ExtractTiles((CTile *)pFrontData);
+							else if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
+								mem_copy(pTiles->m_pTiles, pFrontData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
 
 							DataFile.UnloadData(pTilemapItem->m_Front);
 						}
