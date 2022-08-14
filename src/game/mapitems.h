@@ -300,7 +300,8 @@ struct CMapItemLayerTilemap
 {
 	enum
 	{
-		CURRENT_VERSION = 4
+		CURRENT_VERSION = 3,
+		TILE_SKIP_MIN_VERSION = 4, // supported for loading but not saving
 	};
 
 	CMapItemLayer m_Layer;

@@ -83,24 +83,10 @@ bool CMap::Load(const char *pMapName)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-				if(pTilemap->m_Version > 3)
+				if(pTilemap->m_Version >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
 				{
-					CTile *pTiles = static_cast<CTile *>(malloc(pTilemap->m_Width * pTilemap->m_Height * sizeof(CTile)));
-
-					// extract original tile data
-					int i = 0;
-					CTile *pSavedTiles = static_cast<CTile *>(m_DataFile.GetData(pTilemap->m_Data));
-					while(i < pTilemap->m_Width * pTilemap->m_Height)
-					{
-						for(unsigned Counter = 0; Counter <= pSavedTiles->m_Skip && i < pTilemap->m_Width * pTilemap->m_Height; Counter++)
-						{
-							pTiles[i] = *pSavedTiles;
-							pTiles[i++].m_Skip = 0;
-						}
-
-						pSavedTiles++;
-					}
-
+					CTile *pTiles = static_cast<CTile *>(malloc((size_t)pTilemap->m_Width * pTilemap->m_Height * sizeof(CTile)));
+					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(m_DataFile.GetData(pTilemap->m_Data)), m_DataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
 					m_DataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles));
 				}
 			}
@@ -138,6 +124,22 @@ unsigned CMap::Crc() const
 int CMap::MapSize() const
 {
 	return m_DataFile.MapSize();
+}
+
+void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t SrcSize)
+{
+	size_t DestIndex = 0;
+	size_t SrcIndex = 0;
+	while(DestIndex < DestSize && SrcIndex < SrcSize)
+	{
+		for(unsigned Counter = 0; Counter <= pSrc[SrcIndex].m_Skip && DestIndex < DestSize; Counter++)
+		{
+			pDest[DestIndex] = pSrc[SrcIndex];
+			pDest[DestIndex].m_Skip = 0;
+			DestIndex++;
+		}
+		SrcIndex++;
+	}
 }
 
 extern IEngineMap *CreateEngineMap() { return new CMap; }

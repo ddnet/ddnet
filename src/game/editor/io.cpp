@@ -201,7 +201,7 @@ bool CEditorMap::Save(const char *pFileName)
 				pLayerTiles->PrepareForSave();
 
 				CMapItemLayerTilemap Item;
-				Item.m_Version = 3;
+				Item.m_Version = CMapItemLayerTilemap::CURRENT_VERSION;
 
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayerTiles->m_Flags;
@@ -736,11 +736,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						{
 							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
-							if(pTilemapItem->m_Version > 3)
-								pTiles->ExtractTiles((CTile *)pFrontData);
-							else if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
-								mem_copy(pTiles->m_pTiles, pFrontData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
-
+							pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size);
 							DataFile.UnloadData(pTilemapItem->m_Front);
 						}
 						else if(pTiles->m_Switch)
@@ -795,10 +791,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						{
 							void *pData = DataFile.GetData(pTilemapItem->m_Data);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
-							if(pTilemapItem->m_Version > 3)
-								pTiles->ExtractTiles((CTile *)pData);
-							else if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
-								mem_copy(pTiles->m_pTiles, pData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
+							pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pData, Size);
 
 							if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
 							{

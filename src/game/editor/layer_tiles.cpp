@@ -4,6 +4,7 @@
 
 #include <engine/client.h>
 #include <engine/graphics.h>
+#include <engine/shared/map.h>
 #include <engine/textrender.h>
 
 #include "editor.h"
@@ -97,19 +98,13 @@ void CLayerTiles::PrepareForSave()
 	}
 }
 
-void CLayerTiles::ExtractTiles(CTile *pSavedTiles)
+void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize)
 {
-	int i = 0;
-	while(i < m_Width * m_Height)
-	{
-		for(unsigned Counter = 0; Counter <= pSavedTiles->m_Skip && i < m_Width * m_Height; Counter++)
-		{
-			m_pTiles[i] = *pSavedTiles;
-			m_pTiles[i++].m_Skip = 0;
-		}
-
-		pSavedTiles++;
-	}
+	const size_t DestSize = (size_t)m_Width * m_Height;
+	if(TilemapItemVersion >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
+		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
+	else if(SavedTilesSize >= DestSize)
+		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 }
 
 void CLayerTiles::MakePalette()

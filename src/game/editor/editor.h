@@ -624,7 +624,7 @@ public:
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	void PrepareForSave();
-	void ExtractTiles(CTile *pSavedTiles);
+	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize);
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{
