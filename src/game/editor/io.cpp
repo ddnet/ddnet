@@ -677,7 +677,6 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pLayer = pTiles;
 
 						pGroup->AddLayer(pTiles);
-						void *pData = DataFile.GetData(pTilemapItem->m_Data);
 						pTiles->m_Image = pTilemapItem->m_Image;
 						pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
 
@@ -814,6 +813,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						}
 						else // regular tile layer or game layer
 						{
+							void *pData = DataFile.GetData(pTilemapItem->m_Data);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
 							{
@@ -828,9 +828,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									}
 								}
 							}
+							DataFile.UnloadData(pTilemapItem->m_Data);
 						}
-
-						DataFile.UnloadData(pTilemapItem->m_Data);
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_QUADS)
 					{
