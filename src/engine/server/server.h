@@ -487,4 +487,5 @@ public:
 #endif
 };
 
+extern CServer *CreateServer();
 #endif
