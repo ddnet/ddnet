@@ -20,6 +20,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
 #include "menus.h"
@@ -450,14 +451,30 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	}
 
 	// motd
-	Motd.HSplitTop(10.0f, 0, &Motd);
+	const float MotdFontSize = 16.0f;
+	Motd.HSplitTop(10.0f, nullptr, &Motd);
 	Motd.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-	Motd.Margin(5.0f, &Motd);
-	y = 0.0f;
-	x = 5.0f;
-	TextRender()->Text(0, Motd.x + x, Motd.y + y, 32, Localize("MOTD"), -1.0f);
-	y += 32.0f + 5.0f;
-	TextRender()->Text(0, Motd.x + x, Motd.y + y, 16, m_pClient->m_Motd.m_aServerMotd, Motd.w);
+	Motd.HMargin(5.0f, &Motd);
+	Motd.VMargin(10.0f, &Motd);
+
+	CUIRect MotdHeader;
+	Motd.HSplitTop(2.0f * MotdFontSize, &MotdHeader, &Motd);
+	Motd.HSplitTop(5.0f, nullptr, &Motd);
+	TextRender()->Text(nullptr, MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
+
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = 5 * MotdFontSize;
+	s_ScrollRegion.Begin(&Motd, &ScrollOffset, &ScrollParams);
+	Motd.y += ScrollOffset.y;
+
+	CUIRect MotdTextArea;
+	Motd.HSplitTop((str_countchr(m_pClient->m_Motd.m_aServerMotd, '\n') + 1) * MotdFontSize, &MotdTextArea, &Motd);
+	s_ScrollRegion.AddRect(MotdTextArea);
+	TextRender()->Text(nullptr, MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.m_aServerMotd, MotdTextArea.w);
+
+	s_ScrollRegion.End();
 }
 
 bool CMenus::RenderServerControlServer(CUIRect MainView)
