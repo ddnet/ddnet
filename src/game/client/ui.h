@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+class IClient;
 class IGraphics;
 class IKernel;
 
@@ -203,6 +204,7 @@ class CUI
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
+	IClient *m_pClient;
 	IGraphics *m_pGraphics;
 	IInput *m_pInput;
 	ITextRender *m_pTextRender;
@@ -218,6 +220,7 @@ public:
 
 	void Init(IKernel *pKernel);
 	void InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount);
+	IClient *Client() const { return m_pClient; }
 	IGraphics *Graphics() const { return m_pGraphics; }
 	IInput *Input() const { return m_pInput; }
 	ITextRender *TextRender() const { return m_pTextRender; }
@@ -306,6 +309,7 @@ public:
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
+	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed = 10.0f);
 
 	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
