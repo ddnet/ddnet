@@ -1536,7 +1536,7 @@ Sending initial client info
 == Envoi des informations initiales du client
 
 Uploading map data to GPU
-== Téléchargement des données de la map vers le GPU
+== Transfert des données de la map vers le GPU
 
 Loading menu images
 == Chargement des images de menu
@@ -1578,4 +1578,4 @@ Something hookable
 == Quelque chose d'accrochable
 
 Loading race demo files
-== Chargement des fichiers de demo de la course
+== Chargement des fichiers de demo de course
