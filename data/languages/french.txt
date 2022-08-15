@@ -23,6 +23,7 @@
 #	Nouaa			2022-05-14 23:00:00
 #	Chairn			2022-06-16 19:00:00
 #	Sucre			2022-07-19 20:36:00
+#	archimede67		2022-08-15 13:02:00
 
 ##### /authors #####
 
@@ -1517,64 +1518,64 @@ Loading sound files
 == Chargement des fichiers sonores
 
 Preparing demo playback
-== 
+== Préparation de la lecture de la demo
 
 Loading map file from storage
-== 
+== Chargement de la map depuis le stockage
 
 Why are you slowmo replaying to read this?
-== 
+== Pourquoi rejoues-tu en slow-motion pour lire ça?
 
 Initializing components
-== 
+== Initialisation des composants
 
 Initializing map logic
-== 
+== Initialisation de la logique de la map
 
 Sending initial client info
-== 
+== Envoi des informations initiales du client
 
 Uploading map data to GPU
-== 
+== Téléchargement des données de la map vers le GPU
 
 Loading menu images
-== 
+== Chargement des images de menu
 
 Loading demo files
-== 
+== Chargement des fichiers de demo
 
 Loading ghost files
-== 
+== Chargement des fichiers de fantôme
 
 Name Plate
-== 
+== Plaque de nom
 
 Hook Collisions
-== 
+== Collisions du grappin
 
 Show client IDs in scoreboard
-== 
+== Afficher les IDs des clients dans le tableau des scores
 
 Show hook strength indicator
-== 
+== Afficher l'indicateur de force du grappin
 
 Hook collision line width
-== 
+== Largeur de la ligne de collision du grappin
 
 Hook collision line opacity
-== 
+== Opacité de la ligne de collision du grappin
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Couleurs de la ligne de collision du grappin, dans le cas d'une collision possible avec :
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Vos mouvements ne sont pas pris en compte lors du calcul des couleurs de la ligne
 
 Nothing hookable
-== 
+== Rien d'accrochable
 
 Something hookable
-== 
+== Quelque chose d'accrochable
 
 Loading race demo files
-== 
+== Chargement des fichiers de demo de la course
