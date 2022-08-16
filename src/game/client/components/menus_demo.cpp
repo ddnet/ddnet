@@ -1260,7 +1260,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Storage()->CreateFolder("demos", IStorage::TYPE_SAVE);
 		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open file");
+			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
 
