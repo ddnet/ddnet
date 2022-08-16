@@ -201,7 +201,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, CONFIG_FILE, aBuf, sizeof(aBuf));
 			if(!open_file(aBuf))
 			{
-				dbg_msg("menus", "couldn't open file");
+				dbg_msg("menus", "couldn't open file '%s'", aBuf);
 			}
 		}
 
@@ -216,7 +216,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
 			if(!open_file(aBuf))
 			{
-				dbg_msg("menus", "couldn't open file");
+				dbg_msg("menus", "couldn't open file '%s'", aBuf);
 			}
 		}
 
@@ -233,7 +233,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
 			if(!open_file(aBuf))
 			{
-				dbg_msg("menus", "couldn't open file");
+				dbg_msg("menus", "couldn't open file '%s'", aBuf);
 			}
 		}
 
@@ -749,9 +749,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CButtonContainer s_SkinDBDirID;
 	if(DoButton_Menu(&s_SkinDBDirID, Localize("Skin Database"), 0, &SkinDB))
 	{
-		if(!open_link("https://ddnet.tw/skins/"))
+		const char *pLink = "https://ddnet.tw/skins/";
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
 	}
 
@@ -766,7 +767,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
 		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open file");
+			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
 
@@ -1863,10 +1864,13 @@ public:
 
 void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, std::vector<CLanguage> &vLanguages)
 {
-	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
+	const char *pFilename = "languages/index.txt";
+	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
 	{
-		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "couldn't open index file");
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "couldn't open index file '%s'", pFilename);
+		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 		return;
 	}
 

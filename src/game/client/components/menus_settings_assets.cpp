@@ -689,7 +689,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		Storage()->CreateFolder(aBufFull, IStorage::TYPE_SAVE);
 		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open file");
+			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
 

@@ -15,10 +15,13 @@
 
 void CCountryFlags::LoadCountryflagsIndexfile()
 {
-	IOHANDLE File = Storage()->OpenFile("countryflags/index.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
+	const char *pFilename = "countryflags/index.txt";
+	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "couldn't open index file");
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "couldn't open index file '%s'", pFilename);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 		return;
 	}
 

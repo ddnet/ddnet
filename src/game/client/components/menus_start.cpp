@@ -44,9 +44,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_DiscordButton;
 	if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link(Localize("https://ddnet.tw/discord")))
+		const char *pLink = Localize("https://ddnet.tw/discord");
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
 		m_DoubleClickIndex = -1;
 	}
@@ -56,9 +57,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_LearnButton;
 	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link(Localize("https://wiki.ddnet.tw/")))
+		const char *pLink = Localize("https://wiki.ddnet.tw/");
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
 		m_DoubleClickIndex = -1;
 	}
@@ -94,9 +96,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_WebsiteButton;
 	if(DoButton_Menu(&s_WebsiteButton, Localize("Website"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link("https://ddnet.tw/"))
+		const char *pLink = "https://ddnet.tw/";
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
 		m_DoubleClickIndex = -1;
 	}
