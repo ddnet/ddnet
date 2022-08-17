@@ -40,6 +40,33 @@ CLayerTiles::CLayerTiles(int w, int h)
 	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 }
 
+CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
+	CLayer(Other)
+{
+	m_Width = Other.m_Width;
+	m_Height = Other.m_Height;
+	m_pTiles = new CTile[m_Width * m_Height];
+	mem_copy(m_pTiles, Other.m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+
+	m_Image = Other.m_Image;
+	m_Texture = Other.m_Texture;
+	m_Game = Other.m_Game;
+	m_Color = Other.m_Color;
+	m_ColorEnv = Other.m_ColorEnv;
+	m_ColorEnvOffset = Other.m_ColorEnvOffset;
+
+	m_AutoMapperConfig = Other.m_AutoMapperConfig;
+	m_Seed = Other.m_Seed;
+	m_AutoAutoMap = Other.m_AutoAutoMap;
+	m_Tele = Other.m_Tele;
+	m_Speedup = Other.m_Speedup;
+	m_Front = Other.m_Front;
+	m_Switch = Other.m_Switch;
+	m_Tune = Other.m_Tune;
+
+	mem_copy(m_aFileName, Other.m_aFileName, IO_MAX_PATH_LENGTH);
+}
+
 CLayerTiles::~CLayerTiles()
 {
 	delete[] m_pTiles;
@@ -569,6 +596,11 @@ void CLayerTiles::BrushRotate(float Amount)
 		BrushFlipX();
 		BrushFlipY();
 	}
+}
+
+CLayer *CLayerTiles::Duplicate() const
+{
+	return new CLayerTiles(*this);
 }
 
 void CLayerTiles::Resize(int NewW, int NewH)
