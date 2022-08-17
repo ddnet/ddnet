@@ -1229,8 +1229,6 @@ set(EXPECTED_DATA
   countryflags/default.png
   countryflags/index.txt
   debug_font.png
-  demo_buttons.png
-  demo_buttons2.png
   editor/audio_source.png
   editor/background.png
   editor/basic_freeze.rules
