@@ -2997,6 +2997,18 @@ const char *str_rchr(const char *haystack, char needle)
 	return strrchr(haystack, needle);
 }
 
+int str_countchr(const char *haystack, char needle)
+{
+	int count = 0;
+	while(*haystack)
+	{
+		if(*haystack == needle)
+			count++;
+		haystack++;
+	}
+	return count;
+}
+
 void str_hex(char *dst, int dst_size, const void *data, int data_size)
 {
 	static const char hex[] = "0123456789ABCDEF";
