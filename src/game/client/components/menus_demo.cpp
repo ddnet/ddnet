@@ -34,7 +34,7 @@ int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
-int CMenus::DoButton_Sprite(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners)
 {	
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 
@@ -393,8 +393,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// combined play and pause button
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_PlayPauseButton;
-	if(DoButton_Sprite(&s_PlayPauseButton, pInfo->m_Paused ? "\xEF\x81\x8B" : "\xEF\x81\x8C", false, &Button, IGraphics::CORNER_ALL))
-	//IMAGE_DEMOBUTTONS, pInfo->m_Paused ? SPRITE_DEMOBUTTON_PLAY : SPRITE_DEMOBUTTON_PAUSE
+	if(DoButton_FontIcon(&s_PlayPauseButton, pInfo->m_Paused ? "\xEF\x81\x8B" : "\xEF\x81\x8C", false, &Button, IGraphics::CORNER_ALL))
 	{
 		if(pInfo->m_Paused)
 		{
@@ -411,8 +410,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_ResetButton;
-	if(DoButton_Sprite(&s_ResetButton, "\xEF\x81\x8D", false, &Button, IGraphics::CORNER_ALL))
-	//IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP
+	if(DoButton_FontIcon(&s_ResetButton, "\xEF\x81\x8D", false, &Button, IGraphics::CORNER_ALL))
 	{
 		DemoPlayer()->Pause();
 		DemoPlayer()->SeekPercent(0.0f);
@@ -422,14 +420,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
-	if(DoButton_Sprite(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
 		DecreaseDemoSpeed = true;
 
 	// fastforward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_FastForwardButton;
-	if(DoButton_Sprite(&s_FastForwardButton, "\xEF\x81\x8e", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8e", 0, &Button, IGraphics::CORNER_ALL))
 		IncreaseDemoSpeed = true;
 
 	// speed meter
@@ -442,21 +440,21 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins * 10, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceBeginButton;
-	if(DoButton_Sprite(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
 		Client()->DemoSliceBegin();
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceEndButton;
-	if(DoButton_Sprite(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
 		Client()->DemoSliceEnd();
 
 	// slice save button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceSaveButton;
-	if(DoButton_Sprite(&s_SliceSaveButton, "\xF0\x9F\x96\xAA", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SliceSaveButton, "\xF0\x9F\x96\xAA", 0, &Button, IGraphics::CORNER_ALL))
 	{
 		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 		m_aDemoPlayerPopupHint[0] = '\0';
@@ -476,7 +474,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitRight(Margins * 3, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static CButtonContainer s_KeyboardShortcutsButton;
-	if(DoButton_Sprite(&s_KeyboardShortcutsButton, g_Config.m_ClDemoKeyboardShortcuts ? "\xE2\x8C\xA8" : "\xEF\x81\xAE", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, g_Config.m_ClDemoKeyboardShortcuts ? "\xE2\x8C\xA8" : "\xEF\x81\xAE", 0, &Button, IGraphics::CORNER_ALL))
 	{
 		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
