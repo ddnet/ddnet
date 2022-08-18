@@ -2075,14 +2075,14 @@ int CMenus::Render()
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_SlowDownButton;
-			if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
+			if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL, false))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_FastForwardButton;
-			if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8e", 0, &Button, IGraphics::CORNER_ALL))
+			if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8E", 0, &Button, IGraphics::CORNER_ALL, false))
 				IncDemoSpeed = true;
 
 			// speed meter

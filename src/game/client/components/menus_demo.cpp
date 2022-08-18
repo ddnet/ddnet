@@ -34,17 +34,28 @@ int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
-int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners)
-{	
+int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, bool IsDisabled = false)
+{
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	CUIRect Rect = *pRect;
 	CUIRect Temp;
 	Rect.HMargin(2.0f, &Temp);
 	SLabelProperties Props;
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
-	TextRender()->SetCurFont(NULL);
+
+	if (IsDisabled){
+		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		TextRender()->TextOutlineColor(ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f));
+		UI()->DoLabel(&Temp, "\xEF\x9C\x95", Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+
+	TextRender()->SetCurFont(nullptr);
 
 	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
@@ -427,7 +438,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_FastForwardButton;
-	if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8e", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8E", 0, &Button, IGraphics::CORNER_ALL))
 		IncreaseDemoSpeed = true;
 
 	// speed meter
@@ -454,7 +465,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceSaveButton;
-	if(DoButton_FontIcon(&s_SliceSaveButton, "\xF0\x9F\x96\xAA", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SliceSaveButton, "\xEF\x80\xBD", 0, &Button, IGraphics::CORNER_ALL))
 	{
 		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 		m_aDemoPlayerPopupHint[0] = '\0';
@@ -471,10 +482,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// toggle keyboard shortcuts button
-	ButtonBar.VSplitRight(Margins * 3, &ButtonBar, 0);
+	ButtonBar.VSplitRight(Margins, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static CButtonContainer s_KeyboardShortcutsButton;
-	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, g_Config.m_ClDemoKeyboardShortcuts ? "\xE2\x8C\xA8" : "\xEF\x81\xAE", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, "\xE2\x8C\xA8", 0, &Button, IGraphics::CORNER_ALL, g_Config.m_ClDemoKeyboardShortcuts ? false : true))
 	{
 		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
