@@ -1269,7 +1269,6 @@ set(EXPECTED_DATA
   editor/winter_main.rules
   emoticons.png
   extras.png
-  file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
   fonts/Icons.otf
