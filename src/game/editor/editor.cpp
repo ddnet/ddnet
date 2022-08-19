@@ -212,6 +212,17 @@ void CLayerGroup::DeleteLayer(int Index)
 	m_pMap->m_Modified = true;
 }
 
+void CLayerGroup::DuplicateLayer(int Index)
+{
+	if(Index < 0 || Index >= (int)m_vpLayers.size())
+		return;
+
+	auto *pDup = m_vpLayers[Index]->Duplicate();
+	m_vpLayers.insert(m_vpLayers.begin() + Index + 1, pDup);
+
+	m_pMap->m_Modified = true;
+}
+
 void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
 {
 	*pWidth = 0;
@@ -743,6 +754,11 @@ int CEditor::FindSelectedQuadIndex(int Index) const
 		if(m_vSelectedQuads[i] == Index)
 			return i;
 	return -1;
+}
+
+bool CEditor::IsSpecialLayer(const CLayer *pLayer) const
+{
+	return m_Map.m_pGameLayer == pLayer || m_Map.m_pTeleLayer == pLayer || m_Map.m_pSpeedupLayer == pLayer || m_Map.m_pFrontLayer == pLayer || m_Map.m_pSwitchLayer == pLayer || m_Map.m_pTuneLayer == pLayer;
 }
 
 void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
@@ -3480,7 +3496,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 						else
 							s_LayerPopupContext.m_vpLayers.clear();
 
-						UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 300, PopupLayer, &s_LayerPopupContext);
+						UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 320, PopupLayer, &s_LayerPopupContext);
 					}
 				}
 

@@ -12,6 +12,13 @@ CLayerSounds::CLayerSounds()
 	m_Sound = -1;
 }
 
+CLayerSounds::CLayerSounds(const CLayerSounds &Other) :
+	CLayer(Other)
+{
+	m_Sound = Other.m_Sound;
+	m_vSources = Other.m_vSources;
+}
+
 CLayerSounds::~CLayerSounds() = default;
 
 void CLayerSounds::Render(bool Tileset)
@@ -218,4 +225,9 @@ void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 		Func(&Source.m_SoundEnv);
 		Func(&Source.m_PosEnv);
 	}
+}
+
+CLayer *CLayerSounds::Duplicate() const
+{
+	return new CLayerSounds(*this);
 }

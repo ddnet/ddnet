@@ -127,6 +127,17 @@ public:
 		m_BrushRefCount = 0;
 	}
 
+	CLayer(const CLayer &Other)
+	{
+		str_copy(m_aName, Other.m_aName, sizeof(m_aName));
+		m_Flags = Other.m_Flags;
+		m_pEditor = Other.m_pEditor;
+		m_Type = Other.m_Type;
+		m_BrushRefCount = 0;
+		m_Visible = true;
+		m_Readonly = false;
+	}
+
 	virtual ~CLayer()
 	{
 	}
@@ -147,6 +158,8 @@ public:
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 
+	virtual CLayer *Duplicate() const = 0;
+
 	virtual void GetSize(float *pWidth, float *pHeight)
 	{
 		*pWidth = 0;
@@ -159,7 +172,6 @@ public:
 
 	bool m_Readonly;
 	bool m_Visible;
-
 	int m_BrushRefCount;
 };
 
@@ -198,6 +210,7 @@ public:
 	void GetSize(float *pWidth, float *pHeight) const;
 
 	void DeleteLayer(int Index);
+	void DuplicateLayer(int Index);
 	int SwapLayers(int Index0, int Index1);
 
 	bool IsEmpty() const
@@ -554,6 +567,7 @@ protected:
 
 public:
 	CLayerTiles(int w, int h);
+	CLayerTiles(const CLayerTiles &Other);
 	~CLayerTiles();
 
 	virtual CTile GetTile(int x, int y);
@@ -579,6 +593,8 @@ public:
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
+
+	CLayer *Duplicate() const override;
 
 	virtual void ShowInfo();
 	int RenderProperties(CUIRect *pToolbox) override;
@@ -637,6 +653,7 @@ class CLayerQuads : public CLayer
 {
 public:
 	CLayerQuads();
+	CLayerQuads(const CLayerQuads &Other);
 	~CLayerQuads();
 
 	void Render(bool QuadPicker = false) override;
@@ -655,6 +672,7 @@ public:
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	void GetSize(float *pWidth, float *pHeight) override;
+	CLayer *Duplicate() const override;
 
 	int m_Image;
 	std::vector<CQuad> m_vQuads;
@@ -842,6 +860,7 @@ public:
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
+	bool IsSpecialLayer(const CLayer *pLayer) const;
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
@@ -1318,6 +1337,7 @@ class CLayerSounds : public CLayer
 {
 public:
 	CLayerSounds();
+	CLayerSounds(const CLayerSounds &Other);
 	~CLayerSounds();
 
 	void Render(bool Tileset = false) override;
@@ -1331,6 +1351,8 @@ public:
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+
+	CLayer *Duplicate() const override;
 
 	int m_Sound;
 	std::vector<CSoundSource> m_vSources;

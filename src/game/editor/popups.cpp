@@ -397,6 +397,21 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 		return CLayerTiles::RenderCommonProperties(pPopup->m_CommonPropState, pEditor, &View, pPopup->m_vpLayers);
 	}
 
+	// duplicate layer button
+	CUIRect DupButton;
+	static int s_DuplicationButton = 0;
+	View.HSplitBottom(4.0f, &View, nullptr);
+	View.HSplitBottom(12.0f, &View, &DupButton);
+
+	if(!pEditor->IsSpecialLayer(pEditor->GetSelectedLayer(0)))
+	{
+		if(pEditor->DoButton_Editor(&s_DuplicationButton, "Duplicate layer", 0, &DupButton, 0, "Duplicates the layer"))
+		{
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->DuplicateLayer(pEditor->m_vSelectedLayers[0]);
+			return 1;
+		}
+	}
+
 	// don't allow deletion of game layer
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))
