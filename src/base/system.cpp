@@ -65,6 +65,7 @@
 
 #include <cerrno>
 #include <io.h>
+#include <objbase.h>
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
@@ -4198,6 +4199,17 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 	using namespace std::chrono_literals;
 	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());
 }
+
+#if defined(CONF_FAMILY_WINDOWS)
+CWindowsComLifecycle::CWindowsComLifecycle()
+{
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+}
+CWindowsComLifecycle::~CWindowsComLifecycle()
+{
+	CoUninitialize();
+}
+#endif
 
 size_t std::hash<NETADDR>::operator()(const NETADDR &Addr) const noexcept
 {

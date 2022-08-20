@@ -2515,6 +2515,19 @@ public:
 	}
 };
 
+#if defined(CONF_FAMILY_WINDOWS)
+/**
+ * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
+ * which may be necessary for using the open_file and open_link functions.
+ */
+class CWindowsComLifecycle
+{
+public:
+	CWindowsComLifecycle();
+	~CWindowsComLifecycle();
+};
+#endif
+
 /**
  * Copies a string to a fixed-size array of chars.
  *
