@@ -1774,6 +1774,62 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 	return 0;
 }
 
+int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	CUIRect CoordXPicker;
+	CUIRect CoordYPicker;
+
+	View.HSplitMid(&CoordXPicker, &CoordYPicker);
+	CoordXPicker.VSplitRight(2.f, &CoordXPicker, nullptr);
+
+	int MaxX = pEditor->m_Map.m_pGameLayer->m_Width - 1;
+	int MaxY = pEditor->m_Map.m_pGameLayer->m_Height - 1;
+
+	if(pEditor->m_GotoX > MaxX)
+		pEditor->m_GotoX = MaxX;
+	if(pEditor->m_GotoY > MaxY)
+		pEditor->m_GotoY = MaxY;
+
+	static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+
+	enum
+	{
+		PROP_CoordX = 0,
+		PROP_CoordY,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"X", pEditor->m_GotoX, PROPTYPE_INT_STEP, 0, MaxX},
+		{"Y", pEditor->m_GotoY, PROPTYPE_INT_STEP, 0, MaxY},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&CoordXPicker, aProps, s_aIds, &NewVal, s_Color);
+
+	if(Prop == PROP_CoordX)
+	{
+		pEditor->m_GotoX = NewVal;
+	}
+	else if(Prop == PROP_CoordY)
+	{
+		pEditor->m_GotoY = NewVal;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, ""))
+	{
+		pEditor->Goto(pEditor->m_GotoX + 0.5f, pEditor->m_GotoY + 0.5f);
+	}
+
+	return 0;
+}
+
 int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect SVPicker, HuePicker;

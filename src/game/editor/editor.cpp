@@ -1080,6 +1080,21 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
 
+		// goto xy button
+		{
+			TB_Bottom.VSplitLeft(50.0, &Button, &TB_Bottom);
+			static int s_GotoButton = 0;
+			if(DoButton_Editor(&s_GotoButton, "Goto XY", 0, &Button, 0, "Go to a specified coordinate point on the map"))
+			{
+				static int s_ModifierPopupID = 0;
+				if(!UiPopupExists(&s_ModifierPopupID))
+				{
+					UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, 52, PopupGoto);
+				}
+			}
+			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
+		}
+
 		// tile manipulation
 		{
 			static int s_BorderBut = 0;
@@ -6145,6 +6160,12 @@ void CEditor::ZoomMouseTarget(float ZoomFactor)
 	// adjust camera
 	m_WorldOffsetX += (Mwx - m_WorldOffsetX) * (1 - ZoomFactor);
 	m_WorldOffsetY += (Mwy - m_WorldOffsetY) * (1 - ZoomFactor);
+}
+
+void CEditor::Goto(float X, float Y)
+{
+	m_WorldOffsetX = X * 32;
+	m_WorldOffsetY = Y * 32;
 }
 
 void CEditorMap::DeleteEnvelope(int Index)
