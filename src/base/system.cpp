@@ -68,6 +68,7 @@
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
+#include <shlwapi.h>
 #include <wincrypt.h>
 #else
 #error NOT IMPLEMENTED
@@ -2309,6 +2310,17 @@ int fs_is_dir(const char *path)
 #endif
 }
 
+int fs_is_relative_path(const char *path)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WCHAR wPath[IO_MAX_PATH_LENGTH];
+	MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath));
+	return PathIsRelativeW(wPath) ? 1 : 0;
+#else
+	return path[0] == '/' ? 0 : 1; // yes, it's that simple
+#endif
+}
+
 int fs_chdir(const char *path)
 {
 	if(fs_is_dir(path))
@@ -3866,8 +3878,18 @@ int open_file(const char *path)
 #if defined(CONF_PLATFORM_MACOS)
 	return open_link(path);
 #else
+	// Create a file link so the path can contain forward and
+	// backward slashes. But the file link must be absolute.
 	char buf[512];
-	str_format(buf, sizeof(buf), "file://%s", path);
+	char workingDir[IO_MAX_PATH_LENGTH];
+	if(fs_is_relative_path(path))
+	{
+		fs_getcwd(workingDir, sizeof(workingDir));
+		str_append(workingDir, "/", sizeof(workingDir));
+	}
+	else
+		workingDir[0] = '\0';
+	str_format(buf, sizeof(buf), "file://%s%s", workingDir, path);
 	return open_link(buf);
 #endif
 }

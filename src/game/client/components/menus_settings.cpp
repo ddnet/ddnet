@@ -409,6 +409,18 @@ struct CUISkin
 	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->m_aName, pOther); }
 };
 
+void CMenus::RefreshSkins()
+{
+	auto SkinStartLoadTime = time_get_nanoseconds();
+	m_pClient->m_Skins.Refresh([&](int) {
+		// if skin refreshing takes to long, swap to a loading screen
+		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
+		{
+			RenderLoading(Localize("Loading skin files"), "", 0, false);
+		}
+	});
+}
+
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect Button, Label, Dummy, DummyLabel, SkinList, QuickSearch, QuickSearchClearButton, SkinDB, SkinPrefix, SkinPrefixLabel, DirectoryButton, RefreshButton, Eyes, EyesLabel, EyesTee, EyesRight;
@@ -470,6 +482,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadSkins, Localize("Download skins"), g_Config.m_ClDownloadSkins, &DummyLabel))
 	{
 		g_Config.m_ClDownloadSkins ^= 1;
+		RefreshSkins();
+		s_InitSkinlist = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -477,6 +491,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadCommunitySkins, Localize("Download community skins"), g_Config.m_ClDownloadCommunitySkins, &DummyLabel))
 	{
 		g_Config.m_ClDownloadCommunitySkins ^= 1;
+		RefreshSkins();
+		s_InitSkinlist = true;
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
@@ -484,6 +500,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &DummyLabel))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
+		RefreshSkins();
 		s_InitSkinlist = true;
 	}
 
@@ -651,10 +668,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if((pSkinToBeSelected->m_aName[0] == 'x' && pSkinToBeSelected->m_aName[1] == '_'))
 				continue;
 
-			// vanilla skins only
-			if(g_Config.m_ClVanillaSkinsOnly && !pSkinToBeSelected->m_IsVanilla)
-				continue;
-
 			if(pSkinToBeSelected == 0)
 				continue;
 
@@ -779,14 +792,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
-		auto SkinStartLoadTime = time_get_nanoseconds();
-		m_pClient->m_Skins.Refresh([&](int) {
-			// if skin refreshing takes to long, swap to a loading screen
-			if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
-			{
-				RenderLoading(Localize("Loading skin files"), "", 0, false);
-			}
-		});
+		RefreshSkins();
 		s_InitSkinlist = true;
 		if(Client()->State() >= IClient::STATE_ONLINE)
 		{

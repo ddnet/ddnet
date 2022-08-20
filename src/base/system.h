@@ -1822,6 +1822,15 @@ int fs_storage_path(const char *appname, char *path, int max);
 int fs_is_dir(const char *path);
 
 /*
+    Function: fs_is_relative_path
+        Checks whether a given path is relative or absolute.
+
+    Returns:
+        Returns 1 if relative, 0 if absolute.
+*/
+int fs_is_relative_path(const char *path);
+
+/*
 	Function: fs_chdir
 		Changes current working directory
 
