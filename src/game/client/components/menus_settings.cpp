@@ -668,10 +668,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if((pSkinToBeSelected->m_aName[0] == 'x' && pSkinToBeSelected->m_aName[1] == '_'))
 				continue;
 
-			// vanilla skins only
-			if(g_Config.m_ClVanillaSkinsOnly && !pSkinToBeSelected->m_IsVanilla)
-				continue;
-
 			if(pSkinToBeSelected == 0)
 				continue;
 
