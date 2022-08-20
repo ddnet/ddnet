@@ -1240,8 +1240,8 @@ public:
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
 
-	unsigned char m_GotoX;
-	unsigned char m_GotoY;
+	int m_GotoX;
+	int m_GotoY;
 };
 
 // make sure to inline this function
