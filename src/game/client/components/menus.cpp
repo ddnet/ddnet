@@ -1510,13 +1510,6 @@ int CMenus::Render()
 			}
 			ExtraAlign = 0;
 		}
-		else if(m_Popup == POPUP_PURE)
-		{
-			pTitle = Localize("Disconnected");
-			pExtraText = Localize("The server is running a non-standard tuning on a pure game type.");
-			pButtonText = Localize("Ok");
-			ExtraAlign = -1;
-		}
 		else if(m_Popup == POPUP_DELETE_DEMO)
 		{
 			pTitle = Localize("Delete demo");
@@ -2528,7 +2521,7 @@ void CMenus::OnRender()
 	{
 		Client()->Disconnect();
 		SetActive(true);
-		m_Popup = POPUP_PURE;
+		PopupMessage(Localize("Disconnected"), Localize("The server is running a non-standard tuning on a pure game type."), Localize("Ok"));
 	}
 
 	if(!IsActive())
