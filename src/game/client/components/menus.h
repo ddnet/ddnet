@@ -348,11 +348,6 @@ protected:
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
 
-	//
-	bool m_EscapePressed;
-	bool m_EnterPressed;
-	bool m_DeletePressed;
-
 	// for map download popup
 	int64_t m_DownloadLastCheckTime;
 	int m_DownloadLastCheckSize;

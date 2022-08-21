@@ -6385,6 +6385,7 @@ void CEditor::OnRender()
 	}
 
 	UI()->FinishCheck();
+	UI()->ClearHotkeys();
 	Input()->Clear();
 }
 
