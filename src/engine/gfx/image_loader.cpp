@@ -1,6 +1,7 @@
 #include "image_loader.h"
 #include <base/log.h>
 #include <base/system.h>
+#include <csetjmp>
 #include <cstdlib>
 
 #include <png.h>
@@ -8,20 +9,22 @@
 struct SLibPNGWarningItem
 {
 	SImageByteBuffer *m_pByteLoader;
-	const char *pFileName;
+	const char *m_pFileName;
+	std::jmp_buf m_Buf;
 };
 
-static void LibPNGError(png_structp png_ptr, png_const_charp error_msg)
+[[noreturn]] static void LibPNGError(png_structp png_ptr, png_const_charp error_msg)
 {
 	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
 	pUserStruct->m_pByteLoader->m_Err = -1;
-	dbg_msg("libpng", "error for file \"%s\": %s", pUserStruct->pFileName, error_msg);
+	dbg_msg("libpng", "error for file \"%s\": %s", pUserStruct->m_pFileName, error_msg);
+	std::longjmp(pUserStruct->m_Buf, 1);
 }
 
 static void LibPNGWarning(png_structp png_ptr, png_const_charp warning_msg)
 {
 	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
-	dbg_msg("libpng", "warning for file \"%s\": %s", pUserStruct->pFileName, warning_msg);
+	dbg_msg("libpng", "warning for file \"%s\": %s", pUserStruct->m_pFileName, warning_msg);
 }
 
 static bool FileMatchesImageType(SImageByteBuffer &ByteLoader)
@@ -125,6 +128,18 @@ static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
 	return Result;
 }
 
+static void ReadImgInfo(png_structrp pPNGStruct, png_infop pPNGInfo, SLibPNGWarningItem &UserErrorStruct)
+{
+	if(!setjmp(UserErrorStruct.m_Buf))
+		png_read_info(pPNGStruct, pPNGInfo);
+}
+
+static void ReadImg(png_structrp pPNGStruct, png_bytepp pRowPointers, SLibPNGWarningItem &UserErrorStruct)
+{
+	if(!setjmp(UserErrorStruct.m_Buf))
+		png_read_image(pPNGStruct, pRowPointers);
+}
+
 bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
 {
 	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -135,6 +150,9 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 		return false;
 	}
 
+	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName};
+	png_set_error_fn(pPNGStruct, &UserErrorStruct, LibPNGError, LibPNGWarning);
+
 	png_infop pPNGInfo = png_create_info_struct(pPNGStruct);
 
 	if(pPNGInfo == NULL)
@@ -143,9 +161,6 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 		dbg_msg("png", "libpng internal failure: png_create_info_struct failed.");
 		return false;
 	}
-
-	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName};
-	png_set_error_fn(pPNGStruct, &UserErrorStruct, LibPNGError, LibPNGWarning);
 
 	if(!FileMatchesImageType(ByteLoader))
 	{
@@ -159,7 +174,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 
 	png_set_sig_bytes(pPNGStruct, 8);
 
-	png_read_info(pPNGStruct, pPNGInfo);
+	ReadImgInfo(pPNGStruct, pPNGInfo, UserErrorStruct);
 
 	if(ByteLoader.m_Err != 0)
 	{
@@ -215,7 +230,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 				pRowPointers[y] = new png_byte[BytesInRow];
 			}
 
-			png_read_image(pPNGStruct, pRowPointers);
+			ReadImg(pPNGStruct, pRowPointers, UserErrorStruct);
 
 			if(ByteLoader.m_Err == 0)
 				pImageBuff = (uint8_t *)malloc((size_t)Height * (size_t)Width * (size_t)ColorChannelCount * sizeof(uint8_t));
