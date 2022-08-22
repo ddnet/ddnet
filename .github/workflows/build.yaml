@@ -33,7 +33,7 @@ jobs:
             CXXFLAGS: -Werror
             GTEST_FILTER: -*SQLite*
         - os: macOS-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DPREFER_BUNDLED_LIBS=ON
           package-file: "*-macos.dmg"
           fancy: false
           env:
