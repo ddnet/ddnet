@@ -102,6 +102,7 @@ CLayerGroup::CLayerGroup()
 	m_OffsetY = 0;
 	m_ParallaxX = 100;
 	m_ParallaxY = 100;
+	m_ParallaxZoom = 100;
 
 	m_UseClipping = 0;
 	m_ClipX = 0;
@@ -131,9 +132,11 @@ void CLayerGroup::Convert(CUIRect *pRect)
 
 void CLayerGroup::Mapping(float *pPoints)
 {
+	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? m_ParallaxZoom : 100.0f;
+
 	m_pMap->m_pEditor->RenderTools()->MapScreenToWorld(
 		m_pMap->m_pEditor->m_WorldOffsetX, m_pMap->m_pEditor->m_WorldOffsetY,
-		m_ParallaxX, m_ParallaxY, m_OffsetX, m_OffsetY,
+		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
 		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->m_WorldZoom, pPoints);
 
 	pPoints[0] += m_pMap->m_pEditor->m_EditorOffsetX;
@@ -880,6 +883,16 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
 
+		// zoom button
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_ZoomButton = 0;
+		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, 0, "Toggles preview of how layers will be zoomed in-game"))
+		{
+			m_PreviewZoom = !m_PreviewZoom;
+		}
+
+		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+
 		// grid button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
@@ -1250,8 +1263,8 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	float CenterX = fx2f(pSource->m_Position.x);
 	float CenterY = fx2f(pSource->m_Position.y);
 
-	float dx = (CenterX - wx) / m_WorldZoom;
-	float dy = (CenterY - wy) / m_WorldZoom;
+	float dx = (CenterX - wx) / m_MouseWScale;
+	float dy = (CenterY - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
@@ -1343,7 +1356,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		Graphics()->SetColor(0, 1, 0, 1);
 	}
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1371,8 +1384,8 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	float CenterX = fx2f(pQuad->m_aPoints[4].x);
 	float CenterY = fx2f(pQuad->m_aPoints[4].y);
 
-	float dx = (CenterX - wx) / m_WorldZoom;
-	float dy = (CenterY - wy) / m_WorldZoom;
+	float dx = (CenterX - wx) / m_MouseWScale;
+	float dy = (CenterY - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
@@ -1382,7 +1395,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	if(IsQuadSelected(Index))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_WorldZoom, 7.0f * m_WorldZoom);
+		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -1598,7 +1611,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	else
 		Graphics()->SetColor(0, 1, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1612,8 +1625,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	float px = fx2f(pQuad->m_aPoints[V].x);
 	float py = fx2f(pQuad->m_aPoints[V].y);
 
-	float dx = (px - wx) / m_WorldZoom;
-	float dy = (py - wy) / m_WorldZoom;
+	float dx = (px - wx) / m_MouseWScale;
+	float dy = (py - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
@@ -1621,7 +1634,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	if(IsQuadSelected(QuadIndex) && m_SelectedPoints & (1 << V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_WorldZoom, 7.0f * m_WorldZoom);
+		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -1805,7 +1818,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	else
 		Graphics()->SetColor(1, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1841,7 +1854,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
 
 	bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
-	float SnapRadius = 4.f * m_WorldZoom;
+	float SnapRadius = 4.f * m_MouseWScale;
 
 	vec2 Mouse = vec2(UI()->MouseWorldX(), UI()->MouseWorldY());
 	vec2 Point = Mouse;
@@ -2042,14 +2055,14 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	IGraphics::CQuadItem aMarkers[4];
 
 	for(int i = 0; i < m_QuadKnifeCount; i++)
-		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_MouseWScale, 5.f * m_MouseWScale);
 
 	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsDraw(aMarkers, m_QuadKnifeCount);
 
 	if(ValidPosition)
 	{
-		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_WorldZoom, 5.f * m_WorldZoom);
+		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_MouseWScale, 5.f * m_MouseWScale);
 		Graphics()->QuadsDraw(&MarkerCurrent, 1);
 	}
 
@@ -2196,8 +2209,8 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	float CenterX = fx2f(pQuad->m_aPoints[4].x) + fx2f(pEnvelope->m_vPoints[PIndex].m_aValues[0]);
 	float CenterY = fx2f(pQuad->m_aPoints[4].y) + fx2f(pEnvelope->m_vPoints[PIndex].m_aValues[1]);
 
-	float dx = (CenterX - wx) / m_WorldZoom;
-	float dy = (CenterY - wy) / m_WorldZoom;
+	float dx = (CenterX - wx) / m_MouseWScale;
+	float dy = (CenterY - wy) / m_MouseWScale;
 	if(dx * dx + dy * dy < 50.0f && UI()->CheckActiveItem(nullptr))
 	{
 		UI()->SetHotItem(pID);
@@ -2289,7 +2302,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	else
 		Graphics()->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_WorldZoom, 5.0f * m_WorldZoom);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2723,6 +2736,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						m_Brush.m_OffsetY += pGroup->m_OffsetY;
 						m_Brush.m_ParallaxX = pGroup->m_ParallaxX;
 						m_Brush.m_ParallaxY = pGroup->m_ParallaxY;
+						m_Brush.m_ParallaxZoom = pGroup->m_ParallaxZoom;
 						m_Brush.Render();
 						float w, h;
 						m_Brush.GetSize(&w, &h);
@@ -2799,13 +2813,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		{
 			if(s_Operation == OP_PAN_WORLD)
 			{
-				m_WorldOffsetX -= m_MouseDeltaX * m_WorldZoom;
-				m_WorldOffsetY -= m_MouseDeltaY * m_WorldZoom;
+				m_WorldOffsetX -= m_MouseDeltaX * m_MouseWScale;
+				m_WorldOffsetY -= m_MouseDeltaY * m_MouseWScale;
 			}
 			else if(s_Operation == OP_PAN_EDITOR)
 			{
-				m_EditorOffsetX -= m_MouseDeltaX * m_WorldZoom;
-				m_EditorOffsetY -= m_MouseDeltaY * m_WorldZoom;
+				m_EditorOffsetX -= m_MouseDeltaX * m_MouseWScale;
+				m_EditorOffsetY -= m_MouseDeltaY * m_MouseWScale;
 			}
 
 			// release mouse
@@ -2821,13 +2835,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		{
 			float PanSpeed = 64.0f;
 			if(Input()->KeyPress(KEY_A))
-				m_WorldOffsetX -= PanSpeed * m_WorldZoom;
+				m_WorldOffsetX -= PanSpeed * m_MouseWScale;
 			else if(Input()->KeyPress(KEY_D))
-				m_WorldOffsetX += PanSpeed * m_WorldZoom;
+				m_WorldOffsetX += PanSpeed * m_MouseWScale;
 			if(Input()->KeyPress(KEY_W))
-				m_WorldOffsetY -= PanSpeed * m_WorldZoom;
+				m_WorldOffsetY -= PanSpeed * m_MouseWScale;
 			else if(Input()->KeyPress(KEY_S))
-				m_WorldOffsetY += PanSpeed * m_WorldZoom;
+				m_WorldOffsetY += PanSpeed * m_MouseWScale;
 		}
 	}
 	else if(UI()->CheckActiveItem(s_pEditorID))
@@ -2886,7 +2900,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			RenderTools()->MapScreenToWorld(
 				m_WorldOffsetX, m_WorldOffsetY,
-				100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
+				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
 
 			if(i == 0)
 			{
@@ -2928,7 +2942,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 				RenderTools()->MapScreenToWorld(
 					m_WorldOffsetX, m_WorldOffsetY,
-					100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
+					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
 
 				CUIRect r;
 				r.x = aPoints[0];
@@ -3360,7 +3374,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect View)
 
 					static int s_GroupPopupId = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 230, PopupGroup);
+						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
 
 					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
 						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
@@ -6134,7 +6148,7 @@ void CEditor::ZoomMouseTarget(float ZoomFactor)
 	float aPoints[4];
 	RenderTools()->MapScreenToWorld(
 		m_WorldOffsetX, m_WorldOffsetY,
-		100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
+		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
 
 	float WorldWidth = aPoints[2] - aPoints[0];
 	float WorldHeight = aPoints[3] - aPoints[1];
@@ -6246,6 +6260,8 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	CLayerGroup *pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
+	pGroup->m_CustomParallaxZoom = 0;
+	pGroup->m_ParallaxZoom = 0;
 	CLayerQuads *pLayer = new CLayerQuads;
 	pLayer->m_pEditor = m_pEditor;
 	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
@@ -6415,6 +6431,8 @@ void CEditor::OnUpdate()
 
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
+
+			m_MouseWScale = WorldWidth / Graphics()->WindowWidth();
 
 			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
 			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());

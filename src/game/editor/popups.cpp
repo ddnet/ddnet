@@ -320,6 +320,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		PROP_POS_Y,
 		PROP_PARA_X,
 		PROP_PARA_Y,
+		PROP_CUSTOM_ZOOM,
+		PROP_PARA_ZOOM,
 		PROP_USE_CLIPPING,
 		PROP_CLIP_X,
 		PROP_CLIP_Y,
@@ -334,6 +336,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Custom Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom, PROPTYPE_BOOL, 0, 1},
+		{"Para Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
 		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -364,6 +368,13 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX = NewVal;
 		else if(Prop == PROP_PARA_Y)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY = NewVal;
+		else if(Prop == PROP_CUSTOM_ZOOM)
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = NewVal;
+		else if(Prop == PROP_PARA_ZOOM)
+		{
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = 1;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom = NewVal;
+		}
 		else if(Prop == PROP_POS_X)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
 		else if(Prop == PROP_POS_Y)
@@ -378,6 +389,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
 		else if(Prop == PROP_CLIP_H)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+
+		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->OnEdited();
 	}
 
 	return 0;
