@@ -721,7 +721,7 @@ endif()
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
   set(PLATFORM_CLIENT_LIBS opengl32 winmm)
-  set(PLATFORM_LIBS version ws2_32) # Windows sockets
+  set(PLATFORM_LIBS shlwapi version ws2_32) # Windows sockets
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
@@ -2110,8 +2110,8 @@ if(CLIENT)
     skin.h
     ui.cpp
     ui.h
-    ui_ex.cpp
-    ui_ex.h
+    ui_rect.cpp
+    ui_rect.h
   )
   set_src(GAME_EDITOR GLOB src/game/editor
     auto_map.cpp
@@ -2292,12 +2292,15 @@ if(SERVER)
     databases/connection_pool.h
     databases/mysql.cpp
     databases/sqlite.cpp
+    main.cpp
     name_ban.cpp
     name_ban.h
     register.cpp
     register.h
     server.cpp
     server.h
+    server_logger.cpp
+    server_logger.h
     sql_string_helpers.cpp
     sql_string_helpers.h
     upnp.cpp
@@ -2424,6 +2427,7 @@ if(TOOLS)
     map_convert_07.cpp
     map_diff.cpp
     map_extract.cpp
+    map_find_env.cpp
     map_optimize.cpp
     map_replace_area.cpp
     map_replace_image.cpp
@@ -2863,6 +2867,7 @@ if(CLIENT AND DMGBUILD)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.59.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.59.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.57.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/

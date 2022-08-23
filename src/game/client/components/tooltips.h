@@ -1,10 +1,11 @@
 #ifndef GAME_CLIENT_COMPONENTS_TOOLTIPS_H
 #define GAME_CLIENT_COMPONENTS_TOOLTIPS_H
 
-#include <cstdint>
 #include <game/client/component.h>
-#include <game/client/ui.h>
+#include <game/client/ui_rect.h>
 
+#include <cstdint>
+#include <functional>
 #include <optional>
 #include <unordered_map>
 

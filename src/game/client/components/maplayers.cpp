@@ -1414,7 +1414,8 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Rot = Channels.b / 180.0f * pi;
 		}
 
-		bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || !(Color.a > 0);
+		const bool IsFullyTransparent = Color.a <= 0;
+		bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || IsFullyTransparent;
 
 		if(NeedsFlush)
 		{
@@ -1422,14 +1423,14 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 			QuadsRenderCount = 0;
 			CurQuadOffset = i;
-			if(Color.a == 0)
+			if(IsFullyTransparent)
 			{
 				// since this quad is ignored, the offset is the next quad
 				++CurQuadOffset;
 			}
 		}
 
-		if(Color.a > 0)
+		if(!IsFullyTransparent)
 		{
 			SQuadRenderInfo &QInfo = s_vQuadRenderInfo[QuadsRenderCount++];
 			QInfo.m_Color = Color;
@@ -1561,6 +1562,7 @@ void CMapLayers::OnRender()
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
+		CMapItemGroupEx *pGroupEx = m_pLayers->GetGroupEx(g);
 
 		if(!pGroup)
 		{
@@ -1574,7 +1576,7 @@ void CMapLayers::OnRender()
 		{
 			// set clipping
 			float aPoints[4];
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), m_pLayers->GameGroupEx(), GetCurCamera()->m_Zoom);
 			Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
 			float x0 = (pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
 			float y0 = (pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
@@ -1592,12 +1594,7 @@ void CMapLayers::OnRender()
 				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
 		}
 
-		if((!g_Config.m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
-		{
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
-		}
-		else
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
+		RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, pGroupEx, GetCurCamera()->m_Zoom);
 
 		CTile *pGameTiles = NULL;
 

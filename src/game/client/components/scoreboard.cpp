@@ -57,7 +57,7 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 {
 	float h = 50.0f;
 
-	RenderTools()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 10.0f);
+	Graphics()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 10.0f);
 
 	// render goals
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -87,7 +87,7 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 {
 	// background
-	RenderTools()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 10.0f);
+	Graphics()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 10.0f);
 
 	// Headline
 	y += 10.0f;
@@ -168,12 +168,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	{
 		int Corners;
 		if(upper16 || upper32 || upper24)
-			Corners = CUI::CORNER_R;
+			Corners = IGraphics::CORNER_R;
 		else if(lower16 || lower32 || lower24)
-			Corners = CUI::CORNER_L;
+			Corners = IGraphics::CORNER_L;
 		else
-			Corners = CUI::CORNER_ALL;
-		RenderTools()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), Corners, 17.0f);
+			Corners = IGraphics::CORNER_ALL;
+		Graphics()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), Corners, 17.0f);
 	}
 
 	char aBuf[128] = {0};
@@ -358,10 +358,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
 			int Corners = 0;
 			if(OldDDTeam != DDTeam)
-				Corners |= CUI::CORNER_TL | CUI::CORNER_TR;
+				Corners |= IGraphics::CORNER_TL | IGraphics::CORNER_TR;
 			if(NextDDTeam != DDTeam)
-				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
-			RenderTools()->DrawRect(x - 10.0f, y, w, LineHeight + Spacing, Color, Corners, RoundRadius);
+				Corners |= IGraphics::CORNER_BL | IGraphics::CORNER_BR;
+			Graphics()->DrawRect(x - 10.0f, y, w, LineHeight + Spacing, Color, Corners, RoundRadius);
 
 			if(NextDDTeam != DDTeam)
 			{
@@ -393,7 +393,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// background so it's easy to find the local player or the followed one in spectator mode
 		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
-			RenderTools()->DrawRect(x, y, w - 20.0f, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, RoundRadius);
+			Graphics()->DrawRect(x, y, w - 20.0f, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 		}
 
 		// score
@@ -565,10 +565,10 @@ void CScoreboard::RenderRecordingNotification(float x)
 	float w = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
 
 	// draw the box
-	RenderTools()->DrawRect(x, 0.0f, w + 60.0f, 50.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_B, 15.0f);
+	Graphics()->DrawRect(x, 0.0f, w + 60.0f, 50.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 15.0f);
 
 	// draw the red dot
-	RenderTools()->DrawRect(x + 20, 15.0f, 20.0f, 20.0f, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), CUI::CORNER_ALL, 10.0f);
+	Graphics()->DrawRect(x + 20, 15.0f, 20.0f, 20.0f, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), IGraphics::CORNER_ALL, 10.0f);
 
 	TextRender()->Text(0, x + 50.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 }

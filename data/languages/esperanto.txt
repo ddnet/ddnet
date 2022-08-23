@@ -1,26 +1,5 @@
 ##### translated strings #####
 
-Successfully saved the replay!
-== 
-
-Saving ddnet-settings.cfg failed
-== 
-
-Replay feature is disabled!
-== 
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
- unsupported
-== 
-
-The format of texture %s is not RGBA which will cause visual bugs.
-== 
-
-Preparing demo playback
-== 
-
 Connected
 == Konektita
 
@@ -29,18 +8,6 @@ Loading map file from storage
 
 Loading DDNet Client
 == Ŝargas DDNet
-
-Initializing components
-== 
-
-Initializing assets
-== 
-
-Initializing map logic
-== 
-
-Sending initial client info
-== 
 
 Warning
 == Averto
@@ -57,14 +24,8 @@ Chat
 -Page %d-
 == -Paĝo %d-
 
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
-
 Game paused
 == Paŭzata ludo
-
-Sudden Death
-== 
 
 Warmup
 == Trejnado
@@ -87,14 +48,8 @@ Vote yes
 Vote no
 == Voĉdoni ne
 
-Position:
-== 
-
 Speed:
 == Rapideco:
-
-Angle:
-== 
 
 Spectate
 == Spekti
@@ -102,23 +57,8 @@ Spectate
 Free-View
 == Libera vidado
 
-Server best:
-== 
-
-Personal best:
-== 
-
-Uploading map data to GPU
-== 
-
-Reset
-== 
-
 News
 == Novaĵoj
-
-Demos
-== 
 
 Internet
 == Internet
@@ -153,26 +93,8 @@ Connecting to
 Abort
 == Nuligi
 
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
 Downloading map
 == Elŝutas mapon
-
-Getting game info
-== 
-
-Requesting to join the game
-== 
 
 Disconnected
 == Malkonektita
@@ -182,42 +104,6 @@ Ok
 
 Reconnect in %d sec
 == Rekonektiĝos post %d sek
-
-The server is running a non-standard tuning on a pure game type.
-== 
-
-Delete demo
-== 
-
-Are you sure that you want to delete the demo?
-== 
-
-Rename demo
-== 
-
-Render demo
-== 
-
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Remove friend
-== 
-
-Are you sure that you want to remove the player from your friends list?
-== 
-
-Sound error
-== 
-
-The audio device couldn't be initialised.
-== 
-
-Password incorrect
-== 
 
 Try again
 == Reprovi
@@ -242,15 +128,6 @@ Are you sure that you want to disconnect your dummy?
 
 Welcome to DDNet
 == Bonvenon en DDNet
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
 
 Please enter your nickname below.
 == Bonvolu tajpi vian kromnomon.
@@ -300,20 +177,8 @@ Country / Region
 Error
 == Eraro
 
-Unable to delete the demo
-== 
-
-Unable to rename the demo
-== 
-
 New name:
 == Nova nomo:
-
-Destination file already exist
-== 
-
-Error loading demo
-== 
 
 Show chat
 == Montri la diskutejon
@@ -324,20 +189,11 @@ Use sounds
 Speed
 == Rapideco
 
-Show ingame HUD
-== 
-
-Video name:
-== 
-
 Join Tutorial Server
 == Aliĝi al la lernila servilo
 
 Skip Tutorial
 == Pasi la lernilo
-
-Show DDNet map finishes in server browser
-== 
 
 transmits your player name to info2.ddnet.tw
 == sendas vian ludantnomon al info2.ddnet.tw
@@ -347,9 +203,6 @@ Nickname
 
 Theme
 == Temo
-
-Loading menu images
-== 
 
 AFR
 == AFR
@@ -414,17 +267,8 @@ Refreshing...
 Connect
 == Konektiĝi
 
-Server filter
-== 
-
-Has people playing
-== 
-
 Count players only
 == Nur nombri ludantojn
-
-Server not full
-== 
 
 Show friends only
 == Nur montri amikojn
@@ -432,50 +276,17 @@ Show friends only
 No password
 == Neniu pasvorto
 
-Strict gametype filter
-== 
-
 Game types:
 == Ludtipoj:
-
-Player country:
-== 
-
-Filter connecting players
-== 
-
-Indicate map finish
-== 
-
-Unfinished map
-== 
 
 Countries
 == Landoj
 
-Types
-== 
-
-Reset filter
-== 
-
-Server details
-== 
-
 Favorite
 == Favorati
 
-Leak IP
-== 
-
-Scoreboard
-== 
-
 Friends
 == Amikoj
-
-Remove
-== 
 
 Name
 == Nomo
@@ -489,9 +300,6 @@ Add Friend
 Filter
 == Filtri
 
-Info
-== 
-
 Select a name
 == Elekti nomon
 
@@ -504,71 +312,14 @@ Remove chat
 Close
 == Fermi
 
-Demofile: %s
-== 
-
-Loading demo files
-== 
-
-Parent Folder
-== 
-
 Folder
 == Dosierujo
-
-Invalid Demo
-== 
-
-Demo details
-== 
-
-Created:
-== 
-
-Type:
-== 
-
-Length:
-== 
 
 Version:
 == Versio:
 
-Markers:
-== 
-
 Map:
 == Mapo:
-
-Size:
-== 
-
-%.2f MiB
-== 
-
-%.2f KiB
-== 
-
-Crc:
-== 
-
-Netversion:
-== 
-
-Demo
-== 
-
-Markers
-== 
-
-Length
-== 
-
-Date
-== 
-
-Fetch Info
-== 
 
 Open
 == Malfermi
@@ -577,29 +328,17 @@ Open
 Play
 == Legi
 
-Demos directory
-== 
-
 Delete
 == Forigi
 
 Rename
 == Renomigi
 
-Render
-== 
-
 Connect Dummy
 == Konektigi pupon
 
 Connecting dummy
 == Pupo konektas
-
-Stop record
-== 
-
-Record demo
-== 
 
 Join red
 == Aliĝi al ruĝa taemo
@@ -640,12 +379,6 @@ Game type
 Map
 == Mapo
 
-Score limit
-== 
-
-Time limit
-== 
-
 MOTD
 == MDLT
 
@@ -670,11 +403,462 @@ Vote command:
 Add
 == Aldoni
 
-Loading ghost files
-== 
-
 Time
 == Tempo
+
+Dummy settings
+== Agordoj de la pupo
+
+Skins
+== Haŭtoj
+
+Skin Database
+== Datumbazo de haŭtoj
+
+Skins directory
+== Dosierujo de haŭtoj
+
+Move left
+== Movi maldekstren
+
+Move right
+== Movi dekstren
+
+Jump
+== Salti
+
+Fire
+== Pafi
+
+Hook
+== Hoki
+
+Show others
+== Montri aliaj
+
+Show all
+== Montri ĉiuj
+
+Hammer
+== Martelo
+
+Pistol
+== Pistolo
+
+Laser
+== Lasero
+
+Mouse
+== Muso
+
+Weapon
+== Batalilo
+
+Dummy
+== Pupo
+
+Screen
+== Ekrano
+
+default
+== defaŭlta
+
+auto
+== aŭtomata
+
+Language
+== Lingvo
+
+General
+== Ĝenerala
+
+Appearance
+== Aspekto
+
+Graphics
+== Grafikoj
+
+Sound
+== Sono
+
+DDNet
+== DDNet
+
+Assets
+== Bildoj
+
+DDNet Client needs to be restarted to complete update!
+== Vi devas relanci DDNet por kompletigi la ĝisdatigon.
+
+You must restart the game for all settings to take effect.
+== Vi devas relanci la ludon por aktivigi ĉiujn agordojn.
+
+Show dummy actions
+== Montri la agojn de la pupo
+
+Team message
+== Mesaĝo de teamo
+
+Friend message
+== Mesaĝo de amiko
+
+Normal message
+== Normala mesaĝo
+
+Preview
+== Antaŭrigardilo
+
+A Tee
+== Tejo
+
+DDNet %s is available:
+== DDNet %s estas disponebla:
+
+Update now
+== Ĝisdatigi nun
+
+Updating...
+== Ĝisdatiĝas...
+
+Check now
+== Kontroli nun
+
+Discord
+== Diskordo
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Learn
+== Lerni
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Tutorial
+== Lernilo
+
+Website
+== Retejo
+
+Settings
+== Agordoj
+
+Stop server
+== Halti servilon
+
+Run server
+== Lanci servilon
+
+Editor
+== Redaktilo
+
+[Start menu]
+Play
+== Ludi
+
+DDNet %s is out!
+== DDNet %s estas disponebla!
+
+Downloading %s:
+== Elŝutas %s:
+
+Restart
+== Relanci
+
+Spectators
+== Spektantoj
+
+Red team
+== Ruĝa teamo
+
+Blue team
+== Blua teamo
+
+Follow
+== Sekvi
+
+Deaths
+== Mortoj
+
+1 new mention
+== 1 nova mencio
+
+%d new mentions
+== %d novaj mencioj
+
+9+ new mentions
+== 9+ novaj mencioj
+
+Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
+Replay feature is disabled!
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Sudden Death
+== 
+
+Position:
+== 
+
+Angle:
+== 
+
+Server best:
+== 
+
+Personal best:
+== 
+
+Uploading map data to GPU
+== 
+
+Reset
+== 
+
+Demos
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+The server is running a non-standard tuning on a pure game type.
+== 
+
+Delete demo
+== 
+
+Are you sure that you want to delete the demo?
+== 
+
+Rename demo
+== 
+
+Render demo
+== 
+
+Replace video
+== 
+
+File already exists, do you want to overwrite it?
+== 
+
+Remove friend
+== 
+
+Are you sure that you want to remove the player from your friends list?
+== 
+
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
+Password incorrect
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Unable to delete the demo
+== 
+
+Unable to rename the demo
+== 
+
+Destination file already exist
+== 
+
+Error loading demo
+== 
+
+Show ingame HUD
+== 
+
+Video name:
+== 
+
+Show DDNet map finishes in server browser
+== 
+
+Loading menu images
+== 
+
+Server filter
+== 
+
+Has people playing
+== 
+
+Server not full
+== 
+
+Strict gametype filter
+== 
+
+Player country:
+== 
+
+Filter connecting players
+== 
+
+Indicate map finish
+== 
+
+Unfinished map
+== 
+
+Types
+== 
+
+Reset filter
+== 
+
+Server details
+== 
+
+Leak IP
+== 
+
+Scoreboard
+== 
+
+Remove
+== 
+
+Info
+== 
+
+Demofile: %s
+== 
+
+Loading demo files
+== 
+
+Parent Folder
+== 
+
+Invalid Demo
+== 
+
+Demo details
+== 
+
+Created:
+== 
+
+Type:
+== 
+
+Length:
+== 
+
+Markers:
+== 
+
+Size:
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Crc:
+== 
+
+Netversion:
+== 
+
+Demo
+== 
+
+Markers
+== 
+
+Length
+== 
+
+Date
+== 
+
+Fetch Info
+== 
+
+Demos directory
+== 
+
+Render
+== 
+
+Stop record
+== 
+
+Record demo
+== 
+
+Score limit
+== 
+
+Time limit
+== 
+
+Loading ghost files
+== 
 
 Reload
 == 
@@ -739,9 +923,6 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Dummy settings
-== Agordoj de la pupo
-
 Your skin
 == 
 
@@ -775,32 +956,8 @@ Body
 Feet
 == 
 
-Skins
-== Haŭtoj
-
-Skin Database
-== Datumbazo de haŭtoj
-
-Skins directory
-== Dosierujo de haŭtoj
-
 Loading skin files
 == 
-
-Move left
-== Movi maldekstren
-
-Move right
-== Movi dekstren
-
-Jump
-== Salti
-
-Fire
-== Pafi
-
-Hook
-== Hoki
 
 Hook collisions
 == 
@@ -813,12 +970,6 @@ Zoom out
 
 Default zoom
 == 
-
-Show others
-== Montri aliaj
-
-Show all
-== Montri ĉiuj
 
 Toggle dyncam
 == 
@@ -835,20 +986,11 @@ Dummy copy
 Hammerfly dummy
 == 
 
-Hammer
-== Martelo
-
-Pistol
-== Pistolo
-
 Shotgun
 == 
 
 Grenade
 == 
-
-Laser
-== Lasero
 
 Next weapon
 == 
@@ -945,9 +1087,6 @@ Controller Axis #%d
 Controls
 == 
 
-Mouse
-== Muso
-
 Ingame mouse sens.
 == 
 
@@ -960,17 +1099,11 @@ Controller
 Movement
 == 
 
-Weapon
-== Batalilo
-
 Reset to defaults
 == 
 
 Voting
 == 
-
-Dummy
-== Pupo
 
 Miscellaneous
 == 
@@ -1002,9 +1135,6 @@ V-Sync
 may cause delay
 == 
 
-Screen
-== Ekrano
-
 FSAA samples
 == 
 
@@ -1023,17 +1153,11 @@ UI Color
 Renderer
 == 
 
-default
-== defaŭlta
-
 custom
 == 
 
 Graphics cards
 == 
-
-auto
-== aŭtomata
 
 Play background music
 == 
@@ -1082,33 +1206,6 @@ Map sound volume
 
 Background music volume
 == 
-
-Language
-== Lingvo
-
-General
-== Ĝenerala
-
-Appearance
-== Aspekto
-
-Graphics
-== Grafikoj
-
-Sound
-== Sono
-
-DDNet
-== DDNet
-
-Assets
-== Bildoj
-
-DDNet Client needs to be restarted to complete update!
-== Vi devas relanci DDNet por kompletigi la ĝisdatigon.
-
-You must restart the game for all settings to take effect.
-== Vi devas relanci la ludon por aktivigi ĉiujn agordojn.
 
 Hue
 == 
@@ -1164,9 +1261,6 @@ Show DDRace HUD
 Show jumps indicator
 == 
 
-Show dummy actions
-== Montri la agojn de la pupo
-
 Show player position
 == 
 
@@ -1200,20 +1294,8 @@ System message
 Highlighted message
 == 
 
-Team message
-== Mesaĝo de teamo
-
-Friend message
-== Mesaĝo de amiko
-
-Normal message
-== Normala mesaĝo
-
 Client message
 == 
-
-Preview
-== Antaŭrigardilo
 
 Name plates size
 == 
@@ -1259,9 +1341,6 @@ Nothing hookable
 
 Something hookable
 == 
-
-A Tee
-== Tejo
 
 Normal Color
 == 
@@ -1365,23 +1444,11 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
-DDNet %s is available:
-== DDNet %s estas disponebla:
-
-Update now
-== Ĝisdatigi nun
-
-Updating...
-== Ĝisdatiĝas...
-
 DDNet Client updated!
 == 
 
 No updates available
 == 
-
-Check now
-== Kontroli nun
 
 Entities
 == 
@@ -1401,57 +1468,14 @@ Loading assets
 Assets directory
 == 
 
-Discord
-== Diskordo
-
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
-
-Learn
-== Lerni
-
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
-
-Tutorial
-== Lernilo
-
 Can't find a Tutorial server
 == 
-
-Website
-== Retejo
-
-Settings
-== Agordoj
-
-Stop server
-== Halti servilon
-
-Run server
-== Lanci servilon
 
 Server executable not found, can't run server
 == 
 
-Editor
-== Redaktilo
-
-[Start menu]
-Play
-== Ludi
-
-DDNet %s is out!
-== DDNet %s estas disponebla!
-
-Downloading %s:
-== Elŝutas %s:
-
 Update failed! Check log...
 == 
-
-Restart
-== Relanci
 
 Loading race demo files
 == 
@@ -1461,9 +1485,6 @@ Time limit: %d min
 
 Round
 == 
-
-Spectators
-== Spektantoj
 
 Game over
 == 
@@ -1501,23 +1522,11 @@ Red team wins!
 Blue team wins!
 == 
 
-Red team
-== Ruĝa teamo
-
-Blue team
-== Blua teamo
-
 Loading sound files
 == 
 
-Follow
-== Sekvi
-
 Frags
 == 
-
-Deaths
-== Mortoj
 
 Suicides
 == 
@@ -1539,12 +1548,3 @@ Best
 
 Grabs
 == 
-
-1 new mention
-== 1 nova mencio
-
-%d new mentions
-== %d novaj mencioj
-
-9+ new mentions
-== 9+ novaj mencioj

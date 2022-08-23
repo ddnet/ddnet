@@ -10,8 +10,8 @@
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/client/ui_ex.h>
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 #include <engine/editor.h>
 #include <engine/graphics.h>
@@ -128,6 +128,17 @@ public:
 		m_BrushRefCount = 0;
 	}
 
+	CLayer(const CLayer &Other)
+	{
+		str_copy(m_aName, Other.m_aName, sizeof(m_aName));
+		m_Flags = Other.m_Flags;
+		m_pEditor = Other.m_pEditor;
+		m_Type = Other.m_Type;
+		m_BrushRefCount = 0;
+		m_Visible = true;
+		m_Readonly = false;
+	}
+
 	virtual ~CLayer()
 	{
 	}
@@ -148,6 +159,8 @@ public:
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 
+	virtual CLayer *Duplicate() const = 0;
+
 	virtual void GetSize(float *pWidth, float *pHeight)
 	{
 		*pWidth = 0;
@@ -160,7 +173,6 @@ public:
 
 	bool m_Readonly;
 	bool m_Visible;
-
 	int m_BrushRefCount;
 };
 
@@ -176,6 +188,8 @@ public:
 
 	int m_ParallaxX;
 	int m_ParallaxY;
+	int m_CustomParallaxZoom;
+	int m_ParallaxZoom;
 
 	int m_UseClipping;
 	int m_ClipX;
@@ -199,6 +213,7 @@ public:
 	void GetSize(float *pWidth, float *pHeight) const;
 
 	void DeleteLayer(int Index);
+	void DuplicateLayer(int Index);
 	int SwapLayers(int Index0, int Index1);
 
 	bool IsEmpty() const
@@ -240,6 +255,12 @@ public:
 				return false;
 		}
 	}*/
+
+	void OnEdited()
+	{
+		if(!m_CustomParallaxZoom)
+			m_ParallaxZoom = GetParallaxZoomDefault(m_ParallaxX, m_ParallaxY);
+	}
 
 	void Clear()
 	{
@@ -555,6 +576,7 @@ protected:
 
 public:
 	CLayerTiles(int w, int h);
+	CLayerTiles(const CLayerTiles &Other);
 	~CLayerTiles();
 
 	virtual CTile GetTile(int x, int y);
@@ -580,6 +602,8 @@ public:
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
+
+	CLayer *Duplicate() const override;
 
 	virtual void ShowInfo();
 	int RenderProperties(CUIRect *pToolbox) override;
@@ -638,6 +662,7 @@ class CLayerQuads : public CLayer
 {
 public:
 	CLayerQuads();
+	CLayerQuads(const CLayerQuads &Other);
 	~CLayerQuads();
 
 	void Render(bool QuadPicker = false) override;
@@ -656,6 +681,7 @@ public:
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 
 	void GetSize(float *pWidth, float *pHeight) override;
+	CLayer *Duplicate() const override;
 
 	int m_Image;
 	std::vector<CQuad> m_vQuads;
@@ -685,7 +711,6 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
-	CUIEx m_UIEx;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -709,7 +734,6 @@ public:
 	class ITextRender *TextRender() { return m_pTextRender; }
 	class IStorage *Storage() { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
-	CUIEx *UIEx() { return &m_UIEx; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() :
@@ -773,6 +797,7 @@ public:
 
 		m_GuiActive = true;
 		m_ProofBorders = false;
+		m_PreviewZoom = false;
 
 		m_ShowTileInfo = false;
 		m_ShowDetail = true;
@@ -845,6 +870,7 @@ public:
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
+	bool IsSpecialLayer(const CLayer *pLayer) const;
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
@@ -946,6 +972,8 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 	bool m_ProofBorders;
+	bool m_PreviewZoom;
+	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	float m_MouseX = 0.0f;
 	float m_MouseY = 0.0f;
 	float m_MouseWorldX = 0.0f;
@@ -1021,7 +1049,7 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = nullptr);
 
-	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL);
 	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
@@ -1033,7 +1061,7 @@ public:
 	bool UiPopupExists(void *pID);
 	bool UiPopupOpen();
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = CUI::CORNER_ALL, ColorRGBA *pColor = nullptr);
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr);
 
 	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
 
@@ -1321,6 +1349,7 @@ class CLayerSounds : public CLayer
 {
 public:
 	CLayerSounds();
+	CLayerSounds(const CLayerSounds &Other);
 	~CLayerSounds();
 
 	void Render(bool Tileset = false) override;
@@ -1334,6 +1363,8 @@ public:
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+
+	CLayer *Duplicate() const override;
 
 	int m_Sound;
 	std::vector<CSoundSource> m_vSources;

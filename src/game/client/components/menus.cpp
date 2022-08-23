@@ -152,7 +152,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 
 	if(!MouseInsideColorPicker)
 		Color.a *= UI()->ButtonColorMul(pButtonContainer);
-	RenderTools()->DrawUIRect(pRect, Color, Corners, r);
+	pRect->Draw(Color, Corners, r);
 
 	if(pImageName)
 	{
@@ -188,7 +188,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 5.0f);
+	pRect->Draw(ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER);
@@ -230,7 +230,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 		if(pActiveColor)
 			ColorMenuTab = *pActiveColor;
 
-		RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
+		Rect.Draw(ColorMenuTab, Corners, EdgeRounding);
 	}
 	else
 	{
@@ -240,7 +240,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 			if(pHoverColor)
 				HoverColorMenuTab = *pHoverColor;
 
-			RenderTools()->DrawUIRect(&Rect, HoverColorMenuTab, Corners, EdgeRounding);
+			Rect.Draw(HoverColorMenuTab, Corners, EdgeRounding);
 		}
 		else
 		{
@@ -248,7 +248,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 			if(pDefaultColor)
 				ColorMenuTab = *pDefaultColor;
 
-			RenderTools()->DrawUIRect(&Rect, ColorMenuTab, Corners, EdgeRounding);
+			Rect.Draw(ColorMenuTab, Corners, EdgeRounding);
 		}
 	}
 
@@ -279,9 +279,9 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	if(Checked == 2)
-		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 0.98f, 0.5f, 0.55f), CUI::CORNER_T, 5.0f);
+		pRect->Draw(ColorRGBA(1, 0.98f, 0.5f, 0.55f), IGraphics::CORNER_T, 5.0f);
 	else if(Checked)
-		RenderTools()->DrawUIRect(pRect, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_T, 5.0f);
+		pRect->Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_T, 5.0f);
 	CUIRect t;
 	pRect->VSplitLeft(5.0f, 0, &t);
 	UI()->DoLabel(&t, pText, pRect->h * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
@@ -298,7 +298,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	t.VSplitLeft(5.0f, 0, &t);
 
 	c.Margin(2.0f, &c);
-	RenderTools()->DrawUIRect(&c, ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), CUI::CORNER_ALL, 3.0f);
+	c.Draw(ColorRGBA(1, 1, 1, 0.25f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 3.0f);
 
 	const bool Checkable = *pBoxText == 'X';
 	SLabelProperties Props;
@@ -408,7 +408,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float Lin
 	Button.HSplitTop(2.0f, 0x0, &Button);
 	Button.HSplitBottom(2.0f, &Button, 0x0);
 
-	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, CUI::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
+	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, IGraphics::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
 	{
 		ColorHSLA HSL = color_cast<ColorHSLA>(DefaultColor);
 		*pColorValue = HSL.Pack(false);
@@ -476,7 +476,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 	if(ms_ValueSelectorTextMode && s_pLastTextpID == pID)
 	{
 		static float s_NumberBoxID = 0;
-		UIEx()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, CUI::CORNER_ALL);
+		UI()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, IGraphics::CORNER_ALL);
 
 		UI()->SetActiveItem(&s_NumberBoxID);
 
@@ -556,7 +556,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 			else
 				str_format(aBuf, sizeof(aBuf), "%d", Current);
 		}
-		RenderTools()->DrawUIRect(pRect, *pColor, CUI::CORNER_ALL, Round);
+		pRect->Draw(*pColor, IGraphics::CORNER_ALL, Round);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_CENTER);
 	}
 
@@ -688,7 +688,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			pHomeButtonColorHover = &HomeButtonColorAlertHover;
 		}
 
-		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_HOME], pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
+		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_HOME], pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
 		{
 			m_ShowStart = true;
 			m_DoubleClickIndex = -1;
@@ -704,7 +704,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static CButtonContainer s_NewsButton;
-			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_NEWS]))
+			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_NEWS]))
 			{
 				NewPage = PAGE_NEWS;
 				m_DoubleClickIndex = -1;
@@ -714,7 +714,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static CButtonContainer s_DemosButton;
-			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DEMOS]))
+			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DEMOS]))
 			{
 				DemolistPopulate();
 				NewPage = PAGE_DEMOS;
@@ -725,7 +725,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static CButtonContainer s_InternetButton;
-			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
+			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
@@ -735,7 +735,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static CButtonContainer s_LanButton;
-			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
+			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
@@ -745,7 +745,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
 			static CButtonContainer s_FavoritesButton;
-			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
+			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
@@ -755,7 +755,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
 			static CButtonContainer s_DDNetButton;
-			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DDNET]))
+			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DDNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
 				{
@@ -768,7 +768,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
 			static CButtonContainer s_KoGButton;
-			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_KOG]))
+			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_KOG]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
 				{
@@ -785,7 +785,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_GameButton;
-		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage == PAGE_GAME, &Button, CUI::CORNER_TL))
+		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage == PAGE_GAME, &Button, IGraphics::CORNER_TL))
 			NewPage = PAGE_GAME;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
@@ -816,7 +816,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
 		static CButtonContainer s_CallVoteButton;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, IGraphics::CORNER_TR))
 		{
 			NewPage = PAGE_CALLVOTE;
 			m_ControlPageOpening = true;
@@ -829,7 +829,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_QuitButton;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
-	if(DoButton_MenuTab(&s_QuitButton, "\xEF\x80\x91", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
+	if(DoButton_MenuTab(&s_QuitButton, "\xEF\x80\x91", 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
 	{
 		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
@@ -845,13 +845,13 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
 
-	if(DoButton_MenuTab(&s_SettingsButton, "\xEF\x80\x93", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
+	if(DoButton_MenuTab(&s_SettingsButton, "\xEF\x80\x93", m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_EditorButton;
-	if(DoButton_MenuTab(&s_EditorButton, "\xEF\x81\x84", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
+	if(DoButton_MenuTab(&s_EditorButton, "\xEF\x81\x84", 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
 	{
 		g_Config.m_ClEditor = 1;
 	}
@@ -862,14 +862,14 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
 
-		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x84\xB1", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
+		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x84\xB1", m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = PAGE_DEMOS;
 
 		Box.VSplitRight(10.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_ServerButton;
 
-		if(DoButton_MenuTab(&s_ServerButton, "\xEF\x95\xBD", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
+		if(DoButton_MenuTab(&s_ServerButton, "\xEF\x95\xBD", m_ActivePage == g_Config.m_UiPage, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = g_Config.m_UiPage;
 	}
 
@@ -922,7 +922,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	Graphics()->BlendNormal();
 
 	Graphics()->TextureClear();
-	RenderTools()->DrawUIRect(&Box, ColorRGBA{0, 0, 0, 0.50f}, CUI::CORNER_ALL, 15.0f);
+	Box.Draw(ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
 
 	CUIRect Part;
 
@@ -940,7 +940,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_CENTER);
 
 	if(RenderLoadingBar)
-		RenderTools()->DrawRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f), CUI::CORNER_ALL, 5.0f);
+		Graphics()->DrawRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f), IGraphics::CORNER_ALL, 5.0f);
 
 	Client()->UpdateAndSwap();
 }
@@ -949,7 +949,7 @@ void CMenus::RenderNews(CUIRect MainView)
 {
 	g_Config.m_UiUnreadNews = false;
 
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	MainView.HSplitTop(15.0f, 0, &MainView);
 	MainView.VSplitLeft(15.0f, 0, &MainView);
@@ -982,7 +982,7 @@ void CMenus::OnInit()
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
-	UIEx()->Init(UI(), Kernel(), RenderTools(), m_aInputEvents, &m_NumInputEvents);
+	UI()->InitInputs(m_aInputEvents, &m_NumInputEvents);
 
 	m_RefreshButton.Init(UI(), -1);
 	m_ConnectButton.Init(UI(), -1);
@@ -1097,7 +1097,7 @@ void CMenus::RenderColorPicker()
 
 	// Render
 	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
-	RenderTools()->DrawUIRect(&PickerRect, BackgroundColor, 0, 0);
+	PickerRect.Draw(BackgroundColor, 0, 0);
 
 	CUIRect ColorsArea, HueArea, ValuesHitbox, BottomArea, HSVHRect, HSVSRect, HSVVRect, HEXRect, ALPHARect;
 	PickerRect.Margin(3, &ColorsArea);
@@ -1135,10 +1135,10 @@ void CMenus::RenderColorPicker()
 
 	ColorRGBA BlackColor(0, 0, 0, 0.5f);
 
-	RenderTools()->DrawUIRect(&HueArea, BlackColor, 0, 0);
+	HueArea.Draw(BlackColor, 0, 0);
 	HueArea.Margin(1, &HueArea);
 
-	RenderTools()->DrawUIRect(&ColorsArea, BlackColor, 0, 0);
+	ColorsArea.Draw(BlackColor, 0, 0);
 	ColorsArea.Margin(1, &ColorsArea);
 
 	unsigned int H = ms_ColorPicker.m_HSVColor / (1 << 16);
@@ -1158,14 +1158,14 @@ void CMenus::RenderColorPicker()
 	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
 	vec4 BR(rgb.r, rgb.g, rgb.b, 1.0f);
 
-	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, CUI::CORNER_NONE, 0.0f);
+	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
 
 	TL = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	TR = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	BL = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	BR = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, CUI::CORNER_NONE, 0.0f);
+	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
 
 	// Hue Area
 	static const float s_aColorIndices[7][3] = {
@@ -1188,7 +1188,7 @@ void CMenus::RenderColorPicker()
 		BL = vec4(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
 
 		HuePartialArea.y = HueArea.y + HuePickerOffset * j;
-		RenderTools()->DrawUIRect4(&HuePartialArea, TL, TL, BL, BL, CUI::CORNER_NONE, 0.0f);
+		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
 	}
 
 	//Editboxes Area
@@ -1215,7 +1215,7 @@ void CMenus::RenderColorPicker()
 	// TODO : ALPHA SUPPORT
 	//static int ALPHAID = 0;
 	UI()->DoLabel(&ALPHARect, "A: 255", 10, TEXTALIGN_CENTER);
-	RenderTools()->DrawUIRect(&ALPHARect, ColorRGBA(0, 0, 0, 0.65f), CUI::CORNER_ALL, 5.0f);
+	ALPHARect.Draw(ColorRGBA(0, 0, 0, 0.65f), IGraphics::CORNER_ALL, 5.0f);
 
 	// Logic
 	float PickerX, PickerY;
@@ -1242,9 +1242,9 @@ void CMenus::RenderColorPicker()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(MarkerOutline);
-	RenderTools()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
+	Graphics()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
 	Graphics()->SetColor(color_cast<ColorRGBA, ColorHSVA>(PickerColorHSV));
-	RenderTools()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
+	Graphics()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
 	Graphics()->QuadsEnd();
 
 	// Marker Hue Area
@@ -1257,9 +1257,9 @@ void CMenus::RenderColorPicker()
 	const float HMOColor = PickerColorHSV.x > 0.75f ? 1.0f : 0.0f;
 	ColorRGBA HueMarkerOutline(HMOColor, HMOColor, HMOColor, 1);
 
-	RenderTools()->DrawUIRect(&HueMarker, HueMarkerOutline, CUI::CORNER_ALL, 1.2f);
+	HueMarker.Draw(HueMarkerOutline, IGraphics::CORNER_ALL, 1.2f);
 	HueMarker.Margin(1.2f, &HueMarker);
-	RenderTools()->DrawUIRect(&HueMarker, HueMarkerColor, CUI::CORNER_ALL, 1.2f);
+	HueMarker.Draw(HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
 
 	ms_ColorPicker.m_HSVColor = PickerColorHSV.Pack(false);
 	*ms_ColorPicker.m_pColor = color_cast<ColorHSLA, ColorHSVA>(PickerColorHSV).Pack(false);
@@ -1272,7 +1272,7 @@ int CMenus::Render()
 
 	CUIRect Screen = *UI()->Screen();
 	UI()->MapScreen();
-	UIEx()->ResetMouseSlow();
+	UI()->ResetMouseSlow();
 
 	static int s_Frame = 0;
 	if(s_Frame == 0)
@@ -1510,13 +1510,6 @@ int CMenus::Render()
 			}
 			ExtraAlign = 0;
 		}
-		else if(m_Popup == POPUP_PURE)
-		{
-			pTitle = Localize("Disconnected");
-			pExtraText = Localize("The server is running a non-standard tuning on a pure game type.");
-			pButtonText = Localize("Ok");
-			ExtraAlign = -1;
-		}
 		else if(m_Popup == POPUP_DELETE_DEMO)
 		{
 			pTitle = Localize("Delete demo");
@@ -1618,7 +1611,7 @@ int CMenus::Render()
 			Box.Margin(150.0f, &Box);
 
 		// render the box
-		RenderTools()->DrawUIRect(&Box, BgColor, CUI::CORNER_ALL, 15.0f);
+		Box.Draw(BgColor, IGraphics::CORNER_ALL, 15.0f);
 
 		Box.HSplitTop(20.f, &Part, &Box);
 		Box.HSplitTop(24.f, &Part, &Box);
@@ -1763,7 +1756,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
-			UIEx()->DoEditBox(&g_Config.m_Password, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &s_Offset, true);
+			UI()->DoEditBox(&g_Config.m_Password, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &s_Offset, true);
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
@@ -1826,9 +1819,9 @@ int CMenus::Render()
 				Box.HSplitTop(20.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
-				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+				Part.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 				Part.w = maximum(10.0f, (Part.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
-				RenderTools()->DrawUIRect(&Part, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
+				Part.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 			}
 		}
 		else if(m_Popup == POPUP_LANGUAGE)
@@ -1990,7 +1983,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
-			UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
+			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
@@ -2075,14 +2068,14 @@ int CMenus::Render()
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_SlowDownButton;
-			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
+			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, IGraphics::CORNER_ALL))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_FastForwardButton;
-			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
+			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, IGraphics::CORNER_ALL))
 				IncDemoSpeed = true;
 
 			// speed meter
@@ -2113,7 +2106,7 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
-			UIEx()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
+			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
 		}
 		else if(m_Popup == POPUP_REPLACE_VIDEO)
 		{
@@ -2227,7 +2220,7 @@ int CMenus::Render()
 			static float s_Offset = 0.0f;
 			SUIExEditBoxProperties EditProps;
 			EditProps.m_pEmptyText = Client()->PlayerName();
-			UIEx()->DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps);
+			UI()->DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -2428,7 +2421,7 @@ bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	if(!m_MenuActive)
 		return false;
 
-	UIEx()->ConvertMouseMove(&x, &y, CursorType);
+	UI()->ConvertMouseMove(&x, &y, CursorType);
 
 	m_MousePos.x = clamp(m_MousePos.x + x, 0.f, (float)Graphics()->WindowWidth());
 	m_MousePos.y = clamp(m_MousePos.y + y, 0.f, (float)Graphics()->WindowHeight());
@@ -2528,7 +2521,7 @@ void CMenus::OnRender()
 	{
 		Client()->Disconnect();
 		SetActive(true);
-		m_Popup = POPUP_PURE;
+		PopupMessage(Localize("Disconnected"), Localize("The server is running a non-standard tuning on a pure game type."), Localize("Ok"));
 	}
 
 	if(!IsActive())

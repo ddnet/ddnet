@@ -26,6 +26,7 @@
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
 # 2022-07-04 cheeser0613
+# 2022-08-08 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1418,13 +1419,13 @@ Ingame controller mode
 == 游戏内控制器瞄准模式
 
 Ingame controller sens.
-== 类比摇杆灵敏度（游戏）
+== 摇杆灵敏度（游戏）
 
 UI controller sens.
-== 类比摇杆灵敏度（界面）
+== 摇杆灵敏度（界面）
 
 Controller jitter tolerance
-== 类比摇杆错位容错
+== 摇杆死区
 
 No controller found. Plug in a controller and restart the game.
 == 未检测到任何控制器。请尝试重新连接控制器并重启游戏。
@@ -1439,16 +1440,16 @@ Aim bind
 == 操作轴绑定
 
 Controller Axis #%d
-== 类比摇杆 #%d
+== 摇杆 #%d
 
 Mouse
-== 滑鼠
+== 鼠标
 
 Ingame mouse sens.
-== 滑鼠灵敏度（游戏）
+== 鼠标灵敏度（游戏）
 
 UI mouse sens.
-== 滑鼠灵敏度（界面）
+== 鼠标灵敏度（界面）
 
 Controller
 == 控制器
@@ -1481,106 +1482,106 @@ Extras
 == 其他
 
 Preparing demo playback
-== 
+== 正在准备回放
 
 Connected
-== 
+== 连接成功
 
 Loading map file from storage
-== 
+== 正在从硬盘中加载地图文件
+
+Why are you slowmo replaying to read this?
+== 所以你为什么要慢速回放来看这个
 
 Initializing components
-== 
+== 正在初始化游戏引擎
 
 Initializing assets
-== 
+== 正在初始化资源
 
 Initializing map logic
-== 
+== 正在初始化地图逻辑
 
 Sending initial client info
-== 
+== 正在发送初始客户端信息
 
 Uploading map data to GPU
-== 
+== 正在将地图数据传输至显卡
 
 Getting game info
-== 
+== 正在获取游戏信息
 
 Requesting to join the game
-== 
-
-Sending intial client info
-== 
+== 正在请求加入游戏
 
 Loading menu images
-== 
+== 正在加载主菜单图片
 
 Loading demo files
-== 
+== 正在加载回放文件
 
 Loading ghost files
-== 
+== 正在加载影子文件
 
 Loading skin files
-== 
+== 正在加载皮肤文件
 
 Appearance
-== 
+== 游戏界面
 
 Name Plate
-== 
+== 昵称板块
 
 Hook Collisions
-== 
+== 瞄准辅助
 
 Show health, shields and ammo
-== 
+== 显示生命、护甲与弹药栏
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== 显示客户端 IDs （计分板中）
 
 Show DDRace HUD
-== 
+== 显示 DDRace HUD
 
 Show jumps indicator
-== 
+== 显示可跳跃次数
 
 Show hook strength indicator
-== 
+== 显示对其他玩家的钩索强度
 
 Hook collision line
-== 
+== 瞄准辅助线
 
 Hook collision line width
-== 
+== 辅助线宽度
 
 Hook collision line opacity
-== 
+== 辅助线不透明度
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== 辅助线颜色（当瞄准以下实体物时）：
 
 Your movements are not taken into account when calculating the line colors
-== 
+== 移动所造成的瞄准偏移将不计入考量
 
 Nothing hookable
-== 
+== 未瞄准任何实体物
 
 Something hookable
-== 
+== 可钩索的方块
 
 A Tee
-== 
+== 其他玩家
 
 Loading assets
-== 
+== 正在加载资源
 
 Loading race demo files
-== 
+== 正在加载回放文件
 
 Loading sound files
-== 
+== 正在加载声音文件

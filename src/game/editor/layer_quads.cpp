@@ -14,6 +14,13 @@ CLayerQuads::CLayerQuads()
 	m_Image = -1;
 }
 
+CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
+	CLayer(Other)
+{
+	m_Image = Other.m_Image;
+	m_vQuads = Other.m_vQuads;
+}
+
 CLayerQuads::~CLayerQuads() = default;
 
 void CLayerQuads::Render(bool QuadPicker)
@@ -254,4 +261,9 @@ void CLayerQuads::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 		Func(&Quad.m_PosEnv);
 		Func(&Quad.m_ColorEnv);
 	}
+}
+
+CLayer *CLayerQuads::Duplicate() const
+{
+	return new CLayerQuads(*this);
 }

@@ -52,8 +52,9 @@ public:
 	float GetProximityRadius() const { return m_ProximityRadius; }
 
 	void Destroy() { delete this; }
+	virtual void PreTick() {}
 	virtual void Tick() {}
-	virtual void TickDefered() {}
+	virtual void TickDeferred() {}
 
 	bool GameLayerClipped(vec2 CheckPos);
 	float m_ProximityRadius;

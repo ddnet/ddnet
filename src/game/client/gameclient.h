@@ -99,6 +99,8 @@ public:
 	bool m_HudHealthArmor;
 	bool m_HudAmmo;
 	bool m_HudDDRace;
+
+	bool m_NoWeakHookAndBounce;
 };
 
 class CSnapEntities

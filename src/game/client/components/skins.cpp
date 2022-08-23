@@ -65,6 +65,9 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	str_copy(aNameWithoutPng, pName);
 	aNameWithoutPng[str_length(aNameWithoutPng) - 4] = 0;
 
+	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(aNameWithoutPng))
+		return 0;
+
 	// Don't add duplicate skins (one from user's config directory, other from
 	// client itself)
 	for(int i = 0; i < pSelf->Num(); i++)
@@ -154,7 +157,6 @@ int CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	}
 
 	CSkin Skin;
-	Skin.m_IsVanilla = IsVanillaSkin(pName);
 	Skin.m_OriginalSkin.m_Body = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_BODY]);
 	Skin.m_OriginalSkin.m_BodyOutline = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_BODY_OUTLINE]);
 	Skin.m_OriginalSkin.m_Feet = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_FOOT]);
@@ -355,7 +357,6 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
-		DummySkin.m_IsVanilla = true;
 		str_copy(DummySkin.m_aName, "dummy");
 		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 		m_vSkins.push_back(DummySkin);

@@ -1822,6 +1822,15 @@ int fs_storage_path(const char *appname, char *path, int max);
 int fs_is_dir(const char *path);
 
 /*
+    Function: fs_is_relative_path
+        Checks whether a given path is relative or absolute.
+
+    Returns:
+        Returns 1 if relative, 0 if absolute.
+*/
+int fs_is_relative_path(const char *path);
+
+/*
 	Function: fs_chdir
 		Changes current working directory
 
@@ -2505,6 +2514,19 @@ public:
 		cmdline_free(m_Argc, m_ppArgv);
 	}
 };
+
+#if defined(CONF_FAMILY_WINDOWS)
+/**
+ * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
+ * which may be necessary for using the open_file and open_link functions.
+ */
+class CWindowsComLifecycle
+{
+public:
+	CWindowsComLifecycle();
+	~CWindowsComLifecycle();
+};
+#endif
 
 /**
  * Copies a string to a fixed-size array of chars.

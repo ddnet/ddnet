@@ -38,7 +38,7 @@ void CMenus::RenderGame(CUIRect MainView)
 {
 	CUIRect Button, ButtonBar, ButtonBar2;
 	MainView.HSplitTop(45.0f, &ButtonBar, &MainView);
-	RenderTools()->DrawUIRect(&ButtonBar, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	ButtonBar.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	// button bar
 	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
@@ -70,7 +70,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	static CButtonContainer s_DummyButton;
 	if(!Client()->DummyAllowed())
 	{
-		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button, nullptr, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(1.0f, 0.5f, 0.5f, 0.75f), vec4(1, 0.5f, 0.5f, 0.5f));
+		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(1.0f, 0.5f, 0.5f, 0.75f), vec4(1, 0.5f, 0.5f, 0.5f));
 	}
 	else if(DummyConnecting)
 	{
@@ -209,11 +209,11 @@ void CMenus::RenderGame(CUIRect MainView)
 void CMenus::RenderPlayers(CUIRect MainView)
 {
 	CUIRect Button, Button2, ButtonBar, Options, Player;
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	// player options
 	MainView.Margin(10.0f, &Options);
-	RenderTools()->DrawUIRect(&Options, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+	Options.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 	Options.Margin(10.0f, &Options);
 	Options.HSplitTop(50.0f, &Button, &Options);
 	UI()->DoLabel(&Button, Localize("Player options"), 34.0f, TEXTALIGN_LEFT);
@@ -278,7 +278,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			continue;
 
 		if(Count % 2 == 1)
-			RenderTools()->DrawUIRect(&Item.m_Rect, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 10.0f);
+			Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		Item.m_Rect.VSplitRight(300.0f, &Player, &Item.m_Rect);
 
 		// player info
@@ -359,7 +359,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	Client()->GetServerInfo(&CurrentServerInfo);
 
 	// render background
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	CUIRect View, ServerInfo, GameInfo, Motd;
 
@@ -374,7 +374,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	// serverinfo
 	View.HSplitTop(View.h / 2 - 5.0f, &ServerInfo, &Motd);
 	ServerInfo.VSplitLeft(View.w / 2 - 5.0f, &ServerInfo, &GameInfo);
-	RenderTools()->DrawUIRect(&ServerInfo, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
+	ServerInfo.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 
 	ServerInfo.Margin(5.0f, &ServerInfo);
 
@@ -418,7 +418,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	// gameinfo
 	GameInfo.VSplitLeft(10.0f, 0x0, &GameInfo);
-	RenderTools()->DrawUIRect(&GameInfo, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
+	GameInfo.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 
 	GameInfo.Margin(5.0f, &GameInfo);
 
@@ -451,7 +451,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	// motd
 	Motd.HSplitTop(10.0f, 0, &Motd);
-	RenderTools()->DrawUIRect(&Motd, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_ALL, 10.0f);
+	Motd.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 	Motd.Margin(5.0f, &Motd);
 	y = 0.0f;
 	x = 5.0f;
@@ -565,9 +565,9 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// render background
 	CUIRect Bottom, RconExtension, TabBar, Button;
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
-	RenderTools()->DrawUIRect(&Bottom, ms_ColorTabbarActive, 0, 10.0f);
+	Bottom.Draw(ms_ColorTabbarActive, 0, 10.0f);
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
 	if(Client()->RconAuthed())
@@ -633,7 +633,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				EditProps.m_SelectText = true;
 			}
 			EditProps.m_pEmptyText = Localize("Search");
-			UIEx()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps);
+			UI()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
 		}
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
@@ -680,7 +680,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&m_aCallvoteReason);
-		UIEx()->DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_ALL);
+		UI()->DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL);
 
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
@@ -751,11 +751,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 				static float s_OffsetDesc = 0.0f;
-				UIEx()->DoEditBox(&s_aVoteDescription, &Button, s_aVoteDescription, sizeof(s_aVoteDescription), 14.0f, &s_OffsetDesc, false, CUI::CORNER_ALL);
+				UI()->DoEditBox(&s_aVoteDescription, &Button, s_aVoteDescription, sizeof(s_aVoteDescription), 14.0f, &s_OffsetDesc, false, IGraphics::CORNER_ALL);
 
 				Bottom.VMargin(20.0f, &Button);
 				static float s_OffsetCmd = 0.0f;
-				UIEx()->DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, CUI::CORNER_ALL);
+				UI()->DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, IGraphics::CORNER_ALL);
 			}
 		}
 	}
@@ -769,7 +769,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	int Page = g_Config.m_UiPage;
 	int NewPage = -1;
 
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	Box.HSplitTop(5.0f, &MainView, &MainView);
 	Box.HSplitTop(24.0f, &Box, &MainView);
@@ -815,7 +815,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	Box.VSplitLeft(110.0f, &Button, &Box);
 	static CButtonContainer s_KoGButton;
-	if(DoButton_MenuTab(&s_KoGButton, "KoG", Page == PAGE_KOG, &Button, CUI::CORNER_BR))
+	if(DoButton_MenuTab(&s_KoGButton, "KoG", Page == PAGE_KOG, &Button, IGraphics::CORNER_BR))
 	{
 		if(Page != PAGE_KOG)
 		{
@@ -920,7 +920,7 @@ void CMenus::DeleteGhostItem(int Index)
 void CMenus::RenderGhost(CUIRect MainView)
 {
 	// render background
-	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_B, 10.0f);
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	MainView.HSplitTop(10.0f, 0, &MainView);
 	MainView.HSplitBottom(5.0f, &MainView, 0);
@@ -934,7 +934,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.HSplitBottom(28.0f, &View, &Status);
 
 	// split of the scrollbar
-	RenderTools()->DrawUIRect(&Headers, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_T, 5.0f);
+	Headers.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
 	Headers.VSplitRight(20.0f, &Headers, 0);
 
 	struct CColumn
@@ -975,13 +975,13 @@ void CMenus::RenderGhost(CUIRect MainView)
 	for(int i = 0; i < NumCols; i++)
 		DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), 0, &s_aCols[i].m_Rect);
 
-	RenderTools()->DrawUIRect(&View, ColorRGBA(0, 0, 0, 0.15f), 0, 0);
+	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	CUIRect Scroll;
 	View.VSplitRight(20.0f, &View, &Scroll);
 
 	static float s_ScrollValue = 0;
-	s_ScrollValue = UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 	int NumGhosts = m_vGhosts.size();
 	static int s_SelectedIndex = 0;
@@ -1011,7 +1011,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			{
 				CUIRect r = Row;
 				r.Margin(1.5f, &r);
-				RenderTools()->DrawUIRect(&r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
+				r.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
 			}
 
 			if(UI()->DoButtonLogic(pItem, 0, &Row))
@@ -1080,7 +1080,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	if(NewSelected != -1)
 		s_SelectedIndex = NewSelected;
 
-	RenderTools()->DrawUIRect(&Status, ColorRGBA(1, 1, 1, 0.25f), CUI::CORNER_B, 5.0f);
+	Status.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
 
 	CUIRect Button;

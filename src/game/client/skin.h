@@ -8,8 +8,6 @@
 // do this better and nicer
 struct CSkin
 {
-	bool m_IsVanilla;
-
 	struct SSkinTextures
 	{
 		IGraphics::CTextureHandle m_Body;

@@ -10,6 +10,7 @@
 # 2022-05-16 CHaBek
 # 2022-06-17 CHaBek
 # 2022-07-05 CHaBek
+# 2022-08-17 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -1461,106 +1462,106 @@ Extras
 == 기타
 
 Preparing demo playback
-== 
+== 데모 재생 준비 중
 
 Connected
-== 
+== 연결됨
 
 Loading map file from storage
-== 
+== 저장공간에서 맵 파일 로딩 중
+
+Why are you slowmo replaying to read this?
+== 왜 이것을 슬로우 모션으로 보려고 하십니까?
 
 Initializing components
-== 
+== 구성요소 초기화 중
 
 Initializing assets
-== 
+== 에셋 초기화 중
 
 Initializing map logic
-== 
+== 맵 로직 초기화 중
 
 Sending initial client info
-== 
+== 초기 클라이언트 정보 전송 중
 
 Uploading map data to GPU
-== 
+== 맵 데이터를 GPU에 업로드 중
 
 Getting game info
-== 
+== 게임 정보 가져오는 중
 
 Requesting to join the game
-== 
-
-Sending intial client info
-== 
+== 게임 참가 요청 중
 
 Loading menu images
-== 
+== 메뉴 이미지 로딩 중
 
 Loading demo files
-== 
+== 데모 파일 로딩 중
 
 Loading ghost files
-== 
+== 고스트 파일 로딩 중
 
 Loading skin files
-== 
+== 스킨 파일 로딩 중
 
 Appearance
-== 
+== 표시
 
 Name Plate
-== 
+== 이름 표시
 
 Hook Collisions
-== 
+== 갈고리 보조선
 
 Show health, shields and ammo
-== 
+== 체력과 방패, 탄약 표시
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== 점수판에 클라이언트 ID 표시
 
 Show DDRace HUD
-== 
+== DDRace HUD 표시
 
 Show jumps indicator
-== 
+== 점프 상태 표시
 
 Show hook strength indicator
-== 
+== 갈고리 세기 표시
 
 Hook collision line
-== 
+== 갈고리 보조선
 
 Hook collision line width
-== 
+== 갈고리 보조선 폭
 
 Hook collision line opacity
-== 
+== 갈고리 보조선 불투명도
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== 갈고리 보조선 색상:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== 색상 계산에 이동은 고려하지 않습니다.
 
 Nothing hookable
-== 
+== 갈고리 불가
 
 Something hookable
-== 
+== 갈고리 가능
 
 A Tee
-== 
+== Tee 대상
 
 Loading assets
-== 
+== 에셋 로딩 중
 
 Loading race demo files
-== 
+== 레이스 데모 파일 로딩 중
 
 Loading sound files
-== 
+== 소리 파일 로딩 중

@@ -84,53 +84,47 @@ static const ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
 void CGraph::Init(float Min, float Max)
 {
-	m_MinRange = m_Min = Min;
-	m_MaxRange = m_Max = Max;
+	SetMin(Min);
+	SetMax(Max);
 	m_Index = 0;
 }
 
-void CGraph::ScaleMax()
+void CGraph::SetMin(float Min)
 {
-	int i = 0;
-	m_Max = m_MaxRange;
-	for(i = 0; i < MAX_VALUES; i++)
-	{
-		if(m_aValues[i] > m_Max)
-			m_Max = m_aValues[i];
-	}
+	m_MinRange = m_Min = Min;
 }
 
-void CGraph::ScaleMin()
+void CGraph::SetMax(float Max)
 {
-	int i = 0;
+	m_MaxRange = m_Max = Max;
+}
+
+void CGraph::Scale()
+{
 	m_Min = m_MinRange;
-	for(i = 0; i < MAX_VALUES; i++)
+	m_Max = m_MaxRange;
+	for(auto Value : m_aValues)
 	{
-		if(m_aValues[i] < m_Min)
-			m_Min = m_aValues[i];
+		if(Value > m_Max)
+			m_Max = Value;
+		else if(Value < m_Min)
+			m_Min = Value;
 	}
 }
 
 void CGraph::Add(float v, float r, float g, float b)
 {
-	m_Index = (m_Index + 1) & (MAX_VALUES - 1);
-	m_aValues[m_Index] = v;
-	m_aColors[m_Index][0] = r;
-	m_aColors[m_Index][1] = g;
-	m_aColors[m_Index][2] = b;
+	m_Index = (m_Index + 1) % MAX_VALUES;
+	InsertAt(m_Index, v, r, g, b);
 }
 
-bool CGraph::InsertAt(int i, float v, float r, float g, float b)
+void CGraph::InsertAt(size_t Index, float v, float r, float g, float b)
 {
-	if(i < 0 || i > MAX_VALUES - 1)
-	{
-		return false;
-	}
-	m_aValues[i] = v;
-	m_aColors[i][0] = r;
-	m_aColors[i][1] = g;
-	m_aColors[i][2] = b;
-	return true;
+	dbg_assert(Index < MAX_VALUES, "Index out of bounds");
+	m_aValues[Index] = v;
+	m_aColors[Index][0] = r;
+	m_aColors[Index][1] = g;
+	m_aColors[Index][2] = b;
 }
 
 void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
@@ -150,24 +144,24 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 	IGraphics::CLineItem LineItem(x, y + h / 2, x + w, y + h / 2);
 	pGraphics->LinesDraw(&LineItem, 1);
 	pGraphics->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
-	IGraphics::CLineItem Array[2] = {
+	IGraphics::CLineItem aLineItems[2] = {
 		IGraphics::CLineItem(x, y + (h * 3) / 4, x + w, y + (h * 3) / 4),
 		IGraphics::CLineItem(x, y + h / 4, x + w, y + h / 4)};
-	pGraphics->LinesDraw(Array, 2);
+	pGraphics->LinesDraw(aLineItems, 2);
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
 		float a0 = (i - 1) / (float)MAX_VALUES;
 		float a1 = i / (float)MAX_VALUES;
-		int i0 = (m_Index + i - 1) & (MAX_VALUES - 1);
-		int i1 = (m_Index + i) & (MAX_VALUES - 1);
+		int i0 = (m_Index + i - 1) % MAX_VALUES;
+		int i1 = (m_Index + i) % MAX_VALUES;
 
 		float v0 = (m_aValues[i0] - m_Min) / (m_Max - m_Min);
 		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
 
-		IGraphics::CColorVertex ArrayV[2] = {
+		IGraphics::CColorVertex aColorVertices[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(ArrayV, 2);
+		pGraphics->SetColorVertex(aColorVertices, 2);
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
 	}
@@ -1143,14 +1137,11 @@ void CClient::DebugRender()
 		float sp = Graphics()->ScreenWidth() / 100.0f;
 		float x = Graphics()->ScreenWidth() - w - sp;
 
-		m_FpsGraph.ScaleMax();
-		m_FpsGraph.ScaleMin();
+		m_FpsGraph.Scale();
 		m_FpsGraph.Render(Graphics(), m_DebugFont, x, sp * 5, w, h, "FPS");
-		m_InputtimeMarginGraph.ScaleMin();
-		m_InputtimeMarginGraph.ScaleMax();
+		m_InputtimeMarginGraph.Scale();
 		m_InputtimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp, w, h, "Prediction Margin");
-		m_GametimeMarginGraph.ScaleMin();
-		m_GametimeMarginGraph.ScaleMax();
+		m_GametimeMarginGraph.Scale();
 		m_GametimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp + h + sp, w, h, "Gametime Margin");
 	}
 }
@@ -4585,6 +4576,8 @@ int main(int argc, const char **argv)
 {
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
+#elif defined(CONF_FAMILY_WINDOWS)
+	CWindowsComLifecycle WindowsComLifecycle;
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;

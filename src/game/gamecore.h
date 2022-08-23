@@ -10,6 +10,7 @@
 #include <set>
 #include <vector>
 
+#include <engine/console.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
@@ -40,6 +41,8 @@ public:
 
 class CTuningParams
 {
+	static const char *ms_apNames[];
+
 public:
 	CTuningParams()
 	{
@@ -48,8 +51,6 @@ public:
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
 	}
-
-	static const char *ms_apNames[];
 
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) CTuneParam m_##Name;
 #include "tuning.h"
@@ -63,6 +64,8 @@ public:
 	bool Set(const char *pName, float Value);
 	bool Get(int Index, float *pValue) const;
 	bool Get(const char *pName, float *pValue) const;
+	static const char *Name(int Index) { return ms_apNames[Index]; }
+	int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
 };
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
@@ -269,7 +272,8 @@ public:
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
 	void Reset();
-	void Tick(bool UseInput);
+	void TickDeferred();
+	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();
 
 	void Read(const CNetObj_CharacterCore *pObjCore);

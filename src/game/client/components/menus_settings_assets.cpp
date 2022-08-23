@@ -396,7 +396,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	static CButtonContainer s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
 
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, CUI::CORNER_L, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, IGraphics::CORNER_L, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_ENTITIES;
 	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_GAME], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_GAME;
@@ -406,7 +406,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		s_CurCustomTab = ASSETS_TAB_PARTICLES;
 	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_HUD], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_HUD;
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, CUI::CORNER_R, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, IGraphics::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = ASSETS_TAB_EXTRAS;
 
 	auto LoadStartTime = time_get_nanoseconds();
@@ -659,7 +659,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			EditProps.m_SelectText = true;
 		}
 		EditProps.m_pEmptyText = Localize("Search");
-		if(UIEx()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, CUI::CORNER_ALL, EditProps))
+		if(UI()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
 			gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 
@@ -689,14 +689,14 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		Storage()->CreateFolder(aBufFull, IStorage::TYPE_SAVE);
 		if(!open_file(aBuf))
 		{
-			dbg_msg("menus", "couldn't open file");
+			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_AssetsReloadBtnID;
-	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, nullptr, CUI::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		ClearCustomItems(s_CurCustomTab);
 	}

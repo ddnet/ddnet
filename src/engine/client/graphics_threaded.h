@@ -1015,8 +1015,8 @@ public:
 
 	void SetColorVertex(const CColorVertex *pArray, int Num) override;
 	void SetColor(float r, float g, float b, float a) override;
-	void SetColor(ColorRGBA rgb) override;
-	void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) override;
+	void SetColor(ColorRGBA Color) override;
+	void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) override;
 
 	// go through all vertices and change their color (only works for quads)
 	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
@@ -1126,6 +1126,13 @@ public:
 
 	void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) override;
 	void QuadsText(float x, float y, float Size, const char *pText) override;
+
+	void DrawRectExt(float x, float y, float w, float h, float r, int Corners) override;
+	void DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners) override;
+	int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) override;
+	void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) override;
+	void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) override;
+	void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) override;
 
 	const GL_STexCoord *GetCurTextureCoordinates() override
 	{

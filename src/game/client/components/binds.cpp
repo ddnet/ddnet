@@ -255,7 +255,7 @@ void CBinds::OnConsoleInit()
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
 	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
-	Console()->Register("dump_binds", "?s[key]", CFGFLAG_CLIENT, ConDumpBinds, this, "Print command executed by this keybindind or all binds");
+	Console()->Register("binds", "?s[key]", CFGFLAG_CLIENT, ConBinds, this, "Print command executed by this keybinding or all binds");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
 
@@ -281,7 +281,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	pBinds->Bind(KeyID, pResult->GetString(1), false, Modifier);
 }
 
-void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
+void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 {
 	CBinds *pBinds = (CBinds *)pUserData;
 	if(pResult->NumArguments() == 1)
@@ -290,18 +290,18 @@ void CBinds::ConDumpBinds(IConsole::IResult *pResult, void *pUserData)
 		const char *pKeyName = pResult->GetString(0);
 
 		int Modifier;
-		int id = pBinds->GetBindSlot(pKeyName, &Modifier);
-		if(!id)
+		int KeyID = pBinds->GetBindSlot(pKeyName, &Modifier);
+		if(!KeyID)
 		{
 			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 		else
 		{
-			if(!pBinds->m_aapKeyBindings[Modifier][id])
-				str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, id);
+			if(!pBinds->m_aapKeyBindings[Modifier][KeyID])
+				str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, KeyID);
 			else
-				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, id, pBinds->m_aapKeyBindings[Modifier][id]);
+				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, KeyID, pBinds->m_aapKeyBindings[Modifier][KeyID]);
 
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
@@ -328,9 +328,9 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 	CBinds *pBinds = (CBinds *)pUserData;
 	const char *pKeyName = pResult->GetString(0);
 	int Modifier;
-	int id = pBinds->GetBindSlot(pKeyName, &Modifier);
+	int KeyID = pBinds->GetBindSlot(pKeyName, &Modifier);
 
-	if(!id)
+	if(!KeyID)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
@@ -338,7 +338,7 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pBinds->Bind(id, "", false, Modifier);
+	pBinds->Bind(KeyID, "", false, Modifier);
 }
 
 void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)

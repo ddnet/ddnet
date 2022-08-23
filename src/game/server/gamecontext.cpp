@@ -2550,17 +2550,34 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	const char *pParamName = pResult->GetString(0);
-	float NewValue = pResult->GetFloat(1);
 
-	if(pSelf->Tuning()->Set(pParamName, NewValue))
+	char aBuf[256];
+	if(pResult->NumArguments() == 2)
 	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
-		pSelf->SendTuningParams(-1);
+		float NewValue = pResult->GetFloat(1);
+		if(pSelf->Tuning()->Set(pParamName, NewValue) && pSelf->Tuning()->Get(pParamName, &NewValue))
+		{
+			str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
+			pSelf->SendTuningParams(-1);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "No such tuning parameter: %s", pParamName);
+		}
 	}
 	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+	{
+		float Value;
+		if(pSelf->Tuning()->Get(pParamName, &Value))
+		{
+			str_format(aBuf, sizeof(aBuf), "%s %.2f", pParamName, Value);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "No such tuning parameter: %s", pParamName);
+		}
+	}
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 }
 
 void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserData)
@@ -2569,17 +2586,19 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 	const char *pParamName = pResult->GetString(0);
 	float OldValue;
 
+	char aBuf[256];
 	if(!pSelf->Tuning()->Get(pParamName, &OldValue))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		str_format(aBuf, sizeof(aBuf), "No such tuning parameter: %s", pParamName);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		return;
 	}
 
 	float NewValue = fabs(OldValue - pResult->GetFloat(1)) < 0.0001f ? pResult->GetFloat(2) : pResult->GetFloat(1);
 
 	pSelf->Tuning()->Set(pParamName, NewValue);
+	pSelf->Tuning()->Get(pParamName, &NewValue);
 
-	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	pSelf->SendTuningParams(-1);
@@ -2588,19 +2607,39 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ResetTuning();
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
+	if(pResult->NumArguments())
+	{
+		const char *pParamName = pResult->GetString(0);
+		float DefaultValue = 0.0f;
+		char aBuf[256];
+		CTuningParams TuningParams;
+		if(TuningParams.Get(pParamName, &DefaultValue) && pSelf->Tuning()->Set(pParamName, DefaultValue) && pSelf->Tuning()->Get(pParamName, &DefaultValue))
+		{
+			str_format(aBuf, sizeof(aBuf), "%s reset to %.2f", pParamName, DefaultValue);
+			pSelf->SendTuningParams(-1);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "No such tuning parameter: %s", pParamName);
+		}
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+	else
+	{
+		pSelf->ResetTuning();
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
+	}
 }
 
-void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTunes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[256];
 	for(int i = 0; i < pSelf->Tuning()->Num(); i++)
 	{
-		float v;
-		pSelf->Tuning()->Get(i, &v);
-		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], v);
+		float Value;
+		pSelf->Tuning()->Get(i, &Value);
+		str_format(aBuf, sizeof(aBuf), "%s %.2f", CTuningParams::Name(i), Value);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
@@ -2614,15 +2653,17 @@ void CGameContext::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < NUM_TUNEZONES)
 	{
-		if(pSelf->TuningList()[List].Set(pParamName, NewValue))
+		char aBuf[256];
+		if(pSelf->TuningList()[List].Set(pParamName, NewValue) && pSelf->TuningList()[List].Get(pParamName, &NewValue))
 		{
-			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 			pSelf->SendTuningParams(-1, List);
 		}
 		else
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		{
+			str_format(aBuf, sizeof(aBuf), "No such tuning parameter: %s", pParamName);
+		}
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
 
@@ -2635,9 +2676,9 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 	{
 		for(int i = 0; i < pSelf->TuningList()[List].Num(); i++)
 		{
-			float v;
-			pSelf->TuningList()[List].Get(i, &v);
-			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], v);
+			float Value;
+			pSelf->TuningList()[List].Get(i, &Value);
+			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, CTuningParams::Name(i), Value);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		}
 	}
@@ -3140,10 +3181,10 @@ void CGameContext::OnConsoleInit()
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
+	Console()->Register("tune", "s[tuning] ?i[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value or show current value");
 	Console()->Register("toggle_tune", "s[tuning] i[value 1] i[value 2]", CFGFLAG_SERVER | CFGFLAG_GAME, ConToggleTuneParam, this, "Toggle tune variable");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning");
+	Console()->Register("tune_reset", "?s[tuning]", CFGFLAG_SERVER, ConTuneReset, this, "Reset all or one tuning variable to default");
+	Console()->Register("tunes", "", CFGFLAG_SERVER, ConTunes, this, "List all tuning variables and their values");
 	Console()->Register("tune_zone", "i[zone] s[tuning] i[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
 	Console()->Register("tune_zone_dump", "i[zone]", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
 	Console()->Register("tune_zone_reset", "?i[zone]", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");

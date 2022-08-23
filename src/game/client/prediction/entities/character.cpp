@@ -561,12 +561,24 @@ void CCharacter::ResetInput()
 	m_LatestPrevInput = m_LatestInput = m_Input;
 }
 
-void CCharacter::Tick()
+void CCharacter::PreTick()
 {
 	DDRaceTick();
 
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true);
+	m_Core.Tick(true, !m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce);
+}
+
+void CCharacter::Tick()
+{
+	if(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce)
+	{
+		m_Core.TickDeferred();
+	}
+	else
+	{
+		PreTick();
+	}
 
 	// handle Weapons
 	HandleWeapons();
@@ -580,7 +592,7 @@ void CCharacter::Tick()
 	m_PrevPos = m_Core.m_Pos;
 }
 
-void CCharacter::TickDefered()
+void CCharacter::TickDeferred()
 {
 	m_Core.Move();
 	m_Core.Quantize();

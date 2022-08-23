@@ -1,4 +1,4 @@
-﻿##### authors #####
+##### authors #####
 #originally created by:
 # slinack
 #modified by:
@@ -63,7 +63,7 @@ All
 == Todos
 
 Are you sure that you want to delete the demo?
-== Tem certeza que deseja deletar o demo?
+== Tem certeza que deseja deletar a demo?
 
 Are you sure that you want to quit?
 == Você tem certeza que deseja sair?
@@ -135,7 +135,7 @@ Delete demo
 == Deletar demo
 
 Demo details
-== Detalhes do demo
+== Detalhes da demo
 
 Demofile: %s
 == Demo: %s
@@ -487,10 +487,10 @@ Type
 == Tipo
 
 Unable to delete the demo
-== Não foi possível deletar o demo
+== Não foi possível deletar a demo
 
 Unable to rename the demo
-== Não foi possível renomear o demo
+== Não foi possível renomear a demo
 
 Use sounds
 == Usar sons
@@ -1471,106 +1471,106 @@ Extras
 == Extras
 
 Preparing demo playback
-== 
+== Preparando reprodução da demo
 
 Connected
-== 
+== Conectado
 
 Loading map file from storage
-== 
+== Carregando arquivo de mapa do armazenamento
+
+Why are you slowmo replaying to read this?
+== Por que você está respondendo em câmera lenta para ler isso?
 
 Initializing components
-== 
+== Inicializando componentes
 
 Initializing assets
-== 
+== Inicializando ativos
 
 Initializing map logic
-== 
+== Inicializando lógica de mapa
 
 Sending initial client info
-== 
+== Enviando info iniciais do cliente
 
 Uploading map data to GPU
-== 
+== Carregando dados de mapa para GPU
 
 Getting game info
-== 
+== Obtendo info do jogo
 
 Requesting to join the game
-== 
-
-Sending intial client info
-== 
+== Solicitando entrada no jogo
 
 Loading menu images
-== 
+== Carregando imagens de menu
 
 Loading demo files
-== 
+== Carregando arquivos de demo
 
 Loading ghost files
-== 
+== Carregando arquivos de fantasma
 
 Loading skin files
-== 
+== Carregando arquivos de skins
 
 Appearance
-== 
+== Aparência
 
 Name Plate
-== 
+== Placa de nome
 
 Hook Collisions
-== 
+== Colisões de gancho
 
 Show health, shields and ammo
-== 
+== Mostrar saúde, escudos e munição
 
 DDRace HUD
-== 
+== HUD do DDRace
 
 Show client IDs in scoreboard
-== 
+== Mostrar IDs de cliente no placar
 
 Show DDRace HUD
-== 
+== Mostrar HUD do DDRace
 
 Show jumps indicator
-== 
+== Mostrar indicador de pulos
 
 Show hook strength indicator
-== 
+== Mostrar indicador de força do gancho
 
 Hook collision line
-== 
+== Linha de colisão do gancho
 
 Hook collision line width
-== 
+== Largura da linha de colisão do gancho
 
 Hook collision line opacity
-== 
+== Opacidade da linha de colisão do gancho
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Cores da linha de colisão do gancho, no caso de uma possível colisão com:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Seus movimentos não são levados em conta ao calcular as cores de linha
 
 Nothing hookable
-== 
+== Nada enganchável
 
 Something hookable
-== 
+== Alguma coisa enganchável
 
 A Tee
-== 
+== Um tee
 
 Loading assets
-== 
+== Carregando ativos
 
 Loading race demo files
-== 
+== Carregando arquivos de demo de corrida
 
 Loading sound files
-== 
+== Carregando arquivos de som

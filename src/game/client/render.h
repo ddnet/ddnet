@@ -3,12 +3,11 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
-#include "ui.h"
-
 #include <base/color.h>
 #include <base/vmath.h>
 
 #include <game/client/skin.h>
+#include <game/client/ui_rect.h>
 
 class CSpeedupTile;
 class CSwitchTile;
@@ -21,6 +20,7 @@ struct CDataSprite;
 struct CDataSprite;
 struct CEnvPoint;
 struct CMapItemGroup;
+struct CMapItemGroupEx;
 struct CQuad;
 
 class CTeeRenderInfo
@@ -106,21 +106,6 @@ public:
 	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
 	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
-	// rects
-	void DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners);
-	void DrawRoundRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners);
-
-	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
-
-	void DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-
-	void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding);
-	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-	void DrawRect4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
-	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
-
-	void DrawCircle(float x, float y, float r, int Segments);
-
 	// larger rendering methods
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
 	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
@@ -144,8 +129,9 @@ public:
 	// helpers
 	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);
 	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
-	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
+		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom);
+	void MapScreenToInterface(float CenterX, float CenterY);
 
 	// DDRace
 

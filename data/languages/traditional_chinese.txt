@@ -15,6 +15,7 @@
 # 2022-05-14 cheeser0613
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
+# 2022-08-08 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1288,7 +1289,7 @@ Show local player's key presses
 == 顯示周圍玩家的按鍵輸入
 
 Settings file
-== 設定文件
+== 設定檔案
 
 Config directory
 == 配置目錄 (cfg)
@@ -1407,13 +1408,13 @@ Ingame controller mode
 == 游戲内控制器瞄準模式
 
 Ingame controller sens.
-== 類比搖桿靈敏度（游戲）
+== 搖桿靈敏度（游戲）
 
 UI controller sens.
-== 類比遙感靈敏度（界面）
+== 搖桿靈敏度（界面）
 
 Controller jitter tolerance
-== 類比搖桿錯位容錯
+== 搖桿錯位容錯
 
 No controller found. Plug in a controller and restart the game.
 == 未檢測到任何控制器。請重試重新連接控制器並重啓游戲。
@@ -1428,7 +1429,7 @@ Aim bind
 == 操作軸綁定
 
 Controller Axis #%d
-== 類比搖桿 #%d
+== 搖桿 #%d
 
 Mouse
 == 滑鼠
@@ -1470,106 +1471,106 @@ Extras
 == 其他
 
 Preparing demo playback
-== 
+== 正在準備回放
 
 Connected
-== 
+== 連接成功
 
 Loading map file from storage
-== 
+== 正在從硬盤中加載地圖檔案
+
+Why are you slowmo replaying to read this?
+== 所以你爲什麽要慢速回放來看這個
 
 Initializing components
-== 
+== 正在初始化游戲引擎
 
 Initializing assets
-== 
+== 正在初始化材質
 
 Initializing map logic
-== 
+== 正在初始化地圖邏輯
 
 Sending initial client info
-== 
+== 正在發送初始客戶端資訊
 
 Uploading map data to GPU
-== 
+== 正在將地圖數據傳輸至顯卡
 
 Getting game info
-== 
+== 正在獲取游戲資訊
 
 Requesting to join the game
-== 
-
-Sending intial client info
-== 
+== 正在請求加入游戲
 
 Loading menu images
-== 
+== 正在加載主菜單圖片
 
 Loading demo files
-== 
+== 正在加載回放檔案
 
 Loading ghost files
-== 
+== 正在加載影子檔案
 
 Loading skin files
-== 
+== 正在加載外觀檔案
 
 Appearance
-== 
+== 游戲界面
 
 Name Plate
-== 
+== 匿稱板塊
 
 Hook Collisions
-== 
+== 瞄準輔助
 
 Show health, shields and ammo
-== 
+== 顯示生命、護甲與彈藥欄
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== 顯示客戶端 IDs （計分板中）
 
 Show DDRace HUD
-== 
+== 顯示 DDRace HUD
 
 Show jumps indicator
-== 
+== 顯示跳躍次數
 
 Show hook strength indicator
-== 
+== 顯示對其他玩家的鈎索强度
 
 Hook collision line
-== 
+== 瞄準輔助綫
 
 Hook collision line width
-== 
+== 輔助綫寬度
 
 Hook collision line opacity
-== 
+== 輔助綫不透明度
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== 輔助綫顔色（當瞄準以下實體物時）：
 
 Your movements are not taken into account when calculating the line colors
-== 
+== 移動所造成的瞄準偏移將不計入考量
 
 Nothing hookable
-== 
+== 未瞄準任何實體物
 
 Something hookable
-== 
+== 可鈎索的方塊
 
 A Tee
-== 
+== 其他玩家
 
 Loading assets
-== 
+== 正在加載材質
 
 Loading race demo files
-== 
+== 正在加載回放檔案
 
 Loading sound files
-== 
+== 正在加載聲音檔案

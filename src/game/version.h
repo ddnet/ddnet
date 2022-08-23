@@ -7,7 +7,7 @@
 #endif
 #define GAME_VERSION "0.6.4, " GAME_RELEASE_VERSION
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
-#define CLIENT_VERSIONNR 16022
+#define CLIENT_VERSIONNR 16031
 extern const char *GIT_SHORTREV_HASH;
 #define GAME_NAME "DDNet"
 #endif

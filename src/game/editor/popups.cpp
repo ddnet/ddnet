@@ -72,14 +72,14 @@ void CEditor::UiDoPopupMenu()
 				UI()->SetActiveItem(&s_UiPopups[i].m_pId);
 		}
 
-		int Corners = CUI::CORNER_ALL;
+		int Corners = IGraphics::CORNER_ALL;
 		if(s_UiPopups[i].m_IsMenu)
-			Corners = CUI::CORNER_R | CUI::CORNER_B;
+			Corners = IGraphics::CORNER_R | IGraphics::CORNER_B;
 
 		CUIRect r = s_UiPopups[i].m_Rect;
-		RenderTools()->DrawUIRect(&r, ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);
+		r.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), Corners, 3.0f);
 		r.Margin(1.0f, &r);
-		RenderTools()->DrawUIRect(&r, ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
+		r.Draw(ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
 		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))
@@ -320,6 +320,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		PROP_POS_Y,
 		PROP_PARA_X,
 		PROP_PARA_Y,
+		PROP_CUSTOM_ZOOM,
+		PROP_PARA_ZOOM,
 		PROP_USE_CLIPPING,
 		PROP_CLIP_X,
 		PROP_CLIP_Y,
@@ -334,6 +336,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Custom Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom, PROPTYPE_BOOL, 0, 1},
+		{"Para Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
 		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -364,6 +368,13 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX = NewVal;
 		else if(Prop == PROP_PARA_Y)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY = NewVal;
+		else if(Prop == PROP_CUSTOM_ZOOM)
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = NewVal;
+		else if(Prop == PROP_PARA_ZOOM)
+		{
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = 1;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom = NewVal;
+		}
 		else if(Prop == PROP_POS_X)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
 		else if(Prop == PROP_POS_Y)
@@ -378,6 +389,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
 		else if(Prop == PROP_CLIP_H)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+
+		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->OnEdited();
 	}
 
 	return 0;
@@ -395,6 +408,21 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pPopup->m_vpLayers.size() > 1)
 	{
 		return CLayerTiles::RenderCommonProperties(pPopup->m_CommonPropState, pEditor, &View, pPopup->m_vpLayers);
+	}
+
+	// duplicate layer button
+	CUIRect DupButton;
+	static int s_DuplicationButton = 0;
+	View.HSplitBottom(4.0f, &View, nullptr);
+	View.HSplitBottom(12.0f, &View, &DupButton);
+
+	if(!pEditor->IsSpecialLayer(pEditor->GetSelectedLayer(0)))
+	{
+		if(pEditor->DoButton_Editor(&s_DuplicationButton, "Duplicate layer", 0, &DupButton, 0, "Duplicates the layer"))
+		{
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->DuplicateLayer(pEditor->m_vSelectedLayers[0]);
+			return 1;
+		}
 	}
 
 	// don't allow deletion of game layer
@@ -1232,7 +1260,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		CUIRect Scroll;
 		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
 		{
@@ -1340,7 +1368,7 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		CUIRect Scroll;
 		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
 		{
@@ -1483,7 +1511,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 	{
 		CUIRect Scroll;
 		View.VSplitRight(20.0f, &View, &Scroll);
-		s_ScrollValue = pEditor->UIEx()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
 
 		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
 		{

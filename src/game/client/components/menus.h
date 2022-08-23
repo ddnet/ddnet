@@ -19,7 +19,6 @@
 
 #include <game/client/component.h>
 #include <game/client/ui.h>
-#include <game/client/ui_ex.h>
 #include <game/voting.h>
 
 #include <game/client/render.h>
@@ -78,14 +77,10 @@ class CMenus : public CComponent
 
 	char m_aLocalStringHelper[1024];
 
-	CUIEx m_UIEx;
-
-	CUIEx *UIEx() { return &m_UIEx; }
-
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_Sprite(CButtonContainer *pButtonContainer, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = nullptr, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1, bool CheckForActiveColorPicker = false);
+	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = nullptr, int Corners = IGraphics::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1, bool CheckForActiveColorPicker = false);
 	int DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10, int AlignVertically = 1);
 
 	int DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect);
@@ -108,9 +103,11 @@ class CMenus : public CComponent
 
 	void RenderColorPicker();
 
+	void RefreshSkins();
+
 	// new gui with gui elements
 	template<typename T>
-	int DoButtonMenu(CUIElement &UIElement, const void *pID, T &&GetTextLambda, int Checked, const CUIRect *pRect, bool HintRequiresStringCheck, bool HintCanChangePositionOrSize = false, int Corners = CUI::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1)
+	int DoButtonMenu(CUIElement &UIElement, const void *pID, T &&GetTextLambda, int Checked, const CUIRect *pRect, bool HintRequiresStringCheck, bool HintCanChangePositionOrSize = false, int Corners = IGraphics::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f), int AlignVertically = 1)
 	{
 		CUIRect Text = *pRect;
 		Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
@@ -162,7 +159,7 @@ class CMenus : public CComponent
 					Graphics()->SetColor(Color);
 
 					CUIElement::SUIElementRect &NewRect = *UIElement.Get(i);
-					NewRect.m_UIRectQuadContainer = RenderTools()->CreateRoundRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
+					NewRect.m_UIRectQuadContainer = Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
 
 					NewRect.m_X = pRect->x;
 					NewRect.m_Y = pRect->y;
@@ -689,7 +686,6 @@ public:
 		POPUP_CONNECTING,
 		POPUP_MESSAGE,
 		POPUP_DISCONNECTED,
-		POPUP_PURE,
 		POPUP_LANGUAGE,
 		POPUP_COUNTRY,
 		POPUP_DELETE_DEMO,

@@ -12,6 +12,13 @@ CLayerSounds::CLayerSounds()
 	m_Sound = -1;
 }
 
+CLayerSounds::CLayerSounds(const CLayerSounds &Other) :
+	CLayer(Other)
+{
+	m_Sound = Other.m_Sound;
+	m_vSources = Other.m_vSources;
+}
+
 CLayerSounds::~CLayerSounds() = default;
 
 void CLayerSounds::Render(bool Tileset)
@@ -40,12 +47,12 @@ void CLayerSounds::Render(bool Tileset)
 		{
 		case CSoundShape::SHAPE_CIRCLE:
 		{
-			m_pEditor->RenderTools()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
+			m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
 				Source.m_Shape.m_Circle.m_Radius, 32);
 
 			float Falloff = ((float)Source.m_Falloff / 255.0f);
 			if(Falloff > 0.0f)
-				m_pEditor->RenderTools()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
+				m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
 					Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
 			break;
 		}
@@ -53,13 +60,13 @@ void CLayerSounds::Render(bool Tileset)
 		{
 			float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
 			float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
-			m_pEditor->RenderTools()->DrawRoundRectExt(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
-				Width, Height, 0.0f, CUI::CORNER_NONE);
+			m_pEditor->Graphics()->DrawRectExt(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
+				Width, Height, 0.0f, IGraphics::CORNER_NONE);
 
 			float Falloff = ((float)Source.m_Falloff / 255.0f);
 			if(Falloff > 0.0f)
-				m_pEditor->RenderTools()->DrawRoundRectExt(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
-					Width * Falloff, Height * Falloff, 0.0f, CUI::CORNER_NONE);
+				m_pEditor->Graphics()->DrawRectExt(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
+					Width * Falloff, Height * Falloff, 0.0f, IGraphics::CORNER_NONE);
 			break;
 		}
 		}
@@ -218,4 +225,9 @@ void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 		Func(&Source.m_SoundEnv);
 		Func(&Source.m_PosEnv);
 	}
+}
+
+CLayer *CLayerSounds::Duplicate() const
+{
+	return new CLayerSounds(*this);
 }

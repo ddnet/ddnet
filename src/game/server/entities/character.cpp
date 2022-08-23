@@ -712,7 +712,7 @@ void CCharacter::ResetInput()
 	m_LatestPrevInput = m_LatestInput = m_Input;
 }
 
-void CCharacter::Tick()
+void CCharacter::PreTick()
 {
 	if(m_StartTime > Server()->Tick())
 	{
@@ -738,7 +738,22 @@ void CCharacter::Tick()
 	Antibot()->OnCharacterTick(m_pPlayer->GetCID());
 
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true);
+	m_Core.Tick(true, !g_Config.m_SvNoWeakHookAndBounce);
+}
+
+void CCharacter::Tick()
+{
+	if(g_Config.m_SvNoWeakHookAndBounce)
+	{
+		if(m_Paused)
+			return;
+
+		m_Core.TickDeferred();
+	}
+	else
+	{
+		PreTick();
+	}
 
 	if(!m_PrevInput.m_Hook && m_Input.m_Hook && !(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER))
 	{
@@ -764,7 +779,7 @@ void CCharacter::Tick()
 	m_PrevPos = m_Core.m_Pos;
 }
 
-void CCharacter::TickDefered()
+void CCharacter::TickDeferred()
 {
 	// advance the dummy
 	{

@@ -170,9 +170,9 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 
 	// register server dummy commands for tab completion
-	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, 0, 0, "Reset tuning");
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, 0, 0, "Dump tuning");
+	Console()->Register("tune", "s[tuning] ?i[value]", CFGFLAG_SERVER, 0, 0, "Tune variable to value or show current value");
+	Console()->Register("tune_reset", "?s[tuning]", CFGFLAG_SERVER, 0, 0, "Reset all or one tuning variable to default");
+	Console()->Register("tunes", "", CFGFLAG_SERVER, 0, 0, "List all tuning variables and their values");
 	Console()->Register("change_map", "?r[map]", CFGFLAG_SERVER, 0, 0, "Change map");
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER, 0, 0, "Restart in x seconds");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, 0, 0, "Broadcast message");
@@ -235,8 +235,8 @@ void CGameClient::OnInit()
 	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
 
 	// propagate pointers
-	m_UI.Init(Input(), Graphics(), TextRender());
-	m_RenderTools.Init(Graphics(), TextRender(), this);
+	m_UI.Init(Kernel());
+	m_RenderTools.Init(Graphics(), TextRender());
 
 	int64_t Start = time_get();
 
@@ -274,7 +274,7 @@ void CGameClient::OnInit()
 		if(m_Menus.IsInit())
 		{
 			char aBuff[256];
-			str_format(aBuff, std::size(aBuff), "%s [%d/%d]", Localize("Initializing components"), (CompCounter + 1), (int)ComponentCount());
+			str_format(aBuff, std::size(aBuff), "%s [%d/%d]", CompCounter == 40 ? Localize("Why are you slowmo replaying to read this?") : Localize("Initializing components"), (CompCounter + 1), (int)ComponentCount());
 			m_Menus.RenderLoading(pLoadingDDNetCaption, aBuff, 1 + SkippedComps);
 			SkippedComps = 0;
 		}
@@ -1077,6 +1077,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_HudHealthArmor = true;
 	Info.m_HudAmmo = true;
 	Info.m_HudDDRace = false;
+	Info.m_NoWeakHookAndBounce = false;
 
 	if(Version >= 0)
 	{
@@ -1127,6 +1128,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		Info.m_HudHealthArmor = Flags2 & GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
 		Info.m_HudAmmo = Flags2 & GAMEINFOFLAG2_HUD_AMMO;
 		Info.m_HudDDRace = Flags2 & GAMEINFOFLAG2_HUD_DDRACE;
+	}
+	if(Version >= 8)
+	{
+		Info.m_NoWeakHookAndBounce = Flags2 & GAMEINFOFLAG2_NO_WEAK_HOOK_AND_BOUNCE;
 	}
 	return Info;
 }
@@ -2277,6 +2282,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_PredictFreeze = g_Config.m_ClPredictFreeze;
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
+	m_GameWorld.m_WorldConfig.m_NoWeakHookAndBounce = m_GameInfo.m_NoWeakHookAndBounce;
 
 	// always update default tune zone, even without character
 	if(!m_GameWorld.m_WorldConfig.m_UseTuneZones)

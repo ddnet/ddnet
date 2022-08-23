@@ -34,7 +34,7 @@ bool CTuningParams::Get(int Index, float *pValue) const
 bool CTuningParams::Set(const char *pName, float Value)
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, ms_apNames[i]) == 0)
+		if(str_comp_nocase(pName, Name(i)) == 0)
 			return Set(i, Value);
 	return false;
 }
@@ -42,15 +42,24 @@ bool CTuningParams::Set(const char *pName, float Value)
 bool CTuningParams::Get(const char *pName, float *pValue) const
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, ms_apNames[i]) == 0)
+		if(str_comp_nocase(pName, Name(i)) == 0)
 			return Get(i, pValue);
 
 	return false;
 }
 
-float HermiteBasis1(float v)
+int CTuningParams::PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCallback, void *pUser)
 {
-	return 2 * v * v * v - 3 * v * v + 1;
+	int Index = 0;
+	for(int i = 0; i < Num(); i++)
+	{
+		if(str_find_nocase(Name(i), pStr))
+		{
+			pfnCallback(Index, Name(i), pUser);
+			Index++;
+		}
+	}
+	return Index;
 }
 
 float VelocityRamp(float Value, float Start, float Range, float Curvature)
@@ -116,18 +125,13 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
-void CCharacterCore::Tick(bool UseInput)
+void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
 	m_TriggeredEvents = 0;
 
 	// get ground state
-	bool Grounded = false;
-	if(m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
-		Grounded = true;
-	if(m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5))
-		Grounded = true;
-
+	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
 	m_Vel.y += m_Tuning.m_Gravity;
@@ -387,6 +391,12 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
+	if(DoDeferredTick)
+		TickDeferred();
+}
+
+void CCharacterCore::TickDeferred()
+{
 	if(m_pWorld)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)

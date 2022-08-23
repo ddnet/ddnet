@@ -184,6 +184,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		// save group name
 		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
 
+		CMapItemGroupEx GItemEx;
+		GItemEx.m_Version = CMapItemGroupEx::CURRENT_VERSION;
+		GItemEx.m_ParallaxZoom = pGroup->m_ParallaxZoom;
+
 		for(const auto &pLayer : pGroup->m_vpLayers)
 		{
 			if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -331,7 +335,9 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 			}
 		}
 
-		df.AddItem(MAPITEMTYPE_GROUP, GroupCount++, sizeof(GItem), &GItem);
+		df.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
+		df.AddItem(MAPITEMTYPE_GROUP_EX, GroupCount, sizeof(GItemEx), &GItemEx);
+		GroupCount++;
 	}
 
 	// save envelopes
@@ -581,9 +587,15 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 			int Start, Num;
 			DataFile.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
+
+			int StartEx, NumEx;
+			DataFile.GetType(MAPITEMTYPE_GROUP_EX, &StartEx, &NumEx);
 			for(int g = 0; g < Num; g++)
 			{
 				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g, nullptr, nullptr);
+				CMapItemGroupEx *pGItemEx = nullptr;
+				if(NumEx)
+					pGItemEx = (CMapItemGroupEx *)DataFile.GetItem(StartEx + g, nullptr, nullptr);
 
 				if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
 					continue;
@@ -606,6 +618,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				// load group name
 				if(pGItem->m_Version >= 3)
 					IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
+
+				pGroup->m_ParallaxZoom = GetParallaxZoom(pGItem, pGItemEx);
+				pGroup->m_CustomParallaxZoom = pGroup->m_ParallaxZoom != GetParallaxZoomDefault(pGroup->m_ParallaxX, pGroup->m_ParallaxY);
 
 				for(int l = 0; l < pGItem->m_NumLayers; l++)
 				{
@@ -677,7 +692,6 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						pLayer = pTiles;
 
 						pGroup->AddLayer(pTiles);
-						void *pData = DataFile.GetData(pTilemapItem->m_Data);
 						pTiles->m_Image = pTilemapItem->m_Image;
 						pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
 
@@ -701,14 +715,15 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_TELECHECKOUT,
 									TILE_TELEINWEAPON,
 									TILE_TELEINHOOK};
-								mem_copy(((CLayerTele *)pTiles)->m_pTeleTile, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
+								CTeleTile *pLayerTeleTiles = ((CLayerTele *)pTiles)->m_pTeleTile;
+								mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
 									pTiles->m_pTiles[i].m_Index = 0;
 									for(int TilesRep : s_aTilesRep)
 									{
-										if(((CLayerTele *)pTiles)->m_pTeleTile[i].m_Type == TilesRep)
+										if(pLayerTeleTiles[i].m_Type == TilesRep)
 											pTiles->m_pTiles[i].m_Index = TilesRep;
 									}
 								}
@@ -722,11 +737,12 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile))
 							{
-								mem_copy(((CLayerSpeedup *)pTiles)->m_pSpeedupTile, pSpeedupData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
+								CSpeedupTile *pLayerSpeedupTiles = ((CLayerSpeedup *)pTiles)->m_pSpeedupTile;
+								mem_copy(pLayerSpeedupTiles, pSpeedupData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(((CLayerSpeedup *)pTiles)->m_pSpeedupTile[i].m_Force > 0)
+									if(pLayerSpeedupTiles[i].m_Force > 0)
 										pTiles->m_pTiles[i].m_Index = TILE_BOOST;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
@@ -768,7 +784,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									TILE_ALLOW_TELE_GUN,
 									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
-								mem_copy(((CLayerSwitch *)pTiles)->m_pSwitchTile, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
+								mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
@@ -800,7 +816,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
 							{
 								CTuneTile *pLayerTuneTiles = ((CLayerTune *)pTiles)->m_pTuneTile;
-								mem_copy(((CLayerTune *)pTiles)->m_pTuneTile, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
+								mem_copy(pLayerTuneTiles, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
@@ -814,6 +830,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						}
 						else // regular tile layer or game layer
 						{
+							void *pData = DataFile.GetData(pTilemapItem->m_Data);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile))
 							{
@@ -828,9 +845,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 									}
 								}
 							}
+							DataFile.UnloadData(pTilemapItem->m_Data);
 						}
-
-						DataFile.UnloadData(pTilemapItem->m_Data);
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_QUADS)
 					{

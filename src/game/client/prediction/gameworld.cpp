@@ -187,6 +187,17 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
+	if(m_WorldConfig.m_NoWeakHookAndBounce)
+	{
+		for(auto *pEnt : m_apFirstEntityTypes)
+			for(; pEnt;)
+			{
+				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+				pEnt->PreTick();
+				pEnt = m_pNextTraverseEntity;
+			}
+	}
+
 	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
 		{
@@ -199,7 +210,7 @@ void CGameWorld::Tick()
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-			pEnt->TickDefered();
+			pEnt->TickDeferred();
 			pEnt->m_SnapTicks++;
 			pEnt = m_pNextTraverseEntity;
 		}

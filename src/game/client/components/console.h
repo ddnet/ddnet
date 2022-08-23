@@ -38,18 +38,19 @@ class CGameConsole : public CComponent
 		char *m_pHistoryEntry;
 
 		CLineInput m_Input;
+		const char *m_pName;
 		int m_Type;
-		int m_CompletionEnumerationCount;
 		int m_BacklogCurPage;
 
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
-		bool m_CompletionUsed;
 		int m_CompletionChosen;
+		char m_aCompletionBufferArgument[128];
+		int m_CompletionChosenArgument;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
-		bool m_ReverseTAB;
+		float m_CompletionRenderOffsetChange;
 
 		char m_aUser[32];
 		bool m_UserGot;
@@ -66,6 +67,7 @@ class CGameConsole : public CComponent
 		void ClearBacklog();
 		void ClearBacklogYOffsets();
 		void ClearHistory();
+		void Reset();
 
 		void ExecuteLine(const char *pLine);
 
@@ -73,7 +75,8 @@ class CGameConsole : public CComponent
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
 
 		const char *GetString() const { return m_Input.GetString(); }
-		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
+		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
+		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 	};
 
 	class IConsole *m_pConsole;
@@ -105,7 +108,7 @@ class CGameConsole : public CComponent
 	void Toggle(int Type);
 	void Dump(int Type);
 
-	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
+	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);
