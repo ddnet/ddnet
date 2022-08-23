@@ -12,19 +12,19 @@ int InsertPixelArtQuads(CQuad *, int &, const CImageInfo &, const int[], const i
 
 bool LoadPNG(CImageInfo *, const char *);
 bool OpenMaps(const char[][64], CDataFileReader &, CDataFileWriter &);
-void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, const int, CQuad *, const int);
+void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, int, CQuad *, int);
 
 CMapItemLayerQuads *GetQuadLayer(CDataFileReader &, const int[], int *);
-CQuad CreateNewQuad(const float, const float, const int, const int, const uint8_t[], const int[]);
+CQuad CreateNewQuad(float, float, int, int, const uint8_t[], const int[]);
 
 bool GetPixelClamped(const CImageInfo &, int, int, uint8_t[]);
 bool ComparePixel(const uint8_t[], const uint8_t[]);
-bool IsPixelOptimizable(const CImageInfo &, const int, const int, const uint8_t[], const bool[]);
+bool IsPixelOptimizable(const CImageInfo &, int, int, const uint8_t[], const bool[]);
 void SetVisitedPixels(const CImageInfo &, int, int, int, int, bool[]);
 
 int GetImagePixelSize(const CImageInfo &);
-int FindSuperPixelSize(const CImageInfo &, const uint8_t[], const int, const int, const int, bool[]);
-void GetOptimizedQuadSize(const CImageInfo &, const int, const uint8_t[], const int, const int, int &, int &, bool[]);
+int FindSuperPixelSize(const CImageInfo &, const uint8_t[], int, int, int, bool[]);
+void GetOptimizedQuadSize(const CImageInfo &, int, const uint8_t[], int, int, int &, int &, bool[]);
 
 int main(int argc, const char **argv)
 {
@@ -55,8 +55,8 @@ int main(int argc, const char **argv)
 	int aPixelSizes[2] = {atoi(argv[2]), atoi(argv[8])}; //quad_pixelsize, img_pixelsize
 
 	bool aArtOptions[3];
-	aArtOptions[0] = argc >= 10 ? atoi(argv[10]) : 1; //optimize
-	aArtOptions[1] = argc >= 11 ? atoi(argv[11]) : 0; //centralize
+	aArtOptions[0] = argc >= 10 ? atoi(argv[10]) : true; //optimize
+	aArtOptions[1] = argc >= 11 ? atoi(argv[11]) : false; //centralize
 
 	dbg_msg("map_create_pixelart", "image_file='%s'; image_pixelsize='%dpx'; input_map='%s'; layergroup_id='#%d'; layer_id='#%d'; pos_x='#%dpx'; pos_y='%dpx'; quad_pixelsize='%dpx'; output_map='%s'; optimize='%d'; centralize='%d'",
 		aFilenames[2], aPixelSizes[0], aFilenames[1], aLayerID[0], aLayerID[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[2], aArtOptions[0], aArtOptions[1]);
@@ -89,6 +89,7 @@ bool CreatePixelArt(const char aFilenames[3][64], const int aLayerID[2], const i
 	InsertCurrentQuads(InputMap, pQuadLayer, pQuads);
 	int QuadsCounter = InsertPixelArtQuads(pQuads, pQuadLayer->m_NumQuads, Img, aStartingPos, aPixelSizes, aArtOptions);
 	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, ((int)sizeof(CQuad)) * (pQuadLayer->m_NumQuads + 1));
+	delete[] pQuads;
 
 	dbg_msg("map_create_pixelart", "INFO: sucessfully added %d new pixelart quads.", QuadsCounter);
 	return true;
@@ -105,7 +106,7 @@ int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, con
 {
 	int ImgPixelSize = aPixelSizes[0], QuadPixelSize = aPixelSizes[1], OriginalNumQuads = NumQuads;
 	int aForcedPivot[2] = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max()};
-	bool aVisitedPixels[Img.m_Height * Img.m_Width];
+	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
 	memset(aVisitedPixels, 0, sizeof(bool[Img.m_Height * Img.m_Width]));
 
 	for(int y = 0; y < Img.m_Height; y += ImgPixelSize)
@@ -130,6 +131,7 @@ int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, con
 			pQuads[NumQuads] = CreateNewQuad(Posx, Posy, QuadPixelSize * Width, QuadPixelSize * Height, aPixel, aArtOptions[1] ? aForcedPivot : 0x0);
 			NumQuads++;
 		}
+	delete[] aVisitedPixels;
 
 	return NumQuads - OriginalNumQuads;
 }
@@ -159,7 +161,7 @@ void GetOptimizedQuadSize(const CImageInfo &Img, const int ImgPixelSize, const u
 int GetImagePixelSize(const CImageInfo &Img)
 {
 	int ImgPixelSize = std::numeric_limits<int>::max();
-	bool aVisitedPixels[Img.m_Height * Img.m_Width];
+	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
 	memset(aVisitedPixels, 0, sizeof(bool[Img.m_Height * Img.m_Width]));
 
 	for(int y = 0; y < Img.m_Height && ImgPixelSize > 1; y++)
@@ -174,6 +176,7 @@ int GetImagePixelSize(const CImageInfo &Img)
 			if(SuperPixelSize < ImgPixelSize)
 				ImgPixelSize = SuperPixelSize;
 		}
+	delete[] aVisitedPixels;
 
 	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %dpx", ImgPixelSize);
 	return ImgPixelSize;
@@ -289,12 +292,12 @@ CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const i
 		Quad.m_aPoints[i * 2 + 1].x = x + w;
 	}
 
-	for(int i = 0; i < 4; i++)
+	for(auto &QuadColor : Quad.m_aColors)
 	{
-		Quad.m_aColors[i].r = aColor[0];
-		Quad.m_aColors[i].g = aColor[1];
-		Quad.m_aColors[i].b = aColor[2];
-		Quad.m_aColors[i].a = aColor[3];
+		QuadColor.r = aColor[0];
+		QuadColor.g = aColor[1];
+		QuadColor.b = aColor[2];
+		QuadColor.a = aColor[3];
 	}
 
 	Quad.m_aPoints[4].x = aForcedPivot ? f2fx(aForcedPivot[0]) : x;
