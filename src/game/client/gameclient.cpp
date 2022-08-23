@@ -374,6 +374,8 @@ void CGameClient::OnInit()
 
 void CGameClient::OnUpdate()
 {
+	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
+
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
 	IInput::ECursorType CursorType = Input()->CursorRelative(&x, &y);
