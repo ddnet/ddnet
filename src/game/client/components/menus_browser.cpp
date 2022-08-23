@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/log.h>
+
+#include <engine/favorites.h>
 #include <engine/friends.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
@@ -196,7 +199,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	if(HandleListInputs(View, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_SelectedIndex, NumServers))
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
-		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 	}
 
 	// set clipping
@@ -285,8 +288,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				r.Margin(0.5f, &r);
 				RenderTools()->DrawUIElRect(*pItem->m_pUIElement->Get(0), &r, ColorRGBA(1, 1, 1, 0.5f), CUI::CORNER_ALL, 4.0f);
 			}
-
-			if(!Selected && UI()->MouseHovered(&Row))
+			else if(UI()->MouseHovered(&Row))
 			{
 				CUIRect r = Row;
 				r.Margin(0.5f, &r);
@@ -331,7 +333,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
-				if(pItem->m_Favorite)
+				if(pItem->m_Favorite != TRISTATE::NONE)
 				{
 					RenderBrowserIcons(*pItem->m_pUIElement->Get(gs_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
 				}
@@ -479,13 +481,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		// select the new server
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
-		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 		if(DoubleClicked && Input()->MouseDoubleClick())
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
 				m_Popup = POPUP_SWITCH_SERVER;
-				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress);
 			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
@@ -622,9 +624,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(ServerBrowser()->IsRefreshing())
 				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
 			else if(ServerBrowser()->IsGettingServerlist())
-				str_copy(m_aLocalStringHelper, Localize("Refreshing..."), sizeof(m_aLocalStringHelper));
+				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
 			else
-				str_copy(m_aLocalStringHelper, Localize("Refresh"), sizeof(m_aLocalStringHelper));
+				str_copy(m_aLocalStringHelper, Localize("Refresh"));
 
 			return m_aLocalStringHelper;
 		};
@@ -661,7 +663,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
 				m_Popup = POPUP_SWITCH_SERVER;
-				str_copy(m_aNextServer, g_Config.m_UiServerAddress, sizeof(m_aNextServer));
+				str_copy(m_aNextServer, g_Config.m_UiServerAddress);
 			}
 			else
 				Client()->Connect(g_Config.m_UiServerAddress);
@@ -801,13 +803,13 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		static int s_ActivePage = 0;
 
-		static int s_CountriesButton = 0;
+		static CButtonContainer s_CountriesButton;
 		if(DoButton_MenuTab(&s_CountriesButton, Localize("Countries"), s_ActivePage == 0, &Button, CUI::CORNER_TL))
 		{
 			s_ActivePage = 0;
 		}
 
-		static int s_TypesButton = 0;
+		static CButtonContainer s_TypesButton;
 		if(DoButton_MenuTab(&s_TypesButton, Localize("Types"), s_ActivePage == 1, &Button2, CUI::CORNER_TR))
 		{
 			s_ActivePage = 1;
@@ -1004,7 +1006,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		}
 	}
 
-	static int s_ClearButton = 0;
+	static CButtonContainer s_ClearButton;
 	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &ResetButton))
 	{
 		g_Config.m_BrFilterString[0] = 0;
@@ -1073,28 +1075,29 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			ButtonAddFav.VSplitLeft(5.0f, 0, &ButtonAddFav);
 			static int s_AddFavButton = 0;
 			static int s_LeakIpButton = 0;
-			if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
+			if(DoButton_CheckBox_Tristate(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
 			{
-				if(pSelectedServer->m_Favorite)
+				if(pSelectedServer->m_Favorite != TRISTATE::NONE)
 				{
-					ServerBrowser()->RemoveFavorite(pSelectedServer->m_NetAddr);
+					Favorites()->Remove(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses);
 				}
 				else
 				{
-					ServerBrowser()->AddFavorite(pSelectedServer->m_NetAddr);
+					Favorites()->Add(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses);
 					if(g_Config.m_UiPage == PAGE_LAN)
 					{
-						ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, true);
+						Favorites()->AllowPing(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses, true);
 					}
 				}
+				Client()->ServerBrowserUpdate();
 			}
-			if(pSelectedServer->m_Favorite)
+			if(pSelectedServer->m_Favorite != TRISTATE::NONE)
 			{
-				bool IpLeak = ServerBrowser()->IsFavoritePingAllowed(pSelectedServer->m_NetAddr);
-				if(DoButton_CheckBox(&s_LeakIpButton, Localize("Leak IP"), IpLeak, &ButtonLeakIp))
+				if(DoButton_CheckBox_Tristate(&s_LeakIpButton, Localize("Leak IP"), pSelectedServer->m_FavoriteAllowPing, &ButtonLeakIp))
 				{
-					ServerBrowser()->FavoriteAllowPing(pSelectedServer->m_NetAddr, !IpLeak);
+					Favorites()->AllowPing(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses, pSelectedServer->m_FavoriteAllowPing == TRISTATE::NONE);
 				}
+				Client()->ServerBrowserUpdate();
 			}
 		}
 
@@ -1167,7 +1170,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			char aTemp[16];
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
-				str_copy(aTemp, "SPEC", sizeof(aTemp));
+				str_copy(aTemp, "SPEC");
 			else if(IsRace(pSelectedServer) && g_Config.m_ClDDRaceScoreBoard)
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
@@ -1325,7 +1328,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 						(!m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
 							str_quickhash(pItem->m_aClients[j].m_aName) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
-						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress, sizeof(g_Config.m_UiServerAddress));
+						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 						m_ScrollOffset = ItemIndex;
 						m_SelectedIndex = ItemIndex;
 						Found = true;
@@ -1339,7 +1342,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
 	if(m_FriendlistSelectedIndex != -1)
 	{
-		static int s_RemoveButton = 0;
+		static CButtonContainer s_RemoveButton;
 		if(DoButton_Menu(&s_RemoveButton, Localize("Remove"), 0, &Button))
 			m_Popup = POPUP_REMOVE_FRIEND;
 	}
@@ -1368,7 +1371,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
-		static int s_AddButton = 0;
+		static CButtonContainer s_AddButton;
 		if(DoButton_Menu(&s_AddButton, Localize("Add Friend"), 0, &Button))
 		{
 			m_pClient->Friends()->AddFriend(s_aName, s_aClan);
@@ -1434,15 +1437,15 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		ms_ColorTabbarActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		ms_ColorTabbarInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
 
-		static int s_FiltersTab = 0;
+		static CButtonContainer s_FiltersTab;
 		if(DoButton_MenuTab(&s_FiltersTab, Localize("Filter"), ToolboxPage == 0, &TabButton0, CUI::CORNER_BL, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 0;
 
-		static int s_InfoTab = 0;
+		static CButtonContainer s_InfoTab;
 		if(DoButton_MenuTab(&s_InfoTab, Localize("Info"), ToolboxPage == 1, &TabButton1, 0, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 1;
 
-		static int s_FriendsTab = 0;
+		static CButtonContainer s_FriendsTab;
 		if(DoButton_MenuTab(&s_FriendsTab, Localize("Friends"), ToolboxPage == 2, &TabButton2, CUI::CORNER_BR, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 2;
 

@@ -29,15 +29,15 @@ def filter_cpp(filenames):
 def find_clang_format(version):
 	for binary in (
 		"clang-format",
-		"clang-format-{}".format(version),
-		"/opt/clang-format-static/clang-format-{}".format(version)):
+		f"clang-format-{version}",
+		f"/opt/clang-format-static/clang-format-{version}"):
 		try:
 			out = subprocess.check_output([binary, "--version"])
 		except FileNotFoundError:
 			continue
-		if "clang-format version {}.".format(version) in out.decode("utf-8"):
+		if f"clang-format version {version}." in out.decode("utf-8"):
 			return binary
-	print("Found no clang-format {}".format(version))
+	print(f"Found no clang-format {version}")
 	sys.exit(-1)
 
 clang_format_bin = find_clang_format(10)

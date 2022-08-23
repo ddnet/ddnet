@@ -9,7 +9,7 @@ CTooltips::CTooltips()
 
 void CTooltips::OnReset()
 {
-	HoverTime = -1;
+	m_HoverTime = -1;
 	m_Tooltips.clear();
 }
 
@@ -19,7 +19,7 @@ void CTooltips::SetActiveTooltip(CTooltip &Tooltip)
 		return;
 
 	m_ActiveTooltip.emplace(Tooltip);
-	HoverTime = time_get();
+	m_HoverTime = time_get();
 }
 
 inline void CTooltips::ClearActiveTooltip()
@@ -68,7 +68,7 @@ void CTooltips::OnRender()
 			return;
 
 		// Delay tooltip until 1 second passed.
-		if(HoverTime > time_get() - time_freq())
+		if(m_HoverTime > time_get() - time_freq())
 			return;
 
 		const float MARGIN = 5.0f;

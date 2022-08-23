@@ -27,28 +27,22 @@ CHud::CHud()
 	// won't work if zero
 	m_FrameTimeAvg = 0.0f;
 	m_FPSTextContainerIndex = -1;
-	OnReset();
 }
 
 void CHud::ResetHudContainers()
 {
 	for(auto &ScoreInfo : m_aScoreInfo)
 	{
-		if(ScoreInfo.m_OptionalNameTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(ScoreInfo.m_OptionalNameTextContainerIndex);
-		if(ScoreInfo.m_TextRankContainerIndex != -1)
-			TextRender()->DeleteTextContainer(ScoreInfo.m_TextRankContainerIndex);
-		if(ScoreInfo.m_TextScoreContainerIndex != -1)
-			TextRender()->DeleteTextContainer(ScoreInfo.m_TextScoreContainerIndex);
+		TextRender()->DeleteTextContainer(ScoreInfo.m_OptionalNameTextContainerIndex);
+		TextRender()->DeleteTextContainer(ScoreInfo.m_TextRankContainerIndex);
+		TextRender()->DeleteTextContainer(ScoreInfo.m_TextScoreContainerIndex);
 		if(ScoreInfo.m_RoundRectQuadContainerIndex != -1)
 			Graphics()->DeleteQuadContainer(ScoreInfo.m_RoundRectQuadContainerIndex);
 
 		ScoreInfo.Reset();
 	}
 
-	if(m_FPSTextContainerIndex != -1)
-		TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
-	m_FPSTextContainerIndex = -1;
+	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
 }
 
 void CHud::OnWindowResize()
@@ -72,6 +66,8 @@ void CHud::OnReset()
 
 void CHud::OnInit()
 {
+	OnReset();
+
 	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	PrepareAmmoHealthAndArmorQuads();
@@ -241,13 +237,12 @@ void CHud::RenderScoreHud()
 				// draw score
 				if(aRecreateTeamScore[t])
 				{
-					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
-						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
+					TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) / 2 - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
-					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScoreTeam[t]);
+					TextRender()->CreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScoreTeam[t]);
 				}
 				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
 				{
@@ -278,15 +273,14 @@ void CHud::RenderScoreHud()
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
 
-							if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
-								TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
+							TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
 
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 
 							CTextCursor Cursor;
 							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
-							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
+							TextRender()->CreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
 						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
@@ -422,13 +416,12 @@ void CHud::RenderScoreHud()
 
 				if(RecreateScores)
 				{
-					if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
-						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
+					TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax + (ScoreWidthMax - m_aScoreInfo[t].m_ScoreTextWidth) - Split, StartY + t * 20 + (18.f - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
-					m_aScoreInfo[t].m_TextScoreContainerIndex = TextRender()->CreateTextContainer(&Cursor, aScore[t]);
+					TextRender()->CreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScore[t]);
 				}
 				// draw score
 				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
@@ -449,14 +442,13 @@ void CHud::RenderScoreHud()
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
 
-							if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
-								TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
+							TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex);
 
 							CTextCursor Cursor;
 							float w = TextRender()->TextWidth(0, 8.0f, pName, -1, -1.0f);
 							TextRender()->SetCursor(&Cursor, minimum(m_Width - w - 1.0f, m_Width - ScoreWidthMax - ImageSize - 2 * Split - PosSize), StartY + (t + 1) * 20.0f - 2.0f, 8.0f, TEXTFLAG_RENDER);
 							Cursor.m_LineWidth = -1;
-							m_aScoreInfo[t].m_OptionalNameTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, pName);
+							TextRender()->CreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
 						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
@@ -490,13 +482,12 @@ void CHud::RenderScoreHud()
 				{
 					mem_copy(m_aScoreInfo[t].m_aRankText, aBuf, sizeof(m_aScoreInfo[t].m_aRankText));
 
-					if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
-						TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex);
+					TextRender()->DeleteTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax - ImageSize - Split - PosSize, StartY + t * 20 + (18.f - 10.f) / 2.f, 10.0f, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = -1;
-					m_aScoreInfo[t].m_TextRankContainerIndex = TextRender()->CreateTextContainer(&Cursor, aBuf);
+					TextRender()->CreateTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, &Cursor, aBuf);
 				}
 				if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
 				{
@@ -557,7 +548,7 @@ void CHud::RenderTextInfo()
 		auto OldFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
 		if(m_FPSTextContainerIndex == -1)
-			m_FPSTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, "0");
+			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
 		else
 			TextRender()->RecreateTextContainerSoft(&Cursor, m_FPSTextContainerIndex, aBuf);
 		TextRender()->SetRenderFlags(OldFlags);
@@ -802,12 +793,7 @@ void CHud::RenderVoting()
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.40f);
-
-	RenderTools()->DrawRoundRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, 5.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_ALL, 5.0f);
 
 	TextRender()->TextColor(1, 1, 1, 1);
 
@@ -1018,13 +1004,13 @@ void CHud::PreparePlayerStateQuads()
 
 	// Quads for displaying prohibited capabilities
 	m_SoloOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoCollisionOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoHookHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoHammerHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoGunHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoShotgunHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoGrenadeHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
-	m_NoLaserHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_CollisionDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_HookHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_HammerHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_GunHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_ShotgunHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_GrenadeHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_LaserHitDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
 	// Quads for displaying freeze status
 	m_DeepFrozenOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -1044,19 +1030,20 @@ void CHud::RenderPlayerState(const int ClientID)
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
+	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
 	int TotalJumpsToDisplay = 0, AvailableJumpsToDisplay = 0;
 	if(g_Config.m_ClShowhudJumpsIndicator)
 	{
 		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
 			bool Grounded = false;
-			if(Collision()->CheckPoint(pCharacter->m_Pos.x + CCharacterCore::PhysicalSize() / 2,
-				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			if(Collision()->CheckPoint(pPlayer->m_X + CCharacterCore::PhysicalSize() / 2,
+				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
 			{
 				Grounded = true;
 			}
-			if(Collision()->CheckPoint(pCharacter->m_Pos.x - CCharacterCore::PhysicalSize() / 2,
-				   pCharacter->m_Pos.y + CCharacterCore::PhysicalSize() / 2 + 5))
+			if(Collision()->CheckPoint(pPlayer->m_X - CCharacterCore::PhysicalSize() / 2,
+				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
 			{
 				Grounded = true;
 			}
@@ -1069,7 +1056,7 @@ void CHud::RenderPlayerState(const int ClientID)
 			else if(pCharacter->m_Jumps == 1)
 			{
 				// If the player has only one jump, each jump is the last one
-				UsedJumps = pCharacter->m_Jumped & 2;
+				UsedJumps = pPlayer->m_Jumped & 2;
 			}
 			else if(pCharacter->m_Jumps == -1)
 			{
@@ -1083,7 +1070,7 @@ void CHud::RenderPlayerState(const int ClientID)
 			}
 
 			int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
-			if(!(pCharacter->m_Jumped & 2) && UnusedJumps <= 0)
+			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
@@ -1122,7 +1109,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	// render weapons
 	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_HAMMER)
+		if(pPlayer->m_Weapon != WEAPON_HAMMER)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -1136,7 +1123,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_GUN].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_GUN)
+		if(pPlayer->m_Weapon != WEAPON_GUN)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -1149,7 +1136,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_SHOTGUN)
+		if(pPlayer->m_Weapon != WEAPON_SHOTGUN)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -1162,7 +1149,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_GRENADE)
+		if(pPlayer->m_Weapon != WEAPON_GRENADE)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -1175,7 +1162,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_LASER].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_LASER)
+		if(pPlayer->m_Weapon != WEAPON_LASER)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -1188,7 +1175,7 @@ void CHud::RenderPlayerState(const int ClientID)
 	}
 	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
 	{
-		if(pCharacter->m_ActiveWeapon != WEAPON_NINJA)
+		if(pPlayer->m_Weapon != WEAPON_NINJA)
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 		}
@@ -1271,53 +1258,53 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_SoloOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoCollision)
+	if(pCharacter->m_CollisionDisabled)
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoCollision);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoCollisionOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudCollisionDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_CollisionDisabledOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoHookHit)
+	if(pCharacter->m_HookHitDisabled)
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHookHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHookHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudHookHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_HookHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if(pCharacter->m_NoHammerHit)
+	if(pCharacter->m_HammerHitDisabled)
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoHammerHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoHammerHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudHammerHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_HammerHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoGrenadeHit && pCharacter->m_HasTelegunGun && pCharacter->m_aWeapons[WEAPON_GUN].m_Got))
+	if((pCharacter->m_GrenadeHitDisabled && pCharacter->m_HasTelegunGun && pCharacter->m_aWeapons[WEAPON_GUN].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoGunHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudGunHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LaserHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoShotgunHit && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
+	if((pCharacter->m_ShotgunHitDisabled && pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoShotgunHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoShotgunHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudShotgunHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_ShotgunHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoGrenadeHit && pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got))
+	if((pCharacter->m_GrenadeHitDisabled && pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoGrenadeHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoGrenadeHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudGrenadeHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_GrenadeHitDisabledOffset, x, y);
 		x += 12;
 	}
-	if((pCharacter->m_NoLaserHit && pCharacter->m_aWeapons[WEAPON_LASER].m_Got))
+	if((pCharacter->m_LaserHitDisabled && pCharacter->m_aWeapons[WEAPON_LASER].m_Got))
 	{
 		HasProhibitedCapabilities = true;
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNoLaserHit);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_NoLaserHitOffset, x, y);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLaserHitDisabled);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LaserHitDisabledOffset, x, y);
 	}
 
 	// render dummy actions and freeze state
@@ -1519,12 +1506,7 @@ void CHud::RenderDummyActions()
 		StartY -= 56;
 	}
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
-	Graphics()->QuadsEnd();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	RenderTools()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_L, 5.0f);
 
 	float y = StartY + 2;
 	float x = StartX + 2;
@@ -1594,12 +1576,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 		StartY -= 56;
 	}
 
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(StartX, StartY, BoxWidth, BoxHeight, 5.0f, CUI::CORNER_L);
-	Graphics()->QuadsEnd();
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	RenderTools()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_L, 5.0f);
 
 	CNetObj_Character *pCharacter = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
 	const float TicksPerSecond = 50.0f;
@@ -1721,11 +1698,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 void CHud::RenderSpectatorHud()
 {
 	// draw the box
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(m_Width - 180.0f, m_Height - 15.0f, 180.0f, 15.0f, 5.0f, CUI::CORNER_TL);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(m_Width - 180.0f, m_Height - 15.0f, 180.0f, 15.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_TL, 5.0f);
 
 	// draw the text
 	char aBuf[128];
@@ -1738,15 +1711,10 @@ void CHud::RenderLocalTime(float x)
 	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_Scoreboard.Active())
 		return;
 
-	//draw the box
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(x - 30.0f, 0.0f, 25.0f, 12.5f, 3.75f, CUI::CORNER_B);
-	Graphics()->QuadsEnd();
+	// draw the box
+	RenderTools()->DrawRect(x - 30.0f, 0.0f, 25.0f, 12.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_B, 3.75f);
 
-	//draw the text
+	// draw the text
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 	TextRender()->Text(0, x - 25.0f, (12.5f - 5.f) / 2.f, 5.0f, aTimeStr, -1.0f);

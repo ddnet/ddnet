@@ -1292,6 +1292,7 @@ set(EXPECTED_DATA
   languages/czech.txt
   languages/danish.txt
   languages/dutch.txt
+  languages/esperanto.txt
   languages/finnish.txt
   languages/french.txt
   languages/german.txt
@@ -1706,6 +1707,7 @@ set_src(BASE GLOB_RECURSE src/base
   system.cpp
   system.h
   tl/threading.h
+  types.h
   unicode/confusables.cpp
   unicode/confusables.h
   unicode/confusables_data.h
@@ -1723,6 +1725,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   discord.h
   editor.h
   engine.h
+  favorites.h
   friends.h
   ghost.h
   graphics.h
@@ -1946,7 +1949,6 @@ if(CLIENT)
     backend/opengl/opengl_sl_program.cpp
     backend/opengl/opengl_sl_program.h
     backend/opengles/backend_opengles.cpp
-    backend/opengles/backend_opengles.h
     backend/opengles/backend_opengles3.cpp
     backend/opengles/backend_opengles3.h
     backend/opengles/gles_class_defines.h
@@ -1964,6 +1966,7 @@ if(CLIENT)
     demoedit.cpp
     demoedit.h
     discord.cpp
+    favorites.cpp
     friends.cpp
     friends.h
     ghost.cpp
@@ -2312,8 +2315,6 @@ if(SERVER)
     entities/dragger.h
     entities/dragger_beam.cpp
     entities/dragger_beam.h
-    entities/flag.cpp
-    entities/flag.h
     entities/gun.cpp
     entities/gun.h
     entities/laser.cpp

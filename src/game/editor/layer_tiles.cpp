@@ -1044,7 +1044,10 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 
 void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 {
+	const auto ImgBefore = m_Image;
 	Func(&m_Image);
+	if(m_Image != ImgBefore)
+		m_Texture.Invalidate();
 }
 
 void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)

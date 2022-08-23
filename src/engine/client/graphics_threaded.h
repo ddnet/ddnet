@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <vector>
 
-#define CMD_BUFFER_DATA_BUFFER_SIZE 1024 * 1024 * 2
-#define CMD_BUFFER_CMD_BUFFER_SIZE 1024 * 256
+constexpr int CMD_BUFFER_DATA_BUFFER_SIZE = 1024 * 1024 * 2;
+constexpr int CMD_BUFFER_CMD_BUFFER_SIZE = 1024 * 256;
 
 class CCommandBuffer
 {
@@ -824,6 +824,8 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	std::vector<uint8_t> m_vSpriteHelper;
 
+	bool m_WarnPngliteIncompatibleImages = false;
+
 	std::vector<SWarning> m_vWarnings;
 
 	// is a non full windowed (in a sense that the viewport won't include the whole window),
@@ -1249,6 +1251,7 @@ public:
 	int GetNumScreens() const override;
 	void Minimize() override;
 	void Maximize() override;
+	void WarnPngliteIncompatibleImages(bool Warn) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
 	bool SetWindowScreen(int Index) override;
 	void Move(int x, int y) override;

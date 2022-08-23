@@ -35,7 +35,7 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 		if(!pText)
 			m_aInputEvents[m_NumEvents].m_aText[0] = 0;
 		else
-			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText, sizeof(m_aInputEvents[m_NumEvents].m_aText));
+			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText);
 		m_aInputEvents[m_NumEvents].m_InputCount = m_InputCounter;
 		m_NumEvents++;
 	}
@@ -137,7 +137,7 @@ void CInput::UpdateActiveJoystick()
 	}
 	// Fall back to first joystick if no match was found
 	if(!m_pActiveJoystick)
-		m_pActiveJoystick = &m_vJoysticks[0];
+		m_pActiveJoystick = &m_vJoysticks[0]; // NOLINT(readability-container-data-pointer)
 }
 
 void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -160,7 +160,7 @@ CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
 	m_NumButtons = SDL_JoystickNumButtons(pDelegate);
 	m_NumBalls = SDL_JoystickNumBalls(pDelegate);
 	m_NumHats = SDL_JoystickNumHats(pDelegate);
-	str_copy(m_aName, SDL_JoystickName(pDelegate), sizeof(m_aName));
+	str_copy(m_aName, SDL_JoystickName(pDelegate));
 	SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
 	m_InstanceID = SDL_JoystickInstanceID(pDelegate);
 }
@@ -180,7 +180,7 @@ void CInput::SelectNextJoystick()
 	if(Num > 1)
 	{
 		m_pActiveJoystick = &m_vJoysticks[(m_pActiveJoystick->GetIndex() + 1) % Num];
-		str_copy(g_Config.m_InpControllerGUID, m_pActiveJoystick->GetGUID(), sizeof(g_Config.m_InpControllerGUID));
+		str_copy(g_Config.m_InpControllerGUID, m_pActiveJoystick->GetGUID());
 	}
 }
 
@@ -561,7 +561,7 @@ int CInput::Update()
 			m_EditingTextLen = str_length(Event.edit.text);
 			if(m_EditingTextLen)
 			{
-				str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
+				str_copy(m_aEditingText, Event.edit.text);
 				m_EditingCursor = 0;
 				for(int i = 0; i < Event.edit.start; i++)
 					m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);

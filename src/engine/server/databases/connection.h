@@ -13,7 +13,7 @@ class IDbConnection
 public:
 	IDbConnection(const char *pPrefix)
 	{
-		str_copy(m_aPrefix, pPrefix, sizeof(m_aPrefix));
+		str_copy(m_aPrefix, pPrefix);
 	}
 	virtual ~IDbConnection() {}
 	IDbConnection &operator=(const IDbConnection &) = delete;

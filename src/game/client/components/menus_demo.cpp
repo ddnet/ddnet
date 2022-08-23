@@ -34,9 +34,9 @@ int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
-int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
+int CMenus::DoButton_Sprite(CButtonContainer *pButtonContainer, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
 {
-	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pID)), Corners, 5.0f);
+	RenderTools()->DrawUIRect(pRect, ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
 	Graphics()->QuadsBegin();
 	if(!Checked)
@@ -46,7 +46,7 @@ int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Chec
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
-	return UI()->DoButtonLogic(pID, Checked, pRect);
+	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
 bool CMenus::DemoFilterChat(const void *pData, int Size, void *pUser)
@@ -110,15 +110,15 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		static int s_RemoveChat = 0;
 
-		static int s_ButtonAbort = 0;
+		static CButtonContainer s_ButtonAbort;
 		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 			m_DemoPlayerState = DEMOPLAYER_NONE;
 
-		static int s_ButtonOk = 0;
+		static CButtonContainer s_ButtonOk;
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 		{
 			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
-				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"), sizeof(m_aDemoPlayerPopupHint));
+				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
 			else
 			{
 				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
@@ -132,7 +132,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(DemoFile && str_comp(m_aDemoPlayerPopupHint, pStr) != 0)
 				{
 					io_close(DemoFile);
-					str_copy(m_aDemoPlayerPopupHint, pStr, sizeof(m_aDemoPlayerPopupHint));
+					str_copy(m_aDemoPlayerPopupHint, pStr);
 				}
 				else
 				{
@@ -392,7 +392,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	// combined play and pause button
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_PlayPauseButton = 0;
+	static CButtonContainer s_PlayPauseButton;
 	if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, pInfo->m_Paused ? SPRITE_DEMOBUTTON_PLAY : SPRITE_DEMOBUTTON_PAUSE, false, &Button, CUI::CORNER_ALL))
 	{
 		if(pInfo->m_Paused)
@@ -409,7 +409,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_ResetButton = 0;
+	static CButtonContainer s_ResetButton;
 	if(DoButton_Sprite(&s_ResetButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP, false, &Button, CUI::CORNER_ALL))
 	{
 		DemoPlayer()->Pause();
@@ -419,14 +419,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// slowdown
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SlowDownButton = 0;
+	static CButtonContainer s_SlowDownButton;
 	if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 		DecreaseDemoSpeed = true;
 
 	// fastforward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_FastForwardButton = 0;
+	static CButtonContainer s_FastForwardButton;
 	if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
 		IncreaseDemoSpeed = true;
 
@@ -439,24 +439,24 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// slice begin button
 	ButtonBar.VSplitLeft(Margins * 10, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SliceBeginButton = 0;
+	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_Sprite(&s_SliceBeginButton, IMAGE_DEMOBUTTONS2, SPRITE_DEMOBUTTON_SLICE_BEGIN, 0, &Button, CUI::CORNER_ALL))
 		Client()->DemoSliceBegin();
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SliceEndButton = 0;
+	static CButtonContainer s_SliceEndButton;
 	if(DoButton_Sprite(&s_SliceEndButton, IMAGE_DEMOBUTTONS2, SPRITE_DEMOBUTTON_SLICE_END, 0, &Button, CUI::CORNER_ALL))
 		Client()->DemoSliceEnd();
 
 	// slice save button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static int s_SliceSaveButton = 0;
+	static CButtonContainer s_SliceSaveButton;
 	if(DoButton_Sprite(&s_SliceSaveButton, IMAGE_FILEICONS, SPRITE_FILE_DEMO2, 0, &Button, CUI::CORNER_ALL))
 	{
-		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
@@ -473,7 +473,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// toggle keyboard shortcuts button
 	ButtonBar.VSplitRight(Margins * 3, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
-	static int s_KeyboardShortcutsButton = 0;
+	static CButtonContainer s_KeyboardShortcutsButton;
 	int Sprite = g_Config.m_ClDemoKeyboardShortcuts ? SPRITE_DEMOBUTTON_SHORTCUTS_ENABLED : SPRITE_DEMOBUTTON_SHORTCUTS_DISABLED;
 	if(DoButton_Sprite(&s_KeyboardShortcutsButton, IMAGE_DEMOBUTTONS2, Sprite, 0, &Button, CUI::CORNER_ALL))
 	{
@@ -751,7 +751,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	}
 
 	CDemoItem Item;
-	str_copy(Item.m_aFilename, pInfo->m_pName, sizeof(Item.m_aFilename));
+	str_copy(Item.m_aFilename, pInfo->m_pName);
 	if(IsDir)
 	{
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pInfo->m_pName);
@@ -856,13 +856,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	{
 		CDemoItem &Item = m_vDemos[m_DemolistSelectedIndex];
 		if(str_comp(Item.m_aFilename, "..") == 0)
-			str_copy(aFooterLabel, Localize("Parent Folder"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Parent Folder"));
 		else if(m_DemolistSelectedIsDir)
-			str_copy(aFooterLabel, Localize("Folder"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Folder"));
 		else if(!FetchHeader(Item))
-			str_copy(aFooterLabel, Localize("Invalid Demo"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Invalid Demo"));
 		else
-			str_copy(aFooterLabel, Localize("Demo details"), sizeof(aFooterLabel));
+			str_copy(aFooterLabel, Localize("Demo details"));
 	}
 
 	// render background
@@ -1084,7 +1084,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_vDemos.size());
 	if(PreviousIndex != m_DemolistSelectedIndex)
 	{
-		str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName, sizeof(g_Config.m_UiDemoSelected));
+		str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName);
 		DemolistOnUpdate(false);
 	}
 
@@ -1127,7 +1127,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			if(UI()->DoButtonLogic(Item.m_aName, Selected, &Row))
 			{
 				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
-				str_copy(g_Config.m_UiDemoSelected, Item.m_aName, sizeof(g_Config.m_UiDemoSelected));
+				str_copy(g_Config.m_UiDemoSelected, Item.m_aName);
 				DemolistOnUpdate(false);
 				m_DoubleClickIndex = ItemIndex;
 			}
@@ -1203,7 +1203,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Activated = true;
 	}
 
-	static int s_RefreshButton = 0;
+	static CButtonContainer s_RefreshButton;
 	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		DemolistPopulate();
@@ -1217,7 +1217,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			FetchAllHeaders();
 	}
 
-	static int s_PlayButton = 0;
+	static CButtonContainer s_PlayButton;
 	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		if(m_DemolistSelectedIndex >= 0)
@@ -1229,7 +1229,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				else // sub folder
 				{
 					char aTemp[256];
-					str_copy(aTemp, m_aCurrentDemoFolder, sizeof(aTemp));
+					str_copy(aTemp, m_aCurrentDemoFolder);
 					str_format(m_aCurrentDemoFolder, sizeof(m_aCurrentDemoFolder), "%s/%s", aTemp, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					m_DemolistStorageType = m_vDemos[m_DemolistSelectedIndex].m_StorageType;
 				}
@@ -1252,7 +1252,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 	}
 
-	static int s_DirectoryButtonID = 0;
+	static CButtonContainer s_DirectoryButtonID;
 	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
@@ -1266,7 +1266,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	if(!m_DemolistSelectedIsDir)
 	{
-		static int s_DeleteButton = 0;
+		static CButtonContainer s_DeleteButton;
 		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
@@ -1277,27 +1277,27 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 		}
 
-		static int s_RenameButton = 0;
+		static CButtonContainer s_RenameButton;
 		if(DoButton_Menu(&s_RenameButton, Localize("Rename"), 0, &RenameRect))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
 				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENAME_DEMO;
-				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 				return;
 			}
 		}
 
 #if defined(CONF_VIDEORECORDER)
-		static int s_RenderButton = 0;
+		static CButtonContainer s_RenderButton;
 		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
 				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENDER_DEMO;
-				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFile));
+				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 				return;
 			}
 		}

@@ -94,15 +94,18 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 			}
 			if(pItem->m_Version < 2 || pItem->m_Synchronized)
 			{
-				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
-										    0,
-										    (CurTick - MinTick),
-										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-									    TickToNanoSeconds.count())) +
-					 MinTick * TickToNanoSeconds;
+				if(pThis->m_pClient->m_Snap.m_pGameInfoObj)
+				{
+					// get the lerp of the current tick and prev
+					int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+					int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+					s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
+											    0,
+											    (CurTick - MinTick),
+											    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+										    TickToNanoSeconds.count())) +
+						 MinTick * TickToNanoSeconds;
+				}
 			}
 			else
 			{
@@ -182,7 +185,7 @@ void FillTmpTileSpeedup(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTe
 	}
 
 	//same as in rotate from Graphics()
-	float Angle = (float)AngleRotate * (3.14159265f / 180.0f);
+	float Angle = (float)AngleRotate * (pi / 180.0f);
 	float c = cosf(Angle);
 	float s = sinf(Angle);
 	float xR, yR;
@@ -833,8 +836,8 @@ void CMapLayers::OnMapLoad()
 						vtmpTileTexCoords.insert(vtmpTileTexCoords.end(), vtmpBorderRightTilesTexCoords.begin(), vtmpBorderRightTilesTexCoords.end());
 
 						//setup params
-						float *pTmpTiles = (vtmpTiles.empty()) ? NULL : (float *)&vtmpTiles[0];
-						unsigned char *pTmpTileTexCoords = (vtmpTileTexCoords.empty()) ? NULL : (unsigned char *)&vtmpTileTexCoords[0];
+						float *pTmpTiles = vtmpTiles.empty() ? NULL : (float *)vtmpTiles.data();
+						unsigned char *pTmpTileTexCoords = vtmpTileTexCoords.empty() ? NULL : (unsigned char *)vtmpTileTexCoords.data();
 
 						Visuals.m_BufferContainerIndex = -1;
 						size_t UploadDataSize = vtmpTileTexCoords.size() * sizeof(SGraphicTileTexureCoords) + vtmpTiles.size() * sizeof(SGraphicTile);
@@ -951,9 +954,9 @@ void CMapLayers::OnMapLoad()
 				{
 					void *pUploadData = NULL;
 					if(Textured)
-						pUploadData = &vtmpQuadsTextured[0];
+						pUploadData = vtmpQuadsTextured.data();
 					else
-						pUploadData = &vtmpQuads[0];
+						pUploadData = vtmpQuads.data();
 					// create the buffer object
 					int BufferObjectIndex = Graphics()->CreateBufferObject(UploadDataSize, pUploadData, 0);
 					// then create the buffer container
@@ -1087,7 +1090,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA &Color, CMapItemLayer
 		int DrawCount = s_vpIndexOffsets.size();
 		if(DrawCount != 0)
 		{
-			Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, &s_vpIndexOffsets[0], &s_vDrawCounts[0], DrawCount);
+			Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, s_vpIndexOffsets.data(), s_vDrawCounts.data(), DrawCount);
 		}
 	}
 
@@ -1416,7 +1419,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 		if(NeedsFlush)
 		{
 			// render quads of the current offset directly(cancel batching)
-			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_vQuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 			QuadsRenderCount = 0;
 			CurQuadOffset = i;
 			if(Color.a == 0)
@@ -1435,7 +1438,7 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 			QInfo.m_Rotation = Rot;
 		}
 	}
-	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &s_vQuadRenderInfo[0], QuadsRenderCount, CurQuadOffset);
+	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 }
 
 void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer)

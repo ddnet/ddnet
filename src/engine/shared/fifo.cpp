@@ -19,7 +19,7 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 	if(pFifoFile[0] == '\0')
 		return;
 
-	str_copy(m_aFilename, pFifoFile, sizeof(m_aFilename));
+	str_copy(m_aFilename, pFifoFile);
 	m_Flag = Flag;
 
 	mkfifo(m_aFilename, 0600);

@@ -231,6 +231,8 @@ private:
 
 	CNetPacketConstruct m_Construct;
 
+	NETADDR m_aConnectAddrs[16];
+	int m_NumConnectAddrs;
 	NETADDR m_PeerAddr;
 	NETSOCKET m_Socket;
 	NETSTATS m_Stats;
@@ -241,6 +243,7 @@ private:
 	void AckChunks(int Ack);
 
 	int QueueChunkEx(int Flags, int DataSize, const void *pData, int Sequence);
+	void SendConnect();
 	void SendControl(int ControlMsg, const void *pExtra, int ExtraSize);
 	void ResendChunk(CNetChunkResend *pResend);
 	void Resend();
@@ -251,7 +254,7 @@ public:
 
 	void Reset(bool Rejoin = false);
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
-	int Connect(NETADDR *pAddr);
+	int Connect(const NETADDR *pAddr, int NumAddrs);
 	void Disconnect(const char *pReason);
 
 	int Update();
@@ -264,6 +267,11 @@ public:
 	void SignalResend();
 	int State() const { return m_State; }
 	const NETADDR *PeerAddress() const { return &m_PeerAddr; }
+	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const
+	{
+		*ppAddrs = m_aConnectAddrs;
+		*pNumAddrs = m_NumConnectAddrs;
+	}
 
 	void ResetErrorString() { m_aErrorString[0] = 0; }
 	const char *ErrorString() const { return m_aErrorString; }
@@ -487,7 +495,7 @@ public:
 
 	// connection state
 	int Disconnect(const char *pReason);
-	int Connect(NETADDR *pAddr);
+	int Connect(const NETADDR *pAddr, int NumAddrs);
 
 	// communication
 	int Recv(CNetChunk *pChunk);
@@ -502,6 +510,8 @@ public:
 	// error and state
 	int NetType() const { return net_socket_type(m_Socket); }
 	int State();
+	const NETADDR *ServerAddress() const { return m_Connection.PeerAddress(); }
+	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const { m_Connection.ConnectAddresses(ppAddrs, pNumAddrs); }
 	int GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;
 
@@ -534,7 +544,7 @@ public:
 	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
-	static int IsSeqInBackroom(int Seq, int Ack);
+	static bool IsSeqInBackroom(int Seq, int Ack);
 };
 
 #endif

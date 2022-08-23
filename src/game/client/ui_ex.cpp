@@ -547,12 +547,12 @@ bool CUIEx::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigne
 	if(UI()->LastActiveItem() == pID && Input()->GetIMEEditingTextLength() > -1)
 	{
 		int EditingTextCursor = Input()->GetEditingCursor();
-		str_copy(aDispEditingText, pDisplayStr, sizeof(aDispEditingText));
+		str_copy(aDispEditingText, pDisplayStr);
 		char aEditingText[IInput::INPUT_TEXT_SIZE + 2];
 		if(Hidden)
 		{
 			// Do not show editing text in password field
-			str_copy(aEditingText, "[*]", sizeof(aEditingText));
+			str_copy(aEditingText, "[*]");
 			EditingTextCursor = 1;
 		}
 		else

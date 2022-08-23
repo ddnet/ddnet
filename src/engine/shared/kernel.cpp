@@ -80,7 +80,7 @@ public:
 
 		pInterface->m_pKernel = this;
 		m_aInterfaces[m_NumInterfaces].m_pInterface = pInterface;
-		str_copy(m_aInterfaces[m_NumInterfaces].m_aName, pName, sizeof(m_aInterfaces[m_NumInterfaces].m_aName));
+		str_copy(m_aInterfaces[m_NumInterfaces].m_aName, pName);
 		m_aInterfaces[m_NumInterfaces].m_AutoDestroy = Destroy;
 		m_NumInterfaces++;
 

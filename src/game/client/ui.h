@@ -187,6 +187,10 @@ struct SLabelProperties
 	bool m_EnableWidthCheck = true;
 };
 
+class CButtonContainer
+{
+};
+
 class CUI
 {
 	bool m_Enabled;
@@ -239,6 +243,7 @@ public:
 
 	enum
 	{
+		CORNER_NONE = 0,
 		CORNER_TL = 1,
 		CORNER_TR = 2,
 		CORNER_BL = 4,

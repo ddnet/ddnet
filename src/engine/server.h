@@ -14,7 +14,6 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
-#include <game/version.h>
 
 struct CAntibotRoundData;
 
@@ -57,36 +56,42 @@ public:
 	virtual int ClientCountry(int ClientID) const = 0;
 	virtual bool ClientIngame(int ClientID) const = 0;
 	virtual bool ClientAuthed(int ClientID) const = 0;
-	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
+	virtual bool GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 
+	/**
+	 * Returns the version of the client with the given client ID.
+	 *
+	 * @param ClientID the client ID, which must be between 0 and
+	 * MAX_CLIENTS - 1, or equal to SERVER_DEMO_CLIENT for server demos.
+	 *
+	 * @return The version of the client with the given client ID.
+	 * For server demos this is always the latest client version.
+	 * On errors, VERSION_NONE is returned.
+	 */
+	virtual int GetClientVersion(int ClientID) const = 0;
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
 	template<class T, typename std::enable_if<!protocol7::is_sixup<T>::value, int>::type = 0>
-	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
+	inline int SendPackMsg(const T *pMsg, int Flags, int ClientID)
 	{
 		int Result = 0;
-		T tmp;
 		if(ClientID == -1)
 		{
 			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i))
-				{
-					mem_copy(&tmp, pMsg, sizeof(T));
-					Result = SendPackMsgTranslate(&tmp, Flags, i);
-				}
+					Result = SendPackMsgTranslate(pMsg, Flags, i);
 		}
 		else
 		{
-			mem_copy(&tmp, pMsg, sizeof(T));
-			Result = SendPackMsgTranslate(&tmp, Flags, ClientID);
+			Result = SendPackMsgTranslate(pMsg, Flags, ClientID);
 		}
 		return Result;
 	}
 
 	template<class T, typename std::enable_if<protocol7::is_sixup<T>::value, int>::type = 1>
-	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
+	inline int SendPackMsg(const T *pMsg, int Flags, int ClientID)
 	{
 		int Result = 0;
 		if(ClientID == -1)
@@ -102,50 +107,57 @@ public:
 	}
 
 	template<class T>
-	int SendPackMsgTranslate(T *pMsg, int Flags, int ClientID)
+	int SendPackMsgTranslate(const T *pMsg, int Flags, int ClientID)
 	{
 		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientID)
+	int SendPackMsgTranslate(const CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientID)
 	{
-		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
+		CNetMsg_Sv_Emoticon MsgCopy;
+		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+		return Translate(MsgCopy.m_ClientID, ClientID) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
+	int SendPackMsgTranslate(const CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
+		CNetMsg_Sv_Chat MsgCopy;
+		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+
 		char aBuf[1000];
-		if(pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
+		if(MsgCopy.m_ClientID >= 0 && !Translate(MsgCopy.m_ClientID, ClientID))
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
-			pMsg->m_pMessage = aBuf;
-			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
+			str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(MsgCopy.m_ClientID), MsgCopy.m_pMessage);
+			MsgCopy.m_pMessage = aBuf;
+			MsgCopy.m_ClientID = VANILLA_MAX_CLIENTS - 1;
 		}
 
 		if(IsSixup(ClientID))
 		{
 			protocol7::CNetMsg_Sv_Chat Msg7;
-			Msg7.m_ClientID = pMsg->m_ClientID;
-			Msg7.m_pMessage = pMsg->m_pMessage;
-			Msg7.m_Mode = pMsg->m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
+			Msg7.m_ClientID = MsgCopy.m_ClientID;
+			Msg7.m_pMessage = MsgCopy.m_pMessage;
+			Msg7.m_Mode = MsgCopy.m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
 			Msg7.m_TargetID = -1;
 			return SendPackMsgOne(&Msg7, Flags, ClientID);
 		}
 
-		return SendPackMsgOne(pMsg, Flags, ClientID);
+		return SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(CNetMsg_Sv_KillMsg *pMsg, int Flags, int ClientID)
+	int SendPackMsgTranslate(const CNetMsg_Sv_KillMsg *pMsg, int Flags, int ClientID)
 	{
-		if(!Translate(pMsg->m_Victim, ClientID))
+		CNetMsg_Sv_KillMsg MsgCopy;
+		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+		if(!Translate(MsgCopy.m_Victim, ClientID))
 			return 0;
-		if(!Translate(pMsg->m_Killer, ClientID))
-			pMsg->m_Killer = pMsg->m_Victim;
-		return SendPackMsgOne(pMsg, Flags, ClientID);
+		if(!Translate(MsgCopy.m_Killer, ClientID))
+			MsgCopy.m_Killer = MsgCopy.m_Victim;
+		return SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
 	template<class T>
-	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
+	int SendPackMsgOne(const T *pMsg, int Flags, int ClientID)
 	{
 		dbg_assert(ClientID != -1, "SendPackMsgOne called with -1");
 		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
@@ -155,19 +167,11 @@ public:
 		return SendMsg(&Packer, Flags, ClientID);
 	}
 
-	int GetClientVersion(int ClientID) const
-	{
-		CClientInfo Info;
-		GetClientInfo(ClientID, &Info);
-		return Info.m_DDNetVersion;
-	}
-
 	bool Translate(int &Target, int Client)
 	{
 		if(IsSixup(Client))
 			return true;
-		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
-		if(ClientVersion >= VERSION_DDNET_OLD)
+		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
 		int *pMap = GetIdMap(Client);
 		bool Found = false;
@@ -187,8 +191,7 @@ public:
 	{
 		if(IsSixup(Client))
 			return true;
-		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
-		if(ClientVersion >= VERSION_DDNET_OLD)
+		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
 		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
 		int *pMap = GetIdMap(Client);

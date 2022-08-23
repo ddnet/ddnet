@@ -277,7 +277,6 @@ public:
 	void Quantize();
 
 	// DDRace
-
 	int m_Id;
 	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
@@ -292,14 +291,14 @@ public:
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
 	bool m_Solo;
 	bool m_Jetpack;
-	bool m_NoCollision;
+	bool m_CollisionDisabled;
 	bool m_EndlessHook;
 	bool m_EndlessJump;
-	bool m_NoHammerHit;
-	bool m_NoGrenadeHit;
-	bool m_NoLaserHit;
-	bool m_NoShotgunHit;
-	bool m_NoHookHit;
+	bool m_HammerHitDisabled;
+	bool m_GrenadeHitDisabled;
+	bool m_LaserHitDisabled;
+	bool m_ShotgunHitDisabled;
+	bool m_HookHitDisabled;
 	bool m_Super;
 	bool m_HasTelegunGun;
 	bool m_HasTelegunGrenade;

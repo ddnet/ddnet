@@ -18,15 +18,15 @@ def hash_password(password):
 
 def auth_add_p_line(username, level, pwhash, salt):
 	if level not in ('admin', 'mod', 'moderator', 'helper'):
-		print("Warning: level ({}) not one of admin, mod or helper.".format(level), file=sys.stderr)
-	if repr(level) != "'{}'".format(level):
-		print("Warning: level ({}) contains weird symbols, config line is possibly malformed.".format(level), file=sys.stderr)
-	if repr(username) != "'{}'".format(username):
-		print("Warning: username ({}) contains weird symbols, config line is possibly malformed.".format(username), file=sys.stderr)
+		print(f"Warning: level ({level}) not one of admin, mod or helper.", file=sys.stderr)
+	if repr(level) != f"'{level}'":
+		print(f"Warning: level ({level}) contains weird symbols, config line is possibly malformed.", file=sys.stderr)
+	if repr(username) != f"'{username}'":
+		print(f"Warning: username ({username}) contains weird symbols, config line is possibly malformed.", file=sys.stderr)
 	username = username.replace('"', '\\"')
 	if ' ' in username or ';' in username:
-		username = '"{}"'.format(username)
-	return "auth_add_p {} {} {} {}".format(username, level, pwhash, salt)
+		username = f'"{username}"'
+	return f"auth_add_p {username} {level} {pwhash} {salt}"
 
 def auth_add_p_line_from_pw(username, level, password):
 	if len(password) < 8:
@@ -57,13 +57,13 @@ def main():
 	use_stdio = args.config is None or args.config == '-'
 	if use_stdio:
 		if args.config is None:
-			input_file = open(os.devnull)
+			input_file = open(os.devnull, encoding="utf-8")
 		else:
 			input_file = sys.stdin
 		output_file = sys.stdout
 	else:
-		input_file = open(args.config)
-		output_file = tempfile.NamedTemporaryFile('w', dir=os.getcwd(), prefix="{}.".format(args.config), delete=False)
+		input_file = open(args.config, encoding="utf-8") # pylint: disable=consider-using-with
+		output_file = tempfile.NamedTemporaryFile('w', dir=os.getcwd(), prefix=f"{args.config}.", delete=False) # pylint: disable=consider-using-with
 
 	for line in input_file:
 		parsed = parse_line(line)

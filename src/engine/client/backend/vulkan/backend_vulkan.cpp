@@ -3576,7 +3576,7 @@ public:
 			STWGraphicGPU::ETWGraphicsGPUType GPUType = VKGPUTypeToGraphicsGPUType(DeviceProp.deviceType);
 
 			STWGraphicGPU::STWGraphicGPUItem NewGPU;
-			str_copy(NewGPU.m_aName, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(NewGPU.m_aName)));
+			str_copy(NewGPU.m_aName, DeviceProp.deviceName);
 			NewGPU.m_GPUType = GPUType;
 			m_pGPUList->m_vGPUs.push_back(NewGPU);
 
@@ -3587,7 +3587,7 @@ public:
 
 			if(GPUType < AutoGPUType && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
-				str_copy(m_pGPUList->m_AutoGPU.m_aName, DeviceProp.deviceName, minimum(sizeof(DeviceProp.deviceName), sizeof(m_pGPUList->m_AutoGPU.m_aName)));
+				str_copy(m_pGPUList->m_AutoGPU.m_aName, DeviceProp.deviceName);
 				m_pGPUList->m_AutoGPU.m_GPUType = GPUType;
 
 				AutoGPUType = GPUType;

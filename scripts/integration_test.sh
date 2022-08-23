@@ -55,9 +55,20 @@ function kill_all() {
 	fi
 
 	sleep 1
-	echo "shutdown" > server.fifo
-	echo "quit" > client1.fifo
-	echo "quit" > client2.fifo
+	if [[ ! -f fail_server.txt ]]
+	then
+		echo "[*] shutting down server"
+		echo "shutdown" > server.fifo
+	fi
+	local i
+	for ((i=1;i<3;i++))
+	do
+		if [[ ! -f fail_client$i.txt ]]
+		then
+			echo "[*] shutting down client$i"
+			echo "quit" > "client$i.fifo"
+		fi
+	done
 }
 
 function cleanup() {

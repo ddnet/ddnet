@@ -174,6 +174,7 @@ private:
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
 	class IDemoPlayer *m_pDemoPlayer;
+	class IFavorites *m_pFavorites;
 	class IServerBrowser *m_pServerBrowser;
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
@@ -226,6 +227,7 @@ public:
 	class ITextRender *TextRender() const { return m_pTextRender; }
 	class IDemoPlayer *DemoPlayer() const { return m_pDemoPlayer; }
 	class IDemoRecorder *DemoRecorder(int Recorder) const { return Client()->DemoRecorder(Recorder); }
+	class IFavorites *Favorites() const { return m_pFavorites; }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; }
@@ -349,14 +351,14 @@ public:
 		int m_EmoticonStartTick;
 		bool m_Solo;
 		bool m_Jetpack;
-		bool m_NoCollision;
+		bool m_CollisionDisabled;
 		bool m_EndlessHook;
 		bool m_EndlessJump;
-		bool m_NoHammerHit;
-		bool m_NoGrenadeHit;
-		bool m_NoLaserHit;
-		bool m_NoShotgunHit;
-		bool m_NoHookHit;
+		bool m_HammerHitDisabled;
+		bool m_GrenadeHitDisabled;
+		bool m_LaserHitDisabled;
+		bool m_ShotgunHitDisabled;
+		bool m_HookHitDisabled;
 		bool m_Super;
 		bool m_HasTelegunGun;
 		bool m_HasTelegunGrenade;
@@ -668,7 +670,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudAirjump;
 		IGraphics::CTextureHandle m_SpriteHudAirjumpEmpty;
 		IGraphics::CTextureHandle m_SpriteHudSolo;
-		IGraphics::CTextureHandle m_SpriteHudNoCollision;
+		IGraphics::CTextureHandle m_SpriteHudCollisionDisabled;
 		IGraphics::CTextureHandle m_SpriteHudEndlessJump;
 		IGraphics::CTextureHandle m_SpriteHudEndlessHook;
 		IGraphics::CTextureHandle m_SpriteHudJetpack;
@@ -680,12 +682,12 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarFull;
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
-		IGraphics::CTextureHandle m_SpriteHudNoHookHit;
-		IGraphics::CTextureHandle m_SpriteHudNoHammerHit;
-		IGraphics::CTextureHandle m_SpriteHudNoShotgunHit;
-		IGraphics::CTextureHandle m_SpriteHudNoGrenadeHit;
-		IGraphics::CTextureHandle m_SpriteHudNoLaserHit;
-		IGraphics::CTextureHandle m_SpriteHudNoGunHit;
+		IGraphics::CTextureHandle m_SpriteHudHookHitDisabled;
+		IGraphics::CTextureHandle m_SpriteHudHammerHitDisabled;
+		IGraphics::CTextureHandle m_SpriteHudShotgunHitDisabled;
+		IGraphics::CTextureHandle m_SpriteHudGrenadeHitDisabled;
+		IGraphics::CTextureHandle m_SpriteHudLaserHitDisabled;
+		IGraphics::CTextureHandle m_SpriteHudGunHitDisabled;
 		IGraphics::CTextureHandle m_SpriteHudDeepFrozen;
 		IGraphics::CTextureHandle m_SpriteHudLiveFrozen;
 		IGraphics::CTextureHandle m_SpriteHudTeleportGrenade;

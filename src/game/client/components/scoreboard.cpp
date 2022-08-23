@@ -57,12 +57,7 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 {
 	float h = 50.0f;
 
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.5f);
-	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 10.0f);
 
 	// render goals
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -92,12 +87,7 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 {
 	// background
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0, 0, 0, 0.5f);
-	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
-	Graphics()->QuadsEnd();
+	RenderTools()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), CUI::CORNER_ALL, 10.0f);
 
 	// Headline
 	y += 10.0f;
@@ -175,17 +165,16 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float h = 760.0f;
 
 	// background
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
-	if(upper16 || upper32 || upper24)
-		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f, 10);
-	else if(lower16 || lower32 || lower24)
-		RenderTools()->DrawRoundRectExt(x, y, w, h, 17.0f, 5);
-	else
-		RenderTools()->DrawRoundRect(x, y, w, h, 17.0f);
-	Graphics()->QuadsEnd();
+	{
+		int Corners;
+		if(upper16 || upper32 || upper24)
+			Corners = CUI::CORNER_R;
+		else if(lower16 || lower32 || lower24)
+			Corners = CUI::CORNER_L;
+		else
+			Corners = CUI::CORNER_ALL;
+		RenderTools()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), Corners, 17.0f);
+	}
 
 	char aBuf[128] = {0};
 
@@ -198,7 +187,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			pTitle = Localize("Game over");
 		else
 		{
-			str_copy(aBuf, Client()->GetCurrentMap(), sizeof(aBuf));
+			str_copy(aBuf, Client()->GetCurrentMap());
 			while(TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
 				aBuf[str_length(aBuf) - 1] = '\0';
 			if(str_comp(aBuf, Client()->GetCurrentMap()))
@@ -366,28 +355,20 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		if(DDTeam != TEAM_FLOCK)
 		{
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
-			Graphics()->SetColor(rgb);
-
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
 			int Corners = 0;
-
 			if(OldDDTeam != DDTeam)
 				Corners |= CUI::CORNER_TL | CUI::CORNER_TR;
 			if(NextDDTeam != DDTeam)
 				Corners |= CUI::CORNER_BL | CUI::CORNER_BR;
-
-			RenderTools()->DrawRoundRectExt(x - 10.0f, y, w, LineHeight + Spacing, RoundRadius, Corners);
-
-			Graphics()->QuadsEnd();
+			RenderTools()->DrawRect(x - 10.0f, y, w, LineHeight + Spacing, Color, Corners, RoundRadius);
 
 			if(NextDDTeam != DDTeam)
 			{
 				if(m_pClient->m_Snap.m_aTeamSize[0] > 8)
 				{
 					if(DDTeam == TEAM_SUPER)
-						str_copy(aBuf, Localize("Super"), sizeof(aBuf));
+						str_copy(aBuf, Localize("Super"));
 					else
 						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize / 1.5f), FontSize / 1.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
@@ -396,7 +377,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				else
 				{
 					if(DDTeam == TEAM_SUPER)
-						str_copy(aBuf, Localize("Super"), sizeof(aBuf));
+						str_copy(aBuf, Localize("Super"));
 					else
 						str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
 					tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
@@ -412,11 +393,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// background so it's easy to find the local player or the followed one in spectator mode
 		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
-			RenderTools()->DrawRoundRect(x, y, w - 20.0f, LineHeight, RoundRadius);
-			Graphics()->QuadsEnd();
+			RenderTools()->DrawRect(x, y, w - 20.0f, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, RoundRadius);
 		}
 
 		// score
@@ -587,19 +564,11 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 	float w = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
 
-	//draw the box
-	Graphics()->BlendNormal();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-	RenderTools()->DrawRoundRectExt(x, 0.0f, w + 60.0f, 50.0f, 15.0f, CUI::CORNER_B);
-	Graphics()->QuadsEnd();
+	// draw the box
+	RenderTools()->DrawRect(x, 0.0f, w + 60.0f, 50.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), CUI::CORNER_B, 15.0f);
 
-	//draw the red dot
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
-	RenderTools()->DrawRoundRect(x + 20, 15.0f, 20.0f, 20.0f, 10.0f);
-	Graphics()->QuadsEnd();
+	// draw the red dot
+	RenderTools()->DrawRect(x + 20, 15.0f, 20.0f, 20.0f, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), CUI::CORNER_ALL, 10.0f);
 
 	TextRender()->Text(0, x + 50.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 }
@@ -654,21 +623,21 @@ void CScoreboard::OnRender()
 			if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER && m_pClient->m_Snap.m_pGameDataObj)
 			{
 				char aText[256];
-				str_copy(aText, Localize("Draw!"), sizeof(aText));
+				str_copy(aText, Localize("Draw!"));
 
 				if(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed > m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue)
 				{
 					if(pRedClanName)
 						str_format(aText, sizeof(aText), Localize("%s wins!"), pRedClanName);
 					else
-						str_copy(aText, Localize("Red team wins!"), sizeof(aText));
+						str_copy(aText, Localize("Red team wins!"));
 				}
 				else if(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue > m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed)
 				{
 					if(pBlueClanName)
 						str_format(aText, sizeof(aText), Localize("%s wins!"), pBlueClanName);
 					else
-						str_copy(aText, Localize("Blue team wins!"), sizeof(aText));
+						str_copy(aText, Localize("Blue team wins!"));
 				}
 
 				float TextWidth = TextRender()->TextWidth(0, 86.0f, aText, -1, -1.0f);

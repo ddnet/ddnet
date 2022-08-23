@@ -103,7 +103,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 		IsNight = true;
 	}
 	else
-		str_copy(aThemeName, aFullName, sizeof(aThemeName));
+		str_copy(aThemeName, aFullName);
 
 	if(str_comp(aThemeName, "none") == 0 || str_comp(aThemeName, "auto") == 0 || str_comp(aThemeName, "rand") == 0) // "none", "auto" and "rand" reserved, disallowed for maps
 		return 0;
@@ -195,7 +195,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 	bool NeedImageLoading = false;
 
-	str_copy(m_aMapName, g_Config.m_ClMenuMap, sizeof(m_aMapName));
+	str_copy(m_aMapName, g_Config.m_ClMenuMap);
 
 	if(g_Config.m_ClMenuMap[0] != '\0')
 	{

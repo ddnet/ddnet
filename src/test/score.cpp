@@ -106,7 +106,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		ASSERT_FALSE(CScoreWorker::SaveScore(m_pConn, &ScoreData, false, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
-	void ExpectLines(std::shared_ptr<CScorePlayerResult> pPlayerResult, std::initializer_list<const char *> Lines, bool All = false)
+	void ExpectLines(const std::shared_ptr<CScorePlayerResult> &pPlayerResult, std::initializer_list<const char *> Lines, bool All = false)
 	{
 		EXPECT_EQ(pPlayerResult->m_MessageKind, All ? CScorePlayerResult::ALL : CScorePlayerResult::DIRECT);
 
@@ -183,9 +183,9 @@ TEST_P(SingleScore, LoadPlayerData)
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
 	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
-	for(int i = 0; i < NUM_CHECKPOINTS; i++)
+	for(auto &Time : m_pPlayerResult->m_Data.m_Info.m_aTimeCp)
 	{
-		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_aTimeCp[i], 0);
+		ASSERT_EQ(Time, 0);
 	}
 
 	str_copy(m_PlayerRequest.m_aRequestingPlayer, "nameless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));

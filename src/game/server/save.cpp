@@ -21,7 +21,7 @@ void CSaveTee::Save(CCharacter *pChr)
 
 	m_TeeStarted = pChr->Teams()->TeeStarted(m_ClientID);
 	m_TeeFinished = pChr->Teams()->TeeFinished(m_ClientID);
-	m_IsSolo = pChr->m_Solo;
+	m_IsSolo = pChr->m_Core.m_Solo;
 
 	for(int i = 0; i < NUM_WEAPONS; i++)
 	{
@@ -34,18 +34,27 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_LastWeapon = pChr->m_LastWeapon;
 	m_QueuedWeapon = pChr->m_QueuedWeapon;
 
-	m_SuperJump = pChr->m_SuperJump;
-	m_Jetpack = pChr->m_Jetpack;
+	m_EndlessJump = pChr->m_Core.m_EndlessJump;
+	m_Jetpack = pChr->m_Core.m_Jetpack;
 	m_NinjaJetpack = pChr->m_NinjaJetpack;
 	m_FreezeTime = pChr->m_FreezeTime;
 	m_FreezeStart = pChr->Server()->Tick() - pChr->m_Core.m_FreezeStart;
 
-	m_DeepFreeze = pChr->m_DeepFreeze;
-	m_LiveFreeze = pChr->m_LiveFreeze;
-	m_EndlessHook = pChr->m_EndlessHook;
+	m_DeepFrozen = pChr->m_Core.m_DeepFrozen;
+	m_LiveFrozen = pChr->m_Core.m_LiveFrozen;
+	m_EndlessHook = pChr->m_Core.m_EndlessHook;
 	m_DDRaceState = pChr->m_DDRaceState;
 
-	m_Hit = pChr->m_Hit;
+	m_HitDisabledFlags = 0;
+	if(pChr->m_Core.m_HammerHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::HAMMER_HIT_DISABLED;
+	if(pChr->m_Core.m_ShotgunHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::SHOTGUN_HIT_DISABLED;
+	if(pChr->m_Core.m_GrenadeHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::GRENADE_HIT_DISABLED;
+	if(pChr->m_Core.m_LaserHitDisabled)
+		m_HitDisabledFlags |= CSaveTee::LASER_HIT_DISABLED;
+
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
 
@@ -77,8 +86,8 @@ void CSaveTee::Save(CCharacter *pChr)
 	// Core
 	m_CorePos = pChr->m_Core.m_Pos;
 	m_Vel = pChr->m_Core.m_Vel;
-	m_Hook = !pChr->m_Core.m_NoHookHit;
-	m_Collision = !pChr->m_Core.m_NoCollision;
+	m_HookHitEnabled = !pChr->m_Core.m_HookHitDisabled;
+	m_CollisionEnabled = !pChr->m_Core.m_CollisionDisabled;
 	m_ActiveWeapon = pChr->m_Core.m_ActiveWeapon;
 	m_Jumped = pChr->m_Core.m_Jumped;
 	m_JumpedTotal = pChr->m_Core.m_JumpedTotal;
@@ -129,18 +138,22 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_LastWeapon = m_LastWeapon;
 	pChr->m_QueuedWeapon = m_QueuedWeapon;
 
-	pChr->m_SuperJump = m_SuperJump;
-	pChr->m_Jetpack = m_Jetpack;
+	pChr->m_Core.m_EndlessJump = m_EndlessJump;
+	pChr->m_Core.m_Jetpack = m_Jetpack;
 	pChr->m_NinjaJetpack = m_NinjaJetpack;
 	pChr->m_FreezeTime = m_FreezeTime;
 	pChr->m_Core.m_FreezeStart = pChr->Server()->Tick() - m_FreezeStart;
 
-	pChr->m_DeepFreeze = m_DeepFreeze;
-	pChr->m_LiveFreeze = m_LiveFreeze;
-	pChr->m_EndlessHook = m_EndlessHook;
+	pChr->m_Core.m_DeepFrozen = m_DeepFrozen;
+	pChr->m_Core.m_LiveFrozen = m_LiveFrozen;
+	pChr->m_Core.m_EndlessHook = m_EndlessHook;
 	pChr->m_DDRaceState = m_DDRaceState;
 
-	pChr->m_Hit = m_Hit;
+	pChr->m_Core.m_HammerHitDisabled = m_HitDisabledFlags & CSaveTee::HAMMER_HIT_DISABLED;
+	pChr->m_Core.m_ShotgunHitDisabled = m_HitDisabledFlags & CSaveTee::SHOTGUN_HIT_DISABLED;
+	pChr->m_Core.m_GrenadeHitDisabled = m_HitDisabledFlags & CSaveTee::GRENADE_HIT_DISABLED;
+	pChr->m_Core.m_LaserHitDisabled = m_HitDisabledFlags & CSaveTee::LASER_HIT_DISABLED;
+
 	pChr->m_TuneZone = m_TuneZone;
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
 
@@ -170,8 +183,8 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	// Core
 	pChr->m_Core.m_Pos = m_CorePos;
 	pChr->m_Core.m_Vel = m_Vel;
-	pChr->m_Core.m_NoHookHit = !m_Hook;
-	pChr->m_Core.m_NoCollision = !m_Collision;
+	pChr->m_Core.m_HookHitDisabled = !m_HookHitEnabled;
+	pChr->m_Core.m_CollisionDisabled = !m_CollisionEnabled;
 	pChr->m_Core.m_ActiveWeapon = m_ActiveWeapon;
 	pChr->m_Core.m_Jumped = m_Jumped;
 	pChr->m_Core.m_JumpedTotal = m_JumpedTotal;
@@ -236,7 +249,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t"
 		// tee stats
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_EndlessJump
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 		"%d\t%d\t%d\t%d\t" // m_Pos.x
 		"%d\t%d\t" // m_TeleCheckpoint
@@ -269,8 +282,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_aWeapons[5].m_AmmoRegenStart, m_aWeapons[5].m_Ammo, m_aWeapons[5].m_Ammocost, m_aWeapons[5].m_Got,
 		m_LastWeapon, m_QueuedWeapon,
 		// tee states
-		m_SuperJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeStart, m_DeepFreeze, m_EndlessHook,
-		m_DDRaceState, m_Hit, m_Collision, m_TuneZone, m_TuneZoneOld, m_Hook, m_Time,
+		m_EndlessJump, m_Jetpack, m_NinjaJetpack, m_FreezeTime, m_FreezeStart, m_DeepFrozen, m_EndlessHook,
+		m_DDRaceState, m_HitDisabledFlags, m_CollisionEnabled, m_TuneZone, m_TuneZoneOld, m_HookHitEnabled, m_Time,
 		(int)m_Pos.x, (int)m_Pos.y, (int)m_PrevPos.x, (int)m_PrevPos.y,
 		m_TeleCheckpoint, m_LastPenalty,
 		(int)m_CorePos.x, (int)m_CorePos.y, m_Vel.x, m_Vel.y,
@@ -291,7 +304,7 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_InputDirection, m_InputJump, m_InputFire, m_InputHook,
 		m_ReloadTimer,
 		m_TeeStarted,
-		m_LiveFreeze);
+		m_LiveFrozen);
 	return m_aString;
 }
 
@@ -309,7 +322,7 @@ int CSaveTee::FromString(const char *pString)
 		"%d\t%d\t%d\t%d\t"
 		"%d\t%d\t"
 		// tee states
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_SuperJump
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_EndlessJump
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t" // m_DDRaceState
 		"%f\t%f\t%f\t%f\t" // m_Pos.x
 		"%d\t%d\t" // m_TeleCheckpoint
@@ -342,8 +355,8 @@ int CSaveTee::FromString(const char *pString)
 		&m_aWeapons[5].m_AmmoRegenStart, &m_aWeapons[5].m_Ammo, &m_aWeapons[5].m_Ammocost, &m_aWeapons[5].m_Got,
 		&m_LastWeapon, &m_QueuedWeapon,
 		// tee states
-		&m_SuperJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeStart, &m_DeepFreeze, &m_EndlessHook,
-		&m_DDRaceState, &m_Hit, &m_Collision, &m_TuneZone, &m_TuneZoneOld, &m_Hook, &m_Time,
+		&m_EndlessJump, &m_Jetpack, &m_NinjaJetpack, &m_FreezeTime, &m_FreezeStart, &m_DeepFrozen, &m_EndlessHook,
+		&m_DDRaceState, &m_HitDisabledFlags, &m_CollisionEnabled, &m_TuneZone, &m_TuneZoneOld, &m_HookHitEnabled, &m_Time,
 		&m_Pos.x, &m_Pos.y, &m_PrevPos.x, &m_PrevPos.y,
 		&m_TeleCheckpoint, &m_LastPenalty,
 		&m_CorePos.x, &m_CorePos.y, &m_Vel.x, &m_Vel.y,
@@ -364,7 +377,7 @@ int CSaveTee::FromString(const char *pString)
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
 		&m_ReloadTimer,
 		&m_TeeStarted,
-		&m_LiveFreeze);
+		&m_LiveFrozen);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -391,7 +404,7 @@ int CSaveTee::FromString(const char *pString)
 		m_TeeStarted = true;
 		[[fallthrough]];
 	case 109:
-		m_LiveFreeze = 0;
+		m_LiveFrozen = false;
 		[[fallthrough]];
 	case 110:
 		return 0;

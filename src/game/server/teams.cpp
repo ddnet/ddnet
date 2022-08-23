@@ -363,7 +363,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientID, int Team)
 		return "You are in this team already";
 	if(!Character(ClientID))
 		return "Your character is not valid";
-	if(Team == TEAM_SUPER && !Character(ClientID)->m_Super)
+	if(Team == TEAM_SUPER && !Character(ClientID)->IsSuper())
 		return "You can't join super team if you don't have super rights";
 	if(Team != TEAM_SUPER && Character(ClientID)->m_DDRaceState != DDRACE_NONE)
 		return "You have started racing already";
@@ -478,11 +478,14 @@ bool CGameTeams::TeamFinished(int Team)
 
 int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
-	int64_t Mask = 0;
-
 	if(Team == TEAM_SUPER)
+	{
+		if(ExceptID == -1)
+			return 0xffffffffffffffff;
 		return 0xffffffffffffffff & ~(1 << ExceptID);
+	}
 
+	int64_t Mask = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ExceptID)

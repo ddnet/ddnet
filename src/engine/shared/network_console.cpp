@@ -66,7 +66,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 		{
 			if(net_addr_comp(pAddr, m_aSlots[i].m_Connection.PeerAddress()) == 0)
 			{
-				str_copy(aError, "only one client per IP allowed", sizeof(aError));
+				str_copy(aError, "only one client per IP allowed");
 				break;
 			}
 		}
@@ -83,7 +83,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 
 	// reject client
 	if(!aError[0])
-		str_copy(aError, "no free slot available", sizeof(aError));
+		str_copy(aError, "no free slot available");
 
 	net_tcp_send(Socket, aError, str_length(aError));
 	net_tcp_close(Socket);

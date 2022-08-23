@@ -27,6 +27,7 @@
 #endif
 
 #include <chrono>
+#include <functional>
 
 extern "C" {
 
@@ -834,6 +835,9 @@ typedef struct NETADDR
 	unsigned int type;
 	unsigned char ip[16];
 	unsigned short port;
+
+	bool operator==(const NETADDR &other) const;
+	bool operator!=(const NETADDR &other) const { return !(*this == other); }
 } NETADDR;
 
 #ifdef CONF_FAMILY_UNIX
@@ -2500,6 +2504,29 @@ public:
 	{
 		cmdline_free(m_Argc, m_ppArgv);
 	}
+};
+
+/**
+ * Copies a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to be copied.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_copy(char (&dst)[N], const char *src)
+{
+	str_copy(dst, src, N);
+}
+
+template<>
+struct std::hash<NETADDR>
+{
+	size_t operator()(const NETADDR &Addr) const noexcept;
 };
 
 #endif

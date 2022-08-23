@@ -354,9 +354,9 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 
 	m_vSpriteHelper.resize((size_t)w * h * bpp);
 
-	CopyTextureFromTextureBufferSub(&m_vSpriteHelper[0], w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
+	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
 
-	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, &m_vSpriteHelper[0], FromImageInfo.m_Format, 0);
+	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
 
 	return RetHandle;
 }
@@ -640,7 +640,8 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 
 		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
-		if(::LoadPNG(ImageByteBuffer, pFilename, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		int PngliteIncompatible;
+		if(::LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 		{
 			pImg->m_pData = pImgBuffer;
 
@@ -652,6 +653,30 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 			{
 				free(pImgBuffer);
 				return 0;
+			}
+
+			if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
+			{
+				SWarning Warning;
+				str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions: "), pFilename);
+				static const int FLAGS[] = {PNGLITE_COLOR_TYPE, PNGLITE_BIT_DEPTH, PNGLITE_INTERLACE_TYPE, PNGLITE_COMPRESSION_TYPE, PNGLITE_FILTER_TYPE};
+				static const char *EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
+
+				bool First = true;
+				for(int i = 0; i < (int)std::size(FLAGS); i++)
+				{
+					if((PngliteIncompatible & FLAGS[i]) != 0)
+					{
+						if(!First)
+						{
+							str_append(Warning.m_aWarningMsg, ", ", sizeof(Warning.m_aWarningMsg));
+						}
+						str_append(Warning.m_aWarningMsg, EXPLANATION[i], sizeof(Warning.m_aWarningMsg));
+						First = false;
+					}
+				}
+				str_append(Warning.m_aWarningMsg, Localize(" unsupported"), sizeof(Warning.m_aWarningMsg));
+				m_vWarnings.emplace_back(Warning);
 			}
 		}
 		else
@@ -1413,12 +1438,12 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 			if(Container.m_QuadBufferObjectIndex == -1)
 			{
 				size_t UploadDataSize = Container.m_vQuads.size() * sizeof(SQuadContainer::SQuad);
-				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, &Container.m_vQuads[0], 0);
+				Container.m_QuadBufferObjectIndex = CreateBufferObject(UploadDataSize, Container.m_vQuads.data(), 0);
 			}
 			else
 			{
 				size_t UploadDataSize = Container.m_vQuads.size() * sizeof(SQuadContainer::SQuad);
-				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, &Container.m_vQuads[0], 0);
+				RecreateBufferObject(Container.m_QuadBufferObjectIndex, UploadDataSize, Container.m_vQuads.data(), 0);
 			}
 
 			if(Container.m_QuadBufferContainerIndex == -1)
@@ -2513,6 +2538,11 @@ void CGraphics_Threaded::Maximize()
 	m_pBackend->Maximize();
 }
 
+void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
+{
+	m_WarnPngliteIncompatibleImages = Warn;
+}
+
 void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing)
 {
 	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless, AllowResizing);
@@ -2678,7 +2708,7 @@ void CGraphics_Threaded::TakeScreenshot(const char *pFilename)
 
 void CGraphics_Threaded::TakeCustomScreenshot(const char *pFilename)
 {
-	str_copy(m_aScreenshotName, pFilename, sizeof(m_aScreenshotName));
+	str_copy(m_aScreenshotName, pFilename);
 	m_DoScreenshot = true;
 }
 
@@ -2808,7 +2838,7 @@ SWarning *CGraphics_Threaded::GetCurWarning()
 		return NULL;
 	else
 	{
-		SWarning *pCurWarning = &m_vWarnings[0];
+		SWarning *pCurWarning = m_vWarnings.data();
 		return pCurWarning;
 	}
 }

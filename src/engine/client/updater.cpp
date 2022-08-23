@@ -54,7 +54,7 @@ CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, cons
 void CUpdaterFetchTask::OnProgress()
 {
 	CLockScope ls(m_pUpdater->m_Lock);
-	str_copy(m_pUpdater->m_aStatus, Dest(), sizeof(m_pUpdater->m_aStatus));
+	str_copy(m_pUpdater->m_aStatus, Dest());
 	m_pUpdater->m_Percent = Progress();
 }
 
@@ -352,7 +352,7 @@ void CUpdater::PerformUpdate()
 		pLastFile = m_aClientExecTmp;
 	}
 
-	str_copy(m_aLastFile, pLastFile, sizeof(m_aLastFile));
+	str_copy(m_aLastFile, pLastFile);
 }
 
 void CUpdater::CommitUpdate()

@@ -290,7 +290,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 					// add the data
 					Item.m_NumQuads = pLayerQuads->m_vQuads.size();
-					Item.m_Data = df.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), &pLayerQuads->m_vQuads[0]);
+					Item.m_Data = df.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), pLayerQuads->m_vQuads.data());
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerQuads->m_aName);
@@ -319,7 +319,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 
 					// add the data
 					Item.m_NumSources = pLayerSounds->m_vSources.size();
-					Item.m_Data = df.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), &pLayerSounds->m_vSources[0]);
+					Item.m_Data = df.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), pLayerSounds->m_vSources.data());
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerSounds->m_aName);
@@ -358,7 +358,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
 		int Count = pEnvelope->m_vPoints.size();
-		mem_copy(&pPoints[PointCount], &pEnvelope->m_vPoints[0], sizeof(CEnvPoint) * Count);
+		mem_copy(&pPoints[PointCount], pEnvelope->m_vPoints.data(), sizeof(CEnvPoint) * Count);
 		PointCount += Count;
 	}
 
@@ -374,11 +374,12 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		CServerInfo CurrentServerInfo;
 		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
-		const unsigned char aIPv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		const unsigned char aIPv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+		NETADDR ServerAddr = m_pEditor->Client()->ServerAddress();
+		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 		// and if we're on localhost
-		if(!mem_comp(CurrentServerInfo.m_NetAddr.ip, aIPv4Localhost, sizeof(aIPv4Localhost)) || !mem_comp(CurrentServerInfo.m_NetAddr.ip, aIPv6Localhost, sizeof(aIPv6Localhost)))
+		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
 		{
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));
@@ -848,7 +849,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
 						pGroup->AddLayer(pQuads);
 						pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
-						mem_copy(&pQuads->m_vQuads[0], pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
+						mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
 						DataFile.UnloadData(pQuadsItem->m_Data);
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
@@ -874,7 +875,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
 						pGroup->AddLayer(pSounds);
 						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
-						mem_copy(&pSounds->m_vSources[0], pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
+						mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
 						DataFile.UnloadData(pSoundsItem->m_Data);
 					}
 					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
@@ -949,7 +950,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e, nullptr, nullptr);
 				CEnvelope *pEnv = new CEnvelope(pItem->m_Channels);
 				pEnv->m_vPoints.resize(pItem->m_NumPoints);
-				mem_copy(&pEnv->m_vPoints[0], &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
+				mem_copy(pEnv->m_vPoints.data(), &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
 				if(pItem->m_aName[0] != -1) // compatibility with old maps
 					IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
 				m_vpEnvelopes.push_back(pEnv);

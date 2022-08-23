@@ -400,7 +400,7 @@ void CRegister::CProtocol::OnToken(const char *pToken)
 {
 	m_NewChallengeToken = true;
 	m_HaveChallengeToken = true;
-	str_copy(m_aChallengeToken, pToken, sizeof(m_aChallengeToken));
+	str_copy(m_aChallengeToken, pToken);
 
 	CheckChallengeStatus();
 	if(time_get() >= m_NextRegister)
@@ -602,7 +602,7 @@ void CRegister::OnConfigChange()
 			log_warn("register", "header '%s' doesn't contain mandatory ': ', ignoring", aHeader);
 			continue;
 		}
-		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader, sizeof(m_aaExtraHeaders));
+		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader);
 		m_NumExtraHeaders += 1;
 	}
 	for(int i = 0; i < NUM_PROTOCOLS; i++)
@@ -664,7 +664,7 @@ void CRegister::OnNewInfo(const char *pInfo)
 	}
 
 	m_GotServerInfo = true;
-	str_copy(m_aServerInfo, pInfo, sizeof(m_aServerInfo));
+	str_copy(m_aServerInfo, pInfo);
 	{
 		CLockScope ls(m_pGlobal->m_Lock);
 		m_pGlobal->m_InfoSerial += 1;

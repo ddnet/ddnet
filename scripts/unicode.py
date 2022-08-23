@@ -25,7 +25,7 @@ UNICODEDATA_FIELDS = (
 )
 
 def data():
-	with open('UnicodeData.txt') as f:
+	with open('UnicodeData.txt', encoding='utf-8') as f:
 		return list(csv.DictReader(f, fieldnames=UNICODEDATA_FIELDS, delimiter=';'))
 
 def unhex(s):

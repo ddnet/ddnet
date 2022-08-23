@@ -102,7 +102,7 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 	Msg.m_Color = color;
 	str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), FORMAT_SPACE);
 	Msg.m_TimestampLength = str_length(Msg.m_aTimestamp);
-	str_copy(Msg.m_aSystem, sys, sizeof(Msg.m_aSystem));
+	str_copy(Msg.m_aSystem, sys);
 	Msg.m_SystemLength = str_length(Msg.m_aSystem);
 
 	// TODO: Add level?

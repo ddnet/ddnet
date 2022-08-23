@@ -22,6 +22,7 @@
 #include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
+#include <engine/favorites.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -47,8 +48,6 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
-
-#include <base/system.h>
 
 #include <game/localization.h>
 #include <game/version.h>
@@ -520,7 +519,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 		return;
 
 	if(pPassword != m_aRconPassword)
-		str_copy(m_aRconPassword, pPassword, sizeof(m_aRconPassword));
+		str_copy(m_aRconPassword, pPassword);
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
 	Msg.AddString(pName, 32);
@@ -651,8 +650,8 @@ void CClient::SetState(EClientState s)
 
 		if(s == IClient::STATE_ONLINE)
 		{
-			Discord()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
-			Steam()->SetGameInfo(m_ServerAddress, m_aCurrentMap);
+			Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap);
+			Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap);
 		}
 		else if(Old == IClient::STATE_ONLINE)
 		{
@@ -681,6 +680,7 @@ void CClient::OnEnterGame(bool Dummy)
 	m_aReceivedSnapshots[Dummy] = 0;
 	m_aSnapshotParts[Dummy] = 0;
 	m_aPredTick[Dummy] = 0;
+	m_aAckGameTick[Dummy] = -1;
 	m_aCurrentRecvTick[Dummy] = 0;
 	m_aCurGameTick[Dummy] = 0;
 	m_aPrevGameTick[Dummy] = 0;
@@ -710,14 +710,17 @@ void CClient::EnterGame(int Conn)
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 }
 
-void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR &Addr, bool Dummy)
+void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
 {
 	MD5_CTX Md5;
 	md5_init(&Md5);
 	const char *pDummy = Dummy ? "dummy" : "normal";
 	md5_update(&Md5, (unsigned char *)pDummy, str_length(pDummy) + 1);
 	md5_update(&Md5, (unsigned char *)pSeed, str_length(pSeed) + 1);
-	md5_update(&Md5, (unsigned char *)&Addr, sizeof(Addr));
+	for(int i = 0; i < NumAddrs; i++)
+	{
+		md5_update(&Md5, (unsigned char *)&pAddrs[i], sizeof(pAddrs[i]));
+	}
 	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	unsigned short aRandom[8];
@@ -730,13 +733,13 @@ void CClient::GenerateTimeoutSeed()
 	secure_random_password(g_Config.m_ClTimeoutSeed, sizeof(g_Config.m_ClTimeoutSeed), 16);
 }
 
-void CClient::GenerateTimeoutCodes()
+void CClient::GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs)
 {
 	if(g_Config.m_ClTimeoutSeed[0])
 	{
 		for(int i = 0; i < 2; i++)
 		{
-			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, m_ServerAddress, i);
+			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, i);
 
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "timeout code '%s' (%s)", m_aTimeoutCodes[i], i == 0 ? "normal" : "dummy");
@@ -745,49 +748,70 @@ void CClient::GenerateTimeoutCodes()
 	}
 	else
 	{
-		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode, sizeof(m_aTimeoutCodes[0]));
-		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode, sizeof(m_aTimeoutCodes[1]));
+		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode);
+		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode);
 	}
 }
 
 void CClient::Connect(const char *pAddress, const char *pPassword)
 {
-	char aBuf[512];
-	int Port = 8303;
-
 	Disconnect();
 
 	m_ConnectionID = RandomUuid();
 	if(pAddress != m_aConnectAddressStr)
-		str_copy(m_aConnectAddressStr, pAddress, sizeof(m_aConnectAddressStr));
+		str_copy(m_aConnectAddressStr, pAddress);
 
-	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aConnectAddressStr);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
-	bool is_websocket = false;
-	if(strncmp(m_aConnectAddressStr, "ws://", 5) == 0)
-	{
-		is_websocket = true;
-		str_copy(m_aConnectAddressStr, pAddress + 5, sizeof(m_aConnectAddressStr));
-	}
+	char aMsg[512];
+	str_format(aMsg, sizeof(aMsg), "connecting to '%s'", m_aConnectAddressStr);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aMsg, gs_ClientNetworkPrintColor);
 
 	ServerInfoRequest();
-	if(net_host_lookup(m_aConnectAddressStr, &m_ServerAddress, m_aNetClient[CONN_MAIN].NetType()) != 0)
+
+	int NumConnectAddrs = 0;
+	NETADDR aConnectAddrs[MAX_SERVER_ADDRESSES];
+	mem_zero(aConnectAddrs, sizeof(aConnectAddrs));
+	const char *pNextAddr = pAddress;
+	char aBuffer[128];
+	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
-		char aBufMsg[256];
-		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
-		net_host_lookup("localhost", &m_ServerAddress, m_aNetClient[CONN_MAIN].NetType());
+		NETADDR NextAddr;
+		if(net_host_lookup(aBuffer, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		{
+			log_error("client", "could not find address of %s", aBuffer);
+			continue;
+		}
+		if(NumConnectAddrs == (int)std::size(aConnectAddrs))
+		{
+			log_warn("client", "too many connect addresses, ignoring %s", aBuffer);
+			continue;
+		}
+		if(NextAddr.port == 0)
+		{
+			NextAddr.port = 8303;
+		}
+		char aNextAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
+		log_debug("client", "resolved connect address '%s' to %s", aBuffer, aNextAddr);
+		aConnectAddrs[NumConnectAddrs] = NextAddr;
+		NumConnectAddrs += 1;
+	}
+
+	if(NumConnectAddrs == 0)
+	{
+		log_error("client", "could not find any connect address, defaulting to localhost for whatever reason...");
+		net_host_lookup("localhost", &aConnectAddrs[0], m_aNetClient[CONN_MAIN].NetType());
+		NumConnectAddrs = 1;
 	}
 
 	if(m_SendPassword)
 	{
-		str_copy(m_aPassword, g_Config.m_Password, sizeof(m_aPassword));
+		str_copy(m_aPassword, g_Config.m_Password);
 		m_SendPassword = false;
 	}
 	else if(!pPassword)
 		m_aPassword[0] = 0;
 	else
-		str_copy(m_aPassword, pPassword, sizeof(m_aPassword));
+		str_copy(m_aPassword, pPassword);
 
 	m_CanReceiveServerCapabilities = true;
 	// Deregister Rcon commands from last connected server, might not have called
@@ -795,13 +819,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_aRconAuthed[0] = 0;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
-	if(m_ServerAddress.port == 0)
-		m_ServerAddress.port = Port;
-	if(is_websocket)
-	{
-		m_ServerAddress.type = NETTYPE_WEBSOCKET_IPV4;
-	}
-	m_aNetClient[CONN_MAIN].Connect(&m_ServerAddress);
+
+	m_aNetClient[CONN_MAIN].Connect(aConnectAddrs, NumConnectAddrs);
 	m_aNetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
 
@@ -812,7 +831,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_InputtimeMarginGraph.Init(-150.0f, 150.0f);
 	m_GametimeMarginGraph.Init(-150.0f, 150.0f);
 
-	GenerateTimeoutCodes();
+	GenerateTimeoutCodes(aConnectAddrs, NumConnectAddrs);
 }
 
 void CClient::DisconnectWithReason(const char *pReason)
@@ -860,7 +879,6 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
-	mem_zero(&m_ServerAddress, sizeof(m_ServerAddress));
 
 	// clear snapshots
 	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
@@ -913,8 +931,8 @@ void CClient::DummyConnect()
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
 
-	//connecting to the server
-	m_aNetClient[CONN_DUMMY].Connect(&m_ServerAddress);
+	// connect to the server
+	m_aNetClient[CONN_DUMMY].Connect(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -949,7 +967,7 @@ void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
 	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
-		str_copy(pServerInfo->m_aGameType, "DDraceNetwork", sizeof(pServerInfo->m_aGameType));
+		str_copy(pServerInfo->m_aGameType, "DDraceNetwork");
 }
 
 void CClient::ServerInfoRequest()
@@ -1258,8 +1276,8 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
 	m_aReceivedSnapshots[g_Config.m_ClDummy] = 0;
 
-	str_copy(m_aCurrentMap, pName, sizeof(m_aCurrentMap));
-	str_copy(m_aCurrentMapPath, pFilename, sizeof(m_aCurrentMapPath));
+	str_copy(m_aCurrentMap, pName);
+	str_copy(m_aCurrentMapPath, pFilename);
 
 	return 0;
 }
@@ -1273,7 +1291,7 @@ static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pS
 	}
 	else
 	{
-		str_copy(aSuffix, ".map", sizeof(aSuffix));
+		str_copy(aSuffix, ".map");
 	}
 
 	if(pSha256)
@@ -1519,7 +1537,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	{
 		if(!DuplicatedPacket && (!pEntry || !pEntry->m_GotInfo || SavedType >= pEntry->m_Info.m_Type))
 		{
-			m_ServerBrowser.Set(*pFrom, IServerBrowser::SET_TOKEN, Token, &Info);
+			m_ServerBrowser.OnServerInfoUpdate(*pFrom, Token, &Info);
 		}
 
 		// Player info is irrelevant for the client (while connected),
@@ -1527,7 +1545,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		//
 		// SERVERINFO_EXTENDED_MORE doesn't carry any server
 		// information, so just skip it.
-		if(net_addr_comp(&m_ServerAddress, pFrom) == 0 && RawType != SERVERINFO_EXTENDED_MORE)
+		if(net_addr_comp(&ServerAddress(), pFrom) == 0 && RawType != SERVERINFO_EXTENDED_MORE)
 		{
 			// Only accept server info that has a type that is
 			// newer or equal to something the server already sent
@@ -1535,7 +1553,8 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			if(SavedType >= m_CurrentServerInfo.m_Type)
 			{
 				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
-				m_CurrentServerInfo.m_NetAddr = m_ServerAddress;
+				m_CurrentServerInfo.m_NumAddresses = 1;
+				m_CurrentServerInfo.m_aAddresses[0] = ServerAddress();
 				m_CurrentServerInfoRequestTime = -1;
 			}
 
@@ -1554,7 +1573,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			if(ValidPong)
 			{
 				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
-				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
+				m_ServerBrowser.SetCurrentServerPing(ServerAddress(), LatencyMs);
 				m_CurrentServerPingInfoType = SavedType;
 				m_CurrentServerCurrentPingTime = -1;
 
@@ -1650,7 +1669,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 
 			m_MapDetailsPresent = true;
-			str_copy(m_aMapDetailsName, pMap, sizeof(m_aMapDetailsName));
+			str_copy(m_aMapDetailsName, pMap);
 			m_MapDetailsSha256 = *pMapSha256;
 			m_MapDetailsCrc = MapCrc;
 		}
@@ -1734,7 +1753,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", aBuf);
 
 					m_MapdownloadChunk = 0;
-					str_copy(m_aMapdownloadName, pMap, sizeof(m_aMapdownloadName));
+					str_copy(m_aMapdownloadName, pMap);
 
 					m_MapdownloadSha256Present = (bool)pMapSha256;
 					m_MapdownloadSha256 = pMapSha256 ? *pMapSha256 : SHA256_ZEROED;
@@ -1841,7 +1860,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(m_ServerCapabilities.m_PingEx && m_CurrentServerCurrentPingTime >= 0 && *pID == m_CurrentServerPingUuid)
 			{
 				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
-				m_ServerBrowser.SetCurrentServerPing(m_ServerAddress, LatencyMs);
+				m_ServerBrowser.SetCurrentServerPing(ServerAddress(), LatencyMs);
 				m_CurrentServerCurrentPingTime = -1;
 
 				char aBuf[64];
@@ -1933,7 +1952,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			int DeltaTick = GameTick - Unpacker.GetInt();
 
 			// only allow packets from the server we actually want
-			if(net_addr_comp(&pPacket->m_Address, &m_ServerAddress))
+			if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
 				return;
 
 			// we are not allowed to process snapshot yet
@@ -1961,7 +1980,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(Unpacker.Error() || NumParts < 1 || NumParts > CSnapshot::MAX_PARTS || Part < 0 || Part >= NumParts || PartSize < 0 || PartSize > MAX_SNAPSHOT_PACKSIZE)
 				return;
 
-			if(GameTick >= m_aCurrentRecvTick[Conn])
+			// Check m_aAckGameTick to see if we already got a snapshot for that tick
+			if(GameTick >= m_aCurrentRecvTick[Conn] && GameTick > m_aAckGameTick[Conn])
 			{
 				if(GameTick != m_aCurrentRecvTick[Conn])
 				{
@@ -2035,7 +2055,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					const int SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
-						dbg_msg("client", "delta unpack failed!=%d", SnapSize);
+						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
+						return;
+					}
+					if(!pTmpBuffer3->IsValid(SnapSize))
+					{
+						dbg_msg("client", "snapshot invalid. SnapSize=%d, DeltaSize=%d", SnapSize, DeltaSize);
 						return;
 					}
 
@@ -2079,7 +2104,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					const int AltSnapSize = UnpackAndValidateSnapshot(pTmpBuffer3, pAltSnapBuffer);
 					if(AltSnapSize < 0)
 					{
-						dbg_msg("client", "unpack snapshot and validate failed!=%d", AltSnapSize);
+						dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
 						return;
 					}
 
@@ -2106,8 +2131,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					// apply snapshot, cycle pointers
 					m_aReceivedSnapshots[Conn]++;
-
-					m_aCurrentRecvTick[Conn] = GameTick;
 
 					// we got two snapshots until we see us self as connected
 					if(m_aReceivedSnapshots[Conn] == 2)
@@ -2433,12 +2456,12 @@ void CClient::LoadDDNetInfo()
 	if(CurrentVersion.type == json_string)
 	{
 		char aNewVersionStr[64];
-		str_copy(aNewVersionStr, CurrentVersion, sizeof(aNewVersionStr));
+		str_copy(aNewVersionStr, CurrentVersion);
 		char aCurVersionStr[64];
-		str_copy(aCurVersionStr, GAME_RELEASE_VERSION, sizeof(aCurVersionStr));
+		str_copy(aCurVersionStr, GAME_RELEASE_VERSION);
 		if(ToVersion(aNewVersionStr) > ToVersion(aCurVersionStr))
 		{
-			str_copy(m_aVersionStr, CurrentVersion, sizeof(m_aVersionStr));
+			str_copy(m_aVersionStr, CurrentVersion);
 		}
 		else
 		{
@@ -2454,13 +2477,13 @@ void CClient::LoadDDNetInfo()
 		if(m_aNews[0] && str_find(m_aNews, News) == nullptr)
 			g_Config.m_UiUnreadNews = true;
 
-		str_copy(m_aNews, News, sizeof(m_aNews));
+		str_copy(m_aNews, News);
 	}
 
 	const json_value &MapDownloadUrl = DDNetInfo["map-download-url"];
 	if(MapDownloadUrl.type == json_string)
 	{
-		str_copy(m_aMapDownloadUrl, MapDownloadUrl, sizeof(m_aMapDownloadUrl));
+		str_copy(m_aMapDownloadUrl, MapDownloadUrl);
 	}
 
 	const json_value &Points = DDNetInfo["points"];
@@ -2498,6 +2521,21 @@ void CClient::LoadDDNetInfo()
 			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
 		}
 	}
+	const json_value &WarnPngliteIncompatibleImages = DDNetInfo["warn-pnglite-incompatible-images"];
+	Graphics()->WarnPngliteIncompatibleImages(WarnPngliteIncompatibleImages.type == json_boolean && (bool)WarnPngliteIncompatibleImages);
+}
+
+int CClient::ConnectNetTypes() const
+{
+	const NETADDR *pConnectAddrs;
+	int NumConnectAddrs;
+	m_aNetClient[CONN_MAIN].ConnectAddresses(&pConnectAddrs, &NumConnectAddrs);
+	int NetType = 0;
+	for(int i = 0; i < NumConnectAddrs; i++)
+	{
+		NetType |= pConnectAddrs[i].type;
+	}
+	return NetType;
 }
 
 void CClient::PumpNetwork()
@@ -2563,16 +2601,8 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 {
 	// update ticks, they could have changed
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-	CSnapshotStorage::CHolder *pTemp;
 	m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
 	m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
-
-	// handle snapshots
-	pTemp = m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = pTemp;
-
-	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
 
 	// create a verified and unpacked snapshot
 	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
@@ -2580,9 +2610,13 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	const int AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
 	if(AltSnapSize < 0)
 	{
-		dbg_msg("client", "unpack snapshot and validate failed!=%d", AltSnapSize);
+		dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
 		return;
 	}
+
+	// handle snapshots after validation
+	std::swap(m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV], m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]);
+	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
 	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
 
 	GameClient()->OnNewSnapshot();
@@ -2807,7 +2841,7 @@ void CClient::Update()
 				m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
-				m_ServerBrowser.RequestCurrentServer(m_ServerAddress);
+				m_ServerBrowser.RequestCurrentServer(ServerAddress());
 				m_CurrentServerInfoRequestTime = time_get() + time_freq() * 2;
 			}
 
@@ -2826,7 +2860,7 @@ void CClient::Update()
 				m_CurrentServerPingUuid = RandomUuid();
 				if(!m_ServerCapabilities.m_PingEx)
 				{
-					m_ServerBrowser.RequestCurrentServerWithRandomToken(m_ServerAddress, &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
+					m_ServerBrowser.RequestCurrentServerWithRandomToken(ServerAddress(), &m_CurrentServerPingBasicToken, &m_CurrentServerPingToken);
 				}
 				else
 				{
@@ -2969,6 +3003,7 @@ void CClient::InitInterfaces()
 	// fetch interfaces
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pEditor = Kernel()->RequestInterface<IEditor>();
+	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	//m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pSound = Kernel()->RequestInterface<IEngineSound>();
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
@@ -2993,6 +3028,7 @@ void CClient::InitInterfaces()
 	m_Updater.Init();
 #endif
 
+	m_pConfigManager->RegisterCallback(IFavorites::ConfigSaveCallback, m_pFavorites);
 	m_Friends.Init();
 	m_Foes.Init(true);
 
@@ -3107,17 +3143,20 @@ void CClient::Run()
 		m_pEditor->Save(arg);
 	return;*/
 
+	m_ServerBrowser.OnInit();
+	// loads the existing ddnet info file if it exists
+	LoadDDNetInfo();
+
 	// load data
 	if(!LoadData())
 		return;
 
 	if(Steam()->GetPlayerName())
 	{
-		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName(), sizeof(g_Config.m_SteamName));
+		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName());
 	}
 
 	GameClient()->OnInit();
-	m_ServerBrowser.OnInit();
 
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1, 1.0f));
 	if(GIT_SHORTREV_HASH)
@@ -3150,9 +3189,7 @@ void CClient::Run()
 	InitChecksum();
 	m_pConsole->InitChecksum(ChecksumData());
 
-	// loads the existing ddnet info file if it exists
-	LoadDDNetInfo();
-	// but still request the new one from server
+	// request the new ddnet info from server if already past the welcome dialog
 	if(g_Config.m_ClShowWelcome)
 		g_Config.m_ClShowWelcome = 0;
 	else
@@ -3172,7 +3209,7 @@ void CClient::Run()
 		// handle pending connects
 		if(m_aCmdConnect[0])
 		{
-			str_copy(g_Config.m_UiServerAddress, m_aCmdConnect, sizeof(g_Config.m_UiServerAddress));
+			str_copy(g_Config.m_UiServerAddress, m_aCmdConnect);
 			Connect(m_aCmdConnect);
 			m_aCmdConnect[0] = 0;
 		}
@@ -3484,7 +3521,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0), sizeof(pSelf->m_aCmdConnect));
+	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0));
 }
 
 void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
@@ -3687,6 +3724,41 @@ void CClient::Con_RconLogin(IConsole::IResult *pResult, void *pUserData)
 	pSelf->RconAuth(pResult->GetString(0), pResult->GetString(1));
 }
 
+void CClient::Con_BeginFavoriteGroup(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(pSelf->m_FavoritesGroup)
+	{
+		log_error("client", "opening favorites group while there is already one, discarding old one");
+		for(int i = 0; i < pSelf->m_FavoritesGroupNum; i++)
+		{
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&pSelf->m_aFavoritesGroupAddresses[i], aAddr, sizeof(aAddr), true);
+			log_warn("client", "discarding %s", aAddr);
+		}
+	}
+	pSelf->m_FavoritesGroup = true;
+	pSelf->m_FavoritesGroupAllowPing = false;
+	pSelf->m_FavoritesGroupNum = 0;
+}
+
+void CClient::Con_EndFavoriteGroup(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	if(!pSelf->m_FavoritesGroup)
+	{
+		log_error("client", "closing favorites group while there is none, ignoring");
+		return;
+	}
+	log_info("client", "adding group of %d favorites", pSelf->m_FavoritesGroupNum);
+	pSelf->m_pFavorites->Add(pSelf->m_aFavoritesGroupAddresses, pSelf->m_FavoritesGroupNum);
+	if(pSelf->m_FavoritesGroupAllowPing)
+	{
+		pSelf->m_pFavorites->AllowPing(pSelf->m_aFavoritesGroupAddresses, pSelf->m_FavoritesGroupNum, true);
+	}
+	pSelf->m_FavoritesGroup = false;
+}
+
 void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -3698,10 +3770,29 @@ void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 		return;
 	}
-	pSelf->m_ServerBrowser.AddFavorite(Addr);
-	if(pResult->NumArguments() > 1 && str_find(pResult->GetString(1), "allow_ping"))
+	bool AllowPing = pResult->NumArguments() > 1 && str_find(pResult->GetString(1), "allow_ping");
+	char aAddr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&Addr, aAddr, sizeof(aAddr), true);
+	if(pSelf->m_FavoritesGroup)
 	{
-		pSelf->m_ServerBrowser.FavoriteAllowPing(Addr, true);
+		if(pSelf->m_FavoritesGroupNum == (int)std::size(pSelf->m_aFavoritesGroupAddresses))
+		{
+			log_error("client", "discarding %s because groups can have at most a size of %d", aAddr, pSelf->m_FavoritesGroupNum);
+			return;
+		}
+		log_info("client", "adding %s to favorites group", aAddr);
+		pSelf->m_aFavoritesGroupAddresses[pSelf->m_FavoritesGroupNum] = Addr;
+		pSelf->m_FavoritesGroupAllowPing = pSelf->m_FavoritesGroupAllowPing || AllowPing;
+		pSelf->m_FavoritesGroupNum += 1;
+	}
+	else
+	{
+		log_info("client", "adding %s to favorites", aAddr);
+		pSelf->m_pFavorites->Add(&Addr, 1);
+		if(AllowPing)
+		{
+			pSelf->m_pFavorites->AllowPing(&Addr, 1, true);
+		}
 	}
 }
 
@@ -3710,7 +3801,7 @@ void CClient::Con_RemoveFavorite(IConsole::IResult *pResult, void *pUserData)
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
 	if(net_addr_from_str(&Addr, pResult->GetString(0)) == 0)
-		pSelf->m_ServerBrowser.RemoveFavorite(Addr);
+		pSelf->m_pFavorites->Remove(&Addr, 1);
 }
 
 void CClient::DemoSliceBegin()
@@ -3829,22 +3920,28 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return "error loading demo";
 
 	// load map
-	int Crc = m_DemoPlayer.GetMapInfo()->m_Crc;
-	SHA256_DIGEST Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-	const char *pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
+	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
+	int Crc = pMapInfo->m_Crc;
+	SHA256_DIGEST Sha = pMapInfo->m_Sha256;
+	const char *pError = LoadMapSearch(pMapInfo->m_aName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
 	if(pError)
 	{
 		if(!m_DemoPlayer.ExtractMap(Storage()))
 			return pError;
 
 		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-		pError = LoadMapSearch(m_DemoPlayer.Info()->m_Header.m_aMapName, &Sha, Crc);
+		pError = LoadMapSearch(pMapInfo->m_aName, &Sha, Crc);
 		if(pError)
 		{
 			DisconnectWithReason(pError);
 			return pError;
 		}
 	}
+
+	// setup current info
+	str_copy(m_CurrentServerInfo.m_aMap, pMapInfo->m_aName);
+	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
+	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
 
 	GameClient()->OnConnected();
 
@@ -4057,7 +4154,7 @@ void CClient::InitChecksum()
 {
 	CChecksumData *pData = &m_Checksum.m_Data;
 	pData->m_SizeofData = sizeof(*pData);
-	str_copy(pData->m_aVersionStr, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")", sizeof(pData->m_aVersionStr));
+	str_copy(pData->m_aVersionStr, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
 	pData->m_Start = time_get();
 	os_version_str(pData->m_aOsVersion, sizeof(pData->m_aOsVersion));
 	secure_random_fill(&pData->m_Random, sizeof(pData->m_Random));
@@ -4398,6 +4495,8 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("record", "?r[file]", CFGFLAG_CLIENT, Con_Record, this, "Record to the file");
 	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording");
 	m_pConsole->Register("add_demomarker", "", CFGFLAG_CLIENT, Con_AddDemoMarker, this, "Add demo timeline marker");
+	m_pConsole->Register("begin_favorite_group", "", CFGFLAG_CLIENT, Con_BeginFavoriteGroup, this, "Use this before `add_favorite` to group favorites. End with `end_favorite_group`");
+	m_pConsole->Register("end_favorite_group", "", CFGFLAG_CLIENT, Con_EndFavoriteGroup, this, "Use this after `add_favorite` to group favorites. Start with `begin_favorite_group`");
 	m_pConsole->Register("add_favorite", "s[host|ip] ?s['allow_ping']", CFGFLAG_CLIENT, Con_AddFavorite, this, "Add a server as a favorite");
 	m_pConsole->Register("remove_favorite", "r[host|ip]", CFGFLAG_CLIENT, Con_RemoveFavorite, this, "Remove a server from favorites");
 	m_pConsole->Register("demo_slice_start", "", CFGFLAG_CLIENT, Con_DemoSliceBegin, this, "");
@@ -4418,6 +4517,9 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("add_favorite", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("remove_favorite", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("end_favorite_group", ConchainServerBrowserUpdate, this);
 
 	m_pConsole->Chain("gfx_screen", ConchainWindowScreen, this);
 	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
@@ -4445,17 +4547,17 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
-	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1, sizeof(m_aCmdConnect));
+	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
 }
 
 void CClient::HandleDemoPath(const char *pPath)
 {
-	str_copy(m_aCmdPlayDemo, pPath, sizeof(m_aCmdPlayDemo));
+	str_copy(m_aCmdPlayDemo, pPath);
 }
 
 void CClient::HandleMapPath(const char *pPath)
 {
-	str_copy(m_aCmdEditMap, pPath, sizeof(m_aCmdEditMap));
+	str_copy(m_aCmdEditMap, pPath);
 }
 
 /*
@@ -4582,6 +4684,7 @@ int main(int argc, const char **argv)
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor(), false);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateFavorites().release());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pDiscord);
@@ -4752,7 +4855,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	str_copy(aUrl, "https://info2.ddnet.tw/info", sizeof(aUrl));
+	str_copy(aUrl, "https://info2.ddnet.tw/info");
 
 	if(g_Config.m_BrIndicateFinished)
 	{
@@ -4808,7 +4911,7 @@ SWarning *CClient::GetCurWarning()
 	}
 	else
 	{
-		return &m_vWarnings[0];
+		return m_vWarnings.data();
 	}
 }
 
@@ -4832,27 +4935,44 @@ int CClient::PredictionMargin() const
 
 int CClient::UdpConnectivity(int NetType)
 {
-	NETADDR GlobalUdpAddr;
-	CONNECTIVITY Connectivity = m_aNetClient->GetConnectivity(NetType, &GlobalUdpAddr);
-	GlobalUdpAddr.port = 0;
-	switch(Connectivity)
+	static const int NETTYPES[2] = {NETTYPE_IPV6, NETTYPE_IPV4};
+	int Connectivity = CONNECTIVITY_UNKNOWN;
+	for(int PossibleNetType : NETTYPES)
 	{
-	case CONNECTIVITY::UNKNOWN:
-		return CONNECTIVITY_UNKNOWN;
-	case CONNECTIVITY::CHECKING:
-		return CONNECTIVITY_CHECKING;
-	case CONNECTIVITY::UNREACHABLE:
-		return CONNECTIVITY_UNREACHABLE;
-	case CONNECTIVITY::REACHABLE:
-		return CONNECTIVITY_REACHABLE;
-	case CONNECTIVITY::ADDRESS_KNOWN:
-		if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+		if((NetType & PossibleNetType) == 0)
 		{
-			return CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+			continue;
 		}
-		return CONNECTIVITY_REACHABLE;
-	default:
-		dbg_assert(0, "invalid connectivity value");
-		return CONNECTIVITY_UNKNOWN;
+		NETADDR GlobalUdpAddr;
+		int NewConnectivity;
+		switch(m_aNetClient[CONN_MAIN].GetConnectivity(PossibleNetType, &GlobalUdpAddr))
+		{
+		case CONNECTIVITY::UNKNOWN:
+			NewConnectivity = CONNECTIVITY_UNKNOWN;
+			break;
+		case CONNECTIVITY::CHECKING:
+			NewConnectivity = CONNECTIVITY_CHECKING;
+			break;
+		case CONNECTIVITY::UNREACHABLE:
+			NewConnectivity = CONNECTIVITY_UNREACHABLE;
+			break;
+		case CONNECTIVITY::REACHABLE:
+			NewConnectivity = CONNECTIVITY_REACHABLE;
+			break;
+		case CONNECTIVITY::ADDRESS_KNOWN:
+			GlobalUdpAddr.port = 0;
+			if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+			{
+				NewConnectivity = CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
+				break;
+			}
+			NewConnectivity = CONNECTIVITY_REACHABLE;
+			break;
+		default:
+			dbg_assert(0, "invalid connectivity value");
+			return CONNECTIVITY_UNKNOWN;
+		}
+		Connectivity = std::max(Connectivity, NewConnectivity);
 	}
+	return Connectivity;
 }

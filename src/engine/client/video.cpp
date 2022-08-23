@@ -45,7 +45,7 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 
 	m_Width = Width;
 	m_Height = Height;
-	str_copy(m_aName, pName, sizeof(m_aName));
+	str_copy(m_aName, pName);
 
 	m_FPS = g_Config.m_ClVideoRecorderFPS;
 
@@ -619,7 +619,11 @@ AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t Channel
 	}
 
 	pFrame->format = SampleFmt;
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
+	dbg_assert(av_channel_layout_from_mask(&pFrame->ch_layout, ChannelLayout) == 0, "Failed to set channel layout");
+#else
 	pFrame->channel_layout = ChannelLayout;
+#endif
 	pFrame->sample_rate = SampleRate;
 	pFrame->nb_samples = NbSamples;
 
@@ -739,7 +743,11 @@ bool CVideo::OpenAudio()
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		m_AudioStream.m_vpFrames.emplace_back(nullptr);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
+		m_AudioStream.m_vpFrames[i] = AllocAudioFrame(pContext->sample_fmt, pContext->ch_layout.u.mask, pContext->sample_rate, NbSamples);
+#else
 		m_AudioStream.m_vpFrames[i] = AllocAudioFrame(pContext->sample_fmt, pContext->channel_layout, pContext->sample_rate, NbSamples);
+#endif
 		if(!m_AudioStream.m_vpFrames[i])
 		{
 			dbg_msg("video_recorder", "Could not allocate audio frame");
@@ -779,7 +787,11 @@ bool CVideo::OpenAudio()
 		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_channel_count", 2, 0);
 		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", g_Config.m_SndRate, 0);
 		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
+		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->ch_layout.nb_channels, 0);
+#else
 		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->channels, 0);
+#endif
 		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_sample_rate", pContext->sample_rate, 0);
 		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "out_sample_fmt", pContext->sample_fmt, 0);
 
@@ -826,7 +838,7 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 
 #if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
 	// use only 1 ffmpeg thread on 32-bit to save memory
-	c->thread_count = 1;
+	pContext->thread_count = 1;
 #endif
 
 	switch((*ppCodec)->type)
@@ -847,8 +859,12 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 				}
 			}
 		}
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
+		dbg_assert(av_channel_layout_from_mask(&pContext->ch_layout, AV_CH_LAYOUT_STEREO) == 0, "Failed to set channel layout");
+#else
 		pContext->channels = 2;
 		pContext->channel_layout = AV_CH_LAYOUT_STEREO;
+#endif
 
 		pStream->pSt->time_base.num = 1;
 		pStream->pSt->time_base.den = pContext->sample_rate;

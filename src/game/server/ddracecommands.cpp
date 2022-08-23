@@ -128,14 +128,10 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-	if(pChr && !pChr->m_Super)
+	if(pChr && !pChr->IsSuper())
 	{
-		pChr->m_Super = true;
-		pChr->Core()->m_Super = true;
+		pChr->SetSuper(true);
 		pChr->UnFreeze();
-		pChr->m_TeamBeforeSuper = pChr->Team();
-		pChr->Teams()->SetCharacterTeam(pResult->m_ClientID, TEAM_SUPER);
-		pChr->m_DDRaceState = DDRACE_CHEAT;
 	}
 }
 
@@ -145,12 +141,9 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-	if(pChr && pChr->m_Super)
+	if(pChr && pChr->IsSuper())
 	{
-		pChr->m_Super = false;
-		pChr->Core()->m_Super = false;
-		pChr->Teams()->SetForceCharacterTeam(pResult->m_ClientID,
-			pChr->m_TeamBeforeSuper);
+		pChr->SetSuper(false);
 	}
 }
 
@@ -171,7 +164,7 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
-		pChr->m_DeepFreeze = false;
+		pChr->SetDeepFrozen(false);
 }
 
 void CGameContext::ConLiveFreeze(IConsole::IResult *pResult, void *pUserData)
@@ -217,7 +210,7 @@ void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
-		pChr->m_Jetpack = true;
+		pChr->SetJetpack(true);
 }
 
 void CGameContext::ConWeapons(IConsole::IResult *pResult, void *pUserData)
@@ -249,7 +242,7 @@ void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
-		pChr->m_Jetpack = false;
+		pChr->SetJetpack(false);
 }
 
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)

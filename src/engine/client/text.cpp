@@ -255,6 +255,7 @@ class CTextRender : public IEngineTextRender
 
 	STextContainer &GetTextContainer(int Index)
 	{
+		dbg_assert(Index >= 0, "Text container index was invalid.");
 		if(Index >= (int)m_vpTextContainers.size())
 		{
 			int Size = (int)m_vpTextContainers.size();
@@ -708,7 +709,7 @@ public:
 	{
 		CFont *pFont = new CFont();
 
-		str_copy(pFont->m_aFilename, pFilename, sizeof(pFont->m_aFilename));
+		str_copy(pFont->m_aFilename, pFilename);
 
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &pFont->m_FtFace))
 		{
@@ -742,7 +743,7 @@ public:
 	{
 		CFont::SFontFallBack FallbackFont;
 		FallbackFont.m_pBuf = (void *)pBuf;
-		str_copy(FallbackFont.m_aFilename, pFilename, sizeof(FallbackFont.m_aFilename));
+		str_copy(FallbackFont.m_aFilename, pFilename);
 
 		if(FT_New_Memory_Face(m_FTLibrary, pBuf, Size, 0, &FallbackFont.m_FtFace) == 0)
 		{
@@ -906,7 +907,8 @@ public:
 	{
 		int OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
-		int TextCont = CreateTextContainer(pCursor, pText, Length);
+		int TextCont = -1;
+		CreateTextContainer(TextCont, pCursor, pText, Length);
 		m_RenderFlags = OldRenderFlags;
 		if(TextCont != -1)
 		{
@@ -920,8 +922,11 @@ public:
 		}
 	}
 
-	int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1) override
+	bool CreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
+		dbg_assert(TextContainerIndex == -1, "Text container index was not cleared.");
+		TextContainerIndex = -1;
+
 		CFont *pFont = pCursor->m_pFont;
 
 		// fetch pFont data
@@ -929,12 +934,12 @@ public:
 			pFont = m_pCurFont;
 
 		if(!pFont)
-			return -1;
+			return false;
 
 		bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
-		int ContainerIndex = GetFreeTextContainerIndex();
-		STextContainer &TextContainer = GetTextContainer(ContainerIndex);
+		TextContainerIndex = GetFreeTextContainerIndex();
+		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_pFont = pFont;
 
 		TextContainer.m_SingleTimeUse = (m_RenderFlags & TEXT_RENDER_FLAG_ONE_TIME_USE) != 0;
@@ -978,12 +983,13 @@ public:
 
 		TextContainer.m_FontSize = pSizeData->m_FontSize;
 
-		AppendTextContainer(pCursor, ContainerIndex, pText, Length);
+		AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
 
 		if(TextContainer.m_StringInfo.m_vCharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
 		{
-			FreeTextContainer(ContainerIndex);
-			return -1;
+			FreeTextContainer(TextContainerIndex);
+			TextContainerIndex = -1;
+			return false;
 		}
 		else
 		{
@@ -992,7 +998,7 @@ public:
 			{
 				if((TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
-					UploadTextContainer(ContainerIndex);
+					UploadTextContainer(TextContainerIndex);
 				}
 			}
 
@@ -1006,10 +1012,10 @@ public:
 			TextContainer.m_UnscaledFontSize = pCursor->m_FontSize;
 		}
 
-		return ContainerIndex;
+		return true;
 	}
 
-	void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
+	void AppendTextContainer(int TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
@@ -1436,7 +1442,7 @@ public:
 			if(Graphics()->IsTextBufferingEnabled())
 			{
 				size_t DataSize = TextContainer.m_StringInfo.m_vCharacterQuads.size() * sizeof(STextCharQuad);
-				void *pUploadData = &TextContainer.m_StringInfo.m_vCharacterQuads[0];
+				void *pUploadData = TextContainer.m_StringInfo.m_vCharacterQuads.data();
 
 				if(TextContainer.m_StringInfo.m_QuadBufferObjectIndex != -1 && (TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD) == 0)
 				{
@@ -1497,7 +1503,7 @@ public:
 			if(HasCursor)
 				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, 2);
 			if(HasSelection)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, &vSelectionQuads[0], (int)vSelectionQuads.size());
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, vSelectionQuads.data(), (int)vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			TextContainer.m_HasCursor = HasCursor;
@@ -1523,34 +1529,51 @@ public:
 			pCursor->m_Y = DrawY;
 	}
 
-	// just deletes and creates text container
-	void
-	RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
+	bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
-		DeleteTextContainer(TextContainerIndex);
-		CreateTextContainer(pCursor, pText, Length);
+		if(TextContainerIndex == -1)
+		{
+			return CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
+		}
+		else
+		{
+			AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
+			return true;
+		}
 	}
 
-	void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) override
+	// just deletes and creates text container
+	void
+	RecreateTextContainer(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) override
+	{
+		DeleteTextContainer(TextContainerIndex);
+		CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
+	}
+
+	void RecreateTextContainerSoft(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_StringInfo.m_vCharacterQuads.clear();
 		TextContainer.m_StringInfo.m_QuadNum = 0;
 		// the text buffer gets then recreated by the appended quads
-		AppendTextContainer(pCursor, TextContainerIndex, pText, Length);
+		AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
 	}
 
-	void DeleteTextContainer(int TextContainerIndex) override
+	void DeleteTextContainer(int &TextContainerIndex) override
 	{
-		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-		if(Graphics()->IsTextBufferingEnabled())
+		if(TextContainerIndex != -1)
 		{
-			if(TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
-				Graphics()->DeleteBufferContainer(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, true);
+			STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+			if(Graphics()->IsTextBufferingEnabled())
+			{
+				if(TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
+					Graphics()->DeleteBufferContainer(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, true);
+			}
+			if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
+				Graphics()->DeleteQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
+			FreeTextContainer(TextContainerIndex);
+			TextContainerIndex = -1;
 		}
-		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
-		FreeTextContainer(TextContainerIndex);
 	}
 
 	void UploadTextContainer(int TextContainerIndex) override
@@ -1942,7 +1965,7 @@ public:
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
 				dbg_msg("textrender", "Found non empty text container with index %d with %d quads", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum);
-				HasNonEmptyTextContainer = true;
+				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
 		}
 

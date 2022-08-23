@@ -15,6 +15,7 @@ class CConfig *CComponent::Config() const { return m_pClient->Config(); }
 class IConsole *CComponent::Console() const { return m_pClient->Console(); }
 class IDemoPlayer *CComponent::DemoPlayer() const { return m_pClient->DemoPlayer(); }
 class IDemoRecorder *CComponent::DemoRecorder(int Recorder) const { return m_pClient->DemoRecorder(Recorder); }
+class IFavorites *CComponent::Favorites() const { return m_pClient->Favorites(); }
 class IServerBrowser *CComponent::ServerBrowser() const { return m_pClient->ServerBrowser(); }
 class CLayers *CComponent::Layers() const { return m_pClient->Layers(); }
 class CCollision *CComponent::Collision() const { return m_pClient->Collision(); }

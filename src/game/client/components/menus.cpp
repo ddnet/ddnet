@@ -77,7 +77,7 @@ CMenus::CMenus()
 	m_DeletePressed = false;
 	m_NumInputEvents = 0;
 
-	str_copy(m_aCurrentDemoFolder, "demos", sizeof(m_aCurrentDemoFolder));
+	str_copy(m_aCurrentDemoFolder, "demos");
 	m_aCallvoteReason[0] = 0;
 
 	m_FriendlistSelectedIndex = -1;
@@ -130,7 +130,7 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	return Active ? UI()->DoButtonLogic(pID, Checked, pRect) : 0;
 }
 
-int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically, bool CheckForActiveColorPicker)
+int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color, int AlignVertically, bool CheckForActiveColorPicker)
 {
 	CUIRect Text = *pRect;
 
@@ -151,7 +151,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	}
 
 	if(!MouseInsideColorPicker)
-		Color.a *= UI()->ButtonColorMul(pID);
+		Color.a *= UI()->ButtonColorMul(pButtonContainer);
 	RenderTools()->DrawUIRect(pRect, Color, Corners, r);
 
 	if(pImageName)
@@ -163,7 +163,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 		const CMenuImage *pImage = FindMenuImage(pImageName);
 		if(pImage)
 		{
-			Graphics()->TextureSet(UI()->HotItem() == pID ? pImage->m_OrgTexture : pImage->m_GreyTexture);
+			Graphics()->TextureSet(UI()->HotItem() == pButtonContainer ? pImage->m_OrgTexture : pImage->m_GreyTexture);
 			Graphics()->WrapClamp();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -183,7 +183,7 @@ int CMenus::DoButton_Menu(const void *pID, const char *pText, int Checked, const
 	if(MouseInsideColorPicker)
 		return 0;
 
-	return UI()->DoButtonLogic(pID, Checked, pRect);
+	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
 void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -194,7 +194,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked,
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER);
 }
 
-int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
+int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, int AlignVertically)
 {
 	const bool MouseInside = UI()->MouseInside(pRect);
 	CUIRect Rect = *pRect;
@@ -273,7 +273,7 @@ int CMenus::DoButton_MenuTab(const void *pID, const char *pText, int Checked, co
 	Props.m_AlignVertically = AlignVertically;
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 
-	return UI()->DoButtonLogic(pID, Checked, pRect);
+	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
 int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
@@ -367,7 +367,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	Graphics()->QuadsEnd();
 }
 
-ColorHSLA CMenus::DoLine_ColorPicker(int *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, bool UseCheckBox, int *pCheckBoxValue)
+ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, bool UseCheckBox, int *pCheckBoxValue)
 {
 	CUIRect Section, Button, Label;
 
@@ -657,7 +657,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
 		Box.VSplitLeft(33.0f, &Button, &Box);
-		static int s_StartButton = 0;
+		static CButtonContainer s_StartButton;
 
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
@@ -703,7 +703,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(m_ActivePage == PAGE_NEWS)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_NewsButton = 0;
+			static CButtonContainer s_NewsButton;
 			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_NEWS]))
 			{
 				NewPage = PAGE_NEWS;
@@ -713,7 +713,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		else if(m_ActivePage == PAGE_DEMOS)
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_DemosButton = 0;
+			static CButtonContainer s_DemosButton;
 			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DEMOS]))
 			{
 				DemolistPopulate();
@@ -724,7 +724,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		else
 		{
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_InternetButton = 0;
+			static CButtonContainer s_InternetButton;
 			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
@@ -734,7 +734,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_LanButton = 0;
+			static CButtonContainer s_LanButton;
 			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
@@ -744,7 +744,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
-			static int s_FavoritesButton = 0;
+			static CButtonContainer s_FavoritesButton;
 			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
@@ -754,7 +754,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
-			static int s_DDNetButton = 0;
+			static CButtonContainer s_DDNetButton;
 			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DDNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
@@ -767,7 +767,7 @@ int CMenus::RenderMenubar(CUIRect r)
 			}
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
-			static int s_KoGButton = 0;
+			static CButtonContainer s_KoGButton;
 			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, CUI::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_KOG]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
@@ -784,27 +784,27 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_GameButton = 0;
+		static CButtonContainer s_GameButton;
 		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage == PAGE_GAME, &Button, CUI::CORNER_TL))
 			NewPage = PAGE_GAME;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_PlayersButton = 0;
+		static CButtonContainer s_PlayersButton;
 		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage == PAGE_PLAYERS, &Button, 0))
 			NewPage = PAGE_PLAYERS;
 
 		Box.VSplitLeft(130.0f, &Button, &Box);
-		static int s_ServerInfoButton = 0;
+		static CButtonContainer s_ServerInfoButton;
 		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage == PAGE_SERVER_INFO, &Button, 0))
 			NewPage = PAGE_SERVER_INFO;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
-		static int s_NetworkButton = 0;
+		static CButtonContainer s_NetworkButton;
 		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage == PAGE_NETWORK, &Button, 0))
 			NewPage = PAGE_NETWORK;
 
 		{
-			static int s_GhostButton = 0;
+			static CButtonContainer s_GhostButton;
 			if(GameClient()->m_GameInfo.m_Race)
 			{
 				Box.VSplitLeft(90.0f, &Button, &Box);
@@ -815,7 +815,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, 0, &Box);
-		static int s_CallVoteButton = 0;
+		static CButtonContainer s_CallVoteButton;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, CUI::CORNER_TR))
 		{
 			NewPage = PAGE_CALLVOTE;
@@ -827,7 +827,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_QuitButton = 0;
+	static CButtonContainer s_QuitButton;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
 	if(DoButton_MenuTab(&s_QuitButton, "\xEF\x80\x91", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
 	{
@@ -843,14 +843,14 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_SettingsButton = 0;
+	static CButtonContainer s_SettingsButton;
 
 	if(DoButton_MenuTab(&s_SettingsButton, "\xEF\x80\x93", m_ActivePage == PAGE_SETTINGS, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static int s_EditorButton = 0;
+	static CButtonContainer s_EditorButton;
 	if(DoButton_MenuTab(&s_EditorButton, "\xEF\x81\x84", 0, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
 	{
 		g_Config.m_ClEditor = 1;
@@ -860,14 +860,14 @@ int CMenus::RenderMenubar(CUIRect r)
 	{
 		Box.VSplitRight(10.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
-		static int s_DemoButton = 0;
+		static CButtonContainer s_DemoButton;
 
 		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x84\xB1", m_ActivePage == PAGE_DEMOS, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = PAGE_DEMOS;
 
 		Box.VSplitRight(10.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
-		static int s_ServerButton = 0;
+		static CButtonContainer s_ServerButton;
 
 		if(DoButton_MenuTab(&s_ServerButton, "\xEF\x95\xBD", m_ActivePage == g_Config.m_UiPage, &Button, CUI::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = g_Config.m_UiPage;
@@ -940,13 +940,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_CENTER);
 
 	if(RenderLoadingBar)
-	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1, 1, 1, 0.75f);
-		RenderTools()->DrawRoundRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, 5.0f);
-		Graphics()->QuadsEnd();
-	}
+		RenderTools()->DrawRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f), CUI::CORNER_ALL, 5.0f);
 
 	Client()->UpdateAndSwap();
 }
@@ -1046,9 +1040,9 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 	// reset active item
 	UI()->SetActiveItem(nullptr);
 
-	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
-	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
-	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
+	str_copy(m_aMessageTopic, pTopic);
+	str_copy(m_aMessageBody, pBody);
+	str_copy(m_aMessageButton, pButton);
 	m_Popup = POPUP_MESSAGE;
 }
 
@@ -1059,9 +1053,9 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	// reset active item
 	UI()->SetActiveItem(nullptr);
 
-	str_copy(m_aMessageTopic, pTopic, sizeof(m_aMessageTopic));
-	str_copy(m_aMessageBody, pBody, sizeof(m_aMessageBody));
-	str_copy(m_aMessageButton, pButton, sizeof(m_aMessageButton));
+	str_copy(m_aMessageTopic, pTopic);
+	str_copy(m_aMessageBody, pBody);
+	str_copy(m_aMessageButton, pButton);
 	m_Popup = POPUP_WARNING;
 	SetActive(true);
 
@@ -1164,14 +1158,14 @@ void CMenus::RenderColorPicker()
 	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
 	vec4 BR(rgb.r, rgb.g, rgb.b, 1.0f);
 
-	RenderTools()->DrawUIRect4NoRounding(&ColorsArea, TL, TR, BL, BR);
+	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, CUI::CORNER_NONE, 0.0f);
 
 	TL = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	TR = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	BL = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	BR = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	RenderTools()->DrawUIRect4NoRounding(&ColorsArea, TL, TR, BL, BR);
+	RenderTools()->DrawUIRect4(&ColorsArea, TL, TR, BL, BR, CUI::CORNER_NONE, 0.0f);
 
 	// Hue Area
 	static const float s_aColorIndices[7][3] = {
@@ -1194,7 +1188,7 @@ void CMenus::RenderColorPicker()
 		BL = vec4(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
 
 		HuePartialArea.y = HueArea.y + HuePickerOffset * j;
-		RenderTools()->DrawUIRect4NoRounding(&HuePartialArea, TL, TL, BL, BL);
+		RenderTools()->DrawUIRect4(&HuePartialArea, TL, TL, BL, BL, CUI::CORNER_NONE, 0.0f);
 	}
 
 	//Editboxes Area
@@ -1436,6 +1430,7 @@ int CMenus::Render()
 		const char *pExtraText = "";
 		const char *pButtonText = "";
 		int ExtraAlign = 0;
+		bool UseIpLabel = false;
 
 		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 		if(m_Popup == POPUP_MESSAGE)
@@ -1447,43 +1442,38 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_CONNECTING)
 		{
 			pTitle = Localize("Connecting to");
-			pExtraText = Client()->ConnectAddressString();
+			UseIpLabel = true;
 			pButtonText = Localize("Abort");
 			if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
 			{
-				int Connectivity = Client()->UdpConnectivity(Client()->ServerAddress().type);
-				const char *pMessage = nullptr;
+				int Connectivity = Client()->UdpConnectivity(Client()->ConnectNetTypes());
 				switch(Connectivity)
 				{
 				case IClient::CONNECTIVITY_UNKNOWN:
 					break;
 				case IClient::CONNECTIVITY_CHECKING:
-					pMessage = Localize("Trying to determine UDP connectivity...");
+					pExtraText = Localize("Trying to determine UDP connectivity...");
 					break;
 				case IClient::CONNECTIVITY_UNREACHABLE:
-					pMessage = Localize("UDP seems to be filtered.");
+					pExtraText = Localize("UDP seems to be filtered.");
 					break;
 				case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
-					pMessage = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
+					pExtraText = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
 					break;
 				case IClient::CONNECTIVITY_REACHABLE:
-					pMessage = Localize("No answer from server yet.");
+					pExtraText = Localize("No answer from server yet.");
 					break;
-				}
-				if(pMessage)
-				{
-					str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Client()->ConnectAddressString(), pMessage);
-					pExtraText = aBuf;
 				}
 			}
 			else if(Client()->MapDownloadTotalsize() > 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
 				pTitle = aBuf;
-				pExtraText = "";
+				UseIpLabel = false;
 			}
 			else if(Client()->State() == IClient::STATE_LOADING)
 			{
+				UseIpLabel = false;
 				if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_INITIAL)
 				{
 					pTitle = Localize("Connected");
@@ -1502,7 +1492,7 @@ int CMenus::Render()
 				else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_GETTING_READY)
 				{
 					pTitle = Localize("Connected");
-					pExtraText = Localize("Sending intial client info");
+					pExtraText = Localize("Sending initial client info");
 				}
 			}
 		}
@@ -1531,64 +1521,52 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Delete demo");
 			pExtraText = Localize("Are you sure that you want to delete the demo?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{
 			pTitle = Localize("Rename demo");
-			pExtraText = "";
-			ExtraAlign = -1;
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
 			pTitle = Localize("Render demo");
-			pExtraText = "";
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_REPLACE_VIDEO)
 		{
 			pTitle = Localize("Replace video");
 			pExtraText = Localize("File already exists, do you want to overwrite it?");
-			ExtraAlign = -1;
 		}
 #endif
 		else if(m_Popup == POPUP_REMOVE_FRIEND)
 		{
 			pTitle = Localize("Remove friend");
 			pExtraText = Localize("Are you sure that you want to remove the player from your friends list?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_SOUNDERROR)
 		{
 			pTitle = Localize("Sound error");
 			pExtraText = Localize("The audio device couldn't be initialised.");
 			pButtonText = Localize("Ok");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_PASSWORD)
 		{
 			pTitle = Localize("Password incorrect");
-			pExtraText = "";
 			pButtonText = Localize("Try again");
 		}
 		else if(m_Popup == POPUP_QUIT)
 		{
 			pTitle = Localize("Quit");
 			pExtraText = Localize("Are you sure that you want to quit?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_DISCONNECT)
 		{
 			pTitle = Localize("Disconnect");
 			pExtraText = Localize("Are you sure that you want to disconnect?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_DISCONNECT_DUMMY)
 		{
 			pTitle = Localize("Disconnect Dummy");
 			pExtraText = Localize("Are you sure that you want to disconnect your dummy?");
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
 		{
@@ -1609,6 +1587,7 @@ int CMenus::Render()
 			{
 				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
 				pExtraText = aBuf;
+				ExtraAlign = -1;
 			}
 			else if(Client()->m_Points >= 0)
 			{
@@ -1618,7 +1597,6 @@ int CMenus::Render()
 			{
 				pExtraText = Localize("Checking for existing player with your name");
 			}
-			ExtraAlign = -1;
 		}
 		else if(m_Popup == POPUP_WARNING)
 		{
@@ -1632,7 +1610,6 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Disconnect");
 			pExtraText = Localize("Are you sure that you want to disconnect and switch to a different server?");
-			ExtraAlign = -1;
 		}
 
 		CUIRect Box, Part;
@@ -1648,15 +1625,24 @@ int CMenus::Render()
 		Part.VMargin(20.f, &Part);
 		SLabelProperties Props;
 		Props.m_MaxWidth = (int)Part.w;
+
 		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_LEFT, Props);
 		else
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_CENTER);
+
 		Box.HSplitTop(20.f, &Part, &Box);
 		Box.HSplitTop(24.f, &Part, &Box);
 		Part.VMargin(20.f, &Part);
 
 		float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
+
+		if(UseIpLabel)
+		{
+			UI()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_CENTER);
+			Box.HSplitTop(20.f, &Part, &Box);
+			Box.HSplitTop(24.f, &Part, &Box);
+		}
 
 		Props.m_MaxWidth = (int)Part.w;
 		if(ExtraAlign == -1)
@@ -1690,11 +1676,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 			{
 				m_Popup = POPUP_NONE;
@@ -1713,11 +1699,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Disconnect();
 		}
@@ -1733,11 +1719,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 			{
 				Client()->DummyDisconnect(0);
@@ -1758,11 +1744,11 @@ int CMenus::Render()
 			TryAgain.VMargin(20.0f, &TryAgain);
 			Abort.VMargin(20.0f, &Abort);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || m_EnterPressed)
 			{
 				Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
@@ -1787,7 +1773,7 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(120.0f, &Part);
 
-			static int s_Button = 0;
+			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || (m_EnterPressed && m_Popup != POPUP_CONNECTING))
 			{
 				Client()->Disconnect();
@@ -1857,7 +1843,7 @@ int CMenus::Render()
 			RenderLanguageSelection(Box);
 			Part.VMargin(120.0f, &Part);
 
-			static int s_Button = 0;
+			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EscapePressed || m_EnterPressed)
 				m_Popup = POPUP_FIRST_LAUNCH;
 		}
@@ -1905,7 +1891,7 @@ int CMenus::Render()
 
 			Part.VMargin(120.0f, &Part);
 
-			static int s_Button = 0;
+			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EnterPressed)
 			{
 				g_Config.m_BrFilterCountryIndex = CurSelection;
@@ -1931,11 +1917,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 			{
 				m_Popup = POPUP_NONE;
@@ -1966,11 +1952,11 @@ int CMenus::Render()
 			Ok.VMargin(20.0f, &Ok);
 			Abort.VMargin(20.0f, &Abort);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonOk = 0;
+			static CButtonContainer s_ButtonOk;
 			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 			{
 				m_Popup = POPUP_NONE;
@@ -2025,11 +2011,11 @@ int CMenus::Render()
 			Ok.VMargin(20.0f, &Ok);
 			Abort.VMargin(20.0f, &Abort);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonOk = 0;
+			static CButtonContainer s_ButtonOk;
 			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
 			{
 				m_Popup = POPUP_NONE;
@@ -2046,7 +2032,7 @@ int CMenus::Render()
 						str_format(aBufNew, sizeof(aBufNew), "%s", m_aCurrentDemoFile);
 					char aWholePath[1024];
 					// store new video filename to origin buffer
-					str_copy(m_aCurrentDemoFile, aBufNew, sizeof(m_aCurrentDemoFile));
+					str_copy(m_aCurrentDemoFile, aBufNew);
 					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
 					{
 						PopupMessage(Localize("Error"), Localize("Destination file already exist"), Localize("Ok"));
@@ -2088,14 +2074,14 @@ int CMenus::Render()
 			// slowdown
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			static int s_SlowDownButton = 0;
+			static CButtonContainer s_SlowDownButton;
 			if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
-			static int s_FastForwardButton = 0;
+			static CButtonContainer s_FastForwardButton;
 			if(DoButton_Sprite(&s_FastForwardButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_FASTER, 0, &Button, CUI::CORNER_ALL))
 				IncDemoSpeed = true;
 
@@ -2145,11 +2131,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_RENDER_DEMO;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 			{
 				m_Popup = POPUP_NONE;
@@ -2174,11 +2160,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_NONE;
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 			{
 				m_Popup = POPUP_NONE;
@@ -2203,7 +2189,7 @@ int CMenus::Render()
 			Skip.VMargin(20.0f, &Skip);
 			Join.VMargin(20.0f, &Join);
 
-			static int s_JoinTutorialButton = 0;
+			static CButtonContainer s_JoinTutorialButton;
 			if(DoButton_Menu(&s_JoinTutorialButton, Localize("Join Tutorial Server"), 0, &Join) || m_EnterPressed)
 			{
 				m_JoinTutorial = true;
@@ -2211,7 +2197,7 @@ int CMenus::Render()
 				m_Popup = g_Config.m_BrIndicateFinished ? POPUP_POINTS : POPUP_NONE;
 			}
 
-			static int s_SkipTutorialButton = 0;
+			static CButtonContainer s_SkipTutorialButton;
 			if(DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip) || m_EscapePressed)
 			{
 				m_JoinTutorial = false;
@@ -2256,11 +2242,11 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonNo = 0;
+			static CButtonContainer s_ButtonNo;
 			if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || m_EscapePressed)
 				m_Popup = POPUP_FIRST_LAUNCH;
 
-			static int s_ButtonYes = 0;
+			static CButtonContainer s_ButtonYes;
 			if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				m_Popup = POPUP_NONE;
 		}
@@ -2270,7 +2256,7 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(120.0f, &Part);
 
-			static int s_Button = 0;
+			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
 			{
 				m_Popup = POPUP_NONE;
@@ -2289,14 +2275,14 @@ int CMenus::Render()
 			Yes.VMargin(20.0f, &Yes);
 			No.VMargin(20.0f, &No);
 
-			static int s_ButtonAbort = 0;
+			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
 			{
 				m_Popup = POPUP_NONE;
 				m_aNextServer[0] = '\0';
 			}
 
-			static int s_ButtonTryAgain = 0;
+			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
 				Client()->Connect(m_aNextServer);
 		}
@@ -2306,7 +2292,7 @@ int CMenus::Render()
 			Box.HSplitBottom(24.f, &Box, &Part);
 			Part.VMargin(120.0f, &Part);
 
-			static int s_Button = 0;
+			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
 			{
 				if(m_Popup == POPUP_DISCONNECTED && Client()->m_ReconnectTime > 0)
@@ -2366,11 +2352,11 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 		char aName[128];
 		if(Theme.m_Name.empty())
-			str_copy(aName, "(none)", sizeof(aName));
+			str_copy(aName, "(none)");
 		else if(str_comp(Theme.m_Name.c_str(), "auto") == 0)
-			str_copy(aName, "(seasons)", sizeof(aName));
+			str_copy(aName, "(seasons)");
 		else if(str_comp(Theme.m_Name.c_str(), "rand") == 0)
-			str_copy(aName, "(random)", sizeof(aName));
+			str_copy(aName, "(random)");
 		else if(Theme.m_HasDay && Theme.m_HasNight)
 			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
 		else if(Theme.m_HasDay && !Theme.m_HasNight)
@@ -2399,6 +2385,8 @@ void CMenus::SetActive(bool Active)
 	{
 		ms_ColorPicker.m_Active = false;
 		Input()->SetIMEState(Active);
+		UI()->SetHotItem(nullptr);
+		UI()->SetActiveItem(nullptr);
 	}
 	m_MenuActive = Active;
 	if(!m_MenuActive)
@@ -2663,19 +2651,20 @@ bool CMenus::CheckHotKey(int Key) const
 	       Input()->KeyIsPressed(Key) && m_pClient->m_GameConsole.IsClosed();
 }
 
-int CMenus::DoButton_CheckBox_DontCare(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect)
 {
 	switch(Checked)
 	{
-	case 0:
+	case TRISTATE::NONE:
 		return DoButton_CheckBox_Common(pID, pText, "", pRect);
-	case 1:
-		return DoButton_CheckBox_Common(pID, pText, "X", pRect);
-	case 2:
+	case TRISTATE::SOME:
 		return DoButton_CheckBox_Common(pID, pText, "O", pRect);
+	case TRISTATE::ALL:
+		return DoButton_CheckBox_Common(pID, pText, "X", pRect);
 	default:
-		return DoButton_CheckBox_Common(pID, pText, "", pRect);
+		dbg_assert(false, "invalid tristate");
 	}
+	dbg_break();
 }
 
 int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)

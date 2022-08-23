@@ -697,6 +697,7 @@ void CEditor::SelectLayer(int LayerIndex, int GroupIndex)
 		m_SelectedGroup = GroupIndex;
 
 	m_vSelectedLayers.clear();
+	m_vSelectedQuads.clear();
 	AddSelectedLayer(LayerIndex);
 }
 
@@ -2636,7 +2637,8 @@ void CEditor::DoMapEditor(CUIRect View)
 							size_t BrushIndex = k;
 							if(m_Brush.m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
-							apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), m_Brush.m_vpLayers[BrushIndex], r);
+							if(BrushIndex < m_Brush.m_vpLayers.size())
+								apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), m_Brush.m_vpLayers[BrushIndex], r);
 						}
 					}
 					else
@@ -6412,17 +6414,17 @@ void CEditor::OnUpdate()
 			m_MouseWorldY = 0.0f;
 		}
 	}
+}
 
+void CEditor::OnRender()
+{
 	// toggle gui
 	if(Input()->KeyPress(KEY_TAB))
 		m_GuiActive = !m_GuiActive;
 
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
-}
 
-void CEditor::OnRender()
-{
 	if(m_Animate)
 		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
 	else

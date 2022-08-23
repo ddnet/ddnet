@@ -60,7 +60,7 @@ void CBackground::LoadBackground()
 
 	bool NeedImageLoading = false;
 
-	str_copy(m_aMapName, g_Config.m_ClBackgroundEntities, sizeof(m_aMapName));
+	str_copy(m_aMapName, g_Config.m_ClBackgroundEntities);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
 	if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0)

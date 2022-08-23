@@ -1,20 +1,19 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "player.h"
-#include <engine/shared/config.h>
-
-#include <engine/antibot.h>
-#include <engine/server.h>
-
-#include "base/system.h"
 #include "entities/character.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "score.h"
 
+#include <base/system.h>
+
+#include <engine/antibot.h>
+#include <engine/server.h>
+#include <engine/shared/config.h>
+
 #include <game/gamecore.h>
 #include <game/teamscore.h>
-#include <game/version.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -336,7 +335,7 @@ void CPlayer::Snap(int SnappingClient)
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
 
-	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
 	int Score = abs(m_Score) * -1;
 

@@ -1,15 +1,15 @@
 import sys
 from .datatypes import EmitDefinition, EmitTypeDeclaration
-from . import content
-from . import network
+from . import content # pylint: disable=no-name-in-module
+from . import network # pylint: disable=no-name-in-module
 
 def create_enum_table(names, num):
 	lines = []
 	lines += ["enum", "{"]
-	lines += ["\t%s=0,"%names[0]]
+	lines += [f"\t{names[0]}=0,"]
 	for name in names[1:]:
-		lines += ["\t%s,"%name]
-	lines += ["\t%s" % num, "};"]
+		lines += [f"\t{name},"]
+	lines += [f"\t{num}", "};"]
 	return lines
 
 def create_flags_table(names):
@@ -17,7 +17,7 @@ def create_flags_table(names):
 	lines += ["enum", "{"]
 	i = 0
 	for name in names:
-		lines += ["\t%s = 1<<%d," % (name,i)]
+		lines += [f"\t{name} = 1<<{int(i)},"]
 		i += 1
 	lines += ["};"]
 	return lines
@@ -25,10 +25,10 @@ def create_flags_table(names):
 def EmitEnum(names, num):
 	print("enum")
 	print("{")
-	print("\t%s=0," % names[0])
+	print(f"\t{names[0]}=0,")
 	for name in names[1:]:
-		print("\t%s," % name)
-	print("\t%s" % num)
+		print(f"\t{name},")
+	print(f"\t{num}")
 	print("};")
 
 def EmitFlags(names):
@@ -36,7 +36,7 @@ def EmitFlags(names):
 	print("{")
 	i = 0
 	for name in names:
-		print("\t%s = 1<<%d," % (name,i))
+		print(f"\t{name} = 1<<{int(i)},")
 		i += 1
 	print("};")
 
@@ -64,7 +64,8 @@ def main():
 		print("namespace client_data7 {")
 
 		# emit the type declarations
-		contentlines = open("datasrc/content.py", "rb").readlines()
+		with open("datasrc/content.py", "rb") as f:
+			contentlines = f.readlines()
 		order = []
 		for line in contentlines:
 			line = line.strip()
@@ -77,9 +78,9 @@ def main():
 		print('extern CDataContainer *g_pData;')
 
 		# enums
-		EmitEnum(["IMAGE_%s"%i.name.value.upper() for i in content.container.images.items], "NUM_IMAGES")
-		EmitEnum(["ANIM_%s"%i.name.value.upper() for i in content.container.animations.items], "NUM_ANIMS")
-		EmitEnum(["SPRITE_%s"%i.name.value.upper() for i in content.container.sprites.items], "NUM_SPRITES")
+		EmitEnum([f"IMAGE_{i.name.value.upper()}" for i in content.container.images.items], "NUM_IMAGES")
+		EmitEnum([f"ANIM_{i.name.value.upper()}" for i in content.container.animations.items], "NUM_ANIMS")
+		EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
 
 	if gen_client_content_source or gen_server_content_source:
 		if gen_client_content_source:
@@ -102,12 +103,12 @@ def main():
 		print(network.RawHeader)
 
 		for e in network.Enums:
-			for l in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name):
+			for l in create_enum_table([f"{e.name}_{v}" for v in e.values], f'NUM_{e.name}S'):
 				print(l)
 			print("")
 
 		for e in network.Flags:
-			for l in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]):
+			for l in create_flags_table([f"{e.name}_{v}" for v in e.values]):
 				print(l)
 			print("")
 
@@ -138,8 +139,8 @@ def main():
 				print(line)
 			print("")
 
-		EmitEnum(["SOUND_%s"%i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
-		EmitEnum(["WEAPON_%s"%i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
+		EmitEnum([f"SOUND_{i.name.value.upper()}" for i in content.container.sounds.items], "NUM_SOUNDS")
+		EmitEnum([f"WEAPON_{i.name.value.upper()}" for i in content.container.weapons.id.items], "NUM_WEAPONS")
 
 		print("""
 
@@ -220,19 +221,19 @@ def main():
 
 		lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
 		lines += ['\t"invalid",']
-		lines += ['\t"%s",' % o.name for o in network.Objects]
+		lines += [f'\t"{o.name}",' for o in network.Objects]
 		lines += ['\t""', "};", ""]
 
 		lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
 		lines += ['\t0,']
-		lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects]
+		lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects]
 		lines += ['\t0', "};", ""]
 
 
 		lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
 		lines += ['\t"invalid",']
 		for msg in network.Messages:
-			lines += ['\t"%s",' % msg.name]
+			lines += [f'\t"{msg.name}",']
 		lines += ['\t""']
 		lines += ['};']
 		lines += ['']

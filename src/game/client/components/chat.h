@@ -98,7 +98,7 @@ class CChat : public CComponent
 		const char *m_pName;
 		const char *m_pParams;
 
-		CCommand() {}
+		CCommand() = default;
 		CCommand(const char *pName, const char *pParams) :
 			m_pName(pName), m_pParams(pParams)
 		{
@@ -137,7 +137,7 @@ class CChat : public CComponent
 
 public:
 	CChat();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
 	static constexpr float MESSAGE_PADDING_X = 5.0f;
 	static constexpr float MESSAGE_TEE_SIZE = 7.0f;
@@ -156,15 +156,16 @@ public:
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 	void Echo(const char *pString);
 
-	virtual void OnWindowResize() override;
-	virtual void OnConsoleInit() override;
-	virtual void OnStateChange(int NewState, int OldState) override;
-	virtual void OnRender() override;
-	virtual void RefindSkins();
-	virtual void OnPrepareLines();
-	virtual void OnRelease() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(IInput::CEvent Event) override;
+	void OnWindowResize() override;
+	void OnConsoleInit() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnRender() override;
+	void RefindSkins();
+	void OnPrepareLines();
+	void OnRelease() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnInput(IInput::CEvent Event) override;
+	void OnInit() override;
 
 	void RebuildChat();
 };

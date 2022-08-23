@@ -8,7 +8,6 @@
 
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
-#include <game/version.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -148,9 +147,7 @@ void CGun::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ?
-					    GameServer()->GetClientVersion(SnappingClient) :
-					    CLIENT_VERSIONNR;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
