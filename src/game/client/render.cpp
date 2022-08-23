@@ -15,6 +15,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
@@ -389,10 +390,15 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *pWidth, flo
 }
 
 void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-	float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
+	float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
 {
 	float Width, Height;
 	CalcScreenParams(Aspect, Zoom, &Width, &Height);
+
+	float Scale = (ParallaxZoom * (Zoom - 1.0f) + 100.0f) / 100.0f / Zoom;
+	Width *= Scale;
+	Height *= Scale;
+
 	CenterX *= ParallaxX / 100.0f;
 	CenterY *= ParallaxY / 100.0f;
 	pPoints[0] = OffsetX + CenterX - Width / 2;
@@ -401,10 +407,19 @@ void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[3] = pPoints[1] + Height;
 }
 
-void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
+void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom)
+{
+	float ParallaxZoom = GetParallaxZoom(pGroup, pGroupEx);
+	float aPoints[4];
+	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY, ParallaxZoom,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, aPoints);
+	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+}
+
+void CRenderTools::MapScreenToInterface(float CenterX, float CenterY)
 {
 	float aPoints[4];
-	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, aPoints);
+	MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f,
+		0, 0, Graphics()->ScreenAspect(), 1.0f, aPoints);
 	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }
