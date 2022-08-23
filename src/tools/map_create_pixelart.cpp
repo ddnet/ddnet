@@ -107,7 +107,7 @@ int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, con
 	int ImgPixelSize = aPixelSizes[0], QuadPixelSize = aPixelSizes[1], OriginalNumQuads = NumQuads;
 	int aForcedPivot[2] = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max()};
 	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
-	memset(aVisitedPixels, 0, sizeof(bool[Img.m_Height * Img.m_Width]));
+	memset(aVisitedPixels, 0, sizeof(bool) * Img.m_Height * Img.m_Width);
 
 	for(int y = 0; y < Img.m_Height; y += ImgPixelSize)
 		for(int x = 0; x < Img.m_Width; x += ImgPixelSize)
@@ -162,7 +162,7 @@ int GetImagePixelSize(const CImageInfo &Img)
 {
 	int ImgPixelSize = std::numeric_limits<int>::max();
 	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
-	memset(aVisitedPixels, 0, sizeof(bool[Img.m_Height * Img.m_Width]));
+	memset(aVisitedPixels, 0, sizeof(bool) * Img.m_Height * Img.m_Width);
 
 	for(int y = 0; y < Img.m_Height && ImgPixelSize > 1; y++)
 		for(int x = 0; x < Img.m_Width && ImgPixelSize > 1; x++)
@@ -178,7 +178,7 @@ int GetImagePixelSize(const CImageInfo &Img)
 		}
 	delete[] aVisitedPixels;
 
-	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %dpx", ImgPixelSize);
+	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %dpx %d", ImgPixelSize, ((int)sizeof(aVisitedPixels) * Img.m_Height * Img.m_Width));
 	return ImgPixelSize;
 }
 
