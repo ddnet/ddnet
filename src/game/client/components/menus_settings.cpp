@@ -603,7 +603,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		*pUseCustomColor = *pUseCustomColor ? 0 : 1;
 		SetNeedSendInfo();
 	}
-	static int s_RandomizeColors = 0;
+	CButtonContainer s_RandomizeColors;
 	if(*pUseCustomColor)
 	{
 		RandomColorsButton.VSplitLeft(120.0f, &RandomColorsButton, 0);
@@ -2019,7 +2019,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Assets"),
 		("TClient"),
 		("Profiles")};
-
+	static CButtonContainer s_aTabButtons[sizeof(apTabs)];
 	int NumTabs = (int)std::size(apTabs);
 	int PreviousPage = g_Config.m_UiSettingsPage;
 
@@ -3007,13 +3007,12 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	Label.VSplitLeft(TabsW / NUMBER_OF_TCLIENT_TABS, &Page1Tab, &Page2Tab);
 	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_TCLIENT_TABS, &Page2Tab, &Page3Tab);
 
-	static int s_aPageTabs[NUMBER_OF_TCLIENT_TABS] = {};
-
-	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_PAGE1], Localize("Page 1"), s_CurCustomTab == TCLIENT_TAB_PAGE1, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
+	static CButtonContainer s_aPageTabs[NUMBER_OF_TCLIENT_TABS] = {};
+	if(DoButton_MenuTab(&s_aPageTabs[TCLIENT_TAB_PAGE1], Localize("Page 1"), s_CurCustomTab == TCLIENT_TAB_PAGE1, &Page1Tab, 5, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = TCLIENT_TAB_PAGE1;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_PAGE2], Localize("Page 2"), s_CurCustomTab == TCLIENT_TAB_PAGE2, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab(&s_aPageTabs[TCLIENT_TAB_PAGE2], Localize("Page 2"), s_CurCustomTab == TCLIENT_TAB_PAGE2, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = TCLIENT_TAB_PAGE2;
-	if(DoButton_MenuTab((void *)&s_aPageTabs[TCLIENT_TAB_BINDWHEEL], Localize("BindWheel"), s_CurCustomTab == TCLIENT_TAB_BINDWHEEL, &Page3Tab, 10, NULL, NULL, NULL, NULL, 4))
+	if(DoButton_MenuTab(&s_aPageTabs[TCLIENT_TAB_BINDWHEEL], Localize("BindWheel"), s_CurCustomTab == TCLIENT_TAB_BINDWHEEL, &Page3Tab, 10, NULL, NULL, NULL, NULL, 4))
 		s_CurCustomTab = TCLIENT_TAB_BINDWHEEL;
 
 	const float LineMargin = 20.0f;
@@ -3122,7 +3121,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.VSplitLeft(0, 0, &ExtMenu);
 			ExtMenu.VSplitLeft(130.0f, &ExtMenu, 0);
 			ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
-			static int s_DiscordButton;
+			static CButtonContainer s_DiscordButton;
 			if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 			{
 				if(!open_link("https://discord.gg/fBvhH93Bt6"))
@@ -3181,7 +3180,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
 		}
-		static int OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
+		static CButtonContainer OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
@@ -3273,7 +3272,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorVariableDistance, ("Change indicator offset based on distance to other tees"), &g_Config.m_ClIndicatorVariableDistance, &MainView, LineMargin);
 
-		static int IndicatorAliveColorID, IndicatorDeadColorID;
+		static CButtonContainer IndicatorAliveColorID, IndicatorDeadColorID;
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
@@ -3672,7 +3671,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	LabelRight.VSplitLeft(150.0f, &LabelRight, 0);
 
 	LabelRight.HSplitTop(30.0f, &Button, &LabelRight);
-	static int s_LoadButton;
+	static CButtonContainer s_LoadButton;
 
 	if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
@@ -3722,7 +3721,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	LabelRight.HSplitTop(5.0f, 0, &LabelRight);
 
 	LabelRight.HSplitTop(30.0f, &Button, &LabelRight);
-	static int s_SaveButton;
+	static CButtonContainer s_SaveButton;
 	if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		GameClient()->m_SkinProfiles.AddProfile(
@@ -3745,7 +3744,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	if(s_AllowDelete)
 	{
 		LabelRight.HSplitTop(28.0f, &Button, &LabelRight);
-		static int s_DeleteButton;
+		static CButtonContainer s_DeleteButton;
 		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 		{
 			if(SelectedProfile != -1 && SelectedProfile < GameClient()->m_SkinProfiles.m_Profiles.size())
@@ -3758,7 +3757,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 		LabelRight.HSplitTop(5.0f, 0, &LabelRight);
 
 		LabelRight.HSplitTop(28.0f, &Button, &LabelRight);
-		static int s_OverrideButton;
+		static CButtonContainer s_OverrideButton;
 		if(DoButton_Menu(&s_OverrideButton, Localize("Override"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 		{
 			if(SelectedProfile != -1 && SelectedProfile < GameClient()->m_SkinProfiles.m_Profiles.size())
@@ -3882,7 +3881,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	{
 		SelectedProfile = NewSelected;
 	}
-	static int s_ProfilesFile;
+	static CButtonContainer s_ProfilesFile;
 	CUIRect FileButton;
 	MainView.HSplitBottom(25.0, 0, &FileButton);
 	FileButton.y += 15.0;

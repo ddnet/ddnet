@@ -255,8 +255,8 @@ void CHud::RenderScoreHud()
 				{
 					int BlinkTimer = (m_pClient->m_aFlagDropTick[t] != 0 &&
 								 (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aFlagDropTick[t]) / Client()->GameTickSpeed() >= 25) ?
-								 10 :
-								 20;
+                                                                 10 :
+                                                                 20;
 					if(aFlagCarrier[t] == FLAG_ATSTAND || (aFlagCarrier[t] == FLAG_TAKEN && ((Client()->GameTick(g_Config.m_ClDummy) / BlinkTimer) & 1)))
 					{
 						// draw flag
@@ -579,7 +579,6 @@ void CHud::RenderTextInfo()
 		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 			yOff += 27;
 
-
 		vec2 Pos;
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
 			Pos = vec2(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y);
@@ -603,7 +602,7 @@ void CHud::RenderTextInfo()
 			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 
 			yOff += TextHeight;
-			
+
 			str_format(aBuf, sizeof(aBuf), "VelX: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelX / 256.0f * 50.0 / 32.0f);
 			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
 		}
@@ -623,7 +622,7 @@ void CHud::RenderTextInfo()
 			if(m_pClient->m_Teams.Team(i) == LocalTeamID)
 			{
 				NumInTeam++;
-				if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
+				if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5 || m_pClient->m_aClients[i].m_FreezeEnd > 0)
 					NumFrozen++;
 			}
 		}
@@ -631,7 +630,7 @@ void CHud::RenderTextInfo()
 		//Notify when last
 		if(g_Config.m_ClNotifyWhenLast)
 		{
-			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1 && m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderCur.m_Weapon != 5)
+			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1)
 			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "Last!");
@@ -698,7 +697,7 @@ void CHud::RenderTextInfo()
 					{
 						bool Frozen = false;
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
-						if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5)
+						if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5 || m_pClient->m_aClients[i].m_FreezeEnd > 0)
 						{
 							if(!g_Config.m_ClShowFrozenHudSkins)
 								TeeInfo = FreezeInfo;
@@ -780,15 +779,13 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderVoting()
 {
-	
-    bool kickvote = str_startswith(m_pClient->m_Voting.VoteDescription(),"Kick ")   != 0 ? true: false;
-    bool specvote = str_startswith(m_pClient->m_Voting.VoteDescription(),"Pause ")  != 0 ? true : false;
+	bool kickvote = str_startswith(m_pClient->m_Voting.VoteDescription(), "Kick ") != 0 ? true : false;
+	bool specvote = str_startswith(m_pClient->m_Voting.VoteDescription(), "Pause ") != 0 ? true : false;
 
-    if(g_Config.m_ClVoteDontShow &&  (kickvote || specvote)) 
+	if(g_Config.m_ClVoteDontShow && (kickvote || specvote))
 	{ // only show votes
-	  // check if the is a playervote and if he is in your team.
+		// check if the is a playervote and if he is in your team.
 	}
-
 
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
