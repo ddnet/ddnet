@@ -178,7 +178,7 @@ int GetImagePixelSize(const CImageInfo &Img)
 		}
 	delete[] aVisitedPixels;
 
-	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %dpx %d", ImgPixelSize, ((int)sizeof(aVisitedPixels) * Img.m_Height * Img.m_Width));
+	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %dpx", ImgPixelSize);
 	return ImgPixelSize;
 }
 
