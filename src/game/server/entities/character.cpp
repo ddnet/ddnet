@@ -428,6 +428,7 @@ void CCharacter::FireWeapon()
 		return;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
+	float ProjStartOffset = distance(m_Pos, ProjStartPos);
 
 	switch(m_Core.m_ActiveWeapon)
 	{
@@ -537,7 +538,7 @@ void CCharacter::FireWeapon()
 		else
 			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 
-		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
+		new CLaser(&GameServer()->m_World, ProjStartPos, Direction, LaserReach - ProjStartOffset, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask());
 	}
 	break;
@@ -575,7 +576,7 @@ void CCharacter::FireWeapon()
 		else
 			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 
-		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_LASER);
+		new CLaser(GameWorld(), ProjStartPos, Direction, LaserReach - ProjStartOffset, m_pPlayer->GetCID(), WEAPON_LASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 	}
 	break;
