@@ -10,6 +10,8 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <game/client/ui_scrollregion.h>
+
 #include "editor.h"
 
 // popup menu handling
@@ -320,6 +322,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		PROP_POS_Y,
 		PROP_PARA_X,
 		PROP_PARA_Y,
+		PROP_CUSTOM_ZOOM,
+		PROP_PARA_ZOOM,
 		PROP_USE_CLIPPING,
 		PROP_CLIP_X,
 		PROP_CLIP_Y,
@@ -334,6 +338,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Custom Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom, PROPTYPE_BOOL, 0, 1},
+		{"Para Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
 		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
 		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -364,6 +370,13 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX = NewVal;
 		else if(Prop == PROP_PARA_Y)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY = NewVal;
+		else if(Prop == PROP_CUSTOM_ZOOM)
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = NewVal;
+		else if(Prop == PROP_PARA_ZOOM)
+		{
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = 1;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom = NewVal;
+		}
 		else if(Prop == PROP_POS_X)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
 		else if(Prop == PROP_POS_Y)
@@ -378,6 +391,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
 		else if(Prop == PROP_CLIP_H)
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+
+		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->OnEdited();
 	}
 
 	return 0;
@@ -1234,54 +1249,29 @@ static int g_SelectImageCurrent = -100;
 int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect ButtonBar, ImageView;
-	View.VSplitLeft(80.0f, &ButtonBar, &View);
+	View.VSplitLeft(150.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &ImageView);
 
 	int ShowImage = g_SelectImageCurrent;
 
-	static float s_ScrollValue = 0;
-	float ImagesHeight = pEditor->m_Map.m_vpImages.size() * 14;
-	float ScrollDifference = ImagesHeight - ButtonBar.h;
+	const float RowHeight = 14.0f;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = RowHeight * 5;
+	s_ScrollRegion.Begin(&ButtonBar, &ScrollOffset, &ScrollParams);
+	ButtonBar.y += ScrollOffset.y;
 
-	if(pEditor->m_Map.m_vpImages.size() > 20) // Do we need a scrollbar?
-	{
-		CUIRect Scroll;
-		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
-		{
-			int ScrollNum = (int)((ImagesHeight - ButtonBar.h) / 14.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float ImageStartAt = ScrollDifference * s_ScrollValue;
-	if(ImageStartAt < 0.0f)
-		ImageStartAt = 0.0f;
-
-	float ImageStopAt = ImagesHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ImageCur = 0.0f;
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpImages.size(); i++)
 	{
-		if(ImageCur > ImageStopAt)
-			break;
-		if(ImageCur < ImageStartAt)
-		{
-			ImageCur += 14.0f;
-			continue;
-		}
-		ImageCur += 14.0f;
-
 		CUIRect Button;
-		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
+		ButtonBar.HSplitTop(RowHeight, &Button, &ButtonBar);
+		if(!s_ScrollRegion.AddRect(Button))
+			continue;
 
+		Button.HSplitTop(12.0f, &Button, 0);
 		if(pEditor->UI()->MouseInside(&Button))
 			ShowImage = i;
 
@@ -1297,6 +1287,8 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 				g_SelectImageSelected = i;
 		}
 	}
+
+	s_ScrollRegion.End();
 
 	if(ShowImage >= 0 && (size_t)ShowImage < pEditor->m_Map.m_vpImages.size())
 	{
@@ -1325,7 +1317,7 @@ void CEditor::PopupSelectImageInvoke(int Current, float x, float y)
 	static int s_SelectImagePopupId = 0;
 	g_SelectImageSelected = -100;
 	g_SelectImageCurrent = Current;
-	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 400, 300, PopupSelectImage);
+	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 450, 300, PopupSelectImage);
 }
 
 int CEditor::PopupSelectImageResult()

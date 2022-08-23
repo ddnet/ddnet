@@ -131,15 +131,12 @@ protected:
 	CUI *UI() const { return m_pUI; }
 	std::vector<SUIElementRect> m_vUIRects;
 
-	// used for marquees or other user implemented things
-	int64_t m_ElementTime;
-
 public:
 	CUIElement() = default;
 
 	void Init(CUI *pUI, int RequestedRectCount);
 
-	SUIElementRect *Get(size_t Index)
+	SUIElementRect *Rect(size_t Index)
 	{
 		return &m_vUIRects[Index];
 	}
@@ -159,6 +156,21 @@ struct SLabelProperties
 	bool m_StopAtEnd = false;
 	class CTextCursor *m_pSelCursor = nullptr;
 	bool m_EnableWidthCheck = true;
+};
+
+class CUIElementBase
+{
+private:
+	static CUI *s_pUI;
+
+public:
+	static void Init(CUI *pUI) { s_pUI = pUI; }
+
+	IClient *Client() const;
+	IGraphics *Graphics() const;
+	IInput *Input() const;
+	ITextRender *TextRender() const;
+	CUI *UI() const { return s_pUI; }
 };
 
 class CButtonContainer
