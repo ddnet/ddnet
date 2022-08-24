@@ -47,7 +47,8 @@ int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pT
 	SLabelProperties Props;
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 
-	if (!Enabled){
+	if(!Enabled)
+	{
 		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 		TextRender()->TextOutlineColor(ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f));
 		UI()->DoLabel(&Temp, "\xEF\x9C\x95", Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
@@ -1160,7 +1161,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->TextColor(IconColor);
-		UI()->DoLabel(&FileIcon, Item.m_IsDir ? "\xEF\x81\xBB": "\xEF\x80\x88", 12.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&FileIcon, Item.m_IsDir ? "\xEF\x81\xBB" : "\xEF\x80\x88", 12.0f, TEXTALIGN_LEFT);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->SetCurFont(nullptr);
 

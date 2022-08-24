@@ -4328,26 +4328,27 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 	Button.VSplitLeft(Button.h, &FileIcon, &Button);
 	Button.VSplitLeft(5.0f, nullptr, &Button);
 
-	const char* pIconType;
+	const char *pIconType;
 
 	if(!m_vFileList[Index].m_IsDir)
 	{
 		switch(m_FileDialogFileType)
 		{
-			case FILETYPE_MAP :
-				pIconType = "\xEF\x89\xB9";
-				break;
-			case FILETYPE_IMG :
-				pIconType = "\xEF\x80\xBE";
-				break;
-			case FILETYPE_SOUND :
-				pIconType = "\xEF\x80\x81";
-				break;
-			default :
-				pIconType = "\xEF\x81\xBB";
-
+		case FILETYPE_MAP:
+			pIconType = "\xEF\x89\xB9";
+			break;
+		case FILETYPE_IMG:
+			pIconType = "\xEF\x80\xBE";
+			break;
+		case FILETYPE_SOUND:
+			pIconType = "\xEF\x80\x81";
+			break;
+		default:
+			pIconType = "\xEF\x81\xBB";
 		}
-	} else {
+	}
+	else
+	{
 		pIconType = "\xEF\x81\xBB";
 	}
 
