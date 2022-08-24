@@ -229,6 +229,7 @@ public:
 	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); };
 	vec2 m_Pos;
 	vec2 m_Vel;
+	vec2 m_PosAfterMapColl;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;
@@ -272,9 +273,11 @@ public:
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
 	void Reset();
+	void HandleHookCollision(float Distance, CCharacterCore *pCharCore, const vec2 &Dir, int i);
 	void TickDeferred();
 	void Tick(bool UseInput, bool DoDeferredTick = true);
-	void Move();
+	void Move(bool DoDeferredTick = true);
+	void MoveDeferred(bool UsePosAfterMapColl);
 
 	void Read(const CNetObj_CharacterCore *pObjCore);
 	void Write(CNetObj_CharacterCore *pObjCore);

@@ -268,32 +268,47 @@ void CGameWorld::Tick()
 		if(GameServer()->m_pController->IsForceBalanced())
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Teams have been balanced");
 		// update all objects
-		if(g_Config.m_SvNoWeakHookAndBounce)
+		for(int i = 0; i < NUM_ENTTYPES; ++i)
 		{
-			for(auto *pEnt : m_apFirstEntityTypes)
+			auto *pEnt = m_apFirstEntityTypes[i];
+			if(g_Config.m_SvNoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+			{
 				for(; pEnt;)
 				{
 					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 					pEnt->PreTick();
 					pEnt = m_pNextTraverseEntity;
 				}
-		}
-
-		for(auto *pEnt : m_apFirstEntityTypes)
+				pEnt = m_apFirstEntityTypes[i];
+			}
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 
-		for(auto *pEnt : m_apFirstEntityTypes)
+		for(int i = 0; i < NUM_ENTTYPES; ++i)
+		{
+			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickDeferred();
 				pEnt = m_pNextTraverseEntity;
 			}
+			if(g_Config.m_SvNoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+			{
+				pEnt = m_apFirstEntityTypes[i];
+				for(; pEnt;)
+				{
+					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+					pEnt->PostTickDeferred();
+					pEnt = m_pNextTraverseEntity;
+				}
+			}
+		}
 	}
 	else
 	{

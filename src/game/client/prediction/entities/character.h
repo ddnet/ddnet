@@ -39,6 +39,7 @@ public:
 	void PreTick() override;
 	void Tick() override;
 	void TickDeferred() override;
+	void PostTickDeferred() override;
 
 	bool IsGrounded();
 

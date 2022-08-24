@@ -187,33 +187,47 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
-	if(m_WorldConfig.m_NoWeakHookAndBounce)
+	for(int i = 0; i < NUM_ENTTYPES; ++i)
 	{
-		for(auto *pEnt : m_apFirstEntityTypes)
+		auto *pEnt = m_apFirstEntityTypes[i];
+		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+		{
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->PreTick();
 				pEnt = m_pNextTraverseEntity;
 			}
-	}
-
-	for(auto *pEnt : m_apFirstEntityTypes)
+			pEnt = m_apFirstEntityTypes[i];
+		}
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Tick();
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 
-	for(auto *pEnt : m_apFirstEntityTypes)
+	for(int i = 0; i < NUM_ENTTYPES; ++i)
+	{
+		auto *pEnt = m_apFirstEntityTypes[i];
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->TickDeferred();
-			pEnt->m_SnapTicks++;
 			pEnt = m_pNextTraverseEntity;
 		}
+		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+		{
+			pEnt = m_apFirstEntityTypes[i];
+			for(; pEnt;)
+			{
+				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+				pEnt->PostTickDeferred();
+				pEnt = m_pNextTraverseEntity;
+			}
+		}
+	}
 
 	RemoveEntities();
 

@@ -107,6 +107,12 @@ public: // TODO: Maybe make protected
 	virtual void TickDeferred() {}
 
 	/*
+		Function: TickDeferred
+			Called after all entities TickDeferred() function has been called.
+	*/
+	virtual void PostTickDeferred() {}
+
+	/*
 		Function: TickPaused
 			Called when the game is paused, to freeze the state and position of the entity.
 	*/

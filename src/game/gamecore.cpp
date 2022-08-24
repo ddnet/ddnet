@@ -391,12 +391,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 	}
 
-	if(DoDeferredTick)
-		TickDeferred();
-}
-
-void CCharacterCore::TickDeferred()
-{
 	if(m_pWorld)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -436,25 +430,61 @@ void CCharacterCore::TickDeferred()
 					m_Vel *= 0.85f;
 				}
 
-				// handle hook influence
-				if(!m_HookHitDisabled && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
-				{
-					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
-					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
-						float DragSpeed = m_Tuning.m_HookDragSpeed;
+				if(DoDeferredTick)
+					HandleHookCollision(Distance, pCharCore, Dir, i);
+			}
+		}
+	}
+}
 
-						vec2 Temp;
-						// add force to the hooked player
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, HookAccel * Dir.x * 1.5f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, HookAccel * Dir.y * 1.5f);
-						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
-						// add a little bit force to the guy who has the grip
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -HookAccel * Dir.x * 0.25f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -HookAccel * Dir.y * 0.25f);
-						m_Vel = ClampVel(m_MoveRestrictions, Temp);
-					}
-				}
+void CCharacterCore::HandleHookCollision(float Distance, CCharacterCore *pCharCore, const vec2 &Dir, int i)
+{
+	// handle hook influence
+	if(!m_HookHitDisabled && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
+	{
+		if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
+		{
+			float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
+			float DragSpeed = m_Tuning.m_HookDragSpeed;
+
+			vec2 Temp;
+			// add force to the hooked player
+			Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, HookAccel * Dir.x * 1.5f);
+			Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, HookAccel * Dir.y * 1.5f);
+			pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
+			// add a little bit force to the guy who has the grip
+			Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -HookAccel * Dir.x * 0.25f);
+			Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -HookAccel * Dir.y * 0.25f);
+			m_Vel = ClampVel(m_MoveRestrictions, Temp);
+		}
+	}
+}
+
+void CCharacterCore::TickDeferred()
+{
+	if(m_pWorld)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
+			if(!pCharCore)
+				continue;
+
+			//player *p = (player*)ent;
+			//if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
+
+			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
+				continue; // make sure that we don't nudge our self
+
+			if(!(m_Super || pCharCore->m_Super) && (m_Solo || pCharCore->m_Solo))
+				continue;
+
+			// handle player <-> player collision
+			float Distance = distance(m_Pos, pCharCore->m_Pos);
+			if(Distance > 0)
+			{
+				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
+				HandleHookCollision(Distance, pCharCore, Dir, i);
 			}
 		}
 
@@ -469,7 +499,7 @@ void CCharacterCore::TickDeferred()
 		m_Vel = normalize(m_Vel) * 6000;
 }
 
-void CCharacterCore::Move()
+void CCharacterCore::Move(bool DoDeferredTick)
 {
 	float RampValue = VelocityRamp(length(m_Vel) * 50, m_Tuning.m_VelrampStart, m_Tuning.m_VelrampRange, m_Tuning.m_VelrampCurvature);
 
@@ -493,10 +523,18 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
+	m_PosAfterMapColl = NewPos;
+
+	if(DoDeferredTick)
+		MoveDeferred(false);
+}
+
+void CCharacterCore::MoveDeferred(bool UsePosAfterMapColl)
+{
 	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
 	{
 		// check player collision
-		float Distance = distance(m_Pos, NewPos);
+		float Distance = distance(m_Pos, m_PosAfterMapColl);
 		if(Distance > 0)
 		{
 			int End = Distance + 1;
@@ -504,7 +542,7 @@ void CCharacterCore::Move()
 			for(int i = 0; i < End; i++)
 			{
 				float a = i / Distance;
-				vec2 Pos = mix(m_Pos, NewPos, a);
+				vec2 Pos = mix(m_Pos, m_PosAfterMapColl, a);
 				for(int p = 0; p < MAX_CLIENTS; p++)
 				{
 					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
@@ -512,13 +550,14 @@ void CCharacterCore::Move()
 						continue;
 					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
-					float D = distance(Pos, pCharCore->m_Pos);
+					const auto &OtherCharPos = UsePosAfterMapColl ? pCharCore->m_PosAfterMapColl : pCharCore->m_Pos;
+					float D = distance(Pos, OtherCharPos);
 					if(D < PhysicalSize() && D >= 0.0f)
 					{
 						if(a > 0.0f)
 							m_Pos = LastPos;
-						else if(distance(NewPos, pCharCore->m_Pos) > D)
-							m_Pos = NewPos;
+						else if(distance(m_PosAfterMapColl, OtherCharPos) > D)
+							m_Pos = m_PosAfterMapColl;
 						return;
 					}
 				}
@@ -527,7 +566,7 @@ void CCharacterCore::Move()
 		}
 	}
 
-	m_Pos = NewPos;
+	m_Pos = m_PosAfterMapColl;
 }
 
 void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)

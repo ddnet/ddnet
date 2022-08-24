@@ -55,6 +55,7 @@ public:
 	virtual void PreTick() {}
 	virtual void Tick() {}
 	virtual void TickDeferred() {}
+	virtual void PostTickDeferred() {}
 
 	bool GameLayerClipped(vec2 CheckPos);
 	float m_ProximityRadius;

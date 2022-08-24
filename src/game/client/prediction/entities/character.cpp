@@ -594,7 +594,15 @@ void CCharacter::Tick()
 
 void CCharacter::TickDeferred()
 {
-	m_Core.Move();
+	m_Core.Move(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce == 0);
+	if(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce == 0)
+		PostTickDeferred();
+}
+
+void CCharacter::PostTickDeferred()
+{
+	if(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce)
+		m_Core.MoveDeferred(true);
 	m_Core.Quantize();
 	m_Pos = m_Core.m_Pos;
 }

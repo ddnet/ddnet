@@ -790,20 +790,28 @@ void CCharacter::TickDeferred()
 		m_ReckoningCore.Move();
 		m_ReckoningCore.Quantize();
 	}
-
 	//lastsentcore
-	vec2 StartPos = m_Core.m_Pos;
-	vec2 StartVel = m_Core.m_Vel;
-	bool StuckBefore = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
+	m_CharacterMoveInfo.m_StartPos = m_Core.m_Pos;
+	m_CharacterMoveInfo.m_StartVel = m_Core.m_Vel;
+	m_CharacterMoveInfo.m_StuckBefore = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 
 	m_Core.m_Id = m_pPlayer->GetCID();
-	m_Core.Move();
+	m_Core.Move(g_Config.m_SvNoWeakHookAndBounce == 0);
+
+	if(g_Config.m_SvNoWeakHookAndBounce == 0)
+		PostTickDeferred();
+}
+
+void CCharacter::PostTickDeferred()
+{
+	if(g_Config.m_SvNoWeakHookAndBounce)
+		m_Core.MoveDeferred(true);
 	bool StuckAfterMove = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 	m_Core.Quantize();
 	bool StuckAfterQuant = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 	m_Pos = m_Core.m_Pos;
 
-	if(!StuckBefore && (StuckAfterMove || StuckAfterQuant))
+	if(!m_CharacterMoveInfo.m_StuckBefore && (StuckAfterMove || StuckAfterQuant))
 	{
 		// Hackish solution to get rid of strict-aliasing warning
 		union
@@ -812,18 +820,18 @@ void CCharacter::TickDeferred()
 			unsigned u;
 		} StartPosX, StartPosY, StartVelX, StartVelY;
 
-		StartPosX.f = StartPos.x;
-		StartPosY.f = StartPos.y;
-		StartVelX.f = StartVel.x;
-		StartVelY.f = StartVel.y;
+		StartPosX.f = m_CharacterMoveInfo.m_StartPos.x;
+		StartPosY.f = m_CharacterMoveInfo.m_StartPos.y;
+		StartVelX.f = m_CharacterMoveInfo.m_StartVel.x;
+		StartVelY.f = m_CharacterMoveInfo.m_StartVel.y;
 
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "STUCK!!! %d %d %d %f %f %f %f %x %x %x %x",
-			StuckBefore,
+			m_CharacterMoveInfo.m_StuckBefore,
 			StuckAfterMove,
 			StuckAfterQuant,
-			StartPos.x, StartPos.y,
-			StartVel.x, StartVel.y,
+			m_CharacterMoveInfo.m_StartPos.x, m_CharacterMoveInfo.m_StartPos.y,
+			m_CharacterMoveInfo.m_StartVel.x, m_CharacterMoveInfo.m_StartVel.y,
 			StartPosX.u, StartPosY.u,
 			StartVelX.u, StartVelY.u);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);

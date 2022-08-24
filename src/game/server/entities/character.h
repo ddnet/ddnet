@@ -36,6 +36,7 @@ public:
 	void PreTick() override;
 	void Tick() override;
 	void TickDeferred() override;
+	void PostTickDeferred() override;
 	void TickPaused() override;
 	void Snap(int SnappingClient) override;
 	void SwapClients(int Client1, int Client2) override;
@@ -129,6 +130,13 @@ private:
 
 	int m_Health;
 	int m_Armor;
+
+	struct SCharacterMoveInfo
+	{
+		vec2 m_StartPos;
+		vec2 m_StartVel;
+		bool m_StuckBefore;
+	} m_CharacterMoveInfo;
 
 	// the player core for the physics
 	CCharacterCore m_Core;
