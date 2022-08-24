@@ -33,7 +33,7 @@ public:
 
 	void Reset() override;
 	void Destroy() override;
-	void PreTick() override;
+	void PreTick();
 	void Tick() override;
 	void TickDeferred() override;
 	void TickPaused() override;

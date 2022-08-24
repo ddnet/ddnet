@@ -267,25 +267,31 @@ void CGameWorld::Tick()
 	{
 		if(GameServer()->m_pController->IsForceBalanced())
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Teams have been balanced");
+
 		// update all objects
-		if(g_Config.m_SvNoWeakHookAndBounce)
+		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
-			for(auto *pEnt : m_apFirstEntityTypes)
+			// It's important to call PreTick() and Tick() after each other.
+			// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
+			if(g_Config.m_SvNoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+			{
+				auto *pEnt = m_apFirstEntityTypes[i];
 				for(; pEnt;)
 				{
 					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-					pEnt->PreTick();
+					((CCharacter *)pEnt)->PreTick();
 					pEnt = m_pNextTraverseEntity;
 				}
-		}
+			}
 
-		for(auto *pEnt : m_apFirstEntityTypes)
+			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 
 		for(auto *pEnt : m_apFirstEntityTypes)
 			for(; pEnt;)
