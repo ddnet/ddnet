@@ -3452,7 +3452,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		// Do Settings Key
 		{
-			CKeyInfo &Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
+			CKeyInfo Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
 			for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
 			{
 				for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
