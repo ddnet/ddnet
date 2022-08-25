@@ -3252,11 +3252,6 @@ void CServer::DemoRecorder_HandleAutoStart()
 	}
 }
 
-bool CServer::DemoRecorder_IsRecording()
-{
-	return m_aDemoRecorder[MAX_CLIENTS].IsRecording();
-}
-
 void CServer::SaveDemo(int ClientID, float Time)
 {
 	if(IsRecording(ClientID))

@@ -287,7 +287,6 @@ public:
 	void Ban(int ClientID, int Seconds, const char *pReason) override;
 
 	void DemoRecorder_HandleAutoStart() override;
-	bool DemoRecorder_IsRecording() override;
 
 	//int Tick()
 	int64_t TickStartTime(int Tick);
