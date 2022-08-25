@@ -3734,7 +3734,7 @@ void CGameContext::OnSnap(int ClientID)
 {
 	// add tuning to demo
 	CTuningParams StandardTuning;
-	if(ClientID == -1 && Server()->DemoRecorder_IsRecording() && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
+	if(Server()->IsRecording(ClientID > -1 ? ClientID : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning;
