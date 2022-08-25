@@ -4344,12 +4344,15 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 			pIconType = "\xEF\x80\x81";
 			break;
 		default:
-			pIconType = "\xEF\x81\xBB";
+			pIconType = "";
 		}
 	}
 	else
 	{
-		pIconType = "\xEF\x81\xBB";
+		if(str_comp(m_vFileList[Index].m_aFilename, "..") == 0)
+			pIconType = "\xEF\xA0\x82";
+		else
+			pIconType = "\xEF\x81\xBB";
 	}
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));

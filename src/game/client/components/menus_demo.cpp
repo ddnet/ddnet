@@ -486,7 +486,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitRight(Margins, &ButtonBar, 0);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static CButtonContainer s_KeyboardShortcutsButton;
-	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, "\xE2\x8C\xA8", 0, &Button, IGraphics::CORNER_ALL, g_Config.m_ClDemoKeyboardShortcuts ? true : false))
+	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, "\xE2\x8C\xA8", 0, &Button, IGraphics::CORNER_ALL, g_Config.m_ClDemoKeyboardShortcuts != 0))
 	{
 		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
@@ -1154,6 +1154,14 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Row.VSplitLeft(5.0f, 0, &Row);
 		FileIcon.Margin(1.0f, &FileIcon);
 		FileIcon.x += 2.0f;
+		const char *pIconType;
+
+		if(str_comp(Item.m_aFilename, "..") == 0)
+			pIconType = "\xEF\xA0\x82";
+		else if(Item.m_IsDir)
+			pIconType = "\xEF\x81\xBB";
+		else
+			pIconType = "\xEF\x80\x88";
 
 		ColorRGBA IconColor(1.0f, 1.0f, 1.0f, 1.0f);
 		if(!Item.m_IsDir && (!Item.m_InfosLoaded || !Item.m_Valid))
@@ -1161,7 +1169,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->TextColor(IconColor);
-		UI()->DoLabel(&FileIcon, Item.m_IsDir ? "\xEF\x81\xBB" : "\xEF\x80\x88", 12.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&FileIcon, pIconType, 12.0f, TEXTALIGN_LEFT);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->SetCurFont(nullptr);
 
