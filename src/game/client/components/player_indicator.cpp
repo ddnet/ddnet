@@ -97,7 +97,7 @@ void CPlayerIndicator::OnRender()
 					{
 						Graphics()->QuadsBegin();
 						Graphics()->SetColor(col);
-						RenderTools()->DrawCircle(IndicatorPos.x, IndicatorPos.y, g_Config.m_ClIndicatorRadius, 16);
+						Graphics()->DrawCircle(IndicatorPos.x, IndicatorPos.y, g_Config.m_ClIndicatorRadius, 16);
 						Graphics()->QuadsEnd();
 					}
 				}

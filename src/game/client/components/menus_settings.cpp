@@ -624,7 +624,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(*pUseCustomColor)
 	{
 		RandomColorsButton.VSplitLeft(120.0f, &RandomColorsButton, 0);
-		if(DoButton_Menu(&s_RandomizeColors, "Randomize Colors", 0, &RandomColorsButton, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0, 0, 0, 0.5f), vec4(0, 0, 0, 0.25f)))
+		if(DoButton_Menu(&s_RandomizeColors, "Randomize Colors", 0, &RandomColorsButton, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0, 0, 0, 0.5f), vec4(0, 0, 0, 0.25f)))
 		{
 			if(m_Dummy)
 			{
@@ -3049,7 +3049,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i", "Max Rows", g_Config.m_ClFrozenMaxRows);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClFrozenMaxRows = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenMaxRows, &Button, (g_Config.m_ClFrozenMaxRows - 1) / 5.0f) * 5.0f) + 1;
+			g_Config.m_ClFrozenMaxRows = (int)(UI()->DoScrollbarH(&g_Config.m_ClFrozenMaxRows, &Button, (g_Config.m_ClFrozenMaxRows - 1) / 5.0f) * 5.0f) + 1;
 		}
 		{
 			CUIRect Button, Label;
@@ -3058,7 +3058,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i", "Tee Size", g_Config.m_ClFrozenHudTeeSize);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClFrozenHudTeeSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClFrozenHudTeeSize, &Button, (g_Config.m_ClFrozenHudTeeSize - 8) / 19.0f) * 19.0f) + 8;
+			g_Config.m_ClFrozenHudTeeSize = (int)(UI()->DoScrollbarH(&g_Config.m_ClFrozenHudTeeSize, &Button, (g_Config.m_ClFrozenHudTeeSize - 8) / 19.0f) * 19.0f) + 8;
 		}
 
 		{
@@ -3097,7 +3097,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClRunOnJoinDelay * 20);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			int Delay = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 7) / 93.0f) * 93.0f) + 7;
+			int Delay = (int)(UI()->DoScrollbarH(&g_Config.m_ClRunOnJoinDelay, &Button, (g_Config.m_ClRunOnJoinDelay - 7) / 93.0f) * 93.0f) + 7;
 			if(Delay < 100 || g_Config.m_ClRunOnJoinDelay <= 100)
 			{
 				g_Config.m_ClRunOnJoinDelay = Delay;
@@ -3122,7 +3122,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClHookCollSize = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
+			g_Config.m_ClHookCollSize = (int)(UI()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
 		}
 
 		{
@@ -3132,7 +3132,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			ExtMenu.VSplitLeft(130.0f, &ExtMenu, 0);
 			ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
 			static CButtonContainer s_DiscordButton;
-			if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+			if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 			{
 				if(!open_link("https://discord.gg/fBvhH93Bt6"))
 				{
@@ -3168,7 +3168,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Width", g_Config.m_ClOutlineWidth);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClOutlineWidth = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineWidth, &Button, (g_Config.m_ClOutlineWidth - 1) / 15.0f) * 15.0f) + 1;
+			g_Config.m_ClOutlineWidth = (int)(UI()->DoScrollbarH(&g_Config.m_ClOutlineWidth, &Button, (g_Config.m_ClOutlineWidth - 1) / 15.0f) * 15.0f) + 1;
 		}
 		{
 			CUIRect Button, Label;
@@ -3178,7 +3178,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha", g_Config.m_ClOutlineAlpha);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClOutlineAlpha = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlpha, &Button, (g_Config.m_ClOutlineAlpha) / 100.0f) * 100.0f);
+			g_Config.m_ClOutlineAlpha = (int)(UI()->DoScrollbarH(&g_Config.m_ClOutlineAlpha, &Button, (g_Config.m_ClOutlineAlpha) / 100.0f) * 100.0f);
 		}
 		{
 			CUIRect Button, Label;
@@ -3188,7 +3188,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Outline Alpha (walls)", g_Config.m_ClOutlineAlphaSolid);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClOutlineAlphaSolid = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
+			g_Config.m_ClOutlineAlphaSolid = (int)(UI()->DoScrollbarH(&g_Config.m_ClOutlineAlphaSolid, &Button, (g_Config.m_ClOutlineAlphaSolid) / 100.0f) * 100.0f);
 		}
 		static CButtonContainer OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
 
@@ -3226,7 +3226,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Prediction Margin", g_Config.m_ClPredictionMargin);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			int PredictionMargin = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
+			int PredictionMargin = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
 			if((PredictionMargin < 25 || g_Config.m_ClPredictionMargin <= 25) && g_Config.m_ClPredictionMargin >= 10)
 			{
 				g_Config.m_ClPredictionMargin = PredictionMargin;
@@ -3241,7 +3241,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Negative margin (may lag)", g_Config.m_ClUnfreezeHelperLimit);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeHelperLimit = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
+			g_Config.m_ClUnfreezeHelperLimit = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
 		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
 		if(g_Config.m_ClRemoveAnti)
@@ -3252,7 +3252,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
+			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
 		}
 		if(g_Config.m_ClRemoveAnti)
 		{
@@ -3262,7 +3262,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeLagTicks = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
+			g_Config.m_ClUnfreezeLagTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
 		}
 	}
 
@@ -3300,7 +3300,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator size", g_Config.m_ClIndicatorRadius);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndicatorRadius = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
+			g_Config.m_ClIndicatorRadius = (int)(UI()->DoScrollbarH(&g_Config.m_ClIndicatorRadius, &Button, (g_Config.m_ClIndicatorRadius - 1) / 15.0f) * 15.0f) + 1;
 		}
 		{
 			CUIRect Button, Label;
@@ -3310,7 +3310,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Indicator opacity", g_Config.m_ClIndicatorOpacity);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndicatorOpacity = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOpacity, &Button, (g_Config.m_ClIndicatorOpacity) / 100.0f) * 100.0f);
+			g_Config.m_ClIndicatorOpacity = (int)(UI()->DoScrollbarH(&g_Config.m_ClIndicatorOpacity, &Button, (g_Config.m_ClIndicatorOpacity) / 100.0f) * 100.0f);
 		}
 		{
 			CUIRect Button, Label;
@@ -3322,7 +3322,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			if(g_Config.m_ClIndicatorVariableDistance)
 				str_format(aBuf, sizeof(aBuf), "%s: %i ", "Min offset", g_Config.m_ClIndicatorOffset);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndicatorOffset = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 16) / 184.0f) * 184.0f) + 16;
+			g_Config.m_ClIndicatorOffset = (int)(UI()->DoScrollbarH(&g_Config.m_ClIndicatorOffset, &Button, (g_Config.m_ClIndicatorOffset - 16) / 184.0f) * 184.0f) + 16;
 		}
 		if(g_Config.m_ClIndicatorVariableDistance)
 		{
@@ -3333,7 +3333,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max offset", g_Config.m_ClIndicatorOffsetMax);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClIndicatorOffsetMax = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorOffsetMax, &Button, (g_Config.m_ClIndicatorOffsetMax - 16) / 184.0f) * 184.0f) + 16;
+			g_Config.m_ClIndicatorOffsetMax = (int)(UI()->DoScrollbarH(&g_Config.m_ClIndicatorOffsetMax, &Button, (g_Config.m_ClIndicatorOffsetMax - 16) / 184.0f) * 184.0f) + 16;
 		}
 		if(g_Config.m_ClIndicatorVariableDistance)
 		{
@@ -3345,7 +3345,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Max distance", g_Config.m_ClIndicatorMaxDistance);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			int NewValue = (g_Config.m_ClIndicatorMaxDistance) / 50.0f;
-			NewValue = (int)(UIEx()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
+			NewValue = (int)(UI()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
 			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
 		}
 	}
@@ -3371,7 +3371,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0, 0, 0, 0.3f);
-		RenderTools()->DrawCircle(Screen.w / 2 - 55.0f, Screen.h / 2, 190.0f, 64);
+		Graphics()->DrawCircle(Screen.w / 2 - 55.0f, Screen.h / 2, 190.0f, 64);
 		Graphics()->QuadsEnd();
 
 		Graphics()->WrapClamp();
@@ -3421,7 +3421,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			static float s_OffsetName = 0.0f;
 			SUIExEditBoxProperties EditProps;
 			EditProps.m_pEmptyText = pDescriptionFallback;
-			if(UIEx()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_bindwheellist[i].description), 14.0f, &s_OffsetName, false, CUI::CORNER_ALL, EditProps))
+			if(UI()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_bindwheellist[i].description), 14.0f, &s_OffsetName, false, IGraphics::CORNER_ALL, EditProps))
 			{
 				str_format(GameClient()->m_bindwheellist[i].description, sizeof(GameClient()->m_bindwheellist[i].description), pD[i]);
 			}
@@ -3434,7 +3434,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i + 1);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			static float s_OffsetClan = 0.0f;
-			if(UIEx()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_bindwheellist[i].command), 14.0f, &s_OffsetClan))
+			if(UI()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_bindwheellist[i].command), 14.0f, &s_OffsetClan))
 			{
 				str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), pC[i]);
 			}
@@ -3683,7 +3683,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	LabelRight.HSplitTop(30.0f, &Button, &LabelRight);
 	static CButtonContainer s_LoadButton;
 
-	if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButton_Menu(&s_LoadButton, Localize("Load"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		if(SelectedProfile != -1 && SelectedProfile < GameClient()->m_SkinProfiles.m_Profiles.size())
 		{
@@ -3732,7 +3732,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 	LabelRight.HSplitTop(30.0f, &Button, &LabelRight);
 	static CButtonContainer s_SaveButton;
-	if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		GameClient()->m_SkinProfiles.AddProfile(
 			doColors ? *pColorBody : -1,
@@ -3755,7 +3755,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	{
 		LabelRight.HSplitTop(28.0f, &Button, &LabelRight);
 		static CButtonContainer s_DeleteButton;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 		{
 			if(SelectedProfile != -1 && SelectedProfile < GameClient()->m_SkinProfiles.m_Profiles.size())
 			{
@@ -3768,7 +3768,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 		LabelRight.HSplitTop(28.0f, &Button, &LabelRight);
 		static CButtonContainer s_OverrideButton;
-		if(DoButton_Menu(&s_OverrideButton, Localize("Override"), 0, &Button, 0, CUI::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+		if(DoButton_Menu(&s_OverrideButton, Localize("Override"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 		{
 			if(SelectedProfile != -1 && SelectedProfile < GameClient()->m_SkinProfiles.m_Profiles.size())
 			{

@@ -104,7 +104,7 @@ bool CBindWheel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 void CBindWheel::DrawCircle(float x, float y, float r, int Segments)
 {
-	RenderTools()->DrawCircle(x, y, r, Segments);
+	Graphics()->DrawCircle(x, y, r, Segments);
 }
 
 void CBindWheel::OnRender()
