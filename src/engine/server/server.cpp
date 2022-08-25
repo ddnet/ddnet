@@ -799,9 +799,13 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 		if(RepackMsg(pMsg, Pack7, true))
 			return -1;
 
-		// write message to demo recorder
+		// write message to demo recorders
 		if(!(Flags & MSGFLAG_NORECORD))
-			m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack6.Data(), Pack6.Size());
+		{
+			for(auto &Recorder : m_aDemoRecorder)
+				if(Recorder.IsRecording())
+					Recorder.RecordMessage(Pack6.Data(), Pack6.Size());
+		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
 		{
@@ -837,10 +841,13 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 			return 0;
 		}
 
+		// write message to demo recorders
 		if(!(Flags & MSGFLAG_NORECORD))
 		{
-			m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
-			m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
+			if(m_aDemoRecorder[ClientID].IsRecording())
+				m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
+			if(m_aDemoRecorder[MAX_CLIENTS].IsRecording())
+				m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
 		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
