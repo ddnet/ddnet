@@ -184,11 +184,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewTeleLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
 		{
-			CLayer *pTeleLayer = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeTeleLayer(pTeleLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTeleLayer);
-			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+			auto fnAddTeleLayer = [pEditor, Group]() {
+				CLayer *pTeleLayer = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+				pEditor->m_Map.MakeTeleLayer(pTeleLayer);
+				Group->AddLayer(pTeleLayer);
+				pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+				pEditor->m_Brush.Clear();
+			};
+
+			fnAddTeleLayer();
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddTeleLayer));
+
 			return 1;
 		}
 	}
@@ -201,11 +208,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewSpeedupLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
 		{
-			CLayer *pSpeedupLayer = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSpeedupLayer);
-			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+			auto fnAddSpeedupLayer = [pEditor, Group]() {
+				CLayer *pSpeedupLayer = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+				pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
+				Group->AddLayer(pSpeedupLayer);
+				pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+				pEditor->m_Brush.Clear();
+			};
+
+			fnAddSpeedupLayer();
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddSpeedupLayer));
+
 			return 1;
 		}
 	}
@@ -218,11 +232,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewTuneLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
 		{
-			CLayer *pTuneLayer = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeTuneLayer(pTuneLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTuneLayer);
-			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+			auto fnAddTuneLayer = [pEditor, Group]() {
+				CLayer *pTuneLayer = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+				pEditor->m_Map.MakeTuneLayer(pTuneLayer);
+				Group->AddLayer(pTuneLayer);
+				pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+				pEditor->m_Brush.Clear();
+			};
+
+			fnAddTuneLayer();
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddTuneLayer));
+
 			return 1;
 		}
 	}
@@ -235,11 +256,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewFrontLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
 		{
-			CLayer *pFrontLayer = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeFrontLayer(pFrontLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pFrontLayer);
-			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+			auto fnAddFrontLayer = [pEditor, Group]() {
+				CLayer *pFrontLayer = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+				pEditor->m_Map.MakeFrontLayer(pFrontLayer);
+				Group->AddLayer(pFrontLayer);
+				pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+				pEditor->m_Brush.Clear();
+			};
+
+			fnAddFrontLayer();
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddFrontLayer));
+
 			return 1;
 		}
 	}
@@ -252,11 +280,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewSwitchLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
 		{
-			CLayer *pSwitchLayer = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSwitchLayer);
-			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+			auto fnAddSwitchLayer = [pEditor, Group]() {
+				CLayer *pSwitchLayer = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+				pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
+				Group->AddLayer(pSwitchLayer);
+				pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+				pEditor->m_Brush.Clear();
+			};
+
+			fnAddSwitchLayer();
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddSwitchLayer));
+
 			return 1;
 		}
 	}
@@ -267,11 +302,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewQuadLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
 	{
-		CLayer *pQuadLayer = new CLayerQuads;
-		pQuadLayer->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pQuadLayer);
-		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
+		CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+		auto fnAddQuadLayer = [pEditor, Group]() {
+			CLayer *pQuadLayer = new CLayerQuads;
+			pQuadLayer->m_pEditor = pEditor;
+			Group->AddLayer(pQuadLayer);
+			pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+			Group->m_Collapse = false;
+		};
+
+		fnAddQuadLayer();
+		pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddQuadLayer));
+
 		return 1;
 	}
 
@@ -281,11 +323,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewTileLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
 	{
-		CLayer *pTileLayer = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-		pTileLayer->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTileLayer);
-		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
+		CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+		auto fnAddTileLayer = [pEditor, Group]() {
+			CLayer *pTileLayer = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			pTileLayer->m_pEditor = pEditor;
+			Group->AddLayer(pTileLayer);
+			pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+			Group->m_Collapse = false;
+		};
+
+		fnAddTileLayer();
+		pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddTileLayer));
+
 		return 1;
 	}
 
@@ -295,11 +344,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewSoundLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
 	{
-		CLayer *pSoundLayer = new CLayerSounds;
-		pSoundLayer->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSoundLayer);
-		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
+		CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+		auto fnAddSoundLayer = [pEditor, Group]() {
+			CLayer *pSoundLayer = new CLayerSounds;
+			pSoundLayer->m_pEditor = pEditor;
+			Group->AddLayer(pSoundLayer);
+			pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+			Group->m_Collapse = false;
+		};
+
+		fnAddSoundLayer();
+		pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddSoundLayer));
+
 		return 1;
 	}
 
@@ -422,7 +478,15 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		if(pEditor->DoButton_Editor(&s_DuplicationButton, "Duplicate layer", 0, &DupButton, 0, "Duplicates the layer"))
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->DuplicateLayer(pEditor->m_vSelectedLayers[0]);
+			int SelectedLayer = pEditor->m_vSelectedLayers[0];
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+			auto fnDupLayer = [pEditor, SelectedLayer, Group]() {
+				Group->DuplicateLayer(SelectedLayer);
+			};
+
+			fnDupLayer();
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, SelectedLayer+1, fnDupLayer));
+
 			return 1;
 		}
 	}

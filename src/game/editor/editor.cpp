@@ -6455,6 +6455,8 @@ void CEditorMap::MakeTuneLayer(CLayer *pLayer)
 
 void CEditor::RecordUndoAction(IEditorAction *pAction, bool Clear)
 {
+	pAction->m_pEditor = this;
+
 	if (Clear && m_vpRedoActions.size() > 0) {
 		for (auto Action : m_vpRedoActions) {
 			delete Action;
@@ -6500,4 +6502,25 @@ bool CEditor::Redo()
 	RecordUndoAction(FrontAction, false);
 	m_vpRedoActions.pop_front();
 	return FrontAction->Redo();
+}
+
+
+bool CEditorAddLayerAction::Undo()
+{
+	CLayerGroup *Group = (CLayerGroup *)m_pObject;
+	CLayer *Layer = Group->m_vpLayers[m_LayerIndex];
+
+	if(Layer == m_pEditor->m_Map.m_pFrontLayer)
+		m_pEditor->m_Map.m_pFrontLayer = nullptr;
+	if(Layer == m_pEditor->m_Map.m_pTeleLayer)
+		m_pEditor->m_Map.m_pTeleLayer = nullptr;
+	if(Layer == m_pEditor->m_Map.m_pSpeedupLayer)
+		m_pEditor->m_Map.m_pSpeedupLayer = nullptr;
+	if(Layer == m_pEditor->m_Map.m_pSwitchLayer)
+		m_pEditor->m_Map.m_pSwitchLayer = nullptr;
+	if(Layer == m_pEditor->m_Map.m_pTuneLayer)
+		m_pEditor->m_Map.m_pTuneLayer = nullptr;
+
+	Group->DeleteLayer(m_LayerIndex);
+	return true;
 }

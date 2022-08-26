@@ -712,7 +712,7 @@ public:
 	virtual bool Redo() = 0;
 
 	virtual void Print() = 0;
-	virtual char *Name() const = 0;
+	virtual const char *Name() const = 0;
 
 	CEditor *m_pEditor;
 };
@@ -724,7 +724,52 @@ public:
 	enum class EType
 	{
 		CHANGE_COLOR_TILE,
-		CHANGE_COLOR_QUAD
+		CHANGE_COLOR_QUAD,
+
+		ADD_LAYER,
+		DELETE_LAYER,
+
+		ADD_GROUP,
+		DELETE_GROUP,
+
+		EDIT_LAYER_GROUP,
+		EDIT_LAYER_ORDER,
+		EDIT_LAYER_WIDTH,
+		EDIT_LAYER_HEIGHT,
+		EDIT_LAYER_IMAGE,
+		EDIT_LAYER_COLOR_ENV,
+		EDIT_LAYER_COLOR_TO,
+
+		EDIT_QUAD_POSITION,
+		EDIT_QUAD_CENTER,
+
+		SET_TILE,
+
+		EDIT_GROUP_ORDER,
+		EDIT_GROUP_POS_X,
+		EDIT_GROUP_POS_Y,
+		EDIT_GROUP_PARA_X,
+		EDIT_GROUP_PARA_Y,
+		EDIT_GROUP_CLIP_X,
+		EDIT_GROUP_CLIP_Y,
+		EDIT_GROUP_CLIP_W,
+		EDIT_GROUP_CLIP_H,
+
+		ADD_ENVELOPPE,
+		EDIT_ENV_NAME,
+		EDIT_ENV_POINT_VALUE,
+		EDIT_ENV_POINT_TIME,
+		EDIT_ENV_SYNC_CHECKBOX,
+		DELETE_ENVELOPPE,
+
+		ADD_COMMAND,
+		EDIT_COMMAND,
+		DELETE_COMMAND,
+
+		ADD_IMAGE,
+		ADD_SOUND,
+
+		CHANGE_ORIENTATION_VALUE
 	};
 
 public:
@@ -741,12 +786,47 @@ public:
 	{
 	}
 
-	char *Name() const
+	const char *Name() const override
 	{
 		switch(m_Type)
 		{
 		case EType::CHANGE_COLOR_TILE: return "CHANGE_COLOR_TILE";
 		case EType::CHANGE_COLOR_QUAD: return "CHANGE_COLOR_QUAD";
+		case EType::ADD_LAYER: return "ADD_LAYER";
+		case EType::DELETE_LAYER: return "DELETE_LAYER";
+		case EType::ADD_GROUP: return "ADD_GROUP";
+		case EType::DELETE_GROUP: return "DELETE_GROUP";
+		case EType::EDIT_LAYER_GROUP: return "EDIT_LAYER_GROUP";
+		case EType::EDIT_LAYER_ORDER: return "EDIT_LAYER_ORDER";
+		case EType::EDIT_LAYER_WIDTH: return "EDIT_LAYER_WIDTH";
+		case EType::EDIT_LAYER_HEIGHT: return "EDIT_LAYER_HEIGHT";
+		case EType::EDIT_LAYER_IMAGE: return "EDIT_LAYER_IMAGE";
+		case EType::EDIT_LAYER_COLOR_ENV: return "EDIT_LAYER_COLOR_ENV";
+		case EType::EDIT_LAYER_COLOR_TO: return "EDIT_LAYER_COLOR_TO";
+		case EType::EDIT_QUAD_POSITION: return "EDIT_QUAD_POSITION";
+		case EType::EDIT_QUAD_CENTER: return "EDIT_QUAD_CENTER";
+		case EType::SET_TILE: return "SET_TILE";
+		case EType::EDIT_GROUP_ORDER: return "EDIT_GROUP_ORDER";
+		case EType::EDIT_GROUP_POS_X: return "EDIT_GROUP_POS_X";
+		case EType::EDIT_GROUP_POS_Y: return "EDIT_GROUP_POS_Y";
+		case EType::EDIT_GROUP_PARA_X: return "EDIT_GROUP_PARA_X";
+		case EType::EDIT_GROUP_PARA_Y: return "EDIT_GROUP_PARA_Y";
+		case EType::EDIT_GROUP_CLIP_X: return "EDIT_GROUP_CLIP_X";
+		case EType::EDIT_GROUP_CLIP_Y: return "EDIT_GROUP_CLIP_Y";
+		case EType::EDIT_GROUP_CLIP_W: return "EDIT_GROUP_CLIP_W";
+		case EType::EDIT_GROUP_CLIP_H: return "EDIT_GROUP_CLIP_H";
+		case EType::ADD_ENVELOPPE: return "ADD_ENVELOPPE";
+		case EType::EDIT_ENV_NAME: return "EDIT_ENV_NAME";
+		case EType::EDIT_ENV_POINT_VALUE: return "EDIT_ENV_POINT_VALUE";
+		case EType::EDIT_ENV_POINT_TIME: return "EDIT_ENV_POINT_TIME";
+		case EType::EDIT_ENV_SYNC_CHECKBOX: return "EDIT_ENV_SYNC_CHECKBOX";
+		case EType::DELETE_ENVELOPPE: return "DELETE_ENVELOPPE";
+		case EType::ADD_COMMAND: return "ADD_COMMAND";
+		case EType::EDIT_COMMAND: return "EDIT_COMMAND";
+		case EType::DELETE_COMMAND: return "DELETE_COMMAND";
+		case EType::ADD_IMAGE: return "ADD_IMAGE";
+		case EType::ADD_SOUND: return "ADD_SOUND";
+		case EType::CHANGE_ORIENTATION_VALUE: return "CHANGE_ORIENTATION_VALUE";
 		default: return "UNKNOWN";
 		}
 	}
@@ -814,6 +894,40 @@ public:
 
 private:
 	int m_Index;
+};
+
+class CEditorAddLayerAction : public CEditorAction<CLayer*>
+{
+public:
+	CEditorAddLayerAction(CLayerGroup *pObject, int LayerIndex, std::function<void()> fnAddLayer) :
+		CEditorAction(CEditorAction::EType::ADD_LAYER, pObject, nullptr, pObject->m_vpLayers[pObject->m_vpLayers.size() - 1])
+	{
+		m_LayerIndex = LayerIndex;
+		m_fnAddLayer = fnAddLayer;
+	}
+
+	~CEditorAddLayerAction()
+	{
+
+	}
+
+	bool Undo() override;
+
+	bool Redo() override
+	{
+		// call the add layer function, needed for special layers
+		m_fnAddLayer();
+		return true;
+	}
+
+	void Print() override
+	{
+		dbg_msg("editor", "Editor action: Add layer, type=%d name=%s", m_ValueTo->m_Type, m_ValueTo->m_aName);
+	}
+
+private:
+	int m_LayerIndex;
+	std::function<void()> m_fnAddLayer;
 };
 
 class CEditor : public IEditor
