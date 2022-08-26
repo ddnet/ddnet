@@ -964,8 +964,15 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
 		{
 			dbg_msg("editor", "applying changes");
+			std::vector<SCommonPropState> OriginalStates;
+
 			for(auto &pLayer : vpLayers)
 			{
+				SCommonPropState Original;
+				Original.m_Width = pLayer->m_Width;
+				Original.m_Height = pLayer->m_Height;
+				Original.m_Color = ((pLayer->m_Color.r) << 24) + ((pLayer->m_Color.g) << 16) + (pLayer->m_Color.b << 8) + pLayer->m_Color.a;
+
 				if((State.m_Modified & SCommonPropState::MODIFIED_SIZE) != 0)
 					pLayer->Resize(State.m_Width, State.m_Height);
 
@@ -975,12 +982,13 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 					pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
 					pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
 					pLayer->m_Color.a = State.m_Color & 0xff;
-
-					// TODO -- EDIT_LAYERS_BATCH_COLOR
 				}
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+				OriginalStates.push_back(Original);
 			}
+
+			pEditor->RecordUndoAction(new CEditorEditMultipleLayersAction(nullptr, OriginalStates, State, vpLayers));
 			State.m_Modified = 0;
 		}
 	}

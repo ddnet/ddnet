@@ -711,7 +711,10 @@ public:
 	virtual bool Undo() = 0;
 	virtual bool Redo() = 0;
 
-	virtual void Print() = 0;
+	virtual void Print()
+	{
+	}
+
 	virtual const char *Name() const = 0;
 
 	CEditor *m_pEditor;
@@ -726,7 +729,7 @@ public:
 		CHANGE_COLOR_TILE,
 		CHANGE_COLOR_QUAD,
 
-		EDIT_LAYERS_BATCH_COLOR,
+		EDIT_MULTIPLE_LAYERS,
 
 		ADD_LAYER,
 		DELETE_LAYER,
@@ -794,7 +797,7 @@ public:
 		{
 		case EType::CHANGE_COLOR_TILE: return "CHANGE_COLOR_TILE";
 		case EType::CHANGE_COLOR_QUAD: return "CHANGE_COLOR_QUAD";
-		case EType::EDIT_LAYERS_BATCH_COLOR: return "EDIT_LAYERS_BATCH_COLOR";
+		case EType::EDIT_MULTIPLE_LAYERS: return "EDIT_MULTIPLE_LAYERS";
 		case EType::ADD_LAYER: return "ADD_LAYER";
 		case EType::DELETE_LAYER: return "DELETE_LAYER";
 		case EType::ADD_GROUP: return "ADD_GROUP";
@@ -958,6 +961,69 @@ public:
 
 private:
 	int m_LayerIndex;
+};
+
+class CEditorEditMultipleLayersAction : public CEditorAction<std::vector<CLayerTiles::SCommonPropState>>
+{
+public:
+	CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles::SCommonPropState> Originals, CLayerTiles::SCommonPropState State, std::vector<CLayerTiles *> vpLayers) :
+		CEditorAction(CEditorAction::EType::EDIT_MULTIPLE_LAYERS, pObject, Originals, {State})
+	{
+		m_vpLayers = vpLayers;
+	}
+
+	bool Undo() override
+	{
+		if(m_vpLayers.size() != m_ValueFrom.size())
+			return false;
+
+		for(int i = 0; i < m_vpLayers.size(); i++)
+		{
+			CLayerTiles *pLayer = m_vpLayers[i];
+			CLayerTiles::SCommonPropState Original = m_ValueFrom[i];
+
+			pLayer->Resize(Original.m_Width, Original.m_Height);
+			
+			pLayer->m_Color.r = (Original.m_Color >> 24) & 0xff;
+			pLayer->m_Color.g = (Original.m_Color >> 16) & 0xff;
+			pLayer->m_Color.b = (Original.m_Color >> 8) & 0xff;
+			pLayer->m_Color.a = Original.m_Color & 0xff;
+
+			pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+		}
+
+		return true;
+	}
+
+	bool Redo() override
+	{
+		CLayerTiles::SCommonPropState State = m_ValueTo[0];
+		for(auto *pLayer : m_vpLayers)
+		{
+			if((State.m_Modified & CLayerTiles::SCommonPropState::MODIFIED_SIZE) != 0)
+				pLayer->Resize(State.m_Width, State.m_Height);
+
+			if((State.m_Modified & CLayerTiles::SCommonPropState::MODIFIED_COLOR) != 0)
+			{
+				pLayer->m_Color.r = (State.m_Color >> 24) & 0xff;
+				pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
+				pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
+				pLayer->m_Color.a = State.m_Color & 0xff;
+			}
+
+			pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+		}
+
+		return true;
+	}
+
+	void Print() override
+	{
+		dbg_msg("editor", "Editor action: Edit multiple layers");
+	}
+
+private:
+	std::vector<CLayerTiles *> m_vpLayers;
 };
 
 class CEditor : public IEditor
