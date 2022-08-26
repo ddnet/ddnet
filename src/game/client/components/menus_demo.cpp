@@ -416,6 +416,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			DemoPlayer()->Pause();
 		}
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
 
 	// stop button
 
@@ -427,6 +428,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		DemoPlayer()->Pause();
 		DemoPlayer()->SeekPercent(0.0f);
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
 	// slowdown
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
@@ -434,6 +436,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SlowDownButton;
 	if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
 		DecreaseDemoSpeed = true;
+	GameClient()->m_Tooltips.DoToolTip(&s_SlowDownButton, &Button, Localize("Slow down the demo"));
 
 	// fastforward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
@@ -441,6 +444,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_FastForwardButton;
 	if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8E", 0, &Button, IGraphics::CORNER_ALL))
 		IncreaseDemoSpeed = true;
+	GameClient()->m_Tooltips.DoToolTip(&s_FastForwardButton, &Button, Localize("Speed up the demo"));
 
 	// speed meter
 	ButtonBar.VSplitLeft(Margins * 3, 0, &ButtonBar);
@@ -454,6 +458,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
 		Client()->DemoSliceBegin();
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Slice the beginning of a cut"));
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
@@ -461,6 +466,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceEndButton;
 	if(DoButton_FontIcon(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
 		Client()->DemoSliceEnd();
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Slice the end of a cut"));
 
 	// slice save button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
@@ -472,6 +478,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a seperate demo"));
 
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
@@ -490,6 +497,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_KeyboardShortcutsButton, &Button, Localize("Toggle keyboard shortcuts"));
 
 	// demo name
 	char aDemoName[64] = {0};
