@@ -987,10 +987,14 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 			{
 				if(pEditor->m_SelectedPoints & (1 << v))
 				{
+					CColor PrevColor = pQuad->m_aColors[v];
 					pQuad->m_aColors[v].r = (NewVal >> 24) & 0xff;
 					pQuad->m_aColors[v].g = (NewVal >> 16) & 0xff;
 					pQuad->m_aColors[v].b = (NewVal >> 8) & 0xff;
 					pQuad->m_aColors[v].a = NewVal & 0xff;
+
+					if(!(PrevColor == pQuad->m_aColors[v]))
+						pEditor->RecordUndoAction(new CEditorChangeColorQuadAction(pQuad, v, PrevColor, pQuad->m_aColors[v]));
 				}
 			}
 		}

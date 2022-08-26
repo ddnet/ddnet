@@ -912,10 +912,14 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == PROP_COLOR)
 	{
+		CColor PrevColor = m_Color;
 		m_Color.r = (NewVal >> 24) & 0xff;
 		m_Color.g = (NewVal >> 16) & 0xff;
 		m_Color.b = (NewVal >> 8) & 0xff;
 		m_Color.a = NewVal & 0xff;
+		
+		if(!(PrevColor == m_Color))
+			m_pEditor->RecordUndoAction(new CEditorChangeColorTileAction(this, PrevColor, m_Color));
 	}
 	if(Prop == PROP_COLOR_ENV)
 	{

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
 #include <base/system.h>
 
@@ -699,6 +700,122 @@ public:
 	int RenderProperties(CUIRect *pToolbox) override;
 };
 
+class IEditorAction
+{
+public:
+	IEditorAction()
+	{
+		m_pEditor = nullptr;
+	}
+
+	virtual bool Undo() = 0;
+	virtual bool Redo() = 0;
+
+	virtual void Print() = 0;
+	virtual char *Name() const = 0;
+
+	CEditor *m_pEditor;
+};
+
+template <typename T>
+class CEditorAction : public IEditorAction
+{
+public:
+	enum class EType
+	{
+		CHANGE_COLOR_TILE,
+		CHANGE_COLOR_QUAD
+	};
+
+public:
+	CEditorAction(EType Type, void *pObject, const T &From, const T &To) :
+		IEditorAction()
+	{
+		m_ValueFrom = From;
+		m_ValueTo = To;
+		m_pObject = pObject;
+		m_Type = Type;
+	}
+
+	virtual ~CEditorAction()
+	{
+	}
+
+	char *Name() const
+	{
+		switch(m_Type)
+		{
+		case EType::CHANGE_COLOR_TILE: return "CHANGE_COLOR_TILE";
+		case EType::CHANGE_COLOR_QUAD: return "CHANGE_COLOR_QUAD";
+		default: return "UNKNOWN";
+		}
+	}
+
+	EType m_Type;
+
+protected:
+	T m_ValueFrom;
+	T m_ValueTo;
+	void *m_pObject;
+};
+
+class CEditorChangeColorTileAction : public CEditorAction<CColor>
+{
+public:
+	CEditorChangeColorTileAction(void *pObject, const CColor &OldColor, const CColor &NewColor) :
+		CEditorAction(CEditorAction::EType::CHANGE_COLOR_TILE, pObject, OldColor, NewColor)
+	{
+	}
+
+	bool Undo() override {
+		CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
+		pTileLayer->m_Color = m_ValueFrom;
+		return true;
+	}
+
+	bool Redo() override {
+		CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
+		pTileLayer->m_Color = m_ValueTo;
+		return true;
+	}
+
+	void Print() override {
+		dbg_msg("editor", "Editor action: Change tile color, prev=%d %d %d %d, new=%d %d %d %d", m_ValueFrom.r, m_ValueFrom.g, m_ValueFrom.b, m_ValueFrom.a, m_ValueTo.r, m_ValueTo.g, m_ValueTo.b, m_ValueTo.a);
+	}
+};
+
+class CEditorChangeColorQuadAction : public CEditorAction<CColor>
+{
+public:
+	CEditorChangeColorQuadAction(void *pObject, int Index, const CColor &OldColor, const CColor &NewColor) :
+		CEditorAction(CEditorAction::EType::CHANGE_COLOR_QUAD, pObject, OldColor, NewColor)
+	{
+		m_Index = Index;
+	}
+
+	bool Undo() override
+	{
+		CQuad *pQuad = (CQuad *)m_pObject;
+		pQuad->m_aColors[m_Index] = m_ValueFrom;
+		return true;
+	}
+
+	bool Redo() override
+	{
+		CQuad *pQuad = (CQuad *)m_pObject;
+		pQuad->m_aColors[m_Index] = m_ValueTo;
+		return true;
+	}
+
+	void Print() override
+	{
+		dbg_msg("editor", "Editor action: Change quad color, vertex %d, prev=%d %d %d %d, new=%d %d %d %d", m_Index, m_ValueFrom.r, m_ValueFrom.g, m_ValueFrom.b, m_ValueFrom.a, m_ValueTo.r, m_ValueTo.g, m_ValueTo.b, m_ValueTo.a);
+	}
+
+private:
+	int m_Index;
+};
+
 class CEditor : public IEditor
 {
 	class IInput *m_pInput;
@@ -1227,6 +1344,9 @@ public:
 	static int ms_HuePicker;
 
 	// DDRace
+	void RecordUndoAction(IEditorAction *pAction, bool Clear = true);
+	bool Undo();
+	bool Redo();
 
 	IGraphics::CTextureHandle GetFrontTexture();
 	IGraphics::CTextureHandle GetTeleTexture();
@@ -1248,6 +1368,13 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
+
+	static const int s_MaxActions = 50;
+	std::deque<IEditorAction *> m_vpUndoActions;
+	std::deque<IEditorAction *> m_vpRedoActions;
+
+private:
+	void RecordRedoAction(IEditorAction *Action);
 };
 
 // make sure to inline this function

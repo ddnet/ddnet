@@ -1028,6 +1028,33 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		}
 
+		// undo/redo
+		{
+			bool ModPressed = Input()->ModifierIsPressed();
+			// flip buttons
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_UndoButton = 0;
+			int UndoEnabled = m_vpUndoActions.size() > 0;
+			if(DoButton_Ex(&s_UndoButton, "Undo", UndoEnabled-1, &Button, 0, "[Ctrl+Z] Undo", IGraphics::CORNER_L) || (UndoEnabled && ModPressed && Input()->KeyPress(KEY_Z) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			{
+				//for(auto &pLayer : m_Brush.m_vpLayers)
+				//	pLayer->BrushFlipX();
+				dbg_msg("editor", "UNDOOOOO");
+				Undo();
+			}
+
+			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			static int s_RedoButton = 0;
+			int RedoEnabled = m_vpRedoActions.size() > 0;
+			if(DoButton_Ex(&s_RedoButton, "Redo", RedoEnabled-1, &Button, 0, "[Ctrl+Y] Redo", IGraphics::CORNER_R) || (RedoEnabled && ModPressed && Input()->KeyPress(KEY_Y) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			{
+				dbg_msg("editor", "REEEDOOOO");
+				Redo();
+			}
+
+			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
+		}
+
 		// animation speed
 		if(m_Animate)
 		{
@@ -2987,6 +3014,22 @@ void CEditor::DoMapEditor(CUIRect View)
 
 	UI()->MapScreen();
 	//UI()->ClipDisable();
+
+	// render debug actions
+	int i = 0;
+	TextRender()->TextColor(ColorRGBA(1.0, 0.0, 0.0, 1.0));
+	for(auto it = m_vpRedoActions.rbegin(); it != m_vpRedoActions.rend(); ++it)
+		
+	{
+		UI()->DoTextLabel(110, 80 + i * 14, 400, 12, (*it)->Name(), 12, TEXTALIGN_LEFT);
+		i++;
+	}
+	TextRender()->TextColor(ColorRGBA(1.0, 1.0, 1.0, 1.0));
+	for (const auto& Action : m_vpUndoActions)
+	{
+		UI()->DoTextLabel(110, 80 + i * 14, 400, 12, Action->Name(), 12, TEXTALIGN_LEFT);
+		i++;
+	}
 }
 
 float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
@@ -6408,4 +6451,53 @@ void CEditorMap::MakeTuneLayer(CLayer *pLayer)
 	m_pTuneLayer = (CLayerTune *)pLayer;
 	m_pTuneLayer->m_pEditor = m_pEditor;
 	m_pTuneLayer->m_Texture = m_pEditor->GetTuneTexture();
+}
+
+void CEditor::RecordUndoAction(IEditorAction *pAction, bool Clear)
+{
+	if (Clear && m_vpRedoActions.size() > 0) {
+		for (auto Action : m_vpRedoActions) {
+			delete Action;
+		}
+		m_vpRedoActions.clear();
+	}
+
+	if(m_vpUndoActions.size() >= s_MaxActions) {
+		m_vpUndoActions.pop_back();
+	}
+
+	m_vpUndoActions.push_front(pAction);
+	pAction->Print();
+}
+
+void CEditor::RecordRedoAction(IEditorAction* pAction)
+{
+	if(m_vpRedoActions.size() >= s_MaxActions)
+	{
+		m_vpRedoActions.pop_back();
+	}
+
+	m_vpRedoActions.push_front(pAction);
+}
+
+bool CEditor::Undo()
+{
+	if(m_vpUndoActions.empty())
+		return false;
+
+	IEditorAction *FrontAction = m_vpUndoActions.front();
+	RecordRedoAction(FrontAction);
+	m_vpUndoActions.pop_front();
+	return FrontAction->Undo();
+}
+
+bool CEditor::Redo()
+{
+	if(m_vpRedoActions.empty())
+		return false;
+
+	IEditorAction *FrontAction = m_vpRedoActions.front();
+	RecordUndoAction(FrontAction, false);
+	m_vpRedoActions.pop_front();
+	return FrontAction->Redo();
 }
