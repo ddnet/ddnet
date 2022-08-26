@@ -975,6 +975,8 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 					pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
 					pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
 					pLayer->m_Color.a = State.m_Color & 0xff;
+
+					// TODO -- EDIT_LAYERS_BATCH_COLOR
 				}
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
@@ -1102,9 +1104,25 @@ CLayerTele::CLayerTele(int w, int h) :
 	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
 }
 
+CLayerTele::CLayerTele(const CLayerTele &Other) :
+	CLayerTiles(Other)
+{
+	str_copy(m_aName, "Tele", sizeof(m_aName));
+	m_Tele = 1;
+	m_TeleNum = Other.m_TeleNum;
+
+	m_pTeleTile = new CTeleTile[(size_t)m_Width * m_Height];
+	mem_copy(m_pTeleTile, Other.m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
+}
+
 CLayerTele::~CLayerTele()
 {
 	delete[] m_pTeleTile;
+}
+
+CLayer *CLayerTele::Duplicate() const
+{
+	return new CLayerTele(*this);
 }
 
 void CLayerTele::Resize(int NewW, int NewH)
@@ -1329,6 +1347,19 @@ CLayerSpeedup::CLayerSpeedup(int w, int h) :
 
 	m_pSpeedupTile = new CSpeedupTile[w * h];
 	mem_zero(m_pSpeedupTile, (size_t)w * h * sizeof(CSpeedupTile));
+}
+
+CLayerSpeedup::CLayerSpeedup(const CLayerSpeedup &Other) :
+	CLayerTiles(Other)
+{
+	str_copy(m_aName, "Speedup", sizeof(m_aName));
+	m_Speedup = 1;
+	m_SpeedupAngle = Other.m_SpeedupAngle;
+	m_SpeedupForce = Other.m_SpeedupForce;
+	m_SpeedupMaxSpeed = Other.m_SpeedupMaxSpeed;
+
+	m_pSpeedupTile = new CSpeedupTile[(size_t)m_Width * m_Height];
+	mem_copy(m_pSpeedupTile, Other.m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
 }
 
 CLayerSpeedup::~CLayerSpeedup()
@@ -1566,6 +1597,13 @@ CLayerFront::CLayerFront(int w, int h) :
 	m_Front = 1;
 }
 
+CLayerFront::CLayerFront(const CLayerFront &Other) :
+	CLayerTiles(Other)
+{
+	str_copy(m_aName, "Front", sizeof(m_aName));
+	m_Front = 1;
+}
+
 void CLayerFront::SetTile(int x, int y, CTile tile)
 {
 	if(tile.m_Index == TILE_THROUGH_CUT)
@@ -1614,6 +1652,18 @@ CLayerSwitch::CLayerSwitch(int w, int h) :
 
 	m_pSwitchTile = new CSwitchTile[w * h];
 	mem_zero(m_pSwitchTile, (size_t)w * h * sizeof(CSwitchTile));
+}
+
+CLayerSwitch::CLayerSwitch(const CLayerSwitch &Other) :
+	CLayerTiles(Other)
+{
+	str_copy(m_aName, "Switch", sizeof(m_aName));
+	m_Switch = 1;
+	m_SwitchNumber = Other.m_SwitchNumber;
+	m_SwitchDelay = Other.m_SwitchDelay;
+
+	m_pSwitchTile = new CSwitchTile[(size_t)m_Width * m_Height];
+	mem_copy(m_pSwitchTile, Other.m_pSwitchTile, (size_t)m_Width * m_Height * sizeof(CSwitchTile));
 }
 
 CLayerSwitch::~CLayerSwitch()
@@ -1871,6 +1921,17 @@ CLayerTune::CLayerTune(int w, int h) :
 
 	m_pTuneTile = new CTuneTile[w * h];
 	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
+}
+
+CLayerTune::CLayerTune(const CLayerTune &Other) :
+	CLayerTiles(Other)
+{
+	str_copy(m_aName, "Tune", sizeof(m_aName));
+	m_Tune = 1;
+	m_TuningNumber = Other.m_TuningNumber;
+
+	m_pTuneTile = new CTuneTile[(size_t)m_Width * m_Height];
+	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
 }
 
 CLayerTune::~CLayerTune()

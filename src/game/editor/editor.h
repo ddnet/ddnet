@@ -726,6 +726,8 @@ public:
 		CHANGE_COLOR_TILE,
 		CHANGE_COLOR_QUAD,
 
+		EDIT_LAYERS_BATCH_COLOR,
+
 		ADD_LAYER,
 		DELETE_LAYER,
 
@@ -792,6 +794,7 @@ public:
 		{
 		case EType::CHANGE_COLOR_TILE: return "CHANGE_COLOR_TILE";
 		case EType::CHANGE_COLOR_QUAD: return "CHANGE_COLOR_QUAD";
+		case EType::EDIT_LAYERS_BATCH_COLOR: return "EDIT_LAYERS_BATCH_COLOR";
 		case EType::ADD_LAYER: return "ADD_LAYER";
 		case EType::DELETE_LAYER: return "DELETE_LAYER";
 		case EType::ADD_GROUP: return "ADD_GROUP";
@@ -900,7 +903,7 @@ class CEditorAddLayerAction : public CEditorAction<CLayer*>
 {
 public:
 	CEditorAddLayerAction(CLayerGroup *pObject, int LayerIndex, std::function<void()> fnAddLayer) :
-		CEditorAction(CEditorAction::EType::ADD_LAYER, pObject, nullptr, pObject->m_vpLayers[pObject->m_vpLayers.size() - 1])
+		CEditorAction(CEditorAction::EType::ADD_LAYER, pObject, nullptr, pObject->m_vpLayers[LayerIndex])
 	{
 		m_LayerIndex = LayerIndex;
 		m_fnAddLayer = fnAddLayer;
@@ -928,6 +931,33 @@ public:
 private:
 	int m_LayerIndex;
 	std::function<void()> m_fnAddLayer;
+};
+
+class CEditorDeleteLayerAction : public CEditorAction<CLayer*>
+{
+public:
+	CEditorDeleteLayerAction(CLayerGroup *pObject, int LayerIndex) :
+		CEditorAction(CEditorAction::EType::DELETE_LAYER, pObject, pObject->m_vpLayers[LayerIndex]->Duplicate(), nullptr)
+	{
+		m_LayerIndex = LayerIndex;
+	}
+
+	~CEditorDeleteLayerAction()
+	{
+		delete m_ValueFrom;
+	}
+
+	bool Undo() override;
+
+	bool Redo() override;
+
+	void Print() override
+	{
+		dbg_msg("editor", "Editor action: Delete layer, type=%d name=%s", m_ValueFrom->m_Type, m_ValueFrom->m_aName);
+	}
+
+private:
+	int m_LayerIndex;
 };
 
 class CEditor : public IEditor
@@ -1501,10 +1531,13 @@ class CLayerTele : public CLayerTiles
 {
 public:
 	CLayerTele(int w, int h);
+	CLayerTele(const CLayerTele &Other);
 	~CLayerTele();
 
 	CTeleTile *m_pTeleTile;
 	unsigned char m_TeleNum;
+
+	CLayer *Duplicate() const override;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1521,12 +1554,15 @@ class CLayerSpeedup : public CLayerTiles
 {
 public:
 	CLayerSpeedup(int w, int h);
+	CLayerSpeedup(const CLayerSpeedup &Other);
 	~CLayerSpeedup();
 
 	CSpeedupTile *m_pSpeedupTile;
 	int m_SpeedupForce;
 	int m_SpeedupMaxSpeed;
 	int m_SpeedupAngle;
+
+	CLayer *Duplicate() const override { return new CLayerSpeedup(*this); }
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1542,6 +1578,9 @@ class CLayerFront : public CLayerTiles
 {
 public:
 	CLayerFront(int w, int h);
+	CLayerFront(const CLayerFront &Other);
+
+	CLayer *Duplicate() const override { return new CLayerFront(*this); }
 
 	void Resize(int NewW, int NewH) override;
 	void SetTile(int x, int y, CTile tile) override;
@@ -1551,11 +1590,14 @@ class CLayerSwitch : public CLayerTiles
 {
 public:
 	CLayerSwitch(int w, int h);
+	CLayerSwitch(const CLayerSwitch &Other);
 	~CLayerSwitch();
 
 	CSwitchTile *m_pSwitchTile;
 	unsigned char m_SwitchNumber;
 	unsigned char m_SwitchDelay;
+
+	CLayer *Duplicate() const override { return new CLayerSwitch(*this); }
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -1572,10 +1614,13 @@ class CLayerTune : public CLayerTiles
 {
 public:
 	CLayerTune(int w, int h);
+	CLayerTune(const CLayerTune &Other);
 	~CLayerTune();
 
 	CTuneTile *m_pTuneTile;
 	unsigned char m_TuningNumber;
+
+	CLayer *Duplicate() const override { return new CLayerTune(*this); }
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;

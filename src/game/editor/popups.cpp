@@ -495,6 +495,8 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))
 	{
+		pEditor->RecordUndoAction(new CEditorDeleteLayerAction(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup], pEditor->m_vSelectedLayers[0]));
+
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pFrontLayer)
 			pEditor->m_Map.m_pFrontLayer = nullptr;
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pTeleLayer)

@@ -6524,3 +6524,56 @@ bool CEditorAddLayerAction::Undo()
 	Group->DeleteLayer(m_LayerIndex);
 	return true;
 }
+
+bool CEditorDeleteLayerAction::Undo()
+{
+	CLayerGroup *Group = (CLayerGroup *)m_pObject;
+
+	CLayer *pLayer = m_ValueFrom->Duplicate();
+	if(pLayer->m_Type == LAYERTYPE_TILES)
+	{
+		CLayerTiles *pTilesLayer = (CLayerTiles *)pLayer;
+		if(pTilesLayer->m_Tele)
+			m_pEditor->m_Map.m_pTeleLayer = (CLayerTele *)pLayer;
+		else if(pTilesLayer->m_Tune)
+			m_pEditor->m_Map.m_pTuneLayer = (CLayerTune *)pLayer;
+		else if(pTilesLayer->m_Speedup)
+			m_pEditor->m_Map.m_pSpeedupLayer = (CLayerSpeedup *)pLayer;
+		else if(pTilesLayer->m_Switch)
+			m_pEditor->m_Map.m_pSwitchLayer = (CLayerSwitch *)pLayer;
+		else if(pTilesLayer->m_Front)
+			m_pEditor->m_Map.m_pFrontLayer = (CLayerFront *)pLayer;
+	}
+
+	Group->AddLayer(pLayer);
+	m_pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+	return true;
+}
+
+bool CEditorDeleteLayerAction::Redo()
+{
+	CLayerGroup *Group = (CLayerGroup *)m_pObject;
+	CLayer *pLayer = m_ValueFrom;
+
+	if(pLayer->m_Type == LAYERTYPE_TILES)
+	{
+		CLayerTiles *pTilesLayer = (CLayerTiles *)pLayer;
+		if(pTilesLayer->m_Tele)
+			m_pEditor->m_Map.m_pTeleLayer = nullptr;
+		else if(pTilesLayer->m_Tune)
+			m_pEditor->m_Map.m_pTuneLayer = nullptr;
+		else if(pTilesLayer->m_Speedup)
+			m_pEditor->m_Map.m_pSpeedupLayer = nullptr;
+		else if(pTilesLayer->m_Switch)
+			m_pEditor->m_Map.m_pSwitchLayer = nullptr;
+		else if(pTilesLayer->m_Front)
+			m_pEditor->m_Map.m_pFrontLayer = nullptr;
+	}
+
+	Group->DeleteLayer(m_LayerIndex);
+
+	if(m_LayerIndex > 0)
+		m_pEditor->SelectLayer(m_LayerIndex - 1);
+
+	return true;
+}
