@@ -112,6 +112,34 @@ CLayerGroup::CLayerGroup()
 	m_ClipH = 0;
 }
 
+CLayerGroup::CLayerGroup(const CLayerGroup &Other)
+{
+	str_copy(m_aName, Other.m_aName, sizeof(m_aName));
+	m_Visible = Other.m_Visible;
+	m_Collapse = Other.m_Collapse;
+	m_GameGroup = Other.m_GameGroup;
+	m_OffsetX = Other.m_OffsetX;
+	m_OffsetY = Other.m_OffsetY;
+	m_ParallaxX = Other.m_ParallaxX;
+	m_ParallaxY = Other.m_ParallaxY;
+	m_ParallaxZoom = Other.m_ParallaxZoom;
+
+	m_UseClipping = Other.m_UseClipping;
+	m_ClipX = Other.m_ClipX;
+	m_ClipY = Other.m_ClipY;
+	m_ClipW = Other.m_ClipW;
+	m_ClipH = Other.m_ClipH;
+
+	for(auto const *pLayer : Other.m_vpLayers)
+	{
+		// make sure to duplicate layers
+		m_vpLayers.push_back(pLayer->Duplicate());
+	}
+
+	m_pMap = Other.m_pMap;
+	m_CustomParallaxZoom = Other.m_CustomParallaxZoom;
+}
+
 template<typename T>
 static void DeleteAll(std::vector<T> &vList)
 {
@@ -3579,6 +3607,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		{
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
+
+			RecordUndoAction(new CEditorAddGroupAction(&m_Map, m_Map.m_vpGroups.size() - 1));
 		}
 	}
 
@@ -6574,6 +6604,49 @@ bool CEditorDeleteLayerAction::Redo()
 
 	if(m_LayerIndex > 0)
 		m_pEditor->SelectLayer(m_LayerIndex - 1);
+
+	return true;
+}
+
+bool CEditorAddGroupAction::Undo()
+{
+	CEditorMap *pMap = (CEditorMap *)m_pObject;
+	pMap->DeleteGroup(m_ValueTo);
+
+	m_pEditor->m_SelectedGroup = maximum(0, m_ValueTo - 1);
+
+	return true;
+}
+
+bool CEditorAddGroupAction::Redo()
+{
+	CEditorMap *pMap = (CEditorMap *)m_pObject;
+	pMap->NewGroup();
+
+	m_pEditor->m_SelectedGroup = m_ValueTo;
+
+	return true;
+}
+
+bool CEditorDeleteGroupAction::Undo()
+{
+	// undo is re-adding back the group
+	CEditorMap *pMap = (CEditorMap *)m_pObject;
+	pMap->m_vpGroups.insert(pMap->m_vpGroups.begin() + m_GroupIndex, new CLayerGroup(*m_ValueFrom));
+	pMap->m_Modified = true;
+
+	m_pEditor->m_SelectedGroup = m_GroupIndex;
+
+	return true;
+}
+
+bool CEditorDeleteGroupAction::Redo()
+{
+	// redo is deleting the group, that's easy
+	CEditorMap *pMap = (CEditorMap *)m_pObject;
+	pMap->DeleteGroup(m_GroupIndex);
+
+	m_pEditor->m_SelectedGroup = maximum(0, m_GroupIndex);
 
 	return true;
 }

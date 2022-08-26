@@ -204,6 +204,7 @@ public:
 	bool m_Collapse;
 
 	CLayerGroup();
+	CLayerGroup(const CLayerGroup &Other);
 	~CLayerGroup();
 
 	void Convert(CUIRect *pRect);
@@ -1024,6 +1025,39 @@ public:
 
 private:
 	std::vector<CLayerTiles *> m_vpLayers;
+};
+
+class CEditorAddGroupAction : public CEditorAction<int>
+{
+public:
+	CEditorAddGroupAction(CEditorMap *pObject, int GroupIndex) :
+		CEditorAction(CEditorAction::EType::ADD_GROUP, pObject, -1, GroupIndex)
+	{
+	}
+
+	bool Undo() override;
+	bool Redo() override;
+};
+
+class CEditorDeleteGroupAction : public CEditorAction<CLayerGroup *>
+{
+public:
+	CEditorDeleteGroupAction(CEditorMap *pObject, int GroupIndex) :
+		CEditorAction(CEditorAction::EType::DELETE_GROUP, pObject, new CLayerGroup(*pObject->m_vpGroups[GroupIndex]), nullptr)
+	{
+		m_GroupIndex = GroupIndex;
+	}
+
+	~CEditorDeleteGroupAction()
+	{
+		delete m_ValueFrom;
+	}
+
+	bool Undo() override;
+	bool Redo() override;
+
+private:
+	int m_GroupIndex;
 };
 
 class CEditor : public IEditor

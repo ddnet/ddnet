@@ -130,6 +130,8 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete group", 0, &Button, 0, "Delete group"))
 		{
+			pEditor->RecordUndoAction(new CEditorDeleteGroupAction(&pEditor->m_Map, pEditor->m_SelectedGroup));
+
 			pEditor->m_Map.DeleteGroup(pEditor->m_SelectedGroup);
 			pEditor->m_SelectedGroup = maximum(0, pEditor->m_SelectedGroup - 1);
 			return 1;
