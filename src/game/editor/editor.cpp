@@ -2717,14 +2717,24 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!UI()->MouseButton(0))
 					{
+						CLayerGroup Original;
+						Original.m_pMap = &m_Map;
+						std::vector<CLayer *> apLayers;
+
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
 							size_t BrushIndex = k;
 							if(m_Brush.m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
 							CLayer *pBrush = m_Brush.IsEmpty() ? nullptr : m_Brush.m_vpLayers[BrushIndex];
+
+							apEditLayers[k]->BrushGrab(&Original, r);
 							apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), pBrush, r);
+							apLayers.push_back(apEditLayers[k]);
 						}
+
+
+						RecordUndoAction(new CEditorFillSelectionAction(nullptr, &Original, &m_Brush, apLayers, NumEditLayers, r));
 					}
 					else
 					{

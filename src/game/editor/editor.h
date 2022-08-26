@@ -204,7 +204,7 @@ public:
 	bool m_Collapse;
 
 	CLayerGroup();
-	CLayerGroup(const CLayerGroup &Other);
+	explicit CLayerGroup(const CLayerGroup &Other);
 	~CLayerGroup();
 
 	void Convert(CUIRect *pRect);
@@ -750,6 +750,8 @@ public:
 		EDIT_QUAD_CENTER,
 
 		SET_TILE,
+		FILL_SELECTION,
+		BRUSH_DRAW,
 
 		EDIT_GROUP_ORDER,
 		EDIT_GROUP_POS_X,
@@ -813,6 +815,8 @@ public:
 		case EType::EDIT_QUAD_POSITION: return "EDIT_QUAD_POSITION";
 		case EType::EDIT_QUAD_CENTER: return "EDIT_QUAD_CENTER";
 		case EType::SET_TILE: return "SET_TILE";
+		case EType::FILL_SELECTION: return "FILL_SELECTION";
+		case EType::BRUSH_DRAW: return "BRUSH_DRAW";
 		case EType::EDIT_GROUP_ORDER: return "EDIT_GROUP_ORDER";
 		case EType::EDIT_GROUP_POS_X: return "EDIT_GROUP_POS_X";
 		case EType::EDIT_GROUP_POS_Y: return "EDIT_GROUP_POS_Y";
@@ -969,8 +973,8 @@ private:
 class CEditorEditMultipleLayersAction : public CEditorAction<std::vector<CLayerTiles::SCommonPropState>>
 {
 public:
-	CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles::SCommonPropState> Originals, CLayerTiles::SCommonPropState State, std::vector<CLayerTiles *> vpLayers) :
-		CEditorAction(CEditorAction::EType::EDIT_MULTIPLE_LAYERS, pObject, Originals, {State})
+	CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles::SCommonPropState> vOriginals, CLayerTiles::SCommonPropState State, std::vector<CLayerTiles *> vpLayers) :
+		CEditorAction(CEditorAction::EType::EDIT_MULTIPLE_LAYERS, pObject, vOriginals, {State})
 	{
 		m_vpLayers = vpLayers;
 	}
@@ -1060,6 +1064,63 @@ public:
 
 private:
 	int m_GroupIndex;
+};
+
+class CEditorFillSelectionAction : public CEditorAction<CLayerGroup *>
+{
+public:
+	CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, std::vector<CLayer *> vpLayers, int NumLayers, CUIRect Rect) :
+		CEditorAction(CEditorAction::EType::FILL_SELECTION, pObject, new CLayerGroup(*Original), new CLayerGroup(*Brush))
+	{
+		m_NumLayers = NumLayers;
+		m_Rect = Rect;
+		m_vpLayers = vpLayers;
+	}
+
+	~CEditorFillSelectionAction()
+	{
+		delete m_ValueFrom;
+		delete m_ValueTo;
+	}
+
+	bool Undo() override
+	{
+		// undo is filling back the original tiles
+		CLayerGroup *Brush = m_ValueFrom;
+		for(size_t k = 0; k < m_NumLayers; k++)
+		{
+			size_t BrushIndex = k;
+			if(Brush->m_vpLayers.size() != m_NumLayers)
+				BrushIndex = 0;
+			CLayer *pBrush = Brush->IsEmpty() ? nullptr : Brush->m_vpLayers[BrushIndex];
+
+			m_vpLayers[k]->FillSelection(Brush->IsEmpty(), pBrush, m_Rect);
+		}
+
+		return true;
+	}
+
+	bool Redo() override
+	{
+		// redo is redoing the filling with the new tiles
+		CLayerGroup *Brush = m_ValueTo;
+		for(size_t k = 0; k < m_NumLayers; k++)
+		{
+			size_t BrushIndex = k;
+			if(Brush->m_vpLayers.size() != m_NumLayers)
+				BrushIndex = 0;
+			CLayer *pBrush = Brush->IsEmpty() ? nullptr : Brush->m_vpLayers[BrushIndex];
+
+			m_vpLayers[k]->FillSelection(Brush->IsEmpty(), pBrush, m_Rect);
+		}
+
+		return true;
+	}
+
+private:
+	int m_NumLayers;
+	CUIRect m_Rect;
+	std::vector<CLayer *> m_vpLayers;
 };
 
 class CEditor : public IEditor
