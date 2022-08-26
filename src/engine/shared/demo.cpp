@@ -124,7 +124,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		CloseMapFile = true;
 	}
 
-	if(MapFile)
+	if(m_NoMapData)
+		MapSize = 0;
+	else if(MapFile)
 		MapSize = io_length(MapFile);
 
 	// write header

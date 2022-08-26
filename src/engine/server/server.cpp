@@ -799,9 +799,13 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 		if(RepackMsg(pMsg, Pack7, true))
 			return -1;
 
-		// write message to demo recorder
+		// write message to demo recorders
 		if(!(Flags & MSGFLAG_NORECORD))
-			m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack6.Data(), Pack6.Size());
+		{
+			for(auto &Recorder : m_aDemoRecorder)
+				if(Recorder.IsRecording())
+					Recorder.RecordMessage(Pack6.Data(), Pack6.Size());
+		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
 		{
@@ -837,10 +841,13 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 			return 0;
 		}
 
+		// write message to demo recorders
 		if(!(Flags & MSGFLAG_NORECORD))
 		{
-			m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
-			m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
+			if(m_aDemoRecorder[ClientID].IsRecording())
+				m_aDemoRecorder[ClientID].RecordMessage(Pack.Data(), Pack.Size());
+			if(m_aDemoRecorder[MAX_CLIENTS].IsRecording())
+				m_aDemoRecorder[MAX_CLIENTS].RecordMessage(Pack.Data(), Pack.Size());
 		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
@@ -3252,11 +3259,6 @@ void CServer::DemoRecorder_HandleAutoStart()
 	}
 }
 
-bool CServer::DemoRecorder_IsRecording()
-{
-	return m_aDemoRecorder[MAX_CLIENTS].IsRecording();
-}
-
 void CServer::SaveDemo(int ClientID, float Time)
 {
 	if(IsRecording(ClientID))
@@ -3267,7 +3269,7 @@ void CServer::SaveDemo(int ClientID, float Time)
 		char aOldFilename[IO_MAX_PATH_LENGTH];
 		char aNewFilename[IO_MAX_PATH_LENGTH];
 		str_format(aOldFilename, sizeof(aOldFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientID);
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%5.2f.demo", m_aCurrentMap, m_aClients[ClientID].m_aName, Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", m_aCurrentMap, m_aClients[ClientID].m_aName, Time);
 		Storage()->RenameFile(aOldFilename, aNewFilename, IStorage::TYPE_SAVE);
 	}
 }
