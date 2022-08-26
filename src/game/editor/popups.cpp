@@ -487,7 +487,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnDupLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, SelectedLayer+1, fnDupLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, SelectedLayer + 1, fnDupLayer));
 
 			return 1;
 		}

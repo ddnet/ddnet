@@ -3047,13 +3047,12 @@ void CEditor::DoMapEditor(CUIRect View)
 	int i = 0;
 	TextRender()->TextColor(ColorRGBA(1.0, 0.0, 0.0, 1.0));
 	for(auto it = m_vpRedoActions.rbegin(); it != m_vpRedoActions.rend(); ++it)
-		
 	{
 		UI()->DoTextLabel(110, 80 + i * 14, 400, 12, (*it)->Name(), 12, TEXTALIGN_LEFT);
 		i++;
 	}
 	TextRender()->TextColor(ColorRGBA(1.0, 1.0, 1.0, 1.0));
-	for (const auto& Action : m_vpUndoActions)
+	for(const auto &Action : m_vpUndoActions)
 	{
 		UI()->DoTextLabel(110, 80 + i * 14, 400, 12, Action->Name(), 12, TEXTALIGN_LEFT);
 		i++;
@@ -6487,14 +6486,17 @@ void CEditor::RecordUndoAction(IEditorAction *pAction, bool Clear)
 {
 	pAction->m_pEditor = this;
 
-	if (Clear && m_vpRedoActions.size() > 0) {
-		for (auto Action : m_vpRedoActions) {
+	if(Clear && m_vpRedoActions.size() > 0)
+	{
+		for(auto Action : m_vpRedoActions)
+		{
 			delete Action;
 		}
 		m_vpRedoActions.clear();
 	}
 
-	if(m_vpUndoActions.size() >= s_MaxActions) {
+	if(m_vpUndoActions.size() >= s_MaxActions)
+	{
 		m_vpUndoActions.pop_back();
 	}
 
@@ -6502,7 +6504,7 @@ void CEditor::RecordUndoAction(IEditorAction *pAction, bool Clear)
 	pAction->Print();
 }
 
-void CEditor::RecordRedoAction(IEditorAction* pAction)
+void CEditor::RecordRedoAction(IEditorAction *pAction)
 {
 	if(m_vpRedoActions.size() >= s_MaxActions)
 	{
@@ -6533,7 +6535,6 @@ bool CEditor::Redo()
 	m_vpRedoActions.pop_front();
 	return FrontAction->Redo();
 }
-
 
 bool CEditorAddLayerAction::Undo()
 {

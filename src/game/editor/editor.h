@@ -721,7 +721,7 @@ public:
 	CEditor *m_pEditor;
 };
 
-template <typename T>
+template<typename T>
 class CEditorAction : public IEditorAction
 {
 public:
@@ -854,19 +854,22 @@ public:
 	{
 	}
 
-	bool Undo() override {
+	bool Undo() override
+	{
 		CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
 		pTileLayer->m_Color = m_ValueFrom;
 		return true;
 	}
 
-	bool Redo() override {
+	bool Redo() override
+	{
 		CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
 		pTileLayer->m_Color = m_ValueTo;
 		return true;
 	}
 
-	void Print() override {
+	void Print() override
+	{
 		dbg_msg("editor", "Editor action: Change tile color, prev=%d %d %d %d, new=%d %d %d %d", m_ValueFrom.r, m_ValueFrom.g, m_ValueFrom.b, m_ValueFrom.a, m_ValueTo.r, m_ValueTo.g, m_ValueTo.b, m_ValueTo.a);
 	}
 };
@@ -903,7 +906,7 @@ private:
 	int m_Index;
 };
 
-class CEditorAddLayerAction : public CEditorAction<CLayer*>
+class CEditorAddLayerAction : public CEditorAction<CLayer *>
 {
 public:
 	CEditorAddLayerAction(CLayerGroup *pObject, int LayerIndex, std::function<void()> fnAddLayer) :
@@ -915,7 +918,6 @@ public:
 
 	~CEditorAddLayerAction()
 	{
-
 	}
 
 	bool Undo() override;
@@ -937,7 +939,7 @@ private:
 	std::function<void()> m_fnAddLayer;
 };
 
-class CEditorDeleteLayerAction : public CEditorAction<CLayer*>
+class CEditorDeleteLayerAction : public CEditorAction<CLayer *>
 {
 public:
 	CEditorDeleteLayerAction(CLayerGroup *pObject, int LayerIndex) :
@@ -984,7 +986,7 @@ public:
 			CLayerTiles::SCommonPropState Original = m_ValueFrom[i];
 
 			pLayer->Resize(Original.m_Width, Original.m_Height);
-			
+
 			pLayer->m_Color.r = (Original.m_Color >> 24) & 0xff;
 			pLayer->m_Color.g = (Original.m_Color >> 16) & 0xff;
 			pLayer->m_Color.b = (Original.m_Color >> 8) & 0xff;

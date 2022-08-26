@@ -917,7 +917,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Color.g = (NewVal >> 16) & 0xff;
 		m_Color.b = (NewVal >> 8) & 0xff;
 		m_Color.a = NewVal & 0xff;
-		
+
 		if(!(PrevColor == m_Color))
 			m_pEditor->RecordUndoAction(new CEditorChangeColorTileAction(this, PrevColor, m_Color));
 	}
