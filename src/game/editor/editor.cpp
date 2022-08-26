@@ -1035,7 +1035,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_UndoButton = 0;
 			int UndoEnabled = m_vpUndoActions.size() > 0;
-			if(DoButton_Ex(&s_UndoButton, "Undo", UndoEnabled-1, &Button, 0, "[Ctrl+Z] Undo", IGraphics::CORNER_L) || (UndoEnabled && ModPressed && Input()->KeyPress(KEY_Z) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			if(DoButton_Ex(&s_UndoButton, "Undo", UndoEnabled - 1, &Button, 0, "[Ctrl+Z] Undo", IGraphics::CORNER_L) || (UndoEnabled && ModPressed && m_ShowEnvelopeEditor == 0 && m_ShowServerSettingsEditor == 0 && Input()->KeyPress(KEY_Z) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				//for(auto &pLayer : m_Brush.m_vpLayers)
 				//	pLayer->BrushFlipX();
@@ -1046,7 +1046,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_RedoButton = 0;
 			int RedoEnabled = m_vpRedoActions.size() > 0;
-			if(DoButton_Ex(&s_RedoButton, "Redo", RedoEnabled-1, &Button, 0, "[Ctrl+Y] Redo", IGraphics::CORNER_R) || (RedoEnabled && ModPressed && Input()->KeyPress(KEY_Y) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
+			if(DoButton_Ex(&s_RedoButton, "Redo", RedoEnabled - 1, &Button, 0, "[Ctrl+Y] Redo", IGraphics::CORNER_R) || (RedoEnabled && ModPressed && m_ShowEnvelopeEditor == 0 && m_ShowServerSettingsEditor == 0 && Input()->KeyPress(KEY_Y) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				dbg_msg("editor", "REEEDOOOO");
 				Redo();
