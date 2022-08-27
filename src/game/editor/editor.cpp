@@ -281,6 +281,21 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 	return Index1;
 }
 
+bool CLayerGroup::Contains(int Layer, int Tile)
+{
+	for (auto* pLayer : m_vpLayers)
+	{
+		if (pLayer->m_Type == LAYERTYPE_TILES)
+		{
+			CLayerTiles *pLayerTiles = (CLayerTiles *)pLayer;
+			if((Layer == LAYERTYPE_GAME && pLayerTiles->m_Game) || (Layer == LAYERTYPE_FRONT && pLayerTiles->m_Front) || (Layer == LAYERTYPE_TELE && pLayerTiles->m_Tele) || (Layer == LAYERTYPE_SPEEDUP && pLayerTiles->m_Speedup) || (Layer == LAYERTYPE_TUNE && pLayerTiles->m_Tune) || (Layer == LAYERTYPE_SWITCH && pLayerTiles->m_Switch))
+				if(pLayerTiles->Contains(Tile))
+					return true;
+		}
+	}
+	return false;
+}
+
 void CEditorImage::AnalyseTileFlags()
 {
 	mem_zero(m_aTileFlags, sizeof(m_aTileFlags));
@@ -2500,6 +2515,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	// draw layer borders
 	CLayer *apEditLayers[128];
 	size_t NumEditLayers = 0;
+	std::vector<int> vEditLayers;
 
 	if(m_ShowPicker && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_TILES)
 	{
@@ -2530,6 +2546,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			apEditLayers[NumEditLayers] = GetSelectedLayerType(i, EditingType);
 			if(apEditLayers[NumEditLayers])
 			{
+				vEditLayers.push_back(m_vSelectedLayers[i]);
 				NumEditLayers++;
 			}
 		}
@@ -2641,7 +2658,41 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!m_Brush.IsEmpty())
 					{
+						if(!m_Drawing)
+						{
+							m_Drawing = true;
+							DeleteAll(m_DrawOriginalGroup.m_vpLayers);
+
+							// m_ShouldAddFrontDrawLayer is needed because of the one tile "TILE_THROUGH_CUT" which is a combination of two layers (Game & Front).
+							if(!m_ShouldAddFrontDrawLayer)
+								m_ShouldAddFrontDrawLayer = m_Map.m_vpGroups[m_SelectedGroup]->Contains(LAYERTYPE_FRONT, TILE_THROUGH_CUT) || m_Brush.Contains(LAYERTYPE_GAME, TILE_THROUGH_CUT);
+
+							if(m_ShouldAddFrontDrawLayer && !m_Map.m_pFrontLayer)
+							{
+								CLayer *pLayerFront = new CLayerFront(m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+								m_Map.MakeFrontLayer(pLayerFront);
+								m_Map.m_pGameGroup->AddLayer(pLayerFront);
+							}
+
+							m_ShouldAddFrontDrawLayer = m_ShouldAddFrontDrawLayer && m_Map.m_vpGroups[m_SelectedGroup]->m_GameGroup;
+
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k % m_Brush.m_vpLayers.size();
+								if(apEditLayers[k]->m_Type == m_Brush.m_vpLayers[BrushIndex]->m_Type)
+								{
+									m_DrawOriginalGroup.AddLayer(apEditLayers[k]->Duplicate());
+									if(apEditLayers[k]->m_Type == LAYERTYPE_TILES && ((CLayerTiles *)apEditLayers[k])->m_Front)
+										m_ShouldAddFrontDrawLayer = false;
+								}
+							}
+
+							if(m_ShouldAddFrontDrawLayer)
+								m_DrawOriginalGroup.AddLayer(m_Map.m_pFrontLayer->Duplicate());
+						}
+
 						// draw with brush
+						bool DidDraw = false;
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
 							size_t BrushIndex = k % m_Brush.m_vpLayers.size();
@@ -2653,13 +2704,43 @@ void CEditor::DoMapEditor(CUIRect View)
 									CLayerTiles *pBrushLayer = (CLayerTiles *)m_Brush.m_vpLayers[BrushIndex];
 
 									if(pLayer->m_Tele <= pBrushLayer->m_Tele && pLayer->m_Speedup <= pBrushLayer->m_Speedup && pLayer->m_Front <= pBrushLayer->m_Front && pLayer->m_Game <= pBrushLayer->m_Game && pLayer->m_Switch <= pBrushLayer->m_Switch && pLayer->m_Tune <= pBrushLayer->m_Tune)
+									{
 										pLayer->BrushDraw(pBrushLayer, wx, wy);
+										DidDraw = true;
+									}
 								}
 								else
 								{
 									apEditLayers[k]->BrushDraw(m_Brush.m_vpLayers[BrushIndex], wx, wy);
 								}
 							}
+						}
+
+						if(!UI()->MouseButton(0) && DidDraw) // only record action when we are finished drawing (aka left mouse button is up) and we drew something
+						{
+							DeleteAll(m_DrawLayerGroup.m_vpLayers);
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k % m_Brush.m_vpLayers.size();
+								if(apEditLayers[k]->m_Type == m_Brush.m_vpLayers[BrushIndex]->m_Type)
+									m_DrawLayerGroup.AddLayer(apEditLayers[k]->Duplicate());
+							}
+
+							if(m_ShouldAddFrontDrawLayer)
+							{
+								auto pIt = std::find(m_Map.m_pGameGroup->m_vpLayers.begin(), m_Map.m_pGameGroup->m_vpLayers.end(), m_Map.m_pFrontLayer);
+								if(pIt != m_Map.m_pGameGroup->m_vpLayers.end())
+								{
+									int FrontLayerIndex = pIt - m_Map.m_pGameGroup->m_vpLayers.begin();
+									if(std::find(vEditLayers.begin(), vEditLayers.end(), FrontLayerIndex) == vEditLayers.end())
+										vEditLayers.push_back(FrontLayerIndex);
+								}
+								m_DrawLayerGroup.AddLayer(m_Map.m_pFrontLayer->Duplicate());
+							}
+
+							RecordUndoAction(new CEditorBrushDrawAction(nullptr, &m_DrawOriginalGroup, &m_DrawLayerGroup, m_SelectedGroup, vEditLayers));
+							m_Drawing = false;
+							m_ShouldAddFrontDrawLayer = false;
 						}
 					}
 				}
@@ -2719,7 +2800,9 @@ void CEditor::DoMapEditor(CUIRect View)
 					{
 						CLayerGroup Original;
 						Original.m_pMap = &m_Map;
-						std::vector<CLayer *> apLayers;
+
+						for (size_t k = 0; k < NumEditLayers; k++)
+							apEditLayers[k]->BrushGrab(&Original, r);
 
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
@@ -2728,13 +2811,10 @@ void CEditor::DoMapEditor(CUIRect View)
 								BrushIndex = 0;
 							CLayer *pBrush = m_Brush.IsEmpty() ? nullptr : m_Brush.m_vpLayers[BrushIndex];
 
-							apEditLayers[k]->BrushGrab(&Original, r);
 							apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), pBrush, r);
-							apLayers.push_back(apEditLayers[k]);
 						}
 
-
-						RecordUndoAction(new CEditorFillSelectionAction(nullptr, &Original, &m_Brush, apLayers, NumEditLayers, r));
+						RecordUndoAction(new CEditorFillSelectionAction(nullptr, &Original, &m_Brush, m_SelectedGroup, vEditLayers, r));
 					}
 					else
 					{
@@ -2766,13 +2846,47 @@ void CEditor::DoMapEditor(CUIRect View)
 					else
 					{
 						s_Operation = OP_BRUSH_DRAW;
+						bool DidPlace = false;
+
+						// save current layers data (for undo)
+						DeleteAll(m_DrawOriginalGroup.m_vpLayers);
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
 							size_t BrushIndex = k;
 							if(m_Brush.m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
 							if(apEditLayers[k]->m_Type == m_Brush.m_vpLayers[BrushIndex]->m_Type)
+								m_DrawOriginalGroup.AddLayer(apEditLayers[k]->Duplicate());
+						}
+
+						// perform placing
+						for(size_t k = 0; k < NumEditLayers; k++)
+						{
+							size_t BrushIndex = k;
+							if(m_Brush.m_vpLayers.size() != NumEditLayers)
+								BrushIndex = 0;
+							if(apEditLayers[k]->m_Type == m_Brush.m_vpLayers[BrushIndex]->m_Type)
+							{
 								apEditLayers[k]->BrushPlace(m_Brush.m_vpLayers[BrushIndex], wx, wy);
+								if(apEditLayers[k]->m_Type != LAYERTYPE_TILES)
+									DidPlace = true;
+							}
+						}
+
+						if(DidPlace)
+						{
+							// save modified layers data (for redo)
+							DeleteAll(m_DrawLayerGroup.m_vpLayers);
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k;
+								if(m_Brush.m_vpLayers.size() != NumEditLayers)
+									BrushIndex = 0;
+								if(apEditLayers[k]->m_Type == m_Brush.m_vpLayers[BrushIndex]->m_Type)
+									m_DrawLayerGroup.AddLayer(apEditLayers[k]->Duplicate());
+							}
+
+							RecordUndoAction(new CEditorBrushDrawAction(nullptr, &m_DrawOriginalGroup, &m_DrawLayerGroup, m_SelectedGroup, m_vSelectedLayers));
 						}
 					}
 
@@ -6075,8 +6189,6 @@ void CEditor::Reset(bool CreateDefault)
 
 	m_ShowEnvelopePreview = 0;
 	m_ShiftBy = 1;
-
-	m_Map.m_Modified = false;
 }
 
 int CEditor::GetLineDistance() const
@@ -6322,6 +6434,8 @@ void CEditor::Init()
 	m_QuadsetPicker.m_Readonly = true;
 
 	m_Brush.m_pMap = &m_Map;
+	m_DrawOriginalGroup.m_pMap = &m_Map;
+	m_DrawLayerGroup.m_pMap = &m_Map;
 
 	Reset(false);
 	m_Map.m_Modified = false;
@@ -6660,4 +6774,141 @@ bool CEditorDeleteGroupAction::Redo()
 	m_pEditor->m_SelectedGroup = maximum(0, m_GroupIndex);
 
 	return true;
+}
+
+bool CEditorFillSelectionAction::Undo()
+{
+	bool OldDestructiveMode = m_pEditor->m_BrushDrawDestructive;
+	m_pEditor->m_BrushDrawDestructive = true;
+
+	// undo is filling back the original tiles
+	CLayerGroup *Brush = m_ValueFrom;
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
+
+	int NumLayers = m_vLayers.size();
+	for(size_t k = 0; k < NumLayers; k++)
+	{
+		int LayerIndex = m_vLayers[k];
+		CLayer *pLayer = Group->m_vpLayers[LayerIndex];
+
+		size_t BrushIndex = k;
+		if(Brush->m_vpLayers.size() != NumLayers)
+			BrushIndex = 0;
+		CLayer *pBrush = Brush->IsEmpty() ? nullptr : Brush->m_vpLayers[BrushIndex];
+		//dbg_msg("editor", "undoing layer %d, brush index=%d, brush=%p", k, BrushIndex, pBrush);
+
+		pLayer->FillSelection(Brush->IsEmpty(), pBrush, m_Rect);
+	}
+
+	m_pEditor->m_BrushDrawDestructive = OldDestructiveMode;
+	return true;
+}
+
+bool CEditorFillSelectionAction::Redo()
+{
+	bool OldDestructiveMode = m_pEditor->m_BrushDrawDestructive;
+	m_pEditor->m_BrushDrawDestructive = true;
+
+	// redo is redoing the filling with the new tiles
+	CLayerGroup *Brush = m_ValueTo;
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
+
+	int NumLayers = m_vLayers.size();
+	for(size_t k = 0; k < NumLayers; k++)
+	{
+		int LayerIndex = m_vLayers[k];
+		CLayer *pLayer = Group->m_vpLayers[LayerIndex];
+
+		size_t BrushIndex = k;
+		if(Brush->m_vpLayers.size() != NumLayers)
+			BrushIndex = 0;
+		CLayer *pBrush = Brush->IsEmpty() ? nullptr : Brush->m_vpLayers[BrushIndex];
+
+		pLayer->FillSelection(Brush->IsEmpty(), pBrush, m_Rect);
+	}
+
+	m_pEditor->m_BrushDrawDestructive = OldDestructiveMode;
+	return true;
+}
+
+void CEditorFillSelectionAction::Print()
+{
+	dbg_msg("editor", "editor fill action, num layers=%d, original brush num layers=%d, modified brush num layers=%d", m_vLayers.size(), m_ValueFrom->m_vpLayers.size(), m_ValueTo->m_vpLayers.size());
+	dbg_msg("editor", "rect: w=%f h=%f", m_Rect.w, m_Rect.h);
+}
+
+bool CEditorBrushDrawAction::Undo()
+{
+	// undo is drawing with brush with original data
+	return BrushDraw(m_ValueFrom);
+}
+
+bool CEditorBrushDrawAction::Redo()
+{
+	// redo is drawing with brush with modified data
+	return BrushDraw(m_ValueTo);
+}
+
+bool CEditorBrushDrawAction::BrushDraw(CLayerGroup *Brush)
+{
+	bool OldDestructiveMode = m_pEditor->m_BrushDrawDestructive;
+	m_pEditor->m_BrushDrawDestructive = true;
+
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
+
+	int NumLayers = m_vLayers.size();
+
+	if(NumLayers != Brush->m_vpLayers.size())
+		return false;
+
+	for(size_t k = 0; k < NumLayers; k++)
+	{
+		int LayerIndex = m_vLayers[k];
+		CLayer *pLayer = Group->m_vpLayers[LayerIndex];
+		size_t BrushIndex = k;
+
+		if(pLayer->m_Type == Brush->m_vpLayers[BrushIndex]->m_Type)
+		{
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				CLayerTiles *pLayerTiles = (CLayerTiles *)pLayer;
+				CLayerTiles *pBrushLayer = (CLayerTiles *)Brush->m_vpLayers[BrushIndex];
+
+				pLayerTiles->BrushDraw(pBrushLayer, 0, 0);
+			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				CLayerQuads *pLayerQuads = (CLayerQuads *)pLayer;
+				CLayerQuads *pBrushLayer = (CLayerQuads *)Brush->m_vpLayers[BrushIndex];
+
+				pLayerQuads->m_vQuads.clear();
+				pLayerQuads->m_vQuads = pBrushLayer->m_vQuads;
+			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				CLayerSounds *pLayerSounds = (CLayerSounds *)pLayer;
+				CLayerSounds *pBrushLayer = (CLayerSounds *)Brush->m_vpLayers[BrushIndex];
+
+				pLayerSounds->m_Sound = pBrushLayer->m_Sound;
+
+				pLayerSounds->m_vSources.clear();
+				pLayerSounds->m_vSources = pBrushLayer->m_vSources;
+			}
+		}
+	}
+
+	m_pEditor->m_BrushDrawDestructive = OldDestructiveMode;
+	return true;
+}
+
+void CEditorBrushDrawAction::Print()
+{
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
+	dbg_msg("editor", "Undo action: brush draw.");
+	//for(size_t k = 0; k < m_vLayers.size(); k++)
+	//{
+	//	dbg_msg("editor", "   k=%d, layer index=%d (%s)", k, m_vLayers[k], Group->m_vpLayers[m_vLayers[k]]->m_aName);
+	//	dbg_msg("editor", "   brush layer (original) -> %s", m_ValueFrom->m_vpLayers[k]->m_aName);
+	//	dbg_msg("editor", "   brush layer (modified) -> %s", m_ValueTo->m_vpLayers[k]->m_aName);
+	//}
 }

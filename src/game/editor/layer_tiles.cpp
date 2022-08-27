@@ -64,7 +64,7 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_Switch = Other.m_Switch;
 	m_Tune = Other.m_Tune;
 
-	mem_copy(m_aFileName, Other.m_aFileName, IO_MAX_PATH_LENGTH);
+	str_copy(m_aFileName, Other.m_aFileName, sizeof(m_aFileName));
 }
 
 CLayerTiles::~CLayerTiles()
@@ -1101,6 +1101,15 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 	Func(&m_ColorEnv);
 }
 
+bool CLayerTiles::Contains(int Tile)
+{
+	for(int x = 0; x < m_Width; x++)
+		for(int y = 0; y < m_Height; y++)
+			if(GetTile(x, y).m_Index == Tile)
+				return true;
+	return false;
+}
+
 CLayerTele::CLayerTele(int w, int h) :
 	CLayerTiles(w, h)
 {
@@ -1117,7 +1126,7 @@ CLayerTele::CLayerTele(const CLayerTele &Other) :
 {
 	str_copy(m_aName, "Tele", sizeof(m_aName));
 	m_Tele = 1;
-	m_TeleNum = Other.m_TeleNum;
+	m_TeleNum = m_pEditor->m_TeleNumber;
 
 	m_pTeleTile = new CTeleTile[(size_t)m_Width * m_Height];
 	mem_copy(m_pTeleTile, Other.m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
@@ -1362,9 +1371,9 @@ CLayerSpeedup::CLayerSpeedup(const CLayerSpeedup &Other) :
 {
 	str_copy(m_aName, "Speedup", sizeof(m_aName));
 	m_Speedup = 1;
-	m_SpeedupAngle = Other.m_SpeedupAngle;
-	m_SpeedupForce = Other.m_SpeedupForce;
-	m_SpeedupMaxSpeed = Other.m_SpeedupMaxSpeed;
+	m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
+	m_SpeedupForce = m_pEditor->m_SpeedupForce;
+	m_SpeedupMaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 
 	m_pSpeedupTile = new CSpeedupTile[(size_t)m_Width * m_Height];
 	mem_copy(m_pSpeedupTile, Other.m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
@@ -1667,8 +1676,8 @@ CLayerSwitch::CLayerSwitch(const CLayerSwitch &Other) :
 {
 	str_copy(m_aName, "Switch", sizeof(m_aName));
 	m_Switch = 1;
-	m_SwitchNumber = Other.m_SwitchNumber;
-	m_SwitchDelay = Other.m_SwitchDelay;
+	m_SwitchNumber = m_pEditor->m_SwitchNum;
+	m_SwitchDelay = m_pEditor->m_SwitchDelay;
 
 	m_pSwitchTile = new CSwitchTile[(size_t)m_Width * m_Height];
 	mem_copy(m_pSwitchTile, Other.m_pSwitchTile, (size_t)m_Width * m_Height * sizeof(CSwitchTile));
@@ -1936,7 +1945,7 @@ CLayerTune::CLayerTune(const CLayerTune &Other) :
 {
 	str_copy(m_aName, "Tune", sizeof(m_aName));
 	m_Tune = 1;
-	m_TuningNumber = Other.m_TuningNumber;
+	m_TuningNumber = m_pEditor->m_TuningNum;
 
 	m_pTuneTile = new CTuneTile[(size_t)m_Width * m_Height];
 	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));

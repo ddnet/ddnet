@@ -135,7 +135,7 @@ public:
 		m_Flags = Other.m_Flags;
 		m_pEditor = Other.m_pEditor;
 		m_Type = Other.m_Type;
-		m_BrushRefCount = 0;
+		m_BrushRefCount = Other.m_BrushRefCount;
 		m_Visible = true;
 		m_Readonly = false;
 	}
@@ -217,6 +217,8 @@ public:
 	void DeleteLayer(int Index);
 	void DuplicateLayer(int Index);
 	int SwapLayers(int Index0, int Index1);
+
+	bool Contains(int Layer, int Tile);
 
 	bool IsEmpty() const
 	{
@@ -606,6 +608,7 @@ public:
 	void BrushRotate(float Amount) override;
 
 	CLayer *Duplicate() const override;
+	bool Contains(int Tile);
 
 	virtual void ShowInfo();
 	int RenderProperties(CUIRect *pToolbox) override;
@@ -1069,12 +1072,12 @@ private:
 class CEditorFillSelectionAction : public CEditorAction<CLayerGroup *>
 {
 public:
-	CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, std::vector<CLayer *> vpLayers, int NumLayers, CUIRect Rect) :
+	CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, std::vector<int> vLayers, CUIRect Rect) :
 		CEditorAction(CEditorAction::EType::FILL_SELECTION, pObject, new CLayerGroup(*Original), new CLayerGroup(*Brush))
 	{
-		m_NumLayers = NumLayers;
 		m_Rect = Rect;
-		m_vpLayers = vpLayers;
+		m_vLayers = vLayers;
+		m_GroupIndex = GroupIndex;
 	}
 
 	~CEditorFillSelectionAction()
@@ -1083,44 +1086,43 @@ public:
 		delete m_ValueTo;
 	}
 
-	bool Undo() override
-	{
-		// undo is filling back the original tiles
-		CLayerGroup *Brush = m_ValueFrom;
-		for(size_t k = 0; k < m_NumLayers; k++)
-		{
-			size_t BrushIndex = k;
-			if(Brush->m_vpLayers.size() != m_NumLayers)
-				BrushIndex = 0;
-			CLayer *pBrush = Brush->IsEmpty() ? nullptr : Brush->m_vpLayers[BrushIndex];
+	bool Undo() override;
+	bool Redo() override;
 
-			m_vpLayers[k]->FillSelection(Brush->IsEmpty(), pBrush, m_Rect);
-		}
-
-		return true;
-	}
-
-	bool Redo() override
-	{
-		// redo is redoing the filling with the new tiles
-		CLayerGroup *Brush = m_ValueTo;
-		for(size_t k = 0; k < m_NumLayers; k++)
-		{
-			size_t BrushIndex = k;
-			if(Brush->m_vpLayers.size() != m_NumLayers)
-				BrushIndex = 0;
-			CLayer *pBrush = Brush->IsEmpty() ? nullptr : Brush->m_vpLayers[BrushIndex];
-
-			m_vpLayers[k]->FillSelection(Brush->IsEmpty(), pBrush, m_Rect);
-		}
-
-		return true;
-	}
+	void Print() override;
 
 private:
-	int m_NumLayers;
 	CUIRect m_Rect;
-	std::vector<CLayer *> m_vpLayers;
+	int m_GroupIndex;
+	std::vector<int> m_vLayers;
+};
+
+class CEditorBrushDrawAction : public CEditorAction<CLayerGroup *>
+{
+public:
+	CEditorBrushDrawAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, std::vector<int> vLayers) :
+		CEditorAction(CEditorAction::EType::BRUSH_DRAW, pObject, new CLayerGroup(*Original), new CLayerGroup(*Brush))
+	{
+		m_vLayers = vLayers;
+		m_GroupIndex = GroupIndex;
+	}
+
+	~CEditorBrushDrawAction()
+	{
+		delete m_ValueFrom;
+		delete m_ValueTo;
+	}
+
+	bool Undo() override;
+	bool Redo() override;
+
+	void Print() override;
+
+private:
+	std::vector<int> m_vLayers;
+	int m_GroupIndex;
+
+	bool BrushDraw(CLayerGroup *Brush);
 };
 
 class CEditor : public IEditor
@@ -1260,6 +1262,8 @@ public:
 		m_BrushDrawDestructive = true;
 
 		m_Mentions = 0;
+
+		m_ShouldAddFrontDrawLayer = false;
 	}
 
 	void Init() override;
@@ -1680,8 +1684,14 @@ public:
 	std::deque<IEditorAction *> m_vpUndoActions;
 	std::deque<IEditorAction *> m_vpRedoActions;
 
+	bool m_ShouldAddFrontDrawLayer;
+
 private:
 	void RecordRedoAction(IEditorAction *Action);
+
+	CLayerGroup m_DrawLayerGroup;
+	CLayerGroup m_DrawOriginalGroup;
+	bool m_Drawing = false;
 };
 
 // make sure to inline this function
