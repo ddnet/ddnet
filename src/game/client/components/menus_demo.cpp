@@ -235,6 +235,17 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			DemoPlayer()->SeekPercent(1.0f);
 		}
+
+		// Advance single frame forward/backward with period/comma key
+		const bool TickForwards = Input()->KeyPress(KEY_PERIOD);
+		const bool TickBackwards = Input()->KeyPress(KEY_COMMA);
+		if(TickForwards || TickBackwards)
+		{
+			m_pClient->m_SuppressEvents = true;
+			DemoPlayer()->SetPos(pInfo->m_CurrentTick + (TickForwards ? 3 : 0));
+			m_pClient->m_SuppressEvents = false;
+			DemoPlayer()->Pause();
+		}
 	}
 
 	float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
