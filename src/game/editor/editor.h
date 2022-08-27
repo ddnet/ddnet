@@ -916,9 +916,10 @@ private:
 class CEditorAddLayerAction : public CEditorAction<CLayer *>
 {
 public:
-	CEditorAddLayerAction(CLayerGroup *pObject, int LayerIndex, std::function<void()> fnAddLayer) :
-		CEditorAction(CEditorAction::EType::ADD_LAYER, pObject, nullptr, pObject->m_vpLayers[LayerIndex])
+	CEditorAddLayerAction(int GroupIndex, int LayerIndex, std::function<void()> fnAddLayer) :
+		CEditorAction(CEditorAction::EType::ADD_LAYER, nullptr, nullptr, nullptr)
 	{
+		m_GroupIndex = GroupIndex;
 		m_LayerIndex = LayerIndex;
 		m_fnAddLayer = fnAddLayer;
 	}
@@ -938,22 +939,19 @@ public:
 
 	void Print() override
 	{
-		dbg_msg("editor", "Editor action: Add layer, type=%d name=%s", m_ValueTo->m_Type, m_ValueTo->m_aName);
+		//dbg_msg("editor", "Editor action: Add layer, type=%d name=%s", m_ValueTo->m_Type, m_ValueTo->m_aName);
 	}
 
 private:
 	int m_LayerIndex;
+	int m_GroupIndex;
 	std::function<void()> m_fnAddLayer;
 };
 
 class CEditorDeleteLayerAction : public CEditorAction<CLayer *>
 {
 public:
-	CEditorDeleteLayerAction(CLayerGroup *pObject, int LayerIndex) :
-		CEditorAction(CEditorAction::EType::DELETE_LAYER, pObject, pObject->m_vpLayers[LayerIndex]->Duplicate(), nullptr)
-	{
-		m_LayerIndex = LayerIndex;
-	}
+	CEditorDeleteLayerAction(CEditor *pEditor, int GroupIndex, int LayerIndex);
 
 	~CEditorDeleteLayerAction()
 	{
@@ -961,7 +959,6 @@ public:
 	}
 
 	bool Undo() override;
-
 	bool Redo() override;
 
 	void Print() override
@@ -971,6 +968,7 @@ public:
 
 private:
 	int m_LayerIndex;
+	int m_GroupIndex;
 };
 
 class CEditorEditMultipleLayersAction : public CEditorAction<std::vector<CLayerTiles::SCommonPropState>>

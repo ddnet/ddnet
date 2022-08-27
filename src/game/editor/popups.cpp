@@ -186,8 +186,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewTeleLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
 		{
-			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-			auto fnAddTeleLayer = [pEditor, Group]() {
+			int SelectedGroup = pEditor->m_SelectedGroup;
+			auto fnAddTeleLayer = [pEditor, SelectedGroup]() {
+				CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 				CLayer *pTeleLayer = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 				pEditor->m_Map.MakeTeleLayer(pTeleLayer);
 				Group->AddLayer(pTeleLayer);
@@ -196,7 +197,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddTeleLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddTeleLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTeleLayer));
 
 			return 1;
 		}
@@ -210,8 +211,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewSpeedupLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
 		{
-			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-			auto fnAddSpeedupLayer = [pEditor, Group]() {
+			int SelectedGroup = pEditor->m_SelectedGroup;
+			auto fnAddSpeedupLayer = [pEditor, SelectedGroup]() {
+				CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 				CLayer *pSpeedupLayer = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 				pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
 				Group->AddLayer(pSpeedupLayer);
@@ -220,7 +222,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddSpeedupLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddSpeedupLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSpeedupLayer));
 
 			return 1;
 		}
@@ -234,8 +236,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewTuneLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
 		{
-			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-			auto fnAddTuneLayer = [pEditor, Group]() {
+			int SelectedGroup = pEditor->m_SelectedGroup;
+			auto fnAddTuneLayer = [pEditor, SelectedGroup]() {
+				CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 				CLayer *pTuneLayer = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 				pEditor->m_Map.MakeTuneLayer(pTuneLayer);
 				Group->AddLayer(pTuneLayer);
@@ -244,7 +247,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddTuneLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddTuneLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTuneLayer));
 
 			return 1;
 		}
@@ -258,8 +261,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewFrontLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
 		{
-			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-			auto fnAddFrontLayer = [pEditor, Group]() {
+			int SelectedGroup = pEditor->m_SelectedGroup;
+			auto fnAddFrontLayer = [pEditor, SelectedGroup]() {
+				CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 				CLayer *pFrontLayer = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 				pEditor->m_Map.MakeFrontLayer(pFrontLayer);
 				Group->AddLayer(pFrontLayer);
@@ -268,7 +272,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddFrontLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddFrontLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddFrontLayer));
 
 			return 1;
 		}
@@ -282,8 +286,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_NewSwitchLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
 		{
-			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-			auto fnAddSwitchLayer = [pEditor, Group]() {
+			int SelectedGroup = pEditor->m_SelectedGroup;
+			auto fnAddSwitchLayer = [pEditor, SelectedGroup]() {
+				CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 				CLayer *pSwitchLayer = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 				pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
 				Group->AddLayer(pSwitchLayer);
@@ -292,7 +297,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddSwitchLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddSwitchLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSwitchLayer));
 
 			return 1;
 		}
@@ -304,8 +309,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewQuadLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
 	{
-		CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-		auto fnAddQuadLayer = [pEditor, Group]() {
+		int SelectedGroup = pEditor->m_SelectedGroup;
+		auto fnAddQuadLayer = [pEditor, SelectedGroup]() {
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 			CLayer *pQuadLayer = new CLayerQuads;
 			pQuadLayer->m_pEditor = pEditor;
 			Group->AddLayer(pQuadLayer);
@@ -314,7 +320,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		fnAddQuadLayer();
-		pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddQuadLayer));
+		pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddQuadLayer));
 
 		return 1;
 	}
@@ -325,8 +331,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewTileLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
 	{
-		CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-		auto fnAddTileLayer = [pEditor, Group]() {
+		int SelectedGroup = pEditor->m_SelectedGroup;
+		auto fnAddTileLayer = [pEditor, SelectedGroup]() {
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 			CLayer *pTileLayer = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pTileLayer->m_pEditor = pEditor;
 			Group->AddLayer(pTileLayer);
@@ -335,7 +342,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		fnAddTileLayer();
-		pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddTileLayer));
+		pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTileLayer));
 
 		return 1;
 	}
@@ -346,8 +353,9 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_NewSoundLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
 	{
-		CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-		auto fnAddSoundLayer = [pEditor, Group]() {
+		int SelectedGroup = pEditor->m_SelectedGroup;
+		auto fnAddSoundLayer = [pEditor, SelectedGroup]() {
+			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 			CLayer *pSoundLayer = new CLayerSounds;
 			pSoundLayer->m_pEditor = pEditor;
 			Group->AddLayer(pSoundLayer);
@@ -356,7 +364,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		fnAddSoundLayer();
-		pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, Group->m_vpLayers.size() - 1, fnAddSoundLayer));
+		pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSoundLayer));
 
 		return 1;
 	}
@@ -481,13 +489,14 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 		if(pEditor->DoButton_Editor(&s_DuplicationButton, "Duplicate layer", 0, &DupButton, 0, "Duplicates the layer"))
 		{
 			int SelectedLayer = pEditor->m_vSelectedLayers[0];
-			CLayerGroup *Group = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-			auto fnDupLayer = [pEditor, SelectedLayer, Group]() {
+			int SelectedGroup = pEditor->m_SelectedGroup;
+			auto fnDupLayer = [pEditor, SelectedLayer, SelectedGroup]() {
+				CLayerGroup *Group = pEditor->m_Map.m_vpGroups[SelectedGroup];
 				Group->DuplicateLayer(SelectedLayer);
 			};
 
 			fnDupLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(Group, SelectedLayer + 1, fnDupLayer));
+			pEditor->RecordUndoAction(new CEditorAddLayerAction(pEditor->m_SelectedGroup, SelectedLayer + 1, fnDupLayer));
 
 			return 1;
 		}
@@ -497,7 +506,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))
 	{
-		pEditor->RecordUndoAction(new CEditorDeleteLayerAction(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup], pEditor->m_vSelectedLayers[0]));
+		pEditor->RecordUndoAction(new CEditorDeleteLayerAction(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0]));
 
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pFrontLayer)
 			pEditor->m_Map.m_pFrontLayer = nullptr;

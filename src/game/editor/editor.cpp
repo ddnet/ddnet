@@ -6662,7 +6662,7 @@ bool CEditor::Redo()
 
 bool CEditorAddLayerAction::Undo()
 {
-	CLayerGroup *Group = (CLayerGroup *)m_pObject;
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 	CLayer *Layer = Group->m_vpLayers[m_LayerIndex];
 
 	if(Layer == m_pEditor->m_Map.m_pFrontLayer)
@@ -6680,9 +6680,16 @@ bool CEditorAddLayerAction::Undo()
 	return true;
 }
 
+CEditorDeleteLayerAction::CEditorDeleteLayerAction(CEditor *pEditor, int GroupIndex, int LayerIndex) :
+	CEditorAction(CEditorAction::EType::DELETE_LAYER, nullptr, pEditor->m_Map.m_vpGroups[GroupIndex]->m_vpLayers[LayerIndex]->Duplicate(), nullptr)
+{
+	m_GroupIndex = GroupIndex;
+	m_LayerIndex = LayerIndex;
+}
+
 bool CEditorDeleteLayerAction::Undo()
 {
-	CLayerGroup *Group = (CLayerGroup *)m_pObject;
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 
 	CLayer *pLayer = m_ValueFrom->Duplicate();
 	if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -6700,14 +6707,17 @@ bool CEditorDeleteLayerAction::Undo()
 			m_pEditor->m_Map.m_pFrontLayer = (CLayerFront *)pLayer;
 	}
 
-	Group->AddLayer(pLayer);
-	m_pEditor->SelectLayer(Group->m_vpLayers.size() - 1);
+	Group->m_vpLayers.insert(Group->m_vpLayers.begin() + m_LayerIndex, pLayer);
+	m_pEditor->m_Map.m_Modified = true;
+
+	m_pEditor->SelectLayer(m_LayerIndex);
+
 	return true;
 }
 
 bool CEditorDeleteLayerAction::Redo()
 {
-	CLayerGroup *Group = (CLayerGroup *)m_pObject;
+	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 	CLayer *pLayer = m_ValueFrom;
 
 	if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -6726,9 +6736,7 @@ bool CEditorDeleteLayerAction::Redo()
 	}
 
 	Group->DeleteLayer(m_LayerIndex);
-
-	if(m_LayerIndex > 0)
-		m_pEditor->SelectLayer(m_LayerIndex - 1);
+	m_pEditor->SelectLayer(maximum(0, m_LayerIndex - 1));
 
 	return true;
 }
