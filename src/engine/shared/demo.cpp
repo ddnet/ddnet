@@ -885,12 +885,6 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	return true;
 }
 
-int CDemoPlayer::NextFrame()
-{
-	DoTick();
-	return IsPlaying();
-}
-
 int64_t CDemoPlayer::time()
 {
 #if defined(CONF_VIDEORECORDER)
