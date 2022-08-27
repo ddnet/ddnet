@@ -117,9 +117,8 @@ private:
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	void ScanFile();
-	int NextFrame();
 
-	int64_t time();
+	int64_t Time();
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);

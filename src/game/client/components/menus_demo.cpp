@@ -87,7 +87,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float ButtonbarHeight = 20.0f;
 	const float NameBarHeight = 20.0f;
 	const float Margins = 5.0f;
-	static int64_t LastSpeedChange = 0;
+	static int64_t s_LastSpeedChange = 0;
 
 	// render popups
 	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
@@ -179,6 +179,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
+	float PositionToSeek = -1.0f;
+	float TimeToSeek = 0.0f;
 	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
@@ -187,12 +189,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 			{
 				DemoPlayer()->SetSpeedIndex(+1);
-				LastSpeedChange = time_get();
+				s_LastSpeedChange = time_get();
 			}
 			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
 			{
 				DemoPlayer()->SetSpeedIndex(-1);
-				LastSpeedChange = time_get();
+				s_LastSpeedChange = time_get();
 			}
 		}
 
@@ -212,19 +214,19 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// seek backward/forward 10/5 seconds
 		if(Input()->KeyPress(KEY_J))
 		{
-			DemoPlayer()->SeekTime(-10.0f);
+			TimeToSeek = -10.0f;
 		}
 		else if(Input()->KeyPress(KEY_L))
 		{
-			DemoPlayer()->SeekTime(10.0f);
+			TimeToSeek = 10.0f;
 		}
 		else if(Input()->KeyPress(KEY_LEFT))
 		{
-			DemoPlayer()->SeekTime(-5.0f);
+			TimeToSeek = -5.0f;
 		}
 		else if(Input()->KeyPress(KEY_RIGHT))
 		{
-			DemoPlayer()->SeekTime(5.0f);
+			TimeToSeek = 5.0f;
 		}
 
 		// seek to 0-90%
@@ -233,7 +235,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			if(Input()->KeyPress(aSeekPercentKeys[i]))
 			{
-				DemoPlayer()->SeekPercent(i * 0.1f);
+				PositionToSeek = i * 0.1f;
 				break;
 			}
 		}
@@ -241,18 +243,31 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// seek to the beginning/end
 		if(Input()->KeyPress(KEY_HOME))
 		{
-			DemoPlayer()->SeekPercent(0.0f);
+			PositionToSeek = 0.0f;
 		}
 		else if(Input()->KeyPress(KEY_END))
 		{
-			DemoPlayer()->SeekPercent(1.0f);
+			PositionToSeek = 1.0f;
+		}
+
+		// Advance single frame forward/backward with period/comma key
+		const bool TickForwards = Input()->KeyPress(KEY_PERIOD);
+		const bool TickBackwards = Input()->KeyPress(KEY_COMMA);
+		if(TickForwards || TickBackwards)
+		{
+			m_pClient->m_SuppressEvents = true;
+			DemoPlayer()->SetPos(pInfo->m_CurrentTick + (TickForwards ? 3 : 0));
+			m_pClient->m_SuppressEvents = false;
+			DemoPlayer()->Pause();
+			m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+			m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
 		}
 	}
 
 	float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
 	// render speed info
-	if(g_Config.m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)
+	if(g_Config.m_ClDemoShowSpeed && time_get() - s_LastSpeedChange < time_freq() * 1)
 	{
 		CUIRect Screen = *UI()->Screen();
 
@@ -351,32 +366,23 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				UI()->SetActiveItem(nullptr);
 			else
 			{
-				static float PrevAmount = 0.0f;
+				static float s_PrevAmount = 0.0f;
 				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
-					AmountSeek = PrevAmount + (AmountSeek - PrevAmount) * 0.05f;
-
-					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.0001f)
+					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
 					{
-						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(AmountSeek);
-						m_pClient->m_SuppressEvents = false;
-						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
-						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+						PositionToSeek = AmountSeek;
 					}
 				}
 				else
 				{
-					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
 					{
-						PrevAmount = AmountSeek;
-						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(AmountSeek);
-						m_pClient->m_SuppressEvents = false;
-						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
-						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+						s_PrevAmount = AmountSeek;
+						PositionToSeek = AmountSeek;
 					}
 				}
 			}
@@ -394,7 +400,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(CurrentTick == TotalTicks)
 	{
 		DemoPlayer()->Pause();
-		DemoPlayer()->SeekPercent(0.0f);
+		PositionToSeek = 0.0f;
 	}
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
@@ -512,12 +518,24 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(IncreaseDemoSpeed)
 	{
 		DemoPlayer()->SetSpeedIndex(+1);
-		LastSpeedChange = time_get();
+		s_LastSpeedChange = time_get();
 	}
 	else if(DecreaseDemoSpeed)
 	{
 		DemoPlayer()->SetSpeedIndex(-1);
-		LastSpeedChange = time_get();
+		s_LastSpeedChange = time_get();
+	}
+
+	if((PositionToSeek >= 0.0f && PositionToSeek <= 1.0f) || TimeToSeek != 0.0f)
+	{
+		m_pClient->m_SuppressEvents = true;
+		if(TimeToSeek != 0.0f)
+			DemoPlayer()->SeekTime(TimeToSeek);
+		else
+			DemoPlayer()->SeekPercent(PositionToSeek);
+		m_pClient->m_SuppressEvents = false;
+		m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+		m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
 	}
 }
 
