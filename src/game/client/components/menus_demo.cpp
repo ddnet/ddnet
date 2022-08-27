@@ -75,7 +75,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float ButtonbarHeight = 20.0f;
 	const float NameBarHeight = 20.0f;
 	const float Margins = 5.0f;
-	static int64_t LastSpeedChange = 0;
+	static int64_t s_LastSpeedChange = 0;
 
 	// render popups
 	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
@@ -175,12 +175,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 			{
 				DemoPlayer()->SetSpeedIndex(+1);
-				LastSpeedChange = time_get();
+				s_LastSpeedChange = time_get();
 			}
 			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
 			{
 				DemoPlayer()->SetSpeedIndex(-1);
-				LastSpeedChange = time_get();
+				s_LastSpeedChange = time_get();
 			}
 		}
 
@@ -240,7 +240,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
 	// render speed info
-	if(g_Config.m_ClDemoShowSpeed && time_get() - LastSpeedChange < time_freq() * 1)
+	if(g_Config.m_ClDemoShowSpeed && time_get() - s_LastSpeedChange < time_freq() * 1)
 	{
 		CUIRect Screen = *UI()->Screen();
 
@@ -493,12 +493,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(IncreaseDemoSpeed)
 	{
 		DemoPlayer()->SetSpeedIndex(+1);
-		LastSpeedChange = time_get();
+		s_LastSpeedChange = time_get();
 	}
 	else if(DecreaseDemoSpeed)
 	{
 		DemoPlayer()->SetSpeedIndex(-1);
-		LastSpeedChange = time_get();
+		s_LastSpeedChange = time_get();
 	}
 }
 
