@@ -989,15 +989,12 @@ int CDemoPlayer::Update(bool RealTime)
 	if(!IsPlaying())
 		return 0;
 
-	if(m_Info.m_Info.m_Paused)
+	const int64_t Freq = time_freq();
+	if(!m_Info.m_Info.m_Paused)
 	{
-	}
-	else
-	{
-		int64_t Freq = time_freq();
 		m_Info.m_CurrentTime += (int64_t)(Deltatime * (double)m_Info.m_Info.m_Speed);
 
-		while(true)
+		while(!m_Info.m_Info.m_Paused)
 		{
 			int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
 
@@ -1007,34 +1004,31 @@ int CDemoPlayer::Update(bool RealTime)
 
 			// do one more tick
 			DoTick();
-
-			if(m_Info.m_Info.m_Paused)
-				return 0;
-		}
-
-		// update intratick
-		{
-			int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
-			int64_t PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
-			m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-			m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
-			m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
-			if(m_UpdateIntraTimesFunc)
-				m_UpdateIntraTimesFunc();
-		}
-
-		if(m_Info.m_Info.m_CurrentTick == m_Info.m_PreviousTick ||
-			m_Info.m_Info.m_CurrentTick == m_Info.m_NextTick)
-		{
-			if(m_pConsole)
-			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "tick error prev=%d cur=%d next=%d",
-					m_Info.m_PreviousTick, m_Info.m_Info.m_CurrentTick, m_Info.m_NextTick);
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
-			}
 		}
 	}
+
+	// update intratick
+	{
+		int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
+		int64_t PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
+		m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
+		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
+		m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
+		if(m_UpdateIntraTimesFunc)
+			m_UpdateIntraTimesFunc();
+	}
+
+	if(m_Info.m_Info.m_CurrentTick == m_Info.m_PreviousTick || m_Info.m_Info.m_CurrentTick == m_Info.m_NextTick)
+	{
+		if(m_pConsole)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "tick error prev=%d cur=%d next=%d",
+				m_Info.m_PreviousTick, m_Info.m_Info.m_CurrentTick, m_Info.m_NextTick);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
+		}
+	}
+
 	return 0;
 }
 
