@@ -1077,22 +1077,22 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			// flip buttons
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_UndoButton = 0;
-			int UndoEnabled = m_vpUndoActions.size() > 0;
+			int UndoEnabled = m_EditorHistory.m_vpUndoActions.size() > 0;
 			if(DoButton_Ex(&s_UndoButton, "Undo", UndoEnabled - 1, &Button, 0, "[Ctrl+Z] Undo", IGraphics::CORNER_L) || (UndoEnabled && ModPressed && m_ShowEnvelopeEditor == 0 && m_ShowServerSettingsEditor == 0 && Input()->KeyPress(KEY_Z) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				//for(auto &pLayer : m_Brush.m_vpLayers)
 				//	pLayer->BrushFlipX();
 				dbg_msg("editor", "UNDOOOOO");
-				Undo();
+				m_EditorHistory.Undo();
 			}
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_RedoButton = 0;
-			int RedoEnabled = m_vpRedoActions.size() > 0;
+			int RedoEnabled = m_EditorHistory.m_vpRedoActions.size() > 0;
 			if(DoButton_Ex(&s_RedoButton, "Redo", RedoEnabled - 1, &Button, 0, "[Ctrl+Y] Redo", IGraphics::CORNER_R) || (RedoEnabled && ModPressed && m_ShowEnvelopeEditor == 0 && m_ShowServerSettingsEditor == 0 && Input()->KeyPress(KEY_Y) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				dbg_msg("editor", "REEEDOOOO");
-				Redo();
+				m_EditorHistory.Redo();
 			}
 
 			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
@@ -2738,7 +2738,7 @@ void CEditor::DoMapEditor(CUIRect View)
 								m_DrawLayerGroup.AddLayer(m_Map.m_pFrontLayer->Duplicate());
 							}
 
-							RecordUndoAction(new CEditorBrushDrawAction(nullptr, &m_DrawOriginalGroup, &m_DrawLayerGroup, m_SelectedGroup, vEditLayers));
+							m_EditorHistory.RecordUndoAction(new CEditorBrushDrawAction(nullptr, &m_DrawOriginalGroup, &m_DrawLayerGroup, m_SelectedGroup, vEditLayers));
 							m_Drawing = false;
 							m_ShouldAddFrontDrawLayer = false;
 						}
@@ -2814,7 +2814,7 @@ void CEditor::DoMapEditor(CUIRect View)
 							apEditLayers[k]->FillSelection(m_Brush.IsEmpty(), pBrush, r);
 						}
 
-						RecordUndoAction(new CEditorFillSelectionAction(nullptr, &Original, &m_Brush, m_SelectedGroup, vEditLayers, r));
+						m_EditorHistory.RecordUndoAction(new CEditorFillSelectionAction(nullptr, &Original, &m_Brush, m_SelectedGroup, vEditLayers, r));
 					}
 					else
 					{
@@ -2886,7 +2886,7 @@ void CEditor::DoMapEditor(CUIRect View)
 									m_DrawLayerGroup.AddLayer(apEditLayers[k]->Duplicate());
 							}
 
-							RecordUndoAction(new CEditorBrushDrawAction(nullptr, &m_DrawOriginalGroup, &m_DrawLayerGroup, m_SelectedGroup, m_vSelectedLayers));
+							m_EditorHistory.RecordUndoAction(new CEditorBrushDrawAction(nullptr, &m_DrawOriginalGroup, &m_DrawLayerGroup, m_SelectedGroup, m_vSelectedLayers));
 						}
 					}
 
@@ -3170,13 +3170,13 @@ void CEditor::DoMapEditor(CUIRect View)
 	// render debug actions
 	int i = 0;
 	TextRender()->TextColor(ColorRGBA(1.0, 0.0, 0.0, 1.0));
-	for(auto it = m_vpRedoActions.rbegin(); it != m_vpRedoActions.rend(); ++it)
+	for(auto it = m_EditorHistory.m_vpRedoActions.rbegin(); it != m_EditorHistory.m_vpRedoActions.rend(); ++it)
 	{
 		UI()->DoTextLabel(110, 80 + i * 14, 400, 12, (*it)->Name(), 12, TEXTALIGN_LEFT);
 		i++;
 	}
 	TextRender()->TextColor(ColorRGBA(1.0, 1.0, 1.0, 1.0));
-	for(const auto &Action : m_vpUndoActions)
+	for(const auto &Action : m_EditorHistory.m_vpUndoActions)
 	{
 		UI()->DoTextLabel(110, 80 + i * 14, 400, 12, Action->Name(), 12, TEXTALIGN_LEFT);
 		i++;
@@ -3731,7 +3731,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
 
-			RecordUndoAction(new CEditorAddGroupAction(&m_Map, m_Map.m_vpGroups.size() - 1));
+			m_EditorHistory.RecordUndoAction(new CEditorAddGroupAction(&m_Map, m_Map.m_vpGroups.size() - 1));
 		}
 	}
 
@@ -6189,6 +6189,11 @@ void CEditor::Reset(bool CreateDefault)
 
 	m_ShowEnvelopePreview = 0;
 	m_ShiftBy = 1;
+
+	// todo: clear history
+	m_EditorHistory.Clear();
+	m_EnvelopeEditorHistory.Clear();
+	m_ServerSettingsEditorHistory.Clear();
 }
 
 int CEditor::GetLineDistance() const
@@ -6606,9 +6611,9 @@ void CEditorMap::MakeTuneLayer(CLayer *pLayer)
 	m_pTuneLayer->m_Texture = m_pEditor->GetTuneTexture();
 }
 
-void CEditor::RecordUndoAction(IEditorAction *pAction, bool Clear)
+void CEditorHistory::RecordUndoAction(IEditorAction *pAction, bool Clear)
 {
-	pAction->m_pEditor = this;
+	pAction->m_pEditor = m_pEditor;
 
 	if(Clear && m_vpRedoActions.size() > 0)
 	{
@@ -6628,7 +6633,7 @@ void CEditor::RecordUndoAction(IEditorAction *pAction, bool Clear)
 	pAction->Print();
 }
 
-void CEditor::RecordRedoAction(IEditorAction *pAction)
+void CEditorHistory::RecordRedoAction(IEditorAction *pAction)
 {
 	if(m_vpRedoActions.size() >= s_MaxActions)
 	{
@@ -6638,7 +6643,7 @@ void CEditor::RecordRedoAction(IEditorAction *pAction)
 	m_vpRedoActions.push_front(pAction);
 }
 
-bool CEditor::Undo()
+bool CEditorHistory::Undo()
 {
 	if(m_vpUndoActions.empty())
 		return false;
@@ -6649,7 +6654,7 @@ bool CEditor::Undo()
 	return FrontAction->Undo();
 }
 
-bool CEditor::Redo()
+bool CEditorHistory::Redo()
 {
 	if(m_vpRedoActions.empty())
 		return false;
@@ -6658,6 +6663,17 @@ bool CEditor::Redo()
 	RecordUndoAction(FrontAction, false);
 	m_vpRedoActions.pop_front();
 	return FrontAction->Redo();
+}
+
+void CEditorHistory::Clear()
+{
+	for(auto *pAction : m_vpRedoActions)
+		delete pAction;
+	m_vpRedoActions.clear();
+
+	for(auto *pAction : m_vpUndoActions)
+		delete pAction;
+	m_vpUndoActions.clear();
 }
 
 bool CEditorAddLayerAction::Undo()

@@ -1123,6 +1123,35 @@ private:
 	bool BrushDraw(CLayerGroup *Brush);
 };
 
+class CEditorHistory
+{
+public:
+	CEditorHistory()
+	{
+		m_pEditor = nullptr;
+	}
+
+	~CEditorHistory()
+	{
+		Clear();
+	}
+
+	void RecordUndoAction(IEditorAction *pAction, bool Clear = true);
+	bool Undo();
+	bool Redo();
+
+	void Clear();
+
+	CEditor *m_pEditor;
+	static const int s_MaxActions = 50;
+	std::deque<IEditorAction *> m_vpUndoActions;
+	std::deque<IEditorAction *> m_vpRedoActions;
+
+private:
+	void RecordRedoAction(IEditorAction *Action);
+
+};
+
 class CEditor : public IEditor
 {
 	class IInput *m_pInput;
@@ -1260,6 +1289,10 @@ public:
 		m_BrushDrawDestructive = true;
 
 		m_Mentions = 0;
+
+		m_EditorHistory.m_pEditor = this;
+		m_EnvelopeEditorHistory.m_pEditor = this;
+		m_ServerSettingsEditorHistory.m_pEditor = this;
 
 		m_ShouldAddFrontDrawLayer = false;
 	}
@@ -1653,10 +1686,6 @@ public:
 	static int ms_HuePicker;
 
 	// DDRace
-	void RecordUndoAction(IEditorAction *pAction, bool Clear = true);
-	bool Undo();
-	bool Redo();
-
 	IGraphics::CTextureHandle GetFrontTexture();
 	IGraphics::CTextureHandle GetTeleTexture();
 	IGraphics::CTextureHandle GetSpeedupTexture();
@@ -1678,15 +1707,13 @@ public:
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
 
-	static const int s_MaxActions = 50;
-	std::deque<IEditorAction *> m_vpUndoActions;
-	std::deque<IEditorAction *> m_vpRedoActions;
+	CEditorHistory m_EditorHistory;
+	CEditorHistory m_EnvelopeEditorHistory;
+	CEditorHistory m_ServerSettingsEditorHistory;
 
 	bool m_ShouldAddFrontDrawLayer;
 
 private:
-	void RecordRedoAction(IEditorAction *Action);
-
 	CLayerGroup m_DrawLayerGroup;
 	CLayerGroup m_DrawOriginalGroup;
 	bool m_Drawing = false;

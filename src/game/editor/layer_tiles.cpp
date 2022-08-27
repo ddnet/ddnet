@@ -919,7 +919,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Color.a = NewVal & 0xff;
 
 		if(!(PrevColor == m_Color))
-			m_pEditor->RecordUndoAction(new CEditorChangeColorTileAction(this, PrevColor, m_Color));
+			m_pEditor->m_EditorHistory.RecordUndoAction(new CEditorChangeColorTileAction(this, PrevColor, m_Color));
 	}
 	if(Prop == PROP_COLOR_ENV)
 	{
@@ -988,7 +988,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 				OriginalStates.push_back(Original);
 			}
 
-			pEditor->RecordUndoAction(new CEditorEditMultipleLayersAction(nullptr, OriginalStates, State, vpLayers));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorEditMultipleLayersAction(nullptr, OriginalStates, State, vpLayers));
 			State.m_Modified = 0;
 		}
 	}

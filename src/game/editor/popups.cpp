@@ -130,7 +130,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete group", 0, &Button, 0, "Delete group"))
 		{
-			pEditor->RecordUndoAction(new CEditorDeleteGroupAction(&pEditor->m_Map, pEditor->m_SelectedGroup));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorDeleteGroupAction(&pEditor->m_Map, pEditor->m_SelectedGroup));
 
 			pEditor->m_Map.DeleteGroup(pEditor->m_SelectedGroup);
 			pEditor->m_SelectedGroup = maximum(0, pEditor->m_SelectedGroup - 1);
@@ -197,7 +197,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddTeleLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTeleLayer));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTeleLayer));
 
 			return 1;
 		}
@@ -222,7 +222,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddSpeedupLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSpeedupLayer));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSpeedupLayer));
 
 			return 1;
 		}
@@ -247,7 +247,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddTuneLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTuneLayer));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTuneLayer));
 
 			return 1;
 		}
@@ -272,7 +272,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddFrontLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddFrontLayer));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddFrontLayer));
 
 			return 1;
 		}
@@ -297,7 +297,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnAddSwitchLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSwitchLayer));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSwitchLayer));
 
 			return 1;
 		}
@@ -320,7 +320,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		fnAddQuadLayer();
-		pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddQuadLayer));
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddQuadLayer));
 
 		return 1;
 	}
@@ -342,7 +342,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		fnAddTileLayer();
-		pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTileLayer));
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddTileLayer));
 
 		return 1;
 	}
@@ -364,7 +364,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		fnAddSoundLayer();
-		pEditor->RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSoundLayer));
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(SelectedGroup, pEditor->m_Map.m_vpGroups[SelectedGroup]->m_vpLayers.size() - 1, fnAddSoundLayer));
 
 		return 1;
 	}
@@ -496,7 +496,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 			};
 
 			fnDupLayer();
-			pEditor->RecordUndoAction(new CEditorAddLayerAction(pEditor->m_SelectedGroup, SelectedLayer + 1, fnDupLayer));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorAddLayerAction(pEditor->m_SelectedGroup, SelectedLayer + 1, fnDupLayer));
 
 			return 1;
 		}
@@ -506,7 +506,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_Map.m_pGameLayer != pEditor->GetSelectedLayer(0) &&
 		pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &Button, 0, "Deletes the layer"))
 	{
-		pEditor->RecordUndoAction(new CEditorDeleteLayerAction(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0]));
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorDeleteLayerAction(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0]));
 
 		if(pEditor->GetSelectedLayer(0) == pEditor->m_Map.m_pFrontLayer)
 			pEditor->m_Map.m_pFrontLayer = nullptr;
@@ -1071,7 +1071,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 					pQuad->m_aColors[v].a = NewVal & 0xff;
 
 					if(!(PrevColor == pQuad->m_aColors[v]))
-						pEditor->RecordUndoAction(new CEditorChangeColorQuadAction(pQuad, v, PrevColor, pQuad->m_aColors[v]));
+						pEditor->m_EditorHistory.RecordUndoAction(new CEditorChangeColorQuadAction(pQuad, v, PrevColor, pQuad->m_aColors[v]));
 				}
 			}
 		}
