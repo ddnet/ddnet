@@ -339,14 +339,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				UI()->SetActiveItem(nullptr);
 			else
 			{
-				static float PrevAmount = 0.0f;
+				static float s_PrevAmount = 0.0f;
 				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
-					AmountSeek = PrevAmount + (AmountSeek - PrevAmount) * 0.05f;
+					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
 
-					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.0001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
 					{
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SeekPercent(AmountSeek);
@@ -357,9 +357,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				}
 				else
 				{
-					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(PrevAmount - AmountSeek) >= 0.001f)
+					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
 					{
-						PrevAmount = AmountSeek;
+						s_PrevAmount = AmountSeek;
 						m_pClient->m_SuppressEvents = true;
 						DemoPlayer()->SeekPercent(AmountSeek);
 						m_pClient->m_SuppressEvents = false;
