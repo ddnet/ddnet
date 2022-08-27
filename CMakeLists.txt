@@ -1229,8 +1229,6 @@ set(EXPECTED_DATA
   countryflags/default.png
   countryflags/index.txt
   debug_font.png
-  demo_buttons.png
-  demo_buttons2.png
   editor/audio_source.png
   editor/background.png
   editor/basic_freeze.rules
@@ -1271,7 +1269,6 @@ set(EXPECTED_DATA
   editor/winter_main.rules
   emoticons.png
   extras.png
-  file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
   fonts/Icons.otf

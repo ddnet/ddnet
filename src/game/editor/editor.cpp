@@ -4229,7 +4229,36 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 	Button.VSplitLeft(Button.h, &FileIcon, &Button);
 	Button.VSplitLeft(5.0f, nullptr, &Button);
 
-	RenderTools()->RenderIcon(IMAGE_FILEICONS, m_vFileList[Index].m_IsDir ? SPRITE_FILE_FOLDER : SPRITE_FILE_MAP2, &FileIcon);
+	const char *pIconType;
+
+	if(!m_vFileList[Index].m_IsDir)
+	{
+		switch(m_FileDialogFileType)
+		{
+		case FILETYPE_MAP:
+			pIconType = "\xEF\x89\xB9";
+			break;
+		case FILETYPE_IMG:
+			pIconType = "\xEF\x80\xBE";
+			break;
+		case FILETYPE_SOUND:
+			pIconType = "\xEF\x80\x81";
+			break;
+		default:
+			pIconType = "";
+		}
+	}
+	else
+	{
+		if(str_comp(m_vFileList[Index].m_aFilename, "..") == 0)
+			pIconType = "\xEF\xA0\x82";
+		else
+			pIconType = "\xEF\x81\xBB";
+	}
+
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	UI()->DoLabel(&FileIcon, pIconType, 12.0f, TEXTALIGN_LEFT);
+	TextRender()->SetCurFont(nullptr);
 
 	if(DoButton_File(&m_vFileList[Index], m_vFileList[Index].m_aName, m_FilesSelectedIndex == Index, &Button, 0, nullptr))
 	{
