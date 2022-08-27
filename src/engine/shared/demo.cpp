@@ -246,10 +246,6 @@ void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 
 void CDemoRecorder::Write(int Type, const void *pData, int Size)
 {
-	char aBuffer[64 * 1024];
-	char aBuffer2[64 * 1024];
-	unsigned char aChunk[3];
-
 	if(!m_File)
 		return;
 
@@ -258,6 +254,8 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 
 	/* pad the data with 0 so we get an alignment of 4,
 	else the compression won't work and miss some bytes */
+	char aBuffer[64 * 1024];
+	char aBuffer2[64 * 1024];
 	mem_copy(aBuffer2, pData, Size);
 	while(Size & 3)
 		aBuffer2[Size++] = 0;
@@ -269,6 +267,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 	if(Size < 0)
 		return;
 
+	unsigned char aChunk[3];
 	aChunk[0] = ((Type & 0x3) << 5);
 	if(Size < 30)
 	{
@@ -418,14 +417,13 @@ void CDemoPlayer::SetListener(IListener *pListener)
 
 int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 {
-	unsigned char Chunk = 0;
-
 	*pSize = 0;
 	*pType = 0;
 
 	if(m_File == NULL)
 		return -1;
 
+	unsigned char Chunk = 0;
 	if(io_read(m_File, &Chunk, sizeof(Chunk)) != sizeof(Chunk))
 		return -1;
 
@@ -479,21 +477,19 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 
 void CDemoPlayer::ScanFile()
 {
-	long StartPos;
 	CHeap Heap;
 	CKeyFrameSearch *pFirstKey = 0;
 	CKeyFrameSearch *pCurrentKey = 0;
-	//DEMOREC_CHUNK chunk;
-	int ChunkSize, ChunkType, ChunkTick = 0;
-	int i;
+	int ChunkTick = 0;
 
-	StartPos = io_tell(m_File);
+	long StartPos = io_tell(m_File);
 	m_Info.m_SeekablePoints = 0;
 
 	while(true)
 	{
 		long CurrentPos = io_tell(m_File);
 
+		int ChunkSize, ChunkType;
 		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
 			break;
 
@@ -526,6 +522,7 @@ void CDemoPlayer::ScanFile()
 	}
 
 	// copy all the frames to an array instead for fast access
+	int i;
 	m_pKeyFrames = (CKeyFrame *)calloc(maximum(m_Info.m_SeekablePoints, 1), sizeof(CKeyFrame));
 	for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
 		m_pKeyFrames[i] = pCurrentKey->m_Frame;
