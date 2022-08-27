@@ -885,7 +885,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	return true;
 }
 
-int64_t CDemoPlayer::time()
+int64_t CDemoPlayer::Time()
 {
 #if defined(CONF_VIDEORECORDER)
 	static bool s_Recording = false;
@@ -921,7 +921,7 @@ int CDemoPlayer::Play()
 
 	// set start info
 	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
-	m_Info.m_LastUpdate = time();
+	m_Info.m_LastUpdate = Time();
 	return 0;
 }
 
@@ -985,7 +985,7 @@ void CDemoPlayer::SetSpeedIndex(int Offset)
 
 int CDemoPlayer::Update(bool RealTime)
 {
-	int64_t Now = time();
+	int64_t Now = Time();
 	int64_t Deltatime = Now - m_Info.m_LastUpdate;
 	m_Info.m_LastUpdate = Now;
 

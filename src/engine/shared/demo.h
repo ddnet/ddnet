@@ -118,7 +118,7 @@ private:
 	void DoTick();
 	void ScanFile();
 
-	int64_t time();
+	int64_t Time();
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
