@@ -167,6 +167,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// handle keyboard shortcuts independent of active menu
+	float PositionToSeek = -1.0f;
+	float TimeToSeek = 0.0f;
 	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
@@ -200,19 +202,19 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// seek backward/forward 10/5 seconds
 		if(Input()->KeyPress(KEY_J))
 		{
-			DemoPlayer()->SeekTime(-10.0f);
+			TimeToSeek = -10.0f;
 		}
 		else if(Input()->KeyPress(KEY_L))
 		{
-			DemoPlayer()->SeekTime(10.0f);
+			TimeToSeek = 10.0f;
 		}
 		else if(Input()->KeyPress(KEY_LEFT))
 		{
-			DemoPlayer()->SeekTime(-5.0f);
+			TimeToSeek = -5.0f;
 		}
 		else if(Input()->KeyPress(KEY_RIGHT))
 		{
-			DemoPlayer()->SeekTime(5.0f);
+			TimeToSeek = 5.0f;
 		}
 
 		// seek to 0-90%
@@ -221,7 +223,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			if(Input()->KeyPress(aSeekPercentKeys[i]))
 			{
-				DemoPlayer()->SeekPercent(i * 0.1f);
+				PositionToSeek = i * 0.1f;
 				break;
 			}
 		}
@@ -229,11 +231,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// seek to the beginning/end
 		if(Input()->KeyPress(KEY_HOME))
 		{
-			DemoPlayer()->SeekPercent(0.0f);
+			PositionToSeek = 0.0f;
 		}
 		else if(Input()->KeyPress(KEY_END))
 		{
-			DemoPlayer()->SeekPercent(1.0f);
+			PositionToSeek = 1.0f;
 		}
 
 		// Advance single frame forward/backward with period/comma key
@@ -245,6 +247,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			DemoPlayer()->SetPos(pInfo->m_CurrentTick + (TickForwards ? 3 : 0));
 			m_pClient->m_SuppressEvents = false;
 			DemoPlayer()->Pause();
+			m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+			m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
 		}
 	}
 
@@ -356,14 +360,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
 				{
 					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
-
 					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
 					{
-						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(AmountSeek);
-						m_pClient->m_SuppressEvents = false;
-						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
-						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+						PositionToSeek = AmountSeek;
 					}
 				}
 				else
@@ -371,11 +370,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
 					{
 						s_PrevAmount = AmountSeek;
-						m_pClient->m_SuppressEvents = true;
-						DemoPlayer()->SeekPercent(AmountSeek);
-						m_pClient->m_SuppressEvents = false;
-						m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
-						m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+						PositionToSeek = AmountSeek;
 					}
 				}
 			}
@@ -393,7 +388,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(CurrentTick == TotalTicks)
 	{
 		DemoPlayer()->Pause();
-		DemoPlayer()->SeekPercent(0.0f);
+		PositionToSeek = 0.0f;
 	}
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
@@ -510,6 +505,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		DemoPlayer()->SetSpeedIndex(-1);
 		s_LastSpeedChange = time_get();
+	}
+
+	if((PositionToSeek >= 0.0f && PositionToSeek <= 1.0f) || TimeToSeek != 0.0f)
+	{
+		m_pClient->m_SuppressEvents = true;
+		if(TimeToSeek != 0.0f)
+			DemoPlayer()->SeekTime(TimeToSeek);
+		else
+			DemoPlayer()->SeekPercent(PositionToSeek);
+		m_pClient->m_SuppressEvents = false;
+		m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+		m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
 	}
 }
 
