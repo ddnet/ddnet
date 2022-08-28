@@ -497,6 +497,7 @@ protected:
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);
 	bool FetchHeader(CDemoItem &Item);
 	void FetchAllHeaders();
+	void HandleDemoSeeking(float PositionToSeek, float TimeToSeek);
 	void RenderDemoPlayer(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 
