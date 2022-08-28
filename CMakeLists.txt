@@ -2111,6 +2111,8 @@ if(CLIENT)
     auto_map.h
     editor.cpp
     editor.h
+	editor_actions.cpp
+    editor_actions.h
     explanations.cpp
     io.cpp
     layer_game.cpp
