@@ -752,7 +752,7 @@ public:
 		EDIT_QUAD_POSITION,
 		EDIT_QUAD_CENTER,
 
-		SET_TILE,
+		//SET_TILE,
 		FILL_SELECTION,
 		BRUSH_DRAW,
 
@@ -776,9 +776,11 @@ public:
 		ADD_COMMAND,
 		EDIT_COMMAND,
 		DELETE_COMMAND,
+		MOVE_COMMAND_UP,
+		MOVE_COMMAND_DOWN,
 
-		ADD_IMAGE,
-		ADD_SOUND,
+		//ADD_IMAGE,
+		//ADD_SOUND,
 
 		CHANGE_ORIENTATION_VALUE
 	};
@@ -817,7 +819,6 @@ public:
 		case EType::EDIT_LAYER_COLOR_TO: return "EDIT_LAYER_COLOR_TO";
 		case EType::EDIT_QUAD_POSITION: return "EDIT_QUAD_POSITION";
 		case EType::EDIT_QUAD_CENTER: return "EDIT_QUAD_CENTER";
-		case EType::SET_TILE: return "SET_TILE";
 		case EType::FILL_SELECTION: return "FILL_SELECTION";
 		case EType::BRUSH_DRAW: return "BRUSH_DRAW";
 		case EType::EDIT_GROUP_ORDER: return "EDIT_GROUP_ORDER";
@@ -838,8 +839,10 @@ public:
 		case EType::ADD_COMMAND: return "ADD_COMMAND";
 		case EType::EDIT_COMMAND: return "EDIT_COMMAND";
 		case EType::DELETE_COMMAND: return "DELETE_COMMAND";
-		case EType::ADD_IMAGE: return "ADD_IMAGE";
-		case EType::ADD_SOUND: return "ADD_SOUND";
+		case EType::MOVE_COMMAND_UP: return "MOVE_COMMAND_UP";
+		case EType::MOVE_COMMAND_DOWN: return "MOVE_COMMAND_DOWN";
+		//case EType::ADD_IMAGE: return "ADD_IMAGE";
+		//case EType::ADD_SOUND: return "ADD_SOUND";
 		case EType::CHANGE_ORIENTATION_VALUE: return "CHANGE_ORIENTATION_VALUE";
 		default: return "UNKNOWN";
 		}
@@ -1123,6 +1126,24 @@ private:
 	bool BrushDraw(CLayerGroup *Brush);
 };
 
+class CEditorCommandAction : public CEditorAction<std::string>
+{
+public:
+	CEditorCommandAction(CEditorAction::EType Action, int* pSelectedCommand, int CommandIndex, std::string Old, std::string New) :
+		CEditorAction(Action, nullptr, Old, New)
+	{
+		m_pSelectedCommand = pSelectedCommand;
+		m_CommandIndex = CommandIndex;
+	}
+
+	bool Undo() override;
+	bool Redo() override;
+
+private:
+	int m_CommandIndex;
+	int *m_pSelectedCommand;
+};
+
 class CEditorHistory
 {
 public:
@@ -1141,6 +1162,8 @@ public:
 	bool Redo();
 
 	void Clear();
+	bool CanUndo() const { return m_vpUndoActions.size() > 0; }
+	bool CanRedo() const { return m_vpRedoActions.size() > 0; }
 
 	CEditor *m_pEditor;
 	static const int s_MaxActions = 50;

@@ -5473,6 +5473,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast)
 {
 	static int s_CommandSelectedIndex = -1;
+	bool ModPressed = Input()->ModifierIsPressed();
 
 	CUIRect ToolBar;
 	View.HSplitTop(20.0f, &ToolBar, &View);
@@ -5481,13 +5482,14 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	// do the toolbar
 	{
 		CUIRect Button;
+		CUIRect Rest;
 
 		// command line
 		ToolBar.VSplitLeft(5.0f, nullptr, &Button);
 		UI()->DoLabel(&Button, "Command:", 12.0f, TEXTALIGN_LEFT);
 
 		Button.VSplitLeft(70.0f, nullptr, &Button);
-		Button.VSplitLeft(180.0f, &Button, nullptr);
+		Button.VSplitLeft(180.0f, &Button, &Rest);
 		static int s_ClearButton = 0;
 		DoClearableEditBox(&m_CommandBox, &s_ClearButton, &Button, m_aSettingsCommand, sizeof(m_aSettingsCommand), 12.0f, &m_CommandBox, false, IGraphics::CORNER_ALL);
 
@@ -5495,6 +5497,26 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			UI()->SetActiveItem(&m_CommandBox);
 
 		// buttons
+
+		CUIRect UndoButton;
+		Rest.VSplitLeft(5.0f, nullptr, &Rest);
+		Rest.VSplitLeft(50.0f, &UndoButton, &Rest);
+		static int s_UndoButton = 0;
+		int UndoEnabled = m_ServerSettingsEditorHistory.CanUndo();
+		if(DoButton_Ex(&s_UndoButton, "Undo", UndoEnabled - 1, &UndoButton, 0, "[Ctrl+Z] Undo", IGraphics::CORNER_L) || (UndoEnabled && ModPressed && Input()->KeyPress(KEY_Z) && m_Dialog == DIALOG_NONE))
+		{
+			m_ServerSettingsEditorHistory.Undo();
+		}
+
+		CUIRect RedoButton;
+		Rest.VSplitLeft(50.0f, &RedoButton, &Rest);
+		static int s_RedoButton = 0;
+		int RedoEnabled = m_ServerSettingsEditorHistory.CanRedo();
+		if(DoButton_Ex(&s_RedoButton, "Redo", RedoEnabled - 1, &RedoButton, 0, "[Ctrl+Y] Redo", IGraphics::CORNER_R) || (RedoEnabled && ModPressed && Input()->KeyPress(KEY_Y) && m_Dialog == DIALOG_NONE))
+		{
+			m_ServerSettingsEditorHistory.Redo();
+		}
+
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_AddButton = 0;
 		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.") || ((Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER)) && UI()->LastActiveItem() == &m_CommandBox && m_Dialog == DIALOG_NONE))
@@ -5515,6 +5537,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 					str_copy(Setting.m_aCommand, m_aSettingsCommand, sizeof(Setting.m_aCommand));
 					m_Map.m_vSettings.push_back(Setting);
 					s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
+
+					m_ServerSettingsEditorHistory.RecordUndoAction(new CEditorCommandAction(CEditorAction<std::string>::EType::ADD_COMMAND, &s_CommandSelectedIndex, m_Map.m_vSettings.size() - 1, std::string(), Setting.m_aCommand));
 				}
 			}
 			UI()->SetActiveItem(&m_CommandBox);
@@ -5539,11 +5563,14 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 						}
 					if(Found)
 					{
+						m_ServerSettingsEditorHistory.RecordUndoAction(new CEditorCommandAction(CEditorAction<std::string>::EType::DELETE_COMMAND, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, std::string()));
+
 						m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
 						s_CommandSelectedIndex = i > s_CommandSelectedIndex ? i - 1 : i;
 					}
 					else
 					{
+						m_ServerSettingsEditorHistory.RecordUndoAction(new CEditorCommandAction(CEditorAction<std::string>::EType::EDIT_COMMAND, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand));
 						str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_aSettingsCommand, sizeof(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand));
 					}
 				}
@@ -5555,6 +5582,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			static int s_DelButton = 0;
 			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_CommandBox && m_Dialog == DIALOG_NONE))
 			{
+				m_ServerSettingsEditorHistory.RecordUndoAction(new CEditorCommandAction(CEditorAction<std::string>::EType::DELETE_COMMAND, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, std::string()));
+
 				m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
 				if(s_CommandSelectedIndex >= (int)m_Map.m_vSettings.size())
 					s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
@@ -5568,6 +5597,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			static int s_DownButton = 0;
 			if(s_CommandSelectedIndex < (int)m_Map.m_vSettings.size() - 1 && DoButton_Editor(&s_DownButton, "▼", 0, &Button, 0, "Move command down"))
 			{
+				m_ServerSettingsEditorHistory.RecordUndoAction(new CEditorCommandAction(CEditorAction<std::string>::EType::MOVE_COMMAND_DOWN, &s_CommandSelectedIndex, s_CommandSelectedIndex, std::string(), std::string()));
+
 				std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex + 1]);
 				s_CommandSelectedIndex++;
 			}
@@ -5577,6 +5608,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			static int s_UpButton = 0;
 			if(s_CommandSelectedIndex > 0 && DoButton_Editor(&s_UpButton, "▲", 0, &Button, 0, "Move command up"))
 			{
+				m_ServerSettingsEditorHistory.RecordUndoAction(new CEditorCommandAction(CEditorAction<std::string>::EType::MOVE_COMMAND_UP, &s_CommandSelectedIndex, s_CommandSelectedIndex, std::string(), std::string()));
+
 				std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex - 1]);
 				s_CommandSelectedIndex--;
 			}
@@ -6809,7 +6842,7 @@ bool CEditorFillSelectionAction::Undo()
 	CLayerGroup *Brush = m_ValueFrom;
 	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 
-	int NumLayers = m_vLayers.size();
+	size_t NumLayers = m_vLayers.size();
 	for(size_t k = 0; k < NumLayers; k++)
 	{
 		int LayerIndex = m_vLayers[k];
@@ -6837,7 +6870,7 @@ bool CEditorFillSelectionAction::Redo()
 	CLayerGroup *Brush = m_ValueTo;
 	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 
-	int NumLayers = m_vLayers.size();
+	size_t NumLayers = m_vLayers.size();
 	for(size_t k = 0; k < NumLayers; k++)
 	{
 		int LayerIndex = m_vLayers[k];
@@ -6935,4 +6968,87 @@ void CEditorBrushDrawAction::Print()
 	//	dbg_msg("editor", "   brush layer (original) -> %s", m_ValueFrom->m_vpLayers[k]->m_aName);
 	//	dbg_msg("editor", "   brush layer (modified) -> %s", m_ValueTo->m_vpLayers[k]->m_aName);
 	//}
+}
+
+bool CEditorCommandAction::Undo()
+{
+	switch(m_Type)
+	{
+	case CEditorAction::EType::ADD_COMMAND:
+	{
+		m_pEditor->m_Map.m_vSettings.pop_back();
+		*m_pSelectedCommand = m_pEditor->m_Map.m_vSettings.size() - 1;
+		break;
+	}
+	case CEditorAction::EType::EDIT_COMMAND:
+	{
+		str_copy(m_pEditor->m_Map.m_vSettings[m_CommandIndex].m_aCommand, m_ValueFrom.c_str(), sizeof(m_pEditor->m_Map.m_vSettings[m_CommandIndex].m_aCommand));
+		break;
+	}
+	case CEditorAction::EType::DELETE_COMMAND:
+	{
+		CEditorMap::CSetting Setting;
+		str_copy(Setting.m_aCommand, m_ValueFrom.c_str(), sizeof(Setting.m_aCommand));
+		m_pEditor->m_Map.m_vSettings.insert(m_pEditor->m_Map.m_vSettings.begin() + m_CommandIndex, Setting);
+		*m_pSelectedCommand = m_CommandIndex;
+		break;
+	}
+	case CEditorAction::EType::MOVE_COMMAND_UP:
+	{
+		std::swap(m_pEditor->m_Map.m_vSettings[m_CommandIndex], m_pEditor->m_Map.m_vSettings[m_CommandIndex - 1]);
+		*m_pSelectedCommand = m_CommandIndex;
+		break;
+	}
+	case CEditorAction::EType::MOVE_COMMAND_DOWN:
+	{
+		std::swap(m_pEditor->m_Map.m_vSettings[m_CommandIndex], m_pEditor->m_Map.m_vSettings[m_CommandIndex + 1]);
+		*m_pSelectedCommand = m_CommandIndex;
+		break;
+	}
+	default:
+		return false;
+	}
+	return true;
+}
+
+bool CEditorCommandAction::Redo()
+{
+	switch(m_Type)
+	{
+	case CEditorAction::EType::ADD_COMMAND:
+	{
+		CEditorMap::CSetting Setting;
+		str_copy(Setting.m_aCommand, m_ValueTo.c_str(), sizeof(Setting.m_aCommand));
+		m_pEditor->m_Map.m_vSettings.push_back(Setting);
+		*m_pSelectedCommand = m_pEditor->m_Map.m_vSettings.size() - 1;
+		break;
+	}
+	case CEditorAction::EType::EDIT_COMMAND:
+		str_copy(m_pEditor->m_Map.m_vSettings[m_CommandIndex].m_aCommand, m_ValueTo.c_str(), sizeof(m_pEditor->m_Map.m_vSettings[m_CommandIndex].m_aCommand));
+		break;
+	case CEditorAction::EType::DELETE_COMMAND:
+	{
+		m_pEditor->m_Map.m_vSettings.erase(m_pEditor->m_Map.m_vSettings.begin() + m_CommandIndex);
+
+		if(*m_pSelectedCommand >= (int)m_pEditor->m_Map.m_vSettings.size())
+			*m_pSelectedCommand = m_pEditor->m_Map.m_vSettings.size() - 1;
+
+		break;
+	}
+	case CEditorAction::EType::MOVE_COMMAND_UP:
+	{
+		std::swap(m_pEditor->m_Map.m_vSettings[m_CommandIndex], m_pEditor->m_Map.m_vSettings[m_CommandIndex - 1]);
+		*m_pSelectedCommand = m_CommandIndex;
+		break;
+	}
+	case CEditorAction::EType::MOVE_COMMAND_DOWN:
+	{
+		std::swap(m_pEditor->m_Map.m_vSettings[m_CommandIndex], m_pEditor->m_Map.m_vSettings[m_CommandIndex + 1]);
+		*m_pSelectedCommand = m_CommandIndex;
+		break;
+	}
+	default:
+		return false;
+	}
+	return true;
 }
