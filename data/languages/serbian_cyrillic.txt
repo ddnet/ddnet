@@ -2,7 +2,7 @@
 #originally created by:
 # Veljko Radovanovic (VekiPro) 2020-10-02 18:05:00
 #modified by:
-# Veljko Radovanovic (VekiPro) 2020-10-02 18:05:00
+# Veljko Radovanovic (VekiPro) 2022-08-28 11:56:69
 ##### /authors #####
 
 ##### translated strings #####
@@ -1158,402 +1158,402 @@ Replay
 == Помнови
 
 Saving ddnet-settings.cfg failed
-== 
+== Чување ddnet-settings.cfg неуспело
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Ширина текстуре %s није дељива са %d, или висина није дељива са %d, што ће проузроковати видљиве грешке.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Формате текстуре %s није Ц.З.П.П.(RGBA) што ће проузроковати видљиве грешке
 
 Preparing demo playback
-== 
+== Припрема се репродукција демоа
 
 Connected
-== 
+== Повезано
 
 Loading map file from storage
-== 
+== Учитавање мапе из меморије
 
 Why are you slowmo replaying to read this?
-== 
+== Зашто полако понављаш да би ово прочитао?
 
-Initializing components
-== 
+Initializing components 
+== Учитавам компоненте
 
 Initializing assets
-== 
+== Учитавам слику
 
 Initializing map logic
-== 
+== Учитавам логику мапе
 
 Sending initial client info
-== 
+== Слање учитане информације клијента
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Debug мод је укључен. Притисните Ctrl+Shift+D да га искључите
 
 Position:
-== 
+== Положај:
 
 Speed:
-== 
+== Брзина:
 
 Angle:
-== 
+== Угао:
 
 Uploading map data to GPU
-== 
+== Слање података мапе Г.Ј.О.~у (GPU)
 
 Trying to determine UDP connectivity...
-== 
+== Покушавам да одредим К.Д.П.(UDP) повезаност
 
 UDP seems to be filtered.
-== 
+== Изгледа да је К.Д.П.(UDP) филтриран
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Чини се да су К.Д.П.(UDP) и TCP IP адреса различите. Покушајте да онемогућите VPN, прокси или мрежне акцелераторе.
 
 No answer from server yet.
-== 
+== Сервер још увек не одговара
 
 Getting game info
-== 
+== Добијам инфо. игре
 
 Requesting to join the game
-== 
+== Захтева се улазак у игру
 
 Existing Player
-== 
+== Постојећи играч
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Име: '%s' се већ користи са %d поена. Дали идаље желите да га користите?
 
 Checking for existing player with your name
-== 
+== Проверавамо дали постоји играч са вашим именом
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Дали сте сигурни да желите да прекинете везу?
 
 Join Tutorial Server
-== 
+== Уђи на почетнички сервер
 
 Skip Tutorial
-== 
+== Прескочи увод
 
 Loading menu images
-== 
+== Учитавање мену слика
 
 AFR
-== 
+== АФР.
 
 ASI
-== 
+== АЗИ.
 
 AUS
-== 
+== АУС.
 
 EUR
-== 
+== ЕВР.
 
 NA
-== 
+== С.А.
 
 SA
-== 
+== Ј.А.
 
 CHN
-== 
+== КИН.
 
 Getting server list from master server
-== 
+== Добијам листу сервера са мастер сервера
 
 Refreshing...
-== 
+== Освежавање
 
 Leak IP
-== 
+== Провали адресу
 
 Loading demo files
-== 
+== Учитавање демоа
 
 Loading ghost files
-== 
+== Учитавање духова
 
 Smooth Dynamic Camera
-== 
+== Глатка Динамична Камера
 
 Settings file
-== 
+== Фајл Подешавања
 
 Config directory
-== 
+== Директоријум конфигурацији
 
 Toggle to edit your dummy settings
-== 
+== Укључи да уређујеш подешавања лутке
 
 Download community skins
-== 
+== Преузми остале теме
 
 Choose default eyes when joining a server
-== 
+== Избери уобичајене очи кад уђеш у сервер
 
 Loading skin files
-== 
+== Учитавам фајлове тема
 
 Chat command
-== 
+== к.једностав.текст.комуни.система
 
 Enable controller
-== 
+== Укључи контролер
 
 Controller %d: %s
-== 
+== Контролер %d: %s
 
 Click to cycle through all available controllers.
-== 
+== Кликни да видиш све слободне контролерес
 
 [Ingame controller mode]
 Relative
-== 
+== Релативно
 
 [Ingame controller mode]
 Absolute
-== 
+== Апсолутно
 
 Ingame controller mode
-== 
+== Мод контролера у игри
 
 Ingame controller sens.
-== 
+== Бризина контролера у игри
 
 UI controller sens.
-== 
+== Брзина контролера у мениу
 
 Controller jitter tolerance
-== 
+== Толеранција контролера
 
 No controller found. Plug in a controller and restart the game.
-== 
+== Нема пронађеног контролера, укључите га и поново покрените игру.
 
 Device
-== 
+== Уређај
 
 Status
-== 
+== Статус
 
 Aim bind
-== 
+== Нишан
 
 Controller Axis #%d
-== 
+== Стик %d.
 
 Mouse
-== 
+== Миш
 
 Ingame mouse sens.
-== 
+== Брзина у игри
 
 UI mouse sens.
-== 
+== Брзина у мениу
 
 Controller
-== 
+== Контролер
 
 Dummy
-== 
+== Лутка
 
 Windowed
-== 
+== У прозору
 
 Windowed borderless
-== 
+== У прозору без мениа
 
 Windowed fullscreen
-== 
+== У прозору преко целог екрана
 
 Desktop fullscreen
-== 
+== Системски преко целог екрана
 
 Allows maps to render with more detail
-== 
+== Рендеруј мапу са више детаља
 
 Renderer
-== 
+== Рендерер
 
 default
-== 
+== базично
 
 custom
-== 
+== своје
 
 Graphics cards
-== 
+== Графичка картица
 
 auto
-== 
+== ауто
 
 Game sound volume
-== 
+== Игрина јачина звука
 
 Chat sound volume
-== 
+== Јачина звука дописивања
 
 Background music volume
-== 
+== Позадинска јачина звука
 
 Appearance
-== 
+== Изглед
 
 Name Plate
-== 
+== Плочица са именом
 
 Hook Collisions
-== 
+== Додир куке
 
 Kill Messages
-== 
+== Поруке убистава
 
 Show health, shields and ammo
-== 
+== Прикажи животе, штитове и меткове
 
 DDRace HUD
-== 
+== DDRace Приказ
 
 Show client IDs in scoreboard
-== 
+== Прикажи идентитете на табли резултата
 
 Show DDRace HUD
-== 
+== Прикажи DDRace Приказ
 
 Show jumps indicator
-== 
+== Прикажи индикатор скакања
 
 Show dummy actions
-== 
+== Прикажи акције лутке
 
 Show player position
-== 
+== Прикажи позиције играча
 
 Show player speed
-== 
+== Прикажи брзину играча
 
 Show player target angle
-== 
+== Прикажи циљни угао играча
 
 Show freeze bars
-== 
+== Прикажи freeze bars
 
 Opacity of freeze bars inside freeze
-== 
+== Провидност freeze bars у залеђеном делу
 
 Use old chat style
-== 
+== Користи стари стил дописивања
 
 Preview
-== 
+== Преглед
 
 Show hook strength indicator
-== 
+== Прикажи јачину куке индикатор
 
 Show local player's key presses
-== 
+== Прикажи своје акције
 
 Hook collision line
-== 
+== Додир куке
 
 Hook collision line width
-== 
+== Дебљина линије за додир куке
 
 Hook collision line opacity
-== 
+== Провидност линије за додир куке
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Боје линије за додир куке,у случају да можеш да се закачиш:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Ваши покрети се не узимају у обзир при израчунавању боја линија
 
 Nothing hookable
-== 
+== Ништа закачиво
 
 Something hookable
-== 
+== Нешто закачиво
 
 A Tee
-== 
+== Играч
 
 Normal Color
-== 
+== Нормална боја
 
 Highlight Color
-== 
+== Истакнута Боја
 
 Laser Outline Color
-== 
+== Боја спољашњег ласера
 
 Laser Inner Color
-== 
+== Боја унутрашњег ласера
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Када кренеш да се тркаш, прикажи твог најбржег духа 
 
 Opacity
-== 
+== Провидност
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Подесите непрозирност ентитета који припадају другим тимовима, као што су мајице и натписне плочице
 
 Quads are used for background decoration
-== 
+== Quads су коришћени за декорацију позадине
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Покушај да предвидиш остале објекте да се осећа брже
 
 Background
-== 
+== Позадина
 
 Entities Background color
-== 
+== Статична боја позадине
 
 Use current map as background
-== 
+== Користи ову мапу као позадину
 
 Regular Background Color
-== 
+== Уобичајена боја позадине
 
 Run on join
-== 
+== Уради када уђеш
 
 Chat command (e.g. showall 1)
-== 
+== Команда дописивања (нпр. /cmdlist)
 
 Extras
-== 
+== Додатно
 
 Loading assets
-== 
+== Учитавање средстава
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 Tutorial
-== 
+== Увод
 
 Can't find a Tutorial server
-== 
+== Неможемо пронаћи уводни сервер
 
 Loading race demo files
-== 
+== Учитавам тркачке демо фајлове
 
 Super
-== 
+== Супер
 
 Team %d
-== 
+== Тим %d
 
 Loading sound files
-== 
+== Учитавам звучне фајлове
