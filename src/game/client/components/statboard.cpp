@@ -48,6 +48,9 @@ bool CStatboard::IsActive()
 
 void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
+
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
