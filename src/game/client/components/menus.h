@@ -633,6 +633,7 @@ public:
 	int DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect);
 	std::vector<CDemoItem> m_vDemos;
 	void DemolistPopulate();
+	void DemoSeekTick(IDemoPlayer::ETickOffset TickOffset);
 	bool m_Dummy;
 
 	const char *GetCurrentDemoFolder() const { return m_aCurrentDemoFolder; }

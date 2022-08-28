@@ -934,6 +934,11 @@ int CDemoPlayer::SeekTime(float Seconds)
 	return SetPos(WantedTick);
 }
 
+int CDemoPlayer::SeekTick(ETickOffset TickOffset)
+{
+	return SetPos(m_Info.m_Info.m_CurrentTick + (int)TickOffset);
+}
+
 int CDemoPlayer::SetPos(int WantedTick)
 {
 	if(!m_File)
