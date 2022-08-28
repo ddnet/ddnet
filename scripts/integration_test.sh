@@ -355,23 +355,16 @@ do
 	then
 		continue
 	fi
-	if [ "$arg_verbose" != "1" ]
-	then
-		continue
-	fi
 	echo "[!] Warning: $stderr"
 	cat "$stderr"
 done
 
 if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"
 then
-	if [ "$arg_verbose" == "1" ]
-	then
-		for fail in fail_*
-		do
-			cat "$fail"
-		done
-	fi
+	for fail in fail_*
+	do
+		cat "$fail"
+	done
 	print_results
 	echo "[-] Test failed. See errors above."
 	exit 1
