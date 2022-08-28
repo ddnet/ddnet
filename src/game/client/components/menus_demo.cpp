@@ -291,6 +291,15 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		TextRender()->Text(0, 120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
 	}
 
+	const int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
+	const int TotalTicks = pInfo->m_LastTick - pInfo->m_FirstTick;
+
+	if(CurrentTick == TotalTicks)
+	{
+		DemoPlayer()->Pause();
+		PositionToSeek = 0.0f;
+	}
+
 	if(!m_MenuActive)
 	{
 		HandleDemoSeeking(PositionToSeek, TimeToSeek);
@@ -306,9 +315,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	MainView.Margin(5.0f, &MainView);
 
 	CUIRect SeekBar, ButtonBar, NameBar;
-
-	int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
-	int TotalTicks = pInfo->m_LastTick - pInfo->m_FirstTick;
 
 	MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
 	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
@@ -413,12 +419,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		if(Inside)
 			UI()->SetHotItem(pId);
-	}
-
-	if(CurrentTick == TotalTicks)
-	{
-		DemoPlayer()->Pause();
-		PositionToSeek = 0.0f;
 	}
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
