@@ -6665,7 +6665,7 @@ void CEditorHistory::RecordUndoAction(IEditorAction *pAction, bool Clear)
 		m_vpRedoActions.clear();
 	}
 
-	if(m_vpUndoActions.size() >= s_MaxActions)
+	if(m_vpUndoActions.size() >= g_Config.m_ClEditorMaxHistory)
 	{
 		m_vpUndoActions.pop_back();
 	}
@@ -6676,7 +6676,7 @@ void CEditorHistory::RecordUndoAction(IEditorAction *pAction, bool Clear)
 
 void CEditorHistory::RecordRedoAction(IEditorAction *pAction)
 {
-	if(m_vpRedoActions.size() >= s_MaxActions)
+	if(m_vpRedoActions.size() >= g_Config.m_ClEditorMaxHistory)
 	{
 		m_vpRedoActions.pop_back();
 	}

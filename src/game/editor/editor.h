@@ -729,7 +729,6 @@ public:
 	bool CanRedo() const { return m_vpRedoActions.size() > 0; }
 
 	CEditor *m_pEditor;
-	static const int s_MaxActions = 50;
 	std::deque<IEditorAction *> m_vpUndoActions;
 	std::deque<IEditorAction *> m_vpRedoActions;
 
