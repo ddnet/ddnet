@@ -919,7 +919,15 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Color.a = NewVal & 0xff;
 
 		if(!(PrevColor == m_Color))
-			m_pEditor->m_EditorHistory.RecordUndoAction(new CEditorChangeColorTileAction(this, PrevColor, m_Color));
+		{
+			int LayerIndex = -1;
+			for(size_t k = 0; k < m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup]->m_vpLayers.size(); k++)
+				if(m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup]->m_vpLayers[k] == this)
+					LayerIndex = k;
+
+			if(LayerIndex != -1)
+				m_pEditor->m_EditorHistory.RecordUndoAction(new CEditorChangeColorTileAction(m_pEditor->m_SelectedGroup, LayerIndex, PrevColor, m_Color));
+		}
 	}
 	if(Prop == PROP_COLOR_ENV)
 	{
@@ -988,7 +996,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 				OriginalStates.push_back(Original);
 			}
 
-			pEditor->m_EditorHistory.RecordUndoAction(new CEditorEditMultipleLayersAction(nullptr, OriginalStates, State, vpLayers));
+			pEditor->m_EditorHistory.RecordUndoAction(new CEditorEditMultipleLayersAction(nullptr, OriginalStates, State, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers));
 			State.m_Modified = 0;
 		}
 	}

@@ -749,8 +749,11 @@ public:
 		EDIT_LAYER_COLOR_ENV,
 		EDIT_LAYER_COLOR_TO,
 
+		ADD_QUAD,
+		DELETE_QUAD,
 		EDIT_QUAD_POSITION,
 		EDIT_QUAD_CENTER,
+		EDIT_QUAD_VERTEX,
 
 		//SET_TILE,
 		FILL_SELECTION,
@@ -844,6 +847,9 @@ public:
 		//case EType::ADD_IMAGE: return "ADD_IMAGE";
 		//case EType::ADD_SOUND: return "ADD_SOUND";
 		case EType::CHANGE_ORIENTATION_VALUE: return "CHANGE_ORIENTATION_VALUE";
+		case EType::ADD_QUAD: return "ADD_QUAD";
+		case EType::DELETE_QUAD: return "DELETE_QUAD";
+		case EType::EDIT_QUAD_VERTEX: return "EDIT_QUAD_VERTEX";
 		default: return "UNKNOWN";
 		}
 	}
@@ -856,27 +862,42 @@ protected:
 	void *m_pObject;
 };
 
-class CEditorChangeColorTileAction : public CEditorAction<CColor>
+template<typename T>
+class CEditorLayerAction : public CEditorAction<T>
 {
 public:
-	CEditorChangeColorTileAction(void *pObject, const CColor &OldColor, const CColor &NewColor) :
-		CEditorAction(CEditorAction::EType::CHANGE_COLOR_TILE, pObject, OldColor, NewColor)
+	CEditorLayerAction(CEditorAction::EType Type, void *pObject, int GroupIndex, int LayerIndex, const T &From, const T &To) :
+		CEditorAction<T>(Type, pObject, From, To)
+	{
+		m_GroupIndex = GroupIndex;
+		m_LayerIndex = LayerIndex;
+	}
+
+	template<typename K>
+	K *GetLayer();
+
+protected:
+	int m_GroupIndex;
+	int m_LayerIndex;
+};
+
+template<typename T>
+template<typename K>
+K* CEditorLayerAction<T>::GetLayer()
+{
+	return (K *)(m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex]);
+}
+
+class CEditorChangeColorTileAction : public CEditorLayerAction<CColor>
+{
+public:
+	CEditorChangeColorTileAction(int GroupIndex, int LayerIndex, const CColor &OldColor, const CColor &NewColor) :
+		CEditorLayerAction(CEditorAction::EType::CHANGE_COLOR_TILE, nullptr, GroupIndex, LayerIndex, OldColor, NewColor)
 	{
 	}
 
-	bool Undo() override
-	{
-		CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
-		pTileLayer->m_Color = m_ValueFrom;
-		return true;
-	}
-
-	bool Redo() override
-	{
-		CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
-		pTileLayer->m_Color = m_ValueTo;
-		return true;
-	}
+	bool Undo() override;
+	bool Redo() override;
 
 	void Print() override
 	{
@@ -977,56 +998,15 @@ private:
 class CEditorEditMultipleLayersAction : public CEditorAction<std::vector<CLayerTiles::SCommonPropState>>
 {
 public:
-	CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles::SCommonPropState> vOriginals, CLayerTiles::SCommonPropState State, std::vector<CLayerTiles *> vpLayers) :
+	CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles::SCommonPropState> vOriginals, CLayerTiles::SCommonPropState State, int GroupIndex, std::vector<int> vLayers) :
 		CEditorAction(CEditorAction::EType::EDIT_MULTIPLE_LAYERS, pObject, vOriginals, {State})
 	{
-		m_vpLayers = vpLayers;
+		m_GroupIndex = GroupIndex;
+		m_vLayers = vLayers;
 	}
 
-	bool Undo() override
-	{
-		if(m_vpLayers.size() != m_ValueFrom.size())
-			return false;
-
-		for(int i = 0; i < m_vpLayers.size(); i++)
-		{
-			CLayerTiles *pLayer = m_vpLayers[i];
-			CLayerTiles::SCommonPropState Original = m_ValueFrom[i];
-
-			pLayer->Resize(Original.m_Width, Original.m_Height);
-
-			pLayer->m_Color.r = (Original.m_Color >> 24) & 0xff;
-			pLayer->m_Color.g = (Original.m_Color >> 16) & 0xff;
-			pLayer->m_Color.b = (Original.m_Color >> 8) & 0xff;
-			pLayer->m_Color.a = Original.m_Color & 0xff;
-
-			pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
-		}
-
-		return true;
-	}
-
-	bool Redo() override
-	{
-		CLayerTiles::SCommonPropState State = m_ValueTo[0];
-		for(auto *pLayer : m_vpLayers)
-		{
-			if((State.m_Modified & CLayerTiles::SCommonPropState::MODIFIED_SIZE) != 0)
-				pLayer->Resize(State.m_Width, State.m_Height);
-
-			if((State.m_Modified & CLayerTiles::SCommonPropState::MODIFIED_COLOR) != 0)
-			{
-				pLayer->m_Color.r = (State.m_Color >> 24) & 0xff;
-				pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
-				pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
-				pLayer->m_Color.a = State.m_Color & 0xff;
-			}
-
-			pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
-		}
-
-		return true;
-	}
+	bool Undo() override;
+	bool Redo() override;
 
 	void Print() override
 	{
@@ -1034,7 +1014,8 @@ public:
 	}
 
 private:
-	std::vector<CLayerTiles *> m_vpLayers;
+	std::vector<int> m_vLayers;
+	int m_GroupIndex;
 };
 
 class CEditorAddGroupAction : public CEditorAction<int>
@@ -1142,6 +1123,70 @@ public:
 private:
 	int m_CommandIndex;
 	int *m_pSelectedCommand;
+};
+
+class CEditorAddQuadAction : public CEditorLayerAction<RECTi>
+{
+public:
+	CEditorAddQuadAction(int GroupIndex, int LayerIndex, RECTi Quad) :
+		CEditorLayerAction(CEditorAction::EType::ADD_QUAD, nullptr, GroupIndex, LayerIndex, {}, Quad)
+	{
+	}
+
+	bool Undo() override;
+	bool Redo() override;
+
+};
+
+class CEditorDeleteQuadsAction : public CEditorLayerAction<void*>
+{
+public:
+	CEditorDeleteQuadsAction(int GroupIndex, int LayerIndex, std::vector<int> vQuadIndexes, std::vector<CQuad> vQuads) :
+		CEditorLayerAction(CEditorAction::EType::DELETE_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, nullptr)
+	{
+		m_vQuadIndexes = vQuadIndexes;
+		m_vQuads = vQuads;
+	}
+
+	bool Undo() override
+	{
+		CLayerQuads *pLayer = GetLayer<CLayerQuads>();
+
+		size_t k = 0;
+		
+		pLayer->m_vQuads.resize(pLayer->m_vQuads.size() + m_vQuads.size());
+
+		for(auto &Index : m_vQuadIndexes)
+		{
+			pLayer->m_vQuads.insert(pLayer->m_vQuads.begin() + Index, m_vQuads[k]);
+			k++;
+		}
+
+		return true;
+	}
+
+	bool Redo() override
+	{
+		CLayerQuads *pLayer = GetLayer<CLayerQuads>();
+		std::vector vSelectedQuads = m_vQuadIndexes;
+
+		for(int i = 0; i < (int)vSelectedQuads.size(); ++i)
+		{
+			pLayer->m_vQuads.erase(pLayer->m_vQuads.begin() + vSelectedQuads[i]);
+			for(int j = i + 1; j < (int)vSelectedQuads.size(); ++j)
+				if(vSelectedQuads[j] > vSelectedQuads[i])
+					vSelectedQuads[j]--;
+
+			vSelectedQuads.erase(vSelectedQuads.begin() + i);
+			i--;
+		}
+
+		return true;
+	}
+
+private:
+	std::vector<int> m_vQuadIndexes;
+	std::vector<CQuad> m_vQuads;
 };
 
 class CEditorHistory

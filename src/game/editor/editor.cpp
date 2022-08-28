@@ -778,8 +778,13 @@ void CEditor::DeleteSelectedQuads()
 	if(!pLayer)
 		return;
 
+	std::vector<CQuad> vQuads;
+	std::vector<int> vSelectedQuads = m_vSelectedQuads;
+
 	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
 	{
+		vQuads.emplace_back(pLayer->m_vQuads[m_vSelectedQuads[i]]);
+
 		pLayer->m_vQuads.erase(pLayer->m_vQuads.begin() + m_vSelectedQuads[i]);
 		for(int j = i + 1; j < (int)m_vSelectedQuads.size(); ++j)
 			if(m_vSelectedQuads[j] > m_vSelectedQuads[i])
@@ -788,6 +793,8 @@ void CEditor::DeleteSelectedQuads()
 		m_vSelectedQuads.erase(m_vSelectedQuads.begin() + i);
 		i--;
 	}
+
+	m_EditorHistory.RecordUndoAction(new CEditorDeleteQuadsAction(m_SelectedGroup, m_vSelectedLayers[0], vSelectedQuads, vQuads));
 }
 
 bool CEditor::IsQuadSelected(int Index) const
@@ -1284,7 +1291,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 						Height = m_Map.m_vpImages[pLayerQuads->m_Image]->m_Height;
 					}
 
-					pLayerQuads->NewQuad(x, y, Width, Height);
+					CQuad *NewQuad = pLayerQuads->NewQuad(x, y, Width, Height);
+					m_EditorHistory.RecordUndoAction(new CEditorAddQuadAction(m_SelectedGroup, m_vSelectedLayers[0], {x, y, Width, Height}));
 				}
 				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 				{
@@ -6709,6 +6717,22 @@ void CEditorHistory::Clear()
 	m_vpUndoActions.clear();
 }
 
+bool CEditorChangeColorTileAction::Undo()
+{
+	//CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
+	CLayerTiles *pTileLayer = (CLayerTiles *)m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex];
+	pTileLayer->m_Color = m_ValueFrom;
+	return true;
+}
+
+bool CEditorChangeColorTileAction::Redo()
+{
+	//CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
+	CLayerTiles *pTileLayer = (CLayerTiles *)m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex];
+	pTileLayer->m_Color = m_ValueTo;
+	return true;
+}
+
 bool CEditorAddLayerAction::Undo()
 {
 	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
@@ -6786,6 +6810,54 @@ bool CEditorDeleteLayerAction::Redo()
 
 	Group->DeleteLayer(m_LayerIndex);
 	m_pEditor->SelectLayer(maximum(0, m_LayerIndex - 1));
+
+	return true;
+}
+
+bool CEditorEditMultipleLayersAction::Undo()
+{
+	if(m_vLayers.size() != m_ValueFrom.size())
+		return false;
+
+	for(size_t k = 0; k < m_vLayers.size(); k++)
+	{
+		int LayerIndex = m_vLayers[k];
+		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[LayerIndex];
+		CLayerTiles::SCommonPropState Original = m_ValueFrom[k];
+
+		pLayer->Resize(Original.m_Width, Original.m_Height);
+
+		pLayer->m_Color.r = (Original.m_Color >> 24) & 0xff;
+		pLayer->m_Color.g = (Original.m_Color >> 16) & 0xff;
+		pLayer->m_Color.b = (Original.m_Color >> 8) & 0xff;
+		pLayer->m_Color.a = Original.m_Color & 0xff;
+
+		pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+	}
+
+	return true;
+}
+
+bool CEditorEditMultipleLayersAction::Redo()
+{
+	CLayerTiles::SCommonPropState State = m_ValueTo[0];
+	for(auto LayerIndex : m_vLayers)
+	{
+		CLayerTiles *pLayer = (CLayerTiles *)m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[LayerIndex];
+
+		if((State.m_Modified & CLayerTiles::SCommonPropState::MODIFIED_SIZE) != 0)
+			pLayer->Resize(State.m_Width, State.m_Height);
+
+		if((State.m_Modified & CLayerTiles::SCommonPropState::MODIFIED_COLOR) != 0)
+		{
+			pLayer->m_Color.r = (State.m_Color >> 24) & 0xff;
+			pLayer->m_Color.g = (State.m_Color >> 16) & 0xff;
+			pLayer->m_Color.b = (State.m_Color >> 8) & 0xff;
+			pLayer->m_Color.a = State.m_Color & 0xff;
+		}
+
+		pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+	}
 
 	return true;
 }
@@ -7050,5 +7122,26 @@ bool CEditorCommandAction::Redo()
 	default:
 		return false;
 	}
+	return true;
+}
+
+bool CEditorAddQuadAction::Undo()
+{
+	CLayerQuads *pLayer = GetLayer<CLayerQuads>();
+	pLayer->m_vQuads.pop_back();
+
+	m_pEditor->m_Map.m_Modified = true;
+
+	return true;
+}
+
+bool CEditorAddQuadAction::Redo()
+{
+	CLayerQuads *pLayer = GetLayer<CLayerQuads>();
+	RECTi Quad = m_ValueTo;
+	pLayer->NewQuad(Quad.x, Quad.y, Quad.w, Quad.h);
+
+	m_pEditor->m_Map.m_Modified = true;
+
 	return true;
 }
