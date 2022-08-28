@@ -94,6 +94,16 @@ void CMenus::HandleDemoSeeking(float PositionToSeek, float TimeToSeek)
 	}
 }
 
+void CMenus::DemoSeekTick(IDemoPlayer::ETickOffset TickOffset)
+{
+	m_pClient->m_SuppressEvents = true;
+	DemoPlayer()->SeekTick(TickOffset);
+	m_pClient->m_SuppressEvents = false;
+	DemoPlayer()->Pause();
+	m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
+	m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+}
+
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
 	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
@@ -270,12 +280,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		const bool TickBackwards = Input()->KeyPress(KEY_COMMA);
 		if(TickForwards || TickBackwards)
 		{
-			m_pClient->m_SuppressEvents = true;
-			DemoPlayer()->SetPos(pInfo->m_CurrentTick + (TickForwards ? 3 : 0));
-			m_pClient->m_SuppressEvents = false;
-			DemoPlayer()->Pause();
-			m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
-			m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+			DemoSeekTick(TickForwards ? IDemoPlayer::TICK_NEXT : IDemoPlayer::TICK_PREVIOUS);
 		}
 	}
 

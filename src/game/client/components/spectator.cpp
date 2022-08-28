@@ -424,6 +424,9 @@ void CSpectator::Spectate(int SpectatorID)
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
+		if(DemoPlayer()->BaseInfo()->m_Paused)
+			GameClient()->m_Menus.DemoSeekTick(IDemoPlayer::TICK_CURRENT);
 		return;
 	}
 
