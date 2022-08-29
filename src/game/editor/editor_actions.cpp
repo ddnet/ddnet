@@ -16,20 +16,6 @@ bool CEditorChangeColorTileAction::Redo()
 	return true;
 }
 
-bool CEditorChangeColorQuadAction::Undo()
-{
-	CQuad *pQuad = (CQuad *)m_pObject;
-	pQuad->m_aColors[m_Index] = m_ValueFrom;
-	return true;
-}
-
-bool CEditorChangeColorQuadAction::Redo()
-{
-	CQuad *pQuad = (CQuad *)m_pObject;
-	pQuad->m_aColors[m_Index] = m_ValueTo;
-	return true;
-}
-
 bool CEditorAddLayerAction::Undo()
 {
 	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
@@ -47,6 +33,10 @@ bool CEditorAddLayerAction::Undo()
 		m_pEditor->m_Map.m_pTuneLayer = nullptr;
 
 	Group->DeleteLayer(m_LayerIndex);
+
+	if(m_pEditor->m_SelectedGroup == m_GroupIndex)
+		m_pEditor->SelectLayer(maximum(0, m_LayerIndex - 1));
+
 	return true;
 }
 
@@ -80,7 +70,8 @@ bool CEditorDeleteLayerAction::Undo()
 	Group->m_vpLayers.insert(Group->m_vpLayers.begin() + m_LayerIndex, pLayer);
 	m_pEditor->m_Map.m_Modified = true;
 
-	m_pEditor->SelectLayer(m_LayerIndex);
+	if(m_pEditor->m_SelectedGroup == m_GroupIndex)
+		m_pEditor->SelectLayer(m_LayerIndex);
 
 	return true;
 }
@@ -106,7 +97,9 @@ bool CEditorDeleteLayerAction::Redo()
 	}
 
 	Group->DeleteLayer(m_LayerIndex);
-	m_pEditor->SelectLayer(maximum(0, m_LayerIndex - 1));
+
+	if(m_pEditor->m_SelectedGroup == m_GroupIndex)
+		m_pEditor->SelectLayer(maximum(0, m_LayerIndex - 1));
 
 	return true;
 }
@@ -455,8 +448,8 @@ bool CEditorCommandAction::Redo()
 	return true;
 }
 
-CEditorAddQuadAction::CEditorAddQuadAction(int GroupIndex, int LayerIndex, RECTi *Quad) :
-	CEditorLayerAction(EType::ADD_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, Quad)
+CEditorAddQuadAction::CEditorAddQuadAction(int GroupIndex, int LayerIndex, CQuad *pQuad) :
+	CEditorLayerAction(EType::ADD_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, new CQuad(*pQuad))
 {
 }
 
@@ -478,8 +471,7 @@ bool CEditorAddQuadAction::Undo()
 bool CEditorAddQuadAction::Redo()
 {
 	CLayerQuads *pLayer = GetLayer<CLayerQuads>();
-	RECTi *Quad = m_ValueTo;
-	pLayer->NewQuad(Quad->x, Quad->y, Quad->w, Quad->h);
+	pLayer->m_vQuads.push_back(*m_ValueTo);
 
 	m_pEditor->m_Map.m_Modified = true;
 
@@ -489,14 +481,12 @@ bool CEditorAddQuadAction::Redo()
 bool CEditorDeleteQuadsAction::Undo()
 {
 	CLayerQuads *pLayer = GetLayer<CLayerQuads>();
-
-	size_t k = 0;
-
 	pLayer->m_vQuads.resize(pLayer->m_vQuads.size() + m_vQuads.size());
 
+	size_t k = 0;
 	for(auto &Index : m_vQuadIndexes)
 	{
-		pLayer->m_vQuads.insert(pLayer->m_vQuads.begin() + Index, m_vQuads[k]);
+		pLayer->m_vQuads[Index] = m_vQuads[k];
 		k++;
 	}
 
@@ -517,6 +507,217 @@ bool CEditorDeleteQuadsAction::Redo()
 
 		vSelectedQuads.erase(vSelectedQuads.begin() + i);
 		i--;
+	}
+
+	return true;
+}
+
+CEditorEditQuadPositionAction::CEditorEditQuadPositionAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, const std::vector<CPoint> &OldPos, const std::vector<CPoint> &NewPos) :
+	CEditorLayerQuadsAction(EType::EDIT_QUAD_POSITION, GroupIndex, LayerIndex, vQuads, OldPos, NewPos)
+{
+}
+
+bool CEditorEditQuadPositionAction::Undo()
+{
+	Move(-1);
+	return true;
+}
+
+bool CEditorEditQuadPositionAction::Redo()
+{
+	Move(1);
+	return true;
+}
+
+void CEditorEditQuadPositionAction::Move(int Direction)
+{
+	CLayerQuads *pLayer = GetLayer();
+
+	size_t k = 0;
+	for(auto &QuadIndex : m_vQuads)
+	{
+		CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
+
+		float OffsetX = m_ValueTo[k].x - m_ValueFrom[k].x;
+		float OffsetY = m_ValueTo[k].y - m_ValueFrom[k].y;
+
+		for(auto &QuadPoint : pQuad->m_aPoints)
+		{
+			QuadPoint.x += Direction * OffsetX;
+			QuadPoint.y += Direction * OffsetY;
+		}
+
+		k++;
+	}
+}
+
+bool CEditorEditQuadsPointsAction::Undo()
+{
+	CLayerQuads *pLayer = GetLayer();
+
+	size_t k = 0;
+	for(auto &QuadIndex : m_vQuads)
+	{
+		auto *pQuad = &pLayer->m_vQuads[QuadIndex];
+		for(int v = 0; v < 4; v++)
+		{
+			if(m_Points & (1 << v))
+			{
+				if((m_ValueFrom[k].m_Modified & SEditQuadPoint::MODIFIED_COLOR) != 0)
+					pQuad->m_aColors[v] = m_ValueFrom[k].m_Quad.m_aColors[v];
+				if((m_ValueFrom[k].m_Modified & SEditQuadPoint::MODIFIED_POS_X) != 0)
+					pQuad->m_aPoints[v].x = m_ValueFrom[k].m_Quad.m_aPoints[v].x;
+				if((m_ValueFrom[k].m_Modified & SEditQuadPoint::MODIFIED_POS_Y) != 0)
+					pQuad->m_aPoints[v].y = m_ValueFrom[k].m_Quad.m_aPoints[v].y;
+				if((m_ValueFrom[k].m_Modified & SEditQuadPoint::MODIFIED_TEX_U) != 0)
+					pQuad->m_aTexcoords[v].u = m_ValueFrom[k].m_Quad.m_aTexcoords[v].u;
+				if((m_ValueFrom[k].m_Modified & SEditQuadPoint::MODIFIED_TEX_V) != 0)
+					pQuad->m_aTexcoords[v].v = m_ValueFrom[k].m_Quad.m_aTexcoords[v].v;
+
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_TEX_OFFSET) != 0)
+				{
+					pQuad->m_aTexcoords[v] = m_ValueFrom[k].m_Quad.m_aTexcoords[v];
+					pQuad->m_aTexcoords[(v + 2) % 4].x = m_ValueFrom[k].m_Quad.m_aTexcoords[(v + 2) % 4].x;
+					pQuad->m_aTexcoords[v ^ 1].y = m_ValueFrom[k].m_Quad.m_aTexcoords[v ^ 1].y;
+				}
+			}
+		}
+		k++;
+	}
+
+	return true;
+}
+
+bool CEditorEditQuadsPointsAction::Redo()
+{
+	CLayerQuads *pLayer = GetLayer();
+
+	for(auto &QuadIndex : m_vQuads)
+	{
+		auto *pQuad = &pLayer->m_vQuads[QuadIndex];
+		for(int v = 0; v < 4; v++)
+		{
+			if(m_Points & (1 << v))
+			{
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_COLOR) != 0)
+					pQuad->m_aColors[v] = m_ValueTo[0].m_Quad.m_aColors[v];
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_POS_X) != 0)
+					pQuad->m_aPoints[v].x = m_ValueTo[0].m_Quad.m_aPoints[v].x;
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_POS_Y) != 0)
+					pQuad->m_aPoints[v].y = m_ValueTo[0].m_Quad.m_aPoints[v].y;
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_TEX_U) != 0)
+					pQuad->m_aTexcoords[v].u = m_ValueTo[0].m_Quad.m_aTexcoords[v].u;
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_TEX_V) != 0)
+					pQuad->m_aTexcoords[v].v = m_ValueTo[0].m_Quad.m_aTexcoords[v].v;
+
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_OFFSET) != 0)
+				{
+					// use the stored offset here
+					pQuad->m_aPoints[v].x += m_ValueTo[0].m_Quad.m_aPoints[0].x;
+					pQuad->m_aPoints[v].y += m_ValueTo[0].m_Quad.m_aPoints[0].y;
+				}
+
+				if((m_ValueTo[0].m_Modified & SEditQuadPoint::MODIFIED_TEX_OFFSET) != 0)
+				{
+					// use the stored offset here
+					pQuad->m_aTexcoords[v].u += m_ValueTo[0].m_Quad.m_aTexcoords[0].u;
+					pQuad->m_aTexcoords[v].v += m_ValueTo[0].m_Quad.m_aTexcoords[0].v;
+
+					pQuad->m_aTexcoords[(v + 2) % 4].x += m_ValueTo[0].m_Quad.m_aTexcoords[0].u;
+					pQuad->m_aTexcoords[v ^ 1].y += m_ValueTo[0].m_Quad.m_aTexcoords[0].v;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+CEditorRotateQuadsAction::CEditorRotateQuadsAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, const float &PrevRotation, const float &NewRotation) :
+	CEditorLayerQuadsAction(EType::ROTATE_QUAD, GroupIndex, LayerIndex, vQuads, PrevRotation, NewRotation)
+{
+}
+
+bool CEditorRotateQuadsAction::Undo()
+{
+	RotateInternal(-1);
+	return true;
+}
+
+bool CEditorRotateQuadsAction::Redo()
+{
+	RotateInternal(1);
+	return true;
+}
+
+void CEditorRotateQuadsAction::RotateInternal(int Direction)
+{
+	CLayerQuads *pLayer = GetLayer();
+	for(auto &QuadIndex : m_vQuads)
+	{
+		CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
+		for(int v = 0; v < 4; v++)
+			CEditor::Rotate(&pQuad->m_aPoints[4], &pQuad->m_aPoints[v], Direction == -1 ? m_ValueFrom : m_ValueTo);
+	}
+}
+
+CEditorMoveQuadPivotAction::CEditorMoveQuadPivotAction(int GroupIndex, int LayerIndex, int Quad, const CPoint &OldPos, const CPoint &NewPos) :
+	CEditorLayerQuadsAction(EType::EDIT_QUAD_CENTER, GroupIndex, LayerIndex, {Quad}, OldPos, NewPos)
+{
+}
+
+bool CEditorMoveQuadPivotAction::Undo()
+{
+	CLayerQuads *pLayer = GetLayer();
+	pLayer->m_vQuads[m_vQuads[0]].m_aPoints[4] = m_ValueFrom;
+
+	return true;
+}
+
+bool CEditorMoveQuadPivotAction::Redo()
+{
+	CLayerQuads *pLayer = GetLayer();
+	pLayer->m_vQuads[m_vQuads[0]].m_aPoints[4] = m_ValueTo;
+
+	return true;
+}
+
+CEditorQuadOperationAction::CEditorQuadOperationAction(EType Type, int GroupIndex, int LayerIndex, std::vector<int> vQuads, const std::vector<SQuadOperationInfo> &OldInfos, const std::vector<SQuadOperationInfo> &NewInfos) :
+	CEditorLayerQuadsAction(Type, GroupIndex, LayerIndex, vQuads, OldInfos, NewInfos)
+{
+}
+
+bool CEditorQuadOperationAction::Undo()
+{
+	CLayerQuads *pLayer = GetLayer();
+
+	size_t k = 0;
+	for(auto &QuadIndex : m_vQuads)
+	{
+		CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
+
+		for(int v = 0; v < 4; v++)
+			pQuad->m_aPoints[v] = m_ValueFrom[k].m_aPoints[v];
+
+		k++;
+	}
+
+	return true;
+}
+
+bool CEditorQuadOperationAction::Redo()
+{
+	CLayerQuads *pLayer = GetLayer();
+
+	size_t k = 0;
+	for(auto &QuadIndex : m_vQuads)
+	{
+		CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
+
+		for(int v = 0; v < 4; v++)
+			pQuad->m_aPoints[v] = m_ValueTo[k].m_aPoints[v];
+
+		k++;
 	}
 
 	return true;

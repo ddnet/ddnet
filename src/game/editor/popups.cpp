@@ -599,6 +599,28 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
 	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
 
+	// undo actions
+	static std::vector<SQuadOperationInfo> s_vOriginalInfos, s_vModifiedInfos;
+	static auto BeforeQuadOperation = [](CQuad *pQuad) {
+		s_vOriginalInfos.emplace_back();
+		SQuadOperationInfo *pInfo = &s_vOriginalInfos.back();
+		for(int v = 0; v < 4; v++)
+			pInfo->m_aPoints[v] = pQuad->m_aPoints[v];
+	};
+
+	static auto AfterQuadOperation = [](CQuad *pQuad) {
+		s_vModifiedInfos.emplace_back();
+		SQuadOperationInfo *pInfo = &s_vModifiedInfos.back();
+		for(int v = 0; v < 4; v++)
+			pInfo->m_aPoints[v] = pQuad->m_aPoints[v];
+	};
+
+	auto RecordQuadOperation = [pEditor](IEditorAction::EType Type) {
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorQuadOperationAction(Type, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0], pEditor->m_vSelectedQuads, s_vOriginalInfos, s_vModifiedInfos));
+		s_vOriginalInfos.clear();
+		s_vModifiedInfos.clear();
+	};
+
 	CUIRect Button;
 
 	// delete button
@@ -626,6 +648,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(auto &pQuad : vpQuads)
 			{
+				BeforeQuadOperation(pQuad);
+
 				int Top = pQuad->m_aPoints[0].y;
 				int Left = pQuad->m_aPoints[0].x;
 				int Right = pQuad->m_aPoints[0].x;
@@ -651,7 +675,11 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 				pQuad->m_aPoints[3].x = Right;
 				pQuad->m_aPoints[3].y = Top + Height;
 				pEditor->m_Map.m_Modified = true;
+
+				AfterQuadOperation(pQuad);
 			}
+
+			RecordQuadOperation(IEditorAction::EType::QUAD_OPERATION_ASPECT_RATIO);
 			return 1;
 		}
 	}
@@ -664,13 +692,19 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		for(auto &pQuad : vpQuads)
 		{
+			BeforeQuadOperation(pQuad);
+
 			for(int k = 1; k < 4; k++)
 			{
 				pQuad->m_aPoints[k].x = 1000.0f * (pQuad->m_aPoints[k].x / 1000);
 				pQuad->m_aPoints[k].y = 1000.0f * (pQuad->m_aPoints[k].y / 1000);
 			}
 			pEditor->m_Map.m_Modified = true;
+
+			AfterQuadOperation(pQuad);
 		}
+
+		RecordQuadOperation(IEditorAction::EType::QUAD_OPERATION_ALIGN);
 		return 1;
 	}
 
@@ -682,6 +716,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		for(auto &pQuad : vpQuads)
 		{
+			BeforeQuadOperation(pQuad);
+
 			int Top = pQuad->m_aPoints[0].y;
 			int Left = pQuad->m_aPoints[0].x;
 			int Bottom = pQuad->m_aPoints[0].y;
@@ -708,7 +744,11 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 			pQuad->m_aPoints[3].x = Right;
 			pQuad->m_aPoints[3].y = Bottom;
 			pEditor->m_Map.m_Modified = true;
+
+			AfterQuadOperation(pQuad);
 		}
+
+		RecordQuadOperation(IEditorAction::EType::QUAD_OPERATION_SQUARE);
 		return 1;
 	}
 
@@ -1040,23 +1080,76 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+	PropState State;
+
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, &State);
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
+	static std::vector<SEditQuadPoint> s_vQuadOriginals;
+	SEditQuadPoint Edit;
+	Edit.m_Modified = 0;
+
+	bool ShouldRecord = false;
+
+	if(State == PropState::END)
+	{
+		ShouldRecord = true;
+	}
+	else if(State == PropState::START)
+	{
+		s_vQuadOriginals.clear();
+		for(auto &pQuad : vpQuads)
+		{
+			SEditQuadPoint Original;
+			Original.m_Modified = SEditQuadPoint::MODIFIED_COLOR | SEditQuadPoint::MODIFIED_POS_X | SEditQuadPoint::MODIFIED_POS_Y | SEditQuadPoint::MODIFIED_TEX_U | SEditQuadPoint::MODIFIED_TEX_V;
+			CQuad *pOriginalQuad = &Original.m_Quad;
+
+			for(int v = 0; v < 4; v++)
+			{
+				if(pEditor->m_SelectedPoints & (1 << v))
+				{
+					pOriginalQuad->m_aPoints[v] = pQuad->m_aPoints[v];
+					pOriginalQuad->m_aColors[v] = pQuad->m_aColors[v];
+					pOriginalQuad->m_aTexcoords[v] = pQuad->m_aTexcoords[v];
+				}
+			}
+
+			s_vQuadOriginals.push_back(Original);
+		}
+	}
+
+	CQuad *pEditQuad = &Edit.m_Quad;
+	size_t k = 0;
 	for(auto &pQuad : vpQuads)
 	{
+		bool First = k == 0;
+
 		if(Prop == PROP_POS_X)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
+				{
 					pQuad->m_aPoints[v].x = i2fx(NewVal);
+					if(First && ShouldRecord)
+					{
+						pEditQuad->m_aPoints[v].x = pQuad->m_aPoints[v].x;
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_POS_X;
+					}
+				}
 		}
 		if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
+				{
 					pQuad->m_aPoints[v].y = i2fx(NewVal);
+					if(First && ShouldRecord)
+					{
+						pEditQuad->m_aPoints[v].y = pQuad->m_aPoints[v].y;
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_POS_Y;
+					}
+				}
 		}
 		if(Prop == PROP_COLOR)
 		{
@@ -1064,14 +1157,16 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 			{
 				if(pEditor->m_SelectedPoints & (1 << v))
 				{
-					CColor PrevColor = pQuad->m_aColors[v];
 					pQuad->m_aColors[v].r = (NewVal >> 24) & 0xff;
 					pQuad->m_aColors[v].g = (NewVal >> 16) & 0xff;
 					pQuad->m_aColors[v].b = (NewVal >> 8) & 0xff;
 					pQuad->m_aColors[v].a = NewVal & 0xff;
 
-					if(!(PrevColor == pQuad->m_aColors[v]))
-						pEditor->m_EditorHistory.RecordUndoAction(new CEditorChangeColorQuadAction(pQuad, v, PrevColor, pQuad->m_aColors[v]));
+					if(First && ShouldRecord)
+					{
+						pEditQuad->m_aColors[v] = pQuad->m_aColors[v];
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_COLOR;
+					}
 				}
 			}
 		}
@@ -1079,15 +1174,34 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
+				{
 					pQuad->m_aTexcoords[v].x = f2fx(NewVal / 1024.0f);
+					if(First && ShouldRecord)
+					{
+						pEditQuad->m_aTexcoords[v].u = pQuad->m_aTexcoords[v].x;
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_TEX_U;
+					}
+				}
 		}
 		if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
+				{
 					pQuad->m_aTexcoords[v].y = f2fx(NewVal / 1024.0f);
+					if(First && ShouldRecord)
+					{
+						pEditQuad->m_aTexcoords[v].v = pQuad->m_aTexcoords[v].v;
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_TEX_V;
+					}
+				}
 		}
+
+		k++;
 	}
+
+	if(Prop != -1 && Edit.m_Modified != 0)
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorEditQuadsPointsAction(pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0], pEditor->m_vSelectedQuads, pEditor->m_SelectedPoints, s_vQuadOriginals, Edit));
 
 	return 0;
 }

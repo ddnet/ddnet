@@ -3,17 +3,17 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
+#include <deque>
 #include <string>
 #include <vector>
-#include <deque>
 
 #include <base/system.h>
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/editor/editor_actions.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
-#include <game/editor/editor_actions.h>
 
 #include <engine/editor.h>
 #include <engine/graphics.h>
@@ -734,7 +734,6 @@ public:
 
 private:
 	void RecordRedoAction(class IEditorAction *Action);
-
 };
 
 class CEditor : public IEditor
@@ -918,6 +917,15 @@ public:
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
+
+	enum class PropState
+	{
+		START,
+		EDITING,
+		END
+	};
+	// this allows to track when a prop starts to be edited, is being edited and when it has finished being edited
+	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, PropState *pState, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
 	int m_Mode;
 	int m_Dialog;
@@ -1265,6 +1273,7 @@ public:
 
 	int GetLineDistance() const;
 	void ZoomMouseTarget(float ZoomFactor);
+	static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation);
 
 	static ColorHSVA ms_PickerColor;
 	static int ms_SVPicker;

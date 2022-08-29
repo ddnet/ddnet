@@ -283,9 +283,9 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 
 bool CLayerGroup::Contains(int Layer, int Tile)
 {
-	for (auto* pLayer : m_vpLayers)
+	for(auto *pLayer : m_vpLayers)
 	{
-		if (pLayer->m_Type == LAYERTYPE_TILES)
+		if(pLayer->m_Type == LAYERTYPE_TILES)
 		{
 			CLayerTiles *pLayerTiles = (CLayerTiles *)pLayer;
 			if((Layer == LAYERTYPE_GAME && pLayerTiles->m_Game) || (Layer == LAYERTYPE_FRONT && pLayerTiles->m_Front) || (Layer == LAYERTYPE_TELE && pLayerTiles->m_Tele) || (Layer == LAYERTYPE_SPEEDUP && pLayerTiles->m_Speedup) || (Layer == LAYERTYPE_TUNE && pLayerTiles->m_Tune) || (Layer == LAYERTYPE_SWITCH && pLayerTiles->m_Switch))
@@ -1292,7 +1292,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 					}
 
 					CQuad *NewQuad = pLayerQuads->NewQuad(x, y, Width, Height);
-					m_EditorHistory.RecordUndoAction(new CEditorAddQuadAction(m_SelectedGroup, m_vSelectedLayers[0], new RECTi({x, y, Width, Height})));
+					m_EditorHistory.RecordUndoAction(new CEditorAddQuadAction(m_SelectedGroup, m_vSelectedLayers[0], NewQuad));
 				}
 				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 				{
@@ -1315,7 +1315,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	}
 }
 
-static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
+void CEditor::Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 {
 	int x = pPoint->x - pCenter->x;
 	int y = pPoint->y - pCenter->y;
@@ -1480,11 +1480,21 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 	if(UI()->CheckActiveItem(pID))
 	{
+		static bool s_MouseDown = false;
+		static std::vector<CPoint> s_vPoints;
+		static CPoint s_PreviousPivot;
+
 		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
 		{
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
 			{
+				if(!s_MouseDown)
+				{
+					s_PreviousPivot = pQuad->m_aPoints[4];
+					s_MouseDown = true;
+				}
+
 				if(m_GridActive && !IgnoreGrid)
 				{
 					int LineDistance = GetLineDistance();
@@ -1512,6 +1522,16 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			else if(s_Operation == OP_MOVE_ALL)
 			{
 				CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+				if(!s_MouseDown)
+				{
+					s_MouseDown = true;
+					for(auto &Selected : m_vSelectedQuads)
+					{
+						CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+						s_vPoints.push_back(pCurrentQuad->m_aPoints[4]);
+					}
+				}
+
 				// move all points including pivot
 				if(m_GridActive && !IgnoreGrid)
 				{
@@ -1608,6 +1628,37 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		{
 			if(!UI()->MouseButton(0))
 			{
+				// mouse release: record undo action
+				s_MouseDown = false;
+				if(s_Operation == OP_MOVE_ALL)
+				{
+					if(s_vPoints.size() > 0)
+					{
+						std::vector<CPoint> vDest;
+						CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+
+						size_t k = 0;
+						for(auto &Selected : m_vSelectedQuads)
+						{
+							CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							//vActions.push_back(new CEditorEditQuadPositionAction(m_SelectedGroup, m_vSelectedLayers[0], Selected, s_vPoints[k], pCurrentQuad->m_aPoints[4]));
+							vDest.push_back(pCurrentQuad->m_aPoints[4]);
+							k++;
+						}
+
+						m_EditorHistory.RecordUndoAction(new CEditorEditQuadPositionAction(m_SelectedGroup, m_vSelectedLayers[0], m_vSelectedQuads, s_vPoints, vDest));
+						s_vPoints.clear();
+					}
+				}
+				else if(s_Operation == OP_ROTATE)
+				{
+					m_EditorHistory.RecordUndoAction(new CEditorRotateQuadsAction(m_SelectedGroup, m_vSelectedLayers[0], m_vSelectedQuads, -s_RotateAngle, s_RotateAngle));
+				}
+				else if(s_Operation == OP_MOVE_PIVOT)
+				{
+					m_EditorHistory.RecordUndoAction(new CEditorMoveQuadPivotAction(m_SelectedGroup, m_vSelectedLayers[0], Index, s_PreviousPivot, pQuad->m_aPoints[4]));
+				}
+
 				m_LockMouse = false;
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(nullptr);
@@ -1728,6 +1779,9 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	static bool s_Moved;
 	static int s_Operation = OP_NONE;
 
+	static std::vector<SEditQuadPoint> s_vOriginals;
+	SEditQuadPoint Edit;
+
 	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 
 	if(UI()->CheckActiveItem(pID))
@@ -1735,7 +1789,9 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		if(!s_Moved)
 		{
 			if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
+			{
 				s_Moved = true;
+			}
 		}
 
 		if(s_Moved)
@@ -1837,6 +1893,55 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					else
 						m_SelectedPoints = 1 << V;
 				}
+				else
+				{
+					// record in editor history
+					CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+					if(s_Operation == OP_MOVEPOINT)
+					{
+						int OffsetX = 0;
+						int OffsetY = 0;
+
+						CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[0]];
+						for(int m = 0; m < 4; m++)
+							if(m_SelectedPoints & (1 << m))
+							{
+								OffsetX = pCurrentQuad->m_aPoints[m].x - s_vOriginals[0].m_Quad.m_aPoints[m].x;
+								OffsetY = pCurrentQuad->m_aPoints[m].y - s_vOriginals[0].m_Quad.m_aPoints[m].y;
+								break;
+							}
+
+						// use first point to store offset
+						Edit.m_Quad.m_aPoints[0].x = OffsetX;
+						Edit.m_Quad.m_aPoints[0].y = OffsetY;
+
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_OFFSET;
+
+						m_EditorHistory.RecordUndoAction(new CEditorEditQuadsPointsAction(m_SelectedGroup, m_vSelectedLayers[0], m_vSelectedQuads, m_SelectedPoints, s_vOriginals, Edit));
+					}
+					else if(s_Operation == OP_MOVEUV)
+					{
+						int OffsetX = 0;
+						int OffsetY = 0;
+
+						CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[0]];
+						for(int m = 0; m < 4; m++)
+							if(m_SelectedPoints & (1 << m))
+							{
+								OffsetX = pCurrentQuad->m_aTexcoords[m].u - s_vOriginals[0].m_Quad.m_aTexcoords[m].u;
+								OffsetY = pCurrentQuad->m_aTexcoords[m].v - s_vOriginals[0].m_Quad.m_aTexcoords[m].v;
+								break;
+							}
+
+						// use first point to store texture uv offset
+						Edit.m_Quad.m_aTexcoords[0].u = OffsetX;
+						Edit.m_Quad.m_aTexcoords[0].v = OffsetY;
+
+						Edit.m_Modified |= SEditQuadPoint::MODIFIED_TEX_OFFSET;
+
+						m_EditorHistory.RecordUndoAction(new CEditorEditQuadsPointsAction(m_SelectedGroup, m_vSelectedLayers[0], m_vSelectedQuads, m_SelectedPoints, s_vOriginals, Edit));
+					}
+				}
 
 				m_LockMouse = false;
 				UI()->SetActiveItem(nullptr);
@@ -1875,6 +1980,29 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 			if(!IsQuadSelected(QuadIndex))
 				SelectQuad(QuadIndex);
+
+			s_vOriginals.clear();
+			// save data for undo
+			CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
+			for(auto &Selected : m_vSelectedQuads)
+			{
+				SEditQuadPoint Original;
+				Original.m_Modified = SEditQuadPoint::MODIFIED_POS_X | SEditQuadPoint::MODIFIED_POS_Y | SEditQuadPoint::MODIFIED_TEX_OFFSET;
+				CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+				CQuad *pOriginalQuad = &Original.m_Quad;
+
+				for(int m = 0; m < 4; m++)
+					if(m_SelectedPoints & (1 << m))
+					{
+						pOriginalQuad->m_aPoints[m] = pCurrentQuad->m_aPoints[m];
+
+						pOriginalQuad->m_aTexcoords[m] = pCurrentQuad->m_aTexcoords[m];
+						pOriginalQuad->m_aTexcoords[(m + 2) % 4].x = pCurrentQuad->m_aTexcoords[(m + 2) % 4].x;
+						pOriginalQuad->m_aTexcoords[m ^ 1].y = pCurrentQuad->m_aTexcoords[m ^ 1].y;
+					}
+
+				s_vOriginals.push_back(Original);
+			}
 		}
 		else if(UI()->MouseButton(1))
 		{
@@ -2089,6 +2217,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		pResult->m_aPoints[4].y = ((pResult->m_aPoints[0].y + pResult->m_aPoints[3].y) / 2 + (pResult->m_aPoints[1].y + pResult->m_aPoints[2].y) / 2) / 2;
 
 		m_QuadKnifeCount = 0;
+		m_EditorHistory.RecordUndoAction(new CEditorAddQuadAction(m_SelectedGroup, m_vSelectedLayers[0], pResult));
 	}
 
 	// Render
@@ -2809,7 +2938,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						CLayerGroup Original;
 						Original.m_pMap = &m_Map;
 
-						for (size_t k = 0; k < NumEditLayers; k++)
+						for(size_t k = 0; k < NumEditLayers; k++)
 							apEditLayers[k]->BrushGrab(&Original, r);
 
 						for(size_t k = 0; k < NumEditLayers; k++)
@@ -3485,6 +3614,44 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 	}
 
 	return Change;
+}
+
+int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, PropState *pState, ColorRGBA Color)
+{
+	int Prop = DoProperties(pToolBox, pProps, pIDs, pNewVal);
+
+	static int s_LastProp = -1;
+	static int s_LastVal = 0;
+
+	if(Prop != -1)
+	{
+		s_LastProp = Prop;
+		s_LastVal = *pNewVal;
+	}
+
+	static const void *s_pLastItem = nullptr;
+	auto *pItem = UI()->ActiveItem();
+
+	*pState = PropState::EDITING;
+
+	if(s_pLastItem != pItem)
+	{
+		s_pLastItem = pItem;
+		if(s_pLastItem == nullptr)
+		{
+			Prop = s_LastProp;
+			*pNewVal = s_LastVal;
+			s_LastProp = -1;
+			s_LastVal = 0;
+			*pState = PropState::END;
+		}
+		else
+		{
+			*pState = PropState::START;
+		}
+	}
+
+	return Prop;
 }
 
 void CEditor::RenderLayers(CUIRect LayersBox)
@@ -4717,8 +4884,7 @@ void CEditor::RenderFileDialog()
 					str_format(m_pFileDialogPath, IO_MAX_PATH_LENGTH, "%s/%s", aTemp, m_vFileList[m_FilesSelectedIndex].m_aFilename);
 				}
 			}
-			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType :
-															  m_vFileList[m_FilesSelectedIndex].m_StorageType);
+			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType : m_vFileList[m_FilesSelectedIndex].m_StorageType);
 			if(m_FilesSelectedIndex >= 0 && !m_vFileList[m_FilesSelectedIndex].m_IsDir)
 				str_copy(m_aFileDialogFileName, m_vFileList[m_FilesSelectedIndex].m_aFilename, sizeof(m_aFileDialogFileName));
 			else
@@ -5045,9 +5211,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ColorRGBA EnvColor = ColorRGBA(1, 1, 1, 0.5f);
 		if(!m_Map.m_vpEnvelopes.empty())
 		{
-			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ?
-					   ColorRGBA(1, 0.7f, 0.7f, 0.5f) :
-					   ColorRGBA(0.7f, 1, 0.7f, 0.5f);
+			EnvColor = IsEnvelopeUsed(m_SelectedEnvelope) ? ColorRGBA(1, 0.7f, 0.7f, 0.5f) : ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
 		Shifter.Draw(EnvColor, 0, 0.0f);
