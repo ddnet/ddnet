@@ -420,6 +420,10 @@ void CMenus::RefreshSkins()
 			RenderLoading(Localize("Loading skin files"), "", 0, false);
 		}
 	});
+	if(Client()->State() >= IClient::STATE_ONLINE)
+	{
+		m_pClient->RefindSkins();
+	}
 }
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
@@ -795,10 +799,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		TextRender()->SetCurFont(NULL);
 		RefreshSkins();
 		s_InitSkinlist = true;
-		if(Client()->State() >= IClient::STATE_ONLINE)
-		{
-			m_pClient->RefindSkins();
-		}
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
