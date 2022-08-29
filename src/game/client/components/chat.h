@@ -133,7 +133,6 @@ class CChat : public CComponent
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
-	void Reset();
 
 public:
 	CChat();
@@ -162,6 +161,7 @@ public:
 	void OnRender() override;
 	void RefindSkins();
 	void OnPrepareLines();
+	void Reset();
 	void OnRelease() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool OnInput(IInput::CEvent Event) override;
