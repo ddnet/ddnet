@@ -1080,11 +1080,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		// undo/redo
 		{
-			bool ModPressed = Input()->ModifierIsPressed();
 			// flip buttons
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_UndoButton = 0;
-			int UndoEnabled = m_EditorHistory.m_vpUndoActions.size() > 0;
+			int UndoEnabled = m_EditorHistory.CanUndo();
 			if(DoButton_Ex(&s_UndoButton, "Undo", UndoEnabled - 1, &Button, 0, "[Ctrl+Z] Undo", IGraphics::CORNER_L) || (UndoEnabled && ModPressed && m_ShowEnvelopeEditor == 0 && m_ShowServerSettingsEditor == 0 && Input()->KeyPress(KEY_Z) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				//for(auto &pLayer : m_Brush.m_vpLayers)
@@ -1095,7 +1094,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 			static int s_RedoButton = 0;
-			int RedoEnabled = m_EditorHistory.m_vpRedoActions.size() > 0;
+			int RedoEnabled = m_EditorHistory.CanRedo();
 			if(DoButton_Ex(&s_RedoButton, "Redo", RedoEnabled - 1, &Button, 0, "[Ctrl+Y] Redo", IGraphics::CORNER_R) || (RedoEnabled && ModPressed && m_ShowEnvelopeEditor == 0 && m_ShowServerSettingsEditor == 0 && Input()->KeyPress(KEY_Y) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 			{
 				dbg_msg("editor", "REEEDOOOO");
@@ -1632,7 +1631,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 				s_MouseDown = false;
 				if(s_Operation == OP_MOVE_ALL)
 				{
-					if(s_vPoints.size() > 0)
+					if(!s_vPoints.empty())
 					{
 						std::vector<CPoint> vDest;
 						CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
@@ -3630,7 +3629,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 	}
 
 	static const void *s_pLastItem = nullptr;
-	auto *pItem = UI()->ActiveItem();
+	const void *pItem = UI()->ActiveItem();
 
 	*pState = PropState::EDITING;
 
@@ -6820,16 +6819,16 @@ void CEditorHistory::RecordUndoAction(IEditorAction *pAction, bool Clear)
 {
 	pAction->m_pEditor = m_pEditor;
 
-	if(Clear && m_vpRedoActions.size() > 0)
+	if(Clear && !m_vpRedoActions.empty())
 	{
-		for(auto Action : m_vpRedoActions)
+		for(auto *pRedoAction : m_vpRedoActions)
 		{
-			delete Action;
+			delete pRedoAction;
 		}
 		m_vpRedoActions.clear();
 	}
 
-	if(m_vpUndoActions.size() >= g_Config.m_ClEditorMaxHistory)
+	if((int)m_vpUndoActions.size() >= g_Config.m_ClEditorMaxHistory)
 	{
 		m_vpUndoActions.pop_back();
 	}
@@ -6840,7 +6839,7 @@ void CEditorHistory::RecordUndoAction(IEditorAction *pAction, bool Clear)
 
 void CEditorHistory::RecordRedoAction(IEditorAction *pAction)
 {
-	if(m_vpRedoActions.size() >= g_Config.m_ClEditorMaxHistory)
+	if((int)m_vpRedoActions.size() >= g_Config.m_ClEditorMaxHistory)
 	{
 		m_vpRedoActions.pop_back();
 	}

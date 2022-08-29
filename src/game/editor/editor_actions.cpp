@@ -1,8 +1,21 @@
 #include <game/editor/editor_actions.h>
 
+template<typename T>
+template<typename K>
+K *CEditorLayerAction<T>::GetLayer()
+{
+	//CEditorLayerAction<T>::CEditorAction()
+	return (K *)(IEditorAction::m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex]);
+}
+
+template<typename T>
+CLayerQuads *CEditorLayerQuadsAction<T>::GetLayer()
+{
+	return CEditorLayerAction<T>::template GetLayer<CLayerQuads>();
+}
+
 bool CEditorChangeColorTileAction::Undo()
 {
-	//CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
 	CLayerTiles *pTileLayer = (CLayerTiles *)m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex];
 	pTileLayer->m_Color = m_ValueFrom;
 	return true;
@@ -10,7 +23,6 @@ bool CEditorChangeColorTileAction::Undo()
 
 bool CEditorChangeColorTileAction::Redo()
 {
-	//CLayerTiles *pTileLayer = (CLayerTiles *)m_pObject;
 	CLayerTiles *pTileLayer = (CLayerTiles *)m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex];
 	pTileLayer->m_Color = m_ValueTo;
 	return true;
@@ -45,6 +57,11 @@ CEditorDeleteLayerAction::CEditorDeleteLayerAction(CEditor *pEditor, int GroupIn
 {
 	m_GroupIndex = GroupIndex;
 	m_LayerIndex = LayerIndex;
+}
+
+CEditorDeleteLayerAction::~CEditorDeleteLayerAction()
+{
+	delete m_ValueFrom;
 }
 
 bool CEditorDeleteLayerAction::Undo()
@@ -104,7 +121,7 @@ bool CEditorDeleteLayerAction::Redo()
 	return true;
 }
 
-CEditorEditMultipleLayersAction::CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles_SCommonPropState> vOriginals, CLayerTiles_SCommonPropState State, int GroupIndex, std::vector<int> vLayers) :
+CEditorEditMultipleLayersAction::CEditorEditMultipleLayersAction(void *pObject, const std::vector<CLayerTiles_SCommonPropState> &vOriginals, const CLayerTiles_SCommonPropState &State, int GroupIndex, const std::vector<int> &vLayers) :
 	CEditorAction(CEditorAction::EType::EDIT_MULTIPLE_LAYERS, pObject, vOriginals, {State})
 {
 	m_GroupIndex = GroupIndex;
@@ -160,7 +177,7 @@ bool CEditorEditMultipleLayersAction::Redo()
 }
 
 CEditorAddGroupAction::CEditorAddGroupAction(CEditorMap *pObject, int GroupIndex) :
-	CEditorAction(EType::ADD_GROUP, pObject, -1, GroupIndex)
+	CEditorAction(IEditorAction::EType::ADD_GROUP, pObject, -1, GroupIndex)
 {
 }
 
@@ -190,6 +207,11 @@ CEditorDeleteGroupAction::CEditorDeleteGroupAction(CEditorMap *pObject, int Grou
 	m_GroupIndex = GroupIndex;
 }
 
+CEditorDeleteGroupAction::~CEditorDeleteGroupAction()
+{
+	delete m_ValueFrom;
+}
+
 bool CEditorDeleteGroupAction::Undo()
 {
 	// undo is re-adding back the group
@@ -213,12 +235,18 @@ bool CEditorDeleteGroupAction::Redo()
 	return true;
 }
 
-CEditorFillSelectionAction::CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, std::vector<int> vLayers, CUIRect Rect) :
+CEditorFillSelectionAction::CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, const std::vector<int> &vLayers, const CUIRect &Rect) :
 	CEditorAction(CEditorAction::EType::FILL_SELECTION, pObject, new CLayerGroup(*Original), new CLayerGroup(*Brush))
 {
 	m_Rect = Rect;
 	m_vLayers = vLayers;
 	m_GroupIndex = GroupIndex;
+}
+
+CEditorFillSelectionAction::~CEditorFillSelectionAction()
+{
+	delete m_ValueFrom;
+	delete m_ValueTo;
 }
 
 bool CEditorFillSelectionAction::Undo()
@@ -278,15 +306,21 @@ bool CEditorFillSelectionAction::Redo()
 
 void CEditorFillSelectionAction::Print()
 {
-	dbg_msg("editor", "editor fill action, num layers=%d, original brush num layers=%d, modified brush num layers=%d", m_vLayers.size(), m_ValueFrom->m_vpLayers.size(), m_ValueTo->m_vpLayers.size());
-	dbg_msg("editor", "rect: w=%f h=%f", m_Rect.w, m_Rect.h);
+	//dbg_msg("editor", "editor fill action, num layers=%d, original brush num layers=%d, modified brush num layers=%d", m_vLayers.size(), m_ValueFrom->m_vpLayers.size(), m_ValueTo->m_vpLayers.size());
+	//dbg_msg("editor", "rect: w=%f h=%f", m_Rect.w, m_Rect.h);
 }
 
-CEditorBrushDrawAction::CEditorBrushDrawAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, std::vector<int> vLayers) :
-	CEditorAction(EType::BRUSH_DRAW, pObject, new CLayerGroup(*Original), new CLayerGroup(*Brush))
+CEditorBrushDrawAction::CEditorBrushDrawAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, const std::vector<int> &vLayers) :
+	CEditorAction(IEditorAction::EType::BRUSH_DRAW, pObject, new CLayerGroup(*Original), new CLayerGroup(*Brush))
 {
 	m_vLayers = vLayers;
 	m_GroupIndex = GroupIndex;
+}
+
+CEditorBrushDrawAction::~CEditorBrushDrawAction()
+{
+	delete m_ValueFrom;
+	delete m_ValueTo;
 }
 
 bool CEditorBrushDrawAction::Undo()
@@ -308,7 +342,7 @@ bool CEditorBrushDrawAction::BrushDraw(CLayerGroup *Brush)
 
 	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 
-	int NumLayers = m_vLayers.size();
+	size_t NumLayers = m_vLayers.size();
 
 	if(NumLayers != Brush->m_vpLayers.size())
 		return false;
@@ -355,7 +389,6 @@ bool CEditorBrushDrawAction::BrushDraw(CLayerGroup *Brush)
 
 void CEditorBrushDrawAction::Print()
 {
-	CLayerGroup *Group = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
 	dbg_msg("editor", "Undo action: brush draw.");
 	//for(size_t k = 0; k < m_vLayers.size(); k++)
 	//{
@@ -449,7 +482,7 @@ bool CEditorCommandAction::Redo()
 }
 
 CEditorAddQuadAction::CEditorAddQuadAction(int GroupIndex, int LayerIndex, CQuad *pQuad) :
-	CEditorLayerAction(EType::ADD_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, new CQuad(*pQuad))
+	CEditorLayerAction(IEditorAction::EType::ADD_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, new CQuad(*pQuad))
 {
 }
 
@@ -496,7 +529,7 @@ bool CEditorDeleteQuadsAction::Undo()
 bool CEditorDeleteQuadsAction::Redo()
 {
 	CLayerQuads *pLayer = GetLayer<CLayerQuads>();
-	std::vector vSelectedQuads = m_vQuadIndexes;
+	std::vector<int> vSelectedQuads = m_vQuadIndexes;
 
 	for(int i = 0; i < (int)vSelectedQuads.size(); ++i)
 	{
@@ -512,8 +545,8 @@ bool CEditorDeleteQuadsAction::Redo()
 	return true;
 }
 
-CEditorEditQuadPositionAction::CEditorEditQuadPositionAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, const std::vector<CPoint> &OldPos, const std::vector<CPoint> &NewPos) :
-	CEditorLayerQuadsAction(EType::EDIT_QUAD_POSITION, GroupIndex, LayerIndex, vQuads, OldPos, NewPos)
+CEditorEditQuadPositionAction::CEditorEditQuadPositionAction(int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const std::vector<CPoint> &OldPos, const std::vector<CPoint> &NewPos) :
+	CEditorLayerQuadsAction(IEditorAction::EType::EDIT_QUAD_POSITION, GroupIndex, LayerIndex, vQuads, OldPos, NewPos)
 {
 }
 
@@ -633,8 +666,8 @@ bool CEditorEditQuadsPointsAction::Redo()
 	return true;
 }
 
-CEditorRotateQuadsAction::CEditorRotateQuadsAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, const float &PrevRotation, const float &NewRotation) :
-	CEditorLayerQuadsAction(EType::ROTATE_QUAD, GroupIndex, LayerIndex, vQuads, PrevRotation, NewRotation)
+CEditorRotateQuadsAction::CEditorRotateQuadsAction(int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const float &PrevRotation, const float &NewRotation) :
+	CEditorLayerQuadsAction(IEditorAction::EType::ROTATE_QUAD, GroupIndex, LayerIndex, vQuads, PrevRotation, NewRotation)
 {
 }
 
@@ -662,7 +695,7 @@ void CEditorRotateQuadsAction::RotateInternal(int Direction)
 }
 
 CEditorMoveQuadPivotAction::CEditorMoveQuadPivotAction(int GroupIndex, int LayerIndex, int Quad, const CPoint &OldPos, const CPoint &NewPos) :
-	CEditorLayerQuadsAction(EType::EDIT_QUAD_CENTER, GroupIndex, LayerIndex, {Quad}, OldPos, NewPos)
+	CEditorLayerQuadsAction(IEditorAction::EType::EDIT_QUAD_CENTER, GroupIndex, LayerIndex, {Quad}, OldPos, NewPos)
 {
 }
 
@@ -682,7 +715,7 @@ bool CEditorMoveQuadPivotAction::Redo()
 	return true;
 }
 
-CEditorQuadOperationAction::CEditorQuadOperationAction(EType Type, int GroupIndex, int LayerIndex, std::vector<int> vQuads, const std::vector<SQuadOperationInfo> &OldInfos, const std::vector<SQuadOperationInfo> &NewInfos) :
+CEditorQuadOperationAction::CEditorQuadOperationAction(IEditorAction::EType Type, int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const std::vector<SQuadOperationInfo> &OldInfos, const std::vector<SQuadOperationInfo> &NewInfos) :
 	CEditorLayerQuadsAction(Type, GroupIndex, LayerIndex, vQuads, OldInfos, NewInfos)
 {
 }

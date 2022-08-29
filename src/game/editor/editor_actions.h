@@ -2,12 +2,14 @@
 #define GAME_EDITOR_EDITOR_ACTIONS_H
 
 #include <game/editor/editor.h>
+#include <game/mapitems.h>
 
 class CLayerTiles;
 class CEditorMap;
 struct CLayerTiles_SCommonPropState;
 struct RECTi;
 class CLayerQuads;
+class CLayer;
 
 class IEditorAction
 {
@@ -16,6 +18,8 @@ public:
 	{
 		m_pEditor = nullptr;
 	}
+
+	virtual ~IEditorAction() = default;
 
 	virtual bool Undo() = 0;
 	virtual bool Redo() = 0;
@@ -28,7 +32,6 @@ public:
 
 	class CEditor *m_pEditor;
 
-public:
 	enum class EType
 	{
 		CHANGE_COLOR_TILE,
@@ -98,7 +101,7 @@ template<typename T>
 class CEditorAction : public IEditorAction
 {
 public:
-	CEditorAction(EType Type, void *pObject, const T &From, const T &To) :
+	CEditorAction(IEditorAction::EType Type, void *pObject, const T &From, const T &To) :
 		IEditorAction()
 	{
 		m_ValueFrom = From;
@@ -107,9 +110,7 @@ public:
 		m_Type = Type;
 	}
 
-	virtual ~CEditorAction()
-	{
-	}
+	virtual ~CEditorAction() = default;
 
 	const char *Name() const override
 	{
@@ -179,11 +180,17 @@ template<typename T>
 class CEditorLayerAction : public CEditorAction<T>
 {
 public:
-	CEditorLayerAction(EType Type, void *pObject, int GroupIndex, int LayerIndex, const T &From, const T &To) :
+	CEditorLayerAction(IEditorAction::EType Type, void *pObject, int GroupIndex, int LayerIndex, const T &From, const T &To) :
 		CEditorAction<T>(Type, pObject, From, To)
 	{
 		m_GroupIndex = GroupIndex;
 		m_LayerIndex = LayerIndex;
+	}
+
+	virtual bool Undo() override = 0;
+	virtual bool Redo() override = 0;
+	virtual void Print() override
+	{
 	}
 
 	template<typename K>
@@ -195,23 +202,22 @@ protected:
 };
 
 template<typename T>
-template<typename K>
-K *CEditorLayerAction<T>::GetLayer()
-{
-	return (K *)(m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers[m_LayerIndex]);
-}
-
-template<typename T>
 class CEditorLayerQuadsAction : public CEditorLayerAction<T>
 {
 public:
-	CEditorLayerQuadsAction(EType Type, int GroupIndex, int LayerIndex, std::vector<int> vQuads, const T &Old, const T &New) :
+	CEditorLayerQuadsAction(IEditorAction::EType Type, int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const T &Old, const T &New) :
 		CEditorLayerAction<T>(Type, nullptr, GroupIndex, LayerIndex, Old, New)
 	{
 		m_vQuads = vQuads;
 	}
 
-	CLayerQuads *GetLayer() { return CEditorLayerAction::GetLayer<CLayerQuads>(); }
+	CLayerQuads *GetLayer();
+
+	virtual bool Undo() override = 0;
+	virtual bool Redo() override = 0;
+	virtual void Print() override
+	{
+	}
 
 protected:
 	std::vector<int> m_vQuads;
@@ -221,33 +227,31 @@ class CEditorChangeColorTileAction : public CEditorLayerAction<CColor>
 {
 public:
 	CEditorChangeColorTileAction(int GroupIndex, int LayerIndex, const CColor &OldColor, const CColor &NewColor) :
-		CEditorLayerAction(EType::CHANGE_COLOR_TILE, nullptr, GroupIndex, LayerIndex, OldColor, NewColor)
+		CEditorLayerAction(IEditorAction::EType::CHANGE_COLOR_TILE, nullptr, GroupIndex, LayerIndex, OldColor, NewColor)
 	{
 	}
 
 	bool Undo() override;
 	bool Redo() override;
 
-	void Print() override
-	{
-		dbg_msg("editor", "Editor action: Change tile color, prev=%d %d %d %d, new=%d %d %d %d", m_ValueFrom.r, m_ValueFrom.g, m_ValueFrom.b, m_ValueFrom.a, m_ValueTo.r, m_ValueTo.g, m_ValueTo.b, m_ValueTo.a);
-	}
+	//void Print() override
+	//{
+	//	dbg_msg("editor", "Editor action: Change tile color, prev=%d %d %d %d, new=%d %d %d %d", m_ValueFrom.r, m_ValueFrom.g, m_ValueFrom.b, m_ValueFrom.a, m_ValueTo.r, m_ValueTo.g, m_ValueTo.b, m_ValueTo.a);
+	//}
 };
 
-class CEditorAddLayerAction : public CEditorAction<class CLayer *>
+class CEditorAddLayerAction : public CEditorAction<CLayer *>
 {
 public:
-	CEditorAddLayerAction(int GroupIndex, int LayerIndex, std::function<void()> fnAddLayer) :
-		CEditorAction(EType::ADD_LAYER, nullptr, nullptr, nullptr)
+	CEditorAddLayerAction(int GroupIndex, int LayerIndex, const std::function<void()> &fnAddLayer) :
+		CEditorAction(IEditorAction::EType::ADD_LAYER, nullptr, nullptr, nullptr)
 	{
 		m_GroupIndex = GroupIndex;
 		m_LayerIndex = LayerIndex;
 		m_fnAddLayer = fnAddLayer;
 	}
 
-	~CEditorAddLayerAction()
-	{
-	}
+	~CEditorAddLayerAction() = default;
 
 	bool Undo() override;
 
@@ -269,15 +273,11 @@ private:
 	std::function<void()> m_fnAddLayer;
 };
 
-class CEditorDeleteLayerAction : public CEditorAction<class CLayer *>
+class CEditorDeleteLayerAction : public CEditorAction<CLayer *>
 {
 public:
 	CEditorDeleteLayerAction(CEditor *pEditor, int GroupIndex, int LayerIndex);
-
-	~CEditorDeleteLayerAction()
-	{
-		delete m_ValueFrom;
-	}
+	~CEditorDeleteLayerAction();
 
 	bool Undo() override;
 	bool Redo() override;
@@ -290,7 +290,7 @@ private:
 class CEditorEditMultipleLayersAction : public CEditorAction<std::vector<CLayerTiles_SCommonPropState>>
 {
 public:
-	CEditorEditMultipleLayersAction(void *pObject, std::vector<CLayerTiles_SCommonPropState> vOriginals, CLayerTiles_SCommonPropState State, int GroupIndex, std::vector<int> vLayers);
+	CEditorEditMultipleLayersAction(void *pObject, const std::vector<CLayerTiles_SCommonPropState> &vOriginals, const CLayerTiles_SCommonPropState &State, int GroupIndex, const std::vector<int> &vLayers);
 
 	bool Undo() override;
 	bool Redo() override;
@@ -316,15 +316,11 @@ public:
 
 class CLayerGroup;
 
-class CEditorDeleteGroupAction : public CEditorAction<class CLayerGroup *>
+class CEditorDeleteGroupAction : public CEditorAction<CLayerGroup *>
 {
 public:
 	CEditorDeleteGroupAction(CEditorMap *pObject, int GroupIndex);
-
-	~CEditorDeleteGroupAction()
-	{
-		delete m_ValueFrom;
-	}
+	~CEditorDeleteGroupAction();
 
 	bool Undo() override;
 	bool Redo() override;
@@ -333,16 +329,11 @@ private:
 	int m_GroupIndex;
 };
 
-class CEditorFillSelectionAction : public CEditorAction<class CLayerGroup *>
+class CEditorFillSelectionAction : public CEditorAction<CLayerGroup *>
 {
 public:
-	CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, std::vector<int> vLayers, CUIRect Rect);
-
-	~CEditorFillSelectionAction()
-	{
-		delete m_ValueFrom;
-		delete m_ValueTo;
-	}
+	CEditorFillSelectionAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, const std::vector<int> &vLayers, const CUIRect &Rect);
+	~CEditorFillSelectionAction();
 
 	bool Undo() override;
 	bool Redo() override;
@@ -355,16 +346,11 @@ private:
 	std::vector<int> m_vLayers;
 };
 
-class CEditorBrushDrawAction : public CEditorAction<class CLayerGroup *>
+class CEditorBrushDrawAction : public CEditorAction<CLayerGroup *>
 {
 public:
-	CEditorBrushDrawAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, std::vector<int> vLayers);
-
-	~CEditorBrushDrawAction()
-	{
-		delete m_ValueFrom;
-		delete m_ValueTo;
-	}
+	CEditorBrushDrawAction(void *pObject, CLayerGroup *Original, CLayerGroup *Brush, int GroupIndex, const std::vector<int> &vLayers);
+	~CEditorBrushDrawAction();
 
 	bool Undo() override;
 	bool Redo() override;
@@ -381,7 +367,7 @@ private:
 class CEditorCommandAction : public CEditorAction<std::string>
 {
 public:
-	CEditorCommandAction(EType Action, int *pSelectedCommand, int CommandIndex, std::string Old, std::string New) :
+	CEditorCommandAction(IEditorAction::EType Action, int *pSelectedCommand, int CommandIndex, const std::string &Old, const std::string &New) :
 		CEditorAction(Action, nullptr, Old, New)
 	{
 		m_pSelectedCommand = pSelectedCommand;
@@ -409,8 +395,8 @@ public:
 class CEditorDeleteQuadsAction : public CEditorLayerAction<void *>
 {
 public:
-	CEditorDeleteQuadsAction(int GroupIndex, int LayerIndex, std::vector<int> vQuadIndexes, std::vector<CQuad> vQuads) :
-		CEditorLayerAction(EType::DELETE_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, nullptr)
+	CEditorDeleteQuadsAction(int GroupIndex, int LayerIndex, const std::vector<int> &vQuadIndexes, const std::vector<CQuad> &vQuads) :
+		CEditorLayerAction(IEditorAction::EType::DELETE_QUAD, nullptr, GroupIndex, LayerIndex, nullptr, nullptr)
 	{
 		m_vQuadIndexes = vQuadIndexes;
 		m_vQuads = vQuads;
@@ -427,7 +413,7 @@ private:
 class CEditorEditQuadPositionAction : public CEditorLayerQuadsAction<std::vector<CPoint>>
 {
 public:
-	CEditorEditQuadPositionAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, const std::vector<CPoint> &OldPos, const std::vector<CPoint> &NewPos);
+	CEditorEditQuadPositionAction(int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const std::vector<CPoint> &OldPos, const std::vector<CPoint> &NewPos);
 
 	bool Undo() override;
 	bool Redo() override;
@@ -457,8 +443,8 @@ struct SEditQuadPoint
 class CEditorEditQuadsPointsAction : public CEditorLayerQuadsAction<std::vector<SEditQuadPoint>>
 {
 public:
-	CEditorEditQuadsPointsAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, int Points, const std::vector<SEditQuadPoint> &Old, const SEditQuadPoint &New) :
-		CEditorLayerQuadsAction(EType::EDIT_QUAD_VERTEX, GroupIndex, LayerIndex, vQuads, Old, {New})
+	CEditorEditQuadsPointsAction(int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, int Points, const std::vector<SEditQuadPoint> &Old, const SEditQuadPoint &New) :
+		CEditorLayerQuadsAction(IEditorAction::EType::EDIT_QUAD_VERTEX, GroupIndex, LayerIndex, vQuads, Old, {New})
 	{
 		m_Points = Points;
 	}
@@ -475,7 +461,7 @@ class CEditorMultipleActions : public CEditorLayerAction<void *>
 {
 public:
 	CEditorMultipleActions(std::vector<T *> vpActions) :
-		CEditorLayerAction(EType::EDIT_QUAD_POSITION, nullptr, -1, -1, nullptr, nullptr)
+		CEditorLayerAction(IEditorAction::EType::EDIT_QUAD_POSITION, nullptr, -1, -1, nullptr, nullptr)
 	{
 		m_vpActions = vpActions;
 	}
@@ -517,7 +503,7 @@ private:
 class CEditorRotateQuadsAction : public CEditorLayerQuadsAction<float>
 {
 public:
-	CEditorRotateQuadsAction(int GroupIndex, int LayerIndex, std::vector<int> vQuads, const float &PrevRotation, const float &NewRotation);
+	CEditorRotateQuadsAction(int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const float &PrevRotation, const float &NewRotation);
 
 	bool Undo() override;
 	bool Redo() override;
@@ -543,7 +529,7 @@ struct SQuadOperationInfo
 class CEditorQuadOperationAction : public CEditorLayerQuadsAction<std::vector<SQuadOperationInfo>>
 {
 public:
-	CEditorQuadOperationAction(EType Type, int GroupIndex, int LayerIndex, std::vector<int> vQuads, const std::vector<SQuadOperationInfo> &OldInfos, const std::vector<SQuadOperationInfo> &NewInfos);
+	CEditorQuadOperationAction(IEditorAction::EType Type, int GroupIndex, int LayerIndex, const std::vector<int> &vQuads, const std::vector<SQuadOperationInfo> &OldInfos, const std::vector<SQuadOperationInfo> &NewInfos);
 
 	bool Undo() override;
 	bool Redo() override;
