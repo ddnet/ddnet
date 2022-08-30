@@ -342,6 +342,12 @@ void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCa
 	m_pTeeHistorianCommandUserdata = pUser;
 }
 
+void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnUnknownCommandCallback = pfnCallback;
+	m_pUnknownCommandUserdata = pUser;
+}
+
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
@@ -542,9 +548,12 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 		}
 		else if(Stroke)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
-			Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			if(!m_pfnUnknownCommandCallback(Result.m_pCommand, m_pUnknownCommandUserdata))
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
+				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			}
 		}
 
 		pStr = pNextPart;

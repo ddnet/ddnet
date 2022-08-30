@@ -4549,6 +4549,27 @@ void CClient::HandleMapPath(const char *pPath)
 	str_copy(m_aCmdEditMap, pPath);
 }
 
+static bool UnknownArgumentCallback(const char *pCommand, void *pUser)
+{
+	CClient *pClient = static_cast<CClient *>(pUser);
+	if(str_startswith(pCommand, CONNECTLINK))
+	{
+		pClient->HandleConnectLink(pCommand);
+		return true;
+	}
+	else if(str_endswith(pCommand, ".demo"))
+	{
+		pClient->HandleDemoPath(pCommand);
+		return true;
+	}
+	else if(str_endswith(pCommand, ".map"))
+	{
+		pClient->HandleMapPath(pCommand);
+		return true;
+	}
+	return false;
+}
+
 /*
 	Server Time
 	Client Mirror Time
@@ -4734,14 +4755,9 @@ int main(int argc, const char **argv)
 	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
-	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
-		pClient->HandleConnectLink(argv[1]);
-	else if(argc == 2 && str_endswith(argv[1], ".demo"))
-		pClient->HandleDemoPath(argv[1]);
-	else if(argc == 2 && str_endswith(argv[1], ".map"))
-		pClient->HandleMapPath(argv[1]);
-	else if(argc > 1)
-		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);
+	pConsole->SetUnknownCommandCallback(UnknownArgumentCallback, pClient);
+	pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);
+	pConsole->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 
 	if(pSteam->GetConnectAddress())
 	{
