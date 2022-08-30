@@ -3198,7 +3198,9 @@ void CClient::Run()
 		// handle pending demo play
 		if(m_aCmdPlayDemo[0])
 		{
-			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
+			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ALL);
+			if(pError && !fs_is_relative_path(m_aCmdPlayDemo))
+				pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
 			if(pError)
 				dbg_msg("demo_player", "playing passed demo file '%s' failed: %s", m_aCmdPlayDemo, pError);
 			m_aCmdPlayDemo[0] = 0;
@@ -3207,7 +3209,9 @@ void CClient::Run()
 		// handle pending map edits
 		if(m_aCmdEditMap[0])
 		{
-			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
+			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ALL);
+			if(!Result && !fs_is_relative_path(m_aCmdEditMap))
+				m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
@@ -3502,7 +3506,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0));
+	pSelf->HandleConnectLink(pResult->GetString(0));
 }
 
 void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
@@ -3975,9 +3979,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	const char *pError = pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
-	if(pError)
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", pError);
+	pSelf->HandleDemoPath(pResult->GetString(0));
 }
 
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
@@ -4531,7 +4533,10 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
-	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
+	if(str_startswith(pLink, CONNECTLINK))
+		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
+	else
+		str_copy(m_aCmdConnect, pLink);
 }
 
 void CClient::HandleDemoPath(const char *pPath)
