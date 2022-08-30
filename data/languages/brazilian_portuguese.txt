@@ -915,8 +915,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info2.ddnet.tw
-== transmite seu nome de jogador para info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite seu nome de jogador para info.ddnet.org
 
 Reload
 == Recarregar
@@ -1107,8 +1107,8 @@ Skip the main menu
 Download skins
 == Baixar skins
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/pt-br
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/pt-br
 
 Website
 == Site
@@ -1273,8 +1273,8 @@ Desktop fullscreen
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar pata um servidor diferente?

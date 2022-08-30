@@ -678,8 +678,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Tamamlanan DDNet haritalarını sunucu listesinde göster
 
-transmits your player name to info2.ddnet.tw
-== oyuncu adını info2.ddnet.tw ile paylaşır
+transmits your player name to info.ddnet.org
+== oyuncu adını info.ddnet.org ile paylaşır
 
 Search
 == Ara
@@ -1517,10 +1517,10 @@ Assets directory
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial

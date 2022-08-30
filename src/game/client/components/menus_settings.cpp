@@ -767,7 +767,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CButtonContainer s_SkinDBDirID;
 	if(DoButton_Menu(&s_SkinDBDirID, Localize("Skin Database"), 0, &SkinDB))
 	{
-		const char *pLink = "https://ddnet.tw/skins/";
+		const char *pLink = "https://ddnet.org/skins/";
 		if(!open_link(pLink))
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);

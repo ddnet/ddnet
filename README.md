@@ -1,15 +1,15 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
+[![DDraceNetwork](https://ddnet.org/ddnet-small.png)](https://ddnet.org) [![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
 
-Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
+Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.org) for more information.
 
 Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
 
-You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
+You can get binary releases on the [DDNet website](https://ddnet.org/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
 
-- [Code Browser](https://ddnet.tw/codebrowser/DDNet/)
-- [Source Code Documentation](https://codedoc.ddnet.tw/) (very incomplete, only a few items are documented)
+- [Code Browser](https://ddnet.org/codebrowser/DDNet/)
+- [Source Code Documentation](https://codedoc.ddnet.org/) (very incomplete, only a few items are documented)
 
-If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.tw/wiki/Development) article on the wiki.
+If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.org/wiki/Development) article on the wiki.
 
 Cloning
 -------
@@ -246,7 +246,7 @@ Importing the official DDNet Database
 -------------------------------------
 
 ```bash
-$ wget https://ddnet.tw/stats/ddnet-sql.zip
+$ wget https://ddnet.org/stats/ddnet-sql.zip
 $ unzip ddnet-sql.zip
 $ yaourt -S mariadb mysql-connector-c++
 $ mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql

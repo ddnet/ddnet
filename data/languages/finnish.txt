@@ -703,8 +703,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Näytä DDNet kenttäläpäisyt palvelinselaimessa
 
-transmits your player name to info2.ddnet.tw
-== lähettää nimimerkkisi osoitteeseen info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== lähettää nimimerkkisi osoitteeseen info.ddnet.org
 
 Theme
 == Teema
@@ -1099,14 +1099,14 @@ Emoticons
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == Opi
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Verkkosivu

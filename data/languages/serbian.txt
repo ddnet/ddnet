@@ -709,8 +709,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Prikaži završetka DDNet mape u pregledaču servera
 
-transmits your player name to info2.ddnet.tw
-== prenosi ime vašeg igrača na info2.ddnet.tw
+transmits your player name to info2.ddnet.org
+== prenosi ime vašeg igrača na info2.ddnet.org
 
 Theme
 == Tema
@@ -1076,8 +1076,8 @@ Assets directory
 Learn
 == Uputstvo
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Veb sajt
@@ -1541,8 +1541,8 @@ Loading assets
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Tutorial
 == Uvod

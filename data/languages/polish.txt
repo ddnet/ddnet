@@ -1052,8 +1052,8 @@ Please enter your nickname below.
 Show DDNet map finishes in server browser
 == Pokazuj ukończone mapy DDNet w wyszukiwarce
 
-transmits your player name to info2.ddnet.tw
-== przenosi twój nick do info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== przenosi twój nick do info.ddnet.org
 
 Indicate map finish
 == Pokazuj ukończone mapy
@@ -1169,8 +1169,8 @@ Particles
 Assets directory
 == Katalog zasobów
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Strona
@@ -1335,8 +1335,8 @@ Chat command (e.g. showall 1)
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Tutorial
 == Samouczek

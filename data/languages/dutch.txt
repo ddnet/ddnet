@@ -686,8 +686,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Laat gefinishte maps zien in de verkenner
 
-transmits your player name to info2.ddnet.tw
-== verzendt je speler naam naar info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== verzendt je speler naam naar info.ddnet.org
 
 Search
 == Zoek
@@ -1312,11 +1312,11 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Tutorial
 == Tutorial

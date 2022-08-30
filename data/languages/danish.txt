@@ -698,8 +698,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Vis DDNet kort færdig i serverbrowseren
 
-transmits your player name to info2.ddnet.tw
-== sender dit spillernavn til info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== sender dit spillernavn til info.ddnet.org
 
 Theme
 == Tema
@@ -1100,8 +1100,8 @@ Assets directory
 Learn
 == Lære
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Internet side
@@ -1538,7 +1538,7 @@ Loading assets
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
 Tutorial

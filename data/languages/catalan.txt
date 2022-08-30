@@ -891,8 +891,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalitzacions de mapes en el buscador de servidors
 
-transmits your player name to info2.ddnet.tw
-== retransmet el teu nom de jugar a info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== retransmet el teu nom de jugar a info.ddnet.org
 
 Reload
 == Recarga
@@ -1215,11 +1215,11 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/ca
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ca
 
 Website
 == Página Web

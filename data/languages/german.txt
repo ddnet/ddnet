@@ -1049,8 +1049,8 @@ Default length: %d
 Pause
 == Pause
 
-transmits your player name to info2.ddnet.tw
-== überträgt deinen Spielernamen an info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== überträgt deinen Spielernamen an info.ddnet.org
 
 Server best:
 == Serverbeste:
@@ -1194,8 +1194,8 @@ Particles
 Assets directory
 == Assets-Ordner
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/de
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/de
 
 Saving ddnet-settings.cfg failed
 == ddnet-settings.cfg zu speichern ist fehlgeschlagen
@@ -1269,8 +1269,8 @@ Chat command
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 AFR
 == AFR

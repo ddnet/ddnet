@@ -1073,8 +1073,8 @@ Please enter your nickname below.
 Show DDNet map finishes in server browser
 == Afficher les cartes de DDNet terminées dans le navigateur
 
-transmits your player name to info2.ddnet.tw
-== transmet votre pseudonyme à info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmet votre pseudonyme à info.ddnet.org
 
 Saving ddnet-settings.cfg failed
 == L'enregistrement de ddnet-settings.cfg a échoué
@@ -1151,8 +1151,8 @@ Particles
 Assets directory
 == Répertoire des assets
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Site web
@@ -1281,8 +1281,8 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Êtes vous sur de vouloir vous déconnecter et changer de serveur?

@@ -690,8 +690,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Marcar los mapas DDNet acabados en el navegador de servidores
 
-transmits your player name to info2.ddnet.tw
-== transmite tu nombre de jugador a info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite tu nombre de jugador a info.ddnet.org
 
 Search
 == Buscar
@@ -1167,8 +1167,8 @@ Particles
 Assets directory
 == Directorio de recursos
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Página web
@@ -1270,8 +1270,8 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == ¿Seguro que quieres desconectarte y cambiar de servidor?

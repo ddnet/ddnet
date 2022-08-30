@@ -700,8 +700,8 @@ Video name:
 Show DDNet map finishes in server browser
 == サーバー・ブラウザーで完成した DDNet マップを表示する
 
-transmits your player name to info2.ddnet.tw
-== ハンドルネームを info2.ddnet.tw に送信します
+transmits your player name to info.ddnet.org
+== ハンドルネームを info.ddnet.org に送信します
 
 Theme
 == テーマ
@@ -1141,14 +1141,14 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == チュートリアル
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == ウェブ

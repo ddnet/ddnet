@@ -778,7 +778,7 @@ Skip Tutorial
 Show DDNet map finishes in server browser
 == 
 
-transmits your player name to info2.ddnet.tw
+transmits your player name to info.ddnet.org
 == 
 
 Theme
@@ -1452,13 +1452,13 @@ Assets directory
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
 Learn
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial
