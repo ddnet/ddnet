@@ -905,8 +905,10 @@ void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
 void sphore_init(SEMAPHORE *sem)
 {
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
+	if(*sem == SEM_FAILED)
+		dbg_msg("sphore", "init failed: %d", errno);
 }
 void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
 void sphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
@@ -914,7 +916,7 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	char aBuf[64];
 	sem_close(*sem);
-	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
 	sem_unlink(aBuf);
 }
 #elif defined(CONF_FAMILY_UNIX)
