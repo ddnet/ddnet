@@ -68,14 +68,15 @@ public:
 		BRUSH_DRAW,
 
 		EDIT_GROUP_ORDER,
-		EDIT_GROUP_POS_X,
-		EDIT_GROUP_POS_Y,
-		EDIT_GROUP_PARA_X,
-		EDIT_GROUP_PARA_Y,
-		EDIT_GROUP_CLIP_X,
-		EDIT_GROUP_CLIP_Y,
-		EDIT_GROUP_CLIP_W,
-		EDIT_GROUP_CLIP_H,
+		EDIT_GROUP_PROPERTY,
+		//EDIT_GROUP_POS_X,
+		//EDIT_GROUP_POS_Y,
+		//EDIT_GROUP_PARA_X,
+		//EDIT_GROUP_PARA_Y,
+		//EDIT_GROUP_CLIP_X,
+		//EDIT_GROUP_CLIP_Y,
+		//EDIT_GROUP_CLIP_W,
+		//EDIT_GROUP_CLIP_H,
 
 		ADD_ENVELOPPE,
 		EDIT_ENV_NAME,
@@ -135,14 +136,15 @@ public:
 		case EType::FILL_SELECTION: return "FILL_SELECTION";
 		case EType::BRUSH_DRAW: return "BRUSH_DRAW";
 		case EType::EDIT_GROUP_ORDER: return "EDIT_GROUP_ORDER";
-		case EType::EDIT_GROUP_POS_X: return "EDIT_GROUP_POS_X";
-		case EType::EDIT_GROUP_POS_Y: return "EDIT_GROUP_POS_Y";
-		case EType::EDIT_GROUP_PARA_X: return "EDIT_GROUP_PARA_X";
-		case EType::EDIT_GROUP_PARA_Y: return "EDIT_GROUP_PARA_Y";
-		case EType::EDIT_GROUP_CLIP_X: return "EDIT_GROUP_CLIP_X";
-		case EType::EDIT_GROUP_CLIP_Y: return "EDIT_GROUP_CLIP_Y";
-		case EType::EDIT_GROUP_CLIP_W: return "EDIT_GROUP_CLIP_W";
-		case EType::EDIT_GROUP_CLIP_H: return "EDIT_GROUP_CLIP_H";
+		case EType::EDIT_GROUP_PROPERTY: return "EDIT_GROUP_PROPERTY";
+		//case EType::EDIT_GROUP_POS_X: return "EDIT_GROUP_POS_X";
+		//case EType::EDIT_GROUP_POS_Y: return "EDIT_GROUP_POS_Y";
+		//case EType::EDIT_GROUP_PARA_X: return "EDIT_GROUP_PARA_X";
+		//case EType::EDIT_GROUP_PARA_Y: return "EDIT_GROUP_PARA_Y";
+		//case EType::EDIT_GROUP_CLIP_X: return "EDIT_GROUP_CLIP_X";
+		//case EType::EDIT_GROUP_CLIP_Y: return "EDIT_GROUP_CLIP_Y";
+		//case EType::EDIT_GROUP_CLIP_W: return "EDIT_GROUP_CLIP_W";
+		//case EType::EDIT_GROUP_CLIP_H: return "EDIT_GROUP_CLIP_H";
 		case EType::ADD_ENVELOPPE: return "ADD_ENVELOPPE";
 		case EType::EDIT_ENV_NAME: return "EDIT_ENV_NAME";
 		case EType::EDIT_ENV_POINT_VALUE: return "EDIT_ENV_POINT_VALUE";
@@ -534,5 +536,55 @@ public:
 	bool Undo() override;
 	bool Redo() override;
 };
+
+struct SEditGroupInfo
+{
+	int m_OffsetX;
+	int m_OffsetY;
+
+	int m_ParallaxX;
+	int m_ParallaxY;
+	int m_CustomParallaxZoom;
+	int m_ParallaxZoom;
+
+	int m_UseClipping;
+	int m_ClipX;
+	int m_ClipY;
+	int m_ClipW;
+	int m_ClipH;
+
+	int m_Order;
+
+	enum
+	{
+		ORDER = 1 << 0,
+		OFFSET_X = 1 << 1,
+		OFFSET_Y = 1 << 2,
+		PARA_X = 1 << 3,
+		PARA_Y = 1 << 4,
+		CUSTOM_PARA_ZOOM = 1 << 5,
+		PARA_ZOOM = 1 << 6,
+		USE_CLIPPING = 1 << 7,
+		CLIP_X = 1 << 8,
+		CLIP_Y = 1 << 9,
+		CLIP_W = 1 << 10,
+		CLIP_H = 1 << 11
+	};
+	int m_Modified;
+};
+class CEditorEditGroupProperty : public CEditorAction<SEditGroupInfo>
+{
+public:
+	CEditorEditGroupProperty(int GroupIndex, const SEditGroupInfo &OldInfo, const SEditGroupInfo &NewInfo);
+
+	bool Undo() override;
+	bool Redo() override;
+
+private:
+	int m_GroupIndex;
+
+	void ApplyInfo(const SEditGroupInfo &Info);
+};
+
 
 #endif

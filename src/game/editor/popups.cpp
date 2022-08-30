@@ -124,9 +124,10 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	CUIRect Button;
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_DeleteButton = 0;
+	CLayerGroup *pGroup = pEditor->GetSelectedGroup();
 
 	// don't allow deletion of game group
-	if(pEditor->m_Map.m_pGameGroup != pEditor->GetSelectedGroup())
+	if(pEditor->m_Map.m_pGameGroup != pGroup)
 	{
 		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete group", 0, &Button, 0, "Delete group"))
 		{
@@ -178,7 +179,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pTeleLayer)
+	if(pGroup->m_GameGroup && !pEditor->m_Map.m_pTeleLayer)
 	{
 		// new tele layer
 		View.HSplitBottom(5.0f, &View, &Button);
@@ -203,7 +204,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pSpeedupLayer)
+	if(pGroup->m_GameGroup && !pEditor->m_Map.m_pSpeedupLayer)
 	{
 		// new speedup layer
 		View.HSplitBottom(5.0f, &View, &Button);
@@ -228,7 +229,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pTuneLayer)
+	if(pGroup->m_GameGroup && !pEditor->m_Map.m_pTuneLayer)
 	{
 		// new tune layer
 		View.HSplitBottom(5.0f, &View, &Button);
@@ -253,7 +254,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pFrontLayer)
+	if(pGroup->m_GameGroup && !pEditor->m_Map.m_pFrontLayer)
 	{
 		// new front layer
 		View.HSplitBottom(5.0f, &View, &Button);
@@ -278,7 +279,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		}
 	}
 
-	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pSwitchLayer)
+	if(pGroup->m_GameGroup && !pEditor->m_Map.m_pSwitchLayer)
 	{
 		// new Switch layer
 		View.HSplitBottom(5.0f, &View, &Button);
@@ -370,7 +371,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// group name
-	if(!pEditor->GetSelectedGroup()->m_GameGroup)
+	if(!pGroup->m_GameGroup)
 	{
 		View.HSplitBottom(5.0f, &View, &Button);
 		View.HSplitBottom(12.0f, &View, &Button);
@@ -400,18 +401,18 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 
 	CProperty aProps[] = {
 		{"Order", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Pos X", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Custom Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom, PROPTYPE_BOOL, 0, 1},
-		{"Para Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", -pGroup->m_OffsetX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", -pGroup->m_OffsetY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Para X", pGroup->m_ParallaxX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Para Y", pGroup->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Custom Zoom", pGroup->m_CustomParallaxZoom, PROPTYPE_BOOL, 0, 1},
+		{"Para Zoom", pGroup->m_ParallaxZoom, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 
-		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
-		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Clip Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Clip W", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW, PROPTYPE_INT_SCROLL, 0, 1000000},
-		{"Clip H", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Use Clipping", pGroup->m_UseClipping, PROPTYPE_BOOL, 0, 1},
+		{"Clip X", pGroup->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Clip Y", pGroup->m_ClipY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Clip W", pGroup->m_ClipW, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Clip H", pGroup->m_ClipH, PROPTYPE_INT_SCROLL, 0, 1000000},
 		{nullptr},
 	};
 
@@ -419,47 +420,127 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	int NewVal = 0;
 
 	// cut the properties that isn't needed
-	if(pEditor->GetSelectedGroup()->m_GameGroup)
+	if(pGroup->m_GameGroup)
 		aProps[PROP_POS_X].m_pName = nullptr;
 
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+	PropState State;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, &State);
 	if(Prop != -1)
 		pEditor->m_Map.m_Modified = true;
 
+	static SEditGroupInfo s_OriginalGroupInfo;
+	SEditGroupInfo ModifiedGroupInfo;
+
+	bool Save = State == PropState::START;
+	bool Record = State == PropState::END;
+
 	if(Prop == PROP_ORDER)
+	{
+		if(Save)
+			s_OriginalGroupInfo.m_Order = pEditor->m_SelectedGroup;
+
 		pEditor->m_SelectedGroup = pEditor->m_Map.SwapGroups(pEditor->m_SelectedGroup, NewVal);
+		ModifiedGroupInfo.m_Order = pEditor->m_SelectedGroup;
+
+	}
+
+	if(Save)
+		s_OriginalGroupInfo.m_Modified = 1 << Prop;
+	ModifiedGroupInfo.m_Modified = 1 << Prop;
 
 	// these can not be changed on the game group
-	if(!pEditor->GetSelectedGroup()->m_GameGroup)
+	if(!pGroup->m_GameGroup)
 	{
 		if(Prop == PROP_PARA_X)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_ParallaxX = pGroup->m_ParallaxX;
+			pGroup->m_ParallaxX = NewVal;
+			ModifiedGroupInfo.m_ParallaxX = pGroup->m_ParallaxX;
+		}
 		else if(Prop == PROP_PARA_Y)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_ParallaxY = pGroup->m_ParallaxY;
+			pGroup->m_ParallaxY = NewVal;
+			ModifiedGroupInfo.m_ParallaxY = pGroup->m_ParallaxY;
+		}
 		else if(Prop == PROP_CUSTOM_ZOOM)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_CustomParallaxZoom = pGroup->m_CustomParallaxZoom;
+			pGroup->m_CustomParallaxZoom = NewVal;
+			ModifiedGroupInfo.m_CustomParallaxZoom = pGroup->m_CustomParallaxZoom;
+		}
 		else if(Prop == PROP_PARA_ZOOM)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = 1;
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom = NewVal;
+			if(Save)
+			{
+				s_OriginalGroupInfo.m_CustomParallaxZoom = pGroup->m_CustomParallaxZoom;
+				s_OriginalGroupInfo.m_ParallaxZoom = pGroup->m_ParallaxZoom;
+			}
+			pGroup->m_CustomParallaxZoom = 1;
+			pGroup->m_ParallaxZoom = NewVal;
+
+			ModifiedGroupInfo.m_CustomParallaxZoom = pGroup->m_CustomParallaxZoom;
+			ModifiedGroupInfo.m_ParallaxZoom = pGroup->m_ParallaxZoom;
 		}
 		else if(Prop == PROP_POS_X)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_OffsetX = pGroup->m_OffsetX;
+			pGroup->m_OffsetX = -NewVal;
+			ModifiedGroupInfo.m_OffsetX = pGroup->m_OffsetX;
+		}
 		else if(Prop == PROP_POS_Y)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY = -NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_OffsetY = pGroup->m_OffsetY;
+			pGroup->m_OffsetY = -NewVal;
+			ModifiedGroupInfo.m_OffsetY = pGroup->m_OffsetY;
+		}
 		else if(Prop == PROP_USE_CLIPPING)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_UseClipping = pGroup->m_UseClipping;
+			pGroup->m_UseClipping = NewVal;
+			ModifiedGroupInfo.m_UseClipping = pGroup->m_UseClipping;
+		}
 		else if(Prop == PROP_CLIP_X)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_ClipX = pGroup->m_ClipX;
+			pGroup->m_ClipX = NewVal;
+			ModifiedGroupInfo.m_ClipX = pGroup->m_ClipX;
+		}
 		else if(Prop == PROP_CLIP_Y)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_ClipX = pGroup->m_ClipY;
+			pGroup->m_ClipY = NewVal;
+			ModifiedGroupInfo.m_ClipY = pGroup->m_ClipY;
+		}
 		else if(Prop == PROP_CLIP_W)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_ClipX = pGroup->m_ClipW;
+			pGroup->m_ClipW = NewVal;
+			ModifiedGroupInfo.m_ClipW = pGroup->m_ClipW;
+		}
 		else if(Prop == PROP_CLIP_H)
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+		{
+			if(Save)
+				s_OriginalGroupInfo.m_ClipX = pGroup->m_ClipH;
+			pGroup->m_ClipH = NewVal;
+			ModifiedGroupInfo.m_ClipH = pGroup->m_ClipH;
+		}
 
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->OnEdited();
+		pGroup->OnEdited();
+
 	}
+
+	if(Prop != -1 && Record)
+		pEditor->m_EditorHistory.RecordUndoAction(new CEditorEditGroupProperty(pEditor->m_SelectedGroup, s_OriginalGroupInfo, ModifiedGroupInfo));
 
 	return 0;
 }

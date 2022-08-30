@@ -755,3 +755,67 @@ bool CEditorQuadOperationAction::Redo()
 
 	return true;
 }
+
+CEditorEditGroupProperty::CEditorEditGroupProperty(int GroupIndex, const SEditGroupInfo &OldInfo, const SEditGroupInfo &NewInfo) :
+	CEditorAction(IEditorAction::EType::EDIT_GROUP_PROPERTY, nullptr, OldInfo, NewInfo)
+{
+	m_GroupIndex = GroupIndex;
+}
+
+bool CEditorEditGroupProperty::Undo()
+{
+	if(m_ValueFrom.m_Modified & SEditGroupInfo::ORDER)
+	{
+		int CurrentOrder = m_ValueTo.m_Order;
+		bool Dir = m_ValueTo.m_Order > m_ValueFrom.m_Order;
+		while(CurrentOrder != m_ValueFrom.m_Order)
+		{
+			CurrentOrder = m_pEditor->m_Map.SwapGroups(CurrentOrder, Dir ? CurrentOrder - 1 : CurrentOrder + 1);
+		}
+		m_pEditor->m_SelectedGroup = m_ValueFrom.m_Order;
+	}
+	else
+		ApplyInfo(m_ValueFrom);
+
+	return true;
+}
+
+bool CEditorEditGroupProperty::Redo()
+{
+	if(m_ValueTo.m_Modified & SEditGroupInfo::ORDER)
+		m_pEditor->m_Map.SwapGroups(m_ValueTo.m_Order, m_ValueFrom.m_Order);
+	else
+		ApplyInfo(m_ValueTo);
+
+	return true;
+}
+
+void CEditorEditGroupProperty::ApplyInfo(const SEditGroupInfo &Info)
+{
+	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_GroupIndex];
+
+	if(Info.m_Modified & SEditGroupInfo::OFFSET_X)
+		pGroup->m_OffsetX = Info.m_OffsetX;
+	if(Info.m_Modified & SEditGroupInfo::OFFSET_Y)
+		pGroup->m_OffsetY = Info.m_OffsetY;
+	if(Info.m_Modified & SEditGroupInfo::PARA_X)
+		pGroup->m_ParallaxX = Info.m_ParallaxX;
+	if(Info.m_Modified & SEditGroupInfo::PARA_Y)
+		pGroup->m_ParallaxY = Info.m_ParallaxY;
+	if(Info.m_Modified & SEditGroupInfo::CUSTOM_PARA_ZOOM)
+		pGroup->m_CustomParallaxZoom = Info.m_CustomParallaxZoom;
+	if(Info.m_Modified & SEditGroupInfo::PARA_ZOOM)
+		pGroup->m_ParallaxZoom = Info.m_ParallaxZoom;
+	if(Info.m_Modified & SEditGroupInfo::USE_CLIPPING)
+		pGroup->m_UseClipping = Info.m_UseClipping;
+	if(Info.m_Modified & SEditGroupInfo::CLIP_X)
+		pGroup->m_ClipX = Info.m_ClipX;
+	if(Info.m_Modified & SEditGroupInfo::CLIP_Y)
+		pGroup->m_ClipY = Info.m_ClipY;
+	if(Info.m_Modified & SEditGroupInfo::CLIP_W)
+		pGroup->m_ClipW = Info.m_ClipW;
+	if(Info.m_Modified & SEditGroupInfo::CLIP_H)
+		pGroup->m_ClipH = Info.m_ClipH;
+
+	pGroup->OnEdited();
+}

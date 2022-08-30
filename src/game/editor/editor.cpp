@@ -3339,6 +3339,10 @@ float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Widt
 int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color)
 {
 	int Change = -1;
+	const void *pItem = UI()->ActiveItem();
+	auto ShouldUpdate = [pItem, this](void *pID) {
+		return pItem == nullptr && UI()->ActiveItem() == pID;
+	};
 
 	for(int i = 0; pProps[i].m_pName; i++)
 	{
@@ -3358,17 +3362,17 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			str_format(aBuf, sizeof(aBuf), "%d", pProps[i].m_Value);
 			int NewValue = UiDoValueSelector((char *)&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, &Color);
-			if(NewValue != pProps[i].m_Value)
+			if(NewValue != pProps[i].m_Value || ShouldUpdate(&pIDs[i]))
 			{
 				*pNewVal = NewValue;
 				Change = i;
 			}
-			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Decrease"))
+			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Decrease") || ShouldUpdate((char *)&pIDs[i] + 1))
 			{
 				*pNewVal = pProps[i].m_Value - 1;
 				Change = i;
 			}
-			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, nullptr, 0, &Inc, 0, "Increase"))
+			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, nullptr, 0, &Inc, 0, "Increase") || ShouldUpdate((char *)&pIDs[i] + 2))
 			{
 				*pNewVal = pProps[i].m_Value + 1;
 				Change = i;
@@ -3378,12 +3382,13 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			CUIRect No, Yes;
 			Shifter.VSplitMid(&No, &Yes);
-			if(DoButton_ButtonDec(&pIDs[i], "No", !pProps[i].m_Value, &No, 0, ""))
+
+			if(DoButton_ButtonDec(&pIDs[i], "No", !pProps[i].m_Value, &No, 0, "") || ShouldUpdate(&pIDs[i]))
 			{
 				*pNewVal = 0;
 				Change = i;
 			}
-			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 1, "Yes", pProps[i].m_Value, &Yes, 0, ""))
+			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 1, "Yes", pProps[i].m_Value, &Yes, 0, "") || ShouldUpdate(((char *)&pIDs[i]) + 1))
 			{
 				*pNewVal = 1;
 				Change = i;
@@ -3392,7 +3397,8 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		else if(pProps[i].m_Type == PROPTYPE_INT_SCROLL)
 		{
 			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.");
-			if(NewValue != pProps[i].m_Value)
+			
+			if(NewValue != pProps[i].m_Value || ShouldUpdate(&pIDs[i]))
 			{
 				*pNewVal = NewValue;
 				Change = i;
@@ -3408,16 +3414,16 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			int Value = pProps[i].m_Value;
 
 			int NewValue = UiDoValueSelector(&pIDs[i], &Shifter, "", Value, pProps[i].m_Min, pProps[i].m_Max, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
-			if(DoButton_ButtonDec(&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Decrease"))
+			if(DoButton_ButtonDec(&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Decrease") || ShouldUpdate(&pIDs[i] + 1))
 			{
 				NewValue = (round_ceil((pProps[i].m_Value / (float)Step)) - 1) * Step;
 				if(NewValue < 0)
 					NewValue += 360;
 			}
-			if(DoButton_ButtonInc(&pIDs[i] + 2, nullptr, 0, &Inc, 0, "Increase"))
+			if(DoButton_ButtonInc(&pIDs[i] + 2, nullptr, 0, &Inc, 0, "Increase") || ShouldUpdate(&pIDs[i] + 2))
 				NewValue = (pProps[i].m_Value + Step) / Step * Step;
 
-			if(NewValue != pProps[i].m_Value)
+			if(NewValue != pProps[i].m_Value || ShouldUpdate(&pIDs[i]))
 			{
 				*pNewVal = NewValue % 360;
 				Change = i;
@@ -3478,12 +3484,12 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			}
 
 			//
-			if(NewColor != pProps[i].m_Value)
+			if(NewColor != pProps[i].m_Value || (NewColor == pProps[i].m_Value && ShouldUpdate(&pIDs[i])))
 			{
 				*pNewVal = NewColor;
 				Change = i;
 			}
-			else if(NewColorHex != pProps[i].m_Value)
+			else if(NewColorHex != pProps[i].m_Value || (NewColorHex == pProps[i].m_Value && ShouldUpdate((char *)&pIDs[i] - 1)))
 			{
 				*pNewVal = NewColorHex;
 				Change = i;
@@ -3520,22 +3526,22 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitRight(10.0f, &Shifter, &Down);
 			Shifter.Draw(ColorRGBA(1, 1, 1, 0.5f), 0, 0.0f);
 			UI()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_CENTER);
-			if(DoButton_ButtonDec(&pIDs[i], "-", 0, &Left, 0, "Left"))
+			if(DoButton_ButtonDec(&pIDs[i], "-", 0, &Left, 0, "Left") || ShouldUpdate(&pIDs[i]))
 			{
 				*pNewVal = 1;
 				Change = i;
 			}
-			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 3, "+", 0, &Right, 0, "Right"))
+			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 3, "+", 0, &Right, 0, "Right") || ShouldUpdate(((char *)&pIDs[i]) + 3))
 			{
 				*pNewVal = 2;
 				Change = i;
 			}
-			if(DoButton_ButtonDec(((char *)&pIDs[i]) + 1, "-", 0, &Up, 0, "Up"))
+			if(DoButton_ButtonDec(((char *)&pIDs[i]) + 1, "-", 0, &Up, 0, "Up") || ShouldUpdate(((char *)&pIDs[i]) + 1))
 			{
 				*pNewVal = 4;
 				Change = i;
 			}
-			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, "+", 0, &Down, 0, "Down"))
+			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, "+", 0, &Down, 0, "Down") || ShouldUpdate(((char *)&pIDs[i]) + 2))
 			{
 				*pNewVal = 8;
 				Change = i;
@@ -3599,12 +3605,12 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.Draw(Color, 0, 5.0f);
 			UI()->DoLabel(&Shifter, aBuf, FontSize, TEXTALIGN_CENTER);
 
-			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Previous Envelope"))
+			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Previous Envelope") || ShouldUpdate((char *)&pIDs[i] + 1))
 			{
 				*pNewVal = pProps[i].m_Value - 1;
 				Change = i;
 			}
-			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, nullptr, 0, &Inc, 0, "Next Envelope"))
+			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, nullptr, 0, &Inc, 0, "Next Envelope") || ShouldUpdate(((char *)&pIDs[i]) + 2))
 			{
 				*pNewVal = pProps[i].m_Value + 1;
 				Change = i;
@@ -3646,7 +3652,9 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else
 		{
+			
 			*pState = PropState::START;
+			dbg_msg("editor", "PROPSTATE::START, Prop=%d Value=%d", Prop, *pNewVal);
 		}
 	}
 
