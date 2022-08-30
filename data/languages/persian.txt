@@ -885,7 +885,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-transmits your player name to info2.ddnet.tw
+transmits your player name to info.ddnet.org
 == 
 
 Loading menu images
@@ -1373,10 +1373,10 @@ Loading assets
 Assets directory
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial

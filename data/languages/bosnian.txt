@@ -679,8 +679,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Prikaži završene DDNet mape u pretraživaču za servere
 
-transmits your player name to info2.ddnet.tw
-== prenosi tvoje ime na info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== prenosi tvoje ime na info.ddnet.org
 
 Search
 == Pretraži
@@ -1494,10 +1494,10 @@ Assets directory
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial

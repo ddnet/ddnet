@@ -898,8 +898,8 @@ Date
 Show DDNet map finishes in server browser
 == Mutassa a befejezett pályákat a keresőben
 
-transmits your player name to info2.ddnet.tw
-== továbbítja a játékosnevedet az info2.ddnet.tw oldalra
+transmits your player name to info.ddnet.org
+== továbbítja a játékosnevedet az info.ddnet.org oldalra
 
 Reload
 == Újratöltés
@@ -1265,11 +1265,11 @@ Show local player's key presses
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat. (Nem megfelelően lesz elosztva a kép színvilága.)

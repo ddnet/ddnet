@@ -1089,8 +1089,8 @@ Country / Region
 Speed
 == Rychlost
 
-transmits your player name to info2.ddnet.tw
-== přenese vaše jméno hráče na info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== přenese vaše jméno hráče na info.ddnet.org
 
 Theme
 == Téma
@@ -1165,8 +1165,8 @@ Particles
 Assets directory
 == Adresář aktiv
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == webová stránka
@@ -1540,7 +1540,7 @@ Loading assets
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
 Tutorial

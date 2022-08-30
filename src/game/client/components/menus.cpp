@@ -2204,7 +2204,7 @@ int CMenus::Render()
 			Part.VSplitLeft(30.0f, 0, &Part);
 			str_format(aBuf, sizeof(aBuf), "%s\n(%s)",
 				Localize("Show DDNet map finishes in server browser"),
-				Localize("transmits your player name to info2.ddnet.tw"));
+				Localize("transmits your player name to info.ddnet.org"));
 
 			if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, aBuf, g_Config.m_BrIndicateFinished, &Part))
 				g_Config.m_BrIndicateFinished ^= 1;

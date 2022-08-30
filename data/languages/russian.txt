@@ -807,8 +807,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Показывать в браузере статус завершения карты
 
-transmits your player name to info2.ddnet.tw
-== передает ваш псевдоним на info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== передает ваш псевдоним на info.ddnet.org
 
 Exclude
 == Исключить
@@ -1077,8 +1077,8 @@ Markers
 Skip the main menu
 == Пропускать главное меню
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/ru
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ru
 
 Website
 == Сайт
@@ -1228,8 +1228,8 @@ Chat command
 Discord
 == Дискорд
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 AFR
 == AFR

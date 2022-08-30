@@ -195,8 +195,8 @@ Join Tutorial Server
 Skip Tutorial
 == Pasi la lernilo
 
-transmits your player name to info2.ddnet.tw
-== sendas vian ludantnomon al info2.ddnet.tw
+transmits your player name to info2.ddnet.org
+== sendas vian ludantnomon al info2.ddnet.org
 
 Nickname
 == Kromnomo
@@ -526,14 +526,14 @@ Check now
 Discord
 == Diskordo
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == Lerni
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Tutorial
 == Lernilo

@@ -861,8 +861,8 @@ Speed
 Video name:
 == Nome do vídeo:
 
-transmits your player name to info2.ddnet.tw
-== transmite o teu nome de jogador para info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite o teu nome de jogador para info.ddnet.org
 
 Theme
 == Tema
@@ -951,14 +951,14 @@ Particles
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == Aprender
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Website

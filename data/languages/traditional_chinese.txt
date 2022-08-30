@@ -915,8 +915,8 @@ Date
 Show DDNet map finishes in server browser
 == 在伺服器瀏覽器中顯示已完成的 DDNet 地圖
 
-transmits your player name to info2.ddnet.tw
-== 將會發送您的玩家名稱到 info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== 將會發送您的玩家名稱到 info.ddnet.org
 
 Reload
 == 重新整理
@@ -1083,7 +1083,7 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 國家/地區
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
 Warning
@@ -1273,8 +1273,8 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？

@@ -990,8 +990,8 @@ Default length: %d
 Pause
 == ﺔﺒﻗﺍﺮﻣ
 
-transmits your player name to info2.ddnet.tw
-== ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info.ddnet.org
 
 Server best:
 == :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
@@ -1135,8 +1135,8 @@ Particles
 Assets directory
 == ﻝﺎﻜﺷﻻﺍ ﻒﻠﻣ ﺢﺘﻓ
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Saving ddnet-settings.cfg failed
 == ﻆﻔﺤﻟﺍ ﻞﺸﻓ ddnet-settings.cfg
@@ -1533,7 +1533,7 @@ Loading assets
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
 Tutorial

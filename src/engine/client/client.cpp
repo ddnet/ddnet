@@ -1764,7 +1764,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						char aUrl[256];
 						char aEscaped[256];
 						EscapeUrl(aEscaped, sizeof(aEscaped), m_aMapdownloadFilename + 15); // cut off downloadedmaps/
-						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps2.ddnet.tw") != 0 || m_aMapDownloadUrl[0] == '\0';
+						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps.ddnet.org") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
 						m_pMapdownloadTask = HttpGetFile(aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
@@ -4148,7 +4148,7 @@ void CClient::InitChecksum()
 }
 
 #ifndef DDNET_CHECKSUM_SALT
-// salt@checksum.ddnet.tw: db877f2b-2ddb-3ba6-9f67-a6d169ec671d
+// salt@checksum.ddnet.org: db877f2b-2ddb-3ba6-9f67-a6d169ec671d
 #define DDNET_CHECKSUM_SALT \
 	{ \
 		{ \
@@ -4833,7 +4833,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	str_copy(aUrl, "https://info2.ddnet.tw/info");
+	str_copy(aUrl, "https://info.ddnet.org/info");
 
 	if(g_Config.m_BrIndicateFinished)
 	{

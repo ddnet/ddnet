@@ -35,13 +35,13 @@ a *Teeworlds* modification with a unique cooperative gameplay.
 Load _CONFIGURATION_FILE_ instead of default _autoexec_server.cfg_
 
 === Other options
-All options can be found here: https://ddnet.tw/settingscommands/
+All options can be found here: https://ddnet.org/settingscommands/
 
 == RESOURCES
-- *Website*: https://ddnet.tw/
-- *RSS*: https://ddnet.tw/feed/
-- *Forum*: https://forum.ddnet.tw/
-- *Discord*: https://ddnet.tw/discord
+- *Website*: https://ddnet.org/
+- *RSS*: https://ddnet.org/feed/
+- *Forum*: https://forum.ddnet.org/
+- *Discord*: https://ddnet.org/discord
 - *Source*: https://github.com/ddnet/ddnet
 
 == REPORTING BUGS

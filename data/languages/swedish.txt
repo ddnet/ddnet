@@ -714,8 +714,8 @@ Personal best:
 Show DDNet map finishes in server browser
 == Visa DDNet bana avklarningar i server bläddraren
 
-transmits your player name to info2.ddnet.tw
-== skickar ditt spel namn till info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== skickar ditt spel namn till info.ddnet.org
 
 9+ new mentions
 == 9+ nya nämningar
@@ -1092,8 +1092,8 @@ Download skins
 Client message
 == Klientmeddelande
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Hemsida
@@ -1285,8 +1285,8 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == 

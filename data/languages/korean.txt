@@ -714,8 +714,8 @@ Video name:
 Show DDNet map finishes in server browser
 == DDNet 맵 완주를 서버 브라우저에 표시
 
-transmits your player name to info2.ddnet.tw
-== info2.ddnet.tw에 당신의 닉네임을 전송함
+transmits your player name to info.ddnet.org
+== info.ddnet.org에 당신의 닉네임을 전송함
 
 Theme
 == 테마
@@ -1173,14 +1173,14 @@ Assets directory
 Discord
 == 디스코드
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == 학습터
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == 웹사이트
