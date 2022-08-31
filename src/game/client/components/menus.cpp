@@ -72,9 +72,6 @@ CMenus::CMenus()
 	m_MenuActive = true;
 	m_ShowStart = true;
 
-	m_EscapePressed = false;
-	m_EnterPressed = false;
-	m_DeletePressed = false;
 	m_NumInputEvents = 0;
 
 	str_copy(m_aCurrentDemoFolder, "demos");
@@ -1070,7 +1067,7 @@ bool CMenus::CanDisplayWarning()
 
 void CMenus::RenderColorPicker()
 {
-	if(m_EscapePressed)
+	if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
@@ -1347,7 +1344,7 @@ int CMenus::Render()
 		{
 			Screen.HSplitTop(24.0f, &TabBar, &MainView);
 
-			if(Client()->State() == IClient::STATE_OFFLINE && m_EscapePressed)
+			if(Client()->State() == IClient::STATE_OFFLINE && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
 				m_ShowStart = true;
 			}
@@ -1670,11 +1667,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
 				Client()->Quit();
@@ -1693,11 +1690,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 				Client()->Disconnect();
 		}
 		else if(m_Popup == POPUP_DISCONNECT_DUMMY)
@@ -1713,11 +1710,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				Client()->DummyDisconnect(0);
 				m_Popup = POPUP_NONE;
@@ -1738,11 +1735,11 @@ int CMenus::Render()
 			Abort.VMargin(20.0f, &Abort);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
 			}
@@ -1767,7 +1764,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || (m_EnterPressed && m_Popup != POPUP_CONNECTING))
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
 				Client()->Disconnect();
 				m_Popup = POPUP_NONE;
@@ -1837,7 +1834,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EscapePressed || m_EnterPressed)
+			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 				m_Popup = POPUP_FIRST_LAUNCH;
 		}
 		else if(m_Popup == POPUP_COUNTRY)
@@ -1885,14 +1882,14 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || m_EnterPressed)
+			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				g_Config.m_BrFilterCountryIndex = CurSelection;
 				Client()->ServerBrowserUpdate();
 				m_Popup = POPUP_NONE;
 			}
 
-			if(m_EscapePressed)
+			if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
 				CurSelection = g_Config.m_BrFilterCountryIndex;
 				m_Popup = POPUP_NONE;
@@ -1911,11 +1908,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
 				// delete demo
@@ -1946,11 +1943,11 @@ int CMenus::Render()
 			Abort.VMargin(20.0f, &Abort);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonOk;
-			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
 				// rename demo
@@ -2005,11 +2002,11 @@ int CMenus::Render()
 			Abort.VMargin(20.0f, &Abort);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonOk;
-			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
 				// name video
@@ -2125,11 +2122,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_RENDER_DEMO;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
 				// render video
@@ -2154,11 +2151,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_NONE;
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
 				// remove friend
@@ -2183,7 +2180,7 @@ int CMenus::Render()
 			Join.VMargin(20.0f, &Join);
 
 			static CButtonContainer s_JoinTutorialButton;
-			if(DoButton_Menu(&s_JoinTutorialButton, Localize("Join Tutorial Server"), 0, &Join) || m_EnterPressed)
+			if(DoButton_Menu(&s_JoinTutorialButton, Localize("Join Tutorial Server"), 0, &Join) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_JoinTutorial = true;
 				Client()->RequestDDNetInfo();
@@ -2191,7 +2188,7 @@ int CMenus::Render()
 			}
 
 			static CButtonContainer s_SkipTutorialButton;
-			if(DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip) || m_EscapePressed)
+			if(DoButton_Menu(&s_SkipTutorialButton, Localize("Skip Tutorial"), 0, &Skip) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
 				m_JoinTutorial = false;
 				Client()->RequestDDNetInfo();
@@ -2236,11 +2233,11 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonNo;
-			if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 				m_Popup = POPUP_FIRST_LAUNCH;
 
 			static CButtonContainer s_ButtonYes;
-			if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 				m_Popup = POPUP_NONE;
 		}
 		else if(m_Popup == POPUP_WARNING)
@@ -2250,7 +2247,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed || (time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
 			{
 				m_Popup = POPUP_NONE;
 				SetActive(false);
@@ -2269,14 +2266,14 @@ int CMenus::Render()
 			No.VMargin(20.0f, &No);
 
 			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || m_EscapePressed)
+			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
 				m_Popup = POPUP_NONE;
 				m_aNextServer[0] = '\0';
 			}
 
 			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
+			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 				Client()->Connect(m_aNextServer);
 		}
 		else
@@ -2286,7 +2283,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				if(m_Popup == POPUP_DISCONNECTED && Client()->m_ReconnectTime > 0)
 					Client()->m_ReconnectTime = 0;
@@ -2429,33 +2426,20 @@ bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	return true;
 }
 
-bool CMenus::OnInput(IInput::CEvent e)
+bool CMenus::OnInput(IInput::CEvent Event)
 {
 	// special handle esc and enter for popup purposes
-	if(e.m_Flags & IInput::FLAG_PRESS)
+	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
-		if(e.m_Key == KEY_ESCAPE)
-		{
-			m_EscapePressed = true;
-			if(m_Popup == POPUP_NONE)
-				SetActive(!IsActive());
-			return true;
-		}
+		SetActive(!IsActive());
+		UI()->OnInput(Event);
+		return true;
 	}
-
 	if(IsActive())
 	{
-		if(e.m_Flags & IInput::FLAG_PRESS)
-		{
-			// special for popups
-			if(e.m_Key == KEY_RETURN || e.m_Key == KEY_KP_ENTER)
-				m_EnterPressed = true;
-			else if(e.m_Key == KEY_DELETE)
-				m_DeletePressed = true;
-		}
-
 		if(m_NumInputEvents < MAX_INPUTEVENTS)
-			m_aInputEvents[m_NumInputEvents++] = e;
+			m_aInputEvents[m_NumInputEvents++] = Event;
+		UI()->OnInput(Event);
 		return true;
 	}
 	return false;
@@ -2526,11 +2510,9 @@ void CMenus::OnRender()
 
 	if(!IsActive())
 	{
-		m_EscapePressed = false;
-		m_EnterPressed = false;
-		m_DeletePressed = false;
-		m_NumInputEvents = 0;
 		UI()->FinishCheck();
+		UI()->ClearHotkeys();
+		m_NumInputEvents = 0;
 		return;
 	}
 
@@ -2581,10 +2563,7 @@ void CMenus::OnRender()
 	}
 
 	UI()->FinishCheck();
-
-	m_EscapePressed = false;
-	m_EnterPressed = false;
-	m_DeletePressed = false;
+	UI()->ClearHotkeys();
 	m_NumInputEvents = 0;
 }
 

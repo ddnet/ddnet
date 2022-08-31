@@ -154,11 +154,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static int s_RemoveChat = 0;
 
 		static CButtonContainer s_ButtonAbort;
-		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			m_DemoPlayerState = DEMOPLAYER_NONE;
 
 		static CButtonContainer s_ButtonOk;
-		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 		{
 			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
@@ -705,7 +705,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
+			if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(nullptr);
@@ -1264,7 +1264,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	UI()->ClipDisable();
 
 	bool Activated = false;
-	if(m_EnterPressed || (DoubleClicked && Input()->MouseDoubleClick()))
+	if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (DoubleClicked && Input()->MouseDoubleClick()))
 	{
 		UI()->SetActiveItem(nullptr);
 		Activated = true;
@@ -1334,7 +1334,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(!m_DemolistSelectedIsDir)
 	{
 		static CButtonContainer s_DeleteButton;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || UI()->ConsumeHotkey(CUI::HOTKEY_DELETE) || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{

@@ -244,6 +244,42 @@ void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 	*pY *= Factor;
 }
 
+bool CUI::ConsumeHotkey(EHotkey Hotkey)
+{
+	const bool Pressed = m_HotkeysPressed & Hotkey;
+	m_HotkeysPressed &= ~Hotkey;
+	return Pressed;
+}
+
+bool CUI::OnInput(const IInput::CEvent &Event)
+{
+	if(!Enabled())
+		return false;
+
+	if(Event.m_Flags & IInput::FLAG_PRESS)
+	{
+		unsigned LastHotkeysPressed = m_HotkeysPressed;
+		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
+			m_HotkeysPressed |= HOTKEY_ENTER;
+		else if(Event.m_Key == KEY_ESCAPE)
+			m_HotkeysPressed |= HOTKEY_ESCAPE;
+		else if(Event.m_Key == KEY_TAB && !Input()->KeyIsPressed(KEY_LALT) && !Input()->KeyIsPressed(KEY_RALT))
+			m_HotkeysPressed |= HOTKEY_TAB;
+		else if(Event.m_Key == KEY_DELETE)
+			m_HotkeysPressed |= HOTKEY_DELETE;
+		else if(Event.m_Key == KEY_UP)
+			m_HotkeysPressed |= HOTKEY_UP;
+		else if(Event.m_Key == KEY_DOWN)
+			m_HotkeysPressed |= HOTKEY_DOWN;
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
+			m_HotkeysPressed |= HOTKEY_SCROLL_UP;
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
+			m_HotkeysPressed |= HOTKEY_SCROLL_DOWN;
+		return LastHotkeysPressed != m_HotkeysPressed;
+	}
+	return false;
+}
+
 float CUI::ButtonColorMul(const void *pID)
 {
 	if(CheckActiveItem(pID))

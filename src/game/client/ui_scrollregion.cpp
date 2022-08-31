@@ -73,13 +73,13 @@ void CScrollRegion::End()
 	{
 		const bool IsPageScroll = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
 		const float ScrollUnit = IsPageScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+		if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_UP))
 		{
 			m_AnimTime = AnimationDuration;
 			m_AnimInitScrollY = m_ScrollY;
 			m_AnimTargetScrollY -= ScrollUnit;
 		}
-		else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+		else if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_DOWN))
 		{
 			m_AnimTime = AnimationDuration;
 			m_AnimInitScrollY = m_ScrollY;
