@@ -6303,6 +6303,9 @@ void CEditor::OnUpdate()
 		Reset();
 	}
 
+	for(int i = 0; i < Input()->NumEvents(); i++)
+		UI()->OnInput(Input()->GetEvent(i));
+
 	// handle cursor movement
 	{
 		static float s_MouseX = 0.0f;
