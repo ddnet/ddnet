@@ -542,7 +542,7 @@ int CServer::Init()
 	m_CurrentGameTick = 0;
 
 	m_AnnouncementLastLine = 0;
-	memset(m_aPrevStates, CClient::STATE_EMPTY, MAX_CLIENTS * sizeof(int));
+	mem_zero(m_aPrevStates, sizeof(m_aPrevStates));
 
 	return 0;
 }

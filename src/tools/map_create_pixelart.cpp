@@ -6,8 +6,6 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-#include <cstring>
-
 bool CreatePixelArt(const char[][64], const int[], const int[], int[], const bool[]);
 void InsertCurrentQuads(CDataFileReader &, CMapItemLayerQuads *, CQuad *);
 int InsertPixelArtQuads(CQuad *, int &, const CImageInfo &, const int[], const int[], const bool[]);
@@ -217,7 +215,10 @@ bool GetPixelClamped(const CImageInfo &Img, int x, int y, uint8_t aPixel[4])
 {
 	x = clamp<int>(x, 0, (int)Img.m_Width - 1);
 	y = clamp<int>(y, 0, (int)Img.m_Height - 1);
-	memset(aPixel, 255, sizeof(uint8_t[4]));
+	aPixel[0] = 255;
+	aPixel[1] = 255;
+	aPixel[2] = 255;
+	aPixel[3] = 255;
 
 	int BPP = Img.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
 	for(int i = 0; i < BPP; i++)
