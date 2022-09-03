@@ -1472,70 +1472,34 @@ static int s_AutoMapConfigCurrent = -100;
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
-	CUIRect Button;
-	static int s_aAutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static float s_ScrollValue = 0;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
-	// Add 1 more for the "None" option.
-	float ListHeight = (ButtonHeight + ButtonMargin) * (pAutoMapper->ConfigNamesNum() + 1);
-	float ScrollDifference = ListHeight - View.h;
-
-	// Disable scrollbar if not needed.
-	if(ListHeight > View.h)
+	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); i++)
 	{
-		CUIRect Scroll;
-		View.VSplitRight(20.0f, &View, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
+		CUIRect Button;
+		View.HSplitTop(ButtonMargin, nullptr, &View);
+		View.HSplitTop(ButtonHeight, &Button, &View);
+		if(s_ScrollRegion.AddRect(Button))
 		{
-			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-
-		// Margin for scrollbar
-		View.VSplitRight(2.0f, &View, nullptr);
-	}
-
-	float ListStartAt = ScrollDifference * s_ScrollValue;
-
-	if(ListStartAt < 0.0f)
-		ListStartAt = 0.0f;
-
-	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ListCur = 0;
-
-	pEditor->UI()->ClipEnable(&View);
-
-	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
-	{
-		if(ListCur > ListStopAt)
-			break;
-
-		if(ListCur >= ListStartAt)
-		{
-			View.HSplitTop(ButtonMargin, nullptr, &View);
-			View.HSplitTop(ButtonHeight, &Button, &View);
-			if(pEditor->DoButton_MenuItem(&s_aAutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
-			{
+			static int s_NoneButton = 0;
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
 				s_AutoMapConfigSelected = i;
-			}
 		}
-		ListCur += ButtonHeight + ButtonMargin;
 	}
 
-	pEditor->UI()->ClipDisable();
+	s_ScrollRegion.End();
 
 	return 0;
 }
@@ -1546,9 +1510,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
-	int ItemCount = m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum();
-	if(ItemCount > 10)
-		ItemCount = 10;
+	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), 10);
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
 }
@@ -1560,7 +1522,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
 	s_AutoMapConfigSelected = -100;
-	return s_AutoMapConfigCurrent - 1;
+	return s_AutoMapConfigCurrent;
 }
 
 // DDRace
