@@ -5422,60 +5422,34 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	CUIRect ListBox;
 	View.Margin(1.0f, &ListBox);
 
-	float ListHeight = 17.0f * m_Map.m_vSettings.size();
-	static float s_ScrollValue = 0;
+	const float ButtonHeight = 15.0f;
+	const float ButtonMargin = 2.0f;
 
-	float ScrollDifference = ListHeight - ListBox.h;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5.0f;
+	s_ScrollRegion.Begin(&ListBox, &ScrollOffset, &ScrollParams);
+	ListBox.y += ScrollOffset.y;
 
-	if(ListHeight > ListBox.h) // Do we even need a scrollbar?
-	{
-		CUIRect Scroll;
-		ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
-		s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(UI()->MouseInside(&Scroll) || UI()->MouseInside(&ListBox))
-		{
-			int ScrollNum = (int)((ListHeight - ListBox.h) / 17.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float ListStartAt = ScrollDifference * s_ScrollValue;
-	if(ListStartAt < 0.0f)
-		ListStartAt = 0.0f;
-
-	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ListCur = 0;
-
-	UI()->ClipEnable(&ListBox);
 	for(size_t i = 0; i < m_Map.m_vSettings.size(); i++)
 	{
-		if(ListCur > ListStopAt)
-			break;
-
-		if(ListCur >= ListStartAt)
+		CUIRect Button;
+		ListBox.HSplitTop(ButtonHeight, &Button, &ListBox);
+		ListBox.HSplitTop(ButtonMargin, nullptr, &ListBox);
+		Button.VSplitLeft(5.0f, nullptr, &Button);
+		if(s_ScrollRegion.AddRect(Button))
 		{
-			CUIRect Button;
-			ListBox.HSplitTop(15.0f, &Button, &ListBox);
-			ListBox.HSplitTop(2.0f, nullptr, &ListBox);
-			Button.VSplitLeft(5.0f, nullptr, &Button);
-
 			if(DoButton_MenuItem(&m_Map.m_vSettings[i], m_Map.m_vSettings[i].m_aCommand, s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex == i, &Button, 0, nullptr))
 			{
 				s_CommandSelectedIndex = i;
-				str_copy(m_aSettingsCommand, m_Map.m_vSettings[i].m_aCommand, sizeof(m_aSettingsCommand));
+				str_copy(m_aSettingsCommand, m_Map.m_vSettings[i].m_aCommand);
 				UI()->SetActiveItem(&m_CommandBox);
 			}
 		}
-		ListCur += 17.0f;
 	}
-	UI()->ClipDisable();
+
+	s_ScrollRegion.End();
 }
 
 int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
