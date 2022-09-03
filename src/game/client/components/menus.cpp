@@ -1443,7 +1443,7 @@ int CMenus::Render()
 			pButtonText = Localize("Abort");
 			if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
 			{
-				int Connectivity = Client()->UdpConnectivity(Client()->ConnectNetTypes());
+				int Connectivity = Client()->UdpConnectivity(Client()->ServerAddress().type);
 				switch(Connectivity)
 				{
 				case IClient::CONNECTIVITY_UNKNOWN:

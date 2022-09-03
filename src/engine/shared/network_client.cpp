@@ -50,9 +50,9 @@ int CNetClient::Update()
 	return 0;
 }
 
-int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
+int CNetClient::Connect(NETADDR *pAddr)
 {
-	m_Connection.Connect(pAddr, NumAddrs);
+	m_Connection.Connect(pAddr);
 	return 0;
 }
 
@@ -103,7 +103,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			}
 			else
 			{
-				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr) == 0 && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 			}
 		}

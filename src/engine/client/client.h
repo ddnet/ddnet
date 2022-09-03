@@ -133,7 +133,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CFriends m_Friends;
 	CFriends m_Foes;
 
-	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
+	char m_aConnectAddressStr[256];
 
 	CUuid m_ConnectionID;
 
@@ -151,6 +151,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	float m_RenderFrameTimeHigh;
 	int m_RenderFrames;
 
+	NETADDR m_ServerAddress;
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
 	bool m_AutoStatScreenshotRecycle;
@@ -408,8 +409,7 @@ public:
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
-	const NETADDR &ServerAddress() const override { return *m_aNetClient[CONN_MAIN].ServerAddress(); }
-	int ConnectNetTypes() const override;
+	NETADDR ServerAddress() const override { return m_ServerAddress; }
 	const char *ConnectAddressString() const override { return m_aConnectAddressStr; }
 	const char *MapDownloadName() const override { return m_aMapdownloadName; }
 	int MapDownloadAmount() const override { return !m_pMapdownloadTask ? m_MapdownloadAmount : (int)m_pMapdownloadTask->Current(); }
@@ -519,7 +519,7 @@ public:
 	// DDRace
 
 	void GenerateTimeoutSeed() override;
-	void GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs);
+	void GenerateTimeoutCodes();
 
 	int GetCurrentRaceTime() override;
 
