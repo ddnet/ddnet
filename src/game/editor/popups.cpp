@@ -473,7 +473,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size()},
+		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size() - 1},
 		{"Detail", pCurrentLayer && pCurrentLayer->m_Flags & LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
 		{nullptr},
 	};
@@ -955,7 +955,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color", Color, PROPTYPE_COLOR, -1, (int)pEditor->m_Map.m_vpEnvelopes.size()},
+		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Tex U", tu, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Tex V", tv, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{nullptr},

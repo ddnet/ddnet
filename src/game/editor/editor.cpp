@@ -549,6 +549,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		s_pLastTextpID = pID;
 		s_TextMode = true;
+		m_LockMouse = false;
 		if(IsHex)
 			str_format(s_aNumStr, sizeof(s_aNumStr), "%06X", Current);
 		else
@@ -604,7 +605,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 				else
 					s_Value += m_MouseDeltaX;
 
-				if(absolute(s_Value) > Scale)
+				if(absolute(s_Value) >= Scale)
 				{
 					int Count = (int)(s_Value / Scale);
 					s_Value = fmod(s_Value, Scale);
