@@ -549,6 +549,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		s_pLastTextpID = pID;
 		s_TextMode = true;
+		m_LockMouse = false;
 		if(IsHex)
 			str_format(s_aNumStr, sizeof(s_aNumStr), "%06X", Current);
 		else
