@@ -1254,37 +1254,31 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 	int ShowImage = g_SelectImageCurrent;
 
-	const float RowHeight = 14.0f;
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
+
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
-	ScrollParams.m_ScrollUnit = RowHeight * 5;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
 	s_ScrollRegion.Begin(&ButtonBar, &ScrollOffset, &ScrollParams);
 	ButtonBar.y += ScrollOffset.y;
 
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpImages.size(); i++)
 	{
 		CUIRect Button;
-		ButtonBar.HSplitTop(RowHeight, &Button, &ButtonBar);
-		if(!s_ScrollRegion.AddRect(Button))
-			continue;
-
-		Button.HSplitTop(12.0f, &Button, 0);
-		if(pEditor->UI()->MouseInside(&Button))
-			ShowImage = i;
-
-		if(i == -1)
+		ButtonBar.HSplitTop(ButtonMargin, nullptr, &ButtonBar);
+		ButtonBar.HSplitTop(ButtonHeight, &Button, &ButtonBar);
+		if(s_ScrollRegion.AddRect(Button))
 		{
+			if(pEditor->UI()->MouseInside(&Button))
+				ShowImage = i;
+
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectImageCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i], i == -1 ? "None" : pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
 				g_SelectImageSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpImages[i], pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
-				g_SelectImageSelected = i;
 		}
 	}
 
@@ -1461,7 +1455,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		if(s_ScrollRegion.AddRect(Button))
 		{
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button))
 				s_AutoMapConfigSelected = i;
 		}
 	}
