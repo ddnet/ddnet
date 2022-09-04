@@ -1254,37 +1254,31 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 	int ShowImage = g_SelectImageCurrent;
 
-	const float RowHeight = 14.0f;
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
+
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
-	ScrollParams.m_ScrollUnit = RowHeight * 5;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
 	s_ScrollRegion.Begin(&ButtonBar, &ScrollOffset, &ScrollParams);
 	ButtonBar.y += ScrollOffset.y;
 
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpImages.size(); i++)
 	{
 		CUIRect Button;
-		ButtonBar.HSplitTop(RowHeight, &Button, &ButtonBar);
-		if(!s_ScrollRegion.AddRect(Button))
-			continue;
-
-		Button.HSplitTop(12.0f, &Button, 0);
-		if(pEditor->UI()->MouseInside(&Button))
-			ShowImage = i;
-
-		if(i == -1)
+		ButtonBar.HSplitTop(ButtonMargin, nullptr, &ButtonBar);
+		ButtonBar.HSplitTop(ButtonHeight, &Button, &ButtonBar);
+		if(s_ScrollRegion.AddRect(Button))
 		{
+			if(pEditor->UI()->MouseInside(&Button))
+				ShowImage = i;
+
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectImageCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i], i == -1 ? "None" : pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
 				g_SelectImageSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpImages[i], pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
-				g_SelectImageSelected = i;
 		}
 	}
 
@@ -1335,65 +1329,32 @@ static int g_SelectSoundCurrent = -100;
 
 int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect ButtonBar, SoundView;
-	View.VSplitLeft(80.0f, &ButtonBar, &View);
-	View.Margin(10.0f, &SoundView);
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
 
-	static float s_ScrollValue = 0;
-	float SoundsHeight = pEditor->m_Map.m_vpSounds.size() * 14;
-	float ScrollDifference = SoundsHeight - ButtonBar.h;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
-	if(pEditor->m_Map.m_vpSounds.size() > 20) // Do we need a scrollbar?
-	{
-		CUIRect Scroll;
-		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
-		{
-			int ScrollNum = (int)((SoundsHeight - ButtonBar.h) / 14.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float SoundStartAt = ScrollDifference * s_ScrollValue;
-	if(SoundStartAt < 0.0f)
-		SoundStartAt = 0.0f;
-
-	float SoundStopAt = SoundsHeight - ScrollDifference * (1 - s_ScrollValue);
-	float SoundCur = 0.0f;
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpSounds.size(); i++)
 	{
-		if(SoundCur > SoundStopAt)
-			break;
-		if(SoundCur < SoundStartAt)
-		{
-			SoundCur += 14.0f;
-			continue;
-		}
-		SoundCur += 14.0f;
-
 		CUIRect Button;
-		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
-
-		if(i == -1)
+		View.HSplitTop(ButtonMargin, nullptr, &View);
+		View.HSplitTop(ButtonHeight, &Button, &View);
+		if(s_ScrollRegion.AddRect(Button))
 		{
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectSoundCurrent, &Button))
-				g_SelectSoundSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpSounds[i], pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpSounds[i], i == -1 ? "None" : pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
 				g_SelectSoundSelected = i;
 		}
 	}
+
+	s_ScrollRegion.End();
 
 	return 0;
 }
@@ -1403,7 +1364,7 @@ void CEditor::PopupSelectSoundInvoke(int Current, float x, float y)
 	static int s_SelectSoundPopupId = 0;
 	g_SelectSoundSelected = -100;
 	g_SelectSoundCurrent = Current;
-	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 400, 300, PopupSelectSound);
+	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 150, 300, PopupSelectSound);
 }
 
 int CEditor::PopupSelectSoundResult()
@@ -1494,7 +1455,7 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 		if(s_ScrollRegion.AddRect(Button))
 		{
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button))
 				s_AutoMapConfigSelected = i;
 		}
 	}
