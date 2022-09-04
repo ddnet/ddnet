@@ -6350,7 +6350,7 @@ void CEditor::Init()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_UI.Init(Kernel());
-	m_RenderTools.Init(m_pGraphics, m_pTextRender);
+	m_RenderTools.Init(m_pGraphics, m_pTextRender, (CGameClient *)Kernel()->RequestInterface<IGameClient>());
 	m_Map.m_pEditor = this;
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
