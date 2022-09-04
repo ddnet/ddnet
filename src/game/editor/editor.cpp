@@ -605,7 +605,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 				else
 					s_Value += m_MouseDeltaX;
 
-				if(absolute(s_Value) > Scale)
+				if(absolute(s_Value) >= Scale)
 				{
 					int Count = (int)(s_Value / Scale);
 					s_Value = fmod(s_Value, Scale);
