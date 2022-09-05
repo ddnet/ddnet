@@ -64,6 +64,7 @@
 #include <ws2tcpip.h>
 
 #include <cerrno>
+#include <float.h>
 #include <io.h>
 #include <objbase.h>
 #include <process.h>
@@ -3836,7 +3837,10 @@ PROCESS shell_execute(const char *file)
 	info.lpFile = wBuffer;
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+	// Save and restore the FPU control word because ShellExecute might change it
+	unsigned oldcontrol87 = _control87(0u, 0u);
 	ShellExecuteExW(&info);
+	_control87(oldcontrol87, 0xffffffffu);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
@@ -3873,7 +3877,11 @@ int open_link(const char *link)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[512];
 	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, std::size(wBuffer));
-	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	// Save and restore the FPU control word because ShellExecute might change it
+	unsigned oldcontrol87 = _control87(0u, 0u);
+	int status = (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	_control87(oldcontrol87, 0xffffffffu);
+	return status;
 #elif defined(CONF_PLATFORM_LINUX)
 	const int pid = fork();
 	if(pid == 0)
