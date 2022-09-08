@@ -1426,7 +1426,6 @@ set(EXPECTED_DATA
   shader/vulkan/text.vert
   shader/vulkan/tile.frag
   shader/vulkan/tile.vert
-  skins/Aoe4leg.png
   skins/PaladiN.png
   skins/antiantey.png
   skins/beast.png
