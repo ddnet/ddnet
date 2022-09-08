@@ -1278,7 +1278,7 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 			static int s_NoneButton = 0;
 			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i], i == -1 ? "None" : pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
-				g_SelectImageSelected = -1;
+				g_SelectImageSelected = i;
 		}
 	}
 
