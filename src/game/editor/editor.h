@@ -667,6 +667,7 @@ public:
 
 	void Render(bool QuadPicker = false) override;
 	CQuad *NewQuad(int x, int y, int Width, int Height);
+	int SwapQuads(int Index0, int Index1);
 
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;

@@ -648,7 +648,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 
 	enum
 	{
-		PROP_POS_X = 0,
+		PROP_ORDER = 0,
+		PROP_POS_X,
 		PROP_POS_Y,
 		PROP_POS_ENV,
 		PROP_POS_ENV_OFFSET,
@@ -657,7 +658,9 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		NUM_PROPS,
 	};
 
+	int NumQuads = pLayer ? (int)pLayer->m_vQuads.size() : 0;
 	CProperty aProps[] = {
+		{"Order", pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], PROPTYPE_INT_STEP, 0, NumQuads},
 		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
@@ -676,6 +679,12 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 
 	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
 	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
+
+	if(Prop == PROP_ORDER && pLayer)
+	{
+		int QuadIndex = pLayer->SwapQuads(pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], NewVal);
+		pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex] = QuadIndex;
+	}
 
 	for(auto &pQuad : vpQuads)
 	{

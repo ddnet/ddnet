@@ -267,3 +267,16 @@ CLayer *CLayerQuads::Duplicate() const
 {
 	return new CLayerQuads(*this);
 }
+
+int CLayerQuads::SwapQuads(int Index0, int Index1)
+{
+	if(Index0 < 0 || Index0 >= (int)m_vQuads.size())
+		return Index0;
+	if(Index1 < 0 || Index1 >= (int)m_vQuads.size())
+		return Index0;
+	if(Index0 == Index1)
+		return Index0;
+	m_pEditor->m_Map.m_Modified = true;
+	std::swap(m_vQuads[Index0], m_vQuads[Index1]);
+	return Index1;
+}
