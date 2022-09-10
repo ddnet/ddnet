@@ -446,25 +446,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		pColorFeet = &g_Config.m_ClDummyColorFeet;
 	}
 
-	// skin info
-	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
-	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
-	if(*pUseCustomColor)
-	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
-	}
-	else
-	{
-		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-	}
-	OwnSkinInfo.m_Size = 50.0f;
-
 	MainView.HSplitTop(10.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
 	Label.VSplitLeft(230.0f, &Label, 0);
@@ -542,6 +523,27 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	// note: get the skin info after the settings buttons, because they can trigger a refresh
+	// which invalidates the skin
+	// skin info
+	CTeeRenderInfo OwnSkinInfo;
+	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
+	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
+	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
+	if(*pUseCustomColor)
+	{
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
+	}
+	else
+	{
+		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+	}
+	OwnSkinInfo.m_Size = 50.0f;
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
