@@ -88,6 +88,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	pOut->m_Passworded = Passworded;
 	str_copy(pOut->m_aGameType, GameType);
 	str_copy(pOut->m_aName, Name);
+	str_sanitize_cc(pOut->m_aName);
 	str_copy(pOut->m_aMapName, MapName);
 	str_copy(pOut->m_aVersion, Version);
 
