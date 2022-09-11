@@ -337,7 +337,7 @@ TEST(Str, InList)
 	EXPECT_TRUE(str_in_list("abc,,def", ",", "def"));
 }
 
-TEST(Str, StrFormat)
+TEST(Str, Format)
 {
 	char aBuf[4];
 	EXPECT_EQ(str_format(aBuf, 4, "%d:", 9), 2);
@@ -348,7 +348,7 @@ TEST(Str, StrFormat)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
-TEST(Str, StrFormatTruncate)
+TEST(Str, FormatTruncate)
 {
 	const char *pStr = "DDNet最好了";
 	char aBuf[64];
@@ -374,7 +374,7 @@ TEST(Str, StrFormatTruncate)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 
-TEST(Str, StrCopyNum)
+TEST(Str, CopyNum)
 {
 	const char *pFoo = "Foobaré";
 	char aBuf[64];
@@ -399,7 +399,7 @@ TEST(Str, StrCopyNum)
 	EXPECT_STREQ(aBuf3, "Foobaré");
 }
 
-TEST(Str, StrCopy)
+TEST(Str, Copy)
 {
 	const char *pStr = "DDNet最好了";
 	char aBuf[64];
@@ -462,7 +462,7 @@ TEST(Str, Utf8Stats)
 	EXPECT_EQ(Count, 3);
 }
 
-TEST(Str, StrTime)
+TEST(Str, Time)
 {
 	char aBuf[32] = "foobar";
 
@@ -514,7 +514,7 @@ TEST(Str, StrTime)
 	EXPECT_STREQ(aBuf, "2057:36.78");
 }
 
-TEST(Str, StrTimeFloat)
+TEST(Str, TimeFloat)
 {
 	char aBuf[64];
 	EXPECT_EQ(str_time_float(123456.78, TIME_DAYS, aBuf, sizeof(aBuf)), 11);
@@ -522,4 +522,20 @@ TEST(Str, StrTimeFloat)
 
 	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
 	EXPECT_STREQ(aBuf, "00:12.16");
+}
+
+TEST(Str, HasCc)
+{
+	EXPECT_FALSE(str_has_cc(""));
+	EXPECT_FALSE(str_has_cc("a"));
+	EXPECT_FALSE(str_has_cc("Merhaba dünya!"));
+
+	EXPECT_TRUE(str_has_cc("\n"));
+	EXPECT_TRUE(str_has_cc("\n"));
+	EXPECT_TRUE(str_has_cc("\r"));
+	EXPECT_TRUE(str_has_cc("\t"));
+	EXPECT_TRUE(str_has_cc("a\n"));
+	EXPECT_TRUE(str_has_cc("a\rb"));
+	EXPECT_TRUE(str_has_cc("\tb"));
+	EXPECT_TRUE(str_has_cc("\n\n"));
 }

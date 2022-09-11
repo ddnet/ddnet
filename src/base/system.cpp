@@ -2650,6 +2650,20 @@ char *str_trim_words(char *str, int words)
 	return str;
 }
 
+bool str_has_cc(const char *str)
+{
+	unsigned char *s = (unsigned char *)str;
+	while(*s)
+	{
+		if(*s < 32)
+		{
+			return true;
+		}
+		s++;
+	}
+	return false;
+}
+
 /* makes sure that the string only contains the characters between 32 and 255 */
 void str_sanitize_cc(char *str_in)
 {
