@@ -191,6 +191,11 @@ int CHttpRequest::RunImpl(CURL *pUser)
 		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(pHandle, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
+	long Protocols = CURLPROTO_HTTPS;
+	if(g_Config.m_HttpAllowInsecure)
+	{
+		Protocols |= CURLPROTO_HTTP;
+	}
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(pHandle, CURLOPT_ERRORBUFFER, aErr);
 
@@ -200,7 +205,7 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
 
 	curl_easy_setopt(pHandle, CURLOPT_SHARE, gs_pShare);
-	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, Protocols);
 	curl_easy_setopt(pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(pHandle, CURLOPT_FAILONERROR, 1L);
