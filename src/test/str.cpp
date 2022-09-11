@@ -523,3 +523,19 @@ TEST(Str, StrTimeFloat)
 	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
 	EXPECT_STREQ(aBuf, "00:12.16");
 }
+
+TEST(Str, HasCc)
+{
+	EXPECT_FALSE(str_has_cc(""));
+	EXPECT_FALSE(str_has_cc("a"));
+	EXPECT_FALSE(str_has_cc("Merhaba dünya!"));
+
+	EXPECT_TRUE(str_has_cc("\n"));
+	EXPECT_TRUE(str_has_cc("\n"));
+	EXPECT_TRUE(str_has_cc("\r"));
+	EXPECT_TRUE(str_has_cc("\t"));
+	EXPECT_TRUE(str_has_cc("a\n"));
+	EXPECT_TRUE(str_has_cc("a\rb"));
+	EXPECT_TRUE(str_has_cc("\tb"));
+	EXPECT_TRUE(str_has_cc("\n\n"));
+}
