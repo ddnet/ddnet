@@ -359,6 +359,7 @@ CClient::CClient() :
 	m_aMapDetailsName[0] = 0;
 	m_MapDetailsSha256 = SHA256_ZEROED;
 	m_MapDetailsCrc = 0;
+	m_aMapDetailsUrl[0] = 0;
 
 	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO);
 	m_pDDNetInfoTask = NULL;
@@ -1658,16 +1659,25 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
 			int MapCrc = Unpacker.GetInt();
+			int MapSize = Unpacker.GetInt();
 
 			if(Unpacker.Error())
 			{
 				return;
 			}
 
+			const char *pMapUrl = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			if(Unpacker.Error())
+			{
+				pMapUrl = "";
+			}
+
 			m_MapDetailsPresent = true;
+			(void)MapSize;
 			str_copy(m_aMapDetailsName, pMap);
 			m_MapDetailsSha256 = *pMapSha256;
 			m_MapDetailsCrc = MapCrc;
+			str_copy(m_aMapDetailsUrl, pMapUrl);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
@@ -1720,9 +1730,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			else
 			{
 				SHA256_DIGEST *pMapSha256 = 0;
+				const char *pMapUrl = nullptr;
 				if(MapDetailsWerePresent && str_comp(m_aMapDetailsName, pMap) == 0 && m_MapDetailsCrc == MapCrc)
 				{
 					pMapSha256 = &m_MapDetailsSha256;
+					pMapUrl = m_aMapDetailsUrl[0] ? m_aMapDetailsUrl : nullptr;
 				}
 				pError = LoadMapSearch(pMap, pMapSha256, MapCrc);
 
@@ -1767,8 +1779,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps.ddnet.org") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
-						m_pMapdownloadTask = HttpGetFile(aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+						m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
+						m_pMapdownloadTask->MaxResponseSize(1024 * 1024 * 1024); // 1 GiB
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
