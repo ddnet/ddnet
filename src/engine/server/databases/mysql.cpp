@@ -64,6 +64,7 @@ public:
 		const char *pUser,
 		const char *pPass,
 		const char *pIp,
+		const char *pBindaddr,
 		int Port,
 		bool Setup);
 	~CMysqlConnection();
@@ -138,6 +139,7 @@ private:
 	char m_aUser[64];
 	char m_aPass[64];
 	char m_aIp[64];
+	char m_aBindaddr[128];
 	int m_Port;
 	bool m_Setup;
 
@@ -155,6 +157,7 @@ CMysqlConnection::CMysqlConnection(
 	const char *pUser,
 	const char *pPass,
 	const char *pIp,
+	const char *pBindaddr,
 	int Port,
 	bool Setup) :
 	IDbConnection(pPrefix),
@@ -173,6 +176,7 @@ CMysqlConnection::CMysqlConnection(
 	str_copy(m_aUser, pUser, sizeof(m_aUser));
 	str_copy(m_aPass, pPass, sizeof(m_aPass));
 	str_copy(m_aIp, pIp, sizeof(m_aIp));
+	str_copy(m_aBindaddr, pBindaddr, sizeof(m_aBindaddr));
 }
 
 CMysqlConnection::~CMysqlConnection()
@@ -217,7 +221,7 @@ void CMysqlConnection::Print(IConsole *pConsole, const char *pMode)
 
 CMysqlConnection *CMysqlConnection::Copy()
 {
-	return new CMysqlConnection(m_aDatabase, GetPrefix(), m_aUser, m_aPass, m_aIp, m_Port, m_Setup);
+	return new CMysqlConnection(m_aDatabase, GetPrefix(), m_aUser, m_aPass, m_aIp, m_aBindaddr, m_Port, m_Setup);
 }
 
 void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
@@ -273,6 +277,10 @@ bool CMysqlConnection::ConnectImpl()
 	mysql_options(&m_Mysql, MYSQL_OPT_WRITE_TIMEOUT, &OptWriteTimeout);
 	mysql_options(&m_Mysql, MYSQL_OPT_RECONNECT, &OptReconnect);
 	mysql_options(&m_Mysql, MYSQL_SET_CHARSET_NAME, "utf8mb4");
+	if(m_aBindaddr[0] != '\0')
+	{
+		mysql_options(&m_Mysql, MYSQL_OPT_BIND, m_aBindaddr);
+	}
 
 	if(!mysql_real_connect(&m_Mysql, m_aIp, m_aUser, m_aPass, nullptr, m_Port, nullptr, CLIENT_IGNORE_SIGPIPE))
 	{
@@ -711,10 +719,11 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pUser,
 	const char *pPass,
 	const char *pIp,
+	const char *pBindaddr,
 	int Port,
 	bool Setup)
 {
-	return std::make_unique<CMysqlConnection>(pDatabase, pPrefix, pUser, pPass, pIp, Port, Setup);
+	return std::make_unique<CMysqlConnection>(pDatabase, pPrefix, pUser, pPass, pIp, pBindaddr, Port, Setup);
 }
 #else
 int MysqlInit()
@@ -730,6 +739,7 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pUser,
 	const char *pPass,
 	const char *pIp,
+	const char *pBindaddr,
 	int Port,
 	bool Setup)
 {
