@@ -1530,7 +1530,11 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	if(!Found)
 	{
-		str_copy(pResult->m_aMessage, "You don't belong to this team", sizeof(pResult->m_aMessage));
+		str_copy(pResult->m_aMessage, "This save exists, but you are not part of it. "
+					      "Make sure you use the same name as you had when saving. "
+					      "If you saved with an already used code, you get a new random save code, "
+					      "check ddnet-saves.txt in config_directory.",
+			sizeof(pResult->m_aMessage));
 		return false;
 	}
 
