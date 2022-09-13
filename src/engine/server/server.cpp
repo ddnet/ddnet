@@ -3387,8 +3387,8 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	auto pMysqlConn = CreateMysqlConnection(
 		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
-		pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6),
-		SetUpDb);
+		pResult->GetString(4), pResult->GetString(5), g_Config.m_SvSqlBindaddr,
+		pResult->GetInteger(6), SetUpDb);
 
 	if(!pMysqlConn)
 	{
