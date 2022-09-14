@@ -19,6 +19,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
+#include <engine/shared/hostlookup.h>
 #include <engine/shared/http.h>
 #include <engine/shared/network.h>
 #include <engine/warning.h>

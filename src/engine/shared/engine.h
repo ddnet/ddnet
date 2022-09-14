@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_ENGINE_H
 #define ENGINE_SHARED_ENGINE_H
 
+#include <engine/shared/jobs.h>
 #include <engine/engine.h>
 
 class CEngine : public IEngine
@@ -14,11 +15,15 @@ public:
 
 	char m_aAppName[256];
 
+	CJobPool m_JobPool;
+	std::vector<IEngineRunner *> m_apRunners;
+
 	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs);
 	virtual ~CEngine() override;
 
 	virtual void Init() override;
-	virtual void AddJob(std::shared_ptr<IJob> pJob) override;
+	virtual void Dispatch(std::shared_ptr<IEngineRunnable> pRunnable) override;
+	virtual int RegisterRunner(IEngineRunner *pRunner) override;
 	virtual void SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger) override;
 };
 

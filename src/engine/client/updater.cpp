@@ -136,7 +136,7 @@ int CUpdater::GetCurrentPercent()
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	m_pEngine->AddJob(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
+	m_pEngine->Dispatch(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
 }
 
 bool CUpdater::MoveFile(const char *pFile)

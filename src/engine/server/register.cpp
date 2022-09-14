@@ -317,7 +317,7 @@ void CRegister::CProtocol::SendRegister()
 		RequestIndex = m_pShared->m_NumTotalRequests;
 		m_pShared->m_NumTotalRequests += 1;
 	}
-	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister)));
+	m_pParent->m_pEngine->Dispatch(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister)));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
@@ -357,7 +357,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 		pDelete->Timeout(CTimeout{1000, 1000, 0, 0});
 	}
 	log_info(ProtocolToSystem(m_Protocol), "deleting...");
-	m_pParent->m_pEngine->AddJob(std::move(pDelete));
+	m_pParent->m_pEngine->Dispatch(std::move(pDelete));
 }
 
 CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :

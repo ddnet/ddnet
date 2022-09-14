@@ -12,19 +12,6 @@
 
 #include "engine.h"
 
-CHostLookup::CHostLookup() = default;
-
-CHostLookup::CHostLookup(const char *pHostname, int Nettype)
-{
-	str_copy(m_aHostname, pHostname);
-	m_Nettype = Nettype;
-}
-
-void CHostLookup::Run()
-{
-	m_Result = net_host_lookup(m_aHostname, &m_Addr, m_Nettype);
-}
-
 static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 {
 	CEngine *pEngine = static_cast<CEngine *>(pUserData);
@@ -69,6 +56,7 @@ CEngine::CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger>
 	}
 
 	m_JobPool.Init(Jobs);
+	IJob::m_sRunner = RegisterRunner(&m_JobPool);
 
 	m_Logging = false;
 }
@@ -91,11 +79,18 @@ void CEngine::Init()
 	m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
 }
 
-void CEngine::AddJob(std::shared_ptr<IJob> pJob)
+int CEngine::RegisterRunner(IEngineRunner *pRunner)
+{
+	m_apRunners.push_back(pRunner);
+	return m_apRunners.size() - 1;
+}
+
+void CEngine::Dispatch(std::shared_ptr<IEngineRunnable> pRunnable)
 {
 	if(g_Config.m_Debug)
-		dbg_msg("engine", "job added");
-	m_JobPool.Add(std::move(pJob));
+		dbg_msg("engine", "job dispatched to %d", pRunnable->Runner());
+
+	m_apRunners[pRunnable->Runner()]->Run(std::move(pRunnable));
 }
 
 void CEngine::SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger)

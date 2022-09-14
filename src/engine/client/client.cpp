@@ -1782,7 +1782,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						m_pMapdownloadTask->MaxResponseSize(1024 * 1024 * 1024); // 1 GiB
-						Engine()->AddJob(m_pMapdownloadTask);
+						Engine()->Dispatch(m_pMapdownloadTask);
 					}
 					else
 						SendMapRequest();
@@ -3861,7 +3861,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
 		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
-		Engine()->AddJob(pDemoEditTask);
+		Engine()->Dispatch(pDemoEditTask);
 		m_lpEditJobs.push_back(pDemoEditTask);
 
 		// And we restart the recorder
@@ -4874,7 +4874,7 @@ void CClient::RequestDDNetInfo()
 	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 	m_pDDNetInfoTask->Timeout(CTimeout{10000, 0, 500, 10});
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
-	Engine()->AddJob(m_pDDNetInfoTask);
+	Engine()->Dispatch(m_pDDNetInfoTask);
 }
 
 int CClient::GetPredictionTime()

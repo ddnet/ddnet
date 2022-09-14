@@ -129,7 +129,7 @@ void CChooseMaster::Reset()
 void CChooseMaster::Refresh()
 {
 	if(m_pJob == nullptr || m_pJob->Status() == IJob::STATE_DONE)
-		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(m_pData));
+		m_pEngine->Dispatch(m_pJob = std::make_shared<CJob>(m_pData));
 }
 
 void CChooseMaster::CJob::Abort()
@@ -329,7 +329,7 @@ void CServerBrowserHttp::Update()
 		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
 		m_pGetServers->Timeout(CTimeout{10000, 0, 8000, 10});
-		m_pEngine->AddJob(m_pGetServers);
+		m_pEngine->Dispatch(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
 	else if(m_State == STATE_REFRESHING)

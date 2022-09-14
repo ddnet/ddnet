@@ -450,7 +450,7 @@ int CSkins::FindImpl(const char *pName)
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
-	m_pClient->Engine()->AddJob(Skin.m_pTask);
+	m_pClient->Engine()->Dispatch(Skin.m_pTask);
 	m_vDownloadSkins.insert(std::lower_bound(m_vDownloadSkins.begin(), m_vDownloadSkins.end(), Skin), std::move(Skin));
 	return -1;
 }

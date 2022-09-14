@@ -4,28 +4,34 @@
 #define ENGINE_SHARED_JOBS_H
 
 #include <base/system.h>
+#include <engine/engine.h>
 
 #include <atomic>
 #include <memory>
 
 class CJobPool;
+class CEngine;
 
-class IJob
+class IJob : public IEngineRunnable
 {
 	friend CJobPool;
+	friend CEngine;
+	inline static int m_sRunner;
 
 private:
 	std::shared_ptr<IJob> m_pNext;
 
 	std::atomic<int> m_Status;
-	virtual void Run() = 0;
+	virtual void Run() override = 0;
 
 public:
 	IJob();
 	IJob(const IJob &Other);
 	IJob &operator=(const IJob &Other);
 	virtual ~IJob();
-	int Status();
+
+	virtual int Status() override;
+	virtual int Runner() final { return m_sRunner; };
 
 	enum
 	{
@@ -35,7 +41,7 @@ public:
 	};
 };
 
-class CJobPool
+class CJobPool : public IEngineRunner
 {
 	enum
 	{
@@ -58,7 +64,8 @@ public:
 
 	void Init(int NumThreads);
 	void Destroy();
-	void Add(std::shared_ptr<IJob> pJob) REQUIRES(!m_Lock);
+	void Add(std::shared_ptr<IJob> pJob);
+	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) override;
 	static void RunBlocking(IJob *pJob);
 };
 #endif

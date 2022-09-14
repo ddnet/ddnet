@@ -112,6 +112,12 @@ void CJobPool::Add(std::shared_ptr<IJob> pJob)
 	sphore_signal(&m_Semaphore);
 }
 
+void CJobPool::Run(std::shared_ptr<IEngineRunnable> pRunnable)
+{
+	auto pJob = std::static_pointer_cast<IJob>(pRunnable);
+	Add(pJob);
+}
+
 void CJobPool::RunBlocking(IJob *pJob)
 {
 	pJob->m_Status = IJob::STATE_RUNNING;
