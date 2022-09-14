@@ -272,9 +272,7 @@ kill_all
 wait
 sleep 1
 
-# TODO: remove the first grep after https://github.com/ddnet/ddnet/pull/5036 is merged
-if ! grep -qE '^\[[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2}\]\[chat\]: 0:-2:client1: hello world$' server.log && \
-	! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} D chat: 0:-2:client1: hello world$' server.log
+if ! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} I chat: 0:-2:client1: hello world$' server.log
 then
 	touch fail_chat.txt
 	echo "[-] Error: chat message not found in server log"
@@ -295,12 +293,12 @@ then
 	echo "[-] Error: admin message not found in server log"
 fi
 
-if ! grep -q "\[demo_player\]: Stopped playback" client1.log
+if ! grep -q "demo_player: Stopped playback" client1.log
 then
 	touch fail_demo_server.txt
 	echo "[-] Error: demo playback of server demo in client 1 was not started/finished"
 fi
-if ! grep -q "\[demo_player\]: Stopped playback" client2.log
+if ! grep -q "demo_player: Stopped playback" client2.log
 then
 	touch fail_demo_client.txt
 	echo "[-] Error: demo playback of client demo in client 2 was not started/finished"
