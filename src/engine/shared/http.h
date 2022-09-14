@@ -39,8 +39,24 @@ struct CTimeout
 	long LowSpeedTime;
 };
 
-class CHttpRequest : public IJob
+class CHttpRunner : public IEngineRunner
 {
+
+public:
+	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) override;
+};
+
+class CHttpRunnable : public IEngineRunnable
+{
+public:
+	inline static int m_sRunner;
+	virtual int Runner() final { return m_sRunner; };
+};
+
+class CHttpRequest : public CHttpRunnable
+{
+	friend CHttpRunner;
+
 	enum class REQUEST
 	{
 		GET = 0,
@@ -81,6 +97,7 @@ class CHttpRequest : public IJob
 	std::atomic<bool> m_Abort{false};
 
 	void Run() override;
+	virtual int Status() override { return 0; };
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
 	int RunImpl(void *pUser);
@@ -192,7 +209,7 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 	return pResult;
 }
 
-bool HttpInit(IStorage *pStorage);
+bool HttpInit(IEngine *pEngine, IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 bool HttpHasIpresolveBug();
 #endif // ENGINE_SHARED_HTTP_H

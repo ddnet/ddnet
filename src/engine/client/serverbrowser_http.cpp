@@ -179,7 +179,9 @@ void CChooseMaster::CJob::Run()
 			CLockScope ls(m_Lock);
 			m_pHead = std::unique_ptr<CHttpRequest>(pHead);
 		}
-		IEngine::RunJobBlocking(pHead);
+
+		//TODO: FIXME
+		//IEngine::RunJobBlocking(pHead);
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
@@ -197,7 +199,9 @@ void CChooseMaster::CJob::Run()
 			CLockScope ls(m_Lock);
 			m_pGet = std::unique_ptr<CHttpRequest>(pGet);
 		}
-		IEngine::RunJobBlocking(pGet);
+
+		//TODO: FIXME
+		//IEngine::RunJobBlocking(pGet);
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
 		if(pHead->State() == HTTP_ABORTED)
 		{

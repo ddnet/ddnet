@@ -15,6 +15,16 @@
 #define WIN32_LEAN_AND_MEAN
 #include <curl/curl.h>
 
+CHttpRunner gs_Runner;
+void CHttpRunner::Run(std::shared_ptr<IEngineRunnable> pRunnable)
+{
+	auto pHttpRunnable = std::static_pointer_cast<CHttpRunnable>(pRunnable);
+	if(auto pRequest = std::dynamic_pointer_cast<CHttpRequest>(pHttpRunnable))
+	{
+		dbg_msg("http", "%s", pRequest->m_aUrl);
+	}
+}
+
 // TODO: Non-global pls?
 static CURLSH *gs_pShare;
 static LOCK gs_aLocks[CURL_LOCK_DATA_LAST + 1];
@@ -71,8 +81,10 @@ int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, v
 	return 0;
 }
 
-bool HttpInit(IStorage *pStorage)
+bool HttpInit(IEngine *pEngine, IStorage *pStorage)
 {
+	CHttpRunnable::m_sRunner = pEngine->RegisterRunner(&gs_Runner);
+
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
 		return true;

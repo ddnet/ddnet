@@ -3012,7 +3012,7 @@ void CClient::InitInterfaces()
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
-	HttpInit(m_pStorage);
+	HttpInit(m_pEngine, m_pStorage);
 
 #if defined(CONF_AUTOUPDATE)
 	m_Updater.Init();
