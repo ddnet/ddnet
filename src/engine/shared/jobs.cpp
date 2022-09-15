@@ -42,7 +42,7 @@ CJobPool::~CJobPool()
 {
 	if(!m_Shutdown)
 	{
-		Destroy();
+		Shutdown();
 	}
 }
 
@@ -83,7 +83,7 @@ void CJobPool::Init(int NumThreads)
 		m_apThreads[i] = thread_init(WorkerThread, this, "CJobPool worker");
 }
 
-void CJobPool::Destroy()
+void CJobPool::Shutdown()
 {
 	m_Shutdown = true;
 	for(int i = 0; i < m_NumThreads; i++)

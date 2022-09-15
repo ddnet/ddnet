@@ -22,7 +22,7 @@ class CUpdaterFetchTask : public CHttpRequest
 	void OnProgress() override;
 
 protected:
-	int OnCompletion(int State) override;
+	void OnCompletion() override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -58,9 +58,9 @@ void CUpdaterFetchTask::OnProgress()
 	m_pUpdater->m_Percent = Progress();
 }
 
-int CUpdaterFetchTask::OnCompletion(int State)
+void CUpdaterFetchTask::OnCompletion()
 {
-	State = CHttpRequest::OnCompletion(State);
+	int State = this->State();
 
 	const char *pFileName = 0;
 	for(const char *pPath = Dest(); *pPath; pPath++)
@@ -81,8 +81,6 @@ int CUpdaterFetchTask::OnCompletion(int State)
 		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
-
-	return State;
 }
 
 CUpdater::CUpdater()

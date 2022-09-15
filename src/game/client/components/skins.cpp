@@ -27,15 +27,12 @@ static bool IsVanillaSkin(const char *pName)
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
-int CSkins::CGetPngFile::OnCompletion(int State)
+void CSkins::CGetPngFile::OnCompletion()
 {
-	State = CHttpRequest::OnCompletion(State);
-
-	if(State != HTTP_ERROR && State != HTTP_ABORTED && !m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE))
+	if(State() != HTTP_ERROR && State() != HTTP_ABORTED)
 	{
-		State = HTTP_ERROR;
+		m_Loaded = m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
 	}
-	return State;
 }
 
 CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest) :
@@ -425,17 +422,20 @@ int CSkins::FindImpl(const char *pName)
 	const auto &[RangeBegin, RangeEnd] = std::equal_range(m_vDownloadSkins.begin(), m_vDownloadSkins.end(), DownloadNeedle);
 	if(std::distance(RangeBegin, RangeEnd) == 1)
 	{
-		if(RangeBegin->m_pTask && RangeBegin->m_pTask->State() == HTTP_DONE)
+		if(auto pTask = RangeBegin->m_pTask)
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", RangeBegin->m_aName);
-			Storage()->RenameFile(RangeBegin->m_aPath, aPath, IStorage::TYPE_SAVE);
-			LoadSkin(RangeBegin->m_aName, RangeBegin->m_pTask->m_Info);
-			RangeBegin->m_pTask = nullptr;
-		}
-		if(RangeBegin->m_pTask && (RangeBegin->m_pTask->State() == HTTP_ERROR || RangeBegin->m_pTask->State() == HTTP_ABORTED))
-		{
-			RangeBegin->m_pTask = nullptr;
+			if(pTask->State() == HTTP_DONE && pTask->m_Loaded)
+			{
+				char aPath[IO_MAX_PATH_LENGTH];
+				str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", RangeBegin->m_aName);
+				Storage()->RenameFile(RangeBegin->m_aPath, aPath, IStorage::TYPE_SAVE);
+				LoadSkin(RangeBegin->m_aName, pTask->m_Info);
+				pTask = nullptr;
+			}
+			if((pTask->State() == HTTP_DONE && !pTask->m_Loaded) || (pTask->State() == HTTP_ERROR || pTask->State() == HTTP_ABORTED))
+			{
+				pTask = nullptr;
+			}
 		}
 		return -1;
 	}

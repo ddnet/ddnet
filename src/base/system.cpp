@@ -1498,6 +1498,55 @@ int net_socket_type(NETSOCKET sock)
 	return sock->type;
 }
 
+int net_loop_create()
+{
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = 0;
+	addr.sin_addr.s_addr = 0;
+
+	int sock = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+	if(sock >= 0)
+	{
+		struct sockaddr assigned;
+		socklen_t len = sizeof(assigned);
+		getsockname(sock, &assigned, &len);
+		if(len != sizeof(assigned))
+		{
+			priv_net_close_socket(sock);
+			return 0;
+		}
+
+		connect(sock, &assigned, len);
+
+		unsigned long mode = 1;
+#if defined(CONF_FAMILY_WINDOWS)
+		ioctlsocket(sock, FIONBIO, (unsigned long *)&mode);
+#else
+		if(ioctl(sock, FIONBIO, (unsigned long *)&mode) == -1)
+			dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
+#endif
+	}
+
+	return sock;
+}
+
+void net_loop_send(int sock, const void *data, size_t len)
+{
+	send(sock, data, len, 0);
+}
+
+int net_loop_recv(int sock, void *buf, size_t len)
+{
+	int bytes = recv(sock, buf, len, 0);
+	return bytes >= 0 ? bytes : 0;
+}
+
+void net_loop_close(int sock)
+{
+	priv_net_close_socket(sock);
+}
+
 NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));

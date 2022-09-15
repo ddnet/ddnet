@@ -10,16 +10,19 @@
 class CFutureLogger;
 class ILogger;
 
-class IEngineRunnable {
+class IEngineRunnable
+{
 public:
 	virtual int Status() = 0;
 	virtual void Run() = 0;
 	virtual int Runner() = 0;
 };
 
-class IEngineRunner {
+class IEngineRunner
+{
 public:
 	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) = 0;
+	virtual void Shutdown() = 0;
 };
 
 class IJob;

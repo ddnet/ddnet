@@ -3,7 +3,10 @@
 
 #include <algorithm>
 #include <atomic>
+#include <condition_variable>
 #include <engine/shared/jobs.h>
+#include <mutex>
+#include <queue>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -39,11 +42,40 @@ struct CTimeout
 	long LowSpeedTime;
 };
 
+class CHttpRequest;
+
 class CHttpRunner : public IEngineRunner
 {
+	enum State
+	{
+		UNINITIALIZED,
+		RUNNING,
+		ERROR
+	};
+
+	int m_WakeUpPair[2];
+
+	std::mutex m_Lock{};
+	std::condition_variable m_Cv{};
+	std::queue<std::shared_ptr<CHttpRequest>> m_PendingRequests{};
+	std::shared_ptr<CHttpRequest> m_pRunningRequestsHead = nullptr;
+	State m_State = UNINITIALIZED;
+
+	void WakeUp();
 
 public:
+	std::atomic<bool> m_Shutdown = false;
+
+	// Boot
+	bool Init();
+	static void ThreadMain(void *pUser);
+
+	// User
 	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) override;
+	void Shutdown() override;
+
+	// Thread
+	void RunLoop();
 };
 
 class CHttpRunnable : public IEngineRunnable
@@ -51,11 +83,16 @@ class CHttpRunnable : public IEngineRunnable
 public:
 	inline static int m_sRunner;
 	virtual int Runner() final { return m_sRunner; };
+	virtual void Run() final{};
 };
 
 class CHttpRequest : public CHttpRunnable
 {
+public:
 	friend CHttpRunner;
+	std::shared_ptr<CHttpRequest> m_pPrev = nullptr;
+	std::shared_ptr<CHttpRequest> m_pNext = nullptr;
+	void *m_pHandle = nullptr; // void * == CURL *
 
 	enum class REQUEST
 	{
@@ -93,14 +130,15 @@ class CHttpRequest : public CHttpRunnable
 	HTTPLOG m_LogProgress = HTTPLOG::ALL;
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
 
+	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
 	std::atomic<int> m_State{HTTP_QUEUED};
 	std::atomic<bool> m_Abort{false};
 
-	void Run() override;
 	virtual int Status() override { return 0; };
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
-	int RunImpl(void *pUser);
+	bool ConfigureHandle(void *pHandle); // void * == CURL *
+	void OnCompletionInternal(unsigned int Result); // unsigned int == CURLcode
 
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
@@ -111,7 +149,7 @@ class CHttpRequest : public CHttpRunnable
 
 protected:
 	virtual void OnProgress() {}
-	virtual int OnCompletion(int State);
+	virtual void OnCompletion(){};
 
 public:
 	CHttpRequest(const char *pUrl);

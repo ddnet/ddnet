@@ -63,7 +63,7 @@ public:
 	~CJobPool();
 
 	void Init(int NumThreads);
-	void Destroy();
+	virtual void Shutdown() override;
 	void Add(std::shared_ptr<IJob> pJob);
 	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) override;
 	static void RunBlocking(IJob *pJob);

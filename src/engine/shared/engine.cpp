@@ -63,7 +63,10 @@ CEngine::CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger>
 
 CEngine::~CEngine()
 {
-	m_JobPool.Destroy();
+	for(auto r : m_apRunners)
+	{
+		r->Shutdown();
+	}
 }
 
 void CEngine::Init()

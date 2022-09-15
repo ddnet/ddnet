@@ -942,6 +942,11 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 */
 int net_socket_type(NETSOCKET sock);
 
+int net_loop_create();
+void net_loop_send(int sock, const void *data, size_t len);
+int net_loop_recv(int sock, void *buf, size_t len);
+void net_loop_close(int sock);
+
 /*
 	Function: net_udp_create
 		Creates a UDP socket and binds it to a port.

@@ -1,8 +1,8 @@
 #ifndef ENGINE_SHARED_ENGINE_H
 #define ENGINE_SHARED_ENGINE_H
 
-#include <engine/shared/jobs.h>
 #include <engine/engine.h>
+#include <engine/shared/jobs.h>
 
 class CEngine : public IEngine
 {
