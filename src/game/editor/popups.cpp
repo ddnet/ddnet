@@ -9,6 +9,7 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <limits>
 
 #include "editor.h"
 
@@ -1782,14 +1783,6 @@ int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitMid(&CoordXPicker, &CoordYPicker);
 	CoordXPicker.VSplitRight(2.f, &CoordXPicker, nullptr);
 
-	int MaxX = pEditor->m_Map.m_pGameLayer->m_Width - 1;
-	int MaxY = pEditor->m_Map.m_pGameLayer->m_Height - 1;
-
-	if(pEditor->m_GotoX > MaxX)
-		pEditor->m_GotoX = MaxX;
-	if(pEditor->m_GotoY > MaxY)
-		pEditor->m_GotoY = MaxY;
-
 	static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
 
 	enum
@@ -1800,8 +1793,8 @@ int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"X", pEditor->m_GotoX, PROPTYPE_INT_STEP, 0, MaxX},
-		{"Y", pEditor->m_GotoY, PROPTYPE_INT_STEP, 0, MaxY},
+		{"X", pEditor->m_GotoX, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y", pEditor->m_GotoY, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
 		{nullptr},
 	};
 
