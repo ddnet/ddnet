@@ -69,9 +69,13 @@ void CHttpRunner::WakeUp()
 
 void CHttpRunner::Run(std::shared_ptr<IEngineRunnable> pRunnable)
 {
-	std::lock_guard l(m_Lock);
+	std::unique_lock l(m_Lock);
 	if(m_Shutdown)
 		return;
+
+	m_Cv.wait(l, [this]() { return m_State != UNINITIALIZED; });
+	if(m_State == ERROR)
+		return; //TODO: Report and handle this properly
 
 	auto pHttpRunnable = std::static_pointer_cast<CHttpRunnable>(pRunnable);
 	if(auto pRequest = std::dynamic_pointer_cast<CHttpRequest>(pHttpRunnable))
