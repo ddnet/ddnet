@@ -2073,6 +2073,8 @@ if(CLIENT)
     components/voting.h
     gameclient.cpp
     gameclient.h
+    laser_data.cpp
+    laser_data.h
     lineinput.cpp
     lineinput.h
     prediction/entities/character.cpp
