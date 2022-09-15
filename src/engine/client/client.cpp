@@ -2891,15 +2891,11 @@ void CClient::Update()
 	{
 		if(m_pMapdownloadTask->State() == HTTP_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == HTTP_ERROR)
+		else if(m_pMapdownloadTask->State() == HTTP_ERROR || m_pMapdownloadTask->State() == HTTP_ABORTED)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
-		}
-		else if(m_pMapdownloadTask->State() == HTTP_ABORTED)
-		{
-			m_pMapdownloadTask = NULL;
 		}
 	}
 
