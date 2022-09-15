@@ -3791,7 +3791,7 @@ static void ModifyIndexDeleted(int *pIndex)
 
 int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int s_ReloadButton = 0;
+	static int s_ReaddButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 
@@ -3822,7 +3822,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitTop(12.0f, &Slot, &View);
 	}
 
-	if(pEditor->DoButton_MenuItem(&s_ReloadButton, "Reload", 0, &Slot, 0, "Reloads the image from mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from mapres folder"))
 	{
 		bool bIsExternal = pImg->m_External;
 		char aBuffer[1024];
@@ -3856,7 +3856,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int s_ReloadButton = 0;
+	static int s_ReaddButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 
@@ -3865,7 +3865,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitTop(12.0f, &Slot, &View);
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
-	if(pEditor->DoButton_MenuItem(&s_ReloadButton, "Reload", 0, &Slot, 0, "Reloads the sound from mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from mapres folder"))
 	{
 		char aBuffer[1024];
 		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.opus", pSound->m_aName);
