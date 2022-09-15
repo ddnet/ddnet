@@ -34,6 +34,19 @@ static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void IEngineRunnable::SetStatus(IEngineRunnable::EStatus NewStatus)
+{
+	std::unique_lock l(m_StatusLock);
+	m_Status = NewStatus;
+	m_StatusCV.notify_all();
+}
+
+void IEngineRunnable::Wait()
+{
+	std::unique_lock l(m_StatusLock);
+	m_StatusCV.wait(l, [this](){ return m_Status == EStatus::DONE; });
+}
+
 CEngine::CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs)
 {
 	m_pFutureLogger = std::move(pFutureLogger);

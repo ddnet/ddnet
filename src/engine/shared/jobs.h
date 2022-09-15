@@ -21,24 +21,12 @@ class IJob : public IEngineRunnable
 private:
 	std::shared_ptr<IJob> m_pNext;
 
-	std::atomic<int> m_Status;
 	virtual void Run() override = 0;
 
 public:
-	IJob();
-	IJob(const IJob &Other);
-	IJob &operator=(const IJob &Other);
 	virtual ~IJob();
 
-	virtual int Status() override;
 	virtual int Runner() final { return m_sRunner; };
-
-	enum
-	{
-		STATE_PENDING = 0,
-		STATE_RUNNING,
-		STATE_DONE
-	};
 };
 
 class CJobPool : public IEngineRunner

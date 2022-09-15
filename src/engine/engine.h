@@ -3,7 +3,9 @@
 #ifndef ENGINE_ENGINE_H
 #define ENGINE_ENGINE_H
 
+#include <atomic>
 #include <memory>
+#include <condition_variable>
 
 #include "kernel.h"
 
@@ -13,9 +15,26 @@ class ILogger;
 class IEngineRunnable
 {
 public:
-	virtual int Status() = 0;
-	virtual void Run() = 0;
+	enum EStatus {
+		PENDING = 0,
+		RUNNING,
+		DONE
+	};
+
 	virtual int Runner() = 0;
+	virtual void Run() = 0;
+
+private:
+	std::atomic<EStatus> m_Status = PENDING;
+
+protected:
+	std::mutex m_StatusLock;
+	std::condition_variable m_StatusCV;
+	void SetStatus(EStatus NewStatus);
+
+public:
+	EStatus Status() { return m_Status; };
+	void Wait();
 };
 
 class IEngineRunner

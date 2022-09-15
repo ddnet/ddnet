@@ -2933,7 +2933,7 @@ void CClient::Update()
 		if(!m_lpEditJobs.empty())
 		{
 			std::shared_ptr<CDemoEdit> e = m_lpEditJobs.front();
-			if(e->Status() == IJob::STATE_DONE)
+			if(e->Status() == IEngineRunnable::DONE)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", e->Destination());

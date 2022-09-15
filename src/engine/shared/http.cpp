@@ -80,7 +80,7 @@ void CHttpRunner::Run(std::shared_ptr<IEngineRunnable> pRunnable)
 	auto pHttpRunnable = std::static_pointer_cast<CHttpRunnable>(pRunnable);
 	if(auto pRequest = std::dynamic_pointer_cast<CHttpRequest>(pHttpRunnable))
 	{
-		dbg_msg("http", "queueing: %s", pRequest->m_aUrl);
+		pRequest->SetStatus(IEngineRunnable::RUNNING);
 		m_PendingRequests.emplace(std::move(pRequest));
 		WakeUp();
 	}
@@ -184,14 +184,12 @@ void CHttpRunner::RunLoop()
 		std::swap(m_PendingRequests, NewRequests);
 		LoopL.unlock();
 
-		dbg_msg("test", "new requests %ld", NewRequests.size());
-
 		while(!NewRequests.empty())
 		{
 			auto pRequest = std::move(NewRequests.front());
 			NewRequests.pop();
 
-			dbg_msg("http", "starting: %s", pRequest->m_aUrl);
+			dbg_msg("http", "task: %s", pRequest->m_aUrl);
 
 			CURL *EH = curl_easy_init();
 			if(!EH)
@@ -210,7 +208,6 @@ void CHttpRunner::RunLoop()
 			m_pRunningRequestsHead = std::move(pRequest);
 
 			mc = curl_multi_add_handle(MultiH, EH);
-			dbg_msg("http", "added multi");
 			if(mc != CURLM_OK)
 				goto bail; //TODO: Report the error
 		}
@@ -236,6 +233,11 @@ bail:;
 		{
 			curl_easy_cleanup(pRequest->m_pHandle);
 			pRequest->m_pPrev = nullptr;
+
+			// Emulate CURLE_ABORTED_BY_CALLBACK
+			str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
+			pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+
 			pRequest = std::move(pRequest->m_pNext);
 		}
 	}
@@ -455,6 +457,7 @@ void CHttpRequest::OnCompletionInternal(unsigned int Result)
 
 	m_State = State;
 	OnCompletion();
+	SetStatus(IEngineRunnable::DONE);
 }
 
 size_t CHttpRequest::OnData(char *pData, size_t DataSize)

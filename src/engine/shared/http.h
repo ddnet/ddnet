@@ -80,10 +80,14 @@ public:
 
 class CHttpRunnable : public IEngineRunnable
 {
+protected:
+	EStatus m_Status = PENDING;
+
 public:
 	inline static int m_sRunner;
 	virtual int Runner() final { return m_sRunner; };
-	virtual void Run() final{};
+	virtual void Run() final {};
+	virtual EStatus Status() final { return m_Status; };
 };
 
 class CHttpRequest : public CHttpRunnable
@@ -134,7 +138,6 @@ public:
 	std::atomic<int> m_State{HTTP_QUEUED};
 	std::atomic<bool> m_Abort{false};
 
-	virtual int Status() override { return 0; };
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
 	bool ConfigureHandle(void *pHandle); // void * == CURL *

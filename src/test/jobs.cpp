@@ -77,7 +77,7 @@ TEST_F(Jobs, LookupHost)
 	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
 
 	Add(pJob);
-	while(pJob->Status() != IJob::STATE_DONE)
+	while(pJob->Status() != IEngineRunnable::DONE)
 	{
 		// yay, busy loop...
 		thread_yield();
@@ -99,7 +99,7 @@ TEST_F(Jobs, LookupHostWebsocket)
 	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
 
 	Add(pJob);
-	while(pJob->Status() != IJob::STATE_DONE)
+	while(pJob->Status() != IEngineRunnable::DONE)
 	{
 		// yay, busy loop...
 		thread_yield();
@@ -126,7 +126,7 @@ TEST_F(Jobs, Many)
 				sphore_signal(&sphore);
 			}
 		});
-		EXPECT_EQ(pJob->Status(), IJob::STATE_PENDING);
+		EXPECT_EQ(pJob->Status(), IEngineRunnable::PENDING);
 		vpJobs.push_back(pJob);
 	}
 	for(auto &pJob : vpJobs)
@@ -138,7 +138,7 @@ TEST_F(Jobs, Many)
 	m_Pool.~CJobPool();
 	for(auto &pJob : vpJobs)
 	{
-		EXPECT_EQ(pJob->Status(), IJob::STATE_DONE);
+		EXPECT_EQ(pJob->Status(), IEngineRunnable::DONE);
 	}
 	new(&m_Pool) CJobPool();
 }

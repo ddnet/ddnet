@@ -30,11 +30,10 @@ public:
 		MAX_URLS = 16,
 	};
 	CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CChooseMaster();
 
 	bool GetBestUrl(const char **pBestUrl) const;
 	void Reset();
-	bool IsRefreshing() const { return m_pJob && m_pJob->Status() != IJob::STATE_DONE; }
+	bool IsRefreshing() const { return m_pJob && m_pJob->Status() != IEngineRunnable::DONE; }
 	void Refresh();
 
 private:
@@ -51,15 +50,16 @@ private:
 	};
 	class CJob : public IJob
 	{
+		IEngine *m_pEngine;
 		LOCK m_Lock;
 		std::shared_ptr<CData> m_pData;
-		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
-		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
+		std::shared_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
+		std::shared_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
 		void Run() override REQUIRES(!m_Lock);
 
 	public:
-		CJob(std::shared_ptr<CData> pData) :
-			m_pData(std::move(pData)) { m_Lock = lock_create(); }
+		CJob(IEngine *pEngine, std::shared_ptr<CData> pData) :
+			m_pEngine(pEngine), m_pData(std::move(pData)) { m_Lock = lock_create(); }
 		virtual ~CJob() { lock_destroy(m_Lock); }
 		void Abort() REQUIRES(!m_Lock);
 	};
@@ -84,14 +84,6 @@ CChooseMaster::CChooseMaster(IEngine *pEngine, VALIDATOR pfnValidator, const cha
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		str_copy(m_pData->m_aaUrls[i], ppUrls[i]);
-	}
-}
-
-CChooseMaster::~CChooseMaster()
-{
-	if(m_pJob)
-	{
-		m_pJob->Abort();
 	}
 }
 
@@ -128,22 +120,8 @@ void CChooseMaster::Reset()
 
 void CChooseMaster::Refresh()
 {
-	if(m_pJob == nullptr || m_pJob->Status() == IJob::STATE_DONE)
-		m_pEngine->Dispatch(m_pJob = std::make_shared<CJob>(m_pData));
-}
-
-void CChooseMaster::CJob::Abort()
-{
-	CLockScope ls(m_Lock);
-	if(m_pHead != nullptr)
-	{
-		m_pHead->Abort();
-	}
-
-	if(m_pGet != nullptr)
-	{
-		m_pGet->Abort();
-	}
+	if(m_pJob == nullptr || m_pJob->Status() == IEngineRunnable::DONE)
+		m_pEngine->Dispatch(m_pJob = std::make_shared<CJob>(m_pEngine, m_pData));
 }
 
 void CChooseMaster::CJob::Run()
@@ -172,16 +150,13 @@ void CChooseMaster::CJob::Run()
 	{
 		aTimeMs[i] = -1;
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		CHttpRequest *pHead = HttpHead(pUrl).release();
+		std::shared_ptr<CHttpRequest> pHead = HttpHead(pUrl);
+
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
-		{
-			CLockScope ls(m_Lock);
-			m_pHead = std::unique_ptr<CHttpRequest>(pHead);
-		}
 
-		//TODO: FIXME
-		//IEngine::RunJobBlocking(pHead);
+		m_pEngine->Dispatch(pHead);
+		pHead->Wait();
 		if(pHead->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
@@ -191,19 +166,17 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
+
 		auto StartTime = time_get_nanoseconds();
-		CHttpRequest *pGet = HttpGet(pUrl).release();
+
+		std::shared_ptr<CHttpRequest> pGet = HttpGet(pUrl);
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
-		{
-			CLockScope ls(m_Lock);
-			m_pGet = std::unique_ptr<CHttpRequest>(pGet);
-		}
 
-		//TODO: FIXME
-		//IEngine::RunJobBlocking(pGet);
+		m_pEngine->Dispatch(pGet);
+		pGet->Wait();
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pHead->State() == HTTP_ABORTED)
+		if(pGet->State() == HTTP_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
@@ -212,6 +185,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
+
 		json_value *pJson = pGet->ResultJson();
 		if(!pJson)
 		{

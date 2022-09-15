@@ -4,28 +4,7 @@
 
 #include <base/lock_scope.h>
 
-IJob::IJob() :
-	m_Status(STATE_PENDING)
-{
-}
-
-IJob::IJob(const IJob &Other) :
-	m_Status(STATE_PENDING)
-{
-}
-
-IJob &IJob::operator=(const IJob &Other)
-{
-	m_Status = STATE_PENDING;
-	return *this;
-}
-
 IJob::~IJob() = default;
-
-int IJob::Status()
-{
-	return m_Status.load();
-}
 
 CJobPool::CJobPool()
 {
@@ -120,7 +99,7 @@ void CJobPool::Run(std::shared_ptr<IEngineRunnable> pRunnable)
 
 void CJobPool::RunBlocking(IJob *pJob)
 {
-	pJob->m_Status = IJob::STATE_RUNNING;
+	pJob->SetStatus(IEngineRunnable::RUNNING);
 	pJob->Run();
-	pJob->m_Status = IJob::STATE_DONE;
+	pJob->SetStatus(IEngineRunnable::DONE);
 }

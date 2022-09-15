@@ -114,7 +114,7 @@ void CSounds::OnRender()
 	// check for sound initialisation
 	if(m_WaitForSoundJob)
 	{
-		if(m_pSoundJob->Status() == IJob::STATE_DONE)
+		if(m_pSoundJob->Status() == IEngineRunnable::DONE)
 			m_WaitForSoundJob = false;
 		else
 			return;
