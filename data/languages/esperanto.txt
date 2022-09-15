@@ -195,9 +195,6 @@ Join Tutorial Server
 Skip Tutorial
 == Pasi la lernilo
 
-transmits your player name to info2.ddnet.org
-== sendas vian ludantnomon al info2.ddnet.org
-
 Nickname
 == Kromnomo
 
@@ -668,9 +665,6 @@ Getting game info
 Requesting to join the game
 == 
 
-The server is running a non-standard tuning on a pure game type.
-== 
-
 Delete demo
 == 
 
@@ -734,6 +728,12 @@ Video name:
 Show DDNet map finishes in server browser
 == 
 
+transmits your player name to info.ddnet.org
+== 
+
+The server is running a non-standard tuning on a pure game type.
+== 
+
 Loading menu images
 == 
 
@@ -780,6 +780,33 @@ Remove
 == 
 
 Info
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Demofile: %s
@@ -923,6 +950,9 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Loading skin files
+== 
+
 Your skin
 == 
 
@@ -954,9 +984,6 @@ Body
 == 
 
 Feet
-== 
-
-Loading skin files
 == 
 
 Hook collisions
@@ -1084,9 +1111,6 @@ Aim bind
 Controller Axis #%d
 == 
 
-Controls
-== 
-
 Ingame mouse sens.
 == 
 
@@ -1205,6 +1229,9 @@ Map sound volume
 == 
 
 Background music volume
+== 
+
+Controls
 == 
 
 Hue
@@ -1348,10 +1375,34 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
 == 
 
 Save the best demo of each race
@@ -1448,9 +1499,6 @@ DDNet Client updated!
 == 
 
 No updates available
-== 
-
-Entities
 == 
 
 Emoticons

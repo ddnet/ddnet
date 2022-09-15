@@ -493,7 +493,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
 		Client()->DemoSliceBegin();
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Slice the beginning of a cut"));
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut"));
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
@@ -501,7 +501,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceEndButton;
 	if(DoButton_FontIcon(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
 		Client()->DemoSliceEnd();
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Slice the end of a cut"));
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut"));
 
 	// slice save button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);

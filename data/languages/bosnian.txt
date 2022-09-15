@@ -1177,6 +1177,33 @@ Refreshing...
 Leak IP
 == 
 
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
+== 
+
 Loading demo files
 == 
 
@@ -1210,6 +1237,9 @@ Themes directory
 Max CSVs
 == 
 
+Loading skin files
+== 
+
 Toggle to edit your dummy settings
 == 
 
@@ -1226,9 +1256,6 @@ Skin Database
 == 
 
 Skins directory
-== 
-
-Loading skin files
 == 
 
 Chat command
@@ -1428,10 +1455,34 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1471,9 +1522,6 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
-== 
-
-Entities
 == 
 
 Emoticons

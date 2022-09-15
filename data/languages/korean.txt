@@ -1023,12 +1023,6 @@ Show kill messages
 Kill Messages
 == 킬 메시지
 
-Laser Outline Color
-== 레이저 테두리 색상
-
-Laser Inner Color
-== 레이저 색상
-
 Use old chat style
 == 구식 채팅 방식 사용
 
@@ -1565,3 +1559,57 @@ Loading race demo files
 
 Loading sound files
 == 소리 파일 로딩 중
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
+== 
+
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
