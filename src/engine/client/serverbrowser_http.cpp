@@ -53,8 +53,6 @@ private:
 		IEngine *m_pEngine;
 		LOCK m_Lock;
 		std::shared_ptr<CData> m_pData;
-		std::shared_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
-		std::shared_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
 		void Run() override REQUIRES(!m_Lock);
 
 	public:

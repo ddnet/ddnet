@@ -50,6 +50,7 @@ class IEngine : public IInterface
 	MACRO_INTERFACE("engine", 0)
 
 public:
+	virtual void Shutdown() override = 0;
 	virtual ~IEngine() = default;
 
 	virtual void Init() = 0;

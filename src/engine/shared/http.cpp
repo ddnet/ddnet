@@ -33,12 +33,7 @@ bool CHttpRunner::Init()
 	m_WakeUpPair[0] = m_WakeUpPair[1] = net_loop_create();
 #endif
 
-	write(m_WakeUpPair[1], "t", 1);
-	char aT[10];
-	read(m_WakeUpPair[0], aT, sizeof(aT));
-	dbg_assert(aT[0] == 't', "self-test failed");
-
-	thread_init(CHttpRunner::ThreadMain, this, "http_runner");
+	m_pThread = thread_init(CHttpRunner::ThreadMain, this, "http_runner");
 
 	std::unique_lock l(m_Lock);
 	m_Cv.wait(l, [this]() { return m_State != UNINITIALIZED; });
@@ -59,7 +54,7 @@ bool CHttpRunner::Init()
 
 void CHttpRunner::WakeUp()
 {
-//TODO: Check with TSan to make sure we hold m_Lock
+//TODO: Check with TSA to make sure we hold m_Lock
 #if defined(CONF_FAMILY_UNIX)
 	write(m_WakeUpPair[1], "w", 1);
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -145,6 +140,7 @@ void CHttpRunner::RunLoop()
 		std::unique_lock LoopL(m_Lock);
 		if(m_Shutdown)
 			break;
+
 		LoopL.unlock();
 
 		if(mc != CURLM_OK)
@@ -162,20 +158,15 @@ void CHttpRunner::RunLoop()
 		{
 			if(m->msg == CURLMSG_DONE)
 			{
-				CHttpRequest *pRequest;
-				curl_easy_getinfo(m->easy_handle, CURLINFO_PRIVATE, &pRequest);
+				auto RequestIt = m_RunningRequests.find(m->easy_handle);
+				dbg_assert(RequestIt != m_RunningRequests.end(), "Running handle not added to map");
+				auto pRequest = RequestIt->second;
 
 				pRequest->OnCompletionInternal(m->data.result);
 				curl_multi_remove_handle(MultiH, m->easy_handle);
 				curl_easy_cleanup(m->easy_handle);
 
-				if(pRequest->m_pPrev)
-					pRequest->m_pPrev->m_pNext = pRequest->m_pNext;
-				else
-					m_pRunningRequestsHead = pRequest->m_pNext;
-
-				if(pRequest->m_pNext)
-					pRequest->m_pNext->m_pPrev = pRequest->m_pPrev;
+				m_RunningRequests.erase(RequestIt);
 			}
 		}
 
@@ -198,14 +189,7 @@ void CHttpRunner::RunLoop()
 			if(!pRequest->ConfigureHandle(EH))
 				goto bail; //TODO: Report the error
 
-			curl_easy_setopt(EH, CURLOPT_PRIVATE, pRequest.get());
-
-			// Linked list keeps the requests alive
-			pRequest->m_pPrev = nullptr;
-			pRequest->m_pNext = m_pRunningRequestsHead;
-			if(m_pRunningRequestsHead)
-				m_pRunningRequestsHead->m_pPrev = pRequest;
-			m_pRunningRequestsHead = std::move(pRequest);
+			m_RunningRequests.emplace(std::make_pair(EH, std::move(pRequest)));
 
 			mc = curl_multi_add_handle(MultiH, EH);
 			if(mc != CURLM_OK)
@@ -227,19 +211,15 @@ bail:;
 		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
 	}
 
-	if(m_pRunningRequestsHead)
+	for(auto &ReqPair : m_RunningRequests)
 	{
-		for(std::shared_ptr<CHttpRequest> pRequest = std::move(m_pRunningRequestsHead); pRequest;)
-		{
-			curl_easy_cleanup(pRequest->m_pHandle);
-			pRequest->m_pPrev = nullptr;
+		auto &[pHandle, pRequest] = ReqPair;
+		curl_multi_remove_handle(MultiH, pHandle);
+		curl_easy_cleanup(pHandle);
 
-			// Emulate CURLE_ABORTED_BY_CALLBACK
-			str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
-			pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
-
-			pRequest = std::move(pRequest->m_pNext);
-		}
+		// Emulate CURLE_ABORTED_BY_CALLBACK
+		str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
+		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
 	}
 
 	curl_multi_cleanup(MultiH);
@@ -248,9 +228,21 @@ bail:;
 
 void CHttpRunner::Shutdown()
 {
-	std::lock_guard l(m_Lock);
-	m_Shutdown = true;
-	WakeUp();
+	if(m_pThread)
+	{
+		std::lock_guard l(m_Lock);
+		m_Shutdown = true;
+		WakeUp();
+	}
+}
+
+CHttpRunner::~CHttpRunner()
+{
+	if(!m_Shutdown)
+		Shutdown();
+
+	if(m_pThread)
+		thread_wait(m_pThread);
 }
 
 int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)

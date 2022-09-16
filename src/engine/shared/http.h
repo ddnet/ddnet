@@ -7,6 +7,7 @@
 #include <engine/shared/jobs.h>
 #include <mutex>
 #include <queue>
+#include <unordered_map>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -58,13 +59,15 @@ class CHttpRunner : public IEngineRunner
 	std::mutex m_Lock{};
 	std::condition_variable m_Cv{};
 	std::queue<std::shared_ptr<CHttpRequest>> m_PendingRequests{};
-	std::shared_ptr<CHttpRequest> m_pRunningRequestsHead = nullptr;
+	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests{}; // void * == CURL *
 	State m_State = UNINITIALIZED;
+	void *m_pThread = nullptr;
 
 	void WakeUp();
 
 public:
 	std::atomic<bool> m_Shutdown = false;
+	~CHttpRunner();
 
 	// Boot
 	bool Init();
@@ -94,8 +97,6 @@ class CHttpRequest : public CHttpRunnable
 {
 public:
 	friend CHttpRunner;
-	std::shared_ptr<CHttpRequest> m_pPrev = nullptr;
-	std::shared_ptr<CHttpRequest> m_pNext = nullptr;
 	void *m_pHandle = nullptr; // void * == CURL *
 
 	enum class REQUEST
@@ -156,7 +157,7 @@ protected:
 
 public:
 	CHttpRequest(const char *pUrl);
-	~CHttpRequest();
+	virtual ~CHttpRequest();
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }

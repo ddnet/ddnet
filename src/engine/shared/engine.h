@@ -15,10 +15,12 @@ public:
 
 	char m_aAppName[256];
 
+	bool m_Shutdown = false;
 	CJobPool m_JobPool;
 	std::vector<IEngineRunner *> m_apRunners;
 
 	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs);
+	virtual void Shutdown() override;
 	virtual ~CEngine() override;
 
 	virtual void Init() override;
