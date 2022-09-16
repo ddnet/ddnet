@@ -78,17 +78,19 @@ class CRegister : public IRegister
 			int m_Index;
 			int m_InfoSerial;
 			std::shared_ptr<CShared> m_pShared;
-			std::unique_ptr<CHttpRequest> m_pRegister;
+			std::shared_ptr<CHttpRequest> m_pRegister;
+			IEngine *m_pEngine;
 			void Run() override;
 
 		public:
-			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::unique_ptr<CHttpRequest> &&pRegister) :
+			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::unique_ptr<CHttpRequest> &&pRegister, IEngine *pEngine) :
 				m_Protocol(Protocol),
 				m_ServerPort(ServerPort),
 				m_Index(Index),
 				m_InfoSerial(InfoSerial),
 				m_pShared(std::move(pShared)),
-				m_pRegister(std::move(pRegister))
+				m_pRegister(std::move(pRegister)),
+				m_pEngine(pEngine)
 			{
 			}
 			virtual ~CJob() = default;
@@ -317,7 +319,7 @@ void CRegister::CProtocol::SendRegister()
 		RequestIndex = m_pShared->m_NumTotalRequests;
 		m_pShared->m_NumTotalRequests += 1;
 	}
-	m_pParent->m_pEngine->Dispatch(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister)));
+	m_pParent->m_pEngine->Dispatch(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pEngine));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
@@ -414,7 +416,8 @@ void CRegister::CProtocol::OnToken(const char *pToken)
 
 void CRegister::CProtocol::CJob::Run()
 {
-	IEngine::RunJobBlocking(m_pRegister.get());
+	m_pEngine->Dispatch(m_pRegister);
+	m_pRegister->Wait();
 	if(m_pRegister->State() != HTTP_DONE)
 	{
 		// TODO: log the error response content from master

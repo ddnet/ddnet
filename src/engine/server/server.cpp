@@ -21,6 +21,7 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
+#include <engine/shared/hostlookup.h>
 #include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
@@ -2696,7 +2697,7 @@ int CServer::Run()
 						InitDnsbl(ClientID);
 					}
 					else if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
-						m_aClients[ClientID].m_pDnsblLookup->Status() == IJob::STATE_DONE)
+						m_aClients[ClientID].m_pDnsblLookup->Status() == IEngineRunnable::DONE)
 					{
 						if(m_aClients[ClientID].m_pDnsblLookup->m_Result != 0)
 						{
