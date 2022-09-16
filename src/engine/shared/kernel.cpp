@@ -44,6 +44,15 @@ public:
 		m_NumInterfaces = 0;
 	}
 
+	void Shutdown() override
+	{
+		for(int i = m_NumInterfaces - 1; i >= 0; i--)
+		{
+			if(m_aInterfaces[i].m_AutoDestroy)
+				m_aInterfaces[i].m_pInterface->Shutdown();
+		}
+	}
+
 	virtual ~CKernel()
 	{
 		// delete interfaces in reverse order just the way it would happen to objects on the stack

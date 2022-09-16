@@ -20,6 +20,7 @@ protected:
 public:
 	IInterface() :
 		m_pKernel(nullptr) {}
+	virtual void Shutdown() {}
 	virtual ~IInterface() {}
 };
 
@@ -40,6 +41,7 @@ class IKernel
 
 public:
 	static IKernel *Create();
+	virtual void Shutdown() = 0;
 	virtual ~IKernel() {}
 
 	// templated access to handle pointer conversions and interface names

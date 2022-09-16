@@ -342,7 +342,7 @@ int CSound::Update()
 	return 0;
 }
 
-int CSound::Shutdown()
+void CSound::Shutdown()
 {
 	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
 	{
@@ -353,7 +353,6 @@ int CSound::Shutdown()
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	free(m_pMixBuffer);
 	m_pMixBuffer = 0;
-	return 0;
 }
 
 int CSound::AllocID()
