@@ -65,16 +65,16 @@ void CHttpRunner::WakeUp()
 void CHttpRunner::Run(std::shared_ptr<IEngineRunnable> pRunnable)
 {
 	std::unique_lock l(m_Lock);
-	if(m_Shutdown)
-		return;
-
-	m_Cv.wait(l, [this]() { return m_State != UNINITIALIZED; });
-	if(m_State == ERROR)
-		return; //TODO: Report and handle this properly
-
 	auto pHttpRunnable = std::static_pointer_cast<CHttpRunnable>(pRunnable);
 	if(auto pRequest = std::dynamic_pointer_cast<CHttpRequest>(pHttpRunnable))
 	{
+		if(m_State != RUNNING)
+		{
+			dbg_msg("http", "Discarding request due to %s", m_State == SHUTDOWN ? "shutdown" : "irrecoverable error");
+			pRequest->m_State = HTTP_ABORTED;
+			pRequest->SetStatus(IEngineRunnable::DONE);
+			return;
+		}
 		pRequest->SetStatus(IEngineRunnable::RUNNING);
 		m_PendingRequests.emplace(std::move(pRequest));
 		WakeUp();
@@ -132,26 +132,34 @@ void CHttpRunner::RunLoop()
 	InitL.release();
 
 	curl_waitfd ExtraFds[] = {{static_cast<curl_socket_t>(m_WakeUpPair[0]), CURL_POLL_IN, 0}};
-	while(!m_Shutdown)
+	while(m_State == RUNNING)
 	{
 		int Events = 0;
 		CURLMcode mc = curl_multi_wait(MultiH, ExtraFds, sizeof(ExtraFds) / sizeof(ExtraFds[0]), 1000000, &Events);
 
 		std::unique_lock LoopL(m_Lock);
-		if(m_Shutdown)
+		if(m_State != RUNNING)
 			break;
 
-		LoopL.unlock();
-
 		if(mc != CURLM_OK)
-			break; //TODO: Report the error
+		{
+			dbg_msg("http", "Failed multi wait: %s", curl_multi_strerror(mc));
+			m_State = ERROR;
+			break;
+		}
+		LoopL.unlock();
 
 		// Discard data on the wakeup pair
 		Discard(m_WakeUpPair[0]);
 
 		mc = curl_multi_perform(MultiH, &Events);
 		if(mc != CURLM_OK)
-			break; //TODO: Report the error
+		{
+			dbg_msg("http", "Failed multi perform: %s", curl_multi_strerror(mc));
+			LoopL.lock();
+			m_State = ERROR;
+			break;
+		}
 
 		struct CURLMsg *m;
 		while((m = curl_multi_info_read(MultiH, &Events)))
@@ -182,48 +190,73 @@ void CHttpRunner::RunLoop()
 
 			dbg_msg("http", "task: %s", pRequest->m_aUrl);
 
-			CURL *EH = curl_easy_init();
-			if(!EH)
-				goto bail; //TODO: Report the error
+			CURL *pEH = curl_easy_init();
+			if(!pEH)
+				goto error_init;
 
-			if(!pRequest->ConfigureHandle(EH))
-				goto bail; //TODO: Report the error
+			if(!pRequest->ConfigureHandle(pEH))
+				goto error_configure;
 
-			m_RunningRequests.emplace(std::make_pair(EH, std::move(pRequest)));
-
-			mc = curl_multi_add_handle(MultiH, EH);
+			mc = curl_multi_add_handle(MultiH, pEH);
 			if(mc != CURLM_OK)
-				goto bail; //TODO: Report the error
+				goto error_configure;
+
+			m_RunningRequests.emplace(std::make_pair(pEH, std::move(pRequest)));
+			continue;
+
+		error_configure:
+			curl_easy_cleanup(pEH);
+		error_init:
+			dbg_msg("http", "failed to start new request");
+			NewRequests.emplace(std::move(pRequest));
+			LoopL.lock();
+			m_State = ERROR;
+			LoopL.unlock();
+			break;
+		}
+
+		// Only possible if m_State == ERROR
+		while(!NewRequests.empty())
+		{
+			auto pRequest = std::move(NewRequests.front());
+			NewRequests.pop();
+
+			pRequest->KillRequest(CURLE_ABORTED_BY_CALLBACK, "Shutting down");
 		}
 	}
-bail:;
 
+	bool Cleanup = true;
 	std::lock_guard FinalL(m_Lock);
-	m_Shutdown = true;
+	if(m_State == ERROR)
+	{
+		Cleanup = false;
+	}
 
 	while(!m_PendingRequests.empty())
 	{
 		auto pRequest = std::move(m_PendingRequests.front());
 		m_PendingRequests.pop();
 
-		// Emulate CURLE_ABORTED_BY_CALLBACK
-		str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
-		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+		pRequest->KillRequest(CURLE_ABORTED_BY_CALLBACK, "Shutting down");
 	}
 
 	for(auto &ReqPair : m_RunningRequests)
 	{
 		auto &[pHandle, pRequest] = ReqPair;
-		curl_multi_remove_handle(MultiH, pHandle);
-		curl_easy_cleanup(pHandle);
+		if(Cleanup)
+		{
+			curl_multi_remove_handle(MultiH, pHandle);
+			curl_easy_cleanup(pHandle);
+		}
 
-		// Emulate CURLE_ABORTED_BY_CALLBACK
-		str_copy(pRequest->m_aErr, "Shutting down", sizeof(pRequest->m_aErr));
-		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+		pRequest->KillRequest(CURLE_ABORTED_BY_CALLBACK, "Shutting down");
 	}
 
-	curl_multi_cleanup(MultiH);
-	curl_global_cleanup();
+	if(Cleanup)
+	{
+		curl_multi_cleanup(MultiH);
+		curl_global_cleanup();
+	}
 }
 
 void CHttpRunner::Shutdown()
@@ -231,14 +264,14 @@ void CHttpRunner::Shutdown()
 	if(m_pThread)
 	{
 		std::lock_guard l(m_Lock);
-		m_Shutdown = true;
+		m_State = SHUTDOWN;
 		WakeUp();
 	}
 }
 
 CHttpRunner::~CHttpRunner()
 {
-	if(!m_Shutdown)
+	if(m_State != SHUTDOWN)
 		Shutdown();
 
 	if(m_pThread)
@@ -487,6 +520,12 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 	}
 }
 
+void CHttpRequest::KillRequest(unsigned int Code, const char *pReason)
+{
+	str_copy(m_aErr, pReason, sizeof(m_aErr));
+	OnCompletionInternal(Code);
+}
+
 size_t CHttpRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pUser)
 {
 	return ((CHttpRequest *)pUser)->OnData(pData, Size * Number);
@@ -547,10 +586,8 @@ json_value *CHttpRequest::ResultJson() const
 
 bool HttpInit(IEngine *pEngine, IStorage *pStorage)
 {
-	if(gs_Runner.Init())
-		return true;
-
+	bool Result = gs_Runner.Init();
 	CHttpRunnable::m_sRunner = pEngine->RegisterRunner(&gs_Runner);
 
-	return false;
+	return Result;
 }

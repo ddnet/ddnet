@@ -51,6 +51,7 @@ class CHttpRunner : public IEngineRunner
 	{
 		UNINITIALIZED,
 		RUNNING,
+		SHUTDOWN,
 		ERROR
 	};
 
@@ -60,13 +61,12 @@ class CHttpRunner : public IEngineRunner
 	std::condition_variable m_Cv{};
 	std::queue<std::shared_ptr<CHttpRequest>> m_PendingRequests{};
 	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests{}; // void * == CURL *
-	State m_State = UNINITIALIZED;
+	std::atomic<State> m_State = UNINITIALIZED;
 	void *m_pThread = nullptr;
 
 	void WakeUp();
 
 public:
-	std::atomic<bool> m_Shutdown = false;
 	~CHttpRunner();
 
 	// Boot
@@ -143,6 +143,7 @@ public:
 	bool BeforeInit();
 	bool ConfigureHandle(void *pHandle); // void * == CURL *
 	void OnCompletionInternal(unsigned int Result); // unsigned int == CURLcode
+	void KillRequest(unsigned int CurlCode, const char *pReason);
 
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
