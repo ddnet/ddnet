@@ -30,7 +30,7 @@ class CSound : public IEngineSound
 public:
 	int Init() override;
 	int Update() override;
-	int Shutdown() override;
+	void Shutdown() override;
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
 

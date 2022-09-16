@@ -3049,19 +3049,6 @@ void CClient::Run()
 		g_UuidManager.DebugDump();
 	}
 
-	// init SDL
-	{
-		if(SDL_Init(0) < 0)
-		{
-			dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
-			return;
-		}
-
-#ifndef CONF_PLATFORM_ANDROID
-		atexit(SDL_Quit);
-#endif
-	}
-
 	// init graphics
 	{
 		m_pGraphics = CreateEngineGraphicsThreaded();
@@ -3492,11 +3479,6 @@ void CClient::Run()
 		m_aNetClient[i].Close();
 
 	delete m_pEditor;
-	m_pInput->Shutdown();
-	m_pGraphics->Shutdown();
-
-	// shutdown SDL
-	SDL_Quit();
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -4788,6 +4770,17 @@ int main(int argc, const char **argv)
 		}
 	}
 
+	// init SDL
+	if(SDL_Init(0) < 0)
+	{
+		dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+		return -1;
+	}
+
+#ifndef CONF_PLATFORM_ANDROID
+	atexit(SDL_Quit);
+#endif
+
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
@@ -4806,7 +4799,11 @@ int main(int argc, const char **argv)
 		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
 	}
 
+	pKernel->Shutdown();
 	delete pKernel;
+
+	// shutdown SDL
+	SDL_Quit();
 
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
