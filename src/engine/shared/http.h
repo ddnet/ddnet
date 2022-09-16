@@ -89,7 +89,7 @@ protected:
 public:
 	inline static int m_sRunner;
 	virtual int Runner() final { return m_sRunner; };
-	virtual void Run() final {};
+	virtual void Run() final{};
 	virtual EStatus Status() final { return m_Status; };
 };
 

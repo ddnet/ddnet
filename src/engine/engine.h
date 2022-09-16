@@ -4,8 +4,8 @@
 #define ENGINE_ENGINE_H
 
 #include <atomic>
-#include <memory>
 #include <condition_variable>
+#include <memory>
 
 #include "kernel.h"
 
@@ -15,7 +15,8 @@ class ILogger;
 class IEngineRunnable
 {
 public:
-	enum EStatus {
+	enum EStatus
+	{
 		PENDING = 0,
 		RUNNING,
 		DONE

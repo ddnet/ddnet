@@ -11,6 +11,7 @@
 #if !defined(CONF_FAMILY_WINDOWS)
 #include <csignal>
 #include <fcntl.h>
+#include <unistd.h>
 #endif
 
 #define WIN32_LEAN_AND_MEAN

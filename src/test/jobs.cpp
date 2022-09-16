@@ -3,8 +3,8 @@
 
 #include <base/system.h>
 #include <engine/engine.h>
-#include <engine/shared/jobs.h>
 #include <engine/shared/hostlookup.h>
+#include <engine/shared/jobs.h>
 
 #include <functional>
 

@@ -44,7 +44,7 @@ void IEngineRunnable::SetStatus(IEngineRunnable::EStatus NewStatus)
 void IEngineRunnable::Wait()
 {
 	std::unique_lock l(m_StatusLock);
-	m_StatusCV.wait(l, [this](){ return m_Status == EStatus::DONE; });
+	m_StatusCV.wait(l, [this]() { return m_Status == EStatus::DONE; });
 }
 
 CEngine::CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs)
