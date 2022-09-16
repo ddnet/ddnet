@@ -2980,7 +2980,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		ColorHSLA LaserRifleInnerColor = DoLine_ColorPicker(&s_LaserRifleInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Inner Color"), &g_Config.m_ClLaserRifleInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
 		ColorHSLA LaserShotgunOutlineColor = DoLine_ColorPicker(&s_LaserShotgunOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Outline Color"), &g_Config.m_ClLaserShotgunOutlineColor, ColorRGBA(0.125490f, 0.098039f, 0.043137f, 1.0f), false);
 		ColorHSLA LaserShotgunInnerColor = DoLine_ColorPicker(&s_LaserShotgunInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Inner Color"), &g_Config.m_ClLaserShotgunInnerColor, ColorRGBA(0.764705f, 0.505882f, 0.0f, 1.0f), false);
+		
 		// ***** Entities ***** //
+		LeftView.HSplitTop(MarginToNextSection * 2.0f, 0x0, &LeftView);
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
 		UI()->DoLabel(&Label, Localize("Entities"), HeadlineFontSize, TEXTALIGN_LEFT);
 
@@ -2992,8 +2994,22 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		ColorHSLA LaserDoorOutlineColor = DoLine_ColorPicker(&s_LaserDoorOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Door Laser Outline Color"), &g_Config.m_ClLaserDoorOutlineColor, ColorRGBA(0.0f, 0.129411f, 0.094117f, 1.0f), false);
 		ColorHSLA LaserDoorInnerColor = DoLine_ColorPicker(&s_LaserDoorInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Door Laser Inner Color"), &g_Config.m_ClLaserDoorInnerColor, ColorRGBA(0.262745f, 0.760784f, 0.639215f, 1.0f), false);
-		ColorHSLA LaserFreezeOutlineColor = DoLine_ColorPicker(&s_LaserFreezeOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Outline Color"), &g_Config.m_ClLaserFreezeOutlineColor, ColorRGBA(0.192156f, 0.031372f, 0.074509f, 1.0f), false);
-		ColorHSLA LaserFreezeInnerColor = DoLine_ColorPicker(&s_LaserFreezeInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Inner Color"), &g_Config.m_ClLaserFreezeInnerColor, ColorRGBA(0.760784f, 0.262745f, 0.403921f, 1.0f), false);
+		ColorHSLA LaserFreezeOutlineColor = DoLine_ColorPicker(&s_LaserFreezeOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Outline Color"), &g_Config.m_ClLaserFreezeOutlineColor, ColorRGBA(0.129411f, 0.121568f, 0.180392f, 1.0f), false);
+		ColorHSLA LaserFreezeInnerColor = DoLine_ColorPicker(&s_LaserFreezeInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Inner Color"), &g_Config.m_ClLaserFreezeInnerColor, ColorRGBA(0.482352f, 0.443137f, 0.564705f, 1.0f), false);
+
+		static CButtonContainer s_AllToRifleResetID;
+
+		LeftView.HSplitTop(20.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(20.0f, &Button, &LeftView);
+		if(DoButton_Menu(&s_AllToRifleResetID, Localize("Set all to Rifle"), 0, &Button))
+		{
+			g_Config.m_ClLaserShotgunOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserShotgunInnerColor = g_Config.m_ClLaserRifleInnerColor;
+			g_Config.m_ClLaserDoorOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserDoorInnerColor = g_Config.m_ClLaserRifleInnerColor;
+			g_Config.m_ClLaserFreezeOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserFreezeInnerColor = g_Config.m_ClLaserRifleInnerColor;
+		}
 
 		// ***** Laser Preview ***** //
 		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
