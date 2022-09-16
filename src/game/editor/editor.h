@@ -835,6 +835,8 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
+		m_GotoX = 0;
+		m_GotoY = 0;
 
 		m_Mentions = 0;
 	}
@@ -1239,6 +1241,8 @@ public:
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupGoto(CEditor *pEditor, CUIRect View, void *pContext);
+	void Goto(float X, float Y);
 	unsigned char m_TeleNumber;
 
 	unsigned char m_TuningNum;
@@ -1249,6 +1253,9 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
+
+	int m_GotoX;
+	int m_GotoY;
 };
 
 // make sure to inline this function

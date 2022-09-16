@@ -9,6 +9,7 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <limits>
 
 #include <game/client/ui_scrollregion.h>
 
@@ -1694,6 +1695,54 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 
 	if(Prop == PROP_TUNE)
 		pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+
+	return 0;
+}
+
+int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	CUIRect CoordXPicker;
+	CUIRect CoordYPicker;
+
+	View.HSplitMid(&CoordXPicker, &CoordYPicker);
+	CoordXPicker.VSplitRight(2.f, &CoordXPicker, nullptr);
+
+	static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+
+	enum
+	{
+		PROP_CoordX = 0,
+		PROP_CoordY,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"X", pEditor->m_GotoX, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y", pEditor->m_GotoY, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&CoordXPicker, aProps, s_aIds, &NewVal, s_Color);
+
+	if(Prop == PROP_CoordX)
+	{
+		pEditor->m_GotoX = NewVal;
+	}
+	else if(Prop == PROP_CoordY)
+	{
+		pEditor->m_GotoY = NewVal;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, ""))
+	{
+		pEditor->Goto(pEditor->m_GotoX + 0.5f, pEditor->m_GotoY + 0.5f);
+	}
 
 	return 0;
 }
