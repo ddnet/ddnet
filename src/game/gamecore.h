@@ -66,6 +66,7 @@ public:
 	bool Get(const char *pName, float *pValue) const;
 	static const char *Name(int Index) { return ms_apNames[Index]; }
 	int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
+	float GetWeaponFireDelay(int Weapon) const;
 };
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
@@ -167,7 +168,7 @@ enum
 	COREEVENT_HOOK_ATTACH_GROUND = 0x10,
 	COREEVENT_HOOK_HIT_NOHOOK = 0x20,
 	COREEVENT_HOOK_RETRACT = 0x40,
-	//COREEVENT_HOOK_TELE=0x80,
+	// COREEVENT_HOOK_TELE=0x80,
 };
 
 // show others values - do not change them
@@ -320,7 +321,7 @@ private:
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
 
-//input count
+// input count
 struct CInputCount
 {
 	int m_Presses;
