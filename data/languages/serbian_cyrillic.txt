@@ -1178,9 +1178,6 @@ Loading map file from storage
 Why are you slowmo replaying to read this?
 == Зашто полако понављаш да би ово прочитао?
 
-Initializing components 
-== Учитавам компоненте
-
 Initializing assets
 == Учитавам слику
 
@@ -1489,12 +1486,6 @@ Normal Color
 Highlight Color
 == Истакнута Боја
 
-Laser Outline Color
-== Боја спољашњег ласера
-
-Laser Inner Color
-== Боја унутрашњег ласера
-
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Када кренеш да се тркаш, прикажи твог најбржег духа 
 
@@ -1557,3 +1548,60 @@ Team %d
 
 Loading sound files
 == Учитавам звучне фајлове
+
+Initializing components
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
+== 
+
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
