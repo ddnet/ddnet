@@ -1771,7 +1771,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					ResetMapDownload();
 
-					if(pMapSha256 && g_Config.m_ClHttpMapDownload)
+					if(pMapSha256)
 					{
 						char aUrl[256];
 						char aEscaped[256];
