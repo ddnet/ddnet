@@ -16,6 +16,7 @@
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
 # 2022-08-08 cheeser0613
+# 2022-09-17 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -613,7 +614,7 @@ Length:
 == 長度：
 
 Laser
-== 鐳射槍
+== 鐳射
 
 Netversion:
 == 通訊版本：
@@ -1570,55 +1571,55 @@ Loading sound files
 == 正在加載聲音檔案
 
 Play the current demo
-== 
+== 播放回放
 
 Pause the current demo
-== 
+== 暫停回放
 
 Stop the current demo
-== 
+== 結束回放
 
 Slow down the demo
-== 
+== 減慢播放速度
 
 Speed up the demo
-== 
+== 加快播放速度
 
 Mark the beginning of a cut
-== 
+== 標記裁剪起點
 
 Mark the end of a cut
-== 
+== 標記裁剪終點
 
 Export cut as a seperate demo
-== 
+== 另存爲新回放檔案
 
 Toggle keyboard shortcuts
-== 
+== 啓用/禁用鍵盤快捷鍵
 
 Weapons
-== 
+== 武器
 
 Rifle Laser Outline Color
-== 
+== 鐳射槍彈道外框顔色
 
 Rifle Laser Inner Color
-== 
+== 鐳射槍彈道實心顔色
 
 Shotgun Laser Outline Color
-== 
+== 霰彈槍彈道外框顔色
 
 Shotgun Laser Inner Color
-== 
+== 霰彈槍彈道實心顔色
 
 Door Laser Outline Color
-== 
+== 鐳射門外框顔色
 
 Door Laser Inner Color
-== 
+== 鐳射門實心顔色
 
 Freeze Laser Outline Color
-== 
+== 凍結鐳射外框顔色
 
 Freeze Laser Inner Color
-== 
+== 凍結鐳射實心顔色

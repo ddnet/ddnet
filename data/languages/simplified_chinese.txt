@@ -27,6 +27,7 @@
 # 2022-06-27 cheeser0613
 # 2022-07-04 cheeser0613
 # 2022-08-08 cheeser0613
+# 2022-09-17 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -624,7 +625,7 @@ Length:
 == 时长：
 
 Laser
-== 激光枪
+== 激光
 
 Netversion:
 == 通信版本：
@@ -1581,55 +1582,55 @@ Loading sound files
 == 正在加载声音文件
 
 Play the current demo
-== 
+== 播放回放
 
 Pause the current demo
-== 
+== 暂停回放
 
 Stop the current demo
-== 
+== 结束回放
 
 Slow down the demo
-== 
+== 减慢播放速度
 
 Speed up the demo
-== 
+== 加快播放速度
 
 Mark the beginning of a cut
-== 
+== 标记裁剪起点
 
 Mark the end of a cut
-== 
+== 标记裁剪终点
 
 Export cut as a seperate demo
-== 
+== 另存为新回放文件
 
 Toggle keyboard shortcuts
-== 
+== 启用/禁用键盘快捷键
 
 Weapons
-== 
+== 武器
 
 Rifle Laser Outline Color
-== 
+== 激光枪弹道外框颜色
 
 Rifle Laser Inner Color
-== 
+== 激光枪弹道实心颜色
 
 Shotgun Laser Outline Color
-== 
+== 霰弹枪弹道外框颜色
 
 Shotgun Laser Inner Color
-== 
+== 霰弹枪弹道实心颜色
 
 Door Laser Outline Color
-== 
+== 激光门外框颜色
 
 Door Laser Inner Color
-== 
+== 激光门实心颜色
 
 Freeze Laser Outline Color
-== 
+== 冻结激光外框颜色
 
 Freeze Laser Inner Color
-== 
+== 冻结激光实心颜色
