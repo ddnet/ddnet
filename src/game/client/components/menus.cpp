@@ -1114,11 +1114,15 @@ void CMenus::RenderColorPicker()
 		return;
 	}
 
+	// Prevent activation of UI elements outside of active color picker
+	if(UI()->MouseInside(&PickerRect))
+		UI()->SetHotItem(&ms_ColorPicker);
+
 	// Render
 	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
 	PickerRect.Draw(BackgroundColor, 0, 0);
 
-	CUIRect ColorsArea, HueArea, ValuesHitbox, BottomArea, HSVHRect, HSVSRect, HSVVRect, HEXRect, ALPHARect;
+	CUIRect ColorsArea, HueArea, ValuesHitbox, BottomArea, HueRect, SatRect, ValueRect, HexRect, AlphaRect;
 	PickerRect.Margin(3, &ColorsArea);
 
 	ColorsArea.HSplitBottom(ms_ColorPicker.ms_Height - 140.0f, &ColorsArea, &ValuesHitbox);
@@ -1128,21 +1132,21 @@ void CMenus::RenderColorPicker()
 	BottomArea.HSplitTop(3, 0x0, &BottomArea);
 	HueArea.VSplitLeft(3, 0x0, &HueArea);
 
-	BottomArea.HSplitTop(20, &HSVHRect, &BottomArea);
+	BottomArea.HSplitTop(20, &HueRect, &BottomArea);
 	BottomArea.HSplitTop(3, 0x0, &BottomArea);
 
 	constexpr float ValuePadding = 5.0f;
-	const float HSVValueWidth = (HSVHRect.w - ValuePadding * 2) / 3.0f;
-	const float HEXValueWidth = HSVValueWidth * 2 + ValuePadding;
+	const float HsvValueWidth = (HueRect.w - ValuePadding * 2) / 3.0f;
+	const float HexValueWidth = HsvValueWidth * 2 + ValuePadding;
 
-	HSVHRect.VSplitLeft(HSVValueWidth, &HSVHRect, &HSVSRect);
-	HSVSRect.VSplitLeft(ValuePadding, 0x0, &HSVSRect);
-	HSVSRect.VSplitLeft(HSVValueWidth, &HSVSRect, &HSVVRect);
-	HSVVRect.VSplitLeft(ValuePadding, 0x0, &HSVVRect);
+	HueRect.VSplitLeft(HsvValueWidth, &HueRect, &SatRect);
+	SatRect.VSplitLeft(ValuePadding, 0x0, &SatRect);
+	SatRect.VSplitLeft(HsvValueWidth, &SatRect, &ValueRect);
+	ValueRect.VSplitLeft(ValuePadding, 0x0, &ValueRect);
 
-	BottomArea.HSplitTop(20, &HEXRect, &BottomArea);
-	HEXRect.VSplitLeft(HEXValueWidth, &HEXRect, &ALPHARect);
-	ALPHARect.VSplitLeft(ValuePadding, 0x0, &ALPHARect);
+	BottomArea.HSplitTop(20, &HexRect, &BottomArea);
+	HexRect.VSplitLeft(HexValueWidth, &HexRect, &AlphaRect);
+	AlphaRect.VSplitLeft(ValuePadding, 0x0, &AlphaRect);
 
 	if(UI()->MouseButtonReleased(1) && !UI()->MouseInside(&ValuesHitbox))
 	{
@@ -1160,22 +1164,16 @@ void CMenus::RenderColorPicker()
 	ColorsArea.Draw(BlackColor, 0, 0);
 	ColorsArea.Margin(1, &ColorsArea);
 
-	unsigned int H = ms_ColorPicker.m_HSVColor / (1 << 16);
-	unsigned int S = (ms_ColorPicker.m_HSVColor - (H << 16)) / (1 << 8);
-	unsigned int V = ms_ColorPicker.m_HSVColor % (1 << 8);
-
 	ColorHSVA PickerColorHSV(ms_ColorPicker.m_HSVColor);
+	unsigned H = (unsigned)(PickerColorHSV.x * 255.0f);
+	unsigned S = (unsigned)(PickerColorHSV.y * 255.0f);
+	unsigned V = (unsigned)(PickerColorHSV.z * 255.0f);
 
 	// Color Area
-	ColorRGBA rgb;
-	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 0.0f, 1.0f));
-	vec4 TL(rgb.r, rgb.g, rgb.b, 1.0f);
-	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
-	vec4 TR(rgb.r, rgb.g, rgb.b, 1.0f);
-	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 0.0f, 1.0f));
-	vec4 BL(rgb.r, rgb.g, rgb.b, 1.0f);
-	rgb = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
-	vec4 BR(rgb.r, rgb.g, rgb.b, 1.0f);
+	vec4 TL = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 0.0f, 1.0f));
+	vec4 TR = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
+	vec4 BL = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 0.0f, 1.0f));
+	vec4 BR = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
 
 	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
 
@@ -1210,59 +1208,54 @@ void CMenus::RenderColorPicker()
 		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
 	}
 
-	//Editboxes Area
+	// Editboxes Area
 	ColorRGBA EditboxBackground(0, 0, 0, 0.4f);
 
-	static int RGBRID = 0;
-	static int RGBGID = 0;
-	static int RGBBID = 0;
+	static int s_aValueSelectorIds[4];
 
-	H = DoValueSelector(&RGBRID, &HSVHRect, "H:", true, H, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
-	S = DoValueSelector(&RGBGID, &HSVSRect, "S:", true, S, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
-	V = DoValueSelector(&RGBBID, &HSVVRect, "V:", true, V, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
+	H = DoValueSelector(&s_aValueSelectorIds[0], &HueRect, "H:", true, H, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
+	S = DoValueSelector(&s_aValueSelectorIds[1], &SatRect, "S:", true, S, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
+	V = DoValueSelector(&s_aValueSelectorIds[2], &ValueRect, "V:", true, V, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
 
-	PickerColorHSV = ColorHSVA((H << 16) + (S << 8) + V);
+	PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f);
 
-	unsigned int HEX = color_cast<ColorRGBA, ColorHSVA>(PickerColorHSV).Pack(false);
-	static int HEXID = 0;
+	unsigned int Hex = color_cast<ColorRGBA>(PickerColorHSV).Pack(false);
+	unsigned int NewHex = DoValueSelector(&s_aValueSelectorIds[3], &HexRect, "HEX:", false, Hex, 0, 0xFFFFFF, 1, 1, true, 5.0f, &EditboxBackground);
 
-	unsigned int NEWHEX = DoValueSelector(&HEXID, &HEXRect, "HEX:", false, HEX, 0, 0xFFFFFF, 1, 1, true, 5.0f, &EditboxBackground);
-
-	if(HEX != NEWHEX)
-		PickerColorHSV = color_cast<ColorHSVA, ColorRGBA>(NEWHEX);
+	if(Hex != NewHex)
+		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA(NewHex));
 
 	// TODO : ALPHA SUPPORT
-	//static int ALPHAID = 0;
-	UI()->DoLabel(&ALPHARect, "A: 255", 10, TEXTALIGN_CENTER);
-	ALPHARect.Draw(ColorRGBA(0, 0, 0, 0.65f), IGraphics::CORNER_ALL, 5.0f);
+	UI()->DoLabel(&AlphaRect, "A: 255", 10, TEXTALIGN_CENTER);
+	AlphaRect.Draw(ColorRGBA(0, 0, 0, 0.65f), IGraphics::CORNER_ALL, 5.0f);
 
 	// Logic
 	float PickerX, PickerY;
 
-	static int ColorPickerID = 0;
-	static int HuePickerID = 0;
+	static int s_ColorPickerId = 0;
+	static int s_HuePickerId = 0;
 
-	if(UI()->DoPickerLogic(&ColorPickerID, &ColorsArea, &PickerX, &PickerY))
+	if(UI()->DoPickerLogic(&s_ColorPickerId, &ColorsArea, &PickerX, &PickerY))
 	{
 		PickerColorHSV.y = PickerX / ColorsArea.w;
 		PickerColorHSV.z = 1.0f - PickerY / ColorsArea.h;
 	}
 
-	if(UI()->DoPickerLogic(&HuePickerID, &HueArea, &PickerX, &PickerY))
+	if(UI()->DoPickerLogic(&s_HuePickerId, &HueArea, &PickerX, &PickerY))
 		PickerColorHSV.x = 1.0f - PickerY / HueArea.h;
 
 	// Marker Color Area
 	float MarkerX = ColorsArea.x + ColorsArea.w * PickerColorHSV.y;
 	float MarkerY = ColorsArea.y + ColorsArea.h * (1.0f - PickerColorHSV.z);
 
-	int MarkerOutlineInd = PickerColorHSV.z > 0.5f ? 0.0f : 1.0f;
+	const float MarkerOutlineInd = PickerColorHSV.z > 0.5f ? 0.0f : 1.0f;
 	ColorRGBA MarkerOutline(MarkerOutlineInd, MarkerOutlineInd, MarkerOutlineInd, 1.0f);
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(MarkerOutline);
 	Graphics()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
-	Graphics()->SetColor(color_cast<ColorRGBA, ColorHSVA>(PickerColorHSV));
+	Graphics()->SetColor(color_cast<ColorRGBA>(PickerColorHSV));
 	Graphics()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
 	Graphics()->QuadsEnd();
 
@@ -1272,16 +1265,16 @@ void CMenus::RenderColorPicker()
 	HueMarker.h = 6.5f;
 	HueMarker.y = (HueArea.y + HueArea.h * (1.0f - PickerColorHSV.x)) - HueMarker.h / 2.0f;
 
-	ColorRGBA HueMarkerColor = color_cast<ColorRGBA, ColorHSVA>(ColorHSVA(PickerColorHSV.x, 1, 1, 1));
-	const float HMOColor = PickerColorHSV.x > 0.75f ? 1.0f : 0.0f;
-	ColorRGBA HueMarkerOutline(HMOColor, HMOColor, HMOColor, 1);
+	ColorRGBA HueMarkerColor = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1, 1, 1));
+	const float HueMarkerOutlineColor = PickerColorHSV.x > 0.75f ? 1.0f : 0.0f;
+	ColorRGBA HueMarkerOutline(HueMarkerOutlineColor, HueMarkerOutlineColor, HueMarkerOutlineColor, 1);
 
 	HueMarker.Draw(HueMarkerOutline, IGraphics::CORNER_ALL, 1.2f);
 	HueMarker.Margin(1.2f, &HueMarker);
 	HueMarker.Draw(HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
 
 	ms_ColorPicker.m_HSVColor = PickerColorHSV.Pack(false);
-	*ms_ColorPicker.m_pColor = color_cast<ColorHSLA, ColorHSVA>(PickerColorHSV).Pack(false);
+	*ms_ColorPicker.m_pColor = color_cast<ColorHSLA>(PickerColorHSV).Pack(false);
 }
 
 int CMenus::Render()
