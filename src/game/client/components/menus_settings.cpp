@@ -3246,10 +3246,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CButtonContainer s_ResetID1;
 	Miscellaneous.HSplitTop(25.0f, &Button, &Right);
 	DoLine_ColorPicker(&s_ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
-	Right.HSplitTop(5.0f, 0x0, &Right);
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
-		g_Config.m_ClHttpMapDownload ^= 1;
 
 	static CButtonContainer s_ButtonTimeout;
 	Right.HSplitTop(10.0f, 0x0, &Right);
