@@ -1114,6 +1114,10 @@ void CMenus::RenderColorPicker()
 		return;
 	}
 
+	// Prevent activation of UI elements outside of active color picker
+	if(UI()->MouseInside(&PickerRect))
+		UI()->SetHotItem(&ms_ColorPicker);
+
 	// Render
 	ColorRGBA BackgroundColor(0.1f, 0.1f, 0.1f, 1.0f);
 	PickerRect.Draw(BackgroundColor, 0, 0);
