@@ -2979,7 +2979,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		ColorHSLA LaserRifleOutlineColor = DoLine_ColorPicker(&s_LaserRifleOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Outline Color"), &g_Config.m_ClLaserRifleOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
 		ColorHSLA LaserRifleInnerColor = DoLine_ColorPicker(&s_LaserRifleInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Inner Color"), &g_Config.m_ClLaserRifleInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
 		ColorHSLA LaserShotgunOutlineColor = DoLine_ColorPicker(&s_LaserShotgunOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Outline Color"), &g_Config.m_ClLaserShotgunOutlineColor, ColorRGBA(0.125490f, 0.098039f, 0.043137f, 1.0f), false);
-		ColorHSLA LaserShotgunInnerColor = DoLine_ColorPicker(&s_LaserShotgunInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Inner Color"), &g_Config.m_ClLaserShotgunInnerColor, ColorRGBA(0.764705f, 0.505882f, 0.0f, 1.0f), false);
+		ColorHSLA LaserShotgunInnerColor = DoLine_ColorPicker(&s_LaserShotgunInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Inner Color"), &g_Config.m_ClLaserShotgunInnerColor, ColorRGBA(0.570588f, 0.417647f, 0.252941f, 1.0f), false);
 
 		// ***** Entities ***** //
 		LeftView.HSplitTop(MarginToNextSection * 2.0f, 0x0, &LeftView);
@@ -3014,12 +3014,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// values taken from the CL commands
 		LeftView.HSplitTop(10.0f, 0x0, &LeftView);
 		LeftView.HSplitTop(20.0f, &Button, &LeftView);
-		if(DoButton_Menu(&s_AllToDefaultResetID, Localize("Reset all"), 0, &Button))
+		if(DoButton_Menu(&s_AllToDefaultResetID, Localize("Reset to defaults"), 0, &Button))
 		{
 			g_Config.m_ClLaserRifleOutlineColor = 11176233;
 			g_Config.m_ClLaserRifleInnerColor = 11206591;
 			g_Config.m_ClLaserShotgunOutlineColor = 1866773;
-			g_Config.m_ClLaserShotgunInnerColor = 1900385;
+			g_Config.m_ClLaserShotgunInnerColor = 1467241;
 			g_Config.m_ClLaserDoorOutlineColor = 7667473;
 			g_Config.m_ClLaserDoorInnerColor = 7701379;
 			g_Config.m_ClLaserFreezeOutlineColor = 11613223;
