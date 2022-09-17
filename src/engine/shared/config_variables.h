@@ -300,7 +300,7 @@ MACRO_CONFIG_COL(ClMessageTeamColor, cl_message_team_color, 5636050, CFGFLAG_CLI
 MACRO_CONFIG_COL(ClMessageColor, cl_message_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message color")
 MACRO_CONFIG_COL(ClLaserRifleInnerColor, cl_laser_rifle_inner_color, 11206591, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color for Rifle")
 MACRO_CONFIG_COL(ClLaserRifleOutlineColor, cl_laser_rifle_outline_color, 11176233, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color for Rifle")
-MACRO_CONFIG_COL(ClLaserShotgunInnerColor, cl_laser_sg_inner_color, 1900385, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color for Shotgun")
+MACRO_CONFIG_COL(ClLaserShotgunInnerColor, cl_laser_sg_inner_color, 1467241, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color for Shotgun")
 MACRO_CONFIG_COL(ClLaserShotgunOutlineColor, cl_laser_sg_outline_color, 1866773, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color for Shotgun")
 MACRO_CONFIG_COL(ClLaserDoorInnerColor, cl_laser_door_inner_color, 7701379, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color for doors")
 MACRO_CONFIG_COL(ClLaserDoorOutlineColor, cl_laser_door_outline_color, 7667473, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color for doors")
