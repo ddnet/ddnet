@@ -22,6 +22,7 @@
 # Rafael Fontenelle   2021-02-13 07:00:00
 # Rafael Fontenelle   2021-06-10 12:00:00
 # pv                  2022-06-01 20:44:00
+# Rafael Fontenelle   2022-09-17 23:23:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1570,55 +1571,55 @@ Loading sound files
 == Carregando arquivos de som
 
 Play the current demo
-== 
+== Assistir a demo atual
 
 Pause the current demo
-== 
+== Pausar a demo atual
 
 Stop the current demo
-== 
+== Parar a demo atual
 
 Slow down the demo
-== 
+== Desacelerar a demo
 
 Speed up the demo
-== 
+== Acelerar a demo
 
 Mark the beginning of a cut
-== 
+== Marcar o início de um corte
 
 Mark the end of a cut
-== 
+== Marcar o fim de um corte
 
 Export cut as a seperate demo
-== 
+== Exportar corte como uma demo separada
 
 Toggle keyboard shortcuts
-== 
+== Ativar atalhos de teclado
 
 Weapons
-== 
+== Armas
 
 Rifle Laser Outline Color
-== 
+== Cor de contorno do laser do rifle
 
 Rifle Laser Inner Color
-== 
+== Cor de interna do laser do rifle
 
 Shotgun Laser Outline Color
-== 
+== Cor contorno do laser da espingarda
 
 Shotgun Laser Inner Color
-== 
+== Cor interna do laser do espingarda
 
 Door Laser Outline Color
-== 
+== Cor de contorno do laser da porta
 
 Door Laser Inner Color
-== 
+== Cor interna do laser do porta
 
 Freeze Laser Outline Color
-== 
+== Cor de contorno do laser do congelamento
 
 Freeze Laser Inner Color
-== 
+== Cor interna do laser do congelamento
