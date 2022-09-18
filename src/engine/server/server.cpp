@@ -1886,7 +1886,8 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, m_NetServer.MaxClients());
+			const int MaxClients = maximum(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
+			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, MaxClients);
 			p.AddString(aBuf, 64);
 		}
 	}
