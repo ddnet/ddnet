@@ -1168,7 +1168,7 @@ Assets directory
 == Directorio de recursos
 
 https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/es
 
 Website
 == Página web
