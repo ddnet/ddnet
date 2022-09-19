@@ -1175,7 +1175,7 @@ Learn
 == 학습터
 
 https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ko
 
 Website
 == 웹사이트
