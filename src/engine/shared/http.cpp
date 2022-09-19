@@ -271,7 +271,7 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	if(Ret != CURLE_OK)
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
-			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, aErr);
+			dbg_msg("http", "%s failed. libcurl error (%d): %s", m_aUrl, (int)Ret, aErr);
 		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
