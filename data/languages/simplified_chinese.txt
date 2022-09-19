@@ -1096,7 +1096,7 @@ Country / Region
 == 国家 / 地区
 
 https://wiki.ddnet.org/
-== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
+== https://wiki.ddnet.org/wiki/Main_Page/zh
 
 Warning
 == 警告

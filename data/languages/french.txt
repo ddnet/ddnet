@@ -1152,7 +1152,7 @@ Assets directory
 == Répertoire des assets
 
 https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/fr
 
 Website
 == Site web
