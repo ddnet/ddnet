@@ -149,6 +149,7 @@ typedef struct
 } NETSOCKET_BUFFER;
 
 void net_buffer_init(NETSOCKET_BUFFER *buffer);
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer);
 void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size);
 
 struct NETSOCKET_INTERNAL
@@ -1698,6 +1699,16 @@ void net_buffer_init(NETSOCKET_BUFFER *buffer)
 #endif
 }
 
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	for(int i = 0; i < VLEN; i++)
+	{
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+#endif
+}
+
 void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 {
 #if defined(CONF_PLATFORM_LINUX)
@@ -1719,6 +1730,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	{
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
+			net_buffer_reinit(&sock->buffer);
 			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
 			sock->buffer.pos = 0;
 		}
@@ -1728,6 +1740,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	{
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
+			net_buffer_reinit(&sock->buffer);
 			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
 			sock->buffer.pos = 0;
 		}
