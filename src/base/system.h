@@ -942,9 +942,51 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 */
 int net_socket_type(NETSOCKET sock);
 
+/**
+ * @defgroup Network-Loop
+ * @ingroup Network-General
+ */
+
+/**
+ * Creates an udp socket connected to itself
+ *
+ * @ingroup Network-Loop
+ *
+ * @return On success returns the socket fd. On failure -1
+ */
 int net_loop_create();
+
+/**
+ * Send a packet over a Loop socket.
+ *
+ * @ingroup Network-Loop
+ *
+ * @param sock Socket to use.
+ * @param data Pointer to the data to send.
+ * @param len Length of the data.
+ */
 void net_loop_send(int sock, const void *data, size_t len);
+
+/**
+ * Receives a packet on the loop socket
+ *
+ * @ingroup Network-Loop
+ *
+ * @param sock Socket to use.
+ * @param buf Pointer to the buffer to store the received data in.
+ * @param len Size of the buffer.
+ * @return Returns the number of bytes read. Will return 0 instead
+ * of blocking if there is no data
+ */
 int net_loop_recv(int sock, void *buf, size_t len);
+
+/**
+ * Close loop socket
+ *
+ * @ingroup Network-Loop
+ *
+ * @param sock Socket to close.
+ */
 void net_loop_close(int sock);
 
 /*
