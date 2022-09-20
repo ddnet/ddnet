@@ -43,8 +43,7 @@ bool CHttpRunner::Init()
 	if(m_State != RUNNING)
 	{
 #if defined(CONF_FAMILY_UNIX)
-		close(m_WakeUpPair[0]);
-		close(m_WakeUpPair[1]);
+		io_pipe_close(m_WakeUpPair);
 #elif defined(CONF_FAMILY_WINDOWS)
 		net_loop_close(m_WakeUpPair[0]);
 #endif
@@ -279,6 +278,12 @@ CHttpRunner::~CHttpRunner()
 
 	if(m_pThread)
 		thread_wait(m_pThread);
+
+#if defined(CONF_FAMILY_UNIX)
+	io_pipe_close(m_WakeUpPair);
+#elif defined(CONF_FAMILY_WINDOWS)
+	net_loop_close(m_WakeUpPair[0]);
+#endif
 }
 
 int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)

@@ -2155,6 +2155,13 @@ int io_pipe_read(int fd, void *buf, size_t len)
 	return read(fd, buf, len);
 }
 
+int io_pipe_close(int pipefd[2])
+{
+	int r1 = close(pipefd[0]);
+	int r2 = close(pipefd[1]);
+	return r1 || r2 ? -1 : 0;
+}
+
 #if defined(CONF_FAMILY_WINDOWS)
 static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 {

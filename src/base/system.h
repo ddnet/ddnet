@@ -1221,6 +1221,14 @@ int io_pipe_write(int fd, const void *data, size_t len);
 int io_pipe_read(int fd, void *buf, size_t len);
 
 /**
+ * Close a pipe
+ *
+ * @param pipefd Pipe to close
+ * @return Returns 0 on success, -1 on error.
+ */
+int io_pipe_close(int pipefd[2]);
+
+/**
  * @defgroup Strings
  *
  * String related functions.
