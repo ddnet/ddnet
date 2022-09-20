@@ -1188,6 +1188,39 @@ void net_unix_close(UNIXSOCKET sock);
 #endif
 
 /**
+ * Creates a non-blocking pipe.
+ *
+ * @param pipefd Array to put the pipe fds into.
+ * pipefd[0] will contain the read end, pipefd[1] the write end.
+ *
+ * @return On success 0 is returned. On error -1 is returned and pipefd is untouched.
+ */
+int io_pipe(int pipefd[2]);
+
+/**
+ * Write to a pipe.
+ *
+ * @param fd Write end of the pipe.
+ * @param data Pointer to the data to be written.
+ * @param len Size of the data to be written.
+ *
+ * @return Number of bytes written or -1 on failure.
+ */
+int io_pipe_write(int fd, const void *data, size_t len);
+
+/**
+ * Read from a pipe.
+ *
+ * @param fd Read end of the pipe.
+ * @param buf Poiter to buffer.
+ * @param len Size of the buffer.
+ *
+ * @remark Returns 0 if the call would have blocked.
+ * @return Number of bytes read or -1 on failure.
+ */
+int io_pipe_read(int fd, void *buf, size_t len);
+
+/**
  * @defgroup Strings
  *
  * String related functions.

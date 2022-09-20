@@ -10,12 +10,12 @@
 
 #if !defined(CONF_FAMILY_WINDOWS)
 #include <csignal>
-#include <fcntl.h>
-#include <unistd.h>
 #endif
 
 #define WIN32_LEAN_AND_MEAN
 #include <curl/curl.h>
+
+char g_WakeUp = 'w';
 
 CHttpRunner gs_Runner;
 
@@ -29,9 +29,11 @@ bool CHttpRunner::Init()
 
 	// Create wakeup pair
 #if defined(CONF_FAMILY_UNIX)
-	pipe2(m_WakeUpPair, O_NONBLOCK);
+	if(io_pipe(m_WakeUpPair))
+		return true;
 #elif defined(CONF_FAMILY_WINDOWS)
-	m_WakeUpPair[0] = m_WakeUpPair[1] = net_loop_create();
+	if((m_WakeUpPair[0] = m_WakeUpPair[1] = net_loop_create()) == -1)
+		return true;
 #endif
 
 	m_pThread = thread_init(CHttpRunner::ThreadMain, this, "http_runner");
@@ -57,9 +59,9 @@ void CHttpRunner::WakeUp()
 {
 //TODO: Check with TSA to make sure we hold m_Lock
 #if defined(CONF_FAMILY_UNIX)
-	write(m_WakeUpPair[1], "w", 1);
+	(void)io_pipe_write(m_WakeUpPair[1], &g_WakeUp, sizeof(g_WakeUp));
 #elif defined(CONF_FAMILY_WINDOWS)
-	net_loop_send(m_WakeUpPair[1], "w", 1);
+	(void)net_loop_send(m_WakeUpPair[1], &g_WakeUp, sizeof(g_WakeUp));
 #endif
 }
 
@@ -93,7 +95,7 @@ void Discard(int fd)
 	char aBuf[32];
 	while(
 #if defined(CONF_FAMILY_UNIX)
-		read(fd, aBuf, sizeof(aBuf)) >= 0
+		io_pipe_read(fd, aBuf, sizeof(aBuf)) >= 0
 #elif defined(CONF_FAMILY_WINDOWS)
 		net_loop_recv(fd, aBuf, sizeof(aBuf))
 #endif
@@ -463,7 +465,7 @@ void CHttpRequest::OnCompletionInternal(unsigned int Result)
 	else
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
-			dbg_msg("http", "task done %s", m_aUrl);
+			dbg_msg("http", "task done: %s", m_aUrl);
 		State = HTTP_DONE;
 	}
 

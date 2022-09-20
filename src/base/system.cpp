@@ -2121,6 +2121,40 @@ void net_unix_close(UNIXSOCKET sock)
 }
 #endif
 
+int io_pipe(int pipefd[2])
+{
+	int pipefd_[2];
+
+#if defined(CONF_FAMILY_UNIX)
+	if(pipe(pipefd_))
+		return -1;
+
+	unsigned long mode = 1;
+	if(ioctl(pipefd_[0], FIONBIO, &mode) ||
+		ioctl(pipefd_[1], FIONBIO, &mode))
+	{
+		close(pipefd_[0]);
+		close(pipefd_[1]);
+		return -1;
+	}
+	pipefd[0] = pipefd_[0];
+	pipefd[1] = pipefd_[1];
+#else
+#error not implemented
+#endif
+	return 0;
+}
+
+int io_pipe_write(int fd, const void *data, size_t len)
+{
+	return write(fd, data, len);
+}
+
+int io_pipe_read(int fd, void *buf, size_t len)
+{
+	return read(fd, buf, len);
+}
+
 #if defined(CONF_FAMILY_WINDOWS)
 static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 {
