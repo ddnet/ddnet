@@ -508,7 +508,16 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int
 
 void CRegister::Update()
 {
-	m_GotFirstUpdateCall = true;
+	if(!m_GotFirstUpdateCall)
+	{
+		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6];
+		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
+		if(Ipv6 && Ipv4)
+		{
+			dbg_assert(!HttpHasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
+		}
+		m_GotFirstUpdateCall = true;
+	}
 	if(!m_GotServerInfo)
 	{
 		return;

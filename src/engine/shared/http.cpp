@@ -116,6 +116,13 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
+bool HttpHasIpresolveBug()
+{
+	// curl < 7.77.0 doesn't use CURLOPT_IPRESOLVE correctly wrt.
+	// connection caches.
+	return curl_version_info(CURLVERSION_NOW)->version_num < 0x074d00;
+}
+
 CHttpRequest::CHttpRequest(const char *pUrl)
 {
 	str_copy(m_aUrl, pUrl);
