@@ -34,6 +34,7 @@ def transfer(file_from, file_to):
 	cursor_to = conn_to.cursor()
 
 	conn_from = sqlite3.connect(file_from, isolation_level='EXCLUSIVE')
+	conn_from.text_factory = lambda b: b.decode(errors = 'ignore').rstrip()
 	for line in conn_from.iterdump():
 		cursor_to.execute(line)
 		print(line.encode('utf-8'))
@@ -78,17 +79,11 @@ def main():
 	if num == 0:
 		return
 
-	print(f'{num} new entries in backup database found ({num_ranks} ranks, {num_teamranks} teamranks, {num_saves} saves')
-	print('Moving entries from {os.path.abspath(args.f)} to {os.path.abspath(args.to)}')
-	sql_file = 'ddnet-server-' + strftime('%Y-%m-%d') + '.sql'
-	print("You can use the following commands to import the entries to MySQL (use sed 's/record_/prefix_/' for other database prefixes):")
+	print(f'{num} new entries in backup database found ({num_ranks} ranks, {num_teamranks} teamranks, {num_saves} saves)')
+	print(f'Moving entries from {os.path.abspath(args.f)} to {os.path.abspath(args.to)}')
+	print("You can use the following commands to import the entries to MySQL (using https://github.com/techouse/sqlite3-to-mysql/):")
 	print()
-	print((f"    echo '.dump --preserve-rowids' | sqlite3 {os.path.abspath(args.to)} | " + # including rowids, this forces sqlite to name all columns in each INSERT statement
-			"grep -E '^INSERT INTO record_(race|teamrace|saves)' | " + # filter out inserts
-			"sed -e 's/INSERT INTO/INSERT IGNORE INTO/' | " + # ignore duplicate rows
-			f"sed -e 's/rowid,//' -e 's/VALUES([0-9]*,/VALUES(/' > {sql_file}")) # filter out rowids again
-	print(f"    mysql -u teeworlds -p'PW2' teeworlds < {sql_file}")
-	print()
+	print(f"sqlite3mysql --sqlite-file {os.path.abspath(args.to)} --ignore-duplicate-keys --mysql-insert-method IGNORE --sqlite-tables record_race record_teamrace record_saves --mysql-password 'PW2' --mysql-host 'host' --mysql-database teeworlds --mysql-user teeworlds")
 	print(f"When the ranks are transfered successfully to mysql, {os.path.abspath(args.to)} can be removed")
 	print()
 	print("Log of the transfer:")
