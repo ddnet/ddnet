@@ -118,6 +118,9 @@ class CRegister : public IRegister
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
+	// Don't start sending registers before the server has initialized
+	// completely.
+	bool m_GotFirstUpdateCall = false;
 	int m_ServerPort;
 	char m_aConnlessTokenHex[16];
 
@@ -505,6 +508,16 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int
 
 void CRegister::Update()
 {
+	if(!m_GotFirstUpdateCall)
+	{
+		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6];
+		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
+		if(Ipv6 && Ipv4)
+		{
+			dbg_assert(!HttpHasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
+		}
+		m_GotFirstUpdateCall = true;
+	}
 	if(!m_GotServerInfo)
 	{
 		return;
@@ -605,6 +618,11 @@ void CRegister::OnConfigChange()
 		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader);
 		m_NumExtraHeaders += 1;
 	}
+	// Don't start registering before the first `CRegister::Update` call.
+	if(!m_GotFirstUpdateCall)
+	{
+		return;
+	}
 	for(int i = 0; i < NUM_PROTOCOLS; i++)
 	{
 		if(aOldProtocolEnabled[i] == m_aProtocolEnabled[i])
@@ -668,6 +686,12 @@ void CRegister::OnNewInfo(const char *pInfo)
 	{
 		CLockScope ls(m_pGlobal->m_Lock);
 		m_pGlobal->m_InfoSerial += 1;
+	}
+
+	// Don't start registering before the first `CRegister::Update` call.
+	if(!m_GotFirstUpdateCall)
+	{
+		return;
 	}
 
 	// Immediately send new info if it changes, but at most once per second.
