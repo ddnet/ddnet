@@ -1783,6 +1783,24 @@ int CMenus::Render()
 			{
 				Client()->Disconnect();
 				m_Popup = POPUP_NONE;
+				if(g_Config.m_UiPage == PAGE_INTERNET)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+				else if(g_Config.m_UiPage == PAGE_LAN)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+				else if(g_Config.m_UiPage == PAGE_FAVORITES)
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+				else if(g_Config.m_UiPage == PAGE_DDNET)
+				{
+					// start a new server list request
+					Client()->RequestDDNetInfo();
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+				}
+				else if(g_Config.m_UiPage == PAGE_KOG)
+				{
+					// start a new server list request
+					Client()->RequestDDNetInfo();
+					ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+				}
 			}
 
 			if(Client()->MapDownloadTotalsize() > 0)
