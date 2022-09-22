@@ -845,6 +845,17 @@ int CMenus::RenderMenubar(CUIRect r)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
+	if(Client()->State() != IClient::STATE_OFFLINE)
+	{
+		Box.VSplitRight(33.0f, &Box, &Button);
+		static CButtonContainer s_CloseButton;
+		if(DoButton_MenuTab(&s_CloseButton, "\xE2\x9C\x95", 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_CLOSE], NULL, NULL, NULL, 10.0f, 0))
+		{
+			SetActive(!IsActive());
+		}
+		Box.VSplitRight(5.0f, &Box, &Button);
+	}
+
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_QuitButton;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
@@ -860,14 +871,14 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 	}
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(5.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
 
 	if(DoButton_MenuTab(&s_SettingsButton, "\xEF\x80\x93", m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
 		NewPage = PAGE_SETTINGS;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(5.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_EditorButton;
 	if(DoButton_MenuTab(&s_EditorButton, "\xEF\x81\x84", 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
@@ -877,14 +888,14 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
-		Box.VSplitRight(10.0f, &Box, &Button);
+		Box.VSplitRight(5.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
 
 		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x84\xB1", m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = PAGE_DEMOS;
 
-		Box.VSplitRight(10.0f, &Box, &Button);
+		Box.VSplitRight(5.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_ServerButton;
 
