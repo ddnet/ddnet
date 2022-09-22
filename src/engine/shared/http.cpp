@@ -8,6 +8,8 @@
 #include <engine/storage.h>
 #include <game/version.h>
 
+#include <thread>
+
 #if !defined(CONF_FAMILY_WINDOWS)
 #include <csignal>
 #endif
@@ -19,7 +21,7 @@ char g_WakeUp = 'w';
 
 CHttpRunner gs_Runner;
 
-bool CHttpRunner::Init()
+bool CHttpRunner::Init(std::chrono::milliseconds ShutdownDelay)
 {
 #if !defined(CONF_FAMILY_WINDOWS)
 	// As a multithreaded application we have to tell curl to not install signal
@@ -36,6 +38,7 @@ bool CHttpRunner::Init()
 		return true;
 #endif
 
+	m_ShutdownDelay = ShutdownDelay;
 	m_pThread = thread_init(CHttpRunner::ThreadMain, this, "http_runner");
 
 	std::unique_lock l(m_Lock);
@@ -194,7 +197,7 @@ void CHttpRunner::RunLoop()
 			auto pRequest = std::move(NewRequests.front());
 			NewRequests.pop();
 
-			dbg_msg("http", "task: %s", pRequest->m_aUrl);
+			dbg_msg("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
 
 			CURL *pEH = curl_easy_init();
 			if(!pEH)
@@ -267,6 +270,7 @@ void CHttpRunner::RunLoop()
 
 void CHttpRunner::Shutdown()
 {
+	std::this_thread::sleep_for(m_ShutdownDelay);
 	if(m_pThread)
 	{
 		std::lock_guard l(m_Lock);
@@ -596,7 +600,7 @@ json_value *CHttpRequest::ResultJson() const
 	return json_parse((char *)pResult, ResultLength);
 }
 
-bool HttpInit(IEngine *pEngine, IStorage *pStorage)
+bool HttpInit(IEngine *pEngine, IStorage *pStorage, std::chrono::milliseconds ShutdownDelay)
 {
 	static_assert(CURL_ERROR_SIZE <= 256); // CHttpRequest::m_aErr
 
@@ -606,7 +610,7 @@ bool HttpInit(IEngine *pEngine, IStorage *pStorage)
 
 	dbg_assert(CHttpRunnable::m_sRunner == -1, "http module initialized twice");
 
-	bool Result = gs_Runner.Init();
+	bool Result = gs_Runner.Init(ShutdownDelay);
 	CHttpRunnable::m_sRunner = pEngine->RegisterRunner(&gs_Runner);
 
 	return Result;

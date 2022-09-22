@@ -8,6 +8,7 @@
 #include <mutex>
 #include <queue>
 #include <unordered_map>
+#include <chrono>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -63,6 +64,7 @@ class CHttpRunner : public IEngineRunner
 	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests{}; // void * == CURL *
 	std::atomic<State> m_State = UNINITIALIZED;
 	void *m_pThread = nullptr;
+	std::chrono::milliseconds m_ShutdownDelay = std::chrono::milliseconds::zero();
 
 	void WakeUp();
 
@@ -70,7 +72,7 @@ public:
 	~CHttpRunner();
 
 	// Boot
-	bool Init();
+	bool Init(std::chrono::milliseconds ShutdownDelay);
 	static void ThreadMain(void *pUser);
 
 	// User
@@ -106,6 +108,22 @@ public:
 		POST,
 		POST_JSON,
 	};
+	static constexpr const char *GetRequestType(REQUEST Type)
+	{
+		switch(Type)
+		{
+		case REQUEST::GET:
+			return "GET";
+		case REQUEST::HEAD:
+			return "HEAD";
+		case REQUEST::POST:
+		case REQUEST::POST_JSON:
+			return "POST";
+		}
+
+		// Unreachable, maybe assert?
+		return "UNKNOWN";
+	}
 	char m_aUrl[256] = {0};
 
 	void *m_pHeaders = nullptr;
@@ -252,7 +270,7 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 	return pResult;
 }
 
-bool HttpInit(IEngine *pEngine, IStorage *pStorage);
+bool HttpInit(IEngine *pEngine, IStorage *pStorage, std::chrono::milliseconds ShutdownDelay = std::chrono::milliseconds::zero());
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 bool HttpHasIpresolveBug();
 #endif // ENGINE_SHARED_HTTP_H

@@ -3639,7 +3639,7 @@ void CServer::RegisterCommands()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 
-	HttpInit(Kernel()->RequestInterface<IEngine>(), m_pStorage);
+	HttpInit(Kernel()->RequestInterface<IEngine>(), m_pStorage, std::chrono::milliseconds(1000));
 
 	// register console commands
 	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
