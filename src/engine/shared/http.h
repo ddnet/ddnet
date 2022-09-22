@@ -87,7 +87,7 @@ protected:
 	EStatus m_Status = PENDING;
 
 public:
-	inline static int m_sRunner;
+	inline static int m_sRunner = -1;
 	virtual int Runner() final { return m_sRunner; };
 	virtual void Run() final{};
 	virtual EStatus Status() final { return m_Status; };

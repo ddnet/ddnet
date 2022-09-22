@@ -81,6 +81,10 @@ void CHttpRunner::Run(std::shared_ptr<IEngineRunnable> pRunnable)
 		m_PendingRequests.emplace(std::move(pRequest));
 		WakeUp();
 	}
+	else
+	{
+		dbg_assert(false, "Unknown http runnable type");
+	}
 }
 
 void CHttpRunner::ThreadMain(void *pUser)
@@ -113,8 +117,8 @@ void CHttpRunner::RunLoop()
 		return;
 	}
 
-	CURLM *MultiH = curl_multi_init();
-	if(!MultiH)
+	CURLM *pMultiH = curl_multi_init();
+	if(!pMultiH)
 	{
 		dbg_msg("http", "curl_multi_init failed");
 		m_State = ERROR;
@@ -137,7 +141,7 @@ void CHttpRunner::RunLoop()
 	while(m_State == RUNNING)
 	{
 		int Events = 0;
-		CURLMcode mc = curl_multi_wait(MultiH, ExtraFds, sizeof(ExtraFds) / sizeof(ExtraFds[0]), 1000000, &Events);
+		CURLMcode mc = curl_multi_wait(pMultiH, ExtraFds, sizeof(ExtraFds) / sizeof(ExtraFds[0]), 1000000, &Events);
 
 		std::unique_lock LoopL(m_Lock);
 		if(m_State != RUNNING)
@@ -154,7 +158,7 @@ void CHttpRunner::RunLoop()
 		// Discard data on the wakeup pair
 		Discard(m_WakeUpPair[0]);
 
-		mc = curl_multi_perform(MultiH, &Events);
+		mc = curl_multi_perform(pMultiH, &Events);
 		if(mc != CURLM_OK)
 		{
 			dbg_msg("http", "Failed multi perform: %s", curl_multi_strerror(mc));
@@ -164,7 +168,7 @@ void CHttpRunner::RunLoop()
 		}
 
 		struct CURLMsg *m;
-		while((m = curl_multi_info_read(MultiH, &Events)))
+		while((m = curl_multi_info_read(pMultiH, &Events)))
 		{
 			if(m->msg == CURLMSG_DONE)
 			{
@@ -173,7 +177,7 @@ void CHttpRunner::RunLoop()
 				auto pRequest = RequestIt->second;
 
 				pRequest->OnCompletionInternal(m->data.result);
-				curl_multi_remove_handle(MultiH, m->easy_handle);
+				curl_multi_remove_handle(pMultiH, m->easy_handle);
 				curl_easy_cleanup(m->easy_handle);
 
 				m_RunningRequests.erase(RequestIt);
@@ -199,7 +203,7 @@ void CHttpRunner::RunLoop()
 			if(!pRequest->ConfigureHandle(pEH))
 				goto error_configure;
 
-			mc = curl_multi_add_handle(MultiH, pEH);
+			mc = curl_multi_add_handle(pMultiH, pEH);
 			if(mc != CURLM_OK)
 				goto error_configure;
 
@@ -247,7 +251,7 @@ void CHttpRunner::RunLoop()
 		auto &[pHandle, pRequest] = ReqPair;
 		if(Cleanup)
 		{
-			curl_multi_remove_handle(MultiH, pHandle);
+			curl_multi_remove_handle(pMultiH, pHandle);
 			curl_easy_cleanup(pHandle);
 		}
 
@@ -256,7 +260,7 @@ void CHttpRunner::RunLoop()
 
 	if(Cleanup)
 	{
-		curl_multi_cleanup(MultiH);
+		curl_multi_cleanup(pMultiH);
 		curl_global_cleanup();
 	}
 }
@@ -371,12 +375,12 @@ bool CHttpRequest::BeforeInit()
 	return true;
 }
 
-bool CHttpRequest::ConfigureHandle(CURL *pUser)
+bool CHttpRequest::ConfigureHandle(void *pUser)
 {
 	if(!BeforeInit())
 		return false;
 
-	CURL *pHandle = m_pHandle = (CURL *)pUser;
+	CURL *pHandle = m_pHandle = static_cast<CURL *>(pUser);
 	if(g_Config.m_DbgCurl)
 	{
 		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
@@ -594,6 +598,14 @@ json_value *CHttpRequest::ResultJson() const
 
 bool HttpInit(IEngine *pEngine, IStorage *pStorage)
 {
+	static_assert(CURL_ERROR_SIZE <= 256); // CHttpRequest::m_aErr
+
+	// CHttpRequest::OnCompletionInternal(unsigned int == CURLcode)
+	static_assert(std::numeric_limits<std::underlying_type_t<CURLcode>>::min() >= std::numeric_limits<unsigned int>::min() && // NOLINT(misc-redundant-expression)
+		      std::numeric_limits<std::underlying_type_t<CURLcode>>::max() <= std::numeric_limits<unsigned int>::max()); // NOLINT(misc-redundant-expression)
+
+	dbg_assert(CHttpRunnable::m_sRunner == -1, "http module initialized twice");
+
 	bool Result = gs_Runner.Init();
 	CHttpRunnable::m_sRunner = pEngine->RegisterRunner(&gs_Runner);
 

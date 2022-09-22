@@ -228,7 +228,7 @@ public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	virtual ~CServerBrowserHttp();
 	void Update() override;
-	bool IsRefreshing() override { return m_State != STATE_DONE; }
+	bool IsRefreshing() override { return m_State == STATE_REFRESHING; }
 	void Refresh() override;
 	bool GetBestUrl(const char **pBestUrl) const override { return m_pChooseMaster->GetBestUrl(pBestUrl); }
 

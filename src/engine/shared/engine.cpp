@@ -110,10 +110,12 @@ int CEngine::RegisterRunner(IEngineRunner *pRunner)
 
 void CEngine::Dispatch(std::shared_ptr<IEngineRunnable> pRunnable)
 {
+	dbg_assert(pRunnable->Runner() != -1, "runnable with invalid runner");
+
 	if(g_Config.m_Debug)
 		dbg_msg("engine", "job dispatched to %d", pRunnable->Runner());
 
-	m_apRunners[pRunnable->Runner()]->Run(pRunnable);
+	m_apRunners[pRunnable->Runner()]->Run(std::move(pRunnable));
 }
 
 void CEngine::SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger)
