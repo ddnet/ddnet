@@ -2732,23 +2732,23 @@ void CMenus::SetMenuPage(int NewPage)
 void CMenus::RefreshBrowserTab(int UiPage)
 {
 	if(UiPage == PAGE_INTERNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			else if(UiPage == PAGE_LAN)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-			else if(UiPage == PAGE_FAVORITES)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			else if(UiPage == PAGE_DDNET)
-			{
-				// start a new server list request
-				Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-			}
-			else if(UiPage == PAGE_KOG)
-			{
-				// start a new server list request
-				Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
-			}
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+	else if(UiPage == PAGE_LAN)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+	else if(UiPage == PAGE_FAVORITES)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+	else if(UiPage == PAGE_DDNET)
+	{
+		// start a new server list request
+		Client()->RequestDDNetInfo();
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+	}
+	else if(UiPage == PAGE_KOG)
+	{
+		// start a new server list request
+		Client()->RequestDDNetInfo();
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+	}
 }
 
 bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
