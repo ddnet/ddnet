@@ -61,6 +61,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		else
 		{
 			Client()->Disconnect();
+			RefreshBrowserTab(g_Config.m_UiPage);
 		}
 	}
 

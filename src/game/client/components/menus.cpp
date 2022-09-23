@@ -1298,6 +1298,7 @@ int CMenus::Render()
 		s_Frame++;
 		m_DoubleClickIndex = -1;
 
+		RefreshBrowserTab(g_Config.m_UiPage);
 		if(g_Config.m_UiPage == PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 		else if(g_Config.m_UiPage == PAGE_LAN)
@@ -1783,6 +1784,7 @@ int CMenus::Render()
 			{
 				Client()->Disconnect();
 				m_Popup = POPUP_NONE;
+				RefreshBrowserTab(g_Config.m_UiPage);
 			}
 
 			if(Client()->MapDownloadTotalsize() > 0)
@@ -2725,6 +2727,28 @@ void CMenus::SetMenuPage(int NewPage)
 	m_MenuPage = NewPage;
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
 		g_Config.m_UiPage = NewPage;
+}
+
+void CMenus::RefreshBrowserTab(int UiPage)
+{
+	if(UiPage == PAGE_INTERNET)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+	else if(UiPage == PAGE_LAN)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+	else if(UiPage == PAGE_FAVORITES)
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+	else if(UiPage == PAGE_DDNET)
+	{
+		// start a new server list request
+		Client()->RequestDDNetInfo();
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
+	}
+	else if(UiPage == PAGE_KOG)
+	{
+		// start a new server list request
+		Client()->RequestDDNetInfo();
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+	}
 }
 
 bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
