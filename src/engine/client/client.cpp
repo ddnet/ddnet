@@ -3207,11 +3207,11 @@ void CClient::Run()
 		{
 			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ALL);
 			if(!Result && !fs_is_relative_path(m_aCmdEditMap))
-				m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
+				Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
-				dbg_msg("demo_player", "editing passed map file '%s' failed", m_aCmdEditMap);
+				dbg_msg("editor", "editing passed map file '%s' failed", m_aCmdEditMap);
 			m_aCmdEditMap[0] = 0;
 		}
 
