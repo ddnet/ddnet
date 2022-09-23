@@ -631,25 +631,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, Func, 0, &ButtonRefresh, true, false, IGraphics::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 		{
-			if(g_Config.m_UiPage == PAGE_INTERNET)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			else if(g_Config.m_UiPage == PAGE_LAN)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-			else if(g_Config.m_UiPage == PAGE_FAVORITES)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			else if(g_Config.m_UiPage == PAGE_DDNET)
-			{
-				// start a new server list request
-				Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-			}
-			else if(g_Config.m_UiPage == PAGE_KOG)
-			{
-				// start a new server list request
-				Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
-			}
-			m_DoubleClickIndex = -1;
+			RefreshBrowserTab(g_Config.m_UiPage);
 		}
 
 		static int s_JoinButton = 0;
