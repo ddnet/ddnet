@@ -242,16 +242,14 @@ public:
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
 				"/opt/ddnet"};
-			const int DirsCount = std::size(apDirs);
 
-			int i;
-			for(i = 0; i < DirsCount; i++)
+			for(const char *pDir : apDirs)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", apDirs[i]);
+				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", pDir);
 				if(fs_is_dir(aBuf))
 				{
-					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", apDirs[i]);
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", pDir);
 					return;
 				}
 			}
