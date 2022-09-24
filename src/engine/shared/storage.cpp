@@ -555,7 +555,10 @@ public:
 		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
 		if(fs_makedir_rec_for(aNewBuffer) < 0)
+		{
 			dbg_msg("storage", "cannot create folder for: %s", aNewBuffer);
+			return false;
+		}
 
 		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
