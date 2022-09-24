@@ -124,10 +124,10 @@ public:
 			}
 		}
 
-		char *pLine;
 		CLineReader LineReader;
 		LineReader.Init(File);
 
+		char *pLine;
 		while((pLine = LineReader.Get()))
 		{
 			const char *pLineWithoutPrefix = str_startswith(pLine, "add_path ");
@@ -379,14 +379,12 @@ public:
 		}
 		else
 		{
-			IOHANDLE Handle = 0;
-
 			if(Type <= TYPE_ALL)
 			{
 				// check all available directories
 				for(int i = 0; i < m_NumPaths; ++i)
 				{
-					Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
+					IOHANDLE Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
 					if(Handle)
 						return Handle;
 				}
@@ -394,7 +392,7 @@ public:
 			else if(Type >= 0 && Type < m_NumPaths)
 			{
 				// check wanted directory
-				Handle = io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
+				IOHANDLE Handle = io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
 				if(Handle)
 					return Handle;
 			}
@@ -470,7 +468,7 @@ public:
 			return false;
 
 		pBuffer[0] = 0;
-		char aBuf[IO_MAX_PATH_LENGTH];
+
 		CFindCBData Data;
 		Data.m_pStorage = this;
 		Data.m_pFilename = pFilename;
@@ -478,6 +476,7 @@ public:
 		Data.m_pBuffer = pBuffer;
 		Data.m_BufferSize = BufferSize;
 
+		char aBuf[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
 		{
 			// search within all available directories
