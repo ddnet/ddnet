@@ -152,8 +152,16 @@ public:
 
 	void AddPath(const char *pPath)
 	{
-		if(m_NumPaths >= MAX_PATHS || !pPath[0])
+		if(!pPath[0])
+		{
+			dbg_msg("storage", "cannot add empty path");
 			return;
+		}
+		if(m_NumPaths >= MAX_PATHS)
+		{
+			dbg_msg("storage", "cannot add path '%s', the maximum number of paths is %d", pPath, MAX_PATHS);
+			return;
+		}
 
 		if(!str_comp(pPath, "$USERDIR"))
 		{
@@ -182,6 +190,10 @@ public:
 			{
 				str_copy(m_aaStoragePaths[m_NumPaths++], pPath);
 				dbg_msg("storage", "added path '%s'", pPath);
+			}
+			else
+			{
+				dbg_msg("storage", "cannot add path '%s', which is not a directory", pPath);
 			}
 		}
 	}
