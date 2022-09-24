@@ -2345,10 +2345,7 @@ int fs_chdir(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 		MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer));
-		if(_wchdir(wBuffer))
-			return 1;
-		else
-			return 0;
+		return SetCurrentDirectoryW(wBuffer) != 0 ? 0 : 1;
 #else
 		if(chdir(path))
 			return 1;
