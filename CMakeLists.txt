@@ -1686,6 +1686,8 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 
 # Sources
 set_src(BASE GLOB_RECURSE src/base
+  bezier.cpp
+  bezier.h
   color.h
   detect.h
   dynamic.h
@@ -1824,8 +1826,6 @@ set_src(ENGINE_GFX GLOB src/engine/gfx
   image_manipulation.h
 )
 set_src(GAME_SHARED GLOB src/game
-  bezier.cpp
-  bezier.h
   collision.cpp
   collision.h
   ddracechat.h
