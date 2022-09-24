@@ -62,37 +62,36 @@ public:
 		// add save directories
 		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
 			if(StorageType == STORAGETYPE_CLIENT)
 			{
-				fs_makedir(GetPath(TYPE_SAVE, "screenshots", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "screenshots/auto", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "screenshots/auto/stats", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "maps", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "mapres", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "downloadedmaps", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "skins", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "downloadedskins", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "themes", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/emoticons", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/entities", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/game", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/particles", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/hud", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/extras", aPath, sizeof(aPath)));
+				CreateFolder("screenshots", TYPE_SAVE);
+				CreateFolder("screenshots/auto", TYPE_SAVE);
+				CreateFolder("screenshots/auto/stats", TYPE_SAVE);
+				CreateFolder("maps", TYPE_SAVE);
+				CreateFolder("mapres", TYPE_SAVE);
+				CreateFolder("downloadedmaps", TYPE_SAVE);
+				CreateFolder("skins", TYPE_SAVE);
+				CreateFolder("downloadedskins", TYPE_SAVE);
+				CreateFolder("themes", TYPE_SAVE);
+				CreateFolder("assets", TYPE_SAVE);
+				CreateFolder("assets/emoticons", TYPE_SAVE);
+				CreateFolder("assets/entities", TYPE_SAVE);
+				CreateFolder("assets/game", TYPE_SAVE);
+				CreateFolder("assets/particles", TYPE_SAVE);
+				CreateFolder("assets/hud", TYPE_SAVE);
+				CreateFolder("assets/extras", TYPE_SAVE);
 #if defined(CONF_VIDEORECORDER)
-				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
+				CreateFolder("videos", TYPE_SAVE);
 #endif
 			}
-			fs_makedir(GetPath(TYPE_SAVE, "dumps", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos/auto", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos/auto/race", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos/replays", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "editor", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "ghosts", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "teehistorian", aPath, sizeof(aPath)));
+			CreateFolder("dumps", TYPE_SAVE);
+			CreateFolder("demos", TYPE_SAVE);
+			CreateFolder("demos/auto", TYPE_SAVE);
+			CreateFolder("demos/auto/race", TYPE_SAVE);
+			CreateFolder("demos/replays", TYPE_SAVE);
+			CreateFolder("editor", TYPE_SAVE);
+			CreateFolder("ghosts", TYPE_SAVE);
+			CreateFolder("teehistorian", TYPE_SAVE);
 		}
 
 		return m_NumPaths ? 0 : 1;
