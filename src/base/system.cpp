@@ -2278,9 +2278,9 @@ int fs_makedir(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer));
-	if(_wmkdir(wBuffer) == 0)
+	if(CreateDirectoryW(wBuffer, NULL) != 0)
 		return 0;
-	if(errno == EEXIST)
+	if(GetLastError() == ERROR_ALREADY_EXISTS)
 		return 0;
 	return -1;
 #else
