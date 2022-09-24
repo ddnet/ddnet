@@ -588,14 +588,14 @@ public:
 
 	static IStorage *Create(int StorageType, int NumArgs, const char **ppArguments)
 	{
-		CStorage *p = new CStorage();
-		if(p && p->Init(StorageType, NumArgs, ppArguments))
+		CStorage *pStorage = new CStorage();
+		if(pStorage && pStorage->Init(StorageType, NumArgs, ppArguments))
 		{
 			dbg_msg("storage", "initialisation failed");
-			delete p;
-			p = 0;
+			delete pStorage;
+			pStorage = nullptr;
 		}
-		return p;
+		return pStorage;
 	}
 };
 
