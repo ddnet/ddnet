@@ -510,14 +510,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
 		static const char *s_apSkinPrefixes[] = {"kitty", "santa"};
-		for(auto &pPrefix : s_apSkinPrefixes)
+		static CButtonContainer s_aPrefixButtons[std::size(s_apSkinPrefixes)];
+		for(size_t i = 0; i < std::size(s_apSkinPrefixes); i++)
 		{
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
-			static CButtonContainer s_PrefixButton;
-			if(DoButton_Menu(&s_PrefixButton, pPrefix, 0, &Button))
+			if(DoButton_Menu(&s_aPrefixButtons[i], s_apSkinPrefixes[i], 0, &Button))
 			{
-				str_copy(g_Config.m_ClSkinPrefix, pPrefix);
+				str_copy(g_Config.m_ClSkinPrefix, s_apSkinPrefixes[i]);
 			}
 		}
 	}
