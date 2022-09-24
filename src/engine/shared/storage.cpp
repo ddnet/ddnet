@@ -319,10 +319,10 @@ public:
 		if(Type == TYPE_ALL)
 		{
 			// list all available directories
-			for(int i = 0; i < m_NumPaths; ++i)
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 				fs_listdir_fileinfo(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
 		}
-		else if(Type >= 0 && Type < m_NumPaths)
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
 			// list wanted directory
 			fs_listdir_fileinfo(GetPath(Type, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, Type, pUser);
@@ -335,10 +335,10 @@ public:
 		if(Type == TYPE_ALL)
 		{
 			// list all available directories
-			for(int i = 0; i < m_NumPaths; ++i)
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 				fs_listdir(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
 		}
-		else if(Type >= 0 && Type < m_NumPaths)
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
 			// list wanted directory
 			fs_listdir(GetPath(Type, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, Type, pUser);
@@ -392,14 +392,14 @@ public:
 			if(Type <= TYPE_ALL)
 			{
 				// check all available directories
-				for(int i = 0; i < m_NumPaths; ++i)
+				for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 				{
 					IOHANDLE Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
 					if(Handle)
 						return Handle;
 				}
 			}
-			else if(Type >= 0 && Type < m_NumPaths)
+			else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 			{
 				// check wanted directory
 				IOHANDLE Handle = io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
@@ -490,14 +490,14 @@ public:
 		if(Type == TYPE_ALL)
 		{
 			// search within all available directories
-			for(int i = 0; i < m_NumPaths; ++i)
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 			{
 				fs_listdir(GetPath(i, pPath, aBuf, sizeof(aBuf)), FindFileCallback, i, &Data);
 				if(pBuffer[0])
 					return true;
 			}
 		}
-		else if(Type >= 0 && Type < m_NumPaths)
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
 			// search within wanted directory
 			fs_listdir(GetPath(Type, pPath, aBuf, sizeof(aBuf)), FindFileCallback, Type, &Data);
