@@ -335,7 +335,7 @@ public:
 		}
 	}
 
-	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
 		if(Type == TYPE_ABSOLUTE)
 		{
