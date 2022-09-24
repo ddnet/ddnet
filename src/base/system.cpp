@@ -2359,11 +2359,10 @@ int fs_chdir(const char *path)
 
 char *fs_getcwd(char *buffer, int buffer_size)
 {
-	if(buffer == 0)
-		return 0;
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	if(_wgetcwd(wBuffer, buffer_size) == 0)
+	DWORD result = GetCurrentDirectoryW(std::size(wBuffer), wBuffer);
+	if(result == 0 || result > std::size(wBuffer))
 		return 0;
 	WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buffer, buffer_size, NULL, NULL);
 	return buffer;
