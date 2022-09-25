@@ -52,8 +52,8 @@ public:
 
 	void Init(int NumThreads);
 	virtual void Shutdown() override;
-	void Add(std::shared_ptr<IJob> pJob);
-	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) override;
+	void Add(std::shared_ptr<IJob> pJob) REQUIRES(!m_Lock);
+	virtual void Run(std::shared_ptr<IEngineRunnable> pRunnable) REQUIRES(!m_Lock) override;
 	static void RunBlocking(IJob *pJob);
 };
 #endif
