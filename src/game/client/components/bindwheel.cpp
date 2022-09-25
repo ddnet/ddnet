@@ -65,7 +65,7 @@ void CBindWheel::OnConsoleInit()
 	Console()->Chain("bindwheel", ConchainBindwheel, this);
 
 
-
+	/*
 	for(int i = 0; i < NUM_BINDWHEEL; i++)
 	{
 		if(!(str_comp(GameClient()->m_bindwheellist[i].description, "EMPTY") == 0))
@@ -78,6 +78,8 @@ void CBindWheel::OnConsoleInit()
 			str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), "");
 		}
 	}
+	*/
+	
 }
 
 void CBindWheel::OnReset()
