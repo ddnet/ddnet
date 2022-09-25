@@ -891,8 +891,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalitzacions de mapes en el buscador de servidors
 
-transmits your player name to info2.ddnet.tw
-== retransmet el teu nom de jugar a info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== retransmet el teu nom de jugar a info.ddnet.org
 
 Reload
 == Recarga
@@ -1170,12 +1170,6 @@ Assets
 Kill Messages
 == Missatges al matar
 
-Laser Outline Color
-== Color exterior del làser
-
-Laser Inner Color
-== Color de l'interior del làser
-
 Use old chat style
 == Utilitzar l'estil antic del xat
 
@@ -1215,11 +1209,11 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/ca
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ca
 
 Website
 == Página Web
@@ -1366,10 +1360,40 @@ Requesting to join the game
 Loading menu images
 == 
 
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
+== 
+
 Loading demo files
 == 
 
 Loading ghost files
+== 
+
+Loading skin files
 == 
 
 Toggle to edit your dummy settings
@@ -1379,9 +1403,6 @@ Download community skins
 == 
 
 Choose default eyes when joining a server
-== 
-
-Loading skin files
 == 
 
 Enable controller
@@ -1516,6 +1537,33 @@ Normal Color
 == 
 
 Highlight Color
+== 
+
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

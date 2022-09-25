@@ -9,6 +9,7 @@
 #include "entity.h"
 #include <algorithm>
 #include <engine/shared/config.h>
+#include <game/client/laser_data.h>
 #include <game/client/projectile_data.h>
 #include <game/mapitems.h>
 #include <utility>
@@ -480,9 +481,18 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		CEntity *pEnt = new CPickup(NetPickup);
 		InsertEntity(pEnt, true);
 	}
-	else if(ObjType == NETOBJTYPE_LASER && m_WorldConfig.m_PredictWeapons)
+	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
-		CLaser NetLaser = CLaser(this, ObjID, (CNetObj_Laser *)pObjData);
+		CLaserData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
+		{
+			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pObjData, this);
+		}
+		CLaser NetLaser = CLaser(this, ObjID, &Data);
 		CLaser *pMatching = 0;
 		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
 			if(NetLaser.Match(pLaser))
@@ -632,7 +642,25 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		}
 		return 0;
 	}
-	case NETOBJTYPE_LASER: FindType(ENTTYPE_LASER, CLaser, CNetObj_Laser);
+	case NETOBJTYPE_LASER:
+	case NETOBJTYPE_DDNETLASER:
+	{
+		CLaserData Data;
+		if(ObjType == NETOBJTYPE_LASER)
+		{
+			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pObjData, this);
+		}
+		CLaser *pEnt = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER);
+		if(pEnt && CLaser(this, ObjID, &Data).Match(pEnt))
+		{
+			return pEnt;
+		}
+		return 0;
+	}
 	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
 	}
 	return 0;

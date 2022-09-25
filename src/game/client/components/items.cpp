@@ -10,6 +10,7 @@
 #include <game/mapitems.h>
 
 #include <game/client/gameclient.h>
+#include <game/client/laser_data.h>
 #include <game/client/projectile_data.h>
 #include <game/client/render.h>
 
@@ -237,18 +238,52 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y - Size * 0.75f);
 }
 
-void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
+void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 {
+	int Type = clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
+
 	ColorRGBA RGB;
-	vec2 Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
-	vec2 From = vec2(pCurrent->m_FromX, pCurrent->m_FromY);
+	vec2 Pos = pCurrent->m_To;
+	vec2 From = pCurrent->m_From;
 	float Len = distance(Pos, From);
-	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserOutlineColor));
+
+	int ColorIn, ColorOut;
+	switch(Type)
+	{
+	case LASERTYPE_RIFLE:
+		ColorOut = g_Config.m_ClLaserRifleOutlineColor;
+		ColorIn = g_Config.m_ClLaserRifleInnerColor;
+		break;
+	case LASERTYPE_SHOTGUN:
+		ColorOut = g_Config.m_ClLaserShotgunOutlineColor;
+		ColorIn = g_Config.m_ClLaserShotgunInnerColor;
+		break;
+	case LASERTYPE_DOOR:
+		ColorOut = g_Config.m_ClLaserDoorOutlineColor;
+		ColorIn = g_Config.m_ClLaserDoorInnerColor;
+		break;
+	case LASERTYPE_FREEZE:
+		ColorOut = g_Config.m_ClLaserFreezeOutlineColor;
+		ColorIn = g_Config.m_ClLaserFreezeInnerColor;
+		break;
+	default:
+		ColorOut = g_Config.m_ClLaserRifleOutlineColor;
+		ColorIn = g_Config.m_ClLaserRifleInnerColor;
+	}
+
+	RGB = color_cast<ColorRGBA>(ColorHSLA(ColorOut));
 	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
-	RGB = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserInnerColor));
+	RGB = color_cast<ColorRGBA>(ColorHSLA(ColorIn));
 	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
 
 	int TuneZone = GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+	bool IsOtherTeam = (pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && m_pClient->IsOtherTeam(pCurrent->m_Owner));
+
+	float Alpha = 1.f;
+	if(IsOtherTeam)
+	{
+		Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+	}
 
 	vec2 Dir;
 	if(Len > 0)
@@ -271,7 +306,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 		Graphics()->QuadsBegin();
 
 		// do outline
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, Alpha);
 		Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
 
 		IGraphics::CFreeformItem Freeform(
@@ -283,7 +318,7 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 
 		// do inner
 		Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f); // center
+		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, Alpha); // center
 
 		Freeform = IGraphics::CFreeformItem(
 			From.x - Out.x, From.y - Out.y,
@@ -300,9 +335,9 @@ void CItems::RenderLaser(const struct CNetObj_Laser *pCurrent, bool IsPredicted)
 		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
 		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, 1.0f);
+		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, 1.0f);
+		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, Alpha);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
 	}
 }
@@ -341,8 +376,7 @@ void CItems::OnRender()
 			auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
 			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 				continue;
-			CNetObj_Laser Data;
-			pLaser->FillInfo(&Data);
+			CLaserData Data = pLaser->GetData();
 			RenderLaser(&Data, true);
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
@@ -419,7 +453,7 @@ void CItems::OnRender()
 			if(pPrev)
 				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData);
 		}
-		else if(Item.m_Type == NETOBJTYPE_LASER)
+		else if(Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER)
 		{
 			if(UsePredicted)
 			{
@@ -427,7 +461,16 @@ void CItems::OnRender()
 				if(pLaser && pLaser->GetOwner() >= 0 && GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 					continue;
 			}
-			CNetObj_Laser Laser = *((const CNetObj_Laser *)pData);
+
+			CLaserData Data;
+			if(Item.m_Type == NETOBJTYPE_LASER)
+			{
+				Data = ExtractLaserInfo((const CNetObj_Laser *)pData, &GameClient()->m_GameWorld);
+			}
+			else
+			{
+				Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pData, &GameClient()->m_GameWorld);
+			}
 
 			if(pEntEx)
 			{
@@ -435,31 +478,35 @@ void CItems::OnRender()
 				{
 					if(Inactive && BlinkingLight)
 						continue;
-					Laser.m_StartTick = DraggerStartTick;
+					Data.m_StartTick = DraggerStartTick;
+					Data.m_Type = LASERTYPE_FREEZE;
 				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE)
 				{
 					if(Inactive && BlinkingGun)
 						continue;
-					Laser.m_StartTick = GunStartTick;
+					Data.m_StartTick = GunStartTick;
+					Data.m_Type = pEntEx->m_EntityClass == ENTITYCLASS_GUN_FREEZE ? LASERTYPE_FREEZE : LASERTYPE_DOOR;
 				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
 				{
 					if(Inactive && BlinkingDragger)
 						continue;
-					Laser.m_StartTick = DraggerStartTick;
+					Data.m_StartTick = DraggerStartTick;
+					Data.m_Type = LASERTYPE_DOOR;
 				}
 				if(pEntEx->m_EntityClass == ENTITYCLASS_DOOR)
 				{
 					if(Inactive || IsSuper)
 					{
-						Laser.m_FromX = Laser.m_X;
-						Laser.m_FromY = Laser.m_Y;
+						Data.m_From.x = Data.m_To.x;
+						Data.m_From.y = Data.m_To.y;
 					}
-					Laser.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+					Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+					Data.m_Type = LASERTYPE_DOOR;
 				}
 			}
-			RenderLaser(&Laser);
+			RenderLaser(&Data);
 		}
 	}
 

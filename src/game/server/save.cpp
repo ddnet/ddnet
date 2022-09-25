@@ -511,7 +511,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 		pGameContext->SendChatTarget(ClientID, "Could not find your Team");
 		break;
 	case 3:
-		pGameContext->SendChatTarget(ClientID, "Unable to find all Characters");
+		pGameContext->SendChatTarget(ClientID, "To save all players in your team have to be alive and not in '/spec'");
 		break;
 	case 4:
 		pGameContext->SendChatTarget(ClientID, "Your team has not started yet");

@@ -491,10 +491,10 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 }
 
 static const char *DEFAULT_SERVERLIST_URLS[] = {
-	"https://master1.ddnet.tw/ddnet/15/servers.json",
-	"https://master2.ddnet.tw/ddnet/15/servers.json",
-	"https://master3.ddnet.tw/ddnet/15/servers.json",
-	"https://master4.ddnet.tw/ddnet/15/servers.json",
+	"https://master1.ddnet.org/ddnet/15/servers.json",
+	"https://master2.ddnet.org/ddnet/15/servers.json",
+	"https://master3.ddnet.org/ddnet/15/servers.json",
+	"https://master4.ddnet.org/ddnet/15/servers.json",
 };
 
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IStorage *pStorage, const char *pPreviousBestUrl)

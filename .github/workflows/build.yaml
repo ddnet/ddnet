@@ -58,7 +58,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get upgrade -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr -y
 
     - name: Prepare Linux (non-fancy)
       if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
@@ -138,16 +138,22 @@ jobs:
         ./DDNet-Server shutdown
 
     - name: Build headless client
+      if: contains(matrix.os, 'ubuntu-latest')
       env: ${{ matrix.env }}
       run: |
         mkdir headless
         cd headless
+        CFLAGS="$CFLAGS --coverage"
+        CXXFLAGS="$CXXFLAGS --coverage"
+        LDFLAGS="$LDFLAGS --coverage"
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
     - name: Test headless client
+      if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
         ./DDNet-Server &
         ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
 
@@ -174,7 +180,7 @@ jobs:
         ./DDNet-Server shutdown
 
     - name: Run integration tests with Valgrind's Memcheck
-      if: contains(matrix.os, 'ubuntu')
+      if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
         ./integration_test.sh --valgrind-memcheck
@@ -191,3 +197,10 @@ jobs:
       with:
         name: ddnet-${{ matrix.os }}
         path: release/artifacts
+
+    - name: Upload Codecov report
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src

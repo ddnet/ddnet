@@ -667,6 +667,7 @@ public:
 
 	void Render(bool QuadPicker = false) override;
 	CQuad *NewQuad(int x, int y, int Width, int Height);
+	int SwapQuads(int Index0, int Index1);
 
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
@@ -809,7 +810,7 @@ public:
 		m_ShowEnvelopeEditor = 0;
 		m_ShowServerSettingsEditor = false;
 
-		m_ShowEnvelopePreview = 0;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
 		m_SelectedEnvelopePoint = -1;
 
@@ -834,6 +835,8 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
+		m_GotoX = 0;
+		m_GotoY = 0;
 
 		m_Mentions = 0;
 	}
@@ -991,7 +994,14 @@ public:
 	float m_AnimateSpeed;
 
 	int m_ShowEnvelopeEditor;
-	int m_ShowEnvelopePreview; //Values: 0-Off|1-Selected Envelope|2-All
+
+	enum EShowEnvelope
+	{
+		SHOWENV_NONE = 0,
+		SHOWENV_SELECTED,
+		SHOWENV_ALL
+	};
+	EShowEnvelope m_ShowEnvelopePreview;
 	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
@@ -1126,9 +1136,10 @@ public:
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 
-	void RenderImages(CUIRect Toolbox, CUIRect View);
-	void RenderLayers(CUIRect Toolbox, CUIRect View);
-	void RenderSounds(CUIRect Toolbox, CUIRect View);
+	void RenderLayers(CUIRect LayersBox);
+	void RenderImagesList(CUIRect Toolbox);
+	void RenderSelectedImage(CUIRect View);
+	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
@@ -1140,7 +1151,7 @@ public:
 	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
-	void SelectLayerByTile(float &Scroll);
+	bool SelectLayerByTile();
 
 	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
@@ -1237,6 +1248,8 @@ public:
 	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupGoto(CEditor *pEditor, CUIRect View, void *pContext);
+	void Goto(float X, float Y);
 	unsigned char m_TeleNumber;
 
 	unsigned char m_TuningNum;
@@ -1247,6 +1260,9 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
+
+	int m_GotoX;
+	int m_GotoY;
 };
 
 // make sure to inline this function

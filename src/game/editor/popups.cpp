@@ -9,6 +9,9 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <limits>
+
+#include <game/client/ui_scrollregion.h>
 
 #include "editor.h"
 
@@ -471,7 +474,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size()},
+		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size() - 1},
 		{"Detail", pCurrentLayer && pCurrentLayer->m_Flags & LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
 		{nullptr},
 	};
@@ -646,7 +649,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 
 	enum
 	{
-		PROP_POS_X = 0,
+		PROP_ORDER = 0,
+		PROP_POS_X,
 		PROP_POS_Y,
 		PROP_POS_ENV,
 		PROP_POS_ENV_OFFSET,
@@ -655,7 +659,9 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		NUM_PROPS,
 	};
 
+	int NumQuads = pLayer ? (int)pLayer->m_vQuads.size() : 0;
 	CProperty aProps[] = {
+		{"Order", pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], PROPTYPE_INT_STEP, 0, NumQuads},
 		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
@@ -674,6 +680,12 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 
 	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
 	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
+
+	if(Prop == PROP_ORDER && pLayer)
+	{
+		int QuadIndex = pLayer->SwapQuads(pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], NewVal);
+		pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex] = QuadIndex;
+	}
 
 	for(auto &pQuad : vpQuads)
 	{
@@ -953,7 +965,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color", Color, PROPTYPE_COLOR, -1, (int)pEditor->m_Map.m_vpEnvelopes.size()},
+		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Tex U", tu, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Tex V", tv, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{nullptr},
@@ -1247,69 +1259,40 @@ static int g_SelectImageCurrent = -100;
 int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect ButtonBar, ImageView;
-	View.VSplitLeft(80.0f, &ButtonBar, &View);
+	View.VSplitLeft(150.0f, &ButtonBar, &View);
 	View.Margin(10.0f, &ImageView);
 
 	int ShowImage = g_SelectImageCurrent;
 
-	static float s_ScrollValue = 0;
-	float ImagesHeight = pEditor->m_Map.m_vpImages.size() * 14;
-	float ScrollDifference = ImagesHeight - ButtonBar.h;
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
 
-	if(pEditor->m_Map.m_vpImages.size() > 20) // Do we need a scrollbar?
-	{
-		CUIRect Scroll;
-		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&ButtonBar, &ScrollOffset, &ScrollParams);
+	ButtonBar.y += ScrollOffset.y;
 
-		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
-		{
-			int ScrollNum = (int)((ImagesHeight - ButtonBar.h) / 14.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float ImageStartAt = ScrollDifference * s_ScrollValue;
-	if(ImageStartAt < 0.0f)
-		ImageStartAt = 0.0f;
-
-	float ImageStopAt = ImagesHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ImageCur = 0.0f;
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpImages.size(); i++)
 	{
-		if(ImageCur > ImageStopAt)
-			break;
-		if(ImageCur < ImageStartAt)
-		{
-			ImageCur += 14.0f;
-			continue;
-		}
-		ImageCur += 14.0f;
-
 		CUIRect Button;
-		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
-
-		if(pEditor->UI()->MouseInside(&Button))
-			ShowImage = i;
-
-		if(i == -1)
+		ButtonBar.HSplitTop(ButtonMargin, nullptr, &ButtonBar);
+		ButtonBar.HSplitTop(ButtonHeight, &Button, &ButtonBar);
+		if(s_ScrollRegion.AddRect(Button))
 		{
+			if(pEditor->UI()->MouseInside(&Button))
+				ShowImage = i;
+
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectImageCurrent, &Button))
-				g_SelectImageSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpImages[i], pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i], i == -1 ? "None" : pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
 				g_SelectImageSelected = i;
 		}
 	}
+
+	s_ScrollRegion.End();
 
 	if(ShowImage >= 0 && (size_t)ShowImage < pEditor->m_Map.m_vpImages.size())
 	{
@@ -1338,7 +1321,7 @@ void CEditor::PopupSelectImageInvoke(int Current, float x, float y)
 	static int s_SelectImagePopupId = 0;
 	g_SelectImageSelected = -100;
 	g_SelectImageCurrent = Current;
-	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 400, 300, PopupSelectImage);
+	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 450, 300, PopupSelectImage);
 }
 
 int CEditor::PopupSelectImageResult()
@@ -1356,65 +1339,32 @@ static int g_SelectSoundCurrent = -100;
 
 int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect ButtonBar, SoundView;
-	View.VSplitLeft(80.0f, &ButtonBar, &View);
-	View.Margin(10.0f, &SoundView);
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
 
-	static float s_ScrollValue = 0;
-	float SoundsHeight = pEditor->m_Map.m_vpSounds.size() * 14;
-	float ScrollDifference = SoundsHeight - ButtonBar.h;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
-	if(pEditor->m_Map.m_vpSounds.size() > 20) // Do we need a scrollbar?
-	{
-		CUIRect Scroll;
-		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
-		{
-			int ScrollNum = (int)((SoundsHeight - ButtonBar.h) / 14.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float SoundStartAt = ScrollDifference * s_ScrollValue;
-	if(SoundStartAt < 0.0f)
-		SoundStartAt = 0.0f;
-
-	float SoundStopAt = SoundsHeight - ScrollDifference * (1 - s_ScrollValue);
-	float SoundCur = 0.0f;
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpSounds.size(); i++)
 	{
-		if(SoundCur > SoundStopAt)
-			break;
-		if(SoundCur < SoundStartAt)
-		{
-			SoundCur += 14.0f;
-			continue;
-		}
-		SoundCur += 14.0f;
-
 		CUIRect Button;
-		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
-
-		if(i == -1)
+		View.HSplitTop(ButtonMargin, nullptr, &View);
+		View.HSplitTop(ButtonHeight, &Button, &View);
+		if(s_ScrollRegion.AddRect(Button))
 		{
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectSoundCurrent, &Button))
-				g_SelectSoundSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpSounds[i], pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpSounds[i], i == -1 ? "None" : pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
 				g_SelectSoundSelected = i;
 		}
 	}
+
+	s_ScrollRegion.End();
 
 	return 0;
 }
@@ -1424,7 +1374,7 @@ void CEditor::PopupSelectSoundInvoke(int Current, float x, float y)
 	static int s_SelectSoundPopupId = 0;
 	g_SelectSoundSelected = -100;
 	g_SelectSoundCurrent = Current;
-	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 400, 300, PopupSelectSound);
+	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 150, 300, PopupSelectSound);
 }
 
 int CEditor::PopupSelectSoundResult()
@@ -1493,70 +1443,34 @@ static int s_AutoMapConfigCurrent = -100;
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
-	CUIRect Button;
-	static int s_aAutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static float s_ScrollValue = 0;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
-	// Add 1 more for the "None" option.
-	float ListHeight = (ButtonHeight + ButtonMargin) * (pAutoMapper->ConfigNamesNum() + 1);
-	float ScrollDifference = ListHeight - View.h;
-
-	// Disable scrollbar if not needed.
-	if(ListHeight > View.h)
+	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); i++)
 	{
-		CUIRect Scroll;
-		View.VSplitRight(20.0f, &View, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
+		CUIRect Button;
+		View.HSplitTop(ButtonMargin, nullptr, &View);
+		View.HSplitTop(ButtonHeight, &Button, &View);
+		if(s_ScrollRegion.AddRect(Button))
 		{
-			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-
-		// Margin for scrollbar
-		View.VSplitRight(2.0f, &View, nullptr);
-	}
-
-	float ListStartAt = ScrollDifference * s_ScrollValue;
-
-	if(ListStartAt < 0.0f)
-		ListStartAt = 0.0f;
-
-	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ListCur = 0;
-
-	pEditor->UI()->ClipEnable(&View);
-
-	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
-	{
-		if(ListCur > ListStopAt)
-			break;
-
-		if(ListCur >= ListStartAt)
-		{
-			View.HSplitTop(ButtonMargin, nullptr, &View);
-			View.HSplitTop(ButtonHeight, &Button, &View);
-			if(pEditor->DoButton_MenuItem(&s_aAutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
-			{
+			static int s_NoneButton = 0;
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button))
 				s_AutoMapConfigSelected = i;
-			}
 		}
-		ListCur += ButtonHeight + ButtonMargin;
 	}
 
-	pEditor->UI()->ClipDisable();
+	s_ScrollRegion.End();
 
 	return 0;
 }
@@ -1567,9 +1481,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
-	int ItemCount = m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum();
-	if(ItemCount > 10)
-		ItemCount = 10;
+	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), 10);
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
 }
@@ -1581,7 +1493,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
 	s_AutoMapConfigSelected = -100;
-	return s_AutoMapConfigCurrent - 1;
+	return s_AutoMapConfigCurrent;
 }
 
 // DDRace
@@ -1783,6 +1695,54 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 
 	if(Prop == PROP_TUNE)
 		pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+
+	return 0;
+}
+
+int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	CUIRect CoordXPicker;
+	CUIRect CoordYPicker;
+
+	View.HSplitMid(&CoordXPicker, &CoordYPicker);
+	CoordXPicker.VSplitRight(2.f, &CoordXPicker, nullptr);
+
+	static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+
+	enum
+	{
+		PROP_CoordX = 0,
+		PROP_CoordY,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"X", pEditor->m_GotoX, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y", pEditor->m_GotoY, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&CoordXPicker, aProps, s_aIds, &NewVal, s_Color);
+
+	if(Prop == PROP_CoordX)
+	{
+		pEditor->m_GotoX = NewVal;
+	}
+	else if(Prop == PROP_CoordY)
+	{
+		pEditor->m_GotoY = NewVal;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, ""))
+	{
+		pEditor->Goto(pEditor->m_GotoX + 0.5f, pEditor->m_GotoY + 0.5f);
+	}
 
 	return 0;
 }

@@ -359,6 +359,7 @@ CClient::CClient() :
 	m_aMapDetailsName[0] = 0;
 	m_MapDetailsSha256 = SHA256_ZEROED;
 	m_MapDetailsCrc = 0;
+	m_aMapDetailsUrl[0] = 0;
 
 	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO);
 	m_pDDNetInfoTask = NULL;
@@ -1299,7 +1300,6 @@ static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pS
 
 const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc)
 {
-	const char *pError = 0;
 	char aBuf[512];
 	char aWanted[SHA256_MAXSTRSIZE + 16];
 	aWanted[0] = 0;
@@ -1316,15 +1316,15 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 
 	// try the normal maps folder
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+	const char *pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
-		return pError;
+		return nullptr;
 
 	// try the downloaded maps
 	FormatMapDownloadFilename(pMapName, pWantedSha256, WantedCrc, false, aBuf, sizeof(aBuf));
 	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 	if(!pError)
-		return pError;
+		return nullptr;
 
 	// backward compatibility with old names
 	if(pWantedSha256)
@@ -1332,16 +1332,22 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 		FormatMapDownloadFilename(pMapName, 0, WantedCrc, false, aBuf, sizeof(aBuf));
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 		if(!pError)
-			return pError;
+			return nullptr;
 	}
 
 	// search for the map within subfolders
 	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
+	{
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+		if(!pError)
+			return nullptr;
+	}
 
-	return pError;
+	static char s_aErrorMsg[256];
+	str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "Could not find map '%s'", pMapName);
+	return s_aErrorMsg;
 }
 
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
@@ -1653,16 +1659,25 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
 			int MapCrc = Unpacker.GetInt();
+			int MapSize = Unpacker.GetInt();
 
 			if(Unpacker.Error())
 			{
 				return;
 			}
 
+			const char *pMapUrl = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			if(Unpacker.Error())
+			{
+				pMapUrl = "";
+			}
+
 			m_MapDetailsPresent = true;
+			(void)MapSize;
 			str_copy(m_aMapDetailsName, pMap);
 			m_MapDetailsSha256 = *pMapSha256;
 			m_MapDetailsCrc = MapCrc;
+			str_copy(m_aMapDetailsUrl, pMapUrl);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
@@ -1715,9 +1730,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			else
 			{
 				SHA256_DIGEST *pMapSha256 = 0;
+				const char *pMapUrl = nullptr;
 				if(MapDetailsWerePresent && str_comp(m_aMapDetailsName, pMap) == 0 && m_MapDetailsCrc == MapCrc)
 				{
 					pMapSha256 = &m_MapDetailsSha256;
+					pMapUrl = m_aMapDetailsUrl[0] ? m_aMapDetailsUrl : nullptr;
 				}
 				pError = LoadMapSearch(pMap, pMapSha256, MapCrc);
 
@@ -1754,16 +1771,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					ResetMapDownload();
 
-					if(pMapSha256 && g_Config.m_ClHttpMapDownload)
+					if(pMapSha256)
 					{
 						char aUrl[256];
 						char aEscaped[256];
 						EscapeUrl(aEscaped, sizeof(aEscaped), m_aMapdownloadFilename + 15); // cut off downloadedmaps/
-						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps2.ddnet.tw") != 0 || m_aMapDownloadUrl[0] == '\0';
+						bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps.ddnet.org") != 0 || m_aMapDownloadUrl[0] == '\0';
 						str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 
-						m_pMapdownloadTask = HttpGetFile(aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+						m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
+						m_pMapdownloadTask->MaxResponseSize(1024 * 1024 * 1024); // 1 GiB
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -2901,15 +2919,11 @@ void CClient::Update()
 	{
 		if(m_pMapdownloadTask->State() == HTTP_DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == HTTP_ERROR)
+		else if(m_pMapdownloadTask->State() == HTTP_ERROR || m_pMapdownloadTask->State() == HTTP_ABORTED)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
 			SendMapRequest();
-		}
-		else if(m_pMapdownloadTask->State() == HTTP_ABORTED)
-		{
-			m_pMapdownloadTask = NULL;
 		}
 	}
 
@@ -3048,19 +3062,6 @@ void CClient::Run()
 	if(g_Config.m_Debug)
 	{
 		g_UuidManager.DebugDump();
-	}
-
-	// init SDL
-	{
-		if(SDL_Init(0) < 0)
-		{
-			dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
-			return;
-		}
-
-#ifndef CONF_PLATFORM_ANDROID
-		atexit(SDL_Quit);
-#endif
 	}
 
 	// init graphics
@@ -3208,7 +3209,9 @@ void CClient::Run()
 		// handle pending demo play
 		if(m_aCmdPlayDemo[0])
 		{
-			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
+			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ALL);
+			if(pError && !fs_is_relative_path(m_aCmdPlayDemo))
+				pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ABSOLUTE);
 			if(pError)
 				dbg_msg("demo_player", "playing passed demo file '%s' failed: %s", m_aCmdPlayDemo, pError);
 			m_aCmdPlayDemo[0] = 0;
@@ -3217,11 +3220,13 @@ void CClient::Run()
 		// handle pending map edits
 		if(m_aCmdEditMap[0])
 		{
-			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
+			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ALL);
+			if(!Result && !fs_is_relative_path(m_aCmdEditMap))
+				Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ABSOLUTE);
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
-				dbg_msg("demo_player", "editing passed map file '%s' failed", m_aCmdEditMap);
+				dbg_msg("editor", "editing passed map file '%s' failed", m_aCmdEditMap);
 			m_aCmdEditMap[0] = 0;
 		}
 
@@ -3489,11 +3494,6 @@ void CClient::Run()
 		m_aNetClient[i].Close();
 
 	delete m_pEditor;
-	m_pInput->Shutdown();
-	m_pGraphics->Shutdown();
-
-	// shutdown SDL
-	SDL_Quit();
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -3512,7 +3512,7 @@ bool CClient::CtrlShiftKey(int Key, bool &Last)
 void CClient::Con_Connect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	str_copy(pSelf->m_aCmdConnect, pResult->GetString(0));
+	pSelf->HandleConnectLink(pResult->GetString(0));
 }
 
 void CClient::Con_Disconnect(IConsole::IResult *pResult, void *pUserData)
@@ -3918,7 +3918,10 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	if(pError)
 	{
 		if(!m_DemoPlayer.ExtractMap(Storage()))
+		{
+			DisconnectWithReason(pError);
 			return pError;
+		}
 
 		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
 		pError = LoadMapSearch(pMapInfo->m_aName, &Sha, Crc);
@@ -3982,9 +3985,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	const char *pError = pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
-	if(pError)
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", pError);
+	pSelf->HandleDemoPath(pResult->GetString(0));
 }
 
 void CClient::Con_DemoPlay(IConsole::IResult *pResult, void *pUserData)
@@ -4155,7 +4156,7 @@ void CClient::InitChecksum()
 }
 
 #ifndef DDNET_CHECKSUM_SALT
-// salt@checksum.ddnet.tw: db877f2b-2ddb-3ba6-9f67-a6d169ec671d
+// salt@checksum.ddnet.org: db877f2b-2ddb-3ba6-9f67-a6d169ec671d
 #define DDNET_CHECKSUM_SALT \
 	{ \
 		{ \
@@ -4538,7 +4539,10 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
-	str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
+	if(str_startswith(pLink, CONNECTLINK))
+		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
+	else
+		str_copy(m_aCmdConnect, pLink);
 }
 
 void CClient::HandleDemoPath(const char *pPath)
@@ -4549,6 +4553,27 @@ void CClient::HandleDemoPath(const char *pPath)
 void CClient::HandleMapPath(const char *pPath)
 {
 	str_copy(m_aCmdEditMap, pPath);
+}
+
+static bool UnknownArgumentCallback(const char *pCommand, void *pUser)
+{
+	CClient *pClient = static_cast<CClient *>(pUser);
+	if(str_startswith(pCommand, CONNECTLINK))
+	{
+		pClient->HandleConnectLink(pCommand);
+		return true;
+	}
+	else if(str_endswith(pCommand, ".demo"))
+	{
+		pClient->HandleDemoPath(pCommand);
+		return true;
+	}
+	else if(str_endswith(pCommand, ".map"))
+	{
+		pClient->HandleMapPath(pCommand);
+		return true;
+	}
+	return false;
 }
 
 /*
@@ -4744,14 +4769,9 @@ int main(int argc, const char **argv)
 	g_Config.m_ClConfigVersion = 1;
 
 	// parse the command line arguments
-	if(argc == 2 && str_startswith(argv[1], CONNECTLINK))
-		pClient->HandleConnectLink(argv[1]);
-	else if(argc == 2 && str_endswith(argv[1], ".demo"))
-		pClient->HandleDemoPath(argv[1]);
-	else if(argc == 2 && str_endswith(argv[1], ".map"))
-		pClient->HandleMapPath(argv[1]);
-	else if(argc > 1)
-		pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);
+	pConsole->SetUnknownCommandCallback(UnknownArgumentCallback, pClient);
+	pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);
+	pConsole->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 
 	if(pSteam->GetConnectAddress())
 	{
@@ -4773,6 +4793,17 @@ int main(int argc, const char **argv)
 		}
 	}
 
+	// init SDL
+	if(SDL_Init(0) < 0)
+	{
+		dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+		return -1;
+	}
+
+#ifndef CONF_PLATFORM_ANDROID
+	atexit(SDL_Quit);
+#endif
+
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
@@ -4791,7 +4822,11 @@ int main(int argc, const char **argv)
 		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
 	}
 
+	pKernel->Shutdown();
 	delete pKernel;
+
+	// shutdown SDL
+	SDL_Quit();
 
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
@@ -4848,7 +4883,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	str_copy(aUrl, "https://info2.ddnet.tw/info");
+	str_copy(aUrl, "https://info.ddnet.org/info");
 
 	if(g_Config.m_BrIndicateFinished)
 	{

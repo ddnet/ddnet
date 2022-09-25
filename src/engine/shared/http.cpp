@@ -116,6 +116,13 @@ void EscapeUrl(char *pBuf, int Size, const char *pStr)
 	curl_free(pEsc);
 }
 
+bool HttpHasIpresolveBug()
+{
+	// curl < 7.77.0 doesn't use CURLOPT_IPRESOLVE correctly wrt.
+	// connection caches.
+	return curl_version_info(CURLVERSION_NOW)->version_num < 0x074d00;
+}
+
 CHttpRequest::CHttpRequest(const char *pUrl)
 {
 	str_copy(m_aUrl, pUrl);
@@ -123,10 +130,10 @@ CHttpRequest::CHttpRequest(const char *pUrl)
 
 CHttpRequest::~CHttpRequest()
 {
+	m_ResponseLength = 0;
 	if(!m_WriteToFile)
 	{
 		m_BufferSize = 0;
-		m_BufferLength = 0;
 		free(m_pBuffer);
 		m_pBuffer = nullptr;
 	}
@@ -191,6 +198,11 @@ int CHttpRequest::RunImpl(CURL *pUser)
 		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(pHandle, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
+	long Protocols = CURLPROTO_HTTPS;
+	if(g_Config.m_HttpAllowInsecure)
+	{
+		Protocols |= CURLPROTO_HTTP;
+	}
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(pHandle, CURLOPT_ERRORBUFFER, aErr);
 
@@ -198,9 +210,13 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	curl_easy_setopt(pHandle, CURLOPT_TIMEOUT_MS, m_Timeout.TimeoutMs);
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
 	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
+	if(m_MaxResponseSize >= 0)
+	{
+		curl_easy_setopt(pHandle, CURLOPT_MAXFILESIZE_LARGE, (curl_off_t)m_MaxResponseSize);
+	}
 
 	curl_easy_setopt(pHandle, CURLOPT_SHARE, gs_pShare);
-	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, Protocols);
 	curl_easy_setopt(pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(pHandle, CURLOPT_FAILONERROR, 1L);
@@ -215,6 +231,10 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 	curl_easy_setopt(pHandle, CURLOPT_IPRESOLVE, m_IpResolve == IPRESOLVE::V4 ? CURL_IPRESOLVE_V4 : m_IpResolve == IPRESOLVE::V6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_WHATEVER);
+	if(g_Config.m_Bindaddr[0] != '\0')
+	{
+		curl_easy_setopt(pHandle, CURLOPT_INTERFACE, g_Config.m_Bindaddr);
+	}
 
 	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x074400)
 	{
@@ -258,7 +278,7 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	if(Ret != CURLE_OK)
 	{
 		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
-			dbg_msg("http", "%s failed. libcurl error: %s", m_aUrl, aErr);
+			dbg_msg("http", "%s failed. libcurl error (%d): %s", m_aUrl, (int)Ret, aErr);
 		return (Ret == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 	}
 	else
@@ -271,6 +291,12 @@ int CHttpRequest::RunImpl(CURL *pUser)
 
 size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 {
+	// Need to check for the maximum response size here as curl can only
+	// guarantee it if the server sets a Content-Length header.
+	if(m_MaxResponseSize >= 0 && m_ResponseLength + DataSize > (uint64_t)m_MaxResponseSize)
+	{
+		return 0;
+	}
 	if(!m_WriteToFile)
 	{
 		if(DataSize == 0)
@@ -278,7 +304,7 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 			return DataSize;
 		}
 		size_t NewBufferSize = maximum((size_t)1024, m_BufferSize);
-		while(m_BufferLength + DataSize > NewBufferSize)
+		while(m_ResponseLength + DataSize > NewBufferSize)
 		{
 			NewBufferSize *= 2;
 		}
@@ -287,12 +313,13 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 			m_pBuffer = (unsigned char *)realloc(m_pBuffer, NewBufferSize);
 			m_BufferSize = NewBufferSize;
 		}
-		mem_copy(m_pBuffer + m_BufferLength, pData, DataSize);
-		m_BufferLength += DataSize;
+		mem_copy(m_pBuffer + m_ResponseLength, pData, DataSize);
+		m_ResponseLength += DataSize;
 		return DataSize;
 	}
 	else
 	{
+		m_ResponseLength += DataSize;
 		return io_write(m_File, pData, DataSize);
 	}
 }
@@ -358,7 +385,7 @@ void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
 		return;
 	}
 	*ppResult = m_pBuffer;
-	*pResultLength = m_BufferLength;
+	*pResultLength = m_ResponseLength;
 }
 
 json_value *CHttpRequest::ResultJson() const

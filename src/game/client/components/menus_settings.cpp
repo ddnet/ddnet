@@ -19,6 +19,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
 #include "binds.h"
@@ -419,6 +420,10 @@ void CMenus::RefreshSkins()
 			RenderLoading(Localize("Loading skin files"), "", 0, false);
 		}
 	});
+	if(Client()->State() >= IClient::STATE_ONLINE)
+	{
+		m_pClient->RefindSkins();
+	}
 }
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
@@ -440,25 +445,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		pColorBody = &g_Config.m_ClDummyColorBody;
 		pColorFeet = &g_Config.m_ClDummyColorFeet;
 	}
-
-	// skin info
-	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
-	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
-	if(*pUseCustomColor)
-	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
-	}
-	else
-	{
-		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-	}
-	OwnSkinInfo.m_Size = 50.0f;
 
 	MainView.HSplitTop(10.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
@@ -524,19 +510,40 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
 		static const char *s_apSkinPrefixes[] = {"kitty", "santa"};
-		for(auto &pPrefix : s_apSkinPrefixes)
+		static CButtonContainer s_aPrefixButtons[std::size(s_apSkinPrefixes)];
+		for(size_t i = 0; i < std::size(s_apSkinPrefixes); i++)
 		{
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
-			static CButtonContainer s_PrefixButton;
-			if(DoButton_Menu(&s_PrefixButton, pPrefix, 0, &Button))
+			if(DoButton_Menu(&s_aPrefixButtons[i], s_apSkinPrefixes[i], 0, &Button))
 			{
-				str_copy(g_Config.m_ClSkinPrefix, pPrefix);
+				str_copy(g_Config.m_ClSkinPrefix, s_apSkinPrefixes[i]);
 			}
 		}
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	// note: get the skin info after the settings buttons, because they can trigger a refresh
+	// which invalidates the skin
+	// skin info
+	CTeeRenderInfo OwnSkinInfo;
+	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
+	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
+	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
+	if(*pUseCustomColor)
+	{
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
+	}
+	else
+	{
+		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+	}
+	OwnSkinInfo.m_Size = 50.0f;
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
@@ -782,7 +789,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CButtonContainer s_SkinDBDirID;
 	if(DoButton_Menu(&s_SkinDBDirID, Localize("Skin Database"), 0, &SkinDB))
 	{
-		const char *pLink = "https://ddnet.tw/skins/";
+		const char *pLink = "https://ddnet.org/skins/";
 		if(!open_link(pLink))
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
@@ -814,10 +821,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		TextRender()->SetCurFont(NULL);
 		RefreshSkins();
 		s_InitSkinlist = true;
-		if(Client()->State() >= IClient::STATE_ONLINE)
-		{
-			m_pClient->RefindSkins();
-		}
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(NULL);
@@ -947,7 +950,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 	const float Spacing = 2.0f;
 	const float BackgroundHeight = NumOptions * (ButtonHeight + Spacing) + (NumOptions == 1 ? 0 : Spacing);
 	if(View.h < BackgroundHeight)
-		return BackgroundHeight; // TODO: make this less hacky by porting CScrollRegion from vanilla
+		return BackgroundHeight;
 
 	View.HSplitTop(BackgroundHeight, &View, 0);
 
@@ -1127,110 +1130,120 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		}
 	}
 
-	// controls in a scrollable listbox
-	static int s_ControlsList = 0;
-	static int s_SelectedControl = -1;
-	static float s_ScrollValue = 0;
-	static int s_OldSelected = 0;
+	// scrollable controls
 	static float s_JoystickSettingsHeight = 0.0f; // we calculate this later and don't render until enough space is available
-	// Hacky values: Size of 10.0f per item for smoother scrolling, 72 elements
-	// fits the current size of controls settings
-	const float PseudoItemSize = 10.0f;
-	UiDoListboxStart(&s_ControlsList, &MainView, PseudoItemSize, Localize("Controls"), "", 72 + (int)ceilf(s_JoystickSettingsHeight / PseudoItemSize + 0.5f), 1, s_SelectedControl, s_ScrollValue);
-
-	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton;
-	CListboxItem Item = UiDoListboxNextItem(&s_OldSelected, false, false, true);
-	Item.m_Rect.HSplitTop(10.0f, 0, &Item.m_Rect);
-	Item.m_Rect.VSplitMid(&MouseSettings, &VotingSettings);
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = 120.0f;
+	s_ScrollRegion.Begin(&MainView, &ScrollOffset, &ScrollParams);
+	MainView.y += ScrollOffset.y;
 
 	const float FontSize = 14.0f;
 	const float Margin = 10.0f;
 	const float HeaderHeight = FontSize + 5.0f + Margin;
 
+	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton;
+	MainView.VSplitMid(&MouseSettings, &VotingSettings);
+
 	// mouse settings
 	{
 		MouseSettings.VMargin(5.0f, &MouseSettings);
 		MouseSettings.HSplitTop(80.0f, &MouseSettings, &JoystickSettings);
-		MouseSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		MouseSettings.VMargin(10.0f, &MouseSettings);
+		if(s_ScrollRegion.AddRect(MouseSettings))
+		{
+			MouseSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			MouseSettings.VMargin(10.0f, &MouseSettings);
 
-		TextRender()->Text(0, MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
+			TextRender()->Text(0, MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
 
-		MouseSettings.HSplitTop(HeaderHeight, 0, &MouseSettings);
+			MouseSettings.HSplitTop(HeaderHeight, 0, &MouseSettings);
 
-		CUIRect Button;
-		MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
-		UI()->DoScrollbarOption(&g_Config.m_InpMousesens, &g_Config.m_InpMousesens, &Button, Localize("Ingame mouse sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			CUIRect Button;
+			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
+			UI()->DoScrollbarOption(&g_Config.m_InpMousesens, &g_Config.m_InpMousesens, &Button, Localize("Ingame mouse sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
-		MouseSettings.HSplitTop(2.0f, 0, &MouseSettings);
+			MouseSettings.HSplitTop(2.0f, 0, &MouseSettings);
 
-		MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
-		UI()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
+			UI()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
+		}
 	}
 
 	// joystick settings
 	{
 		JoystickSettings.HSplitTop(Margin, 0, &JoystickSettings);
-		JoystickSettings.HSplitTop(s_JoystickSettingsHeight, &JoystickSettings, &MovementSettings);
-		JoystickSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		JoystickSettings.VMargin(Margin, &JoystickSettings);
+		JoystickSettings.HSplitTop(s_JoystickSettingsHeight + HeaderHeight + Margin, &JoystickSettings, &MovementSettings);
+		if(s_ScrollRegion.AddRect(JoystickSettings))
+		{
+			JoystickSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			JoystickSettings.VMargin(Margin, &JoystickSettings);
 
-		TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
+			TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
 
-		JoystickSettings.HSplitTop(HeaderHeight, 0, &JoystickSettings);
-		s_JoystickSettingsHeight = RenderSettingsControlsJoystick(JoystickSettings) + HeaderHeight + Margin; // + Margin for another bottom margin
+			JoystickSettings.HSplitTop(HeaderHeight, 0, &JoystickSettings);
+			s_JoystickSettingsHeight = RenderSettingsControlsJoystick(JoystickSettings);
+		}
 	}
 
 	// movement settings
 	{
 		MovementSettings.HSplitTop(Margin, 0, &MovementSettings);
 		MovementSettings.HSplitTop(365.0f, &MovementSettings, &WeaponSettings);
-		MovementSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		MovementSettings.VMargin(Margin, &MovementSettings);
+		if(s_ScrollRegion.AddRect(MovementSettings))
+		{
+			MovementSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			MovementSettings.VMargin(Margin, &MovementSettings);
 
-		TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
+			TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
 
-		MovementSettings.HSplitTop(HeaderHeight, 0, &MovementSettings);
-		DoSettingsControlsButtons(0, 15, MovementSettings);
+			MovementSettings.HSplitTop(HeaderHeight, 0, &MovementSettings);
+			DoSettingsControlsButtons(0, 15, MovementSettings);
+		}
 	}
 
 	// weapon settings
 	{
 		WeaponSettings.HSplitTop(Margin, 0, &WeaponSettings);
 		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
-		WeaponSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		WeaponSettings.VMargin(Margin, &WeaponSettings);
+		if(s_ScrollRegion.AddRect(WeaponSettings))
+		{
+			WeaponSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			WeaponSettings.VMargin(Margin, &WeaponSettings);
 
-		TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
+			TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
 
-		WeaponSettings.HSplitTop(HeaderHeight, 0, &WeaponSettings);
-		DoSettingsControlsButtons(15, 22, WeaponSettings);
+			WeaponSettings.HSplitTop(HeaderHeight, 0, &WeaponSettings);
+			DoSettingsControlsButtons(15, 22, WeaponSettings);
+		}
 	}
 
 	// defaults
 	{
 		ResetButton.HSplitTop(Margin, 0, &ResetButton);
 		ResetButton.HSplitTop(40.0f, &ResetButton, 0);
-		ResetButton.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		ResetButton.HMargin(10.0f, &ResetButton);
-		ResetButton.VMargin(30.0f, &ResetButton);
-		ResetButton.HSplitTop(20.0f, &ResetButton, 0);
-		static CButtonContainer s_DefaultButton;
-		if(DoButton_Menu(&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
+		if(s_ScrollRegion.AddRect(ResetButton))
 		{
-			m_pClient->m_Binds.SetDefaults();
+			ResetButton.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			ResetButton.HMargin(10.0f, &ResetButton);
+			ResetButton.VMargin(30.0f, &ResetButton);
+			static CButtonContainer s_DefaultButton;
+			if(DoButton_Menu(&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
+			{
+				m_pClient->m_Binds.SetDefaults();
 
-			g_Config.m_InpMousesens = 200;
-			g_Config.m_UiMousesens = 200;
+				g_Config.m_InpMousesens = 200;
+				g_Config.m_UiMousesens = 200;
 
-			g_Config.m_InpControllerEnable = 0;
-			g_Config.m_InpControllerGUID[0] = '\0';
-			g_Config.m_InpControllerAbsolute = 0;
-			g_Config.m_InpControllerSens = 100;
-			g_Config.m_InpControllerX = 0;
-			g_Config.m_InpControllerY = 1;
-			g_Config.m_InpControllerTolerance = 5;
-			g_Config.m_UiControllerSens = 100;
+				g_Config.m_InpControllerEnable = 0;
+				g_Config.m_InpControllerGUID[0] = '\0';
+				g_Config.m_InpControllerAbsolute = 0;
+				g_Config.m_InpControllerSens = 100;
+				g_Config.m_InpControllerX = 0;
+				g_Config.m_InpControllerY = 1;
+				g_Config.m_InpControllerTolerance = 5;
+				g_Config.m_UiControllerSens = 100;
+			}
 		}
 	}
 
@@ -1238,55 +1251,67 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		VotingSettings.VMargin(5.0f, &VotingSettings);
 		VotingSettings.HSplitTop(80.0f, &VotingSettings, &ChatSettings);
-		VotingSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		VotingSettings.VMargin(Margin, &VotingSettings);
+		if(s_ScrollRegion.AddRect(VotingSettings))
+		{
+			VotingSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			VotingSettings.VMargin(Margin, &VotingSettings);
 
-		TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
+			TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
 
-		VotingSettings.HSplitTop(HeaderHeight, 0, &VotingSettings);
-		DoSettingsControlsButtons(22, 24, VotingSettings);
+			VotingSettings.HSplitTop(HeaderHeight, 0, &VotingSettings);
+			DoSettingsControlsButtons(22, 24, VotingSettings);
+		}
 	}
 
 	// chat settings
 	{
 		ChatSettings.HSplitTop(Margin, 0, &ChatSettings);
 		ChatSettings.HSplitTop(145.0f, &ChatSettings, &DummySettings);
-		ChatSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		ChatSettings.VMargin(Margin, &ChatSettings);
+		if(s_ScrollRegion.AddRect(ChatSettings))
+		{
+			ChatSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			ChatSettings.VMargin(Margin, &ChatSettings);
 
-		TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
+			TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
 
-		ChatSettings.HSplitTop(HeaderHeight, 0, &ChatSettings);
-		DoSettingsControlsButtons(24, 29, ChatSettings);
+			ChatSettings.HSplitTop(HeaderHeight, 0, &ChatSettings);
+			DoSettingsControlsButtons(24, 29, ChatSettings);
+		}
 	}
 
 	// dummy settings
 	{
 		DummySettings.HSplitTop(Margin, 0, &DummySettings);
 		DummySettings.HSplitTop(100.0f, &DummySettings, &MiscSettings);
-		DummySettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		DummySettings.VMargin(Margin, &DummySettings);
+		if(s_ScrollRegion.AddRect(DummySettings))
+		{
+			DummySettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			DummySettings.VMargin(Margin, &DummySettings);
 
-		TextRender()->Text(0, DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
+			TextRender()->Text(0, DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
 
-		DummySettings.HSplitTop(HeaderHeight, 0, &DummySettings);
-		DoSettingsControlsButtons(29, 32, DummySettings);
+			DummySettings.HSplitTop(HeaderHeight, 0, &DummySettings);
+			DoSettingsControlsButtons(29, 32, DummySettings);
+		}
 	}
 
 	// misc settings
 	{
 		MiscSettings.HSplitTop(Margin, 0, &MiscSettings);
 		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
-		MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		MiscSettings.VMargin(Margin, &MiscSettings);
+		if(s_ScrollRegion.AddRect(MiscSettings))
+		{
+			MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+			MiscSettings.VMargin(Margin, &MiscSettings);
 
-		TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
+			TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
 
-		MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
-		DoSettingsControlsButtons(32, 44, MiscSettings);
+			MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
+			DoSettingsControlsButtons(32, 44, MiscSettings);
+		}
 	}
 
-	UiDoListboxEnd(&s_ScrollValue, 0);
+	s_ScrollRegion.End();
 }
 
 int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, CButtonContainer *pButtonContainer, float &ScrollVal)
@@ -2972,18 +2997,65 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	{
 		MainView.VSplitMid(&LeftView, &RightView);
 
-		// ***** Laser ***** //
+		// ***** Weapons ***** //
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
-		UI()->DoLabel(&Label, Localize("Laser"), HeadlineFontSize, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Label, Localize("Weapons"), HeadlineFontSize, TEXTALIGN_LEFT);
 
-		// General laser settings
-		LeftView.HSplitTop(SectionTotalMargin + 2 * ColorPickerLineSize, &Section, &LeftView);
+		// General weapon laser settings
+		LeftView.HSplitTop(SectionTotalMargin + 4 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
-		static CButtonContainer s_LaserOutResetID, s_LaserInResetID;
+		static CButtonContainer s_LaserRifleOutResetID, s_LaserRifleInResetID, s_LaserShotgunOutResetID, s_LaserShotgunInResetID;
 
-		ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&s_LaserOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
-		ColorHSLA LaserInnerColor = DoLine_ColorPicker(&s_LaserInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+		ColorHSLA LaserRifleOutlineColor = DoLine_ColorPicker(&s_LaserRifleOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Outline Color"), &g_Config.m_ClLaserRifleOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
+		ColorHSLA LaserRifleInnerColor = DoLine_ColorPicker(&s_LaserRifleInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Inner Color"), &g_Config.m_ClLaserRifleInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+		ColorHSLA LaserShotgunOutlineColor = DoLine_ColorPicker(&s_LaserShotgunOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Outline Color"), &g_Config.m_ClLaserShotgunOutlineColor, ColorRGBA(0.125490f, 0.098039f, 0.043137f, 1.0f), false);
+		ColorHSLA LaserShotgunInnerColor = DoLine_ColorPicker(&s_LaserShotgunInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Inner Color"), &g_Config.m_ClLaserShotgunInnerColor, ColorRGBA(0.570588f, 0.417647f, 0.252941f, 1.0f), false);
+
+		// ***** Entities ***** //
+		LeftView.HSplitTop(MarginToNextSection * 2.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Entities"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General entity laser settings
+		LeftView.HSplitTop(SectionTotalMargin + 4 * ColorPickerLineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		static CButtonContainer s_LaserDoorOutResetID, s_LaserDoorInResetID, s_LaserFreezeOutResetID, s_LaserFreezeInResetID;
+
+		ColorHSLA LaserDoorOutlineColor = DoLine_ColorPicker(&s_LaserDoorOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Door Laser Outline Color"), &g_Config.m_ClLaserDoorOutlineColor, ColorRGBA(0.0f, 0.131372f, 0.096078f, 1.0f), false);
+		ColorHSLA LaserDoorInnerColor = DoLine_ColorPicker(&s_LaserDoorInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Door Laser Inner Color"), &g_Config.m_ClLaserDoorInnerColor, ColorRGBA(0.262745f, 0.760784f, 0.639215f, 1.0f), false);
+		ColorHSLA LaserFreezeOutlineColor = DoLine_ColorPicker(&s_LaserFreezeOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Outline Color"), &g_Config.m_ClLaserFreezeOutlineColor, ColorRGBA(0.131372f, 0.123529f, 0.182352f, 1.0f), false);
+		ColorHSLA LaserFreezeInnerColor = DoLine_ColorPicker(&s_LaserFreezeInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Inner Color"), &g_Config.m_ClLaserFreezeInnerColor, ColorRGBA(0.482352f, 0.443137f, 0.564705f, 1.0f), false);
+
+		static CButtonContainer s_AllToRifleResetID, s_AllToDefaultResetID;
+
+		LeftView.HSplitTop(20.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(20.0f, &Button, &LeftView);
+		if(DoButton_Menu(&s_AllToRifleResetID, Localize("Set all to Rifle"), 0, &Button))
+		{
+			g_Config.m_ClLaserShotgunOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserShotgunInnerColor = g_Config.m_ClLaserRifleInnerColor;
+			g_Config.m_ClLaserDoorOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserDoorInnerColor = g_Config.m_ClLaserRifleInnerColor;
+			g_Config.m_ClLaserFreezeOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserFreezeInnerColor = g_Config.m_ClLaserRifleInnerColor;
+		}
+
+		// values taken from the CL commands
+		LeftView.HSplitTop(10.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(20.0f, &Button, &LeftView);
+		if(DoButton_Menu(&s_AllToDefaultResetID, Localize("Reset to defaults"), 0, &Button))
+		{
+			g_Config.m_ClLaserRifleOutlineColor = 11176233;
+			g_Config.m_ClLaserRifleInnerColor = 11206591;
+			g_Config.m_ClLaserShotgunOutlineColor = 1866773;
+			g_Config.m_ClLaserShotgunInnerColor = 1467241;
+			g_Config.m_ClLaserDoorOutlineColor = 7667473;
+			g_Config.m_ClLaserDoorInnerColor = 7701379;
+			g_Config.m_ClLaserFreezeOutlineColor = 11613223;
+			g_Config.m_ClLaserFreezeInnerColor = 12001153;
+		}
 
 		// ***** Laser Preview ***** //
 		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
@@ -2991,8 +3063,19 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserRifleOutlineColor, LaserRifleInnerColor, LASERTYPE_RIFLE);
 
-		DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserShotgunOutlineColor, LaserShotgunInnerColor, LASERTYPE_SHOTGUN);
+
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserDoorOutlineColor, LaserDoorInnerColor, LASERTYPE_DOOR);
+
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserFreezeOutlineColor, LaserFreezeInnerColor, LASERTYPE_DOOR);
 	}
 }
 
@@ -4135,10 +4218,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CButtonContainer s_ResetID1;
 	Miscellaneous.HSplitTop(25.0f, &Button, &Right);
 	DoLine_ColorPicker(&s_ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
-	Right.HSplitTop(5.0f, 0x0, &Right);
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
-		g_Config.m_ClHttpMapDownload ^= 1;
 
 	static CButtonContainer s_ButtonTimeout;
 	Right.HSplitTop(10.0f, 0x0, &Right);

@@ -703,8 +703,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Näytä DDNet kenttäläpäisyt palvelinselaimessa
 
-transmits your player name to info2.ddnet.tw
-== lähettää nimimerkkisi osoitteeseen info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== lähettää nimimerkkisi osoitteeseen info.ddnet.org
 
 Theme
 == Teema
@@ -988,12 +988,6 @@ Show kill messages
 Show votes window after voting
 == Näytä äänestysikkuna äänestämisen jälkeen
 
-Laser Outline Color
-== Laserin ulkoviivan väri
-
-Laser Inner Color
-== Laserin sisäväri
-
 Use old chat style
 == Käytä vanhaa chatin tyyliä
 
@@ -1099,14 +1093,14 @@ Emoticons
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == Opi
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Verkkosivu
@@ -1256,6 +1250,33 @@ Loading menu images
 Refreshing...
 == 
 
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
+== 
+
 Loading demo files
 == 
 
@@ -1277,6 +1298,9 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Loading skin files
+== 
+
 Toggle to edit your dummy settings
 == 
 
@@ -1287,9 +1311,6 @@ Fat skins (DDFat)
 == 
 
 Choose default eyes when joining a server
-== 
-
-Loading skin files
 == 
 
 Dummy copy
@@ -1471,6 +1492,36 @@ Normal Color
 Highlight Color
 == 
 
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
@@ -1511,9 +1562,6 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
-== 
-
-Entities
 == 
 
 Particles

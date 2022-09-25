@@ -515,7 +515,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 
 auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);
 #if defined(CONF_TEST_MYSQL)
-auto g_pMysqlConn = CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", 3306, true);
+auto g_pMysqlConn = CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", "", 3306, true);
 #endif
 
 auto g_TestValues

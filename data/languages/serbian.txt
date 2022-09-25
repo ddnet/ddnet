@@ -6,24 +6,25 @@
 #	EliteTee	2011-11-30 01:55:30
 #	DNR			2011-11-30 01:57:52
 #	Kingston		2020-08-18 10:57:34
+#   Veljko Radovanovic (VekiPro) 2022-08-28 11:56:69
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== Još %ds
+== %ds je preostalo
 
 %i minute left
-== %i minut preostao
+== još %i minut
 
 %i minutes left
-== Preostalo: %i min.
+== još %i minuta
 
 %i second left
-== Preostalo: %i min.
+== još %i sekund
 
 %i seconds left
-== Preostalo: %i sek.
+== još samo %i sekundi
 
 %s wins!
 == %s je pobedio!
@@ -32,7 +33,7 @@
 == -Strana %d-
 
 Abort
-== Prekini
+== Odustani
 
 Add
 == Dodaj
@@ -47,19 +48,19 @@ All
 == Svi
 
 Are you sure that you want to delete the demo?
-== Da li ste sigurni da želite obrisati demo-snimak?
+== Da li ste sigurni da želite da izbrišete video snimak?
 
 Are you sure that you want to quit?
-== Jeste li sigurni da želite izaći?
+== Da li ste sigurni da želite da izađete?
 
 Are you sure that you want to remove the player from your friends list?
-== Da li ste sigurni da želite obrisati igrača iz liste prijatelja?
+== Da li si siguran da hoćeš izbrisati igrača iz liste prijatelja?
 
 Automatically record demos
-== Automatski snimaj demo-e
+== Automatski snimi video
 
 Automatically take game over screenshot
-== Automatski snimi screenshot
+== Automatski snimi ekran
 
 Blue team
 == Plavi tim
@@ -74,10 +75,10 @@ Call vote
 == Glasanje
 
 Change settings
-== Izmeni podešavanja
+== Promeni Podešavanja
 
 Chat
-== Čet
+== Dopisivanje
 
 Clan
 == Klan
@@ -89,13 +90,13 @@ Close
 == Zatvori
 
 Connect
-== Konektuj
+== Poveži se
 
 Connecting to
-== Konektujem se na
+== Povezujem se na
 
 Connection Problems...
-== Problemi sa konekcijom...
+== Problemi sa internetom
 
 Console
 == Konzola
@@ -110,28 +111,28 @@ Current
 == Trenutno
 
 Custom colors
-== Vlastite boje
+== Prilagođena boja
 
 Delete
 == Izbriši
 
 Delete demo
-== Obriši demo-snimak
+== Obriši snimak
 
 Demo details
-== Detalji demo-a
+== Detalji snimka
 
 Demofile: %s
-== Demo-snimak: %s
+== Snimak: %s
 
 Demos
-== Demo-i
+== Snimci
 
 Disconnect
-== Diskonektuj
+== Prekini vezu
 
 Disconnected
-== Diskonektovan
+== Prekinuta veza
 
 Downloading map
 == Preuzimam mapu
@@ -143,16 +144,16 @@ Dynamic Camera
 == Dinamična kamera
 
 Emoticon
-== Emotikon
+== Osećanja
 
 Error
 == Greška
 
 Error loading demo
-== Greška prilikom učitavanja demo-snimka
+== Greška pri učitavanju snimka
 
 Favorite
-== Omiljen
+== Omiljeno
 
 Favorites
 == Omiljeni
@@ -167,7 +168,7 @@ Fire
 == Pucaj
 
 Folder
-== Folder
+== Datoteka
 
 Force vote
 == Obavezno glasanje
@@ -179,13 +180,13 @@ Friends
 == Prijatelji
 
 Fullscreen
-== Čitav ekran
+== Preko celog ekrana
 
 Game
 == Igra
 
 Game info
-== O igri
+== O Igri
 
 Game over
 == Igra je završena
@@ -197,19 +198,19 @@ Game types:
 == Tipovi igre:
 
 General
-== Generalno
+== Opšte
 
 Graphics
 == Grafika
 
 Grenade
-== Granate
+== Bazuka
 
 Hammer
 == Čekić
 
 Has people playing
-== Server nije prazan
+== Ima igrača
 
 High Detail
 == Visoki detalji
@@ -218,19 +219,19 @@ Hook
 == Kuka
 
 Invalid Demo
-== Neispravan demo-snimak
+== Neispravan snimak
 
 Join blue
-== U plavi tim
+== Izraj za plave
 
 Join red
-== U crveni tim
+== Izraj za crvene
 
 Jump
 == Skok
 
 Kick player
-== Izbaci igrača iz igre
+== Izbaci igrača
 
 Language
 == Jezik
@@ -242,25 +243,25 @@ Map
 == Mapa
 
 Move left
-== Levo
+== Pomeri se levo
 
 Move player to spectators
-== Prebaci igrača u posmatrače
+== Premesti igrača u razgledača
 
 Move right
-== Desno
+== Pomeri se desno
 
 Movement
 == Kretanje
 
 Mute when not active
-== Bez zvuka prilikom neaktivnosti
+== Isključi zvuk kada je neaktivan
 
 Name
 == Ime
 
 Next weapon
-== Sledeće oružje
+== Sledeće oružije
 
 Nickname
 == Nadimak
@@ -272,19 +273,19 @@ No password
 == Bez lozinke
 
 No servers found
-== Nije pronađen nijedan server
+== Nema pronađenih servera
 
 No servers match your filter criteria
-== Nijedan server ne odgovara filter kriterijumu
+== Nijedan server ne odgovara vašim filterima pretrage
 
 Ok
-== Ok
+== U redu
 
 Open
 == Otvori
 
 Parent Folder
-== Prethodni folder
+== Prethodna datoteka
 
 Password
 == Lozinka
@@ -298,10 +299,6 @@ Ping
 Pistol
 == Pištolj
 
-[Demo browser]
-Play
-== Pokreni
-
 Play background music
 == Pozadinska muzika
 
@@ -309,7 +306,7 @@ Player
 == Igrač
 
 Player country:
-== Država
+== Država igrača
 
 Player options
 == Podešavanja igrača
@@ -318,10 +315,10 @@ Players
 == Igrači
 
 Please balance teams!
-== Molim balansirajte timove!
+== Uravnotežite timove!
 
 Prev. weapon
-== Prethodno oružje
+== Prethodno oružije
 
 Quit
 == Izlaz
@@ -342,67 +339,70 @@ Remote console
 == Udaljena konzola
 
 Remove
-== Ukloni
+== Obriši
 
 Remove friend
-== Ukloni prijatelja
+== Obriši prijatelja
 
 Rename
 == Preimenuj
 
 Rename demo
-== Preimenuj demo
+== Preimenuj snimak
 
 Reset filter
-== Poništi filter
+== Povrati filter
 
 Sample rate
-== Frekvencija
+== Frekfencija
 
 Score
 == Rezultat
 
 Score limit
-== Max. bodova
+== Najviše bodova
 
 Scoreboard
-== Bodovi
+== Tabela rezultata
 
 Screenshot
-== Screenshot
+== Snimak ekrana
 
 Server address:
 == Adresa servera:
 
 Server details
-== Podaci servera
+== Detalji o serveru
 
 Server filter
 == Filter servera
 
 Server info
-== O Serveru
+== O serveru
 
 Server not full
 == Server nije pun
 
+Settings
+== Podešavanja
+
 Shotgun
-== Pumparica
+== Sačmara
 
 Show chat
-== Prikaži čet
+== Prikaži dopisivanje
 
 Show friends only
 == Prikaži samo prijatelje
 
 Show ingame HUD
-== Prikaži HUD
+== Koristi HUD u igri
 
 Show name plates
-== Prikaži imena igrača
+== Prikaži pločice sa imenima
 
 Skins
-== Skinovi
+== Teme
 
 Sound
 == Zvuk
@@ -411,49 +411,49 @@ Sound error
 == Problem sa zvukom
 
 Spectate
-== Posmatraj
+== Razgledaj
 
 Spectate next
-== Posmatraj sledećeg
+== Razgledaj sledećeg
 
 Spectate previous
-== Posmatraj prošlog
+== Razgledaj prošlog
 
 Spectator mode
-== Posmatrački mod
+== Mod razgledanja
 
 Spectators
-== Posmatrači
+== Razgledači
 
 Stop record
 == Prekini snimanje
 
 Strict gametype filter
-== Striktan filter tipa igre
+== Strogi filter tipa igre
 
 Sudden Death
 == Iznenadna smrt
 
 Switch weapon on pickup
-== Aktiviraj novo oružje prilikom uzimanja
+== Promeni oružije kad ga pokupiš
 
 Team
 == Tim
 
 Team chat
-== Timski čet
+== Timsko dopisivanje
 
 The audio device couldn't be initialised.
-== Audio uređaj nije moguće pokrenuti.
+== Audio uređaj nije moguće pokrenuti
 
 The server is running a non-standard tuning on a pure game type.
-== Server sadrži nestandardna podešavanja.
+== Server izvodi nestandardno podešavanje čistog tipa igre.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Mapa u editoru nije zapamćena, možda želite da je zapamtite pre izlaska iz igre.
+== Mapa nije sačuvana, verovatno želite da je sačuvate pre izlaska iz igre.
 
 Time limit
-== Max. vremena
+== Vremensko ograničenje
 
 Time limit: %d min
 == Vremensko ograničenje: %d min.
@@ -465,16 +465,16 @@ Type
 == Tip
 
 Unable to delete the demo
-== Demo nije moguće obrisati
+== Snimak nije moguće obrisati
 
 Unable to rename the demo
-== Demo nije moguće preimenovati
+== Snimak nije moguće preimenovati
 
 Use sounds
 == Koristi zvuk
 
 Use team colors for name plates
-== Koristi timsku boju u prikazu imena
+== Koristite timske boje za pločice sa imenima
 
 V-Sync
 == V-Sync
@@ -498,7 +498,7 @@ Voting
 == Glasanje
 
 Warmup
-== Zagrejavanje
+== Zagrevanje
 
 Weapon
 == Oružje
@@ -507,13 +507,45 @@ Yes
 == Da
 
 You must restart the game for all settings to take effect.
-== Morate ponovo pokrenuti igru da bi sva nova podešavanja bila primenjena.
+== Morate ponovo pokrenuti igru da bi sva podešavanja bila primenjena
+
+##### needs translation #####
+
+Demo
+== Snimak
+
+Editor
+== Uređivač
+
+Game paused
+== Igra je pauzirana
+
+Laser
+== Laser
+
+Length
+== Dužina
+
+Reset
+== Resetuj
+
+Save
+== Sačuvaj
+
+Screen
+== Ekran
+
+Show only chat messages from friends
+== Prikaži samo poruke sa dopisivanja od prijatelja
+
+Size
+== Veličina
 
 New name:
 == Novo ime:
 
 Sat.
-== Sat.
+== Zasić.
 
 Miscellaneous
 == Razno
@@ -522,37 +554,34 @@ Internet
 == Internet
 
 Max demos
-== Maksimalan broj demo-a
+== Maksimalan broj snimaka
 
 News
-== Novo
+== Novosti
 
 Join game
-== Uključi se u igru
+== Uđi na server
 
 FSAA samples
-== FSAA samples
+== FSAA
 
 Sound volume
 == Jačina zvuka
 
 Created:
-== Kreirano:
+== Napravljeno
 
 Max Screenshots
-== Maksimalan broj screenshot-ova
+== Maksimalan broj snimaka ekrana
 
 Length:
-== Dužina:
-
-Laser
-== Puška
+== Dužina
 
 Netversion:
-== Net verzija:
+== Net Verzija
 
 Map:
-== Mapa:
+== Mapa
 
 Info
 == Info
@@ -561,16 +590,16 @@ Hue
 == Nijansa
 
 Record demo
-== Snimi demo
+== Snimi
 
 Your skin
-== Vaš skin
+== Vaša tema
 
 Size:
-== Veličina:
+== Veličina
 
 Reset to defaults
-== Resetuj podešavanja
+== Resetuj
 
 Quit anyway?
 == Izlaz?
@@ -597,964 +626,986 @@ Alpha
 == Provid.
 
 LAN
-== LAN
+== Lok. mreža
 
 Name plates size
-== Veličina pločice za ime
+== Veličina pločice sa imenom
 
 Type:
 == Tip:
 
 Successfully saved the replay!
-== Uspesno sačuvan replay!
+== Snimak je uspešno sačuvan!
 
 Replay feature is disabled!
-== Replay opcija je isključena!
+== Funkcija ponavljanja je onemogućena!
 
-Game paused
-== Igra pauzirana
+Warning
+== Upozorenje
 
-Learn
-== Nauči
+Server best:
+== Najbolji rekord na serveru:
+
+Personal best:
+== Moj Najbolji rekord:
+
+Browser
+== Pregledač
+
+Ghost
+== Duh
 
 Loading DDNet Client
-== Učitavanje DDNet Klijenta
+== Učitavam DDNet klijent
+
+Reconnect in %d sec
+== Ponovo povezivanje za %d sekundi
 
 Render demo
 == Renderuj demo
 
-Disconnect Dummy
-== Diskonektuj Dummy
+Replace video
+== Zameni video
 
-Video name:
-== Video naziv:
+File already exists, do you want to overwrite it?
+== Fajl već postoji, hoćete li da ga zamenite?
+
+Are you sure that you want to disconnect?
+== Da li ste sigurni da želite da prekinete vezu?
+
+Disconnect Dummy
+== Prekini kopiju
+
+Are you sure that you want to disconnect your dummy?
+== Da li ste sigurni da želite da prekinete kopiju?
+
+Welcome to DDNet
+== Dobro došli u DDNet
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork je kooperativna onlajn igra u kojoj je cilj da vi i vaša grupa teeova dođete do cilja na mapi. Kao novajlija trebali biste započeti na Novice serverima, na kojima se nalaze najjednostavnije mape. Razmislite o pingu da biste izabrali server koji vam je blizu.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Tipka K da se ubijes (restart), tipka q da pauziras i gledas druge igrače.
+== Koristite taster k za ubijanje (ponovno pokretanje), q za pauziranje i gledanje drugih igrača. Pogledajte podešavanja za ostale prečice tastera.
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Preporučuje se da proverite podešavanja kako biste ih prilagodili pre nego što se pridružite serveru.
+
+Please enter your nickname below.
+== Molimo vas napišite vaš nadimak ispod.
+
+Country / Region
+== Zemlja / region
+
+Destination file already exist
+== Datoteka odredišta već postoji
+
+Speed
+== Brzina
+
+Video name:
+== Naziv videa:
+
+Show DDNet map finishes in server browser
+== Prikaži završetka DDNet mape u pregledaču servera
+
+Theme
+== Tema
+
+Search
+== Pretraga
+
+Exclude
+== Preskoči
+
+%d of %d servers
+== %d od %d servera
+
+%d of %d server
+== %d od %d servera
+
+%d players
+== %d igrača
+
+%d player
+== %d igrač
+
+Filter connecting players
+== Filtriraj povezane igrače
+
+Indicate map finish
+== Označi kao završeno
+
+Unfinished map
+== Nedovršena mapa
+
+Countries
+== Zemlje
+
+Types
+== Tipovi
+
+Select a name
+== Izaberite ime
+
+Please use a different name
+== Izaberite drugo ime
+
+Remove chat
+== Ukloni dopisivanje
+
+Markers:
+== Markeri:
+
+%.2f MiB
+== %.2f MiB
+
+%.2f KiB
+== %.2f KiB
+
+Markers
+== Markeri
+
+Date
+== Datum
+
+Fetch Info
+== Dohvati informacije
+
+[Demo browser]
+Play
+== Pusti
+
+Demos directory
+== Video direktorijum
+
+Render
+== Renderuj
+
+Connecting dummy
+== Povezujem kopiju
+
+Connect Dummy
+== Poveži kopiju
+
+Kill
+== Ubij se
+
+Pause
+== Pauza
+
+Reload
+== Osveži
+
+Deactivate
+== Deaktiviraj
+
+Activate
+== Aktiviraj
+
+Switch weapon when out of ammo
+== Zameni oružje kad nema municije
+
+Show clan above name plates
+== Prikaži klan iznad pločice sa imenima
+
+Clan plates size
+== Veličina pločice sa klanom
+
+Skip the main menu
+== Preskoči glavni meni
+
+Refresh Rate
+== Osvežavanje
+
+Themes directory
+== Tema direktorijuma
+
+Automatically take statboard screenshot
+== Automatski napravi snimak ekrana statistike
+
+Automatically create statboard csv
+== Automatski napravi statistike csv
+
+Max CSVs
+== Najviše csv-ova
+
+Dummy settings
+== Podešavanja kopije
+
+Download skins
+== Preuzimaj teme
+
+Vanilla skins only
+== Klasične teme
+
+Fat skins (DDFat)
+== Debele teme
+
+Skin prefix
+== Perfiks teme
+
+Skin Database
+== Baza temi
+
+Skins directory
+== Direktorijum tema
+
+Hook collisions
+== Dodir kuke
+
+Zoom in
+== Uvećaj
+
+Zoom out
+== Umanji
+
+Default zoom
+== Klasična veličina
+
+Show others
+== Prikaži ostale
+
+Show all
+== Prikaži sve
+
+Toggle dyncam
+== Dinamična kamera
+
+Toggle dummy
+== Prebaci na kopiju
+
+Toggle ghost
+== Prebaci na duha
+
+Dummy copy
+== Zajed. kret. kopije
+
+Hammerfly dummy
+== Let. čekićem kop.
+
+Converse
+== Svi dopisivanje
+
+Statboard
+== Statistike
+
+Lock team
+== Zaključaj tim
+
+Show entities
+== Prikaži entities
+
+Show HUD
+== Prikaži HUD
+
+may cause delay
+== može prouzrokovati kašnjenje
+
+Use high DPI
+== Koristi visoki DPI
+
+Enable game sounds
+== Koristi zvukove igre
+
+Enable gun sound
+== Omogući zvuk pucanja
+
+Enable long pain sound (used when shooting in freeze)
+== Omogući dug zvuk bola (koristi se kada se puca u smrzavanju)
+
+Enable server message sound
+== Omogući zvuk poruke servera
+
+Enable regular chat sound
+== Omogući uobičajen zvuk dopisivanja
+
+Enable team chat sound
+== Omogući timski zvuk dopisivanja
+
+Enable highlighted chat sound
+== Omogući istaknuti zvuk dopisivanja
+
+Threaded sound loading
+== Učitavanje zvuka sa navojem
+
+Map sound volume
+== Jačina zvuka na mapi
+
+HUD
+== HUD
+
+DDNet
+== DDNet
+
+Assets
+== Sredstva
+
+DDNet Client needs to be restarted to complete update!
+== Potrebno je ponovo pokrenuti DDNet klijent da biste dovršili ažuriranje!
+
+Use DDRace Scoreboard
+== Koristi DDRace tabelu rezultata
+
+Show score
+== Prikaži bodove
+
+Show names in chat in team colors
+== Prikažite imena u dopisivanju u bojama tima
+
+Show kill messages
+== Prikaži dopisivanje smrti
+
+Show votes window after voting
+== Prikaži statistiku glasova nakon glasanja
+
+Messages
+== Poruke
+
+System message
+== Sistemska poruka
+
+Highlighted message
+== Istaknuta poruka
+
+Team message
+== Timska poruka
+
+Friend message
+== Poruka prijatelja
+
+Normal message
+== Klasična poruka
+
+Client message
+== Poruka klijenta
+
+Save the best demo of each race
+== Sačuvajte najbolji snimak svake trke
+
+Default length: %d
+== Podrazumevana dužina: %d
+
+Enable replays
+== Omogući ponovljene reprodukcije
+
+Show ghost
+== Prikaži duha
+
+Save ghost
+== Sačivaj duha
+
+Gameplay
+== Igra
+
+Overlay entities
+== Prekrivajući entities
+
+Show text entities
+== Prikaži tekstualne entities
+
+Show others (own team only)
+== Prikaži ostale (samo svoj tim)
+
+Show quads
+== Prikaži quads
+
+AntiPing
+== AntiPing
+
+AntiPing: predict other players
+== AntiPing: predviđanje drugih igrača
+
+AntiPing: predict weapons
+== AntiPing: predviđanje oružija
+
+AntiPing: predict grenade paths
+== AntiPing: predviđanje putanje granate
+
+Show other players' hook collision lines
+== Prikaži liniju sudara kuke drugih igrača
+
+Show other players' key presses
+== Prikaži pritiske tastera drugih igrača
+
+Old mouse mode
+== Stari mod miša
+
+Show tiles layers from BG map
+== Prikaži slojeve pločica sa BG mape
+
+Try fast HTTP map download first
+== Probaj brzi HTTP preuzimač mapa prvo
+
+DDNet %s is available:
+== DDNet %s je dostupan:
+
+Update now
+== Unapredi sada
+
+Updating...
+== Unapređujem...
+
+DDNet Client updated!
+== DDNet klijent je unapređen!
+
+No updates available
+== Nema dostupnih unapređenja
+
+Check now
+== Proveri sada
+
+New random timeout code
+== Novi slučajni kod isteka vremena
+
+Entities
+== Entities
+
+Emoticons
+== Ikonice osećanja
+
+Particles
+== Čestice
+
+Assets directory
+== Direktorijum sredstva
+
+Learn
+== Uputstvo
+
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
+
+Website
+== Veb sajt
+
+Stop server
+== Zaustavi server
+
+Run server
+== Pokreni server
+
+Server executable not found, can't run server
+== Izvršna datoteka servera nije pronađena, ne može se pokrenuti server
+
+[Start menu]
+Play
+== Igraj
+
+DDNet %s is out!
+== DDNet %s je izašao!
+
+Downloading %s:
+== Preuzimanje %s:
+
+Update failed! Check log...
+== Ažuriranje nije uspelo! Sačekajte log...
+
+Restart
+== Ponovo pokreni
+
+Time
+== Vreme
+
+Follow
+== Prati
+
+Frags
+== Geleri
+
+Deaths
+== Smrti
+
+Suicides
+== Samoubitstva
+
+Ratio
+== Odnos
+
+Net
+== Mreža
+
+FPM
+== FPM
+
+Spree
+== Zaglupi
+
+Best
+== Najbolji
+
+Grabs
+== Hvataljke
+
+1 new mention
+== 1 novo pominjanje
+
+%d new mentions
+== %d novih pominjanja
+
+9+ new mentions
+== 9+ novih pominjanja
+
+Manual
+== Uputstvo
+
+Race
+== Trka
+
+Auto
+== Auto
+
+Replay
+== Pomnovi
 
 Saving ddnet-settings.cfg failed
-== 
+== Čuvanje ddnet-settings.cfg neuspelo
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Širina teksture %s nije deljiva sa %d, ili visina nije deljiva sa %d, što će prouzrokovati vidljive greške.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formate teksture %s nije C.Z.P.P.(RGBA) što će prouzrokovati vidljive greške
 
 Preparing demo playback
-== 
+== Priprema se reprodukcija demoa
 
 Connected
-== 
+== Povezano
 
 Loading map file from storage
-== 
+== Učitavanje mape iz memorije
 
 Why are you slowmo replaying to read this?
-== 
+== Zašto polako ponavljaš da bi ovo pročitao?
+
+Initializing assets
+== Učitavam sliku
+
+Initializing map logic
+== Učitavam logiku mape
+
+Sending initial client info
+== Slanje učitane informacije klijenta
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Debug mod je uključen. Pritisnite Ctrl+Shift+D da ga isključite
+
+Position:
+== Položaj:
+
+Speed:
+== Brzina:
+
+Angle:
+== Ugao:
+
+Uploading map data to GPU
+== Slanje podataka mape G.J.O.~u (GPU)
+
+Trying to determine UDP connectivity...
+== Pokušavam da odredim K.D.P.(UDP) povezanost
+
+UDP seems to be filtered.
+== Izgleda da je K.D.P.(UDP) filtriran
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== Čini se da su K.D.P.(UDP) i TCP IP adresa različite. Pokušajte da onemogućite VPN, proksi ili mrežne akceleratore.
+
+No answer from server yet.
+== Server još uvek ne odgovara
+
+Getting game info
+== Dobijam info. igre
+
+Requesting to join the game
+== Zahteva se ulazak u igru
+
+Existing Player
+== Postojeći igrač
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Ime: '%s' se već koristi sa %d poena. Dali idalje želite da ga koristite?
+
+Checking for existing player with your name
+== Proveravamo dali postoji igrač sa vašim imenom
+
+Are you sure that you want to disconnect and switch to a different server?
+== Dali ste sigurni da želite da prekinete vezu?
+
+Join Tutorial Server
+== Uđi na početnički server
+
+Skip Tutorial
+== Preskoči uvod
+
+Loading menu images
+== Učitavanje menu slika
+
+AFR
+== AFR.
+
+ASI
+== AZI.
+
+AUS
+== AUS.
+
+EUR
+== EVR.
+
+NA
+== S.A.
+
+SA
+== J.A.
+
+CHN
+== KIN.
+
+Getting server list from master server
+== Dobijam listu servera sa master servera
+
+Refreshing...
+== Osvežavanje
+
+Leak IP
+== Provali adresu
+
+Loading demo files
+== Učitavanje demoa
+
+Loading ghost files
+== Učitavanje duhova
+
+Smooth Dynamic Camera
+== Glatka Dinamična Kamera
+
+Settings file
+== Fajl Podešavanja
+
+Config directory
+== Direktorijum konfiguraciji
+
+Toggle to edit your dummy settings
+== Uključi da uređuješ podešavanja lutke
+
+Download community skins
+== Preuzmi ostale teme
+
+Choose default eyes when joining a server
+== Izberi uobičajene oči kad uđeš u server
+
+Loading skin files
+== Učitavam fajlove tema
+
+Chat command
+== k.jednostav.tekst.komuni.sistema
+
+Enable controller
+== Uključi kontroler
+
+Controller %d: %s
+== Kontroler %d: %s
+
+Click to cycle through all available controllers.
+== Klikni da vidiš sve slobodne kontroleres
+
+[Ingame controller mode]
+Relative
+== Relativno
+
+[Ingame controller mode]
+Absolute
+== Apsolutno
+
+Ingame controller mode
+== Mod kontrolera u igri
+
+Ingame controller sens.
+== Brizina kontrolera u igri
+
+UI controller sens.
+== Brzina kontrolera u meniu
+
+Controller jitter tolerance
+== Tolerancija kontrolera
+
+No controller found. Plug in a controller and restart the game.
+== Nema pronađenog kontrolera, uključite ga i ponovo pokrenite igru.
+
+Device
+== Uređaj
+
+Status
+== Status
+
+Aim bind
+== Nišan
+
+Controller Axis #%d
+== Stik %d.
+
+Mouse
+== Miš
+
+Ingame mouse sens.
+== Brzina u igri
+
+UI mouse sens.
+== Brzina u meniu
+
+Controller
+== Kontroler
+
+Dummy
+== Lutka
+
+Windowed
+== U prozoru
+
+Windowed borderless
+== U prozoru bez menia
+
+Windowed fullscreen
+== U prozoru preko celog ekrana
+
+Desktop fullscreen
+== Sistemski preko celog ekrana
+
+Allows maps to render with more detail
+== Renderuj mapu sa više detalja
+
+Renderer
+== Renderer
+
+default
+== bazično
+
+custom
+== svoje
+
+Graphics cards
+== Grafička kartica
+
+auto
+== auto
+
+Game sound volume
+== Igrina jačina zvuka
+
+Chat sound volume
+== Jačina zvuka dopisivanja
+
+Background music volume
+== Pozadinska jačina zvuka
+
+Appearance
+== Izgled
+
+Name Plate
+== Pločica sa imenom
+
+Hook Collisions
+== Dodir kuke
+
+Kill Messages
+== Poruke ubistava
+
+Show health, shields and ammo
+== Prikaži živote, štitove i metkove
+
+DDRace HUD
+== DDRace Prikaz
+
+Show client IDs in scoreboard
+== Prikaži identitete na tabli rezultata
+
+Show DDRace HUD
+== Prikaži DDRace Prikaz
+
+Show jumps indicator
+== Prikaži indikator skakanja
+
+Show dummy actions
+== Prikaži akcije lutke
+
+Show player position
+== Prikaži pozicije igrača
+
+Show player speed
+== Prikaži brzinu igrača
+
+Show player target angle
+== Prikaži ciljni ugao igrača
+
+Show freeze bars
+== Prikaži freeze bars
+
+Opacity of freeze bars inside freeze
+== Providnost freeze bars u zaleđenom delu
+
+Use old chat style
+== Koristi stari stil dopisivanja
+
+Preview
+== Pregled
+
+Show hook strength indicator
+== Prikaži jačinu kuke indikator
+
+Show local player's key presses
+== Prikaži svoje akcije
+
+Hook collision line
+== Dodir kuke
+
+Hook collision line width
+== Debljina linije za dodir kuke
+
+Hook collision line opacity
+== Providnost linije za dodir kuke
+
+Colors of the hook collision line, in case of a possible collision with:
+== Boje linije za dodir kuke,u slučaju da možeš da se zakačiš:
+
+Your movements are not taken into account when calculating the line colors
+== Vaši pokreti se ne uzimaju u obzir pri izračunavanju boja linija
+
+Nothing hookable
+== Ništa zakačivo
+
+Something hookable
+== Nešto zakačivo
+
+A Tee
+== Igrač
+
+Normal Color
+== Normalna boja
+
+Highlight Color
+== Istaknuta Boja
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Kada kreneš da se trkaš, prikaži tvog najbržeg duha 
+
+Opacity
+== Providnost
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Podesite neprozirnost entiteta koji pripadaju drugim timovima, kao što su majice i natpisne pločice
+
+Quads are used for background decoration
+== Quads su korišćeni za dekoraciju pozadine
+
+Tries to predict other entities to give a feel of low latency
+== Pokušaj da predvidiš ostale objekte da se oseća brže
+
+Background
+== Pozadina
+
+Entities Background color
+== Statična boja pozadine
+
+Use current map as background
+== Koristi ovu mapu kao pozadinu
+
+Regular Background Color
+== Uobičajena boja pozadine
+
+Run on join
+== Uradi kada uđeš
+
+Chat command (e.g. showall 1)
+== Komanda dopisivanja (npr. /cmdlist)
+
+Extras
+== Dodatno
+
+Loading assets
+== Učitavanje sredstava
+
+Discord
+== Discord
+
+https://ddnet.org/discord
+== https://ddnet.org/discord
+
+Tutorial
+== Uvod
+
+Can't find a Tutorial server
+== Nemožemo pronaći uvodni server
+
+Loading race demo files
+== Učitavam trkačke demo fajlove
+
+Super
+== Super
+
+Team %d
+== Tim %d
+
+Loading sound files
+== Učitavam zvučne fajlove
 
 Initializing components
 == 
 
-Initializing assets
+transmits your player name to info.ddnet.org
 == 
 
-Initializing map logic
+Play the current demo
 == 
 
-Sending initial client info
+Pause the current demo
 == 
 
-Warning
+Stop the current demo
 == 
 
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+Slow down the demo
 == 
 
-Position:
+Speed up the demo
 == 
 
-Speed:
+Mark the beginning of a cut
 == 
 
-Angle:
+Mark the end of a cut
 == 
 
-Server best:
+Export cut as a seperate demo
 == 
 
-Personal best:
+Toggle keyboard shortcuts
 == 
 
-Uploading map data to GPU
+Weapons
 == 
 
-Reset
+Rifle Laser Outline Color
 == 
 
-Browser
+Rifle Laser Inner Color
 == 
 
-Ghost
+Shotgun Laser Outline Color
 == 
 
-Trying to determine UDP connectivity...
+Shotgun Laser Inner Color
 == 
 
-UDP seems to be filtered.
+Door Laser Outline Color
 == 
 
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+Door Laser Inner Color
 == 
 
-No answer from server yet.
+Freeze Laser Outline Color
 == 
 
-Getting game info
-== 
-
-Requesting to join the game
-== 
-
-Reconnect in %d sec
-== 
-
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
-Welcome to DDNet
-== 
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
-
-Please enter your nickname below.
-== 
-
-Existing Player
-== 
-
-Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
-
-Checking for existing player with your name
-== 
-
-Are you sure that you want to disconnect and switch to a different server?
-== 
-
-Country / Region
-== 
-
-Destination file already exist
-== 
-
-Speed
-== 
-
-Join Tutorial Server
-== 
-
-Skip Tutorial
-== 
-
-Show DDNet map finishes in server browser
-== 
-
-transmits your player name to info2.ddnet.tw
-== 
-
-Theme
-== 
-
-Loading menu images
-== 
-
-AFR
-== 
-
-ASI
-== 
-
-AUS
-== 
-
-EUR
-== 
-
-NA
-== 
-
-SA
-== 
-
-CHN
-== 
-
-Getting server list from master server
-== 
-
-Search
-== 
-
-Exclude
-== 
-
-%d of %d servers
-== 
-
-%d of %d server
-== 
-
-%d players
-== 
-
-%d player
-== 
-
-Refreshing...
-== 
-
-Filter connecting players
-== 
-
-Indicate map finish
-== 
-
-Unfinished map
-== 
-
-Countries
-== 
-
-Types
-== 
-
-Leak IP
-== 
-
-Select a name
-== 
-
-Please use a different name
-== 
-
-Remove chat
-== 
-
-Loading demo files
-== 
-
-Markers:
-== 
-
-%.2f MiB
-== 
-
-%.2f KiB
-== 
-
-Demo
-== 
-
-Markers
-== 
-
-Length
-== 
-
-Date
-== 
-
-Fetch Info
-== 
-
-Demos directory
-== 
-
-Render
-== 
-
-Connect Dummy
-== 
-
-Connecting dummy
-== 
-
-Kill
-== 
-
-Pause
-== 
-
-Loading ghost files
-== 
-
-Time
-== 
-
-Reload
-== 
-
-Deactivate
-== 
-
-Activate
-== 
-
-Save
-== 
-
-Smooth Dynamic Camera
-== 
-
-Switch weapon when out of ammo
-== 
-
-Skip the main menu
-== 
-
-Refresh Rate
-== 
-
-Settings file
-== 
-
-Config directory
-== 
-
-Themes directory
-== 
-
-Automatically take statboard screenshot
-== 
-
-Automatically create statboard csv
-== 
-
-Max CSVs
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Download skins
-== 
-
-Download community skins
-== 
-
-Vanilla skins only
-== 
-
-Fat skins (DDFat)
-== 
-
-Skin prefix
-== 
-
-Choose default eyes when joining a server
-== 
-
-Skin Database
-== 
-
-Skins directory
-== 
-
-Loading skin files
-== 
-
-Hook collisions
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
-Default zoom
-== 
-
-Show others
-== 
-
-Show all
-== 
-
-Toggle dyncam
-== 
-
-Toggle dummy
-== 
-
-Toggle ghost
-== 
-
-Dummy copy
-== 
-
-Hammerfly dummy
-== 
-
-Converse
-== 
-
-Statboard
-== 
-
-Lock team
-== 
-
-Show entities
-== 
-
-Show HUD
-== 
-
-Chat command
-== 
-
-Enable controller
-== 
-
-Controller %d: %s
-== 
-
-Click to cycle through all available controllers.
-== 
-
-[Ingame controller mode]
-Relative
-== 
-
-[Ingame controller mode]
-Absolute
-== 
-
-Ingame controller mode
-== 
-
-Ingame controller sens.
-== 
-
-UI controller sens.
-== 
-
-Controller jitter tolerance
-== 
-
-No controller found. Plug in a controller and restart the game.
-== 
-
-Device
-== 
-
-Status
-== 
-
-Aim bind
-== 
-
-Controller Axis #%d
-== 
-
-Mouse
-== 
-
-Ingame mouse sens.
-== 
-
-UI mouse sens.
-== 
-
-Controller
-== 
-
-Dummy
-== 
-
-Windowed
-== 
-
-Windowed borderless
-== 
-
-Windowed fullscreen
-== 
-
-Desktop fullscreen
-== 
-
-may cause delay
-== 
-
-Screen
-== 
-
-Allows maps to render with more detail
-== 
-
-Use high DPI
-== 
-
-Renderer
-== 
-
-default
-== 
-
-custom
-== 
-
-Graphics cards
-== 
-
-auto
-== 
-
-Enable game sounds
-== 
-
-Enable gun sound
-== 
-
-Enable long pain sound (used when shooting in freeze)
-== 
-
-Enable server message sound
-== 
-
-Enable regular chat sound
-== 
-
-Enable team chat sound
-== 
-
-Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
-
-Game sound volume
-== 
-
-Chat sound volume
-== 
-
-Map sound volume
-== 
-
-Background music volume
-== 
-
-Appearance
-== 
-
-DDNet
-== 
-
-Assets
-== 
-
-DDNet Client needs to be restarted to complete update!
-== 
-
-HUD
-== 
-
-Name Plate
-== 
-
-Hook Collisions
-== 
-
-Kill Messages
-== 
-
-Show health, shields and ammo
-== 
-
-Show kill messages
-== 
-
-Show score
-== 
-
-Show votes window after voting
-== 
-
-DDRace HUD
-== 
-
-Use DDRace Scoreboard
-== 
-
-Show client IDs in scoreboard
-== 
-
-Show DDRace HUD
-== 
-
-Show jumps indicator
-== 
-
-Show dummy actions
-== 
-
-Show player position
-== 
-
-Show player speed
-== 
-
-Show player target angle
-== 
-
-Show freeze bars
-== 
-
-Opacity of freeze bars inside freeze
-== 
-
-Show names in chat in team colors
-== 
-
-Show only chat messages from friends
-== 
-
-Use old chat style
-== 
-
-Messages
-== 
-
-System message
-== 
-
-Highlighted message
-== 
-
-Team message
-== 
-
-Friend message
-== 
-
-Normal message
-== 
-
-Client message
-== 
-
-Preview
-== 
-
-Show clan above name plates
-== 
-
-Clan plates size
-== 
-
-Show hook strength indicator
-== 
-
-Show other players' key presses
-== 
-
-Show local player's key presses
-== 
-
-Hook collision line
-== 
-
-Show other players' hook collision lines
-== 
-
-Hook collision line width
-== 
-
-Hook collision line opacity
-== 
-
-Colors of the hook collision line, in case of a possible collision with:
-== 
-
-Your movements are not taken into account when calculating the line colors
-== 
-
-Nothing hookable
-== 
-
-Something hookable
-== 
-
-A Tee
-== 
-
-Normal Color
-== 
-
-Highlight Color
-== 
-
-Laser Outline Color
-== 
-
-Laser Inner Color
-== 
-
-Save the best demo of each race
-== 
-
-Enable replays
-== 
-
-Default length: %d
-== 
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
-
-Show ghost
-== 
-
-Save ghost
-== 
-
-Gameplay
-== 
-
-Overlay entities
-== 
-
-Size
-== 
-
-Show text entities
-== 
-
-Opacity
-== 
-
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
-
-Show others (own team only)
-== 
-
-Show quads
-== 
-
-Quads are used for background decoration
-== 
-
-AntiPing
-== 
-
-Tries to predict other entities to give a feel of low latency
-== 
-
-AntiPing: predict other players
-== 
-
-AntiPing: predict weapons
-== 
-
-AntiPing: predict grenade paths
-== 
-
-Old mouse mode
-== 
-
-Background
-== 
-
-Entities Background color
-== 
-
-Use current map as background
-== 
-
-Show tiles layers from BG map
-== 
-
-Regular Background Color
-== 
-
-Try fast HTTP map download first
-== 
-
-New random timeout code
-== 
-
-Run on join
-== 
-
-Chat command (e.g. showall 1)
-== 
-
-DDNet %s is available:
-== 
-
-Update now
-== 
-
-Updating...
-== 
-
-DDNet Client updated!
-== 
-
-No updates available
-== 
-
-Check now
-== 
-
-Entities
-== 
-
-Emoticons
-== 
-
-Particles
-== 
-
-Extras
-== 
-
-Loading assets
-== 
-
-Assets directory
-== 
-
-Discord
-== 
-
-https://ddnet.tw/discord
-== 
-
-https://wiki.ddnet.tw/
-== 
-
-Tutorial
-== 
-
-Can't find a Tutorial server
-== 
-
-Website
-== 
-
-Settings
-== 
-
-Stop server
-== 
-
-Run server
-== 
-
-Server executable not found, can't run server
-== 
-
-Editor
-== 
-
-[Start menu]
-Play
-== 
-
-DDNet %s is out!
-== 
-
-Downloading %s:
-== 
-
-Update failed! Check log...
-== 
-
-Restart
-== 
-
-Loading race demo files
-== 
-
-Super
-== 
-
-Team %d
-== 
-
-Manual
-== 
-
-Race
-== 
-
-Auto
-== 
-
-Replay
-== 
-
-Loading sound files
-== 
-
-Follow
-== 
-
-Frags
-== 
-
-Deaths
-== 
-
-Suicides
-== 
-
-Ratio
-== 
-
-Net
-== 
-
-FPM
-== 
-
-Spree
-== 
-
-Best
-== 
-
-Grabs
-== 
-
-1 new mention
-== 
-
-%d new mentions
-== 
-
-9+ new mentions
+Freeze Laser Inner Color
 == 

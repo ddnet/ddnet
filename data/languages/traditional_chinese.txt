@@ -16,6 +16,7 @@
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
 # 2022-08-08 cheeser0613
+# 2022-09-17 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -613,7 +614,7 @@ Length:
 == 長度：
 
 Laser
-== 鐳射槍
+== 鐳射
 
 Netversion:
 == 通訊版本：
@@ -915,8 +916,8 @@ Date
 Show DDNet map finishes in server browser
 == 在伺服器瀏覽器中顯示已完成的 DDNet 地圖
 
-transmits your player name to info2.ddnet.tw
-== 將會發送您的玩家名稱到 info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== 將會發送您的玩家名稱到 info.ddnet.org
 
 Reload
 == 重新整理
@@ -1083,8 +1084,8 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 國家/地區
 
-https://wiki.ddnet.tw/
-== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/zh
 
 Warning
 == 警告
@@ -1252,12 +1253,6 @@ Windowed borderless
 Desktop fullscreen
 == 無邊框全螢幕
 
-Laser Outline Color
-== 鐳射線邊框顏色
-
-Laser Inner Color
-== 鐳射線顏色
-
 Preview
 == 預覽
 
@@ -1273,8 +1268,8 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
@@ -1574,3 +1569,57 @@ Loading race demo files
 
 Loading sound files
 == 正在加載聲音檔案
+
+Play the current demo
+== 播放回放
+
+Pause the current demo
+== 暫停回放
+
+Stop the current demo
+== 結束回放
+
+Slow down the demo
+== 減慢播放速度
+
+Speed up the demo
+== 加快播放速度
+
+Mark the beginning of a cut
+== 標記裁剪起點
+
+Mark the end of a cut
+== 標記裁剪終點
+
+Export cut as a seperate demo
+== 另存爲新回放檔案
+
+Toggle keyboard shortcuts
+== 啓用/禁用鍵盤快捷鍵
+
+Weapons
+== 武器
+
+Rifle Laser Outline Color
+== 鐳射槍彈道外框顔色
+
+Rifle Laser Inner Color
+== 鐳射槍彈道實心顔色
+
+Shotgun Laser Outline Color
+== 霰彈槍彈道外框顔色
+
+Shotgun Laser Inner Color
+== 霰彈槍彈道實心顔色
+
+Door Laser Outline Color
+== 鐳射門外框顔色
+
+Door Laser Inner Color
+== 鐳射門實心顔色
+
+Freeze Laser Outline Color
+== 凍結鐳射外框顔色
+
+Freeze Laser Inner Color
+== 凍結鐳射實心顔色

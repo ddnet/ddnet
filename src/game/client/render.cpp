@@ -48,10 +48,18 @@ void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender, CGameCli
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
 
+	// Feet
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+
+	// Mirrored Feet
+	Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+	Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+
 	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
@@ -302,6 +310,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					int QuadOffset = 2;
 					int EyeQuadOffset = 0;
 					int TeeEye = 0;
+
 					switch(Emote)
 					{
 					case EMOTE_PAIN:
@@ -343,6 +352,10 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			float h = BaseSize / 2;
 
 			int QuadOffset = 7;
+			if(Dir.x < 0 && pInfo->m_FeetFlipped)
+			{
+				QuadOffset += 2;
+			}
 
 			Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
 

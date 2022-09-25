@@ -75,11 +75,19 @@ public:
 		DEMOTYPE_SERVER,
 	};
 
+	enum ETickOffset
+	{
+		TICK_CURRENT = 1, // update the current tick again
+		TICK_PREVIOUS = 0, // go to the previous tick
+		TICK_NEXT = 3, // go to the next tick
+	};
+
 	~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int Offset) = 0;
 	virtual int SeekPercent(float Percent) = 0;
 	virtual int SeekTime(float Seconds) = 0;
+	virtual int SeekTick(ETickOffset TickOffset) = 0;
 	virtual int SetPos(int WantedTick) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;

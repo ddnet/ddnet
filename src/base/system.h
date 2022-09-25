@@ -1250,6 +1250,19 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 char *str_trim_words(char *str, int words);
 
 /**
+ * Check whether string has ASCII control characters.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to check.
+ *
+ * @return Whether the string has ASCII control characters.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+bool str_has_cc(const char *str);
+
+/**
  * Replaces all characters below 32 with whitespace.
  *
  * @ingroup Strings
@@ -1587,6 +1600,23 @@ const char *str_find(const char *haystack, const char *needle);
 		- The strings are treated as zero-terminated strings.
 */
 const char *str_rchr(const char *haystack, char needle);
+
+/*
+	Function: str_countchr
+		Counts the number of occurrences of a character in a string.
+
+	Parameters:
+		haystack - String to count in
+		needle - Character to count
+
+	Returns:
+		The number of characters in the haystack string matching
+		the needle character.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+int str_countchr(const char *haystack, char needle);
 
 /*
 	Function: str_hex

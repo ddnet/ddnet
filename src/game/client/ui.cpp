@@ -82,6 +82,13 @@ const CLinearScrollbarScale CUI::ms_LinearScrollbarScale;
 const CLogarithmicScrollbarScale CUI::ms_LogarithmicScrollbarScale(25);
 float CUI::ms_FontmodHeight = 0.8f;
 
+CUI *CUIElementBase::s_pUI = nullptr;
+
+IClient *CUIElementBase::Client() const { return s_pUI->Client(); }
+IGraphics *CUIElementBase::Graphics() const { return s_pUI->Graphics(); }
+IInput *CUIElementBase::Input() const { return s_pUI->Input(); }
+ITextRender *CUIElementBase::TextRender() const { return s_pUI->TextRender(); }
+
 void CUI::Init(IKernel *pKernel)
 {
 	m_pClient = pKernel->RequestInterface<IClient>();
@@ -90,6 +97,7 @@ void CUI::Init(IKernel *pKernel)
 	m_pTextRender = pKernel->RequestInterface<ITextRender>();
 	InitInputs(m_pInput->GetEventsRaw(), m_pInput->GetEventCountRaw());
 	CUIRect::Init(m_pGraphics);
+	CUIElementBase::Init(this);
 }
 
 void CUI::InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount)
@@ -234,6 +242,42 @@ void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 
 	*pX *= Factor;
 	*pY *= Factor;
+}
+
+bool CUI::ConsumeHotkey(EHotkey Hotkey)
+{
+	const bool Pressed = m_HotkeysPressed & Hotkey;
+	m_HotkeysPressed &= ~Hotkey;
+	return Pressed;
+}
+
+bool CUI::OnInput(const IInput::CEvent &Event)
+{
+	if(!Enabled())
+		return false;
+
+	if(Event.m_Flags & IInput::FLAG_PRESS)
+	{
+		unsigned LastHotkeysPressed = m_HotkeysPressed;
+		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
+			m_HotkeysPressed |= HOTKEY_ENTER;
+		else if(Event.m_Key == KEY_ESCAPE)
+			m_HotkeysPressed |= HOTKEY_ESCAPE;
+		else if(Event.m_Key == KEY_TAB && !Input()->KeyIsPressed(KEY_LALT) && !Input()->KeyIsPressed(KEY_RALT))
+			m_HotkeysPressed |= HOTKEY_TAB;
+		else if(Event.m_Key == KEY_DELETE)
+			m_HotkeysPressed |= HOTKEY_DELETE;
+		else if(Event.m_Key == KEY_UP)
+			m_HotkeysPressed |= HOTKEY_UP;
+		else if(Event.m_Key == KEY_DOWN)
+			m_HotkeysPressed |= HOTKEY_DOWN;
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
+			m_HotkeysPressed |= HOTKEY_SCROLL_UP;
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
+			m_HotkeysPressed |= HOTKEY_SCROLL_DOWN;
+		return LastHotkeysPressed != m_HotkeysPressed;
+	}
+	return false;
 }
 
 float CUI::ButtonColorMul(const void *pID)

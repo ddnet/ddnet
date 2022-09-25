@@ -117,9 +117,8 @@ private:
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	void ScanFile();
-	int NextFrame();
 
-	int64_t time();
+	int64_t Time();
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
@@ -140,6 +139,7 @@ public:
 	void SetSpeedIndex(int Offset) override;
 	int SeekPercent(float Percent) override;
 	int SeekTime(float Seconds) override;
+	int SeekTick(ETickOffset TickOffset) override;
 	int SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const override;

@@ -108,6 +108,7 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(
 	const char *pUser,
 	const char *pPass,
 	const char *pIp,
+	const char *pBindaddr,
 	int Port,
 	bool Setup);
 

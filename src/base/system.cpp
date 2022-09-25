@@ -64,6 +64,7 @@
 #include <ws2tcpip.h>
 
 #include <cerrno>
+#include <float.h>
 #include <io.h>
 #include <objbase.h>
 #include <process.h>
@@ -148,6 +149,7 @@ typedef struct
 } NETSOCKET_BUFFER;
 
 void net_buffer_init(NETSOCKET_BUFFER *buffer);
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer);
 void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size);
 
 struct NETSOCKET_INTERNAL
@@ -905,8 +907,10 @@ void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
 void sphore_init(SEMAPHORE *sem)
 {
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
+	if(*sem == SEM_FAILED)
+		dbg_msg("sphore", "init failed: %d", errno);
 }
 void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
 void sphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
@@ -914,7 +918,7 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	char aBuf[64];
 	sem_close(*sem);
-	str_format(aBuf, sizeof(aBuf), "/%d-ddnet.tw-%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
 	sem_unlink(aBuf);
 }
 #elif defined(CONF_FAMILY_UNIX)
@@ -1695,6 +1699,16 @@ void net_buffer_init(NETSOCKET_BUFFER *buffer)
 #endif
 }
 
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	for(int i = 0; i < VLEN; i++)
+	{
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+#endif
+}
+
 void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 {
 #if defined(CONF_PLATFORM_LINUX)
@@ -1716,6 +1730,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	{
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
+			net_buffer_reinit(&sock->buffer);
 			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
 			sock->buffer.pos = 0;
 		}
@@ -1725,6 +1740,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	{
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
+			net_buffer_reinit(&sock->buffer);
 			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
 			sock->buffer.pos = 0;
 		}
@@ -2262,9 +2278,9 @@ int fs_makedir(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 	MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer));
-	if(_wmkdir(wBuffer) == 0)
+	if(CreateDirectoryW(wBuffer, NULL) != 0)
 		return 0;
-	if(errno == EEXIST)
+	if(GetLastError() == ERROR_ALREADY_EXISTS)
 		return 0;
 	return -1;
 #else
@@ -2329,10 +2345,7 @@ int fs_chdir(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
 		MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer));
-		if(_wchdir(wBuffer))
-			return 1;
-		else
-			return 0;
+		return SetCurrentDirectoryW(wBuffer) != 0 ? 0 : 1;
 #else
 		if(chdir(path))
 			return 1;
@@ -2346,11 +2359,10 @@ int fs_chdir(const char *path)
 
 char *fs_getcwd(char *buffer, int buffer_size)
 {
-	if(buffer == 0)
-		return 0;
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	if(_wgetcwd(wBuffer, buffer_size) == 0)
+	DWORD result = GetCurrentDirectoryW(std::size(wBuffer), wBuffer);
+	if(result == 0 || result > std::size(wBuffer))
 		return 0;
 	WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buffer, buffer_size, NULL, NULL);
 	return buffer;
@@ -2645,6 +2657,20 @@ char *str_trim_words(char *str, int words)
 		str++;
 	}
 	return str;
+}
+
+bool str_has_cc(const char *str)
+{
+	unsigned char *s = (unsigned char *)str;
+	while(*s)
+	{
+		if(*s < 32)
+		{
+			return true;
+		}
+		s++;
+	}
+	return false;
 }
 
 /* makes sure that the string only contains the characters between 32 and 255 */
@@ -2995,6 +3021,18 @@ const char *str_find(const char *haystack, const char *needle)
 const char *str_rchr(const char *haystack, char needle)
 {
 	return strrchr(haystack, needle);
+}
+
+int str_countchr(const char *haystack, char needle)
+{
+	int count = 0;
+	while(*haystack)
+	{
+		if(*haystack == needle)
+			count++;
+		haystack++;
+	}
+	return count;
 }
 
 void str_hex(char *dst, int dst_size, const void *data, int data_size)
@@ -3822,7 +3860,10 @@ PROCESS shell_execute(const char *file)
 	info.lpFile = wBuffer;
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+	// Save and restore the FPU control word because ShellExecute might change it
+	unsigned oldcontrol87 = _control87(0u, 0u);
 	ShellExecuteExW(&info);
+	_control87(oldcontrol87, 0xffffffffu);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
@@ -3859,7 +3900,11 @@ int open_link(const char *link)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[512];
 	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, std::size(wBuffer));
-	return (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	// Save and restore the FPU control word because ShellExecute might change it
+	unsigned oldcontrol87 = _control87(0u, 0u);
+	int status = (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	_control87(oldcontrol87, 0xffffffffu);
+	return status;
 #elif defined(CONF_PLATFORM_LINUX)
 	const int pid = fork();
 	if(pid == 0)

@@ -807,8 +807,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Показывать в браузере статус завершения карты
 
-transmits your player name to info2.ddnet.tw
-== передает ваш псевдоним на info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== передает ваш псевдоним на info.ddnet.org
 
 Exclude
 == Исключить
@@ -1077,8 +1077,8 @@ Markers
 Skip the main menu
 == Пропускать главное меню
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/ru
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ru
 
 Website
 == Сайт
@@ -1204,12 +1204,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Дамми
 
-Laser Outline Color
-== Цвет обводки лазера
-
-Laser Inner Color
-== Цвет лазера
-
 Preview
 == Превью
 
@@ -1228,8 +1222,8 @@ Chat command
 Discord
 == Дискорд
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 AFR
 == AFR
@@ -1564,4 +1558,58 @@ Loading sound files
 == Загрузка звуковых файлов
 
 Why are you slowmo replaying to read this?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
+== 
+
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
 == 

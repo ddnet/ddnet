@@ -1229,8 +1229,6 @@ set(EXPECTED_DATA
   countryflags/default.png
   countryflags/index.txt
   debug_font.png
-  demo_buttons.png
-  demo_buttons2.png
   editor/audio_source.png
   editor/background.png
   editor/basic_freeze.rules
@@ -1271,7 +1269,6 @@ set(EXPECTED_DATA
   editor/winter_main.rules
   emoticons.png
   extras.png
-  file_icons.png
   fonts/DejaVuSans.ttf
   fonts/GlowSansJCompressed-Book.otf
   fonts/Icons.otf
@@ -1429,7 +1426,6 @@ set(EXPECTED_DATA
   shader/vulkan/text.vert
   shader/vulkan/tile.frag
   shader/vulkan/tile.vert
-  skins/Aoe4leg.png
   skins/PaladiN.png
   skins/antiantey.png
   skins/beast.png
@@ -1690,6 +1686,8 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 
 # Sources
 set_src(BASE GLOB_RECURSE src/base
+  bezier.cpp
+  bezier.h
   color.h
   detect.h
   dynamic.h
@@ -1828,8 +1826,6 @@ set_src(ENGINE_GFX GLOB src/engine/gfx
   image_manipulation.h
 )
 set_src(GAME_SHARED GLOB src/game
-  bezier.cpp
-  bezier.h
   collision.cpp
   collision.h
   ddracechat.h
@@ -2086,6 +2082,8 @@ if(CLIENT)
     components/voting.h
     gameclient.cpp
     gameclient.h
+    laser_data.cpp
+    laser_data.h
     lineinput.cpp
     lineinput.h
     prediction/entities/character.cpp
@@ -2112,6 +2110,8 @@ if(CLIENT)
     ui.h
     ui_rect.cpp
     ui_rect.h
+    ui_scrollregion.cpp
+    ui_scrollregion.h
   )
   set_src(GAME_EDITOR GLOB src/game/editor
     auto_map.cpp
@@ -2425,6 +2425,7 @@ if(TOOLS)
     dilate.cpp
     dummy_map.cpp
     map_convert_07.cpp
+    map_create_pixelart.cpp
     map_diff.cpp
     map_extract.cpp
     map_find_env.cpp
@@ -2444,7 +2445,7 @@ if(TOOLS)
       string(REGEX REPLACE "\\.cpp$" "" TOOL "${T}")
       set(TOOL_DEPS ${DEPS})
       set(TOOL_LIBS ${LIBS})
-      if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
+      if(TOOL MATCHES "^(dilate|map_convert_07|map_create_pixelart|map_optimize|map_extract|map_replace_image)$")
         list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS})
 	list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx>)
         list(APPEND TOOL_LIBS ${PNG_LIBRARIES})
@@ -2527,6 +2528,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     json.cpp
     mapbugs.cpp
     name_ban.cpp
+    net.cpp
     netaddr.cpp
     os.cpp
     packer.cpp

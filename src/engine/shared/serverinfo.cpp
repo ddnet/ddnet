@@ -74,10 +74,10 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	Error = Error || MaxClients.type != json_integer;
 	Error = Error || MaxPlayers.type != json_integer;
 	Error = Error || Passworded.type != json_boolean;
-	Error = Error || GameType.type != json_string;
-	Error = Error || Name.type != json_string;
-	Error = Error || MapName.type != json_string;
-	Error = Error || Version.type != json_string;
+	Error = Error || GameType.type != json_string || str_has_cc(GameType);
+	Error = Error || Name.type != json_string || str_has_cc(Name);
+	Error = Error || MapName.type != json_string || str_has_cc(MapName);
+	Error = Error || Version.type != json_string || str_has_cc(Version);
 	Error = Error || Clients.type != json_array;
 	if(Error)
 	{
@@ -102,8 +102,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		const json_value &Score = Client["score"];
 		const json_value &IsPlayer = Client["is_player"];
 		Error = false;
-		Error = Error || ClientName.type != json_string;
-		Error = Error || Clan.type != json_string;
+		Error = Error || ClientName.type != json_string || str_has_cc(ClientName);
+		Error = Error || Clan.type != json_string || str_has_cc(ClientName);
 		Error = Error || Country.type != json_integer;
 		Error = Error || Score.type != json_integer;
 		Error = Error || IsPlayer.type != json_boolean;

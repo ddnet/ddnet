@@ -170,7 +170,7 @@ static context_data contexts[WS_CONTEXTS];
 int websocket_create(const char *addr, int port)
 {
 	struct lws_context_creation_info info;
-	memset(&info, 0, sizeof(info));
+	mem_zero(&info, sizeof(info));
 	info.port = port;
 	info.iface = addr;
 	info.protocols = protocols;

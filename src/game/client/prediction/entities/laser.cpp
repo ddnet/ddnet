@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "laser.h"
 #include "character.h"
+#include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
@@ -185,13 +186,11 @@ void CLaser::Tick()
 	}
 }
 
-CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
+CLaser::CLaser(CGameWorld *pGameWorld, int ID, CLaserData *pLaser) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
-	m_Pos.x = pLaser->m_X;
-	m_Pos.y = pLaser->m_Y;
-	m_From.x = pLaser->m_FromX;
-	m_From.y = pLaser->m_FromY;
+	m_Pos = pLaser->m_To;
+	m_From = pLaser->m_From;
 	m_EvalTick = pLaser->m_StartTick;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	m_Owner = -2;
@@ -204,7 +203,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
 		m_Dir = normalize(m_Dir);
 	else
 		m_Energy = 0;
-	m_Type = WEAPON_LASER;
+	m_Type = pLaser->m_Type == LASERTYPE_SHOTGUN ? WEAPON_SHOTGUN : WEAPON_LASER;
 	m_PrevPos = m_From;
 	m_ID = ID;
 }
@@ -228,4 +227,19 @@ bool CLaser::Match(CLaser *pLaser)
 	const vec2 OtherDiff = pLaser->m_Pos - pLaser->m_From;
 	const float DirError = distance(normalize(OtherDiff) * length(ThisDiff), ThisDiff);
 	return DirError <= 2.f;
+}
+
+CLaserData CLaser::GetData() const
+{
+	CLaserData Result;
+	Result.m_From.x = m_From.x;
+	Result.m_From.y = m_From.y;
+	Result.m_To.x = m_Pos.x;
+	Result.m_To.y = m_Pos.y;
+	Result.m_StartTick = m_EvalTick;
+	Result.m_ExtraInfo = true;
+	Result.m_Owner = m_Owner;
+	Result.m_Type = m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : LASERTYPE_RIFLE;
+	Result.m_TuneZone = m_TuneZone;
+	return Result;
 }

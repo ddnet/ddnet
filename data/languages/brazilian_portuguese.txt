@@ -22,6 +22,7 @@
 # Rafael Fontenelle   2021-02-13 07:00:00
 # Rafael Fontenelle   2021-06-10 12:00:00
 # pv                  2022-06-01 20:44:00
+# Rafael Fontenelle   2022-09-17 23:23:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -915,8 +916,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info2.ddnet.tw
-== transmite seu nome de jogador para info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite seu nome de jogador para info.ddnet.org
 
 Reload
 == Recarregar
@@ -1107,8 +1108,8 @@ Skip the main menu
 Download skins
 == Baixar skins
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/pt-br
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/pt-br
 
 Website
 == Site
@@ -1213,12 +1214,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Laser Outline Color
-== Cor de contorno do laser
-
-Laser Inner Color
-== Cor interna do laser
-
 Preview
 == Visualizar
 
@@ -1273,8 +1268,8 @@ Desktop fullscreen
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar pata um servidor diferente?
@@ -1574,3 +1569,57 @@ Loading race demo files
 
 Loading sound files
 == Carregando arquivos de som
+
+Play the current demo
+== Assistir a demo atual
+
+Pause the current demo
+== Pausar a demo atual
+
+Stop the current demo
+== Parar a demo atual
+
+Slow down the demo
+== Desacelerar a demo
+
+Speed up the demo
+== Acelerar a demo
+
+Mark the beginning of a cut
+== Marcar o início de um corte
+
+Mark the end of a cut
+== Marcar o fim de um corte
+
+Export cut as a seperate demo
+== Exportar corte como uma demo separada
+
+Toggle keyboard shortcuts
+== Ativar atalhos de teclado
+
+Weapons
+== Armas
+
+Rifle Laser Outline Color
+== Cor de contorno do laser do rifle
+
+Rifle Laser Inner Color
+== Cor de interna do laser do rifle
+
+Shotgun Laser Outline Color
+== Cor contorno do laser da espingarda
+
+Shotgun Laser Inner Color
+== Cor interna do laser do espingarda
+
+Door Laser Outline Color
+== Cor de contorno do laser da porta
+
+Door Laser Inner Color
+== Cor interna do laser do porta
+
+Freeze Laser Outline Color
+== Cor de contorno do laser do congelamento
+
+Freeze Laser Inner Color
+== Cor interna do laser do congelamento

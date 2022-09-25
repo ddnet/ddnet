@@ -849,6 +849,7 @@ bool CGraphics_Threaded::ScreenshotDirect()
 void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
+	dbg_assert(!TextureID.IsValid() || m_vTextureIndices[TextureID.Id()] == -1, "Texture handle was not invalid, but also did not correlate to an existing texture.");
 	m_State.m_Texture = TextureID.Id();
 }
 

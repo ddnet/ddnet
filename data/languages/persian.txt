@@ -864,9 +864,6 @@ Getting game info
 Requesting to join the game
 == 
 
-The server is running a non-standard tuning on a pure game type.
-== 
-
 The audio device couldn't be initialised.
 == 
 
@@ -885,7 +882,10 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-transmits your player name to info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== 
+
+The server is running a non-standard tuning on a pure game type.
 == 
 
 Loading menu images
@@ -913,6 +913,33 @@ CHN
 == 
 
 Leak IP
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a seperate demo
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Loading demo files
@@ -957,6 +984,9 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Loading skin files
+== 
+
 Toggle to edit your dummy settings
 == 
 
@@ -973,9 +1003,6 @@ Skins
 == 
 
 Skins directory
-== 
-
-Loading skin files
 == 
 
 Hook collisions
@@ -1268,10 +1295,34 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
 == 
 
 Save the best demo of each race
@@ -1355,9 +1406,6 @@ DDNet %s is available:
 DDNet Client updated!
 == 
 
-Entities
-== 
-
 Emoticons
 == 
 
@@ -1373,10 +1421,10 @@ Loading assets
 Assets directory
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial
