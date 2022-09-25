@@ -29,14 +29,9 @@ bool CHttpRunner::Init(std::chrono::milliseconds ShutdownDelay)
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
-	// Create wakeup pair
-#if defined(CONF_FAMILY_UNIX)
-	if(io_pipe(m_WakeUpPair))
+	// Create interrupt object
+	if(net_interrupt_create(&m_Interruptible))
 		return true;
-#elif defined(CONF_FAMILY_WINDOWS)
-	if((m_WakeUpPair[0] = m_WakeUpPair[1] = net_loop_create()) == -1)
-		return true;
-#endif
 
 	m_ShutdownDelay = ShutdownDelay;
 	m_pThread = thread_init(CHttpRunner::ThreadMain, this, "http_runner");
@@ -45,11 +40,7 @@ bool CHttpRunner::Init(std::chrono::milliseconds ShutdownDelay)
 	m_Cv.wait(l, [this]() { return m_State != UNINITIALIZED; });
 	if(m_State != RUNNING)
 	{
-#if defined(CONF_FAMILY_UNIX)
-		io_pipe_close(m_WakeUpPair);
-#elif defined(CONF_FAMILY_WINDOWS)
-		net_loop_close(m_WakeUpPair[0]);
-#endif
+		net_interrupt_destroy(&m_Interruptible);
 
 		return true;
 	}
@@ -59,12 +50,7 @@ bool CHttpRunner::Init(std::chrono::milliseconds ShutdownDelay)
 
 void CHttpRunner::WakeUp()
 {
-//TODO: Check with TSA to make sure we hold m_Lock
-#if defined(CONF_FAMILY_UNIX)
-	(void)io_pipe_write(m_WakeUpPair[1], &g_WakeUp, sizeof(g_WakeUp));
-#elif defined(CONF_FAMILY_WINDOWS)
-	(void)net_loop_send(m_WakeUpPair[1], &g_WakeUp, sizeof(g_WakeUp));
-#endif
+	net_interrupt_interrupt(m_Interruptible);
 }
 
 void CHttpRunner::Run(std::shared_ptr<IEngineRunnable> pRunnable)
@@ -94,19 +80,6 @@ void CHttpRunner::ThreadMain(void *pUser)
 {
 	CHttpRunner *pSelf = static_cast<CHttpRunner *>(pUser);
 	pSelf->RunLoop();
-}
-
-void Discard(int fd)
-{
-	char aBuf[32];
-	while(
-#if defined(CONF_FAMILY_UNIX)
-		io_pipe_read(fd, aBuf, sizeof(aBuf)) >= 0
-#elif defined(CONF_FAMILY_WINDOWS)
-		net_loop_recv(fd, aBuf, sizeof(aBuf))
-#endif
-	)
-		;
 }
 
 void CHttpRunner::RunLoop()
@@ -140,7 +113,7 @@ void CHttpRunner::RunLoop()
 	InitL.unlock();
 	InitL.release();
 
-	curl_waitfd ExtraFds[] = {{static_cast<curl_socket_t>(m_WakeUpPair[0]), CURL_POLL_IN, 0}};
+	curl_waitfd ExtraFds[] = {{static_cast<curl_socket_t>(net_interrupt_get_fd(m_Interruptible)), CURL_POLL_IN, 0}};
 	while(m_State == RUNNING)
 	{
 		int Events = 0;
@@ -158,8 +131,8 @@ void CHttpRunner::RunLoop()
 		}
 		LoopL.unlock();
 
-		// Discard data on the wakeup pair
-		Discard(m_WakeUpPair[0]);
+		// Clear any interrupts
+		net_interrupt_clear(m_Interruptible);
 
 		mc = curl_multi_perform(pMultiH, &Events);
 		if(mc != CURLM_OK)
@@ -287,11 +260,7 @@ CHttpRunner::~CHttpRunner()
 	if(m_pThread)
 		thread_wait(m_pThread);
 
-#if defined(CONF_FAMILY_UNIX)
-	io_pipe_close(m_WakeUpPair);
-#elif defined(CONF_FAMILY_WINDOWS)
-	net_loop_close(m_WakeUpPair[0]);
-#endif
+	net_interrupt_destroy(&m_Interruptible);
 }
 
 int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)

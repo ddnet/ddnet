@@ -78,21 +78,3 @@ TEST(Io, SyncWorks)
 	EXPECT_FALSE(io_close(File));
 	EXPECT_FALSE(fs_remove(Info.m_aFilename));
 }
-
-TEST(Io, Pipe)
-{
-	int pipefd[2];
-	int r = io_pipe(pipefd);
-	ASSERT_TRUE(r >= 0);
-
-	char aBuf[32];
-	EXPECT_FALSE(io_pipe_write(pipefd[0], "w", 1) >= 0); // Write to read end
-	EXPECT_FALSE(io_pipe_read(pipefd[1], aBuf, sizeof(aBuf)) >= 0); // Read from write end
-
-	aBuf[0] = '\0';
-	EXPECT_TRUE(io_pipe_write(pipefd[1], "test", 4) == 4);
-	EXPECT_TRUE(io_pipe_read(pipefd[0], aBuf, sizeof(aBuf)) == 4);
-	EXPECT_TRUE(mem_comp(aBuf, "test", 4) == 0);
-
-	EXPECT_FALSE(io_pipe_close(pipefd));
-}

@@ -3,12 +3,12 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <engine/shared/jobs.h>
 #include <mutex>
 #include <queue>
 #include <unordered_map>
-#include <chrono>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -56,7 +56,7 @@ class CHttpRunner : public IEngineRunner
 		ERROR
 	};
 
-	int m_WakeUpPair[2];
+	FD_INTERRUPT m_Interruptible;
 
 	std::mutex m_Lock{};
 	std::condition_variable m_Cv{};

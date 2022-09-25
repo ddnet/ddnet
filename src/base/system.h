@@ -942,53 +942,6 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 */
 int net_socket_type(NETSOCKET sock);
 
-/**
- * @defgroup Network-Loop
- * @ingroup Network-General
- */
-
-/**
- * Creates an udp socket connected to itself
- *
- * @ingroup Network-Loop
- *
- * @return On success returns the socket fd. On failure -1
- */
-int net_loop_create();
-
-/**
- * Send a packet over a Loop socket.
- *
- * @ingroup Network-Loop
- *
- * @param sock Socket to use.
- * @param data Pointer to the data to send.
- * @param len Length of the data.
- */
-void net_loop_send(int sock, const void *data, size_t len);
-
-/**
- * Receives a packet on the loop socket
- *
- * @ingroup Network-Loop
- *
- * @param sock Socket to use.
- * @param buf Pointer to the buffer to store the received data in.
- * @param len Size of the buffer.
- * @return Returns the number of bytes read. Will return 0 instead
- * of blocking if there is no data
- */
-int net_loop_recv(int sock, void *buf, size_t len);
-
-/**
- * Close loop socket
- *
- * @ingroup Network-Loop
- *
- * @param sock Socket to close.
- */
-void net_loop_close(int sock);
-
 /*
 	Function: net_udp_create
 		Creates a UDP socket and binds it to a port.
@@ -1187,46 +1140,50 @@ void net_unix_close(UNIXSOCKET sock);
 
 #endif
 
-/**
- * Creates a non-blocking pipe.
- *
- * @param pipefd Array to put the pipe fds into.
- * pipefd[0] will contain the read end, pipefd[1] the write end.
- *
- * @return On success 0 is returned. On error -1 is returned and pipefd is untouched.
- */
-int io_pipe(int pipefd[2]);
+typedef struct
+{
+	int fds_private[2];
+} FD_INTERRUPT;
 
 /**
- * Write to a pipe.
+ * Create a new interruptible object. These allow a call to
+ * select/poll/epoll/kqueue/... to be interrupted in a thread-safe manner.
  *
- * @param fd Write end of the pipe.
- * @param data Pointer to the data to be written.
- * @param len Size of the data to be written.
- *
- * @return Number of bytes written or -1 on failure.
+ * @param interrupt storage for the interrupt object
+ * @return int 0 on success, -1 on failure
  */
-int io_pipe_write(int fd, const void *data, size_t len);
+int net_interrupt_create(FD_INTERRUPT *interrupt);
 
 /**
- * Read from a pipe.
+ * Get the end of the interrupt to be passed to
+ * select/poll/epoll/kqueue/...
  *
- * @param fd Read end of the pipe.
- * @param buf Poiter to buffer.
- * @param len Size of the buffer.
- *
- * @remark Returns 0 if the call would have blocked.
- * @return Number of bytes read or -1 on failure.
+ * @param interrupt interrupt to extract the fd from.
+ * @return int fd
  */
-int io_pipe_read(int fd, void *buf, size_t len);
+int net_interrupt_get_fd(FD_INTERRUPT interrupt);
 
 /**
- * Close a pipe
+ * Send an interrupt to the object. Interrupt must be cleared
+ * before next call to select/poll/epoll/kqueue/...
  *
- * @param pipefd Pipe to close
- * @return Returns 0 on success, -1 on error.
+ * @param interrupt interrupt to be signalled.
  */
-int io_pipe_close(int pipefd[2]);
+void net_interrupt_interrupt(FD_INTERRUPT interrupt);
+
+/**
+ * Clear an interrupt.
+ *
+ * @param interrupt interrupt to be cleared.
+ */
+void net_interrupt_clear(FD_INTERRUPT interrupt);
+
+/**
+ * Destroy an interruptible object.
+ *
+ * @param interrupt interrupt to destroy.
+ */
+void net_interrupt_destroy(FD_INTERRUPT *interrupt);
 
 /**
  * @defgroup Strings

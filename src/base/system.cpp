@@ -1498,55 +1498,6 @@ int net_socket_type(NETSOCKET sock)
 	return sock->type;
 }
 
-int net_loop_create()
-{
-	struct sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_port = 0;
-	addr.sin_addr.s_addr = 0;
-
-	int sock = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
-	if(sock >= 0)
-	{
-		struct sockaddr assigned;
-		socklen_t len = sizeof(assigned);
-		getsockname(sock, &assigned, &len);
-		if(len != sizeof(assigned))
-		{
-			priv_net_close_socket(sock);
-			return 0;
-		}
-
-		connect(sock, &assigned, len);
-
-		unsigned long mode = 1;
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
-#endif
-	}
-
-	return sock;
-}
-
-void net_loop_send(int sock, const void *data, size_t len)
-{
-	send(sock, data, len, 0);
-}
-
-int net_loop_recv(int sock, void *buf, size_t len)
-{
-	int bytes = recv(sock, buf, len, 0);
-	return bytes >= 0 ? bytes : 0;
-}
-
-void net_loop_close(int sock)
-{
-	priv_net_close_socket(sock);
-}
-
 NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
@@ -2121,45 +2072,105 @@ void net_unix_close(UNIXSOCKET sock)
 }
 #endif
 
-int io_pipe(int pipefd[2])
+int net_interrupt_create(FD_INTERRUPT *interrupt)
 {
-	int pipefd_[2];
+	int *fds = interrupt->fds_private;
 
 #if defined(CONF_FAMILY_UNIX)
-	if(pipe(pipefd_))
+	if(pipe(fds))
 		return -1;
 
 	unsigned long mode = 1;
-	if(ioctl(pipefd_[0], FIONBIO, &mode) ||
-		ioctl(pipefd_[1], FIONBIO, &mode))
+	if(ioctl(fds[0], FIONBIO, &mode) ||
+		ioctl(fds[1], FIONBIO, &mode))
 	{
-		close(pipefd_[0]);
-		close(pipefd_[1]);
+		close(fds[0]);
+		close(fds[1]);
 		return -1;
 	}
-	pipefd[0] = pipefd_[0];
-	pipefd[1] = pipefd_[1];
+#elif defined(CONF_FAMILY_WINDOWS)
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = 0;
+	addr.sin_addr.s_addr = 0;
+
+	int sock = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+	if(sock < 0)
+		return -1;
+
+	struct sockaddr assigned;
+	socklen_t len = sizeof(assigned);
+	if(getsockname(sock, &assigned, &len) || len != sizeof(assigned))
+		goto error;
+
+	if(connect(sock, &assigned, len))
+		goto error;
+
+	unsigned long mode = 1;
+	if(ioctlsocket(sock, FIONBIO, (unsigned long *)&mode))
+		goto error;
+
+	fds[0] = fds[1] = sock;
+
+error:
+	priv_net_close_socket(sock);
+	return -1;
 #else
 #error not implemented
 #endif
+
 	return 0;
 }
 
-int io_pipe_write(int fd, const void *data, size_t len)
+int net_interrupt_get_fd(FD_INTERRUPT interrupt)
 {
-	return write(fd, data, len);
+#if defined(CONF_FAMILY_UNIX) || defined(CONF_FAMILY_WINDOWS)
+	return interrupt.fds_private[0];
+#else
+#error not implemented
+#endif
 }
 
-int io_pipe_read(int fd, void *buf, size_t len)
+void net_interrupt_interrupt(FD_INTERRUPT interrupt)
 {
-	return read(fd, buf, len);
+#if defined(CONF_FAMILY_UNIX)
+	if(write(interrupt.fds_private[1], "w", 1) <= 0)
+	{
+		dbg_msg("interrupt", "error writing on pipe");
+	}
+#elif defined(CONF_FAMILY_WINDOWS)
+	(void)send(interrupt.fds_private[1], "w", 1, 0);
+#else
+#error not implemented
+#endif
 }
 
-int io_pipe_close(int pipefd[2])
+void net_interrupt_clear(FD_INTERRUPT interrupt)
 {
-	int r1 = close(pipefd[0]);
-	int r2 = close(pipefd[1]);
-	return r1 || r2 ? -1 : 0;
+	char buf[32];
+	while(
+#if defined(CONF_FAMILY_UNIX)
+		read(interrupt.fds_private[0], buf, sizeof(buf)) > 0
+#elif defined(CONF_FAMILY_WINDOWS)
+		recv(interrupt.fds_private[0], buf, sizeof(buf), 0) > 0
+#else
+#error not implemented
+#endif
+	)
+		;
+}
+
+void net_interrupt_destroy(FD_INTERRUPT *interrupt)
+{
+#if defined(CONF_FAMILY_UNIX)
+	close(interrupt->fds_private[0]);
+	close(interrupt->fds_private[1]);
+#elif defined(CONF_FAMILY_WINDOWS)
+	priv_net_close_socket(interrupt->fds_private[0]);
+#else
+#error not implemented
+#endif
+	interrupt->fds_private[0] = interrupt->fds_private[1] = -1;
 }
 
 #if defined(CONF_FAMILY_WINDOWS)

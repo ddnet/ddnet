@@ -45,16 +45,3 @@ TEST(Net, Ipv4AndIpv6Work)
 	EXPECT_EQ(Addr, LocalhostV6);
 	EXPECT_EQ(mem_comp(pData, "def", 3), 0);
 }
-
-TEST(Net, NetLoopSanity)
-{
-	int Socket = net_loop_create();
-	EXPECT_TRUE(Socket >= 0);
-
-	char aBuf[32];
-	net_loop_send(Socket, "w", 1);
-	EXPECT_TRUE(net_loop_recv(Socket, aBuf, sizeof(aBuf)) == 1);
-	EXPECT_TRUE(mem_comp(aBuf, "w", 1) == 0);
-
-	net_loop_close(Socket);
-}
