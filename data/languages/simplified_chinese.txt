@@ -110,9 +110,6 @@ Client
 Close
 == 关闭
 
-Connect
-== 连接
-
 Connecting to
 == 正在连接到
 
@@ -386,9 +383,6 @@ Red team
 
 Red team wins!
 == 红队胜利！
-
-Refresh
-== 刷新
 
 Remote console
 == 远程控制台
@@ -764,9 +758,6 @@ Show other players' key presses
 
 Show tiles layers from BG map
 == 显示实体层背景地图的图块层
-
-Try fast HTTP map download first
-== 优先尝试使用 HTTP 协议快速下载地图
 
 DDNet %s is available:
 == DDNet %s 现已可用：
@@ -1285,9 +1276,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == 你确定要断开此服务器连接并进入其他服务器吗？
 
-Refreshing...
-== 正在刷新...
-
 Kill Messages
 == 击杀消息
 
@@ -1634,3 +1622,6 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == 冻结激光实心颜色
+
+Set all to Rifle
+== 

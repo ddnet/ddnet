@@ -496,7 +496,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	Status.Margin(5.0f, &Status);
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, Status3;
-	Status.VSplitRight(250.0f, &SearchInfoAndAddr, &ServersAndConnect);
+	Status.VSplitRight(125.0f, &SearchInfoAndAddr, &ServersAndConnect);
 	if(SearchInfoAndAddr.w > 350.0f)
 		SearchInfoAndAddr.VSplitLeft(350.0f, &SearchInfoAndAddr, NULL);
 	CUIRect SearchAndInfo, ServerAddr, ConnectButtons;
@@ -620,11 +620,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static int s_RefreshButton = 0;
 		auto Func = [this]() mutable -> const char * {
 			if(ServerBrowser()->IsRefreshing())
-				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
+				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "↻ %d%%", ServerBrowser()->LoadingProgression());
 			else if(ServerBrowser()->IsGettingServerlist())
-				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
+				str_copy(m_aLocalStringHelper, "↻...");
 			else
-				str_copy(m_aLocalStringHelper, Localize("Refresh"));
+				str_copy(m_aLocalStringHelper, "↻");
 
 			return m_aLocalStringHelper;
 		};
@@ -637,7 +637,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static int s_JoinButton = 0;
 
 		if(DoButtonMenu(
-			   m_ConnectButton, &s_JoinButton, []() -> const char * { return Localize("Connect"); }, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5, 0, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)) ||
+			   m_ConnectButton, &s_JoinButton, []() -> const char * { return "⏎"; }, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5, 0, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)) ||
 			UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 		{
 			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)

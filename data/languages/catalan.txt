@@ -81,9 +81,6 @@ Client
 Close
 == Tancar
 
-Connect
-== Connectar
-
 Connecting to
 == T'estàs unint a
 
@@ -329,9 +326,6 @@ Red team
 
 Red team wins!
 == El equip vermell guanya!
-
-Refresh
-== Actualitzar
 
 Remote console
 == Consola remota
@@ -795,9 +789,6 @@ Max CSVs
 %.2f KiB
 == %.2f KiB
 
-Try fast HTTP map download first
-== Intentar primer la descàrrega ràpida del mapa
-
 Use DDRace Scoreboard
 == Utilitzar la taula d'estadístiques DDRace
 
@@ -1112,9 +1103,6 @@ Getting server list from master server
 
 %d player
 == %d jugador
-
-Refreshing...
-== Actualitzant...
 
 Leak IP
 == Fer la teva ip pública
@@ -1564,6 +1552,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

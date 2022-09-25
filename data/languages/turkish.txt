@@ -90,9 +90,6 @@ Client
 Close
 == Kapat
 
-Connect
-== Bağlan
-
 Connecting to
 == Bağlanılıyor
 
@@ -333,9 +330,6 @@ Red team
 
 Red team wins!
 == Kırmızı takım kazandı!
-
-Refresh
-== Yenile
 
 Remote console
 == Uzak Konsol
@@ -1008,9 +1002,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Yapı katmanlarını göster
 
-Try fast HTTP map download first
-== Önce HTTP üzerinden haritayı hızlı indirmeyi dene
-
 DDNet %s is available:
 == DDNet %s yayınlandı:
 
@@ -1079,6 +1070,9 @@ Auto
 
 Replay
 == Yeniden oynatma
+
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/tr
 
 Saving ddnet-settings.cfg failed
 == 
@@ -1213,9 +1207,6 @@ Getting server list from master server
 == 
 
 %d player
-== 
-
-Refreshing...
 == 
 
 Leak IP
@@ -1514,6 +1505,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
@@ -1567,9 +1561,6 @@ Discord
 
 https://ddnet.org/discord
 == 
-
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/tr
 
 Tutorial
 == 

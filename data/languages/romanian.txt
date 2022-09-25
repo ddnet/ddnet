@@ -91,9 +91,6 @@ Client
 Close
 == Închide
 
-Connect
-== Conectează
-
 Connecting to
 == Conectare la
 
@@ -340,9 +337,6 @@ Red team
 
 Red team wins!
 == Echipa roșie a câștigat!
-
-Refresh
-== Reîncarcă
 
 Remote console
 == Consolă server
@@ -827,9 +821,6 @@ Exclude
 == 
 
 %d player
-== 
-
-Refreshing...
 == 
 
 Filter connecting players
@@ -1374,6 +1365,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 Save the best demo of each race
 == 
 
@@ -1450,9 +1444,6 @@ Show tiles layers from BG map
 == 
 
 Regular Background Color
-== 
-
-Try fast HTTP map download first
 == 
 
 New random timeout code

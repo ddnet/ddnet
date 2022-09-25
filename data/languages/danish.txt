@@ -86,9 +86,6 @@ Client
 Close
 == Luk
 
-Connect
-== Tilslut
-
 Connecting to
 == Forbinder til
 
@@ -332,9 +329,6 @@ Red team
 
 Red team wins!
 == Rødt hold vinder!
-
-Refresh
-== Opdater
 
 Remote console
 == Serverkonsol
@@ -1061,9 +1055,6 @@ Use current map as background
 Show tiles layers from BG map
 == Vis fliselag fra baggrundskortet
 
-Try fast HTTP map download first
-== Prøv hurtig download af HTTP kort først
-
 DDNet %s is available:
 == DDNet %s er tilgængelig:
 
@@ -1285,9 +1276,6 @@ CHN
 == 
 
 Getting server list from master server
-== 
-
-Refreshing...
 == 
 
 Leak IP
@@ -1545,6 +1533,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

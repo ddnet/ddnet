@@ -81,9 +81,6 @@ Client
 Close
 == Чыгуу
 
-Connect
-== Туташуу
-
 Connecting to
 == Туташтырылууда
 
@@ -390,9 +387,6 @@ Red team
 
 Red team wins!
 == Кызылдар утту!
-
-Refresh
-== Жаңылоо
 
 Remote console
 == Алыскы консоль
@@ -812,9 +806,6 @@ Exclude
 == 
 
 %d player
-== 
-
-Refreshing...
 == 
 
 Filter connecting players
@@ -1359,6 +1350,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 Save the best demo of each race
 == 
 
@@ -1435,9 +1429,6 @@ Show tiles layers from BG map
 == 
 
 Regular Background Color
-== 
-
-Try fast HTTP map download first
 == 
 
 New random timeout code

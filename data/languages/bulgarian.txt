@@ -85,9 +85,6 @@ Client
 Close
 == Затвори
 
-Connect
-== Впиши
-
 Connecting to
 == Свързвам се с
 
@@ -331,9 +328,6 @@ Red team
 
 Red team wins!
 == Отбор Червени печели!
-
-Refresh
-== Обнови
 
 Remote console
 == Сървър Конзола
@@ -815,9 +809,6 @@ Exclude
 == 
 
 %d player
-== 
-
-Refreshing...
 == 
 
 Filter connecting players
@@ -1368,6 +1359,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 Save the best demo of each race
 == 
 
@@ -1444,9 +1438,6 @@ Show tiles layers from BG map
 == 
 
 Regular Background Color
-== 
-
-Try fast HTTP map download first
 == 
 
 New random timeout code

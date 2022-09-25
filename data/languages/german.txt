@@ -103,9 +103,6 @@ Close
 Colors of the hook collision line, in case of a possible collision with:
 == Die Farbe der Hakenkollisionlinie bei einer möglichen Kollision mit:
 
-Connect
-== Verbinden
-
 Connecting to
 == Verbinden mit
 
@@ -352,9 +349,6 @@ Red team
 
 Red team wins!
 == Rotes Team gewinnt!
-
-Refresh
-== Aktualisieren
 
 Remote console
 == Remote-Konsole
@@ -769,9 +763,6 @@ Show score
 
 %.2f KiB
 == %.2f KiB
-
-Try fast HTTP map download first
-== Schnellen HTTP-Kartendownload nutzen
 
 Enable regular chat sound
 == Ton für normale Nachrichten aktivieren
@@ -1314,9 +1305,6 @@ A Tee
 Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
 
-Refreshing...
-== Aktualisieren...
-
 Kill Messages
 == Kill-Nachrichten
 
@@ -1621,3 +1609,6 @@ Mark the beginning of a cut
 
 Mark the end of a cut
 == Das Ende eines Schnitts markieren
+
+Set all to Rifle
+== Alle auf Gewehr setzen

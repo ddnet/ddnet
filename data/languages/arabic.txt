@@ -80,9 +80,6 @@ Client
 Close
 == ﻕﻼﻏﺍ
 
-Connect
-== ﻝﺎﺼﺗﺍ
-
 Connecting to
 == ﻰﻟﺍ ﻝﺎﺼﺗﺍ
 
@@ -329,9 +326,6 @@ Red team
 
 Red team wins!
 == !ﺮﺼﺘﻧﺍ ﺮﻤﺣﻻﺍ ﻖﻳﺮﻔﻟﺍ
-
-Refresh
-== ﺚﻳﺪﺤﺗ
 
 Remote console
 == ﻦﻣﺩﻻﺍ ﻞﺴﻧﻮﻛ
@@ -722,9 +716,6 @@ Show score
 
 %.2f KiB
 == %.2f KiB
-
-Try fast HTTP map download first
-== ﻝﻭﺍ ﺏﺎﻤﻟﺍ ﻞﻴﻤﺤﺘﻟ ﻉﺮﺳﺍ HTTP ﻡﺪﺨﺘﺳﺍ ﺏﺮﺟ
 
 Enable regular chat sound
 == ﺔﻳﺩﺎﻌﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
@@ -1276,9 +1267,6 @@ CHN
 Getting server list from master server
 == 
 
-Refreshing...
-== 
-
 Leak IP
 == 
 
@@ -1537,6 +1525,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

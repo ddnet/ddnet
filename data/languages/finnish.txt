@@ -87,9 +87,6 @@ Client
 Close
 == Sulje
 
-Connect
-== Yhdistä
-
 Connecting to
 == Yhdistetään
 
@@ -333,9 +330,6 @@ Red team
 
 Red team wins!
 == Punainen joukkue voitti!
-
-Refresh
-== Päivitä
 
 Remote console
 == Etäkonsoli
@@ -1066,9 +1060,6 @@ Background
 Use current map as background
 == Käytä nykyistä kenttää taustana
 
-Try fast HTTP map download first
-== Yritä nopeaa HTTP-kentänlatausta ensin
-
 DDNet %s is available:
 == DDNet %s on saatavilla:
 
@@ -1245,9 +1236,6 @@ Skip Tutorial
 == 
 
 Loading menu images
-== 
-
-Refreshing...
 == 
 
 Play the current demo
@@ -1520,6 +1508,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

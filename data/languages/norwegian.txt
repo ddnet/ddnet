@@ -87,9 +87,6 @@ Client
 Close
 == Lukk
 
-Connect
-== Koble til
-
 Connecting to
 == Kobler til
 
@@ -333,9 +330,6 @@ Red team
 
 Red team wins!
 == Rødt lag vant!
-
-Refresh
-== Oppdater
 
 Remote console
 == Server-konsoll
@@ -999,9 +993,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Vis tile-lag fra BG-bane
 
-Try fast HTTP map download first
-== Forsøk først rask HTTP-nedlasting av bane
-
 DDNet %s is available:
 == DDNet %s er tilgjengelig:
 
@@ -1288,9 +1279,6 @@ CHN
 Getting server list from master server
 == 
 
-Refreshing...
-== 
-
 Leak IP
 == 
 
@@ -1546,6 +1534,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

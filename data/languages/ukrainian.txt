@@ -43,9 +43,6 @@ Chat
 Close
 == Зачинити
 
-Connect
-== Під’єднатись
-
 Connecting to
 == Підключення до
 
@@ -253,9 +250,6 @@ Red team
 
 Red team wins!
 == Червоні перемогли!
-
-Refresh
-== Оновити
 
 Remote console
 == Консоль сервера
@@ -994,9 +988,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Показувати шари з тайлами з фонової карти
 
-Try fast HTTP map download first
-== Намагатися скакачати карту швидко по HTTP
-
 DDNet %s is available:
 == Доступний новий DDNet %s:
 
@@ -1140,9 +1131,6 @@ Getting server list from master server
 
 %d player
 == %d Гравець
-
-Refreshing...
-== Оновлення...
 
 Leak IP
 == Стійке IP
@@ -1559,6 +1547,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

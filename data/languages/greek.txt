@@ -85,9 +85,6 @@ Client
 Close
 == Κλείσιμο
 
-Connect
-== Σύνδεση
-
 Connecting to
 == Σύνδεση με
 
@@ -334,9 +331,6 @@ Red team
 
 Red team wins!
 == Η κόκκινη ομάδα νίκησε!
-
-Refresh
-== Ανανέωση
 
 Remote console
 == Απομακρ. κονσόλα
@@ -821,9 +815,6 @@ Exclude
 == 
 
 %d player
-== 
-
-Refreshing...
 == 
 
 Filter connecting players
@@ -1368,6 +1359,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 Save the best demo of each race
 == 
 
@@ -1444,9 +1438,6 @@ Show tiles layers from BG map
 == 
 
 Regular Background Color
-== 
-
-Try fast HTTP map download first
 == 
 
 New random timeout code

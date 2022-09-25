@@ -95,9 +95,6 @@ Client
 Close
 == Закрыть
 
-Connect
-== Подключиться
-
 Connecting to
 == Подключение к
 
@@ -341,9 +338,6 @@ Red team
 
 Red team wins!
 == Красные победили!
-
-Refresh
-== Обновить
 
 Remote console
 == Консоль сервера
@@ -1005,9 +999,6 @@ Show other players' key presses
 Show tiles layers from BG map
 == Показывать тайловые слои фона
 
-Try fast HTTP map download first
-== Быстро загружать карты по HTTP
-
 DDNet %s is available:
 == Доступен DDNet %s:
 
@@ -1263,9 +1254,6 @@ Desktop fullscreen
 
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
-
-Refreshing...
-== Обновление...
 
 Kill Messages
 == Сообщения о смерти
@@ -1612,4 +1600,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 

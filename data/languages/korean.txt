@@ -94,9 +94,6 @@ Client
 Close
 == 닫기
 
-Connect
-== 연결
-
 Connecting to
 == 연결 중
 
@@ -331,9 +328,6 @@ Red team
 
 Red team wins!
 == 레드팀 승리!
-
-Refresh
-== 새로고침
 
 Remote console
 == 원격 콘솔
@@ -742,9 +736,6 @@ Exclude
 %d player
 == %d 플레이어
 
-Refreshing...
-== 새로고침 중...
-
 Filter connecting players
 == 접속 중인 플레이어 제외
 
@@ -1122,9 +1113,6 @@ Show tiles layers from BG map
 
 Regular Background Color
 == 기본 배경 색상
-
-Try fast HTTP map download first
-== 빠른 HTTP 맵 다운로드 우선 시도
 
 New random timeout code
 == 새로운 무작위 타임아웃 코드 생성
@@ -1614,3 +1602,6 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == 동결 레이저 광선 색상
+
+Set all to Rifle
+== 

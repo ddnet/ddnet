@@ -105,9 +105,6 @@ Client
 Close
 == Fechar
 
-Connect
-== Conectar
-
 Connecting to
 == Conectando a
 
@@ -354,9 +351,6 @@ Red team
 
 Red team wins!
 == Vitória do time vermelho!
-
-Refresh
-== Atualizar
 
 Remote console
 == Console remoto
@@ -798,9 +792,6 @@ Show score
 
 UI Color
 == Cor da UI
-
-Try fast HTTP map download first
-== Tentar baixar mapa por HTTP (rápido) primeiro
 
 Best
 == Melhor
@@ -1274,9 +1265,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar pata um servidor diferente?
 
-Refreshing...
-== Atualizando...
-
 Kill Messages
 == Mensagens de kill
 
@@ -1623,3 +1611,6 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == Cor interna do laser do congelamento
+
+Set all to Rifle
+== 

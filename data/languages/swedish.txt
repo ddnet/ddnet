@@ -89,9 +89,6 @@ Client
 Close
 == Stäng
 
-Connect
-== Anslut
-
 Connecting to
 == Ansluter till
 
@@ -335,9 +332,6 @@ Red team
 
 Red team wins!
 == Röda laget vann!
-
-Refresh
-== Uppdatera
 
 Remote console
 == Serverkonsol
@@ -834,9 +828,6 @@ Are you sure that you want to disconnect your dummy?
 Overlay entities
 == Overlay entities
 
-Try fast HTTP map download first
-== Pröva snabb HTTP bana nedladdning först
-
 Date
 == Datum
 
@@ -1176,9 +1167,6 @@ CHN
 
 Getting server list from master server
 == Hämtar server lista från master server
-
-Refreshing...
-== Ladder om...
 
 Leak IP
 == Läck IP
@@ -1567,6 +1555,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

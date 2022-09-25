@@ -107,9 +107,6 @@ Client
 Close
 == Fermer
 
-Connect
-== Se connecter
-
 Connecting to
 == Connexion à
 
@@ -353,9 +350,6 @@ Red team
 
 Red team wins!
 == L'équipe rouge gagne !
-
-Refresh
-== Rafraîchir
 
 Remote console
 == Console serveur
@@ -920,9 +914,6 @@ Hammerfly dummy
 Switch weapon when out of ammo
 == Changer d'arme lorsqu'il n'y a plus de munition
 
-Try fast HTTP map download first
-== Carte : essayer d'abord le téléchargement rapide HTTP
-
 Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
 
@@ -1281,9 +1272,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Êtes vous sur de vouloir vous déconnecter et changer de serveur?
 
-Refreshing...
-== Actualisation...
-
 Show local player's key presses
 == Montrer les touches appuyées des autres joueurs
 
@@ -1626,4 +1614,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 

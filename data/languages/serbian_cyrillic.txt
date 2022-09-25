@@ -85,9 +85,6 @@ Client
 Close
 == Затвори
 
-Connect
-== Повежи се
-
 Connecting to
 == Повезујем се на
 
@@ -327,9 +324,6 @@ Red team
 
 Red team wins!
 == Црвени тим је победио!
-
-Refresh
-== Освежи
 
 Remote console
 == Удаљена конзола
@@ -1033,9 +1027,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Прикажи слојеве плочица са BG мапе
 
-Try fast HTTP map download first
-== Пробај брзи HTTP преузимач мапа прво
-
 DDNet %s is available:
 == DDNet %s је доступан:
 
@@ -1264,9 +1255,6 @@ CHN
 
 Getting server list from master server
 == Добијам листу сервера са мастер сервера
-
-Refreshing...
-== Освежавање
 
 Leak IP
 == Провали адресу
@@ -1604,4 +1592,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 

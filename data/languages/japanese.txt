@@ -85,9 +85,6 @@ Client
 Close
 == 閉じる
 
-Connect
-== 接続
-
 Connecting to
 == 接続先
 
@@ -328,9 +325,6 @@ Red team
 
 Red team wins!
 == 赤チームの勝ち！
-
-Refresh
-== 更新
 
 Remote console
 == リモートコンソール
@@ -1096,9 +1090,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 普通の背景色
 
-Try fast HTTP map download first
-== マップのダウンロードは HTTP を優先にする
-
 New random timeout code
 == ランダムにタイムアウト・コードを生成
 
@@ -1320,9 +1311,6 @@ SA
 == 
 
 CHN
-== 
-
-Refreshing...
 == 
 
 Play the current demo
@@ -1559,6 +1547,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

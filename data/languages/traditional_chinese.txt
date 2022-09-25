@@ -99,9 +99,6 @@ Client
 Close
 == 關閉
 
-Connect
-== 連線
-
 Connecting to
 == 正在連線到
 
@@ -375,9 +372,6 @@ Red team
 
 Red team wins!
 == 紅隊勝利！
-
-Refresh
-== 重新整理
 
 Remote console
 == 遠端控制檯
@@ -753,9 +747,6 @@ Show other players' key presses
 
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
-
-Try fast HTTP map download first
-== 優先嘗試用HTTP高速下載地圖
 
 DDNet %s is available:
 == DDNet %s 現已可用：
@@ -1274,9 +1265,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
-Refreshing...
-== 正在重整...
-
 Kill Messages
 == 擊殺訊息
 
@@ -1623,3 +1611,6 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == 凍結鐳射實心顔色
+
+Set all to Rifle
+== 

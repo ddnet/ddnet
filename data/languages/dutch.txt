@@ -98,9 +98,6 @@ Client
 Close
 == Sluiten
 
-Connect
-== Verbinden
-
 Connecting to
 == Verbinden met
 
@@ -344,9 +341,6 @@ Red team
 
 Red team wins!
 == Rode team wint!
-
-Refresh
-== Vernieuwen
 
 Remote console
 == Remote console
@@ -1009,9 +1003,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Laat tegellagen van achtergrondmap zien
 
-Try fast HTTP map download first
-== Probeer eerst een snelle HTTP download voor deze map
-
 DDNet %s is available:
 == DDNet %s is beschikbaar
 
@@ -1155,9 +1146,6 @@ Getting server list from master server
 
 %d player
 == %d speler
-
-Refreshing...
-== Aan het verversen...
 
 Leak IP
 == Lek IP
@@ -1604,6 +1592,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Extras

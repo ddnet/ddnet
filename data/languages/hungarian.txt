@@ -87,9 +87,6 @@ Client
 Close
 == Bezárás
 
-Connect
-== Csatlakozás
-
 Connecting to
 == Csatlakozás...
 
@@ -324,9 +321,6 @@ Red team
 
 Red team wins!
 == A piros csapat nyert!
-
-Refresh
-== Újratöltés
 
 Remote console
 == Távoli konzol
@@ -793,9 +787,6 @@ Max CSVs
 Strict gametype filter
 == Szigorú játékmód szűrő
 
-Try fast HTTP map download first
-== Próbáljon elősször gyors HTTP letöltést
-
 Use DDRace Scoreboard
 == DDRace pontszámtábla használata
 
@@ -1247,9 +1238,6 @@ SA
 CHN
 == KíNA
 
-Refreshing...
-== Frissítés...
-
 Kill Messages
 == Halálüzenetek
 
@@ -1604,4 +1592,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
