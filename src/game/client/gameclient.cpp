@@ -135,7 +135,7 @@ void CGameClient::OnConsoleInit()
 					      &m_FreezeBars,
 					      &m_DamageInd,
 					      &m_PlayerIndicator,
-                          &m_bindwheel,
+                          //&m_bindwheel,
 					      &m_Hud,
 					      &m_Spectator,
 					      &m_Emoticon,
@@ -160,7 +160,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Menus,
 						  &m_Spectator,
-                          &m_bindwheel,
+                          //&m_bindwheel,
 						  &m_Emoticon,
 						  &m_Controls,
 						  &m_Binds});

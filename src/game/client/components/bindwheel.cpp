@@ -53,20 +53,18 @@ void CBindWheel::ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, 
 	
 	}
 }
-
-void CBindWheel::OnConsoleInit()
+void CBindWheel::OnInit()
 {
-	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
-	if(pConfigManager)
-		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
+	//IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	//if(pConfigManager)
+		//pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
-	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConBindwheel, this, "Open bindwheel selector");
-	Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:10]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
-	Console()->Chain("bindwheel", ConchainBindwheel, this);
+	//Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConBindwheel, this, "Open bindwheel selector");
+	//Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:10]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
+	//Console()->Chain("bindwheel", ConchainBindwheel, this);
 
-
-	/*
-	for(int i = 0; i < NUM_BINDWHEEL; i++)
+	
+	for(int i = 0; i < 6; i++)
 	{
 		if(!(str_comp(GameClient()->m_bindwheellist[i].description, "EMPTY") == 0))
 		{
@@ -78,7 +76,7 @@ void CBindWheel::OnConsoleInit()
 			str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), "");
 		}
 	}
-	*/
+	
 	
 }
 
