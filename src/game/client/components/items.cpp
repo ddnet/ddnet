@@ -479,21 +479,18 @@ void CItems::OnRender()
 					if(Inactive && BlinkingLight)
 						continue;
 					Data.m_StartTick = DraggerStartTick;
-					Data.m_Type = LASERTYPE_FREEZE;
 				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE)
 				{
 					if(Inactive && BlinkingGun)
 						continue;
 					Data.m_StartTick = GunStartTick;
-					Data.m_Type = pEntEx->m_EntityClass == ENTITYCLASS_GUN_FREEZE ? LASERTYPE_FREEZE : LASERTYPE_DOOR;
 				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
 				{
 					if(Inactive && BlinkingDragger)
 						continue;
 					Data.m_StartTick = DraggerStartTick;
-					Data.m_Type = LASERTYPE_DOOR;
 				}
 				if(pEntEx->m_EntityClass == ENTITYCLASS_DOOR)
 				{
@@ -503,7 +500,6 @@ void CItems::OnRender()
 						Data.m_From.y = Data.m_To.y;
 					}
 					Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
-					Data.m_Type = LASERTYPE_DOOR;
 				}
 			}
 			RenderLaser(&Data);

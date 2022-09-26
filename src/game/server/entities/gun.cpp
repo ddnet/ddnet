@@ -186,19 +186,32 @@ void CGun::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+	int StartTick = pEntData ? 0 : m_EvalTick;
 
-	if(!pObj)
-		return;
+	if(SnappingClientVersion >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return;
 
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_Pos.x;
-	pObj->m_FromY = (int)m_Pos.y;
-
-	if(pEntData)
-		pObj->m_StartTick = 0;
+		pObj->m_ToX = (int)m_Pos.x;
+		pObj->m_ToY = (int)m_Pos.y;
+		pObj->m_FromX = (int)m_Pos.x;
+		pObj->m_FromY = (int)m_Pos.y;
+		pObj->m_StartTick = StartTick;
+		pObj->m_Owner = -1;
+		pObj->m_Type = m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
+	}
 	else
-		pObj->m_StartTick = m_EvalTick;
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = (int)m_Pos.x;
+		pObj->m_Y = (int)m_Pos.y;
+		pObj->m_FromX = (int)m_Pos.x;
+		pObj->m_FromY = (int)m_Pos.y;
+		pObj->m_StartTick = StartTick;
+	}
 }
