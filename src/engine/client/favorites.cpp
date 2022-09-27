@@ -2,6 +2,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 
