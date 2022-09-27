@@ -799,45 +799,48 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 	}
 
-	Box.VSplitRight(33.0f, &Box, &Button);
-	static CButtonContainer s_StartButton;
+	if(Client()->State() == IClient::STATE_OFFLINE)
+	{
+		Box.VSplitRight(33.0f, &Box, &Button);
+		static CButtonContainer s_StartButton;
 
-	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
-	bool GotNewsOrUpdate = false;
+		bool GotNewsOrUpdate = false;
 
 #if defined(CONF_AUTOUPDATE)
-	int State = Updater()->GetCurrentState();
-	bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-	if(State == IUpdater::CLEAN && NeedUpdate)
-	{
-		GotNewsOrUpdate = true;
-	}
+		int State = Updater()->GetCurrentState();
+		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+		if(State == IUpdater::CLEAN && NeedUpdate)
+		{
+			GotNewsOrUpdate = true;
+		}
 #endif
 
-	GotNewsOrUpdate |= (bool)g_Config.m_UiUnreadNews;
+		GotNewsOrUpdate |= (bool)g_Config.m_UiUnreadNews;
 
-	ColorRGBA HomeButtonColorAlert(0, 1, 0, 0.25f);
-	ColorRGBA HomeButtonColorAlertHover(0, 1, 0, 0.5f);
-	ColorRGBA *pHomeButtonColor = NULL;
-	ColorRGBA *pHomeButtonColorHover = NULL;
+		ColorRGBA HomeButtonColorAlert(0, 1, 0, 0.25f);
+		ColorRGBA HomeButtonColorAlertHover(0, 1, 0, 0.5f);
+		ColorRGBA *pHomeButtonColor = NULL;
+		ColorRGBA *pHomeButtonColorHover = NULL;
 
-	const char *pHomeScreenButtonLabel = "\xEF\x80\x95";
-	if(GotNewsOrUpdate)
-	{
-		pHomeScreenButtonLabel = "\xEF\x87\xAA";
-		pHomeButtonColor = &HomeButtonColorAlert;
-		pHomeButtonColorHover = &HomeButtonColorAlertHover;
+		const char *pHomeScreenButtonLabel = "\xEF\x80\x95";
+		if(GotNewsOrUpdate)
+		{
+			pHomeScreenButtonLabel = "\xEF\x87\xAA";
+			pHomeButtonColor = &HomeButtonColorAlert;
+			pHomeButtonColorHover = &HomeButtonColorAlertHover;
+		}
+
+		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_HOME], pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
+		{
+			m_ShowStart = true;
+			m_DoubleClickIndex = -1;
+		}
+
+		Box.VSplitRight(5.0f, &Box, &Button);
 	}
-
-	if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_HOME], pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
-	{
-		m_ShowStart = true;
-		m_DoubleClickIndex = -1;
-	}
-
-	Box.VSplitRight(5.0f, &Box, &Button);
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
