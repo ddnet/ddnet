@@ -8,11 +8,8 @@
 // line input helper
 class CLineInput
 {
-	enum
-	{
-		MAX_SIZE = 512,
-		MAX_CHARS = MAX_SIZE / 2,
-	};
+	static const int MAX_SIZE = 512;
+	static const int MAX_CHARS = MAX_SIZE / 2;
 	char m_aStr[MAX_SIZE];
 	int m_Len;
 	int m_CursorPos;

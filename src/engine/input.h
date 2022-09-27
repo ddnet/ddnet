@@ -12,10 +12,7 @@ class IInput : public IInterface
 {
 	MACRO_INTERFACE("input", 0)
 public:
-	enum
-	{
-		INPUT_TEXT_SIZE = 128
-	};
+	static const int INPUT_TEXT_SIZE = 128;
 
 	class CEvent
 	{
@@ -27,10 +24,7 @@ public:
 	};
 
 protected:
-	enum
-	{
-		INPUT_BUFFER_SIZE = 32
-	};
+	static const int INPUT_BUFFER_SIZE = 32;
 
 	// quick access to events
 	int m_NumEvents;

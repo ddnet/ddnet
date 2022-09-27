@@ -41,10 +41,7 @@ public:
 
 	struct CNetworkCountry
 	{
-		enum
-		{
-			MAX_SERVERS = 1024
-		};
+		static const int MAX_SERVERS = 1024;
 
 		char m_aName[256];
 		int m_FlagID;
@@ -60,12 +57,9 @@ public:
 		};
 	};
 
-	enum
-	{
-		MAX_FAVORITES = 2048,
-		MAX_COUNTRIES = 32,
-		MAX_TYPES = 32,
-	};
+	static const int MAX_FAVORITES = 2048;
+	static const int MAX_COUNTRIES = 32;
+	static const int MAX_TYPES = 32;
 
 	struct CNetwork
 	{

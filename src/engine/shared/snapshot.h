@@ -32,15 +32,12 @@ class CSnapshot
 	size_t TotalSize() const { return sizeof(CSnapshot) + OffsetSize() + m_DataSize; }
 
 public:
-	enum
-	{
-		OFFSET_UUID_TYPE = 0x4000,
-		MAX_TYPE = 0x7fff,
-		MAX_ID = 0xffff,
-		MAX_ITEMS = 1024,
-		MAX_PARTS = 64,
-		MAX_SIZE = MAX_PARTS * 1024
-	};
+	static const int OFFSET_UUID_TYPE = 0x4000;
+	static const int MAX_TYPE = 0x7fff;
+	static const int MAX_ID = 0xffff;
+	static const int MAX_ITEMS = 1024;
+	static const int MAX_PARTS = 64;
+	static const int MAX_SIZE = MAX_PARTS * 1024;
 
 	void Clear()
 	{
@@ -75,10 +72,7 @@ public:
 	};
 
 private:
-	enum
-	{
-		MAX_NETOBJSIZES = 64
-	};
+	static const int MAX_NETOBJSIZES = 64;
 	short m_aItemSizes[MAX_NETOBJSIZES];
 	int m_aSnapshotDataRate[CSnapshot::MAX_TYPE + 1];
 	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
@@ -133,10 +127,7 @@ public:
 
 class CSnapshotBuilder
 {
-	enum
-	{
-		MAX_EXTENDED_ITEM_TYPES = 64,
-	};
+	static const int MAX_EXTENDED_ITEM_TYPES = 64;
 
 	char m_aData[CSnapshot::MAX_SIZE];
 	int m_DataSize;
