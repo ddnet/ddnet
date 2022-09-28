@@ -2029,7 +2029,20 @@ int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
 unsigned long str_toulong_base(const char *str, int base);
 float str_tofloat(const char *str);
+
+/**
+ * Determines whether a character is whitespace.
+ *
+ * @ingroup Strings
+ *
+ * @param c the character to check
+ *
+ * @return 1 if the character is whitespace, 0 otherwise.
+ *
+ * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'
+ */
 int str_isspace(char c);
+
 char str_uppercase(char c);
 int str_isallnum(const char *str);
 unsigned str_quickhash(const char *str);

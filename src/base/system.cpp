@@ -3369,7 +3369,10 @@ void net_stats(NETSTATS *stats_inout)
 	*stats_inout = network_stats;
 }
 
-int str_isspace(char c) { return c == ' ' || c == '\n' || c == '\t'; }
+int str_isspace(char c)
+{
+	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+}
 
 char str_uppercase(char c)
 {
