@@ -2744,28 +2744,28 @@ void str_clean_whitespaces(char *str_in)
 
 char *str_skip_to_whitespace(char *str)
 {
-	while(*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	while(*str && !str_isspace(*str))
 		str++;
 	return str;
 }
 
 const char *str_skip_to_whitespace_const(const char *str)
 {
-	while(*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	while(*str && !str_isspace(*str))
 		str++;
 	return str;
 }
 
 char *str_skip_whitespaces(char *str)
 {
-	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+	while(*str && str_isspace(*str))
 		str++;
 	return str;
 }
 
 const char *str_skip_whitespaces_const(const char *str)
 {
-	while(*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+	while(*str && str_isspace(*str))
 		str++;
 	return str;
 }

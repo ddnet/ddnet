@@ -715,6 +715,43 @@ TEST(Str, CleanWhitespaces)
 	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
 }
 
+TEST(Str, SkipToWhitespace)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf);
+	str_copy(aBuf, "    a");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf);
+	str_copy(aBuf, "aaaa  b");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+	str_copy(aBuf, "aaaa\n\nb");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+	str_copy(aBuf, "aaaa\r\rb");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+	str_copy(aBuf, "aaaa\t\tb");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+}
+
+TEST(Str, SkipWhitespaces)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	EXPECT_EQ(str_skip_whitespaces(aBuf), aBuf);
+	EXPECT_EQ(str_skip_whitespaces_const(aBuf), aBuf);
+	str_copy(aBuf, "aaaa");
+	EXPECT_EQ(str_skip_whitespaces(aBuf), aBuf);
+	EXPECT_EQ(str_skip_whitespaces_const(aBuf), aBuf);
+	str_copy(aBuf, " \n\r\taaaa");
+	EXPECT_EQ(str_skip_whitespaces(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_whitespaces_const(aBuf), aBuf + 4);
+}
+
 TEST(Str, CompFilename)
 {
 	EXPECT_EQ(str_comp_filenames("a", "a"), 0);

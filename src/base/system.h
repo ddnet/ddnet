@@ -1307,7 +1307,7 @@ void str_sanitize_filename(char *str);
 void str_clean_whitespaces(char *str);
 
 /**
- * Skips leading non-whitespace characters(all but ' ', '\t', '\n', '\r').
+ * Skips leading non-whitespace characters.
  *
  * @ingroup Strings
  *
@@ -1317,6 +1317,7 @@ void str_clean_whitespaces(char *str);
  *		   within the string.
  *
  * @remark The strings are treated as zero-terminated strings.
+ * @remark Whitespace is defined according to str_isspace.
  */
 char *str_skip_to_whitespace(char *str);
 
@@ -1327,7 +1328,7 @@ char *str_skip_to_whitespace(char *str);
 const char *str_skip_to_whitespace_const(const char *str);
 
 /**
- * Skips leading whitespace characters(' ', '\t', '\n', '\r').
+ * Skips leading whitespace characters.
  *
  * @ingroup Strings
  *
@@ -1337,6 +1338,7 @@ const char *str_skip_to_whitespace_const(const char *str);
  * within the string.
  *
  * @remark The strings are treated as zero-terminated strings.
+ * @remark Whitespace is defined according to str_isspace.
  */
 char *str_skip_whitespaces(char *str);
 
