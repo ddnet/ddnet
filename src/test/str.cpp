@@ -567,6 +567,54 @@ TEST(Str, HasCc)
 	EXPECT_TRUE(str_has_cc("\x1F"));
 }
 
+TEST(Str, SanitizeCc)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "");
+	str_copy(aBuf, "a");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "a");
+	str_copy(aBuf, "Merhaba dünya!");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "Merhaba dünya!");
+
+	str_copy(aBuf, "\n");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\r");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\t");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "a\n");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "a ");
+	str_copy(aBuf, "a\rb");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "a b");
+	str_copy(aBuf, "\tb");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " b");
+	str_copy(aBuf, "\n\n");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "  ");
+	str_copy(aBuf, "\x1C");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1D");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1E");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1F");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+}
+
 TEST(Str, CompFilename)
 {
 	EXPECT_EQ(str_comp_filenames("a", "a"), 0);
