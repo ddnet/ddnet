@@ -51,7 +51,7 @@ void CPlayerIndicator::OnRender()
 					!OtherTee.m_Spec &&
 					m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				{
-					if(g_Config.m_ClPlayerIndicatorFreeze && OtherTee.m_RenderCur.m_Weapon != WEAPON_NINJA)
+					if(g_Config.m_ClPlayerIndicatorFreeze && !(OtherTee.m_RenderCur.m_Weapon == WEAPON_NINJA || OtherTee.m_FreezeEnd > 0 || OtherTee.m_DeepFrozen))
 						continue;
 
 					vec2 norm = NormalizedDirection(m_pClient->m_aClients[i].m_RenderPos, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos) * (-1);
@@ -66,7 +66,7 @@ void CPlayerIndicator::OnRender()
 					vec2 IndicatorPos(norm.x * Offset + Position.x, norm.y * Offset + Position.y);
 					CTeeRenderInfo TeeInfo = OtherTee.m_RenderInfo;
 					float Alpha = g_Config.m_ClIndicatorOpacity / 100.0f;
-					if(OtherTee.m_RenderCur.m_Weapon == WEAPON_NINJA)
+					if(OtherTee.m_RenderCur.m_Weapon == WEAPON_NINJA || OtherTee.m_FreezeEnd > 0 || OtherTee.m_DeepFrozen)
 					{
 						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorFreeze));
 						if(g_Config.m_ClIndicatorTees)
