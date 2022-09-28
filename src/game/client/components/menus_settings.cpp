@@ -3184,7 +3184,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(130.0f, &Label, &Button);
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s: %i", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
+	str_format(aBuf, sizeof(aBuf), "%s: %.2f", Localize("Default zoom"), g_Config.m_ClDefaultZoom);
 	UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 	g_Config.m_ClDefaultZoom = static_cast<int>(UI()->DoScrollbarH(&g_Config.m_ClDefaultZoom, &Button, g_Config.m_ClDefaultZoom / 20.0f) * 20.0f + 0.1f);
 

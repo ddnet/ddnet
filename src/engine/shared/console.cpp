@@ -748,6 +748,15 @@ struct CIntVariableData
 	int m_OldValue;
 };
 
+struct CFloatVariableData
+{
+	IConsole *m_pConsole;
+	float *m_pVariable;
+	float m_Min;
+	float m_Max;
+	float m_OldValue;
+};
+
 struct CColVariableData
 {
 	IConsole *m_pConsole;
@@ -790,6 +799,35 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[32];
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+}
+
+static void FloatVariableCommand(IConsole::IResult *pResult, void *pUserData)
+{
+	CFloatVariableData *pData = (CFloatVariableData *)pUserData;
+
+	if(pResult->NumArguments())
+	{
+		float Val = pResult->GetFloat(0);
+
+		// do clamping
+		if(pData->m_Min != pData->m_Max)
+		{
+			if(Val < pData->m_Min)
+				Val = pData->m_Min;
+			if(pData->m_Max != 0 && Val > pData->m_Max)
+				Val = pData->m_Max;
+		}
+
+		*(pData->m_pVariable) = Val;
+		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Val;
+	}
+	else
+	{
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "Value: %.2f", *(pData->m_pVariable));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
@@ -1028,6 +1066,12 @@ void CConsole::Init()
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
 	}
 
+#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	{ \
+		static CFloatVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def}; \
+		Register(#ScriptName, "?i", Flags, FloatVariableCommand, &Data, Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
+	}
+
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	{ \
 		static CColVariableData Data = {this, &g_Config.m_##Name, static_cast<bool>((Flags)&CFGFLAG_COLLIGHT), \
@@ -1045,6 +1089,7 @@ void CConsole::Init()
 #include "config_variables.h"
 
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_FLOAT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 }
@@ -1285,6 +1330,8 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
+#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc)
+
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Save, Desc)
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
@@ -1303,6 +1350,7 @@ void CConsole::ResetServerGameSettings()
 #include "config_variables.h"
 
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_FLOAT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 }
