@@ -2824,8 +2824,9 @@ int str_comp_filenames(const char *a, const char *b)
 				return result;
 		}
 
-		if(*a != *b)
-			break;
+		result = tolower(*a) - tolower(*b);
+		if(result)
+			return result;
 	}
 	return *a - *b;
 }

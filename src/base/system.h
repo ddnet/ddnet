@@ -1416,7 +1416,7 @@ int str_comp(const char *a, const char *b);
 int str_comp_num(const char *a, const char *b, int num);
 
 /**
- * Compares two strings case sensitive, digit chars will be compared as numbers.
+ * Compares two strings case insensitive, digit chars will be compared as numbers.
  *
  * @ingroup Strings
  *
