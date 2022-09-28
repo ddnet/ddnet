@@ -663,6 +663,26 @@ TEST(Str, Sanitize)
 	EXPECT_STREQ(aBuf, " ");
 }
 
+TEST(Str, CleanWhitespaces)
+{
+	char aBuf[64];
+	str_copy(aBuf, "aa bb ccc dddd eeeee");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
+	str_copy(aBuf, "     ");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "");
+	str_copy(aBuf, "     aa");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa");
+	str_copy(aBuf, "aa     ");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa");
+	str_copy(aBuf, "  aa   bb    ccc     dddd       eeeee    ");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
+}
+
 TEST(Str, CompFilename)
 {
 	EXPECT_EQ(str_comp_filenames("a", "a"), 0);

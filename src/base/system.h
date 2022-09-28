@@ -1302,7 +1302,7 @@ void str_sanitize_filename(char *str);
  *
  * @param str String to clean up
  *
- * @remark The strings are treated as zero-termineted strings.
+ * @remark The strings are treated as zero-terminated strings.
  */
 void str_clean_whitespaces(char *str);
 
