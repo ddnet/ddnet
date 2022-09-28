@@ -2648,11 +2648,13 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 	return str_utf8_fix_truncation(buffer);
 }
 
-char *str_trim_words(char *str, int words)
+const char *str_trim_words(const char *str, int words)
 {
+	while(*str && str_isspace(*str))
+		str++;
 	while(words && *str)
 	{
-		if(isspace(*str) && !isspace(*(str + 1)))
+		if(str_isspace(*str) && !str_isspace(*(str + 1)))
 			words--;
 		str++;
 	}

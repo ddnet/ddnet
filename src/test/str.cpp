@@ -374,6 +374,30 @@ TEST(Str, FormatTruncate)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 
+TEST(Str, TrimWords)
+{
+	const char *pStr1 = "aa bb ccc   dddd    eeeee";
+	EXPECT_STREQ(str_trim_words(pStr1, 0), "aa bb ccc   dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 1), "bb ccc   dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 2), "ccc   dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 3), "dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 4), "eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 5), "");
+	EXPECT_STREQ(str_trim_words(pStr1, 100), "");
+	const char *pStr2 = "   aaa  bb   ";
+	EXPECT_STREQ(str_trim_words(pStr2, 0), "aaa  bb   ");
+	EXPECT_STREQ(str_trim_words(pStr2, 1), "bb   ");
+	EXPECT_STREQ(str_trim_words(pStr2, 2), "");
+	EXPECT_STREQ(str_trim_words(pStr2, 100), "");
+	const char *pStr3 = "\n\naa  bb\t\tccc\r\n\r\ndddd";
+	EXPECT_STREQ(str_trim_words(pStr3, 0), "aa  bb\t\tccc\r\n\r\ndddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 1), "bb\t\tccc\r\n\r\ndddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 2), "ccc\r\n\r\ndddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 3), "dddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 4), "");
+	EXPECT_STREQ(str_trim_words(pStr3, 100), "");
+}
+
 TEST(Str, CopyNum)
 {
 	const char *pFoo = "Foobaré";

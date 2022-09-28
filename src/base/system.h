@@ -1246,8 +1246,9 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
  * @return Trimmed string
  *
  * @remark The strings are treated as zero-terminated strings.
+ * @remark Leading whitespace is always trimmed.
  */
-char *str_trim_words(char *str, int words);
+const char *str_trim_words(const char *str, int words);
 
 /**
  * Check whether string has ASCII control characters.
