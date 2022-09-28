@@ -555,13 +555,16 @@ TEST(Str, HasCc)
 	EXPECT_FALSE(str_has_cc("Merhaba dünya!"));
 
 	EXPECT_TRUE(str_has_cc("\n"));
-	EXPECT_TRUE(str_has_cc("\n"));
 	EXPECT_TRUE(str_has_cc("\r"));
 	EXPECT_TRUE(str_has_cc("\t"));
 	EXPECT_TRUE(str_has_cc("a\n"));
 	EXPECT_TRUE(str_has_cc("a\rb"));
 	EXPECT_TRUE(str_has_cc("\tb"));
 	EXPECT_TRUE(str_has_cc("\n\n"));
+	EXPECT_TRUE(str_has_cc("\x1C"));
+	EXPECT_TRUE(str_has_cc("\x1D"));
+	EXPECT_TRUE(str_has_cc("\x1E"));
+	EXPECT_TRUE(str_has_cc("\x1F"));
 }
 
 TEST(Str, CompFilename)
