@@ -1558,58 +1558,58 @@ Loading sound files
 == Загрузка звуковых файлов
 
 Why are you slowmo replaying to read this?
-== 
+== Зачем ты читаешь на это в замедлении?
 
 Play the current demo
-== 
+== Включить демо
 
 Pause the current demo
-== 
+== Поставить на паузу
 
 Stop the current demo
-== 
+== Остановить демо
 
 Slow down the demo
-== 
+== Замедлить демо
 
 Speed up the demo
-== 
+== Ускорить демо
 
 Mark the beginning of a cut
-== 
+== Отметить начало участка
 
 Mark the end of a cut
-== 
+== Отметить конец участка
 
 Export cut as a seperate demo
-== 
+== Экспортировать участок отдельно
 
 Toggle keyboard shortcuts
-== 
+== Включить горячие клавиши
 
 Weapons
-== 
+== Оружия
 
 Rifle Laser Outline Color
-== 
+== Цвет обводки лазера
 
 Rifle Laser Inner Color
-== 
+== Цвет лазера
 
 Shotgun Laser Outline Color
-== 
+== Цвет обводки лазера дробовика
 
 Shotgun Laser Inner Color
-== 
+== Цвет лазера дробовика
 
 Door Laser Outline Color
-== 
+== Цвет обводки двери
 
 Door Laser Inner Color
-== 
+== Цвет двери
 
 Freeze Laser Outline Color
-== 
+== Цвет обводки фриз лазера
 
 Freeze Laser Inner Color
-== 
+== Цвет фриз лазера
