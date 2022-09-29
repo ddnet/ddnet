@@ -715,3 +715,16 @@ TEST(Str, CompFilename)
 	EXPECT_GT(str_comp_filenames("file4414520", "file2055"), 0);
 	EXPECT_LT(str_comp_filenames("file4414520", "file205523151812419"), 0);
 }
+
+TEST(Str, RightChar)
+{
+	const char *pStr = "a bb ccc dddd       eeeee";
+	EXPECT_EQ(str_rchr(pStr, 'a'), pStr);
+	EXPECT_EQ(str_rchr(pStr, 'b'), pStr + 3);
+	EXPECT_EQ(str_rchr(pStr, 'c'), pStr + 7);
+	EXPECT_EQ(str_rchr(pStr, 'd'), pStr + 12);
+	EXPECT_EQ(str_rchr(pStr, ' '), pStr + 19);
+	EXPECT_EQ(str_rchr(pStr, 'e'), pStr + 24);
+	EXPECT_EQ(str_rchr(pStr, '\0'), pStr + str_length(pStr));
+	EXPECT_EQ(str_rchr(pStr, 'y'), nullptr);
+}

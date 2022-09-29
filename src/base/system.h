@@ -1585,21 +1585,20 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 */
 const char *str_find(const char *haystack, const char *needle);
 
-/*
-	Function: str_rchr
-		Finds the last occurance of a character
+/**
+ * Finds the last occurance of a character
+ *
+ * @ingroup Strings
+ *
+ * @param haystack String to search in
+ * @param needle Character to search for
 
-	Parameters:
-		haystack - String to search in
-		needle - Character to search for
-
-	Returns:
-		A pointer into haystack where the needle was found.
-		Returns NULL if needle could not be found.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+ * @return A pointer into haystack where the needle was found.
+ * Returns NULL if needle could not be found.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark The zero-terminator character can also be found with this function.
+ */
 const char *str_rchr(const char *haystack, char needle);
 
 /*
