@@ -1581,7 +1581,7 @@ Mark the beginning of a cut
 Mark the end of a cut
 == Отметить конец участка
 
-Export cut as a seperate demo
+Export cut as a separate demo
 == Экспортировать участок отдельно
 
 Toggle keyboard shortcuts
