@@ -1271,7 +1271,7 @@ Mark the beginning of a cut
 Mark the end of a cut
 == 
 
-Export cut as a seperate demo
+Export cut as a separate demo
 == 
 
 Toggle keyboard shortcuts

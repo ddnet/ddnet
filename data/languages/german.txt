@@ -1583,7 +1583,7 @@ Slow down the demo
 Speed up the demo
 == Demo beschleunigen
 
-Export cut as a seperate demo
+Export cut as a separate demo
 == Schnitt als separate Demo exportieren
 
 Toggle keyboard shortcuts

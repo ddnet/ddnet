@@ -513,7 +513,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a seperate demo"));
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
 
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
