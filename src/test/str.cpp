@@ -728,3 +728,16 @@ TEST(Str, RightChar)
 	EXPECT_EQ(str_rchr(pStr, '\0'), pStr + str_length(pStr));
 	EXPECT_EQ(str_rchr(pStr, 'y'), nullptr);
 }
+
+TEST(Str, CountChar)
+{
+	const char *pStr = "a bb ccc dddd       eeeee";
+	EXPECT_EQ(str_countchr(pStr, 'a'), 1);
+	EXPECT_EQ(str_countchr(pStr, 'b'), 2);
+	EXPECT_EQ(str_countchr(pStr, 'c'), 3);
+	EXPECT_EQ(str_countchr(pStr, 'd'), 4);
+	EXPECT_EQ(str_countchr(pStr, 'e'), 5);
+	EXPECT_EQ(str_countchr(pStr, ' '), 10);
+	EXPECT_EQ(str_countchr(pStr, '\0'), 0);
+	EXPECT_EQ(str_countchr(pStr, 'y'), 0);
+}

@@ -1601,21 +1601,20 @@ const char *str_find(const char *haystack, const char *needle);
  */
 const char *str_rchr(const char *haystack, char needle);
 
-/*
-	Function: str_countchr
-		Counts the number of occurrences of a character in a string.
+/**
+ * Counts the number of occurrences of a character in a string.
+ *
+ * @ingroup Strings
+ *
+ * @param haystack String to count in
+ * @param needle Character to count
 
-	Parameters:
-		haystack - String to count in
-		needle - Character to count
-
-	Returns:
-		The number of characters in the haystack string matching
-		the needle character.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+ * @return The number of characters in the haystack string matching
+ * the needle character.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark The number of zero-terminator characters cannot be counted.
+ */
 int str_countchr(const char *haystack, char needle);
 
 /*
