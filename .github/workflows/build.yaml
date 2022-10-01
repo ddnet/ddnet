@@ -108,11 +108,13 @@ jobs:
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
+
     - name: Test debug
       env: ${{ matrix.env }}
       run: |
         cd debug
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+
     - name: Run debug server
       env: ${{ matrix.env }}
       run: |
@@ -126,11 +128,13 @@ jobs:
         cd release
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
+
     - name: Test release
       env: ${{ matrix.env }}
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
+
     - name: Run release server
       env: ${{ matrix.env }}
       run: |
@@ -149,13 +153,37 @@ jobs:
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
-    - name: Test headless client
+
+    - name: Test headless client (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+
+    - name: Upload Codecov report (unit tests)
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src
+        flags: unittests
+
+    - name: Test headless client (start & connect)
+      if: contains(matrix.os, 'ubuntu-latest')
+      run: |
+        cd headless
+        # Remove old coverage data:
+        find . -name '*.gcno' -o -name '*.gcda' -delete
         ./DDNet-Server &
         ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
+
+    - name: Upload Codecov report (start & connect)
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src
+        flags: startconnect
 
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
@@ -165,6 +193,7 @@ jobs:
         cd fancy
         ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
+
     - name: Test fancy
       if: matrix.fancy
       env: ${{ matrix.env }}
@@ -183,7 +212,17 @@ jobs:
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
+        # Remove old coverage data:
+        find . -name '*.gcno' -o -name '*.gcda' -delete
         ./integration_test.sh --valgrind-memcheck
+
+    - name: Upload Codecov report (integration tests)
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src
+        flags: intgrationtests
 
     - name: Package
       run: |
@@ -198,9 +237,3 @@ jobs:
         name: ddnet-${{ matrix.os }}
         path: release/artifacts
 
-    - name: Upload Codecov report
-      if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
-      with:
-        gcov: true
-        gcov_include: src
