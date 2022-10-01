@@ -1591,7 +1591,7 @@ bool CClient::ShouldSendChatTimeoutCodeHeuristic()
 	{
 		return false;
 	}
-	return IsDDNet(&m_CurrentServerInfo);
+	return (IsDDNet(&m_CurrentServerInfo) || IsGores(&m_CurrentServerInfo));
 }
 
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)

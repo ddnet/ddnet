@@ -95,6 +95,7 @@ bool IsDDRace(const CServerInfo *pInfo);
 bool IsDDNet(const CServerInfo *pInfo);
 bool IsBlockWorlds(const CServerInfo *pInfo);
 bool IsCity(const CServerInfo *pInfo);
+bool IsGores(const CServerInfo *pInfo);
 
 bool Is64Player(const CServerInfo *pInfo);
 bool IsPlus(const CServerInfo *pInfo);

@@ -459,6 +459,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						hsl = ColorHSLA(0.58f, 1.0f, 0.75f);
 					else if(IsDDRace(pItem))
 						hsl = ColorHSLA(0.75f, 1.0f, 0.75f);
+					else if(IsGores(pItem))
+						hsl = ColorHSLA(0.525f, 1.0f, 0.75f);
 					else if(IsRace(pItem))
 						hsl = ColorHSLA(0.46f, 1.0f, 0.75f);
 
