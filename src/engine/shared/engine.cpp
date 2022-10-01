@@ -77,7 +77,7 @@ CEngine::CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger>
 void CEngine::Shutdown()
 {
 	m_Shutdown = true;
-	for(auto r : m_apRunners)
+	for(auto *r : m_apRunners)
 	{
 		r->Shutdown();
 	}
@@ -110,12 +110,13 @@ int CEngine::RegisterRunner(IEngineRunner *pRunner)
 
 void CEngine::Dispatch(std::shared_ptr<IEngineRunnable> pRunnable)
 {
-	dbg_assert(pRunnable->Runner() != -1, "runnable with invalid runner");
+	int Runner = pRunnable->Runner();
+	dbg_assert(Runner != -1, "runnable with invalid runner");
 
 	if(g_Config.m_Debug)
-		dbg_msg("engine", "job dispatched to %d", pRunnable->Runner());
+		dbg_msg("engine", "job dispatched to %d", Runner);
 
-	m_apRunners[pRunnable->Runner()]->Run(std::move(pRunnable));
+	m_apRunners[Runner]->Run(std::move(pRunnable));
 }
 
 void CEngine::SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger)
