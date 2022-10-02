@@ -19,8 +19,13 @@ jobs:
     - name: Prepare
       run: |
         sudo apt-get update -y
-        sudo apt-get install clang-format imagemagick ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools -y
+        sudo apt-get install clang-format imagemagick ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools rustc cargo -y
         pip3 install pylint
+        git clone https://gitlab.com/Patiga/twmap
+        cd twmap/twmap-tools
+        cargo install --path=.
+        cd ../..
+        rm -rf twmap
         mkdir release
         cd release
         cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
@@ -63,3 +68,15 @@ jobs:
     - name: Unused headers
       run: |
         find src -name '*.h' | while read -r i; do grep -r -q "$(basename "$i")" || (echo "Header file $i is unused" && exit 1); done
+    - name: Check maps
+      run: |
+        findings=$(find data -type f -name '*.map' -print0 | xargs -0 ~/.cargo/bin/twmap-check-ddnet 2>&1 | \
+          grep -v -E "\"data/maps/(ctf|dm).*\.map\": Time cps are missing on the map" | \
+          grep -v -E "\"data/themes/.*\.map\": Time cps are missing on the map" | \
+          grep -v -E "\"data/maps/ctf4\.map\": Map - Image error at index 3 : 'jungle_doodads_old' is not a valid external image in version DDNet06" | \
+          grep -v -E "\"data/themes/autumn_night\.map\": Map - Image error at index 3 : 'generic_lamps' is not a valid external image in version DDNet06" | \
+          grep -v -E "\"data/maps7?/Tutorial\.map\": Map setting - Unusual: 'sv_show_others_default'" || true)
+        if [ -n "$findings" ]; then
+          echo "$findings"
+          exit 1
+        fi
