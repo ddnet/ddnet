@@ -35,6 +35,16 @@ jobs:
       run: scripts/languages/update_all.py
     - name: Check dilated images
       run: scripts/check_dilate.sh release data
+    # TODO: Enable on release branches
+    #- name: Out-of-date translations
+    #  run: |
+    #    cp -a data/languages data/languages.orig
+    #    scripts/languages/update_all.py
+    #    diff_lang=$(diff data/languages.orig data/languages)
+    #    if [ -n "$diff_lang" ]; then
+    #      echo "Update translations:\n$diff_lang"
+    #      exit 1
+    #    fi
     - name: Shellcheck
       run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
     - name: Check log error case
