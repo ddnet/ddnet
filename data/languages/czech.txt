@@ -987,9 +987,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Zobrazit vrstvy dlaždic z mapy BG
 
-Try fast HTTP map download first
-== Zkusit rychlé HTTP stáhnutí map jako první
-
 DDNet %s is available:
 == DDNet %s je k dispozici:
 
@@ -1325,6 +1322,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1547,6 +1547,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

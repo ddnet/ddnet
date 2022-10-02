@@ -1008,9 +1008,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Yapı katmanlarını göster
 
-Try fast HTTP map download first
-== Önce HTTP üzerinden haritayı hızlı indirmeyi dene
-
 DDNet %s is available:
 == DDNet %s yayınlandı:
 
@@ -1079,6 +1076,9 @@ Auto
 
 Replay
 == Yeniden oynatma
+
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/tr
 
 Saving ddnet-settings.cfg failed
 == 
@@ -1252,6 +1252,9 @@ Loading demo files
 == 
 
 Demos directory
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Loading ghost files
@@ -1514,6 +1517,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
@@ -1567,9 +1573,6 @@ Discord
 
 https://ddnet.org/discord
 == 
-
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/tr
 
 Tutorial
 == 

@@ -999,9 +999,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Vis tile-lag fra BG-bane
 
-Try fast HTTP map download first
-== Forsøk først rask HTTP-nedlasting av bane
-
 DDNet %s is available:
 == DDNet %s er tilgjengelig:
 
@@ -1324,6 +1321,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1546,6 +1546,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

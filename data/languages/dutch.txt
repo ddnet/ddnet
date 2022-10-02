@@ -1009,9 +1009,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Laat tegellagen van achtergrondmap zien
 
-Try fast HTTP map download first
-== Probeer eerst een snelle HTTP download voor deze map
-
 DDNet %s is available:
 == DDNet %s is beschikbaar
 
@@ -1439,6 +1436,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1604,6 +1604,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Extras

@@ -1034,9 +1034,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Prikaži slojeve pločica sa BG mape
 
-Try fast HTTP map download first
-== Probaj brzi HTTP preuzimač mapa prvo
-
 DDNet %s is available:
 == DDNet %s je dostupan:
 
@@ -1583,6 +1580,9 @@ Export cut as a separate demo
 Toggle keyboard shortcuts
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Weapons
 == 
 
@@ -1608,4 +1608,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 

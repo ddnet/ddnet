@@ -1390,6 +1390,7 @@ int CMenus::Render()
 					RenderServerControl(MainView);
 				else if(m_GamePage == PAGE_SETTINGS)
 					RenderSettings(MainView);
+				RenderIngameHint();
 			}
 			else if(m_MenuPage == PAGE_NEWS)
 			{

@@ -834,9 +834,6 @@ Are you sure that you want to disconnect your dummy?
 Overlay entities
 == Overlay entities
 
-Try fast HTTP map download first
-== Pröva snabb HTTP bana nedladdning först
-
 Date
 == Datum
 
@@ -1378,6 +1375,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1567,6 +1567,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

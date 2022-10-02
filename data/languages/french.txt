@@ -920,9 +920,6 @@ Hammerfly dummy
 Switch weapon when out of ammo
 == Changer d'arme lorsqu'il n'y a plus de munition
 
-Try fast HTTP map download first
-== Carte : essayer d'abord le téléchargement rapide HTTP
-
 Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
 
@@ -1601,6 +1598,9 @@ Export cut as a separate demo
 Toggle keyboard shortcuts
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Weapons
 == 
 
@@ -1626,4 +1626,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 

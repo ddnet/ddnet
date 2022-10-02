@@ -507,6 +507,7 @@ protected:
 	void RenderServerControl(CUIRect MainView);
 	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
 	bool RenderServerControlServer(CUIRect MainView);
+	void RenderIngameHint();
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;

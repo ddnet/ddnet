@@ -635,9 +635,6 @@ Show other players' hook collision lines
 Show other players' key presses
 == Pokazuj naciśnięcia klawiszy innych graczy
 
-Try fast HTTP map download first
-== Próbuj najpierw ściągać mapy z serwera HTTP.
-
 Gameplay
 == Rozgrywka
 
@@ -1431,6 +1428,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1596,6 +1596,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Extras
