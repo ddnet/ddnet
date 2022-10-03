@@ -4113,27 +4113,27 @@ int secure_rand_below(int below)
 int os_version_str(char *version, int length)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	const char *DLL = "C:\\Windows\\System32\\user32.dll";
+	const WCHAR *module_path = L"kernel32.dll";
 	DWORD handle;
-	DWORD size = GetFileVersionInfoSizeA(DLL, &handle);
+	DWORD size = GetFileVersionInfoSizeW(module_path, &handle);
 	if(!size)
 	{
 		return 1;
 	}
 	void *data = malloc(size);
-	if(!GetFileVersionInfoA(DLL, handle, size, data))
+	if(!GetFileVersionInfoW(module_path, handle, size, data))
 	{
 		free(data);
 		return 1;
 	}
 	VS_FIXEDFILEINFO *fileinfo;
 	UINT unused;
-	if(!VerQueryValueA(data, "\\", (void **)&fileinfo, &unused))
+	if(!VerQueryValueW(data, L"\\", (void **)&fileinfo, &unused))
 	{
 		free(data);
 		return 1;
 	}
-	str_format(version, length, "Windows %d.%d.%d.%d",
+	str_format(version, length, "Windows %hu.%hu.%hu.%hu",
 		HIWORD(fileinfo->dwProductVersionMS),
 		LOWORD(fileinfo->dwProductVersionMS),
 		HIWORD(fileinfo->dwProductVersionLS),
