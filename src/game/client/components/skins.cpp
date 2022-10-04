@@ -349,6 +349,7 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 
 	m_vSkins.clear();
 	m_vDownloadSkins.clear();
+	m_DownloadingSkins = 0;
 	SSkinScanUser SkinScanUser;
 	SkinScanUser.m_pThis = this;
 	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
@@ -432,10 +433,12 @@ int CSkins::FindImpl(const char *pName)
 			Storage()->RenameFile(RangeBegin->m_aPath, aPath, IStorage::TYPE_SAVE);
 			LoadSkin(RangeBegin->m_aName, RangeBegin->m_pTask->m_Info);
 			RangeBegin->m_pTask = nullptr;
+			--m_DownloadingSkins;
 		}
 		if(RangeBegin->m_pTask && (RangeBegin->m_pTask->State() == HTTP_ERROR || RangeBegin->m_pTask->State() == HTTP_ABORTED))
 		{
 			RangeBegin->m_pTask = nullptr;
+			--m_DownloadingSkins;
 		}
 		return -1;
 	}
@@ -452,5 +455,6 @@ int CSkins::FindImpl(const char *pName)
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
 	m_vDownloadSkins.insert(std::lower_bound(m_vDownloadSkins.begin(), m_vDownloadSkins.end(), Skin), std::move(Skin));
+	++m_DownloadingSkins;
 	return -1;
 }

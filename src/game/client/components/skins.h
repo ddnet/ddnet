@@ -54,9 +54,12 @@ public:
 	const CSkin *Get(int Index);
 	int Find(const char *pName);
 
+	bool IsDownloadingSkins() { return m_DownloadingSkins; }
+
 private:
 	std::vector<CSkin> m_vSkins;
 	std::vector<CDownloadSkin> m_vDownloadSkins;
+	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
