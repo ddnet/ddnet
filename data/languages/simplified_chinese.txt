@@ -765,9 +765,6 @@ Show other players' key presses
 Show tiles layers from BG map
 == 显示实体层背景地图的图块层
 
-Try fast HTTP map download first
-== 优先尝试使用 HTTP 协议快速下载地图
-
 DDNet %s is available:
 == DDNet %s 现已可用：
 
@@ -1634,3 +1631,9 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == 冻结激光实心颜色
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Set all to Rifle
+== 

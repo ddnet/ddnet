@@ -1011,9 +1011,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Mostrar capas de tiles del mapa de fondo
 
-Try fast HTTP map download first
-== Intentar primero la descarga rápida de HTTP para mapas
-
 DDNet %s is available:
 == DDNet %s está disponible:
 
@@ -1527,6 +1524,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1609,6 +1609,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Loading assets

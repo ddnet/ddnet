@@ -1061,9 +1061,6 @@ Use current map as background
 Show tiles layers from BG map
 == Vis fliselag fra baggrundskortet
 
-Try fast HTTP map download first
-== Prøv hurtig download af HTTP kort først
-
 DDNet %s is available:
 == DDNet %s er tilgængelig:
 
@@ -1323,6 +1320,9 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1545,6 +1545,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

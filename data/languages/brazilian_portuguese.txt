@@ -799,9 +799,6 @@ Show score
 UI Color
 == Cor da UI
 
-Try fast HTTP map download first
-== Tentar baixar mapa por HTTP (rápido) primeiro
-
 Best
 == Melhor
 
@@ -1623,3 +1620,9 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == Cor interna do laser do congelamento
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Set all to Rifle
+== 

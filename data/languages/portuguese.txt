@@ -1163,6 +1163,9 @@ Demos directory
 Render
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Kill
 == 
 
@@ -1468,6 +1471,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 Enable replays
 == 
 
@@ -1511,9 +1517,6 @@ Show tiles layers from BG map
 == 
 
 Regular Background Color
-== 
-
-Try fast HTTP map download first
 == 
 
 Run on join

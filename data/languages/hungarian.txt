@@ -793,9 +793,6 @@ Max CSVs
 Strict gametype filter
 == Szigorú játékmód szűrő
 
-Try fast HTTP map download first
-== Próbáljon elősször gyors HTTP letöltést
-
 Use DDRace Scoreboard
 == DDRace pontszámtábla használata
 
@@ -1579,6 +1576,9 @@ Export cut as a separate demo
 Toggle keyboard shortcuts
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Weapons
 == 
 
@@ -1604,4 +1604,7 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 

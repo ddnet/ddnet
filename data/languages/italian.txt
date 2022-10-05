@@ -1090,9 +1090,6 @@ Use current map as background
 Show tiles layers from BG map
 == Mostra i layer dei tile dalla mappa in sfondo
 
-Try fast HTTP map download first
-== Prova un download veloce della mappa con HTTP
-
 DDNet %s is available:
 == DDNet %s è disponibile:
 
@@ -1350,6 +1347,9 @@ Markers:
 %.2f KiB
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Loading ghost files
 == 
 
@@ -1575,6 +1575,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

@@ -1066,9 +1066,6 @@ Background
 Use current map as background
 == Käytä nykyistä kenttää taustana
 
-Try fast HTTP map download first
-== Yritä nopeaa HTTP-kentänlatausta ensin
-
 DDNet %s is available:
 == DDNet %s on saatavilla:
 
@@ -1278,6 +1275,9 @@ Toggle keyboard shortcuts
 == 
 
 Loading demo files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Loading ghost files
@@ -1520,6 +1520,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

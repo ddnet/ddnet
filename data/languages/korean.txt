@@ -1123,9 +1123,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 기본 배경 색상
 
-Try fast HTTP map download first
-== 빠른 HTTP 맵 다운로드 우선 시도
-
 New random timeout code
 == 새로운 무작위 타임아웃 코드 생성
 
@@ -1614,3 +1611,9 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == 동결 레이저 광선 색상
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Set all to Rifle
+== 

@@ -985,9 +985,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Prikaži slojeve od pozadinske mape
 
-Try fast HTTP map download first
-== Pokušaj prvo brzo HTTP skidanje mape
-
 DDNet %s is available:
 == DDNet %s je dostupan:
 
@@ -1214,6 +1211,9 @@ Loading demo files
 == 
 
 Demos directory
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Loading ghost files
@@ -1483,6 +1483,9 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

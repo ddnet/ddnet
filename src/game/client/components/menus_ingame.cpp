@@ -1159,3 +1159,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 			m_pClient->m_Ghost.SaveGhost(pGhost);
 	}
 }
+
+void CMenus::RenderIngameHint()
+{
+	float Width = 300 * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0, 0, Width, 300);
+	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->Text(0x0, 5, 290, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
+	UI()->MapScreen();
+}
