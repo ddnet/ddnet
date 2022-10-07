@@ -62,6 +62,10 @@ int main(int argc, const char **argv)
 		}
 	}
 
+#if defined(CONF_FAMILY_WINDOWS)
+	CWindowsComLifecycle WindowsComLifecycle(false);
+#endif
+
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 #if defined(CONF_PLATFORM_ANDROID)
 	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));

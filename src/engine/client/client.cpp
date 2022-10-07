@@ -4574,7 +4574,7 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
 #elif defined(CONF_FAMILY_WINDOWS)
-	CWindowsComLifecycle WindowsComLifecycle;
+	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;

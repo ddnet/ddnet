@@ -719,6 +719,9 @@ static unsigned long __stdcall thread_run(void *user)
 #error not implemented
 #endif
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	CWindowsComLifecycle WindowsComLifecycle(false);
+#endif
 	struct THREAD_RUN *data = (THREAD_RUN *)user;
 	void (*threadfunc)(void *) = data->threadfunc;
 	void *u = data->u;
@@ -4252,9 +4255,12 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-CWindowsComLifecycle::CWindowsComLifecycle()
+// See https://learn.microsoft.com/en-us/windows/win32/learnwin32/initializing-the-com-library
+CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
 {
-	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	HRESULT result = CoInitializeEx(NULL, (HasWindow ? COINIT_APARTMENTTHREADED : COINIT_MULTITHREADED) | COINIT_DISABLE_OLE1DDE);
+	dbg_assert(result != S_FALSE, "COM library already initialized on this thread");
+	dbg_assert(result == S_OK, "COM library initialization failed");
 }
 CWindowsComLifecycle::~CWindowsComLifecycle()
 {
