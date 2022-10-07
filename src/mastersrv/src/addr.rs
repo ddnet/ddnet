@@ -272,6 +272,7 @@ impl<'de> serde::Deserialize<'de> for RegisterAddr {
 mod test {
     use super::Addr;
     use super::Protocol;
+    use super::RegisterAddr;
     use std::net::IpAddr;
     use std::str::FromStr;
 
