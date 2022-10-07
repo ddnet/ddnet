@@ -141,6 +141,8 @@ public:
 		NUM_NETWORKS,
 	};
 
+	static constexpr const char *SEARCH_EXCLUDE_TOKEN = ";";
+
 	virtual void Refresh(int Type) = 0;
 	virtual bool IsGettingServerlist() const = 0;
 	virtual bool IsRefreshing() const = 0;
