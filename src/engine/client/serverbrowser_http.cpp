@@ -166,7 +166,7 @@ void CChooseMaster::CJob::Run()
 	//
 	// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to
 	// fail.
-	CTimeout Timeout{10000, 0, 8000, 10};
+	CTimeout Timeout{20000, 0, 1000, 20};
 	int aTimeMs[MAX_URLS];
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
@@ -328,7 +328,7 @@ void CServerBrowserHttp::Update()
 		}
 		m_pGetServers = HttpGet(pBestUrl);
 		// 10 seconds connection timeout, lower than 8KB/s for 10 seconds to fail.
-		m_pGetServers->Timeout(CTimeout{10000, 0, 8000, 10});
+		m_pGetServers->Timeout(CTimeout{20000, 0, 1000, 20});
 		m_pEngine->AddJob(m_pGetServers);
 		m_State = STATE_REFRESHING;
 	}
