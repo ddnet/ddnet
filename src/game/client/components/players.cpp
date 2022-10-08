@@ -420,7 +420,7 @@ void CPlayers::RenderPlayer(
 
 	// evaluate animation
 	float WalkTime = fmod(Position.x, 100.0f) / 100.0f;
-	float RunTime = fmod(Position.x, 250.0f) / 250.0f;
+	float RunTime = fmod(Position.x, 200.0f) / 200.0f;
 
 	// Don't do a moon walk outside the left border
 	if(WalkTime < 0)
