@@ -17,6 +17,7 @@
 # Deëivid!        2022-05-13 18:44:00
 # Deëivid!        2022-06-22 19:26:00
 # Deëivid!        2022-07-05 22:30:00
+# Deëivid!        2022-10-08 19:20:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1459,166 +1460,166 @@ Extras
 == Extras
 
 Preparing demo playback
-== 
+== Preparando la reproducción de la demo
 
 Connected
-== 
+== Conectado
 
 Loading map file from storage
-== 
+== Cargando archivo de mapa desde el almacenamiento
 
 Why are you slowmo replaying to read this?
-== 
+== ¿Por qué lo reproduces a cámara lenta para leer esto?
 
 Initializing components
-== 
+== Inicializando componentes
 
 Initializing assets
-== 
+== Inicializando recursos
 
 Initializing map logic
-== 
+== Inicializando lógica de mapa
 
 Sending initial client info
-== 
+== Enviando información inicial del cliente
 
 Uploading map data to GPU
-== 
+== Cargando datos del mapa a la GPU
 
 Getting game info
-== 
+== Obteniendo información de la partida
 
 Requesting to join the game
-== 
+== Solicitando unión a la partida
 
 Loading menu images
-== 
+== Cargando imágenes del menú
 
 Play the current demo
-== 
+== Reproducir la demo actual
 
 Pause the current demo
-== 
+== Pausar la demo actual
 
 Stop the current demo
-== 
+== Detener la demo actual
 
 Slow down the demo
-== 
+== Ralentizar la demo
 
 Speed up the demo
-== 
+== Acelerar la demo
 
 Mark the beginning of a cut
-== 
+== Marca el inicio de un corte
 
 Mark the end of a cut
-== 
+== Marca el final de un corte
 
 Export cut as a separate demo
-== 
+== Exportar corte como una demo diferente
 
 Toggle keyboard shortcuts
-== 
+== Alternar atajos de teclado
 
 Loading demo files
-== 
+== Cargando archivos de demos
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menú abierto. Presiona la tecla Esc otra vez para cerrarlo.
 
 Loading ghost files
-== 
+== Cargando archivos de fantasma
 
 Loading skin files
-== 
+== Cargando archivos de skins
 
 Appearance
-== 
+== Apariencia
 
 Name Plate
-== 
+== Nombres
 
 Hook Collisions
-== 
+== Colisiones del gancho
 
 Show health, shields and ammo
-== 
+== Mostrar salud, escudos y munición
 
 DDRace HUD
-== 
+== HUD DDRace
 
 Show client IDs in scoreboard
-== 
+== Mostrar IDs de cliente en la tabla de puntuación
 
 Show DDRace HUD
-== 
+== Mostrar el HUD DDRace
 
 Show jumps indicator
-== 
+== Mostrar indicador de saltos
 
 Show hook strength indicator
-== 
+== Mostrar indicador de fuerza del gancho
 
 Hook collision line
-== 
+== Línea de colisión del gancho
 
 Hook collision line width
-== 
+== Ancho de la línea de colisión del gancho
 
 Hook collision line opacity
-== 
+== Opacidad de la lína de colisión del gancho
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Colores de la línea de colisión del gancho, en el posible caso de que colisione con:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Tus movimientos no cuentan al calcular los colores de la línea
 
 Nothing hookable
-== 
+== Nada enganchable
 
 Something hookable
-== 
+== Algo enganchable
 
 A Tee
-== 
+== Un Tee
 
 Weapons
-== 
+== Armas
 
 Rifle Laser Outline Color
-== 
+== Color externo del Láser de Rifle
 
 Rifle Laser Inner Color
-== 
+== Color interno del Láser de Rifle
 
 Shotgun Laser Outline Color
-== 
+== Color externo del Láser de la Escopeta
 
 Shotgun Laser Inner Color
-== 
+== Color interno del Láser de la Escopeta
 
 Door Laser Outline Color
-== 
+== Color externo de las Puertas Láser
 
 Door Laser Inner Color
-== 
+== Color interno de las Puertas Láser
 
 Freeze Laser Outline Color
-== 
+== Color externo del Láser Congelante
 
 Freeze Laser Inner Color
-== 
+== Color interno del Láser Congelante
 
 Set all to Rifle
-== 
+== Usar todos como el Rifle
 
 Loading assets
-== 
+== Cargando recursos
 
 Loading race demo files
-== 
+== Cargando archivos de demos de carreras
 
 Loading sound files
-== 
+== Cargando archivos de sonido
