@@ -24,7 +24,7 @@ Items can be added when <mods_snap> is called using the <snap_new_item> function
 Section: Client Side
 
 Topic: Inspection
-<modc_newsnapshot> is called when a new snapshot has arrived for processing. <snap_num_items>, <snap_get_item> and <snap_find_item> can be used to inspect the current and previous snapshot. This can be done anywhere while the client is running and not just in the <modc_newsnapshot> function. The client can also call <snap_invalidate_item> if an item contains improper information that could harm the operation of the client. This should however be done in <modc_newsnapshot> to assure that no bad data propagates into the rest of the client.
+<modc_newsnapshot> is called when a new snapshot has arrived for processing. <snap_num_items>, <snap_get_item> and <snap_find_item> can be used to inspect the current and previous snapshot. This can be done anywhere while the client is running and not just in the <modc_newsnapshot> function.
 
 Topic: Rendering
 DOCTODO
