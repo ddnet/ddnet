@@ -50,8 +50,8 @@ Topic: Interval
 
 The interval for how often a client receives a snapshot changes during the course of the connection. There are three different snapshot rates.
 
-- *Init*. 5 snapshots per second. Used when a client is connecting and used until the client has acknowlaged a snapshot. This mechanism is used because the first snapshot because no delta compression can be done.
+- *Init*. 5 snapshots per second. Used when a client is connecting and used until the client has acknowledged a snapshot. This mechanism is used because the first snapshot because no delta compression can be done.
 
 - *Full*. Snapshot for every tick or every even tick depending on server configuration. This is used during normal gameplay and everything is running smooth.
 
-- *Recovery*. 1 snapshot each second. A client enters recovery rate when it haven't acknowlaged a snapshot over 1 second. This is to let the client to beable to recover if it has a slow connection.
+- *Recovery*. 1 snapshot each second. A client enters recovery rate when it hasn't acknowledged a snapshot over 1 second. This is to let the client be able to recover if it has a slow connection.
