@@ -995,20 +995,6 @@ int CClient::SnapItemSize(int SnapID, int Index) const
 	return m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
 }
 
-void CClient::SnapInvalidateItem(int SnapID, int Index)
-{
-	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	CSnapshotItem *pSnapshotItem = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
-	if(pSnapshotItem)
-	{
-		if((char *)pSnapshotItem < (char *)m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap || (char *)pSnapshotItem > (char *)m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap + m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_AltSnapSize)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "snap invalidate problem");
-		if((char *)pSnapshotItem >= (char *)m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap && (char *)pSnapshotItem < (char *)m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pSnap + m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_SnapSize)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "snap invalidate problem");
-		pSnapshotItem->m_TypeAndID = -1;
-	}
-}
-
 void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 {
 	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapID])
