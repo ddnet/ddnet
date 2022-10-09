@@ -982,7 +982,7 @@ int CClient::LoadData()
 void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const
 {
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	CSnapshotItem *pSnapshotItem = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
+	const CSnapshotItem *pSnapshotItem = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
 	pItem->m_DataSize = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
 	pItem->m_Type = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(Index);
 	pItem->m_ID = pSnapshotItem->ID();
@@ -995,7 +995,7 @@ int CClient::SnapItemSize(int SnapID, int Index) const
 	return m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
 }
 
-void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
+const void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 {
 	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapID])
 		return 0x0;
@@ -2259,10 +2259,10 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 	int Num = pFrom->NumItems();
 	for(int Index = 0; Index < Num; Index++)
 	{
-		CSnapshotItem *pFromItem = pFrom->GetItem(Index);
+		const CSnapshotItem *pFromItem = pFrom->GetItem(Index);
 		const int FromItemSize = pFrom->GetItemSize(Index);
 		const int ItemType = pFrom->GetItemType(Index);
-		void *pData = pFromItem->Data();
+		const void *pData = pFromItem->Data();
 		Unpacker.Reset(pData, FromItemSize);
 
 		void *pRawObj = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
