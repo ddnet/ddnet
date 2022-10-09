@@ -465,8 +465,8 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 
 void CSnapshotStorage::Init()
 {
-	m_pFirst = 0;
-	m_pLast = 0;
+	m_pFirst = nullptr;
+	m_pLast = nullptr;
 }
 
 void CSnapshotStorage::PurgeAll()
@@ -481,8 +481,8 @@ void CSnapshotStorage::PurgeAll()
 	}
 
 	// no more snapshots in storage
-	m_pFirst = 0;
-	m_pLast = 0;
+	m_pFirst = nullptr;
+	m_pLast = nullptr;
 }
 
 void CSnapshotStorage::PurgeUntil(int Tick)
@@ -501,14 +501,14 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 			break;
 
 		m_pFirst = pNext;
-		pNext->m_pPrev = 0x0;
+		pNext->m_pPrev = nullptr;
 
 		pHolder = pNext;
 	}
 
 	// no more snapshots in storage
-	m_pFirst = 0;
-	m_pLast = 0;
+	m_pFirst = nullptr;
+	m_pLast = nullptr;
 }
 
 void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *pData, int AltDataSize, const void *pAltData)
@@ -538,12 +538,12 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *
 	}
 	else
 	{
-		pHolder->m_pAltSnap = 0;
+		pHolder->m_pAltSnap = nullptr;
 		pHolder->m_AltSnapSize = 0;
 	}
 
 	// link
-	pHolder->m_pNext = 0;
+	pHolder->m_pNext = nullptr;
 	pHolder->m_pPrev = m_pLast;
 	if(m_pLast)
 		m_pLast->m_pNext = pHolder;
@@ -605,7 +605,7 @@ int *CSnapshotBuilder::GetItemData(int Key)
 		if(GetItem(i)->Key() == Key)
 			return GetItem(i)->Data();
 	}
-	return 0;
+	return nullptr;
 }
 
 int CSnapshotBuilder::Finish(void *pSnapData)
@@ -657,7 +657,7 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 {
 	if(ID == -1)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if(m_DataSize + sizeof(CSnapshotItem) + Size >= CSnapshot::MAX_SIZE ||
@@ -665,7 +665,7 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 	{
 		dbg_assert(m_DataSize < CSnapshot::MAX_SIZE, "too much data");
 		dbg_assert(m_NumItems < CSnapshot::MAX_ITEMS, "too many items");
-		return 0;
+		return nullptr;
 	}
 
 	bool Extended = false;
