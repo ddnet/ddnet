@@ -1495,6 +1495,33 @@ void CServerBrowser::TypeFilterClean(int Network)
 	str_copy(pExcludeTypes, aNewList, sizeof(g_Config.m_BrFilterExcludeTypes));
 }
 
+bool CServerBrowser::IsRegistered(const NETADDR &Addr)
+{
+	const int NumServers = m_pHttp->NumServers();
+	for(int i = 0; i < NumServers; i++)
+	{
+		const CServerInfo Info = m_pHttp->Server(i);
+		for(int j = 0; j < Info.m_NumAddresses; j++)
+		{
+			if(net_addr_comp(&Info.m_aAddresses[j], &Addr) == 0)
+			{
+				return true;
+			}
+		}
+	}
+
+	const int NumLegacyServers = m_pHttp->NumLegacyServers();
+	for(int i = 0; i < NumLegacyServers; i++)
+	{
+		if(net_addr_comp(&m_pHttp->LegacyServer(i), &Addr) == 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 int CServerInfo::EstimateLatency(int Loc1, int Loc2)
 {
 	if(Loc1 == LOC_UNKNOWN || Loc2 == LOC_UNKNOWN)

@@ -646,8 +646,9 @@ void CClient::SetState(EClientState s)
 
 		if(s == IClient::STATE_ONLINE)
 		{
-			Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap);
-			Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap);
+			const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
+			Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+			Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
 		}
 		else if(Old == IClient::STATE_ONLINE)
 		{
