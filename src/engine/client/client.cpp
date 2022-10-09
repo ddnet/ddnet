@@ -685,9 +685,10 @@ void CClient::LoadDebugFont()
 void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const
 {
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	const CSnapshotItem *pSnapshotItem = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItem(Index);
-	pItem->m_DataSize = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
-	pItem->m_Type = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemType(Index);
+	const CSnapshot *pSnapshot = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap;
+	const CSnapshotItem *pSnapshotItem = pSnapshot->GetItem(Index);
+	pItem->m_DataSize = pSnapshot->GetItemSize(Index);
+	pItem->m_Type = pSnapshot->GetItemType(Index);
 	pItem->m_ID = pSnapshotItem->ID();
 	return (void *)pSnapshotItem->Data();
 }
