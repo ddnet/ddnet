@@ -135,6 +135,7 @@ public:
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
 	int GetCurrentType() override { return m_ServerlistType; }
+	bool IsRegistered(const NETADDR &Addr);
 
 private:
 	CNetClient *m_pNetClient = nullptr;
