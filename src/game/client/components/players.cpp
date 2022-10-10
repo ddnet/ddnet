@@ -435,7 +435,7 @@ void CPlayers::RenderPlayer(
 		State.Add(&g_pData->m_aAnimations[ANIM_INAIR], 0, 1.0f); // TODO: some sort of time here
 	else if(Stationary)
 	{
-		if(Inactive)
+		if(g_Config.m_ClCustomAnimations && Inactive)
 		{
 			State.Add(Direction.x < 0 ? &g_pData->m_aAnimations[ANIM_SIT_LEFT] : &g_pData->m_aAnimations[ANIM_SIT_RIGHT], 0, 1.0f); // TODO: some sort of time here
 			RenderInfo.m_FeetFlipped = true;
@@ -445,7 +445,7 @@ void CPlayers::RenderPlayer(
 	}
 	else if(!WantOtherDir)
 	{
-		if(Running)
+		if(g_Config.m_ClCustomAnimations && Running)
 			State.Add(Player.m_VelX < 0 ? &g_pData->m_aAnimations[ANIM_RUN_LEFT] : &g_pData->m_aAnimations[ANIM_RUN_RIGHT], RunTime, 1.0f);
 		else
 			State.Add(&g_pData->m_aAnimations[ANIM_WALK], WalkTime, 1.0f);
@@ -512,7 +512,7 @@ void CPlayers::RenderPlayer(
 					else
 						Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
 				}
-				else
+				else if(g_Config.m_ClCustomAnimations)
 					Graphics()->QuadsSetRotation(Direction.x < 0 ? 100.0f : 500.0f);
 
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
@@ -521,7 +521,7 @@ void CPlayers::RenderPlayer(
 			{
 				WeaponPosition = Position;
 				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
-				if(IsSit)
+				if(g_Config.m_ClCustomAnimations && IsSit)
 					WeaponPosition.y += 3.0f;
 
 				if(Direction.x < 0)
