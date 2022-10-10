@@ -26,7 +26,7 @@ To clone this repository with history since we moved the libraries to https://gi
 
     git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
 
-To clone the libraries if you have previously cloned DDNet without them:
+To clone the libraries if you have previously cloned DDNet without them, or if you require the ddnet-libs history instead of a shallow clone:
 
     git submodule update --init --recursive
 
