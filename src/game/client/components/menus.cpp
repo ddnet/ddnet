@@ -11,6 +11,7 @@
 #include <base/vmath.h>
 
 #include <engine/client.h>
+#include <engine/config.h>
 #include <engine/editor.h>
 #include <engine/friends.h>
 #include <engine/graphics.h>
@@ -1035,6 +1036,15 @@ void CMenus::OnInit()
 	// load menu images
 	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
+}
+
+void CMenus::OnConsoleInit()
+{
+	auto *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager != nullptr)
+		pConfigManager->RegisterCallback(CMenus::ConfigSaveCallback, this);
+	Console()->Register("add_favorite_skin", "s[skin_name]", CFGFLAG_CLIENT, Con_AddFavoriteSkin, this, "Add a skin as a favorite");
+	Console()->Register("remove_favorite_skin", "s[skin_name]", CFGFLAG_CLIENT, Con_RemFavoriteSkin, this, "Remove a skin from the favorites");
 }
 
 void CMenus::ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 
 #include <chrono>
+#include <unordered_set>
 #include <vector>
 
 #include <engine/console.h>
@@ -521,6 +522,14 @@ protected:
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	// skin favorite list
+	bool m_SkinFavoritesChanged = false;
+	std::unordered_set<std::string> m_SkinFavorites;
+	static void Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+	void OnConfigSave(IConfigManager *pConfigManager);
+
 	// found in menus_settings.cpp
 	void RenderLanguageSelection(CUIRect MainView);
 	void RenderThemeSelection(CUIRect MainView, bool Header = true);
@@ -561,6 +570,7 @@ public:
 	void KillServer();
 
 	virtual void OnInit() override;
+	void OnConsoleInit() override;
 
 	virtual void OnStateChange(int NewState, int OldState) override;
 	virtual void OnReset() override;
