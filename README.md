@@ -42,7 +42,11 @@ On older distributions like Ubuntu 18.04 don't install `google-mock`, but instea
 Or on CentOS, RedHat and AlmaLinux like this:
 
     sudo yum install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel SDL2-devel sqlite-devel wavpack-devel libx264-devel ffmpeg-devel vulkan-devel glslang spirv-tools libpng-devel
+ 
+Or on Fedora like this:  
 
+    sudo dnf install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel SDL2-devel sqlite-devel wavpack-devel x264-devel ffmpeg-devel vulkan-devel glslang spirv-tools libpng-devel
+    
 Or on Arch Linux like this:
 
     sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools libpng
