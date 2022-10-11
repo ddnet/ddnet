@@ -85,8 +85,6 @@ public:
 	static bool ParseLocation(int *pResult, const char *pString);
 };
 
-bool Is64Player(const CServerInfo *pInfo);
-
 class IServerBrowser : public IInterface
 {
 	MACRO_INTERFACE("serverbrowser", 0)

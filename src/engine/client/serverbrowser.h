@@ -32,7 +32,6 @@ public:
 		int64_t m_RequestTime;
 		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
-		bool m_Request64Legacy;
 		CServerInfo m_Info;
 
 		CServerEntry *m_pPrevReq; // request list
@@ -131,7 +130,6 @@ public:
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 	void OnInit();
 
-	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
 	int GetCurrentType() override { return m_ServerlistType; }
