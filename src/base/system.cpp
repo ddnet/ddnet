@@ -3910,11 +3910,26 @@ int open_link(const char *link)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR wBuffer[512];
 	MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, std::size(wBuffer));
+	SHELLEXECUTEINFOW info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
+	info.cbSize = sizeof(SHELLEXECUTEINFOW);
+	info.lpVerb = NULL; // NULL to use the default verb, as "open" may not be available
+	info.lpFile = wBuffer;
+	info.nShow = SW_SHOWNORMAL;
+	// The SEE_MASK_NOASYNC flag ensures that the ShellExecuteEx function
+	// finishes its DDE conversation before it returns, so it's not necessary
+	// to pump messages in the calling thread.
+	// The SEE_MASK_FLAG_NO_UI flag suppresses error messages that would pop up
+	// when the link cannot be opened, e.g. when a folder does not exist.
+	// The SEE_MASK_ASYNCOK flag is not used. It would allow the call to
+	// ShellExecuteEx to return earlier, but it also prevents us from doing
+	// our own error handling, as the function would always return TRUE.
+	info.fMask = SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI;
 	// Save and restore the FPU control word because ShellExecute might change it
 	unsigned oldcontrol87 = _control87(0u, 0u);
-	int status = (uintptr_t)ShellExecuteW(NULL, L"open", wBuffer, NULL, NULL, SW_SHOWDEFAULT) > 32;
+	BOOL success = ShellExecuteExW(&info);
 	_control87(oldcontrol87, 0xffffffffu);
-	return status;
+	return success;
 #elif defined(CONF_PLATFORM_LINUX)
 	const int pid = fork();
 	if(pid == 0)
