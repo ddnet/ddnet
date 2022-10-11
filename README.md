@@ -315,3 +315,11 @@ DDNet is available in the [Phoronix Test Suite](https://openbenchmarking.org/tes
 ```bash
 $ phoronix-test-suite benchmark ddnet
 ```
+
+Better Git Blame
+----------------
+Set a git ignore revs file to ignore formatting revisions:
+
+```bash
+git config blame.ignoreRevsFile formatting-revs.txt
+```
