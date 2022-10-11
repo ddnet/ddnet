@@ -47,6 +47,9 @@ Or on Arch Linux like this:
 
     sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools libpng
 
+Or on Gentoo like this:
+    emerge --ask media-libs/freetype media-libs/glew media-libs/libogg media-libs/libsdl2 media-libs/opus media-libs/opusfile media-libs/pnglite media-video/ffmpeg dev-libs/glib dev-libs/openssl dev-db/sqlite media-libs/libglvnd media-libs/libpng media-sound/wavpack net-misc/curl media-libs/vulkan-loader[layers] media-libs/libsdl2[vulkan] x11-libs/gdk-pixbuf x11-libs/libnotify dev-util/spirv-tools dev-util/glslang dev-util/spirv-headers
+    
 On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
 
     brew install cmake freetype glew googletest opusfile SDL2 wavpack x264 ffmpeg molten-vk vulkan-headers glslang spirv-tools libpng
