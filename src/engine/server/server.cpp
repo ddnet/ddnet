@@ -2218,6 +2218,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"size\":%d"
 		"},"
 		"\"version\":\"%s\","
+		"\"client_score_kind\":\"time\","
 		"\"clients\":[",
 		MaxClients,
 		MaxPlayers,
@@ -2250,7 +2251,7 @@ void CServer::UpdateRegisterServerInfo()
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
 				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
 				m_aClients[i].m_Country,
-				m_aClients[i].m_Score == -1 ? -9999 : m_aClients[i].m_Score == 9999 ? -10000 : -m_aClients[i].m_Score,
+				m_aClients[i].m_Score == -1 ? -9999 : m_aClients[i].m_Score,
 				JsonBool(GameServer()->IsClientPlayer(i)));
 			str_append(aInfo, aClientInfo, sizeof(aInfo));
 			FirstPlayer = false;

@@ -1133,6 +1133,19 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		static float s_ScrollValue = 0;
 		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumReceivedClients, 1, -1, s_ScrollValue);
 
+		int ClientScoreKind = pSelectedServer->m_ClientScoreKind;
+		if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
+		{
+			if((str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap")) && g_Config.m_ClDDRaceScoreBoard)
+			{
+				ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
+			}
+			else
+			{
+				ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_POINTS;
+			}
+		}
+
 		for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 		{
 			CListboxItem Item = UiDoListboxNextItem(&pSelectedServer->m_aClients[i]);
@@ -1166,16 +1179,36 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			char aTemp[16];
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
-				str_copy(aTemp, "SPEC");
-			else if((str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap")) && g_Config.m_ClDDRaceScoreBoard)
 			{
-				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
-					aTemp[0] = 0;
-				else
-					str_time((int64_t)abs(pSelectedServer->m_aClients[i].m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+				str_copy(aTemp, "SPEC");
+			}
+			else if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_POINTS)
+			{
+				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
 			}
 			else
-				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
+			{
+				bool Empty = false;
+				int Time;
+				if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+				{
+					Time = abs(pSelectedServer->m_aClients[i].m_Score);
+					Empty = Time == 0 || Time == 9999;
+				}
+				else
+				{
+					Time = pSelectedServer->m_aClients[i].m_Score;
+					Empty = Time < 0;
+				}
+				if(!Empty)
+				{
+					str_time((int64_t)Time * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+				}
+				else
+				{
+					aTemp[0] = 0;
+				}
+			}
 
 			float ScoreFontSize = 12.0f;
 			while(ScoreFontSize >= 4.0f && TextRender()->TextWidth(0, ScoreFontSize, aTemp, -1, -1.0f) > Score.w)
