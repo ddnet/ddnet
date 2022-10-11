@@ -910,7 +910,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_TileInfoButton = 0;
 		if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-			(Input()->KeyPress(KEY_I) && ModPressed))
+			(Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed))
 		{
 			m_ShowTileInfo = !m_ShowTileInfo;
 			m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -1249,6 +1249,16 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				(Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+		}
+
+		// Hex values button
+		if(m_ShowTileInfo)
+		{
+			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
+			static int s_TileInfoHexButton = 0;
+			if(DoButton_Editor(&s_TileInfoHexButton, "Hex Values", m_ShowTileHexInfo, &Button, 0, "[ctrl+shift+i] Show a tile's hex value") ||
+				(Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed))
+				m_ShowTileHexInfo = !m_ShowTileHexInfo;
 		}
 	}
 }
