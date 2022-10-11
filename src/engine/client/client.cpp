@@ -1578,7 +1578,7 @@ bool CClient::ShouldSendChatTimeoutCodeHeuristic()
 	{
 		return false;
 	}
-	return IsDDNet(&m_CurrentServerInfo);
+	return str_find_nocase(m_CurrentServerInfo.m_aGameType, "ddracenet") || str_find_nocase(m_CurrentServerInfo.m_aGameType, "ddnet");
 }
 
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)

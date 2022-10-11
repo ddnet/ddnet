@@ -1009,15 +1009,16 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool FDDrace;
 	if(Version < 1)
 	{
-		Race = IsRace(pFallbackServerInfo);
-		FastCap = IsFastCap(pFallbackServerInfo);
-		FNG = IsFNG(pFallbackServerInfo);
-		DDRace = IsDDRace(pFallbackServerInfo);
-		DDNet = IsDDNet(pFallbackServerInfo);
-		BlockWorlds = IsBlockWorlds(pFallbackServerInfo);
-		City = IsCity(pFallbackServerInfo);
-		Vanilla = IsVanilla(pFallbackServerInfo);
-		Plus = IsPlus(pFallbackServerInfo);
+		const char *pGameType = pFallbackServerInfo->m_aGameType;
+		Race = str_find_nocase(pGameType, "race") || str_find_nocase(pGameType, "fastcap");
+		FastCap = str_find_nocase(pGameType, "fastcap");
+		FNG = str_find_nocase(pGameType, "fng");
+		DDRace = str_find_nocase(pGameType, "ddrace") || str_find_nocase(pGameType, "mkrace");
+		DDNet = str_find_nocase(pGameType, "ddracenet") || str_find_nocase(pGameType, "ddnet");
+		BlockWorlds = str_startswith(pGameType, "bw  ") || str_comp_nocase(pGameType, "bw") == 0;
+		City = str_find_nocase(pGameType, "city");
+		Vanilla = str_comp(pGameType, "DM") == 0 || str_comp(pGameType, "TDM") == 0 || str_comp(pGameType, "CTF") == 0;
+		Plus = str_find(pGameType, "+");
 		FDDrace = false;
 	}
 	else
