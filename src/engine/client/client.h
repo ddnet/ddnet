@@ -251,8 +251,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_ServerSentCapabilities;
 	CServerCapabilities m_ServerCapabilities;
 
-	bool ShouldSendChatTimeoutCodeHeuristic();
-
 	CServerInfo m_CurrentServerInfo;
 	int64_t m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
 

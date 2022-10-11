@@ -1561,15 +1561,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 #undef GET_INT
 }
 
-bool CClient::ShouldSendChatTimeoutCodeHeuristic()
-{
-	if(m_ServerSentCapabilities)
-	{
-		return false;
-	}
-	return str_find_nocase(m_CurrentServerInfo.m_aGameType, "ddracenet") || str_find_nocase(m_CurrentServerInfo.m_aGameType, "ddnet");
-}
-
 static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 {
 	CServerCapabilities Result;
@@ -2156,7 +2147,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(m_aReceivedSnapshots[Conn] > 50 && !m_aCodeRunAfterJoin[Conn])
 					{
-						if(m_ServerCapabilities.m_ChatTimeoutCode || ShouldSendChatTimeoutCodeHeuristic())
+						if(m_ServerCapabilities.m_ChatTimeoutCode)
 						{
 							CNetMsg_Cl_Say MsgP;
 							MsgP.m_Team = 0;
