@@ -325,8 +325,12 @@ $ phoronix-test-suite benchmark ddnet
 
 Better Git Blame
 ----------------
-Set a git ignore revs file to ignore formatting revisions:
 
+First, use a better tool than `git blame` itself, e.g. [`tig`](https://jonas.github.io/tig/). There's probably a good UI for Windows, too. Alternatively, use the GitHub UI, click "Blame" in any file view.
+
+For `tig`, use `tig blame path/to/file.cpp` to open the blame view, you can navigate with arrow keys or kj, press comma to go to the previous revision of the current line, q to quit.
+
+Only then you could also set up git to ignore specific formatting revisions:
 ```bash
 git config blame.ignoreRevsFile formatting-revs.txt
 ```
