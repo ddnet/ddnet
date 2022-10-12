@@ -928,7 +928,7 @@ void CChat::RefindSkins()
 	{
 		if(Line.m_HasRenderTee)
 		{
-			const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(Line.m_aSkinName));
+			const CSkin *pSkin = m_pClient->m_Skins.Find(Line.m_aSkinName);
 			if(Line.m_CustomColoredSkin)
 				Line.m_RenderSkin = pSkin->m_ColorableSkin;
 			else
