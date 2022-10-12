@@ -1,5 +1,5 @@
-if exist %APPDATA%\DDNet\ (
-	@start explorer %APPDATA%\DDNet\
+if exist "%APPDATA%\DDNet\" (
+	@start explorer "%APPDATA%\DDNet\"
 ) else (
-	@start explorer %APPDATA%\Teeworlds\
+	@start explorer "%APPDATA%\Teeworlds\"
 )
