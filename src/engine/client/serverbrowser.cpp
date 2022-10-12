@@ -720,12 +720,6 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 	{
 		SetInfo(pEntry, *pInfo);
 		pEntry->m_Info.m_Latency = minimum(static_cast<int>((time_get() - m_BroadcastTime) * 1000 / time_freq()), 999);
-		if(pInfo->m_Type == SERVERINFO_VANILLA && Is64Player(pInfo))
-		{
-			pEntry->m_Request64Legacy = true;
-			// Force a quick update.
-			RequestImpl64(Addr, pEntry);
-		}
 	}
 	else if(pEntry->m_RequestTime > 0)
 	{
@@ -747,16 +741,6 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 			SetLatency(Addr, Latency);
 		}
 		pEntry->m_RequestTime = -1; // Request has been answered
-
-		if(!pEntry->m_RequestIgnoreInfo)
-		{
-			if(pInfo->m_Type == SERVERINFO_VANILLA && Is64Player(pInfo))
-			{
-				pEntry->m_Request64Legacy = true;
-				// Force a quick update.
-				RequestImpl64(Addr, pEntry);
-			}
-		}
 	}
 	RemoveRequest(pEntry);
 
@@ -865,35 +849,6 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 	mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 	Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
 	Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
-
-	m_pNetClient->Send(&Packet);
-
-	if(pEntry)
-		pEntry->m_RequestTime = time_get();
-}
-
-void CServerBrowser::RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const
-{
-	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY) + 1];
-	CNetChunk Packet;
-
-	if(g_Config.m_Debug)
-	{
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "requesting server info 64 from %s", aAddrStr);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
-	}
-
-	mem_copy(aBuffer, SERVERBROWSE_GETINFO_64_LEGACY, sizeof(SERVERBROWSE_GETINFO_64_LEGACY));
-	aBuffer[sizeof(SERVERBROWSE_GETINFO_64_LEGACY)] = GetBasicToken(GenerateToken(Addr));
-
-	Packet.m_ClientID = -1;
-	Packet.m_Address = Addr;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	Packet.m_DataSize = sizeof(aBuffer);
-	Packet.m_pData = aBuffer;
 
 	m_pNetClient->Send(&Packet);
 
@@ -1123,10 +1078,7 @@ void CServerBrowser::Update(bool ForceResort)
 
 		if(pEntry->m_RequestTime == 0)
 		{
-			if(pEntry->m_Request64Legacy)
-				RequestImpl64(pEntry->m_Info.m_aAddresses[0], pEntry);
-			else
-				RequestImpl(pEntry->m_Info.m_aAddresses[0], pEntry, nullptr, nullptr, false);
+			RequestImpl(pEntry->m_Info.m_aAddresses[0], pEntry, nullptr, nullptr, false);
 		}
 
 		Count++;
@@ -1562,72 +1514,4 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		}
 	}
 	return true;
-}
-
-bool IsVanilla(const CServerInfo *pInfo)
-{
-	return !str_comp(pInfo->m_aGameType, "DM") || !str_comp(pInfo->m_aGameType, "TDM") || !str_comp(pInfo->m_aGameType, "CTF");
-}
-
-bool IsCatch(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "catch");
-}
-
-bool IsInsta(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "idm") || str_find_nocase(pInfo->m_aGameType, "itdm") || str_find_nocase(pInfo->m_aGameType, "ictf");
-}
-
-bool IsFNG(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "fng");
-}
-
-bool IsRace(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "race") || str_find_nocase(pInfo->m_aGameType, "fastcap");
-}
-
-bool IsFastCap(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "fastcap");
-}
-
-bool IsBlockInfectionZ(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "blockz") ||
-	       str_find_nocase(pInfo->m_aGameType, "infectionz");
-}
-
-bool IsBlockWorlds(const CServerInfo *pInfo)
-{
-	return (str_startswith(pInfo->m_aGameType, "bw  ")) || (str_comp_nocase(pInfo->m_aGameType, "bw") == 0);
-}
-
-bool IsCity(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "city");
-}
-
-bool IsDDRace(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "ddrace") || str_find_nocase(pInfo->m_aGameType, "mkrace");
-}
-
-bool IsDDNet(const CServerInfo *pInfo)
-{
-	return str_find_nocase(pInfo->m_aGameType, "ddracenet") || str_find_nocase(pInfo->m_aGameType, "ddnet");
-}
-
-// other
-
-bool Is64Player(const CServerInfo *pInfo)
-{
-	return str_find(pInfo->m_aGameType, "64") || str_find(pInfo->m_aName, "64") || IsDDNet(pInfo);
-}
-
-bool IsPlus(const CServerInfo *pInfo)
-{
-	return str_find(pInfo->m_aGameType, "+");
 }

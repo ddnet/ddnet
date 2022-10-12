@@ -352,15 +352,14 @@ void CGhost::OnRender()
 		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the ghost to the ninja
-			int Skin = m_pClient->m_Skins.Find("x_ninja");
-			if(Skin != -1)
+			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
+			if(pSkin != nullptr)
 			{
 				bool IsTeamplay = false;
 				if(m_pClient->m_Snap.m_pGameInfoObj)
 					IsTeamplay = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
 
 				GhostNinjaRenderInfo = Ghost.m_RenderInfo;
-				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
 				GhostNinjaRenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				GhostNinjaRenderInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				GhostNinjaRenderInfo.m_BloodColor = pSkin->m_BloodColor;
@@ -387,8 +386,7 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName);
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
-	int SkinId = m_pClient->m_Skins.Find(aSkinName);
-	const CSkin *pSkin = m_pClient->m_Skins.Get(SkinId);
+	const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
 	pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
@@ -679,8 +677,7 @@ void CGhost::RefindSkin()
 		{
 			CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 
-			int SkinId = m_pClient->m_Skins.Find(aSkinName);
-			const CSkin *pSkin = m_pClient->m_Skins.Get(SkinId);
+			const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
 			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 			pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
@@ -691,8 +688,7 @@ void CGhost::RefindSkin()
 	{
 		CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
 
-		int SkinId = m_pClient->m_Skins.Find(aSkinName);
-		const CSkin *pSkin = m_pClient->m_Skins.Get(SkinId);
+		const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
 		pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 		pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 		pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;

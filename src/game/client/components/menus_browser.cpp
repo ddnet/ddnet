@@ -464,19 +464,19 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				{
 					ColorHSLA hsl = ColorHSLA(1.0f, 1.0f, 1.0f);
 
-					if(IsVanilla(pItem))
+					if(str_comp(pItem->m_aGameType, "DM") == 0 || str_comp(pItem->m_aGameType, "TDM") == 0 || str_comp(pItem->m_aGameType, "CTF") == 0)
 						hsl = ColorHSLA(0.33f, 1.0f, 0.75f);
-					else if(IsCatch(pItem))
+					else if(str_find_nocase(pItem->m_aGameType, "catch"))
 						hsl = ColorHSLA(0.17f, 1.0f, 0.75f);
-					else if(IsInsta(pItem))
+					else if(str_find_nocase(pItem->m_aGameType, "idm") || str_find_nocase(pItem->m_aGameType, "itdm") || str_find_nocase(pItem->m_aGameType, "ictf"))
 						hsl = ColorHSLA(0.00f, 1.0f, 0.75f);
-					else if(IsFNG(pItem))
+					else if(str_find_nocase(pItem->m_aGameType, "fng"))
 						hsl = ColorHSLA(0.83f, 1.0f, 0.75f);
-					else if(IsDDNet(pItem))
+					else if(str_find_nocase(pItem->m_aGameType, "ddracenet") || str_find_nocase(pItem->m_aGameType, "ddnet"))
 						hsl = ColorHSLA(0.58f, 1.0f, 0.75f);
-					else if(IsDDRace(pItem))
+					else if(str_find_nocase(pItem->m_aGameType, "ddrace") || str_find_nocase(pItem->m_aGameType, "mkrace"))
 						hsl = ColorHSLA(0.75f, 1.0f, 0.75f);
-					else if(IsRace(pItem))
+					else if(str_find_nocase(pItem->m_aGameType, "race") || str_find_nocase(pItem->m_aGameType, "fastcap"))
 						hsl = ColorHSLA(0.46f, 1.0f, 0.75f);
 
 					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
@@ -1167,7 +1167,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			if(!pSelectedServer->m_aClients[i].m_Player)
 				str_copy(aTemp, "SPEC");
-			else if(IsRace(pSelectedServer) && g_Config.m_ClDDRaceScoreBoard)
+			else if((str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap")) && g_Config.m_ClDDRaceScoreBoard)
 			{
 				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
 					aTemp[0] = 0;

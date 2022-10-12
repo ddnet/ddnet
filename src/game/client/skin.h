@@ -1,6 +1,7 @@
 #ifndef GAME_CLIENT_SKIN_H
 #define GAME_CLIENT_SKIN_H
 #include <base/color.h>
+#include <base/system.h>
 #include <base/vmath.h>
 #include <engine/graphics.h>
 #include <limits>
@@ -8,6 +9,10 @@
 // do this better and nicer
 struct CSkin
 {
+private:
+	char m_aName[24];
+
+public:
 	struct SSkinTextures
 	{
 		IGraphics::CTextureHandle m_Body;
@@ -36,7 +41,6 @@ struct CSkin
 
 	SSkinTextures m_OriginalSkin;
 	SSkinTextures m_ColorableSkin;
-	char m_aName[24];
 	ColorRGBA m_BloodColor;
 
 	template<bool IsSizeType>
@@ -129,6 +133,15 @@ struct CSkin
 
 	bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 	bool operator==(const CSkin &Other) const { return !str_comp(m_aName, Other.m_aName); }
+
+	CSkin(const char *pName)
+	{
+		str_copy(m_aName, pName);
+	}
+	CSkin(CSkin &&) = default;
+	CSkin &operator=(CSkin &&) = default;
+
+	const char *GetName() const { return m_aName; }
 };
 
 #endif

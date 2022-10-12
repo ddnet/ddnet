@@ -769,10 +769,9 @@ void CPlayers::OnRender()
 		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
-			int Skin = m_pClient->m_Skins.Find("x_ninja");
-			if(Skin != -1)
+			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
+			if(pSkin != nullptr)
 			{
-				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
 				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
@@ -786,8 +785,7 @@ void CPlayers::OnRender()
 			}
 		}
 	}
-	int Skin = m_pClient->m_Skins.Find("x_spec");
-	const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+	const CSkin *pSkin = m_pClient->m_Skins.Find("x_spec");
 	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;

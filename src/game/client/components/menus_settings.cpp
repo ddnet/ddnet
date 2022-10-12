@@ -18,6 +18,7 @@
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
+#include <game/client/skin.h>
 #include <game/client/ui.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
@@ -404,10 +405,10 @@ struct CUISkin
 	CUISkin(const CSkin *pSkin) :
 		m_pSkin(pSkin) {}
 
-	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->m_aName, Other.m_pSkin->m_aName) < 0; }
+	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0; }
 
-	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->m_aName, pOther) < 0; }
-	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->m_aName, pOther); }
+	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->GetName(), pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->GetName(), pOther); }
 };
 
 void CMenus::RefreshSkins()
@@ -571,7 +572,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// which invalidates the skin
 	// skin info
 	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
+	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
@@ -718,15 +719,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// a downloading skin
 		s_SkinCount = m_pClient->m_Skins.Num();
 		m_SkinFavoritesChanged = false;
-		bool RequiresRebuild = false;
 
 		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {
 			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkinToBeSelected->m_aName, g_Config.m_ClSkinFilterString))
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkinToBeSelected->GetName(), g_Config.m_ClSkinFilterString))
 				return false;
 
 			// no special skins
-			if((pSkinToBeSelected->m_aName[0] == 'x' && pSkinToBeSelected->m_aName[1] == '_'))
+			if((pSkinToBeSelected->GetName()[0] == 'x' && pSkinToBeSelected->GetName()[1] == '_'))
 				return false;
 
 			if(pSkinToBeSelected == 0)
@@ -737,38 +737,27 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		for(const auto &it : m_SkinFavorites)
 		{
-			const auto FirstSkinIndex = m_pClient->m_Skins.Find(it.c_str());
-			// second call is intended, our implemention doesnt return the index in the call where the download finished
-			const auto SkinIndex = m_pClient->m_Skins.Find(it.c_str());
-			if(SkinIndex == -1)
-				continue;
-			if(FirstSkinIndex == -1 && SkinIndex != -1)
-			{
-				// skin list changed, rebuild next frame
-				RequiresRebuild = true;
-			}
-			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.Get(SkinIndex);
+			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str());
 
-			if(!SkinNotFiltered(pSkinToBeSelected))
+			if(pSkinToBeSelected == nullptr || !SkinNotFiltered(pSkinToBeSelected))
 				continue;
 
 			s_vFavoriteSkinListHelper.emplace_back(pSkinToBeSelected);
 		}
-		for(int i = 0; i < m_pClient->m_Skins.Num(); ++i)
+		for(const auto &SkinIt : m_pClient->m_Skins.GetSkinsUnsafe())
 		{
-			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.Get(i);
-
-			if(!SkinNotFiltered(pSkinToBeSelected))
+			const auto &pSkinToBeSelected = SkinIt.second;
+			if(!SkinNotFiltered(pSkinToBeSelected.get()))
 				continue;
 
-			if(std::find(m_SkinFavorites.begin(), m_SkinFavorites.end(), pSkinToBeSelected->m_aName) == m_SkinFavorites.end())
-				s_vSkinListHelper.emplace_back(pSkinToBeSelected);
+			if(std::find(m_SkinFavorites.begin(), m_SkinFavorites.end(), pSkinToBeSelected->GetName()) == m_SkinFavorites.end())
+				s_vSkinListHelper.emplace_back(pSkinToBeSelected.get());
 		}
 		std::sort(s_vSkinListHelper.begin(), s_vSkinListHelper.end());
 		std::sort(s_vFavoriteSkinListHelper.begin(), s_vFavoriteSkinListHelper.end());
 		s_vSkinList = s_vFavoriteSkinListHelper;
 		s_vSkinList.insert(s_vSkinList.end(), s_vSkinListHelper.begin(), s_vSkinListHelper.end());
-		s_InitSkinlist = RequiresRebuild;
+		s_InitSkinlist = false;
 	}
 
 	auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav) {
@@ -793,7 +782,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		const CSkin *pSkinToBeDraw = s_vSkinList[i].m_pSkin;
 
-		if(str_comp(pSkinToBeDraw->m_aName, pSkinName) == 0)
+		if(str_comp(pSkinToBeDraw->GetName(), pSkinName) == 0)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(pSkinToBeDraw, OldSelected >= 0 && (size_t)OldSelected == i);
@@ -816,7 +805,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			{
 				SLabelProperties Props;
 				Props.m_MaxWidth = Item.m_Rect.w;
-				UI()->DoLabel(&Item.m_Rect, pSkinToBeDraw->m_aName, 12.0f, TEXTALIGN_LEFT, Props);
+				UI()->DoLabel(&Item.m_Rect, pSkinToBeDraw->GetName(), 12.0f, TEXTALIGN_LEFT, Props);
 			}
 			if(g_Config.m_Debug)
 			{
@@ -831,7 +820,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 			// render skin favorite icon
 			{
-				const auto SkinItFav = m_SkinFavorites.find(pSkinToBeDraw->m_aName);
+				const auto SkinItFav = m_SkinFavorites.find(pSkinToBeDraw->GetName());
 				const auto IsFav = SkinItFav != m_SkinFavorites.end();
 				CUIRect FavIcon;
 				OriginalRect.HSplitTop(20.0f, &FavIcon, nullptr);
@@ -847,7 +836,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 						RenderFavIcon(FavIcon, IsFav);
 					}
 				}
-				if(UI()->DoButtonLogic(pSkinToBeDraw->m_aName, 0, &FavIcon))
+				if(UI()->DoButtonLogic(pSkinToBeDraw->GetName(), 0, &FavIcon))
 				{
 					if(IsFav)
 					{
@@ -855,7 +844,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 					}
 					else
 					{
-						m_SkinFavorites.emplace(pSkinToBeDraw->m_aName);
+						m_SkinFavorites.emplace(pSkinToBeDraw->GetName());
 					}
 					s_InitSkinlist = true;
 				}
@@ -866,7 +855,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(pSkinName, s_vSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(pSkinName, s_vSkinList[NewSelected].m_pSkin->GetName(), sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
@@ -2900,7 +2889,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 			// Load skins
 
-			int DefaultInd = GameClient()->m_Skins.Find("default");
+			const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
 
 			for(auto &Info : aRenderInfo)
 			{
@@ -2908,13 +2897,13 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				Info.m_CustomColoredSkin = false;
 			}
 
-			int ind = -1;
+			const CSkin *pSkin = nullptr;
 			int pos = 0;
 
-			aRenderInfo[pos++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = pDefaultSkin->m_OriginalSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("pinky")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("cammostripes")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("beast")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
 		}
 
 		// System
