@@ -2563,11 +2563,14 @@ public:
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
  * which may be necessary for using the open_file and open_link functions.
+ * Must be used on every thread. It's automatically used on threads created
+ * with thread_init. Pass true to the constructor on threads that own a
+ * window (i.e. pump a message queue).
  */
 class CWindowsComLifecycle
 {
 public:
-	CWindowsComLifecycle();
+	CWindowsComLifecycle(bool HasWindow);
 	~CWindowsComLifecycle();
 };
 #endif
