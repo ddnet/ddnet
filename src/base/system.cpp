@@ -4215,20 +4215,11 @@ static HMODULE exception_handling_module = nullptr;
 void init_exception_handler()
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	exception_handling_module = LoadLibraryA("exchndl.dll");
-	if(exception_handling_module != nullptr)
+	const char *module_name = "exchndl.dll";
+	exception_handling_module = LoadLibraryA(module_name);
+	if(exception_handling_module == nullptr)
 	{
-		// Intentional
-#ifdef __MINGW32__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		auto exc_hndl_init = (void APIENTRY (*)(void *))GetProcAddress(exception_handling_module, "ExcHndlInit");
-#ifdef __MINGW32__
-#pragma GCC diagnostic pop
-#endif
-		void *exception_handling_offset = (void *)GetModuleHandle(NULL);
-		exc_hndl_init(exception_handling_offset);
+		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld)", module_name, GetLastError());
 	}
 #else
 #error exception handling not implemented
@@ -4240,16 +4231,22 @@ void set_exception_handler_log_file(const char *log_file_path)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(exception_handling_module != nullptr)
 	{
+		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+		MultiByteToWideChar(CP_UTF8, 0, log_file_path, -1, wBuffer, std::size(wBuffer));
 		// Intentional
 #ifdef __MINGW32__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
-		auto exception_log_file_path_func = (BOOL APIENTRY(*)(const char *))(GetProcAddress(exception_handling_module, "ExcHndlSetLogFileNameA"));
+		const char *function_name = "ExcHndlSetLogFileNameW";
+		auto exception_log_file_path_func = (BOOL APIENTRY(*)(const WCHAR *))(GetProcAddress(exception_handling_module, function_name));
 #ifdef __MINGW32__
 #pragma GCC diagnostic pop
 #endif
-		exception_log_file_path_func(log_file_path);
+		if(exception_log_file_path_func == nullptr)
+			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld)", function_name, GetLastError());
+		else
+			exception_log_file_path_func(wBuffer);
 	}
 #else
 #error exception handling not implemented
