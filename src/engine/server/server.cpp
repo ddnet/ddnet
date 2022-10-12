@@ -296,7 +296,7 @@ void CServer::CClient::Reset()
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
 	m_SnapRate = CClient::SNAPRATE_INIT;
-	m_Score = 0;
+	m_Score = -1;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 }
@@ -2014,7 +2014,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			q.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 
 			ADD_INT(q, m_aClients[i].m_Country); // client country
-			ADD_INT(q, m_aClients[i].m_Score); // client score
+			ADD_INT(q, m_aClients[i].m_Score == -1 ? -9999 : m_aClients[i].m_Score == 9999 ? -10000 : -m_aClients[i].m_Score); // client score
 			ADD_INT(q, GameServer()->IsClientPlayer(i) ? 1 : 0); // is player?
 			if(Type == SERVERINFO_EXTENDED)
 				q.AddString("", 0); // extra info, reserved
@@ -2096,7 +2096,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country
-				Packer.AddInt(m_aClients[i].m_Score == -9999 ? -1 : -m_aClients[i].m_Score); // client score
+				Packer.AddInt(m_aClients[i].m_Score); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 			}
 		}
@@ -2250,7 +2250,7 @@ void CServer::UpdateRegisterServerInfo()
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
 				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
 				m_aClients[i].m_Country,
-				m_aClients[i].m_Score,
+				m_aClients[i].m_Score == -1 ? -9999 : m_aClients[i].m_Score == 9999 ? -10000 : -m_aClients[i].m_Score,
 				JsonBool(GameServer()->IsClientPlayer(i)));
 			str_append(aInfo, aClientInfo, sizeof(aInfo));
 			FirstPlayer = false;

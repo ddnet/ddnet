@@ -182,7 +182,6 @@ public:
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	bool m_Afk;
-	bool m_HasFinishScore;
 
 	int m_ChatScore;
 

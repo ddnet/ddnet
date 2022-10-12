@@ -45,10 +45,8 @@ struct CScorePlayerResult : ISqlResult
 		char m_aBroadcast[1024];
 		struct
 		{
-			float m_Time;
+			float m_Time; // -1 for no time.
 			float m_aTimeCp[NUM_CHECKPOINTS];
-			int m_Score;
-			int m_HasFinishScore;
 			int m_Birthday; // 0 indicates no birthday
 		} m_Info;
 		struct
