@@ -1,3 +1,4 @@
+#include "engine/server/databases/connection_pool.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -103,7 +104,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
 			ScoreData.m_aCurrentTimeCp[i] = WithTimeCheckPoints ? i : 0;
 		str_copy(ScoreData.m_aRequestingPlayer, "deen", sizeof(ScoreData.m_aRequestingPlayer));
-		ASSERT_FALSE(CScoreWorker::SaveScore(m_pConn, &ScoreData, false, m_aError, sizeof(m_aError))) << m_aError;
+		ASSERT_FALSE(CScoreWorker::SaveScore(m_pConn, &ScoreData, Write::NORMAL, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
 	void ExpectLines(const std::shared_ptr<CScorePlayerResult> &pPlayerResult, std::initializer_list<const char *> Lines, bool All = false)
@@ -248,7 +249,7 @@ struct TeamScore : public Score
 		str_copy(teamScoreData.m_aaNames[1], "brainless tee", sizeof(teamScoreData.m_aaNames[1]));
 		teamScoreData.m_Time = 100.0;
 		str_copy(teamScoreData.m_aTimestamp, "2021-11-24 19:24:08", sizeof(teamScoreData.m_aTimestamp));
-		ASSERT_FALSE(CScoreWorker::SaveTeamScore(m_pConn, &teamScoreData, false, m_aError, sizeof(m_aError))) << m_aError;
+		ASSERT_FALSE(CScoreWorker::SaveTeamScore(m_pConn, &teamScoreData, Write::NORMAL, m_aError, sizeof(m_aError))) << m_aError;
 
 		str_copy(m_PlayerRequest.m_aMap, "Kobra 3", sizeof(m_PlayerRequest.m_aMap));
 		str_copy(m_PlayerRequest.m_aRequestingPlayer, "brainless tee", sizeof(m_PlayerRequest.m_aRequestingPlayer));
@@ -515,7 +516,17 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 
 auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);
 #if defined(CONF_TEST_MYSQL)
-auto g_pMysqlConn = CreateMysqlConnection("ddnet", "record", "ddnet", "thebestpassword", "localhost", "", 3306, true);
+CMysqlConfig gMysqlConfig{
+	"ddnet", // database
+	"record", // prefix
+	"ddnet", // user
+	"thebestpassword", // password
+	"localhost", // ip
+	"", // bindaddr
+	3306, // port
+	true, // setup
+};
+auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
 #endif
 
 auto g_TestValues
