@@ -149,8 +149,8 @@ void InitAndroid()
 		if(pIOR != NULL)
 		{
 			char aFileSHA[SHA256_MAXSTRSIZE];
-			sha256_str(ShaAllFile, aFileSHA, SHA256_MAXSTRSIZE);
-			io_write(pIOR, aFileSHA, SHA256_MAXSTRSIZE - 1);
+			sha256_str(ShaAllFile, aFileSHA, sizeof(aFileSHA));
+			io_write(pIOR, aFileSHA, str_length(aFileSHA));
 			io_close(pIOR);
 		}
 	}
