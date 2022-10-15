@@ -7,17 +7,16 @@ const SHA256_DIGEST SHA256_ZEROED = {{0}};
 
 static void digest_str(const unsigned char *digest, size_t digest_len, char *str, size_t max_len)
 {
-	unsigned i;
 	if(max_len > digest_len * 2 + 1)
 	{
 		max_len = digest_len * 2 + 1;
 	}
 	str[max_len - 1] = 0;
 	max_len -= 1;
-	for(i = 0; i < max_len; i++)
+	for(size_t i = 0; i < max_len; i++)
 	{
 		static const char HEX[] = "0123456789abcdef";
-		int index = i / 2;
+		size_t index = i / 2;
 		if(i % 2 == 0)
 		{
 			str[i] = HEX[digest[index] >> 4];
