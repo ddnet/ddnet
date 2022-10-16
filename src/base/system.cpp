@@ -4239,7 +4239,7 @@ void set_exception_handler_log_file(const char *log_file_path)
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 		const char *function_name = "ExcHndlSetLogFileNameW";
-		auto exception_log_file_path_func = (BOOL APIENTRY(*)(const WCHAR *))(GetProcAddress(exception_handling_module, function_name));
+		auto exception_log_file_path_func = (BOOL(APIENTRY *)(const WCHAR *))(GetProcAddress(exception_handling_module, function_name));
 #ifdef __MINGW32__
 #pragma GCC diagnostic pop
 #endif
