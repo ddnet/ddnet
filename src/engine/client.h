@@ -8,11 +8,16 @@
 #include "message.h"
 #include <base/hash.h>
 
+#include <engine/shared/translation_context.h>
+
 #include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
 
 #include <engine/friends.h>
 #include <engine/shared/snapshot.h>
 #include <functional>
+
+#include <engine/client/enums.h>
 
 struct SWarning;
 
@@ -23,8 +28,6 @@ enum
 	RECORDER_RACE = 2,
 	RECORDER_REPLAYS = 3,
 	RECORDER_MAX = 4,
-
-	NUM_DUMMIES = 2,
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
@@ -73,6 +76,7 @@ public:
 		LOADING_CALLBACK_DETAIL_DEMO,
 	};
 	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
+	CTranslationContext m_TranslationContext;
 
 protected:
 	// quick access to state of the client
@@ -232,17 +236,27 @@ public:
 	virtual CSnapItem SnapGetItem(int SnapId, int Index) const = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
+	virtual void SnapSetStaticsize7(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(int Conn, CMsgPacker *pMsg, int Flags) = 0;
 	virtual int SendMsgActive(CMsgPacker *pMsg, int Flags) = 0;
 
 	template<class T>
-	int SendPackMsgActive(T *pMsg, int Flags)
+	int SendPackMsgActive(T *pMsg, int Flags, bool NoTranslate = false)
 	{
-		CMsgPacker Packer(T::ms_MsgId, false);
+		CMsgPacker Packer(T::ms_MsgId, false, NoTranslate);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsgActive(&Packer, Flags);
+	}
+
+	template<class T>
+	int SendPackMsg(int Conn, T *pMsg, int Flags, bool NoTranslate = false)
+	{
+		CMsgPacker Packer(T::ms_MsgId, false, NoTranslate);
+		if(pMsg->Pack(&Packer))
+			return -1;
+		return SendMsg(Conn, &Packer, Flags);
 	}
 
 	//
@@ -265,6 +279,9 @@ public:
 	int Points() const { return m_Points; }
 	int64_t ReconnectTime() const { return m_ReconnectTime; }
 	void SetReconnectTime(int64_t ReconnectTime) { m_ReconnectTime = ReconnectTime; }
+
+	virtual bool IsSixup() const = 0;
+
 	virtual int GetCurrentRaceTime() = 0;
 
 	virtual void RaceRecord_Start(const char *pFilename) = 0;
@@ -368,6 +385,9 @@ public:
 	virtual void RenderShutdownMessage() = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
+	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
+
+	virtual int ClientVersion7() const = 0;
 };
 
 void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap);

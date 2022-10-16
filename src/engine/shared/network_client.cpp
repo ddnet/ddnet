@@ -56,13 +56,19 @@ int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 	return 0;
 }
 
+int CNetClient::Connect7(const NETADDR *pAddr, int NumAddrs)
+{
+	m_Connection.Connect7(pAddr, NumAddrs);
+	return 0;
+}
+
 int CNetClient::ResetErrorString()
 {
 	m_Connection.ResetErrorString();
 	return 0;
 }
 
-int CNetClient::Recv(CNetChunk *pChunk)
+int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup)
 {
 	while(true)
 	{
@@ -83,9 +89,12 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		{
 			continue;
 		}
+		if(Sixup)
+			Addr.type |= NETTYPE_TW7;
 
-		bool Sixup = false;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup) == 0)
+		SECURITY_TOKEN Token;
+		*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
+		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
 		{
 			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
@@ -103,7 +112,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			}
 			else
 			{
-				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 			}
 		}
