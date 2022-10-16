@@ -558,6 +558,22 @@ void CSpectator::Spectate(int SpectatorId)
 	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SpectatorId)
 		return;
 
+	if(Client()->IsSixup())
+	{
+		protocol7::CNetMsg_Cl_SetSpectatorMode Msg;
+		if(SpectatorId == SPEC_FREEVIEW)
+		{
+			Msg.m_SpecMode = protocol7::SPEC_FREEVIEW;
+			Msg.m_SpectatorId = -1;
+		}
+		else
+		{
+			Msg.m_SpecMode = protocol7::SPEC_PLAYER;
+			Msg.m_SpectatorId = SpectatorId;
+		}
+		Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL, true);
+		return;
+	}
 	CNetMsg_Cl_SetSpectatorMode Msg;
 	Msg.m_SpectatorId = SpectatorId;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);

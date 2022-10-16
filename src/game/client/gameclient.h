@@ -17,6 +17,9 @@
 
 #include <game/client/prediction/gameworld.h>
 
+#include <game/generated/protocol7.h>
+#include <game/generated/protocolglue.h>
+
 // components
 #include "components/background.h"
 #include "components/binds.h"
@@ -48,6 +51,7 @@
 #include "components/race_demo.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
+#include "components/skins7.h"
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
@@ -121,6 +125,7 @@ public:
 	CParticles m_Particles;
 	CMenus m_Menus;
 	CSkins m_Skins;
+	CSkins7 m_Skins7;
 	CCountryFlags m_CountryFlags;
 	CFlow m_Flow;
 	CHud m_Hud;
@@ -157,6 +162,7 @@ private:
 	std::vector<class CComponent *> m_vpAll;
 	std::vector<class CComponent *> m_vpInput;
 	CNetObjHandler m_NetObjHandler;
+	protocol7::CNetObjHandler m_NetObjHandler7;
 
 	class IEngine *m_pEngine;
 	class IInput *m_pInput;
@@ -203,6 +209,7 @@ private:
 
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConReadyChange7(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -478,6 +485,7 @@ public:
 	void OnInit() override;
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
+	void *TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn);
 	void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy) override;
 	void InvalidateSnapshot() override;
 	void OnNewSnapshot() override;
@@ -508,13 +516,21 @@ public:
 	const char *NetVersion() const override;
 	int DDNetVersion() const override;
 	const char *DDNetVersionStr() const override;
+	virtual int ClientVersion7() const override;
+
+	void DoTeamChangeMessage7(const char *pName, int ClientId, int Team, const char *pPrefix = "");
 
 	// actions
 	// TODO: move these
 	void SendSwitchTeam(int Team);
+	void SendStartInfo7(bool Dummy) const;
+	void SendSkinChange7(bool Dummy);
+	// Returns true if the requested skin change got applied by the server
+	bool GotWantedSkin7(bool Dummy);
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
 	void SendKill(int ClientId) const;
+	void SendReadyChange7();
 
 	int m_NextChangeInfo;
 
@@ -557,6 +573,7 @@ public:
 	bool IsLocalCharSuper() const;
 	bool CanDisplayWarning() const override;
 	CNetObjHandler *GetNetObjHandler() override;
+	protocol7::CNetObjHandler *GetNetObjHandler7() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);

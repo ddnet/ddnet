@@ -1386,6 +1386,7 @@ set(EXPECTED_DATA
   countryflags/ZW.png
   countryflags/default.png
   countryflags/index.txt
+  deadtee.png
   debug_font.png
   editor/audio_source.png
   editor/automap/basic_freeze.rules
@@ -1986,10 +1987,13 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   protocol_ex.cpp
   protocol_ex.h
   protocol_ex_msgs.h
+  protocolglue.cpp
+  protocolglue.h
   ringbuffer.cpp
   ringbuffer.h
   serverinfo.cpp
   serverinfo.h
+  sixup_translate_snapshot.cpp
   snapshot.cpp
   snapshot.h
   storage.cpp
@@ -1998,6 +2002,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
+  translation_context.h
   uuid_manager.cpp
   uuid_manager.h
   video.cpp
@@ -2148,6 +2153,7 @@ if(CLIENT)
     demoedit.cpp
     demoedit.h
     discord.cpp
+    enums.h
     favorites.cpp
     friends.cpp
     friends.h
@@ -2169,6 +2175,7 @@ if(CLIENT)
     serverbrowser_http.h
     serverbrowser_ping_cache.cpp
     serverbrowser_ping_cache.h
+    sixup_translate_system.cpp
     smooth_time.cpp
     smooth_time.h
     sound.cpp
@@ -2237,6 +2244,7 @@ if(CLIENT)
     components/menus_demo.cpp
     components/menus_ingame.cpp
     components/menus_settings.cpp
+    components/menus_settings7.cpp
     components/menus_settings_assets.cpp
     components/menus_start.cpp
     components/motd.cpp
@@ -2253,6 +2261,8 @@ if(CLIENT)
     components/scoreboard.h
     components/skins.cpp
     components/skins.h
+    components/skins7.cpp
+    components/skins7.h
     components/sounds.cpp
     components/sounds.h
     components/spectator.cpp
@@ -2292,6 +2302,7 @@ if(CLIENT)
     render.cpp
     render.h
     render_map.cpp
+    sixup_translate_game.cpp
     skin.h
     ui.cpp
     ui.h
