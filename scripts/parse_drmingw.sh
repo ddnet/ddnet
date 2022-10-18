@@ -16,7 +16,7 @@ fi
 
 TMP_OFFSET=$(grep -E -o "\(with offset [0-9A-F]+\)" "$2" | grep -E -o "[A-F0-9]*")
 if [ -z "$TMP_OFFSET" ]; then
-	TMP_OFFSET=$(grep -E -o "^[0-9A-F]+-[0-9A-F]+ .+\.exe$" "$2" | grep -E -o "^[A-F0-9]+")
+	TMP_OFFSET=$(grep -E -o "^[0-9A-F]+-[0-9A-F]+ .+\.exe" "$2" | grep -E -o "^[A-F0-9]+")
 	if [ -z "$TMP_OFFSET" ]; then
 		printf "\e[31m%s\e[30m\n" "Module offset not found; addresses will be absolute"
 		echo -en "\e[0m"
