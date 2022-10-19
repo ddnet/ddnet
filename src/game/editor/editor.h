@@ -835,6 +835,7 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
+		m_ShowTileHexInfo = false;
 		m_GotoX = 0;
 		m_GotoY = 0;
 
@@ -914,6 +915,7 @@ public:
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
+	bool m_ShowTileHexInfo;
 
 	int m_Mentions;
 
