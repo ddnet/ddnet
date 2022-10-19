@@ -46,9 +46,9 @@ int main(int argc, const char **argv)
 	}
 
 	char aFilenames[3][64];
-	snprintf(aFilenames[0], 64, "%s", argv[3]); //input_map
-	snprintf(aFilenames[1], 64, "%s", argv[9]); //output_map
-	snprintf(aFilenames[2], 64, "%s", argv[1]); //image_file
+	str_copy(aFilenames[0], argv[3]); //input_map
+	str_copy(aFilenames[1], argv[9]); //output_map
+	str_copy(aFilenames[2], argv[1]); //image_file
 
 	int aLayerID[2] = {str_toint(argv[4]), str_toint(argv[5])}; //layergroup_id, layer_id
 	int aStartingPos[2] = {str_toint(argv[6]) * 32, str_toint(argv[7]) * 32}; //pos_x, pos_y

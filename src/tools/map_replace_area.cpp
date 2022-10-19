@@ -72,9 +72,9 @@ int main(int argc, const char *argv[])
 	}
 
 	char aaMapNames[3][64];
-	snprintf(aaMapNames[0], 64, "%s", argv[1]); //from_map
-	snprintf(aaMapNames[1], 64, "%s", argv[4]); //to_map
-	snprintf(aaMapNames[2], 64, "%s", argv[9]); //output_map
+	str_copy(aaMapNames[0], argv[1]); //from_map
+	str_copy(aaMapNames[1], argv[4]); //to_map
+	str_copy(aaMapNames[2], argv[9]); //output_map
 
 	float aaaGameAreas[2][2][2];
 

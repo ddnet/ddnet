@@ -130,7 +130,7 @@ int main(int argc, const char **argv)
 	}
 
 	char aFilename[64];
-	snprintf(aFilename, 64, "%s", argv[1]);
+	str_copy(aFilename, argv[1]);
 	int EnvID = str_toint(argv[2]) - 1;
 	dbg_msg("map_find_env", "input_map='%s'; env_number='#%d';", aFilename, EnvID + 1);
 
