@@ -836,7 +836,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 						RenderFavIcon(FavIcon, IsFav);
 					}
 				}
-				if(UI()->DoButtonLogic(pSkinToBeDraw->GetName(), 0, &FavIcon))
+				if(UI()->DoButtonLogic(&pSkinToBeDraw->m_Metrics.m_Body, 0, &FavIcon))
 				{
 					if(IsFav)
 					{
