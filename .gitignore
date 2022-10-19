@@ -11,6 +11,7 @@ bundle/
 .DS_Store
 .ninja_deps
 .ninja_log
+CACHEDIR.TAG
 CMakeCache.txt
 CMakeFiles
 CMakeSettings*
@@ -20,10 +21,12 @@ CTestTestfile.cmake
 Debug
 Makefile
 Release
+SAN.*
 _CPack_Packages/
 build.ninja
 checksummed_*
 cmake_install.cmake
+debug
 gmock.pc
 gmock_main.pc
 googletest-build/
@@ -34,8 +37,8 @@ gtest_main.pc
 install_manifest*.txt
 ninja_package
 pack_*/
+release
 rules.ninja
-SAN.*
 testrunner\[1\]_include.cmake
 vulkan_shaders_sha256.txt
 
