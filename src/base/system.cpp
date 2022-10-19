@@ -1176,7 +1176,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 
 		i++;
 		if(hostname[i] == ':')
-			*port = atol(hostname + i + 1);
+			*port = str_toint(hostname + i + 1);
 	}
 	else
 	{
@@ -1186,7 +1186,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 		host[i] = 0;
 
 		if(hostname[i] == ':')
-			*port = atol(hostname + i + 1);
+			*port = str_toint(hostname + i + 1);
 	}
 
 	return 0;
