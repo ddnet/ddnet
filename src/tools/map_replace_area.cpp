@@ -80,10 +80,10 @@ int main(int argc, const char *argv[])
 
 	for(int i = 0; i < 2; i++)
 	{
-		aaaGameAreas[i][0][0] = atof(argv[2 + i * 3]) * 32; //x
-		aaaGameAreas[i][1][0] = atof(argv[3 + i * 3]) * 32; //y
-		aaaGameAreas[i][0][1] = aaaGameAreas[i][0][0] + atof(argv[7]) * 32; //x + width
-		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + atof(argv[8]) * 32; //y + height
+		aaaGameAreas[i][0][0] = str_tofloat(argv[2 + i * 3]) * 32; //x
+		aaaGameAreas[i][1][0] = str_tofloat(argv[3 + i * 3]) * 32; //y
+		aaaGameAreas[i][0][1] = aaaGameAreas[i][0][0] + str_tofloat(argv[7]) * 32; //x + width
+		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + str_tofloat(argv[8]) * 32; //y + height
 	}
 
 	cmdline_free(argc, argv);
