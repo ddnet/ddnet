@@ -1612,7 +1612,7 @@ Freeze Laser Inner Color
 == Цвет фриз лазера
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Меню открыто. Нажмите Esc для закрытия меню
 
 Set all to Rifle
-== 
+== Цвет всех как у лазера
