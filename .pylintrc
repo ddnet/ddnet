@@ -22,3 +22,4 @@ disable=
   R0915, # too-many-statements
   W0511, # fixme
   W0603, # global-statement
+  R0022, # useless-option-value
