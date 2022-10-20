@@ -1176,7 +1176,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 
 		i++;
 		if(hostname[i] == ':')
-			*port = atol(hostname + i + 1);
+			*port = str_toint(hostname + i + 1);
 	}
 	else
 	{
@@ -1186,7 +1186,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 		host[i] = 0;
 
 		if(hostname[i] == ':')
-			*port = atol(hostname + i + 1);
+			*port = str_toint(hostname + i + 1);
 	}
 
 	return 0;
@@ -3399,10 +3399,10 @@ int str_isallnum(const char *str)
 	return 1;
 }
 
-int str_toint(const char *str) { return atoi(str); }
+int str_toint(const char *str) { return str_toint_base(str, 10); }
 int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
 unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
-float str_tofloat(const char *str) { return atof(str); }
+float str_tofloat(const char *str) { return strtod(str, NULL); }
 
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
