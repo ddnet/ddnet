@@ -1025,7 +1025,8 @@ void CConsole::Init()
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
 		static CIntVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def}; \
-		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
+		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, \
+			Max == 0 ? Desc " (default: " #Def ", min: " #Min ")" : Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
 	}
 
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
