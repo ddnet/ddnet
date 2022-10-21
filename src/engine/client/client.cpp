@@ -3252,7 +3252,10 @@ void CClient::Run()
 				}
 			}
 			else if(m_EditorActive)
+			{
+				Input()->SetIMEState(false);
 				m_EditorActive = false;
+			}
 
 			Update();
 			int64_t Now = time_get();
