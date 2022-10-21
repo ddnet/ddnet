@@ -3987,55 +3987,58 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 	ToolBox.y += ScrollOffset.y;
 
 	bool ScrollToSelection = false;
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	if(m_Dialog == DIALOG_NONE && !m_Map.m_vpImages.empty())
 	{
-		int OldImage = m_SelectedImage;
-		m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
-		for(size_t i = m_SelectedImage + 1; i < m_Map.m_vpImages.size(); i++)
+		if(Input()->KeyPress(KEY_DOWN))
 		{
-			if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
+			int OldImage = m_SelectedImage;
+			m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
+			for(size_t i = m_SelectedImage + 1; i < m_Map.m_vpImages.size(); i++)
 			{
-				m_SelectedImage = i;
-				break;
-			}
-		}
-		if(m_SelectedImage == OldImage && !m_Map.m_vpImages[m_SelectedImage]->m_External)
-		{
-			for(size_t i = 0; i < m_Map.m_vpImages.size(); i++)
-			{
-				if(m_Map.m_vpImages[i]->m_External)
+				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
 				{
 					m_SelectedImage = i;
 					break;
 				}
 			}
-		}
-		ScrollToSelection = OldImage != m_SelectedImage;
-	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
-	{
-		int OldImage = m_SelectedImage;
-		m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
-		for(int i = m_SelectedImage - 1; i >= 0; i--)
-		{
-			if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
+			if(m_SelectedImage == OldImage && !m_Map.m_vpImages[m_SelectedImage]->m_External)
 			{
-				m_SelectedImage = i;
-				break;
+				for(size_t i = 0; i < m_Map.m_vpImages.size(); i++)
+				{
+					if(m_Map.m_vpImages[i]->m_External)
+					{
+						m_SelectedImage = i;
+						break;
+					}
+				}
 			}
+			ScrollToSelection = OldImage != m_SelectedImage;
 		}
-		if(m_SelectedImage == OldImage && m_Map.m_vpImages[m_SelectedImage]->m_External)
+		else if(Input()->KeyPress(KEY_UP))
 		{
-			for(int i = (int)m_Map.m_vpImages.size() - 1; i >= 0; i--)
+			int OldImage = m_SelectedImage;
+			m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
+			for(int i = m_SelectedImage - 1; i >= 0; i--)
 			{
-				if(!m_Map.m_vpImages[i]->m_External)
+				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
 				{
 					m_SelectedImage = i;
 					break;
 				}
 			}
+			if(m_SelectedImage == OldImage && m_Map.m_vpImages[m_SelectedImage]->m_External)
+			{
+				for(int i = (int)m_Map.m_vpImages.size() - 1; i >= 0; i--)
+				{
+					if(!m_Map.m_vpImages[i]->m_External)
+					{
+						m_SelectedImage = i;
+						break;
+					}
+				}
+			}
+			ScrollToSelection = OldImage != m_SelectedImage;
 		}
-		ScrollToSelection = OldImage != m_SelectedImage;
 	}
 
 	for(int e = 0; e < 2; e++) // two passes, first embedded, then external
@@ -4166,15 +4169,18 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	ToolBox.y += ScrollOffset.y;
 
 	bool ScrollToSelection = false;
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	if(m_Dialog == DIALOG_NONE && !m_Map.m_vpSounds.empty())
 	{
-		m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
-		ScrollToSelection = true;
-	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
-	{
-		m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
-		ScrollToSelection = true;
+		if(Input()->KeyPress(KEY_DOWN))
+		{
+			m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
+			ScrollToSelection = true;
+		}
+		else if(Input()->KeyPress(KEY_UP))
+		{
+			m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
+			ScrollToSelection = true;
+		}
 	}
 
 	CUIRect Slot;
