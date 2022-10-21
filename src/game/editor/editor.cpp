@@ -4166,15 +4166,18 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	ToolBox.y += ScrollOffset.y;
 
 	bool ScrollToSelection = false;
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE)
+	if(m_Dialog == DIALOG_NONE && !m_Map.m_vpSounds.empty())
 	{
-		m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
-		ScrollToSelection = true;
-	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE)
-	{
-		m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
-		ScrollToSelection = true;
+		if(Input()->KeyPress(KEY_DOWN))
+		{
+			m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
+			ScrollToSelection = true;
+		}
+		else if(Input()->KeyPress(KEY_UP))
+		{
+			m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
+			ScrollToSelection = true;
+		}
 	}
 
 	CUIRect Slot;
