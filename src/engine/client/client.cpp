@@ -3236,11 +3236,7 @@ void CClient::Run()
 			g_Config.m_DbgGraphs ^= 1;
 
 		if(CtrlShiftKey(KEY_E, LastE))
-		{
 			g_Config.m_ClEditor = g_Config.m_ClEditor ^ 1;
-			Input()->MouseModeRelative();
-			Input()->SetIMEState(true);
-		}
 
 		// render
 		{
@@ -3249,6 +3245,7 @@ void CClient::Run()
 				if(!m_EditorActive)
 				{
 					Input()->MouseModeRelative();
+					Input()->SetIMEState(true);
 					GameClient()->OnActivateEditor();
 					m_pEditor->ResetMentions();
 					m_EditorActive = true;
