@@ -28,6 +28,7 @@
 # 2022-07-04 cheeser0613
 # 2022-08-08 cheeser0613
 # 2022-09-17 cheeser0613
+# 2022-10-24 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1633,7 +1634,7 @@ Freeze Laser Inner Color
 == 冻结激光实心颜色
 
 Menu opened. Press Esc key again to close menu.
-== 
+== 菜单已打开，再次点击 Esc 以关闭
 
 Set all to Rifle
-== 
+== 统一为激光枪颜色
