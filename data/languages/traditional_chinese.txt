@@ -17,6 +17,7 @@
 # 2022-06-27 cheeser0613
 # 2022-08-08 cheeser0613
 # 2022-09-17 cheeser0613
+# 2022-10-24 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1622,7 +1623,7 @@ Freeze Laser Inner Color
 == 凍結鐳射實心顔色
 
 Menu opened. Press Esc key again to close menu.
-== 
+== 菜單已打開，再次點擊 Esc 以關閉
 
 Set all to Rifle
-== 
+== 統一為鐳射槍顔色
