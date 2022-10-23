@@ -64,7 +64,7 @@
 #include <ws2tcpip.h>
 
 #include <cerrno>
-#include <float.h>
+#include <fenv.h>
 #include <io.h>
 #include <objbase.h>
 #include <process.h>
@@ -3871,9 +3871,11 @@ PROCESS shell_execute(const char *file)
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
-	unsigned oldcontrol87 = _control87(0u, 0u);
+	fenv_t floating_point_environment;
+	int fegetenv_result = fegetenv(&floating_point_environment);
 	ShellExecuteExW(&info);
-	_control87(oldcontrol87, 0xffffffffu);
+	if(fegetenv_result == 0)
+		fesetenv(&floating_point_environment);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
 	char *argv[2];
@@ -3926,9 +3928,11 @@ int open_link(const char *link)
 	// our own error handling, as the function would always return TRUE.
 	info.fMask = SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI;
 	// Save and restore the FPU control word because ShellExecute might change it
-	unsigned oldcontrol87 = _control87(0u, 0u);
+	fenv_t floating_point_environment;
+	int fegetenv_result = fegetenv(&floating_point_environment);
 	BOOL success = ShellExecuteExW(&info);
-	_control87(oldcontrol87, 0xffffffffu);
+	if(fegetenv_result == 0)
+		fesetenv(&floating_point_environment);
 	return success;
 #elif defined(CONF_PLATFORM_LINUX)
 	const int pid = fork();
