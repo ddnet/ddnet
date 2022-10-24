@@ -179,6 +179,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				}
 				else
 				{
+					if(DemoFile)
+						io_close(DemoFile);
 					m_DemoPlayerState = DEMOPLAYER_NONE;
 					Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 					DemolistPopulate();
