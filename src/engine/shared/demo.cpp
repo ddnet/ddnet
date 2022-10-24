@@ -1143,7 +1143,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	m_SliceTo = EndTick;
 	m_Stop = false;
 
-	if(m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
+	if(m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, fs_is_relative_path(pDemo) ? IStorage::TYPE_ALL : IStorage::TYPE_ABSOLUTE) == -1)
 		return;
 
 	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
