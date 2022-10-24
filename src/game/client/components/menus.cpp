@@ -1995,14 +1995,12 @@ int CMenus::Render()
 				// rename demo
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
-					char aBufOld[512];
+					char aBufOld[IO_MAX_PATH_LENGTH];
 					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-					int Length = str_length(m_aCurrentDemoFile);
-					char aBufNew[512];
-					if(Length <= 4 || m_aCurrentDemoFile[Length - 5] != '.' || str_comp_nocase(m_aCurrentDemoFile + Length - 4, "demo"))
-						str_format(aBufNew, sizeof(aBufNew), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-					else
-						str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+					char aBufNew[IO_MAX_PATH_LENGTH];
+					str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+					if(!str_endswith(aBufNew, ".demo"))
+						str_append(aBufNew, ".demo", sizeof(aBufNew));
 					if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
 						DemolistPopulate();
@@ -2054,17 +2052,12 @@ int CMenus::Render()
 				// name video
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
-					char aBufOld[512];
+					char aBufOld[IO_MAX_PATH_LENGTH];
 					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-					int Length = str_length(m_aCurrentDemoFile);
-					char aBufNew[512];
-					if(Length <= 3 || m_aCurrentDemoFile[Length - 4] != '.' || str_comp_nocase(m_aCurrentDemoFile + Length - 3, "mp4"))
-						str_format(aBufNew, sizeof(aBufNew), "%s.mp4", m_aCurrentDemoFile);
-					else
-						str_format(aBufNew, sizeof(aBufNew), "%s", m_aCurrentDemoFile);
-					char aWholePath[1024];
+					if(!str_endswith(m_aCurrentDemoFile, ".mp4"))
+						str_append(m_aCurrentDemoFile, ".mp4", sizeof(m_aCurrentDemoFile));
+					char aWholePath[IO_MAX_PATH_LENGTH];
 					// store new video filename to origin buffer
-					str_copy(m_aCurrentDemoFile, aBufNew);
 					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
 					{
 						m_Popup = POPUP_REPLACE_VIDEO;
