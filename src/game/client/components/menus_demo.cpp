@@ -160,14 +160,17 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static CButtonContainer s_ButtonOk;
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 		{
+			char aDemoName[IO_MAX_PATH_LENGTH];
+			DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
+			str_append(aDemoName, ".demo", sizeof(aDemoName));
+
 			if(!str_endswith(m_aCurrentDemoFile, ".demo"))
 				str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
-			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
+			if(str_comp(aDemoName, m_aCurrentDemoFile) == 0)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
 			else
 			{
-
 				char aPath[IO_MAX_PATH_LENGTH];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 
@@ -512,7 +515,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceSaveButton;
 	if(DoButton_FontIcon(&s_SliceSaveButton, "\xEF\x80\xBD", 0, &Button, IGraphics::CORNER_ALL))
 	{
-		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+		DemoPlayer()->GetDemoName(m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile));
+		str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
