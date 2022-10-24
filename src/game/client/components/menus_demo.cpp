@@ -160,12 +160,13 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static CButtonContainer s_ButtonOk;
 		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 		{
+			if(!str_endswith(m_aCurrentDemoFile, ".demo"))
+				str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
+
 			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
 			else
 			{
-				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
-					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 
 				char aPath[IO_MAX_PATH_LENGTH];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
