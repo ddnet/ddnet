@@ -24,6 +24,7 @@
 #	Chairn			2022-06-16 19:00:00
 #	Sucre			2022-07-19 20:36:00
 #	archimede67		2022-08-15 13:02:00
+#	Nouaa			2022-10-25 18:00:00
 
 ##### /authors #####
 
@@ -1467,7 +1468,7 @@ Extras
 == Extras
 
 Connected
-==  Connecté
+== Connecté
 
 Initializing assets
 == Initialisation des assets
@@ -1572,37 +1573,37 @@ Loading race demo files
 == Chargement des fichiers de demo de course
 
 Play the current demo
-== 
+== Jouer la démo en cours
 
 Pause the current demo
-== 
+== Mettre en pause la démo en cours
 
 Stop the current demo
-== 
+== Arrêter la démo en cours
 
 Slow down the demo
-== 
+== Ralentir la démo
 
 Speed up the demo
-== 
+== Accélérer la démo
 
 Mark the beginning of a cut
-== 
+== Marquer le début d'une coupe
 
 Mark the end of a cut
-== 
+== Marquer la fin d'une coupe
 
 Export cut as a separate demo
-== 
+== Exporter la coupe comme une démo séparée
 
 Toggle keyboard shortcuts
-== 
+== Basculer les raccourcis clavier
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menu ouvert. Appuyez à nouveau sur la touche Esc pour fermer le menu.
 
 Weapons
-== 
+== Armes
 
 Rifle Laser Outline Color
 == 
