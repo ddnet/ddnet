@@ -92,7 +92,9 @@ Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 
    Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
 * **-DTEST_MYSQL=[ON|OFF]** <br>
-Whether to test MySQL/MariaDB support in GTest based tests. Note that this requires a running MySQL/MariaDB database on localhost with this setup:
+Whether to test MySQL/MariaDB support in GTest based tests. Default value is OFF.
+
+   Note that this requires a running MySQL/MariaDB database on localhost with this setup:
 
 ```
 CREATE DATABASE ddnet;
@@ -119,10 +121,12 @@ Whether to optimize for development, speeding up the compilation process a littl
 * **-DUPNP=[ON|OFF]** <br>
 Whether to enable UPnP support for the server.
 You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
+Default value is OFF.
 
 * **-DVULKAN=[ON|OFF]** <br>
 Whether to enable the vulkan backend.
 On Windows you need to install the Vulkan SDK and set the `VULKAN_SDK` environment flag accordingly.
+Default value is ON for Windows x86\_64 and Linux, and OFF for Windows x86 and macOS.
 
 * **-GNinja** <br>
 Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
