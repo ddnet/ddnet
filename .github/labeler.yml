@@ -1,0 +1,50 @@
+network:
+- any: ["datasrc/*.py"]
+
+sixup:
+- any: ["datasrc/seven/*.py"]
+
+scripts: "scripts/**/*"
+
+android:
+- any: ["scripts/android/**/*", "src/android/**/*"]
+
+base: "src/base/**/*"
+
+building:
+- any: ["*.supp", "CMakeLists.txt", "Dockerfile"]
+
+CI:
+- any: ["bors.toml", ".github/workflows/**/*"]
+
+client:
+- any: ["src/engine/client/**/*", "src/engine/shared/**/*", "src/game/client/**/*", "src/game/*.{h,cpp,rs}"]
+
+server:
+- any: ["src/engine/server/**/*", "src/engine/shared/**/*", "src/game/server/**/*", "src/game/*.{h,cpp,rs}"]
+
+antibot: "src/antibot/**/*"
+
+editor:
+- any: ["src/game/editor/**/*"]
+
+prediction:
+- any: ["src/game/client/prediction/**/*"]
+
+sql:
+- any: ["src/engine/server/databases/**/*"]
+
+macOS:
+- any: ["src/macos/**/*", "./**/*.mm"]
+
+tests:
+- any: ["src/test/**/*"]
+
+tools:
+- any: ["src/tools/**/*]
+
+"UI/UX":
+- any: ["src/game/client/components/menu_*.{h,cpp}", "src/game/client/components/*board.{h,cpp}", "src/game/client/components/{hud,chat,freezebars,killmessages}.{h,cpp}"]
+
+teehistorian:
+- any: ["src/game/server/teehistorian.{h,cpp}"]
