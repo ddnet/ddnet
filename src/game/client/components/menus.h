@@ -47,7 +47,7 @@ public:
 	unsigned int m_HSVColor;
 };
 
-// compnent to fetch keypresses, override all other input
+// component to fetch keypresses, override all other input
 class CMenusKeyBinder : public CComponent
 {
 public:

@@ -22,7 +22,7 @@ function make_opusfile() {
 	(
 		cd "$1" || exit 1
 		if [[ "$_EXISTS_PROJECT" == 0 ]]; then
-			#not nice but doesnt matter
+			#not nice but doesn't matter
 			cp -R ../../ogg/include .
 			cp -R ../../opus/include .
 			cp -R ../../ogg/"$2"/include/ogg/* include/ogg/

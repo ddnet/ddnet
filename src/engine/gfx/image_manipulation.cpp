@@ -33,7 +33,7 @@ static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pD
 				{
 					for(int p = 0; p < BPP - 1; ++p)
 						// Seems safe for BPP = 3, 4 which we use. clang-analyzer seems to
-						// asssume being called with larger value. TODO: Can make this
+						// assume being called with larger value. TODO: Can make this
 						// safer anyway.
 						aSumOfOpaque[p] += pSrc[k + p]; // NOLINT(clang-analyzer-core.uninitialized.Assign)
 					++Counter;

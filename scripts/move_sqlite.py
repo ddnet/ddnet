@@ -84,7 +84,7 @@ def main():
 	print("You can use the following commands to import the entries to MySQL (using https://github.com/techouse/sqlite3-to-mysql/):")
 	print()
 	print(f"sqlite3mysql --sqlite-file {os.path.abspath(args.to)} --ignore-duplicate-keys --mysql-insert-method IGNORE --sqlite-tables record_race record_teamrace record_saves --mysql-password 'PW2' --mysql-host 'host' --mysql-database teeworlds --mysql-user teeworlds")
-	print(f"When the ranks are transfered successfully to mysql, {os.path.abspath(args.to)} can be removed")
+	print(f"When the ranks are transferred successfully to mysql, {os.path.abspath(args.to)} can be removed")
 	print()
 	print("Log of the transfer:")
 	print()

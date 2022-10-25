@@ -17,7 +17,7 @@ void main()
 	float OutlineBlend = (1.0 - textColor.a);	
 
 	// since the outline is always black, or even if it has decent colors, it can be just added to the actual color
-	// without loosing any or too much color
+	// without losing any or too much color
 	
 	// lerp isn't commutative, so add the color the fragment looses by lerping
 	// this reduces the chance of false color calculation if the text is transparent

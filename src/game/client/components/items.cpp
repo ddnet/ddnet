@@ -97,7 +97,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	vec2 Vel = Pos - PrevPos;
 
 	// add particle for this projectile
-	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compability
+	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compatibility
 	if(CurWeapon == WEAPON_GRENADE)
 	{
 		m_pClient->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha);

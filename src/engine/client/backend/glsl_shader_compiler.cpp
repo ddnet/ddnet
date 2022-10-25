@@ -183,7 +183,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 						Line.append(pBuff);
 						return;
 					}
-					// since GLES doesnt support texture LOD bias as global state, use the shader function instead(since GLES 3.0 uses shaders only anyway)
+					// since GLES doesn't support texture LOD bias as global state, use the shader function instead(since GLES 3.0 uses shaders only anyway)
 					else if(str_comp(aTmpStr, "texture") == 0)
 					{
 						Line.append("texture");

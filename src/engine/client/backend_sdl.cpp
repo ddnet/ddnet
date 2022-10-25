@@ -333,7 +333,7 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 			return true;
 		}
 #endif
-// Don't allow GL 3.3, if the driver doesn't support atleast OpenGL 4.5
+// Don't allow GL 3.3, if the driver doesn't support at least OpenGL 4.5
 #ifndef CONF_FAMILY_WINDOWS
 		if(GLEW_VERSION_4_4)
 		{
@@ -622,7 +622,7 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 			g_Config.m_GfxGLMinor = 0;
 			g_Config.m_GfxGLPatch = 0;
 
-			// GLES also doesnt know GL_QUAD
+			// GLES also doesn't know GL_QUAD
 			g_Config.m_GfxQuadAsTriangle = 1;
 		}
 #else
@@ -1425,7 +1425,7 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 		SetMode.refresh_rate = RefreshRate;
 		SDL_SetWindowDisplayMode(m_pWindow, SDL_GetClosestDisplayMode(g_Config.m_GfxScreen, &SetMode, &ClosestMode));
 #ifdef CONF_FAMILY_WINDOWS
-		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes appart from other video modes (as of SDL 2.0.16)
+		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes apart from other video modes (as of SDL 2.0.16)
 		// see implementation of SDL_SetWindowDisplayMode
 		SetWindowParams(1, false, true);
 #endif

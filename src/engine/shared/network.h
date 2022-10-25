@@ -523,7 +523,7 @@ public:
 	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
 };
 
-// TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywere
+// TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywhere
 class CNetBase
 {
 	static IOHANDLE ms_DataLogSent;

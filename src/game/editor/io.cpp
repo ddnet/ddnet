@@ -1028,7 +1028,7 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	if(!Err)
 		return Err;
 
-	// modify indecies
+	// modify indices
 	gs_ModifyAddAmount = m_Map.m_vpImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
 

@@ -1062,7 +1062,7 @@ private:
 		// must be calculated when the buffer gets filled
 		size_t m_EstimatedRenderCallCount = 0;
 
-		// usefull data
+		// useful data
 		VkBuffer m_Buffer;
 		size_t m_BufferOff;
 		std::array<SDeviceDescriptorSet, 2> m_aDescriptors;
@@ -1095,7 +1095,7 @@ private:
 
 protected:
 	/************************
-	* ERROR MANAGMENT
+	* ERROR MANAGEMENT
 	************************/
 
 	char m_aError[1024];
@@ -1149,7 +1149,7 @@ protected:
 			dbg_msg("vulkan", "surface lost");
 			break;
 		/*case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
-			dbg_msg("vulkan", "fullscreen exlusive mode lost");
+			dbg_msg("vulkan", "fullscreen exclusive mode lost");
 			break;*/
 		case VK_ERROR_INCOMPATIBLE_DRIVER:
 			pCriticalError = "no compatible driver found. Vulkan 1.1 is required.";
@@ -1496,7 +1496,7 @@ protected:
 	}
 
 	/************************
-	* MEMORY MANAGMENT
+	* MEMORY MANAGEMENT
 	************************/
 
 	bool AllocateVulkanMemory(const VkMemoryAllocateInfo *pAllocateInfo, VkDeviceMemory *pMemory)
@@ -3711,14 +3711,14 @@ public:
 		uint32_t DevPropCount = 0;
 		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, NULL) != VK_SUCCESS)
 		{
-			SetError("Querying logical device extension propterties failed.");
+			SetError("Querying logical device extension properties failed.");
 			return false;
 		}
 
 		std::vector<VkExtensionProperties> vDevPropList(DevPropCount);
 		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, vDevPropList.data()) != VK_SUCCESS)
 		{
-			SetError("Querying logical device extension propterties failed.");
+			SetError("Querying logical device extension properties failed.");
 			return false;
 		}
 
@@ -5442,7 +5442,7 @@ public:
 	}
 
 	/************************
-	* MEMORY MANAGMENT
+	* MEMORY MANAGEMENT
 	************************/
 
 	uint32_t FindMemoryType(VkPhysicalDevice PhyDevice, uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
