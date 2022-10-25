@@ -44,7 +44,11 @@ tools:
 - any: ["src/tools/**/*]
 
 "UI/UX":
-- any: ["src/game/client/components/menu_*.{h,cpp}", "src/game/client/components/*board.{h,cpp}", "src/game/client/components/{hud,chat,freezebars,killmessages}.{h,cpp}"]
+- any:
+  - "src/game/client/components/menu_*.{h,cpp}"
+  - "src/game/client/components/*board.{h,cpp}"
+  - "src/game/client/components/{hud,chat,freezebars,killmessages}.{h,cpp}"
+  - "src/game/client/ui*.{h,cpp}"
 
 teehistorian:
 - any: ["src/game/server/teehistorian.{h,cpp}"]
