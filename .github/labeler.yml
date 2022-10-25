@@ -41,7 +41,7 @@ tests:
 - any: ["src/test/**/*"]
 
 tools:
-- any: ["src/tools/**/*]
+- any: ["src/tools/**/*"]
 
 "UI/UX":
 - any:
