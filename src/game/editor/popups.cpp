@@ -32,10 +32,11 @@ void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Wi
 	if(g_UiNumPopups > 7)
 		return;
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
-	if(x + Width > UI()->Screen()->w)
-		x -= Width;
-	if(y + Height > UI()->Screen()->h)
-		y -= Height;
+	const float Margin = 5.0f;
+	if(x + Width > UI()->Screen()->w - Margin)
+		x = maximum<float>(x - Width, Margin);
+	if(y + Height > UI()->Screen()->h - Margin)
+		y = maximum<float>(y - Height, Margin);
 	s_UiPopups[g_UiNumPopups].m_pId = pID;
 	s_UiPopups[g_UiNumPopups].m_IsMenu = Flags;
 	s_UiPopups[g_UiNumPopups].m_Rect.x = x;
