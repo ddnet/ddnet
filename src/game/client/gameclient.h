@@ -136,7 +136,7 @@ public:
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
-    CBindWheel m_bindwheel;
+    CBindWheel m_Bindwheel;
 	CDamageInd m_DamageInd;
 	CVoting m_Voting;
 	CSpectator m_Spectator;
@@ -348,7 +348,6 @@ public:
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
-        int m_bindwheel;
 		float m_EmoticonStartFraction;
 		int m_EmoticonStartTick;
 		bool m_Solo;
@@ -660,13 +659,6 @@ public:
 	SClientEmoticonsSkin m_EmoticonsSkin;
 	bool m_EmoticonsSkinLoaded;
 
-	struct SClientBindWheel
-	{
-		char description[MAX_BINDWHEEL_DESC];
-		char command[MAX_BINDWHEEL_CMD];
-	};
-	SClientBindWheel m_bindwheellist[NUM_BINDWHEEL];
-	
 	struct SClientHudSkin
 	{
 		IGraphics::CTextureHandle m_SpriteHudAirjump;

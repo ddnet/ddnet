@@ -3478,9 +3478,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 			float NudgeX = margin * cosf(Angle);
 			float NudgeY = 150.0f * sinf(Angle);
-
+			
 			char aBuf[MAX_BINDWHEEL_DESC];
-			str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_bindwheellist[i].description);
+			str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_Bindwheel.m_BindWheelList[i].description);
 			TextRender()->Text(0, Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
 		}
 		Graphics()->WrapNormal();
@@ -3489,9 +3489,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		for(int i = 0; i < NUM_BINDWHEEL; i++)
 		{
-			str_format(pD[i], sizeof(pD[i]), GameClient()->m_bindwheellist[i].description);
+			str_format(pD[i], sizeof(pD[i]), GameClient()->m_Bindwheel.m_BindWheelList[i].description);
 
-			str_format(pC[i], sizeof(pC[i]), GameClient()->m_bindwheellist[i].command);
+			str_format(pC[i], sizeof(pC[i]), GameClient()->m_Bindwheel.m_BindWheelList[i].command);
 
 			// Description
 			MainView.HSplitTop(15.0f, 0, &MainView);
@@ -3504,9 +3504,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			static float s_OffsetName = 0.0f;
 			SUIExEditBoxProperties EditProps;
 			EditProps.m_pEmptyText = pDescriptionFallback;
-			if(UI()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_bindwheellist[i].description), 14.0f, &s_OffsetName, false, IGraphics::CORNER_ALL, EditProps))
+			if(UI()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].description), 14.0f, &s_OffsetName, false, IGraphics::CORNER_ALL, EditProps))
 			{
-				str_format(GameClient()->m_bindwheellist[i].description, sizeof(GameClient()->m_bindwheellist[i].description), pD[i]);
+				str_format(GameClient()->m_Bindwheel.m_BindWheelList[i].description, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].description), pD[i]);
 			}
 
 			// Command
@@ -3517,9 +3517,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i + 1);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			static float s_OffsetClan = 0.0f;
-			if(UI()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_bindwheellist[i].command), 14.0f, &s_OffsetClan))
+			if(UI()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command), 14.0f, &s_OffsetClan))
 			{
-				str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), pC[i]);
+				str_format(GameClient()->m_Bindwheel.m_BindWheelList[i].command, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command), pC[i]);
 			}
 
 			if(NUM_BINDWHEEL / 2 == i + 1)

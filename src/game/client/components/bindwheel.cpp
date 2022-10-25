@@ -6,11 +6,13 @@
 
 #include "chat.h"
 #include "emoticon.h"
+
 #include <game/client/animstate.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
 
 #include <game/client/gameclient.h>
+#include "bindwheel.h"
 
 CBindWheel::CBindWheel()
 {
@@ -53,27 +55,28 @@ void CBindWheel::ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, 
 	
 	}
 }
-void CBindWheel::OnInit()
+void CBindWheel::OnConsoleInit()
 {
-	//IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
-	//if(pConfigManager)
-		//pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
+	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	if(pConfigManager)
+		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
-	//Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConBindwheel, this, "Open bindwheel selector");
-	//Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:10]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
-	//Console()->Chain("bindwheel", ConchainBindwheel, this);
+
+	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConBindwheel, this, "Open bindwheel selector");
+	Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:10]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
+	Console()->Chain("bindwheel", ConchainBindwheel, this);
 
 	
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < NUM_BINDWHEEL; i++)
 	{
-		if(!(str_comp(GameClient()->m_bindwheellist[i].description, "EMPTY") == 0))
+		if(!(str_comp(m_BindWheelList[i].description, "EMPTY") == 0))
 		{
-			str_format(GameClient()->m_bindwheellist[i].description, sizeof(GameClient()->m_bindwheellist[i].description), "EMPTY");
+			str_format(m_BindWheelList[i].description, sizeof(m_BindWheelList[i].description), "EMPTY");
 		}
 
-		if(str_comp(GameClient()->m_bindwheellist[i].command, "") == 0)
+		if(str_comp(m_BindWheelList[i].command, "") == 0)
 		{
-			str_format(GameClient()->m_bindwheellist[i].command, sizeof(GameClient()->m_bindwheellist[i].command), "");
+			str_format(m_BindWheelList[i].command, sizeof(m_BindWheelList[i].command), "");
 		}
 	}
 	
@@ -167,7 +170,7 @@ void CBindWheel::OnRender()
 		float NudgeY = 150.0f * sinf(Angle);
 
 		char aBuf[MAX_BINDWHEEL_DESC];
-		str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_bindwheellist[i].description);
+		str_format(aBuf, sizeof(aBuf), "%s", m_BindWheelList[i].description);
 		//str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
 		TextRender()->Text(0, Screen.w / 2 + NudgeX - TextRender()->TextWidth(0, Size, aBuf, -1, -1.0f)*0.5, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
 	}
@@ -197,18 +200,18 @@ void CBindWheel::OnRender()
 void CBindWheel::Binwheel(int Bind)
 {
 	//bindwheel 0 "123456789" "say hey"
-	char *command = GameClient()->m_bindwheellist[Bind].command;
-	char aBuf[256];
-	Console()->ExecuteLine(GameClient()->m_bindwheellist[Bind].command);
+	char *command = m_BindWheelList[Bind].command;
+	char aBuf[256] = {};
+	Console()->ExecuteLine(m_BindWheelList[Bind].command);
 }
 
 void CBindWheel::updateBinds(int Bindpos, char *Description, char *Command)
 {
-	str_format(GameClient()->m_bindwheellist[Bindpos].command, sizeof(GameClient()->m_bindwheellist[Bindpos].command), Command);
-	str_format(GameClient()->m_bindwheellist[Bindpos].description, sizeof(GameClient()->m_bindwheellist[Bindpos].description), Description);
+	str_format(m_BindWheelList[Bindpos].command, sizeof(m_BindWheelList[Bindpos].command), Command);
+	str_format(m_BindWheelList[Bindpos].description, sizeof(m_BindWheelList[Bindpos].description), Description);
 	
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "[%d]: '%s' -> '%s'", Bindpos, GameClient()->m_bindwheellist[Bindpos].description,GameClient()->m_bindwheellist[Bindpos].command);
+	str_format(aBuf, sizeof(aBuf), "[%d]: '%s' -> '%s'", Bindpos, m_BindWheelList[Bindpos].description, m_BindWheelList[Bindpos].command);
 	
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "updateBinds", aBuf);
 }
@@ -217,12 +220,12 @@ void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserD
 {
 	CBindWheel *pSelf = (CBindWheel *)pUserData;
 
-	char aBuf[128];
+	char aBuf[128] = {};
 	const char *pEnd = aBuf + sizeof(aBuf) - 4;
 	for(int i = 0; i < NUM_BINDWHEEL ; ++i)
 	{
-		char *command = pSelf->GameClient()->m_bindwheellist[i].command;
-		char *description = pSelf->GameClient()->m_bindwheellist[i].description;
+		char *command = pSelf->m_BindWheelList[i].command;
+		char *description = pSelf->m_BindWheelList[i].description;
 		str_format(aBuf, sizeof(aBuf), "bindwheel %d \"%s\" \"%s\"",i,description,command);
 
 		pConfigManager->WriteLine(aBuf);

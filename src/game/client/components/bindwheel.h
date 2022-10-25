@@ -24,12 +24,20 @@ class CBindWheel : public CComponent
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
 public:
+	struct SClientBindWheel
+	{
+		char description[MAX_BINDWHEEL_DESC];
+		char command[MAX_BINDWHEEL_CMD];
+	};
+	SClientBindWheel m_BindWheelList[NUM_BINDWHEEL];
+
+
 	CBindWheel();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnReset() override;
-	virtual void OnInit() override;
 	virtual void OnRender() override;
+	virtual void OnConsoleInit() override;
 	virtual void OnRelease() override;
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	static void ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
