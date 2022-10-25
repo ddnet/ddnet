@@ -582,7 +582,7 @@ weapon.visual_size.Set(64)
 weapon.offsetx.Set(32)
 weapon.offsety.Set(4)
 # the number after the plus sign is the sprite scale, which is calculated for all sprites ( w / sqrt(w² * h²) ) of the additionally added x offset, which is added now,
-# since the muzzle image is 32 pixels bigger, devided by 2, because a sprite's position is always at the center of the sprite image itself
+# since the muzzle image is 32 pixels bigger, divided by 2, because a sprite's position is always at the center of the sprite image itself
 # => the offset added, bcs the sprite is bigger now, but should not be shifted to the left
 # => 96 / sqrt(64×64+96×96)  (the original sprite scale)
 # => 64 × original sprite scale (the actual size of the sprite ingame see weapon.visual_size above)

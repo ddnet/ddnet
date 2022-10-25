@@ -150,7 +150,7 @@ void CGameClient::OnConsoleInit()
 	m_vpInput.insert(m_vpInput.end(), {&CMenus::m_Binder, // this will take over all input when we want to bind a key
 						  &m_Binds.m_SpecialBinds,
 						  &m_GameConsole,
-						  &m_Chat, // chat has higher prio due to tha you can quit it by pressing esc
+						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Menus,
 						  &m_Spectator,
@@ -354,8 +354,8 @@ void CGameClient::OnInit()
 
 	m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 
-	// Agressively try to grab window again since some Windows users report
-	// window not being focussed after starting client.
+	// Aggressively try to grab window again since some Windows users report
+	// window not being focused after starting client.
 	Graphics()->SetWindowGrab(true);
 
 	CChecksumData *pChecksum = Client()->ChecksumData();
@@ -1192,7 +1192,7 @@ void CGameClient::OnNewSnapshot()
 		Client.m_SpecCharPresent = false;
 	}
 
-	// go trough all the items in the snapshot and gather the info we want
+	// go through all the items in the snapshot and gather the info we want
 	{
 		m_Snap.m_aTeamSize[TEAM_RED] = m_Snap.m_aTeamSize[TEAM_BLUE] = 0;
 

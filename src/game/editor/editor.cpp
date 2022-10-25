@@ -2484,7 +2484,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 	else
 	{
-		// pick a type of layers to edit, prefering Tiles layers.
+		// pick a type of layers to edit, preferring Tiles layers.
 		int EditingType = -1;
 		for(size_t i = 0; i < m_vSelectedLayers.size(); i++)
 		{

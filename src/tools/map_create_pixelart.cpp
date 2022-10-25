@@ -91,7 +91,7 @@ bool CreatePixelArt(const char aFilenames[3][64], const int aLayerID[2], const i
 	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, ((int)sizeof(CQuad)) * (pQuadLayer->m_NumQuads + 1));
 	delete[] pQuads;
 
-	dbg_msg("map_create_pixelart", "INFO: sucessfully added %d new pixelart quads.", QuadsCounter);
+	dbg_msg("map_create_pixelart", "INFO: successfully added %d new pixelart quads.", QuadsCounter);
 	return true;
 }
 
@@ -280,12 +280,12 @@ CMapItemLayerQuads *GetQuadLayer(CDataFileReader &InputMap, const int aLayerID[2
 	return (CMapItemLayerQuads *)pLayerItem;
 }
 
-CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const int Heigth, const uint8_t aColor[4], const int aForcedPivot[2] = 0x0)
+CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const int Height, const uint8_t aColor[4], const int aForcedPivot[2] = 0x0)
 {
 	CQuad Quad;
 	Quad.m_PosEnv = Quad.m_ColorEnv = -1;
 	Quad.m_PosEnvOffset = Quad.m_ColorEnvOffset = 0;
-	float x = f2fx(PosX), y = f2fx(PosY), w = f2fx(Width / 2.f), h = f2fx(Heigth / 2.f);
+	float x = f2fx(PosX), y = f2fx(PosY), w = f2fx(Width / 2.f), h = f2fx(Height / 2.f);
 
 	for(int i = 0; i < 2; i++)
 	{

@@ -504,7 +504,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	// skip the input if chat is active
 	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
-		// save reseted input
+		// save the reset input
 		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 		return;
 	}

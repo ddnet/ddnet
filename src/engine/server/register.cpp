@@ -656,7 +656,7 @@ bool CRegister::OnPacket(const CNetChunk *pPacket)
 		const char *pToken = Unpacker.GetString(0);
 		if(Unpacker.Error())
 		{
-			log_error("register", "got errorneous challenge packet from master");
+			log_error("register", "got erroneous challenge packet from master");
 			return true;
 		}
 

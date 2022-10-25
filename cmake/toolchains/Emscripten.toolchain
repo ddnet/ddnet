@@ -9,7 +9,7 @@ set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} --preload-file data")
 set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} --allow-multiple-definition -Wl,--shared-memory,--no-check-features")
 # TODO
 #set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -lwebsocket.js -s PROXY_POSIX_SOCKETS=1")
-# use Web Assmebly & a WebGL2 comptatible GLES3 implementation
+# use Web Assembly & a WebGL2 compatible GLES3 implementation
 set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s WASM=1")
 set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s USE_WEBGL2=1")
 set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s FULL_ES3=1")

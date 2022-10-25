@@ -135,7 +135,7 @@ public:
 	void Load(int Team, bool KeepCurrentWeakStrong);
 	CSaveTee *m_pSavedTees;
 
-	// returns true if an error occured
+	// returns true if an error occurred
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 
 private:

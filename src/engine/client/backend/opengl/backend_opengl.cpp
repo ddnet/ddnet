@@ -21,7 +21,7 @@
 #else
 #include <GLES3/gl3.h>
 #define GL_TEXTURE_2D_ARRAY_EXT GL_TEXTURE_2D_ARRAY
-// GLES doesnt support GL_QUADS, but the code is also never executed
+// GLES doesn't support GL_QUADS, but the code is also never executed
 #define GL_QUADS GL_TRIANGLES
 #ifndef CONF_BACKEND_OPENGL_ES3
 #include <GLES/gl.h>

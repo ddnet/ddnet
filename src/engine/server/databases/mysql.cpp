@@ -645,7 +645,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize)
 	}
 	if(Error)
 	{
-		dbg_assert(0, "error getting string: truncation occured");
+		dbg_assert(0, "error getting string: truncation occurred");
 	}
 }
 
@@ -677,7 +677,7 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	}
 	if(Error)
 	{
-		dbg_assert(0, "error getting blob: truncation occured");
+		dbg_assert(0, "error getting blob: truncation occurred");
 	}
 	return Length;
 }

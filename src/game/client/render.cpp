@@ -245,7 +245,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	float MinY = -32.0f * AssumedScale;
 	// the body pos shifts the body away from center
 	MinY += BodyPos.y;
-	// the actual body is smaller tho, bcs it doesnt use the full skin image in most cases
+	// the actual body is smaller though, because it doesn't use the full skin image in most cases
 	MinY += BodyOffset.y;
 
 	vec2 FeetOffset;
@@ -255,13 +255,13 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	// MaxY builds up from the MinY
 	float MaxY = MinY + BodyHeight;
 	// if the body is smaller than the total feet offset, use feet
-	// since feets are smaller in height, respect the assumed relative position
+	// since feet are smaller in height, respect the assumed relative position
 	MaxY = maximum(MaxY, (-16.0f * AssumedScale + FeetPos.y) + FeetOffset.y + FeetHeight);
 
 	// now we got the full rendered size
 	float FullHeight = (MaxY - MinY);
 
-	// next step is to calculate the offset that was created compared to the assumed relative positon
+	// next step is to calculate the offset that was created compared to the assumed relative position
 	float MidOfRendered = MinY + FullHeight / 2.0f;
 
 	// TODO: x coordinate is ignored for now, bcs it's not really used yet anyway

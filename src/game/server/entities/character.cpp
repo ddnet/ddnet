@@ -1209,7 +1209,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
 
-	// Display Informations
+	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
 	pDDNetCharacter->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
 	pDDNetCharacter->m_FreezeStart = m_Core.m_FreezeStart;
