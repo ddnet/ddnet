@@ -1573,7 +1573,7 @@ Loading race demo files
 == Chargement des fichiers de demo de course
 
 Play the current demo
-== Lecture de la démo en cours
+== Jouer la démo en cours
 
 Pause the current demo
 == Mettre en pause la démo en cours
