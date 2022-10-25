@@ -23,6 +23,7 @@
 # Rafael Fontenelle   2021-06-10 12:00:00
 # pv                  2022-06-01 20:44:00
 # Rafael Fontenelle   2022-09-17 23:23:00
+# Rafael Fontenelle   2022-10-25 11:22:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1622,7 +1623,7 @@ Freeze Laser Inner Color
 == Cor interna do laser do congelamento
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menu aberto. Pressione Esc novamente para fechar o menu.
 
 Set all to Rifle
-== 
+== Definir todos para rifle
