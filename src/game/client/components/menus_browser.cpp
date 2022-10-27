@@ -47,7 +47,7 @@ void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo 
 		"CHN", // LOC_CHINA // Localize("CHN")
 	};
 	dbg_assert(0 <= pInfo->m_Location && pInfo->m_Location < CServerInfo::NUM_LOCS, "location out of range");
-	str_format(pBuffer, BufferLength, "%s", Localize(LOCATION_NAMES[pInfo->m_Location]));
+	str_copy(pBuffer, Localize(LOCATION_NAMES[pInfo->m_Location]), BufferLength);
 }
 
 void CMenus::RenderServerbrowserServerList(CUIRect View)

@@ -191,7 +191,7 @@ void CBinds::GetKey(const char *pBindStr, char *aBuf, unsigned BufSize)
 				if(Mod)
 					str_format(aBuf, BufSize, "%s+%s", GetModifierName(Mod), Input()->KeyName(KeyId));
 				else
-					str_format(aBuf, BufSize, "%s", Input()->KeyName(KeyId));
+					str_copy(aBuf, Input()->KeyName(KeyId), BufSize);
 				return;
 			}
 		}

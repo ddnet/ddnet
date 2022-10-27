@@ -2681,7 +2681,7 @@ void CGraphics_Threaded::AddBackEndWarningIfExists()
 	if(pErrStr != NULL)
 	{
 		SWarning NewWarning;
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "%s", Localize(pErrStr));
+		str_copy(NewWarning.m_aWarningMsg, Localize(pErrStr));
 		m_vWarnings.emplace_back(NewWarning);
 	}
 }
