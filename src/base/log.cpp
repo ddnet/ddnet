@@ -423,9 +423,12 @@ class CLoggerWindowsDebugger : public ILogger
 public:
 	void Log(const CLogMessage *pMessage) override
 	{
-		WCHAR aWBuffer[4096];
-		MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, aWBuffer, sizeof(aWBuffer) / sizeof(WCHAR));
-		OutputDebugStringW(aWBuffer);
+		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, NULL, 0);
+		dbg_assert(WLen > 0, "MultiByteToWideChar failure");
+		WCHAR *pWide = (WCHAR *)malloc(WLen * sizeof(*pWide));
+		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, pWide, WLen) == WLen, "MultiByteToWideChar failure");
+		OutputDebugStringW(pWide);
+		free(pWide);
 	}
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()
