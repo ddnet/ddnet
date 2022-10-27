@@ -26,7 +26,7 @@ GameInfoFlags = [
 ]
 GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
-	"HUD_DDRACE", "NO_WEAK_HOOK_AND_BOUNCE"
+	"HUD_DDRACE", "NO_WEAK_HOOK"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 ProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [

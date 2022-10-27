@@ -273,7 +273,7 @@ void CGameWorld::Tick()
 		{
 			// It's important to call PreTick() and Tick() after each other.
 			// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
-			if(g_Config.m_SvNoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+			if(g_Config.m_SvNoWeakHook && i == ENTTYPE_CHARACTER)
 			{
 				auto *pEnt = m_apFirstEntityTypes[i];
 				for(; pEnt;)

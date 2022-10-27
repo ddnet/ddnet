@@ -738,12 +738,12 @@ void CCharacter::PreTick()
 	Antibot()->OnCharacterTick(m_pPlayer->GetCID());
 
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true, !g_Config.m_SvNoWeakHookAndBounce);
+	m_Core.Tick(true, !g_Config.m_SvNoWeakHook);
 }
 
 void CCharacter::Tick()
 {
-	if(g_Config.m_SvNoWeakHookAndBounce)
+	if(g_Config.m_SvNoWeakHook)
 	{
 		if(m_Paused)
 			return;
