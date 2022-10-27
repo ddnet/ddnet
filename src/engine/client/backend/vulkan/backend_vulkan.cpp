@@ -1106,7 +1106,7 @@ protected:
 	{
 		char aError[1024];
 		if(pErrStrExtra == nullptr)
-			str_format(aError, std::size(aError), "%s", pErr);
+			str_copy(aError, pErr);
 		else
 			str_format(aError, std::size(aError), "%s: %s", pErr, pErrStrExtra);
 		dbg_msg("vulkan", "vulkan error: %s", aError);

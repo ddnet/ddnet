@@ -2773,7 +2773,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
-		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_GAME].m_pFilename);
+		str_copy(aPath, g_pData->m_aImages[IMAGE_GAME].m_pFilename);
 		IsDefault = true;
 	}
 	else
@@ -2935,7 +2935,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
-		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_EMOTICONS].m_pFilename);
+		str_copy(aPath, g_pData->m_aImages[IMAGE_EMOTICONS].m_pFilename);
 		IsDefault = true;
 	}
 	else
@@ -2989,7 +2989,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
-		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_PARTICLES].m_pFilename);
+		str_copy(aPath, g_pData->m_aImages[IMAGE_PARTICLES].m_pFilename);
 		IsDefault = true;
 	}
 	else
@@ -3076,7 +3076,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
-		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_HUD].m_pFilename);
+		str_copy(aPath, g_pData->m_aImages[IMAGE_HUD].m_pFilename);
 		IsDefault = true;
 	}
 	else
@@ -3149,7 +3149,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	bool IsDefault = false;
 	if(str_comp(pPath, "default") == 0)
 	{
-		str_format(aPath, sizeof(aPath), "%s", g_pData->m_aImages[IMAGE_EXTRAS].m_pFilename);
+		str_copy(aPath, g_pData->m_aImages[IMAGE_EXTRAS].m_pFilename);
 		IsDefault = true;
 	}
 	else
@@ -3261,7 +3261,7 @@ void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, I
 	{
 		if(str_comp(g_Config.m_ClMenuMap, pResult->GetString(0)) != 0)
 		{
-			str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", pResult->GetString(0));
+			str_copy(g_Config.m_ClMenuMap, pResult->GetString(0));
 			pSelf->m_MenuBackground.LoadMenuBackground();
 		}
 	}

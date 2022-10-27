@@ -52,7 +52,7 @@ public:
 	void SetDefaults();
 	void UnbindAll();
 	const char *Get(int KeyID, int ModifierCombination);
-	void GetKey(const char *pBindStr, char *aBuf, unsigned BufSize);
+	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize);
 	int GetBindSlot(const char *pBindString, int *pModifierCombination);
 	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);

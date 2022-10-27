@@ -653,7 +653,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 			if(*pNewModifierCombination)
 				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(Key));
 			else
-				str_format(aBuf, sizeof(aBuf), "%s", Input()->KeyName(Key));
+				str_copy(aBuf, Input()->KeyName(Key));
 
 			DoButton_KeySelect(pID, aBuf, 0, pRect);
 		}
@@ -2381,13 +2381,13 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		else if(str_comp(Theme.m_Name.c_str(), "rand") == 0)
 			str_copy(aName, "(random)");
 		else if(Theme.m_HasDay && Theme.m_HasNight)
-			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
+			str_copy(aName, Theme.m_Name.c_str());
 		else if(Theme.m_HasDay && !Theme.m_HasNight)
 			str_format(aName, sizeof(aName), "%s (day)", Theme.m_Name.c_str());
 		else if(!Theme.m_HasDay && Theme.m_HasNight)
 			str_format(aName, sizeof(aName), "%s (night)", Theme.m_Name.c_str());
 		else // generic
-			str_format(aName, sizeof(aName), "%s", Theme.m_Name.c_str());
+			str_copy(aName, Theme.m_Name.c_str());
 
 		UI()->DoLabel(&Item.m_Rect, aName, 16 * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
 	}
@@ -2397,7 +2397,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 
 	if(ItemActive && NewSelected != SelectedTheme)
 	{
-		str_format(g_Config.m_ClMenuMap, sizeof(g_Config.m_ClMenuMap), "%s", vThemesRef[NewSelected].m_Name.c_str());
+		str_copy(g_Config.m_ClMenuMap, vThemesRef[NewSelected].m_Name.c_str());
 		m_pBackground->LoadMenuBackground(vThemesRef[NewSelected].m_HasDay, vThemesRef[NewSelected].m_HasNight);
 	}
 }

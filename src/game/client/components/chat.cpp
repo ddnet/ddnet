@@ -804,7 +804,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		if(pCurrentLine->m_ClientID < 0) // server or client message
 		{
 			str_copy(pCurrentLine->m_aName, "*** ");
-			str_format(pCurrentLine->m_aText, sizeof(pCurrentLine->m_aText), "%s", pLine);
+			str_copy(pCurrentLine->m_aText, pLine);
 		}
 		else
 		{
@@ -834,9 +834,9 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 				Highlighted = true;
 			}
 			else
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "%s", m_pClient->m_aClients[ClientID].m_aName);
+				str_copy(pCurrentLine->m_aName, m_pClient->m_aClients[ClientID].m_aName);
 
-			str_format(pCurrentLine->m_aText, sizeof(pCurrentLine->m_aText), "%s", pLine);
+			str_copy(pCurrentLine->m_aText, pLine);
 			pCurrentLine->m_Friend = m_pClient->m_aClients[ClientID].m_Friend;
 		}
 

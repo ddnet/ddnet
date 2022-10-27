@@ -1975,7 +1975,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 						str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(ClientID),
 							pOption->m_aDescription, aReason);
-						str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
+						str_copy(aDesc, pOption->m_aDescription);
 
 						if((str_endswith(pOption->m_aCommand, "random_map") || str_endswith(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '0' && aReason[0] <= '5')
 						{
@@ -1984,7 +1984,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						}
 						else
 						{
-							str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
+							str_copy(aCmd, pOption->m_aCommand);
 						}
 
 						m_LastMapVote = time_get();
@@ -2005,8 +2005,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					else
 					{
 						str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), pMsg->m_pValue);
-						str_format(aDesc, sizeof(aDesc), "%s", pMsg->m_pValue);
-						str_format(aCmd, sizeof(aCmd), "%s", pMsg->m_pValue);
+						str_copy(aDesc, pMsg->m_pValue);
+						str_copy(aCmd, pMsg->m_pValue);
 					}
 				}
 
@@ -3380,7 +3380,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 		else
 		{
-			str_format(aVersion, sizeof(aVersion), "%s", GAME_VERSION);
+			str_copy(aVersion, GAME_VERSION);
 		}
 		CTeeHistorian::CGameInfo GameInfo;
 		GameInfo.m_GameUuid = m_GameUuid;
@@ -4147,7 +4147,7 @@ void CGameContext::List(int ClientID, const char *pFilter)
 			}
 			else
 			{
-				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, "%s", pName);
+				str_copy(&aBuf[Bufcnt], pName, sizeof(aBuf) - Bufcnt);
 				Bufcnt += str_length(pName);
 			}
 		}

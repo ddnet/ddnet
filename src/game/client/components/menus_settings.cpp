@@ -1434,7 +1434,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 			CListboxItem Item = UiDoListboxNextItem(pIDs[i], CurSelection == i);
 			if(Item.m_Visible)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s", pStr[i]);
+				str_copy(aBuf, pStr[i]);
 				UI()->DoLabel(&Item.m_Rect, aBuf, 16.0f, TEXTALIGN_CENTER);
 			}
 		}
