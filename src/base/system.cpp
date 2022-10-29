@@ -1430,6 +1430,24 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 	return 0;
 }
 
+#if defined(CONF_FAMILY_WINDOWS)
+static char *windows_format_system_message(int error)
+{
+	WCHAR *wide_message;
+	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
+	if(FormatMessageW(flags, NULL, error, 0, (LPWSTR)&wide_message, 0, NULL) == 0)
+	{
+		return nullptr;
+	}
+	int len = WideCharToMultiByte(CP_UTF8, 0, wide_message, -1, NULL, 0, NULL, NULL);
+	dbg_assert(len > 0, "WideCharToMultiByte failure");
+	char *message = (char *)malloc(len * sizeof(*message));
+	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_message, -1, message, len, NULL, NULL) == len, "WideCharToMultiByte failure");
+	LocalFree(wide_message);
+	return message;
+}
+#endif
+
 static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, int sockaddrlen)
 {
 	int sock, e;
@@ -1439,13 +1457,10 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	if(sock < 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		char buf[128];
-		WCHAR wBuffer[128];
 		int error = WSAGetLastError();
-		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, std::size(wBuffer), 0) == 0)
-			wBuffer[0] = 0;
-		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
-		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
+		char *message = windows_format_system_message(error);
+		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, message == nullptr ? "unknown error" : message);
+		free(message);
 #else
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
@@ -1478,13 +1493,10 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	if(e != 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		char buf[128];
-		WCHAR wBuffer[128];
 		int error = WSAGetLastError();
-		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0, error, 0, wBuffer, std::size(wBuffer), 0) == 0)
-			wBuffer[0] = 0;
-		WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buf, sizeof(buf), NULL, NULL);
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, buf);
+		char *message = windows_format_system_message(error);
+		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, message == nullptr ? "unknown error" : message);
+		free(message);
 #else
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
