@@ -312,7 +312,7 @@ public:
 
 	IGraphics::CTextureHandle m_Texture;
 	int m_External;
-	char m_aName[128];
+	char m_aName[IO_MAX_PATH_LENGTH];
 	unsigned char m_aTileFlags[256];
 	class CAutoMapper m_AutoMapper;
 };
@@ -335,7 +335,7 @@ public:
 	~CEditorSound();
 
 	int m_SoundID;
-	char m_aName[128];
+	char m_aName[IO_MAX_PATH_LENGTH];
 
 	void *m_pData;
 	unsigned m_DataSize;
@@ -949,11 +949,11 @@ public:
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
 	char m_aFilesSelectedName[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogFilterString[64];
+	char m_aFileDialogFilterString[IO_MAX_PATH_LENGTH];
 	char *m_pFileDialogPath;
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
-	char m_aFileDialogNewFolderName[64];
+	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
@@ -963,7 +963,7 @@ public:
 	struct CFilelistItem
 	{
 		char m_aFilename[IO_MAX_PATH_LENGTH];
-		char m_aName[128];
+		char m_aName[IO_MAX_PATH_LENGTH];
 		bool m_IsDir;
 		bool m_IsLink;
 		int m_StorageType;
