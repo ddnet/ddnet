@@ -813,9 +813,10 @@ void CHud::RenderPlayerState(const int ClientID)
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
 	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
-	int TotalJumpsToDisplay = 0, AvailableJumpsToDisplay = 0;
+	int TotalJumpsToDisplay = 0;
 	if(g_Config.m_ClShowhudJumpsIndicator)
 	{
+		int AvailableJumpsToDisplay;
 		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
 			bool Grounded = false;
@@ -1409,7 +1410,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 	float y = StartY + LineSpacer * 2;
 	float xl = StartX + 2;
 	float xr = m_Width - 2;
-	int DigitsIndex = 0;
+	int DigitsIndex;
 
 	static float s_TextWidth0 = TextRender()->TextWidth(0, Fontsize, "0.00", -1, -1.0f);
 	static float s_TextWidth00 = TextRender()->TextWidth(0, Fontsize, "00.00", -1, -1.0f);

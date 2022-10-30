@@ -282,11 +282,9 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 				if(Size >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
 				{
-					int x = 0;
-					int y = 0;
-					for(y = 0; y < pTLayer->m_Height; ++y)
+					for(int y = 0; y < pTLayer->m_Height; ++y)
 					{
-						for(x = 0; x < pTLayer->m_Width; ++x)
+						for(int x = 0; x < pTLayer->m_Width; ++x)
 						{
 							unsigned char Index = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
 							if(Index >= TILE_TIME_CHECKPOINT_FIRST && Index <= TILE_TIME_CHECKPOINT_LAST)
