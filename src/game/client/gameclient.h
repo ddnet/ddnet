@@ -725,7 +725,7 @@ private:
 
 	float m_LastZoom;
 	float m_LastScreenAspect;
-	float m_LastDummyConnected;
+	bool m_LastDummyConnected;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
