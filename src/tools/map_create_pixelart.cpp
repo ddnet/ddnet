@@ -31,7 +31,7 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	if(argc < 11 || argc > 12)
+	if(argc < 9 || argc > 12)
 	{
 		dbg_msg("map_create_pixelart", "Invalid arguments");
 		dbg_msg("map_create_pixelart", "Usage: %s <image.png> <img_pixelsize> <input_map> <layergroup_id> <layer_id> <pos_x> <pos_y> <quad_pixelsize> <output_map> [optimize=0|1] [centralize=0|1]", argv[0]);
