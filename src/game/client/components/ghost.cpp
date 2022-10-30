@@ -106,7 +106,7 @@ void CGhost::CGhostPath::SetSize(int Items)
 	m_NumItems = Items;
 }
 
-void CGhost::CGhostPath::Add(CGhostCharacter Char)
+void CGhost::CGhostPath::Add(const CGhostCharacter &Char)
 {
 	SetSize(m_NumItems + 1);
 	*Get(m_NumItems - 1) = Char;
