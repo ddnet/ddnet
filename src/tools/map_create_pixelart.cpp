@@ -224,7 +224,7 @@ bool GetPixelClamped(const CImageInfo &Img, int x, int y, uint8_t aPixel[4])
 	for(int i = 0; i < BPP; i++)
 		aPixel[i] = ((uint8_t *)Img.m_pData)[x * BPP + (Img.m_Width * BPP * y) + i];
 
-	return aPixel[3];
+	return aPixel[3] > 0;
 }
 
 bool ComparePixel(const uint8_t aPixel1[4], const uint8_t aPixel2[4])
