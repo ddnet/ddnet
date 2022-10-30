@@ -5745,7 +5745,6 @@ public:
 		auto &TextureText = m_vTextures[Texture];
 		auto &TextureTextOutline = m_vTextures[TextureOutline];
 		auto &DescrSetText = TextureText.m_VKTextDescrSet;
-		auto &DescrSetTextOutline = TextureText.m_VKTextDescrSet;
 
 		VkDescriptorSetAllocateInfo DesAllocInfo{};
 		DesAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -5780,8 +5779,6 @@ public:
 		aDescriptorWrites[1].pImageInfo = &aImageInfo[1];
 
 		vkUpdateDescriptorSets(m_VKDevice, static_cast<uint32_t>(aDescriptorWrites.size()), aDescriptorWrites.data(), 0, nullptr);
-
-		DescrSetTextOutline = DescrSetText;
 
 		return true;
 	}
