@@ -193,7 +193,7 @@ void CHud::RenderScoreHud()
 			static float s_TextWidth100 = TextRender()->TextWidth(0, 14.0f, "100", -1, -1.0f);
 			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
 			float Split = 3.0f;
-			float ImageSize = GameFlags & GAMEFLAG_FLAGS ? 16.0f : Split;
+			float ImageSize = (GameFlags & GAMEFLAG_FLAGS) ? 16.0f : Split;
 			for(int t = 0; t < 2; t++)
 			{
 				// draw box
