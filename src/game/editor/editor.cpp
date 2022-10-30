@@ -5057,48 +5057,45 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		ColorRGBA aColors[] = {ColorRGBA(1, 0.2f, 0.2f), ColorRGBA(0.2f, 1, 0.2f), ColorRGBA(0.2f, 0.2f, 1), ColorRGBA(1, 1, 0.2f)};
 
-		if(pEnvelope)
+		CUIRect Button;
+
+		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
+
+		static const char *s_aapNames[4][4] = {
+			{"V", "", "", ""},
+			{"", "", "", ""},
+			{"X", "Y", "R", ""},
+			{"R", "G", "B", "A"},
+		};
+
+		static const char *s_aapDescriptions[4][4] = {
+			{"Volume of the envelope", "", "", ""},
+			{"", "", "", ""},
+			{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
+			{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
+		};
+
+		static int s_aChannelButtons[4] = {0};
+		int Bit = 1;
+
+		for(int i = 0; i < pEnvelope->m_Channels; i++, Bit <<= 1)
 		{
-			CUIRect Button;
-
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
-			static const char *s_aapNames[4][4] = {
-				{"V", "", "", ""},
-				{"", "", "", ""},
-				{"X", "Y", "R", ""},
-				{"R", "G", "B", "A"},
-			};
-
-			static const char *s_aapDescriptions[4][4] = {
-				{"Volume of the envelope", "", "", ""},
-				{"", "", "", ""},
-				{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
-				{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
-			};
-
-			static int s_aChannelButtons[4] = {0};
-			int Bit = 1;
-
-			for(int i = 0; i < pEnvelope->m_Channels; i++, Bit <<= 1)
-			{
-				ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-
-				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
-					s_ActiveChannels ^= Bit;
-			}
-
-			// sync checkbox
-			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-			ToolBar.VSplitLeft(12.0f, &Button, &ToolBar);
-			static int s_SyncButton;
-			if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized ? "X" : "", 0, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
-				pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
-
-			ToolBar.VSplitLeft(4.0f, &Button, &ToolBar);
-			ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
-			UI()->DoLabel(&Button, "Synchronized", 10.0f, TEXTALIGN_LEFT);
+			if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
+				s_ActiveChannels ^= Bit;
 		}
+
+		// sync checkbox
+		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
+		ToolBar.VSplitLeft(12.0f, &Button, &ToolBar);
+		static int s_SyncButton;
+		if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized ? "X" : "", 0, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
+			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
+
+		ToolBar.VSplitLeft(4.0f, &Button, &ToolBar);
+		ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
+		UI()->DoLabel(&Button, "Synchronized", 10.0f, TEXTALIGN_LEFT);
 
 		float EndTime = pEnvelope->EndTime();
 		if(EndTime < 1)

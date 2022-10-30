@@ -564,7 +564,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 		return;
 	m_IsValidCopy = false;
 	m_pParent = pFrom;
-	if(m_pParent && m_pParent->m_pChild && m_pParent->m_pChild != this)
+	if(m_pParent->m_pChild && m_pParent->m_pChild != this)
 		m_pParent->m_pChild->m_IsValidCopy = false;
 	pFrom->m_pChild = this;
 

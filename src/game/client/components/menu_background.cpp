@@ -193,8 +193,6 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 	ResetPositions();
 
-	bool NeedImageLoading = false;
-
 	str_copy(m_aMapName, g_Config.m_ClMenuMap);
 
 	if(g_Config.m_ClMenuMap[0] != '\0')
@@ -265,11 +263,9 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(m_Loaded)
 		{
 			m_pLayers->InitBackground(m_pMap);
-			NeedImageLoading = true;
 
 			CMapLayers::OnMapLoad();
-			if(NeedImageLoading)
-				m_pImages->LoadBackground(m_pLayers, m_pMap);
+			m_pImages->LoadBackground(m_pLayers, m_pMap);
 
 			// look for custom positions
 			CMapItemLayerTilemap *pTLayer = m_pLayers->GameLayer();
