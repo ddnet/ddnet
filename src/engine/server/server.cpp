@@ -115,6 +115,7 @@ void CSnapIDPool::FreeID(int ID)
 {
 	if(ID < 0)
 		return;
+	dbg_assert((size_t)ID < std::size(m_aIDs), "id is out of range");
 	dbg_assert(m_aIDs[ID].m_State == ID_ALLOCATED, "id is not allocated");
 
 	m_InUsage--;
