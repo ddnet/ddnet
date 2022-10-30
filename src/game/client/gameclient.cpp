@@ -1662,7 +1662,7 @@ void CGameClient::OnNewSnapshot()
 		m_aDDRaceMsgSent[i] = true;
 	}
 
-	if(m_aShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || (m_aShowOthers[g_Config.m_ClDummy] != SHOW_OTHERS_NOT_SET && m_aShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
+	if(m_aShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || m_aShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers)
 	{
 		{
 			CNetMsg_Cl_ShowOthers Msg;

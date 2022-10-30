@@ -6585,7 +6585,7 @@ public:
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
 			m_RecreateSwapChain = true;
 		}
-		else if(!pCommand->m_ByResize)
+		else
 		{
 			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
 			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != Viewport.width || (uint32_t)pCommand->m_Height != Viewport.height)
