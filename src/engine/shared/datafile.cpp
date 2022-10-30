@@ -66,16 +66,6 @@ struct CDatafileHeader
 	int m_DataSize;
 };
 
-struct CDatafileData
-{
-	int m_NumItemTypes;
-	int m_NumItems;
-	int m_NumRawData;
-	int m_ItemSize;
-	int m_DataSize;
-	char m_aStart[4];
-};
-
 struct CDatafileInfo
 {
 	CDatafileItemType *m_pItemTypes;
