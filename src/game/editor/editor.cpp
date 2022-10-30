@@ -6105,8 +6105,6 @@ void CEditor::Reset(bool CreateDefault)
 
 	m_ShowEnvelopePreview = SHOWENV_NONE;
 	m_ShiftBy = 1;
-
-	m_Map.m_Modified = false;
 }
 
 int CEditor::GetLineDistance() const

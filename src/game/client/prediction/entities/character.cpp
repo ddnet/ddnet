@@ -1131,8 +1131,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
-	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
-	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
@@ -1142,6 +1140,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
+	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
