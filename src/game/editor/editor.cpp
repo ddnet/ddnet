@@ -5119,24 +5119,21 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(UI()->HotItem() == &s_EnvelopeEditorID)
 		{
 			// do stuff
-			if(pEnvelope)
+			if(UI()->MouseButtonClicked(1))
 			{
-				if(UI()->MouseButtonClicked(1))
-				{
-					// add point
-					int Time = (int)(((UI()->MouseX() - View.x) * TimeScale) * 1000.0f);
-					//float env_y = (UI()->MouseY()-view.y)/TimeScale;
-					ColorRGBA Channels;
-					pEnvelope->Eval(Time / 1000.0f, Channels);
-					pEnvelope->AddPoint(Time,
-						f2fx(Channels.r), f2fx(Channels.g),
-						f2fx(Channels.b), f2fx(Channels.a));
-					m_Map.m_Modified = true;
-				}
-
-				m_ShowEnvelopePreview = SHOWENV_SELECTED;
-				m_pTooltip = "Press right mouse button to create a new point";
+				// add point
+				int Time = (int)(((UI()->MouseX() - View.x) * TimeScale) * 1000.0f);
+				//float env_y = (UI()->MouseY()-view.y)/TimeScale;
+				ColorRGBA Channels;
+				pEnvelope->Eval(Time / 1000.0f, Channels);
+				pEnvelope->AddPoint(Time,
+					f2fx(Channels.r), f2fx(Channels.g),
+					f2fx(Channels.b), f2fx(Channels.a));
+				m_Map.m_Modified = true;
 			}
+
+			m_ShowEnvelopePreview = SHOWENV_SELECTED;
+			m_pTooltip = "Press right mouse button to create a new point";
 		}
 
 		// render lines

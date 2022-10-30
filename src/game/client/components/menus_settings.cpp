@@ -729,9 +729,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if((pSkinToBeSelected->GetName()[0] == 'x' && pSkinToBeSelected->GetName()[1] == '_'))
 				return false;
 
-			if(pSkinToBeSelected == 0)
-				return false;
-
 			return true;
 		};
 
