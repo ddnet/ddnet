@@ -373,10 +373,10 @@ public:
 		char m_aCreditsTmp[128];
 		char m_aLicenseTmp[32];
 
-		char m_aAuthor[32];
-		char m_aVersion[16];
-		char m_aCredits[128];
-		char m_aLicense[32];
+		char m_aAuthor[sizeof(m_aAuthorTmp)];
+		char m_aVersion[sizeof(m_aVersionTmp)];
+		char m_aCredits[sizeof(m_aCreditsTmp)];
+		char m_aLicense[sizeof(m_aLicenseTmp)];
 
 		void Reset()
 		{
