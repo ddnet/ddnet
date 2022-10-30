@@ -116,7 +116,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		while(true)
 		{
 			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
-			if(Bytes <= 0)
+			if(Bytes == 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes);
 			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
