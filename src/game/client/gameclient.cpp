@@ -1436,14 +1436,14 @@ void CGameClient::OnNewSnapshot()
 					if(m_aFlagDropTick[TEAM_RED] == 0)
 						m_aFlagDropTick[TEAM_RED] = Client()->GameTick(g_Config.m_ClDummy);
 				}
-				else if(m_aFlagDropTick[TEAM_RED] != 0)
+				else
 					m_aFlagDropTick[TEAM_RED] = 0;
 				if(m_Snap.m_pGameDataObj->m_FlagCarrierBlue == FLAG_TAKEN)
 				{
 					if(m_aFlagDropTick[TEAM_BLUE] == 0)
 						m_aFlagDropTick[TEAM_BLUE] = Client()->GameTick(g_Config.m_ClDummy);
 				}
-				else if(m_aFlagDropTick[TEAM_BLUE] != 0)
+				else
 					m_aFlagDropTick[TEAM_BLUE] = 0;
 				if(m_LastFlagCarrierRed == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierRed >= 0)
 					OnFlagGrab(TEAM_RED);
