@@ -622,7 +622,7 @@ void CHud::RenderTextInfo()
 			if(m_pClient->m_Teams.Team(i) == LocalTeamID)
 			{
 				NumInTeam++;
-				if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5 || m_pClient->m_aClients[i].m_FreezeEnd > 0)
+				if(m_pClient->m_aClients[i].m_FreezeEnd > 0)
 					NumFrozen++;
 			}
 		}
@@ -697,7 +697,7 @@ void CHud::RenderTextInfo()
 					{
 						bool Frozen = false;
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
-						if(m_pClient->m_aClients[i].m_RenderCur.m_Weapon == 5 || m_pClient->m_aClients[i].m_FreezeEnd > 0)
+						if(m_pClient->m_aClients[i].m_FreezeEnd > 0)
 						{
 							if(!g_Config.m_ClShowFrozenHudSkins)
 								TeeInfo = FreezeInfo;
