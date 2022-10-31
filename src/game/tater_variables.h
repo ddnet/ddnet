@@ -10,9 +10,6 @@ MACRO_CONFIG_INT(ClFrozenHudTeeSize, tc_frozen_tees_size, 15, 8, 20, CFGFLAG_CLI
 MACRO_CONFIG_INT(ClFrozenMaxRows, tc_frozen_tees_max_rows, 1, 1, 6, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of rows in frozen tee HUD display")
 MACRO_CONFIG_INT(ClFrozenHudTeamOnly, tc_frozen_tees_only_inteam, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Only render frozen tee HUD display while in team")
 
-MACRO_CONFIG_INT(ClFixKoGSpec, tc_kog_spec_skin, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "A fix to display spectating tees on KoG.")
-MACRO_CONFIG_INT(ClFixKoGSpecNames, tc_kog_spec_names, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplates of spectating tees on KoG")
-
 MACRO_CONFIG_INT(ClPingNameCircle, tc_nameplate_ping_circle, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows a circle next to nameplate to indicate ping")
 
 MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")

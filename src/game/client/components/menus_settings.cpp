@@ -3186,10 +3186,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 				g_Config.m_ClRunOnJoinDelay = Delay;
 			}
 		}
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpec, ("Spectator outline fix on KoG (slightly buggy)"), &g_Config.m_ClFixKoGSpec, &MainView, LineMargin);
-		if(g_Config.m_ClFixKoGSpec)
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFixKoGSpecNames, ("Show names of spectating players on KoG"), &g_Config.m_ClFixKoGSpecNames, &MainView, LineMargin);
-
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);

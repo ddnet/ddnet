@@ -882,16 +882,13 @@ void CPlayers::OnRender()
 		{
 			continue;
 		}
-		if(!m_aClient.m_SpecCharPresent && !g_Config.m_ClFixKoGSpec)
+		if(!m_aClient.m_SpecCharPresent)
 		{
 			continue;
 		}
 
 		vec2 Pos;
-		if(g_Config.m_ClFixKoGSpec)
-			Pos = m_aClient.m_RenderPos;
-		else
-			Pos = m_aClient.m_SpecChar;
+		Pos = m_aClient.m_SpecChar;
 
 		bool spec = false;
 		spec = (m_aClient.m_Team == TEAM_SPECTATORS || m_aClient.m_SpecCharPresent) && !(m_pClient->IsOtherTeam(ClientID));
