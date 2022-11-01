@@ -1166,11 +1166,11 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 					if(pButtonName != nullptr)
 					{
 						static char aBuf[64];
-						str_format(aBuf, sizeof(aBuf), "[ctrl+a] %s", pButtonName);
+						str_format(aBuf, sizeof(aBuf), "[ctrl+t] %s", pButtonName);
 
 						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 						static int s_ModifierButton = 0;
-						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, 0, aBuf, IGraphics::CORNER_ALL) || (ModPressed && Input()->KeyPress(KEY_A)))
+						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, 0, aBuf, IGraphics::CORNER_ALL) || (ModPressed && Input()->KeyPress(KEY_T)))
 						{
 							static int s_ModifierPopupID = 0;
 							if(!UiPopupExists(&s_ModifierPopupID))
