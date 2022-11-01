@@ -2048,9 +2048,6 @@ char str_uppercase(char c);
 int str_isallnum(const char *str);
 unsigned str_quickhash(const char *str);
 
-struct SKELETON;
-void str_utf8_skeleton_begin(struct SKELETON *skel, const char *str);
-int str_utf8_skeleton_next(struct SKELETON *skel);
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 
 /*
