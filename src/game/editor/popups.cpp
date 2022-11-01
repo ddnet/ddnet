@@ -1514,7 +1514,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
@@ -1613,7 +1613,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
