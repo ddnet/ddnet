@@ -1112,15 +1112,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		// tile manipulation
 		{
-			static int s_BorderBut = 0;
 			CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-
-			// no border for tele layer, speedup, front and switch
-			if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
-				pT = nullptr;
-
-			if(pT)
+			if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
 			{
+				static int s_BorderBut = 0;
 				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", IGraphics::CORNER_ALL))
 				{
