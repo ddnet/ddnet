@@ -1551,7 +1551,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
 		if(Prop == PROP_TELE)
 		{
-			pEditor->m_TeleNumber = (NewVal + 256) % 256;
+			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
 		}
 
 		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TeleNumber)
@@ -1579,7 +1579,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_STEP, 0, 255},
+		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_STEP, 1, 255},
 		{"Max Speed", pEditor->m_SpeedupMaxSpeed, PROPTYPE_INT_STEP, 0, 255},
 		{"Angle", pEditor->m_SpeedupAngle, PROPTYPE_ANGLE_SCROLL, 0, 359},
 		{nullptr},
@@ -1590,7 +1590,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_FORCE)
-		pEditor->m_SpeedupForce = clamp(NewVal, 0, 255);
+		pEditor->m_SpeedupForce = clamp(NewVal, 1, 255);
 	if(Prop == PROP_MAXSPEED)
 		pEditor->m_SpeedupMaxSpeed = clamp(NewVal, 0, 255);
 	if(Prop == PROP_ANGLE)
@@ -1657,7 +1657,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 		if(Prop == PROP_SwitchNumber)
 		{
-			pEditor->m_SwitchNum = (NewVal + 256) % 256;
+			pEditor->m_SwitchNum = (NewVal - 1 + 255) % 255 + 1;
 		}
 		else if(Prop == PROP_SwitchDelay)
 		{
