@@ -1508,6 +1508,8 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
+	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
 	// find empty number button
 	{
@@ -1567,9 +1569,6 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
-	View.HSplitBottom(12.0f, &View, &Button);
-
 	enum
 	{
 		PROP_FORCE = 0,
@@ -1606,11 +1605,10 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
 
-	CUIRect DelayPicker;
-
-	View.HSplitMid(&NumberPicker, &DelayPicker);
-	NumberPicker.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
+	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
+	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
 	// find empty number button
 	{
@@ -1676,9 +1674,6 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
-	View.HSplitBottom(12.0f, &View, &Button);
-
 	enum
 	{
 		PROP_TUNE = 0,
@@ -1702,12 +1697,6 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect CoordXPicker;
-	CUIRect CoordYPicker;
-
-	View.HSplitMid(&CoordXPicker, &CoordYPicker);
-	CoordXPicker.VSplitRight(2.f, &CoordXPicker, nullptr);
-
 	static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
 
 	enum
@@ -1725,7 +1714,7 @@ int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = pEditor->DoProperties(&CoordXPicker, aProps, s_aIds, &NewVal, s_Color);
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_Color);
 
 	if(Prop == PROP_CoordX)
 	{
