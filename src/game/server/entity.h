@@ -87,13 +87,6 @@ public: // TODO: Maybe make protected
 	virtual void Reset() {}
 
 	/*
-		Function: PreTick
-			Called to progress the entity before the next tick.
-			Can be used to prepare variables for all clients before the next tick is executed.
-	*/
-	virtual void PreTick() {}
-
-	/*
 		Function: Tick
 			Called to progress the entity to the next tick. Updates
 			and moves the entity to its new state and position.
