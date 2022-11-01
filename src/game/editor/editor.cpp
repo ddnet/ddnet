@@ -1112,15 +1112,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		// tile manipulation
 		{
-			static int s_BorderBut = 0;
 			CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-
-			// no border for tele layer, speedup, front and switch
-			if(pT && (pT->m_Tele || pT->m_Speedup || pT->m_Switch || pT->m_Front || pT->m_Tune))
-				pT = nullptr;
-
-			if(pT)
+			if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
 			{
+				static int s_BorderBut = 0;
 				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", IGraphics::CORNER_ALL))
 				{
@@ -1132,35 +1127,35 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 			// do tele/tune/switch/speedup button
 			{
-				int (*pPopupFunc)(CEditor * peditor, CUIRect View, void *pContext) = nullptr;
-				const char *pButtonName = nullptr;
-				float Height = 0.0f;
 				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 				if(pS)
 				{
+					const char *pButtonName = nullptr;
+					int (*pfnPopupFunc)(CEditor * pEditor, CUIRect View, void *pContext) = nullptr;
+					int Rows = 0;
 					if(pS == m_Map.m_pSwitchLayer)
 					{
 						pButtonName = "Switch";
-						pPopupFunc = PopupSwitch;
-						Height = 36;
+						pfnPopupFunc = PopupSwitch;
+						Rows = 2;
 					}
 					else if(pS == m_Map.m_pSpeedupLayer)
 					{
 						pButtonName = "Speedup";
-						pPopupFunc = PopupSpeedup;
-						Height = 53;
+						pfnPopupFunc = PopupSpeedup;
+						Rows = 3;
 					}
 					else if(pS == m_Map.m_pTuneLayer)
 					{
 						pButtonName = "Tune";
-						pPopupFunc = PopupTune;
-						Height = 23;
+						pfnPopupFunc = PopupTune;
+						Rows = 1;
 					}
 					else if(pS == m_Map.m_pTeleLayer)
 					{
 						pButtonName = "Tele";
-						pPopupFunc = PopupTele;
-						Height = 23;
+						pfnPopupFunc = PopupTele;
+						Rows = 1;
 					}
 
 					if(pButtonName != nullptr)
@@ -1175,7 +1170,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 							static int s_ModifierPopupID = 0;
 							if(!UiPopupExists(&s_ModifierPopupID))
 							{
-								UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, Height, pPopupFunc);
+								UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, pfnPopupFunc);
 							}
 						}
 						TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
