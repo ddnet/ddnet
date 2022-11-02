@@ -3450,7 +3450,7 @@ public:
 		VKAppInfo.applicationVersion = 1;
 		VKAppInfo.pEngineName = "DDNet-Vulkan";
 		VKAppInfo.engineVersion = 1;
-		VKAppInfo.apiVersion = VK_API_VERSION_1_0;
+		VKAppInfo.apiVersion = VK_API_VERSION_1_1;
 
 		void *pExt = nullptr;
 #if defined(VK_EXT_validation_features) && VK_EXT_VALIDATION_FEATURES_SPEC_VERSION >= 5
