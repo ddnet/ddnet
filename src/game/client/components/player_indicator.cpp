@@ -47,7 +47,6 @@ void CPlayerIndicator::OnRender()
 				CGameClient::CClientData OtherTee = m_pClient->m_aClients[i];
 				if(
 					OtherTee.m_Team == m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team &&
-					!OtherTee.m_Paused &&
 					!OtherTee.m_Spec &&
 					m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				{
