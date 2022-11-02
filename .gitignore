@@ -93,6 +93,7 @@ target
 .vs
 .vscode
 compile_commands.json
+cmake-build-*/*
 cscope.files
 cscope.out
 out
