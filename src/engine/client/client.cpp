@@ -4054,10 +4054,8 @@ void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_AddDemoMarker(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DemoRecorder_AddDemoMarker(RECORDER_MANUAL);
-	pSelf->DemoRecorder_AddDemoMarker(RECORDER_RACE);
-	pSelf->DemoRecorder_AddDemoMarker(RECORDER_AUTO);
-	pSelf->DemoRecorder_AddDemoMarker(RECORDER_REPLAYS);
+	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
+		pSelf->DemoRecorder_AddDemoMarker(Recorder);
 }
 
 void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
