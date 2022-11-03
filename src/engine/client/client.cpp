@@ -893,7 +893,7 @@ void CClient::Disconnect()
 	// make sure to remove replay tmp demo
 	if(g_Config.m_ClReplays)
 	{
-		Storage()->RemoveFile((&m_aDemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename(), IStorage::TYPE_SAVE);
+		Storage()->RemoveFile(m_aDemoRecorder[RECORDER_REPLAYS].GetCurrentFilename(), IStorage::TYPE_SAVE);
 	}
 }
 
@@ -3818,7 +3818,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		else
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
 
-		char *pSrc = (&m_aDemoRecorder[RECORDER_REPLAYS])->GetCurrentFilename();
+		char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].GetCurrentFilename();
 
 		// Slice the demo to get only the last cl_replay_length seconds
 		const int EndTick = GameTick(g_Config.m_ClDummy);
@@ -4020,7 +4020,7 @@ void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 	m_aDemoRecorder[Recorder].Stop();
 	if(RemoveFile)
 	{
-		const char *pFilename = (&m_aDemoRecorder[Recorder])->GetCurrentFilename();
+		const char *pFilename = m_aDemoRecorder[Recorder].GetCurrentFilename();
 		if(pFilename[0] != '\0')
 			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
 	}
