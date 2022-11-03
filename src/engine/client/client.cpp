@@ -295,8 +295,10 @@ void CSmoothTime::UpdateMargin(int64_t TargetMargin)
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, [&]() { UpdateDemoIntraTimers(); })
 {
-	for(auto &DemoRecorder : m_aDemoRecorder)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
+	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&m_SnapshotDelta, false);
+	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&m_SnapshotDelta, true);
+	m_aDemoRecorder[RECORDER_RACE] = CDemoRecorder(&m_SnapshotDelta, true);
+	m_aDemoRecorder[RECORDER_REPLAYS] = CDemoRecorder(&m_SnapshotDelta, true);
 
 	m_pEditor = 0;
 	m_pInput = 0;
