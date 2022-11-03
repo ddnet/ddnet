@@ -3847,7 +3847,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		bool bIsExternal = pImg->m_External;
 		char aBuffer[1024];
 		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.png", pImg->m_aName);
-		pEditor->ReplaceImage(aBuffer, IStorage::TYPE_ALL, pEditor);
+		ReplaceImage(aBuffer, IStorage::TYPE_ALL, pEditor);
 		pImg->m_External = bIsExternal;
 		return 1;
 	}
@@ -3889,7 +3889,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		char aBuffer[1024];
 		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.opus", pSound->m_aName);
-		pEditor->ReplaceSound(aBuffer, IStorage::TYPE_ALL, pEditor);
+		ReplaceSound(aBuffer, IStorage::TYPE_ALL, pEditor);
 		return 1;
 	}
 
