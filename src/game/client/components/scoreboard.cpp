@@ -524,15 +524,6 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	if(!m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording() &&
-		!m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording() &&
-		!m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording() &&
-		!m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-	{
-		return;
-	}
-
-	//draw the text
 	char aBuf[64] = "\0";
 	char aBuf2[64];
 	char aTime[32];
@@ -561,6 +552,9 @@ void CScoreboard::RenderRecordingNotification(float x)
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Replay"), aTime);
 		str_append(aBuf, aBuf2, sizeof(aBuf));
 	}
+
+	if(!aBuf[0])
+		return;
 
 	float w = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
 
