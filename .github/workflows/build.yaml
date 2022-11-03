@@ -98,6 +98,7 @@ jobs:
         brew install pkg-config sdl2 ffmpeg python3 ninja molten-vk vulkan-headers glslang spirv-tools
         brew upgrade freetype
         pip3 install dmgbuild
+        echo /Library/Frameworks/Python.framework/Versions/3.11/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Build in debug mode
