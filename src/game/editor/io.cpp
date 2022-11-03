@@ -1030,6 +1030,9 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 	gs_ModifyAddAmount = m_Map.m_vpImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
 
+	gs_ModifyAddAmount = m_Map.m_vpSounds.size();
+	NewMap.ModifySoundIndex(ModifyAdd);
+
 	gs_ModifyAddAmount = m_Map.m_vpEnvelopes.size();
 	NewMap.ModifyEnvelopeIndex(ModifyAdd);
 
@@ -1037,6 +1040,11 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 	for(const auto &pImage : NewMap.m_vpImages)
 		m_Map.m_vpImages.push_back(pImage);
 	NewMap.m_vpImages.clear();
+
+	// transfer sounds
+	for(const auto &pSound : NewMap.m_vpSounds)
+		m_Map.m_vpSounds.push_back(pSound);
+	NewMap.m_vpSounds.clear();
 
 	// transfer envelopes
 	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
