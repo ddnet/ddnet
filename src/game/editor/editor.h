@@ -1099,6 +1099,19 @@ public:
 	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
 
+	struct SMessagePopupContext
+	{
+		static constexpr float POPUP_MAX_WIDTH = 200.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+		char m_aMessage[256];
+		ColorRGBA m_TextColor;
+
+		void DefaultColor(class ITextRender *pTextRender);
+		void ErrorColor();
+	};
+	static int PopupMessage(CEditor *pEditor, CUIRect View, void *pContext);
+	void ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext);
+
 	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
 	static void CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);

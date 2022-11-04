@@ -1870,3 +1870,34 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 
 	return 0;
 }
+
+void CEditor::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
+{
+	m_TextColor = pTextRender->DefaultTextColor();
+}
+
+void CEditor::SMessagePopupContext::ErrorColor()
+{
+	m_TextColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
+int CEditor::PopupMessage(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = View.w;
+	pEditor->TextRender()->TextColor(pMessagePopup->m_TextColor);
+	pEditor->TextRender()->TextEx(&Cursor, pMessagePopup->m_aMessage, -1);
+	pEditor->TextRender()->TextColor(pEditor->TextRender()->DefaultTextColor());
+
+	return 0;
+}
+
+void CEditor::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const int LineCount = TextRender()->TextLineCount(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
+	UiInvokePopupMenu(pContext, 0, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, PopupMessage, pContext);
+}
