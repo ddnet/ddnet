@@ -3814,7 +3814,6 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_RemoveButton = 0;
 
 	CUIRect Slot;
-	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	CEditorImage *pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
 
@@ -3826,7 +3825,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 			pImg->m_External = 0;
 			return 1;
 		}
-		View.HSplitTop(5.0f, &Slot, &View);
+		View.HSplitTop(5.0f, nullptr, &View);
 		View.HSplitTop(12.0f, &Slot, &View);
 	}
 	else if(IsVanillaImage(pImg->m_aName))
@@ -3836,7 +3835,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 			pImg->m_External = 1;
 			return 1;
 		}
-		View.HSplitTop(5.0f, &Slot, &View);
+		View.HSplitTop(5.0f, nullptr, &View);
 		View.HSplitTop(12.0f, &Slot, &View);
 	}
 
@@ -3845,12 +3844,12 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		bool bIsExternal = pImg->m_External;
 		char aBuffer[1024];
 		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.png", pImg->m_aName);
-		pEditor->ReplaceImage(aBuffer, IStorage::TYPE_ALL, pEditor);
+		ReplaceImage(aBuffer, IStorage::TYPE_ALL, pEditor);
 		pImg->m_External = bIsExternal;
 		return 1;
 	}
 
-	View.HSplitTop(5.0f, &Slot, &View);
+	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
 	{
@@ -3858,7 +3857,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		return 1;
 	}
 
-	View.HSplitTop(5.0f, &Slot, &View);
+	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
 	{
@@ -3879,7 +3878,6 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_RemoveButton = 0;
 
 	CUIRect Slot;
-	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
@@ -3887,11 +3885,11 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		char aBuffer[1024];
 		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.opus", pSound->m_aName);
-		pEditor->ReplaceSound(aBuffer, IStorage::TYPE_ALL, pEditor);
+		ReplaceSound(aBuffer, IStorage::TYPE_ALL, pEditor);
 		return 1;
 	}
 
-	View.HSplitTop(5.0f, &Slot, &View);
+	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
 	{
@@ -3899,7 +3897,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 		return 1;
 	}
 
-	View.HSplitTop(5.0f, &Slot, &View);
+	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
 	{
@@ -4093,7 +4091,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 					if(pImg->m_External || IsVanillaImage(pImg->m_aName))
 						Height = 73;
 					else
-						Height = 60;
+						Height = 56;
 					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
 				}
 			}
@@ -4211,7 +4209,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 
 			static int s_PopupSoundID = 0;
 			if(Result == 2)
-				UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 43, PopupSound);
+				UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 56, PopupSound);
 		}
 	}
 
