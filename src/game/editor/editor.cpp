@@ -779,10 +779,8 @@ void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 void CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	if(pEditor->Append(pFileName, StorageType))
+	if(!pEditor->Append(pFileName, StorageType))
 		pEditor->m_aFileName[0] = 0;
-	else
-		pEditor->SortImages();
 
 	pEditor->m_Dialog = DIALOG_NONE;
 }

@@ -31,12 +31,12 @@ struct CSoundSource_DEPRECATED
 	int m_SoundEnvOffset;
 };
 
-int CEditor::Save(const char *pFilename)
+bool CEditor::Save(const char *pFilename)
 {
 	return m_Map.Save(Kernel()->RequestInterface<IStorage>(), pFilename);
 }
 
-int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
+bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
@@ -46,7 +46,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
 		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
-		return 0;
+		return false;
 	}
 
 	// save version
@@ -394,14 +394,14 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		}
 	}
 
-	return 1;
+	return true;
 }
 
-int CEditor::Load(const char *pFileName, int StorageType)
+bool CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	int result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
-	if(result)
+	bool Result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	if(Result)
 	{
 		str_copy(m_aFileName, pFileName, 512);
 		SortImages();
@@ -412,14 +412,14 @@ int CEditor::Load(const char *pFileName, int StorageType)
 		m_aFileName[0] = 0;
 		Reset();
 	}
-	return result;
+	return Result;
 }
 
-int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
+bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
 {
 	CDataFileReader DataFile;
 	if(!DataFile.Open(pStorage, pFileName, StorageType))
-		return 0;
+		return false;
 
 	Clean();
 
@@ -427,7 +427,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 	CMapItemVersion *pItemVersion = (CMapItemVersion *)DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
 	if(!pItemVersion)
 	{
-		return 0;
+		return false;
 	}
 	else if(pItemVersion->m_Version == 1)
 	{
@@ -1005,10 +1005,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 		}
 	}
 	else
-		return 0;
+		return false;
 
 	m_Modified = false;
-	return 1;
+	return true;
 }
 
 static int gs_ModifyAddAmount = 0;
@@ -1018,19 +1018,20 @@ static void ModifyAdd(int *pIndex)
 		*pIndex += gs_ModifyAddAmount;
 }
 
-int CEditor::Append(const char *pFileName, int StorageType)
+bool CEditor::Append(const char *pFileName, int StorageType)
 {
 	CEditorMap NewMap;
 	NewMap.m_pEditor = this;
 
-	int Err;
-	Err = NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
-	if(!Err)
-		return Err;
+	if(!NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType))
+		return false;
 
 	// modify indices
 	gs_ModifyAddAmount = m_Map.m_vpImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
+
+	gs_ModifyAddAmount = m_Map.m_vpSounds.size();
+	NewMap.ModifySoundIndex(ModifyAdd);
 
 	gs_ModifyAddAmount = m_Map.m_vpEnvelopes.size();
 	NewMap.ModifyEnvelopeIndex(ModifyAdd);
@@ -1040,13 +1041,17 @@ int CEditor::Append(const char *pFileName, int StorageType)
 		m_Map.m_vpImages.push_back(pImage);
 	NewMap.m_vpImages.clear();
 
+	// transfer sounds
+	for(const auto &pSound : NewMap.m_vpSounds)
+		m_Map.m_vpSounds.push_back(pSound);
+	NewMap.m_vpSounds.clear();
+
 	// transfer envelopes
 	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
 		m_Map.m_vpEnvelopes.push_back(pEnvelope);
 	NewMap.m_vpEnvelopes.clear();
 
 	// transfer groups
-
 	for(const auto &pGroup : NewMap.m_vpGroups)
 	{
 		if(pGroup == NewMap.m_pGameGroup)
@@ -1059,6 +1064,8 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	}
 	NewMap.m_vpGroups.clear();
 
+	SortImages();
+
 	// all done \o/
-	return 0;
+	return true;
 }

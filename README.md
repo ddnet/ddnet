@@ -339,3 +339,11 @@ Only then you could also set up git to ignore specific formatting revisions:
 ```bash
 git config blame.ignoreRevsFile formatting-revs.txt
 ```
+
+(Neo)Vim Syntax Highlighting for config files
+----------------------------------------
+Copy the file detection and syntax files to your vim config folder, in the case of neovim:
+
+```bash
+cp -R other/vim/* ~/.config/nvim/
+```

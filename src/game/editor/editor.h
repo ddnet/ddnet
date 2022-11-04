@@ -467,8 +467,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	int Save(class IStorage *pStorage, const char *pFilename);
-	int Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Save(class IStorage *pStorage, const char *pFilename);
+	bool Load(class IStorage *pStorage, const char *pFilename, int StorageType);
 
 	// DDRace
 
@@ -857,9 +857,9 @@ public:
 		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 
 	void Reset(bool CreateDefault = true);
-	int Save(const char *pFilename) override;
-	int Load(const char *pFilename, int StorageType) override;
-	int Append(const char *pFilename, int StorageType);
+	bool Save(const char *pFilename) override;
+	bool Load(const char *pFilename, int StorageType) override;
+	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
 
