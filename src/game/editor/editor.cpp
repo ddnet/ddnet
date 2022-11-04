@@ -3839,14 +3839,25 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitTop(12.0f, &Slot, &View);
 	}
 
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
 	{
-		bool bIsExternal = pImg->m_External;
-		char aBuffer[1024];
-		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.png", pImg->m_aName);
-		ReplaceImage(aBuffer, IStorage::TYPE_ALL, pEditor);
-		pImg->m_External = bIsExternal;
-		return 1;
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
+		char aPath[IO_MAX_PATH_LENGTH];
+		if(pEditor->Storage()->FindFile(aFilename, "mapres", IStorage::TYPE_ALL, aPath, sizeof(aPath)))
+		{
+			bool WasExternal = pImg->m_External;
+			ReplaceImage(aPath, IStorage::TYPE_ALL, pEditor);
+			pImg->m_External = WasExternal;
+			return 1;
+		}
+		else
+		{
+			static SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.ErrorColor();
+			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find image '%s' in the mapres folder.", aFilename);
+			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
+		}
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
@@ -3881,12 +3892,23 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitTop(12.0f, &Slot, &View);
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
-		char aBuffer[1024];
-		str_format(aBuffer, sizeof(aBuffer), "mapres/%s.opus", pSound->m_aName);
-		ReplaceSound(aBuffer, IStorage::TYPE_ALL, pEditor);
-		return 1;
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
+		char aPath[IO_MAX_PATH_LENGTH];
+		if(pEditor->Storage()->FindFile(aFilename, "mapres", IStorage::TYPE_ALL, aPath, sizeof(aPath)))
+		{
+			ReplaceSound(aPath, IStorage::TYPE_ALL, pEditor);
+			return 1;
+		}
+		else
+		{
+			static SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.ErrorColor();
+			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find sound '%s' in the mapres folder.", aFilename);
+			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
+		}
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
