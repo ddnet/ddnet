@@ -3839,25 +3839,39 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		View.HSplitTop(12.0f, &Slot, &View);
 	}
 
+	static SSelectionPopupContext s_SelectionPopupContext;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
-		char aPath[IO_MAX_PATH_LENGTH];
-		if(pEditor->Storage()->FindFile(aFilename, "mapres", IStorage::TYPE_ALL, aPath, sizeof(aPath)))
-		{
-			bool WasExternal = pImg->m_External;
-			ReplaceImage(aPath, IStorage::TYPE_ALL, pEditor);
-			pImg->m_External = WasExternal;
-			return 1;
-		}
-		else
+		s_SelectionPopupContext.m_pSelection = nullptr;
+		s_SelectionPopupContext.m_Entries.clear();
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
+		if(s_SelectionPopupContext.m_Entries.empty())
 		{
 			static SMessagePopupContext s_MessagePopupContext;
 			s_MessagePopupContext.ErrorColor();
 			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find image '%s' in the mapres folder.", aFilename);
 			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
 		}
+		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		{
+			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+		}
+		else
+		{
+			str_copy(s_SelectionPopupContext.m_aMessage, "Select the wanted image:");
+			pEditor->ShowPopupSelection(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_SelectionPopupContext);
+		}
+	}
+	if(s_SelectionPopupContext.m_pSelection != nullptr)
+	{
+		bool WasExternal = pImg->m_External;
+		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
+		pImg->m_External = WasExternal;
+		s_SelectionPopupContext.m_pSelection = nullptr;
+		s_SelectionPopupContext.m_Entries.clear();
+		return 1;
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
@@ -3892,23 +3906,37 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitTop(12.0f, &Slot, &View);
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
+	static SSelectionPopupContext s_SelectionPopupContext;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
-		char aPath[IO_MAX_PATH_LENGTH];
-		if(pEditor->Storage()->FindFile(aFilename, "mapres", IStorage::TYPE_ALL, aPath, sizeof(aPath)))
-		{
-			ReplaceSound(aPath, IStorage::TYPE_ALL, pEditor);
-			return 1;
-		}
-		else
+		s_SelectionPopupContext.m_pSelection = nullptr;
+		s_SelectionPopupContext.m_Entries.clear();
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
+		if(s_SelectionPopupContext.m_Entries.empty())
 		{
 			static SMessagePopupContext s_MessagePopupContext;
 			s_MessagePopupContext.ErrorColor();
 			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find sound '%s' in the mapres folder.", aFilename);
 			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
 		}
+		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		{
+			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+		}
+		else
+		{
+			str_copy(s_SelectionPopupContext.m_aMessage, "Select the wanted sound:");
+			pEditor->ShowPopupSelection(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_SelectionPopupContext);
+		}
+	}
+	if(s_SelectionPopupContext.m_pSelection != nullptr)
+	{
+		ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
+		s_SelectionPopupContext.m_pSelection = nullptr;
+		s_SelectionPopupContext.m_Entries.clear();
+		return 1;
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
