@@ -1901,3 +1901,40 @@ void CEditor::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 	const int LineCount = TextRender()->TextLineCount(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
 	UiInvokePopupMenu(pContext, 0, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, PopupMessage, pContext);
 }
+
+CEditor::SSelectionPopupContext::SSelectionPopupContext()
+{
+	m_pSelection = nullptr;
+}
+
+int CEditor::PopupSelection(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
+
+	CUIRect Slot;
+	const int LineCount = pEditor->TextRender()->TextLineCount(nullptr, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	View.HSplitTop(LineCount * SSelectionPopupContext::POPUP_FONT_SIZE, &Slot, &View);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = Slot.w;
+	pEditor->TextRender()->TextEx(&Cursor, pSelectionPopup->m_aMessage, -1);
+
+	for(const auto &Entry : pSelectionPopup->m_Entries)
+	{
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
+		if(pEditor->DoButton_MenuItem(&Entry, Entry.c_str(), 0, &Slot, 0, nullptr))
+			pSelectionPopup->m_pSelection = &Entry;
+	}
+
+	return pSelectionPopup->m_pSelection == nullptr ? 0 : 1;
+}
+
+void CEditor::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
+{
+	const int LineCount = TextRender()->TextLineCount(nullptr, SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	const float PopupHeight = LineCount * SSelectionPopupContext::POPUP_FONT_SIZE + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	pContext->m_pSelection = nullptr;
+	UiInvokePopupMenu(pContext, 0, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, PopupSelection, pContext);
+}
