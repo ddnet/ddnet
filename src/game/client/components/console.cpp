@@ -506,7 +506,7 @@ CGameConsole::~CGameConsole()
 float CGameConsole::TimeNow()
 {
 	static int64_t s_TimeStart = time_get();
-	return float(time_get() - s_TimeStart) / float(time_freq());
+	return (time_get() - s_TimeStart) / (float)time_freq();
 }
 
 CGameConsole::CInstance *CGameConsole::CurrentConsole()

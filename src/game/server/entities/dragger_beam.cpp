@@ -47,7 +47,7 @@ void CDraggerBeam::Tick()
 	// after CDraggerBeam::Tick and only every 150ms
 	// When the dragger is disabled for the target player's team, the dragger beam dissolves. The check if a dragger
 	// is disabled is only executed every 150ms, so the beam can stay activated up to 6 extra ticks
-	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
 			!Switchers()[m_Number].m_aStatus[pTarget->Team()])

@@ -220,7 +220,7 @@ void CPickup::Snap(int SnappingClient)
 
 void CPickup::Move()
 {
-	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
 		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
