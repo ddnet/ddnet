@@ -128,7 +128,7 @@ void CPickup::Tick()
 
 void CPickup::Move()
 {
-	if(GameWorld()->GameTick() % int(GameWorld()->GameTickSpeed() * 0.15f) == 0)
+	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
 		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);

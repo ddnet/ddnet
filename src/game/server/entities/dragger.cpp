@@ -33,7 +33,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool Ignore
 
 void CDragger::Tick()
 {
-	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
 		m_EvalTick = Server()->Tick();

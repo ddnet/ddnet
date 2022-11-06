@@ -2059,13 +2059,11 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 	{
 		GLint RealOffset = (GLint)((((size_t)(uintptr_t)(pBuffOffset)) / (6 * sizeof(unsigned int))) * 4);
 		size_t SingleVertSize = (sizeof(vec2) + (IsTextured ? sizeof(vec3) : 0));
-		size_t CurBufferOffset = (RealOffset)*SingleVertSize;
-
+		size_t CurBufferOffset = RealOffset * SingleVertSize;
+		int XCount = i - (size_t)(i / JumpIndex) * JumpIndex;
+		int YCount = (size_t)(i / JumpIndex);
 		for(size_t n = 0; n < 4; ++n)
 		{
-			int XCount = i - (int(i / JumpIndex) * JumpIndex);
-			int YCount = (int(i / JumpIndex));
-
 			ptrdiff_t VertOffset = (ptrdiff_t)(CurBufferOffset + (n * SingleVertSize));
 			vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 

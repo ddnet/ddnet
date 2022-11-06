@@ -234,7 +234,7 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, int64_t Ma
 	float e = a + pi / 3;
 	for(int i = 0; i < Amount; i++)
 	{
-		float f = mix(s, e, float(i + 1) / float(Amount + 2));
+		float f = mix(s, e, (i + 1) / (float)(Amount + 2));
 		CNetEvent_DamageInd *pEvent = (CNetEvent_DamageInd *)m_Events.Create(NETEVENTTYPE_DAMAGEIND, sizeof(CNetEvent_DamageInd), Mask);
 		if(pEvent)
 		{
@@ -688,8 +688,8 @@ void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 
 	if(Total > VANILLA_MAX_CLIENTS && m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetClientVersion() <= VERSION_DDRACE)
 	{
-		Yes = float(Yes * VANILLA_MAX_CLIENTS) / float(Total);
-		No = float(No * VANILLA_MAX_CLIENTS) / float(Total);
+		Yes = (Yes * VANILLA_MAX_CLIENTS) / (float)Total;
+		No = (No * VANILLA_MAX_CLIENTS) / (float)Total;
 		Total = VANILLA_MAX_CLIENTS;
 	}
 
