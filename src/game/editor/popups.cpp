@@ -1870,3 +1870,71 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 
 	return 0;
 }
+
+void CEditor::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
+{
+	m_TextColor = pTextRender->DefaultTextColor();
+}
+
+void CEditor::SMessagePopupContext::ErrorColor()
+{
+	m_TextColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
+int CEditor::PopupMessage(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = View.w;
+	pEditor->TextRender()->TextColor(pMessagePopup->m_TextColor);
+	pEditor->TextRender()->TextEx(&Cursor, pMessagePopup->m_aMessage, -1);
+	pEditor->TextRender()->TextColor(pEditor->TextRender()->DefaultTextColor());
+
+	return 0;
+}
+
+void CEditor::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const int LineCount = TextRender()->TextLineCount(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
+	UiInvokePopupMenu(pContext, 0, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, PopupMessage, pContext);
+}
+
+CEditor::SSelectionPopupContext::SSelectionPopupContext()
+{
+	m_pSelection = nullptr;
+}
+
+int CEditor::PopupSelection(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
+
+	CUIRect Slot;
+	const int LineCount = pEditor->TextRender()->TextLineCount(nullptr, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	View.HSplitTop(LineCount * SSelectionPopupContext::POPUP_FONT_SIZE, &Slot, &View);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = Slot.w;
+	pEditor->TextRender()->TextEx(&Cursor, pSelectionPopup->m_aMessage, -1);
+
+	for(const auto &Entry : pSelectionPopup->m_Entries)
+	{
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
+		if(pEditor->DoButton_MenuItem(&Entry, Entry.c_str(), 0, &Slot, 0, nullptr))
+			pSelectionPopup->m_pSelection = &Entry;
+	}
+
+	return pSelectionPopup->m_pSelection == nullptr ? 0 : 1;
+}
+
+void CEditor::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
+{
+	const int LineCount = TextRender()->TextLineCount(nullptr, SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	const float PopupHeight = LineCount * SSelectionPopupContext::POPUP_FONT_SIZE + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	pContext->m_pSelection = nullptr;
+	UiInvokePopupMenu(pContext, 0, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, PopupSelection, pContext);
+}

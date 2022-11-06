@@ -5,6 +5,9 @@
 
 #include "kernel.h"
 
+#include <set>
+#include <string>
+
 enum
 {
 	MAX_PATHS = 16
@@ -31,6 +34,7 @@ public:
 	virtual bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) = 0;
 	virtual char *ReadFileStr(const char *pFilename, int Type) = 0;
 	virtual bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize) = 0;
+	virtual size_t FindFiles(const char *pFilename, const char *pPath, int Type, std::set<std::string> *pEntries) = 0;
 	virtual bool RemoveFile(const char *pFilename, int Type) = 0;
 	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type) = 0;
 	virtual bool CreateFolder(const char *pFoldername, int Type) = 0;
