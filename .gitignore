@@ -98,6 +98,8 @@ cscope.files
 cscope.out
 out
 tags
+# don't ignore this, it's used for the vscode workspace that ddnet provides
+!ddnet-cmake-tools-kits.json
 
 # bam ignores
 /.bam
