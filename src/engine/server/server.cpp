@@ -2542,7 +2542,7 @@ int CServer::Run()
 	if(Config()->m_SvSqliteFile[0] != '\0')
 	{
 		char aFullPath[IO_MAX_PATH_LENGTH];
-		Storage()->GetCompletePath(fs_is_relative_path(Config()->m_SvSqliteFile) ? IStorage::TYPE_SAVE : IStorage::TYPE_ABSOLUTE, Config()->m_SvSqliteFile, aFullPath, sizeof(aFullPath));
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE_OR_ABSOLUTE, Config()->m_SvSqliteFile, aFullPath, sizeof(aFullPath));
 		auto pSqliteConn = CreateSqliteConnection(aFullPath, true);
 
 		if(Config()->m_SvUseSQL)

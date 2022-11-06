@@ -365,8 +365,18 @@ public:
 		return pBuffer;
 	}
 
+	void TranslateType(int &Type, const char *pPath)
+	{
+		if(Type == TYPE_SAVE_OR_ABSOLUTE)
+			Type = fs_is_relative_path(pPath) ? TYPE_SAVE : TYPE_ABSOLUTE;
+		else if(Type == TYPE_ALL_OR_ABSOLUTE)
+			Type = fs_is_relative_path(pPath) ? TYPE_ALL : TYPE_ABSOLUTE;
+	}
+
 	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) override
 	{
+		TranslateType(Type, pFilename);
+
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(!pBuffer)
 		{
@@ -376,7 +386,7 @@ public:
 
 		if(Type == TYPE_ABSOLUTE)
 		{
-			return io_open(pFilename, Flags);
+			return io_open(GetPath(TYPE_ABSOLUTE, pFilename, pBuffer, BufferSize), Flags);
 		}
 		if(str_startswith(pFilename, "mapres/../skins/"))
 		{
@@ -396,7 +406,7 @@ public:
 		}
 		else
 		{
-			if(Type <= TYPE_ALL)
+			if(Type == TYPE_ALL)
 			{
 				// check all available directories
 				for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
@@ -656,6 +666,7 @@ public:
 
 	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
 	{
+		TranslateType(Type, pDir);
 		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}

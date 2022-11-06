@@ -22,6 +22,20 @@ public:
 		TYPE_SAVE = 0,
 		TYPE_ALL = -1,
 		TYPE_ABSOLUTE = -2,
+		/**
+		 * Translates to TYPE_SAVE if a path is relative
+		 * and to TYPE_ABSOLUTE if a path is absolute.
+		 * Only usable with OpenFile, ReadFile, ReadFileStr
+		 * and GetCompletePath.
+		 */
+		TYPE_SAVE_OR_ABSOLUTE = -3,
+		/**
+		 * Translates to TYPE_ALL if a path is relative
+		 * and to TYPE_ABSOLUTE if a path is absolute.
+		 * Only usable with OpenFile, ReadFile, ReadFileStr
+		 * and GetCompletePath.
+		 */
+		TYPE_ALL_OR_ABSOLUTE = -4,
 
 		STORAGETYPE_BASIC = 0,
 		STORAGETYPE_SERVER,
