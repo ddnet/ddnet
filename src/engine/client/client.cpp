@@ -46,6 +46,7 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocol_ex.h>
+#include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
@@ -4448,8 +4449,10 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("demo_play", "", CFGFLAG_CLIENT, Con_DemoPlay, this, "Play demo");
 	m_pConsole->Register("demo_speed", "i[speed]", CFGFLAG_CLIENT, Con_DemoSpeed, this, "Set demo speed");
 
-	m_pConsole->Register("save_replay", "?i[length] ?s[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
+	m_pConsole->Register("save_replay", "?i[length] s[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
+
+	RustVersionRegister(*m_pConsole);
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
@@ -4607,7 +4610,7 @@ int main(int argc, const char **argv)
 
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
-	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
+	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT).release();
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineSound *pEngineSound = CreateEngineSound();

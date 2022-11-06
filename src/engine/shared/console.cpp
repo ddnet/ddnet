@@ -19,28 +19,28 @@
 
 // todo: rework this
 
-const char *CConsole::CResult::GetString(unsigned Index)
+const char *CConsole::CResult::GetString(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return "";
 	return m_apArgs[Index];
 }
 
-int CConsole::CResult::GetInteger(unsigned Index)
+int CConsole::CResult::GetInteger(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0;
 	return str_toint(m_apArgs[Index]);
 }
 
-float CConsole::CResult::GetFloat(unsigned Index)
+float CConsole::CResult::GetFloat(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0.0f;
 	return str_tofloat(m_apArgs[Index]);
 }
 
-ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 {
 	ColorHSLA Hsla = ColorHSLA(0, 0, 0);
 	if(Index >= m_NumArgs)
@@ -322,7 +322,7 @@ LOG_COLOR ColorToLogColor(ColorRGBA Color)
 		(uint8_t)(Color.b * 255.0)};
 }
 
-void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
+void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
 {
 	LEVEL LogLevel = IConsole::ToLogLevel(Level);
 	// if the color is pure white, use default terminal color
@@ -1269,7 +1269,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 	return 0;
 }
 
-extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
+std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
 
 void CConsole::ResetServerGameSettings()
 {
@@ -1308,7 +1308,7 @@ void CConsole::ResetServerGameSettings()
 #undef MACRO_CONFIG_STR
 }
 
-int CConsole::CResult::GetVictim()
+int CConsole::CResult::GetVictim() const
 {
 	return m_Victim;
 }

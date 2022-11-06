@@ -18,35 +18,26 @@ jobs:
         include:
         - os: ubuntu-latest
           cmake-args: -G Ninja
+          cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
           fancy: true
-          env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
-            CXXFLAGS: -Werror
         - os: ubuntu-20.04
           cmake-path: /usr/bin/
           cmake-args: -G Ninja -DTEST_MYSQL=ON
+          cmake-init-env: CXXFLAGS=-Werror
+          gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
           fancy: false
-          env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
-            CXXFLAGS: -Werror
-            GTEST_FILTER: -*SQLite*
         - os: macOS-latest
           cmake-args: -G Ninja
+          cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
           fancy: false
-          env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
-            CXXFLAGS: -Werror
         - os: windows-latest
           cmake-args: -A x64
+          cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
           fancy: false
-          env:
-            CFLAGS: /WX
-            CXXFLAGS: /WX
-            LDFLAGS: /WX
 
     steps:
     - uses: actions/checkout@v3
@@ -63,6 +54,7 @@ jobs:
     - name: Prepare Linux (non-fancy)
       if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
       run: |
+        rustup default 1.48.0
         sudo rm -rf /var/lib/mysql/ /var/run/mysqld
         sudo mkdir /var/lib/mysql/ /var/run/mysqld/
         sudo chown mysql:mysql /var/lib/mysql/ /var/run/mysqld/
@@ -102,49 +94,41 @@ jobs:
         sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Build in debug mode
-      env: ${{ matrix.env }}
       run: |
         mkdir debug
         cd debug
-        ${{ matrix.cmake-path }}cmake --version
-        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
 
     - name: Test debug
-      env: ${{ matrix.env }}
       run: |
         cd debug
-        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
 
     - name: Run debug server
-      env: ${{ matrix.env }}
       run: |
         cd debug
         ./DDNet-Server shutdown
 
     - name: Build in release mode
-      env: ${{ matrix.env }}
       run: |
         mkdir release
         cd release
-        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
 
     - name: Test release
-      env: ${{ matrix.env }}
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
 
     - name: Run release server
-      env: ${{ matrix.env }}
       run: |
         cd release
         ./DDNet-Server shutdown
 
     - name: Build headless client
       if: contains(matrix.os, 'ubuntu-latest')
-      env: ${{ matrix.env }}
       run: |
         mkdir headless
         cd headless
@@ -152,7 +136,7 @@ jobs:
         CXXFLAGS="$CXXFLAGS --coverage"
         LDFLAGS="$LDFLAGS --coverage"
         ${{ matrix.cmake-path }}cmake --version
-        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
 
     - name: Test headless client (unit tests)
@@ -188,23 +172,21 @@ jobs:
 
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
-      env: ${{ matrix.env }}
       run: |
         mkdir fancy
         cd fancy
-        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
 
     - name: Test fancy
       if: matrix.fancy
-      env: ${{ matrix.env }}
       run: |
+        find /usr/lib/ -name '*libwebsockets*'
         cd fancy
-        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
 
     - name: Run fancy server
       if: matrix.fancy
-      env: ${{ matrix.env }}
       run: |
         cd fancy
         ./DDNet-Server shutdown
