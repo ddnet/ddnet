@@ -22,9 +22,8 @@ fn main() {
     if env::var_os("DDNET_TEST_NO_LINK").is_some() {
         return;
     }
-    if env::var_os("CARGO_FEATURE_LINK_TEST_LIBRARIES").is_some() {
-        let libraries = env::var("DDNET_TEST_LIBRARIES")
-            .expect("environment variable DDNET_TEST_LIBRARIES required but not found");
+
+    if let Ok(libraries) = env::var("DDNET_TEST_LIBRARIES") {
         let mut seen_library_dirs = HashSet::new();
         for library in libraries.split(';') {
             let library = Path::new(library);
