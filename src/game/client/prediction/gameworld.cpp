@@ -340,10 +340,10 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
-	int Num = FindEntities(Pos, Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; i++)
 	{
-		CCharacter *pChar = (CCharacter *)apEnts[i];
+		auto *pChar = static_cast<CCharacter *>(apEnts[i]);
 		vec2 Diff = pChar->m_Pos - Pos;
 		vec2 ForceDir(0, 1);
 		float l = length(Diff);

@@ -50,11 +50,11 @@ void CGun::Tick()
 void CGun::Fire()
 {
 	// Create a list of players who are in the range of the turret
-	CCharacter *apPlayersInRange[MAX_CLIENTS];
+	CEntity *apPlayersInRange[MAX_CLIENTS];
 	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange,
-		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
 	int aTargetIdInTeam[MAX_CLIENTS];
@@ -69,7 +69,7 @@ void CGun::Fire()
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
-		CCharacter *pTarget = apPlayersInRange[i];
+		CCharacter *pTarget = static_cast<CCharacter *>(apPlayersInRange[i]);
 		const int &TargetTeam = pTarget->Team();
 		// Do not fire at super players
 		if(TargetTeam == TEAM_SUPER)
