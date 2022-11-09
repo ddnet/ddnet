@@ -19,7 +19,8 @@ fn main() {
 
     println!("cargo:rerun-if-env-changed=DDNET_TEST_LIBRARIES");
     println!("cargo:rerun-if-env-changed=DDNET_TEST_NO_LINK");
-    if env::var_os("DDNET_TEST_NO_LINK").is_some() {
+    println!("cargo:rerun-if-env-changed=RA_RUSTC_WRAPPER");
+    if env::var_os("DDNET_TEST_NO_LINK").is_some() || env::var_os("RA_RUSTC_WRAPPER").is_some() {
         return;
     }
     if env::var_os("CARGO_FEATURE_LINK_TEST_LIBRARIES").is_some() {
