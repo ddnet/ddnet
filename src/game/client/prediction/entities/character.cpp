@@ -137,11 +137,11 @@ void CCharacter::HandleNinja()
 
 		// check if we Hit anything along the way
 		{
-			CCharacter *apEnts[MAX_CLIENTS];
+			CEntity *apEnts[MAX_CLIENTS];
 			vec2 Dir = m_Pos - OldPos;
 			float Radius = m_ProximityRadius * 2.0f;
 			vec2 Center = OldPos + Dir * 0.5f;
-			int Num = GameWorld()->FindEntities(Center, Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			int Num = GameWorld()->FindEntities(Center, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 			// check that we're not in solo part
 			if(TeamsCore()->GetSolo(GetCID()))
@@ -149,37 +149,38 @@ void CCharacter::HandleNinja()
 
 			for(int i = 0; i < Num; ++i)
 			{
-				if(apEnts[i] == this)
+				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
+				if(pChr == this)
 					continue;
 
 				// Don't hit players in other teams
-				if(Team() != apEnts[i]->Team())
+				if(Team() != pChr->Team())
 					continue;
 
 				// Don't hit players in solo parts
-				if(TeamsCore()->GetSolo(apEnts[i]->GetCID()))
+				if(TeamsCore()->GetSolo(pChr->GetCID()))
 					return;
 
 				// make sure we haven't Hit this object before
 				bool bAlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
-					if(m_aHitObjects[j] == apEnts[i]->GetCID())
+					if(m_aHitObjects[j] == pChr->GetCID())
 						bAlreadyHit = true;
 				}
 				if(bAlreadyHit)
 					continue;
 
 				// check so we are sufficiently close
-				if(distance(apEnts[i]->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
+				if(distance(pChr->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
 					continue;
 
 				// Hit a player, give them damage and stuffs...
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
-					m_aHitObjects[m_NumObjectsHit++] = apEnts[i]->GetCID();
+					m_aHitObjects[m_NumObjectsHit++] = pChr->GetCID();
 
-				CCharacter *pChar = GameWorld()->GetCharacterByID(apEnts[i]->GetCID());
+				CCharacter *pChar = GameWorld()->GetCharacterByID(pChr->GetCID());
 				if(pChar)
 					pChar->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, GetCID(), WEAPON_NINJA);
 			}
@@ -304,14 +305,14 @@ void CCharacter::FireWeapon()
 		if(m_Core.m_HammerHitDisabled)
 			break;
 
-		CCharacter *apEnts[MAX_CLIENTS];
+		CEntity *apEnts[MAX_CLIENTS];
 		int Hits = 0;
-		int Num = GameWorld()->FindEntities(ProjStartPos, m_ProximityRadius * 0.5f, (CEntity **)apEnts,
+		int Num = GameWorld()->FindEntities(ProjStartPos, m_ProximityRadius * 0.5f, apEnts,
 			MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 		for(int i = 0; i < Num; ++i)
 		{
-			CCharacter *pTarget = apEnts[i];
+			auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
 
 			if((pTarget == this || !CanCollide(pTarget->GetCID())))
 				continue;
