@@ -3594,15 +3594,15 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	{
 		int TypeID;
 		int ItemID;
-		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
+		void *pData = Reader.GetItem(i, &TypeID, &ItemID);
 		int Size = Reader.GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
 		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{
 			FoundInfo = true;
-			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
 			if(Size >= (int)sizeof(CMapItemInfoSettings))
 			{
+				CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
 				if(pInfo->m_Settings > -1)
 				{
 					SettingsIndex = pInfo->m_Settings;
@@ -3620,15 +3620,15 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 				{
 					MapInfo = *pInfo;
 					MapInfo.m_Settings = SettingsIndex;
-					pData = (int *)&MapInfo;
+					pData = &MapInfo;
 					Size = sizeof(MapInfo);
 				}
 			}
 			else
 			{
-				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pInfo;
+				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pData;
 				MapInfo.m_Settings = SettingsIndex;
-				pData = (int *)&MapInfo;
+				pData = &MapInfo;
 				Size = sizeof(MapInfo);
 			}
 		}
