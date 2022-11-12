@@ -240,7 +240,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aSnapshotIncomingDataSize[NUM_DUMMIES];
 
 	CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aaapDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char m_aaaDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	CSnapshotDelta m_SnapshotDelta;
 
