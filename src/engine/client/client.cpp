@@ -3852,20 +3852,15 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	// setup buffers
 	mem_zero(m_aaaDemorecSnapshotData, sizeof(m_aaaDemorecSnapshotData));
 
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = &m_aDemorecSnapshotHolders[SNAP_CURRENT];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV] = &m_aDemorecSnapshotHolders[SNAP_PREV];
-
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SNAP_CURRENT][0];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SNAP_CURRENT][1];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_SnapSize = 0;
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_AltSnapSize = 0;
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick = -1;
-
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SNAP_PREV][0];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SNAP_PREV][1];
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_SnapSize = 0;
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_AltSnapSize = 0;
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick = -1;
+	for(int SnapshotType = 0; SnapshotType < NUM_SNAPSHOT_TYPES; SnapshotType++)
+	{
+		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType] = &m_aDemorecSnapshotHolders[SnapshotType];
+		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][0];
+		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][1];
+		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_SnapSize = 0;
+		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_AltSnapSize = 0;
+		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_Tick = -1;
+	}
 
 	// enter demo playback state
 	SetState(IClient::STATE_DEMOPLAYBACK);
