@@ -100,7 +100,7 @@ void InitAndroid()
 	sha256_from_str(&ShaAllFile, vLines[0].c_str());
 
 	// TODO: check files individually
-	if(!GotSHA || sha256_comp(ShaAllFile, ShaAll) != 0)
+	if(!GotSHA || ShaAllFile != ShaAll)
 	{
 		// then the files
 		for(size_t i = 1; i < vLines.size(); ++i)

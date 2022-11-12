@@ -52,7 +52,10 @@ TEST(Hash, Sha256ToStringLargeBuffer)
 
 TEST(Hash, Sha256Eq)
 {
-	EXPECT_EQ(sha256("", 0), sha256("", 0));
+	EXPECT_EQ(sha256_comp(sha256("", 0), sha256("", 0)), 0);
+	EXPECT_TRUE(sha256("", 0) == sha256("", 0));
+	EXPECT_NE(sha256_comp(sha256("a", 1), sha256("b", 1)), 0);
+	EXPECT_TRUE(sha256("a", 1) != sha256("b", 1));
 }
 
 TEST(Hash, Sha256FromStr)
@@ -149,7 +152,10 @@ TEST(Hash, Md5ToStringLargeBuffer)
 
 TEST(Hash, Md5Eq)
 {
-	EXPECT_EQ(md5("", 0), md5("", 0));
+	EXPECT_EQ(md5_comp(md5("", 0), md5("", 0)), 0);
+	EXPECT_TRUE(md5("", 0) == md5("", 0));
+	EXPECT_NE(md5_comp(md5("a", 1), md5("b", 1)), 0);
+	EXPECT_TRUE(md5("a", 1) != md5("b", 1));
 }
 
 TEST(Hash, Md5FromStr)

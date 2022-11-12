@@ -58,10 +58,47 @@ TEST(Str, Utf8CompConfusables)
 {
 	EXPECT_TRUE(str_utf8_comp_confusable("abc", "abc") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("rn", "m") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("m", "rn") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("rna", "ma") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("ma", "rna") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("mA", "rna") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("ma", "rnA") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("arn", "am") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("am", "arn") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("Am", "arn") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("am", "Arn") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("l", "ӏ") == 0); // CYRILLIC SMALL LETTER PALOCHKA
 	EXPECT_TRUE(str_utf8_comp_confusable("i", "¡") == 0); // INVERTED EXCLAMATION MARK
 	EXPECT_FALSE(str_utf8_comp_confusable("o", "x") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("aceiou", "ąçęįǫų") == 0);
+}
+
+TEST(Str, Utf8ToSkeleton)
+{
+	int aBuf[32];
+	EXPECT_EQ(str_utf8_to_skeleton("abc", aBuf, 0), 0);
+	EXPECT_EQ(str_utf8_to_skeleton("", aBuf, std::size(aBuf)), 0);
+	EXPECT_EQ(str_utf8_to_skeleton("abc", aBuf, std::size(aBuf)), 3);
+	EXPECT_EQ(aBuf[0], 'a');
+	EXPECT_EQ(aBuf[1], 'b');
+	EXPECT_EQ(aBuf[2], 'c');
+	EXPECT_EQ(str_utf8_to_skeleton("m", aBuf, std::size(aBuf)), 2);
+	EXPECT_EQ(aBuf[0], 'r');
+	EXPECT_EQ(aBuf[1], 'n');
+	EXPECT_EQ(str_utf8_to_skeleton("rn", aBuf, std::size(aBuf)), 2);
+	EXPECT_EQ(aBuf[0], 'r');
+	EXPECT_EQ(aBuf[1], 'n');
+	EXPECT_EQ(str_utf8_to_skeleton("ӏ", aBuf, std::size(aBuf)), 1); // CYRILLIC SMALL LETTER PALOCHKA
+	EXPECT_EQ(aBuf[0], 'i');
+	EXPECT_EQ(str_utf8_to_skeleton("¡", aBuf, std::size(aBuf)), 1); // INVERTED EXCLAMATION MARK
+	EXPECT_EQ(aBuf[0], 'i');
+	EXPECT_EQ(str_utf8_to_skeleton("ąçęįǫų", aBuf, std::size(aBuf)), 6);
+	EXPECT_EQ(aBuf[0], 'a');
+	EXPECT_EQ(aBuf[1], 'c');
+	EXPECT_EQ(aBuf[2], 'e');
+	EXPECT_EQ(aBuf[3], 'i');
+	EXPECT_EQ(aBuf[4], 'o');
+	EXPECT_EQ(aBuf[5], 'u');
 }
 
 TEST(Str, Utf8ToLower)
