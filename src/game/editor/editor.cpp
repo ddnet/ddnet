@@ -115,8 +115,8 @@ CLayerGroup::CLayerGroup()
 template<typename T>
 static void DeleteAll(std::vector<T> &vList)
 {
-	for(auto &Item : vList)
-		delete Item;
+	for(const auto &pItem : vList)
+		delete pItem;
 	vList.clear();
 }
 
@@ -2986,7 +2986,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			for(int i = 0; i < 2; i++)
 			{
 				float aPoints[4];
-				float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
+				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				float Aspect = aAspects[i];
 
 				RenderTools()->MapScreenToWorld(
@@ -3143,7 +3143,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		else if(pProps[i].m_Type == PROPTYPE_COLOR)
 		{
 			static const char *s_apTexts[4] = {"R", "G", "B", "A"};
-			static int s_aShift[] = {24, 16, 8, 0};
+			static const int s_aShift[] = {24, 16, 8, 0};
 			int NewColor = 0;
 
 			// extra space

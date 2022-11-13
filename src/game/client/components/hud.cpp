@@ -175,7 +175,7 @@ void CHud::RenderScoreHud()
 
 			bool aRecreateTeamScore[2] = {str_comp(aScoreTeam[0], m_aScoreInfo[0].m_aScoreText) != 0, str_comp(aScoreTeam[1], m_aScoreInfo[1].m_aScoreText) != 0};
 
-			int aFlagCarrier[2] = {
+			const int aFlagCarrier[2] = {
 				m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed,
 				m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue};
 
@@ -516,7 +516,7 @@ void CHud::RenderTextInfo()
 		static float s_TextWidth000 = TextRender()->TextWidth(0, 12.f, "000", -1, -1.0f);
 		static float s_TextWidth0000 = TextRender()->TextWidth(0, 12.f, "0000", -1, -1.0f);
 		static float s_TextWidth00000 = TextRender()->TextWidth(0, 12.f, "00000", -1, -1.0f);
-		static float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
+		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
 
 		int DigitIndex = GetDigitsIndex(FrameTime, 4);
 		//TextRender()->Text(0, m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1.0f);

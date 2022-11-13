@@ -394,7 +394,7 @@ void CCharacter::FireWeapon()
 			int ShotSpread = 2;
 			for(int i = -ShotSpread; i <= ShotSpread; ++i)
 			{
-				float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+				const float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
 				float a = angle(Direction);
 				a += aSpreading[i + 2];
 				float v = 1 - (absolute(i) / (float)ShotSpread);

@@ -504,7 +504,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 						if(pRule->m_Value == CPosRule::INDEX)
 						{
 							RespectRules = false;
-							for(auto &Index : pRule->m_vIndexList)
+							for(const auto &Index : pRule->m_vIndexList)
 							{
 								if(CheckIndex == Index.m_ID && (!Index.m_TestFlag || CheckFlags == Index.m_Flag))
 								{
@@ -515,7 +515,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 						}
 						else if(pRule->m_Value == CPosRule::NOTINDEX)
 						{
-							for(auto &Index : pRule->m_vIndexList)
+							for(const auto &Index : pRule->m_vIndexList)
 							{
 								if(CheckIndex == Index.m_ID && (!Index.m_TestFlag || CheckFlags == Index.m_Flag))
 								{
