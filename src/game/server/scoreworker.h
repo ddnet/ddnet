@@ -236,7 +236,7 @@ public:
 			BestTimeCp = 0;
 	}
 
-	void Set(float Time, float aTimeCp[NUM_CHECKPOINTS])
+	void Set(float Time, const float aTimeCp[NUM_CHECKPOINTS])
 	{
 		m_BestTime = Time;
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)

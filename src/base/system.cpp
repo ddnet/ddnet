@@ -4057,7 +4057,7 @@ int secure_random_uninit()
 #endif
 }
 
-void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)
+void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
 	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.

@@ -2430,7 +2430,7 @@ int kill_process(PROCESS process);
 		random - Pointer to a randomly-initialized array of shorts.
 		random_length - Length of the short array.
 */
-void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length);
+void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length);
 
 /*
 	Function: secure_random_init

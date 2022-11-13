@@ -132,7 +132,7 @@ void CScore::MapInfo(int ClientID, const char *pMapName)
 	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientID, pMapName, 0);
 }
 
-void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
+void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->m_Cheated || NotEligible)

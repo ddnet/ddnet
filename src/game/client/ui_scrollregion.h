@@ -111,7 +111,7 @@ public:
 	};
 
 	CScrollRegion();
-	void Begin(CUIRect *pClipRect, vec2 *pOutOffset, CScrollRegionParams *pParams = nullptr);
+	void Begin(CUIRect *pClipRect, vec2 *pOutOffset, const CScrollRegionParams *pParams = nullptr);
 	void End();
 	bool AddRect(const CUIRect &Rect, bool ShouldScrollHere = false); // returns true if the added rect is visible (not clipped)
 	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW);

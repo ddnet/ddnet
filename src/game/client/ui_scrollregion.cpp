@@ -20,7 +20,7 @@ CScrollRegion::CScrollRegion()
 	m_Params = CScrollRegionParams();
 }
 
-void CScrollRegion::Begin(CUIRect *pClipRect, vec2 *pOutOffset, CScrollRegionParams *pParams)
+void CScrollRegion::Begin(CUIRect *pClipRect, vec2 *pOutOffset, const CScrollRegionParams *pParams)
 {
 	if(pParams)
 		m_Params = *pParams;

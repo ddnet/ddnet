@@ -260,7 +260,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			}
 		}
 
-		void Free(SMemoryHeapQueueElement &AllocatedMemory)
+		void Free(const SMemoryHeapQueueElement &AllocatedMemory)
 		{
 			bool ContinueFree = true;
 			SMemoryHeapQueueElement ThisEl = AllocatedMemory;
@@ -1705,7 +1705,7 @@ protected:
 		return floor(log2(maximum(Width, maximum(Height, Depth)))) + 1;
 	}
 
-	static size_t ImageMipLevelCount(VkExtent3D &ImgExtent)
+	static size_t ImageMipLevelCount(const VkExtent3D &ImgExtent)
 	{
 		return ImageMipLevelCount(ImgExtent.width, ImgExtent.height, ImgExtent.depth);
 	}
@@ -2798,7 +2798,7 @@ protected:
 		vkBindImageMemory(m_VKDevice, Image, ImageMem.m_BufferMem.m_Mem, ImageMem.m_HeapData.m_OffsetToAlign);
 	}
 
-	void ImageBarrier(VkImage &Image, size_t MipMapBase, size_t MipMapCount, size_t LayerBase, size_t LayerCount, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout)
+	void ImageBarrier(const VkImage &Image, size_t MipMapBase, size_t MipMapCount, size_t LayerBase, size_t LayerCount, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout)
 	{
 		VkCommandBuffer MemCommandBuffer = GetMemoryCommandBuffer();
 
@@ -6492,7 +6492,7 @@ public:
 		ExecBuffer.m_EstimatedRenderCallCount = 0;
 	}
 
-	void Cmd_Clear(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_Clear *pCommand)
+	void Cmd_Clear(const SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_Clear *pCommand)
 	{
 		if(ExecBuffer.m_ClearColorInRenderThread)
 		{
