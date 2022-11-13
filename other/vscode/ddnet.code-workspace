@@ -80,6 +80,9 @@
 		"clang-format.executable": "clang-format-10",
 		"lldb.launch.expressions": "native",
 		"editor.defaultFormatter": "xaver.clang-format",
+		"[rust]": {
+			"editor.defaultFormatter": "rust-lang.rust-analyzer",
+		},
 		"editor.formatOnSave": true,
 		"cmake.additionalKits": [
 			"${workspaceFolder}/other/vscode/ddnet-cmake-tools-kits.json"
@@ -172,7 +175,7 @@
 			"twxs.cmake",
 			"ms-vscode.cmake-tools",
 			"vadimcn.vscode-lldb",
-			"rust-lang.rust"
+			"rust-lang.rust-analyzer"
 		]
 	},
 	"tasks": {
@@ -180,17 +183,31 @@
 		"tasks": [
 			{
 				"type": "cmake",
-				"label": "CMake: build",
+				"label": "CMake: build client",
 				"command": "build",
 				"targets": [
-					"all"
+					"DDNet"
 				],
 				"group": {
 					"kind": "build",
 					"isDefault": true
 				},
 				"problemMatcher": [],
-				"detail": "Build all targets"
+				"detail": "Build client targets"
+			},
+			{
+				"type": "cmake",
+				"label": "CMake: build server",
+				"command": "build",
+				"targets": [
+					"DDNet-Server"
+				],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"problemMatcher": [],
+				"detail": "Build server targets"
 			}
 		]
 	},
@@ -202,7 +219,7 @@
 				"request": "launch",
 				"name": "Launch client",
 				"program": "${workspaceFolder}/build/DDNet",
-				"preLaunchTask": "CMake: build",
+				"preLaunchTask": "CMake: build client",
 				// use dbg configs like this
 				// "args": [ "dbg_gfx 0" ],
 				// enable this to start the debugger with TSAN
@@ -214,7 +231,7 @@
 				"request": "launch",
 				"name": "Launch server",
 				"program": "${workspaceFolder}/build/DDNet-Server",
-				"preLaunchTask": "CMake: build",
+				"preLaunchTask": "CMake: build server",
 				"cwd": "${workspaceFolder}/build"
 			},
 			// useful for cross debugging the windows (wine) client
