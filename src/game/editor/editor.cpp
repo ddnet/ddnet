@@ -910,7 +910,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
 		if(DoButton_Editor(&s_GridButton, "Grid", m_GridActive, &Button, 0, "[ctrl+g] Toggle Grid") ||
-			(Input()->KeyPress(KEY_G) && ModPressed))
+			(Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
 		{
 			m_GridActive = !m_GridActive;
 		}
@@ -2354,6 +2354,28 @@ void CEditor::DoMapEditor(CUIRect View)
 	// render all good stuff
 	if(!m_ShowPicker)
 	{
+		if(Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && Input()->KeyPress(KEY_G))
+		{
+			const bool AnyHidden =
+				!m_Map.m_pGameLayer->m_Visible ||
+				(m_Map.m_pFrontLayer && !m_Map.m_pFrontLayer->m_Visible) ||
+				(m_Map.m_pTeleLayer && !m_Map.m_pTeleLayer->m_Visible) ||
+				(m_Map.m_pSpeedupLayer && !m_Map.m_pSpeedupLayer->m_Visible) ||
+				(m_Map.m_pTuneLayer && !m_Map.m_pTuneLayer->m_Visible) ||
+				(m_Map.m_pSwitchLayer && !m_Map.m_pSwitchLayer->m_Visible);
+			m_Map.m_pGameLayer->m_Visible = AnyHidden;
+			if(m_Map.m_pFrontLayer)
+				m_Map.m_pFrontLayer->m_Visible = AnyHidden;
+			if(m_Map.m_pTeleLayer)
+				m_Map.m_pTeleLayer->m_Visible = AnyHidden;
+			if(m_Map.m_pSpeedupLayer)
+				m_Map.m_pSpeedupLayer->m_Visible = AnyHidden;
+			if(m_Map.m_pTuneLayer)
+				m_Map.m_pTuneLayer->m_Visible = AnyHidden;
+			if(m_Map.m_pSwitchLayer)
+				m_Map.m_pSwitchLayer->m_Visible = AnyHidden;
+		}
+
 		for(auto &pGroup : m_Map.m_vpGroups)
 		{
 			if(pGroup->m_Visible)
