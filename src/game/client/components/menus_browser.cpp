@@ -190,7 +190,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	if(UI()->ConsumeHotkey(CUI::HOTKEY_TAB))
 	{
-		const int Direction = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT) ? -1 : 1;
+		const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
 		g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + Direction) % 3;
 	}
 
@@ -589,7 +589,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		static int s_ClearButton = 0;
 		static float s_Offset = 0.0f;
-		if(Input()->KeyPress(KEY_X) && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && Input()->ModifierIsPressed())
+		if(Input()->KeyPress(KEY_X) && Input()->ShiftIsPressed() && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
 		if(UI()->DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL))
 			Client()->ServerBrowserUpdate();

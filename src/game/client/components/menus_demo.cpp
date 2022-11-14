@@ -221,7 +221,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
-		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
+		if(!Input()->ShiftIsPressed())
 		{
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 			{
@@ -410,7 +410,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				static float s_PrevAmount = 0.0f;
 				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(Input()->ShiftIsPressed())
 				{
 					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
 					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)

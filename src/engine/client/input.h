@@ -101,6 +101,8 @@ public:
 	void Shutdown() override;
 
 	bool ModifierIsPressed() const override { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
+	bool ShiftIsPressed() const override { return KeyState(KEY_LSHIFT) || KeyState(KEY_RSHIFT); }
+	bool AltIsPressed() const override { return KeyState(KEY_LALT) || KeyState(KEY_RALT); }
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 

@@ -71,7 +71,7 @@ void CScrollRegion::End()
 
 	if(UI()->Enabled() && UI()->MouseHovered(&RegionRect))
 	{
-		const bool IsPageScroll = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+		const bool IsPageScroll = Input()->AltIsPressed();
 		const float ScrollUnit = IsPageScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_UP))
 		{
