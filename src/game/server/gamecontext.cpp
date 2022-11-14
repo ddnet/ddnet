@@ -14,6 +14,7 @@
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
+#include <engine/shared/json.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/memheap.h>
 #include <engine/storage.h>
@@ -4283,4 +4284,74 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientID)
 		return true;
 	}
 	return false;
+}
+
+void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
+{
+	if(!m_apPlayers[ID])
+		return;
+
+	char aCSkinName[64];
+
+	CTeeInfo &TeeInfo = m_apPlayers[ID]->m_TeeInfos;
+
+	char aJsonSkin[400];
+	aJsonSkin[0] = '\0';
+
+	if(!Server()->IsSixup(ID))
+	{
+		// 0.6
+		if(TeeInfo.m_UseCustomColor)
+		{
+			str_format(aJsonSkin, sizeof(aJsonSkin),
+				"\"name\":\"%s\","
+				"\"color_body\":%d,"
+				"\"color_feet\":%d",
+				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_aSkinName),
+				TeeInfo.m_ColorBody,
+				TeeInfo.m_ColorFeet);
+		}
+		else
+		{
+			str_format(aJsonSkin, sizeof(aJsonSkin),
+				"\"name\":\"%s\"",
+				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_aSkinName));
+		}
+	}
+	else
+	{
+		const char *apPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
+		char aPartBuf[64];
+
+		for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
+		{
+			str_format(aPartBuf, sizeof(aPartBuf),
+				"%s\"%s\":{"
+				"\"name\":\"%s\"",
+				i == 0 ? "" : ",",
+				apPartNames[i],
+				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_apSkinPartNames[i]));
+
+			str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
+
+			if(TeeInfo.m_aUseCustomColors[i])
+			{
+				str_format(aPartBuf, sizeof(aPartBuf),
+					",color:%d",
+					TeeInfo.m_aSkinPartColors[i]);
+				str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
+			}
+			str_append(aJsonSkin, "}", sizeof(aJsonSkin));
+		}
+	}
+
+	str_format(aBuf, BufSize,
+		",\"skin\":{"
+		"%s"
+		"},"
+		"\"afk\":%s,"
+		"\"team\":%d",
+		aJsonSkin,
+		JsonBool(m_apPlayers[ID]->m_Afk),
+		m_apPlayers[ID]->GetTeam());
 }

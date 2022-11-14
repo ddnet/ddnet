@@ -2238,7 +2238,10 @@ void CServer::UpdateRegisterServerInfo()
 			char aCName[32];
 			char aCClan[32];
 
-			char aClientInfo[256];
+			char aExtraPlayerInfo[512];
+			GameServer()->OnUpdatePlayerServerInfo(aExtraPlayerInfo, sizeof(aExtraPlayerInfo), i);
+
+			char aClientInfo[1024];
 			str_format(aClientInfo, sizeof(aClientInfo),
 				"%s{"
 				"\"name\":\"%s\","
@@ -2246,13 +2249,15 @@ void CServer::UpdateRegisterServerInfo()
 				"\"country\":%d,"
 				"\"score\":%d,"
 				"\"is_player\":%s"
+				"%s"
 				"}",
 				!FirstPlayer ? "," : "",
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
 				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
 				m_aClients[i].m_Country,
 				m_aClients[i].m_Score,
-				JsonBool(GameServer()->IsClientPlayer(i)));
+				JsonBool(GameServer()->IsClientPlayer(i)),
+				aExtraPlayerInfo);
 			str_append(aInfo, aClientInfo, sizeof(aInfo));
 			FirstPlayer = false;
 		}
