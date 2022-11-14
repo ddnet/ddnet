@@ -198,7 +198,8 @@ void CLayerGroup::Render()
 		}
 	}
 
-	pGraphics->ClipDisable();
+	if(m_UseClipping)
+		pGraphics->ClipDisable();
 }
 
 void CLayerGroup::AddLayer(CLayer *pLayer)
