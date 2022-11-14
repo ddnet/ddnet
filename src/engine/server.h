@@ -322,6 +322,14 @@ public:
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+
+	/**
+	 * Used to report custom player info to master servers.
+	 * 
+	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"skin": "default", "team": 1'
+	 * @param i The client id.
+	 */
+	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) = 0;
 };
 
 extern IGameServer *CreateGameServer();

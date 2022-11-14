@@ -6,6 +6,7 @@
 struct StdSkin
 {
 	char m_aSkinName[64];
+	// body, marking, decoration, hands, feet, eyes
 	char m_apSkinPartNames[6][24];
 	bool m_aUseCustomColors[6];
 	int m_aSkinPartColors[6];
