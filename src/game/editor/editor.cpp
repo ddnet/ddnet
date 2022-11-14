@@ -2356,17 +2356,9 @@ void CEditor::DoMapEditor(CUIRect View)
 	if(!m_ShowPicker)
 	{
 		for(auto &pGroup : m_Map.m_vpGroups)
-		{ // don't render the front, tele, speedup and switch layer now we will do it later to make them on top of others
-			if(
-				pGroup == (CLayerGroup *)m_Map.m_pFrontLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pTeleLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pSpeedupLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pSwitchLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pTuneLayer)
-				continue;
+		{
 			if(pGroup->m_Visible)
 				pGroup->Render();
-			//UI()->ClipEnable(&view);
 		}
 
 		// render the game, tele, speedup, front, tune and switch above everything else
@@ -2695,7 +2687,6 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						//editor.map.groups[selected_group]->mapscreen();
 						for(size_t k = 0; k < NumEditLayers; k++)
 							apEditLayers[k]->BrushSelecting(r);
 						UI()->MapScreen();
@@ -2716,7 +2707,6 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						//editor.map.groups[selected_group]->mapscreen();
 						for(size_t k = 0; k < NumEditLayers; k++)
 							apEditLayers[k]->BrushSelecting(r);
 						UI()->MapScreen();
@@ -3029,7 +3019,6 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	UI()->MapScreen();
-	//UI()->ClipDisable();
 }
 
 float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
