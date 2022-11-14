@@ -2553,7 +2553,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			if(Input()->ModifierIsPressed() || UI()->MouseButton(2))
 			{
-				if(Input()->KeyIsPressed(KEY_LSHIFT))
+				if(Input()->ShiftIsPressed())
 					s_Operation = OP_PAN_EDITOR;
 				else
 					s_Operation = OP_PAN_WORLD;
@@ -2646,7 +2646,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!UI()->MouseButton(0))
 					{
-						if(Input()->KeyIsPressed(KEY_LSHIFT))
+						if(Input()->ShiftIsPressed())
 						{
 							CLayerQuads *pQuadLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
 							if(pQuadLayer)

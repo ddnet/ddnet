@@ -110,7 +110,6 @@ class CChat : public CComponent
 	};
 
 	std::vector<CCommand> m_vCommands;
-	bool m_ReverseTAB;
 
 	struct CHistoryEntry
 	{
