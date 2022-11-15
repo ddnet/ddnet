@@ -81,7 +81,6 @@ void CChat::Reset()
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
 
-	m_ReverseTAB = false;
 	m_Show = false;
 	m_InputUpdate = false;
 	m_ChatStringOffset = 0;
@@ -307,6 +306,8 @@ bool CChat::OnInput(IInput::CEvent Event)
 	}
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
+		const bool ShiftPressed = Input()->ShiftIsPressed();
+
 		// fill the completion buffer
 		if(!m_CompletionUsed)
 		{
@@ -353,9 +354,9 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 			const size_t NumCommands = m_vCommands.size();
 
-			if(m_ReverseTAB && m_CompletionUsed)
+			if(ShiftPressed && m_CompletionUsed)
 				m_CompletionChosen--;
-			else if(!m_ReverseTAB)
+			else if(!ShiftPressed)
 				m_CompletionChosen++;
 			m_CompletionChosen = (m_CompletionChosen + 2 * NumCommands) % (2 * NumCommands);
 
@@ -367,7 +368,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 				int SearchType;
 				int Index;
 
-				if(m_ReverseTAB)
+				if(ShiftPressed)
 				{
 					SearchType = ((m_CompletionChosen - i + 2 * NumCommands) % (2 * NumCommands)) / NumCommands;
 					Index = (m_CompletionChosen - i + NumCommands) % NumCommands;
@@ -425,11 +426,11 @@ bool CChat::OnInput(IInput::CEvent Event)
 				CGameClient::CClientData *pCompletionClientData;
 				for(int i = 0; i < m_PlayerCompletionListLength; ++i)
 				{
-					if(m_ReverseTAB && m_CompletionUsed)
+					if(ShiftPressed && m_CompletionUsed)
 					{
 						m_CompletionChosen--;
 					}
-					else if(!m_ReverseTAB)
+					else if(!ShiftPressed)
 					{
 						m_CompletionChosen++;
 					}
@@ -484,27 +485,17 @@ bool CChat::OnInput(IInput::CEvent Event)
 	else
 	{
 		// reset name completion process
-		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY_TAB)
+		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key != KEY_TAB && Event.m_Key != KEY_LSHIFT && Event.m_Key != KEY_RSHIFT)
 		{
-			if(Event.m_Key != KEY_LSHIFT)
-			{
-				m_CompletionChosen = -1;
-				m_CompletionUsed = false;
-			}
+			m_CompletionChosen = -1;
+			m_CompletionUsed = false;
 		}
 
 		m_OldChatStringLength = m_Input.GetLength();
 		m_Input.ProcessInput(Event);
 		m_InputUpdate = true;
 	}
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_LSHIFT)
-	{
-		m_ReverseTAB = true;
-	}
-	else if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY_LSHIFT)
-	{
-		m_ReverseTAB = false;
-	}
+
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
 	{
 		if(m_pHistoryEntry)

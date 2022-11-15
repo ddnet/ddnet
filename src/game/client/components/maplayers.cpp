@@ -1654,7 +1654,7 @@ void CMapLayers::OnRender()
 					Render = true;
 			}
 
-			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->ModifierIsPressed() && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && Input()->KeyPress(KEY_KP_0))
+			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->ModifierIsPressed() && Input()->ShiftIsPressed() && Input()->KeyPress(KEY_KP_0))
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);

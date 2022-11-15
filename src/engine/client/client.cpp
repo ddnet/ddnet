@@ -3408,7 +3408,7 @@ void CClient::Run()
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
 {
-	if(Input()->ModifierIsPressed() && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && !Last && Input()->KeyIsPressed(Key))
+	if(Input()->ModifierIsPressed() && Input()->ShiftIsPressed() && !Last && Input()->KeyIsPressed(Key))
 	{
 		Last = true;
 		return true;

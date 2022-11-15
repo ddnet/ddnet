@@ -198,7 +198,8 @@ void CLayerGroup::Render()
 		}
 	}
 
-	pGraphics->ClipDisable();
+	if(m_UseClipping)
+		pGraphics->ClipDisable();
 }
 
 void CLayerGroup::AddLayer(CLayer *pLayer)
@@ -612,7 +613,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		{
 			if(UI()->MouseButton(0))
 			{
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(Input()->ShiftIsPressed())
 					s_Value += m_MouseDeltaX * 0.05f;
 				else
 					s_Value += m_MouseDeltaX;
@@ -851,8 +852,8 @@ static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType
 
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
-	bool ModPressed = Input()->ModifierIsPressed();
-	bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+	const bool ModPressed = Input()->ModifierIsPressed();
+	const bool ShiftPressed = Input()->ShiftIsPressed();
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -1311,8 +1312,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
-	bool IgnoreGrid;
-	IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	if(UI()->CheckActiveItem(pID))
 	{
@@ -1432,7 +1432,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	if(dx * dx + dy * dy < 50)
 		UI()->SetHotItem(pID);
 
-	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	// draw selection background
 	if(IsQuadSelected(Index))
@@ -1589,7 +1589,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 		if(UI()->MouseButton(0))
 		{
-			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			if(Input()->ShiftIsPressed())
 			{
 				s_Operation = OP_MOVE_PIVOT;
 
@@ -1631,7 +1631,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 		if(UI()->MouseButton(1))
 		{
-			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			if(Input()->ShiftIsPressed())
 			{
 				s_Operation = OP_DELETE;
 
@@ -1692,7 +1692,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	static bool s_Moved;
 	static int s_Operation = OP_NONE;
 
-	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	if(UI()->CheckActiveItem(pID))
 	{
@@ -1796,7 +1796,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			{
 				if(!s_Moved)
 				{
-					if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+					if(Input()->ShiftIsPressed())
 						m_SelectedPoints ^= 1 << V;
 					else
 						m_SelectedPoints = 1 << V;
@@ -1820,7 +1820,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		{
 			UI()->SetActiveItem(pID);
 			s_Moved = false;
-			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			if(Input()->ShiftIsPressed())
 			{
 				s_Operation = OP_MOVEUV;
 				m_LockMouse = true;
@@ -1830,7 +1830,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 			if(!(m_SelectedPoints & (1 << V)))
 			{
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(Input()->ShiftIsPressed())
 					m_SelectedPoints |= 1 << V;
 				else
 					m_SelectedPoints = 1 << V;
@@ -1850,7 +1850,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			UI()->SetActiveItem(pID);
 			if(!(m_SelectedPoints & (1 << V)))
 			{
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(Input()->ShiftIsPressed())
 					m_SelectedPoints |= 1 << V;
 				else
 					m_SelectedPoints = 1 << V;
@@ -1896,7 +1896,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	CLayerQuads *pLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
 
-	bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->AltIsPressed();
 	float SnapRadius = 4.f * m_MouseWScale;
 
 	vec2 Mouse = vec2(UI()->MouseWorldX(), UI()->MouseWorldY());
@@ -2260,7 +2260,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		s_CurQIndex = QIndex;
 	}
 
-	const bool IgnoreGrid = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	if(UI()->CheckActiveItem(pID) && s_CurQIndex == QIndex)
 	{
@@ -2355,17 +2355,9 @@ void CEditor::DoMapEditor(CUIRect View)
 	if(!m_ShowPicker)
 	{
 		for(auto &pGroup : m_Map.m_vpGroups)
-		{ // don't render the front, tele, speedup and switch layer now we will do it later to make them on top of others
-			if(
-				pGroup == (CLayerGroup *)m_Map.m_pFrontLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pTeleLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pSpeedupLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pSwitchLayer ||
-				pGroup == (CLayerGroup *)m_Map.m_pTuneLayer)
-				continue;
+		{
 			if(pGroup->m_Visible)
 				pGroup->Render();
-			//UI()->ClipEnable(&view);
 		}
 
 		// render the game, tele, speedup, front, tune and switch above everything else
@@ -2561,7 +2553,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			if(Input()->ModifierIsPressed() || UI()->MouseButton(2))
 			{
-				if(Input()->KeyIsPressed(KEY_LSHIFT))
+				if(Input()->ShiftIsPressed())
 					s_Operation = OP_PAN_EDITOR;
 				else
 					s_Operation = OP_PAN_WORLD;
@@ -2654,7 +2646,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!UI()->MouseButton(0))
 					{
-						if(Input()->KeyIsPressed(KEY_LSHIFT))
+						if(Input()->ShiftIsPressed())
 						{
 							CLayerQuads *pQuadLayer = (CLayerQuads *)GetSelectedLayerType(0, LAYERTYPE_QUADS);
 							if(pQuadLayer)
@@ -2694,7 +2686,6 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						//editor.map.groups[selected_group]->mapscreen();
 						for(size_t k = 0; k < NumEditLayers; k++)
 							apEditLayers[k]->BrushSelecting(r);
 						UI()->MapScreen();
@@ -2715,7 +2706,6 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						//editor.map.groups[selected_group]->mapscreen();
 						for(size_t k = 0; k < NumEditLayers; k++)
 							apEditLayers[k]->BrushSelecting(r);
 						UI()->MapScreen();
@@ -2754,7 +2744,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 
 					CLayerTiles *pLayer = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-					if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && pLayer)
+					if(Input()->ShiftIsPressed() && pLayer)
 						s_Operation = OP_BRUSH_PAINT;
 				}
 
@@ -2872,7 +2862,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				UI()->SetActiveItem(nullptr);
 			}
 		}
-		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) &&
+		if(!Input()->ShiftIsPressed() &&
 			!Input()->ModifierIsPressed() &&
 			m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 		{
@@ -3028,7 +3018,6 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	UI()->MapScreen();
-	//UI()->ClipDisable();
 }
 
 float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
@@ -3115,7 +3104,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			CUIRect Inc, Dec;
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
-			bool Shift = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
+			const bool Shift = Input()->ShiftIsPressed();
 			int Step = Shift ? 1 : 45;
 			int Value = pProps[i].m_Value;
 
@@ -3364,7 +3353,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				if(g != m_SelectedGroup)
 					SelectLayer(0, g);
 
-				if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+				if(Input()->ShiftIsPressed() && m_SelectedGroup == g)
 				{
 					m_vSelectedLayers.clear();
 					for(size_t i = 0; i < m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
@@ -3458,7 +3447,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				static CLayerPopupContext s_LayerPopupContext = {};
 				if(Result == 1)
 				{
-					if((Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && m_SelectedGroup == g)
+					if(Input()->ShiftIsPressed() && m_SelectedGroup == g)
 					{
 						auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
 						if(Position != m_vSelectedLayers.end())
@@ -3466,7 +3455,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						else
 							AddSelectedLayer(i);
 					}
-					else if(!(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)))
+					else if(!Input()->ShiftIsPressed())
 					{
 						SelectLayer(i, g);
 					}
@@ -3507,7 +3496,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(Input()->ShiftIsPressed())
 		{
 			if(m_vSelectedLayers[m_vSelectedLayers.size() - 1] < (int)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
 				AddSelectedLayer(m_vSelectedLayers[m_vSelectedLayers.size() - 1] + 1);
@@ -3538,7 +3527,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	}
 	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
-		if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+		if(Input()->ShiftIsPressed())
 		{
 			if(m_vSelectedLayers[m_vSelectedLayers.size() - 1] > 0)
 				AddSelectedLayer(m_vSelectedLayers[m_vSelectedLayers.size() - 1] - 1);
@@ -5294,7 +5283,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						}
 						else
 						{
-							if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+							if(Input()->ShiftIsPressed())
 							{
 								if(i != 0)
 								{
@@ -5870,9 +5859,9 @@ void CEditor::Render()
 
 	if(m_Dialog == DIALOG_NONE)
 	{
-		bool ModPressed = Input()->ModifierIsPressed();
-		bool ShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-		bool AltPressed = Input()->KeyIsPressed(KEY_LALT) || Input()->KeyIsPressed(KEY_RALT);
+		const bool ModPressed = Input()->ModifierIsPressed();
+		const bool ShiftPressed = Input()->ShiftIsPressed();
+		const bool AltPressed = Input()->AltIsPressed();
 		// ctrl+n to create new map
 		if(Input()->KeyPress(KEY_N) && ModPressed)
 		{

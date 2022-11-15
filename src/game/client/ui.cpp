@@ -263,7 +263,7 @@ bool CUI::OnInput(const IInput::CEvent &Event)
 			m_HotkeysPressed |= HOTKEY_ENTER;
 		else if(Event.m_Key == KEY_ESCAPE)
 			m_HotkeysPressed |= HOTKEY_ESCAPE;
-		else if(Event.m_Key == KEY_TAB && !Input()->KeyIsPressed(KEY_LALT) && !Input()->KeyIsPressed(KEY_RALT))
+		else if(Event.m_Key == KEY_TAB && !Input()->AltIsPressed())
 			m_HotkeysPressed |= HOTKEY_TAB;
 		else if(Event.m_Key == KEY_DELETE)
 			m_HotkeysPressed |= HOTKEY_DELETE;
@@ -672,8 +672,8 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 
 		m_CurCursor = minimum(str_length(pStr), m_CurCursor);
 
-		bool IsShiftPressed = Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT);
-		bool IsModPressed = Input()->ModifierIsPressed();
+		const bool IsShiftPressed = Input()->ShiftIsPressed();
+		const bool IsModPressed = Input()->ModifierIsPressed();
 
 		if(Enabled() && !IsShiftPressed && IsModPressed && Input()->KeyPress(KEY_V))
 		{
@@ -1101,7 +1101,7 @@ float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 		if(MouseButton(0))
 		{
 			Grabbed = true;
-			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			if(Input()->ShiftIsPressed())
 				m_MouseSlow = true;
 		}
 		else
@@ -1181,7 +1181,7 @@ float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, co
 		if(MouseButton(0))
 		{
 			Grabbed = true;
-			if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+			if(Input()->ShiftIsPressed())
 				m_MouseSlow = true;
 		}
 		else
