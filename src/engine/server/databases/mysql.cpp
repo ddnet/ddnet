@@ -618,7 +618,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize)
 
 	for(int i = 0; i < BufferSize; i++)
 	{
-		pBuffer[i] = 'a';
+		pBuffer[i] = '\0';
 	}
 
 	MYSQL_BIND Bind;
@@ -628,7 +628,8 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize)
 	mem_zero(&Bind, sizeof(Bind));
 	Bind.buffer_type = MYSQL_TYPE_STRING;
 	Bind.buffer = pBuffer;
-	Bind.buffer_length = BufferSize;
+	// leave one character for null-termination
+	Bind.buffer_length = BufferSize - 1;
 	Bind.length = &Length;
 	Bind.is_null = &IsNull;
 	Bind.is_unsigned = false;
