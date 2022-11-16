@@ -3223,22 +3223,22 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			UI()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_CENTER);
 			if(DoButton_ButtonDec(&pIDs[i], "-", 0, &Left, 0, "Left"))
 			{
-				*pNewVal = 1;
+				*pNewVal = DIRECTION_LEFT;
 				Change = i;
 			}
 			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 3, "+", 0, &Right, 0, "Right"))
 			{
-				*pNewVal = 2;
+				*pNewVal = DIRECTION_RIGHT;
 				Change = i;
 			}
 			if(DoButton_ButtonDec(((char *)&pIDs[i]) + 1, "-", 0, &Up, 0, "Up"))
 			{
-				*pNewVal = 4;
+				*pNewVal = DIRECTION_UP;
 				Change = i;
 			}
 			if(DoButton_ButtonInc(((char *)&pIDs[i]) + 2, "+", 0, &Down, 0, "Down"))
 			{
-				*pNewVal = 8;
+				*pNewVal = DIRECTION_DOWN;
 				Change = i;
 			}
 		}
