@@ -510,10 +510,10 @@ enum
 
 enum
 {
-	DIRECTION_LEFT = 1,
-	DIRECTION_RIGHT = 2,
-	DIRECTION_UP = 4,
-	DIRECTION_DOWN = 8,
+	DIRECTION_LEFT = 0,
+	DIRECTION_RIGHT,
+	DIRECTION_UP,
+	DIRECTION_DOWN,
 };
 
 struct RECTi
@@ -531,32 +531,45 @@ protected:
 		switch(Direction)
 		{
 		case DIRECTION_LEFT:
+			ShiftBy = minimum(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
-				mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
+				if(ShiftBy < m_Width)
+					mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
 				mem_zero(&pTiles[y * m_Width + (m_Width - ShiftBy)], ShiftBy * sizeof(T));
 			}
 			break;
 		case DIRECTION_RIGHT:
+			ShiftBy = minimum(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
-				mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
+				if(ShiftBy < m_Width)
+					mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
 				mem_zero(&pTiles[y * m_Width], ShiftBy * sizeof(T));
 			}
 			break;
 		case DIRECTION_UP:
-			for(int y = 0; y < m_Height - ShiftBy; ++y)
+			ShiftBy = minimum(ShiftBy, m_Height);
+			for(int y = ShiftBy; y < m_Height; ++y)
 			{
-				mem_copy(&pTiles[y * m_Width], &pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
-				mem_zero(&pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
+				mem_copy(&pTiles[(y - ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
+			}
+			for(int y = m_Height - ShiftBy; y < m_Height; ++y)
+			{
+				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
 			}
 			break;
 		case DIRECTION_DOWN:
-			for(int y = m_Height - 1; y >= ShiftBy; --y)
+			ShiftBy = minimum(ShiftBy, m_Height);
+			for(int y = m_Height - ShiftBy - 1; y >= 0; --y)
 			{
-				mem_copy(&pTiles[y * m_Width], &pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
-				mem_zero(&pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
+				mem_copy(&pTiles[(y + ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
 			}
+			for(int y = 0; y < ShiftBy; ++y)
+			{
+				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
+			}
+			break;
 		}
 	}
 	template<typename T>
