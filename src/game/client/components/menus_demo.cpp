@@ -325,18 +325,22 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	MainView.HSplitBottom(TotalHeight, 0, &MainView);
 	MainView.VSplitLeft(50.0f, 0, &MainView);
-	MainView.VSplitLeft(450.0f, &MainView, 0);
+	MainView.VSplitLeft(600.0f, &MainView, 0);
 
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
 
 	MainView.Margin(5.0f, &MainView);
 
-	CUIRect SeekBar, ButtonBar, NameBar;
+	CUIRect SeekBar, ButtonBar, NameBar, SpeedBar{};
 
 	MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
 	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
 	ButtonBar.HSplitBottom(NameBarHeight, &ButtonBar, &NameBar);
 	NameBar.HSplitTop(4.0f, 0, &NameBar);
+	SpeedBar.HSplitBottom(NameBarHeight, &SpeedBar, &NameBar);
+	ButtonBar.HSplitTop(0.0f, 0, &SpeedBar);
+	SpeedBar.VSplitLeft(123.0f, 0, &SpeedBar);
+	SpeedBar.VSplitLeft(133.0f, &SpeedBar, 0);
 
 	// do seekbar
 	{
@@ -460,7 +464,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
 
 	// stop button
-
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_ResetButton;
@@ -471,8 +474,24 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
-	// slowdown
+	// one tick back
+	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneTickBackButton;
+	if(DoButton_FontIcon(&s_OneTickBackButton, "\xEF\x81\x93", 0, &Button, IGraphics::CORNER_ALL))
+		DemoSeekTick(IDemoPlayer::TICK_PREVIOUS);
+	GameClient()->m_Tooltips.DoToolTip(&s_OneTickBackButton, &Button, Localize("Go back one tick"));
+
+	// one tick forward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneTickForwardButton;
+	if(DoButton_FontIcon(&s_OneTickForwardButton, "\xEF\x81\x94", 0, &Button, IGraphics::CORNER_ALL))
+		DemoSeekTick(IDemoPlayer::TICK_NEXT);
+	GameClient()->m_Tooltips.DoToolTip(&s_OneTickForwardButton, &Button, Localize("Go forward one tick"));
+
+	// slowdown
+	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
 	if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
@@ -491,10 +510,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins * 3, 0, &ButtonBar);
 	char aBuffer[64];
 	str_format(aBuffer, sizeof(aBuffer), "×%g", pInfo->m_Speed);
-	UI()->DoLabel(&ButtonBar, aBuffer, Button.h * 0.7f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&SpeedBar, aBuffer, Button.h * 0.7f, TEXTALIGN_CENTER);
 
 	// slice begin button
-	ButtonBar.VSplitLeft(Margins * 10, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins * 7, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
@@ -513,7 +532,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceSaveButton;
-	if(DoButton_FontIcon(&s_SliceSaveButton, "\xEF\x80\xBD", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SliceSaveButton, "\xEF\x82\x8E", 0, &Button, IGraphics::CORNER_ALL))
 	{
 		DemoPlayer()->GetDemoName(m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile));
 		str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
@@ -521,6 +540,36 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
+
+	// one marker back
+	ButtonBar.VSplitLeft(Margins + 20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneMarkerBackButton;
+	if(DoButton_FontIcon(&s_OneMarkerBackButton, "\xEF\x81\x88", 0, &Button, IGraphics::CORNER_ALL))
+		for(int i = pInfo->m_NumTimelineMarkers-1; i >= 0; i--)
+		{
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick)
+			{
+				DemoPlayer()->SeekPercent(static_cast<float>(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / static_cast<float>(TotalTicks));
+				break;
+			}
+		}
+	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
+
+	// one marker forward
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneMarkerForwardButton;
+	if(DoButton_FontIcon(&s_OneMarkerForwardButton, "\xEF\x81\x91", 0, &Button, IGraphics::CORNER_ALL))
+		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
+		{
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick)-2 > CurrentTick)
+			{
+				DemoPlayer()->SeekPercent(static_cast<float>(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / static_cast<float>(TotalTicks));
+				break;
+			}
+		}
+	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
