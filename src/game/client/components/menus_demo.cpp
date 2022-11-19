@@ -546,7 +546,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneMarkerBackButton;
 	if(DoButton_FontIcon(&s_OneMarkerBackButton, "\xEF\x81\x88", 0, &Button, IGraphics::CORNER_ALL))
-		for(int i = pInfo->m_NumTimelineMarkers-1; i >= 0; i--)
+		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
 		{
 			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick)
 			{
@@ -563,7 +563,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(DoButton_FontIcon(&s_OneMarkerForwardButton, "\xEF\x81\x91", 0, &Button, IGraphics::CORNER_ALL))
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick)-2 > CurrentTick)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - 2 > CurrentTick)
 			{
 				DemoPlayer()->SeekPercent(static_cast<float>(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / static_cast<float>(TotalTicks));
 				break;
