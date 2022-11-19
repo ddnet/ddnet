@@ -31,19 +31,16 @@ void CGameTeams::Reset()
 		m_aTeamState[i] = TEAMSTATE_EMPTY;
 		m_aTeamLocked[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
-
-		m_aInvited[i] = 0;
-		m_aPractice[i] = false;
-		m_aLastSwap[i] = 0;
 		m_aTeamSentStartWarning[i] = false;
-		m_aTeamUnfinishableKillTick[i] = -1;
+		ResetRoundState(i);
 	}
 }
 
 void CGameTeams::ResetRoundState(int Team)
 {
 	ResetInvited(Team);
-	ResetSwitchers(Team);
+	if(Team != TEAM_SUPER)
+		ResetSwitchers(Team);
 	m_aLastSwap[Team] = 0;
 
 	m_aPractice[Team] = false;
