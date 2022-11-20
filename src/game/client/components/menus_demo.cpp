@@ -541,6 +541,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
 
+	// threshold value, accounts for slight inaccuracy when setting demo position
+	const int Threshold = 10;
+
 	// one marker back
 	ButtonBar.VSplitLeft(Margins + 20.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
@@ -548,11 +551,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(DoButton_FontIcon(&s_OneMarkerBackButton, "\xEF\x81\x88", 0, &Button, IGraphics::CORNER_ALL))
 		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
 				DemoPlayer()->SeekPercent((float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks);
 				break;
 			}
+			DemoPlayer()->SeekPercent(0.0f);
 		}
 	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
 
@@ -563,11 +567,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(DoButton_FontIcon(&s_OneMarkerForwardButton, "\xEF\x81\x91", 0, &Button, IGraphics::CORNER_ALL))
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - 2 > CurrentTick)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
 				DemoPlayer()->SeekPercent((float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks);
 				break;
 			}
+			DemoPlayer()->SeekPercent(1.0f);
 		}
 	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
