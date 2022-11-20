@@ -437,7 +437,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						TextRender()->TextColor(0.94f, 0.4f, 0.4f, 1);
 						UI()->DoLabel(&IconText, aBufFriendsOnServer, 10.0f, TEXTALIGN_LEFT);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1);
-					
 					}
 				}
 
