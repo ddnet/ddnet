@@ -255,12 +255,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			m_SelectedIndex = i;
 
 		// update friend counter
+		int FriendsOnServer = 0;
 		if(pItem->m_FriendState != IFriends::FRIEND_NO)
 		{
 			for(int j = 0; j < pItem->m_NumReceivedClients; ++j)
 			{
 				if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO)
 				{
+					FriendsOnServer++;
 					unsigned NameHash = str_quickhash(pItem->m_aClients[j].m_aName);
 					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
 					for(auto &Friend : m_vFriends)
@@ -420,20 +422,30 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_PLAYERS)
 			{
-				CUIRect Icon;
-				Button.VMargin(4.0f, &Button);
+				CUIRect Icon, IconText;
+				Button.VMargin(2.0f, &Button);
 				if(pItem->m_FriendState != IFriends::FRIEND_NO)
 				{
-					Button.VSplitLeft(Button.h, &Icon, &Button);
+					Button.VSplitLeft(38.0f, &Button, &Icon);
 					Icon.Margin(2.0f, &Icon);
+					Icon.VSplitLeft(13.0f, &Icon, &IconText);
 					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
+					if(FriendsOnServer > 1)
+					{
+						char aBufFriendsOnServer[64];
+						str_format(aBufFriendsOnServer, sizeof(aBufFriendsOnServer), "%d", FriendsOnServer);
+						TextRender()->TextColor(0.94f, 0.4f, 0.4f, 1);
+						UI()->DoLabel(&IconText, aBufFriendsOnServer, 10.0f, TEXTALIGN_LEFT);
+						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1);
+					
+					}
 				}
 
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_LEFT, -1, 1, false);
 				TextRender()->TextColor(1, 1, 1, 1);
 			}
 			else if(ID == COL_PING)
