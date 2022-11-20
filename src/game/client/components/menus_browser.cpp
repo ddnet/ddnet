@@ -98,7 +98,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, 0, {0}, {0}}, // Localize - these strings are localized within CLocConstString
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, "Type", 1, 50.0f, 0, {0}, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, 0, {0}, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 75.0f, 0, {0}, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 85.0f, 0, {0}, {0}},
 		{-1, -1, " ", 1, 10.0f, 0, {0}, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, FIXED, {0}, {0}},
 	};
@@ -255,12 +255,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			m_SelectedIndex = i;
 
 		// update friend counter
+		int FriendsOnServer = 0;
 		if(pItem->m_FriendState != IFriends::FRIEND_NO)
 		{
 			for(int j = 0; j < pItem->m_NumReceivedClients; ++j)
 			{
 				if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO)
 				{
+					FriendsOnServer++;
 					unsigned NameHash = str_quickhash(pItem->m_aClients[j].m_aName);
 					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
 					for(auto &Friend : m_vFriends)
@@ -420,13 +422,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_PLAYERS)
 			{
-				CUIRect Icon;
-				Button.VMargin(4.0f, &Button);
+				CUIRect Icon, IconText;
+				Button.VMargin(2.0f, &Button);
 				if(pItem->m_FriendState != IFriends::FRIEND_NO)
 				{
-					Button.VSplitLeft(Button.h, &Icon, &Button);
+					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
+					Icon.HSplitBottom(6.0f, 0, &IconText);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
+					if(FriendsOnServer > 1)
+					{
+						char aBufFriendsOnServer[64];
+						str_format(aBufFriendsOnServer, sizeof(aBufFriendsOnServer), "%i", FriendsOnServer);
+						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1);
+						UI()->DoLabel(&IconText, aBufFriendsOnServer, 10.0f, TEXTALIGN_CENTER);
+						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1);
+					}
 				}
 
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
