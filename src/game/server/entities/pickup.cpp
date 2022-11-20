@@ -191,7 +191,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	int Size = Server()->IsSixup(SnappingClient) ? 3 * 4 : sizeof(CNetObj_Pickup);
+	int Size = Server()->IsSixup(SnappingClient) ? sizeof(protocol7::CNetObj_Pickup) : sizeof(CNetObj_Pickup);
 	CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), Size));
 	if(!pPickup)
 		return;
@@ -209,9 +209,9 @@ void CPickup::Snap(int SnappingClient)
 	if(Server()->IsSixup(SnappingClient))
 	{
 		if(m_Type == POWERUP_WEAPON)
-			pPickup->m_Type = m_Subtype == WEAPON_SHOTGUN ? 3 : m_Subtype == WEAPON_GRENADE ? 2 : 4;
+			pPickup->m_Type = m_Subtype == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : m_Subtype == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
 		else if(m_Type == POWERUP_NINJA)
-			pPickup->m_Type = 5;
+			pPickup->m_Type = protocol7::PICKUP_NINJA;
 	}
 	else
 		pPickup->m_Subtype = m_Subtype;
