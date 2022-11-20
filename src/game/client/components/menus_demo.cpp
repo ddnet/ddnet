@@ -331,7 +331,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	MainView.Margin(5.0f, &MainView);
 
-	CUIRect SeekBar, ButtonBar, NameBar, SpeedBar{};
+	CUIRect SeekBar, ButtonBar, NameBar, SpeedBar;
 
 	MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
 	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
@@ -550,7 +550,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick)
 			{
-				DemoPlayer()->SeekPercent(static_cast<float>(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / static_cast<float>(TotalTicks));
+				DemoPlayer()->SeekPercent((float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks);
 				break;
 			}
 		}
@@ -565,7 +565,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - 2 > CurrentTick)
 			{
-				DemoPlayer()->SeekPercent(static_cast<float>(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / static_cast<float>(TotalTicks));
+				DemoPlayer()->SeekPercent((float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks);
 				break;
 			}
 		}
