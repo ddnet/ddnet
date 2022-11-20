@@ -924,13 +924,13 @@ int CDemoPlayer::Play()
 
 int CDemoPlayer::SeekPercent(float Percent)
 {
-	int WantedTick = m_Info.m_Info.m_FirstTick + ((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
+	int WantedTick = m_Info.m_Info.m_FirstTick + round_truncate((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
 	return SetPos(WantedTick);
 }
 
 int CDemoPlayer::SeekTime(float Seconds)
 {
-	int WantedTick = m_Info.m_Info.m_CurrentTick + (Seconds * (float)SERVER_TICK_SPEED);
+	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
 	return SetPos(WantedTick);
 }
 
