@@ -98,7 +98,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, 0, {0}, {0}}, // Localize - these strings are localized within CLocConstString
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, "Type", 1, 50.0f, 0, {0}, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, 0, {0}, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 75.0f, 0, {0}, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 85.0f, 0, {0}, {0}},
 		{-1, -1, " ", 1, 10.0f, 0, {0}, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, FIXED, {0}, {0}},
 	};
@@ -426,16 +426,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				Button.VMargin(2.0f, &Button);
 				if(pItem->m_FriendState != IFriends::FRIEND_NO)
 				{
-					Button.VSplitLeft(38.0f, &Button, &Icon);
+					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					Icon.VSplitLeft(13.0f, &Icon, &IconText);
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_LEFT);
+					Icon.HSplitBottom(6.0f, 0, &IconText);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
 					if(FriendsOnServer > 1)
 					{
 						char aBufFriendsOnServer[64];
-						str_format(aBufFriendsOnServer, sizeof(aBufFriendsOnServer), "%d", FriendsOnServer);
-						TextRender()->TextColor(0.94f, 0.4f, 0.4f, 1);
-						UI()->DoLabel(&IconText, aBufFriendsOnServer, 10.0f, TEXTALIGN_LEFT);
+						str_format(aBufFriendsOnServer, sizeof(aBufFriendsOnServer), "%i", FriendsOnServer);
+						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1);
+						UI()->DoLabel(&IconText, aBufFriendsOnServer, 10.0f, TEXTALIGN_CENTER);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1);
 					}
 				}
@@ -444,7 +444,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
 				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_LEFT, -1, 1, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_RIGHT, -1, 1, false);
 				TextRender()->TextColor(1, 1, 1, 1);
 			}
 			else if(ID == COL_PING)
