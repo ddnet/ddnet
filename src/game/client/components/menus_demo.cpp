@@ -513,8 +513,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
 	{
-		if(CurrentTick < (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick) || g_Config.m_ClDemoSliceEnd == -1)
-			Client()->DemoSliceBegin();
+		Client()->DemoSliceBegin();
+		if(CurrentTick > (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick))
+			g_Config.m_ClDemoSliceEnd = -1;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut"));
 
@@ -524,8 +525,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceEndButton;
 	if(DoButton_FontIcon(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
 	{
-		if(CurrentTick > (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick) || g_Config.m_ClDemoSliceBegin == -1)
-			Client()->DemoSliceEnd();
+		Client()->DemoSliceEnd();
+		if(CurrentTick < (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick))
+			g_Config.m_ClDemoSliceBegin = -1;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut"));
 
