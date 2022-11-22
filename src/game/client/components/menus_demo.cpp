@@ -353,6 +353,20 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		FilledBar.w = 10.0f + (FilledBar.w - 10.0f) * Amount;
 		FilledBar.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 
+		// draw highlighting
+		if(g_Config.m_ClDemoSliceBegin != -1 && g_Config.m_ClDemoSliceEnd != -1)
+		{
+			float RatioBegin = (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick) / (float)TotalTicks;
+			float RatioEnd = (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick) / (float)TotalTicks;
+			float Span = ((SeekBar.w - 10.0f) * RatioEnd) - ((SeekBar.w - 10.0f) * RatioBegin);
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
+			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w - 10.0f) * RatioBegin, SeekBar.y, Span, SeekBar.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
 		// draw markers
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
@@ -498,7 +512,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
+	{
 		Client()->DemoSliceBegin();
+		if(CurrentTick > (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick))
+			g_Config.m_ClDemoSliceEnd = -1;
+	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut"));
 
 	// slice end button
@@ -506,7 +524,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceEndButton;
 	if(DoButton_FontIcon(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
+	{
 		Client()->DemoSliceEnd();
+		if(CurrentTick < (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick))
+			g_Config.m_ClDemoSliceBegin = -1;
+	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut"));
 
 	// slice save button
