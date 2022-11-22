@@ -645,7 +645,7 @@ public:
 
 	struct SClientEmoticonsSkin
 	{
-		IGraphics::CTextureHandle m_aSpriteEmoticons[16];
+		IGraphics::CTextureHandle m_aSpriteEmoticons[25];
 	};
 
 	SClientEmoticonsSkin m_EmoticonsSkin;

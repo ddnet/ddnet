@@ -2433,26 +2433,34 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				case EMOTICON_GHOST:
 				case EMOTICON_QUESTION:
 				case EMOTICON_WTF:
+				case EMOTICON_CLIP:
 					EmoteType = EMOTE_SURPRISE;
 					break;
 				case EMOTICON_DOTDOT:
 				case EMOTICON_DROP:
 				case EMOTICON_ZZZ:
+				case EMOTICON_WAIT:
+				case EMOTICON_SPEC:
 					EmoteType = EMOTE_BLINK;
 					break;
 				case EMOTICON_EYES:
 				case EMOTICON_HEARTS:
 				case EMOTICON_MUSIC:
+				case EMOTICON_YES:
 					EmoteType = EMOTE_HAPPY;
 					break;
 				case EMOTICON_OOP:
 				case EMOTICON_SORRY:
 				case EMOTICON_SUSHI:
+				case EMOTICON_HELP:
+				case EMOTICON_ACHE:
+				case EMOTICON_WIFI:
 					EmoteType = EMOTE_PAIN;
 					break;
 				case EMOTICON_DEVILTEE:
 				case EMOTICON_SPLATTEE:
 				case EMOTICON_ZOMG:
+				case EMOTICON_NO:
 					EmoteType = EMOTE_ANGRY;
 					break;
 				default:
