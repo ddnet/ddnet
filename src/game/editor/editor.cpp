@@ -969,10 +969,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		static int s_ZoomOutButton = 0;
 		if(DoButton_FontIcon(&s_ZoomOutButton, "-", 0, &Button, 0, "[NumPad-] Zoom out", IGraphics::CORNER_L))
 		{
-			if(m_ZoomLevel + 50 > 2000)
-				m_ZoomLevel = 2000;
-			else
-				m_ZoomLevel += 50;
+			ChangeZoom(50.0f);
 		}
 
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
@@ -981,17 +978,14 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			m_EditorOffsetX = 0;
 			m_EditorOffsetY = 0;
-			m_ZoomLevel = 100;
+			SetZoom(100.0f);
 		}
 
 		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_ZoomInButton = 0;
 		if(DoButton_FontIcon(&s_ZoomInButton, "+", 0, &Button, 0, "[NumPad+] Zoom in", IGraphics::CORNER_R))
 		{
-			if(m_ZoomLevel - 50 < 10)
-				m_ZoomLevel = 10;
-			else
-				m_ZoomLevel -= 50;
+			ChangeZoom(-50.0f);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -2401,7 +2395,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		CLayerTiles *pT = static_cast<CLayerTiles *>(GetSelectedLayerType(0, LAYERTYPE_TILES));
-		if(m_ShowTileInfo && pT && pT->m_Visible && m_ZoomLevel <= 300)
+		if(m_ShowTileInfo && pT && pT->m_Visible && m_Zoom <= 300.0f)
 		{
 			GetSelectedGroup()->MapScreen();
 			pT->ShowInfo();
@@ -5719,7 +5713,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %i, Y: %i, Z: %i, A: %.1f, G: %i  %s", (int)UI()->MouseWorldX() / 32, (int)UI()->MouseWorldY() / 32, m_ZoomLevel, m_AnimateSpeed, m_GridFactor, aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %i, Y: %i, Z: %.1f, A: %.1f, G: %i  %s", (int)UI()->MouseWorldX() / 32, (int)UI()->MouseWorldY() / 32, m_Zoom, m_AnimateSpeed, m_GridFactor, aTimeStr);
 	UI()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_RIGHT);
 
 	static int s_CloseButton = 0;
@@ -5784,14 +5778,14 @@ void CEditor::Render()
 
 	// do zooming
 	if(Input()->KeyPress(KEY_KP_MINUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
-		m_ZoomLevel += 50;
+		ChangeZoom(50.0f);
 	if(Input()->KeyPress(KEY_KP_PLUS) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
-		m_ZoomLevel -= 50;
+		ChangeZoom(-50.0f);
 	if(Input()->KeyPress(KEY_KP_MULTIPLY) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
 		m_EditorOffsetX = 0;
 		m_EditorOffsetY = 0;
-		m_ZoomLevel = 100;
+		SetZoom(100.0f);
 	}
 
 	for(int i = KEY_1; i <= KEY_0; i++)
@@ -6024,25 +6018,13 @@ void CEditor::Render()
 
 	if(m_Dialog == DIALOG_NONE && !m_MouseInsidePopup && UI()->MouseInside(&View))
 	{
-		// Determines in which direction to zoom.
-		int Zoom = 0;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			Zoom--;
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			Zoom++;
-
-		if(Zoom != 0)
-		{
-			float OldLevel = m_ZoomLevel;
-			m_ZoomLevel = maximum(m_ZoomLevel + Zoom * 20, 10);
-			if(g_Config.m_ClLimitMaxZoomLevel)
-				m_ZoomLevel = minimum(m_ZoomLevel, 2000);
-			if(g_Config.m_EdZoomTarget)
-				ZoomMouseTarget((float)m_ZoomLevel / OldLevel);
-		}
+			ChangeZoom(20.0f);
+		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+			ChangeZoom(-20.0f);
 	}
 
-	m_WorldZoom = m_ZoomLevel / 100.0f;
+	UpdateZoom();
 
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
@@ -6116,8 +6098,9 @@ void CEditor::Reset(bool CreateDefault)
 	m_EditorOffsetX = 0.0f;
 	m_EditorOffsetY = 0.0f;
 
+	m_Zoom = 200.0f;
+	m_Zooming = false;
 	m_WorldZoom = 1.0f;
-	m_ZoomLevel = 200;
 
 	m_MouseDeltaX = 0;
 	m_MouseDeltaY = 0;
@@ -6134,20 +6117,46 @@ void CEditor::Reset(bool CreateDefault)
 
 int CEditor::GetLineDistance() const
 {
-	int LineDistance = 512;
+	if(m_Zoom <= 100.0f)
+		return 16;
+	else if(m_Zoom <= 250.0f)
+		return 32;
+	else if(m_Zoom <= 450.0f)
+		return 64;
+	else if(m_Zoom <= 850.0f)
+		return 128;
+	else if(m_Zoom <= 1550.0f)
+		return 256;
+	else
+		return 512;
+}
 
-	if(m_ZoomLevel <= 100)
-		LineDistance = 16;
-	else if(m_ZoomLevel <= 250)
-		LineDistance = 32;
-	else if(m_ZoomLevel <= 450)
-		LineDistance = 64;
-	else if(m_ZoomLevel <= 850)
-		LineDistance = 128;
-	else if(m_ZoomLevel <= 1550)
-		LineDistance = 256;
+void CEditor::SetZoom(float Target)
+{
+	Target = clamp(Target, MinZoomLevel(), MaxZoomLevel());
 
-	return LineDistance;
+	const float Now = Client()->LocalTime();
+	float Current = m_Zoom;
+	float Derivative = 0.0f;
+	if(m_Zooming)
+	{
+		const float Progress = ZoomProgress(Now);
+		Current = m_ZoomSmoothing.Evaluate(Progress);
+		Derivative = m_ZoomSmoothing.Derivative(Progress);
+	}
+
+	m_ZoomSmoothingTarget = Target;
+	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0.0f, m_ZoomSmoothingTarget);
+	m_ZoomSmoothingStart = Now;
+	m_ZoomSmoothingEnd = Now + g_Config.m_ClSmoothZoomTime / 1000.0f;
+
+	m_Zooming = true;
+}
+
+void CEditor::ChangeZoom(float Amount)
+{
+	const float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
+	SetZoom(CurrentTarget + Amount);
 }
 
 void CEditor::ZoomMouseTarget(float ZoomFactor)
@@ -6166,8 +6175,46 @@ void CEditor::ZoomMouseTarget(float ZoomFactor)
 	float Mwy = aPoints[1] + WorldHeight * (UI()->MouseY() / UI()->Screen()->h);
 
 	// adjust camera
-	m_WorldOffsetX += (Mwx - m_WorldOffsetX) * (1 - ZoomFactor);
-	m_WorldOffsetY += (Mwy - m_WorldOffsetY) * (1 - ZoomFactor);
+	m_WorldOffsetX += (Mwx - m_WorldOffsetX) * (1.0f - ZoomFactor);
+	m_WorldOffsetY += (Mwy - m_WorldOffsetY) * (1.0f - ZoomFactor);
+}
+
+void CEditor::UpdateZoom()
+{
+	if(m_Zooming)
+	{
+		const float Time = Client()->LocalTime();
+		const float OldLevel = m_Zoom;
+		if(Time >= m_ZoomSmoothingEnd)
+		{
+			m_Zoom = m_ZoomSmoothingTarget;
+			m_Zooming = false;
+		}
+		else
+		{
+			m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
+		}
+		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
+		if(g_Config.m_EdZoomTarget)
+			ZoomMouseTarget(m_Zoom / OldLevel);
+	}
+
+	m_WorldZoom = m_Zoom / 100.0f;
+}
+
+float CEditor::MinZoomLevel() const
+{
+	return 10.0f;
+}
+
+float CEditor::MaxZoomLevel() const
+{
+	return g_Config.m_ClLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max();
+}
+
+float CEditor::ZoomProgress(float CurrentTime) const
+{
+	return (CurrentTime - m_ZoomSmoothingStart) / (m_ZoomSmoothingEnd - m_ZoomSmoothingStart);
 }
 
 void CEditor::Goto(float X, float Y)
