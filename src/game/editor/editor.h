@@ -3,6 +3,7 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
+#include <base/bezier.h>
 #include <base/system.h>
 
 #include <game/client/render.h>
@@ -800,8 +801,10 @@ public:
 		m_EditorOffsetX = 0.0f;
 		m_EditorOffsetY = 0.0f;
 
+		m_Zoom = 200.0f;
+		m_Zooming = false;
 		m_WorldZoom = 1.0f;
-		m_ZoomLevel = 200;
+
 		m_LockMouse = false;
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
@@ -984,8 +987,16 @@ public:
 	float m_WorldOffsetY;
 	float m_EditorOffsetX;
 	float m_EditorOffsetY;
+
+	// Zooming
+	CCubicBezier m_ZoomSmoothing;
+	float m_ZoomSmoothingStart;
+	float m_ZoomSmoothingEnd;
+	bool m_Zooming;
+	float m_Zoom;
+	float m_ZoomSmoothingTarget;
 	float m_WorldZoom;
-	int m_ZoomLevel;
+
 	bool m_LockMouse;
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
@@ -1274,7 +1285,15 @@ public:
 	static const char *Explain(int ExplanationID, int Tile, int Layer);
 
 	int GetLineDistance() const;
+
+	// Zooming
+	void SetZoom(float Target);
+	void ChangeZoom(float Amount);
 	void ZoomMouseTarget(float ZoomFactor);
+	void UpdateZoom();
+	float ZoomProgress(float CurrentTime) const;
+	float MinZoomLevel() const;
+	float MaxZoomLevel() const;
 
 	static ColorHSVA ms_PickerColor;
 	static int ms_SVPicker;
