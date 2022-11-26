@@ -1118,6 +1118,7 @@ public:
 	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
@@ -1212,6 +1213,7 @@ public:
 	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
+	void RemoveUnusedEnvelopes();
 
 	void RenderLayers(CUIRect LayersBox);
 	void RenderImagesList(CUIRect Toolbox);
