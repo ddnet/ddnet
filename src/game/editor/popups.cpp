@@ -1904,7 +1904,13 @@ void CEditor::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 
 CEditor::SSelectionPopupContext::SSelectionPopupContext()
 {
+	Reset();
+}
+
+void CEditor::SSelectionPopupContext::Reset()
+{
 	m_pSelection = nullptr;
+	m_Entries.clear();
 }
 
 int CEditor::PopupSelection(CEditor *pEditor, CUIRect View, void *pContext)

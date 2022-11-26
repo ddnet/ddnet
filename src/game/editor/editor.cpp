@@ -3872,8 +3872,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
 		if(s_SelectionPopupContext.m_Entries.empty())
 		{
@@ -3897,8 +3896,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		bool WasExternal = pImg->m_External;
 		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
 		pImg->m_External = WasExternal;
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		return 1;
 	}
 
@@ -3939,8 +3937,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
 		if(s_SelectionPopupContext.m_Entries.empty())
 		{
@@ -3962,8 +3959,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	if(s_SelectionPopupContext.m_pSelection != nullptr)
 	{
 		ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		return 1;
 	}
 

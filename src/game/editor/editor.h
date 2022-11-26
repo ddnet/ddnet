@@ -1148,6 +1148,7 @@ public:
 		const std::string *m_pSelection;
 
 		SSelectionPopupContext();
+		void Reset();
 	};
 	static int PopupSelection(CEditor *pEditor, CUIRect View, void *pContext);
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
