@@ -385,7 +385,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
+bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs, const char *pReason)
 {
 	// find a matching vote mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumVoteMutes; i++)
@@ -393,6 +393,7 @@ bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 		if(net_addr_comp_noport(&m_aVoteMutes[i].m_Addr, pAddr) == 0)
 		{
 			m_aVoteMutes[i].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+			str_copy(m_aVoteMutes[i].m_aReason, pReason, sizeof(m_aVoteMutes[i].m_aReason));
 			return true;
 		}
 	}
@@ -402,6 +403,7 @@ bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 	{
 		m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
 		m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+		str_copy(m_aVoteMutes[m_NumVoteMutes].m_aReason, pReason, sizeof(m_aVoteMutes[m_NumVoteMutes].m_aReason));
 		m_NumVoteMutes++;
 		return true;
 	}
@@ -410,19 +412,21 @@ bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 	return false;
 }
 
-bool CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID)
+void CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pReason, const char *pDisplayName, int AuthedID)
 {
-	if(!TryVoteMute(pAddr, Secs))
-		return false;
-
+	if(!TryVoteMute(pAddr, Secs, pReason))
+		return;
 	if(!pDisplayName)
-		return true;
+		return;
 
 	char aBuf[128];
-	str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
-		Server()->ClientName(AuthedID), pDisplayName, Secs);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", aBuf);
-	return true;
+	if(pReason[0])
+		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting (%s)",
+			Server()->ClientName(AuthedID), pDisplayName, Secs, pReason);
+	else
+		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting",
+			Server()->ClientName(AuthedID), pDisplayName, Secs);
+	SendChat(-1, CHAT_ALL, aBuf);
 }
 
 bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID)
@@ -513,15 +517,8 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
 	int Seconds = clamp(pResult->GetInteger(1), 1, 86400);
-	bool Found = pSelf->VoteMute(&Addr, Seconds, pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
-
-	if(Found)
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
-			pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Victim), Seconds);
-		pSelf->SendChat(-1, 0, aBuf);
-	}
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
+	pSelf->VoteMute(&Addr, Seconds, pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 }
 
 void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
@@ -568,8 +565,8 @@ void CGameContext::ConVoteMutes(IConsole::IResult *pResult, void *pUserData)
 	for(int i = 0; i < pSelf->m_NumVoteMutes; i++)
 	{
 		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
-		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i,
-			aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
+		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left (%s)", i,
+			aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aVoteMutes[i].m_aReason);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes", aBuf);
 	}
 }
