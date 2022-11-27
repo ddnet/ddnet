@@ -984,13 +984,13 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aPoints[v].x = i2fx(NewVal);
+					pQuad->m_aPoints[v].x = i2fx(fx2i(pQuad->m_aPoints[v].x) + NewVal - x);
 		}
 		if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aPoints[v].y = i2fx(NewVal);
+					pQuad->m_aPoints[v].y = i2fx(fx2i(pQuad->m_aPoints[v].y) + NewVal - y);
 		}
 		if(Prop == PROP_COLOR)
 		{
@@ -1009,13 +1009,13 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aTexcoords[v].x = f2fx(NewVal / 1024.0f);
+					pQuad->m_aTexcoords[v].x = f2fx(fx2f(pQuad->m_aTexcoords[v].x) + (NewVal - tu) / 1024.0f);
 		}
 		if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aTexcoords[v].y = f2fx(NewVal / 1024.0f);
+					pQuad->m_aTexcoords[v].y = f2fx(fx2f(pQuad->m_aTexcoords[v].y) + (NewVal - tv) / 1024.0f);
 		}
 	}
 
