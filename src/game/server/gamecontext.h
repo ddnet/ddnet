@@ -440,8 +440,8 @@ private:
 	int m_NumVoteMutes;
 	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
-	bool TryVoteMute(const NETADDR *pAddr, int Secs);
-	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
+	bool TryVoteMute(const NETADDR *pAddr, int Secs, const char *pReason);
+	void VoteMute(const NETADDR *pAddr, int Secs, const char *pReason, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
 	void WhisperID(int ClientID, int VictimID, const char *pMessage);
