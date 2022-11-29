@@ -4440,6 +4440,7 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
+	// Chrome works fine with ddnet:// but not with ddnet:
 	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
 	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
 		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
@@ -4447,6 +4448,10 @@ void CClient::HandleConnectLink(const char *pLink)
 		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
 	else
 		str_copy(m_aCmdConnect, pLink);
+	// Edge appends / to the URL
+	const int len = str_length(m_aCmdConnect);
+	if(m_aCmdConnect[len - 1] == '/')
+		m_aCmdConnect[len - 1] = '\0';
 }
 
 void CClient::HandleDemoPath(const char *pPath)
