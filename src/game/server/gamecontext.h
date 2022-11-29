@@ -117,6 +117,7 @@ class CGameContext : public IGameServer
 	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);
@@ -448,6 +449,26 @@ private:
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
 	void UnlockTeam(int ClientID, int Team);
+
+	enum
+	{
+		MAX_LOG_SECONDS = 240,
+		MAX_LOGS = 256,
+	};
+	struct CLog
+	{
+		int64_t m_Timestamp;
+		bool m_FromServer;
+		char m_aDescription[128];
+		int m_ClientVersion;
+		char m_aClientName[MAX_NAME_LENGTH];
+		char m_aClientAddrStr[NETADDR_MAXSTRSIZE];
+	};
+	CLog m_aLogs[MAX_LOGS];
+	int m_FirstLog;
+	int m_LastLog;
+
+	void LogEvent(const char *Description, int ClientID);
 
 public:
 	CLayers *Layers() { return &m_Layers; }

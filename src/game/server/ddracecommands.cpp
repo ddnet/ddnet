@@ -827,3 +827,52 @@ void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Antibot()->Dump();
 }
+
+void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int LimitSecs = MAX_LOG_SECONDS;
+	if(pResult->NumArguments() > 0)
+		LimitSecs = pResult->GetInteger(0);
+
+	if(LimitSecs < 0)
+		return;
+
+	for(int i = pSelf->m_FirstLog; i != pSelf->m_LastLog; i = (i + 1) % pSelf->MAX_LOGS)
+	{
+		CLog *pEntry = &pSelf->m_aLogs[i];
+
+		if(!pEntry->m_Timestamp)
+			continue;
+
+		int Seconds = (time_get() - pEntry->m_Timestamp) / time_freq();
+		if(Seconds > LimitSecs)
+			continue;
+
+		char aBuf[256];
+		if(pEntry->m_FromServer)
+			str_format(aBuf, sizeof aBuf, "%s, %d seconds ago", pEntry->m_aDescription, Seconds);
+		else
+			str_format(aBuf, sizeof aBuf, "%s, %d seconds ago < addr=<{%s}> name='%s' client=%d",
+				pEntry->m_aDescription, Seconds, pEntry->m_aClientAddrStr, pEntry->m_aClientName, pEntry->m_ClientVersion);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "log", aBuf);
+	}
+}
+
+void CGameContext::LogEvent(const char *Description, int ClientID)
+{
+	CLog *pNewEntry = &m_aLogs[m_LastLog];
+	m_LastLog = (m_LastLog + 1) % MAX_LOGS;
+	if(m_LastLog == m_FirstLog)
+		m_FirstLog++;
+
+	pNewEntry->m_Timestamp = time_get();
+	str_copy(pNewEntry->m_aDescription, Description);
+	pNewEntry->m_FromServer = ClientID < 0;
+	if(!pNewEntry->m_FromServer)
+	{
+		pNewEntry->m_ClientVersion = Server()->GetClientVersion(ClientID);
+		Server()->GetClientAddr(ClientID, pNewEntry->m_aClientAddrStr, sizeof(pNewEntry->m_aClientAddrStr));
+		str_copy(pNewEntry->m_aClientName, Server()->ClientName(ClientID));
+	}
+}

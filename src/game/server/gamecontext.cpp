@@ -93,6 +93,9 @@ void CGameContext::Construct(int Resetting)
 	m_NumMutes = 0;
 	m_NumVoteMutes = 0;
 
+	m_LastLog = 0;
+	m_FirstLog = 0;
+
 	if(Resetting == NO_RESET)
 	{
 		m_NonEmptySince = 0;
@@ -472,6 +475,9 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 			if(!m_apPlayers[i]->m_DND && Send)
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 		}
+
+		str_format(aBuf, sizeof aBuf, "Chat: %s", aText);
+		LogEvent(aBuf, ChatterClientID);
 	}
 	else
 	{
@@ -1060,6 +1066,14 @@ void CGameContext::OnTick()
 			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
 		}
 	}
+	for(int i = 0; i < m_LastLog; i++)
+	{
+		if(m_aLogs[i].m_Timestamp && (time_get() - m_aLogs[i].m_Timestamp) / time_freq() > MAX_LOG_SECONDS)
+		{
+			m_FirstLog = (m_FirstLog + 1) % MAX_LOGS;
+			m_aLogs[m_FirstLog].m_Timestamp = 0;
+		}
+	}
 
 	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{
@@ -1462,6 +1476,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		Server()->GetClientAddr(ClientID, &Addr);
 		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientID), "Initial chat delay", true);
 	}
+
+	LogEvent("Connect", ClientID);
 }
 
 bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
@@ -1524,6 +1540,8 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
+	LogEvent("Disconnect", ClientID);
+
 	AbortVoteKickOnDisconnect(ClientID);
 	m_pController->OnPlayerDisconnect(m_apPlayers[ClientID], pReason);
 	delete m_apPlayers[ClientID];
@@ -2347,6 +2365,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Score()->LoadPlayerData(ClientID);
 
 				SixupNeedsUpdate = true;
+
+				LogEvent("Name change", ClientID);
 			}
 
 			if(str_comp(Server()->ClientClan(ClientID), pMsg->m_pClan))
