@@ -184,7 +184,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
-void CMenus::DoButton_KeySelect(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
+void CMenus::DoButton_KeySelect(const void *pID, const char *pText, const CUIRect *pRect)
 {
 	pRect->Draw(ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
 	CUIRect Temp;
@@ -644,22 +644,16 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCo
 
 	// draw
 	if(UI()->CheckActiveItem(pID) && s_ButtonUsed == 0)
-		DoButton_KeySelect(pID, "???", 0, pRect);
+		DoButton_KeySelect(pID, "???", pRect);
+	else if(NewKey == 0)
+		DoButton_KeySelect(pID, "", pRect);
 	else
 	{
-		if(Key)
-		{
-			char aBuf[64];
-			if(*pNewModifierCombination)
-				str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(Key));
-			else
-				str_copy(aBuf, Input()->KeyName(Key));
-
-			DoButton_KeySelect(pID, aBuf, 0, pRect);
-		}
-		else
-			DoButton_KeySelect(pID, "", 0, pRect);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(NewKey));
+		DoButton_KeySelect(pID, aBuf, pRect);
 	}
+
 	return NewKey;
 }
 
