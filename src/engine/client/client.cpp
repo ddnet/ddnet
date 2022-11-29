@@ -4440,8 +4440,11 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
-	if(str_startswith(pLink, CONNECTLINK))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK) - 1);
+	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
+	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
+		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
+	else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
+		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
 	else
 		str_copy(m_aCmdConnect, pLink);
 }
@@ -4459,7 +4462,7 @@ void CClient::HandleMapPath(const char *pPath)
 static bool UnknownArgumentCallback(const char *pCommand, void *pUser)
 {
 	CClient *pClient = static_cast<CClient *>(pUser);
-	if(str_startswith(pCommand, CONNECTLINK))
+	if(str_startswith(pCommand, CONNECTLINK_NO_SLASH))
 	{
 		pClient->HandleConnectLink(pCommand);
 		return true;
