@@ -324,7 +324,33 @@ protected:
 	CUIElement m_RefreshButton;
 	CUIElement m_ConnectButton;
 
-	void PopupMessage(const char *pTopic, const char *pBody, const char *pButton);
+	// generic popups
+	typedef void (CMenus::*FPopupButtonCallback)();
+	void DefaultButtonCallback()
+	{
+		// do nothing
+	}
+	enum
+	{
+		BUTTON_CONFIRM = 0, // confirm / yes / close / ok
+		BUTTON_CANCEL, // cancel / no
+		NUM_BUTTONS
+	};
+	char m_aPopupTitle[128];
+	char m_aPopupMessage[256];
+	struct
+	{
+		char m_aLabel[64];
+		int m_NextPopup;
+		FPopupButtonCallback m_pfnCallback;
+	} m_aPopupButtons[NUM_BUTTONS];
+
+	void PopupMessage(const char *pTitle, const char *pMessage,
+		const char *pButtonLabel, int NextPopup = POPUP_NONE, FPopupButtonCallback pfnButtonCallback = &CMenus::DefaultButtonCallback);
+	void PopupConfirm(const char *pTitle, const char *pMessage,
+		const char *pConfirmButtonLabel, const char *pCancelButtonLabel,
+		FPopupButtonCallback pfnConfirmButtonCallback = &CMenus::DefaultButtonCallback, int ConfirmNextPopup = POPUP_NONE,
+		FPopupButtonCallback pfnCancelButtonCallback = &CMenus::DefaultButtonCallback, int CancelNextPopup = POPUP_NONE);
 
 	// TODO: this is a bit ugly but.. well.. yeah
 	enum
@@ -687,10 +713,11 @@ public:
 	enum
 	{
 		POPUP_NONE = 0,
+		POPUP_MESSAGE, // generic message popup (one button)
+		POPUP_CONFIRM, // generic confirmation popup (two buttons)
 		POPUP_FIRST_LAUNCH,
 		POPUP_POINTS,
 		POPUP_CONNECTING,
-		POPUP_MESSAGE,
 		POPUP_DISCONNECTED,
 		POPUP_LANGUAGE,
 		POPUP_COUNTRY,
