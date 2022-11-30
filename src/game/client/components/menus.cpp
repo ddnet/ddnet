@@ -1569,11 +1569,6 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Render demo");
 		}
-		else if(m_Popup == POPUP_REPLACE_VIDEO)
-		{
-			pTitle = Localize("Replace video");
-			pExtraText = Localize("File already exists, do you want to overwrite it?");
-		}
 #endif
 		else if(m_Popup == POPUP_PASSWORD)
 		{
@@ -1969,7 +1964,7 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button, Buttons;
+			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -1979,8 +1974,7 @@ int CMenus::Render()
 #endif
 			Part.VMargin(80.0f, &Part);
 
-			Part.HSplitBottom(20.0f, &Part, &Buttons);
-			Buttons.VSplitMid(&Abort, &Ok);
+			Part.VSplitMid(&Abort, &Ok);
 
 			Ok.VMargin(20.0f, &Ok);
 			Abort.VMargin(20.0f, &Abort);
@@ -1996,22 +1990,19 @@ int CMenus::Render()
 				// name video
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
-					char aBufOld[IO_MAX_PATH_LENGTH];
-					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					if(!str_endswith(m_aCurrentDemoFile, ".mp4"))
 						str_append(m_aCurrentDemoFile, ".mp4", sizeof(m_aCurrentDemoFile));
 					char aWholePath[IO_MAX_PATH_LENGTH];
 					// store new video filename to origin buffer
 					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
 					{
-						m_Popup = POPUP_REPLACE_VIDEO;
+						char aMessage[128 + IO_MAX_PATH_LENGTH];
+						str_format(aMessage, sizeof(aMessage), Localize("File '%s' already exists, do you want to overwrite it?"), m_aCurrentDemoFile);
+						PopupConfirm(Localize("Replace video"), aMessage, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDemoReplaceVideo, POPUP_NONE, &CMenus::DefaultButtonCallback, POPUP_RENDER_DEMO);
 					}
 					else
 					{
-						const char *pError = Client()->DemoPlayer_Render(aBufOld, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
-						m_Speed = 4;
-						if(pError)
-							PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+						PopupConfirmDemoReplaceVideo();
 					}
 				}
 			}
@@ -2081,38 +2072,6 @@ int CMenus::Render()
 			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, TEXTALIGN_LEFT);
 			static float s_Offset = 0.0f;
 			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
-		}
-		else if(m_Popup == POPUP_REPLACE_VIDEO)
-		{
-			CUIRect Yes, No;
-			Box.HSplitBottom(20.f, &Box, &Part);
-#if defined(__ANDROID__)
-			Box.HSplitBottom(60.f, &Box, &Part);
-#else
-			Box.HSplitBottom(24.f, &Box, &Part);
-#endif
-			Part.VMargin(80.0f, &Part);
-
-			Part.VSplitMid(&No, &Yes);
-
-			Yes.VMargin(20.0f, &Yes);
-			No.VMargin(20.0f, &No);
-
-			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
-				m_Popup = POPUP_RENDER_DEMO;
-
-			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
-			{
-				m_Popup = POPUP_NONE;
-				// render video
-				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-				const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
-				m_Speed = 4;
-				if(pError)
-					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
-			}
 		}
 #endif
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
@@ -2243,6 +2202,18 @@ int CMenus::Render()
 	}
 	return 0;
 }
+
+#if defined(CONF_VIDEORECORDER)
+void CMenus::PopupConfirmDemoReplaceVideo()
+{
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+	m_Speed = 4;
+	if(pError)
+		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+}
+#endif
 
 void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 {

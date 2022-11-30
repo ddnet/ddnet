@@ -508,8 +508,9 @@ protected:
 
 	// found in menus.cpp
 	int Render();
-	//void render_background();
-	//void render_loading(float percent);
+#if defined(CONF_VIDEORECORDER)
+	void PopupConfirmDemoReplaceVideo();
+#endif
 	int RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -727,7 +728,6 @@ public:
 		POPUP_COUNTRY,
 		POPUP_RENAME_DEMO,
 		POPUP_RENDER_DEMO,
-		POPUP_REPLACE_VIDEO,
 		POPUP_PASSWORD,
 		POPUP_QUIT,
 		POPUP_WARNING,
