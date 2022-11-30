@@ -570,6 +570,7 @@ protected:
 	void RenderSettingsDummyPlayer(CUIRect MainView);
 	void RenderSettingsTee(CUIRect MainView);
 	void RenderSettingsControls(CUIRect MainView);
+	void ResetSettingsControls();
 	void RenderSettingsGraphics(CUIRect MainView);
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
