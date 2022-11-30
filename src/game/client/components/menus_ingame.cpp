@@ -56,7 +56,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 		{
-			m_Popup = POPUP_DISCONNECT;
+			PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDisconnect);
 		}
 		else
 		{
@@ -88,7 +88,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
-				m_Popup = POPUP_DISCONNECT_DUMMY;
+				PopupConfirm(Localize("Disconnect Dummy"), Localize("Are you sure that you want to disconnect your dummy?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDisconnectDummy);
 			}
 			else
 			{
@@ -206,6 +206,17 @@ void CMenus::RenderGame(CUIRect MainView)
 			}
 		}
 	}
+}
+
+void CMenus::PopupConfirmDisconnect()
+{
+	Client()->Disconnect();
+}
+
+void CMenus::PopupConfirmDisconnectDummy()
+{
+	Client()->DummyDisconnect(0);
+	SetActive(false);
 }
 
 void CMenus::RenderPlayers(CUIRect MainView)

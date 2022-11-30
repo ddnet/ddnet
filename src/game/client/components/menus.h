@@ -529,6 +529,8 @@ protected:
 
 	// found in menus_ingame.cpp
 	void RenderGame(CUIRect MainView);
+	void PopupConfirmDisconnect();
+	void PopupConfirmDisconnectDummy();
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerControl(CUIRect MainView);
@@ -729,8 +731,6 @@ public:
 		POPUP_SOUNDERROR,
 		POPUP_PASSWORD,
 		POPUP_QUIT,
-		POPUP_DISCONNECT,
-		POPUP_DISCONNECT_DUMMY,
 		POPUP_WARNING,
 		POPUP_SWITCH_SERVER,
 
