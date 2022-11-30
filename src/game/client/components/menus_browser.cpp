@@ -1363,7 +1363,15 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	{
 		static CButtonContainer s_RemoveButton;
 		if(DoButton_Menu(&s_RemoveButton, Localize("Remove"), 0, &Button))
-			m_Popup = POPUP_REMOVE_FRIEND;
+		{
+			const CFriendInfo *pRemoveFriend = m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo;
+			const bool IsPlayer = m_pClient->Friends()->GetFriendState(pRemoveFriend->m_aName, pRemoveFriend->m_aClan) == IFriends::FRIEND_PLAYER;
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf),
+				IsPlayer ? Localize("Are you sure that you want to remove the player '%s' from your friends list?") : Localize("Are you sure that you want to remove the clan '%s' from your friends list?"),
+				IsPlayer ? pRemoveFriend->m_aName : pRemoveFriend->m_aClan);
+			PopupConfirm(Localize("Remove friend"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmRemoveFriend);
+		}
 	}
 
 	// add friend
@@ -1398,6 +1406,14 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			Client()->ServerBrowserUpdate();
 		}
 	}
+}
+
+void CMenus::PopupConfirmRemoveFriend()
+{
+	const CFriendInfo *pRemoveFriend = m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo;
+	m_pClient->Friends()->RemoveFriend(pRemoveFriend->m_aName, pRemoveFriend->m_aClan);
+	FriendlistOnUpdate();
+	Client()->ServerBrowserUpdate();
 }
 
 void CMenus::RenderServerbrowser(CUIRect MainView)
