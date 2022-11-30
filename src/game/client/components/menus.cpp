@@ -1618,11 +1618,6 @@ int CMenus::Render()
 			pButtonText = m_aMessageButton;
 			ExtraAlign = -1;
 		}
-		else if(m_Popup == POPUP_SWITCH_SERVER)
-		{
-			pTitle = Localize("Disconnect");
-			pExtraText = Localize("Are you sure that you want to disconnect and switch to a different server?");
-		}
 
 		CUIRect Box, Part;
 		Box = Screen;
@@ -2158,29 +2153,6 @@ int CMenus::Render()
 				m_Popup = POPUP_NONE;
 				SetActive(false);
 			}
-		}
-		else if(m_Popup == POPUP_SWITCH_SERVER)
-		{
-			CUIRect Yes, No;
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
-
-			// buttons
-			Part.VMargin(80.0f, &Part);
-			Part.VSplitMid(&No, &Yes);
-			Yes.VMargin(20.0f, &Yes);
-			No.VMargin(20.0f, &No);
-
-			static CButtonContainer s_ButtonAbort;
-			if(DoButton_Menu(&s_ButtonAbort, Localize("No"), 0, &No) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
-			{
-				m_Popup = POPUP_NONE;
-				m_aNextServer[0] = '\0';
-			}
-
-			static CButtonContainer s_ButtonTryAgain;
-			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
-				Client()->Connect(m_aNextServer);
 		}
 		else
 		{

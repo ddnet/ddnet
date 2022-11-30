@@ -509,15 +509,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
 		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
 		if(DoubleClicked && Input()->MouseDoubleClick())
-		{
-			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-			{
-				m_Popup = POPUP_SWITCH_SERVER;
-				str_copy(m_aNextServer, g_Config.m_UiServerAddress);
-			}
-			else
-				Client()->Connect(g_Config.m_UiServerAddress);
-		}
+			Connect(g_Config.m_UiServerAddress);
 	}
 
 	//Status.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 5.0f);
@@ -668,15 +660,25 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			   m_ConnectButton, &s_JoinButton, []() -> const char * { return Localize("Connect"); }, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5, 0, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)) ||
 			UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 		{
-			if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
-			{
-				m_Popup = POPUP_SWITCH_SERVER;
-				str_copy(m_aNextServer, g_Config.m_UiServerAddress);
-			}
-			else
-				Client()->Connect(g_Config.m_UiServerAddress);
+			Connect(g_Config.m_UiServerAddress);
 		}
 	}
+}
+
+void CMenus::Connect(const char *pAddress)
+{
+	if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+	{
+		str_copy(m_aNextServer, pAddress);
+		PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect and switch to a different server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
+	}
+	else
+		Client()->Connect(pAddress);
+}
+
+void CMenus::PopupConfirmSwitchServer()
+{
+	Client()->Connect(m_aNextServer);
 }
 
 void CMenus::RenderServerbrowserFilters(CUIRect View)

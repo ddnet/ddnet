@@ -544,6 +544,8 @@ protected:
 	int m_DoubleClickIndex;
 	int m_ScrollOffset;
 	void RenderServerbrowserServerList(CUIRect View);
+	void Connect(const char *pAddress);
+	void PopupConfirmSwitchServer();
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
 	void RenderServerbrowserFriends(CUIRect View);
@@ -731,7 +733,6 @@ public:
 		POPUP_PASSWORD,
 		POPUP_QUIT,
 		POPUP_WARNING,
-		POPUP_SWITCH_SERVER,
 
 		// demo player states
 		DEMOPLAYER_NONE = 0,
