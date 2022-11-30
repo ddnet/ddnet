@@ -1366,8 +1366,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(nullptr);
-				m_Popup = POPUP_DELETE_DEMO;
+				char aBuf[128 + IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the demo '%s'?"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				PopupConfirm(Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteDemo);
 				return;
 			}
 		}
@@ -1400,4 +1401,21 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	UI()->DoLabel(&LabelRect, aFooterLabel, 14.0f, TEXTALIGN_LEFT);
+}
+
+void CMenus::PopupConfirmDeleteDemo()
+{
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+	if(Storage()->RemoveFile(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+	{
+		DemolistPopulate();
+		DemolistOnUpdate(false);
+	}
+	else
+	{
+		char aError[128 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), Localize("Unable to delete the demo '%s'"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+		PopupMessage(Localize("Error"), aError, Localize("Ok"));
+	}
 }
