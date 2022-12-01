@@ -71,7 +71,8 @@ jobs:
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
       run: |
-        sudo apt-get install libmariadbclient-dev libwebsockets-dev mariadb-server-10.3 -y
+        sudo apt-get install libmariadb-dev libwebsockets-dev mariadb-server -y
+        sudo systemctl stop mysql
         sudo rm -rf /var/lib/mysql/
         sudo mysql_install_db --user=mysql --datadir=/var/lib/mysql/
         cd /usr; sudo mysqld_safe --datadir='/var/lib/mysql/' --no-watch
@@ -181,7 +182,6 @@ jobs:
     - name: Test fancy
       if: matrix.fancy
       run: |
-        find /usr/lib/ -name '*libwebsockets*'
         cd fancy
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
 
