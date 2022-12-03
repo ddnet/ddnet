@@ -1885,23 +1885,27 @@ int CMenus::Render()
 				}
 			}
 
-			const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+			bool Activated = false;
+			const int NewSelected = UiDoListboxEnd(&s_ScrollValue, &Activated);
 			if(OldSelected != NewSelected)
 				s_CurSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
 
-			Part.VMargin(120.0f, &Part);
+			CUIRect CancelButton, OkButton;
+			Part.VMargin(100.0f, &Part);
+			Part.VSplitMid(&CancelButton, &OkButton, 40.0f);
 
-			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+			static CButtonContainer s_CancelButton;
+			if(DoButton_Menu(&s_CancelButton, Localize("Cancel"), 0, &CancelButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
-				g_Config.m_BrFilterCountryIndex = s_CurSelection;
-				Client()->ServerBrowserUpdate();
+				s_CurSelection = g_Config.m_BrFilterCountryIndex;
 				m_Popup = POPUP_NONE;
 			}
 
-			if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+			static CButtonContainer s_OkButton;
+			if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &OkButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || Activated)
 			{
-				s_CurSelection = g_Config.m_BrFilterCountryIndex;
+				g_Config.m_BrFilterCountryIndex = s_CurSelection;
+				Client()->ServerBrowserUpdate();
 				m_Popup = POPUP_NONE;
 			}
 		}
