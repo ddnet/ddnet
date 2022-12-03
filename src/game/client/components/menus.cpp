@@ -1857,9 +1857,9 @@ int CMenus::Render()
 			Box.HSplitBottom(20.f, &Box, 0);
 			Box.VMargin(20.0f, &Box);
 
-			static int CurSelection = -2;
-			if(CurSelection == -2)
-				CurSelection = g_Config.m_BrFilterCountryIndex;
+			static int s_CurSelection = -2;
+			if(s_CurSelection == -2)
+				s_CurSelection = g_Config.m_BrFilterCountryIndex;
 			static float s_ScrollValue = 0.0f;
 			int OldSelected = -1;
 			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
@@ -1867,7 +1867,7 @@ int CMenus::Render()
 			for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 			{
 				const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
-				if(pEntry->m_CountryCode == CurSelection)
+				if(pEntry->m_CountryCode == s_CurSelection)
 					OldSelected = i;
 
 				CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i);
@@ -1887,21 +1887,21 @@ int CMenus::Render()
 
 			const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 			if(OldSelected != NewSelected)
-				CurSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
+				s_CurSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
 
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
-				g_Config.m_BrFilterCountryIndex = CurSelection;
+				g_Config.m_BrFilterCountryIndex = s_CurSelection;
 				Client()->ServerBrowserUpdate();
 				m_Popup = POPUP_NONE;
 			}
 
 			if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			{
-				CurSelection = g_Config.m_BrFilterCountryIndex;
+				s_CurSelection = g_Config.m_BrFilterCountryIndex;
 				m_Popup = POPUP_NONE;
 			}
 		}
