@@ -1337,19 +1337,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			static CButtonContainer s_DefaultButton;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
 			{
-				m_pClient->m_Binds.SetDefaults();
-
-				g_Config.m_InpMousesens = 200;
-				g_Config.m_UiMousesens = 200;
-
-				g_Config.m_InpControllerEnable = 0;
-				g_Config.m_InpControllerGUID[0] = '\0';
-				g_Config.m_InpControllerAbsolute = 0;
-				g_Config.m_InpControllerSens = 100;
-				g_Config.m_InpControllerX = 0;
-				g_Config.m_InpControllerY = 1;
-				g_Config.m_InpControllerTolerance = 5;
-				g_Config.m_UiControllerSens = 100;
+				PopupConfirm(Localize("Reset controls"), Localize("Are you sure that you want to reset the controls to their defaults?"),
+					Localize("Reset"), Localize("Cancel"), &CMenus::ResetSettingsControls);
 			}
 		}
 	}
@@ -1419,6 +1408,23 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	}
 
 	s_ScrollRegion.End();
+}
+
+void CMenus::ResetSettingsControls()
+{
+	m_pClient->m_Binds.SetDefaults();
+
+	g_Config.m_InpMousesens = 200;
+	g_Config.m_UiMousesens = 200;
+
+	g_Config.m_InpControllerEnable = 0;
+	g_Config.m_InpControllerGUID[0] = '\0';
+	g_Config.m_InpControllerAbsolute = 0;
+	g_Config.m_InpControllerSens = 100;
+	g_Config.m_InpControllerX = 0;
+	g_Config.m_InpControllerY = 1;
+	g_Config.m_InpControllerTolerance = 5;
+	g_Config.m_UiControllerSens = 100;
 }
 
 int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, CButtonContainer *pButtonContainer, float &ScrollVal)
