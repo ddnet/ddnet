@@ -484,7 +484,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
 		CLaserData Data;
-		if(ObjType == NETOBJTYPE_PROJECTILE)
+		if(ObjType == NETOBJTYPE_LASER)
 		{
 			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
 		}
