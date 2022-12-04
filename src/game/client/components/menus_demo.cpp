@@ -484,7 +484,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(DoButton_FontIcon(&s_ResetButton, "\xEF\x81\x8D", false, &Button, IGraphics::CORNER_ALL))
 	{
 		DemoPlayer()->Pause();
-		DemoPlayer()->SeekPercent(0.0f);
+		PositionToSeek = 0.0f;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
@@ -575,10 +575,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
-				DemoPlayer()->SeekPercent((float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks);
+				PositionToSeek = (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
 				break;
 			}
-			DemoPlayer()->SeekPercent(0.0f);
+			PositionToSeek = 0.0f;
 		}
 	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
 
@@ -591,10 +591,10 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
-				DemoPlayer()->SeekPercent((float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks);
+				PositionToSeek = (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
 				break;
 			}
-			DemoPlayer()->SeekPercent(1.0f);
+			PositionToSeek = 1.0f;
 		}
 	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
