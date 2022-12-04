@@ -337,10 +337,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
 	ButtonBar.HSplitBottom(NameBarHeight, &ButtonBar, &NameBar);
 	NameBar.HSplitTop(4.0f, 0, &NameBar);
-	SpeedBar.HSplitBottom(NameBarHeight, &SpeedBar, &NameBar);
-	ButtonBar.HSplitTop(0.0f, 0, &SpeedBar);
-	SpeedBar.VSplitLeft(123.0f, 0, &SpeedBar);
-	SpeedBar.VSplitLeft(133.0f, &SpeedBar, 0);
 
 	// do seekbar
 	{
@@ -521,13 +517,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_FastForwardButton, &Button, Localize("Speed up the demo"));
 
 	// speed meter
-	ButtonBar.VSplitLeft(Margins * 3, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins * 12, &SpeedBar, &ButtonBar);
 	char aBuffer[64];
 	str_format(aBuffer, sizeof(aBuffer), "×%g", pInfo->m_Speed);
 	UI()->DoLabel(&SpeedBar, aBuffer, Button.h * 0.7f, TEXTALIGN_CENTER);
 
 	// slice begin button
-	ButtonBar.VSplitLeft(Margins * 7, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
