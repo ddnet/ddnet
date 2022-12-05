@@ -166,8 +166,6 @@ private:
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
-	int m_NeedRefresh;
-
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
 	int m_NumServers;
