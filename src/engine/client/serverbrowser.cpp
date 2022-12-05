@@ -55,6 +55,8 @@ CServerBrowser::CServerBrowser()
 	m_pLastReqServer = nullptr;
 	m_NumRequests = 0;
 
+	m_NeedResort = false;
+
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
 	m_NumServers = 0;
@@ -69,8 +71,6 @@ CServerBrowser::CServerBrowser()
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
 	m_pDDNetInfo = nullptr;
-
-	m_SortOnNextUpdate = false;
 }
 
 CServerBrowser::~CServerBrowser()
@@ -733,8 +733,7 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 		pEntry->m_RequestTime = -1; // Request has been answered
 	}
 	RemoveRequest(pEntry);
-
-	m_SortOnNextUpdate = true;
+	RequestResort();
 }
 
 void CServerBrowser::Refresh(int Type)
@@ -1009,7 +1008,7 @@ void CServerBrowser::UpdateFromHttp()
 		}
 	}
 
-	m_SortOnNextUpdate = true;
+	RequestResort();
 }
 
 void CServerBrowser::CleanUp()
@@ -1025,7 +1024,7 @@ void CServerBrowser::CleanUp()
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 }
 
-void CServerBrowser::Update(bool ForceResort)
+void CServerBrowser::Update()
 {
 	int64_t Timeout = time_freq();
 	int64_t Now = time_get();
@@ -1104,7 +1103,7 @@ void CServerBrowser::Update(bool ForceResort)
 	}
 
 	// check if we need to resort
-	if(m_Sorthash != SortHash() || ForceResort || m_SortOnNextUpdate)
+	if(m_Sorthash != SortHash() || m_NeedResort)
 	{
 		for(int i = 0; i < m_NumServers; i++)
 		{
@@ -1113,7 +1112,7 @@ void CServerBrowser::Update(bool ForceResort)
 			pInfo->m_FavoriteAllowPing = m_pFavorites->IsPingAllowed(pInfo->m_aAddresses, pInfo->m_NumAddresses);
 		}
 		Sort();
-		m_SortOnNextUpdate = false;
+		m_NeedResort = false;
 	}
 }
 
