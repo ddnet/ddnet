@@ -537,6 +537,13 @@ void CEditor::RenderGrid(CLayerGroup *pGroup)
 	Graphics()->LinesEnd();
 }
 
+void CEditor::SnapToGrid(float &x, float &y)
+{
+	const int GridDistance = GetLineDistance() * m_GridFactor;
+	x = (int)((x + (x >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
+	y = (int)((y + (y >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
+}
+
 void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness)
 {
 	Graphics()->TextureSet(Texture);
@@ -1314,29 +1321,12 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		{
 			if(s_Operation == OP_MOVE)
 			{
+				float x = wx;
+				float y = wy;
 				if(m_GridActive && !IgnoreGrid)
-				{
-					int LineDistance = GetLineDistance();
-
-					float x = 0.0f;
-					float y = 0.0f;
-					if(wx >= 0)
-						x = (int)((wx + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						x = (int)((wx - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					if(wy >= 0)
-						y = (int)((wy + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-
-					pSource->m_Position.x = f2fx(x);
-					pSource->m_Position.y = f2fx(y);
-				}
-				else
-				{
-					pSource->m_Position.x = f2fx(wx);
-					pSource->m_Position.y = f2fx(wy);
-				}
+					SnapToGrid(x, y);
+				pSource->m_Position.x = f2fx(x);
+				pSource->m_Position.y = f2fx(y);
 			}
 		}
 
@@ -1443,48 +1433,20 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			// check if we only should move pivot
 			if(s_Operation == OP_MOVE_PIVOT)
 			{
+				float x = wx;
+				float y = wy;
 				if(m_GridActive && !IgnoreGrid)
-				{
-					int LineDistance = GetLineDistance();
-
-					float x = 0.0f;
-					float y = 0.0f;
-					if(wx >= 0)
-						x = (int)((wx + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						x = (int)((wx - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					if(wy >= 0)
-						y = (int)((wy + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-
-					pQuad->m_aPoints[4].x = f2fx(x);
-					pQuad->m_aPoints[4].y = f2fx(y);
-				}
-				else
-				{
-					pQuad->m_aPoints[4].x = f2fx(wx);
-					pQuad->m_aPoints[4].y = f2fx(wy);
-				}
+					SnapToGrid(x, y);
+				pQuad->m_aPoints[4].x = f2fx(x);
+				pQuad->m_aPoints[4].y = f2fx(y);
 			}
 			else if(s_Operation == OP_MOVE_ALL)
 			{
+				// move all points including pivot
 				float x = wx;
 				float y = wy;
-				// move all points including pivot
 				if(m_GridActive && !IgnoreGrid)
-				{
-					int LineDistance = GetLineDistance();
-
-					if(wx >= 0)
-						x = (int)((wx + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						x = (int)((wx - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					if(wy >= 0)
-						y = (int)((wy + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-				}
+					SnapToGrid(x, y);
 
 				int OffsetX = f2fx(x) - pQuad->m_aPoints[4].x;
 				int OffsetY = f2fx(y) - pQuad->m_aPoints[4].y;
@@ -1688,18 +1650,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				float x = wx;
 				float y = wy;
 				if(m_GridActive && !IgnoreGrid)
-				{
-					int LineDistance = GetLineDistance();
-
-					if(wx >= 0)
-						x = (int)((wx + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						x = (int)((wx - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					if(wy >= 0)
-						y = (int)((wy + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-					else
-						y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-				}
+					SnapToGrid(x, y);
 
 				int OffsetX = f2fx(x) - pQuad->m_aPoints[V].x;
 				int OffsetY = f2fx(y) - pQuad->m_aPoints[V].y;
@@ -2233,19 +2184,9 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		{
 			if(m_GridActive && !IgnoreGrid)
 			{
-				int LineDistance = GetLineDistance();
-
-				float x = 0.0f;
-				float y = 0.0f;
-				if(wx >= 0)
-					x = (int)((wx + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-				else
-					x = (int)((wx - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-				if(wy >= 0)
-					y = (int)((wy + (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-				else
-					y = (int)((wy - (LineDistance / 2) * m_GridFactor) / (LineDistance * m_GridFactor)) * (LineDistance * m_GridFactor);
-
+				float x = wx;
+				float y = wy;
+				SnapToGrid(x, y);
 				pEnvelope->m_vPoints[PIndex].m_aValues[0] = f2fx(x) - pQuad->m_aPoints[4].x;
 				pEnvelope->m_vPoints[PIndex].m_aValues[1] = f2fx(y) - pQuad->m_aPoints[4].y;
 			}
