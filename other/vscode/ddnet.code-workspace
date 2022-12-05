@@ -97,8 +97,8 @@
 						"long": "Disable optimizations",
 						"buildType": "Debug",
 						"settings": {
-							"CMAKE_CXX_FLAGS_DEBUG": "",
-							"CMAKE_C_FLAGS_DEBUG": "",
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
 						}
 					},
 					"release": {
@@ -106,8 +106,8 @@
 						"long": "Enable optimizations",
 						"buildType": "Release",
 						"settings": {
-							"CMAKE_CXX_FLAGS_RELEASE": "",
-							"CMAKE_C_FLAGS_RELEASE": "",
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
 						}
 					},
 					"minsize": {
@@ -115,8 +115,8 @@
 						"long": "Enable optimizations, optimized for size",
 						"buildType": "MinSizeRel",
 						"settings": {
-							"CMAKE_CXX_FLAGS_MINSIZEREL": "",
-							"CMAKE_C_FLAGS_MINSIZEREL": "",
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
 						}
 					},
 					"reldeb": {
@@ -124,8 +124,8 @@
 						"long": "Enable optimizations, provide debug symbols",
 						"buildType": "RelWithDebInfo",
 						"settings": {
-							"CMAKE_CXX_FLAGS_RELWITHDEBINFO": "",
-							"CMAKE_C_FLAGS_RELWITHDEBINFO": "",
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
 						}
 					},
 					"debAndASAN": {
@@ -133,8 +133,8 @@
 						"long": "Disable optimizations, enable ASAN & UBSAN",
 						"buildType": "Debug",
 						"settings": {
-							"CMAKE_CXX_FLAGS_DEBUG": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
-							"CMAKE_C_FLAGS_DEBUG": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+							"CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
 						}
 					},
 					"relAndASAN": {
@@ -142,8 +142,8 @@
 						"long": "Enable optimizations, enable ASAN & UBSAN",
 						"buildType": "RelWithDebInfo",
 						"settings": {
-							"CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
-							"CMAKE_C_FLAGS_RELWITHDEBINFO": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+							"CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
 						}
 					},
 					"debAndTSAN": {
@@ -151,8 +151,8 @@
 						"long": "Disable optimizations, enable TSAN & UBSAN",
 						"buildType": "Debug",
 						"settings": {
-							"CMAKE_CXX_FLAGS_DEBUG": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
-							"CMAKE_C_FLAGS_DEBUG": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+							"CMAKE_CXX_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
 						}
 					},
 					"relAndTSAN": {
@@ -160,8 +160,8 @@
 						"long": "Enable optimizations, enable TSAN & UBSAN",
 						"buildType": "RelWithDebInfo",
 						"settings": {
-							"CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
-							"CMAKE_C_FLAGS_RELWITHDEBINFO": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+							"CMAKE_CXX_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
 						}
 					}
 				}

@@ -3843,8 +3843,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
 		if(s_SelectionPopupContext.m_Entries.empty())
 		{
@@ -3868,8 +3867,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		bool WasExternal = pImg->m_External;
 		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
 		pImg->m_External = WasExternal;
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		return 1;
 	}
 
@@ -3910,8 +3908,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
 		if(s_SelectionPopupContext.m_Entries.empty())
 		{
@@ -3933,8 +3930,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	if(s_SelectionPopupContext.m_pSelection != nullptr)
 	{
 		ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
-		s_SelectionPopupContext.m_pSelection = nullptr;
-		s_SelectionPopupContext.m_Entries.clear();
+		s_SelectionPopupContext.Reset();
 		return 1;
 	}
 
@@ -4877,6 +4873,21 @@ bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
 	return false;
 }
 
+void CEditor::RemoveUnusedEnvelopes()
+{
+	for(size_t Envelope = 0; Envelope < m_Map.m_vpEnvelopes.size();)
+	{
+		if(IsEnvelopeUsed(Envelope))
+		{
+			++Envelope;
+		}
+		else
+		{
+			m_Map.DeleteEnvelope(Envelope);
+		}
+	}
+}
+
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
 	if(m_SelectedEnvelope < 0)
@@ -5561,7 +5572,6 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
-	View.HSplitTop(2.0f, &Slot, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map (ctrl+n)"))
 	{
@@ -5664,16 +5674,47 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 	return 0;
 }
 
+int CEditor::PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	static int s_RemoveUnusedEnvelopesButton = 0;
+	static SConfirmPopupContext s_ConfirmPopupContext;
+	if(pEditor->DoButton_MenuItem(&s_RemoveUnusedEnvelopesButton, "Remove unused envelopes", 0, &Slot, 0, "Removes all unused envelopes from the map"))
+	{
+		s_ConfirmPopupContext.Reset();
+		str_copy(s_ConfirmPopupContext.m_aMessage, "Are you sure that you want to remove all unused envelopes from this map?");
+		pEditor->ShowPopupConfirm(Slot.x + Slot.w, Slot.y, &s_ConfirmPopupContext);
+	}
+	if(s_ConfirmPopupContext.m_Result == SConfirmPopupContext::CONFIRMED)
+		pEditor->RemoveUnusedEnvelopes();
+	if(s_ConfirmPopupContext.m_Result != SConfirmPopupContext::UNSET)
+	{
+		s_ConfirmPopupContext.Reset();
+		return 1;
+	}
+
+	return 0;
+}
+
 void CEditor::RenderMenubar(CUIRect MenuBar)
 {
 	CUIRect FileButton;
 	static int s_FileButton = 0;
 	MenuBar.VSplitLeft(60.0f, &FileButton, &MenuBar);
 	if(DoButton_Menu(&s_FileButton, "File", 0, &FileButton, 0, nullptr))
-		UiInvokePopupMenu(&s_FileButton, 1, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120, 160, PopupMenuFile, this);
+		UiInvokePopupMenu(&s_FileButton, 1, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 152.0f, PopupMenuFile, this);
+
+	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
+
+	CUIRect ToolsButton;
+	static int s_ToolsButton = 0;
+	MenuBar.VSplitLeft(60.0f, &ToolsButton, &MenuBar);
+	if(DoButton_Menu(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr))
+		UiInvokePopupMenu(&s_ToolsButton, 1, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 22.0f, PopupMenuTools, this);
 
 	CUIRect Info, Close;
-	MenuBar.VSplitLeft(40.0f, nullptr, &MenuBar);
+	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
 	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
 	Close.VSplitLeft(5.0f, nullptr, &Close);
 	MenuBar.VSplitLeft(MenuBar.w * 0.75f, &MenuBar, &Info);

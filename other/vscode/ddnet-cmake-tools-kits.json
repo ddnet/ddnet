@@ -10,7 +10,7 @@
 		},
 		"cmakeSettings": {
 			"DEV": "ON",
-			"CMAKE_CXX_LINK_FLAGS": "-fuse-ld=mold"
+			"CMAKE_CXX_LINK_FLAGS_INIT": "-fuse-ld=mold"
 		}
 	},
 	{

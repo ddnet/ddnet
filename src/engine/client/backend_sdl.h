@@ -111,8 +111,8 @@ struct SBackendCapabilites
 class CCommandProcessorFragment_SDL
 {
 	// SDL stuff
-	SDL_Window *m_pWindow;
-	SDL_GLContext m_GLContext;
+	SDL_Window *m_pWindow = nullptr;
+	SDL_GLContext m_GLContext = nullptr;
 
 public:
 	enum
@@ -169,8 +169,8 @@ static constexpr size_t gs_GPUInfoStringSize = 256;
 // graphics backend implemented with SDL and the graphics library @see EBackendType
 class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 {
-	SDL_Window *m_pWindow = NULL;
-	SDL_GLContext m_GLContext;
+	SDL_Window *m_pWindow = nullptr;
+	SDL_GLContext m_GLContext = nullptr;
 	ICommandProcessor *m_pProcessor = nullptr;
 	std::atomic<uint64_t> m_TextureMemoryUsage{0};
 	std::atomic<uint64_t> m_BufferMemoryUsage{0};

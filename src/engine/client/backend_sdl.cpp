@@ -1258,7 +1258,8 @@ int CGraphicsBackend_SDL_GL::Shutdown()
 	delete m_pProcessor;
 	m_pProcessor = nullptr;
 
-	SDL_GL_DeleteContext(m_GLContext);
+	if(m_GLContext != nullptr)
+		SDL_GL_DeleteContext(m_GLContext);
 	SDL_DestroyWindow(m_pWindow);
 
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);

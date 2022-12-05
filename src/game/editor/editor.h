@@ -1118,6 +1118,7 @@ public:
 	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
@@ -1137,6 +1138,27 @@ public:
 	static int PopupMessage(CEditor *pEditor, CUIRect View, void *pContext);
 	void ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext);
 
+	struct SConfirmPopupContext
+	{
+		enum EConfirmationResult
+		{
+			UNSET = 0,
+			CONFIRMED,
+			CANCELED
+		};
+		static constexpr float POPUP_MAX_WIDTH = 200.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+		static constexpr float POPUP_BUTTON_HEIGHT = 12.0f;
+		static constexpr float POPUP_BUTTON_SPACING = 5.0f;
+		char m_aMessage[256];
+		EConfirmationResult m_Result;
+
+		SConfirmPopupContext();
+		void Reset();
+	};
+	static int PopupConfirm(CEditor *pEditor, CUIRect View, void *pContext);
+	void ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext);
+
 	struct SSelectionPopupContext
 	{
 		static constexpr float POPUP_MAX_WIDTH = 300.0f;
@@ -1148,6 +1170,7 @@ public:
 		const std::string *m_pSelection;
 
 		SSelectionPopupContext();
+		void Reset();
 	};
 	static int PopupSelection(CEditor *pEditor, CUIRect View, void *pContext);
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
@@ -1190,6 +1213,7 @@ public:
 	static void AddSound(const char *pFileName, int StorageType, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
+	void RemoveUnusedEnvelopes();
 
 	void RenderLayers(CUIRect LayersBox);
 	void RenderImagesList(CUIRect Toolbox);
