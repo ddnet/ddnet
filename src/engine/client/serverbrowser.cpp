@@ -267,33 +267,33 @@ void CServerBrowser::Filter()
 	// filter the servers
 	for(int i = 0; i < m_NumServers; i++)
 	{
-		int Filtered = 0;
+		bool Filtered = false;
 
 		if(g_Config.m_BrFilterEmpty && m_ppServerlist[i]->m_Info.m_NumFilteredPlayers == 0)
-			Filtered = 1;
+			Filtered = true;
 		else if(g_Config.m_BrFilterFull && Players(m_ppServerlist[i]->m_Info) == Max(m_ppServerlist[i]->m_Info))
-			Filtered = 1;
+			Filtered = true;
 		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags & SERVER_FLAG_PASSWORD)
-			Filtered = 1;
+			Filtered = true;
 		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(m_ppServerlist[i]->m_Info.m_aAddress, g_Config.m_BrFilterServerAddress))
-			Filtered = 1;
+			Filtered = true;
 		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
-			Filtered = 1;
+			Filtered = true;
 		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, g_Config.m_BrFilterGametype))
-			Filtered = 1;
+			Filtered = true;
 		else if(g_Config.m_BrFilterUnfinishedMap && m_ppServerlist[i]->m_Info.m_HasRank == 1)
-			Filtered = 1;
+			Filtered = true;
 		else
 		{
 			if(g_Config.m_BrFilterCountry)
 			{
-				Filtered = 1;
+				Filtered = true;
 				// match against player country
 				for(int p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 				{
 					if(m_ppServerlist[i]->m_Info.m_aClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
 					{
-						Filtered = 0;
+						Filtered = false;
 						break;
 					}
 				}
@@ -342,7 +342,7 @@ void CServerBrowser::Filter()
 				}
 
 				if(!MatchFound)
-					Filtered = 1;
+					Filtered = true;
 			}
 
 			if(!Filtered && g_Config.m_BrExcludeString[0] != '\0')
@@ -359,28 +359,28 @@ void CServerBrowser::Filter()
 					// match against server name
 					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, aExcludeStr))
 					{
-						Filtered = 1;
+						Filtered = true;
 						break;
 					}
 
 					// match against map
 					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, aExcludeStr))
 					{
-						Filtered = 1;
+						Filtered = true;
 						break;
 					}
 
 					// match against gametype
 					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, aExcludeStr))
 					{
-						Filtered = 1;
+						Filtered = true;
 						break;
 					}
 				}
 			}
 		}
 
-		if(Filtered == 0)
+		if(!Filtered)
 		{
 			// check for friend
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
