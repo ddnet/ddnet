@@ -618,11 +618,11 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 
 	// check if it's an official server
 	bool Official = false;
-	for(int i = 0; !Official && i < (int)std::size(m_aNetworks); i++)
+	for(const auto &Network : m_aNetworks)
 	{
-		for(int j = 0; !Official && j < m_aNetworks[i].m_NumCountries; j++)
+		for(int j = 0; !Official && j < Network.m_NumCountries; j++)
 		{
-			CNetworkCountry *pCntr = &m_aNetworks[i].m_aCountries[j];
+			const CNetworkCountry *pCntr = &Network.m_aCountries[j];
 			for(int k = 0; !Official && k < pCntr->m_NumServers; k++)
 			{
 				for(int l = 0; !Official && l < NumAddrs; l++)
@@ -634,6 +634,8 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 				}
 			}
 		}
+		if(Official)
+			break;
 	}
 	pEntry->m_Info.m_Official = Official;
 
