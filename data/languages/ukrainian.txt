@@ -19,9 +19,6 @@ Address
 All
 == Всі
 
-Are you sure that you want to delete the demo?
-== Ви впевнені, що хочете видалити демо?
-
 Are you sure that you want to quit?
 == Ви дійсно бажаєте вийти?
 
@@ -481,9 +478,6 @@ File already exists, do you want to overwrite it?
 Remove friend
 == Видалити друга
 
-Are you sure that you want to remove the player from your friends list?
-== Ви впевнені, що хочете видалити гравця зі свого списку друзів?
-
 Sound error
 == Звукова помилка
 
@@ -529,17 +523,11 @@ Quit anyway?
 %i seconds left
 == Залишилось %i секунд
 
-Unable to delete the demo
-== Неможливо видалити демо
-
 Unable to rename the demo
 == Неможливо перейменувати демо
 
 New name:
 == Нове ім’я
-
-Destination file already exist
-== Файл призначення вже існує
 
 Show ingame HUD
 == Показувати HUD
@@ -1319,6 +1307,12 @@ Getting game info
 Requesting to join the game
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
 Join Tutorial Server
 == 
 
@@ -1328,6 +1322,12 @@ Skip Tutorial
 Loading menu images
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
 Play the current demo
 == 
 
@@ -1335,6 +1335,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1352,16 +1358,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
@@ -1436,6 +1454,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Windowed fullscreen

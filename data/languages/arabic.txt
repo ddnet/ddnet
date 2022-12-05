@@ -41,14 +41,8 @@ Address
 All
 == ﻞﻜﻟﺍ
 
-Are you sure that you want to delete the demo?
-== ﻮﻳﺪﻴﻔﻟﺍ ﻑﺬﺤﻟ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
-
 Are you sure that you want to quit?
 == ﻪﺒﻌﻠﻟﺍ ﻕﻼﻏﻻ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
-
-Are you sure that you want to remove the player from your friends list?
-== ﺀﺎﻗﺪﺻﻻﺍ ﺔﻤﺋﺎﻗ ﻦﻣ ﺐﻋﻼﻟﺍ ﺍﺬﻫ ﻪﻟﺍﺯﻻ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
 
 Automatically record demos
 == ﻲﺋﺎﻘﻠﺗ ﻮﻳﺪﻴﻓ ﻞﻴﺠﺴﺗ
@@ -458,9 +452,6 @@ Try again
 
 Type
 == ﺭﻮﻃ
-
-Unable to delete the demo
-== ﻮﻳﺪﻴﻓﻟﺍ ﻑﺬﺤﺑ ﻞﺸﻓ
 
 Unable to rename the demo
 == ﻮﻳﺪﻴﻓﻟﺍ ﺔﻴﻤﺴﺗ ﺓﺩﺎﻋﺎﺑ ﻞﺸﻓ
@@ -993,9 +984,6 @@ transmits your player name to info.ddnet.org
 Server best:
 == :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
 
-Destination file already exist
-== ﻞﻌﻔﻟﺎﺑ ﺩﻮﺟﻮﻣ ﺏﻮﻠﻄﻤﻟﺍ ﻒﻠﻤﻟﺍ
-
 Render demo
 == ﻮﻳﺪﻴﻓﻟﺍ ﻞﻴﻤﺤﺗ
 
@@ -1237,7 +1225,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1276,7 +1267,16 @@ Getting server list from master server
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1286,6 +1286,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1303,16 +1309,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
@@ -1390,6 +1408,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy

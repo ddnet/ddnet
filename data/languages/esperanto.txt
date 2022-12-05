@@ -647,6 +647,12 @@ Reset
 Demos
 == 
 
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -665,34 +671,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Delete demo
-== 
-
-Are you sure that you want to delete the demo?
-== 
-
 Rename demo
 == 
 
 Render demo
-== 
-
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Remove friend
-== 
-
-Are you sure that you want to remove the player from your friends list?
-== 
-
-Sound error
-== 
-
-The audio device couldn't be initialised.
 == 
 
 Password incorrect
@@ -707,16 +689,16 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
-Unable to delete the demo
+Cancel
 == 
 
 Unable to rename the demo
 == 
 
-Destination file already exist
+File '%s' already exists, do you want to overwrite it?
 == 
 
-Error loading demo
+Replace video
 == 
 
 Show ingame HUD
@@ -729,6 +711,9 @@ Show DDNet map finishes in server browser
 == 
 
 transmits your player name to info.ddnet.org
+== 
+
+Error loading demo
 == 
 
 The server is running a non-standard tuning on a pure game type.
@@ -779,7 +764,19 @@ Scoreboard
 Remove
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Remove friend
+== 
+
 Info
+== 
+
+File already exists, do you want to overwrite it?
 == 
 
 Play the current demo
@@ -789,6 +786,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -804,6 +807,12 @@ Mark the end of a cut
 == 
 
 Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
@@ -869,10 +878,16 @@ Fetch Info
 Demos directory
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete demo
+== 
+
 Render
 == 
 
-Menu opened. Press Esc key again to close menu.
+Unable to delete the demo '%s'
 == 
 
 Stop record
@@ -900,6 +915,9 @@ Activate
 == 
 
 Save
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Dynamic Camera
@@ -1127,6 +1145,12 @@ Movement
 == 
 
 Reset to defaults
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Voting

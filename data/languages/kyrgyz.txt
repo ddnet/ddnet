@@ -39,14 +39,8 @@ All
 Alpha
 == Тунук.
 
-Are you sure that you want to delete the demo?
-== Сиз чын эле демонун өчүрүлүшүн каалайсызбы?
-
 Are you sure that you want to quit?
 == Сиз чын эле оюндан чыгууну каалайсызбы?
-
-Are you sure that you want to remove the player from your friends list?
-== Сиз чын эле бул оюнчуну достор тизмеңизден өчүргүңүз келеби?
 
 Automatically record demos
 == Демону автоматтуу түрдө жаздыруу
@@ -544,9 +538,6 @@ Type:
 UI Color
 == Интерфейс түсү
 
-Unable to delete the demo
-== Демону өчүрүү мүмкүн эмес
-
 Unable to rename the demo
 == Демо атын өзгөртүү мүмкүн эмес
 
@@ -700,21 +691,6 @@ Reconnect in %d sec
 Render demo
 == 
 
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
 Welcome to DDNet
 == 
 
@@ -739,13 +715,16 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
-== 
-
 Country / Region
 == 
 
-Destination file already exist
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Replace video
 == 
 
 Speed
@@ -817,6 +796,9 @@ Exclude
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Filter connecting players
 == 
 
@@ -835,10 +817,19 @@ Types
 Leak IP
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
 Select a name
 == 
 
 Please use a different name
+== 
+
+File already exists, do you want to overwrite it?
 == 
 
 Remove chat
@@ -851,6 +842,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -866,6 +863,12 @@ Mark the end of a cut
 == 
 
 Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
@@ -901,16 +904,28 @@ Fetch Info
 Demos directory
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
 == 
 
-Menu opened. Press Esc key again to close menu.
+Unable to delete the demo '%s'
+== 
+
+Are you sure that you want to disconnect?
 == 
 
 Connect Dummy
 == 
 
 Connecting dummy
+== 
+
+Disconnect Dummy
+== 
+
+Are you sure that you want to disconnect your dummy?
 == 
 
 Kill
@@ -935,6 +950,9 @@ Activate
 == 
 
 Save
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Smooth Dynamic Camera
@@ -1105,6 +1123,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy

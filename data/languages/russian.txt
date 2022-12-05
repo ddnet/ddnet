@@ -53,14 +53,8 @@ Address
 All
 == Все
 
-Are you sure that you want to delete the demo?
-== Вы уверены, что хотите удалить демо?
-
 Are you sure that you want to quit?
 == Вы действительно желаете выйти?
-
-Are you sure that you want to remove the player from your friends list?
-== Вы уверены, что хотите удалить игрока из друзей?
 
 Automatically record demos
 == Записывать демо
@@ -483,9 +477,6 @@ Try again
 Type
 == Тип
 
-Unable to delete the demo
-== Невозможно удалить демо
-
 Unable to rename the demo
 == Невозможно переименовать демо
 
@@ -797,9 +788,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Пожалуйста, ниже укажите ваш псевдоним.
-
-Destination file already exist
-== Конечный файл уже существует
 
 Video name:
 == Название видео:
@@ -1616,3 +1604,39 @@ Menu opened. Press Esc key again to close menu.
 
 Set all to Rifle
 == Цвет всех как у лазера
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 

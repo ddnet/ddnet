@@ -56,14 +56,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Weet je zeker dat je de demo wilt verwijderen?
-
 Are you sure that you want to quit?
 == Weet je zeker dat je wilt stoppen?
-
-Are you sure that you want to remove the player from your friends list?
-== Weet je zeker dat je deze speler uit je vriendenlijst wilt verwijderen?
 
 Automatically record demos
 == Automatisch demo's opnemen
@@ -474,9 +468,6 @@ Try again
 Type
 == Type
 
-Unable to delete the demo
-== Demo kon niet worden verwijderd
-
 Unable to rename the demo
 == Niet mogelijk om de demo te hernoemen
 
@@ -676,9 +667,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Voer je bijnaam in a.u.b.
-
-Destination file already exist
-== Bestemmingsfolder bestaat al
 
 Video name:
 == Video naam:
@@ -1403,7 +1391,19 @@ Getting game info
 Requesting to join the game
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
 Loading menu images
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1413,6 +1413,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1430,16 +1436,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Loading skin files
@@ -1502,6 +1520,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Appearance

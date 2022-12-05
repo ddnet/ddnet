@@ -27,12 +27,8 @@ Address
 == ﺱﺭﺩﺁ
 All
 == ﻪﻤﻫ
-Are you sure that you want to delete the demo?
-== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ ﻮﻣﺩ ﻞﯾﺎﻓ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ
 Are you sure that you want to quit?
 == ؟ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-Are you sure that you want to remove the player from your friends list?
-== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﺍﺭ ﻦﻜﯾﺯﺎﺑ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ
 Automatically record demos
 == ﺭﺎﻛﺩﻮﺧ ﺕﺭﻮﺻ ﻪﺑ ﻮﻣﺩ ﻂﺒﺿ
 Automatically take game over screenshot
@@ -329,17 +325,11 @@ Yes
 Country / Region
 == ﻪﻘﻄﻨﻣ / ﺭﻮﺸﮐ
 
-Unable to delete the demo
-== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻑﺬﺣ ﻥﺎﮑﻣﺍ
-
 Unable to rename the demo
 == ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ ﻥﺎﮑﻣﺍ
 
 New name:
 == ﺪﯾﺪﺟ ﻢﺳﺍ
-
-Destination file already exist
-== ﺖﺳﺍ ﺩﻮﺟﻮﻣ ﻞﺒﻗ ﺯﺍ ﺪﺼﻘﻣ ﻞﯾﺎﻓ
 
 Show chat
 == ﺖﭼ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
@@ -846,6 +836,9 @@ Personal best:
 Uploading map data to GPU
 == 
 
+The audio device couldn't be initialised.
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -864,9 +857,6 @@ Getting game info
 Requesting to join the game
 == 
 
-The audio device couldn't be initialised.
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
@@ -874,6 +864,12 @@ It's recommended that you check the settings to adjust them to your liking befor
 == 
 
 Please enter your nickname below.
+== 
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -915,6 +911,12 @@ CHN
 Leak IP
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
 Play the current demo
 == 
 
@@ -922,6 +924,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -937,6 +945,12 @@ Mark the end of a cut
 == 
 
 Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
@@ -960,13 +974,19 @@ Netversion:
 Fetch Info
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
 == 
 
-Menu opened. Press Esc key again to close menu.
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
@@ -1086,6 +1106,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy

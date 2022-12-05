@@ -66,14 +66,8 @@ Address
 All
 == Tout le monde
 
-Are you sure that you want to delete the demo?
-== Êtes-vous sûr de vouloir supprimer la démo ?
-
 Are you sure that you want to quit?
 == Êtes-vous sûr de vouloir quitter ?
-
-Are you sure that you want to remove the player from your friends list?
-== Êtes-vous sûr de vouloir supprimer ce joueur de votre liste d'amis ?
 
 Automatically record demos
 == Enregistrer les démos automatiquement
@@ -483,9 +477,6 @@ Try again
 
 Type
 == Type
-
-Unable to delete the demo
-== Impossible de supprimer la démo
 
 Unable to rename the demo
 == Impossible de renommer la démo
@@ -989,9 +980,6 @@ Show tiles layers from BG map
 
 Show votes window after voting
 == Afficher la fenêtre de vote après avoir voté
-
-Destination file already exist
-== Le fichier de destination existe déjà
 
 %d new mentions
 == %d nouveaux messages
@@ -1604,6 +1592,42 @@ Menu opened. Press Esc key again to close menu.
 
 Weapons
 == Armes
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
 
 Rifle Laser Outline Color
 == 

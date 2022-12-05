@@ -53,14 +53,8 @@ Address
 All
 == 모두
 
-Are you sure that you want to delete the demo?
-== 데모를 삭제하시겠습니까?
-
 Are you sure that you want to quit?
 == 종료하시겠습니까?
-
-Are you sure that you want to remove the player from your friends list?
-== 이 플레이어를 친구 목록에서 삭제하시겠습니까?
 
 Automatically record demos
 == 자동으로 데모 녹화
@@ -456,9 +450,6 @@ Try again
 Type
 == 종류
 
-Unable to delete the demo
-== 데모를 삭제할 수 없음
-
 Unable to rename the demo
 == 데모의 이름을 변경할 수 없음
 
@@ -703,9 +694,6 @@ Are you sure that you want to disconnect and switch to a different server?
 
 Country / Region
 == 국가 / 지역
-
-Destination file already exist
-== 대상 파일이 이미 존재함
 
 Speed
 == 속도
@@ -1618,3 +1606,39 @@ Menu opened. Press Esc key again to close menu.
 
 Set all to Rifle
 == 소총 색상으로 통일
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 

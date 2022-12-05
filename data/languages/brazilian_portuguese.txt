@@ -64,14 +64,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== Tem certeza que deseja deletar a demo?
-
 Are you sure that you want to quit?
 == Você tem certeza que deseja sair?
-
-Are you sure that you want to remove the player from your friends list?
-== Tem certeza que deseja remover o jogador de sua lista de amigos?
 
 Automatically record demos
 == Gravar demos automaticamente
@@ -487,9 +481,6 @@ Try again
 
 Type
 == Tipo
-
-Unable to delete the demo
-== Não foi possível deletar a demo
 
 Unable to rename the demo
 == Não foi possível renomear a demo
@@ -1058,9 +1049,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Por favor, insira seu apelido abaixo.
 
-Destination file already exist
-== O arquivo de destino já existe
-
 Video name:
 == Nome do vídeo
 
@@ -1627,3 +1615,39 @@ Menu opened. Press Esc key again to close menu.
 
 Set all to Rifle
 == Definir todos para rifle
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 

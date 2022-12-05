@@ -61,14 +61,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Möchtest du die Aufnahme wirklich löschen?
-
 Are you sure that you want to quit?
 == Bist du sicher, dass du beenden möchtest?
-
-Are you sure that you want to remove the player from your friends list?
-== Bist du sicher, dass du diesen Spieler aus deiner Freundesliste entfernen möchtest?
 
 Automatically record demos
 == Automatisch Aufnahmen erstellen
@@ -496,9 +490,6 @@ Try again
 
 Type
 == Typ
-
-Unable to delete the demo
-== Aufnahme konnte nicht gelöscht werden
 
 Unable to rename the demo
 == Aufnahme konnte nicht umbenannt werden
@@ -1051,9 +1042,6 @@ transmits your player name to info.ddnet.org
 
 Server best:
 == Serverbeste:
-
-Destination file already exist
-== Zieldatei existiert bereits
 
 Render demo
 == Demo rendern
@@ -1624,3 +1612,39 @@ Menu opened. Press Esc key again to close menu.
 
 Set all to Rifle
 == Alle auf Gewehr setzen
+
+Cancel
+== Abbrechen
+
+File '%s' already exists, do you want to overwrite it?
+== Datei '%s' existiert bereits, willst du sie überschreiben?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Willst du wirklich den Spieler '%s' aus deiner Freundesliste entfernen?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Willst du wirklich den Clan '%s' aus deiner Freundesliste entfernen?
+
+Go back one tick
+== Vorheriger Tick
+
+Go forward one tick
+== Nächster Tick
+
+Go back one marker
+== Vorherige Markierung
+
+Go forward one marker
+== Nächste Markierung
+
+Are you sure that you want to delete the demo '%s'?
+== Willst du wirklich die Demo '%s' entfernen?
+
+Unable to delete the demo '%s'
+== Kann Demo '%s' nicht entfernen
+
+Reset controls
+== Bedienungen zurücksetzen
+
+Are you sure that you want to reset the controls to their defaults?
+== Willst du wirklich die Bedienungen zum Standard zurücksetzen?
