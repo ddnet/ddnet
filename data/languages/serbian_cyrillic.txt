@@ -43,14 +43,8 @@ Address
 All
 == Сви
 
-Are you sure that you want to delete the demo?
-== Да ли сте сигурни да желите да избришете видео снимак?
-
 Are you sure that you want to quit?
 == Да ли сте сигурни да желите да изађете?
-
-Are you sure that you want to remove the player from your friends list?
-== Да ли си сигуран да хоћеш избрисати играча из листе пријатеља?
 
 Automatically record demos
 == Аутоматски сними видео
@@ -460,9 +454,6 @@ Try again
 Type
 == Тип
 
-Unable to delete the demo
-== Снимак није могуће обрисати
-
 Unable to rename the demo
 == Снимак није могуће преименовати
 
@@ -692,9 +683,6 @@ Please enter your nickname below.
 
 Country / Region
 == Земља / регион
-
-Destination file already exist
-== Датотека одредишта већ постоји
 
 Speed
 == Брзина
@@ -1549,6 +1537,18 @@ Loading sound files
 Initializing components
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
 Play the current demo
 == 
 
@@ -1556,6 +1556,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1573,10 +1579,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
 Menu opened. Press Esc key again to close menu.
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Weapons

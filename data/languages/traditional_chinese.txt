@@ -58,14 +58,8 @@ Address
 All
 == 全部
 
-Are you sure that you want to delete the demo?
-== 你確定要刪除這個回放嗎？
-
 Are you sure that you want to quit?
 == 你確定要退出嗎？
-
-Are you sure that you want to remove the player from your friends list?
-== 你確定要把這個玩家從好友列表中刪除嗎？
 
 Automatically record demos
 == 自動錄製回放
@@ -517,9 +511,6 @@ Try again
 
 Type
 == 模式
-
-Unable to delete the demo
-== 無法刪除這個回放
 
 Unable to rename the demo
 == 無法重新命名這個回放
@@ -1057,9 +1048,6 @@ Personal best:
 
 Render demo
 == 渲染回放
-
-Destination file already exist
-== 目標檔案已經存在
 
 Replace video
 == 替換影片
@@ -1627,3 +1615,39 @@ Menu opened. Press Esc key again to close menu.
 
 Set all to Rifle
 == 統一為鐳射槍顔色
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 

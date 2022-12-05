@@ -45,14 +45,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Er du sikker på at du vil slette denne demoen?
-
 Are you sure that you want to quit?
 == Er du sikker på at du vil avslutte?
-
-Are you sure that you want to remove the player from your friends list?
-== Er du sikker på at du vil fjerne denne spilleren fra vennelisten?
 
 Automatically record demos
 == Spill inn demoer automatisk
@@ -463,9 +457,6 @@ Try again
 Type
 == Type
 
-Unable to delete the demo
-== Kunne ikke slette demoen
-
 Unable to rename the demo
 == Kunne ikke endre navn på demoen
 
@@ -665,9 +656,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Skriv inn ditt ønskede kallenavn under.
-
-Destination file already exist
-== Destinasjonsfilen eksisterer allerede
 
 Video name:
 == Navn på video:
@@ -1249,7 +1237,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1288,7 +1279,16 @@ Getting server list from master server
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1298,6 +1298,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1315,16 +1321,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
@@ -1402,6 +1420,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy

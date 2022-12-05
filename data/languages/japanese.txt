@@ -43,14 +43,8 @@ Address
 All
 == 全部
 
-Are you sure that you want to delete the demo?
-== デモを削除してもよろしいですか？
-
 Are you sure that you want to quit?
 == 終了してもよろしいですか？
-
-Are you sure that you want to remove the player from your friends list?
-== このプレイヤーを友達リストから削除してもよろしいですか？
 
 Automatically record demos
 == 自動的にデモを保存する
@@ -458,9 +452,6 @@ Try again
 Type
 == タイプ
 
-Unable to delete the demo
-== デモを削除できません。
-
 Unable to rename the demo
 == デモの名前を変更できません。
 
@@ -687,9 +678,6 @@ Checking for existing player with your name
 
 Country / Region
 == 国・地域
-
-Destination file already exist
-== 保存先のファイルはすでに存在します
 
 Speed
 == 速度
@@ -1286,7 +1274,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1322,6 +1313,15 @@ CHN
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
 Play the current demo
 == 
 
@@ -1329,6 +1329,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1346,16 +1352,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
@@ -1430,6 +1448,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Windowed fullscreen

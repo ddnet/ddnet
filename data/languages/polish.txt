@@ -47,14 +47,8 @@ Address
 All
 == Wszyscy
 
-Are you sure that you want to delete the demo?
-== Czy na pewno chcesz usunąć to demo?
-
 Are you sure that you want to quit?
 == Czy na pewno chcesz opuścić grę?
-
-Are you sure that you want to remove the player from your friends list?
-== Czy na pewno chcesz usunąć tego gracza z listy znajomych?
 
 Automatically record demos
 == Automatycznie nagrywaj dema
@@ -465,9 +459,6 @@ Try again
 Type
 == Typ
 
-Unable to delete the demo
-== Nie można usunąć dema
-
 Unable to rename the demo
 == Nie można zmienić nazwy dema
 
@@ -784,9 +775,6 @@ Enable replays
 
 Automatically create statboard csv
 == Automatycznie stwórz plik csv z tabelą wyników
-
-Destination file already exist
-== Plik docelowy już istnieje
 
 Reload
 == Przeładuj
@@ -1395,7 +1383,19 @@ Getting game info
 Requesting to join the game
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
 Loading menu images
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1405,6 +1405,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1422,16 +1428,28 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Loading skin files
@@ -1494,6 +1512,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Appearance

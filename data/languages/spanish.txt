@@ -58,14 +58,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== ¿Estás seguro de que quieres eliminar la demo?
-
 Are you sure that you want to quit?
 == ¿Estás seguro de que quieres salir?
-
-Are you sure that you want to remove the player from your friends list?
-== ¿Estás seguro de que quieres eliminar a este jugador de la lista de amigos?
 
 Automatically record demos
 == Grabar demos automáticamente
@@ -482,9 +476,6 @@ Try again
 Type
 == Tipo
 
-Unable to delete the demo
-== No se pudo eliminar la demo
-
 Unable to rename the demo
 == No se pudo renombrar la demo
 
@@ -681,9 +672,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Por favor, introduzca su apodo a continuación.
-
-Destination file already exist
-== El archivo de destino ya existe
 
 Video name:
 == Nombre del video:
@@ -1623,3 +1611,39 @@ Loading race demo files
 
 Loading sound files
 == Cargando archivos de sonido
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
