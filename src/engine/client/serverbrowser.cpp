@@ -158,7 +158,7 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 			pThis->QueueRequest(pChosen);
 			char aAddr[NETADDR_MAXSTRSIZE];
 			net_addr_str(&pChosen->m_Info.m_aAddresses[0], aAddr, sizeof(aAddr), true);
-			dbg_msg("serverbrowse/dbg", "queuing ping request for %s", aAddr);
+			dbg_msg("serverbrowser", "queuing ping request for %s", aAddr);
 		}
 		if(i < (int)vSortedServers.size() && New)
 		{
@@ -727,7 +727,7 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 		{
 			char aAddr[NETADDR_MAXSTRSIZE];
 			net_addr_str(&Addr, aAddr, sizeof(aAddr), true);
-			dbg_msg("serverbrowse/dbg", "received ping response from %s", aAddr);
+			dbg_msg("serverbrowser", "received ping response from %s", aAddr);
 			SetLatency(Addr, Latency);
 		}
 		pEntry->m_RequestTime = -1; // Request has been answered
@@ -777,7 +777,7 @@ void CServerBrowser::Refresh(int Type)
 		}
 
 		if(g_Config.m_Debug)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "broadcasting for servers");
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "serverbrowser", "broadcasting for servers");
 	}
 	else if(Type == IServerBrowser::TYPE_FAVORITES || Type == IServerBrowser::TYPE_INTERNET || Type == IServerBrowser::TYPE_DDNET || Type == IServerBrowser::TYPE_KOG)
 	{
@@ -802,7 +802,7 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "requesting server info from %s", aAddrStr);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "serverbrowser", aBuf);
 	}
 
 	int Token = GenerateToken(Addr);
@@ -872,7 +872,7 @@ void CServerBrowser::UpdateFromHttp()
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "cannot parse br_location: '%s'", g_Config.m_BrLocation);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowser", aBuf);
 		}
 	}
 
@@ -1146,7 +1146,7 @@ void CServerBrowser::LoadDDNetServers()
 
 			if(pSrv->type != json_object || pTypes->type != json_object || pName->type != json_string || pFlagID->type != json_integer)
 			{
-				dbg_msg("client_srvbrowse", "invalid attributes");
+				dbg_msg("serverbrowser", "invalid attributes");
 				continue;
 			}
 
@@ -1166,7 +1166,7 @@ void CServerBrowser::LoadDDNetServers()
 
 				if(pAddrs->type != json_array)
 				{
-					dbg_msg("client_srvbrowse", "invalid attributes");
+					dbg_msg("serverbrowser", "invalid attributes");
 					continue;
 				}
 
@@ -1192,7 +1192,7 @@ void CServerBrowser::LoadDDNetServers()
 					const json_value *pAddr = json_array_get(pAddrs, g);
 					if(pAddr->type != json_string)
 					{
-						dbg_msg("client_srvbrowse", "invalid attributes");
+						dbg_msg("serverbrowser", "invalid attributes");
 						continue;
 					}
 					const char *pStr = json_string_get(pAddr);
@@ -1286,7 +1286,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.json: '%s'", (const char *)Location);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse", aBuf);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowser", aBuf);
 		}
 	}
 }
