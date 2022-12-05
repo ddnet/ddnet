@@ -48,11 +48,11 @@ public:
 
 CServerBrowser::CServerBrowser()
 {
-	m_ppServerlist = 0;
-	m_pSortedServerlist = 0;
+	m_ppServerlist = nullptr;
+	m_pSortedServerlist = nullptr;
 
-	m_pFirstReqServer = 0; // request list
-	m_pLastReqServer = 0;
+	m_pFirstReqServer = nullptr; // request list
+	m_pLastReqServer = nullptr;
 	m_NumRequests = 0;
 
 	m_NumSortedServers = 0;
@@ -61,14 +61,14 @@ CServerBrowser::CServerBrowser()
 	m_NumServerCapacity = 0;
 
 	m_Sorthash = 0;
-	m_aFilterString[0] = 0;
-	m_aFilterGametypeString[0] = 0;
+	m_aFilterString[0] = '\0';
+	m_aFilterGametypeString[0] = '\0';
 
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
-	m_pDDNetInfo = 0;
+	m_pDDNetInfo = nullptr;
 
 	m_SortOnNextUpdate = false;
 }
@@ -171,7 +171,7 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 const CServerInfo *CServerBrowser::SortedGet(int Index) const
 {
 	if(Index < 0 || Index >= m_NumSortedServers)
-		return 0;
+		return nullptr;
 	return &m_ppServerlist[m_pSortedServerlist[Index]]->m_Info;
 }
 
@@ -470,8 +470,8 @@ void CServerBrowser::RemoveRequest(CServerEntry *pEntry)
 		else
 			m_pLastReqServer = pEntry->m_pPrevReq;
 
-		pEntry->m_pPrevReq = 0;
-		pEntry->m_pNextReq = 0;
+		pEntry->m_pPrevReq = nullptr;
+		pEntry->m_pNextReq = nullptr;
 		m_NumRequests--;
 	}
 }
@@ -495,7 +495,7 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 	else
 		m_pFirstReqServer = pEntry;
 	m_pLastReqServer = pEntry;
-	pEntry->m_pNextReq = 0;
+	pEntry->m_pNextReq = nullptr;
 	m_NumRequests++;
 }
 
@@ -510,7 +510,7 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 				return;
 			}
 			pBuffer[0] = ',';
-			pBuffer[1] = 0;
+			pBuffer[1] = '\0';
 			pBuffer += 1;
 			BufferSize -= 1;
 		}
@@ -909,7 +909,7 @@ void CServerBrowser::UpdateFromHttp()
 				pExcludeTypes = g_Config.m_BrFilterExcludeTypesKoG;
 				break;
 			default:
-				dbg_assert(0, "invalid network");
+				dbg_assert(false, "invalid network");
 				return;
 			}
 			// remove unknown elements of exclude list
@@ -1024,8 +1024,8 @@ void CServerBrowser::CleanUp()
 	m_NumServers = 0;
 	m_NumSortedServers = 0;
 	m_ByAddr.clear();
-	m_pFirstReqServer = 0;
-	m_pLastReqServer = 0;
+	m_pFirstReqServer = nullptr;
+	m_pLastReqServer = nullptr;
 	m_NumRequests = 0;
 	m_CurrentMaxRequests = g_Config.m_BrMaxRequests;
 }
@@ -1280,7 +1280,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 	if(m_pDDNetInfo && m_pDDNetInfo->type != json_object)
 	{
 		json_value_free(m_pDDNetInfo);
-		m_pDDNetInfo = 0;
+		m_pDDNetInfo = nullptr;
 	}
 
 	m_OwnLocation = CServerInfo::LOC_UNKNOWN;
@@ -1341,7 +1341,7 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 
 bool CServerBrowser::IsRefreshing() const
 {
-	return m_pFirstReqServer != 0;
+	return m_pFirstReqServer != nullptr;
 }
 
 bool CServerBrowser::IsGettingServerlist() const
