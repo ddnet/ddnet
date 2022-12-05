@@ -26,7 +26,8 @@ void CServerLogger::Log(const CLogMessage *pMessage)
 			m_vPending.clear();
 		}
 		m_PendingLock.unlock();
-		m_pServer->SendLogLine(pMessage);
+		if(m_pServer)
+			m_pServer->SendLogLine(pMessage);
 	}
 	else
 	{

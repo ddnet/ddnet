@@ -204,14 +204,12 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
 				LastWasNumber = true;
 			}
-			else if(LastWasNumber && (*pStr == '.' || *pStr == ' ' || *pStr == '\0'))
+			else if(LastWasNumber && (*pStr == '.' || *pStr == ' '))
 			{
-				int CurNumber = 0;
 				if(CurNumberStrLen > 0)
 				{
 					aCurNumberStr[CurNumberStrLen] = 0;
-					CurNumber = str_toint(aCurNumberStr);
-					aNumbers[TotalNumbersPassed++] = CurNumber;
+					aNumbers[TotalNumbersPassed++] = str_toint(aCurNumberStr);
 					CurNumberStrLen = 0;
 				}
 

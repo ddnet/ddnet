@@ -50,7 +50,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		vec2 Temp;
 		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
-		vec2 &HitPos = pHit->Core()->m_Pos;
+		const vec2 &HitPos = pHit->Core()->m_Pos;
 		if(!g_Config.m_SvOldLaser)
 		{
 			if(m_PrevPos != HitPos)

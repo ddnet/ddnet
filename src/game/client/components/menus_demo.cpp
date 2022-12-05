@@ -1130,7 +1130,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		CLocConstString m_Caption;
 		int m_Direction;
 		float m_Width;
-		int m_Flags;
 		CUIRect m_Rect;
 		CUIRect m_Spacer;
 	};
@@ -1144,10 +1143,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, 0, {0}, {0}},
-		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, 0, {0}, {0}},
-		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, 0, {0}, {0}},
-		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, 1, {0}, {0}},
+		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, {0}, {0}},
+		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, {0}, {0}},
+		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, {0}, {0}},
+		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, {0}, {0}},
 	};
 	/* This is just for scripts/update_localization.py to work correctly. Don't remove!
 		Localize("Demo");Localize("Markers");Localize("Length");Localize("Date");

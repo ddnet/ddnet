@@ -69,16 +69,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		CLocConstString m_Caption;
 		int m_Direction;
 		float m_Width;
-		int m_Flags;
 		CUIRect m_Rect;
 		CUIRect m_Spacer;
 	};
 
 	enum
 	{
-		FIXED = 1,
-		SPACER = 2,
-
 		COL_FLAG_LOCK = 0,
 		COL_FLAG_FAV,
 		COL_FLAG_OFFICIAL,
@@ -91,16 +87,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	};
 
 	CColumn s_aCols[] = {
-		{-1, -1, " ", -1, 2.0f, 0, {0}, {0}},
-		{COL_FLAG_LOCK, -1, " ", -1, 14.0f, 0, {0}, {0}},
-		{COL_FLAG_FAV, -1, " ", -1, 14.0f, 0, {0}, {0}},
-		{COL_FLAG_OFFICIAL, -1, " ", -1, 14.0f, 0, {0}, {0}},
-		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, 0, {0}, {0}}, // Localize - these strings are localized within CLocConstString
-		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, "Type", 1, 50.0f, 0, {0}, {0}},
-		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, 0, {0}, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 85.0f, 0, {0}, {0}},
-		{-1, -1, " ", 1, 10.0f, 0, {0}, {0}},
-		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, FIXED, {0}, {0}},
+		{-1, -1, " ", -1, 2.0f, {0}, {0}},
+		{COL_FLAG_LOCK, -1, " ", -1, 14.0f, {0}, {0}},
+		{COL_FLAG_FAV, -1, " ", -1, 14.0f, {0}, {0}},
+		{COL_FLAG_OFFICIAL, -1, " ", -1, 14.0f, {0}, {0}},
+		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, {0}, {0}}, // Localize - these strings are localized within CLocConstString
+		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, "Type", 1, 50.0f, {0}, {0}},
+		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, {0}, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 85.0f, {0}, {0}},
+		{-1, -1, " ", 1, 10.0f, {0}, {0}},
+		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, {0}, {0}},
 	};
 	// This is just for scripts/update_localization.py to work correctly (all other strings are already Localize()'d somewhere else). Don't remove!
 	// Localize("Type");
@@ -116,7 +112,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 			if(i + 1 < NumCols)
 			{
-				//Cols[i].flags |= SPACER;
 				Headers.VSplitLeft(2, &s_aCols[i].m_Spacer, &Headers);
 			}
 		}

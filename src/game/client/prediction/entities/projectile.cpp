@@ -101,7 +101,7 @@ void CProjectile::Tick()
 
 	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
 	{
-		if(m_Explosive && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
+		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
 		{
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), -1LL);
 		}

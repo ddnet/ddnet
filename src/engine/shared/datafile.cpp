@@ -66,16 +66,6 @@ struct CDatafileHeader
 	int m_DataSize;
 };
 
-struct CDatafileData
-{
-	int m_NumItemTypes;
-	int m_NumItems;
-	int m_NumRawData;
-	int m_ItemSize;
-	int m_DataSize;
-	char m_aStart[4];
-};
-
 struct CDatafileInfo
 {
 	CDatafileItemType *m_pItemTypes;
@@ -126,7 +116,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		while(true)
 		{
 			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
-			if(Bytes <= 0)
+			if(Bytes == 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes);
 			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
@@ -191,7 +181,6 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	{
 		io_close(pTmpDataFile->m_File);
 		free(pTmpDataFile);
-		pTmpDataFile = 0;
 		dbg_msg("datafile", "couldn't load the whole thing, wanted=%d got=%d", Size, ReadSize);
 		return false;
 	}

@@ -251,7 +251,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	int TotalPlayers = 0;
 
-	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -538,7 +538,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	int NumOptions = 0;
 	int Selected = 0;
 	static int aPlayerIDs[MAX_CLIENTS];
-	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;

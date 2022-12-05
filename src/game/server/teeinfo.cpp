@@ -38,7 +38,7 @@ CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int
 	m_ColorFeet = ColorFeet;
 }
 
-CTeeInfo::CTeeInfo(const char *apSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors)
+CTeeInfo::CTeeInfo(const char *apSkinPartNames[6], const int *pUseCustomColors, const int *pSkinPartColors)
 {
 	for(int i = 0; i < 6; i++)
 	{

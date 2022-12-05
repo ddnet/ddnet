@@ -848,7 +848,7 @@ void CMapLayers::OnMapLoad()
 							mem_copy_special(pUploadData, pTmpTiles, sizeof(vec2), vtmpTiles.size() * 4, (DoTextureCoords ? sizeof(vec3) : 0));
 							if(DoTextureCoords)
 							{
-								mem_copy_special(pUploadData + sizeof(vec2), pTmpTileTexCoords, sizeof(vec3), vtmpTiles.size() * 4, (DoTextureCoords ? (sizeof(vec2)) : 0));
+								mem_copy_special(pUploadData + sizeof(vec2), pTmpTileTexCoords, sizeof(vec3), vtmpTiles.size() * 4, sizeof(vec2));
 							}
 
 							// first create the buffer object

@@ -260,7 +260,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			}
 		}
 
-		void Free(SMemoryHeapQueueElement &AllocatedMemory)
+		void Free(const SMemoryHeapQueueElement &AllocatedMemory)
 		{
 			bool ContinueFree = true;
 			SMemoryHeapQueueElement ThisEl = AllocatedMemory;
@@ -1705,7 +1705,7 @@ protected:
 		return floor(log2(maximum(Width, maximum(Height, Depth)))) + 1;
 	}
 
-	static size_t ImageMipLevelCount(VkExtent3D &ImgExtent)
+	static size_t ImageMipLevelCount(const VkExtent3D &ImgExtent)
 	{
 		return ImageMipLevelCount(ImgExtent.width, ImgExtent.height, ImgExtent.depth);
 	}
@@ -2146,7 +2146,7 @@ protected:
 			{
 				if(m_vvUsedThreadDrawCommandBuffer[i + 1][m_CurImageIndex])
 				{
-					auto &GraphicThreadCommandBuffer = m_vvThreadDrawCommandBuffers[i + 1][m_CurImageIndex];
+					const auto &GraphicThreadCommandBuffer = m_vvThreadDrawCommandBuffers[i + 1][m_CurImageIndex];
 					m_vHelperThreadDrawCommandBuffers[ThreadedCommandsUsedCount++] = GraphicThreadCommandBuffer;
 
 					m_vvUsedThreadDrawCommandBuffer[i + 1][m_CurImageIndex] = false;
@@ -2798,7 +2798,7 @@ protected:
 		vkBindImageMemory(m_VKDevice, Image, ImageMem.m_BufferMem.m_Mem, ImageMem.m_HeapData.m_OffsetToAlign);
 	}
 
-	void ImageBarrier(VkImage &Image, size_t MipMapBase, size_t MipMapCount, size_t LayerBase, size_t LayerCount, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout)
+	void ImageBarrier(const VkImage &Image, size_t MipMapBase, size_t MipMapCount, size_t LayerBase, size_t LayerCount, VkFormat Format, VkImageLayout OldLayout, VkImageLayout NewLayout)
 	{
 		VkCommandBuffer MemCommandBuffer = GetMemoryCommandBuffer();
 
@@ -3189,7 +3189,7 @@ protected:
 	void RenderTileLayer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, size_t DrawCalls, const CCommandBuffer::SState &State, size_t BufferContainerIndex)
 	{
 		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
+		const auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
@@ -3197,8 +3197,7 @@ protected:
 		bool IsTextured = GetIsTextured(State);
 		if(IsTextured)
 		{
-			auto &DescrSet = m_vTextures[State.m_Texture].m_VKStandard3DTexturedDescrSet;
-			ExecBuffer.m_aDescriptors[0] = DescrSet;
+			ExecBuffer.m_aDescriptors[0] = m_vTextures[State.m_Texture].m_VKStandard3DTexturedDescrSet;
 		}
 
 		ExecBuffer.m_IndexBuffer = m_RenderIndexBuffer;
@@ -3807,7 +3806,7 @@ public:
 		}
 
 		VKIOMode = g_Config.m_GfxVsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR;
-		for(auto &Mode : vPresentModeList)
+		for(const auto &Mode : vPresentModeList)
 		{
 			if(Mode == VKIOMode)
 				return true;
@@ -3815,7 +3814,7 @@ public:
 
 		dbg_msg("vulkan", "warning: requested presentation mode was not available. falling back to mailbox / fifo relaxed.");
 		VKIOMode = g_Config.m_GfxVsync ? VK_PRESENT_MODE_FIFO_RELAXED_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
-		for(auto &Mode : vPresentModeList)
+		for(const auto &Mode : vPresentModeList)
 		{
 			if(Mode == VKIOMode)
 				return true;
@@ -5745,7 +5744,6 @@ public:
 		auto &TextureText = m_vTextures[Texture];
 		auto &TextureTextOutline = m_vTextures[TextureOutline];
 		auto &DescrSetText = TextureText.m_VKTextDescrSet;
-		auto &DescrSetTextOutline = TextureText.m_VKTextDescrSet;
 
 		VkDescriptorSetAllocateInfo DesAllocInfo{};
 		DesAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -5780,8 +5778,6 @@ public:
 		aDescriptorWrites[1].pImageInfo = &aImageInfo[1];
 
 		vkUpdateDescriptorSets(m_VKDevice, static_cast<uint32_t>(aDescriptorWrites.size()), aDescriptorWrites.data(), 0, nullptr);
-
-		DescrSetTextOutline = DescrSetText;
 
 		return true;
 	}
@@ -6495,7 +6491,7 @@ public:
 		ExecBuffer.m_EstimatedRenderCallCount = 0;
 	}
 
-	void Cmd_Clear(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_Clear *pCommand)
+	void Cmd_Clear(const SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_Clear *pCommand)
 	{
 		if(ExecBuffer.m_ClearColorInRenderThread)
 		{
@@ -6511,8 +6507,7 @@ public:
 		if(IsTextured)
 		{
 			size_t AddressModeIndex = GetAddressModeIndex(pCommand->m_State);
-			auto &DescrSet = m_vTextures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
-			ExecBuffer.m_aDescriptors[0] = DescrSet;
+			ExecBuffer.m_aDescriptors[0] = m_vTextures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
 		}
 
 		ExecBuffer.m_IndexBuffer = m_IndexBuffer;
@@ -6555,8 +6550,7 @@ public:
 		bool IsTextured = GetIsTextured(pCommand->m_State);
 		if(IsTextured)
 		{
-			auto &DescrSet = m_vTextures[pCommand->m_State.m_Texture].m_VKStandard3DTexturedDescrSet;
-			ExecBuffer.m_aDescriptors[0] = DescrSet;
+			ExecBuffer.m_aDescriptors[0] = m_vTextures[pCommand->m_State.m_Texture].m_VKStandard3DTexturedDescrSet;
 		}
 
 		ExecBuffer.m_IndexBuffer = m_IndexBuffer;
@@ -6588,7 +6582,7 @@ public:
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
 			m_RecreateSwapChain = true;
 		}
-		else if(!pCommand->m_ByResize)
+		else
 		{
 			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
 			if(pCommand->m_X != 0 || pCommand->m_Y != 0 || (uint32_t)pCommand->m_Width != Viewport.width || (uint32_t)pCommand->m_Height != Viewport.height)
@@ -6660,7 +6654,7 @@ public:
 
 		auto StagingBuffer = GetStagingBuffer(pUploadData, DataSize);
 
-		auto &MemBlock = m_vBufferObjects[BufferIndex].m_BufferObject.m_Mem;
+		const auto &MemBlock = m_vBufferObjects[BufferIndex].m_BufferObject.m_Mem;
 		VkBuffer VertexBuffer = MemBlock.m_Buffer;
 		MemoryBarrier(VertexBuffer, Offset + MemBlock.m_HeapData.m_OffsetToAlign, DataSize, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, true);
 		CopyBuffer(StagingBuffer.m_Buffer, VertexBuffer, StagingBuffer.m_HeapData.m_OffsetToAlign, Offset + MemBlock.m_HeapData.m_OffsetToAlign, DataSize);
@@ -6799,7 +6793,7 @@ public:
 	{
 		size_t BufferContainerIndex = (size_t)pCommand->m_BufferContainerIndex;
 		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
+		const auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
@@ -6808,8 +6802,7 @@ public:
 		if(IsTextured)
 		{
 			size_t AddressModeIndex = GetAddressModeIndex(pCommand->m_State);
-			auto &DescrSet = m_vTextures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
-			ExecBuffer.m_aDescriptors[0] = DescrSet;
+			ExecBuffer.m_aDescriptors[0] = m_vTextures[pCommand->m_State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
 		}
 
 		ExecBuffer.m_IndexBuffer = m_RenderIndexBuffer;
@@ -6902,13 +6895,12 @@ public:
 	{
 		size_t BufferContainerIndex = (size_t)pCommand->m_BufferContainerIndex;
 		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
+		const auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
 
-		auto &TextTextureDescr = m_vTextures[pCommand->m_TextTextureIndex].m_VKTextDescrSet;
-		ExecBuffer.m_aDescriptors[0] = TextTextureDescr;
+		ExecBuffer.m_aDescriptors[0] = m_vTextures[pCommand->m_TextTextureIndex].m_VKTextDescrSet;
 
 		ExecBuffer.m_IndexBuffer = m_RenderIndexBuffer;
 
@@ -6961,7 +6953,7 @@ public:
 	void BufferContainer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, size_t BufferContainerIndex, size_t DrawCalls)
 	{
 		size_t BufferObjectIndex = (size_t)m_vBufferContainers[BufferContainerIndex].m_BufferObjectIndex;
-		auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
+		const auto &BufferObject = m_vBufferObjects[BufferObjectIndex];
 
 		ExecBuffer.m_Buffer = BufferObject.m_CurBuffer;
 		ExecBuffer.m_BufferOff = BufferObject.m_CurBufferOffset;
@@ -6970,8 +6962,7 @@ public:
 		if(IsTextured)
 		{
 			size_t AddressModeIndex = GetAddressModeIndex(State);
-			auto &DescrSet = m_vTextures[State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
-			ExecBuffer.m_aDescriptors[0] = DescrSet;
+			ExecBuffer.m_aDescriptors[0] = m_vTextures[State.m_Texture].m_aVKStandardTexturedDescrSets[AddressModeIndex];
 		}
 
 		ExecBuffer.m_IndexBuffer = m_RenderIndexBuffer;

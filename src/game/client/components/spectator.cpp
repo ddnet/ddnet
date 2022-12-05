@@ -119,7 +119,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->CanChangeSpectator())
 		return;
 
-	CGameClient::CSnapState &Snap = pSelf->m_pClient->m_Snap;
+	const CGameClient::CSnapState &Snap = pSelf->m_pClient->m_Snap;
 	int SpectatorID = Snap.m_SpecInfo.m_SpectatorID;
 
 	int NewSpectatorID = -1;
@@ -218,7 +218,7 @@ void CSpectator::OnRender()
 	float BoxMove = -10.0f;
 	float BoxOffset = 0.0f;
 
-	for(auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
+	for(const auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
 	{
 		if(!pInfo || pInfo->m_Team == TEAM_SPECTATORS)
 			continue;

@@ -80,7 +80,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	return 0;
 }
 
-static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, uint8_t *pImg, int ImgWidth, int ImgX, int ImgY, int CheckWidth, int CheckHeight)
+static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, const uint8_t *pImg, int ImgWidth, int ImgX, int ImgY, int CheckWidth, int CheckHeight)
 {
 	int MaxY = -1;
 	int MinY = CheckHeight + 1;

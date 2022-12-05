@@ -1436,14 +1436,14 @@ void CGameClient::OnNewSnapshot()
 					if(m_aFlagDropTick[TEAM_RED] == 0)
 						m_aFlagDropTick[TEAM_RED] = Client()->GameTick(g_Config.m_ClDummy);
 				}
-				else if(m_aFlagDropTick[TEAM_RED] != 0)
+				else
 					m_aFlagDropTick[TEAM_RED] = 0;
 				if(m_Snap.m_pGameDataObj->m_FlagCarrierBlue == FLAG_TAKEN)
 				{
 					if(m_aFlagDropTick[TEAM_BLUE] == 0)
 						m_aFlagDropTick[TEAM_BLUE] = Client()->GameTick(g_Config.m_ClDummy);
 				}
-				else if(m_aFlagDropTick[TEAM_BLUE] != 0)
+				else
 					m_aFlagDropTick[TEAM_BLUE] = 0;
 				if(m_LastFlagCarrierRed == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierRed >= 0)
 					OnFlagGrab(TEAM_RED);
@@ -1662,7 +1662,7 @@ void CGameClient::OnNewSnapshot()
 		m_aDDRaceMsgSent[i] = true;
 	}
 
-	if(m_aShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || (m_aShowOthers[g_Config.m_ClDummy] != SHOW_OTHERS_NOT_SET && m_aShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers))
+	if(m_aShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || m_aShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers)
 	{
 		{
 			CNetMsg_Cl_ShowOthers Msg;
@@ -2217,14 +2217,14 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 	float Distance = 0.0f;
 	int ClosestID = -1;
 
-	CClientData &OwnClientData = m_aClients[ownID];
+	const CClientData &OwnClientData = m_aClients[ownID];
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == ownID)
 			continue;
 
-		CClientData &cData = m_aClients[i];
+		const CClientData &cData = m_aClients[i];
 
 		if(!cData.m_Active)
 			continue;
@@ -2295,10 +2295,9 @@ void CGameClient::UpdatePrediction()
 	vec2 LocalCharPos = vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y);
 	m_GameWorld.m_Core.m_aTuning[g_Config.m_ClDummy] = m_aTuning[g_Config.m_ClDummy];
 
-	int TuneZone = 0;
 	if(m_GameWorld.m_WorldConfig.m_UseTuneZones)
 	{
-		TuneZone = Collision()->IsTune(Collision()->GetMapIndex(LocalCharPos));
+		int TuneZone = Collision()->IsTune(Collision()->GetMapIndex(LocalCharPos));
 
 		if(TuneZone != m_aLocalTuneZone[g_Config.m_ClDummy])
 		{

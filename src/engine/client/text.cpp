@@ -42,7 +42,6 @@ struct SFontSizeChar
 	float m_AdvanceX;
 
 	float m_aUVs[4];
-	int64_t m_TouchTime;
 	FT_UInt m_GlyphIndex;
 };
 

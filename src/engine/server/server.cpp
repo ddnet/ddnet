@@ -115,6 +115,7 @@ void CSnapIDPool::FreeID(int ID)
 {
 	if(ID < 0)
 		return;
+	dbg_assert((size_t)ID < std::size(m_aIDs), "id is out of range");
 	dbg_assert(m_aIDs[ID].m_State == ID_ALLOCATED, "id is not allocated");
 
 	m_InUsage--;
@@ -775,7 +776,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	}
 	else
 	{
-		Packer.AddInt((0 << 1) | (pMsg->m_System ? 1 : 0)); // NETMSG_EX, NETMSGTYPE_EX
+		Packer.AddInt(pMsg->m_System ? 1 : 0); // NETMSG_EX, NETMSGTYPE_EX
 		g_UuidManager.PackUuid(MsgId, &Packer);
 	}
 	Packer.AddRaw(pMsg->Data(), pMsg->Size());
@@ -2806,7 +2807,7 @@ int CServer::Run()
 
 			NonActive = true;
 
-			for(auto &Client : m_aClients)
+			for(const auto &Client : m_aClients)
 			{
 				if(Client.m_State != CClient::STATE_EMPTY)
 				{

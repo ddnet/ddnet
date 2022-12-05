@@ -541,7 +541,7 @@ void CLayerTiles::BrushFlipX()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE ? TILEFLAG_HFLIP : TILEFLAG_VFLIP;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_HFLIP : TILEFLAG_VFLIP;
 }
 
 void CLayerTiles::BrushFlipY()
@@ -557,7 +557,7 @@ void CLayerTiles::BrushFlipY()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE ? TILEFLAG_VFLIP : TILEFLAG_HFLIP;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_VFLIP : TILEFLAG_HFLIP;
 }
 
 void CLayerTiles::BrushRotate(float Amount)

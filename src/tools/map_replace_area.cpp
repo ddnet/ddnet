@@ -43,12 +43,12 @@ bool AdaptVisiblePoint(const float[2][2][2], const float[2][2], const MapObject[
 
 MapObject CreateMapObject(const CMapItemGroup *, int, int, int, int);
 void SetExtendedArea(MapObject &);
-bool GetVisibleArea(const float[2][2], MapObject, float[2][2] = 0x0);
-bool GetReplaceableArea(const float[2][2], MapObject, float[2][2]);
+bool GetVisibleArea(const float[2][2], const MapObject &, float[2][2] = 0x0);
+bool GetReplaceableArea(const float[2][2], const MapObject &, float[2][2]);
 
 void GetGameAreaDistance(const float[2][2][2], const MapObject[2], const float[2][2][2], float[2]);
 void GetGameAreaDistance(const float[2][2][2], const MapObject[2], const float[2][2], float[2]);
-void GetSignificantScreenPos(MapObject, const float[2][2], const float[2][2], float[2]);
+void GetSignificantScreenPos(const MapObject &, const float[2][2], const float[2][2], float[2]);
 void ConvertToTiles(const float[2][2], int[2][2]);
 
 bool GetLineIntersection(const float[2], const float[2], float[2] = 0x0);
@@ -511,7 +511,7 @@ void SetExtendedArea(MapObject &Ob)
 	}
 }
 
-bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVisibleArea[2][2])
+bool GetVisibleArea(const float aaGameArea[2][2], const MapObject &Ob, float aaVisibleArea[2][2])
 {
 	if(IsInexistent((float *)Ob.m_aaExtendedArea, 4))
 		return false;
@@ -543,7 +543,7 @@ bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVi
 	return true;
 }
 
-bool GetReplaceableArea(const float aaVisibleArea[2][2], const MapObject Ob, float aaReplaceableArea[2][2])
+bool GetReplaceableArea(const float aaVisibleArea[2][2], const MapObject &Ob, float aaReplaceableArea[2][2])
 {
 	SetInexistent((float *)aaReplaceableArea, 4);
 	if(IsInexistent((float *)aaVisibleArea, 4))
@@ -599,7 +599,7 @@ void GetGameAreaDistance(const float aaaGameAreas[2][2][2], const MapObject aObs
 	GetGameAreaDistance(aaaGameAreas, aObs, aaaVisibleAreas, aDistance);
 }
 
-void GetSignificantScreenPos(const MapObject Ob, const float aaVisibleArea[2][2], const float aaReplaceableArea[2][2], float aScreen[2])
+void GetSignificantScreenPos(const MapObject &Ob, const float aaVisibleArea[2][2], const float aaReplaceableArea[2][2], float aScreen[2])
 {
 	for(int i = 0; i < 2; i++)
 	{

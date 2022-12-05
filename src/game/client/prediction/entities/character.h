@@ -103,7 +103,7 @@ public:
 	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
 	int GetCID() { return m_ID; }
-	void SetInput(CNetObj_PlayerInput *pNewInput)
+	void SetInput(const CNetObj_PlayerInput *pNewInput)
 	{
 		m_LatestInput = m_Input = *pNewInput;
 		// it is not allowed to aim in the center

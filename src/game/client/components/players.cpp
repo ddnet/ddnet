@@ -193,7 +193,6 @@ void CPlayers::RenderHookCollLine(
 			vec2 NewPos = OldPos;
 
 			bool DoBreak = false;
-			int Hit = 0;
 
 			do
 			{
@@ -207,7 +206,7 @@ void CPlayers::RenderHookCollLine(
 				}
 
 				int TeleNr = 0;
-				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
+				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
 
 				if(!DoBreak && Hit)
 				{
@@ -765,7 +764,7 @@ void CPlayers::OnRender()
 		if(m_pClient->m_aClients[i].m_LiveFrozen)
 			m_aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
 
-		CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
+		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
 		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja

@@ -67,7 +67,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 						++pBuff;
 					}
 
-					if(*pBuff == ' ' && *(pBuff + 1) && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
+					if(*pBuff == ' ' && *(pBuff + 1) == 'i' && *(pBuff + 2) == 'n')
 					{
 						pBuff += 3;
 						Line.append("attribute");
@@ -95,7 +95,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 							pBuff += 2;
 							Found = true;
 						}
-						else if(*pBuff == 'o' && *(pBuff + 1) && *(pBuff + 1) == 'u' && *(pBuff + 2) == 't')
+						else if(*pBuff == 'o' && *(pBuff + 1) == 'u' && *(pBuff + 2) == 't')
 						{
 							pBuff += 3;
 							Found = true;

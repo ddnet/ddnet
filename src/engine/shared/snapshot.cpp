@@ -37,7 +37,7 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 		return InternalType;
 	}
 
-	int TypeItemIndex = GetItemIndex((0 << 16) | InternalType); // NETOBJTYPE_EX
+	int TypeItemIndex = GetItemIndex(InternalType); // NETOBJTYPE_EX
 	if(TypeItemIndex == -1 || GetItemSize(TypeItemIndex) < (int)sizeof(CUuid))
 	{
 		return InternalType;

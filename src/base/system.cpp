@@ -1777,7 +1777,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 		return bytes;
 	}
 #else
-	if(bytes == 0 && sock->ipv4sock >= 0)
+	if(sock->ipv4sock >= 0)
 	{
 		socklen_t fromlen = sizeof(struct sockaddr_in);
 		bytes = recvfrom(sock->ipv4sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
@@ -4061,7 +4061,7 @@ int secure_random_uninit()
 #endif
 }
 
-void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)
+void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
 	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
