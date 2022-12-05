@@ -672,25 +672,31 @@ void CGhost::RefindSkin()
 	char aSkinName[64];
 	for(auto &Ghost : m_aActiveGhosts)
 	{
-		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
+		if(!Ghost.Empty())
+		{
+			IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
+			if(aSkinName[0] != '\0')
+			{
+				CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
+
+				const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
+				pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
+			}
+		}
+	}
+	if(!m_CurGhost.Empty())
+	{
+		IntsToStr(&m_CurGhost.m_Skin.m_Skin0, 6, aSkinName);
 		if(aSkinName[0] != '\0')
 		{
-			CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
+			CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
 
 			const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
 			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 			pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
 		}
-	}
-	IntsToStr(&m_CurGhost.m_Skin.m_Skin0, 6, aSkinName);
-	if(aSkinName[0] != '\0')
-	{
-		CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
-
-		const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
-		pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-		pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-		pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
 	}
 }
