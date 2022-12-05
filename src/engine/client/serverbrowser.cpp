@@ -254,7 +254,6 @@ bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
 
 void CServerBrowser::Filter()
 {
-	int i = 0, p = 0;
 	m_NumSortedServers = 0;
 
 	// allocate the sorted list
@@ -266,7 +265,7 @@ void CServerBrowser::Filter()
 	}
 
 	// filter the servers
-	for(i = 0; i < m_NumServers; i++)
+	for(int i = 0; i < m_NumServers; i++)
 	{
 		int Filtered = 0;
 
@@ -290,7 +289,7 @@ void CServerBrowser::Filter()
 			{
 				Filtered = 1;
 				// match against player country
-				for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
+				for(int p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 				{
 					if(m_ppServerlist[i]->m_Info.m_aClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
 					{
@@ -323,7 +322,7 @@ void CServerBrowser::Filter()
 					}
 
 					// match against players
-					for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
+					for(int p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 					{
 						if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, aFilterStr) ||
 							str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, aFilterStr))
@@ -385,7 +384,7 @@ void CServerBrowser::Filter()
 		{
 			// check for friend
 			m_ppServerlist[i]->m_Info.m_FriendState = IFriends::FRIEND_NO;
-			for(p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
+			for(int p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 			{
 				m_ppServerlist[i]->m_Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName,
 					m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan);
@@ -429,10 +428,8 @@ void SetFilteredPlayers(const CServerInfo &Item)
 
 void CServerBrowser::Sort()
 {
-	int i;
-
 	// fill m_NumFilteredPlayers
-	for(i = 0; i < m_NumServers; i++)
+	for(int i = 0; i < m_NumServers; i++)
 	{
 		SetFilteredPlayers(m_ppServerlist[i]->m_Info);
 	}
@@ -607,10 +604,8 @@ void CServerBrowser::SetLatency(NETADDR Addr, int Latency)
 
 CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int NumAddrs)
 {
-	CServerEntry *pEntry = 0;
-
 	// create new pEntry
-	pEntry = (CServerEntry *)m_ServerlistHeap.Allocate(sizeof(CServerEntry));
+	CServerEntry *pEntry = (CServerEntry *)m_ServerlistHeap.Allocate(sizeof(CServerEntry));
 	mem_zero(pEntry, sizeof(CServerEntry));
 
 	// set the info
@@ -761,7 +756,6 @@ void CServerBrowser::Refresh(int Type)
 	{
 		unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
 		CNetChunk Packet;
-		int i;
 
 		/* do the broadcast version */
 		Packet.m_ClientID = -1;
@@ -781,7 +775,7 @@ void CServerBrowser::Refresh(int Type)
 
 		m_BroadcastTime = time_get();
 
-		for(i = 8303; i <= 8310; i++)
+		for(int i = 8303; i <= 8310; i++)
 		{
 			Packet.m_Address.port = i;
 			m_pNetClient->Send(&Packet);
@@ -807,9 +801,6 @@ void CServerBrowser::Refresh(int Type)
 
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken, bool RandomToken) const
 {
-	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-	CNetChunk Packet;
-
 	if(g_Config.m_Debug)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -838,9 +829,11 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 		*pBasicToken = GetBasicToken(Token);
 	}
 
+	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
 	mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
 	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
 
+	CNetChunk Packet;
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
