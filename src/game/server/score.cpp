@@ -173,6 +173,7 @@ void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	Tmp->m_TeamrankUuid = RandomUuid();
 
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeamScore, std::move(Tmp), "save team score");
 }
@@ -292,7 +293,24 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	Tmp->m_aGeneratedCode[0] = '\0';
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
+	char aBuf[512];
+	if(Tmp->m_aCode[0] == '\0')
+	{
+		str_format(aBuf,
+			sizeof(aBuf),
+			"Team save in progress. You'll be able to load with '/load %s'",
+			Tmp->m_aGeneratedCode);
+	}
+	else
+	{
+		str_format(aBuf,
+			sizeof(aBuf),
+			"Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails",
+			Tmp->m_aCode,
+			Tmp->m_aGeneratedCode);
+	}
 	pController->m_Teams.KillSavedTeam(ClientID, Team);
+	GameServer()->SendChatTeam(Team, aBuf);
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
 }
 

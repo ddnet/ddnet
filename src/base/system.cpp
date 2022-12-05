@@ -934,8 +934,12 @@ void sphore_init(SEMAPHORE *sem)
 
 void sphore_wait(SEMAPHORE *sem)
 {
-	if(sem_wait(sem) != 0)
-		dbg_msg("sphore", "wait failed: %d", errno);
+	do
+	{
+		errno = 0;
+		if(sem_wait(sem) != 0)
+			dbg_msg("sphore", "wait failed: %d", errno);
+	} while(errno == EINTR);
 }
 
 void sphore_signal(SEMAPHORE *sem)

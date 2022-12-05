@@ -1,6 +1,7 @@
 #ifndef ENGINE_SERVER_DATABASES_CONNECTION_H
 #define ENGINE_SERVER_DATABASES_CONNECTION_H
 
+#include "connection_pool.h"
 #include <base/system.h>
 
 #include <memory>
@@ -90,26 +91,19 @@ private:
 	char m_aPrefix[64];
 
 protected:
-	void FormatCreateRace(char *aBuf, unsigned int BufferSize);
-	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType);
+	void FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup);
+	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType, bool Backup);
 	void FormatCreateMaps(char *aBuf, unsigned int BufferSize);
-	void FormatCreateSaves(char *aBuf, unsigned int BufferSize);
+	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup);
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize);
 };
 
+bool MysqlAvailable();
 int MysqlInit();
 void MysqlUninit();
 
 std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup);
 // Returns nullptr if MySQL support is not compiled in.
-std::unique_ptr<IDbConnection> CreateMysqlConnection(
-	const char *pDatabase,
-	const char *pPrefix,
-	const char *pUser,
-	const char *pPass,
-	const char *pIp,
-	const char *pBindaddr,
-	int Port,
-	bool Setup);
+std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config);
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_H
