@@ -13,6 +13,7 @@
 #	gerdoe		2020-09-17 22:49:22
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
+#	banan   	2022-06-12 11:36:50
 ##### /authors #####
 
 ##### translated strings #####
@@ -1606,37 +1607,37 @@ Set all to Rifle
 == Цвет всех как у лазера
 
 Cancel
-== 
+== Отмена
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== файл '%s' уже существует, вы уверены что хотите его перезаписать?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Вы уверены что хотите удалить игрока '%s' из списка ваших друзей?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Вы уверены что хотите удалить клан '%s' из списка ваших друзей?
 
 Go back one tick
-== 
+== Отмотать назад на один тик
 
 Go forward one tick
-== 
+== Отмотать вперед на один тик
 
 Go back one marker
-== 
+== Отмотать назад на один маркер
 
 Go forward one marker
-== 
+== Отмотать вперед на один маркер
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Вы уверены что хотите удалить демо '%s'?
 
 Unable to delete the demo '%s'
-== 
+== Невозможно удалить демо '%s'
 
 Reset controls
-== 
+== Сброс настроек
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Вы уверены что хотите сбросить настройки на их стандартные значения?
