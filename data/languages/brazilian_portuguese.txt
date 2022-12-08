@@ -1617,37 +1617,37 @@ Set all to Rifle
 == Definir todos para rifle
 
 Cancel
-== 
+== Cancelar
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== O arquivo "%s" já existe, tem certeza que deseja sobrescrevê-lo?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Tem certeza que deseja remover o jogador "%s" de sua lista de amigos?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Tem certeza que deseja remover o clã "%s" da sua lista de amigos?
 
 Go back one tick
-== 
+== Voltar um passo
 
 Go forward one tick
-== 
+== Avançar um passo
 
 Go back one marker
-== 
+== Voltar um marcador
 
 Go forward one marker
-== 
+== Avançar um marcador
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Tem certeza que deseja excluir a demo "%s"?
 
 Unable to delete the demo '%s'
-== 
+== Não foi possível excluir a demo "%s"
 
 Reset controls
-== 
+== Redefinir controles
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Tem certeza que deseja redefinir os controles para seu padrão?
