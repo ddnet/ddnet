@@ -2543,15 +2543,17 @@ int CServer::Run()
 	{
 		char aFullPath[IO_MAX_PATH_LENGTH];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE_OR_ABSOLUTE, Config()->m_SvSqliteFile, aFullPath, sizeof(aFullPath));
+		auto pSqliteConn = CreateSqliteConnection(aFullPath, true);
 
 		if(Config()->m_SvUseSQL)
 		{
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE_BACKUP, Config()->m_SvSqliteFile);
+			DbPool()->RegisterDatabase(std::move(pSqliteConn), CDbConnectionPool::WRITE_BACKUP);
 		}
 		else
 		{
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::READ, Config()->m_SvSqliteFile);
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE, Config()->m_SvSqliteFile);
+			auto pCopy = std::unique_ptr<IDbConnection>(pSqliteConn->Copy());
+			DbPool()->RegisterDatabase(std::move(pSqliteConn), CDbConnectionPool::READ);
+			DbPool()->RegisterDatabase(std::move(pCopy), CDbConnectionPool::WRITE);
 		}
 	}
 
@@ -3375,12 +3377,6 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	if(!MysqlAvailable())
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
-		return;
-	}
-
 	if(!pSelf->Config()->m_SvUseSQL)
 		return;
 
@@ -3390,34 +3386,38 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CMysqlConfig Config;
-	bool Write;
+	bool ReadOnly;
 	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
-		Write = false;
+		ReadOnly = false;
 	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
-		Write = true;
+		ReadOnly = true;
 	else
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 
-	str_copy(Config.m_aDatabase, pResult->GetString(1), sizeof(Config.m_aDatabase));
-	str_copy(Config.m_aPrefix, pResult->GetString(2), sizeof(Config.m_aPrefix));
-	str_copy(Config.m_aUser, pResult->GetString(3), sizeof(Config.m_aUser));
-	str_copy(Config.m_aPass, pResult->GetString(4), sizeof(Config.m_aPass));
-	str_copy(Config.m_aIp, pResult->GetString(5), sizeof(Config.m_aIp));
-	str_copy(Config.m_aBindaddr, Config.m_aBindaddr, sizeof(Config.m_aBindaddr));
-	Config.m_Port = pResult->GetInteger(6);
-	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
+	bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
+
+	auto pMysqlConn = CreateMysqlConnection(
+		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
+		pResult->GetString(4), pResult->GetString(5), g_Config.m_SvSqlBindaddr,
+		pResult->GetInteger(6), SetUpDb);
+
+	if(!pMysqlConn)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "can't add MySQL server: compiled without MySQL support");
+		return;
+	}
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"Adding new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
-		Write ? "Write" : "Read",
-		Config.m_aDatabase, Config.m_aPrefix, Config.m_aUser, Config.m_aIp, Config.m_Port);
+		"Added new Sql%sServer: DB: '%s' Prefix: '%s' User: '%s' IP: <{%s}> Port: %d",
+		ReadOnly ? "Read" : "Write",
+		pResult->GetString(1), pResult->GetString(2), pResult->GetString(3),
+		pResult->GetString(5), pResult->GetInteger(6));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-	pSelf->DbPool()->RegisterMysqlDatabase(Write ? CDbConnectionPool::WRITE : CDbConnectionPool::READ, &Config);
+	pSelf->DbPool()->RegisterDatabase(std::move(pMysqlConn), ReadOnly ? CDbConnectionPool::READ : CDbConnectionPool::WRITE);
 }
 
 void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)

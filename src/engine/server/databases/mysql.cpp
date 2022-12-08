@@ -1,5 +1,4 @@
 #include "connection.h"
-#include "engine/server/databases/connection_pool.h"
 
 #if defined(CONF_MYSQL)
 #include <mysql.h>
@@ -25,11 +24,6 @@ enum
 
 std::atomic_int g_MysqlState = {MYSQLSTATE_UNINITIALIZED};
 std::atomic_int g_MysqlNumConnections;
-
-bool MysqlAvailable()
-{
-	return true;
-}
 
 int MysqlInit()
 {
@@ -64,7 +58,15 @@ void MysqlUninit()
 class CMysqlConnection : public IDbConnection
 {
 public:
-	explicit CMysqlConnection(CMysqlConfig m_Config);
+	CMysqlConnection(
+		const char *pDatabase,
+		const char *pPrefix,
+		const char *pUser,
+		const char *pPass,
+		const char *pIp,
+		const char *pBindaddr,
+		int Port,
+		bool Setup);
 	~CMysqlConnection();
 	void Print(IConsole *pConsole, const char *pMode) override;
 
@@ -132,8 +134,14 @@ private:
 	std::vector<MYSQL_BIND> m_vStmtParameters;
 	std::vector<UParameterExtra> m_vStmtParameterExtras;
 
-	// copy of m_Config vars
-	CMysqlConfig m_Config;
+	// copy of config vars
+	char m_aDatabase[64];
+	char m_aUser[64];
+	char m_aPass[64];
+	char m_aIp[64];
+	char m_aBindaddr[128];
+	int m_Port;
+	bool m_Setup;
 
 	std::atomic_bool m_InUse;
 };
@@ -143,9 +151,18 @@ void CMysqlConnection::CStmtDeleter::operator()(MYSQL_STMT *pStmt) const
 	mysql_stmt_close(pStmt);
 }
 
-CMysqlConnection::CMysqlConnection(CMysqlConfig Config) :
-	IDbConnection(Config.m_aPrefix),
-	m_Config(Config),
+CMysqlConnection::CMysqlConnection(
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	const char *pBindaddr,
+	int Port,
+	bool Setup) :
+	IDbConnection(pPrefix),
+	m_Port(Port),
+	m_Setup(Setup),
 	m_InUse(false)
 {
 	g_MysqlNumConnections += 1;
@@ -154,6 +171,12 @@ CMysqlConnection::CMysqlConnection(CMysqlConfig Config) :
 	mem_zero(m_aErrorDetail, sizeof(m_aErrorDetail));
 	mem_zero(&m_Mysql, sizeof(m_Mysql));
 	mysql_init(&m_Mysql);
+
+	str_copy(m_aDatabase, pDatabase, sizeof(m_aDatabase));
+	str_copy(m_aUser, pUser, sizeof(m_aUser));
+	str_copy(m_aPass, pPass, sizeof(m_aPass));
+	str_copy(m_aIp, pIp, sizeof(m_aIp));
+	str_copy(m_aBindaddr, pBindaddr, sizeof(m_aBindaddr));
 }
 
 CMysqlConnection::~CMysqlConnection()
@@ -192,13 +215,13 @@ void CMysqlConnection::Print(IConsole *pConsole, const char *pMode)
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
 		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
-		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port);
+		pMode, m_aDatabase, GetPrefix(), m_aUser, m_aIp, m_Port);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 CMysqlConnection *CMysqlConnection::Copy()
 {
-	return new CMysqlConnection(m_Config);
+	return new CMysqlConnection(m_aDatabase, GetPrefix(), m_aUser, m_aPass, m_aIp, m_aBindaddr, m_Port, m_Setup);
 }
 
 void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
@@ -232,7 +255,7 @@ bool CMysqlConnection::ConnectImpl()
 			StoreErrorStmt("free_result");
 			dbg_msg("mysql", "can't free last result %s", m_aErrorDetail);
 		}
-		if(!mysql_select_db(&m_Mysql, m_Config.m_aDatabase))
+		if(!mysql_select_db(&m_Mysql, m_aDatabase))
 		{
 			// Success.
 			return false;
@@ -254,12 +277,12 @@ bool CMysqlConnection::ConnectImpl()
 	mysql_options(&m_Mysql, MYSQL_OPT_WRITE_TIMEOUT, &OptWriteTimeout);
 	mysql_options(&m_Mysql, MYSQL_OPT_RECONNECT, &OptReconnect);
 	mysql_options(&m_Mysql, MYSQL_SET_CHARSET_NAME, "utf8mb4");
-	if(m_Config.m_aBindaddr[0] != '\0')
+	if(m_aBindaddr[0] != '\0')
 	{
-		mysql_options(&m_Mysql, MYSQL_OPT_BIND, m_Config.m_aBindaddr);
+		mysql_options(&m_Mysql, MYSQL_OPT_BIND, m_aBindaddr);
 	}
 
-	if(!mysql_real_connect(&m_Mysql, m_Config.m_aIp, m_Config.m_aUser, m_Config.m_aPass, nullptr, m_Config.m_Port, nullptr, CLIENT_IGNORE_SIGPIPE))
+	if(!mysql_real_connect(&m_Mysql, m_aIp, m_aUser, m_aPass, nullptr, m_Port, nullptr, CLIENT_IGNORE_SIGPIPE))
 	{
 		StoreErrorMysql("real_connect");
 		return true;
@@ -274,11 +297,11 @@ bool CMysqlConnection::ConnectImpl()
 		return true;
 	}
 
-	if(m_Config.m_Setup)
+	if(m_Setup)
 	{
 		char aCreateDatabase[1024];
 		// create database
-		str_format(aCreateDatabase, sizeof(aCreateDatabase), "CREATE DATABASE IF NOT EXISTS %s CHARACTER SET utf8mb4", m_Config.m_aDatabase);
+		str_format(aCreateDatabase, sizeof(aCreateDatabase), "CREATE DATABASE IF NOT EXISTS %s CHARACTER SET utf8mb4", m_aDatabase);
 		if(PrepareAndExecuteStatement(aCreateDatabase))
 		{
 			return true;
@@ -286,23 +309,23 @@ bool CMysqlConnection::ConnectImpl()
 	}
 
 	// Connect to specific database
-	if(mysql_select_db(&m_Mysql, m_Config.m_aDatabase))
+	if(mysql_select_db(&m_Mysql, m_aDatabase))
 	{
 		StoreErrorMysql("select_db");
 		return true;
 	}
 
-	if(m_Config.m_Setup)
+	if(m_Setup)
 	{
 		char aCreateRace[1024];
 		char aCreateTeamrace[1024];
 		char aCreateMaps[1024];
 		char aCreateSaves[1024];
 		char aCreatePoints[1024];
-		FormatCreateRace(aCreateRace, sizeof(aCreateRace), /* Backup */ false);
-		FormatCreateTeamrace(aCreateTeamrace, sizeof(aCreateTeamrace), "VARBINARY(16)", /* Backup */ false);
+		FormatCreateRace(aCreateRace, sizeof(aCreateRace));
+		FormatCreateTeamrace(aCreateTeamrace, sizeof(aCreateTeamrace), "VARBINARY(16)");
 		FormatCreateMaps(aCreateMaps, sizeof(aCreateMaps));
-		FormatCreateSaves(aCreateSaves, sizeof(aCreateSaves), /* Backup */ false);
+		FormatCreateSaves(aCreateSaves, sizeof(aCreateSaves));
 		FormatCreatePoints(aCreatePoints, sizeof(aCreatePoints));
 
 		if(PrepareAndExecuteStatement(aCreateRace) ||
@@ -313,7 +336,7 @@ bool CMysqlConnection::ConnectImpl()
 		{
 			return true;
 		}
-		m_Config.m_Setup = false;
+		m_Setup = false;
 	}
 	dbg_msg("mysql", "connection established");
 	return false;
@@ -690,15 +713,19 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	return ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 }
 
-std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config)
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	const char *pBindaddr,
+	int Port,
+	bool Setup)
 {
-	return std::make_unique<CMysqlConnection>(Config);
+	return std::make_unique<CMysqlConnection>(pDatabase, pPrefix, pUser, pPass, pIp, pBindaddr, Port, Setup);
 }
 #else
-bool MysqlAvailable()
-{
-	return false;
-}
 int MysqlInit()
 {
 	return 0;
@@ -706,7 +733,15 @@ int MysqlInit()
 void MysqlUninit()
 {
 }
-std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config)
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	const char *pBindaddr,
+	int Port,
+	bool Setup)
 {
 	return nullptr;
 }
