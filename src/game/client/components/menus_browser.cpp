@@ -7,6 +7,7 @@
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/localization.h>
 #include <engine/textrender.h>
 
 #include <game/client/components/console.h>
@@ -38,13 +39,13 @@ void FormatServerbrowserPing(char *pBuffer, int BufferLength, const CServerInfo 
 	}
 	static const char *LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
 		"", // LOC_UNKNOWN
-		"AFR", // LOC_AFRICA // Localize("AFR")
-		"ASI", // LOC_ASIA // Localize("ASI")
-		"AUS", // LOC_AUSTRALIA // Localize("AUS")
-		"EUR", // LOC_EUROPE // Localize("EUR")
-		"NA", // LOC_NORTH_AMERICA // Localize("NA")
-		"SA", // LOC_SOUTH_AMERICA // Localize("SA")
-		"CHN", // LOC_CHINA // Localize("CHN")
+		Localizable("AFR"), // LOC_AFRICA
+		Localizable("ASI"), // LOC_ASIA
+		Localizable("AUS"), // LOC_AUSTRALIA
+		Localizable("EUR"), // LOC_EUROPE
+		Localizable("NA"), // LOC_NORTH_AMERICA
+		Localizable("SA"), // LOC_SOUTH_AMERICA
+		Localizable("CHN"), // LOC_CHINA
 	};
 	dbg_assert(0 <= pInfo->m_Location && pInfo->m_Location < CServerInfo::NUM_LOCS, "location out of range");
 	str_copy(pBuffer, Localize(LOCATION_NAMES[pInfo->m_Location]), BufferLength);
@@ -92,14 +93,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		{COL_FLAG_FAV, -1, " ", -1, 14.0f, {0}, {0}},
 		{COL_FLAG_OFFICIAL, -1, " ", -1, 14.0f, {0}, {0}},
 		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, {0}, {0}}, // Localize - these strings are localized within CLocConstString
-		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, "Type", 1, 50.0f, {0}, {0}},
+		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, {0}, {0}},
 		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 85.0f, {0}, {0}},
 		{-1, -1, " ", 1, 10.0f, {0}, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, {0}, {0}},
 	};
-	// This is just for scripts/update_localization.py to work correctly (all other strings are already Localize()'d somewhere else). Don't remove!
-	// Localize("Type");
 
 	int NumCols = std::size(s_aCols);
 
