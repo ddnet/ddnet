@@ -8,8 +8,9 @@
 #include <SDL_video.h>
 
 #include <atomic>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 struct SBackendCapabilites;
@@ -23,9 +24,55 @@ enum EDebugGFXModes
 	DEBUG_GFX_MODE_ALL,
 };
 
+enum ERunCommandReturnTypes
+{
+	RUN_COMMAND_COMMAND_HANDLED = 0,
+	RUN_COMMAND_COMMAND_UNHANDLED,
+	RUN_COMMAND_COMMAND_WARNING,
+	RUN_COMMAND_COMMAND_ERROR,
+};
+
+enum EGFXErrorType
+{
+	GFX_ERROR_TYPE_NONE = 0,
+	GFX_ERROR_TYPE_INIT,
+	GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE,
+	GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER,
+	GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING,
+	GFX_ERROR_TYPE_RENDER_RECORDING,
+	GFX_ERROR_TYPE_RENDER_CMD_FAILED,
+	GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED,
+	GFX_ERROR_TYPE_SWAP_FAILED,
+	GFX_ERROR_TYPE_UNKNOWN,
+};
+
+enum EGFXWarningType
+{
+	GFX_WARNING_TYPE_NONE = 0,
+	GFX_WARNING_TYPE_INIT_FAILED,
+	GFX_WARNING_LOW_ON_MEMORY,
+	GFX_WARNING_MISSING_EXTENSION,
+	GFX_WARNING_TYPE_UNKNOWN,
+};
+
+struct SGFXErrorContainer
+{
+	EGFXErrorType m_ErrorType = EGFXErrorType::GFX_ERROR_TYPE_NONE;
+	std::vector<std::string> m_vErrors;
+};
+
+struct SGFXWarningContainer
+{
+	EGFXWarningType m_WarningType = EGFXWarningType::GFX_WARNING_TYPE_NONE;
+	std::vector<std::string> m_vWarnings;
+};
+
 class CCommandProcessorFragment_GLBase
 {
 protected:
+	SGFXErrorContainer m_Error;
+	SGFXWarningContainer m_Warning;
+
 	static size_t TexFormatToImageColorChannelCount(int TexFormat);
 	static void *Resize(const unsigned char *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP);
 
@@ -35,10 +82,15 @@ protected:
 
 public:
 	virtual ~CCommandProcessorFragment_GLBase() = default;
-	virtual bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand) = 0;
+	virtual ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) = 0;
 
 	virtual void StartCommands(size_t CommandCount, size_t EstimatedRenderCallCount) {}
 	virtual void EndCommands() {}
+
+	const SGFXErrorContainer &GetError() { return m_Error; }
+	virtual void ErroneousCleanup() {}
+
+	const SGFXWarningContainer &GetWarning() { return m_Warning; }
 
 	enum
 	{

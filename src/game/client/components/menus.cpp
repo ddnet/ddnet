@@ -1090,7 +1090,11 @@ void CMenus::PopupConfirm(const char *pTitle, const char *pMessage, const char *
 
 void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pButton, std::chrono::nanoseconds Duration)
 {
-	dbg_msg(pTopic, "%s", pBody);
+	// no multiline support for console
+	std::string BodyStr = pBody;
+	while(BodyStr.find('\n') != std::string::npos)
+		BodyStr.replace(BodyStr.find('\n'), 1, " ");
+	dbg_msg(pTopic, "%s", BodyStr.c_str());
 
 	// reset active item
 	UI()->SetActiveItem(nullptr);
