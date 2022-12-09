@@ -329,27 +329,23 @@ void CWorker::ProcessQueries()
 			if(m_pShared->m_Shutdown && m_pWriteBackup != nullptr)
 			{
 				dbg_msg("sql", "[%i] %s skipped to backup database during shutdown", JobNum, pThreadData->m_pName);
-				break;
 			}
 			else if(FailMode && m_pWriteBackup != nullptr)
 			{
 				dbg_msg("sql", "[%i] %s skipped to backup database during FailMode", JobNum, pThreadData->m_pName);
-				break;
 			}
 			else if(CDbConnectionPool::ExecSqlFunc(m_pWriteConnection.get(), pThreadData.get(), Write::NORMAL))
 			{
 				dbg_msg("sql", "[%i] %s done on write database", JobNum, pThreadData->m_pName);
 				Success = true;
-				break;
 			}
 			// enter fail mode if not successful
 			FailMode = FailMode || !Success;
 			const Write w = Success ? Write::NORMAL_SUCCEEDED : Write::NORMAL_FAILED;
-			if(CDbConnectionPool::ExecSqlFunc(m_pWriteBackup.get(), pThreadData.get(), w))
+			if(m_pWriteBackup && CDbConnectionPool::ExecSqlFunc(m_pWriteBackup.get(), pThreadData.get(), w))
 			{
 				dbg_msg("sql", "[%i] %s done move write on backup database to non-backup table", JobNum, pThreadData->m_pName);
 				Success = true;
-				break;
 			}
 		}
 		break;
