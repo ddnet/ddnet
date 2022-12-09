@@ -16,6 +16,10 @@ import sqlite3
 import argparse
 from time import strftime
 import os
+from datetime import datetime, timedelta
+
+tables = ['record_race', 'record_teamrace', 'record_saves']
+date = (datetime.now() - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
 
 def sqlite_table_exists(cursor, table):
 	cursor.execute(f"SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='{table}'")
@@ -38,17 +42,19 @@ def transfer(file_from, file_to):
 	for line in conn_from.iterdump():
 		cursor_to.execute(line)
 		print(line.encode('utf-8'))
+	for table in tables:
+		cursor_to.execute(f'INSERT INTO {table} SELECT * FROM {table}_backup WHERE Timestamp < "{date}"')
 	cursor_to.close()
 	conn_to.commit()
 	conn_to.close()
 
 	cursor_from = conn_from.cursor()
-	if sqlite_table_exists(cursor_from, 'record_race'):
-		cursor_from.execute('DELETE FROM record_race')
-	if sqlite_table_exists(cursor_from, 'record_teamrace'):
-		cursor_from.execute('DELETE FROM record_teamrace')
-	if sqlite_table_exists(cursor_from, 'record_saves'):
-		cursor_from.execute('DELETE FROM record_saves')
+	for table in tables:
+		if sqlite_table_exists(cursor_from, table):
+			cursor_from.execute(f'DELETE FROM {table}')
+		backup_table = f'{table}_backup'
+		if sqlite_table_exists(cursor_from, backup_table):
+			cursor_from.execute(f'DELETE FROM {backup_table} WHERE Timestamp < "{date}"')
 	cursor_from.close()
 	conn_from.commit()
 	conn_from.close()
@@ -71,15 +77,15 @@ def main():
 		return
 
 	conn = sqlite3.connect(args.f)
-	num_ranks = sqlite_num_transfer(conn, 'record_race')
-	num_teamranks = sqlite_num_transfer(conn, 'record_teamrace')
-	num_saves = sqlite_num_transfer(conn, 'record_saves')
-	num = num_ranks + num_teamranks + num_saves
+	num = {}
+	for table in tables:
+		num[table] = sqlite_num_transfer(conn, table)
+		num[table] += sqlite_num_transfer(conn, f'{table}_backup')
 	conn.close()
-	if num == 0:
+	if sum(num.values()) == 0:
 		return
 
-	print(f'{num} new entries in backup database found ({num_ranks} ranks, {num_teamranks} teamranks, {num_saves} saves)')
+	print(f'{num} new entries in backup database found ({num["record_race"]} ranks, {num["record_teamrace"]} teamranks, {num["record_saves"]} saves)')
 	print(f'Moving entries from {os.path.abspath(args.f)} to {os.path.abspath(args.to)}')
 	print("You can use the following commands to import the entries to MySQL (using https://github.com/techouse/sqlite3-to-mysql/):")
 	print()
