@@ -1,4 +1,5 @@
 #include "scoreworker.h"
+#include "base/system.h"
 
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
@@ -640,23 +641,23 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			if(pData->m_Time < Time)
 			{
 				str_format(aBuf, sizeof(aBuf),
-					"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=%s, GameID=? WHERE ID = ?",
-					pSqlServer->GetPrefix(), pData->m_Time, pSqlServer->False());
+					"UPDATE %s_teamrace SET Time=%.2f, Timestamp=%s, DDNet7=%s, GameID=? WHERE ID = ?",
+					pSqlServer->GetPrefix(), pData->m_Time, pSqlServer->InsertTimestampAsUtc(), pSqlServer->False());
 				if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 				{
 					return true;
 				}
 				pSqlServer->BindString(1, pData->m_aTimestamp);
 				pSqlServer->BindString(2, pData->m_aGameUuid);
-				// copy uuid, because mysql BindBlob doesn't support const buffers
-				CUuid TeamrankId = pData->m_TeamrankUuid;
-				pSqlServer->BindBlob(3, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+				pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
 				pSqlServer->Print();
 				int NumUpdated;
 				if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
 				{
 					return true;
 				}
+				// return error if we didn't update any rows
+				return NumUpdated == 0;
 			}
 			return false;
 		}
