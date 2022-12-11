@@ -29,6 +29,7 @@
 # 2022-08-08 cheeser0613
 # 2022-09-17 cheeser0613
 # 2022-10-24 cheeser0613
+# 2022-12-11 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1628,37 +1629,37 @@ Set all to Rifle
 == 统一为激光枪颜色
 
 Cancel
-== 
+== 取消
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== 文件名 "%s" 已经存在，是否要覆盖该文件？
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== 你确定要将好友 "%s" 从你的好友列表中删除？
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== 你确定要将战队 "%s" 从你的好友列表中删除？
 
 Go back one tick
-== 
+== 上一个 tick
 
 Go forward one tick
-== 
+== 下一个 tick
 
 Go back one marker
-== 
+== 返回上一个标记
 
 Go forward one marker
-== 
+== 跳至下一个标记
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== 你确定要删除回放文件 "%s" ？
 
 Unable to delete the demo '%s'
-== 
+== 无法删除回放文件 "%s"
 
 Reset controls
-== 
+== 恢复默认设置
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== 你确定要将当前的控制恢复至默认设置？
