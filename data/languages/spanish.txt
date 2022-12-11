@@ -1613,37 +1613,37 @@ Loading sound files
 == Cargando archivos de sonido
 
 Cancel
-== 
+== Cancelar
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== El archivo '%s' ya existe, ¿quieres sobrescribirlo?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== ¿Estás seguro de que quieres quitar al jugador '%s' de tu lista de amigos?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== ¿Estás seguro de que quieres quitar al clan '%s' de tu lista de amigos?
 
 Go back one tick
-== 
+== Retroceder un tick
 
 Go forward one tick
-== 
+== Avanzar un tick
 
 Go back one marker
-== 
+== Retroceder un marcador
 
 Go forward one marker
-== 
+== Avanzar un marcador
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== ¿Estás seguro de que quieres eliminar la demo '%s'?
 
 Unable to delete the demo '%s'
-== 
+== No se pudo eliminar la demo '%s'
 
 Reset controls
-== 
+== Restablecer controles
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== ¿Estás seguro de que quieres restablecer a los controles predeterminados?
