@@ -6160,7 +6160,7 @@ void CEditor::SetZoom(float Target)
 	m_ZoomSmoothingTarget = Target;
 	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0.0f, m_ZoomSmoothingTarget);
 	m_ZoomSmoothingStart = Now;
-	m_ZoomSmoothingEnd = Now + g_Config.m_ClSmoothZoomTime / 1000.0f;
+	m_ZoomSmoothingEnd = Now + g_Config.m_EdSmoothZoomTime / 1000.0f;
 
 	m_Zooming = true;
 }
