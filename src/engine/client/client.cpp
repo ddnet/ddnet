@@ -894,7 +894,7 @@ void CClient::Disconnect()
 	// make sure to remove replay tmp demo
 	if(g_Config.m_ClReplays)
 	{
-		Storage()->RemoveFile(m_aDemoRecorder[RECORDER_REPLAYS].GetCurrentFilename(), IStorage::TYPE_SAVE);
+		DemoRecorder_Stop(RECORDER_REPLAYS, true);
 	}
 }
 
