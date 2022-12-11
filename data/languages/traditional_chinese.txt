@@ -18,6 +18,7 @@
 # 2022-08-08 cheeser0613
 # 2022-09-17 cheeser0613
 # 2022-10-24 cheeser0613
+# 2022-12-11 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -498,7 +499,7 @@ The server is running a non-standard tuning on a pure game type.
 == 此伺服器執行著經過調整的非標準遊戲模式。
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 編輯器中的地圖尚未儲存，建議您在退出遊戲之前返回編輯器進行儲存。
+== 編輯器中的地圖尚未儲存，建議你在退出遊戲之前返回編輯器進行儲存。
 
 Time limit
 == 規定時限
@@ -906,7 +907,7 @@ Show DDNet map finishes in server browser
 == 在伺服器瀏覽器中顯示已完成的 DDNet 地圖
 
 transmits your player name to info.ddnet.org
-== 將會發送您的玩家名稱到 info.ddnet.org
+== 將會發送你的玩家名稱到 info.ddnet.org
 
 Reload
 == 重新整理
@@ -1126,7 +1127,7 @@ Existing Player
 == 玩家已存在
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的暱稱"%s"在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
+== 你使用的暱稱 "%s" 在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
 
 Checking for existing player with your name
 == 正在查詢該暱稱的DDNet記錄
@@ -1258,7 +1259,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
+== 你確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
 Refreshing...
 == 正在重整...
@@ -1617,37 +1618,37 @@ Set all to Rifle
 == 統一為鐳射槍顔色
 
 Cancel
-== 
+== 取消
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== 檔案名 "%s" 已經存在，是否要取代該檔案？
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== 你確定要將好友 "%s" 從你的好友列表中移除？
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== 你確定要將戰隊 "%s" 從你的好友列表中移除？
 
 Go back one tick
-== 
+== 上一個 tick
 
 Go forward one tick
-== 
+== 下一個 tick
 
 Go back one marker
-== 
+== 返回上一個標記
 
 Go forward one marker
-== 
+== 跳至下一個標記
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== 你確定要刪除回放檔案 "%s" ？
 
 Unable to delete the demo '%s'
-== 
+== 無法刪除回放檔案 "%s"
 
 Reset controls
-== 
+== 恢復預設設定
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== 你確定要將當前的控制恢復至預設設定
