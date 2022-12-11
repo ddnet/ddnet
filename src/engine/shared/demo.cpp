@@ -371,18 +371,26 @@ int CDemoRecorder::Stop()
 
 void CDemoRecorder::AddDemoMarker()
 {
-	if(m_LastTickMarker < 0 || m_NumTimelineMarkers >= MAX_TIMELINE_MARKERS)
+	if(m_LastTickMarker < 0)
+		return;
+	AddDemoMarker(m_LastTickMarker);
+}
+
+void CDemoRecorder::AddDemoMarker(int Tick)
+{
+	dbg_assert(Tick >= 0, "invalid marker tick");
+	if(m_NumTimelineMarkers >= MAX_TIMELINE_MARKERS)
 		return;
 
 	// not more than 1 marker in a second
 	if(m_NumTimelineMarkers > 0)
 	{
-		int Diff = m_LastTickMarker - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
+		int Diff = Tick - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
 		if(Diff < (float)SERVER_TICK_SPEED)
 			return;
 	}
 
-	m_aTimelineMarkers[m_NumTimelineMarkers++] = m_LastTickMarker;
+	m_aTimelineMarkers[m_NumTimelineMarkers++] = Tick;
 
 	if(m_pConsole)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker", gs_DemoPrintColor);
@@ -1170,6 +1178,15 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 		if(pInfo->m_Info.m_Paused)
 			break;
+	}
+
+	// Copy timeline markers to sliced demo
+	for(int i = 0; i < pInfo->m_Info.m_NumTimelineMarkers; i++)
+	{
+		if((m_SliceFrom == -1 || pInfo->m_Info.m_aTimelineMarkers[i] >= m_SliceFrom) && (m_SliceTo == -1 || pInfo->m_Info.m_aTimelineMarkers[i] <= m_SliceTo))
+		{
+			m_pDemoRecorder->AddDemoMarker(pInfo->m_Info.m_aTimelineMarkers[i]);
+		}
 	}
 
 	m_pDemoPlayer->Stop();
