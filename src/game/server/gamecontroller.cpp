@@ -173,7 +173,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 	return Eval.m_Got;
 }
 
-bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
+bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, bool Initial, int Number)
 {
 	if(Index < 0)
 		return false;
@@ -190,7 +190,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	aSides[6] = GameServer()->Collision()->Entity(x - 1, y, Layer);
 	aSides[7] = GameServer()->Collision()->Entity(x - 1, y + 1, Layer);
 
-	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE)
+	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE && Initial)
 	{
 		const int Type = Index - ENTITY_SPAWN;
 		m_avSpawnPoints[Type].push_back(Pos);

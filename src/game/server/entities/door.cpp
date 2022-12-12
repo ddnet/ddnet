@@ -40,6 +40,11 @@ void CDoor::ResetCollision()
 	}
 }
 
+void CDoor::Reset()
+{
+	m_MarkedForDestroy = true;
+}
+
 void CDoor::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))

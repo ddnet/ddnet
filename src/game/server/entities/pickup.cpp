@@ -21,13 +21,12 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int N
 	m_Layer = Layer;
 	m_Number = Number;
 
-	Reset();
-
 	GameWorld()->InsertEntity(this);
 }
 
 void CPickup::Reset()
 {
+	m_MarkedForDestroy = true;
 }
 
 void CPickup::Tick()

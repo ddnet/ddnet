@@ -3432,11 +3432,29 @@ void CGameContext::OnInit()
 	}
 
 	// create all entities from the game layer
+	CreateAllEntities(true);
+
+	if(GIT_SHORTREV_HASH)
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
+
+#ifdef CONF_DEBUG
+	if(g_Config.m_DbgDummies)
+	{
+		for(int i = 0; i < g_Config.m_DbgDummies; i++)
+		{
+			OnClientConnected(MAX_CLIENTS - i - 1, 0);
+		}
+	}
+#endif
+}
+
+void CGameContext::CreateAllEntities(bool Initial)
+{
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
 	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
 
-	CTile *pFront = 0;
-	CSwitchTile *pSwitch = 0;
+	CTile *pFront = nullptr;
+	CSwitchTile *pSwitch = nullptr;
 	if(m_Layers.FrontLayer())
 		pFront = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.FrontLayer()->m_Front);
 	if(m_Layers.SwitchLayer())
@@ -3477,7 +3495,7 @@ void CGameContext::OnInit()
 			if(Index >= ENTITY_OFFSET)
 			{
 				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-				m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
+				m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags, Initial);
 			}
 
 			if(pFront)
@@ -3511,7 +3529,7 @@ void CGameContext::OnInit()
 				if(Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
+					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags, Initial);
 				}
 			}
 			if(pSwitch)
@@ -3522,24 +3540,11 @@ void CGameContext::OnInit()
 				if(Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, pSwitch[y * pTileMap->m_Width + x].m_Number);
+					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, Initial, pSwitch[y * pTileMap->m_Width + x].m_Number);
 				}
 			}
 		}
 	}
-
-	if(GIT_SHORTREV_HASH)
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
-
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgDummies)
-	{
-		for(int i = 0; i < g_Config.m_DbgDummies; i++)
-		{
-			OnClientConnected(MAX_CLIENTS - i - 1, 0);
-		}
-	}
-#endif
 }
 
 void CGameContext::DeleteTempfile()
