@@ -454,8 +454,6 @@ const char *IGameController::GetTeamName(int Team)
 	return "spectators";
 }
 
-//static bool IsSeparator(char c) { return c == ';' || c == ' ' || c == ',' || c == '\t'; }
-
 void IGameController::StartRound()
 {
 	ResetGame();
