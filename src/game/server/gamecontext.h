@@ -287,7 +287,7 @@ public:
 	void OnPreTickTeehistorian() override;
 	bool OnClientDDNetVersionKnown(int ClientID);
 	void FillAntibot(CAntibotRoundData *pData) override;
-	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
+	bool ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;

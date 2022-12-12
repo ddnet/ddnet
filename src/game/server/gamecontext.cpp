@@ -3849,16 +3849,16 @@ void CGameContext::SendRecord(int ClientID)
 	}
 }
 
-int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay)
+bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay)
 {
 	if(!m_apPlayers[ClientID])
-		return 0;
+		return false;
 	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat && m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
-		return 1;
+		return true;
 	else if(g_Config.m_SvDnsblChat && Server()->DnsblBlack(ClientID))
 	{
 		SendChatTarget(ClientID, "Players are not allowed to chat from VPNs at this time");
-		return 1;
+		return true;
 	}
 	else
 		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
@@ -3881,17 +3881,17 @@ int CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDel
 		char aBuf[128];
 		str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Muted);
 		SendChatTarget(ClientID, aBuf);
-		return 1;
+		return true;
 	}
 
 	if(g_Config.m_SvSpamMuteDuration && (m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
 	{
 		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
 		m_apPlayers[ClientID]->m_ChatScore = 0;
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
 int CGameContext::GetDDRaceTeam(int ClientID)
@@ -3926,7 +3926,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 	char *pName;
 	int Victim;
-	int Error = 0;
+	bool Error = false;
 
 	// add token
 	if(*pStr == '"')
@@ -3950,7 +3950,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 			}
 			else if(pStr[0] == 0)
 			{
-				Error = 1;
+				Error = true;
 				break;
 			}
 
@@ -3978,7 +3978,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 		{
 			if(pStr[0] == 0)
 			{
-				Error = 1;
+				Error = true;
 				break;
 			}
 			if(pStr[0] == ' ')
@@ -3999,7 +3999,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 
 	if(pStr[0] != ' ')
 	{
-		Error = 1;
+		Error = true;
 	}
 
 	*pStr = 0;
