@@ -2547,12 +2547,12 @@ int CServer::Run()
 
 		if(Config()->m_SvUseSQL)
 		{
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE_BACKUP, Config()->m_SvSqliteFile);
+			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE_BACKUP, aFullPath);
 		}
 		else
 		{
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::READ, Config()->m_SvSqliteFile);
-			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE, Config()->m_SvSqliteFile);
+			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::READ, aFullPath);
+			DbPool()->RegisterSqliteDatabase(CDbConnectionPool::WRITE, aFullPath);
 		}
 	}
 
