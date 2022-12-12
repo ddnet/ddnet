@@ -3919,16 +3919,14 @@ bool CheckClientID2(int ClientID)
 
 void CGameContext::Whisper(int ClientID, char *pStr)
 {
-	char *pName;
-	char *pMessage;
-	int Error = 0;
-
 	if(ProcessSpamProtection(ClientID))
 		return;
 
 	pStr = str_skip_whitespaces(pStr);
 
+	char *pName;
 	int Victim;
+	int Error = 0;
 
 	// add token
 	if(*pStr == '"')
@@ -4007,8 +4005,7 @@ void CGameContext::Whisper(int ClientID, char *pStr)
 	*pStr = 0;
 	pStr++;
 
-	pMessage = pStr;
-
+	char *pMessage = pStr;
 	char aBuf[256];
 
 	if(Error)

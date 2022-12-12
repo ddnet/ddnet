@@ -165,12 +165,11 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 
 bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 {
-	CSpawnEval Eval;
-
 	// spectators can't spawn
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
+	CSpawnEval Eval;
 	EvaluateSpawnType(&Eval, 0, DDTeam);
 	EvaluateSpawnType(&Eval, 1, DDTeam);
 	EvaluateSpawnType(&Eval, 2, DDTeam);
@@ -184,9 +183,8 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	if(Index < 0)
 		return false;
 
-	int x, y;
-	x = (Pos.x - 16.0f) / 32.0f;
-	y = (Pos.y - 16.0f) / 32.0f;
+	int x = (Pos.x - 16.0f) / 32.0f;
+	int y = (Pos.y - 16.0f) / 32.0f;
 	int aSides[8];
 	aSides[0] = GameServer()->Collision()->Entity(x, y + 1, Layer);
 	aSides[1] = GameServer()->Collision()->Entity(x + 1, y + 1, Layer);
@@ -203,7 +201,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		m_aaSpawnPoints[Type][m_aNumSpawnPoints[Type]] = Pos;
 		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)std::size(m_aaSpawnPoints[0]));
 	}
-
 	else if(Index == ENTITY_DOOR)
 	{
 		for(int i = 0; i < 8; i++)
@@ -322,7 +319,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		aSides2[6] = GameServer()->Collision()->Entity(x - 2, y, Layer);
 		aSides2[7] = GameServer()->Collision()->Entity(x - 2, y + 2, Layer);
 
-		float AngularSpeed = 0.0f;
 		int Ind = Index - ENTITY_LASER_STOP;
 		int M;
 		if(Ind < 0)
@@ -335,6 +331,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		else
 			M = -1;
 
+		float AngularSpeed = 0.0f;
 		if(Ind == 0)
 			AngularSpeed = 0.0f;
 		else if(Ind == 1)
