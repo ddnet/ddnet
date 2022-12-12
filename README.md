@@ -49,7 +49,7 @@ Or on Fedora like this:
 
 Or on Arch Linux like this:
 
-    sudo pacman -S --needed base-devel cargo cmake curl ffmpeg freetype2 git glew glslang gmock libnotify libpng opusfile python rust sdl2 spirv-tools sqlite vulkan-headers vulkan-icd-loader wavpack x264
+    sudo pacman -S --needed base-devel rust cmake curl ffmpeg freetype2 git glew glslang gmock libnotify libpng opusfile python rust sdl2 spirv-tools sqlite vulkan-headers vulkan-icd-loader wavpack x264
 
 Or on Gentoo like this:
 
