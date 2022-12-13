@@ -3494,8 +3494,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 
 			if(Index >= ENTITY_OFFSET)
 			{
-				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-				m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags, Initial);
+				m_pController->OnEntity(Index - ENTITY_OFFSET, x, y, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags, Initial);
 			}
 
 			if(pFront)
@@ -3528,8 +3527,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				if(Index >= ENTITY_OFFSET)
 				{
-					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags, Initial);
+					m_pController->OnEntity(Index - ENTITY_OFFSET, x, y, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags, Initial);
 				}
 			}
 			if(pSwitch)
@@ -3539,8 +3537,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				// if (Index == TILE_DOOR_OFF)
 				if(Index >= ENTITY_OFFSET)
 				{
-					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, Initial, pSwitch[y * pTileMap->m_Width + x].m_Number);
+					m_pController->OnEntity(Index - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, Initial, pSwitch[y * pTileMap->m_Width + x].m_Number);
 				}
 			}
 		}

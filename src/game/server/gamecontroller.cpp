@@ -173,13 +173,12 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 	return Eval.m_Got;
 }
 
-bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, bool Initial, int Number)
+bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
 	dbg_assert(Index >= 0, "Invalid entity index");
 
+	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 
-	int x = (Pos.x - 16.0f) / 32.0f;
-	int y = (Pos.y - 16.0f) / 32.0f;
 	int aSides[8];
 	aSides[0] = GameServer()->Collision()->Entity(x, y + 1, Layer);
 	aSides[1] = GameServer()->Collision()->Entity(x + 1, y + 1, Layer);
