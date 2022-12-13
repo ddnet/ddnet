@@ -1741,7 +1741,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		char aTmpBackendName[256];
 
 		auto IsInfoDefault = [](const SMenuBackendInfo &CheckInfo) {
-			return str_comp_nocase(CheckInfo.m_pBackendName, "OpenGL") == 0 && CheckInfo.m_Major == 3 && CheckInfo.m_Minor == 0 && CheckInfo.m_Patch == 0;
+			return str_comp_nocase(CheckInfo.m_pBackendName, g_Config.ms_pGfxBackend) == 0 && CheckInfo.m_Major == g_Config.ms_GfxGLMajor && CheckInfo.m_Minor == g_Config.ms_GfxGLMinor && CheckInfo.m_Patch == g_Config.ms_GfxGLPatch;
 		};
 
 		int OldSelectedBackend = -1;
