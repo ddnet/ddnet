@@ -5,11 +5,13 @@
 #endif
 
 #include <SDL.h>
+#include <SDL_messagebox.h>
 
 #include <base/math.h>
 #include <cstdlib>
 
 #include <engine/shared/config.h>
+#include <engine/shared/localization.h>
 
 #include <base/tl/threading.h>
 
@@ -72,7 +74,8 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 	}
 }
 
-CGraphicsBackend_Threaded::CGraphicsBackend_Threaded()
+CGraphicsBackend_Threaded::CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc) :
+	m_TranslateFunc(std::move(TranslateFunc))
 {
 	m_pBuffer = nullptr;
 	m_pProcessor = nullptr;
@@ -97,6 +100,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 	m_Shutdown = true;
 	{
 		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
+		m_Warning = m_pProcessor->GetWarning();
 		m_BufferSwapCond.notify_all();
 	}
 	thread_wait(m_pThread);
@@ -106,13 +110,27 @@ void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 #ifdef CONF_WEBASM
 	// run everything single threaded for now, context binding in a thread seems to not work as of now
-	RunBufferSingleThreadedUnsafe(pBuffer);
+	if(!m_pProcessor->HasError())
+	{
+		RunBufferSingleThreadedUnsafe(pBuffer);
+	}
+	else
+	{
+		ProcessError();
+	}
 #else
 	WaitForIdle();
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
-	m_pBuffer = pBuffer;
-	m_BufferInProcess.store(true, std::memory_order_relaxed);
-	m_BufferSwapCond.notify_all();
+	if(!m_pProcessor->HasError())
+	{
+		m_pBuffer = pBuffer;
+		m_BufferInProcess.store(true, std::memory_order_relaxed);
+		m_BufferSwapCond.notify_all();
+	}
+	else
+	{
+		ProcessError();
+	}
 #endif
 }
 
@@ -130,6 +148,28 @@ void CGraphicsBackend_Threaded::WaitForIdle()
 {
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
+}
+
+void CGraphicsBackend_Threaded::ProcessError()
+{
+	const auto &Error = m_pProcessor->GetError();
+	std::string VerboseStr;
+	for(const auto &ErrStr : Error.m_vErrors)
+		VerboseStr.append(std::string(m_TranslateFunc(ErrStr.c_str(), "")) + "\n");
+	const auto CreatedMsgBox = TryCreateMsgBox(true, "Graphics Assertion", VerboseStr.c_str());
+	// check if error msg can be shown, then assert
+	dbg_assert(!CreatedMsgBox, VerboseStr.c_str());
+}
+
+bool CGraphicsBackend_Threaded::GetWarning(std::vector<std::string> &WarningStrings)
+{
+	if(HasWarning())
+	{
+		m_Warning.m_WarningType = GFX_WARNING_TYPE_NONE;
+		WarningStrings = m_Warning.m_vWarnings;
+		return true;
+	}
+	return false;
 }
 
 // ------------ CCommandProcessorFragment_General
@@ -223,14 +263,84 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 
 // ------------ CCommandProcessor_SDL_GL
 
+void CCommandProcessor_SDL_GL::HandleError()
+{
+	auto &Error = GetError();
+	switch(Error.m_ErrorType)
+	{
+	case GFX_ERROR_TYPE_INIT:
+		Error.m_vErrors.emplace_back(Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan from settings_ddnet.cfg in the config directory and try again."));
+		break;
+	case GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE:
+		[[fallthrough]];
+	case GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER:
+		[[fallthrough]];
+	case GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING:
+		Error.m_vErrors.emplace_back(Localizable("Out of VRAM. Try removing custom assets (skins, entities etc.), especially with high resolution."));
+		break;
+	case GFX_ERROR_TYPE_RENDER_RECORDING:
+		Error.m_vErrors.emplace_back(Localizable("An error during command recording occurred. Try to update your GPU drivers."));
+		break;
+	case GFX_ERROR_TYPE_RENDER_CMD_FAILED:
+		Error.m_vErrors.emplace_back(Localizable("A render command failed. Try to update your GPU drivers."));
+		break;
+	case GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED:
+		Error.m_vErrors.emplace_back(Localizable("Submitting the render commands failed. Try to update your GPU drivers."));
+		break;
+	case GFX_ERROR_TYPE_SWAP_FAILED:
+		Error.m_vErrors.emplace_back(Localizable("Failed to swap framebuffers. Try to update your GPU drivers."));
+		break;
+	case GFX_ERROR_TYPE_UNKNOWN:
+		[[fallthrough]];
+	default:
+		Error.m_vErrors.emplace_back(Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan from settings_ddnet.cfg in the config directory and try again."));
+		break;
+	}
+}
+
+void CCommandProcessor_SDL_GL::HandleWarning()
+{
+	auto &Warn = GetWarning();
+	switch(Warn.m_WarningType)
+	{
+	case GFX_WARNING_TYPE_INIT_FAILED:
+		Warn.m_vWarnings.emplace_back(Localizable("Could not initialize the given graphics backend, reverting to the default backend now."));
+		break;
+	case GFX_WARNING_MISSING_EXTENSION:
+		// ignore this warning for now
+		return;
+	case GFX_WARNING_LOW_ON_MEMORY:
+		// ignore this warning for now
+		return;
+	default:
+		dbg_msg("gfx", "unhandled warning %d", (int)Warn.m_WarningType);
+		break;
+	}
+}
+
 void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
 {
 	m_pGLBackend->StartCommands(pBuffer->m_CommandCount, pBuffer->m_RenderCallCount);
 
 	for(CCommandBuffer::SCommand *pCommand = pBuffer->Head(); pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(m_pGLBackend->RunCommand(pCommand))
+		auto Res = m_pGLBackend->RunCommand(pCommand);
+		if(Res == ERunCommandReturnTypes::RUN_COMMAND_COMMAND_HANDLED)
+		{
 			continue;
+		}
+		else if(Res == ERunCommandReturnTypes::RUN_COMMAND_COMMAND_ERROR)
+		{
+			m_Error = m_pGLBackend->GetError();
+			HandleError();
+			return;
+		}
+		else if(Res == ERunCommandReturnTypes::RUN_COMMAND_COMMAND_WARNING)
+		{
+			m_Warning = m_pGLBackend->GetWarning();
+			HandleWarning();
+			return;
+		}
 
 		if(m_SDL.RunCommand(pCommand))
 			continue;
@@ -297,6 +407,21 @@ CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int
 CCommandProcessor_SDL_GL::~CCommandProcessor_SDL_GL()
 {
 	delete m_pGLBackend;
+}
+
+SGFXErrorContainer &CCommandProcessor_SDL_GL::GetError()
+{
+	return m_Error;
+}
+
+void CCommandProcessor_SDL_GL::ErroneousCleanup()
+{
+	return m_pGLBackend->ErroneousCleanup();
+}
+
+SGFXWarningContainer &CCommandProcessor_SDL_GL::GetWarning()
+{
+	return m_Warning;
 }
 
 // ------------ CGraphicsBackend_SDL_GL
@@ -641,6 +766,14 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 	}
 }
 
+bool CGraphicsBackend_SDL_GL::TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg)
+{
+	m_pProcessor->ErroneousCleanup();
+	SDL_DestroyWindow(m_pWindow);
+	SDL_ShowSimpleMessageBox(AsError ? SDL_MESSAGEBOX_ERROR : SDL_MESSAGEBOX_WARNING, pTitle, pMsg, nullptr);
+	return true;
+}
+
 bool CGraphicsBackend_SDL_GL::IsModernAPI(EBackendType BackendType)
 {
 	if(BackendType == BACKEND_TYPE_OPENGL)
@@ -838,7 +971,8 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
 }
 
-CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL()
+CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc) :
+	CGraphicsBackend_Threaded(std::move(TranslateFunc))
 {
 	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
@@ -1473,4 +1607,4 @@ TGLBackendReadPresentedImageData &CGraphicsBackend_SDL_GL::GetReadPresentedImage
 	return m_ReadPresentedImageDataFunc;
 }
 
-IGraphicsBackend *CreateGraphicsBackend() { return new CGraphicsBackend_SDL_GL; }
+IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc) { return new CGraphicsBackend_SDL_GL(std::move(TranslateFunc)); }

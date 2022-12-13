@@ -5,14 +5,18 @@
 
 #include <base/detect.h>
 
-#include "engine/graphics.h"
-#include "graphics_threaded.h"
+#include <engine/graphics.h>
+
+#include <engine/client/graphics_threaded.h>
+
+#include <engine/client/backend/backend_base.h>
 
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
+#include <cstdint>
 #include <mutex>
-#include <stddef.h>
-#include <stdint.h>
+#include <vector>
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <objc/objc-runtime.h>
@@ -42,25 +46,54 @@ public:
 // basic threaded backend, abstract, missing init and shutdown functions
 class CGraphicsBackend_Threaded : public IGraphicsBackend
 {
+private:
+	TTranslateFunc m_TranslateFunc;
+	SGFXWarningContainer m_Warning;
+
 public:
 	// constructed on the main thread, the rest of the functions is run on the render thread
 	class ICommandProcessor
 	{
 	public:
-		virtual ~ICommandProcessor() {}
+		virtual ~ICommandProcessor() = default;
 		virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
+
+		virtual SGFXErrorContainer &GetError() = 0;
+		virtual void ErroneousCleanup() = 0;
+
+		virtual SGFXWarningContainer &GetWarning() = 0;
+
+		bool HasError()
+		{
+			return GetError().m_ErrorType != GFX_ERROR_TYPE_NONE;
+		}
+
+		bool HasWarning()
+		{
+			return GetWarning().m_WarningType != GFX_WARNING_TYPE_NONE;
+		}
 	};
 
-	CGraphicsBackend_Threaded();
+	CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc);
 
 	void RunBuffer(CCommandBuffer *pBuffer) override;
 	void RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer) override;
 	bool IsIdle() const override;
 	void WaitForIdle() override;
 
+	void ProcessError();
+
 protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
+
+	bool HasWarning()
+	{
+		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
+	}
+
+	// returns true if the error msg was shown
+	virtual bool TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg) = 0;
 
 private:
 	ICommandProcessor *m_pProcessor;
@@ -73,6 +106,9 @@ private:
 	void *m_pThread;
 
 	static void ThreadFunc(void *pUser);
+
+public:
+	bool GetWarning(std::vector<std::string> &WarningStrings) override;
 };
 
 // takes care of implementation independent operations
@@ -152,16 +188,27 @@ public:
 // command processor implementation, uses the fragments to combine into one processor
 class CCommandProcessor_SDL_GL : public CGraphicsBackend_Threaded::ICommandProcessor
 {
-	class CCommandProcessorFragment_GLBase *m_pGLBackend;
+	CCommandProcessorFragment_GLBase *m_pGLBackend;
 	CCommandProcessorFragment_SDL m_SDL;
 	CCommandProcessorFragment_General m_General;
 
 	EBackendType m_BackendType;
 
+	SGFXErrorContainer m_Error;
+	SGFXWarningContainer m_Warning;
+
 public:
 	CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch);
 	virtual ~CCommandProcessor_SDL_GL();
 	void RunBuffer(CCommandBuffer *pBuffer) override;
+
+	SGFXErrorContainer &GetError() override;
+	void ErroneousCleanup() override;
+
+	SGFXWarningContainer &GetWarning() override;
+
+	void HandleError();
+	void HandleWarning();
 };
 
 static constexpr size_t gs_GPUInfoStringSize = 256;
@@ -196,8 +243,11 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 	static EBackendType DetectBackend();
 	static void ClampDriverVersion(EBackendType BackendType);
 
+protected:
+	bool TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg) override;
+
 public:
-	CGraphicsBackend_SDL_GL();
+	CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc);
 	int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) override;
 	int Shutdown() override;
 

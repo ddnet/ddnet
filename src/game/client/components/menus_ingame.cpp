@@ -10,6 +10,7 @@
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/localization.h>
 #include <engine/textrender.h>
 
 #include <game/generated/client_data.h>
@@ -985,8 +986,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static CColumn s_aCols[] = {
 		{" ", -1, 2.0f, {0}, {0}},
 		{" ", COL_ACTIVE, 30.0f, {0}, {0}},
-		{"Name", COL_NAME, 300.0f, {0}, {0}}, // Localize("Name")
-		{"Time", COL_TIME, 200.0f, {0}, {0}}, // Localize("Time")
+		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
+		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);

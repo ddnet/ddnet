@@ -1950,6 +1950,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   kernel.cpp
   linereader.cpp
   linereader.h
+  localization.h
   map.cpp
   map.h
   masterserver.cpp

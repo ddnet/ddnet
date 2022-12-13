@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 constexpr int CMD_BUFFER_DATA_BUFFER_SIZE = 1024 * 1024 * 2;
@@ -714,7 +715,7 @@ public:
 		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
 	};
 
-	virtual ~IGraphicsBackend() {}
+	virtual ~IGraphicsBackend() = default;
 
 	virtual int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
@@ -770,6 +771,8 @@ public:
 
 	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
+
+	virtual bool GetWarning(std::vector<std::string> &WarningStrings) = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -1313,6 +1316,7 @@ public:
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
 };
 
-extern IGraphicsBackend *CreateGraphicsBackend();
+typedef std::function<const char *(const char *, const char *)> TTranslateFunc;
+extern IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc);
 
 #endif // ENGINE_CLIENT_GRAPHICS_THREADED_H
