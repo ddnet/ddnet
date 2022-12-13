@@ -3450,15 +3450,16 @@ void CGameContext::OnInit()
 
 void CGameContext::CreateAllEntities(bool Initial)
 {
-	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
-	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
+	const CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
+	const CTile *pTiles = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data));
 
-	CTile *pFront = nullptr;
-	CSwitchTile *pSwitch = nullptr;
+	const CTile *pFront = nullptr;
 	if(m_Layers.FrontLayer())
-		pFront = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.FrontLayer()->m_Front);
+		pFront = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(m_Layers.FrontLayer()->m_Front));
+
+	const CSwitchTile *pSwitch = nullptr;
 	if(m_Layers.SwitchLayer())
-		pSwitch = (CSwitchTile *)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.SwitchLayer()->m_Switch);
+		pSwitch = static_cast<CSwitchTile *>(Kernel()->RequestInterface<IMap>()->GetData(m_Layers.SwitchLayer()->m_Switch));
 
 	for(int y = 0; y < pTileMap->m_Height; y++)
 	{
