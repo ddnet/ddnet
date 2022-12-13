@@ -175,8 +175,8 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 
 bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, bool Initial, int Number)
 {
-	if(Index < 0)
-		return false;
+	dbg_assert(Index >= 0, "Invalid entity index");
+
 
 	int x = (Pos.x - 16.0f) / 32.0f;
 	int y = (Pos.y - 16.0f) / 32.0f;
