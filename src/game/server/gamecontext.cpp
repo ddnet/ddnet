@@ -3465,80 +3465,84 @@ void CGameContext::CreateAllEntities(bool Initial)
 	{
 		for(int x = 0; x < pTileMap->m_Width; x++)
 		{
-			int Index = pTiles[y * pTileMap->m_Width + x].m_Index;
+			const int Index = y * pTileMap->m_Width + x;
 
-			if(Index == TILE_OLDLASER)
+			// Game layer
 			{
-				g_Config.m_SvOldLaser = 1;
-				dbg_msg("game_layer", "found old laser tile");
-			}
-			else if(Index == TILE_NPC)
-			{
-				m_Tuning.Set("player_collision", 0);
-				dbg_msg("game_layer", "found no collision tile");
-			}
-			else if(Index == TILE_EHOOK)
-			{
-				g_Config.m_SvEndlessDrag = 1;
-				dbg_msg("game_layer", "found unlimited hook time tile");
-			}
-			else if(Index == TILE_NOHIT)
-			{
-				g_Config.m_SvHit = 0;
-				dbg_msg("game_layer", "found no weapons hitting others tile");
-			}
-			else if(Index == TILE_NPH)
-			{
-				m_Tuning.Set("player_hooking", 0);
-				dbg_msg("game_layer", "found no player hooking tile");
-			}
-
-			if(Index >= ENTITY_OFFSET)
-			{
-				m_pController->OnEntity(Index - ENTITY_OFFSET, x, y, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags, Initial);
+				const int GameIndex = pTiles[Index].m_Index;
+				if(GameIndex == TILE_OLDLASER)
+				{
+					g_Config.m_SvOldLaser = 1;
+					dbg_msg("game_layer", "found old laser tile");
+				}
+				else if(GameIndex == TILE_NPC)
+				{
+					m_Tuning.Set("player_collision", 0);
+					dbg_msg("game_layer", "found no collision tile");
+				}
+				else if(GameIndex == TILE_EHOOK)
+				{
+					g_Config.m_SvEndlessDrag = 1;
+					dbg_msg("game_layer", "found unlimited hook time tile");
+				}
+				else if(GameIndex == TILE_NOHIT)
+				{
+					g_Config.m_SvHit = 0;
+					dbg_msg("game_layer", "found no weapons hitting others tile");
+				}
+				else if(GameIndex == TILE_NPH)
+				{
+					m_Tuning.Set("player_hooking", 0);
+					dbg_msg("game_layer", "found no player hooking tile");
+				}
+				else if(GameIndex >= ENTITY_OFFSET)
+				{
+					m_pController->OnEntity(GameIndex - ENTITY_OFFSET, x, y, LAYER_GAME, pTiles[Index].m_Flags, Initial);
+				}
 			}
 
 			if(pFront)
 			{
-				Index = pFront[y * pTileMap->m_Width + x].m_Index;
-				if(Index == TILE_OLDLASER)
+				const int FrontIndex = pFront[Index].m_Index;
+				if(FrontIndex == TILE_OLDLASER)
 				{
 					g_Config.m_SvOldLaser = 1;
 					dbg_msg("front_layer", "found old laser tile");
 				}
-				else if(Index == TILE_NPC)
+				else if(FrontIndex == TILE_NPC)
 				{
 					m_Tuning.Set("player_collision", 0);
 					dbg_msg("front_layer", "found no collision tile");
 				}
-				else if(Index == TILE_EHOOK)
+				else if(FrontIndex == TILE_EHOOK)
 				{
 					g_Config.m_SvEndlessDrag = 1;
 					dbg_msg("front_layer", "found unlimited hook time tile");
 				}
-				else if(Index == TILE_NOHIT)
+				else if(FrontIndex == TILE_NOHIT)
 				{
 					g_Config.m_SvHit = 0;
 					dbg_msg("front_layer", "found no weapons hitting others tile");
 				}
-				else if(Index == TILE_NPH)
+				else if(FrontIndex == TILE_NPH)
 				{
 					m_Tuning.Set("player_hooking", 0);
 					dbg_msg("front_layer", "found no player hooking tile");
 				}
-				if(Index >= ENTITY_OFFSET)
+				else if(FrontIndex >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(Index - ENTITY_OFFSET, x, y, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags, Initial);
+					m_pController->OnEntity(FrontIndex - ENTITY_OFFSET, x, y, LAYER_FRONT, pFront[Index].m_Flags, Initial);
 				}
 			}
+
 			if(pSwitch)
 			{
-				Index = pSwitch[y * pTileMap->m_Width + x].m_Type;
+				const int SwitchType = pSwitch[Index].m_Type;
 				// TODO: Add off by default door here
-				// if (Index == TILE_DOOR_OFF)
-				if(Index >= ENTITY_OFFSET)
+				// if(SwitchType == TILE_DOOR_OFF)
+				if(SwitchType >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(Index - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, Initial, pSwitch[y * pTileMap->m_Width + x].m_Number);
+					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number);
 				}
 			}
 		}
