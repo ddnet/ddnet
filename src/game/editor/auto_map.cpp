@@ -118,9 +118,9 @@ void CAutoMapper::Load(const char *pTileName)
 				if(str_length(aOrientation1) > 0)
 				{
 					if(!str_comp(aOrientation1, "XFLIP"))
-						NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
+						NewIndexRule.m_Flag |= TILEFLAG_FLIP_HORIZONTAL;
 					else if(!str_comp(aOrientation1, "YFLIP"))
-						NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+						NewIndexRule.m_Flag |= TILEFLAG_FLIP_VERTICAL;
 					else if(!str_comp(aOrientation1, "ROTATE"))
 						NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 				}
@@ -128,9 +128,9 @@ void CAutoMapper::Load(const char *pTileName)
 				if(str_length(aOrientation2) > 0)
 				{
 					if(!str_comp(aOrientation2, "XFLIP"))
-						NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
+						NewIndexRule.m_Flag |= TILEFLAG_FLIP_HORIZONTAL;
 					else if(!str_comp(aOrientation2, "YFLIP"))
-						NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+						NewIndexRule.m_Flag |= TILEFLAG_FLIP_VERTICAL;
 					else if(!str_comp(aOrientation2, "ROTATE"))
 						NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 				}
@@ -138,9 +138,9 @@ void CAutoMapper::Load(const char *pTileName)
 				if(str_length(aOrientation3) > 0)
 				{
 					if(!str_comp(aOrientation3, "XFLIP"))
-						NewIndexRule.m_Flag |= TILEFLAG_VFLIP;
+						NewIndexRule.m_Flag |= TILEFLAG_FLIP_HORIZONTAL;
 					else if(!str_comp(aOrientation3, "YFLIP"))
-						NewIndexRule.m_Flag |= TILEFLAG_HFLIP;
+						NewIndexRule.m_Flag |= TILEFLAG_FLIP_VERTICAL;
 					else if(!str_comp(aOrientation3, "ROTATE"))
 						NewIndexRule.m_Flag |= TILEFLAG_ROTATE;
 				}
@@ -205,9 +205,9 @@ void CAutoMapper::Load(const char *pTileName)
 						{
 							NewIndexInfo.m_TestFlag = true;
 							if(!str_comp(aOrientation1, "XFLIP"))
-								NewIndexInfo.m_Flag = TILEFLAG_VFLIP;
+								NewIndexInfo.m_Flag = TILEFLAG_FLIP_HORIZONTAL;
 							else if(!str_comp(aOrientation1, "YFLIP"))
-								NewIndexInfo.m_Flag = TILEFLAG_HFLIP;
+								NewIndexInfo.m_Flag = TILEFLAG_FLIP_VERTICAL;
 							else if(!str_comp(aOrientation1, "ROTATE"))
 								NewIndexInfo.m_Flag = TILEFLAG_ROTATE;
 							else if(!str_comp(aOrientation1, "NONE"))
@@ -230,9 +230,9 @@ void CAutoMapper::Load(const char *pTileName)
 						else if(str_length(aOrientation2) > 0 && NewIndexInfo.m_Flag != 0)
 						{
 							if(!str_comp(aOrientation2, "XFLIP"))
-								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
+								NewIndexInfo.m_Flag |= TILEFLAG_FLIP_HORIZONTAL;
 							else if(!str_comp(aOrientation2, "YFLIP"))
-								NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
+								NewIndexInfo.m_Flag |= TILEFLAG_FLIP_VERTICAL;
 							else if(!str_comp(aOrientation2, "ROTATE"))
 								NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
 						}
@@ -251,9 +251,9 @@ void CAutoMapper::Load(const char *pTileName)
 						else if(str_length(aOrientation3) > 0 && NewIndexInfo.m_Flag != 0)
 						{
 							if(!str_comp(aOrientation3, "XFLIP"))
-								NewIndexInfo.m_Flag |= TILEFLAG_VFLIP;
+								NewIndexInfo.m_Flag |= TILEFLAG_FLIP_HORIZONTAL;
 							else if(!str_comp(aOrientation3, "YFLIP"))
-								NewIndexInfo.m_Flag |= TILEFLAG_HFLIP;
+								NewIndexInfo.m_Flag |= TILEFLAG_FLIP_VERTICAL;
 							else if(!str_comp(aOrientation3, "ROTATE"))
 								NewIndexInfo.m_Flag |= TILEFLAG_ROTATE;
 						}
@@ -493,7 +493,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 						{
 							int CheckTile = CheckY * pLayer->m_Width + CheckX;
 							CheckIndex = pReadLayer->m_pTiles[CheckTile].m_Index;
-							CheckFlags = pReadLayer->m_pTiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_VFLIP | TILEFLAG_HFLIP);
+							CheckFlags = pReadLayer->m_pTiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL);
 						}
 						else
 						{
