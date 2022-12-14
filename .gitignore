@@ -132,6 +132,8 @@ tags
 *.sln
 *.so
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 *.suo
 *.swp
 *.tar.gz
