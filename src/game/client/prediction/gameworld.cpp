@@ -188,24 +188,29 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
-	if(m_WorldConfig.m_NoWeakHookAndBounce)
+	for(int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		for(auto *pEnt : m_apFirstEntityTypes)
+		// It's important to call PreTick() and Tick() after each other.
+		// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
+		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+		{
+			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				pEnt->PreTick();
+				((CCharacter *)pEnt)->PreTick();
 				pEnt = m_pNextTraverseEntity;
 			}
-	}
+		}
 
-	for(auto *pEnt : m_apFirstEntityTypes)
+		auto *pEnt = m_apFirstEntityTypes[i];
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Tick();
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 
 	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
