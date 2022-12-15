@@ -84,6 +84,7 @@ protected:
 	float m_aPredIntraTick[NUM_DUMMIES];
 
 	float m_LocalTime;
+	float m_GlobalTime;
 	float m_RenderFrameTime;
 
 	int m_GameTickSpeed;
@@ -146,6 +147,7 @@ public:
 	// other time access
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
+	inline float GlobalTime() const { return m_GlobalTime; }
 	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
 
 	// actions

@@ -143,6 +143,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	uint64_t m_aSnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
+	int64_t m_GlobalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;

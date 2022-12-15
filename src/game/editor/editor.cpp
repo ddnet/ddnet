@@ -6080,7 +6080,7 @@ void CEditor::SetZoom(float Target)
 {
 	Target = clamp(Target, MinZoomLevel(), MaxZoomLevel());
 
-	const float Now = Client()->LocalTime();
+	const float Now = Client()->GlobalTime();
 	float Current = m_Zoom;
 	float Derivative = 0.0f;
 	if(m_Zooming)
@@ -6128,7 +6128,7 @@ void CEditor::UpdateZoom()
 {
 	if(m_Zooming)
 	{
-		const float Time = Client()->LocalTime();
+		const float Time = Client()->GlobalTime();
 		const float OldLevel = m_Zoom;
 		if(Time >= m_ZoomSmoothingEnd)
 		{
@@ -6154,7 +6154,7 @@ float CEditor::MinZoomLevel() const
 
 float CEditor::MaxZoomLevel() const
 {
-	return g_Config.m_ClLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max();
+	return g_Config.m_EdLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max();
 }
 
 float CEditor::ZoomProgress(float CurrentTime) const
