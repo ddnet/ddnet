@@ -6154,7 +6154,7 @@ float CEditor::MinZoomLevel() const
 
 float CEditor::MaxZoomLevel() const
 {
-	return g_Config.m_ClLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max();
+	return g_Config.m_EdLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max();
 }
 
 float CEditor::ZoomProgress(float CurrentTime) const
