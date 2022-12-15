@@ -188,7 +188,7 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
-	if(m_WorldConfig.m_NoWeakHookAndBounce)
+	if(m_WorldConfig.m_NoWeakHook)
 	{
 		for(auto *pEnt : m_apFirstEntityTypes)
 			for(; pEnt;)
