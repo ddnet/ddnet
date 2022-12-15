@@ -2964,7 +2964,7 @@ void CClient::InitInterfaces()
 
 void CClient::Run()
 {
-	m_LocalStartTime = time_get();
+	m_LocalStartTime = m_GlobalStartTime = time_get();
 #if defined(CONF_VIDEORECORDER)
 	IVideo::SetLocalStartTime(m_LocalStartTime);
 #endif
@@ -3383,8 +3383,9 @@ void CClient::Run()
 			g_Config.m_DbgHitch = 0;
 		}
 
-		// update local time
+		// update local and global time
 		m_LocalTime = (time_get() - m_LocalStartTime) / (float)time_freq();
+		m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();
 	}
 
 #if defined(CONF_FAMILY_UNIX)
