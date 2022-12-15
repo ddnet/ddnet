@@ -1208,7 +1208,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
-	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
+	pDDNetCharacter->m_StrongWeakID = g_Config.m_SvNoWeakHook ? 0 : m_StrongWeakID;
 
 	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
