@@ -567,12 +567,12 @@ void CCharacter::PreTick()
 	DDRaceTick();
 
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true, !m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce);
+	m_Core.Tick(true, !m_pGameWorld->m_WorldConfig.m_NoWeakHook);
 }
 
 void CCharacter::Tick()
 {
-	if(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce)
+	if(m_pGameWorld->m_WorldConfig.m_NoWeakHook)
 	{
 		m_Core.TickDeferred();
 	}

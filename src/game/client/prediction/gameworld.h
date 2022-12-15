@@ -77,7 +77,7 @@ public:
 		bool m_IsSolo;
 		bool m_UseTuneZones;
 		bool m_BugDDRaceInput;
-		bool m_NoWeakHookAndBounce;
+		bool m_NoWeakHook;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;
