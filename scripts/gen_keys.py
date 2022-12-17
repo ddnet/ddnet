@@ -64,22 +64,14 @@ print(f"\tKEY_JOYSTICK_BUTTON_9 = {int(highestid)},", file=f); keynames[highesti
 print(f"\tKEY_JOYSTICK_BUTTON_10 = {int(highestid)},", file=f); keynames[highestid] = "joystick10"; highestid += 1
 print(f"\tKEY_JOYSTICK_BUTTON_11 = {int(highestid)},", file=f); keynames[highestid] = "joystick11"; highestid += 1
 print("", file=f)
-print(f"\tKEY_JOY_HAT0_LEFTUP = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_leftup"; highestid += 1
 print(f"\tKEY_JOY_HAT0_UP = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_up"; highestid += 1
-print(f"\tKEY_JOY_HAT0_RIGHTUP = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_rightup"; highestid += 1
 print(f"\tKEY_JOY_HAT0_LEFT = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_left"; highestid += 1
 print(f"\tKEY_JOY_HAT0_RIGHT = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_right"; highestid += 1
-print(f"\tKEY_JOY_HAT0_LEFTDOWN = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_leftdown"; highestid += 1
 print(f"\tKEY_JOY_HAT0_DOWN = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_down"; highestid += 1
-print(f"\tKEY_JOY_HAT0_RIGHTDOWN = {int(highestid)},", file=f); keynames[highestid] = "joy_hat0_rightdown"; highestid += 1
-print(f"\tKEY_JOY_HAT1_LEFTUP = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_leftup"; highestid += 1
 print(f"\tKEY_JOY_HAT1_UP = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_up"; highestid += 1
-print(f"\tKEY_JOY_HAT1_RIGHTUP = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_rightup"; highestid += 1
 print(f"\tKEY_JOY_HAT1_LEFT = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_left"; highestid += 1
 print(f"\tKEY_JOY_HAT1_RIGHT = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_right"; highestid += 1
-print(f"\tKEY_JOY_HAT1_LEFTDOWN = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_leftdown"; highestid += 1
 print(f"\tKEY_JOY_HAT1_DOWN = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_down"; highestid += 1
-print(f"\tKEY_JOY_HAT1_RIGHTDOWN = {int(highestid)},", file=f); keynames[highestid] = "joy_hat1_rightdown"; highestid += 1
 print("", file=f)
 print(f"\tKEY_JOY_AXIS_0_LEFT = {int(highestid)},", file=f); keynames[highestid] = "joy_axis0_left"; highestid += 1
 print(f"\tKEY_JOY_AXIS_0_RIGHT = {int(highestid)},", file=f); keynames[highestid] = "joy_axis0_right"; highestid += 1
@@ -112,8 +104,8 @@ print("\tNUM_JOYSTICK_BUTTONS = KEY_JOYSTICK_BUTTON_11 - KEY_JOYSTICK_BUTTON_0 +
 print("\tNUM_JOYSTICK_AXES_BUTTONS = KEY_JOY_AXIS_11_RIGHT - KEY_JOY_AXIS_0_LEFT + 1,", file=f)
 print("\tNUM_JOYSTICK_BUTTONS_PER_AXIS = KEY_JOY_AXIS_0_RIGHT - KEY_JOY_AXIS_0_LEFT + 1,", file=f)
 print("\tNUM_JOYSTICK_AXES = NUM_JOYSTICK_AXES_BUTTONS / NUM_JOYSTICK_BUTTONS_PER_AXIS,", file=f)
-print("\tNUM_JOYSTICK_HAT_BUTTONS = KEY_JOY_HAT1_RIGHTDOWN - KEY_JOY_HAT0_LEFTUP + 1,", file=f)
-print("\tNUM_JOYSTICK_BUTTONS_PER_HAT = KEY_JOY_HAT1_RIGHTDOWN - KEY_JOY_HAT1_LEFTUP + 1,", file=f)
+print("\tNUM_JOYSTICK_HAT_BUTTONS = KEY_JOY_HAT1_DOWN - KEY_JOY_HAT0_UP + 1,", file=f)
+print("\tNUM_JOYSTICK_BUTTONS_PER_HAT = KEY_JOY_HAT1_DOWN - KEY_JOY_HAT1_UP + 1,", file=f)
 print("\tNUM_JOYSTICK_HATS = NUM_JOYSTICK_HAT_BUTTONS / NUM_JOYSTICK_BUTTONS_PER_HAT,", file=f)
 
 print("};", file=f)
@@ -128,8 +120,6 @@ print('#ifndef KEYS_INCLUDE', file=f)
 print('#error do not include this header!', file=f)
 print('#endif', file=f)
 print('', file=f)
-print("#include <string.h>", file=f)
-print("", file=f)
 print("const char g_aaKeyStrings[512][20] = // NOLINT(misc-definitions-in-headers)", file=f)
 print("{", file=f)
 for n in keynames:

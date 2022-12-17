@@ -40,11 +40,11 @@ public:
 		int GetNumBalls() const override { return m_NumBalls; }
 		int GetNumHats() const override { return m_NumHats; }
 		float GetAxisValue(int Axis) override;
-		int GetHatValue(int Hat) override;
+		void GetHatValue(int Hat, int (&HatKeys)[2]) override;
 		bool Relative(float *pX, float *pY) override;
 		bool Absolute(float *pX, float *pY) override;
 
-		static int GetJoystickHatKey(int Hat, int HatValue);
+		static void GetJoystickHatKeys(int Hat, int HatValue, int (&HatKeys)[2]);
 	};
 
 private:
