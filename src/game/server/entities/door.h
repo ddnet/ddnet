@@ -17,6 +17,7 @@ public:
 	CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 		int Number);
 
+	void Reset() override;
 	void Snap(int SnappingClient) override;
 };
 

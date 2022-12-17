@@ -146,6 +146,8 @@ void CGameWorld::Reset()
 	RemoveEntities();
 
 	m_ResetRequested = false;
+
+	GameServer()->CreateAllEntities(false);
 }
 
 void CGameWorld::RemoveEntities()

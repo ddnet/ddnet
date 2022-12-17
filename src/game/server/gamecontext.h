@@ -187,6 +187,8 @@ public:
 	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
 	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
 
+	void CreateAllEntities(bool Initial);
+
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();
 
@@ -287,7 +289,7 @@ public:
 	void OnPreTickTeehistorian() override;
 	bool OnClientDDNetVersionKnown(int ClientID);
 	void FillAntibot(CAntibotRoundData *pData) override;
-	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
+	bool ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;
