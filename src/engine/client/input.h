@@ -13,6 +13,8 @@ class CInput : public IEngineInput
 public:
 	class CJoystick : public IJoystick
 	{
+		friend class CInput;
+
 		CInput *m_pInput;
 		int m_Index;
 		char m_aName[64];
@@ -58,6 +60,7 @@ private:
 	std::vector<CJoystick> m_vJoysticks;
 	CJoystick *m_pActiveJoystick = nullptr;
 	void InitJoysticks();
+	bool OpenJoystick(int JoystickIndex);
 	void CloseJoysticks();
 	void UpdateActiveJoystick();
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -85,6 +88,8 @@ private:
 	void HandleJoystickAxisMotionEvent(const SDL_Event &Event);
 	void HandleJoystickButtonEvent(const SDL_Event &Event);
 	void HandleJoystickHatMotionEvent(const SDL_Event &Event);
+	void HandleJoystickAddedEvent(const SDL_Event &Event);
+	void HandleJoystickRemovedEvent(const SDL_Event &Event);
 
 	// IME support
 	int m_NumTextInputInstances;

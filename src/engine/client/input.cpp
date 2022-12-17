@@ -91,42 +91,40 @@ void CInput::InitJoysticks()
 		}
 	}
 
-	int NumJoysticks = SDL_NumJoysticks();
-	if(NumJoysticks > 0)
+	const int NumJoysticks = SDL_NumJoysticks();
+	dbg_msg("joystick", "%d joystick(s) found", NumJoysticks);
+	for(int i = 0; i < NumJoysticks; i++)
+		OpenJoystick(i);
+	UpdateActiveJoystick();
+
+	Console()->Chain("joystick_guid", ConchainJoystickGuidChanged, this);
+}
+
+bool CInput::OpenJoystick(int JoystickIndex)
+{
+	SDL_Joystick *pJoystick = SDL_JoystickOpen(JoystickIndex);
+	if(!pJoystick)
 	{
-		dbg_msg("joystick", "%d joystick(s) found", NumJoysticks);
-		int ActualIndex = 0;
-		for(int i = 0; i < NumJoysticks; i++)
-		{
-			SDL_Joystick *pJoystick = SDL_JoystickOpen(i);
-			if(!pJoystick)
-			{
-				dbg_msg("joystick", "Could not open joystick %d: '%s'", i, SDL_GetError());
-				continue;
-			}
-			m_vJoysticks.emplace_back(this, ActualIndex, pJoystick);
-			const CJoystick &Joystick = m_vJoysticks[m_vJoysticks.size() - 1];
-			dbg_msg("joystick", "Opened Joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", i, Joystick.GetName(),
-				Joystick.GetNumAxes(), Joystick.GetNumButtons(), Joystick.GetNumBalls(), Joystick.GetNumHats());
-			ActualIndex++;
-		}
-		if(ActualIndex > 0)
-		{
-			UpdateActiveJoystick();
-			Console()->Chain("joystick_guid", ConchainJoystickGuidChanged, this);
-		}
+		dbg_msg("joystick", "Could not open joystick %d: '%s'", JoystickIndex, SDL_GetError());
+		return false;
 	}
-	else
+	if(std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [pJoystick](const CJoystick &Joystick) -> bool { return Joystick.m_pDelegate == pJoystick; }) != m_vJoysticks.end())
 	{
-		dbg_msg("joystick", "No joysticks found");
+		// Joystick has already been added
+		return false;
 	}
+	m_vJoysticks.emplace_back(this, m_vJoysticks.size(), pJoystick);
+	const CJoystick &Joystick = m_vJoysticks[m_vJoysticks.size() - 1];
+	dbg_msg("joystick", "Opened joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", JoystickIndex, Joystick.GetName(),
+		Joystick.GetNumAxes(), Joystick.GetNumButtons(), Joystick.GetNumBalls(), Joystick.GetNumHats());
+	return true;
 }
 
 void CInput::UpdateActiveJoystick()
 {
+	m_pActiveJoystick = nullptr;
 	if(m_vJoysticks.empty())
 		return;
-	m_pActiveJoystick = nullptr;
 	for(auto &Joystick : m_vJoysticks)
 	{
 		if(str_comp(Joystick.GetGUID(), g_Config.m_InpControllerGUID) == 0)
@@ -482,6 +480,31 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_Event &Event)
 	}
 }
 
+void CInput::HandleJoystickAddedEvent(const SDL_Event &Event)
+{
+	if(OpenJoystick(Event.jdevice.which))
+	{
+		UpdateActiveJoystick();
+	}
+}
+
+void CInput::HandleJoystickRemovedEvent(const SDL_Event &Event)
+{
+	auto RemovedJoystick = std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [Event](const CJoystick &Joystick) -> bool { return Joystick.GetInstanceID() == Event.jdevice.which; });
+	if(RemovedJoystick != m_vJoysticks.end())
+	{
+		dbg_msg("joystick", "Closed joystick %d '%s'", (*RemovedJoystick).GetIndex(), (*RemovedJoystick).GetName());
+		auto NextJoystick = m_vJoysticks.erase(RemovedJoystick);
+		// Adjust indices of following joysticks
+		while(NextJoystick != m_vJoysticks.end())
+		{
+			(*NextJoystick).m_Index--;
+			++NextJoystick;
+		}
+		UpdateActiveJoystick();
+	}
+}
+
 bool CInput::GetIMEState()
 {
 	return m_NumTextInputInstances > 0;
@@ -620,6 +643,14 @@ int CInput::Update()
 
 		case SDL_JOYHATMOTION:
 			HandleJoystickHatMotionEvent(Event);
+			break;
+
+		case SDL_JOYDEVICEADDED:
+			HandleJoystickAddedEvent(Event);
+			break;
+
+		case SDL_JOYDEVICEREMOVED:
+			HandleJoystickRemovedEvent(Event);
 			break;
 
 		// handle mouse buttons
