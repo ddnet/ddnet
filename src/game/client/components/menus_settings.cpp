@@ -210,6 +210,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				dbg_msg("menus", "couldn't open file '%s'", aBuf);
 			}
 		}
+		GameClient()->m_Tooltips.DoToolTip(&s_SettingsButtonID, &SettingsButton, Localize("Open the settings file"));
 
 		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect ConfigButton;
@@ -225,6 +226,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				dbg_msg("menus", "couldn't open file '%s'", aBuf);
 			}
 		}
+		GameClient()->m_Tooltips.DoToolTip(&s_ConfigButtonID, &ConfigButton, Localize("Open the directory that contains the configuration and user files"));
 
 		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect DirectoryButton;
@@ -242,6 +244,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 				dbg_msg("menus", "couldn't open file '%s'", aBuf);
 			}
 		}
+		GameClient()->m_Tooltips.DoToolTip(&s_ThemesButtonID, &DirectoryButton, Localize("Open the directory to add custom themes"));
 
 		// auto statboard screenshot
 		{
@@ -917,6 +920,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButtonID, &DirectoryButton, Localize("Open the directory to add custom skins"));
 
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);

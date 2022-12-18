@@ -1406,6 +1406,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButtonID, &DirectoryButton, Localize("Open the directory that contains the demo files"));
 
 	if(!m_DemolistSelectedIsDir)
 	{
