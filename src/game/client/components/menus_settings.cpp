@@ -1115,7 +1115,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 		{
 			View.HSplitTop((View.h - ButtonHeight) / 2.0f, 0, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UI()->DoLabel(&Button, Localize("No controller found. Plug in a controller and restart the game."), 13.0f, TEXTALIGN_CENTER);
+			UI()->DoLabel(&Button, Localize("No controller found. Plug in a controller."), 13.0f, TEXTALIGN_CENTER);
 		}
 	}
 
