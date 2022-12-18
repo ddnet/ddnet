@@ -57,7 +57,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	CUIRect Status;
 
 	View.HSplitTop(ms_ListheaderHeight, &Headers, &View);
-	View.HSplitBottom(70.0f, &View, &Status);
+	View.HSplitBottom(65.0f, &View, &Status);
 
 	// split of the scrollbar
 	Headers.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
@@ -510,8 +510,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			Connect(g_Config.m_UiServerAddress);
 	}
 
-	//Status.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 5.0f);
-	Status.Margin(5.0f, &Status);
+	// Render bar that shows the loading progression.
+	// The bar is only shown while loading and fades out when it's done.
+	CUIRect RefreshBar;
+	Status.HSplitTop(5.0f, &RefreshBar, &Status);
+	static float s_LoadingProgressionFadeEnd = 0.0f;
+	if(ServerBrowser()->IsRefreshing() && ServerBrowser()->LoadingProgression() < 100)
+	{
+		s_LoadingProgressionFadeEnd = Client()->GlobalTime() + 2.0f;
+	}
+	const float LoadingProgressionTimeDiff = s_LoadingProgressionFadeEnd - Client()->GlobalTime();
+	if(LoadingProgressionTimeDiff > 0.0f)
+	{
+		const float RefreshBarAlpha = minimum(LoadingProgressionTimeDiff, 0.8f);
+		RefreshBar.h = 2.0f;
+		RefreshBar.w *= ServerBrowser()->LoadingProgression() / 100.0f;
+		RefreshBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, RefreshBarAlpha), IGraphics::CORNER_NONE, 0.0f);
+	}
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, Status3;
 	Status.VSplitRight(250.0f, &SearchInfoAndAddr, &ServersAndConnect);
@@ -637,9 +652,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		static int s_RefreshButton = 0;
 		auto Func = [this]() mutable -> const char * {
-			if(ServerBrowser()->IsRefreshing())
-				str_format(m_aLocalStringHelper, sizeof(m_aLocalStringHelper), "%s (%d%%)", Localize("Refresh"), ServerBrowser()->LoadingProgression());
-			else if(ServerBrowser()->IsGettingServerlist())
+			if(ServerBrowser()->IsRefreshing() || ServerBrowser()->IsGettingServerlist())
 				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
 			else
 				str_copy(m_aLocalStringHelper, Localize("Refresh"));
