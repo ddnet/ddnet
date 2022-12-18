@@ -383,56 +383,56 @@ void CInput::UpdateJoystickState()
 	}
 }
 
-void CInput::HandleJoystickAxisMotionEvent(const SDL_Event &Event)
+void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 {
 	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick || pJoystick->GetInstanceID() != Event.jaxis.which)
+	if(!pJoystick || pJoystick->GetInstanceID() != Event.which)
 		return;
-	if(Event.jaxis.axis >= NUM_JOYSTICK_AXES)
+	if(Event.axis >= NUM_JOYSTICK_AXES)
 		return;
 
-	const int LeftKey = KEY_JOY_AXIS_0_LEFT + 2 * Event.jaxis.axis;
+	const int LeftKey = KEY_JOY_AXIS_0_LEFT + 2 * Event.axis;
 	const int RightKey = LeftKey + 1;
 	const float DeadZone = GetJoystickDeadzone();
 
-	if(Event.jaxis.value <= SDL_JOYSTICK_AXIS_MIN * DeadZone && !m_aInputState[LeftKey])
+	if(Event.value <= SDL_JOYSTICK_AXIS_MIN * DeadZone && !m_aInputState[LeftKey])
 	{
 		m_aInputState[LeftKey] = true;
 		m_aInputCount[LeftKey] = m_InputCounter;
 		AddEvent(0, LeftKey, IInput::FLAG_PRESS);
 	}
-	else if(Event.jaxis.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aInputState[LeftKey])
+	else if(Event.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aInputState[LeftKey])
 	{
 		m_aInputState[LeftKey] = false;
 		AddEvent(0, LeftKey, IInput::FLAG_RELEASE);
 	}
 
-	if(Event.jaxis.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aInputState[RightKey])
+	if(Event.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aInputState[RightKey])
 	{
 		m_aInputState[RightKey] = true;
 		m_aInputCount[RightKey] = m_InputCounter;
 		AddEvent(0, RightKey, IInput::FLAG_PRESS);
 	}
-	else if(Event.jaxis.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aInputState[RightKey])
+	else if(Event.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aInputState[RightKey])
 	{
 		m_aInputState[RightKey] = false;
 		AddEvent(0, RightKey, IInput::FLAG_RELEASE);
 	}
 }
 
-void CInput::HandleJoystickButtonEvent(const SDL_Event &Event)
+void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 {
 	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick || pJoystick->GetInstanceID() != Event.jbutton.which)
+	if(!pJoystick || pJoystick->GetInstanceID() != Event.which)
 		return;
-	if(Event.jbutton.button >= NUM_JOYSTICK_BUTTONS)
+	if(Event.button >= NUM_JOYSTICK_BUTTONS)
 		return;
 
-	const int Key = Event.jbutton.button + KEY_JOYSTICK_BUTTON_0;
+	const int Key = Event.button + KEY_JOYSTICK_BUTTON_0;
 
 	if(Event.type == SDL_JOYBUTTONDOWN)
 	{
@@ -447,20 +447,20 @@ void CInput::HandleJoystickButtonEvent(const SDL_Event &Event)
 	}
 }
 
-void CInput::HandleJoystickHatMotionEvent(const SDL_Event &Event)
+void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 {
 	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick || pJoystick->GetInstanceID() != Event.jhat.which)
+	if(!pJoystick || pJoystick->GetInstanceID() != Event.which)
 		return;
-	if(Event.jhat.hat >= NUM_JOYSTICK_HATS)
+	if(Event.hat >= NUM_JOYSTICK_HATS)
 		return;
 
 	int HatKeys[2];
-	CJoystick::GetJoystickHatKeys(Event.jhat.hat, Event.jhat.value, HatKeys);
+	CJoystick::GetJoystickHatKeys(Event.hat, Event.value, HatKeys);
 
-	for(int Key = KEY_JOY_HAT0_UP + Event.jhat.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Event.jhat.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
+	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
 	{
 		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aInputState[Key])
 		{
@@ -480,17 +480,17 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_Event &Event)
 	}
 }
 
-void CInput::HandleJoystickAddedEvent(const SDL_Event &Event)
+void CInput::HandleJoystickAddedEvent(const SDL_JoyDeviceEvent &Event)
 {
-	if(OpenJoystick(Event.jdevice.which))
+	if(OpenJoystick(Event.which))
 	{
 		UpdateActiveJoystick();
 	}
 }
 
-void CInput::HandleJoystickRemovedEvent(const SDL_Event &Event)
+void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 {
-	auto RemovedJoystick = std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [Event](const CJoystick &Joystick) -> bool { return Joystick.GetInstanceID() == Event.jdevice.which; });
+	auto RemovedJoystick = std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [Event](const CJoystick &Joystick) -> bool { return Joystick.GetInstanceID() == Event.which; });
 	if(RemovedJoystick != m_vJoysticks.end())
 	{
 		dbg_msg("joystick", "Closed joystick %d '%s'", (*RemovedJoystick).GetIndex(), (*RemovedJoystick).GetName());
@@ -633,24 +633,24 @@ int CInput::Update()
 
 		// handle the joystick events
 		case SDL_JOYAXISMOTION:
-			HandleJoystickAxisMotionEvent(Event);
+			HandleJoystickAxisMotionEvent(Event.jaxis);
 			break;
 
 		case SDL_JOYBUTTONUP:
 		case SDL_JOYBUTTONDOWN:
-			HandleJoystickButtonEvent(Event);
+			HandleJoystickButtonEvent(Event.jbutton);
 			break;
 
 		case SDL_JOYHATMOTION:
-			HandleJoystickHatMotionEvent(Event);
+			HandleJoystickHatMotionEvent(Event.jhat);
 			break;
 
 		case SDL_JOYDEVICEADDED:
-			HandleJoystickAddedEvent(Event);
+			HandleJoystickAddedEvent(Event.jdevice);
 			break;
 
 		case SDL_JOYDEVICEREMOVED:
-			HandleJoystickRemovedEvent(Event);
+			HandleJoystickRemovedEvent(Event.jdevice);
 			break;
 
 		// handle mouse buttons

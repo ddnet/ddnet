@@ -3,6 +3,9 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
+#include <SDL_events.h>
+#include <SDL_joystick.h>
+
 #include <engine/input.h>
 #include <engine/keys.h>
 
@@ -85,11 +88,11 @@ private:
 
 	void UpdateMouseState();
 	void UpdateJoystickState();
-	void HandleJoystickAxisMotionEvent(const SDL_Event &Event);
-	void HandleJoystickButtonEvent(const SDL_Event &Event);
-	void HandleJoystickHatMotionEvent(const SDL_Event &Event);
-	void HandleJoystickAddedEvent(const SDL_Event &Event);
-	void HandleJoystickRemovedEvent(const SDL_Event &Event);
+	void HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event);
+	void HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event);
+	void HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event);
+	void HandleJoystickAddedEvent(const SDL_JoyDeviceEvent &Event);
+	void HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event);
 
 	// IME support
 	int m_NumTextInputInstances;
