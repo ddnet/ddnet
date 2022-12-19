@@ -3175,6 +3175,11 @@ void CClient::Run()
 			else
 				SetState(IClient::STATE_QUITTING); // SDL_QUIT
 		}
+
+		char aFile[IO_MAX_PATH_LENGTH];
+		if(Input()->GetDropFile(aFile, sizeof(aFile)) && str_startswith(aFile, CONNECTLINK_NO_SLASH))
+			HandleConnectLink(aFile);
+
 #if defined(CONF_AUTOUPDATE)
 		Updater()->Update();
 #endif

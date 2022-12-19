@@ -114,6 +114,8 @@ public:
 	virtual int GetEditingCursor() = 0;
 	virtual void SetEditingPosition(float X, float Y) = 0;
 
+	virtual bool GetDropFile(char *aBuf, int Len) = 0;
+
 	ECursorType CursorRelative(float *pX, float *pY)
 	{
 		if(MouseRelative(pX, pY))
