@@ -244,7 +244,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			Dir = 0;
 		else if(Flags == (TILEFLAG_ROTATE))
 			Dir = 1;
-		else if(Flags == (TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL))
+		else if(Flags == (TILEFLAG_XFLIP | TILEFLAG_YFLIP))
 			Dir = 2;
 		else
 			Dir = 3;

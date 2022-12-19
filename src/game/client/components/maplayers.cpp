@@ -229,7 +229,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 		unsigned char x3 = x0;
 		unsigned char y3 = y0 + 1;
 
-		if(Flags & TILEFLAG_FLIP_HORIZONTAL)
+		if(Flags & TILEFLAG_XFLIP)
 		{
 			x0 = x2;
 			x1 = x3;
@@ -237,7 +237,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 			x3 = x0;
 		}
 
-		if(Flags & TILEFLAG_FLIP_VERTICAL)
+		if(Flags & TILEFLAG_YFLIP)
 		{
 			y0 = y3;
 			y2 = y1;

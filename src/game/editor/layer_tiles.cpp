@@ -86,7 +86,7 @@ void CLayerTiles::PrepareForSave()
 {
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
-			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL | TILEFLAG_ROTATE;
+			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE;
 
 	if(m_Image != -1 && m_Color.a == 255)
 	{
@@ -541,7 +541,7 @@ void CLayerTiles::BrushFlipX()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_FLIP_VERTICAL : TILEFLAG_FLIP_HORIZONTAL;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_YFLIP : TILEFLAG_XFLIP;
 }
 
 void CLayerTiles::BrushFlipY()
@@ -557,7 +557,7 @@ void CLayerTiles::BrushFlipY()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_FLIP_HORIZONTAL : TILEFLAG_FLIP_VERTICAL;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_XFLIP : TILEFLAG_YFLIP;
 }
 
 void CLayerTiles::BrushRotate(float Amount)
@@ -582,7 +582,7 @@ void CLayerTiles::BrushRotate(float Amount)
 				else
 				{
 					if(pDst->m_Flags & TILEFLAG_ROTATE)
-						pDst->m_Flags ^= (TILEFLAG_FLIP_VERTICAL | TILEFLAG_FLIP_HORIZONTAL);
+						pDst->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
 					pDst->m_Flags ^= TILEFLAG_ROTATE;
 				}
 			}
@@ -666,8 +666,8 @@ void CLayerTiles::ShowInfo()
 				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileHexInfo ? "%02X" : "%i", m_pTiles[c].m_Index);
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 
-				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_FLIP_HORIZONTAL ? 'H' : ' ',
-					m_pTiles[c].m_Flags & TILEFLAG_FLIP_VERTICAL ? 'V' : ' ',
+				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_XFLIP ? 'X' : ' ',
+					m_pTiles[c].m_Flags & TILEFLAG_YFLIP ? 'Y' : ' ',
 					m_pTiles[c].m_Flags & TILEFLAG_ROTATE ? 'R' : ' ',
 					0};
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32 + 16, 16.0f, aFlags);
@@ -1763,7 +1763,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				if(IsRotatableTile(pDst2->m_Index))
 				{
 					if(pDst2->m_Flags & TILEFLAG_ROTATE)
-						pDst2->m_Flags ^= (TILEFLAG_FLIP_VERTICAL | TILEFLAG_FLIP_HORIZONTAL);
+						pDst2->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
 					pDst2->m_Flags ^= TILEFLAG_ROTATE;
 				}
 			}

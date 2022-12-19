@@ -364,7 +364,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						y3 = y0 + 1;
 					}
 
-					if(Flags & TILEFLAG_FLIP_HORIZONTAL)
+					if(Flags & TILEFLAG_XFLIP)
 					{
 						x0 = x2;
 						x1 = x3;
@@ -372,7 +372,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						x3 = x0;
 					}
 
-					if(Flags & TILEFLAG_FLIP_VERTICAL)
+					if(Flags & TILEFLAG_YFLIP)
 					{
 						y0 = y3;
 						y2 = y1;
@@ -923,7 +923,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 					float x3 = Nudge + Px0 / TexSize + Frac;
 					float y3 = Nudge + Py1 / TexSize - Frac;
 
-					if(Flags & TILEFLAG_FLIP_HORIZONTAL)
+					if(Flags & TILEFLAG_XFLIP)
 					{
 						x0 = x2;
 						x1 = x3;
@@ -931,7 +931,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 						x3 = x0;
 					}
 
-					if(Flags & TILEFLAG_FLIP_VERTICAL)
+					if(Flags & TILEFLAG_YFLIP)
 					{
 						y0 = y3;
 						y2 = y1;
