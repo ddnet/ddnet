@@ -20,7 +20,6 @@ CProjectile::CProjectile(
 	int Span,
 	bool Freeze,
 	bool Explosive,
-	float Force,
 	int SoundImpact,
 	int Layer,
 	int Number) :
@@ -31,7 +30,6 @@ CProjectile::CProjectile(
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
-	m_Force = Force;
 	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = Server()->Tick();

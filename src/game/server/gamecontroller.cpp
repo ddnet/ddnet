@@ -231,7 +231,6 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			-2, //Span
 			true, //Freeze
 			true, //Explosive
-			0, //Force
 			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
 			Layer,
 			Number);
@@ -258,7 +257,6 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			-2, //Span
 			true, //Freeze
 			false, //Explosive
-			0,
 			SOUND_GRENADE_EXPLODE,
 			Layer,
 			Number);
