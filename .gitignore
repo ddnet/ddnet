@@ -40,7 +40,6 @@ pack_*/
 release
 rules.ninja
 testrunner\[1\]_include.cmake
-vulkan_shaders_sha256.txt
 
 /SDL2.framework
 
