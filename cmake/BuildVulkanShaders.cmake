@@ -43,13 +43,13 @@ if(NOT SPIRV_OPTIMIZER_PROGRAM)
 endif()
 
 file(GLOB_RECURSE GLSL_SHADER_FILES
-  "data/shaders/vulkan/*.frag"
-  "data/shaders/vulkan/*.vert"
+  "data/shader/vulkan/*.frag"
+  "data/shader/vulkan/*.vert"
 )
 
 set(TMP_SHADER_SHA256_LIST "")
 foreach(GLSL_SHADER_FILE ${GLSL_SHADER_FILES})
-  file(SHA256 ${FILE_NAME} TMP_FILE_SHA)
+  file(SHA256 ${GLSL_SHADER_FILE} TMP_FILE_SHA)
   set(TMP_SHADER_SHA256_LIST "${TMP_SHADER_SHA256_LIST}${TMP_FILE_SHA}")
 endforeach(GLSL_SHADER_FILE)
 
@@ -58,11 +58,8 @@ set(GLSL_SHADER_SHA256 "${GLSL_SHADER_SHA256}@v1")
 
 set(FOUND_MATCHING_SHA256_FILE FALSE)
 
-if(EXISTS "${PROJECT_BINARY_DIR}/vulkan_shaders_sha256.txt")
-  file(STRINGS "${PROJECT_BINARY_DIR}/vulkan_shaders_sha256.txt" VULKAN_SHADERS_SHA256_FILE_CONTENT)
-  if("${VULKAN_SHADERS_SHA256_FILE_CONTENT}" STREQUAL "${GLSL_SHADER_SHA256}")
-    set(FOUND_MATCHING_SHA256_FILE TRUE)
-  endif()
+if("${VULKAN_SHADER_FILE_SHA256}" STREQUAL "${GLSL_SHADER_SHA256}")
+  set(FOUND_MATCHING_SHA256_FILE TRUE)
 endif()
 
 set(TW_VULKAN_VERSION "vulkan100")
@@ -177,5 +174,5 @@ if(NOT FOUND_MATCHING_SHA256_FILE)
   set(VULKAN_SHADER_FILE_LIST ${VULKAN_SHADER_FILE_LIST} CACHE STRING "Vulkan shader file list" FORCE)
 
   message(STATUS "Finished building vulkan shaders")
-  file(WRITE "${PROJECT_BINARY_DIR}/vulkan_shaders_sha256.txt" "${GLSL_SHADER_SHA256}")
+  set(VULKAN_SHADER_FILE_SHA256 ${GLSL_SHADER_SHA256} CACHE STRING "Vulkan shader file hash" FORCE)
 endif()
