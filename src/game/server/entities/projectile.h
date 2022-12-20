@@ -17,7 +17,6 @@ public:
 		int Span,
 		bool Freeze,
 		bool Explosive,
-		float Force,
 		int SoundImpact,
 		int Layer = 0,
 		int Number = 0);
@@ -38,7 +37,6 @@ private:
 	int m_Type;
 	//int m_Damage;
 	int m_SoundImpact;
-	float m_Force;
 	int m_StartTick;
 	bool m_Explosive;
 

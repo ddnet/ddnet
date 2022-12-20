@@ -408,7 +408,6 @@ void CCharacter::FireWeapon()
 					(int)(GameWorld()->GameTickSpeed() * Tuning()->m_ShotgunLifetime), //Span
 					false, //Freeze
 					false, //Explosive
-					0, //Force
 					-1 //SoundImpact
 				);
 			}
@@ -435,7 +434,6 @@ void CCharacter::FireWeapon()
 			Lifetime, //Span
 			false, //Freeze
 			true, //Explosive
-			0, //Force
 			SOUND_GRENADE_EXPLODE //SoundImpact
 		); //SoundImpact
 	}
