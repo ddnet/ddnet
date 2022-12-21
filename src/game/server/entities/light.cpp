@@ -129,47 +129,55 @@ void CLight::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
-	if(!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
+	vec2 From = m_Pos;
+	int StartTick = 0;
 
 	if(pChr && pChr->Team() == TEAM_SUPER)
 	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
+		From = m_Pos;
 	}
 	else if(pChr && m_Layer == LAYER_SWITCH && Switchers()[m_Number].m_aStatus[pChr->Team()])
 	{
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
+		From = m_To;
 	}
 	else if(m_Layer != LAYER_SWITCH)
 	{
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
-	}
-	else
-	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
+		From = m_To;
 	}
 
-	if(pEntData)
+	if(!pEntData)
 	{
-		pObj->m_StartTick = 0;
-	}
-	else
-	{
-		int StartTick = m_EvalTick;
+		StartTick = m_EvalTick;
 		if(StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
 		else if(StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
+	}
+
+	if(SnappingClientVersion >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return;
+
+		pObj->m_ToX = (int)m_Pos.x;
+		pObj->m_ToY = (int)m_Pos.y;
+		pObj->m_FromX = (int)From.x;
+		pObj->m_FromY = (int)From.y;
+		pObj->m_StartTick = StartTick;
+		pObj->m_Owner = -1;
+		pObj->m_Type = LASERTYPE_FREEZE;
+	}
+	else
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = (int)m_Pos.x;
+		pObj->m_Y = (int)m_Pos.y;
+		pObj->m_FromX = (int)From.x;
+		pObj->m_FromY = (int)From.y;
 		pObj->m_StartTick = StartTick;
 	}
 }

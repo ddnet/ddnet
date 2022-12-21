@@ -282,7 +282,7 @@ Objects = [
 		NetIntAny("m_FromX"),
 		NetIntAny("m_FromY"),
 		NetTick("m_StartTick"),
-		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
 		NetIntAny("m_Type"),
 	]),
 

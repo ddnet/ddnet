@@ -50,20 +50,14 @@ void CDoor::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
-	if(!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
 		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
+	vec2 From;
+	int StartTick;
 
 	if(pEntData)
 	{
@@ -71,9 +65,8 @@ void CDoor::Snap(int SnappingClient)
 		pEntData->m_Layer = m_Layer;
 		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
 
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
-		pObj->m_StartTick = 0;
+		From = m_To;
+		StartTick = 0;
 	}
 	else
 	{
@@ -84,14 +77,39 @@ void CDoor::Snap(int SnappingClient)
 
 		if(pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && !Switchers().empty() && Switchers()[m_Number].m_aStatus[pChr->Team()])
 		{
-			pObj->m_FromX = (int)m_To.x;
-			pObj->m_FromY = (int)m_To.y;
+			From = m_To;
 		}
 		else
 		{
-			pObj->m_FromX = (int)m_Pos.x;
-			pObj->m_FromY = (int)m_Pos.y;
+			From = m_Pos;
 		}
-		pObj->m_StartTick = Server()->Tick();
+		StartTick = Server()->Tick();
+	}
+
+	if(SnappingClientVersion >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return;
+
+		pObj->m_ToX = (int)m_Pos.x;
+		pObj->m_ToY = (int)m_Pos.y;
+		pObj->m_FromX = (int)From.x;
+		pObj->m_FromY = (int)From.y;
+		pObj->m_StartTick = StartTick;
+		pObj->m_Owner = -1;
+		pObj->m_Type = LASERTYPE_DOOR;
+	}
+	else
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = (int)m_Pos.x;
+		pObj->m_Y = (int)m_Pos.y;
+		pObj->m_FromX = (int)From.x;
+		pObj->m_FromY = (int)From.y;
+		pObj->m_StartTick = StartTick;
 	}
 }
