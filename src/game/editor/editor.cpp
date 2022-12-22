@@ -4667,6 +4667,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	const char *pBasePath, const char *pDefaultName,
 	void (*pfnFunc)(const char *pFileName, int StorageType, void *pUser), void *pUser)
 {
+	UiClosePopupMenus();
 	m_FileDialogStorageType = StorageType;
 	m_pFileDialogTitle = pTitle;
 	m_pFileDialogButtonText = pButtonText;
