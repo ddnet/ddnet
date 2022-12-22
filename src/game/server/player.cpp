@@ -686,16 +686,24 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	if(g_Config.m_SvMaxAfkTime == 0)
-		return;
+	m_Afk = g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime;
+}
 
-	if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
+void CPlayer::SetAfk(bool Afk)
+{
+	if(g_Config.m_SvMaxAfkTime == 0)
 	{
-		m_Afk = true;
+		m_Afk = false;
 		return;
 	}
 
-	m_Afk = false;
+	m_Afk = Afk;
+
+	// Ensure that the AFK state is not reset again automatically
+	if(Afk)
+		m_LastPlaytime = time_get() - time_freq() * g_Config.m_SvMaxAfkTime - 1;
+	else
+		m_LastPlaytime = time_get();
 }
 
 int CPlayer::GetDefaultEmote() const

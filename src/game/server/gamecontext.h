@@ -127,6 +127,7 @@ class CGameContext : public IGameServer
 	struct CPersistentClientData
 	{
 		bool m_IsSpectator;
+		bool m_IsAfk;
 	};
 
 public:

@@ -922,7 +922,7 @@ void CGameContext::OnTick()
 											     GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())))
 						continue;
 
-					if(m_apPlayers[i]->m_Afk && i != m_VoteCreator)
+					if(m_apPlayers[i]->IsAfk() && i != m_VoteCreator)
 						continue;
 
 					// can't vote in kick and spec votes in the beginning after joining
@@ -973,7 +973,7 @@ void CGameContext::OnTick()
 							if(i != j && (!m_apPlayers[j] || str_comp(aaBuf[j], aaBuf[i]) != 0))
 								continue;
 
-							if(m_apPlayers[j] && !m_apPlayers[j]->m_Afk && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS &&
+							if(m_apPlayers[j] && !m_apPlayers[j]->IsAfk() && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS &&
 								((Server()->Tick() - m_apPlayers[j]->m_JoinTick) / (Server()->TickSpeed() * 60) > g_Config.m_SvVoteVetoTime ||
 									(m_apPlayers[j]->GetCharacter() && m_apPlayers[j]->GetCharacter()->m_DDRaceState == DDRACE_STARTED &&
 										(Server()->Tick() - m_apPlayers[j]->GetCharacter()->m_StartTime) / (Server()->TickSpeed() * 60) > g_Config.m_SvVoteVetoTime)))
@@ -1488,6 +1488,7 @@ bool CGameContext::OnClientDataPersist(int ClientID, void *pData)
 		return false;
 	}
 	pPersistent->m_IsSpectator = m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS;
+	pPersistent->m_IsAfk = m_apPlayers[ClientID]->IsAfk();
 	return true;
 }
 
@@ -1495,9 +1496,11 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 {
 	CPersistentClientData *pPersistentData = (CPersistentClientData *)pData;
 	bool Spec = false;
+	bool Afk = true;
 	if(pPersistentData)
 	{
 		Spec = pPersistentData->m_IsSpectator;
+		Afk = pPersistentData->m_IsAfk;
 	}
 
 	{
@@ -1522,6 +1525,7 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
+	m_apPlayers[ClientID]->SetAfk(Afk);
 	NextUniqueClientID += 1;
 
 #ifdef CONF_DEBUG
@@ -4361,6 +4365,6 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 		"\"afk\":%s,"
 		"\"team\":%d",
 		aJsonSkin,
-		JsonBool(m_apPlayers[ID]->m_Afk),
+		JsonBool(m_apPlayers[ID]->IsAfk()),
 		m_apPlayers[ID]->GetTeam());
 }
