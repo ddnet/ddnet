@@ -551,6 +551,8 @@ protected:
 	void RenderServerbrowserFriends(CUIRect View);
 	void PopupConfirmRemoveFriend();
 	void RenderServerbrowser(CUIRect MainView);
+	template<typename F>
+	bool PrintHighlighted(const char *pName, F &&PrintFn);
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 

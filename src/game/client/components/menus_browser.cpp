@@ -346,30 +346,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				bool Printed = false;
 
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
-				{
-					const char *pStrToken = g_Config.m_BrFilterString;
-					char aFilterStr[sizeof(g_Config.m_BrFilterString)];
-					while((pStrToken = str_next_token(pStrToken, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
-					{
-						if(aFilterStr[0] == '\0')
-						{
-							continue;
-						}
-
-						// highlight the parts that matches
-						const char *pStr = str_utf8_find_nocase(pItem->m_aName, aFilterStr);
-						if(pStr)
-						{
-							UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 0), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pStr - pItem->m_aName));
-							TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-							UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 1), &Button, pStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)str_length(aFilterStr), &pItem->m_pUIElement->Rect(gs_OffsetColName + 0)->m_Cursor);
-							TextRender()->TextColor(1, 1, 1, 1);
-							UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 2), &Button, pStr + str_length(aFilterStr), FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Rect(gs_OffsetColName + 1)->m_Cursor);
-							Printed = true;
-							break;
-						}
-					}
-				}
+					Printed = PrintHighlighted(pItem->m_aName, [this, pItem, FontSize, &Button](const char *pFilteredStr, const int FilterLen) {
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 0), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pFilteredStr - pItem->m_aName));
+						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 1), &Button, pFilteredStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, FilterLen, &pItem->m_pUIElement->Rect(gs_OffsetColName + 0)->m_Cursor);
+						TextRender()->TextColor(1, 1, 1, 1);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 2), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Rect(gs_OffsetColName + 1)->m_Cursor);
+					});
 				if(!Printed)
 					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 			}
@@ -390,27 +373,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				float FontSize = 12.0f;
 				bool Printed = false;
-
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
-				{
-					const char *pStrToken = g_Config.m_BrFilterString;
-					char aFilterStr[sizeof(g_Config.m_BrFilterString)];
-					while((pStrToken = str_next_token(pStrToken, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
-					{
-						// highlight the parts that matches
-						const char *pStr = str_utf8_find_nocase(pItem->m_aMap, aFilterStr);
-						if(pStr)
-						{
-							UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pStr - pItem->m_aMap));
-							TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-							UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 1), &Button, pStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)str_length(aFilterStr), &pItem->m_pUIElement->Rect(gs_OffsetColMap + 0)->m_Cursor);
-							TextRender()->TextColor(1, 1, 1, 1);
-							UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 2), &Button, pStr + str_length(aFilterStr), FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 1)->m_Cursor);
-							Printed = true;
-							break;
-						}
-					}
-				}
+					Printed = PrintHighlighted(pItem->m_aMap, [this, pItem, FontSize, &Button](const char *pFilteredStr, const int FilterLen) {
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, (int)(pFilteredStr - pItem->m_aMap));
+						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 1), &Button, pFilteredStr, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, FilterLen, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 0)->m_Cursor);
+						TextRender()->TextColor(1, 1, 1, 1);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 2), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_LEFT, Button.w, 1, true, -1, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 1)->m_Cursor);
+					});
 				if(!Printed)
 					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_LEFT, Button.w, 1, true);
 			}
@@ -1215,25 +1185,13 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			const char *pName = pSelectedServer->m_aClients[i].m_aName;
 			bool Printed = false;
 			if(g_Config.m_BrFilterString[0])
-			{
-				const char *pStr = g_Config.m_BrFilterString;
-				char aFilterStr[sizeof(g_Config.m_BrFilterString)];
-				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
-				{
-					// highlight the parts that matches
-					const char *pFilteredStr = str_utf8_find_nocase(pName, aFilterStr);
-					if(pFilteredStr)
-					{
-						TextRender()->TextEx(&Cursor, pName, (int)(pFilteredStr - pName));
-						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pFilteredStr, str_length(aFilterStr));
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pFilteredStr + str_length(aFilterStr), -1);
-						Printed = true;
-						break;
-					}
-				}
-			}
+				Printed = PrintHighlighted(pName, [this, &Cursor, pName](const char *pFilteredStr, const int FilterLen) {
+					TextRender()->TextEx(&Cursor, pName, (int)(pFilteredStr - pName));
+					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
+					TextRender()->TextEx(&Cursor, pFilteredStr, FilterLen);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->TextEx(&Cursor, pFilteredStr + FilterLen, -1);
+				});
 			if(!Printed)
 				TextRender()->TextEx(&Cursor, pName, -1);
 
@@ -1243,25 +1201,13 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			const char *pClan = pSelectedServer->m_aClients[i].m_aClan;
 			Printed = false;
 			if(g_Config.m_BrFilterString[0])
-			{
-				const char *pStr = g_Config.m_BrFilterString;
-				char aFilterStr[sizeof(g_Config.m_BrFilterString)];
-				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
-				{
-					// highlight the parts that matches
-					const char *pFilteredString = str_utf8_find_nocase(pClan, aFilterStr);
-					if(pFilteredString)
-					{
-						TextRender()->TextEx(&Cursor, pClan, (int)(pFilteredString - pClan));
-						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pFilteredString, str_length(aFilterStr));
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-						TextRender()->TextEx(&Cursor, pFilteredString + str_length(aFilterStr), -1);
-						Printed = true;
-						break;
-					}
-				}
-			}
+				Printed = PrintHighlighted(pClan, [this, &Cursor, pClan](const char *pFilteredStr, const int FilterLen) {
+					TextRender()->TextEx(&Cursor, pClan, (int)(pFilteredStr - pClan));
+					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
+					TextRender()->TextEx(&Cursor, pFilteredStr, FilterLen);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->TextEx(&Cursor, pFilteredStr + FilterLen, -1);
+				});
 			if(!Printed)
 				TextRender()->TextEx(&Cursor, pClan, -1);
 
@@ -1272,6 +1218,35 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 		UiDoListboxEnd(&s_ScrollValue, 0);
 	}
+}
+
+template<typename F>
+bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
+{
+	const char *pStr = g_Config.m_BrFilterString;
+	char aFilterStr[sizeof(g_Config.m_BrFilterString)];
+	while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
+	{
+		// highlight the parts that matches
+		const char *pFilteredStr;
+		int FilterLen = str_length(aFilterStr);
+		if(aFilterStr[0] == '"' && aFilterStr[FilterLen - 1] == '"')
+		{
+			aFilterStr[FilterLen - 1] = '\0';
+			pFilteredStr = str_comp(pName, &aFilterStr[1]) == 0 ? pName : nullptr;
+			FilterLen -= 2;
+		}
+		else
+		{
+			pFilteredStr = str_utf8_find_nocase(pName, aFilterStr);
+		}
+		if(pFilteredStr)
+		{
+			PrintFn(pFilteredStr, FilterLen);
+			return true;
+		}
+	}
+	return false;
 }
 
 void CMenus::FriendlistOnUpdate()
