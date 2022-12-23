@@ -104,6 +104,14 @@ void CEditor::UiDoPopupMenu()
 	}
 }
 
+void CEditor::UiClosePopupMenus()
+{
+	m_LockMouse = false;
+	UI()->SetActiveItem(nullptr);
+	g_UiNumPopups = 0;
+	m_PopupEventWasActivated = false;
+}
+
 bool CEditor::UiPopupExists(void *pid)
 {
 	for(int i = 0; i < g_UiNumPopups; i++)
