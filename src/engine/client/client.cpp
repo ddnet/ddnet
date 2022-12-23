@@ -3177,8 +3177,15 @@ void CClient::Run()
 		}
 
 		char aFile[IO_MAX_PATH_LENGTH];
-		if(Input()->GetDropFile(aFile, sizeof(aFile)) && str_startswith(aFile, CONNECTLINK_NO_SLASH))
-			HandleConnectLink(aFile);
+		if(Input()->GetDropFile(aFile, sizeof(aFile)))
+		{
+			if(str_startswith(aFile, CONNECTLINK_NO_SLASH))
+				HandleConnectLink(aFile);
+			else if(str_endswith(aFile, ".demo"))
+				HandleDemoPath(aFile);
+			else if(str_endswith(aFile, ".map"))
+				HandleMapPath(aFile);
+		}
 
 #if defined(CONF_AUTOUPDATE)
 		Updater()->Update();

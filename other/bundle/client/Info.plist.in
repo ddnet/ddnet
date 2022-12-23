@@ -29,6 +29,29 @@
 				</array>
 			</dict>
 		</array>
+		<key>CFBundleDocumentTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>DDNet demo</string>
+				<key>CFBundleTypeRole</key>
+				<string>DDNet demo viewer</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>dyn.ah62d4rv4ge80k3prr6</string>
+					<string>public.data</string>
+				</array>
+				<key>CFBundleTypeName</key>
+				<string>DDNet map</string>
+				<key>CFBundleTypeRole</key>
+				<string>DDNet map editor</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>dyn.ah62d4rv4ge8042pu</string>
+					<string>public.data</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSHighResolutionCapable</key>
 		<true/>
 		<key>NSPrefersDisplaySafeAreaCompatibilityMode</key>
