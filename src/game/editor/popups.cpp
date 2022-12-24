@@ -86,29 +86,20 @@ void CEditor::UiDoPopupMenu()
 		r.Draw(ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
-		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext))
-		{
-			m_LockMouse = false;
-			UI()->SetActiveItem(nullptr);
-			g_UiNumPopups--;
-			m_PopupEventWasActivated = false;
-		}
-
-		if(Input()->KeyPress(KEY_ESCAPE))
-		{
-			m_LockMouse = false;
-			UI()->SetActiveItem(nullptr);
-			g_UiNumPopups--;
-			m_PopupEventWasActivated = false;
-		}
+		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext) || Input()->KeyPress(KEY_ESCAPE))
+			UiClosePopupMenus(1);
 	}
 }
 
-void CEditor::UiClosePopupMenus()
+void CEditor::UiClosePopupMenus(int Menus)
 {
+	if(Menus <= 0)
+		Menus = g_UiNumPopups;
+	if(Menus <= 0)
+		return;
 	m_LockMouse = false;
 	UI()->SetActiveItem(nullptr);
-	g_UiNumPopups = 0;
+	g_UiNumPopups = maximum(0, g_UiNumPopups - Menus);
 	m_PopupEventWasActivated = false;
 }
 
@@ -1252,7 +1243,7 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
 	{
 		static int s_AbortButton = 0;
-		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr) || pEditor->Input()->KeyPress(KEY_ESCAPE))
+		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr))
 		{
 			pEditor->m_PopupEventWasActivated = false;
 			return 1;
