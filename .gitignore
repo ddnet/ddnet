@@ -130,6 +130,7 @@ tags
 *.sdf
 *.sln
 *.so
+*.spv
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
