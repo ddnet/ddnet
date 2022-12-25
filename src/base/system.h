@@ -14,8 +14,19 @@
 #define __USE_GNU
 #endif
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <time.h>
+
+#ifdef __MINGW32__
+#undef PRId64
+#undef PRIu64
+#define PRId64 "I64d"
+#define PRIu64 "I64u"
+#define PRIzu "Iu"
+#else
+#define PRIzu "zu"
+#endif
 
 #ifdef CONF_FAMILY_UNIX
 #include <sys/un.h>
