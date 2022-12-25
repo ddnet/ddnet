@@ -10,11 +10,16 @@ function(check_working_cxx_atomics varname)
   check_cxx_source_compiles("
 #include <atomic>
 #include <cstdint>
+std::atomic<int> x1;
+std::atomic<short> x2;
+std::atomic<char> x3;
 std::atomic<uint64_t> x (0);
 int main() {
   uint64_t i = x.load(std::memory_order_relaxed);
   (void)i;
-  return 0;
+  ++x3;
+  ++x2;
+  return ++x1;
 }
 " ${varname})
   set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
