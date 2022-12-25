@@ -80,6 +80,11 @@
 #include <sys/filio.h>
 #endif
 
+// for msvc
+#ifndef PRId64
+#define PRId64 "I64d"
+#endif
+
 extern "C" {
 
 IOHANDLE io_stdin()
