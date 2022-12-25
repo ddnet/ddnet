@@ -4694,6 +4694,11 @@ int main(int argc, const char **argv)
 		}
 	}
 
+	// Register protocol and file extensions
+#if defined(CONF_FAMILY_WINDOWS)
+	pClient->ShellRegister();
+#endif
+
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
@@ -4887,3 +4892,40 @@ int CClient::UdpConnectivity(int NetType)
 	}
 	return Connectivity;
 }
+
+#if defined(CONF_FAMILY_WINDOWS)
+void CClient::ShellRegister()
+{
+	char aBinaryPath[IO_MAX_PATH_LENGTH];
+	Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
+	char aFullPath[IO_MAX_PATH_LENGTH];
+	if(fs_is_relative_path(aBinaryPath))
+	{
+		if(fs_getcwd(aFullPath, sizeof(aFullPath)))
+		{
+			str_append(aFullPath, "/", sizeof(aFullPath));
+			str_append(aFullPath, aBinaryPath, sizeof(aFullPath));
+		}
+		else
+			aFullPath[0] = '\0';
+	}
+	else
+		str_copy(aFullPath, aBinaryPath);
+
+	if(!aFullPath[0])
+	{
+		dbg_msg("client", "Failed to register protocol and file extensions: could not determine absolute path");
+		return;
+	}
+
+	bool Updated = false;
+	if(!shell_register_protocol("ddnet", aFullPath, &Updated))
+		dbg_msg("client", "Failed to register ddnet protocol");
+	if(!shell_register_extension(".map", "Map File", GAME_NAME, aFullPath, &Updated))
+		dbg_msg("client", "Failed to register .map file extension");
+	if(!shell_register_extension(".demo", "Demo File", GAME_NAME, aFullPath, &Updated))
+		dbg_msg("client", "Failed to register .demo file extension");
+	if(Updated)
+		shell_update();
+}
+#endif

@@ -280,6 +280,10 @@ public:
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual bool InfoTaskRunning() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;
+
+#if defined(CONF_FAMILY_WINDOWS)
+	virtual void ShellRegister() = 0;
+#endif
 };
 
 class IGameClient : public IInterface

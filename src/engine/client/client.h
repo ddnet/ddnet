@@ -546,6 +546,10 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
 	int UdpConnectivity(int NetType) override;
+
+#if defined(CONF_FAMILY_WINDOWS)
+	void ShellRegister() override;
+#endif
 };
 
 #endif
