@@ -1096,7 +1096,7 @@ public:
 
 	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext = nullptr);
 	void UiDoPopupMenu();
-	void UiClosePopupMenus();
+	void UiClosePopupMenus(int Menus = 0);
 	bool UiPopupExists(void *pID);
 	bool UiPopupOpen();
 
