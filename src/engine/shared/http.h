@@ -5,6 +5,9 @@
 #include <atomic>
 #include <engine/shared/jobs.h>
 
+#define WIN32_LEAN_AND_MEAN
+#include <curl/system.h>
+
 typedef struct _json_value json_value;
 class IStorage;
 
@@ -71,8 +74,8 @@ class CHttpRequest : public IJob
 	char m_aDestAbsolute[IO_MAX_PATH_LENGTH] = {0};
 	char m_aDest[IO_MAX_PATH_LENGTH] = {0};
 
-	std::atomic<double> m_Size{0.0};
-	std::atomic<double> m_Current{0.0};
+	std::atomic<int64_t> m_Size{0};
+	std::atomic<int64_t> m_Current{0};
 	std::atomic<int> m_Progress{0};
 	HTTPLOG m_LogProgress = HTTPLOG::ALL;
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
@@ -89,7 +92,7 @@ class CHttpRequest : public IJob
 	// `DataSize`.
 	size_t OnData(char *pData, size_t DataSize);
 
-	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
+	static size_t ProgressCallback(void *pUser, curl_off_t DlTotal, curl_off_t DlCurr, curl_off_t UlTotal, curl_off_t UlCurr);
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
 protected:

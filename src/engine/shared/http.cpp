@@ -198,11 +198,6 @@ int CHttpRequest::RunImpl(CURL *pUser)
 		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(pHandle, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
-	long Protocols = CURLPROTO_HTTPS;
-	if(g_Config.m_HttpAllowInsecure)
-	{
-		Protocols |= CURLPROTO_HTTP;
-	}
 	char aErr[CURL_ERROR_SIZE];
 	curl_easy_setopt(pHandle, CURLOPT_ERRORBUFFER, aErr);
 
@@ -216,7 +211,21 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	}
 
 	curl_easy_setopt(pHandle, CURLOPT_SHARE, gs_pShare);
+#if LIBCURL_VERSION_NUM >= 0x075500 // 7.85.0
+	const char *pProtocols = "https";
+	if(g_Config.m_HttpAllowInsecure)
+	{
+		pProtocols = "https,hpp";
+	}
+	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS_STR, pProtocols);
+#else
+	long Protocols = CURLPROTO_HTTPS;
+	if(g_Config.m_HttpAllowInsecure)
+	{
+		Protocols |= CURLPROTO_HTTP;
+	}
 	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, Protocols);
+#endif
 	curl_easy_setopt(pHandle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pHandle, CURLOPT_MAXREDIRS, 4L);
 	curl_easy_setopt(pHandle, CURLOPT_FAILONERROR, 1L);
@@ -229,7 +238,7 @@ int CHttpRequest::RunImpl(CURL *pUser)
 	curl_easy_setopt(pHandle, CURLOPT_WRITEFUNCTION, WriteCallback);
 	curl_easy_setopt(pHandle, CURLOPT_NOPROGRESS, 0L);
 	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
-	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
+	curl_easy_setopt(pHandle, CURLOPT_XFERINFOFUNCTION, ProgressCallback);
 	curl_easy_setopt(pHandle, CURLOPT_IPRESOLVE, m_IpResolve == IPRESOLVE::V4 ? CURL_IPRESOLVE_V4 : m_IpResolve == IPRESOLVE::V6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_WHATEVER);
 	if(g_Config.m_Bindaddr[0] != '\0')
 	{
@@ -329,14 +338,14 @@ size_t CHttpRequest::WriteCallback(char *pData, size_t Size, size_t Number, void
 	return ((CHttpRequest *)pUser)->OnData(pData, Size * Number);
 }
 
-int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr)
+size_t CHttpRequest::ProgressCallback(void *pUser, curl_off_t DlTotal, curl_off_t DlCurr, curl_off_t UlTotal, curl_off_t UlCurr)
 {
 	CHttpRequest *pTask = (CHttpRequest *)pUser;
 	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
 	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
 	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
 	pTask->OnProgress();
-	return pTask->m_Abort ? -1 : 0;
+	return pTask->m_Abort;
 }
 
 int CHttpRequest::OnCompletion(int State)
