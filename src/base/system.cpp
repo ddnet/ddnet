@@ -1436,7 +1436,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-static char *windows_format_system_message(int error)
+static char *windows_format_system_message(unsigned long error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
@@ -4303,6 +4303,109 @@ CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
 CWindowsComLifecycle::~CWindowsComLifecycle()
 {
 	CoUninitialize();
+}
+
+static void windows_print_error(const char *system, const char *prefix, HRESULT error)
+{
+	char *message = windows_format_system_message(error);
+	dbg_msg(system, "%s: %s", prefix, message == nullptr ? "unknown error" : message);
+	free(message);
+}
+
+static std::wstring utf8_to_wstring(const char *str)
+{
+	const int orig_length = str_length(str);
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, NULL, 0);
+	std::wstring wide_string(size_needed, '\0');
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
+	return wide_string;
+}
+
+bool shell_register_protocol(const char *protocol_name, const char *executable)
+{
+	const std::wstring protocol_name_wide = utf8_to_wstring(protocol_name);
+	const std::wstring executable_wide = utf8_to_wstring(executable);
+
+	// Open registry key for protocol associations of the current user
+	HKEY handle_subkey_classes;
+	const LRESULT result_subkey_classes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", 0, KEY_ALL_ACCESS, &handle_subkey_classes);
+	if(result_subkey_classes != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error opening registry key", result_subkey_classes);
+		return false;
+	}
+
+	// Create the protocol key
+	HKEY handle_subkey_protocol;
+	const LRESULT result_subkey_protocol = RegCreateKeyExW(handle_subkey_classes, protocol_name_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_protocol, NULL);
+	RegCloseKey(handle_subkey_classes);
+	if(result_subkey_protocol != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_protocol);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the name of the display name of the protocol
+	const std::wstring value_protocol = L"URL:" + protocol_name_wide + L" Protocol";
+	const LRESULT result_value_protocol = RegSetValueExW(handle_subkey_protocol, L"", 0, REG_SZ, (BYTE *)value_protocol.c_str(), (value_protocol.length() + 1) * sizeof(wchar_t));
+	if(result_value_protocol != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_protocol);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Set the "URL Protocol" value, to specify that this key describes a URL protocol
+	const LRESULT result_value_empty = RegSetValueEx(handle_subkey_protocol, L"URL Protocol", 0, REG_SZ, (BYTE *)L"", sizeof(wchar_t));
+	if(result_value_empty != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_empty);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Create the "DefaultIcon" subkey
+	HKEY handle_subkey_icon;
+	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_protocol, L"DefaultIcon", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_icon, NULL);
+	if(result_subkey_icon != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_icon);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the icon associated with the protocol
+	const std::wstring value_icon = L"\"" + executable_wide + L"\",0";
+	const LRESULT result_value_icon = RegSetValueExW(handle_subkey_icon, L"", 0, REG_SZ, (BYTE *)value_icon.c_str(), (value_icon.length() + 1) * sizeof(wchar_t));
+	RegCloseKey(handle_subkey_icon);
+	if(result_value_icon != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_icon);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Create the "shell\open\command" subkeys
+	HKEY handle_subkey_shell_open_command;
+	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_protocol, L"shell\\open\\command", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_shell_open_command, NULL);
+	RegCloseKey(handle_subkey_protocol);
+	if(result_subkey_shell_open_command != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_shell_open_command);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the executable command associated with the protocol
+	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
+	const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
+	RegCloseKey(handle_subkey_shell_open_command);
+	if(result_value_executable != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_executable);
+		return false;
+	}
+
+	return true;
 }
 #endif
 

@@ -2570,6 +2570,18 @@ public:
 	CWindowsComLifecycle(bool HasWindow);
 	~CWindowsComLifecycle();
 };
+
+/**
+ * Registers a protocol handler.
+ *
+ * @ingroup Shell
+ *
+ * @param protocol_name The name of the protocol.
+ * @param executable The absolute path of the executable that will be associated with the protocol.
+ *
+ * @return true on success, false on failure.
+ */
+bool shell_register_protocol(const char *protocol_name, const char *executable);
 #endif
 
 /**
