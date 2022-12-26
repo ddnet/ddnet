@@ -3175,6 +3175,18 @@ void CClient::Run()
 			else
 				SetState(IClient::STATE_QUITTING); // SDL_QUIT
 		}
+
+		char aFile[IO_MAX_PATH_LENGTH];
+		if(Input()->GetDropFile(aFile, sizeof(aFile)))
+		{
+			if(str_startswith(aFile, CONNECTLINK_NO_SLASH))
+				HandleConnectLink(aFile);
+			else if(str_endswith(aFile, ".demo"))
+				HandleDemoPath(aFile);
+			else if(str_endswith(aFile, ".map"))
+				HandleMapPath(aFile);
+		}
+
 #if defined(CONF_AUTOUPDATE)
 		Updater()->Update();
 #endif

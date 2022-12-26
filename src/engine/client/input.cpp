@@ -60,6 +60,8 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
+
+	m_aDropFile[0] = 0;
 }
 
 void CInput::Init()
@@ -751,6 +753,11 @@ int CInput::Update()
 		// other messages
 		case SDL_QUIT:
 			return 1;
+
+		case SDL_DROPFILE:
+			str_copy(m_aDropFile, Event.drop.file);
+			SDL_free(Event.drop.file);
+			break;
 		}
 
 		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
@@ -775,6 +782,17 @@ int CInput::VideoRestartNeeded()
 		return 1;
 	}
 	return 0;
+}
+
+bool CInput::GetDropFile(char *aBuf, int Len)
+{
+	if(m_aDropFile[0] != '\0')
+	{
+		str_copy(aBuf, m_aDropFile, Len);
+		m_aDropFile[0] = '\0';
+		return true;
+	}
+	return false;
 }
 
 IEngineInput *CreateEngineInput()

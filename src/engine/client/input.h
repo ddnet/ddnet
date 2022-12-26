@@ -94,6 +94,8 @@ private:
 	void HandleJoystickAddedEvent(const SDL_JoyDeviceEvent &Event);
 	void HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event);
 
+	char m_aDropFile[IO_MAX_PATH_LENGTH];
+
 	// IME support
 	int m_NumTextInputInstances;
 	char m_aEditingText[INPUT_TEXT_SIZE];
@@ -138,6 +140,8 @@ public:
 	const char *GetIMEEditingText() override;
 	int GetEditingCursor() override;
 	void SetEditingPosition(float X, float Y) override;
+
+	bool GetDropFile(char *aBuf, int Len) override;
 };
 
 #endif
