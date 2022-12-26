@@ -324,6 +324,12 @@ void CServerBrowser::Filter()
 						if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, aFilterStr) ||
 							str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, aFilterStr))
 						{
+							if(g_Config.m_BrFilterConnectingPlayers &&
+								str_comp(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, "(connecting)") == 0 &&
+								m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan[0] == '\0')
+							{
+								continue;
+							}
 							m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
 							break;
 						}
