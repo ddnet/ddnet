@@ -414,8 +414,12 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
-		int NumInserted;
-		pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+		int NumDeleted;
+		pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize);
+		if(NumDeleted == 0)
+		{
+			dbg_msg("sql", "Warning: Rank got moved out of backup database, will show up as duplicate rank in MySQL");
+		}
 		return false;
 	}
 	if(w == Write::NORMAL_FAILED)
@@ -554,8 +558,17 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		// copy uuid, because mysql BindBlob doesn't support const buffers
 		CUuid TeamrankId = pData->m_TeamrankUuid;
 		pSqlServer->BindBlob(1, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
-		int NumInserted;
-		return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+		pSqlServer->Print();
+		int NumDeleted;
+		if(pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize))
+		{
+			return true;
+		}
+		if(NumDeleted == 0)
+		{
+			dbg_msg("sql", "Warning: Teamrank got moved out of backup database, will show up as duplicate teamrank in MySQL");
+		}
+		return false;
 	}
 	if(w == Write::NORMAL_FAILED)
 	{
@@ -570,6 +583,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			return true;
 		}
 		pSqlServer->BindBlob(1, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+		pSqlServer->Print();
 		if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
 		{
 			return true;
@@ -583,6 +597,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 			return true;
 		}
 		pSqlServer->BindBlob(1, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+		pSqlServer->Print();
 		return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 	}
 
