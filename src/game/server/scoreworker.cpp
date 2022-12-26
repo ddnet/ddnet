@@ -548,7 +548,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 	if(w == Write::NORMAL_SUCCEEDED)
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"DELETE FROM %s_teamrace_backup WHERE GameId=?",
+			"DELETE FROM %s_teamrace_backup WHERE ID=?",
 			pSqlServer->GetPrefix());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
@@ -576,7 +576,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		CUuid TeamrankId = pData->m_TeamrankUuid;
 
 		str_format(aBuf, sizeof(aBuf),
-			"INSERT INTO %s_teamrace SELECT * FROM %s_teamrace_backup WHERE GameId=?",
+			"INSERT INTO %s_teamrace SELECT * FROM %s_teamrace_backup WHERE ID=?",
 			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
@@ -590,7 +590,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		}
 
 		str_format(aBuf, sizeof(aBuf),
-			"DELETE FROM %s_teamrace_backup WHERE GameId=?",
+			"DELETE FROM %s_teamrace_backup WHERE ID=?",
 			pSqlServer->GetPrefix());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
