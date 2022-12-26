@@ -1,6 +1,7 @@
 #include "scoreworker.h"
-#include "base/system.h"
 
+#include <base/log.h>
+#include <base/system.h>
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/server/sql_string_helpers.h>
@@ -415,16 +416,19 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
 		int NumDeleted;
-		pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize);
+		if(pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize))
+		{
+			return true;
+		}
 		if(NumDeleted == 0)
 		{
-			dbg_msg("sql", "Warning: Rank got moved out of backup database, will show up as duplicate rank in MySQL");
+			log_warn("sql", "Rank got moved out of backup database, will show up as duplicate rank in MySQL");
 		}
 		return false;
 	}
 	if(w == Write::NORMAL_FAILED)
 	{
-		int NumInserted;
+		int NumUpdated;
 		// move to non-tmp table succeded. delete from backup again
 		str_format(aBuf, sizeof(aBuf),
 			"INSERT INTO %s_race SELECT * FROM %s_race_backup WHERE GameId=? AND Name=? AND Timestamp=%s",
@@ -437,7 +441,10 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
-		pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		{
+			return true;
+		}
 
 		// move to non-tmp table succeded. delete from backup again
 		str_format(aBuf, sizeof(aBuf),
@@ -451,7 +458,14 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		pSqlServer->BindString(2, pData->m_aName);
 		pSqlServer->BindString(3, pData->m_aTimestamp);
 		pSqlServer->Print();
-		pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		{
+			return true;
+		}
+		if(NumUpdated == 0)
+		{
+			log_warn("sql", "Rank got moved out of backup database, will show up as duplicate rank in MySQL");
+		}
 		return false;
 	}
 
@@ -566,7 +580,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 		}
 		if(NumDeleted == 0)
 		{
-			dbg_msg("sql", "Warning: Teamrank got moved out of backup database, will show up as duplicate teamrank in MySQL");
+			log_warn("sql", "Teamrank got moved out of backup database, will show up as duplicate teamrank in MySQL");
 		}
 		return false;
 	}
