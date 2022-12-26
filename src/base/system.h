@@ -2582,6 +2582,20 @@ public:
  * @return true on success, false on failure.
  */
 bool shell_register_protocol(const char *protocol_name, const char *executable);
+
+/**
+ * Registers a file extension.
+ *
+ * @ingroup Shell
+ *
+ * @param extension The file extension, including the leading dot.
+ * @param description A readable description for the file extension.
+ * @param executable_name A unique name that will used to describe the application.
+ * @param executable The absolute path of the executable that will be associated with the file extension.
+ *
+ * @return true on success, false on failure.
+ */
+bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable);
 #endif
 
 /**
