@@ -70,11 +70,6 @@
 
 #include "base/hash.h"
 
-// for msvc
-#ifndef PRIu64
-#define PRIu64 "I64u"
-#endif
-
 #include <chrono>
 #include <thread>
 
