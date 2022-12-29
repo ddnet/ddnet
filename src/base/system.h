@@ -2578,10 +2578,13 @@ public:
  *
  * @param protocol_name The name of the protocol.
  * @param executable The absolute path of the executable that will be associated with the protocol.
+ * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
  *
  * @return true on success, false on failure.
+ *
+ * @remark The caller must later call shell_update, iff the shell needs to be updated.
  */
-bool shell_register_protocol(const char *protocol_name, const char *executable);
+bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated);
 
 /**
  * Registers a file extension.
@@ -2592,10 +2595,22 @@ bool shell_register_protocol(const char *protocol_name, const char *executable);
  * @param description A readable description for the file extension.
  * @param executable_name A unique name that will used to describe the application.
  * @param executable The absolute path of the executable that will be associated with the file extension.
+ * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
  *
  * @return true on success, false on failure.
+ *
+ * @remark The caller must later call shell_update, iff the shell needs to be updated.
  */
-bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable);
+bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated);
+
+/**
+ * Notifies the system that a protocol or file extension has been changed and the shell needs to be updated.
+ *
+ * @ingroup Shell
+ * 
+ * @remark This is a potentially expensive operation, so it should only be called when necessary.
+ */
+void shell_update();
 #endif
 
 /**

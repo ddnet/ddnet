@@ -58,7 +58,9 @@
 #elif defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
+// 0x0501 (Windows XP) is required for mingw to get getaddrinfo to work
+// 0x0600 (Windows Vista) is required to use RegGetValueW
+#define _WIN32_WINNT 0x0600
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -70,6 +72,7 @@
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
+#include <shlobj.h> // SHChangeNotify
 #include <shlwapi.h>
 #include <wincrypt.h>
 #else
@@ -4321,7 +4324,7 @@ static std::wstring utf8_to_wstring(const char *str)
 	return wide_string;
 }
 
-bool shell_register_protocol(const char *protocol_name, const char *executable)
+bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
 {
 	const std::wstring protocol_name_wide = utf8_to_wstring(protocol_name);
 	const std::wstring executable_wide = utf8_to_wstring(executable);
@@ -4395,20 +4398,29 @@ bool shell_register_protocol(const char *protocol_name, const char *executable)
 		return false;
 	}
 
-	// Set the default value for the key, which specifies the executable command associated with the protocol
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_executable[MAX_PATH + 16];
+	DWORD old_size_executable = sizeof(old_value_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
 	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
-	const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
-	RegCloseKey(handle_subkey_shell_open_command);
-	if(result_value_executable != ERROR_SUCCESS)
+	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, value_executable.c_str()) != 0)
 	{
-		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_executable);
-		return false;
+		// Set the default value for the key, which specifies the executable command associated with the protocol
+		const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_shell_open_command);
+		if(result_value_executable != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_protocol", "Error setting registry value", result_value_executable);
+			return false;
+		}
+
+		*updated = true;
 	}
 
 	return true;
 }
 
-bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable)
+bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated)
 {
 	const std::wstring extension_wide = utf8_to_wstring(extension);
 	const std::wstring executable_name_wide = utf8_to_wstring(executable_name);
@@ -4489,15 +4501,24 @@ bool shell_register_extension(const char *extension, const char *description, co
 		return false;
 	}
 
-	// Set the default value for the key, which specifies the executable command associated with the application
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_executable[MAX_PATH + 16];
+	DWORD old_size_executable = sizeof(old_value_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
 	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
-	const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
-	RegCloseKey(handle_subkey_shell_open_command);
-	if(result_value_executable != ERROR_SUCCESS)
+	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, value_executable.c_str()) != 0)
 	{
-		windows_print_error("shell_register_extension", "Error setting registry value", result_value_executable);
-		RegCloseKey(handle_subkey_classes);
-		return false;
+		// Set the default value for the key, which specifies the executable command associated with the application
+		const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_shell_open_command);
+		if(result_value_executable != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_extension", "Error setting registry value", result_value_executable);
+			RegCloseKey(handle_subkey_classes);
+			return false;
+		}
+
+		*updated = true;
 	}
 
 	// Create the file extension key
@@ -4510,16 +4531,30 @@ bool shell_register_extension(const char *extension, const char *description, co
 		return false;
 	}
 
-	// Set the default value for the key, which associates the file extension with the program ID
-	const LRESULT result_value_application = RegSetValueExW(handle_subkey_extension, L"", 0, REG_SZ, (BYTE *)program_id_wide.c_str(), (program_id_wide.length() + 1) * sizeof(wchar_t));
-	RegCloseKey(handle_subkey_extension);
-	if(result_value_application != ERROR_SUCCESS)
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_application[128];
+	DWORD old_size_application = sizeof(old_value_application);
+	const LRESULT result_old_value_application = RegGetValueW(handle_subkey_extension, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_application, &old_size_application);
+	if(result_old_value_application != ERROR_SUCCESS || wcscmp(old_value_application, program_id_wide.c_str()) != 0)
 	{
-		windows_print_error("shell_register_extension", "Error setting registry value", result_value_application);
-		return false;
+		// Set the default value for the key, which associates the file extension with the program ID
+		const LRESULT result_value_application = RegSetValueExW(handle_subkey_extension, L"", 0, REG_SZ, (BYTE *)program_id_wide.c_str(), (program_id_wide.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_extension);
+		if(result_value_application != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_extension", "Error setting registry value", result_value_application);
+			return false;
+		}
+
+		*updated = true;
 	}
 
 	return true;
+}
+
+void shell_update()
+{
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
 }
 #endif
 
