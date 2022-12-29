@@ -59,7 +59,7 @@
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
 // 0x0501 (Windows XP) is required for mingw to get getaddrinfo to work
-// 0x0600 (Windows Vista) is required to use RegGetValueW
+// 0x0600 (Windows Vista) is required to use RegGetValueW and RegDeleteTreeW
 #define _WIN32_WINNT 0x0600
 #include <windows.h>
 #include <winsock2.h>
@@ -4547,6 +4547,33 @@ bool shell_register_extension(const char *extension, const char *description, co
 		}
 
 		*updated = true;
+	}
+
+	return true;
+}
+
+bool shell_unregister(const char *shell_class, bool *updated)
+{
+	const std::wstring class_wide = utf8_to_wstring(shell_class);
+
+	// Open registry key for protocol and file associations of the current user
+	HKEY handle_subkey_classes;
+	const LRESULT result_subkey_classes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", 0, KEY_ALL_ACCESS, &handle_subkey_classes);
+	if(result_subkey_classes != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_unregister", "Error opening registry key", result_subkey_classes);
+		return false;
+	}
+
+	// Delete the registry keys for the shell class (protocol or program ID)
+	LRESULT result_delete = RegDeleteTreeW(handle_subkey_classes, class_wide.c_str());
+	RegCloseKey(handle_subkey_classes);
+	if(result_delete != ERROR_SUCCESS && result_delete != ERROR_FILE_NOT_FOUND)
+	{
+		windows_print_error("shell_unregister", "Error deleting registry key", result_delete);
+		if(result_delete == ERROR_SUCCESS)
+			*updated = true;
+		return false;
 	}
 
 	return true;
