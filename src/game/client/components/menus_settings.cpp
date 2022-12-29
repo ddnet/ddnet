@@ -3433,6 +3433,17 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	SUIExEditBoxProperties EditProps;
 	EditProps.m_pEmptyText = Localize("Chat command (e.g. showall 1)");
 	UI()->DoEditBox(g_Config.m_ClRunOnJoin, &Button, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, IGraphics::CORNER_ALL, EditProps);
+
+#if defined(CONF_FAMILY_WINDOWS)
+	static CButtonContainer s_ButtonUnregisterShell;
+	Right.HSplitTop(10.0f, nullptr, &Right);
+	Right.HSplitTop(20.0f, &Button, &Right);
+	if(DoButton_Menu(&s_ButtonUnregisterShell, Localize("Unregister protocol and file extensions"), 0, &Button))
+	{
+		Client()->ShellUnregister();
+	}
+#endif
+
 	// Updater
 #if defined(CONF_AUTOUPDATE)
 	{

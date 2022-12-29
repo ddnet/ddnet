@@ -549,6 +549,7 @@ public:
 
 #if defined(CONF_FAMILY_WINDOWS)
 	void ShellRegister() override;
+	void ShellUnregister() override;
 #endif
 };
 

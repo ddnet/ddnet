@@ -283,6 +283,7 @@ public:
 
 #if defined(CONF_FAMILY_WINDOWS)
 	virtual void ShellRegister() = 0;
+	virtual void ShellUnregister() = 0;
 #endif
 };
 

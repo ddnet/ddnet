@@ -4928,4 +4928,17 @@ void CClient::ShellRegister()
 	if(Updated)
 		shell_update();
 }
+
+void CClient::ShellUnregister()
+{
+	bool Updated = false;
+	if(!shell_unregister("ddnet", &Updated))
+		dbg_msg("client", "Failed to unregister ddnet protocol");
+	if(!shell_unregister(GAME_NAME ".map", &Updated))
+		dbg_msg("client", "Failed to unregister .map file extension");
+	if(!shell_unregister(GAME_NAME ".demo", &Updated))
+		dbg_msg("client", "Failed to unregister .demo file extension");
+	if(Updated)
+		shell_update();
+}
 #endif
