@@ -2842,7 +2842,7 @@ int str_comp_filenames(const char *a, const char *b)
 				return 1;
 			else if(*b >= '0' && *b <= '9')
 				return -1;
-			else if(!(!result && *a && *b))
+			else if(result || *a == '\0' || *b == '\0')
 				return result;
 		}
 
