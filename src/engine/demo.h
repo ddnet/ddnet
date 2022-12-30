@@ -77,9 +77,9 @@ public:
 
 	enum ETickOffset
 	{
-		TICK_CURRENT = 1, // update the current tick again
-		TICK_PREVIOUS = 0, // go to the previous tick
-		TICK_NEXT = 3, // go to the next tick
+		TICK_CURRENT, // update the current tick again
+		TICK_PREVIOUS, // go to the previous tick
+		TICK_NEXT, // go to the next tick
 	};
 
 	~IDemoPlayer() {}

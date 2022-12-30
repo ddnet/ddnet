@@ -944,7 +944,27 @@ int CDemoPlayer::SeekTime(float Seconds)
 
 int CDemoPlayer::SeekTick(ETickOffset TickOffset)
 {
-	return SetPos(m_Info.m_Info.m_CurrentTick + (int)TickOffset);
+	int WantedTick;
+	switch(TickOffset)
+	{
+	case TICK_CURRENT:
+		WantedTick = m_Info.m_Info.m_CurrentTick;
+		break;
+	case TICK_PREVIOUS:
+		WantedTick = m_Info.m_PreviousTick;
+		break;
+	case TICK_NEXT:
+		WantedTick = m_Info.m_NextTick;
+		break;
+	default:
+		dbg_assert(false, "Invalid TickOffset");
+		WantedTick = -1;
+		break;
+	}
+
+	// +1 because SetPos will seek until the given tick is the next tick that
+	// will be played back, whereas we want the wanted tick to be played now.
+	return SetPos(WantedTick + 1);
 }
 
 int CDemoPlayer::SetPos(int WantedTick)
