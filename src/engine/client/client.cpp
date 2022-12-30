@@ -3978,7 +3978,10 @@ void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 	{
 		const char *pFilename = m_aDemoRecorder[Recorder].GetCurrentFilename();
 		if(pFilename[0] != '\0')
+		{
 			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
+			m_aDemoRecorder[Recorder].ClearCurrentFilename();
+		}
 	}
 }
 
