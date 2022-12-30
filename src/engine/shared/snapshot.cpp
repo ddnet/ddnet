@@ -681,6 +681,8 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 		if(Type < 0)
 			return pObj;
 	}
+	else if(Type < 0)
+		return nullptr;
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndID = (Type << 16) | ID;
