@@ -108,6 +108,9 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 
 void CScore::LoadBestTime()
 {
+	if(((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult)
+		return; // already in progress
+
 	auto LoadBestTimeResult = std::make_shared<CScoreLoadBestTimeResult>();
 	((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult = LoadBestTimeResult;
 

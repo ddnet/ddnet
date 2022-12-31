@@ -176,6 +176,14 @@ void CGameControllerDDRace::Tick()
 		if(m_pLoadBestTimeResult->m_Success)
 		{
 			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+				{
+					GameServer()->SendRecord(i);
+				}
+			}
 		}
 		m_pLoadBestTimeResult = nullptr;
 	}
