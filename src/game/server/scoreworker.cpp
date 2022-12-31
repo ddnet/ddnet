@@ -94,10 +94,10 @@ bool CTeamrank::SamePlayers(const std::vector<std::string> *pvSortedNames)
 	return true;
 }
 
-bool CScoreWorker::Init(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorker::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlInitData *pData = dynamic_cast<const CSqlInitData *>(pGameData);
-	CScoreInitResult *pResult = dynamic_cast<CScoreInitResult *>(pGameData->m_pResult.get());
+	auto pData = dynamic_cast<const CSqlLoadBestTimeData *>(pGameData);
+	auto pResult = dynamic_cast<CScoreLoadBestTimeResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
 	// get the best time

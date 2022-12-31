@@ -44,6 +44,7 @@ public:
 
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
 
+	void LoadBestTime();
 	void MapInfo(int ClientID, const char *pMapName);
 	void MapVote(int ClientID, const char *pMapName);
 	void LoadPlayerData(int ClientID, const char *pName = "");

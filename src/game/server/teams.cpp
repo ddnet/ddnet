@@ -779,7 +779,11 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 	bool NeedToSendNewServerRecord = false;
 	// update server best time
-	if(GameServer()->m_pController->m_CurrentRecord == 0 || Time < GameServer()->m_pController->m_CurrentRecord)
+	if(GameServer()->m_pController->m_CurrentRecord == 0)
+	{
+		GameServer()->Score()->LoadBestTime();
+	}
+	else if(Time < GameServer()->m_pController->m_CurrentRecord)
 	{
 		// check for nameless
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientID), "nameless tee"))

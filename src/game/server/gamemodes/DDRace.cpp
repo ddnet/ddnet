@@ -15,7 +15,7 @@
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
-	IGameController(pGameServer), m_Teams(pGameServer), m_pInitResult(nullptr)
+	IGameController(pGameServer), m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
 
@@ -171,13 +171,13 @@ void CGameControllerDDRace::Tick()
 	m_Teams.ProcessSaveTeam();
 	m_Teams.Tick();
 
-	if(m_pInitResult != nullptr && m_pInitResult->m_Completed)
+	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
 	{
-		if(m_pInitResult->m_Success)
+		if(m_pLoadBestTimeResult->m_Success)
 		{
-			m_CurrentRecord = m_pInitResult->m_CurrentRecord;
+			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
 		}
-		m_pInitResult = nullptr;
+		m_pLoadBestTimeResult = nullptr;
 	}
 }
 
