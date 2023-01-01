@@ -73,11 +73,6 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server())
 {
-	auto InitResult = std::make_shared<CScoreInitResult>();
-	auto Tmp = std::make_unique<CSqlInitData>(InitResult);
-	((CGameControllerDDRace *)(pGameServer->m_pController))->m_pInitResult = InitResult;
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
-
 	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
@@ -109,8 +104,19 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 		Server()->SetErrorShutdown("sql too few words in wordlist");
 		return;
 	}
+}
 
-	m_pPool->Execute(CScoreWorker::Init, std::move(Tmp), "load best time");
+void CScore::LoadBestTime()
+{
+	if(((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult)
+		return; // already in progress
+
+	auto LoadBestTimeResult = std::make_shared<CScoreLoadBestTimeResult>();
+	((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult = LoadBestTimeResult;
+
+	auto Tmp = std::make_unique<CSqlLoadBestTimeData>(LoadBestTimeResult);
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
 
 void CScore::LoadPlayerData(int ClientID, const char *pName)

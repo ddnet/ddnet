@@ -94,10 +94,10 @@ bool CTeamrank::SamePlayers(const std::vector<std::string> *pvSortedNames)
 	return true;
 }
 
-bool CScoreWorker::Init(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+bool CScoreWorker::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlInitData *pData = dynamic_cast<const CSqlInitData *>(pGameData);
-	CScoreInitResult *pResult = dynamic_cast<CScoreInitResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlLoadBestTimeData *>(pGameData);
+	auto *pResult = dynamic_cast<CScoreLoadBestTimeResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
 	// get the best time
@@ -126,8 +126,8 @@ bool CScoreWorker::Init(IDbConnection *pSqlServer, const ISqlData *pGameData, ch
 // update stuff
 bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	pResult->SetVariant(CScorePlayerResult::PLAYER_INFO);
 
 	char aBuf[512];
@@ -209,8 +209,8 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 
 bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	char aFuzzyMap[128];
@@ -270,8 +270,8 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	char aFuzzyMap[128];
 	str_copy(aFuzzyMap, pData->m_aName, sizeof(aFuzzyMap));
@@ -396,8 +396,8 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	char aBuf[1024];
@@ -555,7 +555,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
+	const auto *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
 	char aBuf[512];
 
@@ -724,8 +724,8 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 
 bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	char aServerLike[16];
 	str_format(aServerLike, sizeof(aServerLike), "%%%s%%", pData->m_aServer);
@@ -828,8 +828,8 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	// check sort method
 	char aBuf[2400];
@@ -911,8 +911,8 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 
 bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
@@ -998,8 +998,8 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
@@ -1085,8 +1085,8 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 
 bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
@@ -1177,8 +1177,8 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 
 bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(abs(pData->m_Offset) - 1, 0);
@@ -1292,8 +1292,8 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	char aBuf[512];
@@ -1337,8 +1337,8 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 
 bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	int LimitStart = maximum(pData->m_Offset - 1, 0);
@@ -1386,8 +1386,8 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 
 bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
-	CScoreRandomMapResult *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
 	if(0 <= pData->m_Stars && pData->m_Stars <= 5)
@@ -1436,8 +1436,8 @@ bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlRandomMapRequest *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
-	CScoreRandomMapResult *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlRandomMapRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
 	if(pData->m_Stars >= 0)
@@ -1500,8 +1500,8 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 
 bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
-	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
+	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 
 	if(w == Write::NORMAL_SUCCEEDED)
 	{
@@ -1647,8 +1647,8 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 {
 	if(w == Write::NORMAL_SUCCEEDED || Write::BACKUP_FIRST)
 		return false;
-	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
-	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
+	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 	pResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 
 	char aCurrentTimestamp[512];
@@ -1775,8 +1775,8 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const CSqlPlayerRequest *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
-	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	char aSaveLike[128] = "";
