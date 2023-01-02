@@ -4574,11 +4574,13 @@ bool shell_unregister(const char *shell_class, bool *updated)
 	// Delete the registry keys for the shell class (protocol or program ID)
 	LRESULT result_delete = RegDeleteTreeW(handle_subkey_classes, class_wide.c_str());
 	RegCloseKey(handle_subkey_classes);
-	if(result_delete != ERROR_SUCCESS && result_delete != ERROR_FILE_NOT_FOUND)
+	if(result_delete == ERROR_SUCCESS)
+	{
+		*updated = true;
+	}
+	else if(result_delete != ERROR_FILE_NOT_FOUND)
 	{
 		windows_print_error("shell_unregister", "Error deleting registry key", result_delete);
-		if(result_delete == ERROR_SUCCESS)
-			*updated = true;
 		return false;
 	}
 
