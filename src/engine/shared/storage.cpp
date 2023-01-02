@@ -677,6 +677,25 @@ public:
 		return pBuffer;
 	}
 
+	const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) override
+	{
+		char aBinaryPath[IO_MAX_PATH_LENGTH];
+		GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
+		if(fs_is_relative_path(aBinaryPath))
+		{
+			if(fs_getcwd(pBuffer, BufferSize))
+			{
+				str_append(pBuffer, "/", BufferSize);
+				str_append(pBuffer, aBinaryPath, BufferSize);
+			}
+			else
+				pBuffer[0] = '\0';
+		}
+		else
+			str_copy(pBuffer, aBinaryPath, BufferSize);
+		return pBuffer;
+	}
+
 	static IStorage *Create(int StorageType, int NumArgs, const char **ppArguments)
 	{
 		CStorage *pStorage = new CStorage();
