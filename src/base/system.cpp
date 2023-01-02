@@ -236,11 +236,6 @@ void mem_move(void *dest, const void *source, size_t size)
 	memmove(dest, source, size);
 }
 
-void mem_zero(void *block, size_t size)
-{
-	memset(block, 0, size);
-}
-
 int mem_comp(const void *a, const void *b, size_t size)
 {
 	return memcmp(a, b, size);

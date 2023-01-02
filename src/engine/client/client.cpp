@@ -4195,9 +4195,7 @@ void CClient::RegisterCommands()
 
 static CClient *CreateClient()
 {
-	CClient *pClient = static_cast<CClient *>(malloc(sizeof(*pClient)));
-	mem_zero(pClient, sizeof(CClient));
-	return new(pClient) CClient;
+	return new CClient;
 }
 
 void CClient::HandleConnectAddress(const NETADDR *pAddr)
@@ -4369,8 +4367,7 @@ int main(int argc, const char **argv)
 	CleanerFunctions.emplace([pKernel, pClient]() {
 		pKernel->Shutdown();
 		delete pKernel;
-		pClient->~CClient();
-		free(pClient);
+		delete pClient;
 	});
 
 	const std::thread::id MainThreadId = std::this_thread::get_id();
