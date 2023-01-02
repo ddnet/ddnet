@@ -4414,6 +4414,10 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 
 		*updated = true;
 	}
+	else
+	{
+		RegCloseKey(handle_subkey_shell_open_command);
+	}
 
 	return true;
 }
@@ -4545,6 +4549,10 @@ bool shell_register_extension(const char *extension, const char *description, co
 		}
 
 		*updated = true;
+	}
+	else
+	{
+		RegCloseKey(handle_subkey_extension);
 	}
 
 	return true;
