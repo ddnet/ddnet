@@ -58,7 +58,9 @@
 #elif defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
+// 0x0501 (Windows XP) is required for mingw to get getaddrinfo to work
+// 0x0600 (Windows Vista) is required to use RegGetValueW and RegDeleteTreeW
+#define _WIN32_WINNT 0x0600
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -70,6 +72,7 @@
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
+#include <shlobj.h> // SHChangeNotify
 #include <shlwapi.h>
 #include <wincrypt.h>
 #else
@@ -1436,7 +1439,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-static char *windows_format_system_message(int error)
+static char *windows_format_system_message(unsigned long error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
@@ -4301,6 +4304,282 @@ CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
 CWindowsComLifecycle::~CWindowsComLifecycle()
 {
 	CoUninitialize();
+}
+
+static void windows_print_error(const char *system, const char *prefix, HRESULT error)
+{
+	char *message = windows_format_system_message(error);
+	dbg_msg(system, "%s: %s", prefix, message == nullptr ? "unknown error" : message);
+	free(message);
+}
+
+static std::wstring utf8_to_wstring(const char *str)
+{
+	const int orig_length = str_length(str);
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, NULL, 0);
+	std::wstring wide_string(size_needed, '\0');
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
+	return wide_string;
+}
+
+bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
+{
+	const std::wstring protocol_name_wide = utf8_to_wstring(protocol_name);
+	const std::wstring executable_wide = utf8_to_wstring(executable);
+
+	// Open registry key for protocol associations of the current user
+	HKEY handle_subkey_classes;
+	const LRESULT result_subkey_classes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", 0, KEY_ALL_ACCESS, &handle_subkey_classes);
+	if(result_subkey_classes != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error opening registry key", result_subkey_classes);
+		return false;
+	}
+
+	// Create the protocol key
+	HKEY handle_subkey_protocol;
+	const LRESULT result_subkey_protocol = RegCreateKeyExW(handle_subkey_classes, protocol_name_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_protocol, NULL);
+	RegCloseKey(handle_subkey_classes);
+	if(result_subkey_protocol != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_protocol);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the name of the display name of the protocol
+	const std::wstring value_protocol = L"URL:" + protocol_name_wide + L" Protocol";
+	const LRESULT result_value_protocol = RegSetValueExW(handle_subkey_protocol, L"", 0, REG_SZ, (BYTE *)value_protocol.c_str(), (value_protocol.length() + 1) * sizeof(wchar_t));
+	if(result_value_protocol != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_protocol);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Set the "URL Protocol" value, to specify that this key describes a URL protocol
+	const LRESULT result_value_empty = RegSetValueEx(handle_subkey_protocol, L"URL Protocol", 0, REG_SZ, (BYTE *)L"", sizeof(wchar_t));
+	if(result_value_empty != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_empty);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Create the "DefaultIcon" subkey
+	HKEY handle_subkey_icon;
+	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_protocol, L"DefaultIcon", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_icon, NULL);
+	if(result_subkey_icon != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_icon);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the icon associated with the protocol
+	const std::wstring value_icon = L"\"" + executable_wide + L"\",0";
+	const LRESULT result_value_icon = RegSetValueExW(handle_subkey_icon, L"", 0, REG_SZ, (BYTE *)value_icon.c_str(), (value_icon.length() + 1) * sizeof(wchar_t));
+	RegCloseKey(handle_subkey_icon);
+	if(result_value_icon != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error setting registry value", result_value_icon);
+		RegCloseKey(handle_subkey_protocol);
+		return false;
+	}
+
+	// Create the "shell\open\command" subkeys
+	HKEY handle_subkey_shell_open_command;
+	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_protocol, L"shell\\open\\command", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_shell_open_command, NULL);
+	RegCloseKey(handle_subkey_protocol);
+	if(result_subkey_shell_open_command != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_shell_open_command);
+		return false;
+	}
+
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_executable[MAX_PATH + 16];
+	DWORD old_size_executable = sizeof(old_value_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
+	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
+	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, value_executable.c_str()) != 0)
+	{
+		// Set the default value for the key, which specifies the executable command associated with the protocol
+		const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_shell_open_command);
+		if(result_value_executable != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_protocol", "Error setting registry value", result_value_executable);
+			return false;
+		}
+
+		*updated = true;
+	}
+
+	return true;
+}
+
+bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated)
+{
+	const std::wstring extension_wide = utf8_to_wstring(extension);
+	const std::wstring executable_name_wide = utf8_to_wstring(executable_name);
+	const std::wstring description_wide = executable_name_wide + L" " + utf8_to_wstring(description);
+	const std::wstring program_id_wide = executable_name_wide + extension_wide;
+	const std::wstring executable_wide = utf8_to_wstring(executable);
+
+	// Open registry key for file associations of the current user
+	HKEY handle_subkey_classes;
+	const LRESULT result_subkey_classes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", 0, KEY_ALL_ACCESS, &handle_subkey_classes);
+	if(result_subkey_classes != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_extension", "Error opening registry key", result_subkey_classes);
+		return false;
+	}
+
+	// Create the program ID key
+	HKEY handle_subkey_program_id;
+	const LRESULT result_subkey_program_id = RegCreateKeyExW(handle_subkey_classes, program_id_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_program_id, NULL);
+	if(result_subkey_program_id != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_extension", "Error creating registry key", result_subkey_program_id);
+		RegCloseKey(handle_subkey_classes);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the file type description for legacy applications
+	const LRESULT result_description_default = RegSetValueExW(handle_subkey_program_id, L"", 0, REG_SZ, (BYTE *)description_wide.c_str(), (description_wide.length() + 1) * sizeof(wchar_t));
+	if(result_description_default != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_extension", "Error setting registry value", result_description_default);
+		RegCloseKey(handle_subkey_program_id);
+		RegCloseKey(handle_subkey_classes);
+		return false;
+	}
+
+	// Set the "FriendlyTypeName" value, which specifies the file type description for modern applications
+	const LRESULT result_description_friendly = RegSetValueExW(handle_subkey_program_id, L"FriendlyTypeName", 0, REG_SZ, (BYTE *)description_wide.c_str(), (description_wide.length() + 1) * sizeof(wchar_t));
+	if(result_description_friendly != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_extension", "Error setting registry value", result_description_friendly);
+		RegCloseKey(handle_subkey_program_id);
+		RegCloseKey(handle_subkey_classes);
+		return false;
+	}
+
+	// Create the "DefaultIcon" subkey
+	HKEY handle_subkey_icon;
+	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_program_id, L"DefaultIcon", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_icon, NULL);
+	if(result_subkey_icon != ERROR_SUCCESS)
+	{
+		windows_print_error("register_protocol", "Error creating registry key", result_subkey_icon);
+		RegCloseKey(handle_subkey_program_id);
+		RegCloseKey(handle_subkey_classes);
+		return false;
+	}
+
+	// Set the default value for the key, which specifies the icon associated with the program ID
+	const std::wstring value_icon = L"\"" + executable_wide + L"\",0";
+	const LRESULT result_value_icon = RegSetValueExW(handle_subkey_icon, L"", 0, REG_SZ, (BYTE *)value_icon.c_str(), (value_icon.length() + 1) * sizeof(wchar_t));
+	RegCloseKey(handle_subkey_icon);
+	if(result_value_icon != ERROR_SUCCESS)
+	{
+		windows_print_error("register_protocol", "Error setting registry value", result_value_icon);
+		RegCloseKey(handle_subkey_program_id);
+		RegCloseKey(handle_subkey_classes);
+		return false;
+	}
+
+	// Create the "shell\open\command" subkeys
+	HKEY handle_subkey_shell_open_command;
+	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_program_id, L"shell\\open\\command", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_shell_open_command, NULL);
+	RegCloseKey(handle_subkey_program_id);
+	if(result_subkey_shell_open_command != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_extension", "Error creating registry key", result_subkey_shell_open_command);
+		RegCloseKey(handle_subkey_classes);
+		return false;
+	}
+
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_executable[MAX_PATH + 16];
+	DWORD old_size_executable = sizeof(old_value_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
+	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
+	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, value_executable.c_str()) != 0)
+	{
+		// Set the default value for the key, which specifies the executable command associated with the application
+		const LRESULT result_value_executable = RegSetValueExW(handle_subkey_shell_open_command, L"", 0, REG_SZ, (BYTE *)value_executable.c_str(), (value_executable.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_shell_open_command);
+		if(result_value_executable != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_extension", "Error setting registry value", result_value_executable);
+			RegCloseKey(handle_subkey_classes);
+			return false;
+		}
+
+		*updated = true;
+	}
+
+	// Create the file extension key
+	HKEY handle_subkey_extension;
+	const LRESULT result_subkey_extension = RegCreateKeyExW(handle_subkey_classes, extension_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_extension, NULL);
+	RegCloseKey(handle_subkey_classes);
+	if(result_subkey_extension != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_extension", "Error creating registry key", result_subkey_extension);
+		return false;
+	}
+
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_application[128];
+	DWORD old_size_application = sizeof(old_value_application);
+	const LRESULT result_old_value_application = RegGetValueW(handle_subkey_extension, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_application, &old_size_application);
+	if(result_old_value_application != ERROR_SUCCESS || wcscmp(old_value_application, program_id_wide.c_str()) != 0)
+	{
+		// Set the default value for the key, which associates the file extension with the program ID
+		const LRESULT result_value_application = RegSetValueExW(handle_subkey_extension, L"", 0, REG_SZ, (BYTE *)program_id_wide.c_str(), (program_id_wide.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_extension);
+		if(result_value_application != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_extension", "Error setting registry value", result_value_application);
+			return false;
+		}
+
+		*updated = true;
+	}
+
+	return true;
+}
+
+bool shell_unregister(const char *shell_class, bool *updated)
+{
+	const std::wstring class_wide = utf8_to_wstring(shell_class);
+
+	// Open registry key for protocol and file associations of the current user
+	HKEY handle_subkey_classes;
+	const LRESULT result_subkey_classes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", 0, KEY_ALL_ACCESS, &handle_subkey_classes);
+	if(result_subkey_classes != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_unregister", "Error opening registry key", result_subkey_classes);
+		return false;
+	}
+
+	// Delete the registry keys for the shell class (protocol or program ID)
+	LRESULT result_delete = RegDeleteTreeW(handle_subkey_classes, class_wide.c_str());
+	RegCloseKey(handle_subkey_classes);
+	if(result_delete != ERROR_SUCCESS && result_delete != ERROR_FILE_NOT_FOUND)
+	{
+		windows_print_error("shell_unregister", "Error deleting registry key", result_delete);
+		if(result_delete == ERROR_SUCCESS)
+			*updated = true;
+		return false;
+	}
+
+	return true;
+}
+
+void shell_update()
+{
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
 }
 #endif
 
