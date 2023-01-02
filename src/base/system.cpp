@@ -2834,9 +2834,11 @@ int str_comp_filenames(const char *a, const char *b)
 	{
 		if(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9')
 		{
+			result = 0;
 			do
 			{
-				result = *a - *b;
+				if(!result)
+					result = *a - *b;
 				++a;
 				++b;
 			} while(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9');

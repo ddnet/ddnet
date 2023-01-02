@@ -827,6 +827,12 @@ TEST(Str, CompFilename)
 	EXPECT_GT(str_comp_filenames("1b", "1a"), 0);
 	EXPECT_GT(str_comp_filenames("12a", "1B"), 0);
 	EXPECT_LT(str_comp_filenames("1B", "12a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "1B"), 0);
+	EXPECT_LT(str_comp_filenames("1B", "10a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "00B"), 0);
+	EXPECT_LT(str_comp_filenames("00B", "10a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "09B"), 0);
+	EXPECT_LT(str_comp_filenames("09B", "10a"), 0);
 	EXPECT_LT(str_comp_filenames("abc", "abcd"), 0);
 	EXPECT_GT(str_comp_filenames("abcd", "abc"), 0);
 	EXPECT_LT(str_comp_filenames("abc2", "abcd1"), 0);
@@ -840,6 +846,10 @@ TEST(Str, CompFilename)
 	EXPECT_GT(str_comp_filenames("file09", "file1"), 0);
 	EXPECT_LT(str_comp_filenames("file1", "file009"), 0);
 	EXPECT_GT(str_comp_filenames("file009", "file1"), 0);
+	EXPECT_GT(str_comp_filenames("file10", "file00"), 0);
+	EXPECT_LT(str_comp_filenames("file00", "file10"), 0);
+	EXPECT_GT(str_comp_filenames("file10", "file09"), 0);
+	EXPECT_LT(str_comp_filenames("file09", "file10"), 0);
 	EXPECT_LT(str_comp_filenames("file13", "file37"), 0);
 	EXPECT_GT(str_comp_filenames("file37", "file13"), 0);
 	EXPECT_LT(str_comp_filenames("file1.ext", "file09.ext"), 0);
@@ -851,6 +861,10 @@ TEST(Str, CompFilename)
 	EXPECT_GT(str_comp_filenames("file37.ext", "file13.ext"), 0);
 	EXPECT_LT(str_comp_filenames("FILE13.EXT", "file37.ext"), 0);
 	EXPECT_GT(str_comp_filenames("file37.ext", "FILE13.EXT"), 0);
+	EXPECT_GT(str_comp_filenames("file10.ext", "file00.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file00.ext", "file10.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file10.ext", "file09.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file09.ext", "file10.ext"), 0);
 	EXPECT_LT(str_comp_filenames("file42", "file1337"), 0);
 	EXPECT_GT(str_comp_filenames("file1337", "file42"), 0);
 	EXPECT_LT(str_comp_filenames("file42.ext", "file1337.ext"), 0);
