@@ -73,6 +73,8 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server())
 {
+	LoadBestTime();
+
 	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
