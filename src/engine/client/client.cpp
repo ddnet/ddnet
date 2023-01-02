@@ -4906,22 +4906,8 @@ int CClient::UdpConnectivity(int NetType)
 #if defined(CONF_FAMILY_WINDOWS)
 void CClient::ShellRegister()
 {
-	char aBinaryPath[IO_MAX_PATH_LENGTH];
-	Storage()->GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
 	char aFullPath[IO_MAX_PATH_LENGTH];
-	if(fs_is_relative_path(aBinaryPath))
-	{
-		if(fs_getcwd(aFullPath, sizeof(aFullPath)))
-		{
-			str_append(aFullPath, "/", sizeof(aFullPath));
-			str_append(aFullPath, aBinaryPath, sizeof(aFullPath));
-		}
-		else
-			aFullPath[0] = '\0';
-	}
-	else
-		str_copy(aFullPath, aBinaryPath);
-
+	Storage()->GetBinaryPathAbsolute(PLAT_CLIENT_EXEC, aFullPath, sizeof(aFullPath));
 	if(!aFullPath[0])
 	{
 		dbg_msg("client", "Failed to register protocol and file extensions: could not determine absolute path");
@@ -4935,19 +4921,31 @@ void CClient::ShellRegister()
 		dbg_msg("client", "Failed to register .map file extension");
 	if(!shell_register_extension(".demo", "Demo File", GAME_NAME, aFullPath, &Updated))
 		dbg_msg("client", "Failed to register .demo file extension");
+	if(!shell_register_application(GAME_NAME, aFullPath, &Updated))
+		dbg_msg("client", "Failed to register application");
 	if(Updated)
 		shell_update();
 }
 
 void CClient::ShellUnregister()
 {
+	char aFullPath[IO_MAX_PATH_LENGTH];
+	Storage()->GetBinaryPathAbsolute(PLAT_CLIENT_EXEC, aFullPath, sizeof(aFullPath));
+	if(!aFullPath[0])
+	{
+		dbg_msg("client", "Failed to unregister protocol and file extensions: could not determine absolute path");
+		return;
+	}
+
 	bool Updated = false;
-	if(!shell_unregister("ddnet", &Updated))
+	if(!shell_unregister_class("ddnet", &Updated))
 		dbg_msg("client", "Failed to unregister ddnet protocol");
-	if(!shell_unregister(GAME_NAME ".map", &Updated))
+	if(!shell_unregister_class(GAME_NAME ".map", &Updated))
 		dbg_msg("client", "Failed to unregister .map file extension");
-	if(!shell_unregister(GAME_NAME ".demo", &Updated))
+	if(!shell_unregister_class(GAME_NAME ".demo", &Updated))
 		dbg_msg("client", "Failed to unregister .demo file extension");
+	if(!shell_unregister_application(aFullPath, &Updated))
+		dbg_msg("client", "Failed to unregister application");
 	if(Updated)
 		shell_update();
 }

@@ -4324,6 +4324,12 @@ static std::wstring utf8_to_wstring(const char *str)
 	return wide_string;
 }
 
+static std::wstring filename_from_path(const std::wstring &path)
+{
+	const size_t pos = path.find_last_of(L"/\\");
+	return pos == std::wstring::npos ? path : path.substr(pos + 1);
+}
+
 bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
 {
 	const std::wstring protocol_name_wide = utf8_to_wstring(protocol_name);
@@ -4415,6 +4421,10 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 		}
 
 		*updated = true;
+	}
+	else
+	{
+		RegCloseKey(handle_subkey_shell_open_command);
 	}
 
 	return true;
@@ -4548,11 +4558,64 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 		*updated = true;
 	}
+	else
+	{
+		RegCloseKey(handle_subkey_extension);
+	}
 
 	return true;
 }
 
-bool shell_unregister(const char *shell_class, bool *updated)
+bool shell_register_application(const char *name, const char *executable, bool *updated)
+{
+	const std::wstring name_wide = utf8_to_wstring(name);
+	const std::wstring executable_filename = filename_from_path(utf8_to_wstring(executable));
+
+	// Open registry key for application registrations
+	HKEY handle_subkey_applications;
+	const LRESULT result_subkey_applications = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes\\Applications", 0, KEY_ALL_ACCESS, &handle_subkey_applications);
+	if(result_subkey_applications != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_application", "Error opening registry key", result_subkey_applications);
+		return false;
+	}
+
+	// Create the program key
+	HKEY handle_subkey_program;
+	const LRESULT result_subkey_program = RegCreateKeyExW(handle_subkey_applications, executable_filename.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_program, NULL);
+	RegCloseKey(handle_subkey_applications);
+	if(result_subkey_program != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_register_application", "Error creating registry key", result_subkey_program);
+		return false;
+	}
+
+	// Get the previous default value for the key, so we can determine if it changed
+	wchar_t old_value_executable[MAX_PATH];
+	DWORD old_size_executable = sizeof(old_value_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_program, NULL, L"FriendlyAppName", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
+	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, name_wide.c_str()) != 0)
+	{
+		// Set the "FriendlyAppName" value, which specifies the displayed name of the application
+		const LRESULT result_program_name = RegSetValueExW(handle_subkey_program, L"FriendlyAppName", 0, REG_SZ, (BYTE *)name_wide.c_str(), (name_wide.length() + 1) * sizeof(wchar_t));
+		RegCloseKey(handle_subkey_program);
+		if(result_program_name != ERROR_SUCCESS)
+		{
+			windows_print_error("shell_register_application", "Error setting registry value", result_program_name);
+			return false;
+		}
+
+		*updated = true;
+	}
+	else
+	{
+		RegCloseKey(handle_subkey_program);
+	}
+
+	return true;
+}
+
+bool shell_unregister_class(const char *shell_class, bool *updated)
 {
 	const std::wstring class_wide = utf8_to_wstring(shell_class);
 
@@ -4561,18 +4624,49 @@ bool shell_unregister(const char *shell_class, bool *updated)
 	const LRESULT result_subkey_classes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes", 0, KEY_ALL_ACCESS, &handle_subkey_classes);
 	if(result_subkey_classes != ERROR_SUCCESS)
 	{
-		windows_print_error("shell_unregister", "Error opening registry key", result_subkey_classes);
+		windows_print_error("shell_unregister_class", "Error opening registry key", result_subkey_classes);
 		return false;
 	}
 
 	// Delete the registry keys for the shell class (protocol or program ID)
 	LRESULT result_delete = RegDeleteTreeW(handle_subkey_classes, class_wide.c_str());
 	RegCloseKey(handle_subkey_classes);
-	if(result_delete != ERROR_SUCCESS && result_delete != ERROR_FILE_NOT_FOUND)
+	if(result_delete == ERROR_SUCCESS)
 	{
-		windows_print_error("shell_unregister", "Error deleting registry key", result_delete);
-		if(result_delete == ERROR_SUCCESS)
-			*updated = true;
+		*updated = true;
+	}
+	else if(result_delete != ERROR_FILE_NOT_FOUND)
+	{
+		windows_print_error("shell_unregister_class", "Error deleting registry key", result_delete);
+		return false;
+	}
+
+	return true;
+}
+
+bool shell_unregister_application(const char *executable, bool *updated)
+{
+	const std::wstring executable_filename = filename_from_path(utf8_to_wstring(executable));
+
+	// Open registry key for application registrations
+	HKEY handle_subkey_applications;
+	const LRESULT result_subkey_applications = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Classes\\Applications", 0, KEY_ALL_ACCESS, &handle_subkey_applications);
+	if(result_subkey_applications != ERROR_SUCCESS)
+	{
+		windows_print_error("shell_unregister_application", "Error opening registry key", result_subkey_applications);
+		return false;
+	}
+
+	// Delete the registry keys for the application description
+	LRESULT result_delete = RegDeleteTreeW(handle_subkey_applications, executable_filename.c_str());
+	RegCloseKey(handle_subkey_applications);
+	if(result_delete == ERROR_SUCCESS)
+	{
+		*updated = true;
+	}
+	else if(result_delete != ERROR_FILE_NOT_FOUND)
+	{
+		windows_print_error("shell_unregister_application", "Error deleting registry key", result_delete);
 		return false;
 	}
 
