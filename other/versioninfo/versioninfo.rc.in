@@ -1,0 +1,38 @@
+#include <winver.h>
+#include <ntdef.h>
+
+#if CONF_DEBUG
+#define VER_DEBUG VS_FF_DEBUG
+#else
+#define VER_DEBUG 0
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION       ${VERSION_MAJOR},${VERSION_MINOR},${VERSION_PATCH},0
+PRODUCTVERSION    ${VERSION_MAJOR},${VERSION_MINOR},${VERSION_PATCH},0
+FILEFLAGSMASK     VS_FFI_FILEFLAGSMASK
+FILEFLAGS         VER_DEBUG
+FILEOS            VOS__WINDOWS32
+FILETYPE          VFT_APP
+FILESUBTYPE       VFT2_UNKNOWN
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904B0"
+		BEGIN
+		VALUE "Comments",         "${VERSION_EXECUTABLE}\0"
+		VALUE "CompanyName",      "${VERSION_COMPANY}\0"
+		VALUE "FileDescription",  "${VERSION_EXECUTABLE}\0"
+		VALUE "FileVersion",      "${VERSION}\0"
+		VALUE "InternalName",     "${VERSION_EXECUTABLE}\0"
+		VALUE "LegalCopyright",   "Copyright (C) ${VERSION_COMPANY}\0"
+		VALUE "OriginalFilename", "${VERSION_EXECUTABLE}.exe\0"
+		VALUE "ProductName",      "${VERSION_EXECUTABLE}\0"
+		VALUE "ProductVersion",   "${VERSION}\0"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409, 1200
+	END
+END
