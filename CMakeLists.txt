@@ -347,6 +347,8 @@ if(NOT MSVC AND NOT HAIKU)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety-negative)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdynamic-class-memaccess) # clang
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wclass-memaccess) # gcc
   add_linker_flag_if_supported(OUR_FLAGS_LINK -Wno-alloc-size-larger-than) # save.cpp with LTO
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurrences
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurrences
@@ -2693,6 +2695,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     jobs.cpp
     json.cpp
     mapbugs.cpp
+    memory.cpp
     name_ban.cpp
     net.cpp
     netaddr.cpp

@@ -216,11 +216,6 @@ void mem_move(void *dest, const void *source, unsigned size)
 	memmove(dest, source, size);
 }
 
-void mem_zero(void *block, unsigned size)
-{
-	memset(block, 0, size);
-}
-
 IOHANDLE io_open_impl(const char *filename, int flags)
 {
 	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");

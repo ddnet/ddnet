@@ -4438,9 +4438,8 @@ void CClient::RegisterCommands()
 
 static CClient *CreateClient()
 {
-	CClient *pClient = static_cast<CClient *>(malloc(sizeof(*pClient)));
-	mem_zero(pClient, sizeof(CClient));
-	return new(pClient) CClient;
+	CClient *pClient = new CClient();
+	return pClient;
 }
 
 void CClient::HandleConnectAddress(const NETADDR *pAddr)
@@ -4630,8 +4629,7 @@ int main(int argc, const char **argv)
 		if(RegisterFail)
 		{
 			delete pKernel;
-			pClient->~CClient();
-			free(pClient);
+			delete pClient;
 			return -1;
 		}
 	}
@@ -4726,8 +4724,7 @@ int main(int argc, const char **argv)
 
 	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
 
-	pClient->~CClient();
-	free(pClient);
+	delete pClient;
 
 	NotificationsUninit();
 	secure_random_uninit();
