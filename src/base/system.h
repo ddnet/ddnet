@@ -2615,6 +2615,21 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated);
 
 /**
+ * Registers an application.
+ *
+ * @ingroup Shell
+ *
+ * @param name Readable name of the application.
+ * @param executable The absolute path of the executable being registered.
+ * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ *
+ * @return true on success, false on failure.
+ *
+ * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ */
+bool shell_register_application(const char *name, const char *executable, bool *updated);
+
+/**
  * Unregisters a protocol or file extension handler.
  *
  * @ingroup Shell
@@ -2628,7 +2643,21 @@ bool shell_register_extension(const char *extension, const char *description, co
  *
  * @remark The caller must later call shell_update, iff the shell needs to be updated.
  */
-bool shell_unregister(const char *shell_class, bool *updated);
+bool shell_unregister_class(const char *shell_class, bool *updated);
+
+/**
+ * Unregisters an application.
+ *
+ * @ingroup Shell
+ *
+ * @param executable The absolute path of the executable being unregistered.
+ * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ *
+ * @return true on success, false on failure.
+ *
+ * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ */
+bool shell_unregister_application(const char *executable, bool *updated);
 
 /**
  * Notifies the system that a protocol or file extension has been changed and the shell needs to be updated.
