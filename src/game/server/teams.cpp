@@ -24,6 +24,7 @@ void CGameTeams::Reset()
 		m_aTeeStarted[i] = false;
 		m_aTeeFinished[i] = false;
 		m_aLastChat[i] = 0;
+		SendTeamsState(i);
 	}
 
 	for(int i = 0; i < NUM_TEAMS; ++i)

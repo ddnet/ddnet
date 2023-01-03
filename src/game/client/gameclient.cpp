@@ -810,18 +810,10 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		for(i = 0; i < MAX_CLIENTS; i++)
 		{
-			int Team = pUnpacker->GetInt();
-			bool WentWrong = false;
-
-			if(pUnpacker->Error())
-				WentWrong = true;
-
-			if(!WentWrong && Team >= TEAM_FLOCK && Team <= TEAM_SUPER)
+			const int Team = pUnpacker->GetInt();
+			if(!pUnpacker->Error() && Team >= TEAM_FLOCK && Team <= TEAM_SUPER)
 				m_Teams.Team(i, Team);
 			else
-				WentWrong = true;
-
-			if(WentWrong)
 			{
 				m_Teams.Team(i, 0);
 				break;
@@ -881,6 +873,17 @@ void CGameClient::OnStartGame()
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && !g_Config.m_ClAutoDemoOnConnect)
 		Client()->DemoRecorder_HandleAutoStart();
 	m_Statboard.OnReset();
+}
+
+void CGameClient::OnStartRound()
+{
+	// In GamePaused or GameOver state RoundStartTick is updated on each tick
+	// hence no need to reset stats until player leaves GameOver
+	// and it would be a mistake to reset stats after or during the pause
+	m_Statboard.OnReset();
+
+	// Restart automatic race demo recording
+	m_RaceDemo.OnReset();
 }
 
 void CGameClient::OnFlagGrab(int TeamID)
@@ -1404,14 +1407,10 @@ void CGameClient::OnNewSnapshot()
 					OnGameOver();
 				else if(s_GameOver && !CurrentTickGameOver)
 					OnStartGame();
-				// Reset statboard when new round is started (RoundStartTick changed)
+				// Handle case that a new round is started (RoundStartTick changed)
 				// New round is usually started after `restart` on server
-				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick
-					// In GamePaused or GameOver state RoundStartTick is updated on each tick
-					// hence no need to reset stats until player leaves GameOver
-					// and it would be a mistake to reset stats after or during the pause
-					&& !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED || s_GamePaused))
-					m_Statboard.OnReset();
+				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick && !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED || s_GamePaused))
+					OnStartRound();
 				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_GameOver = CurrentTickGameOver;
 				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
