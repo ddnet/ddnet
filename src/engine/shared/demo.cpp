@@ -65,8 +65,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		return -1;
 	}
 
-	CDemoHeader Header;
-	CTimelineMarkers TimelineMarkers;
 	if(m_File)
 	{
 		io_close(DemoFile);
@@ -130,6 +128,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		MapSize = io_length(MapFile);
 
 	// write header
+	CDemoHeader Header;
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
@@ -141,6 +140,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	// Header.m_Length - add this on stop
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
+
+	CTimelineMarkers TimelineMarkers;
+	mem_zero(&TimelineMarkers, sizeof(TimelineMarkers));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
 	//Write Sha256
