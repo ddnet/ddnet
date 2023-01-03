@@ -41,7 +41,6 @@ void CGameTeams::ResetRoundState(int Team)
 	ResetInvited(Team);
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
-	m_aLastSwap[Team] = 0;
 
 	m_aPractice[Team] = false;
 	m_aTeamUnfinishableKillTick[Team] = -1;
@@ -51,6 +50,7 @@ void CGameTeams::ResetRoundState(int Team)
 		{
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			GameServer()->m_apPlayers[i]->m_SwapTargetsClientID = -1;
+			m_aLastSwap[i] = 0;
 		}
 	}
 }
@@ -861,7 +861,7 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 	}
 
 	pPlayer->m_SwapTargetsClientID = pTargetPlayer->GetCID();
-	m_aLastSwap[Team] = Server()->Tick();
+	m_aLastSwap[pPlayer->GetCID()] = Server()->Tick();
 }
 
 void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPlayer, int Team)
@@ -871,7 +871,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 
 	char aBuf[128];
 
-	int Since = (Server()->Tick() - m_aLastSwap[Team]) / Server()->TickSpeed();
+	int Since = (Server()->Tick() - m_aLastSwap[pTargetPlayer->GetCID()]) / Server()->TickSpeed();
 	if(Since < g_Config.m_SvSaveSwapGamesDelay)
 	{
 		str_format(aBuf, sizeof(aBuf),
