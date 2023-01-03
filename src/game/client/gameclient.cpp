@@ -810,18 +810,10 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		for(i = 0; i < MAX_CLIENTS; i++)
 		{
-			int Team = pUnpacker->GetInt();
-			bool WentWrong = false;
-
-			if(pUnpacker->Error())
-				WentWrong = true;
-
-			if(!WentWrong && Team >= TEAM_FLOCK && Team <= TEAM_SUPER)
+			const int Team = pUnpacker->GetInt();
+			if(!pUnpacker->Error() && Team >= TEAM_FLOCK && Team <= TEAM_SUPER)
 				m_Teams.Team(i, Team);
 			else
-				WentWrong = true;
-
-			if(WentWrong)
 			{
 				m_Teams.Team(i, 0);
 				break;
