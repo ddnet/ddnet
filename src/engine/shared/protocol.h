@@ -47,7 +47,7 @@ enum
 	NETMSG_RCON_AUTH_STATUS, // result of the authentication
 	NETMSG_RCON_LINE, // line that should be printed to the remote console
 
-	NETMSG_AUTH_CHALLANGE, //
+	NETMSG_AUTH_CHALLENGE, //
 	NETMSG_AUTH_RESULT, //
 
 	// sent by client

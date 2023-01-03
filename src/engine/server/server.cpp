@@ -748,7 +748,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId += 1;
 			else if(MsgId == NETMSG_RCON_LINE)
 				MsgId = 13;
-			else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
+			else if(MsgId >= NETMSG_AUTH_CHALLENGE && MsgId <= NETMSG_AUTH_RESULT)
 				MsgId += 4;
 			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 				MsgId += 4;
