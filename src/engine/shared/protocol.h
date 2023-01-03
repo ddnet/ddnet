@@ -3,8 +3,6 @@
 #ifndef ENGINE_SHARED_PROTOCOL_H
 #define ENGINE_SHARED_PROTOCOL_H
 
-#include <base/system.h>
-
 /*
 	Connection diagram - How the initialization works.
 
@@ -47,7 +45,7 @@ enum
 	NETMSG_RCON_AUTH_STATUS, // result of the authentication
 	NETMSG_RCON_LINE, // line that should be printed to the remote console
 
-	NETMSG_AUTH_CHALLANGE, //
+	NETMSG_AUTH_CHALLENGE, //
 	NETMSG_AUTH_RESULT, //
 
 	// sent by client
@@ -87,6 +85,8 @@ enum
 	MAX_CLIENTS = 64,
 	VANILLA_MAX_CLIENTS = 16,
 	MAX_CHECKPOINTS = 25,
+	MIN_TICK = 0,
+	MAX_TICK = 0x6FFFFFFF,
 
 	MAX_INPUT_SIZE = 128,
 	MAX_SNAPSHOT_PACKSIZE = 900,
