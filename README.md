@@ -134,11 +134,19 @@ Default value is ON for Windows x86\_64 and Linux, and OFF for Windows x86 and m
 Use the Ninja build system instead of Make. This automatically parallelizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
 
 * **-DCMAKE_CXX_LINK_FLAGS=[FLAGS]** <br>
-Custom flags to set for compiler when linking. With clang++ as the compiler this can be [used to link](https://github.com/rui314/mold#how-to-use) with [mold](https://github.com/rui314/mold), speeds up linking by a factor of ~10:
+Custom flags to set for compiler when linking.
 
-```bash
-CC=clang CXX=clang++ cmake -DCMAKE_CXX_LINK_FLAGS="--ld-path=/usr/bin/mold" .
-```
+* **-DEXCEPTION_HANDLING=[ON|OFF]** <br>
+Enable exception handling (only works with Windows as of now, uses DrMingw there). Default value is OFF.
+
+* **-DIPO=[ON|OFF]** <br>
+Enable interprocedural optimizations, also known as Link Time Optimization (LTO). Default value is OFF.
+
+* **-DFUSE_LD=[OFF|LINKER]** <br>
+Linker to use. Default value is OFF to try mold, lld, gold.
+
+* **-DSECURITY_COMPILER_FLAGS=[ON|OFF]** <br>
+Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
 
 Running tests (Debian/Ubuntu)
 -----------------------------
