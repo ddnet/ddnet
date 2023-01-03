@@ -977,7 +977,7 @@ void CGameTeams::ProcessSaveTeam()
 			if(Count(Team) > 0)
 			{
 				// load weak/strong order to prevent switching weak/strong while saving
-				m_apSaveTeamResult[Team]->m_SavedTeam.Load(Team, false);
+				m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, false);
 			}
 			break;
 		case CScoreSaveResult::LOAD_SUCCESS:
@@ -992,7 +992,7 @@ void CGameTeams::ProcessSaveTeam()
 			if(Count(Team) > 0)
 			{
 				// keep current weak/strong order as on some maps there is no other way of switching
-				m_apSaveTeamResult[Team]->m_SavedTeam.Load(Team, true);
+				m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, true);
 			}
 			char aSaveID[UUID_MAXSTRSIZE];
 			FormatUuid(m_apSaveTeamResult[Team]->m_SaveID, aSaveID, UUID_MAXSTRSIZE);

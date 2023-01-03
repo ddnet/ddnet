@@ -8,6 +8,7 @@
 
 class IGameController;
 class CGameContext;
+class CGameWorld;
 class CCharacter;
 class CSaveTeam;
 
@@ -123,7 +124,7 @@ private:
 class CSaveTeam
 {
 public:
-	CSaveTeam(IGameController *pController);
+	CSaveTeam();
 	~CSaveTeam();
 	char *GetString();
 	int GetMembersCount() const { return m_MembersCount; }
@@ -131,17 +132,16 @@ public:
 	int FromString(const char *pString);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
-	int Save(int Team);
-	void Load(int Team, bool KeepCurrentWeakStrong);
-	CSaveTee *m_pSavedTees;
+	int Save(CGameContext *pGameServer, int Team, bool Dry = false);
+	void Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong);
+
+	CSaveTee *m_pSavedTees = nullptr;
 
 	// returns true if an error occurred
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 
 private:
-	CCharacter *MatchCharacter(int ClientID, int SaveID, bool KeepCurrentCharacter);
-
-	IGameController *m_pController;
+	CCharacter *MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter);
 
 	char m_aString[65536];
 
@@ -151,13 +151,13 @@ private:
 		int m_EndTime;
 		int m_Type;
 	};
-	SSimpleSwitchers *m_pSwitchers;
+	SSimpleSwitchers *m_pSwitchers = nullptr;
 
-	int m_TeamState;
-	int m_MembersCount;
-	int m_HighestSwitchNumber;
-	int m_TeamLocked;
-	int m_Practice;
+	int m_TeamState = 0;
+	int m_MembersCount = 0;
+	int m_HighestSwitchNumber = 0;
+	int m_TeamLocked = 0;
+	int m_Practice = 0;
 };
 
 #endif // GAME_SERVER_SAVE_H

@@ -801,8 +801,8 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		return;
 
-	CSaveTeam SavedTeam(pSelf->m_pController);
-	int Result = SavedTeam.Save(pPlayer->GetTeam());
+	CSaveTeam SavedTeam;
+	int Result = SavedTeam.Save(pSelf, pPlayer->GetTeam(), true);
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 

@@ -150,6 +150,26 @@ void CGameWorld::Reset()
 	GameServer()->CreateAllEntities(false);
 }
 
+void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
+{
+	for(auto *pEnt : m_apFirstEntityTypes)
+	{
+		for(; pEnt;)
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			for(int i = 0; i < NumPlayers; i++)
+			{
+				if(pEnt->GetOwnerID() == PlayerIds[i])
+				{
+					RemoveEntity(pEnt);
+					pEnt->Destroy();
+				}
+			}
+			pEnt = m_pNextTraverseEntity;
+		}
+	}
+}
+
 void CGameWorld::RemoveEntities()
 {
 	// destroy objects marked for destruction

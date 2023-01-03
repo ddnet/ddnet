@@ -278,9 +278,9 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	if(pController->m_Teams.GetSaving(Team))
 		return;
 
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_SaveID = RandomUuid();
-	int Result = SaveResult->m_SavedTeam.Save(Team);
+	int Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
 	pController->m_Teams.SetSaving(Team, SaveResult);
@@ -332,7 +332,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
 		return;
 	}
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->m_Teams.SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);
