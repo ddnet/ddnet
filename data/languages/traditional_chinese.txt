@@ -1398,9 +1398,6 @@ UI controller sens.
 Controller jitter tolerance
 == 搖桿錯位容錯
 
-No controller found. Plug in a controller and restart the game.
-== 未檢測到任何控制器。請重試重新連接控制器並重啓游戲。
-
 Device
 == 輸入設備
 
@@ -1652,3 +1649,64 @@ Reset controls
 
 Are you sure that you want to reset the controls to their defaults?
 == 你確定要將當前的控制恢復至預設設定
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+Open the directory that contains the demo files
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the directory to add custom skins
+== 
+
+No controller found. Plug in a controller.
+== 
+
+Unregister protocol and file extensions
+== 
+
+Open the directory to add custom assets
+== 
