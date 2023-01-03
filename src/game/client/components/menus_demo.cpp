@@ -163,15 +163,15 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
 			str_append(aDemoName, ".demo", sizeof(aDemoName));
 
-			if(!str_endswith(m_aCurrentDemoFile, ".demo"))
-				str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
+			if(!str_endswith(m_DemoSliceInput.GetString(), ".demo"))
+				m_DemoSliceInput.Append(".demo");
 
-			if(str_comp(aDemoName, m_aCurrentDemoFile) == 0)
+			if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
 			else
 			{
 				char aPath[IO_MAX_PATH_LENGTH];
-				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
 
 				IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
 				const char *pStr = Localize("File already exists, do you want to overwrite it?");
@@ -207,8 +207,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		TextBox.VSplitLeft(20.0f, 0, &TextBox);
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
 		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_ML);
-		static float s_Offset = 0.0f;
-		if(UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset))
+		if(UI()->DoEditBox(&m_DemoSliceInput, &TextBox, 12.0f))
 		{
 			m_aDemoPlayerPopupHint[0] = '\0';
 		}
@@ -561,8 +560,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_SliceSaveButton;
 	if(DoButton_FontIcon(&s_SliceSaveButton, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
 	{
-		DemoPlayer()->GetDemoName(m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile));
-		str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
+		char aDemoName[IO_MAX_PATH_LENGTH];
+		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
+		m_DemoSliceInput.Set(aDemoName);
+		m_DemoSliceInput.Append(".demo");
+		UI()->SetActiveItem(&m_DemoSliceInput);
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
@@ -1142,9 +1144,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENAME_DEMO;
-				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				m_DemoRenameInput.Set(m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				UI()->SetActiveItem(&m_DemoRenameInput);
 				return;
 			}
 		}
@@ -1155,9 +1157,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(nullptr);
 				m_Popup = POPUP_RENDER_DEMO;
-				str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				m_DemoRenderInput.Set(m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				UI()->SetActiveItem(&m_DemoRenderInput);
 				return;
 			}
 		}

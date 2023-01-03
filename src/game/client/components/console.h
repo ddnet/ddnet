@@ -37,7 +37,7 @@ class CGameConsole : public CComponent
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
-		CLineInput m_Input;
+		CLineInputBuffered<512> m_Input;
 		const char *m_pName;
 		int m_Type;
 		int m_BacklogCurPage;
@@ -71,7 +71,7 @@ class CGameConsole : public CComponent
 
 		void ExecuteLine(const char *pLine);
 
-		void OnInput(const IInput::CEvent &Event);
+		bool OnInput(const IInput::CEvent &Event);
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
 
 		const char *GetString() const { return m_Input.GetString(); }
@@ -94,16 +94,15 @@ class CGameConsole : public CComponent
 	float m_StateChangeDuration;
 
 	bool m_MouseIsPress = false;
-	int m_MousePressX = 0;
-	int m_MousePressY = 0;
-	int m_MouseCurX = 0;
-	int m_MouseCurY = 0;
+	vec2 m_MousePress = vec2(0.0f, 0.0f);
+	vec2 m_MouseRelease = vec2(0.0f, 0.0f);
 	int m_CurSelStart = 0;
 	int m_CurSelEnd = 0;
 	bool m_HasSelection = false;
 	int m_NewLineCounter = 0;
+	bool m_WantsSelectionCopy = false;
 
-	int m_LastInputLineCount = 0;
+	float m_LastInputHeight = 0.0f;
 
 	void Toggle(int Type);
 	void Dump(int Type);

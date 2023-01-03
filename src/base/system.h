@@ -2386,7 +2386,7 @@ int str_utf8_check(const char *str);
 		- The string is treated as zero-terminated utf8 string.
 		- It's the user's responsibility to make sure the bounds are aligned.
 */
-void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count);
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count);
 
 /*
 	Function: str_next_token

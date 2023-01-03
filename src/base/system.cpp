@@ -3750,7 +3750,7 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
-void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count)
 {
 	const char *cursor = str;
 	*size = 0;
@@ -3761,7 +3761,7 @@ void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int
 		{
 			break;
 		}
-		if(cursor - str >= max_size)
+		if((size_t)(cursor - str) >= max_size)
 		{
 			break;
 		}

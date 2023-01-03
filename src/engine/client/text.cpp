@@ -803,16 +803,15 @@ public:
 
 		pCursor->m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
 		pCursor->m_SelectionHeightFactor = 1.0f;
-		pCursor->m_PressMouseX = 0;
-		pCursor->m_PressMouseY = 0;
-		pCursor->m_ReleaseMouseX = 0;
-		pCursor->m_ReleaseMouseY = 0;
+		pCursor->m_PressMouse = vec2(0.0f, 0.0f);
+		pCursor->m_ReleaseMouse = vec2(0.0f, 0.0f);
 		pCursor->m_SelectionStart = 0;
 		pCursor->m_SelectionEnd = 0;
 
 		pCursor->m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
 		pCursor->m_ForceCursorRendering = false;
 		pCursor->m_CursorCharacter = -1;
+		pCursor->m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
 	}
 
 	void MoveCursor(CTextCursor *pCursor, float x, float y) const override
@@ -857,15 +856,6 @@ public:
 		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, StrLength);
 		return Cursor.BoundingBox();
-	}
-
-	vec2 CaretPosition(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) override
-	{
-		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, Flags);
-		Cursor.m_LineWidth = LineWidth;
-		TextEx(&Cursor, pText, StrLength);
-		return vec2(Cursor.m_X, Cursor.m_Y);
 	}
 
 	void TextColor(float r, float g, float b, float a) override
@@ -1102,18 +1092,18 @@ public:
 		int SelectionStartChar = -1;
 		int SelectionEndChar = -1;
 
-		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			return (LastCharX - LastCharWidth / 2 <= CursorX_ &&
-				       CharX + CharWidth / 2 > CursorX_ &&
-				       CharY - Size <= CursorY_ &&
-				       CharY > CursorY_) ||
+		auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
+			return (LastCharX - LastCharWidth / 2 <= CursorPos.x &&
+				       CharX + CharWidth / 2 > CursorPos.x &&
+				       CharY - Size <= CursorPos.y &&
+				       CharY > CursorPos.y) ||
 			       (CheckOuter &&
-				       CharY - Size > CursorY_);
+				       CharY - Size > CursorPos.y);
 		};
-		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckInsideChar(CheckOuter, CursorX_, CursorY_, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
+				if(CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 				{
 					SelectionChar = pCursor->m_GlyphCount;
 					SelectionStarted = !SelectionStarted;
@@ -1121,17 +1111,17 @@ public:
 				}
 			}
 		};
-		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float CharX, float CharWidth, float CharY) -> bool {
-			return (CharX + CharWidth / 2 > CursorX_ &&
-				       CharY - Size <= CursorY_ &&
-				       CharY > CursorY_) ||
+		auto &&CheckOutsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
+			return (CharX + CharWidth / 2 > CursorPos.x &&
+				       CharY - Size <= CursorPos.y &&
+				       CharY > CursorPos.y) ||
 			       (CheckOuter &&
-				       CharY <= CursorY_);
+				       CharY <= CursorPos.y);
 		};
-		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionEnd = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckOutsideChar(CheckOuter, CursorX_, CursorY_, CharX, CharWidth, CharY))
+				if(CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
 				{
 					SelectionChar = pCursor->m_GlyphCount;
 					SelectionStarted = !SelectionStarted;
@@ -1356,7 +1346,7 @@ public:
 
 					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
 					{
-						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, pCursor->m_GlyphCount == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
+						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouse, pCursor->m_GlyphCount == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
 						{
 							pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 						}
@@ -1366,15 +1356,15 @@ public:
 					{
 						if(pCursor->m_GlyphCount == 0)
 						{
-							CheckSelectionStart(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
-							CheckSelectionStart(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
+							CheckSelectionStart(true, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
+							CheckSelectionStart(true, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
 						}
 
 						// if selection didn't start and the mouse pos is at least on 50% of the right side of the character start
-						CheckSelectionStart(false, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
-						CheckSelectionStart(false, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
-						CheckSelectionEnd(false, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, CharX, CharWidth, TmpY);
-						CheckSelectionEnd(false, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, CharX, CharWidth, TmpY);
+						CheckSelectionStart(false, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
+						CheckSelectionStart(false, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
+						CheckSelectionEnd(false, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, CharX, CharWidth, TmpY);
+						CheckSelectionEnd(false, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, CharX, CharWidth, TmpY);
 					}
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 					{
@@ -1399,6 +1389,7 @@ public:
 							HasCursor = true;
 							aCursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
 							aCursorQuads[1] = IGraphics::CQuadItem(SelX, DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+							pCursor->m_CursorRenderedPosition = vec2(SelX, DrawY);
 						}
 					}
 
@@ -1459,8 +1450,8 @@ public:
 
 			if(SelectionStarted)
 			{
-				CheckSelectionEnd(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::max(), 0, DrawY + Size);
-				CheckSelectionEnd(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::max(), 0, DrawY + Size);
+				CheckSelectionEnd(true, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::max(), 0, DrawY + Size);
+				CheckSelectionEnd(true, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::max(), 0, DrawY + Size);
 			}
 		}
 		else if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
@@ -1481,7 +1472,7 @@ public:
 
 		if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 		{
-			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && pCursor->m_CursorCharacter == -1 && CheckOutsideChar(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, std::numeric_limits<float>::max(), 0, DrawY + Size))
+			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && pCursor->m_CursorCharacter == -1 && CheckOutsideChar(true, pCursor->m_ReleaseMouse, std::numeric_limits<float>::max(), 0, DrawY + Size))
 			{
 				pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 			}
@@ -1491,6 +1482,7 @@ public:
 				HasCursor = true;
 				aCursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
 				aCursorQuads[1] = IGraphics::CQuadItem((LastSelX + LastSelWidth), DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+				pCursor->m_CursorRenderedPosition = vec2(LastSelX + LastSelWidth, DrawY);
 			}
 		}
 

@@ -802,11 +802,9 @@ public:
 		m_pFileDialogTitle = nullptr;
 		m_pFileDialogButtonText = nullptr;
 		m_pFileDialogUser = nullptr;
-		m_aFileDialogFileName[0] = '\0';
 		m_aFileDialogCurrentFolder[0] = '\0';
 		m_aFileDialogCurrentLink[0] = '\0';
 		m_aFilesSelectedName[0] = '\0';
-		m_aFileDialogFilterString[0] = '\0';
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
 		m_FileDialogOpening = false;
 		m_FilesSelectedIndex = -1;
@@ -858,9 +856,6 @@ public:
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
 		m_CursorTexture.Invalidate();
-
-		m_CommandBox = 0.0f;
-		m_aSettingsCommand[0] = 0;
 
 		ms_pUiGotContext = nullptr;
 
@@ -975,15 +970,15 @@ public:
 	const char *m_pFileDialogButtonText;
 	bool (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
-	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFileNameInput;
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
 	char m_aFilesSelectedName[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogFilterString[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFilterInput;
 	char *m_pFileDialogPath;
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
-	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	EPreviewImageState m_PreviewImageState;
 	CImageInfo m_FilePreviewImageInfo;
@@ -1146,8 +1141,7 @@ public:
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
-	float m_CommandBox;
-	char m_aSettingsCommand[256];
+	CLineInputBuffered<256> m_SettingsCommandInput;
 
 	void PlaceBorderTiles();
 
@@ -1171,8 +1165,8 @@ public:
 
 	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 
-	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
-	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 

@@ -503,16 +503,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
-		SUIExEditBoxProperties EditProps;
+		static CLineInput s_FilterInput(g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString));
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			UI()->SetActiveItem(&g_Config.m_BrFilterString);
-
-			EditProps.m_SelectText = true;
+			s_FilterInput.SelectAll();
 		}
-		static int s_ClearButton = 0;
-		static float s_Offset = 0.0f;
-		if(UI()->DoClearableEditBox(&g_Config.m_BrFilterString, &s_ClearButton, &QuickSearch, g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
+		if(UI()->DoClearableEditBox(&s_FilterInput, &QuickSearch, 12.0f))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -533,11 +530,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickExclude.VSplitLeft(SearchExcludeAddrStrMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
-		static int s_ClearButton = 0;
-		static float s_Offset = 0.0f;
+		static CLineInput s_ExcludeInput(g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString));
 		if(Input()->KeyPress(KEY_X) && Input()->ShiftIsPressed() && Input()->ModifierIsPressed())
-			UI()->SetActiveItem(&g_Config.m_BrExcludeString);
-		if(UI()->DoClearableEditBox(&g_Config.m_BrExcludeString, &s_ClearButton, &QuickExclude, g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL))
+			UI()->SetActiveItem(&s_ExcludeInput);
+		if(UI()->DoClearableEditBox(&s_ExcludeInput, &QuickExclude, 12.0f))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -569,9 +565,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		// address info
 		UI()->DoLabel(&ServerAddr, Localize("Server address:"), 14.0f, TEXTALIGN_ML);
 		ServerAddr.VSplitLeft(SearchExcludeAddrStrMax + 5.0f + ExcludeSearchIconMax + 5.0f, NULL, &ServerAddr);
-		static int s_ClearButton = 0;
-		static float s_Offset = 0.0f;
-		UI()->DoClearableEditBox(&g_Config.m_UiServerAddress, &s_ClearButton, &ServerAddr, g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress), 12.0f, &s_Offset);
+		static CLineInput s_ServerAddressInput(g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress));
+		UI()->DoClearableEditBox(&s_ServerAddressInput, &ServerAddr, 12.0f);
 
 		// button area
 		ButtonArea = ConnectButtons;
@@ -670,8 +665,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	UI()->DoLabel(&Button, Localize("Game types:"), FontSize, TEXTALIGN_ML);
 	Button.VSplitRight(60.0f, 0, &Button);
 	ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
-	static float s_OffsetGametype = 0.0f;
-	if(UI()->DoEditBox(&g_Config.m_BrFilterGametype, &Button, g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype), FontSize, &s_OffsetGametype))
+	static CLineInput s_GametypeInput(g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype));
+	if(UI()->DoEditBox(&s_GametypeInput, &Button, FontSize))
 		Client()->ServerBrowserUpdate();
 
 	// server address
@@ -679,8 +674,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	ServerFilter.HSplitTop(19.0f, &Button, &ServerFilter);
 	UI()->DoLabel(&Button, Localize("Server address:"), FontSize, TEXTALIGN_ML);
 	Button.VSplitRight(60.0f, 0, &Button);
-	static float s_OffsetAddr = 0.0f;
-	if(UI()->DoEditBox(&g_Config.m_BrFilterServerAddress, &Button, g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress), FontSize, &s_OffsetAddr))
+	static CLineInput s_FilterServerAddressInput(g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress));
+	if(UI()->DoEditBox(&s_FilterServerAddressInput, &Button, FontSize))
 		Client()->ServerBrowserUpdate();
 
 	// player country
@@ -1375,25 +1370,25 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 		UI()->DoLabel(&Button, aBuf, FontSize + 2, TEXTALIGN_ML);
 		Button.VSplitLeft(80.0f, 0, &Button);
-		static char s_aName[MAX_NAME_LENGTH] = {0};
-		static float s_OffsetName = 0.0f;
-		UI()->DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), FontSize + 2, &s_OffsetName);
+		static CLineInputBuffered<MAX_NAME_LENGTH> s_NameInput;
+		UI()->DoEditBox(&s_NameInput, &Button, FontSize + 2.0f);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 		UI()->DoLabel(&Button, aBuf, FontSize + 2, TEXTALIGN_ML);
 		Button.VSplitLeft(80.0f, 0, &Button);
-		static char s_aClan[MAX_CLAN_LENGTH] = {0};
-		static float s_OffsetClan = 0.0f;
-		UI()->DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), FontSize + 2, &s_OffsetClan);
+		static CLineInputBuffered<MAX_CLAN_LENGTH> s_ClanInput;
+		UI()->DoEditBox(&s_ClanInput, &Button, FontSize + 2.0f);
 
 		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
 		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
 		static CButtonContainer s_AddButton;
 		if(DoButton_Menu(&s_AddButton, Localize("Add Friend"), 0, &Button))
 		{
-			m_pClient->Friends()->AddFriend(s_aName, s_aClan);
+			m_pClient->Friends()->AddFriend(s_NameInput.GetString(), s_ClanInput.GetString());
+			s_NameInput.Clear();
+			s_ClanInput.Clear();
 			FriendlistOnUpdate();
 			Client()->ServerBrowserUpdate();
 		}

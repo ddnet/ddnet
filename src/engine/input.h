@@ -14,7 +14,7 @@ class IInput : public IInterface
 public:
 	enum
 	{
-		INPUT_TEXT_SIZE = 128
+		INPUT_TEXT_SIZE = 32 * UTF8_BYTE_LENGTH + 1,
 	};
 
 	class CEvent
@@ -34,7 +34,7 @@ protected:
 
 	// quick access to events
 	size_t m_NumEvents;
-	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
+	CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
 	int64_t m_LastUpdate;
 	float m_UpdateTime;
 
@@ -51,6 +51,12 @@ public:
 		CURSOR_MOUSE,
 		CURSOR_JOYSTICK,
 	};
+	enum
+	{
+		MAX_COMPOSITION_ARRAY_SIZE = 32, // SDL2 limitation
+
+		COMP_LENGTH_INACTIVE = -1,
+	};
 
 	// events
 	size_t NumEvents() const { return m_NumEvents; }
@@ -60,8 +66,6 @@ public:
 		dbg_assert(Index < m_NumEvents, "Index invalid");
 		return m_aInputEvents[Index];
 	}
-	CEvent *GetEventsRaw() { return m_aInputEvents; }
-	size_t *GetEventCountRaw() { return &m_NumEvents; }
 
 	/**
 	 * @return Rolling average of the time in seconds between
@@ -110,12 +114,16 @@ public:
 	virtual void SetClipboardText(const char *pText) = 0;
 
 	// text editing
-	virtual bool GetIMEState() = 0;
-	virtual void SetIMEState(bool Activate) = 0;
-	virtual int GetIMEEditingTextLength() const = 0;
-	virtual const char *GetIMEEditingText() = 0;
-	virtual int GetEditingCursor() = 0;
-	virtual void SetEditingPosition(float X, float Y) = 0;
+	virtual void StartTextInput() = 0;
+	virtual void StopTextInput() = 0;
+	virtual const char *GetComposition() const = 0;
+	virtual bool HasComposition() const = 0;
+	virtual int GetCompositionCursor() const = 0;
+	virtual int GetCompositionLength() const = 0;
+	virtual const char *GetCandidate(int Index) const = 0;
+	virtual int GetCandidateCount() const = 0;
+	virtual int GetCandidateSelectedIndex() const = 0;
+	virtual void SetCompositionWindowPosition(float X, float Y, float H) = 0;
 
 	virtual bool GetDropFile(char *aBuf, int Len) = 0;
 

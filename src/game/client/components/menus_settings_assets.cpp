@@ -259,7 +259,7 @@ static size_t gs_aCustomListSize[NUMBER_OF_ASSETS_TABS] = {
 	0,
 };
 
-static char s_aFilterString[NUMBER_OF_ASSETS_TABS][50];
+static CLineInputBuffered<64> s_aFilterInputs[NUMBER_OF_ASSETS_TABS];
 
 static int s_CurCustomTab = ASSETS_TAB_ENTITIES;
 
@@ -377,7 +377,7 @@ int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> 
 		const TName *pAsset = &vAssetList[i];
 
 		// filter quick search
-		if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(pAsset->m_aName, s_aFilterString[s_CurCustomTab]))
+		if(!s_aFilterInputs[s_CurCustomTab].IsEmpty() && !str_utf8_find_nocase(pAsset->m_aName, s_aFilterInputs[s_CurCustomTab].GetString()))
 			continue;
 
 		vpSearchList.push_back(pAsset);
@@ -472,7 +472,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				const SCustomEntities *pEntity = &m_vEntitiesList[i];
 
 				// filter quick search
-				if(s_aFilterString[s_CurCustomTab][0] != '\0' && !str_utf8_find_nocase(pEntity->m_aName, s_aFilterString[s_CurCustomTab]))
+				if(!s_aFilterInputs[s_CurCustomTab].IsEmpty() && !str_utf8_find_nocase(pEntity->m_aName, s_aFilterInputs[s_CurCustomTab].GetString()))
 					continue;
 
 				gs_vpSearchEntitiesList.push_back(pEntity);
@@ -650,16 +650,13 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
-		static int s_ClearButton = 0;
-		static float s_Offset = 0.0f;
-		SUIExEditBoxProperties EditProps;
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
-			UI()->SetActiveItem(&s_aFilterString[s_CurCustomTab]);
-			EditProps.m_SelectText = true;
+			UI()->SetActiveItem(&s_aFilterInputs[s_CurCustomTab]);
+			s_aFilterInputs[s_CurCustomTab].SelectAll();
 		}
-		EditProps.m_pEmptyText = Localize("Search");
-		if(UI()->DoClearableEditBox(&s_aFilterString[s_CurCustomTab], &s_ClearButton, &QuickSearch, s_aFilterString[s_CurCustomTab], sizeof(s_aFilterString[0]), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps))
+		s_aFilterInputs[s_CurCustomTab].SetEmptyText(Localize("Search"));
+		if(UI()->DoClearableEditBox(&s_aFilterInputs[s_CurCustomTab], &QuickSearch, 14.0f))
 			gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 

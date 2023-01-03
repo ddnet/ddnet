@@ -335,10 +335,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 	UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_ML);
-	static float s_OffsetName = 0.0f;
-	SUIExEditBoxProperties EditProps;
-	EditProps.m_pEmptyText = pNameFallback;
-	if(UI()->DoEditBox(pName, &Button, pName, sizeof(g_Config.m_PlayerName), 14.0f, &s_OffsetName, false, IGraphics::CORNER_ALL, EditProps))
+	static CLineInput s_NameInput;
+	s_NameInput.SetBuffer(pName, sizeof(g_Config.m_PlayerName));
+	s_NameInput.SetEmptyText(pNameFallback);
+	if(UI()->DoEditBox(&s_NameInput, &Button, 14.0f))
 	{
 		SetNeedSendInfo();
 	}
@@ -351,8 +351,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	Button.VSplitLeft(150.0f, &Button, 0);
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 	UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_ML);
-	static float s_OffsetClan = 0.0f;
-	if(UI()->DoEditBox(pClan, &Button, pClan, sizeof(g_Config.m_PlayerClan), 14.0f, &s_OffsetClan))
+	static CLineInput s_ClanInput;
+	s_ClanInput.SetBuffer(pClan, sizeof(g_Config.m_PlayerClan));
+	if(UI()->DoEditBox(&s_ClanInput, &Button, 14.0f))
 	{
 		SetNeedSendInfo();
 	}
@@ -585,11 +586,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	UI()->DoLabel(&SkinPrefixLabel, Localize("Skin prefix"), 14.0f, TEXTALIGN_ML);
 
 	SkinPrefix.HSplitTop(20.0f, &SkinPrefixLabel, &SkinPrefix);
-	{
-		static int s_ClearButton = 0;
-		static float s_Offset = 0.0f;
-		UI()->DoClearableEditBox(g_Config.m_ClSkinPrefix, &s_ClearButton, &SkinPrefixLabel, g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix), 14.0f, &s_Offset);
-	}
+	static CLineInput s_SkinPrefixInput(g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix));
+	UI()->DoClearableEditBox(&s_SkinPrefixInput, &SkinPrefixLabel, 14.0f);
 
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
@@ -692,11 +690,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	Label.VSplitRight(34.0f, &Label, &Button);
 
-	static float s_OffsetSkin = 0.0f;
-	static int s_ClearButton = 0;
-	SUIExEditBoxProperties EditProps;
-	EditProps.m_pEmptyText = "default";
-	if(UI()->DoClearableEditBox(pSkinName, &s_ClearButton, &Label, pSkinName, sizeof(g_Config.m_ClPlayerSkin), 14.0f, &s_OffsetSkin, false, IGraphics::CORNER_ALL, EditProps))
+	static CLineInput s_SkinInput;
+	s_SkinInput.SetBuffer(pSkinName, sizeof(g_Config.m_ClPlayerSkin));
+	s_SkinInput.SetEmptyText("default");
+	if(UI()->DoClearableEditBox(&s_SkinInput, &Label, 14.0f))
 	{
 		SetNeedSendInfo();
 	}
@@ -929,17 +926,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
-		static int s_ClearButtonSearch = 0;
-		static float s_Offset = 0.0f;
-		SUIExEditBoxProperties EditPropsSearch;
+		static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
-
-			EditPropsSearch.m_SelectText = true;
+			s_SkinFilterInput.SelectAll();
 		}
-		EditPropsSearch.m_pEmptyText = Localize("Search");
-		if(UI()->DoClearableEditBox(&g_Config.m_ClSkinFilterString, &s_ClearButtonSearch, &QuickSearch, g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditPropsSearch))
+		s_SkinFilterInput.SetEmptyText(Localize("Search"));
+		if(UI()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
 			s_InitSkinlist = true;
 	}
 
@@ -2008,15 +2002,16 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// sample rate box
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_SndRate);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		UI()->DoLabel(&Button, Localize("Sample rate"), 14.0f, TEXTALIGN_ML);
 		Button.VSplitLeft(190.0f, 0, &Button);
-		static float s_Offset = 0.0f;
-		UI()->DoEditBox(&g_Config.m_SndRate, &Button, aBuf, sizeof(aBuf), 14.0f, &s_Offset);
-		g_Config.m_SndRate = maximum(1, str_toint(aBuf));
-		m_NeedRestartSound = !s_SndEnable || s_SndRate != g_Config.m_SndRate;
+		static CLineInputNumber s_SndRateInput(g_Config.m_SndRate);
+		if(UI()->DoEditBox(&s_SndRateInput, &Button, 14.0f))
+		{
+			g_Config.m_SndRate = maximum(1, s_SndRateInput.GetInteger());
+			m_NeedRestartSound = !s_SndEnable || s_SndRate != g_Config.m_SndRate;
+		}
+		s_SndRateInput.SetInteger(g_Config.m_SndRate);
 	}
 
 	// volume slider
@@ -3365,8 +3360,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Background.HSplitTop(20.0f, &Background, 0);
 	Background.VSplitLeft(100.0f, &Label, &TempLabel);
 	UI()->DoLabel(&Label, Localize("Map"), 14.0f, TEXTALIGN_ML);
-	static float s_Map = 0.0f;
-	UI()->DoEditBox(g_Config.m_ClBackgroundEntities, &TempLabel, g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), 14.0f, &s_Map);
+	static CLineInput s_BackgroundEntitiesInput(g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities));
+	UI()->DoEditBox(&s_BackgroundEntitiesInput, &TempLabel, 14.0f);
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	bool UseCurrentMap = str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0;
@@ -3395,16 +3390,15 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		Client()->GenerateTimeoutSeed();
 	}
 
-	static float s_RunOnJoin = 0.0f;
 	Right.HSplitTop(5.0f, 0, &Right);
 	Right.HSplitTop(20.0f, &Label, &Right);
 	Label.VSplitLeft(5.0f, 0, &Label);
 	UI()->DoLabel(&Label, Localize("Run on join"), 14.0f, TEXTALIGN_ML);
 	Right.HSplitTop(20.0f, &Button, &Right);
 	Button.VSplitLeft(5.0f, 0, &Button);
-	SUIExEditBoxProperties EditProps;
-	EditProps.m_pEmptyText = Localize("Chat command (e.g. showall 1)");
-	UI()->DoEditBox(g_Config.m_ClRunOnJoin, &Button, g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin), 14.0f, &s_RunOnJoin, false, IGraphics::CORNER_ALL, EditProps);
+	static CLineInput s_RunOnJoinInput(g_Config.m_ClRunOnJoin, sizeof(g_Config.m_ClRunOnJoin));
+	s_RunOnJoinInput.SetEmptyText(Localize("Chat command (e.g. showall 1)"));
+	UI()->DoEditBox(&s_RunOnJoinInput, &Button, 14.0f);
 
 #if defined(CONF_FAMILY_WINDOWS)
 	static CButtonContainer s_ButtonUnregisterShell;

@@ -24,6 +24,16 @@
 #define SDL_JOYSTICK_AXIS_MAX 32767
 #endif
 
+#if defined(CONF_FAMILY_WINDOWS)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+// windows.h must be included before imm.h, but clang-format requires includes to be sorted alphabetically, hence this comment.
+#include <imm.h>
+#endif
+
+// for platform specific features that aren't available or are broken in SDL
+#include <SDL_syswm.h>
+
 void CInput::AddEvent(char *pText, int Key, int Flags)
 {
 	if(m_NumEvents != INPUT_BUFFER_SIZE)
@@ -57,20 +67,20 @@ CInput::CInput()
 
 	m_pClipboardText = nullptr;
 
-	m_NumTextInputInstances = 0;
-	m_EditingTextLen = -1;
-	m_aEditingText[0] = '\0';
+	m_CompositionLength = COMP_LENGTH_INACTIVE;
+	m_CompositionCursor = 0;
+	m_CandidateSelectedIndex = -1;
 
 	m_aDropFile[0] = '\0';
 }
 
 void CInput::Init()
 {
+	StopTextInput();
+
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
-	// increase ime instance counter for menu
-	SetIMEState(true);
 	MouseModeRelative();
 
 	InitJoysticks();
@@ -324,6 +334,24 @@ void CInput::SetClipboardText(const char *pText)
 	SDL_SetClipboardText(pText);
 }
 
+void CInput::StartTextInput()
+{
+	// enable system messages for IME
+	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+	SDL_StartTextInput();
+}
+
+void CInput::StopTextInput()
+{
+	SDL_StopTextInput();
+	// disable system messages for performance
+	SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
+	m_CompositionLength = COMP_LENGTH_INACTIVE;
+	m_CompositionCursor = 0;
+	m_aComposition[0] = '\0';
+	m_vCandidates.clear();
+}
+
 void CInput::Clear()
 {
 	mem_zero(m_aInputState, sizeof(m_aInputState));
@@ -510,58 +538,14 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 	}
 }
 
-bool CInput::GetIMEState()
+void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 {
-	return m_NumTextInputInstances > 0;
-}
-
-void CInput::SetIMEState(bool Activate)
-{
-	if(Activate)
-	{
-		if(m_NumTextInputInstances == 0)
-			SDL_StartTextInput();
-		m_NumTextInputInstances++;
-	}
-	else
-	{
-		if(m_NumTextInputInstances == 0)
-			return;
-		m_NumTextInputInstances--;
-		if(m_NumTextInputInstances == 0)
-			SDL_StopTextInput();
-	}
-}
-
-const char *CInput::GetIMEEditingText()
-{
-	if(m_EditingTextLen > 0)
-		return m_aEditingText;
-	else
-		return "";
-}
-
-int CInput::GetEditingCursor()
-{
-	return m_EditingCursor;
-}
-
-void CInput::SetEditingPosition(float X, float Y)
-{
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	int ScreenWidth = Graphics()->ScreenWidth();
-	int ScreenHeight = Graphics()->ScreenHeight();
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	vec2 ScreenScale = vec2(ScreenWidth / (ScreenX1 - ScreenX0), ScreenHeight / (ScreenY1 - ScreenY0));
-
-	SDL_Rect ImeWindowRect;
-	ImeWindowRect.x = X * ScreenScale.x;
-	ImeWindowRect.y = Y * ScreenScale.y;
-	ImeWindowRect.h = 60;
-	ImeWindowRect.w = 1000;
-
-	SDL_SetTextInputRect(&ImeWindowRect);
+	SDL_Rect Rect;
+	Rect.x = X / m_pGraphics->ScreenHiDPIScale();
+	Rect.y = Y / m_pGraphics->ScreenHiDPIScale();
+	Rect.h = H / m_pGraphics->ScreenHiDPIScale();
+	Rect.w = 0;
+	SDL_SetTextInputRect(&Rect);
 }
 
 int CInput::Update()
@@ -583,8 +567,6 @@ int CInput::Update()
 		NumKeyStates = KEY_MOUSE_1;
 	mem_copy(m_aInputState, pState, NumKeyStates);
 	mem_zero(m_aInputState + NumKeyStates, KEY_LAST - NumKeyStates);
-	if(m_EditingTextLen == 0)
-		m_EditingTextLen = -1;
 
 	// these states must always be updated manually because they are not in the SDL_GetKeyboardState from SDL
 	UpdateMouseState();
@@ -598,26 +580,38 @@ int CInput::Update()
 		int Action = IInput::FLAG_PRESS;
 		switch(Event.type)
 		{
+		case SDL_SYSWMEVENT:
+			ProcessSystemMessage(Event.syswm.msg);
+			break;
+
 		case SDL_TEXTEDITING:
 		{
-			m_EditingTextLen = str_length(Event.edit.text);
-			if(m_EditingTextLen)
+			m_CompositionLength = str_length(Event.edit.text);
+			if(m_CompositionLength)
 			{
-				str_copy(m_aEditingText, Event.edit.text);
-				m_EditingCursor = 0;
+				str_copy(m_aComposition, Event.edit.text);
+				m_CompositionCursor = 0;
 				for(int i = 0; i < Event.edit.start; i++)
-					m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
+					m_CompositionCursor = str_utf8_forward(m_aComposition, m_CompositionCursor);
+				// Event.edit.length is currently unused on Windows and will always be 0, so we don't support selecting composition text
+				AddEvent(nullptr, KEY_UNKNOWN, IInput::FLAG_TEXT);
 			}
 			else
 			{
-				m_aEditingText[0] = '\0';
+				m_aComposition[0] = '\0';
+				m_CompositionLength = 0;
+				m_CompositionCursor = 0;
 			}
 			break;
 		}
+
 		case SDL_TEXTINPUT:
-			m_EditingTextLen = -1;
+			m_aComposition[0] = '\0';
+			m_CompositionLength = COMP_LENGTH_INACTIVE;
+			m_CompositionCursor = 0;
 			AddEvent(Event.text.text, KEY_UNKNOWN, IInput::FLAG_TEXT);
 			break;
+
 		// handle keys
 		case SDL_KEYDOWN:
 			// See SDL_Keymod for possible modifiers:
@@ -771,7 +765,7 @@ int CInput::Update()
 			break;
 		}
 
-		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && (!SDL_IsTextInputActive() || m_EditingTextLen == -1))
+		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && !HasComposition())
 		{
 			if(Action & IInput::FLAG_PRESS)
 			{
@@ -782,7 +776,61 @@ int CInput::Update()
 		}
 	}
 
+	if(m_CompositionLength == 0)
+		m_CompositionLength = COMP_LENGTH_INACTIVE;
+
 	return 0;
+}
+
+void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	// Todo SDL: remove this after SDL2 supports IME candidates
+	if(pMsg->subsystem == SDL_SYSWM_WINDOWS && pMsg->msg.win.msg == WM_IME_NOTIFY)
+	{
+		switch(pMsg->msg.win.wParam)
+		{
+		case IMN_OPENCANDIDATE:
+		case IMN_CHANGECANDIDATE:
+		{
+			HWND WindowHandle = pMsg->msg.win.hwnd;
+			HIMC ImeContext = ImmGetContext(WindowHandle);
+			DWORD Size = ImmGetCandidateListW(ImeContext, 0, nullptr, 0);
+			LPCANDIDATELIST pCandidateList = nullptr;
+			if(Size > 0)
+			{
+				pCandidateList = (LPCANDIDATELIST)malloc(Size);
+				Size = ImmGetCandidateListW(ImeContext, 0, pCandidateList, Size);
+			}
+			m_vCandidates.clear();
+			if(pCandidateList && Size > 0)
+			{
+				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
+				{
+					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);
+					const int Len = WideCharToMultiByte(CP_UTF8, 0, pCandidate, -1, nullptr, 0, nullptr, nullptr);
+					dbg_assert(Len > 0, "WideCharToMultiByte failure");
+					m_vCandidates.emplace_back();
+					m_vCandidates.back().resize(Len, '\0');
+					dbg_assert(WideCharToMultiByte(CP_UTF8, 0, pCandidate, -1, &m_vCandidates.back()[0], Len, nullptr, nullptr) == Len, "WideCharToMultiByte failure");
+				}
+				m_CandidateSelectedIndex = pCandidateList->dwSelection - pCandidateList->dwPageStart;
+			}
+			else
+			{
+				m_CandidateSelectedIndex = -1;
+			}
+			free(pCandidateList);
+			ImmReleaseContext(WindowHandle, ImeContext);
+			break;
+		}
+		case IMN_CLOSECANDIDATE:
+			m_vCandidates.clear();
+			m_CandidateSelectedIndex = -1;
+			break;
+		}
+	}
+#endif
 }
 
 bool CInput::GetDropFile(char *aBuf, int Len)

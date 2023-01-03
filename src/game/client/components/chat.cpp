@@ -36,6 +36,8 @@ CChat::CChat()
 	std::sort(m_vCommands.begin(), m_vCommands.end());
 
 	m_Mode = MODE_NONE;
+
+	m_Input.SetClipboardLineCallback([this](const char *pStr) { SayChat(pStr); });
 }
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
@@ -77,8 +79,6 @@ void CChat::Reset()
 	m_PrevShowChat = false;
 
 	m_Show = false;
-	m_InputUpdate = false;
-	m_ChatStringOffset = 0;
 	m_CompletionUsed = false;
 	m_CompletionChosen = -1;
 	m_aCompletionBuffer[0] = 0;
@@ -170,99 +170,6 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 	if(m_Mode == MODE_NONE)
 		return false;
 
-	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_V))
-	{
-		const char *pText = Input()->GetClipboardText();
-		if(pText)
-		{
-			// if the text has more than one line, we send all lines except the last one
-			// the last one is set as in the text field
-			char aLine[256];
-			int i, Begin = 0;
-			for(i = 0; i < str_length(pText); i++)
-			{
-				if(pText[i] == '\n')
-				{
-					int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-					str_copy(aLine, pText + Begin, max);
-					Begin = i + 1;
-					SayChat(aLine);
-					while(pText[i] == '\n')
-						i++;
-				}
-			}
-			int max = minimum(i - Begin + 1, (int)sizeof(aLine));
-			str_copy(aLine, pText + Begin, max);
-			m_Input.Append(aLine);
-		}
-	}
-
-	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_C))
-	{
-		Input()->SetClipboardText(m_Input.GetString());
-	}
-
-	if(Input()->ModifierIsPressed()) // jump to spaces and special ASCII characters
-	{
-		int SearchDirection = 0;
-		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_BACKSPACE))
-			SearchDirection = -1;
-		else if(Input()->KeyPress(KEY_RIGHT) || Input()->KeyPress(KEY_DELETE))
-			SearchDirection = 1;
-
-		if(SearchDirection != 0)
-		{
-			int OldOffset = m_Input.GetCursorOffset();
-
-			int FoundAt = SearchDirection > 0 ? m_Input.GetLength() - 1 : 0;
-			for(int i = m_Input.GetCursorOffset() + SearchDirection; SearchDirection > 0 ? i < m_Input.GetLength() - 1 : i > 0; i += SearchDirection)
-			{
-				int Next = i + SearchDirection;
-				if((m_Input.GetString()[Next] == ' ') ||
-					(m_Input.GetString()[Next] >= 32 && m_Input.GetString()[Next] <= 47) ||
-					(m_Input.GetString()[Next] >= 58 && m_Input.GetString()[Next] <= 64) ||
-					(m_Input.GetString()[Next] >= 91 && m_Input.GetString()[Next] <= 96))
-				{
-					FoundAt = i;
-					if(SearchDirection < 0)
-						FoundAt++;
-					break;
-				}
-			}
-
-			if(Input()->KeyPress(KEY_BACKSPACE))
-			{
-				if(m_Input.GetCursorOffset() != 0)
-				{
-					char aText[512];
-					str_copy(aText, m_Input.GetString(), FoundAt + 1);
-
-					if(m_Input.GetCursorOffset() != str_length(m_Input.GetString()))
-						str_append(aText, m_Input.GetString() + m_Input.GetCursorOffset(), str_length(m_Input.GetString()));
-
-					m_Input.Set(aText);
-				}
-			}
-			else if(Input()->KeyPress(KEY_DELETE))
-			{
-				if(m_Input.GetCursorOffset() != m_Input.GetLength())
-				{
-					char aText[512];
-					aText[0] = '\0';
-
-					str_copy(aText, m_Input.GetString(), m_Input.GetCursorOffset() + 1);
-
-					if(FoundAt != m_Input.GetLength())
-						str_append(aText, m_Input.GetString() + FoundAt, sizeof(aText));
-
-					m_Input.Set(aText);
-					FoundAt = OldOffset;
-				}
-			}
-			m_Input.SetCursorOffset(FoundAt);
-		}
-	}
-
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
 		DisableMode();
@@ -307,7 +214,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 		if(!m_CompletionUsed)
 		{
 			const char *pCursor = m_Input.GetString() + m_Input.GetCursorOffset();
-			for(int Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor - 1) != ' '; --pCursor, ++Count)
+			for(size_t Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor - 1) != ' '; --pCursor, ++Count)
 				;
 			m_PlaceholderOffset = pCursor - m_Input.GetString();
 
@@ -405,10 +312,8 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength, sizeof(aBuf));
 
 				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->m_pName) + 1;
-				m_OldChatStringLength = m_Input.GetLength();
-				m_Input.Set(aBuf); // TODO: Use Add instead
+				m_Input.Set(aBuf);
 				m_Input.SetCursorOffset(m_PlaceholderOffset + m_PlaceholderLength);
-				m_InputUpdate = true;
 			}
 		}
 		else
@@ -470,10 +375,8 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength, sizeof(aBuf));
 
 				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionString);
-				m_OldChatStringLength = m_Input.GetLength();
-				m_Input.Set(aBuf); // TODO: Use Add instead
+				m_Input.Set(aBuf);
 				m_Input.SetCursorOffset(m_PlaceholderOffset + m_PlaceholderLength);
-				m_InputUpdate = true;
 			}
 		}
 	}
@@ -486,9 +389,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			m_CompletionUsed = false;
 		}
 
-		m_OldChatStringLength = m_Input.GetLength();
 		m_Input.ProcessInput(Event);
-		m_InputUpdate = true;
 	}
 
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
@@ -532,10 +433,10 @@ void CChat::EnableMode(int Team)
 		else
 			m_Mode = MODE_ALL;
 
-		Input()->SetIMEState(true);
 		Input()->Clear();
 		m_CompletionChosen = -1;
 		m_CompletionUsed = false;
+		m_Input.Activate(EInputPriority::CHAT);
 	}
 }
 
@@ -543,8 +444,8 @@ void CChat::DisableMode()
 {
 	if(m_Mode != MODE_NONE)
 	{
-		Input()->SetIMEState(false);
 		m_Mode = MODE_NONE;
+		m_Input.Deactivate();
 	}
 }
 
@@ -1156,8 +1057,10 @@ void CChat::OnRender()
 		--m_PendingChatCounter;
 	}
 
-	float Width = 300.0f * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, 300.0f);
+	const float Height = 300.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
 	float x = 5.0f;
 	float y = 300.0f - 20.0f;
 	if(m_Mode != MODE_NONE)
@@ -1166,7 +1069,6 @@ void CChat::OnRender()
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Width - 190.0f;
-		Cursor.m_MaxLines = 2;
 
 		if(m_Mode == MODE_ALL)
 			TextRender()->TextEx(&Cursor, Localize("All"), -1);
@@ -1177,52 +1079,32 @@ void CChat::OnRender()
 
 		TextRender()->TextEx(&Cursor, ": ", -1);
 
-		// IME candidate editing
-		bool Editing = false;
-		int EditingCursor = Input()->GetEditingCursor();
-		if(Input()->GetIMEState())
-		{
-			if(str_length(Input()->GetIMEEditingText()))
-			{
-				m_Input.Editing(Input()->GetIMEEditingText(), EditingCursor);
-				Editing = true;
-			}
-		}
+		const float MessageMaxWidth = Cursor.m_LineWidth - (Cursor.m_X - Cursor.m_StartX);
+		const CUIRect ClippingRect = {Cursor.m_X, Cursor.m_Y, MessageMaxWidth, 2.25f * Cursor.m_FontSize};
+		const float XScale = Graphics()->ScreenWidth() / Width;
+		const float YScale = Graphics()->ScreenHeight() / Height;
+		Graphics()->ClipEnable((int)(ClippingRect.x * XScale), (int)(ClippingRect.y * YScale), (int)(ClippingRect.w * XScale), (int)(ClippingRect.h * YScale));
 
-		// check if the visible text has to be moved
-		if(m_InputUpdate)
-		{
-			if(m_ChatStringOffset > 0 && m_Input.GetLength(Editing) < m_OldChatStringLength)
-				m_ChatStringOffset = maximum(0, m_ChatStringOffset - (m_OldChatStringLength - m_Input.GetLength(Editing)));
+		float ScrollOffset = m_Input.GetScrollOffset();
+		float ScrollOffsetChange = m_Input.GetScrollOffsetChange();
 
-			if(m_ChatStringOffset > m_Input.GetCursorOffset(Editing))
-				m_ChatStringOffset -= m_ChatStringOffset - m_Input.GetCursorOffset(Editing);
-			else
-			{
-				CTextCursor Temp = Cursor;
-				Temp.m_Flags = 0;
-				TextRender()->TextEx(&Temp, m_Input.GetString(Editing) + m_ChatStringOffset, m_Input.GetCursorOffset(Editing) - m_ChatStringOffset);
-				TextRender()->TextEx(&Temp, "|", -1);
-				while(Temp.m_LineCount > 2)
-				{
-					++m_ChatStringOffset;
-					Temp = Cursor;
-					Temp.m_Flags = 0;
-					TextRender()->TextEx(&Temp, m_Input.GetString(Editing) + m_ChatStringOffset, m_Input.GetCursorOffset(Editing) - m_ChatStringOffset);
-					TextRender()->TextEx(&Temp, "|", -1);
-				}
-			}
-			m_InputUpdate = false;
-		}
+		m_Input.Activate(EInputPriority::CHAT); // Ensure that the input is active
+		const CUIRect InputCursorRect = {Cursor.m_X, Cursor.m_Y - ScrollOffset, 0.0f, 0.0f};
+		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, m_Input.WasChanged(), MessageMaxWidth);
 
-		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing) + m_ChatStringOffset, m_Input.GetCursorOffset(Editing) - m_ChatStringOffset);
-		static float MarkerOffset = TextRender()->TextWidth(8.0f, "|", -1, -1.0f) / 3;
-		CTextCursor Marker = Cursor;
-		Marker.m_X -= MarkerOffset;
-		TextRender()->TextEx(&Marker, "|", -1);
-		TextRender()->TextEx(&Cursor, m_Input.GetString(Editing) + m_Input.GetCursorOffset(Editing), -1);
-		if(m_pClient->m_GameConsole.IsClosed())
-			Input()->SetEditingPosition(Marker.m_X, Marker.m_Y + Marker.m_FontSize);
+		Graphics()->ClipDisable();
+
+		// Scroll up or down to keep the caret inside the clipping rect
+		const float CaretPositionY = m_Input.GetCaretPosition().y - ScrollOffsetChange;
+		if(CaretPositionY < ClippingRect.y)
+			ScrollOffsetChange -= ClippingRect.y - CaretPositionY;
+		else if(CaretPositionY + Cursor.m_FontSize > ClippingRect.y + ClippingRect.h)
+			ScrollOffsetChange += CaretPositionY + Cursor.m_FontSize - (ClippingRect.y + ClippingRect.h);
+
+		UI()->DoSmoothScrollLogic(&ScrollOffset, &ScrollOffsetChange, ClippingRect.h, BoundingBox.m_H);
+
+		m_Input.SetScrollOffset(ScrollOffset);
+		m_Input.SetScrollOffsetChange(ScrollOffsetChange);
 	}
 
 #if defined(CONF_VIDEORECORDER)
