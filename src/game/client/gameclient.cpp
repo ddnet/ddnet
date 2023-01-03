@@ -883,6 +883,17 @@ void CGameClient::OnStartGame()
 	m_Statboard.OnReset();
 }
 
+void CGameClient::OnStartRound()
+{
+	// In GamePaused or GameOver state RoundStartTick is updated on each tick
+	// hence no need to reset stats until player leaves GameOver
+	// and it would be a mistake to reset stats after or during the pause
+	m_Statboard.OnReset();
+
+	// Restart automatic race demo recording
+	m_RaceDemo.OnReset();
+}
+
 void CGameClient::OnFlagGrab(int TeamID)
 {
 	if(TeamID == TEAM_RED)
@@ -1404,14 +1415,10 @@ void CGameClient::OnNewSnapshot()
 					OnGameOver();
 				else if(s_GameOver && !CurrentTickGameOver)
 					OnStartGame();
-				// Reset statboard when new round is started (RoundStartTick changed)
+				// Handle case that a new round is started (RoundStartTick changed)
 				// New round is usually started after `restart` on server
-				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick
-					// In GamePaused or GameOver state RoundStartTick is updated on each tick
-					// hence no need to reset stats until player leaves GameOver
-					// and it would be a mistake to reset stats after or during the pause
-					&& !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED || s_GamePaused))
-					m_Statboard.OnReset();
+				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick && !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED || s_GamePaused))
+					OnStartRound();
 				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
 				s_GameOver = CurrentTickGameOver;
 				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
