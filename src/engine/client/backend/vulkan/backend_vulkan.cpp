@@ -3751,7 +3751,7 @@ public:
 				AutoGPUType = GPUType;
 			}
 
-			if(((IsAutoGPU && GPUType < FoundGPUType) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGPUName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
+			if(((IsAutoGPU && (FoundGPUType > STWGraphicGPU::ETWGraphicsGPUType::GRAPHICS_GPU_TYPE_INTEGRATED && GPUType < FoundGPUType)) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGPUName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
 			{
 				FoundDeviceIndex = Index;
 				FoundGPUType = GPUType;
