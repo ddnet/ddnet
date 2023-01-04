@@ -121,6 +121,8 @@ public:
 	*/
 	void RemoveEntity(CEntity *pEntity);
 
+	void RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers);
+
 	/*
 		Function: Snap
 			Calls Snap on all the entities in the world to create

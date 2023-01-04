@@ -50,6 +50,8 @@ private:
 public:
 	void SetBouncing(int Value);
 	bool FillExtraInfo(CNetObj_DDNetProjectile *pProj);
+
+	virtual int GetOwnerID() const override { return m_Owner; }
 };
 
 #endif

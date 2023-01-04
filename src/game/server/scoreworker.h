@@ -149,9 +149,8 @@ struct CSqlScoreData : ISqlData
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerID, IGameController *pController) :
+	CScoreSaveResult(int PlayerID) :
 		m_Status(SAVE_FAILED),
-		m_SavedTeam(CSaveTeam(pController)),
 		m_RequestingPlayer(PlayerID)
 	{
 		m_aMessage[0] = '\0';
