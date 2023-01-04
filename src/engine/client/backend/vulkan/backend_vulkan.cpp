@@ -1108,12 +1108,14 @@ protected:
 	void SetError(EGFXErrorType ErrType, const char *pErr, const char *pErrStrExtra = nullptr)
 	{
 		std::unique_lock<std::mutex> Lock(m_ErrWarnMutex);
-		if(std::find(m_Error.m_vErrors.begin(), m_Error.m_vErrors.end(), pErr) == m_Error.m_vErrors.end())
-			m_Error.m_vErrors.emplace_back(pErr);
+		SGFXErrorContainer::SError Err = {false, pErr};
+		if(std::find(m_Error.m_vErrors.begin(), m_Error.m_vErrors.end(), Err) == m_Error.m_vErrors.end())
+			m_Error.m_vErrors.emplace_back();
 		if(pErrStrExtra != nullptr)
 		{
-			if(std::find(m_Error.m_vErrors.begin(), m_Error.m_vErrors.end(), pErrStrExtra) == m_Error.m_vErrors.end())
-				m_Error.m_vErrors.emplace_back(pErrStrExtra);
+			SGFXErrorContainer::SError ErrExtra = {false, pErrStrExtra};
+			if(std::find(m_Error.m_vErrors.begin(), m_Error.m_vErrors.end(), ErrExtra) == m_Error.m_vErrors.end())
+				m_Error.m_vErrors.emplace_back(ErrExtra);
 		}
 		if(m_CanAssert)
 		{
@@ -1155,15 +1157,15 @@ protected:
 		switch(CallResult)
 		{
 		case VK_ERROR_OUT_OF_HOST_MEMORY:
-			pCriticalError = Localizable("host ran out of memory");
+			pCriticalError = "host ran out of memory";
 			dbg_msg("vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_OUT_OF_DEVICE_MEMORY:
-			pCriticalError = Localizable("device ran out of memory");
+			pCriticalError = "device ran out of memory";
 			dbg_msg("vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_DEVICE_LOST:
-			pCriticalError = Localizable("device lost");
+			pCriticalError = "device lost";
 			dbg_msg("vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_OUT_OF_DATE_KHR:
@@ -1182,18 +1184,18 @@ protected:
 			dbg_msg("vulkan", "fullscreen exclusive mode lost");
 			break;*/
 		case VK_ERROR_INCOMPATIBLE_DRIVER:
-			pCriticalError = Localizable("no compatible driver found. Vulkan 1.1 is required.");
+			pCriticalError = "no compatible driver found. Vulkan 1.1 is required.";
 			dbg_msg("vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_INITIALIZATION_FAILED:
-			pCriticalError = Localizable("initialization failed for unknown reason.");
+			pCriticalError = "initialization failed for unknown reason.";
 			dbg_msg("vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_LAYER_NOT_PRESENT:
-			SetWarning(EGFXWarningType::GFX_WARNING_MISSING_EXTENSION, Localizable("One Vulkan layer was not present. (try to disable them)"));
+			SetWarning(EGFXWarningType::GFX_WARNING_MISSING_EXTENSION, "One Vulkan layer was not present. (try to disable them)");
 			break;
 		case VK_ERROR_EXTENSION_NOT_PRESENT:
-			SetWarning(EGFXWarningType::GFX_WARNING_MISSING_EXTENSION, Localizable("One Vulkan extension was not present. (try to disable them)"));
+			SetWarning(EGFXWarningType::GFX_WARNING_MISSING_EXTENSION, "One Vulkan extension was not present. (try to disable them)");
 			break;
 		case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
 			dbg_msg("vulkan", "native window in use");
@@ -1208,7 +1210,7 @@ protected:
 			m_RecreateSwapChain = true;
 			break;
 		default:
-			m_ErrorHelper = Localizable("unknown error");
+			m_ErrorHelper = "unknown error";
 			m_ErrorHelper.append(std::to_string(CallResult));
 			pCriticalError = m_ErrorHelper.c_str();
 			break;
@@ -1618,7 +1620,7 @@ protected:
 				{
 					if(vkMapMemory(m_VKDevice, TmpBufferMemory.m_Mem, 0, VK_WHOLE_SIZE, 0, &pMapData) != VK_SUCCESS)
 					{
-						SetError(RequiresMapping ? EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING : EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, Localizable("Failed to map buffer block memory."));
+						SetError(RequiresMapping ? EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING : EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, "Failed to map buffer block memory.");
 						delete pNewHeap;
 						return false;
 					}
@@ -1634,7 +1636,7 @@ protected:
 				Heaps.back()->m_Heap.Init(MemoryBlockSize * BlockCount, 0);
 				if(!Heaps.back()->m_Heap.Allocate(RequiredSize, TargetAlignment, AllocatedMem))
 				{
-					SetError(RequiresMapping ? EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING : EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, Localizable("Heap allocation failed directly after creating fresh heap."));
+					SetError(RequiresMapping ? EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING : EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, "Heap allocation failed directly after creating fresh heap.");
 					return false;
 				}
 			}
@@ -1790,7 +1792,7 @@ protected:
 
 		if(!AllocateVulkanMemory(&MemAllocInfo, &BufferMemory.m_Mem))
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE, Localizable("Allocation for image memory failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE, "Allocation for image memory failed.");
 			return false;
 		}
 
@@ -2245,7 +2247,7 @@ protected:
 
 		if(vkEndCommandBuffer(CommandBuffer) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, Localizable("Command buffer cannot be ended anymore."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, "Command buffer cannot be ended anymore.");
 			return false;
 		}
 
@@ -2290,7 +2292,7 @@ protected:
 			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
 			if(pCritErrorMsg != nullptr)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED, Localizable("Submitting to graphics queue failed."), pCritErrorMsg);
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED, "Submitting to graphics queue failed.", pCritErrorMsg);
 				return false;
 			}
 		}
@@ -2317,7 +2319,7 @@ protected:
 			const char *pCritErrorMsg = CheckVulkanCriticalError(QueuePresentRes);
 			if(pCritErrorMsg != nullptr)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_SWAP_FAILED, Localizable("Presenting graphics queue failed."), pCritErrorMsg);
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Presenting graphics queue failed.", pCritErrorMsg);
 				return false;
 			}
 		}
@@ -2359,7 +2361,7 @@ protected:
 				const char *pCritErrorMsg = CheckVulkanCriticalError(AcqResult);
 				if(pCritErrorMsg != nullptr)
 				{
-					SetError(EGFXErrorType::GFX_ERROR_TYPE_SWAP_FAILED, Localizable("Acquiring next image failed."), pCritErrorMsg);
+					SetError(EGFXErrorType::GFX_ERROR_TYPE_SWAP_FAILED, "Acquiring next image failed.", pCritErrorMsg);
 					return false;
 				}
 				else if(AcqResult == VK_ERROR_SURFACE_LOST_KHR)
@@ -2410,7 +2412,7 @@ protected:
 
 		if(vkBeginCommandBuffer(CommandBuffer, &BeginInfo) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, Localizable("Command buffer cannot be filled anymore."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, "Command buffer cannot be filled anymore.");
 			return false;
 		}
 
@@ -3499,14 +3501,14 @@ public:
 		unsigned int ExtCount = 0;
 		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, nullptr))
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not get instance extensions from SDL."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
 			return false;
 		}
 
 		std::vector<const char *> vExtensionList(ExtCount);
 		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, vExtensionList.data()))
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not get instance extensions from SDL."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
 			return false;
 		}
 
@@ -3555,7 +3557,7 @@ public:
 		VkResult Res = vkEnumerateInstanceLayerProperties(&LayerCount, NULL);
 		if(Res != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not get vulkan layers."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not get vulkan layers.");
 			return false;
 		}
 
@@ -3563,7 +3565,7 @@ public:
 		Res = vkEnumerateInstanceLayerProperties(&LayerCount, vVKInstanceLayers.data());
 		if(Res != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not get vulkan layers."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not get vulkan layers.");
 			return false;
 		}
 
@@ -3640,7 +3642,7 @@ public:
 		const char *pCritErrorMsg = CheckVulkanCriticalError(Res);
 		if(pCritErrorMsg != nullptr)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating instance failed."), pCritErrorMsg);
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating instance failed.", pCritErrorMsg);
 			return false;
 		}
 		else if(Res == VK_ERROR_LAYER_NOT_PRESENT || Res == VK_ERROR_EXTENSION_NOT_PRESENT)
@@ -3707,7 +3709,7 @@ public:
 		vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, nullptr);
 		if(DevicesCount == 0)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("No vulkan compatible devices found."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "No vulkan compatible devices found.");
 			return false;
 		}
 
@@ -3828,7 +3830,7 @@ public:
 		vkGetPhysicalDeviceQueueFamilyProperties(CurDevice, &FamQueueCount, nullptr);
 		if(FamQueueCount == 0)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("No vulkan queue family properties found."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "No vulkan queue family properties found.");
 			return false;
 		}
 
@@ -3850,7 +3852,7 @@ public:
 
 		if(QueueNodeIndex == std::numeric_limits<uint32_t>::max())
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("No vulkan queue found that matches the requirements: graphics queue."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "No vulkan queue found that matches the requirements: graphics queue.");
 			return false;
 		}
 
@@ -3869,14 +3871,14 @@ public:
 		uint32_t DevPropCount = 0;
 		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, NULL) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Querying logical device extension properties failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Querying logical device extension properties failed.");
 			return false;
 		}
 
 		std::vector<VkExtensionProperties> vDevPropList(DevPropCount);
 		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, vDevPropList.data()) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Querying logical device extension properties failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Querying logical device extension properties failed.");
 			return false;
 		}
 
@@ -3916,7 +3918,7 @@ public:
 		VkResult res = vkCreateDevice(m_VKGPU, &VKCreateInfo, nullptr, &m_VKDevice);
 		if(res != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Logical device could not be created."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Logical device could not be created.");
 			return false;
 		}
 
@@ -3928,7 +3930,7 @@ public:
 		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, &m_VKPresentSurface))
 		{
 			dbg_msg("vulkan", "error from sdl: %s", SDL_GetError());
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating a vulkan surface for the SDL window failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating a vulkan surface for the SDL window failed.");
 			return false;
 		}
 
@@ -3936,7 +3938,7 @@ public:
 		vkGetPhysicalDeviceSurfaceSupportKHR(m_VKGPU, m_VKGraphicsQueueIndex, m_VKPresentSurface, &IsSupported);
 		if(!IsSupported)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("The device surface does not support presenting the framebuffer to a screen. (maybe the wrong GPU was selected?)"));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "The device surface does not support presenting the framebuffer to a screen. (maybe the wrong GPU was selected?)");
 			return false;
 		}
 
@@ -3953,14 +3955,14 @@ public:
 		uint32_t PresentModeCount = 0;
 		if(vkGetPhysicalDeviceSurfacePresentModesKHR(m_VKGPU, m_VKPresentSurface, &PresentModeCount, NULL) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("The device surface presentation modes could not be fetched."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "The device surface presentation modes could not be fetched.");
 			return false;
 		}
 
 		std::vector<VkPresentModeKHR> vPresentModeList(PresentModeCount);
 		if(vkGetPhysicalDeviceSurfacePresentModesKHR(m_VKGPU, m_VKPresentSurface, &PresentModeCount, vPresentModeList.data()) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("The device surface presentation modes could not be fetched."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "The device surface presentation modes could not be fetched.");
 			return false;
 		}
 
@@ -3990,7 +3992,7 @@ public:
 	{
 		if(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_VKGPU, m_VKPresentSurface, &VKSurfCapabilities) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("The device surface capabilities could not be fetched."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "The device surface capabilities could not be fetched.");
 			return false;
 		}
 		return true;
@@ -4042,7 +4044,7 @@ public:
 		std::vector<VkImageUsageFlags> vOurImgUsages = OurImageUsages();
 		if(vOurImgUsages.empty())
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Framebuffer image attachment types not supported."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Framebuffer image attachment types not supported.");
 			return false;
 		}
 
@@ -4053,7 +4055,7 @@ public:
 			VkImageUsageFlags ImgUsageFlags = ImgUsage & VKCapabilities.supportedUsageFlags;
 			if(ImgUsageFlags != ImgUsage)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Framebuffer image attachment types not supported."));
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Framebuffer image attachment types not supported.");
 				return false;
 			}
 
@@ -4076,7 +4078,7 @@ public:
 		VkResult Res = vkGetPhysicalDeviceSurfaceFormatsKHR(m_VKGPU, m_VKPresentSurface, &SurfFormats, nullptr);
 		if(Res != VK_SUCCESS && Res != VK_INCOMPLETE)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("The device surface format fetching failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "The device surface format fetching failed.");
 			return false;
 		}
 
@@ -4084,7 +4086,7 @@ public:
 		Res = vkGetPhysicalDeviceSurfaceFormatsKHR(m_VKGPU, m_VKPresentSurface, &SurfFormats, vSurfFormatList.data());
 		if(Res != VK_SUCCESS && Res != VK_INCOMPLETE)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("The device surface format fetching failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "The device surface format fetching failed.");
 			return false;
 		}
 
@@ -4170,7 +4172,7 @@ public:
 		const char *pCritErrorMsg = CheckVulkanCriticalError(SwapchainCreateRes);
 		if(pCritErrorMsg != nullptr)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating the swap chain failed."), pCritErrorMsg);
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating the swap chain failed.", pCritErrorMsg);
 			return false;
 		}
 		else if(SwapchainCreateRes == VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
@@ -4194,7 +4196,7 @@ public:
 		VkResult res = vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, nullptr);
 		if(res != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not get swap chain images."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not get swap chain images.");
 			return false;
 		}
 
@@ -4203,7 +4205,7 @@ public:
 		m_vSwapChainImages.resize(ImgCount);
 		if(vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, m_vSwapChainImages.data()) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not get swap chain images."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not get swap chain images.");
 			return false;
 		}
 
@@ -4311,7 +4313,7 @@ public:
 
 			if(vkCreateImageView(m_VKDevice, &CreateInfo, nullptr, &m_vSwapChainImageViewList[i]) != VK_SUCCESS)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Could not create image views for the swap chain framebuffers."));
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Could not create image views for the swap chain framebuffers.");
 				return false;
 			}
 		}
@@ -4420,7 +4422,7 @@ public:
 
 		if(vkCreateRenderPass(m_VKDevice, &CreateRenderPassInfo, nullptr, &m_VKRenderPass) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating the render pass failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating the render pass failed.");
 			return false;
 		}
 
@@ -4455,7 +4457,7 @@ public:
 
 			if(vkCreateFramebuffer(m_VKDevice, &FramebufferInfo, nullptr, &m_vFramebufferList[i]) != VK_SUCCESS)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating the framebuffers failed."));
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating the framebuffers failed.");
 				return false;
 			}
 		}
@@ -4482,7 +4484,7 @@ public:
 
 		if(vkCreateShaderModule(m_VKDevice, &CreateInfo, nullptr, &ShaderModule) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Shader module was not created."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Shader module was not created.");
 			return false;
 		}
 
@@ -4506,13 +4508,13 @@ public:
 
 		if(vkCreateDescriptorSetLayout(m_VKDevice, &LayoutInfo, nullptr, &m_StandardTexturedDescriptorSetLayout) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating descriptor layout failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating descriptor layout failed.");
 			return false;
 		}
 
 		if(vkCreateDescriptorSetLayout(m_VKDevice, &LayoutInfo, nullptr, &m_Standard3DTexturedDescriptorSetLayout) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating descriptor layout failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating descriptor layout failed.");
 			return false;
 		}
 		return true;
@@ -4560,7 +4562,7 @@ public:
 
 		if(!ShaderLoaded)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("A shader file could not load correctly."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "A shader file could not load correctly.");
 			return false;
 		}
 
@@ -4700,7 +4702,7 @@ public:
 
 		if(vkCreatePipelineLayout(m_VKDevice, &PipelineLayoutInfo, nullptr, &PipeLayout) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating pipeline layout failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating pipeline layout failed.");
 			return false;
 		}
 
@@ -4736,7 +4738,7 @@ public:
 
 		if(vkCreateGraphicsPipelines(m_VKDevice, VK_NULL_HANDLE, 1, &PipelineInfo, nullptr, &Pipeline) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating the graphic pipeline failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating the graphic pipeline failed.");
 			return false;
 		}
 
@@ -4829,7 +4831,7 @@ public:
 
 		if(vkCreateDescriptorSetLayout(m_VKDevice, &LayoutInfo, nullptr, &m_TextDescriptorSetLayout) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating descriptor layout failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating descriptor layout failed.");
 			return false;
 		}
 
@@ -4974,7 +4976,7 @@ public:
 
 		if(vkCreateDescriptorSetLayout(m_VKDevice, &LayoutInfo, nullptr, &SetLayout) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating descriptor layout failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating descriptor layout failed.");
 			return false;
 		}
 		return true;
@@ -5214,7 +5216,7 @@ public:
 		{
 			if(vkCreateCommandPool(m_VKDevice, &CreatePoolInfo, nullptr, &m_vCommandPools[i]) != VK_SUCCESS)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating the command pool failed."));
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating the command pool failed.");
 				return false;
 			}
 		}
@@ -5257,7 +5259,7 @@ public:
 
 		if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, m_vMainDrawCommandBuffers.data()) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Allocating command buffers failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Allocating command buffers failed.");
 			return false;
 		}
 
@@ -5265,7 +5267,7 @@ public:
 
 		if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, m_vMemoryCommandBuffers.data()) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Allocating memory command buffers failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Allocating memory command buffers failed.");
 			return false;
 		}
 
@@ -5280,7 +5282,7 @@ public:
 				AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 				if(vkAllocateCommandBuffers(m_VKDevice, &AllocInfo, ThreadDrawCommandBuffers.data()) != VK_SUCCESS)
 				{
-					SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Allocating thread command buffers failed."));
+					SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Allocating thread command buffers failed.");
 					return false;
 				}
 			}
@@ -5337,7 +5339,7 @@ public:
 				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vMemorySemaphores[i]) != VK_SUCCESS ||
 				vkCreateFence(m_VKDevice, &FenceInfo, nullptr, &m_vFrameFences[i]) != VK_SUCCESS)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating swap chain sync objects(fences, semaphores) failed."));
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating swap chain sync objects(fences, semaphores) failed.");
 				return false;
 			}
 		}
@@ -5633,7 +5635,7 @@ public:
 
 		if(vkCreateBuffer(m_VKDevice, &BufferInfo, nullptr, &VKBuffer) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, Localizable("Buffer creation failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, "Buffer creation failed.");
 			return false;
 		}
 
@@ -5661,7 +5663,7 @@ public:
 
 		if(!AllocateVulkanMemory(&MemAllocInfo, &VKBufferMemory.m_Mem))
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, Localizable("Allocation for buffer object failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, "Allocation for buffer object failed.");
 			return false;
 		}
 
@@ -5669,7 +5671,7 @@ public:
 
 		if(vkBindBufferMemory(m_VKDevice, VKBuffer, VKBufferMemory.m_Mem, 0) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, Localizable("Binding memory to buffer failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, "Binding memory to buffer failed.");
 			return false;
 		}
 
@@ -5697,7 +5699,7 @@ public:
 
 		if(vkCreateDescriptorPool(m_VKDevice, &PoolInfo, nullptr, &NewPool.m_Pool) != VK_SUCCESS)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, Localizable("Creating the descriptor pool failed."));
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "Creating the descriptor pool failed.");
 			return false;
 		}
 
@@ -6200,7 +6202,7 @@ public:
 			BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 			if(vkBeginCommandBuffer(MemCommandBuffer, &BeginInfo) != VK_SUCCESS)
 			{
-				SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, Localizable("Command buffer cannot be filled anymore."));
+				SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, "Command buffer cannot be filled anymore.");
 				return false;
 			}
 		}
@@ -6239,7 +6241,7 @@ public:
 
 				if(vkBeginCommandBuffer(DrawCommandBuffer, &BeginInfo) != VK_SUCCESS)
 				{
-					SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, Localizable("Thread draw command buffer cannot be filled anymore."));
+					SetError(EGFXErrorType::GFX_ERROR_TYPE_RENDER_RECORDING, "Thread draw command buffer cannot be filled anymore.");
 					return false;
 				}
 			}
@@ -6480,14 +6482,14 @@ public:
 		case CCommandProcessorFragment_GLBase::CMD_INIT:
 			if(!Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)))
 			{
-				SetWarningPreMsg(Localizable("Could not initialize Vulkan: "));
+				SetWarningPreMsg("Could not initialize Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;
 		case CCommandProcessorFragment_GLBase::CMD_SHUTDOWN:
 			if(!Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)))
 			{
-				SetWarningPreMsg(Localizable("Could not shutdown Vulkan: "));
+				SetWarningPreMsg("Could not shutdown Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;
@@ -6495,14 +6497,14 @@ public:
 		case CCommandProcessorFragment_GLBase::CMD_PRE_INIT:
 			if(!Cmd_PreInit(static_cast<const CCommandProcessorFragment_GLBase::SCommand_PreInit *>(pBaseCommand)))
 			{
-				SetWarningPreMsg(Localizable("Could not initialize Vulkan: "));
+				SetWarningPreMsg("Could not initialize Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;
 		case CCommandProcessorFragment_GLBase::CMD_POST_SHUTDOWN:
 			if(!Cmd_PostShutdown(static_cast<const CCommandProcessorFragment_GLBase::SCommand_PostShutdown *>(pBaseCommand)))
 			{
-				SetWarningPreMsg(Localizable("Could not shutdown Vulkan: "));
+				SetWarningPreMsg("Could not shutdown Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;

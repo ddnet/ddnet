@@ -57,8 +57,18 @@ enum EGFXWarningType
 
 struct SGFXErrorContainer
 {
+	struct SError
+	{
+		bool m_RequiresTranslation;
+		std::string m_Err;
+
+		bool operator==(const SError &Other) const
+		{
+			return m_RequiresTranslation == Other.m_RequiresTranslation && m_Err == Other.m_Err;
+		}
+	};
 	EGFXErrorType m_ErrorType = EGFXErrorType::GFX_ERROR_TYPE_NONE;
-	std::vector<std::string> m_vErrors;
+	std::vector<SError> m_vErrors;
 };
 
 struct SGFXWarningContainer
