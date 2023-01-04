@@ -121,6 +121,7 @@ public:
 	*/
 	void RemoveEntity(CEntity *pEntity);
 
+	void RemoveEntitiesFromPlayer(int PlayerId);
 	void RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers);
 
 	/*
