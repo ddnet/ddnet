@@ -1258,7 +1258,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== Tem certeza que deseja desconectar e trocar pata um servidor diferente?
+== Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
 Refreshing...
 == Atualizando...
