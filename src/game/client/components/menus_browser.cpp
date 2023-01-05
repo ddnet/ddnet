@@ -12,11 +12,11 @@
 
 #include <game/client/components/console.h>
 #include <game/client/components/countryflags.h>
+#include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_listbox.h>
 #include <game/localization.h>
-
-#include <game/client/gameclient.h>
 
 #include "menus.h"
 
@@ -160,9 +160,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
-	CUIRect Scroll;
-	View.VSplitRight(20.0f, &View, &Scroll);
-
 	int NumServers = ServerBrowser()->NumSortedServers();
 
 	// display important messages in the middle of the screen so no
@@ -178,34 +175,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			UI()->DoLabel(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, TEXTALIGN_CENTER);
 	}
 
-	static float s_ScrollValue = 0;
-
-	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
 	if(UI()->ConsumeHotkey(CUI::HOTKEY_TAB))
 	{
 		const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
 		g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + Direction) % 3;
 	}
 
-	if(HandleListInputs(View, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_SelectedIndex, NumServers))
-	{
-		const CServerInfo *pItem = ServerBrowser()->SortedGet(m_SelectedIndex);
-		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
-	}
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, m_SelectedIndex, &View, false);
 
-	// set clipping
-	UI()->ClipEnable(&View);
-
-	CUIRect OriginalView = View;
-	int Num = (int)(View.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = maximum(NumServers - Num + 1, 0);
-	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
-
-	int NewSelected = -1;
-	bool DoubleClicked = false;
 	int NumPlayers = 0;
-
+	static int s_PrevSelectedIndex = -1;
+	if(s_PrevSelectedIndex != m_SelectedIndex)
+	{
+		s_ListBox.ScrollToSelected();
+		s_PrevSelectedIndex = m_SelectedIndex;
+	}
 	m_SelectedIndex = -1;
 
 	// reset friend counter
@@ -229,23 +214,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	for(int i = 0; i < NumServers; i++)
 	{
-		int ItemIndex = i;
-		const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
+		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
 		NumPlayers += pItem->m_NumFilteredPlayers;
-		CUIRect Row;
 
-		const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
-		//initialize
-		if(pItem->m_pUIElement == NULL)
+		if(pItem->m_pUIElement == nullptr)
 		{
+			const int UIRectCount = 2 + (COL_VERSION + 1) * 3;
 			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
-		int Selected = str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0; //selected_index==ItemIndex;
-
-		View.HSplitTop(ms_ListheaderHeight, &Row, &View);
-
-		if(Selected)
+		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
+		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
 		// update friend counter
@@ -273,31 +252,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 		}
 
-		// make sure that only those in view can be selected
-		if(Row.y + Row.h > OriginalView.y && Row.y < OriginalView.y + OriginalView.h)
-		{
-			if(Selected)
-			{
-				CUIRect r = Row;
-				r.Margin(0.5f, &r);
-				pItem->m_pUIElement->Rect(0)->Draw(&r, ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
-			}
-			else if(UI()->MouseHovered(&Row))
-			{
-				CUIRect r = Row;
-				r.Margin(0.5f, &r);
-				pItem->m_pUIElement->Rect(0)->Draw(&r, ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
-			}
-
-			if(UI()->DoButtonLogic(pItem, Selected, &Row))
-			{
-				NewSelected = ItemIndex;
-				if(NewSelected == m_DoubleClickIndex)
-					DoubleClicked = true;
-				m_DoubleClickIndex = NewSelected;
-			}
-		}
-		else
+		if(!ListItem.m_Visible)
 		{
 			// reset active item, if not visible
 			if(UI()->CheckActiveItem(pItem))
@@ -312,8 +267,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			CUIRect Button;
 			char aTemp[64];
 			Button.x = s_aCols[c].m_Rect.x;
-			Button.y = Row.y;
-			Button.h = Row.h;
+			Button.y = ListItem.m_Rect.y;
+			Button.h = ListItem.m_Rect.h;
 			Button.w = s_aCols[c].m_Rect.w;
 
 			int ID = s_aCols[c].m_ID;
@@ -469,16 +424,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		}
 	}
 
-	UI()->ClipDisable();
-
-	if(NewSelected != -1)
+	const int NewSelected = s_ListBox.DoEnd();
+	if(NewSelected != m_SelectedIndex)
 	{
-		// select the new server
-		const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
-		str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
-		if(DoubleClicked && Input()->MouseDoubleClick())
-			Connect(g_Config.m_UiServerAddress);
+		m_SelectedIndex = NewSelected;
+		if(m_SelectedIndex >= 0)
+		{
+			// select the new server
+			const CServerInfo *pItem = ServerBrowser()->SortedGet(NewSelected);
+			if(pItem)
+			{
+				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
+			}
+		}
 	}
+	if(s_ListBox.WasItemActivated())
+		Connect(g_Config.m_UiServerAddress);
 
 	// Render bar that shows the loading progression.
 	// The bar is only shown while loading and fades out when it's done.
@@ -1123,30 +1084,22 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 	if(pSelectedServer)
 	{
-		static int s_VoteList = 0;
-		static float s_ScrollValue = 0;
-		UiDoListboxStart(&s_VoteList, &ServerScoreBoard, 26.0f, Localize("Scoreboard"), "", pSelectedServer->m_NumReceivedClients, 1, -1, s_ScrollValue);
+		static CListBox s_ListBox;
+		s_ListBox.DoAutoSpacing(1.0f);
+		s_ListBox.DoStart(25.0f, pSelectedServer->m_NumReceivedClients, 1, 3, -1, &ServerScoreBoard);
 
 		for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 		{
-			CListboxItem Item = UiDoListboxNextItem(&pSelectedServer->m_aClients[i]);
+			const CServerInfo::CClient &CurrentClient = pSelectedServer->m_aClients[i];
+			const CListboxItem Item = s_ListBox.DoNextItem(&CurrentClient);
 
 			if(!Item.m_Visible)
 				continue;
 
 			CUIRect Name, Clan, Score, Flag;
-			Item.m_Rect.HSplitTop(25.0f, &Name, &Item.m_Rect);
-			if(UiLogicGetCurrentClickedItem() == i)
-			{
-				if(pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_PLAYER)
-					m_pClient->Friends()->RemoveFriend(pSelectedServer->m_aClients[i].m_aName, pSelectedServer->m_aClients[i].m_aClan);
-				else
-					m_pClient->Friends()->AddFriend(pSelectedServer->m_aClients[i].m_aName, pSelectedServer->m_aClients[i].m_aClan);
-				FriendlistOnUpdate();
-				Client()->ServerBrowserUpdate();
-			}
+			Name = Item.m_Rect;
 
-			ColorRGBA Color = pSelectedServer->m_aClients[i].m_FriendState == IFriends::FRIEND_NO ?
+			ColorRGBA Color = CurrentClient.m_FriendState == IFriends::FRIEND_NO ?
 						  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
 						  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
 			Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
@@ -1159,17 +1112,17 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			// score
 			char aTemp[16];
 
-			if(!pSelectedServer->m_aClients[i].m_Player)
+			if(!CurrentClient.m_Player)
 				str_copy(aTemp, "SPEC");
 			else if((str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap")) && g_Config.m_ClDDRaceScoreBoard)
 			{
-				if(pSelectedServer->m_aClients[i].m_Score == -9999 || pSelectedServer->m_aClients[i].m_Score == 0)
+				if(CurrentClient.m_Score == -9999 || CurrentClient.m_Score == 0)
 					aTemp[0] = 0;
 				else
-					str_time((int64_t)abs(pSelectedServer->m_aClients[i].m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+					str_time((int64_t)abs(CurrentClient.m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
 			}
 			else
-				str_format(aTemp, sizeof(aTemp), "%d", pSelectedServer->m_aClients[i].m_Score);
+				str_format(aTemp, sizeof(aTemp), "%d", CurrentClient.m_Score);
 
 			float ScoreFontSize = 12.0f;
 			while(ScoreFontSize >= 4.0f && TextRender()->TextWidth(0, ScoreFontSize, aTemp, -1, -1.0f) > Score.w)
@@ -1182,7 +1135,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			// name
 			TextRender()->SetCursor(&Cursor, Name.x, Name.y + (Name.h - (FontSize - 2)) / 2.f, FontSize - 2, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Cursor.m_LineWidth = Name.w;
-			const char *pName = pSelectedServer->m_aClients[i].m_aName;
+			const char *pName = CurrentClient.m_aName;
 			bool Printed = false;
 			if(g_Config.m_BrFilterString[0])
 				Printed = PrintHighlighted(pName, [this, &Cursor, pName](const char *pFilteredStr, const int FilterLen) {
@@ -1198,7 +1151,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			// clan
 			TextRender()->SetCursor(&Cursor, Clan.x, Clan.y + (Clan.h - (FontSize - 2)) / 2.f, FontSize - 2, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Cursor.m_LineWidth = Clan.w;
-			const char *pClan = pSelectedServer->m_aClients[i].m_aClan;
+			const char *pClan = CurrentClient.m_aClan;
 			Printed = false;
 			if(g_Config.m_BrFilterString[0])
 				Printed = PrintHighlighted(pClan, [this, &Cursor, pClan](const char *pFilteredStr, const int FilterLen) {
@@ -1213,10 +1166,20 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			// flag
 			ColorRGBA FColor(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_CountryFlags.Render(pSelectedServer->m_aClients[i].m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
+			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
 		}
 
-		UiDoListboxEnd(&s_ScrollValue, 0);
+		const int NewSelected = s_ListBox.DoEnd();
+		if(s_ListBox.WasItemSelected())
+		{
+			const CServerInfo::CClient &SelectedClient = pSelectedServer->m_aClients[NewSelected];
+			if(SelectedClient.m_FriendState == IFriends::FRIEND_PLAYER)
+				m_pClient->Friends()->RemoveFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
+			else
+				m_pClient->Friends()->AddFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
+			FriendlistOnUpdate();
+			Client()->ServerBrowserUpdate();
+		}
 	}
 }
 
@@ -1276,49 +1239,48 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	FilterHeader.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
 	ServerFriends.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
 	UI()->DoLabel(&FilterHeader, Localize("Friends"), FontSize + 4.0f, TEXTALIGN_CENTER);
-	CUIRect Button, List;
 
+	CUIRect List;
 	ServerFriends.Margin(3.0f, &ServerFriends);
 	ServerFriends.VMargin(3.0f, &ServerFriends);
 	ServerFriends.HSplitBottom(100.0f, &List, &ServerFriends);
 
 	// friends list(remove friend)
-	static float s_ScrollValue = 0;
+	static CListBox s_ListBox;
 	if(m_FriendlistSelectedIndex >= (int)m_vFriends.size())
 		m_FriendlistSelectedIndex = m_vFriends.size() - 1;
-	UiDoListboxStart(&m_vFriends, &List, 30.0f, "", "", m_vFriends.size(), 1, m_FriendlistSelectedIndex, s_ScrollValue);
+	s_ListBox.DoAutoSpacing(3.0f);
+	s_ListBox.DoStart(30.0f, m_vFriends.size(), 1, 3, m_FriendlistSelectedIndex, &List);
 
 	std::sort(m_vFriends.begin(), m_vFriends.end());
-	for(auto &Friend : m_vFriends)
+	for(size_t i = 0; i < m_vFriends.size(); ++i)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&Friend.m_NumFound, false, false);
+		const auto &Friend = m_vFriends[i];
+		const CListboxItem Item = s_ListBox.DoNextItem(&Friend, m_FriendlistSelectedIndex >= 0 && (size_t)m_FriendlistSelectedIndex == i);
+		if(!Item.m_Visible)
+			continue;
 
-		if(Item.m_Visible)
-		{
-			Item.m_Rect.Margin(1.5f, &Item.m_Rect);
-			CUIRect OnState;
-			Item.m_Rect.VSplitRight(30.0f, &Item.m_Rect, &OnState);
-			Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_L, 4.0f);
+		CUIRect NameClanLabels, NameLabel, ClanLabel, OnState;
+		Item.m_Rect.VSplitRight(30.0f, &NameClanLabels, &OnState);
+		NameClanLabels.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_L, 4.0f);
 
-			Item.m_Rect.VMargin(2.5f, &Item.m_Rect);
-			Item.m_Rect.HSplitTop(12.0f, &Item.m_Rect, &Button);
-			UI()->DoLabel(&Item.m_Rect, Friend.m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
-			UI()->DoLabel(&Button, Friend.m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
+		NameClanLabels.VMargin(2.5f, &NameClanLabels);
+		NameClanLabels.HSplitTop(12.0f, &NameLabel, &ClanLabel);
+		UI()->DoLabel(&NameLabel, Friend.m_pFriendInfo->m_aName, FontSize, TEXTALIGN_LEFT);
+		UI()->DoLabel(&ClanLabel, Friend.m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_LEFT);
 
-			OnState.Draw(Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_R, 4.0f);
-			OnState.HMargin((OnState.h - FontSize) / 3, &OnState);
-			OnState.VMargin(5.0f, &OnState);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%i", Friend.m_NumFound);
-			UI()->DoLabel(&OnState, aBuf, FontSize + 2, TEXTALIGN_RIGHT);
-		}
+		OnState.Draw(Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_R, 4.0f);
+		OnState.HMargin((OnState.h - FontSize) / 3, &OnState);
+		OnState.VMargin(5.0f, &OnState);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%i", Friend.m_NumFound);
+		UI()->DoLabel(&OnState, aBuf, FontSize + 2, TEXTALIGN_RIGHT);
 	}
 
-	bool Activated = false;
-	m_FriendlistSelectedIndex = UiDoListboxEnd(&s_ScrollValue, &Activated);
+	m_FriendlistSelectedIndex = s_ListBox.DoEnd();
 
 	// activate found server with friend
-	if(Activated && m_vFriends[m_FriendlistSelectedIndex].m_NumFound)
+	if(s_ListBox.WasItemActivated() && m_vFriends[m_FriendlistSelectedIndex].m_NumFound)
 	{
 		bool Found = false;
 		int NumServers = ServerBrowser()->NumSortedServers();
@@ -1336,7 +1298,6 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 							str_quickhash(pItem->m_aClients[j].m_aName) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
 					{
 						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
-						m_ScrollOffset = ItemIndex;
 						m_SelectedIndex = ItemIndex;
 						Found = true;
 					}
@@ -1345,6 +1306,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		}
 	}
 
+	CUIRect Button;
 	ServerFriends.HSplitTop(2.5f, 0, &ServerFriends);
 	ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
 	if(m_FriendlistSelectedIndex != -1)

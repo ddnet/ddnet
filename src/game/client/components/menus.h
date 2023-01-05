@@ -195,22 +195,6 @@ class CMenus : public CComponent
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 
-	struct CListboxItem
-	{
-		int m_Visible;
-		int m_Selected;
-		CUIRect m_Rect;
-		CUIRect m_HitRect;
-	};
-
-	void UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-		int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly = false);
-	CListboxItem UiDoListboxNextItem(const void *pID, bool Selected = false, bool KeyEvents = true, bool NoHoverEffects = false);
-	CListboxItem UiDoListboxNextRow();
-	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive = nullptr);
-
-	int UiLogicGetCurrentClickedItem();
-
 	/**
 	 * Places and renders a tooltip near pNearRect.
 	 * For now only works correctly with single line tooltips, since Text width calculation gets broken when there are multiple lines.
@@ -541,8 +525,6 @@ protected:
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
-	int m_DoubleClickIndex;
-	int m_ScrollOffset;
 	void RenderServerbrowserServerList(CUIRect View);
 	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();
@@ -565,8 +547,8 @@ protected:
 	void OnConfigSave(IConfigManager *pConfigManager);
 
 	// found in menus_settings.cpp
-	void RenderLanguageSelection(CUIRect MainView);
-	void RenderThemeSelection(CUIRect MainView, bool Header = true);
+	bool RenderLanguageSelection(CUIRect MainView);
+	void RenderThemeSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
 	void RenderSettingsPlayer(CUIRect MainView);
 	void RenderSettingsDummyPlayer(CUIRect MainView);
@@ -746,7 +728,6 @@ private:
 	static int GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	void SetMenuPage(int NewPage);
 	void RefreshBrowserTab(int UiPage);
-	bool HandleListInputs(const CUIRect &View, float &ScrollValue, float ScrollAmount, int *pScrollOffset, float ElemHeight, int &SelectedIndex, int NumElems);
 
 	// found in menus_ingame.cpp
 	void RenderInGameNetwork(CUIRect MainView);

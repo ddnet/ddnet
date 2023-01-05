@@ -3,7 +3,9 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
+
 #include <game/client/gameclient.h>
+#include <game/client/ui_listbox.h>
 #include <game/localization.h>
 
 #include "menus.h"
@@ -457,7 +459,6 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	// skin selector
 	MainView.HSplitTop(MainView.h - 10.0f - ms_ButtonHeight, &CustomList, &MainView);
-	static float s_ScrollValue = 0.0f;
 	if(gs_aInitCustomList[s_CurCustomTab])
 	{
 		int ListSize = 0;
@@ -533,7 +534,8 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		SearchListSize = gs_vpSearchExtrasList.size();
 	}
 
-	UiDoListboxStart(&gs_aInitCustomList[s_CurCustomTab], &CustomList, TextureHeight + 15.0f + 10.0f + Margin, "", "", SearchListSize, CustomList.w / (Margin + TextureWidth), OldSelected, s_ScrollValue, true);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(TextureHeight + 15.0f + 10.0f + Margin, SearchListSize, CustomList.w / (Margin + TextureWidth), 1, OldSelected, &CustomList, false);
 	for(size_t i = 0; i < SearchListSize; ++i)
 	{
 		const SCustomItem *pItem = GetCustomItem(s_CurCustomTab, i);
@@ -571,30 +573,30 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				OldSelected = i;
 		}
 
-		CListboxItem Item = UiDoListboxNextItem(pItem, OldSelected >= 0 && (size_t)OldSelected == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(pItem, OldSelected >= 0 && (size_t)OldSelected == i);
 		CUIRect ItemRect = Item.m_Rect;
 		ItemRect.Margin(Margin / 2, &ItemRect);
-		if(Item.m_Visible)
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect TextureRect;
+		ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
+		TextureRect.HSplitTop(10, NULL, &TextureRect);
+		UI()->DoLabel(&ItemRect, pItem->m_aName, ItemRect.h - 2, TEXTALIGN_CENTER);
+		if(pItem->m_RenderTexture.IsValid())
 		{
-			CUIRect TextureRect;
-			ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
-			TextureRect.HSplitTop(10, NULL, &TextureRect);
-			UI()->DoLabel(&ItemRect, pItem->m_aName, ItemRect.h - 2, TEXTALIGN_CENTER);
-			if(pItem->m_RenderTexture.IsValid())
-			{
-				Graphics()->WrapClamp();
-				Graphics()->TextureSet(pItem->m_RenderTexture);
-				Graphics()->QuadsBegin();
-				Graphics()->SetColor(1, 1, 1, 1);
-				IGraphics::CQuadItem QuadItem(TextureRect.x + (TextureRect.w - TextureWidth) / 2, TextureRect.y + (TextureRect.h - TextureHeight) / 2, TextureWidth, TextureHeight);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-				Graphics()->QuadsEnd();
-				Graphics()->WrapNormal();
-			}
+			Graphics()->WrapClamp();
+			Graphics()->TextureSet(pItem->m_RenderTexture);
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1, 1, 1, 1);
+			IGraphics::CQuadItem QuadItem(TextureRect.x + (TextureRect.w - TextureWidth) / 2, TextureRect.y + (TextureRect.h - TextureHeight) / 2, TextureWidth, TextureHeight);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+			Graphics()->WrapNormal();
 		}
 	}
 
-	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
+	const int NewSelected = s_ListBox.DoEnd();
 	if(OldSelected != NewSelected)
 	{
 		if(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName[0] != '\0')
