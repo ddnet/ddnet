@@ -250,7 +250,7 @@ int main(int argc, const char **argv)
 				}
 				else if(aImageFlags[ImageIndex] == 0)
 				{
-					mem_zero(pImgBuff, Width * Height * 4);
+					mem_zero(pImgBuff, (size_t)Width * Height * 4);
 				}
 				else
 				{

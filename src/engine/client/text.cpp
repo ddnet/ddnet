@@ -539,7 +539,7 @@ class CTextRender : public IEngineTextRender
 		if(Width > 0 && Height > 0)
 		{
 			// prepare glyph data
-			mem_zero(ms_aGlyphData, Width * Height);
+			mem_zero(ms_aGlyphData, (size_t)Width * Height);
 
 			for(py = 0; py < pBitmap->rows; py++)
 				for(px = 0; px < pBitmap->width; px++)
