@@ -1388,9 +1388,6 @@ UI controller sens.
 Controller jitter tolerance
 == 컨트롤러 신호 오차 허용 범위
 
-No controller found. Plug in a controller and restart the game.
-== 컨트롤러가 발견되지 않았습니다. 컨트롤러 연결 후 게임을 재시작 하십시오.
-
 Device
 == 장치
 
@@ -1607,6 +1604,40 @@ Menu opened. Press Esc key again to close menu.
 Set all to Rifle
 == 소총 색상으로 통일
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
 Cancel
 == 
 
@@ -1631,14 +1662,41 @@ Go back one marker
 Go forward one marker
 == 
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
 Unable to delete the demo '%s'
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the directory to add custom skins
+== 
+
+No controller found. Plug in a controller.
+== 
+
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Unregister protocol and file extensions
+== 
+
+Open the directory to add custom assets
 == 

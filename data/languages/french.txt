@@ -1401,9 +1401,6 @@ UI controller sens.
 Controller jitter tolerance
 == Tolérance gigue de la manette
 
-No controller found. Plug in a controller and restart the game.
-== Aucune manette détectée. Branchez une manette et redémarrez le jeu.
-
 Device
 == Manette
 
@@ -1593,6 +1590,40 @@ Menu opened. Press Esc key again to close menu.
 Weapons
 == Armes
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
 Cancel
 == Annuler
 
@@ -1617,11 +1648,32 @@ Go back one marker
 Go forward one marker
 == Aller au marqueur suivant
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == Êtes-vous sûrs de vouloir supprimer la démo '%s' ?
 
 Unable to delete the demo '%s'
 == Impossible de supprimer la démo '%s'
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the directory to add custom skins
+== 
+
+No controller found. Plug in a controller.
+== 
 
 Reset controls
 == Réinitialiser les contrôles
@@ -1655,3 +1707,9 @@ Freeze Laser Inner Color
 
 Set all to Rifle
 == Copier les réglages du fusil laser à tous
+
+Unregister protocol and file extensions
+== 
+
+Open the directory to add custom assets
+== 

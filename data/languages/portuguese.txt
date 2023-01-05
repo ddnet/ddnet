@@ -962,6 +962,40 @@ Editor
 
 [Start menu]
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
 Successfully saved the replay!
 == 
 
@@ -1172,6 +1206,9 @@ Fetch Info
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
@@ -1199,7 +1236,19 @@ Smooth Dynamic Camera
 Skip the main menu
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
 Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
 == 
 
 Loading skin files
@@ -1227,6 +1276,9 @@ Choose default eyes when joining a server
 == 
 
 Skin Database
+== 
+
+Open the directory to add custom skins
 == 
 
 Hook collisions
@@ -1303,7 +1355,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1549,6 +1601,9 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 Emoticons
 == 
 
@@ -1559,6 +1614,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Tutorial
