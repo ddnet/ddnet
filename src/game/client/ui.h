@@ -251,6 +251,10 @@ public:
 		HOTKEY_TAB = 1 << 5,
 		HOTKEY_SCROLL_UP = 1 << 6,
 		HOTKEY_SCROLL_DOWN = 1 << 7,
+		HOTKEY_PAGE_UP = 1 << 8,
+		HOTKEY_PAGE_DOWN = 1 << 9,
+		HOTKEY_HOME = 1 << 10,
+		HOTKEY_END = 1 << 11,
 	};
 
 	void ResetUIElement(CUIElement &UIElement);

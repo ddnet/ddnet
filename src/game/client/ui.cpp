@@ -275,6 +275,14 @@ bool CUI::OnInput(const IInput::CEvent &Event)
 			m_HotkeysPressed |= HOTKEY_SCROLL_UP;
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 			m_HotkeysPressed |= HOTKEY_SCROLL_DOWN;
+		else if(Event.m_Key == KEY_PAGEUP)
+			m_HotkeysPressed |= HOTKEY_PAGE_UP;
+		else if(Event.m_Key == KEY_PAGEDOWN)
+			m_HotkeysPressed |= HOTKEY_PAGE_DOWN;
+		else if(Event.m_Key == KEY_HOME)
+			m_HotkeysPressed |= HOTKEY_HOME;
+		else if(Event.m_Key == KEY_END)
+			m_HotkeysPressed |= HOTKEY_END;
 		return LastHotkeysPressed != m_HotkeysPressed;
 	}
 	return false;
