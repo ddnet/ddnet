@@ -14,6 +14,7 @@
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
 #	banan   	2022-06-12 11:36:50
+#	ban   	2023-01-5 10:22:50
 ##### /authors #####
 
 ##### translated strings #####
@@ -1363,9 +1364,6 @@ UI controller sens.
 Controller jitter tolerance
 == Устойчивость к движению контроллера
 
-No controller found. Plug in a controller and restart the game.
-== Контроллер не найден. Подключите контроллер и перезапустите игру.
-
 Device
 == Устройство
 
@@ -1641,3 +1639,64 @@ Reset controls
 
 Are you sure that you want to reset the controls to their defaults?
 == Вы уверены что хотите сбросить настройки на их стандартные значения?
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Ошибка во время инициализации. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке config и повторите попытку.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== Нехватка памяти VRAM. Попробуйте удалить пользовательские ресурсы (скины, энтити и т.д.), особенно те, которые имеют высокое разрешение.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Произошла ошибка во время выполнения команды записи. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Команда рендеринга не выполнена. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Отправка команд рендеринга не удалась. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Не удалось выполнить подкачку кадровых буферов. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Неизвестная ошибка. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке config и повторите попытку.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Не удалось инициализировать заданный графический модуль, возврат к модулю по умолчанию.
+
+Open the directory that contains the demo files
+== Открытие папки, содержащего файлы демок
+
+Save power by lowering refresh rate (higher input latency)
+== Экономия энергии за счет снижения частоты кадров (более высокая задержка ввода)
+
+Open the settings file
+== Открытие файла настроек
+
+Open the directory that contains the configuration and user files
+== Открытие папки, содержащей файлы конфигурации и пользовательские файлы
+
+Open the directory to add custom themes
+== Открытие папки для добавления пользовательских тем
+
+Open the directory to add custom skins
+== Открытие папки для добавления пользовательских скинов
+
+No controller found. Plug in a controller.
+== Контроллер не найден. Подключите контроллер.
+
+Unregister protocol and file extensions
+== Незарегистрированный протокол и расширения файлов
+
+Open the directory to add custom assets
+== Открытие папки для добавления пользовательских ресурсов
