@@ -67,7 +67,7 @@ All
 == Tout le monde
 
 Are you sure that you want to quit?
-== Êtes-vous sûr de vouloir quitter ?
+== Êtes-vous sûrs de vouloir quitter ?
 
 Automatically record demos
 == Enregistrer les démos automatiquement
@@ -691,7 +691,7 @@ AntiPing: predict other players
 == AntiPing: prédit le déplacement des autres joueurs
 
 Are you sure that you want to disconnect your dummy?
-== Êtes vous sûr de vouloir déconnecter votre dummy ?
+== Êtes vous sûrs de vouloir déconnecter votre dummy ?
 
 Reload
 == Recharger
@@ -778,7 +778,7 @@ Dummy settings
 == Config. du dummy
 
 Are you sure that you want to disconnect?
-== Êtes-vous sûr de vouloir vous déconnecter ?
+== Êtes-vous sûrs de vouloir vous déconnecter ?
 
 Deactivate
 == Désactiver
@@ -1585,7 +1585,7 @@ Toggle keyboard shortcuts
 == Basculer les raccourcis clavier
 
 Menu opened. Press Esc key again to close menu.
-== Menu ouvert. Appuyez à nouveau sur la touche Esc pour fermer le menu.
+== Menu ouvert. Appuyez à nouveau sur la touche Éch. pour fermer le menu.
 
 Weapons
 == Armes
@@ -1625,37 +1625,37 @@ Could not initialize the given graphics backend, reverting to the default backen
 == 
 
 Cancel
-== 
+== Annuler
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Le fichier '%s' existe déjà, voulez-vous l'écraser ?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Êtes-vous sûrs de vouloir retirer le joueur '%s' de votre liste d'amis ? 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Êtes-vous sûrs de vouloir retirer le clan '%s' de votre liste d'amis ?
 
 Go back one tick
-== 
+== Reculer d'une image
 
 Go forward one tick
-== 
+== Avancer d'une image
 
 Go back one marker
-== 
+== Aller au marqueur précédent
 
 Go forward one marker
-== 
+== Aller au marqueur suivant
 
 Open the directory that contains the demo files
 == 
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Êtes-vous sûrs de vouloir supprimer la démo '%s' ?
 
 Unable to delete the demo '%s'
-== 
+== Impossible de supprimer la démo '%s'
 
 Save power by lowering refresh rate (higher input latency)
 == 
@@ -1676,37 +1676,37 @@ No controller found. Plug in a controller.
 == 
 
 Reset controls
-== 
+== Réinitialiser les contrôles
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Êtes-vous sûrs de vouloir réinitialiser les contrôles aux valeurs par défaut ?
 
 Rifle Laser Outline Color
-== 
+== Couleur fusil laser (contour)
 
 Rifle Laser Inner Color
-== 
+== Couleur fusil laser (intérieur)
 
 Shotgun Laser Outline Color
-== 
+== Couleur fusil à pompe (contour)
 
 Shotgun Laser Inner Color
-== 
+== Couleur fusil à pompe (intérieur)
 
 Door Laser Outline Color
-== 
+== Couleur porte laser (contour)
 
 Door Laser Inner Color
-== 
+== Couleur porte laser (intérieur)
 
 Freeze Laser Outline Color
-== 
+== Couleur laser gelant (contour)
 
 Freeze Laser Inner Color
-== 
+== Couleur laser gelant (intérieur)
 
 Set all to Rifle
-== 
+== Copier les réglages du fusil laser à tous
 
 Unregister protocol and file extensions
 == 
