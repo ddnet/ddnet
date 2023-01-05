@@ -251,7 +251,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	if(m_HookState == HOOK_IDLE)
 	{
 		SetHookedPlayer(-1);
-		m_HookState = HOOK_IDLE;
 		m_HookPos = m_Pos;
 	}
 	else if(m_HookState >= HOOK_RETRACT_START && m_HookState < HOOK_RETRACT_END)
