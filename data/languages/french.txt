@@ -1594,35 +1594,35 @@ Weapons
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Échec lors de l'initialisation. Essayez de changer gfx_backend à OpenGL ou Vulkan dans le fichier settings_ddnet.cfg dans le dossier de configuration et réessayez.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Mémoire graphique insuffisante. Essayez de retirer des ressources personnalisées (skins, entités, etc.), spécialement celles de haute résolution.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Une erreur pendant l'enregistrement des commandes est survenue. Essayez de mettre à jour vos pilotes GPU.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Une commande de rendu a échoué. Essayez de mettre à jour vos pilotes GPU.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== L'envoi d'une commande de rendu a échoué. Essayez de mettre à jour vos pilotes GPU.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Échec de l'échange de tampons d'images. Essayez de mettre à jour vos pilotes GPU.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Erreur inconnue. Essayez de changer gfx_backend à OpenGL ou Vulkan dans le fichier settings_ddnet.cfg dans le dossier de configuration et réessayez.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Impossible d'initialiser le moteur de rendu spécifié, nouvel essai avec le moteur par défaut.
 
 Cancel
 == Annuler
@@ -1649,7 +1649,7 @@ Go forward one marker
 == Aller au marqueur suivant
 
 Open the directory that contains the demo files
-== 
+== Ouvrir le dossier contenant les fichiers démo
 
 Are you sure that you want to delete the demo '%s'?
 == Êtes-vous sûrs de vouloir supprimer la démo '%s' ?
@@ -1658,22 +1658,22 @@ Unable to delete the demo '%s'
 == Impossible de supprimer la démo '%s'
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Économiser la puissance en diminuant le taux de rafraîchissement (augmente la latence d'entrée)
 
 Open the settings file
-== 
+== Ouvrir le fichier de configuration
 
 Open the directory that contains the configuration and user files
-== 
+== Ouvrir le dossier de configuration et des fichiers personnalisés
 
 Open the directory to add custom themes
-== 
+== Ouvrir le dossier pour ajouter un thème personnalisé
 
 Open the directory to add custom skins
-== 
+== Ouvrir le dossier pour ajouter des skins personnalisés
 
 No controller found. Plug in a controller.
-== 
+== Aucune manette détectée. Branchez une manette.
 
 Reset controls
 == Réinitialiser les contrôles
@@ -1709,7 +1709,7 @@ Set all to Rifle
 == Copier les réglages du fusil laser à tous
 
 Unregister protocol and file extensions
-== 
+== Désenregistrer le protocole et les extensions de fichier
 
 Open the directory to add custom assets
-== 
+== Ouvrir le dossier pour ajouter des ressources personnalisées
