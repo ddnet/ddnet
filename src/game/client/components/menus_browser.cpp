@@ -1030,8 +1030,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	const CServerInfo *pSelectedServer = ServerBrowser()->SortedGet(m_SelectedIndex);
 
 	// split off a piece to use for scoreboard
-	ServerDetails.HSplitTop(90.0f, &ServerDetails, &ServerScoreBoard);
-	ServerDetails.HSplitBottom(2.5f, &ServerDetails, 0x0);
+	ServerDetails.HSplitTop(110.0f, &ServerDetails, &ServerScoreBoard);
 
 	// server details
 	CTextCursor Cursor;
@@ -1043,8 +1042,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 	if(pSelectedServer)
 	{
-		ServerDetails.VSplitLeft(5.0f, 0, &ServerDetails);
-		ServerDetails.Margin(3.0f, &ServerDetails);
+		ServerDetails.Margin(5.0f, &ServerDetails);
 
 		CUIRect Row;
 		static CLocConstString s_aLabels[] = {
@@ -1052,17 +1050,28 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			"Game type",
 			"Ping"};
 
-		CUIRect LeftColumn;
-		CUIRect RightColumn;
+		// copy info button
+		{
+			CUIRect Button;
+			ServerDetails.HSplitBottom(15.0f, &ServerDetails, &Button);
+			static CButtonContainer s_CopyButton;
+			if(DoButton_Menu(&s_CopyButton, Localize("Copy info"), 0, &Button))
+			{
+				char aInfo[256];
+				pSelectedServer->InfoToString(aInfo, sizeof(aInfo));
+				Input()->SetClipboardText(aInfo);
+			}
+		}
 
-		//
+		ServerDetails.HSplitBottom(2.5f, &ServerDetails, nullptr);
+
+		// favorite checkbox
 		{
 			CUIRect Button;
 			ServerDetails.HSplitBottom(20.0f, &ServerDetails, &Button);
 			CUIRect ButtonAddFav;
 			CUIRect ButtonLeakIp;
 			Button.VSplitMid(&ButtonAddFav, &ButtonLeakIp);
-			ButtonAddFav.VSplitLeft(5.0f, 0, &ButtonAddFav);
 			static int s_AddFavButton = 0;
 			static int s_LeakIpButton = 0;
 			if(DoButton_CheckBox_Tristate(&s_AddFavButton, Localize("Favorite"), pSelectedServer->m_Favorite, &ButtonAddFav))
@@ -1091,7 +1100,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			}
 		}
 
-		ServerDetails.VSplitLeft(5.0f, 0x0, &ServerDetails);
+		CUIRect LeftColumn, RightColumn;
 		ServerDetails.VSplitLeft(80.0f, &LeftColumn, &RightColumn);
 
 		for(auto &Label : s_aLabels)
