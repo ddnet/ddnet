@@ -378,6 +378,7 @@ public:
 	}
 
 	bool operator==(const vector4_base &vec) const { return x == vec.x && y == vec.y && z == vec.z && w == vec.w; } //TODO: do this with an eps instead
+	bool operator!=(const vector4_base &vec) const { return x != vec.x || y != vec.y || z != vec.z || w != vec.w; }
 };
 
 typedef vector4_base<float> vec4;
