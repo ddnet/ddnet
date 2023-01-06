@@ -21,6 +21,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
@@ -242,16 +243,15 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_MUTE, &Button);
 
-	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_EMOTICON_MUTE, &Button);
 
-	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_FRIEND, &Button);
 
 	int TotalPlayers = 0;
-
 	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
@@ -265,14 +265,11 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		TotalPlayers++;
 	}
 
-	static int s_VoteList = 0;
-	static float s_ScrollValue = 0;
-	CUIRect List = Options;
-	// List.HSplitTop(28.0f, 0, &List);
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(24.0f, TotalPlayers, 1, 3, -1, &Options);
 
 	// options
-	static int s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
+	static char s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -280,25 +277,27 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			continue;
 
 		int Index = m_pClient->m_Snap.m_apInfoByName[i]->m_ClientID;
-
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
 
-		CListboxItem Item = UiDoListboxNextItem(&m_pClient->m_aClients[Index]);
+		CGameClient::CClientData &CurrentClient = m_pClient->m_aClients[Index];
+		const CListboxItem Item = s_ListBox.DoNextItem(&CurrentClient);
 
 		Count++;
 
 		if(!Item.m_Visible)
 			continue;
 
+		CUIRect Row = Item.m_Rect;
 		if(Count % 2 == 1)
-			Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		Item.m_Rect.VSplitRight(300.0f, &Player, &Item.m_Rect);
+			Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+		Row.VSplitRight(s_ListBox.ScrollbarWidthMax() - s_ListBox.ScrollbarWidth(), &Row, nullptr);
+		Row.VSplitRight(300.0f, &Player, &Row);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
 
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[Index].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = CurrentClient.m_RenderInfo;
 		TeeInfo.m_Size = Button.h;
 
 		CAnimState *pIdleState = CAnimState::GetIdle();
@@ -308,59 +307,57 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 
-		Player.HSplitTop(1.5f, 0, &Player);
+		Player.HSplitTop(1.5f, nullptr, &Player);
 		Player.VSplitMid(&Player, &Button);
-		Item.m_Rect.VSplitRight(200.0f, &Button2, &Item.m_Rect);
+		Row.VSplitRight(210.0f, &Button2, &Row);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, Player.x, Player.y + (Player.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aName, -1);
+		TextRender()->TextEx(&Cursor, CurrentClient.m_aName, -1);
 
 		TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
+		TextRender()->TextEx(&Cursor, CurrentClient.m_aClan, -1);
 
-		// TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		// Cursor.m_LineWidth = Button.w;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[Index].m_Country, &Color,
+		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &Color,
 			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore chat button
-		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
-		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		Row.HMargin(2.0f, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(g_Config.m_ClShowChatFriends && !CurrentClient.m_Friend)
 			DoButton_Toggle(&s_aPlayerIDs[Index][0], 1, &Button, false);
-		else if(DoButton_Toggle(&s_aPlayerIDs[Index][0], m_pClient->m_aClients[Index].m_ChatIgnore, &Button, true))
-			m_pClient->m_aClients[Index].m_ChatIgnore ^= 1;
+		else if(DoButton_Toggle(&s_aPlayerIDs[Index][0], CurrentClient.m_ChatIgnore, &Button, true))
+			CurrentClient.m_ChatIgnore ^= 1;
 
 		// ignore emoticon button
-		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
-		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		Row.VSplitLeft(30.0f, nullptr, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(g_Config.m_ClShowChatFriends && !CurrentClient.m_Friend)
 			DoButton_Toggle(&s_aPlayerIDs[Index][1], 1, &Button, false);
-		else if(DoButton_Toggle(&s_aPlayerIDs[Index][1], m_pClient->m_aClients[Index].m_EmoticonIgnore, &Button, true))
-			m_pClient->m_aClients[Index].m_EmoticonIgnore ^= 1;
+		else if(DoButton_Toggle(&s_aPlayerIDs[Index][1], CurrentClient.m_EmoticonIgnore, &Button, true))
+			CurrentClient.m_EmoticonIgnore ^= 1;
 
 		// friend button
-		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
-		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(DoButton_Toggle(&s_aPlayerIDs[Index][2], m_pClient->m_aClients[Index].m_Friend, &Button, true))
+		Row.VSplitLeft(10.0f, nullptr, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(DoButton_Toggle(&s_aPlayerIDs[Index][2], CurrentClient.m_Friend, &Button, true))
 		{
-			if(m_pClient->m_aClients[Index].m_Friend)
-				m_pClient->Friends()->RemoveFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+			if(CurrentClient.m_Friend)
+				m_pClient->Friends()->RemoveFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 			else
-				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+				m_pClient->Friends()->AddFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 		}
 	}
 
-	UiDoListboxEnd(&s_ScrollValue, 0);
+	s_ListBox.DoEnd();
 }
 
 void CMenus::RenderServerInfo(CUIRect MainView)
@@ -507,8 +504,6 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 bool CMenus::RenderServerControlServer(CUIRect MainView)
 {
-	static int s_VoteList = 0;
-	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
 	int Total = m_pClient->m_Voting.m_NumVoteOptions;
 	int NumVoteOptions = 0;
@@ -523,7 +518,8 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		TotalShown++;
 	}
 
-	UiDoListboxStart(&s_VoteList, &List, 19.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(19.0f, TotalShown, 1, 3, s_CurVoteOption, &List);
 
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext)
@@ -532,21 +528,23 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
 			continue;
 
-		CListboxItem Item = UiDoListboxNextItem(pOption);
-
-		if(Item.m_Visible)
-			UI()->DoLabel(&Item.m_Rect, pOption->m_aDescription, 13.0f, TEXTALIGN_LEFT);
-
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
 		NumVoteOptions++;
+
+		const CListboxItem Item = s_ListBox.DoNextItem(pOption);
+		if(!Item.m_Visible)
+			continue;
+
+		SLabelProperties Props;
+		Props.m_AlignVertically = 0;
+		UI()->DoLabel(&Item.m_Rect, pOption->m_aDescription, 13.0f, TEXTALIGN_LEFT, Props);
 	}
 
-	bool Call;
-	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, &Call);
+	s_CurVoteOption = s_ListBox.DoEnd();
 	if(s_CurVoteOption < Total)
 		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
-	return Call;
+	return s_ListBox.WasItemActivated();
 }
 
 bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
@@ -571,36 +569,36 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		aPlayerIDs[NumOptions++] = Index;
 	}
 
-	static int s_VoteList = 0;
-	static float s_ScrollValue = 0;
-	CUIRect List = MainView;
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(24.0f, NumOptions, 1, 3, Selected, &MainView);
 
 	for(int i = 0; i < NumOptions; i++)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&aPlayerIDs[i]);
+		const CListboxItem Item = s_ListBox.DoNextItem(&aPlayerIDs[i]);
+		if(!Item.m_Visible)
+			continue;
 
-		if(Item.m_Visible)
-		{
-			CTeeRenderInfo TeeInfo = m_pClient->m_aClients[aPlayerIDs[i]].m_RenderInfo;
-			TeeInfo.m_Size = Item.m_Rect.h;
+		CUIRect TeeRect, Label;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h, &TeeRect, &Label);
 
-			CAnimState *pIdleState = CAnimState::GetIdle();
-			vec2 OffsetToMid;
-			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-			vec2 TeeRenderPos(Item.m_Rect.x + Item.m_Rect.h / 2, Item.m_Rect.y + Item.m_Rect.h / 2 + OffsetToMid.y);
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[aPlayerIDs[i]].m_RenderInfo;
+		TeeInfo.m_Size = TeeRect.h;
 
-			RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+		CAnimState *pIdleState = CAnimState::GetIdle();
+		vec2 OffsetToMid;
+		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+		vec2 TeeRenderPos(TeeRect.x + TeeInfo.m_Size / 2, TeeRect.y + TeeInfo.m_Size / 2 + OffsetToMid.y);
 
-			Item.m_Rect.x += TeeInfo.m_Size;
-			UI()->DoLabel(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_LEFT);
-		}
+		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+
+		SLabelProperties Props;
+		Props.m_AlignVertically = 0;
+		UI()->DoLabel(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_LEFT, Props);
 	}
 
-	bool Call;
-	Selected = UiDoListboxEnd(&s_ScrollValue, &Call);
+	Selected = s_ListBox.DoEnd();
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
-	return Call;
+	return s_ListBox.WasItemActivated();
 }
 
 void CMenus::RenderServerControl(CUIRect MainView)
@@ -1022,70 +1020,37 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
-	CUIRect Scroll;
-	View.VSplitRight(20.0f, &View, &Scroll);
-
-	static float s_ScrollValue = 0;
-	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-	int NumGhosts = m_vGhosts.size();
+	const int NumGhosts = m_vGhosts.size();
 	static int s_SelectedIndex = 0;
-	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);
-
-	// set clipping
-	UI()->ClipEnable(&View);
-
-	CUIRect OriginalView = View;
-	int Num = (int)(View.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = maximum(NumGhosts - Num + 1, 0);
-	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
-
-	int NewSelected = -1;
-	bool DoubleClicked = false;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(17.0f, NumGhosts, 1, 3, s_SelectedIndex, &View, false);
 
 	for(int i = 0; i < NumGhosts; i++)
 	{
-		const CGhostItem *pItem = &m_vGhosts[i];
-		CUIRect Row;
-		View.HSplitTop(17.0f, &Row, &View);
-
-		// make sure that only those in view can be selected
-		if(Row.y + Row.h > OriginalView.y && Row.y < OriginalView.y + OriginalView.h)
-		{
-			if(i == s_SelectedIndex)
-			{
-				CUIRect r = Row;
-				r.Margin(1.5f, &r);
-				r.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
-			}
-
-			if(UI()->DoButtonLogic(pItem, 0, &Row))
-			{
-				NewSelected = i;
-				DoubleClicked |= NewSelected == m_DoubleClickIndex;
-				m_DoubleClickIndex = NewSelected;
-			}
-		}
+		const CGhostItem *pGhost = &m_vGhosts[i];
+		const CListboxItem Item = s_ListBox.DoNextItem(pGhost);
+		if(!Item.m_Visible)
+			continue;
 
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
-		if(pItem->m_Own)
+		if(pGhost->m_Own)
 			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
 
-		TextRender()->TextColor(rgb.WithAlpha(pItem->HasFile() ? 1.0f : 0.5f));
+		TextRender()->TextColor(rgb.WithAlpha(pGhost->HasFile() ? 1.0f : 0.5f));
 
 		for(int c = 0; c < NumCols; c++)
 		{
 			CUIRect Button;
 			Button.x = s_aCols[c].m_Rect.x;
-			Button.y = Row.y;
-			Button.h = Row.h;
+			Button.y = Item.m_Rect.y;
+			Button.h = Item.m_Rect.h;
 			Button.w = s_aCols[c].m_Rect.w;
 
 			int Id = s_aCols[c].m_Id;
 
 			if(Id == COL_ACTIVE)
 			{
-				if(pItem->Active())
+				if(pGhost->Active())
 				{
 					Graphics()->WrapClamp();
 					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
@@ -1103,7 +1068,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f) / 2.f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
-				TextRender()->TextEx(&Cursor, pItem->m_aPlayer, -1);
+				TextRender()->TextEx(&Cursor, pGhost->m_aPlayer, -1);
 			}
 			else if(Id == COL_TIME)
 			{
@@ -1112,7 +1077,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[64];
-				str_time(pItem->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+				str_time(pGhost->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}
@@ -1120,10 +1085,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	UI()->ClipDisable();
-
-	if(NewSelected != -1)
-		s_SelectedIndex = NewSelected;
+	s_SelectedIndex = s_ListBox.DoEnd();
 
 	Status.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
@@ -1151,7 +1113,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 		static CButtonContainer s_GhostButton;
 		const char *pText = pGhost->Active() ? Localize("Deactivate") : Localize("Activate");
-		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (DoubleClicked && Input()->MouseDoubleClick()))
+		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || s_ListBox.WasItemActivated())
 		{
 			if(pGhost->Active())
 			{

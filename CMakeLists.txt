@@ -2277,6 +2277,8 @@ if(CLIENT)
     skin.h
     ui.cpp
     ui.h
+    ui_listbox.cpp
+    ui_listbox.h
     ui_rect.cpp
     ui_rect.h
     ui_scrollregion.cpp

@@ -49,7 +49,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -62,7 +61,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -88,7 +86,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
 			s_JoinTutorialTime = 0.0f;
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -101,7 +98,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
