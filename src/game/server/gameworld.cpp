@@ -150,6 +150,11 @@ void CGameWorld::Reset()
 	GameServer()->CreateAllEntities(false);
 }
 
+void CGameWorld::RemoveEntitiesFromPlayer(int PlayerId)
+{
+	RemoveEntitiesFromPlayers(&PlayerId, 1);
+}
+
 void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 {
 	for(auto *pEnt : m_apFirstEntityTypes)

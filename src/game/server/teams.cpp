@@ -413,6 +413,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			GetPlayer(ClientID)->m_VotedForPractice = false;
 			GetPlayer(ClientID)->m_SwapTargetsClientID = -1;
 		}
+		m_pGameContext->m_World.RemoveEntitiesFromPlayer(ClientID);
 	}
 
 	if(Team != TEAM_SUPER && (m_aTeamState[Team] == TEAMSTATE_EMPTY || m_aTeamLocked[Team]))
