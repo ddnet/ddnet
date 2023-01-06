@@ -415,6 +415,21 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
 
+	// copy info button
+	{
+		CUIRect Button;
+		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
+		Button.VSplitRight(200.0f, &ServerInfo, &Button);
+		static CButtonContainer s_CopyButton;
+		if(DoButton_Menu(&s_CopyButton, Localize("Copy info"), 0, &Button))
+		{
+			char aInfo[256];
+			CurrentServerInfo.InfoToString(aInfo, sizeof(aInfo));
+			Input()->SetClipboardText(aInfo);
+		}
+	}
+
+	// favorite checkbox
 	{
 		CUIRect Button;
 		NETADDR ServerAddr = Client()->ServerAddress();

@@ -2506,15 +2506,6 @@ int secure_rand();
 int secure_rand_below(int below);
 
 /*
-	Function: set_console_msg_color
-		Sets the console color.
-
-	Parameters:
-		rgb - If NULL it will reset the console color to default, else it will transform the rgb color to a console color
-*/
-void set_console_msg_color(const void *rgbvoid);
-
-/*
 	Function: os_version_str
 		Returns a human-readable version string of the operating system
 
