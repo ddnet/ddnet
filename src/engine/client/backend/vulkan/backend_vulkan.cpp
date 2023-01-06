@@ -1210,7 +1210,7 @@ protected:
 			m_RecreateSwapChain = true;
 			break;
 		default:
-			m_ErrorHelper = "unknown error";
+			m_ErrorHelper = "unknown error: ";
 			m_ErrorHelper.append(std::to_string(CallResult));
 			pCriticalError = m_ErrorHelper.c_str();
 			break;
@@ -3720,11 +3720,20 @@ public:
 
 		std::vector<VkPhysicalDevice> vDeviceList(DevicesCount);
 		Res = vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, vDeviceList.data());
-		if(Res != VK_SUCCESS)
+		if(Res != VK_SUCCESS && Res != VK_INCOMPLETE)
 		{
 			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, CheckVulkanCriticalError(Res));
 			return false;
 		}
+		if(DevicesCount == 0)
+		{
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "No vulkan compatible devices found.");
+			return false;
+		}
+		// make sure to use the correct amount of devices available
+		// the amount of physical devices can be smaller than the amount of devices reported
+		// see vkEnumeratePhysicalDevices for details
+		vDeviceList.resize(DevicesCount);
 
 		size_t Index = 0;
 		std::vector<VkPhysicalDeviceProperties> vDevicePropList(vDeviceList.size());
