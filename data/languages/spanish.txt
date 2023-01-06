@@ -1662,7 +1662,7 @@ An error during command recording occurred. Try to update your GPU drivers.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== Un comando de remderización falló. Intenta actualizar los controladores de tu GPU.
+== Un comando de renderización falló. Intenta actualizar los controladores de tu GPU.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
@@ -1678,10 +1678,10 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== No se pudo inicializar el backed de gráficos dado, volviendo al backend predeterminado.
+== No se pudo inicializar el backend de gráficos dado, volviendo al backend predeterminado.
 
 Open the directory that contains the demo files
-== Abre la carpeta que contiene los archivos de demo
+== Abrir la carpeta que contiene los archivos de demo
 
 Save power by lowering refresh rate (higher input latency)
 == Ahorra energía al reducir la frecuencia de actualización (mayor latencia de entrada)
@@ -1699,7 +1699,7 @@ Open the directory to add custom skins
 == Abrir la carpeta para agregar skins personalizadas
 
 No controller found. Plug in a controller.
-== No se encontró un controlador. Conecta uno.
+== No se encontró un mando. Conecta uno.
 
 Unregister protocol and file extensions
 == Anular registro de protocolo y extensiones de archivo
