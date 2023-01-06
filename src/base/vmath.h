@@ -106,7 +106,7 @@ inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 
 inline float length(const vector2_base<float> &a)
 {
-	return sqrtf(a.x * a.x + a.y * a.y);
+	return sqrtf(dot(a, a));
 }
 
 inline float angle(const vector2_base<float> &a)
@@ -131,7 +131,7 @@ inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
 
 inline vector2_base<float> normalize(const vector2_base<float> &v)
 {
-	float divisor = sqrtf(v.x * v.x + v.y * v.y);
+	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector2_base<float>(0.0f, 0.0f);
 	float l = (float)(1.0f / divisor);
@@ -271,12 +271,12 @@ inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
 //
 inline float length(const vector3_base<float> &a)
 {
-	return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
+	return sqrtf(dot(a, a));
 }
 
 inline vector3_base<float> normalize(const vector3_base<float> &v)
 {
-	float divisor = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector3_base<float>(0.0f, 0.0f, 0.0f);
 	float l = (float)(1.0f / divisor);
