@@ -311,6 +311,9 @@ void CCommandProcessor_SDL_GL::HandleWarning()
 	case GFX_WARNING_TYPE_INIT_FAILED:
 		Warn.m_vWarnings.emplace_back(Localizable("Could not initialize the given graphics backend, reverting to the default backend now.", "Graphics error"));
 		break;
+	case GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER:
+		Warn.m_vWarnings.emplace_back(Localizable("Could not initialize the given graphics backend, this is probably caused because you didn't install the driver of the integrated graphics card.", "Graphics error"));
+		break;
 	case GFX_WARNING_MISSING_EXTENSION:
 		// ignore this warning for now
 		return;

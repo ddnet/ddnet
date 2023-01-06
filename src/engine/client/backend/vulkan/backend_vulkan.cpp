@@ -3727,7 +3727,7 @@ public:
 		}
 		if(DevicesCount == 0)
 		{
-			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "No vulkan compatible devices found.");
+			SetWarning(EGFXWarningType::GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER, "No vulkan compatible devices found.");
 			return false;
 		}
 		// make sure to use the correct amount of devices available
