@@ -3706,7 +3706,12 @@ public:
 	[[nodiscard]] bool SelectGPU(char *pRendererName, char *pVendorName, char *pVersionName)
 	{
 		uint32_t DevicesCount = 0;
-		vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, nullptr);
+		auto Res = vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, nullptr);
+		if(Res != VK_SUCCESS)
+		{
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, CheckVulkanCriticalError(Res));
+			return false;
+		}
 		if(DevicesCount == 0)
 		{
 			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, "No vulkan compatible devices found.");
@@ -3714,7 +3719,12 @@ public:
 		}
 
 		std::vector<VkPhysicalDevice> vDeviceList(DevicesCount);
-		vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, vDeviceList.data());
+		Res = vkEnumeratePhysicalDevices(m_VKInstance, &DevicesCount, vDeviceList.data());
+		if(Res != VK_SUCCESS)
+		{
+			SetError(EGFXErrorType::GFX_ERROR_TYPE_INIT, CheckVulkanCriticalError(Res));
+			return false;
+		}
 
 		size_t Index = 0;
 		std::vector<VkPhysicalDeviceProperties> vDevicePropList(vDeviceList.size());
