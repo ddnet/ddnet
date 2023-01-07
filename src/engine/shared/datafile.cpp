@@ -5,6 +5,7 @@
 
 #include <base/hash_ctxt.h>
 #include <base/log.h>
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
