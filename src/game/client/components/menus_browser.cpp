@@ -10,6 +10,7 @@
 #include <engine/shared/localization.h>
 #include <engine/textrender.h>
 
+#include <game/client/animstate.h>
 #include <game/client/components/console.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/gameclient.h>
@@ -1105,16 +1106,29 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			if(!Item.m_Visible)
 				continue;
 
-			CUIRect Name, Clan, Score, Flag;
+			const bool HasTeeToRender = pSelectedServer->m_aClients[i].m_aSkin[0] != '\0';
+
+			CUIRect Skin, Name, Clan, Score, Flag;
 			Name = Item.m_Rect;
 
 			ColorRGBA Color = CurrentClient.m_FriendState == IFriends::FRIEND_NO ?
 						  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
 						  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
 			Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
-			Name.VSplitLeft(5.0f, 0, &Name);
+			if(HasTeeToRender)
+			{
+				Name.VSplitLeft(1.0f, nullptr, &Name);
+			}
 			Name.VSplitLeft(34.0f, &Score, &Name);
-			Name.VSplitRight(34.0f, &Name, &Flag);
+			if(HasTeeToRender)
+			{
+				Name.VSplitLeft(18.0f, &Skin, &Name);
+			}
+			else
+			{
+				Name.VSplitLeft(5.0f, 0, &Name);
+			}
+			Name.VSplitRight(HasTeeToRender ? 20.0 : 34.0f, &Name, &Flag);
 			Flag.HMargin(4.0f, &Flag);
 			Name.HSplitTop(12.0f, &Name, &Clan);
 
@@ -1140,6 +1154,35 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			TextRender()->SetCursor(&Cursor, Score.x, Score.y + (Score.h - ScoreFontSize) / 2.0f, ScoreFontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Cursor.m_LineWidth = Score.w;
 			TextRender()->TextEx(&Cursor, aTemp, -1);
+
+			// render tee if available
+			if(HasTeeToRender)
+			{
+				CTeeRenderInfo TeeInfo;
+				const CSkin *pSkin = m_pClient->m_Skins.Find(CurrentClient.m_aSkin);
+				TeeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+				TeeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+				TeeInfo.m_SkinMetrics = pSkin->m_Metrics;
+				TeeInfo.m_CustomColoredSkin = CurrentClient.m_CustomSkinColors;
+				if(CurrentClient.m_CustomSkinColors)
+				{
+					TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(CurrentClient.m_CustomSkinColorBody).UnclampLighting());
+					TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(CurrentClient.m_CustomSkinColorFeet).UnclampLighting());
+				}
+				else
+				{
+					TeeInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+					TeeInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+				}
+				TeeInfo.m_Size = minimum(Skin.w, Skin.h);
+
+				CAnimState *pIdleState = CAnimState::GetIdle();
+				vec2 OffsetToMid;
+				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+				vec2 TeeRenderPos(Skin.x + TeeInfo.m_Size / 2, Skin.y + Skin.h / 2 + OffsetToMid.y);
+
+				RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+			}
 
 			// name
 			TextRender()->SetCursor(&Cursor, Name.x, Name.y + (Name.h - (FontSize - 2)) / 2.f, FontSize - 2, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
@@ -1175,7 +1218,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 
 			// flag
 			ColorRGBA FColor(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &FColor, Flag.x, Flag.y, Flag.w, Flag.h);
+			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &FColor, Flag.x,
+				Flag.y + ((Flag.h - Flag.w / 2) / 2),
+				Flag.w, Flag.w / 2);
 		}
 
 		const int NewSelected = s_ListBox.DoEnd();
