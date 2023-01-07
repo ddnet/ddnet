@@ -42,6 +42,12 @@ public:
 		int m_Score;
 		bool m_Player;
 
+		// skin info
+		char m_aSkin[24 + 1];
+		bool m_CustomSkinColors;
+		int m_CustomSkinColorBody;
+		int m_CustomSkinColorFeet;
+
 		int m_FriendState;
 	};
 
