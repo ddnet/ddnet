@@ -372,10 +372,10 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 	// unpack deleted stuff
 	int *pDeleted = pData;
 	if(pDelta->m_NumDeletedItems < 0)
-		return -1;
+		return -201;
 	pData += pDelta->m_NumDeletedItems;
 	if(pData > pEnd)
-		return -1;
+		return -101;
 
 	// copy all non deleted stuff
 	for(int i = 0; i < pFrom->NumItems(); i++)
@@ -396,7 +396,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		{
 			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
 			if(!pObj)
-				return -4;
+				return -301;
 
 			// keep it
 			mem_copy(pObj, pFromItem->Data(), ItemSize);
@@ -407,15 +407,15 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 	for(int i = 0; i < pDelta->m_NumUpdateItems; i++)
 	{
 		if(pData + 2 > pEnd)
-			return -1;
+			return -102;
 
 		const int Type = *pData++;
 		if(Type < 0 || Type > CSnapshot::MAX_TYPE)
-			return -3;
+			return -202;
 
 		const int ID = *pData++;
 		if(ID < 0 || ID > CSnapshot::MAX_ID)
-			return -3;
+			return -203;
 
 		int ItemSize;
 		if(Type < MAX_NETOBJSIZES && m_aItemSizes[Type])
@@ -423,14 +423,14 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		else
 		{
 			if(pData + 1 > pEnd)
-				return -2;
+				return -103;
 			if(*pData < 0 || *pData > INT_MAX / 4)
-				return -3;
+				return -204;
 			ItemSize = (*pData++) * 4;
 		}
 
 		if(ItemSize < 0 || RangeCheck(pEnd, pData, ItemSize))
-			return -3;
+			return -205;
 
 		const int Key = (Type << 16) | ID;
 
@@ -440,14 +440,14 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 			pNewData = (int *)Builder.NewItem(Type, ID, ItemSize);
 
 		if(!pNewData)
-			return -4;
+			return -302;
 
 		const int FromIndex = pFrom->GetItemIndex(Key);
 		if(FromIndex != -1)
 		{
 			// we got an update so we need to apply the diff
 			if(!UndiffItem(pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize / 4, &m_aSnapshotDataRate[Type]))
-				return -3;
+				return -206;
 		}
 		else // no previous, just copy the pData
 		{
