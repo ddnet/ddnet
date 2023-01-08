@@ -51,27 +51,28 @@ void CUIElement::SUIElementRect::Reset()
 void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	bool NeedsRecreate = false;
-	if(m_UIRectQuadContainer == -1 || m_X != pRect->x || m_Y != pRect->y || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
+	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
 	{
 		if(m_UIRectQuadContainer != -1)
 			m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
 		NeedsRecreate = true;
 	}
+	m_X = pRect->x;
+	m_Y = pRect->y;
 	if(NeedsRecreate)
 	{
-		m_X = pRect->x;
-		m_Y = pRect->y;
 		m_Width = pRect->w;
 		m_Height = pRect->h;
 		m_QuadColor = Color;
 
 		m_pParent->UI()->Graphics()->SetColor(Color);
-		m_UIRectQuadContainer = m_pParent->UI()->Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
+		m_UIRectQuadContainer = m_pParent->UI()->Graphics()->CreateRectQuadContainer(0, 0, pRect->w, pRect->h, Rounding, Corners);
 		m_pParent->UI()->Graphics()->SetColor(1, 1, 1, 1);
 	}
 
 	m_pParent->UI()->Graphics()->TextureClear();
-	m_pParent->UI()->Graphics()->RenderQuadContainer(m_UIRectQuadContainer, -1);
+	m_pParent->UI()->Graphics()->RenderQuadContainerEx(m_UIRectQuadContainer,
+		0, -1, m_X, m_Y, 1, 1);
 }
 
 /********************************************************
@@ -593,7 +594,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
-	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != x || RectEl.m_Y != y || RectEl.m_Width != w || RectEl.m_Height != h || ColorChanged)
+	if(RectEl.m_UITextContainer == -1 || RectEl.m_Width != w || RectEl.m_Height != h || ColorChanged)
 	{
 		NeedsRecreate = true;
 	}
@@ -610,12 +611,12 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 				NeedsRecreate = true;
 		}
 	}
+	RectEl.m_X = x;
+	RectEl.m_Y = y;
 	if(NeedsRecreate)
 	{
 		TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
 
-		RectEl.m_X = x;
-		RectEl.m_Y = y;
 		RectEl.m_Width = w;
 		RectEl.m_Height = h;
 
@@ -627,8 +628,8 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 			RectEl.m_Text.clear();
 
 		CUIRect TmpRect;
-		TmpRect.x = x;
-		TmpRect.y = y;
+		TmpRect.x = 0;
+		TmpRect.y = 0;
 		TmpRect.w = w;
 		TmpRect.h = h;
 
@@ -642,7 +643,10 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 	ColorRGBA ColorText(RectEl.m_TextColor);
 	ColorRGBA ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer != -1)
-		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline);
+	{
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer,
+			ColorText, ColorTextOutline, x, y);
+	}
 }
 
 void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
