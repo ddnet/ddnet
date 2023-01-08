@@ -1115,20 +1115,10 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 						  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
 						  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
 			Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
-			if(HasTeeToRender)
-			{
-				Name.VSplitLeft(1.0f, nullptr, &Name);
-			}
+			Name.VSplitLeft(1.0f, nullptr, &Name);
 			Name.VSplitLeft(34.0f, &Score, &Name);
-			if(HasTeeToRender)
-			{
-				Name.VSplitLeft(18.0f, &Skin, &Name);
-			}
-			else
-			{
-				Name.VSplitLeft(5.0f, 0, &Name);
-			}
-			Name.VSplitRight(HasTeeToRender ? 20.0 : 34.0f, &Name, &Flag);
+			Name.VSplitLeft(18.0f, &Skin, &Name);
+			Name.VSplitRight(20.0, &Name, &Flag);
 			Flag.HMargin(4.0f, &Flag);
 			Name.HSplitTop(12.0f, &Name, &Clan);
 
