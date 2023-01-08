@@ -183,7 +183,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, m_SelectedIndex, &View, false);
+	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false);
 
 	int NumPlayers = 0;
 	static int s_PrevSelectedIndex = -1;
