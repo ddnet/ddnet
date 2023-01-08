@@ -174,51 +174,8 @@ void mem_move(void *dest, const void *source, size_t size);
 template<typename T>
 inline void mem_zero(T *block, size_t size)
 {
-	typedef typename std::remove_all_extents<T>::type BaseT;
-	if constexpr(std::is_pointer<T>::value || std::is_pointer<BaseT>::value)
-	{
-		// pointer of pointer, just memset it
-		memset(block, 0, size);
-	}
-	else if constexpr(std::is_array<T>::value)
-	{ // pointer to array type
-		if constexpr(std::is_fundamental<BaseT>::value)
-		{ // array of fundamental type, just memset it
-			memset(block, 0, size);
-		}
-		else
-		{ // array of user defined type, destroying all objects and recreating new ones
-			const size_t N = size / sizeof(BaseT);
-			if constexpr(!std::is_trivially_destructible<BaseT>::value)
-			{ // non trivial destructor means user provided or virtual destructor, see https://en.cppreference.com/w/cpp/language/destructor#Trivial_destructor
-				// so we gotta call it manually
-				for(size_t i(0); i < N; ++i)
-					((BaseT *)block)[i].~BaseT();
-			}
-			if constexpr(std::is_trivially_constructible<BaseT>::value)
-				memset(block, 0, size); // trivial constructor implies POD
-			else
-				new(block) BaseT[N]{};
-		}
-	}
-	else if constexpr(std::is_fundamental<typename std::remove_pointer<T>::type>::value || std::is_same<decltype(block), void *>::value)
-	{ // pointer to fundamental type, just memset it
-		memset(block, 0, size);
-	}
-	else
-	{ // pointer to type T, BUT CAN BE AN ARRAY...
-		const size_t N = size / sizeof(T);
-		if constexpr(!std::is_trivially_destructible<T>::value)
-		{ // non trivial destructor means user provided or virtual destructor, see https://en.cppreference.com/w/cpp/language/destructor#Trivial_destructor
-			// so we gotta call it manually
-			for(size_t i(0); i < N; ++i)
-				block[i].~T();
-		}
-		if constexpr(std::is_trivially_constructible<T>::value)
-			memset(block, 0, size); // trivial constructor implies POD
-		else
-			new(block) T[N]{};
-	}
+	static_assert((std::is_trivially_constructible<T>::value && std::is_trivially_destructible<T>::value) || std::is_fundamental<T>::value);
+	memset(block, 0, size);
 }
 
 /**
