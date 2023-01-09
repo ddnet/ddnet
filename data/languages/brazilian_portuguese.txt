@@ -24,6 +24,7 @@
 # pv                  2022-06-01 20:44:00
 # Rafael Fontenelle   2022-09-17 23:23:00
 # Rafael Fontenelle   2022-10-25 11:22:00
+# Rafael Fontenelle   2023-01-09 10:33:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1653,59 +1654,59 @@ Are you sure that you want to reset the controls to their defaults?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Falha durante a inicialização. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== VRAM insuficiente. Tente remover ativos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Ocorreu um erro durante a gravação do comando. Tente atualizar seus drivers de GPU.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Um comando de renderização falhou. Tente atualizar seus drivers de GPU.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== O envio dos comandos de renderização falhou. Tente atualizar seus drivers de GPU.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Falha ao trocar framebuffers. Tente atualizar seus drivers de GPU.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Erro desconhecido. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Não foi possível inicializar o backend gráfico fornecido, revertendo para o backend padrão agora.
 
 Open the directory that contains the demo files
-== 
+== Abre o diretório que contém os arquivos de demonstração
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Economiza energia diminuindo a taxa de atualização (maior latência de entrada)
 
 Open the settings file
-== 
+== Abre o arquivo de configurações
 
 Open the directory that contains the configuration and user files
-== 
+== Abre o diretório que contém os arquivos de configuração e do usuário
 
 Open the directory to add custom themes
-== 
+== Abre o diretório para adicionar os temas personalizados
 
 Open the directory to add custom skins
-== 
+== Abre o diretório para adicionar skins personalizadas
 
 No controller found. Plug in a controller.
-== 
+== Nenhum controle encontrado. Conecte um controle.
 
 Unregister protocol and file extensions
-== 
+== Protoloco e arquivos de extensões não registrados
 
 Open the directory to add custom assets
-== 
+== Abre o diretório para adicionar os ativos personalizados
