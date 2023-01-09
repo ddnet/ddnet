@@ -40,8 +40,6 @@
 #include <chrono>
 #include <functional>
 
-extern "C" {
-
 /**
  * @defgroup Debug
  *
@@ -2523,7 +2521,6 @@ int os_version_str(char *version, int length);
 void init_exception_handler();
 void set_exception_handler_log_file(const char *log_file_path);
 #endif
-}
 
 /**
  * Fetches a sample from a high resolution timer and converts it in nanoseconds.
