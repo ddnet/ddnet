@@ -257,7 +257,7 @@ if(CMAKE_GENERATOR STREQUAL "Ninja")
 endif()
 
 if(NOT MSVC AND NOT HAIKU)
-  IF(NOT TARGET_OS STREQUAL "mac")
+  if(NOT TARGET_OS STREQUAL "mac")
     if(NOT FUSE_LD STREQUAL OFF)
       add_linker_flag_if_supported(OUR_FLAGS_LINK -fuse-ld=${FUSE_LD})
       if(FLAG_SUPPORTED_fuse_ld_${FUSE_LD})
