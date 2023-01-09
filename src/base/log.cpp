@@ -19,8 +19,6 @@
 #include <android/log.h>
 #endif
 
-extern "C" {
-
 std::atomic<LEVEL> loglevel = LEVEL_INFO;
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
@@ -152,7 +150,6 @@ void log_log_color(LEVEL level, LOG_COLOR color, const char *sys, const char *fm
 	va_start(args, fmt);
 	log_log_impl(level, true, color, sys, fmt, args);
 	va_end(args);
-}
 }
 
 #if defined(CONF_PLATFORM_ANDROID)
