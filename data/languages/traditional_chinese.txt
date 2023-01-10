@@ -19,6 +19,7 @@
 # 2022-09-17 cheeser0613
 # 2022-10-24 cheeser0613
 # 2022-12-11 cheeser0613
+# 2023-01-11 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1474,7 +1475,7 @@ Sending initial client info
 == 正在發送初始客戶端資訊
 
 Uploading map data to GPU
-== 正在將地圖數據傳輸至顯卡
+== 正在將地圖數據傳輸至顯示卡
 
 Getting game info
 == 正在獲取游戲資訊
@@ -1654,59 +1655,59 @@ Are you sure that you want to reset the controls to their defaults?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== 初始化失敗。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== 顯存不足。請嘗試移除自定義材質（如外觀，實體層等等），尤其高分辨率的自定義材質。
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程序。
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== 渲染指令錯誤。請嘗試更新顯示卡驅動程序。
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== 渲染指令提交失敗。請嘗試更新顯示卡驅動程序。
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== 幀緩存交替失敗。請嘗試更新顯示卡驅動程序。
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== 未知錯誤。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== 無法初始化當前配置的圖形後端，正在將配置回退至預設圖形後端。
 
 Open the directory that contains the demo files
-== 
+== 打開存有回放檔案的資料夾路徑
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== 節能模式（限制幀率上限以降低功耗但也將提高輸入延遲）
 
 Open the settings file
-== 
+== 打開設定檔案
 
 Open the directory that contains the configuration and user files
-== 
+== 打開存有配置檔案與用戶檔案的資料夾路徑
 
 Open the directory to add custom themes
-== 
+== 打開用以添加自定義主題的資料夾路徑
 
 Open the directory to add custom skins
-== 
+== 打開用以添加自定義外觀的資料夾路徑
 
 No controller found. Plug in a controller.
-== 
+== 未檢測到任何控制器。請嘗試重新連接控制器。
 
 Unregister protocol and file extensions
-== 
+== 未注冊的協議與擴充檔案
 
 Open the directory to add custom assets
-== 
+== 打開用以添加自定義材質的資料夾路徑
