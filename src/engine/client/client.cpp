@@ -3035,8 +3035,21 @@ void CClient::Run()
 				PortRef = 0;
 			}
 			BindAddr.port = PortRef;
+			unsigned RemainingAttempts = 25;
 			while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
 			{
+				if(BindAddr.port != 0)
+				{
+					--RemainingAttempts;
+					if(RemainingAttempts == 0)
+					{
+						if(g_Config.m_Bindaddr[0])
+							dbg_msg("client", "Could not open network client, try changing or unsetting the bindaddr '%s'", g_Config.m_Bindaddr);
+						else
+							dbg_msg("client", "Could not open network client");
+						return;
+					}
+				}
 				BindAddr.port = (secure_rand() % 64511) + 1024;
 			}
 		}
