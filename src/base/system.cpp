@@ -3788,30 +3788,12 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 
 int bytes_be_to_int(const unsigned char *bytes)
 {
-	int Result;
-	unsigned char *pResult = (unsigned char *)&Result;
-	for(unsigned i = 0; i < sizeof(int); i++)
-	{
-#if defined(CONF_ARCH_ENDIAN_BIG)
-		pResult[i] = bytes[i];
-#else
-		pResult[i] = bytes[sizeof(int) - i - 1];
-#endif
-	}
-	return Result;
+	return bytes_be_to_uint(bytes);
 }
 
 void int_to_bytes_be(unsigned char *bytes, int value)
 {
-	const unsigned char *pValue = (const unsigned char *)&value;
-	for(unsigned i = 0; i < sizeof(int); i++)
-	{
-#if defined(CONF_ARCH_ENDIAN_BIG)
-		bytes[i] = pValue[i];
-#else
-		bytes[sizeof(int) - i - 1] = pValue[i];
-#endif
-	}
+	uint_to_bytes_be(bytes, value);
 }
 
 unsigned bytes_be_to_uint(const unsigned char *bytes)
