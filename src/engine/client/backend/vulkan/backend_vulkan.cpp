@@ -1110,7 +1110,7 @@ protected:
 		std::unique_lock<std::mutex> Lock(m_ErrWarnMutex);
 		SGFXErrorContainer::SError Err = {false, pErr};
 		if(std::find(m_Error.m_vErrors.begin(), m_Error.m_vErrors.end(), Err) == m_Error.m_vErrors.end())
-			m_Error.m_vErrors.emplace_back();
+			m_Error.m_vErrors.emplace_back(Err);
 		if(pErrStrExtra != nullptr)
 		{
 			SGFXErrorContainer::SError ErrExtra = {false, pErrStrExtra};
