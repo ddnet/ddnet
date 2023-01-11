@@ -3017,16 +3017,16 @@ void CClient::Run()
 	// open socket
 	{
 		NETADDR BindAddr;
-		if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
-		{
-			// got bindaddr
-			BindAddr.type = NETTYPE_ALL;
-		}
-		else
+		if(g_Config.m_Bindaddr[0] == '\0')
 		{
 			mem_zero(&BindAddr, sizeof(BindAddr));
-			BindAddr.type = NETTYPE_ALL;
 		}
+		else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+		{
+			dbg_msg("client", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
+			return;
+		}
+		BindAddr.type = NETTYPE_ALL;
 		for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
 		{
 			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
