@@ -967,10 +967,9 @@ void CClient::ServerInfoRequest()
 	m_CurrentServerInfoRequestTime = 0;
 }
 
-int CClient::LoadData()
+void CClient::LoadDebugFont()
 {
 	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	return 1;
 }
 
 // ---
@@ -3057,9 +3056,7 @@ void CClient::Run()
 	// loads the existing ddnet info file if it exists
 	LoadDDNetInfo();
 
-	// load data
-	if(!LoadData())
-		return;
+	LoadDebugFont();
 
 	if(Steam()->GetPlayerName())
 	{
