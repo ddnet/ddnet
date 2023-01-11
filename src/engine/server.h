@@ -254,6 +254,8 @@ public:
 	virtual void SetErrorShutdown(const char *pReason) = 0;
 	virtual void ExpireServerInfo() = 0;
 
+	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
 	virtual const char *GetMapName() const = 0;
