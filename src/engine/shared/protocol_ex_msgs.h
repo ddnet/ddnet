@@ -8,7 +8,7 @@
 //
 // Example:
 //
-// 1) `i-unfreeze-you@ddnet.tw`
+// 1) `i-unfreeze-you@ddnet.org`
 // 2) `creeper@minetee`
 //
 // The first example applies if you own the `ddnet.org` domain, that is, if you
