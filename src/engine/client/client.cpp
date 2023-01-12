@@ -4066,7 +4066,7 @@ void CClient::InitChecksum()
 }
 
 #ifndef DDNET_CHECKSUM_SALT
-// salt@checksum.ddnet.org: db877f2b-2ddb-3ba6-9f67-a6d169ec671d
+// salt@checksum.ddnet.tw: db877f2b-2ddb-3ba6-9f67-a6d169ec671d
 #define DDNET_CHECKSUM_SALT \
 	{ \
 		{ \
