@@ -4062,6 +4062,7 @@ void CClient::InitChecksum()
 	pData->m_Version = GameClient()->DDNetVersion();
 	pData->m_SizeofClient = sizeof(*this);
 	pData->m_SizeofConfig = sizeof(pData->m_Config);
+	pData->InitFiles();
 }
 
 #ifndef DDNET_CHECKSUM_SALT
