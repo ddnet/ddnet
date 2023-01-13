@@ -250,15 +250,10 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
 				bool BuildThisLayer = true;
-				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT && !GameTypeHasFrontLayer)
-					BuildThisLayer = false;
-				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP && !GameTypeHasSpeedupLayer)
+				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH && !GameTypeHasFrontLayer &&
+					!GameTypeHasSpeedupLayer && !GameTypeHasTeleLayer && !GameTypeHasTuneLayer)
 					BuildThisLayer = false;
 				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && !GameTypeHasSwitchLayer)
-					BuildThisLayer = false;
-				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !GameTypeHasTeleLayer)
-					BuildThisLayer = false;
-				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !GameTypeHasTuneLayer)
 					BuildThisLayer = false;
 
 				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][n].IsValid(), "entities texture already loaded when it should not be");
@@ -278,21 +273,14 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 							{
 								if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
 								{
-									if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_GAME && !IsValidGameTile((int)TileIndex))
-										ValidTile = false;
-									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT && !IsValidFrontTile((int)TileIndex))
-										ValidTile = false;
-									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP && !IsValidSpeedupTile((int)TileIndex))
+									if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH && !IsValidGameTile((int)TileIndex) && !IsValidFrontTile((int)TileIndex) && !IsValidSpeedupTile((int)TileIndex) &&
+										!IsValidTeleTile((int)TileIndex) && !IsValidTuneTile((int)TileIndex))
 										ValidTile = false;
 									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH)
 									{
 										if(!IsValidSwitchTile((int)TileIndex))
 											ValidTile = false;
 									}
-									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TELE && !IsValidTeleTile((int)TileIndex))
-										ValidTile = false;
-									else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE && !IsValidTuneTile((int)TileIndex))
-										ValidTile = false;
 								}
 							}
 							else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE) && IsCreditsTile((int)TileIndex))
