@@ -270,6 +270,10 @@ public:
 
 	std::vector<CNameBan> m_vNameBans;
 
+	size_t m_AnnouncementLastLine;
+	std::vector<std::string> m_vAnnouncements;
+	char m_aAnnouncementFile[IO_MAX_PATH_LENGTH];
+
 	CServer();
 	~CServer();
 
@@ -444,7 +448,6 @@ public:
 	void GetClientAddr(int ClientID, NETADDR *pAddr) const override;
 	int m_aPrevStates[MAX_CLIENTS];
 	const char *GetAnnouncementLine(char const *pFileName) override;
-	unsigned m_AnnouncementLastLine;
 
 	int *GetIdMap(int ClientID) override;
 
