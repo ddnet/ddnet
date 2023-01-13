@@ -401,7 +401,7 @@ TEST_P(Points, OnePoints)
 {
 	m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 2, requested by brainless tee"}, true);
+	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 2"});
 }
 
 TEST_P(Points, OnePointsTop)
@@ -419,7 +419,7 @@ TEST_P(Points, TwoPoints)
 	m_pConn->AddPoints("nameless tee", 2, m_aError, sizeof(m_aError));
 	m_pConn->AddPoints("brainless tee", 3, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"2. nameless tee Points: 2, requested by brainless tee"}, true);
+	ExpectLines(m_pPlayerResult, {"2. nameless tee Points: 2"});
 }
 
 TEST_P(Points, TwoPointsTop)
@@ -440,7 +440,7 @@ TEST_P(Points, EqualPoints)
 	m_pConn->AddPoints("brainless tee", 3, m_aError, sizeof(m_aError));
 	m_pConn->AddPoints("nameless tee", 1, m_aError, sizeof(m_aError));
 	ASSERT_FALSE(CScoreWorker::ShowPoints(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 3, requested by brainless tee"}, true);
+	ExpectLines(m_pPlayerResult, {"1. nameless tee Points: 3"});
 }
 
 TEST_P(Points, EqualPointsTop)

@@ -1322,10 +1322,9 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 		int Count = pSqlServer->GetInt(2);
 		char aName[MAX_NAME_LENGTH];
 		pSqlServer->GetString(3, aName, sizeof(aName));
-		pResult->m_MessageKind = CScorePlayerResult::ALL;
+		pResult->m_MessageKind = CScorePlayerResult::DIRECT;
 		str_format(paMessages[0], sizeof(paMessages[0]),
-			"%d. %s Points: %d, requested by %s",
-			Rank, aName, Count, pData->m_aRequestingPlayer);
+			"%d. %s Points: %d", Rank, aName, Count);
 	}
 	else
 	{
