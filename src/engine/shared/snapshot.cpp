@@ -219,8 +219,8 @@ bool CSnapshotDelta::UndiffItem(const int *pPast, int *pDiff, int *pOut, int Siz
 	while(Size)
 	{
 		const long OutValue = (long)*pPast + *pDiff;
-		if(!in_range<long>(OutValue, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()))
-			return false;
+		//if(!in_range<long>(OutValue, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()))
+		//	return false;
 		*pOut = (int)OutValue;
 
 		if(*pDiff == 0)
@@ -447,7 +447,10 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		{
 			// we got an update so we need to apply the diff
 			if(!UndiffItem(pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize / 4, &m_aSnapshotDataRate[Type]))
-				return -206;
+			{
+				// TODO: Breaks old client on new server
+				//return -206;
+			}
 		}
 		else // no previous, just copy the pData
 		{
