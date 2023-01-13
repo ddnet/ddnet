@@ -4489,6 +4489,7 @@ void CEditor::RenderFileDialog()
 	// the buttons
 	static int s_OkButton = 0;
 	static int s_CancelButton = 0;
+	static int s_RefreshButton = 0;
 	static int s_NewFolderButton = 0;
 	static int s_MapInfoButton = 0;
 
@@ -4563,6 +4564,11 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
+	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
+	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))
+		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
+
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
 		ButtonBar.VSplitLeft(40.0f, nullptr, &ButtonBar);
@@ -4613,8 +4619,9 @@ void CEditor::RefreshFilteredFileList()
 	}
 }
 
-void CEditor::FilelistPopulate(int StorageType)
+void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 {
+	m_FileDialogLastPopulatedStorageType = StorageType;
 	m_vCompleteFileList.clear();
 	if(m_FileDialogStorageType != IStorage::TYPE_SAVE && !str_comp(m_pFileDialogPath, "maps"))
 	{
@@ -4629,11 +4636,14 @@ void CEditor::FilelistPopulate(int StorageType)
 	Storage()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
 	std::sort(m_vCompleteFileList.begin(), m_vCompleteFileList.end());
 	RefreshFilteredFileList();
-	m_FilesSelectedIndex = m_vpFilteredFileList.empty() ? -1 : 0;
-	if(m_FilesSelectedIndex >= 0)
-		str_copy(m_aFilesSelectedName, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName);
-	else
-		m_aFilesSelectedName[0] = '\0';
+	if(!KeepSelection)
+	{
+		m_FilesSelectedIndex = m_vpFilteredFileList.empty() ? -1 : 0;
+		if(m_FilesSelectedIndex >= 0)
+			str_copy(m_aFilesSelectedName, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName);
+		else
+			m_aFilesSelectedName[0] = '\0';
+	}
 	m_PreviewImageIsLoaded = false;
 }
 
