@@ -111,7 +111,7 @@ public:
 
 	unsigned Pack(bool Alpha = true)
 	{
-		return (Alpha ? ((unsigned)(a * 255.0f) << 24) : 0) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
+		return (Alpha ? ((unsigned)round_to_int(a * 255.0f) << 24) : 0) + ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
 	}
 
 	DerivedT WithAlpha(float alpha)
