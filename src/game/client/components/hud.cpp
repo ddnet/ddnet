@@ -599,7 +599,10 @@ void CHud::RenderTextInfo()
 	{
 		int NumInTeam = 0;
 		int NumFrozen = 0;
-		int LocalTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+		int LocalTeamID = m_pClient->m_Snap.m_SpecInfo.m_Active == 1 && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != -1 ?
+					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID) :
+					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(!m_pClient->m_Snap.m_apPlayerInfos[i])
@@ -608,7 +611,7 @@ void CHud::RenderTextInfo()
 			if(m_pClient->m_Teams.Team(i) == LocalTeamID)
 			{
 				NumInTeam++;
-				if(m_pClient->m_aClients[i].m_FreezeEnd > 0)
+				if(m_pClient->m_aClients[i].m_FreezeEnd > 0 || m_pClient->m_aClients[i].m_DeepFrozen)
 					NumFrozen++;
 			}
 		}
@@ -680,7 +683,7 @@ void CHud::RenderTextInfo()
 					{
 						bool Frozen = false;
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
-						if(m_pClient->m_aClients[i].m_FreezeEnd > 0)
+						if(m_pClient->m_aClients[i].m_FreezeEnd > 0 || m_pClient->m_aClients[i].m_DeepFrozen)
 						{
 							if(!g_Config.m_ClShowFrozenHudSkins)
 								TeeInfo = FreezeInfo;
