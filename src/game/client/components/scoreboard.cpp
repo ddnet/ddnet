@@ -84,6 +84,81 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 	}
 }
 
+void CScoreboard::RenderServerInfo(float x, float y, float w)
+{
+	float h = 300.0f;
+
+	Graphics()->DrawRect(x, y, w, h, ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 10.0f);
+
+	CServerInfo Info;
+	Client()->GetServerInfo(&Info);
+
+	// Render game type
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Game type"), Info.m_aGameType);
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 20.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render map
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Map"), Client()->GetCurrentMap());
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 50.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render players
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %d/%d", Localize("Players"), Info.m_NumPlayers, Info.m_MaxPlayers);
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 80.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render clients
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %d/%d", Localize("Clients"), Info.m_NumClients, Info.m_MaxClients);
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 110.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render version
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Version"), Info.m_aVersion);
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 140.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render address
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Address"), Info.m_aAddress);
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 170.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render latency
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %dms", Localize("Ping"), m_pClient->m_Snap.m_pLocalInfo->m_Latency);
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 200.0f, 20.0f, aBuf, -1.0f);
+	}
+	// Render password
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Password"), Info.m_Flags & 1 ? Localize("Yes") : Localize("No"));
+
+		float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1, -1.0f);
+		TextRender()->Text(0, x + 5.0f, y + 230.0f, 20.0f, aBuf, -1.0f);
+	}
+}
+
 void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 {
 	// background
@@ -187,54 +262,48 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			pTitle = Localize("Game over");
 		else
 		{
-			str_copy(aBuf, Client()->GetCurrentMap());
-			while(TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
-				aBuf[str_length(aBuf) - 1] = '\0';
-			if(str_comp(aBuf, Client()->GetCurrentMap()))
-				str_append(aBuf, "…", sizeof(aBuf));
-			pTitle = aBuf;
+			if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+			{
+				if(m_pClient->m_Snap.m_pGameDataObj)
+				{
+					int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue;
+					str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score"), Score);
+					pTitle = aBuf;
+				}
+			}
+			else
+			{
+				if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW &&
+					m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID])
+				{
+					int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID]->m_Score;
+					str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score"), Score);
+					pTitle = aBuf;
+				}
+				else if(m_pClient->m_Snap.m_pLocalInfo)
+				{
+					int Score = m_pClient->m_Snap.m_pLocalInfo->m_Score;
+					str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score"), Score);
+					pTitle = aBuf;
+				}
+			}
+
+			if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+			{
+				if(m_ServerRecord > 0)
+				{
+					str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
+					str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Time"), aBuf);
+				}
+				else
+					str_copy(aBuf, " ");
+				pTitle = aBuf;
+			}
 		}
 	}
 	TextRender()->Text(0, x + 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, pTitle, -1.0f);
 
-	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
-	{
-		if(m_pClient->m_Snap.m_pGameDataObj)
-		{
-			int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue;
-			str_format(aBuf, sizeof(aBuf), "%d", Score);
-		}
-	}
-	else
-	{
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW &&
-			m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID])
-		{
-			int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID]->m_Score;
-			str_format(aBuf, sizeof(aBuf), "%d", Score);
-		}
-		else if(m_pClient->m_Snap.m_pLocalInfo)
-		{
-			int Score = m_pClient->m_Snap.m_pLocalInfo->m_Score;
-			str_format(aBuf, sizeof(aBuf), "%d", Score);
-		}
-	}
-
-	if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
-	{
-		if(m_ServerRecord > 0)
-			str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
-		else
-			aBuf[0] = 0;
-	}
-
 	float tw;
-
-	if(!lower16 && !lower32 && !lower24)
-	{
-		tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1, -1.0f);
-		TextRender()->Text(0, x + w - tw - 20.0f, y + (50.f - TitleFontsize) / 2.f, TitleFontsize, aBuf, -1.0f);
-	}
 
 	// calculate measurements
 	float LineHeight = 60.0f;
@@ -638,7 +707,7 @@ void CScoreboard::OnRender()
 				TextRender()->Text(0, Width / 2 - TextWidth / 2, 39, 86.0f, aText, -1.0f);
 			}
 
-			//decrease width, because team games use additional offsets
+			// decrease width, because team games use additional offsets
 			w -= 10.0f;
 
 			int NumPlayers = maximum(m_pClient->m_Snap.m_aTeamSize[TEAM_RED], m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE]);
@@ -657,6 +726,8 @@ void CScoreboard::OnRender()
 	}
 
 	RenderRecordingNotification((Width / 7) * 4 + 20);
+
+	RenderServerInfo(0, Height / 2 - 200, 320.0f);
 }
 
 bool CScoreboard::Active()

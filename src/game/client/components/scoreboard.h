@@ -10,6 +10,7 @@
 class CScoreboard : public CComponent
 {
 	void RenderGoals(float x, float y, float w);
+	void RenderServerInfo(float x, float y, float w);
 	void RenderSpectators(float x, float y, float w, float h);
 	void RenderScoreboard(float x, float y, float w, int Team, const char *pTitle, int NumPlayers = -1);
 	void RenderRecordingNotification(float x);
