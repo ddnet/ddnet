@@ -3,8 +3,6 @@
 #include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 
-#include <engine/shared/config.h>
-
 #include <cstdlib>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -36,8 +34,8 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 
 		if(!S_ISFIFO(Attribute.st_mode))
 		{
-			dbg_msg("fifo", "can't remove file '%s', quitting", m_aFilename);
-			exit(2);
+			dbg_msg("fifo", "can't remove file '%s'", m_aFilename);
+			return;
 		}
 	}
 
@@ -48,11 +46,11 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 
 void CFifo::Shutdown()
 {
-	if(m_File >= 0)
-	{
-		close(m_File);
-		fs_remove(m_aFilename);
-	}
+	if(m_File < 0)
+		return;
+
+	close(m_File);
+	fs_remove(m_aFilename);
 }
 
 void CFifo::Update()
