@@ -292,8 +292,9 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			{
 				if(m_ServerRecord > 0)
 				{
-					str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
-					str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Time"), aBuf);
+					char Time[128] = {0};
+					str_time_float(m_ServerRecord, TIME_HOURS, Time, sizeof(Time));
+					str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Time"), Time);
 				}
 				else
 					str_copy(aBuf, " ");
