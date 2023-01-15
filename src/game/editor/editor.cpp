@@ -4499,6 +4499,7 @@ void CEditor::RenderFileDialog()
 	{
 		if(IsDir) // folder
 		{
+			m_aFileDialogFilterString[0] = '\0';
 			if(str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") == 0) // parent folder
 			{
 				if(fs_parent_dir(m_pFileDialogPath))
