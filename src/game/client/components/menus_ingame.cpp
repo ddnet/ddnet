@@ -593,7 +593,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabel(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_LEFT, Props);
+		UI()->DoLabel(&Label, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_LEFT, Props);
 	}
 
 	Selected = s_ListBox.DoEnd();
