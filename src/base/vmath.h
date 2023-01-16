@@ -138,7 +138,7 @@ inline vector2_base<float> normalize(const vector2_base<float> &v)
 	return vector2_base<float>(v.x * l, v.y * l);
 }
 
-constexpr inline vector2_base<float> direction(float angle)
+inline vector2_base<float> direction(float angle)
 {
 	return vector2_base<float>(cosf(angle), sinf(angle));
 }
