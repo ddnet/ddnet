@@ -17,6 +17,11 @@ public:
 	{
 		Reset();
 	}
+
+	void PackMessageSystem()
+	{
+		AddInt((m_MsgID << 1) | (m_System ? 1 : 0));
+	}
 };
 
 #endif
