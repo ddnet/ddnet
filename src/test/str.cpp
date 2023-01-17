@@ -272,6 +272,7 @@ TEST(Str, HexEncode)
 	EXPECT_STREQ(aOut, "41 42 43 ");
 	str_hex(aOut, sizeof(aOut), pData, 4);
 	EXPECT_STREQ(aOut, "41 42 43 44 ");
+
 	str_hex(aOut, 1, pData, 4);
 	EXPECT_STREQ(aOut, "");
 	str_hex(aOut, 2, pData, 4);
@@ -288,6 +289,54 @@ TEST(Str, HexEncode)
 	EXPECT_STREQ(aOut, "41 42 ");
 	str_hex(aOut, 8, pData, 4);
 	EXPECT_STREQ(aOut, "41 42 ");
+}
+
+TEST(Str, HexEncodeCstyle)
+{
+	char aOut[128];
+	const char *pData = "ABCD";
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 0);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 1);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 2);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 3);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
+
+	str_hex_cstyle(aOut, 1, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 2, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 3, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 4, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 5, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 6, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 7, pData, 4);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, 12, pData, 4);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, 13, pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+	str_hex_cstyle(aOut, 14, pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 1);
+	EXPECT_STREQ(aOut, "0x41,\n0x42,\n0x43,\n0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 2);
+	EXPECT_STREQ(aOut, "0x41, 0x42,\n0x43, 0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 3);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43,\n0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 500);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
 }
 
 TEST(Str, HexDecode)

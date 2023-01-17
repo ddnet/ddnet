@@ -1640,6 +1640,22 @@ int str_countchr(const char *haystack, char needle);
  */
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 
+/**
+ * Takes a datablock and generates a hex string of it, in the C style array format,
+ * i.e. with bytes formatted in 0x00-0xFF notation and commas with spaces between the bytes.
+ * The output can be split over multiple lines by specifying the maximum number of bytes
+ * that should be printed per line.
+ *
+ * @param dst Buffer to fill with hex data.
+ * @param dst_size Size of the buffer (at least 6 * data_size + 1 to contain all data).
+ * @param data Data to turn into hex.
+ * @param data_size Size of the data.
+ * @param bytes_per_line After this many printed bytes a newline will be printed.
+ *
+ * @remark The destination buffer will be zero-terminated.
+ */
+void str_hex_cstyle(char *dst, int dst_size, const void *data, int data_size, int bytes_per_line = 12);
+
 /*
 	Function: str_hex_decode
 		Takes a hex string *without spaces between bytes* and returns a
