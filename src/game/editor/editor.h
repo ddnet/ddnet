@@ -153,6 +153,8 @@ public:
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
 
+	virtual bool IsEntitiesLayer() const { return false; }
+
 	virtual void Render(bool Tileset = false) {}
 	virtual int RenderProperties(CUIRect *pToolbox) { return 0; }
 
@@ -607,6 +609,8 @@ public:
 	void Convert(CUIRect Rect, RECTi *pOut);
 	void Snap(CUIRect *pRect);
 	void Clamp(RECTi *pRect);
+
+	virtual bool IsEntitiesLayer() const override;
 
 	virtual bool IsEmpty(CLayerTiles *pLayer);
 	void BrushSelecting(CUIRect Rect) override;

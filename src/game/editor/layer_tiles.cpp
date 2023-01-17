@@ -177,6 +177,11 @@ void CLayerTiles::Clamp(RECTi *pRect)
 		pRect->w = 0;
 }
 
+bool CLayerTiles::IsEntitiesLayer() const
+{
+	return m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this;
+}
+
 bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
@@ -683,12 +688,12 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
-	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this);
+	const bool EntitiesLayer = IsEntitiesLayer();
 
 	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
-	if(!IsGameLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
+	if(!EntitiesLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_ColclButton = 0;
@@ -847,7 +852,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{nullptr},
 	};
 
-	if(IsGameLayer) // remove the image and color properties if this is a game layer
+	if(EntitiesLayer) // remove the image and color properties if this is a game layer
 	{
 		aProps[PROP_IMAGE].m_pName = nullptr;
 		aProps[PROP_COLOR].m_pName = nullptr;

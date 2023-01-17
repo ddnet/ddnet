@@ -479,8 +479,8 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 		{nullptr},
 	};
 
-	// if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0)) // don't use Group and Detail from the selection if this is the game layer
-	if(pEditor->m_Map.m_pGameLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pTeleLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSpeedupLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pFrontLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pSwitchLayer == pEditor->GetSelectedLayer(0) || pEditor->m_Map.m_pTuneLayer == pEditor->GetSelectedLayer(0)) // don't use Group and Detail from the selection if this is the game layer
+	// don't use Group and Detail from the selection if this is an entities layer
+	if(pEditor->GetSelectedLayer(0)->IsEntitiesLayer())
 	{
 		aProps[0].m_Type = PROPTYPE_NULL;
 		aProps[2].m_Type = PROPTYPE_NULL;
