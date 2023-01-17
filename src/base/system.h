@@ -1628,20 +1628,16 @@ const char *str_rchr(const char *haystack, char needle);
  */
 int str_countchr(const char *haystack, char needle);
 
-/*
-	Function: str_hex
-		Takes a datablock and generates a hex string of it, with spaces
-		between bytes.
-
-	Parameters:
-		dst - Buffer to fill with hex data
-		dst_size - size of the buffer
-		data - Data to turn into hex
-		data - Size of the data
-
-	Remarks:
-		- The destination buffer will be zero-terminated
-*/
+/**
+ * Takes a datablock and generates a hex string of it, with spaces between bytes.
+ *
+ * @param dst Buffer to fill with hex data.
+ * @param dst_size Size of the buffer (at least 3 * data_size + 1 to contain all data).
+ * @param data Data to turn into hex.
+ * @param data_size Size of the data.
+ *
+ * @remark The destination buffer will be zero-terminated.
+ */
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 
 /*
