@@ -113,7 +113,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_QuitButton;
 	bool UsedEscape = false;
-	if(DoButton_Menu(&s_QuitButton, Localize("Quit"), 0, &Button, 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (UsedEscape = UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)) || CheckHotKey(KEY_Q))
+	if(DoButton_Menu(&s_QuitButton, Localize("Quit"), 0, &Button, 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (UsedEscape = UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)) || CheckHotKey(KEY_Q)) // NOLINT(bugprone-assignment-in-if-condition)
 	{
 		if(UsedEscape || m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{

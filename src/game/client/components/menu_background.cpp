@@ -89,21 +89,25 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	char aFullName[128];
 	char aThemeName[128];
 	str_truncate(aFullName, sizeof(aFullName), pName, pSuffix - pName);
+	str_copy(aThemeName, aFullName);
 
 	bool IsDay = false;
 	bool IsNight = false;
-	if((pSuffix = str_endswith(aFullName, "_day")))
+	pSuffix = str_endswith(aFullName, "_day");
+	if(pSuffix)
 	{
 		str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
 		IsDay = true;
 	}
-	else if((pSuffix = str_endswith(aFullName, "_night")))
-	{
-		str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
-		IsNight = true;
-	}
 	else
-		str_copy(aThemeName, aFullName);
+	{
+		pSuffix = str_endswith(aFullName, "_night");
+		if(pSuffix)
+		{
+			str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
+			IsNight = true;
+		}
+	}
 
 	if(str_comp(aThemeName, "none") == 0 || str_comp(aThemeName, "auto") == 0 || str_comp(aThemeName, "rand") == 0) // "none", "auto" and "rand" reserved, disallowed for maps
 		return 0;

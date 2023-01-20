@@ -550,21 +550,24 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundNum = 0;
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
 
-	CCharacter *pChr;
 	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
-	CPlayer *pPlayer2;
+	CCharacter *pChr = nullptr;
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
+		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW)
 		{
-			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
+			CPlayer *pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID];
+			if(pPlayer2)
 			{
-				pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
-				pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
+				pChr = pPlayer2->GetCharacter();
 			}
 		}
-		else if((pChr = pPlayer->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
+		else
+		{
+			pChr = pPlayer->GetCharacter();
+		}
+		if(pChr && pChr->m_DDRaceState == DDRACE_STARTED)
 		{
 			pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
 			pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;

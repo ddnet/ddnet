@@ -390,8 +390,8 @@ void CGameWorld::NetObjBegin()
 
 void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
 {
-	CCharacter *pChar;
-	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
+	CCharacter *pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER);
+	if(pChar)
 	{
 		pChar->Read(pCharObj, pExtended, IsLocal);
 		pChar->Keep();
@@ -682,5 +682,5 @@ void CGameWorld::Clear()
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
-			delete pFirstEntityType;
+			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
 }

@@ -1638,19 +1638,20 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRG
 	Cmd.m_pIndicesOffsets = (char **)pData;
 	Cmd.m_pDrawCount = (unsigned int *)(((char *)pData) + (sizeof(char *) * NumIndicesOffset));
 
-	if(!AddCmd(
-		   Cmd, [&] {
-			   pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
-			   if(pData == 0x0)
-			   {
-				   dbg_msg("graphics", "failed to allocate data for vertices");
-				   return false;
-			   }
-			   Cmd.m_pIndicesOffsets = (char **)pData;
-			   Cmd.m_pDrawCount = (unsigned int *)(((char *)pData) + (sizeof(char *) * NumIndicesOffset));
-			   return true;
-		   },
-		   "failed to allocate memory for render command"))
+	const bool Success = AddCmd(
+		Cmd, [&] {
+			pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
+			if(pData == 0x0)
+			{
+				dbg_msg("graphics", "failed to allocate data for vertices");
+				return false;
+			}
+			Cmd.m_pIndicesOffsets = (char **)pData;
+			Cmd.m_pDrawCount = (unsigned int *)(((char *)pData) + (sizeof(char *) * NumIndicesOffset));
+			return true;
+		},
+		"failed to allocate memory for render command");
+	if(!Success)
 	{
 		return;
 	}
@@ -1680,8 +1681,9 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, const Color
 	Cmd.m_Dir = Dir;
 
 	// check if we have enough free memory in the commandbuffer
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for render command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for render command");
+	if(!Success)
 	{
 		return;
 	}
@@ -1707,8 +1709,9 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, const C
 	Cmd.m_Dir = Dir;
 
 	// check if we have enough free memory in the commandbuffer
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for render command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for render command");
+	if(!Success)
 	{
 		return;
 	}
@@ -1733,17 +1736,18 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 		return;
 
 	// check if we have enough free memory in the commandbuffer
-	if(!AddCmd(
-		   Cmd, [&] {
-			   Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
-			   if(Cmd.m_pQuadInfo == 0x0)
-			   {
-				   dbg_msg("graphics", "failed to allocate data for the quad info");
-				   return false;
-			   }
-			   return true;
-		   },
-		   "failed to allocate memory for render quad command"))
+	const bool Success = AddCmd(
+		Cmd, [&] {
+			Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
+			if(Cmd.m_pQuadInfo == 0x0)
+			{
+				dbg_msg("graphics", "failed to allocate data for the quad info");
+				return false;
+			}
+			return true;
+		},
+		"failed to allocate memory for render quad command");
+	if(!Success)
 	{
 		return;
 	}
@@ -1768,8 +1772,9 @@ void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, i
 	Cmd.m_TextColor = TextColor;
 	Cmd.m_TextOutlineColor = TextOutlineColor;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for render text command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for render text command");
+	if(!Success)
 	{
 		return;
 	}
@@ -1994,8 +1999,9 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 		Cmd.m_pOffset = (void *)(QuadOffset * 6 * sizeof(unsigned int));
 		Cmd.m_BufferContainerIndex = Container.m_QuadBufferContainerIndex;
 
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to allocate memory for render quad container"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to allocate memory for render quad container");
+		if(!Success)
 		{
 			return;
 		}
@@ -2073,8 +2079,9 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 		Cmd.m_Center.x = Quad.m_aVertices[0].m_Pos.x + (Quad.m_aVertices[1].m_Pos.x - Quad.m_aVertices[0].m_Pos.x) / 2.f;
 		Cmd.m_Center.y = Quad.m_aVertices[0].m_Pos.y + (Quad.m_aVertices[2].m_Pos.y - Quad.m_aVertices[0].m_Pos.y) / 2.f;
 
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to allocate memory for render quad container extended"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to allocate memory for render quad container extended");
+		if(!Success)
 		{
 			return;
 		}
@@ -2208,17 +2215,18 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 			}
 		}
 
-		if(!AddCmd(
-			   Cmd, [&] {
-				   Cmd.m_pRenderInfo = (IGraphics::SRenderSpriteInfo *)m_pCommandBuffer->AllocData(sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
-				   if(Cmd.m_pRenderInfo == 0x0)
-				   {
-					   dbg_msg("graphics", "failed to allocate data for render info");
-					   return false;
-				   }
-				   return true;
-			   },
-			   "failed to allocate memory for render quad container sprite"))
+		const bool Success = AddCmd(
+			Cmd, [&] {
+				Cmd.m_pRenderInfo = (IGraphics::SRenderSpriteInfo *)m_pCommandBuffer->AllocData(sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
+				if(Cmd.m_pRenderInfo == 0x0)
+				{
+					dbg_msg("graphics", "failed to allocate data for render info");
+					return false;
+				}
+				return true;
+			},
+			"failed to allocate memory for render quad container sprite");
+		if(!Success)
 		{
 			return;
 		}
@@ -2282,8 +2290,9 @@ int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadD
 	{
 		Cmd.m_pUploadData = pUploadData;
 
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to allocate memory for update buffer object command"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to allocate memory for update buffer object command");
+		if(!Success)
 		{
 			return -1;
 		}
@@ -2296,17 +2305,18 @@ int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadD
 			if(Cmd.m_pUploadData == NULL)
 				return -1;
 
-			if(!AddCmd(
-				   Cmd, [&] {
-					   Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-					   if(Cmd.m_pUploadData == 0x0)
-					   {
-						   dbg_msg("graphics", "failed to allocate data for upload data");
-						   return false;
-					   }
-					   return true;
-				   },
-				   "failed to allocate memory for create buffer object command"))
+			const bool Success = AddCmd(
+				Cmd, [&] {
+					Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+					if(Cmd.m_pUploadData == 0x0)
+					{
+						dbg_msg("graphics", "failed to allocate data for upload data");
+						return false;
+					}
+					return true;
+				},
+				"failed to allocate memory for create buffer object command");
+			if(!Success)
 			{
 				return -1;
 			}
@@ -2317,8 +2327,9 @@ int CGraphics_Threaded::CreateBufferObject(size_t UploadDataSize, void *pUploadD
 		{
 			Cmd.m_pUploadData = NULL;
 
-			if(!AddCmd(
-				   Cmd, [] { return true; }, "failed to allocate memory for create buffer object command"))
+			const bool Success = AddCmd(
+				Cmd, [] { return true; }, "failed to allocate memory for create buffer object command");
+			if(!Success)
 			{
 				return -1;
 			}
@@ -2352,8 +2363,9 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 	{
 		Cmd.m_pUploadData = pUploadData;
 
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to allocate memory for recreate buffer object command"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to allocate memory for recreate buffer object command");
+		if(!Success)
 		{
 			return;
 		}
@@ -2366,17 +2378,18 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 			if(Cmd.m_pUploadData == NULL)
 				return;
 
-			if(!AddCmd(
-				   Cmd, [&] {
-					   Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-					   if(Cmd.m_pUploadData == 0x0)
-					   {
-						   dbg_msg("graphics", "failed to allocate data for upload data");
-						   return false;
-					   }
-					   return true;
-				   },
-				   "failed to allocate memory for recreate buffer object command"))
+			const bool Success = AddCmd(
+				Cmd, [&] {
+					Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+					if(Cmd.m_pUploadData == 0x0)
+					{
+						dbg_msg("graphics", "failed to allocate data for upload data");
+						return false;
+					}
+					return true;
+				},
+				"failed to allocate memory for recreate buffer object command");
+			if(!Success)
 			{
 				return;
 			}
@@ -2387,8 +2400,9 @@ void CGraphics_Threaded::RecreateBufferObject(int BufferIndex, size_t UploadData
 		{
 			Cmd.m_pUploadData = NULL;
 
-			if(!AddCmd(
-				   Cmd, [] { return true; }, "failed to allocate memory for update buffer object command"))
+			const bool Success = AddCmd(
+				Cmd, [] { return true; }, "failed to allocate memory for update buffer object command");
+			if(!Success)
 			{
 				return;
 			}
@@ -2420,8 +2434,9 @@ void CGraphics_Threaded::UpdateBufferObjectInternal(int BufferIndex, size_t Uplo
 	{
 		Cmd.m_pUploadData = pUploadData;
 
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to allocate memory for update buffer object command"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to allocate memory for update buffer object command");
+		if(!Success)
 		{
 			return;
 		}
@@ -2432,17 +2447,18 @@ void CGraphics_Threaded::UpdateBufferObjectInternal(int BufferIndex, size_t Uplo
 		if(Cmd.m_pUploadData == NULL)
 			return;
 
-		if(!AddCmd(
-			   Cmd, [&] {
-				   Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
-				   if(Cmd.m_pUploadData == 0x0)
-				   {
-					   dbg_msg("graphics", "failed to allocate data for upload data");
-					   return false;
-				   }
-				   return true;
-			   },
-			   "failed to allocate memory for update buffer object command"))
+		const bool Success = AddCmd(
+			Cmd, [&] {
+				Cmd.m_pUploadData = m_pCommandBuffer->AllocData(UploadDataSize);
+				if(Cmd.m_pUploadData == 0x0)
+				{
+					dbg_msg("graphics", "failed to allocate data for upload data");
+					return false;
+				}
+				return true;
+			},
+			"failed to allocate memory for update buffer object command");
+		if(!Success)
 		{
 			return;
 		}
@@ -2460,8 +2476,9 @@ void CGraphics_Threaded::CopyBufferObjectInternal(int WriteBufferIndex, int Read
 	Cmd.m_ReadOffset = ReadOffset;
 	Cmd.m_CopySize = CopyDataSize;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for copy buffer object command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for copy buffer object command");
+	if(!Success)
 	{
 		return;
 	}
@@ -2475,8 +2492,9 @@ void CGraphics_Threaded::DeleteBufferObject(int BufferIndex)
 	CCommandBuffer::SCommand_DeleteBufferObject Cmd;
 	Cmd.m_BufferIndex = BufferIndex;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for delete buffer object command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for delete buffer object command");
+	if(!Success)
 	{
 		return;
 	}
@@ -2511,17 +2529,18 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	if(Cmd.m_pAttributes == nullptr)
 		return -1;
 
-	if(!AddCmd(
-		   Cmd, [&] {
-			   Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-			   if(Cmd.m_pAttributes == nullptr)
-			   {
-				   dbg_msg("graphics", "failed to allocate data for upload data");
-				   return false;
-			   }
-			   return true;
-		   },
-		   "failed to allocate memory for create buffer container command"))
+	const bool Success = AddCmd(
+		Cmd, [&] {
+			Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+			if(Cmd.m_pAttributes == nullptr)
+			{
+				dbg_msg("graphics", "failed to allocate data for upload data");
+				return false;
+			}
+			return true;
+		},
+		"failed to allocate memory for create buffer container command");
+	if(!Success)
 	{
 		return -1;
 	}
@@ -2541,8 +2560,9 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 	Cmd.m_BufferContainerIndex = ContainerIndex;
 	Cmd.m_DestroyAllBO = DestroyAllBO;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for delete buffer container command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for delete buffer container command");
+	if(!Success)
 	{
 		return;
 	}
@@ -2577,17 +2597,18 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 	if(Cmd.m_pAttributes == nullptr)
 		return;
 
-	if(!AddCmd(
-		   Cmd, [&] {
-			   Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
-			   if(Cmd.m_pAttributes == nullptr)
-			   {
-				   dbg_msg("graphics", "failed to allocate data for upload data");
-				   return false;
-			   }
-			   return true;
-		   },
-		   "failed to allocate memory for update buffer container command"))
+	const bool Success = AddCmd(
+		Cmd, [&] {
+			Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)m_pCommandBuffer->AllocData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
+			if(Cmd.m_pAttributes == nullptr)
+			{
+				dbg_msg("graphics", "failed to allocate data for upload data");
+				return false;
+			}
+			return true;
+		},
+		"failed to allocate memory for update buffer container command");
+	if(!Success)
 	{
 		return;
 	}
@@ -2602,8 +2623,9 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 	CCommandBuffer::SCommand_IndicesRequiredNumNotify Cmd;
 	Cmd.m_RequiredIndicesNum = RequiredIndicesCount;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to allocate memory for indcies required count notify command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to allocate memory for indcies required count notify command");
+	if(!Success)
 	{
 		return;
 	}
@@ -2679,8 +2701,9 @@ void CGraphics_Threaded::UpdateViewport(int X, int Y, int W, int H, bool ByResiz
 	Cmd.m_Height = H;
 	Cmd.m_ByResize = ByResize;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add resize command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to add resize command");
+	if(!Success)
 	{
 		return;
 	}
@@ -3021,8 +3044,9 @@ void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
 	CCommandBuffer::SCommand_WindowDestroyNtf Cmd;
 	Cmd.m_WindowID = WindowID;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add window destroy notify command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to add window destroy notify command");
+	if(!Success)
 	{
 		return;
 	}
@@ -3039,8 +3063,9 @@ void CGraphics_Threaded::WindowCreateNtf(uint32_t WindowID)
 	CCommandBuffer::SCommand_WindowCreateNtf Cmd;
 	Cmd.m_WindowID = WindowID;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add window create notify command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to add window create notify command");
+	if(!Success)
 	{
 		return;
 	}
@@ -3109,8 +3134,9 @@ void CGraphics_Threaded::Swap()
 	{
 		// add swap command
 		CCommandBuffer::SCommand_Swap Cmd;
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to add swap command"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to add swap command");
+		if(!Success)
 		{
 			return;
 		}
@@ -3119,8 +3145,9 @@ void CGraphics_Threaded::Swap()
 	if(g_Config.m_GfxFinish)
 	{
 		CCommandBuffer::SCommand_Finish Cmd;
-		if(!AddCmd(
-			   Cmd, [] { return true; }, "failed to add finish command"))
+		const bool Success = AddCmd(
+			Cmd, [] { return true; }, "failed to add finish command");
+		if(!Success)
 		{
 			return;
 		}
@@ -3146,8 +3173,9 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	Cmd.m_VSync = State ? 1 : 0;
 	Cmd.m_pRetOk = &RetOk;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add vsync command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to add vsync command");
+	if(!Success)
 	{
 		return false;
 	}
@@ -3170,8 +3198,9 @@ bool CGraphics_Threaded::SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32
 	Cmd.m_pRetMultiSamplingCount = &MultiSamplingCountBackend;
 	Cmd.m_pRetOk = &RetOk;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add multi sampling command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to add multi sampling command");
+	if(!Success)
 	{
 		return false;
 	}
@@ -3188,8 +3217,9 @@ void CGraphics_Threaded::InsertSignal(CSemaphore *pSemaphore)
 	CCommandBuffer::SCommand_Signal Cmd;
 	Cmd.m_pSemaphore = pSemaphore;
 
-	if(!AddCmd(
-		   Cmd, [] { return true; }, "failed to add signal command"))
+	const bool Success = AddCmd(
+		Cmd, [] { return true; }, "failed to add signal command");
+	if(!Success)
 	{
 		return;
 	}

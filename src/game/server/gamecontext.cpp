@@ -3895,11 +3895,15 @@ bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDe
 		return true;
 	}
 
-	if(g_Config.m_SvSpamMuteDuration && (m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+	if(g_Config.m_SvSpamMuteDuration)
 	{
-		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
-		m_apPlayers[ClientID]->m_ChatScore = 0;
-		return true;
+		m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty;
+		if(m_apPlayers[ClientID]->m_ChatScore > g_Config.m_SvChatThreshold)
+		{
+			Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+			m_apPlayers[ClientID]->m_ChatScore = 0;
+			return true;
+		}
 	}
 
 	return false;

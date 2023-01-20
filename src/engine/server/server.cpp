@@ -1663,12 +1663,15 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				if(!pName[0])
 				{
-					if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
-						AuthLevel = AUTHED_ADMIN;
-					else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD)), pPw))
-						AuthLevel = AUTHED_MOD;
-					else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_HELPER)), pPw))
+					KeySlot = m_AuthManager.DefaultKey(AUTHED_HELPER);
+					if(m_AuthManager.CheckKey(KeySlot, pPw))
 						AuthLevel = AUTHED_HELPER;
+					KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD);
+					if(m_AuthManager.CheckKey(KeySlot, pPw))
+						AuthLevel = AUTHED_MOD;
+					KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN);
+					if(m_AuthManager.CheckKey(KeySlot, pPw))
+						AuthLevel = AUTHED_ADMIN;
 				}
 				else
 				{

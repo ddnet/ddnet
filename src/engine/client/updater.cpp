@@ -254,7 +254,6 @@ void CUpdater::ParseUpdate()
 	{
 		for(int i = 0; i < json_array_length(pVersions); i++)
 		{
-			const json_value *pTemp;
 			const json_value *pCurrent = json_array_get(pVersions, i);
 			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
 			{
@@ -262,12 +261,14 @@ void CUpdater::ParseUpdate()
 					m_ClientUpdate = true;
 				if(json_boolean_get(json_object_get(pCurrent, "server")))
 					m_ServerUpdate = true;
-				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
+				const json_value *pTemp = json_object_get(pCurrent, "download");
+				if(pTemp->type == json_array)
 				{
 					for(int j = 0; j < json_array_length(pTemp); j++)
 						AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
 				}
-				if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
+				pTemp = json_object_get(pCurrent, "remove");
+				if(pTemp->type == json_array)
 				{
 					for(int j = 0; j < json_array_length(pTemp); j++)
 						AddFileJob(json_string_get(json_array_get(pTemp, j)), false);

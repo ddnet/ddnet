@@ -78,13 +78,13 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientID < 0)
 		{
-			const char *p, *t;
 			const char *pLookFor = "flag was captured by '";
-			if((p = str_find(pMsg->m_pMessage, pLookFor)))
+			const char *p = str_find(pMsg->m_pMessage, pLookFor);
+			if(p)
 			{
 				char aName[MAX_NAME_LENGTH];
 				p += str_length(pLookFor);
-				t = str_rchr(p, '\'');
+				const char *t = str_rchr(p, '\'');
 
 				if(t <= p)
 					return;
