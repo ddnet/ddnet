@@ -1147,6 +1147,20 @@ void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path);
  */
 void net_unix_close(UNIXSOCKET sock);
 
+#elif defined(CONF_FAMILY_WINDOWS)
+
+/**
+ * Formats a Windows error code as a human-readable string.
+ *
+ * @param error The Windows error code.
+ *
+ * @return A new string representing the error code.
+ *
+ * @remark Guarantees that result will contain zero-termination.
+ * @remark The result must be freed after it has been used.
+ */
+char *windows_format_system_message(unsigned long error);
+
 #endif
 
 /**
