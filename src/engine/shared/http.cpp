@@ -22,7 +22,7 @@ static bool gs_Initialized = false;
 
 static int GetLockIndex(int Data)
 {
-	if(0 > Data || Data >= CURL_LOCK_DATA_LAST)
+	if(Data < 0 || Data >= CURL_LOCK_DATA_LAST)
 	{
 		Data = CURL_LOCK_DATA_LAST;
 	}

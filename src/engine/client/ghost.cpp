@@ -201,7 +201,7 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, SHA256_DIGEST Ma
 		return -1;
 	}
 
-	if(4 > m_Header.m_Version || m_Header.m_Version > gs_CurVersion)
+	if(m_Header.m_Version < 4 || m_Header.m_Version > gs_CurVersion)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "ghost version %d is not supported", m_Header.m_Version);
@@ -373,7 +373,7 @@ bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, c
 	io_read(File, &Header, sizeof(Header));
 	io_close(File);
 
-	if(mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || 4 > Header.m_Version || Header.m_Version > gs_CurVersion)
+	if(mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || Header.m_Version < 4 || Header.m_Version > gs_CurVersion)
 		return false;
 
 	if(str_comp(Header.m_aMap, pMap) != 0)
