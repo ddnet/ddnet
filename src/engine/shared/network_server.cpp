@@ -6,7 +6,8 @@
 #include "config.h"
 #include "netban.h"
 #include "network.h"
-#include <engine/message.h>
+#include <engine/shared/compression.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 
 const int g_DummyMapCrc = 0xD6909B17;
@@ -270,7 +271,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	return Slot; // done
 }
 
-void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *apMsgs[], int Num)
+void CNetServer::SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num)
 {
 	CNetPacketConstruct Construct;
 	mem_zero(&Construct, sizeof(Construct));
@@ -278,7 +279,7 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CMsgPacker *apMsgs[], int Num)
 
 	for(int i = 0; i < Num; i++)
 	{
-		const CMsgPacker *pMsg = apMsgs[i];
+		const CPacker *pMsg = ppMsgs[i];
 		CNetChunkHeader Header;
 		Header.m_Flags = NET_CHUNKFLAG_VITAL;
 		Header.m_Size = pMsg->Size();
@@ -366,9 +367,9 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			// map if there are too many connection attempts at once.
 
 			// send mapchange + map data + con_ready + 3 x empty snap (with token)
-			CMsgPacker MapChangeMsg(NETMSG_MAP_CHANGE, true);
-			MapChangeMsg.PackMessageSystem();
-
+			CPacker MapChangeMsg;
+			MapChangeMsg.Reset();
+			MapChangeMsg.AddInt((NETMSG_MAP_CHANGE << 1) | 1);
 			if(Flooding)
 			{
 				// Fallback to dm1
@@ -384,9 +385,9 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 				MapChangeMsg.AddInt(sizeof(g_aDummyMapData));
 			}
 
-			CMsgPacker MapDataMsg(NETMSG_MAP_DATA, true);
-			MapDataMsg.PackMessageSystem();
-
+			CPacker MapDataMsg;
+			MapDataMsg.Reset();
+			MapDataMsg.AddInt((NETMSG_MAP_DATA << 1) | 1);
 			if(Flooding)
 			{
 				// send empty map data to keep 0.6.4 support
@@ -406,17 +407,19 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 				MapDataMsg.AddRaw(g_aDummyMapData, sizeof(g_aDummyMapData)); // map data
 			}
 
-			CMsgPacker ConReadyMsg(NETMSG_CON_READY, true);
-			ConReadyMsg.PackMessageSystem();
+			CPacker ConReadyMsg;
+			ConReadyMsg.Reset();
+			ConReadyMsg.AddInt((NETMSG_CON_READY << 1) | 1);
 
-			CMsgPacker SnapEmptyMsg(NETMSG_SNAPEMPTY, true);
-			SnapEmptyMsg.PackMessageSystem();
+			CPacker SnapEmptyMsg;
+			SnapEmptyMsg.Reset();
+			SnapEmptyMsg.AddInt((NETMSG_SNAPEMPTY << 1) | 1);
 			SECURITY_TOKEN SecurityToken = GetVanillaToken(Addr);
 			SnapEmptyMsg.AddInt(SecurityToken);
 			SnapEmptyMsg.AddInt(SecurityToken + 1);
 
 			// send all chunks/msgs in one packet
-			const CMsgPacker *apMsgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,
+			const CPacker *apMsgs[] = {&MapChangeMsg, &MapDataMsg, &ConReadyMsg,
 				&SnapEmptyMsg, &SnapEmptyMsg, &SnapEmptyMsg};
 			SendMsgs(Addr, apMsgs, std::size(apMsgs));
 		}
