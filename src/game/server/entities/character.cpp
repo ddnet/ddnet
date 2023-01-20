@@ -830,12 +830,12 @@ void CCharacter::TickDeferred()
 		int Events = m_Core.m_TriggeredEvents;
 		int CID = m_pPlayer->GetCID();
 
-		int64_t TeamMask = Teams()->TeamMask(Team(), -1, CID);
+		CMask TeamMask = Teams()->TeamMask(Team(), -1, CID);
 		// Some sounds are triggered client-side for the acting player
 		// so we need to avoid duplicating them
-		int64_t TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID);
+		CMask TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID);
 		// Some are triggered client-side but only on Sixup
-		int64_t TeamMaskExceptSelfIfSixup = Server()->IsSixup(CID) ? TeamMaskExceptSelf : TeamMask;
+		CMask TeamMaskExceptSelfIfSixup = Server()->IsSixup(CID) ? TeamMaskExceptSelf : TeamMask;
 
 		if(Events & COREEVENT_GROUND_JUMP)
 			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
@@ -2322,7 +2322,7 @@ void CCharacter::Rescue()
 	}
 }
 
-int64_t CCharacter::TeamMask()
+CMask CCharacter::TeamMask()
 {
 	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCID());
 }

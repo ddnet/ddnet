@@ -4,6 +4,7 @@
 #define GAME_SERVER_GAMECONTEXT_H
 
 #include <engine/console.h>
+#include <engine/mask.h>
 #include <engine/server.h>
 
 #include <game/collision.h>
@@ -205,12 +206,12 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64_t Mask = -1);
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
-	void CreateHammerHit(vec2 Pos, int64_t Mask = -1);
-	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1);
-	void CreateDeath(vec2 Pos, int ClientID, int64_t Mask = -1);
-	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1);
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, CMask Mask = {});
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CMask Mask = {});
+	void CreateHammerHit(vec2 Pos, CMask Mask = {});
+	void CreatePlayerSpawn(vec2 Pos, CMask Mask = {});
+	void CreateDeath(vec2 Pos, int ClientID, CMask Mask = {});
+	void CreateSound(vec2 Pos, int Sound, CMask Mask = {});
 	void CreateSoundGlobal(int Sound, int Target = -1);
 
 	enum
@@ -296,7 +297,7 @@ public:
 	int64_t m_NonEmptySince;
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
-	int64_t ClientsMaskExcludeClientVersionAndHigher(int Version);
+	CMask ClientsMaskExcludeClientVersionAndHigher(int Version);
 	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
@@ -503,9 +504,10 @@ public:
 	void ResetTuning();
 };
 
-inline int64_t CmaskAll() { return -1LL; }
-inline int64_t CmaskOne(int ClientID) { return 1LL << ClientID; }
-inline int64_t CmaskUnset(int64_t Mask, int ClientID) { return Mask ^ CmaskOne(ClientID); }
-inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask & CmaskOne(ClientID)) != 0; }
+inline CMask CmaskAll() { return CMask(); }
+inline CMask CmaskNone() { return CMask(0LL); }
+inline CMask CmaskOne(int ClientID) { return CMask(ClientID); }
+inline CMask CmaskUnset(CMask Mask, int ClientID) { return Mask ^ CmaskOne(ClientID); }
+inline CMask CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
+inline bool CmaskIsSet(CMask Mask, int ClientID) { return (Mask & CmaskOne(ClientID)) != CmaskNone(); }
 #endif

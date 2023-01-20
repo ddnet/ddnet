@@ -126,7 +126,7 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
+	CMask TeamMask;
 	bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
@@ -326,7 +326,7 @@ void CProjectile::Snap(int SnappingClient)
 	}
 
 	CCharacter *pOwnerChar = 0;
-	int64_t TeamMask = -1LL;
+	CMask TeamMask;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);

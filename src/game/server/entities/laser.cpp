@@ -27,7 +27,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : 0;
+	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CmaskNone();
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
 	GameWorld()->InsertEntity(this);
@@ -303,7 +303,7 @@ void CLaser::Snap(int SnappingClient)
 		return;
 
 	pOwnerChar = nullptr;
-	int64_t TeamMask = -1LL;
+	CMask TeamMask;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
