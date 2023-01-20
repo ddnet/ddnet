@@ -281,9 +281,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	std::vector<SWarning> m_vWarnings;
 
-#if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
-#endif
 
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
