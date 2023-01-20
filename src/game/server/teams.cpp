@@ -492,7 +492,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		if(!GetPlayer(i))
 			continue; // Player doesn't exist
 
-		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
+		if(GetPlayer(i)->GetTeam() != TEAM_SPECTATORS && !GetPlayer(i)->IsPaused())
 		{ // Not spectator
 			if(i != Asker)
 			{ // Actions of other players

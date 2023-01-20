@@ -652,7 +652,7 @@ void IGameController::Snap(int SnappingClient)
 			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_aLastUpdateTick[Team] < Server()->Tick())
 			{
 				// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
-				vEndTicks.emplace_back(std::pair<int, int>(GameServer()->Switchers()[i].m_aEndTick[Team], i));
+				vEndTicks.emplace_back(GameServer()->Switchers()[i].m_aEndTick[Team], i);
 			}
 		}
 

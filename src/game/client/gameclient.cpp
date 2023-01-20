@@ -830,7 +830,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
 		// reset character prediction
-		if(!(m_GameWorld.m_WorldConfig.m_IsFNG && pMsg->m_Weapon == WEAPON_LASER))
+		if(!m_GameWorld.m_WorldConfig.m_IsFNG || pMsg->m_Weapon != WEAPON_LASER)
 		{
 			m_CharOrder.GiveWeak(pMsg->m_Victim);
 			if(CCharacter *pChar = m_GameWorld.GetCharacterByID(pMsg->m_Victim))
@@ -1562,10 +1562,10 @@ void CGameClient::OnNewSnapshot()
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		// update friend state
-		m_aClients[i].m_Friend = !(i == m_Snap.m_LocalClientID || !m_Snap.m_apPlayerInfos[i] || !Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+		m_aClients[i].m_Friend = i != m_Snap.m_LocalClientID && m_Snap.m_apPlayerInfos[i] && Friends()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true);
 
 		// update foe state
-		m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientID || !m_Snap.m_apPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+		m_aClients[i].m_Foe = i != m_Snap.m_LocalClientID && m_Snap.m_apPlayerInfos[i] && Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true);
 	}
 
 	// sort player infos by name
@@ -2486,7 +2486,7 @@ void CGameClient::UpdateRenderedCharacters()
 				if(pChar && AntiPingGunfire() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
 				{
 					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
-					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))
+					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && (!pChar->m_NinjaJetpack || pChar->Core()->m_ActiveWeapon != WEAPON_GUN))
 						m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
 				}
 			}

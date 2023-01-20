@@ -1901,10 +1901,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// check if the new settings require a restart
 	if(CheckSettings)
 	{
-		m_NeedRestartGraphics = !(s_GfxFsaaSamples == g_Config.m_GfxFsaaSamples &&
-					  !s_GfxBackendChanged &&
-					  !s_GfxGPUChanged &&
-					  s_GfxHighdpi == g_Config.m_GfxHighdpi);
+		m_NeedRestartGraphics = s_GfxFsaaSamples != g_Config.m_GfxFsaaSamples ||
+					s_GfxBackendChanged ||
+					s_GfxGPUChanged ||
+					s_GfxHighdpi != g_Config.m_GfxHighdpi;
 	}
 }
 

@@ -1382,9 +1382,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		return;
 	}
 
-	if(m_aClients[ClientID].m_Sixup && (Msg = MsgFromSixup(Msg, Sys)) < 0)
+	if(m_aClients[ClientID].m_Sixup)
 	{
-		return;
+		Msg = MsgFromSixup(Msg, Sys);
+		if(Msg < 0)
+		{
+			return;
+		}
 	}
 
 	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)

@@ -338,7 +338,7 @@ CEntity *CGameWorld::GetEntity(int ID, int EntityType)
 
 void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
 {
-	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
+	if(Owner < 0 && m_WorldConfig.m_IsSolo && (Weapon != WEAPON_SHOTGUN || !m_WorldConfig.m_IsDDRace))
 		return;
 
 	// deal damage

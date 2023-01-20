@@ -409,8 +409,8 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 	{
 		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
-			if(!((Server()->IsSixup(i) && (Flags & CHAT_SIXUP)) ||
-				   (!Server()->IsSixup(i) && (Flags & CHAT_SIX))))
+			if((!Server()->IsSixup(i) || !(Flags & CHAT_SIXUP)) &&
+				(Server()->IsSixup(i) || !(Flags & CHAT_SIX)))
 				continue;
 
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
@@ -418,8 +418,8 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 	}
 	else
 	{
-		if(!((Server()->IsSixup(To) && (Flags & CHAT_SIXUP)) ||
-			   (!Server()->IsSixup(To) && (Flags & CHAT_SIX))))
+		if((!Server()->IsSixup(To) || !(Flags & CHAT_SIXUP)) &&
+			(Server()->IsSixup(To) || !(Flags & CHAT_SIX)))
 			return;
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, To);
@@ -1007,8 +1007,8 @@ void CGameContext::OnTick()
 				m_VoteEnforce = (m_VoteWillPass && !Veto) ? VOTE_ENFORCE_YES : VOTE_ENFORCE_NO;
 
 			// / Ensure minimum time for vote to end when moderating.
-			if(m_VoteEnforce == VOTE_ENFORCE_YES && !(PlayerModerating() &&
-									(IsKickVote() || IsSpecVote()) && time_get() < m_VoteCloseTime))
+			if(m_VoteEnforce == VOTE_ENFORCE_YES && (!PlayerModerating() ||
+									(!IsKickVote() && !IsSpecVote()) || time_get() >= m_VoteCloseTime))
 			{
 				Server()->SetRconCID(IServer::RCON_CID_VOTE);
 				Console()->ExecuteLine(m_aVoteCommand);

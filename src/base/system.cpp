@@ -3447,7 +3447,7 @@ int str_isallnum(const char *str)
 {
 	while(*str)
 	{
-		if(!(*str >= '0' && *str <= '9'))
+		if(*str < '0' || *str > '9')
 			return 0;
 		str++;
 	}
@@ -3713,7 +3713,7 @@ int str_utf8_decode(const char **ptr)
 			utf8_code_point = utf8_code_point << (6 * utf8_bytes_needed);
 			continue;
 		}
-		if(!(utf8_lower_boundary <= byte_value && byte_value <= utf8_upper_boundary))
+		if(utf8_lower_boundary > byte_value || byte_value > utf8_upper_boundary)
 		{
 			// Resetting variables not necessary, will be done when
 			// the function is called again.

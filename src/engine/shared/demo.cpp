@@ -1141,7 +1141,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Size = bytes_be_to_int(pDemoHeader->m_aMapSize);
 
 	io_close(File);
-	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
+	return !mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) && pDemoHeader->m_Version >= gs_OldVersion;
 }
 
 int CDemoPlayer::GetDemoType() const

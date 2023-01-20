@@ -803,7 +803,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 			if(abs(m_aVoices[VoiceID].m_Tick - Tick) > Threshold)
 			{
 				// take care of looping (modulo!)
-				if(!(IsLooping && (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
+				if(!IsLooping || (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) > Threshold)
 				{
 					m_aVoices[VoiceID].m_Tick = Tick;
 				}

@@ -1245,7 +1245,7 @@ void CChat::OnRender()
 	}
 
 #if defined(CONF_VIDEORECORDER)
-	if(!((g_Config.m_ClShowChat && !IVideo::Current()) || (g_Config.m_ClVideoShowChat && IVideo::Current())))
+	if((!g_Config.m_ClShowChat || IVideo::Current()) && (!g_Config.m_ClVideoShowChat || !IVideo::Current()))
 #else
 	if(!g_Config.m_ClShowChat)
 #endif
