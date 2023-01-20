@@ -504,10 +504,4 @@ public:
 	void ResetTuning();
 };
 
-inline CMask CmaskAll() { return CMask(); }
-inline CMask CmaskNone() { return ~CMask(); }
-inline CMask CmaskOne(int ClientID) { return CMask(ClientID); }
-inline CMask CmaskUnset(CMask Mask, int ClientID) { return Mask ^ CmaskOne(ClientID); }
-inline CMask CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(CMask Mask, int ClientID) { return (Mask & CmaskOne(ClientID)) != CmaskNone(); }
 #endif

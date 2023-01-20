@@ -724,7 +724,7 @@ int IGameController::ClampTeam(int Team)
 CMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	// Send all world events to everyone by default
-	return CmaskAllExceptOne(ExceptID);
+	return CMaskAllExceptOne(ExceptID);
 }
 
 void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)

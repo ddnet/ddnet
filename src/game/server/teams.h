@@ -151,7 +151,7 @@ public:
 
 	bool IsInvited(int Team, int ClientID)
 	{
-		return CmaskIsSet(m_aInvited[Team], ClientID);
+		return CMaskIsSet(m_aInvited[Team], ClientID);
 	}
 
 	bool IsStarted(int Team)

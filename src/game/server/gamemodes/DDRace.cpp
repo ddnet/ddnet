@@ -215,7 +215,7 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 CMask CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	if(Asker == -1)
-		return CmaskAllExceptOne(ExceptID);
+		return CMaskAllExceptOne(ExceptID);
 
 	return m_Teams.TeamMask(GetPlayerTeam(Asker), ExceptID, Asker);
 }

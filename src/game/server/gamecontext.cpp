@@ -306,9 +306,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			int PlayerTeam = pChr->Team();
 			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
-				if(!CmaskIsSet(TeamMask, PlayerTeam))
+				if(!CMaskIsSet(TeamMask, PlayerTeam))
 					continue;
-				TeamMask = CmaskUnset(TeamMask, PlayerTeam);
+				TeamMask = CMaskUnset(TeamMask, PlayerTeam);
 			}
 
 			pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
@@ -4180,12 +4180,12 @@ int CGameContext::GetClientVersion(int ClientID) const
 
 CMask CGameContext::ClientsMaskExcludeClientVersionAndHigher(int Version)
 {
-	CMask Mask = CmaskNone();
+	CMask Mask = CMaskNone();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(GetClientVersion(i) >= Version)
 			continue;
-		Mask |= CmaskOne(i);
+		Mask |= CMaskOne(i);
 	}
 	return Mask;
 }
