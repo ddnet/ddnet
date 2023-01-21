@@ -22,7 +22,7 @@ CBindWheel::CBindWheel()
 void CBindWheel::ConBindwheel(IConsole::IResult *pResult, void *pUserData)
 {
 	CBindWheel *pSelf = (CBindWheel *)pUserData;
-	if(!pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
@@ -116,13 +116,6 @@ void CBindWheel::OnRender()
 	{
 		if(m_WasActive && m_SelectedBind != -1)
 			Binwheel(m_SelectedBind);
-		m_WasActive = false;
-		return;
-	}
-
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-	{
-		m_Active = false;
 		m_WasActive = false;
 		return;
 	}
