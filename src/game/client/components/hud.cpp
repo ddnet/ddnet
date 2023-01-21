@@ -622,8 +622,10 @@ void CHud::RenderTextInfo()
 			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "Last!");
-				TextRender()->Text(170, 4, 14, aBuf, -1.0f);
+				str_format(aBuf, sizeof(aBuf), g_Config.m_ClNotifyWhenLastText);
+                TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClNotifyWhenLastColor)));
+				TextRender()->Text(0, 170, 4, 14, aBuf, -1.0f);
+                TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 		//Show freeze text

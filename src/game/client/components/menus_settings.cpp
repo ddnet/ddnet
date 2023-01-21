@@ -3295,6 +3295,26 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
+
+        if (g_Config.m_ClNotifyWhenLast)
+        {
+            // create a text box for notification text 
+            CUIRect Button, Label;
+            static CButtonContainer NotifyWhenLastTextID;
+            static float s_NotifyWhenLastText = 0.0f;
+        	MainView.HSplitTop(5.0f, 0, &MainView);
+        	MainView.HSplitTop(20.0f, &Button, &MainView);
+        	Button.VSplitLeft(15.0f, 0, &Button);
+        	SUIExEditBoxProperties EditProps;
+        	EditProps.m_pEmptyText = Localize("Last!");
+        	UI()->DoEditBox(g_Config.m_ClNotifyWhenLastText, &Button, g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText), 12.0f, &s_NotifyWhenLastText, false, IGraphics::CORNER_ALL, EditProps);
+            MainView.HSplitTop(25.0f, &Section, &MainView);
+		    
+            DoLine_ColorPicker(&NotifyWhenLastTextID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+        
+        }
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, ("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &MainView, LineMargin);
 		{
