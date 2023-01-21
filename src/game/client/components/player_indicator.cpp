@@ -32,8 +32,11 @@ void CPlayerIndicator::OnRender()
 
 	vec2 Position = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos;
 
-	if(g_Config.m_ClPlayerIndicator == 1)
-	{
+    if (g_Config.m_ClPlayerIndicator != 1)
+        return;
+
+
+
 		Graphics()->TextureClear();
 		float CircleSize = 7.0f;
 		ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
@@ -45,6 +48,7 @@ void CPlayerIndicator::OnRender()
 					continue;
 
 				CGameClient::CClientData OtherTee = m_pClient->m_aClients[i];
+                CCharacterCore *pOtherCharacter = &m_pClient->m_aClients[i].m_Predicted;
 				if(
 					OtherTee.m_Team == m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team &&
 					!OtherTee.m_Spec &&
@@ -67,7 +71,15 @@ void CPlayerIndicator::OnRender()
 					float Alpha = g_Config.m_ClIndicatorOpacity / 100.0f;
 					if(OtherTee.m_FreezeEnd > 0 || OtherTee.m_DeepFrozen)
 					{
-						col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorFreeze));
+                        // check if player is frozen or is getting saved
+                        if(pOtherCharacter->m_IsInFreeze == 0)
+                        {
+                            // player is on the way to get free again
+                            col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorSaved));
+                        }else{
+                            // player is frozen
+                            col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorFreeze));
+                        }
 						if(g_Config.m_ClIndicatorTees)
 						{
 							TeeInfo.m_ColorBody.r *= 0.4;
@@ -102,5 +114,4 @@ void CPlayerIndicator::OnRender()
 				}
 			}
 		}
-	}
 }

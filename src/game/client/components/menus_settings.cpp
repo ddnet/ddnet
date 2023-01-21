@@ -3463,7 +3463,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorVariableDistance, ("Change indicator offset based on distance to other tees"), &g_Config.m_ClIndicatorVariableDistance, &MainView, LineMargin);
 
-		static CButtonContainer IndicatorAliveColorID, IndicatorDeadColorID;
+		static CButtonContainer IndicatorAliveColorID, IndicatorDeadColorID, IndicatorSavedColorID;
 
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
@@ -3472,8 +3472,13 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoLine_ColorPicker(&IndicatorAliveColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-		{
+		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		
+        MainView.HSplitTop(25.0f, &Section, &MainView);
+		DoLine_ColorPicker(&IndicatorSavedColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator save color"), &g_Config.m_ClIndicatorSaved, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		
+        
+        {
 			CUIRect Button, Label;
 			MainView.HSplitTop(5.0f, &Button, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
