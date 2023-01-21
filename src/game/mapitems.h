@@ -8,9 +8,8 @@
 // layer types
 enum
 {
-	// TODO(Shereef Marzouk): fix this for vanilla, make use of LAYERTYPE_GAME instead of using m_game variable in the editor.
 	LAYERTYPE_INVALID = 0,
-	LAYERTYPE_GAME,
+	LAYERTYPE_GAME, // unused
 	LAYERTYPE_TILES,
 	LAYERTYPE_QUADS,
 	LAYERTYPE_FRONT,

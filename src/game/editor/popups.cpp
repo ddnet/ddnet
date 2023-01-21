@@ -494,7 +494,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 
 	if(Prop == PROP_ORDER)
 		pEditor->SelectLayer(pCurrentGroup->SwapLayers(pEditor->m_vSelectedLayers[0], NewVal));
-	else if(Prop == PROP_GROUP && pCurrentLayer && pCurrentLayer->m_Type != LAYERTYPE_GAME)
+	else if(Prop == PROP_GROUP && pCurrentLayer)
 	{
 		if(NewVal >= 0 && (size_t)NewVal < pEditor->m_Map.m_vpGroups.size())
 		{
