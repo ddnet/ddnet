@@ -892,7 +892,6 @@ public:
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
-	bool IsSpecialLayer(const CLayer *pLayer) const;
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));

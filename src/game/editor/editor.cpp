@@ -782,11 +782,6 @@ int CEditor::FindSelectedQuadIndex(int Index) const
 	return -1;
 }
 
-bool CEditor::IsSpecialLayer(const CLayer *pLayer) const
-{
-	return m_Map.m_pGameLayer == pLayer || m_Map.m_pTeleLayer == pLayer || m_Map.m_pSpeedupLayer == pLayer || m_Map.m_pFrontLayer == pLayer || m_Map.m_pSwitchLayer == pLayer || m_Map.m_pTuneLayer == pLayer;
-}
-
 void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
