@@ -1878,6 +1878,19 @@ int fs_makedir_rec_for(const char *path);
  */
 int fs_storage_path(const char *appname, char *path, int max);
 
+/**
+ * Checks if a file exists.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path the path to check.
+ *
+ * @return 1 if a file with the given path exists,
+ * 0 on failure or if the file does not exist.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+int fs_is_file(const char *path);
 
 /**
  * Checks if a folder exists.
