@@ -1437,7 +1437,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-static char *windows_format_system_message(unsigned long error)
+char *windows_format_system_message(unsigned long error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;

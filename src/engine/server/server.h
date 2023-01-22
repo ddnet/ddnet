@@ -221,9 +221,7 @@ public:
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
 	CEcon m_Econ;
-#if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
-#endif
 	CServerBan m_ServerBan;
 
 	IEngineMap *m_pMap;

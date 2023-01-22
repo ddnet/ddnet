@@ -2598,9 +2598,7 @@ int CServer::Run()
 
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 
-#if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
-#endif
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", Config()->m_SvName);
@@ -2798,9 +2796,7 @@ int CServer::Run()
 
 				UpdateClientRconCommands();
 
-#if defined(CONF_FAMILY_UNIX)
 				m_Fifo.Update();
-#endif
 			}
 
 			// master server stuff
@@ -2879,9 +2875,7 @@ int CServer::Run()
 
 	m_Econ.Shutdown();
 
-#if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
-#endif
 
 	GameServer()->OnShutdown();
 	m_pMap->Unload();
