@@ -433,6 +433,44 @@ public:
 		return 0;
 	}
 
+	template<typename F>
+	bool GenericExists(const char *pFilename, int Type, F &&CheckFunction)
+	{
+		TranslateType(Type, pFilename);
+
+		char aBuffer[IO_MAX_PATH_LENGTH];
+		if(Type == TYPE_ALL)
+		{
+			// check all available directories
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
+			{
+				if(CheckFunction(GetPath(i, pFilename, aBuffer, sizeof(aBuffer))))
+					return true;
+			}
+			return false;
+		}
+		else if(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths))
+		{
+			// check wanted directory
+			return CheckFunction(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)));
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
+			return false;
+		}
+	}
+
+	bool FileExists(const char *pFilename, int Type) override
+	{
+		return GenericExists(pFilename, Type, fs_is_file);
+	}
+
+	bool FolderExists(const char *pFilename, int Type) override
+	{
+		return GenericExists(pFilename, Type, fs_is_dir);
+	}
+
 	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) override
 	{
 		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, Type);

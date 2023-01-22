@@ -25,15 +25,15 @@ public:
 		/**
 		 * Translates to TYPE_SAVE if a path is relative
 		 * and to TYPE_ABSOLUTE if a path is absolute.
-		 * Only usable with OpenFile, ReadFile, ReadFileStr
-		 * and GetCompletePath.
+		 * Only usable with OpenFile, ReadFile, ReadFileStr,
+		 * GetCompletePath, FileExists and FolderExists.
 		 */
 		TYPE_SAVE_OR_ABSOLUTE = -3,
 		/**
 		 * Translates to TYPE_ALL if a path is relative
 		 * and to TYPE_ABSOLUTE if a path is absolute.
-		 * Only usable with OpenFile, ReadFile, ReadFileStr
-		 * and GetCompletePath.
+		 * Only usable with OpenFile, ReadFile, ReadFileStr,
+		 * GetCompletePath, FileExists and FolderExists.
 		 */
 		TYPE_ALL_OR_ABSOLUTE = -4,
 
@@ -45,6 +45,8 @@ public:
 	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) = 0;
 	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser) = 0;
 	virtual IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = nullptr, int BufferSize = 0) = 0;
+	virtual bool FileExists(const char *pFilename, int Type) = 0;
+	virtual bool FolderExists(const char *pFilename, int Type) = 0;
 	virtual bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) = 0;
 	virtual char *ReadFileStr(const char *pFilename, int Type) = 0;
 	virtual bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize) = 0;
