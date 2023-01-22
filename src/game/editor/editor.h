@@ -153,6 +153,8 @@ public:
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
 
+	virtual bool IsEntitiesLayer() const { return false; }
+
 	virtual void Render(bool Tileset = false) {}
 	virtual int RenderProperties(CUIRect *pToolbox) { return 0; }
 
@@ -608,6 +610,8 @@ public:
 	void Snap(CUIRect *pRect);
 	void Clamp(RECTi *pRect);
 
+	virtual bool IsEntitiesLayer() const override;
+
 	virtual bool IsEmpty(CLayerTiles *pLayer);
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
@@ -888,7 +892,6 @@ public:
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
-	bool IsSpecialLayer(const CLayer *pLayer) const;
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
