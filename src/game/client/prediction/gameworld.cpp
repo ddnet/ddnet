@@ -682,5 +682,5 @@ void CGameWorld::Clear()
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
-			delete pFirstEntityType;
+			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
 }
