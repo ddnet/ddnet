@@ -3324,7 +3324,7 @@ void CClient::Run()
 			{
 				// write down the config and quit
 				if(!m_pConfigManager->Save())
-					m_vWarnings.emplace_back(SWarning(Localize("Saving ddnet-settings.cfg failed")));
+					m_vWarnings.emplace_back(Localize("Saving ddnet-settings.cfg failed"));
 				s_SavedConfig = true;
 			}
 
