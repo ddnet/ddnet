@@ -342,9 +342,14 @@ struct CMapItemVersion
 
 struct CEnvPoint
 {
+	enum
+	{
+		MAX_CHANNELS = 4,
+	};
+
 	int m_Time; // in ms
 	int m_Curvetype;
-	int m_aValues[4]; // 1-4 depending on envelope (22.10 fixed point)
+	int m_aValues[MAX_CHANNELS]; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
 };
