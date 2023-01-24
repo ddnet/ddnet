@@ -5282,13 +5282,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			CUIRect ToolBar1;
 			CUIRect ToolBar2;
-
 			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
+			ToolBar1.VSplitRight(3.0f, &ToolBar1, nullptr);
+			ToolBar2.VSplitRight(3.0f, &ToolBar2, nullptr);
 			if(ToolBar.w > ToolBar.h * 21)
 			{
-				ToolBar1.VMargin(3.0f, &ToolBar1);
-				ToolBar2.VMargin(3.0f, &ToolBar2);
-
 				CUIRect Label1;
 				CUIRect Label2;
 
