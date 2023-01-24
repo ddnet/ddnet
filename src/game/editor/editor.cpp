@@ -4923,7 +4923,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_RIGHT);
 
 			ToolBar.VSplitLeft(3.0f, nullptr, &ToolBar);
-			ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
+			ToolBar.VSplitLeft(ToolBar.w > ToolBar.h * 40 ? 80.0f : 60.0f, &Button, &ToolBar);
 
 			static float s_NameBox = 0;
 			if(DoEditBox(&s_NameBox, &Button, pEnvelope->m_aName, sizeof(pEnvelope->m_aName), 10.0f, &s_NameBox, false, IGraphics::CORNER_ALL, "The name of the selected envelope"))
