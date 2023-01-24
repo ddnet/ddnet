@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_ENTITIES_LASER_H
 #define GAME_SERVER_ENTITIES_LASER_H
 
+#include <base/tl/bitmask.h>
 #include <game/server/entity.h>
 
 class CLaser : public CEntity
@@ -31,7 +32,7 @@ private:
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
-	int m_TeamMask;
+	CClientMask m_TeamMask;
 	bool m_ZeroEnergyBounceInLastTick;
 
 	// DDRace

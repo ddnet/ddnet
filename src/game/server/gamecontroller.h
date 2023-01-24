@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_GAMECONTROLLER_H
 #define GAME_SERVER_GAMECONTROLLER_H
 
+#include <base/tl/bitmask.h>
 #include <base/vmath.h>
 #include <engine/map.h>
 
@@ -143,7 +144,7 @@ public:
 	virtual bool CanJoinTeam(int Team, int NotThisID);
 	int ClampTeam(int Team);
 
-	virtual int64_t GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+	virtual CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
 	// DDRace
 
