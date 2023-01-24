@@ -4832,7 +4832,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			pNewEnv = m_Map.NewEnvelope(1);
 		}
 
-		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
+		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New4dButton = 0;
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
@@ -4841,7 +4841,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			pNewEnv = m_Map.NewEnvelope(4);
 		}
 
-		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
+		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New2dButton = 0;
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
@@ -4853,7 +4853,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// Delete button
 		if(m_SelectedEnvelope >= 0)
 		{
-			ToolBar.VSplitRight(10.0f, &ToolBar, &Button);
+			ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			static int s_DelButton = 0;
 			if(DoButton_Editor(&s_DelButton, "Delete", 0, &Button, 0, "Delete this envelope"))
@@ -4918,7 +4918,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(pEnvelope)
 		{
-			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
+			ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
 			ToolBar.VSplitLeft(35.0f, &Button, &ToolBar);
 			UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
 
@@ -4981,13 +4981,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		// sync checkbox
-		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
+		ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
 		ToolBar.VSplitLeft(12.0f, &Button, &ToolBar);
 		static int s_SyncButton;
 		if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized ? "X" : "", 0, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
 			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
 
-		ToolBar.VSplitLeft(4.0f, &Button, &ToolBar);
+		ToolBar.VSplitLeft(4.0f, nullptr, &ToolBar);
 		ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
 		UI()->DoLabel(&Button, "Synchronized", 10.0f, TEXTALIGN_LEFT);
 
