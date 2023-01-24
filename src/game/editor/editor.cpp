@@ -4972,12 +4972,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_aChannelButtons[CEnvPoint::MAX_CHANNELS] = {0};
 		int Bit = 1;
 
-		for(int i = 0; i < pEnvelope->m_Channels; i++, Bit <<= 1)
+		for(int i = 0; i < CEnvPoint::MAX_CHANNELS; i++, Bit <<= 1)
 		{
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-
-			if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
-				s_ActiveChannels ^= Bit;
+			if(i < pEnvelope->m_Channels)
+			{
+				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
+					s_ActiveChannels ^= Bit;
+			}
 		}
 
 		// sync checkbox
