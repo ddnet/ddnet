@@ -4988,8 +4988,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
 
 		ToolBar.VSplitLeft(4.0f, nullptr, &ToolBar);
-		ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
-		UI()->DoLabel(&Button, "Synchronized", 10.0f, TEXTALIGN_LEFT);
+		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
+		UI()->DoLabel(&Button, "Sync.", 10.0f, TEXTALIGN_LEFT);
 
 		float EndTime = pEnvelope->EndTime();
 		if(EndTime < 1)
